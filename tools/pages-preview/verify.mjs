@@ -84,6 +84,7 @@ try {
 for (const page of pages) {
   const name = page.path === '/' ? 'index.html' : page.path.slice(1) + '/index.html';
   const html = await readFile(join(out, name), 'utf8');
+  assert.ok(!/<title>[^<]*(?:· тест|\bpreview\b)/i.test(html), `${name} must use a public-facing page title`);
   assert.ok(html.includes('noindex,nofollow'), `${name} must be noindex`);
   assert.ok(html.includes(`${base}assets/`), `${name} bundle path must have base`);
   for (const match of html.matchAll(/(?:href|src)=["'](\/[^"']*)["']/g)) assert.ok(match[1].startsWith(base), `${name}: root URL ${match[1]}`);

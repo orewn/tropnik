@@ -65,6 +65,17 @@ jobs:
           cache-dependency-path: |
             android/**/*.gradle.kts
             android/gradle/wrapper/gradle-wrapper.properties
+      # Hosted runner SDK layout: actions/runner-images ubuntu24/20261101.360,
+      # images/ubuntu/scripts/build/install-android-sdk.sh. Its tools are not on PATH.
+      - name: Expose the hosted Android command-line tools
+        run: |
+          tropnik_sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          if [[ ! -x "$tropnik_sdk/cmdline-tools/latest/bin/sdkmanager" || ! -x "$tropnik_sdk/cmdline-tools/latest/bin/avdmanager" ]]; then
+            printf '%s\n' 'The hosted Android command-line tools are missing from the expected SDK directory.' >&2
+            exit 1
+          fi
+          printf 'ANDROID_HOME=%s\nANDROID_SDK_ROOT=%s\n' "$tropnik_sdk" "$tropnik_sdk" >> "$GITHUB_ENV"
+          printf '%s\n' "$tropnik_sdk/cmdline-tools/latest/bin" "$tropnik_sdk/platform-tools" "$tropnik_sdk/emulator" >> "$GITHUB_PATH"
       - name: Android SDK
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - name: Local terrain verifier dependencies
@@ -116,6 +127,17 @@ jobs:
           cache-dependency-path: |
             android/**/*.gradle.kts
             android/gradle/wrapper/gradle-wrapper.properties
+      # Hosted runner SDK layout: actions/runner-images ubuntu24/20261101.360,
+      # images/ubuntu/scripts/build/install-android-sdk.sh. Its tools are not on PATH.
+      - name: Expose the hosted Android command-line tools
+        run: |
+          tropnik_sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          if [[ ! -x "$tropnik_sdk/cmdline-tools/latest/bin/sdkmanager" || ! -x "$tropnik_sdk/cmdline-tools/latest/bin/avdmanager" ]]; then
+            printf '%s\n' 'The hosted Android command-line tools are missing from the expected SDK directory.' >&2
+            exit 1
+          fi
+          printf 'ANDROID_HOME=%s\nANDROID_SDK_ROOT=%s\n' "$tropnik_sdk" "$tropnik_sdk" >> "$GITHUB_ENV"
+          printf '%s\n' "$tropnik_sdk/cmdline-tools/latest/bin" "$tropnik_sdk/platform-tools" "$tropnik_sdk/emulator" >> "$GITHUB_PATH"
       - name: Install official SDK and one emulator image
         timeout-minutes: 8
         run: |

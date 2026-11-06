@@ -209,9 +209,9 @@ const escape = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').r
 for (const page of pages) {
   const target = page.path === '/' ? join(out, 'index.html') : join(out, page.path.slice(1), 'index.html');
   await mkdir(dirname(target), {recursive: true});
-  await writeFile(target, html.replace(/<title>[^<]*<\/title>/, `<title>${escape(page.title)} · Тропник · тест</title>`));
+  await writeFile(target, html.replace(/<title>[^<]*<\/title>/, `<title>${escape(page.title)} · Тропник</title>`));
 }
-await writeFile(join(out, '404.html'), html.replace(/<title>[^<]*<\/title>/, '<title>Страница не найдена · Тропник · тест</title>'));
+await writeFile(join(out, '404.html'), html.replace(/<title>[^<]*<\/title>/, '<title>Страница не найдена · Тропник</title>'));
 const packageRoots = new Set(dependencyModules.map(id => {
   const marker = '/node_modules/', index = id.lastIndexOf(marker), parts = id.slice(index + marker.length).split('/');
   return id.slice(0, index + marker.length) + parts.slice(0, parts[0].startsWith('@') ? 2 : 1).join('/');

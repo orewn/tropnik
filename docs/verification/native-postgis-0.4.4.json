@@ -1,0 +1,87 @@
+{
+  "verifiedAt": "2026-11-06T18:35:28Z",
+  "release": "0.4.4",
+  "repository": "orewn/tropnik",
+  "headSha": "ebb59b2d5e6a18220dce91ca03a4e0233a660e4a",
+  "runId": 42271612317,
+  "jobId": 128077311070,
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/42271612317",
+  "jobUrl": "https://github.com/orewn/tropnik/actions/runs/42271612317/job/128077311070",
+  "conclusion": "success",
+  "evidence": "Exact SHA confirmed in checkout log; every verbose test result inspected, not just workflow conclusion.",
+  "unitRace": {
+    "command": "go test -race -count=1 ./...",
+    "passedPackages": 6
+  },
+  "staticAnalysis": {
+    "command": "go vet ./...",
+    "result": "PASS"
+  },
+  "native": {
+    "command": "go test -race -count=1 -v -tags=integration ./internal/store",
+    "postgresImage": "postgis/postgis:18-3.7",
+    "passed": 27,
+    "sqlIntegrationTests": 25,
+    "additionalCursorUnitTests": 2,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 22.385,
+    "packageResult": "ok tropa/backend/internal/store 22.385s",
+    "requiredSchemaVersion": 5,
+    "migrationEvidence": "Each SQL fixture calls migrations.Apply in a fresh schema. The ordered list includes 001_initial.sql, 002_moderation.sql, 003_auth_rate_limits.sql, 004_account_history.sql and 005_account_lifecycle.sql. Native readiness test also passes.",
+    "tests": [
+      "TestHistoryCursorRoundTripKeepsTimestampAndTieBreaker",
+      "TestHistoryCursorRejectsUnboundedMalformedAndUnusableValues",
+      "TestPublicLifecycleHTTPRoundTripWithExplicitTestMailer",
+      "TestAccountActionDigestExpiryReplacementAndPurpose",
+      "TestPasswordResetAtomicallyRevokesSessionsAndAllLinks",
+      "TestAccountTokenSingleUseAcrossIndependentPools",
+      "TestResetAndCredentialFencedLoginCannotLeaveAnOldSession",
+      "TestAccountDeletionBlocksCommitmentsAndKeepsAnAnonymousHistory",
+      "TestConcurrentDeleteAndJoinCannotCreateADeletedParticipant",
+      "TestAccountDeletionCannotOrphanAWithdrawnDepartureCreator",
+      "TestRuntimeRoleCanCompleteLifecycleWithoutOperatorPrivileges",
+      "TestLifecycleMailAndReauthenticationBudgetsUsePersistentScopes",
+      "TestAuthenticationBudgetPersistsExpiresAndCleansBoundedly",
+      "TestAuthenticationBudgetSerializesAcrossPools",
+      "TestReadinessRequiresCurrentSchemaVersion",
+      "TestCompletedHistoryIsPrivateStableAndRetainsReviewedRevision",
+      "TestModerationCaseScopeMuteAndIndependentAppeal",
+      "TestPersistentPostingBudgetAcrossConcurrentChannels",
+      "TestRestrictedRuntimeRoleCanOperateButCannotElevate",
+      "TestConcurrentLastPlacesAndReplay",
+      "TestReviewedRoutePolicyCannotBeWeakened",
+      "TestGuideWithdrawalAndPrivateChat",
+      "TestCompletionReviewsAndOfflineConflict",
+      "TestRecruitmentDoesNotSilentlyBookTourists",
+      "TestRealSessionsAndPendingGuide",
+      "TestOverviewIsBoundedAndFullRouteRemainsAvailable",
+      "TestRosterOnlyAssignedGuideAndRevokedInterestCannotPost"
+    ]
+  },
+  "artifact": {
+    "id": 13528889224,
+    "name": "tropnik-native-postgis-ebb59b2d5e6a18220dce91ca03a4e0233a660e4a",
+    "url": "https://github.com/orewn/tropnik/actions/runs/42271612317/artifacts/13528889224",
+    "digest": "sha256:c1c7ca9987d211168b90701b4b61b52fdb6efb092007032f4e69aa257645c3f2",
+    "expiresAt": "2026-11-20T18:33:44Z"
+  },
+  "fullSanitizedLog": "docs/verification/native-postgis-ebb59b2.log",
+  "logSanitization": {
+    "redactedFields": 3,
+    "details": "Removed terminal control sequences and replaced token/Authorization fields. GitHub had already masked those values. No URI credentials or signed URL parameters were found."
+  },
+  "previousFalseGreen": {
+    "headSha": "65d337d70a5a7fb4255561b43bdb857559199f77",
+    "runUrl": "https://github.com/orewn/tropnik/actions/runs/42270216418",
+    "jobUrl": "https://github.com/orewn/tropnik/actions/runs/42270216418/job/128072524086",
+    "failure": "TestConcurrentDeleteAndJoinCannotCreateADeletedParticipant stopped at fixture creation: invalid_request. Capacity 20 exceeded the reviewed route maximum 8; the race did not run.",
+    "masking": "The outer tee pipeline did not propagate the failing integration script exit status.",
+    "corrections": "Fixture capacity is 8; a successful join leaves before the next of 10 races; exactly one operation must commit. CI now uses explicit bash/pipefail and native -count=1 -v.",
+    "productionPolicyChanged": false
+  },
+  "limitations": [
+    "The HTTP lifecycle test injects a test mail transport. No actual recipient was emailed.",
+    "These results verify the tested SQL, HTTP, concurrency and policy paths; they do not establish live deployment or external SMTP configuration."
+  ]
+}
