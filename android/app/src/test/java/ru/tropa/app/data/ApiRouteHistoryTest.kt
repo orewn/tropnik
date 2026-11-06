@@ -2,6 +2,7 @@ package ru.tropa.app.data
 
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.tls.HandshakeCertificates
@@ -26,8 +27,15 @@ class ApiRouteHistoryTest {
         val certificate = HeldCertificate.Builder().addSubjectAlternativeName("localhost").build()
         val serverTls = HandshakeCertificates.Builder().heldCertificate(certificate).build()
         val clientTls = HandshakeCertificates.Builder().addTrustedCertificate(certificate.certificate).build()
-        server = MockWebServer().apply { useHttps(serverTls.sslSocketFactory(), false); start() }
-        val client = OkHttpClient.Builder().sslSocketFactory(clientTls.sslSocketFactory(), clientTls.trustManager)
+        // setChunkedBody writes HTTP/1.1 transfer framing. HTTP/2 DATA must not
+        // contain that framing, so these chunked/decoded-budget fixtures use H1.
+        server = MockWebServer().apply {
+            protocols = listOf(Protocol.HTTP_1_1)
+            useHttps(serverTls.sslSocketFactory(), false)
+            start()
+        }
+        val client = OkHttpClient.Builder().protocols(listOf(Protocol.HTTP_1_1))
+            .sslSocketFactory(clientTls.sslSocketFactory(), clientTls.trustManager)
             .followRedirects(false).followSslRedirects(false).retryOnConnectionFailure(false).callTimeout(10, TimeUnit.SECONDS).build()
         api = ApiClient({ server.url("/api/v1").toString() }, { token }, client)
     }
@@ -49,6 +57,7 @@ class ApiRouteHistoryTest {
         assertEquals(33.123456789, geometry.getJSONArray(99_999).getDouble(0), 0.0)
         val request = server.takeRequest(3, TimeUnit.SECONDS)!!
         assertEquals("/api/v1/routes/route-fixture", request.path)
+        assertEquals("GET /api/v1/routes/route-fixture HTTP/1.1", request.requestLine)
         assertNull(request.getHeader("Authorization"))
     }
 

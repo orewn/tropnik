@@ -195,6 +195,61 @@
 .explore-layout .map-style-switch button .map-icon {width: 24px; height: 24px; flex-shrink: 0}
 .explore-layout .map-icon {display: block}
 .explore-layout .region-marker-label {font: var(--button-sm)}
+.explore-layout .region-marker,
+.explore-layout .leaflet-region-marker .region-marker {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+}
+.explore-layout .region-marker[hidden] {display: none !important}
+.explore-layout .region-marker .region-marker-label {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) !important;
+  width: max-content;
+  max-width: 224px;
+  padding: 8px 12px;
+  white-space: normal;
+  text-wrap: balance;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .3s cubic-bezier(.22, 1, .36, 1);
+}
+.explore-layout .region-marker:hover,
+.explore-layout .region-marker:focus-visible,
+.explore-layout .region-marker.is-selected {z-index: 2}
+.explore-layout .region-marker:hover .region-marker-label,
+.explore-layout .region-marker:focus-visible .region-marker-label,
+.explore-layout .region-marker.is-selected .region-marker-label {
+  opacity: 1;
+  visibility: visible;
+}
+.explore-layout .region-marker:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+.explore-layout .region-marker.direction-cluster,
+.explore-layout .leaflet-region-marker .region-marker.direction-cluster {width: 144px}
+.explore-layout .region-marker.direction-cluster .region-marker-label {
+  position: static;
+  transform: none !important;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  min-height: 44px;
+  padding: 8px;
+  opacity: 1;
+  visibility: visible;
+  white-space: nowrap;
+}
 .explore-layout .region-marker.is-overview .region-marker-dot {
   display: grid;
   place-items: center;
@@ -207,6 +262,7 @@
   font: var(--caption-3);
   font-variant-numeric: tabular-nums;
 }
+.explore-layout .region-marker.direction-cluster .region-marker-dot {display: none}
 .explore-layout .map-context {font: var(--body-6)}
 
 .explore-layout .terrain-heading h2 {font: var(--heading-2); letter-spacing: -.035em; text-wrap: balance}
@@ -227,9 +283,6 @@
   .explore-layout .map-context {max-width: calc(100% - 192px)}
 }
 @media (max-width: 700px) {
-  /* Separate neighbouring destination labels at the complete-country scale. */
-  .region-marker-altai .region-marker-label {transform: translate(-24px, -8px)}
-  .region-marker-baikal .region-marker-label {transform: translate(8px, -24px)}
   .explore-layout .map-preload-status {left: 16px; bottom: calc(50% + 32px); max-width: calc(100% - 32px)}
   .explore-layout:has(.explore-panel.collapsed) .map-preload-status {bottom: 148px}
   .explore-layout .explore-panel-content {padding: 4px 24px 24px}
@@ -302,10 +355,9 @@
 @media (max-width: 700px) {
   .map-attribution {left: auto; right: 16px; bottom: calc(var(--map-bottom-inset, 0px) + 12px)}
   .map-attribution-content {left: auto; right: 0; max-width: calc(100vw - 32px)}
-  .region-marker-krym .region-marker-label {transform: translate(-4px, 40px)}
-  .region-marker-krasnodar .region-marker-label {transform: translate(38px, 8px)}
 }
 @media (prefers-reduced-motion: reduce) {
+  .explore-layout .region-marker .region-marker-label {transition: none}
   .map-attribution-toggle {transition: none}
   .map-attribution-toggle:active {transform: none}
 }

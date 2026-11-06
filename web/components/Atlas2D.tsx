@@ -8,8 +8,9 @@ import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,leafletRussiaMask,ru
 import {useEffect,useRef,useState} from 'react';
 import type {Map as LeafletMap,Layer,LayerGroup,GeoJSON as LeafletGeoJSON,Path as LeafletPath,PathOptions} from 'leaflet';
 import {Check} from '@/components/TropnikIcons';
-import {regions,routeCountLabel} from '@/lib/content';
+import {regions,routeCountLabel,type Region} from '@/lib/content';
 import {mapDirectionCounts} from '@/lib/map-catalog';
+import {groupMapDirections,updateDirectionButtons,type MapDirectionGroup} from '@/lib/map-direction-layout';
 import {territoryForShape,type MapRegion} from '@/lib/territories';
 import type {AtlasProps} from './Atlas';
 import {canvasStyle} from '@/public/maps/canvas-style.js';
@@ -40,6 +41,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
  const container=useRef<HTMLDivElement>(null),mapRef=useRef<LeafletMap|null>(null),baseRef=useRef<CanvasDetailLayer|null>(null);
  const points=useRef<LayerGroup|null>(null),selected=useRef<LeafletGeoJSON|null>(null),positionMarker=useRef<Layer|null>(null);
  const directionButtons=useRef(new Map<string,HTMLButtonElement>());
+ const directionGroups=useRef(new Map<string,MapDirectionGroup<Region>>()),updateDirections=useRef<(()=>void)|null>(null),visibleTrailsRef=useRef(visibleTrails);
  const territoryLayer=useRef<LeafletGeoJSON|null>(null),regionRef=useRef(region);
  const coverageRef=useRef<Coverage|null>(null),cameraFloor=useRef<RussiaCamera|null>(null),fullView=useRef(true),detailRequest=useRef(0);
  const framedCamera=useRef<RussiaCamera|null>(null);
@@ -56,6 +58,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
  pathVisibility.current=showPaths;
  trailRef.current=trail;
  regionRef.current=region;
+ visibleTrailsRef.current=visibleTrails;
  const sceneAvailable=hasTerrainPreview(trail,region?.id);
  callbacks.current={onRegion,onTrail,onMapNote,onViewportRegion};
  useEffect(()=>{setScene(false);if(sceneAvailable)void preloadTerrain();},[region?.id,trail?.id,sceneAvailable]);
@@ -169,11 +172,22 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     L.geoJSON(leafletRussiaMask(coverage.mask),{pane:'russia-mask',interactive:false,style:{renderer:L.canvas({pane:'russia-mask',padding:.15}),stroke:false,fillColor:MAP_OUTSIDE_COLOR,fillOpacity:1,fillRule:'evenodd'}}).addTo(map);
     for(const item of regions){
      if(!inRussiaCoverage(...item.center,coverage.area))continue;
-     const button=document.createElement('button');button.className='region-marker region-marker-'+item.id;button.setAttribute('aria-label',`Открыть ${item.name}`);directionButtons.current.set(item.id,button);
+     const button=document.createElement('button');button.type='button';button.className='region-marker region-marker-'+item.id;button.setAttribute('aria-label',`Открыть ${item.name}`);directionButtons.current.set(item.id,button);
      const dot=document.createElement('span');dot.className='region-marker-dot';const label=document.createElement('span');label.className='region-marker-label';label.textContent=item.name;button.appendChild(dot);button.appendChild(label);
-     button.addEventListener('click',event=>{event.stopPropagation();callbacks.current.onRegion(item);});
+     button.addEventListener('click',event=>{
+      event.stopPropagation();const group=directionGroups.current.get(item.id);
+      if(group&&group.members.length>1){
+       frameRefit.current?.cancel();fitTerritoryBounds({...group.anchor,bounds:group.bounds},!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      }else callbacks.current.onRegion(item);
+     });
      L.marker([item.center[1],russiaLongitude(item.center[0])],{icon:L.divIcon({html:button,className:'leaflet-region-marker',iconSize:[1,1],iconAnchor:[0,0]}),keyboard:false}).addTo(map);
     }
+    updateDirections.current=()=>{
+     if(cancelled||map!==mapRef.current)return;
+     const groups=groupMapDirections(regions.filter(item=>directionButtons.current.has(item.id)),center=>map.latLngToContainerPoint([center[1],russiaLongitude(center[0])]));
+     directionGroups.current=updateDirectionButtons(directionButtons.current,groups,mapDirectionCounts(visibleTrailsRef.current),!regionRef.current,regionRef.current?.id);
+    };
+    updateDirections.current();
     points.current=L.layerGroup().addTo(map);
     const clampCamera=()=>{
      const floor=cameraFloor.current;if(cancelled||clamping||!floor)return;
@@ -186,13 +200,14 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
      const found=map.getZoom()>=4?Object.entries(regionBoxes).find(([,b])=>center.lng>=b[0]&&center.lng<=b[2]&&center.lat>=b[1]&&center.lat<=b[3]):undefined;
      callbacks.current.onViewportRegion?.(found?.[0]);
     };
-    map.on('moveend',()=>{clampCamera();ensureDetail();});
+    map.on('moveend',()=>{clampCamera();ensureDetail();updateDirections.current?.();});
     const queueResize=()=>{
      cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{
       if(cancelled||!container.current)return;
       const wasOverview=fullView.current;
       map.invalidateSize({pan:false});const {camera:next}=russiaView(container.current,256);cameraFloor.current=next;map.setMinZoom(next.zoom);
       if(wasOverview)fitRussia(false);else{clampCamera();frameRefit.current?.resized();}
+      updateDirections.current?.();
      });
     };
     resize=new ResizeObserver(queueResize);resize.observe(element);
@@ -202,7 +217,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     ensureDetail();
    }catch(error){if(!cancelled){frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();setStatus('Не удалось загрузить географию России. Карточки маршрутов доступны в списке.');console.error('Russia canvas map failed',error);}}
   })();
-  return()=>{cancelled=true;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();++detailRequest.current;detailLoading.current=false;ensureReliefRef.current=null;cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);resize?.disconnect();panelChanges?.disconnect();reliefRef.current?.destroy();reliefRef.current=null;mapRef.current?.remove();mapRef.current=null;directionButtons.current.clear();leafletRef.current=null;baseRef.current=null;territoryLayer.current=null;points.current=null;selected.current=null;positionMarker.current=null;coverageRef.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
+  return()=>{cancelled=true;updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();++detailRequest.current;detailLoading.current=false;ensureReliefRef.current=null;cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);resize?.disconnect();panelChanges?.disconnect();reliefRef.current?.destroy();reliefRef.current=null;mapRef.current?.remove();mapRef.current=null;directionButtons.current.clear();leafletRef.current=null;baseRef.current=null;territoryLayer.current=null;points.current=null;selected.current=null;positionMarker.current=null;coverageRef.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
  },[]);
  useEffect(()=>{
   const map=mapRef.current,element=container.current,L=leafletRef.current;if(!map||!element||!L||!loaded)return;
@@ -226,14 +241,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
  },[region?.id,loaded]);
  useEffect(()=>{
   if(!loaded)return;
-  const counts=mapDirectionCounts(visibleTrails);
-  for(const item of regions){
-   const button=directionButtons.current.get(item.id);if(!button)continue;
-   const count=counts.get(item.id)||0,dot=button.querySelector('.region-marker-dot');
-   button.classList.toggle('is-overview',!region);
-   if(dot)dot.textContent=region?'':String(count);
-   button.setAttribute('aria-label',region?`Открыть ${item.name}`:`Открыть ${item.name}, ${routeCountLabel(count)} в каталоге`);
-  }
+  updateDirections.current?.();
  },[visibleTrails,region?.id,loaded]);
  useEffect(()=>{
   const map=mapRef.current,coverage=coverageRef.current;if(!map||!coverage||!loaded)return;
