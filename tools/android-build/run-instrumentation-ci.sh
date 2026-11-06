@@ -15,8 +15,10 @@ tropnik_emulator="$tropnik_sdk/emulator/emulator"
 tropnik_serial='emulator-5554'
 mkdir -p "$tropnik_output"
 [[ -r /dev/kvm && -w /dev/kvm ]]
-"$tropnik_emulator" -accel-check > "$tropnik_output/acceleration.txt" 2>&1
-"$tropnik_emulator" -version > "$tropnik_output/emulator-version.txt" 2>&1
+# Keep preflight diagnostics in both the job log and the retained artifact.
+# pipefail preserves a launcher/linker failure instead of letting tee mask it.
+"$tropnik_emulator" -accel-check 2>&1 | tee "$tropnik_output/acceleration.txt"
+"$tropnik_emulator" -version 2>&1 | tee "$tropnik_output/emulator-version.txt"
 cp "$tropnik_sdk/system-images/android-35/google_apis/x86_64/source.properties" "$tropnik_output/system-image.properties"
 
 tropnik_emulator_pid=''

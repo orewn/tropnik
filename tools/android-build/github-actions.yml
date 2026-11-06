@@ -138,6 +138,13 @@ jobs:
           fi
           printf 'ANDROID_HOME=%s\nANDROID_SDK_ROOT=%s\n' "$tropnik_sdk" "$tropnik_sdk" >> "$GITHUB_ENV"
           printf '%s\n' "$tropnik_sdk/cmdline-tools/latest/bin" "$tropnik_sdk/platform-tools" "$tropnik_sdk/emulator" >> "$GITHUB_PATH"
+      # Noble's libpulse0 supplies libpulse.so.0, required by the emulator
+      # launcher even when the subsequent device runs with -no-audio.
+      - name: Install emulator shared-library dependency
+        timeout-minutes: 5
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libpulse0
       - name: Install official SDK and one emulator image
         timeout-minutes: 8
         run: |
