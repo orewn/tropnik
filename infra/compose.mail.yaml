@@ -1,0 +1,15 @@
+# Opt in only after configuring a real SMTP account and an HTTPS action page.
+# The base deployment keeps the database/API network internal by default.
+services:
+  api:
+    environment:
+      TROPA_SMTP_HOST: ${TROPA_SMTP_HOST:?Set the verified SMTP host}
+      TROPA_SMTP_PORT: ${TROPA_SMTP_PORT:?Set the SMTP port}
+      TROPA_SMTP_TLS_MODE: ${TROPA_SMTP_TLS_MODE:?Choose tls or starttls}
+      TROPA_SMTP_USERNAME: ${TROPA_SMTP_USERNAME:-}
+      TROPA_SMTP_PASSWORD: ${TROPA_SMTP_PASSWORD:-}
+      TROPA_MAIL_FROM: ${TROPA_MAIL_FROM:?Set the sender address}
+      TROPA_ACCOUNT_ACTION_URL: ${TROPA_ACCOUNT_ACTION_URL:?Set the HTTPS account action page}
+    networks: [backend, mail-egress]
+networks:
+  mail-egress: {}

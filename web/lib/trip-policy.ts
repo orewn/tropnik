@@ -9,7 +9,7 @@ export function startAllowed(d: Departure, roster: Participant[], userId: string
 }
 
 export function reviewAllowed(d: Departure, user: User | null, reviews: Review[], target: 'guide' | 'route') {
-  return !!user && d.status === 'completed' && d.membership === 'completed' && d.guideId !== user.id && !reviews.some(r => r.userId === user.id && r.target === target);
+  return !!user && d.status === 'completed' && d.membership === 'completed' && d.guideId !== user.id && (!d.reviewTargets || d.reviewTargets.includes(target)) && !reviews.some(r => r.userId === user.id && r.target === target);
 }
 
 export function routePolicy(route?: Route) {

@@ -82,6 +82,7 @@ type Departure struct {
 	ID               string    `json:"id"`
 	RouteID          string    `json:"routeId"`
 	RouteRevisionID  string    `json:"routeRevisionId"`
+	RouteTitle       string    `json:"routeTitle"`
 	GuideID          *string   `json:"guideId"`
 	GuideName        *string   `json:"guideName"`
 	StartsAt         time.Time `json:"startsAt"`
@@ -96,6 +97,7 @@ type Departure struct {
 	GuideEligible    bool      `json:"guideEligible"`
 	Membership       string    `json:"membership"`
 	CreatedAt        time.Time `json:"createdAt"`
+	ReviewTargets    *[]string `json:"reviewTargets,omitempty"`
 }
 
 type Member struct{ UserID, Role, Status string }

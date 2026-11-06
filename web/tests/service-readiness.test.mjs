@@ -43,7 +43,7 @@ test('liveness, non-200, malformed and oversized responses never report ready', 
   for (const response of responses) {
     const result = await probeServiceReadiness('https://api.example', {fetcher:async () => response()});
     assert.equal(result.status, 503);
-    assert.deepEqual(result.body, {configured:true, connected:false, version:'0.1.0', mode:'unavailable'});
+    assert.deepEqual(result.body, {configured:true, connected:false, version:'0.1.0', mode:'unavailable', reason:'upstream_unavailable'});
   }
 });
 
@@ -53,6 +53,7 @@ test('unsafe configuration is not contacted or disclosed', async () => {
     assert.equal(result.status, 503);
     assert.equal(result.body.configured, true);
     assert.equal(result.body.connected, false);
+    assert.equal(result.body.reason, 'service_config');
     assert.doesNotMatch(JSON.stringify(result.body), /private-value|api\.example|remote\.example/);
   }
 });
@@ -61,6 +62,7 @@ test('network failure does not expose upstream error text', async () => {
   const result = await probeServiceReadiness('https://api.example', {fetcher:async () => { throw new Error('PRIVATE-CONNECTION-DETAIL'); }});
   assert.equal(result.status, 503);
   assert.equal(result.body.connected, false);
+  assert.equal(result.body.reason, 'upstream_unavailable');
   assert.doesNotMatch(JSON.stringify(result.body), /PRIVATE-CONNECTION-DETAIL/);
 });
 

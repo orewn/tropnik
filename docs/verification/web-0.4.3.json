@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-06",
+  "webVersion": "0.4.3",
+  "androidVersion": "0.4.2-preview",
+  "androidRebuilt": false,
+  "site": {
+    "sourceCommit": "d6cd9a71b108f8be0830376650175052e76f2100",
+    "deploymentId": "appgdep_6aedfb4a09e081919b121a3706b46192",
+    "versionId": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_41b14772f1cc8191a08465e5192f8f82",
+    "status": "succeeded",
+    "environmentRevision": 1,
+    "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+    "audience": "owner-private"
+  },
+  "validation": {
+    "nodeTests": {
+      "passed": 182,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "command": "node --experimental-strip-types --test --test-concurrency=1 --test-reporter=tap tests/*.test.mjs",
+      "logSha256": "189f4b853d14933000f6fa67ad7df875c47e6f6ba907044de6f92d2bb5d0f06d"
+    },
+    "nextBuild": {
+      "exitCode": 0,
+      "buildId": "9MXhbULARduz4Q2KSvT_o",
+      "logSha256": "f0e38391e1765b31ba8798759edec7bdcddcc2bcfa4de92919d68ac37d4f2774"
+    },
+    "staticBuild": {
+      "exitCode": 0,
+      "buildId": "b9d05918d0ed6c14",
+      "pages": 297,
+      "referenceRoutes": 277,
+      "base": "/tropnik-test/",
+      "origin": "https://orewn.github.io",
+      "httpChecks": 51,
+      "logSha256": "715eb8fdec95223ebe434e2664d4df206c1704d02722850d7dd875c89126a117"
+    },
+    "territoryGenerator": {
+      "testsPassed": 6,
+      "reproducible": true,
+      "selectedSourceElements": 85,
+      "sourceGeometryFiles": 280
+    },
+    "sourceParity": {
+      "filesCompared": 1144,
+      "directories": [
+        "app",
+        "components",
+        "lib",
+        "public",
+        "scripts",
+        "tests"
+      ],
+      "differences": 0
+    },
+    "browser": {
+      "managedPreview": [
+        "territory selection",
+        "Chukotka antimeridian fit",
+        "Baikal direction and territory search",
+        "offline download manager route"
+      ],
+      "rendererObserved": "canvas-fallback",
+      "production": "owner sign-in gate; installation not verified",
+      "gpuPerformanceMeasured": false,
+      "physicalAndroidDeviceTested": false
+    }
+  },
+  "staticArchive": {
+    "fileName": "tropnik-test.zip",
+    "bytes": 37566004,
+    "sha256": "afca7a6b0831c653ef87e9eb7261970bc7aae6805497dad463663ada4244ed90"
+  },
+  "nativePostgisGate": "not run in this environment",
+  "backendConnected": false,
+  "apkArtifacts": [
+    {
+      "fileName": "tropnik-arm64-preview.apk",
+      "bytes": 24467090,
+      "sha256": "41eabb299c0b2037311e813dd8d15f1f026977f601d851dfdd537b48b2f32292"
+    },
+    {
+      "fileName": "tropnik-preview.apk",
+      "bytes": 31619028,
+      "sha256": "775bcfea9ca1ac775876f9fc419f4c67a222b25d59f4962a5aa23d7e1b33becd"
+    }
+  ],
+  "limitations": [
+    "Detailed offline coverage is the Bzerpin pilot area, not all Russia.",
+    "277 routes are references; none are certified field-verified/navigation-ready.",
+    "Live API routes need territorial membership.",
+    "Email verification, password recovery and account deletion are not implemented.",
+    "Completed participation navigation and Android response budget need integration work.",
+    "No licensed Gotham Pro or Quixel files included."
+  ]
+}

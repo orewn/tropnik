@@ -1,0 +1,468 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-06",
+  "source": {
+    "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+    "name": "Яндекс Путешествия — маршруты для хайкинга в России",
+    "publishedAt": "2024-05-05"
+  },
+  "routes": [
+    {
+      "id": "divnogorye-big-divy",
+      "regionId": "voronezh",
+      "regionIds": [
+        "voronezh"
+      ],
+      "territoryIds": [
+        "territory-28173009B2687808218031"
+      ],
+      "title": "Дивногорье — Большие Дивы и Маяцкое городище",
+      "subtitle": "Музей-заповедник · Воронежская область",
+      "description": "Прогулка среди меловых останцев с осмотром Маяцкого городища. В Больших Дивах находится пещерный храм; его внутреннюю часть посещают с экскурсией музея. Открытый участок маршрута доступен для самостоятельной прогулки.",
+      "distanceKm": null,
+      "duration": "Обзорная экскурсия — 2 ч",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://divnogor.ru/jekskursii/",
+      "sourceName": "Музей-заповедник «Дивногорье»",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Круглый год; расписание музея уточняется перед визитом",
+      "sourceTechnicalDifficulty": null,
+      "notes": [
+        "Километраж выбранной нитки не подтверждён официальным описанием; время относится к экскурсии с гидом.",
+        "К пещерному комплексу ведёт металлическая лестница; полный подъём насчитывает около 400 ступеней.",
+        "В пещере прохладно даже летом; возьмите тёплый слой и воду.",
+        "Проверенная геометрия этого варианта пока не добавлена. Карточка содержит описание, а не готовый навигационный трек."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+          "name": "Яндекс Путешествия — Дивногорье",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2024-05-05"
+        },
+        {
+          "url": "https://divnogor.ru/visit/",
+          "name": "Дивногорье — планирование визита",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ]
+    },
+    {
+      "id": "primorye-cape-tobizina",
+      "regionId": "primorye",
+      "regionIds": [
+        "primorye"
+      ],
+      "territoryIds": [
+        "territory-28173009B46831765844996"
+      ],
+      "title": "Мыс Тобизина — от бухты Карпинского",
+      "subtitle": "Остров Русский · расстояние в одну сторону",
+      "description": "Тропа от бухты Карпинского ведёт через лес и открытые участки к скалистому мысу. По пути встречаются береговые укрепления Владивостокской крепости; с прибрежных скал видны бухты и море.",
+      "distanceKm": 2.5,
+      "duration": "Около 1 ч в одну сторону",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://visit-primorye.ru/what-to-do/mys-tobizina",
+      "sourceName": "Туристско-информационный центр Приморского края",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Пешеходные экскурсии: май–октябрь; условия вне сезона уточнять",
+      "sourceTechnicalDifficulty": "В описании ТИЦ: без крутых затяжных подъёмов",
+      "notes": [
+        "2,5 км и около часа относятся к участку от бухты до мыса. Обратный путь и подход от остановки учитываются отдельно.",
+        "Тропа проходит у обрывов; мокрые камни и сильный ветер требуют осторожности. Не кормите и не трогайте диких животных.",
+        "Экскурсия из Владивостока на 4–5 часов включает другую программу; это не время только пешего участка.",
+        "Проверенная геометрия этого варианта пока не добавлена. Карточка содержит описание, а не готовый навигационный трек."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+          "name": "Яндекс Путешествия — мыс Тобизина",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2024-05-05"
+        },
+        {
+          "url": "https://visit-primorye.ru/tours/marshrut-na-mys-tobizina",
+          "name": "Visit Primorye — программа маршрута на мыс Тобизина",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "distanceNote": "в одну сторону"
+    },
+    {
+      "id": "katun-upper-multinskoye",
+      "regionId": "altai",
+      "regionIds": [
+        "altai"
+      ],
+      "territoryIds": [
+        "territory-28173009B30008444211385"
+      ],
+      "title": "Мультинские озёра — к Верхнему озеру",
+      "subtitle": "Катунский заповедник · от устья реки Поперечной",
+      "description": "Официальная экотропа идёт от устья Поперечной к Верхнему Мультинскому озеру и обратно. Лесные участки сменяются полянами, у озера открываются виды на горные склоны. Это отдельный маршрут заповедника внутри большого Мультинского района.",
+      "distanceKm": 6,
+      "duration": null,
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://katunskiy.ru/posetitelyam/marshrutyi/v-kray-ozer-i-vodopadov",
+      "sourceName": "Катунский биосферный заповедник",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Сезон и доступ уточнять у администрации территории",
+      "sourceTechnicalDifficulty": "Требуется хорошая физическая подготовка",
+      "notes": [
+        "6 км относятся к нитке от устья Поперечной и обратно. Дорога от Мульты и подход через Нижнее и Среднее озёра сюда не включены.",
+        "Нужен пропуск заповедника; его оформляют также на кордоне «Среднее Мультинское озеро». Порядок сопровождения уточняйте при оформлении.",
+        "Нельзя сходить с разрешённой нитки, купаться и приводить домашних животных; возможны противопожарные закрытия.",
+        "Поперечное озеро — другой официальный маршрут; его нельзя включать в тот же километраж.",
+        "Проверенная геометрия этого варианта пока не добавлена. Карточка содержит описание, а не готовый навигационный трек."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+          "name": "Яндекс Путешествия — Мультинские озёра",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2024-05-05"
+        },
+        {
+          "url": "https://katunskiy.ru/posetitelyam/com_content-article-33",
+          "name": "Катунский заповедник — правила посещения",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        },
+        {
+          "url": "https://katunskiy.ru/posetitelyam/marshrutyi/-starinnoy-tropoy-staroverov-",
+          "name": "Катунский заповедник — отдельная тропа к Поперечному озеру",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "distanceNote": "туда и обратно"
+    },
+    {
+      "id": "curonian-efa",
+      "regionId": "kaliningrad",
+      "regionIds": [
+        "kaliningrad"
+      ],
+      "territoryIds": [
+        "territory-28173009B40138449315491"
+      ],
+      "title": "Куршская коса — Высота Эфа",
+      "subtitle": "Полная паспортная нитка с выходом к морю",
+      "description": "Радиальная экотропа у посёлка Морское знакомит с прибрежными дюнами. Полный вариант включает морской пляж, лесные участки и обзорные площадки у дюны Ореховой. Возвращение входит в паспортную длину.",
+      "distanceKm": 2.7,
+      "duration": "Около 90 мин",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://park-kosa.ru/vyisota-efa.pdf",
+      "sourceName": "Национальный парк «Куршская коса» — паспорт тропы",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Сезон и доступ уточнять у администрации территории",
+      "sourceTechnicalDifficulty": "Некатегорийный маршрут",
+      "notes": [
+        "2,7 км и 90 минут взяты из паспорта от 16 июня 2025 года: этот вариант включает выход к морскому пляжу.",
+        "В обзорной вебкарточке парка указано 2,4 км. Здесь использована конкретная полная нитка паспорта.",
+        "Перед визитом проверьте правила посещения национального парка и доступность оборудованных участков.",
+        "Проверенная геометрия этого варианта пока не добавлена. Карточка содержит описание, а не готовый навигационный трек."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+          "name": "Яндекс Путешествия — Куршская коса",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2024-05-05"
+        },
+        {
+          "url": "https://park-kosa.ru/vysota-efa-28ekologicheskaya-tropa29",
+          "name": "Куршская коса — обзорное описание Высоты Эфа",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        },
+        {
+          "url": "https://park-kosa.ru/vyisota-efa.pdf",
+          "name": "Паспорт экологической тропы «Высота Эфа»",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description",
+          "publishedAt": "2025-06-16"
+        }
+      ],
+      "distanceNote": "туда и обратно"
+    },
+    {
+      "id": "stolby-book-of-nature",
+      "regionId": "krasnoyarsk",
+      "regionIds": [
+        "krasnoyarsk"
+      ],
+      "territoryIds": [
+        "territory-28173009B65133456612022"
+      ],
+      "title": "Красноярские Столбы — «Книга природы»",
+      "subtitle": "Центральный вход · расстояние в одну сторону",
+      "description": "Настильная экотропа начинается за часовней на кордоне Лалетино и проходит вдоль ручья. Информационные стенды знакомят с местной природой, а площадки со скамьями позволяют делать остановки.",
+      "distanceKm": 1.2,
+      "duration": "Около 30 мин в одну сторону",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://kras-stolby.ru/posetitelyam/marshruty/poznavatelnaya-ekotropa-kniga-prirody-1/",
+      "sourceName": "Национальный парк «Красноярские Столбы»",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Круглый год, в светлое время суток; возможны временные ограничения",
+      "sourceTechnicalDifficulty": "По описанию парка специальная подготовка не требуется",
+      "notes": [
+        "1,2 км — путь в одну сторону. Возвращение и подход к кордону от городской остановки не включены.",
+        "Зимой настил может обледенеть. Проверяйте объявления парка о пожарной опасности и других временных ограничениях.",
+        "Проверенная геометрия этого варианта пока не добавлена. Карточка содержит описание, а не готовый навигационный трек."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+          "name": "Яндекс Путешествия — Красноярские Столбы",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2024-05-05"
+        },
+        {
+          "url": "https://kras-stolby.ru/posetitelyam/marshruty/",
+          "name": "Красноярские Столбы — действующие маршруты",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "operatingNotice": {
+        "title": "Посещение по утверждённым маршрутам",
+        "body": "С 1 декабря 2025 года парк разрешает туристические прогулки только по перечисленным утверждённым маршрутам. Отдельные восхождения на скалы в этот перечень не входят.",
+        "url": "https://kras-stolby.ru/posetitelyam/marshruty/",
+        "effectiveAt": "2025-12-01"
+      },
+      "distanceNote": "в одну сторону"
+    },
+    {
+      "id": "stolby-takmak-legends",
+      "regionId": "krasnoyarsk",
+      "regionIds": [
+        "krasnoyarsk"
+      ],
+      "territoryIds": [
+        "territory-28173009B65133456612022"
+      ],
+      "title": "Красноярские Столбы — «Легенды Такмака»",
+      "subtitle": "Восточный вход · Китайская стенка, Бородок и Ермак",
+      "description": "Кольцевой маршрут начинается у Восточного входа и Гранитного карьера. Он связывает Китайскую стенку, Сторожевой, Бородок и Ермак; с отдельных участков открываются виды на Такмак и Красноярск. После пологого начала предстоит крутой подъём.",
+      "distanceKm": 6,
+      "duration": "Около 4 ч",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://kras-stolby.ru/posetitelyam/marshruty/marshrut-legendy-takmaka-1/",
+      "sourceName": "Национальный парк «Красноярские Столбы»",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Круглый год, в светлое время суток; возможны временные ограничения",
+      "sourceTechnicalDifficulty": "По описанию парка специальная подготовка не требуется; есть крутой подъём",
+      "notes": [
+        "Маршрут охватывает район Ермака и виды на Такмак. Отдельное восхождение на массив Такмак в эту нитку не включено.",
+        "Связь неустойчива. На скальных участках, влажных корнях и в гололёд нужна осторожность.",
+        "Проверенная геометрия этого варианта пока не добавлена. Карточка содержит описание, а не готовый навигационный трек."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+          "name": "Яндекс Путешествия — Красноярские Столбы",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2024-05-05"
+        },
+        {
+          "url": "https://kras-stolby.ru/posetitelyam/marshruty/",
+          "name": "Красноярские Столбы — действующие маршруты",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "operatingNotice": {
+        "title": "Посещение по утверждённым маршрутам",
+        "body": "С 1 декабря 2025 года парк разрешает туристические прогулки только по перечисленным утверждённым маршрутам. Отдельные восхождения на скалы в этот перечень не входят.",
+        "url": "https://kras-stolby.ru/posetitelyam/marshruty/",
+        "effectiveAt": "2025-12-01"
+      },
+      "distanceNote": "полный маршрут"
+    },
+    {
+      "id": "stolby-nature-climate",
+      "regionId": "krasnoyarsk",
+      "regionIds": [
+        "krasnoyarsk"
+      ],
+      "territoryIds": [
+        "territory-28173009B65133456612022"
+      ],
+      "title": "Красноярские Столбы — «Природа и климат»",
+      "subtitle": "Виды Такмаковского района · от верхней станции К1",
+      "description": "Оборудованная тропа у верхней станции канатной дороги «Бобрового лога». Настил соединяет тематические площадки с видами на тайгу и скалы. Это действующий вариант знакомства с Такмаковским районом без отдельного восхождения на скалы.",
+      "distanceKm": 1.16,
+      "duration": "Около 1 ч",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://kras-stolby.ru/posetitelyam/marshruty/ekotropa-priroda-i-klimat-1/",
+      "sourceName": "Национальный парк «Красноярские Столбы»",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Круглый год, в часы работы канатной дороги К1",
+      "sourceTechnicalDifficulty": "Оборудованный деревянным настилом маршрут",
+      "notes": [
+        "1,16 км — туда и обратно; в одну сторону 0,58 км. Канатная дорога не входит в пешеходный километраж.",
+        "Начало у верхней станции К1; нужен билет на подъёмник и проверка его расписания.",
+        "Официальная тропа добавлена как актуальный вариант осмотра района из статьи. Самостоятельный подъём на Такмак не предлагается.",
+        "Проверенная геометрия этого варианта пока не добавлена. Карточка содержит описание, а не готовый навигационный трек."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+          "name": "Яндекс Путешествия — направление «Красноярские Столбы»",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2024-05-05"
+        },
+        {
+          "url": "https://kras-stolby.ru/posetitelyam/marshruty/",
+          "name": "Красноярские Столбы — действующие маршруты",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "operatingNotice": {
+        "title": "Посещение по утверждённым маршрутам",
+        "body": "С 1 декабря 2025 года парк разрешает туристические прогулки только по перечисленным утверждённым маршрутам. Отдельные восхождения на скалы в этот перечень не входят.",
+        "url": "https://kras-stolby.ru/posetitelyam/marshruty/",
+        "effectiveAt": "2025-12-01"
+      },
+      "distanceNote": "туда и обратно"
+    },
+    {
+      "id": "baikal-listvyanka-bolshie-koty",
+      "regionId": "baikal",
+      "regionIds": [
+        "baikal"
+      ],
+      "territoryIds": [
+        "territory-28173009B78872068540735"
+      ],
+      "title": "Большая Байкальская тропа — Листвянка — Большие Коты",
+      "subtitle": "Самостоятельный участок ББТ · в одну сторону",
+      "description": "От Листвянки тропа поднимается через лес, затем спускается к Байкалу и идёт вдоль берега к Большим Котам. Есть узкие участки над водой и каменистые осыпи. Отрезок описан отдельно от продолжения к Большому Голоустному.",
+      "distanceKm": 24.7,
+      "duration": "5–8 ч в одну сторону",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://greatbaikaltrail.org/listvyanka-bol-shie-koty",
+      "sourceName": "Ассоциация «Большая Байкальская тропа»",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Сезон и доступ уточнять у администрации территории",
+      "sourceTechnicalDifficulty": "Средняя — оценка создателей тропы",
+      "notes": [
+        "24,7 км — участок Листвянка — Большие Коты, а не полная ББТ или 45,9 км до Большого Голоустного.",
+        "Нужно разрешение Прибайкальского национального парка. Ночёвки, ограничения и обратную дорогу планируют отдельно.",
+        "Создатели тропы сообщают, что с 2023 года не выполняют её обслуживание. Состояние участка проверяйте у администрации парка.",
+        "Перепад высот не перенесён в суммарный набор. Ссылка на GPS-архив пока не проверена и не используется для навигации.",
+        "Проверенная геометрия этого варианта пока не добавлена. Карточка содержит описание, а не готовый навигационный трек."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+          "name": "Яндекс Путешествия — Большая Байкальская тропа",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2024-05-05"
+        },
+        {
+          "url": "https://baikal-1.ru/tourism/routes-and-maps/bbt-1-listvyanka-bolshoye-goloustnoye/",
+          "name": "Заповедное Прибайкалье — полный маршрут до Большого Голоустного",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        },
+        {
+          "url": "https://drive.google.com/file/d/1yVIfkSTPdUQtXRuROt78ua659_fAP9FZ/view",
+          "name": "ББТ — GPS-архив участка, файл не проверен",
+          "reviewedAt": "2026-11-06",
+          "scope": "geometry_download"
+        },
+        {
+          "url": "https://baikal-1.ru/medvedi-v-natsionalnom-parke-poseshhenie-eshhyo-dvuh-marshrutov-priostanovleno/",
+          "name": "Заповедное Прибайкалье — закрытие ББТ из-за медведей",
+          "publishedAt": "2026-09-04",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "operatingNotice": {
+        "title": "По сообщению от 04.09.2026 доступ закрыт",
+        "body": "Администрация Прибайкальского национального парка закрыла Большую Байкальскую тропу с 4 сентября 2026 года из-за активности медведей. Позднейшее снятие ограничения в проверенных источниках не подтверждено. Перед планированием похода получите актуальный статус у парка.",
+        "url": "https://baikal-1.ru/medvedi-v-natsionalnom-parke-poseshhenie-eshhyo-dvuh-marshrutov-priostanovleno/",
+        "effectiveAt": "2026-09-04"
+      },
+      "distanceNote": "в одну сторону",
+      "accessStatus": "closed"
+    }
+  ],
+  "updatesByRouteId": {
+    "kavkaz-16b": {
+      "territoryIds": [
+        "territory-28173009B83675725671802"
+      ],
+      "sourceKind": "official",
+      "additionalSources": [
+        {
+          "url": "https://travel.yandex.ru/journal/marshruty-dlya-hajkinga-v-rossii/",
+          "name": "Яндекс Путешествия — Тисо-самшитовая роща",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2024-05-05"
+        },
+        {
+          "url": "https://www.kavkazzapoved.ru/news/tiso-samshitovaya-roscha-kak-podgotovitsya-k-progulke-chto-vzyat-s-soboy-i-o-chyom-nuzhno-znat",
+          "name": "Кавказский заповедник — подготовка к посещению рощи",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description",
+          "publishedAt": "2026-06-17"
+        }
+      ],
+      "operatingNotice": {
+        "title": "Учитывайте сезонные часы работы рощи",
+        "body": "По памятке заповедника от 17 июня 2026 года роща закрывается в 18:00 летом и в 17:00 зимой. Для Большого кольца рекомендуются ранний старт, обувь для каменистых ступеней и готовность к подъёмам; проход с детской коляской не предусмотрен. Уточните расписание перед визитом.",
+        "url": "https://www.kavkazzapoved.ru/news/tiso-samshitovaya-roscha-kak-podgotovitsya-k-progulke-chto-vzyat-s-soboy-i-o-chyom-nuzhno-znat",
+        "effectiveAt": "2026-06-17"
+      },
+      "distanceNote": "полный маршрут"
+    }
+  }
+}

@@ -120,8 +120,8 @@ def make_scene(runtime: Path, renderer_path: Path, route_path: Path, *,
     guard = """(function(){
 const status=document.getElementById('scene-status');
 function fail(message){document.documentElement.dataset.sceneState='failed';if(status){status.hidden=false;status.textContent=message;}window.dispatchEvent(new Event('tropnik-scene-fatal'));}
-window.addEventListener('error',function(){fail('Сцена не открылась. Подготовьте её заново.');});
-window.addEventListener('unhandledrejection',function(){fail('Не удалось подготовить сцену. Сохранённая карта остаётся доступной.');});
+window.addEventListener('error',function(){fail('Рельеф не открылся. Попробуйте ещё раз.');});
+window.addEventListener('unhandledrejection',function(){fail('Не удалось открыть рельеф. Сохранённая карта остаётся доступной.');});
 })();"""
     bootstrap = """
 (function(){
@@ -130,7 +130,7 @@ const status=document.getElementById('scene-status');
 const terrainGrid=__GRID__;
 let renderer=null,active=false,disposed=false,terminal=false,layoutObserver=null,preparation=null;
 document.documentElement.dataset.sceneState='loading';
-function failure(message){status.hidden=false;status.textContent=message||'Сцена недоступна на этом устройстве. Вернитесь к сохранённой карте.';}
+function failure(){status.hidden=false;status.textContent='Не удалось открыть рельеф. Попробуйте снова или вернитесь к сохранённой карте.';}
 function terminalFailure(message){
  if(disposed||terminal)return;terminal=true;active=false;
  if(preparation)preparation.abort();if(renderer){renderer.destroy();renderer=null;}
@@ -147,7 +147,7 @@ function fitLabels(){
 }
 window.addEventListener('tropnik-scene-resume',function(){if(terminal)return;active=true;if(renderer)renderer.setVisible(true);else start();});
 window.addEventListener('tropnik-scene-pause',function(){active=false;if(preparation)preparation.abort();if(renderer)renderer.setVisible(false);});
-window.addEventListener('tropnik-scene-fatal',function(){terminalFailure('Сцена остановилась. Подготовьте её заново.');});
+window.addEventListener('tropnik-scene-fatal',function(){terminalFailure('Рельеф закрылся. Откройте его снова.');});
 window.addEventListener('pagehide',function(){disposed=true;if(preparation)preparation.abort();if(layoutObserver)layoutObserver.disconnect();window.removeEventListener('resize',fitLabels);if(renderer)renderer.destroy();},{once:true});
 async function start(){
  if(disposed||terminal||!active||renderer||preparation)return;

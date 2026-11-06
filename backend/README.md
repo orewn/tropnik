@@ -10,6 +10,10 @@ routes, verified guides, departures, participants or ratings**.
 - Real email/password registration and login, opaque 256-bit sessions, logout.
   Only SHA-256 session-token hashes are stored. Passwords use the Go standard
   library's PBKDF2-HMAC-SHA256, 600,000 iterations and a unique 128-bit salt.
+- Email verification, password recovery and account closure through a configured
+  TLS SMTP transport. Without mail configuration, public registration and new
+  action-link requests stay closed. See the lifecycle section below for delivery
+  limits, retained records and operator setup.
 - Shared PostgreSQL authentication budgets: 20 attempts/IP/minute and ten login
   attempts/normalized account/minute. Identifiers are HMAC-SHA256 digests made
   with a stable server-only key. Restarting or adding an API process does not
@@ -69,7 +73,11 @@ Key operations:
 | Public regions and trails | `GET /regions`, `GET /routes?region=karelia`, `GET /routes/{id}` |
 | Public guide profiles | `GET /guides`, `GET /guides/{id}` |
 | Real account | `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /me` |
+| Confirm email | `POST /auth/email/request`, `POST /auth/email/confirm` |
+| Recover password | `POST /auth/password/request`, `POST /auth/password/reset` |
+| Close account with current-password confirmation | `POST /me/delete` |
 | Profile / guide application | `PATCH /me/profile` |
+| Private completed hike history | `GET /me/departures?limit=20&cursor=...` |
 | Create dated hike | `POST /departures` (eligible verified guide) |
 | Join / withdraw | `POST /departures/{id}/join`, `POST /departures/{id}/leave` |
 | Roster / attendance | `GET /departures/{id}/participants`, `POST /departures/{id}/check-in` |
@@ -103,6 +111,28 @@ Route list geometry is explicitly `geometryDetail: "overview"`, bounded to
 1,000 source vertices per route. It is for discovery, not navigation. Request
 `GET /routes/{id}` for the complete reviewed geometry (`geometryDetail: "full"`)
 and pin its revision when preparing an offline package.
+
+Route overview pages are bounded to **1 MiB of decoded JSON**, including their
+envelope. A page can contain fewer than the requested limit even when more
+routes exist: continue with `meta.nextCursor` until it is absent. The cursor
+always points to the last included route; a row that does not fit is not skipped.
+Full route detail has a separate **8 MiB** decoded response budget and retains
+all reviewed vertices, up to 100,000. The Android client applies the same limits
+while streaming, including chunked and gzip responses; error responses retain
+the 1 MiB limit. A legacy oversized route returns an explicit service error
+instead of truncated geometry. Operator import reads at most 10 MiB, validates
+bounded metadata and finite WGS84 coordinate pairs, and checks the full route
+transport budget before storage.
+
+`GET /me/departures` returns only the authenticated account's completed
+memberships in completed hikes, with the pinned route revision and completion
+time. It accepts a page size of 1–50 (default 20) and a stable descending
+completion-time/ID cursor. It includes records after a route leaves the public
+catalogue and never includes a roster or private contacts. `reviewTargets`
+lists the account's remaining review targets; a hidden review still occupies
+its target. Completed departure detail also returns that field only to the
+current completed participant. The web account and Android profile link each
+history entry to its hike and reviews; the history is not a public profile.
 
 ## Local development
 
@@ -242,9 +272,83 @@ The exact account/report/appeal request shapes are in `contracts/api.ts` and
 OpenAPI. Queues return up to 100 eligible cases, oldest first; personal histories
 return up to 100 recent records. Older-page navigation is not implemented.
 
-The framework now applies migrations 001, 002 and 003 in order and refuses API
-readiness without schema version 3. Re-run migrations with the owner credential,
+The framework now applies migrations 001–005 in order and refuses API
+readiness without schema version 5. Migration 004 adds account-history indexes;
+005 adds digest-only action tokens, permanent account tombstones and guards
+against deleting active participants, guides or departure owners. Re-run
+migrations with the owner credential,
 then reapply restricted runtime grants as documented in `../infra`.
+
+## Account lifecycle and mail transport
+
+Configure `TROPA_SMTP_HOST`, `TROPA_SMTP_PORT`, `TROPA_SMTP_TLS_MODE` (`tls` or
+`starttls`), `TROPA_MAIL_FROM` and `TROPA_ACCOUNT_ACTION_URL`. Optional SMTP
+username/password must be supplied together. TLS 1.2 or newer, certificate
+validation and matching server name are mandatory; STARTTLS cannot fall back
+to plaintext. The action URL is a fixed operator-configured HTTPS page, normally
+`https://your-domain.example/account/action`; it is never built from request
+Host headers. A deployment under a path prefix includes that prefix in this URL.
+The Docker base network has no external egress; use the explicit mail overlay in
+[`infra`](../infra/README.md) when the sender is ready.
+
+An entirely absent configuration disables signup and new-link requests with
+`503 registration_unavailable`, while existing accounts can log in. A partial
+configuration fails startup. There is no log mailer, development token response
+or fake success transport. Tests explicitly inject an in-memory mailer or use
+a loopback TLS SMTP fixture with `example.invalid` recipients. No real mail was
+sent while implementing or testing this change.
+
+Successful registration keeps the original `201 {data:{token,expiresAt,user}}`
+session contract and `emailVerified:false`. Email ownership changes only after
+consuming the verification link. A verification flag does not grant a guide
+qualification, a staff role or an operator entitlement; existing participation
+permissions are unchanged.
+
+Action secrets contain 256 cryptographically random bits. Only SHA-256 digests
+are stored. Verification lasts at most 24 hours; reset links last 30 minutes.
+Links put the secret in a URL fragment. The action page reads it once, immediately
+removes it from the address bar and sends it only in the subsequent explicit
+POST. Merely opening an email link does not consume it. New requests replace the
+previous link of the same purpose. Token consumption and the corresponding
+account mutation are one transaction, using a consistent user-row lock order.
+
+Mail requests use a bounded in-memory queue (36 accepted jobs including four
+active workers). Workers have a 20-second operation timeout; SMTP itself has a
+15-second bound. A restart can lose queued requests; delivery is not a durable
+promise, and the user can request another link. SMTP acceptance is audited as
+acceptance, not mailbox delivery. Failed transport attempts revoke their own
+token. Tokens, SMTP diagnostics and email addresses are not written to logs.
+This transport sends account security mail; stored moderation notifications and
+the departure outbox are not connected to it.
+
+Recovery and verification-request responses are identical for existing, absent,
+verified, disabled and staff accounts. Database account lookups and SMTP run
+outside the HTTP response path. The existing HMAC-backed budget table now also
+limits mail to three requests/address/15 minutes and deletion reauthentication
+to five attempts/account/minute, in addition to the shared IP budget. Per-address
+suppression still returns the same `202`; it does not claim mail was delivered.
+
+A reset atomically changes the hash, consumes the token and revokes every
+session and outstanding action link. Login session creation rechecks the
+previously verified password hash under a row lock, closing the concurrent
+login/reset race. The user signs in again; no automatic session is issued by
+reset. A password-change notification is attempted through the same mail queue.
+
+Account closure requires a valid session, the current password and explicit
+confirmation. Active memberships, owned or guided departures, and owned open
+recruitment requests block closure. The account is disabled permanently, email
+and name are replaced, its password is destroyed and sessions/links are revoked.
+Cached idempotent departure responses also replace the former guide name.
+Participation history, messages/reviews, qualification evidence and audit remain;
+personal information inside retained text or backups is **not** automatically
+erased. An operator still needs a retention and personal-data request process.
+Staff recovery and closure require operator-managed deprovisioning, not these
+public endpoints.
+
+The implementation follows the relevant token, enumeration, session-revocation
+and reauthentication guidance in the [OWASP Forgot Password Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html)
+and [Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html).
+This scope is not a claim of complete OWASP or legal compliance.
 
 ## Authentication budgets and trusted ingress
 
@@ -344,9 +448,10 @@ an execution result. The exact current scope and source hashes are recorded in
   restricted API database role; verify backup restoration, not only backup creation.
 - Set up operational guide/route review, reports/appeals and privacy/retention
   procedures. This CLI is a technical review mechanism, not a legal attestation.
-- Add email/contact verification, password recovery and account deletion flows.
-  Accounts currently truthfully return `emailVerified: false`; email ownership
-  is not established by typing an address. Operator MFA/SSO is not implemented.
+- Configure and validate a real mail sender and the account-action page; exercise
+  verification, recovery, delivery failure and closure against the deployed
+  service. The implemented flows do not replace operator MFA/SSO or a complete
+  personal-data retention/deletion process.
 - Staff the moderation and independent-appeal process before accepting public
   UGC. Case APIs and the web interface exist; no staffed service or response-time
   commitment is implied. Profile/request-card/catalog report targets, collusion

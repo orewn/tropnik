@@ -83,7 +83,7 @@ func TestForwardedAddressRequiresExplicitProxyTrust(t *testing.T) {
 func TestPrivateEndpointsDenyMissingOrForgedSessions(t *testing.T) {
 	s := testServer(t, Config{Origins: []string{"https://tropa.example"}})
 	h := s.Handler()
-	for _, tc := range []struct{ method, path string }{{"GET", "/api/v1/me"}, {"POST", "/api/v1/departures/123/join"}, {"GET", "/api/v1/departures/123/messages"}, {"POST", "/api/v1/departures/123/reviews"}, {"POST", "/api/v1/sync/observations"}, {"POST", "/api/v1/recruitment-requests"}, {"GET", "/api/v1/me/summary"}, {"POST", "/api/v1/reports"}, {"GET", "/api/v1/moderation/reports"}, {"POST", "/api/v1/moderation/reports/123/resolve"}, {"POST", "/api/v1/moderation-actions/123/appeals"}, {"POST", "/api/v1/moderation/appeals/123/resolve"}} {
+	for _, tc := range []struct{ method, path string }{{"GET", "/api/v1/me"}, {"POST", "/api/v1/departures/123/join"}, {"GET", "/api/v1/departures/123/messages"}, {"POST", "/api/v1/departures/123/reviews"}, {"POST", "/api/v1/sync/observations"}, {"POST", "/api/v1/recruitment-requests"}, {"GET", "/api/v1/me/summary"}, {"GET", "/api/v1/me/departures?userId=another-account"}, {"POST", "/api/v1/reports"}, {"GET", "/api/v1/moderation/reports"}, {"POST", "/api/v1/moderation/reports/123/resolve"}, {"POST", "/api/v1/moderation-actions/123/appeals"}, {"POST", "/api/v1/moderation/appeals/123/resolve"}} {
 		for _, header := range []string{"", "Bearer guide", "Bearer ../../admin"} {
 			r := httptest.NewRequest(tc.method, tc.path, nil)
 			if header != "" {

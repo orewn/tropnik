@@ -5,6 +5,7 @@ import {dirname, join, resolve, relative, extname, isAbsolute} from 'node:path';
 import {mkdir, readFile, writeFile, readdir, rm, access} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {normalizeBase, rewriteScript, rewriteJSON, rewriteHTML, rewriteCSS, ts} from './paths.mjs';
+import {APK_FILE, ensureApk, readApkManifest, verifyApk} from './apk-artifact.mjs';
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const web = join(project, 'web');
@@ -13,7 +14,7 @@ const {build: viteBuild} = await import(require.resolve('vite'));
 const {default: react} = await import(require.resolve('@vitejs/plugin-react'));
 const args = process.argv.slice(2);
 const option = (name, fallback) => args.includes(name) ? args[args.indexOf(name) + 1] : fallback;
-const base = normalizeBase(option('--base', '/tropnik-test/'));
+const base = normalizeBase(option('--base', '/tropnik/'));
 const origin = option('--origin', 'http://localhost:4173');
 const parsedOrigin = new URL(origin);
 if (!['https:', 'http:'].includes(parsedOrigin.protocol) || parsedOrigin.origin !== origin || parsedOrigin.username || parsedOrigin.password) throw new Error('--origin must contain only the scheme and host.');
@@ -27,6 +28,13 @@ const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const exists = async path => access(path).then(() => true, () => false);
 const textExtensions = new Set(['.json', '.webmanifest', '.html', '.css', '.js', '.mjs']);
 const vendorScripts = /\/maps\/(?:maplibre|leaflet|protomaps-leaflet)/;
+
+// A successful release must include the download advertised on the Android page.
+// Fetching is a separate explicit preparation step; the build never uses the network.
+const androidMetadata = await readApkManifest(join(web, 'public/downloads/android-manifest.json'));
+await ensureApk(join(web, 'public/downloads', APK_FILE), androidMetadata, {download: false});
+const sourceCommit = process.env.GITHUB_SHA || null;
+if (sourceCommit !== null && !/^[a-f0-9]{40}$/.test(sourceCommit)) throw new Error('GITHUB_SHA must be a full source commit.');
 
 async function files(root) {
   const result = [];
@@ -49,7 +57,7 @@ const infoPages = {
   about: 'О проекте', safety: 'Подготовка к походу', sources: 'Источники и лицензии',
   privacy: 'Конфиденциальность', terms: 'Условия', offline: 'Карты с собой',
   trips: 'Походы и группы', community: 'Сообщество', guides: 'Гидам и инструкторам',
-  account: 'Личный кабинет', moderation: 'Модерация', android: 'Тропник для Android',
+  account: 'Личный кабинет', 'account/action': 'Действие с аккаунтом', search: 'Поиск', moderation: 'Модерация', android: 'Тропник для Android',
 };
 // Inherit the current site's cascade. This preview does not maintain a second visual system.
 const layoutPath = join(web, 'app/layout.tsx');
@@ -103,26 +111,19 @@ const {regions, trails} = await import('data:text/javascript;base64,' + Buffer.f
 const pages = [
   {path: '/', title: 'Карта маршрутов России', kind: 'home'},
   ...Object.entries(infoPages).map(([kind, title]) => ({path: '/' + kind, title, kind})),
-  {path: '/preview', title: 'О тестовой версии', kind: 'preview'},
+  {path: '/preview', title: 'Возможности Тропника', kind: 'preview'},
   ...regions.map(region => ({path: '/regions/' + encodeURIComponent(region.id), title: region.name, kind: 'region', id: region.id})),
   ...trails.map(trail => ({path: '/routes/' + encodeURIComponent(trail.id), title: trail.title, kind: 'route', id: trail.id})),
 ];
 if (new Set(pages.map(page => page.path)).size !== pages.length) throw new Error('Duplicate catalogue page path.');
-let apk = null;
 const apkManifestPath = join(source, 'public/downloads/android-manifest.json');
-if (await exists(apkManifestPath)) {
-  const metadata = JSON.parse(await readFile(apkManifestPath, 'utf8'));
-  const androidPage = await readFile(join(source, 'app/android/page.tsx'), 'utf8');
-  const urls = [...androidPage.matchAll(/href=["'](\/downloads\/[^"']+\.apk)["']/g)].map(match => match[1]);
-  if (urls.length !== 1 || urls[0].includes('..')) throw new Error('Android page must name one local APK for checksum verification.');
-  const path = join(source, 'public', urls[0].slice(1));
-  if (await exists(path)) {
-    const bytes = await readFile(path);
-    if (bytes.length !== metadata.bytes || sha(bytes) !== metadata.sha256) throw new Error('APK bytes do not match the current Android manifest.');
-    apk = {path: urls[0], bytes: bytes.length, sha256: metadata.sha256, version: metadata.version, architecture: metadata.architecture, signature: metadata.signature, deviceExecutionVerified: metadata.deviceExecutionVerified === true};
-  }
-}
-const config = {id: buildId, base, origin, hasApk: !!apk, pages};
+const metadata = await readApkManifest(apkManifestPath);
+const androidPage = await readFile(join(source, 'app/android/page.tsx'), 'utf8');
+const urls = [...androidPage.matchAll(/href=["'](\/downloads\/[^"']+\.apk)["']/g)].map(match => match[1]);
+if (urls.length !== 1 || urls[0] !== `/downloads/${APK_FILE}`) throw new Error('Android page must name the checksum-pinned ARM64 APK.');
+const verifiedApk = await verifyApk(join(source, 'public', urls[0].slice(1)), metadata);
+const apk = {path: urls[0], ...verifiedApk, architecture: metadata.architecture, signature: metadata.signature, deviceExecutionVerified: metadata.deviceExecutionVerified === true};
+const config = {id: buildId, base, origin, hasApk: true, pages};
 
 // The archived offline pack is copied byte-for-byte. Only its separate application style gets a base path.
 for (const path of await files(join(source, 'public'))) {
@@ -139,7 +140,6 @@ for (const path of await files(join(source, 'public'))) {
     else if (name.endsWith('.css')) value = rewriteCSS(value, base);
     else if (!vendorScripts.test('/' + name)) value = rewriteScript(value, name, {base});
     if (name === 'sw.js') value = value.replace(/const VERSION\s*=\s*['"][^'"]+['"]/, `const VERSION='${base.slice(1, -1)}-tropnik-shell-${buildId}'`);
-    if (name === 'offline.html') value = value.replace('<body>', '<body><div style="background:#244d3c;color:#fffefa;padding:8px 16px;font:12px/16px system-ui">Тестовая версия · автономная карта. Серверные действия недоступны.</div>');
     bytes = Buffer.from(value);
   }
   await mkdir(dirname(target), {recursive: true});
@@ -147,12 +147,12 @@ for (const path of await files(join(source, 'public'))) {
 }
 const manifestPath = join(publicDir, 'manifest.webmanifest');
 const pwa = JSON.parse(await readFile(manifestPath, 'utf8'));
-pwa.name = 'Тропник · тестовая версия'; pwa.short_name = 'Тропник · тест';
+pwa.name = 'Тропник'; pwa.short_name = 'Тропник';
 await writeFile(manifestPath, JSON.stringify(pwa, null, 2) + '\n');
 await writeFile(join(publicDir, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
 await writeFile(join(publicDir, '.nojekyll'), '');
 await writeFile(join(stage, 'entry.tsx'), "import './source/pages-preview/src/main.tsx';\n");
-await writeFile(join(stage, 'index.html'), `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#244d3c"><meta name="robots" content="noindex,nofollow"><meta name="description" content="Тестовая версия Тропника: карта, реальные справочные маршруты и проверяемые офлайн данные. Серверные действия отключены."><title>Тропник · тестовая версия</title><link rel="icon" href="${base}favicon.svg"><link rel="manifest" href="${base}manifest.webmanifest"><link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin><link rel="preconnect" href="https://tiles.mapterhorn.com" crossorigin></head><body><div id="root"><main class="pages-preview-boot"><h1>Тропник · тестовая версия</h1><p>Открываем карту и справочные данные. Серверные действия отключены.</p></main></div><noscript>Для интерактивной карты нужен JavaScript. <a href="${base}offline.html">Автономная карта</a> также требует включённый JavaScript.</noscript><script type="module" src="/entry.tsx"></script></body></html>`);
+await writeFile(join(stage, 'index.html'), `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#244d3c"><meta name="robots" content="noindex,nofollow"><meta name="description" content="Карта маршрутов по России. Выбирайте направление и сохраняйте тропы для своего путешествия."><title>Тропник</title><link rel="icon" href="${base}favicon.svg"><link rel="manifest" href="${base}manifest.webmanifest"><link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin><link rel="preconnect" href="https://tiles.mapterhorn.com" crossorigin></head><body><div id="root"><main class="pages-preview-boot"><h1>Тропник</h1><p>Открываем карту маршрутов…</p></main></div><noscript>Чтобы открыть карту, разрешите выполнение сценариев в настройках браузера. <a href="${base}offline-viewer.html">Автономная карта</a> доступна после включения сценариев.</noscript><script type="module" src="/entry.tsx"></script></body></html>`);
 
 const boundary = {
   [join(source, 'lib/api')]: join(source, 'pages-preview/src/api.ts'),
@@ -232,7 +232,7 @@ for (const root of [...packageRoots].sort()) {
 }
 await writeFile(join(out, 'THIRD_PARTY_NOTICES.txt'), 'Tropnik static preview: browser dependencies\n\n' + thirdParty.map(item => `${item.name} ${item.version}\nLicense: ${JSON.stringify(item.license)}\n${item.notices.join('\n') || 'License notice is retained in the distributed bundle.'}\n`).join('\n'));
 const report = {
-  schemaVersion: 1, buildId, base, origin, renderer: 'Existing public terrain module from the input snapshot',
+  schemaVersion: 1, buildId, sourceCommit, base, origin, renderer: 'Existing public terrain module from the input snapshot',
   apiConnected: false, serverCodeIncluded: false, fakeServerResponses: false, pages: pages.length,
   regions: regions.length, referenceRoutes: trails.length, hasApk: config.hasApk, apk, layoutStyles,
   storageNamespace: base.slice(1, -1), immutableOfflinePack: true, inputs, bundledModules, thirdParty,

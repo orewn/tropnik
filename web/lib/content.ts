@@ -1,19 +1,31 @@
 import importedCatalog from './catalog.generated.json';
 import importedPoints from './route-points.generated.json';
+import telegramReviewed from './telegram-reviewed.generated.json';
+import editorialRegions from './editorial-regions.generated.json';
+import yandexReviewed from './yandex-routes.generated.json';
+import discoveryReviewed from './discovery-routes.generated.json';
+import discoveryEastReviewed from './russiadiscovery-east.generated.json';
 import displayCoverage from '@/public/data/russia-boundaries-provenance.json';
 export type Region = {
   id: string; name: string; caption: string; description: string; terrain: string;
-  center: [number, number]; zoom: number; shapeNames: string[]; tint: string; timezone: string;
+  center: [number, number]; bounds?: [number, number, number, number]; zoom: number; shapeNames: string[]; tint: string; timezone: string;
 };
 
-export const regions: Region[] = [
+const initialRegions: Region[] = [
   { id: 'altai', name: 'Алтай', caption: 'Горы. Озёра. Простор.', terrain: 'Горные тропы', tint: '#CDD8C6', center: [86.8, 50.5], zoom: 6.1, timezone: 'Asia/Barnaul', shapeNames: ['Altai Republic', 'Republic of Altai', 'Altai Krai'], description: 'Выберите район Алтая и изучите маршрут перед выходом. В каталоге отдельно отмечаем техническую сложность, нагрузку и дату проверки тропы. Туристическое направление включает территории, которые не совпадают с границей одного региона.' },
   { id: 'krasnodar', name: 'Краснодарский край', caption: 'От моря к вершинам.', terrain: 'Кавказ и предгорья', tint: '#D9DDC1', center: [40.05, 44.05], zoom: 7, timezone: 'Europe/Moscow', shapeNames: ['Krasnodar Krai'], description: 'Маршруты Черноморского побережья, предгорий и Западного Кавказа. Участки в заповедниках и национальных парках требуют отдельной проверки действующих правил посещения. Карточка тропы и разрешение на её посещение — разные вещи.' },
   { id: 'karelia', name: 'Карелия', caption: 'Лес, вода и тишина.', terrain: 'Лесные маршруты', tint: '#C8D7CF', center: [33.2, 63.3], zoom: 5.9, timezone: 'Europe/Moscow', shapeNames: ['Republic of Karelia', 'Karelia'], description: 'Планируйте поход по лесам и озёрным районам Карелии. Для каждой опубликованной тропы понадобятся сведения о покрытии, переправах, точках старта и сезонных ограничениях. Пока проверенных выходов нет, их набор не открывается.' },
-  { id: 'krym', name: 'Крым', caption: 'Тропы над морем.', terrain: 'Горы и побережье', tint: '#E0D7BD', center: [34.2, 44.8], zoom: 8, timezone: 'Europe/Moscow', shapeNames: ['Republic of Crimea', 'Crimea'], description: 'Туристическое направление для выбора горных и прибрежных маршрутов. Перед выходом необходимо проверить доступность конкретного участка и действующие ограничения. Подробная карта и актуальное подтверждение маршрута публикуются отдельно.' },
+  { id: 'krym', name: 'Крым', caption: 'Тропы над морем.', terrain: 'Горы и побережье', tint: '#E0D7BD', center: [34.2, 44.8], zoom: 8, timezone: 'Europe/Moscow', shapeNames: ['Autonomous Republic of Crimea', 'Sevastopol', 'Republic of Crimea', 'Crimea'], description: 'Туристическое направление для выбора горных и прибрежных маршрутов. Перед выходом необходимо проверить доступность конкретного участка и действующие ограничения. Подробная карта и актуальное подтверждение маршрута публикуются отдельно.' },
   { id: 'baikal', name: 'Байкал', caption: 'Большое озеро. Большой путь.', terrain: 'Прибрежные тропы', tint: '#CCDCE0', center: [108.0, 53.3], zoom: 6, timezone: 'Asia/Irkutsk', shapeNames: ['Irkutsk Oblast', 'Republic of Buryatia', 'Buryatia'], description: 'Байкал объединяет маршруты разных административных территорий. Поэтому один маршрут имеет собственную страницу и может встречаться в нескольких региональных подборках. Сезон, разрешения и фактические условия проверяются для каждого выхода.' },
   { id: 'kamchatka', name: 'Камчатка', caption: 'Встреча с большим ландшафтом.', terrain: 'Вулканы и долины', tint: '#D9D2C7', center: [159.8, 54.5], zoom: 5.7, timezone: 'Asia/Kamchatka', shapeNames: ['Kamchatka Krai'], description: 'Направление для походов с подходящим по квалификации инструктором. В карточке важны удалённость, технические участки, сезон и необходимые разрешения. Наличие объекта на общей карте не означает готовность маршрута к прохождению.' },
 ];
+
+export const regions: Region[] = [...initialRegions, ...(editorialRegions.regions as Region[])];
+
+export type SourceReference = {
+  url: string; name: string; messageId?: number; publishedAt?: string; reviewedAt: string;
+  scope: 'community_mention' | 'editorial_mention' | 'official_description' | 'geometry_download';
+};
 
 export type Trail = {
   id: string; regionId: string; title: string; subtitle: string; description: string;
@@ -22,7 +34,12 @@ export type Trail = {
   geometryUrl?: string; sourceUrl: string; sourceName: string; checkedAt: string;
   publicationStatus: 'reference' | 'published'; season: string; notes: string[];
   operatingNotice?: {title:string;body:string;url:string;effectiveAt:string};
-  sourceKind?:'database'|'official'|'published'; officialEvidence?:{url:string;summary:string;checkedAt:string;scope:string}; center?:[number,number]; bbox?:number[];
+  sourceKind?:'database'|'official'|'published'|'community'; officialEvidence?:{url:string;summary:string;checkedAt:string;scope:string}; center?:[number,number]; bbox?:number[];
+  sourceTitle?: string;
+  additionalSources?: SourceReference[];
+  territoryIds?: string[];
+  accessStatus?: 'closed' | 'restricted' | 'unknown';
+  distanceNote?: string;
   sourceTechnicalDifficulty?:string|null; geometryLengthKm?:number; osmId?:number; regionIds?:string[]; revisionId?:string; geometry?:unknown;
 };
 
@@ -103,7 +120,41 @@ const initialTrails: Trail[] = [
 
 // Keep the source archive intact; the Russia catalogue excludes geometries wholly outside the sourced display area.
 const outsideDisplayCoverage=new Set(displayCoverage.excludedCatalogRouteIds);
-export const trails:Trail[] = [...initialTrails.map(t=>({...t,...(importedPoints as Record<string,unknown>)[t.id] as object})),...(importedCatalog as Trail[])].filter(trail=>!outsideDisplayCoverage.has(trail.id));
+// Only the explicit review publisher writes this public file. Raw Telegram
+// exports and automatic candidates never enter the application import graph.
+const telegramSources = telegramReviewed.sourcesByRouteId as Record<string, SourceReference[]>;
+const reviewedCatalogues = [yandexReviewed, discoveryReviewed, discoveryEastReviewed] as {
+  routes: Trail[]; updatesByRouteId: Record<string, Partial<Trail>>;
+}[];
+export const trails: Trail[] = [
+  ...initialTrails.map(t => ({...t, ...(importedPoints as Record<string, unknown>)[t.id] as object})),
+  ...(importedCatalog as Trail[]), ...reviewedCatalogues.flatMap(source => source.routes),
+  ...(telegramReviewed.routes as Trail[]),
+].filter(trail => !outsideDisplayCoverage.has(trail.id)).map(trail => {
+  let merged = trail;
+  for (const source of reviewedCatalogues) {
+    const update = source.updatesByRouteId[trail.id];
+    if (update) merged = {...merged, ...update, id: trail.id, additionalSources: [
+      ...(merged.additionalSources || []), ...(update.additionalSources || []),
+    ]};
+  }
+  const sources = [...(merged.additionalSources || []), ...(telegramSources[trail.id] || [])];
+  const clean = (text: string) => text
+    .replace('Пеший маршрут из открытой базы OpenStreetMap. На карте сохранены исходные сегменты: между ними могут быть развилки и разрывы. Проходимость, разрешения и условия ещё требуют проверки.', 'Пеший маршрут по сведениям из открытой карты. На пути могут встречаться развилки и участки без описания. Перед выходом уточните состояние тропы и правила посещения.')
+    .replaceAll('Геометрия OSM пока не сверена с полной официальной ниткой.', 'Линию пути ещё нужно сверить с полным описанием заповедника.')
+    .replaceAll('Геометрия OSM не сверена с полной официальной ниткой.', 'Линия пути ещё требует проверки.')
+    .replaceAll('На карте показаны реальные сегменты OpenStreetMap. Их соответствие официальной нитке и полнота не проверены; это не готовый навигационный трек.', 'Линия на карте ещё не проверена на местности. Для навигации подготовьте проверенный маршрут.')
+    .replaceAll('Геометрия из открытой базы не является проверенным навигационным треком.', 'Перед выходом сопоставьте путь на карте с актуальным описанием маршрута.')
+    .replaceAll('Данные OpenStreetMap', 'Описание маршрута');
+  const sourceTitle = merged.title;
+  const title = /^Маршрут OSM \d+$/.test(sourceTitle)
+    ? `Тропа без названия · ${regions.find(region => region.id === merged.regionId)?.name || 'Россия'}` : sourceTitle;
+  return {...merged, title, ...(title !== sourceTitle ? {sourceTitle} : {}),
+    description: clean(merged.description), subtitle: clean(merged.subtitle), notes: merged.notes.map(clean),
+    ...(merged.operatingNotice ? {operatingNotice: {...merged.operatingNotice, body: clean(merged.operatingNotice.body)}} : {}),
+    ...(sources.length ? {additionalSources: [...new Map(sources.map(source => [source.url, source])).values()]} : {}),
+  };
+});
 
 export const regionById = (id: string) => regions.find(r => r.id === id);
 export const trailById = (id: string) => trails.find(r => r.id === id);

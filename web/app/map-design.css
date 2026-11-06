@@ -195,6 +195,18 @@
 .explore-layout .map-style-switch button .map-icon {width: 24px; height: 24px; flex-shrink: 0}
 .explore-layout .map-icon {display: block}
 .explore-layout .region-marker-label {font: var(--button-sm)}
+.explore-layout .region-marker.is-overview .region-marker-dot {
+  display: grid;
+  place-items: center;
+  width: auto;
+  min-width: 32px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 8px;
+  color: var(--surface);
+  font: var(--caption-3);
+  font-variant-numeric: tabular-nums;
+}
 .explore-layout .map-context {font: var(--body-6)}
 
 .explore-layout .terrain-heading h2 {font: var(--heading-2); letter-spacing: -.035em; text-wrap: balance}
@@ -297,3 +309,20 @@
   .map-attribution-toggle {transition: none}
   .map-attribution-toggle:active {transform: none}
 }
+
+/* Territory navigation: source silhouettes, readable labels and full touch targets. */
+.territory-switch{display:flex;gap:4px;padding:4px;margin:20px 0 0;background:#e9eddf;border:1px solid #d3dcc7;border-radius:12px}
+.territory-switch button{flex:1;min-height:44px;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:14px;line-height:20px;border-radius:8px;background:transparent}
+.territory-switch button[aria-pressed=true]{background:var(--surface);color:var(--forest);box-shadow:0 1px 4px #243d2317;font-weight:600}
+.territory-switch button span{font-size:12px;line-height:16px;font-variant-numeric:tabular-nums;opacity:.7}
+.territory-browser-note{font-size:14px;line-height:20px;color:var(--muted);margin:0 0 12px}
+.territory-list{display:flex;flex-direction:column;gap:0}
+.territory-list .region-option{min-height:80px;padding-block:12px;border-bottom:1px solid #d4ddc657}
+.territory-list .region-option-text{min-width:0}
+.territory-list .region-option-text strong{font-size:16px;line-height:24px;overflow-wrap:anywhere}
+.territory-list .region-option-text small{font-size:12px;line-height:16px;margin-top:4px}
+.territory-list .region-thumbnail{flex-shrink:0;width:56px;height:56px;border-radius:12px 12px 20px 12px}
+.territory-list .region-artwork{width:43px;height:43px}
+.territory-list .region-option>svg{flex-shrink:0;display:block;width:20px;height:20px}
+.territory-more{margin-top:16px}
+@media(max-width:700px){.territory-switch{margin-top:16px}.territory-list{display:flex;gap:0}.territory-list .region-option{gap:16px}.territory-list .region-option-text strong{font-size:16px;line-height:24px}}

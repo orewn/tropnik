@@ -1,0 +1,114 @@
+name: Public GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: ${{ github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      build_id: ${{ steps.build_metadata.outputs.build_id }}
+    steps:
+      - name: Check out the exact source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install the pinned package manager and frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Restore and verify the public Android preview
+        run: node tools/pages-preview/fetch-apk.mjs
+      - name: Verify APK download failure boundaries
+        run: node --test tools/pages-preview/tests/*.test.mjs
+      - name: Verify reviewed Telegram reference boundaries
+        run: |
+          python3 -m unittest discover -s tools/import-data/telegram -p 'test_*.py'
+          python3 tools/import-data/telegram/cli.py validate
+      - name: Run web regression checks
+        working-directory: web
+        run: node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs
+      - name: Check static client types
+        run: node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
+      - name: Read the configured Pages destination
+        id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Require the intended public destination
+        env:
+          PAGES_CONFIG_ORIGIN: ${{ steps.pages.outputs.origin }}
+          PAGES_CONFIG_BASE: ${{ steps.pages.outputs.base_path }}
+        run: |
+          test "$PAGES_CONFIG_ORIGIN" = 'https://orewn.github.io'
+          test "$PAGES_CONFIG_BASE" = '/tropnik'
+      - name: Build and verify the static site
+        run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Record the verified build identity
+        id: build_metadata
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFileSync, appendFileSync} from 'node:fs';
+          const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
+          assert.match(build.buildId, /^[a-f0-9]{16}$/);
+          assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(build.hasApk, true);
+          appendFileSync(process.env.GITHUB_OUTPUT, `build_id=${build.buildId}\n`);
+          NODE
+      - name: Upload the verified static artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: web/pages-preview/dist
+          include-hidden-files: true
+          retention-days: 7
+
+  deploy:
+    needs: build
+    if: ${{ github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the matching verification tools
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Deploy the verified artifact
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+      - name: Verify the public build and APK without authentication
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+          EXPECTED_BUILD_ID: ${{ needs.build.outputs.build_id }}
+        run: node tools/pages-preview/verify-deployed.mjs "$PAGES_URL" "$EXPECTED_BUILD_ID" "$GITHUB_SHA"

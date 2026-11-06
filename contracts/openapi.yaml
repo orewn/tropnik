@@ -75,7 +75,7 @@ paths:
           type: string
       responses:
         '200':
-          description: Envelope<Route[]>
+          description: Envelope<Route[]>; at most 1 MiB decoded JSON. The page may be shorter than limit; follow meta.nextCursor until absent.
   /routes/{id}:
     parameters:
     - $ref: '#/components/parameters/ID'
@@ -83,8 +83,35 @@ paths:
       summary: One public route and its current revision, geometryDetail=full
       responses:
         '200':
-          description: Envelope<Route>
+          description: Envelope<Route>; complete geometry with at most 100000 vertices, capped at 8 MiB decoded JSON. Oversized legacy records return an explicit error, never truncated geometry.
         '404':
+          $ref: '#/components/responses/Error'
+  /me/departures:
+    get:
+      summary: Private completed participation history for the current authenticated account
+      description: No user ID parameter is accepted. Completion time and departure ID form a stable descending cursor. Withdrawn public routes remain in the participant history with the pinned route revision. No roster or private contacts are returned. Hidden reviews still prevent duplicate submission to their target.
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 20
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 256
+        description: Opaque position from meta.nextCursor, not authorization or an account selector
+      responses:
+        '200':
+          description: Envelope<CompletedDeparture[]>; meta.nextCursor continues older records when present
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
           $ref: '#/components/responses/Error'
   /departures:
     get:
@@ -361,6 +388,7 @@ paths:
   /auth/register:
     post:
       summary: Create a real account; guide applications remain pending
+      description: Registration requires a configured TLS mail transport and bounded queue capacity. Success retains the session envelope and emailVerified=false; verification mail is requested asynchronously, not guaranteed delivered. Missing configuration returns 503 before account creation.
       requestBody:
         required: true
         content:
@@ -395,6 +423,128 @@ paths:
         '201':
           description: Envelope<{token,expiresAt,user}>; token returned once, hash stored in DB
         '409':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /auth/email/request:
+    post:
+      summary: Request an email verification link without revealing account existence
+      description: Same 202 response for unknown, already verified, disabled, staff and per-address limited accounts. Shared IP limits can return 429. Mail is attempted asynchronously; a process restart can lose queued work. At most three verification or recovery requests per address in fifteen minutes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountMailInput'
+      responses:
+        '202':
+          description: Envelope<AccountMailResponse>; status=accepted and a uniform message; no token or user identifier
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /auth/email/confirm:
+    post:
+      summary: Consume a single-use verification token, valid for at most 24 hours
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [token]
+              properties:
+                token:
+                  $ref: '#/components/schemas/AccountActionToken'
+      responses:
+        '200':
+          description: Envelope with status=verified. No session is created.
+        '400':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+  /auth/password/request:
+    post:
+      summary: Request a password reset without revealing account existence
+      description: Same asynchronous response and address/IP limits as email verification requests. Staff accounts use operator-managed recovery. A new link replaces the previous link of the same purpose.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountMailInput'
+      responses:
+        '202':
+          description: Envelope<AccountMailResponse>; status=accepted and a uniform message, not delivery confirmation
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /auth/password/reset:
+    post:
+      summary: Consume a 30-minute single-use token and revoke every existing session
+      description: Token consumption, password replacement and revocation of all sessions and outstanding action links commit atomically. Concurrent login cannot create a session with credentials verified before the reset. No automatic login. The web BFF clears its session cookie on success. Password-change notification is attempted asynchronously.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [token, password, passwordConfirmation]
+              properties:
+                token:
+                  $ref: '#/components/schemas/AccountActionToken'
+                password:
+                  type: string
+                  minLength: 12
+                  maxLength: 128
+                  writeOnly: true
+                passwordConfirmation:
+                  type: string
+                  minLength: 12
+                  maxLength: 128
+                  writeOnly: true
+      responses:
+        '200':
+          description: Envelope with status=password_changed and a sign-in-again message
+        '400':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+  /me/delete:
+    post:
+      summary: Reauthenticate and permanently close the current account
+      description: Requires the current password and explicit confirmation. Active participation, guide assignments and owned open recruitment requests block deletion. Staff accounts require operator deprovisioning. A transaction replaces email, display name and password, disables the account and revokes every session and action token. Completed participation, user-generated text, qualification evidence and audit remain with an anonymised profile. This is not a promise of erasing all personal data from retained content or backups.
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [password, confirmation]
+              properties:
+                password:
+                  type: string
+                  maxLength: 128
+                  writeOnly: true
+                confirmation:
+                  type: string
+                  const: delete
+      responses:
+        '204':
+          description: Account closed. The web BFF clears its session cookie.
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '429':
           $ref: '#/components/responses/Error'
   /auth/login:
     post:
@@ -955,6 +1105,23 @@ paths:
         '409':
           $ref: '#/components/responses/Error'
 components:
+  schemas:
+    AccountActionToken:
+      type: string
+      pattern: '^[A-Za-z0-9_-]{43}$'
+      minLength: 43
+      maxLength: 43
+      writeOnly: true
+      description: 256 random bits encoded as canonical unpadded base64url. Sent only in email URL fragments and POST bodies, never in API responses or logs; only SHA-256 digests are stored.
+    AccountMailInput:
+      type: object
+      additionalProperties: false
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
   securitySchemes:
     bearerAuth:
       type: http

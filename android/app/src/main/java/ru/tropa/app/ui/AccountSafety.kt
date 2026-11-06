@@ -23,10 +23,10 @@ internal fun AccountSummaryCard(state: OnlineState, onOpen: () -> Unit) {
     CardShell {
         Text("Личный кабинет", style = MaterialTheme.typography.titleLarge)
         val summary = state.accountSummary
-        if (summary == null) Text("Статистика и награды появятся после ответа сервиса. Они основаны на подтверждённом участии.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+        if (summary == null) Text("Обновите профиль, чтобы увидеть свои походы и награды.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
         else {
             Text("${summary.completedTrips} завершённых походов · ${summary.reviewsWritten} отзывов", style = MaterialTheme.typography.bodyLarge)
-            if (summary.badges.isEmpty()) Text("Наград пока нет. Участие и полезные отзывы подтверждает сервер.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+            if (summary.badges.isEmpty()) Text("Награды появятся за участие в походах и полезные отзывы.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
             summary.badges.forEach { badge ->
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(badge.title, style = MaterialTheme.typography.titleMedium, color = Palette.Forest)
@@ -50,14 +50,14 @@ internal fun AccountSafetyScreen(model: OnlineViewModel, state: OnlineState, onB
         item { PageHeading("Уважение\nк каждому голосу.", "Решения сервиса, ваши обращения и право на пересмотр.") }
         item {
             CardShell {
-                Text(if (state.canUseNetwork) "Данные по последнему ответу сервиса" else "Без связи · доступны ранее загруженные данные", style = MaterialTheme.typography.bodyMedium)
+                if (!state.canUseNetwork) Text("Без интернета доступны сохранённые данные", style = MaterialTheme.typography.bodyMedium)
                 if (state.accountUpdatedAt > 0) Text("Обновлено ${safetyDate(Instant.ofEpochMilli(state.accountUpdatedAt).toString())}", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                 TrailOutlineButton(onClick = model::refreshAccount, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Обновить кабинет") }
                 if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                 (state.error ?: state.accountError)?.let { Text(it, color = Palette.Alert, style = MaterialTheme.typography.bodyMedium) }
             }
         }
-        item { SectionHeading("Уведомления", "Только события, которые вернул ваш сервис") }
+        item { SectionHeading("Уведомления", "Новости ваших походов и обращений") }
         if (state.notifications.isEmpty()) item { Text(if (state.accountUpdatedAt == 0L) "Обновите кабинет, чтобы получить уведомления." else "Уведомлений пока нет.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted) }
         items(state.notifications, key = { "notification:${it.id}" }) { notification ->
             CardShell {
@@ -80,7 +80,7 @@ internal fun AccountSafetyScreen(model: OnlineViewModel, state: OnlineState, onB
             }
         }
         item { SectionHeading("Решения по вашему аккаунту", "Можно подать апелляцию на решение модерации") }
-        if (state.moderationActions.isEmpty()) item { Text(if (state.accountUpdatedAt == 0L) "Список ещё не загружен." else "Сервис не вернул решений по вашему аккаунту.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted) }
+        if (state.moderationActions.isEmpty()) item { Text(if (state.accountUpdatedAt == 0L) "Список ещё не загружен." else "Решений по вашему аккаунту пока нет.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted) }
         items(state.moderationActions, key = { "action:${it.id}" }) { action ->
             CardShell {
                 StatusPill(if (action.revokedAt != null) "Решение отменено" else when (action.action) { "hide" -> "Публикация скрыта"; "mute" -> "Ограничение сообщений"; "hide_and_mute" -> "Скрытие и ограничение"; else -> action.action }, caution = action.revokedAt == null)
@@ -101,7 +101,7 @@ internal fun AccountSafetyScreen(model: OnlineViewModel, state: OnlineState, onB
                 Text(safetyDate(appeal.createdAt), style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
             }
         }
-        item { InfoCard("Обращения и апелляции требуют связи. Автоматическая защита от спама и ограничения сервера могут отклонить отправку; сообщение об ошибке не означает принятие обращения.") }
+        item { InfoCard("Для отправки обращения или апелляции нужен интернет. После отправки дождитесь подтверждения.") }
     }
     appealAction?.let { action -> AppealDialog(state, model, action) { appealAction = null } }
 }

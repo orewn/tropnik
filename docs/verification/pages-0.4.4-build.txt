@@ -1,0 +1,113 @@
+vite v8.0.13 building client environment for production...
+[2Ktransforming...✓ 194 modules transformed.
+rendering chunks...
+computing gzip size...
+web/pages-preview/dist/index.html                                             1.79 kB │ gzip:   0.87 kB
+web/pages-preview/dist/assets/canvas-relief.worker-Bb5BmOpD.js                2.09 kB
+web/pages-preview/dist/assets/terrain-preparation.worker-Dww9I-q3.js          3.26 kB
+web/pages-preview/dist/assets/manrope-cyrillic-400-normal-BMzJvInZ.woff2      7.84 kB
+web/pages-preview/dist/assets/manrope-cyrillic-700-normal-Dw_fZAg2.woff2      7.85 kB
+web/pages-preview/dist/assets/manrope-cyrillic-500-normal-B1OEZity.woff2      7.87 kB
+web/pages-preview/dist/assets/manrope-cyrillic-600-normal-DvRl3Mj-.woff2      7.87 kB
+web/pages-preview/dist/assets/manrope-cyrillic-700-normal-7JNVKxyl.woff      10.00 kB
+web/pages-preview/dist/assets/manrope-cyrillic-500-normal-CNwnNrRC.woff      10.01 kB
+web/pages-preview/dist/assets/manrope-cyrillic-400-normal-Dvx59UGC.woff      10.03 kB
+web/pages-preview/dist/assets/manrope-cyrillic-600-normal-It4mZcQk.woff      10.06 kB
+web/pages-preview/dist/assets/manrope-latin-500-normal-BYYD-dBL.woff2        14.04 kB
+web/pages-preview/dist/assets/manrope-latin-400-normal-PaqtzbVb.woff2        14.10 kB
+web/pages-preview/dist/assets/manrope-latin-600-normal-4f0koTD-.woff2        14.17 kB
+web/pages-preview/dist/assets/manrope-latin-700-normal-BZp_XxE4.woff2        14.21 kB
+web/pages-preview/dist/assets/manrope-latin-500-normal-DMZssgOp.woff         18.24 kB
+web/pages-preview/dist/assets/manrope-latin-400-normal-8tf8FM3T.woff         18.29 kB
+web/pages-preview/dist/assets/manrope-latin-600-normal-BqgrALkZ.woff         18.38 kB
+web/pages-preview/dist/assets/manrope-latin-700-normal-DGRFkw-m.woff         18.41 kB
+web/pages-preview/dist/.vite/manifest.json                                   20.94 kB │ gzip:   2.24 kB
+web/pages-preview/dist/assets/AccountLifecycle-rdQu3XmW.css                   0.12 kB │ gzip:   0.12 kB
+web/pages-preview/dist/assets/Footer-BI3wJc_-.css                             1.09 kB │ gzip:   0.36 kB
+web/pages-preview/dist/assets/page-DCo5zBXa.css                               5.84 kB │ gzip:   1.55 kB
+web/pages-preview/dist/assets/server-data-CVlsZjEu.css                       86.43 kB │ gzip:  16.74 kB
+web/pages-preview/dist/assets/index-bj6SMFNn.css                            114.50 kB │ gzip:  23.11 kB
+web/pages-preview/dist/assets/navigation-DvZyvZzl.js                          0.10 kB │ gzip:   0.12 kB
+web/pages-preview/dist/assets/routing-tzoz5knK.js                             0.35 kB │ gzip:   0.25 kB
+web/pages-preview/dist/assets/page-CPlE8lSf.js                                0.46 kB │ gzip:   0.33 kB
+web/pages-preview/dist/assets/chunk-TNCvackw.js                               0.56 kB │ gzip:   0.36 kB
+web/pages-preview/dist/assets/ContentPage-LU9s0ysF.js                         0.65 kB │ gzip:   0.36 kB
+web/pages-preview/dist/assets/not-found-Bp8uB9pg.js                           0.75 kB │ gzip:   0.48 kB
+web/pages-preview/dist/assets/android-unavailable-D9gmZOcz.js                 0.89 kB │ gzip:   0.55 kB
+web/pages-preview/dist/assets/api-policy-Bl-zAgzW.js                          0.94 kB │ gzip:   0.62 kB
+web/pages-preview/dist/assets/page-SMG486Hh.js                                1.16 kB │ gzip:   0.67 kB
+web/pages-preview/dist/assets/page-YXa2rk7p.js                                1.19 kB │ gzip:   0.68 kB
+web/pages-preview/dist/assets/preload-helper-BP3Ldioq.js                      1.20 kB │ gzip:   0.68 kB
+web/pages-preview/dist/assets/map-policy-CtCbTW-O.js                          1.45 kB │ gzip:   0.79 kB
+web/pages-preview/dist/assets/local-Ctq6Qr5F.js                               1.61 kB │ gzip:   0.83 kB
+web/pages-preview/dist/assets/preview-info-DJNIe2u2.js                        1.79 kB │ gzip:   0.88 kB
+web/pages-preview/dist/assets/page-BgP_5dys.js                                2.07 kB │ gzip:   1.15 kB
+web/pages-preview/dist/assets/page-BCGP0Q5C.js                                2.43 kB │ gzip:   1.07 kB
+web/pages-preview/dist/assets/ReportDialog-DszD4TUD.js                        3.12 kB │ gzip:   1.50 kB
+web/pages-preview/dist/assets/page-BDzQeYSG2.js                               3.17 kB │ gzip:   1.37 kB
+web/pages-preview/dist/assets/page-DYBCtkK-.js                                3.20 kB │ gzip:   1.37 kB
+web/pages-preview/dist/assets/GuidePanel-XmNdel0j.js                          3.40 kB │ gzip:   1.65 kB
+web/pages-preview/dist/assets/page-BhNqbBiH.js                                3.59 kB │ gzip:   1.52 kB
+web/pages-preview/dist/assets/page-Xj0v0Exl.js                                4.06 kB │ gzip:   1.87 kB
+web/pages-preview/dist/assets/page-C_gSDY0x.js                                4.89 kB │ gzip:   2.15 kB
+web/pages-preview/dist/assets/page-BXF_nOFU.js                                5.08 kB │ gzip:   2.02 kB
+web/pages-preview/dist/assets/EventCategoryIcon-B6wUZQzC.js                   5.93 kB │ gzip:   2.78 kB
+web/pages-preview/dist/assets/page-1w6CzScI.js                                7.38 kB │ gzip:   2.89 kB
+web/pages-preview/dist/assets/jsx-runtime-DjlV3CtQ.js                         7.88 kB │ gzip:   2.98 kB
+web/pages-preview/dist/assets/AccountLifecycle-CAYlyskq.js                   10.27 kB │ gzip:   3.31 kB
+web/pages-preview/dist/assets/page-ByOWN83-.js                               11.15 kB │ gzip:   4.19 kB
+web/pages-preview/dist/assets/page--9OWyAxn.js                               12.22 kB │ gzip:   3.95 kB
+web/pages-preview/dist/assets/page-CI65elaw.js                               13.23 kB │ gzip:   4.14 kB
+web/pages-preview/dist/assets/site-search-DMpGEWHe.js                        18.01 kB │ gzip:   6.64 kB
+web/pages-preview/dist/assets/Footer-DuBF8W0I.js                             19.79 kB │ gzip:   7.53 kB
+web/pages-preview/dist/assets/page-Duatw7gW.js                               21.35 kB │ gzip:   6.36 kB
+web/pages-preview/dist/assets/_virtual_pages-build-DmbzWr-d.js               39.16 kB │ gzip:   7.54 kB
+web/pages-preview/dist/assets/Trips-CPb7rhA6.js                              40.58 kB │ gzip:  11.62 kB
+web/pages-preview/dist/assets/terrain-renderer-jzpBRG45.js                   50.49 kB │ gzip:  17.93 kB
+web/pages-preview/dist/assets/page-Cnp8uSOI.js                               71.11 kB │ gzip:  21.71 kB
+web/pages-preview/dist/assets/esm-DD4nqYfG.js                               127.18 kB │ gzip:  36.29 kB
+web/pages-preview/dist/assets/leaflet-src-B2StQ5NN.js                       148.81 kB │ gzip:  43.38 kB
+web/pages-preview/dist/assets/index-8huHij0M.js                             187.22 kB │ gzip:  59.49 kB
+web/pages-preview/dist/assets/server-data-CFIAWryS.js                       484.92 kB │ gzip: 190.66 kB
+web/pages-preview/dist/assets/content-9LnaXeaO.js                           607.87 kB │ gzip:  67.98 kB
+web/pages-preview/dist/assets/maplibre-gl-CbP5Hwa9.js                     1,104.23 kB │ gzip: 298.14 kB
+
+✓ built in 1.97s
+{
+  "verified": true,
+  "pages": 337,
+  "referenceRoutes": 306,
+  "productionRoutingChecks": 1016,
+  "mapPolicyChecks": 14,
+  "staticApiNetworkCalls": 0,
+  "checkedScripts": 83,
+  "publicAssetChecks": 334,
+  "outputFiles": 1393,
+  "offlineFilesVerified": 252,
+  "overviewReliefTilesVerified": 341,
+  "terrainGrid": [
+    513,
+    513
+  ],
+  "apkVerified": true,
+  "coverageExcludedRoutes": [
+    "osm-relation-14407325"
+  ],
+  "base": "/tropnik/"
+}
+{
+  "verified": true,
+  "base": "/tropnik/",
+  "httpChecks": 51,
+  "browserRenderingTested": false,
+  "backendConnected": false
+}
+Static archive: /workspace/scratch/81f8b0146058/tropnik-work/web/pages-preview/tropnik.zip (38004435 bytes)
+{
+  "buildId": "513ab54dd0d530f3",
+  "output": "/workspace/scratch/81f8b0146058/tropnik-work/web/pages-preview/dist",
+  "archive": "/workspace/scratch/81f8b0146058/tropnik-work/web/pages-preview/tropnik.zip",
+  "base": "/tropnik/",
+  "pages": 337,
+  "referenceRoutes": 306
+}

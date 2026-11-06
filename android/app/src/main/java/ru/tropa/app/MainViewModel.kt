@@ -91,9 +91,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 app.offlinePacks.install(region)
-                mutableState.update { it.copy(notice = "Пакет ${region.name} сохранён и проверен на устройстве") }
+                mutableState.update { it.copy(notice = "Карта «${region.name}» сохранена на телефоне") }
             } catch (cancelled: CancellationException) { throw cancelled
-            } catch (_: Exception) { mutableState.update { it.copy(notice = "Не удалось сохранить пакет. Освободите место и повторите.") } }
+            } catch (_: Exception) { mutableState.update { it.copy(notice = "Не удалось сохранить карту. Освободите место и повторите.") } }
             finally { mutableState.update { it.copy(busyId = null) } }
         }
     }
@@ -101,15 +101,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun removePack(pack: InstalledPackEntity) {
         viewModelScope.launch {
             runCatching { app.offlinePacks.remove(pack.regionId) }
-                .onSuccess { mutableState.update { it.copy(notice = "Пакет удалён. Сохранённые карточки остались.") } }
-                .onFailure { mutableState.update { it.copy(notice = "Не удалось удалить пакет. Попробуйте ещё раз.") } }
+                .onSuccess { mutableState.update { it.copy(notice = "Карта удалена. Сохранённые карточки остались.") } }
+                .onFailure { mutableState.update { it.copy(notice = "Не удалось удалить карту. Попробуйте ещё раз.") } }
         }
     }
 
     fun verifyPack(pack: InstalledPackEntity) {
         viewModelScope.launch {
             val valid = app.offlinePacks.verify(pack)
-            mutableState.update { it.copy(notice = if (valid) "Целостность всех файлов пакета подтверждена" else "Пакет повреждён или удалён. Сохраните его заново.") }
+            mutableState.update { it.copy(notice = if (valid) "Сохранённая карта доступна без интернета" else "Сохранённая карта недоступна. Загрузите её заново.") }
         }
     }
 
@@ -117,7 +117,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (role !in setOf("tourist", "guide")) return
         viewModelScope.launch {
             app.database.dao().putPreference(PreferenceEntity("role", role))
-            mutableState.update { it.copy(notice = "Предпочтение сохранено локально. Это не регистрация и не проверка квалификации.") }
+            mutableState.update { it.copy(notice = "Предпочтение сохранено. Для проведения походов нужно подтвердить квалификацию.") }
         }
     }
 

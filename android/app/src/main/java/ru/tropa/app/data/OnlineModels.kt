@@ -33,12 +33,13 @@ data class PublishedRoute(val id: String, val slug: String, val regionId: String
 data class Departure(val id: String, val routeId: String, val routeRevisionId: String, val guideId: String?, val guideName: String?,
     val startsAt: String, val endsAt: String, val timeZone: String, val minPeople: Int, val capacity: Int,
     val participantCount: Int, val status: String, val version: Int, val routeOpen: Boolean,
-    val guideEligible: Boolean, val membership: String) {
+    val guideEligible: Boolean, val membership: String, val routeTitle: String? = null, val reviewTargets: List<String>? = null) {
     companion object {
         fun parse(j: JSONObject) = Departure(j.getString("id"), j.getString("routeId"), j.getString("routeRevisionId"),
             j.stringOrNull("guideId"), j.stringOrNull("guideName"), j.getString("startsAt"), j.getString("endsAt"),
             j.getString("timeZone"), j.getInt("minPeople"), j.getInt("capacity"), j.getInt("participantCount"),
-            j.getString("status"), j.getInt("version"), j.getBoolean("routeOpen"), j.getBoolean("guideEligible"), j.getString("membership"))
+            j.getString("status"), j.getInt("version"), j.getBoolean("routeOpen"), j.getBoolean("guideEligible"), j.getString("membership"),
+            j.stringOrNull("routeTitle"), j.optJSONArray("reviewTargets")?.let { targets -> (0 until targets.length()).map { targets.getString(it) } })
     }
 }
 
@@ -70,6 +71,20 @@ enum class ConversationKind(val path: String) { DEPARTURE("departures"), RECRUIT
 data class Conversation(val kind: ConversationKind, val id: String, val title: String)
 data class MessagePage(val messages: List<ChatMessage>, val cursor: String?)
 data class RoutePage(val routes: List<PublishedRoute>, val cursor: String?)
+data class CompletedDeparture(val id: String, val routeId: String, val routeRevisionId: String,
+    val routeTitle: String, val startsAt: String, val endsAt: String, val completedAt: String,
+    val timeZone: String, val role: String, val guideId: String?, val guideName: String?, val reviewTargets: List<String>) {
+    companion object {
+        fun parse(j: JSONObject): CompletedDeparture {
+            val targets = j.getJSONArray("reviewTargets")
+            return CompletedDeparture(j.getString("id"), j.getString("routeId"), j.getString("routeRevisionId"),
+                j.getString("routeTitle"), j.getString("startsAt"), j.getString("endsAt"), j.getString("completedAt"),
+                j.getString("timeZone"), j.getString("role"), j.stringOrNull("guideId"), j.stringOrNull("guideName"),
+                (0 until targets.length()).map { targets.getString(it) })
+        }
+    }
+}
+data class DepartureHistoryPage(val departures: List<CompletedDeparture>, val cursor: String?)
 data class PendingMessageView(val clientId: String, val body: String, val createdAt: Long, val failed: Boolean, val error: String?)
 class ApiFailure(val code: String, override val message: String, val status: Int = 0) : Exception(message) {
     val transient get() = status == 0 || status == 408 || status == 429 || status >= 500

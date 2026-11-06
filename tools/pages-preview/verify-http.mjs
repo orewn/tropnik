@@ -6,6 +6,7 @@ import {createPreviewServer} from './serve.mjs';
 
 const out=resolve(process.argv[2]);
 const report=JSON.parse(await readFile(join(out,'build-info.json'),'utf8'));
+assert.equal(report.hasApk,true,'A public Pages build cannot omit its advertised APK');
 const pages=JSON.parse(await readFile(join(out,'page-manifest.json'),'utf8'));
 const {server,base}=await createPreviewServer(out);
 server.listen(0,'127.0.0.1');

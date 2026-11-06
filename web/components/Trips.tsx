@@ -2,13 +2,15 @@
 
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {UsersThree, Compass, ArrowRight, ArrowLeft, Plus, CalendarBlank, ShieldCheck, ArrowClockwise, ChatCircleDots, Star, Info, CheckCircle, UserCircle, Flag} from '@/components/TropnikIcons';
-import {api, ApiError, AUTH_EVENT, announceAuth, errorText, isAbort, serviceStatus, type AuthChange, type User, type Route, type Departure, type RecruitmentRequest, type Review, type Participant} from '@/lib/api';
+import {api, apiEnvelope, ApiError, AUTH_EVENT, announceAuth, errorText, isAbort, serviceStatus, type AuthChange, type User, type Route, type Departure, type RecruitmentRequest, type Review, type Participant} from '@/lib/api';
 import {joinAllowed, startAllowed, reviewAllowed, routePolicy, zonedISO} from '@/lib/trip-policy';
 import {AuthDialog} from './AuthDialog';
 import {Modal} from './Modal';
 import {ChatPanel} from './ChatPanel';
 import {ReportDialog} from './ReportDialog';
 import {regions, trails} from '@/lib/content';
+import {deriveRouteCategories, type EventCategoryId} from '@/lib/event-categories';
+import {EventCategoryIcon, RouteCategoryBadges} from './EventCategoryIcon';
 
 const labels: Record<string, string> = {recruiting: 'Идёт набор', ready: 'Группа собрана', awaiting_guide: 'Нужен гид', in_progress: 'В пути', completed: 'Поход завершён', cancelled: 'Отменён', aborted: 'Поход прекращён', open: 'Ищем гида', accepted: 'Выход назначен'};
 const membershipLabels: Record<Departure['membership'], string> = {none: 'Вы пока не в группе', confirmed: 'Участие подтверждено', checked_in: 'Явка подтверждена', cancelled: 'Вы вышли из группы', completed: 'Поход завершён', no_show: 'Явка на старт не подтверждена'};
@@ -33,6 +35,8 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
   const [departures, setDepartures] = useState<Departure[]>([]);
   const [requests, setRequests] = useState<RecruitmentRequest[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
+  const [routeCursor, setRouteCursor] = useState<string | null>(null);
+  const [routeLoading, setRouteLoading] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [selected, setSelected] = useState<Selection | null>(null);
   const [current, setCurrent] = useState<Departure | null>(null);
@@ -61,6 +65,8 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
   const actionSequence = useRef(0);
   const authEpoch = useRef(0);
   const listController = useRef<AbortController | null>(null);
+  const routePageController = useRef<AbortController | null>(null);
+  const routePageInFlight = useRef(false);
   const detailController = useRef<AbortController | null>(null);
   const inFlight = useRef(false);
   const attempts = useRef<Record<string, {key: string; version: number}>>({});
@@ -69,6 +75,14 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
   const closeDeparture = useCallback(() => { if (!inFlight.current) setDepartureForm(null); }, []);
   const closeConfirm = useCallback(() => { if (!inFlight.current) setConfirm(null); }, []);
   const title = (id: string) => routes.find(route => route.id === id)?.title || trails.find(route => route.id === id)?.title || 'Маршрут';
+  const routeCategories = (id: string, pinnedTitle?: string, revisionId?: string) => {
+    const route = routes.find(item => item.id === id);
+    if (route && (!revisionId || route.revisionId === revisionId)) return deriveRouteCategories(route);
+    // Completed departures retain their own route revision; never label them from a newer description.
+    if (pinnedTitle) return deriveRouteCategories({title: pinnedTitle});
+    if (revisionId) return [];
+    return deriveRouteCategories(trails.find(item => item.id === id));
+  };
   const currentRequest = selected?.kind === 'recruitment-requests' ? requests.find(request => request.id === selected.id) : undefined;
   const chosenRoute = routes.find(route => route.id === (departureForm?.request?.routeId || routeId));
   const policy = routePolicy(chosenRoute);
@@ -92,6 +106,10 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
   const load = useCallback(async () => {
     const request = ++listSequence.current;
     listController.current?.abort();
+    routePageController.current?.abort();
+    routePageInFlight.current = false;
+    setRouteCursor(null);
+    setRouteLoading(false);
     const controller = new AbortController();
     listController.current = controller;
     setLoading(true);
@@ -102,7 +120,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
       if (!connected) { setUser(null); setRequests([]); setDepartures([]); setRoutes([]); return; }
       const [profile, routeList, departureList] = await Promise.allSettled([
         api<User>('me', {signal: controller.signal}),
-        api<Route[]>('routes?limit=100', {signal: controller.signal}),
+        apiEnvelope<Route[]>('routes?limit=100', {signal: controller.signal}),
         api<Departure[]>('departures', {signal: controller.signal}),
       ]);
       if (request !== listSequence.current) return;
@@ -113,7 +131,11 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
         setRequests([]);
         if (!(profile.reason instanceof ApiError && profile.reason.status === 401)) setError(errorText(profile.reason));
       }
-      if (routeList.status === 'fulfilled') setRoutes(previous => [...routeList.value, ...previous.filter(route => !routeList.value.some(next => next.id === route.id))]);
+      if (routeList.status === 'fulfilled') {
+        const page = routeList.value;
+        setRoutes(previous => [...page.data, ...previous.filter(route => !page.data.some(next => next.id === route.id))]);
+        setRouteCursor(page.meta?.nextCursor || null);
+      }
       else setError(errorText(routeList.reason));
       if (departureList.status === 'fulfilled') setDepartures(departureList.value);
       else { setDepartures([]); if (!(departureList.reason instanceof ApiError && departureList.reason.status === 401)) setError(errorText(departureList.reason)); }
@@ -125,6 +147,29 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
       if (!isAbort(error) && request === listSequence.current) { setError(errorText(error)); setService(previous => previous === 'checking' ? 'unavailable' : previous); }
     } finally { if (request === listSequence.current) setLoading(false); }
   }, []);
+
+  const loadMoreRoutes = useCallback(async () => {
+    if (!routeCursor || loading || routePageInFlight.current) return;
+    const request = listSequence.current, epoch = authEpoch.current, cursor = routeCursor;
+    const controller = new AbortController();
+    routePageController.current = controller;
+    routePageInFlight.current = true;
+    setRouteLoading(true);
+    try {
+      const page = await apiEnvelope<Route[]>('routes?limit=100&cursor=' + encodeURIComponent(cursor), {signal: controller.signal});
+      if (request !== listSequence.current || epoch !== authEpoch.current) return;
+      if (page.meta?.nextCursor === cursor) throw new Error('route_cursor_stalled');
+      setRoutes(previous => [...previous, ...page.data.filter(route => !previous.some(item => item.id === route.id))]);
+      setRouteCursor(page.meta?.nextCursor || null);
+    } catch (error) {
+      if (!isAbort(error) && request === listSequence.current && epoch === authEpoch.current) setError(errorText(error));
+    } finally {
+      if (request === listSequence.current && epoch === authEpoch.current) {
+        routePageInFlight.current = false;
+        setRouteLoading(false);
+      }
+    }
+  }, [routeCursor, loading]);
 
   useEffect(() => {
     try {
@@ -157,7 +202,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
     setNow(Date.now());
     return () => {
       ++listSequence.current; ++detailSequence.current; ++authEpoch.current;
-      listController.current?.abort(); detailController.current?.abort();
+      listController.current?.abort(); routePageController.current?.abort(); detailController.current?.abort();
       window.removeEventListener(AUTH_EVENT, changed); window.removeEventListener('storage', storage); clearInterval(clock);
     };
   }, [load]);
@@ -174,6 +219,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
         const departure = await api<Departure>('departures/' + encodeURIComponent(selected.id), {signal: controller.signal});
         if (request !== detailSequence.current) return;
         setCurrent(departure);
+        setReviewTarget(previous => departure.reviewTargets && !departure.reviewTargets.includes(previous) ? departure.reviewTargets[0] || previous : previous);
         const [written, roster] = await Promise.all([
           api<Review[]>('departures/' + encodeURIComponent(selected.id) + '/reviews', {signal: controller.signal}),
           departure.guideId === user?.id ? api<Participant[]>('departures/' + encodeURIComponent(selected.id) + '/participants', {signal: controller.signal}) : Promise.resolve([]),
@@ -279,13 +325,15 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
   const canCheckIn = !!current && assignedGuide && current.guideEligible && current.routeOpen && ['ready', 'recruiting'].includes(current.status) && now >= Date.parse(current.startsAt) - 86400000 && now < Date.parse(current.endsAt);
   const canReview = !!current && reviewAllowed(current, user, reviews, reviewTarget);
   const beforeStart = !!current && ['recruiting', 'ready', 'awaiting_guide'].includes(current.status);
+  const selectedCategories = current ? routeCategories(current.routeId, current.routeTitle, current.routeRevisionId) : routeCategories(currentRequest?.routeId || '');
 
   return <>
     {error && <div className="inline-error" role="alert"><Info size={22}/><span>{error}</span></div>}
-    {service === 'preview' && <div className="notice-block">Вы смотрите пилот. Общий сервер групп ещё не подключён, поэтому опубликованных походов и сообщений здесь пока нет. Личные черновики остаются на вашем устройстве.</div>}
+    {service === 'preview' && <div className="notice-block">Походы пока недоступны. Вы можете выбрать маршрут и сохранить личный план на устройстве.</div>}
     {selected ? <>
       <button className="back-link" onClick={() => choose(null)}><ArrowLeft size={17}/>К списку походов</button>
-      <div className="offline-heading"><h2>{title(current?.routeId || currentRequest?.routeId || '')}</h2><button className="icon-button" onClick={() => { setError(''); void refreshDetail(); }} disabled={detailLoading || !!busy} aria-label="Обновить состояние группы"><ArrowClockwise size={20}/></button></div>
+      <div className="offline-heading"><div className="trip-route-heading">{selectedCategories[0]&&<EventCategoryIcon category={selectedCategories[0]} size={32}/>}<h2>{current?.routeTitle || title(current?.routeId || currentRequest?.routeId || '')}</h2></div><button className="icon-button" onClick={() => { setError(''); void refreshDetail(); }} disabled={detailLoading || !!busy} aria-label="Обновить состояние группы"><ArrowClockwise size={20}/></button></div>
+      <RouteCategoryBadges categories={selectedCategories} className="trip-detail-categories"/>
       {detailLoading && <p className="status-loading" role="status">Проверяем состав и доступ…</p>}
       <div className="conversation">
         {canChat ? <ChatPanel key={selected.kind + selected.id + user!.id} kind={selected.kind} id={selected.id} user={user!}/> : <div className="empty-state"><ChatCircleDots size={40}/><h2>Чат участников</h2><p>Доступ появится после подтверждённого присоединения к обсуждению или группе.</p>
@@ -299,12 +347,12 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
               <p>{dateLabel(current.startsAt, current.timeZone)}<br/>Часовой пояс: {current.timeZone}</p>
               <div className="quorum-track" aria-label={current.participantCount + ' из ' + current.minPeople + ' необходимых участников'}>{Array.from({length: Math.min(current.minPeople, 12)}, (_, i) => <span key={i} className={i < current.participantCount ? i === 0 && current.guideId ? 'filled guide' : 'filled' : ''}/>)}</div>
               <p>{current.participantCount} / {current.capacity} участников · минимум {current.minPeople}<br/>Гид: {current.guideName || 'Не назначен'}</p>
-              <p style={{marginTop: 12}}>{current.guideEligible ? 'Допуск гида действителен для выхода' : 'Допуск гида требует проверки'}<br/>{current.routeOpen ? 'Текущая версия маршрута опубликована' : 'Маршрут недоступен для старта'}</p>
+              <p style={{marginTop: 12}}>{current.guideEligible ? 'Допуск гида действителен для выхода' : 'Допуск гида требует проверки'}<br/>{current.routeOpen ? 'Маршрут доступен для похода' : 'Маршрут недоступен для старта'}</p>
               <p style={{marginTop: 12}}>{membershipLabels[current.membership]}</p>
               {['none', 'cancelled'].includes(current.membership) && <button className="button primary full" onClick={() => void join(current)} disabled={!!busy || !joinAllowed(current, now)}>Подтвердить участие</button>}
               {activeMember && beforeStart && <button className="text-link" disabled={!!busy} onClick={() => setConfirm({action: 'leave', version: current.version})}>Выйти из группы</button>}
             </div>
-            {assignedGuide && <div className="prose-card"><h3>Решение гида</h3><p>Подтвердите фактическую явку. Старт повторно проверяет состав, допуск и версию маршрута на сервере.</p>
+            {assignedGuide && <div className="prose-card"><h3>Решение гида</h3><p>Подтвердите, кто пришёл на место встречи. Для старта нужны подходящий состав, допуск гида и актуальный маршрут.</p>
               <div className="stack">{participants.map(person => <div className="roster-row" key={person.userId}><span>{person.displayName}<small>{person.role === 'guide' ? 'Гид' : 'Турист'}</small></span>
                 {person.status === 'checked_in' || person.status === 'completed' ? <span title={person.status === 'completed' ? 'Поход завершён' : 'Явка подтверждена'}><CheckCircle size={20}/></span>
                   : person.status === 'no_show' ? <small>Не был на старте</small>
@@ -338,14 +386,15 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
         <button className="icon-button" onClick={() => { setError(''); void load(); }} disabled={loading || !!busy} aria-label="Обновить походы"><ArrowClockwise size={20}/></button>
       </div>
       <nav className="page-tabs" aria-label="Разделы походов">{([['departures', 'Выходы с гидом', departures.length], ['requests', 'Ищут компанию', requests.length], ['drafts', 'Мои черновики', drafts.length]] as const).map(([key, label, count]) => <button key={key} className={tab === key ? 'active' : ''} aria-current={tab === key ? 'page' : undefined} onClick={() => setTab(key)}>{label} <span className="tab-count">{count}</span></button>)}</nav>
-      {loading ? <p className="status-loading">Обновляем данные…</p> : tab === 'departures' ? departures.length ? <div className="list-grid">{departures.map(departure => <article className="departure-card" key={departure.id}><span className="status-pill">{labels[departure.status]}</span><h3>{title(departure.routeId)}</h3><p className="departure-date">{dateLabel(departure.startsAt, departure.timeZone)} · {departure.timeZone}</p><div className="departure-meta"><span><UsersThree size={16}/>{departure.participantCount}/{departure.capacity}</span><span><ShieldCheck size={16}/>{departure.guideName || 'Гид пока не назначен'}</span></div><footer><p>Минимум {departure.minPeople} человек<br/>Включая гида</p><button className="button secondary" onClick={() => choose({kind: 'departures', id: departure.id})}>Открыть группу <ArrowRight size={16}/></button></footer></article>)}</div> : <Empty title="Первый поход ещё впереди" description="Выберите опубликованный маршрут и предложите дату. Подходящий гид назначит выход и откроет набор."/>
-        : tab === 'requests' ? requests.length ? <div className="list-grid">{requests.map(request => <article className="departure-card" key={request.id}><span className="status-pill warning">{labels[request.status]}</span><h3>{title(request.routeId)}</h3><p className="request-body">{request.body}</p><div className="departure-meta"><span><CalendarBlank size={16}/>{request.preferredDate || 'Дата обсуждается'}</span><span><UsersThree size={16}/>{request.interestedCount} интересуются</span></div><footer><p>{request.creatorName}</p><button className="button secondary" disabled={!!busy} onClick={() => choose({kind: 'recruitment-requests', id: request.id})}>В обсуждение <ArrowRight size={16}/></button></footer></article>)}</div> : <Empty title={user ? 'Найдите своих попутчиков' : 'Начните со знакомства'} description={service === 'configured' && !user ? 'Войдите, чтобы увидеть запросы на походы и обсуждать их с другими участниками.' : 'Открытых запросов пока нет. Изучите карту и подготовьте предложение для будущей группы.'} onLogin={service === 'configured' && !user ? () => setAuth(true) : undefined}/>
-          : drafts.length ? <div className="list-grid">{drafts.map(draft => <article className="departure-card" key={draft.id}><span className="status-pill offline">Личный черновик</span><h3>{draft.title}</h3><p className="departure-date">Желаемая дата: {draft.preferredDate || 'Обсуждается'}</p><p className="request-body" style={{marginTop: 12}}>{draft.note}</p><footer><p>Не опубликован<br/>Гид не назначен</p><a className="button secondary" href={'/?route=' + encodeURIComponent(draft.routeId) + '&region=' + encodeURIComponent(trails.find(trail => trail.id === draft.routeId)?.regionId || 'krasnodar')}>К маршруту <ArrowRight size={16}/></a></footer><button className="text-link" onClick={() => { try { const next = drafts.filter(item => item.id !== draft.id); localStorage.setItem('tropa-requests', JSON.stringify(next)); setDrafts(next); } catch { setError('Не удалось удалить черновик. Проверьте доступ к хранилищу устройства.'); } }}>Удалить черновик</button></article>)}</div> : <Empty title="Место для будущих планов" description="Личный черновик можно сохранить из карточки маршрута. Он останется на этом устройстве, пока вы готовитесь к выходу."/>}
+      {loading ? <p className="status-loading">Обновляем данные…</p> : tab === 'departures' ? departures.length ? <div className="list-grid">{departures.map(departure => <article className="departure-card" key={departure.id}><span className="status-pill">{labels[departure.status]}</span><TripRouteHeading title={departure.routeTitle || title(departure.routeId)} categories={routeCategories(departure.routeId, departure.routeTitle, departure.routeRevisionId)}/><RouteCategoryBadges categories={routeCategories(departure.routeId, departure.routeTitle, departure.routeRevisionId)} limit={2}/><p className="departure-date">{dateLabel(departure.startsAt, departure.timeZone)} · {departure.timeZone}</p><div className="departure-meta"><span><UsersThree size={16}/>{departure.participantCount}/{departure.capacity}</span><span><ShieldCheck size={16}/>{departure.guideName || 'Гид пока не назначен'}</span></div><footer><p>Минимум {departure.minPeople} человек<br/>Включая гида</p><button className="button secondary" onClick={() => choose({kind: 'departures', id: departure.id})}>Открыть группу <ArrowRight size={16}/></button></footer></article>)}</div> : <Empty title="Первый поход ещё впереди" description="Выберите опубликованный маршрут и предложите дату. Подходящий гид назначит выход и откроет набор."/>
+        : tab === 'requests' ? requests.length ? <div className="list-grid">{requests.map(request => <article className="departure-card" key={request.id}><span className="status-pill warning">{labels[request.status]}</span><TripRouteHeading title={title(request.routeId)} categories={routeCategories(request.routeId)}/><RouteCategoryBadges categories={routeCategories(request.routeId)} limit={2}/><p className="request-body">{request.body}</p><div className="departure-meta"><span><CalendarBlank size={16}/>{request.preferredDate || 'Дата обсуждается'}</span><span><UsersThree size={16}/>{request.interestedCount} интересуются</span></div><footer><p>{request.creatorName}</p><button className="button secondary" disabled={!!busy} onClick={() => choose({kind: 'recruitment-requests', id: request.id})}>В обсуждение <ArrowRight size={16}/></button></footer></article>)}</div> : <Empty title={user ? 'Найдите своих попутчиков' : 'Начните со знакомства'} description={service === 'configured' && !user ? 'Войдите, чтобы увидеть запросы на походы и обсуждать их с другими участниками.' : 'Открытых запросов пока нет. Изучите карту и подготовьте предложение для будущей группы.'} onLogin={service === 'configured' && !user ? () => setAuth(true) : undefined}/>
+          : drafts.length ? <div className="list-grid">{drafts.map(draft => <article className="departure-card" key={draft.id}><span className="status-pill offline">Личный черновик</span><TripRouteHeading title={draft.title} categories={routeCategories(draft.routeId)}/><RouteCategoryBadges categories={routeCategories(draft.routeId)} limit={2}/><p className="departure-date">Желаемая дата: {draft.preferredDate || 'Обсуждается'}</p><p className="request-body" style={{marginTop: 12}}>{draft.note}</p><footer><p>Не опубликован<br/>Гид не назначен</p><a className="button secondary" href={'/?route=' + encodeURIComponent(draft.routeId) + '&region=' + encodeURIComponent(trails.find(trail => trail.id === draft.routeId)?.regionId || 'krasnodar')}>К маршруту <ArrowRight size={16}/></a></footer><button className="text-link" onClick={() => { try { const next = drafts.filter(item => item.id !== draft.id); localStorage.setItem('tropa-requests', JSON.stringify(next)); setDrafts(next); } catch { setError('Не удалось удалить черновик. Проверьте доступ к хранилищу устройства.'); } }}>Удалить черновик</button></article>)}</div> : <Empty title="Место для будущих планов" description="Личный черновик можно сохранить из карточки маршрута. Он останется на этом устройстве, пока вы готовитесь к выходу."/>}
     </>}
     {auth && <AuthDialog onClose={closeAuth} onUser={setUser}/>}
     {create && <Modal title="Предложите свой поход" onClose={closeCreate}>
-      {service !== 'configured' || !routes.some(route => route.status === 'published') ? <div className="small-empty"><Compass size={37}/><h3>Начните с маршрута на карте</h3><p>Для общего запроса нужен опубликованный маршрут и подключённый сервер. В карточках справочных маршрутов можно сохранить личный черновик.</p><a className="button primary" href="/">Выбрать маршрут <ArrowRight size={16}/></a></div> : <form className="stack" onSubmit={createRequest}>
+      {service !== 'configured' || !routes.some(route => route.status === 'published') ? <div className="small-empty"><Compass size={37}/><h3>Начните с маршрута на карте</h3><p>В карточке маршрута можно сохранить личный план и вернуться к нему позже.</p><a className="button primary" href="/">Выбрать маршрут <ArrowRight size={16}/></a></div> : <form className="stack" onSubmit={createRequest}>
         <label>Маршрут<select required disabled={!!busy} value={routeId} onChange={event => setRouteId(event.target.value)}><option value="">Выберите опубликованный маршрут</option>{routes.filter(route => route.status === 'published').map(route => <option key={route.id} value={route.id}>{route.title}</option>)}</select></label>
+        {routeCursor && <button type="button" className="button secondary" disabled={routeLoading || loading || !!busy} onClick={() => void loadMoreRoutes()}>{routeLoading ? 'Загружаем маршруты…' : 'Загрузить ещё маршруты'}</button>}
         <label>Желаемая дата<input type="date" disabled={!!busy} value={date} min={new Date().toLocaleDateString('en-CA')} onChange={event => setDate(event.target.value)}/></label>
         <label>Что важно для группы<textarea required maxLength={2000} disabled={!!busy} rows={4} value={body} onChange={event => setBody(event.target.value)} placeholder="Ваш опыт, ожидания и удобные даты"/></label>
         <div className="inline-note"><Info size={18}/><span>Это запрос на обсуждение. Гид отдельно подтвердит даты и условия. Места не бронируются автоматически.</span></div>
@@ -357,16 +406,17 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
         const route = routes.find(item => item.id === event.target.value), limits = routePolicy(route);
         setRouteId(event.target.value); setMinPeople(limits.minPeople); setCapacity(Math.min(Math.max(8, limits.minPeople), limits.maxGroupSize)); setZone(regions.find(region => region.id === route?.regionId)?.timezone || 'Europe/Moscow');
       }}><option value="">Выберите опубликованный маршрут</option>{routes.filter(route => route.status === 'published').map(route => <option key={route.id} value={route.id}>{route.title}</option>)}</select></label>}
+      {!departureForm.request && routeCursor && <button type="button" className="button secondary" disabled={routeLoading || loading || !!busy} onClick={() => void loadMoreRoutes()}>{routeLoading ? 'Загружаем маршруты…' : 'Загрузить ещё маршруты'}</button>}
       <label>Часовой пояс<select value={zone} disabled={!!busy} onChange={event => setZone(event.target.value)}>{Array.from(new Set(['Europe/Moscow', ...regions.map(region => region.timezone)])).map(value => <option value={value} key={value}>{value}</option>)}</select></label>
       <label>Начало по выбранному поясу<input type="datetime-local" required disabled={!!busy} value={startsAt} onChange={event => setStartsAt(event.target.value)}/></label>
       <label>Окончание по выбранному поясу<input type="datetime-local" required disabled={!!busy} value={endsAt} onChange={event => setEndsAt(event.target.value)}/></label>
       <label>Минимум участников вместе с гидом<input type="number" required step={1} disabled={!!busy} min={policy.minPeople} max={policy.maxGroupSize} value={minPeople} onChange={event => setMinPeople(Number(event.target.value))}/></label>
       <label>Всего мест вместе с гидом<input type="number" required step={1} disabled={!!busy} min={minPeople} max={policy.maxGroupSize} value={capacity} onChange={event => setCapacity(Number(event.target.value))}/></label>
-      <div className="inline-note"><Info size={18}/><span>{chosenRoute ? 'Ограничения маршрута: от ' + policy.minPeople + ' до ' + policy.maxGroupSize + ' человек, включая гида. ' : ''}{policy.requiredGuides !== 1 ? 'Для маршрута требуется несколько гидов; такой состав пока не поддерживается.' : 'Сервер проверит допуск и актуальную версию маршрута. Участие в этих датах подтверждается отдельно.'}</span></div>
+      <div className="inline-note"><Info size={18}/><span>{chosenRoute ? 'Ограничения маршрута: от ' + policy.minPeople + ' до ' + policy.maxGroupSize + ' человек, включая гида. ' : ''}{policy.requiredGuides !== 1 ? 'Для маршрута требуется несколько гидов; такой состав пока не поддерживается.' : 'Перед выходом проверяются допуск гида и доступность маршрута. Участие в этих датах подтверждается отдельно.'}</span></div>
       {error && <p className="error-message" role="alert">{error}</p>}<button className="button primary" disabled={!!busy || !chosenRoute || policy.requiredGuides !== 1}>{busy ? 'Ожидаем ответ…' : 'Создать выход'}</button>
     </form></Modal>}
     {confirm && current && <Modal title={{start: 'Подтвердить начало похода?', complete: 'Завершить поход?', cancel: 'Отменить выход?', abort: 'Прекратить поход?', leave: 'Выйти из группы?'}[confirm.action]} onClose={closeConfirm}>
-      <p className="muted">{confirm.action === 'start' ? 'Подтвердите фактическую готовность. Сервер проверит явку, состав, действующий допуск гида и версию маршрута.' : confirm.action === 'complete' ? 'Подтвердите, что выход завершён. У участников с подтверждённой явкой появится возможность оставить отзыв.' : confirm.action === 'leave' ? assignedGuide ? 'После вашего выхода группа останется без гида и потеряет готовность к старту. Участники смогут обсудить дальнейшие действия.' : 'Ваше участие перестанет быть подтверждённым. Состав и готовность группы будут пересчитаны.' : 'Участники увидят новый статус. Это действие не отправляет автоматический вызов экстренным службам.'}</p>
+      <p className="muted">{confirm.action === 'start' ? 'Подтвердите готовность группы. Для старта нужны явка участников, действующий допуск гида и доступный маршрут.' : confirm.action === 'complete' ? 'Подтвердите, что выход завершён. У участников с подтверждённой явкой появится возможность оставить отзыв.' : confirm.action === 'leave' ? assignedGuide ? 'После вашего выхода группа останется без гида и потеряет готовность к старту. Участники смогут обсудить дальнейшие действия.' : 'Ваше участие перестанет быть подтверждённым. Состав и готовность группы будут пересчитаны.' : 'Участники увидят новый статус. Это действие не отправляет автоматический вызов экстренным службам.'}</p>
       {error && <p className="error-message" role="alert">{error}</p>}
       <div className="section-actions"><button className="button primary" disabled={!!busy} onClick={async () => { const result = confirm.action === 'leave' ? await write<Departure>('departures/' + encodeURIComponent(current.id) + '/leave', {}) : await write<Departure>('departures/' + encodeURIComponent(current.id) + '/transition', {action: confirm.action, expectedVersion: confirm.version}); if (result.ok) setConfirm(null); }}>{busy ? 'Ожидаем ответ…' : 'Подтвердить'}</button><button className="button secondary" disabled={!!busy} onClick={closeConfirm}>Вернуться</button></div>
     </Modal>}
@@ -376,4 +426,8 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
 
 function Empty({title, description, onLogin}: {title: string; description: string; onLogin?: () => void}) {
   return <div className="empty-state"><UsersThree size={46}/><h2>{title}</h2><p>{description}</p><div className="empty-actions">{onLogin && <button className="button primary" onClick={onLogin}><UserCircle size={18}/>Войти</button>}<a className={onLogin ? 'button secondary' : 'button primary'} href="/">Исследовать карту <ArrowRight size={17}/></a></div></div>;
+}
+
+function TripRouteHeading({title, categories}: {title: string; categories: readonly EventCategoryId[]}) {
+  return <div className="trip-route-heading">{categories[0]&&<EventCategoryIcon category={categories[0]} size={32}/>}<h3>{title}</h3></div>;
 }

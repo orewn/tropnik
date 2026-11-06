@@ -24,7 +24,8 @@ func GrantRuntime(ctx context.Context, pool *pgxpool.Pool, role string) error {
 		"GRANT USAGE ON SCHEMA " + quotedSchema + " TO " + r,
 		"GRANT SELECT ON users,sessions,guide_qualifications,regions,routes,route_regions,route_revisions,departures,memberships,idempotency_keys,messages,reviews,offline_observations,recruitment_requests,recruitment_members,recruitment_messages,schema_migrations TO " + r,
 		"GRANT INSERT(email,password_hash,display_name,role,guide_status) ON users TO " + r,
-		"GRANT UPDATE(display_name,role,guide_status) ON users TO " + r,
+		"GRANT UPDATE(display_name,role,guide_status,email,password_hash,email_verified,disabled,deleted_at) ON users TO " + r,
+		"GRANT SELECT,INSERT,UPDATE ON account_action_tokens TO " + r,
 		"GRANT INSERT,UPDATE ON sessions,departures,memberships,idempotency_keys,messages,reviews,offline_observations,recruitment_requests,recruitment_members,recruitment_messages TO " + r,
 		"GRANT DELETE ON recruitment_members TO " + r,
 		// Shared auth counters need bounded removal of expired identities.

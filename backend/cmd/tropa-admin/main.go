@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
-	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -140,31 +140,24 @@ func run() error {
 			}
 		}
 	case "import-route":
-		b, e := os.ReadFile(*file)
+		input, e := os.Open(*file)
 		if e != nil {
 			return e
 		}
-		if len(b) > 10<<20 {
+		defer input.Close()
+		b, e := io.ReadAll(io.LimitReader(input, domain.RouteImportBytes+1))
+		if e != nil {
+			return e
+		}
+		if len(b) > domain.RouteImportBytes {
 			return fmt.Errorf("route file too large")
 		}
 		var r domain.Route
 		if e = json.Unmarshal(b, &r); e != nil {
 			return e
 		}
-		if r.Title == "" || r.Slug == "" || r.RegionID == "" || r.Description == "" || r.Activity == "" || r.Season == "" || r.Source.Name == "" || r.Source.License == "" || r.Source.RetrievedAt.IsZero() || r.AscentM < 0 || r.DurationMin < 1 {
-			return fmt.Errorf("route description, source/license/date, activity, season, ascent and duration required")
-		}
-		u, e := url.Parse(r.Source.URL)
-		if e != nil || u.Scheme != "https" || u.Host == "" {
-			return fmt.Errorf("HTTPS source URL required")
-		}
-		if r.Geometry.Type != "LineString" || len(r.Geometry.Coordinates) < 2 || len(r.Geometry.Coordinates) > 100000 {
-			return fmt.Errorf("bounded LineString required")
-		}
-		for _, p := range r.Geometry.Coordinates {
-			if len(p) != 2 || p[0] < -180 || p[0] > 180 || p[1] < -90 || p[1] > 90 {
-				return fmt.Errorf("geometry must contain WGS84 longitude/latitude pairs")
-			}
+		if e = domain.ValidateRouteImport(r); e != nil {
+			return e
 		}
 		geo, _ := json.Marshal(r.Geometry)
 		e = tx.QueryRow(ctx, "INSERT INTO routes(slug,region_id,title,description,activity,status) VALUES($1,$2,$3,$4,$5,'review_required') RETURNING id::text", r.Slug, r.RegionID, r.Title, r.Description, r.Activity).Scan(&entity)

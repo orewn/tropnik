@@ -21,7 +21,8 @@ EXCLUDED_DIRS = {
     '.sites-runtime', '.gradle', '.kotlin', '.cache', 'cache', 'caches',
     'raw', 'build', 'dist', 'target', 'coverage', '.stage', '__pycache__',
     '.pytest_cache', '.mypy_cache', '.venv', 'venv', '.idea', 'tmp', 'temp',
-    'outputs', 'work', 'credentials', 'secrets', '.secrets',
+    'outputs', 'work', 'private', 'credentials', 'secrets', '.secrets',
+    '.ssh', '.aws', '.azure', '.kube', '.gnupg',
 }
 EXCLUDED_SUFFIXES = {
     '.apk', '.aab', '.apks', '.zip', '.tar', '.tgz', '.gz', '.bundle',
@@ -63,6 +64,8 @@ def exclusion(path):
     if any(piece.lower() in EXCLUDED_DIRS for piece in pieces[:-1]):
         return 'raw-cache-build-or-private-directory'
     name = path.name.lower()
+    if name.endswith(('.export.json', '.queue.json')):
+        return 'unreviewed-chat-export-or-queue'
     if name in SECRET_NAMES or name.startswith(('id_rsa', 'id_ed25519', 'service-account')):
         return 'credential-or-machine-local-file'
     if name == '.env' or name.startswith('.env.') and not name.endswith(('.example', '.sample', '.template')):

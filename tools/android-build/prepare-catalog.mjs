@@ -40,13 +40,15 @@ const compiled=ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.
 const {regions,trails}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
 const coverage=JSON.parse(await readFile(join(root,'web/public/data/russia-boundaries-provenance.json'),'utf8'));
 const excluded=new Set(coverage.excludedCatalogRouteIds);
-if(regions.length!==6||trails.length!==277)throw new Error('Review the changed web catalog cardinality before regenerating native parity');
+if(!regions.length||regions.length>200||!trails.length||trails.length>100000)throw new Error('Web catalog cardinality is outside the reviewed import budget');
 if(new Set(trails.map(t=>t.id)).size!==trails.length||trails.some(t=>excluded.has(t.id)))throw new Error('Duplicate or excluded route in native import');
 const regionIds=new Set(regions.map(r=>r.id));
+if(regionIds.size!==regions.length||regions.some(region=>!/^[a-z0-9-]+$/.test(region.id)||!Array.isArray(region.center)||region.center.length!==2||!region.center.every(Number.isFinite)))throw new Error('Invalid curated region identity or overview centre');
 const learning=JSON.parse((await input(join(root,'tools/android-build/fixtures/learning-route.json'))).toString('utf8'));
 if(learning.id!=='learning-route'||!learning.illustrative||learning.geometryAsset)throw new Error('Learning card must remain explicitly illustrative and geometry-free');
 
 const geometries=[];
+const referenceOnlyRouteIds=[];
 const finite=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0?value:null;
 const routes=[];
 for(const trail of trails){
@@ -54,13 +56,19 @@ for(const trail of trails){
   if(!/^[a-z0-9-]+$/.test(trail.id)||!regionIds.has(trail.regionId))throw new Error(`Invalid route identity ${trail.id}`);
   const memberships=trail.regionIds?.length?trail.regionIds:[trail.regionId];
   if(memberships.some(id=>!regionIds.has(id)))throw new Error('Unknown region membership');
-  if(typeof trail.geometryUrl!=='string'||!/^\/data\/(?:routes|imported)\/[a-z0-9-]+\.geojson$/.test(trail.geometryUrl))throw new Error(`Missing or unsupported route geometry: ${trail.id}`);
-  const sourcePath='web/public'+trail.geometryUrl;
-  const bytes=await readFile(join(root,sourcePath));
-  const geometry=JSON.parse(bytes.toString('utf8'));
-  if(!['FeatureCollection','Feature','MultiLineString','LineString'].includes(geometry.type))throw new Error('Unexpected reference geometry type');
-  const geometryAsset=trail.id==='kavkaz-8a'?'maps/routes/route-11566519.geojson':`maps/routes/${trail.id}.geojson`;
-  geometries.push({routeId:trail.id,path:geometryAsset,sourcePath,bytes:bytes.length,sha256:sha(bytes),data:bytes});
+  let geometryAsset=null;
+  if(trail.geometryUrl!==undefined&&trail.geometryUrl!==null){
+    if(typeof trail.geometryUrl!=='string'||!/^\/data\/(?:routes|imported)\/[a-z0-9-]+\.geojson$/.test(trail.geometryUrl))throw new Error(`Unsupported route geometry path: ${trail.id}`);
+    const sourcePath='web/public'+trail.geometryUrl;
+    const bytes=await readFile(join(root,sourcePath));
+    const geometry=JSON.parse(bytes.toString('utf8'));
+    if(!['FeatureCollection','Feature','MultiLineString','LineString'].includes(geometry.type))throw new Error('Unexpected reference geometry type');
+    geometryAsset=trail.id==='kavkaz-8a'?'maps/routes/route-11566519.geojson':`maps/routes/${trail.id}.geojson`;
+    geometries.push({routeId:trail.id,path:geometryAsset,sourcePath,bytes:bytes.length,sha256:sha(bytes),data:bytes});
+  }else{
+    if(trail.geometry!=null||trail.center!=null||trail.bbox!=null||trail.geometryLengthKm!=null)throw new Error(`Reference without a geometry source cannot claim a route location: ${trail.id}`);
+    referenceOnlyRouteIds.push(trail.id);
+  }
   const notice=trail.operatingNotice;
   const distance=finite(trail.distanceKm);
   routes.push({id:trail.id,regionId:trail.regionId,regionIds:memberships,title:trail.title,
@@ -69,8 +77,11 @@ for(const trail of trails){
     ascentMeters:finite(trail.ascentM),durationMinutes:null,durationText:trail.duration??null,
     geometryAsset,illustrative:false,fieldVerified:false,navigationReady:false,
     sourceName:trail.sourceName,sourceUrl:trail.sourceUrl,
-    sourceLicense:'Геометрия: © OpenStreetMap contributors, ODbL 1.0. Независимое описание с указанным источником.',
+    sourceTitle:trail.sourceTitle??null,distanceNote:trail.distanceNote??null,accessStatus:trail.accessStatus??null,
+    territoryIds:trail.territoryIds??[],
+    sourceLicense:geometryAsset?'Геометрия: © OpenStreetMap contributors, ODbL 1.0. Независимое описание с указанным источником.':'Описание с указанным источником. Линия маршрута пока не добавлена.',
     sourceDate:trail.checkedAt,sourceKind:trail.sourceKind??null,publicationStatus:trail.publicationStatus,
+    additionalSources:trail.additionalSources??[],
     currentStatusLabel:notice?.title??null,currentAdvisory:notice?.body??null,
     advisorySourceUrl:notice?.url??null,operatingNotice:notice??null,
     officialEvidence:trail.officialEvidence??null,
@@ -91,6 +102,7 @@ const catalog={schemaVersion:1,version:`web-catalog-${identity.slice(0,16)}`,
 const catalogBytes=json(catalog);
 const manifest={schemaVersion:1,id:'tropnik-reference-catalog-v1',catalog:{path:'catalog.json',bytes:catalogBytes.length,sha256:sha(catalogBytes)},
   sourceInputs:inputRecords,regionIds:[...regionIds],referenceRouteIds:trails.map(t=>t.id),learningRouteIds:[learning.id],
+  geometryRouteIds:geometries.map(record=>record.routeId),referenceOnlyRouteIds,
   excludedRouteIds:[...excluded],fieldVerifiedCount:0,navigationReadyCount:0,
   files:geometries.map(({data,...record})=>record)};
 const expectedNames=new Set(geometries.map(record=>record.path.split('/').at(-1)));
@@ -104,5 +116,6 @@ await output(join(assets,'catalog-manifest.json'),json(manifest));
 const byRegion=Object.fromEntries([...regionIds].map(id=>[id,trails.filter(t=>t.regionId===id||t.regionIds?.includes(id)).length]));
 console.log(JSON.stringify({checked:check,regions:regions.length,referenceRoutes:trails.length,learningRoutes:1,
   geometryFiles:geometries.length,geometryBytes:geometries.reduce((sum,g)=>sum+g.bytes,0),
+  referenceOnlyRoutes:referenceOnlyRouteIds.length,
   catalogBytes:catalogBytes.length,catalogSha256:manifest.catalog.sha256,byRegion,
   excludedRouteIds:manifest.excludedRouteIds,fieldVerified:0,navigationReady:0},null,2));

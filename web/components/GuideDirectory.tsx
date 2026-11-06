@@ -60,7 +60,7 @@ export function GuideDirectory() {
           <div><button className="text-link" onClick={() => setReport(review.id)}><Flag size={14}/>Сообщить о нарушении</button></div>
         </article>) : <p>Опубликованных отзывов пока нет.</p>}
       </div>}
-    </article>)}</div> : !error && <div className="empty-state"><UsersThree size={37}/><h2>Здесь появятся первые гиды</h2><p>{preview ? 'Общий сервер пока не подключён. В пилоте нет вымышленных профилей и рейтингов.' : 'Профили публикуются после проверки действующего допуска. Рейтинги формируются из отзывов участников завершённых походов.'}</p></div>}
+    </article>)}</div> : !error && <div className="empty-state"><UsersThree size={37}/><h2>Здесь появятся первые гиды</h2><p>{preview ? 'Каталог гидов пока недоступен. Вы можете изучить маршруты и сохранить планы на будущую поездку.' : 'Профили публикуются после проверки действующего допуска. Рейтинги формируются из отзывов участников завершённых походов.'}</p></div>}
     {report && <ReportDialog targetType="review" targetId={report} onClose={() => setReport(null)}/>}
   </section>;
 }

@@ -47,6 +47,9 @@ data class OnlineState(
     val chatUpdatedAt: Long = 0L,
     val refreshedAt: Long = 0L,
     val accountSummary: AccountSummary? = null,
+    val departureHistory: List<CompletedDeparture> = emptyList(),
+    val historyCursor: String? = null,
+    val historyUpdatedAt: Long = 0L,
     val notifications: List<AccountNotification> = emptyList(),
     val reports: List<UserReport> = emptyList(),
     val moderationActions: List<ModerationAction> = emptyList(),
@@ -89,7 +92,8 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
 
     fun clearNotice() { mutableState.update { it.copy(notice = null) } }
     fun clearError() { mutableState.update { it.copy(error = null) } }
-    fun routeTitle(id: String) = mutableState.value.routes.firstOrNull { it.id == id }?.title ?: "Маршрут похода"
+    fun routeTitle(id: String) = mutableState.value.routes.firstOrNull { it.id == id }?.title
+        ?: mutableState.value.departureHistory.firstOrNull { it.routeId == id }?.routeTitle ?: "Маршрут похода"
     fun filterRoute(id: String?) {
         mutableState.update { it.copy(routeFilter = id, departure = null, request = null, conversation = null) }
         if (mutableState.value.canUseNetwork) refresh()
@@ -104,8 +108,8 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
     fun closeRecruitmentComposer() { mutableState.update { it.copy(recruitmentForRoute = null) } }
 
     private fun requireOnline() {
-        if (!mutableState.value.configured) throw ApiFailure("service_not_configured", "Подключите HTTPS адрес сервиса в профиле.")
-        if (mutableState.value.connection == ConnectionState.OFFLINE) throw ApiFailure("offline", "Для этого действия нужно подключение. Подтверждение выполняет сервер.")
+        if (!mutableState.value.configured) throw ApiFailure("service_not_configured", "Настройте подключение в профиле, чтобы продолжить.")
+        if (mutableState.value.connection == ConnectionState.OFFLINE) throw ApiFailure("offline", "Для этого действия нужен интернет. Подключитесь и повторите попытку.")
     }
     private fun requireSession(): AccountSession = mutableState.value.session
         ?: throw ApiFailure("auth_required", "Сначала войдите в аккаунт.", 401)
@@ -125,7 +129,7 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
                     if (failure.status == 401 && mutableState.value.session != null) {
                         syncJob?.cancel()
                         app.vault.clearSession()
-                        mutableState.update { it.copy(session = null, conversation = null, messages = emptyList(), pending = emptyList(), cachedConversations = emptyList(), accountSummary = null, notifications = emptyList(), reports = emptyList(), moderationActions = emptyList(), appeals = emptyList(), accountUpdatedAt = 0) }
+                        mutableState.update { it.copy(session = null, conversation = null, messages = emptyList(), pending = emptyList(), cachedConversations = emptyList(), accountSummary = null, departureHistory = emptyList(), historyCursor = null, historyUpdatedAt = 0, notifications = emptyList(), reports = emptyList(), moderationActions = emptyList(), appeals = emptyList(), accountUpdatedAt = 0) }
                     }
                     mutableState.update { it.copy(error = readable(failure),
                         readiness = if (failure.status == 503 || failure.code == "network_unavailable") ServerState.Unavailable(failure.message) else it.readiness) }
@@ -160,7 +164,7 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
         val session = api.authenticate(email, password, name, role)
         if (epoch != generation) return@action
         app.vault.saveSession(session)
-        mutableState.update { it.copy(session = session, notice = if (name == null) "Вход выполнен" else if (role == "guide") "Аккаунт создан. Квалификация гида ожидает проверки." else "Аккаунт создан") }
+        mutableState.update { it.copy(session = session, accountSummary = null, departureHistory = emptyList(), historyCursor = null, historyUpdatedAt = 0, notifications = emptyList(), reports = emptyList(), moderationActions = emptyList(), appeals = emptyList(), accountUpdatedAt = 0, notice = if (name == null) "Вход выполнен" else if (role == "guide") "Аккаунт создан. Квалификация гида ожидает проверки." else "Аккаунт создан") }
         refreshData(epoch)
         refreshPrivateLists()
         flushOutbox()
@@ -174,7 +178,7 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
         app.vault.clearSession()
         if (session != null) privateStore.clear(session)
         mutableState.value = OnlineState(serverUrl = app.vault.serverUrl(), connection = mutableState.value.connection,
-            notice = if (revoked) "Вы вышли. Серверный сеанс отозван, личный кэш удалён." else "Вы вышли на этом устройстве. Отзыв серверного сеанса не подтверждён; он может действовать до истечения срока.")
+            notice = if (revoked) "Вы вышли. Сохранённая переписка удалена с телефона." else "Вы вышли на этом телефоне. Не удалось подтвердить завершение входа без подключения.")
         if (mutableState.value.canUseNetwork) refresh()
     }
 
@@ -219,6 +223,22 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun refreshAccount() = action { epoch -> refreshAccountData(requireSession(), epoch) }
+    fun refreshHistory() = action { epoch ->
+        val session = requireSession()
+        val page = api.departureHistory()
+        if (same(session, epoch)) mutableState.update { it.copy(departureHistory = page.departures, historyCursor = page.cursor,
+            historyUpdatedAt = System.currentTimeMillis()) }
+    }
+    fun loadMoreHistory() = action { epoch ->
+        val session = requireSession()
+        val cursor = mutableState.value.historyCursor ?: return@action
+        val page = api.departureHistory(cursor)
+        if (same(session, epoch)) {
+            if (page.cursor == cursor) throw ApiFailure("invalid_cursor", "Не удалось загрузить предыдущие походы. Обновите историю.")
+            mutableState.update { it.copy(departureHistory = (it.departureHistory + page.departures).distinctBy(CompletedDeparture::id),
+                historyCursor = page.cursor) }
+        }
+    }
     private suspend fun refreshAccountData(session: AccountSession, epoch: Int) = coroutineScope {
         val summary = async { api.accountSummary() }
         val notifications = async { api.notifications() }
@@ -239,7 +259,7 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
         val session = requireSession()
         require(body.trim().characterCount() in 10..2000) { "Опишите причину: от 10 до 2000 символов" }
         val report = api.report(target, reason, body)
-        if (same(session, epoch)) { mutableState.update { it.copy(reports = listOf(report) + it.reports.filterNot { old -> old.id == report.id }, notice = "Обращение принято сервером. Решение появится в кабинете.") }; onSuccess() }
+        if (same(session, epoch)) { mutableState.update { it.copy(reports = listOf(report) + it.reports.filterNot { old -> old.id == report.id }, notice = "Обращение отправлено. Решение появится в кабинете.") }; onSuccess() }
     }
     fun appeal(action: ModerationAction, body: String, onSuccess: () -> Unit) = action { epoch ->
         val session = requireSession()
@@ -247,7 +267,7 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
         val appeal = api.appeal(action.id, body)
         if (same(session, epoch)) {
             mutableState.update { it.copy(appeals = listOf(appeal) + it.appeals.filterNot { old -> old.id == appeal.id },
-                moderationActions = it.moderationActions.map { old -> if (old.id == action.id) old.copy(appealStatus = appeal.status) else old }, notice = "Апелляция принята сервером. Решение рассмотрит другой сотрудник.") }
+                moderationActions = it.moderationActions.map { old -> if (old.id == action.id) old.copy(appealStatus = appeal.status) else old }, notice = "Апелляция отправлена. Её рассмотрит другой сотрудник.") }
             onSuccess()
         }
     }
@@ -255,7 +275,10 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
     fun loadMoreRoutes() = action { epoch ->
         val cursor = mutableState.value.routeCursor ?: return@action
         val page = api.routePage(cursor)
-        if (epoch == generation) mutableState.update { it.copy(routes = (it.routes + page.routes).distinctBy(PublishedRoute::id), routeCursor = page.cursor) }
+        if (epoch == generation) {
+            if (page.cursor == cursor) throw ApiFailure("invalid_cursor", "Не удалось загрузить другие маршруты. Обновите список.")
+            mutableState.update { it.copy(routes = (it.routes + page.routes).distinctBy(PublishedRoute::id), routeCursor = page.cursor) }
+        }
     }
 
     fun openRoute(id: String, onReady: (PublishedRoute) -> Unit) = action { epoch ->
@@ -280,7 +303,7 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
     }
     fun leave(departure: Departure) = action { epoch ->
         val updated = api.leave(departure.id)
-        if (epoch == generation) { updateDeparture(updated); mutableState.update { it.copy(notice = "Участие отменено сервером") } }
+        if (epoch == generation) { updateDeparture(updated); mutableState.update { it.copy(notice = "Участие отменено") } }
     }
     fun checkIn(departure: Departure, participant: Participant) = action { epoch ->
         val updated = api.checkIn(departure, participant.userId)
@@ -315,7 +338,8 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
     fun review(departure: Departure, target: String, rating: Int, body: String, onSuccess: () -> Unit = {}) = action { epoch ->
         api.review(departure.id, target, rating, body)
         val reviews = api.reviews(departure.id)
-        if (epoch == generation) { mutableState.update { it.copy(reviews = reviews, notice = "Отзыв опубликован после проверки участия сервером") }; onSuccess() }
+        val updated = api.departure(departure.id)
+        if (epoch == generation) { updateDeparture(updated); mutableState.update { it.copy(reviews = reviews, notice = "Отзыв опубликован") }; onSuccess() }
     }
 
     fun openChat(conversation: Conversation) {
@@ -434,9 +458,9 @@ class OnlineViewModel(application: Application) : AndroidViewModel(application) 
 
     private fun readable(error: ApiFailure): String = when {
         error.status == 401 -> "Не удалось подтвердить вход. Проверьте данные или войдите заново."
-        error.status == 429 -> "Слишком много запросов. Повторите попытку позже."
-        error.status == 409 -> "Данные изменились или действие уже недоступно. Обновите поход и проверьте условия. ${error.message}"
-        error.status == 403 -> "Сервер не разрешил действие. ${error.message}"
+        error.status == 429 -> "Пожалуйста, подождите немного и попробуйте снова."
+        error.status == 409 -> "Условия похода изменились. Обновите карточку и попробуйте снова."
+        error.status == 403 -> "Это действие сейчас недоступно для вашего аккаунта."
         else -> error.message
     }
 }

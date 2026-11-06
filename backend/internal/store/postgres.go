@@ -204,7 +204,7 @@ func (s *Store) Route(ctx context.Context, id string) (domain.Route, error) {
 }
 
 const eligibleSQL = `u.guide_status='verified' AND NOT u.disabled AND EXISTS(SELECT 1 FROM guide_qualifications q WHERE q.user_id=u.id AND q.revoked_at IS NULL AND q.activity=r.activity AND q.valid_until>=d.ends_at AND q.max_difficulty>=CASE rr.difficulty WHEN 'easy' THEN 1 WHEN 'moderate' THEN 2 WHEN 'hard' THEN 3 ELSE 4 END)`
-const departureSQL = `SELECT d.id::text,d.route_id::text,d.route_revision_id::text,d.guide_id::text,u.display_name,d.starts_at,d.ends_at,d.time_zone,d.min_people,d.capacity,d.status,d.version,d.created_at,d.created_by::text,
+const departureSQL = `SELECT d.id::text,d.route_id::text,d.route_revision_id::text,r.title,d.guide_id::text,u.display_name,d.starts_at,d.ends_at,d.time_zone,d.min_people,d.capacity,d.status,d.version,d.created_at,d.created_by::text,
 (r.status='published' AND r.current_revision_id=d.route_revision_id AND rr.reviewed_at IS NOT NULL AND rr.required_guides=1),COALESCE((` + eligibleSQL + `),false)
 FROM departures d JOIN routes r ON r.id=d.route_id JOIN route_revisions rr ON rr.id=d.route_revision_id LEFT JOIN users u ON u.id=d.guide_id `
 
@@ -213,7 +213,7 @@ func readGroup(ctx context.Context, q querier, id string, locked bool) (g domain
 	if locked {
 		query += " FOR UPDATE OF d FOR SHARE OF r,rr"
 	}
-	e = q.QueryRow(ctx, query, id).Scan(&g.ID, &g.RouteID, &g.RouteRevisionID, &g.GuideID, &g.GuideName, &g.StartsAt, &g.EndsAt, &g.TimeZone, &g.MinPeople, &g.Capacity, &g.Status, &g.Version, &g.CreatedAt, &g.OwnerID, &g.RouteOpen, &g.GuideEligible)
+	e = q.QueryRow(ctx, query, id).Scan(&g.ID, &g.RouteID, &g.RouteRevisionID, &g.RouteTitle, &g.GuideID, &g.GuideName, &g.StartsAt, &g.EndsAt, &g.TimeZone, &g.MinPeople, &g.Capacity, &g.Status, &g.Version, &g.CreatedAt, &g.OwnerID, &g.RouteOpen, &g.GuideEligible)
 	if e != nil {
 		return g, dbErr(e)
 	}
@@ -259,7 +259,30 @@ func publicDeparture(g domain.Group, user string) domain.Departure {
 }
 func (s *Store) Departure(ctx context.Context, id, user string) (domain.Departure, error) {
 	g, e := readGroup(ctx, s.Pool, id, false)
-	return publicDeparture(g, user), e
+	out := publicDeparture(g, user)
+	if e != nil {
+		return out, e
+	}
+	if g.Status == "completed" && out.Membership == "completed" {
+		targets := []string{}
+		if g.CanReview(user, "route") {
+			var routeWritten, guideWritten bool
+			e = s.Pool.QueryRow(ctx, `SELECT
+ EXISTS(SELECT 1 FROM reviews WHERE departure_id=$1 AND user_id=$2 AND target='route'),
+ EXISTS(SELECT 1 FROM reviews WHERE departure_id=$1 AND user_id=$2 AND target='guide')`, id, user).Scan(&routeWritten, &guideWritten)
+			if e != nil {
+				return out, e
+			}
+			if !routeWritten {
+				targets = append(targets, "route")
+			}
+			if !guideWritten {
+				targets = append(targets, "guide")
+			}
+		}
+		out.ReviewTargets = &targets
+	}
+	return out, nil
 }
 func (s *Store) Departures(ctx context.Context, route, user string) ([]domain.Departure, error) {
 	rows, e := s.Pool.Query(ctx, `SELECT d.id::text FROM departures d JOIN routes r ON r.id=d.route_id WHERE ($1='' OR r.id::text=$1 OR r.slug=$1) AND d.ends_at>now() AND d.status IN ('recruiting','ready','awaiting_guide','in_progress') ORDER BY d.starts_at LIMIT 100`, route)

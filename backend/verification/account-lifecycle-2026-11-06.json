@@ -1,0 +1,82 @@
+{
+  "scope": "account email verification, password reset, account closure; canonical tropnik-work",
+  "checkedAt": "2026-11-06",
+  "unit": {
+    "command": "go test -race -json ./...",
+    "passEventsIncludingSubtests": 60,
+    "failed": 0,
+    "testedPackages": 6,
+    "log": "/workspace/scratch/81f8b0146058/backend-lifecycle-unit.jsonl"
+  },
+  "vet": {
+    "command": "go vet ./...",
+    "exitCode": 0
+  },
+  "sqlIntegration": {
+    "command": "go test -c -tags=integration ./internal/store",
+    "compiled": true,
+    "executedLocally": false,
+    "reason": "No native PostgreSQL/PostGIS or Docker in this local environment; exact-head native CI required."
+  },
+  "web": {
+    "command": "node --experimental-strip-types --test tests/account-lifecycle.test.mjs tests/api-policy.test.mjs tests/backend-forwarding.test.mjs tests/backend-origin.test.mjs",
+    "passed": 26,
+    "failed": 0,
+    "skipped": 0
+  },
+  "typeScript": [
+    "pages-preview/tsconfig.json: passed",
+    "tests/tsconfig.backend.json: passed"
+  ],
+  "mailVerification": [
+    "Loopback implicit TLS and mandatory STARTTLS accepted synthetic example.invalid mail with a test CA",
+    "Untrusted certificate and missing STARTTLS rejected before credentials/content",
+    "No real email sent"
+  ],
+  "limits": [
+    "In-memory bounded mail queue can lose pending work on restart; no durable delivery promise",
+    "Only profile/credential identity is anonymised. User text, participation, qualification evidence and audit remain; no full-erasure promise",
+    "Staff recovery/deletion requires operator deprovisioning",
+    "No email transport configured in this workspace; new public registration closed"
+  ],
+  "sources": [
+    "https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html",
+    "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+  ],
+  "sha256": {
+    "backend/migrations/005_account_lifecycle.sql": "eb897f087dba1aac5c05a82c2b8bcfc6e2edf17bbbb0543fc8cd4e71a65da467",
+    "backend/migrations/migrate.go": "3c2b83e919f3d83208e62d83f3dedc40d33d70a3cad9a9bf24e73efe63aa0552",
+    "backend/migrations/grants.go": "60f6480fa769fd60cb4f4c06836c7a30077cc9cd5cee16fc4f1cd3a1f50beb54",
+    "backend/internal/auth/account_lifecycle.go": "0fc5ccd287734f07a39f066934c784a33835282bb82a5d8e99b448757e74da2f",
+    "backend/internal/auth/account_lifecycle_mail.go": "43530c5d0ba1577b7b74af80bbd8ee252a6889d8087d7713176cbb5525330aaa",
+    "backend/internal/auth/account_lifecycle_test.go": "7e371737d8cae825e385c676b7468e560df2100a7c376d1b83af3220080a2f5b",
+    "backend/internal/auth/account_lifecycle_mail_test.go": "4764a622ccf89cfd9bec427512a71049bc114fe4b8e7c78d10e8dfa3aeeb6963",
+    "backend/internal/store/account_lifecycle.go": "e6326a9095604e0960f0e7523d57c920fc9cbb553be54ba18c2aa279392b6fb7",
+    "backend/internal/store/auth_rate.go": "ae05c57c6026e7012cd87177e8693180c101460da10bef0f6cff3a8af92baecc",
+    "backend/internal/store/account_lifecycle_integration_test.go": "91e6cd339e289409093adff96eb21d792bd92ad2670625864d89230394991b2b",
+    "backend/internal/store/account_lifecycle_http_integration_test.go": "eebaba12a04798560a06243a77cde1f647b1993444cbbcd975548f97074dfbaf",
+    "backend/internal/httpapi/account_lifecycle.go": "4425fac9ebbbc568c91dcecf4fffe07918e447dd0f7c57c069a81d3df48ff5a1",
+    "backend/internal/httpapi/account_lifecycle_test.go": "f8a961cdb54a838ae1efdc355d90b64ebeec3c457c8d90267e86aabf452e5497",
+    "backend/internal/httpapi/server.go": "c14a58f71b65282d99ce8d92df1b314e04bf57be34e3d54728dbd213eca6059d",
+    "backend/internal/httpapi/security.go": "babdd68023223bc8845258ff045f1bf64daf50bd78cc05fbb59cea4c013277d2",
+    "backend/cmd/tropa-api/account_lifecycle_config.go": "16ba0dd150f8a65fba2be88a3c5c982fa5c2d9dd45a8a387ba06e6bb0baa0fc7",
+    "backend/cmd/tropa-api/account_lifecycle_config_test.go": "6e3483cf722d2650bd698f5f53e609b009b5c8564b88aeda07b6c28b459b11ba",
+    "backend/cmd/tropa-api/main.go": "6e6630194a380df1d6c61f242b4e5e5c44053b6112383570d3aeb5416491be35",
+    "web/components/AccountLifecycle.tsx": "063a7d48250f9b9ff3c82b28e36686fb0910c087f89ed6375585d10846427f12",
+    "web/components/AccountLifecycle.module.css": "0284696dc027417f0616fec85ae2c7e6633c21d42c32cf14874a662ac5cad28f",
+    "web/components/AccountPanel.tsx": "0754000ad8d184e1bd36a034f9dd165b66e395042bf6816c78a83562efe4e18f",
+    "web/components/AuthDialog.tsx": "0718a264b1d97ad19dc0636c41a3c5a587b197b040a34211501f44241d9925f4",
+    "web/app/account/action/page.tsx": "34dc11f5a7011d877539f7784875930b0985ad32d79fe717f5342e357144e531",
+    "web/app/api/backend/[...path]/route.ts": "5b0593ae96879e5400a4691b7e5b930b4bc2c56330a106f6350fffe2241d9c2e",
+    "web/lib/account-action.ts": "e4ee9178958d290cd88fd794881ef074a6df34755e1a42a2dbbe890c27b4a5df",
+    "web/lib/contract.ts": "c68dbea54516d02e74a4a77b7d2e331aa3d709d9bcd7b05994c60fe866796fe2",
+    "web/tests/account-lifecycle.test.mjs": "3969cec414ab22bdf1938e479ab88f262639c6f3ce757d6c417ec658985d284a",
+    "web/tests/backend-origin.test.mjs": "ab20c300233481d3200cb2adc54b5eb6caa29b0cc6ecf64858dc0e6adbba78c1",
+    "contracts/api.ts": "c68dbea54516d02e74a4a77b7d2e331aa3d709d9bcd7b05994c60fe866796fe2",
+    "contracts/openapi.yaml": "b76d7489a2ef8070aa7ae2ac9a0aa38b4f9ccf850c45ee37feee4d47dfebef74",
+    "infra/compose.mail.yaml": "5abdc1fc8ada27fe1508bee135fef79f3aefd1fcbb54b520b7ca68844a080147",
+    "infra/.env.example": "9c46f2258d44c1818c2daeea39a6359a14476cc602b68e4841103e1e769649dd",
+    "backend/README.md": "f3feb48a2e88357e878d7d0132dab8c37e4f5002c7a14b4c820c3a5480c50b00",
+    "infra/README.md": "c3bde72cfd77ff3f4ab3785768549e616f0cbd5ab0b49ca7a2aaa4f2e1a62e2c"
+  }
+}

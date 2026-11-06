@@ -30,6 +30,14 @@ test('reviews exclude the guide, no-show and duplicate target', () => {
   assert.equal(reviewAllowed(group, {id:'tourist'}, [{userId:'tourist',target:'route'}], 'guide'), true);
 });
 
+test('private review availability prevents resubmission of a hidden review', () => {
+  const group = {...departure, status:'completed', membership:'completed', reviewTargets:['guide']};
+  // Public reviews do not expose a moderated review's body or existence.
+  assert.equal(reviewAllowed(group, {id:'tourist'}, [], 'route'), false);
+  assert.equal(reviewAllowed(group, {id:'tourist'}, [], 'guide'), true);
+  assert.equal(reviewAllowed({...group,reviewTargets:[]}, {id:'tourist'}, [], 'guide'), false);
+});
+
 test('regional times convert to UTC and invalid dates are rejected', () => {
   assert.equal(zonedISO('2026-11-06T12:30','Europe/Moscow'),'2026-11-06T09:30:00.000Z');
   assert.equal(zonedISO('2026-11-06T12:30','Asia/Kamchatka'),'2026-11-06T00:30:00.000Z');

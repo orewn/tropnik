@@ -10,6 +10,9 @@ import (
 )
 
 func (c Config) Validate() error {
+	if err := validateAccountLifecycleConfig(c.AccountLifecycle); err != nil {
+		return err
+	}
 	if len(c.AuthRateKey) != 32 {
 		return errors.New("TROPA_AUTH_RATE_KEY must be an independent 256-bit server key")
 	}

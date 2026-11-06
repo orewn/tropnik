@@ -5,6 +5,7 @@ import "./gotham.css";
 import "./terrain.css";
 import "./map-design.css";
 import "./place-stories.css";
+import "./event-categories.css";
 import '@fontsource/manrope/cyrillic-400.css';
 import '@fontsource/manrope/cyrillic-500.css';
 import '@fontsource/manrope/cyrillic-600.css';

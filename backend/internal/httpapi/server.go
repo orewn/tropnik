@@ -28,6 +28,7 @@ type Config struct {
 	TrustedProxyCIDRs []netip.Prefix
 	ProxyToken        []byte
 	AuthRateKey       []byte
+	AccountLifecycle  *AccountLifecycleConfig
 }
 type authBudget interface {
 	ConsumeAuthAttempt(context.Context, string, [32]byte) (store.AuthAttempt, error)
@@ -39,6 +40,7 @@ type Server struct {
 	limiter    *limiter
 	dummyHash  string
 	authBudget authBudget
+	lifecycle  *accountLifecycle
 }
 type window struct {
 	count   int
@@ -83,7 +85,11 @@ func New(db *store.Store, cfg Config) (*Server, error) {
 	if e != nil {
 		return nil, e
 	}
-	return &Server{DB: db, cfg: cfg, authSlots: make(chan struct{}, 4), limiter: &limiter{entries: map[string]window{}}, dummyHash: dummy, authBudget: db}, nil
+	lifecycle, e := newAccountLifecycle(db, cfg.AccountLifecycle)
+	if e != nil {
+		return nil, e
+	}
+	return &Server{DB: db, cfg: cfg, authSlots: make(chan struct{}, 4), limiter: &limiter{entries: map[string]window{}}, dummyHash: dummy, authBudget: db, lifecycle: lifecycle}, nil
 }
 func (s *Server) Handler() http.Handler {
 	m := http.NewServeMux()
@@ -108,8 +114,10 @@ func (s *Server) Handler() http.Handler {
 	m.HandleFunc("POST /api/v1/auth/register", s.register)
 	m.HandleFunc("POST /api/v1/auth/login", s.login)
 	m.HandleFunc("POST /api/v1/auth/logout", s.logout)
+	s.accountLifecycleRoutes(m)
 	m.HandleFunc("GET /api/v1/me", s.me)
 	m.HandleFunc("GET /api/v1/me/summary", s.accountSummary)
+	m.HandleFunc("GET /api/v1/me/departures", s.departureHistory)
 	m.HandleFunc("GET /api/v1/me/notifications", s.notifications)
 	m.HandleFunc("POST /api/v1/me/notifications/{id}/read", s.readNotification)
 	m.HandleFunc("GET /api/v1/me/reports", s.myReports)
@@ -331,11 +339,8 @@ func (s *Server) routes(w http.ResponseWriter, r *http.Request) {
 		fail(w, e)
 		return
 	}
-	meta := map[string]string{"mode": "production"}
-	if len(x) == limit {
-		meta["nextCursor"] = x[len(x)-1].ID
-	}
-	_ = json.NewEncoder(w).Encode(map[string]any{"data": x, "meta": meta})
+	data, e := routePageJSON(x, limit)
+	routeResponse(w, data, e)
 }
 func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	x, e := s.DB.Route(r.Context(), r.PathValue("id"))
@@ -343,7 +348,8 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		fail(w, e)
 		return
 	}
-	respond(w, 200, x)
+	data, e := routeDetailJSON(x)
+	routeResponse(w, data, e)
 }
 func (s *Server) departures(w http.ResponseWriter, r *http.Request) {
 	u, ok := s.optionalUser(w, r)
@@ -413,14 +419,14 @@ func (s *Server) allowAuthAttempt(w http.ResponseWriter, r *http.Request, scope,
 	}
 	return true
 }
-func (s *Server) session(w http.ResponseWriter, r *http.Request, u domain.User, status int) {
+func (s *Server) session(w http.ResponseWriter, r *http.Request, u domain.User, status int, credentialHash string) {
 	t, e := auth.SessionToken()
 	if e != nil {
 		fail(w, e)
 		return
 	}
 	exp := time.Now().UTC().Add(24 * time.Hour)
-	if e = s.DB.CreateSession(r.Context(), u.ID, t, exp); e != nil {
+	if e = s.DB.CreateSessionWithCredentials(r.Context(), u.ID, t, exp, credentialHash); e != nil {
 		fail(w, e)
 		return
 	}
@@ -452,12 +458,12 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		fail(w, domain.ErrInvalid)
 		return
 	}
-	u, e := s.DB.Register(r.Context(), in.Email, hash, in.DisplayName, in.Role)
+	u, e := s.registerWithMail(r.Context(), in.Email, hash, in.DisplayName, in.Role)
 	if e != nil {
-		fail(w, e)
+		accountLifecycleFailure(w, e)
 		return
 	}
-	s.session(w, r, u, 201)
+	s.session(w, r, u, 201, hash)
 }
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	if !s.authGuard(w, r) {
@@ -498,7 +504,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		fail(w, e)
 		return
 	}
-	s.session(w, r, u, 200)
+	s.session(w, r, u, 200, hash)
 }
 func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 	if _, ok := s.user(w, r); !ok {

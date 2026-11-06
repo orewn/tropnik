@@ -260,22 +260,22 @@ fun TropaMap(
                 }
             }
             Text(when {
-                onlineFailed -> "Сетевая карта недоступна · локальная карта"
-                onlineMode -> "Подробная карта подгружается по сети"
-                connection == ConnectionState.LIMITED -> "Сеть ограничена · локальная карта"
-                else -> "Локальная карта · без загрузок из сети"
+                onlineFailed -> "Показана сохранённая карта"
+                onlineMode -> "Подробная карта"
+                connection == ConnectionState.LIMITED -> "Обзорная карта"
+                else -> "Карта без интернета"
             }, Modifier.align(Alignment.BottomCenter).padding(bottom = 104.dp).background(Palette.Surface.copy(alpha = .96f)).padding(horizontal = 8.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.labelSmall, color = Palette.Muted)
             Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 50.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TrailChoice(selected = onlineMode, onClick = {
                     if (onlineFailed) { onlineFailed = false; onlineRequested = true } else onlineRequested = !onlineRequested
-                }, enabled = connection == ConnectionState.ONLINE, label = { Text("Сеть") }, modifier = Modifier.heightIn(min = 48.dp))
+                }, enabled = connection == ConnectionState.ONLINE, label = { Text("Подробная карта") }, modifier = Modifier.heightIn(min = 48.dp))
                 TrailChoice(selected = relief, onClick = { relief = !relief }, enabled = zoom < 6 || (reliefArea && zoom >= 7) || (onlineMode && zoom >= 5),
                     label = { Text("Рельеф") }, modifier = Modifier.heightIn(min = 48.dp))
                 TrailChoice(selected = tilted, onClick = {
                     map?.let { current -> current.animateCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(current.cameraPosition).tilt(if (tilted) 0.0 else 40.0).build()), 300) }
                 }, enabled = zoom >= 10, label = { Text("Ракурс") }, modifier = Modifier.heightIn(min = 48.dp))
-                TrailChoice(selected = eco, onClick = { eco = !eco }, label = { Text("Эко") }, modifier = Modifier.heightIn(min = 48.dp))
+                TrailChoice(selected = eco, onClick = { eco = !eco }, label = { Text("Беречь заряд") }, modifier = Modifier.heightIn(min = 48.dp))
             }
         }
         Surface(Modifier.align(Alignment.BottomStart), color = Palette.Surface.copy(alpha = .96f), shape = RoundedCornerShape(topEnd = 12.dp)) {

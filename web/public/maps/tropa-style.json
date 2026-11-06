@@ -83,7 +83,7 @@
       "id": "overview-relief",
       "type": "raster",
       "source": "russia-relief",
-      "maxzoom": 7,
+      "maxzoom": 6,
       "paint": {
         "raster-opacity": [
           "interpolate",
@@ -97,7 +97,7 @@
           1,
           4,
           1,
-          7,
+          6,
           0
         ],
         "raster-fade-duration": 200

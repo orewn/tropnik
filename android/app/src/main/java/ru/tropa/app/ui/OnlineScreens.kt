@@ -28,7 +28,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.delay
 import org.json.JSONObject
-import ru.tropa.app.BuildConfig
 import ru.tropa.app.OnlineState
 import ru.tropa.app.OnlineViewModel
 import ru.tropa.app.data.*
@@ -47,6 +46,20 @@ fun OnlineProfileScreen(model: OnlineViewModel, state: OnlineState, onSources: (
     var showServer by remember { mutableStateOf(false) }
     var showLogout by remember { mutableStateOf(false) }
     var showAccountSafety by remember { mutableStateOf(false) }
+    var showHistory by remember(state.user?.id) { mutableStateOf(false) }
+    if (showHistory && state.user != null) {
+        val chat = state.conversation
+        val departure = state.departure
+        when {
+            chat != null -> ChatScreen(model, state, chat)
+            departure != null -> {
+                BackHandler { model.closeDetail() }
+                DepartureScreen(model, state, departure, { showHistory = false }, "История походов")
+            }
+            else -> AccountHistoryScreen(model, state) { showHistory = false }
+        }
+        return
+    }
     if (showAccountSafety && state.user != null) { AccountSafetyScreen(model, state) { showAccountSafety = false }; return }
     var register by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
@@ -63,9 +76,9 @@ fun OnlineProfileScreen(model: OnlineViewModel, state: OnlineState, onSources: (
         item { ServiceStatus(state, model::refresh) }
         item {
             CardShell {
-                Text("Ваш сервис", style = MaterialTheme.typography.titleLarge)
-                Text(if (state.configured) state.serverUrl else "Подключите адрес сервиса, чтобы создать аккаунт и присоединиться к походу.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
-                TrailOutlineButton(onClick = { showServer = true }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("configure_service")) { Text(if (state.configured) "Изменить адрес" else "Подключить сервис") }
+                Text("Подключение", style = MaterialTheme.typography.titleLarge)
+                Text(if (state.configured) "Подключение настроено. Войдите, чтобы записываться на походы и общаться." else "Вход, запись на походы и чаты станут доступны после подключения.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                TrailOutlineButton(onClick = { showServer = true }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("configure_service")) { Text(if (state.configured) "Настройки подключения" else "Подключиться") }
             }
         }
         item { OnlineError(state, model::clearError) }
@@ -87,7 +100,7 @@ fun OnlineProfileScreen(model: OnlineViewModel, state: OnlineState, onSources: (
                         if (role == "guide") Text("Регистрация гида создаёт заявку на проверку. Вести поход можно после подтверждения квалификации для нужного вида активности и региона.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
                     }
                     TrailButton(onClick = { model.authenticate(email, password, if (register) name else null, role) }, enabled = state.canUseNetwork && !state.busy && email.contains('@') && password.characterCount() in 12..128 && (!register || name.trim().length >= 2), modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("auth_submit")) { Text(if (register) "Создать аккаунт" else "Войти") }
-                    Text(if (!state.configured) "Сначала подключите сервис выше." else "Данные аккаунта отправляются на указанный HTTPS сервис. Пароль не сохраняется в приложении.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+                    Text(if (!state.configured) "Сначала настройте подключение выше." else "Ваш пароль не сохраняется в приложении.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                 }
             }
         } else {
@@ -97,34 +110,39 @@ fun OnlineProfileScreen(model: OnlineViewModel, state: OnlineState, onSources: (
                     Text(account.displayName, style = MaterialTheme.typography.headlineMedium)
                     Text(account.email, style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
                     StatusPill(if (account.role == "guide") guideLabel(account.guideStatus) else "Турист", caution = account.role == "guide" && account.guideStatus != "verified")
-                    if (account.staffRole in setOf("moderator", "admin")) Text(if (account.staffRole == "admin") "Администратор сервиса" else "Модератор сервиса", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
-                    if (!account.emailVerified) Text("Адрес почты ещё не подтверждён сервисом.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+                    if (account.staffRole in setOf("moderator", "admin")) Text(if (account.staffRole == "admin") "Администратор" else "Модератор", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+                    if (!account.emailVerified) Text("Подтвердите адрес электронной почты.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                     Field(editName, { editName = it.take(80) }, "Отображаемое имя")
                     RoleChoice(editRole) { editRole = it }
                     TrailOutlineButton(onClick = { model.updateProfile(editName, editRole) }, enabled = state.canUseNetwork && !state.busy && editName.trim().length in 2..80, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Сохранить профиль") }
-                    Text("Выбор роли не подтверждает квалификацию. Допуск гида и актуальность маршрута проверяются сервером перед созданием и стартом похода.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                    Text("Чтобы вести походы, гиду нужно подтвердить квалификацию для выбранного района.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
                     TrailTextButton(onClick = { showLogout = true }, enabled = !state.busy, modifier = Modifier.heightIn(min = 48.dp)) { Text("Выйти на этом устройстве") }
                 }
             }
             item { AccountSummaryCard(state) { showAccountSafety = true; if (state.canUseNetwork && !state.busy) model.refreshAccount() } }
-        }
-        item {
-            CardShell {
-                Text("Личные данные под контролем", style = MaterialTheme.typography.titleLarge)
-                Text("Сеанс и тексты чатов зашифрованы ключом Android Keystore. При выходе личный кэш и неотправленные сообщения удаляются. Геопозиция остаётся на устройстве и запрашивается только по вашей кнопке.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
-                Text("Чат защищён HTTPS при передаче, но не является сквозным шифрованием: сервер обрабатывает сообщения. Телеметрия и рекламные SDK не подключены.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+            item {
+                TrailOutlineButton(onClick = {
+                    model.closeChat(); model.closeDetail(); showHistory = true
+                    if (state.canUseNetwork) model.refreshHistory()
+                }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_account_history")) { Text("История походов и отзывы") }
             }
         }
         item {
             CardShell {
-                Text("Тропник ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.titleLarge)
-                Text("Предварительная сборка. Публикация сервиса, проверка маршрутов на местности и выпуск в магазины требуют отдельной готовности оператора.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                Text("Личные данные под контролем", style = MaterialTheme.typography.titleLarge)
+                Text("При выходе сохранённая переписка и неотправленные сообщения удаляются с телефона. Местоположение определяется только по вашей кнопке и остаётся на устройстве.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+            }
+        }
+        item {
+            CardShell {
+                Text("Тропник", style = MaterialTheme.typography.titleLarge)
+                Text("Находите маршруты и людей, с которыми по пути.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
                 TrailTextButton(onClick = onSources, Modifier.heightIn(min = 48.dp).testTag("show_sources")) { Text("Источники и лицензии") }
             }
         }
     }
     if (showServer) ServerDialog(state, model, onDismiss = { showServer = false })
-    if (showLogout) ConfirmAction("Выйти из аккаунта?", "Личный кэш переписок и очередь сообщений удалятся с этого устройства. Закладки и карты останутся. Если связи нет, отзыв сеанса на сервере не может быть подтверждён.", "Выйти", { showLogout = false }, { showLogout = false; model.logout() })
+    if (showLogout) ConfirmAction("Выйти из аккаунта?", "Сохранённая переписка и неотправленные сообщения удалятся с телефона. Закладки и карты останутся.", "Выйти", { showLogout = false }, { showLogout = false; model.logout() })
 }
 
 @Composable
@@ -133,14 +151,14 @@ private fun ServerDialog(state: OnlineState, model: OnlineViewModel, onDismiss: 
     var validation by remember { mutableStateOf<String?>(null) }
     TrailDialog(onDismissRequest = onDismiss, title = { Text("Подключение к Тропнику") }, text = {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Введите адрес сервера, которому доверяете. Аккаунт и сообщения будут отправляться на этот адрес.", style = MaterialTheme.typography.bodyMedium)
-            Field(value, { value = it; validation = null }, "HTTPS адрес", keyboard = KeyboardType.Uri, tag = "service_url")
-            Text("Например: https://your-domain.ru. Можно указать полный путь /api/v1. Пустое поле отключает сервис.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
-            if (state.session != null) Text("Смена адреса завершит локальный сеанс и удалит личный кэш, включая неотправленные сообщения.", color = Palette.Alert, style = MaterialTheme.typography.bodyMedium)
+            Text("Укажите адрес подключения, которому доверяете. Здесь будут храниться аккаунт и сообщения.", style = MaterialTheme.typography.bodyMedium)
+            Field(value, { value = it; validation = null }, "Адрес подключения", keyboard = KeyboardType.Uri, tag = "service_url")
+            Text("Пустое поле отключает подключение.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+            if (state.session != null) Text("Смена подключения завершит вход и удалит сохранённую переписку, включая неотправленные сообщения.", color = Palette.Alert, style = MaterialTheme.typography.bodyMedium)
             validation?.let { Text(it, color = Palette.Alert) }
         }
     }, confirmButton = { TrailTextButton(onClick = {
-        runCatching { ApiAddress.normalize(value) }.onSuccess { model.configureServer(it); onDismiss() }.onFailure { validation = it.message ?: "Проверьте адрес" }
+        runCatching { ApiAddress.normalize(value) }.onSuccess { model.configureServer(it); onDismiss() }.onFailure { validation = "Проверьте адрес подключения и попробуйте снова." }
     }, enabled = !state.busy) { Text("Сохранить адрес") } }, dismissButton = { TrailTextButton(onClick = onDismiss) { Text("Отмена") } })
 }
 
@@ -161,12 +179,12 @@ fun OnlineTripsScreen(model: OnlineViewModel, state: OnlineState, onProfile: () 
             item { PageHeading("Хороший поход\nначинается с людей.", "Один маршрут. Одна дата. Своя группа и проверенный гид.") }
             item { ServiceStatus(state, model::refresh) }
             item { OnlineError(state, model::clearError) }
-            item { InfoCard("Минимум 4 человека всего, включая гида. Запись, присутствие и разрешение старта подтверждает сервер; действия без связи не занимают место.") }
+            item { InfoCard("Для похода нужны минимум 4 человека, включая гида. Чтобы записаться, подключитесь к интернету и дождитесь подтверждения.") }
             if (state.routeFilter != null) item { CardShell { Text("Выбран маршрут: ${model.routeTitle(state.routeFilter)}", style = MaterialTheme.typography.titleMedium); TrailTextButton(onClick = { model.filterRoute(null) }) { Text("Показать все маршруты") } } }
             if (!state.configured || state.user == null) item {
                 CardShell {
                     Text(if (!state.configured) "Подключим вашу группу" else "Походы доступны после входа", style = MaterialTheme.typography.titleLarge)
-                    Text(if (!state.configured) "Локальная карта уже доступна. Для настоящих аккаунтов, наборов и переписки укажите адрес сервиса в профиле." else "Опубликованные походы можно изучать. Для записи и общения нужен аккаунт.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                    Text(if (!state.configured) "Маршруты и карта уже доступны. Для записи и общения настройте подключение в профиле." else "Опубликованные походы можно изучать. Для записи и общения нужен аккаунт.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
                     TrailButton(onClick = onProfile, Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Перейти в профиль") }
                 }
             }
@@ -185,12 +203,12 @@ fun OnlineTripsScreen(model: OnlineViewModel, state: OnlineState, onProfile: () 
                     }
                 }
             }
-            item { SectionHeading("Походы с датой", "Состав и условия — по последнему ответу сервера") }
-            if (departures.isEmpty()) item { EmptyCard("Походов пока нет", if (state.refreshedAt == 0L) "После подключения здесь появятся опубликованные сервером походы." else "Для выбранного направления походы пока не загружены. Можно начать набор по опубликованному маршруту.", Glyph.PEOPLE) }
+            item { SectionHeading("Походы с датой", "Выберите подходящие дату и маршрут") }
+            if (departures.isEmpty()) item { EmptyCard("Походов пока нет", if (state.refreshedAt == 0L) "После подключения здесь появятся походы, к которым можно присоединиться." else "Для выбранного направления походы пока не загружены. Можно начать набор по опубликованному маршруту.", Glyph.PEOPLE) }
             items(departures, key = { "departure:${it.id}" }) { departure ->
                 OutlineCard(onClick = { model.openDeparture(departure.id) }) {
                     StatusPill(departureLabel(departure.status), caution = !departure.routeOpen || !departure.guideEligible)
-                    Text(model.routeTitle(departure.routeId), style = MaterialTheme.typography.titleMedium)
+                    Text(departure.routeTitle ?: model.routeTitle(departure.routeId), style = MaterialTheme.typography.titleMedium)
                     Text(dateTime(departure.startsAt, departure.timeZone), style = MaterialTheme.typography.bodyLarge)
                     Text("${departure.participantCount} из ${departure.capacity} · ${departure.guideName ?: "Гид не назначен"}", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
                 }
@@ -205,14 +223,14 @@ fun OnlineTripsScreen(model: OnlineViewModel, state: OnlineState, onProfile: () 
                     Text("${request.creatorName} · интересуются ${request.interestedCount}", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                 }
             }
-            item { SectionHeading("Маршруты сервиса", "Опубликованные карточки с актуальной версией и источником") }
-            if (state.routes.isEmpty()) item { Text("Опубликованных маршрутов сервис пока не вернул. Справочные карточки из комплекта APK доступны во вкладке «Карта».", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted) }
+            item { SectionHeading("Маршруты для походов", "Выберите путь для своей группы") }
+            if (state.routes.isEmpty()) item { Text("Маршрутов для записи пока нет. Посмотреть другие направления можно во вкладке «Карта».", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted) }
             items(state.routes, key = { "published:${it.id}" }) { route ->
                 OutlineCard(onClick = { model.openRoute(route.id, onRoute) }) {
-                    StatusPill(if (route.status == "closed") "Закрыт" else "Опубликован сервисом", caution = route.status == "closed")
+                    StatusPill(if (route.status == "closed") "Закрыт" else "Открыт для походов", caution = route.status == "closed")
                     Text(route.title, style = MaterialTheme.typography.titleMedium)
                     Text("${route.distanceKm} км · ${difficultyLabel(route.difficulty)}", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
-                    Text("Открыть карточку и геометрию", style = MaterialTheme.typography.labelLarge, color = Palette.Forest)
+                    Text("Посмотреть маршрут", style = MaterialTheme.typography.labelLarge, color = Palette.Forest)
                 }
             }
             if (state.routeCursor != null) item { TrailOutlineButton(onClick = model::loadMoreRoutes, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Показать ещё маршруты") } }
@@ -224,7 +242,7 @@ fun OnlineTripsScreen(model: OnlineViewModel, state: OnlineState, onProfile: () 
 }
 
 @Composable
-private fun DepartureScreen(model: OnlineViewModel, state: OnlineState, departure: Departure, onProfile: () -> Unit) {
+private fun DepartureScreen(model: OnlineViewModel, state: OnlineState, departure: Departure, onProfile: () -> Unit, backLabel: String = "Все походы") {
     var confirm by remember { mutableStateOf<Pair<String, String>?>(null) }
     var review by remember { mutableStateOf(false) }
     var reportedReview by remember { mutableStateOf<ReportTarget?>(null) }
@@ -232,8 +250,8 @@ private fun DepartureScreen(model: OnlineViewModel, state: OnlineState, departur
     val activeMembership = departure.membership in setOf("confirmed", "checked_in", "completed")
     val openForJoin = departure.status in setOf("recruiting", "ready", "awaiting_guide")
     LazyColumn(Modifier.fillMaxSize().testTag("departure_detail"), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { BackAction("Все походы", model::closeDetail) }
-        item { PageHeading(model.routeTitle(departure.routeId), dateTime(departure.startsAt, departure.timeZone)) }
+        item { BackAction(backLabel, model::closeDetail) }
+        item { PageHeading(departure.routeTitle ?: model.routeTitle(departure.routeId), dateTime(departure.startsAt, departure.timeZone)) }
         item { ServiceStatus(state) { model.openDeparture(departure.id) } }
         item { OnlineError(state, model::clearError) }
         item {
@@ -242,13 +260,13 @@ private fun DepartureScreen(model: OnlineViewModel, state: OnlineState, departur
                 Text("${departure.participantCount} из ${departure.capacity} участников", style = MaterialTheme.typography.titleLarge)
                 Text("Минимум ${departure.minPeople} всего, включая гида. Ваш статус: ${membershipLabel(departure.membership)}.", style = MaterialTheme.typography.bodyMedium)
                 Text("Гид: ${departure.guideName ?: "не назначен"}\nЗавершение: ${dateTime(departure.endsAt, departure.timeZone)}\nЧасовой пояс: ${departure.timeZone}", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
-                Text(if (departure.routeOpen) "Маршрут открыт по последней проверке сервера." else "Маршрут закрыт или версия недоступна — старт запрещён.", color = if (departure.routeOpen) Palette.Forest else Palette.Alert)
-                Text(if (departure.guideEligible) "Допуск назначенного гида подтверждён сервером." else "Допуск гида отсутствует или требует обновления — старт запрещён.", color = if (departure.guideEligible) Palette.Forest else Palette.Alert)
+                Text(if (departure.routeOpen) "Маршрут открыт для похода." else "Маршрут недоступен. Начать поход сейчас нельзя.", color = if (departure.routeOpen) Palette.Forest else Palette.Alert)
+                Text(if (departure.guideEligible) "Квалификация гида подтверждена." else "Гиду нужно подтвердить допуск. Начать поход сейчас нельзя.", color = if (departure.guideEligible) Palette.Forest else Palette.Alert)
                 if (state.user == null) TrailButton(onClick = onProfile, Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Войти для участия") }
                 else {
                     if (!activeMembership && openForJoin) TrailButton(onClick = { model.join(departure) }, enabled = state.canUseNetwork && !state.busy && departure.routeOpen && departure.guideEligible && departure.participantCount < departure.capacity, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Присоединиться к походу") }
                     if (activeMembership || assigned) TrailOutlineButton(onClick = { model.openChat(Conversation(ConversationKind.DEPARTURE, departure.id, model.routeTitle(departure.routeId))) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Открыть чат группы") }
-                    if (activeMembership && !assigned && openForJoin) TrailTextButton(onClick = { confirm = "leave" to "Отменить своё участие? Место освободится только после подтверждения сервером." }, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.heightIn(min = 48.dp)) { Text("Отменить участие") }
+                    if (activeMembership && !assigned && openForJoin) TrailTextButton(onClick = { confirm = "leave" to "Отменить своё участие? Дождитесь подтверждения, чтобы место освободилось." }, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.heightIn(min = 48.dp)) { Text("Отменить участие") }
                 }
             }
         }
@@ -265,23 +283,23 @@ private fun DepartureScreen(model: OnlineViewModel, state: OnlineState, departur
             item {
                 CardShell {
                     Text("Решение о старте", style = MaterialTheme.typography.titleLarge)
-                    Text("Отмечены ${state.roster.count { it.status == "checked_in" }} из минимум ${departure.minPeople}. Сервер заново проверит маршрут, квалификацию, состав и версию похода. Результат действует только при успешном ответе.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
-                    if (openForJoin) TrailButton(onClick = { confirm = "start" to "Подтвердить старт? Убедитесь, что все отмеченные участники действительно на месте и готовы. Сервер повторно проверит допуск." }, enabled = state.canUseNetwork && !state.busy && departure.guideEligible && departure.routeOpen && state.roster.count { it.status == "checked_in" } >= departure.minPeople, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Проверить условия и начать") }
+                    Text("Отмечены ${state.roster.count { it.status == "checked_in" }} из минимум ${departure.minPeople}. Убедитесь, что группа на месте и готова к выходу.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                    if (openForJoin) TrailButton(onClick = { confirm = "start" to "Начать поход? Убедитесь, что все отмеченные участники на месте и готовы к выходу." }, enabled = state.canUseNetwork && !state.busy && departure.guideEligible && departure.routeOpen && state.roster.count { it.status == "checked_in" } >= departure.minPeople, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Проверить условия и начать") }
                     if (departure.status == "in_progress") {
                         TrailButton(onClick = { confirm = "complete" to "Завершить поход? Подтвердите, что группа вернулась и поход действительно окончен." }, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Завершить поход") }
-                        TrailOutlineButton(onClick = { confirm = "abort" to "Прервать поход и сообщить этот статус группе через сервер? Это не вызов спасательной службы." }, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Прервать поход") }
+                        TrailOutlineButton(onClick = { confirm = "abort" to "Сообщить группе, что поход прерван? Это действие не вызывает спасателей." }, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Прервать поход") }
                     }
-                    if (openForJoin) TrailTextButton(onClick = { confirm = "cancel" to "Отменить этот поход для всей группы? Участники увидят изменение после связи с сервером." }, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.heightIn(min = 48.dp)) { Text("Отменить поход") }
+                    if (openForJoin) TrailTextButton(onClick = { confirm = "cancel" to "Отменить поход для всей группы? Участники увидят изменение после подключения к интернету." }, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.heightIn(min = 48.dp)) { Text("Отменить поход") }
                 }
             }
         }
         item { SectionHeading("Отзывы участников", "Отзывы публикуются после завершённого похода и проверки участия") }
-        if (state.reviews.isEmpty()) item { Text("Отзывов пока нет. Рейтинг не рассчитывается без реальных оценок.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted) }
+        if (state.reviews.isEmpty()) item { Text("Отзывов пока нет. После похода участники смогут поделиться впечатлениями.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted) }
         items(state.reviews, key = { it.id }) { item -> CardShell {
             Text("${if (item.target == "guide") "Гид" else "Маршрут"} · ${item.rating} из 5", style = MaterialTheme.typography.titleMedium); Text(item.body); Text(dateTime(item.createdAt), style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
             if (state.user != null) TrailTextButton(onClick = { reportedReview = ReportTarget("review", item.id) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Сообщить о нарушении") }
         } }
-        if (departure.status == "completed" && departure.membership == "completed") item { TrailOutlineButton(onClick = { review = true }, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Оставить отзыв") } }
+        if (departure.status == "completed" && departure.membership == "completed" && !assigned && departure.reviewTargets?.isEmpty() != true) item { TrailOutlineButton(onClick = { review = true }, enabled = state.canUseNetwork && !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Оставить отзыв") } }
     }
     confirm?.let { action -> ConfirmAction("Подтвердите действие", action.second, "Подтвердить", { confirm = null }, { confirm = null; if (action.first == "leave") model.leave(departure) else model.transition(departure, action.first) }) }
     if (review) ReviewDialog(state, model, departure) { review = false }
@@ -333,7 +351,7 @@ private fun ChatScreen(model: OnlineViewModel, state: OnlineState, conversation:
             state.chatError?.let { Text(it, color = Palette.Alert, style = MaterialTheme.typography.bodyMedium) }
         }
         LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("chat_messages"), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (state.messages.isEmpty() && state.pending.isEmpty()) item { EmptyCard("Разговор начинается здесь", if (state.chatBusy) "Загружаем доступную переписку…" else "Сообщений в доступной истории пока нет. Доступ к чату проверяет сервер.", Glyph.PEOPLE) }
+            if (state.messages.isEmpty() && state.pending.isEmpty()) item { EmptyCard("Разговор начинается здесь", if (state.chatBusy) "Загружаем доступную переписку…" else "Здесь ещё нет сообщений. Начните знакомство с группой.", Glyph.PEOPLE) }
             items(state.messages, key = { "server:${it.id}" }) { message ->
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     MessageBubble(message.displayName, if (message.visibility == "hidden") "Сообщение скрыто модератором" else message.body, dateTime(message.createdAt), message.userId == state.user?.id)
@@ -344,16 +362,15 @@ private fun ChatScreen(model: OnlineViewModel, state: OnlineState, conversation:
                 CardShell {
                     StatusPill(if (pending.failed) "Не отправлено" else "Ожидает отправки", caution = true)
                     Text(pending.body, style = MaterialTheme.typography.bodyLarge)
-                    Text(pending.error ?: "Сохранено только на этом устройстве. Группа ещё не получила сообщение.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+                    Text(pending.error ?: "Ещё не отправлено. Группа пока не получила сообщение.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                     TrailTextButton(onClick = { model.removePending(pending.clientId) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Удалить из очереди") }
                 }
             }
-            item { Text("При первом открытии загружаются последние 100 сообщений. На устройстве сохраняются до 500 полученных сообщений. Старая история за этим пределом здесь не загружается.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted) }
         }
         Surface(color = Palette.Surface) {
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (state.accountSummary?.mutedNow == true) Text("Отправка ограничена до ${dateTime(state.accountSummary.mutedUntil!!)}. Причина и апелляция — в профиле.", style = MaterialTheme.typography.bodySmall, color = Palette.Alert)
-                if (state.pending.isNotEmpty()) TrailOutlineButton(onClick = { model.flushOutbox(retryFailed = true) }, enabled = state.canUseNetwork, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Повторить отправку очереди (${state.pending.size})") }
+                if (state.pending.isNotEmpty()) TrailOutlineButton(onClick = { model.flushOutbox(retryFailed = true) }, enabled = state.canUseNetwork, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Отправить снова (${state.pending.size})") }
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(draft, { draft = it.take(4000) }, Modifier.weight(1f).testTag("chat_composer"), label = { Text("Сообщение") }, minLines = 1, maxLines = 4)
                     TrailButton(onClick = { val submitted = draft; model.sendMessage(submitted) { if (draft == submitted) draft = "" } }, enabled = draft.isNotBlank() && state.user != null && !state.enqueueBusy && state.accountSummary?.mutedNow != true, modifier = Modifier.heightIn(min = 56.dp).testTag("chat_send")) { Text(if (state.canUseNetwork) "Отправить" else "В очередь") }
@@ -370,7 +387,7 @@ private fun MessageBubble(name: String, body: String, time: String, mine: Boolea
         .background(if (mine) Palette.Land else Palette.Surface, RoundedCornerShape(12.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(name, style = MaterialTheme.typography.labelLarge, color = Palette.Forest)
         Text(body, style = MaterialTheme.typography.bodyLarge)
-        Text("$time · принято сервером", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+        Text("$time · отправлено", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
     }
 }
 
@@ -418,7 +435,7 @@ private fun DepartureDialog(state: OnlineState, model: OnlineViewModel, recruitm
                 !start.isAfter(Instant.now()) -> "Начало должно быть в будущем"
                 !end.isAfter(start) -> "Завершение должно быть позже начала"
                 min == null || cap == null || min !in maxOf(4, selected?.minPeople ?: 4)..50 || cap !in min..(selected?.maxGroupSize ?: 50) -> "Проверьте минимум и вместимость по правилам маршрута"
-                (selected?.requiredGuides ?: 1) > 1 -> "Этот маршрут требует нескольких гидов. Текущая версия сервиса не публикует такой поход."
+                (selected?.requiredGuides ?: 1) > 1 -> "Для этого маршрута нужны несколько гидов. Создание такого похода пока недоступно."
                 else -> null
             }
             if (validation == null && routeId != null) {
@@ -438,7 +455,7 @@ private fun DepartureDialog(state: OnlineState, model: OnlineViewModel, recruitm
             Field(minimum, { minimum = it.filter(Char::isDigit).take(2) }, "Минимум", Modifier.weight(1f), KeyboardType.Number)
             Field(capacity, { capacity = it.filter(Char::isDigit).take(2) }, "Всего мест", Modifier.weight(1f), KeyboardType.Number)
         }
-        Text("Гид включён в число участников. Сервер проверит действующий допуск, область квалификации, доступность маршрута и закрепит его версию. Интересующиеся туристы не записываются автоматически.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+        Text("Гид включён в число участников. Для проведения похода нужен действующий допуск. Каждый турист подтверждает запись отдельно.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
         selected?.let { Text("Правила маршрута: минимум ${it.minPeople}, максимум ${it.maxGroupSize}, гидов ${it.requiredGuides}.", style = MaterialTheme.typography.bodyMedium) }
         validation?.let { Text(it, color = Palette.Alert) }
     }
@@ -446,22 +463,23 @@ private fun DepartureDialog(state: OnlineState, model: OnlineViewModel, recruitm
 
 @Composable
 private fun ReviewDialog(state: OnlineState, model: OnlineViewModel, departure: Departure, onDismiss: () -> Unit) {
+    val targets = departure.reviewTargets ?: listOf("route", "guide")
     var rating by remember { mutableIntStateOf(0) }
-    var target by remember { mutableStateOf("route") }
+    var target by remember(departure.id, targets) { mutableStateOf(targets.firstOrNull() ?: "route") }
     var body by remember { mutableStateOf("") }
     FormDialog("Ваш опыт похода", state, onDismiss, confirm = {
-        TrailTextButton(onClick = { model.review(departure, target, rating, body, onDismiss) }, enabled = state.canUseNetwork && !state.busy && rating in 1..5 && body.isNotBlank()) { Text("Опубликовать") }
+        TrailTextButton(onClick = { model.review(departure, target, rating, body, onDismiss) }, enabled = state.canUseNetwork && !state.busy && target in targets && rating in 1..5 && body.isNotBlank()) { Text("Опубликовать") }
     }) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TrailChoice(target == "route", { target = "route" }, label = { Text("Маршрут") }, modifier = Modifier.heightIn(min = 48.dp))
-            TrailChoice(target == "guide", { target = "guide" }, label = { Text("Гид") }, modifier = Modifier.heightIn(min = 48.dp))
+            if ("route" in targets) TrailChoice(target == "route", { target = "route" }, label = { Text("Маршрут") }, modifier = Modifier.heightIn(min = 48.dp))
+            if ("guide" in targets) TrailChoice(target == "guide", { target = "guide" }, label = { Text("Гид") }, modifier = Modifier.heightIn(min = 48.dp))
         }
         Text("Ваша оценка", style = MaterialTheme.typography.titleMedium)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             (1..5).forEach { value -> TrailChoice(rating == value, { rating = value }, label = { Text(value.toString()) }, modifier = Modifier.heightIn(min = 48.dp)) }
         }
         OutlinedTextField(body, { body = it.take(3000) }, Modifier.fillMaxWidth(), label = { Text("Что было полезно другим участникам") }, minLines = 3, maxLines = 6)
-        Text("Отзывы доступны только подтверждённым участникам завершённого похода. Проверку выполняет сервер.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+        Text("Отзывы могут оставить подтверждённые участники после завершения похода.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
     }
 }
 
@@ -522,12 +540,12 @@ private fun Field(value: String, onChange: (String) -> Unit, label: String, modi
 private fun ServiceStatus(state: OnlineState, onRefresh: () -> Unit) {
     val readiness = state.readiness
     val status = when {
-        !state.configured -> "Адрес сервиса ещё не задан"
-        state.connection == ConnectionState.OFFLINE -> "Без связи · локальные данные"
-        readiness == ServerState.Checking -> "Проверяем API и базу данных"
-        readiness == ServerState.Reachable -> "API и база данных готовы"
-        readiness is ServerState.Unavailable -> "Сервис сейчас недоступен"
-        else -> "Готовность сервиса ещё не проверена"
+        !state.configured -> "Вход и запись на походы пока недоступны"
+        state.connection == ConnectionState.OFFLINE -> "Без интернета доступны сохранённые данные"
+        readiness == ServerState.Checking -> "Подключаемся…"
+        readiness == ServerState.Reachable -> "Есть подключение"
+        readiness is ServerState.Unavailable -> "Не удалось подключиться. Попробуйте позже"
+        else -> "Обновите страницу, чтобы подключиться"
     }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -537,10 +555,7 @@ private fun ServiceStatus(state: OnlineState, onRefresh: () -> Unit) {
         if (state.configured) {
             Text(if (state.user == null) "Вход в аккаунт не выполнен" else "Вход в аккаунт выполнен", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
             if (state.connection != ConnectionState.OFFLINE && readiness is ServerState.Unavailable) {
-                Text(readiness.reason, style = MaterialTheme.typography.bodySmall, color = Palette.Alert)
-            }
-            if (state.connection != ConnectionState.OFFLINE && readiness == ServerState.Reachable && state.readinessCheckedAt > 0) {
-                Text("Готовность проверена ${localTime(state.readinessCheckedAt)}", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+                Text("Проверьте подключение к интернету и повторите попытку.", style = MaterialTheme.typography.bodySmall, color = Palette.Alert)
             }
             if (state.refreshedAt > 0) Text("Данные обновлены ${localTime(state.refreshedAt)}", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
         }

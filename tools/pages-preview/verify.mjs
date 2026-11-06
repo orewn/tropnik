@@ -14,6 +14,7 @@ const exists = async path => access(path).then(() => true, () => false);
 assert.equal(report.apiConnected, false);
 assert.equal(report.serverCodeIncluded, false);
 assert.equal(report.fakeServerResponses, false);
+assert.equal(report.hasApk, true, 'The public Pages build must include its advertised Android download');
 assert.ok(report.bundledModules.includes('pages-preview/src/api.ts'));
 assert.ok(report.bundledModules.includes('components/Explore.tsx'));
 assert.ok(report.bundledModules.includes('components/Header.tsx'));
@@ -31,7 +32,7 @@ assert.ok(rewritten.includes("const logical='/'+pathname.slice(base.length)"), '
 assert.ok(rewritten.includes('https://tiles.example/a'));
 assert.equal(pagesPath(base + 'data/a.json', base), base + 'data/a.json');
 assert.deepEqual(rewriteJSON({glyphs:'/offline-map/fonts/{fontstack}/{range}.pbf'}, base), {glyphs:base+'offline-map/fonts/{fontstack}/{range}.pbf'});
-assert.equal(rewriteHTML('<a href="/offline.html">', base), `<a href="${base}offline.html">`);
+assert.equal(rewriteHTML('<a href="/offline-viewer.html">', base), `<a href="${base}offline-viewer.html">`);
 assert.equal(rewriteScript("import {canvasStyle} from '/maps/canvas-style.js';", 'offline.js', {base}), `import {canvasStyle} from '${base}maps/canvas-style.js';`);
 assert.equal(rewriteScript("const fonts='/offline-fonts.css';", 'sw.js', {base}), `const fonts='${base}offline-fonts.css';`);
 
@@ -87,7 +88,7 @@ for (const page of pages) {
   assert.ok(html.includes(`${base}assets/`), `${name} bundle path must have base`);
   for (const match of html.matchAll(/(?:href|src)=["'](\/[^"']*)["']/g)) assert.ok(match[1].startsWith(base), `${name}: root URL ${match[1]}`);
 }
-for (const path of ['data/world.geojson', 'data/regions.geojson', 'data/russia-display-area.geojson', 'data/russia-outside-mask.geojson', 'data/russia-canonical-mask.geojson', 'data/russia-boundaries-provenance.json', 'maps/russia-viewport.js', 'maps/tropnik-sprite.png', 'maps/tropnik-sprite@2x.json', 'maps/maplibre-worker.js', 'terrain/terrain-grid.json', 'terrain/terrain-preview.json', 'offline.html', 'offline.js', 'offline-fonts.css', 'sw.js', '404.html', '.nojekyll']) assert.ok(await exists(join(out, path)), `Missing ${path}`);
+for (const path of ['data/world.geojson', 'data/regions.geojson', 'data/territories.geojson', 'data/russia-display-area.geojson', 'data/russia-outside-mask.geojson', 'data/russia-canonical-mask.geojson', 'data/russia-boundaries-provenance.json', 'maps/russia-viewport.js', 'maps/tropnik-sprite.png', 'maps/tropnik-sprite@2x.json', 'maps/maplibre-worker.js', 'terrain/terrain-grid.json', 'terrain/terrain-preview.json', 'offline-viewer.html', 'offline.js', 'offline-fonts.css', 'sw.js', '404.html', '.nojekyll']) assert.ok(await exists(join(out, path)), `Missing ${path}`);
 for (const css of ['globals.css', 'tropnik-system.css', 'gotham.css', 'terrain.css', 'map-design.css', 'place-stories.css']) {
   assert.ok(report.layoutStyles.includes('./' + css), `Current layout style omitted: ${css}`);
   assert.ok(report.bundledModules.includes('app/' + css), `Current layout style not bundled: ${css}`);
@@ -176,9 +177,23 @@ assert.ok(outputFiles.every(path => !/\/(?:backend|api)\//.test(path)), 'No back
 // Inspect the deployed code's URL literals, not a second implementation of the app.
 // Internal router keys are intentionally unprefixed; source provenance and the
 // cryptographically pinned offline pack describe their own original resource root.
-const rootAsset = /^\/(?:data|maps|terrain|offline-map|fonts|downloads|assets)(?:\/|$)|^\/offline(?:-fonts)?\.(?:html|js|css)$/;
+const rootAsset = /^\/(?:data|maps|terrain|offline-map|fonts|downloads|assets)(?:\/|$)|^\/offline(?:-fonts|-viewer)?\.(?:html|js|css)$/;
 const deployedUrls = new Set();
 let checkedScripts = 0;
+// Rolldown can compact a literal URL array into `a,b`.split(`,`). Inspect
+// the resulting values rather than mistaking the whole packed string for a URL.
+function literalValues(node) {
+  const member = node.parent, call = member?.parent;
+  if (member && ts.isPropertyAccessExpression(member) && member.expression === node
+    && member.name.text === 'split' && call && ts.isCallExpression(call)
+    && call.expression === member && call.arguments.length === 1) {
+    const separator = call.arguments[0];
+    if ((ts.isStringLiteral(separator) || ts.isNoSubstitutionTemplateLiteral(separator)) && separator.text) {
+      return node.text.split(separator.text);
+    }
+  }
+  return [node.text];
+}
 for (const path of outputFiles) {
   const name = path.slice(out.length + 1);
   if (name.startsWith('offline-map/') || /(?:^|\/)(?:maplibre|leaflet|protomaps-leaflet)[^/]*\.[cm]?js$/.test(name)) continue;
@@ -187,8 +202,10 @@ for (const path of outputFiles) {
   const source = ts.createSourceFile(name, code, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
   function visit(node) {
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node) || ts.isTemplateHead(node)) {
-      assert.ok(!rootAsset.test(node.text), `Unprefixed public asset in ${name}: ${node.text}`);
-      if (node.text.startsWith(base)) deployedUrls.add(node.text);
+      for (const value of literalValues(node)) {
+        assert.ok(!rootAsset.test(value), `Unprefixed public asset in ${name}: ${value}`);
+        if (value.startsWith(base)) deployedUrls.add(value);
+      }
     }
     ts.forEachChild(node, visit);
   }

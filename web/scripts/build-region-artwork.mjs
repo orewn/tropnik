@@ -4,10 +4,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
-import ts from 'typescript';
+import {readRegionDefinitions} from './region-artwork-catalog.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const sourcePath = path.join(root, 'public/data/regions.geojson');
+const sourcePath = path.join(root, 'public/data/territories.geojson');
 const outputPath = path.join(root, 'lib/region-artwork.generated.json');
 const sourceBytes = fs.readFileSync(sourcePath);
 const source = JSON.parse(sourceBytes);
@@ -15,21 +15,8 @@ const size = 1024, padding = 64;
 const fail = message => {throw new Error(message);};
 
 // Read the actual catalogue rather than maintaining a second mapping of places.
-const catalogue = ts.createSourceFile('content.ts', fs.readFileSync(path.join(root, 'lib/content.ts'), 'utf8'), ts.ScriptTarget.Latest, true);
-let declaration;
-for (const statement of catalogue.statements) {
-  if (!ts.isVariableStatement(statement)) continue;
-  declaration ??= statement.declarationList.declarations.find(item => ts.isIdentifier(item.name) && item.name.text === 'regions');
-}
-if (!declaration?.initializer || !ts.isArrayLiteralExpression(declaration.initializer)) fail('The region catalogue must be a literal array');
-const definitions = declaration.initializer.elements.map(element => {
-  if (!ts.isObjectLiteralExpression(element)) fail('Invalid region definition');
-  const property = name => element.properties.find(item => ts.isPropertyAssignment(item) && item.name.getText(catalogue) === name)?.initializer;
-  const id = property('id'), aliases = property('shapeNames');
-  if (!id || !ts.isStringLiteral(id) || !aliases || !ts.isArrayLiteralExpression(aliases) || !aliases.elements.every(ts.isStringLiteral)) fail('Region id and shapeNames must be literal strings');
-  return {id: id.text, shapeNames: aliases.elements.map(item => item.text)};
-});
-if (new Set(definitions.map(item => item.id)).size !== definitions.length) fail('Duplicate region ids');
+const definitions = readRegionDefinitions(fs.readFileSync(path.join(root, 'lib/content.ts'), 'utf8'),
+  specifier => JSON.parse(fs.readFileSync(path.join(root, 'lib', specifier), 'utf8')));
 if (source.type !== 'FeatureCollection' || !Array.isArray(source.features)) fail('Expected the local region FeatureCollection');
 
 const area = ring => Math.abs(ring.reduce((sum, point, i) => {
@@ -94,7 +81,7 @@ for (const definition of definitions) {
       maximumCoordinateRoundingSvgUnits: .5}};
 }
 
-const result = {schemaVersion: 1, source: {path: '/data/regions.geojson', sha256: createHash('sha256').update(sourceBytes).digest('hex')},
+const result = {schemaVersion: 1, source: {path: '/data/territories.geojson', sha256: createHash('sha256').update(sourceBytes).digest('hex')},
   viewBox: `0 0 ${size} ${size}`, artwork: shapes};
 const bytes = JSON.stringify(result) + '\n';
 if (process.argv.includes('--check')) {

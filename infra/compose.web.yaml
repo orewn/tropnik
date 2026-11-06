@@ -9,6 +9,7 @@ services:
     environment:
       NODE_ENV: production
       TROPA_API_URL: http://api:8080
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?Set the HTTPS website origin}
       TROPA_PROXY_TOKEN: ${TROPA_PROXY_TOKEN:-}
       NEXT_PUBLIC_SITE_URL: ${PUBLIC_ORIGIN:?Set the HTTPS website origin}
       TROPA_PUBLIC_INDEXING: ${TROPA_PUBLIC_INDEXING:-false}

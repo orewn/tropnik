@@ -1,0 +1,85 @@
+{
+  "scope": "Private completed participation history and route transport budgets",
+  "recordedAt": "2026-11-06T17:36:18.905094+00:00",
+  "go": {
+    "toolchain": "go1.27.3",
+    "raceCommand": "go test -race -json ./...",
+    "status": "passed",
+    "testPasses": 43,
+    "testFailures": 0,
+    "packages": [
+      "tropa/backend/internal/abuse",
+      "tropa/backend/cmd/tropa-api",
+      "tropa/backend/internal/domain",
+      "tropa/backend/internal/store",
+      "tropa/backend/internal/auth",
+      "tropa/backend/internal/httpapi"
+    ],
+    "vet": "go vet ./... passed",
+    "rawLogSHA256": "31e83d479df66218caa59c01e7bddcf0e7d6b1a39ac11a94e2f390a3b4b7016a"
+  },
+  "web": {
+    "typecheck": "node node_modules/typescript/bin/tsc --noEmit passed",
+    "policyCommand": "node --experimental-strip-types --test tests/api-policy.test.mjs",
+    "policyTestsPassed": 9,
+    "policyTestsFailed": 0
+  },
+  "nativePostGIS": {
+    "status": "compiled_only_locally",
+    "command": "go test -c -tags=integration ./internal/store",
+    "newTest": "TestCompletedHistoryIsPrivateStableAndRetainsReviewedRevision",
+    "note": "No local PostgreSQL or Docker. Compilation does not verify SQL execution, native transactions or runtime grants; run the native PostGIS CI gate on the published source."
+  },
+  "android": {
+    "status": "source_and_unit_tests_added_not_executed_locally",
+    "newTestClass": "ApiRouteHistoryTest",
+    "testMethods": 6,
+    "note": "No local Android SDK/Gradle toolchain. Rebuild and run JVM/device gates on the exact new source before claiming APK coverage; previous APK does not include these changes."
+  },
+  "budgets": {
+    "ordinaryAndRoutePageDecodedJSONBytes": 1048576,
+    "fullRouteDecodedJSONBytes": 8388608,
+    "maximumFullRouteVertices": 100000,
+    "operatorImportBytes": 10485760,
+    "historyDefaultLimit": 20,
+    "historyMaximumLimit": 50
+  },
+  "scopeLimits": [
+    "Territory membership for newly imported API routes is not part of this change.",
+    "This verification is a scoped handoff snapshot before separately developed account lifecycle integration."
+  ],
+  "sourceSHA256": {
+    "backend/README.md": "ba73ded3153bfe55adf3892ae11a42ad6fb90055785bb3fc96496263c184a8c1",
+    "backend/cmd/tropa-admin/main.go": "25b8ac4b1dfb0cfbe9fc24ee712e4bdf8870c82ed5c0cdba7e406106bc0c7183",
+    "backend/internal/domain/history.go": "9c13f3c4d69473d16d637a5c4c2da6f978079dc8ca862ef97b18f3b31d02b5e0",
+    "backend/internal/domain/model.go": "87de17e54aee5384254268183cef5cb58a0e2e60159468ca39194b5d2cf5be7a",
+    "backend/internal/domain/route_transport.go": "1540d5078844800c8ec214dd45b2b066597c051ab6348547f796cb911828399f",
+    "backend/internal/domain/route_transport_test.go": "baddbb8d9e29d2715c9f73668e0b4ac006f309687564c81f43e1b653ed8ead46",
+    "backend/internal/httpapi/history.go": "378b630e0b6b01d29148e35f4a53d32467434c436fe491a81dc608ff8c226c48",
+    "backend/internal/httpapi/route_response.go": "2ca8d480bc93897f19b8b38fede2cafa13efd9bbff8134d828b20171a5e599f0",
+    "backend/internal/httpapi/route_response_test.go": "3029447a50cd5002f16e925a95f6a1ccb9f279f9c7febb51401122ce0d25f887",
+    "backend/internal/httpapi/server.go": "d17fc825017b95f58f693948742e352bf642968e5fc1b0ccc5390d6b4003ea6f",
+    "backend/internal/httpapi/server_test.go": "bd041b0fbba39f943bd3f94c469143812dc997ab25a7d7fe05ac35452cfb7069",
+    "backend/internal/store/history.go": "64df5cc82a488f16275d201c6e0b38a3a70c6475673dc24029515a34dcf4d32e",
+    "backend/internal/store/history_test.go": "e497d398724514fa32f3bdcc0a6e95714450e85600b332f3ea8f0200d223367b",
+    "backend/internal/store/history_integration_test.go": "82a7c072a7ae2222af0c437b4ea9eb1e510d0ca146189e07f45ac7677d54ecf5",
+    "backend/internal/store/postgres.go": "d8a061102c3fba9c65c94bbc05fdb3dd1c5d6a10c5b3364741e75741c62e88a5",
+    "backend/migrations/004_account_history.sql": "bd05793f03c77514dc668047a883980956139ca8ab0ffa42e472f0a1341e21a4",
+    "backend/migrations/migrate.go": "ee08f59622a2ee3185f581f616e1a31043ef08e05055eecc511b67e4c11754d8",
+    "contracts/api.ts": "e7ccf547ef96bc0496809f547c3b98b769e4daf61fd122073c2eb83ac7824fa2",
+    "contracts/openapi.yaml": "d5fd9a0848ca15fcdc1905e614f6478a9fda1200b455d098c3d11a9ce908f8a6",
+    "web/components/AccountPanel.tsx": "3dda9cfe14f14cc95fbcc9dbd250ecee60d7bd19f70d514eec7e8023af05c50f",
+    "web/components/TripHistory.tsx": "b5a5c4f16236f75455937ff2a8386480484f90bacfd63c25494fa36acc6e0ced",
+    "web/components/Trips.tsx": "0c71c482042922c441ee3fe415dd31b3389e24d70baf9fba42298abca5319f0d",
+    "web/lib/contract.ts": "e7ccf547ef96bc0496809f547c3b98b769e4daf61fd122073c2eb83ac7824fa2",
+    "web/lib/trip-policy.ts": "fa29a35807f3b0315dd0152841b689e0fb43587e29919c3519575e28bd1b763c",
+    "web/tests/api-policy.test.mjs": "c7ee1d88ae02b6f3f618bf033ec17ad3543b0708d66b78e41b90083912a58ba4",
+    "android/app/src/main/java/ru/tropa/app/OnlineViewModel.kt": "cfe9b9d39b7e396407cec8d198c83f195e4d5a7c4cb44a63fdbe70ec98beccaa",
+    "android/app/src/main/java/ru/tropa/app/data/ApiClient.kt": "14270da95d9ea8117030eea3da07ce03e5f68e72afa1a78c79ef1e9385e77248",
+    "android/app/src/main/java/ru/tropa/app/data/ApiResponseBudget.kt": "2d49458b7f8dd4d9d1b084eccd48c808975bec285c69ee67cdfc7de02193ac06",
+    "android/app/src/main/java/ru/tropa/app/data/OnlineModels.kt": "d160d9548d4513fc39ca3c572a532acd5d7f098a8f386b37d6fd2bc044f531d0",
+    "android/app/src/main/java/ru/tropa/app/ui/AccountHistory.kt": "efa1a61b2a8b7f5c96b7f5000fcf0d021f9de7d421b8c550eefdf5acd40f3711",
+    "android/app/src/main/java/ru/tropa/app/ui/OnlineScreens.kt": "c87f1af254efc812edaab1b21ab25c960066b69fad2ccf7c08a2bd22575fe788",
+    "android/app/src/test/java/ru/tropa/app/data/ApiRouteHistoryTest.kt": "3494f7468a3c0cd23fb2f3321cc0b77651a8743c0aab08cec890cd96346930d3"
+  }
+}

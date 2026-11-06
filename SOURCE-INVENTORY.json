@@ -2,17 +2,14 @@
   "schemaVersion": 1,
   "project": "Тропник",
   "profile": "github",
-  "createdAt": "2026-11-06T13:44:02.865270+00:00",
-  "fileCount": 3717,
-  "totalBytes": 206130981,
+  "createdAt": "2026-11-06T16:22:32.599513+00:00",
+  "fileCount": 3739,
+  "totalBytes": 238338804,
   "excludedEntryCounts": {
-    "build_archive_or_sensitive_file_type": 4,
     "bulk_audit_data_in_full_zip_only": 2,
-    "generated_or_local_directory": 15,
-    "local_config_or_stale_lock": 2,
-    "outside_allowlist": 6,
-    "rebuildable_boundary_processing_cache": 2,
-    "rebuildable_verification_transport": 1,
+    "generated_or_local_directory": 5,
+    "local_config_or_stale_lock": 1,
+    "outside_allowlist": 1,
     "separate_apk_delivery": 1
   },
   "apkIncluded": false,
@@ -36,8 +33,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 27918,
-      "sha256": "9bd06e72dfd9b43492b6ca6de24c1bf69c0430ca2a8b2bfb563e4f5c365ec5b5"
+      "bytes": 31860,
+      "sha256": "f38c7a2338067667fcf5102dccda46c4d92d35a1d8db126f5d92926aec7f8266"
     },
     {
       "path": "android/.gitignore",
@@ -4786,8 +4783,8 @@
     },
     {
       "path": "backend/SECURITY_REVIEW.md",
-      "bytes": 10025,
-      "sha256": "d6dfb153e353ba02316fd365cda459498921535dcffbd769abd34293807873f0"
+      "bytes": 11373,
+      "sha256": "da5181393d35890805144d6af6ea58dbc5a5dd0ee24f534d848d3bf400643f8d"
     },
     {
       "path": "backend/cmd/tropa-admin/main.go",
@@ -10830,6 +10827,11 @@
       "sha256": "983b86dee9ce94126d5fa4dbc8b4d030bee7dbc434f0527fcb8b1b75dd3cbad4"
     },
     {
+      "path": "data/overview-relief/raw/.SR_50M.tif.zsy9Gv",
+      "bytes": 31195136,
+      "sha256": "398f07cb537703dad503a1702c9161cbe9ba40838d2c1986cb8f3ba47ecaab88"
+    },
+    {
       "path": "data/overview-relief/raw/SR_50M.VERSION.txt",
       "bytes": 5,
       "sha256": "f22abd6773ab232869321ad4b1e47ac0c908febf4f3a2bd10c8066140f741261"
@@ -12145,6 +12147,11 @@
       "sha256": "c06388cdfdb3dbc02e857e9d9ff5a1fd3cb520092f7f1ad5186739250a46c82f"
     },
     {
+      "path": "docs/backend-origin-audit-2026-11-06.md",
+      "bytes": 4194,
+      "sha256": "c552f3cd7c42d2d50ccf4fdfff2329657aeaeac8a1bc135339a9feeafb4d1431"
+    },
+    {
       "path": "docs/connection-audit.md",
       "bytes": 23125,
       "sha256": "e7e277f964dd0565a4eb7494f2f96e97870b61f7ba3ba925e77f6c630a622640"
@@ -12166,8 +12173,8 @@
     },
     {
       "path": "docs/final-delivery.md",
-      "bytes": 27339,
-      "sha256": "5b5b4af63d5a34b830211e134f2e8f8f9346802c00a84ddfbb2d55e137dad0e5"
+      "bytes": 32209,
+      "sha256": "9aa072065ec2cb45b79f2db4324374a121626447b84368b4d460febb68278756"
     },
     {
       "path": "docs/merge-backend-review.md",
@@ -12188,6 +12195,11 @@
       "path": "docs/product-requirements.md",
       "bytes": 22455,
       "sha256": "b19421375c89ce109979f0dd412089035c18645ecb9e59e56de15503877d7068"
+    },
+    {
+      "path": "docs/release-0.4.3.md",
+      "bytes": 12485,
+      "sha256": "6e8cdd242345f811332b71aae0987a63ce789bfb5b92fda876feb84bcea17397"
     },
     {
       "path": "docs/research-rf-seo.md",
@@ -12365,6 +12377,11 @@
       "sha256": "03f7a0d4d8ad5b87e834657ee98a6626350d87eb5c94f9f091fd7ec4c550ee9d"
     },
     {
+      "path": "docs/verification/web-0.4.3.json",
+      "bytes": 3237,
+      "sha256": "cf04efb99eca7564c090ba62799f5b262527ab2b9effe9580363891b6a1201ae"
+    },
+    {
       "path": "docs/verification/web-merge-addendum.json",
       "bytes": 569,
       "sha256": "aa6342e68254de1746d31dc90d8a6ab5ed252d616a53c7af2a4940b2dae59580"
@@ -12396,8 +12413,8 @@
     },
     {
       "path": "infra/.env.example",
-      "bytes": 701,
-      "sha256": "b5b3bb5c3eb100d169280fc3df7e12c10253806acf9b92ab1bb7545b37e486c5"
+      "bytes": 858,
+      "sha256": "51312748f3c7cf96315d329efe3e7d1a223847a3b3bb2bf63137a81e9d5f5927"
     },
     {
       "path": "infra/Caddyfile.example",
@@ -12406,8 +12423,8 @@
     },
     {
       "path": "infra/README.md",
-      "bytes": 9677,
-      "sha256": "60eba69f17227fb3b15545f8e9e89fd33ff821018eac2646fa70bef0f6722f31"
+      "bytes": 12139,
+      "sha256": "eafa357cb569673687f361523a30a812bc20b6e2f26fb2dbffda295827a77bff"
     },
     {
       "path": "infra/compose.test.yaml",
@@ -12416,8 +12433,8 @@
     },
     {
       "path": "infra/compose.web.yaml",
-      "bytes": 851,
-      "sha256": "3ba7bc941156ec9ba4f182aec9afaf326e374cb2dec86df54a0417606005b139"
+      "bytes": 919,
+      "sha256": "58408b8f0242f1c04d501d7f3550246cfcd6fd7c30a6e5d85e5cf42fbd8277b2"
     },
     {
       "path": "infra/compose.yaml",
@@ -12695,6 +12712,11 @@
       "sha256": "7d062d0ee9d5f0fe3e3944970060adc9cf8f791e8b7a299ce09a0b2d003cbd98"
     },
     {
+      "path": "tools/map-package/build-territories.py",
+      "bytes": 20631,
+      "sha256": "ff06ba389d05b29fccb0aacfecd8fcb83795537216b29eb5aa109f37656b73cb"
+    },
+    {
       "path": "tools/map-package/download_pilot.py",
       "bytes": 15231,
       "sha256": "412997c6c1d30e9b58848e2b2dd216b801d2304975b85db403e8863bd7d23640"
@@ -12710,9 +12732,24 @@
       "sha256": "129096c4f1db9f4be68fb79434d39fcca8b22c37dafe8726fa01cb2bb6028f25"
     },
     {
+      "path": "tools/map-package/requirements-territories.txt",
+      "bytes": 104,
+      "sha256": "f3cee9de00d014e6233937b76508d6beecd9cb20d9cbbc4aa2c8cae971076056"
+    },
+    {
       "path": "tools/map-package/russia-catalog-integration.test.mjs",
       "bytes": 4312,
       "sha256": "604aebbb3fad2d13da72f3a2ec32df3dc671583b7af42a54d636d81d51da4ae9"
+    },
+    {
+      "path": "tools/map-package/territories.README.md",
+      "bytes": 3862,
+      "sha256": "c7eafc1a3c25512b91a602da1b7b9b60f9609d584d5df56a00e06c94287ed91e"
+    },
+    {
+      "path": "tools/map-package/test_territories.py",
+      "bytes": 7360,
+      "sha256": "a47b2df4f6d99a0360eacad48e89474c40806e63336153cae820045158110cf7"
     },
     {
       "path": "tools/package-project.py",
@@ -12731,13 +12768,13 @@
     },
     {
       "path": "tools/pages-preview/build.mjs",
-      "bytes": 18956,
-      "sha256": "d27880c52663d66325843ee9f2c2aef8f81549ff556ef47427f1ade465386e0c"
+      "bytes": 18970,
+      "sha256": "4176ce6e66e2fabe4c6dbf60c47a938dae82233ca3b2b5f2afdebdc7f213a998"
     },
     {
       "path": "tools/pages-preview/paths.mjs",
-      "bytes": 4202,
-      "sha256": "7d29e7c669a89f6cad5aababacd119afaba458a40e75699427a4b3b9f0c4fbc8"
+      "bytes": 4239,
+      "sha256": "ca6f0bd4645d4d165ec568a56eefa6207cd88fa8377a10934f025e5276589e12"
     },
     {
       "path": "tools/pages-preview/serve.mjs",
@@ -12751,8 +12788,8 @@
     },
     {
       "path": "tools/pages-preview/verify.mjs",
-      "bytes": 15036,
-      "sha256": "bea686170c5d748478ad54fe18008ce97df920c481ce272c99b8ed9d8dcc9995"
+      "bytes": 15826,
+      "sha256": "b52bf08005a54340a51710e85d8497c9e83e911a6b980af48eccb498e0a08d0a"
     },
     {
       "path": "tools/test-package-project.py",
@@ -12806,13 +12843,13 @@
     },
     {
       "path": "web/app/api/backend/[...path]/route.ts",
-      "bytes": 4972,
-      "sha256": "99dfe938fa7301b3cf5eb3e616f623c421ef4c9c116f896fdcfbce7f24a865de"
+      "bytes": 5214,
+      "sha256": "10a573e5b76b2662dc3d264aebc49d7222702a30851a1e787cc389d8742d73cc"
     },
     {
       "path": "web/app/api/status/route.ts",
-      "bytes": 312,
-      "sha256": "3e2499bc1a55f317d2c7aa098bdfd47a4357b7c913273394e7a59246f0d64cdd"
+      "bytes": 453,
+      "sha256": "05e65c0154e38eedb2479ada9cfed91b991dcffc90ab22cdacbcb0e9d4249ee0"
     },
     {
       "path": "web/app/chatgpt-auth.ts",
@@ -12826,8 +12863,8 @@
     },
     {
       "path": "web/app/error.tsx",
-      "bytes": 852,
-      "sha256": "be66ee506b69e33a346cc9875537d4134bbc40ea274d55f529bd1e9361b2a3c5"
+      "bytes": 859,
+      "sha256": "235bfc846969a2dfda140132c503d4a790dfaed57fbd49898ad9e1eefecae49f"
     },
     {
       "path": "web/app/globals.css",
@@ -12851,8 +12888,8 @@
     },
     {
       "path": "web/app/map-design.css",
-      "bytes": 13655,
-      "sha256": "b6cc6914cc46e309a6ddc29f983dc5d1478c86accb30c32e1fce715d15420fb7"
+      "bytes": 15318,
+      "sha256": "b6bc1fa31d97dbd524ead0182e4f3e0f241d5a3671eb6bd2811d3ff7a02cc291"
     },
     {
       "path": "web/app/moderation/page.tsx",
@@ -12956,13 +12993,13 @@
     },
     {
       "path": "web/components/Atlas.tsx",
-      "bytes": 24424,
-      "sha256": "20c75e273dc6d7734d39950405be579aee5bfe0affae25bf8ca04bb926310b50"
+      "bytes": 28975,
+      "sha256": "051af1bca3d945ed9c4b4054cf5580781901e5ce1510d8dfff958aab9f29436c"
     },
     {
       "path": "web/components/Atlas2D.tsx",
-      "bytes": 22042,
-      "sha256": "fdb47d77b330aabd39ce3b194c464c27ea59dda0c8d22d2b3e876b9dab0c5db6"
+      "bytes": 26954,
+      "sha256": "1e639a2f694bac019120b741da657adda68c5ff3af9f1e9e42a6340822b98f3b"
     },
     {
       "path": "web/components/AuthDialog.tsx",
@@ -12996,8 +13033,8 @@
     },
     {
       "path": "web/components/Explore.tsx",
-      "bytes": 18729,
-      "sha256": "b0f05577924998e736e66b86b9937a9d696abf694509fc6622bb103839e0e91c"
+      "bytes": 17977,
+      "sha256": "8b18b4d53d88537017ae42b338e89443afe4893ceb4c91c92858d8c5eec48bc0"
     },
     {
       "path": "web/components/Footer.tsx",
@@ -13041,8 +13078,8 @@
     },
     {
       "path": "web/components/Offline.tsx",
-      "bytes": 7684,
-      "sha256": "483f1a50ca958842bbf62c5dbdebe726e239e0f7493db4a912054688ed7647be"
+      "bytes": 9166,
+      "sha256": "3c4e185d0b5328ce393a52e7473331c3cf9d41adc62df817b653711dec56e030"
     },
     {
       "path": "web/components/PlaceStories.tsx",
@@ -13051,8 +13088,8 @@
     },
     {
       "path": "web/components/RegionArtwork.tsx",
-      "bytes": 1030,
-      "sha256": "fb9e5424941e55402333f22bdbe93c8dcac462079dd671431083a8c2672ba806"
+      "bytes": 1440,
+      "sha256": "64c58c558cf7d0212b0fba2627badb99ca551be2d8f93afcd9c261442dd5b2d2"
     },
     {
       "path": "web/components/ReportDialog.tsx",
@@ -13073,6 +13110,11 @@
       "path": "web/components/TerrainScene.tsx",
       "bytes": 8810,
       "sha256": "c734bce1d27038f53a3bb376c2ffcc52d0be471a633f8027be2f709da345526c"
+    },
+    {
+      "path": "web/components/TerritoryBrowser.tsx",
+      "bytes": 3883,
+      "sha256": "4f097c5c8b88058c2996b23d8886a34ab3f9110055674797de22fd9cab785b27"
     },
     {
       "path": "web/components/TrailCard.tsx",
@@ -13460,6 +13502,11 @@
       "sha256": "6dc6f19bdc625816ae8ccb40914e6af7695523b1577b3b519f736bef1df1e367"
     },
     {
+      "path": "web/lib/backend-origin.ts",
+      "bytes": 972,
+      "sha256": "e8ba20f4cf66c86f0a189b9d9f88a6208a50e8c00fd6390ef4184ec1fda61e03"
+    },
+    {
       "path": "web/lib/canvas-relief.ts",
       "bytes": 6889,
       "sha256": "f8f8c4e422f6a911cceaf26371c4ec0019c4542b246c1882df2ce487645563a7"
@@ -13501,8 +13548,8 @@
     },
     {
       "path": "web/lib/content.ts",
-      "bytes": 13587,
-      "sha256": "dec710dc12340d1bcff08073fef3dcf9fe10bb8acf48a06dc732d1ef20bad407"
+      "bytes": 13634,
+      "sha256": "de25c4deab207bb2aed7df60ea22406c95a6de179d7f7381a097db5c3a6c4709"
     },
     {
       "path": "web/lib/contract.ts",
@@ -13520,9 +13567,19 @@
       "sha256": "ad7edee9094ef4fbd19d3951417fb190d57f78258aacd3d8905d76f7f6e783ed"
     },
     {
+      "path": "web/lib/map-framing.ts",
+      "bytes": 4293,
+      "sha256": "3bcb72867804d1f095ba369b24d7e395fad2430f15a84e7e1ac0fde87f82d5c3"
+    },
+    {
+      "path": "web/lib/map-lifecycle.ts",
+      "bytes": 3559,
+      "sha256": "19d3f1488145f16942f2e0765b3e2623cb787cf510526c0a1d0db02c71f07e41"
+    },
+    {
       "path": "web/lib/map-preload.ts",
-      "bytes": 6461,
-      "sha256": "64f4f1caa05a3285f12ae1f0e333e99607db745b8c1fbea7fb6dfbb5dab3b7c2"
+      "bytes": 6465,
+      "sha256": "8558c44b00c569f73365ff72fdc468e36a2a94d9db07ffd03e52d0ba0afbd72b"
     },
     {
       "path": "web/lib/map-resource-pool.ts",
@@ -13536,13 +13593,13 @@
     },
     {
       "path": "web/lib/offline-map.ts",
-      "bytes": 4543,
-      "sha256": "8fe427e8c79385cf6c5c1e1eefe45200c30d1e83c6d787a4abaa26c46493dce7"
+      "bytes": 8712,
+      "sha256": "667853b486a76e94359ce15e29c6d1e00c1832eb0d192e6d2966e5002327daf8"
     },
     {
       "path": "web/lib/region-artwork.generated.json",
-      "bytes": 14365,
-      "sha256": "c754c8af3a2bf99474afed732390ee52e7dedbd4b663670611b2c1c8b135e794"
+      "bytes": 25604,
+      "sha256": "4dac06f45d8fcc8e4484cf18076e3254fd36284cde6ecd131933e205e92e5f84"
     },
     {
       "path": "web/lib/route-adapter.ts",
@@ -13566,8 +13623,8 @@
     },
     {
       "path": "web/lib/service-readiness.ts",
-      "bytes": 3755,
-      "sha256": "a877db4b1a79dfd9477e4f876528ac35ec98afd451bfcfb1bd7725e5178186c9"
+      "bytes": 4439,
+      "sha256": "8a046348c4385958983931fc7a2724ca9e951d936daa82e89d7298b2030ef854"
     },
     {
       "path": "web/lib/terrain-preparation.ts",
@@ -13578,6 +13635,16 @@
       "path": "web/lib/terrain-preparation.worker.ts",
       "bytes": 1141,
       "sha256": "83c22571d4b871fc4c0e0ec6da97741357296338507b9c9d0200bb09f1d65b61"
+    },
+    {
+      "path": "web/lib/territories.generated.json",
+      "bytes": 326296,
+      "sha256": "d3d2059e99dd93629a95cea408b01eb3202419fec985eb7156b8442beb0fca21"
+    },
+    {
+      "path": "web/lib/territories.ts",
+      "bytes": 2187,
+      "sha256": "4cfea3650a3adbccc420f58c799168880ff890488c574e06b3a0dc1b65bc7163"
     },
     {
       "path": "web/lib/trip-policy.ts",
@@ -13591,8 +13658,8 @@
     },
     {
       "path": "web/next-env.d.ts",
-      "bytes": 284,
-      "sha256": "217ce9348b523c3e6954fb50bb93364b58781d86742c995f3a5b03ba88b9ba72"
+      "bytes": 288,
+      "sha256": "1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b"
     },
     {
       "path": "web/next.config.ts",
@@ -13602,7 +13669,7 @@
     {
       "path": "web/package.json",
       "bytes": 2534,
-      "sha256": "99a3e08e8ef8af3668cd370feaced2e4b6035a7567ea0ab9caf9358b82e062a3"
+      "sha256": "c79b0c65674658327908c8792d4dbf8fb48d7ba43686dfe34db4ee9be7c60a80"
     },
     {
       "path": "web/pages-preview/src/android-unavailable.tsx",
@@ -13616,8 +13683,8 @@
     },
     {
       "path": "web/pages-preview/src/main.tsx",
-      "bytes": 3819,
-      "sha256": "4623da9c3caeae253b20b28498aa2bd66ee497c0eac06c2aef1b93cc52ad74e9"
+      "bytes": 3826,
+      "sha256": "312a4b91bbb2d3a756c370fa18d9b1cba47bd401bc1d921e32e4451b684ac69b"
     },
     {
       "path": "web/pages-preview/src/navigation.ts",
@@ -15105,6 +15172,11 @@
       "sha256": "feff393d4f67343493a338b16df8c8f30259475b00aea01677a5ea6cb2880e3f"
     },
     {
+      "path": "web/public/data/territories.geojson",
+      "bytes": 518096,
+      "sha256": "e470f86a415025be16e6061e7b74892cc0955bcd5159a422f2b8d7914947114d"
+    },
+    {
       "path": "web/public/data/world.geojson",
       "bytes": 218039,
       "sha256": "7f996c23814a99ba9a34d1e35205d7afff13550e013e23d3cbbeb8229d42239f"
@@ -15211,8 +15283,8 @@
     },
     {
       "path": "web/public/maps/pilot-style.json",
-      "bytes": 10928,
-      "sha256": "84e11226f6863977caf9e1d27fafc8d1e010d8379295eca5919a6aaea815b841"
+      "bytes": 11229,
+      "sha256": "b6bf0f49d3eae149c49ff08b4c93524f4f7a911faa7b42a8fe327905b9f28205"
     },
     {
       "path": "web/public/maps/protomaps-leaflet.js",
@@ -16962,7 +17034,7 @@
     {
       "path": "web/public/maps/tropa-style.json",
       "bytes": 22322,
-      "sha256": "c204a014e83489ae52885a19b283a7fe43cd01c58988b229079695ca9d02f1e4"
+      "sha256": "c0e935d15a101ce2d3b39b4f154c40db6fda78f175279012d1feee46e8158efa"
     },
     {
       "path": "web/public/maps/tropnik-pictograms.js",
@@ -18002,7 +18074,7 @@
     {
       "path": "web/public/offline-map/manifest.json",
       "bytes": 147281,
-      "sha256": "828b2a50db5a0d1be9ac61e1b9c1da3b7e465489c2a2fa542e4a562f1feef233"
+      "sha256": "8e93c36d333bd482934d041850bf81919a6813d43ccc81bc31e70b6aa9a670f5"
     },
     {
       "path": "web/public/offline-map/route-11566519.geojson",
@@ -18021,8 +18093,8 @@
     },
     {
       "path": "web/public/offline-map/terrain/landscape.html",
-      "bytes": 1958485,
-      "sha256": "a0807ff332a5caf72cca79ad3850ee8f6095f0175df2be5940a9008e203cce88"
+      "bytes": 1961381,
+      "sha256": "d5c396a2338478a5bd0e969e29b5c6827b38e10b76b37b38c621742881f908ae"
     },
     {
       "path": "web/public/offline-map/terrain/manifest.json",
@@ -18265,14 +18337,14 @@
       "sha256": "0a6e494f988a0b7c8dab52257aedc4c84e24dde4c12bc78302cf12f81a8402d8"
     },
     {
+      "path": "web/public/offline-viewer.html",
+      "bytes": 5951,
+      "sha256": "1d2eaa6406f0f0a0292b617575a63dc77ea294cee57517f9270b687da3ce805c"
+    },
+    {
       "path": "web/public/offline.css",
       "bytes": 4883,
       "sha256": "959b084910f8897f26e7427da968548cd5a237532893fd064734979e5f03a291"
-    },
-    {
-      "path": "web/public/offline.html",
-      "bytes": 5864,
-      "sha256": "dbabdebddcd2e970e44c099e223f4c625cdfdeaf2090411d61503cfee78a965e"
     },
     {
       "path": "web/public/offline.js",
@@ -18286,8 +18358,8 @@
     },
     {
       "path": "web/public/sw.js",
-      "bytes": 5124,
-      "sha256": "da94a3422c15b13e9110791417021c383e0a3e37f4895fa5f09a73f35dc240c7"
+      "bytes": 5167,
+      "sha256": "72ba95009598f68f8b81ad39620ad93fb9bfe0d21971a4a0d81ca60d45946c62"
     },
     {
       "path": "web/public/terrain/ATTRIBUTION.txt",
@@ -18341,13 +18413,13 @@
     },
     {
       "path": "web/scripts/build-region-artwork.mjs",
-      "bytes": 7523,
-      "sha256": "b5c58d5f47c18440cd537d1bfd4ed54e2a93efc6ad318bd6de9d635d34a0dcde"
+      "bytes": 7531,
+      "sha256": "c2c5ea910fcd43ae4c98ecac9c054cc8d494bf1f0050fff9eb98e4b2a4fba49b"
     },
     {
       "path": "web/scripts/build-tropnik.mjs",
-      "bytes": 625,
-      "sha256": "55ab147d151bfba8cbb06cf5033767177530c1100eca6d688b5f1fe98d87a80f"
+      "bytes": 658,
+      "sha256": "1e6e35cf275c517da92ffb2ef046a34ecbbc0c7ad4bae5a09aa8983b0bd714fa"
     },
     {
       "path": "web/scripts/build-verified.sh",
@@ -18465,6 +18537,11 @@
       "sha256": "6da99286e0eb7905595ca851e68983bedf94a0f93814819d61f2b1f3a0342ba2"
     },
     {
+      "path": "web/scripts/verify-map-shell.mjs",
+      "bytes": 7499,
+      "sha256": "a3719b2d3dbc819e1bf76e98aa955ac651ca7980294a8882f932580265e6afb8"
+    },
+    {
       "path": "web/scripts/verify-overview-relief.mjs",
       "bytes": 1439,
       "sha256": "32dc0c7d210c9bc1e9ad5bda6c8b733886f788820f98b6ed0d6b7ed8b276d6f2"
@@ -18495,6 +18572,11 @@
       "sha256": "30c0101ad410a7396a069813d976cd27b97611ee8e1f29f152e9f04f82068b4a"
     },
     {
+      "path": "web/tests/backend-origin.test.mjs",
+      "bytes": 9730,
+      "sha256": "dd6da29991d51e01da64073e0253f373be2b08c47a0d26e222c75b5cd69c7127"
+    },
+    {
       "path": "web/tests/canvas-relief.test.mjs",
       "bytes": 7934,
       "sha256": "2b222088e8bea41e48f8ba00c3cf7ba5443d9d604f2c4d8c943b03693b728191"
@@ -18520,9 +18602,19 @@
       "sha256": "c29164612f8ad99b441e381f580afc85ba1ec45a240e60bd9ed2db7e3ebebb5d"
     },
     {
+      "path": "web/tests/map-framing.test.mjs",
+      "bytes": 9587,
+      "sha256": "f0eec4ce2b42500a1a7666b06188d2c7a24d37b47aad25d80dc5a44b0296d03e"
+    },
+    {
       "path": "web/tests/map-layout.test.mjs",
       "bytes": 3197,
       "sha256": "8e87563767f86d01c67fd7e57912848bb4afa0a57c38f09a35a69a5a672ba73a"
+    },
+    {
+      "path": "web/tests/map-lifecycle.test.mjs",
+      "bytes": 9353,
+      "sha256": "eb1231586f552d29bc8b01957a24bfda23c9cd101023871fe007cf81fc1153cb"
     },
     {
       "path": "web/tests/map-preload.test.mjs",
@@ -18530,9 +18622,24 @@
       "sha256": "9b333cddbc96a582c8328701c333b22a78e8af2d3795e267ddcc0e21e2b03d01"
     },
     {
+      "path": "web/tests/map-shell.test.mjs",
+      "bytes": 4742,
+      "sha256": "3c86c9151ad50e9231bdd05d151deac67b39c4a8a68f61cfbd6c6f9722aa1322"
+    },
+    {
       "path": "web/tests/map-transport.test.mjs",
       "bytes": 5834,
       "sha256": "598f6b1c0683db3ea7b99544cf8723aa5c5e40f504ef1abcfe7045b5fece1ce1"
+    },
+    {
+      "path": "web/tests/offline-package.test.mjs",
+      "bytes": 11827,
+      "sha256": "47ebdf9ef8c7db20f4cb0ef2623f6f09df3a1e7e08f2c8bf532d77a21644d61a"
+    },
+    {
+      "path": "web/tests/offline-viewer-routing.test.mjs",
+      "bytes": 2747,
+      "sha256": "9a907a5fd73fd8a1d606275ebc4d9e5aa3b250297ac4c171e792bb702edbedf5"
     },
     {
       "path": "web/tests/overview-offline.test.mjs",
@@ -18551,8 +18658,8 @@
     },
     {
       "path": "web/tests/service-readiness.test.mjs",
-      "bytes": 5089,
-      "sha256": "e6647d22f2b05d112f3d7855b92924602d07e9ec58c905c6dd177da8ce64d8f0"
+      "bytes": 5236,
+      "sha256": "76a360210c731c5c4425cee8fbb9e22e41ce96d7295f12f51c0f332fe9defc4f"
     },
     {
       "path": "web/tests/terrain-material.test.mjs",
@@ -18571,8 +18678,8 @@
     },
     {
       "path": "web/tests/tsconfig.backend.json",
-      "bytes": 201,
-      "sha256": "7929d84ac19b9564cc4acffc1c671c5353fbec20fc4e8b3fb397fcf99e9efd97"
+      "bytes": 231,
+      "sha256": "6fb957cd0cab98c6018276192eb588eb26954b6f06350b0a9bf1fa74feec591a"
     },
     {
       "path": "web/tsconfig.json",

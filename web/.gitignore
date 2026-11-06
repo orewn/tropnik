@@ -44,3 +44,8 @@ yarn-error.log*
 # OS metadata
 .DS_Store
 /node_modules
+
+# Static publication output
+/pages-preview/.stage/
+/pages-preview/dist/
+/pages-preview/*.zip

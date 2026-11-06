@@ -2,11 +2,11 @@ import {createRequire} from 'node:module';
 
 const require = createRequire(new URL('../../web/package.json', import.meta.url));
 const ts = require('typescript');
-const publicRoot = /^\/(?:data|maps|terrain|api|offline-map|_offline|_next|assets|fonts|downloads|regions|routes|guides|trips|community|account|moderation|about|safety|sources|privacy|terms|android|offline-fonts\.css|offline(?:\.html|\.js|\.css)?|preview|sw\.js|manifest\.webmanifest|favicon\.svg|og-cover\.png|icon-(?:192|512)\.png)(?:[/?#.]|$)/;
-const storagePrefixes = ['tropnik-shell-', 'tropnik-map-', 'tropnik-staging-', 'tropa-local-', 'tropa-auth-change', 'tropa-requests', 'tropnik-checklist', 'tropnik-download-map'];
+const publicRoot = /^\/(?:data|maps|terrain|api|offline-map|_offline|_next|assets|fonts|downloads|regions|routes|guides|trips|community|account|moderation|about|safety|sources|privacy|terms|android|search|offline-fonts\.css|offline(?:-viewer\.html|\.js|\.css)?|preview|sw\.js|manifest\.webmanifest|favicon\.svg|og-cover\.png|icon-(?:192|512)\.png)(?:[/?#.]|$)/;
+const storagePrefixes = ['tropnik-shell-', 'tropnik-map-', 'tropnik-staging-', 'tropa-local-', 'tropa-auth-change', 'tropa-requests', 'tropnik-checklist', 'tropnik-download-map', 'tropnik-offline-map-change'];
 
-export function normalizeBase(value = '/tropnik-test/') {
-  if (!/^\/[a-z0-9][a-z0-9-]*\/$/i.test(value)) throw new Error('Pages base must be one project directory, for example /tropnik-test/.');
+export function normalizeBase(value = '/tropnik/') {
+  if (!/^\/[a-z0-9][a-z0-9-]*\/$/i.test(value)) throw new Error('Pages base must be one project directory, for example /tropnik/.');
   return value;
 }
 

@@ -54,7 +54,7 @@ export function warmMap() {
   if (typeof window === 'undefined') return;
   const webgl=supportsMapWebGL();
   void preloadPublic('/data/russia-display-area.geojson'); void preloadPublic(webgl?'/data/russia-canonical-mask.geojson':'/data/russia-outside-mask.geojson');
-  void preloadPublic('/data/regions.geojson'); void preloadPublic('/maps/tropa-style.json');
+  void preloadPublic('/data/territories.geojson'); void preloadPublic('/maps/tropa-style.json');
   if(!webgl)return Promise.resolve();
   if (!mapWarm) mapWarm = import('maplibre-gl').then(ml => {
     ml.addProtocol('tropnik-map', transport.load);

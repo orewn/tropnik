@@ -46,7 +46,7 @@ export async function apiEnvelope<T>(path: string, init?: RequestInit): Promise<
     if (response.status === 204) return {data: undefined as T};
     let result: unknown;
     try { result = await response.json(); }
-    catch { throw new ApiError(response.status, 'invalid_response', 'Не удалось прочитать ответ сервера. Обновите данные перед повтором действия.', cleared); }
+    catch { throw new ApiError(response.status, 'invalid_response', 'Не удалось обновить данные. Попробуйте ещё раз.', cleared); }
     if (!result || typeof result !== 'object') throw new ApiError(response.status, 'invalid_response', 'Сервер вернул неполный ответ. Попробуйте обновить данные.', cleared);
     const body = result as {data?: T; error?: {code?: string; message?: string}; meta?: Envelope<T>['meta']};
     if (!response.ok) throw new ApiError(response.status, body.error?.code || 'request_failed', body.error?.message || 'Не удалось выполнить действие.', cleared);
@@ -56,7 +56,7 @@ export async function apiEnvelope<T>(path: string, init?: RequestInit): Promise<
     if (error instanceof ApiError) throw error;
     if (timedOut) throw new ApiError(0, 'timeout', 'Ответ не получен вовремя. Действие не подтверждено. Обновите данные перед повтором.');
     if (init?.signal?.aborted) throw error;
-    throw new ApiError(0, 'network_unavailable', 'Нет связи с сервером. Действие не подтверждено. Сохранённые карты остаются доступны.');
+    throw new ApiError(0, 'network_unavailable', 'Не удалось подтвердить действие. Проверьте подключение и попробуйте ещё раз. Сохранённые карты доступны без сети.');
   } finally {
     clearTimeout(timer);
     init?.signal?.removeEventListener('abort', abort);
@@ -74,16 +74,16 @@ export async function serviceStatus(signal?: AbortSignal): Promise<boolean> {
   const timer = setTimeout(() => controller.abort(), 10000);
   try {
     const response = await fetch('/api/status', {signal: controller.signal, cache: 'no-store', credentials: 'same-origin'});
-    if (!response.ok) throw new ApiError(response.status, 'status_unavailable', 'Не удалось проверить подключение сервиса. Повторите попытку.');
+    if (!response.ok) throw new ApiError(response.status, 'status_unavailable', 'Не удалось подключиться. Попробуйте ещё раз.');
     const value: unknown = await response.json();
     const state = value as {configured?: unknown; connected?: unknown; mode?: unknown} | null;
-    if (!state || typeof state !== 'object' || typeof state.connected !== 'boolean' || typeof state.configured !== 'boolean') throw new ApiError(502, 'status_unavailable', 'Не удалось проверить подключение сервиса. Повторите попытку.');
+    if (!state || typeof state !== 'object' || typeof state.connected !== 'boolean' || typeof state.configured !== 'boolean') throw new ApiError(502, 'status_unavailable', 'Не удалось подключиться. Попробуйте ещё раз.');
     if (state.connected && state.configured && state.mode === 'connected') return true;
     if (!state.connected && !state.configured && state.mode === 'preview') return false;
-    throw new ApiError(503, 'status_unavailable', 'Готовность сервиса пока не подтверждена. Повторите попытку.');
+    throw new ApiError(503, 'status_unavailable', 'Сейчас это действие недоступно. Попробуйте позже.');
   } catch (error) {
     if (signal?.aborted || error instanceof ApiError) throw error;
-    throw new ApiError(0, 'status_unavailable', 'Не удалось проверить подключение сервиса. Повторите попытку.');
+    throw new ApiError(0, 'status_unavailable', 'Не удалось подключиться. Попробуйте ещё раз.');
   } finally { clearTimeout(timer); signal?.removeEventListener('abort', abort); }
 }
 

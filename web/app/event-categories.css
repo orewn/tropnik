@@ -1,0 +1,27 @@
+/* Original category symbols share the map family's grid and field palette. */
+:root{--category-forest-ink:#31553e;--category-forest-paper:#e9efe1;--category-water-ink:#335a68;--category-water-paper:#e6eff0;--category-earth-ink:#81522f;--category-earth-paper:#f3eadc;--category-stone-ink:#535d63;--category-stone-paper:#ebeeeb}
+.event-category-icon{display:block;flex:none;width:var(--event-icon-size,24px);height:var(--event-icon-size,24px);overflow:visible}
+.event-category-tone-forest{--category-ink:var(--category-forest-ink);--category-paper:var(--category-forest-paper)}
+.event-category-tone-water{--category-ink:var(--category-water-ink);--category-paper:var(--category-water-paper)}
+.event-category-tone-earth{--category-ink:var(--category-earth-ink);--category-paper:var(--category-earth-paper)}
+.event-category-tone-stone{--category-ink:var(--category-stone-ink);--category-paper:var(--category-stone-paper)}
+.event-category-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 8px 4px 4px;border-radius:8px;background:var(--category-paper);color:var(--category-ink);white-space:nowrap;font-weight:500}
+.route-categories{display:flex;align-items:center;flex-wrap:wrap;gap:8px;text-align:left;min-width:0}
+.trail-card .route-categories{margin-top:12px;margin-bottom:4px}
+.trail-card-top .event-category-icon{width:32px;height:32px;color:var(--forest)}
+.trail-card-top .trail-card-theme{display:flex;align-items:center;gap:8px;min-width:0}
+.trail-card-top .difficulty{white-space:normal}
+.departure-card .route-categories{margin-top:12px;margin-bottom:12px}.departure-card .trip-route-heading{margin-top:16px}.departure-card .trip-route-heading h3{margin:0}
+.trip-route-heading{display:flex;align-items:flex-start;gap:12px;min-width:0}
+.trip-route-heading>.event-category-icon{color:var(--forest);margin-top:4px}
+.trip-detail-categories{margin-bottom:24px}
+/* Optional category controls retain a full touch target and labelled selected state. */
+.event-category-control{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:8px 12px;border-radius:8px;background:var(--surface);color:var(--ink);transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .3s cubic-bezier(.22,1,.36,1)}
+.event-category-control:hover:not(:disabled){background:var(--category-paper,#e9efe1)}
+.event-category-control[aria-pressed=true]{background:var(--forest);color:var(--surface)}
+.event-category-control:active:not(:disabled){transform:translateY(1px) scale(.98)}
+.event-category-control:focus-visible{outline:3px solid var(--accent,#b47a43);outline-offset:4px}
+.event-category-control:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:700px){.route-categories{gap:4px}.event-category-badge{max-width:100%;white-space:normal}.trip-route-heading{gap:8px}}
+@media(prefers-reduced-motion:reduce){.event-category-control{transition:none}.event-category-control:active:not(:disabled){transform:none}}
+@media(forced-colors:active){.event-category-badge{border:1px solid CanvasText;background:Canvas;color:CanvasText}.event-category-control[aria-pressed=true]{outline:2px solid Highlight}}

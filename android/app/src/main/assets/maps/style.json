@@ -1987,7 +1987,7 @@
     "tropnik:russiaBoundaryProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
     "tropnik:displayScope": "russia-only",
     "tropnik:russiaReliefManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
-    "tropnik:onlineSourcesManifestSha256": "c2b69324b29b57453c61648cf38d15fd7378e91f152a35e8a92a8e992262e260",
+    "tropnik:onlineSourcesManifestSha256": "7fa2f088ab5c87a65feee85979d28b635b9791ba7b8f8b060bc14397c65fc746",
     "tropnik:onlineLayerIds": [
       "online-natural-grass",
       "online-forest",

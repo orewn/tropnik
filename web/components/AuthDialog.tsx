@@ -37,7 +37,7 @@ export function AuthDialog({onClose, onUser}: {onClose: () => void; onUser: (use
     setError('');
     try {
       const value = await api<{user: User}>('auth/' + mode, {method: 'POST', body: JSON.stringify({email: email.trim(), password, ...(mode === 'register' ? {displayName, role} : {})})});
-      if (!value?.user?.id) throw new Error('Сервер не подтвердил вход. Повторите попытку.');
+      if (!value?.user?.id) throw new Error('Не удалось подтвердить вход. Повторите попытку.');
       onUser(value.user);
       announceAuth(value.user);
       onClose();
@@ -65,9 +65,11 @@ export function AuthDialog({onClose, onUser}: {onClose: () => void; onUser: (use
       {mode === 'register' && <label className="check-label"><input required type="checkbox" disabled={pending} checked={consent} onChange={event => setConsent(event.target.checked)}/><span>Мне исполнилось 18 лет. Я принимаю <a href="/terms" target="_blank" rel="noreferrer">условия</a> и ознакомился с <a href="/privacy" target="_blank" rel="noreferrer">обработкой данных</a>.</span></label>}
       {error && <p className="error-message" role="alert">{error}</p>}
       <button className="button primary full" disabled={pending || service !== 'ready' || mode === 'register' && !consent}>{pending ? 'Ожидаем ответ…' : mode === 'register' ? 'Создать аккаунт' : 'Войти'}</button>
-      {service === 'checking' && <p className="fineprint" role="status">Проверяем подключение сервиса…</p>}
-      {service === 'preview' && <p className="fineprint">В ознакомительной версии аккаунты не создаются до подключения защищённого сервера. Избранное и сохранённые карточки доступны без регистрации.</p>}
-      {service === 'error' && <div className="inline-note"><span>Подключение пока не подтверждено.</span><button className="text-link" type="button" onClick={() => void check()}>Проверить снова</button></div>}
+      {mode === 'login' && <a className="text-link" href="/account/action">Не помню пароль</a>}
+      {mode === 'register' && <p className="field-help">После создания аккаунта запросим письмо для подтверждения почты. Если оно не придёт, можно запросить новое в личном кабинете.</p>}
+      {service === 'checking' && <p className="fineprint" role="status">Проверяем доступность входа…</p>}
+      {service === 'preview' && <p className="fineprint">Вход и регистрация пока недоступны. Избранное и сохранённые карточки можно использовать без аккаунта.</p>}
+      {service === 'error' && <div className="inline-note"><span>Не удалось проверить доступность входа. Попробуйте ещё раз.</span><button className="text-link" type="button" onClick={() => void check()}>Проверить снова</button></div>}
     </form>
   </Modal>;
 }

@@ -63,7 +63,7 @@ internal fun rememberLandscapeDocument(enabled: Boolean): State<LocalLandscapeDo
                     }
                 }
                 LocalLandscapeDocument(html = document)
-            }.getOrElse { LocalLandscapeDocument(error = "Не удалось проверить локальную 3D сцену. Сохранённая карта доступна.") }
+            }.getOrElse { LocalLandscapeDocument(error = "Рельеф пока не открывается. Вернитесь к сохранённой карте.") }
         }
     }
 }
@@ -149,7 +149,7 @@ internal class LocalLandscapeViewer(private val context: Context) {
                         probe()
                     }
                     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-                        if (request?.isForMainFrame == true && view === browser) fail("Не удалось открыть локальную сцену. Откройте карточку маршрута снова.")
+                        if (request?.isForMainFrame == true && view === browser) fail("Рельеф не открылся. Попробуйте ещё раз.")
                     }
                     override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
                         if (view === browser) {
@@ -158,7 +158,7 @@ internal class LocalLandscapeViewer(private val context: Context) {
                             invalidateDocumentState()
                             browser = null
                             ready = false
-                            error = "Система освободила ресурсы 3D сцены. Подготовьте её заново; сохранённая карта доступна."
+                            error = "Рельеф закрылся. Откройте его снова или вернитесь к карте."
                         }
                         // A view with a dead renderer must never be resumed or
                         // reused. Remove only this view, not other WebViews.
@@ -173,7 +173,7 @@ internal class LocalLandscapeViewer(private val context: Context) {
             applyActivity()
             startWarmupTimeout()
         } catch (_: Exception) {
-            fail("На устройстве недоступен системный WebView. Откройте сохранённую карту и слой рельефа.")
+            fail("Не удалось открыть рельеф на этом телефоне. Сохранённая карта остаётся доступна.")
         }
     }
 
@@ -245,7 +245,7 @@ internal class LocalLandscapeViewer(private val context: Context) {
                         }
                     })
                 }
-                "\"failed\"" -> fail("Сцена остановилась. Подготовьте её заново или вернитесь к сохранённой карте.")
+                "\"failed\"" -> fail("Рельеф закрылся. Попробуйте снова или вернитесь к сохранённой карте.")
                 else -> {
                     if (ready) { ready = false; startWarmupTimeout(); applyActivity() }
                     scheduleProbe(100)
@@ -272,7 +272,7 @@ internal class LocalLandscapeViewer(private val context: Context) {
         val timeout = Runnable {
             warmupTimeout = null
             if (!disposed && browser === view && resumed && !ready) {
-                fail("Сцена не успела подготовиться. Откройте карточку ещё раз или используйте сохранённую карту.")
+                fail("Рельеф не открылся. Попробуйте ещё раз или вернитесь к сохранённой карте.")
             }
         }
         warmupTimeout = timeout
@@ -359,7 +359,7 @@ internal fun LocalLandscapeScene(viewer: LocalLandscapeViewer, visible: Boolean,
             TrailTextButton(onClick = onBack, enabled = visible, modifier = Modifier.heightIn(min = 48.dp).testTag("landscape_back")) { TropaIcon(Glyph.BACK); Spacer(Modifier.width(8.dp)); Text("К карте") }
             Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
                 Text("Бзерпинский район", style = MaterialTheme.typography.titleMedium)
-                if (!compact) Text("Локальная 3D модель высот", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+                if (!compact) Text("Посмотрите на горы с разных сторон", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
             }
         }
         val browser = viewer.browser
@@ -368,14 +368,14 @@ internal fun LocalLandscapeScene(viewer: LocalLandscapeViewer, visible: Boolean,
                 EmptyCard("Сцена сейчас недоступна", viewer.error!!, Glyph.MOUNTAIN)
                 if (viewer.canRetry) TrailButton(onClick = viewer::retry, enabled = visible,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("landscape_retry")) {
-                    Text("Подготовить сцену заново")
+                    Text("Попробовать снова")
                 }
             }
         } else if (browser == null) {
             LinearProgressIndicator(Modifier.fillMaxWidth())
         } else key(browser) { AndroidView(factory = { browser }, modifier = Modifier.weight(1f).fillMaxWidth().testTag("landscape_webview")) }
         if (!compact) Surface(color = Palette.Surface) {
-            Text("Справочная модель местности. Перед выходом проверьте действующие ограничения маршрута 8А. Рельеф не определяет проходимость.", Modifier.padding(12.dp), style = MaterialTheme.typography.bodySmall, color = Palette.WarningText)
+            Text("Перед походом уточните разрешённый путь и действующие ограничения у заповедника.", Modifier.padding(12.dp), style = MaterialTheme.typography.bodySmall, color = Palette.WarningText)
         }
     }
 }

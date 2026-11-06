@@ -1,0 +1,20 @@
+.searchLink[aria-current=page] {background:#e8eedf;color:var(--forest)}
+.sessionLabel {min-width:0}
+.header :global(.top-nav) .menuOfflineLink {display:none}
+@media(max-width:700px){
+ .header .actions {flex-shrink:0}
+ .header :global(.brand){min-height:44px}
+ .header .searchLink,.header .offlineLink,.header .sessionButton,.header .actions :global(.menu-toggle){min-width:44px;min-height:44px}
+ .header .searchLink,.header .offlineLink,.header .actions :global(.menu-toggle){width:44px;height:44px}
+}
+@media(max-width:430px){
+ .sessionButton{min-width:44px!important;width:44px;min-height:44px!important;padding:8px!important}
+ .sessionLabel{display:none}
+}
+@media(max-width:370px){.actions{gap:0}}
+@media(max-width:360px){
+ .header :global(.brand){font-size:20px;line-height:28px;gap:4px}
+ .header .actions{gap:4px}
+ .header .offlineLink{display:none}
+ .header :global(.top-nav) .menuOfflineLink{display:flex}
+}

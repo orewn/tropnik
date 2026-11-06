@@ -35,7 +35,7 @@ class ApiClient internal constructor(private val endpoint: () -> String, private
             if (response.optJSONObject("data")?.opt("status") == "ready" &&
                 response.optJSONObject("meta")?.opt("mode") == "production" && !response.has("error")) {
                 ServerState.Reachable
-            } else ServerState.Unavailable("Сервис отвечает, но не подтвердил готовность API и базы данных.")
+            } else ServerState.Unavailable("Подключение пока недоступно. Попробуйте позже.")
         }
     } catch (failure: ApiFailure) { ServerState.Unavailable(failure.message) }
 
@@ -48,6 +48,12 @@ class ApiClient internal constructor(private val endpoint: () -> String, private
     suspend fun logout() { request("POST", "/auth/logout") }
     suspend fun me() = Account.parse(request("GET", "/me").getJSONObject("data"))
     suspend fun accountSummary() = AccountSummary.parse(request("GET", "/me/summary").getJSONObject("data"))
+    suspend fun departureHistory(cursor: String? = null): DepartureHistoryPage {
+        val query = if (cursor.isNullOrBlank()) "" else "&cursor=" + URLEncoder.encode(cursor, "UTF-8")
+        val response = request("GET", "/me/departures?limit=20$query", expectedStatus = 200)
+        return DepartureHistoryPage(response.getJSONArray("data").objectList().map(CompletedDeparture::parse),
+            response.optJSONObject("meta")?.stringOrNull("nextCursor"))
+    }
     suspend fun notifications() = request("GET", "/me/notifications").getJSONArray("data").objectList().map(AccountNotification::parse)
     suspend fun readNotification(id: String) { request("POST", "/me/notifications/${ApiAddress.segment(id)}/read") }
     suspend fun reports() = request("GET", "/me/reports").getJSONArray("data").objectList().map(UserReport::parse)
@@ -59,10 +65,11 @@ class ApiClient internal constructor(private val endpoint: () -> String, private
     suspend fun updateProfile(name: String, role: String) = Account.parse(request("PATCH", "/me/profile", JSONObject().put("displayName", name.trim()).put("role", role)).getJSONObject("data"))
     suspend fun routePage(cursor: String? = null): RoutePage {
         val query = if (cursor.isNullOrBlank()) "" else "&cursor=" + URLEncoder.encode(cursor, "UTF-8")
-        val response = request("GET", "/routes?limit=25$query", authenticated = false)
+        val response = request("GET", "/routes?limit=25$query", authenticated = false, expectedStatus = 200)
         return RoutePage(response.getJSONArray("data").objectList().map { PublishedRoute.parse(it).copy(apiOrigin = baseUrl) }, response.optJSONObject("meta")?.stringOrNull("nextCursor"))
     }
-    suspend fun route(id: String) = PublishedRoute.parse(request("GET", "/routes/${ApiAddress.segment(id)}", authenticated = false).getJSONObject("data")).copy(apiOrigin = baseUrl)
+    suspend fun route(id: String) = PublishedRoute.parse(request("GET", "/routes/${ApiAddress.segment(id)}", authenticated = false,
+        expectedStatus = 200, successResponseBytes = ApiResponseBudget.FULL_ROUTE_BYTES).getJSONObject("data")).copy(apiOrigin = baseUrl)
     suspend fun departures(routeId: String? = null) = request("GET", "/departures" + (routeId?.let { "?route=${ApiAddress.segment(it)}" } ?: ""), authenticationOptional = true).getJSONArray("data").objectList().map(Departure::parse)
     suspend fun departure(id: String) = Departure.parse(request("GET", "/departures/${ApiAddress.segment(id)}", authenticationOptional = true).getJSONObject("data"))
     suspend fun participants(id: String) = request("GET", "/departures/${ApiAddress.segment(id)}/participants").getJSONArray("data").objectList().map(Participant::parse)
@@ -95,8 +102,9 @@ class ApiClient internal constructor(private val endpoint: () -> String, private
         "/departures/${ApiAddress.segment(departureId)}/reviews", JSONObject().put("target", target).put("rating", rating).put("body", text.trim())).getJSONObject("data"))
 
     private suspend fun request(method: String, path: String, body: JSONObject? = null, authenticated: Boolean = true,
-        authenticationOptional: Boolean = false, extraHeaders: Map<String, String> = emptyMap(), expectedStatus: Int? = null): JSONObject = withContext(Dispatchers.IO) {
-        if (!configured) throw ApiFailure("service_not_configured", "Сначала подключите HTTPS адрес сервиса в профиле.")
+        authenticationOptional: Boolean = false, extraHeaders: Map<String, String> = emptyMap(), expectedStatus: Int? = null,
+        successResponseBytes: Int = ApiResponseBudget.DEFAULT_BYTES): JSONObject = withContext(Dispatchers.IO) {
+        if (!configured) throw ApiFailure("service_not_configured", "Сначала настройте подключение в профиле.")
         val base = baseUrl
         val token = if (authenticated) bearer() else null
         if (authenticated && !authenticationOptional && token.isNullOrBlank()) throw ApiFailure("auth_required", "Войдите в аккаунт, чтобы продолжить.", 401)
@@ -108,30 +116,38 @@ class ApiClient internal constructor(private val endpoint: () -> String, private
         try {
             http.newCall(builder.build()).execute().use { response ->
                 if (response.isSuccessful && expectedStatus != null && response.code != expectedStatus) {
-                    throw ApiFailure("unexpected_status", "Сервис не подтвердил готовность ожидаемым ответом (${response.code}).", response.code)
+                    throw ApiFailure("unexpected_status", "Не удалось подключиться. Попробуйте позже.", response.code)
                 }
                 if (response.code == 204) return@withContext JSONObject()
+                // A full route has its own bounded geometry budget. Failure bodies
+                // and every other operation retain the smaller default limit.
+                val responseLimit = if (response.isSuccessful) successResponseBytes else ApiResponseBudget.DEFAULT_BYTES
+                if ((response.body?.contentLength() ?: -1L) > responseLimit) {
+                    throw ApiFailure("response_too_large", "Не удалось загрузить данные. Обновите страницу или попробуйте позже.")
+                }
                 val output = ByteArrayOutputStream()
                 response.body?.byteStream()?.use { input ->
                     val buffer = ByteArray(8192)
                     while (true) {
                         val length = input.read(buffer)
                         if (length < 0) break
-                        if (output.size() + length > 1_048_576) throw ApiFailure("response_too_large", "Ответ сервиса слишком большой. Попробуйте позже.")
+                        // This counts decoded bytes, including chunked/gzip bodies
+                        // without a trustworthy Content-Length.
+                        if (length > responseLimit - output.size()) throw ApiFailure("response_too_large", "Не удалось загрузить данные. Обновите страницу или попробуйте позже.")
                         output.write(buffer, 0, length)
                     }
                 }
                 val json = runCatching { JSONObject(output.toString("UTF-8")) }.getOrElse {
-                    throw ApiFailure("http_${response.code}", "Сервис вернул ответ в неподдерживаемом формате (${response.code}).", response.code)
+                    throw ApiFailure("http_${response.code}", "Не удалось загрузить данные. Попробуйте позже.", response.code)
                 }
                 if (!response.isSuccessful) {
                     val failure = json.optJSONObject("error")
                     throw ApiFailure(failure?.optString("code")?.takeIf { it.isNotBlank() } ?: "http_${response.code}",
-                        failure?.optString("message")?.takeIf { it.isNotBlank() } ?: "Сервис вернул ошибку ${response.code}.", response.code)
+                        failure?.optString("message")?.takeIf { it.isNotBlank() } ?: "Не удалось выполнить действие. Попробуйте позже.", response.code)
                 }
                 json
             }
         } catch (failure: ApiFailure) { throw failure }
-        catch (_: java.io.IOException) { throw ApiFailure("network_unavailable", "Не удалось связаться с сервисом. Проверьте интернет и адрес подключения.") }
+        catch (_: java.io.IOException) { throw ApiFailure("network_unavailable", "Не удалось подключиться. Проверьте интернет и попробуйте снова.") }
     }
 }

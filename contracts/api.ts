@@ -5,10 +5,16 @@ export type Envelope<T> = { data: T; meta?: { mode: 'production'; nextCursor?: s
 export type User = { id: ID; displayName: string; email: string; role: 'tourist' | 'guide'; staffRole: 'none' | 'moderator' | 'admin'; guideStatus: 'none' | 'pending' | 'verified' | 'suspended' | 'expired'; emailVerified: boolean; createdAt: string };
 export type AuthResponse = Envelope<{ token: string; expiresAt: string; user: User }>;
 export type RegisterInput = { email: string; password: string; displayName: string; role: 'tourist' | 'guide' };
+export type AccountMailInput = {email: string};
+export type AccountMailResponse = {status: 'accepted'; message: string};
+export type AccountEmailConfirmInput = {token: string};
+export type AccountPasswordResetInput = {token: string; password: string; passwordConfirmation: string};
+export type AccountDeleteInput = {password: string; confirmation: 'delete'};
 export type Region = { id: string; title: string; description: string; center: [number, number]; bounds: [number, number, number, number]; routeCount: number };
 export type Route = { id: ID; slug: string; regionId: string; title: string; description: string; difficulty: 'easy' | 'moderate' | 'hard' | 'expert'; activity: string; distanceKm: number; ascentM: number; durationMin: number; minPeople: number; maxGroupSize: number; requiredGuides: number; status: 'published' | 'closed'; revisionId: ID; revision: number; verifiedAt: string | null; source: { name: string; url: string; license: string; retrievedAt: string }; geometry: { type: 'LineString'; coordinates: number[][] }; geometryDetail: 'overview' | 'full'; season: string; updatedAt: string };
 export type DepartureStatus = 'recruiting' | 'ready' | 'awaiting_guide' | 'in_progress' | 'completed' | 'cancelled' | 'aborted';
-export type Departure = { id: ID; routeId: ID; routeRevisionId: ID; guideId: ID | null; guideName: string | null; startsAt: string; endsAt: string; timeZone: string; minPeople: number; capacity: number; participantCount: number; status: DepartureStatus; version: number; routeOpen: boolean; guideEligible: boolean; membership: 'none' | 'confirmed' | 'checked_in' | 'cancelled' | 'completed' | 'no_show'; createdAt: string };
+export type Departure = { id: ID; routeId: ID; routeRevisionId: ID; routeTitle?: string; reviewTargets?: ('route' | 'guide')[]; guideId: ID | null; guideName: string | null; startsAt: string; endsAt: string; timeZone: string; minPeople: number; capacity: number; participantCount: number; status: DepartureStatus; version: number; routeOpen: boolean; guideEligible: boolean; membership: 'none' | 'confirmed' | 'checked_in' | 'cancelled' | 'completed' | 'no_show'; createdAt: string };
+export type CompletedDeparture = { id: ID; routeId: ID; routeRevisionId: ID; routeTitle: string; startsAt: string; endsAt: string; completedAt: string; timeZone: string; role: 'tourist' | 'guide'; guideId: ID | null; guideName: string | null; reviewTargets: ('route' | 'guide')[] };
 export type CreateDepartureInput = { routeId: ID; routeRevisionId?: ID; startsAt: string; endsAt: string; timeZone: string; minPeople?: number; capacity?: number };
 export type RecruitmentRequest = { id: ID; routeId: ID; creatorId: ID; creatorName: string; preferredDate: string | null; body: string; status: 'open' | 'accepted' | 'cancelled'; departureId: ID | null; interestedCount: number; createdAt: string };
 export type RecruitmentMessage = { id: ID; requestId: ID; userId: ID; displayName: string; body: string; visibility: 'visible' | 'hidden'; clientId: string; createdAt: string };
@@ -69,3 +75,9 @@ export type ResolveAppealInput = { decision: 'upheld' | 'overturned'; reason: st
 // Chat visibility hidden is a tombstone with body=''. Polling only by createdAt
 // does not capture moderation changes: refresh the current latest-100 snapshot.
 // GET /guides/ID/reviews -> Review[] for public, non-hidden guide reviews.
+
+// GET /me/departures?limit=20&cursor=... -> Envelope<CompletedDeparture[]>; authenticated account only.
+// History limit 1..50; meta.nextCursor continues older completed participation by (completedAt,id).
+// Cursor is an opaque position, never an account selector or authorization. No participant list is returned.
+// GET /routes pages are capped at 1 MiB of decoded JSON and may return fewer than limit.
+// Always follow meta.nextCursor. GET /routes/ID retains complete geometry with an 8 MiB decoded JSON budget.

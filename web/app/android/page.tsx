@@ -1,4 +1,22 @@
 import androidBuild from '@/public/downloads/android-manifest.json';
-import type {Metadata} from 'next';import {Header} from '@/components/Header';import {Footer} from '@/components/Footer';import {Mountains,ArrowDown,MapTrifold,ShieldCheck} from '@/components/TropnikIcons';
-export const metadata:Metadata={title:'Тропник для Android',description:'Нативное приложение Тропник: карта, сохранённые маршруты, детальный офлайн-пакет и GPS-позиция.'};
-export default function Android(){return <><Header active=""/><main id="main"><section className="page-hero"><span className="eyebrow">Тропник с собой</span><h1>Связь закончилась.<br/>Карта осталась.</h1><p>Нативное приложение Android хранит скачанные данные на устройстве. В пилотный APK включён детальный район Бзерпинского карниза.</p></section><div className="page-content"><div className="app-callout"><div><h2>Подготовьте карту<br/>до выхода.</h2><p>Тропы, подписи, высоты и объёмная сцена — внутри пакета. Приложение проверяет целостность файлов и показывает границу доступного покрытия.</p><a className="button" href="/downloads/tropnik-arm64-preview.apk" download><ArrowDown size={18}/>Скачать APK · ARM64 · {new Intl.NumberFormat('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1}).format(androidBuild.bytes/1024**2)} МиБ</a><p className="fineprint" style={{marginTop:12}}>Версия {androidBuild.version}. Android 8.0 и новее (API 26), устройство ARM64. Пилотная debug-сборка с отладочной подписью. Запуск на устройстве ещё не проверен. <a href="/downloads/android-manifest.json">Размер, SHA256 и сведения о сборке</a>.</p></div><div className="phone-silhouette" aria-hidden="true"><Mountains size={73}/><span><MapTrifold size={21}/>Бзерпин · карта на устройстве</span></div></div><div className="prose-grid"><article className="prose-card"><MapTrifold size={29}/><h3>Точная граница покрытия</h3><p>Офлайн-пакет охватывает район Бзерпинского карниза. Маршруты Тисо-самшитовой рощи находятся за его пределами.</p></article><article className="prose-card"><ShieldCheck size={29}/><h3>Дата и источник рядом</h3><p>Скачанные данные не обновляются без сети. Ограничения и условия нужно проверять заново перед каждым выходом.</p></article><article className="prose-card"><Mountains size={29}/><h3>Место для вашего опыта</h3><p>Карта помогает ориентироваться. Она не заменяет подготовку, разрешения и допуск гида к конкретному маршруту.</p></article></div></div></main><Footer/></>;}
+import type {Metadata} from 'next';
+import {Header} from '@/components/Header';
+import {Footer} from '@/components/Footer';
+import {Mountains, ArrowDown, MapTrifold, ShieldCheck} from '@/components/TropnikIcons';
+
+export const metadata: Metadata = {title: 'Тропник для Android', description: 'Карта и сохранённые маршруты на телефоне — даже без интернета.'};
+export default function Android() {
+  return <><Header active=""/><main id="main">
+    <section className="page-hero"><span className="eyebrow">Тропник с собой</span><h1>Связь закончилась.<br/>Карта осталась.</h1><p>Сохраните маршруты на телефоне и возвращайтесь к ним без интернета. Подробная карта Бзерпинского карниза уже внутри приложения.</p></section>
+    <div className="page-content"><div className="app-callout"><div><h2>Подготовьте карту<br/>до выхода.</h2><p>Тропы, подписи и рельеф помогают изучить местность. Граница на карте показывает, какой район доступен без сети.</p>
+      <a className="button" href="/downloads/tropnik-arm64-preview.apk" download><ArrowDown size={18}/>Скачать для Android · {new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 1}).format(androidBuild.bytes / 1024 ** 2)} МБ</a>
+      <p className="fineprint" style={{marginTop: 12}}>Для телефонов с Android 8.0 и новее. После установки откройте карту и убедитесь, что нужный участок доступен без интернета.</p>
+    </div><div className="phone-silhouette" aria-hidden="true"><Mountains size={73}/><span><MapTrifold size={21}/>Бзерпинский карниз</span></div></div>
+      <div className="prose-grid">
+        <article className="prose-card"><MapTrifold size={29}/><h3>Нужный участок под рукой</h3><p>Подробная карта охватывает район Бзерпинского карниза. Для других направлений заранее проверьте доступное покрытие.</p></article>
+        <article className="prose-card"><ShieldCheck size={29}/><h3>Дата и источник рядом</h3><p>Сохранённые сведения остаются с вами. Перед каждым походом проверяйте свежие ограничения и условия посещения.</p></article>
+        <article className="prose-card"><Mountains size={29}/><h3>Планируйте свой путь</h3><p>Сравнивайте маршруты, учитывайте свою подготовку и выбирайте подходящего гида.</p></article>
+      </div>
+    </div>
+  </main><Footer/></>;
+}

@@ -23,8 +23,9 @@ class CatalogIntegrityTests(unittest.TestCase):
         report = verify_catalog(self.manifest_bytes, self.read,
             actual_geometry=[str(p.relative_to(ASSETS)) for p in (ASSETS / "maps/routes").glob("*.geojson")],
             source_read=lambda path: (ROOT / path).read_bytes())
-        self.assertEqual(report["catalogReferenceRouteCount"], 277)
-        self.assertEqual(report["catalogRegionCount"], 6)
+        self.assertEqual(report["catalogReferenceRouteCount"], len(self.manifest["referenceRouteIds"]))
+        self.assertEqual(report["catalogRegionCount"], len(self.manifest["regionIds"]))
+        self.assertEqual(report["catalogReferenceOnlyRouteCount"], len(self.manifest.get("referenceOnlyRouteIds", [])))
         self.assertTrue(report["catalogSourceByteParityVerified"])
 
     def test_missing_changed_and_unlisted_geometry_is_rejected(self):
@@ -41,6 +42,19 @@ class CatalogIntegrityTests(unittest.TestCase):
         with self.assertRaisesRegex(AssetError, "stale"):
             verify_catalog(self.manifest_bytes, self.read, actual_geometry=[r["path"] for r in self.manifest["files"]] + ["maps/routes/stale.geojson"])
 
+    def test_empty_geometry_and_removed_source_inventory_cannot_be_rehashed_away(self):
+        manifest = copy.deepcopy(self.manifest)
+        record = manifest["files"][0]
+        path = record["path"]
+        empty = b'{"type":"FeatureCollection","features":[]}'
+        record.update(bytes=len(empty), sha256=digest(empty))
+        with self.assertRaisesRegex(AssetError, "no features"):
+            verify_catalog(json.dumps(manifest).encode(), lambda p: empty if p == path else self.read(p))
+        manifest = copy.deepcopy(self.manifest)
+        manifest["sourceInputs"] = []
+        with self.assertRaisesRegex(AssetError, "input inventory"):
+            verify_catalog(json.dumps(manifest).encode(), self.read)
+
     def test_rehashed_catalog_cannot_promote_verification_or_invent_duration(self):
         for field, value in [("fieldVerified", True), ("navigationReady", True), ("durationMinutes", 60), ("regionIds", ["foreign-region"])]:
             catalog = json.loads(self.read("catalog.json"))
@@ -50,6 +64,64 @@ class CatalogIntegrityTests(unittest.TestCase):
             manifest["catalog"].update(bytes=len(changed), sha256=digest(changed))
             with self.assertRaises(AssetError):
                 verify_catalog(json.dumps(manifest).encode(), lambda p: changed if p == "catalog.json" else self.read(p))
+
+    def reference_fixture(self):
+        catalog = json.loads(self.read("catalog.json"))
+        route = copy.deepcopy(catalog["routes"][0])
+        route.update(id="synthetic-reference-only", title="Синтетическая карточка для теста",
+                     geometryAsset=None, center=None, bbox=None, geometryLengthKm=None,
+                     distanceMeters=None, ascentMeters=None, durationMinutes=None, durationText=None,
+                     sourceKind="community", sourceLicense="Описание с указанным источником.")
+        catalog["routes"].append(route)
+        manifest = copy.deepcopy(self.manifest)
+        manifest["referenceRouteIds"].append(route["id"])
+        manifest.setdefault("referenceOnlyRouteIds", []).append(route["id"])
+        return catalog, manifest, route
+
+    def verify_fixture(self, catalog, manifest):
+        changed = json.dumps(catalog).encode()
+        manifest["catalog"].update(bytes=len(changed), sha256=digest(changed))
+        return verify_catalog(json.dumps(manifest).encode(), lambda p: changed if p == "catalog.json" else self.read(p))
+
+    def test_explicit_geometry_free_card_preserves_source_card_without_fake_line(self):
+        catalog, manifest, _ = self.reference_fixture()
+        report = self.verify_fixture(catalog, manifest)
+        self.assertEqual(report["catalogGeometryFilesVerified"], len(self.manifest["files"]))
+        self.assertEqual(report["catalogReferenceOnlyRouteCount"], len(self.manifest.get("referenceOnlyRouteIds", [])) + 1)
+        self.assertEqual(report["catalogReferenceRouteCount"], len(self.manifest["referenceRouteIds"]) + 1)
+
+    def test_geometry_free_card_cannot_claim_a_location_or_geometry_licence(self):
+        for field, value in [("center", [40, 43]), ("bbox", [40, 43, 41, 44]), ("inlineGeometry", "{}"),
+                             ("geometryLengthKm", 1), ("sourceLicense", "© OpenStreetMap contributors")]:
+            catalog, manifest, route = self.reference_fixture()
+            route[field] = value
+            with self.subTest(field=field), self.assertRaises(AssetError):
+                self.verify_fixture(catalog, manifest)
+
+    def test_dropped_geometry_is_not_silently_reclassified_as_unlocated_reference(self):
+        catalog = json.loads(self.read("catalog.json"))
+        route = next(route for route in catalog["routes"] if route.get("geometryAsset"))
+        route.update(geometryAsset=None, center=None, bbox=None, geometryLengthKm=None, sourceLicense="Описание.")
+        with self.assertRaises(AssetError):
+            self.verify_fixture(catalog, copy.deepcopy(self.manifest))
+
+    def test_manifest_and_catalogue_region_ids_must_match_exactly(self):
+        manifest = copy.deepcopy(self.manifest)
+        manifest["regionIds"].append("foreign-region")
+        with self.assertRaisesRegex(AssetError, "region parity"):
+            verify_catalog(json.dumps(manifest).encode(), self.read)
+
+    def test_additional_sources_cannot_smuggle_participants_or_wrong_message_identity(self):
+        source = {"url": "https://t.me/poiskpohod/101", "name": "Сообщество poiskpohod", "messageId": 101,
+                  "publishedAt": "2026-11-01T12:00:00", "reviewedAt": "2026-11-06", "scope": "community_mention"}
+        catalog, manifest, route = self.reference_fixture()
+        route["additionalSources"] = [source]
+        self.verify_fixture(catalog, manifest)
+        for change in [{"authorId": 123}, {"url": "https://t.me/poiskpohod/102"}, {"url": "file:///tmp/private"}]:
+            catalog, manifest, route = self.reference_fixture()
+            route["additionalSources"] = [{**source, **change}]
+            with self.subTest(change=change), self.assertRaises(AssetError):
+                self.verify_fixture(catalog, manifest)
 
     def test_online_sources_are_bounded_and_cannot_replace_local_resources_or_mask(self):
         style = json.loads(self.read("maps/style.json"))

@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-06",
+  "scope": "Local 0.4.4 source acceptance; publication and new APK require separate receipts",
+  "webVersion": "0.4.4",
+  "androidSourceVersion": "0.4.4-preview",
+  "androidSourceVersionCode": 7,
+  "publication": {
+    "claimed": false,
+    "commit": null,
+    "reason": "This receipt records local gates before the final source publication and exact-commit CI."
+  },
+  "web": {
+    "tests": {
+      "passed": 225,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "command": "node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs",
+      "log": "docs/verification/web-0.4.4-tests.txt",
+      "logSha256": "b25e83b2b867b88bdab0fbc99de45c779dab0d329539e7339f843b9b18986b75",
+      "durationMs": 13541.400214
+    },
+    "typeScript": {
+      "command": "node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit",
+      "passed": true
+    },
+    "searchAndCategories": {
+      "passed": 20,
+      "includedInFullWebTotal": true,
+      "routeDocuments": 306,
+      "regionDocuments": 15,
+      "storyDocuments": 13,
+      "pageDocuments": 12,
+      "eventCategories": 12
+    },
+    "browserRenderingVerifiedByThisReceipt": false,
+    "gpuFpsMeasured": false
+  },
+  "pages": {
+    "buildId": "513ab54dd0d530f3",
+    "sourceCommit": null,
+    "base": "/tropnik/",
+    "origin": "https://orewn.github.io",
+    "pages": 337,
+    "publicAssetChecks": 334,
+    "outputFiles": 1393,
+    "offlineFilesVerified": 252,
+    "overviewReliefTilesVerified": 341,
+    "httpChecks": 51,
+    "apkVerified": true,
+    "backendConnected": false,
+    "browserRenderingTested": false,
+    "log": "docs/verification/pages-0.4.4-build.txt",
+    "logSha256": "3e48cf0a3957aebaacbfebaadb5df3ecba424cd0a3328aa9143efe3cb051f2b0",
+    "archive": {
+      "file": "tropnik.zip",
+      "bytes": 38004435,
+      "sha256": "69bb8de379ce04e608422a20765591ed4656185bf71011366be6e15e0e06bcb2"
+    },
+    "pathUnitTests": {
+      "passed": 9,
+      "reportedBy": "release owner",
+      "includedInFullWebTotal": false
+    }
+  },
+  "catalog": {
+    "referenceRoutes": 306,
+    "regions": 15,
+    "geometryRoutes": 277,
+    "referenceOnlyRoutes": 29,
+    "learningRoutes": 1,
+    "fieldVerified": 0,
+    "navigationReady": 0,
+    "nativeCatalog": {
+      "path": "catalog.json",
+      "bytes": 920577,
+      "sha256": "335b59dea657f308a4a9ae204975a9076550c5dec1269979250561dc7864898a"
+    },
+    "nativeSourceCheckPassed": true,
+    "geometryByteParityVerified": true
+  },
+  "android": {
+    "pythonAssetTests": {
+      "passed": 27,
+      "failed": 0
+    },
+    "landscapeBootstrapTests": {
+      "passed": 6,
+      "failed": 0
+    },
+    "catalogCheck": true,
+    "landscapeCheck": true,
+    "landscape": {
+      "bytes": 1989266,
+      "sha256": "2a0765d2de2170c069ffc881492830f1ac8916c9e5d2b3650815a559ab0ac8d6"
+    },
+    "kotlinCompilationForNewSource": "pending exact-commit CI",
+    "newApkBuilt": false,
+    "deviceExecutionVerified": false,
+    "downloadedApkVersion": "0.4.2-preview",
+    "downloadedApkSha256": "41eabb299c0b2037311e813dd8d15f1f026977f601d851dfdd537b48b2f32292",
+    "downloadedApkBytes": 24467090
+  },
+  "backend": {
+    "lifecycleReceipt": "backend/verification/account-lifecycle-2026-11-06.json",
+    "lifecycleReceiptSha256": "adc0bf72fa1ac191cada0806c4361991bb8744b11c47d96fe28b7fa037210b23",
+    "goRacePassEventsIncludingSubtests": 60,
+    "goRaceFailures": 0,
+    "goTestedPackages": 6,
+    "goRaceLogSha256": "89e6db6c17e3057fd1948f9c110c14b73b53cc785ecbb2997871cd3536324523",
+    "goVetExitCode": 0,
+    "requiredSchemaVersion": 5,
+    "nativePostGISCurrentSource": "compiled locally; execution pending exact-commit CI",
+    "historyBudgetReceipt": "backend/verification/history-budget-2026-11-06.json",
+    "historyBudgetReceiptSha256": "20e6bad7b855c14fd3f09c49c3eed4ec6f03f559c8c34082e160bb11c1274284",
+    "smtpConfigured": false,
+    "realEmailSent": false,
+    "mailAcceptedJobLimit": 36,
+    "mailWorkers": 4,
+    "mailJobTimeoutSeconds": 20,
+    "verificationTokenHours": 24,
+    "passwordResetTokenMinutes": 30,
+    "deletionIsFullErasure": false,
+    "liveApiConnectedToPages": false
+  },
+  "telegram": {
+    "testsPassed": 19,
+    "testsFailed": 0,
+    "sourceMessagesRead": 0,
+    "publicRoutes": 0,
+    "sourceMappings": 0,
+    "status": "pending_history_access"
+  },
+  "githubPublicationBoundary": {
+    "testsPassed": 2,
+    "testsFailed": 0,
+    "privateDirectoriesExcluded": true,
+    "exportAndQueueJsonExcluded": true,
+    "reviewedPublicJsonPreserved": true,
+    "credentialsAndCachesExcluded": true
+  },
+  "pendingExternalGates": [
+    "Publication receipt with actual commit and unauthenticated deployed Pages checks",
+    "New Android JVM/build/package verification on the final commit",
+    "Native PostgreSQL/PostGIS migrations, concurrency and runtime grants on the final commit",
+    "Real HTTPS backend and authenticated web/Android end-to-end scenarios",
+    "Real TLS SMTP delivery and operator configuration",
+    "Android device UI, GPS, airplane mode, accessibility and battery checks",
+    "Hardware GPU/FPS measurement",
+    "Telegram history access and human review",
+    "Production signing, store publication and field route validation"
+  ]
+}

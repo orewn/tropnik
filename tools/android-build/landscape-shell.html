@@ -9,12 +9,12 @@
 <style>__STYLE__</style>
 </head>
 <body>
-<main class="landscape" aria-label="Локальная объёмная модель Бзерпинского района">
+<main class="landscape" aria-label="Рельеф Бзерпинского района">
   <canvas id="terrain-canvas" tabindex="0" aria-label="Рельеф. Поворот перетаскиванием или стрелками; масштаб колёсиком, жестом двух пальцев или кнопками."></canvas>
   <header class="heading">
     <p class="caption-3">ЗАПАДНЫЙ КАВКАЗ</p>
     <h1 class="heading-5">Бзерпинский район</h1>
-    <p class="caption-2">Ландшафт по данным высот</p>
+    <p class="caption-2">Посмотрите на горы с разных сторон</p>
   </header>
   <p id="scene-status" class="status body-6" role="status">Готовим рельеф…</p>
   <nav class="controls" aria-label="Управление ландшафтом">
@@ -23,21 +23,19 @@
     <button id="reset" class="button-md" type="button" aria-label="Вернуть исходный ракурс" title="Исходный ракурс"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 10a8 8 0 1 1 2 8M4 4v6h6"/></svg></button>
   </nav>
   <details class="information">
-    <summary class="button-sm">О рельефе и источниках<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 9 5 6 5-6"/></svg></summary>
+    <summary class="button-sm">О районе и источниках<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 9 5 6 5-6"/></svg></summary>
     <div class="information-body body-6">
-      <p>Поверните ландшафт пальцем. Освещение следует ракурсу автоматически.</p>
-      <p>Высоты сохранены в масштабе 1:1. Цвет и материал помогают читать форму поверхности и не показывают её текущее состояние. Это модель высот, а не спутниковый снимок.</p>
-      <p>Срез по краю обозначает границу модели, а не геологические слои.</p>
-      <p>Область модели: 40,29–40,49° в. д.; 43,64–43,82° с. ш. За её пределами детального рельефа в этом пакете нет.</p>
-      <p>Линия содержит исходные сегменты OpenStreetMap. Её отображение не означает, что участок открыт. Перед походом проверьте действующие ограничения.</p>
-      <p>__SOURCE_NAME__. Исходные измерения TanDEM X: 2011–2015 годы; часть дополнительных данных старше. Пакет получен 6 ноября 2026 года.</p>
+      <p>Проведите пальцем, чтобы повернуть рельеф. Двумя пальцами можно приблизить и отдалить горы.</p>
+      <p>Познакомьтесь с районом Бзерпинского карниза перед походом. Подробный рельеф доступен в пределах показанной области.</p>
+      <p>Перед выходом уточните разрешённый путь, погоду и действующие ограничения у заповедника.</p>
+      <p>Источник: __SOURCE_NAME__.</p>
       <p class="caption-5">__ATTRIBUTION__</p>
       <p class="caption-5">__LIABILITY__</p>
       <p class="caption-5">© OpenStreetMap contributors · ODbL 1.0. Лицензии пакета доступны в приложении, в разделе «Источники и лицензии».</p>
     </div>
   </details>
-  <p class="hint caption-5">Все данные сцены уже на устройстве</p>
-  <noscript><p class="status body-6">3D сцена требует JavaScript системного WebView. Вернитесь к карте, чтобы открыть сохранённые тропы и слой рельефа.</p></noscript>
+  <p class="hint caption-5">Доступно без интернета</p>
+  <noscript><p class="status body-6">Не удалось открыть рельеф. Вернитесь к сохранённой карте.</p></noscript>
 </main>
 <script>__GUARD__</script>
 <script>__SCRIPT__</script>

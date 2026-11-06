@@ -14,14 +14,12 @@ const loaders = {
   terms: () => import('../../app/terms/page'), offline: () => import('../../app/offline/page'),
   trips: () => import('../../app/trips/page'), community: () => import('../../app/community/page'),
   guides: () => import('../../app/guides/page'), account: () => import('../../app/account/page'),
+  'account/action': () => import('../../app/account/action/page'),
+  search: () => import('../../app/search/page'),
   moderation: () => import('../../app/moderation/page'),
   android: () => build.hasApk ? import('../../app/android/page') : import('./android-unavailable'),
   preview: () => import('./preview-info'), missing: () => import('../../app/not-found'),
 };
-
-function Banner() {
-  return <aside className="pages-preview-banner" aria-label="Статус тестовой версии"><strong>Тестовая версия</strong><span className="pages-preview-desktop">Карта и локальные данные доступны. Серверные действия отключены.</span><a href={`${build.base}preview/`} aria-label="Возможности и ограничения тестовой версии"><span className="pages-preview-desktop">Возможности и ограничения</span><span className="pages-preview-mobile">Подробнее</span></a><span className="pages-preview-mobile pages-preview-mobile-note">Аккаунты и чат не подключены</span></aside>;
-}
 
 async function start() {
   const page = resolvePage(window.location.pathname);
@@ -33,12 +31,12 @@ async function start() {
   let content: ReactNode;
   try {content = await renderPage({params: Promise.resolve({id: page?.id}), searchParams: Promise.resolve(Object.fromEntries(new URLSearchParams(location.search)))});}
   catch (error) {console.error('Static page unavailable', error); content = (await loaders.missing()).default();}
-  document.title = `${page?.title || 'Страница не найдена'} · Тропник · тест`;
-  createRoot(document.getElementById('root')!).render(<StrictMode><a className="skip-link" href="#main">Перейти к содержимому</a><Banner/>{content}</StrictMode>);
+  document.title = `${page?.title || 'Страница не найдена'} · Тропник`;
+  createRoot(document.getElementById('root')!).render(<StrictMode><a className="skip-link" href="#main">Перейти к содержимому</a>{content}</StrictMode>);
   if ('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register(`${build.base}sw.js`, {scope: build.base}).catch(error => console.info('Offline shell not installed', error));
 }
 
 void start().catch(error => {
   console.error('Static preview failed to start', error);
-  createRoot(document.getElementById('root')!).render(<><Banner/><main id="main" className="pages-preview-boot"><h1>Не удалось открыть страницу</h1><p>Обновите страницу при устойчивой связи. Сохранённые данные можно открыть в автономном режиме.</p><a href={`${build.base}offline.html`}>Открыть автономную карту</a></main></>);
+  createRoot(document.getElementById('root')!).render(<><main id="main" className="pages-preview-boot"><h1>Не удалось открыть страницу</h1><p>Обновите страницу при устойчивой связи. Сохранённые данные можно открыть в автономном режиме.</p><a href={`${build.base}offline-viewer.html`}>Открыть автономную карту</a></main></>);
 });

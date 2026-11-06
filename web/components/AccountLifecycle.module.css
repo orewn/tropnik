@@ -1,0 +1,11 @@
+.action {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}

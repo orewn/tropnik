@@ -3,6 +3,7 @@ package ru.tropa.app.data
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Locale
 
 data class Region(
     val id: String,
@@ -46,9 +47,34 @@ data class TrailRoute(
     val officialEvidenceSummary: String? = null,
     val officialEvidenceScope: String? = null,
     val officialEvidenceCheckedAt: String? = null,
+    val sourceKind: String? = null,
+    val additionalSources: List<RouteSourceReference> = emptyList(),
+    val distanceNote: String? = null,
+    val accessStatus: String? = null,
+    val territoryIds: List<String> = emptyList(),
+)
+
+data class RouteSourceReference(
+    val url: String,
+    val name: String,
+    val scope: String,
+    val reviewedAt: String,
+    val publishedAt: String? = null,
+    val messageId: Int? = null,
 )
 
 data class Catalog(val version: String, val regions: List<Region>, val routes: List<TrailRoute>) {
+    /** Cards remain discoverable even when no route line has been published. */
+    fun referenceRoutes(query: String = "", regionId: String? = null): List<TrailRoute> {
+        val needle = searchText(query.take(100))
+        val regionNames = regions.associate { it.id to it.name }
+        return routes.filter { route ->
+            !route.illustrative && (regionId == null || regionId in route.regionIds) &&
+                (needle.isBlank() || searchText(listOf(route.title, route.summary, route.description,
+                    route.regionIds.mapNotNull(regionNames::get).joinToString(" ")).joinToString(" ")).contains(needle))
+        }
+    }
+
     companion object {
         fun load(context: Context): Catalog {
             val json = context.assets.open("catalog.json").bufferedReader().use { JSONObject(it.readText()) }
@@ -67,6 +93,7 @@ data class Catalog(val version: String, val regions: List<Region>, val routes: L
     }
 }
 
+private fun searchText(value: String) = value.trim().lowercase(Locale.ROOT).replace('ё', 'е')
 private fun JSONArray.objects() = (0 until length()).map { getJSONObject(it) }
 private fun JSONObject.optionalString(key: String) = if (isNull(key)) null else getString(key)
 private fun JSONObject.optionalDouble(key: String) = if (isNull(key)) null else getDouble(key)
@@ -97,6 +124,16 @@ fun JSONObject.toRoute(): TrailRoute = TrailRoute(
     officialEvidenceSummary = optionalString("officialEvidenceSummary"),
     officialEvidenceScope = optionalString("officialEvidenceScope"),
     officialEvidenceCheckedAt = optionalString("officialEvidenceCheckedAt"),
+    sourceKind = optionalString("sourceKind"),
+    distanceNote = optionalString("distanceNote"),
+    accessStatus = optionalString("accessStatus"),
+    territoryIds = optJSONArray("territoryIds")?.let { list -> (0 until list.length()).map { list.getString(it) } }.orEmpty(),
+    additionalSources = optJSONArray("additionalSources")?.objects()?.map { source ->
+        RouteSourceReference(url = source.getString("url"), name = source.getString("name"),
+            scope = source.getString("scope"), reviewedAt = source.getString("reviewedAt"),
+            publishedAt = source.optionalString("publishedAt"),
+            messageId = if (source.isNull("messageId")) null else source.getInt("messageId"))
+    }.orEmpty(),
 )
 
 fun PublishedRoute.toTrailRoute(): TrailRoute {
@@ -105,20 +142,19 @@ fun PublishedRoute.toTrailRoute(): TrailRoute {
     val difficultyName = when (difficulty) { "easy" -> "Простой"; "moderate" -> "Средний"; "hard" -> "Сложный"; "expert" -> "Экспертный"; else -> difficulty }
     val originKey = java.security.MessageDigest.getInstance("SHA-256").digest(apiOrigin.toByteArray()).take(8).joinToString("") { "%02x".format(it) }
     val snapshot = JSONObject().put("id", "api:$originKey:$id").put("regionId", regionId).put("title", title)
-        .put("summary", "Карточка опубликована подключённым сервисом. Состояние на момент загрузки.")
+        .put("summary", "Посмотрите описание маршрута и выберите подходящий поход.")
         .put("description", description).put("difficulty", difficultyName).put("distanceMeters", distanceKm * 1000)
         .put("ascentMeters", ascentM).put("durationMinutes", durationMin).put("geometryAsset", JSONObject.NULL)
         .put("inlineGeometry", geometry.toString()).put("apiRouteId", id).put("apiRevisionId", revisionId).put("apiOrigin", apiOrigin)
         .put("illustrative", false).put("fieldVerified", false).put("sourceName", source.getString("name"))
         .put("sourceUrl", source.getString("url")).put("sourceLicense", source.getString("license"))
         .put("sourceDate", source.getString("retrievedAt"))
-        .put("currentStatusLabel", if (status == "closed") "Закрыт сервисом" else "Опубликован сервисом")
-        .put("currentAdvisory", if (status == "closed") "Сервис обозначил маршрут закрытым. Не используйте линию как разрешение на прохождение." else JSONObject.NULL)
+        .put("currentStatusLabel", if (status == "closed") "Маршрут закрыт" else "Открыт для походов")
+        .put("currentAdvisory", if (status == "closed") "Маршрут закрыт для посещения. Уточните ограничения у организатора." else JSONObject.NULL)
         .put("advisorySourceUrl", source.getString("url"))
         .put("notices", JSONArray(listOf("Данные карточки не заменяют проверку условий, погоды и допусков перед выходом.",
-            "Версия маршрута: $revisionId. Поход закрепляется за конкретной версией на сервере.",
-            "Правила сервиса: минимум $minPeople человек, максимум $maxGroupSize, гидов: $requiredGuides. Гид включён в число участников.",
-            "Подробный офлайн пакет есть только у пилотной зоны Бзерпинского карниза. В остальных местах доступна обзорная карта.",
-            "Оффлайн сохранение карточки не обновляет состояние маршрута и не даёт разрешение на старт.")))
+            "Группа от $minPeople до $maxGroupSize человек, включая гидов. Необходимое число гидов: $requiredGuides.",
+            "Без интернета подробная карта доступна в районе Бзерпинского карниза. Для других районов сохраняется обзорная карта.",
+            "Перед походом обновите карточку и проверьте условия посещения.")))
     return snapshot.toRoute()
 }

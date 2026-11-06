@@ -11,7 +11,7 @@ import (
 var Files embed.FS
 
 // RequiredVersion is also the readiness gate used by the running API.
-const RequiredVersion = 3
+const RequiredVersion = 5
 
 func Apply(ctx context.Context, pool *pgxpool.Pool) error {
 	c, e := pool.Acquire(ctx)
@@ -27,7 +27,7 @@ func Apply(ctx context.Context, pool *pgxpool.Pool) error {
 	if e = c.QueryRow(ctx, "SELECT to_regclass(quote_ident(current_schema())||'.schema_migrations')::text").Scan(&table); e != nil {
 		return e
 	}
-	for version, name := range []string{"001_initial.sql", "002_moderation.sql", "003_auth_rate_limits.sql"} {
+	for version, name := range []string{"001_initial.sql", "002_moderation.sql", "003_auth_rate_limits.sql", "004_account_history.sql", "005_account_lifecycle.sql"} {
 		if table != nil || version > 0 {
 			var exists bool
 			if e = c.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=$1)", version+1).Scan(&exists); e != nil {

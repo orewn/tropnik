@@ -1,0 +1,695 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-06",
+  "source": {
+    "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+    "name": "RussiaDiscovery",
+    "publishedAt": "2025-09-11"
+  },
+  "routes": [
+    {
+      "id": "bbt-bolshie-koty-goloustnoe",
+      "regionId": "baikal",
+      "regionIds": [
+        "baikal"
+      ],
+      "title": "Большие Коты — Большое Голоустное",
+      "subtitle": "Большая Байкальская тропа · отдельный участок",
+      "description": "Путь по берегу Байкала через мыс Скрипер и лесные склоны. На отдельных участках встречаются осыпающиеся берега; автор тропы описывает обходы по каменистому пляжу. Планировать переход нужно с запасом времени и актуальными сведениями о состоянии пути.",
+      "distanceKm": 30,
+      "duration": "8–14 ч",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://www.greatbaikaltrail.org/tropa-bol-shie-koty-bol-shoe-goloustno",
+      "sourceName": "Большая Байкальская Тропа",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Уточнить перед выходом",
+      "accessStatus": "closed",
+      "notes": [
+        "Организация ББТ сообщает, что с 2023 года не выполняет прежнее ежегодное обслуживание этой тропы.",
+        "Расстояние относится только к участку от Больших Котов, а не ко всей сети ББТ.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "в одну сторону",
+      "sourceTechnicalDifficulty": "Средняя — по описанию ББТ",
+      "territoryIds": [
+        "territory-28173009B78872068540735"
+      ],
+      "operatingNotice": {
+        "title": "Посещение приостановлено",
+        "body": "С 4 сентября 2026 года администрация приостановила посещение Большой Байкальской тропы из-за активности медведей. Более позднее подтверждение открытия при проверке не найдено.",
+        "url": "https://baikal-1.ru/medvedi-v-natsionalnom-parke-poseshhenie-eshhyo-dvuh-marshrutov-priostanovleno/",
+        "effectiveAt": "2026-09-04"
+      }
+    },
+    {
+      "id": "baikal-khamar-daban-waterfall",
+      "regionId": "baikal",
+      "regionIds": [
+        "baikal"
+      ],
+      "title": "В дебри Хамар-Дабана — к водопаду",
+      "subtitle": "Танхой · Байкальский заповедник",
+      "description": "Радиальная прогулка от центральной усадьбы по Кедровой аллее и долине Осиновки к лесному водопаду. На пути есть настилы, переходы через ручьи и подвесные мосты. Возвращение проходит по той же тропе.",
+      "distanceKm": 12,
+      "duration": "6 ч",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://baikalecotourism.ru/hamardabantur",
+      "sourceName": "Байкальский заповедник",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Июнь — сентябрь",
+      "accessStatus": "unknown",
+      "notes": [
+        "Это вариант экскурсии к водопаду. Подъём к альпийским лугам — другой вариант пути.",
+        "Участники должны быть готовы к длительному пешему переходу.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "радиальный маршрут",
+      "sourceTechnicalDifficulty": "Категория 1 в описании экскурсии; требуется выносливость",
+      "territoryIds": [
+        "territory-28173009B49563687485750"
+      ]
+    },
+    {
+      "id": "teriberka-batareysky-waterfall",
+      "regionId": "murmansk",
+      "regionIds": [
+        "murmansk"
+      ],
+      "title": "Териберка — Батарейский водопад",
+      "subtitle": "Побережье Баренцева моря · природный парк",
+      "description": "Маршрут дирекции природного парка объединяет каменный пляж и водопад, соединяющий Малое Батарейское озеро с морем. По дороге тундровые участки сменяются бухтами и гранитными скалами.",
+      "distanceKm": 5,
+      "duration": "2 ч",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://murmansk.travel/excursions/811",
+      "sourceName": "Дирекция ООПТ · туристический портал Мурманской области",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Уточнить перед выходом",
+      "accessStatus": "unknown",
+      "notes": [
+        "Для территории природного парка оформляется разрешение; само село находится за его пределами.",
+        "Зимние условия отличаются: уточните доступ и необходимое снаряжение.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        },
+        {
+          "url": "https://www.murmansk.travel/places/936",
+          "name": "Правила посещения парка «Териберка»",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "distanceNote": "маршрут парка целиком",
+      "territoryIds": [
+        "territory-28173009B70218250039968"
+      ]
+    },
+    {
+      "id": "ergaki-svetloe",
+      "regionId": "krasnoyarsk",
+      "regionIds": [
+        "krasnoyarsk"
+      ],
+      "title": "Ергаки — озеро Светлое",
+      "subtitle": "Экотропа природного парка «Ергаки»",
+      "description": "Оборудованная тропа к озеру Светлому. Часть пути имеет твёрдое покрытие, у начала расположены информационные стенды и место для палаток. У озера парк указывает три палаточные стоянки и площадку для отдыха.",
+      "distanceKm": 7,
+      "duration": null,
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://ergaki-park.ru/tourism/ekotropy/",
+      "sourceName": "Природный парк «Ергаки»",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Пешком: июнь — сентябрь; зимой — лыжи или снегоступы",
+      "accessStatus": "unknown",
+      "notes": [
+        "Указана длина экотропы; обратный путь и радиальные выходы рассчитываются отдельно.",
+        "Ночёвки планируйте на разрешённых стоянках.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "длина экотропы",
+      "territoryIds": [
+        "territory-28173009B65133456612022"
+      ]
+    },
+    {
+      "id": "elbrus-devichyi-kosy",
+      "regionId": "kabardino-balkaria",
+      "regionIds": [
+        "kabardino-balkaria"
+      ],
+      "title": "Терскол — водопад Девичьи Косы",
+      "subtitle": "Приэльбрусье · от посёлка Терскол",
+      "description": "Путь от Терскола через хвойный лес и открытые каменистые склоны к водопаду на южном склоне пика Терскол. С тропы видны Баксанская долина и окружающие хребты. На развилке после старта выбирается направление к Девичьим Косам.",
+      "distanceKm": 10.2,
+      "duration": "4–5 ч",
+      "ascentM": 650,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://resort-elbrus.ru/whatTodo/15/vodopad-devichi-kosy",
+      "sourceName": "Курорт «Эльбрус»",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Уточнить перед выходом",
+      "accessStatus": "unknown",
+      "notes": [
+        "Показатели относятся к описанному курортом выходу от Терскола и обратно.",
+        "На открытых каменистых участках нужна устойчивая обувь.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "туда и обратно",
+      "territoryIds": [
+        "territory-28173009B46612801043871"
+      ]
+    },
+    {
+      "id": "elbrus-terskol-gorge",
+      "regionId": "kabardino-balkaria",
+      "regionIds": [
+        "kabardino-balkaria"
+      ],
+      "title": "Терскольское ущелье — водопад Терскол",
+      "subtitle": "Приэльбрусье · от мечети в Терсколе",
+      "description": "Тропа идёт вдоль реки через сосновый лес к базальтовым скалам и водопаду. Набор высоты постепенный, но ближе к цели есть крутой каменистый участок. Через некоторые ручьи устроены деревянные переходы.",
+      "distanceKm": 4,
+      "duration": "8 ч — программа экскурсии",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://resort-elbrus.ru/excursions/15/treking-terskolskoe-ushhele",
+      "sourceName": "Курорт «Эльбрус»",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Уточнить перед выходом",
+      "accessStatus": "unknown",
+      "notes": [
+        "В описании этого варианта указано около 4 км в одну сторону. Обратный путь учитывайте отдельно.",
+        "Другие описания используют иной старт и расстояние; не смешивайте параметры вариантов.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "в одну сторону",
+      "sourceTechnicalDifficulty": "Средняя — по описанию экскурсии",
+      "territoryIds": [
+        "territory-28173009B46612801043871"
+      ]
+    },
+    {
+      "id": "cheget-narzan-glade",
+      "regionId": "kabardino-balkaria",
+      "regionIds": [
+        "kabardino-balkaria"
+      ],
+      "title": "Чегет — Поляна Нарзанов",
+      "subtitle": "Приэльбрусье · экотропа № 5",
+      "description": "Короткая прогулка от Чегета к поляне с минеральными источниками. Это отдельный участок экотропы: расстояние не включает подход от поляны Азау, описанный в общей туристической подборке.",
+      "distanceKm": 2,
+      "duration": null,
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://resort-elbrus.ru/whatTodo/23/polyana-narzanov",
+      "sourceName": "Курорт «Эльбрус»",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Круглый год — по описанию места",
+      "accessStatus": "unknown",
+      "notes": [
+        "Для более длинного выхода от Азау нужно отдельно проверить всю нитку и её доступность.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "туда и обратно",
+      "territoryIds": [
+        "territory-28173009B46612801043871"
+      ]
+    },
+    {
+      "id": "dombay-chuchkhur-waterfalls",
+      "regionId": "karachay-cherkessia",
+      "regionIds": [
+        "karachay-cherkessia"
+      ],
+      "title": "Домбай — Русская поляна — Чучхурские водопады",
+      "subtitle": "Тебердинский национальный парк · Домбай-Ульген",
+      "description": "Путь по долине Домбай-Ульген проходит через Русскую поляну и далее поднимается к Чучхурским водопадам. У развилки направления к Чучхурским и Птышскому водопадам расходятся; прямого перехода между ними в описании парка нет.",
+      "distanceKm": 4.6,
+      "duration": null,
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://tgpbz.ru/novosti/otkrytie-marshruta-na-chuchhurskie-vodopady/",
+      "sourceName": "Тебердинский национальный парк",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Уточнить перед выходом",
+      "accessStatus": "restricted",
+      "notes": [
+        "4,6 км — расстояние от КПП до Чучхурских водопадов по сообщению об открытии 9 июня 2026 года.",
+        "Эта длина не описывает только разрешённый сейчас участок до Русской поляны.",
+        "Для участков в пограничной зоне заранее уточняйте отдельный пропуск.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "до водопадов, в одну сторону",
+      "territoryIds": [
+        "territory-28173009B95588705134862"
+      ],
+      "operatingNotice": {
+        "title": "Доступ только до Русской поляны",
+        "body": "В сообщении от 8 октября 2026 года парк ограничил маршрут участком до Русской поляны. Подтверждение открытия дальнейшего пути при проверке не найдено.",
+        "url": "https://tgpbz.ru/novosti-teberdinskogo-nats-parka/",
+        "effectiveAt": "2026-10-08"
+      }
+    },
+    {
+      "id": "dombay-alibek-waterfall",
+      "regionId": "karachay-cherkessia",
+      "regionIds": [
+        "karachay-cherkessia"
+      ],
+      "title": "Ущелье Алибек — Алибекский водопад",
+      "subtitle": "Домбай · Тебердинский национальный парк",
+      "description": "От КПП путь ведёт по горной дороге через хвойный лес к альплагерю Алибек, затем по пешей тропе к водопаду. Направление на Турье озеро отделяется на развилке и требует самостоятельной проверки доступа.",
+      "distanceKm": 5.7,
+      "duration": null,
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://tgpbz.ru/marshruty/ushhele-alibek/",
+      "sourceName": "Тебердинский национальный парк",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Уточнить перед выходом",
+      "accessStatus": "restricted",
+      "notes": [
+        "По карте маршрутов парка расстояние до водопада — 5,7 км в одну сторону. Общая длина всех ответвлений не подставлена в эту карточку.",
+        "Ограничение до водопада не означает разрешения на дальнейший путь к Турьему озеру.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        },
+        {
+          "url": "https://tgpbz.ru/karta-marshrutov/",
+          "name": "Карта маршрутов Тебердинского парка",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "distanceNote": "до водопада, в одну сторону",
+      "territoryIds": [
+        "territory-28173009B95588705134862"
+      ],
+      "operatingNotice": {
+        "title": "Дальнейший путь ограничен",
+        "body": "Октябрьские сообщения парка допускают посещение только до Алибекского водопада. Для других участков уточняйте действующие ограничения и пограничный пропуск.",
+        "url": "https://tgpbz.ru/novosti-teberdinskogo-nats-parka/",
+        "effectiveAt": "2026-10-20"
+      }
+    },
+    {
+      "id": "arkhyz-lake-love",
+      "regionId": "karachay-cherkessia",
+      "regionIds": [
+        "karachay-cherkessia"
+      ],
+      "title": "Озеро Любви — Суук-Джюрек-Кёль",
+      "subtitle": "Архыз · посещение запрещено",
+      "description": "Озеро упомянуто в туристической подборке, однако администрация национального парка относит его к заповедной зоне и запрещает посещение. Карточка сохранена, чтобы при поиске места было видно это ограничение.",
+      "distanceKm": null,
+      "duration": null,
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://tgpbz.ru/otvety-na-chasto-zadavaemye-voprosy/",
+      "sourceName": "Тебердинский национальный парк",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Уточнить перед выходом",
+      "accessStatus": "closed",
+      "notes": [
+        "Парк сообщает, что разрешения на посещение озера не оформляются.",
+        "Выберите вместо него официально утверждённую тропу с подтверждённым доступом.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "territoryIds": [
+        "territory-28173009B95588705134862"
+      ],
+      "operatingNotice": {
+        "title": "Посещение запрещено",
+        "body": "По сообщению администрации озеро находится в заповедной зоне; посещение запрещено и разрешения не оформляются. Статус прочитан 6 ноября 2026 года.",
+        "url": "https://tgpbz.ru/otvety-na-chasto-zadavaemye-voprosy/",
+        "effectiveAt": "2026-11-06"
+      }
+    },
+    {
+      "id": "kamchatka-around-tolbachiks",
+      "regionId": "kamchatka",
+      "regionIds": [
+        "kamchatka"
+      ],
+      "title": "Вокруг Толбачиков",
+      "subtitle": "Ключевской парк · Клешня — Столик",
+      "description": "Пеший маршрут между кордоном Клешня и стоянкой Столик у горы Копыто. По паспорту парка это линейный путь, который можно проходить в обратном направлении. Радиальные выходы к вулканам в указанную длину не включены.",
+      "distanceKm": 60,
+      "duration": "5 дней пешком + дорога",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://www.vulcanikamchatki.ru/files/pasporta_2024/3_pasport_vokrug_tolbachikov.pdf",
+      "sourceName": "Природный парк «Вулканы Камчатки»",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Июнь — сентябрь",
+      "accessStatus": "closed",
+      "notes": [
+        "Оформление разрешения и регистрация группы на входе и выходе предусмотрены паспортом парка.",
+        "Название «кольцо» в статье не меняет линейный вариант, описанный в действующем паспорте.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "без радиальных выходов",
+      "sourceTechnicalDifficulty": "Некатегорийный — по паспорту парка",
+      "territoryIds": [
+        "territory-28173009B70023447378008"
+      ],
+      "operatingNotice": {
+        "title": "Маршрут закрыт",
+        "body": "В перечне парка, прочитанном 6 ноября 2026 года, маршрут отмечен закрытым. Дата изменения статуса на странице не указана.",
+        "url": "https://www.vulcanikamchatki.ru/v_pomow_gostyu/nomera_marshrutov/",
+        "effectiveAt": "2026-11-06"
+      }
+    },
+    {
+      "id": "nalychevo-avachinsky-central",
+      "regionId": "kamchatka",
+      "regionIds": [
+        "kamchatka"
+      ],
+      "title": "Налычево — Авачинский — Центральный",
+      "subtitle": "Пеший участок через Авачинский перевал",
+      "description": "Двухдневный переход от кордона Авачинский до кордона Центральный. Этот паспортный участок входит в район, который подборка описывает как Налычевское кольцо; он не равен всему длинному кольцевому путешествию.",
+      "distanceKm": 37,
+      "duration": "2 дня, 1 ночь",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://www.vulcanikamchatki.ru/files/pasporta_2024/pasport_2_avachinskij-central_nyj.pdf",
+      "sourceName": "Природный парк «Вулканы Камчатки»",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Июнь — октябрь",
+      "accessStatus": "closed",
+      "notes": [
+        "В паспорте Авачинскому перевалу присвоены 1А летом и 1Б зимой; подготовку оценивайте с квалифицированным гидом.",
+        "Для посещения требуется разрешение парка.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "между кордонами",
+      "sourceTechnicalDifficulty": "Перевал: 1А летом, 1Б зимой",
+      "territoryIds": [
+        "territory-28173009B70023447378008"
+      ],
+      "operatingNotice": {
+        "title": "Маршрут закрыт",
+        "body": "Перечень парка на дату чтения 6 ноября 2026 года отмечает этот участок закрытым.",
+        "url": "https://www.vulcanikamchatki.ru/v_pomow_gostyu/nomera_marshrutov/",
+        "effectiveAt": "2026-11-06"
+      }
+    },
+    {
+      "id": "kamchatka-pacific-ring",
+      "regionId": "kamchatka",
+      "regionIds": [
+        "kamchatka"
+      ],
+      "title": "Тихоокеанское кольцо",
+      "subtitle": "Южно-Камчатский парк · прежний маршрут",
+      "description": "Справочная запись о прежнем маршруте. На сайте парка указано, что варианты «Тихоокеанское кольцо — 1» и «морской путь» недействительны. Использовать старое описание как разрешённый путь нельзя.",
+      "distanceKm": null,
+      "duration": null,
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://www.vulcanikamchatki.ru/v_pomow_gostyu/nomera_marshrutov/",
+      "sourceName": "Природный парк «Вулканы Камчатки»",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Уточнить перед выходом",
+      "accessStatus": "closed",
+      "notes": [
+        "Новый индивидуальный маршрут требует отдельного согласования с отделом охраны парка.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "territoryIds": [
+        "territory-28173009B70023447378008"
+      ],
+      "operatingNotice": {
+        "title": "Прежний маршрут недействителен",
+        "body": "Парк сообщает, что ранее существовавшие варианты этого маршрута недействительны. Новый утверждённый путь в прочитанном перечне не указан.",
+        "url": "https://www.vulcanikamchatki.ru/v_pomow_gostyu/nomera_marshrutov/",
+        "effectiveAt": "2026-11-06"
+      }
+    },
+    {
+      "id": "akkem-three-birches-refuge",
+      "regionId": "altai",
+      "regionIds": [
+        "altai"
+      ],
+      "title": "Аккемская тропа — от Трёх берёз к приюту Аккем",
+      "subtitle": "Алтай · пеший участок после заброски",
+      "description": "Переход по долине Аккема к горному приюту: сначала через горную тайгу с подъёмами и спусками, затем ближе к реке с видами на массив Белухи. Карточка относится к пешей части после стоянки Три берёзы.",
+      "distanceKm": 22,
+      "duration": "7–10 ч",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://altai.travel/tourism/tours/shkola-alpinizma-na-beluhe",
+      "sourceName": "Туристический портал Алтая · программа оператора «Высотник»",
+      "sourceKind": "official",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "season": "Уточнить перед выходом",
+      "accessStatus": "unknown",
+      "notes": [
+        "Заброска от Тюнгура через Кузуяк — отдельный транспортный участок. Она не включена в 22 км.",
+        "Восхождение на Белуху и занятия альпинизмом в карточку не входят.",
+        "Перед выходом уточните погоду, разрешения и действующие ограничения у организации, отвечающей за маршрут."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ],
+      "distanceNote": "от Трёх берёз до приюта",
+      "territoryIds": [
+        "territory-28173009B30008444211385"
+      ]
+    }
+  ],
+  "updatesByRouteId": {
+    "osm-relation-4509282": {
+      "title": "Через горы к морю — Тридцатка",
+      "regionIds": [
+        "krasnodar",
+        "adygea"
+      ],
+      "description": "Путь через Фишт-Оштенский район в сторону Черноморского побережья. У «Тридцатки» несколько официальных вариантов. Для сохранённой линии конкретный вариант ещё не установлен, поэтому расстояние и время другого варианта не подставлены.",
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        },
+        {
+          "url": "https://www.kavkazzapoved.ru/en/node/81",
+          "name": "Кавказский заповедник — вариант 30А",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "accessStatus": "restricted",
+      "operatingNotice": {
+        "title": "Полное прохождение ограничено",
+        "body": "С 27 октября 2026 года на вариантах 30А и 30Б от КПП Лагонаки доступен только однодневный участок до Инструкторской щели без ночёвки; варианты 30В и 30Г закрыты. Для сохранённой линии уточните вариант и разрешённый участок.",
+        "url": "https://www.kavkazzapoved.ru/news/s-27-oktyabrya-zakryvaetsya-chast-letnikh-turisticheskikh-marshrutov",
+        "effectiveAt": "2026-10-27"
+      }
+    },
+    "osm-relation-10626407": {
+      "title": "Водопад Кейва",
+      "description": "Лесной выход к водопаду рядом с Красной Поляной. В публикации описаны тропа и более широкая грунтовая дорога. Какая из них полностью совпадает с сохранённой линией, ещё нужно проверить.",
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ]
+    },
+    "osm-relation-16138449": {
+      "description": "Маршрут по хребту Аибга с видами на горы над Красной Поляной. В статье рассматривается переход между курортами; доступ к конкретным участкам и работу подъёмников уточняйте перед выходом.",
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ]
+    },
+    "osm-relation-15922325": {
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "publishedAt": "2025-09-11",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention"
+        }
+      ]
+    }
+  }
+}

@@ -49,6 +49,37 @@ one-off process with an explicitly supplied operator database credential.
 Do not copy that credential into the API service or the browser. See the backend
 README for bootstrap, actual qualification review and route publication.
 
+## Optional account mail
+
+The base deployment keeps registration and new email links closed. To enable
+them, fill the mail settings in the environment template with a real sender:
+`TROPA_SMTP_HOST`, `TROPA_SMTP_PORT`, `TROPA_SMTP_TLS_MODE` (`tls` or `starttls`),
+`TROPA_MAIL_FROM`, and the HTTPS `TROPA_ACCOUNT_ACTION_URL`, including any frontend
+path prefix before `/account/action`. Set SMTP username/password together when
+the relay requires authentication. There is no plaintext transport or skipped
+certificate verification option.
+
+The base `backend` network is internal. Add the explicit mail overlay to give
+the API outbound connectivity while the database remains on the internal network:
+
+```bash
+docker compose -f compose.yaml -f compose.web.yaml -f compose.mail.yaml --env-file .env up --build -d
+```
+
+Restrict the new network's outbound policy to the configured mail relay in the
+deployment firewall. No mail settings are bundled into the frontend. Configure
+the sender with the mail provider and verify the actual deployed flow before
+opening public registration. Do not use real recipients for integration tests.
+
+The queue is bounded and in memory; a restart can lose pending messages. HTTP
+acceptance does not guarantee delivery. Re-requesting a link is supported, with
+three requests per address per fifteen minutes. An unavailable transport revokes
+the affected link and records a generic mail failure. Operators must monitor
+these failures and define retention for expired digest-only token records. The
+account closure flow anonymises profile credentials while preserving required
+participation, qualification and audit records; it is not a complete legal data
+erasure process. See the backend lifecycle section for exact guarantees.
+
 ## Standard Next deployment
 
 The application source uses Next conventions. Install its pinned dependencies
@@ -58,7 +89,7 @@ and use its ordinary Next commands on Node 24:
 cd ../web
 pnpm install --frozen-lockfile
 pnpm run build:next
-TROPA_API_URL=http://127.0.0.1:8080 pnpm run start:next
+PUBLIC_ORIGIN=https://your-domain.example TROPA_API_URL=http://127.0.0.1:8080 pnpm run start:next
 ```
 
 `pnpm-lock.yaml` is the current lockfile, including the map dependencies. The
@@ -92,6 +123,36 @@ of the API, for example `TROPA_API_URL=http://127.0.0.1:8080` when Next and the 
 share this host. The BFF appends `/api/v1` itself. Do not append it twice. Never
 put credentials or database strings in `NEXT_PUBLIC_*` variables. Native Android
 uses the public HTTPS origin and the same `/api/v1` API.
+
+Set the server-only `PUBLIC_ORIGIN` on the Next process as well as Go. It must be
+the exact canonical HTTPS browser origin, without a trailing slash, credentials,
+path, query or fragment. The Compose web service passes the same value to both
+processes. `NEXT_PUBLIC_SITE_URL` controls bundled public metadata and does not
+replace this runtime security setting.
+
+The BFF compares mutation `Origin` with `PUBLIC_ORIGIN` and derives its `Secure`
+cookie attribute from that configuration. It never uses `Host`,
+`X-Forwarded-Host`, `X-Forwarded-Proto` or the internal Next listener URL to grant
+browser access. This matters behind Caddy: the public request can arrive at a
+Next listener addressed as `0.0.0.0:3000`. Missing or invalid `PUBLIC_ORIGIN`
+disables a configured BFF before any upstream request. With no `TROPA_API_URL`,
+the preview remains explicitly disconnected. `/api/status` reports connected
+only when this origin policy is valid and Go's database-readiness response is
+valid. Its bounded `reason` distinguishes `service_config` from
+`upstream_unavailable` without returning hostnames, environment values or errors
+from the upstream connection.
+
+For local development, explicitly set `PUBLIC_ORIGIN=http://localhost:3000`
+with `NODE_ENV=development`; `127.0.0.1` and `[::1]` are also supported loopback
+hosts. HTTP origins are rejected in production and outside these development
+hosts. A differently named local browser origin needs its own explicit value;
+forwarded headers cannot override it.
+
+On the current private Sites preview the corresponding server value is
+`PUBLIC_ORIGIN=https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site`.
+Setting this origin does not deploy the Go backend, grant Sites access to other
+users or make its private browser sign-in gate an Android API. Native clients
+still require a separately reachable HTTPS Go API origin.
 
 Use `Caddyfile.example` as the ingress starting point. It sends `/api/v1/*` to Go
 and all remaining paths, **including `/api/backend/*`**, to Next. DNS and the
@@ -166,6 +227,18 @@ and container startup still require a Docker-capable host.
 The ordinary Next 16 build, including TypeScript checking and standalone output,
 also completed in the authoring environment. This does not constitute a Docker
 build or a live web/API/PostGIS integration check.
+
+The additional BFF boundary regression check runs without a database:
+
+```bash
+cd ../web
+node --experimental-strip-types --test tests/backend-origin.test.mjs tests/backend-forwarding.test.mjs tests/service-readiness.test.mjs
+node node_modules/typescript/bin/tsc -p tests/tsconfig.backend.json --pretty false
+```
+
+It invokes the actual BFF handler with an internal listener URL and mocked
+upstream responses, including successful and failed logout. It proves configured
+origin and cookie behavior, not Caddy/container startup or live authentication.
 
 ## Operational launch checks
 

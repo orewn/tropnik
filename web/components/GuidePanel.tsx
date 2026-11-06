@@ -69,7 +69,7 @@ export function GuidePanel() {
       <ShieldCheck size={30}/>
       <div><strong>{user ? user.displayName : 'Профиль гида'}</strong>
         <p>{loading ? 'Проверяем статус профиля…' : user ? guideStates[user.guideStatus] : 'Выберите роль при регистрации. Проверка допуска проходит отдельно.'}</p>
-        {user?.guideStatus === 'verified' && <p>Право вести конкретный маршрут сервер проверит по категории и сроку допуска.</p>}
+        {user?.guideStatus === 'verified' && <p>Для каждого маршрута проверяются квалификация гида и срок допуска.</p>}
         {user && ['pending', 'expired', 'suspended'].includes(user.guideStatus) && <p>Назначение выходов доступно после проверки действующих оснований оператором.</p>}
       </div>
       {!loading && (user?.guideStatus === 'verified' ? <a className="button primary small" style={{marginLeft: 'auto'}} href="/trips?tab=requests">К запросам <ArrowRight size={16}/></a>

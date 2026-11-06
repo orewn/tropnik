@@ -29,8 +29,10 @@ button:focus-visible{outline:3px solid #aa7344;outline-offset:4px}
 .info small{display:block;font-size:12px;line-height:16px;margin-top:16px;overflow-wrap:anywhere;color:#576950}
 .info ul{padding-left:24px;font-size:14px;line-height:20px}
 .info li+li{margin-top:12px}
-.status{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:16px 24px;max-width:calc(100% - 48px);background:#fffefa;border:1px solid #cbd5c3;border-radius:12px;font-size:14px;line-height:20px}
-.status:empty{display:none}
+.scene-feedback{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:16px 24px;max-width:calc(100% - 48px);background:#fffefa;border:1px solid #cbd5c3;border-radius:12px;font-size:14px;line-height:20px}
+.scene-feedback[hidden],.scene-retry[hidden]{display:none}
+.scene-retry{min-height:48px;margin-top:16px;padding:12px 16px;border:1px solid #244d3c;border-radius:12px;background:#244d3c;color:#fffefa;font-weight:600}
+.scene-retry:hover{background:#183b2c}
 @media(max-width:600px){
  .heading{left:24px;top:24px;max-width:calc(100% - 112px)}
  h1{font-size:30px;line-height:36px;margin:12px 0}
@@ -43,7 +45,7 @@ button:focus-visible{outline:3px solid #aa7344;outline-offset:4px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
-</style></head><body><canvas id="terrain" tabindex="0" aria-label="Трёхмерный рельеф. Перетаскивание меняет ракурс, стрелки поворачивают, плюс и минус меняют масштаб."></canvas><div class="heading"><span class="eyebrow">Западный Кавказ · Тропник</span><h1>Бзерпинский<br>ландшафт</h1><p>Высоты без преувеличения</p></div><div class="tools" aria-label="Управление ландшафтом"><button id="zoom-in" aria-label="Приблизить"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5v18M5 14h18"/></svg></button><button id="zoom-out" aria-label="Отдалить"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 14h18"/></svg></button><hr><button id="rotate" aria-label="Повернуть"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8a9 9 0 1 1-2 10M3 4v7h7"/></svg></button><button id="reset" aria-label="Исходный ракурс"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H4v6m14-6h6v6M4 18v6h6m14-6v6h-6m-8-7 4-7 4 7h-8Z"/></svg></button><hr><button id="about" aria-label="О данных" aria-expanded="false"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 14A10 10 0 1 1 4 14a10 10 0 0 1 20 0ZM13 12h2v8m-2 0h4M14 8v.01"/></svg></button></div><div class="notice"><strong>Поворачивайте сцену. Свет следует ракурсу.</strong><p>Показана справочная геометрия источника. В сообщении от 26.10.2026 указан доступ только до карниза и закрытие лагеря Холодный. Проверяйте условия перед выходом.</p><div class="source">Геометрия маршрута <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a> · Данные и лицензии — в сведениях о сцене</div></div><div id="status" class="status" role="status">Строим рельеф…</div><section id="info" class="info" role="dialog" aria-modal="true" aria-label="О данных ландшафта" hidden><button class="close" id="close" aria-label="Закрыть сведения"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7 21 21M21 7 7 21"/></svg></button><h2>География сцены</h2><p>Высоты взяты из цифровой модели поверхности Copernicus GLO-30 через Mapterhorn. Цвета и фактура помогают читать форму рельефа. Это условные материалы, не фотосъёмка и не сведения о текущем растительном покрове. Срез по краю обозначает границу модели, а не геологические слои.</p><ul><li>Сетка 513×513 точек, шаг около 31×39 м. Номинальный шаг источника 30 м; это не заявленная точность измерений.</li><li>Основная съёмка 2011–2015 годов. Поверхность может включать лес и строения.</li><li>Масштаб высоты 1:1. Освещение следует камере автоматически и не показывает фактическую погоду или положение солнца.</li><li>Область 40.29–40.49° в. д., 43.64–43.82° с. ш. Сцена не предназначена для оценки лавин, препятствий и допустимости выхода.</li></ul><p>Полная нитка маршрута на карте не означает, что все её участки открыты. Официальное сообщение Кавказского заповедника от 26.10.2026:</p><small>https://www.kavkazzapoved.ru/news/s-27-oktyabrya-zakryvaetsya-chast-letnikh-turisticheskikh-marshrutov</small><small>Terrain © Mapterhorn; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved</small><small>The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.</small><small>Mapterhorn: https://mapterhorn.com/attribution/<br>Геометрия маршрута © OpenStreetMap contributors, ODbL 1.0. Лицензия Copernicus и сведения об источниках включены в пакет приложения.</small></section><script>
+</style></head><body><canvas id="terrain" tabindex="0" aria-label="Трёхмерный рельеф. Перетаскивание меняет ракурс, стрелки поворачивают, плюс и минус меняют масштаб."></canvas><div class="heading"><span class="eyebrow">Западный Кавказ · Тропник</span><h1>Бзерпинский<br>ландшафт</h1><p>Горы рядом</p></div><div class="tools" aria-label="Управление ландшафтом"><button id="zoom-in" aria-label="Приблизить"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5v18M5 14h18"/></svg></button><button id="zoom-out" aria-label="Отдалить"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 14h18"/></svg></button><hr><button id="rotate" aria-label="Повернуть"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8a9 9 0 1 1-2 10M3 4v7h7"/></svg></button><button id="reset" aria-label="Исходный ракурс"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H4v6m14-6h6v6M4 18v6h6m14-6v6h-6m-8-7 4-7 4 7h-8Z"/></svg></button><hr><button id="about" aria-label="О данных" aria-expanded="false"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 14A10 10 0 1 1 4 14a10 10 0 0 1 20 0ZM13 12h2v8m-2 0h4M14 8v.01"/></svg></button></div><div class="notice"><strong>Поворачивайте и приближайте карту.</strong><p>В сообщении от 26.10.2026 указан доступ только до карниза и закрытие лагеря Холодный. Проверяйте условия перед выходом.</p><div class="source">Линия маршрута <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a> · Данные и лицензии — в сведениях о сцене</div></div><div id="feedback" class="scene-feedback"><div id="status" class="status" role="status">Строим рельеф…</div><button id="retry" class="scene-retry" hidden>Подготовить заново</button></div><section id="info" class="info" role="dialog" aria-modal="true" aria-label="О данных ландшафта" hidden><button class="close" id="close" aria-label="Закрыть сведения"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7 21 21M21 7 7 21"/></svg></button><h2>О местности</h2><p>Высоты взяты из цифровой модели поверхности Copernicus GLO-30 через Mapterhorn. Цвета и фактура помогают читать форму рельефа. Это условные материалы, не фотосъёмка и не сведения о текущем растительном покрове. Срез по краю обозначает границу модели, а не геологические слои.</p><ul><li>Основная съёмка 2011–2015 годов. Поверхность может включать лес и строения.</li><li>Рельеф помогает изучить местность. Погоду, состояние троп и условия выхода проверяйте отдельно.</li></ul><p>Полная нитка маршрута на карте не означает, что все её участки открыты. Официальное сообщение Кавказского заповедника от 26.10.2026:</p><small>https://www.kavkazzapoved.ru/news/s-27-oktyabrya-zakryvaetsya-chast-letnikh-turisticheskikh-marshrutov</small><small>Terrain © Mapterhorn; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved</small><small>The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.</small><small>Mapterhorn: https://mapterhorn.com/attribution/<br>Линия маршрута © OpenStreetMap contributors, ODbL 1.0. Лицензия Copernicus и сведения об источниках включены в пакет приложения.</small></section><script>
 /**
  * Georeferenced DEM viewer; no external dependencies, assets or network requests.
  * Heights stay at 1:1 scale. Colours are cartographic, not observed land cover.
@@ -1208,6 +1210,7 @@ class TerrainRenderer {
         this.viewportInsets = normalizedInsets(options.viewportInsets);
         this.visible = true;
         this.destroyed = false;
+        this.failed = false;
         this.contextLost = false;
         this.frame = 0;
         this.dirty = true;
@@ -1413,9 +1416,18 @@ class TerrainRenderer {
             this.request();
         }
         catch (_c) {
-            this.warmRequested = false;
-            this.notify('onError', 'Сцена недоступна. Вернитесь к карте и откройте её снова.');
+            this.terminalFailure('Не удалось восстановить ландшафт. Подготовьте сцену заново.');
         }
+    }
+    /** An ended graphics session cannot be made ready again by merely unhiding it.
+     * Release it before notifying the host; retry must own a new renderer/canvas. */
+    terminalFailure(message) {
+        if (this.destroyed)
+            return;
+        this.failed = true;
+        this.destroy();
+        this.notify('onError', message);
+        this.notify('onFatal', message);
     }
     unbindControls() { this.events.forEach(([target, name, handler, options]) => target.removeEventListener(name, handler, options)); this.events = []; }
     observe() {
@@ -1561,7 +1573,7 @@ class TerrainRenderer {
                 this.fallbackAfterLoss();
                 return;
             }
-            this.notify('onError', 'Не удалось нарисовать ландшафт. Вернитесь к карте.');
+            this.terminalFailure('Не удалось нарисовать ландшафт. Подготовьте сцену заново.');
             return;
         }
         const ms = performance.now() - started, renderer = this.gpu ? 'webgl2' : 'canvas2d', quality = motion ? 'motion' : 'full';
@@ -1614,9 +1626,44 @@ class TerrainRenderer {
 
 /** Embedded by build-landscape.mjs; all terrain data and scripts remain local. */
 function mountLandscape(grid, route) {
-    const canvas = document.getElementById('terrain'), status = document.getElementById('status');
-    let renderer = null, controller = null, preparing = false, disposed = false, active = true, observer = null, creditTimer = null, creditShown = false;
-    const available = () => active && !disposed && document.visibilityState !== 'hidden';
+    let canvas = document.getElementById('terrain');
+    const status = document.getElementById('status'), feedback = document.getElementById('feedback'), retry = document.getElementById('retry');
+    let renderer = null, controller = null, preparing = false, disposed = false, terminal = false, generation = 0, active = true, observer = null, creditTimer = null, creditShown = false;
+    document.documentElement.dataset.sceneState = 'loading';
+    const available = () => active && !disposed && !terminal && document.visibilityState !== 'hidden';
+    function terminalFailure(message) {
+        if (disposed || terminal)
+            return;
+        terminal = true;
+        ++generation;
+        controller === null || controller === void 0 ? void 0 : controller.abort();
+        observer === null || observer === void 0 ? void 0 : observer.disconnect();
+        observer = null;
+        if (creditTimer !== null) {
+            clearTimeout(creditTimer);
+            creditTimer = null;
+        }
+        renderer === null || renderer === void 0 ? void 0 : renderer.destroy();
+        renderer = null;
+        document.documentElement.dataset.sceneState = 'failed';
+        status.textContent = message || 'Не удалось подготовить ландшафт. Можно попробовать ещё раз.';
+        feedback.hidden = false;
+        retry.hidden = false;
+    }
+    retry.onclick = () => {
+        if (disposed || !terminal)
+            return;
+        // A canvas with a lost GPU context cannot become a fresh drawing surface.
+        // destroy() above restores the original node if fallback replaced it.
+        const replacement = canvas.cloneNode(false);
+        canvas.replaceWith(replacement);
+        canvas = replacement;
+        terminal = false;
+        retry.hidden = true;
+        status.textContent = 'Готовим ландшафт заново…';
+        document.documentElement.dataset.sceneState = 'loading';
+        void prepare();
+    };
     function fit() {
         if (!renderer)
             return;
@@ -1627,21 +1674,30 @@ function mountLandscape(grid, route) {
         if (renderer || preparing || !available())
             return;
         preparing = true;
-        const job = new AbortController();
+        const job = new AbortController(), attempt = ++generation;
         controller = job;
+        const current = () => !disposed && !terminal && attempt === generation;
         try {
             const preparedModel = await createTerrainModelAsync(grid, { signal: job.signal });
-            if (job.signal.aborted || !available())
+            if (job.signal.aborted || !available() || !current())
                 return;
             renderer = new TerrainRenderer(canvas, grid, { preparedModel, onRender: () => {
+                    if (!current())
+                        return;
+                    document.documentElement.dataset.sceneState = 'ready';
                     status.textContent = '';
+                    feedback.hidden = true;
                     const credit = document.querySelector('.source');
                     if (credit && !creditShown) {
                         creditShown = true;
                         creditTimer = setTimeout(() => { var _a; if ((_a = credit.contains) === null || _a === void 0 ? void 0 : _a.call(credit, document.activeElement))
                             return; credit.hidden = true; fit(); }, 8000);
                     }
-                }, onError: message => { status.textContent = message; } });
+                }, onError: message => { if (current()) {
+                    status.textContent = message;
+                    feedback.hidden = false;
+                } }, onFatal: message => { if (current())
+                    terminalFailure(message); } });
             renderer.setGeometry(route);
             fit();
             if (typeof ResizeObserver !== 'undefined') {
@@ -1651,8 +1707,8 @@ function mountLandscape(grid, route) {
             }
         }
         catch (error) {
-            if ((error === null || error === void 0 ? void 0 : error.name) !== 'AbortError' && available())
-                status.textContent = 'Не удалось подготовить сцену. Обновите страницу или вернитесь к карте.';
+            if ((error === null || error === void 0 ? void 0 : error.name) !== 'AbortError' && available() && current())
+                terminalFailure('Не удалось подготовить ландшафт. Можно попробовать ещё раз.');
         }
         finally {
             preparing = false;

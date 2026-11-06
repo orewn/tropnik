@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-06",
+  "source": {
+    "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+    "name": "RussiaDiscovery — места для треккинга в России",
+    "publishedAt": "2025-09-11"
+  },
+  "routes": [
+    {
+      "id": "sikhote-alin-arsenyev",
+      "regionId": "primorye",
+      "regionIds": [
+        "primorye"
+      ],
+      "territoryIds": [
+        "territory-28173009B46831765844996"
+      ],
+      "title": "Тропа Арсеньева",
+      "subtitle": "Сихотэ-Алинский заповедник · Приморский край",
+      "description": "Многодневный переход от посёлка Таёжный через удалённую часть заповедника по участку экспедиционного пути Арсеньева. Ночёвки предусмотрены в таёжных избах; на пути есть перевалы, ручьи и лесные препятствия.",
+      "distanceKm": 72,
+      "duration": "6 дней / 5 ночей",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://sikhote-alin.ru/node/19604?language=ru",
+      "sourceName": "Сихотэ-Алинский заповедник",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Вторая половина сентября — октябрь",
+      "sourceTechnicalDifficulty": "для подготовленных туристов",
+      "notes": [
+        "Участие согласовывает заповедник после предварительного собеседования; опубликованный размер группы — 2–4 человека.",
+        "Участник несёт личные вещи и питание. Высоты перевалов не использованы как суммарный набор высоты.",
+        "Проверенный навигационный трек пока не добавлен. Уточните условия и точку встречи у организатора перед выходом."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2025-09-11"
+        }
+      ],
+      "distanceNote": "полный маршрут",
+      "accessStatus": "restricted",
+      "operatingNotice": {
+        "title": "Опубликованные даты 2026 года прошли",
+        "body": "Последний выход в календаре заповедника назначен на 12–17 октября 2026 года. Сроки следующего сезона и приём заявок необходимо уточнить у заповедника.",
+        "url": "https://sikhote-alin.ru/node/19604?language=ru",
+        "effectiveAt": "2026-11-06"
+      }
+    },
+    {
+      "id": "leopard-land-leopard-trail",
+      "regionId": "primorye",
+      "regionIds": [
+        "primorye"
+      ],
+      "territoryIds": [
+        "territory-28173009B46831765844996"
+      ],
+      "title": "Тропой леопарда",
+      "subtitle": "Национальный парк «Земля леопарда» · Барабаш",
+      "description": "Кольцевая экотропа начинается у визит-центра в Барабаше и знакомит с широколиственным лесом южного Приморья. По пути устроены информационные площадки, ботанические таблички и историческая экспозиция с восстановленными окопами.",
+      "distanceKm": 1.8,
+      "duration": "2 ч",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://leopard-land.ru/services/excursions",
+      "sourceName": "Национальный парк «Земля леопарда»",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Круглый год",
+      "sourceTechnicalDifficulty": "простой",
+      "notes": [
+        "Старт — визит-центр, Барабаш, улица Хасанская, 6Б. Перед посещением нужны регистрация и инструктаж.",
+        "Доступны самостоятельное посещение и экскурсия с гидом; расписание и билет уточняются у национального парка.",
+        "Параметры относятся к кольцевой экотропе, а не к билету для посещения других зон парка. Встреча с леопардом не гарантируется.",
+        "Проверенный навигационный трек пока не добавлен. Уточните условия и точку встречи у организатора перед выходом."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2025-09-11"
+        }
+      ],
+      "distanceNote": "кольцевой маршрут",
+      "accessStatus": "restricted"
+    },
+    {
+      "id": "lazovsky-petrov-island",
+      "regionId": "primorye",
+      "regionIds": [
+        "primorye"
+      ],
+      "territoryIds": [
+        "territory-28173009B46831765844996"
+      ],
+      "title": "Остров Петрова — «Остров, остановивший время»",
+      "subtitle": "Лазовский заповедник · Приморский край",
+      "description": "Пешеходная экскурсия по заповедному острову с осмотром леса и следов его истории. Программа проходит по установленной тропе; визит организует Лазовский заповедник.",
+      "distanceKm": null,
+      "duration": "Экскурсия — 2 ч",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://openlazovsky.ru/lazovskiyzapovednik",
+      "sourceName": "Муниципальный туристический портал Лазовского округа",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Май — сентябрь",
+      "sourceTechnicalDifficulty": null,
+      "notes": [
+        "Посещение острова возможно только в составе организованной экскурсии. Переправу и наличие мест согласуют заранее.",
+        "Муниципальное описание указывает группу до 12 человек. Километраж именно этой тропы в первичном описании не указан.",
+        "Время относится к экскурсионной программе. Длительность подъезда и переправы согласуйте с организатором отдельно.",
+        "Проверенный навигационный трек пока не добавлен. Уточните условия и точку встречи у организатора перед выходом."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2025-09-11"
+        },
+        {
+          "url": "https://visit-primorye.ru/what-to-do/ostrov-petrova",
+          "name": "Visit Primorye — правила посещения острова Петрова",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        },
+        {
+          "url": "https://openlazovsky.ru/",
+          "name": "МКУ «Центр культуры, спорта, туризма и молодёжной политики» Лазовского округа",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "accessStatus": "restricted"
+    },
+    {
+      "id": "sakhalin-chekhov-peak",
+      "regionId": "sakhalin",
+      "regionIds": [
+        "sakhalin"
+      ],
+      "territoryIds": [
+        "territory-28173009B36269087375583"
+      ],
+      "title": "Пик Чехова от кафе «Старый друг»",
+      "subtitle": "Южно-Сахалинск · Сусунайский хребет",
+      "description": "Подъём от городской точки старта через лес и каменистые участки к вершине пика Чехова. В ясную погоду сверху видны низменности и горы южного Сахалина, а также залив Анива.",
+      "distanceKm": 5.7,
+      "duration": "7 ч туда и обратно",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://sakhalin.tours/node/262",
+      "sourceName": "Туристический портал Южно-Сахалинска",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Условия уточняются перед выходом",
+      "sourceTechnicalDifficulty": null,
+      "notes": [
+        "Дистанция отсчитывается от кафе «Старый друг» до вершины. Она отличается от описаний со стартом у подножия.",
+        "Высота вершины 1045 м над уровнем моря не является набором высоты; набор по выбранной нитке не подтверждён.",
+        "Проверенный навигационный трек пока не добавлен. Уточните условия и точку встречи у организатора перед выходом."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2025-09-11"
+        }
+      ],
+      "distanceNote": "в одну сторону",
+      "accessStatus": "unknown"
+    },
+    {
+      "id": "kunashir-mendeleev-fumaroles",
+      "regionId": "sakhalin",
+      "regionIds": [
+        "sakhalin"
+      ],
+      "territoryIds": [
+        "territory-28173009B36269087375583"
+      ],
+      "title": "Вулкан Менделеева — к фумарольному полю",
+      "subtitle": "Кунашир · от 16-го километра дороги Южно-Курильск — Головнино",
+      "description": "Лесная тропа через заросли бамбука выводит к северо-западному фумарольному полю. Часть пути совпадает со старой дорогой, связанной с добычей серы. Эта карточка ограничена подходом к полю; подъём на вершину в неё не включён.",
+      "distanceKm": 2.5,
+      "duration": null,
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://kurilskiy.ru/other-routes-kunashir",
+      "sourceName": "Государственный заповедник «Курильский»",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Май — ноябрь; в другое время нужны проводник и зимнее снаряжение",
+      "sourceTechnicalDifficulty": "требует минимальной физической подготовки",
+      "notes": [
+        "В описании заповедника 3–6 часов отведены программе с возможным продолжением к вершине. Отдельное время подхода к полю не выделено.",
+        "Фумаролы выделяют опасные газы. Не приближайтесь к выходам газа и не касайтесь термальной воды; соблюдайте ограничения и указания проводника.",
+        "На тропе нет сотовой связи. До поездки уточните пограничный режим и необходимые документы.",
+        "Проверенный навигационный трек пока не добавлен. Уточните условия и точку встречи у организатора перед выходом."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2025-09-11"
+        },
+        {
+          "url": "https://kurilskiy.ru/tpost/1pn23fitz1-kalendar-turisticheskoi-privlekatelnosti",
+          "name": "Курильский заповедник — информация для посетителей, сезон 2026",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "distanceNote": "в одну сторону до фумарольного поля",
+      "accessStatus": "restricted"
+    },
+    {
+      "id": "kunashir-golovnin-caldera",
+      "regionId": "sakhalin",
+      "regionIds": [
+        "sakhalin"
+      ],
+      "territoryIds": [
+        "territory-28173009B36269087375583"
+      ],
+      "title": "Кальдера вулкана Головнина — к озеру Кипящему",
+      "subtitle": "Кунашир · от 43-го километра дороги Южно-Курильск — Головнино",
+      "description": "Маршрут по грунтовой дороге поднимается к обзорным площадкам кальдеры, затем спускается внутрь вулканической котловины. Конечная точка официальной нитки — район озера Кипящего.",
+      "distanceKm": 7.5,
+      "duration": "6–7 ч туда и обратно",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://kurilskiy.ru/routes-nature-reserve",
+      "sourceName": "Государственный заповедник «Курильский»",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Май — ноябрь; фактическое открытие уточняется у заповедника",
+      "sourceTechnicalDifficulty": "требует минимальной физической подготовки",
+      "notes": [
+        "Для посещения нужны разрешение заповедника и инструктаж. Транспорт до обзорной площадки изменяет пешую часть; здесь приведён вариант от дороги.",
+        "Кипящее озеро опасно из-за горячих выбросов и газов: не купайтесь, не подходите к фумаролам и не заходите на запрещённые участки берега.",
+        "До поездки уточните пограничный режим и необходимые документы.",
+        "Проверенный навигационный трек пока не добавлен. Уточните условия и точку встречи у организатора перед выходом."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2025-09-11"
+        },
+        {
+          "url": "https://kurilskiy.ru/rules",
+          "name": "Курильский заповедник — правила посещения",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        },
+        {
+          "url": "https://kurilskiy.ru/tpost/1pn23fitz1-kalendar-turisticheskoi-privlekatelnosti",
+          "name": "Курильский заповедник — информация для посетителей, сезон 2026",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "distanceNote": "в одну сторону до озера Кипящего",
+      "accessStatus": "restricted"
+    },
+    {
+      "id": "kunashir-cape-stolbchaty",
+      "regionId": "sakhalin",
+      "regionIds": [
+        "sakhalin"
+      ],
+      "territoryIds": [
+        "territory-28173009B36269087375583"
+      ],
+      "title": "Мыс Столбчатый от посёлка «13 км»",
+      "subtitle": "Кунашир · побережье Охотского моря",
+      "description": "Путь вдоль морского берега к мысу с характерными многогранными каменными колоннами. Начало и возвращение — у дачного посёлка «13 км». Это короткий радиальный вариант, отдельный от длинного перехода через экотропу Столбовскую.",
+      "distanceKm": 3,
+      "duration": "2,5–4 ч туда и обратно",
+      "ascentM": null,
+      "difficulty": "unknown",
+      "difficultyLabel": "Сложность требует проверки",
+      "sourceUrl": "https://www.kurilskiy.ru/routes-protective-zone",
+      "sourceName": "Государственный заповедник «Курильский»",
+      "checkedAt": "2026-11-06",
+      "publicationStatus": "reference",
+      "sourceKind": "official",
+      "season": "Круглый год при подходящих приливе и состоянии моря",
+      "sourceTechnicalDifficulty": "требует минимальной физической подготовки",
+      "notes": [
+        "Время прохода согласуют с приливами и волнением: прижимы у скал могут быть непроходимы. На мокрых камнях нужна обувь с надёжным сцеплением.",
+        "На маршруте нет сотовой связи. До поездки уточните пограничный режим и необходимые документы.",
+        "Линейный маршрут через Столбовскую тропу имеет другие дистанцию и условия; его участки сюда не добавлены.",
+        "Проверенный навигационный трек пока не добавлен. Уточните условия и точку встречи у организатора перед выходом."
+      ],
+      "additionalSources": [
+        {
+          "url": "https://www.russiadiscovery.ru/news/mesta_dlya_trekkinga/",
+          "name": "RussiaDiscovery — места для треккинга",
+          "reviewedAt": "2026-11-06",
+          "scope": "editorial_mention",
+          "publishedAt": "2025-09-11"
+        },
+        {
+          "url": "https://kurilskiy.ru/tpost/1pn23fitz1-kalendar-turisticheskoi-privlekatelnosti",
+          "name": "Курильский заповедник — информация для посетителей, сезон 2026",
+          "reviewedAt": "2026-11-06",
+          "scope": "official_description"
+        }
+      ],
+      "distanceNote": "в одну сторону",
+      "accessStatus": "restricted"
+    }
+  ],
+  "updatesByRouteId": {}
+}

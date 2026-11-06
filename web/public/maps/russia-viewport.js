@@ -66,29 +66,120 @@ function onSegment(x, y, a, b) {
   return Math.abs(cross) < 1e-10 && x >= Math.min(a[0], b[0]) - 1e-10 && x <= Math.max(a[0], b[0]) + 1e-10
     && y >= Math.min(a[1], b[1]) - 1e-10 && y <= Math.max(a[1], b[1]) + 1e-10;
 }
-function inRing(x, y, ring) {
+const COVERAGE_EPSILON = 1e-10;
+const coverageIndexes = new WeakMap();
+const inBounds = (x, y, bounds) => x >= bounds[0] - COVERAGE_EPSILON && x <= bounds[2] + COVERAGE_EPSILON
+  && y >= bounds[1] - COVERAGE_EPSILON && y <= bounds[3] + COVERAGE_EPSILON;
+
+function ringIndex(points) {
+  if (!points.length) return null;
+  const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const [x, y] of points) {
+    bounds[0] = Math.min(bounds[0], x); bounds[1] = Math.min(bounds[1], y);
+    bounds[2] = Math.max(bounds[2], x); bounds[3] = Math.max(bounds[3], y);
+  }
+  const count = Math.max(1, Math.min(512, Math.ceil(Math.sqrt(points.length) * 2)));
+  const scale = bounds[3] > bounds[1] ? count / (bounds[3] - bounds[1]) : 0;
+  const bucket = y => clamp(Math.floor((y - bounds[1]) * scale), 0, count - 1);
+  const buckets = Array.from({length: count}, () => []);
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+    const low = bucket(Math.min(points[i][1], points[j][1]) - COVERAGE_EPSILON);
+    const high = bucket(Math.max(points[i][1], points[j][1]) + COVERAGE_EPSILON);
+    for (let row = low; row <= high; row++) buckets[row].push(i);
+  }
+  return {points, bounds, buckets, bucket};
+}
+
+function inIndexedRing(x, y, ring) {
+  if (!ring || !inBounds(x, y, ring.bounds)) return false;
   let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const a = ring[i], b = ring[j];
+  for (const i of ring.buckets[ring.bucket(y)]) {
+    const a = ring.points[i], b = ring.points[i === 0 ? ring.points.length - 1 : i - 1];
+    if (y < Math.min(a[1], b[1]) - COVERAGE_EPSILON || y > Math.max(a[1], b[1]) + COVERAGE_EPSILON
+      || x > Math.max(a[0], b[0]) + COVERAGE_EPSILON) continue;
+    const crosses = (a[1] > y) !== (b[1] > y);
+    if (x < Math.min(a[0], b[0]) - COVERAGE_EPSILON) {if (crosses) inside = !inside; continue;}
     if (onSegment(x, y, a, b)) return true;
-    if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) inside = !inside;
+    if (crosses && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) inside = !inside;
   }
   return inside;
 }
 
-/** Coverage is cartographic, not evidence of access, trail safety or legal permission. */
+/** The immutable, fetched coverage is indexed once. Latitude buckets only
+ * discard edges that cannot intersect the query ray; the exact boundary and
+ * hole checks remain unchanged. Dense route fitting must not rescan all
+ * 46,000+ country vertices for every route vertex on the UI thread. */
+function coverageIndex(area) {
+  const polygons = [];
+  const visit = value => {
+    if (!value) return;
+    if (value.type === 'FeatureCollection') {value.features.forEach(visit); return;}
+    if (value.type === 'Feature') {visit(value.geometry); return;}
+    if (value.type === 'GeometryCollection') {value.geometries.forEach(visit); return;}
+    for (const rings of value.type === 'Polygon' ? [value.coordinates] : value.type === 'MultiPolygon' ? value.coordinates : []) {
+      const outer = ringIndex(rings[0] || []);
+      if (outer) polygons.push({outer, holes: rings.slice(1).map(ringIndex).filter(Boolean)});
+    }
+  };
+  visit(area);
+  if (!polygons.length) return {polygons, buckets: []};
+  const south = Math.min(...polygons.map(polygon => polygon.outer.bounds[1]));
+  const north = Math.max(...polygons.map(polygon => polygon.outer.bounds[3]));
+  const count = 256, scale = north > south ? count / (north - south) : 0;
+  const bucket = y => clamp(Math.floor((y - south) * scale), 0, count - 1);
+  const buckets = Array.from({length: count}, () => []);
+  for (const polygon of polygons) {
+    const low = bucket(polygon.outer.bounds[1] - COVERAGE_EPSILON), high = bucket(polygon.outer.bounds[3] + COVERAGE_EPSILON);
+    for (let row = low; row <= high; row++) buckets[row].push(polygon);
+  }
+  return {south, north, bucket, buckets};
+}
+
+/** Coverage is cartographic, not evidence of access, trail safety or legal permission.
+ * Pass a new geometry object if replacing the pinned coverage snapshot. */
 export function inRussiaCoverage(lng, lat, area) {
   const x = russiaLongitude(lng);
-  if (!Number.isFinite(x) || !Number.isFinite(lat)) return false;
-  const geometry = value => {
-    if (!value) return false;
-    if (value.type === 'FeatureCollection') return value.features.some(geometry);
-    if (value.type === 'Feature') return geometry(value.geometry);
-    if (value.type === 'GeometryCollection') return value.geometries.some(geometry);
-    const polygons = value.type === 'Polygon' ? [value.coordinates] : value.type === 'MultiPolygon' ? value.coordinates : [];
-    return polygons.some(rings => inRing(x, lat, rings[0]) && !rings.slice(1).some(ring => inRing(x, lat, ring)));
+  if (!Number.isFinite(x) || !Number.isFinite(lat) || !area || typeof area !== 'object') return false;
+  let index = coverageIndexes.get(area);
+  if (!index) {index = coverageIndex(area); coverageIndexes.set(area, index);}
+  if (!index.buckets.length || lat < index.south - COVERAGE_EPSILON || lat > index.north + COVERAGE_EPSILON) return false;
+  return index.buckets[index.bucket(lat)].some(polygon => inIndexedRing(x, lat, polygon.outer)
+    && !polygon.holes.some(ring => inIndexedRing(x, lat, ring)));
+}
+
+/** Exact camera bounds of covered vertices. If the four extrema are covered,
+ * no other vertex can change the answer, so dense in-country tracks need only
+ * four polygon queries. Otherwise test only candidates that can expand the
+ * already verified bounds; the rendered route itself is never simplified. */
+export function coveredRussiaBounds(positions, area) {
+  let extent = null;
+  const extrema = [];
+  for (const point of positions) {
+    const x = russiaLongitude(point[0]), y = point[1];
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    if (!extent) {extent = [x, y, x, y]; extrema.push([x, y], [x, y], [x, y], [x, y]);}
+    else {
+      if (x < extent[0]) {extent[0] = x; extrema[0] = [x, y];}
+      if (y < extent[1]) {extent[1] = y; extrema[1] = [x, y];}
+      if (x > extent[2]) {extent[2] = x; extrema[2] = [x, y];}
+      if (y > extent[3]) {extent[3] = y; extrema[3] = [x, y];}
+    }
+  }
+  if (!extent) return null;
+  const verified = extrema.filter(point => inRussiaCoverage(point[0], point[1], area));
+  if (verified.length === extrema.length) return extent;
+  let bounds = null;
+  const extend = (x, y) => {
+    if (!bounds) bounds = [x, y, x, y];
+    else {bounds[0] = Math.min(bounds[0], x); bounds[1] = Math.min(bounds[1], y); bounds[2] = Math.max(bounds[2], x); bounds[3] = Math.max(bounds[3], y);}
   };
-  return geometry(area);
+  for (const [x, y] of verified) extend(x, y);
+  for (const point of positions) {
+    const x = russiaLongitude(point[0]), y = point[1];
+    if (!Number.isFinite(x) || !Number.isFinite(y) || bounds && x >= bounds[0] && x <= bounds[2] && y >= bounds[1] && y <= bounds[3]) continue;
+    if (inRussiaCoverage(x, y, area)) extend(x, y);
+  }
+  return bounds;
 }
 
 /** Leaflet does not repeat GeoJSON with raster/vector tiles. Cover the adjacent world copies explicitly. */

@@ -18,10 +18,10 @@ or a claim of production certification.
 | Case privacy and appeals | Queues return only reported material for cases the actor may review. Self-cases, original-report conflicts and staff subjects outside the actor's authority are excluded before the queue limit and rechecked before evidence is returned. Appeals exclude the subject, original reporter and original moderator. Queue reads and decisions are audited. | An authorized reviewer can read the reported body and minimal identities. This release does not implement a separate per-case assignee permission or a staff investigation organization. |
 | Moderation transactions | Hide/mute, decisions, visibility, notifications and audit records commit together. Overturning one action preserves other active actions. A mute does not prevent reports, appeals, maps or incident handling. | The real PostgreSQL lock/visibility assertions are compiled but unexecuted here. Hidden cached messages need a current snapshot refresh; a creation-time cursor alone cannot propagate a later hide. |
 | Sessions | Cryptographically random 256-bit bearer tokens, only token hashes in PostgreSQL, expiry and explicit revocation. Browser integration uses an HttpOnly cookie at the BFF boundary. | Email ownership, account recovery/deletion and operator MFA remain launch work. |
-| Passwords and auth abuse | PBKDF2-SHA256 with 600,000 iterations, unique salt, constant-time verification, bounded input and bounded concurrent password hashing. Per-IP and per-account auth limits. | Auth rate limiting is process-local. Ingress/BFF must be configured before shared-IP production traffic. |
+| Passwords and auth abuse | PBKDF2-SHA256 with 600,000 iterations, unique salt, constant-time verification and bounded input. Migration 003 stores HMAC-keyed per-IP and per-account budgets in PostgreSQL; atomic upserts persist denied attempts and share limits across API processes/restarts. Database failure denies authentication. | The four concurrent password-hash slots and broader 120/minute write guard remain process-local. Accurate per-visitor accounting behind ingress requires the independently keyed proxy chain; real two-pool PostgreSQL execution is still a deployment gate. |
 | Posting abuse | PostgreSQL serializes per-user budgets across channels and API replicas. Unicode-normalized fingerprints, bounded link counts, recruitment/report budgets and temporary mutes are checked before new content commits. Stable message-client-ID replay precedes spam accounting and redacts hidden content. | These are explicit heuristics, not AI or a guarantee of spam detection. They do not establish identity or detect coordinated accounts. Operator monitoring and a false-positive process are needed. |
 | Reviews and badges | A completed participant may write at most one review per target and cannot review their own guiding. Hidden reviews leave public aggregates. Badges use actual completion/review event evidence and dates, and confer no permissions. | Guide-confirmed completion can still be abused by colluding people; no independent physical-attendance verification is claimed. |
-| Proxy trust | Forwarded addresses are ignored unless the direct peer matches an explicit trusted CIDR; only `X-Real-IP` is interpreted. | Trusted ingress must overwrite incoming spoofable headers. No default broad trust range is shipped. |
+| Proxy trust | Forwarded addresses are ignored unless the direct peer matches an explicit trusted CIDR and a separate 256-bit ingress proof matches in constant time. Only a single valid `X-Real-IP` is interpreted; arbitrary `X-Forwarded-For` is ignored. | Trusted ingress must overwrite incoming spoofable headers and install the same proof on Caddy, Next and Go. No default broad trust range is shipped. Managed Sites does not automatically provide this chain. |
 | Database credentials | Separate owner/operator and restricted API roles; production rejects superuser/create-role/create-db/bypass-RLS accounts. External databases require verified TLS unless private-network trust is explicitly configured. | The actual restricted-role/container integration test remains a mandatory deployment gate. |
 | Offline reconciliation | Observations have client IDs, observation time, base version and explicit conflict acknowledgements. Every response keeps `serverAuthorized: false`. | A disconnected phone cannot learn about later guide revocation or trail closure. Cached maps must remain available during an incident. |
 
@@ -34,6 +34,18 @@ web owner corrected the two initial findings: logout upstream errors now clear
 the local cookie with an explicit acknowledgement header while reporting that
 server revocation was not confirmed; `HEAD` responses have no parsed JSON body.
 Those changes were observed in the final source review, not on a live backend.
+
+The subsequent deployment review found that ordinary Next can construct
+`req.nextUrl` from the internal listener hostname and port. Comparing a public
+browser `Origin` to that internal URL would reject legitimate mutations behind
+Caddy. The BFF now checks the server-only canonical `PUBLIC_ORIGIN` instead and
+uses its HTTPS scheme for both session creation and deletion cookies. Missing or
+invalid origin configuration fails closed; request/forwarded host and protocol
+headers never grant origin trust. Plain HTTP is permitted only for an explicit
+loopback origin under `NODE_ENV=development`. See
+[`backend-origin-audit-2026-11-06.md`](../docs/backend-origin-audit-2026-11-06.md).
+The status endpoint applies the same origin policy before probing Go readiness;
+it does not report the browser service as connected when that policy is invalid.
 
 The social UI clears private views on confirmed local-session changes, prevents
 stale async responses from replacing a newer identity/group, preserves message

@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {"incremental": false},
-  "files": ["../lib/backend-forwarding.ts", "../app/api/backend/[...path]/route.ts"],
+  "files": ["../lib/backend-forwarding.ts", "../app/api/backend/[...path]/route.ts", "../app/api/status/route.ts"],
   "include": [],
   "exclude": []
 }

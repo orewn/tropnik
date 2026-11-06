@@ -1,5 +1,5 @@
 import {canvasStyle} from '/maps/canvas-style.js';
-import {RUSSIA_AREA_URL,RUSSIA_MASK_URL,RUSSIA_CANONICAL_MASK_URL,MAP_OUTSIDE_COLOR,russiaCamera,russiaPadding,constrainRussiaCamera,displayGeoJSON,inRussiaCoverage,leafletRussiaMask,russiaLongitude} from '/maps/russia-viewport.js';
+import {RUSSIA_AREA_URL,RUSSIA_MASK_URL,RUSSIA_CANONICAL_MASK_URL,MAP_OUTSIDE_COLOR,russiaCamera,russiaPadding,constrainRussiaCamera,displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,leafletRussiaMask,russiaLongitude} from '/maps/russia-viewport.js';
 
 const byId=id=>document.getElementById(id),status=text=>{byId('map-status').textContent=text;};
 const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -34,7 +34,7 @@ function cameraView(tileSize){
  element.parentElement.style.setProperty('--map-bottom-inset',`${covered}px`);
  return {camera:russiaCamera(rect.width,rect.height,padding,tileSize),padding};
 }
-function inCoverage(data){return coordinates(data).filter(point=>inRussiaCoverage(point[0],point[1],coverage));}
+function coveredBounds(data){return coveredRussiaBounds(coordinates(data),coverage);}
 function coverageStyle(style,mask){
  const next=structuredClone(style);
  next.sources['russia-land']={type:'geojson',data:coverage};next.sources['russia-mask']={type:'geojson',data:mask};
@@ -75,9 +75,9 @@ async function createGL(ml,admin,mask){
    map.addLayer({id:'route',type:'line',source:'saved-route',paint:{'line-color':'#244d3c','line-width':4,'line-dasharray':[3,1]}},MASK);
   }
   fitPending=false;if(!geometry||!fit)return;
-  const inside=inCoverage(data);
-  if(!inside.length){status('У этой линии нет точек внутри покрытия России. Карточка остаётся доступной.');return;}
-  const bounds=inside.reduce((bounds,point)=>bounds.extend(point),new ml.LngLatBounds(inside[0],inside[0]));
+  const covered=coveredBounds(data);
+  if(!covered){status('У этой линии нет точек внутри покрытия России. Карточка остаётся доступной.');return;}
+  const bounds=new ml.LngLatBounds([covered[0],covered[1]],[covered[2],covered[3]]);
   fullView=false;map.fitBounds(bounds,{padding:cameraView(512).padding,maxZoom:14,duration:reduced?0:600});
  };
  map.on('style.load',()=>{
@@ -120,8 +120,8 @@ async function createLeaflet(admin,mask){
  const draw=geometry=>{
   if(selectedLayer){map.removeLayer(selectedLayer);selectedLayer=null;}if(!geometry)return;
   const data=displayGeoJSON(geometry);selectedLayer=L.geoJSON(data,{style:{color:'#244d3c',weight:4,dashArray:'8 4'},interactive:false}).addTo(map);
-  const inside=inCoverage(data);if(!inside.length){status('У этой линии нет точек внутри покрытия России. Карточка остаётся доступной.');return;}
-  fit(L.latLngBounds(inside.map(([lng,lat])=>L.latLng(lat,lng))),14);
+  const covered=coveredBounds(data);if(!covered){status('У этой линии нет точек внутри покрытия России. Карточка остаётся доступной.');return;}
+  fit(L.latLngBounds([[covered[1],covered[0]],[covered[3],covered[2]]]),14);
  };
  const stopObserver=observeMap(()=>{const wasOverview=fullView;map.invalidateSize({pan:false});floor=cameraView(256).camera;map.setMinZoom(floor.zoom);if(wasOverview)fitRussia();else clampCamera();});
  requestAnimationFrame(()=>mapVisible(true));

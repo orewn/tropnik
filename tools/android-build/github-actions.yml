@@ -21,8 +21,7 @@ on:
       - 'web/public/data/russia-*'
       - 'web/public/data/routes/**'
       - 'web/lib/content.ts'
-      - 'web/lib/catalog.generated.json'
-      - 'web/lib/route-points.generated.json'
+      - 'web/lib/*.generated.json'
       - '.github/workflows/android.yml'
 
 permissions:

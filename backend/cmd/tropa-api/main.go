@@ -94,6 +94,10 @@ func run() error {
 		}
 	}
 	cfg := httpapi.Config{Origins: []string{origin}, HTTPS: u.Scheme == "https", TrustedProxyCIDRs: trusted, ProxyToken: proxyToken, AuthRateKey: rateKey}
+	cfg.AccountLifecycle, e = accountLifecycleConfig(os.Getenv)
+	if e != nil {
+		return e
+	}
 	if e := cfg.Validate(); e != nil {
 		return e
 	}
@@ -118,6 +122,11 @@ func run() error {
 	if e != nil {
 		return errors.New("authentication initialization failed")
 	}
+	defer func() {
+		shutdownCtx, done := context.WithTimeout(context.Background(), 5*time.Second)
+		defer done()
+		_ = app.Shutdown(shutdownCtx)
+	}()
 	addr := os.Getenv("HTTP_ADDR")
 	if addr == "" {
 		addr = "127.0.0.1:8080"
@@ -126,14 +135,25 @@ func run() error {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 	defer signal.Stop(stop)
+	serveFinished := make(chan struct{})
+	shutdownFinished := make(chan struct{})
 	go func() {
-		<-stop
+		defer close(shutdownFinished)
+		select {
+		case <-stop:
+		case <-serveFinished:
+			return
+		}
 		c, done := context.WithTimeout(context.Background(), 10*time.Second)
 		defer done()
-		_ = srv.Shutdown(c)
+		if err := srv.Shutdown(c); err != nil {
+			_ = srv.Close()
+		}
 	}()
 	slog.Info("TROPA API ready", "address", addr, "mode", mode)
 	e = srv.ListenAndServe()
+	close(serveFinished)
+	<-shutdownFinished
 	if errors.Is(e, http.ErrServerClosed) {
 		return nil
 	}

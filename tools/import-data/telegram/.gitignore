@@ -1,0 +1,4 @@
+private/
+__pycache__/
+*.export.json
+*.queue.json

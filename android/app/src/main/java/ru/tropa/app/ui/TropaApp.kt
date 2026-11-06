@@ -188,7 +188,7 @@ private fun BrandBar(state: AppState, onBack: () -> Unit) {
 private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () -> Unit) {
     val selected = model.region(state.regionId)
     val regions = model.catalog.regions.filter { state.search.isBlank() || (it.name + " " + it.subtitle).contains(state.search.trim(), ignoreCase = true) }
-    val regionRoutes = model.catalog.routes.filter { selected?.id in it.regionIds && !it.illustrative }
+    val regionRoutes = model.catalog.referenceRoutes(state.search, selected?.id)
     LazyColumn(
         Modifier.fillMaxSize().testTag("explore_list"),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
@@ -196,16 +196,16 @@ private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () 
     ) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Eyebrow(if (selected == null) "РОССИЯ · ПЕРВЫЕ НАПРАВЛЕНИЯ" else "ВЫБИРАЕМ РАЙОН")
+                Eyebrow(if (selected == null) "ПОХОДЫ ПО РОССИИ" else "ВЫБИРАЕМ РАЙОН")
                 Text(selected?.name ?: "Дальше начинается\nваша история.", style = MaterialTheme.typography.headlineLarge)
                 Text(selected?.subtitle ?: "Находите маршрут и людей, с которыми по пути.", color = Palette.Muted, style = MaterialTheme.typography.bodyLarge)
             }
         }
-        if (selected == null) item {
+        item {
             OutlinedTextField(
                 value = state.search, onValueChange = model::search,
                 modifier = Modifier.fillMaxWidth().testTag("region_search"),
-                placeholder = { Text("Найти регион", style = MaterialTheme.typography.bodyLarge) },
+                placeholder = { Text(if (selected == null) "Найти регион или маршрут" else "Найти маршрут", style = MaterialTheme.typography.bodyLarge) },
                 leadingIcon = { TropaIcon(Glyph.SEARCH) }, singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 trailingIcon = if (state.search.isNotBlank()) { { TrailIconButton(onClick = { model.search("") }) { TropaIcon(Glyph.CLOSE, description = "Очистить поиск") } } } else null,
@@ -234,6 +234,11 @@ private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () 
             item { SectionHeading("Куда отправимся", "Выберите регион на карте или в списке") }
             if (regions.isEmpty()) item { EmptyCard("Регион не найден", "Попробуйте другое название: например, «Алтай», «Карелия» или «Крым».", Glyph.SEARCH) }
             items(regions, key = { it.id }) { region -> RegionCard(region) { model.selectRegion(region.id) } }
+            if (state.search.isNotBlank()) {
+                item { SectionHeading("Найденные маршруты", "Выберите карточку, чтобы узнать больше") }
+                if (regionRoutes.isEmpty()) item { EmptyCard("Маршрут не найден", "Попробуйте название места или другой запрос.", Glyph.SEARCH) }
+                items(regionRoutes, key = { "search_${it.id}" }) { route -> RouteCard(route, saved = state.savedRoutes.any { it.routeId == route.id }) { model.selectRoute(route.id) } }
+            }
             item { InfoCard("Карта помогает выбрать направление. Проверка конкретной тропы, условий и гида выполняется перед походом.") }
         } else {
             item {
@@ -242,8 +247,8 @@ private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () 
                     OfflineAction(selected, model, state)
                 }
             }
-            item { SectionHeading("Маршруты района", "Данные из открытых источников с указанным статусом проверки") }
-            if (regionRoutes.isEmpty()) item { EmptyCard("Маршруты ещё готовятся", "Здесь появятся карточки с источниками, сложностью и датой проверки. Непроверенные тропы не выдаются за готовые походы.", Glyph.MOUNTAIN) }
+            item { SectionHeading("Маршруты района", "Выберите тропу для следующего похода") }
+            if (regionRoutes.isEmpty()) item { EmptyCard(if (state.search.isBlank()) "Маршруты ещё готовятся" else "Маршрут не найден", "Попробуйте другое название или соседний район.", Glyph.MOUNTAIN) }
             items(regionRoutes, key = { it.id }) { route -> RouteCard(route, saved = state.savedRoutes.any { it.routeId == route.id }) { model.selectRoute(route.id) } }
             item { InfoCard("Поход начинается с группы минимум из 4 человек, включая проверенного гида. Число мест и допустимое соотношение участников определяются для конкретного маршрута.") }
         }
@@ -279,12 +284,12 @@ private fun RouteCard(route: TrailRoute, saved: Boolean, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = Palette.Surface), border = BorderStroke(1.dp, Palette.Line)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                StatusPill(route.currentStatusLabel ?: if (route.illustrative) "Учебный пример" else "Требует проверки", caution = true)
+                StatusPill(route.currentStatusLabel ?: if (route.accessStatus == "closed") "Посещение приостановлено" else if (route.illustrative) "Учебный пример" else "Условия уточняются", caution = true)
                 if (saved) TropaIcon(Glyph.BOOKMARK, description = "Сохранено на устройстве")
             }
             Text(route.title, style = MaterialTheme.typography.titleLarge)
             Text(route.summary, style = MaterialTheme.typography.bodyMedium, color = Palette.Muted, maxLines = 4, overflow = TextOverflow.Ellipsis)
-            route.distanceMeters?.let { Text("${distance(it)} · в описании источника", style = MaterialTheme.typography.labelMedium) }
+            route.distanceMeters?.let { Text(distance(it) + (route.distanceNote?.let { note -> " · $note" } ?: ""), style = MaterialTheme.typography.labelMedium) }
             Row(verticalAlignment = Alignment.CenterVertically) { Text("Посмотреть карточку", style = MaterialTheme.typography.labelMedium, color = Palette.Forest); Spacer(Modifier.width(8.dp)); TropaIcon(Glyph.NEXT) }
         }
     }
@@ -310,7 +315,7 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Eyebrow(if (route.illustrative) "УЧЕБНЫЙ ОБРАЗЕЦ" else (region?.name ?: "МАРШРУТ").uppercase(Locale("ru")))
                 Text(route.title, style = MaterialTheme.typography.headlineLarge)
-                StatusPill(route.currentStatusLabel ?: if (route.illustrative) "Не является реальной тропой" else "Условия и сложность не подтверждены", caution = true)
+                StatusPill(route.currentStatusLabel ?: if (route.accessStatus == "closed") "Посещение приостановлено" else if (route.illustrative) "Учебная карточка" else "Условия уточняются", caution = true)
                 Text(route.summary, style = MaterialTheme.typography.bodyLarge, color = Palette.Muted)
             }
         }
@@ -332,22 +337,22 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
                 Box(Modifier.fillMaxWidth().height(320.dp).clip(RoundedCornerShape(16.dp))) {
                     TropaMap(model.catalog.regions, region, route, connection = state.connection, modifier = Modifier.fillMaxSize())
                     Surface(Modifier.align(Alignment.TopStart).padding(12.dp), shape = RoundedCornerShape(8.dp), color = Palette.Surface) {
-                        Text(if (route.currentAdvisory != null) "Линия маршрута · доступ ограничен" else if (route.apiRouteId != null) "Геометрия опубликованной версии" else "Справочная геометрия OSM", Modifier.padding(8.dp), style = MaterialTheme.typography.labelSmall)
+                        Text(if (route.currentAdvisory != null) "Доступ ограничен" else "Линия маршрута", Modifier.padding(8.dp), style = MaterialTheme.typography.labelSmall)
                     }
                 }
-                Text(if (route.id == "kavkaz-8a") "На карте показан полный набор сегментов OSM, включая направление к закрытому лагерю. Граница закрытого участка не установлена по геометрии. Линия не является разрешённым навигационным треком." else if (route.apiRouteId != null) "Линия получена от сервиса для указанной версии. Отображение линии не является навигацией, проверкой проходимости или разрешением на выход." else "Линия содержит исходные сегменты и возможные ответвления. Это не готовый навигационный трек.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
-                if (route.id != "kavkaz-8a") Text("Линия маршрута доступна без интернета. Подробная подложка вне района Бзерпинского карниза подгружается только при включённой «Сети»; автономно остаётся обзорная карта.", style = MaterialTheme.typography.bodySmall, color = Palette.Ochre)
+                Text(if (route.id == "kavkaz-8a") "Направление к закрытому лагерю также показано на карте. Перед выходом уточните разрешённый путь у заповедника." else "Перед выходом уточните путь, доступность тропы и условия посещения.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+                if (route.id != "kavkaz-8a") Text("Линия маршрута доступна без интернета. Для подробной карты за пределами Бзерпинского карниза понадобится подключение.", style = MaterialTheme.typography.bodySmall, color = Palette.Ochre)
                 if (route.id == "kavkaz-8a") {
-                    Text("Рельеф рассчитан по реальной модели поверхности. Кнопка «Ракурс» меняет перспективу плоской карты; объёмная модель открывается отдельно.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+                    Text("Посмотрите на горы с разных сторон и познакомьтесь с районом будущего похода.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                     TrailButton(onClick = { onLandscapeChange(true) }, enabled = landscapeViewer.ready,
                         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_landscape")) {
-                        Text(if (landscapeViewer.ready) "Открыть 3D ландшафт" else if (landscapeViewer.error == null) "Готовим 3D ландшафт…" else "3D сцена недоступна")
+                        Text(if (landscapeViewer.ready) "Посмотреть рельеф" else if (landscapeViewer.error == null) "Готовим рельеф…" else "Рельеф пока недоступен")
                     }
                     landscapeViewer.error?.let {
                         Text(it, style = MaterialTheme.typography.bodySmall, color = Palette.WarningText)
                         if (landscapeViewer.canRetry) TrailTextButton(onClick = landscapeViewer::retry,
                             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("landscape_retry_card")) {
-                            Text("Подготовить сцену заново")
+                            Text("Попробовать снова")
                         }
                     }
                 }
@@ -355,8 +360,8 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
         } else item {
             CardShell {
                 TropaIcon(Glyph.MOUNTAIN, Modifier.size(48.dp))
-                Text(if (route.illustrative) "Без выдуманной тропы" else "Геометрия ещё не подтверждена", style = MaterialTheme.typography.titleLarge)
-                Text(if (route.illustrative) "Образец помогает проверить приложение. У него нет географической линии, которую можно принять за настоящий путь." else "Описание доступно, но линия на карте не показана, пока не получен и не проверен соответствующий источник.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                Text(if (route.illustrative) "Учебная карточка" else "Путь пока не добавлен", style = MaterialTheme.typography.titleLarge)
+                Text(if (route.illustrative) "Попробуйте сохранить карточку и вернуться к ней без интернета." else "Сейчас доступны описание и источники. Перед походом уточните путь и условия посещения.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
             }
         }
         item {
@@ -366,7 +371,8 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
             }
         }
         item { Metric("Длительность по источнику", route.durationText ?: route.durationMinutes?.let { "$it мин" } ?: "Нет данных", Modifier.fillMaxWidth()) }
-        item { InfoCard(if (route.illustrative) "Все действия с образцом происходят локально. Никто не записывается на реальный поход." else if (route.apiRouteId != null) "Параметры маршрута получены от сервиса. Сложность: ${route.difficulty.lowercase(Locale("ru"))}. Перед выходом проверьте актуальность условий." else "Параметры приведены только при наличии в источнике. Сумма сегментов OSM может отличаться от длины маршрута из-за веток. Оценка сложности: ${route.difficulty.lowercase(Locale("ru"))}.", tone = Palette.Ochre) }
+        route.distanceNote?.let { note -> item { Text("Расстояние: $note", style = MaterialTheme.typography.bodySmall, color = Palette.Muted) } }
+        item { InfoCard(if (route.illustrative) "Это учебный пример: запись на настоящий поход не создаётся." else "Сложность: ${route.difficulty.lowercase(Locale("ru"))}. Перед выходом проверьте погоду, ограничения и подготовку группы.", tone = Palette.Ochre) }
         item {
             TrailButton(onClick = { model.toggleSaved(route) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("save_route"),
                 enabled = state.busyId == null, shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(12.dp, 8.dp)) {
@@ -380,18 +386,16 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
                 Text("Перед походом", style = MaterialTheme.typography.titleLarge)
                 route.notices.forEach { notice -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { TropaIcon(Glyph.INFO, color = Palette.Ochre); Text(notice, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium) } }
                 Text("Минимум 4 человека всего, включая гида. Набор запускается для конкретной даты, маршрута и подтверждённого гида.", style = MaterialTheme.typography.bodyMedium)
-                if (!serviceMatches) Text("Карточка сохранена с другого сервиса: ${route.apiOrigin}. Подключите его в профиле, чтобы работать с этим маршрутом.", style = MaterialTheme.typography.bodyMedium, color = Palette.Ochre)
+                if (!serviceMatches) Text("Для записи на этот маршрут восстановите подключение в профиле.", style = MaterialTheme.typography.bodyMedium, color = Palette.Ochre)
                 if (route.apiRouteId != null) TrailButton(onClick = onRecruitment, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(if (serviceMatches) "Начать набор на этот маршрут" else "Подключить сервис карточки") }
-                TrailOutlineButton(onClick = onTrips, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) { Text(if (route.apiRouteId == null) "Открыть походы сервиса" else "Посмотреть походы по маршруту") }
+                TrailOutlineButton(onClick = onTrips, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) { Text(if (route.apiRouteId == null) "Найти поход" else "Посмотреть походы по маршруту") }
             }
         }
         if (region != null) item { OfflineAction(region, model, state) }
         item {
             CardShell {
-                Eyebrow("ПРОИСХОЖДЕНИЕ ДАННЫХ")
+                Eyebrow("ИСТОЧНИКИ")
                 Text(route.sourceName, style = MaterialTheme.typography.titleSmall)
-                Text("Источник просмотрен: ${route.sourceDate}. Это дата проверки источника, не дата осмотра тропы.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
-                Text(route.sourceLicense, style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                 route.sourceUrl?.let { url ->
                     TrailTextButton(onClick = {
                         val uri = Uri.parse(url)
@@ -399,13 +403,17 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
                     }) { Text("Открыть первоисточник"); Spacer(Modifier.width(8.dp)); TropaIcon(Glyph.NEXT) }
                 }
                 route.officialEvidenceSummary?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-                route.officialEvidenceScope?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Palette.Muted) }
-                route.officialEvidenceCheckedAt?.let { Text("Официальный источник просмотрен: $it", style = MaterialTheme.typography.bodySmall, color = Palette.Muted) }
                 route.officialEvidenceUrl?.let { url ->
                     TrailTextButton(onClick = {
                         val uri = Uri.parse(url)
                         if (uri.scheme == "https") runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
                     }) { Text("Официальное описание"); Spacer(Modifier.width(8.dp)); TropaIcon(Glyph.NEXT) }
+                }
+                route.additionalSources.distinctBy { it.url }.filter { it.url != route.sourceUrl && it.url != route.officialEvidenceUrl }.forEach { source ->
+                    TrailTextButton(onClick = {
+                        val uri = Uri.parse(source.url)
+                        if (uri.scheme == "https") runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
+                    }) { Text(source.name); Spacer(Modifier.width(8.dp)); TropaIcon(Glyph.NEXT) }
                 }
             }
         }
@@ -423,12 +431,12 @@ private fun OfflineAction(region: Region, model: MainViewModel, state: AppState)
             TropaIcon(if (installed != null) Glyph.CHECK else Glyph.SAVE)
             Text(if (installed != null) "Сохранено на телефоне" else "Возьмите карту с собой", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
         }
-        Text(if (region.id == "krasnodar") "Обзор края и подробная карта только района Бзерпинского карниза. Маршруты рощи в Хосте находятся вне подробного пакета. Пилотная карта уже включена в приложение." else "Сохраняются обзорная карта и доступные карточки. Подробные тропы для этого региона в сборку не включены.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+        Text(if (region.id == "krasnodar") "Сохраните карточки, обзор края и подробную карту района Бзерпинского карниза. Для подробной карты других районов понадобится интернет." else "Сохраните карточки и обзорную карту. Подробная карта доступна при подключении к интернету.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-        if (installed != null) Text("${sizeLabel(installed.sizeBytes)} · версия ${installed.version}", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+        if (installed != null) Text(sizeLabel(installed.sizeBytes), style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
         TrailOutlineButton(onClick = { model.saveRegion(region) }, enabled = state.busyId == null,
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("save_pack"), shape = RoundedCornerShape(12.dp)) {
-            Text(if (busy) "Проверяем файлы…" else if (installed == null) "Сохранить офлайн" else "Обновить локальный пакет")
+            Text(if (busy) "Сохраняем карту…" else if (installed == null) "Сохранить офлайн" else "Обновить сохранённое")
         }
         Text("Сохранение карты не подтверждает безопасность и актуальность условий маршрута.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
     }
@@ -439,7 +447,7 @@ private fun SavedScreen(model: MainViewModel, state: AppState) {
     var remove by remember { mutableStateOf<InstalledPackEntity?>(null) }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { PageHeading("Всё под рукой", "Карточки и карты хранятся на этом телефоне.") }
-        item { SectionHeading("Офлайн пакеты", "Проверенные контрольные суммы файлов") }
+        item { SectionHeading("Карты без интернета", "Сохранённые направления всегда под рукой") }
         if (state.packs.isEmpty()) item { EmptyCard("Пока нет сохранённых областей", "Откройте регион на карте и нажмите «Сохранить офлайн».", Glyph.SAVE) }
         items(state.packs, key = { it.regionId }) { pack ->
             CardShell {
@@ -450,10 +458,10 @@ private fun SavedScreen(model: MainViewModel, state: AppState) {
                     }
                     TrailIconButton(onClick = { remove = pack }) { TropaIcon(Glyph.TRASH, description = "Удалить пакет ${pack.title}") }
                 }
-                Text(if (pack.includesTrailGeometry) "Обзорная карта и исходные линии маршрута. Полевой проверки нет." else "Обзорная карта. Подробные тропы не включены.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                Text(if (pack.includesTrailGeometry) "Карточки, обзорная карта и линии маршрутов." else "Карточки и обзорная карта.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TrailTextButton(onClick = { model.selectRegion(pack.regionId) }) { Text("Открыть") }
-                    TrailTextButton(onClick = { model.verifyPack(pack) }) { Text("Проверить файлы") }
+                    TrailTextButton(onClick = { model.verifyPack(pack) }) { Text("Проверить доступность") }
                 }
             }
         }
@@ -463,8 +471,8 @@ private fun SavedScreen(model: MainViewModel, state: AppState) {
         item { InfoCard("Без интернета не обновляются условия, погода и состав группы. Отправка сообщений и подтверждение участия требуют связи.") }
     }
     remove?.let { pack -> TrailDialog(
-        onDismissRequest = { remove = null }, title = { Text("Удалить офлайн пакет?") },
-        text = { Text("Пакет «${pack.title}» освободит ${sizeLabel(pack.sizeBytes)}. Сохранённые карточки останутся.") },
+        onDismissRequest = { remove = null }, title = { Text("Удалить сохранённую карту?") },
+        text = { Text("Карта «${pack.title}» освободит ${sizeLabel(pack.sizeBytes)}. Сохранённые карточки останутся.") },
         confirmButton = { TrailTextButton(onClick = { model.removePack(pack); remove = null }) { Text("Удалить") } },
         dismissButton = { TrailTextButton(onClick = { remove = null }) { Text("Оставить") } },
     ) }
