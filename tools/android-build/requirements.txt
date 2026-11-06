@@ -1,0 +1,4 @@
+# Local terrain derivation/verifier versions used for this merged source.
+# These are build tools, never dependencies embedded into the APK.
+numpy==2.3.5
+Pillow==13.0.0

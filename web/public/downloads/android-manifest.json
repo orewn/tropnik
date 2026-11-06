@@ -1,0 +1,25 @@
+{
+  "version": "0.4.2-preview",
+  "versionCode": 6,
+  "architecture": "arm64-v8a",
+  "minSdk": 26,
+  "targetSdk": 36,
+  "bytes": 24467090,
+  "sha256": "41eabb299c0b2037311e813dd8d15f1f026977f601d851dfdd537b48b2f32292",
+  "signature": "development / debug",
+  "deviceExecutionVerified": false,
+  "russiaCoverageProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+  "sceneGridDimensions": [
+    513,
+    513
+  ],
+  "russiaOverviewTileCount": 341,
+  "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+  "catalogReferenceRouteCount": 277,
+  "catalogRegionCount": 6,
+  "catalogLearningRouteCount": 1,
+  "localRouteGeometryCount": 277,
+  "onlineDetailedMapAvailable": true,
+  "fullRussiaDetailedOffline": false,
+  "losslessPayloadVerified": true
+}

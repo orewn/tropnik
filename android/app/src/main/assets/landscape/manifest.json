@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "id": "tropnik-bzerpinsky-landscape-v5-recovery",
+  "offline": true,
+  "bounds": [
+    40.29,
+    43.64,
+    40.49,
+    43.82
+  ],
+  "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+  "rendererSha256": "694dd9201c1a62a10a1e12d71af7e41acab77b56f1500f14eef7d32baa0c1832",
+  "gridSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+  "embeddedGridSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+  "gridDimensions": [
+    513,
+    513
+  ],
+  "gridProvenance": {
+    "inputManifest": {
+      "path": "data/terrain-pilot/runtime/manifest.json",
+      "sizeBytes": 20521,
+      "sha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15"
+    },
+    "output": {
+      "path": "web/public/terrain/terrain-grid.json",
+      "sizeBytes": 1823647,
+      "sha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "dimensions": [
+        513,
+        513
+      ],
+      "samples": 263169
+    },
+    "sampleSpacingApproxM": {
+      "eastWest": 31.42,
+      "northSouth": 39.14
+    },
+    "inputTilesVerified": 12,
+    "verifier": "tools/map-package/refine_terrain.py --check",
+    "verifierSha256": "129096c4f1db9f4be68fb79434d39fcca8b22c37dafe8726fa01cb2bb6028f25"
+  },
+  "routeSha256": "4ada4a8f1354d8f8302be208c4ce9e5043cd08f1097ad020c2e67f36d93febc9",
+  "fontInputs": {
+    "manrope-cyrillic-400-normal.woff2": "5a987d1484070f1ea54de7c10ebfa4057a18e379361dbe5fd5c4fa4c2d95ef39",
+    "manrope-cyrillic-600-normal.woff2": "80b86efbef1c9fb66557cc4cc7b6db42db2fd631f1a9b8735f3bbefbb5128799",
+    "manrope-latin-400-normal.woff2": "849290ef12a2eeb9af5c11924120d11aa4ae8b435ed3347d7fc8bc240c293ca3",
+    "manrope-latin-600-normal.woff2": "f7ac6258da20ab7541939b59851155753d1d24f1b30cbcb949077a3faa3d1593"
+  },
+  "files": [
+    {
+      "path": "landscape.html",
+      "sizeBytes": 1990035,
+      "sha256": "41743ade3e96408b0687515d770903497fddb139587f64e45af5f8d74384194a"
+    }
+  ]
+}

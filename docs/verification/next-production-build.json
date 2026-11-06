@@ -1,0 +1,32 @@
+{
+  "recordedAt": "2026-11-06T07:51:26.341567+00:00",
+  "framework": "Next.js 16.3.4",
+  "bundler": "webpack",
+  "command": "next build --webpack",
+  "environment": "Isolated merged source copy /tmp/tropnik-merged-source-OArJ3Mt6",
+  "status": "passed",
+  "typeScript": "passed",
+  "exitCode": 0,
+  "generatedStaticPages": 16,
+  "compilationSeconds": 10.3,
+  "typeScriptSeconds": 8.2,
+  "buildStagesObserved": [
+    "compilation",
+    "TypeScript",
+    "page data",
+    "static generation",
+    "page optimization",
+    "build traces"
+  ],
+  "log": "next-production-build.txt",
+  "logSha256": "0c0c5810a193ced993e824ddc64d6c151f5d53850f2bb5e73573b613ab5ad7b8",
+  "evidence": "Release owner reported exit 0; complete final merged build output independently read and copied.",
+  "notValidatedByThisBuild": [
+    "Docker image/startup",
+    "Live Go API/PostgreSQL/PostGIS flow",
+    "Browser interactions",
+    "Android execution",
+    "Field navigation"
+  ],
+  "finalSourceScope": "This ordinary Next build preceded final CSS spacing adjustments and the Canvas detail-layer cleanup at zoom < 4. The successful final Sites/Vinext build and the repeated 101-test run include the cleanup. No additional ordinary Next build after those last changes is claimed."
+}

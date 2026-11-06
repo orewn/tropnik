@@ -1,0 +1,16 @@
+{"Time":"2026-11-06T15:26:41.156253459+03:00","Action":"start","Package":"tropa/backend/internal/store"}
+{"Time":"2026-11-06T15:26:41.160226828+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestAuthenticationBudgetPersistsExpiresAndCleansBoundedly"}
+{"Time":"2026-11-06T15:26:41.160333879+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestAuthenticationBudgetPersistsExpiresAndCleansBoundedly","Output":"=== RUN   TestAuthenticationBudgetPersistsExpiresAndCleansBoundedly\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:26:41.478757885+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestAuthenticationBudgetPersistsExpiresAndCleansBoundedly","Output":"--- PASS: TestAuthenticationBudgetPersistsExpiresAndCleansBoundedly (0.32s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:26:41.478847881+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestAuthenticationBudgetPersistsExpiresAndCleansBoundedly","Elapsed":0.32}
+{"Time":"2026-11-06T15:26:41.478882162+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestReadinessRequiresCurrentSchemaVersion"}
+{"Time":"2026-11-06T15:26:41.478884806+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestReadinessRequiresCurrentSchemaVersion","Output":"=== RUN   TestReadinessRequiresCurrentSchemaVersion\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:26:41.616184135+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestReadinessRequiresCurrentSchemaVersion","Output":"--- PASS: TestReadinessRequiresCurrentSchemaVersion (0.14s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:26:41.616228201+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestReadinessRequiresCurrentSchemaVersion","Elapsed":0.14}
+{"Time":"2026-11-06T15:26:41.616242523+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestWasmRuntimeSQLGrantsAndMigrationReapply"}
+{"Time":"2026-11-06T15:26:41.616245207+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestWasmRuntimeSQLGrantsAndMigrationReapply","Output":"=== RUN   TestWasmRuntimeSQLGrantsAndMigrationReapply\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:26:41.890980933+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestWasmRuntimeSQLGrantsAndMigrationReapply","Output":"--- PASS: TestWasmRuntimeSQLGrantsAndMigrationReapply (0.27s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:26:41.89103855+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestWasmRuntimeSQLGrantsAndMigrationReapply","Elapsed":0.27}
+{"Time":"2026-11-06T15:26:41.891046652+03:00","Action":"output","Package":"tropa/backend/internal/store","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:26:41.891913646+03:00","Action":"output","Package":"tropa/backend/internal/store","Output":"ok  \ttropa/backend/internal/store\t0.735s\n"}
+{"Time":"2026-11-06T15:26:41.891933186+03:00","Action":"pass","Package":"tropa/backend/internal/store","Elapsed":0.736}

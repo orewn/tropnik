@@ -1,0 +1,23 @@
+{
+  "author": "Tropnik project",
+  "source": "web/components/MapIcon.tsx",
+  "sourceSha256": "cd6024dcbf1019435c5bb39ba9545e968f673e5673cb887000bca7fb0436c13a",
+  "rights": "Original project artwork; no third-party pictograms or fonts. Follows the project licence.",
+  "logicalSize": 32,
+  "keys": [
+    "camp",
+    "water",
+    "shelter",
+    "pass",
+    "peak",
+    "viewpoint",
+    "info"
+  ],
+  "generatedFiles": [
+    "tropnik-sprite.png",
+    "tropnik-sprite.json",
+    "tropnik-sprite@2x.png",
+    "tropnik-sprite@2x.json"
+  ],
+  "coordinates": "No geographic coordinates or POI records are created by this tool."
+}

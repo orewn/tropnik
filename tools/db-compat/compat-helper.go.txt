@@ -1,0 +1,50 @@
+// This helper is deliberately separate from the production integration gate.
+// PGlite is a single-session compatibility engine, not concurrent native PostgreSQL.
+var compatSharedStore *store.Store
+
+func TestMain(m *testing.M) {
+ if os.Getenv("TROPA_COMPAT_DATABASE_URL") == "" || os.Getenv("TROPA_WASM_COMPAT") != "1" {
+  fmt.Fprintln(os.Stderr, "explicit isolated WASM compatibility configuration required")
+  os.Exit(2)
+ }
+ code := m.Run()
+ if compatSharedStore != nil { compatSharedStore.Close() }
+ os.Exit(code)
+}
+func db(t *testing.T) *store.Store {
+ t.Helper()
+ u, e := url.Parse(os.Getenv("TROPA_COMPAT_DATABASE_URL"))
+ if e != nil || u.Hostname() != "127.0.0.1" || u.Path != "/postgres" {
+  t.Fatal("compat harness permits only its local, isolated default PGlite database")
+ }
+ ctx := context.Background()
+ if compatSharedStore == nil {
+  cfg, e := pgxpool.ParseConfig(u.String())
+  if e != nil { t.Fatal(e) }
+  cfg.MaxConns = 1
+  cfg.MinConns = 1
+  cfg.ConnConfig.RuntimeParams["timezone"] = "UTC"
+  cfg.ConnConfig.RuntimeParams["statement_timeout"] = "8000"
+  pool, e := pgxpool.NewWithConfig(ctx, cfg)
+  if e != nil { t.Fatal(e) }
+  compatSharedStore = &store.Store{Pool:pool}
+ }
+ s := compatSharedStore
+ pool := s.Pool
+ var version, database string
+ if e = pool.QueryRow(ctx,"SELECT version(), current_database()").Scan(&version,&database); e != nil { pool.Close(); t.Fatal(e) }
+ if !strings.Contains(version,"PGlite") || database != "postgres" { pool.Close(); t.Fatal("refusing a non-PGlite engine") }
+ b := make([]byte,8)
+ if _,e = rand.Read(b); e != nil { pool.Close(); t.Fatal(e) }
+ schema := "tropa_compat_"+hex.EncodeToString(b)
+ ident := pgx.Identifier{schema}.Sanitize()
+ if _,e = pool.Exec(ctx,"CREATE SCHEMA "+ident+"; SET search_path TO "+ident+",public"); e != nil { pool.Close(); t.Fatal(e) }
+ t.Cleanup(func(){
+  // Restore the shared WASM session between serial tests, never alter a host DB.
+  _, e := pool.Exec(context.Background(),"RESET ROLE; SET search_path TO public; DROP SCHEMA "+ident+" CASCADE")
+  if e != nil { t.Error(e) }
+ })
+ if e = migrations.Apply(ctx,pool); e != nil { t.Fatal(e) }
+ if e = s.Ready(ctx); e != nil { t.Fatal(e) }
+ return s
+}

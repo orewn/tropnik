@@ -1,0 +1,57 @@
+{
+  "checkOnly": true,
+  "terrainTileCount": 21,
+  "terrainManifestFilesVerified": 48,
+  "terrainManifestBytesVerified": 2288677,
+  "terrainGridSamples": 16641,
+  "terrainBounds": [
+    40.29,
+    43.64,
+    40.49,
+    43.82
+  ],
+  "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+  "landscapeManifestFilesVerified": 1,
+  "landscapeBytesVerified": 1990035,
+  "landscapeSha256": "41743ade3e96408b0687515d770903497fddb139587f64e45af5f8d74384194a",
+  "landscapeOffline": true,
+  "landscapeGridDimensions": [
+    513,
+    513
+  ],
+  "landscapeGridSamples": 263169,
+  "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+  "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+  "landscapeGridSpacingApproxM": {
+    "eastWest": 31.42,
+    "northSouth": 39.14
+  },
+  "russiaDisplayAssetCount": 2,
+  "russiaDisplayAssetBytesVerified": 2219720,
+  "russiaDisplayProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+  "russiaFitBounds": [
+    [
+      19.6389282,
+      41.1858711
+    ],
+    [
+      191.0026658,
+      81.858721
+    ]
+  ],
+  "russiaMaskConfigured": true,
+  "russiaExcludedCatalogRouteIds": [
+    "osm-relation-14407325"
+  ],
+  "russiaOverviewTileCount": 341,
+  "russiaOverviewTileBytesVerified": 1689348,
+  "russiaOverviewFilesVerified": 344,
+  "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+  "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+  "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+  "russiaOverviewMaxNativeZoom": 4,
+  "russiaOverviewLayerMaxZoom": 6,
+  "russiaOverviewLocalOnly": true,
+  "russiaOverviewCompleteWrappedXYZ": true,
+  "russiaOverviewIsElevationData": false
+}

@@ -1,0 +1,30 @@
+{
+  "recordedAt": "2026-11-06T06:44:12.353556+00:00",
+  "framework": "Vinext / Sites private-preview build",
+  "buildStatus": "passed",
+  "sourceCommit": "1eae1ffdfec5151ec5fc328c33f087ac2a269acd",
+  "sourceCommitScope": "Sites preview repository; not the orewn/tropnik GitHub branch",
+  "sourceScope": "Final web readiness fix and updated ARM64 download artifact",
+  "evidence": "Build/deployment owner reported successful final Sites/Vinext build and native deployment status SUCCEEDED; local deployment archive read for size/SHA.",
+  "deploymentStatusAtRecord": "SUCCEEDED",
+  "deploymentId": "appgdep_6aed76918e1081918d4f9da4101a3b45",
+  "versionId": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_170b0aa21f5081919b972ec4461b0fce",
+  "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+  "audience": "owner-private",
+  "runtimeEnvironment": {
+    "revision": 0,
+    "entries": [],
+    "apiConfigured": false
+  },
+  "deploymentArchive": {
+    "name": "tropnik-connected-site-deploy.tar.gz",
+    "bytes": 29186286,
+    "sha256": "bd0bad51bd7476a7a892efc1af6ca4fa54b3df2b2dc65a3cadcefc2fa0f51e3b"
+  },
+  "notValidatedByThisBuild": [
+    "Live Go API/PostGIS flow",
+    "Android device execution",
+    "Repeated UI check past the external ChatGPT login gate"
+  ],
+  "note": "Managed-preview UI checks are separate from deployment success. A frontend deployment does not deploy the external Go/PostGIS service."
+}

@@ -1,0 +1,226 @@
+{
+  "recordedAt": "2026-11-06T13:00:22.691002+00:00",
+  "status": "passed",
+  "projectVersion": "0.4.1",
+  "sourceRoot": "web/",
+  "executionMode": "Isolated full frozen-source copy with shared installed dependencies; ordinary Next production build, not the Sites/Vinext build.",
+  "sourceVerification": {
+    "fileCount": 1161,
+    "bytes": 52801993,
+    "inventorySha256": "862f8549125f72f2fd7d6675a7442c95eacb2a76c7491dbb21c84cf084e98358",
+    "liveSourceDriftCount": 0,
+    "sourceCodeEditsRequired": false,
+    "nextStartedWithoutGeneratedOutput": true,
+    "isolatedGeneratorChanges": [
+      "next-env.d.ts"
+    ],
+    "originalNextOutputMovedOrEdited": false,
+    "officialPreviewDaemonTouched": false,
+    "canonicalSitesCheckoutTouched": false
+  },
+  "runtime": {
+    "node": "v24.22.1",
+    "next": "16.3.4",
+    "typescript": "5.9.3",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "environment": {
+    "NEXT_TELEMETRY_DISABLED": "1",
+    "TROPA_STANDALONE": "false",
+    "CIRCLE_NODE_TOTAL": "2",
+    "nextStaticPageWorkers": 1
+  },
+  "tests": {
+    "runner": "node --experimental-strip-types --test --test-reporter=tap tests/*.test.mjs",
+    "files": 14,
+    "tests": 121,
+    "suites": 0,
+    "pass": 121,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "nextProductionBuild": {
+    "command": "node node_modules/next/dist/bin/next build --webpack",
+    "exitCode": 0,
+    "durationSeconds": 24.073,
+    "compiledSuccessfully": true,
+    "builtInTypeScriptCheckPassed": true,
+    "staticGenerationProgress": {
+      "completed": 16,
+      "total": 16
+    },
+    "routeEntries": [
+      {
+        "path": "/",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/_not-found",
+        "rendering": "static"
+      },
+      {
+        "path": "/about",
+        "rendering": "static"
+      },
+      {
+        "path": "/account",
+        "rendering": "static"
+      },
+      {
+        "path": "/android",
+        "rendering": "static"
+      },
+      {
+        "path": "/api/backend/[...path]",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/api/status",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/community",
+        "rendering": "static"
+      },
+      {
+        "path": "/guides",
+        "rendering": "static"
+      },
+      {
+        "path": "/moderation",
+        "rendering": "static"
+      },
+      {
+        "path": "/offline",
+        "rendering": "static"
+      },
+      {
+        "path": "/privacy",
+        "rendering": "static"
+      },
+      {
+        "path": "/qa-mobile",
+        "rendering": "static"
+      },
+      {
+        "path": "/regions/[id]",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/robots.txt",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/routes/[id]",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/safety",
+        "rendering": "static"
+      },
+      {
+        "path": "/sitemap.xml",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/sources",
+        "rendering": "static"
+      },
+      {
+        "path": "/terms",
+        "rendering": "static"
+      },
+      {
+        "path": "/trips",
+        "rendering": "static"
+      }
+    ],
+    "buildId": "4lhUbya2qfLbAB6bNgW08"
+  },
+  "freshTypeScript": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false",
+    "exitCode": 0,
+    "durationSeconds": 7.932,
+    "diagnosticCount": 0,
+    "staleNextValidatorErrorsResolved": true
+  },
+  "steps": [
+    {
+      "name": "web-tests",
+      "command": [
+        "node",
+        "--experimental-strip-types",
+        "--test",
+        "--test-reporter=tap",
+        "tests/api-policy.test.mjs",
+        "tests/backend-forwarding.test.mjs",
+        "tests/canvas-relief.test.mjs",
+        "tests/landscape-bootstrap.test.mjs",
+        "tests/map-layout.test.mjs",
+        "tests/map-preload.test.mjs",
+        "tests/map-transport.test.mjs",
+        "tests/overview-offline.test.mjs",
+        "tests/relief-shading.test.mjs",
+        "tests/russia-viewport.test.mjs",
+        "tests/service-readiness.test.mjs",
+        "tests/terrain-material.test.mjs",
+        "tests/terrain-preparation.test.mjs",
+        "tests/terrain-renderer.test.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-06T12:57:45.884869+00:00",
+      "durationSeconds": 1.454
+    },
+    {
+      "name": "next-production-build",
+      "command": [
+        "node",
+        "node_modules/next/dist/bin/next",
+        "build",
+        "--webpack"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-06T12:57:47.338837+00:00",
+      "durationSeconds": 24.073
+    },
+    {
+      "name": "fresh-typescript",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-06T12:58:11.412174+00:00",
+      "durationSeconds": 7.932
+    }
+  ],
+  "logs": [
+    {
+      "path": "docs/verification/final-web-0.4.1-tests.txt",
+      "bytes": 25621,
+      "sha256": "5813004ca5d54ca906942fe5114ada0613f435fbb01eb0944ced367635eb951d"
+    },
+    {
+      "path": "docs/verification/final-web-0.4.1-next-build.txt",
+      "bytes": 1057,
+      "sha256": "68901427bc5e74c81f0c6a808cf53e97014da04d500ba553257951ad6d8976d5"
+    }
+  ],
+  "notIncludedInSource": [
+    "node_modules",
+    "isolated .next build output",
+    "temporary source copy"
+  ],
+  "notClaimed": [
+    "browser UI or WebGL/GPU validation by this run",
+    "Android device or emulator execution",
+    "live production API connectivity",
+    "Sites/Vinext publication"
+  ]
+}

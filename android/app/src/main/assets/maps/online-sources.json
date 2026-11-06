@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Optional online detail, separate from bundled offline coverage",
+  "sourceIds": [
+    "online-openmaptiles",
+    "online-dem"
+  ],
+  "layerIds": [
+    "online-natural-grass",
+    "online-forest",
+    "online-scrub",
+    "online-ice",
+    "online-residential",
+    "online-parks",
+    "online-park-border",
+    "online-hillshade",
+    "online-water",
+    "online-waterway",
+    "online-boundaries",
+    "online-road-outline",
+    "online-roads",
+    "online-tracks",
+    "online-paths",
+    "online-rail",
+    "online-buildings",
+    "online-water-label",
+    "online-state-label",
+    "online-city-label",
+    "online-town-label",
+    "online-village-label",
+    "online-peak-label",
+    "online-outdoor-poi-dot",
+    "online-outdoor-poi-label",
+    "online-path-label"
+  ],
+  "sources": {
+    "online-openmaptiles": {
+      "type": "vector",
+      "url": "https://tiles.openfreemap.org/planet/latest",
+      "minzoom": 5,
+      "maxzoom": 14,
+      "attribution": "OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors"
+    },
+    "online-dem": {
+      "type": "raster-dem",
+      "tiles": [
+        "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"
+      ],
+      "tileSize": 512,
+      "encoding": "terrarium",
+      "minzoom": 5,
+      "maxzoom": 12,
+      "attribution": "Terrain © Mapterhorn; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved"
+    }
+  },
+  "allowlistedRemoteResources": [
+    "https://tiles.openfreemap.org/planet/latest",
+    "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"
+  ],
+  "webStyleSha256": "c204a014e83489ae52885a19b283a7fe43cd01c58988b229079695ca9d02f1e4",
+  "vectorTileJsonSnapshot": {
+    "sourceUrl": "https://tiles.openfreemap.org/planet/latest",
+    "retrievedAt": "2026-11-06",
+    "sha256": "3339dd4706556bf88d514cb54b10647dbe1f8306381f739f2a2e52341147040c",
+    "resolvedTiles": [
+      "https://tiles.openfreemap.org/planet/20261101_080013_pt/{z}/{x}/{y}.pbf"
+    ]
+  },
+  "demTileJsonSnapshot": {
+    "sourceUrl": "https://tiles.mapterhorn.com/tilejson.json",
+    "sha256": "d28ade7b57a0c28f8f5d3f3f1b3f07e0c20306ea9e223c4f3dcffc5854f11543",
+    "sourcePath": "data/terrain-pilot/runtime/sources/mapterhorn-tilejson.json"
+  },
+  "primaryDocumentation": [
+    "https://openfreemap.org/quick_start/",
+    "https://mapterhorn.com/data-access/",
+    "https://mapterhorn.com/attribution",
+    "https://maplibre.org/maplibre-style-spec/sources/"
+  ],
+  "minimumVisibleZoom": 5,
+  "globalDemMaximumNativeZoom": 12,
+  "localFallbackRetained": true,
+  "remoteSourcesRemovableByPrefix": "online-",
+  "fullRussiaDetailedOffline": false,
+  "deviceNetworkRenderingVerified": false,
+  "attribution": [
+    "OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors",
+    "Terrain © Mapterhorn; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved"
+  ],
+  "notes": [
+    "The offline overview and bounded pilot sources remain separate and unchanged.",
+    "Online source availability is not a navigation or trail-condition verification.",
+    "All remote resources belong to online-* sources; glyphs remain bundled."
+  ]
+}

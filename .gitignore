@@ -1,0 +1,53 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.dev.vars*
+**/local.properties
+**/keystore.properties
+**/key.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+
+# Installed dependencies and generated build state
+node_modules/
+.next/
+dist/
+build/
+.gradle/
+.kotlin/
+_deps/
+__pycache__/
+*.pyc
+*.tsbuildinfo
+.cache/
+.npm/
+.pnpm-store/
+.sites-runtime/
+.wrangler/
+.vinext/
+.rsync-tmp/
+toolchains/
+android-sdk/
+outputs/
+*.log
+*.tmp
+
+# Deliver separately; preserve runtime map .pbf and license files
+*.apk
+*.aab
+*.apks
+web/public/downloads/
+data/catalog/raw/geofabrik/*.osm.pbf
+data/catalog/raw-trails-krym.geojson
+
+# Current dependency source is pnpm-lock.yaml
+web/package-lock.json
+
+# Deterministic transport/verification work directories
+tools/github-publish/generated/
+tools/db-compat/.work/

@@ -1,0 +1,67 @@
+{
+  "release": "0.4.0-merged-preview",
+  "source": {
+    "project_id": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+    "checkout_path": "/tmp/tropnik-merged-source-OArJ3Mt6",
+    "commit_sha": "45cd0bc39423ebee7109cac92bf18f09a87720b3",
+    "archive": "/workspace/scratch/a2ce00e514d4/outputs/tropnik-merged-site-deploy.tar.gz"
+  },
+  "deployment": {
+    "id": "appgdep_6aed8957b0908191bf833c6fdf54abd5",
+    "project_id": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+    "title": "Тропник — маршруты и объёмный ландшафт",
+    "version_id": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_a08dcd2bf8fc81918b852ca704f5f07d",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aed4db0a81881919cc3840d28cfad27",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-11-06T08:01:35.739418+00:00"
+  },
+  "audience": "existing owner-private; unchanged",
+  "validation": {
+    "ordinaryNextBuild": {
+      "version": "16.3.4",
+      "result": "passed",
+      "typeScript": "passed",
+      "staticPages": 16,
+      "log": "next-production-build.txt"
+    },
+    "sitesBuild": {
+      "result": "passed",
+      "vinext": "1.0.0-beta.5",
+      "vite": "8.0.13",
+      "externalLandScapeRequests": 0
+    },
+    "webTests": {
+      "passed": 101,
+      "failed": 0,
+      "skipped": 0
+    },
+    "russiaIntegration": {
+      "passed": 3,
+      "failed": 0
+    },
+    "offline": {
+      "files": 252,
+      "vectorTiles": 193,
+      "terrainTiles": 21,
+      "packageBytes": 7008721,
+      "landscapeBytes": 1958485,
+      "archiveHashesVerified": true
+    },
+    "canvasOverviewLod": "At zoom < 4 detail tile layer is released and outstanding layer installation is invalidated; whole-country overview uses local geography."
+  },
+  "limits": {
+    "apiConfigured": false,
+    "postgisLiveIntegrationTested": false,
+    "physicalAndroidTested": false,
+    "browserWebGL2Available": false,
+    "pointerAutomationTimeoutObserved": true,
+    "keyboardRegionAndTerrainRetested": true,
+    "githubMainContainsFullSource": false
+  }
+}

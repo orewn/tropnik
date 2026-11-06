@@ -1,0 +1,299 @@
+/* Authoritative typography and cartographic symbols for the interactive atlas. */
+.explore-layout {
+  --map-font: 'Gotham Pro', Manrope, system-ui, sans-serif;
+  --heading-2: 600 48px/48px var(--map-font);
+  --heading-4: 600 30px/36px var(--map-font);
+  --heading-5: 600 24px/32px var(--map-font);
+  --title-2: 500 18px/28px var(--map-font);
+  --title-3: 500 16px/24px var(--map-font);
+  --body-3: 400 16px/24px var(--map-font);
+  --body-6: 400 14px/20px var(--map-font);
+  --button-md: 600 16px/24px var(--map-font);
+  --button-sm: 600 14px/20px var(--map-font);
+  --caption-3: 600 12px/16px var(--map-font);
+  --caption-4: 500 12px/16px var(--map-font);
+  --caption-5: 400 12px/16px var(--map-font);
+  font: var(--body-6);
+  letter-spacing: 0;
+}
+
+.explore-layout .heading-2 {font: var(--heading-2); letter-spacing: -.035em; text-wrap: balance}
+.explore-layout .heading-4 {font: var(--heading-4); letter-spacing: -.025em; text-wrap: balance}
+.explore-layout .heading-5 {font: var(--heading-5); letter-spacing: -.02em; text-wrap: balance}
+.explore-layout .title-2 {font: var(--title-2); letter-spacing: -.015em; text-wrap: balance}
+.explore-layout .title-3 {font: var(--title-3); letter-spacing: 0; text-wrap: balance}
+.explore-layout .body-3 {font: var(--body-3); letter-spacing: 0; text-wrap: pretty}
+.explore-layout .body-6 {font: var(--body-6); letter-spacing: 0; text-wrap: pretty}
+.explore-layout .caption-3 {font: var(--caption-3); letter-spacing: 0}
+.explore-layout .caption-4 {font: var(--caption-4); letter-spacing: 0}
+
+.explore-layout .explore-panel-content {padding: 24px}
+.explore-layout .explore-panel h1,
+.explore-layout .explore-panel h1.route-title {
+  font: var(--heading-4);
+  letter-spacing: -.025em;
+  text-wrap: balance;
+  margin-bottom: 12px;
+}
+.explore-layout .panel-intro {font: var(--body-6); letter-spacing: 0; text-wrap: pretty}
+.explore-layout .eyebrow {font: var(--caption-3); letter-spacing: .1em}
+.explore-layout .pilot-label,
+.explore-layout .panel-foot,
+.explore-layout .section-heading > span {font: var(--caption-4); letter-spacing: 0}
+.explore-layout .section-heading h2 {font: var(--title-3); letter-spacing: 0}
+.explore-layout .search-field {padding: 0 12px; gap: 8px; border-radius: 12px}
+.explore-layout .search-field input {font: var(--body-3); letter-spacing: 0}
+.explore-layout .back-link,
+.explore-layout .filter-button,
+.explore-layout .region-detail-link,
+.explore-layout .text-link {font: var(--button-sm); letter-spacing: 0}
+.explore-layout .filters label,
+.explore-layout .filters select {font: var(--body-6); letter-spacing: 0}
+.explore-layout .button {font: var(--button-md); letter-spacing: 0; white-space: normal; text-wrap: balance}
+.explore-layout .route-actions .text-link {font: var(--button-sm)}
+.explore-layout .route-status,
+.explore-layout .route-restriction,
+.explore-layout .route-section p,
+.explore-layout .check-list,
+.explore-layout .info-compact,
+.explore-layout .info-compact p,
+.explore-layout .together-note p,
+.explore-layout .catalog-empty p,
+.explore-layout .small-empty p {font: var(--body-6); letter-spacing: 0; text-wrap: pretty}
+.explore-layout .route-section h3,
+.explore-layout .together-note strong {font: var(--title-3); letter-spacing: 0}
+.explore-layout .route-restriction strong {font: var(--button-sm); letter-spacing: 0}
+.explore-layout .route-restriction a,
+.explore-layout .source-note,
+.explore-layout .route-section .source-note,
+.explore-layout .source-block span,
+.explore-layout .source-block a,
+.explore-layout .source-difficulty,
+.explore-layout .source-difficulty p,
+.explore-layout .source-difficulty a {font: var(--caption-5); letter-spacing: 0; text-wrap: pretty}
+.explore-layout .source-block strong {font: var(--title-3); letter-spacing: 0}
+.explore-layout .route-summary strong {font: var(--heading-5); letter-spacing: -.02em; font-variant-numeric: tabular-nums}
+.explore-layout .route-summary small,
+.explore-layout .route-summary span {font: var(--caption-4); letter-spacing: 0}
+.explore-layout .catalog-empty h3,
+.explore-layout .small-empty h3 {font: var(--title-2); letter-spacing: -.015em; text-wrap: balance}
+
+.explore-layout .region-list {gap: 4px}
+.explore-layout .region-option {
+  gap: 12px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition: background-color 300ms cubic-bezier(.22,1,.36,1), border-color 300ms cubic-bezier(.22,1,.36,1);
+}
+.explore-layout .region-option:hover {padding: 8px; background: #f0f2e9; border-color: #d8e0d0}
+.explore-layout .region-option:active {transform: scale(.98)}
+.explore-layout .region-option > svg {width: 24px; height: 24px; flex-shrink: 0; transition: transform 500ms cubic-bezier(.22,1,.36,1)}
+.explore-layout .region-option-text {gap: 4px; min-width: 0}
+.explore-layout .region-option-text strong {font: var(--title-3); letter-spacing: -.01em; text-wrap: balance}
+.explore-layout .region-option-text small {font: var(--caption-5); letter-spacing: 0; text-wrap: pretty}
+.explore-layout .region-thumbnail {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  color: #244d3c;
+  overflow: visible;
+}
+.explore-layout .region-thumbnail::before,
+.explore-layout .region-thumbnail::after {content: none}
+.explore-layout .region-thumbnail > svg {filter: none}
+.region-artwork {display: block; width: 64px; height: 64px}
+.region-artwork-shape {fill: #60806b; stroke: #244d3c; stroke-width: .8px}
+.region-artwork-symbol {display: grid; place-items: center}
+.region-artwork-symbol .map-icon {width: 24px; height: 24px}
+
+.explore-layout .trail-card {border-radius: 12px; transition: border-color 300ms cubic-bezier(.22,1,.36,1)}
+.explore-layout .trail-card-main {padding: 16px}
+.explore-layout .trail-card-top {margin-bottom: 12px; gap: 8px}
+.explore-layout .trail-card h3 {font: var(--title-2); letter-spacing: -.015em; text-wrap: balance}
+.explore-layout .trail-card p {font: var(--body-6); letter-spacing: 0; text-wrap: pretty; margin-top: 8px}
+.explore-layout .trail-facts,
+.explore-layout .trail-facts span {font: var(--caption-4); letter-spacing: 0; font-variant-numeric: tabular-nums}
+.explore-layout .difficulty {font: var(--caption-3); letter-spacing: 0}
+.explore-layout .source-status,
+.explore-layout .preload-hint {font: var(--caption-4); letter-spacing: 0}
+.explore-layout .preload-hint {padding: 0 16px 12px}
+.explore-layout .trail-card-bottom {padding: 4px 8px 4px 16px; gap: 8px}
+
+.explore-layout .map-context,
+.explore-layout .map-legend,
+.explore-layout .map-credits,
+.explore-layout .region-marker-label {font: var(--caption-4); letter-spacing: 0}
+.explore-layout .map-style-switch button,
+.explore-layout .layer-button,
+.explore-layout .layer-menu,
+.explore-layout .layer-menu button {font: var(--button-sm); letter-spacing: 0}
+.explore-layout .layer-menu label,
+.explore-layout .map-skeleton,
+.explore-layout .map-discover-card p,
+.explore-layout .map-message {font: var(--body-6); letter-spacing: 0; text-wrap: pretty}
+.explore-layout .map-message button,
+.explore-layout .map-discover-card button {font: var(--button-sm)}
+.explore-layout .layer-menu strong {font: var(--title-3)}
+.explore-layout .layer-menu > a {font: var(--caption-5)}
+.explore-layout .map-discover-card h3 {font: var(--title-2)}
+.explore-layout .map-warning-icon {font: var(--caption-3)}
+.explore-layout .map-preload-status {
+  position: absolute;
+  z-index: 8;
+  left: 24px;
+  bottom: 88px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 48px);
+  padding: 8px 12px;
+  border: 1px solid #c2d0b8;
+  border-radius: 8px;
+  background: #fffef7ee;
+  color: var(--forest);
+  font: var(--caption-4);
+  pointer-events: none;
+}
+.explore-layout .map-preload-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border: 2px solid #b7844b;
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+.explore-layout .map-controls,
+.explore-layout .terrain-controls,
+.explore-layout .map-style-switch {
+  background: var(--surface);
+  color: var(--forest);
+  border: 1px solid #bdc9b7;
+  border-radius: 16px;
+  padding: 4px;
+  gap: 4px;
+  box-shadow: 0 8px 24px #1b392818;
+}
+.explore-layout .map-controls button,
+.explore-layout .terrain-controls > button {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 12px;
+  transition: transform 300ms cubic-bezier(.22,1,.36,1), background-color 300ms cubic-bezier(.22,1,.36,1);
+}
+.explore-layout .map-style-switch button {min-height: 48px; gap: 8px; border-radius: 12px; padding: 8px 12px}
+.explore-layout .map-controls button:hover,
+.explore-layout .terrain-controls > button:hover {background: #e1e8d9}
+.explore-layout .map-controls button:active,
+.explore-layout .terrain-controls > button:active {transform: scale(.98)}
+.explore-layout .map-controls button .map-icon,
+.explore-layout .terrain-controls > button .map-icon,
+.explore-layout .map-style-switch button .map-icon {width: 24px; height: 24px; flex-shrink: 0}
+.explore-layout .map-icon {display: block}
+.explore-layout .region-marker-label {font: var(--button-sm)}
+.explore-layout .map-context {font: var(--body-6)}
+
+.explore-layout .terrain-heading h2 {font: var(--heading-2); letter-spacing: -.035em; text-wrap: balance}
+.explore-layout .terrain-heading .eyebrow {font: var(--caption-3); letter-spacing: .1em}
+.explore-layout .terrain-heading p {font: var(--body-6); letter-spacing: 0; text-wrap: pretty}
+.explore-layout .terrain-bottom > span:last-child,
+.explore-layout .terrain-live,
+.explore-layout .terrain-attribution,
+.explore-layout .terrain-info a {font: var(--caption-4); letter-spacing: 0}
+.explore-layout .terrain-info strong {font: var(--title-3); letter-spacing: 0}
+.explore-layout .terrain-info p,
+.explore-layout .terrain-progress {font: var(--body-6); letter-spacing: 0; text-wrap: pretty}
+
+@media (max-width: 930px) {
+  /* The buttons retain their explicit accessible labels in the compact dock. */
+  .explore-layout .map-style-switch button {font-size: 0; line-height: 0; gap: 0; padding: 8px}
+  .explore-layout .layer-button {font-size: 0; line-height: 0}
+  .explore-layout .map-context {max-width: calc(100% - 192px)}
+}
+@media (max-width: 700px) {
+  /* Separate neighbouring destination labels at the complete-country scale. */
+  .region-marker-altai .region-marker-label {transform: translate(-24px, -8px)}
+  .region-marker-baikal .region-marker-label {transform: translate(8px, -24px)}
+  .explore-layout .map-preload-status {left: 16px; bottom: calc(50% + 32px); max-width: calc(100% - 32px)}
+  .explore-layout:has(.explore-panel.collapsed) .map-preload-status {bottom: 148px}
+  .explore-layout .explore-panel-content {padding: 4px 24px 24px}
+  .explore-layout .explore-panel.collapsed h1 {font: var(--heading-4); letter-spacing: -.025em}
+  .explore-layout .explore-panel.collapsed .panel-intro {font: var(--body-6)}
+  .explore-layout .explore-panel.collapsed .eyebrow {font: var(--caption-3)}
+  .explore-layout .terrain-heading h2 {font: var(--heading-4); letter-spacing: -.025em}
+  .explore-layout .terrain-loading .caption-2 {font: var(--caption-5)}
+  .explore-layout .terrain-controls,
+  .explore-layout .map-controls {gap: 0}
+}
+@media (prefers-reduced-motion: reduce) {
+  .explore-layout .region-option,
+  .explore-layout .region-option > svg,
+  .explore-layout .trail-card,
+  .explore-layout .map-controls button,
+  .explore-layout .terrain-controls > button {transition: none}
+  .explore-layout .region-option:active,
+  .explore-layout .region-option:hover > svg,
+  .explore-layout .map-controls button:active,
+  .explore-layout .terrain-controls > button:active {transform: none}
+}
+
+/* Credits are visible on first display, then available through a dedicated map control. */
+.map-attribution {
+  position: absolute;
+  z-index: 20;
+  left: 24px;
+  bottom: calc(var(--map-bottom-inset, 0px) + 16px);
+  color: var(--forest);
+}
+.map-attribution[hidden] {display: none}
+.map-attribution-content {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  width: max-content;
+  max-width: min(400px, calc(100vw - 48px));
+  padding: 12px 16px;
+  border: 1px solid #c2d0b8;
+  border-radius: 12px;
+  background: #fffefa;
+  box-shadow: 0 8px 32px #243e2b14;
+  font: var(--caption-2);
+  text-wrap: pretty;
+}
+.map-attribution-content p {margin-top: 8px; font: var(--caption-4)}
+.map-attribution-content a {text-decoration: underline; text-underline-offset: 3px}
+.map-attribution-toggle {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 12px;
+  border: 1px solid #c2d0b8 !important;
+  border-radius: 12px;
+  background: #fffefa;
+  transition: background 300ms cubic-bezier(.22,1,.36,1), transform 300ms cubic-bezier(.22,1,.36,1);
+}
+.map-attribution-toggle:hover {background: #e1e8d9}
+.map-attribution-toggle:active {transform: scale(.98)}
+.showing-terrain > .map-attribution {visibility: hidden}
+.terrain-info a {display: inline-flex; align-items: center; gap: 8px}
+.explore-layout .map-skeleton {background: #e7ebe2}
+.explore-layout .atlas-canvas.leaflet-container {background: #e7ebe2 !important}
+.explore-layout .map-legend {left: 88px}
+@media (min-width: 701px) {
+  .explore-layout .terrain-bottom {left: 88px}
+}
+@media (max-width: 700px) {
+  .map-attribution {left: auto; right: 16px; bottom: calc(var(--map-bottom-inset, 0px) + 12px)}
+  .map-attribution-content {left: auto; right: 0; max-width: calc(100vw - 32px)}
+  .region-marker-krym .region-marker-label {transform: translate(-4px, 40px)}
+  .region-marker-krasnodar .region-marker-label {transform: translate(38px, 8px)}
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-attribution-toggle {transition: none}
+  .map-attribution-toggle:active {transform: none}
+}

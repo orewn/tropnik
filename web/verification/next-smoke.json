@@ -1,0 +1,29 @@
+{
+  "scope": "Local built Next standalone without backend, not Docker/PostGIS",
+  "checks": [
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/trips",
+      "status": 200
+    },
+    {
+      "path": "/guides",
+      "status": 200
+    },
+    {
+      "path": "/account",
+      "status": 200
+    },
+    {
+      "path": "/api/status",
+      "status": 200
+    },
+    {
+      "path": "/api/backend/me",
+      "status": 503
+    }
+  ]
+}

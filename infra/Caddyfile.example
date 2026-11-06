@@ -1,0 +1,22 @@
+# Put the actual domain here after DNS is configured.
+# Set TROPA_PROXY_TOKEN in Caddy's own service environment as well as Next/Go.
+# Both incoming forwarding headers are OVERWRITTEN, not appended or trusted.
+# The actual proxy/BFF peers must also be in Go's TRUSTED_PROXY_CIDRS.
+your-domain.example {
+    handle /api/v1/* {
+        reverse_proxy 127.0.0.1:8080 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Tropa-Proxy-Token "{$TROPA_PROXY_TOKEN}"
+        }
+    }
+    handle {
+        reverse_proxy 127.0.0.1:3000 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Tropa-Proxy-Token "{$TROPA_PROXY_TOKEN}"
+        }
+    }
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}

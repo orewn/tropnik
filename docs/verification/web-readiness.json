@@ -1,0 +1,53 @@
+{
+  "recordedAt": "2026-11-06T06:44:12.353556+00:00",
+  "scope": "Bounded readiness fix after connection audit; no backend/database mutation",
+  "command": "node --test tests/api-policy.test.mjs tests/service-readiness.test.mjs",
+  "workingDirectory": "web",
+  "executionEvidence": "Command completed in tool session after final strict production-envelope change; observed exit 0 and all 15 passed.",
+  "result": {
+    "tests": 15,
+    "passed": 15,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "exitCode": 0
+  },
+  "suiteCounts": {
+    "api-policy.test.mjs": 8,
+    "service-readiness.test.mjs": 7
+  },
+  "readinessCases": [
+    "Unset configuration stays preview without network access",
+    "Connected requires HTTP 200 plus data.status ready, meta.mode production and no error",
+    "Liveness/non-200/malformed/oversized/HTML/preview responses never become ready",
+    "Unsafe configuration is not contacted or disclosed",
+    "Network exception details are not returned",
+    "Bounded timeout aborts a stalled request",
+    "Client rejects presence-only status and keeps preview or unavailable authentication disabled"
+  ],
+  "typeChecks": {
+    "sharedWorkspaceFullTsc": {
+      "status": "failed",
+      "cause": "Existing generated .next/types/validator.ts imports missing exports from generated routes.js; generated files left unchanged"
+    },
+    "changedSourceTypeScript": {
+      "status": "passed",
+      "scope": "Three changed TypeScript source files with imports; temporary config excludes generated .next types",
+      "exitCode": 0
+    },
+    "isolatedFullNextBuild": {
+      "status": "passed",
+      "report": "next-production-build.json",
+      "typeScript": "passed"
+    }
+  },
+  "sourceHashes": {
+    "web/lib/service-readiness.ts": "a877db4b1a79dfd9477e4f876528ac35ec98afd451bfcfb1bd7725e5178186c9",
+    "web/app/api/status/route.ts": "3e2499bc1a55f317d2c7aa098bdfd47a4357b7c913273394e7a59246f0d64cdd",
+    "web/lib/api.ts": "58561145e9cbac981b6766b346824e57e965cf99ba60cba391accec894361f91",
+    "web/tests/api-policy.test.mjs": "704364a351d0a66c82a32fee27dd733a08c11a274e212ba0a393e90775df958e",
+    "web/tests/service-readiness.test.mjs": "e6647d22f2b05d112f3d7855b92924602d07e9ec58c905c6dd177da8ce64d8f0"
+  },
+  "liveApiPostgisExecuted": false,
+  "newDeploymentProvesApiConnection": false
+}

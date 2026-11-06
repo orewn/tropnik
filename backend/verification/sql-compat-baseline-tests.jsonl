@@ -1,0 +1,40 @@
+{"Time":"2026-11-06T15:10:06.506951798+03:00","Action":"start","Package":"tropa/backend/internal/store"}
+{"Time":"2026-11-06T15:10:06.511220009+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestModerationCaseScopeMuteAndIndependentAppeal"}
+{"Time":"2026-11-06T15:10:06.511285518+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestModerationCaseScopeMuteAndIndependentAppeal","Output":"=== RUN   TestModerationCaseScopeMuteAndIndependentAppeal\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:06.919414014+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestModerationCaseScopeMuteAndIndependentAppeal","Output":"--- PASS: TestModerationCaseScopeMuteAndIndependentAppeal (0.41s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:06.919466684+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestModerationCaseScopeMuteAndIndependentAppeal","Elapsed":0.41}
+{"Time":"2026-11-06T15:10:06.919496839+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestReviewedRoutePolicyCannotBeWeakened"}
+{"Time":"2026-11-06T15:10:06.919506353+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestReviewedRoutePolicyCannotBeWeakened","Output":"=== RUN   TestReviewedRoutePolicyCannotBeWeakened\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.101653907+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestReviewedRoutePolicyCannotBeWeakened","Output":"--- PASS: TestReviewedRoutePolicyCannotBeWeakened (0.18s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.101711364+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestReviewedRoutePolicyCannotBeWeakened","Elapsed":0.18}
+{"Time":"2026-11-06T15:10:07.101723702+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestGuideWithdrawalAndPrivateChat"}
+{"Time":"2026-11-06T15:10:07.101727198+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestGuideWithdrawalAndPrivateChat","Output":"=== RUN   TestGuideWithdrawalAndPrivateChat\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.264613635+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestGuideWithdrawalAndPrivateChat","Output":"--- PASS: TestGuideWithdrawalAndPrivateChat (0.16s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.26466313+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestGuideWithdrawalAndPrivateChat","Elapsed":0.16}
+{"Time":"2026-11-06T15:10:07.264680136+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestCompletionReviewsAndOfflineConflict"}
+{"Time":"2026-11-06T15:10:07.264682699+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestCompletionReviewsAndOfflineConflict","Output":"=== RUN   TestCompletionReviewsAndOfflineConflict\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.456391416+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestCompletionReviewsAndOfflineConflict","Output":"--- PASS: TestCompletionReviewsAndOfflineConflict (0.19s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.456440481+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestCompletionReviewsAndOfflineConflict","Elapsed":0.19}
+{"Time":"2026-11-06T15:10:07.456451137+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestRecruitmentDoesNotSilentlyBookTourists"}
+{"Time":"2026-11-06T15:10:07.456454011+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestRecruitmentDoesNotSilentlyBookTourists","Output":"=== RUN   TestRecruitmentDoesNotSilentlyBookTourists\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.617682401+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestRecruitmentDoesNotSilentlyBookTourists","Output":"--- PASS: TestRecruitmentDoesNotSilentlyBookTourists (0.16s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.617734059+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestRecruitmentDoesNotSilentlyBookTourists","Elapsed":0.16}
+{"Time":"2026-11-06T15:10:07.617753799+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestRealSessionsAndPendingGuide"}
+{"Time":"2026-11-06T15:10:07.617759197+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestRealSessionsAndPendingGuide","Output":"=== RUN   TestRealSessionsAndPendingGuide\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.748998467+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestRealSessionsAndPendingGuide","Output":"--- PASS: TestRealSessionsAndPendingGuide (0.13s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.749044607+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestRealSessionsAndPendingGuide","Elapsed":0.13}
+{"Time":"2026-11-06T15:10:07.7490533+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestOverviewIsBoundedAndFullRouteRemainsAvailable"}
+{"Time":"2026-11-06T15:10:07.749059289+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestOverviewIsBoundedAndFullRouteRemainsAvailable","Output":"=== RUN   TestOverviewIsBoundedAndFullRouteRemainsAvailable\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.96026292+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestOverviewIsBoundedAndFullRouteRemainsAvailable","Output":"--- PASS: TestOverviewIsBoundedAndFullRouteRemainsAvailable (0.21s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:07.960320567+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestOverviewIsBoundedAndFullRouteRemainsAvailable","Elapsed":0.21}
+{"Time":"2026-11-06T15:10:07.960336+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestRosterOnlyAssignedGuideAndRevokedInterestCannotPost"}
+{"Time":"2026-11-06T15:10:07.960340337+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestRosterOnlyAssignedGuideAndRevokedInterestCannotPost","Output":"=== RUN   TestRosterOnlyAssignedGuideAndRevokedInterestCannotPost\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:08.141392734+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestRosterOnlyAssignedGuideAndRevokedInterestCannotPost","Output":"--- PASS: TestRosterOnlyAssignedGuideAndRevokedInterestCannotPost (0.18s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:08.141483701+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestRosterOnlyAssignedGuideAndRevokedInterestCannotPost","Elapsed":0.18}
+{"Time":"2026-11-06T15:10:08.141497502+03:00","Action":"run","Package":"tropa/backend/internal/store","Test":"TestWasmRuntimeSQLGrantsAndMigrationReapply"}
+{"Time":"2026-11-06T15:10:08.141500667+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestWasmRuntimeSQLGrantsAndMigrationReapply","Output":"=== RUN   TestWasmRuntimeSQLGrantsAndMigrationReapply\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:08.329601369+03:00","Action":"output","Package":"tropa/backend/internal/store","Test":"TestWasmRuntimeSQLGrantsAndMigrationReapply","Output":"--- PASS: TestWasmRuntimeSQLGrantsAndMigrationReapply (0.19s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:08.329659006+03:00","Action":"pass","Package":"tropa/backend/internal/store","Test":"TestWasmRuntimeSQLGrantsAndMigrationReapply","Elapsed":0.19}
+{"Time":"2026-11-06T15:10:08.329672586+03:00","Action":"output","Package":"tropa/backend/internal/store","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-11-06T15:10:08.331240082+03:00","Action":"output","Package":"tropa/backend/internal/store","Output":"ok  \ttropa/backend/internal/store\t1.824s\n"}
+{"Time":"2026-11-06T15:10:08.331293032+03:00","Action":"pass","Package":"tropa/backend/internal/store","Elapsed":1.8239999999999998}

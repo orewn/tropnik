@@ -1,0 +1,38 @@
+{
+  "license": "ODbL-1.0",
+  "attribution": "© OpenStreetMap contributors",
+  "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "retrievedAt": "2026-11-06T03:55:37+00:00",
+  "sources": [
+    {
+      "osmRelationId": 3748147,
+      "sourceUrl": "https://hiking.waymarkedtrails.org/api/v1/details/relation/3748147",
+      "file": "osm-relation-3748147.wmt.json",
+      "sha256": "8aa46981e1d57b7e440558d346105caba1e6254884180c79016d06c2a68ed0a6",
+      "retrievedAt": "2026-11-06T03:55:37+00:00",
+      "segments": 12,
+      "vertices": 80,
+      "drawnSegmentLengthKm": 1.276
+    },
+    {
+      "osmRelationId": 3748250,
+      "sourceUrl": "https://hiking.waymarkedtrails.org/api/v1/details/relation/3748250",
+      "file": "osm-relation-3748250.wmt.json",
+      "sha256": "6baf7d5f783ee7206a30dbe384d3f9b6b19bafad1b426351343d755e9e9ce3f9",
+      "retrievedAt": "2026-11-06T03:55:37+00:00",
+      "segments": 32,
+      "vertices": 254,
+      "drawnSegmentLengthKm": 3.524
+    },
+    {
+      "osmRelationId": 11566519,
+      "sourceUrl": "https://hiking.waymarkedtrails.org/api/v1/details/relation/11566519",
+      "file": "osm-relation-11566519.wmt.json",
+      "sha256": "b773ad9f586f5bb9b81c4462d222556985b075be02d6ba9be950216d90a94742",
+      "retrievedAt": "2026-11-06T03:55:37+00:00",
+      "segments": 24,
+      "vertices": 1084,
+      "drawnSegmentLengthKm": 20.295
+    }
+  ]
+}

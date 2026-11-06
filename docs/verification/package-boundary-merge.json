@@ -1,0 +1,31 @@
+{
+  "recordedAt": "2026-11-06T07:51:26.341567+00:00",
+  "scope": "Merged source allowlist and Android manifest import; no final snapshot/archive produced",
+  "tests": {
+    "command": "python3 tools/test-package-project.py",
+    "passed": 8,
+    "failed": 0,
+    "exitCode": 0
+  },
+  "livePathSelection": {
+    "source": {
+      "requiredSourcesPresent": true,
+      "boundaryRawIncluded": true,
+      "rendererAndDocsIncluded": true,
+      "boundaryCacheExcluded": true,
+      "androidManifestIncluded": true,
+      "apkExcluded": true
+    },
+    "github": {
+      "requiredSourcesPresent": true,
+      "boundaryRawIncluded": true,
+      "rendererAndDocsIncluded": true,
+      "boundaryCacheExcluded": true,
+      "androidManifestIncluded": true,
+      "apkExcluded": true
+    }
+  },
+  "packagerSha256": "22e0075acad2af14e4eb1bce9b8eafc67e7f41cedecef7ec5c1bce23d299f879",
+  "finalSnapshotCreated": false,
+  "finalContentSecretScanRun": false
+}

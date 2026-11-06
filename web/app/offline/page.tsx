@@ -1,0 +1,3 @@
+import type {Metadata} from 'next';import {Header} from '@/components/Header';import {Footer} from '@/components/Footer';import {Offline} from '@/components/Offline';
+export const metadata:Metadata={title:'Карты с собой',description:'Сохранённые маршруты и подробный картографический пакет Тропника на вашем устройстве.',robots:{index:false,follow:false}};
+export default function Page(){return <><Header active="offline"/><main id="main"><section className="page-hero"><span className="eyebrow">Вне зоны связи</span><h1>Возьмите карту с собой.</h1><p>Сохраните материалы заранее. Отдельно скачайте подробную карту местности и карточки нужных маршрутов.</p></section><div className="page-content"><Offline/></div></main><Footer/></>;}

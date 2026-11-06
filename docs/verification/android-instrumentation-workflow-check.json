@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-11-06T12:29:45.150945+00:00",
+  "status": "passed",
+  "scope": "Static workflow and shell checks plus synthetic JUnit report fixtures; no emulator or device was executed.",
+  "yamlParsed": true,
+  "bashSyntaxChecked": true,
+  "templateMatchesWorkflow": true,
+  "manualOnlyDeviceJob": true,
+  "timeoutMinutes": 25,
+  "actionReferences": [
+    "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+    "actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad",
+    "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+  ],
+  "fixtureChecks": [
+    "missing-report-rejected",
+    "five-real-case-nodes-accepted-fixture",
+    "failed-gradle-rejected",
+    "failure-node-rejected",
+    "skipped-node-rejected",
+    "duplicates-and-missing-cases-rejected",
+    "wrong-test-class-rejected",
+    "malformed-xml-rejected"
+  ],
+  "actualDeviceExecutionPerformed": false,
+  "githubWorkflowDispatched": false,
+  "sources": [
+    "https://developer.android.com/studio/run/emulator-acceleration",
+    "https://developer.android.com/studio/run/emulator-commandline",
+    "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+    "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch"
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "createdAt": "2026-11-06T04:57:13.010722+00:00",
+  "scope": "Bounded initial data import for six tourism destinations; not all trails in Russia.",
+  "routeCount": 278,
+  "routeCountsByRegion": {
+    "altai": 9,
+    "krasnodar": 99,
+    "karelia": 11,
+    "krym": 151,
+    "baikal": 7,
+    "kamchatka": 1
+  },
+  "routeSourceType": "route",
+  "rawTrailCount": 30544,
+  "rawTrailCoverage": "Downloaded Geofabrik Crimea extract only",
+  "rawTrailTypes": {
+    "footway": 17039,
+    "path": 13492,
+    "bridleway": 13
+  },
+  "fieldVerifiedRouteCount": 0,
+  "officialOnlineEvidenceRecordCount": 43,
+  "officialOnlineEvidenceMeaning": "Scoped manager/operator/tourism-source descriptions or access statements; see evidenceLevel. Not field, geometry or present-opening verification.",
+  "waymarkedCandidates": 395,
+  "geographicExclusions": 117,
+  "requestFailures": [],
+  "maxDepthSaturatedAreas": [],
+  "unqueriedSubareas": 0,
+  "globalDetailLimitOmissions": 0,
+  "providerSelection": "Top-level route relations indexed by Waymarked Trails hiking API; does not enumerate every physical path or every child relation.",
+  "geofabrikOsmTimestamp": "2026-11-03T21:24:23Z",
+  "pbfSha256": "fdfefb7ee667d83971072d94d3e5d76fe35b9f6e24fb9b354ea50b9750c29614",
+  "overpassKamchatkaPilot": {
+    "status": "unavailable",
+    "error": "HTTP Error 502: Bad Gateway",
+    "requests": 1,
+    "retryOrAlternateEndpointUsed": false
+  },
+  "auditStatus": "passed",
+  "auditScope": "File integrity, referential consistency, data-shape checks and verification semantics. This is not a route or field-safety certification.",
+  "routeVertices": 223073,
+  "rawApiSourceHashesChecked": 417,
+  "fileSizesBytes": {
+    "routes.json": 590938,
+    "routes.geojson": 5918915,
+    "raw-trails-krym.geojson": 42751149,
+    "verification-evidence.json": 98237,
+    "verification-coverage.json": 359575,
+    "verification-coverage.csv": 42782
+  },
+  "integration": {
+    "metadata": "routes.json",
+    "singleGeometryTemplate": "geometry/osm-relation-{id}.geojson",
+    "regionalGeometryTemplate": "regions/{regionId}.geojson",
+    "evidence": "verification-evidence.json",
+    "doNotLoadAtStartup": [
+      "raw-trails-krym.geojson",
+      "routes.geojson",
+      "raw/geofabrik/crimean-fed-district-latest.osm.pbf"
+    ],
+    "verificationCoverage": "verification-coverage.json"
+  },
+  "publicationRules": [
+    "Imported records are reference/noindex until editorial publication checks.",
+    "The calculated geometryLengthKm is not official itinerary distance.",
+    "retrievedAt means data fetched, not an official or human route review.",
+    "A stale closure notice remains visible and requires a fresh check; expiration does not reopen a route."
+  ],
+  "sourceBackedGeographicExclusionCount": 2,
+  "onlineVerificationCoverage": {
+    "routeCount": 278,
+    "confirmationStatusCounts": {
+      "authoritative_description_found": 40,
+      "no_authoritative_confirmation_found": 86,
+      "unnamed_identity_unresolved": 23,
+      "reference_identity_not_researched": 93,
+      "related_authoritative_source_found": 20,
+      "publisher_description_found": 9,
+      "project_reference_found": 5,
+      "secondary_source_only": 1,
+      "related_publisher_source_found": 1
+    },
+    "researchStatusCounts": {
+      "attempted": 162,
+      "not_researched": 116
+    },
+    "identityStatusCounts": {
+      "named": 161,
+      "unnamed": 23,
+      "reference_only": 94
+    },
+    "sourceWebsiteRouteCount": 63,
+    "uniqueSuppliedWebsiteReads": 47,
+    "websiteReadStatusCounts": {
+      "readable": 35,
+      "unavailable": 9,
+      "insufficient_readable_content": 3
+    },
+    "searchQueryCount": 48,
+    "explicitEvidenceRecords": 43,
+    "evidenceLevelCounts": {
+      "official_notice": 8,
+      "official_description": 7,
+      "operator_page": 10,
+      "official_feature_description": 3,
+      "official_status_page": 2,
+      "operator_description": 5,
+      "official_access_rule": 5,
+      "official_tourism_publication": 3
+    },
+    "geometryVerifiedCount": 0,
+    "fieldVerifiedCount": 0,
+    "navigationReadyCount": 0,
+    "byRegion": {
+      "altai": {
+        "secondary_source_only": 1,
+        "reference_identity_not_researched": 1,
+        "publisher_description_found": 5,
+        "no_authoritative_confirmation_found": 1,
+        "authoritative_description_found": 1
+      },
+      "baikal": {
+        "publisher_description_found": 2,
+        "project_reference_found": 1,
+        "unnamed_identity_unresolved": 2,
+        "no_authoritative_confirmation_found": 2
+      },
+      "kamchatka": {
+        "unnamed_identity_unresolved": 1
+      },
+      "karelia": {
+        "related_authoritative_source_found": 3,
+        "no_authoritative_confirmation_found": 6,
+        "authoritative_description_found": 2
+      },
+      "krasnodar": {
+        "authoritative_description_found": 28,
+        "no_authoritative_confirmation_found": 47,
+        "unnamed_identity_unresolved": 5,
+        "related_authoritative_source_found": 14,
+        "publisher_description_found": 2,
+        "related_publisher_source_found": 1,
+        "project_reference_found": 2
+      },
+      "krym": {
+        "reference_identity_not_researched": 92,
+        "no_authoritative_confirmation_found": 30,
+        "authoritative_description_found": 9,
+        "unnamed_identity_unresolved": 15,
+        "project_reference_found": 2,
+        "related_authoritative_source_found": 3
+      }
+    }
+  }
+}

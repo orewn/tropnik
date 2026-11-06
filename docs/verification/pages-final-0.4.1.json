@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-06T12:55:26.803258+00:00",
+  "release": "0.4.1-preview",
+  "buildId": "038dc97e1612744e",
+  "base": "/tropnik-test/",
+  "origin": "https://orewn.github.io",
+  "files": {
+    "archive": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.1/tropnik-test.zip",
+      "bytes": 37392858,
+      "sha256": "6e31d4f6da95c6247cad1003fca14d324ae70e0533efe539db4eff175690624e"
+    },
+    "buildInfo": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.1/pages-preview-dist/build-info.json",
+      "bytes": 201048,
+      "sha256": "577b285001cbc60289f80be2b462746a6def94cc018d3eb9a0dd7b436cde7602"
+    },
+    "verification": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.1/pages-preview-dist/verification.json",
+      "bytes": 452,
+      "sha256": "e90faecf7fee398a418dffc08720ce5b819b6f1ff7525c6f4f06372c49a85d44"
+    },
+    "httpVerification": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.1/pages-preview-dist/http-verification.json",
+      "bytes": 135,
+      "sha256": "72d41102193461677b82b7ad68c0b65520f1b17d9058c72f38d70b38f24aee8a"
+    },
+    "pageManifest": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.1/pages-preview-dist/page-manifest.json",
+      "bytes": 43953,
+      "sha256": "633a9f12b73696743249365f31b55690a5983430ba7e1d2e59f88eaa77ed5841"
+    },
+    "apk": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.1/pages-preview-dist/downloads/tropnik-arm64-preview.apk",
+      "bytes": 24606797,
+      "sha256": "9e5496c156720566169c2fc6a5198c2e9d5b3a170024cd910f1d1ef2f7587b41"
+    }
+  },
+  "zipEntries": 1309,
+  "zipCrcVerified": true,
+  "sourceSnapshotInputsChecked": 1088,
+  "sourceSnapshotChangedPaths": [],
+  "scopedTypecheck": {
+    "command": "node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json",
+    "exitCode": 0
+  },
+  "serviceWorker": {
+    "sourceVersion": "tropnik-shell-v8",
+    "sourceSha256": "da94a3422c15b13e9110791417021c383e0a3e37f4895fa5f09a73f35dc240c7",
+    "deployedCacheVersion": "tropnik-test-tropnik-shell-038dc97e1612744e",
+    "deployedSha256": "cde18103605b08b50fe4eda3e2e66dcadca35a416743f4c3a8edd0fca8e098e1",
+    "localOverviewPathPrefixed": true,
+    "browserInstallTestedHere": false
+  },
+  "checks": {
+    "verified": true,
+    "pages": 297,
+    "referenceRoutes": 277,
+    "productionRoutingChecks": 896,
+    "mapPolicyChecks": 14,
+    "staticApiNetworkCalls": 0,
+    "checkedScripts": 46,
+    "publicAssetChecks": 52,
+    "outputFiles": 1307,
+    "offlineFilesVerified": 252,
+    "overviewReliefTilesVerified": 341,
+    "terrainGrid": [
+      513,
+      513
+    ],
+    "apkVerified": true,
+    "coverageExcludedRoutes": [
+      "osm-relation-14407325"
+    ],
+    "base": "/tropnik-test/"
+  },
+  "httpChecks": {
+    "verified": true,
+    "base": "/tropnik-test/",
+    "httpChecks": 51,
+    "browserRenderingTested": false,
+    "backendConnected": false
+  },
+  "browserRenderingTestedHere": false,
+  "githubWrites": false,
+  "sitesWrites": false
+}

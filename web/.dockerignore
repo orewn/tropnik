@@ -1,0 +1,14 @@
+node_modules
+.next
+dist
+.vinext
+.wrangler
+.sites-runtime
+.git
+.env
+.env.*
+outputs
+work
+*.tsbuildinfo
+*.log
+package-lock.json

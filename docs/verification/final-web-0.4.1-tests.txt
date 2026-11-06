@@ -1,0 +1,738 @@
+TAP version 13
+# Subtest: join control rejects a full, guide-free, closed or late departure
+ok 1 - join control rejects a full, guide-free, closed or late departure
+  ---
+  duration_ms: 1.001922
+  type: 'test'
+  ...
+# Subtest: start needs actual attendance including the guide and the scheduled time
+ok 2 - start needs actual attendance including the guide and the scheduled time
+  ---
+  duration_ms: 0.209076
+  type: 'test'
+  ...
+# Subtest: reviews exclude the guide, no-show and duplicate target
+ok 3 - reviews exclude the guide, no-show and duplicate target
+  ---
+  duration_ms: 0.194954
+  type: 'test'
+  ...
+# Subtest: regional times convert to UTC and invalid dates are rejected
+ok 4 - regional times convert to UTC and invalid dates are rejected
+  ---
+  duration_ms: 14.412791
+  type: 'test'
+  ...
+# Subtest: polling does not drop an acknowledged send and moderation tombstones replace text
+ok 5 - polling does not drop an acknowledged send and moderation tombstones replace text
+  ---
+  duration_ms: 1.560706
+  type: 'test'
+  ...
+# Subtest: API preserves custom Headers, cursor and same-origin credentials
+ok 6 - API preserves custom Headers, cursor and same-origin credentials
+  ---
+  duration_ms: 4.556346
+  type: 'test'
+  ...
+# Subtest: API handles 204 and rejects missing data instead of claiming success
+ok 7 - API handles 204 and rejects missing data instead of claiming success
+  ---
+  duration_ms: 9.165001
+  type: 'test'
+  ...
+# Subtest: logout distinguishes a cleared local cookie from an uncertain network failure
+ok 8 - logout distinguishes a cleared local cookie from an uncertain network failure
+  ---
+  duration_ms: 1.905506
+  type: 'test'
+  ...
+# Subtest: two clients behind the same authenticated BFF keep distinct upstream IPs
+ok 9 - two clients behind the same authenticated BFF keep distinct upstream IPs
+  ---
+  duration_ms: 6.558858
+  type: 'test'
+  ...
+# Subtest: missing configuration, forged proof and malformed addresses fail closed
+ok 10 - missing configuration, forged proof and malformed addresses fail closed
+  ---
+  duration_ms: 2.044004
+  type: 'test'
+  ...
+# Subtest: upstream authorization is derived only from a valid server cookie
+ok 11 - upstream authorization is derived only from a valid server cookie
+  ---
+  duration_ms: 0.303427
+  type: 'test'
+  ...
+# Subtest: rate-limit delay reaches the browser without leaking ingress headers
+ok 12 - rate-limit delay reaches the browser without leaking ingress headers
+  ---
+  duration_ms: 0.86183
+  type: 'test'
+  ...
+# Subtest: current map downloads are capped at three and decoding waits for the previous result
+ok 13 - current map downloads are capped at three and decoding waits for the previous result
+  ---
+  duration_ms: 8.075718
+  type: 'test'
+  ...
+# Subtest: queue overflow is an explicit error, never a successfully ready blank tile
+ok 14 - queue overflow is an explicit error, never a successfully ready blank tile
+  ---
+  duration_ms: 9.362679
+  type: 'test'
+  ...
+# Subtest: unloading an active tile keeps its worker slot and discards its late pixels
+ok 15 - unloading an active tile keeps its worker slot and discards its late pixels
+  ---
+  duration_ms: 4.303514
+  type: 'test'
+  ...
+# Subtest: repeated pan and unload cannot enqueue unlimited ImageBitmap decodes
+ok 16 - repeated pan and unload cannot enqueue unlimited ImageBitmap decodes
+  ---
+  duration_ms: 9.513627
+  type: 'test'
+  ...
+# Subtest: a stalled decoder applies byte backpressure before starting more downloads
+ok 17 - a stalled decoder applies byte backpressure before starting more downloads
+  ---
+  duration_ms: 3.271427
+  type: 'test'
+  ...
+# Subtest: worker timeout releases pending jobs and stale callbacks cannot affect a fresh worker
+ok 18 - worker timeout releases pending jobs and stale callbacks cannot affect a fresh worker
+  ---
+  duration_ms: 2.158607
+  type: 'test'
+  ...
+# Subtest: worker errors and disposal clear work without starting stale downloads or paint
+ok 19 - worker errors and disposal clear work without starting stale downloads or paint
+  ---
+  duration_ms: 1.574787
+  type: 'test'
+  ...
+# Subtest: switching to a detailed base redraws and submits transparent shading mode
+ok 20 - switching to a detailed base redraws and submits transparent shading mode
+  ---
+  duration_ms: 1.57726
+  type: 'test'
+  ...
+# Subtest: standalone starts one cooperative preparation and never creates a renderer after disposal
+ok 21 - standalone starts one cooperative preparation and never creates a renderer after disposal
+  ---
+  duration_ms: 5.817028
+  type: 'test'
+  ...
+# Subtest: a fast hide/show retries preparation once without a detached or duplicate scene
+ok 22 - a fast hide/show retries preparation once without a detached or duplicate scene
+  ---
+  duration_ms: 1.563539
+  type: 'test'
+  ...
+# Subtest: bfcache and tab visibility retain a ready renderer and ordinary disposal destroys it
+ok 23 - bfcache and tab visibility retain a ready renderer and ordinary disposal destroys it
+  ---
+  duration_ms: 2.099859
+  type: 'test'
+  ...
+# Subtest: terminal failure after the first frame requires a fresh canvas and cannot be revived by stale callbacks
+ok 24 - terminal failure after the first frame requires a fresh canvas and cannot be revived by stale callbacks
+  ---
+  duration_ms: 2.330416
+  type: 'test'
+  ...
+# Subtest: real vendor stylesheet order cannot collapse the atlas container
+ok 25 - real vendor stylesheet order cannot collapse the atlas container
+  ---
+  duration_ms: 128.256126
+  type: 'test'
+  ...
+# Subtest: all preview cards share one concurrency limit and duplicate requests
+ok 26 - all preview cards share one concurrency limit and duplicate requests
+  ---
+  duration_ms: 23.105889
+  type: 'test'
+  ...
+# Subtest: network and malformed JSON failures do not poison retries
+ok 27 - network and malformed JSON failures do not poison retries
+  ---
+  duration_ms: 3.977001
+  type: 'test'
+  ...
+# Subtest: semantic invalidation retries settled data and preserves a shared in-flight request
+ok 28 - semantic invalidation retries settled data and preserves a shared in-flight request
+  ---
+  duration_ms: 0.61671
+  type: 'test'
+  ...
+# Subtest: streamed resource size and retained byte budget are bounded
+ok 29 - streamed resource size and retained byte budget are bounded
+  ---
+  duration_ms: 8.241727
+  type: 'test'
+  ...
+# Subtest: bounded queue rejects extra speculative work and still completes accepted requests
+ok 30 - bounded queue rejects extra speculative work and still completes accepted requests
+  ---
+  duration_ms: 0.64289
+  type: 'test'
+  ...
+# Subtest: route tile plan covers bounds without truncating at the centre
+ok 31 - route tile plan covers bounds without truncating at the centre
+  ---
+  duration_ms: 0.699986
+  type: 'test'
+  ...
+# Subtest: antimeridian bounds wrap without out-of-world tiles; invalid coordinates fail closed
+ok 32 - antimeridian bounds wrap without out-of-world tiles; invalid coordinates fail closed
+  ---
+  duration_ms: 0.379432
+  type: 'test'
+  ...
+# Subtest: preloaded vector data is reused and worker transfer cannot detach the cache
+ok 33 - preloaded vector data is reused and worker transfer cannot detach the cache
+  ---
+  duration_ms: 7.330012
+  type: 'test'
+  ...
+# Subtest: JSON style and source responses cannot mutate the shared preview data
+ok 34 - JSON style and source responses cannot mutate the shared preview data
+  ---
+  duration_ms: 1.329466
+  type: 'test'
+  ...
+# Subtest: cancelling one map consumer does not cancel another map or the preview
+ok 35 - cancelling one map consumer does not cancel another map or the preview
+  ---
+  duration_ms: 1.502007
+  type: 'test'
+  ...
+# Subtest: new live tiles use native scheduling and cache eviction never claims a cached tile
+ok 36 - new live tiles use native scheduling and cache eviction never claims a cached tile
+  ---
+  duration_ms: 1.190106
+  type: 'test'
+  ...
+# Subtest: private API, alternate origins and unsafe URL forms never enter the public cache transport
+ok 37 - private API, alternate origins and unsafe URL forms never enter the public cache transport
+  ---
+  duration_ms: 3.445299
+  type: 'test'
+  ...
+# Subtest: an opened map can replace queued speculative work without exceeding concurrency
+ok 38 - an opened map can replace queued speculative work without exceeding concurrency
+  ---
+  duration_ms: 3.023652
+  type: 'test'
+  ...
+# Subtest: rejected HTTP status and oversized headers stop the underlying network request
+ok 39 - rejected HTTP status and oversized headers stop the underlying network request
+  ---
+  duration_ms: 1.780737
+  type: 'test'
+  ...
+# Subtest: empty coverage tiles and string resources preserve MapLibre response types
+ok 40 - empty coverage tiles and string resources preserve MapLibre response types
+  ---
+  duration_ms: 26.627302
+  type: 'test'
+  ...
+# Subtest: offline shell saves all 341 actual RF overview tiles using 57 verified tile downloads
+ok 41 - offline shell saves all 341 actual RF overview tiles using 57 verified tile downloads
+  ---
+  duration_ms: 151.835834
+  type: 'test'
+  ...
+# Subtest: corrupt overview bytes reject installation instead of claiming a complete offline map
+ok 42 - corrupt overview bytes reject installation instead of claiming a complete offline map
+  ---
+  duration_ms: 11.056414
+  type: 'test'
+  ...
+# Subtest: flat DEM does not fabricate topographic shadows in the detailed map
+ok 43 - flat DEM does not fabricate topographic shadows in the detailed map
+  ---
+  duration_ms: 29.271252
+  type: 'test'
+  ...
+# Subtest: opposite physical slopes receive different illumination; downsizing averages heights across RGB carries
+ok 44 - opposite physical slopes receive different illumination; downsizing averages heights across RGB carries
+  ---
+  duration_ms: 152.080853
+  type: 'test'
+  ...
+# Subtest: unsupported raster payloads and invalid tile coordinates fail before allocating a map texture
+ok 45 - unsupported raster payloads and invalid tile coordinates fail before allocating a map texture
+  ---
+  duration_ms: 0.561988
+  type: 'test'
+  ...
+# Subtest: the viewport and tests use the exact pinned runtime coverage, including the Arctic
+ok 46 - the viewport and tests use the exact pinned runtime coverage, including the Arctic
+  ---
+  duration_ms: 15.891611
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Kaliningrad
+ok 47 - real geographical fixture: Kaliningrad
+  ---
+  duration_ms: 69.502949
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Moscow
+ok 48 - real geographical fixture: Moscow
+  ---
+  duration_ms: 31.230418
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Anadyr
+ok 49 - real geographical fixture: Anadyr
+  ---
+  duration_ms: 3.678632
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Uelen west longitude
+ok 50 - real geographical fixture: Uelen west longitude
+  ---
+  duration_ms: 2.63084
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Wrangel west of dateline
+ok 51 - real geographical fixture: Wrangel west of dateline
+  ---
+  duration_ms: 5.979754
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Yalta
+ok 52 - real geographical fixture: Yalta
+  ---
+  duration_ms: 2.293581
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Simferopol
+ok 53 - real geographical fixture: Simferopol
+  ---
+  duration_ms: 2.12075
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Sevastopol
+ok 54 - real geographical fixture: Sevastopol
+  ---
+  duration_ms: 1.990383
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Kerch
+ok 55 - real geographical fixture: Kerch
+  ---
+  duration_ms: 2.207101
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Dzhankoi
+ok 56 - real geographical fixture: Dzhankoi
+  ---
+  duration_ms: 2.287682
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Lake Ladoga display water
+ok 57 - real geographical fixture: Lake Ladoga display water
+  ---
+  duration_ms: 2.998996
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Lake Onega display water
+ok 58 - real geographical fixture: Lake Onega display water
+  ---
+  duration_ms: 2.648517
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Helsinki
+ok 59 - real geographical fixture: Helsinki
+  ---
+  duration_ms: 7.515652
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Kyiv
+ok 60 - real geographical fixture: Kyiv
+  ---
+  duration_ms: 3.629608
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Kherson
+ok 61 - real geographical fixture: Kherson
+  ---
+  duration_ms: 3.959225
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Tbilisi
+ok 62 - real geographical fixture: Tbilisi
+  ---
+  duration_ms: 3.582877
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Ulaanbaatar
+ok 63 - real geographical fixture: Ulaanbaatar
+  ---
+  duration_ms: 5.152325
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Harbin
+ok 64 - real geographical fixture: Harbin
+  ---
+  duration_ms: 3.27391
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Anchorage
+ok 65 - real geographical fixture: Anchorage
+  ---
+  duration_ms: 3.581535
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Northernmost source island
+ok 66 - real geographical fixture: Northernmost source island
+  ---
+  duration_ms: 3.555886
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Chukotka east of dateline source interior
+ok 67 - real geographical fixture: Chukotka east of dateline source interior
+  ---
+  duration_ms: 2.605502
+  type: 'test'
+  ...
+# Subtest: real geographical fixture: Chukotka west of dateline source interior
+ok 68 - real geographical fixture: Chukotka west of dateline source interior
+  ---
+  duration_ms: 3.195332
+  type: 'test'
+  ...
+# Subtest: Chukotka uses one continuous longitude interval and survives wrapped camera/GeoJSON inputs
+ok 69 - Chukotka uses one continuous longitude interval and survives wrapped camera/GeoJSON inputs
+  ---
+  duration_ms: 170.80198
+  type: 'test'
+  ...
+# Subtest: all source bounds and runtime geometry fit above the panel: portrait 390×844, 420px panel, 256px world tile
+ok 70 - all source bounds and runtime geometry fit above the panel: portrait 390×844, 420px panel, 256px world tile
+  ---
+  duration_ms: 31.218701
+  type: 'test'
+  ...
+# Subtest: all source bounds and runtime geometry fit above the panel: portrait 390×844, 420px panel, 512px world tile
+ok 71 - all source bounds and runtime geometry fit above the panel: portrait 390×844, 420px panel, 512px world tile
+  ---
+  duration_ms: 24.449345
+  type: 'test'
+  ...
+# Subtest: all source bounds and runtime geometry fit above the panel: desktop 1100×780, 256px world tile
+ok 72 - all source bounds and runtime geometry fit above the panel: desktop 1100×780, 256px world tile
+  ---
+  duration_ms: 19.781691
+  type: 'test'
+  ...
+# Subtest: all source bounds and runtime geometry fit above the panel: desktop 1100×780, 512px world tile
+ok 73 - all source bounds and runtime geometry fit above the panel: desktop 1100×780, 512px world tile
+  ---
+  duration_ms: 34.988665
+  type: 'test'
+  ...
+# Subtest: all source bounds and runtime geometry fit above the panel: compact 320×640, 320px panel, 256px world tile
+ok 74 - all source bounds and runtime geometry fit above the panel: compact 320×640, 320px panel, 256px world tile
+  ---
+  duration_ms: 21.921741
+  type: 'test'
+  ...
+# Subtest: all source bounds and runtime geometry fit above the panel: compact 320×640, 320px panel, 512px world tile
+ok 75 - all source bounds and runtime geometry fit above the panel: compact 320×640, 320px panel, 512px world tile
+  ---
+  duration_ms: 12.069054
+  type: 'test'
+  ...
+# Subtest: all source bounds and runtime geometry fit above the panel: compact 320×640, 420px panel, 256px world tile
+ok 76 - all source bounds and runtime geometry fit above the panel: compact 320×640, 420px panel, 256px world tile
+  ---
+  duration_ms: 14.617177
+  type: 'test'
+  ...
+# Subtest: all source bounds and runtime geometry fit above the panel: compact 320×640, 420px panel, 512px world tile
+ok 77 - all source bounds and runtime geometry fit above the panel: compact 320×640, 420px panel, 512px world tile
+  ---
+  duration_ms: 13.94872
+  type: 'test'
+  ...
+# Subtest: camera constraints preserve eastern Chukotka, bound drags and keep the current overview floor
+ok 78 - camera constraints preserve eastern Chukotka, bound drags and keep the current overview floor
+  ---
+  duration_ms: 0.474476
+  type: 'test'
+  ...
+# Subtest: the public excluded route and committed coverage report match the runtime provenance
+ok 79 - the public excluded route and committed coverage report match the runtime provenance
+  ---
+  duration_ms: 94.152772
+  type: 'test'
+  ...
+# Subtest: unconfigured service stays preview without a network request
+ok 80 - unconfigured service stays preview without a network request
+  ---
+  duration_ms: 1.876572
+  type: 'test'
+  ...
+# Subtest: connected requires the database readiness endpoint and its exact success body
+ok 81 - connected requires the database readiness endpoint and its exact success body
+  ---
+  duration_ms: 5.595915
+  type: 'test'
+  ...
+# Subtest: liveness, non-200, malformed and oversized responses never report ready
+ok 82 - liveness, non-200, malformed and oversized responses never report ready
+  ---
+  duration_ms: 5.377845
+  type: 'test'
+  ...
+# Subtest: unsafe configuration is not contacted or disclosed
+ok 83 - unsafe configuration is not contacted or disclosed
+  ---
+  duration_ms: 0.535327
+  type: 'test'
+  ...
+# Subtest: network failure does not expose upstream error text
+ok 84 - network failure does not expose upstream error text
+  ---
+  duration_ms: 0.406584
+  type: 'test'
+  ...
+# Subtest: timeout aborts a stalled readiness request and returns unavailable
+ok 85 - timeout aborts a stalled readiness request and returns unavailable
+  ---
+  duration_ms: 17.24981
+  type: 'test'
+  ...
+# Subtest: client keeps auth disabled for preview or failed readiness and rejects presence-only status
+ok 86 - client keeps auth disabled for preview or failed readiness and rejects presence-only status
+  ---
+  duration_ms: 2.492862
+  type: 'test'
+  ...
+# Subtest: world anchored material repeats continuously, including negative coordinates
+ok 87 - world anchored material repeats continuously, including negative coordinates
+  ---
+  duration_ms: 6.743146
+  type: 'test'
+  ...
+# Subtest: material allocation is deterministic and bounded before GPU upload
+ok 88 - material allocation is deterministic and bounded before GPU upload
+  ---
+  duration_ms: 41.059942
+  type: 'test'
+  ...
+# Subtest: cut rim joins the rendered LOD edge exactly, with no invented top elevations
+ok 89 - cut rim joins the rendered LOD edge exactly, with no invented top elevations
+  ---
+  duration_ms: 7.074376
+  type: 'test'
+  ...
+# Subtest: one shared preparation survives consumer cancellation and retains transferred buffers for later cards
+ok 90 - one shared preparation survives consumer cancellation and retains transferred buffers for later cards
+  ---
+  duration_ms: 12.545658
+  type: 'test'
+  ...
+# Subtest: an already cancelled consumer starts no fetch, import, or worker
+ok 91 - an already cancelled consumer starts no fetch, import, or worker
+  ---
+  duration_ms: 1.558942
+  type: 'test'
+  ...
+# Subtest: unsupported, blocked, failed, undecodable, and timed-out workers use one cooperative fallback
+    # Subtest: unsupported
+    ok 1 - unsupported
+      ---
+      duration_ms: 3.660444
+      type: 'test'
+      ...
+    # Subtest: blocked
+    ok 2 - blocked
+      ---
+      duration_ms: 5.956904
+      type: 'test'
+      ...
+    # Subtest: failed
+    ok 3 - failed
+      ---
+      duration_ms: 7.543594
+      type: 'test'
+      ...
+    # Subtest: decode
+    ok 4 - decode
+      ---
+      duration_ms: 2.731241
+      type: 'test'
+      ...
+    # Subtest: timeout
+    ok 5 - timeout
+      ---
+      duration_ms: 11.364214
+      type: 'test'
+      ...
+    1..5
+ok 92 - unsupported, blocked, failed, undecodable, and timed-out workers use one cooperative fallback
+  ---
+  duration_ms: 33.151698
+  type: 'test'
+  ...
+# Subtest: invalid worker models fail validation before cache and use the verified source for fallback
+ok 93 - invalid worker models fail validation before cache and use the verified source for fallback
+  ---
+  duration_ms: 2.017364
+  type: 'test'
+  ...
+# Subtest: a failed module or grid load clears the shared job so a corrected resource can retry
+    # Subtest: module
+    ok 1 - module
+      ---
+      duration_ms: 0.885396
+      type: 'test'
+      ...
+    # Subtest: grid
+    ok 2 - grid
+      ---
+      duration_ms: 0.619395
+      type: 'test'
+      ...
+    1..2
+ok 94 - a failed module or grid load clears the shared job so a corrected resource can retry
+  ---
+  duration_ms: 1.954059
+  type: 'test'
+  ...
+# Subtest: fallback failure is not cached; the next attempt may use a fresh worker successfully
+ok 95 - fallback failure is not cached; the next attempt may use a fresh worker successfully
+  ---
+  duration_ms: 3.853545
+  type: 'test'
+  ...
+# Subtest: the actual worker module produces identical derivatives across a real thread boundary
+ok 96 - the actual worker module produces identical derivatives across a real thread boundary
+  ---
+  duration_ms: 98.088541
+  type: 'test'
+  ...
+# Subtest: async preparation shares the exact calculation and yields to other tasks
+ok 97 - async preparation shares the exact calculation and yields to other tasks
+  ---
+  duration_ms: 47.729602
+  type: 'test'
+  ...
+# Subtest: prepared models fail closed for altered provenance, dimensions, values or detached buffers
+ok 98 - prepared models fail closed for altered provenance, dimensions, values or detached buffers
+  ---
+  duration_ms: 3.084254
+  type: 'test'
+  ...
+# Subtest: route follows actual LOD triangles across cells and diagonals, including ragged edges
+ok 99 - route follows actual LOD triangles across cells and diagonals, including ragged edges
+  ---
+  duration_ms: 7.104351
+  type: 'test'
+  ...
+# Subtest: mesh sampling preserves the final row/column and rejects invalid input before traversal
+ok 100 - mesh sampling preserves the final row/column and rejects invalid input before traversal
+  ---
+  duration_ms: 0.594207
+  type: 'test'
+  ...
+# Subtest: bounded shadow traversal finds a one-cell ridge between the old exponential ray samples
+ok 101 - bounded shadow traversal finds a one-cell ridge between the old exponential ray samples
+  ---
+  duration_ms: 59.044131
+  type: 'test'
+  ...
+# Subtest: off-ray maxima never cast a shadow by themselves and refinement has a fixed work budget
+ok 102 - off-ray maxima never cast a shadow by themselves and refinement has a fixed work budget
+  ---
+  duration_ms: 30.75422
+  type: 'test'
+  ...
+# Subtest: LOD hysteresis avoids toggling near a zoom threshold while retaining hard limits
+ok 103 - LOD hysteresis avoids toggling near a zoom threshold while retaining hard limits
+  ---
+  duration_ms: 0.476539
+  type: 'test'
+  ...
+# Subtest: pointerdown/up and wheel state cannot recreate buffers, switch LOD or allocate shadow targets
+ok 104 - pointerdown/up and wheel state cannot recreate buffers, switch LOD or allocate shadow targets
+  ---
+  duration_ms: 54.011526
+  type: 'test'
+  ...
+# Subtest: renderer retains validated prepared buffers instead of recomputing the model
+ok 105 - renderer retains validated prepared buffers instead of recomputing the model
+  ---
+  duration_ms: 0.833768
+  type: 'test'
+  ...
+# Subtest: hidden warmup renders one real frame, coalesces calls, and stays idle afterwards
+ok 106 - hidden warmup renders one real frame, coalesces calls, and stays idle afterwards
+  ---
+  duration_ms: 8.797896
+  type: 'test'
+  ...
+# Subtest: hidden document defers warmup until visibility resumes
+ok 107 - hidden document defers warmup until visibility resumes
+  ---
+  duration_ms: 3.596127
+  type: 'test'
+  ...
+# Subtest: screen-space route thickness cannot pull an occluded trail through terrain depth
+ok 108 - screen-space route thickness cannot pull an occluded trail through terrain depth
+  ---
+  duration_ms: 0.58999
+  type: 'test'
+  ...
+# Subtest: fallback canvas is restored on destroy and the same original canvas can be retried
+ok 109 - fallback canvas is restored on destroy and the same original canvas can be retried
+  ---
+  duration_ms: 4.092136
+  type: 'test'
+  ...
+# Subtest: failed fallback allocation leaves the original DOM canvas and controls available for retry
+ok 110 - failed fallback allocation leaves the original DOM canvas and controls available for retry
+  ---
+  duration_ms: 0.387665
+  type: 'test'
+  ...
+# Subtest: terminal context loss after the first frame invalidates the session and a fresh renderer can retry
+ok 111 - terminal context loss after the first frame invalidates the session and a fresh renderer can retry
+  ---
+  duration_ms: 5.125655
+  type: 'test'
+  ...
+# Subtest: a terminal Canvas failure after ready releases resources and reports fatal exactly once
+ok 112 - a terminal Canvas failure after ready releases resources and reports fatal exactly once
+  ---
+  duration_ms: 1.976903
+  type: 'test'
+  ...
+# Subtest: host callback exceptions cannot break rendering or cleanup
+ok 113 - host callback exceptions cannot break rendering or cleanup
+  ---
+  duration_ms: 1.583049
+  type: 'test'
+  ...
+# Subtest: default fit and measured insets keep the complete DEM inside the unobscured viewport
+ok 114 - default fit and measured insets keep the complete DEM inside the unobscured viewport
+  ---
+  duration_ms: 1.394965
+  type: 'test'
+  ...
+1..114
+# tests 121
+# suites 0
+# pass 121
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1361.62365

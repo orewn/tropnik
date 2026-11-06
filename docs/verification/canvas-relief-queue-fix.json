@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-11-06T12:45:29.166939+00:00",
+  "status": "passed",
+  "scope": "One confirmed Canvas relief queue defect; no Android/map data/Atlas changes in this patch.",
+  "previousReproduction": {
+    "overflow": {
+      "createTileCount": 49,
+      "workerPosts": 48,
+      "successfulEmptyReadyTiles": 1
+    },
+    "unloadCycles": {
+      "cycles": 8,
+      "tilesPerCycle": 40,
+      "workerPostsWithoutReplies": 320
+    }
+  },
+  "fix": {
+    "maxCurrentJobs": 48,
+    "maxFetching": 3,
+    "maxWorkerTasks": 1,
+    "maxEncodedTileBytes": 2097152,
+    "maxReadyBytesAndFetchReservations": 8388608,
+    "workerTimeoutMs": 10000,
+    "currentMapRequestPriority": 0,
+    "tileUnloadKeepsActiveSlotUntilReplyOrStop": true,
+    "overflowReportedAsError": true
+  },
+  "checks": {
+    "hostQueueRegressionTests": {
+      "tests": 8,
+      "passed": 8
+    },
+    "heightShadingTests": {
+      "tests": 3,
+      "passed": 3
+    },
+    "actualWorkerGpuExecution": false,
+    "projectTypeCheck": {
+      "passed": false,
+      "blockingFile": "web/.next/types/validator.ts",
+      "diagnostic": "Generated routes.js has no AppRoutes, LayoutRoutes, ParamMap, AppRouteHandlerRoutes exports. No changed-file diagnostic was emitted. Regenerate Next types in the parent canonical build."
+    }
+  },
+  "files": [
+    {
+      "path": "web/lib/canvas-relief.ts",
+      "sha256": "f8f8c4e422f6a911cceaf26371c4ec0019c4542b246c1882df2ce487645563a7"
+    },
+    {
+      "path": "web/tests/canvas-relief.test.mjs",
+      "sha256": "2b222088e8bea41e48f8ba00c3cf7ba5443d9d604f2c4d8c943b03693b728191"
+    }
+  ],
+  "sourceReview": {
+    "rfMaskAboveReliefAndBase": true,
+    "terrariumDecodedBeforeAveraging": true,
+    "detailModeCallsSetOverviewFalse": true
+  },
+  "remainingIntegrationNotes": [
+    "Atlas offline transition should also set relief overview mode; initialise a missing dynamic relief layer on online if desired. Parent owns Atlas integration."
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "auditedAt": "2026-11-06T04:59:39.580447+00:00",
+  "status": "passed",
+  "scope": "File integrity, referential consistency, data-shape checks and verification semantics. This is not a route or field-safety certification.",
+  "routeRecordsChecked": 278,
+  "routeVerticesChecked": 223073,
+  "rawApiSourceHashesChecked": 417,
+  "rawTrailRecordsChecked": 30544,
+  "officialEvidenceRecordsChecked": 43,
+  "onlineResearchMatrixRecordsChecked": 278,
+  "failures": []
+}

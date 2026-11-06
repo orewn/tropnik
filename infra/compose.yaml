@@ -1,0 +1,62 @@
+name: tropa
+services:
+  db:
+    image: postgis/postgis:18-3.7
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: tropa
+      POSTGRES_USER: tropa_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Generate a unique owner password}
+      TROPA_APP_PASSWORD: ${TROPA_APP_PASSWORD:?Generate a separate API password}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./db/01-runtime-role.sh:/docker-entrypoint-initdb.d/01-runtime-role.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U tropa_owner -d tropa"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [backend]
+  migrate:
+    build: ../backend
+    image: tropa-api:local
+    entrypoint: [/tropa-migrate]
+    environment:
+      DATABASE_URL: postgres://tropa_owner:${POSTGRES_PASSWORD:?Required}@db:5432/tropa?sslmode=disable
+      RUNTIME_DB_ROLE: tropa_app
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [backend]
+    restart: "no"
+  api:
+    build: ../backend
+    image: tropa-api:local
+    environment:
+      APP_ENV: production
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?Set the HTTPS website origin}
+      HTTP_ADDR: 0.0.0.0:8080
+      DATABASE_URL: postgres://tropa_app:${TROPA_APP_PASSWORD:?Required}@db:5432/tropa?sslmode=disable
+      TRUST_PRIVATE_DATABASE_NETWORK: "true"
+      TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
+      TROPA_PROXY_TOKEN: ${TROPA_PROXY_TOKEN:-}
+      TROPA_AUTH_RATE_KEY: ${TROPA_AUTH_RATE_KEY:?Generate a stable independent auth HMAC key}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    ports: ["127.0.0.1:8080:8080"]
+    read_only: true
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    healthcheck:
+      test: [CMD, /tropa-health]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    networks: [backend]
+networks:
+  backend:
+    internal: true
+volumes:
+  postgres-data:

@@ -1,0 +1,57 @@
+{
+  "recordedAt": "2026-11-06T07:51:26.341567+00:00",
+  "release": "0.4.0-merged-preview",
+  "environment": "Managed browser QA with WebGL2 unavailable; Leaflet Canvas fallback",
+  "observedBy": "Release owner in an interactive browser session; summary communicated to documentation owner",
+  "observations": [
+    {
+      "check": "Full Russia overview in Canvas fallback",
+      "status": "passed"
+    },
+    {
+      "check": "Keyboard Enter repeatedly selects Krasnodar and displays 98 routes",
+      "status": "passed"
+    },
+    {
+      "check": "Keyboard activation opens terrain scene; visible rendered terrain independently inspected in supplied screenshot",
+      "status": "passed"
+    },
+    {
+      "check": "390x844 mobile screenshot: full RF, six regional labels, neutral map background, collapsed initial panel, no story/attribution overlap",
+      "status": "passed"
+    },
+    {
+      "check": "Accessibility tree returned complete content",
+      "status": "passed",
+      "evidence": "Release owner browser report"
+    },
+    {
+      "check": "Pointer automation through Input.dispatchMouseEvent",
+      "status": "inconclusive_timeout",
+      "evidence": "Timeout observed; full pointer workflow not verified"
+    }
+  ],
+  "scope": "Bounded Canvas/UI and keyboard checks, not an exhaustive interaction suite. Pointer automation timed out; cause is unconfirmed. The QA browser does not provide WebGL2. A later overview screenshot API call also timed out; prolonged stability is not claimed.",
+  "notValidated": [
+    "Complete pointer interaction workflow; Input.dispatchMouseEvent timed out",
+    "GPU WebGL2 rendering in this browser",
+    "Device FPS or performance budget",
+    "Physical Android device",
+    "Live API/DB E2E",
+    "Airplane mode/GPS on device",
+    "Prolonged browser stability or a sustained performance benchmark"
+  ],
+  "updatedAt": "2026-11-06T08:03:56.976926+00:00",
+  "rendererSourceReview": {
+    "observedBy": "Release owner read-only audit",
+    "finding": "No evident infinite RAF or runaway preload found",
+    "limit": "Does not establish the cause of the observed automation timeout or prove absence of every performance defect."
+  },
+  "terrainScreenshot": {
+    "fileName": "browser-screenshot-1793951863603.jpg",
+    "bytes": 95460,
+    "sha256": "47c4c585b0f38126fc87410f568ba3797a95a661e34aa9200774c214622a43e4",
+    "includedInSourceSnapshot": false,
+    "review": "Final supplied screenshot independently inspected: rendered terrain, controls, selected Krasnodar and 98-route count visible. No GPU/FPS inference."
+  }
+}

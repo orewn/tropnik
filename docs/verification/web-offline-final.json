@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-11-06T07:59:40.392964+00:00",
+  "release": "0.4.0-merged-preview",
+  "manifest": "web/public/offline-map/manifest.json",
+  "manifestSha256": "828b2a50db5a0d1be9ac61e1b9c1da3b7e465489c2a2fa542e4a562f1feef233",
+  "resourceFiles": 252,
+  "resourceBytes": 6861440,
+  "manifestBytes": 147281,
+  "packageBytesIncludingManifest": 7008721,
+  "vectorTiles": 193,
+  "terrainTiles": 21,
+  "complete": true,
+  "sizeOrShaMismatches": [],
+  "shell": {
+    "version": "tropnik-shell-v7",
+    "localFiles": 33,
+    "missing": []
+  },
+  "concreteLocalStyleReferencesChecked": 12,
+  "landscape": {
+    "bytes": 1958485,
+    "sha256": "a0807ff332a5caf72cca79ad3850ee8f6095f0175df2be5940a9008e203cce88",
+    "bothWebCopiesIdentical": true
+  },
+  "siteArm64": {
+    "bytes": 22852083,
+    "sha256": "2fb439eb16f5cfc2724b4d48f7a44eef05f874a95e18dafe6cf18242db08a2e7",
+    "matchesNativeAndDownloadManifest": true
+  },
+  "scope": "Local file/link/size/SHA verification after final generated files were copied back; no claim of device airplane-mode execution or HTTP download test on the authenticated published URL.",
+  "revalidatedAt": "2026-11-06T08:03:56.976926+00:00",
+  "sourceCommit": "45cd0bc39423ebee7109cac92bf18f09a87720b3"
+}

@@ -1,0 +1,38 @@
+{
+  "recordedAt": "2026-11-06T08:03:56.976926+00:00",
+  "release": "0.4.0-merged-preview",
+  "environment": "Isolated merged web source /tmp/tropnik-merged-source-OArJ3Mt6",
+  "web": {
+    "testDefinition": "web/package.json scripts.test",
+    "tests": 101,
+    "passed": 101,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "durationMs": 804.195104,
+    "log": "web-merged-tests.txt",
+    "logSha256": "2886336955dc51aff92697de584e51ee5c8af5eeb68d4c542e5b4423ba09a42d",
+    "sourceCommit": "45cd0bc39423ebee7109cac92bf18f09a87720b3",
+    "scope": "Final run after the Canvas detail-layer cleanup at zoom < 4."
+  },
+  "catalogIntegration": {
+    "testDefinition": "tools/map-package/russia-catalog-integration.test.mjs",
+    "tests": 3,
+    "passed": 3,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "durationMs": 378.810231,
+    "log": "russia-integration-tests.txt",
+    "logSha256": "15eb338a694e9f15ec2cf2a39c2252079fa7bab9bcf9f7f2d86ce1cc9ecd50fa"
+  },
+  "evidence": "Final run results supplied by release owner; both output logs independently read and archived. Counts are from each run, not sums of earlier checkpoints.",
+  "notValidated": [
+    "Live API/DB E2E",
+    "Physical Android device",
+    "Browser GPU/FPS measurements",
+    "Field navigation"
+  ]
+}

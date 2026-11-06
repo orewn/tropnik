@@ -1,0 +1,23 @@
+{
+  "checked": true,
+  "regions": 6,
+  "referenceRoutes": 277,
+  "learningRoutes": 1,
+  "geometryFiles": 277,
+  "geometryBytes": 5369449,
+  "catalogBytes": 758873,
+  "catalogSha256": "4b123fae59af5407b4b1e1f66f9a34050bf1d67f1a006909498fbf5ce5c218bc",
+  "byRegion": {
+    "altai": 9,
+    "krasnodar": 98,
+    "karelia": 11,
+    "krym": 151,
+    "baikal": 7,
+    "kamchatka": 1
+  },
+  "excludedRouteIds": [
+    "osm-relation-14407325"
+  ],
+  "fieldVerified": 0,
+  "navigationReady": 0
+}

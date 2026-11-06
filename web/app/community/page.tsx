@@ -1,0 +1,3 @@
+import type {Metadata} from 'next';import {Header} from '@/components/Header';import {Footer} from '@/components/Footer';import {Community} from '@/components/Community';
+export const metadata:Metadata={title:'Сообщество',description:'Люди, которым по пути. Обсуждайте будущий поход, находите гида и готовьтесь вместе.',robots:{index:false,follow:true}};
+export default function Page(){return <><Header active="community"/><main id="main"><section className="page-hero"><span className="eyebrow">Люди, которым по пути</span><h1>У каждого похода<br/>есть своё начало.</h1><p>Обсудите маршрут, обозначьте опыт и пожелания. Когда подходящий гид назначит выход, подтвердите участие в конкретной дате.</p></section><div className="page-content"><Community/></div></main><Footer/></>;}

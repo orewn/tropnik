@@ -1,0 +1,85 @@
+{
+  "routeCount": 278,
+  "confirmationStatusCounts": {
+    "authoritative_description_found": 40,
+    "no_authoritative_confirmation_found": 86,
+    "unnamed_identity_unresolved": 23,
+    "reference_identity_not_researched": 93,
+    "related_authoritative_source_found": 20,
+    "publisher_description_found": 9,
+    "project_reference_found": 5,
+    "secondary_source_only": 1,
+    "related_publisher_source_found": 1
+  },
+  "researchStatusCounts": {
+    "attempted": 162,
+    "not_researched": 116
+  },
+  "identityStatusCounts": {
+    "named": 161,
+    "unnamed": 23,
+    "reference_only": 94
+  },
+  "sourceWebsiteRouteCount": 63,
+  "uniqueSuppliedWebsiteReads": 47,
+  "websiteReadStatusCounts": {
+    "readable": 35,
+    "unavailable": 9,
+    "insufficient_readable_content": 3
+  },
+  "searchQueryCount": 48,
+  "explicitEvidenceRecords": 43,
+  "evidenceLevelCounts": {
+    "official_notice": 8,
+    "official_description": 7,
+    "operator_page": 10,
+    "official_feature_description": 3,
+    "official_status_page": 2,
+    "operator_description": 5,
+    "official_access_rule": 5,
+    "official_tourism_publication": 3
+  },
+  "geometryVerifiedCount": 0,
+  "fieldVerifiedCount": 0,
+  "navigationReadyCount": 0,
+  "byRegion": {
+    "altai": {
+      "secondary_source_only": 1,
+      "reference_identity_not_researched": 1,
+      "publisher_description_found": 5,
+      "no_authoritative_confirmation_found": 1,
+      "authoritative_description_found": 1
+    },
+    "baikal": {
+      "publisher_description_found": 2,
+      "project_reference_found": 1,
+      "unnamed_identity_unresolved": 2,
+      "no_authoritative_confirmation_found": 2
+    },
+    "kamchatka": {
+      "unnamed_identity_unresolved": 1
+    },
+    "karelia": {
+      "related_authoritative_source_found": 3,
+      "no_authoritative_confirmation_found": 6,
+      "authoritative_description_found": 2
+    },
+    "krasnodar": {
+      "authoritative_description_found": 28,
+      "no_authoritative_confirmation_found": 47,
+      "unnamed_identity_unresolved": 5,
+      "related_authoritative_source_found": 14,
+      "publisher_description_found": 2,
+      "related_publisher_source_found": 1,
+      "project_reference_found": 2
+    },
+    "krym": {
+      "reference_identity_not_researched": 92,
+      "no_authoritative_confirmation_found": 30,
+      "authoritative_description_found": 9,
+      "unnamed_identity_unresolved": 15,
+      "project_reference_found": 2,
+      "related_authoritative_source_found": 3
+    }
+  }
+}

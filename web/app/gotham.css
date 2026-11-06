@@ -1,0 +1,14 @@
+/* Gotham Pro: licensed files when supplied; local installed faces otherwise. No synthetic bold or italic. */
+@font-face{font-family:'Gotham Pro';font-style:normal;font-weight:100;font-display:swap;src:local('GothamPro-Thin'),local('Gotham Pro Thin');}
+@font-face{font-family:'Gotham Pro';font-style:italic;font-weight:100;font-display:swap;src:local('GothamPro-ThinItalic'),local('Gotham Pro Thin Italic');}
+@font-face{font-family:'Gotham Pro';font-style:normal;font-weight:300;font-display:swap;src:local('GothamPro-Light'),local('Gotham Pro Light');}
+@font-face{font-family:'Gotham Pro';font-style:italic;font-weight:300;font-display:swap;src:local('GothamPro-LightItalic'),local('Gotham Pro Light Italic');}
+@font-face{font-family:'Gotham Pro';font-style:normal;font-weight:400;font-display:swap;src:local('GothamPro-Regular'),local('Gotham Pro Regular');}
+@font-face{font-family:'Gotham Pro';font-style:italic;font-weight:400;font-display:swap;src:local('GothamPro-RegularItalic'),local('Gotham Pro Regular Italic');}
+@font-face{font-family:'Gotham Pro';font-style:normal;font-weight:500;font-display:swap;src:local('GothamPro-Medium'),local('Gotham Pro Medium');}
+@font-face{font-family:'Gotham Pro';font-style:italic;font-weight:500;font-display:swap;src:local('GothamPro-MediumItalic'),local('Gotham Pro Medium Italic');}
+@font-face{font-family:'Gotham Pro';font-style:normal;font-weight:700;font-display:swap;src:local('GothamPro-Bold'),local('Gotham Pro Bold');}
+@font-face{font-family:'Gotham Pro';font-style:italic;font-weight:700;font-display:swap;src:local('GothamPro-BoldItalic'),local('Gotham Pro Bold Italic');}
+@font-face{font-family:'Gotham Pro';font-style:normal;font-weight:900;font-display:swap;src:local('GothamPro-Black'),local('Gotham Pro Black');}
+@font-face{font-family:'Gotham Pro';font-style:italic;font-weight:900;font-display:swap;src:local('GothamPro-BlackItalic'),local('Gotham Pro Black Italic');}
+html,body{font-family:'Gotham Pro',Manrope,system-ui,sans-serif;font-synthesis:none}

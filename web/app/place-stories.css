@@ -1,0 +1,65 @@
+/* Compact editorial stories leave the initial country view visible.
+   Imported after the shared design system; selected-region cards keep it. */
+.fact-story-body[hidden] {display: none}
+.fact-card .fact-story-toggle {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0; background: transparent;
+  color: var(--forest); white-space: nowrap; cursor: pointer;
+  transition: color 300ms var(--motion, cubic-bezier(.22,1,.36,1));
+}
+.fact-card .fact-story-toggle:hover {color: var(--forest-dark)}
+.fact-card .fact-story-toggle:active {transform: translateY(1px)}
+.fact-card .fact-story-toggle:focus-visible {
+  outline: 2px solid var(--forest); outline-offset: 4px; border-radius: 4px;
+}
+.fact-card .fact-story-toggle svg {
+  flex-shrink: 0; transform: rotate(90deg);
+  transition: transform 300ms var(--motion, cubic-bezier(.22,1,.36,1));
+}
+.fact-card .fact-story-toggle[aria-expanded="true"] svg {transform: rotate(-90deg)}
+.fact-card .fact-story-body .fact-place {margin-top: 8px}
+
+.fact-card.fact-card--compact {width: 352px}
+.fact-card--compact .fact-card-inner {padding: 16px 16px 8px; min-height: 0}
+.fact-card--compact .fact-topline {
+  position: absolute; top: 4px; right: 4px; margin: 0; z-index: 1;
+}
+.fact-card--compact .fact-topline > svg,
+.fact-card--compact .fact-topline .eyebrow,
+.fact-card--compact .fact-topline .fact-count {display: none}
+.fact-card--compact .fact-dismiss {margin: 0; width: 44px; height: 44px}
+.fact-card.fact-card--compact h3 {
+  max-width: none; margin: 0; padding-right: 32px;
+  font-size: 18px; line-height: 28px; font-weight: 500;
+  text-wrap: balance;
+}
+.fact-card--compact .fact-source {margin-top: 4px; max-width: 100%; text-wrap: pretty}
+.fact-card--compact .fact-card-footer {padding: 4px 8px 4px 16px; gap: 8px}
+.fact-card--compact .fact-controls .fact-count {margin: 0 4px 0 0; white-space: nowrap}
+.fact-card--compact .fact-controls button {width: 44px; height: 44px; min-width: 44px}
+
+@media (max-width: 700px) {
+  /* A map status message takes priority until dismissed; overlays never stack. */
+  .explore-layout:has(.map-message) .fact-card {visibility: hidden; pointer-events: none}
+  .explore-layout:has(.explore-panel.collapsed) .fact-card.fact-card--compact,
+  .explore-layout .fact-card.fact-card--compact {
+    width: min(296px, calc(100% - 88px));
+    top: 80px;
+    bottom: auto;
+    border-radius: 12px 12px 24px 12px;
+  }
+  .fact-card--compact .fact-card-inner {padding: 8px 12px}
+  .fact-card.fact-card--compact h3 {
+    font-size: 14px; line-height: 20px; font-weight: 500;
+  }
+  .fact-card--compact .fact-card-footer {padding: 0 8px 0 12px; gap: 4px}
+  .fact-card--compact .fact-story-toggle {font-size: 12px; line-height: 16px; gap: 4px}
+  .fact-card--compact .fact-source {font-size: 12px; line-height: 16px}
+  .fact-card--compact .fact-controls .fact-count {margin-right: 0}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fact-card .fact-copy {animation: none}
+  .fact-card .fact-story-toggle,
+  .fact-card .fact-story-toggle svg {transition: none}
+}

@@ -1,0 +1,6 @@
+© OpenStreetMap contributors · geoBoundaries (OpenStreetMap / Wambacher, 2017); display selection and simplification by Тропник
+ODbL 1.0: https://opendatacommons.org/licenses/odbl/1-0/
+OSM copyright: https://www.openstreetmap.org/copyright
+geoBoundaries: https://www.geoboundaries.org/
+Source representation year 2017; publisher build 2023-12-12. Modified selection/dissolve/simplification/longitude wrapping by Тропник.
+Display scope only. No current legal-boundary, surveyed-coastline or navigation claim.

@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.Tropa" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">#F5F3E8</item>
+        <item name="android:navigationBarColor">#FFFEFA</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">#F5F3E8</item>
+    </style>
+</resources>

@@ -1,0 +1,1097 @@
+{
+  "createdAt": "2026-11-06T04:40:29.676588+00:00",
+  "scope": "All distinct website URLs currently supplied in the imported route records. Fragments share one network read. Name matches are only candidates for human review.",
+  "sources": [
+    {
+      "url": "http://ecotrails.ru/beartrail",
+      "routeIds": [
+        "osm-relation-18197120"
+      ],
+      "checkedAt": "2026-11-06T04:40:01.139736+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://ecotrails.ru/beartrail",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Tue, 21 Oct 2025 03:29:39 GMT",
+      "status": "readable",
+      "bodySha256": "50c187ab47a86185555c92a54ee7c9e85717780dca594082e5013b9c12a44c7c",
+      "bodyBytes": 292024,
+      "readableCharacterCount": 9837,
+      "title": "Экологическая тропа \"Медвежья\"",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-18197120",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "http://ecotrails.ru/gorasinyukhatrail",
+      "routeIds": [
+        "osm-relation-18197367"
+      ],
+      "checkedAt": "2026-11-06T04:40:01.140482+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://ecotrails.ru/gorasinyukhatrail",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Tue, 21 Oct 2025 03:28:54 GMT",
+      "status": "readable",
+      "bodySha256": "223e1d569b93449e17a03f057f60efcb3ea2aa449d7100b4bd540292acdc1273",
+      "bodyBytes": 271023,
+      "readableCharacterCount": 5997,
+      "title": "Экологическая тропа \"Гора Синюха\"",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-18197367",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "http://ecotrails.ru/shinoktrail",
+      "routeIds": [
+        "osm-relation-18197451"
+      ],
+      "checkedAt": "2026-11-06T04:40:02.399673+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://ecotrails.ru/shinoktrail",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Tue, 21 Oct 2025 03:29:40 GMT",
+      "status": "readable",
+      "bodySha256": "29dca517c884ac40880526fd321fd248fbbe042d0536160e1846a0be1ca1f2f1",
+      "bodyBytes": 283371,
+      "readableCharacterCount": 10936,
+      "title": "Экологическая тропа \"Шинок\"",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-18197451",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "http://ecotrails.ru/wolftrail",
+      "routeIds": [
+        "osm-relation-18197119"
+      ],
+      "checkedAt": "2026-11-06T04:40:01.048874+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://ecotrails.ru/wolftrail",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Tue, 21 Oct 2025 03:29:40 GMT",
+      "status": "readable",
+      "bodySha256": "8855446da4c5a98051584539abcd9b317a5809f4bfc2b34b504efcedb1d07a60",
+      "bodyBytes": 283918,
+      "readableCharacterCount": 7570,
+      "title": "Экологическая тропа \"Волчья\"",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-18197119",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "http://karadag.com.ru/contacts",
+      "routeIds": [
+        "osm-relation-15477153"
+      ],
+      "checkedAt": "2026-11-06T04:39:52.474646+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "http://karadag.com.ru/contacts",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "e6393834fd2f62c8a96dac9ad9c17e78fdafe2d7feb7da19d2e680876fe32976",
+      "bodyBytes": 14244,
+      "readableCharacterCount": 2803,
+      "title": "Контакты",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-15477153",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "http://www.comleshos.crimea-portal.gov.ua",
+      "routeIds": [
+        "osm-relation-2978230"
+      ],
+      "checkedAt": "2026-11-06T04:38:49.777354+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "status": "unavailable",
+      "error": "HTTP Error 503: Service Unavailable",
+      "retryOrIdentityChangeUsed": false
+    },
+    {
+      "url": "https://admnvrsk.ru/",
+      "routeIds": [
+        "osm-relation-15352668"
+      ],
+      "checkedAt": "2026-11-06T04:39:51.470114+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "status": "unavailable",
+      "error": "HTTP Error 502: Bad Gateway",
+      "retryOrIdentityChangeUsed": false
+    },
+    {
+      "url": "https://bst-sev.ru/",
+      "routeIds": [
+        "osm-relation-7051502"
+      ],
+      "checkedAt": "2026-11-06T04:38:55.756053+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "status": "unavailable",
+      "error": "HTTP Error 503: Service Unavailable",
+      "retryOrIdentityChangeUsed": false
+    },
+    {
+      "url": "https://caucasiantrail.ru/",
+      "routeIds": [
+        "osm-relation-14594896",
+        "osm-relation-18162201"
+      ],
+      "checkedAt": "2026-11-06T04:39:48.094143+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://caucasiantrail.ru/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Tue, 06 Oct 2026 17:17:27 GMT",
+      "status": "readable",
+      "bodySha256": "3791e08811939c39a6368109b2f7c32725a0e1fd8c521f22fb13984cb8145c91",
+      "bodyBytes": 689891,
+      "readableCharacterCount": 6623,
+      "title": "Кавказская тропа",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14594896",
+          "exactNormalizedNameFound": true
+        },
+        {
+          "routeId": "osm-relation-18162201",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://greatbaikaltrail.org",
+      "routeIds": [
+        "osm-relation-5461727"
+      ],
+      "checkedAt": "2026-11-06T04:38:49.779484+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://greatbaikaltrail.org",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Fri, 10 Apr 2026 12:13:52 GMT",
+      "status": "readable",
+      "bodySha256": "0ea7fe1201e65d9d444c864e433725c7d8103fd504f9e30cdc741560fbe6a237",
+      "bodyBytes": 141164,
+      "readableCharacterCount": 1830,
+      "title": "Большая Байкальская Тропа | Официальный сайт ББТ",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-5461727",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://krasnayapolyanaresort.ru/alpijskie_luga",
+      "routeIds": [
+        "osm-relation-14376417"
+      ],
+      "checkedAt": "2026-11-06T04:39:22.863256+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://krasnayapolyanaresort.ru/ecotrails/alpijskie-luga",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "df6339172dd858ef1e456d2f312b74f2952eecae5c6b5bf2969a3acb53928668",
+      "bodyBytes": 1385727,
+      "readableCharacterCount": 7943,
+      "title": "Альпийские луга",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14376417",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://krasnayapolyanaresort.ru/chernichnaya_tropa",
+      "routeIds": [
+        "osm-relation-14376382"
+      ],
+      "checkedAt": "2026-11-06T04:39:21.410865+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://krasnayapolyanaresort.ru/ecotrails/chernichnaya-tropa",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "209cf3b6d785b5ddd7ffe36194b253065fc1918c8a7b7be3bcd170ec4fea3f8e",
+      "bodyBytes": 1378348,
+      "readableCharacterCount": 7681,
+      "title": "Черничная",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14376382",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://krasnayapolyanaresort.ru/reliktovyij_les",
+      "routeIds": [
+        "osm-relation-11681960"
+      ],
+      "checkedAt": "2026-11-06T04:39:04.416565+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://krasnayapolyanaresort.ru/ecotrails/reliktovyij-les",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "9c7092d4367bc830944734feb2b7912402efef4758a60c4ba21568849f2ffe35",
+      "bodyBytes": 1377788,
+      "readableCharacterCount": 7550,
+      "title": "Реликтовый лес",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-11681960",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://krasnayapolyanaresort.ru/slopes_new",
+      "routeIds": [
+        "osm-relation-14376574",
+        "osm-relation-14376588",
+        "osm-relation-14376599",
+        "osm-relation-14376615",
+        "osm-relation-14376633"
+      ],
+      "checkedAt": "2026-11-06T04:39:22.883952+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://krasnayapolyanaresort.ru/map",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": null,
+      "status": "insufficient_readable_content",
+      "bodySha256": "edb0a32fa60130c8646acdba7970a7b2af8264a367233dd54c7b90b287872795",
+      "bodyBytes": 577526,
+      "readableCharacterCount": 61,
+      "title": "Карта Курорта Красная Поляна | объекты и навигация по высотам",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14376574",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-14376588",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-14376599",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-14376615",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-14376633",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://krasnayapolyanaresort.ru/tropa_zdorovya",
+      "routeIds": [
+        "osm-relation-13030392"
+      ],
+      "checkedAt": "2026-11-06T04:39:11.182453+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://krasnayapolyanaresort.ru/ecotrails/tropa-zdorovya",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "9ace6e4e9aeb0eb9656db490dcbae8ac4918b3a5e1ba8b18a7f6f1d90f5c2d9c",
+      "bodyBytes": 1334206,
+      "readableCharacterCount": 7540,
+      "title": "Тропа здоровья",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-13030392",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://krasnayapolyanaresort.ru/vodopad_polikarya_legkiy",
+      "routeIds": [
+        "osm-relation-13025082"
+      ],
+      "checkedAt": "2026-11-06T04:39:05.844309+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://krasnayapolyanaresort.ru/ecotrails/vodopad-polikarya",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "85af90665f13364ec43f65fea3bcc573342b2e0495cc5014efdd532e1f28ad64",
+      "bodyBytes": 1357944,
+      "readableCharacterCount": 7486,
+      "title": "Водопад Поликаря Красная Поляна",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-13025082",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://npsochi.ru/mesta/turisticheskie-obekty-natsparka/agurskiy-vodopad/",
+      "routeIds": [
+        "osm-relation-14397488"
+      ],
+      "checkedAt": "2026-11-06T04:39:43.476808+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://npsochi.ru/mesta/turisticheskie-obekty-natsparka/agurskiy-vodopad/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "584a7b122bf82423e64e9644b7b07032fe6067149a62a15551bba08ca186832c",
+      "bodyBytes": 172712,
+      "readableCharacterCount": 7067,
+      "title": "Все объекты Сочинского национального парка",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14397488",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://npsochi.ru/mesta/turisticheskie-obekty-natsparka/azhek/",
+      "routeIds": [
+        "osm-relation-14397458"
+      ],
+      "checkedAt": "2026-11-06T04:39:42.837554+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://npsochi.ru/mesta/turisticheskie-obekty-natsparka/azhek/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "c81215cd884f3a01e3f5bb179febba0a208ef9059f34d831dc3aac8e0cc7cf30",
+      "bodyBytes": 174577,
+      "readableCharacterCount": 7015,
+      "title": "Все объекты Сочинского национального парка",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14397458",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://npsochi.ru/mesta/turisticheskie-obekty-natsparka/bashnya-akhun/",
+      "routeIds": [
+        "osm-relation-14397487"
+      ],
+      "checkedAt": "2026-11-06T04:39:43.283672+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://npsochi.ru/mesta/turisticheskie-obekty-natsparka/bashnya-akhun/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "ecfc62fc9598d703b3bfdc2351931dd1fe4381d3ad9f365370d25b9b4ad9761f",
+      "bodyBytes": 176417,
+      "readableCharacterCount": 7551,
+      "title": "Все объекты Сочинского национального парка",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14397487",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://npsochi.ru/mesta/turisticheskie-obekty-natsparka/orlinye-skaly/",
+      "routeIds": [
+        "osm-relation-14397491"
+      ],
+      "checkedAt": "2026-11-06T04:39:48.086925+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://npsochi.ru/mesta/turisticheskie-obekty-natsparka/orlinye-skaly/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "3315d6b4afae53226b4a066e17afba5092dbbe03abd5ba5b9d14721f0b45751f",
+      "bodyBytes": 168089,
+      "readableCharacterCount": 5307,
+      "title": "Все объекты Сочинского национального парка",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14397491",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://npsochi.ru/mesta/turisticheskie-obekty-v-upravlenii-agentov-natsparka/krasnopolyanskiy-dolmen/",
+      "routeIds": [
+        "osm-relation-14378740"
+      ],
+      "checkedAt": "2026-11-06T04:39:37.487882+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://npsochi.ru/mesta/turisticheskie-obekty-v-upravlenii-agentov-natsparka/krasnopolyanskiy-dolmen/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "a1d11a38426ed0152f8da39aadf9ac96f8703b5f95e20f54a3d837d059dc68bb",
+      "bodyBytes": 158053,
+      "readableCharacterCount": 2542,
+      "title": "Все объекты Сочинского национального парка",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14378740",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://npsochi.ru/mesta/turisticheskie-obekty-v-upravlenii-agentov-natsparka/vodopad-bezymyannyy/",
+      "routeIds": [
+        "osm-relation-14378808"
+      ],
+      "checkedAt": "2026-11-06T04:39:39.054077+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://npsochi.ru/mesta/turisticheskie-obekty-v-upravlenii-agentov-natsparka/vodopad-bezymyannyy/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "2c6cf86be54a855d17d2c11926ffc2b96b6f29327531c99cdc08e8a0b7d92422",
+      "bodyBytes": 158029,
+      "readableCharacterCount": 2542,
+      "title": "Все объекты Сочинского национального парка",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14378808",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://npsochi.ru/mesta/turisticheskie-obekty-v-upravlenii-agentov-natsparka/vodopad-devichi-slezy/",
+      "routeIds": [
+        "osm-relation-14378779"
+      ],
+      "checkedAt": "2026-11-06T04:39:38.172318+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://npsochi.ru/mesta/turisticheskie-obekty-v-upravlenii-agentov-natsparka/vodopad-devichi-slezy/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "ada3cf97853d932ffdb2c03d6dcc33eb1fb6f564a6eec2e474b032654c607ff2",
+      "bodyBytes": 158040,
+      "readableCharacterCount": 2542,
+      "title": "Все объекты Сочинского национального парка",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14378779",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://riekkalansaarifest.ru/50mile",
+      "routeIds": [
+        "osm-relation-18257803"
+      ],
+      "checkedAt": "2026-11-06T04:40:20.213260+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "status": "unavailable",
+      "error": "HTTP Error 404: Not Found",
+      "retryOrIdentityChangeUsed": false
+    },
+    {
+      "url": "https://riekkalansaarifest.ru/fun7",
+      "routeIds": [
+        "osm-relation-18251718"
+      ],
+      "checkedAt": "2026-11-06T04:40:11.886645+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "status": "unavailable",
+      "error": "HTTP Error 404: Not Found",
+      "retryOrIdentityChangeUsed": false
+    },
+    {
+      "url": "https://riekkalansaarifest.ru/long35",
+      "routeIds": [
+        "osm-relation-18251715"
+      ],
+      "checkedAt": "2026-11-06T04:40:11.412444+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "status": "unavailable",
+      "error": "HTTP Error 404: Not Found",
+      "retryOrIdentityChangeUsed": false
+    },
+    {
+      "url": "https://riekkalansaarifest.ru/middle25",
+      "routeIds": [
+        "osm-relation-18251717"
+      ],
+      "checkedAt": "2026-11-06T04:40:11.763397+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "status": "unavailable",
+      "error": "HTTP Error 404: Not Found",
+      "retryOrIdentityChangeUsed": false
+    },
+    {
+      "url": "https://riekkalansaarifest.ru/rkt12",
+      "routeIds": [
+        "osm-relation-18251716"
+      ],
+      "checkedAt": "2026-11-06T04:40:11.473735+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "status": "unavailable",
+      "error": "HTTP Error 404: Not Found",
+      "retryOrIdentityChangeUsed": false
+    },
+    {
+      "url": "https://riekkalansaarifest.ru/ultra55",
+      "routeIds": [
+        "osm-relation-18108422"
+      ],
+      "checkedAt": "2026-11-06T04:39:53.802602+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "status": "unavailable",
+      "error": "HTTP Error 404: Not Found",
+      "retryOrIdentityChangeUsed": false
+    },
+    {
+      "url": "https://rosakhutor.com/",
+      "routeIds": [
+        "osm-relation-13232467",
+        "osm-relation-13232468",
+        "osm-relation-13232469",
+        "osm-relation-13232470",
+        "osm-relation-16277119",
+        "osm-relation-16277120"
+      ],
+      "checkedAt": "2026-11-06T04:39:16.800168+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://rosakhutor.ru/",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": null,
+      "status": "insufficient_readable_content",
+      "bodySha256": "d0db68a344d1ad23628a7baec8bdbdf58a763073717bd3cf01ebba3d3478e8ef",
+      "bodyBytes": 13602,
+      "readableCharacterCount": 0,
+      "title": "",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-13232467",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-13232468",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-13232469",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-13232470",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-16277119",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-16277120",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://rosakhutor.com/hotels/26346/",
+      "routeIds": [
+        "osm-relation-14378873"
+      ],
+      "checkedAt": "2026-11-06T04:39:42.688303+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://rosakhutor.ru/hotels/26346/",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": null,
+      "status": "insufficient_readable_content",
+      "bodySha256": "d0db68a344d1ad23628a7baec8bdbdf58a763073717bd3cf01ebba3d3478e8ef",
+      "bodyBytes": 13602,
+      "readableCharacterCount": 0,
+      "title": "",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14378873",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://ru.wikipedia.org/wiki/%D0%92%D1%81%D0%B5%D1%81%D0%BE%D1%8E%D0%B7%D0%BD%D1%8B%D0%B9_%D1%82%D1%83%D1%80%D0%B8%D1%81%D1%82%D1%81%D0%BA%D0%B8%D0%B9_%D0%BC%D0%B0%D1%80%D1%88%D1%80%D1%83%D1%82_%E2%84%96_77",
+      "routeIds": [
+        "osm-relation-6040458"
+      ],
+      "checkedAt": "2026-11-06T04:38:49.780227+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://ru.wikipedia.org/wiki/%D0%92%D1%81%D0%B5%D1%81%D0%BE%D1%8E%D0%B7%D0%BD%D1%8B%D0%B9_%D1%82%D1%83%D1%80%D0%B8%D1%81%D1%82%D1%81%D0%BA%D0%B8%D0%B9_%D0%BC%D0%B0%D1%80%D1%88%D1%80%D1%83%D1%82_%E2%84%96_77",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Fri, 23 Oct 2026 04:38:57 GMT",
+      "status": "readable",
+      "bodySha256": "671c4f2153270db48523e04a9c8f36bf47cd7d411a0811699f048bf7724fec7d",
+      "bodyBytes": 124045,
+      "readableCharacterCount": 9646,
+      "title": "Всесоюзный туристский маршрут № 77 — Википедия",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-6040458",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://rutrail.org/trails/102/",
+      "routeIds": [
+        "osm-relation-18144131"
+      ],
+      "checkedAt": "2026-11-06T04:39:56.408750+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://rutrail.org/trails/102/",
+      "contentType": "text/html;charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "bea197c148b0a29e6f86b223fa693c2efbc713ca6c7046ccd049872e76f9cddd",
+      "bodyBytes": 26035,
+      "readableCharacterCount": 2832,
+      "title": "Гора Кивакка",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-18144131",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://rutrail.org/trails/12/",
+      "routeIds": [
+        "osm-relation-12328003"
+      ],
+      "checkedAt": "2026-11-06T04:39:04.441793+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://rutrail.org/trails/12/",
+      "contentType": "text/html;charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "0d7d8c9157b4c6e6dcbc82444f535244f09e8277cf028b452db1c0cdc3dacb55",
+      "bodyBytes": 50911,
+      "readableCharacterCount": 7058,
+      "title": "Каверзинские водопады",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-12328003",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://rutrail.org/trails/61/",
+      "routeIds": [
+        "osm-relation-7971235"
+      ],
+      "checkedAt": "2026-11-06T04:38:57.028608+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://rutrail.org/trails/61/",
+      "contentType": "text/html;charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "87e8e18b55604754c2638af9da32df06ef3e9d310eb0865b1e796a519fccee16",
+      "bodyBytes": 55291,
+      "readableCharacterCount": 8110,
+      "title": "«Кольцо Суханова» (Ущелье Актру)",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-7971235",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://rutrail.org/trails/65/",
+      "routeIds": [
+        "osm-relation-10716769"
+      ],
+      "checkedAt": "2026-11-06T04:38:58.116123+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://rutrail.org/trails/65/",
+      "contentType": "text/html;charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "fee1769ecad29d50433fe0c12bdb01f04a0e73ebe27955e4f4a6028501ca9ada",
+      "bodyBytes": 58270,
+      "readableCharacterCount": 6032,
+      "title": "Пик Черского",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-10716769",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://rutrail.org/trails/70/",
+      "routeIds": [
+        "osm-relation-12350723",
+        "osm-relation-18673170"
+      ],
+      "checkedAt": "2026-11-06T04:39:04.653070+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://rutrail.org/trails/70/",
+      "contentType": "text/html;charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "f11be9b7cedd67b5c059312a23b1b817dc47d831fc7fbd97d90b2053d2dd61bf",
+      "bodyBytes": 86114,
+      "readableCharacterCount": 9583,
+      "title": "От вершин к вершинам (Индюк, Семашхо, Два брата)",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-12350723",
+          "exactNormalizedNameFound": false
+        },
+        {
+          "routeId": "osm-relation-18673170",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://rutrail.org/trails/96/",
+      "routeIds": [
+        "osm-relation-18144198"
+      ],
+      "checkedAt": "2026-11-06T04:39:57.148376+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://rutrail.org/trails/96/",
+      "contentType": "text/html;charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "f8699e70b3386d15fb575bbb998f4ef3305fb240e684b58e5d5b19f9fdc0ad76",
+      "bodyBytes": 102146,
+      "readableCharacterCount": 3938,
+      "title": "Монастырская тропа",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-18144198",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://sailugem.ru/index.php/agency/tourist-routes/237-pilgrimage",
+      "routeIds": [
+        "osm-relation-13083400"
+      ],
+      "checkedAt": "2026-11-06T04:39:11.403894+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://sailugem.ru/index.php/agency/tourist-routes/237-pilgrimage",
+      "contentType": "text/html; charset=utf-8",
+      "lastModified": "Fri, 06 Nov 2026 04:39:18 GMT",
+      "status": "readable",
+      "bodySha256": "7d85f3d95c76753cbc295b7fe16565c28efd24d27c07a914250bd6bbedab9cd0",
+      "bodyBytes": 71914,
+      "readableCharacterCount": 8142,
+      "title": "Национальный парк \"Сайлюгемский\" - Эколого-туристический маршрут «Большое горное путешествие»",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-13083400",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://trekkingmania.ru/kt/",
+      "routeIds": [
+        "osm-relation-15004011"
+      ],
+      "checkedAt": "2026-11-06T04:39:48.767397+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://trekkingmania.ru/kt/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "3214df08342741ec67e8fcc4d997372116e46fb3fc8cac61900a3a0f00416938",
+      "bodyBytes": 180020,
+      "readableCharacterCount": 17244,
+      "title": "Крымская Тропа",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-15004011",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://visitabrau.ru/todo/peshie-marshruty/",
+      "routeIds": [
+        "osm-relation-15354460",
+        "osm-relation-15444795",
+        "osm-relation-16121230",
+        "osm-relation-16126776",
+        "osm-relation-16127081"
+      ],
+      "checkedAt": "2026-11-06T04:39:52.443821+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://visitabrau.ru/activities/peshie-marshruty/",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null,
+      "status": "readable",
+      "bodySha256": "f299b23879f244223534219e3ea5badf5854104b2f0a44aea9ca830e522ae063",
+      "bodyBytes": 403577,
+      "readableCharacterCount": 21891,
+      "title": "Пешие маршруты, Абрау-Дюрсо | Чем заняться на курорте",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-15354460",
+          "exactNormalizedNameFound": true
+        },
+        {
+          "routeId": "osm-relation-15444795",
+          "exactNormalizedNameFound": true
+        },
+        {
+          "routeId": "osm-relation-16121230",
+          "exactNormalizedNameFound": true
+        },
+        {
+          "routeId": "osm-relation-16126776",
+          "exactNormalizedNameFound": true
+        },
+        {
+          "routeId": "osm-relation-16127081",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://www.kavkazzapoved.ru/routes/no-13-k-achipsinskim-vodopadam",
+      "routeIds": [
+        "osm-relation-14376257"
+      ],
+      "checkedAt": "2026-11-06T04:39:18.578320+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://www.kavkazzapoved.ru/routes/no-13-k-achipsinskim-vodopadam",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Fri, 06 Nov 2026 04:39:22 GMT",
+      "status": "readable",
+      "bodySha256": "40cd67e2096bcaafa6ffd0d4c4936a9164efa95abfeb850a678bd8a785f757de",
+      "bodyBytes": 143690,
+      "readableCharacterCount": 8113,
+      "title": "№ 13 «К Ачипсинским водопадам». | Кавказский государственный природный биосферный заповедник имени Х.Г.Шапошникова",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14376257",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://www.kavkazzapoved.ru/routes/no-8-cherez-pereval-aishkha-k-chernomu-moryu",
+      "routeIds": [
+        "osm-relation-1474673"
+      ],
+      "checkedAt": "2026-11-06T04:38:49.776257+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://www.kavkazzapoved.ru/routes/no-8-cherez-pereval-aishkha-k-chernomu-moryu",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Fri, 06 Nov 2026 04:38:56 GMT",
+      "status": "readable",
+      "bodySha256": "ea95a193c6f1a1ce4a7224261dc01807fff096757395dc003505e15f1102c462",
+      "bodyBytes": 151094,
+      "readableCharacterCount": 11439,
+      "title": "№ 8 «Через перевал Аишха к Черному морю» | Кавказский государственный природный биосферный заповедник имени Х.Г.Шапошникова",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-1474673",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://www.kavkazzapoved.ru/routes/no-8a-urochische-medvezhi-vorota-bzerpinskiy-karniz-lager-kholodnyy",
+      "routeIds": [
+        "osm-relation-11566519"
+      ],
+      "checkedAt": "2026-11-06T04:38:59.841004+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://www.kavkazzapoved.ru/routes/no-8a-urochische-medvezhi-vorota-bzerpinskiy-karniz-lager-kholodnyy",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Fri, 06 Nov 2026 04:39:05 GMT",
+      "status": "readable",
+      "bodySha256": "6278d8d73c5c0239de983a8e026e775e6ac6aac3af8e588fa420d295a322d8d1",
+      "bodyBytes": 144850,
+      "readableCharacterCount": 8702,
+      "title": "№ 8а «Урочище Медвежьи ворота – Бзерпинский карниз - Лагерь Холодный». | Кавказский государственный природный биосферный заповедник имени Х.Г.Шапошникова",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-11566519",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://www.kavkazzapoved.ru/routes/no-9-urochische-engelmanovy-polyany-ozero-kardyvach",
+      "routeIds": [
+        "osm-relation-14376817",
+        "osm-relation-14378813"
+      ],
+      "checkedAt": "2026-11-06T04:39:27.785738+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://www.kavkazzapoved.ru/routes/no-9-urochische-engelmanovy-polyany-ozero-kardyvach",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Fri, 06 Nov 2026 04:39:36 GMT",
+      "status": "readable",
+      "bodySha256": "5c99a9c7bcedb611c1b09e2eb48e9ce48d646ae0e19402463d7f8f84f6ea0879",
+      "bodyBytes": 148439,
+      "readableCharacterCount": 10223,
+      "title": "№ 9 «Урочище Энгельмановы поляны – озеро Кардывач» | Кавказский государственный природный биосферный заповедник имени Х.Г.Шапошникова",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14376817",
+          "exactNormalizedNameFound": true
+        },
+        {
+          "routeId": "osm-relation-14378813",
+          "exactNormalizedNameFound": false
+        }
+      ]
+    },
+    {
+      "url": "https://www.kavkazzapoved.ru/routes/no131-k-achipsinskim-vodopadam-do-mesta-otdykha-kupel",
+      "routeIds": [
+        "osm-relation-14376203"
+      ],
+      "checkedAt": "2026-11-06T04:39:17.215995+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://www.kavkazzapoved.ru/routes/no131-k-achipsinskim-vodopadam-do-mesta-otdykha-kupel",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Fri, 06 Nov 2026 04:39:22 GMT",
+      "status": "readable",
+      "bodySha256": "02b8b810d609993508adfe91425e3b4efae05708d92e947593946c488e1982c8",
+      "bodyBytes": 134217,
+      "readableCharacterCount": 5749,
+      "title": "№13/1 \"К Ачипсинским водопадам до места отдыха \"Купель\" | Кавказский государственный природный биосферный заповедник имени Х.Г.Шапошникова",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14376203",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    },
+    {
+      "url": "https://www.kavkazzapoved.ru/routes/no15-krasnaya-polyana-medoveevka",
+      "routeIds": [
+        "osm-relation-14378861"
+      ],
+      "checkedAt": "2026-11-06T04:39:39.205539+00:00",
+      "method": "Direct read of the website URL supplied by OSM; not automatically an authoritative source.",
+      "httpStatus": 200,
+      "finalUrl": "https://www.kavkazzapoved.ru/routes/no15-krasnaya-polyana-medoveevka",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": "Fri, 06 Nov 2026 04:39:42 GMT",
+      "status": "readable",
+      "bodySha256": "06787fa746818aeaebd9f68d5bfb80c718980acac56fbca2d0f0d859f52a2ca7",
+      "bodyBytes": 140391,
+      "readableCharacterCount": 7102,
+      "title": "№15 \"Красная поляна - Медовеевка\". | Кавказский государственный природный биосферный заповедник имени Х.Г.Шапошникова",
+      "fullArticleRedistributed": false,
+      "routeNameSignals": [
+        {
+          "routeId": "osm-relation-14378861",
+          "exactNormalizedNameFound": true
+        }
+      ]
+    }
+  ]
+}

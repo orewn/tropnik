@@ -1,0 +1,47 @@
+name: Backend and native PostGIS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['backend/**', 'infra/**', '.github/workflows/backend.yml']
+  pull_request:
+    paths: ['backend/**', 'infra/**', '.github/workflows/backend.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.27.3'
+          cache-dependency-path: backend/go.sum
+      - name: Unit tests and race detector
+        working-directory: backend
+        run: go test -race -count=1 ./...
+      - name: Static checks
+        working-directory: backend
+        run: go vet ./...
+      - name: Native PostGIS integration gate
+        run: |
+          mkdir -p verification
+          bash infra/run-integration.sh 2>&1 | tee verification/native-postgis.log
+      - name: Preserve integration evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-native-postgis-${{ github.sha }}
+          path: verification/native-postgis.log
+          if-no-files-found: warn
+          retention-days: 14

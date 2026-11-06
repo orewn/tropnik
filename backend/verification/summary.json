@@ -1,0 +1,99 @@
+{
+  "recordedAt": "2026-11-06T05:42:48.901010+00:00",
+  "toolchain": "go version go1.27.3 linux/amd64",
+  "scope": "backend, contracts and infra; social web API/policy handoff and read-only BFF review",
+  "checks": [
+    {
+      "command": "GOPROXY=off go test -race -json ./...",
+      "status": "passed",
+      "topLevelTests": 22,
+      "testAndSubtestPassEvents": 31,
+      "failedEvents": 0,
+      "packagesWithExecutedTests": [
+        "tropa/backend/cmd/tropa-api",
+        "tropa/backend/internal/abuse",
+        "tropa/backend/internal/auth",
+        "tropa/backend/internal/domain",
+        "tropa/backend/internal/httpapi"
+      ]
+    },
+    {
+      "command": "GOPROXY=off go vet ./...",
+      "status": "passed"
+    },
+    {
+      "command": "GOPROXY=off go test -c -tags=integration -o /tmp/tropa-postgres-integration.test ./internal/store",
+      "status": "compiled_only",
+      "executed": false
+    },
+    {
+      "command": "GOPROXY=off CGO_ENABLED=0 go build -buildvcs=false ./...",
+      "status": "passed",
+      "note": "VCS metadata stamping disabled for the surrounding shared-workspace layout."
+    },
+    {
+      "command": "yaml.safe_load for contracts/openapi.yaml, infra/compose.yaml, infra/compose.test.yaml, infra/compose.web.yaml",
+      "status": "syntax_passed_only"
+    },
+    {
+      "command": "bash -n infra/run-integration.sh infra/db/01-runtime-role.sh",
+      "status": "syntax_passed_only"
+    }
+  ],
+  "webHandoff": {
+    "apiPolicyTests": {
+      "command": "node --test tests/api-policy.test.mjs",
+      "passed": 8,
+      "failed": 0
+    },
+    "typescript": "passed at social UI handoff",
+    "nextBuild": "Next 16.3.4 standard standalone production build passed at social UI handoff",
+    "httpSmokeArtifact": "../../web/verification/next-smoke.json",
+    "limit": "No live configured API/database flow was exercised. Shared visual/icon work after the handoff needs the web owner final verification."
+  },
+  "notExecuted": [
+    "Real PostgreSQL/PostGIS integration suite, including case privacy and concurrent posting",
+    "Docker image build and container startup",
+    "Runtime database role tests on PostgreSQL",
+    "Live web/API/database flow",
+    "Dependency/container vulnerability scan and SBOM",
+    "Load and Android device/field testing"
+  ],
+  "databaseBlocker": "PostgreSQL and Docker unavailable; ordinary package setup could not change system users. No privilege workaround was used.",
+  "sourceSHA256": {
+    "cmd/tropa-admin/main.go": "12f5d7d4704a6607e84b881c6f7d1fa48ecee4ff50714bbc6b916c470da0f621",
+    "cmd/tropa-api/main.go": "4ee47baede4d1a5943ed248687c56c5d456a8f0c999c46df7affab748324048a",
+    "cmd/tropa-api/main_test.go": "d3d5343000e60f2c61e84db08af9045d6d8385caec01d7d5bdadd5794ce56076",
+    "cmd/tropa-health/main.go": "cf8df2d2bd1a2f0c74413ad2f96721b0bd1aadb76788e7eb25a31aab06221927",
+    "cmd/tropa-migrate/main.go": "cfac4f734fe706b21c12ce47c249f805743213415529f935292176997b4c87cc",
+    "go.mod": "c32c0f87d8ff9711806fedd8145fbf3733d9aae045c837cf7c5c562edae82817",
+    "go.sum": "1b0aad3174fe40cd2c768d6853cee172f4bed96c68a8d0be1ef827798dec075b",
+    "internal/abuse/policy.go": "8a49423f05f73e7c884cb747c0a683461d12396f1aac0606cb154a1cc54933fa",
+    "internal/abuse/policy_test.go": "e8562c6e3caede330563b7c7285e873651996be7afeeac632021447ba184e37d",
+    "internal/auth/password.go": "e503331d23f675a15e388d54585e4cc05dc4f61856ff3ef8f67032e893f442f5",
+    "internal/auth/password_test.go": "a362d8788ca400d4015747fa9bbd71b943f0de829daf7b4da33c0779e533c6e9",
+    "internal/domain/model.go": "7c3df55532e75d8423fb0c9292655a9b6c80a0d00542be2998d391e8e67aa29b",
+    "internal/domain/model_test.go": "e64c60b65fb9f4ff6303d6e580550cee37cc76c684cb1d68323f48dfbb74659b",
+    "internal/domain/moderation.go": "136ced4b574a8458bb5ac2f5ca7dfc7ba25bc59bdeed23279ca2c4bd3314c4f5",
+    "internal/domain/moderation_test.go": "0971098d1d3beb8874f68fff79aadb00912dddd0ea21ba4820f7077fe8d93a75",
+    "internal/httpapi/guides.go": "a3c7a39c63240e18767aad68eb80ac4ac779f8d337760b84666f12aaebdb8424",
+    "internal/httpapi/moderation.go": "767a0dab3b7aa8adc0cff9636d43e0ff02fa87aa8d4bbe612c08a9cb31d038c6",
+    "internal/httpapi/participants.go": "1752c3465c652e77835f54113ca73a10f931abc0167b73e6b5fdbf4bf4cd9e13",
+    "internal/httpapi/recruitment.go": "053d8c63e298d171647adaec7b5715052cb2eaf8668d0b2aa187f7f76c63908b",
+    "internal/httpapi/server.go": "711d620efc0e579a97390d5cc9e6d6728e42bbaed7e7b8f1da52847d5739a23b",
+    "internal/httpapi/server_test.go": "96292c2cd7ed415ad1595802467533eca1731674b8de5c792f63d66a873020eb",
+    "internal/store/account.go": "0fb41cd8b48b007a423b72cea1d5a0489b56d1f3a03c88e5443870d63e858818",
+    "internal/store/guides.go": "b643af7384d34c4aa1f4e08e0d8ee5a9e7b40e19ce54880fa5bd2cae5cff6b23",
+    "internal/store/moderation.go": "2f46b90c0de44994b284d16aca3f946c80f5b4e25e7a934e49c42f455b327cd3",
+    "internal/store/moderation_integration_test.go": "93c78ab5718d252c052ad70422afe4821b28e0a768c1dc0c55bed288b515ff9e",
+    "internal/store/postgres.go": "b72063db0d143d4d2de05a6bd395efbd8e0ace02f072af092ea723bc1ae09c9f",
+    "internal/store/postgres_integration_test.go": "e125ac9ac051be55c9cebedf91279fb85589e515173a92b81e75336562928556",
+    "internal/store/posting.go": "17a2f53cb41cf52219a591cf12ec48338d9394ce081d59e83f292fd17781758a",
+    "internal/store/recruitment.go": "d4e757e8f086d9f07d97e4c9bf48eb73d55eb7f04ab4dd7752f55b17f2131ec3",
+    "internal/store/social.go": "be0174e0ecc2de9441ea2915806d3e0ac667db77366a2f953296fe5f88730e68",
+    "migrations/001_initial.sql": "80fb93d9ad2f045528af78133145c0af30488df5c5c1e3e12e76285e1939fc47",
+    "migrations/002_moderation.sql": "1b93355995403292235c8e50433211c47c83128b39c5e41b634cc12b5a1955ff",
+    "migrations/grants.go": "fe7e4f57389e3a43a845b40d2d898f947259efc1db5bc49e6ccf91dd303fb00e",
+    "migrations/migrate.go": "c0d1977bd550afe63ad42221480150ba723b9041d5aae3a046b4872097317c9e"
+  }
+}

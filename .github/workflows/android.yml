@@ -1,0 +1,127 @@
+# Copy to .github/workflows/android.yml at the repository root.
+# This job builds preview artifacts only. It does not publish a release or use
+# a production signing key. Action commits were resolved from official tags.
+name: Android preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_instrumentation:
+        description: 'Run five device scenarios on one API 35 x86_64 emulator'
+        type: boolean
+        required: false
+        default: false
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'tools/android-build/**'
+      - 'tools/map-package/**'
+      - 'data/terrain-pilot/runtime/**'
+      - 'web/public/terrain/**'
+      - 'web/public/data/russia-*'
+      - 'web/public/data/routes/**'
+      - 'web/lib/content.ts'
+      - 'web/lib/catalog.generated.json'
+      - 'web/lib/route-points.generated.json'
+      - '.github/workflows/android.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: JDK17
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: |
+            android/**/*.gradle.kts
+            android/gradle/wrapper/gradle-wrapper.properties
+      - name: Android SDK
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Local terrain verifier dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/tropnik-python"
+          "$RUNNER_TEMP/tropnik-python/bin/python" -m pip install -r tools/android-build/requirements.txt
+          printf '%s\n' "$RUNNER_TEMP/tropnik-python/bin" >> "$GITHUB_PATH"
+          node --version
+          npm install --prefix "$RUNNER_TEMP/tropnik-catalog-node" --ignore-scripts --no-package-lock --no-audit --no-fund typescript@5.9.3
+          printf 'NODE_PATH=%s\n' "$RUNNER_TEMP/tropnik-catalog-node/node_modules" >> "$GITHUB_ENV"
+      - name: Build, test and verify
+        run: |
+          chmod +x android/gradlew
+          bash tools/android-build/build.sh
+      - name: Save preview APKs and reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-android-preview
+          path: |
+            android/dist/
+            android/app/build/reports/tests/testDebugUnitTest/
+            android/app/build/test-results/testDebugUnitTest/
+          if-no-files-found: error
+          retention-days: 14
+
+  instrumentation:
+    name: Manual Android device scenarios
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_instrumentation }}
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    concurrency:
+      group: tropnik-android-device-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      ANDROID_AVD_HOME: ${{ runner.temp }}/tropnik-avd
+      TROPA_API_BASE_URL: ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: JDK17 and build dependency cache
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: |
+            android/**/*.gradle.kts
+            android/gradle/wrapper/gradle-wrapper.properties
+      - name: Install official SDK and one emulator image
+        timeout-minutes: 8
+        run: |
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools' 'emulator' 'system-images;android-35;google_apis;x86_64'
+          mkdir -p "$ANDROID_AVD_HOME"
+          printf 'no\n' | avdmanager create avd --force --name tropnik-ci-api35 --package 'system-images;android-35;google_apis;x86_64' --device pixel_6
+      - name: Require KVM on the disposable Linux runner
+        run: |
+          test -e /dev/kvm
+          sudo chown "$(id -u):$(id -g)" /dev/kvm
+          test -r /dev/kvm
+          test -w /dev/kvm
+      - name: Run actual connected instrumentation
+        run: bash tools/android-build/run-instrumentation-ci.sh
+      - name: Save actual device results and diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-android-api35-instrumentation-${{ github.run_attempt }}
+          path: |
+            android/dist/instrumentation-ci/
+            android/app/build/reports/androidTests/connected/
+            android/app/build/outputs/androidTest-results/connected/
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+          if-no-files-found: warn
+          retention-days: 14

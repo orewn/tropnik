@@ -1,0 +1,84 @@
+/** One bounded pool shared by every preview. It never marks an offline pack complete. */
+type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown};
+type Options = {concurrency?: number; maxBytes?: number; maxResourceBytes?: number; maxQueued?: number; timeoutMs?: number; fetcher?: typeof fetch};
+
+export class MapResourcePool {
+  private entries = new Map<string, Entry>();
+  private queue: string[] = [];
+  private active = 0;
+  private bytes = 0;
+  private options: Required<Options>;
+  constructor(options: Options = {}) {
+    this.options = {concurrency: 3, maxBytes: 24 * 1024 * 1024, maxResourceBytes: 8 * 1024 * 1024, maxQueued: 72, timeoutMs: 15000, fetcher: (...args) => fetch(...args), ...options};
+  }
+  get(url: string, priority = 1): Promise<ArrayBuffer> {
+    const existing = this.entries.get(url);
+    if (existing) {existing.priority = Math.min(existing.priority, priority); this.entries.delete(url); this.entries.set(url, existing); return existing.promise;}
+    if (this.queue.length >= this.options.maxQueued) {
+      // An opened map takes precedence over speculative cards still in the queue.
+      const victim = this.queue.findLast(key => (this.entries.get(key)?.priority ?? 0) > priority);
+      if (!victim) return Promise.reject(new Error('Preview queue is full'));
+      this.queue.splice(this.queue.indexOf(victim), 1);
+      this.entries.get(victim)?.reject(new Error('Preview superseded by an opened map'));
+      this.remove(victim);
+    }
+    let resolve!: Entry['resolve'], reject!: Entry['reject'];
+    const promise = new Promise<ArrayBuffer>((yes, no) => {resolve = yes; reject = no;});
+    this.entries.set(url, {promise, resolve, reject, priority, bytes: 0, settled: false});
+    this.queue.push(url); this.pump(); return promise;
+  }
+  has(url: string) {return this.entries.has(url);}
+  /** Discard invalid content after validation without interrupting another consumer's active request. */
+  invalidate(url: string) {if (this.entries.get(url)?.settled) this.remove(url);}
+  async json<T>(url: string, priority = 1): Promise<T> {
+    const bytes = await this.get(url, priority), entry = this.entries.get(url);
+    if (entry?.json !== undefined) return entry.json as T;
+    try {const value = JSON.parse(new TextDecoder().decode(bytes)) as T; if (entry) entry.json = value; return value;}
+    catch (error) {this.remove(url); throw error;}
+  }
+  private remove(url: string) {const entry = this.entries.get(url); if (entry) {this.bytes -= entry.bytes; this.entries.delete(url);}}
+  private pump() {
+    this.queue.sort((a, b) => (this.entries.get(a)?.priority ?? 9) - (this.entries.get(b)?.priority ?? 9));
+    while (this.active < this.options.concurrency && this.queue.length) {
+      const url = this.queue.shift()!, entry = this.entries.get(url); if (!entry) continue; this.active++;
+      this.read(url).then(bytes => {
+        entry.bytes = bytes.byteLength; entry.settled = true; this.bytes += entry.bytes;
+        for (const [key, candidate] of this.entries) {if (this.bytes <= this.options.maxBytes) break; if (candidate.settled && key !== url) this.remove(key);}
+        entry.resolve(bytes);
+      }, error => {this.remove(url); entry.reject(error);}).finally(() => {this.active--; this.pump();});
+    }
+  }
+  private async read(url: string) {
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), this.options.timeoutMs);
+    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+    try {
+      const response = await this.options.fetcher(url, {cache: 'force-cache', credentials: url.startsWith('/') ? 'same-origin' : 'omit', signal: controller.signal});
+      if (!response.ok) throw new Error(`Preview resource unavailable (${response.status})`);
+      if (Number(response.headers.get('content-length') || 0) > this.options.maxResourceBytes) throw new Error('Preview resource exceeds the byte budget');
+      reader = response.body?.getReader(); if (!reader) return new ArrayBuffer(0);
+      const chunks: Uint8Array[] = []; let length = 0;
+      while (true) {const {value, done} = await reader.read(); if (done) break; length += value.byteLength; if (length > this.options.maxResourceBytes) throw new Error('Preview resource exceeds the byte budget'); chunks.push(value);}
+      const output = new Uint8Array(length); let offset = 0; for (const chunk of chunks) {output.set(chunk, offset); offset += chunk.length;} return output.buffer;
+    } finally {clearTimeout(timer); controller.abort(); await reader?.cancel().catch(() => {});}
+  }
+  stats() {return {active: this.active, queued: this.queue.length, cached: this.entries.size, bytes: this.bytes};}
+}
+
+export type Tile = {z: number; x: number; y: number};
+const toTile = (lng: number, lat: number, z: number) => {
+  const n = 2 ** z, phi = Math.max(-85.05112878, Math.min(85.05112878, lat)) * Math.PI / 180;
+  return [Math.min(n - 1, Math.max(0, Math.floor((lng + 180) / 360 * n))), Math.min(n - 1, Math.max(0, Math.floor((1 - Math.asinh(Math.tan(phi)) / Math.PI) / 2 * n)))];
+};
+/** Covers the actual route bounds at the best zoom within a preview budget. */
+export function routeTilePlan(bounds: number[], budget = 18, maxZoom = 12): Tile[] {
+  if (bounds.length !== 4 || !bounds.every(Number.isFinite) || bounds[1] > bounds[3] || bounds[1] < -90 || bounds[3] > 90 || bounds[0] < -180 || bounds[0] > 180 || bounds[2] < -180 || bounds[2] > 180 || budget < 2) return [];
+  const boxes = bounds[0] <= bounds[2] ? [bounds] : [[bounds[0], bounds[1], 180, bounds[3]], [-180, bounds[1], bounds[2], bounds[3]]];
+  for (let z = maxZoom; z >= 0; z--) {
+    const extents = boxes.map(b => {const [x0, y0] = toTile(b[0], b[3], z), [x1, y1] = toTile(b[2], b[1], z); return {x0, y0, x1, y1};});
+    if (extents.reduce((n, r) => n + (r.x1 - r.x0 + 1) * (r.y1 - r.y0 + 1), 0) > budget) continue;
+    const tiles = new Map<string, Tile>();
+    for (const r of extents) for (let y = r.y0; y <= r.y1; y++) for (let x = r.x0; x <= r.x1; x++) tiles.set(`${z}/${x}/${y}`, {z, x, y});
+    return [...tiles.values()];
+  }
+  return [];
+}

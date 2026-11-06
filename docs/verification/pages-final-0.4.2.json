@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-06T13:26:23.000852+00:00",
+  "release": "0.4.2-preview",
+  "buildId": "1c350cb52a19d6a0",
+  "base": "/tropnik-test/",
+  "origin": "https://orewn.github.io",
+  "publication": {
+    "performed": false,
+    "liveGitHubPagesUrlClaimed": false,
+    "scope": "A verified static artifact for the configured base/origin; no deployment performed."
+  },
+  "files": {
+    "archive": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.2/tropnik-test.zip",
+      "bytes": 37211651,
+      "sha256": "5b69ca387c9b72d67e33f2e00d3e52fa0fc881fb1ebc2126ea607853160df4e7"
+    },
+    "buildInfo": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.2/pages-preview-dist/build-info.json",
+      "bytes": 201048,
+      "sha256": "5aacb48adf1db49cc1338628a43e83039964a4512b195263e9f7f3d3080a3f89"
+    },
+    "verification": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.2/pages-preview-dist/verification.json",
+      "bytes": 452,
+      "sha256": "e90faecf7fee398a418dffc08720ce5b819b6f1ff7525c6f4f06372c49a85d44"
+    },
+    "httpVerification": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.2/pages-preview-dist/http-verification.json",
+      "bytes": 135,
+      "sha256": "72d41102193461677b82b7ad68c0b65520f1b17d9058c72f38d70b38f24aee8a"
+    },
+    "pageManifest": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.2/pages-preview-dist/page-manifest.json",
+      "bytes": 43953,
+      "sha256": "633a9f12b73696743249365f31b55690a5983430ba7e1d2e59f88eaa77ed5841"
+    },
+    "apk": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.2/pages-preview-dist/downloads/tropnik-arm64-preview.apk",
+      "bytes": 24467090,
+      "sha256": "41eabb299c0b2037311e813dd8d15f1f026977f601d851dfdd537b48b2f32292"
+    },
+    "apkManifest": {
+      "path": "/workspace/scratch/a2ce00e514d4/tropnik-complete-0.4.2/pages-preview-dist/downloads/android-manifest.json",
+      "bytes": 826,
+      "sha256": "78fdd21cd19e94b735f2e3e2cb0d440b8c1a39fc57f9dca325e72dee16f81997"
+    }
+  },
+  "zipEntries": 1309,
+  "zipCrcVerified": true,
+  "zipFilesMatchFinalDirectory": true,
+  "sourceSnapshotInputsChecked": 1088,
+  "sourceSnapshotChangedPaths": [],
+  "scopedTypecheck": {
+    "command": "node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json",
+    "exitCode": 0,
+    "diagnosticCount": 0
+  },
+  "serviceWorker": {
+    "sourceVersion": "tropnik-shell-v8",
+    "sourceSha256": "da94a3422c15b13e9110791417021c383e0a3e37f4895fa5f09a73f35dc240c7",
+    "deployedCacheVersion": "tropnik-test-tropnik-shell-1c350cb52a19d6a0",
+    "deployedSha256": "ba94cf8dc756d4ca1cb12dfc268aaca93b7633dbb40aca07ec2ef8c495e2ad4f",
+    "localOverviewPathPrefixed": true,
+    "browserInstallTestedHere": false
+  },
+  "checks": {
+    "verified": true,
+    "pages": 297,
+    "referenceRoutes": 277,
+    "productionRoutingChecks": 896,
+    "mapPolicyChecks": 14,
+    "staticApiNetworkCalls": 0,
+    "checkedScripts": 46,
+    "publicAssetChecks": 52,
+    "outputFiles": 1307,
+    "offlineFilesVerified": 252,
+    "overviewReliefTilesVerified": 341,
+    "terrainGrid": [
+      513,
+      513
+    ],
+    "apkVerified": true,
+    "coverageExcludedRoutes": [
+      "osm-relation-14407325"
+    ],
+    "base": "/tropnik-test/"
+  },
+  "httpChecks": {
+    "verified": true,
+    "base": "/tropnik-test/",
+    "httpChecks": 51,
+    "browserRenderingTested": false,
+    "backendConnected": false
+  },
+  "apkSummary": {
+    "version": "0.4.2-preview",
+    "versionCode": 6,
+    "architecture": "arm64-v8a",
+    "referenceRoutes": 277,
+    "regions": 6,
+    "geometryFiles": 277,
+    "fullRussiaDetailedOffline": false,
+    "deviceExecutionVerified": false
+  },
+  "browserRenderingTestedHere": false,
+  "githubWrites": false,
+  "sitesWrites": false,
+  "noindexStaticPreview": true,
+  "serverApiConfigured": false
+}

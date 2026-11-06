@@ -1,0 +1,247 @@
+{
+  "recordedAt": "2026-11-06T13:24:53.891466+00:00",
+  "status": "passed",
+  "projectVersion": "0.4.2",
+  "sourceRoot": "web/",
+  "executionMode": "Fresh isolated source copy with shared installed dependencies; ordinary Next production build, not the Sites/Vinext build.",
+  "sourceVerification": {
+    "fileCount": 1308,
+    "bytes": 56164752,
+    "inventorySha256": "68c34a53e0219f2ebb94288963fc8daf9e85c6fb1387a6d30ca8f3fa1ca52266",
+    "inventoryPath": "/tmp/tropnik-next-final-042-hxy4fpdu/verification/source-inventory.json",
+    "liveSourceDriftCount": 0,
+    "sourceCodeEditsRequired": false,
+    "nextStartedWithoutGeneratedOutput": true,
+    "isolatedGeneratorChanges": [
+      "next-env.d.ts"
+    ],
+    "originalNextOutputMovedOrEdited": false,
+    "officialPreviewDaemonTouched": false,
+    "canonicalSitesCheckoutTouched": false
+  },
+  "runtime": {
+    "node": "v24.22.1",
+    "next": "16.3.4",
+    "typescript": "5.9.3",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "environment": {
+    "NEXT_TELEMETRY_DISABLED": "1",
+    "TROPA_STANDALONE": "false",
+    "CIRCLE_NODE_TOTAL": "2"
+  },
+  "tests": {
+    "tests": 121,
+    "suites": 0,
+    "pass": 121,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "files": 14,
+    "execution": "Reused root supplied final 0.4.2 test receipt; not rerun",
+    "suppliedReceiptPath": "/tmp/tropnik-web-final-0.4.2-tests.txt",
+    "receiptSha256": "7dd4f5fbd5402765dca94ffce2fa715824891bfc76b68069f329b9b348e44262"
+  },
+  "nextProductionBuild": {
+    "name": "next-production-build",
+    "command": [
+      "node",
+      "node_modules/next/dist/bin/next",
+      "build",
+      "--webpack"
+    ],
+    "exitCode": 0,
+    "startedAt": "2026-11-06T13:24:17.768306+00:00",
+    "durationSeconds": 26.416,
+    "compiledSuccessfully": true,
+    "builtInTypeScriptCheckPassed": true,
+    "staticGenerationProgress": {
+      "completed": 16,
+      "total": 16
+    },
+    "routeEntries": [
+      {
+        "path": "/",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/_not-found",
+        "rendering": "static"
+      },
+      {
+        "path": "/about",
+        "rendering": "static"
+      },
+      {
+        "path": "/account",
+        "rendering": "static"
+      },
+      {
+        "path": "/android",
+        "rendering": "static"
+      },
+      {
+        "path": "/api/backend/[...path]",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/api/status",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/community",
+        "rendering": "static"
+      },
+      {
+        "path": "/guides",
+        "rendering": "static"
+      },
+      {
+        "path": "/moderation",
+        "rendering": "static"
+      },
+      {
+        "path": "/offline",
+        "rendering": "static"
+      },
+      {
+        "path": "/privacy",
+        "rendering": "static"
+      },
+      {
+        "path": "/qa-mobile",
+        "rendering": "static"
+      },
+      {
+        "path": "/regions/[id]",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/robots.txt",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/routes/[id]",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/safety",
+        "rendering": "static"
+      },
+      {
+        "path": "/sitemap.xml",
+        "rendering": "dynamic"
+      },
+      {
+        "path": "/sources",
+        "rendering": "static"
+      },
+      {
+        "path": "/terms",
+        "rendering": "static"
+      },
+      {
+        "path": "/trips",
+        "rendering": "static"
+      }
+    ],
+    "buildId": "UV_UotxLvLp2C2Z3gNr5p"
+  },
+  "freshTypeScript": {
+    "name": "fresh-typescript",
+    "command": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "--noEmit",
+      "--incremental",
+      "false"
+    ],
+    "exitCode": 0,
+    "startedAt": "2026-11-06T13:24:44.184936+00:00",
+    "durationSeconds": 9.23,
+    "diagnosticCount": 0
+  },
+  "apkAtSourceSnapshot": {
+    "version": "0.4.2-preview",
+    "versionCode": 6,
+    "architecture": "arm64-v8a",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "bytes": 24467090,
+    "sha256": "41eabb299c0b2037311e813dd8d15f1f026977f601d851dfdd537b48b2f32292",
+    "signature": "development / debug",
+    "deviceExecutionVerified": false,
+    "russiaCoverageProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+    "sceneGridDimensions": [
+      513,
+      513
+    ],
+    "russiaOverviewTileCount": 341,
+    "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+    "catalogReferenceRouteCount": 277,
+    "catalogRegionCount": 6,
+    "catalogLearningRouteCount": 1,
+    "localRouteGeometryCount": 277,
+    "onlineDetailedMapAvailable": true,
+    "fullRussiaDetailedOffline": false,
+    "losslessPayloadVerified": true
+  },
+  "steps": [
+    {
+      "name": "next-production-build",
+      "command": [
+        "node",
+        "node_modules/next/dist/bin/next",
+        "build",
+        "--webpack"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-06T13:24:17.768306+00:00",
+      "durationSeconds": 26.416
+    },
+    {
+      "name": "fresh-typescript",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-06T13:24:44.184936+00:00",
+      "durationSeconds": 9.23
+    }
+  ],
+  "logs": [
+    {
+      "path": "docs/verification/final-web-0.4.2-tests.txt",
+      "bytes": 10808,
+      "sha256": "7dd4f5fbd5402765dca94ffce2fa715824891bfc76b68069f329b9b348e44262"
+    },
+    {
+      "path": "docs/verification/final-web-0.4.2-next-build.txt",
+      "bytes": 1058,
+      "sha256": "12f4a051492cd709a4766a9e1f7cf890070f95f71ec93630c324fcc3a860d9ff"
+    },
+    {
+      "path": "docs/verification/final-web-0.4.2-typescript.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "isolatedSource": "/tmp/tropnik-next-final-042-hxy4fpdu/web",
+  "notIncludedInSource": [
+    "node_modules",
+    "isolated .next output",
+    "temporary source copy"
+  ],
+  "notClaimed": [
+    "Browser UI or WebGL/GPU validation by this run",
+    "Android device or emulator execution",
+    "Live production API connectivity",
+    "GitHub Pages or Sites publication"
+  ]
+}

@@ -1,0 +1,2 @@
+import {notFound} from 'next/navigation';
+export default function QAMobile(){if(process.env.NODE_ENV==='production')notFound();return <main style={{display:'flex',justifyContent:'center',padding:20,background:'#d3d8c7',minHeight:'100vh'}}><iframe src="/" title="Мобильная проверка · 390 × 844" style={{width:390,height:844,border:'1px solid #b7c5a5',borderRadius:20,boxShadow:'0 15px 70px #244d3c25'}}/></main>;}

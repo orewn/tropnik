@@ -1,0 +1,18 @@
+{
+  "sourceCommit": "e6f074266c290944f044f3223937cd2a6af3957d",
+  "changes": "Vendor stylesheet position precedence and map detail loading indicator",
+  "files": [
+    {
+      "path": "app/globals.css",
+      "sha256": "1e442172c60f3629522cd59af2ebf0d739fe99ec4516171a278dd4e85bcf19d0"
+    },
+    {
+      "path": "app/map-design.css",
+      "sha256": "bb828f1918dd486b31364e2c0fe9d6218449d849bdfd2340b86e56dcad3c6706"
+    },
+    {
+      "path": "tests/map-layout.test.mjs",
+      "sha256": "8e87563767f86d01c67fd7e57912848bb4afa0a57c38f09a35a69a5a672ba73a"
+    }
+  ]
+}

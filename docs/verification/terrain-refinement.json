@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "verifiedAt": "2026-11-06T07:05:19.213774+00:00",
+  "command": "python3 tools/map-package/refine_terrain.py",
+  "scriptSha256": "129096c4f1db9f4be68fb79434d39fcca8b22c37dafe8726fa01cb2bb6028f25",
+  "inputManifest": {
+    "path": "data/terrain-pilot/runtime/manifest.json",
+    "sizeBytes": 20521,
+    "sha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15"
+  },
+  "manifestFilesVerified": 48,
+  "inputTiles": [
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2506/1492.png",
+      "sizeBytes": 91728,
+      "sha256": "8463130a95a480c3213c611c46bed4b088002c2168fcda5057b2c6061998ba7e",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2506/1493.png",
+      "sizeBytes": 89460,
+      "sha256": "01602372206bc971dde3c012e2a8defe550453f984f927666f24c5f64ef79502",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2506/1494.png",
+      "sizeBytes": 84429,
+      "sha256": "0f22d003fd23f306ce0815cee54fe45cc9c76ea72ff0cb55dac4b2005ebe79a6",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2506/1495.png",
+      "sizeBytes": 86652,
+      "sha256": "77d86cf76e5d7af994f49624cffe932cefb9b4c911476cbb11ef5da6a46e30fe",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2507/1492.png",
+      "sizeBytes": 86317,
+      "sha256": "aa932a03386dc78ba87b0737401827ab03b75786256c151aa43fc0f6ce4c19b5",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2507/1493.png",
+      "sizeBytes": 89010,
+      "sha256": "556b1ad4b2a710353d3f969dc8b3774e44500206854c47eb0f4f346967002042",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2507/1494.png",
+      "sizeBytes": 85578,
+      "sha256": "55099802e02103181e5aeda22e9b796bb57fb57eabede2a2fd831eb360ab0fdc",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2507/1495.png",
+      "sizeBytes": 87416,
+      "sha256": "cfdb6afe9d8d3f07387c6436ff9a00b82a586e3729f78f8da30f6f76a0244df2",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2508/1492.png",
+      "sizeBytes": 87369,
+      "sha256": "34bf5c573a7d8745c81a54d41b0ad6bb5000ef7c2b949c811c330e45f89a4fb1",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2508/1493.png",
+      "sizeBytes": 89923,
+      "sha256": "494eabad7d58cdc02d9b6ab232049c10cfb74ccea7309954069a3eee0ba4138a",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2508/1494.png",
+      "sizeBytes": 88051,
+      "sha256": "699fa72859ee6ec7c5fb6b9fef28ecab712a532827eb6b0af477fc00db602dce",
+      "manifestVerified": true
+    },
+    {
+      "path": "data/terrain-pilot/runtime/tiles/12/2508/1495.png",
+      "sizeBytes": 83530,
+      "sha256": "f2442dbb3f26518d9ceaed147adf0bfa0c24de042f309391a3530c023d589605",
+      "manifestVerified": true
+    }
+  ],
+  "previewMatchesManifestGridGeometry": true,
+  "previewMetadataNote": "Original web preview bytes are preserved, including its earlier checkedAt timestamp. Its height samples and spatial metadata exactly match the manifest-verified original archive grid.",
+  "outputs": [
+    {
+      "path": "web/public/terrain/terrain-grid.json",
+      "sizeBytes": 1823647,
+      "sha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "dimensions": [
+        513,
+        513
+      ],
+      "samples": 263169
+    },
+    {
+      "path": "web/public/terrain/terrain-preview.json",
+      "sizeBytes": 117031,
+      "sha256": "33d73d4f1a88a2c226845ed9c382b523b88638b1e99b0fd199384369ea31af9d",
+      "dimensions": [
+        129,
+        129
+      ],
+      "byteIdenticalToOriginalWebGrid": true
+    }
+  ],
+  "sampling": {
+    "outputSampleSpacingApproxM": {
+      "eastWest": 31.42,
+      "northSouth": 39.14
+    },
+    "inputTileSize": 256,
+    "inputZoom": 12,
+    "upstreamSourceNominalResolutionM": 30,
+    "outputRangeM": [
+      552.3,
+      3231.3
+    ],
+    "noNetworkAccessUsed": true,
+    "generatedHeights": false,
+    "missingDataFilled": false,
+    "maxOutputRoundingErrorM": 0.049999714328123446,
+    "scalarCrossCheckSamples": 81,
+    "scalarCrossCheckMaxAbsErrorM": 1.0613803169690073e-09,
+    "pixelCentreCrossCheckSamples": 36,
+    "pixelCentreMaxAbsErrorM": 0.0,
+    "numericCrossCheckToleranceM": 1e-06,
+    "missingNeighbourRejected": true
+  },
+  "comparisonWithOriginalPreview": {
+    "comparison": "All original 129 by 129 coordinates coincide with every fourth new grid node.",
+    "reasonForDifference": "Original preview samples WEBP512; new grid samples its archived 2 by 2 scalar-averaged PNG256 derivative. Both outputs are rounded to 0.1 m.",
+    "measurementAccuracyClaim": null,
+    "sampleCount": 16641,
+    "meanSignedDifferenceM": -0.0030707289225398258,
+    "meanAbsoluteDifferenceM": 0.4733910221741491,
+    "rootMeanSquaredDifferenceM": 0.6651646139897293,
+    "medianAbsoluteDifferenceM": 0.3000000000001819,
+    "p95AbsoluteDifferenceM": 1.400000000000091,
+    "p99AbsoluteDifferenceM": 2.199999999999818,
+    "maxAbsoluteDifferenceM": 5.5,
+    "interpretation": "Observed resampling differences, not an accuracy guarantee or a source survey validation.",
+    "featureSamples": [
+      {
+        "feature": "north_west",
+        "originalRow": 0,
+        "originalColumn": 0,
+        "longitude": 40.29,
+        "latitude": 43.82,
+        "originalHeightM": 1559.1,
+        "refinedHeightM": 1560.0,
+        "differenceM": 0.900000000000091
+      },
+      {
+        "feature": "north_east",
+        "originalRow": 0,
+        "originalColumn": 128,
+        "longitude": 40.49,
+        "latitude": 43.82,
+        "originalHeightM": 2237.4,
+        "refinedHeightM": 2236.1,
+        "differenceM": -1.300000000000182
+      },
+      {
+        "feature": "centre",
+        "originalRow": 64,
+        "originalColumn": 64,
+        "longitude": 40.39,
+        "latitude": 43.730000000000004,
+        "originalHeightM": 2036.1,
+        "refinedHeightM": 2036.2,
+        "differenceM": 0.10000000000013642
+      },
+      {
+        "feature": "south_west",
+        "originalRow": 128,
+        "originalColumn": 0,
+        "longitude": 40.29,
+        "latitude": 43.64,
+        "originalHeightM": 1851.7,
+        "refinedHeightM": 1851.8,
+        "differenceM": 0.09999999999990905
+      },
+      {
+        "feature": "south_east",
+        "originalRow": 128,
+        "originalColumn": 128,
+        "longitude": 40.49,
+        "latitude": 43.64,
+        "originalHeightM": 2272.0,
+        "refinedHeightM": 2272.4,
+        "differenceM": 0.40000000000009095
+      },
+      {
+        "feature": "original_minimum",
+        "originalRow": 104,
+        "originalColumn": 0,
+        "longitude": 40.29,
+        "latitude": 43.67375,
+        "originalHeightM": 551.4,
+        "refinedHeightM": 552.4,
+        "differenceM": 1.0
+      },
+      {
+        "feature": "original_maximum",
+        "originalRow": 67,
+        "originalColumn": 104,
+        "longitude": 40.4525,
+        "latitude": 43.72578125,
+        "originalHeightM": 3231.1,
+        "refinedHeightM": 3230.2,
+        "differenceM": -0.900000000000091
+      },
+      {
+        "feature": "largest_absolute_difference",
+        "originalRow": 30,
+        "originalColumn": 22,
+        "longitude": 40.324374999999996,
+        "latitude": 43.7778125,
+        "originalHeightM": 2445.3,
+        "refinedHeightM": 2439.8,
+        "differenceM": -5.5
+      }
+    ]
+  },
+  "archivePreservation": {
+    "unchanged": true,
+    "fileCount": 49,
+    "beforeTreeSha256": "e8b2d3e219fd1d7266efe93e2e797a3fccc5edcb8c30918b82a93b602d1c6cd0",
+    "afterTreeSha256": "e8b2d3e219fd1d7266efe93e2e797a3fccc5edcb8c30918b82a93b602d1c6cd0"
+  }
+}

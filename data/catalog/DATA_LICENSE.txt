@@ -1,0 +1,21 @@
+MAP DATA AND PROVENANCE
+
+Copyright OpenStreetMap contributors.
+The OSM-derived datasets in this directory are available under the Open Database License 1.0:
+https://opendatacommons.org/licenses/odbl/1-0/
+https://www.openstreetmap.org/copyright
+
+Retain attribution and licence information when displaying or redistributing these data. Applicable ODbL attribution, source-access and share-alike obligations remain attached to an adapted database; copying data into this project does not remove them.
+
+Distribution channels:
+- Geofabrik: https://download.geofabrik.de/russia/crimean-fed-district.html
+- Waymarked Trails: https://hiking.waymarkedtrails.org/
+- OpenStreetMap: https://www.openstreetmap.org/
+
+Geofabrik and Waymarked Trails derive from the same underlying OSM database and are not independent confirmations of a route. Source snapshots, raw response hashes, extraction bounds, filters and exceptions are recorded in the adjacent JSON reports.
+
+Raw trail segments and OSM route relations do not establish access permission, current opening, legal difficulty, trail connectivity or field verification. The dataset includes no verified-route endorsements, invented ratings, guide profiles or booked departures.
+
+Official website evidence consists of source URLs, checksums, dates and limited independently written factual summaries. The source articles and photographs are not redistributed. Each record specifies which facts were checked; it does not certify the OSM geometry.
+
+No proprietary MAPS.ME, Wikiloc or AllTrails database or GPX library is included. No Waymarked Trails server implementation is copied into this project.

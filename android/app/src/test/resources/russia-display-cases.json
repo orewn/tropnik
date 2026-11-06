@@ -1,0 +1,183 @@
+{
+  "sourceReport": "data/boundaries/russia-mask-checks.json",
+  "sourceReportSha256": "13b538512452eca426b2aeb394a4d06d16754575257c4dfbd2bf8a72ab0b3073",
+  "description": "Documented tourism-display selection, not a legal-boundary assertion",
+  "pointCases": [
+    {
+      "name": "Kaliningrad",
+      "inputLngLat": [
+        20.5,
+        54.71
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Moscow",
+      "inputLngLat": [
+        37.617,
+        55.755
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Anadyr",
+      "inputLngLat": [
+        177.5167,
+        64.7333
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Uelen west longitude",
+      "inputLngLat": [
+        -169.8092,
+        66.1599
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Wrangel west of dateline",
+      "inputLngLat": [
+        179.0,
+        71.2
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Yalta",
+      "inputLngLat": [
+        34.1667,
+        44.5
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Simferopol",
+      "inputLngLat": [
+        34.1,
+        44.95
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Sevastopol",
+      "inputLngLat": [
+        33.53,
+        44.6
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Kerch",
+      "inputLngLat": [
+        36.47,
+        45.35
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Dzhankoi",
+      "inputLngLat": [
+        34.39,
+        45.71
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Lake Ladoga display water",
+      "inputLngLat": [
+        31.5,
+        60.8
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Lake Onega display water",
+      "inputLngLat": [
+        35.5,
+        61.8
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Helsinki",
+      "inputLngLat": [
+        24.94,
+        60.17
+      ],
+      "expectedInside": false
+    },
+    {
+      "name": "Kyiv",
+      "inputLngLat": [
+        30.52,
+        50.45
+      ],
+      "expectedInside": false
+    },
+    {
+      "name": "Kherson",
+      "inputLngLat": [
+        32.62,
+        46.64
+      ],
+      "expectedInside": false
+    },
+    {
+      "name": "Tbilisi",
+      "inputLngLat": [
+        44.8,
+        41.71
+      ],
+      "expectedInside": false
+    },
+    {
+      "name": "Ulaanbaatar",
+      "inputLngLat": [
+        106.92,
+        47.92
+      ],
+      "expectedInside": false
+    },
+    {
+      "name": "Harbin",
+      "inputLngLat": [
+        126.63,
+        45.75
+      ],
+      "expectedInside": false
+    },
+    {
+      "name": "Anchorage",
+      "inputLngLat": [
+        -149.9,
+        61.22
+      ],
+      "expectedInside": false
+    },
+    {
+      "name": "Northernmost source island",
+      "inputLngLat": [
+        58.685943993487044,
+        81.77403425
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Chukotka east of dateline source interior",
+      "inputLngLat": [
+        182.6018457244424,
+        66.59362445
+      ],
+      "expectedInside": true
+    },
+    {
+      "name": "Chukotka west of dateline source interior",
+      "inputLngLat": [
+        177.45,
+        67.02313910000001
+      ],
+      "expectedInside": true
+    }
+  ]
+}

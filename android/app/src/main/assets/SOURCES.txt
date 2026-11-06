@@ -1,0 +1,109 @@
+Тропник — источники обзорной карты
+
+Natural Earth, Admin 0 Countries, scale 1:110m, public domain.
+Source: https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_110m_admin_0_countries.geojson
+Terms: https://www.naturalearthdata.com/about/terms-of-use/
+Bundled retrieval: 2026-11-06.
+
+Обзорные границы обобщены. Они не являются описанием текущего правового статуса территорий, точной границей доступа или навигационными данными.
+
+Map renderer: MapLibre Native Android, BSD-2-Clause.
+https://github.com/maplibre/maplibre-native
+Полный текст BSD-2-Clause для использованного Android тега: licenses/MapLibre-Native-LICENSE.md.
+Jetpack/Compose/Room, Kotlin/coroutines, OkHttp/Okio: Apache License 2.0; текст: licenses/Apache-2.0.txt.
+https://www.apache.org/licenses/LICENSE-2.0
+
+Авторский стиль и интерфейс: проект Тропник.
+Учебная карточка не является настоящим маршрутом и не предназначена для навигации.
+
+СПРАВОЧНЫЙ КАТАЛОГ МАРШРУТОВ
+В APK включены те же 277 справочных маршрутов и шесть регионов, что в экспортированном веб-каталоге, плюс одна отдельно обозначенная учебная карточка без геометрии. Идентификатор маршрута вне принятой области отображения исключён в обеих версиях.
+277 локальных GeoJSON скопированы из веб-проекта без изменения координат. Источник базы геометрий: © OpenStreetMap contributors, ODbL 1.0. Получение данных и отображение линии не являются полевой проверкой, подтверждением условий или разрешением на прохождение.
+https://www.openstreetmap.org/copyright
+https://opendatacommons.org/licenses/odbl/1-0/
+Название источника описания, его URL, дата просмотра и ограниченная область подтверждения официальным источником сохранены в каждой карточке. Неизвестные длина, набор высоты, продолжительность и сложность не подменяются расчётными или вымышленными значениями. Продолжительность может быть текстовым диапазоном исходного описания.
+Каталог: catalog.json. Точные исходные файлы, размеры и SHA256 всех геометрий: catalog-manifest.json. Геометрии: maps/routes/. Ни один из включённых маршрутов не отмечен как проверенный в поле или готовый для навигации.
+
+Приложение не скачивает тайлы с общественных серверов tile.openstreetmap.org и vector.openstreetmap.org.
+Локальное сохранение карточки или карты не подтверждает актуальность доступа и условий похода.
+
+Три карточки по официальным описаниям: Кавказский государственный природный биосферный заповедник.
+https://www.kavkazzapoved.ru/routes/no16a-tiso-samshitovaya-roscha-maloe-kolco
+https://www.kavkazzapoved.ru/routes/no16b-tiso-samshitovaya-roscha-bolshoe-kolco
+https://www.kavkazzapoved.ru/routes/no-8a-urochische-medvezhi-vorota-bzerpinskiy-karniz-lager-kholodnyy
+
+Геометрия маршрута 8А в OSM: https://www.openstreetmap.org/relation/11566519
+© OpenStreetMap contributors. ODbL 1.0: https://www.openstreetmap.org/copyright
+Геометрия получена через Waymarked Trails API. Полевой проверки и подтверждения готовности для навигации нет.
+
+Подробный пилотный пакет: OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors.
+Покрытие: только bbox 40.29,43.64,40.49,43.82, zoom 7–14. Маршруты в Хосте находятся вне этого пакета.
+193 тайла и четыре блока Noto Sans Regular, включая кириллицу, включены в APK и работают без интернета.
+Лицензии: maps/pilot/licenses/. Метаданные и SHA256 каждого файла: maps/pilot/manifest.json.
+https://openfreemap.org/quick_start/
+https://openmaptiles.org/
+https://www.openstreetmap.org/copyright
+
+Региональные границы: geoBoundaries RUS ADM1, снимок источника 2017, исходные данные OpenStreetMap/Wambacher, ODbL 1.0.
+Это обобщённые обзорные границы, а не актуальный административный или юридический справочник.
+
+Текущее ограничение маршрута 8А: сообщение заповедника от 26.10.2026, действует с 27.10.2026. Источник просмотрен 06.11.2026.
+https://www.kavkazzapoved.ru/news/s-27-oktyabrya-zakryvaetsya-chast-letnikh-turisticheskikh-marshrutov
+Показанная OSM геометрия не определяет точную границу закрытого участка и не является разрешённым маршрутом.
+
+
+Рельеф пилотной зоны:
+Terrain © Mapterhorn; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved
+
+The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.
+
+These derivative terrain tiles and the mesh use Copernicus GLO-30 under its included licence. Downstream redistribution must retain the attribution, liability notice and licence obligations. The project is not endorsed by Mapterhorn, DLR, Airbus, the European Union or ESA.
+Mapterhorn: https://mapterhorn.com/attribution/
+Data access: https://mapterhorn.com/data-access/
+Copernicus dataset: https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM
+
+Модель поверхности, исходная номинальная сетка около30м. Основные наблюдения TanDEM-X2011–2015; это не съёмка2026 и не осмотр тропы.
+Полная лицензия: maps/terrain-pilot/sources/Copernicus-GLO30-LICENSE.pdf
+
+UI шрифт Manrope (variable, кириллица и латиница), SIL Open Font License1.1. Полный файл включён в APK, без сетевой загрузки.
+https://github.com/google/fonts/tree/main/ofl/manrope
+Лицензия: licenses/Manrope-OFL.txt
+
+ОБЪЕДИНЁННАЯ ЛОКАЛЬНАЯ 3D СЦЕНА (0.4.0)
+Общий с веб-приложением renderer и производная сетка 513×513 берутся из web/public/terrain/. Генератор tools/android-build/prepare-landscape.py перед упаковкой повторно проверяет производную по неизменённому архиву DEM. Исходная сетка 129×129 и все исходные тайлы/лицензии сохранены. Более плотная сетка не означает новую съёмку или более высокую измерительную точность. Размеры, SHA256 документа, renderer и происхождение сетки находятся в landscape/manifest.json. Срез по краю показывает границу модели, а не геологические слои.
+
+Локальная сцена: поднаборы шрифта Manrope из tools/android-build/fonts под SIL OFL; отдельный текст лицензии licenses/Manrope-Scene-OFL.txt. Полный шрифт нативного интерфейса и его лицензия licenses/Manrope-OFL.txt сохранены отдельно.
+
+ОБЛАСТЬ ОБЗОРНОЙ КАРТЫ РОССИИ
+© OpenStreetMap contributors · geoBoundaries (OpenStreetMap / Wambacher, представленный год 2017), ODbL 1.0. Производная область отображения и упрощение: Тропник. Исходные идентификаторы датасетов, отбор туристических направлений, лицензии и SHA256 сохранены в maps/russia/russia-boundaries-provenance.json. Canonical GeoJSON и обратная маска находятся в той же папке. Это исторические административные данные для отображения, не юридическая граница и не разрешение на посещение. Некоторые административные полигоны включают прибрежные воды.
+https://www.geoboundaries.org/api/current/gbOpen/RUS/ADM1/
+https://www.openstreetmap.org/copyright
+https://opendatacommons.org/licenses/odbl/1-0/
+
+ОБЗОРНЫЙ РЕЛЬЕФ РОССИИ
+Natural Earth SR_50M, использована версия 2.0.0. Картографический масштаб 1:50 000 000, не разрешение 50 метров.
+341 локальный PNG тайл z0–4 включён в APK; более крупные масштабы используют этот же обзор, слой скрывается на zoom 6.
+Полная XYZ-сетка включает прозрачные тайлы и обе стороны линии перемены даты. Сеть для этого слоя не требуется.
+Это исторический тонированный обзорный рисунок рельефа, не DEM, актуальная съёмка, текущий свет или подробная навигационная карта всей России.
+Маска покрытия совпадает с maps/russia/russia-boundaries-provenance.json.
+Происхождение и SHA256: maps/russia-relief/manifest.json; атрибуция: maps/russia-relief/ATTRIBUTION.txt.
+
+Made with Natural Earth. RF display coverage: © OpenStreetMap contributors · geoBoundaries.
+
+Shaded relief: Natural Earth SR_50M version 2.0.0, Public Domain.
+https://www.naturalearthdata.com/about/terms-of-use/
+
+© OpenStreetMap contributors · geoBoundaries (OpenStreetMap / Wambacher, 2017); display selection and simplification by Тропник
+Display mask source database: ODbL-1.0
+https://opendatacommons.org/licenses/odbl/1-0/
+
+Historical, tinted, reprojected cartographic overview. Not a DEM, current imagery, current illumination, a legal boundary or a detailed navigation map.
+
+Детальная карта онлайн (не включена в автономное покрытие)
+OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors
+https://tiles.openfreemap.org/planet/latest
+https://www.openstreetmap.org/copyright
+Terrain © Mapterhorn; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved
+https://tiles.mapterhorn.com/tilejson.json
+https://mapterhorn.com/attribution
+При доступной сети приложение может показывать подробные векторные слои и отмывку рельефа по всей области карты РФ. Это не скачанный пакет всей России: без сети остаются локальный обзор и подробная пилотная зона Бзерпинского карниза. Глобальная основа высот Mapterhorn имеет номинальное разрешение 30 м; это не точность измерения высоты. Светотень в нативной карте не является трёхмерной сеткой рельефа. Работа внешних слоёв на физическом устройстве этой проверкой не подтверждена.

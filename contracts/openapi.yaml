@@ -1,0 +1,999 @@
+openapi: 3.1.0
+info:
+  title: TROPA API
+  version: 0.1.0
+  description: 'Server-authoritative guided hiking groups. Minimum four people includes the
+
+    guide by default. No guide obtains verified status through self-registration.
+
+    Offline observations are evidence awaiting reconciliation, not authorization.
+
+    Production responses contain real database records only. The database initially
+
+    contains region metadata, not fabricated trails, guides, reviews or departures.
+
+    '
+servers:
+- url: /api/v1
+security: []
+paths:
+  /health/live:
+    get:
+      summary: Process liveness
+      responses:
+        '200':
+          description: Process is serving requests
+  /health/ready:
+    get:
+      summary: Database readiness
+      responses:
+        '200':
+          description: Database reachable and schema initialized
+        '503':
+          description: Database unavailable
+  /regions:
+    get:
+      summary: Regions with real published route counts
+      responses:
+        '200':
+          description: Envelope<Region[]>, see api.ts
+  /guides:
+    get:
+      summary: Guides with active operator-reviewed qualifications and actual rating counts
+      responses:
+        '200':
+          description: Envelope<Guide[]>; rating is null when reviewCount=0, no contacts returned
+  /guides/{id}:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      summary: Public guide profile; eligibility for a particular route is still checked separately
+      responses:
+        '200':
+          description: Envelope<Guide>
+        '404':
+          $ref: '#/components/responses/Error'
+  /routes:
+    get:
+      summary: Published or closed routes with provenance; overview geometry has at most 1000 vertices
+        and is not for navigation
+      parameters:
+      - name: region
+        in: query
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 30
+      - name: cursor
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Envelope<Route[]>
+  /routes/{id}:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      summary: One public route and its current revision, geometryDetail=full
+      responses:
+        '200':
+          description: Envelope<Route>
+        '404':
+          $ref: '#/components/responses/Error'
+  /departures:
+    get:
+      summary: Upcoming departures; no member names or private contacts
+      parameters:
+      - name: route
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Envelope<Departure[]>
+    post:
+      summary: Verified eligible guide creates a departure within the reviewed route group policy
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - routeId
+              - startsAt
+              - endsAt
+              - timeZone
+              properties:
+                routeId:
+                  type: string
+                routeRevisionId:
+                  type: string
+                  description: Optional stale-card guard; conflicts if current revision changed
+                startsAt:
+                  type: string
+                  format: date-time
+                endsAt:
+                  type: string
+                  format: date-time
+                timeZone:
+                  type: string
+                  example: Europe/Moscow
+                minPeople:
+                  type: integer
+                  minimum: 4
+                  default: 4
+                  description: Includes guide; must be at least the reviewed route minPeople
+                capacity:
+                  type: integer
+                  minimum: 4
+                  maximum: 50
+                  default: 8
+                  description: Includes guide; cannot exceed the reviewed route maxGroupSize
+      responses:
+        '201':
+          description: Envelope<Departure>
+        '403':
+          $ref: '#/components/responses/Error'
+  /departures/{id}:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      summary: Public departure status; membership when authenticated
+      responses:
+        '200':
+          description: Envelope<Departure>
+        '404':
+          $ref: '#/components/responses/Error'
+  /departures/{id}/join:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Atomically take one place; the assigned guide counts once
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expectedVersion:
+                  type: integer
+                  minimum: 1
+      responses:
+        '200':
+          description: Envelope<Departure>; safe replay does not consume a second place
+        '409':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+  /departures/{id}/leave:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Cancel participation before start; withdrawing guide removes readiness
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<Departure>
+        '409':
+          $ref: '#/components/responses/Error'
+  /departures/{id}/participants:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      summary: Roster for assigned guide only, without contacts or cancelled participants
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: 'Envelope<Participant[]>: userId, displayName, role, status'
+        '403':
+          $ref: '#/components/responses/Error'
+  /departures/{id}/check-in:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Assigned eligible guide records physical attendance online
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userId
+              - expectedVersion
+              properties:
+                userId:
+                  type: string
+                expectedVersion:
+                  type: integer
+      responses:
+        '200':
+          description: Envelope<Departure>
+  /departures/{id}/transition:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Guide starts, completes, cancels or aborts; start rechecks all gates
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - action
+              - expectedVersion
+              properties:
+                action:
+                  type: string
+                  enum:
+                  - start
+                  - complete
+                  - cancel
+                  - abort
+                expectedVersion:
+                  type: integer
+      responses:
+        '200':
+          description: Envelope<Departure>
+        '409':
+          $ref: '#/components/responses/Error'
+  /departures/{id}/messages:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      summary: Private messages; active or completed participants only
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: after
+        in: query
+        schema:
+          type: string
+          format: date-time
+      - name: cursor
+        in: query
+        schema:
+          type: string
+        description: Use meta.nextCursor to avoid gaps between equal timestamps
+      responses:
+        '200':
+          description: Envelope<Message[]>; initial latest 100 ascending, meta.nextCursor retrieves newer
+            messages. No fake delivery acknowledgement.; hidden messages have visibility=hidden and empty
+            body. Refresh latest-100 snapshots to receive moderation changes.
+        '403':
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Send a plain-text message; clientId prevents duplicates
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - body
+              - clientId
+              properties:
+                body:
+                  type: string
+                  minLength: 1
+                  maxLength: 4000
+                clientId:
+                  type: string
+                  minLength: 16
+                  maxLength: 128
+      responses:
+        '201':
+          description: Envelope<Message>
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+  /departures/{id}/reviews:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      summary: Reviews derived from completed participant records
+      responses:
+        '200':
+          description: Envelope<Review[]>
+    post:
+      summary: One review per participant, departure and target
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - target
+              - rating
+              - body
+              properties:
+                target:
+                  type: string
+                  enum:
+                  - guide
+                  - route
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                body:
+                  type: string
+                  minLength: 1
+                  maxLength: 3000
+      responses:
+        '201':
+          description: Envelope<Review>
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+  /auth/register:
+    post:
+      summary: Create a real account; guide applications remain pending
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              - password
+              - displayName
+              - role
+              properties:
+                email:
+                  type: string
+                  format: email
+                  maxLength: 254
+                password:
+                  type: string
+                  minLength: 12
+                  maxLength: 128
+                  writeOnly: true
+                displayName:
+                  type: string
+                  minLength: 2
+                  maxLength: 80
+                role:
+                  type: string
+                  enum:
+                  - tourist
+                  - guide
+      responses:
+        '201':
+          description: Envelope<{token,expiresAt,user}>; token returned once, hash stored in DB
+        '409':
+          $ref: '#/components/responses/Error'
+  /auth/login:
+    post:
+      summary: Email/password session; generic failure and request limits
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                  writeOnly: true
+      responses:
+        '200':
+          description: Envelope<{token,expiresAt,user}>
+        '401':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+  /auth/logout:
+    post:
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Session revoked
+  /me:
+    get:
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<User>
+        '401':
+          $ref: '#/components/responses/Error'
+  /me/profile:
+    patch:
+      summary: Change display name or request guide review; cannot self-verify
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - displayName
+              properties:
+                displayName:
+                  type: string
+                  minLength: 2
+                  maxLength: 80
+                role:
+                  type: string
+                  enum:
+                  - tourist
+                  - guide
+      responses:
+        '200':
+          description: Envelope<User>
+  /sync/observations:
+    post:
+      summary: Record offline field observations; never implicitly authorize a start
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - observations
+              properties:
+                observations:
+                  type: array
+                  maxItems: 50
+                  items:
+                    type: object
+                    required:
+                    - clientId
+                    - departureId
+                    - baseVersion
+                    - observedAt
+                    - kind
+                    - body
+                    properties:
+                      clientId:
+                        type: string
+                        minLength: 16
+                        maxLength: 128
+                      departureId:
+                        type: string
+                      baseVersion:
+                        type: integer
+                        minimum: 1
+                      observedAt:
+                        type: string
+                        format: date-time
+                      kind:
+                        type: string
+                        enum:
+                        - field_note
+                        - check_in_observation
+                      body:
+                        type: string
+                        minLength: 1
+                        maxLength: 4000
+      responses:
+        '200':
+          description: Envelope<SyncAck[]>; every item has serverAuthorized=false
+  /recruitment-requests:
+    get:
+      summary: Open interests and accepted requests, separate from confirmed hikes
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: route
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Envelope<RecruitmentRequest[]>, see api.ts
+    post:
+      summary: Tourist creates an interest group and becomes a member of its chat
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - routeId
+              - body
+              properties:
+                routeId:
+                  type: string
+                preferredDate:
+                  type: string
+                  format: date
+                body:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Envelope<RecruitmentRequest>; no departure permission issued
+        '429':
+          $ref: '#/components/responses/Error'
+  /recruitment-requests/{id}/join:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<{interested:true,confirmedParticipant:false}>
+  /recruitment-requests/{id}/leave:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Leave interest chat; owner cancels an open request
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Interest cancelled; actual departure membership is separate
+  /recruitment-requests/{id}/accept:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Eligible guide atomically accepts and creates a dated departure
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - startsAt
+              - endsAt
+              - timeZone
+              properties:
+                routeRevisionId:
+                  type: string
+                startsAt:
+                  type: string
+                  format: date-time
+                endsAt:
+                  type: string
+                  format: date-time
+                timeZone:
+                  type: string
+                minPeople:
+                  type: integer
+                  minimum: 4
+                  default: 4
+                capacity:
+                  type: integer
+                  minimum: 4
+                  maximum: 50
+                  default: 8
+      responses:
+        '201':
+          description: Envelope<Departure>; tourists are NOT silently booked
+        '403':
+          $ref: '#/components/responses/Error'
+  /recruitment-requests/{id}/messages:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<RecruitmentMessage[]>; latest 100 plain-text messages, ascending; hidden
+            messages have visibility=hidden and empty body. Refresh latest-100 snapshots to receive moderation
+            changes.
+    post:
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - body
+              - clientId
+              properties:
+                body:
+                  type: string
+                  minLength: 1
+                  maxLength: 4000
+                clientId:
+                  type: string
+                  minLength: 16
+                  maxLength: 128
+      responses:
+        '201':
+          description: Envelope<RecruitmentMessage>
+        '429':
+          $ref: '#/components/responses/Error'
+  /guides/{id}/reviews:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      summary: Latest 100 public non-hidden guide reviews; hidden reviews do not contribute to rating
+      responses:
+        '200':
+          description: Envelope<Review[]>
+        '404':
+          $ref: '#/components/responses/Error'
+  /me/summary:
+    get:
+      summary: Own profile, actual completion counts, badges with evidence IDs and current mute expiry
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<AccountSummary>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+  /me/notifications:
+    get:
+      summary: Latest 100 stored notifications for this account; no push delivery is implied
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<Notification[]>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+  /me/notifications/{id}/read:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Mark an owned notification as read
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Read status persisted
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /reports:
+    post:
+      summary: Report another user’s material; private-message reports require current membership
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - targetType
+              - targetId
+              - reason
+              - body
+              properties:
+                targetType:
+                  type: string
+                  enum:
+                  - message
+                  - recruitment_message
+                  - review
+                targetId:
+                  type: string
+                reason:
+                  type: string
+                  enum:
+                  - spam
+                  - harassment
+                  - dangerous_information
+                  - personal_data
+                  - other
+                body:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Envelope<Report>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+  /me/reports:
+    get:
+      summary: Own reports and decisions, latest 100
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<Report[]>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+  /me/moderation-actions:
+    get:
+      summary: Decisions affecting this account; expiresAt ends only the mute component
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<ModerationAction[]>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+  /me/appeals:
+    get:
+      summary: Own appeal history, latest 100
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<Appeal[]>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+  /moderation-actions/{id}/appeals:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Subject requests independent review; an active mute does not block appeals
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - body
+              properties:
+                body:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Envelope<Appeal>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+  /moderation/reports:
+    get:
+      summary: Eligible staff case queue excluding conflicts of interest; case IDs are audited
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - open
+          - resolved
+          - dismissed
+          default: open
+      responses:
+        '200':
+          description: Envelope<ModerationReport[]>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+  /moderation/reports/{id}/resolve:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Staff resolves a case; no self-sanction or deciding one’s own report
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - action
+              - reason
+              properties:
+                action:
+                  type: string
+                  enum:
+                  - dismiss
+                  - hide
+                  - mute
+                  - hide_and_mute
+                reason:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+                muteHours:
+                  type: integer
+                  minimum: 1
+                  maximum: 168
+                  description: Required only for mute or hide_and_mute
+      responses:
+        '200':
+          description: Envelope<Report>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+  /moderation/appeals:
+    get:
+      summary: Independent staff appeal queue excluding subject, original reporter and moderator
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum:
+          - open
+          - upheld
+          - overturned
+          default: open
+      responses:
+        '200':
+          description: Envelope<ModerationAppeal[]>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+  /moderation/appeals/{id}/resolve:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: A different staff member upholds or overturns a decision; other active decisions remain
+        effective
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - decision
+              - reason
+              properties:
+                decision:
+                  type: string
+                  enum:
+                  - upheld
+                  - overturned
+                reason:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+      responses:
+        '200':
+          description: Envelope<Appeal>; exact fields in api.ts
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Opaque random token; not a JWT or user ID
+  parameters:
+    ID:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 128
+  responses:
+    Error:
+      description: Stable machine code with human-readable message; no internal SQL/errors
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - error
+            properties:
+              error:
+                type: object
+                required:
+                - code
+                - message
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  requestId:
+                    type: string

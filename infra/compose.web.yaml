@@ -1,0 +1,27 @@
+services:
+  web:
+    build:
+      context: ../web
+      args:
+        SITE_ORIGIN: ${PUBLIC_ORIGIN:?Set the HTTPS website origin}
+        TROPA_PUBLIC_INDEXING: ${TROPA_PUBLIC_INDEXING:-false}
+    image: tropa-web:local
+    environment:
+      NODE_ENV: production
+      TROPA_API_URL: http://api:8080
+      TROPA_PROXY_TOKEN: ${TROPA_PROXY_TOKEN:-}
+      NEXT_PUBLIC_SITE_URL: ${PUBLIC_ORIGIN:?Set the HTTPS website origin}
+      TROPA_PUBLIC_INDEXING: ${TROPA_PUBLIC_INDEXING:-false}
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+    depends_on:
+      api: { condition: service_healthy }
+    ports: ["127.0.0.1:3000:3000"]
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /app/.next/cache:size=64m,uid=1000,gid=1000
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    networks: [backend]

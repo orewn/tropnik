@@ -1,0 +1,60 @@
+//go:build dbcompat
+
+package store_test
+
+import (
+    "context"
+    "errors"
+    "fmt"
+    "testing"
+    "time"
+
+    "github.com/jackc/pgx/v5"
+    "github.com/jackc/pgx/v5/pgconn"
+    "tropa/backend/migrations"
+    "tropa/backend/internal/auth"
+    "tropa/backend/internal/store"
+)
+
+// SET ROLE validates PostgreSQL SQL grants in the WASM engine. It deliberately
+// does not claim to test wire authentication, SCRAM, pg_hba, TLS, or native roles.
+func TestWasmRuntimeSQLGrantsAndMigrationReapply(t *testing.T) {
+    s := db(t)
+    ctx := context.Background()
+    if e := migrations.Apply(ctx, s.Pool); e != nil { t.Fatal("migration reapply", e) }
+    var versions int
+    if e := s.Pool.QueryRow(ctx, "SELECT count(*) FROM schema_migrations").Scan(&versions); e != nil || versions != migrations.RequiredVersion {
+        t.Fatal("migration versions", versions, e)
+    }
+    _, d := fixture(t, s, 5)
+    role := fmt.Sprintf("tropa_compat_role_%d", time.Now().UnixNano())
+    quoted := pgx.Identifier{role}.Sanitize()
+    if _, e := s.Pool.Exec(ctx, "CREATE ROLE "+quoted+" NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS"); e != nil { t.Fatal(e) }
+    t.Cleanup(func() {
+        if _, e := s.Pool.Exec(context.Background(), "RESET ROLE; DROP OWNED BY "+quoted+"; DROP ROLE "+quoted); e != nil { t.Error(e) }
+    })
+    if e := migrations.GrantRuntime(ctx, s.Pool, role); e != nil { t.Fatal("runtime grants", e) }
+    if _, e := s.Pool.Exec(ctx, "SET ROLE "+quoted); e != nil { t.Fatal(e) }
+    var actual string
+    if e := s.Pool.QueryRow(ctx, "SELECT current_user").Scan(&actual); e != nil || actual != role { t.Fatal("role not applied", actual, e) }
+    if e := s.Ready(ctx); e != nil { t.Fatal("runtime readiness", e) }
+    key := auth.RateIdentity(make([]byte, 32), store.AuthIPScope, "198.51.100.20")
+    if result, e := s.ConsumeAuthAttempt(ctx, store.AuthIPScope, key); e != nil || !result.Allowed { t.Fatal("runtime auth budget", result, e) }
+    u := account(t, s, "compat-runtime-tourist", "tourist")
+    if _, e := s.Join(ctx, u.ID, d.ID, "runtime-compat-join-key-0001", 0); e != nil { t.Fatal("runtime join", e) }
+    if _, e := s.SendMessage(ctx, u.ID, d.ID, "Only isolated SQL compatibility fixture content.", "runtime-compat-message-0001"); e != nil { t.Fatal("runtime posting", e) }
+    if _, e := s.CreateRecruitment(ctx, u.ID, d.RouteID, "", "Isolated runtime recruitment compatibility check."); e != nil { t.Fatal("runtime recruitment", e) }
+    if _, e := s.AccountSummary(ctx, u.ID); e != nil { t.Fatal("runtime account", e) }
+    if _, e := s.Notifications(ctx, u.ID); e != nil { t.Fatal("runtime notifications", e) }
+    for _, sql := range []string{
+        "UPDATE users SET is_admin=true WHERE id='"+u.ID+"'",
+        "UPDATE users SET is_moderator=true WHERE id='"+u.ID+"'",
+        "UPDATE routes SET status='closed'",
+        "UPDATE guide_qualifications SET revoked_at=now()",
+        "UPDATE route_revisions SET reviewed_at=now()",
+    } {
+        _, e := s.Pool.Exec(ctx, sql)
+        var pg *pgconn.PgError
+        if !errors.As(e, &pg) || pg.Code != "42501" { t.Fatal("expected SQL insufficient_privilege", e) }
+    }
+}

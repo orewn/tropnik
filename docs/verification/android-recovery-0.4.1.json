@@ -1,0 +1,2996 @@
+{
+  "recordedAt": "2026-11-06T12:50:22.217606+00:00",
+  "version": "0.4.1-preview",
+  "versionCode": 5,
+  "baseline": "tropnik-merged-final/source/tropnik (0.4.0-merged-preview)",
+  "fixes": [
+    "Terminal graphics failure invalidates readiness, releases resources, rejects stale callbacks and permits a new canvas/WebView session.",
+    "Offline package publication marks ownership inside a small NonCancellable database commit; cancellation propagates without deleting a published directory.",
+    "Added the same local Natural Earth Russia overview raster to Android; 341 PNG tiles at native zoom0–4, hidden from zoom6. It is not a country-wide DEM or detailed trail pack."
+  ],
+  "buildReport": "docs/verification/android-recovery-final-packages.json",
+  "unitReport": "docs/verification/android-unit-tests-0.4.1.json",
+  "tests": {
+    "jvm": {
+      "passed": 25,
+      "failures": 0,
+      "skipped": 0
+    },
+    "pythonAssetChecks": {
+      "passed": 15
+    },
+    "nativeBootstrap": {
+      "passed": 6
+    },
+    "webTerrainRenderer": {
+      "passed": 18
+    },
+    "webStandaloneBootstrap": {
+      "passed": 4
+    },
+    "instrumentationScenariosCompiled": 5,
+    "instrumentationExecuted": false,
+    "ciReportParserSyntheticChecks": 8,
+    "canvasReliefQueue": {
+      "passed": 8
+    },
+    "canvasHeightShading": {
+      "passed": 3
+    }
+  },
+  "apiConfiguration": {
+    "gradleOriginConfigurationUnchanged": true,
+    "compiledApiBaseUrlEmpty": true,
+    "files": [
+      {
+        "path": "android/app/src/main/java/ru/tropa/app/data/ApiClient.kt",
+        "sha256": "989a61b00d13b46d317eae681d8661bd7bc09a34a5c8414bcb64943d647aaa5b",
+        "unchangedFromMerged040": true
+      },
+      {
+        "path": "android/app/src/main/java/ru/tropa/app/OnlineViewModel.kt",
+        "sha256": "27e01ec506d8fd7f05b00e6e33739ed5faf8913dadea7ea375ae8433b4a8887f",
+        "unchangedFromMerged040": true
+      },
+      {
+        "path": "android/app/src/main/res/xml/network_security_config.xml",
+        "sha256": "eb5f5c57a88fc656cb97ee142694b996b286064ba973e51e0158bcdff08b34f2",
+        "unchangedFromMerged040": true
+      }
+    ],
+    "currentServerRequiredMigration": 3
+  },
+  "packages": [
+    {
+      "apk": "tropnik-arm64-preview.apk",
+      "sizeBytes": 24606797,
+      "sha256": "9e5496c156720566169c2fc6a5198c2e9d5b3a170024cd910f1d1ef2f7587b41",
+      "abis": [
+        "arm64-v8a"
+      ],
+      "offlineTileCount": 193,
+      "manifestFilesVerified": 202,
+      "manifestBytesVerified": 2593757,
+      "localOnlyMapResources": true,
+      "cyrillicGlyphsPresent": true,
+      "closureAdvisoryPresent": true,
+      "native64BitElfLoadAlignment": {
+        "lib/arm64-v8a/libandroidx.graphics.path.so": 16384,
+        "lib/arm64-v8a/libmaplibre.so": 16384
+      },
+      "terrainTileCount": 21,
+      "terrainManifestFilesVerified": 48,
+      "terrainManifestBytesVerified": 2288677,
+      "terrainGridSamples": 16641,
+      "terrainBounds": [
+        40.29,
+        43.64,
+        40.49,
+        43.82
+      ],
+      "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+      "landscapeManifestFilesVerified": 1,
+      "landscapeBytesVerified": 1990087,
+      "landscapeSha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "landscapeOffline": true,
+      "landscapeGridDimensions": [
+        513,
+        513
+      ],
+      "landscapeGridSamples": 263169,
+      "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+      "landscapeGridSpacingApproxM": {
+        "eastWest": 31.42,
+        "northSouth": 39.14
+      },
+      "russiaDisplayAssetCount": 2,
+      "russiaDisplayAssetBytesVerified": 2219720,
+      "russiaDisplayProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+      "russiaFitBounds": [
+        [
+          19.6389282,
+          41.1858711
+        ],
+        [
+          191.0026658,
+          81.858721
+        ]
+      ],
+      "russiaMaskConfigured": true,
+      "russiaExcludedCatalogRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "russiaOverviewTileCount": 341,
+      "russiaOverviewTileBytesVerified": 1689348,
+      "russiaOverviewFilesVerified": 344,
+      "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+      "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "russiaOverviewMaxNativeZoom": 4,
+      "russiaOverviewLayerMaxZoom": 6,
+      "russiaOverviewLocalOnly": true,
+      "russiaOverviewCompleteWrappedXYZ": true,
+      "russiaOverviewIsElevationData": false,
+      "terrainRendererSha256": "694dd9201c1a62a10a1e12d71af7e41acab77b56f1500f14eef7d32baa0c1832",
+      "nativeHillshadeCameraRelative": true,
+      "nativeHillshadeCameraAnchored": true,
+      "nativeMapLibreTerrainMeshSupported": false,
+      "separateLocalMeshViewer": true,
+      "manropeFontBundled": true,
+      "terrainTilesVerified": 21,
+      "terrainAttributionAndLicensePresent": true,
+      "sceneBytes": 1990087,
+      "sceneSha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "deviceUiTestPerformedByThisScript": false,
+      "apkSignatureV2Verified": true,
+      "zipAlignment16KVerified": true
+    },
+    {
+      "apk": "tropnik-preview.apk",
+      "sizeBytes": 32379043,
+      "sha256": "486a97b635a8ad3e93c6ded2a745f68313bf1c04784c1e95fbc5e1babd8e559a",
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ],
+      "offlineTileCount": 193,
+      "manifestFilesVerified": 202,
+      "manifestBytesVerified": 2593757,
+      "localOnlyMapResources": true,
+      "cyrillicGlyphsPresent": true,
+      "closureAdvisoryPresent": true,
+      "native64BitElfLoadAlignment": {
+        "lib/arm64-v8a/libandroidx.graphics.path.so": 16384,
+        "lib/arm64-v8a/libmaplibre.so": 16384,
+        "lib/x86_64/libandroidx.graphics.path.so": 16384,
+        "lib/x86_64/libmaplibre.so": 16384
+      },
+      "terrainTileCount": 21,
+      "terrainManifestFilesVerified": 48,
+      "terrainManifestBytesVerified": 2288677,
+      "terrainGridSamples": 16641,
+      "terrainBounds": [
+        40.29,
+        43.64,
+        40.49,
+        43.82
+      ],
+      "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+      "landscapeManifestFilesVerified": 1,
+      "landscapeBytesVerified": 1990087,
+      "landscapeSha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "landscapeOffline": true,
+      "landscapeGridDimensions": [
+        513,
+        513
+      ],
+      "landscapeGridSamples": 263169,
+      "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+      "landscapeGridSpacingApproxM": {
+        "eastWest": 31.42,
+        "northSouth": 39.14
+      },
+      "russiaDisplayAssetCount": 2,
+      "russiaDisplayAssetBytesVerified": 2219720,
+      "russiaDisplayProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+      "russiaFitBounds": [
+        [
+          19.6389282,
+          41.1858711
+        ],
+        [
+          191.0026658,
+          81.858721
+        ]
+      ],
+      "russiaMaskConfigured": true,
+      "russiaExcludedCatalogRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "russiaOverviewTileCount": 341,
+      "russiaOverviewTileBytesVerified": 1689348,
+      "russiaOverviewFilesVerified": 344,
+      "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+      "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "russiaOverviewMaxNativeZoom": 4,
+      "russiaOverviewLayerMaxZoom": 6,
+      "russiaOverviewLocalOnly": true,
+      "russiaOverviewCompleteWrappedXYZ": true,
+      "russiaOverviewIsElevationData": false,
+      "terrainRendererSha256": "694dd9201c1a62a10a1e12d71af7e41acab77b56f1500f14eef7d32baa0c1832",
+      "nativeHillshadeCameraRelative": true,
+      "nativeHillshadeCameraAnchored": true,
+      "nativeMapLibreTerrainMeshSupported": false,
+      "separateLocalMeshViewer": true,
+      "manropeFontBundled": true,
+      "terrainTilesVerified": 21,
+      "terrainAttributionAndLicensePresent": true,
+      "sceneBytes": 1990087,
+      "sceneSha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "deviceUiTestPerformedByThisScript": false,
+      "apkSignatureV2Verified": true,
+      "zipAlignment16KVerified": true
+    }
+  ],
+  "webDownloadManifestMatchesActualApk": true,
+  "ci": {
+    "workflow": ".github/workflows/android.yml",
+    "template": "tools/android-build/github-actions.yml",
+    "deviceJobTrigger": "workflow_dispatch with run_instrumentation=true only",
+    "platform": "ubuntu-24.04, API35 x86_64, KVM, SwiftShader",
+    "timeoutMinutes": 25,
+    "workflowDispatched": false,
+    "deviceExecutionVerified": false,
+    "staticCheckReport": "docs/verification/android-instrumentation-workflow-check.json"
+  },
+  "changedSourceFiles": [
+    {
+      "path": ".github/workflows/android.yml",
+      "status": "modified",
+      "sizeBytes": 4632,
+      "sha256": "1225c12723867c25fefc615be23c8e386370c3bb309afb91ba81dd69185dcd84",
+      "previousSha256": "5ca234360923a59f80826e0be0c6b3c49c62066136ace26d998e105b09fbfc5e"
+    },
+    {
+      "path": "android/BUILD-VERIFICATION.md",
+      "status": "modified",
+      "sizeBytes": 23991,
+      "sha256": "8dd03888fbf3f23a8cf76b2c01eecc4bfc65f59df07ea62151fda93f52cb97dc",
+      "previousSha256": "2c213842e5c7cfc16b6c3eb51bf72442d9dddf2d9fc4cddc5b1db24e3326c89a"
+    },
+    {
+      "path": "android/README.md",
+      "status": "modified",
+      "sizeBytes": 32785,
+      "sha256": "96b19b4685918bdcd936c080d7402c822f13ce433ef52bb3d45e0014f53b46ba",
+      "previousSha256": "75b172ae8d0bbef1880f9fb59adb2c65ca5e53026363a91d50a68d7974dba80f"
+    },
+    {
+      "path": "android/app/build.gradle.kts",
+      "status": "modified",
+      "sizeBytes": 4358,
+      "sha256": "d12fe3bf6f5457f46253f94fb5bda1814acd1d75bffd5469a34dfd1a692ba6cb",
+      "previousSha256": "3c2ed6b58fce9d4959a9ddeb963666f43f2a2ac8f97fe7785b066ee3f7fb1b4c"
+    },
+    {
+      "path": "android/app/src/androidTest/java/ru/tropa/app/LocalExperienceTest.kt",
+      "status": "modified",
+      "sizeBytes": 10411,
+      "sha256": "0dfdafd50f781fb1fabe68f0cb6ab634f9ed6f428cb0e9f3c96166dfc16fa095",
+      "previousSha256": "44249e0697f7be15887635f10779e1c00534225ddfc1fd9f2e5a535dd4008f9a"
+    },
+    {
+      "path": "android/app/src/main/assets/SOURCES.txt",
+      "status": "modified",
+      "sizeBytes": 9411,
+      "sha256": "aeb1ce772247fee3b277bfe2ea0174d3c0c219aa24e5a54fe110254ab310ee0b",
+      "previousSha256": "1dab3c00ce2a19fb83511e2dca731704be426900588000ce2abf407e5f41dbfb"
+    },
+    {
+      "path": "android/app/src/main/assets/catalog.json",
+      "status": "modified",
+      "sizeBytes": 12059,
+      "sha256": "2d1781464051f4d10467693d326cb867a2a1eb5fa2cc2195fc3dc540b82e64ea",
+      "previousSha256": "4f910ec48d7249f814e9e69a722895ea17a4eb0801f0aef6f84ecbcae82c9d65"
+    },
+    {
+      "path": "android/app/src/main/assets/landscape/landscape.html",
+      "status": "modified",
+      "sizeBytes": 1990087,
+      "sha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "previousSha256": "2a7d1d4a1165151a76ad3efa08ceffa572a015b9ab4ca125aeaaed1c5be15f9f"
+    },
+    {
+      "path": "android/app/src/main/assets/landscape/manifest.json",
+      "status": "modified",
+      "sizeBytes": 2054,
+      "sha256": "f629919b576058c9f84d86309cf59c0068dbbc4ac2d0168211d2f66779f97433",
+      "previousSha256": "ff736c808f726b957021434d2e6ee2062ebedc2cad6a74260d8a5c727dd7046a"
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/0/0/0.png",
+      "status": "added",
+      "sizeBytes": 9873,
+      "sha256": "fa0c8ac9af2421b7a2d0b8e45ac54e0a16eb560f7bd22f37320acff453902844",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/1/0/0.png",
+      "status": "added",
+      "sizeBytes": 1030,
+      "sha256": "e4f4b9af834e17a0e325361cbf4fcdeaac0b599c07016b1b0c61dedda54e7cf5",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/1/0/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/1/1/0.png",
+      "status": "added",
+      "sizeBytes": 28533,
+      "sha256": "783c18f7f3439cec000d11984faccf0fef31a723dc6852517eec42fdcc45a850",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/1/1/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/0/0.png",
+      "status": "added",
+      "sizeBytes": 1340,
+      "sha256": "d7a42740f00ddd9065795f3961edce9ada8f59277f89b53b2a5251bf55ede940",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/0/1.png",
+      "status": "added",
+      "sizeBytes": 1390,
+      "sha256": "99fd9fce10ea9aa719758d130957ad325b0a58bd28e1bc1b283a662dad68c606",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/0/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/0/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/1/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/1/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/1/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/1/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/2/0.png",
+      "status": "added",
+      "sizeBytes": 15485,
+      "sha256": "5eda0e650349da6d0357f004d9ce13e74a12f57c6169f532ca32e255e8ee0e3f",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/2/1.png",
+      "status": "added",
+      "sizeBytes": 20765,
+      "sha256": "0050bc131617690a0c89acc12befef8f98ec2d1217e8fa46339c9f461444fac2",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/2/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/2/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/3/0.png",
+      "status": "added",
+      "sizeBytes": 26785,
+      "sha256": "b9ef146d3eb496074059400d77c1c777b3ec2e56b4c56be4ed8a7de1c8aec683",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/3/1.png",
+      "status": "added",
+      "sizeBytes": 36074,
+      "sha256": "524eccda934c774f75c218efe476eb2397e230a79391e9ce7f7d5e0c66c31d8e",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/3/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/2/3/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/0/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/0/1.png",
+      "status": "added",
+      "sizeBytes": 3305,
+      "sha256": "7d920ea9b5714898802c6cf55508e584b2d303b87e33aa15897f722c356417df",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/0/2.png",
+      "status": "added",
+      "sizeBytes": 3430,
+      "sha256": "a7497316b9422cb5b4bdb98c85b0552c3d4c4a3cbd138a44c37c7295853ab0d9",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/0/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/0/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/0/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/0/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/0/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/1/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/1/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/1/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/1/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/1/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/1/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/1/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/1/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/2/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/2/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/2/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/2/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/2/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/2/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/2/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/2/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/3/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/3/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/3/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/3/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/3/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/3/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/3/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/3/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/4/0.png",
+      "status": "added",
+      "sizeBytes": 367,
+      "sha256": "a676afd00a0f08cfc7cf6fc79073611986e3abaf51d365d81920cb30cdb4ae66",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/4/1.png",
+      "status": "added",
+      "sizeBytes": 6135,
+      "sha256": "fcd89f9d2c74d350a8ee037e4f0b9f86f907961e21c3f5c998593f7977bd8b67",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/4/2.png",
+      "status": "added",
+      "sizeBytes": 23038,
+      "sha256": "73a010cdb3f734ac995ad1245e5ecd7f142ef7559c09bb6e2a3f47091cbb6f96",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/4/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/4/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/4/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/4/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/4/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/5/0.png",
+      "status": "added",
+      "sizeBytes": 7816,
+      "sha256": "0a4dbe39bf77bcdfcb1baff70f1158e78517c2b96be980d8d78ac20fdd399023",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/5/1.png",
+      "status": "added",
+      "sizeBytes": 32294,
+      "sha256": "68ce8fe56e02e307e2fda950d4177537f511eed7cdf51838c5cd6bee6fa79aa5",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/5/2.png",
+      "status": "added",
+      "sizeBytes": 49303,
+      "sha256": "8a193dda0a8d0d4a6545f8d4c47998c42939f7dcc06b932f8a29026871c64748",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/5/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/5/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/5/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/5/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/5/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/6/0.png",
+      "status": "added",
+      "sizeBytes": 5377,
+      "sha256": "c10363523b18829e14230c55cb126b153788a661191ef809c474139e2ed06c4f",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/6/1.png",
+      "status": "added",
+      "sizeBytes": 55757,
+      "sha256": "79a3d6b620172cd44bbde52c478b67b923c0fa2db40400873bc83c2393b52904",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/6/2.png",
+      "status": "added",
+      "sizeBytes": 70963,
+      "sha256": "dbe17262f6115680f46aa018ee59ef537c66fcac246444ece457fe41757a4a64",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/6/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/6/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/6/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/6/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/6/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/7/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/7/1.png",
+      "status": "added",
+      "sizeBytes": 28773,
+      "sha256": "5a5820114f34f0661d50e5cc8a275e42f510b38a82d3de0cf35b9c0a27b0a780",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/7/2.png",
+      "status": "added",
+      "sizeBytes": 52795,
+      "sha256": "8cfadf14fba111464d2eeda87272da03a27a4ea1fbfb5c36cee6ba9ce5987aa6",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/7/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/7/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/7/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/7/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/3/7/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/3.png",
+      "status": "added",
+      "sizeBytes": 8633,
+      "sha256": "b3a162b6d6fb45c45910a6f50d37026cfcaadc8f12ceba7a601010658d5a3b82",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/4.png",
+      "status": "added",
+      "sizeBytes": 9020,
+      "sha256": "914e7de131beece5c67c389104c948c1c7b016ce326c6b2f2ca0d6666eda8447",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/0/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/1/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/1.png",
+      "status": "added",
+      "sizeBytes": 17384,
+      "sha256": "979d064f62c1219c9c4f5b3dec09aac08bc7a3fc4c771fc0a1960e019297a548",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/2.png",
+      "status": "added",
+      "sizeBytes": 12432,
+      "sha256": "96ceceb2c7f38417f83b0515c4b8e1740933dcb611856f320ae284bd03f03548",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/3.png",
+      "status": "added",
+      "sizeBytes": 31760,
+      "sha256": "ccf66138480c16a3536187ac94e01805410ac888261851be969e317ef8e962c7",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/4.png",
+      "status": "added",
+      "sizeBytes": 62163,
+      "sha256": "ea0ac54d9416e1b889fb2f7c169dabd83105de6272ce4504c8f83566ea65f52e",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/5.png",
+      "status": "added",
+      "sizeBytes": 31775,
+      "sha256": "87e9ffe16b219a392589b7c2d7430fe39d2c9c3b31dc5cb4e3bf506e491eb9de",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/10/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/1.png",
+      "status": "added",
+      "sizeBytes": 899,
+      "sha256": "adde47ff489fc7389c33f40d98665e3f13780a16f64cc4b63a72a044ba14efa5",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/2.png",
+      "status": "added",
+      "sizeBytes": 6548,
+      "sha256": "ddf25abb664f7b4cc15d6bb57f7f44fcfebd1e25efa0780ea73e875435f44d2a",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/3.png",
+      "status": "added",
+      "sizeBytes": 47349,
+      "sha256": "c0f2c5e778780dcd612171dd4c06838f13feece64e891c727ce5ffd824c68a60",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/4.png",
+      "status": "added",
+      "sizeBytes": 47810,
+      "sha256": "95668047be5895a3b261293d8d764c00efff5192c6ae16da3bba701cfc704829",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/5.png",
+      "status": "added",
+      "sizeBytes": 25107,
+      "sha256": "1c6e31af7e374c06a8a387bca0d097a3cd760065e9d99bbc16f53874c6899b02",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/11/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/1.png",
+      "status": "added",
+      "sizeBytes": 12877,
+      "sha256": "ab7020399f0d6e4e5ada345c3cd1713c52aae9621d1079067817f9ded1e06331",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/2.png",
+      "status": "added",
+      "sizeBytes": 42424,
+      "sha256": "78c3d521e5cef0420095ac7dc8f44333d3889dc8597c2d3067091aa49ed95435",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/3.png",
+      "status": "added",
+      "sizeBytes": 73792,
+      "sha256": "05e4555c9d77a7c00933f52f8fcd7987892d81cc2f95294c1efc8b8ea3ab6995",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/4.png",
+      "status": "added",
+      "sizeBytes": 81152,
+      "sha256": "713442aeedbc1cc11a52722cb6ed22029c45f7e1d0a3c7d01e79e4121267d65c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/5.png",
+      "status": "added",
+      "sizeBytes": 45840,
+      "sha256": "e80818ff29057a88dbdef03dffb44ed7032a167d4d8c416b3934175f8e255296",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/12/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/2.png",
+      "status": "added",
+      "sizeBytes": 2623,
+      "sha256": "7c82a6d0c68af143fd2b43e900d6caa1a9b025396b7d1fee46b23de11ff5d0b9",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/3.png",
+      "status": "added",
+      "sizeBytes": 62932,
+      "sha256": "65fda606709750dc9b1b327c4744e7a28e73a9226a54513193ce539474865b17",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/4.png",
+      "status": "added",
+      "sizeBytes": 83358,
+      "sha256": "cf307a80d7b7c038d19c60c7c5cc70e6e09b60125a56f66447be8b6379a154a1",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/5.png",
+      "status": "added",
+      "sizeBytes": 46758,
+      "sha256": "6f10a09f064e0aac7b7a6cd3f28c49d2d5c70d4505cb45db3ac4e3d1b2bed7b1",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/13/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/2.png",
+      "status": "added",
+      "sizeBytes": 7584,
+      "sha256": "2c0507ab17ba85c4f7541eafd72601951b7179527bc2d55bd9468992e82aafa2",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/3.png",
+      "status": "added",
+      "sizeBytes": 47447,
+      "sha256": "f75baec6fe9fd3a3753e96908a36ddf0d59a538821d60914c04c80c79dbe15f6",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/4.png",
+      "status": "added",
+      "sizeBytes": 79232,
+      "sha256": "1efd9e3a1e14c7b27f70bf45eb17d6de2a57c049ba56808379fc61c13a7d6d02",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/5.png",
+      "status": "added",
+      "sizeBytes": 30399,
+      "sha256": "4a71f776ff0fbbe16cdc16bbd3500151a0d1b0301f8b55e11dec7b387e208835",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/14/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/2.png",
+      "status": "added",
+      "sizeBytes": 365,
+      "sha256": "05bc1d35c60ce91ca5a6010c468cd30f19445aaf375fba7f7b48206510089621",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/3.png",
+      "status": "added",
+      "sizeBytes": 37385,
+      "sha256": "438966f382e59d94035d63283d060e5087acfbd4b53754916d3e869f503f744e",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/4.png",
+      "status": "added",
+      "sizeBytes": 61990,
+      "sha256": "21597d1d64dd797d0f88f26fcbf91e6dd624e92c0cf9b662aff066476a81c78e",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/5.png",
+      "status": "added",
+      "sizeBytes": 7120,
+      "sha256": "1a2ebdd8d1553a6b4403f4f7869ec51082d03b1cb7dfaaec46438dd7bc011665",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/15/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/2/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/3/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/4/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/5/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/6/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/5.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/7/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/1.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/3.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/4.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/5.png",
+      "status": "added",
+      "sizeBytes": 1244,
+      "sha256": "ab806f55f36e682afc5621c826297c0d6f9894cbead7142917b46bb22aa14bb5",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/8/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/0.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/1.png",
+      "status": "added",
+      "sizeBytes": 399,
+      "sha256": "1932de9521fb7630eca447b2827def08a2eaecb5523cf2b5ca9c47ad51097049",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/10.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/11.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/12.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/13.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/14.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/15.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/2.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/3.png",
+      "status": "added",
+      "sizeBytes": 16751,
+      "sha256": "22ba8e72f93f0af2cf420beab0120cb458e3be935a23994c74b71ddf5b42b639",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/4.png",
+      "status": "added",
+      "sizeBytes": 40571,
+      "sha256": "bca41986fb73c18ff82fee90c1db34a0f97d4d2101b86a254909e18d706a2482",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/5.png",
+      "status": "added",
+      "sizeBytes": 30407,
+      "sha256": "a60da9a06772f023808140949a9ad6fade8ac6fcffebfb6b4c3f5bd1c5822a17",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/6.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/7.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/8.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/4/9/9.png",
+      "status": "added",
+      "sizeBytes": 334,
+      "sha256": "70a213096a8a3aa52d8b05ee5ff5f8d14305a01d51f9305d2555880a4a2b458c",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/ATTRIBUTION.txt",
+      "status": "added",
+      "sizeBytes": 591,
+      "sha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/manifest.json",
+      "status": "added",
+      "sizeBytes": 68874,
+      "sha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/russia-relief/tilejson.json",
+      "status": "added",
+      "sizeBytes": 421,
+      "sha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/maps/style.json",
+      "status": "modified",
+      "sizeBytes": 21886,
+      "sha256": "ad0e06e49df5c72aef843872fac675246d8ea7c22e5157e62ed5fb85122cee9e",
+      "previousSha256": "e053c0141e47a135c131f0f328130628ccd5df35641ab050e5a674517f6a5133"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/MainViewModel.kt",
+      "status": "modified",
+      "sizeBytes": 7808,
+      "sha256": "60f64fcfed2d3bbba386218758d6126794356855c284c8d0b317097921de6015",
+      "previousSha256": "47dc28ff401735ecda1a790317ba1b38660eab20d9383dedab1ac7ef50a793bc"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/data/OfflinePackPublication.kt",
+      "status": "added",
+      "sizeBytes": 791,
+      "sha256": "660ccab6c68d5bc325720f84e82db68bb532ad1e87e5bf6b8b4bb99f9f882488",
+      "previousSha256": null
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/data/OfflinePacks.kt",
+      "status": "modified",
+      "sizeBytes": 6756,
+      "sha256": "085a2f4e331132223b42509d430c650cd5125f151d984569e0084fcd18cfac92",
+      "previousSha256": "007c13dd4efa07cb92b8eb64f859e1cc4c5512dc155c21edbcdde40c18dc8ebe"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/LocalLandscapeScene.kt",
+      "status": "modified",
+      "sizeBytes": 17767,
+      "sha256": "208e12f06771d62d9c433325b0cbbe449665a7ba397b70384839c10487f45436",
+      "previousSha256": "66f92393b285bf64d92e3613c97494b9eed8ebfffd9c871e4c400b947065c465"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/TropaApp.kt",
+      "status": "modified",
+      "sizeBytes": 39889,
+      "sha256": "f720c67570f1e246c20035f69ba2185fbaacbd33353e0b9df4f85061fccc39fc",
+      "previousSha256": "494fc4b48fcb5229151dfeb2d54ebb0b394b59974476fcfe67f52f9f8c285255"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt",
+      "status": "modified",
+      "sizeBytes": 15558,
+      "sha256": "e58ed2e4ae58ba41d2b1e61aa485a2395e1cf039b66847c54f0e3d73048adc81",
+      "previousSha256": "1e9a0c1a3183e11d4ea76c94cf825915232381d2213623f657aabc5ab736204d"
+    },
+    {
+      "path": "android/app/src/test/java/ru/tropa/app/data/OfflinePackPublicationTest.kt",
+      "status": "added",
+      "sizeBytes": 3012,
+      "sha256": "ea64b5e4e679d917e76d73796e4f82a2a6a4d5e8d2d8f4116ac0919893f97555",
+      "previousSha256": null
+    },
+    {
+      "path": "docs/verification/android-instrumentation-workflow-check.json",
+      "status": "added",
+      "sizeBytes": 1310,
+      "sha256": "675d4c30213c27a36730835e47ba014b92aa546ad5a1b57b79a53bcc7b39c115",
+      "previousSha256": null
+    },
+    {
+      "path": "docs/verification/android-recovery-final-packages.json",
+      "status": "added",
+      "sizeBytes": 11335,
+      "sha256": "50ec3570946762e34af82ce82dc01f41b4b296d475e77ef320c4f1f166b7d28f",
+      "previousSha256": null
+    },
+    {
+      "path": "docs/verification/android-unit-tests-0.4.1.json",
+      "status": "added",
+      "sizeBytes": 1403,
+      "sha256": "c3b268d5b194b13ac7de4d8a2156fae4f8900564781ec8fd32890e90eb358973",
+      "previousSha256": null
+    },
+    {
+      "path": "docs/verification/canvas-relief-queue-fix.json",
+      "status": "added",
+      "sizeBytes": 1954,
+      "sha256": "6d3efa7461bd318ae391fcb4266d5b36512c62d801ab89f39228b35e7db1694d",
+      "previousSha256": null
+    },
+    {
+      "path": "docs/verification/native-russia-relief-source.json",
+      "status": "added",
+      "sizeBytes": 53848,
+      "sha256": "cb72f9e5f22857eac8fbe528f042a0f3a4adac10e27d13237b8beeec6b307161",
+      "previousSha256": null
+    },
+    {
+      "path": "docs/verification/native-russia-relief-source.md",
+      "status": "added",
+      "sizeBytes": 3776,
+      "sha256": "cc2228a2880cc51c4b12b0027c5844dc5d16f4cefba058441746869f51416803",
+      "previousSha256": null
+    },
+    {
+      "path": "tools/android-build/check-instrumentation.py",
+      "status": "added",
+      "sizeBytes": 3490,
+      "sha256": "07bc03203503433994a6d46b58583876ccd5230b47c2d11815aafc85658a33fc",
+      "previousSha256": null
+    },
+    {
+      "path": "tools/android-build/github-actions.yml",
+      "status": "modified",
+      "sizeBytes": 4632,
+      "sha256": "1225c12723867c25fefc615be23c8e386370c3bb309afb91ba81dd69185dcd84",
+      "previousSha256": "5ca234360923a59f80826e0be0c6b3c49c62066136ace26d998e105b09fbfc5e"
+    },
+    {
+      "path": "tools/android-build/prepare-landscape.py",
+      "status": "modified",
+      "sizeBytes": 18891,
+      "sha256": "7ee47d33772896b4d6ffca34c7c99d47498c1fd948ac5e84cee1bb8cd9150f04",
+      "previousSha256": "4e6f80e0998c5d6dc2a48b3f261b0c18164a8e52489a9f6e823c32b90562202c"
+    },
+    {
+      "path": "tools/android-build/run-instrumentation-ci.sh",
+      "status": "added",
+      "sizeBytes": 3693,
+      "sha256": "724c3888ba430288ab8aac597f34398430e4e51fe926962eb4a23d6700a6a4b1",
+      "previousSha256": null
+    },
+    {
+      "path": "tools/android-build/russia_relief.py",
+      "status": "added",
+      "sizeBytes": 8673,
+      "sha256": "a8cb4842339838c835ee09433b9366026a3a310fa6907706ce2ffad23062dd32",
+      "previousSha256": null
+    },
+    {
+      "path": "tools/android-build/test-landscape-bootstrap.mjs",
+      "status": "modified",
+      "sizeBytes": 6535,
+      "sha256": "b851cb8490a9f5ae25ae5099e3ebeae403241839d4d9e6e94ee8ee188a18f4e3",
+      "previousSha256": "736d0ececfb7e58cd2f8a4110a463f8fba8f619e56aa6826ea9f09c8a08c3b0f"
+    },
+    {
+      "path": "tools/android-build/test_landscape_assets.py",
+      "status": "modified",
+      "sizeBytes": 6629,
+      "sha256": "228311076a933e187dea59f561662804b6f34a9ddd67bc022332043a60db9b22",
+      "previousSha256": "4e5c78aba6ecb12afb9547c16f900082ff6ead81dce699ad23de79ad555ec072"
+    },
+    {
+      "path": "tools/android-build/test_russia_relief.py",
+      "status": "added",
+      "sizeBytes": 4810,
+      "sha256": "2a948c26c74b46468509f7393e299677f142471042f8bf63aa9f2e5083c0f770",
+      "previousSha256": null
+    },
+    {
+      "path": "tools/android-build/verify-apk.py",
+      "status": "modified",
+      "sizeBytes": 8834,
+      "sha256": "fa0c22a58af8feb1da179348696cd3e4903ea3e882ac516ef2216ea01251b5ad",
+      "previousSha256": "b65c64f4216e76aa6ba6b6d779f3c2878604c676e37a696b5a79f77bde7c96c6"
+    },
+    {
+      "path": "web/components/TerrainScene.tsx",
+      "status": "modified",
+      "sizeBytes": 8810,
+      "sha256": "c734bce1d27038f53a3bb376c2ffcc52d0be471a633f8027be2f709da345526c",
+      "previousSha256": "3fd3c81ba1e7e0a78dafd99d67945857bb1cf7ac6a05ac52cc70e9dbc9db9e94"
+    },
+    {
+      "path": "web/lib/canvas-relief.ts",
+      "status": "added",
+      "sizeBytes": 6889,
+      "sha256": "f8f8c4e422f6a911cceaf26371c4ec0019c4542b246c1882df2ce487645563a7",
+      "previousSha256": null
+    },
+    {
+      "path": "web/public/downloads/android-manifest.json",
+      "status": "modified",
+      "sizeBytes": 583,
+      "sha256": "31bd8abff59bda7d629ac076548fc365a128b4a776fae57fdba00e734d1e5935",
+      "previousSha256": "20316c4c790bc60dd17f74070fb0cc51a2c1cf0541f0d79506b0a17a2b409531"
+    },
+    {
+      "path": "web/public/terrain/landscape.html",
+      "status": "modified",
+      "sizeBytes": 1961381,
+      "sha256": "d5c396a2338478a5bd0e969e29b5c6827b38e10b76b37b38c621742881f908ae",
+      "previousSha256": "a0807ff332a5caf72cca79ad3850ee8f6095f0175df2be5940a9008e203cce88"
+    },
+    {
+      "path": "web/public/terrain/terrain-renderer.d.ts",
+      "status": "modified",
+      "sizeBytes": 4347,
+      "sha256": "b7bec9ee9514991f8b70a0cae4f2fcfa237aae7c57f85a995a2f4d04cb0ebf6d",
+      "previousSha256": "73d8ec266f9f7c308833f240e67374c5795eed138017168abf74137915960008"
+    },
+    {
+      "path": "web/public/terrain/terrain-renderer.js",
+      "status": "modified",
+      "sizeBytes": 66589,
+      "sha256": "694dd9201c1a62a10a1e12d71af7e41acab77b56f1500f14eef7d32baa0c1832",
+      "previousSha256": "1fda33a63c1c3b98592fe4903d2c4b78c045f371c51718640858e26d195024e8"
+    },
+    {
+      "path": "web/scripts/build-landscape.mjs",
+      "status": "modified",
+      "sizeBytes": 6914,
+      "sha256": "255db1bbcef48c07701c0d831a7b80ee88311eab62ef0112434974ffbb2f132c",
+      "previousSha256": "cb9d39552d08e0764e29bc78e0d2e6bb5df87fe3bf7569079a4a07acb7ddbb5a"
+    },
+    {
+      "path": "web/scripts/landscape-bootstrap.js",
+      "status": "modified",
+      "sizeBytes": 4822,
+      "sha256": "6b46be16ca987cfe76f7cb6f75e3d9fc402dc5671d987cfcaf3703951bdac63d",
+      "previousSha256": "68a48b012ea83e5c5391fc0f10664ca7564d184263b17725bccc24fd478d64bf"
+    },
+    {
+      "path": "web/scripts/landscape-shell.css",
+      "status": "modified",
+      "sizeBytes": 3579,
+      "sha256": "7be5fee983eb834b43caaecd32d870b797eb43d1f75f0f0258c2c8842764a483",
+      "previousSha256": "f613fe2ffd78b5a7b5c21dfa28cf0edabcdc679065fa8d586fc0a9d8ed6bafbf"
+    },
+    {
+      "path": "web/tests/canvas-relief.test.mjs",
+      "status": "added",
+      "sizeBytes": 7934,
+      "sha256": "2b222088e8bea41e48f8ba00c3cf7ba5443d9d604f2c4d8c943b03693b728191",
+      "previousSha256": null
+    },
+    {
+      "path": "web/tests/landscape-bootstrap.test.mjs",
+      "status": "modified",
+      "sizeBytes": 5206,
+      "sha256": "c29164612f8ad99b441e381f580afc85ba1ec45a240e60bd9ed2db7e3ebebb5d",
+      "previousSha256": "9390cd794d0c34dd694b8de7503f047805968513125665cb94591dd84c513c9e"
+    },
+    {
+      "path": "web/tests/terrain-renderer.test.mjs",
+      "status": "modified",
+      "sizeBytes": 19259,
+      "sha256": "b144efd6815dcb1f5aedc0e34236b50cb78ddb04a60dc63e685249fe5dd6a052",
+      "previousSha256": "42f2a057cf7b12b7d41459ec01328f762afe3e496f79e9bdc929548a5a874495"
+    }
+  ],
+  "changedBinaryDeliverables": [
+    "android/dist/tropnik-arm64-preview.apk",
+    "android/dist/tropnik-preview.apk",
+    "android/dist/tropnik-instrumentation-tests.apk",
+    "web/public/downloads/tropnik-arm64-preview.apk"
+  ],
+  "notExecuted": [
+    "physical device or emulator execution",
+    "physical GPU/driver performance validation",
+    "live Android API/PostGIS end-to-end tests",
+    "GitHub workflow dispatch or publishing"
+  ],
+  "nativeRussiaOverview": {
+    "russiaOverviewTileCount": 341,
+    "russiaOverviewTileBytesVerified": 1689348,
+    "russiaOverviewFilesVerified": 344,
+    "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+    "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+    "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+    "russiaOverviewMaxNativeZoom": 4,
+    "russiaOverviewLayerMaxZoom": 6,
+    "russiaOverviewLocalOnly": true,
+    "russiaOverviewCompleteWrappedXYZ": true,
+    "russiaOverviewIsElevationData": false,
+    "sourceAndNativePackageIdentical": true,
+    "byteSizeWithMetadata": 1759234
+  },
+  "scopeNote": "Android/build tooling plus owned web graphics recovery and Canvas queue files; the whole-repository delivery inventory is generated separately."
+}

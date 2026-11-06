@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#244d3c"><meta name="robots" content="noindex,nofollow">
+<title>Тропник · автономная карта</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/maps/maplibre-gl.css"><link rel="stylesheet" href="/offline.css"><link rel="stylesheet" href="/offline-fonts.css"><link rel="stylesheet" href="/maps/leaflet.css">
+</head>
+<body>
+<header>
+<a class="brand" href="/"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M7 31 20 8l13 23H7Zm7.5 0 7-11 4.5 7-3 4m-6-18 3 4 3-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>тропник</a>
+<span id="connection">Данные на устройстве</span>
+<a href="/offline">Управление картами <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h8v8m0-8L12 16M11 5H5v18h18v-6"/></svg></a>
+</header>
+<main>
+<aside>
+<span class="eyebrow">Вне зоны связи</span><h1>Карта с собой.</h1><p id="summary">Загружаем данные устройства…</p>
+<button id="pilot" hidden>Открыть подробный район Бзерпина</button>
+<a class="landscape-link" id="landscape" href="/terrain/landscape.html">Объёмный ландшафт Бзерпина <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h8v8m0-8L12 16M11 5H5v18h18v-6"/></svg></a>
+<label for="saved">Сохранённый маршрут</label><select id="saved"><option value="">Выберите карточку</option></select>
+<article id="card"><h2>Сохранённые карточки</h2><p>Выберите маршрут из списка. Новые данные загружаются при подключении.</p></article>
+<div class="notice">Источник на карте не подтверждает разрешение на выход. Сохранённые ограничения могут устареть. Группа и старт требуют подтверждения сервера.</div>
+<a href="/safety">Подготовка к походу <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h8v8m0-8L12 16M11 5H5v18h18v-6"/></svg></a>
+</aside>
+<section class="map-wrap" aria-label="Автономная карта России">
+<div id="map" class="map-is-loading" role="region" aria-label="Карта России и сохранённых маршрутов" aria-busy="true"></div>
+<div class="map-tools">
+<button id="zoom-in" aria-label="Увеличить масштаб" disabled><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 5v18M5 14h18"/></svg></button>
+<button id="zoom-out" aria-label="Уменьшить масштаб" disabled><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 14h18"/></svg></button>
+<button id="location" aria-label="Моё местоположение" disabled>Моя позиция</button>
+<button id="overview" aria-label="Показать Россию целиком" title="Показать Россию целиком" disabled><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H4v6m14-6h6v6M4 18v6h6m14-6v6h-6M9 14h10m-5-5v10"/></svg></button>
+</div>
+<div id="map-status" role="status" aria-live="polite">Открываем карту России…</div>
+<div id="map-credits" class="map-attribution" hidden>
+<div id="map-credit-body" class="map-attribution-content">
+<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a><span> · </span><a href="/sources">Данные и лицензии</a>
+<details><summary>Другие поставщики и рельеф</summary>
+<p>Картографические данные и оформление: <a href="https://openmaptiles.org" target="_blank" rel="noreferrer">OpenMapTiles</a>, <a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a>. Регионы: geoBoundaries. <a href="/data/russia-boundaries-provenance.json" target="_blank" rel="noreferrer">Источник географии РФ</a>.</p>
+<p>Рельеф © Mapterhorn; Copernicus WorldDEM-30 © DLR e.V. 2010–2014 и Airbus Defence and Space GmbH 2014–2018, предоставлен по программе COPERNICUS Европейским союзом и ESA. Все права сохранены. <a href="/terrain/ATTRIBUTION.txt" target="_blank" rel="noreferrer">Полная атрибуция</a> · <a href="/terrain/sources/Copernicus-GLO30-LICENSE.pdf" target="_blank" rel="noreferrer">Лицензия рельефа</a>.</p>
+</details>
+</div>
+<button id="map-credit-toggle" class="map-attribution-toggle" aria-label="Свернуть сведения об источниках" aria-expanded="true" aria-controls="map-credit-body"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 25a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm0-12v7m0-12v.2"/></svg></button>
+</div>
+</section>
+</main>
+<script src="/maps/leaflet.js"></script><script src="/maps/protomaps-leaflet.js"></script><script type="module" src="/offline.js"></script>
+</body>
+</html>

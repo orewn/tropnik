@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-06T04:14:30.994718+00:00",
+  "routes": [
+    {
+      "id": "osm-relation-3748147",
+      "sourceType": "route",
+      "title": "Малое кольцо",
+      "regionIds": [
+        "krasnodar"
+      ],
+      "osmId": 3748147,
+      "sourceName": "OpenStreetMap via Waymarked Trails",
+      "sourceUrl": "https://www.openstreetmap.org/relation/3748147",
+      "dataUrl": "https://hiking.waymarkedtrails.org/api/v1/details/relation/3748147",
+      "sourceRawSha256": "8aa46981e1d57b7e440558d346105caba1e6254884180c79016d06c2a68ed0a6",
+      "retrievedAt": "2026-11-06T04:11:42.223902+00:00",
+      "geometryPath": "geometry/osm-relation-3748147.geojson",
+      "geometryLengthKm": 1.276,
+      "officialDistanceKm": null,
+      "difficulty": null,
+      "conditions": null,
+      "conditionsStatus": "requires_current_verification",
+      "navigationReady": false,
+      "fieldVerified": false,
+      "verificationStatus": "source_only",
+      "publicationStatus": "reference",
+      "indexable": false,
+      "bbox": [
+        39.8736882,
+        43.5292187,
+        39.8779973,
+        43.5313315
+      ]
+    }
+  ]
+}

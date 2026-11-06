@@ -1,0 +1,58 @@
+{
+  "suites": [
+    {
+      "name": "ru.tropa.app.data.ApiAddressTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.033"
+    },
+    {
+      "name": "ru.tropa.app.data.ApiContractTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.41"
+    },
+    {
+      "name": "ru.tropa.app.data.LocalLandscapeAssetsTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.059"
+    },
+    {
+      "name": "ru.tropa.app.data.ModerationContractTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.002"
+    },
+    {
+      "name": "ru.tropa.app.data.OfflinePackIntegrityTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.009"
+    },
+    {
+      "name": "ru.tropa.app.data.RussiaDisplayAreaTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.255"
+    }
+  ],
+  "tests": 22,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "instrumentationApkCompiled": true,
+  "instrumentationExecuted": false
+}

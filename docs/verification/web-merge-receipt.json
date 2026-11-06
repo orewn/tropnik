@@ -1,0 +1,253 @@
+{
+  "parallelWebCommit": "f9e8ba81a2b836bef625273e20fc5d8e59d08f30",
+  "parallelSource": "/workspace/scratch/8a746867132d/tropnik/web",
+  "target": "/workspace/scratch/a2ce00e514d4/tropa/web",
+  "merged": [
+    {
+      "path": "app/map-design.css",
+      "sha256": "32ffa423f019d1cfa20b8049ed92528099ae68d52bd7d3c43b81eeaa7738852e"
+    },
+    {
+      "path": "app/terrain.css",
+      "sha256": "a3e2953b07e45049c6e7bc3b89ccd3273f729960ccec100fa6a6e5f0b85b06f1"
+    },
+    {
+      "path": "components/RegionArtwork.tsx",
+      "sha256": "fb9e5424941e55402333f22bdbe93c8dcac462079dd671431083a8c2672ba806"
+    },
+    {
+      "path": "docs/terrain-renderer-before.txt",
+      "sha256": "1ac7c7dd73c87d438d12a18b237fbe66662227fe65ae3709755f65f9364fbd33"
+    },
+    {
+      "path": "docs/vinext-runtime.md",
+      "sha256": "6a8169063d2b024fcbe791837621e0f2bd9863968b5d654d2a0975e76e2ad7f8"
+    },
+    {
+      "path": "lib/map-resource-pool.ts",
+      "sha256": "d0a39e3447136ead4197b21bf83678fe90c2eef9228c505ba28f22c5da188fd1"
+    },
+    {
+      "path": "lib/map-transport.ts",
+      "sha256": "35f6e5efbcb0da73b677365ceee6c6df7a187de444056dbfc1d99de2b04f0563"
+    },
+    {
+      "path": "lib/region-artwork.generated.json",
+      "sha256": "c754c8af3a2bf99474afed732390ee52e7dedbd4b663670611b2c1c8b135e794"
+    },
+    {
+      "path": "lib/terrain-preparation.ts",
+      "sha256": "a6cf9dd5074cb3b1a35999f9514cad08bf73d67ddd0e2e968a802484387b76c9"
+    },
+    {
+      "path": "lib/terrain-preparation.worker.ts",
+      "sha256": "83c22571d4b871fc4c0e0ec6da97741357296338507b9c9d0200bb09f1d65b61"
+    },
+    {
+      "path": "public/terrain/ATTRIBUTION.txt",
+      "sha256": "b00042ffbafb001e94b76c30c9774429fb3180b20c5313f567e661af86fb9220"
+    },
+    {
+      "path": "public/terrain/provenance.json",
+      "sha256": "993bacd41f947ca77344b67d93d5bb4b56a741490297b03c017f741b9c395a70"
+    },
+    {
+      "path": "public/terrain/sources/Copernicus-GLO30-LICENSE.pdf",
+      "sha256": "9cd37d37ea654bbcaf0a2e059e6a3a5b5f76072824d8dd860ccf274ada8951bd"
+    },
+    {
+      "path": "public/terrain/sources/mapterhorn-attribution.json",
+      "sha256": "09f9a9db46bd55a38b4612f0f76a771bd321ed5a75f6e9f3e1170f73eec312c2"
+    },
+    {
+      "path": "public/terrain/terrain-preview.json",
+      "sha256": "33d73d4f1a88a2c226845ed9c382b523b88638b1e99b0fd199384369ea31af9d"
+    },
+    {
+      "path": "scripts/build-region-artwork.mjs",
+      "sha256": "b5c58d5f47c18440cd537d1bfd4ed54e2a93efc6ad318bd6de9d635d34a0dcde"
+    },
+    {
+      "path": "scripts/build-tropnik.mjs",
+      "sha256": "6b05602a3bba6edd152eb616574c3cd8527535d3fdfb476ef788ecc4263b303b"
+    },
+    {
+      "path": "scripts/landscape-bootstrap.js",
+      "sha256": "c9d3ee1a00d540590e83cb410e893621d8c2b04ea69f8a522c49d8c63136a1df"
+    },
+    {
+      "path": "scripts/landscape-shell.css",
+      "sha256": "f613fe2ffd78b5a7b5c21dfa28cf0edabcdc679065fa8d586fc0a9d8ed6bafbf"
+    },
+    {
+      "path": "scripts/record-terrain-gles.mjs",
+      "sha256": "5143fc27b1f0a0a8e8ef348fb14920f844f59a8625598857d23ed1e7b3dd369a"
+    },
+    {
+      "path": "scripts/replay-terrain-gles.py",
+      "sha256": "3f4c1ac0f55fab81e89b778923b88defb70220e9601e83fd1184559d436860d7"
+    },
+    {
+      "path": "tests/fixtures/terrain-worker-thread.mjs",
+      "sha256": "358a071a5cc9d7cc5feff0e9fab898b42b02a07b18722e9029c2a3dfc82a105f"
+    },
+    {
+      "path": "tests/landscape-bootstrap.test.mjs",
+      "sha256": "9390cd794d0c34dd694b8de7503f047805968513125665cb94591dd84c513c9e"
+    },
+    {
+      "path": "tests/map-preload.test.mjs",
+      "sha256": "9b333cddbc96a582c8328701c333b22a78e8af2d3795e267ddcc0e21e2b03d01"
+    },
+    {
+      "path": "tests/map-transport.test.mjs",
+      "sha256": "598f6b1c0683db3ea7b99544cf8723aa5c5e40f504ef1abcfe7045b5fece1ce1"
+    },
+    {
+      "path": "tests/terrain-material.test.mjs",
+      "sha256": "a1db146e44c3e801ac85e957b1edcacb0146bbf01f5e326b7209775f63700005"
+    },
+    {
+      "path": "tests/terrain-preparation.test.mjs",
+      "sha256": "bd6ee6d895460704e5b734a9620033545796f16d4e7a2289c7f23a26318832a0"
+    },
+    {
+      "path": "tests/terrain-renderer.test.mjs",
+      "sha256": "42f2a057cf7b12b7d41459ec01328f762afe3e496f79e9bdc929548a5a874495"
+    },
+    {
+      "path": "README.md",
+      "sha256": "617fcbb726c8d5a6e2c8b80e45c7daedf08d2dbfd6f1bd4bcf601bcd48d072ae"
+    },
+    {
+      "path": "app/android/page.tsx",
+      "sha256": "4e8be23a1e0d9c4a9bdc3e4fb1b4e9e5a9110def053e429dc5d97ae65c66086e"
+    },
+    {
+      "path": "app/globals.css",
+      "sha256": "c87a00265ba2c46b797fc8164226bd3b83faf8f07765d3e76784841c93ffcef6"
+    },
+    {
+      "path": "app/layout.tsx",
+      "sha256": "fbae0154472831d4a2fefdb38bc13f8751873efe79c0e7aa08ca83da59443199"
+    },
+    {
+      "path": "app/sources/page.tsx",
+      "sha256": "17a92d486d30126902d7f60151ca435285d1444758b14dbcdf1bb01f7d64e887"
+    },
+    {
+      "path": "app/tropnik-system.css",
+      "sha256": "a083363f24acef10d509349d3848a4f3acdd52d8dc57b887e7aff2beae056d03"
+    },
+    {
+      "path": "components/Atlas.tsx",
+      "sha256": "3b11649bac1a321f28f53030d8befc76abaf331f744bb430cc1d7efa1d8c2702"
+    },
+    {
+      "path": "components/Atlas2D.tsx",
+      "sha256": "9fdd3ff705a7d19e5082aa76661d305eec502f8ff35be8acd02a234d455f2b53"
+    },
+    {
+      "path": "components/Explore.tsx",
+      "sha256": "7a657ca0da8208a16e41866ab8d0575e240a68df227159c2d3d1b1cc2c00db40"
+    },
+    {
+      "path": "components/MapIcon.tsx",
+      "sha256": "d39271a03b8d16198882ca339eff50b5331306c3bc25a5f56a9c1c4edf881601"
+    },
+    {
+      "path": "components/Offline.tsx",
+      "sha256": "483f1a50ca958842bbf62c5dbdebe726e239e0f7493db4a912054688ed7647be"
+    },
+    {
+      "path": "components/TerrainScene.tsx",
+      "sha256": "c35041fe0f0bbd8c806f381d475ae08018727c3ea4af7fa6e70b66e305cd0455"
+    },
+    {
+      "path": "components/TrailCard.tsx",
+      "sha256": "af9592b455a49e5cf0206aa1e313639611b4cb8de517b710844fbd574bbf59c0"
+    },
+    {
+      "path": "lib/map-preload.ts",
+      "sha256": "57de2d453cb2596cc19c754d0becbc2c6130354c7625a47d6f1875e9b4ab12c6"
+    },
+    {
+      "path": "lib/offline-map.ts",
+      "sha256": "8fe427e8c79385cf6c5c1e1eefe45200c30d1e83c6d787a4abaa26c46493dce7"
+    },
+    {
+      "path": "lib/route-adapter.ts",
+      "sha256": "f220f32d6ca089ef47ab0d3efaca5126c34c7fc2f8c5fbb1844a8c26e5268de4"
+    },
+    {
+      "path": "package.json",
+      "sha256": "87a698bb2d22f9ff05f5aa7a07099c85b18df870cb38892d61ea27e2254214ef"
+    },
+    {
+      "path": "public/fonts/README.md",
+      "sha256": "440c36864a249e84b879beb301454ee48ec3485e4c2532035a8d06be621f5dec"
+    },
+    {
+      "path": "public/maps/pilot-style.json",
+      "sha256": "44ec360c03c6e8d375f9ec020d6a9d86b2a3cd7b8db9368e207862ad39d10cd0"
+    },
+    {
+      "path": "public/maps/tropa-style.json",
+      "sha256": "300471965dc3d804cf57eb69dc1858fb3810b31fc73257227db65fb2d8ec0daa"
+    },
+    {
+      "path": "public/offline-map/manifest.json",
+      "sha256": "7d609b1feb0467a4f046c002833804ddb99393cc38b1362151580f46e4b7a97d"
+    },
+    {
+      "path": "public/offline-map/terrain/landscape.html",
+      "sha256": "e0d149d95c62a54cedf0dd63f12c2853b593994bb02d7958123447728a4df4be"
+    },
+    {
+      "path": "public/offline.html",
+      "sha256": "35ed785183b709d63bce69c71f7c370d71165658a91b98255dcb36545cd79317"
+    },
+    {
+      "path": "public/offline.js",
+      "sha256": "af547239c765813c83b227cbb5dd4f05ad4899594b9569ceec31d310af054f1f"
+    },
+    {
+      "path": "public/sw.js",
+      "sha256": "1934b4bc87fc0eac929e9bb5ab0f245cc58d579acc1054076d013d6fa14923c2"
+    },
+    {
+      "path": "public/terrain/landscape.html",
+      "sha256": "e0d149d95c62a54cedf0dd63f12c2853b593994bb02d7958123447728a4df4be"
+    },
+    {
+      "path": "public/terrain/terrain-grid.json",
+      "sha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55"
+    },
+    {
+      "path": "public/terrain/terrain-renderer.d.ts",
+      "sha256": "73d8ec266f9f7c308833f240e67374c5795eed138017168abf74137915960008"
+    },
+    {
+      "path": "public/terrain/terrain-renderer.js",
+      "sha256": "1fda33a63c1c3b98592fe4903d2c4b78c045f371c51718640858e26d195024e8"
+    },
+    {
+      "path": "scripts/build-landscape.mjs",
+      "sha256": "18e853d43007a52ab6239a78814768c48dfc6ba90376f9daf492e799eb636b55"
+    },
+    {
+      "path": "scripts/create-map-style.mjs",
+      "sha256": "1932d5b7756193be79dc542ce7c0c190682583d1044f9c186bd9f8a04356d03c"
+    },
+    {
+      "path": "scripts/prepare-offline.mjs",
+      "sha256": "c2b07c4c9f624366e04ad0a65275e3e1e3e798d3a34b8aee5426e07e13aadbc2"
+    }
+  ],
+  "preserved": [
+    "public/downloads/android-manifest.json",
+    "public/downloads/tropnik-arm64-preview.apk",
+    "tsconfig.tsbuildinfo"
+  ],
+  "readinessPreserved": true
+}

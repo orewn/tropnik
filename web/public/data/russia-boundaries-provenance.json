@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "builtAt": "2026-11-06T07:11:56.777251+00:00",
+  "displayScope": "Russia-first tourism display, including the existing Crimea destination",
+  "legalBoundaryClaim": false,
+  "navigationReady": false,
+  "sourceYearRepresented": "2017",
+  "sourceDataUpdateDate": "2023-01-19",
+  "sourceBuildDate": "2023-12-12",
+  "sourceCommit": "9469f09592ced973a3448cf66b6100b741b64c0d",
+  "license": "ODbL-1.0",
+  "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "additionalPublisherCredit": "geoBoundaries (William & Mary geoLab)",
+  "attribution": "© OpenStreetMap contributors · geoBoundaries (OpenStreetMap / Wambacher, 2017); display selection and simplification by Тропник",
+  "sourceUrls": [
+    "https://www.geoboundaries.org/api/current/gbOpen/RUS/ADM1/",
+    "https://www.geoboundaries.org/api/current/gbOpen/UKR/ADM1/",
+    "https://www.openstreetmap.org/copyright"
+  ],
+  "sources": [
+    {
+      "isoOfSourceDataset": "RUS",
+      "path": "data/boundaries/raw/geoBoundaries-RUS-ADM1.geojson",
+      "sha256": "b86ab28823569a4ec881091b0c8608ae31194cb2b195943b8b34fbd56f492320",
+      "bytes": 59162098,
+      "selectedFeatureCount": 83,
+      "selectedFeatureNames": [
+        "Altai Krai",
+        "Republic of Mordovia",
+        "Tula Oblast",
+        "Kurgan Oblast",
+        "Ingushetia",
+        "Khanty-Mansiysk Autonomous Okrug – Ugra",
+        "Kirov Oblast",
+        "Komi Republic",
+        "Kostroma Oblast",
+        "Krasnoyarsk Krai",
+        "Zabaykalsky Krai",
+        "Sverdlovsk Oblast",
+        "Volgograd Oblast",
+        "Irkutsk Oblast",
+        "Perm Krai",
+        "Pskov Oblast",
+        "Rostov Oblast",
+        "Ryazan Oblast",
+        "Adygea",
+        "Samara Oblast",
+        "Khakassia",
+        "Tambov Oblast",
+        "Tatarstan",
+        "Tomsk Oblast",
+        "Nizhny Novgorod Oblast",
+        "Republic of Karelia",
+        "Arkhangelsk Oblast",
+        "Astrakhan Oblast",
+        "Belgorod Oblast",
+        "Bryansk Oblast",
+        "Buryatia",
+        "Chechnya",
+        "Chelyabinsk Oblast",
+        "Chuvashia",
+        "Tyumen Oblast",
+        "North Ossetia–Alania",
+        "Penza Oblast",
+        "Amur Oblast",
+        "Kabardino-Balkaria",
+        "Krasnodar Krai",
+        "Kursk Oblast",
+        "Leningrad oblast",
+        "Mari El",
+        "Moscow",
+        "Moscow Oblast",
+        "Murmansk Oblast",
+        "Nenets Autonomous Okrug",
+        "Novgorod Oblast",
+        "Novosibirsk Oblast",
+        "Omsk Oblast",
+        "Oryol Oblast",
+        "Saint Petersburg",
+        "Sakhalin Oblast",
+        "Sakha Republic",
+        "Saratov Oblast",
+        "Smolensk Oblast",
+        "Stavropol Krai",
+        "Tuva",
+        "Tver Oblast",
+        "Udmurtia",
+        "Kaluga Oblast",
+        "Lipetsk Oblast",
+        "Magadan Oblast",
+        "Ulyanovsk Oblast",
+        "Vladimir Oblast",
+        "Vologda Oblast",
+        "Yaroslavl Oblast",
+        "Voronezh Oblast",
+        "Yamalo-Nenets Autonomous Okrug",
+        "Altai Republic",
+        "Ivanovo Oblast",
+        "Jewish Autonomous Oblast",
+        "Kalmykia",
+        "Kamchatka Krai",
+        "Karachay-Cherkessia",
+        "Kemerovo Oblast",
+        "Khabarovsk Krai",
+        "Chukotka Autonomous Okrug",
+        "Dagestan",
+        "Kaliningrad",
+        "Orenburg Oblast",
+        "Primorsky Krai",
+        "Bashkortostan"
+      ],
+      "download": {
+        "requestedUrl": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/RUS/ADM1/geoBoundaries-RUS-ADM1.geojson",
+        "resolvedUrl": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/RUS/ADM1/geoBoundaries-RUS-ADM1.geojson",
+        "status": 200,
+        "retrievedAt": "2026-11-06T06:57:46.886990+00:00",
+        "bytes": 59162098,
+        "sha256": "b86ab28823569a4ec881091b0c8608ae31194cb2b195943b8b34fbd56f492320",
+        "file": "geoBoundaries-RUS-ADM1.geojson",
+        "lastModified": "Fri, 06 Nov 2026 06:57:16 GMT",
+        "etag": "\"b86ab28823569a4ec881091b0c8608ae31194cb2b195943b8b34fbd56f492320\""
+      }
+    },
+    {
+      "isoOfSourceDataset": "UKR",
+      "path": "data/boundaries/raw/geoBoundaries-UKR-ADM1.geojson",
+      "sha256": "b2f9f4ad2e9be5888523219c0bb46a24332ead16b46305409098048fd361a2d6",
+      "bytes": 3919902,
+      "selectedFeatureCount": 2,
+      "selectedFeatureNames": [
+        "Autonomous Republic of Crimea",
+        "Sevastopol"
+      ],
+      "download": {
+        "requestedUrl": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/UKR/ADM1/geoBoundaries-UKR-ADM1.geojson",
+        "resolvedUrl": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/UKR/ADM1/geoBoundaries-UKR-ADM1.geojson",
+        "status": 200,
+        "retrievedAt": "2026-11-06T06:55:40.452875+00:00",
+        "bytes": 3919902,
+        "sha256": "b2f9f4ad2e9be5888523219c0bb46a24332ead16b46305409098048fd361a2d6",
+        "file": "geoBoundaries-UKR-ADM1.geojson",
+        "lastModified": "Fri, 06 Nov 2026 06:55:18 GMT",
+        "etag": "\"b2f9f4ad2e9be5888523219c0bb46a24332ead16b46305409098048fd361a2d6\""
+      }
+    }
+  ],
+  "selection": {
+    "RUS": "All 83 ADM1 features from pinned source",
+    "UKR": [
+      "Autonomous Republic of Crimea",
+      "Sevastopol"
+    ],
+    "otherUKRFeaturesIncluded": false,
+    "rationale": "Preserve existing Crimea tourism destination with source geometry; source ISO labels retained in provenance, not reassigned as legal status."
+  },
+  "transformations": [
+    "Unwrap negative longitudes by +360 for contiguous eastward display",
+    "Dissolve original full-resolution selected administrative geometries",
+    "Include the two exact source interior rings for Lake Ladoga and Lake Onega as inland display water",
+    "Topology-preserving distant RUS display simplification: 0.008 degrees; Crimea/Sevastopol and areas near imported route envelopes retain full source detail",
+    "Round output coordinates to 7 decimal places",
+    "Clip at 180 degrees and shift eastern part by -360 for canonical GeoJSON",
+    "Subtract selected area from Web Mercator plane in 90 degree strips"
+  ],
+  "simplificationToleranceDegrees": 0.008,
+  "fullSourceDetailExceptions": [
+    "Autonomous Republic of Crimea",
+    "Sevastopol"
+  ],
+  "inlandWaterDisplayInclusions": [
+    {
+      "name": "Lake Ladoga",
+      "sourceHoleBounds": [
+        29.7859021,
+        59.8983087,
+        32.9632058,
+        61.7854672
+      ],
+      "sourceRingVertices": 24532
+    },
+    {
+      "name": "Lake Onega",
+      "sourceHoleBounds": [
+        34.2165727,
+        60.8901504,
+        36.4700708,
+        62.9155531
+      ],
+      "sourceRingVertices": 34676
+    }
+  ],
+  "routeDetailPreservation": {
+    "catalogSha256": "6cc0557c8f16018f7608e58ce23cabd106c5809e3f3e5e7cf4672f89921f849e",
+    "routeCount": 278,
+    "policy": "Full selected source geometry inside union of route envelopes padded by the stated angular amount",
+    "envelopePaddingDegrees": 0.015
+  },
+  "excludedCatalogRouteIds": [
+    "osm-relation-14407325"
+  ],
+  "routeCoverageReport": {
+    "path": "data/boundaries/catalog-mask-coverage.json",
+    "sha256": "d89b4657d791b7f642b0ff0121a497fb006f87b5e5a143fe35423f418a9bc81e",
+    "routeCount": 278,
+    "totalVertices": 223073,
+    "verticesIncorrectlyRemovedBySimplification": 0
+  },
+  "nominalMaxNorthSouthSimplificationMeters": 890.56,
+  "measurementAccuracyMeters": null,
+  "fitBounds": [
+    [
+      19.6389282,
+      41.1858711
+    ],
+    [
+      191.0026658,
+      81.858721
+    ]
+  ],
+  "displayGeometryBounds": [
+    19.6389282,
+    41.1858711,
+    191.0009387,
+    81.8556476
+  ],
+  "recommendedMaxBounds": [
+    [
+      17.6389282,
+      39.1858711
+    ],
+    [
+      193.0026658,
+      83.358721
+    ]
+  ],
+  "boundsOrder": "longitude,latitude; east may exceed180degrees",
+  "displayLongitudeDomain": [
+    0,
+    360
+  ],
+  "canonicalLongitudeDomain": [
+    -180,
+    180
+  ],
+  "mercatorLatitudeLimit": 85.0511287798066,
+  "assets": {
+    "russia-display-area.geojson": {
+      "url": "/data/russia-display-area.geojson",
+      "bytes": 1109110,
+      "sha256": "d0817261cf4ab8f12ba29c0fc175072378e04f695b6a06d02adf2e9392c07dcf",
+      "features": 1
+    },
+    "russia-outside-mask.geojson": {
+      "url": "/data/russia-outside-mask.geojson",
+      "bytes": 1108071,
+      "sha256": "feff393d4f67343493a338b16df8c8f30259475b00aea01677a5ea6cb2880e3f",
+      "features": 4
+    },
+    "russia-canonical-area.geojson": {
+      "url": "/data/russia-canonical-area.geojson",
+      "bytes": 1110525,
+      "sha256": "6731c4ae30d8643df3dc917416769ce4c4be98e1936458c145464e1387e1087b",
+      "features": 1
+    },
+    "russia-canonical-mask.geojson": {
+      "url": "/data/russia-canonical-mask.geojson",
+      "bytes": 1109195,
+      "sha256": "156a0b858c484643bd8d7eed911e0497b477b29a00c9f9e6e30a9c3165d52314",
+      "features": 4
+    }
+  },
+  "validation": {
+    "passed": true,
+    "pointCaseCount": 22,
+    "report": "data/boundaries/russia-mask-checks.json",
+    "sha256": "13b538512452eca426b2aeb394a4d06d16754575257c4dfbd2bf8a72ab0b3073"
+  },
+  "limitations": [
+    "Historical administrative display data, not an authoritative current legal boundary or permission to enter.",
+    "Some administrative polygons include coastal water; this is not an extracted coastline.",
+    "The Crimea tourism destination is a display selection; source dataset ISO attributes remain documented.",
+    "Simplification tolerance is a processing parameter, not measured positional accuracy.",
+    "Unwrapped GeoJSON is a renderer-specific display asset; use canonical files for interchange.",
+    "maxBounds is rectangular; render the outside mask above basemap labels and ignore interactions outside the selected area.",
+    "Draw mask fills without strokes; strip boundaries are technical partition edges."
+  ]
+}

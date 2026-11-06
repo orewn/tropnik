@@ -1,0 +1,2522 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-06T07:11:51.065749+00:00",
+  "scope": "All imported line vertices compared against selected historical source plus explicitly included inland water holes and against the runtime display mask. Not field, access or legal verification.",
+  "catalogPath": "data/catalog/routes.geojson",
+  "catalogSha256": "6cc0557c8f16018f7608e58ce23cabd106c5809e3f3e5e7cf4672f89921f849e",
+  "routeCount": 278,
+  "totalVertices": 223073,
+  "excludedCatalogRouteIds": [
+    "osm-relation-14407325"
+  ],
+  "verticesIncorrectlyRemovedBySimplification": 0,
+  "passed": true,
+  "routes": [
+    {
+      "id": "osm-relation-1474673",
+      "title": "Через перевал Аишха к Черному морю",
+      "vertexCount": 5465,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-1842873",
+      "title": "Дорога к зоне",
+      "vertexCount": 41,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2244794",
+      "title": "Маршрут OSM 2244794",
+      "vertexCount": 12,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2978218",
+      "title": "51",
+      "vertexCount": 111,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2978229",
+      "title": "53",
+      "vertexCount": 141,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2978230",
+      "title": "52",
+      "vertexCount": 174,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2978256",
+      "title": "56",
+      "vertexCount": 375,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2978257",
+      "title": "60",
+      "vertexCount": 121,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2978261",
+      "title": "57",
+      "vertexCount": 106,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2978284",
+      "title": "Ишачья тропа",
+      "vertexCount": 191,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2978292",
+      "title": "Красная тропа",
+      "vertexCount": 101,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2981679",
+      "title": "89",
+      "vertexCount": 111,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2981682",
+      "title": "90",
+      "vertexCount": 53,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2981716",
+      "title": "88",
+      "vertexCount": 73,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2981758",
+      "title": "Гора Баллы-Коба - т/с «Мангуп»",
+      "vertexCount": 145,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2981764",
+      "title": "урочище Пятая балка",
+      "vertexCount": 45,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2981768",
+      "title": "родник - гора Баллы Коба",
+      "vertexCount": 63,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2983111",
+      "title": "18",
+      "vertexCount": 72,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2983138",
+      "title": "23",
+      "vertexCount": 73,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2983159",
+      "title": "21",
+      "vertexCount": 159,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2983163",
+      "title": "22",
+      "vertexCount": 163,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2983180",
+      "title": "19",
+      "vertexCount": 69,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2983182",
+      "title": "16",
+      "vertexCount": 97,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2983194",
+      "title": "балка Джан-Дере - с.Новоульяновка",
+      "vertexCount": 93,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2983290",
+      "title": "170",
+      "vertexCount": 27,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984722",
+      "title": "2",
+      "vertexCount": 186,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984740",
+      "title": "т/с «Ай-Димитрий» - т/с «Узунджа»",
+      "vertexCount": 325,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984790",
+      "title": "т/с «Чайный домик» - т/с «Барская поляна»",
+      "vertexCount": 144,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984791",
+      "title": "45",
+      "vertexCount": 32,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984809",
+      "title": "т/с «Чайный домик» - водопад Серебряный",
+      "vertexCount": 142,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984813",
+      "title": "соединительный гора Сююрю-Кая",
+      "vertexCount": 79,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984816",
+      "title": "Водопад Серебряный - т/с «Данила»",
+      "vertexCount": 21,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984826",
+      "title": "54",
+      "vertexCount": 67,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984832",
+      "title": "28",
+      "vertexCount": 176,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984834",
+      "title": "27",
+      "vertexCount": 117,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984835",
+      "title": "26",
+      "vertexCount": 67,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984855",
+      "title": "46",
+      "vertexCount": 107,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984859",
+      "title": "44",
+      "vertexCount": 82,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984860",
+      "title": "т/с «Аи-Димитрий» - урочище Малый Бабулган",
+      "vertexCount": 113,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2984871",
+      "title": "50",
+      "vertexCount": 93,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2985047",
+      "title": "15",
+      "vertexCount": 149,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2985053",
+      "title": "Адым - Чокракская долина - гора Мангуп-Кале",
+      "vertexCount": 105,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2985074",
+      "title": "81",
+      "vertexCount": 175,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2985090",
+      "title": "3",
+      "vertexCount": 320,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2985091",
+      "title": "5",
+      "vertexCount": 155,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2985112",
+      "title": "104",
+      "vertexCount": 148,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2985115",
+      "title": "87",
+      "vertexCount": 200,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2985116",
+      "title": "88",
+      "vertexCount": 67,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2986430",
+      "title": "Пещерный город Эски-Кермен",
+      "vertexCount": 103,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2986482",
+      "title": "2-й лесной кордон - Эски-Кермен",
+      "vertexCount": 77,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2986483",
+      "title": "Соединительный Донаторский",
+      "vertexCount": 114,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992788",
+      "title": "25",
+      "vertexCount": 82,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992795",
+      "title": "24",
+      "vertexCount": 75,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992798",
+      "title": "82",
+      "vertexCount": 193,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992836",
+      "title": "Чертова лестница",
+      "vertexCount": 29,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992837",
+      "title": "8",
+      "vertexCount": 260,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992875",
+      "title": "6",
+      "vertexCount": 123,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992904",
+      "title": "142",
+      "vertexCount": 91,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992976",
+      "title": "148",
+      "vertexCount": 191,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992977",
+      "title": "140",
+      "vertexCount": 42,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992978",
+      "title": "139",
+      "vertexCount": 27,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992992",
+      "title": "145",
+      "vertexCount": 121,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2992996",
+      "title": "Маршрут OSM 2992996",
+      "vertexCount": 97,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993002",
+      "title": "Маршрут OSM 2993002",
+      "vertexCount": 134,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993007",
+      "title": "Маршрут OSM 2993007",
+      "vertexCount": 116,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993028",
+      "title": "Маршрут OSM 2993028",
+      "vertexCount": 69,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993029",
+      "title": "Маршрут OSM 2993029",
+      "vertexCount": 238,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993031",
+      "title": "166",
+      "vertexCount": 366,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993032",
+      "title": "Маршрут OSM 2993032",
+      "vertexCount": 60,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993033",
+      "title": "165",
+      "vertexCount": 248,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993043",
+      "title": "138",
+      "vertexCount": 500,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993089",
+      "title": "Коровья тропа",
+      "vertexCount": 176,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993092",
+      "title": "129",
+      "vertexCount": 260,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993152",
+      "title": "130",
+      "vertexCount": 135,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993154",
+      "title": "128",
+      "vertexCount": 155,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993161",
+      "title": "134",
+      "vertexCount": 253,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993164",
+      "title": "132",
+      "vertexCount": 25,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993165",
+      "title": "133",
+      "vertexCount": 51,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993169",
+      "title": "Маршрут OSM 2993169",
+      "vertexCount": 148,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993180",
+      "title": "143",
+      "vertexCount": 31,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993200",
+      "title": "136",
+      "vertexCount": 62,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993201",
+      "title": "135",
+      "vertexCount": 180,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2993215",
+      "title": "190",
+      "vertexCount": 397,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994714",
+      "title": "175",
+      "vertexCount": 320,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994715",
+      "title": "178",
+      "vertexCount": 179,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994733",
+      "title": "177",
+      "vertexCount": 98,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994734",
+      "title": "176",
+      "vertexCount": 30,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994762",
+      "title": "182",
+      "vertexCount": 150,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994763",
+      "title": "180",
+      "vertexCount": 58,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994789",
+      "title": "174",
+      "vertexCount": 147,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994790",
+      "title": "188",
+      "vertexCount": 212,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994796",
+      "title": "167",
+      "vertexCount": 201,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994839",
+      "title": "185",
+      "vertexCount": 149,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994840",
+      "title": "192",
+      "vertexCount": 74,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994841",
+      "title": "191",
+      "vertexCount": 111,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994874",
+      "title": "195",
+      "vertexCount": 219,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994875",
+      "title": "194",
+      "vertexCount": 116,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994910",
+      "title": "101",
+      "vertexCount": 91,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-2994911",
+      "title": "70",
+      "vertexCount": 104,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008239",
+      "title": "36",
+      "vertexCount": 24,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008293",
+      "title": "Маршрут OSM 3008293",
+      "vertexCount": 116,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008294",
+      "title": "156",
+      "vertexCount": 68,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008326",
+      "title": "149",
+      "vertexCount": 56,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008327",
+      "title": "151",
+      "vertexCount": 288,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008328",
+      "title": "150",
+      "vertexCount": 42,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008341",
+      "title": "98",
+      "vertexCount": 111,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008348",
+      "title": "97",
+      "vertexCount": 155,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008373",
+      "title": "95",
+      "vertexCount": 152,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008384",
+      "title": "93",
+      "vertexCount": 53,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008385",
+      "title": "96",
+      "vertexCount": 71,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008392",
+      "title": "106",
+      "vertexCount": 369,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3008393",
+      "title": "94",
+      "vertexCount": 229,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3037580",
+      "title": "WB1",
+      "vertexCount": 1283,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3038378",
+      "title": "WR",
+      "vertexCount": 2953,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3038445",
+      "title": "WB2",
+      "vertexCount": 974,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3038529",
+      "title": "WY2",
+      "vertexCount": 191,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3038620",
+      "title": "WY1",
+      "vertexCount": 798,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3039148",
+      "title": "WG1",
+      "vertexCount": 926,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3044723",
+      "title": "Маршрут OSM 3044723",
+      "vertexCount": 1338,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3044786",
+      "title": "EY6",
+      "vertexCount": 213,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3044797",
+      "title": "ER1",
+      "vertexCount": 196,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3044940",
+      "title": "Маршрут OSM 3044940",
+      "vertexCount": 491,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3044952",
+      "title": "Маршрут OSM 3044952",
+      "vertexCount": 317,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3044986",
+      "title": "EY5",
+      "vertexCount": 79,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3059143",
+      "title": "Маршрут OSM 3059143",
+      "vertexCount": 170,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3059167",
+      "title": "Маршрут OSM 3059167",
+      "vertexCount": 30,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3059173",
+      "title": "Маршрут OSM 3059173",
+      "vertexCount": 119,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3059316",
+      "title": "EY4",
+      "vertexCount": 168,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3748147",
+      "title": "Малое кольцо",
+      "vertexCount": 80,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-3748250",
+      "title": "Большое кольцо",
+      "vertexCount": 254,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-4509282",
+      "title": "30-ка",
+      "vertexCount": 2317,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-4509285",
+      "title": "Через водопадный",
+      "vertexCount": 1085,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-4509476",
+      "title": "Поля-Ястребиное",
+      "vertexCount": 209,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-4509477",
+      "title": "Жёлтый",
+      "vertexCount": 83,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-4509478",
+      "title": "Красный",
+      "vertexCount": 453,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-5458405",
+      "title": "В бухту Змеёвая",
+      "vertexCount": 501,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-5461727",
+      "title": "ББТ Большая Байкальская тропа",
+      "vertexCount": 3859,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-6040458",
+      "title": "Всесоюзный горнопешеходный маршрут № 77",
+      "vertexCount": 2852,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-6802600",
+      "title": "Узенбашская тропа",
+      "vertexCount": 174,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-7051502",
+      "title": "Большая Севастопольская тропа",
+      "vertexCount": 3846,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-7455857",
+      "title": "Солнечная тропа",
+      "vertexCount": 424,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-7547535",
+      "title": "Маршрут № 4",
+      "vertexCount": 156,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-7971235",
+      "title": "Кольцо Суханова",
+      "vertexCount": 278,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-8192676",
+      "title": "Можевеловая тропа (Центр Оникс - Ангар-Бурун)",
+      "vertexCount": 156,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-8323426",
+      "title": "к горному озеру Алла-Аскыр",
+      "vertexCount": 1737,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-9403239",
+      "title": "Тропа здоровья Малое кольцо",
+      "vertexCount": 33,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-9403246",
+      "title": "Тропа здоровья Большое и среднее кольцо",
+      "vertexCount": 204,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-9524255",
+      "title": "Маршрут OSM 9524255",
+      "vertexCount": 486,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-10626407",
+      "title": "водопад Кейву",
+      "vertexCount": 155,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-10716769",
+      "title": "Тропа на пик Черского",
+      "vertexCount": 699,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-10928641",
+      "title": "Тропа здоровья",
+      "vertexCount": 241,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-11566519",
+      "title": "Урочище Медвежьи ворота – Бзерпинский карниз - Лагерь Холодный",
+      "vertexCount": 1084,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-11620035",
+      "title": "Тропа Голицына",
+      "vertexCount": 140,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-11681960",
+      "title": "Реликтовый лес",
+      "vertexCount": 55,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-11820460",
+      "title": "Таракташская тропа",
+      "vertexCount": 225,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12220791",
+      "title": "Кабанья тропа",
+      "vertexCount": 55,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12328003",
+      "title": "Каверзинские водопады",
+      "vertexCount": 363,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12347143",
+      "title": "Мисхорская тропа",
+      "vertexCount": 156,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12350723",
+      "title": "Индюк тропа.",
+      "vertexCount": 238,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12351763",
+      "title": "Кореизская тропа",
+      "vertexCount": 202,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12404970",
+      "title": "Дантово ущелье - гора Сапун",
+      "vertexCount": 142,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12404988",
+      "title": "Вододопады на Мальцевом ручье",
+      "vertexCount": 333,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12406143",
+      "title": "Тропа здоровья",
+      "vertexCount": 80,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12438965",
+      "title": "Ставрикайская тропа",
+      "vertexCount": 93,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12438966",
+      "title": "Верхняя Боткинская тропа",
+      "vertexCount": 98,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12438967",
+      "title": "Боткинская тропа",
+      "vertexCount": 260,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12438968",
+      "title": "Штангеевская тропа",
+      "vertexCount": 206,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12472017",
+      "title": "Долина привидений",
+      "vertexCount": 283,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12494595",
+      "title": "Ангарский перевал - Эклизи-Бурун",
+      "vertexCount": 279,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12494851",
+      "title": "Эклизи-Бурун - Ангар-Бурун",
+      "vertexCount": 125,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-12494971",
+      "title": "Ангарский перевал - Тиссовое ущелье",
+      "vertexCount": 307,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13014211",
+      "title": "Бор-дол",
+      "vertexCount": 10,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13021062",
+      "title": "Харгинский лес",
+      "vertexCount": 228,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13025082",
+      "title": "Водопад Поликаря",
+      "vertexCount": 48,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13030392",
+      "title": "Тропа здоровья",
+      "vertexCount": 94,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13083400",
+      "title": "Эколого-туристический маршрут «Большое горное путешествие»",
+      "vertexCount": 4328,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13232467",
+      "title": "Путь к водопадам",
+      "vertexCount": 206,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13232468",
+      "title": "Каменный столб",
+      "vertexCount": 73,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13232469",
+      "title": "Юрьев Хутор",
+      "vertexCount": 33,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13232470",
+      "title": "Озёрный траверс",
+      "vertexCount": 358,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13407963",
+      "title": "Романовская дорога",
+      "vertexCount": 301,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13499262",
+      "title": "Еврейская тропа",
+      "vertexCount": 352,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13499477",
+      "title": "тропа Иограф",
+      "vertexCount": 191,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13523771",
+      "title": "Маршрут OSM 13523771",
+      "vertexCount": 90,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-13523772",
+      "title": "Маршрут OSM 13523772",
+      "vertexCount": 90,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14243573",
+      "title": "Маршрут OSM 14243573",
+      "vertexCount": 426,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14243702",
+      "title": "Маршрут OSM 14243702",
+      "vertexCount": 226,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14270035",
+      "title": "10 памятников ВОВ",
+      "vertexCount": 528,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14273717",
+      "title": "Маршрут OSM 14273717",
+      "vertexCount": 610,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376203",
+      "title": "К Ачипсинским водопадам до места отдыха \"Купель\"",
+      "vertexCount": 92,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376257",
+      "title": "К Ачипсинским водопадам",
+      "vertexCount": 667,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376382",
+      "title": "Черничная тропа",
+      "vertexCount": 269,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376417",
+      "title": "Альпийские луга",
+      "vertexCount": 216,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376574",
+      "title": "Два водопада",
+      "vertexCount": 139,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376588",
+      "title": "Черная пирамида",
+      "vertexCount": 65,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376599",
+      "title": "Перевал Седой",
+      "vertexCount": 33,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376615",
+      "title": "Перевал Аибга",
+      "vertexCount": 30,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376633",
+      "title": "Два Озера",
+      "vertexCount": 26,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376657",
+      "title": "Беседка любви",
+      "vertexCount": 162,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376701",
+      "title": "От снежников к Водопадам \"Менделиха\"",
+      "vertexCount": 299,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14376817",
+      "title": "Урочище Энгельмановы поляны – озеро Кардывач",
+      "vertexCount": 1222,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378644",
+      "title": "Воопад Хрустальный",
+      "vertexCount": 220,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378669",
+      "title": "Хмелевские озера + 2 смотровых площадки",
+      "vertexCount": 373,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378729",
+      "title": "Крепость Ачипсе",
+      "vertexCount": 98,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378738",
+      "title": "Греческий обзор, не официальный маршрут в заказнике",
+      "vertexCount": 345,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378740",
+      "title": "Дольмены Краснополянсккие",
+      "vertexCount": 113,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378772",
+      "title": "Путь воина",
+      "vertexCount": 30,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378779",
+      "title": "вдп Девичьи слезы",
+      "vertexCount": 47,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378808",
+      "title": "Водопад \"Безымянный\"",
+      "vertexCount": 236,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378813",
+      "title": "оз.Кардывач - оз.Синеокое",
+      "vertexCount": 194,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378821",
+      "title": "в.д.п. Фермерский",
+      "vertexCount": 178,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378861",
+      "title": "Красная поляна - Медовеевка",
+      "vertexCount": 574,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14378873",
+      "title": "Роза Хутор - кемпинг Нахазо",
+      "vertexCount": 221,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14390321",
+      "title": "Ахштырский хребет",
+      "vertexCount": 98,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14390325",
+      "title": "Дзыхринский водопад",
+      "vertexCount": 73,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14390331",
+      "title": "Пасть Дракона",
+      "vertexCount": 46,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14390337",
+      "title": "вдп Ивановский",
+      "vertexCount": 318,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14390341",
+      "title": "оз. Голубое",
+      "vertexCount": 333,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14390354",
+      "title": "пгт Красная Поляна - с. Аибга",
+      "vertexCount": 494,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14397434",
+      "title": "На вдп Поликаря + Купель 960",
+      "vertexCount": 260,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14397458",
+      "title": "Ажек",
+      "vertexCount": 269,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14397487",
+      "title": "Башня на горе Ахун",
+      "vertexCount": 402,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14397488",
+      "title": "Агурское ущелье и водопады",
+      "vertexCount": 306,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14397491",
+      "title": "Орлиные скалы",
+      "vertexCount": 173,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14397506",
+      "title": "Белые скалы",
+      "vertexCount": 274,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14407325",
+      "title": "к Водопаду",
+      "vertexCount": 92,
+      "outsideDisplaySource": 92,
+      "outsideRuntimeDisplay": 92,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": true,
+      "firstOutsideDisplayLngLat": [
+        40.6314781,
+        43.5290231
+      ]
+    },
+    {
+      "id": "osm-relation-14407510",
+      "title": "К водопаду Коготь",
+      "vertexCount": 83,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14594896",
+      "title": "Кавказская Тропа",
+      "vertexCount": 51133,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-14901517",
+      "title": "Тропа \"Дивный лес\"",
+      "vertexCount": 56,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15004011",
+      "title": "Крымская Тропа",
+      "vertexCount": 18242,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15352276",
+      "title": "Хайкинг 7 ветров",
+      "vertexCount": 160,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15352408",
+      "title": "12 водопадов",
+      "vertexCount": 32,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15352668",
+      "title": "Променад по набережной",
+      "vertexCount": 140,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15352823",
+      "title": "Кольцо вокруг семи ветров",
+      "vertexCount": 69,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15354460",
+      "title": "Виноградный терруар",
+      "vertexCount": 239,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15355329",
+      "title": "На сосновый лес",
+      "vertexCount": 148,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15355460",
+      "title": "На смотровую Дюрсо",
+      "vertexCount": 141,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15355589",
+      "title": "На святую Нину",
+      "vertexCount": 358,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15389861",
+      "title": "Подьем на домик йога",
+      "vertexCount": 63,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15389921",
+      "title": "Вокруг \"Круглого озера\"",
+      "vertexCount": 237,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15398162",
+      "title": "Плесецкие водопады",
+      "vertexCount": 277,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15407594",
+      "title": "Подьем на колдун",
+      "vertexCount": 91,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15418787",
+      "title": "на Неберджай",
+      "vertexCount": 246,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15421359",
+      "title": "на Неберджай-2",
+      "vertexCount": 177,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15421510",
+      "title": "По воде к Водоадам",
+      "vertexCount": 82,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15444795",
+      "title": "Ботаническая тропа",
+      "vertexCount": 193,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15477153",
+      "title": "Экологическая тропа \"Большой Карадаг\"",
+      "vertexCount": 176,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15477200",
+      "title": "Спус к началу Карадагской тропы",
+      "vertexCount": 158,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-15922325",
+      "title": "Никитино — Бамбаки — Тхач — Новопрохладное",
+      "vertexCount": 2534,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-16101696",
+      "title": "эко тропа \"Папоротниковая\"",
+      "vertexCount": 138,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-16121230",
+      "title": "Путь к Дому виноградаря",
+      "vertexCount": 103,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-16126776",
+      "title": "Путь к Усадьбе",
+      "vertexCount": 393,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-16127081",
+      "title": "Путь к Дому йога",
+      "vertexCount": 242,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-16138449",
+      "title": "По хребту Аибга",
+      "vertexCount": 308,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-16149624",
+      "title": "Парк водопадов Менделиха",
+      "vertexCount": 193,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-16277119",
+      "title": "100 пихт",
+      "vertexCount": 115,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-16277120",
+      "title": "Лабиринт",
+      "vertexCount": 80,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-16713285",
+      "title": "Тропа на Чёртовы ворота",
+      "vertexCount": 127,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-17840964",
+      "title": "тропа на водопад Учан-Су",
+      "vertexCount": 10,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18083047",
+      "title": "Маршрут OSM 18083047",
+      "vertexCount": 332,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18086558",
+      "title": "Тропа Палласа",
+      "vertexCount": 190,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18108422",
+      "title": "Riekkalansaari Trail 55km",
+      "vertexCount": 2533,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18144131",
+      "title": "Гора Кивакка",
+      "vertexCount": 290,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18144198",
+      "title": "Монастырская тропа",
+      "vertexCount": 151,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18162201",
+      "title": "Кавказская Тропа — маршруты",
+      "vertexCount": 61185,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18197119",
+      "title": "Экологическая тропа \"Волчья\"",
+      "vertexCount": 215,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18197120",
+      "title": "Экологическая тропа \"Медвежья\"",
+      "vertexCount": 184,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18197367",
+      "title": "Экологическая тропа \"Гора Синюха\"",
+      "vertexCount": 58,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18197451",
+      "title": "Экологическая тропа \"Шинок\"",
+      "vertexCount": 220,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18251715",
+      "title": "Riekkalansaari Trail 35km",
+      "vertexCount": 1779,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18251716",
+      "title": "Riekkalansaari Trail 12km",
+      "vertexCount": 598,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18251717",
+      "title": "Riekkalansaari Trail 25km",
+      "vertexCount": 1388,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18251718",
+      "title": "Riekkalansaari Trail 7km",
+      "vertexCount": 263,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18257803",
+      "title": "Riekkalansaari Trail 80km",
+      "vertexCount": 3146,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18673170",
+      "title": "Индюк, Семашхо, Два брата",
+      "vertexCount": 704,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-18694953",
+      "title": "Маршрут OSM 18694953",
+      "vertexCount": 63,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-21241600",
+      "title": "Экскурсионно-экологическая тропа в мемориальном парке Усадьбы В.П. Сукачёва",
+      "vertexCount": 27,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    },
+    {
+      "id": "osm-relation-21465406",
+      "title": "Тротуары Псебая",
+      "vertexCount": 199,
+      "outsideDisplaySource": 0,
+      "outsideRuntimeDisplay": 0,
+      "verticesIncorrectlyRemovedBySimplification": 0,
+      "whollyOutsideSelectedDisplaySource": false
+    }
+  ]
+}

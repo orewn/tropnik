@@ -1,0 +1,14 @@
+export const RUSSIA_BOUNDS: [[number, number], [number, number]];
+export const RUSSIA_AREA_URL: string;
+export const RUSSIA_MASK_URL: string;
+export const RUSSIA_CANONICAL_MASK_URL: string;
+export const MAP_OUTSIDE_COLOR: string;
+export type RussiaPadding = {top: number; bottom: number; left: number; right: number};
+export type RussiaCamera = {center: [number, number]; zoom: number; pitch?: number; bearing?: number};
+export function russiaLongitude(lng: number): number;
+export function russiaPadding(width: number, height: number, coveredBottom?: number): RussiaPadding;
+export function russiaCamera(width: number, height: number, padding?: RussiaPadding, tileSize?: number): RussiaCamera;
+export function constrainRussiaCamera(lng: number, lat: number, zoom: number, overview: RussiaCamera): RussiaCamera;
+export function displayGeoJSON<T>(value: T): T;
+export function inRussiaCoverage(lng: number, lat: number, area: unknown): boolean;
+export function leafletRussiaMask(mask: GeoJSON.GeoJsonObject): GeoJSON.FeatureCollection;

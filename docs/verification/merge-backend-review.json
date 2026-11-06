@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-06T06:55:17.767175+00:00",
+  "scope": "Read-only backend/contracts/infra/security-docs reconciliation; web/android/data owned by other agents",
+  "currentRoot": "/workspace/scratch/a2ce00e514d4/tropa",
+  "parallelRoot": "/workspace/scratch/8a746867132d/tropnik",
+  "baselineCheckpointInventorySha256": "883325706bf7380c9299f4515827c8e12b47be0b6235c0036043a8d834c2bf5a",
+  "baselineCheckpointZipSha256": "e8af5e33da31f7f52802344d97087b16e50eec740a8770407c9ee11ca75f4763",
+  "scopes": [
+    {
+      "scope": "backend",
+      "currentFiles": 40,
+      "parallelFiles": 40,
+      "identicalFiles": 28,
+      "onlyCurrent": [],
+      "onlyParallel": [],
+      "differences": [
+        {
+          "path": "backend/README.md",
+          "current": {
+            "bytes": 18557,
+            "sha256": "8a484a2cae5807facd179e1fb58bb891a79b8ab7bbfa7988ef52c00a0cf652a7"
+          },
+          "parallel": {
+            "bytes": 12573,
+            "sha256": "7262b01c6da4ccf5309a4b88aa369cd6fa04b707b3b9bc1e72f74f4c63ff2ca6"
+          }
+        },
+        {
+          "path": "backend/SECURITY_REVIEW.md",
+          "current": {
+            "bytes": 10025,
+            "sha256": "d6dfb153e353ba02316fd365cda459498921535dcffbd769abd34293807873f0"
+          },
+          "parallel": {
+            "bytes": 6489,
+            "sha256": "64376cda04b1c7d3adfd2793655a14f67f06d05ab0e384575dbec28dc33dc77f"
+          }
+        },
+        {
+          "path": "backend/cmd/tropa-admin/main.go",
+          "current": {
+            "bytes": 9233,
+            "sha256": "12f5d7d4704a6607e84b881c6f7d1fa48ecee4ff50714bbc6b916c470da0f621"
+          },
+          "parallel": {
+            "bytes": 9231,
+            "sha256": "c026852efb81aaa7e7eea5dc6a5e27b021ff11801a4c33f913f9063907f65450"
+          }
+        },
+        {
+          "path": "backend/internal/abuse/policy_test.go",
+          "current": {
+            "bytes": 1750,
+            "sha256": "e8562c6e3caede330563b7c7285e873651996be7afeeac632021447ba184e37d"
+          },
+          "parallel": {
+            "bytes": 1736,
+            "sha256": "57dc1c8546308204c661dc758637d8606ff95f7719076d009786d36c2c6afe38"
+          }
+        },
+        {
+          "path": "backend/internal/domain/moderation.go",
+          "current": {
+            "bytes": 3451,
+            "sha256": "136ced4b574a8458bb5ac2f5ca7dfc7ba25bc59bdeed23279ca2c4bd3314c4f5"
+          },
+          "parallel": {
+            "bytes": 3435,
+            "sha256": "fc2012638d089fd76f7bd2b2dd01ffce656a3e7a2d4cc3e9b7e48b5310ac2958"
+          }
+        },
+        {
+          "path": "backend/internal/domain/moderation_test.go",
+          "current": {
+            "bytes": 1109,
+            "sha256": "0971098d1d3beb8874f68fff79aadb00912dddd0ea21ba4820f7077fe8d93a75"
+          },
+          "parallel": {
+            "bytes": 946,
+            "sha256": "bc4ce82ec54343faa554db7a0d5fa4ee8175d90c780ae375339296176edd8c88"
+          }
+        },
+        {
+          "path": "backend/internal/httpapi/server_test.go",
+          "current": {
+            "bytes": 3709,
+            "sha256": "96292c2cd7ed415ad1595802467533eca1731674b8de5c792f63d66a873020eb"
+          },
+          "parallel": {
+            "bytes": 3674,
+            "sha256": "4a79767dbc26577051a4f92144270fb788559223938c5511a44f0441d7936e8f"
+          }
+        },
+        {
+          "path": "backend/internal/store/moderation.go",
+          "current": {
+            "bytes": 18978,
+            "sha256": "2f46b90c0de44994b284d16aca3f946c80f5b4e25e7a934e49c42f455b327cd3"
+          },
+          "parallel": {
+            "bytes": 17704,
+            "sha256": "2e660012acb1de8190a64f4b18e093b19c6ffccd3e16cb7c1627efeac32e4668"
+          }
+        },
+        {
+          "path": "backend/internal/store/moderation_integration_test.go",
+          "current": {
+            "bytes": 9312,
+            "sha256": "93c78ab5718d252c052ad70422afe4821b28e0a768c1dc0c55bed288b515ff9e"
+          },
+          "parallel": {
+            "bytes": 6188,
+            "sha256": "931537766adab0a8ee1b5922e6ee492140211e676faea5efaae7c90153595142"
+          }
+        },
+        {
+          "path": "backend/internal/store/postgres_integration_test.go",
+          "current": {
+            "bytes": 17522,
+            "sha256": "e125ac9ac051be55c9cebedf91279fb85589e515173a92b81e75336562928556"
+          },
+          "parallel": {
+            "bytes": 17465,
+            "sha256": "077b259da88a5c0b7f893522a0361620e85baa2db0e935ff22cec758e63398c2"
+          }
+        },
+        {
+          "path": "backend/verification/go-tests.jsonl",
+          "current": {
+            "bytes": 30470,
+            "sha256": "220019366b256de65ed8de198a5040ae5c7d18238cd7de5e807ab32e39346c15"
+          },
+          "parallel": {
+            "bytes": 26544,
+            "sha256": "213f15e30460159cf1e3ad20b64038617b8938a49db70ecee3c175244a26e2c9"
+          }
+        },
+        {
+          "path": "backend/verification/summary.json",
+          "current": {
+            "bytes": 5958,
+            "sha256": "f68393c3c6fba534d6d7d61af975dc40054886371ca7191eb3fed38016d63196"
+          },
+          "parallel": {
+            "bytes": 4270,
+            "sha256": "d22a8261a1cabfd3d5be9128481a529a3774830a0d97079421927f8aa0c2f398"
+          }
+        }
+      ],
+      "decision": "keep current; no additive backend/contract/infra code found"
+    },
+    {
+      "scope": "contracts",
+      "currentFiles": 2,
+      "parallelFiles": 2,
+      "identicalFiles": 0,
+      "onlyCurrent": [],
+      "onlyParallel": [],
+      "differences": [
+        {
+          "path": "contracts/api.ts",
+          "current": {
+            "bytes": 8580,
+            "sha256": "247758a59797b2613dd950d5fc1a00fe826287fee0405bad8d0f531359d6a599"
+          },
+          "parallel": {
+            "bytes": 8414,
+            "sha256": "f80c3c42161a7de097e82e819332af4199ad3da5a476eadfe40fc00789d289f8"
+          }
+        },
+        {
+          "path": "contracts/openapi.yaml",
+          "current": {
+            "bytes": 28786,
+            "sha256": "8b794002c3d0d3dad09fd7a6e5007ee1129649d7a2e1db89f13109f1e84025ba"
+          },
+          "parallel": {
+            "bytes": 28737,
+            "sha256": "86f5bfdd6673b70c377bde02813f8d0dbf640283a1b7af47a2fc6a1e006fd024"
+          }
+        }
+      ],
+      "decision": "keep current; no additive backend/contract/infra code found"
+    },
+    {
+      "scope": "infra",
+      "currentFiles": 8,
+      "parallelFiles": 8,
+      "identicalFiles": 8,
+      "onlyCurrent": [],
+      "onlyParallel": [],
+      "differences": [],
+      "decision": "keep current; no additive backend/contract/infra code found"
+    }
+  ],
+  "gofmtNormalizedIdentical": [
+    "backend/cmd/tropa-admin/main.go",
+    "backend/internal/abuse/policy_test.go",
+    "backend/internal/httpapi/server_test.go",
+    "backend/internal/store/postgres_integration_test.go"
+  ],
+  "backendVerificationRecords": [
+    {
+      "tree": "current",
+      "reportSha256": "f68393c3c6fba534d6d7d61af975dc40054886371ca7191eb3fed38016d63196",
+      "recordedAt": "2026-11-06T05:42:48.901010+00:00",
+      "goTestRecord": {
+        "command": "GOPROXY=off go test -race -json ./...",
+        "status": "passed",
+        "topLevelTests": 22,
+        "testAndSubtestPassEvents": 31,
+        "failedEvents": 0,
+        "packagesWithExecutedTests": [
+          "tropa/backend/cmd/tropa-api",
+          "tropa/backend/internal/abuse",
+          "tropa/backend/internal/auth",
+          "tropa/backend/internal/domain",
+          "tropa/backend/internal/httpapi"
+        ]
+      },
+      "recordedSourceHashMismatches": []
+    },
+    {
+      "tree": "parallel",
+      "reportSha256": "d22a8261a1cabfd3d5be9128481a529a3774830a0d97079421927f8aa0c2f398",
+      "recordedAt": "2026-11-06T04:40:14.029242+00:00",
+      "goTestRecord": {
+        "command": "GOPROXY=off go test -race -json ./...",
+        "status": "passed",
+        "topLevelTests": 18,
+        "testAndSubtestPassEvents": 27,
+        "failedEvents": 0,
+        "packagesWithExecutedTests": [
+          "tropa/backend/cmd/tropa-api",
+          "tropa/backend/internal/domain",
+          "tropa/backend/internal/httpapi",
+          "tropa/backend/internal/auth"
+        ]
+      },
+      "recordedSourceHashMismatches": [
+        "cmd/tropa-admin/main.go",
+        "internal/domain/model.go",
+        "internal/httpapi/guides.go",
+        "internal/httpapi/server.go",
+        "internal/httpapi/server_test.go",
+        "internal/store/guides.go",
+        "internal/store/postgres.go",
+        "internal/store/postgres_integration_test.go",
+        "internal/store/recruitment.go",
+        "internal/store/social.go",
+        "migrations/001_initial.sql",
+        "migrations/grants.go",
+        "migrations/migrate.go"
+      ]
+    }
+  ],
+  "parallelEvidenceDocuments": [
+    {
+      "path": "docs/verification/session-2026-11-06.json",
+      "bytes": 6117,
+      "sha256": "00d2f66e1921b8354a2a239c0772cef0a887afe698c955bafa16568a82b1833c",
+      "status": "external snapshot evidence only; not a merged-build verification"
+    },
+    {
+      "path": "docs/verification/terrain-refinement.json",
+      "bytes": 9325,
+      "sha256": "040935207d18363eb3da14b48fa128b4e70a837c1f759cde2e26972a67336671",
+      "status": "external snapshot evidence only; not a merged-build verification"
+    }
+  ],
+  "currentBackendContractInfraCheckpointMismatches": [],
+  "actions": {
+    "parallelModified": false,
+    "backendCodeChanged": false,
+    "contractsChanged": false,
+    "infraChanged": false,
+    "testsRerun": false,
+    "newZipCreated": false,
+    "githubWrites": false
+  },
+  "limitations": [
+    "Existing PostgreSQL integration executable was compiled but never run on a live database",
+    "Previous web 15 / Android 17 readiness results are checkpoint evidence; merged-client builds need fresh owner verification",
+    "No new operational connection, backend deployment or device validation is implied"
+  ]
+}

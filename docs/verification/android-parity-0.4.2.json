@@ -1,0 +1,449 @@
+{
+  "recordedAt": "2026-11-06T13:22:56.763526+00:00",
+  "scope": "0.4.2 final: native/web catalogue parity (277 references in six regions), exact local geometry, explicit online detail with local fallback, lossless APK compression; API readiness and prior recovery fixes preserved",
+  "versionName": "0.4.2-preview",
+  "versionCode": 6,
+  "minSdk": 26,
+  "targetSdk": 36,
+  "packages": [
+    {
+      "apk": "tropnik-arm64-preview.apk",
+      "sizeBytes": 24467090,
+      "sha256": "41eabb299c0b2037311e813dd8d15f1f026977f601d851dfdd537b48b2f32292",
+      "abis": [
+        "arm64-v8a"
+      ],
+      "offlineTileCount": 193,
+      "manifestFilesVerified": 202,
+      "manifestBytesVerified": 2593757,
+      "cyrillicGlyphsPresent": true,
+      "closureAdvisoryPresent": true,
+      "native64BitElfLoadAlignment": {
+        "lib/arm64-v8a/libandroidx.graphics.path.so": 16384,
+        "lib/arm64-v8a/libmaplibre.so": 16384
+      },
+      "terrainTileCount": 21,
+      "terrainManifestFilesVerified": 48,
+      "terrainManifestBytesVerified": 2288677,
+      "terrainGridSamples": 16641,
+      "terrainBounds": [
+        40.29,
+        43.64,
+        40.49,
+        43.82
+      ],
+      "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+      "landscapeManifestFilesVerified": 1,
+      "landscapeBytesVerified": 1990035,
+      "landscapeSha256": "41743ade3e96408b0687515d770903497fddb139587f64e45af5f8d74384194a",
+      "landscapeOffline": true,
+      "landscapeGridDimensions": [
+        513,
+        513
+      ],
+      "landscapeGridSamples": 263169,
+      "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+      "landscapeGridSpacingApproxM": {
+        "eastWest": 31.42,
+        "northSouth": 39.14
+      },
+      "russiaDisplayAssetCount": 2,
+      "russiaDisplayAssetBytesVerified": 2219720,
+      "russiaDisplayProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+      "russiaFitBounds": [
+        [
+          19.6389282,
+          41.1858711
+        ],
+        [
+          191.0026658,
+          81.858721
+        ]
+      ],
+      "russiaMaskConfigured": true,
+      "russiaExcludedCatalogRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "russiaOverviewTileCount": 341,
+      "russiaOverviewTileBytesVerified": 1689348,
+      "russiaOverviewFilesVerified": 344,
+      "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+      "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "russiaOverviewMaxNativeZoom": 4,
+      "russiaOverviewLayerMaxZoom": 6,
+      "russiaOverviewLocalOnly": true,
+      "russiaOverviewCompleteWrappedXYZ": true,
+      "russiaOverviewIsElevationData": false,
+      "catalogManifestSha256": "e7f4274e46f0a8b0b0be4e1a638687af21bb2ec1e1064e373474c0b1ca9ed45f",
+      "catalogSha256": "4b123fae59af5407b4b1e1f66f9a34050bf1d67f1a006909498fbf5ce5c218bc",
+      "catalogRegionCount": 6,
+      "catalogReferenceRouteCount": 277,
+      "catalogLearningRouteCount": 1,
+      "catalogGeometryFilesVerified": 277,
+      "catalogGeometryBytesVerified": 5369449,
+      "catalogGeometryVerticesVerified": 222981,
+      "catalogRegionMembership": {
+        "altai": 9,
+        "karelia": 11,
+        "krym": 151,
+        "baikal": 7,
+        "kamchatka": 1,
+        "krasnodar": 98
+      },
+      "catalogFieldVerifiedCount": 0,
+      "catalogNavigationReadyCount": 0,
+      "catalogSourceByteParityVerified": false,
+      "localOnlyMapResources": false,
+      "bundledOfflineMapAvailable": true,
+      "onlineMapSourcesExplicitlyAllowlisted": true,
+      "onlineMapSourceUrls": [
+        "https://tiles.openfreemap.org/planet/latest",
+        "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"
+      ],
+      "onlineMapLayerCount": 26,
+      "onlineMapMinZoom": 5,
+      "russiaMaskAboveOnlineMap": true,
+      "onlineSourcesManifestSha256": "c2b69324b29b57453c61648cf38d15fd7378e91f152a35e8a92a8e992262e260",
+      "terrainRendererSha256": "694dd9201c1a62a10a1e12d71af7e41acab77b56f1500f14eef7d32baa0c1832",
+      "nativeHillshadeCameraRelative": true,
+      "nativeHillshadeCameraAnchored": true,
+      "nativeMapLibreTerrainMeshSupported": false,
+      "separateLocalMeshViewer": true,
+      "manropeFontBundled": true,
+      "terrainTilesVerified": 21,
+      "terrainAttributionAndLicensePresent": true,
+      "sceneBytes": 1990035,
+      "sceneSha256": "41743ade3e96408b0687515d770903497fddb139587f64e45af5f8d74384194a",
+      "deviceUiTestPerformedByThisScript": false,
+      "apkSignatureV2Verified": true,
+      "zipAlignment16KVerified": true,
+      "allSourceAssetsByteParity": true,
+      "sourceAssetsVerified": 889
+    },
+    {
+      "apk": "tropnik-preview.apk",
+      "sizeBytes": 31619028,
+      "sha256": "775bcfea9ca1ac775876f9fc419f4c67a222b25d59f4962a5aa23d7e1b33becd",
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ],
+      "offlineTileCount": 193,
+      "manifestFilesVerified": 202,
+      "manifestBytesVerified": 2593757,
+      "cyrillicGlyphsPresent": true,
+      "closureAdvisoryPresent": true,
+      "native64BitElfLoadAlignment": {
+        "lib/arm64-v8a/libandroidx.graphics.path.so": 16384,
+        "lib/arm64-v8a/libmaplibre.so": 16384,
+        "lib/x86_64/libandroidx.graphics.path.so": 16384,
+        "lib/x86_64/libmaplibre.so": 16384
+      },
+      "terrainTileCount": 21,
+      "terrainManifestFilesVerified": 48,
+      "terrainManifestBytesVerified": 2288677,
+      "terrainGridSamples": 16641,
+      "terrainBounds": [
+        40.29,
+        43.64,
+        40.49,
+        43.82
+      ],
+      "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+      "landscapeManifestFilesVerified": 1,
+      "landscapeBytesVerified": 1990035,
+      "landscapeSha256": "41743ade3e96408b0687515d770903497fddb139587f64e45af5f8d74384194a",
+      "landscapeOffline": true,
+      "landscapeGridDimensions": [
+        513,
+        513
+      ],
+      "landscapeGridSamples": 263169,
+      "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+      "landscapeGridSpacingApproxM": {
+        "eastWest": 31.42,
+        "northSouth": 39.14
+      },
+      "russiaDisplayAssetCount": 2,
+      "russiaDisplayAssetBytesVerified": 2219720,
+      "russiaDisplayProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+      "russiaFitBounds": [
+        [
+          19.6389282,
+          41.1858711
+        ],
+        [
+          191.0026658,
+          81.858721
+        ]
+      ],
+      "russiaMaskConfigured": true,
+      "russiaExcludedCatalogRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "russiaOverviewTileCount": 341,
+      "russiaOverviewTileBytesVerified": 1689348,
+      "russiaOverviewFilesVerified": 344,
+      "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+      "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "russiaOverviewMaxNativeZoom": 4,
+      "russiaOverviewLayerMaxZoom": 6,
+      "russiaOverviewLocalOnly": true,
+      "russiaOverviewCompleteWrappedXYZ": true,
+      "russiaOverviewIsElevationData": false,
+      "catalogManifestSha256": "e7f4274e46f0a8b0b0be4e1a638687af21bb2ec1e1064e373474c0b1ca9ed45f",
+      "catalogSha256": "4b123fae59af5407b4b1e1f66f9a34050bf1d67f1a006909498fbf5ce5c218bc",
+      "catalogRegionCount": 6,
+      "catalogReferenceRouteCount": 277,
+      "catalogLearningRouteCount": 1,
+      "catalogGeometryFilesVerified": 277,
+      "catalogGeometryBytesVerified": 5369449,
+      "catalogGeometryVerticesVerified": 222981,
+      "catalogRegionMembership": {
+        "altai": 9,
+        "krym": 151,
+        "kamchatka": 1,
+        "krasnodar": 98,
+        "baikal": 7,
+        "karelia": 11
+      },
+      "catalogFieldVerifiedCount": 0,
+      "catalogNavigationReadyCount": 0,
+      "catalogSourceByteParityVerified": false,
+      "localOnlyMapResources": false,
+      "bundledOfflineMapAvailable": true,
+      "onlineMapSourcesExplicitlyAllowlisted": true,
+      "onlineMapSourceUrls": [
+        "https://tiles.openfreemap.org/planet/latest",
+        "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"
+      ],
+      "onlineMapLayerCount": 26,
+      "onlineMapMinZoom": 5,
+      "russiaMaskAboveOnlineMap": true,
+      "onlineSourcesManifestSha256": "c2b69324b29b57453c61648cf38d15fd7378e91f152a35e8a92a8e992262e260",
+      "terrainRendererSha256": "694dd9201c1a62a10a1e12d71af7e41acab77b56f1500f14eef7d32baa0c1832",
+      "nativeHillshadeCameraRelative": true,
+      "nativeHillshadeCameraAnchored": true,
+      "nativeMapLibreTerrainMeshSupported": false,
+      "separateLocalMeshViewer": true,
+      "manropeFontBundled": true,
+      "terrainTilesVerified": 21,
+      "terrainAttributionAndLicensePresent": true,
+      "sceneBytes": 1990035,
+      "sceneSha256": "41743ade3e96408b0687515d770903497fddb139587f64e45af5f8d74384194a",
+      "deviceUiTestPerformedByThisScript": false,
+      "apkSignatureV2Verified": true,
+      "zipAlignment16KVerified": true,
+      "allSourceAssetsByteParity": true,
+      "sourceAssetsVerified": 889
+    }
+  ],
+  "unitTests": {
+    "suites": [
+      {
+        "name": "ru.tropa.app.data.ApiAddressTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.025"
+      },
+      {
+        "name": "ru.tropa.app.data.ApiContractTest",
+        "tests": "8",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "1.143"
+      },
+      {
+        "name": "ru.tropa.app.data.LocalLandscapeAssetsTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.075"
+      },
+      {
+        "name": "ru.tropa.app.data.MapStylePolicyTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.089"
+      },
+      {
+        "name": "ru.tropa.app.data.ModerationContractTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.002"
+      },
+      {
+        "name": "ru.tropa.app.data.OfflinePackIntegrityTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.01"
+      },
+      {
+        "name": "ru.tropa.app.data.OfflinePackPublicationTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.022"
+      },
+      {
+        "name": "ru.tropa.app.data.RussiaDisplayAreaTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.234"
+      }
+    ],
+    "tests": 29,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "instrumentationApkCompiled": true,
+    "instrumentationExecuted": false
+  },
+  "apiBaseUrl": "",
+  "compression": [
+    {
+      "zipEntriesVerified": 1075,
+      "allUncompressedEntrySha256Unchanged": true,
+      "deflateLevel": 9,
+      "storedEntriesRetainStoredMethod": true,
+      "sourceBytes": 26620600,
+      "sourceSha256": "07d3a9751038ff5be99be589d3f4758cb39866a034a99783475f5e70e39e6404",
+      "outputBytes": 24467090,
+      "outputSha256": "41eabb299c0b2037311e813dd8d15f1f026977f601d851dfdd537b48b2f32292",
+      "savedBytes": 2153510,
+      "debugCertificateSha256": "9159bbd8942c86ee5f81de16e29724505e3b04c9222223dd2b1374c63c4d8718",
+      "sameDebugCertificateVerified": true,
+      "zipAlignment16KVerified": true,
+      "apkV2SignatureVerified": true
+    },
+    {
+      "zipEntriesVerified": 1079,
+      "allUncompressedEntrySha256Unchanged": true,
+      "deflateLevel": 9,
+      "storedEntriesRetainStoredMethod": true,
+      "sourceBytes": 34397764,
+      "sourceSha256": "4c9accad8239bd9fdaf0ee1dc87e7ddb08beb86c1ed43dcb0d9ed56a7814a8fe",
+      "outputBytes": 31619028,
+      "outputSha256": "775bcfea9ca1ac775876f9fc419f4c67a222b25d59f4962a5aa23d7e1b33becd",
+      "savedBytes": 2778736,
+      "debugCertificateSha256": "9159bbd8942c86ee5f81de16e29724505e3b04c9222223dd2b1374c63c4d8718",
+      "sameDebugCertificateVerified": true,
+      "zipAlignment16KVerified": true,
+      "apkV2SignatureVerified": true
+    }
+  ],
+  "assetTests": {
+    "python": {
+      "tests": 21,
+      "passed": 21
+    },
+    "node": {
+      "tests": 6,
+      "passed": 6
+    },
+    "catalogCheck": {
+      "checked": true,
+      "regions": 6,
+      "referenceRoutes": 277,
+      "learningRoutes": 1,
+      "geometryFiles": 277,
+      "geometryBytes": 5369449,
+      "catalogBytes": 758873,
+      "catalogSha256": "4b123fae59af5407b4b1e1f66f9a34050bf1d67f1a006909498fbf5ce5c218bc",
+      "byRegion": {
+        "altai": 9,
+        "krasnodar": 98,
+        "karelia": 11,
+        "krym": 151,
+        "baikal": 7,
+        "kamchatka": 1
+      },
+      "excludedRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "fieldVerified": 0,
+      "navigationReady": 0
+    },
+    "prepareCheck": {
+      "checkOnly": true,
+      "terrainTileCount": 21,
+      "terrainManifestFilesVerified": 48,
+      "terrainManifestBytesVerified": 2288677,
+      "terrainGridSamples": 16641,
+      "terrainBounds": [
+        40.29,
+        43.64,
+        40.49,
+        43.82
+      ],
+      "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+      "landscapeManifestFilesVerified": 1,
+      "landscapeBytesVerified": 1990035,
+      "landscapeSha256": "41743ade3e96408b0687515d770903497fddb139587f64e45af5f8d74384194a",
+      "landscapeOffline": true,
+      "landscapeGridDimensions": [
+        513,
+        513
+      ],
+      "landscapeGridSamples": 263169,
+      "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+      "landscapeGridSpacingApproxM": {
+        "eastWest": 31.42,
+        "northSouth": 39.14
+      },
+      "russiaDisplayAssetCount": 2,
+      "russiaDisplayAssetBytesVerified": 2219720,
+      "russiaDisplayProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+      "russiaFitBounds": [
+        [
+          19.6389282,
+          41.1858711
+        ],
+        [
+          191.0026658,
+          81.858721
+        ]
+      ],
+      "russiaMaskConfigured": true,
+      "russiaExcludedCatalogRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "russiaOverviewTileCount": 341,
+      "russiaOverviewTileBytesVerified": 1689348,
+      "russiaOverviewFilesVerified": 344,
+      "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+      "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "russiaOverviewMaxNativeZoom": 4,
+      "russiaOverviewLayerMaxZoom": 6,
+      "russiaOverviewLocalOnly": true,
+      "russiaOverviewCompleteWrappedXYZ": true,
+      "russiaOverviewIsElevationData": false
+    }
+  },
+  "instrumentationScenariosCompiled": 5,
+  "instrumentationApkCompiled": true,
+  "instrumentationExecuted": false,
+  "deviceExecutionTested": false,
+  "liveApiPostgisTested": false,
+  "note": "Only build, source/asset verification and local test fixtures were executed. No device, emulator or deployed backend/PostGIS test."
+}

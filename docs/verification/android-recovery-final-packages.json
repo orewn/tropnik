@@ -1,0 +1,323 @@
+{
+  "recordedAt": "2026-11-06T12:48:59.719174+00:00",
+  "scope": "0.4.1 final: graphics recovery and cancellable offline publication plus bundled Natural Earth Russia overview relief; readiness and canonical Russia mask preserved",
+  "versionName": "0.4.1-preview",
+  "versionCode": 5,
+  "minSdk": 26,
+  "targetSdk": 36,
+  "packages": [
+    {
+      "apk": "tropnik-arm64-preview.apk",
+      "sizeBytes": 24606797,
+      "sha256": "9e5496c156720566169c2fc6a5198c2e9d5b3a170024cd910f1d1ef2f7587b41",
+      "abis": [
+        "arm64-v8a"
+      ],
+      "offlineTileCount": 193,
+      "manifestFilesVerified": 202,
+      "manifestBytesVerified": 2593757,
+      "localOnlyMapResources": true,
+      "cyrillicGlyphsPresent": true,
+      "closureAdvisoryPresent": true,
+      "native64BitElfLoadAlignment": {
+        "lib/arm64-v8a/libandroidx.graphics.path.so": 16384,
+        "lib/arm64-v8a/libmaplibre.so": 16384
+      },
+      "terrainTileCount": 21,
+      "terrainManifestFilesVerified": 48,
+      "terrainManifestBytesVerified": 2288677,
+      "terrainGridSamples": 16641,
+      "terrainBounds": [
+        40.29,
+        43.64,
+        40.49,
+        43.82
+      ],
+      "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+      "landscapeManifestFilesVerified": 1,
+      "landscapeBytesVerified": 1990087,
+      "landscapeSha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "landscapeOffline": true,
+      "landscapeGridDimensions": [
+        513,
+        513
+      ],
+      "landscapeGridSamples": 263169,
+      "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+      "landscapeGridSpacingApproxM": {
+        "eastWest": 31.42,
+        "northSouth": 39.14
+      },
+      "russiaDisplayAssetCount": 2,
+      "russiaDisplayAssetBytesVerified": 2219720,
+      "russiaDisplayProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+      "russiaFitBounds": [
+        [
+          19.6389282,
+          41.1858711
+        ],
+        [
+          191.0026658,
+          81.858721
+        ]
+      ],
+      "russiaMaskConfigured": true,
+      "russiaExcludedCatalogRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "russiaOverviewTileCount": 341,
+      "russiaOverviewTileBytesVerified": 1689348,
+      "russiaOverviewFilesVerified": 344,
+      "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+      "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "russiaOverviewMaxNativeZoom": 4,
+      "russiaOverviewLayerMaxZoom": 6,
+      "russiaOverviewLocalOnly": true,
+      "russiaOverviewCompleteWrappedXYZ": true,
+      "russiaOverviewIsElevationData": false,
+      "terrainRendererSha256": "694dd9201c1a62a10a1e12d71af7e41acab77b56f1500f14eef7d32baa0c1832",
+      "nativeHillshadeCameraRelative": true,
+      "nativeHillshadeCameraAnchored": true,
+      "nativeMapLibreTerrainMeshSupported": false,
+      "separateLocalMeshViewer": true,
+      "manropeFontBundled": true,
+      "terrainTilesVerified": 21,
+      "terrainAttributionAndLicensePresent": true,
+      "sceneBytes": 1990087,
+      "sceneSha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "deviceUiTestPerformedByThisScript": false,
+      "apkSignatureV2Verified": true,
+      "zipAlignment16KVerified": true
+    },
+    {
+      "apk": "tropnik-preview.apk",
+      "sizeBytes": 32379043,
+      "sha256": "486a97b635a8ad3e93c6ded2a745f68313bf1c04784c1e95fbc5e1babd8e559a",
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ],
+      "offlineTileCount": 193,
+      "manifestFilesVerified": 202,
+      "manifestBytesVerified": 2593757,
+      "localOnlyMapResources": true,
+      "cyrillicGlyphsPresent": true,
+      "closureAdvisoryPresent": true,
+      "native64BitElfLoadAlignment": {
+        "lib/arm64-v8a/libandroidx.graphics.path.so": 16384,
+        "lib/arm64-v8a/libmaplibre.so": 16384,
+        "lib/x86_64/libandroidx.graphics.path.so": 16384,
+        "lib/x86_64/libmaplibre.so": 16384
+      },
+      "terrainTileCount": 21,
+      "terrainManifestFilesVerified": 48,
+      "terrainManifestBytesVerified": 2288677,
+      "terrainGridSamples": 16641,
+      "terrainBounds": [
+        40.29,
+        43.64,
+        40.49,
+        43.82
+      ],
+      "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+      "landscapeManifestFilesVerified": 1,
+      "landscapeBytesVerified": 1990087,
+      "landscapeSha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "landscapeOffline": true,
+      "landscapeGridDimensions": [
+        513,
+        513
+      ],
+      "landscapeGridSamples": 263169,
+      "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+      "landscapeGridSpacingApproxM": {
+        "eastWest": 31.42,
+        "northSouth": 39.14
+      },
+      "russiaDisplayAssetCount": 2,
+      "russiaDisplayAssetBytesVerified": 2219720,
+      "russiaDisplayProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+      "russiaFitBounds": [
+        [
+          19.6389282,
+          41.1858711
+        ],
+        [
+          191.0026658,
+          81.858721
+        ]
+      ],
+      "russiaMaskConfigured": true,
+      "russiaExcludedCatalogRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "russiaOverviewTileCount": 341,
+      "russiaOverviewTileBytesVerified": 1689348,
+      "russiaOverviewFilesVerified": 344,
+      "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+      "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "russiaOverviewMaxNativeZoom": 4,
+      "russiaOverviewLayerMaxZoom": 6,
+      "russiaOverviewLocalOnly": true,
+      "russiaOverviewCompleteWrappedXYZ": true,
+      "russiaOverviewIsElevationData": false,
+      "terrainRendererSha256": "694dd9201c1a62a10a1e12d71af7e41acab77b56f1500f14eef7d32baa0c1832",
+      "nativeHillshadeCameraRelative": true,
+      "nativeHillshadeCameraAnchored": true,
+      "nativeMapLibreTerrainMeshSupported": false,
+      "separateLocalMeshViewer": true,
+      "manropeFontBundled": true,
+      "terrainTilesVerified": 21,
+      "terrainAttributionAndLicensePresent": true,
+      "sceneBytes": 1990087,
+      "sceneSha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "deviceUiTestPerformedByThisScript": false,
+      "apkSignatureV2Verified": true,
+      "zipAlignment16KVerified": true
+    }
+  ],
+  "unitTests": {
+    "suites": [
+      {
+        "name": "ru.tropa.app.data.ApiAddressTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.025"
+      },
+      {
+        "name": "ru.tropa.app.data.ApiContractTest",
+        "tests": "8",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "1.445"
+      },
+      {
+        "name": "ru.tropa.app.data.LocalLandscapeAssetsTest",
+        "tests": "4",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.119"
+      },
+      {
+        "name": "ru.tropa.app.data.ModerationContractTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.008"
+      },
+      {
+        "name": "ru.tropa.app.data.OfflinePackIntegrityTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.015"
+      },
+      {
+        "name": "ru.tropa.app.data.OfflinePackPublicationTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.027"
+      },
+      {
+        "name": "ru.tropa.app.data.RussiaDisplayAreaTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.377"
+      }
+    ],
+    "tests": 25,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "instrumentationApkCompiled": true,
+    "instrumentationExecuted": false
+  },
+  "assetTests": {
+    "python": {
+      "tests": 15,
+      "passed": 15
+    },
+    "node": {
+      "tests": 6,
+      "passed": 6
+    },
+    "prepareCheck": {
+      "checkOnly": true,
+      "terrainTileCount": 21,
+      "terrainManifestFilesVerified": 48,
+      "terrainManifestBytesVerified": 2288677,
+      "terrainGridSamples": 16641,
+      "terrainBounds": [
+        40.29,
+        43.64,
+        40.49,
+        43.82
+      ],
+      "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+      "landscapeManifestFilesVerified": 1,
+      "landscapeBytesVerified": 1990087,
+      "landscapeSha256": "7039f134af06aba740f7f7f085b3723926ee017411fa43a529b84933afd7ff98",
+      "landscapeOffline": true,
+      "landscapeGridDimensions": [
+        513,
+        513
+      ],
+      "landscapeGridSamples": 263169,
+      "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+      "landscapeGridSpacingApproxM": {
+        "eastWest": 31.42,
+        "northSouth": 39.14
+      },
+      "russiaDisplayAssetCount": 2,
+      "russiaDisplayAssetBytesVerified": 2219720,
+      "russiaDisplayProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+      "russiaFitBounds": [
+        [
+          19.6389282,
+          41.1858711
+        ],
+        [
+          191.0026658,
+          81.858721
+        ]
+      ],
+      "russiaMaskConfigured": true,
+      "russiaExcludedCatalogRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "russiaOverviewTileCount": 341,
+      "russiaOverviewTileBytesVerified": 1689348,
+      "russiaOverviewFilesVerified": 344,
+      "russiaOverviewManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
+      "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "russiaOverviewMaxNativeZoom": 4,
+      "russiaOverviewLayerMaxZoom": 6,
+      "russiaOverviewLocalOnly": true,
+      "russiaOverviewCompleteWrappedXYZ": true,
+      "russiaOverviewIsElevationData": false
+    }
+  },
+  "instrumentationScenariosCompiled": 5,
+  "instrumentationApkCompiled": true,
+  "instrumentationExecuted": false,
+  "deviceExecutionTested": false,
+  "liveApiPostgisTested": false,
+  "note": "Only build, source/asset verification and local test fixtures were executed. No device, emulator or deployed backend/PostGIS test."
+}

@@ -1,0 +1,954 @@
+/**
+ * Georeferenced DEM viewer; no external dependencies, assets or network requests.
+ * Heights stay at 1:1 scale. Colours are cartographic, not observed land cover.
+ * WebGL2: full-resolution height/normal textures, LOD mesh, cached terrain shadows.
+ * Canvas2D: smooth, depth-buffered compatibility rendering. No idle animation loop.
+ */
+const PI=Math.PI,TAU=PI*2,EARTH_RADIUS=6371008.8;
+const DEFAULT_VIEW=Object.freeze({yaw:-.48,pitch:.72,zoom:1});
+const SKY=[223,230,218],MAX_VERTICES=1050625,MAX_ROUTE_SEGMENTS=50000;
+const SHADOW_COMPACT_QUERIES=32,SHADOW_FULL_QUERIES=48,SHADOW_MAX_DEPTH=20;
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const mix=(a,b,t)=>a+(b-a)*t;
+const smoothstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const normalize=v=>{const n=Math.hypot(...v)||1;return v.map(x=>x/n);};
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+
+export function validateTerrainGrid(grid){
+ if(!grid||!Number.isInteger(grid.width)||!Number.isInteger(grid.height)||grid.width<2||grid.height<2||
+ grid.width*grid.height>MAX_VERTICES||!grid.elevations||grid.elevations.length!==grid.width*grid.height)
+  throw new TypeError('Invalid or oversized elevation grid');
+ const b=grid.bounds;
+ if(!Array.isArray(b)||b.length!==4||!b.every(Number.isFinite)||b[0]>=b[2]||b[1]>=b[3]||
+ b[0]<-180||b[2]>180||b[1]<-85||b[3]>85)throw new TypeError('Invalid terrain bounds');
+ if(grid.units&&grid.units!=='meters')throw new TypeError('Terrain heights must be in metres');
+ if(grid.rowOrder&&grid.rowOrder!=='north-to-south')throw new TypeError('Unsupported terrain row order');
+ if(grid.columnOrder&&grid.columnOrder!=='west-to-east')throw new TypeError('Unsupported terrain column order');
+ let min=Infinity,max=-Infinity;
+ for(let i=0;i<grid.elevations.length;i++){
+  const h=grid.elevations[i];
+  if(!Number.isFinite(h)||h<-12000||h>10000)throw new TypeError('Invalid terrain elevation');
+  min=Math.min(min,h);max=Math.max(max,h);
+ }
+ return{min,max};
+}
+function terrainModelDimensions(grid){
+ const range=validateTerrainGrid(grid),b=grid.bounds,W=grid.width,H=grid.height,metresPerDegree=EARTH_RADIUS*PI/180;
+ const widthM=(b[2]-b[0])*metresPerDegree*Math.cos((b[1]+b[3])*PI/360),heightM=(b[3]-b[1])*metresPerDegree;
+ const scale=Math.max(widthM,heightM),base=(range.min+range.max)/2,cellX=widthM/(W-1),cellY=heightM/(H-1);
+ if(![widthM,heightM,scale,cellX,cellY].every(v=>Number.isFinite(v)&&v>0)||!Number.isFinite(Math.fround((range.max-base)/scale)))throw new TypeError('Invalid terrain scale');
+ return{grid,widthM,heightM,width:widthM/scale,height:heightM/scale,scale,base,min:range.min,max:range.max,cellX,cellY};
+}
+function terrainModelDraft(grid){
+ const model=terrainModelDimensions(grid),count=grid.width*grid.height;
+ return{...model,heights:new Float32Array(count),normals:new Float32Array(count*3),normalTexture:new Uint8Array(count*4)};
+}
+function prepareTerrainRange(model,start,end){
+ const{grid,scale,base,cellX,cellY,heights,normals,normalTexture}=model,W=grid.width,H=grid.height,values=grid.elevations;
+ const directions=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]];
+ for(let i=start;i<end;i++){
+  const x=i%W,y=Math.floor(i/W),h=values[i];heights[i]=(h-base)/scale;
+  const xl=Math.max(0,x-1),xr=Math.min(W-1,x+1),yn=Math.max(0,y-1),ys=Math.min(H-1,y+1);
+  const sx=(values[y*W+xr]-values[y*W+xl])/((xr-xl)*cellX),sy=(values[yn*W+x]-values[ys*W+x])/((ys-yn)*cellY);
+  const length=Math.hypot(sx,sy,1),n=[-sx/length,-sy/length,1/length];
+  let occlusion=0,samples=0;
+  for(const radius of[2,8])for(const[dx,dy]of directions){
+   const nx=clamp(x+dx*radius,0,W-1),ny=clamp(y+dy*radius,0,H-1),distance=Math.hypot((nx-x)*cellX,(ny-y)*cellY);
+   if(distance){occlusion+=Math.atan(Math.max(0,values[ny*W+nx]-h)/distance);samples++;}
+  }
+  const ao=clamp(1-.56*occlusion/Math.max(1,samples),.58,1);
+  for(let k=0;k<3;k++){normals[i*3+k]=n[k];normalTexture[i*4+k]=Math.round((n[k]*.5+.5)*255);}
+  normalTexture[i*4+3]=Math.round(ao*255);
+ }
+}
+export function createTerrainModel(grid){
+ const model=terrainModelDraft(grid);prepareTerrainRange(model,0,grid.width*grid.height);return model;
+}
+export async function createTerrainModelAsync(grid,{signal}={}){
+ const aborted=()=>{if(signal?.aborted){const error=new Error('Terrain preparation aborted');error.name='AbortError';throw error;}};
+ aborted();await new Promise(resolve=>setTimeout(resolve,0));aborted();
+ const model=terrainModelDraft(grid),count=grid.width*grid.height;
+ for(let start=0;start<count;start+=1024){
+  aborted();prepareTerrainRange(model,start,Math.min(count,start+1024));
+  if(start+1024<count)await new Promise(resolve=>setTimeout(resolve,0));
+ }
+ aborted();return model;
+}
+export function validatePreparedTerrainModel(grid,model){
+ const expected=terrainModelDimensions(grid),count=grid.width*grid.height,source=model?.grid;
+ const invalid=()=>{throw new TypeError('Prepared terrain model does not match its source grid');};
+ if(!model||!source||source.width!==grid.width||source.height!==grid.height||!Array.isArray(source.bounds)||source.bounds.length!==4||source.bounds.some((v,i)=>v!==grid.bounds[i])||source.elevations?.length!==count)invalid();
+ for(const key of['schemaVersion','units','rowOrder','columnOrder','source','attribution'])if(JSON.stringify(source[key])!==JSON.stringify(grid[key]))invalid();
+ for(const key of['widthM','heightM','width','height','scale','base','min','max','cellX','cellY']){
+  if(!Number.isFinite(model[key])||Math.abs(model[key]-expected[key])>Math.max(1,Math.abs(expected[key]))*1e-12)invalid();
+ }
+ if(!(model.heights instanceof Float32Array)||model.heights.length!==count||!(model.normals instanceof Float32Array)||model.normals.length!==count*3||!(model.normalTexture instanceof Uint8Array)||model.normalTexture.length!==count*4)invalid();
+ if(![model.heights,model.normals,model.normalTexture].every(v=>v.buffer instanceof ArrayBuffer))invalid();
+ for(let i=0;i<count;i++){
+  if((source!==grid&&source.elevations[i]!==grid.elevations[i])||!Number.isFinite(model.heights[i])||model.heights[i]!==Math.fround((grid.elevations[i]-expected.base)/expected.scale))invalid();
+  const x=model.normals[i*3],y=model.normals[i*3+1],z=model.normals[i*3+2],length=x*x+y*y+z*z;
+  if(!Number.isFinite(length)||length<.999||length>1.001||z<=0)invalid();
+ }
+ if(model.shadowPyramid!==undefined){
+  let width=2**Math.ceil(Math.log2(grid.width-1)),height=2**Math.ceil(Math.log2(grid.height-1)),index=0;
+  if(!Array.isArray(model.shadowPyramid))invalid();
+  while(true){
+   const level=model.shadowPyramid[index++];
+   if(!level||level.width!==width||level.height!==height||!(level.data instanceof Float32Array)||level.data.length!==width*height||!(level.data.buffer instanceof ArrayBuffer)||!level.data.every(Number.isFinite))invalid();
+   if(width===1&&height===1)break;width=Math.max(1,width/2);height=Math.max(1,height/2);
+  }
+  if(index!==model.shadowPyramid.length)invalid();
+ }
+ return model;
+}
+function terrainShadowPyramid(model){
+ if(model.shadowPyramid)return model.shadowPyramid;
+ const W=model.grid.width,H=model.grid.height,width=2**Math.ceil(Math.log2(W-1)),height=2**Math.ceil(Math.log2(H-1));
+ const data=new Float32Array(width*height);data.fill(-3.4e38);
+ // Each cell bounds all four samples, and therefore every bilinear height inside it.
+ for(let y=0;y<H-1;y++)for(let x=0;x<W-1;x++){
+  const i=y*W+x;data[y*width+x]=Math.max(model.heights[i],model.heights[i+1],model.heights[i+W],model.heights[i+W+1]);
+ }
+ const levels=[{width,height,data}];let previous=levels[0];
+ while(previous.width>1||previous.height>1){
+  const next={width:Math.max(1,previous.width/2),height:Math.max(1,previous.height/2)};next.data=new Float32Array(next.width*next.height);
+  for(let y=0;y<next.height;y++)for(let x=0;x<next.width;x++){
+   const x0=x*2,x1=Math.min(x0+1,previous.width-1),y0=y*2,y1=Math.min(y0+1,previous.height-1),v=previous.data;
+   next.data[y*next.width+x]=Math.max(v[y0*previous.width+x0],v[y0*previous.width+x1],v[y1*previous.width+x0],v[y1*previous.width+x1]);
+  }
+  levels.push(next);previous=next;
+ }
+ model.shadowPyramid=levels;return levels;
+}
+function maximumShadowHeight(model,pyramid,u0,v0,u1,v1){
+ const W=model.grid.width,H=model.grid.height;
+ const x0=clamp(Math.floor(Math.min(u0,u1)*(W-1)),0,W-2),x1=clamp(Math.floor(Math.max(u0,u1)*(W-1)),0,W-2);
+ const y0=clamp(Math.floor(Math.min(v0,v1)*(H-1)),0,H-2),y1=clamp(Math.floor(Math.max(v0,v1)*(H-1)),0,H-2);
+ const level=Math.ceil(Math.log2(Math.max(x1-x0+1,y1-y0+1))),block=2**level,p=pyramid[level];
+ const a=Math.floor(x0/block),b=Math.floor(x1/block),c=Math.floor(y0/block),d=Math.floor(y1/block),v=p.data;
+ return Math.max(v[c*p.width+a],v[c*p.width+b],v[d*p.width+a],v[d*p.width+b]);
+}
+export function sampleTerrainShadow(model,x,y,height,light,requestedBudget=SHADOW_FULL_QUERIES,stats){
+ const budget=Number.isFinite(requestedBudget)?clamp(Math.floor(requestedBudget),1,SHADOW_FULL_QUERIES):SHADOW_FULL_QUERIES;
+ if(stats){stats.queries=0;stats.limitReached=false;}
+ const horizontal=Math.hypot(light[0],light[1]);if(horizontal<1e-8||light[2]<=0)return 1;
+ const u=x/model.widthM+.5,v=.5-y/model.heightM;if(u<0||u>1||v<0||v>1)return 1;
+ const du=light[0]/horizontal/model.width,dv=-light[1]/horizontal/model.height,slope=light[2]/horizontal;
+ const cell=Math.min(model.cellX,model.cellY)/model.scale,start=cell*1.1,h=(height-model.base)/model.scale;
+ let end=.8;
+ if(du>1e-12)end=Math.min(end,(1-u)/du);else if(du< -1e-12)end=Math.min(end,-u/du);
+ if(dv>1e-12)end=Math.min(end,(1-v)/dv);else if(dv< -1e-12)end=Math.min(end,-v/dv);
+ if(end<=start)return 1;
+ const pyramid=terrainShadowPyramid(model),span=end-start;let level=0,index=0,visibility=1;
+ // Dyadic interval traversal needs no growing stack. Bounds only skip clear space;
+ // a high off-ray texel can never darken a pixel without a real on-ray height sample.
+ for(let work=0;work<budget;work++){
+  if(stats)stats.queries=work+1;
+  const length=span*2**-level,lo=start+index*length,hi=lo+length,softness=cell*.25+lo*.014;
+  const maximum=maximumShadowHeight(model,pyramid,u+du*lo,v+dv*lo,u+du*hi,v+dv*hi);
+  if(maximum>h+lo*slope+cell*.18-softness){
+   if(length>cell*.65&&level<SHADOW_MAX_DEPTH){level++;index*=2;continue;}
+   const d=(lo+hi)/2,next=sampleElevation(model,x+light[0]/horizontal*d*model.scale,y+light[1]/horizontal*d*model.scale);
+   if(next!==null){const s=cell*.25+d*.014;visibility=Math.min(visibility,smoothstep(-s,s,h+d*slope+cell*.18-(next-model.base)/model.scale));}
+   if(visibility<.005)return visibility;
+  }
+  for(let up=0;up<SHADOW_MAX_DEPTH;up++){
+   if(level===0)return visibility;
+   if((index&1)===0){index++;break;}
+   index=Math.floor(index/2);level--;
+  }
+ }
+ if(stats)stats.limitReached=true;return visibility;
+}
+export function sampleElevation(model,x,y){
+ if(!Number.isFinite(x)||!Number.isFinite(y))return null;
+ const{grid,widthM,heightM}=model,W=grid.width,H=grid.height;
+ let gx=(x/widthM+.5)*(W-1),gy=(.5-y/heightM)*(H-1);
+ if(gx< -1e-7||gy< -1e-7||gx>W-1+1e-7||gy>H-1+1e-7)return null;
+ gx=clamp(gx,0,W-1);gy=clamp(gy,0,H-1);
+ const ix=Math.min(W-2,Math.floor(gx)),iy=Math.min(H-2,Math.floor(gy)),a=gx-ix,b=gy-iy,v=grid.elevations;
+ return mix(mix(v[iy*W+ix],v[iy*W+ix+1],a),mix(v[(iy+1)*W+ix],v[(iy+1)*W+ix+1],a),b);
+}
+function meshCell(grid,gx,gy,step){
+ const x=Math.min(Math.floor(gx/step),Math.ceil((grid.width-1)/step)-1)*step;
+ const y=Math.min(Math.floor(gy/step),Math.ceil((grid.height-1)/step)-1)*step;
+ return[x,y,Math.min(grid.width-1,x+step),Math.min(grid.height-1,y+step)];
+}
+function meshHeight(model,gx,gy,step){
+ const W=model.grid.width,[x,y,x1,y1]=meshCell(model.grid,gx,gy,step),s=(gx-x)/(x1-x),t=(gy-y)/(y1-y),v=model.heights;
+ const a=v[y*W+x],b=v[y*W+x1],c=v[y1*W+x],d=v[y1*W+x1];
+ // The same a-c-b / b-c-d diagonal used by buildTerrainMesh, including ragged edge cells.
+ return s+t<=1?a+(b-a)*s+(c-a)*t:d+(c-d)*(1-s)+(b-d)*(1-t);
+}
+export function sampleTerrainMeshElevation(model,x,y,step){
+ if(!Number.isInteger(step)||step<1)throw new TypeError('Invalid mesh stride');
+ if(!Number.isFinite(x)||!Number.isFinite(y))return null;
+ const W=model.grid.width,H=model.grid.height,gx=(x/model.widthM+.5)*(W-1),gy=(.5-y/model.heightM)*(H-1);
+ if(gx< -1e-7||gy< -1e-7||gx>W-1+1e-7||gy>H-1+1e-7)return null;
+ return meshHeight(model,clamp(gx,0,W-1),clamp(gy,0,H-1),step)*model.scale+model.base;
+}
+export function drapeTerrainRoute(model,segments,step){
+ if(!Number.isInteger(step)||step<1)throw new TypeError('Invalid mesh stride');
+ if(!Array.isArray(segments)||segments.length>MAX_ROUTE_SEGMENTS)throw new RangeError('Route exceeds the terrain preview limit');
+ const W=model.grid.width,H=model.grid.height,result=[],lift=Math.max(1.5,Math.min(model.cellX,model.cellY)*.08)/model.scale;
+ for(const[a,b]of segments){
+  const gx=(a[0]/model.width+.5)*(W-1),gy=(.5-a[1]/model.height)*(H-1);
+  const dx=(b[0]-a[0])/model.width*(W-1),dy=-(b[1]-a[1])/model.height*(H-1),cuts=[0,1];
+  if(![gx,gy,dx,dy].every(Number.isFinite))throw new TypeError('Invalid terrain route point');
+  if(Math.min(gx,gx+dx)<-1e-7||Math.max(gx,gx+dx)>W-1+1e-7||Math.min(gy,gy+dy)<-1e-7||Math.max(gy,gy+dy)>H-1+1e-7)throw new RangeError('Terrain route point is outside the grid');
+  const boundaries=(start,delta,limit)=>{
+   if(Math.abs(delta)<1e-12)return;
+   const low=Math.min(start,start+delta),high=Math.max(start,start+delta);
+   for(let n=Math.max(1,Math.floor(low/step)+1);n*step<Math.min(high,limit);n++){
+    const t=(n*step-start)/delta;if(t>1e-10&&t<1-1e-10)cuts.push(t);
+   }
+  };
+  boundaries(gx,dx,W-1);boundaries(gy,dy,H-1);cuts.sort((a,b)=>a-b);
+  const cellCuts=cuts.filter((t,i)=>!i||t-cuts[i-1]>1e-10),allCuts=[0];
+  for(let i=1;i<cellCuts.length;i++){
+   const lo=cellCuts[i-1],hi=cellCuts[i],mid=(lo+hi)/2;
+   const[x,y,x1,y1]=meshCell(model.grid,clamp(gx+dx*mid,0,W-1),clamp(gy+dy*mid,0,H-1),step);
+   const aSide=(gx+dx*lo-x)/(x1-x)+(gy+dy*lo-y)/(y1-y)-1;
+   const bSide=(gx+dx*hi-x)/(x1-x)+(gy+dy*hi-y)/(y1-y)-1;
+   if(aSide*bSide<0){const crossing=lo-aSide*(hi-lo)/(bSide-aSide);if(crossing-lo>1e-10&&hi-crossing>1e-10)allCuts.push(crossing);}
+   allCuts.push(hi);
+  }
+  let previous;
+  for(const t of allCuts){
+   const x=mix(a[0],b[0],t),y=mix(a[1],b[1],t),height=meshHeight(model,clamp(gx+dx*t,0,W-1),clamp(gy+dy*t,0,H-1),step);
+   const point=[x,y,height+lift];
+   if(previous){if(result.length>=MAX_ROUTE_SEGMENTS)throw new RangeError('Draped route exceeds the terrain preview limit');result.push([previous,point]);}
+   previous=point;
+  }
+ }
+ return result;
+}
+export function buildTerrainMesh(model,step){
+ if(!Number.isInteger(step)||step<1)throw new TypeError('Invalid mesh stride');
+ const W=model.grid.width,H=model.grid.height,xs=[],ys=[];
+ for(let x=0;x<W-1;x+=step)xs.push(x);xs.push(W-1);
+ for(let y=0;y<H-1;y+=step)ys.push(y);ys.push(H-1);
+ const count=xs.length*ys.length,uv=new Float32Array(count*2),sampleIds=new Uint32Array(count);
+ for(let y=0;y<ys.length;y++)for(let x=0;x<xs.length;x++){
+  const i=y*xs.length+x;uv[i*2]=xs[x]/(W-1);uv[i*2+1]=ys[y]/(H-1);sampleIds[i]=ys[y]*W+xs[x];
+ }
+ const IndexType=count>65535?Uint32Array:Uint16Array,indices=new IndexType((xs.length-1)*(ys.length-1)*6);let j=0;
+ for(let y=0;y<ys.length-1;y++)for(let x=0;x<xs.length-1;x++){
+  const a=y*xs.length+x,b=a+1,c=a+xs.length,d=c+1;
+  for(const id of[a,c,b,b,c,d])indices[j++]=id;
+ }
+ return{uv,sampleIds,indices,count,step,triangles:indices.length/3};
+}
+export function selectTerrainMeshStride(grid,budget,previous=0,hardLimit=MAX_VERTICES){
+ if(!Number.isFinite(budget)||budget<4||!Number.isFinite(hardLimit)||hardLimit<4)throw new TypeError('Invalid terrain vertex budget');
+ const count=step=>(Math.ceil((grid.width-1)/step)+1)*(Math.ceil((grid.height-1)/step)+1),limit=Math.min(MAX_VERTICES,hardLimit);
+ let step=Number.isInteger(previous)&&previous>=1?previous:1;
+ const coarseThreshold=Math.min(limit,budget*(previous?1.25:1));
+ while(count(step)>coarseThreshold)step*=2;
+ const fineThreshold=budget>=limit?limit:budget*.75;
+ while(step>1&&count(step/2)<=fineThreshold)step/=2;
+ return step;
+}
+export function terrainLight(yaw,pitch){
+ const altitude=.58+clamp(pitch,.28,1.32)*.12,azimuth=yaw-2.246;
+ return[Math.cos(azimuth)*Math.cos(altitude),Math.sin(azimuth)*Math.cos(altitude),Math.sin(altitude)];
+}
+/** A schematic cut edge, never a claim about subsurface geology. Its rim uses the exact active mesh samples. */
+export function buildTerrainBoundary(model,step){
+ if(!Number.isInteger(step)||step<1)throw new TypeError('Invalid mesh stride');
+ const W=model.grid.width,H=model.grid.height,xs=[],ys=[],vertices=[],floor=(model.min-model.base)/model.scale-.012;
+ for(let x=0;x<W-1;x+=step)xs.push(x);xs.push(W-1);
+ for(let y=0;y<H-1;y+=step)ys.push(y);ys.push(H-1);
+ const point=(x,y)=>[(x/(W-1)-.5)*model.width,(.5-y/(H-1))*model.height,model.heights[y*W+x]];
+ const edge=(a,b,normal)=>{
+  const lowA=[a[0],a[1],floor],lowB=[b[0],b[1],floor];
+  for(const p of[a,lowA,b,b,lowA,lowB])vertices.push(...p,...normal);
+ };
+ for(let i=1;i<xs.length;i++){
+  edge(point(xs[i-1],0),point(xs[i],0),[0,1,0]);
+  edge(point(xs[i],H-1),point(xs[i-1],H-1),[0,-1,0]);
+ }
+ for(let i=1;i<ys.length;i++){
+  edge(point(0,ys[i]),point(0,ys[i-1]),[-1,0,0]);
+  edge(point(W-1,ys[i-1]),point(W-1,ys[i]),[1,0,0]);
+ }
+ return{vertices:new Float32Array(vertices),floor,count:vertices.length/6,triangles:vertices.length/18};
+}
+// Liang–Barsky keeps crossing segments whose source vertices are both outside.
+export function clipTerrainSegment(a,b,bounds){
+ let start=0,end=1;const dx=b[0]-a[0],dy=b[1]-a[1],p=[-dx,dx,-dy,dy],q=[a[0]-bounds[0],bounds[2]-a[0],a[1]-bounds[1],bounds[3]-a[1]];
+ for(let i=0;i<4;i++){
+  if(Math.abs(p[i])<1e-15){if(q[i]<0)return null;continue;}
+  const t=q[i]/p[i];if(p[i]<0)start=Math.max(start,t);else end=Math.min(end,t);if(start>end)return null;
+ }
+ return[[mix(a[0],b[0],start),mix(a[1],b[1],start)],[mix(a[0],b[0],end),mix(a[1],b[1],end)]];
+}
+export function terrainRoute(model,data){
+ const lines=[],segments=[],bounds=model.grid.bounds;
+ const visit=(g,depth=0)=>{
+  if(!g||depth>16)return;
+  if(g.type==='FeatureCollection'&&Array.isArray(g.features))g.features.forEach(f=>visit(f,depth+1));
+  else if(g.type==='Feature')visit(g.geometry,depth+1);
+  else if(g.type==='GeometryCollection'&&Array.isArray(g.geometries))g.geometries.forEach(f=>visit(f,depth+1));
+  else if(g.type==='LineString'&&Array.isArray(g.coordinates))lines.push(g.coordinates);
+  else if(g.type==='MultiLineString'&&Array.isArray(g.coordinates))lines.push(...g.coordinates.filter(Array.isArray));
+ };visit(data);
+ const valid=p=>Array.isArray(p)&&p.length>=2&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&p[0]>=-180&&p[0]<=180&&p[1]>=-90&&p[1]<=90;
+ const local=p=>[((p[0]-bounds[0])/(bounds[2]-bounds[0])-.5)*model.widthM,((p[1]-bounds[1])/(bounds[3]-bounds[1])-.5)*model.heightM];
+ const lift=Math.max(1.5,Math.min(model.cellX,model.cellY)*.08),step=Math.max(5,Math.min(model.cellX,model.cellY)*.75);
+ let clipped=false,sourceSegments=0;
+ for(const line of lines)for(let i=1;i<line.length;i++){
+  if(++sourceSegments>250000)throw new RangeError('Route exceeds the terrain preview limit');
+  const a=line[i-1],b=line[i];
+  if(!valid(a)||!valid(b)||Math.abs(b[0]-a[0])>180){clipped=true;continue;}
+  const part=clipTerrainSegment(a,b,bounds);if(!part){clipped=true;continue;}
+  if(part[0][0]!==a[0]||part[0][1]!==a[1]||part[1][0]!==b[0]||part[1][1]!==b[1])clipped=true;
+  const p=local(part[0]),q=local(part[1]),length=Math.hypot(q[0]-p[0],q[1]-p[1]);if(length<.01)continue;
+  const count=Math.ceil(length/step);if(segments.length+count>MAX_ROUTE_SEGMENTS)throw new RangeError('Route exceeds the terrain preview limit');
+  let previous;
+  for(let j=0;j<=count;j++){
+   const x=mix(p[0],q[0],j/count),y=mix(p[1],q[1],j/count),h=sampleElevation(model,x,y);
+   if(h===null){previous=undefined;continue;}
+   const point=[x/model.scale,y/model.scale,(h-model.base+lift)/model.scale];
+   if(previous)segments.push([previous,point]);previous=point;
+  }
+ }
+ return{segments,clipped,sourceSegments};
+}
+function multiplyMatrix(a,b){
+ const out=new Float32Array(16);
+ for(let col=0;col<4;col++)for(let row=0;row<4;row++)for(let k=0;k<4;k++)out[col*4+row]+=a[k*4+row]*b[col*4+k];
+ return out;
+}
+function normalizedInsets(value){
+ if(value===null||value===undefined)return null;
+ const result={};for(const key of['top','right','bottom','left'])result[key]=Number.isFinite(value[key])?Math.max(0,value[key]):0;return result;
+}
+const terrainFitCache=new WeakMap();
+function canonicalTerrainFit(model,aspect){
+ let cache=terrainFitCache.get(model);
+ if(!cache){
+  const yaw=DEFAULT_VIEW.yaw,pitch=DEFAULT_VIEW.pitch,z=[Math.sin(yaw)*Math.cos(pitch),-Math.cos(yaw)*Math.cos(pitch),Math.sin(pitch)];
+  const x=[Math.cos(yaw),Math.sin(yaw),0],y=cross(z,x),floor=(model.min-model.base)/model.scale-.012;
+  let near=Infinity,far=-Infinity;
+  for(const a of[-model.width/2,model.width/2])for(const b of[-model.height/2,model.height/2])for(const c of[floor,(model.max-model.base)/model.scale]){
+   const depth=a*z[0]+b*z[1]+(c-.005)*z[2];near=Math.min(near,depth);far=Math.max(far,depth);
+  }
+  const count=64,bins=Array.from({length:count},()=>[Infinity,-Infinity,Infinity,-Infinity,Infinity,-Infinity]);
+  const include=(east,north,height)=>{
+   const h=height-.005,a=east*x[0]+north*x[1],b=east*y[0]+north*y[1]+h*y[2],c=east*z[0]+north*z[1]+h*z[2];
+   const bin=bins[clamp(Math.floor((c-near)/Math.max(1e-9,far-near)*count),0,count-1)];
+   bin[0]=Math.min(bin[0],a);bin[1]=Math.max(bin[1],a);bin[2]=Math.min(bin[2],b);bin[3]=Math.max(bin[3],b);bin[4]=Math.min(bin[4],c);bin[5]=Math.max(bin[5],c);
+  };
+  // One source pass for the canonical view. All later zoom/orbit/resize fits use only 64 depth bounds.
+  const W=model.grid.width,H=model.grid.height;
+  for(let row=0;row<H;row++)for(let col=0;col<W;col++)include((col/(W-1)-.5)*model.width,(.5-row/(H-1))*model.height,model.heights[row*W+col]);
+  for(const east of[-model.width/2,model.width/2])for(const north of[-model.height/2,model.height/2])include(east,north,floor);
+  cache={bins:bins.filter(b=>Number.isFinite(b[0])),fits:new Map()};terrainFitCache.set(model,cache);
+ }
+ const key=String(aspect);if(cache.fits.has(key))return cache.fits.get(key);
+ const bounds=distance=>{
+  let left=Infinity,right=-Infinity,bottom=Infinity,top=-Infinity;
+  for(const b of cache.bins){
+   const close=distance-b[5],away=distance-b[4];
+   left=Math.min(left,b[0]/(b[0]<=0?close:away));right=Math.max(right,b[1]/(b[1]>=0?close:away));
+   bottom=Math.min(bottom,b[2]/(b[2]<=0?close:away));top=Math.max(top,b[3]/(b[3]>=0?close:away));
+  }
+  return{left,right,bottom,top};
+ };
+ const tan=Math.tan(42*PI/360),frame=.78,maxX=2*tan*aspect*frame,maxY=2*tan*frame;
+ const fits=b=>b.right-b.left<=maxX&&b.top-b.bottom<=maxY;
+ let lo=Math.max(...cache.bins.map(b=>b[5]))+.02,hi=Math.max(2,lo*2);
+ for(let i=0;i<24&&!fits(bounds(hi));i++)hi*=2;
+ for(let i=0;i<20;i++){const mid=(lo+hi)/2;if(fits(bounds(mid)))hi=mid;else lo=mid;}
+ const b=bounds(hi),fit={distance:hi,centerX:(b.left+b.right)/2,centerY:(b.bottom+b.top)/2};
+ if(cache.fits.size>=8)cache.fits.delete(cache.fits.keys().next().value);cache.fits.set(key,fit);return fit;
+}
+function cameraFor(model,state,width,height,compact){
+ const insets=state.viewportInsets||{top:0,right:0,bottom:compact&&width<700?height*.47:0,left:0};
+ const horizontal=insets.left+insets.right,vertical=insets.top+insets.bottom;
+ const sx=horizontal?Math.min(1,width*.88/horizontal):1,sy=vertical?Math.min(1,height*.88/vertical):1;
+ const left=insets.left*sx,right=insets.right*sx,top=insets.top*sy,bottom=insets.bottom*sy;
+ const usableW=Math.max(1,width-left-right),usableH=Math.max(1,height-top-bottom),aspect=usableW/usableH,fov=42*PI/180;
+ const z=[Math.sin(state.yaw)*Math.cos(state.pitch),-Math.cos(state.yaw)*Math.cos(state.pitch),Math.sin(state.pitch)];
+ const x=normalize(cross([0,0,1],z)),y=cross(z,x),tan=Math.tan(fov/2),fit=canonicalTerrainFit(model,aspect);
+ const distance=fit.distance/state.zoom,target=[state.offset[0],state.offset[1],.005],eye=target.map((v,i)=>v+z[i]*distance);
+ const view=new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,eye),-dot(y,eye),-dot(z,eye),1]);
+ const f=1/tan*usableH/height,near=.012,far=Math.max(12,distance+2*Math.hypot(model.width,model.height,(model.max-model.min)/model.scale));
+ const projection=new Float32Array([f/(width/height),0,0,0,0,f,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]);
+ return{matrix:multiplyMatrix(projection,view),offset:[(left-right)/width-fit.centerX/tan*usableH/width,(bottom-top)/height-fit.centerY/tan*usableH/height],eye,distance,usableW,usableH,right:x,forward:z};
+}
+function projectPoint(point,camera,width,height){
+ const m=camera.matrix,[x,y,z]=point,w=m[3]*x+m[7]*y+m[11]*z+m[15];if(w<=.012)return null;
+ return[((m[0]*x+m[4]*y+m[8]*z+m[12])/w+camera.offset[0])*width*.5+width*.5,
+  (1-(m[1]*x+m[5]*y+m[9]*z+m[13])/w-camera.offset[1])*height*.5,
+  (m[2]*x+m[6]*y+m[10]*z+m[14])/w,1/w];
+}
+const GLSL_HEIGHT=`
+uniform highp sampler2D uHeight;
+uniform vec2 uGrid;
+uniform vec2 uExtent;
+float heightAt(vec2 uv) {
+ vec2 p=clamp(uv,0.0,1.0)*(uGrid-1.0);
+ ivec2 a=ivec2(floor(p)),b=min(a+ivec2(1),ivec2(uGrid)-1);
+ vec2 f=fract(p);
+ return mix(mix(texelFetch(uHeight,a,0).r,texelFetch(uHeight,ivec2(b.x,a.y),0).r,f.x),
+  mix(texelFetch(uHeight,ivec2(a.x,b.y),0).r,texelFetch(uHeight,b,0).r,f.x),f.y);
+}
+`;
+const TERRAIN_VERTEX=`#version 300 es
+precision highp float;
+layout(location=0) in vec2 aUV;
+uniform mat4 uMatrix;
+uniform vec2 uOffset;
+out vec2 vUV;
+out vec3 vPosition;
+`+GLSL_HEIGHT+`
+void main(){
+ vUV=aUV;vPosition=vec3((aUV.x-.5)*uExtent.x,(.5-aUV.y)*uExtent.y,heightAt(aUV));
+ gl_Position=uMatrix*vec4(vPosition,1.0);gl_Position.xy+=uOffset*gl_Position.w;
+}
+`;
+export function surfaceNoise(x,y,period,seed=0){
+ const hash=(a,b)=>{
+  a=((a%period)+period)%period;b=((b%period)+period)%period;
+  let n=Math.imul(a+1,374761393)^Math.imul(b+1,668265263)^Math.imul(seed+1,1274126177);
+  n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967295;
+ };
+ const ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy;
+ const u=fx*fx*fx*(fx*(fx*6-15)+10),v=fy*fy*fy*(fy*(fy*6-15)+10);
+ return mix(mix(hash(ix,iy),hash(ix+1,iy),u),mix(hash(ix,iy+1),hash(ix+1,iy+1),u),v);
+}
+export function createSurfaceTexture(size=128){
+ if(!Number.isInteger(size)||size<32||size>256||(size&(size-1)))throw new TypeError('Surface texture must be a bounded power of two');
+ const pixels=new Uint8Array(size*size*4);
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+  const u=x/size,v=y/size;
+  const coarse=surfaceNoise(u*4,v*4,4,3),middle=surfaceNoise(u*16,v*16,16,7);
+  const fine=surfaceNoise(u*32,v*32,32,19),grain=surfaceNoise(u*64,v*64,64,41);
+  const ridges=1-Math.abs(2*middle-1),strata=.5+.5*Math.sin((v+coarse*.12)*Math.PI*16);
+  const values=[.32*middle+.42*fine+.26*grain,.54*ridges+.46*strata,coarse,.56*fine+.44*grain];
+  for(let k=0;k<4;k++)pixels[(y*size+x)*4+k]=Math.round(clamp(values[k],0,1)*255);
+ }
+ return{size,pixels};
+}
+export function terrainMaterialColor(height){
+ const stops=[[500,[.16,.29,.24]],[1400,[.30,.43,.31]],[2100,[.51,.55,.36]],[2700,[.64,.62,.52]],[3400,[.76,.75,.68]]];
+ let a=stops[0],b=stops[1];for(let i=1;i<stops.length-1&&height>=stops[i][0];i++){a=stops[i];b=stops[i+1];}
+ const t=smoothstep(a[0],b[0],height);return a[1].map((v,i)=>mix(v,b[1][i],t));
+}
+
+
+const TERRAIN_FRAGMENT="#version 300 es\nprecision highp float;\nin vec2 vUV;\nin vec3 vPosition;\nuniform sampler2D uNormal;\nuniform sampler2D uShadow;\nuniform sampler2D uSurface;\nuniform vec2 uGrid;\nuniform vec3 uLight;\nuniform vec3 uEye;\nuniform float uBase;\nuniform float uScale;\nuniform float uShadowTexel;\nout vec4 outColor;\nvec3 palette(float h){\n vec3 a=vec3(.16,.29,.24),b=vec3(.30,.43,.31),c=vec3(.51,.55,.36),d=vec3(.64,.62,.52),e=vec3(.76,.75,.68);\n if(h<1400.0)return mix(a,b,smoothstep(500.0,1400.0,h));\n if(h<2100.0)return mix(b,c,smoothstep(1400.0,2100.0,h));\n if(h<2700.0)return mix(c,d,smoothstep(2100.0,2700.0,h));\n return mix(d,e,smoothstep(2700.0,3400.0,h));\n}\nvec4 surfaceAt(vec3 p,vec3 n){\n vec3 w=pow(abs(n),vec3(4.0));w/=max(dot(w,vec3(1)),.001);\n return texture(uSurface,p.yz)*w.x+texture(uSurface,p.xz)*w.y+texture(uSurface,p.xy)*w.z;\n}\nvec3 perturbNormal(vec3 p,vec3 n,float height){\n vec3 dp1=dFdx(p),dp2=dFdy(p),r1=cross(dp2,n),r2=cross(n,dp1);\n float determinant=dot(dp1,r1);\n if(abs(determinant)<1e-14)return n;\n vec3 gradient=dFdx(height)*r1+dFdy(height)*r2;\n return normalize(abs(determinant)*n-sign(determinant)*gradient);\n}\nvoid main(){\n vec2 nUV=(vUV*(uGrid-1.0)+.5)/uGrid;\n vec4 tex=texture(uNormal,nUV);vec3 baseNormal=normalize(tex.rgb*2.0-1.0);\n float elevation=vPosition.z*uScale+uBase;\n vec3 metres=vPosition*uScale;\n vec4 macro=surfaceAt(metres/820.0,baseNormal),detail=surfaceAt(metres/96.0,baseNormal);\n float rock=smoothstep(.17,.52,1.0-baseNormal.z);\n rock=max(rock,smoothstep(2300.0,3050.0,elevation)*(.26+macro.b*.35));\n vec3 limestone=mix(vec3(.49,.51,.47),vec3(.72,.69,.61),macro.b*.64+detail.g*.36);\n vec3 albedo=mix(palette(elevation)*(.91+macro.b*.18),limestone,rock*.83);\n albedo*=.94+detail.r*.12;\n // Triplanar detail is filtered with mipmaps and never changes terrain positions.\n float bump=(detail.g*.7+detail.r*.3-.5)*mix(.12,.55,rock)/uScale;\n vec3 n=perturbNormal(vPosition,baseNormal,bump);\n float contourDistance=abs(fract(elevation/100.0+.5)-.5)*100.0;\n float contour=1.0-smoothstep(0.0,max(.7,fwidth(elevation)*.85),contourDistance);\n albedo*=1.0-contour*.035;\n float shadow=texture(uShadow,vUV).r*.5;\n shadow+=(texture(uShadow,vUV+vec2(uShadowTexel,0)).r+texture(uShadow,vUV-vec2(uShadowTexel,0)).r+\n  texture(uShadow,vUV+vec2(0,uShadowTexel)).r+texture(uShadow,vUV-vec2(0,uShadowTexel)).r)*.125;\n vec3 view=normalize(uEye-vPosition),halfVector=normalize(view+uLight);\n float NoL=max(dot(n,uLight),0.0),NoV=max(dot(n,view),.001),NoH=max(dot(n,halfVector),0.0),VoH=max(dot(view,halfVector),0.0);\n float roughness=mix(.94,.76,rock),alpha=roughness*roughness,a2=alpha*alpha;\n float denominator=NoH*NoH*(a2-1.0)+1.0;\n float distribution=a2/(3.14159265*denominator*denominator);\n float k=(roughness+1.0)*(roughness+1.0)/8.0;\n float visibility=NoV/(NoV*(1.0-k)+k)*NoL/(NoL*(1.0-k)+k);\n float fresnel=.035+.965*pow(1.0-VoH,5.0);\n float specular=distribution*visibility*fresnel/max(4.0*NoL*NoV,.001);\n vec3 linearAlbedo=pow(albedo,vec3(2.2));\n vec3 ambient=mix(vec3(.25,.29,.24),vec3(.35,.43,.46),clamp(n.z*.5+.5,0.0,1.0))*tex.a;\n vec3 lit=linearAlbedo*ambient+(linearAlbedo*.965+vec3(specular)) *vec3(1.15,1.06,.91)*NoL*shadow;\n vec3 color=pow(max(lit,vec3(0)),vec3(1.0/2.2));\n float haze=clamp((distance(uEye,vPosition)-.9)*.10,0.0,.22);\n float edge=min(min(vUV.x,1.0-vUV.x),min(vUV.y,1.0-vUV.y));\n haze=max(haze,(1.0-smoothstep(0.0,.003,edge))*.15);\n outColor=vec4(mix(color,vec3(.875,.902,.855),haze),1.0);\n}\n";
+const SHADOW_VERTEX=`#version 300 es
+precision highp float;
+out vec2 vUV;
+void main(){
+ vec2 p=vec2(gl_VertexID==1?3.0:-1.0,gl_VertexID==2?3.0:-1.0);
+ vUV=p*.5+.5;gl_Position=vec4(p,0,1);
+}
+`;
+const SHADOW_FRAGMENT=`#version 300 es
+precision highp float;
+precision highp int;
+in vec2 vUV;
+uniform vec3 uLight;
+uniform int uSteps;
+uniform highp sampler2D uHeightMax;
+out vec4 outColor;
+`+GLSL_HEIGHT+`
+float maximumHeight(vec2 a,vec2 b){
+ ivec2 lo=clamp(ivec2(floor(min(a,b)*(uGrid-1.0))),ivec2(0),ivec2(uGrid)-2);
+ ivec2 hi=clamp(ivec2(floor(max(a,b)*(uGrid-1.0))),ivec2(0),ivec2(uGrid)-2);
+ int level=int(ceil(log2(float(max(hi.x-lo.x+1,hi.y-lo.y+1))))),block=1<<level;lo/=block;hi/=block;
+ return max(max(texelFetch(uHeightMax,lo,level).r,texelFetch(uHeightMax,ivec2(hi.x,lo.y),level).r),
+  max(texelFetch(uHeightMax,ivec2(lo.x,hi.y),level).r,texelFetch(uHeightMax,hi,level).r));
+}
+float visibilityAt(){
+ float h=heightAt(vUV),cell=min(uExtent.x/(uGrid.x-1.0),uExtent.y/(uGrid.y-1.0));
+ float horizontal=length(uLight.xy),slope=uLight.z/max(horizontal,.01);
+ vec2 dir=vec2(uLight.x/uExtent.x,-uLight.y/uExtent.y)/max(horizontal,.01);
+ float start=cell*1.1,end=.8;
+ if(dir.x>1e-12)end=min(end,(1.0-vUV.x)/dir.x);else if(dir.x< -1e-12)end=min(end,-vUV.x/dir.x);
+ if(dir.y>1e-12)end=min(end,(1.0-vUV.y)/dir.y);else if(dir.y< -1e-12)end=min(end,-vUV.y/dir.y);
+ if(end<=start)return 1.0;
+ float span=end-start,visibility=1.0;int level=0,index=0;
+ for(int work=0;work<${SHADOW_FULL_QUERIES};work++){
+  if(work>=uSteps)break;
+  float segment=span*exp2(-float(level)),lo=start+float(index)*segment,hi=lo+segment;
+  float maximum=maximumHeight(vUV+dir*lo,vUV+dir*hi),softness=cell*.25+lo*.014;
+  if(maximum>h+lo*slope+cell*.18-softness){
+   if(segment>cell*.65&&level<${SHADOW_MAX_DEPTH}){level++;index*=2;continue;}
+   float d=(lo+hi)*.5,s=cell*.25+d*.014,clearance=h+d*slope+cell*.18-heightAt(vUV+dir*d);
+   visibility=min(visibility,smoothstep(-s,s,clearance));if(visibility<.005)return visibility;
+  }
+  for(int up=0;up<${SHADOW_MAX_DEPTH};up++){
+   if(level==0)return visibility;
+   if((index&1)==0){index++;break;}index/=2;level--;
+  }
+ }
+ return visibility;
+}
+void main(){
+ float visibility=visibilityAt();
+ outColor=vec4(visibility,visibility,visibility,1);
+}
+`;
+const ROUTE_VERTEX=`#version 300 es
+precision highp float;
+layout(location=0) in vec3 aStart;
+layout(location=1) in vec3 aEnd;
+layout(location=2) in vec2 aCorner;
+uniform mat4 uMatrix;
+uniform vec2 uOffset;
+uniform vec2 uViewport;
+uniform float uHalfWidth;
+out vec2 vDistance;
+flat out float vLength;
+void main(){
+ vec4 a=uMatrix*vec4(aStart,1),b=uMatrix*vec4(aEnd,1);
+ if(a.w<=.012||b.w<=.012){gl_Position=vec4(2,2,2,1);vDistance=vec2(0);vLength=0.0;return;}
+ vec2 delta=(b.xy/b.w-a.xy/a.w)*uViewport*.5;
+ float len=max(length(delta),.001);vec2 direction=delta/len,normal=vec2(-direction.y,direction.x);
+ vec4 point=mix(a,b,aCorner.x);
+ point.xy+=(normal*aCorner.y*uHalfWidth+direction*(aCorner.x*2.0-1.0)*uHalfWidth)*2.0/uViewport*point.w;
+ point.xy+=uOffset*point.w;gl_Position=point;
+ vDistance=vec2(aCorner.x*len+(aCorner.x*2.0-1.0)*uHalfWidth,aCorner.y*uHalfWidth);vLength=len;
+}
+`;
+const ROUTE_FRAGMENT=`#version 300 es
+precision highp float;
+in vec2 vDistance;
+flat in float vLength;
+uniform vec4 uColor;
+uniform float uHalfWidth;
+out vec4 outColor;
+void main(){
+ float cap=max(max(-vDistance.x,vDistance.x-vLength),0.0),dist=length(vec2(cap,vDistance.y));
+ float alpha=1.0-smoothstep(uHalfWidth-.8,uHalfWidth,dist);if(alpha<=0.0)discard;
+ outColor=vec4(uColor.rgb,uColor.a*alpha);
+}
+`;
+const BOUNDARY_VERTEX=`#version 300 es
+precision highp float;
+layout(location=0) in vec3 aPosition;
+layout(location=1) in vec3 aNormal;
+uniform mat4 uMatrix;
+uniform vec2 uOffset;
+out vec3 vPosition;
+out vec3 vNormal;
+void main(){vPosition=aPosition;vNormal=aNormal;gl_Position=uMatrix*vec4(aPosition,1);gl_Position.xy+=uOffset*gl_Position.w;}
+`;
+const BOUNDARY_FRAGMENT=`#version 300 es
+precision highp float;
+in vec3 vPosition;
+in vec3 vNormal;
+uniform vec3 uLight;
+uniform float uFloor;
+out vec4 outColor;
+void main(){
+ float elevation=clamp((vPosition.z-uFloor)/.17,0.0,1.0);
+ vec3 color=mix(vec3(.34,.38,.33),vec3(.49,.53,.46),elevation);
+ float light=.40+.60*max(dot(normalize(vNormal),uLight),0.0);
+ outColor=vec4(color*light,1);
+}
+`;
+const GROUND_VERTEX=`#version 300 es
+precision highp float;
+uniform mat4 uMatrix;
+uniform vec2 uOffset;
+uniform vec2 uExtent;
+uniform float uFloor;
+out vec2 vPoint;
+void main(){
+ int id=gl_VertexID;
+ vec2 uv=vec2(id==1||id==4||id==5?1.0:0.0,id==2||id==3||id==5?1.0:0.0);
+ vPoint=(uv-.5)*(uExtent+vec2(.08));
+ gl_Position=uMatrix*vec4(vPoint,uFloor-.001,1);gl_Position.xy+=uOffset*gl_Position.w;
+}
+`;
+const GROUND_FRAGMENT=`#version 300 es
+precision highp float;
+uniform vec2 uExtent;
+in vec2 vPoint;
+out vec4 outColor;
+void main(){
+ float distanceToBase=length(max(abs(vPoint)-uExtent*.5,vec2(0)));
+ float contact=1.0-smoothstep(0.0,.04,distanceToBase);
+ outColor=vec4(.20,.27,.21,contact*contact*.18);
+}
+`;
+class TerrainGPU{
+ constructor(gl,model){
+  this.gl=gl;this.model=model;this.resources=[];this.meshes=new Map();this.shadows=new Map();this.routeCount=0;
+  try{
+   if(gl.getParameter(gl.MAX_TEXTURE_SIZE)<Math.max(model.grid.width,model.grid.height)||gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS)<1)throw new Error('Terrain GPU limits');
+   this.terrain=this.program(TERRAIN_VERTEX,TERRAIN_FRAGMENT);this.shadow=this.program(SHADOW_VERTEX,SHADOW_FRAGMENT);this.line=this.program(ROUTE_VERTEX,ROUTE_FRAGMENT);
+   this.boundary=this.program(BOUNDARY_VERTEX,BOUNDARY_FRAGMENT);
+   this.ground=this.program(GROUND_VERTEX,GROUND_FRAGMENT);
+   this.heightTexture=this.texture(gl.R32F,model.grid.width,model.grid.height,gl.RED,gl.FLOAT,model.heights,gl.NEAREST);
+   this.normalTexture=this.texture(gl.RGBA8,model.grid.width,model.grid.height,gl.RGBA,gl.UNSIGNED_BYTE,model.normalTexture,gl.LINEAR);
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.generateMipmap(gl.TEXTURE_2D);
+   const pyramid=terrainShadowPyramid(model),first=pyramid[0];
+   this.maxHeightTexture=this.texture(gl.R32F,first.width,first.height,gl.RED,gl.FLOAT,first.data,gl.NEAREST);
+   for(let level=1;level<pyramid.length;level++){const p=pyramid[level];gl.texImage2D(gl.TEXTURE_2D,level,gl.R32F,p.width,p.height,0,gl.RED,gl.FLOAT,p.data);}
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAX_LEVEL,pyramid.length-1);
+   if(gl.getError()!==gl.NO_ERROR)throw new Error('Terrain texture allocation failed');
+   const surface=createSurfaceTexture(128);
+   this.surfaceTexture=this.texture(gl.RGBA8,surface.size,surface.size,gl.RGBA,gl.UNSIGNED_BYTE,surface.pixels,gl.LINEAR);
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.generateMipmap(gl.TEXTURE_2D);
+   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
+   if(anisotropy)gl.texParameterf(gl.TEXTURE_2D,anisotropy.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(4,gl.getParameter(anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+   this.emptyVAO=this.track(gl.createVertexArray(),'VertexArray');this.routeVAO=this.track(gl.createVertexArray(),'VertexArray');this.routeBuffer=this.track(gl.createBuffer(),'Buffer');
+   gl.bindVertexArray(this.routeVAO);gl.bindBuffer(gl.ARRAY_BUFFER,this.routeBuffer);
+   for(const[location,size,offset]of[[0,3,0],[1,3,12],[2,2,24]]){gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,32,offset);}
+   gl.bindVertexArray(null);
+  }catch(error){this.destroy();throw error;}
+ }
+ track(object,type){if(!object)throw new Error('Terrain GPU allocation failed');this.resources.push([object,type]);return object;}
+ program(vertex,fragment){
+  const gl=this.gl,shaders=[];
+  try{
+   for(const[type,source]of[[gl.VERTEX_SHADER,vertex],[gl.FRAGMENT_SHADER,fragment]]){
+    const shader=gl.createShader(type);if(!shader)throw new Error('Terrain shader unavailable');shaders.push(shader);
+    gl.shaderSource(shader,source);gl.compileShader(shader);
+    if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw new Error('Terrain shader: '+gl.getShaderInfoLog(shader));
+   }
+   const program=this.track(gl.createProgram(),'Program');shaders.forEach(shader=>gl.attachShader(program,shader));gl.linkProgram(program);
+   if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error('Terrain shader link: '+gl.getProgramInfoLog(program));
+   return{program,uniforms:new Map()};
+  }finally{shaders.forEach(shader=>gl.deleteShader(shader));}
+ }
+ uniform(program,name){if(!program.uniforms.has(name))program.uniforms.set(name,this.gl.getUniformLocation(program.program,name));return program.uniforms.get(name);}
+ texture(internal,width,height,format,type,data,filtering){
+  const gl=this.gl,texture=this.track(gl.createTexture(),'Texture');gl.bindTexture(gl.TEXTURE_2D,texture);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,filtering);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,filtering);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,internal,width,height,0,format,type,data);return texture;
+ }
+ heightUniforms(program){
+  const gl=this.gl,m=this.model;gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,this.heightTexture);
+  gl.uniform1i(this.uniform(program,'uHeight'),0);gl.uniform2f(this.uniform(program,'uGrid'),m.grid.width,m.grid.height);
+  gl.uniform2f(this.uniform(program,'uExtent'),m.width,m.height);
+ }
+ ensureMesh(mesh){
+  if(this.meshes.has(mesh.step))return this.meshes.get(mesh.step);
+  const gl=this.gl,vao=this.track(gl.createVertexArray(),'VertexArray'),buffer=this.track(gl.createBuffer(),'Buffer'),index=this.track(gl.createBuffer(),'Buffer');
+  gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.uv,gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,8,0);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,index);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,mesh.indices,gl.STATIC_DRAW);gl.bindVertexArray(null);
+  const cut=buildTerrainBoundary(this.model,mesh.step),boundaryVAO=this.track(gl.createVertexArray(),'VertexArray'),boundaryBuffer=this.track(gl.createBuffer(),'Buffer');
+  gl.bindVertexArray(boundaryVAO);gl.bindBuffer(gl.ARRAY_BUFFER,boundaryBuffer);gl.bufferData(gl.ARRAY_BUFFER,cut.vertices,gl.STATIC_DRAW);
+  for(const[location,offset]of[[0,0],[1,12]]){gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,3,gl.FLOAT,false,24,offset);}
+  gl.bindVertexArray(null);
+  const result={vao,count:mesh.indices.length,type:mesh.indices instanceof Uint32Array?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT,boundaryVAO,boundaryCount:cut.count,floor:cut.floor};
+  this.meshes.set(mesh.step,result);return result;
+ }
+ setRoute(segments){
+  const gl=this.gl,vertices=new Float32Array(segments.length*6*8),corners=[[0,-1],[1,-1],[0,1],[0,1],[1,-1],[1,1]];let i=0;
+  for(const[a,b]of segments)for(const corner of corners){vertices.set(a,i);vertices.set(b,i+3);vertices.set(corner,i+6);i+=8;}
+  gl.bindBuffer(gl.ARRAY_BUFFER,this.routeBuffer);gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);this.routeCount=segments.length*6;
+ }
+ shadowMap(light,profile){
+  const gl=this.gl,size=profile.shadowSize,steps=profile.shadowQueries;let target=this.shadows.get(size);
+  if(!target){
+   const texture=this.texture(gl.RGBA8,size,size,gl.RGBA,gl.UNSIGNED_BYTE,null,gl.LINEAR),framebuffer=this.track(gl.createFramebuffer(),'Framebuffer');
+   gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,texture,0);
+   if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('Terrain shadow target unavailable');
+   target={texture,framebuffer,key:''};this.shadows.set(size,target);
+  }
+  const key=steps+':'+light.join(':');
+  if(target.key!==key){
+   gl.bindFramebuffer(gl.FRAMEBUFFER,target.framebuffer);gl.viewport(0,0,size,size);
+   gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.disable(gl.CULL_FACE);gl.useProgram(this.shadow.program);this.heightUniforms(this.shadow);
+   gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,this.maxHeightTexture);gl.uniform1i(this.uniform(this.shadow,'uHeightMax'),3);
+   gl.uniform3fv(this.uniform(this.shadow,'uLight'),light);gl.uniform1i(this.uniform(this.shadow,'uSteps'),steps);
+   gl.bindVertexArray(this.emptyVAO);gl.drawArrays(gl.TRIANGLES,0,3);target.key=key;
+  }
+  return{texture:target.texture,size};
+ }
+ render(mesh,camera,light,width,height,dpr,profile){
+  const gl=this.gl,m=this.model,shadow=this.shadowMap(light,profile),gpuMesh=this.ensureMesh(mesh);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,width,height);gl.clearColor(SKY[0]/255,SKY[1]/255,SKY[2]/255,1);
+  gl.clearDepth(1);gl.depthMask(true);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.disable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);gl.depthMask(false);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  gl.useProgram(this.ground.program);gl.uniformMatrix4fv(this.uniform(this.ground,'uMatrix'),false,camera.matrix);gl.uniform2fv(this.uniform(this.ground,'uOffset'),camera.offset);
+  gl.uniform2f(this.uniform(this.ground,'uExtent'),m.width,m.height);gl.uniform1f(this.uniform(this.ground,'uFloor'),gpuMesh.floor);
+  gl.bindVertexArray(this.emptyVAO);gl.drawArrays(gl.TRIANGLES,0,6);gl.depthMask(true);
+  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.disable(gl.BLEND);gl.useProgram(this.terrain.program);this.heightUniforms(this.terrain);
+  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,this.normalTexture);gl.uniform1i(this.uniform(this.terrain,'uNormal'),1);
+  gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,shadow.texture);gl.uniform1i(this.uniform(this.terrain,'uShadow'),2);
+  gl.activeTexture(gl.TEXTURE4);gl.bindTexture(gl.TEXTURE_2D,this.surfaceTexture);gl.uniform1i(this.uniform(this.terrain,'uSurface'),4);
+  gl.uniformMatrix4fv(this.uniform(this.terrain,'uMatrix'),false,camera.matrix);gl.uniform2fv(this.uniform(this.terrain,'uOffset'),camera.offset);
+  gl.uniform3fv(this.uniform(this.terrain,'uLight'),light);gl.uniform3fv(this.uniform(this.terrain,'uEye'),camera.eye);
+  gl.uniform1f(this.uniform(this.terrain,'uBase'),m.base);gl.uniform1f(this.uniform(this.terrain,'uScale'),m.scale);gl.uniform1f(this.uniform(this.terrain,'uShadowTexel'),1/shadow.size);
+  gl.bindVertexArray(gpuMesh.vao);gl.drawElements(gl.TRIANGLES,gpuMesh.count,gpuMesh.type,0);
+  gl.useProgram(this.boundary.program);gl.uniformMatrix4fv(this.uniform(this.boundary,'uMatrix'),false,camera.matrix);gl.uniform2fv(this.uniform(this.boundary,'uOffset'),camera.offset);
+  gl.uniform3fv(this.uniform(this.boundary,'uLight'),light);gl.uniform1f(this.uniform(this.boundary,'uFloor'),gpuMesh.floor);
+  gl.bindVertexArray(gpuMesh.boundaryVAO);gl.drawArrays(gl.TRIANGLES,0,gpuMesh.boundaryCount);
+  if(this.routeCount){
+   gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.useProgram(this.line.program);
+   gl.uniformMatrix4fv(this.uniform(this.line,'uMatrix'),false,camera.matrix);gl.uniform2fv(this.uniform(this.line,'uOffset'),camera.offset);
+   gl.uniform2f(this.uniform(this.line,'uViewport'),width,height);gl.bindVertexArray(this.routeVAO);
+   for(const[size,color]of[[4.3,[1,.985,.91,.94]],[2.25,[.74,.30,.12,1]]]){
+    gl.uniform1f(this.uniform(this.line,'uHalfWidth'),size*dpr);gl.uniform4fv(this.uniform(this.line,'uColor'),color);gl.drawArrays(gl.TRIANGLES,0,this.routeCount);
+   }
+   gl.depthMask(true);gl.disable(gl.BLEND);
+  }
+  gl.bindVertexArray(null);gl.flush();
+ }
+ destroy(){const gl=this.gl;for(const[object,type]of this.resources.reverse())gl['delete'+type](object);this.resources=[];this.meshes.clear();this.shadows.clear();}
+}
+function palette(height){return terrainMaterialColor(height);}
+
+class TerrainCanvas{
+ constructor(context,model){this.ctx=context;this.model=model;this.shadowCache=new Map();this.boundaries=new Map();}
+ shadows(mesh,light,profile){
+  const key=mesh.step+':'+profile.shadowQueries+':'+light.join(':');if(this.shadowCache.has(key))return this.shadowCache.get(key);
+  const values=new Float32Array(mesh.count),m=this.model;
+  for(let i=0;i<mesh.count;i++){
+   const x=(mesh.uv[i*2]-.5)*m.widthM,y=(.5-mesh.uv[i*2+1])*m.heightM;
+   values[i]=sampleTerrainShadow(m,x,y,m.grid.elevations[mesh.sampleIds[i]],light,profile.shadowQueries);
+  }
+  if(this.shadowCache.size>=4)this.shadowCache.delete(this.shadowCache.keys().next().value);this.shadowCache.set(key,values);return values;
+ }
+ render(mesh,camera,light,width,height,dpr,profile,segments){
+  const m=this.model,ctx=this.ctx;
+  if(!this.image||this.image.width!==width||this.image.height!==height){this.image=ctx.createImageData(width,height);this.depth=new Float32Array(width*height);}
+  const pixels=this.image.data,depth=this.depth;
+  for(let p=0;p<pixels.length;p+=4){pixels[p]=SKY[0];pixels[p+1]=SKY[1];pixels[p+2]=SKY[2];pixels[p+3]=255;}depth.fill(Infinity);
+  if(!this.boundaries.has(mesh.step))this.boundaries.set(mesh.step,buildTerrainBoundary(m,mesh.step));
+  const boundary=this.boundaries.get(mesh.step),shadows=this.shadows(mesh,light,profile),vertices=new Array(mesh.count+boundary.count),colors=new Float32Array((mesh.count+boundary.count)*3);
+  for(let i=0;i<mesh.count;i++){
+   const sample=mesh.sampleIds[i],n=[m.normals[sample*3],m.normals[sample*3+1],m.normals[sample*3+2]],u=mesh.uv[i*2],v=mesh.uv[i*2+1];
+   const point=[(u-.5)*m.width,(.5-v)*m.height,m.heights[sample]];vertices[i]=projectPoint(point,camera,width,height);
+   const base=palette(m.grid.elevations[sample]),slope=smoothstep(.18,.57,1-n[2]),ao=m.normalTexture[sample*4+3]/255,diffuse=Math.max(0,dot(n,light))*shadows[i]*.94;
+   const haze=Math.max(clamp((Math.hypot(...point.map((x,k)=>x-camera.eye[k]))-.68)*.13,0,.32),(1-smoothstep(0,.003,Math.min(u,1-u,v,1-v)))*.15);
+   for(let k=0;k<3;k++){
+    const albedo=mix(base[k],[.57,.55,.48][k],slope*.68),illumination=[.34,.41,.40][k]*(.55+.45*n[2])*ao+[1.05,.99,.85][k]*diffuse;
+    colors[i*3+k]=mix(Math.max(0,albedo**2.2*illumination)**(1/2.2)*255,SKY[k],haze);
+   }
+  }
+  for(let i=0;i<boundary.count;i++){
+   const source=i*6,point=Array.from(boundary.vertices.subarray(source,source+3)),normal=Array.from(boundary.vertices.subarray(source+3,source+6)),target=mesh.count+i;
+   vertices[target]=projectPoint(point,camera,width,height);
+   const elevation=clamp((point[2]-boundary.floor)/.17,0,1),illumination=.40+.60*Math.max(dot(normal,light),0);
+   for(let k=0;k<3;k++)colors[target*3+k]=mix([.34,.38,.33][k],[.49,.53,.46][k],elevation)*illumination*255;
+  }
+  const ids=mesh.indices;
+  for(let i=0;i<ids.length+boundary.count;i+=3){
+   const ia=i<ids.length?ids[i]:mesh.count+i-ids.length,ib=i<ids.length?ids[i+1]:ia+1,ic=i<ids.length?ids[i+2]:ia+2,a=vertices[ia],b=vertices[ib],c=vertices[ic];if(!a||!b||!c)continue;
+   const minX=Math.max(0,Math.floor(Math.min(a[0],b[0],c[0]))),maxX=Math.min(width-1,Math.ceil(Math.max(a[0],b[0],c[0])));
+   const minY=Math.max(0,Math.floor(Math.min(a[1],b[1],c[1]))),maxY=Math.min(height-1,Math.ceil(Math.max(a[1],b[1],c[1])));if(minX>maxX||minY>maxY)continue;
+   const denominator=(b[1]-c[1])*(a[0]-c[0])+(c[0]-b[0])*(a[1]-c[1]);if(Math.abs(denominator)<.00001)continue;
+   const inverse=1/denominator,waX=(b[1]-c[1])*inverse,waY=(c[0]-b[0])*inverse,wbX=(c[1]-a[1])*inverse,wbY=(a[0]-c[0])*inverse;
+   let rowA=((b[1]-c[1])*(minX+.5-c[0])+(c[0]-b[0])*(minY+.5-c[1]))*inverse;
+   let rowB=((c[1]-a[1])*(minX+.5-c[0])+(a[0]-c[0])*(minY+.5-c[1]))*inverse;
+   for(let y=minY;y<=maxY;y++,rowA+=waY,rowB+=wbY){
+    let wa=rowA,wb=rowB,index=y*width+minX;
+    for(let x=minX;x<=maxX;x++,index++,wa+=waX,wb+=wbX){
+     const wc=1-wa-wb;if(wa<-.00001||wb<-.00001||wc<-.00001)continue;
+     const z=wa*a[2]+wb*b[2]+wc*c[2];if(z>depth[index]||z<-1||z>1)continue;depth[index]=z;
+     const pa=wa*a[3],pb=wb*b[3],pc=wc*c[3],reciprocal=1/(pa+pb+pc),offset=index*4;
+     for(let k=0;k<3;k++)pixels[offset+k]=(pa*colors[ia*3+k]+pb*colors[ib*3+k]+pc*colors[ic*3+k])*reciprocal;
+    }
+   }
+  }
+  // Route capsules use the terrain depth buffer, so a hidden trail stays hidden.
+  const projected=segments.map(([a,b])=>[projectPoint(a,camera,width,height),projectPoint(b,camera,width,height)]);
+  for(const[radius,color]of[[4.3*dpr,[255,251,232]],[2.25*dpr,[189,77,31]]])for(const[a,b]of projected)if(a&&b)this.routeCapsule(a,b,radius,color,width,height,pixels,depth);
+  ctx.putImageData(this.image,0,0);
+ }
+ routeCapsule(a,b,radius,color,width,height,pixels,depth){
+  const dx=b[0]-a[0],dy=b[1]-a[1],length=dx*dx+dy*dy;if(length<.00001)return;
+  const minX=Math.max(0,Math.floor(Math.min(a[0],b[0])-radius)),maxX=Math.min(width-1,Math.ceil(Math.max(a[0],b[0])+radius));
+  const minY=Math.max(0,Math.floor(Math.min(a[1],b[1])-radius)),maxY=Math.min(height-1,Math.ceil(Math.max(a[1],b[1])+radius));
+  for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){
+   const t=clamp(((x+.5-a[0])*dx+(y+.5-a[1])*dy)/length,0,1),distance=Math.hypot(x+.5-a[0]-dx*t,y+.5-a[1]-dy*t);if(distance>=radius)continue;
+   const index=y*width+x,z=mix(a[2],b[2],t);if(z>depth[index]||z<-1||z>1)continue;
+   const alpha=clamp(radius-distance,0,1),offset=index*4;for(let k=0;k<3;k++)pixels[offset+k]=mix(pixels[offset+k],color[k],alpha);
+  }
+ }
+ destroy(){this.shadowCache.clear();this.boundaries.clear();this.image=null;this.depth=null;}
+}
+export class TerrainRenderer{
+ constructor(canvas,grid,options={}){
+  this.originalCanvas=canvas;this.canvas=canvas;this.grid=grid;this.options=options;
+  this.model=options.preparedModel===undefined?createTerrainModel(grid):validatePreparedTerrainModel(grid,options.preparedModel);
+  this.widthM=this.model.widthM;this.heightM=this.model.heightM;this.base=this.model.base;
+  this.yaw=DEFAULT_VIEW.yaw;this.pitch=DEFAULT_VIEW.pitch;this.zoom=DEFAULT_VIEW.zoom;this.offset=[0,0];
+  this.viewportInsets=normalizedInsets(options.viewportInsets);
+  this.visible=true;this.destroyed=false;this.failed=false;this.contextLost=false;this.frame=0;this.dirty=true;this.warmRequested=false;
+  this.pointers=new Map();this.events=[];this.meshes=new Map();this.meshStride=0;this.renderProfile=null;this.route=[];this.routeMeshes=new Map();this.gpuRoute=null;this.dragging=false;this.wheeling=false;
+  this.previousTouchAction=canvas.style?.touchAction;if(canvas.style)canvas.style.touchAction='none';
+  try{
+   let gl;
+   if(!options.forceCanvas)try{gl=canvas.getContext('webgl2',{alpha:false,antialias:true,depth:true,stencil:false,preserveDrawingBuffer:false,powerPreference:'default',failIfMajorPerformanceCaveat:true});}catch{}
+   if(gl){try{this.gpu=new TerrainGPU(gl,this.model);this.gl=gl;}catch{gl.getExtension('WEBGL_lose_context')?.loseContext();this.useCanvas(true);}}
+   else this.useCanvas(false);
+   this.bindControls();this.observe();this.document=canvas.ownerDocument||(typeof document!=='undefined'?document:null);
+   this.onVisibility=()=>{if(this.document?.visibilityState!=='hidden')this.request();else this.cancelFrame();};
+   this.document?.addEventListener('visibilitychange',this.onVisibility);this.request();
+  }catch(error){this.destroy();throw error;}
+ }
+ useCanvas(replace){
+  let next=this.canvas;
+  if(replace){
+   next=this.canvas.cloneNode?.(false);if(!next||!this.canvas.parentNode)throw new Error('Аппаратная сцена недоступна. Откройте плоскую карту.');
+  }
+  const ctx=next.getContext('2d',{alpha:false});if(!ctx)throw new Error('На этом устройстве недоступен рендер карты.');
+  // Commit the DOM replacement only after its context succeeds; failed retries retain React's canvas.
+  if(replace){this.canvas.parentNode.replaceChild(next,this.canvas);this.canvas=next;}
+  this.software=new TerrainCanvas(ctx,this.model);this.gl=null;this.gpu=null;
+ }
+ notify(name,value){try{this.options[name]?.(value);}catch{/* Host callbacks must not interrupt rendering or context recovery. */}}
+ bind(name,handler,options){this.canvas.addEventListener(name,handler,options);this.events.push([this.canvas,name,handler,options]);}
+ bindControls(){
+  this.bind('pointerdown',e=>{
+   if(e.button!==undefined&&![0,1,2].includes(e.button))return;try{this.canvas.setPointerCapture(e.pointerId);}catch{}
+   this.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY,pan:e.button===1||e.button===2||e.shiftKey});this.dragging=true;this.request();
+  });
+  this.bind('pointermove',e=>{
+   const old=this.pointers.get(e.pointerId);if(!old)return;const before=[...this.pointers.values()];
+   this.pointers.set(e.pointerId,{...old,x:e.clientX,y:e.clientY});const after=[...this.pointers.values()];
+   if(after.length===1){
+    if(old.pan)this.panBy(e.clientX-old.x,e.clientY-old.y);
+    else{this.yaw+=(e.clientX-old.x)*.0045;this.pitch=clamp(this.pitch+(e.clientY-old.y)*.003,.28,1.32);}
+   }else if(after.length===2){
+    const oldDistance=Math.hypot(before[0].x-before[1].x,before[0].y-before[1].y),newDistance=Math.hypot(after[0].x-after[1].x,after[0].y-after[1].y);
+    if(oldDistance>2)this.zoom=clamp(this.zoom*newDistance/oldDistance,.65,5);
+    this.panBy((after[0].x+after[1].x-before[0].x-before[1].x)/2,(after[0].y+after[1].y-before[0].y-before[1].y)/2);
+   }
+   this.yaw=((this.yaw+PI)%TAU+TAU)%TAU-PI;this.request();
+  });
+  const up=e=>{
+   this.pointers.delete(e.pointerId);try{if(this.canvas.hasPointerCapture?.(e.pointerId))this.canvas.releasePointerCapture(e.pointerId);}catch{}
+   this.dragging=this.pointers.size>0;this.request();
+  };
+  this.bind('pointerup',up);this.bind('pointercancel',up);this.bind('lostpointercapture',up);this.bind('contextmenu',e=>e.preventDefault());
+  this.bind('wheel',e=>{
+   e.preventDefault();const unit=e.deltaMode===1?16:e.deltaMode===2?300:1;
+   this.zoom=clamp(this.zoom*Math.exp(-clamp(e.deltaY*unit,-800,800)*.001),.65,5);
+   this.wheeling=true;clearTimeout(this.wheelTimer);this.wheelTimer=setTimeout(()=>{this.wheeling=false;this.request();},140);this.request();
+  },{passive:false});
+  this.bind('keydown',e=>{
+   if(e.key==='ArrowLeft')this.rotate(-.1);else if(e.key==='ArrowRight')this.rotate(.1);
+   else if(e.key==='ArrowUp'){this.pitch=clamp(this.pitch+.06,.28,1.32);this.request();}
+   else if(e.key==='ArrowDown'){this.pitch=clamp(this.pitch-.06,.28,1.32);this.request();}
+   else if(e.key==='+'||e.key==='=')this.zoomBy(1.15);else if(e.key==='-'||e.key==='−')this.zoomBy(1/1.15);
+   else if(e.key==='Home')this.reset();else return;e.preventDefault();
+  });
+  this.bind('webglcontextlost',e=>{
+   e.preventDefault();this.contextLost=true;this.cancelFrame();this.notify('onError','Графический контекст прерван. Восстанавливаем сцену…');
+   clearTimeout(this.restoreTimer);this.restoreTimer=setTimeout(()=>this.fallbackAfterLoss(),2500);
+  });
+  this.bind('webglcontextrestored',()=>{
+   if(this.destroyed||!this.gl)return;clearTimeout(this.restoreTimer);
+   try{this.gpu?.destroy();this.gpu=new TerrainGPU(this.gl,this.model);this.gpuRoute=null;this.contextLost=false;this.request();}
+   catch{this.fallbackAfterLoss();}
+  });
+ }
+ fallbackAfterLoss(){
+  if(this.destroyed||!this.contextLost)return;clearTimeout(this.restoreTimer);this.unbindControls();this.resize?.disconnect();
+  this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);this.gpuRoute=null;
+  try{this.gpu?.destroy();this.useCanvas(true);this.contextLost=false;this.bindControls();this.observe();this.request();}
+  catch{this.terminalFailure('Не удалось восстановить ландшафт. Подготовьте сцену заново.');}
+ }
+ /** An ended graphics session cannot be made ready again by merely unhiding it.
+  * Release it before notifying the host; retry must own a new renderer/canvas. */
+ terminalFailure(message){
+  if(this.destroyed)return;this.failed=true;this.destroy();
+  this.notify('onError',message);this.notify('onFatal',message);
+ }
+ unbindControls(){this.events.forEach(([target,name,handler,options])=>target.removeEventListener(name,handler,options));this.events=[];}
+ observe(){
+  if(typeof ResizeObserver!=='undefined'){this.resize=new ResizeObserver(()=>this.request());this.resize.observe(this.canvas);}
+  else if(typeof window!=='undefined'&&!this.onResize){this.onResize=()=>this.request();window.addEventListener('resize',this.onResize);}
+ }
+ panBy(dx,dy){
+  const rect=this.canvas.getBoundingClientRect(),factor=1/Math.max(200,Math.min(rect.width,rect.height))/this.zoom,cr=Math.cos(this.yaw),sr=Math.sin(this.yaw);
+  this.offset[0]=clamp(this.offset[0]-(dx*cr+dy*sr)*factor,-this.model.width*.42,this.model.width*.42);
+  this.offset[1]=clamp(this.offset[1]-(dx*sr-dy*cr)*factor,-this.model.height*.42,this.model.height*.42);
+ }
+ heightAt(x,y){return sampleElevation(this.model,x,y);}
+ setGeometry(data){
+  if(this.destroyed)return;
+  try{
+   const result=terrainRoute(this.model,data);this.route=result.segments;this.routeMeshes.clear();this.gpuRoute=null;
+   this.canvas.dataset.routeClipped=String(result.clipped);this.canvas.dataset.routeSegments=String(result.segments.length);
+   this.request();return{segments:result.segments.length,clipped:result.clipped};
+  }catch{
+   this.route=[];this.routeMeshes.clear();this.gpuRoute=null;this.request();this.notify('onError','Геометрия не помещается в предпросмотр. Откройте маршрут на основной карте.');
+   this.canvas.dataset.routeClipped='true';this.canvas.dataset.routeSegments='0';
+   return{segments:0,clipped:true};
+  }
+ }
+ setVisible(value){
+  this.visible=Boolean(value);
+  if(this.visible)this.request();else{this.cancelFrame();this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);if(this.warmRequested)this.request();}
+ }
+ setViewportInsets(insets){if(this.destroyed)return;this.viewportInsets=normalizedInsets(insets);this.request();}
+ warmup(){if(this.destroyed)return;this.warmRequested=true;this.request();}
+ cancelFrame(){if(this.frame){cancelAnimationFrame(this.frame);this.frame=0;}}
+ request(){
+  this.dirty=true;if(this.destroyed||(!this.visible&&!this.warmRequested)||this.contextLost||this.frame||this.document?.visibilityState==='hidden')return;
+  this.frame=requestAnimationFrame(()=>{
+   this.frame=0;const warm=this.warmRequested;this.warmRequested=false;
+   if(!this.destroyed&&(this.visible||warm)&&!this.contextLost&&this.document?.visibilityState!=='hidden'){this.dirty=false;this.render(warm);}
+  });
+ }
+ meshFor(step){if(!this.meshes.has(step))this.meshes.set(step,buildTerrainMesh(this.model,step));return this.meshes.get(step);}
+ profileFor(rect,hardware){
+  const lowMemory=hardware.deviceMemory!==undefined&&hardware.deviceMemory<4,compact=lowMemory||rect.width<700;
+  const key=Boolean(this.gpu)+':'+lowMemory+':'+compact;
+  if(this.renderProfile?.key!==key)this.renderProfile={key,pixelLimit:this.gpu?(lowMemory?1600000:2800000):900000,maxDpr:this.gpu?2:1.5,
+   vertexLimit:this.gpu?(lowMemory?66049:263169):16641,shadowSize:compact?128:256,shadowQueries:compact?SHADOW_COMPACT_QUERIES:SHADOW_FULL_QUERIES};
+  return this.renderProfile;
+ }
+ routeFor(step){
+  if(this.routeMeshes.has(step))return this.routeMeshes.get(step);
+  let route;
+  try{route=drapeTerrainRoute(this.model,this.route,step);}
+  catch{route=[];this.notify('onError','Геометрия не помещается в предпросмотр. Откройте маршрут на основной карте.');}
+  if(this.routeMeshes.size>=2)this.routeMeshes.delete(this.routeMeshes.keys().next().value);this.routeMeshes.set(step,route);return route;
+ }
+ render(warm=false){
+  const started=performance.now(),rect=this.canvas.getBoundingClientRect();if(rect.width<1||rect.height<1){if(warm)this.warmRequested=true;return;}
+  const motion=this.dragging||this.wheeling,hardware=typeof navigator!=='undefined'?navigator:{},profile=this.profileFor(rect,hardware);
+  const wantedDpr=Math.min(typeof devicePixelRatio==='number'?devicePixelRatio:1,profile.maxDpr);
+  const dpr=Math.min(wantedDpr,Math.sqrt(profile.pixelLimit/(rect.width*rect.height)),4096/rect.width,4096/rect.height);
+  const W=Math.max(1,Math.round(rect.width*dpr)),H=Math.max(1,Math.round(rect.height*dpr));
+  if(this.canvas.width!==W||this.canvas.height!==H){this.canvas.width=W;this.canvas.height=H;}
+  const camera=cameraFor(this.model,this,rect.width,rect.height,this.options.compactViewport);
+  const budget=this.gpu?Math.max(4225,camera.usableW*camera.usableH*.55*Math.min(2,this.zoom)):16641;
+  const step=selectTerrainMeshStride(this.grid,budget,this.meshStride,profile.vertexLimit);this.meshStride=step;
+  const mesh=this.meshFor(step),light=terrainLight(this.yaw,this.pitch),route=this.routeFor(step);
+  try{
+   if(this.gpu){if(this.gpuRoute!==route){this.gpu.setRoute(route);this.gpuRoute=route;}this.gpu.render(mesh,camera,light,W,H,dpr,profile);}
+   else this.software.render(mesh,camera,light,W,H,dpr,profile,route);
+  }catch{
+   if(this.gpu){this.warmRequested=warm;this.contextLost=true;this.fallbackAfterLoss();return;}
+   this.terminalFailure('Не удалось нарисовать ландшафт. Подготовьте сцену заново.');return;
+  }
+  const ms=performance.now()-started,renderer=this.gpu?'webgl2':'canvas2d',quality=motion?'motion':'full';
+  this.canvas.dataset.renderMs=ms.toFixed(1);this.canvas.dataset.triangles=String(mesh.triangles);
+  this.canvas.dataset.quality=quality;this.canvas.dataset.renderer=renderer;this.canvas.dataset.meshStride=String(step);
+  this.canvas.dataset.routeMeshStride=String(step);this.canvas.dataset.routeRenderSegments=String(route.length);
+  this.canvas.dataset.sourceVertices=String(this.grid.width*this.grid.height);this.canvas.dataset.heightScale='1';this.canvas.dataset.material='cartographic';
+  // ms is CPU submission/drawing time, not a GPU or phone FPS measurement.
+  this.notify('onRender',{ms,triangles:mesh.triangles,quality,renderer,pixelRatio:dpr,meshStride:step,sourceVertices:this.grid.width*this.grid.height});
+ }
+ rotate(delta){if(this.destroyed||!Number.isFinite(delta))return;this.yaw=((this.yaw+delta+PI)%TAU+TAU)%TAU-PI;this.request();}
+ zoomBy(factor){if(this.destroyed||!Number.isFinite(factor)||factor<=0)return;this.zoom=clamp(this.zoom*factor,.65,5);this.request();}
+ reset(){if(this.destroyed)return;this.yaw=DEFAULT_VIEW.yaw;this.pitch=DEFAULT_VIEW.pitch;this.zoom=DEFAULT_VIEW.zoom;this.offset=[0,0];this.request();}
+ destroy(){
+  if(this.destroyed)return;this.destroyed=true;this.cancelFrame();clearTimeout(this.wheelTimer);clearTimeout(this.restoreTimer);
+  this.resize?.disconnect();if(this.onResize&&typeof window!=='undefined')window.removeEventListener('resize',this.onResize);
+  this.document?.removeEventListener('visibilitychange',this.onVisibility);this.unbindControls();this.pointers.clear();
+  this.gpu?.destroy();this.software?.destroy();this.meshes.clear();this.routeMeshes.clear();this.route=[];this.gpuRoute=null;this.warmRequested=false;
+  if(this.canvas!==this.originalCanvas&&this.canvas.parentNode)this.canvas.parentNode.replaceChild(this.originalCanvas,this.canvas);
+  if(this.originalCanvas.style)this.originalCanvas.style.touchAction=this.previousTouchAction||'';
+ }
+}

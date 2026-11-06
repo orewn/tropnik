@@ -1,0 +1,10 @@
+{
+  "name": "tropnik-db-compat-audit",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.15",
+    "@electric-sql/pglite-socket": "0.2.18",
+    "@electric-sql/pglite-postgis": "0.2.15"
+  }
+}

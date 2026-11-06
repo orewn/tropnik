@@ -1,0 +1,159 @@
+{"Time":"2026-11-06T08:41:24.01098303+03:00","Action":"start","Package":"tropa/backend/cmd/tropa-admin"}
+{"Time":"2026-11-06T08:41:24.011549345+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-admin","Output":"?   \ttropa/backend/cmd/tropa-admin\t[no test files]\n"}
+{"Time":"2026-11-06T08:41:24.011568754+03:00","Action":"skip","Package":"tropa/backend/cmd/tropa-admin","Elapsed":0.001}
+{"Time":"2026-11-06T08:41:25.979761088+03:00","Action":"start","Package":"tropa/backend/cmd/tropa-api"}
+{"Time":"2026-11-06T08:41:25.979846136+03:00","Action":"start","Package":"tropa/backend/cmd/tropa-health"}
+{"Time":"2026-11-06T08:41:25.979916162+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-health","Output":"?   \ttropa/backend/cmd/tropa-health\t[no test files]\n"}
+{"Time":"2026-11-06T08:41:25.979939938+03:00","Action":"skip","Package":"tropa/backend/cmd/tropa-health","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.979944144+03:00","Action":"start","Package":"tropa/backend/cmd/tropa-migrate"}
+{"Time":"2026-11-06T08:41:25.97996122+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-migrate","Output":"?   \ttropa/backend/cmd/tropa-migrate\t[no test files]\n"}
+{"Time":"2026-11-06T08:41:25.980066348+03:00","Action":"start","Package":"tropa/backend/internal/abuse"}
+{"Time":"2026-11-06T08:41:25.979968891+03:00","Action":"skip","Package":"tropa/backend/cmd/tropa-migrate","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.980151948+03:00","Action":"start","Package":"tropa/backend/internal/auth"}
+{"Time":"2026-11-06T08:41:25.980191387+03:00","Action":"run","Package":"tropa/backend/internal/auth","Test":"TestPasswordRoundTripSaltAndTamper"}
+{"Time":"2026-11-06T08:41:25.980197276+03:00","Action":"output","Package":"tropa/backend/internal/auth","Test":"TestPasswordRoundTripSaltAndTamper","Output":"=== RUN   TestPasswordRoundTripSaltAndTamper\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980208784+03:00","Action":"output","Package":"tropa/backend/internal/auth","Test":"TestPasswordRoundTripSaltAndTamper","Output":"--- PASS: TestPasswordRoundTripSaltAndTamper (4.05s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980212549+03:00","Action":"pass","Package":"tropa/backend/internal/auth","Test":"TestPasswordRoundTripSaltAndTamper","Elapsed":4.05}
+{"Time":"2026-11-06T08:41:25.980218338+03:00","Action":"run","Package":"tropa/backend/internal/auth","Test":"TestPasswordBoundsAndTokenEntropy"}
+{"Time":"2026-11-06T08:41:25.980223436+03:00","Action":"output","Package":"tropa/backend/internal/auth","Test":"TestPasswordBoundsAndTokenEntropy","Output":"=== RUN   TestPasswordBoundsAndTokenEntropy\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980227792+03:00","Action":"output","Package":"tropa/backend/internal/auth","Test":"TestPasswordBoundsAndTokenEntropy","Output":"--- PASS: TestPasswordBoundsAndTokenEntropy (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980231728+03:00","Action":"pass","Package":"tropa/backend/internal/auth","Test":"TestPasswordBoundsAndTokenEntropy","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.980234743+03:00","Action":"output","Package":"tropa/backend/internal/auth","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980237908+03:00","Action":"output","Package":"tropa/backend/internal/auth","Output":"ok  \ttropa/backend/internal/auth\t(cached)\n"}
+{"Time":"2026-11-06T08:41:25.980241894+03:00","Action":"pass","Package":"tropa/backend/internal/auth","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.980547585+03:00","Action":"start","Package":"tropa/backend/internal/domain"}
+{"Time":"2026-11-06T08:41:25.980845825+03:00","Action":"run","Package":"tropa/backend/internal/abuse","Test":"TestUnicodeFingerprintAndHiddenLinkNormalization"}
+{"Time":"2026-11-06T08:41:25.980857793+03:00","Action":"output","Package":"tropa/backend/internal/abuse","Test":"TestUnicodeFingerprintAndHiddenLinkNormalization","Output":"=== RUN   TestUnicodeFingerprintAndHiddenLinkNormalization\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980864623+03:00","Action":"output","Package":"tropa/backend/internal/abuse","Test":"TestUnicodeFingerprintAndHiddenLinkNormalization","Output":"--- PASS: TestUnicodeFingerprintAndHiddenLinkNormalization (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980928439+03:00","Action":"pass","Package":"tropa/backend/internal/abuse","Test":"TestUnicodeFingerprintAndHiddenLinkNormalization","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.980931965+03:00","Action":"run","Package":"tropa/backend/internal/abuse","Test":"TestPostingCooldownAndReportsRemainAvailableDuringMute"}
+{"Time":"2026-11-06T08:41:25.980934028+03:00","Action":"output","Package":"tropa/backend/internal/abuse","Test":"TestPostingCooldownAndReportsRemainAvailableDuringMute","Output":"=== RUN   TestPostingCooldownAndReportsRemainAvailableDuringMute\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980937313+03:00","Action":"output","Package":"tropa/backend/internal/abuse","Test":"TestPostingCooldownAndReportsRemainAvailableDuringMute","Output":"--- PASS: TestPostingCooldownAndReportsRemainAvailableDuringMute (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980939436+03:00","Action":"pass","Package":"tropa/backend/internal/abuse","Test":"TestPostingCooldownAndReportsRemainAvailableDuringMute","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.9809425+03:00","Action":"output","Package":"tropa/backend/internal/abuse","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.980945074+03:00","Action":"output","Package":"tropa/backend/internal/abuse","Output":"ok  \ttropa/backend/internal/abuse\t(cached)\n"}
+{"Time":"2026-11-06T08:41:25.980947588+03:00","Action":"pass","Package":"tropa/backend/internal/abuse","Elapsed":0.001}
+{"Time":"2026-11-06T08:41:25.991591141+03:00","Action":"run","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting"}
+{"Time":"2026-11-06T08:41:25.991649208+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting","Output":"=== RUN   TestProductionRejectsUnsafeDefaultsBeforeConnecting\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.991680235+03:00","Action":"run","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/no_database"}
+{"Time":"2026-11-06T08:41:25.991682809+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/no_database","Output":"=== RUN   TestProductionRejectsUnsafeDefaultsBeforeConnecting/no_database\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.991917003+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/no_database","Output":"--- PASS: TestProductionRejectsUnsafeDefaultsBeforeConnecting/no_database (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.991940107+03:00","Action":"pass","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/no_database","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.991959817+03:00","Action":"run","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/plaintext_web"}
+{"Time":"2026-11-06T08:41:25.991963302+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/plaintext_web","Output":"=== RUN   TestProductionRejectsUnsafeDefaultsBeforeConnecting/plaintext_web\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.992153099+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/plaintext_web","Output":"--- PASS: TestProductionRejectsUnsafeDefaultsBeforeConnecting/plaintext_web (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.992168312+03:00","Action":"pass","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/plaintext_web","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.99217377+03:00","Action":"run","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/weak_database_password"}
+{"Time":"2026-11-06T08:41:25.992181622+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/weak_database_password","Output":"=== RUN   TestProductionRejectsUnsafeDefaultsBeforeConnecting/weak_database_password\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.99231315+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/weak_database_password","Output":"--- PASS: TestProductionRejectsUnsafeDefaultsBeforeConnecting/weak_database_password (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.992317908+03:00","Action":"pass","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/weak_database_password","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.992341403+03:00","Action":"run","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/unverified_external_database"}
+{"Time":"2026-11-06T08:41:25.992343616+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/unverified_external_database","Output":"=== RUN   TestProductionRejectsUnsafeDefaultsBeforeConnecting/unverified_external_database\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.992541515+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/unverified_external_database","Output":"--- PASS: TestProductionRejectsUnsafeDefaultsBeforeConnecting/unverified_external_database (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.99255818+03:00","Action":"pass","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/unverified_external_database","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.992579713+03:00","Action":"run","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/demo_flag"}
+{"Time":"2026-11-06T08:41:25.992581756+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/demo_flag","Output":"=== RUN   TestProductionRejectsUnsafeDefaultsBeforeConnecting/demo_flag\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.992722498+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/demo_flag","Output":"--- PASS: TestProductionRejectsUnsafeDefaultsBeforeConnecting/demo_flag (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.992741046+03:00","Action":"pass","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting/demo_flag","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.992766625+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting","Output":"--- PASS: TestProductionRejectsUnsafeDefaultsBeforeConnecting (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.992894608+03:00","Action":"pass","Package":"tropa/backend/cmd/tropa-api","Test":"TestProductionRejectsUnsafeDefaultsBeforeConnecting","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.992900717+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.989516309+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestMinimumIncludesOneGuideOnce"}
+{"Time":"2026-11-06T08:41:25.993072797+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestMinimumIncludesOneGuideOnce","Output":"=== RUN   TestMinimumIncludesOneGuideOnce\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993106678+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestMinimumIncludesOneGuideOnce","Output":"--- PASS: TestMinimumIncludesOneGuideOnce (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993116843+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestMinimumIncludesOneGuideOnce","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.99312773+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin"}
+{"Time":"2026-11-06T08:41:25.993131045+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin","Output":"=== RUN   TestMissingGuideCannotJoin\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993135872+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin/none"}
+{"Time":"2026-11-06T08:41:25.993138997+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin/none","Output":"=== RUN   TestMissingGuideCannotJoin/none\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993142692+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin/none","Output":"--- PASS: TestMissingGuideCannotJoin/none (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993145837+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin/none","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.993149062+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin/revoked"}
+{"Time":"2026-11-06T08:41:25.993151616+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin/revoked","Output":"=== RUN   TestMissingGuideCannotJoin/revoked\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993155131+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin/revoked","Output":"--- PASS: TestMissingGuideCannotJoin/revoked (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993158256+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin/revoked","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.993161992+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin","Output":"--- PASS: TestMissingGuideCannotJoin (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993164916+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestMissingGuideCannotJoin","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.99316766+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestCapacityAndStaleVersion"}
+{"Time":"2026-11-06T08:41:25.993169823+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestCapacityAndStaleVersion","Output":"=== RUN   TestCapacityAndStaleVersion\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993173168+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestCapacityAndStaleVersion","Output":"--- PASS: TestCapacityAndStaleVersion (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993176564+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestCapacityAndStaleVersion","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.993179418+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestWithdrawalRecomputesReadiness"}
+{"Time":"2026-11-06T08:41:25.993182122+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestWithdrawalRecomputesReadiness","Output":"=== RUN   TestWithdrawalRecomputesReadiness\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993186148+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestWithdrawalRecomputesReadiness","Output":"--- PASS: TestWithdrawalRecomputesReadiness (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993188612+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestWithdrawalRecomputesReadiness","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.993190334+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestStartNeedsActualQuorum"}
+{"Time":"2026-11-06T08:41:25.993191767+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStartNeedsActualQuorum","Output":"=== RUN   TestStartNeedsActualQuorum\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993195883+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStartNeedsActualQuorum","Output":"--- PASS: TestStartNeedsActualQuorum (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993197796+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestStartNeedsActualQuorum","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.993199558+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide"}
+{"Time":"2026-11-06T08:41:25.993201021+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide","Output":"=== RUN   TestStartRechecksClosureAndGuide\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993202793+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide/closed"}
+{"Time":"2026-11-06T08:41:25.993204376+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide/closed","Output":"=== RUN   TestStartRechecksClosureAndGuide/closed\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993206629+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide/closed","Output":"--- PASS: TestStartRechecksClosureAndGuide/closed (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993209463+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide/closed","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.993212237+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide/guide"}
+{"Time":"2026-11-06T08:41:25.99321421+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide/guide","Output":"=== RUN   TestStartRechecksClosureAndGuide/guide\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993216504+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide/guide","Output":"--- PASS: TestStartRechecksClosureAndGuide/guide (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993218827+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide/guide","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.99322083+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide","Output":"--- PASS: TestStartRechecksClosureAndGuide (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993222793+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestStartRechecksClosureAndGuide","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.993225447+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestRevocationDoesNotPreventIncidentAbort"}
+{"Time":"2026-11-06T08:41:25.99322706+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestRevocationDoesNotPreventIncidentAbort","Output":"=== RUN   TestRevocationDoesNotPreventIncidentAbort\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993229904+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestRevocationDoesNotPreventIncidentAbort","Output":"--- PASS: TestRevocationDoesNotPreventIncidentAbort (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993231957+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestRevocationDoesNotPreventIncidentAbort","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.993234751+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestReviewsRequireCompletedAttendanceAndExcludeGuide"}
+{"Time":"2026-11-06T08:41:25.993236544+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestReviewsRequireCompletedAttendanceAndExcludeGuide","Output":"=== RUN   TestReviewsRequireCompletedAttendanceAndExcludeGuide\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993242022+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestReviewsRequireCompletedAttendanceAndExcludeGuide","Output":"--- PASS: TestReviewsRequireCompletedAttendanceAndExcludeGuide (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993244496+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestReviewsRequireCompletedAttendanceAndExcludeGuide","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.99324709+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestRemovedParticipantCannotReadChat"}
+{"Time":"2026-11-06T08:41:25.993249053+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestRemovedParticipantCannotReadChat","Output":"=== RUN   TestRemovedParticipantCannotReadChat\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993252278+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestRemovedParticipantCannotReadChat","Output":"--- PASS: TestRemovedParticipantCannotReadChat (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:25.993254982+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestRemovedParticipantCannotReadChat","Elapsed":0}
+{"Time":"2026-11-06T08:41:25.993257075+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestStateInvariantsAcrossAdversarialSequences"}
+{"Time":"2026-11-06T08:41:25.993259389+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStateInvariantsAcrossAdversarialSequences","Output":"=== RUN   TestStateInvariantsAcrossAdversarialSequences\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:26.03150658+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStateInvariantsAcrossAdversarialSequences","Output":"--- PASS: TestStateInvariantsAcrossAdversarialSequences (0.04s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:26.031555754+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestStateInvariantsAcrossAdversarialSequences","Elapsed":0.04}
+{"Time":"2026-11-06T08:41:26.031565469+03:00","Action":"run","Package":"tropa/backend/internal/domain","Test":"TestStaffObjectScopeAndIndependentAppeals"}
+{"Time":"2026-11-06T08:41:26.031568253+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStaffObjectScopeAndIndependentAppeals","Output":"=== RUN   TestStaffObjectScopeAndIndependentAppeals\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:26.031577587+03:00","Action":"output","Package":"tropa/backend/internal/domain","Test":"TestStaffObjectScopeAndIndependentAppeals","Output":"--- PASS: TestStaffObjectScopeAndIndependentAppeals (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:26.031602685+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Test":"TestStaffObjectScopeAndIndependentAppeals","Elapsed":0}
+{"Time":"2026-11-06T08:41:26.031654102+03:00","Action":"output","Package":"tropa/backend/internal/domain","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:26.145836162+03:00","Action":"start","Package":"tropa/backend/internal/httpapi"}
+{"Time":"2026-11-06T08:41:26.145997836+03:00","Action":"start","Package":"tropa/backend/internal/store"}
+{"Time":"2026-11-06T08:41:26.146040861+03:00","Action":"output","Package":"tropa/backend/internal/store","Output":"?   \ttropa/backend/internal/store\t[no test files]\n"}
+{"Time":"2026-11-06T08:41:26.146049785+03:00","Action":"skip","Package":"tropa/backend/internal/store","Elapsed":0}
+{"Time":"2026-11-06T08:41:26.146057186+03:00","Action":"start","Package":"tropa/backend/migrations"}
+{"Time":"2026-11-06T08:41:26.146060371+03:00","Action":"output","Package":"tropa/backend/migrations","Output":"?   \ttropa/backend/migrations\t[no test files]\n"}
+{"Time":"2026-11-06T08:41:26.146062774+03:00","Action":"skip","Package":"tropa/backend/migrations","Elapsed":0}
+{"Time":"2026-11-06T08:41:26.15447461+03:00","Action":"run","Package":"tropa/backend/internal/httpapi","Test":"TestForwardedAddressRequiresExplicitProxyTrust"}
+{"Time":"2026-11-06T08:41:26.154544014+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestForwardedAddressRequiresExplicitProxyTrust","Output":"=== RUN   TestForwardedAddressRequiresExplicitProxyTrust\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:26.154622172+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestForwardedAddressRequiresExplicitProxyTrust","Output":"--- PASS: TestForwardedAddressRequiresExplicitProxyTrust (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:26.154629043+03:00","Action":"pass","Package":"tropa/backend/internal/httpapi","Test":"TestForwardedAddressRequiresExplicitProxyTrust","Elapsed":0}
+{"Time":"2026-11-06T08:41:26.154634251+03:00","Action":"run","Package":"tropa/backend/internal/httpapi","Test":"TestPrivateEndpointsDenyMissingOrForgedSessions"}
+{"Time":"2026-11-06T08:41:26.154636574+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestPrivateEndpointsDenyMissingOrForgedSessions","Output":"=== RUN   TestPrivateEndpointsDenyMissingOrForgedSessions\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:26.995283479+03:00","Action":"output","Package":"tropa/backend/cmd/tropa-api","Output":"ok  \ttropa/backend/cmd/tropa-api\t1.015s\n"}
+{"Time":"2026-11-06T08:41:26.996245411+03:00","Action":"pass","Package":"tropa/backend/cmd/tropa-api","Elapsed":1.016}
+{"Time":"2026-11-06T08:41:27.03440813+03:00","Action":"output","Package":"tropa/backend/internal/domain","Output":"ok  \ttropa/backend/internal/domain\t1.054s\n"}
+{"Time":"2026-11-06T08:41:27.035044119+03:00","Action":"pass","Package":"tropa/backend/internal/domain","Elapsed":1.054}
+{"Time":"2026-11-06T08:41:27.234219553+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestPrivateEndpointsDenyMissingOrForgedSessions","Output":"--- PASS: TestPrivateEndpointsDenyMissingOrForgedSessions (1.08s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:27.234278932+03:00","Action":"pass","Package":"tropa/backend/internal/httpapi","Test":"TestPrivateEndpointsDenyMissingOrForgedSessions","Elapsed":1.08}
+{"Time":"2026-11-06T08:41:27.234290059+03:00","Action":"run","Package":"tropa/backend/internal/httpapi","Test":"TestCORSRejectsUnapprovedOrigin"}
+{"Time":"2026-11-06T08:41:27.234292943+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestCORSRejectsUnapprovedOrigin","Output":"=== RUN   TestCORSRejectsUnapprovedOrigin\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:28.311406191+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestCORSRejectsUnapprovedOrigin","Output":"--- PASS: TestCORSRejectsUnapprovedOrigin (1.08s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:28.311465851+03:00","Action":"pass","Package":"tropa/backend/internal/httpapi","Test":"TestCORSRejectsUnapprovedOrigin","Elapsed":1.08}
+{"Time":"2026-11-06T08:41:28.311476106+03:00","Action":"run","Package":"tropa/backend/internal/httpapi","Test":"TestStrictJSONRejectsExtraAndTrailingPayloads"}
+{"Time":"2026-11-06T08:41:28.311478921+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestStrictJSONRejectsExtraAndTrailingPayloads","Output":"=== RUN   TestStrictJSONRejectsExtraAndTrailingPayloads\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:28.311718132+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestStrictJSONRejectsExtraAndTrailingPayloads","Output":"--- PASS: TestStrictJSONRejectsExtraAndTrailingPayloads (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:28.311723039+03:00","Action":"pass","Package":"tropa/backend/internal/httpapi","Test":"TestStrictJSONRejectsExtraAndTrailingPayloads","Elapsed":0}
+{"Time":"2026-11-06T08:41:28.311750751+03:00","Action":"run","Package":"tropa/backend/internal/httpapi","Test":"TestSelfVerificationCannotBeRequestedInRegistration"}
+{"Time":"2026-11-06T08:41:28.311753315+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestSelfVerificationCannotBeRequestedInRegistration","Output":"=== RUN   TestSelfVerificationCannotBeRequestedInRegistration\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:29.283359597+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestSelfVerificationCannotBeRequestedInRegistration","Output":"--- PASS: TestSelfVerificationCannotBeRequestedInRegistration (0.97s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:29.283420259+03:00","Action":"pass","Package":"tropa/backend/internal/httpapi","Test":"TestSelfVerificationCannotBeRequestedInRegistration","Elapsed":0.97}
+{"Time":"2026-11-06T08:41:29.283428752+03:00","Action":"run","Package":"tropa/backend/internal/httpapi","Test":"TestRegistrationRejectsStaffRoleClaims"}
+{"Time":"2026-11-06T08:41:29.283431396+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestRegistrationRejectsStaffRoleClaims","Output":"=== RUN   TestRegistrationRejectsStaffRoleClaims\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:30.291702838+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Test":"TestRegistrationRejectsStaffRoleClaims","Output":"--- PASS: TestRegistrationRejectsStaffRoleClaims (1.01s)\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:30.291749468+03:00","Action":"pass","Package":"tropa/backend/internal/httpapi","Test":"TestRegistrationRejectsStaffRoleClaims","Elapsed":1.01}
+{"Time":"2026-11-06T08:41:30.291756329+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-11-06T08:41:31.2946954+03:00","Action":"output","Package":"tropa/backend/internal/httpapi","Output":"ok  \ttropa/backend/internal/httpapi\t5.149s\n"}
+{"Time":"2026-11-06T08:41:31.295270048+03:00","Action":"pass","Package":"tropa/backend/internal/httpapi","Elapsed":5.149}

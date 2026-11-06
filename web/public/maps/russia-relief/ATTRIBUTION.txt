@@ -1,0 +1,10 @@
+Made with Natural Earth. RF display coverage: © OpenStreetMap contributors · geoBoundaries.
+
+Shaded relief: Natural Earth SR_50M version 2.0.0, Public Domain.
+https://www.naturalearthdata.com/about/terms-of-use/
+
+© OpenStreetMap contributors · geoBoundaries (OpenStreetMap / Wambacher, 2017); display selection and simplification by Тропник
+Display mask source database: ODbL-1.0
+https://opendatacommons.org/licenses/odbl/1-0/
+
+Historical, tinted, reprojected cartographic overview. Not a DEM, current imagery, current illumination, a legal boundary or a detailed navigation map.

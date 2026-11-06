@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-06",
+  "purpose": "Source-backed editorial exclusions after approximate boundary intersection. Original source responses are retained for audit.",
+  "records": [
+    {
+      "osmRelationId": 2512647,
+      "name": "Itärajan retkeilyreitti",
+      "reason": "primary_source_places_route_outside_selected_destinations",
+      "country": "Finland",
+      "sourceUrl": "https://www.luontoon.fi/itarajankesaretkeilyreitti",
+      "publisher": "Metsähallitus, Luontopalvelut",
+      "finding": "The operator describes a trail in Kainuu/Suomussalmi connecting Martinselkonen and Hossa. It is not a Russian Karelia route.",
+      "approximateBoundaryIntersectionFraction": 0.0182,
+      "sourceScope": "Geographic identity only; the older page is not used as a current operating-status confirmation."
+    },
+    {
+      "osmRelationId": 12804258,
+      "name": "Vienan reitti",
+      "reason": "primary_source_places_route_outside_selected_destinations",
+      "country": "Finland",
+      "sourceUrl": "https://vienanreitti.fi/",
+      "publisher": "Vienan reitti ry",
+      "finding": "The route operator identifies this as a 27 km trail in Suomussalmi, Finland. A historical connection with Viena does not place the contemporary track in Russian Karelia.",
+      "approximateBoundaryIntersectionFraction": 0.111,
+      "sourceScope": "Geographic identity and operator description; no navigation or access certification."
+    }
+  ]
+}

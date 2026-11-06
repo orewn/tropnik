@@ -1,0 +1,43 @@
+{
+  "release": "0.4.2",
+  "date": "2026-11-06",
+  "environment": "Managed Sites development preview through browser, Canvas fallback",
+  "desktop": {
+    "russiaOverviewRendered": true,
+    "regionSelectionKeepsContinuousMap": true,
+    "optionalBzerpinSceneRendered": true,
+    "sceneReturnToMapPassed": true
+  },
+  "mobile": {
+    "viewport": [
+      390,
+      844
+    ],
+    "overviewDestinationLabels": 6,
+    "labelIntersections": 0,
+    "listExpandCollapsePassed": true,
+    "regionSelectionPassed": true,
+    "factExpandCollapsePassed": true,
+    "primarySourceLinkVisible": true,
+    "mapErrorDismissRestoresStory": true
+  },
+  "limits": [
+    "WebGL2 unavailable in this browser; no full-map GPU or FPS claim",
+    "Detailed remote hillshade was unavailable during preview; base vector map stayed usable",
+    "APK device execution is a separate gate"
+  ],
+  "files": [
+    {
+      "path": "web/components/PlaceStories.tsx",
+      "sha256": "c7a0b4979d2239f6a622c91e4890189e9e39b01c14299c2a96b40ad4cc6de470"
+    },
+    {
+      "path": "web/app/map-design.css",
+      "sha256": "b6cc6914cc46e309a6ddc29f983dc5d1478c86accb30c32e1fce715d15420fb7"
+    },
+    {
+      "path": "web/app/place-stories.css",
+      "sha256": "d061783615c3612fb8ae417284d7f4001b8a7a36573ae5c3ad1a2a911a03496b"
+    }
+  ]
+}
