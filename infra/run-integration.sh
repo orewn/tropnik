@@ -14,4 +14,4 @@ TROPA_TEST_ENDPOINT="$(docker compose -p "$TROPA_TEST_PROJECT" -f "$TROPA_SCRIPT
 TROPA_TEST_PORT="${TROPA_TEST_ENDPOINT##*:}"
 export TEST_DATABASE_URL="postgres://tropa_test:${TROPA_TEST_PASSWORD}@127.0.0.1:${TROPA_TEST_PORT}/tropa_test?sslmode=disable"
 cd -- "$TROPA_SCRIPT_DIR/../backend"
-"$TROPA_GO" test -race -tags=integration ./internal/store
+"$TROPA_GO" test -race -count=1 -v -tags=integration ./internal/store

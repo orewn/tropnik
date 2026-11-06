@@ -263,7 +263,9 @@ func TestAccountDeletionBlocksCommitmentsAndKeepsAnAnonymousHistory(t *testing.T
 func TestConcurrentDeleteAndJoinCannotCreateADeletedParticipant(t *testing.T) {
 	s := db(t)
 	ctx := context.Background()
-	_, departure := fixture(t, s, 20)
+	// Respect the reviewed route's maximum. Release each successful join below
+	// so every iteration exercises the account race rather than a full group.
+	_, departure := fixture(t, s, 8)
 	other, err := pgxpool.NewWithConfig(ctx, s.Pool.Config())
 	if err != nil {
 		t.Fatal(err)
@@ -286,9 +288,20 @@ func TestConcurrentDeleteAndJoinCannotCreateADeletedParticipant(t *testing.T) {
 		if joinErr == nil && deleteErr == nil {
 			t.Fatal("both deletion and active join committed")
 		}
+		if joinErr != nil && deleteErr != nil {
+			t.Fatalf("neither operation committed: join=%v delete=%v", joinErr, deleteErr)
+		}
+		if joinErr == nil && !errors.Is(deleteErr, store.ErrActiveAccount) {
+			t.Fatal("successful join did not block deletion with an active commitment", deleteErr)
+		}
 		var orphan bool
 		if err := s.Pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM memberships m JOIN users u ON u.id=m.user_id JOIN departures d ON d.id=m.departure_id WHERE u.id=$1 AND u.deleted_at IS NOT NULL AND m.status IN ('confirmed','checked_in') AND d.status IN ('recruiting','ready','awaiting_guide','in_progress'))`, u.ID).Scan(&orphan); err != nil || orphan {
 			t.Fatal("deleted active participant", err)
+		}
+		if joinErr == nil {
+			if _, err := s.Mutate(ctx, u.ID, departure.ID, "leave", "", 0); err != nil {
+				t.Fatal("could not release the race fixture's place", err)
+			}
 		}
 	}
 }

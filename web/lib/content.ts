@@ -123,6 +123,31 @@ const outsideDisplayCoverage=new Set(displayCoverage.excludedCatalogRouteIds);
 // Only the explicit review publisher writes this public file. Raw Telegram
 // exports and automatic candidates never enter the application import graph.
 const telegramSources = telegramReviewed.sourcesByRouteId as Record<string, SourceReference[]>;
+// Structured counterparts of the dated official notices already in the legacy
+// catalogue. Partial access and a closed destination are kept distinct. No
+// permission is inferred from the absence of a closure notice.
+const reviewedOperatingStatus: Record<string, 'closed' | 'restricted'> = {
+  'kavkaz-8a': 'restricted',
+  'osm-relation-1474673': 'restricted',
+  'osm-relation-11681960': 'closed',
+  'osm-relation-11820460': 'restricted',
+  'osm-relation-12351763': 'restricted',
+  'osm-relation-12438967': 'restricted',
+  'osm-relation-12438968': 'restricted',
+  'osm-relation-13025082': 'closed',
+  'osm-relation-13030392': 'closed',
+  'osm-relation-13499477': 'restricted',
+  'osm-relation-14376382': 'closed',
+  'osm-relation-14376417': 'closed',
+  'osm-relation-14376574': 'closed',
+  'osm-relation-14376588': 'closed',
+  'osm-relation-14376599': 'closed',
+  'osm-relation-14376615': 'closed',
+  'osm-relation-14390331': 'closed',
+  'osm-relation-14397487': 'restricted',
+  'osm-relation-14397488': 'restricted',
+  'osm-relation-14397491': 'restricted',
+};
 const reviewedCatalogues = [yandexReviewed, discoveryReviewed, discoveryEastReviewed] as {
   routes: Trail[]; updatesByRouteId: Record<string, Partial<Trail>>;
 }[];
@@ -131,7 +156,8 @@ export const trails: Trail[] = [
   ...(importedCatalog as Trail[]), ...reviewedCatalogues.flatMap(source => source.routes),
   ...(telegramReviewed.routes as Trail[]),
 ].filter(trail => !outsideDisplayCoverage.has(trail.id)).map(trail => {
-  let merged = trail;
+  let merged = reviewedOperatingStatus[trail.id] && !trail.accessStatus
+    ? {...trail, accessStatus: reviewedOperatingStatus[trail.id]} : trail;
   for (const source of reviewedCatalogues) {
     const update = source.updatesByRouteId[trail.id];
     if (update) merged = {...merged, ...update, id: trail.id, additionalSources: [
@@ -140,6 +166,11 @@ export const trails: Trail[] = [
   }
   const sources = [...(merged.additionalSources || []), ...(telegramSources[trail.id] || [])];
   const clean = (text: string) => text
+    .replaceAll('При прямом чтении 06.11.2026 страница курорта помечает маршрут как закрытый.', 'По сведениям курорта от 6 ноября 2026 года маршрут закрыт.')
+    .replaceAll('Статус страницы оператора · просмотрено 06.11.2026', 'Маршрут закрыт · сведения от 6 ноября')
+    .replaceAll('всей линии OSM', 'всего показанного пути')
+    .replaceAll('подходного маршрута OSM', 'подхода к объекту')
+    .replaceAll('полная геометрия источника', 'полная линия по источнику')
     .replace('Пеший маршрут из открытой базы OpenStreetMap. На карте сохранены исходные сегменты: между ними могут быть развилки и разрывы. Проходимость, разрешения и условия ещё требуют проверки.', 'Пеший маршрут по сведениям из открытой карты. На пути могут встречаться развилки и участки без описания. Перед выходом уточните состояние тропы и правила посещения.')
     .replaceAll('Геометрия OSM пока не сверена с полной официальной ниткой.', 'Линию пути ещё нужно сверить с полным описанием заповедника.')
     .replaceAll('Геометрия OSM не сверена с полной официальной ниткой.', 'Линия пути ещё требует проверки.')
@@ -151,7 +182,8 @@ export const trails: Trail[] = [
     ? `Тропа без названия · ${regions.find(region => region.id === merged.regionId)?.name || 'Россия'}` : sourceTitle;
   return {...merged, title, ...(title !== sourceTitle ? {sourceTitle} : {}),
     description: clean(merged.description), subtitle: clean(merged.subtitle), notes: merged.notes.map(clean),
-    ...(merged.operatingNotice ? {operatingNotice: {...merged.operatingNotice, body: clean(merged.operatingNotice.body)}} : {}),
+    ...(merged.operatingNotice ? {operatingNotice: {...merged.operatingNotice, title: clean(merged.operatingNotice.title), body: clean(merged.operatingNotice.body)}} : {}),
+    ...(merged.officialEvidence ? {officialEvidence: {...merged.officialEvidence, summary: clean(merged.officialEvidence.summary)}} : {}),
     ...(sources.length ? {additionalSources: [...new Map(sources.map(source => [source.url, source])).values()]} : {}),
   };
 });

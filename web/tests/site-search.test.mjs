@@ -72,3 +72,13 @@ test('actual Russian names, typing mistakes and constrained results retain sourc
     else assert.ok(hit.distanceKm <= 15);
   }
 });
+
+test('dated legacy closure notices also reach search, while partial access remains distinct', () => {
+  const polikarya = trails.find(trail => trail.id === 'osm-relation-13025082');
+  assert.equal(polikarya.accessStatus, 'closed');
+  assert.ok(polikarya.operatingNotice.url.startsWith('https://krasnayapolyanaresort.ru/'));
+  assert.equal(searchSite('Поликаря').results.find(hit => hit.id === polikarya.id)?.accessStatus, 'closed');
+  assert.equal(trails.find(trail => trail.id === 'kavkaz-8a').accessStatus, 'restricted');
+  assert.equal(trails.find(trail => trail.id === 'osm-relation-14397487').accessStatus, 'restricted', 'closed tower does not assert closure of its entire approach');
+  assert.equal(trails.find(trail => trail.id === 'osm-relation-14376203').accessStatus, undefined, 'no inferred open or closed status for an unconfirmed future visit');
+});

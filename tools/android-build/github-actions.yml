@@ -11,6 +11,20 @@ on:
         type: boolean
         required: false
         default: false
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'tools/android-build/**'
+      - 'tools/map-package/**'
+      - 'data/terrain-pilot/runtime/**'
+      - 'web/public/terrain/**'
+      - 'web/public/data/**'
+      - 'web/public/maps/**'
+      - 'web/public/offline-map/**'
+      - 'web/lib/content.ts'
+      - 'web/lib/*.generated.json'
+      - '.github/workflows/android.yml'
   pull_request:
     paths:
       - 'android/**'
@@ -18,14 +32,20 @@ on:
       - 'tools/map-package/**'
       - 'data/terrain-pilot/runtime/**'
       - 'web/public/terrain/**'
-      - 'web/public/data/russia-*'
-      - 'web/public/data/routes/**'
+      - 'web/public/data/**'
+      - 'web/public/maps/**'
+      - 'web/public/offline-map/**'
       - 'web/lib/content.ts'
       - 'web/lib/*.generated.json'
       - '.github/workflows/android.yml'
 
 permissions:
   contents: read
+
+# Fail the job when any command in a pipeline fails.
+defaults:
+  run:
+    shell: bash
 
 jobs:
   build:
@@ -72,8 +92,8 @@ jobs:
           retention-days: 14
 
   instrumentation:
-    name: Manual Android device scenarios
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_instrumentation }}
+    name: Android device scenarios
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.run_instrumentation) }}
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 25

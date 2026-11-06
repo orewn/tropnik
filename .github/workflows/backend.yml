@@ -11,6 +11,11 @@ on:
 permissions:
   contents: read
 
+# Explicit bash enables pipefail for every run step, including logs captured by tee.
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: backend-${{ github.ref }}
   cancel-in-progress: false
@@ -35,6 +40,7 @@ jobs:
         run: go vet ./...
       - name: Native PostGIS integration gate
         run: |
+          set -euo pipefail
           mkdir -p verification
           bash infra/run-integration.sh 2>&1 | tee verification/native-postgis.log
       - name: Preserve integration evidence
