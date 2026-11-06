@@ -82,7 +82,6 @@ jobs:
       group: tropnik-android-device-${{ github.ref }}
       cancel-in-progress: false
     env:
-      ANDROID_AVD_HOME: ${{ runner.temp }}/tropnik-avd
       TROPA_API_BASE_URL: ''
     steps:
       - name: Checkout
@@ -101,6 +100,8 @@ jobs:
       - name: Install official SDK and one emulator image
         timeout-minutes: 8
         run: |
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/tropnik-avd"
+          printf 'ANDROID_AVD_HOME=%s\n' "$ANDROID_AVD_HOME" >> "$GITHUB_ENV"
           sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools' 'emulator' 'system-images;android-35;google_apis;x86_64'
           mkdir -p "$ANDROID_AVD_HOME"
           printf 'no\n' | avdmanager create avd --force --name tropnik-ci-api35 --package 'system-images;android-35;google_apis;x86_64' --device pixel_6
