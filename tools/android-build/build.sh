@@ -21,11 +21,16 @@ tropnik_gradle="${TROPNIK_GRADLE:-./gradlew}"
 tropnik_gradle_flags=(--no-daemon --console=plain)
 if [[ "${TROPNIK_GRADLE_OFFLINE:-0}" == "1" ]]; then tropnik_gradle_flags+=(--offline); fi
 
-"$tropnik_gradle" "${tropnik_gradle_flags[@]}" :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest
-python3 "$tropnik_root/tools/android-build/optimize-preview-apk.py" app/build/outputs/apk/debug/app-debug.apk "$tropnik_output/tropnik-preview.apk" --sdk "$tropnik_sdk" --report "$tropnik_output/tropnik-preview.compression.json"
+# signingReport is the authoritative debug store location; do not assume ~/.android.
+# Keep this local process metadata out of the published artifact directory.
+tropnik_signing_report="$(mktemp "${TMPDIR:-/tmp}/tropnik-debug-signing.XXXXXX")"
+trap 'rm -f -- "$tropnik_signing_report"' EXIT
+"$tropnik_gradle" "${tropnik_gradle_flags[@]}" :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:signingReport | tee "$tropnik_signing_report"
+python3 "$tropnik_root/tools/android-build/collect-test-results.py" app/build/test-results/testDebugUnitTest "$tropnik_output/unit-tests.json"
+python3 "$tropnik_root/tools/android-build/optimize-preview-apk.py" app/build/outputs/apk/debug/app-debug.apk "$tropnik_output/tropnik-preview.apk" --sdk "$tropnik_sdk" --signing-report "$tropnik_signing_report" --report "$tropnik_output/tropnik-preview.compression.json"
 cp app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk "$tropnik_output/tropnik-instrumentation-tests.apk"
 "$tropnik_gradle" "${tropnik_gradle_flags[@]}" :app:assembleDebug -PtargetAbi=arm64-v8a
-python3 "$tropnik_root/tools/android-build/optimize-preview-apk.py" app/build/outputs/apk/debug/app-debug.apk "$tropnik_output/tropnik-arm64-preview.apk" --sdk "$tropnik_sdk" --report "$tropnik_output/tropnik-arm64-preview.compression.json"
+python3 "$tropnik_root/tools/android-build/optimize-preview-apk.py" app/build/outputs/apk/debug/app-debug.apk "$tropnik_output/tropnik-arm64-preview.apk" --sdk "$tropnik_sdk" --signing-report "$tropnik_signing_report" --report "$tropnik_output/tropnik-arm64-preview.compression.json"
 
 for tropnik_apk in "$tropnik_output/tropnik-preview.apk" "$tropnik_output/tropnik-arm64-preview.apk"; do
   "$tropnik_sdk/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$tropnik_apk" > "${tropnik_apk%.apk}.signature.txt"
@@ -33,5 +38,4 @@ for tropnik_apk in "$tropnik_output/tropnik-preview.apk" "$tropnik_output/tropni
   "$tropnik_sdk/build-tools/36.0.0/aapt2" dump badging "$tropnik_apk" > "${tropnik_apk%.apk}.manifest.txt"
   python3 "$tropnik_root/tools/android-build/verify-apk.py" "$tropnik_apk" --output "${tropnik_apk%.apk}.verification.json"
 done
-python3 "$tropnik_root/tools/android-build/collect-test-results.py" app/build/test-results/testDebugUnitTest "$tropnik_output/unit-tests.json"
 printf '%s\n' "Verified preview APKs: $tropnik_output"
