@@ -8,6 +8,7 @@ import {AuthDialog} from './AuthDialog';
 import {Modal} from './Modal';
 import {ChatPanel} from './ChatPanel';
 import {ReportDialog} from './ReportDialog';
+import {SafetyPanel} from './SafetyPanel';
 import {regions, trails} from '@/lib/content';
 import {deriveRouteCategories, type EventCategoryId} from '@/lib/event-categories';
 import {EventCategoryIcon, RouteCategoryBadges} from './EventCategoryIcon';
@@ -348,11 +349,12 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
               <div className="quorum-track" aria-label={current.participantCount + ' из ' + current.minPeople + ' необходимых участников'}>{Array.from({length: Math.min(current.minPeople, 12)}, (_, i) => <span key={i} className={i < current.participantCount ? i === 0 && current.guideId ? 'filled guide' : 'filled' : ''}/>)}</div>
               <p>{current.participantCount} / {current.capacity} участников · минимум {current.minPeople}<br/>Гид: {current.guideName || 'Не назначен'}</p>
               <p style={{marginTop: 12}}>{current.guideEligible ? 'Допуск гида действителен для выхода' : 'Допуск гида требует проверки'}<br/>{current.routeOpen ? 'Маршрут доступен для похода' : 'Маршрут недоступен для старта'}</p>
-              <p style={{marginTop: 12}}>{membershipLabels[current.membership]}</p>
+              <p style={{marginTop: 12}}>{membershipLabels[current.membership]}</p><p className="fineprint">Статус безопасности: {current.safetyStatus}. Для обязательного уведомления старт будет заблокирован до проверки регистрации и предвыходного контакта.</p>
               {['none', 'cancelled'].includes(current.membership) && <button className="button primary full" onClick={() => void join(current)} disabled={!!busy || !joinAllowed(current, now)}>Подтвердить участие</button>}
               {activeMember && beforeStart && <button className="text-link" disabled={!!busy} onClick={() => setConfirm({action: 'leave', version: current.version})}>Выйти из группы</button>}
             </div>
-            {assignedGuide && <div className="prose-card"><h3>Решение гида</h3><p>Подтвердите, кто пришёл на место встречи. Для старта нужны подходящий состав, допуск гида и актуальный маршрут.</p>
+            {user && (activeMember || user.staffRole !== 'none') && <SafetyPanel departure={current} user={user} participants={participants} onChanged={refreshDetail}/>}
+            {assignedGuide && <div className="prose-card"><h3>Решение гида</h3><p>Подтвердите, кто пришёл на место встречи. Для старта нужны подходящий состав, допуск гида, актуальный маршрут и обязательные подтверждения безопасности.</p>
               <div className="stack">{participants.map(person => <div className="roster-row" key={person.userId}><span>{person.displayName}<small>{person.role === 'guide' ? 'Гид' : 'Турист'}</small></span>
                 {person.status === 'checked_in' || person.status === 'completed' ? <span title={person.status === 'completed' ? 'Поход завершён' : 'Явка подтверждена'}><CheckCircle size={20}/></span>
                   : person.status === 'no_show' ? <small>Не был на старте</small>
