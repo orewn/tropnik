@@ -15,7 +15,7 @@ import {loadRussiaGeometry,russiaView} from '@/lib/russia-map';
 import {MapStyleSession,loadMapSelection,applyMapLayerVisibility,type MapBaseMode} from '@/lib/map-lifecycle';
 import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {terrainExaggerationForZoom,terrainPitchForZoom} from '@/lib/map-camera-profile';
-import {resolveTrailCenter} from '@/lib/map-coordinate';
+import {mapTrailPointFeatureCollection} from '@/lib/map-trail-points';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -26,6 +26,7 @@ const OFFLINE_MESSAGE='Нет сети. Доступна сохранённая 
 const OVERVIEW_MESSAGE='Обзорные границы. Для ориентирования по тропе нужен детальный пакет.';
 const ROUTE_ERROR='Линия маршрута не загрузилась. Попробуйте ещё раз при устойчивой связи.';
 const ROUTE_COVERAGE_MESSAGE='У этой линии нет точек внутри доступного покрытия России. Карточка остаётся доступной.';
+const TRAIL_POINTS='trail-points',TRAIL_POINT_HALO='trail-point-halo',TRAIL_POINT_DOT='trail-point-dot',TRAIL_POINT_HIT='trail-point-hit';
 function overviewStyle(coverage:Coverage):StyleSpecification {
  return {version:8,name:'Тропник · Россия',sources:{
   land:{type:'geojson',data:coverage.area},regions:{type:'geojson',data:'/data/territories.geojson'},
@@ -52,6 +53,24 @@ function detailStyle(style:StyleSpecification,coverage:Coverage):StyleSpecificat
 function highlightRegion(map:MapInstance,region?:MapRegion){
  const filter:import('maplibre-gl').FilterSpecification=region?['in',['get','shapeName'],['literal',region.shapeNames]]:['==',['get','shapeName'],'__none'];
  for(const id of ['region-selected','region-selected-outline'])if(map.getLayer(id))map.setFilter(id,filter);
+}
+function ensureTrailPointLayers(map:MapInstance){
+ if(!map.getSource(TRAIL_POINTS))map.addSource(TRAIL_POINTS,{type:'geojson',data:EMPTY});
+ if(!map.getLayer(TRAIL_POINT_HALO))map.addLayer({id:TRAIL_POINT_HALO,type:'circle',source:TRAIL_POINTS,paint:{
+  'circle-radius':['case',['==',['get','selected'],true],11,9],
+  'circle-color':'#FFFEFA','circle-opacity':.98,'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport',
+ }});
+ if(!map.getLayer(TRAIL_POINT_DOT))map.addLayer({id:TRAIL_POINT_DOT,type:'circle',source:TRAIL_POINTS,paint:{
+  'circle-radius':['case',['==',['get','selected'],true],7.5,6],
+  'circle-color':['case',['==',['get','selected'],true],'#244D3C','#A56736'],
+  'circle-stroke-color':['case',['==',['get','selected'],true],'#A56736','#876A43'],
+  'circle-stroke-width':['case',['==',['get','selected'],true],2,1],
+  'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport',
+ }});
+ if(!map.getLayer(TRAIL_POINT_HIT))map.addLayer({id:TRAIL_POINT_HIT,type:'circle',source:TRAIL_POINTS,paint:{
+  'circle-radius':18,'circle-color':'#000000','circle-opacity':.001,'circle-stroke-opacity':0,
+  'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport',
+ }});
 }
 function fitTerritory(map:MapInstance,region:MapRegion,element:HTMLElement,duration:number,frame:{current:RussiaCamera|null}){
  const b=region.bounds;if(!b)return false;
@@ -91,7 +110,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
   terrainRef.current=false;setTerrain(false);
  }
  useEffect(()=>{
-  let cancelled=false,geographyPainted=false,overviewFallback=false,directionLayoutFrame=0,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined;
+  let cancelled=false,geographyPainted=false,overviewFallback=false,trailPointEventsBound=false,directionLayoutFrame=0,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined;
   const disconnect=()=>{
    setOffline(!navigator.onLine);
    setStatus(previous=>!navigator.onLine?OFFLINE_MESSAGE:previous===OFFLINE_MESSAGE?(basePreference.current==='overview'?OVERVIEW_MESSAGE:''):previous);
@@ -208,14 +227,30 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      if(!map.getLayer('region-selected-outline'))map.addLayer({id:'region-selected-outline',type:'line',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'line-color':'#315B45','line-width':1.6,'line-opacity':.86}},MASK);
      highlightRegion(map,regionRef.current);
      applyMapLayerVisibility(map,layerVisibility.current);
+     ensureTrailPointLayers(map);
+     if(!trailPointEventsBound){
+      trailPointEventsBound=true;
+      map.on('mouseenter',TRAIL_POINT_HIT,event=>{
+       map.getCanvas().style.cursor='pointer';
+       const id=String(event.features?.[0]?.properties?.id??'');
+       const item=visibleTrailsRef.current.find(candidate=>candidate.id===id);if(item)void preloadTrail(item);
+      });
+      map.on('mouseleave',TRAIL_POINT_HIT,()=>{map.getCanvas().style.cursor='';});
+      map.on('click',TRAIL_POINT_HIT,event=>{
+       const id=String(event.features?.[0]?.properties?.id??'');
+       const item=visibleTrailsRef.current.find(candidate=>candidate.id===id);
+       if(item){map.stop();frameRefit.current?.cancel();onTrailRef.current?.(item);}
+      });
+     }
     });
     map.on('mouseenter','region-fill',()=>{if(map.getZoom()<7)map.getCanvas().style.cursor='pointer';});
     map.on('mouseleave','region-fill',()=>{map.getCanvas().style.cursor='';});
     map.on('click','region-fill',event=>{
      if(map.getZoom()>7||!inRussiaCoverage(event.lngLat.lng,event.lngLat.lat,coverage.area))return;
-     const point=event.point,nearby=map.queryRenderedFeatures([[point.x-4,point.y-4],[point.x+4,point.y+4]],{layers:['region-fill']});
-     const names=[...new Set([...(event.features??[]),...nearby].map(feature=>feature.properties?.shapeName).filter((name):name is string=>typeof name==='string'))];
-     const territory=territoryForMapPoint(names,[russiaLongitude(event.lngLat.lng),event.lngLat.lat]);
+     const direct=[...new Set((event.features??[]).map(feature=>feature.properties?.shapeName).filter((name):name is string=>typeof name==='string'))];
+     const point=event.point,nearby=direct.length?[]:map.queryRenderedFeatures([[point.x-3,point.y-3],[point.x+3,point.y+3]],{layers:['region-fill']});
+     const fallback=[...new Set(nearby.map(feature=>feature.properties?.shapeName).filter((name):name is string=>typeof name==='string'))];
+     const territory=territoryForMapPoint(direct.length?direct:fallback,[russiaLongitude(event.lngLat.lng),event.lngLat.lat]);
      if(territory){map.stop();frameRefit.current?.cancel();onRegionRef.current(territory);}
     });
     map.on('webglcontextlost',()=>setStatus('Графический контекст карты прерван. Восстанавливаем отображение.'));
@@ -291,27 +326,10 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
   updateDirections.current?.();
  },[visibleTrails,region?.id,loaded]);
  useEffect(()=>{
-  const map=mapRef.current,coverage=coverageRef.current;if(!map||!loaded||!coverage||!region)return;
-  let removed=false;const routeMarkers:Marker[]=[];
-  import('maplibre-gl').then(ml=>{
-   if(removed)return;
-   for(const t of visibleTrails){
-    if(!t.center)continue;
-    const center=resolveTrailCenter(t.center,(lng,lat)=>inRussiaCoverage(lng,lat,coverage.area),regionRef.current);
-    if(!center)continue;
-    const button=document.createElement('button');button.type='button';button.className='trail-marker';button.dataset.trailId=t.id;button.classList.toggle('is-selected',trailRef.current?.id===t.id);button.setAttribute('aria-label',`Открыть маршрут ${t.title}`);
-    const label=document.createElement('span');label.className='trail-marker-label';label.setAttribute('aria-hidden','true');label.textContent=t.title;button.appendChild(label);
-    const warm=()=>{void preloadTrail(t);};button.addEventListener('pointerenter',warm,{once:true});button.addEventListener('focus',warm,{once:true});
-    button.addEventListener('click',event=>{event.stopPropagation();map.stop();requestAnimationFrame(()=>onTrailRef.current?.(t));});
-    routeMarkers.push(new ml.Marker({element:button,anchor:'center'}).setLngLat([russiaLongitude(center[0]),center[1]]).addTo(map));
-   }
-   requestAnimationFrame(()=>{if(!removed)updateDirections.current?.();});
-  });
-  return()=>{removed=true;routeMarkers.forEach(marker=>marker.remove());};
- },[visibleTrails,region?.id,loaded]);
- useEffect(()=>{
-  for(const button of container.current?.querySelectorAll<HTMLButtonElement>('.trail-marker')??[])button.classList.toggle('is-selected',button.dataset.trailId===trail?.id);
- },[trail?.id,loaded]);
+  const map=mapRef.current,coverage=coverageRef.current;if(!map||!loaded||!coverage)return;
+  const source=map.getSource(TRAIL_POINTS) as GeoJSONSource|undefined;if(!source)return;
+  source.setData(mapTrailPointFeatureCollection(region?visibleTrails:[],(lng,lat)=>inRussiaCoverage(lng,lat,coverage.area),regionRef.current,trail?.id,russiaLongitude));
+ },[visibleTrails,region?.id,trail?.id,loaded,styleRevision]);
  async function changeBase(mode:MapBaseMode){
   basePreference.current=mode;
   setStatus(!navigator.onLine?OFFLINE_MESSAGE:mode==='overview'?OVERVIEW_MESSAGE:'');

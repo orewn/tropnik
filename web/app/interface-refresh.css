@@ -129,7 +129,7 @@ body{background:var(--paper);color:var(--ink)}
   top:calc(50% + 11px)!important;
   bottom:auto!important;
   width:max-content!important;
-  max-width:168px!important;
+  max-width:var(--map-label-max-width,168px)!important;
   min-width:0!important;
   min-height:0!important;
   white-space:normal!important;

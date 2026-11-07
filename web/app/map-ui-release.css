@@ -92,3 +92,27 @@
 @media(max-height:620px) and (orientation:landscape){.explore-layout .map-context{min-height:46px}.explore-layout .map-style-switch{min-height:46px}.explore-layout .map-style-switch button{height:38px;min-height:38px}.explore-layout .map-controls{top:calc(var(--map-top) + 54px)}.explore-layout .map-controls button{height:38px;min-height:38px}.explore-layout .layer-control{top:auto;bottom:54px}.explore-layout .fact-card.fact-card--compact{top:calc(var(--map-top) + 54px);max-height:150px}}
 @media(prefers-reduced-motion:reduce){.fact-photo img,.explore-layout .map-style-switch button,.explore-layout .map-controls button,.explore-layout .layer-button{transition:none!important}.fact-card:hover .fact-photo img{transform:none}}
 @media(prefers-reduced-transparency:reduce){.explore-layout .map-context,.explore-layout .map-style-switch,.explore-layout .map-controls,.explore-layout .layer-button,.explore-layout .layer-menu{backdrop-filter:none;background:var(--surface)}}
+
+/* Cross-platform label and native point finalization. */
+.explore-layout .region-marker-label,.explore-layout .trail-marker-label{
+  max-width:var(--map-label-max-width,168px)!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  hyphens:auto;
+  contain:layout style;
+  transition:opacity .1s ease,visibility .1s ease!important;
+}
+.explore-layout [data-map-label-hidden='true'] :is(.region-marker-label,.trail-marker-label){opacity:0!important;visibility:hidden!important}
+.explore-layout .leaflet-route-tooltip{
+  max-width:min(230px,calc(100vw - 32px));
+  white-space:normal!important;
+  overflow-wrap:anywhere;
+  text-align:center;
+}
+.explore-layout .tropnik-relief-tiles .leaflet-tile{opacity:1!important;transition:none!important}
+.explore-layout .leaflet-pane.leaflet-trail-points-pane{z-index:650}
+@media(max-width:700px){
+  .explore-layout .region-marker-label{max-width:var(--map-label-max-width,132px)!important;font-size:11px;line-height:1.3}
+  .explore-layout .leaflet-route-tooltip{display:none!important}
+}
+@media(hover:none),(pointer:coarse){.explore-layout .leaflet-route-tooltip{display:none!important}}

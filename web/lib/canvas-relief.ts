@@ -103,7 +103,7 @@ export function createCanvasRelief(L:typeof Leaflet,onState:(ready:boolean)=>voi
         y:coords.y,z:coords.z,overview,stage:'pending'});queuePump();return canvas;
     },
   }) as {new(options:Leaflet.GridLayerOptions):Leaflet.GridLayer};
-  const layer=new Relief({pane:'russia-relief',className:'tropnik-relief-tiles',tileSize:256,minZoom:5,maxNativeZoom:12,maxZoom:18,keepBuffer:2,updateWhenIdle:true,updateWhenZooming:false,opacity:1}) as Leaflet.GridLayer;
+  const layer=new Relief({pane:'russia-relief',className:'tropnik-relief-tiles',tileSize:256,minZoom:5,maxNativeZoom:12,maxZoom:18,keepBuffer:4,updateWhenIdle:false,updateWhenZooming:true,opacity:1}) as Leaflet.GridLayer;
   layer.on('tileunload',(event:Leaflet.TileEvent)=>{
     unloaded.add(event.tile);const id=Number(event.tile.dataset.reliefJob),job=jobs.get(id);if(!job)return;
     job.cancelled=true;jobs.delete(id);releaseBytes(job);

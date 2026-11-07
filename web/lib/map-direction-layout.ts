@@ -72,8 +72,11 @@ export function reconcileDirectionAnchors(
 /** The label-safe rectangle excludes edge clipping and fixed map controls.
  * The compact bottom edge is additionally capped at the top of the mobile sheet. */
 export const MAP_LABEL_SAFE_AREA = {
-  wide: {edge: 18, top: 72, right: 78, bottom: 60},
-  compact: {edge: 12, top: 62, right: 58, bottom: 12},
+  // Fixed controls are measured as obstacles. The base rectangle protects only
+  // the physical viewport edges, so narrow phones do not lose usable space to
+  // guessed control dimensions.
+  wide: {edge: 18, top: 18, right: 18, bottom: 18},
+  compact: {edge: 12, top: 12, right: 12, bottom: 12},
 } as const;
 export const MAP_LABEL_OBSTACLE_SELECTORS = [
   '.map-context','.map-style-switch','.map-controls','.layer-control','.map-message',
@@ -159,22 +162,34 @@ function visibleObstacleRect(element:Element,viewport:MapLabelRect){
   if(rect.width<2||rect.height<2||!intersects(rect,viewport))return undefined;
   return{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom};
 }
+function effectiveVisualRect(bounds:MapLabelRect):MapLabelRect{
+  if(typeof window==='undefined'||!window.visualViewport)return bounds;
+  const visual=window.visualViewport;
+  const candidate={
+    left:Math.max(bounds.left,visual.offsetLeft),
+    right:Math.min(bounds.right,visual.offsetLeft+visual.width),
+    top:Math.max(bounds.top,visual.offsetTop),
+    bottom:Math.min(bounds.bottom,visual.offsetTop+visual.height),
+  };
+  return candidate.right-candidate.left>=80&&candidate.bottom-candidate.top>=80?candidate:bounds;
+}
 function viewportLabelLayout(viewport:HTMLElement){
-  const bounds=viewport.getBoundingClientRect();
+  const bounds=viewport.getBoundingClientRect(),visible=effectiveVisualRect(bounds);
   const root=viewport.closest('.explore-layout')??viewport.parentElement??viewport;
   const panel=root.querySelector<HTMLElement>('.explore-panel');
   let coveredBottom:number|undefined;
   if(panel){
     const covered=panel.getBoundingClientRect();
-    const overlaps=covered.left<bounds.right&&covered.right>bounds.left&&covered.top>bounds.top&&covered.top<bounds.bottom;
-    if(overlaps)coveredBottom=covered.top-12;
+    const overlaps=covered.left<visible.right&&covered.right>visible.left&&covered.top>visible.top&&covered.top<visible.bottom;
+    if(overlaps)coveredBottom=Math.max(visible.top+72,covered.top-12);
   }
-  const safe=mapLabelSafeRect(bounds,viewport.clientWidth<=700,coveredBottom);
+  const compact=Math.min(viewport.clientWidth,visible.right-visible.left)<=700;
+  const safe=mapLabelSafeRect(visible,compact,coveredBottom);
   const selector=MAP_LABEL_OBSTACLE_SELECTORS.join(',');
   const obstacles=[...root.querySelectorAll(selector)]
     .filter(element=>element!==viewport&&!element.contains(viewport))
-    .map(element=>visibleObstacleRect(element,bounds)).filter((rect):rect is MapLabelRect=>!!rect);
-  return{safe,obstacles};
+    .map(element=>visibleObstacleRect(element,visible)).filter((rect):rect is MapLabelRect=>!!rect);
+  return{safe,obstacles,compact};
 }
 
 function constrainLabel(
@@ -183,32 +198,47 @@ function constrainLabel(
 ){
   button.dataset.mapLabelPlacement=preferred;
   delete button.dataset.mapLabelHidden;
+  const available=Math.max(48,safe.right-safe.left-12);
+  const maximum=Math.max(48,Math.min(preferred==='top'?230:168,available));
+  label.style.setProperty('--map-label-max-width',`${Math.floor(maximum)}px`);
   label.style.setProperty('--map-label-shift-x','0px');
   label.style.setProperty('--map-label-shift-y','0px');
   const marker=button.getBoundingClientRect();
   let rect=label.getBoundingClientRect();
+  if(rect.width<2||rect.height<2)return{hidden:true,rect};
   const placement=mapLabelPlacement(preferred,marker,rect.bottom-rect.top,safe);
   if(placement!==preferred){button.dataset.mapLabelPlacement=placement;rect=label.getBoundingClientRect();}
   const shift=mapLabelAvoidObstacles(rect,safe,obstacles);
-  label.style.setProperty('--map-label-shift-x',`${Math.round(shift.x)}px`);
-  label.style.setProperty('--map-label-shift-y',`${Math.round(shift.y)}px`);
+  const x=Math.round(shift.x),y=Math.round(shift.y);
+  label.style.setProperty('--map-label-shift-x',`${x}px`);
+  label.style.setProperty('--map-label-shift-y',`${y}px`);
   if(shift.hidden)button.dataset.mapLabelHidden='true';
-  button.classList.toggle('map-label-shifted',shift.x!==0||shift.y!==0||placement!==preferred);
+  button.classList.toggle('map-label-shifted',x!==0||y!==0||placement!==preferred);
+  return{hidden:shift.hidden,rect:translateRect(rect,x,y)};
 }
 
 /** Called after marker placement, during camera movement and after sheet resize.
  * Geographic anchors never move: only their visual labels flip and translate. */
 export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonElement>,viewport:HTMLElement){
-  const {safe,obstacles}=viewportLabelLayout(viewport);
-  for(const button of buttons.values()){
-    if(button.hidden||!button.isConnected)continue;
+  const {safe,obstacles}=viewportLabelLayout(viewport),placed:MapLabelRect[]=[];
+  const ordered=[...buttons.values()].filter(button=>!button.hidden&&button.isConnected).sort((a,b)=>{
+    const priority=(button:HTMLButtonElement)=>button.classList.contains('is-selected')?0:button.classList.contains('direction-cluster')?1:2;
+    return priority(a)-priority(b)||(a.dataset.regionId??'').localeCompare(b.dataset.regionId??'','en');
+  });
+  for(const button of ordered){
     const label=button.querySelector<HTMLElement>('.region-marker-label');
-    if(label)constrainLabel(button,label,'bottom',safe,obstacles);
+    if(!label)continue;
+    const result=constrainLabel(button,label,'bottom',safe,[...obstacles,...placed]);
+    if(!result.hidden)placed.push(result.rect);
   }
   for(const button of viewport.querySelectorAll<HTMLButtonElement>('.trail-marker')){
     if(!button.isConnected)continue;
     const label=button.querySelector<HTMLElement>('.trail-marker-label');
-    if(label)constrainLabel(button,label,'top',safe,obstacles);
+    if(!label)continue;
+    const active=button.classList.contains('is-selected')||button.matches(':hover,:focus-visible,:focus-within');
+    if(!active){delete button.dataset.mapLabelHidden;label.style.setProperty('--map-label-shift-x','0px');label.style.setProperty('--map-label-shift-y','0px');continue;}
+    const result=constrainLabel(button,label,'top',safe,[...obstacles,...placed]);
+    if(!result.hidden)placed.push(result.rect);
   }
 }
 
@@ -234,9 +264,13 @@ export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
   root.addEventListener('pointerover',eventSchedule,true);
   root.addEventListener('focusin',eventSchedule,true);
   root.addEventListener('transitionend',eventSchedule,true);
-  const fonts=document.fonts;
+  const fonts=document.fonts,visual=window.visualViewport;
   void fonts.ready.then(schedule).catch(()=>undefined);
   fonts.addEventListener('loadingdone',eventSchedule);
+  window.addEventListener('resize',eventSchedule,{passive:true});
+  window.addEventListener('orientationchange',eventSchedule,{passive:true});
+  visual?.addEventListener('resize',eventSchedule,{passive:true});
+  visual?.addEventListener('scroll',eventSchedule,{passive:true});
   schedule();
   return()=>{
     resize.disconnect();mutation.disconnect();
@@ -244,6 +278,10 @@ export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
     root.removeEventListener('focusin',eventSchedule,true);
     root.removeEventListener('transitionend',eventSchedule,true);
     fonts.removeEventListener('loadingdone',eventSchedule);
+    window.removeEventListener('resize',eventSchedule);
+    window.removeEventListener('orientationchange',eventSchedule);
+    visual?.removeEventListener('resize',eventSchedule);
+    visual?.removeEventListener('scroll',eventSchedule);
   };
 }
 
