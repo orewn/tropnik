@@ -168,6 +168,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      scheduleLabelClamp();
     };
     updateDirections.current();
+    map.on('move',scheduleLabelClamp);
     if(regionRef.current&&!fitTerritory(map,regionRef.current,container.current,0,framedCamera))map.jumpTo({center:regionRef.current.center,zoom:regionRef.current.zoom});
     map.on('zoomend',()=>{
      const zoom=map.getZoom();setMapZoom(zoom);
@@ -278,11 +279,17 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
  useEffect(()=>{
   const map=mapRef.current,coverage=coverageRef.current;if(!map||!loaded||!coverage||!region)return;
   let removed=false;const routeMarkers:Marker[]=[];
-  import('maplibre-gl').then(ml=>{if(removed)return;for(const t of visibleTrails){
-   if(!t.center||!inRussiaCoverage(...t.center,coverage.area))continue;
-   const button=document.createElement('button');button.className='trail-marker';button.setAttribute('aria-label',`Открыть маршрут ${t.title}`);button.title=t.title;
-   button.addEventListener('click',event=>{event.stopPropagation();onTrail?.(t);});routeMarkers.push(new ml.Marker({element:button}).setLngLat([russiaLongitude(t.center[0]),t.center[1]]).addTo(map));
-  }});
+  import('maplibre-gl').then(ml=>{
+   if(removed)return;
+   for(const t of visibleTrails){
+    if(!t.center||!inRussiaCoverage(...t.center,coverage.area))continue;
+    const button=document.createElement('button');button.type='button';button.className='trail-marker';button.setAttribute('aria-label',`Открыть маршрут ${t.title}`);
+    const label=document.createElement('span');label.className='trail-marker-label';label.setAttribute('aria-hidden','true');label.textContent=t.title;button.appendChild(label);
+    button.addEventListener('click',event=>{event.stopPropagation();onTrail?.(t);});
+    routeMarkers.push(new ml.Marker({element:button,anchor:'center'}).setLngLat([russiaLongitude(t.center[0]),t.center[1]]).addTo(map));
+   }
+   requestAnimationFrame(()=>{if(!removed)updateDirections.current?.();});
+  });
   return()=>{removed=true;routeMarkers.forEach(marker=>marker.remove());};
  },[visibleTrails,region?.id,loaded,onTrail]);
  async function changeBase(mode:MapBaseMode){

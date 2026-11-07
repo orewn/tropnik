@@ -141,3 +141,118 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .explore-layout .layer-button,.explore-layout .layer-menu,.explore-layout .map-message,
   .map-attribution-content,.map-attribution-toggle{background:var(--surface);backdrop-filter:none}
 }
+
+/* Four-edge map label safe area.
+ * JS keeps every label inside the same explicit safe rectangle; overflow
+ * clipping remains the final defence, never the primary placement strategy. */
+.explore-layout .atlas-wrap,
+.explore-layout .atlas-canvas{overflow:hidden}
+.explore-layout .region-marker{
+  position:relative;
+  display:block;
+  width:44px;
+  height:44px;
+  min-width:44px;
+  min-height:44px;
+  padding:0;
+  overflow:visible;
+}
+.explore-layout .region-marker-dot{
+  position:absolute;
+  left:50%;
+  top:50%;
+  z-index:2;
+  transform:translate(-50%,-50%);
+}
+.explore-layout .region-marker:hover .region-marker-dot{
+  transform:translate(-50%,-50%) scale(1.3);
+}
+.explore-layout .region-marker-label{
+  position:absolute;
+  left:50%;
+  top:calc(50% + 11px);
+  width:max-content;
+  max-width:168px;
+  min-width:0;
+  pointer-events:none;
+  transform:translate(calc(-50% + var(--map-label-shift-x,0px)),var(--map-label-shift-y,0px));
+  transform-origin:50% 0;
+  will-change:transform;
+}
+.explore-layout .region-marker[data-map-label-placement='top'] .region-marker-label{
+  top:auto;
+  bottom:calc(50% + 11px);
+  transform-origin:50% 100%;
+}
+.explore-layout .direction-cluster .region-marker-label{min-width:132px}
+.explore-layout .trail-marker{
+  position:relative;
+  display:grid;
+  place-items:center;
+  width:32px;
+  height:32px;
+  padding:0;
+  border:0!important;
+  border-radius:50%;
+  background:transparent;
+  box-shadow:none;
+  overflow:visible;
+}
+.explore-layout .trail-marker::before{
+  content:'';
+  width:15px;
+  height:15px;
+  border:2px solid var(--surface);
+  border-radius:50%;
+  background:var(--ochre);
+  box-shadow:0 0 0 1px rgba(135,106,67,.38),0 2px 7px rgba(39,64,38,.21);
+  transition:transform .16s ease,background .16s ease;
+}
+.explore-layout .trail-marker:hover,
+.explore-layout .trail-marker:focus-visible{background:transparent}
+.explore-layout .trail-marker:hover::before,
+.explore-layout .trail-marker:focus-visible::before{
+  background:var(--forest);
+  transform:scale(1.16);
+}
+.explore-layout .trail-marker-label{
+  position:absolute;
+  left:50%;
+  bottom:calc(50% + 12px);
+  z-index:12;
+  width:max-content;
+  max-width:min(230px,calc(100vw - 40px));
+  padding:7px 10px;
+  border:1px solid rgba(76,99,79,.56);
+  border-radius:8px;
+  background:rgba(255,254,250,.98);
+  color:var(--forest);
+  box-shadow:0 7px 20px rgba(29,48,38,.14);
+  font:600 11px/1.4 Manrope,system-ui,sans-serif;
+  text-align:center;
+  white-space:normal;
+  overflow-wrap:break-word;
+  pointer-events:none;
+  opacity:0;
+  visibility:hidden;
+  transform:translate(calc(-50% + var(--map-label-shift-x,0px)),var(--map-label-shift-y,0px));
+  transform-origin:50% 100%;
+  transition:opacity .12s ease;
+}
+.explore-layout .trail-marker[data-map-label-placement='bottom'] .trail-marker-label{
+  top:calc(50% + 12px);
+  bottom:auto;
+  transform-origin:50% 0;
+}
+.explore-layout .trail-marker:hover .trail-marker-label,
+.explore-layout .trail-marker:focus-visible .trail-marker-label{
+  opacity:1;
+  visibility:visible;
+}
+.explore-layout .leaflet-route-marker{background:none;border:0}
+@media(max-width:700px){
+  .explore-layout .region-marker{width:38px;height:38px;min-width:38px;min-height:38px}
+  .explore-layout .region-marker-label{max-width:138px}
+  .explore-layout .direction-cluster .region-marker-label{min-width:108px}
+  .explore-layout .trail-marker-label{max-width:min(190px,calc(100vw - 32px));font-size:10px}
+}

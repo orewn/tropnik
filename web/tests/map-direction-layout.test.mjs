@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {dirname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelShift,directionLabelWidth,updateDirectionButtons} from '../lib/map-direction-layout.ts';
+import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,updateDirectionButtons} from '../lib/map-direction-layout.ts';
 import {russiaCamera,russiaPadding,russiaLongitude} from '../public/maps/russia-viewport.js';
 
 // Use the actual fifteen directions, not a separately maintained coordinate
@@ -76,6 +76,7 @@ test('regrouping transfers keyboard focus and restores a separate selected direc
       classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)},
       querySelector:selector=>selector==='.region-marker-dot'?dot:label,
       setAttribute:(name,value)=>attributes.set(name,value),
+      removeAttribute:name=>attributes.delete(name),
       focus:options=>{assert.equal(options.preventScroll,true);ownerDocument.activeElement=buttons.get(id);},
     });
   }
@@ -96,10 +97,15 @@ test('regrouping transfers keyboard focus and restores a separate selected direc
   assert.equal(buttons.get('b').attributes.get('aria-label'),'Открыть Б, маршрутов в каталоге: 3');
 });
 
-test('edge clamp keeps every map label inside the visible atlas',()=>{
-  assert.equal(directionLabelShift(-30,110,0,1000,18),48);
-  assert.equal(directionLabelShift(920,1040,0,1000,18),-58);
-  assert.equal(directionLabelShift(200,320,0,1000,18),0);
+test('safe-area rules keep labels inside all four map edges',()=>{
+  const wide=mapLabelSafeRect({left:0,right:1000,top:0,bottom:800},false);
+  assert.deepEqual(wide,{left:18,right:922,top:72,bottom:740});
+  const compact=mapLabelSafeRect({left:0,right:390,top:0,bottom:772},true,410);
+  assert.deepEqual(compact,{left:12,right:332,top:62,bottom:410});
+  assert.deepEqual(mapLabelShift({left:-30,right:110,top:90,bottom:130},wide),{x:48,y:0});
+  assert.deepEqual(mapLabelShift({left:900,right:1040,top:710,bottom:770},wide),{x:-118,y:-30});
+  assert.equal(mapLabelPlacement('bottom',{left:100,right:132,top:700,bottom:732},40,wide),'top');
+  assert.equal(mapLabelPlacement('top',{left:100,right:132,top:75,bottom:107},40,wide),'bottom');
   assert.ok(directionLabelWidth('Петропавловск-Камчатский')<=168);
   assert.ok(directionLabelWidth('Алтай')>=84);
 });

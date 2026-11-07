@@ -196,6 +196,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
      scheduleLabelClamp();
     };
     updateDirections.current();
+    map.on('move',scheduleLabelClamp);
     points.current=L.layerGroup().addTo(map);
     const clampCamera=()=>{
      const floor=cameraFloor.current;if(cancelled||clamping||!floor)return;
@@ -259,9 +260,13 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
    if(stale||map!==mapRef.current)return;points.current?.clearLayers();
    for(const item of visibleTrails){
     if(!item.center||!inRussiaCoverage(...item.center,coverage.area))continue;
-    const marker=L.circleMarker([item.center[1],russiaLongitude(item.center[0])],{radius:5.5,color:'#fffefa',weight:2,fillColor:'#a47842',fillOpacity:1,opacity:1});
-    const label=document.createElement('span');label.textContent=item.title;marker.bindTooltip(label,{direction:'top',offset:[0,-5]});marker.on('click',()=>callbacks.current.onTrail?.(item));points.current?.addLayer(marker);
+    const button=document.createElement('button');button.type='button';button.className='trail-marker';button.setAttribute('aria-label',`Открыть маршрут ${item.title}`);
+    const label=document.createElement('span');label.className='trail-marker-label';label.setAttribute('aria-hidden','true');label.textContent=item.title;button.appendChild(label);
+    button.addEventListener('click',event=>{event.stopPropagation();callbacks.current.onTrail?.(item);});
+    const marker=L.marker([item.center[1],russiaLongitude(item.center[0])],{icon:L.divIcon({html:button,className:'leaflet-route-marker',iconSize:[32,32],iconAnchor:[16,16]}),keyboard:false});
+    points.current?.addLayer(marker);
    }
+   requestAnimationFrame(()=>{if(!stale)updateDirections.current?.();});
   });
   return()=>{stale=true;};
  },[visibleTrails,region?.id,loaded]);
