@@ -28,6 +28,15 @@ jobs:
           package-manager-cache: false
       - name: Apply product patch
         run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path('tools/apply-startup-visual-polish.py')
+          text=path.read_text()
+          old='doc.write_text(doc_text.rstrip()+section+"\\n")'
+          new='doc.write_text(doc_text.rstrip()+section.rstrip()+"\\n")'
+          if old not in text: raise SystemExit('documentation normalization anchor missing')
+          path.write_text(text.replace(old,new,1))
+          PY
           python3 tools/apply-startup-visual-polish.py
           git diff --check
       - name: Install locked dependencies
