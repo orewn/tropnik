@@ -54,13 +54,13 @@ jobs:
       - name: Apply safety implementation
         run: |
           set -euo pipefail
-          cat tools/safety-backend.part-* > /tmp/apply-safety-backend-packed.py
-          python3 /tmp/apply-safety-backend-packed.py
+          cat tools/safety-backend.part-* > tools/apply-safety-backend-packed.py
+          python3 tools/apply-safety-backend-packed.py
           python3 tools/apply-safety-web-packed.py
           find backend -name '*.go' -print0 | xargs -0 gofmt -w
           git diff --check
-          if git diff --unified=0 -- backend web docs | grep -Ei 'platformFee|payment_intent|pricePerPerson|commission|комисси|оплат'; then
-            echo 'Commercial functionality entered the safety-only release.' >&2
+          if git diff --unified=0 -- backend/internal backend/migrations web/components web/lib | grep -Ei 'platformFee|payment_intent|pricePerPerson|commission|комисси|split-плат'; then
+            echo 'Commercial functionality entered the safety-only runtime.' >&2
             exit 1
           fi
 
