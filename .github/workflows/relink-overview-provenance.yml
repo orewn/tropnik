@@ -1,0 +1,44 @@
+name: Relink overview provenance
+
+on:
+  push:
+    branches: [fix/map-label-viewport-20261107]
+    paths:
+      - '.github/workflows/relink-overview-provenance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  relink:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: fix/map-label-viewport-20261107
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify tiles and relink unchanged overview to current provenance
+        run: |
+          python -m py_compile tools/map-package/relink_overview_provenance.py
+          python tools/map-package/relink_overview_provenance.py
+          python tools/map-package/relink_overview_provenance.py --check
+          git diff --check
+
+      - name: Require a metadata-only package change
+        run: |
+          test "$(git status --short | wc -l)" -eq 1
+          test "$(git status --short | awk '{print $2}')" = 'web/public/maps/russia-relief/manifest.json'
+
+      - name: Commit verified manifest link
+        run: |
+          git config user.name 'tropnik-release-bot'
+          git config user.email '38781694+orewn@users.noreply.github.com'
+          git add web/public/maps/russia-relief/manifest.json
+          git commit -m 'Relink overview relief to current Russia mask provenance'
+          git push origin HEAD:fix/map-label-viewport-20261107
