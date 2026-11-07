@@ -39,3 +39,61 @@ test('mobile paint work is bounded and progress animation stays compositor-only'
   assert.match(css,/contain:layout paint style/);
   assert.match(css,/sheet-handle[\s\S]*min-height:44px/);
 });
+
+test('collapsed mobile sheet has a dedicated stable preview and public browser proof',()=>{
+  const explore=read('components/Explore.tsx');
+  const css=read('app/map-ui-release.css');
+  const pages=read('../.github/workflows/pages.yml');
+  const deployed=read('../tools/pages-preview/verify-deployed.mjs');
+  const browser=read('../tools/pages-preview/browser-smoke.mjs');
+  assert.match(explore,/className="sheet-peek-summary"/);
+  assert.match(explore,/hidden=\{sheetOpen\}/);
+  assert.match(explore,/routeCountPreview/);
+  assert.match(css,/sheet-peek-summary[\s\S]*height:112px/);
+  assert.match(css,/sheet-closed \.explore-panel-content[\s\S]*visibility:hidden!important/);
+  assert.match(pages,/Verify real mobile rendering and sheet interaction/);
+  assert.match(browser,/touchSheet/);
+  assert.match(browser,/sheetHeightDelta/);
+  assert.match(deployed,/browser-verification\.json/);
+  assert.match(deployed,/browserRenderingTested: true/);
+});
+
+
+test('synthetic touch hover paint is cleared without removing keyboard focus',()=>{
+  const css=read('app/map-ui-release.css');
+  const stories=read('components/PlaceStories.tsx');
+  assert.match(css,/Touch browsers may retain synthetic :hover after tap/);
+  assert.match(css,/@media\(hover:none\),\(pointer:coarse\)[\s\S]*\.fact-controls button:hover[\s\S]*background:transparent!important/);
+  assert.match(css,/focus:not\(:focus-visible\)/);
+  assert.match(stories,/releaseTouchFocus/);
+  assert.match(stories,/requestAnimationFrame\(\(\)=>button\.blur\(\)\)/);
+});
+
+
+test('compact landscape keeps every map control at 44px',()=>{
+  const css=read('app/map-ui-release.css');
+  assert.match(css,/Compact landscape keeps 44px touch targets/);
+  assert.match(css,/@media\(max-height:620px\) and \(orientation:landscape\) and \(max-width:900px\)[\s\S]*map-style-switch button[\s\S]*map-controls button[\s\S]*height:44px!important[\s\S]*min-height:44px!important/);
+});
+
+
+test('mobile touch profiles avoid the heavy WebGL startup path',()=>{
+  const preload=read('lib/map-preload.ts');
+  const atlas=read('components/Atlas.tsx');
+  const browser=read('../tools/pages-preview/browser-smoke.mjs');
+  assert.match(preload,/export function preferCanvasMap/);
+  assert.match(preload,/window\.innerWidth<=900/);
+  assert.match(preload,/supportsMapWebGL\(\)&&!preferCanvasMap\(\)/);
+  assert.match(atlas,/preferCanvasMap\(\)\|\|!supportsMapWebGL\(\)/);
+  assert.match(browser,/mobile profile loaded the heavy/);
+  assert.match(browser,/geometry\.engine,'leaflet'/);
+});
+
+
+test('touch landscape receives the mobile sheet preview above 700px',()=>{
+  const css=read('app/map-ui-release.css');
+  assert.match(css,/Touch landscape uses the same compositor sheet above 700px/);
+  assert.match(css,/@media\(min-width:701px\) and \(max-width:900px\) and \(max-height:620px\) and \(orientation:landscape\) and \(pointer:coarse\)/);
+  assert.match(css,/sheet-peek-summary[\s\S]*height:68px[\s\S]*min-height:68px/);
+  assert.match(css,/sheet-closed \.explore-panel[\s\S]*translate3d\(0,calc\(100% - var\(--sheet-peek\)\),0\)/);
+});

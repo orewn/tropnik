@@ -117,12 +117,42 @@ async function loadProfile(cdp,url,profile){
     const targets=[...document.querySelectorAll(targetSelector)].filter(visible).map(element=>{const r=element.getBoundingClientRect();return{label:element.getAttribute('aria-label')||element.textContent?.trim(),width:r.width,height:r.height}});
     const card=document.querySelector('.fact-card')?.getBoundingClientRect();
     return{
-      width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,
+      width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,engine:document.querySelector('.leaflet-container')?'leaflet':document.querySelector('.maplibregl-map')?'maplibre':'unknown',
       escaping:atlas?labels.filter(label=>label.left<atlas.left-1||label.right>atlas.right+1||label.top<atlas.top-1||label.bottom>atlas.bottom+1):[],
       undersized:targets.filter(target=>target.width<43.5||target.height<43.5),
       card:card?{left:card.left,right:card.right,top:card.top,bottom:card.bottom}:null,
     };
   })()`);
+}
+async function tapSelector(cdp,selector,id=1){
+  const point=await evaluate(cdp,`(()=>{const element=document.querySelector(${JSON.stringify(selector)});if(!element)return null;const r=element.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`);
+  if(!point)return false;
+  await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id,radiusX:2,radiusY:2,force:1}]});
+  await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  return true;
+}
+async function sheetSnapshot(cdp){
+  return evaluate(cdp,`(()=>{
+    const visible=element=>{if(!element)return false;const style=getComputedStyle(element),r=element.getBoundingClientRect();return style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)!==0&&r.width>1&&r.height>1};
+    const root=document.querySelector('.explore-layout'),panel=document.querySelector('.explore-panel'),handle=document.querySelector('.sheet-handle'),summary=document.querySelector('.sheet-peek-summary'),content=document.querySelector('.explore-panel-content');
+    if(!root||!panel||!handle)return{available:false};
+    const rect=panel.getBoundingClientRect();
+    return{available:true,state:root.dataset.sheetState,height:rect.height,top:rect.top,transform:getComputedStyle(panel).transform,summaryVisible:visible(summary),contentVisible:visible(content),focused:document.activeElement===handle};
+  })()`);
+}
+async function touchSheet(cdp){
+  let closed=await sheetSnapshot(cdp);
+  if(!closed.available)return{available:false};
+  if(closed.state!=='closed'){
+    assert.equal(await tapSelector(cdp,'.sheet-handle',7),true);
+    await sleep(380);closed=await sheetSnapshot(cdp);
+  }
+  assert.equal(await tapSelector(cdp,'.sheet-handle',8),true);
+  await sleep(380);const open=await sheetSnapshot(cdp);
+  assert.equal(await tapSelector(cdp,'.sheet-handle',9),true);
+  await sleep(380);const final=await sheetSnapshot(cdp);
+  const perf=await evaluate(cdp,`(()=>({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0}))()`);
+  return{available:true,closed,open,final,heightDelta:Math.max(Math.abs(open.height-closed.height),Math.abs(final.height-closed.height)),cls:perf.cls,longest:perf.longest};
 }
 async function touchPrevious(cdp){
   const point=await evaluate(cdp,`(()=>{const button=document.querySelector('.fact-controls button[aria-label="Предыдущая история"]');if(!button)return null;const r=button.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`);
@@ -163,10 +193,23 @@ try{
   const results=[];
   for(const profile of profiles){
     const geometry=await loadProfile(cdp,`http://127.0.0.1:${httpPort}/tropnik/`,profile);
+    assert.equal(geometry.engine,'leaflet',`${profile.name}: mobile profile loaded the heavy ${geometry.engine} engine`);
     assert.ok(geometry.scrollWidth<=geometry.width+1,`${profile.name}: horizontal overflow ${geometry.scrollWidth}>${geometry.width}`);
     assert.deepEqual(geometry.escaping,[],`${profile.name}: labels escaped the map viewport`);
     assert.deepEqual(geometry.undersized,[],`${profile.name}: interactive targets smaller than 44 CSS px`);
     if(geometry.card)assert.ok(geometry.card.left>=-1&&geometry.card.right<=geometry.width+1&&geometry.card.top>=-1&&geometry.card.bottom<=geometry.height+1,`${profile.name}: story card escaped the visual viewport`);
+    const sheet=await touchSheet(cdp);
+    if(sheet.available){
+      assert.equal(sheet.closed.state,'closed',`${profile.name}: initial sheet state`);
+      assert.equal(sheet.closed.summaryVisible,true,`${profile.name}: collapsed preview is not visible`);
+      assert.equal(sheet.closed.contentVisible,false,`${profile.name}: full content leaks into collapsed preview`);
+      assert.equal(sheet.open.state,'open',`${profile.name}: sheet did not open`);
+      assert.equal(sheet.open.contentVisible,true,`${profile.name}: opened content is not visible`);
+      assert.equal(sheet.open.summaryVisible,false,`${profile.name}: collapsed preview remained visible while open`);
+      assert.equal(sheet.final.state,'closed',`${profile.name}: sheet did not close`);
+      assert.equal(sheet.final.focused,false,`${profile.name}: sheet handle retained touch focus`);
+      assert.ok(sheet.heightDelta<1.1,`${profile.name}: panel height changed during transform animation (${sheet.heightDelta}px)`);
+    }
     const touch=await touchPrevious(cdp);
     if(touch.available){
       assert.equal(touch.focused,false,`${profile.name}: story navigation retained touch focus`);
@@ -174,9 +217,9 @@ try{
       assert.ok(touch.cls<.12,`${profile.name}: interaction layout shift ${touch.cls}`);
       assert.ok(touch.longest<350,`${profile.name}: long task ${touch.longest}ms`);
     }
-    results.push({...profile,geometry,touch});
+    results.push({...profile,geometry,sheet,touch});
   }
-  const report={verified:true,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,touch})=>({name,width,height,interactionTested:touch.available,layoutShift:touch.cls??0,longestTaskMs:touch.longest??0})),sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,sheet,touch})=>({name,width,height,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0)})),sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
 }finally{
