@@ -1,0 +1,70 @@
+name: Import verified 0.4.8 product files
+
+on:
+  push:
+    branches: [release/0.4.8-safety-final]
+    paths:
+      - '.github/workflows/import-0.4.8-clean.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tropnik-import-0.4.8-clean
+  cancel-in-progress: true
+
+jobs:
+  import-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: release/0.4.8-safety-final
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Import verified product files only
+        run: |
+          git fetch origin perf/ui-smoothness-0.4.8-final
+          git checkout origin/perf/ui-smoothness-0.4.8-final -- \
+            docs/MAP-VISUAL-SYSTEM.md \
+            tools/pages-preview/browser-smoke.mjs \
+            tools/pages-preview/verify-deployed.mjs \
+            web/app/map-ui-release.css \
+            web/components/Atlas.tsx \
+            web/components/Atlas2D.tsx \
+            web/components/Explore.tsx \
+            web/components/PlaceStories.tsx \
+            web/lib/map-direction-layout.ts \
+            web/lib/map-framing.ts \
+            web/lib/map-preload.ts \
+            web/package.json \
+            web/public/sw.js \
+            web/tests/map-framing.test.mjs \
+            web/tests/map-polish.test.mjs \
+            web/tests/ui-smoothness.test.mjs
+          git diff --check
+      - name: Install locked dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          pnpm --dir web install --frozen-lockfile
+      - name: Verify product release
+        run: |
+          pnpm --dir web test
+          node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
+          pnpm --dir web exec eslint --max-warnings=0 lib/map-direction-layout.ts lib/map-framing.ts tests/ui-smoothness.test.mjs tests/map-framing.test.mjs
+          pnpm --dir web build
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+          GITHUB_SHA="$GITHUB_SHA" node tools/pages-preview/browser-smoke.mjs
+      - name: Commit product files
+        run: |
+          git config user.name 'tropnik-release-bot'
+          git config user.email '38781694+orewn@users.noreply.github.com'
+          git add docs tools/pages-preview web
+          git commit -m 'Release 0.4.8 mobile UX and adaptive map runtime'
+          git push origin HEAD:release/0.4.8-safety-final
