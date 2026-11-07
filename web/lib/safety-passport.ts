@@ -136,6 +136,10 @@ export function newSafetyPassport(id: string, now = new Date()): SafetyPassport 
   };
 }
 
+export function safetyPassportSnapshot(passport: SafetyPassport): string {
+  return JSON.stringify(passport, (key, value) => key === 'updatedAt' ? undefined : value);
+}
+
 export function safetyReadiness(passport: SafetyPassport): SafetyReadiness {
   const missing = requiredFields.filter(([key]) => !String(passport[key] || '').trim()).map(([, label]) => label);
   const validParticipants = passport.participants.filter(participant => participant.name.trim() && participant.phone.trim());

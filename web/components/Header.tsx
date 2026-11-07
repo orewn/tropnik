@@ -19,6 +19,7 @@ export function Header({active = 'map'}: {active?: string}) {
   const searchLink = useRef<HTMLAnchorElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
   const navigation = useRef<HTMLElement>(null);
+  const header = useRef<HTMLElement>(null);
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.key.toLowerCase() !== 'k' || !(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return;
@@ -63,26 +64,42 @@ export function Header({active = 'map'}: {active?: string}) {
   useEffect(() => {
     if (!menu) return;
     const bodyOverflow = document.body.style.overflow;
-    const mobile = window.matchMedia('(max-width: 700px)').matches;
-    if (mobile) document.body.style.overflow = 'hidden';
+    const rootOverflow = document.documentElement.style.overflow;
+    const media = window.matchMedia('(max-width: 700px)');
+    const mobile = media.matches;
+    if (mobile) { document.body.style.overflow = 'hidden'; document.documentElement.style.overflow = 'hidden'; }
+    const focusable = () => [...(header.current?.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])') ?? [])]
+      .filter(element => element.offsetParent !== null && !element.hasAttribute('aria-hidden'));
     requestAnimationFrame(() => navigation.current?.querySelector<HTMLElement>('a[href]')?.focus({preventScroll: true}));
     const key = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      setMenu(false);
-      requestAnimationFrame(() => menuButton.current?.focus({preventScroll: true}));
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMenu(false);
+        requestAnimationFrame(() => menuButton.current?.focus({preventScroll: true}));
+        return;
+      }
+      if (event.key !== 'Tab' || !mobile) return;
+      const items = focusable();
+      const first = items[0], last = items.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus({preventScroll: true}); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus({preventScroll: true}); }
     };
     const outside = (event: PointerEvent) => {
       const target = event.target;
       if (!(target instanceof Node) || navigation.current?.contains(target) || menuButton.current?.contains(target)) return;
       setMenu(false);
     };
+    const resize = () => { if (!media.matches) setMenu(false); };
     window.addEventListener('keydown', key);
     document.addEventListener('pointerdown', outside);
+    media.addEventListener('change', resize);
     return () => {
       document.body.style.overflow = bodyOverflow;
+      document.documentElement.style.overflow = rootOverflow;
       window.removeEventListener('keydown', key);
       document.removeEventListener('pointerdown', outside);
+      media.removeEventListener('change', resize);
     };
   }, [menu]);
   const close = useCallback(() => setAuth(false), []);
@@ -110,7 +127,7 @@ export function Header({active = 'map'}: {active?: string}) {
   }
 
   return <>
-    <header className={`site-header ${styles.header}`}>
+    <header ref={header} className={`site-header ${styles.header}`}>
       <Brand/>
       <nav ref={navigation} id="main-navigation" aria-label="Основная навигация" className={menu ? 'top-nav open' : 'top-nav'} onClick={event=>{if((event.target as HTMLElement).closest('a[href]'))setMenu(false);}}>
         <Link className={active === 'map' ? 'active' : ''} aria-current={active === 'map' ? 'page' : undefined} href="/">Карта маршрутов</Link>

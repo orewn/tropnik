@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element */
 import {useEffect,useMemo,useState,useRef,useId} from 'react';
 import type {KeyboardEvent as ReactKeyboardEvent,PointerEvent as ReactPointerEvent} from 'react';
 import {ArrowRight,CaretLeft,CaretRight,Pause,Play,Compass,X} from '@/components/TropnikIcons';
@@ -6,39 +7,35 @@ import {factsForPlace,type PlaceFact} from '@/lib/facts';
 
 export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeId?:string;onPlace:(f:PlaceFact)=>void}){
  const facts=useMemo(()=>factsForPlace(regionId,routeId),[regionId,routeId]);
- const [index,setIndex]=useState(0),[paused,setPaused]=useState(false),[hovered,setHovered]=useState(false),[hidden,setHidden]=useState(false),[dismissed,setDismissed]=useState(false),[reduced,setReduced]=useState(false),[expanded,setExpanded]=useState(false),[narrow,setNarrow]=useState(false),[failedPhoto,setFailedPhoto]=useState('');
+ const [index,setIndex]=useState(0),[paused,setPaused]=useState(false),[hovered,setHovered]=useState(false),[hidden,setHidden]=useState(false),[dismissed,setDismissed]=useState(Boolean(routeId)),[reduced,setReduced]=useState(false),[expanded,setExpanded]=useState(false),[narrow,setNarrow]=useState(false),[failedPhoto,setFailedPhoto]=useState(''),[canHover,setCanHover]=useState(false),[inViewport,setInViewport]=useState(true);
  const storyId=useId(),overview=!regionId,collapsible=overview||narrow,compact=collapsible&&!expanded;
- const regionKey=useRef(''),swipe=useRef<{x:number;y:number;id:number}|null>(null);
+ const regionKey=useRef(''),swipe=useRef<{x:number;y:number;id:number}|null>(null),card=useRef<HTMLElement|null>(null);
  const fact=facts.length?facts[index%facts.length]:undefined;
 
- useEffect(()=>{
-  if(!fact)return;
-  let active=true;
-  const image=new window.Image();
-  image.decoding='async';
-  image.onload=()=>{if(active)setFailedPhoto(current=>current===fact.id?'':current);};
-  image.onerror=()=>{if(active)setFailedPhoto(fact.id);};
-  image.src=fact.imageUrl;
-  return()=>{active=false;};
- },[fact]);
-
  useEffect(()=>{const media=window.matchMedia('(max-width: 700px)');const sync=()=>setNarrow(media.matches);sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
+ useEffect(()=>{const media=window.matchMedia('(hover: hover) and (pointer: fine)');const sync=()=>setCanHover(media.matches);sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
  useEffect(()=>{const key=`${regionId||'all'}:${routeId||''}`;if(key!==regionKey.current){setIndex(0);setExpanded(false);setPaused(false);regionKey.current=key;}},[regionId,routeId]);
  useEffect(()=>{if(routeId)queueMicrotask(()=>setDismissed(true));},[routeId]);
- useEffect(()=>{const media=window.matchMedia('(prefers-reduced-motion: reduce)');const sync=()=>setReduced(media.matches);sync();media.addEventListener('change',sync);const visibility=()=>setHidden(document.hidden);document.addEventListener('visibilitychange',visibility);return()=>{media.removeEventListener('change',sync);document.removeEventListener('visibilitychange',visibility);};},[]);
+ useEffect(()=>{const media=window.matchMedia('(prefers-reduced-motion: reduce)');const sync=()=>setReduced(media.matches);sync();media.addEventListener('change',sync);const visibility=()=>setHidden(document.hidden);visibility();document.addEventListener('visibilitychange',visibility);return()=>{media.removeEventListener('change',sync);document.removeEventListener('visibilitychange',visibility);};},[]);
  useEffect(()=>{
-  if(!fact)return;
-  if(facts.length<2)return;
+  const node=card.current;
+  if(dismissed||!node||!('IntersectionObserver' in window))return;
+  const observer=new IntersectionObserver(entries=>setInViewport(entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>=.12)),{threshold:[0,.12,.5],rootMargin:'96px'});
+  observer.observe(node);
+  return()=>observer.disconnect();
+ },[dismissed]);
+ useEffect(()=>{
+  if(!fact||dismissed||hidden||!inViewport||facts.length<2)return;
   const connection=(navigator as Navigator&{connection?:{saveData?:boolean;effectiveType?:string}}).connection;
   if(connection?.saveData||/(?:^|-)2g$/.test(connection?.effectiveType||''))return;
   let cancelled=false,idle=0,timer=0;
   const preload=()=>{if(cancelled)return;for(const offset of [-1,1]){const nearby=facts[(index+offset+facts.length)%facts.length];const image=new window.Image();image.decoding='async';image.src=nearby.imageUrl;}};
   const target=window as Window&{requestIdleCallback?:(callback:()=>void,options?:{timeout:number})=>number;cancelIdleCallback?:(handle:number)=>void};
-  if(target.requestIdleCallback)idle=target.requestIdleCallback(preload,{timeout:1800});else timer=window.setTimeout(preload,500);
+  if(target.requestIdleCallback)idle=target.requestIdleCallback(preload,{timeout:1800});else timer=window.setTimeout(preload,600);
   return()=>{cancelled=true;if(idle)target.cancelIdleCallback?.(idle);if(timer)clearTimeout(timer);};
- },[fact,facts,index]);
+ },[fact,facts,index,dismissed,hidden,inViewport]);
 
- const stopped=paused||hovered||hidden||reduced||dismissed||(collapsible&&expanded);
+ const stopped=paused||hovered||hidden||reduced||dismissed||!inViewport||(collapsible&&expanded);
  useEffect(()=>{if(stopped||facts.length<2)return;const timer=setTimeout(()=>setIndex(i=>(i+1)%facts.length),16000);return()=>clearTimeout(timer);},[index,stopped,facts.length]);
 
  if(!fact)return null;
@@ -61,13 +58,11 @@ export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeI
   if(event.key==='ArrowLeft'){event.preventDefault();manual(-1);}
   if(event.key==='ArrowRight'){event.preventDefault();manual(1);}
  }
- function togglePlayback(){
-  if(reduced){setReduced(false);setPaused(false);return;}
-  setPaused(value=>!value);
- }
+ function togglePlayback(){if(!reduced)setPaused(value=>!value);}
  if(dismissed)return <button type="button" className="fact-closed" onClick={()=>setDismissed(false)}><Compass size={17}/>Истории мест</button>;
  const photoFailed=failedPhoto===fact.id;
  return <aside
+  ref={card}
   className={`fact-card ${overview?'overview-fact':''} ${compact?'fact-card--compact':'fact-card--expanded'}`}
   aria-label="Истории мест на карте"
   tabIndex={0}
@@ -75,13 +70,13 @@ export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeI
   onPointerDown={beginSwipe}
   onPointerUp={finishSwipe}
   onPointerCancel={()=>{swipe.current=null;}}
-  onMouseEnter={()=>setHovered(true)}
-  onMouseLeave={()=>setHovered(false)}
+  onMouseEnter={()=>{if(canHover)setHovered(true);}}
+  onMouseLeave={()=>{if(canHover)setHovered(false);}}
   onFocusCapture={()=>setHovered(true)}
   onBlurCapture={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node))setHovered(false);}}
  >
   <figure className={`fact-photo ${photoFailed?'is-fallback':''}`}>
-   {!photoFailed&&<span key={fact.imageUrl} className="fact-photo-image" role="img" aria-label={fact.imageAlt} style={{backgroundImage:`url("${fact.imageUrl.replaceAll('"','%22')}")`,backgroundPosition:fact.imagePosition||'50% 50%'}}/>}
+   {!photoFailed&&<img key={fact.imageUrl} className="fact-photo-image" src={fact.imageUrl} alt={fact.imageAlt} loading={overview?'eager':'lazy'} decoding="async" referrerPolicy="no-referrer" style={{objectPosition:fact.imagePosition||'50% 50%'}} onLoad={()=>setFailedPhoto(current=>current===fact.id?'':current)} onError={()=>setFailedPhoto(fact.id)}/>}
    <span className="fact-photo-fallback" aria-hidden={!photoFailed}><Compass size={22}/><span>Фото временно недоступно</span></span>
    <figcaption>{fact.imageCredit}<span>{fact.imageLicense}</span></figcaption>
   </figure>
@@ -98,7 +93,7 @@ export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeI
    <div className="fact-controls">
     <button type="button" aria-label="Предыдущая история" onClick={event=>{manual(-1);releaseTouchFocus(event.currentTarget);}}><CaretLeft size={15}/></button>
     {compact&&<span className="fact-count caption-5">{String(index%facts.length+1).padStart(2,'0')} / {String(facts.length).padStart(2,'0')}</span>}
-    <button type="button" aria-label={paused||reduced?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={event=>{togglePlayback();releaseTouchFocus(event.currentTarget);}}>{paused||reduced?<Play size={13}/>:<Pause size={13}/>}</button>
+    <button type="button" disabled={reduced} title={reduced?'Автосмена отключена системной настройкой уменьшения движения':undefined} aria-label={reduced?'Автосмена отключена системной настройкой':paused?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={event=>{togglePlayback();releaseTouchFocus(event.currentTarget);}}>{paused||reduced?<Play size={13}/>:<Pause size={13}/>}</button>
     <button type="button" aria-label="Следующая история" onClick={event=>{manual(1);releaseTouchFocus(event.currentTarget);}}><CaretRight size={15}/></button>
    </div>
   </div>

@@ -33,14 +33,14 @@ test('story speculation respects idle time and constrained connections',async()=
   assert.match(stories,/requestIdleCallback/);
   assert.match(stories,/saveData/);
   assert.match(stories,/className="fact-photo-image"/);
-  assert.match(stories,/role="img"/);
+  assert.match(stories,/<img\b/);
   assert.match(stories,/image\.decoding='async'/);
-  assert.doesNotMatch(stories,/<img\b/);
+  assert.doesNotMatch(stories,/role="img"/);
 });
 
 test('safety drafts expose unsaved state and warn only while dirty',async()=>{
   const [component,css]=await Promise.all([read('components/SafetyRegistration.tsx'),read('components/SafetyRegistration.module.css')]);
-  assert.match(component,/passportSnapshot/);
+  assert.match(component,/safetyPassportSnapshot/);
   assert.match(component,/addEventListener\('beforeunload'/);
   assert.match(component,/if \(!dirty\) return/);
   assert.match(component,/Есть несохранённые изменения/);
@@ -53,9 +53,9 @@ test('service worker update is visible and user controlled',async()=>{
   assert.match(client,/registration\.waiting/);
   assert.match(client,/controllerchange/);
   assert.match(client,/skip-waiting/);
-  assert.match(worker,/tropnik-shell-v18/);
+  assert.match(worker,/tropnik-shell-v19/);
   assert.match(worker,/self\.skipWaiting/);
   assert.match(css,/\.app-update/);
   assert.match(css,/forced-colors:active/);
-  assert.equal(JSON.parse(pkg).version,'0.4.11');
+  assert.equal(JSON.parse(pkg).version,'0.4.12');
 });

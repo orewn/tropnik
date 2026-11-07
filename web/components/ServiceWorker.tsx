@@ -10,10 +10,13 @@ type NetworkNavigator = Navigator & {
   connection?: {saveData?: boolean; effectiveType?: string};
 };
 
+const UPDATE_INTERVAL = 30 * 60 * 1000;
+
 export function ServiceWorker() {
   const [updateReady, setUpdateReady] = useState(false);
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const refreshRequested = useRef(false);
+  const lastUpdateCheck = useRef(0);
 
   useEffect(() => {
     if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
@@ -21,8 +24,18 @@ export function ServiceWorker() {
     const idleHandles = new Set<number>();
     const timers = new Set<number>();
     let disposed = false;
-    const controllerChanged = () => { if (refreshRequested.current) location.reload(); };
+    let controllerKnown = !!navigator.serviceWorker.controller;
+    let checkUpdate = () => {};
+    const controllerChanged = () => {
+      if (refreshRequested.current) { location.reload(); return; }
+      if (controllerKnown && !disposed) setUpdateReady(true);
+      controllerKnown = true;
+    };
+    const wake = () => { if (!document.hidden) checkUpdate(); };
     navigator.serviceWorker.addEventListener('controllerchange', controllerChanged);
+    document.addEventListener('visibilitychange', wake);
+    window.addEventListener('online', wake);
+    window.addEventListener('pageshow', wake);
 
     const schedule = (task: () => void, timeout: number) => {
       if (target.requestIdleCallback) {
@@ -43,6 +56,14 @@ export function ServiceWorker() {
     const register = () => schedule(() => {
       void navigator.serviceWorker.register('/sw.js', {updateViaCache: 'none'}).then(registration => {
         registrationRef.current = registration;
+        lastUpdateCheck.current = Date.now();
+        checkUpdate = () => {
+          if (disposed || document.hidden || !navigator.onLine || !registrationRef.current) return;
+          const now = Date.now();
+          if (now - lastUpdateCheck.current < UPDATE_INTERVAL) return;
+          lastUpdateCheck.current = now;
+          void registrationRef.current.update().catch(() => {});
+        };
         const announceWaiting = () => {
           if (!disposed && registration.waiting && navigator.serviceWorker.controller) setUpdateReady(true);
         };
@@ -73,6 +94,9 @@ export function ServiceWorker() {
       disposed = true;
       window.removeEventListener('load', register);
       navigator.serviceWorker.removeEventListener('controllerchange', controllerChanged);
+      document.removeEventListener('visibilitychange', wake);
+      window.removeEventListener('online', wake);
+      window.removeEventListener('pageshow', wake);
       for (const handle of idleHandles) target.cancelIdleCallback?.(handle);
       for (const handle of timers) window.clearTimeout(handle);
     };
@@ -86,8 +110,8 @@ export function ServiceWorker() {
   }
 
   if (!updateReady) return null;
-  return <div className="app-update" role="status" aria-live="polite">
-    <span><strong>Тропник обновлён.</strong> Перезагрузите страницу, чтобы получить свежую карту и исправления.</span>
+  return <div className="app-update" role="region" aria-label="Обновление Тропника">
+    <span role="status" aria-live="polite"><strong>Доступна свежая версия.</strong> Обновите страницу, когда будете готовы получить последние исправления.</span>
     <div><button type="button" className="button primary small" onClick={activateUpdate}>Обновить</button><button type="button" className="button secondary small" onClick={()=>setUpdateReady(false)}>Позже</button></div>
   </div>;
 }
