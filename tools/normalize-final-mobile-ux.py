@@ -73,6 +73,50 @@ for old_control,new_control in controls.items():
     story=story.replace(old_control,new_control,1)
 stories.write_text(story)
 
+# Progressive enhancement: touch phones use the substantially lighter Leaflet
+# canvas path. Desktop keeps MapLibre and all explicit terrain controls.
+preload=root/'web/lib/map-preload.ts'
+preload_text=preload.read_text()
+webgl_anchor="""export function supportsMapWebGL() {
+  if(typeof document==='undefined')return false;
+  if(webglAvailable===undefined){
+    try{const gl=document.createElement('canvas').getContext('webgl2');webglAvailable=!!gl;gl?.getExtension('WEBGL_lose_context')?.loseContext();}
+    catch{webglAvailable=false;}
+  }
+  return webglAvailable;
+}
+"""
+preference="""
+export function preferCanvasMap() {
+  if(typeof window==='undefined'||typeof navigator==='undefined')return false;
+  const nav=navigator as Navigator&{deviceMemory?:number;connection?:{saveData?:boolean}};
+  const coarse=window.matchMedia('(pointer:coarse)').matches||nav.maxTouchPoints>0;
+  const constrained=(nav.deviceMemory??8)<=4||(nav.hardwareConcurrency||8)<=4||!!nav.connection?.saveData;
+  return coarse&&(window.innerWidth<=900||constrained);
+}
+"""
+if webgl_anchor not in preload_text:
+    raise SystemExit('WebGL capability anchor not found')
+preload_text=preload_text.replace(webgl_anchor,webgl_anchor+preference,1)
+old_warm="  const webgl=supportsMapWebGL();"
+new_warm="  const webgl=supportsMapWebGL()&&!preferCanvasMap();"
+if old_warm not in preload_text:
+    raise SystemExit('Map warmup engine anchor not found')
+preload.write_text(preload_text.replace(old_warm,new_warm,1))
+
+atlas=root/'web/components/Atlas.tsx'
+atlas_text=atlas.read_text()
+old_import="import {warmMap,supportsMapWebGL,preloadTerrain,preloadTrail,hasTerrainPreview,loadPublicJSON,mapRequest} from '@/lib/map-preload';"
+new_import="import {warmMap,supportsMapWebGL,preferCanvasMap,preloadTerrain,preloadTrail,hasTerrainPreview,loadPublicJSON,mapRequest} from '@/lib/map-preload';"
+if old_import not in atlas_text:
+    raise SystemExit('Atlas map-preload import anchor not found')
+atlas_text=atlas_text.replace(old_import,new_import,1)
+old_engine="    if(!supportsMapWebGL()){setFallback(true);return;}"
+new_engine="    if(preferCanvasMap()||!supportsMapWebGL()){setFallback(true);return;}"
+if old_engine not in atlas_text:
+    raise SystemExit('Atlas engine selection anchor not found')
+atlas.write_text(atlas_text.replace(old_engine,new_engine,1))
+
 browser=root/'tools/pages-preview/browser-smoke.mjs'
 script=browser.read_text()
 old_metrics="  return{available:true,closed,open,final,heightDelta:Math.max(Math.abs(open.height-closed.height),Math.abs(final.height-closed.height)),cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0};"
@@ -80,7 +124,18 @@ new_metrics="""  const perf=await evaluate(cdp,`(()=>({cls:window.__tropnikPerf?
   return{available:true,closed,open,final,heightDelta:Math.max(Math.abs(open.height-closed.height),Math.abs(final.height-closed.height)),cls:perf.cls,longest:perf.longest};"""
 if old_metrics not in script:
     raise SystemExit('Browser performance metric context anchor not found')
-browser.write_text(script.replace(old_metrics,new_metrics,1))
+script=script.replace(old_metrics,new_metrics,1)
+old_geometry="      width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,"
+new_geometry="      width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,engine:document.querySelector('.leaflet-container')?'leaflet':document.querySelector('.maplibregl-map')?'maplibre':'unknown',"
+if old_geometry not in script:
+    raise SystemExit('Browser geometry engine anchor not found')
+script=script.replace(old_geometry,new_geometry,1)
+old_assert="    assert.ok(geometry.scrollWidth<=geometry.width+1,`${profile.name}: horizontal overflow ${geometry.scrollWidth}>${geometry.width}`);"
+new_assert="""    assert.equal(geometry.engine,'leaflet',`${profile.name}: mobile profile loaded the heavy ${geometry.engine} engine`);
+    assert.ok(geometry.scrollWidth<=geometry.width+1,`${profile.name}: horizontal overflow ${geometry.scrollWidth}>${geometry.width}`);"""
+if old_assert not in script:
+    raise SystemExit('Browser engine assertion anchor not found')
+browser.write_text(script.replace(old_assert,new_assert,1))
 
 ui_test=root/'web/tests/ui-smoothness.test.mjs'
 test_text=ui_test.read_text()
@@ -106,6 +161,33 @@ test('compact landscape keeps every map control at 44px',()=>{
   assert.match(css,/@media\(max-height:620px\) and \(orientation:landscape\) and \(max-width:900px\)[\s\S]*map-style-switch button[\s\S]*map-controls button[\s\S]*height:44px!important[\s\S]*min-height:44px!important/);
 });
 """
+if "mobile touch profiles avoid the heavy WebGL startup path" not in test_text:
+    test_text += """
+
+test('mobile touch profiles avoid the heavy WebGL startup path',()=>{
+  const preload=read('lib/map-preload.ts');
+  const atlas=read('components/Atlas.tsx');
+  const browser=read('../tools/pages-preview/browser-smoke.mjs');
+  assert.match(preload,/export function preferCanvasMap/);
+  assert.match(preload,/window\.innerWidth<=900/);
+  assert.match(preload,/supportsMapWebGL\(\)&&!preferCanvasMap\(\)/);
+  assert.match(atlas,/preferCanvasMap\(\)\|\|!supportsMapWebGL\(\)/);
+  assert.match(browser,/mobile profile loaded the heavy/);
+  assert.match(browser,/geometry\.engine,'leaflet'/);
+});
+"""
 ui_test.write_text(test_text.rstrip()+'\n')
+
+runtime_docs=docs.read_text()
+engine_section="""
+
+## Адаптивный картографический движок
+
+На touch-устройствах с шириной viewport до 900 px, а также при `saveData`, малом объёме памяти или четырёх и менее логических ядрах, Тропник сразу выбирает Leaflet/Canvas. Этот путь сохраняет карту, маршруты, рельеф, точные географические точки, офлайн-обзор и 3D-сцену, но не загружает и не компилирует 1,1‑МБ MapLibre bundle при первом открытии. Desktop и устройства с точным указателем продолжают использовать MapLibre.
+
+Выбор выполняется до `warmMap`: мобильная ветка не запускает MapLibre prewarm и worker pool. Chromium gate отдельно утверждает, что все четыре touch-профиля реально используют Leaflet, а не только имеют соответствующее условие в исходниках.
+"""
+if "## Адаптивный картографический движок" not in runtime_docs:
+    docs.write_text(runtime_docs.rstrip()+engine_section+'\n')
 
 Path(__file__).unlink()
