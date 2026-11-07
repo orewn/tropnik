@@ -1,0 +1,90 @@
+name: Fix Android map effect formatting
+
+on:
+  push:
+    branches: [fix/map-label-viewport-20261107]
+    paths:
+      - '.github/workflows/fix-android-map-format.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: fix/map-label-viewport-20261107
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Normalize the position effect formatting
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt')
+          text = path.read_text()
+          old = '''        withContext(Dispatchers.Main.immediate) {
+                  val ready = position as? PositionState.Ready
+                  val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
+                  nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
+                      points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
+                  scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
+                  if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
+                      lastPositionTime = ready.fix.measuredAt
+                      nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+                  }
+              }
+          }
+          '''
+          new = '''        withContext(Dispatchers.Main.immediate) {
+                  val ready = position as? PositionState.Ready
+                  val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
+                  nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
+                      points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
+                  scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
+                  if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
+                      lastPositionTime = ready.fix.measuredAt
+                      nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+                  }
+              }
+          }
+          '''
+          # The source currently has the same logical indentation width encoded
+          # by the exact string above. Rewrite it through line-aware formatting
+          # so the result is stable even if tabs are introduced elsewhere.
+          start = text.index('        withContext(Dispatchers.Main.immediate) {\n        val ready = position as? PositionState.Ready')
+          end_marker = '\n}\n\n    Box(modifier.background(Palette.Water)) {'
+          end = text.index(end_marker, start)
+          block = '''        withContext(Dispatchers.Main.immediate) {
+              val ready = position as? PositionState.Ready
+              val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
+              nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
+                  points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
+              scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
+              if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
+                  lastPositionTime = ready.fix.measuredAt
+                  nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+              }
+          }
+      }'''
+          text = text[:start] + block + text[end:]
+          path.write_text(text)
+          PY
+          git diff --check
+          grep -A14 -n 'LaunchedEffect(map, styleRevision, displayArea, position)' android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt
+
+      - name: Commit normalized source only
+        run: |
+          test "$(git status --short | wc -l)" -eq 1
+          test "$(git status --short | awk '{print $2}')" = 'android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt'
+          git config user.name 'tropnik-release-bot'
+          git config user.email '38781694+orewn@users.noreply.github.com'
+          git add android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt
+          git commit -m 'Format Android position map effect'
+          git push origin HEAD:fix/map-label-viewport-20261107
