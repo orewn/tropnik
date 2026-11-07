@@ -209,7 +209,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   transition:transform .16s ease,background .16s ease;
 }
 .explore-layout .trail-marker:hover,
-.explore-layout .trail-marker:focus-visible{background:transparent}
+.explore-layout .trail-marker:focus-visible{background:transparent;transform:none}
 .explore-layout .trail-marker:hover::before,
 .explore-layout .trail-marker:focus-visible::before{
   background:var(--forest);

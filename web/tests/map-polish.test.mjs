@@ -72,4 +72,5 @@ test('map marker labels never delegate edge placement to native browser tooltips
   assert.match(css,/--map-label-shift-x/);
   assert.match(css,/--map-label-shift-y/);
   assert.match(css,/atlas-canvas\{overflow:hidden\}/);
+  assert.match(css,/trail-marker:focus-visible\{background:transparent;transform:none\}/);
 });
