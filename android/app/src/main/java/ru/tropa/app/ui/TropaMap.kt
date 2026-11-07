@@ -256,7 +256,7 @@ fun TropaMap(
             nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
         }
     }
-    }
+}
 
     Box(modifier.background(Palette.Water)) {
         AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
