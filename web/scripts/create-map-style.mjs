@@ -9,8 +9,13 @@ const name=['coalesce',['get','name:ru'],['get','name:latin'],['get','name'],'']
 const source='openmaptiles';
 const is=(key,value)=>['==',['get',key],value];
 const oneOf=(key,values)=>['in',['get',key],['literal',values]];
+/* Russia-only label re-layer: keep outside labels masked, but redraw key Russian
+ * cities above the geographic mask so their names aren't cut at the coastline. */
+const priorityCityNames=['Москва','Санкт-Петербург','Петропавловск-Камчатский','Владивосток','Хабаровск','Анадырь','Мурманск','Калининград','Архангельск','Магадан','Южно-Сахалинск','Якутск','Салехард','Новосибирск','Красноярск','Екатеринбург','Иркутск','Казань','Сочи'];
+const priorityCity=['in',name,['literal',priorityCityNames]];
+
 const layer=(id,type,sourceLayer,paint,options={})=>({id,type,source,'source-layer':sourceLayer,paint,...options});
-const text=(id,sourceLayer,minzoom,size,filter,paint={})=>layer(id,'symbol',sourceLayer,{'text-color':'#3F5144','text-halo-color':'#FFFEF7','text-halo-width':1.5,...paint},{minzoom,filter,layout:{'text-field':name,'text-font':font,'text-size':size,'text-max-width':9,'text-padding':5}});
+const text=(id,sourceLayer,minzoom,size,filter,paint={})=>layer(id,'symbol',sourceLayer,{'text-color':'#3F5144','text-halo-color':'#FFFEFA','text-halo-width':1.75,'text-halo-blur':.3,...paint},{minzoom,filter,layout:{'text-field':name,'text-font':font,'text-size':size,'text-max-width':10,'text-padding':7,'text-variable-anchor':['top','bottom','left','right'],'text-justify':'auto','text-radial-offset':.45}});
 const style={version:8,name:'Тропник · ландшафт',metadata:{author:'Tropa project',description:'Original outdoor style. OSM paths are not field-verified hiking permissions.'},glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',sprite:'/maps/tropnik-sprite',sky:{'sky-color':'#BFD8D8','horizon-color':'#E8ECE1','fog-color':'#DDE6DE','sky-horizon-blend':.34,'horizon-fog-blend':.38,'fog-ground-blend':.14,'atmosphere-blend':['interpolate',['linear'],['zoom'],0,.12,8,.06,12,0]},sources:{'overview-land':{type:'geojson',data:'/data/world.geojson'},'terrain-dem':{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'},'hillshade-dem':{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'},openmaptiles:{type:'vector',url:'https://tiles.openfreemap.org/planet/latest',attribution:'<a href="https://openfreemap.org">OpenFreeMap</a> · <a href="https://openmaptiles.org">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>'}},layers:[
  {id:'background',type:'background',paint:{'background-color':'#D7E5E9'}},
  // A local geographic base remains visible while live provider tiles load.
@@ -36,7 +41,7 @@ const style={version:8,name:'Тропник · ландшафт',metadata:{autho
  text('water-label','water_name',7,13,undefined,{'text-color':'#547C8D','text-halo-color':'#D5E7E9'}),
  text('country-label','place',1,['interpolate',['linear'],['zoom'],1,12,5,19],is('class','country'),{'text-color':'#7C8978','text-halo-width':1.2}),
  text('state-label','place',4,12,is('class','state'),{'text-color':'#74866E'}),
- text('city-label','place',3,['interpolate',['linear'],['zoom'],3,11,9,16],is('class','city'),{'text-color':'#384D3E'}),
+ text('city-label','place',3,['interpolate',['linear'],['zoom'],3,11,9,16],['all',is('class','city'),['!',priorityCity]],{'text-color':'#384D3E'}),
  text('town-label','place',7,['interpolate',['linear'],['zoom'],7,11,12,15],is('class','town')),
  text('village-label','place',10,12,oneOf('class',['village','hamlet','suburb'])),
  text('peak-label','mountain_peak',10,12,undefined,{'text-color':'#78664E'}),
@@ -49,6 +54,11 @@ style.sources['overview-land'].data=RUSSIA_AREA_URL;
 style.sources['russia-relief']={type:'raster',tiles:['/maps/russia-relief/{z}/{x}/{y}.png'],tileSize:256,minzoom:0,maxzoom:4};
 style.sources['russia-mask']={type:'geojson',data:RUSSIA_CANONICAL_MASK_URL};
 style.layers.push({id:'russia-outside-mask',type:'fill',source:'russia-mask',paint:{'fill-color':MAP_OUTSIDE_COLOR,'fill-antialias':false}});
+style.layers.push(text('russia-priority-city-label','place',3,
+ ['interpolate',['linear'],['zoom'],3,13,6,17,10,20],
+ ['all',is('class','city'),priorityCity],
+ {'text-color':'#263F32','text-halo-color':'#FFFEFA','text-halo-width':2.4,'text-halo-blur':.5}));
+
 for(const l of style.layers)if(l.filter===undefined)delete l.filter;
 writeFileSync(join(target,'tropa-style.json'),JSON.stringify(style,null,2));
 const base=dirname(require.resolve('maplibre-gl/package.json'));
