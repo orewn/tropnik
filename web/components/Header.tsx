@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {ArrowDown, UserCircle, List, X, CheckCircle, MagnifyingGlass} from '@/components/TropnikIcons';
 import {Brand} from './Brand';
@@ -16,6 +17,8 @@ export function Header({active = 'map'}: {active?: string}) {
   const sequence = useRef(0);
   const logoutPending = useRef(false);
   const searchLink = useRef<HTMLAnchorElement>(null);
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const navigation = useRef<HTMLElement>(null);
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.key.toLowerCase() !== 'k' || !(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return;
@@ -34,18 +37,19 @@ export function Header({active = 'map'}: {active?: string}) {
     return () => window.removeEventListener('keydown', shortcut);
   }, []);
   useEffect(() => {
+    const authSequence = sequence;
     let controller: AbortController | null = null;
     const sync = async () => {
-      const request = ++sequence.current;
+      const request = ++authSequence.current;
       controller?.abort();
       controller = new AbortController();
-      try { const profile = await api<User>('me', {signal: controller.signal}); if (request === sequence.current) setUser(profile); }
-      catch (error) { if (!isAbort(error) && request === sequence.current) setUser(null); }
+      try { const profile = await api<User>('me', {signal: controller.signal}); if (request === authSequence.current) setUser(profile); }
+      catch (error) { if (!isAbort(error) && request === authSequence.current) setUser(null); }
     };
     const authChanged = (event: Event) => {
       const detail = (event as CustomEvent<AuthChange>).detail;
       if (detail && Object.prototype.hasOwnProperty.call(detail, 'user')) {
-        ++sequence.current;
+        ++authSequence.current;
         controller?.abort();
         setUser(detail.user);
       } else void sync();
@@ -54,13 +58,32 @@ export function Header({active = 'map'}: {active?: string}) {
     void sync();
     window.addEventListener(AUTH_EVENT, authChanged);
     window.addEventListener('storage', storageChanged);
-    return () => { ++sequence.current; controller?.abort(); window.removeEventListener(AUTH_EVENT, authChanged); window.removeEventListener('storage', storageChanged); };
+    return () => { ++authSequence.current; controller?.abort(); window.removeEventListener(AUTH_EVENT, authChanged); window.removeEventListener('storage', storageChanged); };
   }, []);
   useEffect(() => {
     if (!menu) return;
-    const key = (event: KeyboardEvent) => { if (event.key === 'Escape') setMenu(false); };
+    const bodyOverflow = document.body.style.overflow;
+    const mobile = window.matchMedia('(max-width: 700px)').matches;
+    if (mobile) document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => navigation.current?.querySelector<HTMLElement>('a[href]')?.focus({preventScroll: true}));
+    const key = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      setMenu(false);
+      requestAnimationFrame(() => menuButton.current?.focus({preventScroll: true}));
+    };
+    const outside = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node) || navigation.current?.contains(target) || menuButton.current?.contains(target)) return;
+      setMenu(false);
+    };
     window.addEventListener('keydown', key);
-    return () => window.removeEventListener('keydown', key);
+    document.addEventListener('pointerdown', outside);
+    return () => {
+      document.body.style.overflow = bodyOverflow;
+      window.removeEventListener('keydown', key);
+      document.removeEventListener('pointerdown', outside);
+    };
   }, [menu]);
   const close = useCallback(() => setAuth(false), []);
 
@@ -89,8 +112,8 @@ export function Header({active = 'map'}: {active?: string}) {
   return <>
     <header className={`site-header ${styles.header}`}>
       <Brand/>
-      <nav id="main-navigation" aria-label="Основная навигация" className={menu ? 'top-nav open' : 'top-nav'}>
-        <a className={active === 'map' ? 'active' : ''} aria-current={active === 'map' ? 'page' : undefined} href="/">Карта маршрутов</a>
+      <nav ref={navigation} id="main-navigation" aria-label="Основная навигация" className={menu ? 'top-nav open' : 'top-nav'} onClick={event=>{if((event.target as HTMLElement).closest('a[href]'))setMenu(false);}}>
+        <Link className={active === 'map' ? 'active' : ''} aria-current={active === 'map' ? 'page' : undefined} href="/">Карта маршрутов</Link>
         <a className={active === 'trips' ? 'active' : ''} aria-current={active === 'trips' ? 'page' : undefined} href="/trips">Походы</a>
         <a className={active === 'community' ? 'active' : ''} aria-current={active === 'community' ? 'page' : undefined} href="/community">Сообщество</a>
         <a className={active === 'guides' ? 'active' : ''} aria-current={active === 'guides' ? 'page' : undefined} href="/guides">Гидам</a>
@@ -102,10 +125,10 @@ export function Header({active = 'map'}: {active?: string}) {
         <a href="/offline" className={`offline-link ${styles.offlineLink}`} aria-label="Карты с собой" title="Карты с собой"><ArrowDown size={18}/><span>Офлайн</span></a>
         {user ? <button className={`button secondary small ${styles.sessionButton}`} onClick={() => void logout()} disabled={pending} aria-label={pending ? 'Выходим из аккаунта' : 'Выйти из аккаунта ' + user.displayName}><CheckCircle size={17}/><span className={styles.sessionLabel}>{pending ? 'Выходим…' : user.displayName.split(' ')[0].slice(0, 16) + ' · выйти'}</span></button>
           : <button className={`button primary small login-button ${styles.sessionButton}`} aria-label="Войти" onClick={() => { setMenu(false); setAuth(true); }}><UserCircle size={18}/><span className={styles.sessionLabel}>Войти</span></button>}
-        <button className="icon-button menu-toggle" aria-label={menu ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menu} aria-controls="main-navigation" onClick={() => setMenu(!menu)}>{menu ? <X size={23}/> : <List size={23}/>}</button>
+        <button ref={menuButton} type="button" className="icon-button menu-toggle" aria-label={menu ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menu} aria-controls="main-navigation" onClick={() => setMenu(!menu)}>{menu ? <X size={23}/> : <List size={23}/>}</button>
       </div>
     </header>
-    {notice && <div className="notice-block" role="status">{notice} <button className="text-link" onClick={() => setNotice('')}>Закрыть</button></div>}
+    {notice && <div className="notice-block" role="status">{notice} <button type="button" className="text-link" aria-label="Закрыть уведомление" onClick={() => setNotice('')}>Закрыть</button></div>}
     {auth && <AuthDialog onClose={close} onUser={setUser}/>}
   </>;
 }

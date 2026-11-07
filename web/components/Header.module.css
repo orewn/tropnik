@@ -18,3 +18,7 @@
  .header .offlineLink{display:none}
  .header :global(.top-nav) .menuOfflineLink{display:flex}
 }
+/* 0.4.11 service polish: the mobile menu is a bounded, safe-area-aware surface. */
+@media(max-width:700px){
+ .header :global(.top-nav.open){max-height:calc(100dvh - 72px);overflow:auto;overscroll-behavior:contain;padding-bottom:max(18px,env(safe-area-inset-bottom))}
+}

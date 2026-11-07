@@ -4,3 +4,16 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
 @media(pointer:coarse){.button,.icon-button,.sheet-handle,.sheet-peek-summary,.filter-button,.back-link,.fact-controls button,.fact-dismiss,.fact-closed{min-height:44px}.button:hover,.icon-button:hover,.filter-button:hover,.back-link:hover,.fact-controls button:hover,.fact-dismiss:hover{transform:none}}
 @media(max-width:700px){.article-body,.page-hero,.site-footer{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}.site-footer{padding-bottom:max(28px,env(safe-area-inset-bottom))}.section-actions{display:grid;grid-template-columns:minmax(0,1fr)}.section-actions>*{width:100%;min-width:0}.modal-backdrop{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:max(12px,env(safe-area-inset-bottom))}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+::selection{background:#cdddbf;color:#142b20}
+:where(h1,h2,h3){text-wrap:balance}:where(p,li){text-wrap:pretty}
+:where(h1,h2,h3,[id]){scroll-margin-top:92px}
+:where(a,button,[role=button]):focus-visible{outline:3px solid #a56736;outline-offset:3px}
+:where(button,[role=button]):disabled{cursor:not-allowed;opacity:.58}
+.explore-panel-content[aria-busy=true] .trail-list,.explore-panel-content[aria-busy=true] .region-list{opacity:.72;transition:opacity 140ms ease}
+.modal,.explore-panel-content{overscroll-behavior:contain}
+.app-update{position:fixed;z-index:120;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));width:min(460px,calc(100vw - 32px));display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border:1px solid #9caf91;border-radius:16px;background:#fffef8;color:#213d30;box-shadow:0 18px 54px #10271c33}
+.app-update span{font-size:13px;line-height:20px}.app-update span strong{display:block}.app-update>div{display:flex;gap:8px}
+@media(max-width:560px){.app-update{grid-template-columns:1fr}.app-update>div{display:grid;grid-template-columns:1fr 1fr}.app-update .button{width:100%}}
+@media(pointer:coarse){.save-button,.region-option{min-height:44px}}
+@media(forced-colors:active){:where(a,button,[role=button]):focus-visible{outline:3px solid Highlight}.app-update{border:2px solid CanvasText}}
+.fact-photo-image{display:block;width:100%;height:100%;min-height:inherit;background-size:cover;background-repeat:no-repeat;background-color:#dfe7d8}

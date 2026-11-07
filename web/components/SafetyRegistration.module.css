@@ -15,3 +15,6 @@
 @media(hover:none),(pointer:coarse){.savedButton:hover,.miniButton:hover,.primaryLink:hover,.secondaryButton:hover{transform:none;box-shadow:none}.savedButton:hover{background:#f7f8f0;border-color:#d7decf}.miniButton:hover{background:#f9faf4}.primaryLink:hover{background:var(--forest)}.secondaryButton:hover{background:#fffef9}}
 @media(max-width:760px){.workspace{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));padding-bottom:max(64px,calc(env(safe-area-inset-bottom) + 48px))}.hero{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}.statusActions>*{min-height:44px}.officialActions>*{min-width:0}}
 @media(prefers-reduced-motion:reduce){.progressTrack span{transition:none}.card,.section{scroll-behavior:auto}}
+.saveState{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border-radius:999px;background:#eef2e8;color:#60705f;font-size:11px;line-height:18px;font-weight:750}
+.saveState.unsaved{background:#fff0dc;color:#7b5129;border:1px solid #e7c493}
+.miniButton:disabled{cursor:default;opacity:.62}
