@@ -63,9 +63,14 @@ jobs:
           old="onClick={()=>setLimit(x=>x+12)}"
           if source.count(old)!=1: raise SystemExit(f'remaining pagination setter count: {source.count(old)}')
           explore.write_text(source.replace(old,"onClick={()=>setPage({key:listKey,limit:limit+12})}",1))
-          stories=Path('web/components/PlaceStories.tsx')
-          lines=stories.read_text().splitlines()
-          stories.write_text('\n'.join(line.rstrip() for line in lines)+'\n')
+          PY
+          python3 tools/fix-service-polish-warnings.py
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ['web/components/PlaceStories.tsx','web/app/final-polish.css']:
+              path=Path(name)
+              lines=path.read_text().splitlines()
+              path.write_text('\n'.join(line.rstrip() for line in lines)+'\n')
           PY
           git diff --check
       - name: Install locked dependencies
@@ -77,21 +82,20 @@ jobs:
         run: pnpm test
       - name: Check static client types
         run: node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
-      - name: Diagnose all remaining lint warnings
+      - name: Strictly lint changed modules and tests
         working-directory: web
-        run: |
-          pnpm exec eslint \
-            components/Explore.tsx \
-            components/TerritoryBrowser.tsx \
-            components/TrailCard.tsx \
-            components/PlaceStories.tsx \
-            components/Header.tsx \
-            components/SafetyRegistration.tsx \
-            components/ServiceWorker.tsx \
-            tests/service-polish.test.mjs \
-            tests/startup-polish.test.mjs \
-            tests/map-polish.test.mjs
-          exit 1
+        run: >-
+          pnpm exec eslint --max-warnings=0
+          components/Explore.tsx
+          components/TerritoryBrowser.tsx
+          components/TrailCard.tsx
+          components/PlaceStories.tsx
+          components/Header.tsx
+          components/SafetyRegistration.tsx
+          components/ServiceWorker.tsx
+          tests/service-polish.test.mjs
+          tests/startup-polish.test.mjs
+          tests/map-polish.test.mjs
       - name: Build production application
         working-directory: web
         run: pnpm build
@@ -116,6 +120,7 @@ jobs:
           test ! -e .github/workflows/service-polish.yml
           test ! -e tools/apply-service-polish.py
           test ! -e tools/fix-service-polish-lint.py
+          test ! -e tools/fix-service-polish-warnings.py
           git diff --check
       - name: Commit verified product release
         run: |
