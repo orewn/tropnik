@@ -68,3 +68,5 @@ jobs:
           git add docs tools/pages-preview web
           git commit -m 'Release 0.4.8 mobile UX and adaptive map runtime'
           git push origin HEAD:release/0.4.8-safety-final
+
+# Trigger: 2026-11-07 release verification
