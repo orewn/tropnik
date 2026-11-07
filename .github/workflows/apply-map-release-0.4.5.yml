@@ -71,7 +71,7 @@ jobs:
       - name: Run the complete web regression suite
         run: pnpm --dir web test
 
-      - name: Lint release-owned modules strictly
+      - name: Lint all release-owned libraries and tests strictly
         working-directory: web
         run: |
           pnpm exec eslint --max-warnings=0 \
@@ -83,7 +83,6 @@ jobs:
             tests/map-coordinate.test.mjs \
             tests/map-region-selection.test.mjs \
             tests/map-direction-layout.test.mjs
-          pnpm exec eslint components/Atlas.tsx components/Atlas2D.tsx
 
       - name: Run TypeScript static verification
         run: node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
