@@ -14,9 +14,11 @@
 - единая палитра и состояния компонентов в `interface-refresh.css`;
 - service worker `tropnik-shell-v13` с проверенной повторной упаковкой manifest обзорного рельефа.
 
-## Правила приёмки
+## Проверка
 
-Релиз допускается в `main` только после полного набора `web/tests/*.test.mjs`, TypeScript `pages-preview/tsconfig.json --noEmit`, проверки изменённых файлов ESLint, production build и успешного Pages deploy того же commit. Отдельно проверяются обе реализации карты: MapLibre WebGL и Leaflet/Canvas fallback.
+Release gate исходного commit выполнил **254/254** веб-регрессии, строгий lint картографических библиотек и тестов, TypeScript-проверку и production build. Подробности и честные границы результата: [читаемый receipt](verification/web-0.4.5-map-release.md) и [машинный receipt](verification/web-0.4.5-map-release.json).
+
+Релиз допускается в `main` только после проверок pull request и успешного Pages deploy итогового merge commit. Отдельно проверяются обе реализации карты: MapLibre WebGL и Leaflet/Canvas fallback.
 
 ## Не заявляется
 
