@@ -20,7 +20,12 @@ def append_once(relative: str, marker: str, addition: str) -> None:
     path.write_text(text.rstrip() + "\n" + addition.strip() + "\n")
 
 
-# Explore: remove legacy imports/dead icon and use a conventional internal navigation assignment.
+# Explore: remove legacy imports/dead icon and use the framework router for internal navigation.
+replace_once(
+    "web/components/Explore.tsx",
+    "'use client';\n",
+    "'use client';\nimport {useRouter} from 'next/navigation';\n",
+)
 replace_once(
     "web/components/Explore.tsx",
     "ShieldCheck,WifiSlash} from '@/components/TropnikIcons';",
@@ -43,13 +48,36 @@ replace_once(
 )
 replace_once(
     "web/components/Explore.tsx",
+    "export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initialRegion?:string;initialTrail?:string;initialPublished?:Trail[]}){\n const hydrated=",
+    "export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initialRegion?:string;initialTrail?:string;initialPublished?:Trail[]}){\n const router=useRouter();\n const hydrated=",
+)
+replace_once(
+    "web/components/Explore.tsx",
     "window.location.assign('/trips?request='+encodeURIComponent(created.id));",
-    "window.location.href='/trips?request='+encodeURIComponent(created.id);",
+    "router.push('/trips?request='+encodeURIComponent(created.id));",
 )
 replace_once(
     "web/components/Explore.tsx",
     "\nfunction ArrowUpRightIcon(){return <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" aria-hidden=\"true\"><path d=\"M6 18 18 6M6 6h12v12\" stroke=\"currentColor\" strokeWidth=\"1.6\" strokeLinecap=\"round\" strokeLinejoin=\"round\"/></svg>;}",
     "",
+)
+
+# Static Pages exposes the same client navigation contract; generated route strings retain the configured base.
+replace_once(
+    "web/pages-preview/src/navigation.ts",
+    "export class StaticPageNotFound extends Error {}\nexport function notFound(): never {throw new StaticPageNotFound('Страница не найдена');}",
+    """export class StaticPageNotFound extends Error {}
+export function notFound(): never {throw new StaticPageNotFound('Страница не найдена');}
+export function useRouter() {
+  return {
+    push(href: string) {window.location.assign(href);},
+    replace(href: string) {window.location.replace(href);},
+    refresh() {window.location.reload();},
+    back() {window.history.back();},
+    forward() {window.history.forward();},
+    prefetch() {return Promise.resolve();},
+  };
+}""",
 )
 
 # Header: capture the auth sequence ref for the whole effect lifecycle.
