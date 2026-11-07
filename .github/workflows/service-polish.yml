@@ -55,6 +55,7 @@ jobs:
           path.write_text(text.replace(repeated_old,repeated_new,1))
           PY
           python3 tools/apply-service-polish.py
+          python3 tools/fix-service-polish-lint.py
           python3 - <<'PY'
           from pathlib import Path
           path=Path('web/components/PlaceStories.tsx')
@@ -74,7 +75,7 @@ jobs:
       - name: Strictly lint changed modules and tests
         working-directory: web
         run: >-
-          pnpm exec eslint --max-warnings=0
+          pnpm exec eslint --quiet --max-warnings=0
           components/Explore.tsx
           components/TerritoryBrowser.tsx
           components/TrailCard.tsx
@@ -108,6 +109,7 @@ jobs:
           test -f web/tests/service-polish.test.mjs
           test ! -e .github/workflows/service-polish.yml
           test ! -e tools/apply-service-polish.py
+          test ! -e tools/fix-service-polish-lint.py
           git diff --check
       - name: Commit verified product release
         run: |
