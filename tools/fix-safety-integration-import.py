@@ -8,5 +8,11 @@ if '\t"errors"\n' not in text:
     replacement = 'import (\n\t"bytes"\n\t"context"\n\t"errors"\n'
     if anchor not in text:
         raise SystemExit('safety integration import anchor not found')
-    path.write_text(text.replace(anchor, replacement, 1))
+    text = text.replace(anchor, replacement, 1)
+fixed = '"safety-contact-key-0001"'
+unique = '"safety-contact-"+d.ID'
+if fixed not in text:
+    raise SystemExit('safety contact idempotency anchor not found')
+text = text.replace(fixed, unique, 1)
+path.write_text(text)
 Path(__file__).unlink()
