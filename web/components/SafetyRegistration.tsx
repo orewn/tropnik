@@ -4,7 +4,6 @@ import {useEffect, useMemo, useState} from 'react';
 import {Header} from './Header';
 import {Footer} from './Footer';
 import {ArrowSquareOut, Check, CheckCircle, Clock, DownloadSimple, Export, Info, MapPin, NotePencil, Plus, ShieldCheck, Trash, UsersThree, X} from './TropnikIcons';
-import {regions, trails} from '@/lib/content';
 import {
   MCHS_REGISTRATION_URL,
   SAFETY_STORAGE_KEY,
@@ -22,6 +21,19 @@ import {
   type SafetyStatus,
 } from '@/lib/safety-passport';
 import styles from './SafetyRegistration.module.css';
+
+type SafetyCatalog = {
+  regions: Array<{id: string; name: string}>;
+  routes: Array<{id: string; title: string; regionId: string; description: string}>;
+};
+let safetyCatalogPromise: Promise<SafetyCatalog> | undefined;
+function loadSafetyCatalog(): Promise<SafetyCatalog> {
+  safetyCatalogPromise ??= import('@/lib/content').then(({regions, trails}) => ({
+    regions: regions.map(({id, name}) => ({id, name})),
+    routes: trails.map(({id, title, regionId, description}) => ({id, title, regionId, description})),
+  }));
+  return safetyCatalogPromise;
+}
 
 const statusLabels: Record<SafetyStatus, string> = {
   draft: 'Черновик',
@@ -109,6 +121,8 @@ export function SafetyRegistration() {
   const [submittedCheck, setSubmittedCheck] = useState(false);
   const [coordinates, setCoordinates] = useState('');
   const [locating, setLocating] = useState(false);
+  const [catalog, setCatalog] = useState<SafetyCatalog | null>(null);
+  const [catalogState, setCatalogState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const readiness = useMemo(() => safetyReadiness(passport), [passport]);
   const deadline = notificationDeadline(passport.startDate);
   const deadlineState = notificationDeadlineState(passport.startDate);
@@ -118,17 +132,25 @@ export function SafetyRegistration() {
     let cancelled = false;
     queueMicrotask(() => {
       if (cancelled) return;
+      let stored: SafetyPassport[] = [];
       try {
-        const stored = parseSafetyPassportList(JSON.parse(localStorage.getItem(SAFETY_STORAGE_KEY) || '[]'));
+        stored = parseSafetyPassportList(JSON.parse(localStorage.getItem(SAFETY_STORAGE_KEY) || '[]'));
         setSaved(stored);
-        const params = new URLSearchParams(location.search);
-        const requested = params.get('passport');
-        const existing = requested ? stored.find(item => item.id === requested) : undefined;
-        if (existing) { setPassport(existing); return; }
-        const routeId = params.get('route');
-        const route = routeId ? trails.find(item => item.id === routeId) : undefined;
+      } catch { setNotice('Не удалось прочитать сохранённые паспорта на этом устройстве.'); }
+      const params = new URLSearchParams(location.search);
+      const requested = params.get('passport');
+      const existing = requested ? stored.find(item => item.id === requested) : undefined;
+      if (existing) { setPassport(existing); return; }
+      const routeId = params.get('route');
+      if (!routeId) return;
+      setCatalogState('loading');
+      void loadSafetyCatalog().then(next => {
+        if (cancelled) return;
+        setCatalog(next);
+        setCatalogState('ready');
+        const route = next.routes.find(item => item.id === routeId);
         if (!route) return;
-        const region = regions.find(item => item.id === route.regionId);
+        const region = next.regions.find(item => item.id === route.regionId);
         setPassport(previous => ({
           ...previous,
           routeId: route.id,
@@ -137,7 +159,9 @@ export function SafetyRegistration() {
           routeDescription: route.description || previous.routeDescription,
           updatedAt: new Date().toISOString(),
         }));
-      } catch { setNotice('Не удалось прочитать сохранённые паспорта на этом устройстве.'); }
+      }).catch(() => {
+        if (!cancelled) { setCatalogState('error'); setNotice('Каталог маршрутов не загрузился. Форму можно заполнить вручную.'); }
+      });
     });
     return () => { cancelled = true; };
   }, []);
@@ -157,10 +181,18 @@ export function SafetyRegistration() {
     });
   }
 
+  async function openCatalog() {
+    if (catalog || catalogState === 'loading') return;
+    setCatalogState('loading');
+    try { const next = await loadSafetyCatalog(); setCatalog(next); setCatalogState('ready'); }
+    catch { setCatalogState('error'); setNotice('Каталог маршрутов не загрузился. Форму можно заполнить вручную.'); }
+  }
+
   function selectRoute(routeId: string) {
-    const route = trails.find(item => item.id === routeId);
-    if (!route) { update('routeId', undefined); return; }
-    const region = regions.find(item => item.id === route.regionId);
+    if (!routeId) { update('routeId', undefined); return; }
+    const route = catalog?.routes.find(item => item.id === routeId);
+    if (!route) return;
+    const region = catalog?.regions.find(item => item.id === route.regionId);
     setPassport(previous => invalidateOfficialStatus({
       ...previous,
       routeId: route.id,
@@ -290,7 +322,7 @@ export function SafetyRegistration() {
                 <span className={styles.statusPill} data-state={passport.status}>{passport.status === 'amendment_required' ? <Info size={16}/> : <ShieldCheck size={16}/>} {statusLabels[passport.status]}</span>
                 <span className={styles.progressLabel}>{readiness.completed} из {readiness.total} обязательных блоков · {readiness.percent}%</span>
               </div>
-              <div className={styles.progressTrack} aria-label={`Готовность ${readiness.percent}%`}><span style={{width: `${readiness.percent}%`}}/></div>
+              <div className={styles.progressTrack} aria-label={`Готовность ${readiness.percent}%`}><span style={{transform: `scaleX(${readiness.percent / 100})`}}/></div>
             </div>
             <div className={styles.statusActions}>
               <button className={styles.miniButton} onClick={() => persist()}><NotePencil size={17}/>Сохранить</button>
@@ -301,9 +333,9 @@ export function SafetyRegistration() {
           <section className={`${styles.card} ${styles.section}`}>
             <div className={styles.sectionHeader}><div><h2>Маршрут и сроки</h2><p>Укажите фактическую нитку маршрута, а не только название направления.</p></div><span className={styles.sectionNumber}>01</span></div>
             <div className={styles.fieldGrid}>
-              <div className={styles.fieldWide}><label htmlFor="catalog-route">Маршрут из каталога Тропника</label><select id="catalog-route" value={passport.routeId || ''} disabled={locked} onChange={event => selectRoute(event.target.value)}><option value="">Не выбран — заполню вручную</option>{trails.map(route => <option key={route.id} value={route.id}>{route.title}</option>)}</select><span className={styles.hint}>Описание из каталога остаётся справочным: проверьте ограничения и фактическую нитку перед подачей.</span></div>
+              <div className={styles.fieldWide}><label htmlFor="catalog-route">Маршрут из каталога Тропника</label>{catalog ? <select id="catalog-route" value={passport.routeId || ''} disabled={locked} onChange={event => selectRoute(event.target.value)}><option value="">Не выбран — заполню вручную</option>{catalog.routes.map(route => <option key={route.id} value={route.id}>{route.title}</option>)}</select> : <button id="catalog-route" type="button" className={styles.catalogButton} disabled={locked || catalogState === 'loading'} onClick={() => void openCatalog()}><MapPin size={18}/>{catalogState === 'loading' ? 'Загружаем каталог…' : catalogState === 'error' ? 'Повторить загрузку каталога' : 'Выбрать маршрут из каталога'}</button>}<span className={styles.hint}>Каталог загружается только по запросу. Описание остаётся справочным: проверьте ограничения и фактическую нитку перед подачей.</span></div>
               <div className={styles.field}><label htmlFor="route-title">Название маршрута *</label><input id="route-title" value={passport.routeTitle} disabled={locked} onChange={event => update('routeTitle', event.target.value)} placeholder="Например, Бзерпинский карниз"/></div>
-              <div className={styles.field}><label htmlFor="region">Регион начала *</label><select id="region" value={passport.region} disabled={locked} onChange={event => update('region', event.target.value)}><option value="">Выберите регион</option>{regions.map(region => <option key={region.id} value={region.name}>{region.name}</option>)}</select></div>
+              <div className={styles.field}><label htmlFor="region">Регион начала *</label><input id="region" list="safety-regions" value={passport.region} disabled={locked} onChange={event => update('region', event.target.value)} placeholder="Введите регион"/><datalist id="safety-regions">{catalog?.regions.map(region => <option key={region.id} value={region.name}/>)}</datalist></div>
             </div>
             <div className={styles.fieldGridThree} style={{marginTop: 16}}>
               <div className={styles.field}><label htmlFor="start-date">Дата выхода *</label><input id="start-date" type="date" value={passport.startDate} disabled={locked} onChange={event => update('startDate', event.target.value)}/></div>

@@ -8,7 +8,7 @@ const source=await readFile(new URL('sw.js',publicRoot),'utf8');
 const manifest=JSON.parse(await readFile(new URL('maps/russia-relief/manifest.json',publicRoot),'utf8'));
 async function run(corrupt=false){
  const calls=[],saved=new Map(),listeners={};
- const cache={addAll:async paths=>{for(const path of paths)saved.set(path,'shell');},put:async(path,response)=>saved.set(path,new Uint8Array(await response.arrayBuffer()))};
+ const cache={addAll:async paths=>{for(const path of paths)saved.set(path,'shell');},match:async path=>saved.get(path),put:async(path,response)=>saved.set(path,new Uint8Array(await response.arrayBuffer()))};
  const context=vm.createContext({self:{addEventListener:(name,callback)=>listeners[name]=callback},caches:{open:async()=>cache},crypto:webcrypto,Response,Uint8Array,Set,Map,Promise,Array,Number,Error,fetch:async path=>{
   calls.push(path);assert.ok(path.startsWith('/maps/russia-relief/'));
   const bytes=await readFile(new URL(path.slice(1),publicRoot));
@@ -16,14 +16,22 @@ async function run(corrupt=false){
  }});
  vm.runInContext(source,context);
  let installation;listeners.install({waitUntil:promise=>installation=promise});
- await installation;return{calls,saved};
+ await installation;
+ const installCalls=calls.length;
+ let warming;listeners.message({data:{type:'warm-map',engine:'canvas'},waitUntil:promise=>warming=promise});
+ await warming;
+ return{calls,saved,installCalls};
 }
-test('offline shell saves all 341 actual RF overview tiles using 57 verified tile downloads',async()=>{
+test('service worker installation keeps verified overview work off the first-load path',async()=>{
+ const {installCalls}=await run();
+ assert.equal(installCalls,0);
+});
+test('idle map warm saves all 341 actual RF overview tiles using 57 verified tile downloads',async()=>{
  const {calls,saved}=await run();
  assert.equal(calls.filter(path=>path.endsWith('.png')).length,57);
  for(const file of manifest.files)assert.equal(saved.get('/maps/russia-relief/'+file.path)?.byteLength,file.bytes,file.path);
  assert.ok(!calls.some(path=>path.includes('/api/')));
 });
-test('corrupt overview bytes reject installation instead of claiming a complete offline map',async()=>{
+test('corrupt overview bytes reject warmup instead of claiming a complete offline map',async()=>{
  await assert.rejects(run(true),/integrity mismatch/);
 });

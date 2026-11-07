@@ -43,5 +43,8 @@ test('the final map UI layer normalizes controls and is imported last', () => {
   assert.match(releaseCss, /@media\(max-width:700px\)/);
   assert.match(releaseCss, /@media\(max-height:620px\) and \(orientation:landscape\)/);
   const imports = [...layout.matchAll(/import "\.\/(.+?\.css)";/g)].map(match => match[1]);
-  assert.equal(imports.at(-1), 'map-ui-release.css', 'release overrides must load after every legacy map stylesheet');
+  const releaseIndex = imports.indexOf('map-ui-release.css');
+  assert.ok(releaseIndex > imports.indexOf('interface-refresh.css'), 'map release overrides must stay after every legacy map stylesheet');
+  assert.equal(imports.at(-1), 'final-polish.css', 'cross-platform guardrails must be the final stylesheet');
+  assert.ok(imports.indexOf('final-polish.css') > releaseIndex, 'generic guardrails must not replace map-specific release geometry');
 });
