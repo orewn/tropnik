@@ -28,6 +28,32 @@ jobs:
           package-manager-cache: false
       - name: Apply service polish
         run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path('tools/apply-service-polish.py')
+          text=path.read_text()
+          helper_old="""def append_once(relative: str, marker: str, addition: str) -> None:
+          """
+          helper_new="""def replace_first(relative: str, old: str, new: str) -> None:
+              path = ROOT / relative
+              text = path.read_text()
+              if old not in text:
+                  raise SystemExit(f"{relative}: expected at least one match")
+              path.write_text(text.replace(old, new, 1))
+
+          def append_once(relative: str, marker: str, addition: str) -> None:
+          """
+          if helper_old not in text: raise SystemExit('replace_first insertion anchor missing')
+          text=text.replace(helper_old,helper_new,1)
+          repeated_old="""replace_once("web/components/Explore.tsx", "saved={saved.some(s=>s.id===t.id)}", "saved={savedIds.has(t.id)}")
+          replace_once("web/components/Explore.tsx", "saved={saved.some(s=>s.id===t.id)}", "saved={savedIds.has(t.id)}")
+          """
+          repeated_new="""replace_first("web/components/Explore.tsx", "saved={saved.some(s=>s.id===t.id)}", "saved={savedIds.has(t.id)}")
+          replace_once("web/components/Explore.tsx", "saved={saved.some(s=>s.id===t.id)}", "saved={savedIds.has(t.id)}")
+          """
+          if repeated_old not in text: raise SystemExit('repeated route-card replacement anchor missing')
+          path.write_text(text.replace(repeated_old,repeated_new,1))
+          PY
           python3 tools/apply-service-polish.py
           git diff --check
       - name: Install locked dependencies
