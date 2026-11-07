@@ -17,6 +17,7 @@ import {territoryById, trailBelongsToRegion, type MapRegion} from '@/lib/territo
 import {filterMapTrails} from '@/lib/map-catalog';
 import {searchSite} from '@/lib/site-search';
 import {Modal} from './Modal';
+import {MapResourceHints} from './MapResourceHints';
 
 const terrainIcon=(id:string,size=24)=>id==='karelia'?<Tree size={size}/>:id==='baikal'?<WaveSine size={size}/>:<Mountains size={size}/>;
 const routeCountPreview=(count:number)=>{
@@ -62,7 +63,7 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  const sheetPreviewMeta=trail
   ?[trail.distanceKm!=null?`${trail.distanceKm.toLocaleString('ru')} км`:undefined,trail.duration].filter(Boolean).join(' · ')||'Открыть карточку маршрута'
   :routeCountPreview(region?shownTrails.length:catalog.length);
- return <section className={`explore-layout ${sheetOpen?'sheet-open':'sheet-closed'}`} data-sheet-state={sheetOpen?'open':'closed'} aria-label="Поиск маршрутов"><aside id={sheetPanelId} className={`explore-panel ${sheetOpen?'expanded':'collapsed'}`}>
+ return <><MapResourceHints/><section className={`explore-layout ${sheetOpen?'sheet-open':'sheet-closed'}`} data-sheet-state={sheetOpen?'open':'closed'} aria-label="Поиск маршрутов"><aside id={sheetPanelId} className={`explore-panel ${sheetOpen?'expanded':'collapsed'}`}>
  <button className="sheet-handle" type="button" onClick={event=>{setSheetOpen(open=>!open);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-controls={sheetPanelId} aria-expanded={sheetOpen} aria-label={sheetOpen?'Свернуть список':'Открыть список'}><span/></button>
  <button className="sheet-peek-summary" type="button" hidden={sheetOpen} onClick={event=>{setSheetOpen(true);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-label={`Открыть: ${sheetPreviewTitle}`}>
   <span className="sheet-peek-copy"><small>{sheetPreviewKind}</small><strong>{sheetPreviewTitle}</strong><span>{sheetPreviewMeta}</span></span><ArrowRight size={20}/>
@@ -82,6 +83,6 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  {notice&&<div className="toast" role="status"><CheckCircle size={20}/><span>{notice}</span><button aria-label="Закрыть уведомление" onClick={()=>setNotice('')}><X size={17}/></button></div>}
  {request&&!auth&&trail&&<Modal title={draftSaved?'Запрос сохранён на устройстве':'Какой поход планируете?'} onClose={closeRequest}>{draftSaved?<div className="success-panel"><CheckCircle size={44}/><p>Это личный черновик. Он ещё не опубликован, гид не назначен и место в группе не забронировано.</p><button className="button primary" onClick={closeRequest}>Понятно</button></div>:<form className="stack" onSubmit={async e=>{e.preventDefault();setRequestError('');if(trail.publicationStatus==='published'){setRequestBusy(true);try{const created=await api<{id:string}>('recruitment-requests',{method:'POST',body:JSON.stringify({routeId:trail.id,preferredDate:date,body:note||'Хочу пройти этот маршрут с гидом.'})});window.location.assign('/trips?request='+encodeURIComponent(created.id));}catch(e){setRequestError(errorText(e));if(e instanceof ApiError&&e.status===401)setAuth(true);}finally{setRequestBusy(false);}return;}try{const requests=JSON.parse(localStorage.getItem('tropa-requests')||'[]');requests.push({id:crypto.randomUUID(),routeId:trail.id,title:trail.title,preferredDate:date,note,status:'local_draft',createdAt:new Date().toISOString()});localStorage.setItem('tropa-requests',JSON.stringify(requests));setDraftSaved(true);}catch{setNotice('Не удалось сохранить черновик. Проверьте свободное место.');}}}><p className="muted">{trail.title}</p><label>Желаемая дата<input type="date" required value={date} min={new Date().toISOString().slice(0,10)} onChange={e=>setDate(e.target.value)}/></label><label>Что важно для вас<textarea value={note} onChange={e=>setNote(e.target.value)} maxLength={1000} rows={4} placeholder="Опыт, удобные даты, пожелания к группе"/></label><div className="inline-note"><Info size={20}/><span>{trail.publicationStatus==='published'?'Откроется обсуждение с набором желающих. Подходящий гид назначит выход; участие в конкретной дате нужно подтвердить отдельно.':'Сейчас можно подготовить личный черновик. Для реального набора нужен опубликованный маршрут и подходящий гид.'}</span></div>{requestError&&<p className="error-message" role="alert">{requestError}</p>}<button className="button primary full" disabled={requestBusy}>{requestBusy?'Подождите…':trail.publicationStatus==='published'?'Открыть обсуждение':'Сохранить черновик'}</button></form>}</Modal>}
  {auth&&<AuthDialog onClose={closeAuth} onUser={()=>setAuth(false)}/>}
- </section>;
+ </section></>;
 }
 function ArrowUpRightIcon(){return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>;}

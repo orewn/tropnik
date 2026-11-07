@@ -9,6 +9,7 @@ import "./event-categories.css";
 import "./map-polish.css";
 import "./interface-refresh.css";
 import "./map-ui-release.css";
+import "./final-polish.css";
 import '@fontsource/manrope/cyrillic-400.css';
 import '@fontsource/manrope/cyrillic-500.css';
 import '@fontsource/manrope/cyrillic-600.css';
@@ -39,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru"><head><link rel="preconnect" href="https://tiles.openfreemap.org" crossOrigin="anonymous"/><link rel="preconnect" href="https://tiles.mapterhorn.com" crossOrigin="anonymous"/><link rel="preload" href="/data/russia-display-area.geojson" as="fetch" crossOrigin="anonymous"/><link rel="preload" href="/maps/tropa-style.json" as="fetch" crossOrigin="anonymous"/></head>
+    <html lang="ru">
       <body><a className="skip-link" href="#main">Перейти к содержимому</a>{children}<ServiceWorker/></body>
     </html>
   );
