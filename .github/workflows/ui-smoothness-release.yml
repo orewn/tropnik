@@ -5,6 +5,8 @@ on:
     branches: [perf/ui-smoothness-0.4.8]
     paths:
       - '.github/workflows/ui-smoothness-release.yml'
+      - 'scripts/apply-ui-smoothness-0.4.8.py'
+      - 'scripts/fix-ui-smoothness-gate.py'
 
 permissions:
   contents: write
