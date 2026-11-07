@@ -13,6 +13,7 @@
 - гистерезис подробного Canvas-слоя, сохранение декодированных рельефных тайлов и увеличенный tile buffer;
 - единая палитра и состояния компонентов в `interface-refresh.css`;
 - service worker `tropnik-shell-v13` с проверенной повторной упаковкой manifest обзорного рельефа.
+- точный anchor marker: MapLibre использует центр фиксированного 44×44 control, Leaflet — `iconSize 44×44 / iconAnchor 22×22`; cluster label больше не меняет размер географического anchor.
 
 ## Проверка
 

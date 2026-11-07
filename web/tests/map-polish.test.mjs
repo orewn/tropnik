@@ -95,3 +95,14 @@ test('map stability release keeps terrain explicit and text collision-aware',()=
     if(layer.layout['symbol-placement']!=='line')assert.equal(layer.layout['symbol-avoid-edges'],true,layer.id);
   }
 });
+
+test('region marker dots stay centered on the exact engine coordinate',()=>{
+  const atlas=read('components/Atlas.tsx');
+  const canvas=read('components/Atlas2D.tsx');
+  const css=read('app/interface-refresh.css');
+  assert.match(atlas,/new ml\.Marker\(\{element:el,anchor:'center'\}\)/);
+  assert.match(canvas,/iconSize:\[DIRECTION_MARKER_SIZE,DIRECTION_MARKER_SIZE\],iconAnchor:\[DIRECTION_MARKER_SIZE\/2,DIRECTION_MARKER_SIZE\/2\]/);
+  assert.doesNotMatch(canvas,/iconSize:\[1,1\],iconAnchor:\[0,0\]/);
+  assert.match(css,/region-marker\.direction-cluster[\s\S]*width:44px!important/);
+  assert.match(css,/Only the label shifts;[\s\S]*the dot and the map engine's anchor never move/);
+});
