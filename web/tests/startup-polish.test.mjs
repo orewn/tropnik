@@ -4,12 +4,14 @@ import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('map hints stay on map surfaces and article pages avoid map startup work',async()=>{
- const [layout,explore,hints]=await Promise.all([read('app/layout.tsx'),read('components/Explore.tsx'),read('components/MapResourceHints.tsx')]);
+ const [layout,explore,hints,staticBuild]=await Promise.all([read('app/layout.tsx'),read('components/Explore.tsx'),read('components/MapResourceHints.tsx'),read('../tools/pages-preview/build.mjs')]);
  assert.doesNotMatch(layout,/tiles\.openfreemap|russia-display-area\.geojson|tropa-style\.json/);
  assert.match(explore,/MapResourceHints/);
  assert.match(hints,/rel="preconnect"/);
  assert.match(hints,/russia-display-area\.geojson/);
  assert.match(hints,/tropa-style\.json/);
+ assert.match(hints,/media="\(hover: hover\) and \(pointer: fine\)"/);
+ assert.doesNotMatch(staticBuild,/<link rel="preconnect" href="https:\/\/tiles\./);
 });
 
 test('service worker registers after load and warms maps only during idle map sessions',async()=>{
@@ -19,7 +21,10 @@ test('service worker registers after load and warms maps only during idle map se
  assert.match(client,/querySelector\('\.explore-layout'\)/);
  assert.match(client,/saveData/);
  assert.match(client,/type: 'warm-map'/);
- assert.match(worker,/tropnik-shell-v18/);
+ assert.match(client,/registrationRef\.current\.update/);
+ assert.match(client,/visibilitychange/);
+ assert.match(client,/controllerchange/);
+ assert.match(worker,/tropnik-shell-v19/);
  assert.match(worker,/addEventListener\('message'/);
  assert.match(worker,/warmMapCache/);
  const install=worker.match(/addEventListener\('install'[\s\S]*?addEventListener\('activate'/)?.[0]||'';
@@ -42,5 +47,14 @@ test('final visual layer owns touch, viewport and reduced-motion guardrails',asy
  assert.match(css,/content-visibility:auto/);
  assert.match(css,/safe-area-inset/);
  assert.match(css,/prefers-reduced-motion/);
- assert.equal(JSON.parse(pkg).version,'0.4.11');
+ assert.equal(JSON.parse(pkg).version,'0.4.12');
+});
+
+
+test('mobile navigation traps focus and restores both document scroll containers',async()=>{
+ const header=await read('components/Header.tsx');
+ assert.match(header,/event\.key !== 'Tab'/);
+ assert.match(header,/document\.documentElement\.style\.overflow = 'hidden'/);
+ assert.match(header,/querySelectorAll<HTMLElement>\('a\[href\],button:not\(\[disabled\]\)/);
+ assert.match(header,/media\.addEventListener\('change', resize\)/);
 });

@@ -51,7 +51,7 @@ test('reported map wedges, clipped labels and false detail banner stay fixed',()
   const maskIndex=style.layers.findIndex(layer=>layer.id==='russia-outside-mask');
   const priorityIndex=style.layers.findIndex(layer=>layer.id==='russia-priority-city-label');
   assert.ok(maskIndex>=0&&priorityIndex>maskIndex,'priority Russian labels redraw after the outside mask');
-  assert.match(sw,/tropnik-shell-v18/);
+  assert.match(sw,/tropnik-shell-v19/);
   assert.match(sw,/russia-canonical-mask\.geojson/);
 });
 

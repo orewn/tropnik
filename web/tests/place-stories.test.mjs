@@ -33,6 +33,10 @@ test('story navigation works in both directions on buttons, keyboard and swipe',
   assert.match(stories, /event\.key==='ArrowRight'/);
   assert.match(stories, /Math\.abs\(dx\)>=44/);
   assert.doesNotMatch(stories, /href=\{fact\.sourceUrl\}/, 'external source sites must not be exposed in the story card');
+  assert.match(stories, /<img key=\{fact\.imageUrl\}/, 'stories must use a native image element');
+  assert.match(stories, /IntersectionObserver/, 'off-screen stories must pause background work');
+  assert.match(stories, /disabled=\{reduced\}/, 'system reduced-motion must disable autoplay');
+  assert.doesNotMatch(stories, /setReduced\(false\)/, 'the UI must not override the operating-system motion preference');
 });
 
 test('the final map UI layer normalizes controls and is imported last', () => {

@@ -15,6 +15,7 @@ import {
   notificationDeadlineState,
   parseSafetyPassportList,
   safetyReadiness,
+  safetyPassportSnapshot,
   transitionSafetyPassport,
   type SafetyParticipant,
   type SafetyPassport,
@@ -76,10 +77,6 @@ function initialPassport(): SafetyPassport {
   return passport;
 }
 
-function passportSnapshot(passport: SafetyPassport): string {
-  return JSON.stringify(passport, key => key === 'updatedAt' ? undefined : passport[key as keyof SafetyPassport]);
-}
-
 function timeLabel(value: string): string {
   if (!value) return 'не отмечено';
   try { return new Intl.DateTimeFormat('ru', {dateStyle: 'medium', timeStyle: 'short'}).format(new Date(value)); }
@@ -120,7 +117,7 @@ async function copyText(value: string): Promise<void> {
 
 export function SafetyRegistration() {
   const [passport, setPassport] = useState<SafetyPassport>(initialPassport);
-  const [savedSnapshot, setSavedSnapshot] = useState(() => passportSnapshot(passport));
+  const [savedSnapshot, setSavedSnapshot] = useState(() => safetyPassportSnapshot(passport));
   const [saved, setSaved] = useState<SafetyPassport[]>([]);
   const [notice, setNotice] = useState('');
   const [submittedCheck, setSubmittedCheck] = useState(false);
@@ -129,7 +126,7 @@ export function SafetyRegistration() {
   const [catalog, setCatalog] = useState<SafetyCatalog | null>(null);
   const [catalogState, setCatalogState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const readiness = useMemo(() => safetyReadiness(passport), [passport]);
-  const dirty = useMemo(() => passportSnapshot(passport) !== savedSnapshot, [passport, savedSnapshot]);
+  const dirty = useMemo(() => safetyPassportSnapshot(passport) !== savedSnapshot, [passport, savedSnapshot]);
   const deadline = notificationDeadline(passport.startDate);
   const deadlineState = notificationDeadlineState(passport.startDate);
   const locked = passport.status === 'closed';
@@ -146,7 +143,7 @@ export function SafetyRegistration() {
       const params = new URLSearchParams(location.search);
       const requested = params.get('passport');
       const existing = requested ? stored.find(item => item.id === requested) : undefined;
-      if (existing) { setSavedSnapshot(passportSnapshot(existing)); setPassport(existing); return; }
+      if (existing) { setSavedSnapshot(safetyPassportSnapshot(existing)); setPassport(existing); return; }
       const routeId = params.get('route');
       if (!routeId) return;
       setCatalogState('loading');
@@ -231,11 +228,16 @@ export function SafetyRegistration() {
     update('participants', next.length ? next : [blankParticipant(id('participant'))]);
   }
 
+  function writeSavedPassports(list: SafetyPassport[]): boolean {
+    try { localStorage.setItem(SAFETY_STORAGE_KEY, JSON.stringify(list)); return true; }
+    catch { setNotice('Не удалось записать данные в браузер. Скачайте JSON-копию и проверьте свободное место.'); return false; }
+  }
+
   function persist(next = passport, message = 'Черновик сохранён только на этом устройстве.') {
     const value = next.id === 'new' ? {...next, id: id('passport'), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()} : {...next, updatedAt: new Date().toISOString()};
     const list = [value, ...saved.filter(item => item.id !== value.id)].slice(0, 20);
-    localStorage.setItem(SAFETY_STORAGE_KEY, JSON.stringify(list));
-    setSavedSnapshot(passportSnapshot(value));
+    if (!writeSavedPassports(list)) return undefined;
+    setSavedSnapshot(safetyPassportSnapshot(value));
     setPassport(value);
     setSaved(list);
     setNotice(message);
@@ -243,20 +245,20 @@ export function SafetyRegistration() {
   }
 
   function removeCurrent() {
-    if (passport.id === 'new') { const next = initialPassport(); setSavedSnapshot(passportSnapshot(next)); setPassport(next); return; }
+    if (passport.id === 'new') { const next = initialPassport(); setSavedSnapshot(safetyPassportSnapshot(next)); setPassport(next); return; }
     if (!window.confirm('Удалить этот паспорт безопасности с устройства?')) return;
     const list = saved.filter(item => item.id !== passport.id);
-    localStorage.setItem(SAFETY_STORAGE_KEY, JSON.stringify(list));
+    if (!writeSavedPassports(list)) return;
     setSaved(list);
     const next = initialPassport();
-    setSavedSnapshot(passportSnapshot(next));
+    setSavedSnapshot(safetyPassportSnapshot(next));
     setPassport(next);
     setNotice('Локальная копия удалена.');
   }
 
   function startNew() {
     const next = initialPassport();
-    setSavedSnapshot(passportSnapshot(next));
+    setSavedSnapshot(safetyPassportSnapshot(next));
     setPassport(next);
     setSubmittedCheck(false);
     setCoordinates('');
@@ -264,7 +266,7 @@ export function SafetyRegistration() {
   }
 
   function loadPassport(item: SafetyPassport) {
-    setSavedSnapshot(passportSnapshot(item));
+    setSavedSnapshot(safetyPassportSnapshot(item));
     setPassport(item);
     setSubmittedCheck(false);
     setCoordinates('');
@@ -474,6 +476,6 @@ export function SafetyRegistration() {
       </div>
     </main>
     <Footer/>
-    {notice && <div className={styles.notice} role="status">{notice}</div>}
+    {notice && <div className={styles.notice} role="status" aria-live="polite">{notice}</div>}
   </div>;
 }
