@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "release": "web-0.4.5",
+  "verifiedAt": "2026-11-07",
+  "sourceCommitBeforeReviewDocs": "623e44c7a6069d2064201a02a570b10556c2ce87",
+  "checks": {
+    "webTests": {"passed": 254, "failed": 0, "skipped": 0, "cancelled": 0},
+    "strictReleaseLint": "passed",
+    "typescriptPagesPreview": "passed",
+    "productionBuild": "passed",
+    "diffCheck": "passed",
+    "temporaryReleaseScaffoldingRemoved": true
+  },
+  "claims": {
+    "browserRenderingTested": false,
+    "androidRebuilt": false,
+    "backendConnected": false
+  }
+}
