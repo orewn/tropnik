@@ -28,56 +28,36 @@ jobs:
           from pathlib import Path
 
           path = Path('android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt')
-          text = path.read_text()
-          old = '''        withContext(Dispatchers.Main.immediate) {
-                  val ready = position as? PositionState.Ready
-                  val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
-                  nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
-                      points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
-                  scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
-                  if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
-                      lastPositionTime = ready.fix.measuredAt
-                      nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
-                  }
-              }
-          }
-          '''
-          new = '''        withContext(Dispatchers.Main.immediate) {
-                  val ready = position as? PositionState.Ready
-                  val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
-                  nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
-                      points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
-                  scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
-                  if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
-                      lastPositionTime = ready.fix.measuredAt
-                      nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
-                  }
-              }
-          }
-          '''
-          # The source currently has the same logical indentation width encoded
-          # by the exact string above. Rewrite it through line-aware formatting
-          # so the result is stable even if tabs are introduced elsewhere.
-          start = text.index('        withContext(Dispatchers.Main.immediate) {\n        val ready = position as? PositionState.Ready')
-          end_marker = '\n}\n\n    Box(modifier.background(Palette.Water)) {'
-          end = text.index(end_marker, start)
-          block = '''        withContext(Dispatchers.Main.immediate) {
-              val ready = position as? PositionState.Ready
-              val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
-              nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
-                  points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
-              scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
-              if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
-                  lastPositionTime = ready.fix.measuredAt
-                  nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
-              }
-          }
-      }'''
-          text = text[:start] + block + text[end:]
+          lines = path.read_text().splitlines()
+          effect = lines.index('    LaunchedEffect(map, styleRevision, displayArea, position) {')
+          start = next(i for i in range(effect + 1, len(lines))
+                       if lines[i] == '        withContext(Dispatchers.Main.immediate) {')
+          box = lines.index('    Box(modifier.background(Palette.Water)) {', start)
+          replacement = [
+              '        withContext(Dispatchers.Main.immediate) {',
+              '            val ready = position as? PositionState.Ready',
+              '            val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true',
+              '            nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(',
+              '                points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))',
+              '            scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null',
+              '            if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {',
+              '                lastPositionTime = ready.fix.measuredAt',
+              '                nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)',
+              '            }',
+              '        }',
+              '    }',
+              '',
+          ]
+          lines[start:box] = replacement
+          text = '\n'.join(lines) + '\n'
+          if text.count('LaunchedEffect(map, styleRevision, displayArea, position) {') != 1:
+              raise SystemExit('Position effect count changed unexpectedly')
+          if '\n        withContext(Dispatchers.Main.immediate) {\n            val ready = position as? PositionState.Ready' not in text:
+              raise SystemExit('Position effect formatting was not applied')
           path.write_text(text)
           PY
           git diff --check
-          grep -A14 -n 'LaunchedEffect(map, styleRevision, displayArea, position)' android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt
+          sed -n '242,266p' android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt
 
       - name: Commit normalized source only
         run: |
