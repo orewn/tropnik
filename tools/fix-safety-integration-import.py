@@ -20,23 +20,17 @@ elif unique not in text:
     raise SystemExit('safety contact idempotency anchor not found')
 
 # fixture() creates an active departure to provide a verified guide and route.
-# This scenario creates a second departure for a new safety revision, so release
-# the fixture departure first. The production overlap guard must remain intact.
-create_anchor = '''\tif _, err = s.Pool.Exec(ctx, "UPDATE routes SET current_revision_id=$2 WHERE id=$1", base.RouteID, revision); err != nil {
+# This scenario creates another departure for a new safety revision, so release
+# the fixture departure first. The production overlap guard remains unchanged.
+cancel_block = '''\tif _, err = s.Pool.Exec(ctx, "UPDATE departures SET status='cancelled' WHERE id=$1", base.ID); err != nil {
 \t\tt.Fatal(err)
 \t}
-\td, err := s.CreateDeparture'''
-create_replacement = '''\tif _, err = s.Pool.Exec(ctx, "UPDATE routes SET current_revision_id=$2 WHERE id=$1", base.RouteID, revision); err != nil {
-\t\tt.Fatal(err)
-\t}
-\tif _, err = s.Pool.Exec(ctx, "UPDATE departures SET status='cancelled' WHERE id=$1", base.ID); err != nil {
-\t\tt.Fatal(err)
-\t}
-\td, err := s.CreateDeparture'''
-if create_anchor in text:
-    text = text.replace(create_anchor, create_replacement, 1)
-elif "UPDATE departures SET status='cancelled' WHERE id=$1" not in text:
-    raise SystemExit('safety fixture overlap anchor not found')
+'''
+create_anchor = '\td, err := s.CreateDeparture'
+if "UPDATE departures SET status='cancelled' WHERE id=$1" not in text:
+    if create_anchor not in text:
+        raise SystemExit('safety fixture departure creation anchor not found')
+    text = text.replace(create_anchor, cancel_block + create_anchor, 1)
 
 integration.write_text(text)
 Path(__file__).unlink()
