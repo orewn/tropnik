@@ -35,7 +35,8 @@ jobs:
           test "$(pnpm --version)" = '11.25.0'
           pnpm --dir web install --frozen-lockfile
       - name: Regenerate the map style
-        run: node web/scripts/create-map-style.mjs
+        working-directory: web
+        run: node scripts/create-map-style.mjs
       - name: Run web regression checks
         working-directory: web
         run: node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs
