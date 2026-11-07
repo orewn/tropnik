@@ -40,7 +40,29 @@ jobs:
           pnpm --dir web install --frozen-lockfile
 
       - name: Apply reviewed release changes
-        run: python tools/apply-map-release-0.4.5.py
+        run: |
+          python tools/apply-map-release-0.4.5.py
+          python - <<'PY'
+          from pathlib import Path
+
+          layout=Path('web/lib/map-direction-layout.ts')
+          text=layout.read_text()
+          old='  let left = viewport.left + preset.edge;'
+          if old not in text:
+              raise SystemExit('map-direction-layout lint anchor missing')
+          layout.write_text(text.replace(old,'  const left = viewport.left + preset.edge;',1))
+
+          for name in ['web/tests/map-direction-layout.test.mjs','web/tests/map-region-selection.test.mjs']:
+              path=Path(name);text=path.read_text()
+              old="  const module={exports:{}};\n  const code="
+              new="  const loadedModule={exports:{}};\n  const code="
+              if old not in text:
+                  raise SystemExit(f'{name}: test loader anchor missing')
+              text=text.replace(old,new,1)
+              text=text.replace("),module,module.exports);\n  cache.set(path,module.exports);return module.exports;",
+                                "),loadedModule,loadedModule.exports);\n  cache.set(path,loadedModule.exports);return loadedModule.exports;",1)
+              path.write_text(text)
+          PY
 
       - name: Regenerate the checked-in map style
         working-directory: web
