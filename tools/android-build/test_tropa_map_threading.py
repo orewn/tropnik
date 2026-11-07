@@ -45,6 +45,11 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
         )
         ui_marker = "withContext(Dispatchers.Main.immediate) {"
         self.assertIn(ui_marker, effect)
+        self.assertIn(
+            "\n        withContext(Dispatchers.Main.immediate) {\n"
+            "            val ready = position as? PositionState.Ready",
+            effect,
+        )
         before_ui, ui_block = effect.split(ui_marker, 1)
         self.assertNotIn("getSourceAs<GeoJsonSource>", before_ui)
         self.assertNotIn("animateCamera", before_ui)
