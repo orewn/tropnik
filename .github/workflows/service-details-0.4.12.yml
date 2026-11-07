@@ -32,10 +32,15 @@ jobs:
           from pathlib import Path
           path=Path('tools/apply-service-details-0.4.12.py')
           text=path.read_text()
-          old=r'''r'\{notice && <div className=\{styles\.notice\}>\{notice\}</div>\}' '''.strip()
-          new=r'''r'\{notice && <div className=\{styles\.notice\} role="status">\{notice\}</div>\}' '''.strip()
-          if old not in text: raise SystemExit('notice regex patch anchor missing')
-          path.write_text(text.replace(old,new,1))
+          replacements={
+            r'''r'\{notice && <div className=\{styles\.notice\}>\{notice\}</div>\}' '''.strip():r'''r'\{notice && <div className=\{styles\.notice\} role="status">\{notice\}</div>\}' '''.strip(),
+            "r''''use client';\nimport {useEffect":"r''''use client';\n/* eslint-disable @next/next/no-img-element */\nimport {useEffect",
+            """ useEffect(()=>{\n  if(dismissed){setInViewport(false);return;}\n  const node=card.current;\n  if(!node||!('IntersectionObserver' in window)){setInViewport(true);return;}\n""":""" useEffect(()=>{\n  const node=card.current;\n  if(dismissed||!node||!('IntersectionObserver' in window))return;\n""",
+          }
+          for old,new in replacements.items():
+            if text.count(old)!=1: raise SystemExit('product patch anchor missing: '+old[:80])
+            text=text.replace(old,new,1)
+          path.write_text(text)
           PY
           python3 tools/apply-service-details-0.4.12.py
           python3 - <<'PY'
