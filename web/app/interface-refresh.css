@@ -94,7 +94,8 @@ body{background:var(--paper);color:var(--ink)}
 .explore-layout .map-context,.explore-layout .map-style-switch,.explore-layout .map-controls,
 .explore-layout .layer-control,.explore-layout .map-message,.explore-layout .map-legend,
 .explore-layout .map-attribution,.explore-layout .fact-card,.explore-layout .fact-closed{z-index:20}
-.explore-layout .maplibregl-marker,.explore-layout .leaflet-marker-pane{z-index:12}
+.explore-layout .maplibregl-marker{z-index:12}
+.explore-layout .leaflet-marker-pane{z-index:600}
 .explore-layout .tropnik-relief-tiles .leaflet-tile{transition:opacity .12s linear}
 
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
