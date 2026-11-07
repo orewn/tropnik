@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 
 def replace_once(path: str, old: str, new: str) -> None:
@@ -52,5 +53,12 @@ replace_once(
       } }));
 """,
 )
+
+package_path = Path("web/package.json")
+package = json.loads(package_path.read_text())
+if package.get("version") != "0.4.4":
+    raise SystemExit(f"Unexpected web version: {package.get('version')}")
+package["version"] = "0.4.5"
+package_path.write_text(json.dumps(package, ensure_ascii=False, indent=2) + "\n")
 
 Path("scripts/fix-offline-package.py").unlink(missing_ok=True)
