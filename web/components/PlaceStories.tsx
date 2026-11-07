@@ -22,6 +22,9 @@ export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeI
 
  if(!fact)return null;
  function manual(delta:number){setPaused(true);setIndex(i=>(i+delta+facts.length)%facts.length);}
+ function releaseTouchFocus(button:HTMLButtonElement){
+  if(window.matchMedia('(hover:none), (pointer:coarse)').matches)requestAnimationFrame(()=>button.blur());
+ }
  function beginSwipe(event:ReactPointerEvent<HTMLElement>){
   if(event.pointerType==='mouse'||(event.target as HTMLElement).closest('button,a'))return;
   swipe.current={x:event.clientX,y:event.clientY,id:event.pointerId};
@@ -70,12 +73,12 @@ export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeI
    </div>
   </div>
   <div className="fact-card-footer">
-   {collapsible?<button className="fact-story-toggle button-sm" aria-expanded={expanded} aria-controls={storyId} onClick={()=>setExpanded(value=>!value)}>{expanded?'Свернуть':'Читать историю'}<CaretRight size={14}/></button>:<button className="fact-place" onClick={()=>{setPaused(true);onPlace(fact);}} title="Открыть направление на карте">{fact.place.length>24?fact.place.split(' · ')[0]:fact.place}<ArrowRight size={12}/></button>}
+   {collapsible?<button className="fact-story-toggle button-sm" aria-expanded={expanded} aria-controls={storyId} onClick={event=>{setExpanded(value=>!value);releaseTouchFocus(event.currentTarget);}}>{expanded?'Свернуть':'Читать историю'}<CaretRight size={14}/></button>:<button className="fact-place" onClick={()=>{setPaused(true);onPlace(fact);}} title="Открыть направление на карте">{fact.place.length>24?fact.place.split(' · ')[0]:fact.place}<ArrowRight size={12}/></button>}
    <div className="fact-controls">
-    <button aria-label="Предыдущая история" onClick={()=>manual(-1)}><CaretLeft size={15}/></button>
+    <button aria-label="Предыдущая история" onClick={event=>{manual(-1);releaseTouchFocus(event.currentTarget);}}><CaretLeft size={15}/></button>
     {compact&&<span className="fact-count caption-5">{String(index%facts.length+1).padStart(2,'0')} / {String(facts.length).padStart(2,'0')}</span>}
-    <button aria-label={paused||reduced?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={togglePlayback}>{paused||reduced?<Play size={13}/>:<Pause size={13}/>}</button>
-    <button aria-label="Следующая история" onClick={()=>manual(1)}><CaretRight size={15}/></button>
+    <button aria-label={paused||reduced?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={event=>{togglePlayback();releaseTouchFocus(event.currentTarget);}}>{paused||reduced?<Play size={13}/>:<Pause size={13}/>}</button>
+    <button aria-label="Следующая история" onClick={event=>{manual(1);releaseTouchFocus(event.currentTarget);}}><CaretRight size={15}/></button>
    </div>
   </div>
   <div className={`fact-progress ${stopped?'paused':''}`} aria-hidden="true"><span key={`${fact.id}-${paused}`}/></div>

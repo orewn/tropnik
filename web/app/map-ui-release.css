@@ -77,7 +77,7 @@
  .explore-layout .map-message{left:var(--map-left);right:calc(var(--map-right) + 58px);width:auto;max-width:none}.maplibregl-ctrl-bottom-left{left:var(--map-left)!important}
  .explore-layout .fact-card.fact-card--compact,.explore-layout:has(.explore-panel.collapsed) .fact-card.fact-card--compact{top:calc(var(--map-top) + 60px);left:var(--map-left);bottom:auto;width:min(330px,calc(100% - 78px));grid-template-columns:96px minmax(0,1fr);border-radius:14px 14px 24px 14px}
  .fact-card--compact .fact-photo{min-height:118px}.fact-card--compact .fact-card-inner{padding:10px 11px 8px}.fact-card--compact .fact-topline{height:27px;margin:-6px -6px -4px 0}
- .fact-card.fact-card--compact h3{font-size:14px;line-height:1.38}.fact-card--compact .fact-source-label{display:none}.fact-card--compact .fact-card-footer{padding:2px 4px 2px 11px;gap:3px;min-height:48px}.fact-card--compact .fact-story-toggle{font-size:11px;gap:3px;min-height:42px}
+ .fact-card.fact-card--compact h3{font-size:14px;line-height:1.38}.fact-card--compact .fact-source-label{display:none}.fact-card--compact .fact-card-footer{padding:2px 4px 2px 11px;gap:3px;min-height:48px}.fact-card--compact .fact-story-toggle{font-size:11px;gap:3px;min-height:44px}
  .fact-card .fact-controls button{width:44px;height:44px;min-width:44px;min-height:44px}.fact-card .fact-controls .fact-count{min-width:38px;font-size:9px;margin:0}
  .fact-card.fact-card--expanded{left:var(--map-left);right:auto;top:calc(var(--map-top) + 60px);bottom:auto;width:min(350px,calc(100% - 78px));max-height:calc(50dvh - 20px);overflow:auto;overscroll-behavior:contain}
  .fact-card--expanded .fact-photo{height:126px;position:sticky;top:0;z-index:2}.fact-card--expanded .fact-card-inner{padding:14px 16px 10px}.fact-card--expanded .fact-card-footer{position:sticky;bottom:0;z-index:3;background:var(--surface)}.fact-photo figcaption{font-size:7px}
@@ -116,3 +116,255 @@
   .explore-layout .leaflet-route-tooltip{display:none!important}
 }
 @media(hover:none),(pointer:coarse){.explore-layout .leaflet-route-tooltip{display:none!important}}
+
+
+/* Tropnik 0.4.8 interaction and rendering performance pass. */
+@keyframes fact-progress-smooth{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.fact-progress span{
+  width:100%!important;
+  transform:scaleX(0);
+  transform-origin:left center;
+  animation-name:fact-progress-smooth!important;
+  will-change:transform;
+}
+.explore-panel-content{
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.explore-layout .atlas-canvas[data-map-camera] .region-marker-label,
+.explore-layout .atlas-canvas[data-map-camera] .trail-marker-label{
+  opacity:0!important;
+  visibility:hidden!important;
+  transition:none!important;
+}
+@supports(content-visibility:auto){
+  .explore-panel-content .trail-card{
+    content-visibility:auto;
+    contain-intrinsic-size:132px;
+  }
+}
+@media(max-width:700px){
+  .explore-layout{
+    --sheet-expanded-height:min(56svh,545px);
+    --sheet-peek:156px;
+  }
+  .explore-layout .explore-panel,
+  .explore-layout .explore-panel.collapsed,
+  .explore-layout .explore-panel.expanded{
+    height:var(--sheet-expanded-height)!important;
+    min-height:0!important;
+    max-height:calc(100svh - var(--header) - 8px)!important;
+    overflow:hidden;
+    transform:translate3d(0,0,0);
+    transition:transform .28s cubic-bezier(.22,1,.36,1)!important;
+    will-change:transform;
+    backface-visibility:hidden;
+    contain:layout paint style;
+  }
+  .explore-layout.sheet-closed .explore-panel{
+    transform:translate3d(0,calc(100% - var(--sheet-peek)),0);
+  }
+  .explore-layout.sheet-open .explore-panel{
+    transform:translate3d(0,0,0);
+  }
+  .explore-layout .sheet-handle{
+    display:grid;
+    place-items:center;
+    flex:0 0 44px;
+    width:100%;
+    min-height:44px;
+    height:44px;
+    padding:0;
+    touch-action:manipulation;
+    user-select:none;
+    -webkit-user-select:none;
+    background:var(--surface);
+  }
+  .explore-layout .sheet-handle>span{
+    width:40px;
+    height:5px;
+    background:#AEBDA4;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+    transition:width .18s ease,background-color .18s ease,transform .18s ease;
+  }
+  .explore-layout.sheet-open .sheet-handle>span{
+    width:48px;
+    background:var(--line-strong);
+  }
+  .explore-layout.sheet-closed .explore-panel-content{
+    overflow:hidden!important;
+    pointer-events:none;
+  }
+  .explore-layout.sheet-closed .sheet-handle{
+    pointer-events:auto;
+  }
+  .explore-layout .explore-panel-content{
+    padding-top:0!important;
+    scroll-behavior:auto;
+  }
+  .explore-layout .map-context,
+  .explore-layout .map-style-switch,
+  .explore-layout .map-controls,
+  .explore-layout .layer-button,
+  .explore-layout .layer-menu,
+  .explore-layout .map-message,
+  .map-attribution-content,
+  .map-attribution-toggle{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    background:rgba(255,254,250,.985)!important;
+  }
+  .explore-layout .map-style-switch,
+  .explore-layout .map-controls,
+  .explore-layout .layer-button,
+  .explore-layout .fact-card{
+    box-shadow:0 8px 22px rgba(29,48,38,.10)!important;
+  }
+  .explore-layout .fact-card{
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    contain:layout paint style;
+  }
+}
+@media(hover:none),(pointer:coarse){
+  .fact-photo img{transition:none!important}
+  .fact-card:hover .fact-photo img{transform:none!important}
+  .explore-layout .map-style-switch button:active:not(:disabled),
+  .explore-layout .map-controls button:active:not(:disabled),
+  .explore-layout .layer-button:active:not(:disabled){transform:none!important}
+}
+@media(max-height:620px) and (orientation:landscape) and (max-width:900px){
+  .explore-layout{--sheet-expanded-height:calc(100svh - var(--header) - 8px);--sheet-peek:112px}
+}
+@media(prefers-reduced-motion:reduce){
+  .explore-layout .explore-panel{transition:none!important}
+  .fact-progress span{animation:none!important;transform:scaleX(1)}
+}
+
+/* Tropnik 0.4.8 collapsed sheet preview. */
+.sheet-peek-summary{display:none}
+@media(max-width:700px){
+  .explore-layout .sheet-peek-summary{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 44px;
+    align-items:center;
+    width:100%;
+    height:112px;
+    min-height:112px;
+    padding:12px 18px 15px 22px;
+    gap:12px;
+    background:var(--surface);
+    color:var(--ink);
+    text-align:left;
+    touch-action:manipulation;
+    contain:layout paint style;
+  }
+  .explore-layout .sheet-peek-summary[hidden]{display:none!important}
+  .sheet-peek-copy{display:flex;min-width:0;flex-direction:column;gap:2px}
+  .sheet-peek-copy small{color:var(--muted);font-size:9px;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
+  .sheet-peek-copy strong{overflow:hidden;color:var(--forest-dark);font-size:18px;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
+  .sheet-peek-copy>span{overflow:hidden;color:var(--muted);font-size:11px;line-height:1.45;text-overflow:ellipsis;white-space:nowrap}
+  .sheet-peek-summary>svg{justify-self:end;color:var(--forest)}
+  .explore-layout.sheet-closed .explore-panel-content,
+  .explore-layout.sheet-closed .panel-foot{
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+  .explore-layout.sheet-open .explore-panel-content,
+  .explore-layout.sheet-open .panel-foot{visibility:visible;opacity:1}
+  .explore-layout .sheet-handle:focus:not(:focus-visible),
+  .explore-layout .sheet-peek-summary:focus:not(:focus-visible){outline:none}
+}
+@media(max-width:360px){
+  .explore-layout .sheet-peek-summary{padding-inline:18px 12px}
+  .sheet-peek-copy strong{font-size:16px}
+}
+
+/* Touch browsers may retain synthetic :hover after tap. */
+@media(hover:none),(pointer:coarse){
+  .fact-controls button:hover,
+  .fact-controls button:active,
+  .fact-controls button:focus:not(:focus-visible){background:transparent!important}
+}
+
+/* Compact landscape keeps 44px touch targets. */
+@media(max-height:620px) and (orientation:landscape) and (max-width:900px){
+  .explore-layout .map-style-switch{min-height:52px!important}
+  .explore-layout .map-style-switch button,
+  .explore-layout .map-controls button{
+    height:44px!important;
+    min-height:44px!important;
+  }
+}
+
+/* Touch landscape uses the same compositor sheet above 700px. */
+@media(min-width:701px) and (max-width:900px) and (max-height:620px) and (orientation:landscape) and (pointer:coarse){
+  .explore-layout{
+    --sheet-expanded-height:calc(100svh - var(--header) - 8px);
+    --sheet-peek:112px;
+  }
+  .explore-layout .explore-panel,
+  .explore-layout .explore-panel.collapsed,
+  .explore-layout .explore-panel.expanded{
+    position:absolute!important;
+    z-index:30;
+    left:0!important;
+    right:0!important;
+    top:auto!important;
+    bottom:0!important;
+    width:100%!important;
+    height:var(--sheet-expanded-height)!important;
+    min-height:0!important;
+    max-height:calc(100svh - var(--header) - 8px)!important;
+    overflow:hidden;
+    border-radius:28px 28px 0 0;
+    transform:translate3d(0,0,0);
+    transition:transform .28s cubic-bezier(.22,1,.36,1)!important;
+    will-change:transform;
+    backface-visibility:hidden;
+    contain:layout paint style;
+  }
+  .explore-layout.sheet-closed .explore-panel{transform:translate3d(0,calc(100% - var(--sheet-peek)),0)}
+  .explore-layout.sheet-open .explore-panel{transform:translate3d(0,0,0)}
+  .explore-layout .sheet-handle{
+    display:grid;
+    place-items:center;
+    width:100%;
+    height:44px;
+    min-height:44px;
+    padding:0;
+    background:var(--surface);
+    touch-action:manipulation;
+  }
+  .explore-layout .sheet-handle>span{width:40px;height:5px;background:#AEBDA4}
+  .explore-layout .sheet-peek-summary{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 44px;
+    align-items:center;
+    width:100%;
+    height:68px;
+    min-height:68px;
+    padding:5px 18px 8px 22px;
+    gap:12px;
+    background:var(--surface);
+    color:var(--ink);
+    text-align:left;
+    touch-action:manipulation;
+  }
+  .explore-layout .sheet-peek-summary[hidden]{display:none!important}
+  .explore-layout.sheet-closed .explore-panel-content,
+  .explore-layout.sheet-closed .panel-foot{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+  .explore-layout.sheet-open .explore-panel-content,
+  .explore-layout.sheet-open .panel-foot{visibility:visible;opacity:1}
+  .explore-layout.sheet-closed .sheet-handle,
+  .explore-layout.sheet-closed .sheet-peek-summary{pointer-events:auto}
+  .explore-layout .map-context,
+  .explore-layout .map-style-switch,
+  .explore-layout .map-controls,
+  .explore-layout .layer-button,
+  .explore-layout .layer-menu,
+  .explore-layout .map-message,
+  .map-attribution-content,
+  .map-attribution-toggle{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+}

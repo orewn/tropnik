@@ -1,5 +1,5 @@
 'use client';
-import {useState,useEffect,useCallback,useMemo,useRef,useSyncExternalStore} from 'react';
+import {useState,useEffect,useCallback,useMemo,useRef,useSyncExternalStore,useId} from 'react';
 import {MagnifyingGlass,ArrowRight,ArrowLeft,Mountains,Tree,WaveSine,MapPin,SlidersHorizontal,BookmarkSimple,CheckCircle,Info,X,Path,Clock,UsersThree,ArrowDown,ArrowSquareOut,ShieldCheck,WifiSlash} from '@/components/TropnikIcons';
 import {trails,regionById,type Trail} from '@/lib/content';
 import {packs,saveReference,downloadJson,type SavedPack} from '@/lib/local';
@@ -19,10 +19,16 @@ import {searchSite} from '@/lib/site-search';
 import {Modal} from './Modal';
 
 const terrainIcon=(id:string,size=24)=>id==='karelia'?<Tree size={size}/>:id==='baikal'?<WaveSine size={size}/>:<Mountains size={size}/>;
+const routeCountPreview=(count:number)=>{
+ const mod100=count%100,mod10=count%10;
+ const noun=mod100>=11&&mod100<=14?'маршрутов':mod10===1?'маршрут':mod10>=2&&mod10<=4?'маршрута':'маршрутов';
+ return `${count.toLocaleString('ru')} ${noun}`;
+};
 const subscribeHydration=()=>()=>{};
 const hydratedSnapshot=()=>true,serverHydrationSnapshot=()=>false;
 export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initialRegion?:string;initialTrail?:string;initialPublished?:Trail[]}){
  const hydrated=useSyncExternalStore(subscribeHydration,hydratedSnapshot,serverHydrationSnapshot);
+ const sheetPanelId=useId();
  const panelContent=useRef<HTMLDivElement>(null);
  const [liveTrails,setLiveTrails]=useState<Trail[]>(initialPublished);
  const [requestBusy,setRequestBusy]=useState(false),[requestError,setRequestError]=useState(''),[auth,setAuth]=useState(false);
@@ -51,8 +57,16 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
   const selected=filterMapTrails(regionalTrails,{query:'',difficulty,duration,onlySaved,savedIds:new Set(saved.map(item=>item.id))});
   return ranks?selected.filter(item=>ranks.has(item.id)).sort((a,b)=>ranks.get(a.id)!-ranks.get(b.id)!):selected;
  },[regionalTrails,routeSearch,difficulty,duration,onlySaved,saved]);
- return <section className="explore-layout" aria-label="Поиск маршрутов"><aside className={`explore-panel ${sheetOpen?'expanded':'collapsed'}`}>
- <button className="sheet-handle" onClick={()=>setSheetOpen(!sheetOpen)} aria-expanded={sheetOpen} aria-label={sheetOpen?'Свернуть список':'Открыть список'}><span/></button>
+ const sheetPreviewKind=trail?'Маршрут':region?'Направление':'Каталог';
+ const sheetPreviewTitle=trail?.title??region?.name??'Все направления';
+ const sheetPreviewMeta=trail
+  ?[trail.distanceKm!=null?`${trail.distanceKm.toLocaleString('ru')} км`:undefined,trail.duration].filter(Boolean).join(' · ')||'Открыть карточку маршрута'
+  :routeCountPreview(region?shownTrails.length:catalog.length);
+ return <section className={`explore-layout ${sheetOpen?'sheet-open':'sheet-closed'}`} data-sheet-state={sheetOpen?'open':'closed'} aria-label="Поиск маршрутов"><aside id={sheetPanelId} className={`explore-panel ${sheetOpen?'expanded':'collapsed'}`}>
+ <button className="sheet-handle" type="button" onClick={event=>{setSheetOpen(open=>!open);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-controls={sheetPanelId} aria-expanded={sheetOpen} aria-label={sheetOpen?'Свернуть список':'Открыть список'}><span/></button>
+ <button className="sheet-peek-summary" type="button" hidden={sheetOpen} onClick={event=>{setSheetOpen(true);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-label={`Открыть: ${sheetPreviewTitle}`}>
+  <span className="sheet-peek-copy"><small>{sheetPreviewKind}</small><strong>{sheetPreviewTitle}</strong><span>{sheetPreviewMeta}</span></span><ArrowRight size={20}/>
+ </button>
  <div className="explore-panel-content" ref={panelContent}>
  {trail?<><button className="back-link" onClick={()=>{setTrail(undefined);if(window.location.pathname==='/')history.replaceState(null,'',region?`/?region=${region.id}`:'/');}}><ArrowLeft size={17}/>Маршруты направления</button><div className="eyebrow">{regionById(trail.regionId)?.name}</div><h1 className="route-title heading-4">{trail.title}</h1><p className="panel-intro body-6">{trail.subtitle}</p><div className="route-status"><Info size={18}/><span>{trail.publicationStatus==='reference'?'Справочные данные. Условия выхода ещё не подтверждены.':'Проверьте текущие условия перед выходом.'}</span></div>{trail.operatingNotice&&<div className="route-restriction"><strong>{trail.operatingNotice.title}</strong>{trail.operatingNotice.body}<a href={trail.operatingNotice.url} target="_blank" rel="noreferrer">Официальное сообщение <ArrowSquareOut size={12}/></a></div>}<div className="route-summary"><div><Path size={20}/><strong>{trail.distanceKm?.toLocaleString('ru')??'—'}<small> км</small></strong><span>{trail.distanceNote || 'длина по источнику'}</span></div><div><Clock size={20}/><strong>{trail.duration??'—'}</strong><span>время по источнику</span></div></div><div className="route-section"><h3>О маршруте</h3><p>{trail.description}</p>{!trail.geometryUrl&&!trail.geometry&&<p className="source-note">{trailGeometryDescription(trail)}</p>}<span className={`difficulty difficulty-${trail.difficulty}`}>{trail.difficultyLabel}</span><SourceDifficulty trail={trail}/></div><div className="route-section"><h3>Условия посещения</h3><ul className="check-list">{trail.notes.map(n=><li key={n}><CheckCircle size={17}/><span>{n}</span></li>)}</ul></div><div className="route-section source-block"><ShieldCheck size={23}/><div><strong>{trail.sourceName}</strong><span>{sourceDateLabel(trail.sourceKind)} {formatEvidenceDate(trail.checkedAt)}</span><a href={trail.sourceUrl} target="_blank" rel="noreferrer">Открыть описание <ArrowSquareOut size={13}/></a></div></div>{trail.officialEvidence&&<div className="route-section"><h3>Что подтвердил официальный источник</h3><p>{trail.officialEvidence.summary}</p>{trail.officialEvidence.scope&&<p className="source-scope">{trail.officialEvidence.scope}</p>}<a className="text-link" href={trail.officialEvidence.url} target="_blank" rel="noreferrer">Читать первоисточник <ArrowSquareOut size={12}/></a><p className="source-note">Описание прочитано {trail.officialEvidence.checkedAt}. Линия маршрута и условия на местности требуют отдельной проверки.</p></div>}<div className="route-actions"><button className="button primary full" disabled={trail.accessStatus==='closed'} onClick={()=>setRequest(true)}><UsersThree size={20}/>{trail.accessStatus==='closed'?'Маршрут закрыт':trail.publicationStatus==='published'?'Открыть набор на маршрут':'Подготовить запрос на поход'}</button><button className="button secondary full" disabled={saving===trail.id} onClick={()=>save(trail)}><ArrowDown size={18}/>{saving===trail.id?'Сохраняем…':saved.some(s=>s.id===trail.id)?'Обновить сохранённую карточку':'Сохранить карточку офлайн'}</button><a href={`/routes/${trail.id}`} className="text-link">Подробная страница маршрута <ArrowRight size={16}/></a></div></>:
  <><div className="panel-title-row">{region?<button className="back-link" onClick={()=>{setRegion(undefined);setQuery('');if(window.location.pathname==='/')history.replaceState(null,'','/');}}><ArrowLeft size={17}/>Все направления</button>:<span className="eyebrow">Место встречи — природа</span>}</div><h1 className="heading-4">{region?region.name:<>Найдите<br/>{' '}свою тропу<span className="heading-dot">.</span></>}</h1><p className="panel-intro body-6">{region?region.caption:'Маршруты по России. Походы с гидом. Люди, которым по пути.'}</p><label className="search-field"><MagnifyingGlass size={20}/><input disabled={!hydrated} aria-label={region?'Поиск маршрута':'Поиск маршрута или направления'} placeholder={region?'Название маршрута':'Куда хочется отправиться?'} value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button onClick={()=>setQuery('')} aria-label="Очистить поиск"><X size={16}/></button>}</label>

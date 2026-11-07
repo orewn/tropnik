@@ -60,6 +60,17 @@ assert.equal(verification.base, build.base);
 assert.equal(verification.pages, build.pages);
 const pages = JSON.parse((await request('page-manifest.json')).text);
 assert.equal(pages.length, build.pages);
+const browser = JSON.parse((await request('browser-verification.json')).text);
+assert.equal(browser.verified, true);
+assert.equal(browser.sourceCommit, expectedCommit);
+assert.ok(Array.isArray(browser.profiles) && browser.profiles.length >= 4);
+for (const profile of browser.profiles) {
+  assert.equal(profile.interactionTested, true, `${profile.name}: story touch was not tested`);
+  assert.equal(profile.sheetTested, true, `${profile.name}: mobile sheet was not tested`);
+  assert.ok(profile.sheetHeightDelta < 1.1, `${profile.name}: mobile sheet changed layout height`);
+  assert.ok(profile.layoutShift < .12, `${profile.name}: excessive layout shift`);
+  assert.ok(profile.longestTaskMs < 350, `${profile.name}: excessive long task`);
+}
 
 const home = (await request('')).text;
 assert.match(home, /Тропник/);
@@ -81,4 +92,4 @@ assert.equal(android.version, build.apk.version);
 const apk = await request(build.apk.path.slice(1), android.bytes, true);
 assert.equal(apk.bytes, android.bytes);
 assert.equal(apk.sha256, android.sha256, 'The public APK is not the pinned Android build');
-console.log(JSON.stringify({verified: true, url: site.href, buildId: build.buildId, sourceCommit: build.sourceCommit, publicHttpChecks: checks, apkSha256: apk.sha256, browserRenderingTested: false}, null, 2));
+console.log(JSON.stringify({verified: true, url: site.href, buildId: build.buildId, sourceCommit: build.sourceCommit, publicHttpChecks: checks, apkSha256: apk.sha256, browserRenderingTested: true, browserProfiles: browser.profiles.length}, null, 2));

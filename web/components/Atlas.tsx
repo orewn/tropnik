@@ -10,7 +10,7 @@ import {regions,routeCountLabel,type Trail,type Region} from '@/lib/content';
 import {mapDirectionCounts} from '@/lib/map-catalog';
 import {groupMapDirections,updateDirectionButtons,reconcileDirectionAnchors,constrainDirectionLabels,bindMapLabelReflow,type MapDirectionGroup} from '@/lib/map-direction-layout';
 import {territoryForMapPoint,type MapRegion} from '@/lib/territories';
-import {warmMap,supportsMapWebGL,preloadTerrain,preloadTrail,hasTerrainPreview,loadPublicJSON,mapRequest} from '@/lib/map-preload';
+import {warmMap,supportsMapWebGL,preferCanvasMap,preloadTerrain,preloadTrail,hasTerrainPreview,loadPublicJSON,mapRequest} from '@/lib/map-preload';
 import {loadRussiaGeometry,russiaView} from '@/lib/russia-map';
 import {MapStyleSession,loadMapSelection,applyMapLayerVisibility,type MapBaseMode} from '@/lib/map-lifecycle';
 import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
@@ -119,7 +119,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
   setOffline(!navigator.onLine);setBaseMode(navigator.onLine?'detail':'overview');if(!navigator.onLine)setStatus(OFFLINE_MESSAGE);window.addEventListener('online',disconnect);window.addEventListener('offline',disconnect);
   (async()=>{
    try{
-    if(!supportsMapWebGL()){setFallback(true);return;}
+    if(preferCanvasMap()||!supportsMapWebGL()){setFallback(true);return;}
     const [ml,coverage]=await Promise.all([import('maplibre-gl'),loadRussiaGeometry(true)]);
     if(cancelled||!container.current)return;
     coverageRef.current=coverage;await warmMap();if(cancelled||!container.current)return;
@@ -196,7 +196,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     updateDirections.current=runDirectionLayout;
     unbindLabels=bindMapLabelReflow(container.current,scheduleDirectionLayout);
     scheduleDirectionLayout();
-    map.on('move',scheduleDirectionLayout);
+
     if(regionRef.current&&!fitTerritory(map,regionRef.current,container.current,0,framedCamera))map.jumpTo({center:regionRef.current.center,zoom:regionRef.current.zoom});
     map.on('zoomend',()=>{
      const zoom=map.getZoom();setMapZoom(zoom);
@@ -210,11 +210,14 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     // The style's viewport-anchored hillshade follows the camera itself.
     // Keep contrast stable instead of restarting a paint transition on each pitch frame.
     map.on('moveend',()=>{
+     if(container.current)delete container.current.dataset.mapCamera;
      scheduleDirectionLayout();
      const c=map.getCenter();const boxes:Record<string,number[]>={altai:[82,48,91,53],krasnodar:[36,42.5,42,46.8],karelia:[29,60.7,37,67.2],krym:[32,44,37,46],baikal:[103,50,113,56.8],kamchatka:[155,50,166,61]};
      const found=map.getZoom()>=4?Object.entries(boxes).find(([,b])=>c.lng>=b[0]&&c.lng<=b[2]&&c.lat>=b[1]&&c.lat<=b[3]):undefined;viewportRef.current?.(found?.[0]);
     });
-    map.on('dragstart',()=>{fullView.current=false;frameRefit.current?.cancel();});map.on('zoomstart',event=>{if(event.originalEvent){fullView.current=false;frameRefit.current?.cancel();}if(container.current)container.current.dataset.mapCamera='zooming';scheduleDirectionLayout();});
+    map.on('dragstart',()=>{fullView.current=false;frameRefit.current?.cancel();});
+    map.on('movestart',()=>{if(container.current)container.current.dataset.mapCamera='moving';});
+    map.on('zoomstart',event=>{if(event.originalEvent){fullView.current=false;frameRefit.current?.cancel();}if(container.current)container.current.dataset.mapCamera='moving';});
     map.on('style.load',()=>{
      if(cancelled)return;geographyPainted=false;styleGeneration.current++;setLoaded(true);setStyleRevision(v=>v+1);
      if(map.getSource('openmaptiles'))overviewFallback=false;
