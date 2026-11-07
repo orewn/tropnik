@@ -7,7 +7,7 @@ that only repartitions the inverse outside-mask must not require rebuilding the
 provenance record. This tool permits that metadata-only relink only when:
 
 * the canonical area bytes are unchanged;
-* the new provenance records the same canonical-area SHA-256;
+* the new, validated provenance records the same canonical-area SHA-256;
 * all 341 z0..4 PNG tiles still match their recorded size and SHA-256.
 
 When any of those conditions fails, perform a full ``build-overview-relief.py``
@@ -60,11 +60,23 @@ def inspect_package(
     if manifest.get("schemaVersion") != 1 or manifest.get("complete") is not True:
         raise RuntimeError("Overview manifest is incomplete")
     if (
+        manifest.get("terrainElevationData") is not False
+        or manifest.get("navigationReady") is not False
+    ):
+        raise RuntimeError("Overview safety classification changed; perform a full review")
+    if (
         manifest.get("tileCount") != 341
         or manifest.get("minzoom") != 0
         or manifest.get("maxzoom") != 4
     ):
         raise RuntimeError("Overview tile matrix changed; perform a full overview rebuild")
+    if (
+        provenance.get("schemaVersion") != 1
+        or provenance.get("validation", {}).get("passed") is not True
+        or provenance.get("legalBoundaryClaim") is not False
+        or provenance.get("navigationReady") is not False
+    ):
+        raise RuntimeError("Boundary provenance is not validated for display-only use")
 
     canonical_sha = sha256_file(canonical_area_path)
     manifest_mask = manifest.get("mask", {})
@@ -73,6 +85,8 @@ def inspect_package(
     )
     if manifest_mask.get("path") != "/data/russia-canonical-area.geojson":
         raise RuntimeError("Overview references an unexpected mask path")
+    if manifest_mask.get("geometryChanged") is not False:
+        raise RuntimeError("Overview manifest does not declare an unchanged raster mask")
     if manifest_mask.get("sha256") != canonical_sha:
         raise RuntimeError("Canonical RF area differs from the overview mask; rebuild required")
     if provenance_asset.get("sha256") != canonical_sha:
