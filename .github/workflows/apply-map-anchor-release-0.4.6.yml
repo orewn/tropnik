@@ -51,6 +51,28 @@ jobs:
           path.write_text('\n'.join(filtered)+'\n')
           PY
           python tools/apply-map-anchor-release-0.4.6.py
+          python - <<'PY'
+          from pathlib import Path
+
+          path=Path('web/components/Atlas2D.tsx')
+          text=path.read_text()
+          declaration="let cancelled=false,resize:ResizeObserver|undefined,panelChanges:MutationObserver|undefined,resizeFrame=0,paintFrame=0,directionLayoutFrame=0,clamping=false,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined;"
+          replacement=declaration+"\n  const directionMarkers=new Map<string,LeafletMarker>();"
+          if text.count(declaration)!=1:
+              raise SystemExit(f'Expected one effect declaration, found {text.count(declaration)}')
+          text=text.replace(declaration,replacement,1)
+
+          local="    const directionMarkers=new Map<string,LeafletMarker>();\n    for(const item of regions){"
+          if text.count(local)!=1:
+              raise SystemExit(f'Expected one local marker map, found {text.count(local)}')
+          text=text.replace(local,"    for(const item of regions){",1)
+
+          cleanup="cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);cancelAnimationFrame(directionLayoutFrame);delete element.dataset.mapCamera;directionMarkers.clear();"
+          fixed="cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);cancelAnimationFrame(directionLayoutFrame);if(container.current)delete container.current.dataset.mapCamera;directionMarkers.clear();"
+          if text.count(cleanup)!=1:
+              raise SystemExit(f'Expected one cleanup anchor, found {text.count(cleanup)}')
+          path.write_text(text.replace(cleanup,fixed,1))
+          PY
           git diff --check
 
       - name: Run complete web regression suite
@@ -78,6 +100,7 @@ jobs:
           grep -q "reconcileDirectionAnchors" web/components/Atlas2D.tsx
           grep -q "data-map-camera='zooming'" web/app/interface-refresh.css
           grep -q "directionAnchorCorrection" web/lib/map-direction-layout.ts
+          grep -q "const directionMarkers=new Map<string,LeafletMarker>()" web/components/Atlas2D.tsx
           test -e docs/release-0.4.6.md
           test ! -e .github/workflows/apply-map-anchor-release-0.4.6.yml
           test ! -e tools/apply-map-anchor-release-0.4.6.py
