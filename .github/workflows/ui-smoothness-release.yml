@@ -47,6 +47,7 @@ jobs:
       - name: Apply deterministic smoothness patch
         run: |
           python3 scripts/apply-ui-smoothness-0.4.8.py
+          python3 scripts/fix-ui-smoothness-gate.py
           git diff --check
 
       - name: Run full web regression suite
@@ -95,6 +96,7 @@ jobs:
           grep -q "content-visibility:auto" web/app/map-ui-release.css
           test -f web/tests/ui-smoothness.test.mjs
           test ! -e scripts/apply-ui-smoothness-0.4.8.py
+          test ! -e scripts/fix-ui-smoothness-gate.py
           test ! -e .github/workflows/ui-smoothness-release.yml
           git diff --check
           git status --short
