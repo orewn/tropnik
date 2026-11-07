@@ -74,8 +74,28 @@ jobs:
 
       - name: Commit verified final release sources and generated assets
         run: |
+          rm -rf data/boundaries/raw
+          rm -f data/boundaries/selected-area-source-cache.json data/boundaries/selected-area-source.wkb
+          git restore .github/workflows/android.yml
           git config user.name 'tropnik-release-bot'
           git config user.email '38781694+orewn@users.noreply.github.com'
-          git add -A
+          git add \
+            android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt \
+            data/boundaries/catalog-mask-coverage.json \
+            data/boundaries/manifest.json \
+            data/boundaries/russia-mask-checks.json \
+            tools/map-package/build-russia-mask.py \
+            tools/map-package/test_russia_mask_partition.py \
+            web/components/Atlas.tsx \
+            web/components/Atlas2D.tsx \
+            web/public/data/russia-boundaries-provenance.json \
+            web/public/data/russia-canonical-mask.geojson \
+            web/public/data/russia-outside-mask.geojson \
+            web/public/maps/tropa-style.json \
+            web/public/sw.js \
+            web/tests/fixtures/russia-checks.json \
+            web/tests/fixtures/russia-route-coverage.json \
+            web/tests/map-direction-layout.test.mjs \
+            web/tests/map-polish.test.mjs
           git commit -m 'Fix map mask wedges, label overflow and Android UI-thread access'
           git push origin HEAD:fix/map-label-viewport-20261107
