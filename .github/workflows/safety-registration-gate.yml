@@ -5,7 +5,7 @@ on:
     branches: [feature/safety-registration-0.4.9]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: safety-registration-0.4.9
@@ -18,11 +18,16 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          persist-credentials: false
+          fetch-depth: 0
+          persist-credentials: true
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Apply deterministic release cleanup
+        run: |
+          python3 tools/fix-safety-registration-release.py
+          git diff --check
       - name: Install locked dependencies
         run: |
           npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
@@ -48,3 +53,12 @@ jobs:
           grep -q 'Регистрация похода в МЧС' web/pages-preview/dist/safety/registration/index.html
           test "$(node -p "require('./web/package.json').version")" = '0.4.9'
           grep -q "tropnik-shell-v16" web/public/sw.js
+      - name: Persist verified cleanup
+        run: |
+          if ! git diff --quiet; then
+            git config user.name 'tropnik-release-bot'
+            git config user.email '38781694+orewn@users.noreply.github.com'
+            git add web/components/SafetyRegistration.tsx web/tests/map-polish.test.mjs web/tests/safety-passport.test.mjs
+            git commit -m 'fix(safety): align release checks and remove dead import'
+            git push origin HEAD:feature/safety-registration-0.4.9
+          fi
