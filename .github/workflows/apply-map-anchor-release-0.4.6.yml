@@ -41,6 +41,15 @@ jobs:
 
       - name: Apply reviewed camera-frame anchor changes
         run: |
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('tools/apply-map-anchor-release-0.4.6.py')
+          lines=path.read_text().splitlines()
+          filtered=[line for line in lines if 'WebGL style load layout' not in line]
+          if len(filtered)!=len(lines)-1:
+              raise SystemExit('Expected exactly one obsolete style-load patch line')
+          path.write_text('\n'.join(filtered)+'\n')
+          PY
           python tools/apply-map-anchor-release-0.4.6.py
           git diff --check
 
