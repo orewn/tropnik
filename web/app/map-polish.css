@@ -1,0 +1,132 @@
+/* Final visual system: restrained outlines, fixed palette and map hierarchy. */
+:root{
+  --paper:#F5F3EB;
+  --surface:#FFFEFA;
+  --surface-soft:#EEF2E8;
+  --forest:#244D3C;
+  --forest-dark:#183B2C;
+  --ink:#1D3026;
+  --muted:#59685D;
+  --line:#D5DCCE;
+  --line-strong:#738570;
+  --ochre:#A56736;
+  --ochre-dark:#8E4F2D;
+  --water:#C8DEE5;
+  --danger:#A7342D;
+  --shadow:0 10px 30px rgba(29,48,38,.08);
+}
+body{background:var(--paper);color:var(--ink)}
+.site-header,.explore-panel,.panel-foot,.content-page,.content-shell{border-color:var(--line)}
+.button,.search-field,.trail-card,.route-restriction,.info-compact,.catalog-empty,.small-empty,.layer-menu{border-color:var(--line)}
+.button.secondary,.button.tertiary{background:var(--surface);border-color:var(--line)}
+.button.secondary:hover,.button.tertiary:hover{border-color:var(--line-strong);background:var(--surface-soft)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--ochre-dark);
+  outline-offset:3px;
+}
+.explore-layout .atlas-wrap{background:#D7E5E2}
+.explore-layout .map-context,
+.explore-layout .map-style-switch,
+.explore-layout .map-controls,
+.explore-layout .layer-button,
+.explore-layout .layer-menu,
+.explore-layout .map-message{
+  border:1px solid rgba(115,133,112,.42);
+  background:rgba(255,254,250,.94);
+  box-shadow:0 10px 28px rgba(29,48,38,.09);
+  backdrop-filter:blur(12px);
+}
+.explore-layout .map-style-switch button.active{background:var(--forest);color:var(--surface)}
+.explore-layout .map-controls button:hover,
+.explore-layout .layer-button:hover,
+.explore-layout .map-style-switch button:not(.active):hover{background:var(--surface-soft)}
+.explore-layout .map-message{
+  right:auto;
+  width:max-content;
+  max-width:min(560px,calc(100% - 150px));
+  color:var(--muted);
+}
+.explore-layout .map-message button{background:var(--surface-soft);color:var(--forest)}
+.explore-layout .region-marker-dot{
+  width:10px;
+  height:10px;
+  border:1px solid var(--surface);
+  background:var(--forest);
+  box-shadow:0 0 0 2px rgba(255,254,250,.72),0 3px 10px rgba(29,48,38,.2);
+}
+.explore-layout .region-marker-label{
+  border:1px solid rgba(115,133,112,.38);
+  background:rgba(255,254,250,.94);
+  box-shadow:0 6px 18px rgba(29,48,38,.09);
+}
+.explore-layout .region-marker:hover .region-marker-label,
+.explore-layout .region-marker:focus-visible .region-marker-label,
+.explore-layout .region-marker.is-selected .region-marker-label{
+  background:var(--forest);
+  border-color:var(--forest);
+  color:var(--surface);
+}
+.explore-layout .region-marker.is-selected .region-marker-dot{
+  background:var(--ochre);
+  box-shadow:0 0 0 2px var(--surface),0 0 0 4px rgba(165,103,54,.28),0 4px 12px rgba(29,48,38,.22);
+}
+.explore-layout .trail-marker{
+  border:1px solid var(--surface);
+  box-shadow:0 0 0 2px rgba(36,77,60,.18),0 4px 14px rgba(29,48,38,.2);
+}
+.explore-layout .trail-card:hover{border-color:var(--line-strong)}
+.explore-layout .trail-card[aria-current=true],
+.explore-layout .trail-card.is-selected{
+  border-color:var(--ochre);
+  box-shadow:0 0 0 1px rgba(165,103,54,.16);
+}
+.explore-layout .map-legend{left:25px;color:var(--muted)}
+.explore-layout .legend-line{border-color:var(--forest)}
+.explore-layout .legend-region{border-color:var(--forest);background:#AFC4A4}
+.map-attribution{
+  left:auto;
+  right:24px;
+  bottom:calc(var(--map-bottom-inset,0px) + 16px);
+  color:var(--forest);
+}
+.map-attribution-content{
+  left:auto;
+  right:0;
+  bottom:calc(100% + 8px);
+  width:max-content;
+  max-width:min(370px,calc(100vw - 48px));
+  padding:10px 13px;
+  border:1px solid rgba(115,133,112,.42);
+  border-radius:11px;
+  background:rgba(255,254,250,.97);
+  box-shadow:0 10px 28px rgba(29,48,38,.1);
+  font:var(--caption-4);
+  line-height:1.5;
+}
+.map-attribution-content p{margin-top:6px;font:var(--caption-5)}
+.map-attribution-content a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.map-attribution-toggle{
+  width:44px;
+  height:44px;
+  min-width:44px;
+  min-height:44px;
+  padding:12px;
+  border:1px solid rgba(115,133,112,.42)!important;
+  border-radius:12px;
+  background:rgba(255,254,250,.86);
+  color:var(--forest);
+  box-shadow:0 8px 22px rgba(29,48,38,.08);
+  backdrop-filter:blur(10px);
+}
+.map-attribution-toggle:hover{background:var(--surface-soft)}
+@media(max-width:700px){
+  .explore-layout .map-message{left:16px;right:16px;width:auto;max-width:none;bottom:calc(50% + 22px)}
+  .explore-layout:has(.explore-panel.collapsed) .map-message{bottom:136px}
+  .map-attribution{right:16px;bottom:calc(var(--map-bottom-inset,0px) + 12px)}
+  .map-attribution-content{max-width:calc(100vw - 32px)}
+}
+@media(prefers-reduced-transparency:reduce){
+  .explore-layout .map-context,.explore-layout .map-style-switch,.explore-layout .map-controls,
+  .explore-layout .layer-button,.explore-layout .layer-menu,.explore-layout .map-message,
+  .map-attribution-content,.map-attribution-toggle{background:var(--surface);backdrop-filter:none}
+}

@@ -8,12 +8,12 @@
   "glyphs": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   "sprite": "/maps/tropnik-sprite",
   "sky": {
-    "sky-color": "#b9d7d5",
-    "horizon-color": "#e4e8d6",
-    "fog-color": "#d8e3d8",
-    "sky-horizon-blend": 0.5,
-    "horizon-fog-blend": 0.6,
-    "fog-ground-blend": 0.3,
+    "sky-color": "#BFD8D8",
+    "horizon-color": "#E8ECE1",
+    "fog-color": "#DDE6DE",
+    "sky-horizon-blend": 0.34,
+    "horizon-fog-blend": 0.38,
+    "fog-ground-blend": 0.14,
     "atmosphere-blend": [
       "interpolate",
       [
@@ -23,10 +23,10 @@
         "zoom"
       ],
       0,
-      0.2,
-      10,
-      0.1,
-      14,
+      0.12,
+      8,
+      0.06,
+      12,
       0
     ]
   },
@@ -75,8 +75,8 @@
       "type": "fill",
       "source": "overview-land",
       "paint": {
-        "fill-color": "#DBE4CD",
-        "fill-outline-color": "#9EAF95"
+        "fill-color": "#DDE6D5",
+        "fill-outline-color": "#A7B69D"
       }
     },
     {
@@ -94,13 +94,17 @@
             "zoom"
           ],
           0,
-          1,
+          0.92,
           4,
-          1,
+          0.88,
           6,
           0
         ],
-        "raster-fade-duration": 200
+        "raster-contrast": 0.28,
+        "raster-saturation": -0.18,
+        "raster-brightness-min": 0.08,
+        "raster-brightness-max": 0.92,
+        "raster-fade-duration": 180
       }
     },
     {
@@ -109,8 +113,8 @@
       "source": "openmaptiles",
       "source-layer": "landcover",
       "paint": {
-        "fill-color": "#E2E9D3",
-        "fill-opacity": 0.85
+        "fill-color": "#E3E9D8",
+        "fill-opacity": 0.78
       },
       "filter": [
         "in",
@@ -133,8 +137,8 @@
       "source": "openmaptiles",
       "source-layer": "landcover",
       "paint": {
-        "fill-color": "#C9DABE",
-        "fill-opacity": 0.83
+        "fill-color": "#C5D6BC",
+        "fill-opacity": 0.82
       },
       "filter": [
         "in",
@@ -157,8 +161,8 @@
       "source": "openmaptiles",
       "source-layer": "landcover",
       "paint": {
-        "fill-color": "#D7E0C5",
-        "fill-opacity": 0.75
+        "fill-color": "#D6DFC9",
+        "fill-opacity": 0.72
       },
       "filter": [
         "in",
@@ -248,7 +252,7 @@
       "id": "terrain-shading",
       "type": "hillshade",
       "source": "hillshade-dem",
-      "minzoom": 5,
+      "minzoom": 2,
       "paint": {
         "hillshade-method": "multidirectional",
         "hillshade-illumination-anchor": "viewport",
@@ -258,14 +262,30 @@
           355
         ],
         "hillshade-illumination-altitude": [
-          40,
-          50,
-          35
+          42,
+          52,
+          36
         ],
-        "hillshade-exaggeration": 0.58,
-        "hillshade-shadow-color": "#233b34",
-        "hillshade-highlight-color": "#fff2da",
-        "hillshade-accent-color": "#35584a"
+        "hillshade-exaggeration": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          2,
+          0.34,
+          5,
+          0.52,
+          9,
+          0.66,
+          13,
+          0.72
+        ],
+        "hillshade-shadow-color": "#29423A",
+        "hillshade-highlight-color": "#FFF2DC",
+        "hillshade-accent-color": "#3D6253"
       }
     },
     {
@@ -274,7 +294,7 @@
       "source": "openmaptiles",
       "source-layer": "water",
       "paint": {
-        "fill-color": "#BCD8DF"
+        "fill-color": "#C8DEE5"
       }
     },
     {
@@ -283,7 +303,7 @@
       "source": "openmaptiles",
       "source-layer": "waterway",
       "paint": {
-        "line-color": "#93BAC6",
+        "line-color": "#8FB7C2",
         "line-width": [
           "interpolate",
           [
@@ -310,7 +330,7 @@
       "source": "openmaptiles",
       "source-layer": "boundary",
       "paint": {
-        "line-color": "#8D9B8B",
+        "line-color": "#7F9080",
         "line-width": [
           "interpolate",
           [

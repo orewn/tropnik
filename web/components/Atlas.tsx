@@ -14,6 +14,7 @@ import {warmMap,supportsMapWebGL,preloadTerrain,hasTerrainPreview,loadPublicJSON
 import {loadRussiaGeometry,russiaView} from '@/lib/russia-map';
 import {MapStyleSession,loadMapSelection,applyMapLayerVisibility,type MapBaseMode} from '@/lib/map-lifecycle';
 import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
+import {terrainExaggerationForZoom,terrainPitchForZoom} from '@/lib/map-camera-profile';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -31,12 +32,12 @@ function overviewStyle(coverage:Coverage):StyleSpecification {
   'russia-mask':{type:'geojson',data:coverage.mask},
  },layers:[
   {id:'background',type:'background',paint:{'background-color':MAP_OUTSIDE_COLOR}},
-  {id:'land',type:'fill',source:'land',paint:{'fill-color':'#DBE4CD','fill-outline-color':'#9EAF95'}},
-  {id:'overview-relief',type:'raster',source:'russia-relief',maxzoom:6,paint:{'raster-opacity':['interpolate',['linear'],['zoom'],0,1,4,1,6,0],'raster-fade-duration':200}},
-  {id:'region-fill',type:'fill',source:'regions',paint:{'fill-color':'#D7E1CB','fill-opacity':.25}},
-  {id:'region-boundary',type:'line',source:'regions',paint:{'line-color':'#7E9279','line-width':.8,'line-opacity':.38}},
-  {id:'region-selected',type:'fill',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'fill-color':'#9BB58E','fill-opacity':.45}},
-  {id:'region-selected-outline',type:'line',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'line-color':'#486B45','line-width':2,'line-opacity':.9}},
+  {id:'land',type:'fill',source:'land',paint:{'fill-color':'#DDE6D5','fill-outline-color':'#A7B69D'}},
+  {id:'overview-relief',type:'raster',source:'russia-relief',maxzoom:6,paint:{'raster-opacity':['interpolate',['linear'],['zoom'],0,.92,4,.88,6,0],'raster-contrast':.28,'raster-saturation':-.18,'raster-brightness-min':.08,'raster-brightness-max':.92,'raster-fade-duration':180}},
+  {id:'region-fill',type:'fill',source:'regions',paint:{'fill-color':'#D7E0D0','fill-opacity':.18}},
+  {id:'region-boundary',type:'line',source:'regions',paint:{'line-color':'#748675','line-width':.7,'line-opacity':.32}},
+  {id:'region-selected',type:'fill',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'fill-color':'#91AC82','fill-opacity':.34}},
+  {id:'region-selected-outline',type:'line',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'line-color':'#315B45','line-width':1.6,'line-opacity':.86}},
   {id:MASK,type:'fill',source:'russia-mask',paint:{'fill-color':MAP_OUTSIDE_COLOR,'fill-antialias':false}},
  ]};
 }
@@ -160,7 +161,13 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     };
     updateDirections.current();
     if(regionRef.current&&!fitTerritory(map,regionRef.current,container.current,0,framedCamera))map.jumpTo({center:regionRef.current.center,zoom:regionRef.current.zoom});
-    map.on('zoomend',()=>setMapZoom(map.getZoom()));
+    map.on('zoomend',()=>{
+     const zoom=map.getZoom();setMapZoom(zoom);
+     if(map.getTerrain()){
+      map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(zoom)});
+      if(!trailRef.current)map.easeTo({pitch:terrainPitchForZoom(zoom,!!regionRef.current),duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:300});
+     }
+    });
     // The style's viewport-anchored hillshade follows the camera itself.
     // Keep contrast stable instead of restarting a paint transition on each pitch frame.
     map.on('moveend',()=>{
@@ -175,10 +182,10 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      setStatus(!navigator.onLine?OFFLINE_MESSAGE:overviewFallback?'Детальная карта недоступна. Показан сохранённый обзор.':basePreference.current==='overview'?OVERVIEW_MESSAGE:'');
      if(map.getSource('terrain-dem')){map.setSourceTileLodParams(4,2,'terrain-dem');map.setSourceTileLodParams(3,2,'hillshade-dem');map.setSourceTileLodParams(3,2,'openmaptiles');}
      if(!map.getSource('regions'))map.addSource('regions',{type:'geojson',data:'/data/territories.geojson'});
-     if(!map.getLayer('region-fill'))map.addLayer({id:'region-fill',type:'fill',source:'regions',paint:{'fill-color':'#A2BC8E','fill-opacity':['interpolate',['linear'],['zoom'],2,.12,7,0]}},MASK);
-     if(!map.getLayer('region-boundary'))map.addLayer({id:'region-boundary',type:'line',source:'regions',maxzoom:8,paint:{'line-color':'#758E70','line-width':.8,'line-opacity':.42}},MASK);
-     if(!map.getLayer('region-selected'))map.addLayer({id:'region-selected',type:'fill',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'fill-color':'#91AE80','fill-opacity':['interpolate',['linear'],['zoom'],2,.35,8,0]}},MASK);
-     if(!map.getLayer('region-selected-outline'))map.addLayer({id:'region-selected-outline',type:'line',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'line-color':'#486B45','line-width':2,'line-opacity':.9}},MASK);
+     if(!map.getLayer('region-fill'))map.addLayer({id:'region-fill',type:'fill',source:'regions',paint:{'fill-color':'#9CB48E','fill-opacity':['interpolate',['linear'],['zoom'],2,.1,7,0]}},MASK);
+     if(!map.getLayer('region-boundary'))map.addLayer({id:'region-boundary',type:'line',source:'regions',maxzoom:8,paint:{'line-color':'#718371','line-width':.7,'line-opacity':.34}},MASK);
+     if(!map.getLayer('region-selected'))map.addLayer({id:'region-selected',type:'fill',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'fill-color':'#91AC82','fill-opacity':['interpolate',['linear'],['zoom'],2,.3,8,0]}},MASK);
+     if(!map.getLayer('region-selected-outline'))map.addLayer({id:'region-selected-outline',type:'line',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'line-color':'#315B45','line-width':1.6,'line-opacity':.86}},MASK);
      highlightRegion(map,regionRef.current);
      applyMapLayerVisibility(map,layerVisibility.current);
     });
@@ -195,7 +202,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      if(cancelled)return;const sourceId=(event as typeof event&{sourceId?:string}).sourceId;
      if(!map.getStyle()&&!overviewFallback){overviewFallback=true;styleSession.current?.fallback();setStatus('Детальная карта недоступна. Открываем сохранённый обзор.');}
      else if(['overview-land','land','regions','russia-mask'].includes(sourceId||''))setStatus('Не удалось загрузить географию России. Обновите страницу.');
-     else setStatus('Часть деталей карты не загрузилась. Можно перейти к сохранённому обзору.');
+     else setStatus('Не все детали карты загрузились. Сохранённый обзор доступен.');
     });
     resize=new ResizeObserver(()=>{
      if(cancelled||!container.current)return;
@@ -220,8 +227,9 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     if(frameRefit.current?.active()){fullView.current=false;map.setTerrain(null);setTerrain(false);fitTerritory(map,region,container.current,reduced?0:900,framedCamera);}
    }else{
     fullView.current=false;framedCamera.current=null;
-    if(map.getSource('terrain-dem'))map.setTerrain({source:'terrain-dem',exaggeration:1});
-    map.flyTo({center:region.center,zoom:region.zoom,pitch:region.id==='karelia'?22:42,offset:window.innerWidth<=700?[0,-Math.round(container.current!.clientHeight*.23)]:[0,0],duration:reduced?0:1100,essential:false});
+    const regionPitch=terrainPitchForZoom(region.zoom,true);
+    if(map.getSource('terrain-dem'))map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(region.zoom)});
+    map.flyTo({center:region.center,zoom:region.zoom,pitch:region.id==='karelia'?Math.min(regionPitch,26):regionPitch,offset:window.innerWidth<=700?[0,-Math.round(container.current!.clientHeight*.23)]:[0,0],duration:reduced?0:1100,essential:false});
     setTerrain(!!map.getSource('terrain-dem'));
    }
   }else fitRussia(0);
@@ -247,9 +255,9 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     if(data.type==='FeatureCollection')data.features.forEach((feature:{geometry:{coordinates:unknown}})=>walk(feature.geometry.coordinates));else if(data.type==='Feature')walk(data.geometry.coordinates);else walk(data.coordinates);
     const coverage=coverageRef.current,covered=coverage?coveredRussiaBounds(coordinates,coverage.area):null;
     if(covered){
-     fullView.current=false;if(map.getSource('terrain-dem')){map.setTerrain({source:'terrain-dem',exaggeration:1});setTerrain(true);}
+     const routeZoom=11;fullView.current=false;if(map.getSource('terrain-dem')){map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(routeZoom)});setTerrain(true);}
      const padding=container.current?russiaView(container.current).padding:80;
-     map.fitBounds([[covered[0],covered[1]],[covered[2],covered[3]]],{padding,maxZoom:14,pitch:55,bearing:-20,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:900});
+     map.fitBounds([[covered[0],covered[1]],[covered[2],covered[3]]],{padding,maxZoom:14,pitch:terrainPitchForZoom(routeZoom,true),bearing:-18,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:900});
     }else if(coordinates.length)setStatus(ROUTE_COVERAGE_MESSAGE);
    }
    },onError:()=>setStatus(ROUTE_ERROR),
@@ -283,7 +291,12 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
   const map=mapRef.current;if(!map||!loaded||(next&&(baseMode==='overview'||offline)))return;
   frameRefit.current?.cancel();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(next){if(!map.getSource('terrain-dem'))map.addSource('terrain-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'});map.setTerrain({source:'terrain-dem',exaggeration:1});map.easeTo({pitch:55,duration:reduced?0:650});}
+  if(next){
+   if(!map.getSource('terrain-dem'))map.addSource('terrain-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'});
+   const zoom=map.getZoom();
+   map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(zoom)});
+   map.easeTo({pitch:terrainPitchForZoom(zoom,!!regionRef.current||!!trailRef.current),duration:reduced?0:650});
+  }
   else{map.setTerrain(null);map.easeTo({pitch:0,bearing:0,duration:reduced?0:500});}setTerrain(next);
  }
  function locate(){
