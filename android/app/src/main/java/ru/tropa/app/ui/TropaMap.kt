@@ -212,30 +212,32 @@ fun TropaMap(
         val nativeMap = map ?: return@LaunchedEffect
         if (styleRevision == 0 || styleLoading) return@LaunchedEffect
         val area = displayArea ?: return@LaunchedEffect
-        withContext(Dispatchers.Main.immediate) {
-        nativeMap.setLatLngBoundsForCameraTarget(area.cameraBounds)
-        scopeNotice = null
-        val style = nativeMap.style ?: return@LaunchedEffect
-        style.getSourceAs<GeoJsonSource>("regions")?.setGeoJson(regionPoints(regions))
-        style.getSourceAs<GeoJsonSource>("focus")?.setGeoJson(points(selected?.let { listOf(it.longitude to it.latitude) } ?: emptyList()))
         val geometry = route?.inlineGeometry ?: route?.geometryAsset?.let { asset ->
-            withContext(Dispatchers.IO) { runCatching { context.assets.open(asset).bufferedReader().use { it.readText() } }.getOrNull() }
-        }
-        style.getSourceAs<GeoJsonSource>("route")?.setGeoJson(geometry ?: points(emptyList()))
-        val focusKey = "${selected?.id}:${route?.id}"
-        if (lastFittedFocus == focusKey) return@LaunchedEffect
-        lastFittedFocus = focusKey
-        if (geometry != null) {
-            val coordinates = mutableListOf<LatLng>()
-            collectCoordinates(JSONObject(geometry), coordinates)
-            if (coordinates.size > 1) {
-                nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.Builder().includes(coordinates).build(), 52), 500)
+            withContext(Dispatchers.IO) {
+                runCatching { context.assets.open(asset).bufferedReader().use { it.readText() } }.getOrNull()
             }
-        } else if (selected != null) {
-            nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                LatLng(selected.latitude, selected.longitude), selected.zoom,
-            ), 500)
-        } else nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(area.fitBounds, 24), 500)
+        }
+        withContext(Dispatchers.Main.immediate) ui@{
+            nativeMap.setLatLngBoundsForCameraTarget(area.cameraBounds)
+            scopeNotice = null
+            val style = nativeMap.style ?: return@ui
+            style.getSourceAs<GeoJsonSource>("regions")?.setGeoJson(regionPoints(regions))
+            style.getSourceAs<GeoJsonSource>("focus")?.setGeoJson(points(selected?.let { listOf(it.longitude to it.latitude) } ?: emptyList()))
+            style.getSourceAs<GeoJsonSource>("route")?.setGeoJson(geometry ?: points(emptyList()))
+            val focusKey = "${selected?.id}:${route?.id}"
+            if (lastFittedFocus == focusKey) return@ui
+            lastFittedFocus = focusKey
+            if (geometry != null) {
+                val coordinates = mutableListOf<LatLng>()
+                collectCoordinates(JSONObject(geometry), coordinates)
+                if (coordinates.size > 1) {
+                    nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.Builder().includes(coordinates).build(), 52), 500)
+                }
+            } else if (selected != null) {
+                nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    LatLng(selected.latitude, selected.longitude), selected.zoom,
+                ), 500)
+            } else nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(area.fitBounds, 24), 500)
         }
     }
 
@@ -253,7 +255,7 @@ fun TropaMap(
             lastPositionTime = ready.fix.measuredAt
             nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
         }
-        }
+    }
     }
 
     Box(modifier.background(Palette.Water)) {
