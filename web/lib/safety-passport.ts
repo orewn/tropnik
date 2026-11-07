@@ -2,7 +2,7 @@ export const SAFETY_PASSPORT_SCHEMA = 1 as const;
 export const SAFETY_STORAGE_KEY = 'tropnik-safety-passports-v1';
 export const MCHS_REGISTRATION_URL = 'https://forms.mchs.gov.ru/registration_tourist_groups';
 
-export type SafetyStatus = 'draft' | 'ready' | 'submitted' | 'confirmed' | 'active' | 'closed';
+export type SafetyStatus = 'draft' | 'ready' | 'submitted' | 'confirmed' | 'amendment_required' | 'active' | 'closed';
 
 export type SafetyParticipant = {
   id: string;
@@ -178,9 +178,10 @@ export function allowedSafetyTransition(current: SafetyStatus, next: SafetyStatu
   const allowed: Record<SafetyStatus, SafetyStatus[]> = {
     draft: ['ready'],
     ready: ['draft', 'submitted'],
-    submitted: ['ready', 'confirmed'],
-    confirmed: ['submitted', 'active'],
-    active: ['confirmed', 'closed'],
+    submitted: ['ready', 'confirmed', 'amendment_required'],
+    confirmed: ['submitted', 'active', 'amendment_required'],
+    amendment_required: ['ready', 'submitted'],
+    active: ['confirmed', 'closed', 'amendment_required'],
     closed: ['active'],
   };
   return allowed[current].includes(next);
@@ -202,9 +203,14 @@ export function transitionSafetyPassport(passport: SafetyPassport, next: SafetyS
   };
 }
 
+export function invalidateOfficialStatus(passport: SafetyPassport, now = new Date()): SafetyPassport {
+  if (!['submitted', 'confirmed', 'active'].includes(passport.status)) return {...passport, updatedAt: now.toISOString()};
+  return {...passport, status: 'amendment_required', updatedAt: now.toISOString()};
+}
+
 export function parseSafetyPassport(value: unknown): SafetyPassport | undefined {
   if (!isRecord(value) || value.schemaVersion !== SAFETY_PASSPORT_SCHEMA || typeof value.id !== 'string' || !value.id) return undefined;
-  const statuses: SafetyStatus[] = ['draft', 'ready', 'submitted', 'confirmed', 'active', 'closed'];
+  const statuses: SafetyStatus[] = ['draft', 'ready', 'submitted', 'confirmed', 'amendment_required', 'active', 'closed'];
   const status = statuses.includes(value.status as SafetyStatus) ? value.status as SafetyStatus : 'draft';
   const participants = Array.isArray(value.participants) ? value.participants.flatMap(item => {
     if (!isRecord(item) || typeof item.id !== 'string' || !item.id) return [];
