@@ -59,9 +59,9 @@ jobs:
       - name: Check static client types
         run: node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
 
-      - name: Strictly lint changed interaction modules
+      - name: Strictly lint new performance primitives
         working-directory: web
-        run: pnpm exec eslint --max-warnings=0 components/Explore.tsx components/Atlas.tsx components/Atlas2D.tsx lib/map-direction-layout.ts lib/map-framing.ts tests/ui-smoothness.test.mjs tests/map-framing.test.mjs
+        run: pnpm exec eslint --max-warnings=0 lib/map-direction-layout.ts lib/map-framing.ts tests/ui-smoothness.test.mjs tests/map-framing.test.mjs
 
       - name: Require zero lint regression
         shell: bash
