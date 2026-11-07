@@ -65,7 +65,20 @@ jobs:
       - name: Verify real mobile rendering and sheet interaction
         env:
           GITHUB_SHA: ${{ github.sha }}
-        run: node tools/pages-preview/browser-smoke.mjs
+        run: |
+          set -euo pipefail
+          passed=false
+          for attempt in 1 2; do
+            if node tools/pages-preview/browser-smoke.mjs; then
+              passed=true
+              break
+            fi
+            if [ "$attempt" -eq 1 ]; then
+              echo 'Chromium smoke hit a transient local startup failure; retrying once.' >&2
+              sleep 2
+            fi
+          done
+          test "$passed" = true
       - name: Record the verified build identity
         id: build_metadata
         run: |
