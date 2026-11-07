@@ -88,3 +88,17 @@ if old not in text and new not in text:
     raise SystemExit('Safety UI test anchor not found')
 text = text.replace(old, new)
 safety_test.write_text(text)
+
+pages_build = root / 'tools/pages-preview/build.mjs'
+text = pages_build.read_text()
+old_pages = """const infoPages = {
+  about: 'О проекте', safety: 'Подготовка к походу', sources: 'Источники и лицензии',
+"""
+new_pages = """const infoPages = {
+  about: 'О проекте', safety: 'Подготовка к походу', 'safety/registration': 'Регистрация похода в МЧС', sources: 'Источники и лицензии',
+"""
+if old_pages in text:
+    text = text.replace(old_pages, new_pages, 1)
+elif new_pages not in text:
+    raise SystemExit('Pages catalogue anchor not found')
+pages_build.write_text(text)
