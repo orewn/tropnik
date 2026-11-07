@@ -1,0 +1,77 @@
+name: Apply map label safe area
+
+on:
+  push:
+    branches: [fix/map-label-safe-area-20261107]
+    paths:
+      - '.github/workflows/apply-map-label-safe-area.yml'
+      - 'tools/apply-map-label-safe-area.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-map-label-safe-area-20261107
+  cancel-in-progress: false
+
+jobs:
+  apply-test-and-commit:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out the reviewed branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: fix/map-label-safe-area-20261107
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Apply strict source migration
+        run: |
+          python -m py_compile tools/apply-map-label-safe-area.py
+          python tools/apply-map-label-safe-area.py
+          git diff --check
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Install frozen web dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+
+      - name: Run map, web and type regressions
+        run: |
+          node --experimental-strip-types --test --test-concurrency=1 web/tests/*.test.mjs
+          node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
+
+      - name: Require the intended label-boundary changes
+        run: |
+          grep -q 'MAP_LABEL_SAFE_AREA' web/lib/map-direction-layout.ts
+          grep -q 'trail-marker-label' web/components/Atlas.tsx
+          grep -q 'trail-marker-label' web/components/Atlas2D.tsx
+          ! grep -q 'button.title=t.title' web/components/Atlas.tsx
+          grep -q 'Four-edge map label safe area' web/app/map-polish.css
+          git diff --check
+          git status --short
+
+      - name: Commit reviewed source and tests
+        run: |
+          git config user.name 'tropnik-release-bot'
+          git config user.email '38781694+orewn@users.noreply.github.com'
+          git add \
+            docs/MAP-VISUAL-SYSTEM.md \
+            web/app/map-polish.css \
+            web/components/Atlas.tsx \
+            web/components/Atlas2D.tsx \
+            web/lib/map-direction-layout.ts \
+            web/tests/map-direction-layout.test.mjs \
+            web/tests/map-polish.test.mjs
+          git commit -m 'Keep every map label inside a four-edge safe area'
+          git push origin HEAD:fix/map-label-safe-area-20261107
