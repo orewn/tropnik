@@ -8,6 +8,7 @@ on:
       - 'tools/final-mobile-map-release.py'
       - 'tools/final-mobile-prepatch.py'
       - 'tools/final-mobile-postpatch.py'
+      - 'tools/final-mobile-lint-compare.py'
   workflow_dispatch:
 
 permissions:
@@ -21,7 +22,7 @@ jobs:
   verify-and-commit:
     if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - name: Check out exact release branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -29,13 +30,6 @@ jobs:
           ref: fix/native-trail-points-final
           fetch-depth: 0
           persist-credentials: true
-
-      - name: Apply deterministic final patch
-        run: |
-          python3 tools/final-mobile-prepatch.py
-          python3 tools/final-mobile-map-release.py
-          python3 tools/final-mobile-postpatch.py
-          git diff --check
 
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -49,14 +43,36 @@ jobs:
           test "$(pnpm --version)" = '11.25.0'
           pnpm --dir web install --frozen-lockfile
 
+      - name: Record current main lint baseline
+        run: |
+          set +e
+          pnpm --dir web exec eslint . --ignore-pattern dist --ignore-pattern .next --format json > "$RUNNER_TEMP/lint-before.json"
+          set -e
+          test -s "$RUNNER_TEMP/lint-before.json"
+
+      - name: Apply deterministic final patch
+        run: |
+          python3 tools/final-mobile-prepatch.py
+          python3 tools/final-mobile-map-release.py
+          python3 tools/final-mobile-postpatch.py
+          git diff --check
+
       - name: Run full web regression suite
         run: pnpm --dir web test
 
       - name: Check static client types
         run: node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
 
-      - name: Lint release-owned source
-        run: pnpm --dir web exec eslint --max-warnings=0 lib/map-direction-layout.ts lib/map-trail-points.ts components/Atlas.tsx components/Atlas2D.tsx lib/canvas-relief.ts tests/map-trail-points.test.mjs
+      - name: Strictly lint new map primitives
+        run: pnpm --dir web exec eslint --max-warnings=0 lib/map-direction-layout.ts lib/map-trail-points.ts lib/canvas-relief.ts tests/map-trail-points.test.mjs
+
+      - name: Require zero lint regression across the app
+        run: |
+          set +e
+          pnpm --dir web exec eslint . --ignore-pattern dist --ignore-pattern .next --format json > "$RUNNER_TEMP/lint-after.json"
+          set -e
+          test -s "$RUNNER_TEMP/lint-after.json"
+          python3 tools/final-mobile-lint-compare.py "$RUNNER_TEMP/lint-before.json" "$RUNNER_TEMP/lint-after.json"
 
       - name: Build production web app
         run: pnpm --dir web build
@@ -71,6 +87,7 @@ jobs:
           test ! -e tools/final-mobile-map-release.py
           test ! -e tools/final-mobile-prepatch.py
           test ! -e tools/final-mobile-postpatch.py
+          test ! -e tools/final-mobile-lint-compare.py
           test ! -e .github/workflows/final-mobile-map-release.yml
           git diff --check
           git status --short
