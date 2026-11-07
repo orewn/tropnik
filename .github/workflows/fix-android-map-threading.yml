@@ -1,0 +1,139 @@
+name: Fix Android map threading source
+
+on:
+  push:
+    branches: [fix/map-label-viewport-20261107]
+    paths:
+      - '.github/workflows/fix-android-map-threading.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: fix/map-label-viewport-20261107
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Replace prohibited nested returns with an explicit UI lambda
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt')
+          text = path.read_text()
+          old = '''    LaunchedEffect(map, styleRevision, displayArea, selected?.id, route?.id) {
+                  val nativeMap = map ?: return@LaunchedEffect
+                  if (styleRevision == 0 || styleLoading) return@LaunchedEffect
+                  val area = displayArea ?: return@LaunchedEffect
+                  withContext(Dispatchers.Main.immediate) {
+                  nativeMap.setLatLngBoundsForCameraTarget(area.cameraBounds)
+                  scopeNotice = null
+                  val style = nativeMap.style ?: return@LaunchedEffect
+                  style.getSourceAs<GeoJsonSource>("regions")?.setGeoJson(regionPoints(regions))
+                  style.getSourceAs<GeoJsonSource>("focus")?.setGeoJson(points(selected?.let { listOf(it.longitude to it.latitude) } ?: emptyList()))
+                  val geometry = route?.inlineGeometry ?: route?.geometryAsset?.let { asset ->
+                      withContext(Dispatchers.IO) { runCatching { context.assets.open(asset).bufferedReader().use { it.readText() } }.getOrNull() }
+                  }
+                  style.getSourceAs<GeoJsonSource>("route")?.setGeoJson(geometry ?: points(emptyList()))
+                  val focusKey = "${selected?.id}:${route?.id}"
+                  if (lastFittedFocus == focusKey) return@LaunchedEffect
+                  lastFittedFocus = focusKey
+                  if (geometry != null) {
+                      val coordinates = mutableListOf<LatLng>()
+                      collectCoordinates(JSONObject(geometry), coordinates)
+                      if (coordinates.size > 1) {
+                          nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.Builder().includes(coordinates).build(), 52), 500)
+                      }
+                  } else if (selected != null) {
+                      nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                          LatLng(selected.latitude, selected.longitude), selected.zoom,
+                      ), 500)
+                  } else nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(area.fitBounds, 24), 500)
+                  }
+              }
+          '''
+          new = '''    LaunchedEffect(map, styleRevision, displayArea, selected?.id, route?.id) {
+                  val nativeMap = map ?: return@LaunchedEffect
+                  if (styleRevision == 0 || styleLoading) return@LaunchedEffect
+                  val area = displayArea ?: return@LaunchedEffect
+                  val geometry = route?.inlineGeometry ?: route?.geometryAsset?.let { asset ->
+                      withContext(Dispatchers.IO) {
+                          runCatching { context.assets.open(asset).bufferedReader().use { it.readText() } }.getOrNull()
+                      }
+                  }
+                  withContext(Dispatchers.Main.immediate) ui@{
+                      nativeMap.setLatLngBoundsForCameraTarget(area.cameraBounds)
+                      scopeNotice = null
+                      val style = nativeMap.style ?: return@ui
+                      style.getSourceAs<GeoJsonSource>("regions")?.setGeoJson(regionPoints(regions))
+                      style.getSourceAs<GeoJsonSource>("focus")?.setGeoJson(points(selected?.let { listOf(it.longitude to it.latitude) } ?: emptyList()))
+                      style.getSourceAs<GeoJsonSource>("route")?.setGeoJson(geometry ?: points(emptyList()))
+                      val focusKey = "${selected?.id}:${route?.id}"
+                      if (lastFittedFocus == focusKey) return@ui
+                      lastFittedFocus = focusKey
+                      if (geometry != null) {
+                          val coordinates = mutableListOf<LatLng>()
+                          collectCoordinates(JSONObject(geometry), coordinates)
+                          if (coordinates.size > 1) {
+                              nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.Builder().includes(coordinates).build(), 52), 500)
+                          }
+                      } else if (selected != null) {
+                          nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                              LatLng(selected.latitude, selected.longitude), selected.zoom,
+                          ), 500)
+                      } else nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(area.fitBounds, 24), 500)
+                  }
+              }
+          '''
+          if old not in text:
+              raise SystemExit('Reviewed TropaMap focus block no longer matches')
+          text = text.replace(old, new, 1)
+
+          old_position = '''        withContext(Dispatchers.Main.immediate) {
+                  val ready = position as? PositionState.Ready
+                  val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
+                  nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
+                      points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
+                  scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
+                  if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
+                      lastPositionTime = ready.fix.measuredAt
+                      nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+                  }
+                  }
+          '''
+          new_position = '''        withContext(Dispatchers.Main.immediate) {
+                  val ready = position as? PositionState.Ready
+                  val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
+                  nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
+                      points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
+                  scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
+                  if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
+                      lastPositionTime = ready.fix.measuredAt
+                      nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+                  }
+              }
+          '''
+          if old_position not in text:
+              raise SystemExit('Reviewed TropaMap position block no longer matches')
+          path.write_text(text.replace(old_position, new_position, 1))
+          PY
+          ! grep -n "return@LaunchedEffect" android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt | awk -F: '$1 >= 210 && $1 <= 250 { found=1 } END { exit found }'
+          git diff --check
+
+      - name: Commit corrected source only
+        run: |
+          test "$(git status --short | wc -l)" -eq 1
+          test "$(git status --short | awk '{print $2}')" = 'android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt'
+          git config user.name 'tropnik-release-bot'
+          git config user.email '38781694+orewn@users.noreply.github.com'
+          git add android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt
+          git commit -m 'Fix Android map UI-context control flow'
+          git push origin HEAD:fix/map-label-viewport-20261107
