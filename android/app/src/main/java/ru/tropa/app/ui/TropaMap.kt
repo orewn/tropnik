@@ -246,17 +246,17 @@ fun TropaMap(
         if (styleRevision == 0 || styleLoading) return@LaunchedEffect
         val area = displayArea ?: return@LaunchedEffect
         withContext(Dispatchers.Main.immediate) {
-        val ready = position as? PositionState.Ready
-        val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
-        nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
-            points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
-        scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
-        if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
-            lastPositionTime = ready.fix.measuredAt
-            nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+            val ready = position as? PositionState.Ready
+            val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
+            nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
+                points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
+            scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
+            if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
+                lastPositionTime = ready.fix.measuredAt
+                nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+            }
         }
     }
-}
 
     Box(modifier.background(Palette.Water)) {
         AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
