@@ -1,0 +1,57 @@
+name: Apply map visual final
+
+on:
+  push:
+    branches: [release/map-visual-final-20261107]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: map-visual-final
+  cancel-in-progress: false
+
+jobs:
+  apply-and-verify:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: release/map-visual-final-20261107
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Apply deterministic map patch
+        run: node tools/apply-map-visual-final.mjs
+      - name: Install pinned dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Regenerate the map style
+        run: node web/scripts/create-map-style.mjs
+      - name: Run web regression checks
+        working-directory: web
+        run: node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs
+      - name: Check static client types
+        run: node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
+      - name: Restore the verified Pages APK
+        run: node tools/pages-preview/fetch-apk.mjs
+      - name: Build the public static preview
+        run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify generated diff
+        run: git diff --check
+      - name: Commit verified generated changes
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add web/components/Atlas.tsx web/scripts/create-map-style.mjs web/public/maps/tropa-style.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Polish map terrain, palette and legal attribution"
+          git push origin HEAD:release/map-visual-final-20261107
