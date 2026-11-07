@@ -59,9 +59,14 @@ jobs:
       - name: Check static client types
         run: node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
 
-      - name: Strictly lint permanent performance and browser gates
+      - name: Strictly lint permanent web performance gates
         working-directory: web
-        run: pnpm exec eslint --max-warnings=0 lib/map-direction-layout.ts lib/map-framing.ts tests/ui-smoothness.test.mjs tests/map-framing.test.mjs ../tools/pages-preview/browser-smoke.mjs ../tools/pages-preview/verify-deployed.mjs
+        run: pnpm exec eslint --max-warnings=0 lib/map-direction-layout.ts lib/map-framing.ts tests/ui-smoothness.test.mjs tests/map-framing.test.mjs
+
+      - name: Validate permanent browser gate scripts
+        run: |
+          node --check tools/pages-preview/browser-smoke.mjs
+          node --check tools/pages-preview/verify-deployed.mjs
 
       - name: Require zero lint regression
         shell: bash
