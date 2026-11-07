@@ -51,6 +51,7 @@ jobs:
         run: |
           test -f web/pages-preview/dist/safety/registration/index.html
           grep -q 'Регистрация похода в МЧС' web/pages-preview/dist/safety/registration/index.html
+          grep -q '"path": "/safety/registration"' web/pages-preview/dist/page-manifest.json
           test "$(node -p "require('./web/package.json').version")" = '0.4.9'
           grep -q "tropnik-shell-v16" web/public/sw.js
       - name: Persist verified cleanup
@@ -58,7 +59,7 @@ jobs:
           if ! git diff --quiet; then
             git config user.name 'tropnik-release-bot'
             git config user.email '38781694+orewn@users.noreply.github.com'
-            git add web/components/SafetyRegistration.tsx web/tests/map-polish.test.mjs web/tests/safety-passport.test.mjs
-            git commit -m 'fix(safety): align release checks and remove dead import'
+            git add web/components/SafetyRegistration.tsx web/tests/map-polish.test.mjs web/tests/safety-passport.test.mjs tools/pages-preview/build.mjs
+            git commit -m 'fix(safety): persist verified registration release cleanup'
             git push origin HEAD:feature/safety-registration-0.4.9
           fi
