@@ -22,15 +22,19 @@ elif unique not in text:
 # fixture() creates an active departure to provide a verified guide and route.
 # This scenario creates another departure for a new safety revision, so release
 # the fixture departure first. The production overlap guard remains unchanged.
-cancel_block = '''\tif _, err = s.Pool.Exec(ctx, "UPDATE departures SET status='cancelled' WHERE id=$1", base.ID); err != nil {
-\t\tt.Fatal(err)
-\t}
-'''
-create_anchor = '\td, err := s.CreateDeparture'
 if "UPDATE departures SET status='cancelled' WHERE id=$1" not in text:
-    if create_anchor not in text:
+    marker = 'd, err := s.CreateDeparture'
+    marker_at = text.find(marker)
+    if marker_at < 0:
         raise SystemExit('safety fixture departure creation anchor not found')
-    text = text.replace(create_anchor, cancel_block + create_anchor, 1)
+    line_at = text.rfind('\n', 0, marker_at) + 1
+    indent = text[line_at:marker_at]
+    cancel_block = (
+        f'{indent}if _, err = s.Pool.Exec(ctx, "UPDATE departures SET status=\'cancelled\' WHERE id=$1", base.ID); err != nil {{\n'
+        f'{indent}\tt.Fatal(err)\n'
+        f'{indent}}}\n'
+    )
+    text = text[:line_at] + cancel_block + text[line_at:]
 
 integration.write_text(text)
 Path(__file__).unlink()
