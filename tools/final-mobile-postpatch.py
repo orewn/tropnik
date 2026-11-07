@@ -38,6 +38,24 @@ text=text.replace('trails:readonly Trail[]','trails:readonly TrailPointInput[]')
 text=text.replace('region:MapRegion|undefined','region:RegionHint|undefined')
 points.write_text(text)
 
+canvas=Path('web/components/Atlas2D.tsx')
+text=canvas.read_text()
+start=""" useEffect(()=>{
+  let cancelled=false,resize:ResizeObserver|undefined,panelChanges:MutationObserver|undefined,resizeFrame=0,paintFrame=0,directionLayoutFrame=0,clamping=false,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined;
+"""
+replacement_start=""" useEffect(()=>{
+  const routePointRegistry=routePointLayers.current;
+  let cancelled=false,resize:ResizeObserver|undefined,panelChanges:MutationObserver|undefined,resizeFrame=0,paintFrame=0,directionLayoutFrame=0,clamping=false,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined;
+"""
+if start not in text:
+    raise SystemExit('Atlas2D lifecycle anchor changed unexpectedly')
+text=text.replace(start,replacement_start,1)
+cleanup="directionButtons.current.clear();routePointLayers.current.clear();leafletRef.current=null;"
+if cleanup not in text:
+    raise SystemExit('Atlas2D route registry cleanup anchor missing')
+text=text.replace(cleanup,"directionButtons.current.clear();routePointRegistry.clear();leafletRef.current=null;",1)
+canvas.write_text(text)
+
 direction=Path('web/tests/map-direction-layout.test.mjs')
 text=direction.read_text()
 text=text.replace("assert.equal(mapLabelPlacement('bottom',{left:100,right:132,top:700,bottom:732},40,wide),'top');","assert.equal(mapLabelPlacement('bottom',{left:100,right:132,top:700,bottom:732},40,wide),'bottom');")
