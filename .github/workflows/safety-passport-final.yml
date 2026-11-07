@@ -1,0 +1,100 @@
+name: Safety passport final gate
+
+on:
+  push:
+    branches: [feature/safety-passport-mchs-final]
+    paths:
+      - '.github/workflows/safety-passport-final.yml'
+      - 'tools/apply-safety-web-packed.py'
+      - 'tools/safety-backend.part-*'
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: tropnik-safety-passport-final
+  cancel-in-progress: true
+
+jobs:
+  verify-and-commit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      TROPA_SAFETY_DATA_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    steps:
+      - name: Check out safety branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: feature/safety-passport-mchs-final
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.27.3'
+          cache-dependency-path: backend/go.sum
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Install frozen web dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+
+      - name: Apply safety implementation
+        run: |
+          set -euo pipefail
+          cat tools/safety-backend.part-* > /tmp/apply-safety-backend-packed.py
+          python3 /tmp/apply-safety-backend-packed.py
+          python3 tools/apply-safety-web-packed.py
+          find backend -name '*.go' -print0 | xargs -0 gofmt -w
+          git diff --check
+          if git diff --unified=0 -- backend web docs | grep -Ei 'platformFee|payment_intent|pricePerPerson|commission|комисси|оплат'; then
+            echo 'Commercial functionality entered the safety-only release.' >&2
+            exit 1
+          fi
+
+      - name: Backend race tests
+        working-directory: backend
+        run: go test -race -count=1 ./...
+
+      - name: Backend static checks
+        working-directory: backend
+        run: go vet ./...
+
+      - name: Native PostGIS integration
+        run: |
+          set -euo pipefail
+          bash infra/run-integration.sh
+
+      - name: Web regression tests
+        working-directory: web
+        run: pnpm test
+
+      - name: Static client types
+        run: node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
+
+      - name: Production web build
+        working-directory: web
+        run: pnpm build
+
+      - name: Commit verified safety release
+        run: |
+          set -euo pipefail
+          git config user.name 'tropnik-safety-release-bot'
+          git config user.email '38781694+orewn@users.noreply.github.com'
+          git add backend web docs
+          git diff --cached --check
+          test -n "$(git diff --cached --name-only)"
+          git commit -m 'Add official hike safety passport and MChS workflow'
+          git push origin HEAD:feature/safety-passport-mchs-final
