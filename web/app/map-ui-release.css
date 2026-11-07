@@ -116,3 +116,127 @@
   .explore-layout .leaflet-route-tooltip{display:none!important}
 }
 @media(hover:none),(pointer:coarse){.explore-layout .leaflet-route-tooltip{display:none!important}}
+
+
+/* Tropnik 0.4.8 interaction and rendering performance pass. */
+@keyframes fact-progress-smooth{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.fact-progress span{
+  width:100%!important;
+  transform:scaleX(0);
+  transform-origin:left center;
+  animation-name:fact-progress-smooth!important;
+  will-change:transform;
+}
+.explore-panel-content{
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.explore-layout .atlas-canvas[data-map-camera] .region-marker-label,
+.explore-layout .atlas-canvas[data-map-camera] .trail-marker-label{
+  opacity:0!important;
+  visibility:hidden!important;
+  transition:none!important;
+}
+@supports(content-visibility:auto){
+  .explore-panel-content .trail-card{
+    content-visibility:auto;
+    contain-intrinsic-size:132px;
+  }
+}
+@media(max-width:700px){
+  .explore-layout{
+    --sheet-expanded-height:min(56svh,545px);
+    --sheet-peek:156px;
+  }
+  .explore-layout .explore-panel,
+  .explore-layout .explore-panel.collapsed,
+  .explore-layout .explore-panel.expanded{
+    height:var(--sheet-expanded-height)!important;
+    min-height:0!important;
+    max-height:calc(100svh - var(--header) - 8px)!important;
+    overflow:hidden;
+    transform:translate3d(0,0,0);
+    transition:transform .28s cubic-bezier(.22,1,.36,1)!important;
+    will-change:transform;
+    backface-visibility:hidden;
+    contain:layout paint style;
+  }
+  .explore-layout.sheet-closed .explore-panel{
+    transform:translate3d(0,calc(100% - var(--sheet-peek)),0);
+  }
+  .explore-layout.sheet-open .explore-panel{
+    transform:translate3d(0,0,0);
+  }
+  .explore-layout .sheet-handle{
+    display:grid;
+    place-items:center;
+    flex:0 0 44px;
+    width:100%;
+    min-height:44px;
+    height:44px;
+    padding:0;
+    touch-action:manipulation;
+    user-select:none;
+    -webkit-user-select:none;
+    background:var(--surface);
+  }
+  .explore-layout .sheet-handle>span{
+    width:40px;
+    height:5px;
+    background:#AEBDA4;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+    transition:width .18s ease,background-color .18s ease,transform .18s ease;
+  }
+  .explore-layout.sheet-open .sheet-handle>span{
+    width:48px;
+    background:var(--line-strong);
+  }
+  .explore-layout.sheet-closed .explore-panel-content{
+    overflow:hidden!important;
+    pointer-events:none;
+  }
+  .explore-layout.sheet-closed .sheet-handle{
+    pointer-events:auto;
+  }
+  .explore-layout .explore-panel-content{
+    padding-top:0!important;
+    scroll-behavior:auto;
+  }
+  .explore-layout .map-context,
+  .explore-layout .map-style-switch,
+  .explore-layout .map-controls,
+  .explore-layout .layer-button,
+  .explore-layout .layer-menu,
+  .explore-layout .map-message,
+  .map-attribution-content,
+  .map-attribution-toggle{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    background:rgba(255,254,250,.985)!important;
+  }
+  .explore-layout .map-style-switch,
+  .explore-layout .map-controls,
+  .explore-layout .layer-button,
+  .explore-layout .fact-card{
+    box-shadow:0 8px 22px rgba(29,48,38,.10)!important;
+  }
+  .explore-layout .fact-card{
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    contain:layout paint style;
+  }
+}
+@media(hover:none),(pointer:coarse){
+  .fact-photo img{transition:none!important}
+  .fact-card:hover .fact-photo img{transform:none!important}
+  .explore-layout .map-style-switch button:active:not(:disabled),
+  .explore-layout .map-controls button:active:not(:disabled),
+  .explore-layout .layer-button:active:not(:disabled){transform:none!important}
+}
+@media(max-height:620px) and (orientation:landscape) and (max-width:900px){
+  .explore-layout{--sheet-expanded-height:calc(100svh - var(--header) - 8px);--sheet-peek:112px}
+}
+@media(prefers-reduced-motion:reduce){
+  .explore-layout .explore-panel{transition:none!important}
+  .fact-progress span{animation:none!important;transform:scaleX(1)}
+}

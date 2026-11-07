@@ -248,7 +248,12 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
 export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
   const root=viewport.closest('.explore-layout')??viewport.parentElement??viewport;
   const selector=MAP_LABEL_OBSTACLE_SELECTORS.join(',');
-  const resize=new ResizeObserver(schedule),observed=new Set<Element>();
+  let frame=0;
+  const queue=()=>{
+    if(frame)return;
+    frame=requestAnimationFrame(()=>{frame=0;schedule();});
+  };
+  const resize=new ResizeObserver(queue),observed=new Set<Element>();
   const observe=()=>{
     for(const element of [viewport,...root.querySelectorAll(selector)])if(!observed.has(element)){observed.add(element);resize.observe(element);}
   };
@@ -257,31 +262,34 @@ export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
     const relevant=records.some(record=>{
       const target=record.target;return !(target instanceof Element)||!target.closest('.atlas-canvas');
     });
-    if(relevant){observe();schedule();}
+    if(relevant){observe();queue();}
   });
-  mutation.observe(root,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden','aria-expanded']});
-  const eventSchedule=()=>schedule();
-  root.addEventListener('pointerover',eventSchedule,true);
-  root.addEventListener('focusin',eventSchedule,true);
-  root.addEventListener('transitionend',eventSchedule,true);
+  mutation.observe(root,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden','aria-expanded','data-sheet-state']});
+  const relevantEvent=(event:Event)=>{
+    const target=event.target;
+    if(!(target instanceof Element))return;
+    if(target===root||target.matches('.explore-panel')||target.closest('.region-marker,.trail-marker,.fact-card,.fact-closed,.map-style-switch,.map-controls,.layer-control,.map-message'))queue();
+  };
+  root.addEventListener('focusin',relevantEvent,true);
+  root.addEventListener('transitionend',relevantEvent,true);
   const fonts=document.fonts,visual=window.visualViewport;
-  void fonts.ready.then(schedule).catch(()=>undefined);
-  fonts.addEventListener('loadingdone',eventSchedule);
-  window.addEventListener('resize',eventSchedule,{passive:true});
-  window.addEventListener('orientationchange',eventSchedule,{passive:true});
-  visual?.addEventListener('resize',eventSchedule,{passive:true});
-  visual?.addEventListener('scroll',eventSchedule,{passive:true});
-  schedule();
+  void fonts.ready.then(queue).catch(()=>undefined);
+  fonts.addEventListener('loadingdone',queue);
+  window.addEventListener('resize',queue,{passive:true});
+  window.addEventListener('orientationchange',queue,{passive:true});
+  visual?.addEventListener('resize',queue,{passive:true});
+  visual?.addEventListener('scroll',queue,{passive:true});
+  queue();
   return()=>{
+    if(frame)cancelAnimationFrame(frame);
     resize.disconnect();mutation.disconnect();
-    root.removeEventListener('pointerover',eventSchedule,true);
-    root.removeEventListener('focusin',eventSchedule,true);
-    root.removeEventListener('transitionend',eventSchedule,true);
-    fonts.removeEventListener('loadingdone',eventSchedule);
-    window.removeEventListener('resize',eventSchedule);
-    window.removeEventListener('orientationchange',eventSchedule);
-    visual?.removeEventListener('resize',eventSchedule);
-    visual?.removeEventListener('scroll',eventSchedule);
+    root.removeEventListener('focusin',relevantEvent,true);
+    root.removeEventListener('transitionend',relevantEvent,true);
+    fonts.removeEventListener('loadingdone',queue);
+    window.removeEventListener('resize',queue);
+    window.removeEventListener('orientationchange',queue);
+    visual?.removeEventListener('resize',queue);
+    visual?.removeEventListener('scroll',queue);
   };
 }
 

@@ -133,7 +133,7 @@ test('component disposal releases pending timers and frames and cannot be revive
  assert.equal(env.timers.size,0);assert.equal(env.frames.size,0);assert.equal(env.count(),0);
 });
 
-test('map input bindings stop automatic framing while only the drawer height transition flushes it',()=>{
+test('map input bindings stop automatic framing while only the drawer transform transition flushes it',()=>{
  const element=()=>{
   const events=new Map();
   return{events,addEventListener:(name,fn)=>events.set(name,fn),removeEventListener:name=>events.delete(name)};
@@ -147,9 +147,9 @@ test('map input bindings stop automatic framing while only the drawer height tra
  env.refit.select('keyboard');surface.events.get('keydown')({key:'ArrowUp'});env.refit.resized();
  assert.equal(env.timers.size,0);
  env.refit.select('transition');env.refit.resized();
- panel.events.get('transitionend')({target:{},propertyName:'height'});
+ panel.events.get('transitionend')({target:{},propertyName:'transform'});
  panel.events.get('transitionend')({target:panel,propertyName:'opacity'});
  assert.equal(env.frames.size,0);
- panel.events.get('transitionend')({target:panel,propertyName:'height'});env.flushFrames();
+ panel.events.get('transitionend')({target:panel,propertyName:'transform'});env.flushFrames();
  assert.equal(env.count(),1);unbind();assert.equal(surface.events.size,0);assert.equal(panel.events.size,0);
 });

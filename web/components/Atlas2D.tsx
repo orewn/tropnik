@@ -208,8 +208,8 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     updateDirections.current=runDirectionLayout;
     unbindLabels=bindMapLabelReflow(container.current,scheduleDirectionLayout);
     scheduleDirectionLayout();
-    map.on('move',scheduleDirectionLayout);map.on('zoom',scheduleDirectionLayout);
-    map.on('zoomstart',()=>{element.dataset.mapCamera='zooming';scheduleDirectionLayout();});
+    map.on('movestart',()=>{element.dataset.mapCamera='moving';});
+    map.on('zoomstart',()=>{element.dataset.mapCamera='moving';});
     map.on('zoomend',()=>{scheduleDirectionLayout();requestAnimationFrame(()=>{if(!cancelled){delete element.dataset.mapCamera;scheduleDirectionLayout();}});});
     points.current=L.layerGroup().addTo(map);
     const clampCamera=()=>{
@@ -223,7 +223,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
      const found=map.getZoom()>=4?Object.entries(regionBoxes).find(([,b])=>center.lng>=b[0]&&center.lng<=b[2]&&center.lat>=b[1]&&center.lat<=b[3]):undefined;
      callbacks.current.onViewportRegion?.(found?.[0]);
     };
-    map.on('moveend',()=>{clampCamera();ensureDetail();scheduleDirectionLayout();});
+    map.on('moveend',()=>{delete element.dataset.mapCamera;clampCamera();ensureDetail();scheduleDirectionLayout();});
     const queueResize=()=>{
      cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{
       if(cancelled||!container.current)return;

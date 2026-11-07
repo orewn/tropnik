@@ -68,7 +68,7 @@ export class MapFrameRefit{
 export function bindMapFrameRefit(surface:HTMLElement,panel:Element|null,refit:MapFrameRefit){
  const stop=()=>refit.cancel();
  const keyboard=(event:KeyboardEvent)=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','+','=','-','−','Home','End','PageUp','PageDown'].includes(event.key))stop();};
- const transition=(event:Event)=>{if(event.target===panel&&(event as TransitionEvent).propertyName==='height')refit.settled();};
+ const transition=(event:Event)=>{const property=(event as TransitionEvent).propertyName;if(event.target===panel&&(property==='transform'||property==='height'))refit.settled();};
  surface.addEventListener('pointerdown',stop,{passive:true});
  surface.addEventListener('touchstart',stop,{passive:true});
  surface.addEventListener('wheel',stop,{passive:true});
