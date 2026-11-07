@@ -39,8 +39,23 @@ jobs:
           python3 scripts/fix-offline-package.py
           git diff --check
       - name: Run full regression suite
+        id: regression
+        continue-on-error: true
         working-directory: web
-        run: pnpm test
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm test 2>&1 | tee ../release-tests.log
+      - name: Upload regression report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-tests-log
+          path: release-tests.log
+          retention-days: 1
+      - name: Enforce regression suite
+        if: steps.regression.outcome != 'success'
+        run: exit 1
       - name: Lint release-owned files strictly
         working-directory: web
         run: pnpm exec eslint --max-warnings=0 lib/map-coordinate.ts lib/offline-map.ts tests/map-coordinate.test.mjs
