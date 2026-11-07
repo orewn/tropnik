@@ -88,6 +88,11 @@ jobs:
             exit 1
           fi
 
+      - name: Show PostGIS safety scenario
+        run: |
+          nl -ba backend/internal/store/safety_integration_test.go | sed -n '1,180p'
+          grep -nE 'func \(s \*Store\).*(Safety|MChS)|beginSafetyMutation|finishSafetyMutation' backend/internal/store/safety.go || true
+
       - name: Backend race tests
         working-directory: backend
         run: go test -race -count=1 ./...
