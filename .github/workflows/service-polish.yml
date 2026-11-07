@@ -58,9 +58,14 @@ jobs:
           python3 tools/fix-service-polish-lint.py
           python3 - <<'PY'
           from pathlib import Path
-          path=Path('web/components/PlaceStories.tsx')
-          lines=path.read_text().splitlines()
-          path.write_text('\n'.join(line.rstrip() for line in lines)+'\n')
+          explore=Path('web/components/Explore.tsx')
+          source=explore.read_text()
+          old="onClick={()=>setLimit(x=>x+12)}"
+          if source.count(old)!=1: raise SystemExit(f'remaining pagination setter count: {source.count(old)}')
+          explore.write_text(source.replace(old,"onClick={()=>setPage({key:listKey,limit:limit+12})}",1))
+          stories=Path('web/components/PlaceStories.tsx')
+          lines=stories.read_text().splitlines()
+          stories.write_text('\n'.join(line.rstrip() for line in lines)+'\n')
           PY
           git diff --check
       - name: Install locked dependencies
