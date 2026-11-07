@@ -38,7 +38,7 @@ test('region marker dots stay centered on the exact engine coordinate',()=>{
 });
 """
 if 'region marker dots stay centered on the exact engine coordinate' not in source:
-    test.write_text(source.rstrip()+addition+'\n')
+    test.write_text(source.rstrip()+addition.rstrip()+'\n')
 
 release=ROOT/'docs/release-0.4.5.md'
 source=release.read_text()
