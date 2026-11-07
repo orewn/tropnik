@@ -62,6 +62,43 @@ jobs:
             web/lib/api.ts \
             web/lib/contract.ts \
             web/tests/safety-passport.test.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path=Path('web/components/SafetyPanel.tsx')
+          text=path.read_text()
+          replacements={
+            "const load=useCallback(async()=>{":"const load=useCallback(async(signal?:AbortSignal)=>{",
+            "api<SafetyPassport>(`departures/${encodeURIComponent(departure.id)}/safety-passport`),api<EmergencyCard>(`departures/${encodeURIComponent(departure.id)}/emergency-card`)":"api<SafetyPassport>(`departures/${encodeURIComponent(departure.id)}/safety-passport`,signal?{signal}:undefined),api<EmergencyCard>(`departures/${encodeURIComponent(departure.id)}/emergency-card`,signal?{signal}:undefined)",
+            "]);setPassport(nextPassport);setCard(nextCard);":"]);if(signal?.aborted)return;setPassport(nextPassport);setCard(nextCard);",
+            "catch(e){setError(errorText(e));}finally{setLoading(false)}":"catch(e){if(!signal?.aborted)setError(errorText(e));}finally{if(!signal?.aborted)setLoading(false)}",
+          }
+          for old,new in replacements.items():
+            if old not in text:
+              raise SystemExit('SafetyPanel effect anchor not found: '+old[:64])
+            text=text.replace(old,new,1)
+          lines=[]
+          load_effect_found=False
+          phone_effect_found=False
+          for line in text.splitlines():
+            if "useEffect(()=>{void load()},[load]);" in line:
+              lines.extend([
+                " useEffect(()=>{",
+                "  const controller=new AbortController();",
+                "  const timer=window.setTimeout(()=>{void load(controller.signal)},0);",
+                "  return()=>{window.clearTimeout(timer);controller.abort()};",
+                " },[load]);",
+              ])
+              load_effect_found=True
+              continue
+            if "useEffect(()=>{if(!guide||!activeParticipants.length)return;setPhones" in line:
+              phone_effect_found=True
+              continue
+            lines.append(line)
+          if not load_effect_found or not phone_effect_found:
+            raise SystemExit('SafetyPanel effect lines not found')
+          path.write_text('\n'.join(lines)+'\n')
+          PY
           git diff --check
           if git diff --unified=0 -- backend web docs | grep -Ei 'platformFee|payment_intent|pricePerPerson|commission|комисси|split-плат'; then
             echo 'Commercial functionality entered the safety-only release.' >&2
