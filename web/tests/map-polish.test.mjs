@@ -54,3 +54,23 @@ test('reported map wedges, clipped labels and false detail banner stay fixed',()
   assert.match(sw,/tropnik-shell-v12/);
   assert.match(sw,/russia-canonical-mask\.geojson/);
 });
+
+test('map marker labels never delegate edge placement to native browser tooltips',()=>{
+  const atlas=read('components/Atlas.tsx');
+  const canvas=read('components/Atlas2D.tsx');
+  const layout=read('lib/map-direction-layout.ts');
+  const css=read('app/map-polish.css');
+  assert.match(layout,/MAP_LABEL_SAFE_AREA/);
+  assert.match(layout,/mapLabelPlacement/);
+  assert.match(layout,/coveredBottom/);
+  assert.match(atlas,/trail-marker-label/);
+  assert.match(canvas,/trail-marker-label/);
+  assert.doesNotMatch(atlas,/button\.title=t\.title/);
+  assert.doesNotMatch(canvas,/bindTooltip/);
+  assert.match(layout,/removeAttribute\('title'\)/);
+  assert.match(css,/data-map-label-placement='top'/);
+  assert.match(css,/--map-label-shift-x/);
+  assert.match(css,/--map-label-shift-y/);
+  assert.match(css,/atlas-canvas\{overflow:hidden\}/);
+  assert.match(css,/trail-marker:focus-visible\{background:transparent;transform:none\}/);
+});

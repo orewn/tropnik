@@ -23,30 +23,108 @@ export function directionLabelWidth(label: string) {
   return Math.min(MAX_LABEL_WIDTH, Math.max(84, Math.ceil([...label].length * 7.1 + 24)));
 }
 
-/** A pure, deterministic edge clamp so border and narrow-screen cases can be tested. */
-export function directionLabelShift(labelLeft: number, labelRight: number, viewLeft: number, viewRight: number, inset = 16) {
-  const values = [labelLeft, labelRight, viewLeft, viewRight, inset];
-  if (!values.every(Number.isFinite) || labelRight < labelLeft || viewRight - viewLeft <= inset * 2) return 0;
-  const min = viewLeft + inset, max = viewRight - inset;
-  if (labelRight - labelLeft >= max - min) return min - labelLeft;
-  if (labelLeft < min) return min - labelLeft;
-  if (labelRight > max) return max - labelRight;
-  return 0;
+export type MapLabelPlacement = 'top' | 'bottom';
+export type MapLabelRect = {left: number; right: number; top: number; bottom: number};
+export type MapLabelSafeRect = MapLabelRect;
+
+/** The label-safe rectangle excludes edge clipping and fixed map controls.
+ * The compact bottom edge is additionally capped at the top of the mobile sheet. */
+export const MAP_LABEL_SAFE_AREA = {
+  wide: {edge: 18, top: 72, right: 78, bottom: 60},
+  compact: {edge: 12, top: 62, right: 58, bottom: 12},
+} as const;
+
+export function mapLabelSafeRect(viewport: MapLabelRect, compact: boolean, coveredBottom?: number): MapLabelSafeRect {
+  const preset = compact ? MAP_LABEL_SAFE_AREA.compact : MAP_LABEL_SAFE_AREA.wide;
+  let left = viewport.left + preset.edge;
+  let right = viewport.right - preset.right;
+  let top = viewport.top + preset.top;
+  let bottom = Math.min(viewport.bottom - preset.bottom, coveredBottom ?? Number.POSITIVE_INFINITY);
+  // On unusually small embeds preserve a valid rectangle instead of making all
+  // labels chase an impossible set of control insets.
+  if (right - left < 160) right = viewport.right - preset.edge;
+  if (bottom - top < 96) {
+    top = viewport.top + preset.edge;
+    bottom = Math.min(viewport.bottom - preset.edge, coveredBottom ?? Number.POSITIVE_INFINITY);
+  }
+  right = Math.max(left + 1, right);
+  bottom = Math.max(top + 1, bottom);
+  return {left, right, top, bottom};
 }
 
-/** Called after the map places its DOM markers, including after resizing the map.
- * Visual labels move inside the atlas; the marker's geographic anchor never moves. */
-export function constrainDirectionLabels(buttons: ReadonlyMap<string, HTMLButtonElement>, viewport: HTMLElement) {
+/** Clamp a measured label to all four sides of the already resolved safe area. */
+export function mapLabelShift(label: MapLabelRect, safe: MapLabelSafeRect) {
+  const values = [...Object.values(label), ...Object.values(safe)];
+  if (!values.every(Number.isFinite) || label.right < label.left || label.bottom < label.top) return {x: 0, y: 0};
+  const labelWidth = label.right - label.left, labelHeight = label.bottom - label.top;
+  const safeWidth = safe.right - safe.left, safeHeight = safe.bottom - safe.top;
+  let x = 0, y = 0;
+  if (labelWidth >= safeWidth) x = safe.left - label.left;
+  else if (label.left < safe.left) x = safe.left - label.left;
+  else if (label.right > safe.right) x = safe.right - label.right;
+  if (labelHeight >= safeHeight) y = safe.top - label.top;
+  else if (label.top < safe.top) y = safe.top - label.top;
+  else if (label.bottom > safe.bottom) y = safe.bottom - label.bottom;
+  return {x, y};
+}
+
+/** Prefer the semantic side of a marker, but flip before applying translation. */
+export function mapLabelPlacement(
+  preferred: MapLabelPlacement, marker: MapLabelRect, labelHeight: number,
+  safe: MapLabelSafeRect, gap = 8,
+): MapLabelPlacement {
+  const above = marker.top - safe.top - gap;
+  const below = safe.bottom - marker.bottom - gap;
+  if (preferred === 'top') return above >= labelHeight || above >= below ? 'top' : 'bottom';
+  return below >= labelHeight || below >= above ? 'bottom' : 'top';
+}
+
+function viewportSafeRect(viewport: HTMLElement) {
   const bounds = viewport.getBoundingClientRect();
-  const inset = viewport.clientWidth <= 600 ? 12 : 18;
+  const panel = viewport.closest('.explore-layout')?.querySelector<HTMLElement>('.explore-panel');
+  let coveredBottom: number | undefined;
+  if (panel) {
+    const covered = panel.getBoundingClientRect();
+    const overlaps = covered.left < bounds.right && covered.right > bounds.left
+      && covered.top > bounds.top && covered.top < bounds.bottom;
+    if (overlaps) coveredBottom = covered.top - 12;
+  }
+  return mapLabelSafeRect(bounds, viewport.clientWidth <= 700, coveredBottom);
+}
+
+function constrainLabel(
+  button: HTMLButtonElement, label: HTMLElement, viewport: HTMLElement,
+  preferred: MapLabelPlacement,
+) {
+  const safe = viewportSafeRect(viewport);
+  button.dataset.mapLabelPlacement = preferred;
+  label.style.setProperty('--map-label-shift-x', '0px');
+  label.style.setProperty('--map-label-shift-y', '0px');
+  const marker = button.getBoundingClientRect();
+  let rect = label.getBoundingClientRect();
+  const placement = mapLabelPlacement(preferred, marker, rect.bottom - rect.top, safe);
+  if (placement !== preferred) {
+    button.dataset.mapLabelPlacement = placement;
+    rect = label.getBoundingClientRect();
+  }
+  const shift = mapLabelShift(rect, safe);
+  label.style.setProperty('--map-label-shift-x', `${Math.round(shift.x)}px`);
+  label.style.setProperty('--map-label-shift-y', `${Math.round(shift.y)}px`);
+  button.classList.toggle('map-label-shifted', shift.x !== 0 || shift.y !== 0 || placement !== preferred);
+}
+
+/** Called after marker placement, during camera movement and after sheet resize.
+ * Geographic anchors never move: only their visual labels flip and translate. */
+export function constrainDirectionLabels(buttons: ReadonlyMap<string, HTMLButtonElement>, viewport: HTMLElement) {
   for (const button of buttons.values()) {
     if (button.hidden || !button.isConnected) continue;
     const label = button.querySelector<HTMLElement>('.region-marker-label');
-    if (!label) continue;
-    label.style.setProperty('--map-label-shift', '0px');
-    const rect = label.getBoundingClientRect();
-    const shift = directionLabelShift(rect.left, rect.right, bounds.left, bounds.right, inset);
-    label.style.setProperty('--map-label-shift', String(Math.round(shift)) + 'px');
+    if (label) constrainLabel(button, label, viewport, 'bottom');
+  }
+  for (const button of viewport.querySelectorAll<HTMLButtonElement>('.trail-marker')) {
+    if (!button.isConnected) continue;
+    const label = button.querySelector<HTMLElement>('.trail-marker-label');
+    if (label) constrainLabel(button, label, viewport, 'top');
   }
 }
 
@@ -136,7 +214,7 @@ export function updateDirectionButtons<T extends MapDirection>(
     if (dot) dot.textContent = content.count;
     if (label) label.textContent = content.label;
     button.setAttribute('aria-label', content.ariaLabel);
-    button.title = content.cluster ? content.ariaLabel : group.anchor.name;
+    button.removeAttribute('title');
   }
   if (focusedId && !anchors.has(focusedId)) {
     const group = groups.find(item => item.members.some(member => member.id === focusedId));
