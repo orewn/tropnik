@@ -1,2 +1,41 @@
+import {DownloadSimple, ShieldCheck} from './TropnikIcons';
 import {Brand} from './Brand';
-export function Footer(){return <footer className="site-footer"><div><Brand small/><p>Путь становится интереснее,<br/>когда есть с кем его разделить.</p></div><nav aria-label="Дополнительная навигация"><a href="/about">О проекте</a><a href="/safety">Подготовка к походу</a><a href="/safety/registration">Регистрация похода в МЧС</a><a href="/sources">Источники и лицензии</a><a href="/privacy">Конфиденциальность</a><a href="/terms">Условия</a></nav><div className="footer-meta">Сделано для путешествий по России.</div></footer>;}
+import styles from './Footer.module.css';
+
+const groups = [
+  {
+    title: 'Исследовать',
+    links: [['Карта маршрутов', '/'], ['Походы', '/trips'], ['Сообщество', '/community'], ['Гидам', '/guides']],
+  },
+  {
+    title: 'Подготовиться',
+    links: [['Карты с собой', '/offline'], ['Подготовка к походу', '/safety'], ['Паспорт похода', '/safety/registration'], ['Поиск по сайту', '/search']],
+  },
+  {
+    title: 'О сервисе',
+    links: [['О проекте', '/about'], ['Источники и лицензии', '/sources'], ['Конфиденциальность', '/privacy'], ['Условия использования', '/terms']],
+  },
+] as const;
+
+export function Footer() {
+  return <footer className={`site-footer ${styles.footer}`}>
+    <div className={styles.inner}>
+      <div className={styles.brandColumn}>
+        <Brand small/>
+        <p>Маршруты России, подготовка к походу и нужные данные офлайн — в одном спокойном и проверяемом сценарии.</p>
+        <div className={styles.badges} aria-label="Принципы сервиса">
+          <span><ShieldCheck size={16}/>Источники и ограничения видны</span>
+          <span><DownloadSimple size={16}/>Ключевые данные доступны без сети</span>
+        </div>
+      </div>
+      {groups.map(group => <section className={styles.group} key={group.title}>
+        <h2>{group.title}</h2>
+        <nav aria-label={group.title}>{group.links.map(([label, href]) => <a href={href} key={href}>{label}</a>)}</nav>
+      </section>)}
+    </div>
+    <div className={styles.bottom}>
+      <span><strong>Тропник</strong> · Сделано для путешествий по России.</span>
+      <span>Перед выходом проверяйте актуальные условия и официальные ограничения территории.</span>
+    </div>
+  </footer>;
+}
