@@ -99,10 +99,10 @@ replace_once(
 path = ROOT / "web/components/SafetyRegistration.tsx"
 text = path.read_text()
 count = text.count("savedSnapshot.current = passportSnapshot(")
-if count != 5:
-    raise SystemExit(f"SafetyRegistration.tsx: expected five snapshot assignments, found {count}")
+if count != 6:
+    raise SystemExit(f"SafetyRegistration.tsx: expected six snapshot assignments, found {count}")
 text = text.replace("savedSnapshot.current = passportSnapshot(", "setSavedSnapshot(passportSnapshot(")
-# Convert assignment closing semicolons into setter call closings for the five known forms.
+# Convert assignment closing semicolons into setter call closings for all known forms.
 for old, new in [
     ("setSavedSnapshot(passportSnapshot(existing);", "setSavedSnapshot(passportSnapshot(existing));"),
     ("setSavedSnapshot(passportSnapshot(value);", "setSavedSnapshot(passportSnapshot(value));"),
