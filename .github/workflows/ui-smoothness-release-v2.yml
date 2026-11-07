@@ -40,6 +40,7 @@ jobs:
         run: |
           python3 -m py_compile tools/apply-ui-smoothness.py
           python3 tools/apply-ui-smoothness.py
+          sed -i 's/[[:space:]]*$//' web/components/PlaceStories.tsx
           git diff --check
       - name: Run full regression suite
         working-directory: web
