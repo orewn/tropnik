@@ -36,4 +36,13 @@ if "UPDATE departures SET status='cancelled' WHERE id=$1" not in text:
     text = text[:match.start()] + cancel_block + text[match.start():]
 
 integration.write_text(text)
+
+# Temporary diagnostic output for the immutable event-chain mismatch. This
+# script deletes itself, so no diagnostic helper enters the product commit.
+safety = (root / 'backend/internal/store/safety.go').read_text().splitlines()
+for start, end in ((80, 180), (730, 840)):
+    print(f'--- safety.go lines {start}-{end} ---')
+    for number, line in enumerate(safety[start - 1:end], start):
+        print(f'{number:4d}: {line}')
+
 Path(__file__).unlink()
