@@ -22,6 +22,29 @@ if old_touch not in style:
     raise SystemExit('Compact story touch target anchor not found')
 css.write_text(style.replace(old_touch,new_touch,1))
 
+stories=root/'web/components/PlaceStories.tsx'
+story=stories.read_text()
+manual_anchor=" function manual(delta:number){setPaused(true);setIndex(i=>(i+delta+facts.length)%facts.length);}\n"
+manual_replacement=""" function manual(delta:number){setPaused(true);setIndex(i=>(i+delta+facts.length)%facts.length);}
+ function releaseTouchFocus(button:HTMLButtonElement){
+  if(window.matchMedia('(hover:none), (pointer:coarse)').matches)requestAnimationFrame(()=>button.blur());
+ }
+"""
+if manual_anchor not in story:
+    raise SystemExit('Story touch-focus helper anchor not found')
+story=story.replace(manual_anchor,manual_replacement,1)
+controls={
+ "<button aria-label=\"Предыдущая история\" onClick={()=>manual(-1)}>":"<button aria-label=\"Предыдущая история\" onClick={event=>{manual(-1);releaseTouchFocus(event.currentTarget);}}>",
+ "<button aria-label={paused||reduced?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={togglePlayback}>":"<button aria-label={paused||reduced?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={event=>{togglePlayback();releaseTouchFocus(event.currentTarget);}}>",
+ "<button aria-label=\"Следующая история\" onClick={()=>manual(1)}>":"<button aria-label=\"Следующая история\" onClick={event=>{manual(1);releaseTouchFocus(event.currentTarget);}}>",
+ "onClick={()=>setExpanded(value=>!value)}>{expanded?'Свернуть':'Читать историю'}":"onClick={event=>{setExpanded(value=>!value);releaseTouchFocus(event.currentTarget);}}>{expanded?'Свернуть':'Читать историю'}",
+}
+for old_control,new_control in controls.items():
+    if old_control not in story:
+        raise SystemExit('Story control focus anchor not found: '+old_control[:48])
+    story=story.replace(old_control,new_control,1)
+stories.write_text(story)
+
 browser=root/'tools/pages-preview/browser-smoke.mjs'
 script=browser.read_text()
 old_metrics="  return{available:true,closed,open,final,heightDelta:Math.max(Math.abs(open.height-closed.height),Math.abs(final.height-closed.height)),cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0};"
