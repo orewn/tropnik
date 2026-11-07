@@ -5,7 +5,7 @@ import {RUSSIA_AREA_URL,RUSSIA_CANONICAL_MASK_URL,MAP_OUTSIDE_COLOR} from '../pu
 const require=createRequire(import.meta.url);
 const target=join(process.cwd(),'public/maps');mkdirSync(target,{recursive:true});
 const font=['Noto Sans Regular'];
-const name=['coalesce',['get','name:ru'],['get','name:latin'],['get','name'],''];
+const name=['coalesce',['get','name:ru'],['get','name'],['get','name:latin'],''];
 const source='openmaptiles';
 const is=(key,value)=>['==',['get',key],value];
 const oneOf=(key,values)=>['in',['get',key],['literal',values]];
@@ -15,12 +15,12 @@ const priorityCityNames=['Москва','Санкт-Петербург','Пет�
 const priorityCity=['in',name,['literal',priorityCityNames]];
 
 const layer=(id,type,sourceLayer,paint,options={})=>({id,type,source,'source-layer':sourceLayer,paint,...options});
-const text=(id,sourceLayer,minzoom,size,filter,paint={})=>layer(id,'symbol',sourceLayer,{'text-color':'#3F5144','text-halo-color':'#FFFEFA','text-halo-width':1.75,'text-halo-blur':.3,...paint},{minzoom,filter,layout:{'text-field':name,'text-font':font,'text-size':size,'text-max-width':10,'text-padding':7,'text-variable-anchor':['top','bottom','left','right'],'text-justify':'auto','text-radial-offset':.45}});
+const text=(id,sourceLayer,minzoom,size,filter,paint={})=>layer(id,'symbol',sourceLayer,{'text-color':'#3F5144','text-halo-color':'#FFFEFA','text-halo-width':1.75,'text-halo-blur':.3,...paint},{minzoom,filter,layout:{'text-field':name,'text-font':font,'text-size':size,'text-max-width':9,'text-padding':10,'text-variable-anchor':['top','bottom','left','right'],'text-justify':'auto','text-radial-offset':.55,'symbol-avoid-edges':true,'text-allow-overlap':false,'text-ignore-placement':false}});
 const style={version:8,name:'Тропник · ландшафт',metadata:{author:'Tropa project',description:'Original outdoor style. OSM paths are not field-verified hiking permissions.'},glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',sprite:'/maps/tropnik-sprite',sky:{'sky-color':'#BFD8D8','horizon-color':'#E8ECE1','fog-color':'#DDE6DE','sky-horizon-blend':.34,'horizon-fog-blend':.38,'fog-ground-blend':.14,'atmosphere-blend':['interpolate',['linear'],['zoom'],0,.12,8,.06,12,0]},sources:{'overview-land':{type:'geojson',data:'/data/world.geojson'},'terrain-dem':{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'},'hillshade-dem':{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'},openmaptiles:{type:'vector',url:'https://tiles.openfreemap.org/planet/latest',attribution:'<a href="https://openfreemap.org">OpenFreeMap</a> · <a href="https://openmaptiles.org">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>'}},layers:[
  {id:'background',type:'background',paint:{'background-color':'#D7E5E9'}},
  // A local geographic base remains visible while live provider tiles load.
  {id:'overview-land',type:'fill',source:'overview-land',paint:{'fill-color':'#DDE6D5','fill-outline-color':'#A7B69D'}},
- {id:'overview-relief',type:'raster',source:'russia-relief',maxzoom:6,paint:{'raster-opacity':['interpolate',['linear'],['zoom'],0,.92,4,.88,6,0],'raster-contrast':.28,'raster-saturation':-.18,'raster-brightness-min':.08,'raster-brightness-max':.92,'raster-fade-duration':180}},
+ {id:'overview-relief',type:'raster',source:'russia-relief',maxzoom:6,paint:{'raster-opacity':['interpolate',['linear'],['zoom'],0,.92,4,.88,6,0],'raster-contrast':.28,'raster-saturation':-.18,'raster-brightness-min':.08,'raster-brightness-max':.92,'raster-fade-duration':0}},
  layer('natural-grass','fill','landcover',{'fill-color':'#E3E9D8','fill-opacity':.78},{filter:oneOf('class',['grass','farmland'])}),
  layer('forest','fill','landcover',{'fill-color':'#C5D6BC','fill-opacity':.82},{filter:oneOf('class',['wood','forest'])}),
  layer('scrub','fill','landcover',{'fill-color':'#D6DFC9','fill-opacity':.72},{filter:oneOf('class',['scrub','heath'])}),
@@ -28,7 +28,7 @@ const style={version:8,name:'Тропник · ландшафт',metadata:{autho
  layer('residential','fill','landuse',{'fill-color':'#E9E7DE'},{filter:oneOf('class',['residential','commercial','industrial']),minzoom:9}),
  layer('parks','fill','park',{'fill-color':'#C1D5B2','fill-opacity':.22},{minzoom:7}),
  layer('park-border','line','park',{'line-color':'#789B65','line-width':.9,'line-dasharray':[3,3],'line-opacity':.65},{minzoom:9}),
- {id:'terrain-shading',type:'hillshade',source:'hillshade-dem',minzoom:2,paint:{'hillshade-method':'multidirectional','hillshade-illumination-anchor':'viewport','hillshade-illumination-direction':[315,270,355],'hillshade-illumination-altitude':[42,52,36],'hillshade-exaggeration':['interpolate',['linear'],['zoom'],2,.34,5,.52,9,.66,13,.72],'hillshade-shadow-color':'#29423A','hillshade-highlight-color':'#FFF2DC','hillshade-accent-color':'#3D6253'}},
+ {id:'terrain-shading',type:'hillshade',source:'hillshade-dem',minzoom:2,paint:{'hillshade-method':'multidirectional','hillshade-illumination-anchor':'map','hillshade-illumination-direction':[315,270,355],'hillshade-illumination-altitude':[42,52,36],'hillshade-exaggeration':['interpolate',['linear'],['zoom'],2,.34,5,.52,9,.66,13,.72],'hillshade-shadow-color':'#29423A','hillshade-highlight-color':'#FFF2DC','hillshade-accent-color':'#3D6253'}},
  layer('water','fill','water',{'fill-color':'#C8DEE5'}),
  layer('waterway','line','waterway',{'line-color':'#8FB7C2','line-width':['interpolate',['linear'],['zoom'],8,.4,14,1.5,18,3.5]},{layout:{'line-cap':'round'}}),
  layer('boundaries','line','boundary',{'line-color':'#7F9080','line-width':['interpolate',['linear'],['zoom'],2,.6,8,1.1],'line-opacity':.48,'line-dasharray':[4,3]},{filter:['<=',['get','admin_level'],4]}),
@@ -46,9 +46,9 @@ const style={version:8,name:'Тропник · ландшафт',metadata:{autho
  text('village-label','place',10,12,oneOf('class',['village','hamlet','suburb'])),
  text('peak-label','mountain_peak',10,12,undefined,{'text-color':'#78664E'}),
  layer('outdoor-poi-symbol','symbol','poi',{}, {minzoom:12,filter:['any',oneOf('class',['camp_site','campsite','alpine_hut','shelter','drinking_water','viewpoint','information']),oneOf('subclass',['camp_site','campsite','alpine_hut','shelter','drinking_water','viewpoint','information'])],layout:{'icon-image':['match',['case',oneOf('subclass',['camp_site','campsite','alpine_hut','shelter','drinking_water','viewpoint','information']),['get','subclass'],['get','class']],['camp_site','campsite'],'camp',['alpine_hut','shelter'],'shelter','drinking_water','water','viewpoint','viewpoint','info'],'icon-size':.8,'icon-padding':8,'icon-allow-overlap':false}}),
- {...text('outdoor-poi-label','poi',13,12,['any',oneOf('class',['camp_site','campsite','alpine_hut','shelter','drinking_water','viewpoint','information']),oneOf('subclass',['camp_site','campsite','alpine_hut','shelter','drinking_water','viewpoint','information'])]),layout:{'text-field':name,'text-font':font,'text-size':12,'text-offset':[0,1.4],'text-anchor':'top','text-max-width':11}},
+ {...text('outdoor-poi-label','poi',13,12,['any',oneOf('class',['camp_site','campsite','alpine_hut','shelter','drinking_water','viewpoint','information']),oneOf('subclass',['camp_site','campsite','alpine_hut','shelter','drinking_water','viewpoint','information'])]),layout:{'text-field':name,'text-font':font,'text-size':12,'text-offset':[0,1.4],'text-anchor':'top','text-max-width':10,'text-padding':10,'symbol-avoid-edges':true}},
  layer('summit-symbol','symbol','mountain_peak',{}, {minzoom:11,filter:oneOf('class',['peak','volcano','saddle']),layout:{'icon-image':['case',is('class','saddle'),'pass','peak'],'icon-size':.7,'icon-padding':10,'icon-offset':[0,-18]}}),
- {...text('path-label','transportation_name',14,11,oneOf('class',['path','track'])),layout:{'symbol-placement':'line','text-field':name,'text-font':font,'text-size':11,'text-padding':20}},
+ {...text('path-label','transportation_name',14,11,oneOf('class',['path','track'])),layout:{'symbol-placement':'line','text-field':name,'text-font':font,'text-size':11,'text-padding':24,'symbol-avoid-edges':true}},
 ]};
 style.sources['overview-land'].data=RUSSIA_AREA_URL;
 style.sources['russia-relief']={type:'raster',tiles:['/maps/russia-relief/{z}/{x}/{y}.png'],tileSize:256,minzoom:0,maxzoom:4};

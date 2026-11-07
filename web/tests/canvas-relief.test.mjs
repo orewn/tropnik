@@ -103,10 +103,10 @@ test('worker errors and disposal clear work without starting stale downloads or 
   assert.equal(env.workers.length,1);assert.equal(tile.drawn,0);assert.equal(env.completed.length,before);
 });
 
-test('switching to a detailed base redraws and submits transparent shading mode',async()=>{
+test('switching base mode keeps decoded relief visible and applies the new shading to future tiles',async()=>{
   const env=fixture();env.add();await tick();env.resolvePending();await tick();
   assert.equal(env.workers[0].messages[0].overview,true);env.workers[0].reply();await tick();
-  env.relief.setOverview(false);assert.equal(env.relief.layer.redraws,1);
+  env.relief.setOverview(false);assert.equal(env.relief.layer.redraws,0);
   env.add();await tick();env.resolvePending();await tick();assert.equal(env.workers[0].messages[1].overview,false);
   env.relief.destroy();assert.equal(env.timers.size,0);
 });

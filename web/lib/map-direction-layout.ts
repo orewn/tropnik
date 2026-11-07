@@ -26,6 +26,7 @@ export function directionLabelWidth(label: string) {
 export type MapLabelPlacement = 'top' | 'bottom';
 export type MapLabelRect = {left: number; right: number; top: number; bottom: number};
 export type MapLabelSafeRect = MapLabelRect;
+export type MapLabelAvoidance = {x:number;y:number;hidden:boolean};
 
 /** The label-safe rectangle excludes edge clipping and fixed map controls.
  * The compact bottom edge is additionally capped at the top of the mobile sheet. */
@@ -33,10 +34,14 @@ export const MAP_LABEL_SAFE_AREA = {
   wide: {edge: 18, top: 72, right: 78, bottom: 60},
   compact: {edge: 12, top: 62, right: 58, bottom: 12},
 } as const;
+export const MAP_LABEL_OBSTACLE_SELECTORS = [
+  '.map-context','.map-style-switch','.map-controls','.layer-control','.map-message',
+  '.map-legend','.map-attribution','.fact-card','.fact-closed','.explore-panel',
+] as const;
 
 export function mapLabelSafeRect(viewport: MapLabelRect, compact: boolean, coveredBottom?: number): MapLabelSafeRect {
   const preset = compact ? MAP_LABEL_SAFE_AREA.compact : MAP_LABEL_SAFE_AREA.wide;
-  let left = viewport.left + preset.edge;
+  const left = viewport.left + preset.edge;
   let right = viewport.right - preset.right;
   let top = viewport.top + preset.top;
   let bottom = Math.min(viewport.bottom - preset.bottom, coveredBottom ?? Number.POSITIVE_INFINITY);
@@ -67,6 +72,33 @@ export function mapLabelShift(label: MapLabelRect, safe: MapLabelSafeRect) {
   else if (label.bottom > safe.bottom) y = safe.bottom - label.bottom;
   return {x, y};
 }
+const translateRect=(rect:MapLabelRect,x:number,y:number):MapLabelRect=>({left:rect.left+x,right:rect.right+x,top:rect.top+y,bottom:rect.bottom+y});
+const insideSafe=(rect:MapLabelRect,safe:MapLabelSafeRect)=>rect.left>=safe.left-.5&&rect.right<=safe.right+.5&&rect.top>=safe.top-.5&&rect.bottom<=safe.bottom+.5;
+const intersects=(a:MapLabelRect,b:MapLabelRect,gap=0)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
+
+/** Resolve collisions with real overlays after the four-edge clamp. Labels may
+ * move, but their geographic marker never does. If no legal position exists,
+ * hiding the visual label is safer than drawing it over a control or card; the
+ * button keeps its accessible name. */
+export function mapLabelAvoidObstacles(label:MapLabelRect,safe:MapLabelSafeRect,obstacles:readonly MapLabelRect[],gap=8):MapLabelAvoidance{
+  const initial=mapLabelShift(label,safe);let x=initial.x,y=initial.y,current=translateRect(label,x,y);
+  const usable=obstacles.filter(obstacle=>[...Object.values(obstacle)].every(Number.isFinite)&&obstacle.right>obstacle.left&&obstacle.bottom>obstacle.top);
+  for(let pass=0;pass<Math.min(16,usable.length+4);pass++){
+    const obstacle=usable.find(item=>intersects(current,item,gap));
+    if(!obstacle)return{x,y,hidden:Math.hypot(x,y)>180};
+    const moves=[
+      {dx:obstacle.left-gap-current.right,dy:0},
+      {dx:obstacle.right+gap-current.left,dy:0},
+      {dx:0,dy:obstacle.top-gap-current.bottom},
+      {dx:0,dy:obstacle.bottom+gap-current.top},
+    ].map(move=>({...move,rect:translateRect(current,move.dx,move.dy)}))
+      .filter(move=>insideSafe(move.rect,safe))
+      .sort((a,b)=>(Math.abs(a.dx)+Math.abs(a.dy))-(Math.abs(b.dx)+Math.abs(b.dy)));
+    const best=moves[0];if(!best)return{x,y,hidden:true};
+    x+=best.dx;y+=best.dy;current=best.rect;
+  }
+  return{x,y,hidden:true};
+}
 
 /** Prefer the semantic side of a marker, but flip before applying translation. */
 export function mapLabelPlacement(
@@ -79,53 +111,99 @@ export function mapLabelPlacement(
   return below >= labelHeight || below >= above ? 'bottom' : 'top';
 }
 
-function viewportSafeRect(viewport: HTMLElement) {
-  const bounds = viewport.getBoundingClientRect();
-  const panel = viewport.closest('.explore-layout')?.querySelector<HTMLElement>('.explore-panel');
-  let coveredBottom: number | undefined;
-  if (panel) {
-    const covered = panel.getBoundingClientRect();
-    const overlaps = covered.left < bounds.right && covered.right > bounds.left
-      && covered.top > bounds.top && covered.top < bounds.bottom;
-    if (overlaps) coveredBottom = covered.top - 12;
+function visibleObstacleRect(element:Element,viewport:MapLabelRect){
+  const style=getComputedStyle(element);
+  if(style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0)return undefined;
+  const rect=element.getBoundingClientRect();
+  if(rect.width<2||rect.height<2||!intersects(rect,viewport))return undefined;
+  return{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom};
+}
+function viewportLabelLayout(viewport:HTMLElement){
+  const bounds=viewport.getBoundingClientRect();
+  const root=viewport.closest('.explore-layout')??viewport.parentElement??viewport;
+  const panel=root.querySelector<HTMLElement>('.explore-panel');
+  let coveredBottom:number|undefined;
+  if(panel){
+    const covered=panel.getBoundingClientRect();
+    const overlaps=covered.left<bounds.right&&covered.right>bounds.left&&covered.top>bounds.top&&covered.top<bounds.bottom;
+    if(overlaps)coveredBottom=covered.top-12;
   }
-  return mapLabelSafeRect(bounds, viewport.clientWidth <= 700, coveredBottom);
+  const safe=mapLabelSafeRect(bounds,viewport.clientWidth<=700,coveredBottom);
+  const selector=MAP_LABEL_OBSTACLE_SELECTORS.join(',');
+  const obstacles=[...root.querySelectorAll(selector)]
+    .filter(element=>element!==viewport&&!element.contains(viewport))
+    .map(element=>visibleObstacleRect(element,bounds)).filter((rect):rect is MapLabelRect=>!!rect);
+  return{safe,obstacles};
 }
 
 function constrainLabel(
-  button: HTMLButtonElement, label: HTMLElement, viewport: HTMLElement,
-  preferred: MapLabelPlacement,
-) {
-  const safe = viewportSafeRect(viewport);
-  button.dataset.mapLabelPlacement = preferred;
-  label.style.setProperty('--map-label-shift-x', '0px');
-  label.style.setProperty('--map-label-shift-y', '0px');
-  const marker = button.getBoundingClientRect();
-  let rect = label.getBoundingClientRect();
-  const placement = mapLabelPlacement(preferred, marker, rect.bottom - rect.top, safe);
-  if (placement !== preferred) {
-    button.dataset.mapLabelPlacement = placement;
-    rect = label.getBoundingClientRect();
-  }
-  const shift = mapLabelShift(rect, safe);
-  label.style.setProperty('--map-label-shift-x', `${Math.round(shift.x)}px`);
-  label.style.setProperty('--map-label-shift-y', `${Math.round(shift.y)}px`);
-  button.classList.toggle('map-label-shifted', shift.x !== 0 || shift.y !== 0 || placement !== preferred);
+  button:HTMLButtonElement,label:HTMLElement,preferred:MapLabelPlacement,
+  safe:MapLabelSafeRect,obstacles:readonly MapLabelRect[],
+){
+  button.dataset.mapLabelPlacement=preferred;
+  delete button.dataset.mapLabelHidden;
+  label.style.setProperty('--map-label-shift-x','0px');
+  label.style.setProperty('--map-label-shift-y','0px');
+  const marker=button.getBoundingClientRect();
+  let rect=label.getBoundingClientRect();
+  const placement=mapLabelPlacement(preferred,marker,rect.bottom-rect.top,safe);
+  if(placement!==preferred){button.dataset.mapLabelPlacement=placement;rect=label.getBoundingClientRect();}
+  const shift=mapLabelAvoidObstacles(rect,safe,obstacles);
+  label.style.setProperty('--map-label-shift-x',`${Math.round(shift.x)}px`);
+  label.style.setProperty('--map-label-shift-y',`${Math.round(shift.y)}px`);
+  if(shift.hidden)button.dataset.mapLabelHidden='true';
+  button.classList.toggle('map-label-shifted',shift.x!==0||shift.y!==0||placement!==preferred);
 }
 
 /** Called after marker placement, during camera movement and after sheet resize.
  * Geographic anchors never move: only their visual labels flip and translate. */
-export function constrainDirectionLabels(buttons: ReadonlyMap<string, HTMLButtonElement>, viewport: HTMLElement) {
-  for (const button of buttons.values()) {
-    if (button.hidden || !button.isConnected) continue;
-    const label = button.querySelector<HTMLElement>('.region-marker-label');
-    if (label) constrainLabel(button, label, viewport, 'bottom');
+export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonElement>,viewport:HTMLElement){
+  const {safe,obstacles}=viewportLabelLayout(viewport);
+  for(const button of buttons.values()){
+    if(button.hidden||!button.isConnected)continue;
+    const label=button.querySelector<HTMLElement>('.region-marker-label');
+    if(label)constrainLabel(button,label,'bottom',safe,obstacles);
   }
-  for (const button of viewport.querySelectorAll<HTMLButtonElement>('.trail-marker')) {
-    if (!button.isConnected) continue;
-    const label = button.querySelector<HTMLElement>('.trail-marker-label');
-    if (label) constrainLabel(button, label, viewport, 'top');
+  for(const button of viewport.querySelectorAll<HTMLButtonElement>('.trail-marker')){
+    if(!button.isConnected)continue;
+    const label=button.querySelector<HTMLElement>('.trail-marker-label');
+    if(label)constrainLabel(button,label,'top',safe,obstacles);
   }
+}
+
+/** Reflow labels when fonts, responsive cards, controls or the mobile sheet
+ * change outside the map engine's own move events. Mutations produced by map
+ * marker transforms are ignored to avoid a feedback loop. */
+export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
+  const root=viewport.closest('.explore-layout')??viewport.parentElement??viewport;
+  const selector=MAP_LABEL_OBSTACLE_SELECTORS.join(',');
+  const resize=new ResizeObserver(schedule),observed=new Set<Element>();
+  const observe=()=>{
+    for(const element of [viewport,...root.querySelectorAll(selector)])if(!observed.has(element)){observed.add(element);resize.observe(element);}
+  };
+  observe();
+  const mutation=new MutationObserver(records=>{
+    const relevant=records.some(record=>{
+      const target=record.target;return !(target instanceof Element)||!target.closest('.atlas-canvas');
+    });
+    if(relevant){observe();schedule();}
+  });
+  mutation.observe(root,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden','aria-expanded']});
+  const eventSchedule=()=>schedule();
+  root.addEventListener('pointerover',eventSchedule,true);
+  root.addEventListener('focusin',eventSchedule,true);
+  root.addEventListener('transitionend',eventSchedule,true);
+  const fonts=document.fonts;
+  void fonts.ready.then(schedule).catch(()=>undefined);
+  fonts.addEventListener('loadingdone',eventSchedule);
+  schedule();
+  return()=>{
+    resize.disconnect();mutation.disconnect();
+    root.removeEventListener('pointerover',eventSchedule,true);
+    root.removeEventListener('focusin',eventSchedule,true);
+    root.removeEventListener('transitionend',eventSchedule,true);
+    fonts.removeEventListener('loadingdone',eventSchedule);
+  };
 }
 
 export function directionCountLabel(count: number) {

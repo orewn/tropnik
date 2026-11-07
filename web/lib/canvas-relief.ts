@@ -103,7 +103,7 @@ export function createCanvasRelief(L:typeof Leaflet,onState:(ready:boolean)=>voi
         y:coords.y,z:coords.z,overview,stage:'pending'});queuePump();return canvas;
     },
   }) as {new(options:Leaflet.GridLayerOptions):Leaflet.GridLayer};
-  const layer=new Relief({pane:'russia-relief',tileSize:256,minZoom:5,maxNativeZoom:12,maxZoom:18,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false,opacity:1}) as Leaflet.GridLayer;
+  const layer=new Relief({pane:'russia-relief',className:'tropnik-relief-tiles',tileSize:256,minZoom:5,maxNativeZoom:12,maxZoom:18,keepBuffer:2,updateWhenIdle:true,updateWhenZooming:false,opacity:1}) as Leaflet.GridLayer;
   layer.on('tileunload',(event:Leaflet.TileEvent)=>{
     unloaded.add(event.tile);const id=Number(event.tile.dataset.reliefJob),job=jobs.get(id);if(!job)return;
     job.cancelled=true;jobs.delete(id);releaseBytes(job);
@@ -113,7 +113,9 @@ export function createCanvasRelief(L:typeof Leaflet,onState:(ready:boolean)=>voi
   });
   return {
     layer,
-    setOverview(next:boolean){if(next!==overview){overview=next;layer.redraw();}},
+    // Keep already decoded tiles on screen. New tiles use the new colour mode;
+    // forcing GridLayer.redraw() here blanked the complete relief during zoom.
+    setOverview(next:boolean){overview=next;},
     destroy(){disposed=true;layer.remove();stopWorker();for(const job of jobs.values()){job.cancelled=true;releaseBytes(job);}jobs.clear();},
   };
 }

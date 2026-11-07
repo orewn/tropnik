@@ -1,0 +1,114 @@
+/* Tropnik 0.4.5 interface pass. Loaded last so one semantic palette governs every surface. */
+:root{
+  --paper:#F5F3EB;
+  --surface:#FFFEFA;
+  --surface-soft:#EEF2E8;
+  --surface-raised:#F9FAF5;
+  --surface-selected:#E6ECE1;
+  --forest:#244D3C;
+  --forest-dark:#183B2C;
+  --ink:#1D3026;
+  --muted:#59685D;
+  --line:#D5DCCE;
+  --line-strong:#738570;
+  --ochre:#A56736;
+  --ochre-dark:#8E4F2D;
+  --water:#C8DEE5;
+  --danger:#A7342D;
+  --focus:#8E4F2D;
+  --shadow-control:0 7px 20px rgba(29,48,38,.09);
+  --shadow-card:0 16px 42px rgba(29,48,38,.08);
+  --radius-control:12px;
+  --radius-card:16px 16px 28px 16px;
+}
+
+::selection{background:rgba(165,103,54,.2);color:var(--ink)}
+body{background:var(--paper);color:var(--ink)}
+
+:is(.button,.filter-button,.save-button,.icon-button,.back-link,.fact-controls button,.fact-dismiss){
+  border-color:var(--line);
+  transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .12s ease;
+}
+.button.primary{background:var(--forest);border-color:var(--forest);color:var(--surface);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.button.primary:hover:not(:disabled){background:var(--forest-dark);border-color:var(--forest-dark);box-shadow:var(--shadow-control)}
+.button.secondary,.button.tertiary{background:var(--surface);border-color:var(--line);color:var(--forest)}
+.button.secondary:hover:not(:disabled),.button.tertiary:hover:not(:disabled){background:var(--surface-soft);border-color:var(--line-strong)}
+:is(.button,.filter-button,.save-button,.icon-button):active:not(:disabled){transform:translateY(1px)}
+
+.search-field,.filters select,.stack input:not([type=checkbox]),.stack select,.stack textarea,.compact-select select{
+  background:var(--surface-raised);
+  border-color:var(--line);
+  color:var(--ink);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65);
+}
+.search-field:focus-within,.filters select:focus-visible,.stack input:focus-visible,.stack select:focus-visible,.stack textarea:focus-visible{
+  border-color:var(--line-strong);
+  box-shadow:0 0 0 3px rgba(142,79,45,.12);
+}
+
+:is(.trail-card,.fact-card,.route-section,.info-compact,.catalog-empty,.small-empty,.prose-card,.account-card,.moderation-item,.departure-card){
+  border-color:var(--line);
+  background:var(--surface);
+  box-shadow:var(--shadow-card);
+}
+.trail-card{border-radius:var(--radius-card)}
+.trail-card:hover{background:var(--surface-raised);border-color:var(--line-strong);transform:translateY(-1px)}
+.trail-card[aria-current=true],.trail-card.is-selected{background:var(--surface-selected);border-color:var(--ochre);box-shadow:0 0 0 1px rgba(165,103,54,.14),var(--shadow-card)}
+.route-summary>div{background:var(--surface-soft);border:1px solid var(--line);border-radius:var(--radius-control)}
+.route-status,.route-restriction{border-color:var(--line);box-shadow:none}
+
+.explore-panel{background:color-mix(in srgb,var(--surface) 96%,transparent);border-color:var(--line);box-shadow:14px 0 34px rgba(29,48,38,.06)}
+.explore-layout .map-context,.explore-layout .map-style-switch,.explore-layout .map-controls,
+.explore-layout .layer-button,.explore-layout .layer-menu,.explore-layout .map-message{
+  border-color:rgba(90,112,93,.48);
+  background:rgba(255,254,250,.96);
+  box-shadow:var(--shadow-control);
+}
+.explore-layout .map-controls button,.explore-layout .map-style-switch button,.explore-layout .layer-button{
+  border-radius:10px;
+}
+.explore-layout .map-controls button:hover,.explore-layout .map-style-switch button:not(.active):hover,.explore-layout .layer-button:hover{
+  background:var(--surface-soft);
+}
+.explore-layout .map-style-switch button.active,.explore-layout .layer-button.active{background:var(--forest);color:var(--surface)}
+
+.explore-layout .trail-marker.is-selected::before{
+  background:var(--forest);
+  box-shadow:0 0 0 2px var(--surface),0 0 0 5px rgba(165,103,54,.35),0 4px 14px rgba(29,48,38,.24);
+  transform:scale(1.12);
+}
+.explore-layout [data-map-label-hidden='true'] .region-marker-label,
+.explore-layout [data-map-label-hidden='true'] .trail-marker-label{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+.explore-layout .atlas-wrap{isolation:isolate}
+.explore-layout .atlas-wrap::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(115,133,112,.22),inset 0 0 18px rgba(231,235,226,.18);
+}
+.explore-layout .map-context,.explore-layout .map-style-switch,.explore-layout .map-controls,
+.explore-layout .layer-control,.explore-layout .map-message,.explore-layout .map-legend,
+.explore-layout .map-attribution,.explore-layout .fact-card,.explore-layout .fact-closed{z-index:20}
+.explore-layout .maplibregl-marker{z-index:12}
+.explore-layout .leaflet-marker-pane{z-index:600}
+.explore-layout .tropnik-relief-tiles .leaflet-tile{transition:opacity .12s linear}
+
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--focus);
+  outline-offset:3px;
+}
+
+@media(max-width:700px){
+  :root{--shadow-card:0 10px 28px rgba(29,48,38,.08)}
+  .explore-panel{box-shadow:0 -12px 30px rgba(29,48,38,.08)}
+  .trail-card:hover{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  :is(.button,.filter-button,.save-button,.icon-button,.back-link,.trail-card),
+  .explore-layout .trail-marker::before,.explore-layout .tropnik-relief-tiles .leaflet-tile{transition:none}
+}

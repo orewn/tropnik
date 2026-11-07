@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {dirname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,updateDirectionButtons} from '../lib/map-direction-layout.ts';
+import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,mapLabelAvoidObstacles,updateDirectionButtons} from '../lib/map-direction-layout.ts';
 import {russiaCamera,russiaPadding,russiaLongitude} from '../public/maps/russia-viewport.js';
 
 // Use the actual fifteen directions, not a separately maintained coordinate
@@ -15,10 +15,10 @@ function load(path){
   assert.ok(path.startsWith(web+sep));
   if(cache.has(path))return cache.get(path);
   if(path.endsWith('.json'))return JSON.parse(readFileSync(path,'utf8'));
-  const module={exports:{}};
+  const loadedModule={exports:{}};
   const code=ts.transpileModule(readFileSync(path,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
-  new Function('require','module','exports',code)(id=>load((id.startsWith('@/')?resolve(web,id.slice(2)):resolve(dirname(path),id))+(id.endsWith('.json')?'':'.ts')),module,module.exports);
-  cache.set(path,module.exports);return module.exports;
+  new Function('require','module','exports',code)(id=>load((id.startsWith('@/')?resolve(web,id.slice(2)):resolve(dirname(path),id))+(id.endsWith('.json')?'':'.ts')),loadedModule,loadedModule.exports);
+  cache.set(path,loadedModule.exports);return loadedModule.exports;
 }
 const {regions}=load(resolve(web,'lib/content.ts'));
 const southIds=['adygea','karachay-cherkessia','kabardino-balkaria','krasnodar','krym'];
@@ -108,4 +108,22 @@ test('safe-area rules keep labels inside all four map edges',()=>{
   assert.equal(mapLabelPlacement('top',{left:100,right:132,top:75,bottom:107},40,wide),'bottom');
   assert.ok(directionLabelWidth('Петропавловск-Камчатский')<=168);
   assert.ok(directionLabelWidth('Алтай')>=84);
+});
+
+test('labels avoid floating cards and controls without moving their map anchor',()=>{
+  const safe={left:18,right:922,top:72,bottom:740};
+  const label={left:720,right:880,top:110,bottom:150};
+  const card={left:700,right:920,top:80,bottom:260};
+  const result=mapLabelAvoidObstacles(label,safe,[card],8);
+  const moved={left:label.left+result.x,right:label.right+result.x,top:label.top+result.y,bottom:label.bottom+result.y};
+  assert.equal(result.hidden,false);
+  assert.ok(moved.right<=card.left-8||moved.left>=card.right+8||moved.bottom<=card.top-8||moved.top>=card.bottom+8);
+  assert.ok(moved.left>=safe.left&&moved.right<=safe.right&&moved.top>=safe.top&&moved.bottom<=safe.bottom);
+});
+
+test('labels hide rather than overlap when no legal rectangle exists',()=>{
+  const safe={left:0,right:100,top:0,bottom:80};
+  const label={left:10,right:90,top:20,bottom:60};
+  const result=mapLabelAvoidObstacles(label,safe,[{left:0,right:100,top:0,bottom:80}],8);
+  assert.equal(result.hidden,true);
 });

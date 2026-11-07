@@ -51,7 +51,7 @@ test('reported map wedges, clipped labels and false detail banner stay fixed',()
   const maskIndex=style.layers.findIndex(layer=>layer.id==='russia-outside-mask');
   const priorityIndex=style.layers.findIndex(layer=>layer.id==='russia-priority-city-label');
   assert.ok(maskIndex>=0&&priorityIndex>maskIndex,'priority Russian labels redraw after the outside mask');
-  assert.match(sw,/tropnik-shell-v12/);
+  assert.match(sw,/tropnik-shell-v13/);
   assert.match(sw,/russia-canonical-mask\.geojson/);
 });
 
@@ -73,4 +73,25 @@ test('map marker labels never delegate edge placement to native browser tooltips
   assert.match(css,/--map-label-shift-y/);
   assert.match(css,/atlas-canvas\{overflow:hidden\}/);
   assert.match(css,/trail-marker:focus-visible\{background:transparent;transform:none\}/);
+});
+
+test('map stability release keeps terrain explicit and text collision-aware',()=>{
+  const atlas=read('components/Atlas.tsx');
+  const canvas=read('components/Atlas2D.tsx');
+  const generator=read('scripts/create-map-style.mjs');
+  const style=JSON.parse(read('public/maps/tropa-style.json'));
+  const layout=read('app/layout.tsx');
+  assert.match(layout,/interface-refresh\.css/);
+  assert.match(atlas,/terrainRef\.current/);
+  assert.match(atlas,/territoryForMapPoint/);
+  assert.match(atlas,/resolveTrailCenter/);
+  assert.doesNotMatch(atlas,/map\.on\('zoomend'[\s\S]{0,300}map\.setTerrain/);
+  assert.match(canvas,/DETAIL_ENTER_ZOOM=4\.6,DETAIL_EXIT_ZOOM=3\.8/);
+  assert.match(canvas,/bindMapLabelReflow/);
+  assert.match(generator,/symbol-avoid-edges/);
+  assert.match(generator,/hillshade-illumination-anchor':'map'/);
+  assert.equal(style.layers.find(layer=>layer.id==='overview-relief').paint['raster-fade-duration'],0);
+  for(const layer of style.layers.filter(layer=>layer.type==='symbol'&&layer.layout?.['text-field'])){
+    if(layer.layout['symbol-placement']!=='line')assert.equal(layer.layout['symbol-avoid-edges'],true,layer.id);
+  }
 });

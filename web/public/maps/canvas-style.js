@@ -24,7 +24,7 @@ const compiledOutdoorPaths=new Map();
 class OutdoorPOISymbolizer{
  constructor(p,layer){
   this.layer=layer;
-  this.text=new p.CenteredTextSymbolizer({labelProps:['name:ru','name'],font:'500 10px Gotham Pro, Manrope, sans-serif',fill:'#486148',stroke:'#faf6e9',width:2,maxLineChars:25});
+  this.text=new p.CenteredTextSymbolizer({labelProps:['name:ru','name','name:latin'],font:'500 10px Gotham Pro, Manrope, sans-serif',fill:'#486148',stroke:'#faf6e9',width:2,maxLineChars:20});
  }
  place(layout,geom,feature){
   const key=outdoorPoiKey(feature.props,this.layer),anchor=geom?.[0]?.[0];
@@ -49,7 +49,7 @@ export function canvasStyle(p,showPaths=true){
  const is=(key,values)=>(_z,f)=>values.includes(f.props[key]);
  const poly=(dataLayer,fill,filter,extras={})=>({dataLayer,symbolizer:new p.PolygonSymbolizer({fill}),...(filter?{filter}:{}),...extras});
  const line=(dataLayer,color,width,filter,extras={})=>({dataLayer,symbolizer:new p.LineSymbolizer({color,width,...(extras.dash?{dash:extras.dash}:{}),opacity:extras.opacity??1,lineCap:'round'}),...(filter?{filter}:{}),...(extras.minzoom!==undefined?{minzoom:extras.minzoom}:{}),...(extras.maxzoom!==undefined?{maxzoom:extras.maxzoom}:{})});
- const label=(dataLayer,size,color,filter,extras={})=>({dataLayer,symbolizer:new p.CenteredTextSymbolizer({labelProps:['name:ru','name'],font:`500 ${size}px Gotham Pro, Manrope, sans-serif`,fill:color,stroke:'#f6f4e8',width:2,maxLineChars:25,...(extras.upper?{textTransform:'uppercase'}:{})}),...(filter?{filter}:{}),...(extras.minzoom!==undefined?{minzoom:extras.minzoom}:{}),...(extras.maxzoom!==undefined?{maxzoom:extras.maxzoom}:{})});
+ const label=(dataLayer,size,color,filter,extras={})=>({dataLayer,symbolizer:new p.CenteredTextSymbolizer({labelProps:['name:ru','name','name:latin'],font:`500 ${size}px Gotham Pro, Manrope, sans-serif`,fill:color,stroke:'#f6f4e8',width:2,maxLineChars:20,...(extras.upper?{textTransform:'uppercase'}:{})}),...(filter?{filter}:{}),...(extras.minzoom!==undefined?{minzoom:extras.minzoom}:{}),...(extras.maxzoom!==undefined?{maxzoom:extras.maxzoom}:{})});
  const paintRules=[
  poly('landcover','#dce5ca',is('class',['grass','farmland'])),poly('landcover','#ccdcbd',is('class',['wood'])),poly('landcover','#d8e3c5',is('class',['scrub'])),poly('landcover','#f6f5ee',is('class',['ice'])),poly('landuse','#e7e8db',is('class',['residential','commercial','industrial']),{minzoom:9}),poly('park','#d4e1c1'),
  poly('water','#d3e4e8'),line('waterway','#afcbd3',z=>z>12?1.5:.6,null,{minzoom:7}),line('boundary','#9baa89',.65,null,{dash:[4,3],opacity:.65}),

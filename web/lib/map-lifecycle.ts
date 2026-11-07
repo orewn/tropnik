@@ -73,14 +73,16 @@ type MapSelectionOptions<Value> = {
   current: () => boolean;
   apply: (value: Value) => void;
   onError: (error: unknown) => void;
+  clearBeforeLoad?: boolean;
 };
 
-/** Clear the previous route immediately. Even before an effect cleanup runs,
- * the card identity and map generation must still match a completed response. */
+/** Keep the previous route visible while a replacement is fetched when the
+ * caller opts out of eager clearing. Stale responses still cannot apply, and a
+ * failed replacement clears the old line rather than mislabelling it. */
 export function loadMapSelection<Value>(options: MapSelectionOptions<Value>): () => void {
   let active = true;
   const current = () => active && options.current();
-  options.clear();
+  if(options.clearBeforeLoad!==false)options.clear();
   void Promise.resolve().then(async () => {
     if (!current()) return;
     const value = await options.load();

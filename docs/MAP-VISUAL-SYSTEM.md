@@ -1,35 +1,44 @@
-# Map visual system
+# Визуальная система карты Тропника
 
-## Palette
+Актуально для веб-релиза **0.4.5**, 7 ноября 2026 года.
 
-- Page background: `#F5F3EB`
-- Surface: `#FFFEFA`
-- Soft surface: `#EEF2E8`
-- Primary forest: `#244D3C`
-- Text: `#1D3026`
-- Secondary text: `#59685D`
-- Quiet border: `#D5DCCE`
-- Functional border: `#738570`
-- Route accent: `#A56736`
+## Палитра
 
-Normal cards and controls use one-pixel quiet borders. Two-pixel emphasis is reserved for keyboard focus and the selected object.
+| Роль | Значение |
+| --- | --- |
+| Бумажный фон | `#F5F3EB` |
+| Основная поверхность | `#FFFEFA` |
+| Мягкая поверхность | `#EEF2E8` |
+| Лесной основной | `#244D3C` |
+| Основной текст | `#1D3026` |
+| Вторичный текст | `#59685D` |
+| Тихая граница | `#D5DCCE` |
+| Функциональная граница | `#738570` |
+| Акцент маршрута | `#A56736` |
+| Усиленный акцент / focus | `#8E4F2D` |
 
-## Relief camera
+Карточки и controls используют одну границу 1 px. Более сильный контур применяется только для клавиатурного focus и выбранного объекта.
 
-The national view stays close to top-down. Pitch and elevation increase gradually with zoom so the country is not compressed into a narrow strip. Route framing is capped at 50 degrees.
+## Подписи
 
-## Attribution
+HTML-подписи направлений и маршрутов используют безопасный прямоугольник по четырём сторонам. Дополнительно алгоритм получает реальные прямоугольники панели, карточки историй, переключателя карты, controls, меню слоёв, сообщений, легенды и attribution. Подпись сначала меняет сторону относительно точки, затем получает минимальный допустимый сдвиг. Географический marker не перемещается. Если свободного места нет, визуальная подпись скрывается; `aria-label` остаётся доступным.
 
-The map shows OpenStreetMap/OpenMapTiles credit on the first display. It may collapse after five seconds or the first interaction, while a labelled info control remains in the map corner. Full notices remain at `/sources` and in the terrain attribution file. Natural Earth is public-domain data and is documented on the sources page rather than repeated over the map.
+Перерасчёт выполняется при движении карты, resize, изменении панели, появлении/скрытии overlays, focus/hover и после загрузки шрифтов. Нативные browser tooltips для маркеров запрещены.
 
-## Label boundaries
+Векторные подписи выбирают `name:ru`, затем локальное `name`, затем `name:latin`. Point labels имеют переменные anchors, увеличенный collision padding и `symbol-avoid-edges`. Canvas fallback использует тот же языковой приоритет и более короткий перенос строки.
 
-Map labels use an explicit safe rectangle rather than the browser's native `title` tooltip placement.
+## Рельеф и zoom
 
-- Desktop safe area: 18 px from the left edge, 72 px below the top controls, 78 px before the right control rail, and 60 px above the bottom legend/credits.
-- Compact safe area: 12 px from the left/bottom edge, 62 px below the top controls, and 58 px before the right controls.
-- When the mobile route sheet overlaps the map, its top edge minus 12 px becomes the hard lower boundary.
-- Direction labels prefer the side below their geographic point; route labels prefer the side above it. A label flips first, then receives the smallest required horizontal and vertical translation.
-- The marker remains on the real geographic coordinate. Only its label may move.
-- Browser-native marker tooltips are forbidden because the browser may position them outside the map. Accessible names remain on the buttons through `aria-label`.
-- The map canvas clips overflow only as a final defence. A correctly placed label must already fit inside the safe rectangle.
+Национальный ракурс остаётся близким к виду сверху. Terrain включается только кнопкой пользователя. Выбор направления или тропы не включает его автоматически. Exaggeration задаётся при включении, но не пересобирается на каждом `zoomend`; меняется только pitch камеры.
+
+В Leaflet/Canvas подробная подложка включается после zoom 4.6 и сохраняется до выхода ниже 3.8. Раздельные пороги предотвращают дребезг на дробном масштабе. Уже декодированные relief tiles остаются на экране при смене обзорного/детального режима; новые tiles получают актуальный режим shading. Tile buffer равен двум экранам.
+
+Обзорный raster не использует cross-fade, а hillshade закреплён относительно карты. Это уменьшает вспышки при смене уровня детализации.
+
+## Выбор территории
+
+MapLibre запрашивает все административные features в небольшой области вокруг курсора. Кандидаты дедуплицируются, затем выбирается самая специфичная территория, содержащая координату клика; при равенстве используются площадь bounds, расстояние до центра и стабильный id. Порядок слоёв renderer больше не определяет результат. Leaflet fallback использует тот же selector.
+
+## Источники и credits
+
+OpenStreetMap/OpenMapTiles credit показывается при первом открытии и остаётся доступным через подписанную кнопку информации. Полные уведомления находятся на `/sources` и в attribution-файлах. Credits нельзя скрывать способом, нарушающим применимые лицензии.
