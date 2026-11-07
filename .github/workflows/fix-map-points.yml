@@ -1,4 +1,4 @@
-name: Map points repair
+name: Tropnik 0.4.5 release gate
 
 on:
   push:
@@ -9,9 +9,9 @@ permissions:
   contents: write
 
 jobs:
-  repair:
+  release:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,44 +19,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.19.0'
-      - name: Apply repair
-        run: python3 scripts/fix-map-points.py
-      - name: Install dependencies
+      - name: Apply map interaction and package integrity fixes
+        run: |
+          python3 scripts/fix-map-points.py
+          python3 scripts/fix-offline-package.py
+          git diff --check
+      - name: Install locked dependencies
         working-directory: web
         run: |
           npm install --global pnpm@11.25.0
           pnpm install --frozen-lockfile
-      - name: Run map regression tests
+      - name: Run full regression suite
         working-directory: web
-        run: node --experimental-strip-types --test tests/map-coordinate.test.mjs
-      - name: Run full tests
-        id: full-tests
-        continue-on-error: true
-        working-directory: web
-        shell: bash
-        run: |
-          set -o pipefail
-          pnpm test 2>&1 | tee ../full-tests.log
-      - name: Upload full test log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: full-tests-log
-          path: full-tests.log
-          retention-days: 1
-      - name: Enforce full tests
-        if: steps.full-tests.outcome != 'success'
-        run: exit 1
+        run: pnpm test
       - name: Run lint
         working-directory: web
         run: pnpm lint
-      - name: Build production
+      - name: Build production release
         working-directory: web
         run: pnpm build
-      - name: Commit repair
+      - name: Commit verified release
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "fix(map): keep route points on land and remove click lag"
+          git diff --cached --check
+          git commit -m "release(web): v0.4.5 responsive route markers"
           git push origin HEAD:main
