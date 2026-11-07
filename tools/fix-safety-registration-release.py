@@ -9,6 +9,61 @@ text = text.replace(
     "import {ArrowRight, ArrowSquareOut, Check, CheckCircle, Clock, DownloadSimple, Export, Info, MapPin, NotePencil, Plus, ShieldCheck, Trash, UsersThree, X} from './TropnikIcons';",
     "import {ArrowSquareOut, Check, CheckCircle, Clock, DownloadSimple, Export, Info, MapPin, NotePencil, Plus, ShieldCheck, Trash, UsersThree, X} from './TropnikIcons';",
 )
+old_effect = """  useEffect(() => {
+    try {
+      const stored = parseSafetyPassportList(JSON.parse(localStorage.getItem(SAFETY_STORAGE_KEY) || '[]'));
+      setSaved(stored);
+      const params = new URLSearchParams(location.search);
+      const requested = params.get('passport');
+      const existing = requested ? stored.find(item => item.id === requested) : undefined;
+      if (existing) { setPassport(existing); return; }
+      const routeId = params.get('route');
+      const route = routeId ? trails.find(item => item.id === routeId) : undefined;
+      if (!route) return;
+      const region = regions.find(item => item.id === route.regionId);
+      setPassport(previous => ({
+        ...previous,
+        routeId: route.id,
+        routeTitle: route.title,
+        region: region?.name || previous.region,
+        routeDescription: route.description || previous.routeDescription,
+        updatedAt: new Date().toISOString(),
+      }));
+    } catch { setNotice('Не удалось прочитать сохранённые паспорта на этом устройстве.'); }
+  }, []);
+"""
+new_effect = """  useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      try {
+        const stored = parseSafetyPassportList(JSON.parse(localStorage.getItem(SAFETY_STORAGE_KEY) || '[]'));
+        setSaved(stored);
+        const params = new URLSearchParams(location.search);
+        const requested = params.get('passport');
+        const existing = requested ? stored.find(item => item.id === requested) : undefined;
+        if (existing) { setPassport(existing); return; }
+        const routeId = params.get('route');
+        const route = routeId ? trails.find(item => item.id === routeId) : undefined;
+        if (!route) return;
+        const region = regions.find(item => item.id === route.regionId);
+        setPassport(previous => ({
+          ...previous,
+          routeId: route.id,
+          routeTitle: route.title,
+          region: region?.name || previous.region,
+          routeDescription: route.description || previous.routeDescription,
+          updatedAt: new Date().toISOString(),
+        }));
+      } catch { setNotice('Не удалось прочитать сохранённые паспорта на этом устройстве.'); }
+    });
+    return () => { cancelled = true; };
+  }, []);
+"""
+if old_effect in text:
+    text = text.replace(old_effect, new_effect, 1)
+elif new_effect not in text:
+    raise SystemExit('Local passport hydration anchor not found')
 component.write_text(text)
 
 map_test = root / 'web/tests/map-polish.test.mjs'
