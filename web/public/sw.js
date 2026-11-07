@@ -1,5 +1,5 @@
 /* Тропник. Only public static assets are cached. Auth, chat and API responses never enter CacheStorage. */
-const VERSION='tropnik-shell-v13';
+const VERSION='tropnik-shell-v14';
 const SHELL=['/maps/russia-viewport.js','/data/russia-display-area.geojson','/data/russia-outside-mask.geojson','/data/russia-canonical-mask.geojson','/data/russia-boundaries-provenance.json','/terrain/ATTRIBUTION.txt','/terrain/sources/Copernicus-GLO30-LICENSE.pdf','/offline-fonts.css','/fonts/MANROPE-LICENSE.txt','/fonts/manrope-latin-400.woff2','/fonts/manrope-cyrillic-400.woff2','/fonts/manrope-latin-600.woff2','/fonts/manrope-cyrillic-600.woff2','/maps/tropnik-pictograms.js','/maps/tropnik-sprite.png','/maps/tropnik-sprite.json','/maps/tropnik-sprite@2x.png','/maps/tropnik-sprite@2x.json','/maps/tropnik-sprite-provenance.json','/terrain/landscape.html','/maps/leaflet.js','/maps/leaflet.css','/maps/protomaps-leaflet.js','/maps/canvas-style.js','/offline-viewer.html','/offline.js','/offline.css','/favicon.svg','/maps/maplibre-gl.mjs','/maps/maplibre-gl.css','/maps/maplibre-worker.js','/data/world.geojson','/data/regions.geojson','/data/territories.geojson'];
 async function cacheOverview(cache){
  const base='/maps/russia-relief/',response=await fetch(base+'manifest.json',{cache:'no-store'});

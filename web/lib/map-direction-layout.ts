@@ -27,6 +27,47 @@ export type MapLabelPlacement = 'top' | 'bottom';
 export type MapLabelRect = {left: number; right: number; top: number; bottom: number};
 export type MapLabelSafeRect = MapLabelRect;
 export type MapLabelAvoidance = {x:number;y:number;hidden:boolean};
+export type MapAnchorShift = {x:number;y:number};
+
+/** Resolve the correction from the engine's projected coordinate to the actual
+ * 44×44 DOM control centre. The current correction is removed before the next
+ * value is calculated, so repeated zoom frames are idempotent rather than
+ * cumulative. */
+export function directionAnchorCorrection(
+  rect:MapLabelRect,point:DirectionScreenPoint,viewport:Pick<MapLabelRect,'left'|'top'>,
+  current:MapAnchorShift={x:0,y:0},
+):MapAnchorShift{
+  const values=[...Object.values(rect),point.x,point.y,viewport.left,viewport.top,current.x,current.y];
+  if(!values.every(Number.isFinite)||rect.right<=rect.left||rect.bottom<=rect.top)return{x:0,y:0};
+  const baseX=(rect.left+rect.right)/2-current.x;
+  const baseY=(rect.top+rect.bottom)/2-current.y;
+  const x=viewport.left+point.x-baseX,y=viewport.top+point.y-baseY;
+  return{x:Math.abs(x)<.25?0:x,y:Math.abs(y)<.25?0:y};
+}
+
+/** Keep the visible control centred on the map engine coordinate even when
+ * legacy CSS, browser zoom or an animated map pane changes its measured box.
+ * Only the inner control receives a CSS `translate`; the source longitude and
+ * latitude remain untouched. */
+export function reconcileDirectionAnchors(
+  buttons:ReadonlyMap<string,HTMLButtonElement>,points:ReadonlyMap<string,DirectionScreenPoint>,viewport:HTMLElement,
+){
+  const bounds=viewport.getBoundingClientRect();let aligned=0;
+  for(const [id,button] of buttons){
+    if(button.hidden||!button.isConnected)continue;
+    const point=points.get(id);if(!point||!Number.isFinite(point.x)||!Number.isFinite(point.y))continue;
+    const rect=button.getBoundingClientRect();if(rect.width<8||rect.height<8)continue;
+    const current={x:Number(button.dataset.mapAnchorShiftX||0),y:Number(button.dataset.mapAnchorShiftY||0)};
+    const next=directionAnchorCorrection({left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},point,{left:bounds.left,top:bounds.top},current);
+    if(Math.abs(next.x)>Math.max(bounds.width,256)||Math.abs(next.y)>Math.max(bounds.height,256))continue;
+    const x=Math.round(next.x*4)/4,y=Math.round(next.y*4)/4;
+    button.dataset.mapAnchorShiftX=String(x);button.dataset.mapAnchorShiftY=String(y);
+    button.style.setProperty('--map-anchor-shift-x',`${x}px`);
+    button.style.setProperty('--map-anchor-shift-y',`${y}px`);
+    aligned++;
+  }
+  return aligned;
+}
 
 /** The label-safe rectangle excludes edge clipping and fixed map controls.
  * The compact bottom edge is additionally capped at the top of the mobile sheet. */
@@ -218,24 +259,33 @@ export function directionGroupsOverlap(a: Pick<MapDirectionGroup, 'point' | 'wid
     && Math.abs(a.point.y - b.point.y) < (a.height + b.height) / 2 + DIRECTION_MARKER_GAP;
 }
 
-/** Recompute after settled camera changes. The small catalogue needs no worker
- * or per-frame DOM churn; merging also accounts for the wider cluster label. */
-export function groupMapDirections<T extends MapDirection>(directions: readonly T[], project: (center: [number, number]) => DirectionScreenPoint): MapDirectionGroup<T>[] {
+function stableDirectionAnchor<T extends MapDirection>(members:readonly T[],preferred:ReadonlySet<string>){
+  const preferredMembers=members.filter(item=>preferred.has(item.id));
+  const candidates=preferredMembers.length?preferredMembers:members;
+  const latitude=members.reduce((sum,item)=>sum+item.center[1],0)/members.length;
+  const scale=Math.max(.15,Math.cos(latitude*Math.PI/180));
+  const longitude=(value:number)=>value<0?value+360:value;
+  const score=(candidate:T)=>members.reduce((sum,item)=>{
+    const dx=(longitude(candidate.center[0])-longitude(item.center[0]))*scale;
+    const dy=candidate.center[1]-item.center[1];return sum+dx*dx+dy*dy;
+  },0);
+  return [...candidates].sort((a,b)=>score(a)-score(b)||a.id.localeCompare(b.id))[0];
+}
+
+/** Recompute on camera frames. Group membership follows screen-space overlap,
+ * while the visible anchor stays on a stable real region centre. */
+export function groupMapDirections<T extends MapDirection>(
+  directions: readonly T[], project: (center: [number, number]) => DirectionScreenPoint,
+  preferredAnchorIds:ReadonlySet<string>=new Set<string>(),
+): MapDirectionGroup<T>[] {
   const points = new Map<string, DirectionScreenPoint>();
   const unique = [...new Map(directions.map(item => [item.id, item])).values()].sort((a, b) => a.id.localeCompare(b.id));
   for (const item of unique) points.set(item.id, project(item.center));
   const group = (members: T[]): MapDirectionGroup<T> => {
     members.sort((a, b) => a.id.localeCompare(b.id));
-    const average = members.reduce((sum, item) => {
-      const p = points.get(item.id)!;
-      return {x: sum.x + p.x / members.length, y: sum.y + p.y / members.length};
-    }, {x: 0, y: 0});
-    // Keep the symbol on a real member centre. A deterministic medoid avoids
-    // suggesting a new destination between the actual catalogue directions.
-    const anchor = members.reduce((best, item) => {
-      const a = points.get(best.id)!, b = points.get(item.id)!;
-      return Math.hypot(b.x - average.x, b.y - average.y) < Math.hypot(a.x - average.x, a.y - average.y) ? item : best;
-    });
+    // Preserve a surviving anchor across adjacent zoom frames. When a group
+    // is new, use a geographic medoid independent of projection and pitch.
+    const anchor = stableDirectionAnchor(members,preferredAnchorIds);
     const longitudes = members.map(item => item.center[0] < 0 ? item.center[0] + 360 : item.center[0]);
     const latitudes = members.map(item => item.center[1]);
     return {
@@ -267,7 +317,7 @@ export function directionMarkerContent(group: MapDirectionGroup, routeCount: num
   return {
     cluster,
     label: cluster ? directionCountLabel(group.members.length) : group.anchor.name,
-    count: !cluster && overview ? String(routeCount) : '',
+    count: cluster ? String(group.members.length) : overview ? String(routeCount) : '',
     ariaLabel: cluster ? `Приблизить ${directionCountLabel(group.members.length)}: ${group.members.map(item => item.name).join(', ')}`
       : `Открыть ${group.anchor.name}${overview ? `, маршрутов в каталоге: ${routeCount}` : ''}`,
   };
@@ -283,7 +333,13 @@ export function updateDirectionButtons<T extends MapDirection>(
   for (const [id, button] of buttons) {
     const group = anchors.get(id);
     button.hidden = !group;
-    if (!group) continue;
+    if (!group) {
+      button.removeAttribute('data-map-anchor-region-id');
+      button.removeAttribute('data-map-group-key');
+      continue;
+    }
+    button.setAttribute('data-map-anchor-region-id',group.anchor.id);
+    button.setAttribute('data-map-group-key',group.key);
     const content = directionMarkerContent(group, counts.get(id) || 0, overview);
     button.classList.toggle('direction-cluster', content.cluster);
     button.classList.toggle('is-overview', overview);

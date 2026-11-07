@@ -51,7 +51,7 @@ test('reported map wedges, clipped labels and false detail banner stay fixed',()
   const maskIndex=style.layers.findIndex(layer=>layer.id==='russia-outside-mask');
   const priorityIndex=style.layers.findIndex(layer=>layer.id==='russia-priority-city-label');
   assert.ok(maskIndex>=0&&priorityIndex>maskIndex,'priority Russian labels redraw after the outside mask');
-  assert.match(sw,/tropnik-shell-v13/);
+  assert.match(sw,/tropnik-shell-v14/);
   assert.match(sw,/russia-canonical-mask\.geojson/);
 });
 
@@ -105,4 +105,10 @@ test('region marker dots stay centered on the exact engine coordinate',()=>{
   assert.doesNotMatch(canvas,/iconSize:\[1,1\],iconAnchor:\[0,0\]/);
   assert.match(css,/region-marker\.direction-cluster[\s\S]*width:44px!important/);
   assert.match(css,/Only the label shifts;[\s\S]*the dot and the map engine's anchor never move/);
+  assert.match(css,/--map-anchor-shift-x/);
+  assert.match(css,/data-map-camera='zooming'/);
+  assert.match(atlas,/reconcileDirectionAnchors/);
+  assert.match(canvas,/reconcileDirectionAnchors/);
+  assert.match(atlas,/map\.on\('move',scheduleDirectionLayout\)/);
+  assert.match(canvas,/map\.on\('move',scheduleDirectionLayout\)/);
 });
