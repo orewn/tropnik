@@ -20,7 +20,20 @@ old_touch=".fact-card--compact .fact-story-toggle{font-size:11px;gap:3px;min-hei
 new_touch=".fact-card--compact .fact-story-toggle{font-size:11px;gap:3px;min-height:44px}"
 if old_touch not in style:
     raise SystemExit('Compact story touch target anchor not found')
-css.write_text(style.replace(old_touch,new_touch,1))
+style=style.replace(old_touch,new_touch,1)
+sticky_marker='/* Touch browsers may retain synthetic :hover after tap. */'
+sticky_fix="""
+
+/* Touch browsers may retain synthetic :hover after tap. */
+@media(hover:none),(pointer:coarse){
+  .fact-controls button:hover,
+  .fact-controls button:active,
+  .fact-controls button:focus:not(:focus-visible){background:transparent!important}
+}
+"""
+if sticky_marker not in style:
+    style=style.rstrip()+sticky_fix
+css.write_text(style.rstrip()+'\n')
 
 stories=root/'web/components/PlaceStories.tsx'
 story=stories.read_text()
@@ -53,5 +66,22 @@ new_metrics="""  const perf=await evaluate(cdp,`(()=>({cls:window.__tropnikPerf?
 if old_metrics not in script:
     raise SystemExit('Browser performance metric context anchor not found')
 browser.write_text(script.replace(old_metrics,new_metrics,1))
+
+ui_test=root/'web/tests/ui-smoothness.test.mjs'
+test_text=ui_test.read_text()
+if "synthetic touch hover paint is cleared" not in test_text:
+    test_text += """
+
+test('synthetic touch hover paint is cleared without removing keyboard focus',()=>{
+  const css=read('app/map-ui-release.css');
+  const stories=read('components/PlaceStories.tsx');
+  assert.match(css,/Touch browsers may retain synthetic :hover after tap/);
+  assert.match(css,/@media\(hover:none\),\(pointer:coarse\)[\s\S]*\.fact-controls button:hover[\s\S]*background:transparent!important/);
+  assert.match(css,/focus:not\(:focus-visible\)/);
+  assert.match(stories,/releaseTouchFocus/);
+  assert.match(stories,/requestAnimationFrame\(\(\)=>button\.blur\(\)\)/);
+});
+"""
+ui_test.write_text(test_text.rstrip()+'\n')
 
 Path(__file__).unlink()
