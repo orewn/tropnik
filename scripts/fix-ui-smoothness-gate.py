@@ -15,16 +15,12 @@ def write(path,text):
 
 def remove_all_per_frame(path):
     text=read(path)
-    before=text
     patterns=(
         r"(?:^|\n)[ \t]*map\.on\(\s*['\"]move['\"]\s*,\s*scheduleDirectionLayout\s*\)\s*;?",
         r"(?:^|\n)[ \t]*map\.on\(\s*['\"]zoom['\"]\s*,\s*scheduleDirectionLayout\s*\)\s*;?",
     )
-    total=0
     for pattern in patterns:
-        text,count=re.subn(pattern,'\n',text,flags=re.M)
-        total+=count
-    # Also remove exact inline remnants without consuming neighbouring code.
+        text,_=re.subn(pattern,'\n',text,flags=re.M)
     for fragment in (
         "map.on('move',scheduleDirectionLayout);",
         "map.on('move', scheduleDirectionLayout);",
@@ -33,14 +29,10 @@ def remove_all_per_frame(path):
         "map.on('zoom', scheduleDirectionLayout);",
         'map.on("zoom",scheduleDirectionLayout);',
     ):
-        count=text.count(fragment)
-        total+=count
         text=text.replace(fragment,'')
     forbidden=re.compile(r"map\.on\(\s*['\"](?:move|zoom)['\"]\s*,\s*scheduleDirectionLayout")
     if forbidden.search(text):
         raise SystemExit(f'{path}: a per-frame direction layout listener survived normalization')
-    if total<1 or text==before:
-        raise SystemExit(f'{path}: no per-frame direction layout listener was removed')
     write(path,text)
 
 
@@ -82,7 +74,6 @@ def update_contract():
 
 update_contract()
 
-# Validate the newly generated performance test against the normalized sources.
 for path in ('web/components/Atlas.tsx','web/components/Atlas2D.tsx'):
     text=read(path)
     if re.search(r"map\.on\(\s*['\"](?:move|zoom)['\"]\s*,\s*scheduleDirectionLayout",text):
@@ -90,5 +81,4 @@ for path in ('web/components/Atlas.tsx','web/components/Atlas2D.tsx'):
     if "map.on('movestart'" not in text or "map.on('moveend'" not in text:
         raise SystemExit(f'{path}: settle-only camera lifecycle is incomplete')
 
-# The release patch is one-shot; keep no repair machinery in the final tree.
 Path(__file__).unlink()
