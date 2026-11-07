@@ -76,6 +76,10 @@ function initialPassport(): SafetyPassport {
   return passport;
 }
 
+function passportSnapshot(passport: SafetyPassport): string {
+  return JSON.stringify(passport, key => key === 'updatedAt' ? undefined : passport[key as keyof SafetyPassport]);
+}
+
 function timeLabel(value: string): string {
   if (!value) return 'не отмечено';
   try { return new Intl.DateTimeFormat('ru', {dateStyle: 'medium', timeStyle: 'short'}).format(new Date(value)); }
@@ -116,6 +120,7 @@ async function copyText(value: string): Promise<void> {
 
 export function SafetyRegistration() {
   const [passport, setPassport] = useState<SafetyPassport>(initialPassport);
+  const [savedSnapshot, setSavedSnapshot] = useState(() => passportSnapshot(passport));
   const [saved, setSaved] = useState<SafetyPassport[]>([]);
   const [notice, setNotice] = useState('');
   const [submittedCheck, setSubmittedCheck] = useState(false);
@@ -124,6 +129,7 @@ export function SafetyRegistration() {
   const [catalog, setCatalog] = useState<SafetyCatalog | null>(null);
   const [catalogState, setCatalogState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const readiness = useMemo(() => safetyReadiness(passport), [passport]);
+  const dirty = useMemo(() => passportSnapshot(passport) !== savedSnapshot, [passport, savedSnapshot]);
   const deadline = notificationDeadline(passport.startDate);
   const deadlineState = notificationDeadlineState(passport.startDate);
   const locked = passport.status === 'closed';
@@ -140,7 +146,7 @@ export function SafetyRegistration() {
       const params = new URLSearchParams(location.search);
       const requested = params.get('passport');
       const existing = requested ? stored.find(item => item.id === requested) : undefined;
-      if (existing) { setPassport(existing); return; }
+      if (existing) { setSavedSnapshot(passportSnapshot(existing)); setPassport(existing); return; }
       const routeId = params.get('route');
       if (!routeId) return;
       setCatalogState('loading');
@@ -171,6 +177,16 @@ export function SafetyRegistration() {
     const timer = setTimeout(() => setNotice(''), 4200);
     return () => clearTimeout(timer);
   }, [notice]);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', beforeUnload);
+    return () => window.removeEventListener('beforeunload', beforeUnload);
+  }, [dirty]);
 
   function update<K extends keyof SafetyPassport>(key: K, value: SafetyPassport[K]) {
     setPassport(previous => {
@@ -219,6 +235,7 @@ export function SafetyRegistration() {
     const value = next.id === 'new' ? {...next, id: id('passport'), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()} : {...next, updatedAt: new Date().toISOString()};
     const list = [value, ...saved.filter(item => item.id !== value.id)].slice(0, 20);
     localStorage.setItem(SAFETY_STORAGE_KEY, JSON.stringify(list));
+    setSavedSnapshot(passportSnapshot(value));
     setPassport(value);
     setSaved(list);
     setNotice(message);
@@ -226,23 +243,28 @@ export function SafetyRegistration() {
   }
 
   function removeCurrent() {
-    if (passport.id === 'new') { setPassport(initialPassport()); return; }
+    if (passport.id === 'new') { const next = initialPassport(); setSavedSnapshot(passportSnapshot(next)); setPassport(next); return; }
     if (!window.confirm('Удалить этот паспорт безопасности с устройства?')) return;
     const list = saved.filter(item => item.id !== passport.id);
     localStorage.setItem(SAFETY_STORAGE_KEY, JSON.stringify(list));
     setSaved(list);
-    setPassport(initialPassport());
+    const next = initialPassport();
+    setSavedSnapshot(passportSnapshot(next));
+    setPassport(next);
     setNotice('Локальная копия удалена.');
   }
 
   function startNew() {
-    setPassport(initialPassport());
+    const next = initialPassport();
+    setSavedSnapshot(passportSnapshot(next));
+    setPassport(next);
     setSubmittedCheck(false);
     setCoordinates('');
     history.replaceState(null, '', location.pathname);
   }
 
   function loadPassport(item: SafetyPassport) {
+    setSavedSnapshot(passportSnapshot(item));
     setPassport(item);
     setSubmittedCheck(false);
     setCoordinates('');
@@ -311,7 +333,7 @@ export function SafetyRegistration() {
           </section>
           <section className={`${styles.card} ${styles.privacyNote}`}>
             <strong>Персональные данные</strong>
-            <p>Черновики остаются в localStorage браузера и не отправляются в Tropnik. На общем устройстве удалите их после переноса.</p>
+            <p>Черновики остаются только в localStorage этого браузера и не отправляются в Tropnik. Хранилище браузера не является защищённым сейфом: на общем устройстве удалите паспорт после переноса.</p>
           </section>
         </aside>
 
@@ -321,11 +343,12 @@ export function SafetyRegistration() {
               <div className={styles.statusTop}>
                 <span className={styles.statusPill} data-state={passport.status}>{passport.status === 'amendment_required' ? <Info size={16}/> : <ShieldCheck size={16}/>} {statusLabels[passport.status]}</span>
                 <span className={styles.progressLabel}>{readiness.completed} из {readiness.total} обязательных блоков · {readiness.percent}%</span>
+                <span className={`${styles.saveState} ${dirty ? styles.unsaved : ''}`} role="status">{dirty ? 'Есть несохранённые изменения' : passport.id === 'new' ? 'Изменений пока нет' : 'Сохранено на этом устройстве'}</span>
               </div>
               <div className={styles.progressTrack} aria-label={`Готовность ${readiness.percent}%`}><span style={{transform: `scaleX(${readiness.percent / 100})`}}/></div>
             </div>
             <div className={styles.statusActions}>
-              <button className={styles.miniButton} onClick={() => persist()}><NotePencil size={17}/>Сохранить</button>
+              <button type="button" className={styles.miniButton} disabled={!dirty} onClick={() => persist()}><NotePencil size={17}/>{dirty ? 'Сохранить изменения' : 'Сохранено'}</button>
               <button className={`${styles.miniButton} ${styles.danger}`} onClick={removeCurrent}><Trash size={17}/>Удалить</button>
             </div>
           </section>

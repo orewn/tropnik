@@ -1,6 +1,6 @@
 {
   "name": "tropnik-web",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "private": true,
   "engines": {
     "node": ">=22.13.0"

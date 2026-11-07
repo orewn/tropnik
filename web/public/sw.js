@@ -1,5 +1,5 @@
 /* Тропник. Only public static assets are cached. Auth, chat and API responses never enter CacheStorage. */
-const VERSION='tropnik-shell-v17';
+const VERSION='tropnik-shell-v18';
 const SHELL=['/maps/russia-viewport.js','/data/russia-display-area.geojson','/data/russia-outside-mask.geojson','/data/russia-canonical-mask.geojson','/data/russia-boundaries-provenance.json','/offline-fonts.css','/fonts/MANROPE-LICENSE.txt','/fonts/manrope-latin-400.woff2','/fonts/manrope-cyrillic-400.woff2','/fonts/manrope-latin-600.woff2','/fonts/manrope-cyrillic-600.woff2','/maps/leaflet.js','/maps/leaflet.css','/maps/protomaps-leaflet.js','/maps/canvas-style.js','/offline-viewer.html','/offline.js','/offline.css','/favicon.svg','/data/world.geojson','/data/regions.geojson','/data/territories.geojson'];
 const MAP_WARM=['/maps/tropa-style.json','/maps/tropnik-pictograms.js','/maps/tropnik-sprite.png','/maps/tropnik-sprite.json','/maps/tropnik-sprite@2x.png','/maps/tropnik-sprite@2x.json','/maps/tropnik-sprite-provenance.json'];
 const WEBGL_WARM=['/terrain/ATTRIBUTION.txt','/terrain/sources/Copernicus-GLO30-LICENSE.pdf','/terrain/landscape.html','/maps/maplibre-gl.mjs','/maps/maplibre-gl.css','/maps/maplibre-worker.js'];
@@ -42,7 +42,7 @@ function warmMapCache(engine){
 }
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(VERSION);await cache.addAll(SHELL);})());});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{for(const name of await caches.keys())if(name.startsWith('tropnik-shell-')&&name!==VERSION)await caches.delete(name);await self.clients.claim();})());});
-self.addEventListener('message',event=>{if(event.data?.type==='warm-map')event.waitUntil(warmMapCache(event.data.engine));});
+self.addEventListener('message',event=>{if(event.data?.type==='skip-waiting')event.waitUntil(self.skipWaiting());else if(event.data?.type==='warm-map')event.waitUntil(warmMapCache(event.data.engine));});
 async function verifiedResource(request){const names=(await caches.keys()).filter(n=>n.startsWith('tropnik-map-')).sort().reverse();for(const name of names){const cache=await caches.open(name);if(await cache.match('/_offline/verified-map')){const match=await cache.match(request);if(match)return match;}}return null;}
 self.addEventListener('fetch',event=>{const req=event.request,url=new URL(req.url);if(req.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/')||req.headers.get('RSC'))return;
  if(url.pathname.startsWith('/offline-map/')||url.pathname==='/maps/pilot-style.json'){event.respondWith((async()=>{if(req.cache==='no-store'||req.cache==='reload')return fetch(req);const found=await verifiedResource(req);if(found)return found;return fetch(req);})());return;}
