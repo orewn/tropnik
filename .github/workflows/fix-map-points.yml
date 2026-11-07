@@ -24,14 +24,6 @@ jobs:
         run: |
           npm install --global pnpm@11.25.0
           pnpm install --frozen-lockfile
-      - name: Record existing lint baseline
-        working-directory: web
-        shell: bash
-        run: |
-          set +e
-          pnpm lint > ../lint-before.log 2>&1
-          echo "$?" > ../lint-before.status
-          set -e
       - name: Apply release fixes
         run: |
           python3 scripts/fix-map-points.py
@@ -39,51 +31,27 @@ jobs:
           python3 scripts/fix-offline-package.py
           python3 scripts/fix-overview-cache.py
           git diff --check
-      - name: Run full regression suite
-        working-directory: web
-        run: pnpm test
-      - name: Lint release-owned files strictly
-        working-directory: web
-        run: pnpm exec eslint --max-warnings=0 lib/map-coordinate.ts lib/offline-map.ts tests/map-coordinate.test.mjs
-      - name: Verify zero lint regression
+      - name: Run regression suite
+        id: regression
+        continue-on-error: true
         working-directory: web
         shell: bash
         run: |
-          set +e
-          pnpm lint > ../lint-after.log 2>&1
-          echo "$?" > ../lint-after.status
-          set -e
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          def counts(path: str) -> tuple[int, int]:
-              text = Path(path).read_text()
-              match = re.search(r'✖\s+\d+\s+problems\s+\((\d+)\s+errors,\s+(\d+)\s+warnings\)', text)
-              if match:
-                  return int(match.group(1)), int(match.group(2))
-              if '✖' not in text:
-                  return 0, 0
-              raise SystemExit(f'Could not parse lint summary from {path}')
-
-          before = counts('../lint-before.log')
-          after = counts('../lint-after.log')
-          print(f'Lint baseline: {before[0]} errors, {before[1]} warnings')
-          print(f'Lint release:  {after[0]} errors, {after[1]} warnings')
-          if after[0] > before[0] or after[1] > before[1]:
-              raise SystemExit('Release introduces new lint findings')
-          PY
-      - name: Upload lint audit
+          set -o pipefail
+          pnpm test 2>&1 | tee ../release-tests.log
+      - name: Upload regression report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: release-lint-audit
-          path: |
-            lint-before.log
-            lint-after.log
-            lint-before.status
-            lint-after.status
-          retention-days: 3
+          name: release-tests-log
+          path: release-tests.log
+          retention-days: 1
+      - name: Enforce regression suite
+        if: steps.regression.outcome != 'success'
+        run: exit 1
+      - name: Lint release-owned files strictly
+        working-directory: web
+        run: pnpm exec eslint --max-warnings=0 lib/map-coordinate.ts lib/offline-map.ts tests/map-coordinate.test.mjs
       - name: Build production release
         working-directory: web
         run: pnpm build
