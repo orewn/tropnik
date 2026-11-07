@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import re
 
 root = Path(__file__).resolve().parents[1]
 integration = root / 'backend/internal/store/safety_integration_test.go'
@@ -23,18 +24,16 @@ elif unique not in text:
 # This scenario creates another departure for a new safety revision, so release
 # the fixture departure first. The production overlap guard remains unchanged.
 if "UPDATE departures SET status='cancelled' WHERE id=$1" not in text:
-    marker = 'd, err := s.CreateDeparture'
-    marker_at = text.find(marker)
-    if marker_at < 0:
+    match = re.search(r'(?m)^(?P<indent>[ \t]*)d\s*,\s*err\s*:=\s*s\.CreateDeparture', text)
+    if not match:
         raise SystemExit('safety fixture departure creation anchor not found')
-    line_at = text.rfind('\n', 0, marker_at) + 1
-    indent = text[line_at:marker_at]
+    indent = match.group('indent')
     cancel_block = (
         f'{indent}if _, err = s.Pool.Exec(ctx, "UPDATE departures SET status=\'cancelled\' WHERE id=$1", base.ID); err != nil {{\n'
         f'{indent}\tt.Fatal(err)\n'
         f'{indent}}}\n'
     )
-    text = text[:line_at] + cancel_block + text[line_at:]
+    text = text[:match.start()] + cancel_block + text[match.start():]
 
 integration.write_text(text)
 Path(__file__).unlink()
