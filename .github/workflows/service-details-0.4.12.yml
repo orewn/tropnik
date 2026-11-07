@@ -28,6 +28,15 @@ jobs:
           package-manager-cache: false
       - name: Apply deterministic product patch
         run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path('tools/apply-service-details-0.4.12.py')
+          text=path.read_text()
+          old=r'''r'\{notice && <div className=\{styles\.notice\}>\{notice\}</div>\}' '''.strip()
+          new=r'''r'\{notice && <div className=\{styles\.notice\} role="status">\{notice\}</div>\}' '''.strip()
+          if old not in text: raise SystemExit('notice regex patch anchor missing')
+          path.write_text(text.replace(old,new,1))
+          PY
           python3 tools/apply-service-details-0.4.12.py
           git diff --check
       - name: Install locked dependencies
