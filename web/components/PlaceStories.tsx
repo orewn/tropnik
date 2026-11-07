@@ -1,22 +1,83 @@
 'use client';
 import {useEffect,useMemo,useState,useRef,useId} from 'react';
-import {ArrowRight,ArrowSquareOut,CaretLeft,CaretRight,Pause,Play,Compass,X} from '@/components/TropnikIcons';
+import type {KeyboardEvent as ReactKeyboardEvent,PointerEvent as ReactPointerEvent} from 'react';
+import {ArrowRight,CaretLeft,CaretRight,Pause,Play,Compass,X} from '@/components/TropnikIcons';
 import {factsForPlace,type PlaceFact} from '@/lib/facts';
+
 export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeId?:string;onPlace:(f:PlaceFact)=>void}){
  const facts=useMemo(()=>factsForPlace(regionId,routeId),[regionId,routeId]);
- const [index,setIndex]=useState(0),[paused,setPaused]=useState(false),[hovered,setHovered]=useState(false),[hidden,setHidden]=useState(false),[dismissed,setDismissed]=useState(false),[reduced,setReduced]=useState(false),[expanded,setExpanded]=useState(false),[narrow,setNarrow]=useState(false);
+ const [index,setIndex]=useState(0),[paused,setPaused]=useState(false),[hovered,setHovered]=useState(false),[hidden,setHidden]=useState(false),[dismissed,setDismissed]=useState(false),[reduced,setReduced]=useState(false),[expanded,setExpanded]=useState(false),[narrow,setNarrow]=useState(false),[failedPhoto,setFailedPhoto]=useState('');
  const storyId=useId(),overview=!regionId,collapsible=overview||narrow,compact=collapsible&&!expanded;
- const regionKey=useRef('');
+ const regionKey=useRef(''),swipe=useRef<{x:number;y:number;id:number}|null>(null);
+ const fact=facts.length?facts[index%facts.length]:undefined;
+
  useEffect(()=>{const media=window.matchMedia('(max-width: 700px)');const sync=()=>setNarrow(media.matches);sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
- useEffect(()=>{const key=`${regionId||'all'}:${routeId||''}`;if(key!==regionKey.current){setIndex(0);setExpanded(false);regionKey.current=key;}},[regionId,routeId]);
+ useEffect(()=>{const key=`${regionId||'all'}:${routeId||''}`;if(key!==regionKey.current){setIndex(0);setExpanded(false);setPaused(false);regionKey.current=key;}},[regionId,routeId]);
  useEffect(()=>{if(routeId)setDismissed(true);},[routeId]);
  useEffect(()=>{const media=window.matchMedia('(prefers-reduced-motion: reduce)');const sync=()=>setReduced(media.matches);sync();media.addEventListener('change',sync);const visibility=()=>setHidden(document.hidden);document.addEventListener('visibilitychange',visibility);return()=>{media.removeEventListener('change',sync);document.removeEventListener('visibilitychange',visibility);};},[]);
+ useEffect(()=>{if(!fact)return;setFailedPhoto(current=>current===fact.id?'':current);if(facts.length<2)return;for(const offset of [-1,1]){const nearby=facts[(index+offset+facts.length)%facts.length];const image=new window.Image();image.src=nearby.imageUrl;}},[fact?.id,facts,index]);
+
  const stopped=paused||hovered||hidden||reduced||dismissed||(collapsible&&expanded);
- useEffect(()=>{if(stopped||facts.length<2)return;const timer=setTimeout(()=>setIndex(i=>(i+1)%facts.length),16000);return()=>clearTimeout(timer);},[index,stopped,facts]);
- const fact=facts[index%facts.length];if(!fact)return null;
+ useEffect(()=>{if(stopped||facts.length<2)return;const timer=setTimeout(()=>setIndex(i=>(i+1)%facts.length),16000);return()=>clearTimeout(timer);},[index,stopped,facts.length]);
+
+ if(!fact)return null;
  function manual(delta:number){setPaused(true);setIndex(i=>(i+delta+facts.length)%facts.length);}
+ function beginSwipe(event:ReactPointerEvent<HTMLElement>){
+  if(event.pointerType==='mouse'||(event.target as HTMLElement).closest('button,a'))return;
+  swipe.current={x:event.clientX,y:event.clientY,id:event.pointerId};
+ }
+ function finishSwipe(event:ReactPointerEvent<HTMLElement>){
+  const start=swipe.current;swipe.current=null;
+  if(!start||start.id!==event.pointerId)return;
+  const dx=event.clientX-start.x,dy=event.clientY-start.y;
+  if(Math.abs(dx)>=44&&Math.abs(dx)>Math.abs(dy)*1.2){event.preventDefault();manual(dx>0?-1:1);}
+ }
+ function storyKey(event:ReactKeyboardEvent<HTMLElement>){
+  if(event.target!==event.currentTarget)return;
+  if(event.key==='ArrowLeft'){event.preventDefault();manual(-1);}
+  if(event.key==='ArrowRight'){event.preventDefault();manual(1);}
+ }
+ function togglePlayback(){
+  if(reduced){setReduced(false);setPaused(false);return;}
+  setPaused(value=>!value);
+ }
  if(dismissed)return <button className="fact-closed" onClick={()=>setDismissed(false)}><Compass size={17}/>Истории мест</button>;
- return <aside className={`fact-card ${overview?'overview-fact':''} ${compact?'fact-card--compact':''}`} aria-label="Истории мест на карте" onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)} onFocusCapture={()=>setHovered(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))setHovered(false);}}>
- <div className="fact-card-inner"><div className="fact-topline"><Compass size={15}/><span className="eyebrow">{regionId?'Ближе к месту':'Открывайте Россию'}</span><span className="fact-count">{String(index%facts.length+1).padStart(2,'0')} / {String(facts.length).padStart(2,'0')}</span><button className="fact-dismiss" onClick={()=>setDismissed(true)} aria-label="Свернуть истории"><X size={13}/></button></div><div className="fact-copy" key={fact.id} aria-live="off"><h3 className={compact?'title-2':undefined}>{fact.title}</h3><div className="fact-story-body" id={storyId} hidden={compact}><p>{fact.body}</p>{collapsible&&<button className="fact-place" onClick={()=>{setPaused(true);onPlace(fact);}} title="Открыть направление на карте">{fact.place}<ArrowRight size={12}/></button>}</div><a className="fact-source caption-5" href={fact.sourceUrl} target="_blank" rel="noreferrer" title={`${fact.source}. Источник прочитан ${fact.checkedAt}`}>{compact?fact.source.split(' · ')[0]:fact.source}<ArrowSquareOut size={10}/></a></div></div>
- <div className="fact-card-footer">{collapsible?<button className="fact-story-toggle button-sm" aria-expanded={expanded} aria-controls={storyId} onClick={()=>setExpanded(value=>!value)}>{expanded?'Свернуть':'Читать историю'}<CaretRight size={14}/></button>:<button className="fact-place" onClick={()=>{setPaused(true);onPlace(fact);}} title="Открыть направление на карте">{fact.place.length>24?fact.place.split(' · ')[0]:fact.place}<ArrowRight size={12}/></button>}<div className="fact-controls">{compact?<span className="fact-count caption-5">{String(index%facts.length+1).padStart(2,'0')} / {String(facts.length).padStart(2,'0')}</span>:<button aria-label="Предыдущая история" onClick={()=>manual(-1)}><CaretLeft size={13}/></button>}<button aria-label={paused||reduced?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={()=>{setReduced(false);setPaused(!paused&&!reduced);}}>{paused||reduced?<Play size={12}/>:<Pause size={12}/>}</button><button aria-label="Следующая история" onClick={()=>manual(1)}><CaretRight size={13}/></button></div></div><div className={`fact-progress ${stopped?'paused':''}`} aria-hidden="true"><span key={`${fact.id}-${paused}`}/></div></aside>;
+ const photoFailed=failedPhoto===fact.id;
+ return <aside
+  className={`fact-card ${overview?'overview-fact':''} ${compact?'fact-card--compact':'fact-card--expanded'}`}
+  aria-label="Истории мест на карте"
+  tabIndex={0}
+  onKeyDown={storyKey}
+  onPointerDown={beginSwipe}
+  onPointerUp={finishSwipe}
+  onPointerCancel={()=>{swipe.current=null;}}
+  onMouseEnter={()=>setHovered(true)}
+  onMouseLeave={()=>setHovered(false)}
+  onFocusCapture={()=>setHovered(true)}
+  onBlurCapture={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node))setHovered(false);}}
+ >
+  <figure className={`fact-photo ${photoFailed?'is-fallback':''}`}>
+   {!photoFailed&&<img key={fact.imageUrl} src={fact.imageUrl} alt={fact.imageAlt} loading="eager" decoding="async" style={{objectPosition:fact.imagePosition||'50% 50%'}} onError={()=>setFailedPhoto(fact.id)}/>} 
+   <span className="fact-photo-fallback" aria-hidden={!photoFailed}><Compass size={22}/><span>Фото временно недоступно</span></span>
+   <figcaption>{fact.imageCredit}<span>{fact.imageLicense}</span></figcaption>
+  </figure>
+  <div className="fact-card-inner">
+   <div className="fact-topline"><Compass size={15}/><span className="eyebrow">{regionId?'Ближе к месту':'Открывайте Россию'}</span><span className="fact-count">{String(index%facts.length+1).padStart(2,'0')} / {String(facts.length).padStart(2,'0')}</span><button className="fact-dismiss" onClick={()=>setDismissed(true)} aria-label="Свернуть истории"><X size={14}/></button></div>
+   <div className="fact-copy" key={fact.id} aria-live={paused?'polite':'off'}>
+    <h3 className={compact?'title-2':undefined}>{fact.title}</h3>
+    <div className="fact-story-body" id={storyId} hidden={compact}><p>{fact.body}</p>{collapsible&&<button className="fact-place" onClick={()=>{setPaused(true);onPlace(fact);}} title="Открыть направление на карте">{fact.place}<ArrowRight size={12}/></button>}</div>
+    <span className="fact-source-label caption-5" title={`Материал проверен ${fact.checkedAt}`}>{fact.source}</span>
+   </div>
+  </div>
+  <div className="fact-card-footer">
+   {collapsible?<button className="fact-story-toggle button-sm" aria-expanded={expanded} aria-controls={storyId} onClick={()=>setExpanded(value=>!value)}>{expanded?'Свернуть':'Читать историю'}<CaretRight size={14}/></button>:<button className="fact-place" onClick={()=>{setPaused(true);onPlace(fact);}} title="Открыть направление на карте">{fact.place.length>24?fact.place.split(' · ')[0]:fact.place}<ArrowRight size={12}/></button>}
+   <div className="fact-controls">
+    <button aria-label="Предыдущая история" onClick={()=>manual(-1)}><CaretLeft size={15}/></button>
+    {compact&&<span className="fact-count caption-5">{String(index%facts.length+1).padStart(2,'0')} / {String(facts.length).padStart(2,'0')}</span>}
+    <button aria-label={paused||reduced?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={togglePlayback}>{paused||reduced?<Play size={13}/>:<Pause size={13}/>}</button>
+    <button aria-label="Следующая история" onClick={()=>manual(1)}><CaretRight size={15}/></button>
+   </div>
+  </div>
+  <div className={`fact-progress ${stopped?'paused':''}`} aria-hidden="true"><span key={`${fact.id}-${paused}`}/></div>
+ </aside>;
 }

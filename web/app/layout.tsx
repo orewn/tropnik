@@ -8,6 +8,7 @@ import "./place-stories.css";
 import "./event-categories.css";
 import "./map-polish.css";
 import "./interface-refresh.css";
+import "./map-ui-release.css";
 import '@fontsource/manrope/cyrillic-400.css';
 import '@fontsource/manrope/cyrillic-500.css';
 import '@fontsource/manrope/cyrillic-600.css';
