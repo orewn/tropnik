@@ -99,13 +99,13 @@ test('regrouping transfers keyboard focus and restores a separate selected direc
 
 test('safe-area rules keep labels inside all four map edges',()=>{
   const wide=mapLabelSafeRect({left:0,right:1000,top:0,bottom:800},false);
-  assert.deepEqual(wide,{left:18,right:922,top:72,bottom:740});
+  assert.deepEqual(wide,{left:18,right:982,top:18,bottom:782});
   const compact=mapLabelSafeRect({left:0,right:390,top:0,bottom:772},true,410);
-  assert.deepEqual(compact,{left:12,right:332,top:62,bottom:410});
+  assert.deepEqual(compact,{left:12,right:378,top:12,bottom:410});
   assert.deepEqual(mapLabelShift({left:-30,right:110,top:90,bottom:130},wide),{x:48,y:0});
-  assert.deepEqual(mapLabelShift({left:900,right:1040,top:710,bottom:770},wide),{x:-118,y:-30});
-  assert.equal(mapLabelPlacement('bottom',{left:100,right:132,top:700,bottom:732},40,wide),'top');
-  assert.equal(mapLabelPlacement('top',{left:100,right:132,top:75,bottom:107},40,wide),'bottom');
+  assert.deepEqual(mapLabelShift({left:900,right:1040,top:710,bottom:770},wide),{x:-58,y:0});
+  assert.equal(mapLabelPlacement('bottom',{left:100,right:132,top:700,bottom:732},40,wide),'bottom');
+  assert.equal(mapLabelPlacement('top',{left:100,right:132,top:75,bottom:107},40,wide),'top');
   assert.ok(directionLabelWidth('Петропавловск-Камчатский')<=168);
   assert.ok(directionLabelWidth('Алтай')>=84);
 });

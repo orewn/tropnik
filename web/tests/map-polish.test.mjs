@@ -63,10 +63,13 @@ test('map marker labels never delegate edge placement to native browser tooltips
   assert.match(layout,/MAP_LABEL_SAFE_AREA/);
   assert.match(layout,/mapLabelPlacement/);
   assert.match(layout,/coveredBottom/);
-  assert.match(atlas,/trail-marker-label/);
-  assert.match(canvas,/trail-marker-label/);
+  assert.match(atlas,/TRAIL_POINT_HIT/);
+  assert.match(atlas,/mapTrailPointFeatureCollection/);
+  assert.match(canvas,/mapTrailPointEntries/);
+  assert.match(canvas,/L\.circleMarker/);
   assert.doesNotMatch(atlas,/button\.title=t\.title/);
-  assert.doesNotMatch(canvas,/bindTooltip/);
+  assert.match(canvas,/finePointer=window\.matchMedia/);
+  assert.match(canvas,/bindTooltip\(item\.title/);
   assert.match(layout,/removeAttribute\('title'\)/);
   assert.match(css,/data-map-label-placement='top'/);
   assert.match(css,/--map-label-shift-x/);
@@ -84,7 +87,7 @@ test('map stability release keeps terrain explicit and text collision-aware',()=
   assert.match(layout,/interface-refresh\.css/);
   assert.match(atlas,/terrainRef\.current/);
   assert.match(atlas,/territoryForMapPoint/);
-  assert.match(atlas,/resolveTrailCenter/);
+  assert.match(atlas,/mapTrailPointFeatureCollection/);
   assert.doesNotMatch(atlas,/map\.on\('zoomend'[\s\S]{0,300}map\.setTerrain/);
   assert.match(canvas,/DETAIL_ENTER_ZOOM=4\.6,DETAIL_EXIT_ZOOM=3\.8/);
   assert.match(canvas,/bindMapLabelReflow/);
@@ -111,4 +114,20 @@ test('region marker dots stay centered on the exact engine coordinate',()=>{
   assert.match(canvas,/reconcileDirectionAnchors/);
   assert.match(atlas,/map\.on\('move',scheduleDirectionLayout\)/);
   assert.match(canvas,/map\.on\('move',scheduleDirectionLayout\)/);
+});
+
+test('mobile visual viewport and native route points stay cross-platform',()=>{
+  const layout=read('lib/map-direction-layout.ts');
+  const atlas=read('components/Atlas.tsx');
+  const canvas=read('components/Atlas2D.tsx');
+  const css=read('app/map-ui-release.css');
+  assert.match(layout,/window\.visualViewport/);
+  assert.match(layout,/visual\?\.addEventListener\('resize'/);
+  assert.match(layout,/--map-label-max-width/);
+  assert.match(layout,/placed:MapLabelRect\[\]/);
+  assert.match(atlas,/type:'circle',source:TRAIL_POINTS/);
+  assert.doesNotMatch(atlas,/new ml\.Marker\(\{element:button,anchor:'center'\}\).*visibleTrails/s);
+  assert.match(canvas,/pane:'trail-points'/);
+  assert.match(canvas,/bindTooltip\(item\.title,\{direction:'auto'/);
+  assert.match(css,/tropnik-relief-tiles \.leaflet-tile\{opacity:1!important;transition:none!important\}/);
 });
