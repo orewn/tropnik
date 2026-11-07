@@ -38,6 +38,28 @@ jobs:
           path.write_text(text.replace(old,new,1))
           PY
           python3 tools/apply-service-details-0.4.12.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          map_test=Path('web/tests/map-polish.test.mjs')
+          text=map_test.read_text()
+          if text.count('tropnik-shell-v18') != 1: raise SystemExit('map polish worker version anchor missing')
+          map_test.write_text(text.replace('tropnik-shell-v18','tropnik-shell-v19',1))
+
+          service_test=Path('web/tests/service-polish.test.mjs')
+          text=service_test.read_text()
+          replacements={
+            "  assert.match(stories,/role=\"img\"/);":"  assert.match(stories,/<img\\b/);",
+            "  assert.doesNotMatch(stories,/<img\\b/);":"  assert.doesNotMatch(stories,/role=\"img\"/);",
+            "  assert.match(component,/passportSnapshot/);":"  assert.match(component,/safetyPassportSnapshot/);",
+            "  assert.match(worker,/tropnik-shell-v18/);":"  assert.match(worker,/tropnik-shell-v19/);",
+            "  assert.equal(JSON.parse(pkg).version,'0.4.11');":"  assert.equal(JSON.parse(pkg).version,'0.4.12');",
+          }
+          for old,new in replacements.items():
+            if text.count(old)!=1: raise SystemExit('service polish assertion anchor missing: '+old)
+            text=text.replace(old,new,1)
+          service_test.write_text(text)
+          PY
           git diff --check
       - name: Install locked dependencies
         run: |
@@ -50,7 +72,7 @@ jobs:
         run: node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
       - name: Strictly lint changed modules and tests
         working-directory: web
-        run: pnpm exec eslint --max-warnings=0 components/PlaceStories.tsx components/ServiceWorker.tsx components/MapResourceHints.tsx components/Header.tsx components/SafetyRegistration.tsx lib/safety-passport.ts tests/place-stories.test.mjs tests/safety-passport.test.mjs tests/startup-polish.test.mjs
+        run: pnpm exec eslint --max-warnings=0 components/PlaceStories.tsx components/ServiceWorker.tsx components/MapResourceHints.tsx components/Header.tsx components/SafetyRegistration.tsx lib/safety-passport.ts tests/place-stories.test.mjs tests/safety-passport.test.mjs tests/startup-polish.test.mjs tests/service-polish.test.mjs tests/map-polish.test.mjs
       - name: Build production application
         working-directory: web
         run: pnpm build
