@@ -8,6 +8,7 @@ on:
       - 'tools/apply-final-mobile-ux.py'
       - 'tools/normalize-final-mobile-ux.py'
       - 'tools/finalize-doc-eof.py'
+      - 'tools/fix-landscape-mobile-sheet.py'
 
 permissions:
   contents: write
@@ -51,6 +52,7 @@ jobs:
         run: |
           python3 tools/apply-final-mobile-ux.py
           python3 tools/normalize-final-mobile-ux.py
+          python3 tools/fix-landscape-mobile-sheet.py
           python3 tools/finalize-doc-eof.py
           git diff --check
 
@@ -130,6 +132,7 @@ jobs:
           test ! -e tools/apply-final-mobile-ux.py
           test ! -e tools/normalize-final-mobile-ux.py
           test ! -e tools/finalize-doc-eof.py
+          test ! -e tools/fix-landscape-mobile-sheet.py
           test ! -e .github/workflows/final-mobile-ux.yml
           test ! -e .github/workflows/ui-smoothness-release-v2.yml
           test ! -e tools/apply-ui-bottom-sheet.py
