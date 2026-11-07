@@ -134,6 +134,14 @@ func (s *Server) Handler() http.Handler {
 	m.HandleFunc("POST /api/v1/departures/{id}/leave", s.leave)
 	m.HandleFunc("POST /api/v1/departures/{id}/check-in", s.checkIn)
 	m.HandleFunc("POST /api/v1/departures/{id}/transition", s.transition)
+	m.HandleFunc("GET /api/v1/departures/{id}/safety-passport", s.safetyPassport)
+	m.HandleFunc("POST /api/v1/departures/{id}/safety-passport/prepare", s.prepareSafetyPassport)
+	m.HandleFunc("POST /api/v1/departures/{id}/mchs/submission", s.recordMCHSSubmission)
+	m.HandleFunc("POST /api/v1/departures/{id}/mchs/confirmation", s.confirmMCHSRegistration)
+	m.HandleFunc("POST /api/v1/departures/{id}/mchs/start-contact", s.confirmMCHSStartContact)
+	m.HandleFunc("POST /api/v1/departures/{id}/mchs/return-report", s.reportMCHSReturn)
+	m.HandleFunc("POST /api/v1/departures/{id}/safety-check-ins", s.safetyCheckIn)
+	m.HandleFunc("GET /api/v1/departures/{id}/emergency-card", s.emergencyCard)
 	m.HandleFunc("GET /api/v1/departures/{id}/messages", s.messages)
 	m.HandleFunc("POST /api/v1/departures/{id}/messages", s.sendMessage)
 	m.HandleFunc("GET /api/v1/departures/{id}/reviews", s.reviews)
@@ -242,6 +250,8 @@ func fail(w http.ResponseWriter, e error) {
 		failure(w, 429, "repeated_content", "Этот текст уже публиковался недавно. Новое сообщение не отправлено. Проверьте историю обсуждения.")
 	case errors.Is(e, domain.ErrLinkLimit):
 		failure(w, 429, "link_limit", "Сообщение не отправлено: слишком много ссылок для текущего лимита аккаунта. Сократите их количество.")
+	case errors.Is(e, domain.ErrSafetyUnavailable):
+		failure(w, 503, "safety_not_configured", "Контур безопасности временно не настроен. Данные не были сохранены.")
 	default:
 		slog.Error("database operation failed", "error_type", fmtErrorType(e))
 		failure(w, 503, "temporarily_unavailable", "Сервис временно недоступен. Повторите позже.")

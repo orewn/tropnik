@@ -2,17 +2,21 @@ package store
 
 import (
 	"context"
+	"time"
 	"tropa/backend/internal/domain"
 )
 
 type Guide struct {
-	ID             string   `json:"id"`
-	DisplayName    string   `json:"displayName"`
-	GuideStatus    string   `json:"guideStatus"`
-	Activities     []string `json:"activities"`
-	CompletedTrips int      `json:"completedTrips"`
-	ReviewCount    int      `json:"reviewCount"`
-	Rating         *float64 `json:"rating"`
+	ID                      string     `json:"id"`
+	DisplayName             string     `json:"displayName"`
+	GuideStatus             string     `json:"guideStatus"`
+	Activities              []string   `json:"activities"`
+	CompletedTrips          int        `json:"completedTrips"`
+	ReviewCount             int        `json:"reviewCount"`
+	Rating                  *float64   `json:"rating"`
+	RegistryNumber          *string    `json:"registryNumber,omitempty"`
+	RegistryRecordURL       *string    `json:"registryRecordUrl,omitempty"`
+	QualificationValidUntil *time.Time `json:"qualificationValidUntil,omitempty"`
 }
 
 func (s *Store) Guides(ctx context.Context, id string) ([]Guide, error) {
@@ -20,7 +24,10 @@ func (s *Store) Guides(ctx context.Context, id string) ([]Guide, error) {
 	ARRAY(SELECT DISTINCT q.activity FROM guide_qualifications q WHERE q.user_id=u.id AND q.revoked_at IS NULL AND q.valid_until>now() ORDER BY q.activity),
 	(SELECT count(*) FROM departures d WHERE d.guide_id=u.id AND d.status='completed'),
 	(SELECT count(*) FROM reviews r JOIN departures d ON d.id=r.departure_id WHERE d.guide_id=u.id AND r.target='guide' AND r.visibility='visible'),
-	(SELECT avg(r.rating)::double precision FROM reviews r JOIN departures d ON d.id=r.departure_id WHERE d.guide_id=u.id AND r.target='guide' AND r.visibility='visible')
+	(SELECT avg(r.rating)::double precision FROM reviews r JOIN departures d ON d.id=r.departure_id WHERE d.guide_id=u.id AND r.target='guide' AND r.visibility='visible'),
+	(SELECT q.registry_number FROM guide_qualifications q WHERE q.user_id=u.id AND q.revoked_at IS NULL AND q.valid_until>now() ORDER BY q.valid_until DESC LIMIT 1),
+	(SELECT q.registry_record_url FROM guide_qualifications q WHERE q.user_id=u.id AND q.revoked_at IS NULL AND q.valid_until>now() ORDER BY q.valid_until DESC LIMIT 1),
+	(SELECT q.valid_until FROM guide_qualifications q WHERE q.user_id=u.id AND q.revoked_at IS NULL AND q.valid_until>now() ORDER BY q.valid_until DESC LIMIT 1)
 	FROM users u WHERE u.guide_status='verified' AND NOT u.disabled AND ($1='' OR u.id::text=$1) AND EXISTS(SELECT 1 FROM guide_qualifications q WHERE q.user_id=u.id AND q.revoked_at IS NULL AND q.valid_until>now()) ORDER BY u.display_name,u.id LIMIT 100`, id)
 	if e != nil {
 		return nil, e
@@ -29,7 +36,7 @@ func (s *Store) Guides(ctx context.Context, id string) ([]Guide, error) {
 	out := []Guide{}
 	for rows.Next() {
 		var g Guide
-		e = rows.Scan(&g.ID, &g.DisplayName, &g.Activities, &g.CompletedTrips, &g.ReviewCount, &g.Rating)
+		e = rows.Scan(&g.ID, &g.DisplayName, &g.Activities, &g.CompletedTrips, &g.ReviewCount, &g.Rating, &g.RegistryNumber, &g.RegistryRecordURL, &g.QualificationValidUntil)
 		if e != nil {
 			return nil, e
 		}

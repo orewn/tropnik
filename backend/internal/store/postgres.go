@@ -16,7 +16,10 @@ import (
 	"tropa/backend/migrations"
 )
 
-type Store struct{ Pool *pgxpool.Pool }
+type Store struct {
+	Pool      *pgxpool.Pool
+	SafetyKey []byte
+}
 type querier interface {
 	QueryRow(context.Context, string, ...any) pgx.Row
 	Query(context.Context, string, ...any) (pgx.Rows, error)
@@ -41,7 +44,12 @@ func New(ctx context.Context, uri string) (*Store, error) {
 		p.Close()
 		return nil, e
 	}
-	return &Store{Pool: p}, nil
+	key, e := loadSafetyKeyFromEnv()
+	if e != nil {
+		p.Close()
+		return nil, e
+	}
+	return &Store{Pool: p, SafetyKey: key}, nil
 }
 func (s *Store) Close() { s.Pool.Close() }
 func (s *Store) Ready(ctx context.Context) error {
@@ -162,15 +170,24 @@ func (s *Store) Regions(ctx context.Context) ([]domain.Region, error) {
 	return out, rows.Err()
 }
 
-const routeSQL = `SELECT r.id::text,r.slug,r.region_id,r.title,r.description,rr.difficulty,r.activity,rr.distance_km,rr.ascent_m,rr.duration_min,rr.min_people,rr.max_group_size,rr.required_guides,r.status,rr.id::text,rr.revision,rr.reviewed_at,rr.source_name,rr.source_url,rr.source_license,rr.source_retrieved_at,ST_AsGeoJSON(rr.geometry)::jsonb,rr.season,r.updated_at FROM routes r JOIN route_revisions rr ON rr.id=r.current_revision_id `
+const routeSQL = `SELECT r.id::text,r.slug,r.region_id,r.title,r.description,rr.difficulty,r.activity,rr.distance_km,rr.ascent_m,rr.duration_min,rr.min_people,rr.max_group_size,rr.required_guides,r.status,rr.id::text,rr.revision,rr.reviewed_at,rr.source_name,rr.source_url,rr.source_license,rr.source_retrieved_at,ST_AsGeoJSON(rr.geometry)::jsonb,rr.season,r.updated_at,rr.risk_class,rr.route_type,rr.legal_difficulty_category,rr.mchs_notification_policy,COALESCE(rr.mchs_territorial_unit_id,''),rr.emergency_exits,rr.control_points,rr.default_check_in_schedule,rr.safety_revision FROM routes r JOIN route_revisions rr ON rr.id=r.current_revision_id `
 
 func scanRoute(r pgx.Row) (x domain.Route, e error) {
-	var geo []byte
-	e = r.Scan(&x.ID, &x.Slug, &x.RegionID, &x.Title, &x.Description, &x.Difficulty, &x.Activity, &x.DistanceKM, &x.AscentM, &x.DurationMin, &x.MinPeople, &x.MaxGroupSize, &x.RequiredGuides, &x.Status, &x.RevisionID, &x.Revision, &x.VerifiedAt, &x.Source.Name, &x.Source.URL, &x.Source.License, &x.Source.RetrievedAt, &geo, &x.Season, &x.UpdatedAt)
+	var geo, emergency, controls, schedule []byte
+	e = r.Scan(&x.ID, &x.Slug, &x.RegionID, &x.Title, &x.Description, &x.Difficulty, &x.Activity, &x.DistanceKM, &x.AscentM, &x.DurationMin, &x.MinPeople, &x.MaxGroupSize, &x.RequiredGuides, &x.Status, &x.RevisionID, &x.Revision, &x.VerifiedAt, &x.Source.Name, &x.Source.URL, &x.Source.License, &x.Source.RetrievedAt, &geo, &x.Season, &x.UpdatedAt, &x.RiskClass, &x.RouteType, &x.LegalDifficultyCategory, &x.MCHSNotificationPolicy, &x.MCHSTerritorialUnitID, &emergency, &controls, &schedule, &x.SafetyRevision)
 	if e != nil {
 		return x, dbErr(e)
 	}
-	e = json.Unmarshal(geo, &x.Geometry)
+	if e = json.Unmarshal(geo, &x.Geometry); e != nil {
+		return x, e
+	}
+	if e = json.Unmarshal(emergency, &x.EmergencyExits); e != nil {
+		return x, e
+	}
+	if e = json.Unmarshal(controls, &x.ControlPoints); e != nil {
+		return x, e
+	}
+	e = json.Unmarshal(schedule, &x.DefaultCheckInSchedule)
 	return x, e
 }
 func (s *Store) Routes(ctx context.Context, region, cursor string, limit int) ([]domain.Route, error) {
@@ -205,15 +222,16 @@ func (s *Store) Route(ctx context.Context, id string) (domain.Route, error) {
 
 const eligibleSQL = `u.guide_status='verified' AND NOT u.disabled AND EXISTS(SELECT 1 FROM guide_qualifications q WHERE q.user_id=u.id AND q.revoked_at IS NULL AND q.activity=r.activity AND q.valid_until>=d.ends_at AND q.max_difficulty>=CASE rr.difficulty WHEN 'easy' THEN 1 WHEN 'moderate' THEN 2 WHEN 'hard' THEN 3 ELSE 4 END)`
 const departureSQL = `SELECT d.id::text,d.route_id::text,d.route_revision_id::text,r.title,d.guide_id::text,u.display_name,d.starts_at,d.ends_at,d.time_zone,d.min_people,d.capacity,d.status,d.version,d.created_at,d.created_by::text,
-(r.status='published' AND r.current_revision_id=d.route_revision_id AND rr.reviewed_at IS NOT NULL AND rr.required_guides=1),COALESCE((` + eligibleSQL + `),false)
-FROM departures d JOIN routes r ON r.id=d.route_id JOIN route_revisions rr ON rr.id=d.route_revision_id LEFT JOIN users u ON u.id=d.guide_id `
+(r.status='published' AND r.current_revision_id=d.route_revision_id AND rr.reviewed_at IS NOT NULL AND rr.required_guides=1),COALESCE((` + eligibleSQL + `),false),
+COALESCE(ds.status,rr.mchs_notification_policy),COALESCE(ds.passport_version,0),COALESCE(ds.notification_policy,rr.mchs_notification_policy),ds.submission_id,(ds.confirmed_at IS NOT NULL),(ds.start_contact_confirmed_at IS NOT NULL),(ds.return_reported_at IS NOT NULL),COALESCE(ds.status IN ('closed','cancelled'),false)
+FROM departures d JOIN routes r ON r.id=d.route_id JOIN route_revisions rr ON rr.id=d.route_revision_id LEFT JOIN users u ON u.id=d.guide_id LEFT JOIN departure_safety ds ON ds.departure_id=d.id `
 
 func readGroup(ctx context.Context, q querier, id string, locked bool) (g domain.Group, e error) {
 	query := departureSQL + "WHERE d.id::text=$1"
 	if locked {
 		query += " FOR UPDATE OF d FOR SHARE OF r,rr"
 	}
-	e = q.QueryRow(ctx, query, id).Scan(&g.ID, &g.RouteID, &g.RouteRevisionID, &g.RouteTitle, &g.GuideID, &g.GuideName, &g.StartsAt, &g.EndsAt, &g.TimeZone, &g.MinPeople, &g.Capacity, &g.Status, &g.Version, &g.CreatedAt, &g.OwnerID, &g.RouteOpen, &g.GuideEligible)
+	e = q.QueryRow(ctx, query, id).Scan(&g.ID, &g.RouteID, &g.RouteRevisionID, &g.RouteTitle, &g.GuideID, &g.GuideName, &g.StartsAt, &g.EndsAt, &g.TimeZone, &g.MinPeople, &g.Capacity, &g.Status, &g.Version, &g.CreatedAt, &g.OwnerID, &g.RouteOpen, &g.GuideEligible, &g.SafetyStatus, &g.SafetyPassportVersion, &g.MCHSNotificationPolicy, &g.MCHSSubmissionID, &g.MCHSConfirmed, &g.StartContactConfirmed, &g.ReturnReported, &g.SafetyClosed)
 	if e != nil {
 		return g, dbErr(e)
 	}
@@ -247,6 +265,11 @@ func readGroup(ctx context.Context, q querier, id string, locked bool) (g domain
 		return g, e
 	}
 	g.Membership = "none"
+	loc, _ := time.LoadLocation(g.TimeZone)
+	if loc == nil {
+		loc = time.UTC
+	}
+	g.SafetyDeadline = domain.MCHSSubmissionDeadline(g.StartsAt.In(loc))
 	g.Refresh()
 	return g, nil
 }
@@ -331,7 +354,10 @@ func saveGroup(ctx context.Context, tx pgx.Tx, g domain.Group, actor, action str
 		return e
 	}
 	_, e = tx.Exec(ctx, "INSERT INTO audit_events(actor_id,action,entity_id,details) VALUES($1,$2,$3,$4)", actor, "departure."+action, g.ID, payload)
-	return e
+	if e != nil {
+		return e
+	}
+	return advanceSafetyStateTx(ctx, tx, g.ID, actor, action)
 }
 
 func (s *Store) Join(ctx context.Context, user, id, key string, expected int64) (domain.Departure, error) {
@@ -393,6 +419,11 @@ func (s *Store) Mutate(ctx context.Context, user, id, action, target string, exp
 	g, e := readGroup(ctx, tx, id, true)
 	if e != nil {
 		return g.Departure, e
+	}
+	if action == "start" {
+		if e = authorizeSafetyStartTx(ctx, tx, id); e != nil {
+			return g.Departure, e
+		}
 	}
 	switch action {
 	case "leave":
