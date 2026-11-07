@@ -55,6 +55,12 @@ jobs:
           path.write_text(text.replace(repeated_old,repeated_new,1))
           PY
           python3 tools/apply-service-polish.py
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path('web/components/PlaceStories.tsx')
+          lines=path.read_text().splitlines()
+          path.write_text('\n'.join(line.rstrip() for line in lines)+'\n')
+          PY
           git diff --check
       - name: Install locked dependencies
         run: |
