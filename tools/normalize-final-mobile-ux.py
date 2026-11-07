@@ -22,4 +22,13 @@ if old_touch not in style:
     raise SystemExit('Compact story touch target anchor not found')
 css.write_text(style.replace(old_touch,new_touch,1))
 
+browser=root/'tools/pages-preview/browser-smoke.mjs'
+script=browser.read_text()
+old_metrics="  return{available:true,closed,open,final,heightDelta:Math.max(Math.abs(open.height-closed.height),Math.abs(final.height-closed.height)),cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0};"
+new_metrics="""  const perf=await evaluate(cdp,`(()=>({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0}))()`);
+  return{available:true,closed,open,final,heightDelta:Math.max(Math.abs(open.height-closed.height),Math.abs(final.height-closed.height)),cls:perf.cls,longest:perf.longest};"""
+if old_metrics not in script:
+    raise SystemExit('Browser performance metric context anchor not found')
+browser.write_text(script.replace(old_metrics,new_metrics,1))
+
 Path(__file__).unlink()
