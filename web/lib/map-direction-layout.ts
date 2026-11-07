@@ -41,7 +41,7 @@ export const MAP_LABEL_OBSTACLE_SELECTORS = [
 
 export function mapLabelSafeRect(viewport: MapLabelRect, compact: boolean, coveredBottom?: number): MapLabelSafeRect {
   const preset = compact ? MAP_LABEL_SAFE_AREA.compact : MAP_LABEL_SAFE_AREA.wide;
-  let left = viewport.left + preset.edge;
+  const left = viewport.left + preset.edge;
   let right = viewport.right - preset.right;
   let top = viewport.top + preset.top;
   let bottom = Math.min(viewport.bottom - preset.bottom, coveredBottom ?? Number.POSITIVE_INFINITY);

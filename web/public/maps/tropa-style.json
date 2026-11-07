@@ -104,7 +104,7 @@
         "raster-saturation": -0.18,
         "raster-brightness-min": 0.08,
         "raster-brightness-max": 0.92,
-        "raster-fade-duration": 180
+        "raster-fade-duration": 0
       }
     },
     {
@@ -255,7 +255,7 @@
       "minzoom": 2,
       "paint": {
         "hillshade-method": "multidirectional",
-        "hillshade-illumination-anchor": "viewport",
+        "hillshade-illumination-anchor": "map",
         "hillshade-illumination-direction": [
           315,
           270,
@@ -592,11 +592,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -604,8 +604,8 @@
           "Noto Sans Regular"
         ],
         "text-size": 13,
-        "text-max-width": 10,
-        "text-padding": 7,
+        "text-max-width": 9,
+        "text-padding": 10,
         "text-variable-anchor": [
           "top",
           "bottom",
@@ -613,7 +613,10 @@
           "right"
         ],
         "text-justify": "auto",
-        "text-radial-offset": 0.45
+        "text-radial-offset": 0.55,
+        "symbol-avoid-edges": true,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
       }
     },
     {
@@ -645,11 +648,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -669,8 +672,8 @@
           5,
           19
         ],
-        "text-max-width": 10,
-        "text-padding": 7,
+        "text-max-width": 9,
+        "text-padding": 10,
         "text-variable-anchor": [
           "top",
           "bottom",
@@ -678,7 +681,10 @@
           "right"
         ],
         "text-justify": "auto",
-        "text-radial-offset": 0.45
+        "text-radial-offset": 0.55,
+        "symbol-avoid-edges": true,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
       }
     },
     {
@@ -710,11 +716,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -722,8 +728,8 @@
           "Noto Sans Regular"
         ],
         "text-size": 12,
-        "text-max-width": 10,
-        "text-padding": 7,
+        "text-max-width": 9,
+        "text-padding": 10,
         "text-variable-anchor": [
           "top",
           "bottom",
@@ -731,7 +737,10 @@
           "right"
         ],
         "text-justify": "auto",
-        "text-radial-offset": 0.45
+        "text-radial-offset": 0.55,
+        "symbol-avoid-edges": true,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
       }
     },
     {
@@ -768,11 +777,11 @@
               ],
               [
                 "get",
-                "name:latin"
+                "name"
               ],
               [
                 "get",
-                "name"
+                "name:latin"
               ],
               ""
             ],
@@ -812,11 +821,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -836,8 +845,8 @@
           9,
           16
         ],
-        "text-max-width": 10,
-        "text-padding": 7,
+        "text-max-width": 9,
+        "text-padding": 10,
         "text-variable-anchor": [
           "top",
           "bottom",
@@ -845,7 +854,10 @@
           "right"
         ],
         "text-justify": "auto",
-        "text-radial-offset": 0.45
+        "text-radial-offset": 0.55,
+        "symbol-avoid-edges": true,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
       }
     },
     {
@@ -877,11 +889,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -901,8 +913,8 @@
           12,
           15
         ],
-        "text-max-width": 10,
-        "text-padding": 7,
+        "text-max-width": 9,
+        "text-padding": 10,
         "text-variable-anchor": [
           "top",
           "bottom",
@@ -910,7 +922,10 @@
           "right"
         ],
         "text-justify": "auto",
-        "text-radial-offset": 0.45
+        "text-radial-offset": 0.55,
+        "symbol-avoid-edges": true,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
       }
     },
     {
@@ -949,11 +964,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -961,8 +976,8 @@
           "Noto Sans Regular"
         ],
         "text-size": 12,
-        "text-max-width": 10,
-        "text-padding": 7,
+        "text-max-width": 9,
+        "text-padding": 10,
         "text-variable-anchor": [
           "top",
           "bottom",
@@ -970,7 +985,10 @@
           "right"
         ],
         "text-justify": "auto",
-        "text-radial-offset": 0.45
+        "text-radial-offset": 0.55,
+        "symbol-avoid-edges": true,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
       }
     },
     {
@@ -994,11 +1012,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -1006,8 +1024,8 @@
           "Noto Sans Regular"
         ],
         "text-size": 12,
-        "text-max-width": 10,
-        "text-padding": 7,
+        "text-max-width": 9,
+        "text-padding": 10,
         "text-variable-anchor": [
           "top",
           "bottom",
@@ -1015,7 +1033,10 @@
           "right"
         ],
         "text-justify": "auto",
-        "text-radial-offset": 0.45
+        "text-radial-offset": 0.55,
+        "symbol-avoid-edges": true,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
       }
     },
     {
@@ -1182,11 +1203,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -1199,7 +1220,9 @@
           1.4
         ],
         "text-anchor": "top",
-        "text-max-width": 11
+        "text-max-width": 10,
+        "text-padding": 10,
+        "symbol-avoid-edges": true
       }
     },
     {
@@ -1282,11 +1305,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -1294,7 +1317,8 @@
           "Noto Sans Regular"
         ],
         "text-size": 11,
-        "text-padding": 20
+        "text-padding": 24,
+        "symbol-avoid-edges": true
       }
     },
     {
@@ -1338,11 +1362,11 @@
             ],
             [
               "get",
-              "name:latin"
+              "name"
             ],
             [
               "get",
-              "name"
+              "name:latin"
             ],
             ""
           ],
@@ -1381,11 +1405,11 @@
           ],
           [
             "get",
-            "name:latin"
+            "name"
           ],
           [
             "get",
-            "name"
+            "name:latin"
           ],
           ""
         ],
@@ -1407,8 +1431,8 @@
           10,
           20
         ],
-        "text-max-width": 10,
-        "text-padding": 7,
+        "text-max-width": 9,
+        "text-padding": 10,
         "text-variable-anchor": [
           "top",
           "bottom",
@@ -1416,7 +1440,10 @@
           "right"
         ],
         "text-justify": "auto",
-        "text-radial-offset": 0.45
+        "text-radial-offset": 0.55,
+        "symbol-avoid-edges": true,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false
       }
     }
   ]

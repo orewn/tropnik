@@ -11,10 +11,10 @@ function load(path){
   assert.ok(path.startsWith(web+sep));
   if(cache.has(path))return cache.get(path);
   if(path.endsWith('.json'))return JSON.parse(readFileSync(path,'utf8'));
-  const module={exports:{}};
+  const loadedModule={exports:{}};
   const code=ts.transpileModule(readFileSync(path,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
-  new Function('require','module','exports',code)(id=>load((id.startsWith('@/')?resolve(web,id.slice(2)):resolve(dirname(path),id))+(id.endsWith('.json')?'':'.ts')),module,module.exports);
-  cache.set(path,module.exports);return module.exports;
+  new Function('require','module','exports',code)(id=>load((id.startsWith('@/')?resolve(web,id.slice(2)):resolve(dirname(path),id))+(id.endsWith('.json')?'':'.ts')),loadedModule,loadedModule.exports);
+  cache.set(path,loadedModule.exports);return loadedModule.exports;
 }
 const {territoryForMapPoint,territoriesForShapes}=load(resolve(web,'lib/territories.ts'));
 

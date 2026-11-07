@@ -8,13 +8,14 @@ import type {Map as MapInstance,Marker,StyleSpecification,GeoJSONSource} from 'm
 import {WifiSlash,Check} from '@/components/TropnikIcons';
 import {regions,routeCountLabel,type Trail,type Region} from '@/lib/content';
 import {mapDirectionCounts} from '@/lib/map-catalog';
-import {groupMapDirections,updateDirectionButtons,constrainDirectionLabels,type MapDirectionGroup} from '@/lib/map-direction-layout';
-import {territoryForShape,type MapRegion} from '@/lib/territories';
-import {warmMap,supportsMapWebGL,preloadTerrain,hasTerrainPreview,loadPublicJSON,mapRequest} from '@/lib/map-preload';
+import {groupMapDirections,updateDirectionButtons,constrainDirectionLabels,bindMapLabelReflow,type MapDirectionGroup} from '@/lib/map-direction-layout';
+import {territoryForMapPoint,type MapRegion} from '@/lib/territories';
+import {warmMap,supportsMapWebGL,preloadTerrain,preloadTrail,hasTerrainPreview,loadPublicJSON,mapRequest} from '@/lib/map-preload';
 import {loadRussiaGeometry,russiaView} from '@/lib/russia-map';
 import {MapStyleSession,loadMapSelection,applyMapLayerVisibility,type MapBaseMode} from '@/lib/map-lifecycle';
 import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {terrainExaggerationForZoom,terrainPitchForZoom} from '@/lib/map-camera-profile';
+import {resolveTrailCenter} from '@/lib/map-coordinate';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -67,9 +68,9 @@ export type AtlasProps={region?:MapRegion;trail?:Trail;visibleTrails?:Trail[];on
 export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,onViewportRegion}:AtlasProps){
  const container=useRef<HTMLDivElement>(null),mapRef=useRef<MapInstance|null>(null),markers=useRef<Marker[]>([]),positionMarker=useRef<Marker|null>(null);
  const directionGroups=useRef(new Map<string,MapDirectionGroup<Region>>()),updateDirections=useRef<(()=>void)|null>(null),visibleTrailsRef=useRef(visibleTrails);
- const onRegionRef=useRef(onRegion),regionRef=useRef(region),trailRef=useRef(trail),viewportRef=useRef(onViewportRegion);
+ const onRegionRef=useRef(onRegion),onTrailRef=useRef(onTrail),regionRef=useRef(region),trailRef=useRef(trail),viewportRef=useRef(onViewportRegion);
  const coverageRef=useRef<Coverage|null>(null),detailRef=useRef<StyleSpecification|null>(null),fullView=useRef(!region),cameraFloor=useRef<RussiaCamera>({center:[105,62],zoom:0});
- const framedCamera=useRef<RussiaCamera|null>(null);
+ const framedCamera=useRef<RussiaCamera|null>(null),terrainRef=useRef(false);
  const frameRefit=useRef<MapFrameRefit|null>(null);
  const styleSession=useRef<MapStyleSession<StyleSpecification>|null>(null),basePreference=useRef<MapBaseMode>('detail'),styleGeneration=useRef(0);
  const layerVisibility=useRef({paths:true,boundaries:true});
@@ -78,7 +79,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
  const [baseMode,setBaseMode]=useState<'detail'|'overview'>('detail'),[terrain,setTerrain]=useState(false),[layersOpen,setLayersOpen]=useState(false),[status,setStatus]=useState('');
  const [pathLayer,setPathLayer]=useState(true),[boundaryLayer,setBoundaryLayer]=useState(true),[mapZoom,setMapZoom]=useState(2),[styleRevision,setStyleRevision]=useState(0);
  const sceneAvailable=hasTerrainPreview(trail,region?.id);
- onRegionRef.current=onRegion;regionRef.current=region;trailRef.current=trail;viewportRef.current=onViewportRegion;
+ onRegionRef.current=onRegion;onTrailRef.current=onTrail;regionRef.current=region;trailRef.current=trail;viewportRef.current=onViewportRegion;terrainRef.current=terrain;
  visibleTrailsRef.current=visibleTrails;
  layerVisibility.current={paths:pathLayer,boundaries:boundaryLayer};
  useEffect(()=>{setScene(false);if(sceneAvailable)void preloadTerrain();},[region?.id,trail?.id,sceneAvailable]);
@@ -86,11 +87,11 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
   const map=mapRef.current,element=container.current;if(!map||!element)return;
   frameRefit.current?.cancel();
   const {camera}=russiaView(element);cameraFloor.current=camera;framedCamera.current=null;fullView.current=true;
-  map.setMinZoom(Math.max(-2,camera.zoom));if(map.getStyle())map.setTerrain(null);map.easeTo({...camera,padding:{top:0,right:0,bottom:0,left:0},duration});
-  setTerrain(false);
+  map.setMinZoom(Math.max(-2,camera.zoom));if(map.getStyle())map.setTerrain(null);map.stop();map.easeTo({...camera,padding:{top:0,right:0,bottom:0,left:0},duration});
+  terrainRef.current=false;setTerrain(false);
  }
  useEffect(()=>{
-  let cancelled=false,geographyPainted=false,overviewFallback=false,labelClampFrame=0,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined;
+  let cancelled=false,geographyPainted=false,overviewFallback=false,labelClampFrame=0,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined;
   const disconnect=()=>{
    setOffline(!navigator.onLine);
    setStatus(previous=>!navigator.onLine?OFFLINE_MESSAGE:previous===OFFLINE_MESSAGE?(basePreference.current==='overview'?OVERVIEW_MESSAGE:''):previous);
@@ -113,7 +114,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     const map=new ml.Map({container:container.current,transformRequest:mapRequest,style:initialMode==='detail'?detailRef.current!:overviewStyle(coverage),...initial,
      minZoom:Math.max(-2,initial.zoom),maxZoom:18,attributionControl:false,renderWorldCopies:true,
      transformConstrain:(point,zoom)=>{const next=constrainFramedCamera(point.lng,point.lat,zoom,cameraFloor.current,framedCamera.current);return{center:new ml.LngLat(...next.center),zoom:next.zoom};},
-     dragRotate:true,touchPitch:true,pitchWithRotate:true,maxPitch:75,fadeDuration:160,pixelRatio:Math.min(devicePixelRatio,2),maxTileCacheZoomLevels:4,
+     dragRotate:true,touchPitch:true,pitchWithRotate:true,maxPitch:75,fadeDuration:80,pixelRatio:Math.min(devicePixelRatio,2),maxTileCacheZoomLevels:6,
      canvasContextAttributes:{antialias:true,preserveDrawingBuffer:false,powerPreference:'high-performance'}});
     mapRef.current=map;
     frameRefit.current=new MapFrameRefit({
@@ -126,7 +127,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      detail:async()=>detailRef.current??(detailRef.current=detailStyle(await loadPublicJSON<StyleSpecification>('/maps/tropa-style.json'),coverage)),
      apply:(next,mode)=>{
       if(cancelled||map!==mapRef.current)return;
-      styleGeneration.current++;setBaseMode(mode);setLoaded(false);setTerrain(false);
+      styleGeneration.current++;setBaseMode(mode);setLoaded(false);terrainRef.current=false;setTerrain(false);
       const hadStyle=!!map.getStyle();
       if(hadStyle)map.setTerrain(null);
       map.setPitch(0);map.setStyle(next,{diff:hadStyle});
@@ -161,6 +162,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
       if(!cancelled&&map===mapRef.current&&container.current)constrainDirectionLabels(directionButtons,container.current);
      });
     };
+    unbindLabels=bindMapLabelReflow(container.current,scheduleLabelClamp);
     updateDirections.current=()=>{
      if(cancelled||map!==mapRef.current)return;
      const groups=groupMapDirections(regions.filter(item=>directionButtons.has(item.id)),center=>map.project([russiaLongitude(center[0]),center[1]]));
@@ -172,9 +174,9 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     if(regionRef.current&&!fitTerritory(map,regionRef.current,container.current,0,framedCamera))map.jumpTo({center:regionRef.current.center,zoom:regionRef.current.zoom});
     map.on('zoomend',()=>{
      const zoom=map.getZoom();setMapZoom(zoom);
-     if(map.getTerrain()){
-      map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(zoom)});
-      if(!trailRef.current)map.easeTo({pitch:terrainPitchForZoom(zoom,!!regionRef.current),duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:300});
+     if(terrainRef.current&&map.getTerrain()&&!trailRef.current){
+      const pitch=terrainPitchForZoom(zoom,!!regionRef.current);
+      if(Math.abs(map.getPitch()-pitch)>1.5)map.easeTo({pitch,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:180});
      }
     });
     // The style's viewport-anchored hillshade follows the camera itself.
@@ -202,8 +204,10 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     map.on('mouseleave','region-fill',()=>{map.getCanvas().style.cursor='';});
     map.on('click','region-fill',event=>{
      if(map.getZoom()>7||!inRussiaCoverage(event.lngLat.lng,event.lngLat.lat,coverage.area))return;
-     const name=event.features?.[0]?.properties?.shapeName;const territory=typeof name==='string'?territoryForShape(name):undefined;
-     if(territory)onRegionRef.current(territory);
+     const point=event.point,nearby=map.queryRenderedFeatures([[point.x-4,point.y-4],[point.x+4,point.y+4]],{layers:['region-fill']});
+     const names=[...new Set([...(event.features??[]),...nearby].map(feature=>feature.properties?.shapeName).filter((name):name is string=>typeof name==='string'))];
+     const territory=territoryForMapPoint(names,[russiaLongitude(event.lngLat.lng),event.lngLat.lat]);
+     if(territory){map.stop();frameRefit.current?.cancel();onRegionRef.current(territory);}
     });
     map.on('webglcontextlost',()=>setStatus('Графический контекст карты прерван. Восстанавливаем отображение.'));
     map.on('webglcontextrestored',()=>setStatus(''));
@@ -225,21 +229,22 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     if(cancelled)return;console.error('Map initialization failed',error);frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
    }
   })();
-  return()=>{cancelled=true;cancelAnimationFrame(labelClampFrame);updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleGeneration.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
+  return()=>{cancelled=true;cancelAnimationFrame(labelClampFrame);unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleGeneration.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
  },[]);
  useEffect(()=>{
   const map=mapRef.current;if(!map||!loaded)return;
   frameRefit.current?.select(region?.bounds?region.id:undefined);
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const terrainActive=terrainRef.current&&!!map.getSource('terrain-dem');
   if(region){
    if(region.bounds&&container.current){
-    if(frameRefit.current?.active()){fullView.current=false;map.setTerrain(null);setTerrain(false);fitTerritory(map,region,container.current,reduced?0:900,framedCamera);}
+    if(frameRefit.current?.active()){fullView.current=false;map.stop();fitTerritory(map,region,container.current,reduced?0:450,framedCamera);}
    }else{
-    fullView.current=false;framedCamera.current=null;
+    fullView.current=false;framedCamera.current=null;map.stop();
+    if(terrainActive&&!map.getTerrain())map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(region.zoom)});
+    if(!terrainActive&&map.getTerrain())map.setTerrain(null);
     const regionPitch=terrainPitchForZoom(region.zoom,true);
-    if(map.getSource('terrain-dem'))map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(region.zoom)});
-    map.flyTo({center:region.center,zoom:region.zoom,pitch:region.id==='karelia'?Math.min(regionPitch,26):regionPitch,offset:window.innerWidth<=700?[0,-Math.round(container.current!.clientHeight*.23)]:[0,0],duration:reduced?0:1100,essential:false});
-    setTerrain(!!map.getSource('terrain-dem'));
+    map.flyTo({center:region.center,zoom:region.zoom,pitch:terrainActive?(region.id==='karelia'?Math.min(regionPitch,26):regionPitch):0,bearing:terrainActive?-8:0,offset:window.innerWidth<=700?[0,-Math.round(container.current!.clientHeight*.23)]:[0,0],duration:reduced?0:650,essential:false});
    }
   }else fitRussia(0);
   highlightRegion(map,region);
@@ -250,7 +255,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
   if(!loaded){clear();return;}
   const generation=styleGeneration.current,identity={id:trail?.id,url:trail?.geometryUrl,geometry:trail?.geometry};
   setStatus(previous=>previous===ROUTE_ERROR||previous===ROUTE_COVERAGE_MESSAGE?'':previous);
-  return loadMapSelection({clear,
+  return loadMapSelection({clear,clearBeforeLoad:!trail?.id,
    current:()=>map===mapRef.current&&generation===styleGeneration.current&&identity.id===trailRef.current?.id&&identity.url===trailRef.current?.geometryUrl&&identity.geometry===trailRef.current?.geometry&&!!map.getStyle(),
    load:async()=>displayGeoJSON(trail?.geometry??(trail?.geometryUrl?await loadPublicJSON<any>(trail.geometryUrl).then(value=>value?.data?.geometry||value):EMPTY)),
    apply:data=>{
@@ -264,9 +269,9 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     if(data.type==='FeatureCollection')data.features.forEach((feature:{geometry:{coordinates:unknown}})=>walk(feature.geometry.coordinates));else if(data.type==='Feature')walk(data.geometry.coordinates);else walk(data.coordinates);
     const coverage=coverageRef.current,covered=coverage?coveredRussiaBounds(coordinates,coverage.area):null;
     if(covered){
-     const routeZoom=11;fullView.current=false;if(map.getSource('terrain-dem')){map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(routeZoom)});setTerrain(true);}
+     const routeZoom=11;fullView.current=false;const terrainActive=terrainRef.current&&!!map.getTerrain();
      const padding=container.current?russiaView(container.current).padding:80;
-     map.fitBounds([[covered[0],covered[1]],[covered[2],covered[3]]],{padding,maxZoom:14,pitch:terrainPitchForZoom(routeZoom,true),bearing:-18,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:900});
+     map.stop();map.fitBounds([[covered[0],covered[1]],[covered[2],covered[3]]],{padding,maxZoom:14,pitch:terrainActive?terrainPitchForZoom(routeZoom,true):0,bearing:terrainActive?-12:0,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:450});
     }else if(coordinates.length)setStatus(ROUTE_COVERAGE_MESSAGE);
    }
    },onError:()=>setStatus(ROUTE_ERROR),
@@ -282,16 +287,22 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
   import('maplibre-gl').then(ml=>{
    if(removed)return;
    for(const t of visibleTrails){
-    if(!t.center||!inRussiaCoverage(...t.center,coverage.area))continue;
-    const button=document.createElement('button');button.type='button';button.className='trail-marker';button.setAttribute('aria-label',`Открыть маршрут ${t.title}`);
+    if(!t.center)continue;
+    const center=resolveTrailCenter(t.center,(lng,lat)=>inRussiaCoverage(lng,lat,coverage.area),regionRef.current);
+    if(!center)continue;
+    const button=document.createElement('button');button.type='button';button.className='trail-marker';button.dataset.trailId=t.id;button.classList.toggle('is-selected',trailRef.current?.id===t.id);button.setAttribute('aria-label',`Открыть маршрут ${t.title}`);
     const label=document.createElement('span');label.className='trail-marker-label';label.setAttribute('aria-hidden','true');label.textContent=t.title;button.appendChild(label);
-    button.addEventListener('click',event=>{event.stopPropagation();onTrail?.(t);});
-    routeMarkers.push(new ml.Marker({element:button,anchor:'center'}).setLngLat([russiaLongitude(t.center[0]),t.center[1]]).addTo(map));
+    const warm=()=>{void preloadTrail(t);};button.addEventListener('pointerenter',warm,{once:true});button.addEventListener('focus',warm,{once:true});
+    button.addEventListener('click',event=>{event.stopPropagation();map.stop();requestAnimationFrame(()=>onTrailRef.current?.(t));});
+    routeMarkers.push(new ml.Marker({element:button,anchor:'center'}).setLngLat([russiaLongitude(center[0]),center[1]]).addTo(map));
    }
    requestAnimationFrame(()=>{if(!removed)updateDirections.current?.();});
   });
   return()=>{removed=true;routeMarkers.forEach(marker=>marker.remove());};
- },[visibleTrails,region?.id,loaded,onTrail]);
+ },[visibleTrails,region?.id,loaded]);
+ useEffect(()=>{
+  for(const button of container.current?.querySelectorAll<HTMLButtonElement>('.trail-marker')??[])button.classList.toggle('is-selected',button.dataset.trailId===trail?.id);
+ },[trail?.id,loaded]);
  async function changeBase(mode:MapBaseMode){
   basePreference.current=mode;
   setStatus(!navigator.onLine?OFFLINE_MESSAGE:mode==='overview'?OVERVIEW_MESSAGE:'');
@@ -304,15 +315,15 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
  }
  function setTerrainMode(next:boolean){
   const map=mapRef.current;if(!map||!loaded||(next&&(baseMode==='overview'||offline)))return;
-  frameRefit.current?.cancel();
+  frameRefit.current?.cancel();terrainRef.current=next;map.stop();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(next){
    if(!map.getSource('terrain-dem'))map.addSource('terrain-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'});
    const zoom=map.getZoom();
    map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(zoom)});
-   map.easeTo({pitch:terrainPitchForZoom(zoom,!!regionRef.current||!!trailRef.current),duration:reduced?0:650});
+   map.easeTo({pitch:terrainPitchForZoom(zoom,!!regionRef.current||!!trailRef.current),duration:reduced?0:420});
   }
-  else{map.setTerrain(null);map.easeTo({pitch:0,bearing:0,duration:reduced?0:500});}setTerrain(next);
+  else{map.setTerrain(null);map.easeTo({pitch:0,bearing:0,duration:reduced?0:300});}setTerrain(next);
  }
  function locate(){
   frameRefit.current?.cancel();
