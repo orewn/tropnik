@@ -16,7 +16,7 @@ jobs:
   build:
     if: ${{ github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     permissions:
       contents: read
       pages: read
@@ -62,6 +62,10 @@ jobs:
           test "$PAGES_CONFIG_BASE" = '/tropnik'
       - name: Build and verify the static site
         run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify real mobile rendering and sheet interaction
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: node tools/pages-preview/browser-smoke.mjs
       - name: Record the verified build identity
         id: build_metadata
         run: |
@@ -69,9 +73,13 @@ jobs:
           import assert from 'node:assert/strict';
           import {readFileSync, appendFileSync} from 'node:fs';
           const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
+          const browser = JSON.parse(readFileSync('web/pages-preview/dist/browser-verification.json', 'utf8'));
           assert.match(build.buildId, /^[a-f0-9]{16}$/);
           assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(build.hasApk, true);
+          assert.equal(browser.verified, true);
+          assert.equal(browser.sourceCommit, process.env.GITHUB_SHA);
+          assert.ok(browser.profiles.length >= 4);
           appendFileSync(process.env.GITHUB_OUTPUT, `build_id=${build.buildId}\n`);
           NODE
       - name: Upload the verified static artifact
@@ -110,7 +118,7 @@ jobs:
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         with:
           artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
-      - name: Verify the public build and APK without authentication
+      - name: Verify the public build, browser report and APK without authentication
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}
           EXPECTED_BUILD_ID: ${{ needs.build.outputs.build_id }}
