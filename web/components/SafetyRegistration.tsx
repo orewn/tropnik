@@ -3,7 +3,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import {Header} from './Header';
 import {Footer} from './Footer';
-import {ArrowRight, ArrowSquareOut, Check, CheckCircle, Clock, DownloadSimple, Export, Info, MapPin, NotePencil, Plus, ShieldCheck, Trash, UsersThree, X} from './TropnikIcons';
+import {ArrowSquareOut, Check, CheckCircle, Clock, DownloadSimple, Export, Info, MapPin, NotePencil, Plus, ShieldCheck, Trash, UsersThree, X} from './TropnikIcons';
 import {regions, trails} from '@/lib/content';
 import {
   MCHS_REGISTRATION_URL,
@@ -115,26 +115,31 @@ export function SafetyRegistration() {
   const locked = passport.status === 'closed';
 
   useEffect(() => {
-    try {
-      const stored = parseSafetyPassportList(JSON.parse(localStorage.getItem(SAFETY_STORAGE_KEY) || '[]'));
-      setSaved(stored);
-      const params = new URLSearchParams(location.search);
-      const requested = params.get('passport');
-      const existing = requested ? stored.find(item => item.id === requested) : undefined;
-      if (existing) { setPassport(existing); return; }
-      const routeId = params.get('route');
-      const route = routeId ? trails.find(item => item.id === routeId) : undefined;
-      if (!route) return;
-      const region = regions.find(item => item.id === route.regionId);
-      setPassport(previous => ({
-        ...previous,
-        routeId: route.id,
-        routeTitle: route.title,
-        region: region?.name || previous.region,
-        routeDescription: route.description || previous.routeDescription,
-        updatedAt: new Date().toISOString(),
-      }));
-    } catch { setNotice('Не удалось прочитать сохранённые паспорта на этом устройстве.'); }
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      try {
+        const stored = parseSafetyPassportList(JSON.parse(localStorage.getItem(SAFETY_STORAGE_KEY) || '[]'));
+        setSaved(stored);
+        const params = new URLSearchParams(location.search);
+        const requested = params.get('passport');
+        const existing = requested ? stored.find(item => item.id === requested) : undefined;
+        if (existing) { setPassport(existing); return; }
+        const routeId = params.get('route');
+        const route = routeId ? trails.find(item => item.id === routeId) : undefined;
+        if (!route) return;
+        const region = regions.find(item => item.id === route.regionId);
+        setPassport(previous => ({
+          ...previous,
+          routeId: route.id,
+          routeTitle: route.title,
+          region: region?.name || previous.region,
+          routeDescription: route.description || previous.routeDescription,
+          updatedAt: new Date().toISOString(),
+        }));
+      } catch { setNotice('Не удалось прочитать сохранённые паспорта на этом устройстве.'); }
+    });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {

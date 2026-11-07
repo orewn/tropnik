@@ -75,8 +75,10 @@ test('exports state clearly that a local package is not an official submission',
 
 test('registration UI remains local-first and links to the official MChS form', async () => {
   const component = await readFile(new URL('../components/SafetyRegistration.tsx', import.meta.url), 'utf8');
+  const policy = await readFile(new URL('../lib/safety-passport.ts', import.meta.url), 'utf8');
   const page = await readFile(new URL('../app/safety/registration/page.tsx', import.meta.url), 'utf8');
-  assert.match(component, /forms\.mchs\.gov\.ru\/registration_tourist_groups/);
+  assert.match(policy, /forms\.mchs\.gov\.ru\/registration_tourist_groups/);
+  assert.match(component, /MCHS_REGISTRATION_URL/);
   assert.match(component, /localStorage\.setItem\(SAFETY_STORAGE_KEY/);
   assert.match(component, /href="tel:112"/);
   assert.match(component, /Переход по ссылке сам по себе не является регистрацией/);

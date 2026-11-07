@@ -54,7 +54,7 @@ async function snapshot(from, to) {
 }
 
 const infoPages = {
-  about: 'О проекте', safety: 'Подготовка к походу', sources: 'Источники и лицензии',
+  about: 'О проекте', safety: 'Подготовка к походу', 'safety/registration': 'Регистрация похода в МЧС', sources: 'Источники и лицензии',
   privacy: 'Конфиденциальность', terms: 'Условия', offline: 'Карты с собой',
   trips: 'Походы и группы', community: 'Сообщество', guides: 'Гидам и инструкторам',
   account: 'Личный кабинет', 'account/action': 'Действие с аккаунтом', search: 'Поиск', moderation: 'Модерация', android: 'Тропник для Android',
