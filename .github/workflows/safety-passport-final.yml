@@ -7,6 +7,7 @@ on:
       - '.github/workflows/safety-passport-final.yml'
       - 'tools/apply-safety-web-packed.py'
       - 'tools/safety-backend.part-*'
+      - 'tools/safety-web.part-*'
 
 permissions:
   contents: write
@@ -54,9 +55,30 @@ jobs:
       - name: Apply safety implementation
         run: |
           set -euo pipefail
+          cat > "$RUNNER_TEMP/safety-part-checks" <<'CHECKS'
+          5ac1ccaae709f11f45721f2c6d36d7884fe916b68fcfaec8db3eb2fd6ff9668b  tools/safety-backend.part-00
+          8b4c326906d31b8b12b8709f15096f8119cadb170fd0e020046ddedc5e44bb33  tools/safety-backend.part-01
+          9466c39e71ccaf31189a2e779f8c96ca3c7858f3ac443fba33af1a2bfd4c6b08  tools/safety-backend.part-02
+          6970c944e88e04f8185fcbd06016c668673abae9ca4fcdd231083f3eefe7fe8d  tools/safety-backend.part-03
+          5eb9527f1dcaff180937338adf88f8b4719499b932ec1e161902748e4ba399fc  tools/safety-backend.part-04
+          50b61a4fd5004a8277f065f28b40d3164c29339b8cd3d1d9902c160df25de27d  tools/safety-backend.part-05
+          5774d5bed1109ba5075f7cf283dda442748d694521f78b48e39e79d31806fcb2  tools/safety-backend.part-06
+          39fb0610eaa6c60ae06ac0aa1fc5f67f72210385cced3c4f1bfa092b51ecd3c9  tools/safety-backend.part-07
+          969a946b5e1479e10bfa83dd6a3c721ee0d85f96fb898d2149001a745ec1d913  tools/safety-backend.part-08
+          ed9d742f92651dbaf86588379e77d884d99e694c749d080bf3fe13aa3afa5be3  tools/safety-web.part-00
+          bce1f0324b921e3a56fb6a6d00ed7900e4e9d9e271f1bf1eae1034153ec0c446  tools/safety-web.part-01
+          55ef804046f8053eb448f3230f675ca2b794bf530eb1511b62a2d64a1e81def8  tools/safety-web.part-02
+          2d03c320b92b05060129c2ad9925e949cc555f9f4427f3c244b12730ef2b455b  tools/safety-web.part-03
+          aadf2a297d95d1cc632bb05b1a2f3f0828a45ef6307fd53475a29a20bda1e110  tools/safety-web.part-04
+          CHECKS
+          sha256sum -c "$RUNNER_TEMP/safety-part-checks"
           cat tools/safety-backend.part-* > tools/apply-safety-backend-packed.py
+          cat tools/safety-web.part-* > tools/apply-safety-web-packed.generated.py
+          printf '%s  %s\n' \
+            '0040ea8a06c7e825cdb7cad9d1cfd30f7ed3bad9dca6e419ec27279a26aaeb78' tools/apply-safety-backend-packed.py \
+            '12262fe38e4ed5612daa2e5ae2924b1d99bac645336ad75f2416b48507d00a1a' tools/apply-safety-web-packed.generated.py | sha256sum -c -
           python3 tools/apply-safety-backend-packed.py
-          python3 tools/apply-safety-web-packed.py
+          python3 tools/apply-safety-web-packed.generated.py
           find backend -name '*.go' -print0 | xargs -0 gofmt -w
           git diff --check
           if git diff --unified=0 -- backend/internal backend/migrations web/components web/lib | grep -Ei 'platformFee|payment_intent|pricePerPerson|commission|комисси|split-плат'; then
