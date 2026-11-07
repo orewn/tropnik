@@ -2,97 +2,48 @@ name: Fix exact map marker anchors
 
 on:
   push:
-    branches: [fix/map-marker-anchor-20261107]
+    branches:
+      - fix/map-marker-anchor-20261107
     paths:
-      - '.github/workflows/fix-map-marker-anchor.yml'
-  workflow_dispatch:
+      - .github/workflows/fix-map-marker-anchor.yml
+  workflow_dispatch: {}
 
 permissions:
   contents: write
 
 jobs:
   verify:
-    if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: fix/map-marker-anchor-20261107
           fetch-depth: 0
           persist-credentials: true
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Install frozen dependencies
+      - name: Install
         run: |
           npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
           pnpm --dir web install --frozen-lockfile
-      - name: Center Leaflet region icons on the geographic coordinate
+      - name: Apply hotfix
         run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          atlas=Path('web/components/Atlas2D.tsx')
-          text=atlas.read_text()
-          old="import {groupMapDirections,updateDirectionButtons,constrainDirectionLabels,bindMapLabelReflow,type MapDirectionGroup} from '@/lib/map-direction-layout';"
-          new="import {DIRECTION_MARKER_SIZE,groupMapDirections,updateDirectionButtons,constrainDirectionLabels,bindMapLabelReflow,type MapDirectionGroup} from '@/lib/map-direction-layout';"
-          if old not in text:
-              raise SystemExit('Atlas2D import anchor missing')
-          text=text.replace(old,new,1)
-          old="iconSize:[1,1],iconAnchor:[0,0]"
-          new="iconSize:[DIRECTION_MARKER_SIZE,DIRECTION_MARKER_SIZE],iconAnchor:[DIRECTION_MARKER_SIZE/2,DIRECTION_MARKER_SIZE/2]"
-          if text.count(old)!=1:
-              raise SystemExit(f'Expected one incorrect Leaflet anchor, found {text.count(old)}')
-          atlas.write_text(text.replace(old,new,1))
-
-          test=Path('web/tests/map-polish.test.mjs')
-          source=test.read_text()
-          addition=r'''
-
-test('region marker dots stay centered on the exact engine coordinate',()=>{
-  const atlas=read('components/Atlas.tsx');
-  const canvas=read('components/Atlas2D.tsx');
-  const css=read('app/interface-refresh.css');
-  assert.match(atlas,/new ml\.Marker\(\{element:el,anchor:'center'\}\)/);
-  assert.match(canvas,/iconSize:\[DIRECTION_MARKER_SIZE,DIRECTION_MARKER_SIZE\],iconAnchor:\[DIRECTION_MARKER_SIZE\/2,DIRECTION_MARKER_SIZE\/2\]/);
-  assert.doesNotMatch(canvas,/iconSize:\[1,1\],iconAnchor:\[0,0\]/);
-  assert.match(css,/region-marker\.direction-cluster[\s\S]*width:44px!important/);
-  assert.match(css,/Only the label shifts;[\s\S]*the dot and the map engine's anchor never move/);
-});
-'''
-          if "region marker dots stay centered on the exact engine coordinate" not in source:
-              test.write_text(source.rstrip()+addition+'\n')
-
-          release=Path('docs/release-0.4.5.md')
-          source=release.read_text()
-          marker='- service worker `tropnik-shell-v13` с проверенной повторной упаковкой manifest обзорного рельефа.\n'
-          line='- точный anchor marker: MapLibre использует центр фиксированного 44×44 control, Leaflet — `iconSize 44×44 / iconAnchor 22×22`; cluster label больше не меняет размер географического anchor.\n'
-          if line not in source:
-              if marker not in source: raise SystemExit('release note anchor missing')
-              release.write_text(source.replace(marker,marker+line,1))
-
-          visual=Path('docs/MAP-VISUAL-SYSTEM.md')
-          source=visual.read_text()
-          paragraph='\nМаркер направления имеет фиксированный географический anchor 44×44 px в обоих движках. В Leaflet центр иконки `[22, 22]` совпадает с координатой, а cluster/label остаются абсолютно позиционированными и не участвуют в размере anchor.\n'
-          if paragraph.strip() not in source:
-              heading='## Рельеф и zoom\n'
-              if heading not in source: raise SystemExit('visual system anchor missing')
-              visual.write_text(source.replace(heading,paragraph+'\n'+heading,1))
-
-          Path('.github/workflows/fix-map-marker-anchor.yml').unlink()
-          PY
+          python tools/fix-marker-anchor.py
           git diff --check
-      - name: Run regression, type and production checks
+      - name: Verify
         run: |
           pnpm --dir web test
           node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
           pnpm --dir web build
-      - name: Commit verified anchor hotfix
+      - name: Commit
         run: |
-          git config user.name 'tropnik-release-bot'
-          git config user.email '38781694+orewn@users.noreply.github.com'
+          git config user.name tropnik-release-bot
+          git config user.email 38781694+orewn@users.noreply.github.com
           git add -A
           git diff --cached --check
           git commit -m 'fix(map): center region markers on exact coordinates'
