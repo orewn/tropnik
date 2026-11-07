@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "builtAt": "2026-11-06T07:11:56.777251+00:00",
+  "builtAt": "2026-11-07T00:54:36.478253+00:00",
   "displayScope": "Russia-first tourism display, including the existing Crimea destination",
   "legalBoundaryClaim": false,
   "navigationReady": false,
@@ -110,14 +110,14 @@
         "Bashkortostan"
       ],
       "download": {
-        "requestedUrl": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/RUS/ADM1/geoBoundaries-RUS-ADM1.geojson",
+        "requestedUrl": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/RUS/ADM1/geoBoundaries-RUS-ADM1.geojson",
         "resolvedUrl": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/RUS/ADM1/geoBoundaries-RUS-ADM1.geojson",
+        "retrievedAt": "2026-11-07T00:53:59.092073+00:00",
         "status": 200,
-        "retrievedAt": "2026-11-06T06:57:46.886990+00:00",
         "bytes": 59162098,
         "sha256": "b86ab28823569a4ec881091b0c8608ae31194cb2b195943b8b34fbd56f492320",
         "file": "geoBoundaries-RUS-ADM1.geojson",
-        "lastModified": "Fri, 06 Nov 2026 06:57:16 GMT",
+        "lastModified": "Sat, 07 Nov 2026 00:53:57 GMT",
         "etag": "\"b86ab28823569a4ec881091b0c8608ae31194cb2b195943b8b34fbd56f492320\""
       }
     },
@@ -132,14 +132,14 @@
         "Sevastopol"
       ],
       "download": {
-        "requestedUrl": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/UKR/ADM1/geoBoundaries-UKR-ADM1.geojson",
+        "requestedUrl": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/UKR/ADM1/geoBoundaries-UKR-ADM1.geojson",
         "resolvedUrl": "https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/UKR/ADM1/geoBoundaries-UKR-ADM1.geojson",
+        "retrievedAt": "2026-11-07T00:54:02.934418+00:00",
         "status": 200,
-        "retrievedAt": "2026-11-06T06:55:40.452875+00:00",
         "bytes": 3919902,
         "sha256": "b2f9f4ad2e9be5888523219c0bb46a24332ead16b46305409098048fd361a2d6",
         "file": "geoBoundaries-UKR-ADM1.geojson",
-        "lastModified": "Fri, 06 Nov 2026 06:55:18 GMT",
+        "lastModified": "Sat, 07 Nov 2026 00:54:02 GMT",
         "etag": "\"b2f9f4ad2e9be5888523219c0bb46a24332ead16b46305409098048fd361a2d6\""
       }
     }
@@ -160,7 +160,7 @@
     "Topology-preserving distant RUS display simplification: 0.008 degrees; Crimea/Sevastopol and areas near imported route envelopes retain full source detail",
     "Round output coordinates to 7 decimal places",
     "Clip at 180 degrees and shift eastern part by -360 for canonical GeoJSON",
-    "Subtract selected area from Web Mercator plane in 90 degree strips"
+    "Subtract selected area from Web Mercator plane in 15-degree renderer-safe cells"
   ],
   "simplificationToleranceDegrees": 0.008,
   "fullSourceDetailExceptions": [
@@ -200,7 +200,7 @@
   ],
   "routeCoverageReport": {
     "path": "data/boundaries/catalog-mask-coverage.json",
-    "sha256": "d89b4657d791b7f642b0ff0121a497fb006f87b5e5a143fe35423f418a9bc81e",
+    "sha256": "6939e2290770c59cf6a4ad483a0d3433ee22680bd17b87975cd91211d0c928ec",
     "routeCount": 278,
     "totalVertices": 223073,
     "verticesIncorrectlyRemovedBySimplification": 0
@@ -252,9 +252,9 @@
     },
     "russia-outside-mask.geojson": {
       "url": "/data/russia-outside-mask.geojson",
-      "bytes": 1108071,
-      "sha256": "feff393d4f67343493a338b16df8c8f30259475b00aea01677a5ea6cb2880e3f",
-      "features": 4
+      "bytes": 1231143,
+      "sha256": "176847c7325ebf4e7f6451309ae94554108de094ce10a052c08991d40f3acf52",
+      "features": 288
     },
     "russia-canonical-area.geojson": {
       "url": "/data/russia-canonical-area.geojson",
@@ -264,16 +264,16 @@
     },
     "russia-canonical-mask.geojson": {
       "url": "/data/russia-canonical-mask.geojson",
-      "bytes": 1109195,
-      "sha256": "156a0b858c484643bd8d7eed911e0497b477b29a00c9f9e6e30a9c3165d52314",
-      "features": 4
+      "bytes": 1233406,
+      "sha256": "ca75aa8f9ce50115ec3106aadcb4bbc3a4951169c27ffd5f85f4e582852aaa4d",
+      "features": 288
     }
   },
   "validation": {
     "passed": true,
     "pointCaseCount": 22,
     "report": "data/boundaries/russia-mask-checks.json",
-    "sha256": "13b538512452eca426b2aeb394a4d06d16754575257c4dfbd2bf8a72ab0b3073"
+    "sha256": "e369b8499518f1043fe2b124930c653b5b5814423ac84320df717a17f100e857"
   },
   "limitations": [
     "Historical administrative display data, not an authoritative current legal boundary or permission to enter.",
@@ -282,6 +282,6 @@
     "Simplification tolerance is a processing parameter, not measured positional accuracy.",
     "Unwrapped GeoJSON is a renderer-specific display asset; use canonical files for interchange.",
     "maxBounds is rectangular; render the outside mask above basemap labels and ignore interactions outside the selected area.",
-    "Draw mask fills without strokes; strip boundaries are technical partition edges."
+    "Draw mask fills without strokes; cell boundaries are technical partition edges."
   ]
 }

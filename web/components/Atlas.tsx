@@ -210,7 +210,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      if(cancelled)return;const sourceId=(event as typeof event&{sourceId?:string}).sourceId;
      if(!map.getStyle()&&!overviewFallback){overviewFallback=true;styleSession.current?.fallback();setStatus('Детальная карта недоступна. Открываем сохранённый обзор.');}
      else if(['overview-land','land','regions','russia-mask'].includes(sourceId||''))setStatus('Не удалось загрузить географию России. Обновите страницу.');
-     else setStatus('Не все детали карты загрузились. Сохранённый обзор доступен.');
+     else { console.warn('Non-critical map detail failed; keeping the rendered overview.'); setTilesLoading(false); }
     });
     resize=new ResizeObserver(()=>{
      if(cancelled||!container.current)return;

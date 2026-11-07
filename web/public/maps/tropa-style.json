@@ -579,7 +579,8 @@
       "paint": {
         "text-color": "#547C8D",
         "text-halo-color": "#D5E7E9",
-        "text-halo-width": 1.5
+        "text-halo-width": 1.75,
+        "text-halo-blur": 0.3
       },
       "minzoom": 7,
       "layout": {
@@ -603,8 +604,16 @@
           "Noto Sans Regular"
         ],
         "text-size": 13,
-        "text-max-width": 9,
-        "text-padding": 5
+        "text-max-width": 10,
+        "text-padding": 7,
+        "text-variable-anchor": [
+          "top",
+          "bottom",
+          "left",
+          "right"
+        ],
+        "text-justify": "auto",
+        "text-radial-offset": 0.45
       }
     },
     {
@@ -614,8 +623,9 @@
       "source-layer": "place",
       "paint": {
         "text-color": "#7C8978",
-        "text-halo-color": "#FFFEF7",
-        "text-halo-width": 1.2
+        "text-halo-color": "#FFFEFA",
+        "text-halo-width": 1.2,
+        "text-halo-blur": 0.3
       },
       "minzoom": 1,
       "filter": [
@@ -659,8 +669,16 @@
           5,
           19
         ],
-        "text-max-width": 9,
-        "text-padding": 5
+        "text-max-width": 10,
+        "text-padding": 7,
+        "text-variable-anchor": [
+          "top",
+          "bottom",
+          "left",
+          "right"
+        ],
+        "text-justify": "auto",
+        "text-radial-offset": 0.45
       }
     },
     {
@@ -670,8 +688,9 @@
       "source-layer": "place",
       "paint": {
         "text-color": "#74866E",
-        "text-halo-color": "#FFFEF7",
-        "text-halo-width": 1.5
+        "text-halo-color": "#FFFEFA",
+        "text-halo-width": 1.75,
+        "text-halo-blur": 0.3
       },
       "minzoom": 4,
       "filter": [
@@ -703,8 +722,16 @@
           "Noto Sans Regular"
         ],
         "text-size": 12,
-        "text-max-width": 9,
-        "text-padding": 5
+        "text-max-width": 10,
+        "text-padding": 7,
+        "text-variable-anchor": [
+          "top",
+          "bottom",
+          "left",
+          "right"
+        ],
+        "text-justify": "auto",
+        "text-radial-offset": 0.45
       }
     },
     {
@@ -714,17 +741,67 @@
       "source-layer": "place",
       "paint": {
         "text-color": "#384D3E",
-        "text-halo-color": "#FFFEF7",
-        "text-halo-width": 1.5
+        "text-halo-color": "#FFFEFA",
+        "text-halo-width": 1.75,
+        "text-halo-blur": 0.3
       },
       "minzoom": 3,
       "filter": [
-        "==",
+        "all",
         [
-          "get",
-          "class"
+          "==",
+          [
+            "get",
+            "class"
+          ],
+          "city"
         ],
-        "city"
+        [
+          "!",
+          [
+            "in",
+            [
+              "coalesce",
+              [
+                "get",
+                "name:ru"
+              ],
+              [
+                "get",
+                "name:latin"
+              ],
+              [
+                "get",
+                "name"
+              ],
+              ""
+            ],
+            [
+              "literal",
+              [
+                "Москва",
+                "Санкт-Петербург",
+                "Петропавловск-Камчатский",
+                "Владивосток",
+                "Хабаровск",
+                "Анадырь",
+                "Мурманск",
+                "Калининград",
+                "Архангельск",
+                "Магадан",
+                "Южно-Сахалинск",
+                "Якутск",
+                "Салехард",
+                "Новосибирск",
+                "Красноярск",
+                "Екатеринбург",
+                "Иркутск",
+                "Казань",
+                "Сочи"
+              ]
+            ]
+          ]
+        ]
       ],
       "layout": {
         "text-field": [
@@ -759,8 +836,16 @@
           9,
           16
         ],
-        "text-max-width": 9,
-        "text-padding": 5
+        "text-max-width": 10,
+        "text-padding": 7,
+        "text-variable-anchor": [
+          "top",
+          "bottom",
+          "left",
+          "right"
+        ],
+        "text-justify": "auto",
+        "text-radial-offset": 0.45
       }
     },
     {
@@ -770,8 +855,9 @@
       "source-layer": "place",
       "paint": {
         "text-color": "#3F5144",
-        "text-halo-color": "#FFFEF7",
-        "text-halo-width": 1.5
+        "text-halo-color": "#FFFEFA",
+        "text-halo-width": 1.75,
+        "text-halo-blur": 0.3
       },
       "minzoom": 7,
       "filter": [
@@ -815,8 +901,16 @@
           12,
           15
         ],
-        "text-max-width": 9,
-        "text-padding": 5
+        "text-max-width": 10,
+        "text-padding": 7,
+        "text-variable-anchor": [
+          "top",
+          "bottom",
+          "left",
+          "right"
+        ],
+        "text-justify": "auto",
+        "text-radial-offset": 0.45
       }
     },
     {
@@ -826,8 +920,9 @@
       "source-layer": "place",
       "paint": {
         "text-color": "#3F5144",
-        "text-halo-color": "#FFFEF7",
-        "text-halo-width": 1.5
+        "text-halo-color": "#FFFEFA",
+        "text-halo-width": 1.75,
+        "text-halo-blur": 0.3
       },
       "minzoom": 10,
       "filter": [
@@ -866,8 +961,16 @@
           "Noto Sans Regular"
         ],
         "text-size": 12,
-        "text-max-width": 9,
-        "text-padding": 5
+        "text-max-width": 10,
+        "text-padding": 7,
+        "text-variable-anchor": [
+          "top",
+          "bottom",
+          "left",
+          "right"
+        ],
+        "text-justify": "auto",
+        "text-radial-offset": 0.45
       }
     },
     {
@@ -877,8 +980,9 @@
       "source-layer": "mountain_peak",
       "paint": {
         "text-color": "#78664E",
-        "text-halo-color": "#FFFEF7",
-        "text-halo-width": 1.5
+        "text-halo-color": "#FFFEFA",
+        "text-halo-width": 1.75,
+        "text-halo-blur": 0.3
       },
       "minzoom": 10,
       "layout": {
@@ -902,8 +1006,16 @@
           "Noto Sans Regular"
         ],
         "text-size": 12,
-        "text-max-width": 9,
-        "text-padding": 5
+        "text-max-width": 10,
+        "text-padding": 7,
+        "text-variable-anchor": [
+          "top",
+          "bottom",
+          "left",
+          "right"
+        ],
+        "text-justify": "auto",
+        "text-radial-offset": 0.45
       }
     },
     {
@@ -1015,8 +1127,9 @@
       "source-layer": "poi",
       "paint": {
         "text-color": "#3F5144",
-        "text-halo-color": "#FFFEF7",
-        "text-halo-width": 1.5
+        "text-halo-color": "#FFFEFA",
+        "text-halo-width": 1.75,
+        "text-halo-blur": 0.3
       },
       "minzoom": 13,
       "filter": [
@@ -1140,8 +1253,9 @@
       "source-layer": "transportation_name",
       "paint": {
         "text-color": "#3F5144",
-        "text-halo-color": "#FFFEF7",
-        "text-halo-width": 1.5
+        "text-halo-color": "#FFFEFA",
+        "text-halo-width": 1.75,
+        "text-halo-blur": 0.3
       },
       "minzoom": 14,
       "filter": [
@@ -1190,6 +1304,119 @@
       "paint": {
         "fill-color": "#e7ebe2",
         "fill-antialias": false
+      }
+    },
+    {
+      "id": "russia-priority-city-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "place",
+      "paint": {
+        "text-color": "#263F32",
+        "text-halo-color": "#FFFEFA",
+        "text-halo-width": 2.4,
+        "text-halo-blur": 0.5
+      },
+      "minzoom": 3,
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "get",
+            "class"
+          ],
+          "city"
+        ],
+        [
+          "in",
+          [
+            "coalesce",
+            [
+              "get",
+              "name:ru"
+            ],
+            [
+              "get",
+              "name:latin"
+            ],
+            [
+              "get",
+              "name"
+            ],
+            ""
+          ],
+          [
+            "literal",
+            [
+              "Москва",
+              "Санкт-Петербург",
+              "Петропавловск-Камчатский",
+              "Владивосток",
+              "Хабаровск",
+              "Анадырь",
+              "Мурманск",
+              "Калининград",
+              "Архангельск",
+              "Магадан",
+              "Южно-Сахалинск",
+              "Якутск",
+              "Салехард",
+              "Новосибирск",
+              "Красноярск",
+              "Екатеринбург",
+              "Иркутск",
+              "Казань",
+              "Сочи"
+            ]
+          ]
+        ]
+      ],
+      "layout": {
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name:ru"
+          ],
+          [
+            "get",
+            "name:latin"
+          ],
+          [
+            "get",
+            "name"
+          ],
+          ""
+        ],
+        "text-font": [
+          "Noto Sans Regular"
+        ],
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          3,
+          13,
+          6,
+          17,
+          10,
+          20
+        ],
+        "text-max-width": 10,
+        "text-padding": 7,
+        "text-variable-anchor": [
+          "top",
+          "bottom",
+          "left",
+          "right"
+        ],
+        "text-justify": "auto",
+        "text-radial-offset": 0.45
       }
     }
   ]

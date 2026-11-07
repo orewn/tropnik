@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-11-06T07:11:51.065749+00:00",
+  "checkedAt": "2026-11-07T00:54:30.773732+00:00",
   "scope": "All imported line vertices compared against selected historical source plus explicitly included inland water holes and against the runtime display mask. Not field, access or legal verification.",
   "catalogPath": "data/catalog/routes.geojson",
   "catalogSha256": "6cc0557c8f16018f7608e58ce23cabd106c5809e3f3e5e7cf4672f89921f849e",

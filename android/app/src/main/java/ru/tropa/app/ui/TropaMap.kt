@@ -182,11 +182,13 @@ fun TropaMap(
         styleLoading = true
         error = null
         val prepared = withContext(Dispatchers.Default) { mapStyleForConnection(styleText, onlineMode) }
-        nativeMap.setStyle(Style.Builder().fromJson(prepared)) {
-            if (styleGeneration == generation) {
-                styleLoading = false
-                error = null
-                styleRevision = generation
+        withContext(Dispatchers.Main.immediate) {
+            nativeMap.setStyle(Style.Builder().fromJson(prepared)) {
+                if (styleGeneration == generation) {
+                    styleLoading = false
+                    error = null
+                    styleRevision = generation
+                }
             }
         }
         delay(12_000)
@@ -195,10 +197,14 @@ fun TropaMap(
             else error = "Локальная карта не открылась. Карточки и источники доступны ниже."
         }
     }
-    LaunchedEffect(eco, mapView) { mapView.setMaximumFps(if (eco) 30 else 60) }
+    LaunchedEffect(eco, mapView) {
+        withContext(Dispatchers.Main.immediate) { mapView.setMaximumFps(if (eco) 30 else 60) }
+    }
     LaunchedEffect(relief, map, styleRevision) {
-        for (layer in listOf("pilot-hillshade", "russia-overview-relief", "online-hillshade")) {
-            map?.style?.getLayer(layer)?.setProperties(PropertyFactory.visibility(if (relief) Property.VISIBLE else Property.NONE))
+        withContext(Dispatchers.Main.immediate) {
+            for (layer in listOf("pilot-hillshade", "russia-overview-relief", "online-hillshade")) {
+                map?.style?.getLayer(layer)?.setProperties(PropertyFactory.visibility(if (relief) Property.VISIBLE else Property.NONE))
+            }
         }
     }
 
@@ -206,6 +212,7 @@ fun TropaMap(
         val nativeMap = map ?: return@LaunchedEffect
         if (styleRevision == 0 || styleLoading) return@LaunchedEffect
         val area = displayArea ?: return@LaunchedEffect
+        withContext(Dispatchers.Main.immediate) {
         nativeMap.setLatLngBoundsForCameraTarget(area.cameraBounds)
         scopeNotice = null
         val style = nativeMap.style ?: return@LaunchedEffect
@@ -229,12 +236,14 @@ fun TropaMap(
                 LatLng(selected.latitude, selected.longitude), selected.zoom,
             ), 500)
         } else nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(area.fitBounds, 24), 500)
+        }
     }
 
     LaunchedEffect(map, styleRevision, displayArea, position) {
         val nativeMap = map ?: return@LaunchedEffect
         if (styleRevision == 0 || styleLoading) return@LaunchedEffect
         val area = displayArea ?: return@LaunchedEffect
+        withContext(Dispatchers.Main.immediate) {
         val ready = position as? PositionState.Ready
         val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
         nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
@@ -243,6 +252,7 @@ fun TropaMap(
         if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
             lastPositionTime = ready.fix.measuredAt
             nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+        }
         }
     }
 
@@ -255,8 +265,8 @@ fun TropaMap(
         if (map != null) {
             Surface(Modifier.align(Alignment.CenterEnd).padding(end = 8.dp), color = Palette.Surface, shape = RoundedCornerShape(12.dp)) {
                 Column {
-                    TrailIconButton(onClick = { map?.animateCamera(CameraUpdateFactory.zoomIn(), 180) }) { TropaIcon(Glyph.ZOOM_IN, description = "Приблизить карту") }
-                    TrailIconButton(onClick = { map?.animateCamera(CameraUpdateFactory.zoomOut(), 180) }) { TropaIcon(Glyph.ZOOM_OUT, description = "Отдалить карту") }
+                    TrailIconButton(onClick = { mapView.post { map?.animateCamera(CameraUpdateFactory.zoomIn(), 180) } }) { TropaIcon(Glyph.ZOOM_IN, description = "Приблизить карту") }
+                    TrailIconButton(onClick = { mapView.post { map?.animateCamera(CameraUpdateFactory.zoomOut(), 180) } }) { TropaIcon(Glyph.ZOOM_OUT, description = "Отдалить карту") }
                 }
             }
             Text(when {
@@ -273,7 +283,7 @@ fun TropaMap(
                 TrailChoice(selected = relief, onClick = { relief = !relief }, enabled = zoom < 6 || (reliefArea && zoom >= 7) || (onlineMode && zoom >= 5),
                     label = { Text("Рельеф") }, modifier = Modifier.heightIn(min = 48.dp))
                 TrailChoice(selected = tilted, onClick = {
-                    map?.let { current -> current.animateCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(current.cameraPosition).tilt(if (tilted) 0.0 else 40.0).build()), 300) }
+                    mapView.post { map?.let { current -> current.animateCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(current.cameraPosition).tilt(if (tilted) 0.0 else 40.0).build()), 300) } }
                 }, enabled = zoom >= 10, label = { Text("Ракурс") }, modifier = Modifier.heightIn(min = 48.dp))
                 TrailChoice(selected = eco, onClick = { eco = !eco }, label = { Text("Беречь заряд") }, modifier = Modifier.heightIn(min = 48.dp))
             }

@@ -104,7 +104,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
    const attached=()=>map===mapRef.current&&baseRef.current===detail;
    detail.on('loading',()=>{if(attached())setTilesLoading(true);});
    detail.on('load',()=>{if(attached())setTilesLoading(false);});
-   detail.on('tileerror',()=>{if(attached()){setTilesLoading(false);setStatus('Часть карты не загрузилась. Проверьте подключение.');}});
+   detail.on('tileerror',()=>{if(attached())setTilesLoading(false);});
    baseRef.current=detail;detail.addTo(map);reliefRef.current?.setOverview(false);return true;
   }catch(error){if(current())throw error;return false;}
   finally{if(request===detailRequest.current)detailLoading.current=false;}

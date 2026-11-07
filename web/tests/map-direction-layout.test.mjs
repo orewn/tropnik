@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {dirname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,updateDirectionButtons} from '../lib/map-direction-layout.ts';
+import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelShift,directionLabelWidth,updateDirectionButtons} from '../lib/map-direction-layout.ts';
 import {russiaCamera,russiaPadding,russiaLongitude} from '../public/maps/russia-viewport.js';
 
 // Use the actual fifteen directions, not a separately maintained coordinate
@@ -94,4 +94,12 @@ test('regrouping transfers keyboard focus and restores a separate selected direc
   assert.ok(buttons.get('b').classes.has('is-selected'));
   assert.ok(!buttons.get('a').classes.has('direction-cluster'));
   assert.equal(buttons.get('b').attributes.get('aria-label'),'Открыть Б, маршрутов в каталоге: 3');
+});
+
+test('edge clamp keeps every map label inside the visible atlas',()=>{
+  assert.equal(directionLabelShift(-30,110,0,1000,18),48);
+  assert.equal(directionLabelShift(920,1040,0,1000,18),-58);
+  assert.equal(directionLabelShift(200,320,0,1000,18),0);
+  assert.ok(directionLabelWidth('Петропавловск-Камчатский')<=168);
+  assert.ok(directionLabelWidth('Алтай')>=84);
 });
