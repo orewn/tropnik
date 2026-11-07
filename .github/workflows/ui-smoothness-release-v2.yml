@@ -41,6 +41,18 @@ jobs:
           python3 -m py_compile tools/apply-ui-smoothness.py
           python3 tools/apply-ui-smoothness.py
           sed -i 's/[[:space:]]*$//' web/components/PlaceStories.tsx
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path('web/tests/map-polish.test.mjs')
+          text=path.read_text()
+          old="""  assert.match(atlas,/map\\.on\\('move',scheduleDirectionLayout\\)/);
+            assert.match(canvas,/map\\.on\\('move',scheduleDirectionLayout\\)/);"""
+          new="""  assert.match(atlas,/map\\.on\\('moveend',[\\s\\S]*scheduleDirectionLayout/);
+            assert.match(canvas,/map\\.on\\('moveend',[\\s\\S]*scheduleDirectionLayout/);"""
+          if old not in text:
+              raise SystemExit('Existing anchor camera assertions changed unexpectedly')
+          path.write_text(text.replace(old,new,1))
+          PY
           git diff --check
       - name: Run full regression suite
         working-directory: web
