@@ -50,9 +50,17 @@ export function supportsMapWebGL() {
   }
   return webglAvailable;
 }
+
+export function preferCanvasMap() {
+  if(typeof window==='undefined'||typeof navigator==='undefined')return false;
+  const nav=navigator as Navigator&{deviceMemory?:number;connection?:{saveData?:boolean}};
+  const coarse=window.matchMedia('(pointer:coarse)').matches||nav.maxTouchPoints>0;
+  const constrained=(nav.deviceMemory??8)<=4||(nav.hardwareConcurrency||8)<=4||!!nav.connection?.saveData;
+  return coarse&&(window.innerWidth<=900||constrained);
+}
 export function warmMap() {
   if (typeof window === 'undefined') return;
-  const webgl=supportsMapWebGL();
+  const webgl=supportsMapWebGL()&&!preferCanvasMap();
   void preloadPublic('/data/russia-display-area.geojson'); void preloadPublic(webgl?'/data/russia-canonical-mask.geojson':'/data/russia-outside-mask.geojson');
   void preloadPublic('/data/territories.geojson'); void preloadPublic('/maps/tropa-style.json');
   if(!webgl)return Promise.resolve();

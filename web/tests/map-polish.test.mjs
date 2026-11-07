@@ -51,7 +51,7 @@ test('reported map wedges, clipped labels and false detail banner stay fixed',()
   const maskIndex=style.layers.findIndex(layer=>layer.id==='russia-outside-mask');
   const priorityIndex=style.layers.findIndex(layer=>layer.id==='russia-priority-city-label');
   assert.ok(maskIndex>=0&&priorityIndex>maskIndex,'priority Russian labels redraw after the outside mask');
-  assert.match(sw,/tropnik-shell-v14/);
+  assert.match(sw,/tropnik-shell-v15/);
   assert.match(sw,/russia-canonical-mask\.geojson/);
 });
 
@@ -112,8 +112,13 @@ test('region marker dots stay centered on the exact engine coordinate',()=>{
   assert.match(css,/data-map-camera='zooming'/);
   assert.match(atlas,/reconcileDirectionAnchors/);
   assert.match(canvas,/reconcileDirectionAnchors/);
-  assert.match(atlas,/map\.on\('move',scheduleDirectionLayout\)/);
-  assert.match(canvas,/map\.on\('move',scheduleDirectionLayout\)/);
+  assert.doesNotMatch(atlas,/map\.on\('move',\s*scheduleDirectionLayout\)/);
+  assert.doesNotMatch(canvas,/map\.on\('move',\s*scheduleDirectionLayout\)/);
+  assert.doesNotMatch(canvas,/map\.on\('zoom',\s*scheduleDirectionLayout\)/);
+  assert.match(atlas,/map\.on\('movestart'/);
+  assert.match(canvas,/map\.on\('movestart'/);
+  assert.match(atlas,/map\.on\('moveend'/);
+  assert.match(canvas,/map\.on\('moveend'/);
 });
 
 test('mobile visual viewport and native route points stay cross-platform',()=>{
