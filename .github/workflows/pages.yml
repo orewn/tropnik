@@ -77,6 +77,7 @@ jobs:
       - name: Upload the verified static artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
+          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
           path: web/pages-preview/dist
           include-hidden-files: true
           retention-days: 7
@@ -107,6 +108,8 @@ jobs:
       - name: Deploy the verified artifact
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        with:
+          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Verify the public build and APK without authentication
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}
