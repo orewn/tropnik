@@ -143,8 +143,9 @@ jobs:
 
       - name: Commit verified clean release
         run: |
+          git restore .github/workflows/pages.yml .github/workflows/final-mobile-ux.yml
           git config user.name 'tropnik-release-bot'
           git config user.email '38781694+orewn@users.noreply.github.com'
           git add -A
-          git commit -m 'Polish 0.4.8 mobile sheet and add real browser gate'
+          git commit -m 'Polish 0.4.8 mobile sheet and adaptive map performance'
           git push origin HEAD:perf/ui-smoothness-0.4.8-final
