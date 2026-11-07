@@ -33,6 +33,21 @@ sticky_fix="""
 """
 if sticky_marker not in style:
     style=style.rstrip()+sticky_fix
+landscape_marker='/* Compact landscape keeps 44px touch targets. */'
+landscape_fix="""
+
+/* Compact landscape keeps 44px touch targets. */
+@media(max-height:620px) and (orientation:landscape) and (max-width:900px){
+  .explore-layout .map-style-switch{min-height:52px!important}
+  .explore-layout .map-style-switch button,
+  .explore-layout .map-controls button{
+    height:44px!important;
+    min-height:44px!important;
+  }
+}
+"""
+if landscape_marker not in style:
+    style=style.rstrip()+landscape_fix
 css.write_text(style.rstrip()+'\n')
 
 stories=root/'web/components/PlaceStories.tsx'
@@ -80,6 +95,15 @@ test('synthetic touch hover paint is cleared without removing keyboard focus',()
   assert.match(css,/focus:not\(:focus-visible\)/);
   assert.match(stories,/releaseTouchFocus/);
   assert.match(stories,/requestAnimationFrame\(\(\)=>button\.blur\(\)\)/);
+});
+"""
+if "compact landscape keeps every map control at 44px" not in test_text:
+    test_text += """
+
+test('compact landscape keeps every map control at 44px',()=>{
+  const css=read('app/map-ui-release.css');
+  assert.match(css,/Compact landscape keeps 44px touch targets/);
+  assert.match(css,/@media\(max-height:620px\) and \(orientation:landscape\) and \(max-width:900px\)[\s\S]*map-style-switch button[\s\S]*map-controls button[\s\S]*height:44px!important[\s\S]*min-height:44px!important/);
 });
 """
 ui_test.write_text(test_text.rstrip()+'\n')
