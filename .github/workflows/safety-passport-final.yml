@@ -9,7 +9,6 @@ on:
       - 'tools/safety-backend.part-*'
       - 'tools/safety-web.part-*'
       - 'tools/fix-safety-integration-import.py'
-      - 'tools/fix-safety-idempotency.py'
 
 permissions:
   contents: write
@@ -81,7 +80,6 @@ jobs:
             '12262fe38e4ed5612daa2e5ae2924b1d99bac645336ad75f2416b48507d00a1a' tools/apply-safety-web-packed.generated.py | sha256sum -c -
           python3 tools/apply-safety-backend-packed.py
           python3 tools/apply-safety-web-packed.generated.py
-          python3 tools/fix-safety-idempotency.py
           python3 tools/fix-safety-integration-import.py
           find backend -name '*.go' -print0 | xargs -0 gofmt -w
           git diff --check
