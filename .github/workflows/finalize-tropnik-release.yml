@@ -37,6 +37,8 @@ jobs:
       - name: Regenerate and validate renderer-safe Russia masks
         run: |
           python tools/map-package/build-russia-mask.py --download-missing
+          cp data/boundaries/russia-mask-checks.json web/tests/fixtures/russia-checks.json
+          cp data/boundaries/catalog-mask-coverage.json web/tests/fixtures/russia-route-coverage.json
           python tools/map-package/test_russia_mask_partition.py
 
       - name: Set up pinned Node.js
