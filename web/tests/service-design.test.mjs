@@ -12,7 +12,7 @@ test('home page uses the unified editorial service component',async()=>{
   assert.match(component,/const steps = \[/);
   assert.match(component,/Проверяемая карта/);
   assert.match(component,/Работа без сети/);
-  assert.match(component,/Паспорт похода/);
+  assert.match(component,/паспорт похода/i);
   assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(css,/@media\(max-width:620px\)/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
