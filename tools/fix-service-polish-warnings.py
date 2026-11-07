@@ -159,4 +159,15 @@ replace_once(
     "import {useMemo, useState} from 'react';",
 )
 
+# Acceptance criteria follow the optimized, accessible photo surface rather than the removed raw <img>.
+replace_once(
+    "web/tests/service-polish.test.mjs",
+    """  assert.match(stories,/fetchPriority=\"low\"/);
+  assert.match(stories,/draggable=\{false\}/);""",
+    """  assert.match(stories,/className=\"fact-photo-image\"/);
+  assert.match(stories,/role=\"img\"/);
+  assert.match(stories,/image\\.decoding='async'/);
+  assert.doesNotMatch(stories,/<img\\b/);""",
+)
+
 Path(__file__).unlink(missing_ok=True)
