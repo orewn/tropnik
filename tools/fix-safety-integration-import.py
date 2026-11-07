@@ -20,9 +20,6 @@ if fixed in text:
 elif unique not in text:
     raise SystemExit('safety contact idempotency anchor not found')
 
-# fixture() creates an active departure to provide a verified guide and route.
-# This scenario creates another departure for a new safety revision, so release
-# the fixture departure first. The production overlap guard remains unchanged.
 if "UPDATE departures SET status='cancelled' WHERE id=$1" not in text:
     match = re.search(r'(?m)^(?P<indent>[ \t]*)d\s*,\s*err\s*:=\s*s\.CreateDeparture', text)
     if not match:
@@ -37,12 +34,10 @@ if "UPDATE departures SET status='cancelled' WHERE id=$1" not in text:
 
 integration.write_text(text)
 
-# Temporary diagnostic output for the immutable event-chain mismatch. This
-# script deletes itself, so no diagnostic helper enters the product commit.
-safety = (root / 'backend/internal/store/safety.go').read_text().splitlines()
-for start, end in ((80, 180), (730, 840)):
-    print(f'--- safety.go lines {start}-{end} ---')
-    for number, line in enumerate(safety[start - 1:end], start):
-        print(f'{number:4d}: {line}')
-
-Path(__file__).unlink()
+safety_text = (root / 'backend/internal/store/safety.go').read_text()
+match = re.search(r'func \(s \*Store\) VerifySafetyEventChain[\s\S]*?\n}', safety_text)
+if not match:
+    raise SystemExit('VerifySafetyEventChain not found')
+print('--- VerifySafetyEventChain ---')
+print(match.group(0))
+raise SystemExit('diagnostic complete')
