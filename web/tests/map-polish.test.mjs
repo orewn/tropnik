@@ -34,3 +34,23 @@ test('final palette and camera profile are wired into the atlas',()=>{
   assert.match(style,/minzoom:2/);
   assert.match(style,/raster-contrast/);
 });
+
+test('reported map wedges, clipped labels and false detail banner stay fixed',()=>{
+  const atlas=read('components/Atlas.tsx');
+  const canvas=read('components/Atlas2D.tsx');
+  const css=read('app/map-polish.css');
+  const generator=read('scripts/create-map-style.mjs');
+  const style=JSON.parse(read('public/maps/tropa-style.json'));
+  const sw=read('public/sw.js');
+  assert.match(atlas,/constrainDirectionLabels/);
+  assert.match(canvas,/constrainDirectionLabels/);
+  assert.doesNotMatch(atlas,/Не все детали карты загрузились/);
+  assert.match(css,/white-space:normal/);
+  assert.match(css,/--map-label-shift/);
+  assert.match(generator,/russia-priority-city-label/);
+  const maskIndex=style.layers.findIndex(layer=>layer.id==='russia-outside-mask');
+  const priorityIndex=style.layers.findIndex(layer=>layer.id==='russia-priority-city-label');
+  assert.ok(maskIndex>=0&&priorityIndex>maskIndex,'priority Russian labels redraw after the outside mask');
+  assert.match(sw,/tropnik-shell-v12/);
+  assert.match(sw,/russia-canonical-mask\.geojson/);
+});

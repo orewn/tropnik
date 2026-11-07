@@ -55,9 +55,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   box-shadow:0 0 0 2px rgba(255,254,250,.72),0 3px 10px rgba(29,48,38,.2);
 }
 .explore-layout .region-marker-label{
-  border:1px solid rgba(115,133,112,.38);
-  background:rgba(255,254,250,.94);
-  box-shadow:0 6px 18px rgba(29,48,38,.09);
+  max-width:168px;
+  min-width:0;
+  white-space:normal;
+  overflow-wrap:break-word;
+  word-break:normal;
+  text-wrap:balance;
+  line-height:1.28;
+  text-align:center;
+  padding:7px 10px;
+  border:1px solid rgba(76,99,79,.55);
+  background:rgba(255,254,250,.96);
+  box-shadow:0 6px 18px rgba(29,48,38,.11),inset 0 0 0 1px rgba(255,255,255,.4);
+  transform:translateX(var(--map-label-shift,0px));
 }
 .explore-layout .region-marker:hover .region-marker-label,
 .explore-layout .region-marker:focus-visible .region-marker-label,
@@ -120,6 +130,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .map-attribution-toggle:hover{background:var(--surface-soft)}
 @media(max-width:700px){
+  .explore-layout .region-marker-label{max-width:138px;padding:6px 8px;font-size:11px}
   .explore-layout .map-message{left:16px;right:16px;width:auto;max-width:none;bottom:calc(50% + 22px)}
   .explore-layout:has(.explore-panel.collapsed) .map-message{bottom:136px}
   .map-attribution{right:16px;bottom:calc(var(--map-bottom-inset,0px) + 12px)}

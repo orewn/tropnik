@@ -13,8 +13,42 @@ export type MapDirectionGroup<T extends MapDirection = MapDirection> = {
 };
 
 export const DIRECTION_MARKER_SIZE = 44;
-export const DIRECTION_CLUSTER_WIDTH = 144;
-export const DIRECTION_MARKER_GAP = 8;
+export const DIRECTION_CLUSTER_WIDTH = 176;
+export const DIRECTION_MARKER_GAP = 12;
+const MAX_LABEL_WIDTH = 168;
+
+/** Approximate the rendered label rather than treating every name as a 44px dot.
+ * The measured DOM position is subsequently clamped against the actual viewport. */
+export function directionLabelWidth(label: string) {
+  return Math.min(MAX_LABEL_WIDTH, Math.max(84, Math.ceil([...label].length * 7.1 + 24)));
+}
+
+/** A pure, deterministic edge clamp so border and narrow-screen cases can be tested. */
+export function directionLabelShift(labelLeft: number, labelRight: number, viewLeft: number, viewRight: number, inset = 16) {
+  const values = [labelLeft, labelRight, viewLeft, viewRight, inset];
+  if (!values.every(Number.isFinite) || labelRight < labelLeft || viewRight - viewLeft <= inset * 2) return 0;
+  const min = viewLeft + inset, max = viewRight - inset;
+  if (labelRight - labelLeft >= max - min) return min - labelLeft;
+  if (labelLeft < min) return min - labelLeft;
+  if (labelRight > max) return max - labelRight;
+  return 0;
+}
+
+/** Called after the map places its DOM markers, including after resizing the map.
+ * Visual labels move inside the atlas; the marker's geographic anchor never moves. */
+export function constrainDirectionLabels(buttons: ReadonlyMap<string, HTMLButtonElement>, viewport: HTMLElement) {
+  const bounds = viewport.getBoundingClientRect();
+  const inset = viewport.clientWidth <= 600 ? 12 : 18;
+  for (const button of buttons.values()) {
+    if (button.hidden || !button.isConnected) continue;
+    const label = button.querySelector<HTMLElement>('.region-marker-label');
+    if (!label) continue;
+    label.style.setProperty('--map-label-shift', '0px');
+    const rect = label.getBoundingClientRect();
+    const shift = directionLabelShift(rect.left, rect.right, bounds.left, bounds.right, inset);
+    label.style.setProperty('--map-label-shift', String(Math.round(shift)) + 'px');
+  }
+}
 
 export function directionCountLabel(count: number) {
   const mod100 = count % 100, mod10 = count % 10;
@@ -51,8 +85,8 @@ export function groupMapDirections<T extends MapDirection>(directions: readonly 
     return {
       key: members.map(item => item.id).join('|'), members, anchor, point: points.get(anchor.id)!,
       bounds: [Math.min(...longitudes), Math.min(...latitudes), Math.max(...longitudes), Math.max(...latitudes)],
-      width: members.length > 1 ? DIRECTION_CLUSTER_WIDTH : DIRECTION_MARKER_SIZE,
-      height: DIRECTION_MARKER_SIZE,
+      width: members.length > 1 ? DIRECTION_CLUSTER_WIDTH : directionLabelWidth(anchor.name),
+      height: members.length > 1 || anchor.name.length > 22 ? 68 : 56,
     };
   };
   const groups = unique.filter(item => {

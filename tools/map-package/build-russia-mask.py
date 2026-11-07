@@ -27,6 +27,7 @@ OUT = ROOT / 'web/public/data'
 QA = ROOT / 'data/boundaries'
 COMMIT = '9469f09592ced973a3448cf66b6100b741b64c0d'
 MERCATOR_LAT = 85.0511287798066
+MASK_TILE_DEGREES = 15.0
 CRIMEA_NAMES = {'Autonomous Republic of Crimea', 'Sevastopol'}
 ATTRIBUTION = '© OpenStreetMap contributors · geoBoundaries (OpenStreetMap / Wambacher, 2017); display selection and simplification by Тропник'
 SCOPE = 'Russia-first tourism display, including the existing Crimea destination'
@@ -136,11 +137,29 @@ def feature_collection(geometries, role, longitude_domain):
         for i, g in enumerate(geometries)]}
 
 
-def inverse_strips(area, west):
-    # <=90-degree strips avoid a single world-spanning exterior ring.
-    # Fill without strokes: strip edges are technical partitions, not borders.
-    return [polygonal(box(x, -MERCATOR_LAT, x + 90, MERCATOR_LAT).difference(area))
-            for x in range(west, west + 360, 90)]
+def inverse_tiles(area, west, tile_degrees=MASK_TILE_DEGREES):
+    """Partition the inverse mask into small, renderer-safe cells.
+
+    The union remains the complete Web-Mercator plane minus the selected area,
+    but no feature has a world-spanning exterior with a complex country hole.
+    This prevents long triangulation wedges without changing geographic scope.
+    """
+    if not 5 <= tile_degrees <= 30 or 360 % tile_degrees:
+        raise ValueError('Mask tile size must evenly divide 360 and stay between 5 and 30 degrees')
+    result = []
+    east_limit = west + 360
+    x = float(west)
+    while x < east_limit - 1e-9:
+        east = min(x + tile_degrees, east_limit)
+        y = -MERCATOR_LAT
+        while y < MERCATOR_LAT - 1e-9:
+            north = min(y + tile_degrees, MERCATOR_LAT)
+            outside = polygonal(box(x, y, east, north).difference(area))
+            if not outside.is_empty:
+                result.append(outside)
+            y = north
+        x = east
+    return result
 
 
 def main():
@@ -223,8 +242,8 @@ def main():
                                   display_source_area.intersection(detail_windows), crimea]))
     area = shape(rounded_mapping(area))
     normal = canonical(area)
-    display_masks = inverse_strips(area, 0)
-    normal_masks = inverse_strips(normal, -180)
+    display_masks = inverse_tiles(area, 0)
+    normal_masks = inverse_tiles(normal, -180)
     assets = {
         'russia-display-area.geojson': feature_collection([area], 'selected-area', '0..360'),
         'russia-outside-mask.geojson': feature_collection(display_masks, 'outside-mask', '0..360'),
@@ -314,6 +333,11 @@ def main():
     normal_world = box(-180, -MERCATOR_LAT, 180, MERCATOR_LAT)
     normal_missing = normal_world.symmetric_difference(unary_union([actual_canonical, actual_canonical_mask])).area
     round_trip = actual_area.symmetric_difference(unary_union(polygons(unwrap(actual_canonical)))).area
+    display_mask_bounds = [shape(f['geometry']).bounds for f in assets['russia-outside-mask.geojson']['features']]
+    canonical_mask_bounds = [shape(f['geometry']).bounds for f in assets['russia-canonical-mask.geojson']['features']]
+    all_mask_bounds = display_mask_bounds + canonical_mask_bounds
+    max_mask_width = max(b[2] - b[0] for b in all_mask_bounds)
+    max_mask_height = max(b[3] - b[1] for b in all_mask_bounds)
     validation = {
         'inputFeatures': len(features), 'sourceVertices': len(coordinates(raw_area)),
         'displayVertices': len(coordinates(actual_area)),
@@ -323,6 +347,9 @@ def main():
         'areaMaskOverlapSquareDegrees': overlap, 'displayPlaneCoverageErrorSquareDegrees': missing,
         'canonicalPlaneCoverageErrorSquareDegrees': normal_missing,
         'canonicalRoundTripDifferenceSquareDegrees': round_trip,
+        'maskPartitionDegrees': MASK_TILE_DEGREES,
+        'displayMaskFeatures': len(display_mask_bounds), 'canonicalMaskFeatures': len(canonical_mask_bounds),
+        'maxMaskFeatureWidthDegrees': max_mask_width, 'maxMaskFeatureHeightDegrees': max_mask_height,
         'simplificationSymmetricDifferenceSquareDegrees': display_source_area.symmetric_difference(area).area,
         'catalogRouteCount': len(route_rows),
         'catalogVerticesIncorrectlyRemovedBySimplification': removed_vertices,
@@ -330,6 +357,8 @@ def main():
     }
     validation['passed'] = (all(t['passed'] for t in tests) and validation['allShippedGeometriesValid']
                              and max(overlap, missing, normal_missing, round_trip) < 0.0001
+                             and max(max_mask_width, max_mask_height) <= MASK_TILE_DEGREES + 0.000001
+                             and len(display_mask_bounds) > 100 and len(canonical_mask_bounds) > 100
                              and removed_vertices == 0)
     write_json(QA / 'russia-mask-checks.json', validation, True)
     if not validation['passed']:
@@ -358,7 +387,7 @@ def main():
                             f'Topology-preserving distant RUS display simplification: {args.simplify_degrees} degrees; Crimea/Sevastopol and areas near imported route envelopes retain full source detail',
                             'Round output coordinates to 7 decimal places',
                             'Clip at 180 degrees and shift eastern part by -360 for canonical GeoJSON',
-                            'Subtract selected area from Web Mercator plane in 90 degree strips'],
+                            f'Subtract selected area from Web Mercator plane in {MASK_TILE_DEGREES:g}-degree renderer-safe cells'],
         'simplificationToleranceDegrees': args.simplify_degrees,
         'fullSourceDetailExceptions': sorted(CRIMEA_NAMES),
         'inlandWaterDisplayInclusions': lake_records,
@@ -393,7 +422,7 @@ def main():
             'Simplification tolerance is a processing parameter, not measured positional accuracy.',
             'Unwrapped GeoJSON is a renderer-specific display asset; use canonical files for interchange.',
             'maxBounds is rectangular; render the outside mask above basemap labels and ignore interactions outside the selected area.',
-            'Draw mask fills without strokes; strip boundaries are technical partition edges.',
+            'Draw mask fills without strokes; cell boundaries are technical partition edges.',
         ],
     }
     write_json(OUT / 'russia-boundaries-provenance.json', provenance, True)

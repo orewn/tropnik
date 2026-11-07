@@ -8,7 +8,7 @@ import type {Map as MapInstance,Marker,StyleSpecification,GeoJSONSource} from 'm
 import {WifiSlash,Check} from '@/components/TropnikIcons';
 import {regions,routeCountLabel,type Trail,type Region} from '@/lib/content';
 import {mapDirectionCounts} from '@/lib/map-catalog';
-import {groupMapDirections,updateDirectionButtons,type MapDirectionGroup} from '@/lib/map-direction-layout';
+import {groupMapDirections,updateDirectionButtons,constrainDirectionLabels,type MapDirectionGroup} from '@/lib/map-direction-layout';
 import {territoryForShape,type MapRegion} from '@/lib/territories';
 import {warmMap,supportsMapWebGL,preloadTerrain,hasTerrainPreview,loadPublicJSON,mapRequest} from '@/lib/map-preload';
 import {loadRussiaGeometry,russiaView} from '@/lib/russia-map';
@@ -90,7 +90,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
   setTerrain(false);
  }
  useEffect(()=>{
-  let cancelled=false,geographyPainted=false,overviewFallback=false,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined;
+  let cancelled=false,geographyPainted=false,overviewFallback=false,labelClampFrame=0,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined;
   const disconnect=()=>{
    setOffline(!navigator.onLine);
    setStatus(previous=>!navigator.onLine?OFFLINE_MESSAGE:previous===OFFLINE_MESSAGE?(basePreference.current==='overview'?OVERVIEW_MESSAGE:''):previous);
@@ -154,10 +154,18 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
       }else onRegionRef.current(r);
      });markers.current.push(new ml.Marker({element:el,anchor:'center'}).setLngLat([russiaLongitude(r.center[0]),r.center[1]]).addTo(map));
     }
+    const scheduleLabelClamp=()=>{
+     if(cancelled||labelClampFrame)return;
+     labelClampFrame=requestAnimationFrame(()=>{
+      labelClampFrame=0;
+      if(!cancelled&&map===mapRef.current&&container.current)constrainDirectionLabels(directionButtons,container.current);
+     });
+    };
     updateDirections.current=()=>{
      if(cancelled||map!==mapRef.current)return;
      const groups=groupMapDirections(regions.filter(item=>directionButtons.has(item.id)),center=>map.project([russiaLongitude(center[0]),center[1]]));
      directionGroups.current=updateDirectionButtons(directionButtons,groups,mapDirectionCounts(visibleTrailsRef.current),!regionRef.current,regionRef.current?.id);
+     scheduleLabelClamp();
     };
     updateDirections.current();
     if(regionRef.current&&!fitTerritory(map,regionRef.current,container.current,0,framedCamera))map.jumpTo({center:regionRef.current.center,zoom:regionRef.current.zoom});
@@ -202,7 +210,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      if(cancelled)return;const sourceId=(event as typeof event&{sourceId?:string}).sourceId;
      if(!map.getStyle()&&!overviewFallback){overviewFallback=true;styleSession.current?.fallback();setStatus('Детальная карта недоступна. Открываем сохранённый обзор.');}
      else if(['overview-land','land','regions','russia-mask'].includes(sourceId||''))setStatus('Не удалось загрузить географию России. Обновите страницу.');
-     else setStatus('Не все детали карты загрузились. Сохранённый обзор доступен.');
+     else { console.warn('Non-critical map detail failed; keeping the rendered overview.'); setTilesLoading(false); }
     });
     resize=new ResizeObserver(()=>{
      if(cancelled||!container.current)return;
@@ -216,7 +224,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     if(cancelled)return;console.error('Map initialization failed',error);frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
    }
   })();
-  return()=>{cancelled=true;updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleGeneration.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
+  return()=>{cancelled=true;cancelAnimationFrame(labelClampFrame);updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleGeneration.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
  },[]);
  useEffect(()=>{
   const map=mapRef.current;if(!map||!loaded)return;

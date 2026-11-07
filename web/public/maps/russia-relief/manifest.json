@@ -92,7 +92,7 @@
     "path": "/data/russia-canonical-area.geojson",
     "sha256": "6731c4ae30d8643df3dc917416769ce4c4be98e1936458c145464e1387e1087b",
     "provenanceUrl": "/data/russia-boundaries-provenance.json",
-    "provenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+    "provenanceSha256": "b8bc96450cc3777d454d87da3018a76db4bc10323720d76cf512831d0e66ac93",
     "license": "ODbL-1.0",
     "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
     "attribution": "© OpenStreetMap contributors · geoBoundaries (OpenStreetMap / Wambacher, 2017); display selection and simplification by Тропник",

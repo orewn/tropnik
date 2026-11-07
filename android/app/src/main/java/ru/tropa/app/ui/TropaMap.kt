@@ -182,11 +182,13 @@ fun TropaMap(
         styleLoading = true
         error = null
         val prepared = withContext(Dispatchers.Default) { mapStyleForConnection(styleText, onlineMode) }
-        nativeMap.setStyle(Style.Builder().fromJson(prepared)) {
-            if (styleGeneration == generation) {
-                styleLoading = false
-                error = null
-                styleRevision = generation
+        withContext(Dispatchers.Main.immediate) {
+            nativeMap.setStyle(Style.Builder().fromJson(prepared)) {
+                if (styleGeneration == generation) {
+                    styleLoading = false
+                    error = null
+                    styleRevision = generation
+                }
             }
         }
         delay(12_000)
@@ -195,10 +197,14 @@ fun TropaMap(
             else error = "Локальная карта не открылась. Карточки и источники доступны ниже."
         }
     }
-    LaunchedEffect(eco, mapView) { mapView.setMaximumFps(if (eco) 30 else 60) }
+    LaunchedEffect(eco, mapView) {
+        withContext(Dispatchers.Main.immediate) { mapView.setMaximumFps(if (eco) 30 else 60) }
+    }
     LaunchedEffect(relief, map, styleRevision) {
-        for (layer in listOf("pilot-hillshade", "russia-overview-relief", "online-hillshade")) {
-            map?.style?.getLayer(layer)?.setProperties(PropertyFactory.visibility(if (relief) Property.VISIBLE else Property.NONE))
+        withContext(Dispatchers.Main.immediate) {
+            for (layer in listOf("pilot-hillshade", "russia-overview-relief", "online-hillshade")) {
+                map?.style?.getLayer(layer)?.setProperties(PropertyFactory.visibility(if (relief) Property.VISIBLE else Property.NONE))
+            }
         }
     }
 
@@ -206,43 +212,49 @@ fun TropaMap(
         val nativeMap = map ?: return@LaunchedEffect
         if (styleRevision == 0 || styleLoading) return@LaunchedEffect
         val area = displayArea ?: return@LaunchedEffect
-        nativeMap.setLatLngBoundsForCameraTarget(area.cameraBounds)
-        scopeNotice = null
-        val style = nativeMap.style ?: return@LaunchedEffect
-        style.getSourceAs<GeoJsonSource>("regions")?.setGeoJson(regionPoints(regions))
-        style.getSourceAs<GeoJsonSource>("focus")?.setGeoJson(points(selected?.let { listOf(it.longitude to it.latitude) } ?: emptyList()))
         val geometry = route?.inlineGeometry ?: route?.geometryAsset?.let { asset ->
-            withContext(Dispatchers.IO) { runCatching { context.assets.open(asset).bufferedReader().use { it.readText() } }.getOrNull() }
-        }
-        style.getSourceAs<GeoJsonSource>("route")?.setGeoJson(geometry ?: points(emptyList()))
-        val focusKey = "${selected?.id}:${route?.id}"
-        if (lastFittedFocus == focusKey) return@LaunchedEffect
-        lastFittedFocus = focusKey
-        if (geometry != null) {
-            val coordinates = mutableListOf<LatLng>()
-            collectCoordinates(JSONObject(geometry), coordinates)
-            if (coordinates.size > 1) {
-                nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.Builder().includes(coordinates).build(), 52), 500)
+            withContext(Dispatchers.IO) {
+                runCatching { context.assets.open(asset).bufferedReader().use { it.readText() } }.getOrNull()
             }
-        } else if (selected != null) {
-            nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                LatLng(selected.latitude, selected.longitude), selected.zoom,
-            ), 500)
-        } else nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(area.fitBounds, 24), 500)
+        }
+        withContext(Dispatchers.Main.immediate) ui@{
+            nativeMap.setLatLngBoundsForCameraTarget(area.cameraBounds)
+            scopeNotice = null
+            val style = nativeMap.style ?: return@ui
+            style.getSourceAs<GeoJsonSource>("regions")?.setGeoJson(regionPoints(regions))
+            style.getSourceAs<GeoJsonSource>("focus")?.setGeoJson(points(selected?.let { listOf(it.longitude to it.latitude) } ?: emptyList()))
+            style.getSourceAs<GeoJsonSource>("route")?.setGeoJson(geometry ?: points(emptyList()))
+            val focusKey = "${selected?.id}:${route?.id}"
+            if (lastFittedFocus == focusKey) return@ui
+            lastFittedFocus = focusKey
+            if (geometry != null) {
+                val coordinates = mutableListOf<LatLng>()
+                collectCoordinates(JSONObject(geometry), coordinates)
+                if (coordinates.size > 1) {
+                    nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.Builder().includes(coordinates).build(), 52), 500)
+                }
+            } else if (selected != null) {
+                nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    LatLng(selected.latitude, selected.longitude), selected.zoom,
+                ), 500)
+            } else nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(area.fitBounds, 24), 500)
+        }
     }
 
     LaunchedEffect(map, styleRevision, displayArea, position) {
         val nativeMap = map ?: return@LaunchedEffect
         if (styleRevision == 0 || styleLoading) return@LaunchedEffect
         val area = displayArea ?: return@LaunchedEffect
-        val ready = position as? PositionState.Ready
-        val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
-        nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
-            points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
-        scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
-        if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
-            lastPositionTime = ready.fix.measuredAt
-            nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+        withContext(Dispatchers.Main.immediate) {
+            val ready = position as? PositionState.Ready
+            val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
+            nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
+                points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
+            scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null
+            if (ready != null && inside && lastPositionTime != ready.fix.measuredAt) {
+                lastPositionTime = ready.fix.measuredAt
+                nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(ready.fix.latitude, area.cameraLongitude(ready.fix.longitude)), 11.0), 500)
+            }
         }
     }
 
@@ -255,8 +267,8 @@ fun TropaMap(
         if (map != null) {
             Surface(Modifier.align(Alignment.CenterEnd).padding(end = 8.dp), color = Palette.Surface, shape = RoundedCornerShape(12.dp)) {
                 Column {
-                    TrailIconButton(onClick = { map?.animateCamera(CameraUpdateFactory.zoomIn(), 180) }) { TropaIcon(Glyph.ZOOM_IN, description = "Приблизить карту") }
-                    TrailIconButton(onClick = { map?.animateCamera(CameraUpdateFactory.zoomOut(), 180) }) { TropaIcon(Glyph.ZOOM_OUT, description = "Отдалить карту") }
+                    TrailIconButton(onClick = { mapView.post { map?.animateCamera(CameraUpdateFactory.zoomIn(), 180) } }) { TropaIcon(Glyph.ZOOM_IN, description = "Приблизить карту") }
+                    TrailIconButton(onClick = { mapView.post { map?.animateCamera(CameraUpdateFactory.zoomOut(), 180) } }) { TropaIcon(Glyph.ZOOM_OUT, description = "Отдалить карту") }
                 }
             }
             Text(when {
@@ -273,7 +285,7 @@ fun TropaMap(
                 TrailChoice(selected = relief, onClick = { relief = !relief }, enabled = zoom < 6 || (reliefArea && zoom >= 7) || (onlineMode && zoom >= 5),
                     label = { Text("Рельеф") }, modifier = Modifier.heightIn(min = 48.dp))
                 TrailChoice(selected = tilted, onClick = {
-                    map?.let { current -> current.animateCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(current.cameraPosition).tilt(if (tilted) 0.0 else 40.0).build()), 300) }
+                    mapView.post { map?.let { current -> current.animateCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(current.cameraPosition).tilt(if (tilted) 0.0 else 40.0).build()), 300) } }
                 }, enabled = zoom >= 10, label = { Text("Ракурс") }, modifier = Modifier.heightIn(min = 48.dp))
                 TrailChoice(selected = eco, onClick = { eco = !eco }, label = { Text("Беречь заряд") }, modifier = Modifier.heightIn(min = 48.dp))
             }
