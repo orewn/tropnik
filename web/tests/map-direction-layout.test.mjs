@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {dirname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,mapLabelAvoidObstacles,updateDirectionButtons} from '../lib/map-direction-layout.ts';
+import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,directionAnchorCorrection,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,mapLabelAvoidObstacles,updateDirectionButtons} from '../lib/map-direction-layout.ts';
 import {russiaCamera,russiaPadding,russiaLongitude} from '../public/maps/russia-viewport.js';
 
 // Use the actual fifteen directions, not a separately maintained coordinate
@@ -62,7 +62,7 @@ test('a cluster names directions instead of summing shared route counts',()=>{
   const [group]=groupMapDirections(south,()=>({x:0,y:0}));
   const content=directionMarkerContent(group,999,true);
   assert.equal(content.label,'5 направлений');
-  assert.equal(content.count,'');
+  assert.equal(content.count,'5');
   assert.ok(!content.ariaLabel.includes('999'));
   for(const item of south)assert.ok(content.ariaLabel.includes(item.name));
   assert.deepEqual([1,2,5,11,21,22].map(directionCountLabel),['1 направление','2 направления','5 направлений','11 направлений','21 направление','22 направления']);
@@ -126,4 +126,23 @@ test('labels hide rather than overlap when no legal rectangle exists',()=>{
   const label={left:10,right:90,top:20,bottom:60};
   const result=mapLabelAvoidObstacles(label,safe,[{left:0,right:100,top:0,bottom:80}],8);
   assert.equal(result.hidden,true);
+});
+
+test('cluster anchors remain stable while the projection changes',()=>{
+  const south=regions.filter(item=>southIds.includes(item.id));
+  const first=groupMapDirections(south,([lng,lat])=>({x:lng*.1,y:lat*.1}));
+  assert.equal(first.length,1);
+  const preferred=new Set(first.map(group=>group.anchor.id));
+  const second=groupMapDirections(south,([lng,lat])=>({x:lng*.15+20,y:lat*.15-10}),preferred);
+  assert.equal(second.length,1);
+  assert.equal(second[0].anchor.id,first[0].anchor.id);
+  assert.ok(second[0].members.some(item=>item.id===second[0].anchor.id));
+});
+
+test('DOM anchor correction is idempotent across repeated camera frames',()=>{
+  const viewport={left:10,top:20};
+  const first=directionAnchorCorrection({left:100,right:144,top:200,bottom:244},{x:130,y:250},viewport);
+  assert.deepEqual(first,{x:18,y:48});
+  const moved={left:118,right:162,top:248,bottom:292};
+  assert.deepEqual(directionAnchorCorrection(moved,{x:130,y:250},viewport,first),first);
 });

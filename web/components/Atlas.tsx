@@ -8,7 +8,7 @@ import type {Map as MapInstance,Marker,StyleSpecification,GeoJSONSource} from 'm
 import {WifiSlash,Check} from '@/components/TropnikIcons';
 import {regions,routeCountLabel,type Trail,type Region} from '@/lib/content';
 import {mapDirectionCounts} from '@/lib/map-catalog';
-import {groupMapDirections,updateDirectionButtons,constrainDirectionLabels,bindMapLabelReflow,type MapDirectionGroup} from '@/lib/map-direction-layout';
+import {groupMapDirections,updateDirectionButtons,reconcileDirectionAnchors,constrainDirectionLabels,bindMapLabelReflow,type MapDirectionGroup} from '@/lib/map-direction-layout';
 import {territoryForMapPoint,type MapRegion} from '@/lib/territories';
 import {warmMap,supportsMapWebGL,preloadTerrain,preloadTrail,hasTerrainPreview,loadPublicJSON,mapRequest} from '@/lib/map-preload';
 import {loadRussiaGeometry,russiaView} from '@/lib/russia-map';
@@ -34,7 +34,7 @@ function overviewStyle(coverage:Coverage):StyleSpecification {
  },layers:[
   {id:'background',type:'background',paint:{'background-color':MAP_OUTSIDE_COLOR}},
   {id:'land',type:'fill',source:'land',paint:{'fill-color':'#DDE6D5','fill-outline-color':'#A7B69D'}},
-  {id:'overview-relief',type:'raster',source:'russia-relief',maxzoom:6,paint:{'raster-opacity':['interpolate',['linear'],['zoom'],0,.92,4,.88,6,0],'raster-contrast':.28,'raster-saturation':-.18,'raster-brightness-min':.08,'raster-brightness-max':.92,'raster-fade-duration':180}},
+  {id:'overview-relief',type:'raster',source:'russia-relief',maxzoom:6,paint:{'raster-opacity':['interpolate',['linear'],['zoom'],0,.92,4,.88,6,0],'raster-contrast':.28,'raster-saturation':-.18,'raster-brightness-min':.08,'raster-brightness-max':.92,'raster-fade-duration':0}},
   {id:'region-fill',type:'fill',source:'regions',paint:{'fill-color':'#D7E0D0','fill-opacity':.18}},
   {id:'region-boundary',type:'line',source:'regions',paint:{'line-color':'#748675','line-width':.7,'line-opacity':.32}},
   {id:'region-selected',type:'fill',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'fill-color':'#91AC82','fill-opacity':.34}},
@@ -91,7 +91,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
   terrainRef.current=false;setTerrain(false);
  }
  useEffect(()=>{
-  let cancelled=false,geographyPainted=false,overviewFallback=false,labelClampFrame=0,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined;
+  let cancelled=false,geographyPainted=false,overviewFallback=false,directionLayoutFrame=0,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined;
   const disconnect=()=>{
    setOffline(!navigator.onLine);
    setStatus(previous=>!navigator.onLine?OFFLINE_MESSAGE:previous===OFFLINE_MESSAGE?(basePreference.current==='overview'?OVERVIEW_MESSAGE:''):previous);
@@ -114,7 +114,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
     const map=new ml.Map({container:container.current,transformRequest:mapRequest,style:initialMode==='detail'?detailRef.current!:overviewStyle(coverage),...initial,
      minZoom:Math.max(-2,initial.zoom),maxZoom:18,attributionControl:false,renderWorldCopies:true,
      transformConstrain:(point,zoom)=>{const next=constrainFramedCamera(point.lng,point.lat,zoom,cameraFloor.current,framedCamera.current);return{center:new ml.LngLat(...next.center),zoom:next.zoom};},
-     dragRotate:true,touchPitch:true,pitchWithRotate:true,maxPitch:75,fadeDuration:80,pixelRatio:Math.min(devicePixelRatio,2),maxTileCacheZoomLevels:6,
+     dragRotate:true,touchPitch:true,pitchWithRotate:true,maxPitch:75,fadeDuration:0,crossSourceCollisions:true,pixelRatio:Math.min(devicePixelRatio,2),maxTileCacheZoomLevels:6,
      canvasContextAttributes:{antialias:true,preserveDrawingBuffer:false,powerPreference:'high-performance'}});
     mapRef.current=map;
     frameRefit.current=new MapFrameRefit({
@@ -142,7 +142,7 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      if(land&&map.isSourceLoaded(land)&&map.getSource('russia-mask')&&map.isSourceLoaded('russia-mask')&&map.queryRenderedFeatures({layers:[land]}).length){geographyPainted=true;setPainted(true);}
     });
     map.addControl(new ml.ScaleControl({maxWidth:100,unit:'metric'}),'bottom-left');
-    const directionButtons=new Map<string,HTMLButtonElement>();
+    const directionButtons=new Map<string,HTMLButtonElement>(),directionMarkers=new Map<string,Marker>();
     for(const r of regions){
      if(!inRussiaCoverage(...r.center,coverage.area))continue;
      const el=document.createElement('button');el.type='button';el.className='region-marker region-marker-'+r.id;el.dataset.regionId=r.id;el.setAttribute('aria-label',`Открыть ${r.name}`);directionButtons.set(r.id,el);
@@ -153,24 +153,31 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
        frameRefit.current?.cancel();fullView.current=false;map.setTerrain(null);setTerrain(false);
        fitTerritory(map,{...group.anchor,bounds:group.bounds},container.current,window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:600,framedCamera);
       }else onRegionRef.current(r);
-     });markers.current.push(new ml.Marker({element:el,anchor:'center'}).setLngLat([russiaLongitude(r.center[0]),r.center[1]]).addTo(map));
-    }
-    const scheduleLabelClamp=()=>{
-     if(cancelled||labelClampFrame)return;
-     labelClampFrame=requestAnimationFrame(()=>{
-      labelClampFrame=0;
-      if(!cancelled&&map===mapRef.current&&container.current)constrainDirectionLabels(directionButtons,container.current);
      });
-    };
-    unbindLabels=bindMapLabelReflow(container.current,scheduleLabelClamp);
-    updateDirections.current=()=>{
-     if(cancelled||map!==mapRef.current)return;
-     const groups=groupMapDirections(regions.filter(item=>directionButtons.has(item.id)),center=>map.project([russiaLongitude(center[0]),center[1]]));
+     const marker=new ml.Marker({element:el,anchor:'center'}).setLngLat([russiaLongitude(r.center[0]),r.center[1]]).addTo(map);
+     directionMarkers.set(r.id,marker);markers.current.push(marker);
+    }
+    const runDirectionLayout=()=>{
+     if(cancelled||map!==mapRef.current||!container.current)return;
+     const items=regions.filter(item=>directionButtons.has(item.id));
+     const projected=new Map(items.map(item=>{const point=map.project([russiaLongitude(item.center[0]),item.center[1]]);return[item.id,{x:point.x,y:point.y}] as const;}));
+     for(const item of items){
+      const marker=directionMarkers.get(item.id),lng=russiaLongitude(item.center[0]);if(!marker)continue;
+      const current=marker.getLngLat();if(Math.abs(current.lng-lng)>1e-9||Math.abs(current.lat-item.center[1])>1e-9)marker.setLngLat([lng,item.center[1]]);
+     }
+     const groups=groupMapDirections(items,center=>map.project([russiaLongitude(center[0]),center[1]]),new Set(directionGroups.current.keys()));
      directionGroups.current=updateDirectionButtons(directionButtons,groups,mapDirectionCounts(visibleTrailsRef.current),!regionRef.current,regionRef.current?.id);
-     scheduleLabelClamp();
+     reconcileDirectionAnchors(directionButtons,projected,container.current);
+     constrainDirectionLabels(directionButtons,container.current);
     };
-    updateDirections.current();
-    map.on('move',scheduleLabelClamp);
+    const scheduleDirectionLayout=()=>{
+     if(cancelled||directionLayoutFrame)return;
+     directionLayoutFrame=requestAnimationFrame(()=>{directionLayoutFrame=0;runDirectionLayout();});
+    };
+    updateDirections.current=runDirectionLayout;
+    unbindLabels=bindMapLabelReflow(container.current,scheduleDirectionLayout);
+    scheduleDirectionLayout();
+    map.on('move',scheduleDirectionLayout);
     if(regionRef.current&&!fitTerritory(map,regionRef.current,container.current,0,framedCamera))map.jumpTo({center:regionRef.current.center,zoom:regionRef.current.zoom});
     map.on('zoomend',()=>{
      const zoom=map.getZoom();setMapZoom(zoom);
@@ -178,15 +185,17 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
       const pitch=terrainPitchForZoom(zoom,!!regionRef.current);
       if(Math.abs(map.getPitch()-pitch)>1.5)map.easeTo({pitch,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:180});
      }
+     scheduleDirectionLayout();
+     requestAnimationFrame(()=>{if(!cancelled&&container.current){delete container.current.dataset.mapCamera;scheduleDirectionLayout();}});
     });
     // The style's viewport-anchored hillshade follows the camera itself.
     // Keep contrast stable instead of restarting a paint transition on each pitch frame.
     map.on('moveend',()=>{
-     updateDirections.current?.();
+     scheduleDirectionLayout();
      const c=map.getCenter();const boxes:Record<string,number[]>={altai:[82,48,91,53],krasnodar:[36,42.5,42,46.8],karelia:[29,60.7,37,67.2],krym:[32,44,37,46],baikal:[103,50,113,56.8],kamchatka:[155,50,166,61]};
      const found=map.getZoom()>=4?Object.entries(boxes).find(([,b])=>c.lng>=b[0]&&c.lng<=b[2]&&c.lat>=b[1]&&c.lat<=b[3]):undefined;viewportRef.current?.(found?.[0]);
     });
-    map.on('dragstart',()=>{fullView.current=false;frameRefit.current?.cancel();});map.on('zoomstart',event=>{if(event.originalEvent){fullView.current=false;frameRefit.current?.cancel();}});
+    map.on('dragstart',()=>{fullView.current=false;frameRefit.current?.cancel();});map.on('zoomstart',event=>{if(event.originalEvent){fullView.current=false;frameRefit.current?.cancel();}if(container.current)container.current.dataset.mapCamera='zooming';scheduleDirectionLayout();});
     map.on('style.load',()=>{
      if(cancelled)return;geographyPainted=false;styleGeneration.current++;setLoaded(true);setStyleRevision(v=>v+1);
      if(map.getSource('openmaptiles'))overviewFallback=false;
@@ -222,14 +231,14 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      map.resize();cameraFloor.current=russiaView(container.current).camera;map.setMinZoom(Math.max(-2,cameraFloor.current.zoom));
      if(fullView.current)map.jumpTo({...cameraFloor.current,padding:{top:0,right:0,bottom:0,left:0}});
      else frameRefit.current?.resized();
-     updateDirections.current?.();
+     scheduleDirectionLayout();
     });
     resize.observe(container.current);const panel=container.current.closest('.explore-layout')?.querySelector('.explore-panel');if(panel)resize.observe(panel);
    }catch(error){
     if(cancelled)return;console.error('Map initialization failed',error);frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
    }
   })();
-  return()=>{cancelled=true;cancelAnimationFrame(labelClampFrame);unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleGeneration.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
+  return()=>{cancelled=true;cancelAnimationFrame(directionLayoutFrame);if(container.current)delete container.current.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleGeneration.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
  },[]);
  useEffect(()=>{
   const map=mapRef.current;if(!map||!loaded)return;

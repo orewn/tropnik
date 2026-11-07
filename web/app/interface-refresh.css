@@ -164,3 +164,41 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   :is(.button,.filter-button,.save-button,.icon-button,.back-link,.trail-card),
   .explore-layout .trail-marker::before,.explore-layout .tropnik-relief-tiles .leaflet-tile{transition:none}
 }
+
+/* Exact camera-frame marker anchoring. */
+.explore-layout .region-marker,
+.explore-layout .leaflet-region-marker .region-marker{
+  translate:var(--map-anchor-shift-x,0px) var(--map-anchor-shift-y,0px)!important;
+  transition:none!important;
+  will-change:translate;
+}
+.explore-layout .region-marker .region-marker-dot,
+.explore-layout .leaflet-region-marker .region-marker .region-marker-dot{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  transform-origin:center!important;
+}
+.explore-layout .region-marker:hover .region-marker-dot,
+.explore-layout .region-marker:focus-visible .region-marker-dot{
+  transform:translate(-50%,-50%) scale(1.16)!important;
+}
+.explore-layout .atlas-canvas[data-map-camera='zooming'] .region-marker-label,
+.explore-layout .atlas-canvas[data-map-camera='zooming'] .trail-marker-label{
+  opacity:0!important;
+  visibility:hidden!important;
+  transition:none!important;
+}
+.explore-layout .atlas-canvas[data-map-camera='zooming'] .region-marker.direction-cluster .region-marker-dot{
+  display:grid!important;
+  place-items:center;
+  min-width:28px;
+  width:auto;
+  height:24px;
+  padding:0 5px;
+  border-radius:8px;
+  color:var(--surface);
+  font:var(--caption-3);
+  font-variant-numeric:tabular-nums;
+}
