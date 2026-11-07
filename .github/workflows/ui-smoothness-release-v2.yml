@@ -38,6 +38,7 @@ jobs:
         run: pnpm --dir web exec eslint . --format json > /tmp/lint-before.json || true
       - name: Apply deterministic performance patches
         run: |
+          if [ "$(tail -n 1 tools/apply-ui-smoothness-extra.py)" = '"' ]; then sed -i '$d' tools/apply-ui-smoothness-extra.py; fi
           python3 -m py_compile tools/apply-ui-smoothness.py tools/apply-ui-smoothness-extra.py tools/apply-ui-bottom-sheet.py
           python3 tools/apply-ui-smoothness.py
           python3 tools/apply-ui-smoothness-extra.py
