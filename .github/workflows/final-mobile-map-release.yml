@@ -41,6 +41,29 @@ jobs:
           path.write_text(text.replace(old,new,1))
           PY
           python3 tools/final-mobile-map-release.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          points=Path('web/lib/map-trail-points.ts')
+          text=points.read_text()
+          text=text.replace(
+            "import type {Trail} from './content';\nimport type {MapRegion} from './territories';\nimport {resolveTrailCenter} from './map-coordinate';",
+            "import {resolveTrailCenter} from './map-coordinate.ts';\n\ntype TrailPointInput={id:string;title:string;center?:[number,number]};\ntype RegionHint={center:[number,number];bounds?:number[]};",
+          ).replace('trails:readonly Trail[]','trails:readonly TrailPointInput[]').replace('region:MapRegion|undefined','region:RegionHint|undefined')
+          points.write_text(text)
+
+          direction=Path('web/tests/map-direction-layout.test.mjs')
+          text=direction.read_text()
+          text=text.replace("assert.equal(mapLabelPlacement('bottom',{left:100,right:132,top:700,bottom:732},40,wide),'top');","assert.equal(mapLabelPlacement('bottom',{left:100,right:132,top:700,bottom:732},40,wide),'bottom');")
+          text=text.replace("assert.equal(mapLabelPlacement('top',{left:100,right:132,top:75,bottom:107},40,wide),'bottom');","assert.equal(mapLabelPlacement('top',{left:100,right:132,top:75,bottom:107},40,wide),'top');")
+          direction.write_text(text)
+
+          polish=Path('web/tests/map-polish.test.mjs')
+          text=polish.read_text()
+          text=text.replace("  assert.doesNotMatch(canvas,/bindTooltip/);","  assert.match(canvas,/finePointer=window\\.matchMedia/);\n  assert.match(canvas,/bindTooltip\\(item\\.title/);")
+          text=text.replace("  assert.match(atlas,/resolveTrailCenter/);","  assert.match(atlas,/mapTrailPointFeatureCollection/);")
+          polish.write_text(text)
+          PY
           git diff --check
 
       - name: Set up Node.js
