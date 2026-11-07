@@ -21,14 +21,20 @@ jobs:
           node-version: '22.19.0'
       - name: Apply repair
         run: python3 scripts/fix-map-points.py
-      - name: Verify
+      - name: Install dependencies
         working-directory: web
         run: |
           npm install --global pnpm@11.25.0
           pnpm install --frozen-lockfile
-          pnpm test
-          pnpm lint
-          pnpm build
+      - name: Run tests
+        working-directory: web
+        run: pnpm test
+      - name: Run lint
+        working-directory: web
+        run: pnpm lint
+      - name: Build production
+        working-directory: web
+        run: pnpm build
       - name: Commit repair
         run: |
           git config user.name "github-actions[bot]"
