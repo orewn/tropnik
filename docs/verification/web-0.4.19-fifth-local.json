@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "checkedAt": "2026-11-09T21:13:09.009240+00:00",
+  "parentCommit": "e0f64d25584fce2734d0cd54a70b6768d9e85baf",
+  "scope": "Fifth candidate: Explore native scroll restoration and bounded first desktop selection trace",
+  "local": {
+    "webTests": {
+      "passed": 432,
+      "failed": 0,
+      "skipped": 0
+    },
+    "pagesToolingTests": {
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0
+    },
+    "eslint": {
+      "passed": true,
+      "errors": 0,
+      "warnings": 0
+    },
+    "webTypes": "PASS",
+    "pagesTypes": "PASS"
+  },
+  "manualPreview": {
+    "renderer": "Leaflet fallback in managed cloud browser",
+    "viewport": {
+      "width": 1363,
+      "height": 936
+    },
+    "freshLoadBeforeHistoryEntries": true,
+    "sameDocument": {
+      "regionEntryPreviouslyScrolledTo": 120,
+      "routeToRegion": {
+        "documentScrollY": 0,
+        "panelScrollTop": 0,
+        "backTop": 96,
+        "hit": "BUTTON"
+      },
+      "regionToDirections": {
+        "documentScrollY": 0,
+        "panelTop": 72
+      },
+      "passed": true
+    },
+    "fullDocument": {
+      "destination": "/planner",
+      "input": "native coordinate click on the visible header link; browser Back",
+      "beforeLeaving": 1542,
+      "firstIntermediateReturn": {
+        "scrollY": 1073,
+        "documentHeight": 4077
+      },
+      "settledReturn": {
+        "scrollY": 1542,
+        "documentHeight": 4922
+      },
+      "passed": true
+    }
+  },
+  "trace": {
+    "scope": "first cold desktop Altai selection only",
+    "timeLimitMs": 8000,
+    "bufferKiB": 2048,
+    "exportLimitBytes": 12582912,
+    "drainLimitMs": 5000,
+    "closeLimitMs": 1000,
+    "changesRuntime": false,
+    "performanceBudgetsChanged": false,
+    "warmupAdded": false
+  },
+  "sourceSHA256": {
+    "web/components/Explore.tsx": "c781610be2aa5d193349d6b16c08460362ec3ce4244e32d00640be0da28bef3e",
+    "web/lib/explore-scroll-restoration.ts": "8809114c075806962376667b182041fcef6e4efe6e0cc03faeffadd4c4453d83",
+    "web/tests/explore-scroll-restoration.test.mjs": "65548653ebf662e0ffeb75f041d7c1e01b90c6dc6706f7e80cee94d9d43406d8",
+    "tools/pages-preview/browser-smoke.mjs": "c95698004bbcb6f6bbe0a9cc07bf1e9a3ecb9c4f068ac63fb2cbc0e891ef5001",
+    "tools/pages-preview/browser-trace.mjs": "02b1a5c7009f349a6a2654325c4835be882f17a0c370f3bddd5d663b82f934bd",
+    "tools/pages-preview/tests/browser-trace.test.mjs": "db3c4931d5b8cfede887b4eb014d12d0e095d85bdf68c7e26c90d1181b0bb9b2"
+  },
+  "logSHA256": {
+    "web-tests": "be8c3412c2cd3b25c7ec8436570ec31b7a216b23987f144f43504a45261db5c2",
+    "tooling-tests": "31de572136c64cb351fcef9853e969ac7407a073192f85f172cfe00770ba0f83",
+    "lint": "42450a8e197a4e160a5e04765fe77efe1e6de5635484b8ce4718c945ba9b0ab9",
+    "types": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pages-types": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "browserGate": "PENDING",
+  "publicRelease": "PENDING",
+  "limitations": [
+    "Managed preview uses Leaflet; desktop MapLibre must pass its separate CI gate.",
+    "Physical device FPS and Brave behavior are not measured by this receipt."
+  ]
+}

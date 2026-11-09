@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": 4,
+  "recordedAt": "2026-11-09T21:14:45.549Z",
+  "sourceCommit": "e0f64d25584fce2734d0cd54a70b6768d9e85baf",
+  "sourceTree": "7311f0bf693a885a96731b8b7c23a422d4b6d90f",
+  "workflowRun": 42695928146,
+  "buildJob": 129427637824,
+  "buildId": "b8f327b3aedcf49b",
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/42695928146",
+  "outcome": "REJECTED_BEFORE_DEPLOY",
+  "deploymentPerformed": false,
+  "completedBuildChecks": {
+    "webTests": {
+      "passed": 430,
+      "failed": 0,
+      "skipped": 0
+    },
+    "pagesToolingTests": {
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0
+    },
+    "eslint": "PASS",
+    "pagesTypes": "PASS",
+    "staticBuild": "PASS",
+    "httpChecks": 52
+  },
+  "mobile": {
+    "status": "PASS_FOR_COMPLETED_MOBILE_SCOPE",
+    "environment": "CI Chromium touch emulation; not physical Android, iPhone or Brave",
+    "profiles": [
+      {
+        "name": "compact-android",
+        "engine": "leaflet",
+        "status": "PASS",
+        "nativeTouch": true,
+        "sheetGesturesPassed": true,
+        "listPositionRetained": true,
+        "selectionPreserved": true,
+        "maxPageScrollDeltaPx": 0,
+        "layoutShift": 0,
+        "recordedLongestTaskMs": 110
+      },
+      {
+        "name": "iphone-portrait",
+        "engine": "leaflet",
+        "status": "PASS",
+        "nativeTouch": true,
+        "sheetGesturesPassed": true,
+        "listPositionRetained": true,
+        "selectionPreserved": true,
+        "maxPageScrollDeltaPx": 0,
+        "layoutShift": 0,
+        "recordedLongestTaskMs": 78
+      },
+      {
+        "name": "android-portrait",
+        "engine": "leaflet",
+        "status": "PASS",
+        "nativeTouch": true,
+        "sheetGesturesPassed": true,
+        "listPositionRetained": true,
+        "selectionPreserved": true,
+        "maxPageScrollDeltaPx": 0,
+        "layoutShift": 0,
+        "recordedLongestTaskMs": 106
+      },
+      {
+        "name": "phone-landscape",
+        "engine": "leaflet",
+        "status": "PASS",
+        "nativeTouch": true,
+        "sheetGesturesPassed": true,
+        "listPositionRetained": true,
+        "selectionPreserved": true,
+        "maxPageScrollDeltaPx": 0,
+        "layoutShift": 0,
+        "recordedLongestTaskMs": 146
+      }
+    ],
+    "mapInteractions": {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "passed": true,
+      "returnedToRegion": true,
+      "returnedToDirections": true,
+      "longestTaskMs": 106,
+      "layoutShift": 0
+    },
+    "zoomAudit": {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "geometryPassed": true,
+      "minimumZoom": 1.337721595206259,
+      "maximumZoom": 18,
+      "keyZooms": [
+        2,
+        5,
+        8,
+        11,
+        14,
+        18
+      ],
+      "detailSteps": 24,
+      "satelliteSteps": 24,
+      "satelliteState": "active",
+      "loadedSatelliteTiles": 4,
+      "savedOverviewKeySteps": 6,
+      "ordinaryTerrainState": "not-offered",
+      "scene3d": {
+        "state": "ready",
+        "ready": true,
+        "nativeZoomInputs": 28,
+        "resetInput": true,
+        "imageChanged": true
+      },
+      "performance": {
+        "layoutShift": 0,
+        "longestTaskMs": 73
+      }
+    },
+    "nativeZoomBurst": {
+      "status": "PASS",
+      "increase": {
+        "status": "PASS",
+        "input": "touch",
+        "dispatchMode": "ordered-native",
+        "receivedTrustedClicks": 4,
+        "step": 0.75,
+        "beforeZoom": 9.58772159520626,
+        "expectedZoom": 12.58772159520626,
+        "actualZoom": 12.58772159520626,
+        "eventSpanMs": 0.7,
+        "allEightACKsFulfilled": true,
+        "causalOrderVerified": true,
+        "selectionPreserved": true,
+        "pageScrollDeltaPx": 0
+      },
+      "decrease": {
+        "status": "PASS",
+        "input": "touch",
+        "dispatchMode": "ordered-native",
+        "receivedTrustedClicks": 4,
+        "step": 0.75,
+        "beforeZoom": 12.58772159520626,
+        "expectedZoom": 9.58772159520626,
+        "actualZoom": 9.58772159520626,
+        "eventSpanMs": 0.6,
+        "allEightACKsFulfilled": true,
+        "causalOrderVerified": true,
+        "selectionPreserved": true,
+        "pageScrollDeltaPx": 0
+      },
+      "returnedToStart": true
+    }
+  },
+  "visualReview": {
+    "status": "PASS_WITH_SCOPE_LIMITS",
+    "reviewer": "map_detail_design",
+    "method": "All 24 original PNGs inspected individually; pixels, not DOM metrics alone.",
+    "originalPngCount": 24,
+    "allManifestHashesVerified": true,
+    "all24FramesReviewed": true,
+    "releaseBlockingDefectsObserved": 0,
+    "findings": [
+      "Satellite z4.50: prior vertical mask seam below the Caucasus is absent; reviewed coastal views show no new gaps.",
+      "Regional label halos no longer visibly merge around Kaluga/Ryazan/Tula in the reviewed z4.50 frame.",
+      "Selected-route casing is legible on relief and satellite where the line is inside the frame.",
+      "Saved overview shows the persistent Russian caption «Обзор без деталей» at close zoom, with separate explanatory notice.",
+      "Satellite source attribution remains visible; imagery age is hidden and z18 displays the source resolution limit.",
+      "All six 3D controls remain visible in overview/close/wide/reset; reset restores the usable overview framing."
+    ],
+    "limits": [
+      "No desktop / MapLibre zoom screenshots: CI stopped before that audit.",
+      "Selected route is outside the z18 viewport; those frames do not verify selected-route styling at z18.",
+      "A/B endpoint labels and expanded mobile panel are not covered by this 24-frame matrix.",
+      "Static screenshots do not prove gesture latency, continuous pan, physical-device FPS or actual Brave behavior."
+    ],
+    "imageManifest": "design/android-portrait.json",
+    "imageManifestSha256": "29327f4f25de2c528c44a939c1b1756c865c405801774c370f498065858d2a08",
+    "reviewSourceSha256": "fec5b2d639683d82b2195aac309ce2c84e5ed31040f457b4f41a79d5a2a952c3"
+  },
+  "desktop": {
+    "status": "FAILED_DURING_MAP_INTERACTIONS",
+    "profile": "desktop-webgl",
+    "engine": "maplibre",
+    "completedDesktopProfiles": 0,
+    "zoomAuditReached": false,
+    "backFailure": {
+      "stage": "Second Back, from region to all directions",
+      "selector": ".explore-panel .back-link",
+      "documentScrollY": 117,
+      "panelTop": -45,
+      "buttonHeight": 44,
+      "hit": "HEADER",
+      "unobscured": false,
+      "selectedRegion": "altai",
+      "buttonCenterY": 1
+    },
+    "performance": {
+      "layoutShift": 0,
+      "longestTaskMs": 790,
+      "budgetMs": 750,
+      "observedOverBudget": true,
+      "performanceAssertionReached": false,
+      "longTaskStartTimeMs": 4965.9,
+      "longTaskDurationMs": 790,
+      "phase": "map-interactions",
+      "attribution": "Not established. The measured over-budget task remains open; failure was raised first by Back target occlusion."
+    }
+  },
+  "followUp": {
+    "candidate": 5,
+    "browserCI": "PENDING",
+    "localReceipt": "web-0.4.19-fifth-local.json",
+    "scope": "Early ownership of manual same-document history restoration before Explore entries are created, release/reacquire on pagehide/pageshow, and cleanup. Separate bounded first-desktop-selection trace; no performance-budget change.",
+    "manualPreview": {
+      "source": "Root CUA observations recorded in fifth-local receipt",
+      "renderer": "Leaflet fallback in managed cloud browser",
+      "sameDocumentTwoBacks": "PASS",
+      "documentScrollYAfterRouteBack": 0,
+      "backButtonTop": 96,
+      "fullDocumentNativePlannerBack": {
+        "beforeLeavingScrollY": 1542,
+        "intermediateScrollY": 1073,
+        "settledScrollY": 1542,
+        "settledAfter": "Lazy footer completed document height; intermediate scroll was not the final result."
+      }
+    },
+    "notEvidenceFor": "Desktop MapLibre CI or publication of the fifth candidate"
+  },
+  "artifacts": {
+    "design": {
+      "githubArtifactId": 13709796490,
+      "sha256": "742c80f3ba152d64e537ba82bb59d8d868bab06406dc65cf6ce690242b1dddae"
+    },
+    "failureZipSha256": "93c672245f90ed6af7ba440cf7cac04cf150f96d5599278ada13fcbc51b8c05e",
+    "filesSHA256": {
+      "browser-failure.json": "4a1207cfddd60c05e9e9936f6094f9a69f18bd577b6a22857ea2a795f4dd3b40",
+      "browser-failure.png": "131312c6e39c8be4535f77416f90b1af2bc4cb761fb9fd401005f33ac8052c71",
+      "build-job.log": "a1efc5be388b7945c6207135520eac05eb6f78cb8f24ac2d76717eac2ff89480"
+    }
+  },
+  "releaseGate": "Fifth exact-source CI, desktop interactions/performance/zoom frames, final visual review and deployment remain pending. Published 0.4.18 evidence does not prove 0.4.19."
+}

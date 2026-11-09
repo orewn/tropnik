@@ -20,6 +20,7 @@ import {searchSite} from '@/lib/site-search';
 import {Modal} from './Modal';
 import {MapResourceHints} from './MapResourceHints';
 import {bindSheetGesture,SHEET_MEDIA_QUERY,type SheetGesture} from '@/lib/sheet-gesture';
+import {bindExploreScrollRestoration} from '@/lib/explore-scroll-restoration';
 
 const terrainIcon=(id:string,size=24)=>id==='karelia'?<Tree size={size}/>:id==='baikal'?<WaveSine size={size}/>:<Mountains size={size}/>;
 const routeCountPreview=(count:number)=>{
@@ -43,9 +44,13 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  useEffect(()=>{warmMap();},[]);
  const closeAuth=useCallback(()=>setAuth(false),[]);
  useEffect(()=>{api<Route[]>('routes').then(r=>setLiveTrails(r.map(publishedTrail))).catch(()=>{});},[]);
+ useLayoutEffect(()=>{
+  if(window.location.pathname!=='/')return;
+  return bindExploreScrollRestoration();
+ },[]);
  const [region,setRegion]=useState<MapRegion|undefined>(territoryById(initialRegion||'')||regionById(initialRegion||catalog.find(t=>t.id===initialTrail)?.regionId||''));
  const [trail,setTrail]=useState<Trail|undefined>(catalog.find(t=>t.id===initialTrail));
- useEffect(()=>{panelContent.current?.scrollTo({top:0});},[trail?.id,region?.id]);
+ useLayoutEffect(()=>{panelContent.current?.scrollTo({top:0,behavior:'instant'});},[trail?.id,region?.id]);
  const [query,setQuery]=useState(''),[filter,setFilter]=useState(false),[duration,setDuration]=useState('any'),[onlySaved,setOnlySaved]=useState(false),[difficulty,setDifficulty]=useState('all');
  const deferredQuery=useDeferredValue(query),searchPending=query!==deferredQuery;
  const [saved,setSaved]=useState<SavedPack[]>([]),[notice,setNotice]=useState(''),[saving,setSaving]=useState(''),[request,setRequest]=useState(false),[date,setDate]=useState(''),[note,setNote]=useState(''),[offline,setOffline]=useState(false),[draftSaved,setDraftSaved]=useState(false),[sheetOpen,setSheetOpen]=useState(false);

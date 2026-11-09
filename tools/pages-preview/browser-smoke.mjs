@@ -7,6 +7,7 @@ import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
 import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-projection.mjs';
 import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving} from './browser-zoom-audit.mjs';
+import {traceDesktopSelection} from './browser-trace.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const REPORT = new URL('browser-verification.json', ROOT);
@@ -574,7 +575,9 @@ async function mapInteraction(cdp,profile,performanceIssues){
   const country=await settledMap(cdp,profile.engine);
   await evaluate(cdp,'window.__tropnikPerf={cls:0,longest:0};window.__tropnikPerfStart=performance.now()');
   await diagnosticPhase(cdp,'map-interactions');
-  const firstDirection=await selectMapDirection(cdp,profile,'altai','Алтай');
+  const selectFirstDirection=()=>selectMapDirection(cdp,profile,'altai','Алтай');
+  const firstSelection=profile.mobile?{value:await selectFirstDirection(),trace:null}:await traceDesktopSelection(cdp,selectFirstDirection,{sourceCommit:process.env.GITHUB_SHA||null});
+  const firstDirection=firstSelection.value;
   const catalogScroll=profile.mobile?await scrollSheetContent(cdp,profile,{stableExtent:true}):null;
   await closeMapSheet(cdp,profile);
   const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
@@ -591,7 +594,7 @@ async function mapInteraction(cdp,profile,performanceIssues){
   if(profile.mobile){
     if(!(perf.longest<350))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:350});
   }else assert.ok(perf.longest<750,`${profile.name}: map interaction long task ${perf.longest}ms`);
-  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
 const httpPort=await freePort(),debugPort=await freePort();
