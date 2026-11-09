@@ -29,6 +29,10 @@ export type MapLabelSafeRect = MapLabelRect;
 export type MapLabelAvoidance = {x:number;y:number;hidden:boolean};
 export type MapAnchorShift = {x:number;y:number};
 
+function setInlineProperty(element:HTMLElement,name:string,value:string){
+  if(element.style.getPropertyValue(name)!==value)element.style.setProperty(name,value);
+}
+
 /** Resolve the correction from the engine's projected coordinate to the actual
  * 44×44 DOM control centre. The current correction is removed before the next
  * value is calculated, so repeated zoom frames are idempotent rather than
@@ -52,7 +56,9 @@ export function directionAnchorCorrection(
 export function reconcileDirectionAnchors(
   buttons:ReadonlyMap<string,HTMLButtonElement>,points:ReadonlyMap<string,DirectionScreenPoint>,viewport:HTMLElement,
 ){
-  const bounds=viewport.getBoundingClientRect();let aligned=0;
+  const bounds=viewport.getBoundingClientRect(),corrections:{button:HTMLButtonElement;x:number;y:number}[]=[];
+  // Measure every anchor before changing any transform: a correction must not
+  // force the next marker to synchronously lay out the map again.
   for(const [id,button] of buttons){
     if(button.hidden||!button.isConnected)continue;
     const point=points.get(id);if(!point||!Number.isFinite(point.x)||!Number.isFinite(point.y))continue;
@@ -61,12 +67,15 @@ export function reconcileDirectionAnchors(
     const next=directionAnchorCorrection({left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},point,{left:bounds.left,top:bounds.top},current);
     if(Math.abs(next.x)>Math.max(bounds.width,256)||Math.abs(next.y)>Math.max(bounds.height,256))continue;
     const x=Math.round(next.x*4)/4,y=Math.round(next.y*4)/4;
-    button.dataset.mapAnchorShiftX=String(x);button.dataset.mapAnchorShiftY=String(y);
-    button.style.setProperty('--map-anchor-shift-x',`${x}px`);
-    button.style.setProperty('--map-anchor-shift-y',`${y}px`);
-    aligned++;
+    corrections.push({button,x,y});
   }
-  return aligned;
+  for(const {button,x,y} of corrections){
+    if(button.dataset.mapAnchorShiftX!==String(x))button.dataset.mapAnchorShiftX=String(x);
+    if(button.dataset.mapAnchorShiftY!==String(y))button.dataset.mapAnchorShiftY=String(y);
+    setInlineProperty(button,'--map-anchor-shift-x',`${x}px`);
+    setInlineProperty(button,'--map-anchor-shift-y',`${y}px`);
+  }
+  return corrections.length;
 }
 
 /** The label-safe rectangle excludes edge clipping and fixed map controls.
@@ -192,35 +201,17 @@ function viewportLabelLayout(viewport:HTMLElement){
   return{safe,obstacles,compact};
 }
 
-function constrainLabel(
-  button:HTMLButtonElement,label:HTMLElement,preferred:MapLabelPlacement,
-  safe:MapLabelSafeRect,obstacles:readonly MapLabelRect[],
-){
-  button.dataset.mapLabelPlacement=preferred;
-  delete button.dataset.mapLabelHidden;
-  const available=Math.max(48,safe.right-safe.left-12);
-  const maximum=Math.max(48,Math.min(preferred==='top'?230:168,available));
-  label.style.setProperty('--map-label-max-width',`${Math.floor(maximum)}px`);
-  label.style.setProperty('--map-label-shift-x','0px');
-  label.style.setProperty('--map-label-shift-y','0px');
-  const marker=button.getBoundingClientRect();
-  let rect=label.getBoundingClientRect();
-  if(rect.width<2||rect.height<2)return{hidden:true,rect};
-  const placement=mapLabelPlacement(preferred,marker,rect.bottom-rect.top,safe);
-  if(placement!==preferred){button.dataset.mapLabelPlacement=placement;rect=label.getBoundingClientRect();}
-  const shift=mapLabelAvoidObstacles(rect,safe,obstacles);
-  const x=Math.round(shift.x),y=Math.round(shift.y);
-  label.style.setProperty('--map-label-shift-x',`${x}px`);
-  label.style.setProperty('--map-label-shift-y',`${y}px`);
-  if(shift.hidden)button.dataset.mapLabelHidden='true';
-  button.classList.toggle('map-label-shifted',x!==0||y!==0||placement!==preferred);
-  return{hidden:shift.hidden,rect:translateRect(rect,x,y)};
-}
+type MeasuredMapLabel={
+  button:HTMLButtonElement;label:HTMLElement;preferred:MapLabelPlacement;placement:MapLabelPlacement;
+  rect?:DOMRect;shift?:MapLabelAvoidance;
+};
 
-/** Called after marker placement, during camera movement and after sheet resize.
- * Geographic anchors never move: only their visual labels flip and translate. */
+/** Reflow settled markers without one forced layout per label. Prepare all
+ * labels, measure all, apply side flips together, then measure only the flipped
+ * labels. Collision resolution uses those snapshots, so its final writes never
+ * alternate with DOM measurements. Geographic anchors and priority stay intact. */
 export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonElement>,viewport:HTMLElement){
-  const {safe,obstacles}=viewportLabelLayout(viewport),placed:MapLabelRect[]=[];
+  const {safe,obstacles}=viewportLabelLayout(viewport),labels:MeasuredMapLabel[]=[];
   const ordered=[...buttons.values()].filter(button=>!button.hidden&&button.isConnected).sort((a,b)=>{
     const priority=(button:HTMLButtonElement)=>button.classList.contains('is-selected')?0:button.classList.contains('direction-cluster')?1:2;
     return priority(a)-priority(b)||(a.dataset.regionId??'').localeCompare(b.dataset.regionId??'','en');
@@ -228,17 +219,46 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
   for(const button of ordered){
     const label=button.querySelector<HTMLElement>('.region-marker-label');
     if(!label)continue;
-    const result=constrainLabel(button,label,'bottom',safe,[...obstacles,...placed]);
-    if(!result.hidden)placed.push(result.rect);
+    labels.push({button,label,preferred:'bottom',placement:'bottom'});
   }
   for(const button of viewport.querySelectorAll<HTMLButtonElement>('.trail-marker')){
     if(!button.isConnected)continue;
     const label=button.querySelector<HTMLElement>('.trail-marker-label');
     if(!label)continue;
     const active=button.classList.contains('is-selected')||button.matches(':hover,:focus-visible,:focus-within');
-    if(!active){delete button.dataset.mapLabelHidden;label.style.setProperty('--map-label-shift-x','0px');label.style.setProperty('--map-label-shift-y','0px');continue;}
-    const result=constrainLabel(button,label,'top',safe,[...obstacles,...placed]);
-    if(!result.hidden)placed.push(result.rect);
+    if(!active){delete button.dataset.mapLabelHidden;setInlineProperty(label,'--map-label-shift-x','0px');setInlineProperty(label,'--map-label-shift-y','0px');continue;}
+    labels.push({button,label,preferred:'top',placement:'top'});
+  }
+  const available=Math.max(48,safe.right-safe.left-12);
+  for(const {button,label,preferred} of labels){
+    if(button.dataset.mapLabelPlacement!==preferred)button.dataset.mapLabelPlacement=preferred;
+    delete button.dataset.mapLabelHidden;
+    const maximum=Math.max(48,Math.min(preferred==='top'?230:168,available));
+    setInlineProperty(label,'--map-label-max-width',`${Math.floor(maximum)}px`);
+    setInlineProperty(label,'--map-label-shift-x','0px');
+    setInlineProperty(label,'--map-label-shift-y','0px');
+  }
+  for(const item of labels){
+    const marker=item.button.getBoundingClientRect(),rect=item.label.getBoundingClientRect();
+    if(rect.width<2||rect.height<2)continue;
+    item.rect=rect;item.placement=mapLabelPlacement(item.preferred,marker,rect.height,safe);
+  }
+  for(const item of labels)if(item.rect&&item.placement!==item.preferred)item.button.dataset.mapLabelPlacement=item.placement;
+  for(const item of labels)if(item.rect&&item.placement!==item.preferred)item.rect=item.label.getBoundingClientRect();
+  // Reuse one obstacle list; every accepted label becomes an obstacle only for
+  // the lower-priority labels that follow it, as in the previous sequential flow.
+  for(const item of labels){
+    if(!item.rect)continue;
+    const shift=mapLabelAvoidObstacles(item.rect,safe,obstacles);
+    item.shift={x:Math.round(shift.x),y:Math.round(shift.y),hidden:shift.hidden};
+    if(!shift.hidden)obstacles.push(translateRect(item.rect,item.shift.x,item.shift.y));
+  }
+  for(const {button,label,preferred,placement,shift} of labels){
+    if(!shift)continue;
+    setInlineProperty(label,'--map-label-shift-x',`${shift.x}px`);
+    setInlineProperty(label,'--map-label-shift-y',`${shift.y}px`);
+    if(shift.hidden)button.dataset.mapLabelHidden='true';
+    button.classList.toggle('map-label-shifted',shift.x!==0||shift.y!==0||placement!==preferred);
   }
 }
 

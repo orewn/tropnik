@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CLOSE_TRAIL_FIXTURE,assertBrowserReport,assertRouteEdgeFrame} from '../browser-report.mjs';
-import {projectMapPoint} from '../map-projection.mjs';
+import {projectMapPoint,unprojectMapPoint} from '../map-projection.mjs';
 
 const commit='a'.repeat(40);
 const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
@@ -12,18 +12,19 @@ function closeTrail(profile,engine,mobile){
    const direction=targetZoom>zoom?1:-1,index=inputs.length;
    inputs.push({input,direction,before:zoom,after:zoom+direction*step,events:['pointerdown','pointerup','click'].map((type,event)=>({type,time:100+index*10+event,timestamp:100+index*10+(event?1:0),trusted:true,pointerType:input,pointerId:mobile?index+2:1}))});zoom+=direction*step;
   }
-  const mapRect=rect(0,72,mobile?412:1000,700),camera={longitude:40.6887254,latitude:45.54436005,zoom,tileSize:mobile?256:512};
+  const mapRect=rect(0,72,mobile?412:1000,mobile?700:928),camera={longitude:40.6887254,latitude:45.54436005,zoom,tileSize:mobile?256:512};
   const markers=CLOSE_TRAIL_FIXTURE.endpoints.map((coordinate,index)=>{
    const letter=['А','Б'][index],point=projectMapPoint(coordinate,camera,mapRect);
    return{role:'img',ariaLabel:`Край ${letter} исходной линии`,pointerEvents:'none',rect:rect(point.x-16,point.y-16,32,32),
     badge:{text:letter,visible:zoom!==11,pointerEvents:'none',rect:rect(point.x-16,point.y-16,32,32)},
     caption:{text:`Точка ${letter}`,visible:zoom===17||!mobile&&zoom===14,pointerEvents:'none',rect:rect(point.x-32,point.y+20,64,24)}};
   });
-  frames.push({targetZoom,zoom,camera,mapRect,routeId:CLOSE_TRAIL_FIXTURE.routeId,inputCount:inputs.length,available:mapRect,scrollY:0,region:CLOSE_TRAIL_FIXTURE.region,queryRoute:CLOSE_TRAIL_FIXTURE.routeId,selectedRoute:'selected',imagery:'',sceneVisible:false,markers,screenshot:`${profile}-source-ends-z${zoom}.png`});
+  frames.push({targetZoom,zoom,camera,mapRect,routeId:CLOSE_TRAIL_FIXTURE.routeId,inputCount:inputs.length,available:mapRect,scrollY:0,region:CLOSE_TRAIL_FIXTURE.region,queryRoute:CLOSE_TRAIL_FIXTURE.routeId,selectedRoute:'selected',imagery:'',sceneVisible:false,markers,overlays:[],reliefPalette:{engine,tiles:mobile?[{visible:true,state:'ready',paintedMode:'detail',desiredMode:'detail'}]:[]},screenshot:`${profile}-source-ends-z${zoom}.png`});
  }
  return{passed:true,input,region:CLOSE_TRAIL_FIXTURE.region,routeId:CLOSE_TRAIL_FIXTURE.routeId,geometryURL:CLOSE_TRAIL_FIXTURE.geometryURL,
   source:{featureCount:1,partCount:1,vertexCount:12,endpoints:CLOSE_TRAIL_FIXTURE.endpoints,sha256:'c'.repeat(64)},
-  initialZoom:14,setupClicks:1,nativeZoomClicks:inputs.length,inputs,frames,visualReviewRequired:true};
+  initialZoom:14,setupClicks:1,nativeZoomClicks:inputs.length,inputs,frames,visualReviewRequired:true,
+  closeFraming:{required:false,passed:true,before:frames.at(-1),gestures:[]}};
 }
 function sheetGestures(){
  const drag=(name,from,to,positions,cancelled=false)=>({name,from,to,passed:true,input:'touch',cancelled,draggingCleared:true,maxTrackingErrorPx:0,pageScrollDeltaPx:0,heightDelta:0,samples:positions.map(panelTop=>({fingerY:panelTop+22,panelTop,expectedTop:panelTop,trackingErrorPx:0,pageScrollDeltaPx:0}))});
@@ -40,7 +41,7 @@ function zoomDesign(profile,engine,mobile){
   events:Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+tap*10+index*2,timestamp:100+tap*10+(index?2:0),trusted:true,pointerType:input,pointerId:mobile?tap+2:1}))).flat(),
   commands:[...(mobile?[]:['mouseMoved']),...Array.from({length:4},()=>mobile?['touchStart','touchEnd']:['mousePressed','mouseReleased']).flat()].map((type,index)=>({index,type,method:mobile?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent',status:'fulfilled',sentAtEpochMs:10000+index*.1,ackAtEpochMs:10040+index,sentOffsetMs:index*.1,ackOffsetMs:40+index,ackDurationMs:40+index*.9})),
  });
- return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:4,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),closeTrail:edges,
+ return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:5,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),closeTrail:edges,
   zoomBurst:{passed:true,input,returnedToStart:true,increase:burst(1,10,high),decrease:burst(-1,high,10)},
   modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview'})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:mobile?'not-offered':'active'},scene3d:{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true}},
   screenshots:[...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
@@ -103,6 +104,7 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
   value=>value.zoomDesigns[0].schemaVersion=1,
   value=>value.zoomDesigns[0].schemaVersion=2,
   value=>value.zoomDesigns[0].schemaVersion=3,
+  value=>value.zoomDesigns[0].schemaVersion=4,
   value=>value.zoomDesigns[0].visualReviewRequired=false,
   value=>value.zoomDesigns[0].detailSteps.splice(6,1),
   value=>value.zoomDesigns[0].detailSteps.pop(),
@@ -169,6 +171,59 @@ test('source-end geometry rejects overlapping badges and cross-end labels from a
  assert.throws(()=>assertRouteEdgeFrame(separated,'Observed zoom14'),/caption overlaps .* badge|badge overlaps .* caption/,'Separate badges do not excuse a label covering the other end');
  const shifted=structuredClone(audit.frames[1]);shifted.markers[0].rect.left+=10;shifted.markers[0].rect.right+=10;
  assert.throws(()=>assertRouteEdgeFrame(shifted,'Shifted source marker'),/original coordinates/,'Collision avoidance must never move the source coordinate');
+});
+test('publication rejects an opaque old relief palette even while its replacement is pending',()=>{
+ for(const state of ['ready','pending','unavailable']){
+  const mixed=evidence(),tile=mixed.zoomDesigns[0].closeTrail.frames[0].reliefPalette.tiles[0];
+  tile.paintedMode='overview';tile.state=state;
+  assert.throws(()=>assertBrowserReport(mixed,commit),/stale relief palette/);
+  tile.visible=false;
+  assert.equal(assertBrowserReport(mixed,commit),mixed,'An explicitly hidden unavailable or in-progress tile is not claimed as rendered');
+ }
+ const missing=evidence();delete missing.zoomDesigns[0].closeTrail.frames[0].reliefPalette;
+ assert.throws(()=>assertBrowserReport(missing,commit),/missing relief palette/);
+});
+test('publication requires both full close-up annotations inside the map and clear of interface panels',()=>{
+ const changes=[
+  audit=>delete audit.closeFraming,
+  audit=>audit.frames[2].markers[0].caption.visible=false,
+  audit=>audit.frames[2].markers[0].caption.rect=rect(-30,250,64,24),
+  audit=>audit.frames[2].overlays=[{kind:'map-context',rect:{...audit.frames[2].markers[0].badge.rect}}],
+  audit=>audit.closeFraming.required=true,
+ ];
+ for(const change of changes){const bad=evidence();change(bad.zoomDesigns[0].closeTrail);assert.throws(()=>assertBrowserReport(bad,commit));}
+});
+test('publication requires native pan delivery, unchanged scale and source coordinates when the close frame was initially clipped',()=>{
+ function panned(){
+  const value=evidence(),audit=value.zoomDesigns[0].closeTrail,after=audit.frames[2],before=structuredClone(after),dx=200,dy=200;
+  const [longitude,latitude]=unprojectMapPoint({x:after.mapRect.left+after.mapRect.width/2+dx,y:after.mapRect.top+after.mapRect.height/2+dy},after.camera,after.mapRect);
+  before.camera={...before.camera,longitude,latitude};
+  before.markers.forEach((marker,index)=>{
+   const point=projectMapPoint(CLOSE_TRAIL_FIXTURE.endpoints[index],before.camera,before.mapRect);
+   marker.rect=rect(point.x-16,point.y-16,32,32);marker.badge.rect={...marker.rect};marker.caption.rect=rect(point.x-32,point.y+20,64,24);
+  });
+  const start={x:80,y:280},end={x:280,y:480};
+  const types=['touchStart',...Array(12).fill('touchMove'),'touchEnd'];
+  const commands=types.map((type,index)=>{
+   const progress=Math.min(1,index/12),sentOffsetMs=index*30+(index===types.length-1?200:0);
+   return{type,method:'Input.dispatchTouchEvent',x:start.x+dx*progress,y:start.y+dy*progress,status:'fulfilled',sentOffsetMs,ackOffsetMs:sentOffsetMs+1};
+  });
+  const pan={input:'touch',start,end,delta:{dx,dy},holdBeforeReleaseMs:200,durationMs:commands.at(-1).ackOffsetMs,commands,canvasPathVerified:true,before,after,
+   events:['pointerdown','pointerup'].map((type,index)=>({type,time:1000+index*700,pointerId:91,pointerType:'touch',trusted:true,...(index?end:start)}))};
+  audit.closeFraming={required:true,passed:true,before,gestures:[pan]};return value;
+ }
+ const good=panned();assert.equal(assertBrowserReport(good,commit),good);
+ const changes=[
+  pan=>pan.events[1].trusted=false,
+  pan=>pan.events[0].pointerId=92,
+  pan=>pan.commands[5].x+=10,
+  pan=>pan.commands.at(-1).sentOffsetMs=pan.commands.at(-2).ackOffsetMs+20,
+  pan=>pan.canvasPathVerified=false,
+  pan=>pan.before.queryRoute='another-route',
+  pan=>pan.after.zoom=18,
+ ];
+ for(const change of changes){const bad=panned();change(bad.zoomDesigns[0].closeTrail.closeFraming.gestures[0]);assert.throws(()=>assertBrowserReport(bad,commit));}
+ const absent=panned();absent.zoomDesigns[0].closeTrail.closeFraming.gestures=[];assert.throws(()=>assertBrowserReport(absent,commit));
 });
 test('old tap-only receipts and sticky native sheet gestures cannot pass publication',()=>{
  const changes=[

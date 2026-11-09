@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": 7,
+  "recordedAt": "2026-11-09T22:10:25.059982+00:00",
+  "sourceCommit": "03de50de8ad25827199dff7f8ec0abf8d36128e8",
+  "sourceTree": "5c0ac0cd9867ead6d2dde49e923639568c9655de",
+  "workflowRun": 42706247348,
+  "workflowAttempt": 1,
+  "buildJob": 129463693690,
+  "buildId": "1a4d63078526e788",
+  "outcome": "BROWSER_STEP_TIMED_OUT_WITH_PARTIAL_DESKTOP_MATRIX",
+  "releaseAccepted": false,
+  "deploymentPerformed": false,
+  "unchangedReruns": 0,
+  "completedBuildChecks": {
+    "webTests": 438,
+    "toolingTests": 47,
+    "lint": "PASS",
+    "webTypes": "PASS",
+    "pagesTypes": "PASS",
+    "staticPages": 339,
+    "referenceRoutes": 306,
+    "routingChecks": 1022,
+    "httpChecks": 52
+  },
+  "browser": {
+    "startedAt": "2026-11-09T21:51:24.6471353Z",
+    "timeoutRecordedAt": "2026-11-09T22:03:37.1614554Z",
+    "timeoutMinutes": 12,
+    "failureJSONEmitted": false,
+    "finalPerformanceGateReached": false,
+    "workflowFailure": "The action Verify real mobile rendering and sheet interaction and desktop map interactions timed out after 12 minutes.",
+    "completeDesktopPerformanceGatePassed": false,
+    "graphicsBackend": "ANGLE SwiftShader, as selected by the workflow launch flags"
+  },
+  "mobileZoom": {
+    "schemaVersion": 4,
+    "complete": true,
+    "geometryPassed": true,
+    "screenshots": 27,
+    "detailSteps": 24,
+    "startedAt": "2026-11-09T21:52:36.440Z",
+    "completedAt": "2026-11-09T21:56:27.077Z",
+    "performance": {
+      "layoutShift": 0,
+      "longestTaskMs": 82
+    },
+    "detailBurstPerformance": {
+      "cls": 0,
+      "longest": 71
+    },
+    "sourceEnds": {
+      "passed": true,
+      "nativeZoomClicks": 12,
+      "performance": {
+        "layoutShift": 0,
+        "longestTaskMs": 0
+      }
+    },
+    "visualReviewRequired": true
+  },
+  "desktopZoom": {
+    "schemaVersion": 4,
+    "complete": false,
+    "geometryPassed": false,
+    "screenshots": 23,
+    "detailSteps": 18,
+    "completedModes": [
+      "detail",
+      "satellite",
+      "saved-overview"
+    ],
+    "lastInspectionMode": "terrain",
+    "lastInspectionZoom": 8.90540610449558,
+    "missing": [
+      "terrain zoom11/14/18",
+      "prepared3D scenes",
+      "source ends",
+      "complete zoom performance"
+    ],
+    "allModePerformance": null,
+    "detailBurstPerformance": {
+      "cls": 0,
+      "longest": 520
+    },
+    "visualReviewRequired": true
+  },
+  "firstDesktopSelectionTrace": {
+    "status": "complete",
+    "dataLossOccurred": false,
+    "recordedDurationMs": 3662.0949089999776,
+    "bytes": 6080113,
+    "sha256": "371067f80fecdb2bc7f2c2c790f3250e9b47eeef0646b6d834e136aa9f2a4e8a",
+    "events": 23731,
+    "cpuSamples": 63497,
+    "limits": {
+      "durationMs": 8000,
+      "drainMs": 5000,
+      "closeMs": 1000,
+      "maxBytes": 33554432,
+      "bufferSizeKiB": 16384,
+      "chunkBytes": 262144
+    },
+    "capturedRenderTasks": [
+      {
+        "durationMs": 408.03,
+        "mainThreadCpuMs": 43.84,
+        "dominantSampledNativeCall": "getProgramParameter(LINK_STATUS)",
+        "approximateSampleWeightMs": 296.824,
+        "nativeSamples": 1367,
+        "program": "circle"
+      },
+      {
+        "durationMs": 265.223,
+        "mainThreadCpuMs": 35.127,
+        "dominantSampledNativeCall": "getProgramParameter(LINK_STATUS)",
+        "approximateSampleWeightMs": 222.527,
+        "nativeSamples": 1000,
+        "programs": [
+          {
+            "name": "hillshadePrepare",
+            "nativeSamples": 966
+          },
+          {
+            "name": "hillshade",
+            "nativeSamples": 34
+          }
+        ]
+      }
+    ],
+    "bundleAttribution": {
+      "bundle": "maplibre-gl-8IiRFv_i.js",
+      "KM": "drawCircle -> useProgram(circle)",
+      "bN": "prepareHillshade -> useProgram(hillshadePrepare)",
+      "yN": "renderHillshade -> useProgram(hillshade)",
+      "bj": "linkProgram -> getProgramParameter(LINK_STATUS)"
+    },
+    "interpretation": "This complete C7 trace captures cold circle and hillshade program-link waits, with additional repeated label layout reads. It does not prove the exact cause of the C6 759 ms task, whose trace window was lost.",
+    "timingQualification": "RunTask durations are exact captured timeline intervals. Sample weights are approximate elapsed-time attribution, not exclusive CPU time; inclusive stacks must not be summed."
+  },
+  "artifact": {
+    "id": 13714427116,
+    "name": "tropnik-pages-design-1",
+    "bytes": 27137048,
+    "sha256": "6fe444f7c1e1b944ff4883f1fd1c2883e27b5ffcfbff9271efc7fd385cd72682",
+    "verifiedAgainstGitHubDigest": true,
+    "headSha": "03de50de8ad25827199dff7f8ec0abf8d36128e8",
+    "runId": 42706247348,
+    "fileCount": 54,
+    "path": "/workspace/scratch/569c30ca9137/ci-evidence-03de50de/13714427116.zip"
+  },
+  "evidenceLimits": [
+    "The external workflow timeout prevented final failure/report output and complete desktop counters.",
+    "Desktop detail-burst 520 ms / CLS 0 is partial evidence; it is not an all-mode desktop performance pass.",
+    "Mobile 82 ms / CLS 0 covers completed modes; separate maxima for satellite, saved overview and prepared 3D were not recorded.",
+    "The trace was instrumented in CI with software rendering; it is not physical-device FPS evidence.",
+    "The application runtime was unchanged from candidate 6; this candidate changed diagnostic coverage."
+  ],
+  "evidenceSHA256": {
+    "build-job.log": "371746add28635ea50aa208dc7559cb268feaea9d818810743502fad3e58b2f2",
+    "artifact-verification.json": "343164bd03eb3480b060e69a148c48224a63bb805ec46b85ac52329d11e3a687",
+    "evidence-summary.json": "bb32b289920632ddb3ab1aa91f3f76d4dccb3dc851d6db8f79ed99de93fa7556",
+    "android-portrait.json": "321fd3b9117eafc91588260f92d8022959cf03917bd490625648311d09a05b62",
+    "desktop-webgl.json": "e3d57e2214adbb4e5fec341d1b24e572b460cd9769a7571c473c8d9c177fd683",
+    "desktop-webgl-first-altai.trace-meta.json": "92967c45365adfe4a43503231c5a1fd8b7e13d8125a926cd19bfc2295b3e9a3c",
+    "trace-analysis.json": "e53b7acf7b1f96f7eeea18b060308239e00b85cf78125ac525dd040f188306c9"
+  }
+}

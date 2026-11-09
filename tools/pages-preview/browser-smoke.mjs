@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {readFile, writeFile, stat} from 'node:fs/promises';
+import {mkdir, readFile, rename, writeFile, stat} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
@@ -596,6 +596,15 @@ const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browserLaunchStarted=performance.now();
 let browser,cdp,currentProfile,failure;
 const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],profilePerformance=[],performanceIssues=[];
+// GitHub can terminate this process before catch/finally. Preserve completed
+// interactions before the long zoom matrix, without marking them as a release.
+const progressDirectory=new URL('../../web/pages-preview/design-qa/',import.meta.url);
+async function checkpoint(phase){
+  await mkdir(progressDirectory,{recursive:true});
+  const temporary=new URL('browser-progress.tmp',progressDirectory);
+  await writeFile(temporary,JSON.stringify({verified:false,sourceCommit:process.env.GITHUB_SHA||null,updatedAt:new Date().toISOString(),profile:currentProfile,phase,performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest})),completedZoomProfiles:zoomDesigns.map(({profile,geometryPassed,performance})=>({profile,geometryPassed,performance}))},null,2)+'\n');
+  await rename(temporary,new URL('browser-progress.json',progressDirectory));
+}
 try{
   browser=launchBrowser(browserBinary(),[
     '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
@@ -643,7 +652,9 @@ try{
       const interaction=await mapInteraction(cdp,profile,performanceIssues);mapInteractions.push(interaction);
       desktopProfiles.push({name:profile.name,width:profile.width,height:profile.height,engine:geometry.engine,coarse:false,mapInteractionTested:true});
       profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
+      await checkpoint('before-zoom-audit');
       zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`}));
+      await checkpoint('profile-complete');
       continue;
     }
     await diagnosticPhase(cdp,'sheet-before');
@@ -679,7 +690,9 @@ try{
     if(interaction)mapInteractions.push(interaction);
     results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,touch,interaction});
     profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
+    await checkpoint(interaction?'before-zoom-audit':'profile-complete');
     if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`}));
+    if(profile.mapInteraction)await checkpoint('profile-complete');
   }
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.

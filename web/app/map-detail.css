@@ -40,7 +40,7 @@
 .atlas-wrap:not([data-map-detail='close']) .route-edge-marker{visibility:hidden}
 .atlas-wrap[data-map-route='selected'] .legend-line{border-top-style:solid;border-top-color:var(--forest)}
 .atlas-wrap[data-map-imagery='satellite'] .route-edge-badge{border-color:#FFFEFA}
-.atlas-wrap[data-map-imagery='satellite'] .map-legend{
+.atlas-wrap .map-legend{
   padding:8px 12px;border:1px solid var(--line);border-radius:8px;
   background:var(--surface);color:var(--forest);
 }

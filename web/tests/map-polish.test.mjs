@@ -130,7 +130,8 @@ test('mobile visual viewport and native route points stay cross-platform',()=>{
   assert.match(layout,/window\.visualViewport/);
   assert.match(layout,/visual\?\.addEventListener\('resize'/);
   assert.match(layout,/--map-label-max-width/);
-  assert.match(layout,/placed:MapLabelRect\[\]/);
+  // Label collision order and actual measured boxes are covered behaviorally
+  // in map-label-dom.test.mjs; a local array name is not that contract.
   assert.match(atlas,/type:'circle',source:TRAIL_POINTS/);
   assert.doesNotMatch(atlas,/new ml\.Marker\(\{element:button,anchor:'center'\}\).*visibleTrails/s);
   assert.match(canvas,/bindTooltip\(item\.title,\{direction:'auto'/);

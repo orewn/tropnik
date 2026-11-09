@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {projectMapPoint} from './map-projection.mjs';
+import {assertSourceEndPanInput,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -87,7 +88,7 @@ function assertSheetGestures(gestures,name){
 
 /** Inspect the painted DOM footprints, independently of the application's
  * density thresholds. Hidden markers still retain their real source ends. */
-export function assertRouteEdgeFrame(frame,context,{requireBothVisible=false}={}){
+export function assertRouteEdgeFrame(frame,context,{requireBothVisible=false,requireFullCaptions=false}={}){
  assert.ok(Number.isFinite(frame.zoom)&&Math.abs(frame.camera?.zoom-frame.zoom)<.01,`${context}: the camera scale differs from the source-end frame`);
  assert.equal(frame.routeId,CLOSE_TRAIL_FIXTURE.routeId,`${context}: the source route was lost`);
  assert.equal(frame.region,CLOSE_TRAIL_FIXTURE.region);assert.equal(frame.queryRoute,CLOSE_TRAIL_FIXTURE.routeId);
@@ -116,7 +117,7 @@ export function assertRouteEdgeFrame(frame,context,{requireBothVisible=false}={}
     const area=clipped(part.rect);if(area.right>area.left&&area.bottom>area.top)parts.push({letter,kind,rect:area});
    }
   }
-  if(requireBothVisible){
+  if(requireBothVisible||requireFullCaptions){
    const badge=marker.badge;
    assert.equal(badge.visible,true,`${context}: separated source end ${letter} did not reappear`);
    assert.ok(badge.rect.left>=frame.available.left-1&&badge.rect.right<=frame.available.right+1&&badge.rect.top>=frame.available.top-1&&badge.rect.bottom<=frame.available.bottom+1,`${context}: separated source end ${letter} is clipped`);
@@ -126,6 +127,26 @@ export function assertRouteEdgeFrame(frame,context,{requireBothVisible=false}={}
   const a=parts[first],b=parts[second];if(a.letter===b.letter)continue;
   const width=Math.min(a.rect.right,b.rect.right)-Math.max(a.rect.left,b.rect.left),height=Math.min(a.rect.bottom,b.rect.bottom)-Math.max(a.rect.top,b.rect.top);
   assert.ok(width<=1||height<=1,`${context}: visible ${a.letter} ${a.kind} overlaps ${b.letter} ${b.kind} (${width}×${height}px)`);
+ }
+ if(requireFullCaptions){
+  assert.ok(Array.isArray(frame.overlays),`${context}: map overlay footprints are missing`);
+  for(const overlay of frame.overlays)rect(overlay.rect);
+  assert.equal(sourceEndsAreFramed(frame),true,`${context}: both full source-end annotations must fit without UI overlap`);
+ }
+ return true;
+}
+
+export function assertReliefPalette(frame,context,engine){
+ assert.equal(frame?.engine,engine,`${context}: missing relief palette evidence`);
+ assert.ok(Array.isArray(frame.tiles));
+ if(engine!=='leaflet')assert.equal(frame.tiles.length,0);
+ for(const tile of frame.tiles){
+  assert.equal(typeof tile.visible,'boolean');
+  assert.ok(['overview','detail',''].includes(tile.paintedMode));
+  assert.ok(['overview','detail',''].includes(tile.desiredMode));
+  assert.ok(['pending','ready','unavailable','skipped'].includes(tile.state));
+  if(tile.visible&&tile.state==='ready')assert.ok(tile.paintedMode,`${context}: a ready relief tile has no painted palette`);
+  if(tile.visible&&tile.paintedMode)assert.equal(tile.paintedMode,tile.desiredMode,`${context}: a stale relief palette remains visible`);
  }
  return true;
 }
@@ -156,18 +177,37 @@ export function assertCloseTrailAudit(audit,name,engine,mobile,screenshots){
   if(index)assert.ok(frame.inputCount>audit.frames[index-1].inputCount);
   const direction=index===0?-1:1,from=index?audit.frames[index-1].inputCount:0;
   assert.ok(audit.inputs.slice(from,frame.inputCount).every(input=>input.direction===direction));
-  assertRouteEdgeFrame(frame,`${name}/source-ends/${frame.zoom}`,{requireBothVisible:index===1});
+  assertRouteEdgeFrame(frame,`${name}/source-ends/${frame.zoom}`,{requireBothVisible:index===1,requireFullCaptions:index===2});
+  assertReliefPalette(frame.reliefPalette,`${name}/source-ends/${frame.zoom}`,engine);
   const screenshot=screenshots.find(item=>item.file===frame.screenshot);
   assert.ok(screenshot&&screenshot.mode==='source-ends'&&Math.abs(screenshot.zoom-frame.zoom)<.01,`${name}: a source-end frame has no reviewable image`);
  }
  assert.equal(audit.frames.at(-1).inputCount,audit.inputs.length);
  assert.equal(new Set(audit.frames.map(frame=>frame.screenshot)).size,3);
+ const framing=audit.closeFraming;
+ assert.equal(framing?.passed,true,`${name}: missing native close-frame placement evidence`);
+ assertRouteEdgeFrame(framing.before,`${name}/source-ends/before-framing`);
+ assert.equal(framing.required,!sourceEndsAreFramed(framing.before));
+ assert.ok(Array.isArray(framing.gestures)&&framing.gestures.length<=2);
+ assert.ok(framing.required?framing.gestures.length>=1:framing.gestures.length===0);
+ let previousFrame=framing.before;
+ for(const pan of framing.gestures){
+  assertSourceEndPanInput(pan,audit.input,`${name}/source-ends/pan`);
+  assert.equal(pan.canvasPathVerified,true);
+  assertRouteEdgeFrame(pan.before,`${name}/source-ends/pan-before`);assertRouteEdgeFrame(pan.after,`${name}/source-ends/pan-after`);
+  assert.equal(sourceEndsAreFramed(pan.before),false,`${name}: an extra framing gesture was sent after both annotations already fitted`);
+  assert.deepEqual(pan.before.camera,previousFrame.camera);
+  assert.ok(Math.abs(pan.before.zoom-17)<.01&&Math.abs(pan.after.zoom-pan.before.zoom)<.01,`${name}: framing changed the zoom`);
+  assert.ok(Math.abs(pan.after.camera.longitude-pan.before.camera.longitude)>1e-7||Math.abs(pan.after.camera.latitude-pan.before.camera.latitude)>1e-7,`${name}: native pan did not move the map`);
+  previousFrame=pan.after;
+ }
+ assert.deepEqual(previousFrame.camera,audit.frames.at(-1).camera);
  return true;
 }
 
 function assertZoomDesign(design,name,engine,mobile){
  assert.equal(design?.geometryPassed,true,`${name}: missing zoom-level design geometry evidence`);
- assert.equal(design.schemaVersion,4,'The design report predates native single-line source-end coverage');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
+ assert.equal(design.schemaVersion,5,'The design report predates live relief palette checks');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
  assert.equal(design.visualReviewRequired,true,'DOM bounds must not be reported as human visual review');
  assert.equal(design.maximumZoom,18);assert.equal(design.routeId,'kavkaz-8a');
  assert.ok(Number.isFinite(design.minimumZoom)&&design.minimumZoom<4,`${name}: zoom coverage omitted the overview`);

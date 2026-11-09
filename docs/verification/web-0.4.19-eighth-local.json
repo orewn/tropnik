@@ -1,0 +1,78 @@
+{
+  "candidate": 8,
+  "release": "0.4.19",
+  "status": "local checks passed; browser and publication pending",
+  "baseCommit": "03de50de8ad25827199dff7f8ec0abf8d36128e8",
+  "checkedAt": "2026-11-09T22:12:10.144623+00:00",
+  "checks": {
+    "web": {
+      "passed": 452,
+      "failed": 0
+    },
+    "tooling": {
+      "passed": 55,
+      "failed": 0
+    },
+    "eslint": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "webTypes": "PASS",
+    "pagesTypes": "PASS",
+    "browserSmokeSyntax": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "runtimeChanges": [
+    "live Canvas relief palettes refresh through the existing bounded queue",
+    "batched label DOM measurements with unchanged final geometry",
+    "paper legend background shared by all 2D map imagery"
+  ],
+  "qaChanges": [
+    "schema5 visible relief mode coherence",
+    "native pan for both complete source-end annotations at zoom17",
+    "real desktop obstacle fixture",
+    "diagnostic progress persists before long zoom audit",
+    "18-minute matrix timeout; unchanged per-interaction budgets"
+  ],
+  "unchangedBudgets": {
+    "mobileLongestTaskExclusiveMs": 350,
+    "desktopLongestTaskExclusiveMs": 750,
+    "reliefJobs": 48,
+    "reliefFetches": 3,
+    "reliefWorkers": 1,
+    "reliefBufferedBytes": 8388608
+  },
+  "logDigests": {
+    "web": {
+      "filename": "tropnik-0.4.19-eighth-web.log",
+      "bytes": 43022,
+      "sha256": "8fd0efc0bf44bfe186225573e24751ecf6df701b374834c8455b8ef6df8393a2"
+    },
+    "lint": {
+      "filename": "tropnik-0.4.19-eighth-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "types": {
+      "filename": "tropnik-0.4.19-eighth-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pages-types": {
+      "filename": "tropnik-0.4.19-eighth-pages-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tooling": {
+      "filename": "tropnik-0.4.19-eighth-tooling.log",
+      "bytes": 11676,
+      "sha256": "f0bd5c45e9695fb20355f1669fc14dad68bed591a210abfea6091603c5f50a9e"
+    }
+  },
+  "limitations": [
+    "CSS legend generalization was visually identified after the full web test run; final exact-source CI remains required",
+    "native pan and palette verification have not yet passed candidate8 browser CI",
+    "no physical Android or Brave performance claim",
+    "old Site archive is obsolete; rebuild before publication"
+  ]
+}

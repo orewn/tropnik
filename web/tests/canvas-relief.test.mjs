@@ -14,10 +14,10 @@ function fixture({autoResolve=false,byteLength=16}={}){
   const requests=[],workers=[],states=[],completed=[],timers=new Map();let timerId=0,fetching=0,maxFetching=0;
   const nodes=new Set();
   class Worker{
-    constructor(){this.messages=[];this.terminated=false;workers.push(this);}
+    constructor(){this.messages=[];this.replied=new Set();this.terminated=false;workers.push(this);}
     postMessage(message){this.messages.push(message);}
     terminate(){this.terminated=true;}
-    reply(index=this.messages.length-1,extra={}){this.onmessage?.({data:{id:this.messages[index].id,pixels:new Uint8ClampedArray(256*256*4),width:256,height:256,...extra}});}
+    reply(index=this.messages.length-1,extra={}){this.replied.add(index);this.onmessage?.({data:{id:this.messages[index].id,pixels:new Uint8ClampedArray(256*256*4),width:256,height:256,...extra}});}
   }
   class ImageData{constructor(data,width,height){this.data=data;this.width=width;this.height=height;}}
   const L={GridLayer:{extend(methods){return class{
@@ -35,13 +35,22 @@ function fixture({autoResolve=false,byteLength=16}={}){
   }
   const scope={exports:{},require:name=>{assert.equal(name,'./map-preload');return{loadPublicBytes};},URL,Worker,ImageData,queueMicrotask,
     setTimeout:(fn,delay)=>{const id=++timerId;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id),
-    document:{createElement(){return{dataset:{},drawn:0,getContext(){return{putImageData:()=>{this.drawn++;}};}};}}};
+    document:{createElement(){return{dataset:{},style:{removeProperty(name){delete this[name];}},drawn:0,getContext(){return{putImageData:()=>{this.drawn++;}};}};}}};
   vm.runInNewContext(compiled,scope);
   const relief=scope.exports.createCanvasRelief(L,value=>states.push(value));
   const add=()=>{const tile=relief.layer.createTile({z:6,x:39,y:20},(error,canvas)=>completed.push({error,canvas}));nodes.add(tile);return tile;};
   const unload=tile=>{nodes.delete(tile);relief.layer.handlers.tileunload({tile});};
   const resolvePending=size=>{for(const request of requests.filter(item=>!item.settled))request.resolve(new ArrayBuffer(size??byteLength));};
-  return{relief,requests,workers,states,completed,timers,add,unload,resolvePending,maxFetching:()=>maxFetching};
+  const drain=async predicate=>{
+    for(let attempt=0;attempt<1000;attempt++){
+      resolvePending();await tick();
+      const worker=workers.at(-1),index=worker?.messages.findIndex((_,i)=>!worker.replied.has(i));
+      if(index>=0)worker.reply(index);await tick();
+      if(predicate())return;
+    }
+    assert.fail('Relief fixture did not drain');
+  };
+  return{relief,requests,workers,states,completed,timers,add,unload,resolvePending,drain,maxFetching:()=>maxFetching};
 }
 
 test('current map downloads are capped at three and decoding waits for the previous result',async()=>{
@@ -103,10 +112,110 @@ test('worker errors and disposal clear work without starting stale downloads or 
   assert.equal(env.workers.length,1);assert.equal(tile.drawn,0);assert.equal(env.completed.length,before);
 });
 
-test('switching base mode keeps decoded relief visible and applies the new shading to future tiles',async()=>{
-  const env=fixture();env.add();await tick();env.resolvePending();await tick();
+test('switching base mode repaints live completed canvases without removing tiles or completing them twice',async()=>{
+  const env=fixture();const tile=env.add();await tick();env.resolvePending();await tick();
   assert.equal(env.workers[0].messages[0].overview,true);env.workers[0].reply();await tick();
+  assert.equal(tile.dataset.reliefMode,'overview');assert.equal(tile.drawn,1);
   env.relief.setOverview(false);assert.equal(env.relief.layer.redraws,0);
-  env.add();await tick();env.resolvePending();await tick();assert.equal(env.workers[0].messages[1].overview,false);
+  assert.equal(tile.drawn,1);assert.equal(tile.style.visibility,undefined);
+  assert.equal(tile.dataset.reliefDesiredMode,'detail');assert.equal(tile.dataset.reliefMode,'overview');
+  await tick();assert.equal(env.requests.length,2);assert.equal(env.requests[1].url,env.requests[0].url);
+  env.resolvePending();await tick();assert.equal(env.workers[0].messages[1].overview,false);
+  env.workers[0].reply();await tick();assert.equal(tile.drawn,2);assert.equal(tile.dataset.reliefMode,'detail');
+  assert.equal(tile.dataset.reliefState,'ready');assert.equal(env.completed.length,1);
   env.relief.destroy();assert.equal(env.timers.size,0);
+});
+
+test('pending and fetching tiles adopt the current palette before decoding',async()=>{
+  for(const fetching of [false,true]){
+    const env=fixture();const tile=env.add();if(fetching)await tick();
+    env.relief.setOverview(false);await tick();env.resolvePending();await tick();
+    assert.equal(env.workers[0].messages[0].overview,false);env.workers[0].reply();await tick();
+    assert.equal(tile.drawn,1);assert.equal(tile.dataset.reliefMode,'detail');assert.equal(env.completed.length,1);
+    assert.equal(env.requests.length,1);env.relief.destroy();
+  }
+});
+
+test('an obsolete active result never paints and waiting ready tiles use the newest palette',async()=>{
+  const env=fixture();const active=env.add(),ready=env.add();await tick();env.resolvePending();await tick();
+  const worker=env.workers[0];assert.equal(worker.messages.length,1);assert.equal(worker.messages[0].overview,true);
+  env.relief.setOverview(false);assert.equal(worker.messages.length,1);
+  worker.reply(0);await tick();assert.equal(active.drawn,0);assert.equal(env.completed.length,0);
+  assert.equal(worker.messages.length,2);assert.equal(worker.messages[1].overview,false);
+  worker.reply(1);await tick();assert.equal(ready.drawn,1);assert.equal(ready.dataset.reliefMode,'detail');
+  await env.drain(()=>active.dataset.reliefMode==='detail');
+  assert.equal(active.drawn,1);assert.equal(env.completed.length,2);assert.ok(env.maxFetching()<=3);
+  env.relief.destroy();
+});
+
+test('rapid mode reversal reuses the painted palette and ignores an unnecessary active replacement',async()=>{
+  const env=fixture();const tile=env.add();await env.drain(()=>tile.drawn===1);
+  const worker=env.workers[0];
+  env.relief.setOverview(false);env.relief.setOverview(true);await tick();
+  assert.equal(env.requests.length,1);assert.equal(tile.dataset.reliefState,'ready');
+  env.relief.setOverview(false);await tick();env.resolvePending();await tick();
+  assert.equal(worker.messages.length,2);assert.equal(worker.messages[1].overview,false);
+  env.relief.setOverview(true);worker.reply(1);await tick();
+  assert.equal(tile.drawn,1);assert.equal(tile.dataset.reliefMode,'overview');assert.equal(env.completed.length,1);
+  env.relief.setOverview(true);await tick();assert.equal(env.requests.length,2);
+  env.relief.setOverview(false);await env.drain(()=>tile.dataset.reliefMode==='detail');
+  assert.equal(tile.drawn,2);assert.equal(env.completed.length,1);env.relief.destroy();
+});
+
+test('failed palette refresh hides only stale pixels, does not loop, and can recover on a later mode change',async()=>{
+  const env=fixture();const tile=env.add();await env.drain(()=>tile.drawn===1);
+  env.relief.setOverview(false);await tick();env.resolvePending();await tick();
+  env.workers[0].reply(1,{error:'Fixture decode failure'});await tick();await tick();
+  assert.equal(tile.dataset.reliefState,'unavailable');assert.equal(tile.dataset.reliefMode,'overview');
+  assert.equal(tile.style.visibility,'hidden');assert.equal(env.requests.length,2);assert.equal(env.completed.length,1);
+  env.relief.setOverview(false);await tick();assert.equal(env.requests.length,2);
+  env.relief.setOverview(true);await tick();assert.equal(tile.style.visibility,undefined);assert.equal(tile.dataset.reliefState,'ready');
+  assert.equal(env.states.at(-1),true,'Reusing good pixels clears the obsolete relief error without waiting for another decode');
+  env.relief.setOverview(false);await env.drain(()=>tile.dataset.reliefMode==='detail');
+  assert.equal(tile.style.visibility,undefined);assert.equal(tile.drawn,2);assert.equal(env.completed.length,1);
+  env.relief.destroy();
+});
+
+test('a rejected or timed-out refresh cannot invalidate an already restored palette',async()=>{
+  for(const failure of ['fetch','worker','timeout']){
+    const env=fixture();const tile=env.add();await env.drain(()=>tile.drawn===1);
+    env.relief.setOverview(false);await tick();
+    if(failure!=='fetch'){env.resolvePending();await tick();}
+    env.relief.setOverview(true);const stateCount=env.states.length;
+    if(failure==='fetch')env.requests.at(-1).reject();
+    else if(failure==='worker')env.workers[0].onerror();
+    else [...env.timers.values()][0].fn();
+    await tick();await tick();
+    assert.equal(tile.dataset.reliefMode,'overview');assert.equal(tile.dataset.reliefState,'ready');
+    assert.equal(tile.style.visibility,undefined);assert.equal(tile.drawn,1);assert.equal(env.completed.length,1);
+    assert.ok(env.states.slice(stateCount).every(state=>state===true));assert.equal(env.states.at(-1),true);
+    assert.equal(env.requests.length,2);env.relief.destroy();
+  }
+});
+
+test('a tile that initially failed can refresh without calling its original completion callback again',async()=>{
+  const env=fixture();const tile=env.add();await tick();env.requests[0].reject();await tick();
+  assert.equal(env.completed.length,1);assert.ok(env.completed[0].error);assert.equal(tile.drawn,0);
+  env.relief.setOverview(false);await env.drain(()=>tile.dataset.reliefMode==='detail');
+  assert.equal(tile.drawn,1);assert.equal(env.completed.length,1);env.relief.destroy();
+});
+
+test('unloading completed and refreshing tiles releases their records and discards late refresh output',async()=>{
+  const env=fixture();const gone=env.add(),active=env.add();await env.drain(()=>env.completed.length===2);
+  env.unload(gone);env.relief.setOverview(false);await tick();env.resolvePending();await tick();
+  assert.equal(env.requests.length,3);const worker=env.workers[0],late=worker.onmessage,id=worker.messages.at(-1).id;
+  env.unload(active);worker.reply();await tick();assert.equal(active.drawn,1);
+  env.relief.setOverview(true);env.relief.setOverview(false);await tick();assert.equal(env.requests.length,3);
+  env.relief.destroy();late({data:{id,pixels:new Uint8ClampedArray(256*256*4),width:256,height:256}});
+  assert.equal(active.drawn,1);assert.equal(env.completed.length,2);assert.equal(env.timers.size,0);
+});
+
+test('palette refresh streams more resident tiles than the admission limit through the same bounded queue',async()=>{
+  const env=fixture();const tiles=[];
+  for(let index=0;index<51;index++){const tile=env.add();tiles.push(tile);await env.drain(()=>tile.drawn===1);}
+  env.relief.setOverview(false);await env.drain(()=>tiles.every(tile=>tile.dataset.reliefMode==='detail'));
+  assert.equal(env.completed.length,51);assert.ok(env.completed.every(result=>!result.error));
+  assert.ok(env.maxFetching()<=3);assert.ok(tiles.every(tile=>tile.drawn===2));assert.equal(env.relief.layer.redraws,0);
+  tiles.forEach(env.unload);const requests=env.requests.length;env.relief.setOverview(true);await tick();
+  assert.equal(env.requests.length,requests);env.relief.destroy();assert.equal(env.timers.size,0);
 });

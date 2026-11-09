@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {CLOSE_TRAIL_FIXTURE,assertCloseTrailAudit,assertNativeBurstEventOrder,assertRouteEdgeFrame} from './browser-report.mjs';
+import {CLOSE_TRAIL_FIXTURE,assertCloseTrailAudit,assertNativeBurstEventOrder,assertRouteEdgeFrame,assertReliefPalette} from './browser-report.mjs';
+import {dispatchSourceEndPan,sourceEndPanPlans,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -82,7 +83,7 @@ export async function dispatchZoomBurst(cdp,point,profile,count=4){
 export async function runZoomDesignAudit(cdp,profile,helpers){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase}=helpers;
  await mkdir(OUTPUT,{recursive:true});
- const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:4,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
+ const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:5,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
  const save=()=>writeFile(new URL(`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');
  const network=new Map();
  const forget=cdp.observe('Network.responseReceived',({requestId,response})=>{
@@ -266,6 +267,60 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
   await waitValue(`${profile.name}: the single-line source did not render`,()=>helpers.mapState(cdp),state=>state?.route===audit.routeId);
   audit.initialZoom=(await settledMap(cdp,profile.engine)).camera.zoom;
   assert.ok(Math.abs(audit.initialZoom-14)<.01,`${profile.name}: the short source route did not fit at zoom14`);
+  async function inspectSourceEnds(targetZoom){
+   const map=await settledMap(cdp,profile.engine);
+   const layout=await evaluate(cdp,`(()=>{
+    const box=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+    const visible=element=>{if(!element)return false;const s=getComputedStyle(element),r=element.getBoundingClientRect();if(s.visibility==='hidden'||s.visibility==='collapse'||r.width<=1||r.height<=1)return false;for(let parent=element;parent;parent=parent.parentElement){const style=getComputedStyle(parent);if(style.display==='none'||Number(style.opacity)===0||parent.hidden)return false;}return true;};
+    const part=element=>({text:element?.textContent?.trim()||'',visible:visible(element),pointerEvents:element?getComputedStyle(element).pointerEvents:'',rect:element?box(element):null});
+    const atlas=document.querySelector('.atlas-wrap'),r=box(atlas),panel=document.querySelector('.explore-panel'),root=document.querySelector('.explore-layout');
+    const mobile=matchMedia('(max-width:700px),(min-width:701px) and (max-width:900px) and (max-height:620px) and (orientation:landscape) and (pointer:coarse)').matches;
+    const available={left:Math.max(0,r.left),right:Math.min(innerWidth,r.right),top:Math.max(0,r.top),bottom:Math.min(innerHeight,r.bottom,mobile&&panel&&root?.dataset.sheetState==='closed'?panel.getBoundingClientRect().top:Infinity)};available.width=available.right-available.left;available.height=available.bottom-available.top;
+    const params=new URLSearchParams(location.search);
+    return{available,scrollY:window.scrollY,region:params.get('region')||'',queryRoute:params.get('route')||'',selectedRoute:atlas.dataset.mapRoute||'',imagery:atlas.dataset.mapImagery||'',sceneVisible:visible(document.querySelector('.terrain-scene.is-visible')),
+     overlays:[...document.querySelectorAll('.map-context,.map-style-switch,.map-controls,.layer-button,.map-message,.fact-closed,.map-attribution-toggle,.map-attribution-content,.map-satellite-credit,.map-legend')].filter(visible).map(element=>({kind:element.className,rect:box(element)})),
+     markers:[...document.querySelectorAll('.route-edge-marker[role="img"]')].map(element=>({role:element.getAttribute('role'),ariaLabel:element.getAttribute('aria-label'),density:element.dataset.routeEdgeDensity||'',pointerEvents:getComputedStyle(element).pointerEvents,rect:box(element),badge:part(element.querySelector('.route-edge-badge')),caption:part(element.querySelector('.route-edge-label'))}))};
+   })()`);
+   const reliefPalette=await waitValue(`${profile.name}: relief tiles retained a stale palette`,()=>evaluate(cdp,`(()=>{
+    const map=document.querySelector('.atlas-canvas'),bounds=map.getBoundingClientRect();
+    const tiles=[...document.querySelectorAll('canvas[data-relief-job]')].map(tile=>{
+     const r=tile.getBoundingClientRect();let visible=r.width>1&&r.height>1&&r.right>bounds.left&&r.left<bounds.right&&r.bottom>bounds.top&&r.top<bounds.bottom;
+     for(let parent=tile;visible&&parent;parent=parent.parentElement){const s=getComputedStyle(parent);if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0||parent.hidden)visible=false;}
+     return{visible,state:tile.dataset.reliefState||'pending',paintedMode:tile.dataset.reliefMode||'',desiredMode:tile.dataset.reliefDesiredMode||''};
+    });return{engine:map.dataset.mapEngine,tiles};
+   })()`),value=>value.tiles.every(tile=>!tile.visible||!tile.paintedMode||tile.paintedMode===tile.desiredMode),15000);
+   assertReliefPalette(reliefPalette,`${profile.name}/source-ends/${map.camera.zoom}`,profile.engine);
+   return{targetZoom,zoom:map.camera.zoom,camera:map.camera,mapRect:map.rect,routeId:map.route,inputCount:audit.inputs.length,reliefPalette,...layout};
+  }
+  async function frameCloseSourceEnds(before){
+   const framing={required:!sourceEndsAreFramed(before),passed:false,before,gestures:[]};audit.closeFraming=framing;
+   let frame=before;
+   // A second gesture is permitted only from freshly observed post-pan bounds.
+   for(let attempt=0;attempt<2&&!sourceEndsAreFramed(frame);attempt++){
+    const plans=sourceEndPanPlans(frame);
+    const target=await evaluate(cdp,`(()=>{
+     for(const plan of ${JSON.stringify(plans)})for(const start of plan.starts){
+      let clear=true;
+      for(let step=0;step<=12;step++){
+       const x=start.x+plan.dx*step/12,y=start.y+plan.dy*step/12,hit=document.elementFromPoint(x,y);
+       if(!hit||hit.tagName!=='CANVAS'||!hit.closest('.atlas-canvas')){clear=false;break;}
+      }
+      if(clear)return{start,delta:{dx:plan.dx,dy:plan.dy}};
+     }
+     return null;
+    })()`);
+    assert.ok(target,`${profile.name}: no exposed Canvas path can frame both source ends`);
+    const started=await evaluate(cdp,'performance.now()'),prior=frame;
+    const pan=await dispatchSourceEndPan(cdp,target.start,target.delta,profile,sleep);
+    frame=await inspectSourceEnds(17);
+    pan.events=await evaluate(cdp,`(window.__tropnikInputEvents||[]).filter(event=>event.time>=${started}).map(({type,time,timestamp,pointerType,pointerId,trusted,x,y})=>({type,time,timestamp,pointerType,pointerId,trusted,x,y}))`);
+    Object.assign(pan,{canvasPathVerified:true,before:prior,after:frame});framing.gestures.push(pan);await save();
+    assert.ok(Math.abs(frame.zoom-prior.zoom)<.01,`${profile.name}: source-end pan changed the zoom`);
+    assertRouteEdgeFrame(frame,`${profile.name}/source-ends/after-pan`);
+   }
+   assertRouteEdgeFrame(frame,`${profile.name}/source-ends/full-close`,{requireFullCaptions:true});
+   framing.passed=true;return frame;
+  }
   for(const [index,targetZoom] of [11,14,17].entries()){
    let current=(await settledMap(cdp,profile.engine)).camera.zoom;
    while(Math.abs(current-targetZoom)>.01){
@@ -277,22 +332,11 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
     assertNativeBurstEventOrder(events,report.input,1);assert.equal(movement.changed,true,`${profile.name}: a source-end zoom control stopped responding`);
     current=movement.after;
    }
-   const map=await settledMap(cdp,profile.engine);
-   const layout=await evaluate(cdp,`(()=>{
-    const box=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
-    const visible=element=>{if(!element)return false;const s=getComputedStyle(element),r=element.getBoundingClientRect();if(s.visibility==='hidden'||s.visibility==='collapse'||r.width<=1||r.height<=1)return false;for(let parent=element;parent;parent=parent.parentElement){const style=getComputedStyle(parent);if(style.display==='none'||Number(style.opacity)===0||parent.hidden)return false;}return true;};
-    const part=element=>({text:element?.textContent?.trim()||'',visible:visible(element),pointerEvents:element?getComputedStyle(element).pointerEvents:'',rect:element?box(element):null});
-    const atlas=document.querySelector('.atlas-wrap'),r=box(atlas),panel=document.querySelector('.explore-panel'),root=document.querySelector('.explore-layout');
-    const mobile=matchMedia('(max-width:700px),(min-width:701px) and (max-width:900px) and (max-height:620px) and (orientation:landscape) and (pointer:coarse)').matches;
-    const available={left:Math.max(0,r.left),right:Math.min(innerWidth,r.right),top:Math.max(0,r.top),bottom:Math.min(innerHeight,r.bottom,mobile&&panel&&root?.dataset.sheetState==='closed'?panel.getBoundingClientRect().top:Infinity)};available.width=available.right-available.left;available.height=available.bottom-available.top;
-    const params=new URLSearchParams(location.search);
-    return{available,scrollY:window.scrollY,region:params.get('region')||'',queryRoute:params.get('route')||'',selectedRoute:atlas.dataset.mapRoute||'',imagery:atlas.dataset.mapImagery||'',sceneVisible:visible(document.querySelector('.terrain-scene.is-visible')),
-     markers:[...document.querySelectorAll('.route-edge-marker[role="img"]')].map(element=>({role:element.getAttribute('role'),ariaLabel:element.getAttribute('aria-label'),density:element.dataset.routeEdgeDensity||'',pointerEvents:getComputedStyle(element).pointerEvents,rect:box(element),badge:part(element.querySelector('.route-edge-badge')),caption:part(element.querySelector('.route-edge-label'))}))};
-   })()`);
-   const frame={targetZoom,zoom:map.camera.zoom,camera:map.camera,mapRect:map.rect,routeId:map.route,inputCount:audit.inputs.length,...layout};
+   let frame=await inspectSourceEnds(targetZoom);
+   if(index===2)frame=await frameCloseSourceEnds(frame);
    audit.frames.push(frame);report.lastInspection={mode:'source-ends',...frame};
    frame.screenshot=(await capture('source-ends',frame,['crowded','separated','close'][index])).file;
-   assertRouteEdgeFrame(frame,`${profile.name}/source-ends/${frame.zoom}`,{requireBothVisible:index===1});await save();
+   assertRouteEdgeFrame(frame,`${profile.name}/source-ends/${frame.zoom}`,{requireBothVisible:index===1,requireFullCaptions:index===2});await save();
   }
   audit.performance=await evaluate(cdp,'({layoutShift:window.__tropnikPerf?.cls||0,longestTaskMs:window.__tropnikPerf?.longest||0})');
   assertCloseTrailAudit({...audit,passed:true},profile.name,profile.engine,profile.mobile,report.screenshots);
