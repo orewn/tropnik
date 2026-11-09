@@ -64,10 +64,14 @@ def source_version(root: Path):
     return version[0], int(code[0])
 
 
-def parse_badging(text):
-    match = re.search(r"^package: name='([^']+)' versionCode='(\d+)' versionName='([^']*)'", text, re.M)
+def parse_badging(text, *, allow_unversioned=False):
+    # AAPT2 reports empty version fields for AGP's instrumentation APK. This
+    # exception applies only to the test package; installable app versions stay
+    # mandatory and are compared exactly with the checked-out Gradle source.
+    match = re.search(r"^package: name='([^']+)' versionCode='(\d*)' versionName='([^']*)'", text, re.M)
     require(match is not None, "APK badging has no package/version")
-    return {"applicationId": match[1], "versionCode": int(match[2]), "version": match[3]}
+    require(allow_unversioned or (bool(match[2]) and bool(match[3])), "Installable app APK requires a version and code")
+    return {"applicationId": match[1], "versionCode": int(match[2]) if match[2] else None, "version": match[3]}
 
 
 def certificate(text):
@@ -85,9 +89,15 @@ def inspect_payload(directory: Path, root: Path):
     for name in APK_NAMES:
         stem = name.removesuffix(".apk")
         certificates.add(certificate((directory / (stem + ".signature.txt")).read_text()))
-        manifest = parse_badging((directory / (stem + ".manifest.txt")).read_text())
+        manifest_text = (directory / (stem + ".manifest.txt")).read_text()
+        manifest = parse_badging(manifest_text, allow_unversioned=name == TEST_APK)
         if name == TEST_APK:
             require(manifest["applicationId"] == TEST_ID, "Unexpected instrumentation package")
+            for line in manifest_text.splitlines():
+                if line.startswith("instrumentation:"):
+                    fields = dict(re.findall(r"([A-Za-z]+)='([^']*)'", line))
+                    require(fields.get("name") == "androidx.test.runner.AndroidJUnitRunner" and
+                            fields.get("targetPackage") == APP_ID, "Unexpected instrumentation runner or target")
             continue
         require(manifest == {"applicationId": APP_ID, "version": version, "versionCode": code},
                 "APK version/package differs from the checked-out source")

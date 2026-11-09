@@ -29,8 +29,9 @@ REPOSITORY = "orewn/tropnik"
 
 def read_request(root: Path):
     request = read_json(root / REQUEST)
-    require(set(request) == {"schemaVersion", "version", "versionCode", "notesFile"} and
+    require(set(request) == {"schemaVersion", "requestId", "version", "versionCode", "notesFile"} and
             request["schemaVersion"] == 1 and
+            isinstance(request["requestId"], str) and re.fullmatch(r"[a-z][a-z0-9-]{7,95}", request["requestId"]) and
             isinstance(request["version"], str) and re.fullmatch(r"\d+\.\d+\.\d+-preview", request["version"]) and
             type(request["versionCode"]) is int and request["versionCode"] > 0,
             "Invalid explicit preview release request")
@@ -124,6 +125,7 @@ def prepare(root: Path, directory: Path, device_directory: Path, output: Path):
         shutil.copyfile(directory / name, output / name)
     verification = read_json(directory / "tropnik-arm64-preview.verification.json")
     metadata = {"version": build["version"], "versionCode": build["versionCode"], "architecture": "arm64-v8a",
+                "releaseRequestId": request["requestId"],
                 "minSdk": 26, "targetSdk": 36, **build["files"][ARM64],
                 "signature": "development / debug", "compatibleWithPreviousPreview": False,
                 "signingCertificateSha256": build["signingCertificateSha256"],
@@ -176,7 +178,7 @@ def prepare(root: Path, directory: Path, device_directory: Path, output: Path):
         "\nАрхив исходников соответствует указанному commit; `verification-reports.zip` содержит подписи, проверки пакетов, "
         "JVM и фактические результаты устройства. `checksums.sha256` связывает файлы этой поставки.\n")
     (output / "release-body.md").write_text(body)
-    publication = {"schemaVersion": 1, "sourceCommit": build["sourceCommit"], "workflowRunId": build["workflowRunId"],
+    publication = {"schemaVersion": 1, "requestId": request["requestId"], "sourceCommit": build["sourceCommit"], "workflowRunId": build["workflowRunId"],
                    "tag": "v" + build["version"], "version": build["version"],
                    "name": "Тропник " + build["version"] + " — Android и веб-конструктор",
                    "bodySha256": fingerprint(output / "release-body.md")["sha256"],
@@ -224,7 +226,9 @@ def publish(output: Path, client):
     publication = read_json(output / "release-upload.json")
     require(os.environ.get("GITHUB_REPOSITORY") == REPOSITORY and os.environ.get("GITHUB_REF") == "refs/heads/main" and
             os.environ.get("GITHUB_EVENT_NAME") in ("push", "workflow_dispatch"), "Publication is restricted to this repository's main workflow")
-    require(publication.get("schemaVersion") == 1 and publication.get("sourceCommit") == os.environ.get("GITHUB_SHA") and
+    require(publication.get("schemaVersion") == 1 and
+            re.fullmatch(r"[a-z][a-z0-9-]{7,95}", publication.get("requestId", "")) and
+            publication.get("sourceCommit") == os.environ.get("GITHUB_SHA") and
             publication.get("workflowRunId") == os.environ.get("GITHUB_RUN_ID") and
             re.fullmatch(r"v\d+\.\d+\.\d+-preview", publication.get("tag", "")), "Publication provenance mismatch")
     for asset in publication["assets"]:

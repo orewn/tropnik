@@ -81,7 +81,7 @@ class ReleaseFixture(unittest.TestCase):
             path.mkdir()
         (self.root / "android/app").mkdir(parents=True)
         (self.root / "android/app/build.gradle.kts").write_text('versionName = "0.4.16-preview"\nversionCode = 8\n')
-        self.request = {"schemaVersion": 1, "version": "0.4.16-preview", "versionCode": 8,
+        self.request = {"schemaVersion": 1, "requestId": "android-preview-fixture-request", "version": "0.4.16-preview", "versionCode": 8,
                         "notesFile": "tools/android-build/release-notes/0.4.16-preview.md"}
         (self.root / self.request["notesFile"]).parent.mkdir(parents=True)
         (self.root / self.request["notesFile"]).write_text("Browser planner; development preview.\n")
@@ -107,8 +107,9 @@ class ReleaseFixture(unittest.TestCase):
                 "Signer #1 certificate DN: C=US, O=Android, CN=Android Debug\n"
                 f"Signer #1 certificate SHA-256 digest: {cert}\n")
             package = artifacts.TEST_ID if name == artifacts.TEST_APK else artifacts.APP_ID
+            version, code = ("", "") if name == artifacts.TEST_APK else ("0.4.16-preview", "8")
             (self.dist / (stem + ".manifest.txt")).write_text(
-                f"package: name='{package}' versionCode='8' versionName='0.4.16-preview' platformBuildVersionName='16'\n")
+                f"package: name='{package}' versionCode='{code}' versionName='{version}' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'\n")
             if name == artifacts.TEST_APK:
                 continue
             fp = artifacts.fingerprint(self.dist / name)
@@ -161,6 +162,29 @@ class ReleaseFixture(unittest.TestCase):
         with self.assertRaises(ValueError):
             artifacts.build_receipt(self.dist, self.root)
 
+    def test_real_unversioned_instrumentation_badging_does_not_relax_app_checks(self):
+        # Exact first-line shape produced by AGP/AAPT2 in run 42641770635.
+        manifest = (self.dist / "tropnik-instrumentation-tests.manifest.txt").read_text()
+        self.assertIsNone(artifacts.parse_badging(manifest, allow_unversioned=True)["versionCode"])
+        self.assertEqual(artifacts.verify_receipt(self.dist, self.root)["versionCode"], 8)
+        for name in (artifacts.ARM64, artifacts.UNIVERSAL):
+            path = self.dist / (name.removesuffix(".apk") + ".manifest.txt")
+            original = path.read_text()
+            for changed in (original.replace("versionCode='8'", "versionCode=''"),
+                            original.replace("versionName='0.4.16-preview'", "versionName=''"),
+                            original.replace("versionCode='8'", "versionCode='7'")):
+                path.write_text(changed)
+                with self.assertRaises(ValueError):
+                    artifacts.inspect_payload(self.dist, self.root)
+            path.write_text(original)
+        test_path = self.dist / "tropnik-instrumentation-tests.manifest.txt"
+        test_path.write_text(manifest.replace(artifacts.TEST_ID, "foreign.test"))
+        with self.assertRaises(ValueError):
+            artifacts.inspect_payload(self.dist, self.root)
+        test_path.write_text(manifest + "instrumentation: name='foreign.Runner' targetPackage='ru.tropa.app.preview'\n")
+        with self.assertRaises(ValueError):
+            artifacts.inspect_payload(self.dist, self.root)
+
     def test_device_proof_cannot_be_reused_for_another_apk_or_source(self):
         original = json.loads((self.device / "device-result.json").read_text())
         for mutation in (lambda x: x.update(sourceCommit="0" * 40),
@@ -184,6 +208,19 @@ class ReleaseFixture(unittest.TestCase):
         self.json(self.root / release.REQUEST, self.request)
         with self.assertRaises(ValueError):
             release.prepare(self.root, self.dist, self.device, self.base / "bad")
+
+    def test_retry_request_id_is_explicit_validated_and_changes_the_gate(self):
+        self.request["requestId"] = "android-preview-instrumentation-metadata-fix"
+        self.json(self.root / release.REQUEST, self.request)
+        self.git("add", release.REQUEST)
+        self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-m", "Explicit release retry")
+        self.assertTrue(release.is_requested(self.root, "push", "refs/heads/main", self.commit, False))
+        self.assertEqual(release.read_request(self.root)["requestId"], self.request["requestId"])
+        for invalid in ("", " ", "../other", "A" * 100, None):
+            self.request["requestId"] = invalid
+            self.json(self.root / release.REQUEST, self.request)
+            with self.assertRaises(ValueError):
+                release.read_request(self.root)
 
     def test_prepared_release_is_reproducible_and_arm64_not_device_claimed(self):
         first = release.prepare(self.root, self.dist, self.device, self.base / "one")
