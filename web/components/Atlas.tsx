@@ -225,6 +225,10 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      if(cancelled||map!==mapRef.current||!container.current)return;
      syncRouteEdgeAnnotations(routeAnnotations.current);
      const center=map.getCenter(),screenCenter=map.project(center);publishMapCamera(container.current,{longitude:center.lng,latitude:center.lat,zoom:map.getZoom(),tileSize:512,engine:'maplibre',centerX:screenCenter.x,centerY:screenCenter.y});
+     // Read-only evidence for the isolated diagnostic branch; no map reference
+     // or setter is exposed to the browser driver.
+     const terrainCamera=JSON.stringify({pitch:map.getPitch(),bearing:map.getBearing(),centerElevation:map.getCenterElevation(),targetElevation:map.getCameraTargetElevation(),terrainElevation:map.queryTerrainElevation(center),centerClampedToGround:map.getCenterClampedToGround(),verticalFieldOfView:map.getVerticalFieldOfView(),pixelRatio:map.getPixelRatio(),terrain:map.getTerrain(),activeLayers:map.getStyle()?.layers?.filter(layer=>(layer.minzoom??0)<=map.getZoom()&&(layer.maxzoom??24)>map.getZoom()&&layer.layout?.visibility!=='none').map(layer=>layer.id)});
+     if(container.current.dataset.mapTerrainCamera!==terrainCamera)container.current.dataset.mapTerrainCamera=terrainCamera;
      const items=directionItems;
      const projected=new Map(items.map(item=>{const point=map.project([russiaLongitude(item.center[0]),item.center[1]]);return[item.id,{x:point.x,y:point.y}] as const;}));
      for(const item of items){

@@ -7,7 +7,7 @@ export const TERRAIN_TRACE_LIMITS=Object.freeze({...DESKTOP_TRACE_LIMITS,duratio
 // The previous 2MiB buffer filled before the observed long task. Broad toplevel
 // events duplicated RunTask and consumed half the evidence. Keep renderer task,
 // layout, CPU stack and GPU evidence without the redundant scheduler stream.
-const CATEGORIES=['devtools.timeline','blink.user_timing','gpu','disabled-by-default-devtools.timeline','disabled-by-default-devtools.timeline.stack','disabled-by-default-v8.cpu_profiler'];
+export const DESKTOP_TRACE_CATEGORIES=Object.freeze(['devtools.timeline','blink.user_timing','gpu','disabled-by-default-devtools.timeline','disabled-by-default-devtools.timeline.stack','disabled-by-default-v8.cpu_profiler']);
 
 /** Diagnostic only: one desktop action, with native input unchanged.
  * CDP Tracing.start/end and IO.read/close are documented in the upstream PDL:
@@ -18,10 +18,11 @@ const CATEGORIES=['devtools.timeline','blink.user_timing','gpu','disabled-by-def
 export async function traceDesktopSelection(cdp,action,{
  output=OUTPUT,sourceCommit=null,limits=DESKTOP_TRACE_LIMITS,
  prefix='desktop-webgl-first-altai',scope='first-desktop-altai-selection',
+ categories=DESKTOP_TRACE_CATEGORIES,
  clock=()=>performance.now(),schedule=setTimeout,cancel=clearTimeout,
 }={}){
  const started=clock(),chunks=[];
- const receipt={schemaVersion:1,scope,sourceCommit,instrumented:true,startedAtEpochMs:Date.now(),limits:{...limits},categories:CATEGORIES,status:'recording',stopReason:null,bytes:0,eof:false,dataLossOccurred:false,errors:[]};
+ const receipt={schemaVersion:1,scope,sourceCommit,instrumented:true,startedAtEpochMs:Date.now(),limits:{...limits},categories:[...categories],status:'recording',stopReason:null,bytes:0,eof:false,dataLossOccurred:false,errors:[]};
  let completion,resolveCompletion,startRequested=false,stopPromise,timer,value,actionError;
  const completed=new Promise(resolve=>{resolveCompletion=resolve;});
  // The completion event is allowed to arrive before Tracing.end is acknowledged.
@@ -72,7 +73,7 @@ export async function traceDesktopSelection(cdp,action,{
    timer=schedule(()=>{void stop('time-limit');},limits.durationMs);
    await cdp.call('Tracing.start',{
     transferMode:'ReturnAsStream',streamFormat:'json',streamCompression:'none',
-    traceConfig:{recordMode:'recordUntilFull',traceBufferSizeInKb:limits.bufferSizeKiB,enableSampling:true,includedCategories:CATEGORIES,excludedCategories:['*']},
+    traceConfig:{recordMode:'recordUntilFull',traceBufferSizeInKb:limits.bufferSizeKiB,enableSampling:true,includedCategories:categories,excludedCategories:['*']},
    },limits.drainMs);
   }catch(error){receipt.errors.push(errorText(error));}
   try{value=await action();}catch(error){actionError=error;receipt.actionError=errorText(error);}
