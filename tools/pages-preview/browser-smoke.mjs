@@ -218,24 +218,37 @@ async function checkMapGeometry(cdp,profile){
   const closed=await layerMenuState(cdp,false);
   return{...geometry,layersInteraction:{opened,closed}};
 }
-async function touchPrevious(cdp){
+async function dismissMapMessage(cdp){
+  const dismissible=await evaluate(cdp,`document.querySelector('.map-message button')?.textContent?.trim()==='Понятно'`);
+  if(!dismissible)return false;
+  assert.equal(await tapSelector(cdp,'.map-message button',13),true,'The map message must accept its dismiss touch');
+  await sleep(50);
+  return true;
+}
+async function touchPrevious(cdp,profile){
+  await dismissMapMessage(cdp);
   if(await evaluate(cdp,`!!document.querySelector('.fact-closed')`)){
     assert.equal(await tapSelector(cdp,'.fact-closed',12),true,'The stories opener must accept a touch');
   }
-  let point;
+  let point,last;
   for(let attempt=0;attempt<40;attempt++){
-    point=await evaluate(cdp,`(()=>{
+    last=await evaluate(cdp,`(()=>{
       const button=document.querySelector('.fact-controls button[aria-label="Предыдущая история"]');
-      if(!button)return null;
+      const message=document.querySelector('.map-message'),dismiss=message?.querySelector('button');
+      const notice={message:message?.textContent?.trim(),dismissible:dismiss?.textContent?.trim()==='Понятно'};
+      if(!button)return{ready:false,reason:'missing-button',dismissed:!!document.querySelector('.fact-closed'),...notice};
       button.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
       const r=button.getBoundingClientRect(),style=getComputedStyle(button),x=r.left+r.width/2,y=r.top+r.height/2;
-      if(style.display==='none'||style.visibility==='hidden'||r.width<1||r.height<1||!button.contains(document.elementFromPoint(x,y)))return null;
-      return{x,y,title:document.querySelector('.fact-copy h3')?.textContent};
+      const hit=document.elementFromPoint(x,y),card=button.closest('.fact-card'),cardRect=card?.getBoundingClientRect();
+      const box=rect=>rect?{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,width:rect.width,height:rect.height}:null;
+      const ready=style.display!=='none'&&style.visibility!=='hidden'&&r.width>1&&r.height>1&&button.contains(hit);
+      return{ready,x,y,title:document.querySelector('.fact-copy h3')?.textContent,visibility:style.visibility,rect:box(r),card:box(cardRect),scrollTop:card?.scrollTop,hit:hit?hit.tagName.toLowerCase()+'.'+(hit.getAttribute('class')||''):null,...notice};
     })()`);
-    if(point)break;
+    if(last?.ready){point=last;break;}
+    if(last?.dismissible)await dismissMapMessage(cdp);
     await sleep(50);
   }
-  assert.ok(point,'Story navigation did not become visible after opening the stories');
+  assert.ok(point,`${profile.name}: story navigation did not become visible after opening: ${JSON.stringify(last)}`);
   await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id:1,radiusX:2,radiusY:2,force:1}]});
   await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   await sleep(240);
@@ -293,7 +306,7 @@ try{
       assert.ok(sheet.heightDelta<1.1,`${profile.name}: panel height changed during transform animation (${sheet.heightDelta}px)`);
     }
     const mapGeometry=await checkMapGeometry(cdp,profile);
-    const touch=await touchPrevious(cdp);
+    const touch=await touchPrevious(cdp,profile);
     if(touch.available){
       assert.equal(touch.focused,false,`${profile.name}: story navigation retained touch focus`);
       assert.equal(touch.background,touch.nextBackground,`${profile.name}: previous-story control kept a sticky visual state`);
