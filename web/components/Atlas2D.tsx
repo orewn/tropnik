@@ -183,7 +183,9 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
      allowed:()=>!cancelled&&map===mapRef.current&&!!regionRef.current?.bounds&&!trailRef.current&&!!container.current,
      refit:()=>{if(regionRef.current)fitTerritoryBounds(regionRef.current,!window.matchMedia('(prefers-reduced-motion: reduce)').matches);},
     });
-    unbindFrame=bindMapFrameRefit(element,element.closest('.explore-layout')?.querySelector('.explore-panel')??null,frameRefit.current);
+    unbindFrame=bindMapFrameRefit(element,element.closest('.explore-layout')?.querySelector('.explore-panel')??null,frameRefit.current,()=>{
+     if(!cancelled&&map===mapRef.current)russiaView(element,256);
+    });
     map.on('dragstart',()=>frameRefit.current?.cancel());
     map.createPane('russia-land');map.getPane('russia-land')!.style.zIndex='150';
     map.createPane('russia-overview-relief');Object.assign(map.getPane('russia-overview-relief')!.style,{zIndex:'160',pointerEvents:'none'});

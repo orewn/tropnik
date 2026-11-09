@@ -153,3 +153,32 @@ test('map input bindings stop automatic framing while only the drawer transform 
  panel.events.get('transitionend')({target:panel,propertyName:'transform'});env.flushFrames();
  assert.equal(env.count(),1);unbind();assert.equal(surface.events.size,0);assert.equal(panel.events.size,0);
 });
+
+test('settled drawer geometry updates even when automatic camera framing is unavailable or canceled',()=>{
+ const element=()=>{
+  const events=new Map();
+  return{events,addEventListener:(name,fn)=>events.set(name,fn),removeEventListener:name=>events.delete(name)};
+ };
+ const surface=element(),panel=element(),env=refitHarness(),measured=[];
+ let covered=357;
+ const unbind=bindMapFrameRefit(surface,panel,env.refit,()=>measured.push(covered));
+ const transition=propertyName=>panel.events.get('transitionend')({target:panel,propertyName});
+ env.refit.select('route-open');env.setAllowed(false);
+ panel.events.get('transitionend')({target:{},propertyName:'transform'});
+ transition('opacity');
+ assert.deepEqual(measured,[],'unrelated transitions must not measure the drawer');
+ covered=156;transition('transform');env.flushFrames();
+ assert.deepEqual(measured,[156],'the settled inset must replace the intermediate animation geometry');
+ assert.equal(env.count(),0,'measuring geometry must not bypass the camera permission');
+
+ env.setAllowed(true);env.refit.select('manual-camera');surface.events.get('pointerdown')({});
+ covered=420;transition('height');env.flushFrames();
+ assert.deepEqual(measured,[156,420]);
+ assert.equal(env.count(),0,'manual camera navigation must remain authoritative');
+
+ env.refit.select('new-territory');covered=156;transition('transform');env.flushFrames();
+ assert.deepEqual(measured,[156,420,156]);
+ assert.equal(env.count(),1,'an allowed new territory may still refit after measuring');
+ unbind();
+ assert.equal(surface.events.size,0);assert.equal(panel.events.size,0);
+});

@@ -141,7 +141,9 @@ export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,
      allowed:()=>!cancelled&&map===mapRef.current&&!!map.getStyle()&&!!regionRef.current?.bounds&&!trailRef.current&&!!container.current,
      refit:()=>{if(regionRef.current&&container.current)fitTerritory(map,regionRef.current,container.current,window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:250,framedCamera);},
     });
-    unbindFrame=bindMapFrameRefit(container.current,container.current.closest('.explore-layout')?.querySelector('.explore-panel')??null,frameRefit.current);
+    unbindFrame=bindMapFrameRefit(container.current,container.current.closest('.explore-layout')?.querySelector('.explore-panel')??null,frameRefit.current,()=>{
+     if(!cancelled&&map===mapRef.current&&container.current)russiaView(container.current);
+    });
     styleSession.current=new MapStyleSession({online:navigator.onLine,preference:basePreference.current,currentMode:initialMode,
      overview:()=>overviewStyle(coverage),
      detail:async()=>detailRef.current??(detailRef.current=detailStyle(await loadPublicJSON<StyleSpecification>('/maps/tropa-style.json'),coverage)),

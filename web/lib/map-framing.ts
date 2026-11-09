@@ -65,10 +65,17 @@ export class MapFrameRefit{
 
 /** DOM input signals distinguish user navigation from programmatic camera
  * movement, which also emits zoom/move events in both map libraries. */
-export function bindMapFrameRefit(surface:HTMLElement,panel:Element|null,refit:MapFrameRefit){
+export function bindMapFrameRefit(surface:HTMLElement,panel:Element|null,refit:MapFrameRefit,onGeometrySettled?:()=>void){
  const stop=()=>refit.cancel();
  const keyboard=(event:KeyboardEvent)=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','+','=','-','−','Home','End','PageUp','PageDown'].includes(event.key))stop();};
- const transition=(event:Event)=>{const property=(event as TransitionEvent).propertyName;if(event.target===panel&&(property==='transform'||property==='height'))refit.settled();};
+ const transition=(event:Event)=>{
+  const property=(event as TransitionEvent).propertyName;
+  if(event.target!==panel||(property!=='transform'&&property!=='height'))return;
+  // Insets belong to the visible layout even when a manual camera or an open
+  // route prevents automatic territory framing.
+  onGeometrySettled?.();
+  refit.settled();
+ };
  surface.addEventListener('pointerdown',stop,{passive:true});
  surface.addEventListener('touchstart',stop,{passive:true});
  surface.addEventListener('wheel',stop,{passive:true});
