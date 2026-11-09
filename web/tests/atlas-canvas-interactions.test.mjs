@@ -7,13 +7,14 @@ import {MAP_CONFIG} from '../lib/map-config.ts';
 import {russiaLongitude,leafletRussiaMask,MAP_OUTSIDE_COLOR} from '../public/maps/russia-viewport.js';
 import * as routePresentation from '../lib/map-route-presentation.ts';
 import {createLeafletCanvas} from '../lib/leaflet-canvas.ts';
+import {maskViewportCulling} from '../lib/leaflet-mask-viewport.ts';
 
 const require=createRequire(new URL('../package.json',import.meta.url));
 const ts=require('typescript');
 const source=readFileSync(new URL('../components/Atlas2D.tsx',import.meta.url),'utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 const component={exports:{}};
-new Function('require','module','exports',compiled)(id=>id==='@/lib/map-config'?{MAP_CONFIG}:id==='@/public/maps/russia-viewport.js'?{russiaLongitude,leafletRussiaMask,MAP_OUTSIDE_COLOR}:id==='@/lib/map-route-presentation'?routePresentation:id==='@/lib/leaflet-canvas'?{createLeafletCanvas}:{},component,component.exports);
+new Function('require','module','exports',compiled)(id=>id==='@/lib/map-config'?{MAP_CONFIG}:id==='@/public/maps/russia-viewport.js'?{russiaLongitude,leafletRussiaMask,MAP_OUTSIDE_COLOR}:id==='@/lib/map-route-presentation'?routePresentation:id==='@/lib/leaflet-canvas'?{createLeafletCanvas}:id==='@/lib/leaflet-mask-viewport'?{maskViewportCulling}:{},component,component.exports);
 const {createCanvasTrailPoint,createCanvasTrailLine,raiseCanvasTrailPoints,createCanvasRussiaMask}=component.exports;
 
 // Use the installed Leaflet implementation for renderer ownership, projection,

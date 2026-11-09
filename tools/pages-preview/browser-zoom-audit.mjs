@@ -41,23 +41,38 @@ export function assertMapUIBounds(layout,context){
  }
 }
 
-/** Deliver distinct native presses without waiting for camera animation between
- * them. The count is deliberately small enough to fit within one animation. */
+/** Send native events in wire order without stretching a touch hold while
+ * Chromium acknowledges/paints the preceding event. CDP.call sends on the
+ * single socket synchronously. Drain every ACK before returning or throwing. */
 export async function dispatchZoomBurst(cdp,point,profile,count=4){
  assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y));
  assert.ok(Number.isInteger(count)&&count>0&&count<=4);
- const started=Date.now();
- if(!profile.mobile)await cdp.call('Input.dispatchMouseEvent',{type:'mouseMoved',x:point.x,y:point.y,pointerType:'mouse'});
+ const started=performance.now(),startedAtEpochMs=Date.now(),commands=[],acknowledgements=[];
+ const enqueue=(method,params)=>{
+  const sent=performance.now(),command={index:commands.length,method,type:params.type,sentAtEpochMs:Date.now(),sentOffsetMs:sent-started};commands.push(command);
+  let acknowledgement;
+  try{acknowledgement=cdp.call(method,params);}catch(error){acknowledgement=Promise.reject(error);}
+  acknowledgements.push(Promise.resolve(acknowledgement).then(()=>{
+   command.ackAtEpochMs=Date.now();command.ackOffsetMs=performance.now()-started;command.ackDurationMs=performance.now()-sent;command.status='fulfilled';
+  },error=>{
+   command.ackAtEpochMs=Date.now();command.ackOffsetMs=performance.now()-started;command.ackDurationMs=performance.now()-sent;command.status='rejected';command.error=error?.message||String(error);throw error;
+  }));
+ };
+ if(!profile.mobile)enqueue('Input.dispatchMouseEvent',{type:'mouseMoved',x:point.x,y:point.y,pointerType:'mouse'});
  for(let index=0;index<count;index++){
   if(profile.mobile){
-   await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id:81,radiusX:3,radiusY:3,force:1}]});
-   await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+   enqueue('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id:81,radiusX:3,radiusY:3,force:1}]});
+   enqueue('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   }else{
-   await cdp.call('Input.dispatchMouseEvent',{type:'mousePressed',x:point.x,y:point.y,button:'left',buttons:1,clickCount:1,pointerType:'mouse'});
-   await cdp.call('Input.dispatchMouseEvent',{type:'mouseReleased',x:point.x,y:point.y,button:'left',buttons:0,clickCount:1,pointerType:'mouse'});
+   enqueue('Input.dispatchMouseEvent',{type:'mousePressed',x:point.x,y:point.y,button:'left',buttons:1,clickCount:1,pointerType:'mouse'});
+   enqueue('Input.dispatchMouseEvent',{type:'mouseReleased',x:point.x,y:point.y,button:'left',buttons:0,clickCount:1,pointerType:'mouse'});
   }
  }
- return{count,durationMs:Date.now()-started,input:profile.mobile?'touch':'mouse'};
+ const producerDurationMs=performance.now()-started,results=await Promise.allSettled(acknowledgements);
+ const receipt={count,dispatchMode:'ordered-native',startedAtEpochMs,producerDurationMs,durationMs:performance.now()-started,input:profile.mobile?'touch':'mouse',commands};
+ const failures=results.filter(result=>result.status==='rejected').map(result=>result.reason);
+ if(failures.length){const error=new AggregateError(failures,`Native zoom input failed: ${failures[0]?.message||String(failures[0])}`);error.inputDiagnostics=receipt;throw error;}
+ return receipt;
 }
 
 /** Real-input zoom coverage plus reviewable images. Network/source availability
@@ -66,7 +81,7 @@ export async function dispatchZoomBurst(cdp,point,profile,count=4){
 export async function runZoomDesignAudit(cdp,profile,helpers){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase}=helpers;
  await mkdir(OUTPUT,{recursive:true});
- const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:2,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
+ const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:3,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
  const save=()=>writeFile(new URL(`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');
  const network=new Map();
  const forget=cdp.observe('Network.responseReceived',({requestId,response})=>{
@@ -147,12 +162,20 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
   assert.ok(point?.unobscured,`${profile.name}: the burst zoom control is unavailable`);
   const step=profile.engine==='leaflet'?.75:1,count=4;
   const expected=Math.min(18,Math.max(report.minimumZoom,before.camera.zoom+direction*step*count));
-  const start=await evaluate(cdp,'({time:performance.now(),scrollY:window.scrollY})');
-  const input=await dispatchZoomBurst(cdp,point,profile,count);
+  const start=await evaluate(cdp,'({time:performance.now(),timeOrigin:performance.timeOrigin,scrollY:window.scrollY})');
+  report.lastZoomBurst={direction,step,beforeZoom:before.camera.zoom,expectedZoom:expected,domSampleStartedAtMs:start.time};
+  let input;
+  try{input=await dispatchZoomBurst(cdp,point,profile,count);}catch(error){Object.assign(report.lastZoomBurst,error.inputDiagnostics||{});throw error;}
+  Object.assign(report.lastZoomBurst,input);
   const after=await waitValue(`${profile.name}: rapid zoom did not accumulate all four presses`,()=>settledMap(cdp,profile.engine),state=>Math.abs(state.camera.zoom-expected)<.01,4000);
-  const delivered=await evaluate(cdp,`(()=>{const events=(window.__tropnikInputEvents||[]).filter(event=>event.type==='click'&&event.time>=${start.time}&&event.trusted&&event.button?.label===${JSON.stringify(label)});return{clicks:events.length,eventSpanMs:events.length>1?events.at(-1).time-events[0].time:0,scrollY:window.scrollY};})()`);
-  const result={...input,direction,step,beforeZoom:before.camera.zoom,expectedZoom:expected,afterZoom:after.camera.zoom,receivedClicks:delivered.clicks,eventSpanMs:delivered.eventSpanMs,pageScrollDeltaPx:Math.abs(delivered.scrollY-start.scrollY)};
+  const delivered=await evaluate(cdp,`(()=>{const events=(window.__tropnikInputEvents||[]).filter(event=>event.time>=${start.time}&&event.button?.label===${JSON.stringify(label)}).map(({type,time,timestamp,pointerType,trusted})=>({type,time,timestamp,pointerType,trusted})),clicks=events.filter(event=>event.type==='click'&&event.trusted);return{events,clicks:clicks.length,eventSpanMs:clicks.length>1?clicks.at(-1).time-clicks[0].time:0,scrollY:window.scrollY,recentLongTasks:(window.__tropnikLongTasks||[]).slice(-32),performance:{...window.__tropnikPerf}};})()`);
+  const expectedEvents=Array.from({length:count},()=>['pointerdown','pointerup','click']).flat();
+  const eventOrderVerified=delivered.events.every(event=>event.trusted)&&JSON.stringify(delivered.events.map(event=>event.type))===JSON.stringify(expectedEvents);
+  const firstPress=input.commands.find(command=>command.type==='touchStart'||command.type==='mousePressed');
+  const result={...input,direction,step,beforeZoom:before.camera.zoom,expectedZoom:expected,afterZoom:after.camera.zoom,receivedClicks:delivered.clicks,eventSpanMs:delivered.eventSpanMs,eventOrderVerified,events:delivered.events,domSampleStartedAtMs:start.time,domTimeOrigin:start.timeOrigin,firstInputLagMs:delivered.events.length?start.timeOrigin+delivered.events[0].time-firstPress.sentAtEpochMs:null,recentLongTasks:delivered.recentLongTasks,performance:delivered.performance,pageScrollDeltaPx:Math.abs(delivered.scrollY-start.scrollY)};
+  report.lastZoomBurst=result;
   assert.equal(delivered.clicks,count,`${profile.name}: the browser did not deliver four distinct trusted zoom clicks: ${JSON.stringify(result)}`);
+  assert.equal(eventOrderVerified,true,`${profile.name}: native pointerdown/up/click order changed: ${JSON.stringify(result)}`);
   assert.ok(delivered.eventSpanMs<200,`${profile.name}: the zoom clicks did not reach the UI within one animation: ${JSON.stringify(result)}`);
   assert.ok(Math.abs(after.camera.zoom-expected)<.01,`${profile.name}: rapid zoom lost an input while the camera was animating: ${JSON.stringify(result)}`);
   assert.ok(result.pageScrollDeltaPx<=1,`${profile.name}: rapid zoom scrolled the page`);
@@ -162,7 +185,9 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
  async function rapidZoomControls(){
   const before=await settledMap(cdp,profile.engine);
   assert.ok(before.camera.zoom>=9.5&&before.camera.zoom<=11,`${profile.name}: burst zoom must start away from either clamp`);
-  const increase=await fastZoomBurst(1),decrease=await fastZoomBurst(-1);
+  const increase=await fastZoomBurst(1);
+  report.zoomBurst={passed:false,input:profile.mobile?'touch':'mouse',increase};
+  const decrease=await fastZoomBurst(-1);
   assert.ok(Math.abs(decrease.afterZoom-before.camera.zoom)<.01,`${profile.name}: opposite zoom bursts did not return to their starting scale`);
   const result={passed:true,input:profile.mobile?'touch':'mouse',increase,decrease,returnedToStart:true};
   report.zoomBurst=result;await save();return result;

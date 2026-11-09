@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-09T20:06:54.042768+00:00",
+  "sourceCommit": "2e9b1e5661e5e2ebb29d324991fb0228bf41be3b",
+  "workflowRun": 42687585354,
+  "attempt": 1,
+  "status": "failed; deployment skipped",
+  "profile": "android-portrait",
+  "error": "AssertionError [ERR_ASSERTION]: android-portrait: the zoom clicks did not reach the UI within one animation: {\"count\":4,\"durationMs\":1570,\"input\":\"touch\",\"direction\":-1,\"step\":0.75,\"beforeZoom\":12.58772159520626,\"expectedZoom\":9.58772159520626,\"afterZoom\":9.58772159520626,\"receivedClicks\":4,\"eventSpanMs\":1535.5,\"pageScrollDeltaPx\":0}",
+  "phase": "zoom-design-detail",
+  "performance": {
+    "cls": 0,
+    "longest": 191
+  },
+  "performanceIssues": [],
+  "inputEvents": [
+    {
+      "type": "pointerdown",
+      "timeMs": 76630.5,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerup",
+      "timeMs": 76646.7,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "click",
+      "timeMs": 76647.3,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerdown",
+      "timeMs": 76663.9,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerup",
+      "timeMs": 76685.3,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "click",
+      "timeMs": 76685.9,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerdown",
+      "timeMs": 76702.7,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerup",
+      "timeMs": 76715,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "click",
+      "timeMs": 76715.7,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerdown",
+      "timeMs": 76732.3,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerup",
+      "timeMs": 76748.4,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "click",
+      "timeMs": 76749,
+      "label": "Увеличить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerdown",
+      "timeMs": 78614,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerup",
+      "timeMs": 78629.9,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "click",
+      "timeMs": 78631.9,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerdown",
+      "timeMs": 78648.2,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerup",
+      "timeMs": 78694.6,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "click",
+      "timeMs": 78696.8,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerdown",
+      "timeMs": 78738.7,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerup",
+      "timeMs": 79240.4,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "click",
+      "timeMs": 79241.8,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerdown",
+      "timeMs": 79371.1,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "pointerup",
+      "timeMs": 80166.3,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    },
+    {
+      "type": "click",
+      "timeMs": 80167.4,
+      "label": "Уменьшить масштаб",
+      "trusted": true
+    }
+  ],
+  "artifactSha256": {
+    "design.zip": "5cd7ad636f2e5fbc196746366ead4c843ba129fa77ab21048efa0df0d9612e68",
+    "browser-failure.zip": "ee760733daa57f5e5f4e672a8b927a779ffd0baf9dafe5794086415ae79de2c5"
+  },
+  "interpretation": "Four minus clicks reached the exact expected zoom, but they were not delivered inside the 200 ms rapid-input budget. Pauses were observed between pointerdown and pointerup. The evidence does not distinguish CDP acknowledgement, compositor work, and multiple shorter renderer tasks.",
+  "nextStep": "One diagnostic retry on the unchanged source, driver and thresholds. Preserve this failure; do not classify it as infrastructure without additional evidence."
+}

@@ -47,7 +47,7 @@ function assertSheetGestures(gestures,name){
 
 function assertZoomDesign(design,name,engine,mobile){
  assert.equal(design?.geometryPassed,true,`${name}: missing zoom-level design geometry evidence`);
- assert.equal(design.schemaVersion,2,'The design report predates notices, credits and saved-overview coverage');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
+ assert.equal(design.schemaVersion,3,'The design report predates ordered native burst input and delivery evidence');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
  assert.equal(design.visualReviewRequired,true,'DOM bounds must not be reported as human visual review');
  assert.equal(design.maximumZoom,18);assert.equal(design.routeId,'kavkaz-8a');
  assert.ok(Number.isFinite(design.minimumZoom)&&design.minimumZoom<4,`${name}: zoom coverage omitted the overview`);
@@ -65,6 +65,24 @@ function assertZoomDesign(design,name,engine,mobile){
  for(const [key,direction] of [['increase',1],['decrease',-1]]){
   const burst=bursts[key];assert.equal(burst?.passed,true);assert.equal(burst.input,mobile?'touch':'mouse');
   assert.equal(burst.count,4);assert.equal(burst.receivedClicks,4);assert.equal(burst.direction,direction);assert.equal(burst.step,step);
+  assert.equal(burst.dispatchMode,'ordered-native');assert.equal(burst.eventOrderVerified,true);
+  const eventTypes=Array.from({length:4},()=>['pointerdown','pointerup','click']).flat();
+  assert.deepEqual(burst.events?.map(event=>event.type),eventTypes,`${name}: trusted native event order was not preserved`);
+  assert.ok(burst.events.every(event=>event.trusted&&Number.isFinite(event.time)&&Number.isFinite(event.timestamp)));
+  for(let index=1;index<burst.events.length;index++)assert.ok(burst.events[index].time>=burst.events[index-1].time);
+  const clicks=burst.events.filter(event=>event.type==='click');
+  assert.ok(Math.abs(burst.eventSpanMs-(clicks.at(-1).time-clicks[0].time))<.01,`${name}: click-span receipt differs from actual DOM events`);
+  const commandTypes=[...(mobile?[]:['mouseMoved']),...Array.from({length:4},()=>mobile?['touchStart','touchEnd']:['mousePressed','mouseReleased']).flat()];
+  assert.deepEqual(burst.commands?.map(command=>command.type),commandTypes,`${name}: native input wire order was not recorded`);
+  for(const [index,command] of burst.commands.entries()){
+   assert.equal(command.index,index);assert.equal(command.status,'fulfilled');
+   assert.equal(command.method,mobile?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent');
+   assert.ok([command.sentAtEpochMs,command.ackAtEpochMs,command.sentOffsetMs,command.ackOffsetMs,command.ackDurationMs].every(Number.isFinite));
+   assert.ok(command.sentOffsetMs>=0&&command.ackOffsetMs>=command.sentOffsetMs&&command.ackDurationMs>=0);
+   if(index)assert.ok(command.sentOffsetMs>=burst.commands[index-1].sentOffsetMs);
+  }
+  assert.ok([burst.producerDurationMs,burst.firstInputLagMs,burst.domTimeOrigin,burst.domSampleStartedAtMs].every(Number.isFinite));
+  assert.ok(Array.isArray(burst.recentLongTasks)&&burst.recentLongTasks.length<=32);
   assert.ok([burst.beforeZoom,burst.afterZoom,burst.expectedZoom,burst.eventSpanMs,burst.durationMs].every(Number.isFinite));
   assert.ok(burst.eventSpanMs>=0&&burst.eventSpanMs<200,`${name}: zoom presses were slower than one animation`);
   const expected=Math.min(18,Math.max(design.minimumZoom,burst.beforeZoom+direction*step*4));

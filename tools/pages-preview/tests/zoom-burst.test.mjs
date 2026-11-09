@@ -2,16 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {assertMapUIBounds,dispatchZoomBurst,settleMapCamera,mapCameraIsMoving} from '../browser-zoom-audit.mjs';
 
-test('rapid zoom uses four serial native presses and releases without camera callbacks',async()=>{
+test('rapid zoom sends native presses in wire order without waiting for slow acknowledgements',async()=>{
  for(const mobile of [true,false]){
-  const calls=[];let dispatching=false;
-  const cdp={async call(method,params){
-   assert.equal(dispatching,false,'Input commands must finish in order');dispatching=true;
-   await Promise.resolve();calls.push({method,...params});dispatching=false;
-  }};
-  const result=await dispatchZoomBurst(cdp,{x:287,y:189},{mobile},4);
-  assert.equal(result.count,4);assert.equal(result.input,mobile?'touch':'mouse');
-  assert.ok(Number.isFinite(result.durationMs)&&result.durationMs>=0);
+  const calls=[],acknowledgements=[];
+  const cdp={call(method,params){calls.push({method,...params});return new Promise(resolve=>acknowledgements.push(resolve));}};
+  const pending=dispatchZoomBurst(cdp,{x:287,y:189},{mobile},4);
+  assert.equal(calls.length,mobile?8:9,'Every event must be sent while the first ACK is still unresolved');
   if(mobile){
    assert.equal(calls.length,8);
    assert.deepEqual(calls.map(call=>call.type),Array.from({length:4},()=>['touchStart','touchEnd']).flat());
@@ -26,7 +22,35 @@ test('rapid zoom uses four serial native presses and releases without camera cal
    for(const call of calls){assert.equal(call.method,'Input.dispatchMouseEvent');assert.equal(call.x,287);assert.equal(call.y,189);assert.equal(call.pointerType,'mouse');}
    for(const call of calls.slice(1)){assert.equal(call.button,'left');assert.equal(call.clickCount,1);}
   }
+  for(const acknowledge of acknowledgements.toReversed())acknowledge();
+  const result=await pending;
+  assert.equal(result.count,4);assert.equal(result.input,mobile?'touch':'mouse');assert.equal(result.dispatchMode,'ordered-native');
+  assert.ok(Number.isFinite(result.durationMs)&&result.durationMs>=0);
+  assert.equal(result.commands.length,calls.length);
+  assert.deepEqual(result.commands.map(command=>command.type),calls.map(call=>call.type));
+  assert.ok(result.commands.every(command=>command.status==='fulfilled'&&command.ackOffsetMs>=command.sentOffsetMs));
+  assert.ok(Math.max(...result.commands.map(command=>command.sentOffsetMs))<=Math.min(...result.commands.map(command=>command.ackOffsetMs)),'Slow ACKs must not throttle the producer');
  }
+});
+
+test('rapid zoom drains all acknowledgements and surfaces every native input error',async()=>{
+ const acknowledgements=[],calls=[];
+ const cdp={call(method,params){calls.push({method,...params});return new Promise((resolve,reject)=>acknowledgements.push({resolve,reject}));}};
+ let terminal=false;
+ const observed=dispatchZoomBurst(cdp,{x:287,y:189},{mobile:true},4).then(()=>{terminal=true;return null;},error=>{terminal=true;return error;});
+ assert.equal(calls.length,8);
+ const first=new Error('touch end failed'),second=new Error('touch start failed');
+ acknowledgements[4].reject(second);acknowledgements[1].reject(first);
+ for(let index=0;index<7;index++)if(index!==1&&index!==4)acknowledgements[index].resolve();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(terminal,false,'One failed ACK must not return while other native input is still outstanding');
+ acknowledgements[7].resolve();
+ const error=await observed;
+ assert.ok(error instanceof AggregateError);assert.deepEqual(error.errors,[first,second]);
+ assert.match(error.message,/touch end failed/);
+ assert.equal(error.inputDiagnostics.commands.length,8);
+ assert.equal(error.inputDiagnostics.commands[1].status,'rejected');assert.equal(error.inputDiagnostics.commands[4].status,'rejected');
+ assert.equal(error.inputDiagnostics.commands[7].status,'fulfilled');
 });
 
 test('invalid zoom bursts fail before emitting partial or empty acceptance input',async()=>{

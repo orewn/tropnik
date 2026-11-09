@@ -13,8 +13,12 @@ function sheetGestures(){
 }
 function zoomDesign(profile,engine,mobile){
  const step=mobile?.75:1,input=mobile?'touch':'mouse',high=10+4*step;
- const burst=(direction,beforeZoom,afterZoom)=>({passed:true,input,count:4,receivedClicks:4,direction,step,beforeZoom,afterZoom,expectedZoom:afterZoom,eventSpanMs:40,durationMs:50,pageScrollDeltaPx:0,selectionPreserved:true});
- return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:2,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),
+ const burst=(direction,beforeZoom,afterZoom)=>({passed:true,input,count:4,receivedClicks:4,direction,step,beforeZoom,afterZoom,expectedZoom:afterZoom,eventSpanMs:30,durationMs:50,pageScrollDeltaPx:0,selectionPreserved:true,
+  dispatchMode:'ordered-native',eventOrderVerified:true,producerDurationMs:1,firstInputLagMs:100,domTimeOrigin:10000,domSampleStartedAtMs:90,recentLongTasks:[],
+  events:Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+tap*10+index*2,timestamp:100+tap*10+index*2,trusted:true,pointerType:input}))).flat(),
+  commands:[...(mobile?[]:['mouseMoved']),...Array.from({length:4},()=>mobile?['touchStart','touchEnd']:['mousePressed','mouseReleased']).flat()].map((type,index)=>({index,type,method:mobile?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent',status:'fulfilled',sentAtEpochMs:10000+index*.1,ackAtEpochMs:10040+index,sentOffsetMs:index*.1,ackOffsetMs:40+index,ackDurationMs:40+index*.9})),
+ });
+ return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:3,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),
   zoomBurst:{passed:true,input,returnedToStart:true,increase:burst(1,10,high),decrease:burst(-1,high,10)},
   modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview'})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:mobile?'not-offered':'active'},scene3d:{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true}},
   screenshots:['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)})))};
@@ -54,6 +58,7 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
   value=>value.zoomDesigns.pop(),
   value=>value.zoomDesigns[0].geometryPassed=false,
   value=>value.zoomDesigns[0].schemaVersion=1,
+  value=>value.zoomDesigns[0].schemaVersion=2,
   value=>value.zoomDesigns[0].visualReviewRequired=false,
   value=>value.zoomDesigns[0].detailSteps.splice(6,1),
   value=>value.zoomDesigns[0].detailSteps.pop(),
@@ -71,6 +76,12 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
   value=>value.zoomDesigns[0].zoomBurst.increase.receivedClicks=3,
   value=>value.zoomDesigns[0].zoomBurst.increase.afterZoom-=.75,
   value=>value.zoomDesigns[0].zoomBurst.increase.eventSpanMs=200,
+  value=>value.zoomDesigns[0].zoomBurst.increase.dispatchMode='serial-ack',
+  value=>value.zoomDesigns[0].zoomBurst.increase.events[1].type='click',
+  value=>value.zoomDesigns[0].zoomBurst.increase.events[2].trusted=false,
+  value=>value.zoomDesigns[0].zoomBurst.increase.commands[3].status='rejected',
+  value=>delete value.zoomDesigns[0].zoomBurst.increase.commands,
+  value=>value.zoomDesigns[0].zoomBurst.increase.recentLongTasks=Array(33).fill({duration:60}),
   value=>value.zoomDesigns[0].zoomBurst.decrease.afterZoom+=.75,
  ];
  for(const change of changes){const bad=evidence();change(bad);assert.throws(()=>assertBrowserReport(bad,commit));}

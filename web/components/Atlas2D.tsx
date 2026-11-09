@@ -21,6 +21,7 @@ import {MapZoomButtons,MAP_ZOOM_BUTTONS} from '@/lib/map-zoom-buttons';
 import {canvasStyle} from '@/public/maps/canvas-style.js';
 import {createCanvasRelief} from '@/lib/canvas-relief';
 import {createLeafletCanvas} from '@/lib/leaflet-canvas';
+import {maskViewportCulling} from '@/lib/leaflet-mask-viewport';
 import {LatestMapNavigation,loadMapSelection} from '@/lib/map-lifecycle';
 import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {mapTrailPointEntries,type MapTrailPoint} from '@/lib/map-trail-points';
@@ -34,8 +35,9 @@ type CanvasTrailPointLayers={marker:LeafletCircleMarker;hit:LeafletCircleMarker}
 export function createCanvasRussiaMask(L:typeof import('leaflet'),mask:GeoJSON.GeoJsonObject){
  // These published cells already share a simplified boundary. Leaflet's
  // per-ring simplifier can cut a shared corner and open a long visible slit.
- const style:import('leaflet').PolylineOptions={renderer:createLeafletCanvas(L,{pane:'russia-mask',padding:.15}),smoothFactor:0,stroke:false,fillColor:MAP_OUTSIDE_COLOR,fillOpacity:1,fillRule:'evenodd'};
- return L.geoJSON(leafletRussiaMask(mask),{pane:'russia-mask',interactive:false,style});
+ const renderer=createLeafletCanvas(L,{pane:'russia-mask',padding:.15}),cull=maskViewportCulling(renderer);
+ const style:import('leaflet').PolylineOptions={renderer,smoothFactor:0,stroke:false,fillColor:MAP_OUTSIDE_COLOR,fillOpacity:1,fillRule:'evenodd'};
+ return L.geoJSON(leafletRussiaMask(mask),{pane:'russia-mask',interactive:false,style,onEachFeature:(_feature,layer)=>{if(layer instanceof L.Polygon)cull(layer);}});
 }
 export function createCanvasTrailPoint(L:typeof import('leaflet'),item:MapTrailPoint,onSelect:()=>void,onHover:()=>void):CanvasTrailPointLayers{
  const center:[number,number]=[item.center[1],russiaLongitude(item.center[0])];

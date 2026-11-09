@@ -121,7 +121,7 @@ async function diagnosticPhase(cdp,name){
   })()`);
 }
 async function performanceDiagnostics(cdp){
-  return evaluate(cdp,'({current:window.__tropnikPerf,counterStart:window.__tropnikPerfStart,phase:window.__tropnikPhase,phases:window.__tropnikPhases,layoutShifts:window.__tropnikLayoutShifts,expectedPointer:window.__tropnikExpectedPointer,inputEvents:window.__tropnikInputEvents})');
+  return evaluate(cdp,'({timeOrigin:performance.timeOrigin,current:window.__tropnikPerf,counterStart:window.__tropnikPerfStart,phase:window.__tropnikPhase,phases:window.__tropnikPhases,layoutShifts:window.__tropnikLayoutShifts,recentLongTasks:window.__tropnikLongTasks,expectedPointer:window.__tropnikExpectedPointer,inputEvents:window.__tropnikInputEvents})');
 }
 async function loadProfile(cdp,url,profile){
   await cdp.call('Emulation.setDeviceMetricsOverride',{width:profile.width,height:profile.height,deviceScaleFactor:profile.mobile?2:1,mobile:profile.mobile,screenWidth:profile.width,screenHeight:profile.height});
@@ -615,10 +615,10 @@ try{
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
     window.__tropnikPerf={cls:0,longest:0};
     window.__tropnikPerfStart=0;window.__tropnikPhase='loading';window.__tropnikPhases=[];window.__tropnikLayoutShifts=[];
-    window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;
+    window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;window.__tropnikLongTasks=[];
     for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,event=>{
       const node=event.target?.nodeType===1?event.target:event.target?.parentElement,button=node?.closest('button,a'),r=button?.getBoundingClientRect();
-      window.__tropnikInputEvents.push({type,time:performance.now(),x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
+      window.__tropnikInputEvents.push({type,time:performance.now(),timestamp:event.timeStamp,pointerType:event.pointerType||'',x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
       if(window.__tropnikInputEvents.length>36)window.__tropnikInputEvents.shift();
     },{capture:true,passive:true});
     try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput){
@@ -628,7 +628,11 @@ try{
       window.__tropnikLayoutShifts.push({time:entry.startTime,observedAt:performance.now(),lastInputTime:entry.lastInputTime,counterStart:window.__tropnikPerfStart,phase:window.__tropnikPhase,value:entry.value,cumulative:window.__tropnikPerf.cls,sources:(entry.sources||[]).slice(0,5).map(source=>({node:nodePath(source.node),previous:rect(source.previousRect),current:rect(source.currentRect)}))});
       if(window.__tropnikLayoutShifts.length>40)window.__tropnikLayoutShifts.shift();
     }}).observe({type:'layout-shift',buffered:true});}catch{}
-    try{new PerformanceObserver(list=>{for(const entry of list.getEntries())window.__tropnikPerf.longest=Math.max(window.__tropnikPerf.longest,entry.duration);}).observe({type:'longtask',buffered:true});}catch{}
+    try{new PerformanceObserver(list=>{for(const entry of list.getEntries()){
+      window.__tropnikPerf.longest=Math.max(window.__tropnikPerf.longest,entry.duration);
+      window.__tropnikLongTasks.push({startTime:entry.startTime,duration:entry.duration,name:entry.name,observedAt:performance.now(),phase:window.__tropnikPhase});
+      if(window.__tropnikLongTasks.length>32)window.__tropnikLongTasks.shift();
+    }}).observe({type:'longtask',buffered:true});}catch{}
   `});
   for(const profile of profiles){
     currentProfile=profile.name;

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "scope": "Final local source validation before exact-commit browser CI and publication",
+  "recordedAt": "2026-11-09T20:20:07.547114+00:00",
+  "parentCommit": "2e9b1e5661e5e2ebb29d324991fb0228bf41be3b",
+  "webTests": {
+    "passed": 430,
+    "failed": 0,
+    "skipped": 0
+  },
+  "pagesToolingTests": {
+    "passed": 26,
+    "failed": 0,
+    "skipped": 0
+  },
+  "typeScript": {
+    "web": "PASS",
+    "pages": "PASS"
+  },
+  "eslint": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "sourceGeometryChanged": false,
+  "changedCodeSHA256": {
+    "tools/pages-preview/browser-report.mjs": "e83ba4d9ff74cb96ed2622255723e2f5ea973b007823df45b2fef127296ec7c0",
+    "tools/pages-preview/browser-smoke.mjs": "0279623a5cdc65f0438c0056ce5902338d8c25ba02a99eb957c155132c9d6904",
+    "tools/pages-preview/browser-zoom-audit.mjs": "2cc62bda1afcab010dcd70998a990714ba67779920617341563963432d0b5708",
+    "tools/pages-preview/tests/browser-report.test.mjs": "f92387132b8e5d3d2de363ae615a9c429ded1c8b447bb564b10141c7b940a75c",
+    "tools/pages-preview/tests/zoom-burst.test.mjs": "f66b568f241b068b76d017c989601fe610b63f55b259c7b406d3b25e557e1df8",
+    "web/components/Atlas2D.tsx": "a93625430659606d3663729394e436793896e5a9f0058bc7634c0ea1d7689b80",
+    "web/lib/leaflet-mask-viewport.ts": "3f7b9849969703d78bdd92f1d17dedfac934a577490712e11fa0f5b38a53209a",
+    "web/tests/atlas-canvas-interactions.test.mjs": "7853dcab4e8a4d9f6cd1fbd06082efc8c46d31d0dce65cae5b07a5eed2d1e9e3",
+    "web/tests/leaflet-mask-viewport.test.mjs": "e24ba0e3e0f68a3c3b7ab244298a10f1227fe178d12cfb1f9a7fa6fd88f3a509"
+  },
+  "limitations": [
+    "Physical Android/Brave FPS remains unmeasured.",
+    "Exact-source browser and published-site evidence remains required."
+  ]
+}
