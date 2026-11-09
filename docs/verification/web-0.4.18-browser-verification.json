@@ -1,0 +1,854 @@
+{
+  "verified": true,
+  "mapInteractionSchemaVersion": 1,
+  "browser": "system Chromium via CDP",
+  "profiles": [
+    {
+      "name": "compact-android",
+      "width": 320,
+      "height": 640,
+      "engine": "leaflet",
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0,
+      "mapGeometry": {
+        "width": 320,
+        "height": 640,
+        "coarse": true,
+        "state": "closed",
+        "layout": {
+          "left": 0,
+          "right": 320,
+          "top": 68,
+          "bottom": 640,
+          "width": 320,
+          "height": 572
+        },
+        "atlas": {
+          "left": 0,
+          "right": 320,
+          "top": 68,
+          "bottom": 640,
+          "width": 320,
+          "height": 572
+        },
+        "available": {
+          "left": 0,
+          "right": 320,
+          "top": 68,
+          "bottom": 484
+        },
+        "overlays": {
+          "stories": {
+            "left": 12,
+            "right": 154.921875,
+            "top": 140,
+            "bottom": 184,
+            "width": 142.921875,
+            "height": 44
+          },
+          "context": {
+            "left": 12,
+            "right": 94.734375,
+            "top": 80,
+            "bottom": 130,
+            "width": 82.734375,
+            "height": 50
+          },
+          "styles": {
+            "left": 256,
+            "right": 308,
+            "top": 80,
+            "bottom": 132,
+            "width": 52,
+            "height": 52
+          },
+          "rail": {
+            "left": 258,
+            "right": 308,
+            "top": 140,
+            "bottom": 331,
+            "width": 50,
+            "height": 191
+          },
+          "layers": {
+            "left": 258,
+            "right": 308,
+            "top": 343,
+            "bottom": 393,
+            "width": 50,
+            "height": 50
+          }
+        },
+        "targets": [
+          {
+            "label": "Увеличить масштаб",
+            "rect": {
+              "left": 261,
+              "right": 305,
+              "top": 144,
+              "bottom": 188,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Уменьшить масштаб",
+            "rect": {
+              "left": 261,
+              "right": 305,
+              "top": 188,
+              "bottom": 232,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Моё местоположение",
+            "rect": {
+              "left": 261,
+              "right": 305,
+              "top": 239,
+              "bottom": 283,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Показать Россию целиком",
+            "rect": {
+              "left": 261,
+              "right": 305,
+              "top": 283,
+              "bottom": 327,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Слои",
+            "rect": {
+              "left": 258,
+              "right": 308,
+              "top": 343,
+              "bottom": 393,
+              "width": 50,
+              "height": 50
+            },
+            "blocked": []
+          }
+        ],
+        "overlaps": [],
+        "layersInteraction": {
+          "opened": {
+            "expanded": true,
+            "visible": true
+          },
+          "closed": {
+            "expanded": false,
+            "visible": false
+          }
+        }
+      },
+      "layoutShift": 0,
+      "longestTaskMs": 113
+    },
+    {
+      "name": "iphone-portrait",
+      "width": 390,
+      "height": 844,
+      "engine": "leaflet",
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0,
+      "mapGeometry": {
+        "width": 390,
+        "height": 844,
+        "coarse": true,
+        "state": "closed",
+        "layout": {
+          "left": 0,
+          "right": 390,
+          "top": 68,
+          "bottom": 844,
+          "width": 390,
+          "height": 776
+        },
+        "atlas": {
+          "left": 0,
+          "right": 390,
+          "top": 68,
+          "bottom": 844,
+          "width": 390,
+          "height": 776
+        },
+        "available": {
+          "left": 0,
+          "right": 390,
+          "top": 68,
+          "bottom": 688
+        },
+        "overlays": {
+          "stories": {
+            "left": 12,
+            "right": 314,
+            "top": 140,
+            "bottom": 309,
+            "width": 302,
+            "height": 169
+          },
+          "context": {
+            "left": 12,
+            "right": 94.734375,
+            "top": 80,
+            "bottom": 130,
+            "width": 82.734375,
+            "height": 50
+          },
+          "styles": {
+            "left": 326,
+            "right": 378,
+            "top": 80,
+            "bottom": 132,
+            "width": 52,
+            "height": 52
+          },
+          "rail": {
+            "left": 328,
+            "right": 378,
+            "top": 140,
+            "bottom": 331,
+            "width": 50,
+            "height": 191
+          },
+          "layers": {
+            "left": 328,
+            "right": 378,
+            "top": 343,
+            "bottom": 393,
+            "width": 50,
+            "height": 50
+          }
+        },
+        "targets": [
+          {
+            "label": "Увеличить масштаб",
+            "rect": {
+              "left": 331,
+              "right": 375,
+              "top": 144,
+              "bottom": 188,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Уменьшить масштаб",
+            "rect": {
+              "left": 331,
+              "right": 375,
+              "top": 188,
+              "bottom": 232,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Моё местоположение",
+            "rect": {
+              "left": 331,
+              "right": 375,
+              "top": 239,
+              "bottom": 283,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Показать Россию целиком",
+            "rect": {
+              "left": 331,
+              "right": 375,
+              "top": 283,
+              "bottom": 327,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Слои",
+            "rect": {
+              "left": 328,
+              "right": 378,
+              "top": 343,
+              "bottom": 393,
+              "width": 50,
+              "height": 50
+            },
+            "blocked": []
+          }
+        ],
+        "overlaps": [],
+        "layersInteraction": {
+          "opened": {
+            "expanded": true,
+            "visible": true
+          },
+          "closed": {
+            "expanded": false,
+            "visible": false
+          }
+        }
+      },
+      "layoutShift": 0,
+      "longestTaskMs": 0
+    },
+    {
+      "name": "android-portrait",
+      "width": 412,
+      "height": 915,
+      "engine": "leaflet",
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0,
+      "mapGeometry": {
+        "width": 412,
+        "height": 915,
+        "coarse": true,
+        "state": "closed",
+        "layout": {
+          "left": 0,
+          "right": 412,
+          "top": 68,
+          "bottom": 915,
+          "width": 412,
+          "height": 847
+        },
+        "atlas": {
+          "left": 0,
+          "right": 412,
+          "top": 68,
+          "bottom": 915,
+          "width": 412,
+          "height": 847
+        },
+        "available": {
+          "left": 0,
+          "right": 412,
+          "top": 68,
+          "bottom": 759
+        },
+        "overlays": {
+          "stories": {
+            "left": 12,
+            "right": 332,
+            "top": 140,
+            "bottom": 309,
+            "width": 320,
+            "height": 169
+          },
+          "context": {
+            "left": 12,
+            "right": 94.734375,
+            "top": 80,
+            "bottom": 130,
+            "width": 82.734375,
+            "height": 50
+          },
+          "styles": {
+            "left": 348,
+            "right": 400,
+            "top": 80,
+            "bottom": 132,
+            "width": 52,
+            "height": 52
+          },
+          "rail": {
+            "left": 350,
+            "right": 400,
+            "top": 140,
+            "bottom": 331,
+            "width": 50,
+            "height": 191
+          },
+          "layers": {
+            "left": 350,
+            "right": 400,
+            "top": 343,
+            "bottom": 393,
+            "width": 50,
+            "height": 50
+          }
+        },
+        "targets": [
+          {
+            "label": "Увеличить масштаб",
+            "rect": {
+              "left": 353,
+              "right": 397,
+              "top": 144,
+              "bottom": 188,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Уменьшить масштаб",
+            "rect": {
+              "left": 353,
+              "right": 397,
+              "top": 188,
+              "bottom": 232,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Моё местоположение",
+            "rect": {
+              "left": 353,
+              "right": 397,
+              "top": 239,
+              "bottom": 283,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Показать Россию целиком",
+            "rect": {
+              "left": 353,
+              "right": 397,
+              "top": 283,
+              "bottom": 327,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Слои",
+            "rect": {
+              "left": 350,
+              "right": 400,
+              "top": 343,
+              "bottom": 393,
+              "width": 50,
+              "height": 50
+            },
+            "blocked": []
+          }
+        ],
+        "overlaps": [],
+        "layersInteraction": {
+          "opened": {
+            "expanded": true,
+            "visible": true
+          },
+          "closed": {
+            "expanded": false,
+            "visible": false
+          }
+        }
+      },
+      "layoutShift": 0,
+      "longestTaskMs": 127
+    },
+    {
+      "name": "phone-landscape",
+      "width": 844,
+      "height": 390,
+      "engine": "leaflet",
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0,
+      "mapGeometry": {
+        "width": 844,
+        "height": 390,
+        "coarse": true,
+        "state": "closed",
+        "layout": {
+          "left": 0,
+          "right": 844,
+          "top": 72,
+          "bottom": 390,
+          "width": 844,
+          "height": 318
+        },
+        "atlas": {
+          "left": 0,
+          "right": 844,
+          "top": 72,
+          "bottom": 390,
+          "width": 844,
+          "height": 318
+        },
+        "available": {
+          "left": 0,
+          "right": 844,
+          "top": 72,
+          "bottom": 278
+        },
+        "overlays": {
+          "stories": {
+            "left": 16,
+            "right": 158.921875,
+            "top": 148,
+            "bottom": 192,
+            "width": 142.921875,
+            "height": 44
+          },
+          "context": {
+            "left": 16,
+            "right": 105.734375,
+            "top": 88,
+            "bottom": 136,
+            "width": 89.734375,
+            "height": 48
+          },
+          "styles": {
+            "left": 771,
+            "right": 828,
+            "top": 88,
+            "bottom": 142,
+            "width": 57,
+            "height": 54
+          },
+          "rail": {
+            "left": 633,
+            "right": 828,
+            "top": 212,
+            "bottom": 266,
+            "width": 195,
+            "height": 54
+          },
+          "layers": {
+            "left": 572,
+            "right": 620,
+            "top": 222,
+            "bottom": 266,
+            "width": 48,
+            "height": 44
+          }
+        },
+        "targets": [
+          {
+            "label": "Увеличить масштаб",
+            "rect": {
+              "left": 638,
+              "right": 682,
+              "top": 217,
+              "bottom": 261,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Уменьшить масштаб",
+            "rect": {
+              "left": 682,
+              "right": 726,
+              "top": 217,
+              "bottom": 261,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Моё местоположение",
+            "rect": {
+              "left": 735,
+              "right": 779,
+              "top": 217,
+              "bottom": 261,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Показать Россию целиком",
+            "rect": {
+              "left": 779,
+              "right": 823,
+              "top": 217,
+              "bottom": 261,
+              "width": 44,
+              "height": 44
+            },
+            "blocked": []
+          },
+          {
+            "label": "Слои",
+            "rect": {
+              "left": 572,
+              "right": 620,
+              "top": 222,
+              "bottom": 266,
+              "width": 48,
+              "height": 44
+            },
+            "blocked": []
+          }
+        ],
+        "overlaps": [],
+        "layersInteraction": {
+          "opened": {
+            "expanded": true,
+            "visible": true
+          },
+          "closed": {
+            "expanded": false,
+            "visible": false
+          }
+        }
+      },
+      "layoutShift": 0,
+      "longestTaskMs": 105
+    }
+  ],
+  "desktopProfiles": [
+    {
+      "name": "desktop-webgl",
+      "width": 1440,
+      "height": 1000,
+      "engine": "maplibre",
+      "coarse": false,
+      "mapInteractionTested": true
+    }
+  ],
+  "mapInteractions": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "mobile": true,
+      "passed": true,
+      "firstDirection": [
+        {
+          "group": "adygea|altai|baikal|kabardino-balkaria|kaliningrad|kamchatka|karachay-cherkessia|karelia|krasnodar|krasnoyarsk|krym|murmansk|primorye|sakhalin|voronezh",
+          "beforeZoom": 1.337721595206259,
+          "afterZoom": 2.337721595206259,
+          "selected": ""
+        },
+        {
+          "group": "altai|baikal",
+          "beforeZoom": 2.337721595206259,
+          "afterZoom": 4.352647277348736,
+          "selected": ""
+        },
+        {
+          "group": "altai",
+          "beforeZoom": 4.352647277348736,
+          "afterZoom": 6.1,
+          "selected": "altai"
+        }
+      ],
+      "route": {
+        "id": "osm-relation-6040458",
+        "title": "Всесоюзный горнопешеходный маршрут № 77",
+        "offsetPx": 14
+      },
+      "line": {
+        "point": {
+          "x": 24.360571571437532,
+          "y": 475.8984449321372
+        },
+        "route": "osm-relation-6040458",
+        "clicked": true,
+        "selectionRetained": true,
+        "reopened": true
+      },
+      "returnedToRegion": true,
+      "returnedToDirections": true,
+      "countryCameraRestored": true,
+      "countryCameras": {
+        "initial": {
+          "longitude": 120.99929234285709,
+          "latitude": 58.40553839033907,
+          "zoom": 1.337721595206259,
+          "tileSize": 256
+        },
+        "returned": {
+          "longitude": 120.99929234285709,
+          "latitude": 58.40553839033907,
+          "zoom": 1.337721595206259,
+          "tileSize": 256
+        }
+      },
+      "secondDirection": [
+        {
+          "group": "adygea|altai|baikal|kabardino-balkaria|kaliningrad|kamchatka|karachay-cherkessia|karelia|krasnodar|krasnoyarsk|krym|murmansk|primorye|sakhalin|voronezh",
+          "beforeZoom": 1.337721595206259,
+          "afterZoom": 2.337721595206259,
+          "selected": ""
+        },
+        {
+          "group": "altai|baikal",
+          "beforeZoom": 2.337721595206259,
+          "afterZoom": 4.352647277348736,
+          "selected": ""
+        },
+        {
+          "group": "baikal",
+          "beforeZoom": 4.352647277348736,
+          "afterZoom": 6,
+          "selected": "baikal"
+        }
+      ],
+      "polygon": {
+        "x": 206,
+        "y": 491.5,
+        "coordinate": [
+          108.61083984375001,
+          52.68970242806751
+        ],
+        "id": "territory-28173009B49563687485750",
+        "title": "Республика Бурятия"
+      },
+      "gestures": {
+        "zoomInput": "touch-control",
+        "beforeZoom": 4.5657444906979014,
+        "afterZoom": 5.3157444906979014,
+        "dragged": true,
+        "dragCameras": {
+          "before": {
+            "longitude": 109.41359607724925,
+            "latitude": 52.11852855301879,
+            "zoom": 5.3157444906979014,
+            "tileSize": 256
+          },
+          "after": {
+            "longitude": 107.71884768006635,
+            "latitude": 52.3779265194021,
+            "zoom": 5.3157444906979014,
+            "tileSize": 256
+          }
+        },
+        "selectionPreserved": true,
+        "resizedTo": {
+          "width": 915,
+          "height": 412
+        },
+        "postResizePolygon": "territory-28173009B49563687485750"
+      },
+      "longestTaskMs": 127,
+      "layoutShift": 0.04227878441174859,
+      "durationMs": 19234
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "mobile": false,
+      "passed": true,
+      "firstDirection": [
+        {
+          "group": "altai",
+          "beforeZoom": 1.90540610449558,
+          "afterZoom": 6.1,
+          "selected": "altai"
+        }
+      ],
+      "route": {
+        "id": "osm-relation-6040458",
+        "title": "Всесоюзный горнопешеходный маршрут № 77",
+        "offsetPx": 14
+      },
+      "line": {
+        "point": {
+          "x": 424.11929556307564,
+          "y": 626.5058129960987
+        },
+        "route": "osm-relation-6040458",
+        "clicked": true,
+        "selectionRetained": true,
+        "reopened": false
+      },
+      "returnedToRegion": true,
+      "returnedToDirections": true,
+      "countryCameraRestored": true,
+      "countryCameras": {
+        "initial": {
+          "longitude": 109.82542975180718,
+          "latitude": 69.6251220425601,
+          "zoom": 1.90540610449558,
+          "tileSize": 512,
+          "centerX": 520.5000000000003,
+          "centerY": 464
+        },
+        "returned": {
+          "longitude": 109.82542975180718,
+          "latitude": 69.6251220425601,
+          "zoom": 1.90540610449558,
+          "tileSize": 512,
+          "centerX": 520.5000000000003,
+          "centerY": 464
+        }
+      },
+      "secondDirection": [
+        {
+          "group": "baikal",
+          "beforeZoom": 1.90540610449558,
+          "afterZoom": 6,
+          "selected": "baikal"
+        }
+      ],
+      "polygon": {
+        "x": 748.3499999999999,
+        "y": 536,
+        "coordinate": [
+          106.28448486328125,
+          53.29999999999998
+        ],
+        "id": "territory-28173009B78872068540735",
+        "title": "Иркутская область"
+      },
+      "gestures": {
+        "zoomInput": "mouse-wheel",
+        "beforeZoom": 4.36935063832489,
+        "afterZoom": 4.872517842089215,
+        "dragged": true,
+        "dragCameras": {
+          "before": {
+            "longitude": 108.20021893346188,
+            "latitude": 58.58120638934162,
+            "zoom": 4.872517842089215,
+            "tileSize": 512,
+            "centerX": 520.5,
+            "centerY": 463.9999999999993
+          },
+          "after": {
+            "longitude": 107.04809353077064,
+            "latitude": 58.731032350971134,
+            "zoom": 4.872517842089215,
+            "tileSize": 512,
+            "centerX": 520.5,
+            "centerY": 464
+          }
+        },
+        "selectionPreserved": true,
+        "resizedTo": {
+          "width": 1260,
+          "height": 900
+        },
+        "postResizePolygon": "territory-28173009B78872068540735"
+      },
+      "longestTaskMs": 330,
+      "layoutShift": 0,
+      "durationMs": 13221
+    }
+  ],
+  "sourceCommit": "d4b6e3d5fc81738105cc8d4f8c32c1853d22d49a"
+}

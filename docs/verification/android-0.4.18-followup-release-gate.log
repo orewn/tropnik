@@ -1,0 +1,11 @@
+# Exact gate excerpt from workflow 42669008316 / build job 129340224820
+2026-11-09T17:53:43.4715400Z ##[group]Run python3 tools/android-build/release-preview.py gate
+2026-11-09T17:53:43.4716154Z [36;1mpython3 tools/android-build/release-preview.py gate[0m
+2026-11-09T17:53:43.4735089Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-09T17:53:43.4735436Z env:
+2026-11-09T17:53:43.4735643Z   TROPA_API_BASE_URL: 
+2026-11-09T17:53:43.4735962Z   TROPNIK_BEFORE_SHA: 62237b7d02e5c9e49bdab00ac2037a17ae753938
+2026-11-09T17:53:43.4736293Z   TROPNIK_PUBLISH_PREVIEW: 
+2026-11-09T17:53:43.4736529Z ##[endgroup]
+2026-11-09T17:53:43.5393506Z release_requested=false
+2026-11-09T17:53:43.5393923Z release_version=

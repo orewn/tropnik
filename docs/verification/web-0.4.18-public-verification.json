@@ -1,0 +1,10 @@
+{
+  "verified": true,
+  "url": "https://orewn.github.io/tropnik/",
+  "buildId": "cb6e96a71fefa404",
+  "sourceCommit": "d4b6e3d5fc81738105cc8d4f8c32c1853d22d49a",
+  "publicHttpChecks": 23,
+  "apkSha256": "b80c36174a87eb70cc8e010af7535847b3fe9374586a87a535718bc25bf3d40f",
+  "browserRenderingTested": true,
+  "browserProfiles": 4
+}

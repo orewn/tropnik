@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "followupRunId": 42669008316,
+  "followupRunUrl": "https://github.com/orewn/tropnik/actions/runs/42669008316",
+  "followupSourceCommit": "d4b6e3d5fc81738105cc8d4f8c32c1853d22d49a",
+  "workflowStatus": "completed",
+  "workflowConclusion": "success",
+  "jobs": [
+    {
+      "id": 129340224820,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129341066324,
+      "name": "Android device scenarios",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129343352660,
+      "name": "Publish the requested Android prerelease",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "releaseRequested": false,
+  "releaseGateEvidence": "android-0.4.18-followup-release-gate.log",
+  "releaseGateActualLines": [
+    "2026-11-09T17:53:43.4735962Z   TROPNIK_BEFORE_SHA: 62237b7d02e5c9e49bdab00ac2037a17ae753938",
+    "2026-11-09T17:53:43.5393506Z release_requested=false",
+    "2026-11-09T17:53:43.5393923Z release_version="
+  ],
+  "releaseRequestBlob": "cbfa26c948838c2e3ed3ad89bc3cfdcf66a4db72",
+  "releaseRequestUnchanged": true,
+  "newBuildArtifacts": [
+    {
+      "id": 13698476143,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "digest": "sha256:949a6c95e148773f9cb4836396aa753a872618bab2da6c77301f7de971e53739",
+      "size": 5354385
+    },
+    {
+      "id": 13698470495,
+      "name": "tropnik-android-preview-1",
+      "digest": "sha256:3b09c26438c2b044796fa7d4f4ae75531e622721f01afb742c13a7683aa94f93",
+      "size": 55812914
+    }
+  ],
+  "newReleaseCandidateProduced": false,
+  "newApksDownloaded": false,
+  "publishedReleaseId": 439451485,
+  "publishedReleaseUrl": "https://github.com/orewn/tropnik/releases/tag/v0.4.18-preview",
+  "publishedSourceCommit": "1df3697a99558f90c15d29103120c62820b562f5",
+  "publishedTag": "v0.4.18-preview",
+  "publishedTagCommitUnchanged": true,
+  "publishedAtUnchanged": "2026-11-09T17:44:01Z",
+  "publishedAssetsUnchanged": {
+    "android-manifest.json": {
+      "id": 728390283,
+      "size": 1858,
+      "digest": "sha256:76caf0b37a5cc2c8ee639bdbf7bd0d8c715049f6cb1efec31eb86f1c2e045918",
+      "browser_download_url": "https://github.com/orewn/tropnik/releases/download/v0.4.18-preview/android-manifest.json"
+    },
+    "checksums.sha256": {
+      "id": 728390403,
+      "size": 460,
+      "digest": "sha256:5dfe3a84220efcbf904f1bb6966280591bdbcf932906ca3e841937cd193caf52",
+      "browser_download_url": "https://github.com/orewn/tropnik/releases/download/v0.4.18-preview/checksums.sha256"
+    },
+    "tropnik-0.4.18-preview-source.tar.gz": {
+      "id": 728390350,
+      "size": 33756337,
+      "digest": "sha256:d238c74ca4ce9d8657f9885a91b33c26c08e2563af27e4844674a83f6330544d",
+      "browser_download_url": "https://github.com/orewn/tropnik/releases/download/v0.4.18-preview/tropnik-0.4.18-preview-source.tar.gz"
+    },
+    "tropnik-arm64-preview.apk": {
+      "id": 728390173,
+      "size": 24528530,
+      "digest": "sha256:b80c36174a87eb70cc8e010af7535847b3fe9374586a87a535718bc25bf3d40f",
+      "browser_download_url": "https://github.com/orewn/tropnik/releases/download/v0.4.18-preview/tropnik-arm64-preview.apk"
+    },
+    "tropnik-preview.apk": {
+      "id": 728390234,
+      "size": 31684564,
+      "digest": "sha256:d31284e50f9cd31a365506b90d6b65a94e8ccff8ec5e2a787cbf49607b76d065",
+      "browser_download_url": "https://github.com/orewn/tropnik/releases/download/v0.4.18-preview/tropnik-preview.apk"
+    },
+    "verification-reports.zip": {
+      "id": 728390299,
+      "size": 36242,
+      "digest": "sha256:b1b834d688838027a2db8b31ee12b14c9fc12581fcceadfc90591f4bf28eb3a8",
+      "browser_download_url": "https://github.com/orewn/tropnik/releases/download/v0.4.18-preview/verification-reports.zip"
+    }
+  },
+  "allSixPublishedLocalFilesUnchanged": true,
+  "priorReleaseDirectory": "/workspace/scratch/569c30ca9137/android-release-0.4.18/published",
+  "canonicalFilesModified": false
+}
