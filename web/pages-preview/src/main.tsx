@@ -17,6 +17,7 @@ const loaders = {
   guides: () => import('../../app/guides/page'), account: () => import('../../app/account/page'),
   'account/action': () => import('../../app/account/action/page'),
   search: () => import('../../app/search/page'),
+  planner: () => import('../../app/planner/page'),
   moderation: () => import('../../app/moderation/page'),
   android: () => build.hasApk ? import('../../app/android/page') : import('./android-unavailable'),
   preview: () => import('./preview-info'), missing: () => import('../../app/not-found'),

@@ -57,5 +57,5 @@ test('service worker update is visible and user controlled',async()=>{
   assert.match(worker,/self\.skipWaiting/);
   assert.match(css,/\.app-update/);
   assert.match(css,/forced-colors:active/);
-  assert.equal(JSON.parse(pkg).version,'0.4.14');
+  assert.equal(JSON.parse(pkg).version,'0.4.15');
 });

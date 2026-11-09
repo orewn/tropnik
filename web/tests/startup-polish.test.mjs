@@ -47,7 +47,7 @@ test('final visual layer owns touch, viewport and reduced-motion guardrails',asy
  assert.match(css,/content-visibility:auto/);
  assert.match(css,/safe-area-inset/);
  assert.match(css,/prefers-reduced-motion/);
- assert.equal(JSON.parse(pkg).version,'0.4.14');
+ assert.equal(JSON.parse(pkg).version,'0.4.15');
 });
 
 test('mobile navigation traps focus and restores both document scroll containers',async()=>{

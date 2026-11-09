@@ -39,9 +39,12 @@ function positions(data: unknown): [number,number][] {
 const DETAIL_ENTER_ZOOM=4.6,DETAIL_EXIT_ZOOM=3.8;
 const regionBoxes:Record<string,number[]>={altai:[82,48,91,53],krasnodar:[36,42.5,42,46.8],karelia:[29,60.7,37,67.2],krym:[32,44,37,46],baikal:[103,50,113,56.8],kamchatka:[155,50,166,61]};
 
-export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,onViewportRegion}:AtlasProps){
+export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,onViewportRegion,planning=false,planPoints}:AtlasProps){
  const container=useRef<HTMLDivElement>(null),mapRef=useRef<LeafletMap|null>(null),baseRef=useRef<CanvasDetailLayer|null>(null);
  const points=useRef<LayerGroup|null>(null),selected=useRef<LayerGroup|null>(null),positionMarker=useRef<Layer|null>(null);
+ const planningMarkers=useRef<LayerGroup|null>(null);
+ const planningRef=useRef(planning),planFrame=useRef<{bounds:number[];selection:NonNullable<AtlasProps['trail']>}|null>(null);
+ const planFrameRevision=useRef(0),planFitPending=useRef(false),zooming=useRef(false);
  const directionButtons=useRef(new Map<string,HTMLButtonElement>()),routePointLayers=useRef(new Map<string,LeafletCircleMarker>());
  const directionGroups=useRef(new Map<string,MapDirectionGroup<Region>>()),updateDirections=useRef<(()=>void)|null>(null),visibleTrailsRef=useRef(visibleTrails);
  const territoryLayer=useRef<LeafletGeoJSON|null>(null),regionRef=useRef(region);
@@ -63,8 +66,10 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
  trailRef.current=trail;
  regionRef.current=region;
  visibleTrailsRef.current=visibleTrails;
- const sceneAvailable=hasTerrainPreview(trail,region?.id);
+ const sceneAvailable=!planning&&hasTerrainPreview(trail,region?.id);
  callbacks.current={onRegion,onTrail,onMapNote,onViewportRegion};
+ useEffect(()=>{planningRef.current=planning;},[planning]);
+ useEffect(()=>{if(planning)onMapNote?.(status);},[planning,status,onMapNote]);
  useEffect(()=>{setScene(false);if(sceneAvailable)void preloadTerrain();},[region?.id,trail?.id,sceneAvailable]);
 
  function territoryStyle(feature?:GeoJSON.Feature):PathOptions{
@@ -86,6 +91,30 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
   const center=map.unproject(map.project(bounds[0],zoom).add(map.project(bounds[1],zoom)).divideBy(2).add([(padding.right-padding.left)/2,(padding.bottom-padding.top)/2]),zoom);
   framedCamera.current={center:[center.lng,center.lat],zoom};fullView.current=false;
   map.fitBounds(bounds,{paddingTopLeft:[padding.left,padding.top],paddingBottomRight:[padding.right,padding.bottom],maxZoom:11,animate});
+ }
+ function hasPlanFrame(){
+  const frame=planFrame.current,current=trailRef.current;
+  return !!(planningRef.current&&frame&&current&&frame.selection.id===current.id&&frame.selection.geometryUrl===current.geometryUrl&&frame.selection.geometry===current.geometry);
+ }
+ function fitPlanFrame(){
+  const map=mapRef.current,element=container.current,L=leafletRef.current,frame=planFrame.current;
+  if(!map||!element||!L||!frame||!hasPlanFrame())return;
+  // Leaflet ignores setView/fitBounds while a CSS zoom is running, even after
+  // map.stop(). Keep only the latest plan and apply it once zoomend fires.
+  if(zooming.current){planFitPending.current=true;return;}
+  planFitPending.current=false;
+  map.stop();map.invalidateSize({pan:false});
+  const b=frame.bounds,bounds=L.latLngBounds([[b[1],b[0]],[b[3],b[2]]]),{padding}=russiaView(element,256);
+  const zoom=Math.min(16,map.getBoundsZoom(bounds,false,L.point(padding.left+padding.right,padding.top+padding.bottom)));
+  const center=map.unproject(map.project(bounds.getSouthWest(),zoom).add(map.project(bounds.getNorthEast(),zoom)).divideBy(2).add([(padding.right-padding.left)/2,(padding.bottom-padding.top)/2]),zoom);
+  framedCamera.current={center:[center.lng,center.lat],zoom};fullView.current=false;
+  map.fitBounds(bounds,{paddingTopLeft:[padding.left,padding.top],paddingBottomRight:[padding.right,padding.bottom],maxZoom:16,animate:false});
+ }
+ function requestPlanFit(){
+  if(!hasPlanFrame())return false;
+  fullView.current=false;
+  frameRefit.current?.select(`plan:${++planFrameRevision.current}`);
+  frameRefit.current?.settled();return true;
  }
  async function addDetail(){
   const map=mapRef.current;if(!map||!navigator.onLine||!wantsDetail.current||map.getZoom()<DETAIL_ENTER_ZOOM)return false;
@@ -180,8 +209,8 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     const map=L.map(element,{center:[camera.center[1],camera.center[0]],zoom:camera.zoom,zoomControl:false,attributionControl:false,minZoom:camera.zoom,maxZoom:18,zoomSnap:0,zoomDelta:.75,preferCanvas:true,scrollWheelZoom:true,worldCopyJump:false,zoomAnimation:true,markerZoomAnimation:true,fadeAnimation:false});
     mapRef.current=map;element.style.background=MAP_OUTSIDE_COLOR;
     frameRefit.current=new MapFrameRefit({
-     allowed:()=>!cancelled&&map===mapRef.current&&!!regionRef.current?.bounds&&!trailRef.current&&!!container.current,
-     refit:()=>{if(regionRef.current)fitTerritoryBounds(regionRef.current,!window.matchMedia('(prefers-reduced-motion: reduce)').matches);},
+     allowed:()=>!cancelled&&map===mapRef.current&&!!container.current&&(hasPlanFrame()||!!regionRef.current?.bounds&&!trailRef.current),
+     refit:()=>{if(hasPlanFrame())fitPlanFrame();else if(regionRef.current)fitTerritoryBounds(regionRef.current,!planningRef.current&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches);},
     });
     unbindFrame=bindMapFrameRefit(element,element.closest('.explore-layout')?.querySelector('.explore-panel')??null,frameRefit.current,()=>{
      if(!cancelled&&map===mapRef.current)russiaView(element,256);
@@ -198,14 +227,14 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     ensureRelief();
     territoryLayer.current=L.geoJSON(displayGeoJSON(admin),{style:territoryStyle,onEachFeature:(feature,layer)=>{
      layer.on('click',(event:{latlng?:{lng:number;lat:number}})=>{
-      if(map.getZoom()>7||!event.latlng||!inRussiaCoverage(event.latlng.lng,event.latlng.lat,coverage.area))return;
+      if(planning||map.getZoom()>7||!event.latlng||!inRussiaCoverage(event.latlng.lng,event.latlng.lat,coverage.area))return;
       const shape=feature.properties?.shapeName;const territory=typeof shape==='string'?territoryForMapPoint([shape],[russiaLongitude(event.latlng.lng),event.latlng.lat]):undefined;if(territory){map.stop();frameRefit.current?.cancel();callbacks.current.onRegion(territory);}
      });
     }}).addTo(map);
     // The non-interactive mask sits above tiles and route paths; validated marker labels stay above it. Leaflet
     // does not repeat GeoJSON, so its two adjacent world copies are covered too.
     L.geoJSON(leafletRussiaMask(coverage.mask),{pane:'russia-mask',interactive:false,style:{renderer:L.canvas({pane:'russia-mask',padding:.15}),stroke:false,fillColor:MAP_OUTSIDE_COLOR,fillOpacity:1,fillRule:'evenodd'}}).addTo(map);
-    for(const item of regions){
+    for(const item of planning?[]:regions){
      if(!inRussiaCoverage(...item.center,coverage.area))continue;
      const button=document.createElement('button');button.type='button';button.className='region-marker region-marker-'+item.id;button.setAttribute('aria-label',`Открыть ${item.name}`);directionButtons.current.set(item.id,button);
      const dot=document.createElement('span');dot.className='region-marker-dot';const label=document.createElement('span');label.className='region-marker-label';label.textContent=item.name;button.appendChild(dot);button.appendChild(label);
@@ -239,8 +268,8 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     unbindLabels=bindMapLabelReflow(container.current,scheduleDirectionLayout);
     scheduleDirectionLayout();
     map.on('movestart',()=>{element.dataset.mapCamera='moving';});
-    map.on('zoomstart',()=>{element.dataset.mapCamera='moving';});
-    map.on('zoomend',()=>{setMapZoom(map.getZoom());scheduleDirectionLayout();requestAnimationFrame(()=>{if(!cancelled){delete element.dataset.mapCamera;scheduleDirectionLayout();}});});
+    map.on('zoomstart',()=>{zooming.current=true;element.dataset.mapCamera='moving';});
+    map.on('zoomend',()=>{zooming.current=false;if(planFitPending.current){planFitPending.current=false;frameRefit.current?.settled();}setMapZoom(map.getZoom());scheduleDirectionLayout();requestAnimationFrame(()=>{if(!cancelled){delete element.dataset.mapCamera;scheduleDirectionLayout();}});});
     points.current=L.layerGroup().addTo(map);
     const clampCamera=()=>{
      const floor=cameraFloor.current;if(cancelled||clamping||!floor)return;
@@ -259,7 +288,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
       if(cancelled||!container.current)return;
       const wasOverview=fullView.current;
       map.invalidateSize({pan:false});const {camera:next}=russiaView(container.current,256);cameraFloor.current=next;map.setMinZoom(next.zoom);
-      if(wasOverview)fitRussia(false);else{clampCamera();frameRefit.current?.resized();}
+      if(wasOverview&&!hasPlanFrame())fitRussia(false);else{clampCamera();frameRefit.current?.resized();}
       scheduleDirectionLayout();
      });
     };
@@ -270,17 +299,18 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     ensureDetail();
    }catch(error){if(!cancelled){frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();setStatus('Не удалось загрузить географию России. Карточки маршрутов доступны в списке.');console.error('Russia canvas map failed',error);}}
   })();
-  return()=>{cancelled=true;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();++detailRequest.current;detailLoading.current=false;ensureReliefRef.current=null;cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);cancelAnimationFrame(directionLayoutFrame);if(container.current)delete container.current.dataset.mapCamera;directionMarkers.clear();resize?.disconnect();panelChanges?.disconnect();reliefRef.current?.destroy();reliefRef.current=null;mapRef.current?.remove();mapRef.current=null;directionButtons.current.clear();routePointRegistry.clear();leafletRef.current=null;baseRef.current=null;satelliteLayer.current=null;satelliteActive.current=false;territoryLayer.current=null;points.current=null;selected.current=null;positionMarker.current=null;coverageRef.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
+  return()=>{cancelled=true;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;planFrame.current=null;planFitPending.current=false;zooming.current=false;unbindFrame?.();++detailRequest.current;detailLoading.current=false;ensureReliefRef.current=null;cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);cancelAnimationFrame(directionLayoutFrame);if(container.current)delete container.current.dataset.mapCamera;directionMarkers.clear();resize?.disconnect();panelChanges?.disconnect();reliefRef.current?.destroy();reliefRef.current=null;mapRef.current?.remove();mapRef.current=null;directionButtons.current.clear();routePointRegistry.clear();leafletRef.current=null;baseRef.current=null;satelliteLayer.current=null;satelliteActive.current=false;territoryLayer.current=null;points.current=null;selected.current=null;positionMarker.current=null;coverageRef.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
  },[]);
  useEffect(()=>{
   const map=mapRef.current,element=container.current,L=leafletRef.current;if(!map||!element||!L||!loaded)return;
-  frameRefit.current?.select(region?.bounds?region.id:undefined);
-  const animate=!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const animate=!planning&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   territoryLayer.current?.setStyle(territoryStyle);
   territoryLayer.current?.eachLayer(layer=>{
    const path=layer as LeafletPath&{feature?:GeoJSON.Feature};
    if(region?.shapeNames.includes(path.feature?.properties?.shapeName))path.bringToFront();
   });
+  if(planning&&trailRef.current)return;
+  frameRefit.current?.select(region?.bounds?region.id:undefined);
   if(!region){fitRussia(animate);return;}
   const {padding}=russiaView(element,256);
   if(region.bounds){
@@ -291,7 +321,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
   const zoom=Math.max(region.zoom,cameraFloor.current?.zoom??region.zoom);
   const pixel=map.project([region.center[1],russiaLongitude(region.center[0])],zoom).add([(padding.right-padding.left)/2,(padding.bottom-padding.top)/2]);
   map.setView(map.unproject(pixel,zoom),zoom,{animate});
- },[region?.id,loaded]);
+ },[region?.id,loaded,planning]);
  useEffect(()=>{
   if(!loaded)return;
   updateDirections.current?.();
@@ -320,7 +350,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
  useEffect(()=>{
   const map=mapRef.current,coverage=coverageRef.current;if(!map||!coverage||!loaded)return;
   const identity={id:trail?.id,url:trail?.geometryUrl,geometry:trail?.geometry};
-  const clear=()=>{if(selected.current){map.removeLayer(selected.current);selected.current=null;}};
+  const clear=()=>{if(selected.current){map.removeLayer(selected.current);selected.current=null;}planFrame.current=null;planFitPending.current=false;};
   setStatus(previous=>previous==='Линия маршрута не загрузилась. Проверьте подключение.'||previous==='У этой линии нет точек внутри доступного покрытия России. Карточка остаётся доступной.'?'':previous);
   return loadMapSelection({clear,clearBeforeLoad:!trail?.id,
    current:()=>map===mapRef.current&&identity.id===trailRef.current?.id&&identity.url===trailRef.current?.geometryUrl&&identity.geometry===trailRef.current?.geometry,
@@ -334,16 +364,29 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
    const {L,data}=result;
    selected.current=L.layerGroup([
     L.geoJSON(data,{style:{color:'#FFFEFA',weight:8,opacity:.96},interactive:false}),
-    L.geoJSON(data,{style:{color:'#244d3c',weight:4,opacity:.95,dashArray:'9 4'},interactive:false}),
+    L.geoJSON(data,{style:feature=>({color:planning?(feature?.properties?.preview?'#8d9b8a':['#244d3c','#b16c38','#486c97','#785781'][Number(feature?.properties?.stage??0)%4]):'#244d3c',weight:4,opacity:.95,dashArray:planning&&!feature?.properties?.preview?undefined:'9 4'}),interactive:false}),
    ]).addTo(map);
    const covered=coveredRussiaBounds(positions(data),coverage.area);
    if(!covered){setStatus('У этой линии нет точек внутри доступного покрытия России. Карточка остаётся доступной.');return;}
+   if(planning&&trail){planFrame.current={bounds:covered,selection:trail};requestPlanFit();return;}
    const bounds=L.latLngBounds([[covered[1],covered[0]],[covered[3],covered[2]]]),element=container.current;if(!element)return;
    const {padding}=russiaView(element,256);fullView.current=false;
    map.stop();map.fitBounds(bounds,{paddingTopLeft:[padding.left,padding.top],paddingBottomRight:[padding.right,padding.bottom],maxZoom:14,animate:!window.matchMedia('(prefers-reduced-motion: reduce)').matches,duration:.45,easeLinearity:.25});
    },onError:()=>setStatus('Линия маршрута не загрузилась. Проверьте подключение.'),
   });
- },[trail?.id,trail?.geometryUrl,trail?.geometry,loaded]);
+ },[trail?.id,trail?.geometryUrl,trail?.geometry,loaded,planning]);
+ useEffect(()=>{
+  const map=mapRef.current,L=leafletRef.current;if(!map||!L||!loaded||!planning)return;
+  planningMarkers.current?.remove();
+  const group=L.layerGroup().addTo(map);planningMarkers.current=group;
+  for(const point of planPoints??[]){
+   const button=document.createElement(point.onSelect?'button':'span');if(button instanceof HTMLButtonElement)button.type='button';else button.setAttribute('role','img');button.className=`planner-map-point planner-map-point--${point.kind}`;button.setAttribute('aria-label',point.label);button.title=point.label;
+   button.textContent=point.kind==='start'?'С':point.kind==='finish'?'Ф':point.kind==='via'?'•':point.kind==='join'?'↔':'+';
+   button.addEventListener('click',event=>{event.stopPropagation();point.onSelect?.();});
+   L.marker([point.point[1],russiaLongitude(point.point[0])],{icon:L.divIcon({html:button,className:'planner-map-marker',iconSize:[44,44],iconAnchor:[22,22]}),keyboard:false,zIndexOffset:point.kind==='choice'?1000:100}).addTo(group);
+  }
+  return()=>{group.remove();if(planningMarkers.current===group)planningMarkers.current=null;};
+ },[planning,planPoints,loaded]);
  async function changeMode(next:'overview'|'detail'){
   wantsSatellite.current=false;removeSatellite();setScene(false);
   setStatus('');
@@ -367,13 +410,13 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
  return <div className={`atlas-wrap ${scene?'showing-terrain':''}`} data-map-imagery={satellite?'satellite':undefined}>
   <div className="atlas-canvas" ref={container} style={{visibility:loaded?'visible':'hidden'}} role="region" aria-label="Интерактивная плоская карта России"/>
   {!loaded&&!status&&<div className="map-skeleton"><MapIcon name="compass" size={38}/><span>Открываем карту России</span></div>}
-  <div className="map-context"><span className="live-dot"/><span>{region?.name||'Россия'}</span><span className="context-divider"/><span>{satellite?'Спутник':region?(mode==='detail'?'Тропы и местность':'Обзор'):routeCountLabel(visibleTrails.length)}</span></div>
+  <div className="map-context"><span className="live-dot"/><span>{planning?'План похода':region?.name||'Россия'}</span><span className="context-divider"/><span>{satellite?'Спутник':planning?'Выбранные участки':region?(mode==='detail'?'Тропы и местность':'Обзор'):routeCountLabel(visibleTrails.length)}</span></div>
   {tilesLoading&&!scene&&!status&&<div className="map-preload-status" role="status">Подгружаем детали текущего ракурса</div>}
   <div className="map-style-switch"><button aria-label="Карта сверху" className={!scene&&!satellite?'active':''} onClick={()=>{setScene(false);if(satellite)void changeMode('detail');}}><MapIcon name="map" size={18}/>Карта</button>{sceneAvailable&&<button aria-label="3D ландшафт Бзерпинского района" className={scene?'active':''} onClick={()=>setScene(true)} onPointerEnter={()=>void preloadTerrain()} title="Объёмная сцена Бзерпинского района"><MapIcon name="terrain" size={19}/>3D</button>}</div>
-  <div className="map-controls"><button aria-label="Увеличить масштаб" disabled={!loaded} onClick={()=>{frameRefit.current?.cancel();mapRef.current?.zoomIn();}}><MapIcon name="plus" size={20}/></button><button aria-label="Уменьшить масштаб" disabled={!loaded} onClick={()=>{frameRefit.current?.cancel();mapRef.current?.zoomOut();}}><MapIcon name="minus" size={20}/></button><span/><button aria-label="Север сверху" title="На плоской карте север всегда сверху" disabled><MapIcon name="compass" size={22}/></button><button aria-label="Моё местоположение" disabled={!loaded} onClick={locate}><MapIcon name="location" size={21}/></button><button aria-label="Показать Россию целиком" disabled={!loaded} onClick={()=>{setScene(false);fitRussia(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);}}><MapIcon name="fit" size={19}/></button></div>
+  <div className="map-controls"><button aria-label="Увеличить масштаб" disabled={!loaded} onClick={()=>{frameRefit.current?.cancel();mapRef.current?.zoomIn();}}><MapIcon name="plus" size={20}/></button><button aria-label="Уменьшить масштаб" disabled={!loaded} onClick={()=>{frameRefit.current?.cancel();mapRef.current?.zoomOut();}}><MapIcon name="minus" size={20}/></button><span/><button aria-label="Север сверху" title="На плоской карте север всегда сверху" disabled><MapIcon name="compass" size={22}/></button><button aria-label="Моё местоположение" disabled={!loaded} onClick={locate}><MapIcon name="location" size={21}/></button><button aria-label={planning&&trail?'Показать поход целиком':'Показать Россию целиком'} disabled={!loaded} onClick={()=>{setScene(false);if(!planning||!requestPlanFit())fitRussia(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);}}><MapIcon name="fit" size={19}/></button></div>
   <div className="layer-control"><button className={layers?'layer-button active':'layer-button'} aria-expanded={layers} onClick={()=>setLayers(!layers)}><MapIcon name="layers" size={20}/>Слои</button>{layers&&<div className="layer-menu"><strong>Ваша карта</strong><button disabled={offline||!loaded} onClick={()=>changeMode('detail')}>Детальные тропы онлайн{mode==='detail'&&!satellite&&<Check size={17}/>}</button><button disabled={offline||!loaded} aria-pressed={satellite} onClick={chooseSatellite}>Спутник{satellite&&<Check size={17}/>}</button><button disabled={!loaded} onClick={()=>changeMode('overview')}>Сохранённый обзор{mode==='overview'&&!satellite&&<Check size={17}/>}</button><label><input type="checkbox" checked={showPaths} onChange={event=>{pathVisibility.current=event.target.checked;setShowPaths(event.target.checked);if(mode==='detail')void addDetail().catch(()=>setStatus('Не удалось обновить слой.'));}}/>Тропы и грунтовые дороги</label><a href="/offline">Подробная офлайн-карта</a><span className="source-note">Плоский режим · без объёмного рельефа</span><a href="/sources">Источники карты</a></div>}</div>
-  {status&&<div className="map-message" role="status"><MapIcon name="info" size={18}/><span>{status}</span><button onClick={()=>setStatus('')}>Понятно</button></div>}
-  <div className="map-legend"><span className="legend-line"/>Тропа<span className="legend-region"/>Направление<span className="legend-hint">{region?'Нажмите на маршрут':'Выберите регион, чтобы приблизить'}</span></div>
+  {status&&!planning&&<div className="map-message" role="status"><MapIcon name="info" size={18}/><span>{status}</span><button onClick={()=>setStatus('')}>Понятно</button></div>}
+  {!planning&&<div className="map-legend"><span className="legend-line"/>Тропа<span className="legend-region"/>Направление<span className="legend-hint">{region?'Нажмите на маршрут':'Выберите регион, чтобы приблизить'}</span></div>}
   {sceneAvailable&&<TerrainScene trail={trail} visible={scene} onClose={()=>setScene(false)}/>}
   {!scene&&<MapAttribution ready={loaded} terrain={reliefReady} satellite={satellite} zoom={mapZoom}/>}
  </div>;

@@ -9,12 +9,15 @@ const androidManifest = JSON.parse(await readFile(new URL('../../../web/public/d
 
 test('search and account actions stay inside the published project for links and imperative navigation',()=>{
   const base='/tropnik/';
-  for(const path of ['/search','/search?q=Байкал','/account/action#token=test']) assert.equal(pagesPath(path,base),base+path.slice(1));
-  const source='const a=<a href="/search">Поиск</a>; window.location.assign("/search"); const b=`/search?q=${query}`;';
+  for(const path of ['/search','/search?q=Байкал','/account/action#token=test','/planner','/planner?route=osm-relation-4509476']) assert.equal(pagesPath(path,base),base+path.slice(1));
+  const source='const a=<a href="/search">Поиск</a>; window.location.assign("/search"); const b=`/search?q=${query}`; const planner=<a href={`/planner?route=${routeId}`}>Собрать поход</a>; const storageKey="tropnik-hike-plans-v1", storageEvent="tropnik-hike-plans-change";';
   const transformed=rewriteScript(source,'Header.tsx',{base});
   assert.ok(transformed.includes('href="/tropnik/search"'));
   assert.ok(transformed.includes('assign("/tropnik/search")'));
   assert.ok(transformed.includes('`/tropnik/search?q=${query}`'));
+  assert.ok(transformed.includes('`/tropnik/planner?route=${routeId}`'));
+  assert.ok(transformed.includes('"tropnik-tropnik-hike-plans-v1"'));
+  assert.ok(transformed.includes('"tropnik-tropnik-hike-plans-change"'));
   assert.equal(rewriteHTML('<a href="/search">Поиск</a>',base),'<a href="/tropnik/search">Поиск</a>');
   assert.equal(pagesPath('https://example.org/search',base),'https://example.org/search');
 });

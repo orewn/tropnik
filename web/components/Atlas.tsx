@@ -84,7 +84,8 @@ function fitTerritory(map:MapInstance,region:MapRegion,element:HTMLElement,durat
  map.fitBounds(bounds,{padding,maxZoom:11,pitch:0,bearing:0,duration,essential:false});
  return true;
 }
-export type AtlasProps={region?:MapRegion;trail?:Trail;visibleTrails?:Trail[];onTrail?:(trail:Trail)=>void;onRegion:(region:MapRegion)=>void;onMapNote?:(text:string)=>void;onViewportRegion?:(regionId:string|undefined)=>void};
+export type PlannerMapPoint={id:string;point:[number,number];label:string;kind:'start'|'finish'|'via'|'join'|'choice';onSelect?:()=>void};
+export type AtlasProps={region?:MapRegion;trail?:Trail;visibleTrails?:Trail[];onTrail?:(trail:Trail)=>void;onRegion:(region:MapRegion)=>void;onMapNote?:(text:string)=>void;onViewportRegion?:(regionId:string|undefined)=>void;planning?:boolean;planPoints?:PlannerMapPoint[]};
 export function Atlas({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,onViewportRegion}:AtlasProps){
  const container=useRef<HTMLDivElement>(null),mapRef=useRef<MapInstance|null>(null),markers=useRef<Marker[]>([]),positionMarker=useRef<Marker|null>(null);
  const directionGroups=useRef(new Map<string,MapDirectionGroup<Region>>()),updateDirections=useRef<(()=>void)|null>(null),visibleTrailsRef=useRef(visibleTrails);

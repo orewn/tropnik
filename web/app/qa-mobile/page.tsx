@@ -11,7 +11,7 @@ export default async function QAMobile({searchParams}: {searchParams: Promise<{p
   const params = await searchParams;
   const profile = Object.hasOwn(profiles, params.profile || '') ? params.profile as keyof typeof profiles : 'phone';
   const [width, height] = profiles[profile];
-  const pages = ['/', '/search', '/safety/registration', '/offline', '/trips', '/community', '/guides'];
+  const pages = ['/', '/search', '/planner', '/safety/registration', '/offline', '/trips', '/community', '/guides'];
   const page = pages.includes(params.page || '') ? params.page! : '/';
   return <main style={{display:'grid',justifyItems:'center',alignContent:'start',gap:16,padding:16,background:'#d3d8c7',minHeight:'100vh'}}>
     <nav aria-label="Профиль проверки" style={{display:'flex',flexWrap:'wrap',gap:16}}>{Object.entries(profiles).map(([key, [w, h]]) => <a key={key} href={`/qa-mobile?profile=${key}&page=${encodeURIComponent(page)}`} aria-current={profile===key?'page':undefined}>{w} × {h}</a>)}</nav>

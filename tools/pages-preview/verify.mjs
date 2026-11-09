@@ -21,6 +21,9 @@ assert.ok(report.bundledModules.includes('components/Header.tsx'));
 assert.ok(report.bundledModules.includes('components/Footer.tsx'));
 assert.ok(report.bundledModules.includes('app/safety/registration/page.tsx'), 'The published safety page must have an executable page loader');
 assert.ok(report.bundledModules.includes('components/SafetyRegistration.tsx'), 'The public safety form must be present in the browser bundle');
+assert.ok(report.bundledModules.includes('app/planner/page.tsx'), 'The published hike planner must have an executable page loader');
+assert.ok(report.bundledModules.includes('components/HikePlanner.tsx'), 'The hike planner must be present in the browser bundle');
+assert.ok(report.bundledModules.includes('lib/trail-connections.ts'), 'The planner must use the real topology and route calculation');
 
 // Catch the dangerous blanket replacement of slash separators and external URLs.
 const sample = `const separator='/';const chunks=x.split('/');const absolute=x.startsWith('/');const data='/data/a.json';const outside='https://tiles.example/a';const historyTest=window.location.pathname==='/';history.replaceState(null,'','/');const logical='/'+pathname.slice(base.length);const route=\`/routes/\${id}\`;const el=<a href="/"/>;`;

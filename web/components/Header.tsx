@@ -136,6 +136,7 @@ export function Header({active = 'map'}: {active?: string}) {
       <Brand/>
       <nav ref={navigation} id="main-navigation" aria-label="Основная навигация" className={menu ? 'top-nav open' : 'top-nav'} onClick={event=>{if((event.target as HTMLElement).closest('a[href]'))setMenu(false);}}>
         <Link className={active === 'map' ? 'active' : ''} aria-current={active === 'map' ? 'page' : undefined} href="/">Карта маршрутов</Link>
+        <a className={active === 'planner' ? 'active' : ''} aria-current={active === 'planner' ? 'page' : undefined} href="/planner">Конструктор</a>
         <a className={active === 'trips' ? 'active' : ''} aria-current={active === 'trips' ? 'page' : undefined} href="/trips">Походы</a>
         <a className={active === 'community' ? 'active' : ''} aria-current={active === 'community' ? 'page' : undefined} href="/community">Сообщество</a>
         <a className={active === 'guides' ? 'active' : ''} aria-current={active === 'guides' ? 'page' : undefined} href="/guides">Гидам</a>

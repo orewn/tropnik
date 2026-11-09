@@ -30,6 +30,10 @@ const exists = async path => access(path).then(() => true, () => false);
 const textExtensions = new Set(['.json', '.webmanifest', '.html', '.css', '.js', '.mjs']);
 const vendorScripts = /\/maps\/(?:maplibre|leaflet|protomaps-leaflet)/;
 
+const connectionsCheck = spawnSync(process.execPath, ['--experimental-strip-types', 'scripts/build-trail-connections.mjs', '--check'], {cwd: web, stdio: 'inherit'});
+if (connectionsCheck.error) throw connectionsCheck.error;
+if (connectionsCheck.status !== 0) throw new Error('The trail connection index must match the current catalogue and geometry before publishing.');
+
 // A successful release must include the download advertised on the Android page.
 // Fetching is a separate explicit preparation step; the build never uses the network.
 const androidMetadata = await readApkManifest(join(web, 'public/downloads/android-manifest.json'));
@@ -57,7 +61,7 @@ async function snapshot(from, to) {
 const infoPages = {
   about: 'О проекте', safety: 'Подготовка к походу', 'safety/registration': 'Регистрация похода в МЧС', sources: 'Источники и лицензии',
   privacy: 'Конфиденциальность', terms: 'Условия', offline: 'Карты с собой',
-  trips: 'Походы и группы', community: 'Сообщество', guides: 'Гидам и инструкторам',
+  trips: 'Походы и группы', community: 'Сообщество', guides: 'Гидам и инструкторам', planner: 'Конструктор похода',
   account: 'Личный кабинет', 'account/action': 'Действие с аккаунтом', search: 'Поиск', moderation: 'Модерация', android: 'Тропник для Android',
 };
 // Inherit the current site's cascade. This preview does not maintain a second visual system.
