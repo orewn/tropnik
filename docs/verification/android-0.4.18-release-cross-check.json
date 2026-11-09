@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "releaseId": 439451485,
+  "releaseUrl": "https://github.com/orewn/tropnik/releases/tag/v0.4.18-preview",
+  "tag": "v0.4.18-preview",
+  "sourceCommit": "1df3697a99558f90c15d29103120c62820b562f5",
+  "workflowRunId": "42666546169",
+  "tagCommitVerified": true,
+  "allJobsSucceeded": true,
+  "artifactOrigins": [
+    {
+      "id": 13697626284,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "size_in_bytes": 5288921,
+      "digest": "sha256:af341d8db1fb1083167a4556fa311462775f8ef3680cba890855c9282ba0a38b",
+      "expired": false,
+      "workflow_run": {
+        "id": 42666546169,
+        "repository_id": 1447843944,
+        "head_repository_id": 1447843944,
+        "head_branch": "main",
+        "head_sha": "1df3697a99558f90c15d29103120c62820b562f5"
+      }
+    },
+    {
+      "id": 13696507360,
+      "name": "tropnik-android-preview-1",
+      "size_in_bytes": 55812929,
+      "digest": "sha256:75d03ab9379bd682233507f8f49f56a756d9fe8b122c8804da0b7a09d074582a",
+      "expired": false,
+      "workflow_run": {
+        "id": 42666546169,
+        "repository_id": 1447843944,
+        "head_repository_id": 1447843944,
+        "head_branch": "main",
+        "head_sha": "1df3697a99558f90c15d29103120c62820b562f5"
+      }
+    },
+    {
+      "id": 13696068916,
+      "name": "tropnik-release-candidate-1",
+      "size_in_bytes": 88586271,
+      "digest": "sha256:df68621647bd801d6238d0459ac116dc8e4891ff08f25de4a6918b725900055f",
+      "expired": false,
+      "workflow_run": {
+        "id": 42666546169,
+        "repository_id": 1447843944,
+        "head_repository_id": 1447843944,
+        "head_branch": "main",
+        "head_sha": "1df3697a99558f90c15d29103120c62820b562f5"
+      }
+    }
+  ],
+  "publicAssetsDownloadedAndVerified": 6,
+  "checksumsEntriesVerified": 5,
+  "publicVerificationReportsIdenticalToCi": 19,
+  "sourceArchiveEmbeddedCommitVerified": true,
+  "keySourceFilesIdenticalToCommit": [
+    "android/app/build.gradle.kts",
+    "android/app/src/main/java/ru/tropa/app/ui/LocalLandscapeScene.kt",
+    "android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt",
+    "android/app/src/main/java/ru/tropa/app/data/MapRouteGeometry.kt",
+    "android/app/src/androidTest/java/ru/tropa/app/LocalExperienceTest.kt",
+    "tools/android-build/device-preflight.py",
+    "tools/android-build/run-instrumentation-ci.sh",
+    "tools/android-build/release-request.json",
+    ".github/workflows/android.yml"
+  ],
+  "jvmTestsPassed": 45,
+  "instrumentationTestsPassed": 6,
+  "rawInstrumentationReparsed": true,
+  "installedArtifactBytesVerified": true,
+  "testedArchitecture": "x86_64",
+  "testedUniversalSha256": "d31284e50f9cd31a365506b90d6b65a94e8ccff8ec5e2a787cbf49607b76d065",
+  "arm64Sha256": "b80c36174a87eb70cc8e010af7535847b3fe9374586a87a535718bc25bf3d40f",
+  "arm64Bytes": 24528530,
+  "signingCertificateSha256": "00746a1b22b18af3a5b868b399e12795a1a9ff37dbbae09f592bcb082ccfb8b1",
+  "manifestSha256": "76caf0b37a5cc2c8ee639bdbf7bd0d8c715049f6cb1efec31eb86f1c2e045918",
+  "manifestBindingsVerified": true,
+  "sixPixelStatesVerified": [
+    {
+      "name": "recovery-after-retry-frame.json",
+      "passed": true,
+      "quantizedColors": 76,
+      "dominantFraction": 0.564453125,
+      "variedTiles": 7,
+      "viewportHeight": 728
+    },
+    {
+      "name": "recovery-before-error-frame.json",
+      "passed": true,
+      "quantizedColors": 76,
+      "dominantFraction": 0.564453125,
+      "variedTiles": 7,
+      "viewportHeight": 728
+    },
+    {
+      "name": "scene-landscape-frame.json",
+      "passed": true,
+      "quantizedColors": 73,
+      "dominantFraction": 0.72265625,
+      "variedTiles": 6,
+      "viewportHeight": 316
+    },
+    {
+      "name": "scene-portrait-frame.json",
+      "passed": true,
+      "quantizedColors": 76,
+      "dominantFraction": 0.564453125,
+      "variedTiles": 7,
+      "viewportHeight": 728
+    },
+    {
+      "name": "scene-reopened-frame.json",
+      "passed": true,
+      "quantizedColors": 77,
+      "dominantFraction": 0.5182291666666666,
+      "variedTiles": 7,
+      "viewportHeight": 728
+    },
+    {
+      "name": "scene-zoom-frame.json",
+      "passed": true,
+      "quantizedColors": 60,
+      "dominantFraction": 0.6572265625,
+      "variedTiles": 7,
+      "viewportHeight": 728
+    }
+  ],
+  "threeSavedSceneScreenshotsRecomputed": [
+    {
+      "name": "scene-portrait.png",
+      "sha256": "635d17e759d70654f42f26c5d10b36c583fb86fb02e93a87968b7a7c90d15b79",
+      "quantizedColors": 60,
+      "dominantFraction": 0.6572265625,
+      "variedTiles": 7,
+      "passed": true
+    },
+    {
+      "name": "scene-zoom.png",
+      "sha256": "e241570d825581da4ee6c787e504153e37154be392cab7abb099fcaa064a8db5",
+      "quantizedColors": 65,
+      "dominantFraction": 0.5221354166666666,
+      "variedTiles": 8,
+      "passed": true
+    },
+    {
+      "name": "scene-landscape.png",
+      "sha256": "95a0a010957897fd76f28a85a7aebd7d8bdd5114a9808f9a39f32ec906137c56",
+      "quantizedColors": 73,
+      "dominantFraction": 0.72265625,
+      "variedTiles": 6,
+      "passed": true
+    }
+  ],
+  "nativeMarkerTapEvidence": {
+    "case": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+    "motionEventScenarioPassed": true,
+    "beforeScreenshot": "device/qa/map-region-before-tap.png",
+    "afterScreenshot": "device/qa/map-region-after-tap.png",
+    "visualInspection": "Before tap: no blocking system dialog, visible region markers. After tap: Krasnodar region page and rendered relief tiles visible."
+  },
+  "visualSceneInspection": "Portrait and landscape screenshots show terrain and the orange route line.",
+  "devicePreflight": {
+    "ready": true,
+    "pixelLauncherAnrRecovered": true,
+    "forceStoppedPackage": "com.google.android.apps.nexuslauncher",
+    "serial": "emulator-5554",
+    "samples": 3
+  },
+  "physicalDeviceVerified": false,
+  "arm64DeviceExecutionVerified": false,
+  "signingScope": "Actual APK whole-file SHA256 and DER certificate fingerprint extracted from v2 signer blocks. Official cryptographic signature validation is retained in CI apksigner reports; no local SDK signature verification is claimed."
+}

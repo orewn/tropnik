@@ -115,7 +115,7 @@ async function diagnosticPhase(cdp,name){
   })()`);
 }
 async function performanceDiagnostics(cdp){
-  return evaluate(cdp,'({current:window.__tropnikPerf,counterStart:window.__tropnikPerfStart,phase:window.__tropnikPhase,phases:window.__tropnikPhases,layoutShifts:window.__tropnikLayoutShifts})');
+  return evaluate(cdp,'({current:window.__tropnikPerf,counterStart:window.__tropnikPerfStart,phase:window.__tropnikPhase,phases:window.__tropnikPhases,layoutShifts:window.__tropnikLayoutShifts,expectedPointer:window.__tropnikExpectedPointer,inputEvents:window.__tropnikInputEvents})');
 }
 async function loadProfile(cdp,url,profile){
   await cdp.call('Emulation.setDeviceMetricsOverride',{width:profile.width,height:profile.height,deviceScaleFactor:profile.mobile?2:1,mobile:profile.mobile,screenWidth:profile.width,screenHeight:profile.height});
@@ -294,7 +294,7 @@ async function waitValue(label,read,accept,timeout=12000){
   throw new Error(`${label}: ${JSON.stringify(last).slice(0,2500)}`);
 }
 async function selectionState(cdp){
-  return evaluate(cdp,`(()=>{const params=new URLSearchParams(location.search);return{region:params.get('region')||'',route:params.get('route')||'',title:document.querySelector('.explore-panel h1')?.textContent?.replace(/\\s+/g,' ').trim()||'',sheet:document.querySelector('.explore-layout')?.dataset.sheetState};})()`);
+  return evaluate(cdp,`(()=>{const params=new URLSearchParams(location.search),active=document.activeElement;return{region:params.get('region')||'',route:params.get('route')||'',title:document.querySelector('.explore-panel h1')?.textContent?.replace(/\\s+/g,' ').trim()||'',sheet:document.querySelector('.explore-layout')?.dataset.sheetState,history:{length:history.length,level:history.state?.tropnikExploreLevel,pushed:history.state?.tropnikExplorePushed,explore:history.state?.tropnikExplore},activeElement:active?{tag:active.tagName,classes:active.getAttribute('class'),label:active.getAttribute('aria-label')}:null};})()`);
 }
 async function expectSelection(cdp,expected){
   return waitValue(`Map selection did not become ${JSON.stringify(expected)}`,()=>selectionState(cdp),state=>Object.entries(expected).every(([key,value])=>state[key]===value));
@@ -315,6 +315,7 @@ async function settledMap(cdp,engine){
 }
 async function pointerAt(cdp,point,profile){
   assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y),'Pointer coordinates must be finite');
+  await evaluate(cdp,`window.__tropnikExpectedPointer={time:performance.now(),x:${point.x},y:${point.y},selector:${JSON.stringify(point.selector||null)},label:${JSON.stringify(point.label||point.title||null)}}`);
   if(profile.mobile){
     await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id:51,radiusX:3,radiusY:3,force:1}]});
     await sleep(45);await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
@@ -325,11 +326,15 @@ async function pointerAt(cdp,point,profile){
   }
 }
 async function elementPoint(cdp,selector){
-  return evaluate(cdp,`(()=>{const element=document.querySelector(${JSON.stringify(selector)});if(!element)return null;const r=element.getBoundingClientRect(),s=getComputedStyle(element);if(element.hidden||s.visibility==='hidden'||s.display==='none'||r.width<2||r.height<2)return null;const x=r.left+r.width/2,y=r.top+r.height/2;if(x<0||y<0||x>=innerWidth||y>=innerHeight)return null;const hit=document.elementFromPoint(x,y);return{x,y,label:element.getAttribute('aria-label')||element.textContent?.trim(),hit:hit?.tagName,unobscured:!!hit&&element.contains(hit)};})()`);
+  return evaluate(cdp,`(()=>{const element=document.querySelector(${JSON.stringify(selector)});if(!element)return null;const r=element.getBoundingClientRect(),s=getComputedStyle(element);if(element.hidden||s.visibility==='hidden'||s.display==='none'||r.width<2||r.height<2)return null;const x=r.left+r.width/2,y=r.top+r.height/2;if(x<0||y<0||x>=innerWidth||y>=innerHeight)return null;const hit=document.elementFromPoint(x,y);return{x,y,width:r.width,height:r.height,label:element.getAttribute('aria-label')||element.textContent?.trim(),hit:hit?.tagName,unobscured:!!hit&&element.contains(hit)};})()`);
 }
 async function pointerSelector(cdp,selector,profile){
-  const point=await waitValue(`Missing pointer target ${selector}`,()=>elementPoint(cdp,selector),Boolean);
-  await pointerAt(cdp,point,profile);return point;
+  let previous=null,stable=0;
+  const point=await waitValue(`Pointer target ${selector} did not become stable and unobscured`,()=>elementPoint(cdp,selector),current=>{
+    const stopped=current?.unobscured&&previous?.unobscured&&['x','y','width','height'].every(key=>Math.abs(current[key]-previous[key])<.25);
+    stable=stopped?stable+1:0;previous=current;return stable>=2;
+  });
+  const target={...point,selector};await pointerAt(cdp,target,profile);return target;
 }
 async function closeMapSheet(cdp,profile){
   if(!profile.mobile)return;
@@ -418,6 +423,7 @@ async function reopenSelectedLine(cdp,profile,trail){
   assert.ok(target,`${profile.name}: selected line has no visible test segment away from route points`);
   await pointerAt(cdp,target,profile);
   await expectSelection(cdp,{region:'altai',route:trail.id,title:trail.title,...(profile.mobile?{sheet:'open'}:{})});
+  if(profile.mobile)await settledSheet(cdp,'open');
   return{point:target,route:trail.id,clicked:true,selectionRetained:true,reopened:profile.mobile};
 }
 async function polygonTouch(cdp,profile){
@@ -521,6 +527,12 @@ try{
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
     window.__tropnikPerf={cls:0,longest:0};
     window.__tropnikPerfStart=0;window.__tropnikPhase='loading';window.__tropnikPhases=[];window.__tropnikLayoutShifts=[];
+    window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;
+    for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,event=>{
+      const node=event.target?.nodeType===1?event.target:event.target?.parentElement,button=node?.closest('button,a'),r=button?.getBoundingClientRect();
+      window.__tropnikInputEvents.push({type,time:performance.now(),x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
+      if(window.__tropnikInputEvents.length>36)window.__tropnikInputEvents.shift();
+    },{capture:true,passive:true});
     try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput){
       window.__tropnikPerf.cls+=entry.value;
       const rect=value=>({x:value.x,y:value.y,width:value.width,height:value.height});
@@ -587,6 +599,7 @@ try{
   const failure={profile:currentProfile,error:error.stack||String(error),performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(cdp){
     try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);}catch{}
+    try{failure.navigationHistory=await cdp.call('Page.getNavigationHistory');}catch{}
     try{failure.performance=await performanceDiagnostics(cdp);}catch{}
     try{const screenshot=await cdp.call('Page.captureScreenshot',{format:'png'});await writeFile(new URL('browser-failure.png',ROOT),Buffer.from(screenshot.data,'base64'));}catch{}
   }

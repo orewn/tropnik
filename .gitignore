@@ -41,7 +41,8 @@ outputs/
 *.apk
 *.aab
 *.apks
-web/public/downloads/
+web/public/downloads/*
+!web/public/downloads/android-manifest.json
 data/catalog/raw/geofabrik/*.osm.pbf
 data/catalog/raw-trails-krym.geojson
 
