@@ -4,7 +4,7 @@
   "catalog": {
     "path": "catalog.json",
     "bytes": 918921,
-    "sha256": "fb50cb3c3ae47d3239f41ce681dff3052f670ff68671c95c3f8e3f4bd66ee483"
+    "sha256": "62f04958424b7ef7c366c480828ffec3c4206429752a864f3d73a947ccbc0a3a"
   },
   "sourceInputs": [
     {
@@ -54,8 +54,8 @@
     },
     {
       "path": "web/public/data/russia-boundaries-provenance.json",
-      "bytes": 10000,
-      "sha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15"
+      "bytes": 10082,
+      "sha256": "b8bc96450cc3777d454d87da3018a76db4bc10323720d76cf512831d0e66ac93"
     },
     {
       "path": "tools/android-build/fixtures/learning-route.json",

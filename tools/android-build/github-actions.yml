@@ -1,13 +1,19 @@
 # Copy to .github/workflows/android.yml at the repository root.
-# This job builds preview artifacts only. It does not publish a release or use
-# a production signing key. Action commits were resolved from official tags.
+# Builds development-signed previews, tests the exact universal artifact, and
+# publishes only an explicit versioned release request after both gates pass.
+# Production signing is intentionally not configured. Actions are commit-pinned.
 name: Android preview
 
 on:
   workflow_dispatch:
     inputs:
       run_instrumentation:
-        description: 'Run five device scenarios on one API 35 x86_64 emulator'
+        description: 'Run six device scenarios on the exact universal APK'
+        type: boolean
+        required: false
+        default: false
+      publish_preview:
+        description: 'Publish the version in release-request.json after exact-artifact device tests (main only)'
         type: boolean
         required: false
         default: false
@@ -51,11 +57,24 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    outputs:
+      artifact_id: ${{ steps.apks.outputs.artifact-id }}
+      release_requested: ${{ steps.release_gate.outputs.release_requested }}
+      release_version: ${{ steps.release_gate.outputs.release_version }}
+    env:
+      TROPA_API_BASE_URL: ''
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - name: Check explicit release request
+        id: release_gate
+        env:
+          TROPNIK_BEFORE_SHA: ${{ github.event.before }}
+          TROPNIK_PUBLISH_PREVIEW: ${{ inputs.publish_preview }}
+        run: python3 tools/android-build/release-preview.py gate
       - name: JDK17
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
@@ -91,21 +110,21 @@ jobs:
           chmod +x android/gradlew
           bash tools/android-build/build.sh
       - name: Save preview APKs and reports
+        id: apks
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: tropnik-android-preview
-          path: |
-            android/dist/
-            android/app/build/reports/tests/testDebugUnitTest/
-            android/app/build/test-results/testDebugUnitTest/
+          name: tropnik-android-preview-${{ github.run_attempt }}
+          path: android/dist/
           if-no-files-found: error
           retention-days: 14
 
   instrumentation:
     name: Android device scenarios
-    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.run_instrumentation) }}
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && (inputs.run_instrumentation || inputs.publish_preview)) }}
     needs: build
+    outputs:
+      artifact_id: ${{ steps.device_reports.outputs.artifact-id }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     concurrency:
@@ -118,15 +137,17 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - name: JDK17 and build dependency cache
+      - name: Download the APKs from the successful build job
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
+          path: android/dist
+          digest-mismatch: error
+      - name: JDK17 for official SDK tools
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
-          cache-dependency-path: |
-            android/**/*.gradle.kts
-            android/gradle/wrapper/gradle-wrapper.properties
       # Hosted runner SDK layout: actions/runner-images ubuntu24/20261101.360,
       # images/ubuntu/scripts/build/install-android-sdk.sh. Its tools are not on PATH.
       - name: Expose the hosted Android command-line tools
@@ -159,18 +180,57 @@ jobs:
           sudo chown "$(id -u):$(id -g)" /dev/kvm
           test -r /dev/kvm
           test -w /dev/kvm
-      - name: Run actual connected instrumentation
+      - name: Install and test the exact optimized universal artifact
         run: bash tools/android-build/run-instrumentation-ci.sh
       - name: Save actual device results and diagnostics
+        id: device_reports
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: tropnik-android-api35-instrumentation-${{ github.run_attempt }}
-          path: |
-            android/dist/instrumentation-ci/
-            android/app/build/reports/androidTests/connected/
-            android/app/build/outputs/androidTest-results/connected/
-            android/app/build/outputs/apk/debug/app-debug.apk
-            android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+          path: android/dist/instrumentation-ci/
           if-no-files-found: warn
           retention-days: 14
+
+
+  publish:
+    name: Publish the requested Android prerelease
+    needs: [build, instrumentation]
+    if: ${{ github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.build.outputs.release_requested == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    concurrency:
+      group: tropnik-preview-release-${{ needs.build.outputs.release_version }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout the tested source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Download the verified build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
+          path: android/dist
+          digest-mismatch: error
+      - name: Download the matching device proof
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.instrumentation.outputs.artifact_id }}
+          path: android/device-proof
+          digest-mismatch: error
+      - name: Recheck gates and prepare immutable release files
+        run: python3 tools/android-build/release-preview.py prepare --directory android/dist --device-directory android/device-proof --output android/release
+      - name: Save the complete release candidate before publication
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-release-candidate-${{ github.run_attempt }}
+          path: android/release/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Create, verify and publish a new prerelease
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 tools/android-build/release-preview.py publish --output android/release

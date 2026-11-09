@@ -195,8 +195,8 @@ function decimal(value: number): string {
   return `${sign}${digits.slice(0, position)}.${digits.slice(position)}`;
 }
 
-/** Export only resolved source segments. A review break remains a distinct trkseg, including zero-meter crossings. */
-export function exportHikeGpx(value: HikeDraft, plan: CompositePlan, resolved: ResolvedPlanGeometry): string {
+/** Shared by the download control and exporter so an enabled action always has the same requirements. */
+function requireHikeGpxExport(value: HikeDraft, plan: CompositePlan, resolved: ResolvedPlanGeometry): HikeDraft & {start: string; finish: string} {
   const draft = readDraft(value);
   if (!draft.stages.length) throw new Error('Добавьте этапы перед экспортом GPX.');
   if (!draft.start || !draft.finish) throw new Error('Выберите начало и конец похода перед экспортом GPX.');
@@ -229,6 +229,23 @@ export function exportHikeGpx(value: HikeDraft, plan: CompositePlan, resolved: R
     }
     if (!segment.some(point => point[0] !== segment[0][0] || point[1] !== segment[0][1])) throw new Error('В GPX есть пустой участок. Пересчитайте путь.');
   }
+  return {...draft, start: draft.start, finish: draft.finish};
+}
+
+export type HikeGpxExportState = {canExport: true} | {canExport: false; reason: string};
+
+export function getHikeGpxExportState(value: HikeDraft, plan: CompositePlan, resolved: ResolvedPlanGeometry): HikeGpxExportState {
+  try {
+    requireHikeGpxExport(value, plan, resolved);
+    return {canExport: true};
+  } catch (error) {
+    return {canExport: false, reason: error instanceof Error ? error.message : 'Не удалось проверить план для GPX. Пересчитайте путь.'};
+  }
+}
+
+/** Export only resolved source segments. A review break remains a distinct trkseg, including zero-meter crossings. */
+export function exportHikeGpx(value: HikeDraft, plan: CompositePlan, resolved: ResolvedPlanGeometry): string {
+  const draft = requireHikeGpxExport(value, plan, resolved);
   const hasBreaks = plan.gaps.length > 0 || !plan.geometryContinuous;
   const warning = hasBreaks
     ? 'Известные участки плана. Между ними есть разрывы или неподтверждённые переходы. Связующие линии не добавлены; проверьте переходы и условия на местности.'

@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Deliberately CI-only: a manual workflow owns one disposable AVD. Never probe
+# Deliberately CI-only: this workflow owns one disposable AVD. Never probe
 # or replace a developer's device, and never fall back to slow CPU emulation.
 if [[ "${GITHUB_ACTIONS:-}" != "true" ]]; then
-  printf '%s\n' 'This bounded runner is only for the manual GitHub Actions job.' >&2
+  printf '%s\n' 'This bounded runner is only for the GitHub Actions device job.' >&2
   exit 2
 fi
 tropnik_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 tropnik_sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
 tropnik_output="$tropnik_root/android/dist/instrumentation-ci"
+tropnik_artifacts="$tropnik_root/android/dist"
 tropnik_adb="$tropnik_sdk/platform-tools/adb"
 tropnik_emulator="$tropnik_sdk/emulator/emulator"
 tropnik_serial='emulator-5554'
 mkdir -p "$tropnik_output"
+python3 "$tropnik_root/tools/android-build/preview_artifacts.py" verify --directory "$tropnik_artifacts" --root "$tropnik_root" --sdk "$tropnik_sdk"
 [[ -r /dev/kvm && -w /dev/kvm ]]
 # Keep preflight diagnostics in both the job log and the retained artifact.
 # pipefail preserves a launcher/linker failure instead of letting tee mask it.
@@ -56,17 +58,20 @@ fi
 "$tropnik_adb" -s "$tropnik_serial" shell input keyevent 82
 "$tropnik_adb" -s "$tropnik_serial" logcat -c
 
-cd "$tropnik_root/android"
-chmod +x gradlew
+# Install the optimized universal APK and test APK produced by the build job.
+# Never invoke Gradle here: rebuilding would test different bytes and a new key.
+"$tropnik_adb" -s "$tropnik_serial" install --no-incremental -r -t "$tropnik_artifacts/tropnik-preview.apk"
+"$tropnik_adb" -s "$tropnik_serial" install --no-incremental -r -t "$tropnik_artifacts/tropnik-instrumentation-tests.apk"
+python3 "$tropnik_root/tools/android-build/preview_artifacts.py" installed --directory "$tropnik_artifacts" --root "$tropnik_root" --sdk "$tropnik_sdk" --serial "$tropnik_serial" --output "$tropnik_output/installed-apks.json"
 set +e
-timeout --signal=TERM --kill-after=30s 12m ./gradlew --no-daemon --console=plain --max-workers=2 \
-  :app:connectedDebugAndroidTest -PapiBaseUrl= \
-  -Pandroid.testInstrumentationRunnerArguments.class=ru.tropa.app.LocalExperienceTest \
-  2>&1 | tee "$tropnik_output/connected-tests.log"
-tropnik_gradle_exit=${PIPESTATUS[0]}
+timeout --signal=TERM --kill-after=30s 12m "$tropnik_adb" -s "$tropnik_serial" shell am instrument -w -r \
+  -e class ru.tropa.app.LocalExperienceTest \
+  ru.tropa.app.preview.test/androidx.test.runner.AndroidJUnitRunner \
+  2>&1 | tee "$tropnik_output/raw-instrumentation.log"
+tropnik_instrumentation_exit=${PIPESTATUS[0]}
 set -e
+sha256sum "$tropnik_artifacts/tropnik-preview.apk" "$tropnik_artifacts/tropnik-instrumentation-tests.apk" > "$tropnik_output/tested-apks.sha256"
 python3 "$tropnik_root/tools/android-build/check-instrumentation.py" \
-  app/build/outputs/androidTest-results/connected "$tropnik_output/device-result.json" \
-  --gradle-exit "$tropnik_gradle_exit"
-sha256sum app/build/outputs/apk/debug/app-debug.apk \
-  app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk > "$tropnik_output/tested-apks.sha256"
+  "$tropnik_output/raw-instrumentation.log" "$tropnik_output/device-result.json" \
+  --process-exit "$tropnik_instrumentation_exit" --artifact-directory "$tropnik_artifacts" \
+  --installed-report "$tropnik_output/installed-apks.json" --root "$tropnik_root"

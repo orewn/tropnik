@@ -75,6 +75,7 @@ import ru.tropa.app.data.InstalledPackEntity
 import ru.tropa.app.data.PositionState
 import ru.tropa.app.data.Region
 import ru.tropa.app.data.TrailRoute
+import ru.tropa.app.data.browserPlannerTarget
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
@@ -230,6 +231,7 @@ private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () 
             is PositionState.Ready -> item { InfoCard("Позиция на ${DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(position.fix.measuredAt))}. Точность около ${position.fix.accuracy.toInt()} м. Это разовое измерение; обновите его при перемещении.") }
             else -> Unit
         }
+        item { BrowserPlannerCard(requireNotNull(model.catalog.browserPlannerTarget()), "open_planner") }
         if (selected == null) {
             item { SectionHeading("Куда отправимся", "Выберите регион на карте или в списке") }
             if (regions.isEmpty()) item { EmptyCard("Регион не найден", "Попробуйте другое название: например, «Алтай», «Карелия» или «Крым».", Glyph.SEARCH) }
@@ -363,6 +365,9 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
                 Text(if (route.illustrative) "Учебная карточка" else "Путь пока не добавлен", style = MaterialTheme.typography.titleLarge)
                 Text(if (route.illustrative) "Попробуйте сохранить карточку и вернуться к ней без интернета." else "Сейчас доступны описание и источники. Перед походом уточните путь и условия посещения.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
             }
+        }
+        model.catalog.browserPlannerTarget(route)?.let { target ->
+            item { BrowserPlannerCard(target, "open_route_planner") }
         }
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

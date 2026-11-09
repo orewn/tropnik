@@ -1984,10 +1984,10 @@
   "glyphs": "asset://maps/pilot/fonts/{fontstack}/{range}.pbf",
   "metadata": {
     "tropnik:terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
-    "tropnik:russiaBoundaryProvenanceSha256": "dfa7e1592ff85056978842aa24d1983042eba1f96b8d58188fdd3138c4b4de15",
+    "tropnik:russiaBoundaryProvenanceSha256": "b8bc96450cc3777d454d87da3018a76db4bc10323720d76cf512831d0e66ac93",
     "tropnik:displayScope": "russia-only",
-    "tropnik:russiaReliefManifestSha256": "c0e3bac32962865ac0045a232c3f58c259506681b500331aeb056ef110f96d54",
-    "tropnik:onlineSourcesManifestSha256": "7fa2f088ab5c87a65feee85979d28b635b9791ba7b8f8b060bc14397c65fc746",
+    "tropnik:russiaReliefManifestSha256": "0be4600a67f7696c74846dfdb2873016e1fc31e7d386353a6afa180f9fa3a4f3",
+    "tropnik:onlineSourcesManifestSha256": "6984b52e533d485f37292851203f467bfa8056d25848e73b59c8a6f7d8840dfa",
     "tropnik:onlineLayerIds": [
       "online-natural-grass",
       "online-forest",

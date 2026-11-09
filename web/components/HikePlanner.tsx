@@ -9,7 +9,7 @@ import {regions, trails, trailById, regionById, type Trail} from '@/lib/content'
 import {loadPublicJSON} from '@/lib/map-preload';
 import connectionData from '@/lib/trail-connections.generated.json';
 import {getTrailConnections, getTrailEndpoints, normalizeTrailGeometry, planTrailSequence, resolvePlanGeometry, type TrailConnection, type TrailConnectionIndex, type TrailEndpoint} from '@/lib/trail-connections';
-import {createHikeDraft, validateHikeDraft, serializeHikeDraft, exportHikeGpx, safeHikeFilename, type HikeDraft} from '@/lib/hike-draft';
+import {createHikeDraft, validateHikeDraft, serializeHikeDraft, exportHikeGpx, getHikeGpxExportState, safeHikeFilename, type HikeDraft} from '@/lib/hike-draft';
 import styles from './HikePlanner.module.css';
 
 const PlannerAtlas = lazy(() => import('./Atlas2D').then(module => ({default: module.Atlas2D})));
@@ -92,6 +92,7 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
   });
   const plan = useMemo(() => planTrailSequence(index, JSON.parse(pathKey)), [pathKey]);
   const resolved = useMemo(() => resolvePlanGeometry(index, plan, loadedGeometry), [plan, loadedGeometry]);
+  const gpxExport = useMemo(() => getHikeGpxExportState(draft, plan, resolved), [draft, plan, resolved]);
   const first = draft.stages[0], last = draft.stages[draft.stages.length - 1];
   const firstId = first?.trailId, lastId = last?.trailId;
   const startPoints = useMemo(() => endpointOptions(firstId, draft.start), [firstId, draft.start]);
@@ -204,9 +205,9 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
     return {...source, id: 'composite-plan', title: 'План похода', geometryUrl: geometry ? undefined : source.geometryUrl, geometry, distanceKm: plan.knownDistanceM / 1000};
   }, [firstId, resolved, loadedGeometry, plan, picker]);
   const days = [...new Set(draft.stages.map(stage => stage.day))];
-  const geometryReady = !loading && !geometryError && resolved.features.length > 0 && !resolved.issues.length;
+  const canExportGpx = !loading && !geometryError && gpxExport.canExport;
   const issues = [...plan.issues, ...(loading ? [] : resolved.issues)].filter((item, position, items) => items.findIndex(other => other.code === item.code && other.trailId === item.trailId && other.connectionId === item.connectionId) === position);
-  const ready = geometryReady && plan.complete && plan.geometryContinuous;
+  const ready = canExportGpx && plan.complete && plan.geometryContinuous;
 
   return <>
     <Header active="planner"/>
@@ -219,7 +220,7 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
         <label className={styles.name}>Название похода<input value={draft.name} maxLength={120} onChange={event => update({name: event.target.value})} placeholder="Мой составной поход"/></label>
         <div className={styles.toolbarActions}>
           <button type="button" className="button primary" disabled={!draft.stages.length} onClick={save}><BookmarkSimple size={18}/>Сохранить</button>
-          <button type="button" className="button secondary" disabled={!geometryReady || !draft.start || !draft.finish} onClick={() => exportFile('gpx')}><DownloadSimple size={18}/>{plan.gaps.length ? 'GPX участков' : 'Скачать GPX'}</button>
+          <button type="button" className="button secondary" disabled={!canExportGpx} title={gpxExport.canExport ? undefined : gpxExport.reason} onClick={() => exportFile('gpx')}><DownloadSimple size={18}/>{plan.gaps.length ? 'GPX участков' : 'Скачать GPX'}</button>
           <details className={styles.fileMenu}><summary>Файлы и планы</summary><div>
             <button type="button" onClick={() => exportFile('json')} disabled={!draft.stages.length}>Скачать план JSON</button>
             <button type="button" onClick={() => fileInput.current?.click()}>Открыть файл плана</button>

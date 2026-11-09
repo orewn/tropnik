@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {buildTrailConnectionIndex} from '../scripts/build-trail-connections.mjs';
 import {coordinateKey, planTrailSequence, resolvePlanGeometry} from '../lib/trail-connections.ts';
-import {createHikeDraft, validateHikeDraft, serializeHikeDraft, safeHikeFilename, exportHikeGpx} from '../lib/hike-draft.ts';
+import {createHikeDraft, validateHikeDraft, serializeHikeDraft, safeHikeFilename, exportHikeGpx, getHikeGpxExportState} from '../lib/hike-draft.ts';
 
 const now = '2026-11-09T12:00:00.000Z';
 const line = coordinates => ({type: 'LineString', coordinates});
@@ -102,6 +102,7 @@ test('GPX escapes user text, preserves day and provenance metadata, and invents 
   draft.name = 'A&B <перевал> "север" \'юг\'';
   draft.notes = 'Не <script> и не ]]>; "кавычки" & вода.';
   const {plan, resolved} = build(draft);
+  assert.deepEqual(getHikeGpxExportState(draft, plan, resolved), {canExport: true});
   const gpx = exportHikeGpx(draft, plan, resolved);
   assert.match(gpx, /<name>A&amp;B &lt;перевал&gt; &quot;север&quot; &apos;юг&apos;<\/name>/);
   assert.match(gpx, /Не &lt;script&gt; и не \]\]&gt;; &quot;кавычки&quot; &amp; вода\./);
@@ -129,6 +130,7 @@ test('unverified transfers export distinct completed segments without a syntheti
   const {plan, resolved} = build(draft);
   assert.equal(plan.complete, false);
   assert.equal(plan.gaps.length, 1);
+  assert.deepEqual(getHikeGpxExportState(draft, plan, resolved), {canExport: true}, 'review breaks still allow an export of the known segments');
   const gpx = exportHikeGpx(draft, plan, resolved);
   const segments = tracks(gpx);
   assert.equal(segments.length, 2);
@@ -172,6 +174,51 @@ test('a zero-distance selection cannot be exported as a completed loop', () => {
   const draft = {...create(), start: pointId('a', [40, 45]), finish: pointId('a', [40, 45])};
   const {plan, resolved} = build(draft);
   assert.throws(() => exportHikeGpx(draft, plan, resolved), /GPX пока недоступен|Нет рассчитанных участков/);
+});
+
+test('an empty stage keeps a nonzero hike incomplete and disables GPX until that stage has a path', () => {
+  const join = connection('a', 'b').id;
+  const firstEmpty = {...connectedDraft(), start: pointId('a', [40.001, 45])};
+  const lastEmpty = {...connectedDraft(), finish: pointId('b', [40.001, 45])};
+  const middleEmpty = {...create(), start: pointId('a', [40, 45]), finish: pointId('a', [40.002, 45]),
+    stages: [{trailId: 'a', day: 1}, {trailId: 'b', day: 1, entryConnectionId: join}, {trailId: 'a', day: 2, entryConnectionId: join}]};
+  for (const [draft, emptyAt, turn] of [
+    [firstEmpty, 0, pointId('a', [40, 45])],
+    [middleEmpty, 1, pointId('b', [40.001, 45.001])],
+    [lastEmpty, 1, pointId('b', [40.001, 45.001])],
+  ]) {
+    const {plan, resolved} = build(draft);
+    assert.ok(plan.knownDistanceM > 0, 'other stages still have a real distance');
+    assert.equal(plan.complete, false, 'a visible nonzero line must not hide an empty stage');
+    assert.equal(plan.geometryContinuous, false);
+    const state = getHikeGpxExportState(draft, plan, resolved);
+    assert.equal(state.canExport, false);
+    assert.match(state.reason, /Вход и выход совпадают/);
+    assert.throws(() => exportHikeGpx(draft, plan, resolved), error => error.message === state.reason);
+
+    const repaired = {...draft, stages: draft.stages.map((stage, i) => i === emptyAt ? {...stage, via: [turn]} : stage)};
+    const current = build(repaired);
+    assert.equal(current.plan.complete, true);
+    assert.equal(current.plan.geometryContinuous, true);
+    assert.deepEqual(getHikeGpxExportState(repaired, current.plan, current.resolved), {canExport: true});
+    assert.doesNotThrow(() => exportHikeGpx(repaired, current.plan, current.resolved));
+  }
+});
+
+test('download eligibility reports the exporter reason for invalid drafts, stale paths and incomplete geometry', () => {
+  const draft = connectedDraft(), {plan, resolved} = build(draft);
+  for (const [value, geometry, expected] of [
+    [{...draft, name: ' '}, resolved, /Название похода/],
+    [{...draft, sourceDigest: '0'.repeat(64)}, resolved, /Данные троп изменились/],
+    [{...draft, stages: [{...draft.stages[0], via: [pointId('a', [40.002, 45])]}, draft.stages[1]]}, resolved, /не соответствует/],
+    [draft, {...resolved, features: resolved.features.slice(1)}, /Не все рассчитанные этапы/],
+    [draft, {...resolved, segments: [[[181, 45], [40, 45]]]}, /некорректные координаты/],
+  ]) {
+    const state = getHikeGpxExportState(value, plan, geometry);
+    assert.equal(state.canExport, false);
+    assert.match(state.reason, expected);
+    assert.throws(() => exportHikeGpx(value, plan, geometry), error => error.message === state.reason);
+  }
 });
 
 test('GPX decimal coordinates remain valid for values normally printed in scientific notation', () => {

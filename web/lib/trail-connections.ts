@@ -259,7 +259,7 @@ export function planTrailSequence(index: TrailConnectionIndex, options: Composit
     path.distanceM = roundM(path.distanceM);
     Object.assign(stage, path, {connected: true});
     plan.knownDistanceM += path.distanceM;
-    if (!path.refs.length) issue({code: 'empty_stage', message: 'Вход и выход совпадают: эта тропа не добавляет пройденного участка. Выберите другую точку или уберите этап.', trailId});
+    if (!path.refs.length) issue({code: 'empty_stage', message: 'Вход и выход совпадают: эта тропа не добавляет пройденного участка. Выберите другую точку или уберите этап.', trailId}, true);
   });
   plan.knownDistanceM = roundM(plan.knownDistanceM);
   if (plan.knownDistanceM === 0) {

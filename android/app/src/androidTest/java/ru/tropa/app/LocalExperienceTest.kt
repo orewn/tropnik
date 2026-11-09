@@ -28,6 +28,33 @@ import java.util.concurrent.TimeUnit
 class LocalExperienceTest {
     @get:Rule val app = createAndroidComposeRule<MainActivity>()
 
+    @Test fun browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp() {
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("open_planner"))
+        app.onNodeWithTag("open_planner").performClick()
+        app.onNodeWithTag("planner_explanation").assertExists()
+        app.onNodeWithText("Конструктор откроется в браузере. Для загрузки нужна сеть.").assertExists()
+        app.onNodeWithText("Планы сохраняются в этом браузере. Для переноса используйте файл JSON; маршрут можно скачать в GPX.").assertExists()
+        app.onNodeWithTag("planner_route").assertDoesNotExist()
+        app.onNodeWithTag("planner_open_browser").assertIsEnabled()
+        screenshot("planner-browser-main-dialog")
+        app.onNodeWithTag("planner_cancel").performClick()
+        app.onNodeWithTag("planner_explanation").assertDoesNotExist()
+        app.onNodeWithTag("nav_explore").assertIsSelected()
+
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_krasnodar"))
+        app.onNodeWithTag("region_krasnodar").performClick()
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
+        app.onNodeWithTag("route_kavkaz-8a").performClick()
+        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("open_route_planner"))
+        app.onNodeWithTag("open_route_planner").performClick()
+        app.onNodeWithTag("planner_route").assertTextContains("Бзерпинский", substring = true)
+        screenshot("planner-browser-route-dialog")
+        app.onNodeWithTag("planner_cancel").performClick()
+        app.onNodeWithTag("planner_explanation").assertDoesNotExist()
+        app.onNodeWithTag("open_route_planner").assertIsDisplayed()
+        app.onNodeWithTag("route_detail").assertExists()
+    }
+
     @Test fun canOpenRegionAndReadOfficialRestrictionWithoutAnAccount() {
         app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_krasnodar"))
         app.onNodeWithTag("region_krasnodar").performClick()

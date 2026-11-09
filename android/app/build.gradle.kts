@@ -28,8 +28,8 @@ android {
         applicationId = "ru.tropa.app.preview"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.4.4-preview"
+        versionCode = 8
+        versionName = "0.4.16-preview"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Both physical ARM phones and an x86_64 emulator are covered by this APK.
@@ -66,6 +66,9 @@ android {
         unitTests.all {
             it.systemProperty("tropnik.assets", file("src/main/assets").absolutePath)
             it.inputs.dir(file("src/main/assets"))
+            val plannerIndex = rootProject.file("../web/lib/trail-connections.generated.json")
+            it.systemProperty("tropnik.planner.index", plannerIndex.absolutePath)
+            it.inputs.file(plannerIndex)
         }
     }
 }

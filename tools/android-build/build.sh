@@ -38,4 +38,7 @@ for tropnik_apk in "$tropnik_output/tropnik-preview.apk" "$tropnik_output/tropni
   "$tropnik_sdk/build-tools/36.0.0/aapt2" dump badging "$tropnik_apk" > "${tropnik_apk%.apk}.manifest.txt"
   python3 "$tropnik_root/tools/android-build/verify-apk.py" "$tropnik_apk" --output "${tropnik_apk%.apk}.verification.json"
 done
+"$tropnik_sdk/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$tropnik_output/tropnik-instrumentation-tests.apk" > "$tropnik_output/tropnik-instrumentation-tests.signature.txt"
+"$tropnik_sdk/build-tools/36.0.0/aapt2" dump badging "$tropnik_output/tropnik-instrumentation-tests.apk" > "$tropnik_output/tropnik-instrumentation-tests.manifest.txt"
+python3 "$tropnik_root/tools/android-build/preview_artifacts.py" create --directory "$tropnik_output" --root "$tropnik_root"
 printf '%s\n' "Verified preview APKs: $tropnik_output"

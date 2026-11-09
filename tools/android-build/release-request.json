@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "version": "0.4.16-preview",
+  "versionCode": 8,
+  "notesFile": "tools/android-build/release-notes/0.4.16-preview.md"
+}
