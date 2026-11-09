@@ -154,6 +154,15 @@
   font: var(--caption-4);
   pointer-events: none;
 }
+@media (min-width: 901px), (min-width: 701px) and (min-height: 621px) {
+  /* The story launcher sits 90px above the bottom and is one control tall.
+     Keep transient loading text in its own row, with a 12px gap above it. */
+  .explore-layout .map-preload-status {
+    left: var(--map-left);
+    bottom: calc(90px + var(--map-control-size) + 12px);
+    max-width: calc(100% - var(--map-left) - var(--map-right) - 64px);
+  }
+}
 .explore-layout .map-preload-status::before {
   content: '';
   width: 8px;

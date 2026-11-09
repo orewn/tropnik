@@ -137,7 +137,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
    const available={left:Math.max(0,map.left),right:Math.min(innerWidth,map.right),top:Math.max(0,map.top),bottom:Math.min(innerHeight,map.bottom,mobile&&sheet&&root?.dataset.sheetState==='closed'?sheet.top:Infinity)};
    // An expanded story is a separate scrollable panel. Inspect its collapsed
    // launcher here; the existing story suite exercises the expanded surface.
-   const ui=[...document.querySelectorAll('.map-context,.map-style-switch,.map-controls,.layer-button,.map-message,.fact-closed,.map-attribution-toggle,.map-attribution-content,.map-satellite-credit,.map-legend')].filter(visible).map(element=>({kind:element.className,rect:box(element)}));
+   const ui=[...document.querySelectorAll('.map-context,.map-style-switch,.map-controls,.layer-button,.map-message,.map-preload-status,.fact-closed,.map-attribution-toggle,.map-attribution-content,.map-satellite-credit,.map-legend')].filter(visible).map(element=>({kind:element.className,rect:box(element)}));
    const targets=[...document.querySelectorAll('.map-style-switch button,.map-controls button:not([disabled]),.layer-button,.map-message button,.fact-closed,.map-attribution-toggle')].filter(visible).map(element=>{
     const r=box(element),x=(r.left+r.right)/2,y=(r.top+r.bottom)/2,hit=document.elementFromPoint(x,y);return{label:element.getAttribute('aria-label')||element.textContent?.trim(),rect:r,minimumSize:44,unobscured:!!hit&&element.contains(hit)};
    });
@@ -314,7 +314,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
     const available={left:Math.max(0,r.left),right:Math.min(innerWidth,r.right),top:Math.max(0,r.top),bottom:Math.min(innerHeight,r.bottom,mobile&&panel&&root?.dataset.sheetState==='closed'?panel.getBoundingClientRect().top:Infinity)};available.width=available.right-available.left;available.height=available.bottom-available.top;
     const params=new URLSearchParams(location.search);
     return{available,scrollY:window.scrollY,region:params.get('region')||'',queryRoute:params.get('route')||'',selectedRoute:atlas.dataset.mapRoute||'',imagery:atlas.dataset.mapImagery||'',sceneVisible:visible(document.querySelector('.terrain-scene.is-visible')),
-     overlays:[...document.querySelectorAll('.map-context,.map-style-switch,.map-controls,.layer-button,.map-message,.fact-closed,.map-attribution-toggle,.map-attribution-content,.map-satellite-credit,.map-legend')].filter(visible).map(element=>({kind:element.className,rect:box(element)})),
+     overlays:[...document.querySelectorAll('.map-context,.map-style-switch,.map-controls,.layer-button,.map-message,.map-preload-status,.fact-closed,.map-attribution-toggle,.map-attribution-content,.map-satellite-credit,.map-legend')].filter(visible).map(element=>({kind:element.className,rect:box(element)})),
      markers:[...document.querySelectorAll('.route-edge-marker[role="img"]')].map(element=>({role:element.getAttribute('role'),ariaLabel:element.getAttribute('aria-label'),density:element.dataset.routeEdgeDensity||'',pointerEvents:getComputedStyle(element).pointerEvents,rect:box(element),badge:part(element.querySelector('.route-edge-badge')),caption:part(element.querySelector('.route-edge-label'))}))};
    })()`);
    const reliefPalette=await waitValue(`${profile.name}: relief tiles retained a stale palette`,()=>evaluate(cdp,`(()=>{

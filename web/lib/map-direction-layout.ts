@@ -88,7 +88,7 @@ export const MAP_LABEL_SAFE_AREA = {
   compact: {edge: 12, top: 12, right: 12, bottom: 12},
 } as const;
 export const MAP_LABEL_OBSTACLE_SELECTORS = [
-  '.map-context','.map-style-switch','.map-controls','.layer-control','.map-message',
+  '.map-context','.map-style-switch','.map-controls','.layer-control','.map-message','.map-preload-status',
   '.map-legend','.map-attribution','.fact-card','.fact-closed','.explore-panel',
 ] as const;
 

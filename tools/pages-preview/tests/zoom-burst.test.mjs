@@ -124,6 +124,19 @@ test('map overlay checks reject the observed notice/story collision and obscured
  assert.throws(()=>assertMapUIBounds(layout,'Clipped attribution'),/map-attribution-toggle leaves the usable map/);
 });
 
+test('the C9 terrain preload notice must occupy a separate row above the story launcher',()=>{
+ const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
+ const layout={width:1440,scrollWidth:1425,scrollY:0,available:rect(384,72,1041,928),ui:[
+  {kind:'map-preload-status',rect:rect(408,878,269,34)},
+  {kind:'fact-closed',rect:rect(408,866,143,44)},
+  {kind:'map-legend',rect:rect(409,939,524,34)},
+ ],targets:[]};
+ assert.throws(()=>assertMapUIBounds(layout,'C9 terrain z14.91'),/map-preload-status overlaps fact-closed/);
+ layout.ui[0].rect=rect(408,820,269,34);
+ assert.equal(layout.ui[1].rect.top-layout.ui[0].rect.bottom,12);
+ assert.doesNotThrow(()=>assertMapUIBounds(layout,'Separate loading row'));
+});
+
 test('settling observes a queued camera only after compositor progress and consecutive idle samples',async()=>{
  let frames=0,reads=0;const observed=[];
  const state=zoom=>({visible:true,moving:false,engine:'leaflet',camera:{longitude:40,latitude:43,zoom,tileSize:256},rect:{left:0,top:68,width:412,height:847},route:'kavkaz-8a'});

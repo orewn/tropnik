@@ -23,9 +23,10 @@ function fixture({width=800,height=600,left=0,top=0,panel,obstacles=[]}={}){
   const px=(node,name)=>parseFloat(node.style.getPropertyValue(name))||0;
   const obstacle=(id,value)=>({id,contains:()=>false,getBoundingClientRect:()=>read(id,value)});
   const panelNode=panel?obstacle('panel',rect(...panel)):null;
-  const blocks=obstacles.map((value,index)=>obstacle(`obstacle-${index}`,rect(...value)));
+  const blocks=obstacles.map((value,index)=>Array.isArray(value)?obstacle(`obstacle-${index}`,rect(...value)):
+    {...obstacle(`obstacle-${index}`,rect(...value.rect)),selector:value.selector});
   if(panelNode)blocks.push(panelNode);
-  const root={querySelector:()=>panelNode,querySelectorAll:()=>blocks};
+  const root={querySelector:()=>panelNode,querySelectorAll:selector=>blocks.filter(block=>!block.selector||selector.split(',').includes(block.selector))};
   const viewport={clientWidth:width,closest:()=>root,querySelectorAll:()=>trails,getBoundingClientRect:()=>read('viewport',rect(left,top,width,height))};
   function add(id,{x=200,y=180,kind='direction',classes=[],hover=false,hidden=false,connected=true,naturalWidth=120,labelHeight=24,empty=false}={}){
     const classNames=new Set(classes),labelId=`${id}:label`;
@@ -139,6 +140,19 @@ test('mobile edge clamp, sheet clearance and overlay avoidance preserve repeated
   assert.ok(first.label.left>=12&&first.label.right<=378&&first.label.top>=12&&first.label.bottom<=428);
   assert.equal(overlap(first.label,card,8),false);assert.deepEqual(first.marker,markerBefore);
   env.reset();env.run();assert.deepEqual(snapshot(button),first,'resetting measurement translations must not accumulate drift');
+});
+
+test('direction and selected trail labels avoid the transient preload row without moving their anchors',()=>{
+  const preload={left:408,top:820,right:677,bottom:854};
+  for(const kind of ['direction','trail']){
+    const env=fixture({left:384,top:72,width:1041,height:928,obstacles:[{selector:'.map-preload-status',rect:[408,820,269,34]}]});
+    const button=env.add('near-preload',{kind,x:180,y:kind==='trail'?812:724,classes:kind==='trail'?['is-selected']:[]});
+    const marker=button.getBoundingClientRect();assert.equal(overlap(button.label.getBoundingClientRect(),preload),true);
+    env.reset();env.run();const first=snapshot(button);
+    assert.equal(first.hidden,undefined);assert.equal(overlap(first.label,preload,8),false);assert.deepEqual(first.marker,marker);
+    assert.ok(env.events.some(event=>event.kind==='read'&&event.target==='obstacle-0'),'The loading row is selected by the shared obstacle query');
+    env.reset();env.run();assert.deepEqual(snapshot(button),first);
+  }
 });
 
 test('inactive, detached and grouped-away markers do not consume label measurements or collision space',()=>{

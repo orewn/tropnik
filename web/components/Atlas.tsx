@@ -161,7 +161,9 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      minZoom:Math.max(-2,initial.zoom),maxZoom:18,attributionControl:false,renderWorldCopies:true,
      transformConstrain:(point,zoom)=>{const next=constrainFramedCamera(point.lng,point.lat,zoom,cameraFloor.current,framedCamera.current);return{center:new ml.LngLat(...next.center),zoom:next.zoom};},
      dragRotate:true,touchPitch:true,pitchWithRotate:true,maxPitch:75,fadeDuration:0,crossSourceCollisions:true,pixelRatio:Math.min(devicePixelRatio,MAP_CONFIG.maxPixelRatio),maxTileCacheZoomLevels:6,
-     canvasContextAttributes:{antialias:true,preserveDrawingBuffer:false,powerPreference:'high-performance'}});
+     // Text and line shaders smooth their own edges. Extra canvas MSAA can
+     // back up DEM uploads on constrained GPUs without improving those layers.
+     canvasContextAttributes:{antialias:false,preserveDrawingBuffer:false,powerPreference:'high-performance'}});
     mapRef.current=map;
     const zoomControl=new MapZoomButtons({zoom:()=>map.getZoom(),bounds:()=>({min:map.getMinZoom(),max:map.getMaxZoom()}),busy:()=>map.isZooming(),
      apply:target=>map.zoomTo(target,{duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:MAP_ZOOM_BUTTONS.durationMs})});
@@ -267,7 +269,9 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      if(cancelled)return;displayedTrail.current=undefined;routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];routeAnnotations.current.length=0;geographyPainted=false;styleGeneration.current++;setLoaded(true);setStyleRevision(v=>v+1);
      if(map.getSource('openmaptiles'))overviewFallback=false;
      setStatus(!navigator.onLine?OFFLINE_MESSAGE:satelliteFailed&&basePreference.current==='satellite'?SATELLITE_ERROR:overviewFallback?'Детальная карта недоступна. Показан сохранённый обзор.':basePreference.current==='overview'?OVERVIEW_MESSAGE:'');
-     if(map.getSource('terrain-dem')){map.setSourceTileLodParams(4,2,'terrain-dem');map.setSourceTileLodParams(3,2,'hillshade-dem');map.setSourceTileLodParams(3,2,'openmaptiles');}
+     // Keep pitched DEM coverage within the flat-view tile budget; vector
+     // labels and trails retain their independent detail budget.
+     if(map.getSource('terrain-dem')){map.setSourceTileLodParams(4,1,'terrain-dem');map.setSourceTileLodParams(3,1,'hillshade-dem');map.setSourceTileLodParams(3,2,'openmaptiles');}
      if(!map.getSource('regions'))map.addSource('regions',{type:'geojson',data:'/data/territories.geojson'});
      if(!map.getLayer('region-fill'))map.addLayer({id:'region-fill',type:'fill',source:'regions',paint:{'fill-color':'#9CB48E','fill-opacity':['interpolate',['linear'],['zoom'],2,.1,7,0]}},MASK);
      if(!map.getLayer('region-boundary'))map.addLayer({id:'region-boundary',type:'line',source:'regions',maxzoom:8,paint:{'line-color':'#718371','line-width':.7,'line-opacity':.34}},MASK);

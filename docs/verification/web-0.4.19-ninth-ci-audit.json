@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-11-09T23:30:08Z",
+  "candidate": "candidate9",
+  "releasePass": false,
+  "verdict": "direction-hit-areas-passed-desktop-terrain-frame-starvation",
+  "source": {
+    "repository": "orewn/tropnik",
+    "commit": "24639180d9f77cb56457e41e9ef5eb3a3e619332",
+    "workflowRunId": 42718225706,
+    "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42718225706",
+    "buildJobId": 129505173786,
+    "buildJobConclusion": "failure",
+    "buildId": "987c147cde39c707",
+    "buildIdVerifiedInJobLog": true,
+    "preBrowserChecks": "passed",
+    "deployJobId": 129512228001,
+    "deployConclusion": "skipped"
+  },
+  "artifacts": [
+    {
+      "id": 13719935995,
+      "name": "tropnik-pages-browser-failure-1",
+      "bytes": 396076,
+      "sha256": "e9963d04698ec2b727e861fcdda75bd8a93ba4713f037aeeaf5739ffbf55f3d6",
+      "archiveHashRecheckedAgainstGitHubDigest": true
+    },
+    {
+      "id": 13719178479,
+      "name": "tropnik-pages-design-1",
+      "bytes": 29694714,
+      "sha256": "870a198c899068b65019d836cb5db1227992ff01f855b6e10712b5bd1b46978c",
+      "archiveHashRecheckedAgainstGitHubDigest": true
+    }
+  ],
+  "directionHitAreas": {
+    "requiredBothEngineChecksPassed": true,
+    "schemaVersion": 1,
+    "evidence": "browser-failure.json completedMapInteractions[].directionHitAreas",
+    "scope": "Native selection through external ordinary labels and counts, cluster expansion where present, edge hit grids, and hidden controls. These are browser inputs, not physical-device measurements or a click audit of every individual region.",
+    "profiles": [
+      {
+        "profile": "android-portrait",
+        "engine": "leaflet",
+        "input": "touch",
+        "passed": true,
+        "nativeActions": 6,
+        "ordinaryLabelSelected": "altai",
+        "ordinaryCountSelected": "baikal",
+        "clusterExpansionActions": 4,
+        "allNativeActionsOutside44pxAnchor": true,
+        "allEventTriplesTrusted": true,
+        "visibleHitProbes": 96,
+        "outsideAnchorHitProbes": 66,
+        "unownedVisibleHitProbes": 0,
+        "hiddenControlObservations": 56,
+        "inViewportHiddenWrapperProbes": 324,
+        "hiddenWrapperCaptures": 0,
+        "mapInteractionLongestTaskMs": 133
+      },
+      {
+        "profile": "desktop-webgl",
+        "engine": "maplibre",
+        "input": "mouse",
+        "passed": true,
+        "nativeActions": 2,
+        "ordinaryLabelSelected": "altai",
+        "ordinaryCountSelected": "baikal",
+        "allNativeActionsOutside44pxAnchor": true,
+        "allEventTriplesTrusted": true,
+        "visibleHitProbes": 32,
+        "outsideAnchorHitProbes": 22,
+        "unownedVisibleHitProbes": 0,
+        "hiddenControlObservations": 18,
+        "hiddenControlsDisplayNone": true,
+        "mapInteractionLongestTaskMs": 390
+      }
+    ]
+  },
+  "failure": {
+    "profile": "desktop-webgl",
+    "phase": "zoom-design-terrain",
+    "error": "The maplibre map did not settle",
+    "errorLoggedAt": "2026-11-09T23:25:05.3725066Z",
+    "beforeZoom": 15.90540610449558,
+    "afterZoom": 16.90540610449558,
+    "nativePlusReachedExactTarget": true,
+    "selectedRoute": "kavkaz-8a",
+    "workflowTimeBudgetExceeded": false,
+    "settle": {
+      "timeoutMs": 15000,
+      "elapsedMs": 15202.334557999973,
+      "requiredIdleObservations": 4,
+      "observedIdleSamples": 3,
+      "cameraRectRouteExactlyIdenticalAcrossSamples": true,
+      "allSamplesMoving": false,
+      "changedFieldsAcrossSamples": [],
+      "frameMs": [1455.976180999889, 11226.463581999997, 2208.7386540001025],
+      "readMs": [4.952967000077479, 3.7765039999503642, 0.8023960000136867],
+      "diagnosis": "Compositor-frame waits consumed the interval before a fourth observation. No floating-point camera drift or repeated navigation is observed in the captured failure samples."
+    },
+    "evidence": "desktop-webgl.json settleDiagnostics and browser-failure.json"
+  },
+  "terrainTrace": {
+    "file": "desktop-webgl-terrain-zoom.trace.json",
+    "metadataFile": "desktop-webgl-terrain-zoom.trace-meta.json",
+    "sha256": "a2142e1d4a5964cba20f910fad3a6441b516bf9c46baf93315637bc20fec4332",
+    "hashRecheckedAgainstMetadata": true,
+    "bytes": 6232237,
+    "status": "complete",
+    "eof": true,
+    "dataLossOccurred": false,
+    "recordedDurationMs": 14615.774088000064,
+    "eventCount": 21042,
+    "cpuSamplesAllProfiles": 246923,
+    "beforeZoom": 4.9054061044955795,
+    "afterZoom": 5.9054061044955795,
+    "directlyCoversFinalFailureZoom": false,
+    "largestMainThreadTask": {
+      "pid": 3286,
+      "tid": 3286,
+      "startTraceUs": 774528517,
+      "wallMs": 7061.741,
+      "threadCpuMs": 186.808,
+      "gpuWaitUnionMs": 7034.606,
+      "texSubImage2DSampleSharePct": 99.211,
+      "longestWaitForTokenMs": [4979.062, 2041.504]
+    },
+    "hotPaths": [
+      "Map._render -> drawSymbols -> drawLayerSymbols -> getTerrainDataForTile -> Terrain.getTerrainData -> Texture.update -> texSubImage2D",
+      "Map._render -> drawHillshade -> prepareHillshade -> Texture.update -> texSubImage2D"
+    ],
+    "sourceEvidence": [
+      "maplibre-gl src/render/terrain.ts:357-363 uploads terrain DEM textures",
+      "maplibre-gl src/webgl/draw/draw_hillshade.ts prepareHillshade uploads hillshade DEM textures",
+      "Trace bundle maplibre-gl-8IiRFv_i.js function positions were matched to the installed source"
+    ],
+    "conclusion": "GPU command-buffer backpressure blocks synchronous DEM texture uploads. Main-thread computation and label layout do not account for the multi-second task.",
+    "limits": [
+      "The trace records successful terrain zoom 4.905 to 5.905, not the later failing zoom 16.905; final frame starvation is established separately by settleDiagnostics.",
+      "GPU wait union merges nested events. CPU sample shares and interpolated sample time are not measured thread CPU time; tdur is reported separately.",
+      "Actual gl.SAMPLES is unknown. This evidence does not establish 4x MSAA or that offscreen terrain RTT uses multisampling.",
+      "Five unmatched begin events at trace boundaries were excluded; metadata reports full EOF and no data loss."
+    ]
+  },
+  "publicConfigFollowup": {
+    "status": "pending-validation-on-next-candidate",
+    "measuredImprovement": null,
+    "changes": [
+      {
+        "api": "canvasContextAttributes.antialias",
+        "before": true,
+        "after": false,
+        "purpose": "Remove additional requested canvas MSAA workload; false is the MapLibre default. Line-edge and SDF-text antialiasing remain implemented in shaders."
+      },
+      {
+        "api": "setSourceTileLodParams tileCountMaxMinRatio",
+        "sources": ["terrain-dem", "hillshade-dem"],
+        "before": 2,
+        "after": 1,
+        "vectorSourceRatio": 2,
+        "purpose": "Bound pitched DEM tile selection and upload workload through the public SDK API. Screenshot review must check terrain detail."
+      }
+    ],
+    "sdkInternalsModified": false,
+    "cameraComparison": "exact-camera-rect-route, unchanged",
+    "settleGate": "15000 ms and four identical idle observations, unchanged",
+    "performanceThresholds": "unchanged",
+    "validationRequired": "Compare new browser/trace results, finish the desktop terrain/3D/source-end matrix, and review relief-detail screenshots before claiming acceleration or publishing."
+  },
+  "remainingAcceptance": {
+    "mobileProfilesCompleted": 4,
+    "androidDesignSchema5Passed": true,
+    "desktopTerrainComplete": false,
+    "desktopPrepared3DAndSourceEndsComplete": false,
+    "finalVisualReview": "pending",
+    "publication": "pending"
+  }
+}
