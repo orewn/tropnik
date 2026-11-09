@@ -47,39 +47,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   color:var(--muted);
 }
 .explore-layout .map-message button{background:var(--surface-soft);color:var(--forest)}
-.explore-layout .region-marker-dot{
-  width:10px;
-  height:10px;
-  border:1px solid var(--surface);
-  background:var(--forest);
-  box-shadow:0 0 0 2px rgba(255,254,250,.72),0 3px 10px rgba(29,48,38,.2);
-}
-.explore-layout .region-marker-label{
-  max-width:var(--map-label-max-width,168px);
-  min-width:0;
-  white-space:normal;
-  overflow-wrap:break-word;
-  word-break:normal;
-  text-wrap:balance;
-  line-height:1.28;
-  text-align:center;
-  padding:7px 10px;
-  border:1px solid rgba(76,99,79,.55);
-  background:rgba(255,254,250,.96);
-  box-shadow:0 6px 18px rgba(29,48,38,.11),inset 0 0 0 1px rgba(255,255,255,.4);
-  transform:translateX(var(--map-label-shift,0px));
-}
-.explore-layout .region-marker:hover .region-marker-label,
-.explore-layout .region-marker:focus-visible .region-marker-label,
-.explore-layout .region-marker.is-selected .region-marker-label{
-  background:var(--forest);
-  border-color:var(--forest);
-  color:var(--surface);
-}
-.explore-layout .region-marker.is-selected .region-marker-dot{
-  background:var(--ochre);
-  box-shadow:0 0 0 2px var(--surface),0 0 0 4px rgba(165,103,54,.28),0 4px 12px rgba(29,48,38,.22);
-}
+
 .explore-layout .trail-marker{
   border:1px solid var(--surface);
   box-shadow:0 0 0 2px rgba(36,77,60,.18),0 4px 14px rgba(29,48,38,.2);
@@ -130,7 +98,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .map-attribution-toggle:hover{background:var(--surface-soft)}
 @media(max-width:700px){
-  .explore-layout .region-marker-label{max-width:138px;padding:6px 8px;font-size:11px}
   .explore-layout .map-message{left:16px;right:16px;width:auto;max-width:none;bottom:calc(50% + 22px)}
   .explore-layout:has(.explore-panel.collapsed) .map-message{bottom:136px}
   .map-attribution{right:16px;bottom:calc(var(--map-bottom-inset,0px) + 12px)}
@@ -147,44 +114,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  * clipping remains the final defence, never the primary placement strategy. */
 .explore-layout .atlas-wrap,
 .explore-layout .atlas-canvas{overflow:hidden}
-.explore-layout .region-marker{
-  position:relative;
-  display:block;
-  width:44px;
-  height:44px;
-  min-width:44px;
-  min-height:44px;
-  padding:0;
-  overflow:visible;
-}
-.explore-layout .region-marker-dot{
-  position:absolute;
-  left:50%;
-  top:50%;
-  z-index:2;
-  transform:translate(-50%,-50%);
-}
-.explore-layout .region-marker:hover .region-marker-dot{
-  transform:translate(-50%,-50%) scale(1.3);
-}
-.explore-layout .region-marker-label{
-  position:absolute;
-  left:50%;
-  top:calc(50% + 11px);
-  width:max-content;
-  max-width:var(--map-label-max-width,168px);
-  min-width:0;
-  pointer-events:none;
-  transform:translate(calc(-50% + var(--map-label-shift-x,0px)),var(--map-label-shift-y,0px));
-  transform-origin:50% 0;
-  will-change:transform;
-}
-.explore-layout .region-marker[data-map-label-placement='top'] .region-marker-label{
-  top:auto;
-  bottom:calc(50% + 11px);
-  transform-origin:50% 100%;
-}
-.explore-layout .direction-cluster .region-marker-label{min-width:132px}
+
 .explore-layout .trail-marker{
   position:relative;
   display:grid;
@@ -251,8 +181,5 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .explore-layout .leaflet-route-marker{background:none;border:0}
 @media(max-width:700px){
-  .explore-layout .region-marker{width:38px;height:38px;min-width:38px;min-height:38px}
-  .explore-layout .region-marker-label{max-width:138px}
-  .explore-layout .direction-cluster .region-marker-label{min-width:108px}
   .explore-layout .trail-marker-label{max-width:min(190px,calc(100vw - 32px));font-size:10px}
 }

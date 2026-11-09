@@ -59,7 +59,7 @@ test('map marker labels never delegate edge placement to native browser tooltips
   const atlas=read('components/Atlas.tsx');
   const canvas=read('components/Atlas2D.tsx');
   const layout=read('lib/map-direction-layout.ts');
-  const css=read('app/map-polish.css');
+  const css=read('app/map-polish.css')+'\n'+read('app/map-direction-marker.css');
   assert.match(layout,/MAP_LABEL_SAFE_AREA/);
   assert.match(layout,/mapLabelPlacement/);
   assert.match(layout,/coveredBottom/);
@@ -100,17 +100,18 @@ test('map stability release keeps terrain explicit and text collision-aware',()=
   }
 });
 
-test('region marker dots stay centered on the exact engine coordinate',()=>{
+test('region flags stay centered on the exact engine coordinate',()=>{
   const atlas=read('components/Atlas.tsx');
   const canvas=read('components/Atlas2D.tsx');
-  const css=read('app/interface-refresh.css');
+  const css=read('app/map-direction-marker.css');
   assert.match(atlas,/new ml\.Marker\(\{element:el,anchor:'center'\}\)/);
   assert.match(canvas,/iconSize:\[DIRECTION_MARKER_SIZE,DIRECTION_MARKER_SIZE\],iconAnchor:\[DIRECTION_MARKER_SIZE\/2,DIRECTION_MARKER_SIZE\/2\]/);
   assert.doesNotMatch(canvas,/iconSize:\[1,1\],iconAnchor:\[0,0\]/);
-  assert.match(css,/region-marker\.direction-cluster[\s\S]*width:44px!important/);
-  assert.match(css,/Only the label shifts;[\s\S]*the dot and the map engine's anchor never move/);
+  assert.match(css,/\.region-marker\s*\{[^}]*width:\s*44px/);
+  assert.match(css,/\.region-marker\s*\{[^}]*height:\s*44px/);
+  assert.match(css,/\.region-marker-emblem\s*\{[^}]*transform:\s*translate\(-50%,\s*-50%\)/);
   assert.match(css,/--map-anchor-shift-x/);
-  assert.match(css,/data-map-camera='zooming'/);
+  assert.match(css,/data-map-camera/);
   assert.match(atlas,/reconcileDirectionAnchors/);
   assert.match(canvas,/reconcileDirectionAnchors/);
   assert.doesNotMatch(atlas,/map\.on\('move',\s*scheduleDirectionLayout\)/);

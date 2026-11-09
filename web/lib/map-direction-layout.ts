@@ -291,6 +291,9 @@ export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
   const relevantEvent=(event:Event)=>{
     const target=event.target;
     if(!(target instanceof Element))return;
+    // Native pointer focus does not change region-label geometry. Avoid a
+    // redundant regroup between down/up; keyboard focus still requests reflow.
+    if(event.type==='focusin'&&target.closest('.region-marker')?.matches(':active'))return;
     if(target===root||target.matches('.explore-panel')||target.closest('.region-marker,.trail-marker,.fact-card,.fact-closed,.map-style-switch,.map-controls,.layer-control,.map-message'))queue();
   };
   root.addEventListener('focusin',relevantEvent,true);
@@ -362,7 +365,9 @@ export function groupMapDirections<T extends MapDirection>(
       key: members.map(item => item.id).join('|'), members, anchor, point: points.get(anchor.id)!,
       bounds: [Math.min(...longitudes), Math.min(...latitudes), Math.max(...longitudes), Math.max(...latitudes)],
       width: members.length > 1 ? DIRECTION_CLUSTER_WIDTH : directionLabelWidth(anchor.name),
-      height: members.length > 1 || anchor.name.length > 22 ? 68 : 56,
+      // A 28px pennant and the padded, potentially wrapped label share the
+      // control. Reserve their full height before deciding which regions group.
+      height: members.length > 1 || anchor.name.length > 22 ? 88 : 72,
     };
   };
   const groups = unique.filter(item => {
@@ -402,22 +407,22 @@ export function updateDirectionButtons<T extends MapDirection>(
   const focusedId = [...buttons].find(([, button]) => button.ownerDocument.activeElement === button)?.[0];
   for (const [id, button] of buttons) {
     const group = anchors.get(id);
-    button.hidden = !group;
+    if (button.hidden !== !group) button.hidden = !group;
     if (!group) {
       button.removeAttribute('data-map-anchor-region-id');
       button.removeAttribute('data-map-group-key');
       continue;
     }
-    button.setAttribute('data-map-anchor-region-id',group.anchor.id);
-    button.setAttribute('data-map-group-key',group.key);
+    if (button.getAttribute('data-map-anchor-region-id') !== group.anchor.id) button.setAttribute('data-map-anchor-region-id',group.anchor.id);
+    if (button.getAttribute('data-map-group-key') !== group.key) button.setAttribute('data-map-group-key',group.key);
     const content = directionMarkerContent(group, counts.get(id) || 0, overview);
     button.classList.toggle('direction-cluster', content.cluster);
     button.classList.toggle('is-overview', overview);
     button.classList.toggle('is-selected', group.members.some(item => item.id === selectedId));
-    const dot = button.querySelector('.region-marker-dot'), label = button.querySelector('.region-marker-label');
-    if (dot) dot.textContent = content.count;
-    if (label) label.textContent = content.label;
-    button.setAttribute('aria-label', content.ariaLabel);
+    const count = button.querySelector('.region-marker-count'), label = button.querySelector('.region-marker-label');
+    if (count && count.textContent !== content.count) count.textContent = content.count;
+    if (label && label.textContent !== content.label) label.textContent = content.label;
+    if (button.getAttribute('aria-label') !== content.ariaLabel) button.setAttribute('aria-label', content.ariaLabel);
     button.removeAttribute('title');
   }
   if (focusedId && !anchors.has(focusedId)) {

@@ -1,0 +1,61 @@
+{
+  "task": "Region direction flags and complete native hit areas",
+  "checkedAt": "2026-11-09T22:43:53.820824+00:00",
+  "sourceBaseCommit": "3a2026afd7e14fdebb15c4e32224a98cc8a7c588",
+  "scope": {
+    "catalogueDirections": 15,
+    "renderers": [
+      "Leaflet Canvas",
+      "MapLibre WebGL"
+    ],
+    "androidBuild": false
+  },
+  "changes": [
+    "Shared SVG pennant replaces circular region dots; legend uses the same silhouette.",
+    "Visible labels and count badges remain clickable outside the 44px engine anchor.",
+    "Non-interactive Leaflet wrappers no longer intercept hits when grouped child buttons are hidden.",
+    "Native pointer, mouse, touch, Enter/Space and double-click events are isolated from map gestures; activation stays on native click.",
+    "GPS, zoom and navigation queues are cancelled before activation; stationary maps are not reset.",
+    "Selected, hovered and keyboard-focused markers rise above ordinary markers without covering fixed controls.",
+    "Old region-only CSS rules are consolidated; unrelated CSS is retained.",
+    "Group footprints include the full pennant and label; unchanged text and attributes are not rewritten."
+  ],
+  "verification": {
+    "applicationTests": {
+      "passed": 460,
+      "failed": 0
+    },
+    "pagesBuildTests": {
+      "passed": 55,
+      "failed": 0
+    },
+    "typescript": "passed --noEmit --incremental false",
+    "targetedEslint": "passed",
+    "productionBuild": "passed node scripts/build-tropnik.mjs",
+    "gitDiffCheck": "passed",
+    "independentReview": "completed; extra stationary Leaflet map.stop() resets found and fixed",
+    "baselineBrowserReproduction": {
+      "engine": "Leaflet",
+      "label": "Приблизить 2 направления: Карелия, Мурманская область",
+      "labelVisibility": "visible",
+      "labelPointerEvents": "none",
+      "nativeClickPoint": {
+        "x": 428,
+        "y": 611
+      },
+      "actualHit": "CANVAS.leaflet-zoom-animated",
+      "result": "group did not open; map container received focus"
+    },
+    "newCandidateBrowserVerification": "pending; the shared preview was retained for the parallel session"
+  },
+  "beforeMerge": [
+    "Reconcile the latest main without overwriting the parallel session.",
+    "Verify native clicks on label text, edges, corners and count badges in both engines.",
+    "Check grouped hidden anchors, keyboard focus, mobile 390px layout and changed zooms."
+  ],
+  "publication": {
+    "liveSiteChanged": false,
+    "mainBranchChanged": false,
+    "status": "held for later integration and publication as requested"
+  }
+}

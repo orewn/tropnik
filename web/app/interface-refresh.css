@@ -77,7 +77,6 @@ body{background:var(--paper);color:var(--ink)}
   box-shadow:0 0 0 2px var(--surface),0 0 0 5px rgba(165,103,54,.35),0 4px 14px rgba(29,48,38,.24);
   transform:scale(1.12);
 }
-.explore-layout [data-map-label-hidden='true'] .region-marker-label,
 .explore-layout [data-map-label-hidden='true'] .trail-marker-label{
   opacity:0!important;
   visibility:hidden!important;
@@ -98,55 +97,6 @@ body{background:var(--paper);color:var(--ink)}
 .explore-layout .leaflet-marker-pane{z-index:600}
 .explore-layout .tropnik-relief-tiles .leaflet-tile{transition:opacity .12s linear}
 
-/* The geographic anchor is always a 44×44 control. Older cluster CSS widened
- * the actual marker to 144px and Leaflet used a 1×1 icon anchored at its corner;
- * both behaviours moved the visible dot away from the supplied coordinate. */
-.explore-layout .region-marker,
-.explore-layout .leaflet-region-marker .region-marker,
-.explore-layout .region-marker.direction-cluster,
-.explore-layout .leaflet-region-marker .region-marker.direction-cluster{
-  box-sizing:border-box;
-  width:44px!important;
-  height:44px!important;
-  min-width:44px!important;
-  min-height:44px!important;
-}
-.explore-layout .leaflet-region-marker{
-  border:0!important;
-  background:transparent!important;
-  overflow:visible!important;
-}
-/* Keep every label outside marker layout. These selectors intentionally beat
- * the legacy !important transforms in map-design.css. Only the label shifts;
- * the dot and the map engine's anchor never move. */
-.explore-layout .region-marker .region-marker-label,
-.explore-layout .leaflet-region-marker .region-marker .region-marker-label,
-.explore-layout .region-marker.direction-cluster .region-marker-label,
-.explore-layout .leaflet-region-marker .region-marker.direction-cluster .region-marker-label{
-  position:absolute!important;
-  display:block!important;
-  left:50%!important;
-  top:calc(50% + 11px)!important;
-  bottom:auto!important;
-  width:max-content!important;
-  max-width:var(--map-label-max-width,168px)!important;
-  min-width:0!important;
-  min-height:0!important;
-  white-space:normal!important;
-  transform:translate(calc(-50% + var(--map-label-shift-x,0px)),var(--map-label-shift-y,0px))!important;
-  transform-origin:50% 0!important;
-}
-.explore-layout .region-marker.direction-cluster .region-marker-label,
-.explore-layout .leaflet-region-marker .region-marker.direction-cluster .region-marker-label{
-  min-width:132px!important;
-}
-.explore-layout .region-marker[data-map-label-placement='top'] .region-marker-label,
-.explore-layout .leaflet-region-marker .region-marker[data-map-label-placement='top'] .region-marker-label{
-  top:auto!important;
-  bottom:calc(50% + 11px)!important;
-  transform-origin:50% 100%!important;
-}
-
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
   outline:2px solid var(--focus);
   outline-offset:3px;
@@ -156,49 +106,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   :root{--shadow-card:0 10px 28px rgba(29,48,38,.08)}
   .explore-panel{box-shadow:0 -12px 30px rgba(29,48,38,.08)}
   .trail-card:hover{transform:none}
-  /* 44px remains the touch target and the Leaflet anchor contract. */
-  .explore-layout .region-marker,
-  .explore-layout .leaflet-region-marker .region-marker{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}
+
 }
 @media(prefers-reduced-motion:reduce){
   :is(.button,.filter-button,.save-button,.icon-button,.back-link,.trail-card),
   .explore-layout .trail-marker::before,.explore-layout .tropnik-relief-tiles .leaflet-tile{transition:none}
 }
 
-/* Exact camera-frame marker anchoring. */
-.explore-layout .region-marker,
-.explore-layout .leaflet-region-marker .region-marker{
-  translate:var(--map-anchor-shift-x,0px) var(--map-anchor-shift-y,0px)!important;
-  transition:none!important;
-  will-change:translate;
-}
-.explore-layout .region-marker .region-marker-dot,
-.explore-layout .leaflet-region-marker .region-marker .region-marker-dot{
-  position:absolute!important;
-  left:50%!important;
-  top:50%!important;
-  transform:translate(-50%,-50%)!important;
-  transform-origin:center!important;
-}
-.explore-layout .region-marker:hover .region-marker-dot,
-.explore-layout .region-marker:focus-visible .region-marker-dot{
-  transform:translate(-50%,-50%) scale(1.16)!important;
-}
-.explore-layout .atlas-canvas[data-map-camera='zooming'] .region-marker-label,
 .explore-layout .atlas-canvas[data-map-camera='zooming'] .trail-marker-label{
   opacity:0!important;
   visibility:hidden!important;
   transition:none!important;
-}
-.explore-layout .atlas-canvas[data-map-camera='zooming'] .region-marker.direction-cluster .region-marker-dot{
-  display:grid!important;
-  place-items:center;
-  min-width:28px;
-  width:auto;
-  height:24px;
-  padding:0 5px;
-  border-radius:8px;
-  color:var(--surface);
-  font:var(--caption-3);
-  font-variant-numeric:tabular-nums;
 }

@@ -120,11 +120,9 @@
 .explore-layout .preload-hint {font: var(--caption-4); letter-spacing: 0}
 .explore-layout .preload-hint {padding: 0 16px 12px}
 .explore-layout .trail-card-bottom {padding: 4px 8px 4px 16px; gap: 8px}
-
 .explore-layout .map-context,
 .explore-layout .map-legend,
-.explore-layout .map-credits,
-.explore-layout .region-marker-label {font: var(--caption-4); letter-spacing: 0}
+.explore-layout .map-credits{font: var(--caption-4); letter-spacing: 0}
 .explore-layout .map-style-switch button,
 .explore-layout .layer-button,
 .explore-layout .layer-menu,
@@ -194,75 +192,7 @@
 .explore-layout .terrain-controls > button .map-icon,
 .explore-layout .map-style-switch button .map-icon {width: 24px; height: 24px; flex-shrink: 0}
 .explore-layout .map-icon {display: block}
-.explore-layout .region-marker-label {font: var(--button-sm)}
-.explore-layout .region-marker,
-.explore-layout .leaflet-region-marker .region-marker {
-  width: 44px;
-  height: 44px;
-  min-height: 44px;
-  padding: 0;
-  gap: 0;
-  justify-content: center;
-}
-.explore-layout .region-marker[hidden] {display: none !important}
-.explore-layout .region-marker .region-marker-label {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 50%;
-  transform: translateX(-50%) !important;
-  width: max-content;
-  max-width: 224px;
-  padding: 8px 12px;
-  white-space: normal;
-  text-wrap: balance;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity .3s cubic-bezier(.22, 1, .36, 1);
-}
-.explore-layout .region-marker:hover,
-.explore-layout .region-marker:focus-visible,
-.explore-layout .region-marker.is-selected {z-index: 2}
-.explore-layout .region-marker:hover .region-marker-label,
-.explore-layout .region-marker:focus-visible .region-marker-label,
-.explore-layout .region-marker.is-selected .region-marker-label {
-  opacity: 1;
-  visibility: visible;
-}
-.explore-layout .region-marker:focus-visible {
-  outline: 2px solid var(--forest);
-  outline-offset: 4px;
-  border-radius: 8px;
-}
-.explore-layout .region-marker.direction-cluster,
-.explore-layout .leaflet-region-marker .region-marker.direction-cluster {width: 144px}
-.explore-layout .region-marker.direction-cluster .region-marker-label {
-  position: static;
-  transform: none !important;
-  display: grid;
-  place-items: center;
-  box-sizing: border-box;
-  width: 100%;
-  max-width: none;
-  min-height: 44px;
-  padding: 8px;
-  opacity: 1;
-  visibility: visible;
-  white-space: nowrap;
-}
-.explore-layout .region-marker.is-overview .region-marker-dot {
-  display: grid;
-  place-items: center;
-  width: auto;
-  min-width: 32px;
-  height: 24px;
-  padding: 0 4px;
-  border-radius: 8px;
-  color: var(--surface);
-  font: var(--caption-3);
-  font-variant-numeric: tabular-nums;
-}
-.explore-layout .region-marker.direction-cluster .region-marker-dot {display: none}
+
 .explore-layout .map-context {font: var(--body-6)}
 
 .explore-layout .terrain-heading h2 {font: var(--heading-2); letter-spacing: -.035em; text-wrap: balance}
@@ -357,7 +287,6 @@
   .map-attribution-content {left: auto; right: 0; max-width: calc(100vw - 32px)}
 }
 @media (prefers-reduced-motion: reduce) {
-  .explore-layout .region-marker .region-marker-label {transition: none}
   .map-attribution-toggle {transition: none}
   .map-attribution-toggle:active {transform: none}
 }

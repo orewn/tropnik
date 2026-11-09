@@ -71,11 +71,12 @@ test('a cluster names directions instead of summing shared route counts',()=>{
 test('regrouping transfers keyboard focus and restores a separate selected direction',()=>{
   const ownerDocument={activeElement:null},buttons=new Map();
   for(const id of ['a','b']){
-    const classes=new Set(),attributes=new Map(),dot={textContent:''},label={textContent:''};
-    buttons.set(id,{ownerDocument,hidden:false,title:'',classes,attributes,dot,label,
+    const classes=new Set(),attributes=new Map(),count={textContent:''},label={textContent:''};
+    buttons.set(id,{ownerDocument,hidden:false,title:'',classes,attributes,count,label,
       classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)},
-      querySelector:selector=>selector==='.region-marker-dot'?dot:label,
+      querySelector:selector=>selector==='.region-marker-count'?count:label,
       setAttribute:(name,value)=>attributes.set(name,value),
+      getAttribute:name=>attributes.get(name)??null,
       removeAttribute:name=>attributes.delete(name),
       focus:options=>{assert.equal(options.preventScroll,true);ownerDocument.activeElement=buttons.get(id);},
     });
@@ -91,7 +92,7 @@ test('regrouping transfers keyboard focus and restores a separate selected direc
   updateDirectionButtons(buttons,expanded,new Map([['a',7],['b',3]]),true,'b');
   assert.ok([...buttons.values()].every(button=>!button.hidden));
   assert.equal(buttons.get('b').label.textContent,'Б');
-  assert.equal(buttons.get('b').dot.textContent,'3');
+  assert.equal(buttons.get('b').count.textContent,'3');
   assert.ok(buttons.get('b').classes.has('is-selected'));
   assert.ok(!buttons.get('a').classes.has('direction-cluster'));
   assert.equal(buttons.get('b').attributes.get('aria-label'),'Открыть Б, маршрутов в каталоге: 3');

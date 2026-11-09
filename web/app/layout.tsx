@@ -12,6 +12,7 @@ import "./map-ui-release.css";
 import "./final-polish.css";
 import "./map-sheet.css";
 import "./map-detail.css";
+import "./map-direction-marker.css";
 import '@fontsource/manrope/cyrillic-400.css';
 import '@fontsource/manrope/cyrillic-500.css';
 import '@fontsource/manrope/cyrillic-600.css';

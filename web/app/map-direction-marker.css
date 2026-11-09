@@ -1,0 +1,170 @@
+/* Region controls share one silhouette and one geometry in both map engines.
+ * A pennant identifies an area; circular copper symbols remain route points. */
+.explore-layout .legend-region {
+  display: inline-block;
+  width: 12px;
+  height: 16px;
+  margin-left: 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--forest);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+}
+.explore-layout .leaflet-region-marker {
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  pointer-events: none;
+}
+.explore-layout .leaflet-region-marker:has(> .region-marker.is-selected) {z-index: 10000 !important}
+.explore-layout .leaflet-region-marker:has(> .region-marker:hover, > .region-marker:focus-visible) {z-index: 10001 !important}
+.explore-layout .region-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--forest);
+  overflow: visible;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  translate: var(--map-anchor-shift-x, 0px) var(--map-anchor-shift-y, 0px);
+  transition: none;
+  z-index: 12;
+}
+.explore-layout .region-marker[hidden] {
+  display: none !important;
+  pointer-events: none;
+}
+.explore-layout .region-marker.is-selected {z-index: 13}
+.explore-layout .region-marker:is(:hover, :focus-visible) {z-index: 14}
+.explore-layout .region-marker:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.explore-layout .region-marker-emblem {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  display: block;
+  width: 24px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  pointer-events: none;
+  transition: opacity 200ms cubic-bezier(.22, 1, .36, 1);
+}
+.explore-layout .region-marker-emblem * {pointer-events: none}
+.explore-layout .region-marker-emblem > svg {
+  display: block;
+  width: 24px;
+  height: 28px;
+  overflow: visible;
+  filter: drop-shadow(0 2px 2px #183B2C26);
+}
+.explore-layout .region-marker-flag {fill: var(--surface); stroke: var(--forest)}
+.explore-layout .region-marker-ridge {stroke: var(--forest)}
+.explore-layout .region-marker:is(:hover, :focus-visible, .is-selected) .region-marker-flag {
+  fill: var(--forest);
+  stroke: var(--surface);
+}
+.explore-layout .region-marker:is(:hover, :focus-visible, .is-selected) .region-marker-ridge {stroke: var(--surface)}
+.explore-layout .region-marker:active .region-marker-emblem {opacity: .82}
+.explore-layout .region-marker-count {
+  position: absolute;
+  left: calc(100% - 4px);
+  top: 0;
+  display: none;
+  place-items: center;
+  box-sizing: border-box;
+  min-width: 24px;
+  height: 20px;
+  padding: 0 4px;
+  border: 1px solid var(--forest);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--forest);
+  font: var(--caption-3);
+  font-variant-numeric: tabular-nums;
+  pointer-events: auto;
+}
+.explore-layout .region-marker:is(.is-overview, .direction-cluster) .region-marker-count:not(:empty) {display: grid}
+.explore-layout .region-marker:is(:hover, :focus-visible, .is-selected) .region-marker-count {
+  border-color: var(--surface);
+  background: var(--forest);
+  color: var(--surface);
+}
+/* The visible label is part of its button even when collision layout moves it
+ * beyond the 44px anchor. No transparent parent pane intercepts those clicks. */
+.explore-layout .region-marker .region-marker-label {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 18px);
+  bottom: auto;
+  display: block;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 0;
+  max-width: var(--map-label-max-width, 168px);
+  padding: 8px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--forest);
+  box-shadow: var(--shadow-control);
+  font: var(--button-sm);
+  letter-spacing: 0;
+  text-align: center;
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  transform: translate(calc(-50% + var(--map-label-shift-x, 0px)), var(--map-label-shift-y, 0px));
+  transform-origin: 50% 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 300ms cubic-bezier(.22, 1, .36, 1) !important;
+}
+.explore-layout .region-marker[data-map-label-placement='top'] .region-marker-label {
+  top: auto;
+  bottom: calc(50% + 18px);
+  transform-origin: 50% 100%;
+}
+.explore-layout .region-marker:is(:hover, :focus-visible, .is-selected, .direction-cluster) .region-marker-label {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.explore-layout .region-marker:is(:hover, :focus-visible, .is-selected) .region-marker-label {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: var(--surface);
+}
+.explore-layout .region-marker.direction-cluster .region-marker-label {min-width: 132px}
+.explore-layout .region-marker[data-map-label-hidden='true'] .region-marker-label,
+.explore-layout .atlas-canvas[data-map-camera] .region-marker-label {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none;
+  transition: none !important;
+}
+@media (max-width: 700px) {
+  .explore-layout .region-marker .region-marker-label {font: var(--caption-3)}
+  .explore-layout .region-marker.direction-cluster .region-marker-label {min-width: 108px}
+}
+@media (prefers-reduced-motion: reduce) {
+  .explore-layout .region-marker-emblem,
+  .explore-layout .region-marker .region-marker-label {transition: none !important}
+}
