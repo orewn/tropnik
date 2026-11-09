@@ -6,6 +6,7 @@ import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
 import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-projection.mjs';
+import {runZoomDesignAudit} from './browser-zoom-audit.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const REPORT = new URL('browser-verification.json', ROOT);
@@ -74,13 +75,14 @@ function serve(rootUrl){
   });
 }
 class CDP{
-  constructor(url){this.url=url;this.next=1;this.pending=new Map();this.listeners=new Map();}
+  constructor(url){this.url=url;this.next=1;this.pending=new Map();this.listeners=new Map();this.observers=new Map();}
   async open(){
     this.socket=new WebSocket(this.url);
     await new Promise((resolve,reject)=>{this.socket.addEventListener('open',resolve,{once:true});this.socket.addEventListener('error',reject,{once:true});});
     this.socket.addEventListener('message',event=>{
       const message=JSON.parse(event.data);
       if(message.id){const waiter=this.pending.get(message.id);if(!waiter)return;this.pending.delete(message.id);message.error?waiter.reject(new Error(message.error.message)):waiter.resolve(message.result);return;}
+      for(const observer of this.observers.get(message.method)||[])observer(message.params);
       const waiters=this.listeners.get(message.method);if(!waiters?.length)return;
       this.listeners.set(message.method,[]);for(const waiter of waiters)waiter(message.params);
     });
@@ -99,6 +101,10 @@ class CDP{
       const wrapped=value=>{clearTimeout(timer);resolve(value);};
       this.listeners.set(method,[...(this.listeners.get(method)||[]),wrapped]);
     });
+  }
+  observe(method,observer){
+    const observers=this.observers.get(method)||new Set();observers.add(observer);this.observers.set(method,observers);
+    return()=>{observers.delete(observer);if(!observers.size)this.observers.delete(method);};
   }
   close(){this.socket?.close();}
 }
@@ -161,7 +167,7 @@ async function sheetSnapshot(cdp){
     const root=document.querySelector('.explore-layout'),panel=document.querySelector('.explore-panel'),handle=document.querySelector('.sheet-handle'),summary=document.querySelector('.sheet-peek-summary'),content=document.querySelector('.explore-panel-content');
     if(!root||!panel||!handle)return{available:false};
     const rect=panel.getBoundingClientRect();
-    return{available:true,state:root.dataset.sheetState,height:rect.height,top:rect.top,transform:getComputedStyle(panel).transform,animating:panel.getAnimations().some(animation=>animation.playState==='running'||animation.pending),summaryVisible:visible(summary),contentVisible:visible(content),focused:document.activeElement===handle};
+    return{available:true,state:root.dataset.sheetState,height:rect.height,top:rect.top,transform:getComputedStyle(panel).transform,animating:panel.getAnimations().some(animation=>animation.playState==='running'||animation.pending),summaryVisible:visible(summary),contentVisible:visible(content),focused:document.activeElement===handle,dragging:root.dataset.sheetDragging==='true'||panel.dataset.sheetDragging==='true',scrollY:window.scrollY,contentScrollTop:content?.scrollTop||0,contentScrollHeight:content?.scrollHeight||0,contentClientHeight:content?.clientHeight||0};
   })()`);
 }
 async function settledSheet(cdp,state){
@@ -186,10 +192,95 @@ async function touchSheet(cdp){
   closed=await settledSheet(cdp,'closed');
   assert.equal(await tapSelector(cdp,'.sheet-handle',8),true);
   const open=await settledSheet(cdp,'open');
+  assert.ok(Math.abs(open.scrollY-closed.scrollY)<=1,'Tapping the sheet handle scrolled the page while opening');
   assert.equal(await tapSelector(cdp,'.sheet-handle',9),true);
   const final=await settledSheet(cdp,'closed');
+  assert.ok(Math.abs(final.scrollY-closed.scrollY)<=1,'Tapping the sheet handle scrolled the page while closing');
   const perf=await evaluate(cdp,`(()=>({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0}))()`);
   return{available:true,closed,open,final,heightDelta:Math.max(Math.abs(open.height-closed.height),Math.abs(final.height-closed.height)),cls:perf.cls,longest:perf.longest};
+}
+async function compositorFrame(cdp){
+  // Inspect rendered geometry after the input has reached a compositor frame.
+  // This waits for paint; it never calls application gesture callbacks.
+  await evaluate(cdp,'new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+}
+async function dragSheetHandle(cdp,profile,baseline,{name,from,to,progress,cancel=false}){
+  const before=await settledSheet(cdp,from),target=await elementPoint(cdp,'.sheet-handle');
+  assert.ok(target?.unobscured,`${profile.name}: ${name} handle is not reachable`);
+  const travel=baseline.closed.top-baseline.open.top;
+  assert.ok(travel>60,`${profile.name}: sheet has no usable drag travel (${travel}px)`);
+  const direction=from==='closed'?-1:1,id=71,samples=[];
+  await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:target.x,y:target.y,id,radiusX:3,radiusY:3,force:1}]});
+  let lastY=target.y;
+  for(const fraction of progress){
+    lastY=target.y+direction*travel*fraction;
+    assert.ok(lastY>=1&&lastY<profile.height,`${profile.name}: ${name} pointer left the viewport`);
+    await cdp.call('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:target.x,y:lastY,id,radiusX:3,radiusY:3,force:1}]});
+    await compositorFrame(cdp);
+    const actual=await sheetSnapshot(cdp),expectedTop=before.top+direction*travel*fraction;
+    const trackingErrorPx=Math.abs(actual.top-expectedTop),pageScrollDeltaPx=Math.abs(actual.scrollY-before.scrollY);
+    samples.push({fraction,fingerY:lastY,panelTop:actual.top,expectedTop,trackingErrorPx,pageScrollDeltaPx});
+    assert.ok(trackingErrorPx<=3,`${profile.name}: ${name} sheet does not follow the finger: ${JSON.stringify(samples.at(-1))}`);
+    assert.ok(pageScrollDeltaPx<=1,`${profile.name}: ${name} scrolled the whole page instead of the handle`);
+    assert.ok(Math.abs(actual.height-before.height)<1.1,`${profile.name}: ${name} changed panel layout height while dragging`);
+  }
+  await cdp.call('Input.dispatchTouchEvent',{type:cancel?'touchCancel':'touchEnd',touchPoints:[]});
+  const settled=await settledSheet(cdp,to);
+  // A delayed compatibility click must not toggle the sheet back after a drag.
+  await sleep(350);
+  const after=await sheetSnapshot(cdp);
+  assert.equal(after.state,to,`${profile.name}: ${name} generated a ghost toggle after release`);
+  assert.equal(after.dragging,false,`${profile.name}: ${name} retained its drag capture state`);
+  assert.ok(Math.abs(after.top-settled.top)<1,`${profile.name}: ${name} moved again after settling`);
+  assert.ok(Math.abs(after.scrollY-before.scrollY)<=1,`${profile.name}: ${name} moved the page`);
+  return{name,from,to,cancelled:cancel,passed:true,input:'touch',samples,maxTrackingErrorPx:Math.max(...samples.map(sample=>sample.trackingErrorPx)),pageScrollDeltaPx:Math.abs(after.scrollY-before.scrollY),heightDelta:Math.abs(after.height-before.height),draggingCleared:!after.dragging};
+}
+async function scrollSheetContent(cdp,profile,{stableExtent=false}={}){
+  const before=await settledSheet(cdp,'open'),selection=await selectionState(cdp);
+  const area=await evaluate(cdp,`(()=>{const element=document.querySelector('.explore-panel-content'),r=element.getBoundingClientRect(),y=Math.min(r.bottom,innerHeight)-32,x=r.left+r.width/2,hit=document.elementFromPoint(x,y);return{x,y,distance:Math.min(140,y-Math.max(r.top,0)-32),unobscured:!!hit&&element.contains(hit),scrollTop:element.scrollTop,scrollHeight:element.scrollHeight,clientHeight:element.clientHeight};})()`);
+  assert.ok(area.unobscured&&area.distance>=48,`${profile.name}: the list has no native swipe area: ${JSON.stringify(area)}`);
+  assert.ok(area.scrollHeight-area.clientHeight-area.scrollTop>40,`${profile.name}: the catalogue has no scrollable content`);
+  const id=72;
+  await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:area.x,y:area.y,id,radiusX:3,radiusY:3,force:1}]});
+  for(let step=1;step<=8;step++){
+    await cdp.call('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:area.x,y:area.y-area.distance*step/8,id,radiusX:3,radiusY:3,force:1}]});
+    await sleep(30);
+  }
+  // Stop inside the list before releasing. Scroll chaining at its boundary is
+  // intentional; this case verifies ownership of a gesture within the list.
+  await sleep(100);
+  await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  let previous=-1,stable=0;
+  const after=await waitValue(`${profile.name}: native list scrolling did not settle`,()=>sheetSnapshot(cdp),current=>{
+    stable=Math.abs(current.contentScrollTop-previous)<.5?stable+1:0;previous=current.contentScrollTop;return stable>=3;
+  },4000);
+  const deltaPx=after.contentScrollTop-before.contentScrollTop,pageScrollDeltaPx=Math.abs(after.scrollY-before.scrollY),sheetDisplacementPx=Math.abs(after.top-before.top);
+  assert.ok(deltaPx>=24,`${profile.name}: swiping the catalogue did not scroll it (${deltaPx}px)`);
+  assert.equal(after.state,'open',`${profile.name}: list scrolling collapsed the sheet`);
+  assert.ok(pageScrollDeltaPx<=1,`${profile.name}: the list swipe scrolled the whole page`);
+  assert.ok(sheetDisplacementPx<=1,`${profile.name}: list scrolling dragged the sheet`);
+  const scrollHeightDelta=Math.abs(after.contentScrollHeight-before.contentScrollHeight);
+  if(stableExtent)assert.ok(scrollHeightDelta<=1,`${profile.name}: route cards changed the scrollbar extent during a swipe (${scrollHeightDelta}px)`);
+  await expectSelection(cdp,{region:selection.region,route:selection.route,title:selection.title});
+  return{passed:true,input:'touch',before:before.contentScrollTop,after:after.contentScrollTop,deltaPx,pageScrollDeltaPx,sheetDisplacementPx,scrollHeightBefore:before.contentScrollHeight,scrollHeightAfter:after.contentScrollHeight,scrollHeightDelta,selectionPreserved:true};
+}
+async function touchSheetGestures(cdp,profile,baseline){
+  const initial=await selectionState(cdp),drags=[];
+  drags.push(await dragSheetHandle(cdp,profile,baseline,{name:'open',from:'closed',to:'open',progress:[.15,.35,.55,.75,1]}));
+  const scroll=await scrollSheetContent(cdp,profile);
+  drags.push(await dragSheetHandle(cdp,profile,baseline,{name:'close',from:'open',to:'closed',progress:[.15,.35,.55,.75,1]}));
+  const reversal=await dragSheetHandle(cdp,profile,baseline,{name:'reverse',from:'closed',to:'closed',progress:[.2,.5,.75,.5,.2,.05]});
+  const cancelled=await dragSheetHandle(cdp,profile,baseline,{name:'cancel',from:'closed',to:'closed',progress:[.2,.45],cancel:true});
+  await pointerSelector(cdp,'.sheet-handle',profile);
+  const recovered=await settledSheet(cdp,'open');
+  assert.ok(Math.abs(recovered.contentScrollTop-scroll.after)<=1,`${profile.name}: opening the sheet lost the list position`);
+  await pointerSelector(cdp,'.sheet-handle',profile);await settledSheet(cdp,'closed');
+  drags.push(await dragSheetHandle(cdp,profile,baseline,{name:'open-again',from:'closed',to:'open',progress:[.2,.5,.8,1]}));
+  drags.push(await dragSheetHandle(cdp,profile,baseline,{name:'close-again',from:'open',to:'closed',progress:[.2,.5,.8,1]}));
+  await pointerSelector(cdp,'.sheet-handle',profile);await settledSheet(cdp,'open');
+  await pointerSelector(cdp,'.sheet-handle',profile);const final=await settledSheet(cdp,'closed');
+  await expectSelection(cdp,{region:initial.region,route:initial.route,title:initial.title});
+  return{passed:true,input:'touch',drags,reversal,cancelled,scroll,tapAfterCancel:true,tapAfterDrag:true,listPositionRetained:true,selectionPreserved:true,finalState:final.state,maxTrackingErrorPx:Math.max(...[...drags,reversal,cancelled].map(item=>item.maxTrackingErrorPx)),maxPageScrollDeltaPx:Math.max(scroll.pageScrollDeltaPx,...[...drags,reversal,cancelled].map(item=>item.pageScrollDeltaPx))};
 }
 async function mapGeometrySnapshot(cdp){
   await settledSheet(cdp,'closed');
@@ -488,6 +579,7 @@ async function mapInteraction(cdp,profile,performanceIssues){
   await evaluate(cdp,'window.__tropnikPerf={cls:0,longest:0};window.__tropnikPerfStart=performance.now()');
   await diagnosticPhase(cdp,'map-interactions');
   const firstDirection=await selectMapDirection(cdp,profile,'altai','Алтай');
+  const catalogScroll=profile.mobile?await scrollSheetContent(cdp,profile,{stableExtent:true}):null;
   await closeMapSheet(cdp,profile);
   const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
   await pointerSelector(cdp,'.explore-panel .back-link',profile);
@@ -503,7 +595,7 @@ async function mapInteraction(cdp,profile,performanceIssues){
   if(profile.mobile){
     if(!(perf.longest<350))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:350});
   }else assert.ok(perf.longest<750,`${profile.name}: map interaction long task ${perf.longest}ms`);
-  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
 const httpPort=await freePort(),debugPort=await freePort();
@@ -518,7 +610,7 @@ const browser=spawn(browserBinary(),[
 ],{stdio:['ignore','ignore','pipe']});
 let browserErrors='';browser.stderr.on('data',chunk=>{browserErrors+=chunk;});
 let cdp,currentProfile;
-const results=[],desktopProfiles=[],mapInteractions=[],profilePerformance=[],performanceIssues=[];
+const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],profilePerformance=[],performanceIssues=[];
 try{
   await waitFor(`http://127.0.0.1:${debugPort}/json/version`);
   const target=await (await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(`http://127.0.0.1:${httpPort}/tropnik/`)}`,{method:'PUT'})).json();
@@ -556,6 +648,7 @@ try{
       const interaction=await mapInteraction(cdp,profile,performanceIssues);mapInteractions.push(interaction);
       desktopProfiles.push({name:profile.name,width:profile.width,height:profile.height,engine:geometry.engine,coarse:false,mapInteractionTested:true});
       profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
+      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`}));
       continue;
     }
     await diagnosticPhase(cdp,'sheet-before');
@@ -572,6 +665,9 @@ try{
       assert.equal(sheet.final.focused,false,`${profile.name}: sheet handle retained touch focus`);
       assert.ok(sheet.heightDelta<1.1,`${profile.name}: panel height changed during transform animation (${sheet.heightDelta}px)`);
     }
+    await diagnosticPhase(cdp,'sheet-gestures-before');
+    const sheetGestures=await touchSheetGestures(cdp,profile,sheet);
+    await diagnosticPhase(cdp,'sheet-gestures-after');
     await diagnosticPhase(cdp,'layers-before');
     const mapGeometry=await checkMapGeometry(cdp,profile);
     await diagnosticPhase(cdp,'layers-after');
@@ -586,19 +682,20 @@ try{
     }
     const interaction=profile.mapInteraction?await mapInteraction(cdp,profile,performanceIssues):null;
     if(interaction)mapInteractions.push(interaction);
-    results.push({...profile,geometry,sheet,mapGeometry,touch,interaction});
+    results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,touch,interaction});
     profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
+    if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`}));
   }
   // Preserve all functional pointer evidence when only a mobile performance
   // budget fails. The same strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Mobile rendering exceeded the unchanged CLS/long-task budgets');
-  const report={verified:true,mapInteractionSchemaVersion:1,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,mapGeometry,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,mapGeometry,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,mapInteractionSchemaVersion:2,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
 }catch(error){
-  const failure={profile:currentProfile,error:error.stack||String(error),performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
+  const failure={profile:currentProfile,error:error.stack||String(error),performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(cdp){
-    try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);}catch{}
+    try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);failure.sheet=await sheetSnapshot(cdp);}catch{}
     try{failure.navigationHistory=await cdp.call('Page.getNavigationHistory');}catch{}
     try{failure.performance=await performanceDiagnostics(cdp);}catch{}
     try{const screenshot=await cdp.call('Page.captureScreenshot',{format:'png'});await writeFile(new URL('browser-failure.png',ROOT),Buffer.from(screenshot.data,'base64'));}catch{}

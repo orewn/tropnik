@@ -1,6 +1,6 @@
 'use client';
 import {useRouter} from 'next/navigation';
-import {useState,useEffect,useCallback,useMemo,useRef,useSyncExternalStore,useId,useDeferredValue} from 'react';
+import {useState,useEffect,useLayoutEffect,useCallback,useMemo,useRef,useSyncExternalStore,useId,useDeferredValue} from 'react';
 import {MagnifyingGlass,ArrowRight,ArrowLeft,Mountains,Tree,WaveSine,MapPin,SlidersHorizontal,BookmarkSimple,CheckCircle,Info,X,Path,Clock,UsersThree,ArrowDown,ArrowSquareOut,ShieldCheck} from '@/components/TropnikIcons';
 import {trails,regionById,type Trail} from '@/lib/content';
 import {packs,saveReference,type SavedPack} from '@/lib/local';
@@ -19,6 +19,7 @@ import {filterMapTrails} from '@/lib/map-catalog';
 import {searchSite} from '@/lib/site-search';
 import {Modal} from './Modal';
 import {MapResourceHints} from './MapResourceHints';
+import {bindSheetGesture,SHEET_MEDIA_QUERY,type SheetGesture} from '@/lib/sheet-gesture';
 
 const terrainIcon=(id:string,size=24)=>id==='karelia'?<Tree size={size}/>:id==='baikal'?<WaveSine size={size}/>:<Mountains size={size}/>;
 const routeCountPreview=(count:number)=>{
@@ -33,6 +34,8 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  const hydrated=useSyncExternalStore(subscribeHydration,hydratedSnapshot,serverHydrationSnapshot);
  const sheetPanelId=useId();
  const panelContent=useRef<HTMLDivElement>(null);
+ const sheetLayout=useRef<HTMLElement>(null),sheetPanel=useRef<HTMLElement>(null),sheetHandle=useRef<HTMLButtonElement>(null),sheetPreview=useRef<HTMLButtonElement>(null);
+ const sheetGesture=useRef<SheetGesture|null>(null),committedSheetOpen=useRef(false);
  const [liveTrails,setLiveTrails]=useState<Trail[]>(initialPublished);
  const [requestBusy,setRequestBusy]=useState(false),[requestError,setRequestError]=useState(''),[auth,setAuth]=useState(false);
  const catalog=useMemo(()=>{const liveIds=new Set(liveTrails.map(item=>item.id));return [...liveTrails,...trails.filter(item=>!liveIds.has(item.id))];},[liveTrails]);
@@ -47,6 +50,17 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  const deferredQuery=useDeferredValue(query),searchPending=query!==deferredQuery;
  const [saved,setSaved]=useState<SavedPack[]>([]),[notice,setNotice]=useState(''),[saving,setSaving]=useState(''),[request,setRequest]=useState(false),[date,setDate]=useState(''),[note,setNote]=useState(''),[offline,setOffline]=useState(false),[draftSaved,setDraftSaved]=useState(false),[sheetOpen,setSheetOpen]=useState(false);
  const [viewportRegion,setViewportRegion]=useState<string|undefined>();
+ useLayoutEffect(()=>{committedSheetOpen.current=sheetOpen;sheetGesture.current?.sync();},[sheetOpen,region?.id,trail?.id]);
+ useEffect(()=>{
+  const root=sheetLayout.current,panel=sheetPanel.current,handle=sheetHandle.current,preview=sheetPreview.current;
+  if(!root||!panel||!handle||!preview)return;
+  const media=window.matchMedia(SHEET_MEDIA_QUERY);
+  const controller=bindSheetGesture({root,panel,handles:[handle,preview],enabled:()=>media.matches,getOpen:()=>committedSheetOpen.current,setOpen:setSheetOpen});
+  sheetGesture.current=controller;
+  const cancel=()=>controller.cancel();
+  media.addEventListener('change',cancel);
+  return()=>{media.removeEventListener('change',cancel);controller.dispose();if(sheetGesture.current===controller)sheetGesture.current=null;};
+ },[]);
  const listKey=`${region?.id||'all'}:${deferredQuery}:${difficulty}:${duration}:${onlySaved}`;
  const [page,setPage]=useState({key:'',limit:12});
  const limit=page.key===listKey?page.limit:12;
@@ -97,9 +111,9 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  const sheetPreviewMeta=trail
   ?[trail.distanceKm!=null?`${trail.distanceKm.toLocaleString('ru')} км`:undefined,trail.duration].filter(Boolean).join(' · ')||'Открыть карточку маршрута'
   :routeCountPreview(region?shownTrails.length:catalog.length);
- return <><MapResourceHints/><section className={`explore-layout ${sheetOpen?'sheet-open':'sheet-closed'}`} data-sheet-state={sheetOpen?'open':'closed'} aria-label="Поиск маршрутов"><aside id={sheetPanelId} className={`explore-panel ${sheetOpen?'expanded':'collapsed'}`}>
- <button className="sheet-handle" type="button" onClick={event=>{setSheetOpen(open=>!open);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-controls={sheetPanelId} aria-expanded={sheetOpen} aria-label={sheetOpen?'Свернуть список':'Открыть список'}><span/></button>
- <button className="sheet-peek-summary" type="button" hidden={sheetOpen} onClick={event=>{setSheetOpen(true);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-label={`Открыть: ${sheetPreviewTitle}`}>
+ return <><MapResourceHints/><section ref={sheetLayout} className={`explore-layout ${sheetOpen?'sheet-open':'sheet-closed'}`} data-sheet-state={sheetOpen?'open':'closed'} aria-label="Поиск маршрутов"><aside ref={sheetPanel} id={sheetPanelId} className={`explore-panel ${sheetOpen?'expanded':'collapsed'}`}>
+ <button ref={sheetHandle} className="sheet-handle" type="button" onClick={event=>{setSheetOpen(open=>!open);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-controls={sheetPanelId} aria-expanded={sheetOpen} aria-label={sheetOpen?'Свернуть список':'Открыть список'}><span/></button>
+ <button ref={sheetPreview} className="sheet-peek-summary" type="button" hidden={sheetOpen} onClick={event=>{setSheetOpen(true);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-label={`Открыть: ${sheetPreviewTitle}`}>
   <span className="sheet-peek-copy"><small>{sheetPreviewKind}</small><strong>{sheetPreviewTitle}</strong><span>{sheetPreviewMeta}</span></span><ArrowRight size={20}/>
  </button>
  <div className="explore-panel-content" ref={panelContent} aria-busy={searchPending}>

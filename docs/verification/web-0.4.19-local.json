@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "version": "0.4.19",
+  "checkedAt": "2026-11-09T19:19:59.117470+00:00",
+  "baseCommit": "a77cffe24388e898c4dba0ec36da65a6dadf28c7",
+  "webTests": {
+    "passed": 411,
+    "failed": 0
+  },
+  "pagesToolTests": {
+    "passed": 23,
+    "failed": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "typeScript": {
+    "web": true,
+    "pages": true
+  },
+  "staticBuild": {
+    "buildId": "5741eb61687d0805",
+    "sourceCommit": null,
+    "pages": 339,
+    "httpChecks": 52,
+    "apkSha256": "b80c36174a87eb70cc8e010af7535847b3fe9374586a87a535718bc25bf3d40f"
+  },
+  "siteBuild": {
+    "sourceCommit": "7d862722b98b46d5c39868615a17c7726413b2f8",
+    "canonicalWebFilesCompared": 1220,
+    "differentFiles": [],
+    "published": false
+  },
+  "manualBrowser": {
+    "viewport": "390x844 iframe / desktop 1363x936",
+    "input": "real mouse coordinates, not physical Android touch",
+    "sheetHandleAndPreviewDragged": true,
+    "nativeContentScroll": true,
+    "documentScrollDuringDrag": 0,
+    "rapidZoom": {
+      "start": 14,
+      "presses": 4,
+      "step": 0.75,
+      "beforeFixActual": 16.25,
+      "afterFixActual": 17,
+      "reverseActual": 14,
+      "routePreserved": true
+    },
+    "desktopSatelliteLoadedTiles": 25
+  },
+  "ciBrowserGate": "pending",
+  "physicalAndroidBraveVerified": false,
+  "logChecksums": {
+    "webTests": {
+      "sha256": "affefee190005bcd134bd03c6ac57e292c4664b24f1facf19e7e5d9962174e55",
+      "bytes": 38753
+    },
+    "lint": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "pagesTests": {
+      "sha256": "af6d1e790e34c5a7ceba11bf01466d8169753332a96352cd016312690807f2dc",
+      "bytes": 2322
+    },
+    "pagesBuild": {
+      "sha256": "5698728daa20e9d5bcdc4022c06c84d865178959f0caf27838ef2057eef58320",
+      "bytes": 10422
+    }
+  }
+}

@@ -137,7 +137,7 @@
       "source": "openmaptiles",
       "source-layer": "landcover",
       "paint": {
-        "fill-color": "#C5D6BC",
+        "fill-color": "#BACEAF",
         "fill-opacity": 0.82
       },
       "filter": [
@@ -161,7 +161,7 @@
       "source": "openmaptiles",
       "source-layer": "landcover",
       "paint": {
-        "fill-color": "#D6DFC9",
+        "fill-color": "#D2DFC5",
         "fill-opacity": 0.72
       },
       "filter": [
@@ -294,7 +294,7 @@
       "source": "openmaptiles",
       "source-layer": "water",
       "paint": {
-        "fill-color": "#C8DEE5"
+        "fill-color": "#C5DEE5"
       }
     },
     {
@@ -303,7 +303,7 @@
       "source": "openmaptiles",
       "source-layer": "waterway",
       "paint": {
-        "line-color": "#8FB7C2",
+        "line-color": "#82ADB9",
         "line-width": [
           "interpolate",
           [
@@ -344,7 +344,19 @@
           8,
           1.1
         ],
-        "line-opacity": 0.48,
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          7,
+          0.48,
+          12,
+          0.18
+        ],
         "line-dasharray": [
           4,
           3
@@ -365,7 +377,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "paint": {
-        "line-color": "#D5D4C6",
+        "line-color": "#CBC9B5",
         "line-width": [
           "interpolate",
           [
@@ -461,7 +473,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "paint": {
-        "line-color": "#B29C75",
+        "line-color": "#A88A61",
         "line-width": [
           "interpolate",
           [
@@ -502,7 +514,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "paint": {
-        "line-color": "#8B6F4D",
+        "line-color": "#9C7950",
         "line-width": [
           "interpolate",
           [
@@ -566,8 +578,8 @@
       "source": "openmaptiles",
       "source-layer": "building",
       "paint": {
-        "fill-color": "#D9D5C5",
-        "fill-outline-color": "#C7C1AE"
+        "fill-color": "#CFCBB9",
+        "fill-outline-color": "#B9B49F"
       },
       "minzoom": 14
     },
@@ -670,7 +682,7 @@
           1,
           12,
           5,
-          19
+          18
         ],
         "text-max-width": 9,
         "text-padding": 10,
@@ -685,7 +697,8 @@
         "symbol-avoid-edges": true,
         "text-allow-overlap": false,
         "text-ignore-placement": false
-      }
+      },
+      "maxzoom": 6
     },
     {
       "id": "state-label",
@@ -741,7 +754,8 @@
         "symbol-avoid-edges": true,
         "text-allow-overlap": false,
         "text-ignore-placement": false
-      }
+      },
+      "maxzoom": 9
     },
     {
       "id": "city-label",
@@ -749,7 +763,7 @@
       "source": "openmaptiles",
       "source-layer": "place",
       "paint": {
-        "text-color": "#384D3E",
+        "text-color": "#314F3D",
         "text-halo-color": "#FFFEFA",
         "text-halo-width": 1.75,
         "text-halo-blur": 0.3
@@ -841,7 +855,7 @@
             "zoom"
           ],
           3,
-          11,
+          12,
           9,
           16
         ],
@@ -858,7 +872,8 @@
         "symbol-avoid-edges": true,
         "text-allow-overlap": false,
         "text-ignore-placement": false
-      }
+      },
+      "maxzoom": 16
     },
     {
       "id": "town-label",
@@ -909,9 +924,9 @@
             "zoom"
           ],
           7,
-          11,
           12,
-          15
+          12,
+          14
         ],
         "text-max-width": 9,
         "text-padding": 10,
@@ -926,7 +941,8 @@
         "symbol-avoid-edges": true,
         "text-allow-overlap": false,
         "text-ignore-placement": false
-      }
+      },
+      "maxzoom": 18
     },
     {
       "id": "village-label",
@@ -1316,7 +1332,7 @@
         "text-font": [
           "Noto Sans Regular"
         ],
-        "text-size": 11,
+        "text-size": 12,
         "text-padding": 24,
         "symbol-avoid-edges": true
       }

@@ -39,7 +39,7 @@ test('story navigation works in both directions on buttons, keyboard and swipe',
   assert.doesNotMatch(stories, /setReduced\(false\)/, 'the UI must not override the operating-system motion preference');
 });
 
-test('the final map UI layer normalizes controls and is imported last', () => {
+test('map UI guardrails precede the focused sheet and detail layers', () => {
   assert.match(releaseCss, /--map-control-size:44px/);
   assert.match(releaseCss, /\.map-controls button[\s\S]*width:var\(--map-control-size\)[\s\S]*height:var\(--map-control-size\)/);
   assert.match(releaseCss, /\.map-style-switch button[\s\S]*height:var\(--map-control-size\)/);
@@ -49,6 +49,6 @@ test('the final map UI layer normalizes controls and is imported last', () => {
   const imports = [...layout.matchAll(/import "\.\/(.+?\.css)";/g)].map(match => match[1]);
   const releaseIndex = imports.indexOf('map-ui-release.css');
   assert.ok(releaseIndex > imports.indexOf('interface-refresh.css'), 'map release overrides must stay after every legacy map stylesheet');
-  assert.equal(imports.at(-1), 'final-polish.css', 'cross-platform guardrails must be the final stylesheet');
+  assert.deepEqual(imports.slice(-3), ['final-polish.css', 'map-sheet.css', 'map-detail.css'], 'focused gesture and detail rules must follow generic cross-platform defaults');
   assert.ok(imports.indexOf('final-polish.css') > releaseIndex, 'generic guardrails must not replace map-specific release geometry');
 });

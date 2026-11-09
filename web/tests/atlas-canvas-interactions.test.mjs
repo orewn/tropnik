@@ -5,13 +5,14 @@ import {createRequire} from 'node:module';
 import vm from 'node:vm';
 import {MAP_CONFIG} from '../lib/map-config.ts';
 import {russiaLongitude} from '../public/maps/russia-viewport.js';
+import * as routePresentation from '../lib/map-route-presentation.ts';
 
 const require=createRequire(new URL('../package.json',import.meta.url));
 const ts=require('typescript');
 const source=readFileSync(new URL('../components/Atlas2D.tsx',import.meta.url),'utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 const component={exports:{}};
-new Function('require','module','exports',compiled)(id=>id==='@/lib/map-config'?{MAP_CONFIG}:id==='@/public/maps/russia-viewport.js'?{russiaLongitude}:{},component,component.exports);
+new Function('require','module','exports',compiled)(id=>id==='@/lib/map-config'?{MAP_CONFIG}:id==='@/public/maps/russia-viewport.js'?{russiaLongitude}:id==='@/lib/map-route-presentation'?routePresentation:{},component,component.exports);
 const {createCanvasTrailPoint,createCanvasTrailLine,raiseCanvasTrailPoints}=component.exports;
 
 // Use the installed Leaflet implementation for renderer ownership, projection,

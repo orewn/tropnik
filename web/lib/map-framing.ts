@@ -68,13 +68,17 @@ export class MapFrameRefit{
 export function bindMapFrameRefit(surface:HTMLElement,panel:Element|null,refit:MapFrameRefit,onGeometrySettled?:()=>void){
  const stop=()=>refit.cancel();
  const keyboard=(event:KeyboardEvent)=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','+','=','-','−','Home','End','PageUp','PageDown'].includes(event.key))stop();};
+ const settled=(event:Event)=>{
+  if(event.target!==panel)return;
+  onGeometrySettled?.();
+  refit.settled();
+ };
  const transition=(event:Event)=>{
   const property=(event as TransitionEvent).propertyName;
   if(event.target===panel&&(property==='transform'||property==='height')){
    // Insets belong to the visible layout even when a manual camera or an open
    // route prevents automatic territory framing.
-   onGeometrySettled?.();
-   refit.settled();
+   settled(event);
   }
  };
  surface.addEventListener('pointerdown',stop,{passive:true});
@@ -82,9 +86,12 @@ export function bindMapFrameRefit(surface:HTMLElement,panel:Element|null,refit:M
  surface.addEventListener('wheel',stop,{passive:true});
  surface.addEventListener('keydown',keyboard);
  panel?.addEventListener('transitionend',transition);
+ // Immediate/reduced-motion drags have no CSS transitionend.
+ panel?.addEventListener('tropnik:sheet-settled',settled);
  return()=>{
   surface.removeEventListener('pointerdown',stop);surface.removeEventListener('touchstart',stop);
   surface.removeEventListener('wheel',stop);surface.removeEventListener('keydown',keyboard);
   panel?.removeEventListener('transitionend',transition);
+  panel?.removeEventListener('tropnik:sheet-settled',settled);
  };
 }

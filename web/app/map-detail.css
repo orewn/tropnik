@@ -1,0 +1,80 @@
+/* Close-up field-map hierarchy. Two source-edge marks, no continuous animation. */
+.atlas-wrap .map-route-context{
+  display:flex;flex-direction:row;align-items:center;justify-content:flex-start;flex-wrap:nowrap;
+  gap:12px;height:56px;min-height:56px;
+  background:var(--surface);
+  border:1px solid #C3CEBC;
+  color:var(--forest);
+  box-shadow:0 4px 16px #183B2C0D;
+  backdrop-filter:none;
+  pointer-events:none;
+}
+.map-route-context>svg{flex:none;color:var(--ochre)}
+.map-route-context-copy{display:flex;flex:1;flex-direction:column;min-width:0;gap:2px;overflow:hidden}
+.map-route-context-copy small{font-size:12px;line-height:16px;font-weight:500;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.map-route-context-copy strong{font-size:14px;line-height:20px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.atlas-wrap .route-edge-marker{
+  width:32px;height:32px;overflow:visible;pointer-events:none!important;
+  user-select:none;-webkit-user-select:none;
+}
+.route-edge-badge{
+  display:grid;place-items:center;width:32px;height:32px;
+  border:2px solid var(--surface);border-radius:8px;
+  background:var(--forest);color:var(--surface);
+  box-shadow:0 0 0 1px #244D3C80,0 4px 8px #183B2C20;
+  font-family:Manrope,system-ui,sans-serif;font-size:14px;line-height:20px;font-weight:700;
+}
+.route-edge-marker--last .route-edge-badge{background:var(--ochre);box-shadow:0 0 0 1px #A5673680,0 4px 8px #183B2C20}
+.route-edge-marker--shared .route-edge-badge{border-radius:9999px;outline:1px solid var(--forest);outline-offset:2px}
+.route-edge-label{
+  position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);
+  padding:2px 8px;border:1px solid #C3CEBC;border-radius:4px;
+  background:var(--surface);color:var(--forest);white-space:nowrap;
+  font-family:Manrope,system-ui,sans-serif;font-size:12px;line-height:16px;font-weight:600;
+}
+.atlas-wrap:not([data-map-detail='close']) .route-edge-marker{visibility:hidden}
+.atlas-wrap[data-map-route='selected'] .legend-line{border-top-style:solid;border-top-color:var(--forest)}
+.atlas-wrap[data-map-imagery='satellite'] .route-edge-badge{border-color:#FFFEFA}
+.atlas-wrap[data-map-imagery='satellite'] .map-legend{
+  padding:8px 12px;border:1px solid var(--line);border-radius:8px;
+  background:var(--surface);color:var(--forest);
+}
+.explore-layout .map-message button{min-width:44px;min-height:44px}
+/* Keep notices in the context column, clear of stories and the bottom rail. */
+@media(min-width:901px),(min-width:701px) and (min-height:621px){
+  .explore-layout .map-message{top:calc(var(--map-top) + 68px);bottom:auto}
+  .explore-layout:has(.atlas-wrap>.map-message)>.fact-card{
+    max-height:calc(100% - var(--map-top) - 240px);overflow:auto;
+  }
+}
+@media(max-width:700px){
+  .explore-layout .map-route-context{padding:8px 12px;gap:8px}
+  .map-route-context>svg{width:20px;height:20px}
+  .route-edge-label{display:none}
+}
+
+/* An expanded portrait sheet leaves too little height for a vertical rail.
+   Keep every 44px action above the drawer, with Layers in its own left slot. */
+@media(max-width:700px) and (orientation:portrait){
+  /* A transient map notice owns the secondary slot. Restore the story launcher
+     immediately when it closes; an already opened story is never hidden. */
+  .explore-layout:has(.atlas-wrap>.map-message)>.fact-closed{display:none}
+  .explore-layout.sheet-open .map-controls{
+    top:auto;right:var(--map-right);bottom:calc(var(--map-bottom-inset,0px) + 12px);
+    width:auto;height:52px;padding:3px 0;gap:0;flex-direction:row;
+  }
+  .explore-layout.sheet-open .map-controls>span{display:none}
+  .explore-layout.sheet-open .layer-control{
+    top:auto;right:auto;left:var(--map-left);bottom:calc(var(--map-bottom-inset,0px) + 12px);
+  }
+  .explore-layout.sheet-open .layer-menu{left:0;right:auto;bottom:60px;top:auto}
+  .explore-layout.sheet-open .map-attribution{
+    top:calc(var(--map-top) + 60px);right:var(--map-right);bottom:auto;left:auto;
+    align-items:flex-start;
+  }
+  .explore-layout.sheet-open .map-attribution-content{
+    top:0;right:52px;bottom:auto;left:auto;
+    max-height:max(64px,calc(100dvh - var(--header) - var(--map-bottom-inset,0px) - 144px));
+    overflow:auto;overscroll-behavior:contain;
+  }
+}

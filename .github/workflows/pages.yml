@@ -3,6 +3,8 @@ name: Public GitHub Pages
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
@@ -90,6 +92,14 @@ jobs:
         with:
           name: tropnik-pages-browser-failure-${{ github.run_attempt }}
           path: web/pages-preview/dist/browser-failure.*
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Preserve map design checks across zoom levels
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-pages-design-${{ github.run_attempt }}
+          path: web/pages-preview/design-qa
           if-no-files-found: ignore
           retention-days: 7
       - name: Upload the verified static artifact

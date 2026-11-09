@@ -182,3 +182,21 @@ test('settled drawer geometry updates even when automatic camera framing is unav
  unbind();
  assert.equal(surface.events.size,0);assert.equal(panel.events.size,0);
 });
+
+test('an immediate sheet gesture settles geometry once and never overrides a manually moved camera',()=>{
+ const element=()=>{
+  const events=new Map();
+  return{events,addEventListener:(name,fn)=>events.set(name,fn),removeEventListener:name=>events.delete(name)};
+ };
+ const surface=element(),panel=element(),env=refitHarness();let measurements=0;
+ const unbind=bindMapFrameRefit(surface,panel,env.refit,()=>measurements++);
+ const settled=panel.events.get('tropnik:sheet-settled');
+ env.refit.select('altai');
+ settled({target:{}});env.flushFrames();assert.equal(measurements,0);
+ settled({target:panel});env.flushFrames();
+ assert.equal(measurements,1);assert.equal(env.count(),1);
+ surface.events.get('pointerdown')({});
+ settled({target:panel});env.flushFrames();
+ assert.equal(measurements,2);assert.equal(env.count(),1,'the explicit gesture settle cannot re-enable automatic framing');
+ unbind();assert.equal(panel.events.size,0);assert.equal(surface.events.size,0);
+});

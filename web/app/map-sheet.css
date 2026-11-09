@@ -1,0 +1,67 @@
+/* Direct manipulation for the route drawer. Only its handle/preview own a
+   pointer; the catalogue and route descriptions retain native scrolling. */
+.explore-panel-content .trail-card {
+  /* The catalogue already loads 12 cards at a time. A 132px offscreen estimate
+     for cards that render at 262–338px changed scrollHeight during momentum
+     scrolling, making the thumb jump. Keep their real geometry in every layout. */
+  content-visibility:visible;
+  contain-intrinsic-size:none;
+}
+@media (max-width:700px), (min-width:701px) and (max-width:900px) and (max-height:620px) and (orientation:landscape) and (pointer:coarse) {
+  .explore-layout .explore-panel,
+  .explore-layout .explore-panel.expanded,
+  .explore-layout .explore-panel.collapsed {
+    transition:transform .2s cubic-bezier(.22,1,.36,1)!important;
+    will-change:auto;
+  }
+  .explore-layout .sheet-handle,
+  .explore-layout .sheet-peek-summary {
+    touch-action:none;
+    cursor:grab;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .explore-layout .sheet-handle {
+    flex:0 0 44px;
+    min-height:44px;
+    height:44px;
+  }
+  .explore-layout .sheet-handle>span,
+  .explore-layout.sheet-open .sheet-handle>span {
+    width:48px;
+    height:4px;
+    border-radius:9999px;
+    background:var(--forest);
+    opacity:.45;
+    box-shadow:none;
+    transition:transform .2s cubic-bezier(.22,1,.36,1),opacity .2s cubic-bezier(.22,1,.36,1);
+  }
+  .explore-layout .sheet-handle:active {transform:none}
+  .explore-layout .sheet-handle:active>span,
+  .explore-layout .sheet-handle:focus-visible>span {opacity:1;transform:scaleX(1.15)}
+  .explore-layout .sheet-handle:focus-visible,
+  .explore-layout .sheet-peek-summary:focus-visible {outline-offset:-4px}
+  .explore-layout .explore-panel-content {
+    touch-action:pan-y;
+    overscroll-behavior-y:auto;
+    -webkit-overflow-scrolling:touch;
+    scroll-behavior:auto;
+  }
+  .explore-layout[data-sheet-dragging="true"] .explore-panel {transition:none!important}
+  .explore-layout[data-sheet-dragging="true"] .sheet-handle,
+  .explore-layout[data-sheet-dragging="true"] .sheet-peek-summary {cursor:grabbing}
+  .explore-layout[data-sheet-dragging="true"] .sheet-handle>span {opacity:1;transform:scaleX(1.15)}
+  .explore-layout[data-sheet-dragging="true"] .sheet-peek-summary {display:none!important}
+  .explore-layout[data-sheet-dragging="true"] .explore-panel-content,
+  .explore-layout[data-sheet-dragging="true"] .panel-foot {
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:none!important;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .explore-layout .explore-panel,
+  .explore-layout .explore-panel.expanded,
+  .explore-layout .explore-panel.collapsed,
+  .explore-layout .sheet-handle>span {transition:none!important}
+}

@@ -10,6 +10,8 @@ import "./map-polish.css";
 import "./interface-refresh.css";
 import "./map-ui-release.css";
 import "./final-polish.css";
+import "./map-sheet.css";
+import "./map-detail.css";
 import '@fontsource/manrope/cyrillic-400.css';
 import '@fontsource/manrope/cyrillic-500.css';
 import '@fontsource/manrope/cyrillic-600.css';
