@@ -15,7 +15,7 @@ function zoomDesign(profile,engine,mobile){
  const step=mobile?.75:1,input=mobile?'touch':'mouse',high=10+4*step;
  const burst=(direction,beforeZoom,afterZoom)=>({passed:true,input,count:4,receivedClicks:4,direction,step,beforeZoom,afterZoom,expectedZoom:afterZoom,eventSpanMs:30,durationMs:50,pageScrollDeltaPx:0,selectionPreserved:true,
   dispatchMode:'ordered-native',eventOrderVerified:true,producerDurationMs:1,firstInputLagMs:100,domTimeOrigin:10000,domSampleStartedAtMs:90,recentLongTasks:[],
-  events:Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+tap*10+index*2,timestamp:100+tap*10+index*2,trusted:true,pointerType:input}))).flat(),
+  events:Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+tap*10+index*2,timestamp:100+tap*10+(index?2:0),trusted:true,pointerType:input,pointerId:mobile?tap+2:1}))).flat(),
   commands:[...(mobile?[]:['mouseMoved']),...Array.from({length:4},()=>mobile?['touchStart','touchEnd']:['mousePressed','mouseReleased']).flat()].map((type,index)=>({index,type,method:mobile?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent',status:'fulfilled',sentAtEpochMs:10000+index*.1,ackAtEpochMs:10040+index,sentOffsetMs:index*.1,ackOffsetMs:40+index,ackDurationMs:40+index*.9})),
  });
  return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:3,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),
@@ -52,6 +52,17 @@ test('both upload and public verification require real mobile and desktop map in
  ];
  for(const change of changes){const bad=evidence();change(bad);assert.throws(()=>assertBrowserReport(bad,commit));}
 });
+test('publication accepts deferred native clicks only with the matching completed pointer pairs',()=>{
+ const report=evidence();
+ for(const design of report.zoomDesigns)for(const key of ['increase','decrease']){
+  const burst=design.zoomBurst[key],clicks=burst.events.filter(event=>event.type==='click'),pointers=burst.events.filter(event=>event.type!=='click');
+  burst.events=[...pointers,...clicks].map((event,index)=>({...event,time:100+index}));
+  burst.eventSpanMs=3;
+ }
+ assert.equal(assertBrowserReport(report,commit),report);
+ const bad=structuredClone(report);bad.zoomDesigns[0].zoomBurst.increase.events[8].pointerId=999;
+ assert.throws(()=>assertBrowserReport(bad,commit),/another pointer pair/);
+});
 test('zoom evidence requires all increments and keeps unavailable imagery explicit',()=>{
  const changes=[
   value=>delete value.zoomDesigns,
@@ -79,6 +90,8 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
   value=>value.zoomDesigns[0].zoomBurst.increase.dispatchMode='serial-ack',
   value=>value.zoomDesigns[0].zoomBurst.increase.events[1].type='click',
   value=>value.zoomDesigns[0].zoomBurst.increase.events[2].trusted=false,
+  value=>delete value.zoomDesigns[0].zoomBurst.increase.events[2].pointerId,
+  value=>value.zoomDesigns[0].zoomBurst.increase.events[2].timestamp+=1,
   value=>value.zoomDesigns[0].zoomBurst.increase.commands[3].status='rejected',
   value=>delete value.zoomDesigns[0].zoomBurst.increase.commands,
   value=>value.zoomDesigns[0].zoomBurst.increase.recentLongTasks=Array(33).fill({duration:60}),

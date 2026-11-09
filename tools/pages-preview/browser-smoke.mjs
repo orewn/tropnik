@@ -618,7 +618,7 @@ try{
     window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;window.__tropnikLongTasks=[];
     for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,event=>{
       const node=event.target?.nodeType===1?event.target:event.target?.parentElement,button=node?.closest('button,a'),r=button?.getBoundingClientRect();
-      window.__tropnikInputEvents.push({type,time:performance.now(),timestamp:event.timeStamp,pointerType:event.pointerType||'',x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
+      window.__tropnikInputEvents.push({type,time:performance.now(),timestamp:event.timeStamp,pointerType:event.pointerType||'',pointerId:Number.isInteger(event.pointerId)?event.pointerId:null,x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
       if(window.__tropnikInputEvents.length>36)window.__tropnikInputEvents.shift();
     },{capture:true,passive:true});
     try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput){

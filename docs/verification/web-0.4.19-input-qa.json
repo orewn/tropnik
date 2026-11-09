@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "scope": "QA-only native click causality validation; runtime unchanged from c903cfc4dc384eb2d18470910d4e14edb53f3a71",
+  "parentCommit": "c903cfc4dc384eb2d18470910d4e14edb53f3a71",
+  "pagesToolingTests": {
+    "passed": 29,
+    "failed": 0,
+    "skipped": 0
+  },
+  "runtimeChanges": false,
+  "sourceSHA256": {
+    "tools/pages-preview/browser-report.mjs": "7fa4442d425e20837ac205da8976795f3e8f3d9839b97628f31ae4cc3af83eb6",
+    "tools/pages-preview/browser-smoke.mjs": "6627a5e07d3b7f05b4bfd8d76ce8a48c6f27ced7b67e4d75e9f3221746e9e4f5",
+    "tools/pages-preview/browser-zoom-audit.mjs": "a53b515f053d600a7e69270e4664c72a1d266b4279050a0c16ba23ff46ae709a",
+    "tools/pages-preview/tests/browser-report.test.mjs": "3ef483e3e1e954f773cba8407487329340eafa994fea76a5b88d2b34ce9fe025",
+    "tools/pages-preview/tests/zoom-burst.test.mjs": "c6eeac190abda2a851d09e7f360e3479fee7e0f292287419396d95b3e32609ee"
+  },
+  "browserGate": "PENDING"
+}

@@ -2,6 +2,40 @@ import assert from 'node:assert/strict';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
+/** Chromium may deliver later pointer pairs before the earlier click events.
+ * Correlate each ordinal click with its completed pair, not with the adjacent
+ * delivery. Blink derives click from the source up event (including its
+ * timestamp); that timestamp can be equal/rounded and is not a unique ID. */
+export function assertNativeBurstEventOrder(events,input,count=4){
+ assert.ok(input==='touch'||input==='mouse');
+ assert.ok(Number.isInteger(count)&&count>0&&count<=4);
+ assert.ok(Array.isArray(events));assert.equal(events.length,count*3,'Native burst events are missing or duplicated');
+ const pointers=[],clicks=[];
+ for(const [index,event] of events.entries()){
+  assert.ok(['pointerdown','pointerup','click'].includes(event.type),'Unexpected native burst event');
+  assert.equal(event.trusted,true,'Native burst contains an untrusted event');
+  assert.ok(Number.isFinite(event.time)&&Number.isFinite(event.timestamp)&&event.timestamp>=0);
+  assert.equal(event.pointerType,input);assert.ok(Number.isInteger(event.pointerId)&&event.pointerId>=0,'Missing native pointer ID');
+  if(index)assert.ok(event.time>=events[index-1].time,'Native event delivery time moved backwards');
+  (event.type==='click'?clicks:pointers).push({...event,index});
+ }
+ assert.deepEqual(pointers.map(event=>event.type),Array.from({length:count},()=>['pointerdown','pointerup']).flat(),'Native pointer pairs are missing, orphaned or reordered');
+ assert.equal(clicks.length,count,'Native burst clicks are missing or duplicated');
+ for(let index=0;index<count;index++){
+  const down=pointers[index*2],up=pointers[index*2+1],click=clicks[index];
+  assert.ok(down.index<up.index&&up.index<click.index,'Native click arrived before its own pointer pair completed');
+  assert.equal(up.pointerId,down.pointerId,'Native pointer pair has mismatched IDs');
+  assert.equal(click.pointerId,up.pointerId,'Native click belongs to another pointer pair');
+  assert.ok(down.timestamp<=up.timestamp,'Native pointer source timestamps are reversed');
+  assert.equal(click.timestamp,up.timestamp,'Chromium click does not match its source pointer-up timestamp');
+  if(index){
+   assert.ok(down.timestamp>=pointers[index*2-1].timestamp,'Native pointer pairs have reversed source timestamps');
+   assert.ok(click.timestamp>=clicks[index-1].timestamp,'Native clicks have reversed source timestamps');
+  }
+ }
+ return true;
+}
+
 function assertSheetDrag(drag,name){
  assert.equal(drag?.passed,true,`${name}: the sheet drag did not pass`);
  assert.equal(drag.input,'touch',`${name}: the sheet was not dragged by touch input`);
@@ -66,10 +100,7 @@ function assertZoomDesign(design,name,engine,mobile){
   const burst=bursts[key];assert.equal(burst?.passed,true);assert.equal(burst.input,mobile?'touch':'mouse');
   assert.equal(burst.count,4);assert.equal(burst.receivedClicks,4);assert.equal(burst.direction,direction);assert.equal(burst.step,step);
   assert.equal(burst.dispatchMode,'ordered-native');assert.equal(burst.eventOrderVerified,true);
-  const eventTypes=Array.from({length:4},()=>['pointerdown','pointerup','click']).flat();
-  assert.deepEqual(burst.events?.map(event=>event.type),eventTypes,`${name}: trusted native event order was not preserved`);
-  assert.ok(burst.events.every(event=>event.trusted&&Number.isFinite(event.time)&&Number.isFinite(event.timestamp)));
-  for(let index=1;index<burst.events.length;index++)assert.ok(burst.events[index].time>=burst.events[index-1].time);
+  assertNativeBurstEventOrder(burst.events,burst.input,burst.count);
   const clicks=burst.events.filter(event=>event.type==='click');
   assert.ok(Math.abs(burst.eventSpanMs-(clicks.at(-1).time-clicks[0].time))<.01,`${name}: click-span receipt differs from actual DOM events`);
   const commandTypes=[...(mobile?[]:['mouseMoved']),...Array.from({length:4},()=>mobile?['touchStart','touchEnd']:['mousePressed','mouseReleased']).flat()];

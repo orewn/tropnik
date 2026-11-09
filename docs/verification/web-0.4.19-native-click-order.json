@@ -1,0 +1,356 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "sourceCommit": "c903cfc4dc384eb2d18470910d4e14edb53f3a71",
+  "workflowRun": 42692408598,
+  "buildJob": 129415277796,
+  "buildId": "3a61987c02229aa1",
+  "outcome": "REJECTED_BEFORE_DEPLOY",
+  "reason": "New test demanded a total interleaving of pointer and click events; Chromium delivered ordered pointer pairs followed by their ordered clicks.",
+  "lastZoomBurst": {
+    "count": 4,
+    "dispatchMode": "ordered-native",
+    "startedAtEpochMs": 1794256028938,
+    "producerDurationMs": 0.654316000000108,
+    "durationMs": 18.646845999988727,
+    "input": "touch",
+    "commands": [
+      {
+        "index": 0,
+        "method": "Input.dispatchTouchEvent",
+        "type": "touchStart",
+        "sentAtEpochMs": 1794256028938,
+        "sentOffsetMs": 0.08085199998458847,
+        "ackAtEpochMs": 1794256028953,
+        "ackOffsetMs": 15.184119999990799,
+        "ackDurationMs": 15.10809700001846,
+        "status": "fulfilled"
+      },
+      {
+        "index": 1,
+        "method": "Input.dispatchTouchEvent",
+        "type": "touchEnd",
+        "sentAtEpochMs": 1794256028938,
+        "sentOffsetMs": 0.16713300000992604,
+        "ackAtEpochMs": 1794256028954,
+        "ackOffsetMs": 15.695937000011327,
+        "ackDurationMs": 15.530076999973971,
+        "status": "fulfilled"
+      },
+      {
+        "index": 2,
+        "method": "Input.dispatchTouchEvent",
+        "type": "touchStart",
+        "sentAtEpochMs": 1794256028938,
+        "sentOffsetMs": 0.2944619999907445,
+        "ackAtEpochMs": 1794256028954,
+        "ackOffsetMs": 15.883929000003263,
+        "ackDurationMs": 15.590219000005163,
+        "status": "fulfilled"
+      },
+      {
+        "index": 3,
+        "method": "Input.dispatchTouchEvent",
+        "type": "touchEnd",
+        "sentAtEpochMs": 1794256028938,
+        "sentOffsetMs": 0.3686910000105854,
+        "ackAtEpochMs": 1794256028954,
+        "ackOffsetMs": 16.42892999999458,
+        "ackDurationMs": 16.061911999975564,
+        "status": "fulfilled"
+      },
+      {
+        "index": 4,
+        "method": "Input.dispatchTouchEvent",
+        "type": "touchStart",
+        "sentAtEpochMs": 1794256028938,
+        "sentOffsetMs": 0.4258079999999609,
+        "ackAtEpochMs": 1794256028955,
+        "ackOffsetMs": 17.478154999989783,
+        "ackDurationMs": 17.053088999993633,
+        "status": "fulfilled"
+      },
+      {
+        "index": 5,
+        "method": "Input.dispatchTouchEvent",
+        "type": "touchEnd",
+        "sentAtEpochMs": 1794256028938,
+        "sentOffsetMs": 0.4707819999894127,
+        "ackAtEpochMs": 1794256028956,
+        "ackOffsetMs": 18.006526000011945,
+        "ackDurationMs": 17.536516000021948,
+        "status": "fulfilled"
+      },
+      {
+        "index": 6,
+        "method": "Input.dispatchTouchEvent",
+        "type": "touchStart",
+        "sentAtEpochMs": 1794256028938,
+        "sentOffsetMs": 0.5543889999971725,
+        "ackAtEpochMs": 1794256028956,
+        "ackOffsetMs": 18.466677999997046,
+        "ackDurationMs": 17.913532000005944,
+        "status": "fulfilled"
+      },
+      {
+        "index": 7,
+        "method": "Input.dispatchTouchEvent",
+        "type": "touchEnd",
+        "sentAtEpochMs": 1794256028938,
+        "sentOffsetMs": 0.6118060000007972,
+        "ackAtEpochMs": 1794256028956,
+        "ackOffsetMs": 18.621278000005987,
+        "ackDurationMs": 18.010213000001386,
+        "status": "fulfilled"
+      }
+    ],
+    "direction": 1,
+    "step": 0.75,
+    "beforeZoom": 9.58772159520626,
+    "expectedZoom": 12.58772159520626,
+    "afterZoom": 12.58772159520626,
+    "receivedClicks": 4,
+    "eventSpanMs": 1.099999999976717,
+    "eventOrderVerified": false,
+    "events": [
+      {
+        "type": "pointerdown",
+        "time": 76529.19999999998,
+        "timestamp": 76514.80000000002,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "pointerup",
+        "time": 76529.49999999997,
+        "timestamp": 76514.80000000002,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "pointerdown",
+        "time": 76529.69999999998,
+        "timestamp": 76514.9,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "pointerup",
+        "time": 76529.80000000002,
+        "timestamp": 76514.9,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "pointerdown",
+        "time": 76530.19999999998,
+        "timestamp": 76515.1,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "pointerup",
+        "time": 76530.30000000002,
+        "timestamp": 76515.1,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "pointerdown",
+        "time": 76530.6,
+        "timestamp": 76515.19999999998,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "pointerup",
+        "time": 76530.80000000002,
+        "timestamp": 76515.19999999998,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "click",
+        "time": 76531.6,
+        "timestamp": 76514.80000000002,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "click",
+        "time": 76532.1,
+        "timestamp": 76514.9,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "click",
+        "time": 76532.49999999997,
+        "timestamp": 76515.1,
+        "pointerType": "touch",
+        "trusted": true
+      },
+      {
+        "type": "click",
+        "time": 76532.69999999998,
+        "timestamp": 76515.19999999998,
+        "pointerType": "touch",
+        "trusted": true
+      }
+    ],
+    "domSampleStartedAtMs": 76513.80000000002,
+    "domTimeOrigin": 1794255952423.8,
+    "firstInputLagMs": 15,
+    "recentLongTasks": [
+      {
+        "startTime": 270.8999999999942,
+        "duration": 70,
+        "name": "self",
+        "observedAt": 359.1000000000058,
+        "phase": "loading"
+      },
+      {
+        "startTime": 360.29999999998836,
+        "duration": 59,
+        "name": "self",
+        "observedAt": 438.5,
+        "phase": "loading"
+      },
+      {
+        "startTime": 487.8999999999942,
+        "duration": 257,
+        "name": "self",
+        "observedAt": 783.6999999999825,
+        "phase": "loading"
+      },
+      {
+        "startTime": 785.6999999999825,
+        "duration": 159,
+        "name": "self",
+        "observedAt": 953.6000000000058,
+        "phase": "loading"
+      },
+      {
+        "startTime": 995,
+        "duration": 106,
+        "name": "self",
+        "observedAt": 1122.3999999999942,
+        "phase": "loading"
+      },
+      {
+        "startTime": 2072.899999999994,
+        "duration": 517,
+        "name": "self",
+        "observedAt": 2622.600000000006,
+        "phase": "loading"
+      },
+      {
+        "startTime": 27210.79999999999,
+        "duration": 65,
+        "name": "self",
+        "observedAt": 27323.699999999983,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 31541.29999999999,
+        "duration": 68,
+        "name": "self",
+        "observedAt": 31662,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 31673.100000000006,
+        "duration": 84,
+        "name": "self",
+        "observedAt": 31868.100000000006,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 31810,
+        "duration": 58,
+        "name": "self",
+        "observedAt": 31868.100000000006,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 35333.79999999999,
+        "duration": 50,
+        "name": "self",
+        "observedAt": 35392.69999999998,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 35590.100000000006,
+        "duration": 66,
+        "name": "self",
+        "observedAt": 35673.600000000006,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 35673.69999999998,
+        "duration": 75,
+        "name": "self",
+        "observedAt": 35811.600000000006,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 35758.5,
+        "duration": 52,
+        "name": "self",
+        "observedAt": 35811.600000000006,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 38582.5,
+        "duration": 74,
+        "name": "self",
+        "observedAt": 38665.69999999998,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 39932.100000000006,
+        "duration": 75,
+        "name": "self",
+        "observedAt": 40012.5,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 43818,
+        "duration": 53,
+        "name": "self",
+        "observedAt": 43881.899999999994,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 46198.600000000006,
+        "duration": 51,
+        "name": "self",
+        "observedAt": 46263.600000000006,
+        "phase": "zoom-design-detail"
+      },
+      {
+        "startTime": 51720.100000000006,
+        "duration": 52,
+        "name": "self",
+        "observedAt": 51879.399999999994,
+        "phase": "zoom-design-detail"
+      }
+    ],
+    "performance": {
+      "cls": 0,
+      "longest": 84
+    },
+    "pageScrollDeltaPx": 0
+  },
+  "artifactSHA256": {
+    "failure": "d2bb619e07ad143368039031a468b933b6535e8ad289f32058c46392369283e6",
+    "design": "ae2308b960f88e04663f56d7e2167c8c70211397ac39350844ab3f0818c5c81d"
+  },
+  "limitsUnchanged": {
+    "trustedClicks": 4,
+    "actualClickSpanMsLessThan": 200,
+    "exactAccumulatedZoom": true,
+    "settleBudgetMs": 4000,
+    "allNativeACKsRequired": true
+  }
+}

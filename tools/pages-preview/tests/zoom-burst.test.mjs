@@ -1,6 +1,55 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {assertMapUIBounds,dispatchZoomBurst,settleMapCamera,mapCameraIsMoving} from '../browser-zoom-audit.mjs';
+import {assertNativeBurstEventOrder} from '../browser-report.mjs';
+
+function nativeBurstEvents(input,delivery='deferred',rounded=false){
+ const pairs=Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({
+  type,timestamp:rounded?100:100+tap*10+(index?2:0),pointerType:input,pointerId:input==='touch'?tap+2:1,trusted:true,
+ })));
+ const ordered=delivery==='interleaved'?pairs.flat():delivery==='mixed'?
+  [...pairs[0].slice(0,2),...pairs[1].slice(0,2),pairs[0][2],...pairs[2].slice(0,2),pairs[1][2],...pairs[3].slice(0,2),pairs[2][2],pairs[3][2]]:
+  [...pairs.flatMap(pair=>pair.slice(0,2)),...pairs.map(pair=>pair[2])];
+ return ordered.map((event,index)=>({...event,time:rounded?150:150+index}));
+}
+
+test('native burst correlation accepts deferred, mixed and interleaved Chromium click delivery',()=>{
+ for(const input of ['touch','mouse'])for(const delivery of ['deferred','mixed','interleaved'])for(const rounded of [false,true]){
+  const events=nativeBurstEvents(input,delivery,rounded);
+  assert.equal(assertNativeBurstEventOrder(events,input),true);
+ }
+ const reused=nativeBurstEvents('touch');for(const event of reused)event.pointerId=2;
+ assert.equal(assertNativeBurstEventOrder(reused,'touch'),true,'Pointer IDs may be reused between completed pointer sequences');
+});
+
+test('native burst correlation rejects orphan, reordered or mismatched pairs and clicks',()=>{
+ const changes=[
+  events=>events.pop(),
+  events=>events.push({...events.at(-1)}),
+  events=>{events[1].type='pointerdown';events[2].type='pointerup';},
+  events=>{[events[1],events[8]]=[events[8],events[1]];},
+  events=>{[events[8],events[9]]=[events[9],events[8]];},
+  events=>{events[1].pointerId=99;},
+  events=>{events[8].pointerId=99;},
+  events=>{delete events[8].pointerId;},
+  events=>{events[8].pointerType='mouse';},
+  events=>{events[8].timestamp=999;},
+  events=>{events[0].timestamp=events[1].timestamp+1;},
+  events=>{events[2].timestamp=99;},
+  events=>{events[8].trusted=false;},
+ ];
+ for(const change of changes){
+  const events=nativeBurstEvents('touch');change(events);
+  // Keep delivery clocks monotonic so ordering failures cannot hide behind a
+  // backwards-clock rejection when the event identities are rearranged.
+  events.forEach((event,index)=>{event.time=150+index;});
+  assert.throws(()=>assertNativeBurstEventOrder(events,'touch'));
+ }
+ const backwards=nativeBurstEvents('touch');backwards[1].time=backwards[0].time-1;
+ assert.throws(()=>assertNativeBurstEventOrder(backwards,'touch'),/delivery time moved backwards/);
+ const mouse=nativeBurstEvents('mouse');[mouse[8].timestamp,mouse[9].timestamp]=[mouse[9].timestamp,mouse[8].timestamp];
+ assert.throws(()=>assertNativeBurstEventOrder(mouse,'mouse'),/source pointer-up timestamp/,'Reused mouse IDs do not excuse a click from another press');
+});
 
 test('rapid zoom sends native presses in wire order without waiting for slow acknowledgements',async()=>{
  for(const mobile of [true,false]){

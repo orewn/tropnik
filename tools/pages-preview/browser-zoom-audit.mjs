@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import {assertNativeBurstEventOrder} from './browser-report.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -168,14 +169,12 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
   try{input=await dispatchZoomBurst(cdp,point,profile,count);}catch(error){Object.assign(report.lastZoomBurst,error.inputDiagnostics||{});throw error;}
   Object.assign(report.lastZoomBurst,input);
   const after=await waitValue(`${profile.name}: rapid zoom did not accumulate all four presses`,()=>settledMap(cdp,profile.engine),state=>Math.abs(state.camera.zoom-expected)<.01,4000);
-  const delivered=await evaluate(cdp,`(()=>{const events=(window.__tropnikInputEvents||[]).filter(event=>event.time>=${start.time}&&event.button?.label===${JSON.stringify(label)}).map(({type,time,timestamp,pointerType,trusted})=>({type,time,timestamp,pointerType,trusted})),clicks=events.filter(event=>event.type==='click'&&event.trusted);return{events,clicks:clicks.length,eventSpanMs:clicks.length>1?clicks.at(-1).time-clicks[0].time:0,scrollY:window.scrollY,recentLongTasks:(window.__tropnikLongTasks||[]).slice(-32),performance:{...window.__tropnikPerf}};})()`);
-  const expectedEvents=Array.from({length:count},()=>['pointerdown','pointerup','click']).flat();
-  const eventOrderVerified=delivered.events.every(event=>event.trusted)&&JSON.stringify(delivered.events.map(event=>event.type))===JSON.stringify(expectedEvents);
+  const delivered=await evaluate(cdp,`(()=>{const events=(window.__tropnikInputEvents||[]).filter(event=>event.time>=${start.time}&&event.button?.label===${JSON.stringify(label)}).map(({type,time,timestamp,pointerType,pointerId,trusted})=>({type,time,timestamp,pointerType,pointerId,trusted})),clicks=events.filter(event=>event.type==='click'&&event.trusted);return{events,clicks:clicks.length,eventSpanMs:clicks.length>1?clicks.at(-1).time-clicks[0].time:0,scrollY:window.scrollY,recentLongTasks:(window.__tropnikLongTasks||[]).slice(-32),performance:{...window.__tropnikPerf}};})()`);
   const firstPress=input.commands.find(command=>command.type==='touchStart'||command.type==='mousePressed');
-  const result={...input,direction,step,beforeZoom:before.camera.zoom,expectedZoom:expected,afterZoom:after.camera.zoom,receivedClicks:delivered.clicks,eventSpanMs:delivered.eventSpanMs,eventOrderVerified,events:delivered.events,domSampleStartedAtMs:start.time,domTimeOrigin:start.timeOrigin,firstInputLagMs:delivered.events.length?start.timeOrigin+delivered.events[0].time-firstPress.sentAtEpochMs:null,recentLongTasks:delivered.recentLongTasks,performance:delivered.performance,pageScrollDeltaPx:Math.abs(delivered.scrollY-start.scrollY)};
+  const result={...input,direction,step,beforeZoom:before.camera.zoom,expectedZoom:expected,afterZoom:after.camera.zoom,receivedClicks:delivered.clicks,eventSpanMs:delivered.eventSpanMs,eventOrderVerified:false,events:delivered.events,domSampleStartedAtMs:start.time,domTimeOrigin:start.timeOrigin,firstInputLagMs:delivered.events.length?start.timeOrigin+delivered.events[0].time-firstPress.sentAtEpochMs:null,recentLongTasks:delivered.recentLongTasks,performance:delivered.performance,pageScrollDeltaPx:Math.abs(delivered.scrollY-start.scrollY)};
   report.lastZoomBurst=result;
   assert.equal(delivered.clicks,count,`${profile.name}: the browser did not deliver four distinct trusted zoom clicks: ${JSON.stringify(result)}`);
-  assert.equal(eventOrderVerified,true,`${profile.name}: native pointerdown/up/click order changed: ${JSON.stringify(result)}`);
+  result.eventOrderVerified=assertNativeBurstEventOrder(delivered.events,input.input,count);
   assert.ok(delivered.eventSpanMs<200,`${profile.name}: the zoom clicks did not reach the UI within one animation: ${JSON.stringify(result)}`);
   assert.ok(Math.abs(after.camera.zoom-expected)<.01,`${profile.name}: rapid zoom lost an input while the camera was animating: ${JSON.stringify(result)}`);
   assert.ok(result.pageScrollDeltaPx<=1,`${profile.name}: rapid zoom scrolled the page`);
