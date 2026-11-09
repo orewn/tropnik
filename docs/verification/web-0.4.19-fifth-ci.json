@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": 5,
+  "recordedAt": "2026-11-09T21:20:47.250206+00:00",
+  "sourceCommit": "1323836e8b822fe3f0c6295a138fc455532ddf59",
+  "sourceTree": "2bbaaa3b55959380d8c7e74c8c93250d85acb2e1",
+  "workflowRun": 42700891491,
+  "buildJob": 129444975154,
+  "buildId": "75acee80d3a9de91",
+  "outcome": "BROWSER_STARTUP_FAILED_BEFORE_APPLICATION",
+  "deploymentPerformed": false,
+  "completedBuildChecks": {
+    "webTests": 432,
+    "toolingTests": 35,
+    "lint": "PASS",
+    "staticTypes": "PASS",
+    "staticBuild": "PASS",
+    "httpChecks": 52
+  },
+  "browser": {
+    "error": "TypeError: fetch failed; ECONNREFUSED 127.0.0.1:33171",
+    "elapsedSeconds": 8.28,
+    "completedProfiles": 0,
+    "traceStarted": false,
+    "desktopBackTested": false,
+    "desktopPerformanceGateTested": false,
+    "rootCause": "Not established: existing startup handling did not preserve stderr in this case."
+  },
+  "artifact": {
+    "id": 13711003362,
+    "name": "tropnik-pages-browser-failure-1",
+    "sha256": "db7e9ef9b6caf0c91165b14ecd70a559eb7c8bcf6f999d7e9888cbc572692887",
+    "headSha": "1323836e8b822fe3f0c6295a138fc455532ddf59",
+    "runId": 42700891491,
+    "verified": true,
+    "bytes": 279,
+    "path": "/workspace/scratch/569c30ca9137/ci-evidence-1323836e/browser-failure.zip"
+  },
+  "unchangedReruns": 0,
+  "nextCandidate": {
+    "startupDiagnostics": "One Chromium spawn; bounded30s readiness with per-request timeout, immediate spawn/exit failure, bounded stderr and process cleanup. Interaction/performance thresholds unchanged.",
+    "mapDesign": "Root reproduced overlap of the two real source-edge markers on a single-part short route at z11; adaptive presentation and native CI coverage are being added."
+  },
+  "evidenceSHA256": {
+    "browser-failure.json": "a3f906e730485d5ae67f03cb71b25440987abaf98a5d325f07dd0f60be9bc6e7",
+    "build-job.log": "90fbd03612bb9df1b824bc251ebd4af6a189cd19389eb02f4cadae434b2937ea",
+    "evidence-summary.json": "b47de56667c00b2215ac6ddbd90b3ec9ad07d313e82fd5e6275a3008937387f0"
+  }
+}

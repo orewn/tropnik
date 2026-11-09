@@ -17,7 +17,7 @@ import {MapStyleSession,loadMapSelection,applyMapLayerVisibility,type MapBaseMod
 import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {terrainExaggerationForZoom,terrainPitchForZoom} from '@/lib/map-camera-profile';
 import {mapTrailPointFeatureCollection} from '@/lib/map-trail-points';
-import {ROUTE_PRESENTATION,OVERVIEW_MESSAGE,overviewContextCaption,routeLineEdges,createRouteEdgeElement} from '@/lib/map-route-presentation';
+import {ROUTE_PRESENTATION,OVERVIEW_MESSAGE,overviewContextCaption,routeLineEdges,createRouteEdgeElement,syncRouteEdgeAnnotations,type RouteEdgeAnnotation} from '@/lib/map-route-presentation';
 import {EMPTY_MAP_TRAILS,type AtlasProps} from '@/lib/map-types';
 import {MAP_CONFIG,viewportRegionId,directionExpansionZoom} from '@/lib/map-config';
 import {coalesceMapFrame,publishMapCamera,resolveRenderedTrail} from '@/lib/map-interaction';
@@ -93,6 +93,7 @@ function fitTerritory(map:MapInstance,region:MapRegion,element:HTMLElement,durat
 export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onRegion,onMapNote,onViewportRegion,planning=false,planPoints}:AtlasProps){
  const container=useRef<HTMLDivElement>(null),mapRef=useRef<MapInstance|null>(null),markers=useRef<Marker[]>([]),positionMarker=useRef<Marker|null>(null);
  const routeEdges=useRef<Marker[]>([]),markerConstructor=useRef<typeof import('maplibre-gl').Marker|null>(null);
+ const routeAnnotations=useRef<RouteEdgeAnnotation[]>([]);
  const directionGroups=useRef(new Map<string,MapDirectionGroup<Region>>()),updateDirections=useRef<(()=>void)|null>(null),visibleTrailsRef=useRef(visibleTrails);
  const onRegionRef=useRef(onRegion),onTrailRef=useRef(onTrail),regionRef=useRef(region),trailRef=useRef(trail),viewportRef=useRef(onViewportRegion);
  const displayedTrail=useRef<AtlasProps['trail']>(undefined);
@@ -129,7 +130,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
   terrainRef.current=false;setTerrain(false);
  }
  useEffect(()=>{
-  const containerElement=container.current,locationEpoch=locationRevision,styleEpoch=styleGeneration,displayedSelection=displayedTrail;
+  const containerElement=container.current,locationEpoch=locationRevision,styleEpoch=styleGeneration,displayedSelection=displayedTrail,edgeAnnotations=routeAnnotations.current;
   let cancelled=false,geographyPainted=false,overviewFallback=false,satelliteFailed=false,directionLayoutFrame=0,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined,unbindZoom:(()=>void)|undefined;
   let resizeFrame:ReturnType<typeof coalesceMapFrame>|undefined,hoverFrame:ReturnType<typeof coalesceMapFrame>|undefined;
   const disconnect=()=>{
@@ -187,7 +188,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      onError:()=>{if(!cancelled)setStatus('Детальная карта не загрузилась. Обзор России остаётся доступен.');},
     });
     map.on('dataloading',()=>{if(tileStatus===undefined)tileStatus=setTimeout(()=>{if(!cancelled)setTilesLoading(true);},300);});
-    map.on('idle',()=>{clearTimeout(tileStatus);tileStatus=undefined;if(!cancelled)setTilesLoading(false);});
+    map.on('idle',()=>{clearTimeout(tileStatus);tileStatus=undefined;if(!cancelled){setTilesLoading(false);syncRouteEdgeAnnotations(edgeAnnotations);}});
     map.on('render',()=>{
      if(cancelled||geographyPainted)return;
      const land=map.getLayer('overview-land')?'overview-land':map.getLayer('land')?'land':null;
@@ -218,6 +219,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     const directionItems=regions.filter(item=>directionButtons.has(item.id));
     const runDirectionLayout=()=>{
      if(cancelled||map!==mapRef.current||!container.current)return;
+     syncRouteEdgeAnnotations(routeAnnotations.current);
      const center=map.getCenter(),screenCenter=map.project(center);publishMapCamera(container.current,{longitude:center.lng,latitude:center.lat,zoom:map.getZoom(),tileSize:512,engine:'maplibre',centerX:screenCenter.x,centerY:screenCenter.y});
      const items=directionItems;
      const projected=new Map(items.map(item=>{const point=map.project([russiaLongitude(item.center[0]),item.center[1]]);return[item.id,{x:point.x,y:point.y}] as const;}));
@@ -260,7 +262,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     map.on('movestart',()=>{locationRevision.current++;setStatus(previous=>previous==='Определяем местоположение…'?'':previous);if(container.current)container.current.dataset.mapCamera='moving';});
     map.on('zoomstart',event=>{if(event.originalEvent){zoomControl.cancel();fullView.current=false;frameRefit.current?.cancel();}if(container.current)container.current.dataset.mapCamera='moving';});
     map.on('style.load',()=>{
-     if(cancelled)return;displayedTrail.current=undefined;routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];geographyPainted=false;styleGeneration.current++;setLoaded(true);setStyleRevision(v=>v+1);
+     if(cancelled)return;displayedTrail.current=undefined;routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];routeAnnotations.current.length=0;geographyPainted=false;styleGeneration.current++;setLoaded(true);setStyleRevision(v=>v+1);
      if(map.getSource('openmaptiles'))overviewFallback=false;
      setStatus(!navigator.onLine?OFFLINE_MESSAGE:satelliteFailed&&basePreference.current==='satellite'?SATELLITE_ERROR:overviewFallback?'Детальная карта недоступна. Показан сохранённый обзор.':basePreference.current==='overview'?OVERVIEW_MESSAGE:'');
      if(map.getSource('terrain-dem')){map.setSourceTileLodParams(4,2,'terrain-dem');map.setSourceTileLodParams(3,2,'hillshade-dem');map.setSourceTileLodParams(3,2,'openmaptiles');}
@@ -328,7 +330,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     if(cancelled)return;console.error('Map initialization failed',error);unbindZoom?.();zoomButtons.current?.dispose();zoomButtons.current=null;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
    }
   })();
-  return()=>{cancelled=true;unbindZoom?.();zoomButtons.current?.dispose();zoomButtons.current=null;displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
+  return()=>{cancelled=true;unbindZoom?.();zoomButtons.current?.dispose();zoomButtons.current=null;displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];edgeAnnotations.length=0;markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
  },[planning]);
  useEffect(()=>{
   const map=mapRef.current;if(!map||!loaded)return;
@@ -350,7 +352,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  },[region,loaded,styleRevision]);
  useEffect(()=>{
   const map=mapRef.current;if(!map)return;
-  const clear=()=>{displayedTrail.current=undefined;routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];if(container.current)delete container.current.dataset.mapRouteId;(map.getSource('selected-trail')as GeoJSONSource|undefined)?.setData(EMPTY);};
+  const clear=()=>{displayedTrail.current=undefined;routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];routeAnnotations.current.length=0;if(container.current)delete container.current.dataset.mapRouteId;(map.getSource('selected-trail')as GeoJSONSource|undefined)?.setData(EMPTY);};
   if(!loaded){clear();return;}
   const generation=styleGeneration.current,identity={id:trail?.id,url:trail?.geometryUrl,geometry:trail?.geometry};
   // Clear the previous SDK request's error before starting a new selection request.
@@ -360,7 +362,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
    current:()=>map===mapRef.current&&generation===styleGeneration.current&&identity.id===trailRef.current?.id&&identity.url===trailRef.current?.geometryUrl&&identity.geometry===trailRef.current?.geometry&&!!map.getStyle(),
    load:async()=>identifyRouteGeometry(displayGeoJSON(readRouteGeometry(trail?.geometry??(trail?.geometryUrl?await loadPublicJSON<unknown>(trail.geometryUrl):EMPTY))),trail?.id??''),
    apply:data=>{
-   routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];
+   routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];routeAnnotations.current.length=0;
    displayedTrail.current=trailRef.current;
    if(map.getSource('selected-trail'))(map.getSource('selected-trail')as GeoJSONSource).setData(data);
    else{map.addSource('selected-trail',{type:'geojson',data});
@@ -373,9 +375,11 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     const MarkerClass=markerConstructor.current;
     if(MarkerClass)for(const edge of routeLineEdges(data)){
      if(!inRussiaCoverage(...edge.coordinate,coverageForEdges.area))continue;
-     routeEdges.current.push(new MarkerClass({element:createRouteEdgeElement(edge),anchor:'center'}).setLngLat(edge.coordinate).addTo(map));
+     const element=createRouteEdgeElement(edge),marker=new MarkerClass({element,anchor:'center'}).setLngLat(edge.coordinate).addTo(map);
+     routeEdges.current.push(marker);routeAnnotations.current.push({element,project:()=>map.project(marker.getLngLat())});
     }
    }
+   syncRouteEdgeAnnotations(routeAnnotations.current);
    if(container.current){if(trail?.id)container.current.dataset.mapRouteId=trail.id;else delete container.current.dataset.mapRouteId;}
    if(trail?.geometryUrl||trail?.geometry){
     const coordinates=routeGeometryPositions(data);

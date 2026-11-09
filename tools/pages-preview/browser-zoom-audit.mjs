@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import {mkdir,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {assertNativeBurstEventOrder} from './browser-report.mjs';
+import {CLOSE_TRAIL_FIXTURE,assertCloseTrailAudit,assertNativeBurstEventOrder,assertRouteEdgeFrame} from './browser-report.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -82,7 +82,7 @@ export async function dispatchZoomBurst(cdp,point,profile,count=4){
 export async function runZoomDesignAudit(cdp,profile,helpers){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase}=helpers;
  await mkdir(OUTPUT,{recursive:true});
- const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:3,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
+ const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:4,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
  const save=()=>writeFile(new URL(`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');
  const network=new Map();
  const forget=cdp.observe('Network.responseReceived',({requestId,response})=>{
@@ -111,7 +111,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
     const r=box(element),x=(r.left+r.right)/2,y=(r.top+r.bottom)/2,hit=document.elementFromPoint(x,y);return{label:element.getAttribute('aria-label')||element.textContent?.trim(),rect:r,minimumSize:44,unobscured:!!hit&&element.contains(hit)};
    });
    const labels=[...document.querySelectorAll('.region-marker-label,.route-edge-label')].filter(visible).map(element=>({label:element.textContent,rect:box(element)}));
-   return{width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollY:window.scrollY,available,ui,targets,labels,detail:atlas.dataset.mapDetail||'',selectedRoute:atlas.dataset.mapRoute||'',imagery:atlas.dataset.mapImagery||'',routeEdgeCount:document.querySelectorAll('.route-edge-marker').length,status:document.querySelector('.map-message')?.textContent?.trim()||'',loadedSatelliteTiles:[...document.querySelectorAll('.leaflet-russia-satellite-pane img')].filter(image=>image.complete&&image.naturalWidth>0).length};
+   return{width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollY:window.scrollY,available,ui,targets,labels,detail:atlas.dataset.mapDetail||'',selectedRoute:atlas.dataset.mapRoute||'',imagery:atlas.dataset.mapImagery||'',routeEdgeCount:document.querySelectorAll('.route-edge-marker[role="img"]').length,status:document.querySelector('.map-message')?.textContent?.trim()||'',loadedSatelliteTiles:[...document.querySelectorAll('.leaflet-russia-satellite-pane img')].filter(image=>image.complete&&image.naturalWidth>0).length};
   })()`);
   report.lastInspection={mode,zoom:map.camera.zoom,...layout};
   assert.equal(map.route,'kavkaz-8a',`${profile.name}/${mode}: changing zoom/base map lost the selected route`);
@@ -245,6 +245,59 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
   report.modes.overview={state:'active',...selection,keySteps,sourceEvidence,visualReviewRequired:true};
   await save();
  }
+ async function closeTrailEdges(){
+  // This canonical short route has one continuous, twelve-vertex source
+  // line. The main audit deliberately keeps its multipart Bzerpin fixture.
+  const bytes=await readFile(new URL(`../../web/public${CLOSE_TRAIL_FIXTURE.geometryURL}`,import.meta.url)),source=JSON.parse(bytes.toString());
+  const lines=source.features?.[0]?.geometry?.coordinates;
+  assert.equal(source.type,'FeatureCollection');assert.equal(source.features?.length,1);assert.equal(source.features[0].geometry.type,'MultiLineString');
+  assert.equal(lines?.length,1);assert.equal(lines[0].length,12);
+  const endpoints=[lines[0][0],lines[0].at(-1)];assert.deepEqual(endpoints,CLOSE_TRAIL_FIXTURE.endpoints);
+  const audit={passed:false,input:report.input,region:CLOSE_TRAIL_FIXTURE.region,routeId:CLOSE_TRAIL_FIXTURE.routeId,geometryURL:CLOSE_TRAIL_FIXTURE.geometryURL,
+   source:{featureCount:source.features.length,partCount:lines.length,vertexCount:lines[0].length,endpoints,sha256:createHash('sha256').update(bytes).digest('hex')},
+   setupClicks:0,nativeZoomClicks:0,inputs:[],frames:[],visualReviewRequired:true};
+  report.closeTrail=audit;await save();
+  await loadProfile(cdp,`${helpers.url}?region=${audit.region}&route=${audit.routeId}`,profile);
+  const setupStart=await evaluate(cdp,'performance.now()');
+  await clearMapStories(cdp,profile);await closeMapSheet(cdp,profile);
+  audit.setupClicks=await evaluate(cdp,`(window.__tropnikInputEvents||[]).filter(event=>event.time>=${setupStart}&&event.type==='click'&&event.trusted).length`);
+  assert.ok(audit.setupClicks<=3,`${profile.name}: unexpected native setup input in the source-end audit`);
+  await diagnosticPhase(cdp,'zoom-design-source-ends');
+  await waitValue(`${profile.name}: the single-line source did not render`,()=>helpers.mapState(cdp),state=>state?.route===audit.routeId);
+  audit.initialZoom=(await settledMap(cdp,profile.engine)).camera.zoom;
+  assert.ok(Math.abs(audit.initialZoom-14)<.01,`${profile.name}: the short source route did not fit at zoom14`);
+  for(const [index,targetZoom] of [11,14,17].entries()){
+   let current=(await settledMap(cdp,profile.engine)).camera.zoom;
+   while(Math.abs(current-targetZoom)>.01){
+    assert.ok(audit.nativeZoomClicks+audit.setupClicks<15,`${profile.name}: source-end coverage exceeded15 native inputs`);
+    const direction=targetZoom>current?1:-1,label=direction>0?'Увеличить масштаб':'Уменьшить масштаб',start=await evaluate(cdp,'performance.now()');
+    const movement=await zoom(direction);
+    const events=await evaluate(cdp,`(window.__tropnikInputEvents||[]).filter(event=>event.time>=${start}&&event.button?.label===${JSON.stringify(label)}).map(({type,time,timestamp,pointerType,pointerId,trusted})=>({type,time,timestamp,pointerType,pointerId,trusted}))`);
+    const input={direction,input:report.input,before:movement.before,after:movement.after,events};audit.inputs.push(input);audit.nativeZoomClicks++;
+    assertNativeBurstEventOrder(events,report.input,1);assert.equal(movement.changed,true,`${profile.name}: a source-end zoom control stopped responding`);
+    current=movement.after;
+   }
+   const map=await settledMap(cdp,profile.engine);
+   const layout=await evaluate(cdp,`(()=>{
+    const box=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+    const visible=element=>{if(!element)return false;const s=getComputedStyle(element),r=element.getBoundingClientRect();if(s.visibility==='hidden'||s.visibility==='collapse'||r.width<=1||r.height<=1)return false;for(let parent=element;parent;parent=parent.parentElement){const style=getComputedStyle(parent);if(style.display==='none'||Number(style.opacity)===0||parent.hidden)return false;}return true;};
+    const part=element=>({text:element?.textContent?.trim()||'',visible:visible(element),pointerEvents:element?getComputedStyle(element).pointerEvents:'',rect:element?box(element):null});
+    const atlas=document.querySelector('.atlas-wrap'),r=box(atlas),panel=document.querySelector('.explore-panel'),root=document.querySelector('.explore-layout');
+    const mobile=matchMedia('(max-width:700px),(min-width:701px) and (max-width:900px) and (max-height:620px) and (orientation:landscape) and (pointer:coarse)').matches;
+    const available={left:Math.max(0,r.left),right:Math.min(innerWidth,r.right),top:Math.max(0,r.top),bottom:Math.min(innerHeight,r.bottom,mobile&&panel&&root?.dataset.sheetState==='closed'?panel.getBoundingClientRect().top:Infinity)};available.width=available.right-available.left;available.height=available.bottom-available.top;
+    const params=new URLSearchParams(location.search);
+    return{available,scrollY:window.scrollY,region:params.get('region')||'',queryRoute:params.get('route')||'',selectedRoute:atlas.dataset.mapRoute||'',imagery:atlas.dataset.mapImagery||'',sceneVisible:visible(document.querySelector('.terrain-scene.is-visible')),
+     markers:[...document.querySelectorAll('.route-edge-marker[role="img"]')].map(element=>({role:element.getAttribute('role'),ariaLabel:element.getAttribute('aria-label'),density:element.dataset.routeEdgeDensity||'',pointerEvents:getComputedStyle(element).pointerEvents,rect:box(element),badge:part(element.querySelector('.route-edge-badge')),caption:part(element.querySelector('.route-edge-label'))}))};
+   })()`);
+   const frame={targetZoom,zoom:map.camera.zoom,camera:map.camera,mapRect:map.rect,routeId:map.route,inputCount:audit.inputs.length,...layout};
+   audit.frames.push(frame);report.lastInspection={mode:'source-ends',...frame};
+   frame.screenshot=(await capture('source-ends',frame,['crowded','separated','close'][index])).file;
+   assertRouteEdgeFrame(frame,`${profile.name}/source-ends/${frame.zoom}`,{requireBothVisible:index===1});await save();
+  }
+  audit.performance=await evaluate(cdp,'({layoutShift:window.__tropnikPerf?.cls||0,longestTaskMs:window.__tropnikPerf?.longest||0})');
+  assertCloseTrailAudit({...audit,passed:true},profile.name,profile.engine,profile.mobile,report.screenshots);
+  audit.passed=true;await save();return audit;
+ }
  try{
   // A real public deep link selects a known source geometry in the prepared
   // Bzerpin area. The earlier map suite separately proves pointer selection.
@@ -322,7 +375,12 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
    await waitValue(`${profile.name}: the 3D scene did not return to the map`,()=>evaluate(cdp,"!document.querySelector('.terrain-scene.is-visible')"),Boolean);
    await settledMap(cdp,profile.engine);
   }else report.modes.scene3d={state:'not-offered',reason:'This selected source geometry does not expose the prepared scene control.'};
-  report.geometryPassed=true;report.performance=await evaluate(cdp,'({layoutShift:window.__tropnikPerf?.cls||0,longestTaskMs:window.__tropnikPerf?.longest||0})');report.completedAt=new Date().toISOString();await save();return report;
+  // loadProfile starts a new document/performance interval. Preserve the
+  // existing all-mode measurements when adding the separate source fixture.
+  const modePerformance=await evaluate(cdp,'({layoutShift:window.__tropnikPerf?.cls||0,longestTaskMs:window.__tropnikPerf?.longest||0})');
+  report.performance=modePerformance;
+  const edges=await closeTrailEdges();
+  report.geometryPassed=true;report.performance={layoutShift:Math.max(modePerformance.layoutShift,edges.performance.layoutShift),longestTaskMs:Math.max(modePerformance.longestTaskMs,edges.performance.longestTaskMs)};report.completedAt=new Date().toISOString();await save();return report;
  }catch(error){report.error=error.stack||String(error);await save();throw error;}
  finally{forget();forgetFinished();forgetFailed();}
 }

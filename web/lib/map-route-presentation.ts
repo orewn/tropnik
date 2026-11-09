@@ -35,6 +35,44 @@ export type RouteEdge = {
   label: string;
 };
 
+/** CSS-pixel footprints shared with the two passive DOM annotations. */
+export const ROUTE_EDGE_LAYOUT = Object.freeze({
+  badgeSize: 32,
+  labelWidth: 64,
+  labelHeight: 24,
+  labelGap: 4,
+  clearance: 8,
+});
+export type RouteEdgeDensity = 'hidden' | 'compact' | 'full';
+type RouteEdgeScreenPoint = Readonly<{x: number; y: number}>;
+export type RouteEdgeAnnotation = {
+  element: HTMLDivElement;
+  project: () => RouteEdgeScreenPoint;
+};
+
+/** Compare screen-space rectangles, not just radial distance: a lower label
+ * can otherwise cover the other badge on a nearly vertical short line. */
+export function routeEdgeDensity(first?: RouteEdgeScreenPoint, second?: RouteEdgeScreenPoint): RouteEdgeDensity {
+  if (!first || !Number.isFinite(first.x) || !Number.isFinite(first.y)) return 'hidden';
+  if (!second) return 'full';
+  if (!Number.isFinite(second.x) || !Number.isFinite(second.y)) return 'hidden';
+  const dx = Math.abs(first.x - second.x), dy = Math.abs(first.y - second.y);
+  const badgeClearance = ROUTE_EDGE_LAYOUT.badgeSize + ROUTE_EDGE_LAYOUT.clearance;
+  if (dx < badgeClearance && dy < badgeClearance) return 'hidden';
+  const fullHeight = ROUTE_EDGE_LAYOUT.badgeSize + ROUTE_EDGE_LAYOUT.labelGap + ROUTE_EDGE_LAYOUT.labelHeight;
+  return dx < ROUTE_EDGE_LAYOUT.labelWidth + ROUTE_EDGE_LAYOUT.clearance && dy < fullHeight + ROUTE_EDGE_LAYOUT.clearance ? 'compact' : 'full';
+}
+
+/** At most two SDK projections at the existing settled-camera boundary.
+ * Stable adapters are created with the markers; no layout reads or new arrays. */
+export function syncRouteEdgeAnnotations(annotations: readonly RouteEdgeAnnotation[]): void {
+  const first = annotations[0], second = annotations[1];
+  if (!first) return;
+  const density = routeEdgeDensity(first.project(), second?.project());
+  if (first.element.dataset.routeEdgeDensity !== density) first.element.dataset.routeEdgeDensity = density;
+  if (second && second.element.dataset.routeEdgeDensity !== density) second.element.dataset.routeEdgeDensity = density;
+}
+
 /** A multi-part source does not establish a start, finish or traversal order.
  * Only one non-degenerate source line receives edge labels, with at most two
  * tiny markers regardless of vertex count. These are not recommended trailheads. */
@@ -75,6 +113,11 @@ export function routeLineEdges(data: GeoJSON.GeoJSON): RouteEdge[] {
 export function createRouteEdgeElement(edge: RouteEdge): HTMLDivElement {
   const element = document.createElement('div');
   element.className = `route-edge-marker route-edge-marker--${edge.kind}`;
+  element.dataset.routeEdgeDensity = 'hidden';
+  element.style.setProperty('--route-edge-badge-size', `${ROUTE_EDGE_LAYOUT.badgeSize}px`);
+  element.style.setProperty('--route-edge-label-width', `${ROUTE_EDGE_LAYOUT.labelWidth}px`);
+  element.style.setProperty('--route-edge-label-height', `${ROUTE_EDGE_LAYOUT.labelHeight}px`);
+  element.style.setProperty('--route-edge-label-gap', `${ROUTE_EDGE_LAYOUT.labelGap}px`);
   element.setAttribute('role', 'img');
   element.setAttribute('aria-label', edge.label);
   const badge = document.createElement('span');

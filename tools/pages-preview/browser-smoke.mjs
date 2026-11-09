@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile, writeFile, stat} from 'node:fs/promises';
-import {spawn, spawnSync} from 'node:child_process';
+import {spawnSync} from 'node:child_process';
 import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
 import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-projection.mjs';
 import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving} from './browser-zoom-audit.mjs';
 import {traceDesktopSelection} from './browser-trace.mjs';
+import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const REPORT = new URL('browser-verification.json', ROOT);
@@ -44,14 +45,6 @@ function browserBinary(){
   throw new Error('No Chromium-compatible browser is installed on the runner');
 }
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
-async function waitFor(url,attempts=80){
-  let last;
-  for(let attempt=0;attempt<attempts;attempt++){
-    try{const response=await fetch(url,{cache:'no-store'});if(response.ok)return response;}catch(error){last=error;}
-    await sleep(100);
-  }
-  throw last||new Error(`Timed out waiting for ${url}`);
-}
 function serve(rootUrl){
   return createServer(async(request,response)=>{
     try{
@@ -601,18 +594,18 @@ const httpPort=await freePort(),debugPort=await freePort();
 const server=serve(ROOT);
 await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(httpPort,'127.0.0.1',resolve);});
 const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
-const browser=spawn(browserBinary(),[
-  '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
-  '--disable-default-apps','--disable-extensions','--disable-features=Translate,MediaRouter','--mute-audio',
-  '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
-  `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
-],{stdio:['ignore','ignore','pipe']});
-let browserErrors='';browser.stderr.on('data',chunk=>{browserErrors+=chunk;});
-let cdp,currentProfile;
+const browserLaunchStarted=performance.now();
+let browser,cdp,currentProfile,failure;
 const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],profilePerformance=[],performanceIssues=[];
 try{
-  await waitFor(`http://127.0.0.1:${debugPort}/json/version`);
-  const target=await (await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(`http://127.0.0.1:${httpPort}/tropnik/`)}`,{method:'PUT'})).json();
+  browser=launchBrowser(browserBinary(),[
+    '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
+    '--disable-default-apps','--disable-extensions','--disable-features=Translate,MediaRouter','--mute-audio',
+    '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
+    `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
+  ]);
+  await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
+  const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(`http://127.0.0.1:${httpPort}/tropnik/`)}`,{method:'PUT'});
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
@@ -696,7 +689,7 @@ try{
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
 }catch(error){
-  const failure={profile:currentProfile,error:error.stack||String(error),performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
+  failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(cdp){
     try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);failure.sheet=await sheetSnapshot(cdp);}catch{}
     try{failure.navigationHistory=await cdp.call('Page.getNavigationHistory');}catch{}
@@ -706,7 +699,15 @@ try{
   await writeFile(new URL('browser-failure.json',ROOT),JSON.stringify(failure,null,2)+'\n');
   throw error;
 }finally{
-  cdp?.close();browser.kill('SIGTERM');server.close();
-  await sleep(100);
-  if(browser.exitCode&&browser.exitCode!==0)console.error(browserErrors.slice(-4000));
+  cdp?.close();
+  const cleanup=await browser?.close();server.closeAllConnections();server.close();
+  if(failure){
+    failure.browserStartup=browser?.diagnostics()??failure.browserStartup;
+    await writeFile(new URL('browser-failure.json',ROOT),JSON.stringify(failure,null,2)+'\n');
+  }
+  if(cleanup&&['timed-out','error'].includes(cleanup.status)){
+    const error=new Error(`Chromium cleanup did not complete: ${JSON.stringify(browser.diagnostics())}`);
+    console.error(error.message);
+    if(!failure){await writeFile(new URL('browser-failure.json',ROOT),JSON.stringify({error:error.message,browserStartup:browser.diagnostics()},null,2)+'\n');throw error;}
+  }
 }

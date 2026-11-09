@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "sourceCommit": "1323836e8b822fe3f0c6295a138fc455532ddf59",
+  "environment": "Managed preview, desktop-sized Leaflet fallback; does not replace desktop MapLibre CI",
+  "viewport": {
+    "width": 1363,
+    "height": 936
+  },
+  "nativeInput": true,
+  "selectedLine": {
+    "routeId": "kavkaz-8a",
+    "frames": [
+      {
+        "file": "tropnik-0419-line-z14.jpg",
+        "zoom": 14.02247349465708
+      },
+      {
+        "file": "tropnik-0419-line-z18.jpg",
+        "zoom": 18
+      }
+    ],
+    "result": "PASS: source line remains visible with bounded forest stroke and light casing, controls clear, source/access warnings retained.",
+    "edgeMarkers": 0,
+    "edgeReason": "Multipart geometry is intentionally not assigned invented endpoints."
+  },
+  "edgeOverlap": {
+    "routeId": "osm-relation-2244794",
+    "file": "tropnik-0419-edges-before-z11.jpg",
+    "zoom": 11,
+    "result": "FAIL: both visible 32px markers overlap at approximately6px separation.",
+    "firstMarker": {
+      "left": 846,
+      "top": 485,
+      "width": 32,
+      "height": 32
+    },
+    "lastMarker": {
+      "left": 847,
+      "top": 491,
+      "width": 32,
+      "height": 32
+    },
+    "sourceParts": 1,
+    "sourceVertices": 12,
+    "fixStatus": "PENDING"
+  },
+  "imageSHA256": {
+    "tropnik-0419-line-z18.jpg": "4d0070d7d8dc902596df418404ac68821e18fae1e42d90bef9826bb074af9a76",
+    "tropnik-0419-line-z14.jpg": "f32bfc9206544f3b4c09e71f22b37b42d708a0eedc5ed8d0474599aa9dfcd5a1",
+    "tropnik-0419-edges-before-z11.jpg": "6a2b486afc0ed1871070799017d1fe3634e75f1368926b71cc4745cb184202ca"
+  }
+}

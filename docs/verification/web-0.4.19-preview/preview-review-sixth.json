@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": 6,
+  "parentCommit": "1323836e8b822fe3f0c6295a138fc455532ddf59",
+  "recordedAt": "2026-11-09T21:28:06.463225+00:00",
+  "environment": "Managed preview with desktop-sized Leaflet fallback",
+  "viewport": {
+    "width": 1363,
+    "height": 936
+  },
+  "routeId": "osm-relation-2244794",
+  "freshReload": true,
+  "nativeInteraction": true,
+  "states": [
+    {
+      "zoom": 14,
+      "density": "compact",
+      "visibleSemanticMarkers": 2,
+      "labelDisplay": "none",
+      "overlapObserved": false,
+      "file": "tropnik-0419-edges-compact-z14.jpg"
+    },
+    {
+      "zoom": 11,
+      "density": "hidden",
+      "visibleSemanticMarkers": 0,
+      "lineAndSelectionRetained": true,
+      "overlapObserved": false,
+      "file": "tropnik-0419-edges-hidden-z11.jpg"
+    },
+    {
+      "zoom": 16.25,
+      "density": "full",
+      "visibleSemanticMarkers": 2,
+      "labelSize": {
+        "width": 64,
+        "height": 24
+      },
+      "labelYRanges": [
+        [
+          400,
+          424
+        ],
+        [
+          649,
+          673
+        ]
+      ],
+      "overlapObserved": false,
+      "file": "tropnik-0419-edges-full-z16_25.jpg"
+    }
+  ],
+  "result": "PASS_FOR_OBSERVED_PRESENTATION",
+  "toolLimitation": "One semantic locator call timed out after its first zoom press. Fresh UI showed z13.25; remaining native clicks proceeded after re-observation. This is not a measured device performance result.",
+  "imageSHA256": {
+    "tropnik-0419-edges-compact-z14.jpg": "4cf9a0b76da2ce62f02768f3d57ec93a8c49de9e0dde859ae87ebf99cd4e729e",
+    "tropnik-0419-edges-hidden-z11.jpg": "af789653d7a315d89770f78ba449f8b8d1084a5f02eb65c4f7e3e774f0aac2a1",
+    "tropnik-0419-edges-full-z16_25.jpg": "0885365ef69a26557010fac46b1b4709de2aca7127e52c1044bd9d96f080e1d6"
+  },
+  "fullMapLibreCI": "PENDING"
+}

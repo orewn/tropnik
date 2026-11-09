@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
+import {projectMapPoint} from './map-projection.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
+
+export const CLOSE_TRAIL_FIXTURE=Object.freeze({
+ region:'krasnodar',routeId:'osm-relation-2244794',geometryURL:'/data/imported/osm-relation-2244794.geojson',
+ endpoints:[[40.6882934,45.5459288],[40.6891574,45.5427913]],
+});
 
 /** Chromium may deliver later pointer pairs before the earlier click events.
  * Correlate each ordinal click with its completed pair, not with the adjacent
@@ -79,9 +85,89 @@ function assertSheetGestures(gestures,name){
  assert.equal(scroll.selectionPreserved,true);assert.equal(gestures.finalState,'closed');
 }
 
+/** Inspect the painted DOM footprints, independently of the application's
+ * density thresholds. Hidden markers still retain their real source ends. */
+export function assertRouteEdgeFrame(frame,context,{requireBothVisible=false}={}){
+ assert.ok(Number.isFinite(frame.zoom)&&Math.abs(frame.camera?.zoom-frame.zoom)<.01,`${context}: the camera scale differs from the source-end frame`);
+ assert.equal(frame.routeId,CLOSE_TRAIL_FIXTURE.routeId,`${context}: the source route was lost`);
+ assert.equal(frame.region,CLOSE_TRAIL_FIXTURE.region);assert.equal(frame.queryRoute,CLOSE_TRAIL_FIXTURE.routeId);
+ assert.equal(frame.selectedRoute,'selected');assert.equal(frame.imagery,'');assert.equal(frame.sceneVisible,false);
+ assert.ok(Number.isFinite(frame.scrollY)&&Math.abs(frame.scrollY)<=1,`${context}: zooming the source ends scrolled the page`);
+ assert.equal(frame.markers?.length,2,`${context}: expected two semantic source ends, without SDK wrappers`);
+ const rect=value=>{
+  assert.ok(value&&['left','right','top','bottom','width','height'].every(key=>Number.isFinite(value[key])),`${context}: missing rendered rectangle`);
+  assert.ok(value.width>=0&&value.height>=0&&Math.abs(value.right-value.left-value.width)<.01&&Math.abs(value.bottom-value.top-value.height)<.01);
+ };
+ rect(frame.available);rect(frame.mapRect);
+ assert.ok(frame.available.width>0&&frame.available.height>0);
+ const clipped=value=>({left:Math.max(value.left,frame.available.left),right:Math.min(value.right,frame.available.right),top:Math.max(value.top,frame.available.top),bottom:Math.min(value.bottom,frame.available.bottom)});
+ const parts=[];
+ for(const [index,letter] of ['А','Б'].entries()){
+  const marker=frame.markers.find(item=>item.ariaLabel===`Край ${letter} исходной линии`);
+  assert.ok(marker,`${context}: source end ${letter} has no semantic annotation`);
+  assert.equal(marker.role,'img');assert.equal(marker.pointerEvents,'none',`${context}: a source end intercepts map input`);rect(marker.rect);
+  const projected=projectMapPoint(CLOSE_TRAIL_FIXTURE.endpoints[index],frame.camera,frame.mapRect);
+  assert.ok(Math.hypot(marker.rect.left+marker.rect.width/2-projected.x,marker.rect.top+marker.rect.height/2-projected.y)<=2,`${context}: source end ${letter} moved away from its original coordinates`);
+  assert.equal(marker.badge?.text,letter);assert.equal(marker.caption?.text,`Точка ${letter}`);
+  for(const [kind,part] of [['badge',marker.badge],['caption',marker.caption]]){
+   rect(part.rect);assert.equal(typeof part.visible,'boolean');assert.equal(part.pointerEvents,'none',`${context}: ${letter} ${kind} intercepts map input`);
+   if(part.visible){
+    assert.ok(part.rect.width>1&&part.rect.height>1,`${context}: a visible annotation has no painted area`);
+    const area=clipped(part.rect);if(area.right>area.left&&area.bottom>area.top)parts.push({letter,kind,rect:area});
+   }
+  }
+  if(requireBothVisible){
+   const badge=marker.badge;
+   assert.equal(badge.visible,true,`${context}: separated source end ${letter} did not reappear`);
+   assert.ok(badge.rect.left>=frame.available.left-1&&badge.rect.right<=frame.available.right+1&&badge.rect.top>=frame.available.top-1&&badge.rect.bottom<=frame.available.bottom+1,`${context}: separated source end ${letter} is clipped`);
+  }
+ }
+ for(let first=0;first<parts.length;first++)for(let second=first+1;second<parts.length;second++){
+  const a=parts[first],b=parts[second];if(a.letter===b.letter)continue;
+  const width=Math.min(a.rect.right,b.rect.right)-Math.max(a.rect.left,b.rect.left),height=Math.min(a.rect.bottom,b.rect.bottom)-Math.max(a.rect.top,b.rect.top);
+  assert.ok(width<=1||height<=1,`${context}: visible ${a.letter} ${a.kind} overlaps ${b.letter} ${b.kind} (${width}×${height}px)`);
+ }
+ return true;
+}
+
+export function assertCloseTrailAudit(audit,name,engine,mobile,screenshots){
+ assert.equal(audit?.passed,true,`${name}: missing real single-line source-end coverage`);
+ assert.equal(audit.input,mobile?'touch':'mouse');assert.equal(audit.routeId,CLOSE_TRAIL_FIXTURE.routeId);assert.equal(audit.region,CLOSE_TRAIL_FIXTURE.region);
+ assert.equal(audit.geometryURL,CLOSE_TRAIL_FIXTURE.geometryURL);assert.equal(audit.visualReviewRequired,true);
+ assert.equal(audit.source?.featureCount,1);assert.equal(audit.source.partCount,1);assert.equal(audit.source.vertexCount,12);
+ assert.deepEqual(audit.source.endpoints,CLOSE_TRAIL_FIXTURE.endpoints);assert.match(audit.source.sha256,/^[a-f0-9]{64}$/);
+ assert.ok(Number.isFinite(audit.initialZoom)&&Math.abs(audit.initialZoom-14)<.01,`${name}: the short source route did not fit at zoom14`);
+ assert.ok(Number.isInteger(audit.setupClicks)&&audit.setupClicks>=0&&audit.setupClicks<=3);
+ assert.ok(Array.isArray(audit.inputs)&&audit.inputs.length>0&&audit.inputs.length+audit.setupClicks<=15,`${name}: the bounded source-end audit exceeded15 native clicks`);
+ const step=engine==='leaflet'?.75:1;let previous=audit.initialZoom;
+ for(const input of audit.inputs){
+  assert.ok(input.direction===1||input.direction===-1);assert.equal(input.input,audit.input);
+  assert.ok(Number.isFinite(input.before)&&Number.isFinite(input.after));
+  assert.ok(Math.abs(input.before-previous)<.01&&Math.abs(input.after-input.before-input.direction*step)<.01,`${name}: a source-end zoom input was lost or reordered`);
+  assertNativeBurstEventOrder(input.events,audit.input,1);previous=input.after;
+ }
+ assert.equal(audit.nativeZoomClicks,audit.inputs.length);
+ assert.equal(audit.frames?.length,3,`${name}: three source-end visual frames are required`);
+ for(const [index,targetZoom] of [11,14,17].entries()){
+  const frame=audit.frames[index];assert.equal(frame.targetZoom,targetZoom);
+  assert.ok(Number.isFinite(frame.zoom)&&Math.abs(frame.zoom-targetZoom)<.01);
+  assert.ok(Number.isInteger(frame.inputCount)&&frame.inputCount>0&&frame.inputCount<=audit.inputs.length);
+  assert.ok(Math.abs(audit.inputs[frame.inputCount-1].after-frame.zoom)<.01);
+  if(index)assert.ok(frame.inputCount>audit.frames[index-1].inputCount);
+  const direction=index===0?-1:1,from=index?audit.frames[index-1].inputCount:0;
+  assert.ok(audit.inputs.slice(from,frame.inputCount).every(input=>input.direction===direction));
+  assertRouteEdgeFrame(frame,`${name}/source-ends/${frame.zoom}`,{requireBothVisible:index===1});
+  const screenshot=screenshots.find(item=>item.file===frame.screenshot);
+  assert.ok(screenshot&&screenshot.mode==='source-ends'&&Math.abs(screenshot.zoom-frame.zoom)<.01,`${name}: a source-end frame has no reviewable image`);
+ }
+ assert.equal(audit.frames.at(-1).inputCount,audit.inputs.length);
+ assert.equal(new Set(audit.frames.map(frame=>frame.screenshot)).size,3);
+ return true;
+}
+
 function assertZoomDesign(design,name,engine,mobile){
  assert.equal(design?.geometryPassed,true,`${name}: missing zoom-level design geometry evidence`);
- assert.equal(design.schemaVersion,3,'The design report predates ordered native burst input and delivery evidence');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
+ assert.equal(design.schemaVersion,4,'The design report predates native single-line source-end coverage');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
  assert.equal(design.visualReviewRequired,true,'DOM bounds must not be reported as human visual review');
  assert.equal(design.maximumZoom,18);assert.equal(design.routeId,'kavkaz-8a');
  assert.ok(Number.isFinite(design.minimumZoom)&&design.minimumZoom<4,`${name}: zoom coverage omitted the overview`);
@@ -143,6 +229,7 @@ function assertZoomDesign(design,name,engine,mobile){
  assert.ok(Array.isArray(design.screenshots)&&design.screenshots.filter(item=>item.mode==='detail').length>=6,`${name}: key-scale review images are missing`);
  assert.ok(design.screenshots.filter(item=>item.mode==='saved-overview').length>=6,`${name}: saved-overview review images are missing`);
  for(const screenshot of design.screenshots){assert.match(screenshot.file,/^[a-z0-9_.-]+\.png$/);assert.match(screenshot.sha256,/^[a-f0-9]{64}$/);assert.ok(screenshot.bytes>1000);}
+ assertCloseTrailAudit(design.closeTrail,name,engine,mobile,design.screenshots);
 }
 
 /** The same evidence gate runs before upload and against the public artifact. */

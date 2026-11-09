@@ -29,6 +29,17 @@ vm.runInNewContext(readFileSync(require.resolve('leaflet/dist/leaflet-src.js'),'
 });
 const L=leaflet.exports;
 
+test('the actual short source route switches edge density with installed Leaflet projections',()=>{
+ const data=JSON.parse(readFileSync(new URL('../public/data/imported/osm-relation-2244794.geojson',import.meta.url),'utf8'));
+ const before=JSON.stringify(data),edges=routePresentation.routeLineEdges(data);
+ assert.equal(edges.length,2);
+ for(const [zoom,expected] of [[11,'hidden'],[14,'compact'],[16,'full']]){
+  const points=edges.map(edge=>L.CRS.EPSG3857.latLngToPoint(L.latLng(edge.coordinate[1],russiaLongitude(edge.coordinate[0])),zoom).round());
+  assert.equal(routePresentation.routeEdgeDensity(points[0],points[1]),expected,`native screen projections at z${zoom}`);
+ }
+ assert.equal(JSON.stringify(data),before,'all twelve source vertices and their properties stay intact');
+});
+
 test('the real mask keeps its shared 45-degree cell edge after Leaflet projects and clips it',()=>{
  const data=JSON.parse(readFileSync(new URL('../public/data/russia-outside-mask.geojson',import.meta.url),'utf8'));
  const original=JSON.stringify(data),zoom=4.5,center=L.latLng(43.719248501487606,40.40214788181817);

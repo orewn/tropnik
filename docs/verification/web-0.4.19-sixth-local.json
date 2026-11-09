@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": 6,
+  "parentCommit": "1323836e8b822fe3f0c6295a138fc455532ddf59",
+  "checkedAt": "2026-11-09T21:31:23.098763+00:00",
+  "scope": "Adaptive source-edge annotations and native close-trail audit; bounded one-process browser startup",
+  "local": {
+    "webTests": {
+      "passed": 438,
+      "failed": 0,
+      "skipped": 0,
+      "command": "node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs"
+    },
+    "pagesToolingTests": {
+      "passed": 45,
+      "failed": 0,
+      "skipped": 0
+    },
+    "eslint": {
+      "errors": 0,
+      "warnings": 0,
+      "passed": true
+    },
+    "webTypes": "PASS",
+    "pagesTypes": "PASS"
+  },
+  "manualPreviewReceipt": "web-0.4.19-preview/preview-review-sixth.json",
+  "sourceSHA256": {
+    "tools/pages-preview/browser-report.mjs": "fc3e07e968ae66457b1ea162afe858948eafb6ab581973628e18fb5ff3eb2bdd",
+    "tools/pages-preview/browser-smoke.mjs": "8974a307a60b19cf084731853b7db8266e078f232616c5e02cfdcaf493965b91",
+    "tools/pages-preview/browser-zoom-audit.mjs": "97cc1fa400dcd35e5060e7606ab45b2c2553252f7f8da4bcb5c37e90e7733967",
+    "tools/pages-preview/tests/browser-report.test.mjs": "aace313682d1099f9b16544ec692e3c06f19321fc771f936bb90789ced12f479",
+    "web/app/map-detail.css": "af1c8c249c1c42bfc5eccd22de586ec4d23ecbf80ca9059b424d6e3f7935e3b1",
+    "web/components/Atlas.tsx": "61e294121ba046f6a0a5e02fcbe90a89704ad3c605b17d85666f59d0aec15bfb",
+    "web/components/Atlas2D.tsx": "f9c1a8fdb16ce8e151f8558608c35d1130bcc1c41ca2cf6d26bf0de6e94317ad",
+    "web/lib/map-route-presentation.ts": "b038900a8bf706be1347edabdd1fe95ecefd949e8b49b1641cb8fb015316079a",
+    "web/tests/atlas-canvas-interactions.test.mjs": "3f4b61daf2aa5d89bb7c3d314c1241d1355fcaf32ddb342335d468d1aba71717",
+    "web/tests/map-route-presentation.test.mjs": "ffd4756da45cd0f039759782bfc2f8740da1572cedf3c0df3bc71dc06d8e483e",
+    "tools/pages-preview/browser-startup.mjs": "5b1e326ccd4b678dd47cc7c09feb0a0e17850b13cc71b42886c07f4181537f91",
+    "tools/pages-preview/tests/browser-startup.test.mjs": "1a8351eb874b7d32572c627bd5a9aefee1f5ba6a031d0dd35923b93a0b8fcf2f"
+  },
+  "logSHA256": {
+    "tooling-tests": "e57bb84dbd16f121faa489e7b8e306ecfd3c01a2a10549bf52c58fd11d048992",
+    "lint": "42450a8e197a4e160a5e04765fe77efe1e6de5635484b8ce4718c945ba9b0ab9",
+    "types": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pages-types": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "web-tests": "a0d8396e079becc4b246c0df58dd769bc88d0b9c2e201c2f1c0b4fa169ef4274"
+  },
+  "siteBuild": {
+    "status": "PASS",
+    "commit": "2b19e1dd472f9fef0fc22df768a898c1366c7e8e",
+    "canonicalWebFilesByteIdentical": 1228,
+    "archiveBytes": 39032009,
+    "archiveSHA256": "e25d5c14d32e08501652f6374ed5a9151f953d8b222c575f6aeffefbf9255bfe",
+    "published": false
+  },
+  "browserGate": "PENDING",
+  "publicRelease": "PENDING",
+  "physicalDeviceFPS": "NOT_MEASURED"
+}
