@@ -94,7 +94,7 @@ jobs:
     needs: build
     if: ${{ github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     permissions:
       contents: read
       actions: read
@@ -118,6 +118,9 @@ jobs:
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         with:
           artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+          # The service can remain in syncing_files beyond the default 10 min.
+          # Keep a bounded wait and the public build/APK verification below.
+          timeout: '1200000'
       - name: Verify the public build, browser report and APK without authentication
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}

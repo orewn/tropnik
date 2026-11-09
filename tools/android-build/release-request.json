@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "requestId": "android-0-4-16-preview-instrumentation-metadata-20261109",
-  "version": "0.4.16-preview",
-  "versionCode": 8,
-  "notesFile": "tools/android-build/release-notes/0.4.16-preview.md"
+  "requestId": "android-0-4-17-preview-webview-visibility-20261109",
+  "version": "0.4.17-preview",
+  "versionCode": 9,
+  "notesFile": "tools/android-build/release-notes/0.4.17-preview.md"
 }

@@ -178,6 +178,7 @@ internal class LocalLandscapeViewer(private val context: Context) {
     }
 
     fun setVisible(value: Boolean) {
+        val becameVisible = value && !visible
         visible = value
         browser?.apply {
             importantForAccessibility = if (value) View.IMPORTANT_FOR_ACCESSIBILITY_AUTO else View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
@@ -186,6 +187,10 @@ internal class LocalLandscapeViewer(private val context: Context) {
             if (!value) clearFocus()
         }
         applyActivity()
+        // The prepared document was occluded by the native route card. Ask the
+        // attached view to compose it now; a visual-state callback is readiness
+        // for a following draw, not evidence that the draw already happened.
+        if (becameVisible) browser?.postInvalidateOnAnimation()
         if (!value && ready) cancelProbe() else probe()
     }
 
@@ -212,12 +217,15 @@ internal class LocalLandscapeViewer(private val context: Context) {
         val view = browser ?: return
         if (disposed) return
         val active = resumed && (visible || !ready)
-        if (active && !webResumed) { view.onResume(); webResumed = true }
+        // Native WebView lifecycle belongs to the Activity. Pausing it as soon
+        // as the occluded warmup reports readiness can prevent its first real
+        // composite. Hidden terrain rendering is stopped independently below.
+        if (resumed && !webResumed) { view.onResume(); webResumed = true }
         if (pageLoaded && lastActive != active) {
             lastActive = active
             view.evaluateJavascript(if (active) RESUME_SCENE else PAUSE_SCENE, null)
         }
-        if (!active && webResumed) { view.onPause(); webResumed = false }
+        if (!resumed && webResumed) { view.onPause(); webResumed = false }
     }
 
     /** onPageFinished alone does not prove that shaders and the first frame ran. */

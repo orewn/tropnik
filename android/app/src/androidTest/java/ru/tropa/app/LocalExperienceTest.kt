@@ -4,6 +4,8 @@ import android.view.View
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Rect
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebView
 import androidx.compose.ui.test.*
@@ -19,6 +21,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
+import org.json.JSONArray
+import org.json.JSONObject
+import org.json.JSONTokener
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -91,17 +96,17 @@ class LocalExperienceTest {
         app.onNodeWithTag("open_landscape").performClick()
         app.onNodeWithTag("landscape_scene").assertExists()
         app.runOnIdle { assertSame(prepared, app.activity.findViewById(R.id.landscape_viewer)) }
-        waitForLandscapeFrame()
+        waitForLandscapeFrame("scene-portrait")
         screenshot("scene-portrait")
         app.runOnUiThread { prepared!!.evaluateJavascript("document.getElementById('zoom-in').click()", null) }
-        waitForLandscapeFrame()
+        waitForLandscapeFrame("scene-zoom")
         screenshot("scene-zoom")
         val originalOrientation = app.activity.requestedOrientation
         val originalConfiguration = app.activity.resources.configuration.orientation
         try {
             app.runOnUiThread { app.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
             app.waitUntil(timeoutMillis = 10_000) { app.activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE }
-            waitForLandscapeFrame()
+            waitForLandscapeFrame("scene-landscape")
             screenshot("scene-landscape")
         } finally {
             app.runOnUiThread { app.activity.requestedOrientation = originalOrientation }
@@ -116,6 +121,7 @@ class LocalExperienceTest {
         }
         app.onNodeWithTag("open_landscape").performClick()
         app.runOnIdle { assertSame("Second opening must reuse its context", prepared, app.activity.findViewById(R.id.landscape_viewer)) }
+        waitForLandscapeFrame("scene-reopened")
     }
 
     @Test fun rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable() {
@@ -152,7 +158,7 @@ class LocalExperienceTest {
         var original: WebView? = null
         app.runOnIdle { original = app.activity.findViewById(R.id.landscape_viewer) }
         app.onNodeWithTag("open_landscape").performClick()
-        waitForLandscapeFrame()
+        waitForLandscapeFrame("recovery-before-error")
         // Exercise the document's real fatal guard. This does not claim to
         // reproduce a physical GPU-driver crash or kill a shared process.
         app.runOnUiThread { original!!.evaluateJavascript("window.dispatchEvent(new Event('error'))", null) }
@@ -171,12 +177,12 @@ class LocalExperienceTest {
             assertNotSame("Retry must create a new graphics session", original, replacement)
         }
         app.onNodeWithTag("open_landscape").performClick()
-        waitForLandscapeFrame()
+        waitForLandscapeFrame("recovery-after-retry")
     }
 
-    private fun waitForLandscapeFrame() {
-        // Let the viewport resize and the requested camera frame reach WebView's
-        // compositor. This is a QA marker, not a native JavaScript interface.
+    private fun waitForLandscapeFrame(name: String) {
+        // The document and viewport must be ready before checking actual screen
+        // pixels. Neither rAF nor VisualStateCallback proves screen composition.
         app.runOnUiThread {
             app.activity.findViewById<WebView>(R.id.landscape_viewer).evaluateJavascript(
                 "window.__tropnikQaDrawn=false;requestAnimationFrame(function(){requestAnimationFrame(function(){window.__tropnikQaDrawn=true;});});", null)
@@ -199,7 +205,149 @@ class LocalExperienceTest {
                 override fun onComplete(requestId: Long) { drawn.countDown() }
             })
         }
-        assertTrue("WebView did not commit the frame", drawn.await(10, TimeUnit.SECONDS))
+        assertTrue("WebView did not report a drawable document", drawn.await(10, TimeUnit.SECONDS))
+        waitForLandscapePixels(name)
+    }
+
+    private data class NativeSceneSnapshot(val bounds: Rect, val details: JSONObject)
+
+    private fun nativeSceneSnapshot(): NativeSceneSnapshot {
+        val bounds = Rect()
+        val details = JSONObject()
+        app.runOnUiThread {
+            val activity = app.activity
+            val view = activity.findViewById<WebView>(R.id.landscape_viewer)
+            details.put("activity", activity.javaClass.name)
+                .put("activityResumed", activity.lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED))
+                .put("windowFlags", activity.window.attributes.flags)
+                .put("windowHasFocus", activity.hasWindowFocus())
+                .put("orientation", activity.resources.configuration.orientation)
+                .put("density", activity.resources.displayMetrics.density)
+            if (view == null) details.put("missing", true)
+            else {
+                val location = IntArray(2)
+                view.getLocationOnScreen(location)
+                bounds.set(location[0], location[1], location[0] + view.width, location[1] + view.height)
+                details.put("boundsOnScreen", JSONArray(listOf(bounds.left, bounds.top, bounds.right, bounds.bottom)))
+                    .put("visibility", view.visibility).put("windowVisibility", view.windowVisibility)
+                    .put("alpha", view.alpha).put("shown", view.isShown).put("attached", view.isAttachedToWindow)
+                    .put("scrollX", view.scrollX).put("scrollY", view.scrollY)
+                    .put("translationX", view.translationX).put("translationY", view.translationY)
+                    .put("scaleX", view.scaleX).put("scaleY", view.scaleY)
+                val parents = JSONArray()
+                var parent = view.parent
+                while (parent is View && parents.length() < 5) {
+                    parents.put(JSONObject().put("class", parent.javaClass.name)
+                        .put("visibility", parent.visibility).put("alpha", parent.alpha)
+                        .put("width", parent.width).put("height", parent.height))
+                    parent = parent.parent
+                }
+                details.put("parents", parents)
+            }
+        }
+        return NativeSceneSnapshot(bounds, details)
+    }
+
+    private fun landscapePixelReport(bitmap: Bitmap, nativeBounds: Rect): JSONObject {
+        val bounds = Rect(nativeBounds)
+        if (!bounds.intersect(0, 0, bitmap.width, bitmap.height) || bounds.width() < 64 || bounds.height() < 64) {
+            return JSONObject().put("passed", false).put("reason", "WebView has no usable screen rectangle")
+        }
+        // Middle terrain only: excludes both the native chrome and the HTML
+        // heading/controls. Checking the whole WebView could accept UI text on
+        // an otherwise blank canvas. Nine tiles also reject a single small mark.
+        val roi = Rect(bounds.left + bounds.width() * 20 / 100,
+            bounds.top + bounds.height() * 34 / 100,
+            bounds.left + bounds.width() * 80 / 100,
+            bounds.top + bounds.height() * 78 / 100)
+        val colors = mutableMapOf<Int, Int>()
+        val tiles = Array(9) { mutableSetOf<Int>() }
+        val columns = 64
+        val rows = 48
+        for (row in 0 until rows) for (column in 0 until columns) {
+            val x = roi.left + ((column + 0.5) * roi.width() / columns).toInt()
+            val y = roi.top + ((row + 0.5) * roi.height() / rows).toInt()
+            val color = bitmap.getPixel(x, y)
+            // Quantization ignores subpixel noise and tiny compositor changes.
+            val quantized = ((Color.red(color) shr 4) shl 8) or
+                ((Color.green(color) shr 4) shl 4) or (Color.blue(color) shr 4)
+            colors[quantized] = (colors[quantized] ?: 0) + 1
+            tiles[(row * 3 / rows) * 3 + column * 3 / columns].add(quantized)
+        }
+        val dominantFraction = (colors.values.maxOrNull() ?: 0).toDouble() / (columns * rows)
+        val variedTiles = tiles.count { it.size >= 4 }
+        val passed = colors.size >= 12 && dominantFraction < 0.95 && variedTiles >= 4
+        return JSONObject().put("passed", passed)
+            .put("roi", JSONArray(listOf(roi.left, roi.top, roi.right, roi.bottom)))
+            .put("sampleCount", columns * rows).put("distinctQuantizedColors", colors.size)
+            .put("dominantFraction", dominantFraction).put("variedTiles", variedTiles)
+            .put("tileColorCounts", JSONArray(tiles.map { it.size }))
+            .put("thresholds", JSONObject().put("minimumColors", 12).put("maximumDominantFractionExclusive", 0.95).put("minimumVariedTiles", 4))
+    }
+
+    private fun documentSceneSnapshot(): Any {
+        val done = CountDownLatch(1)
+        var result: Any = "document probe timed out"
+        app.runOnUiThread {
+            val view = app.activity.findViewById<WebView>(R.id.landscape_viewer)
+            if (view == null) { result = "WebView missing"; done.countDown() }
+            else view.evaluateJavascript("""
+                (function(){
+                  function element(selector){var e=document.querySelector(selector);if(!e)return null;
+                    var r=e.getBoundingClientRect(),s=getComputedStyle(e);
+                    return {rect:{x:r.x,y:r.y,width:r.width,height:r.height},display:s.display,
+                      visibility:s.visibility,opacity:s.opacity,transform:s.transform,
+                      position:s.position,background:s.backgroundColor,width:e.width,height:e.height};}
+                  var hit=document.elementFromPoint(innerWidth/2,innerHeight/2);
+                  return JSON.stringify({sceneState:document.documentElement.dataset.sceneState,
+                    visibility:document.visibilityState,innerWidth:innerWidth,innerHeight:innerHeight,
+                    devicePixelRatio:devicePixelRatio,scrollX:scrollX,scrollY:scrollY,
+                    html:element('html'),body:element('body'),landscape:element('.landscape'),
+                    canvas:element('#terrain-canvas'),heading:element('.heading'),controls:element('.controls'),
+                    centerElement:hit?{tag:hit.tagName,id:hit.id,className:hit.className}:null});
+                })()
+            """.trimIndent()) { raw ->
+                result = runCatching { JSONObject(JSONTokener(raw).nextValue() as String) }.getOrElse { raw }
+                done.countDown()
+            }
+        }
+        done.await(3, TimeUnit.SECONDS)
+        return result
+    }
+
+    private fun waitForLandscapePixels(name: String) {
+        var lastBitmap: Bitmap? = null
+        var native = NativeSceneSnapshot(Rect(), JSONObject())
+        var pixels = JSONObject().put("passed", false).put("reason", "No screenshot captured")
+        var passed = false
+        var failure: Throwable? = null
+        try {
+            app.waitUntil(timeoutMillis = 12_000) {
+                native = nativeSceneSnapshot()
+                lastBitmap?.recycle()
+                lastBitmap = null
+                lastBitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+                pixels = lastBitmap?.let { landscapePixelReport(it, native.bounds) }
+                    ?: JSONObject().put("passed", false).put("reason", "Screenshot unavailable")
+                passed = pixels.optBoolean("passed") && native.details.optBoolean("shown") && native.details.optBoolean("attached")
+                passed
+            }
+        } catch (error: Exception) {
+            failure = error
+        } finally {
+            val diagnostics = JSONObject().put("passed", passed).put("native", native.details)
+                .put("pixels", pixels).put("document", documentSceneSnapshot())
+            val report = File(app.activity.filesDir, "qa/$name-frame.json")
+            report.parentFile!!.mkdirs()
+            report.writeText(diagnostics.toString(2))
+            lastBitmap?.let { bitmap ->
+                if (!passed) File(app.activity.filesDir, "qa/$name-frame-failed.png").outputStream().use { output ->
+                    assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+                }
+                bitmap.recycle()
+            }
+        }
+        if (!passed) throw AssertionError("No visible terrain pixels in the central WebView rectangle: $pixels", failure)
     }
 
     private fun screenshot(name: String) {
