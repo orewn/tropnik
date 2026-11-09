@@ -21,6 +21,8 @@ export function AuthDialog({onClose, onUser}: {onClose: () => void; onUser: (use
     try { setService(await serviceStatus(signal) ? 'ready' : 'preview'); }
     catch (error) { if (!isAbort(error)) setService('error'); }
   }, []);
+  // Start/cancel the external readiness check with this dialog lifecycle.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { const controller = new AbortController(); void check(controller.signal); return () => controller.abort(); }, [check]);
   const close = useCallback(() => { if (!submitting.current) onClose(); }, [onClose]);
 

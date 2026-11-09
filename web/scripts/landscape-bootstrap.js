@@ -1,4 +1,5 @@
 /** Embedded by build-landscape.mjs; all terrain data and scripts remain local. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- build-landscape appends this entry point's invocation to the standalone script.
 function mountLandscape(grid,route){
  let canvas=document.getElementById('terrain');
  const status=document.getElementById('status'),feedback=document.getElementById('feedback'),retry=document.getElementById('retry');

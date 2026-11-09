@@ -1,4 +1,4 @@
-import type {CompositePlan, ResolvedPlanGeometry, TrailConnectionIndex} from './trail-connections';
+import type {CompositePlan, CompositePlanOptions, ResolvedPlanGeometry, TrailConnectionIndex} from './trail-connections';
 
 export type HikeDraftStage = {
   trailId: string;
@@ -167,6 +167,17 @@ export function createHikeDraft(index: TrailConnectionIndex, seedTrailId?: strin
 
 export function serializeHikeDraft(draft: HikeDraft): string {
   return `${JSON.stringify(readDraft(draft), null, 2)}\n`;
+}
+
+/** Metadata and day labels do not change the walked path or map markers. */
+export function hikeDraftPathKey(draft: HikeDraft): string {
+  const options: CompositePlanOptions = {
+    trailIds: draft.stages.map(stage => stage.trailId),
+    connectionIds: draft.stages.slice(1).map(stage => stage.entryConnectionId || ''),
+    start: draft.start, finish: draft.finish,
+    via: Object.fromEntries(draft.stages.map((stage, i) => [i, stage.via ?? []])),
+  };
+  return JSON.stringify(options);
 }
 
 export function safeHikeFilename(name: string, extension?: 'json' | 'gpx'): string {

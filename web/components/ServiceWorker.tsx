@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
+import {watchServiceWorkerRegistration} from '@/lib/service-worker-registration';
 
 type IdleWindow = Window & {
   requestIdleCallback?: (callback: () => void, options?: {timeout: number}) => number;
@@ -24,9 +25,11 @@ export function ServiceWorker() {
     const idleHandles = new Set<number>();
     const timers = new Set<number>();
     let disposed = false;
+    let unwatchRegistration: (() => void) | undefined;
     let controllerKnown = !!navigator.serviceWorker.controller;
     let checkUpdate = () => {};
     const controllerChanged = () => {
+      if (disposed) return;
       if (refreshRequested.current) { location.reload(); return; }
       if (controllerKnown && !disposed) setUpdateReady(true);
       controllerKnown = true;
@@ -38,6 +41,7 @@ export function ServiceWorker() {
     window.addEventListener('pageshow', wake);
 
     const schedule = (task: () => void, timeout: number) => {
+      if (disposed) return;
       if (target.requestIdleCallback) {
         const handle = target.requestIdleCallback(() => {
           idleHandles.delete(handle);
@@ -55,6 +59,7 @@ export function ServiceWorker() {
 
     const register = () => schedule(() => {
       void navigator.serviceWorker.register('/sw.js', {updateViaCache: 'none'}).then(registration => {
+        if (disposed) return;
         registrationRef.current = registration;
         lastUpdateCheck.current = Date.now();
         checkUpdate = () => {
@@ -68,12 +73,8 @@ export function ServiceWorker() {
           if (!disposed && registration.waiting && navigator.serviceWorker.controller) setUpdateReady(true);
         };
         announceWaiting();
-        registration.addEventListener('updatefound', () => {
-          const installing = registration.installing;
-          installing?.addEventListener('statechange', () => {
-            if (installing.state === 'installed') announceWaiting();
-          });
-        });
+        unwatchRegistration?.();
+        unwatchRegistration = watchServiceWorkerRegistration(registration, announceWaiting);
         if (disposed || !document.querySelector('.explore-layout')) return;
         const connection = (navigator as NetworkNavigator).connection;
         if (connection?.saveData || /(?:^|-)2g$/.test(connection?.effectiveType || '')) return;
@@ -92,6 +93,8 @@ export function ServiceWorker() {
 
     return () => {
       disposed = true;
+      unwatchRegistration?.();
+      registrationRef.current = null;
       window.removeEventListener('load', register);
       navigator.serviceWorker.removeEventListener('controllerchange', controllerChanged);
       document.removeEventListener('visibilitychange', wake);

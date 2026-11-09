@@ -1,3 +1,5 @@
+import {MAP_RESOURCE_LIMITS} from './map-config.ts';
+
 /** One bounded pool shared by every preview. It never marks an offline pack complete. */
 type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown};
 type Options = {concurrency?: number; maxBytes?: number; maxResourceBytes?: number; maxQueued?: number; timeoutMs?: number; fetcher?: typeof fetch};
@@ -9,7 +11,10 @@ export class MapResourcePool {
   private bytes = 0;
   private options: Required<Options>;
   constructor(options: Options = {}) {
-    this.options = {concurrency: 3, maxBytes: 24 * 1024 * 1024, maxResourceBytes: 8 * 1024 * 1024, maxQueued: 72, timeoutMs: 15000, fetcher: (...args) => fetch(...args), ...options};
+    this.options = {...MAP_RESOURCE_LIMITS, fetcher: (...args) => fetch(...args), ...options};
+    for (const key of ['concurrency', 'maxBytes', 'maxResourceBytes', 'maxQueued', 'timeoutMs'] as const) {
+      if (!Number.isSafeInteger(this.options[key]) || this.options[key] <= 0) throw new RangeError(`Invalid map resource limit: ${key}`);
+    }
   }
   get(url: string, priority = 1): Promise<ArrayBuffer> {
     const existing = this.entries.get(url);

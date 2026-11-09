@@ -1,5 +1,11 @@
 # TROPA backend
 
+Release verification for 0.4.18 is recorded in
+[`docs/runtime-audit-2026-11-09.md`](../docs/runtime-audit-2026-11-09.md).
+The backend gate runs `go test -race -count=1 ./...`, `go vet ./...` and native
+PostGIS integration against the exact release source. Passing this gate does
+not configure a public API, database, SMTP delivery or operator accounts.
+
 Go API and PostgreSQL/PostGIS persistence for a Russia-first guided hiking product.
 The API stores real accounts, sessions, recruitment requests, groups, messages and
 reviews. The initial migration contains six region records and **no invented

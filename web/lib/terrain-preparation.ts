@@ -88,7 +88,6 @@ export class TerrainPreparation {
     const requestId = this.info.attempts;
     return new Promise((resolve, reject) => {
       let settled = false;
-      let timer: ReturnType<typeof setTimeout> | undefined;
       const finish = (error?: Error, model?: TerrainModel) => {
         if (settled) return;
         settled = true;
@@ -107,7 +106,7 @@ export class TerrainPreparation {
       worker.onerror = event => {event.preventDefault?.(); finish(new Error(event.message || 'Terrain worker failed'));};
       worker.onmessageerror = () => finish(new Error('Terrain worker message could not be decoded'));
       const timeout = this.options.timeoutMs ?? 20000;
-      timer = setTimeout(() => finish(new Error('Terrain worker timed out')), Number.isFinite(timeout) ? Math.max(1, timeout) : 20000);
+      const timer = setTimeout(() => finish(new Error('Terrain worker timed out')), Number.isFinite(timeout) ? Math.max(1, timeout) : 20000);
       try {worker.postMessage({type: 'prepare-terrain', protocol: 1, requestId, grid} satisfies TerrainPreparationRequest);}
       catch (error) {finish(error instanceof Error ? error : new Error('Terrain worker could not receive the grid'));}
     });

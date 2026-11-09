@@ -29,8 +29,12 @@ export function GuideDirectory() {
       else setError(errorText(error));
     } finally { if (request === sequence.current) setLoading(false); }
   }, []);
-  useEffect(() => { const controller = new AbortController(); void load(controller.signal); return () => { ++sequence.current; controller.abort(); }; }, [load]);
+  // The initial directory request is an external lifecycle, not derived render state.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { const activeSequence = sequence, controller = new AbortController(); void load(controller.signal); return () => { ++activeSequence.current; controller.abort(); }; }, [load]);
   useEffect(() => {
+    // Never display the previous guide's reviews while a different guide loads.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setReviews([]);
     setReviewError('');
     if (!opened) return;

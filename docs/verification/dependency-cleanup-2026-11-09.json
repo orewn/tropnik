@@ -1,0 +1,1000 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-09T17:23:39.696805+00:00",
+  "sourceBaseCommit": "c4498b496d4d6963c94023e8425b6e845eedc7db",
+  "testedUncommittedWorkingTree": true,
+  "releaseVersion": "0.4.18",
+  "scope": "Dependency cleanup and compiler/build compatibility; final release commit CI is separate.",
+  "runtime": {
+    "node": "v24.22.1",
+    "pnpm": "11.25.0",
+    "minimumReleaseAgeMinutes": 10080,
+    "supplyChainPolicyUnchanged": true
+  },
+  "versions": {
+    "next": {
+      "before": "16.3.4",
+      "after": "16.4.1"
+    },
+    "eslint-config-next": {
+      "before": "16.3.4",
+      "after": "16.4.1"
+    },
+    "zod": {
+      "before": "^3.25.76",
+      "after": "4.6.6"
+    },
+    "sharp": {
+      "before": "0.35.4",
+      "after": "0.35.5"
+    },
+    "@babel/core": {
+      "before": "7.29.0",
+      "after": "7.29.6"
+    },
+    "browserslist": {
+      "before": "4.28.2",
+      "after": "4.28.7"
+    },
+    "baseline-browser-mapping": {
+      "before": "2.10.30",
+      "after": "2.11.0"
+    },
+    "source-map-js": {
+      "before": "1.2.1",
+      "after": "1.2.2"
+    },
+    "react": {
+      "before": "19.2.6",
+      "after": "19.2.8"
+    },
+    "react-dom": {
+      "before": "19.2.6",
+      "after": "19.2.8"
+    },
+    "react-server-dom-webpack": {
+      "before": "19.2.6",
+      "after": "19.2.8"
+    },
+    "vite": {
+      "before": "8.0.13",
+      "after": "8.1.6"
+    },
+    "undici": {
+      "before": "7.24.8",
+      "after": "7.30.1"
+    },
+    "ws": {
+      "before": "8.18.0",
+      "after": "8.21.0"
+    },
+    "js-yaml": {
+      "before": "4.1.1",
+      "after": "4.3.2"
+    },
+    "brace-expansion-1": {
+      "before": "1.1.14",
+      "after": "1.1.21"
+    },
+    "brace-expansion-5": {
+      "before": "5.0.6",
+      "after": "5.0.12"
+    },
+    "image-size": {
+      "before": "2.0.2",
+      "after": "2.0.3"
+    },
+    "fast-uri": {
+      "before": "3.1.7",
+      "after": "3.1.9"
+    },
+    "fflate": {
+      "before": "0.7.4",
+      "after": "0.7.5"
+    },
+    "esbuild-0.28": {
+      "before": "0.28.0",
+      "after": "0.28.1"
+    }
+  },
+  "configuration": "pnpm-workspace.yaml is the single overrides authority; redundant npm-only package.json overrides were removed. Security overrides are scoped to compatible major/minor lines. eslint-plugin-react-hooks explicitly permits Zod 4. Cloudflare plugin/Wrangler/Miniflare remain on their existing matched versions.",
+  "importAudit": {
+    "checkedAt": "2026-11-09T17:05:40.260Z",
+    "sourceFileCount": 289,
+    "method": "TypeScript AST import/export and literal dynamic-import/require graph; every source outside components/ui is conservatively retained as a root",
+    "externalUiEdges": [
+      {
+        "from": "components/connector-error.tsx",
+        "spec": "@/components/ui/button",
+        "to": "components/ui/button.tsx"
+      }
+    ],
+    "retainedUi": [
+      "components/ui/button.tsx"
+    ],
+    "removedUi": [
+      "components/ui/accordion.tsx",
+      "components/ui/alert-dialog.tsx",
+      "components/ui/alert.tsx",
+      "components/ui/aspect-ratio.tsx",
+      "components/ui/attachment.tsx",
+      "components/ui/avatar.tsx",
+      "components/ui/badge.tsx",
+      "components/ui/breadcrumb.tsx",
+      "components/ui/bubble.tsx",
+      "components/ui/button-group.tsx",
+      "components/ui/calendar.tsx",
+      "components/ui/card.tsx",
+      "components/ui/carousel.tsx",
+      "components/ui/chart.tsx",
+      "components/ui/checkbox.tsx",
+      "components/ui/collapsible.tsx",
+      "components/ui/combobox.tsx",
+      "components/ui/command.tsx",
+      "components/ui/context-menu.tsx",
+      "components/ui/dialog.tsx",
+      "components/ui/direction.tsx",
+      "components/ui/drawer.tsx",
+      "components/ui/dropdown-menu.tsx",
+      "components/ui/empty.tsx",
+      "components/ui/field.tsx",
+      "components/ui/form.tsx",
+      "components/ui/hover-card.tsx",
+      "components/ui/input-group.tsx",
+      "components/ui/input-otp.tsx",
+      "components/ui/input.tsx",
+      "components/ui/item.tsx",
+      "components/ui/kbd.tsx",
+      "components/ui/label.tsx",
+      "components/ui/marker.tsx",
+      "components/ui/menubar.tsx",
+      "components/ui/message-scroller.tsx",
+      "components/ui/message.tsx",
+      "components/ui/native-select.tsx",
+      "components/ui/navigation-menu.tsx",
+      "components/ui/pagination.tsx",
+      "components/ui/popover.tsx",
+      "components/ui/progress.tsx",
+      "components/ui/radio-group.tsx",
+      "components/ui/resizable.tsx",
+      "components/ui/scroll-area.tsx",
+      "components/ui/select.tsx",
+      "components/ui/separator.tsx",
+      "components/ui/sheet.tsx",
+      "components/ui/sidebar.tsx",
+      "components/ui/skeleton.tsx",
+      "components/ui/slider.tsx",
+      "components/ui/sonner.tsx",
+      "components/ui/spinner.tsx",
+      "components/ui/switch.tsx",
+      "components/ui/table.tsx",
+      "components/ui/tabs.tsx",
+      "components/ui/textarea.tsx",
+      "components/ui/toggle-group.tsx",
+      "components/ui/toggle.tsx",
+      "components/ui/tooltip.tsx"
+    ],
+    "packageProof": [
+      {
+        "name": "@base-ui/react",
+        "allImporters": [
+          "components/ui/combobox.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "@hookform/resolvers",
+        "allImporters": [],
+        "retainedImporters": []
+      },
+      {
+        "name": "@shadcn/react",
+        "allImporters": [
+          "components/ui/message-scroller.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "cmdk",
+        "allImporters": [
+          "components/ui/command.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "date-fns",
+        "allImporters": [],
+        "retainedImporters": []
+      },
+      {
+        "name": "embla-carousel-react",
+        "allImporters": [
+          "components/ui/carousel.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "input-otp",
+        "allImporters": [
+          "components/ui/input-otp.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "next-themes",
+        "allImporters": [
+          "components/ui/sonner.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "react-day-picker",
+        "allImporters": [
+          "components/ui/calendar.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "react-hook-form",
+        "allImporters": [
+          "components/ui/form.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "react-resizable-panels",
+        "allImporters": [
+          "components/ui/resizable.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "recharts",
+        "allImporters": [
+          "components/ui/chart.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "sonner",
+        "allImporters": [
+          "components/ui/sonner.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "vaul",
+        "allImporters": [
+          "components/ui/drawer.tsx"
+        ],
+        "retainedImporters": []
+      },
+      {
+        "name": "tw-animate-css",
+        "allImporters": [],
+        "retainedImporters": []
+      }
+    ]
+  },
+  "removedUiLines": 7270,
+  "retainedInfrastructure": [
+    "components/connector-error.tsx",
+    "components/ui/button.tsx",
+    "lib/utils.ts",
+    "lib/connectors.ts",
+    "lib/connector-contract.mts",
+    "lib/connector-errors.mts",
+    "scripts/connector-preview",
+    "scripts/vite",
+    "drizzle"
+  ],
+  "zodCompatibility": {
+    "changes": [
+      "protocol.mjs: both record schemas explicitly declare string keys",
+      "Existing crypto.randomUUID driver IDs satisfy Zod 4 UUID validation",
+      "Existing integer limits already rejected floats"
+    ],
+    "tests": "web/tests/connector-protocol.test.mjs: 8 passed"
+  },
+  "productionAuditBefore": {
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 4,
+        "moderate": 9,
+        "high": 7,
+        "critical": 3
+      },
+      "dependencies": 194,
+      "devDependencies": 0,
+      "optionalDependencies": 87,
+      "totalDependencies": 281
+    },
+    "advisories": [
+      {
+        "module_name": "@babel/core",
+        "severity": "low",
+        "title": "@babel/core: Arbitrary File Read via sourceMappingURL Comment",
+        "vulnerable_versions": "<=7.29.0",
+        "patched_versions": ">=7.29.6",
+        "url": "https://github.com/advisories/GHSA-4x5r-pxfx-6jf8"
+      },
+      {
+        "module_name": "browserslist",
+        "severity": "high",
+        "title": "Browserslist: Unbounded memory growth (no cache eviction) via distinct query results, leading to eventual OOM",
+        "vulnerable_versions": "<=4.28.6",
+        "patched_versions": ">=4.28.7",
+        "url": "https://github.com/advisories/GHSA-c83g-rgw3-j3cx"
+      },
+      {
+        "module_name": "browserslist",
+        "severity": "high",
+        "title": "Browserslist: Uncaught crash / prototype write via untrusted browserslist-stats.json custom stats (normalizeStats)",
+        "vulnerable_versions": "<=4.28.6",
+        "patched_versions": ">=4.28.7",
+        "url": "https://github.com/advisories/GHSA-73wf-gq98-2v4g"
+      },
+      {
+        "module_name": "baseline-browser-mapping",
+        "severity": "moderate",
+        "title": "baseline-browser-mapping process termination on invalid input causes denial of service",
+        "vulnerable_versions": ">=2.0.0 <2.11.0",
+        "patched_versions": ">=2.11.0",
+        "url": "https://github.com/advisories/GHSA-w5vr-8v7q-w6rv"
+      },
+      {
+        "module_name": "fast-uri",
+        "severity": "moderate",
+        "title": "fast-uri vulnerable to inconsistent host case normalization via percent-encoded octets",
+        "vulnerable_versions": ">=3.0.0 <3.1.8",
+        "patched_versions": ">=3.1.8",
+        "url": "https://github.com/advisories/GHSA-hrr3-gc8f-f4qj"
+      },
+      {
+        "module_name": "next",
+        "severity": "critical",
+        "title": "Next.js: Remote Code Execution in next/og ImageResponse",
+        "vulnerable_versions": ">=16.2.0 <16.3.6",
+        "patched_versions": ">=16.3.6",
+        "url": "https://github.com/advisories/GHSA-vcvr-r3jv-pc5j"
+      },
+      {
+        "module_name": "source-map-js",
+        "severity": "high",
+        "title": "source-map-js allows event-loop denial of service through indexed source-map section offsets",
+        "vulnerable_versions": ">=1.0.0 <1.2.2",
+        "patched_versions": ">=1.2.2",
+        "url": "https://github.com/advisories/GHSA-68fv-2mgg-jv7q"
+      },
+      {
+        "module_name": "sharp",
+        "severity": "high",
+        "title": "sharp : Vulnerability in librsvg dependency CVE-2026-96889",
+        "vulnerable_versions": "<0.35.5",
+        "patched_versions": ">=0.35.5",
+        "url": "https://github.com/advisories/GHSA-wq5f-xc86-pv6w"
+      },
+      {
+        "module_name": "next",
+        "severity": "moderate",
+        "title": "Next.js: Pending `use cache` fill can leak Draft Mode content into regular responses and persisted pages",
+        "vulnerable_versions": ">=16.3.0 <16.3.8",
+        "patched_versions": ">=16.3.8",
+        "url": "https://github.com/advisories/GHSA-3w37-wq28-93x7"
+      },
+      {
+        "module_name": "next",
+        "severity": "moderate",
+        "title": "Next.js has cache poisoning of SSG and ISR pages in self-hosted applications",
+        "vulnerable_versions": ">=16.0.0 <16.3.8",
+        "patched_versions": ">=16.3.8",
+        "url": "https://github.com/advisories/GHSA-4jqv-mc3x-m676"
+      },
+      {
+        "module_name": "next",
+        "severity": "low",
+        "title": "Next.js has information disclosure in development server's Model Context Protocol endpoint",
+        "vulnerable_versions": ">=16.0.0 <16.3.8",
+        "patched_versions": ">=16.3.8",
+        "url": "https://github.com/advisories/GHSA-39w2-rjm5-chcv"
+      },
+      {
+        "module_name": "next",
+        "severity": "moderate",
+        "title": "Next.js has information disclosure in App Router metadata image routes via dynamicParams bypass",
+        "vulnerable_versions": ">=16.0.0 <16.3.8",
+        "patched_versions": ">=16.3.8",
+        "url": "https://github.com/advisories/GHSA-f87g-xv8r-7p7x"
+      },
+      {
+        "module_name": "next",
+        "severity": "moderate",
+        "title": "Next.js has cache poisoning in SSG/ISR rendering that leads to cross-user content substitution and persistent denial of service",
+        "vulnerable_versions": ">=16.0.0 <16.3.8",
+        "patched_versions": ">=16.3.8",
+        "url": "https://github.com/advisories/GHSA-mcj8-r9mp-w47p"
+      },
+      {
+        "module_name": "next",
+        "severity": "high",
+        "title": "Next.js has Server-Side Request Forgery in Image Optimization",
+        "vulnerable_versions": ">=16.0.0 <16.3.8",
+        "patched_versions": ">=16.3.8",
+        "url": "https://github.com/advisories/GHSA-cjq9-62q9-8jv4"
+      },
+      {
+        "module_name": "next",
+        "severity": "critical",
+        "title": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used",
+        "vulnerable_versions": ">=16.0.0 <=16.4.0",
+        "patched_versions": ">=16.4.1",
+        "url": "https://github.com/advisories/GHSA-2464-fhr4-w9xw"
+      },
+      {
+        "module_name": "next",
+        "severity": "high",
+        "title": "Next.js: Denial of Service in App Router using Server Actions",
+        "vulnerable_versions": ">=16.0.0 <=16.4.0",
+        "patched_versions": ">=16.4.1",
+        "url": "https://github.com/advisories/GHSA-p3m5-59mp-jv5r"
+      },
+      {
+        "module_name": "next",
+        "severity": "moderate",
+        "title": "next.js cache leak across root param values in nested 'use cache' functions",
+        "vulnerable_versions": ">=16.3.0 <16.3.8",
+        "patched_versions": ">=16.3.8",
+        "url": "https://github.com/advisories/GHSA-h694-7cp9-m8p3"
+      },
+      {
+        "module_name": "next",
+        "severity": "critical",
+        "title": "Next.js: Unauthenticated Remote Code Execution in `use cache` functions returning typed arrays",
+        "vulnerable_versions": ">=16.0.0 <=16.4.0",
+        "patched_versions": ">=16.4.1",
+        "url": "https://github.com/advisories/GHSA-673q-mjm6-r5xr"
+      },
+      {
+        "module_name": "zod",
+        "severity": "high",
+        "title": "Zod can exhaust memory while validating oversized constrained collections",
+        "vulnerable_versions": "<4.6.6",
+        "patched_versions": ">=4.6.6",
+        "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5"
+      },
+      {
+        "module_name": "fast-uri",
+        "severity": "moderate",
+        "title": "fast-uri vulnerable to URI scheme spoofing via percent-encoded scheme decoding",
+        "vulnerable_versions": ">=3.0.0 <3.1.9",
+        "patched_versions": ">=3.1.9",
+        "url": "https://github.com/advisories/GHSA-w74x-v6f9-j3xg"
+      },
+      {
+        "module_name": "fast-uri",
+        "severity": "low",
+        "title": "fast-uri vulnerable to improper path equivalence in relative reference normalization",
+        "vulnerable_versions": ">=3.0.0 <3.1.9",
+        "patched_versions": ">=3.1.9",
+        "url": "https://github.com/advisories/GHSA-xhq7-xmqj-769h"
+      },
+      {
+        "module_name": "fast-uri",
+        "severity": "moderate",
+        "title": "fast-uri vulnerable to host confusion via unchecked WHATWG host canonicalization",
+        "vulnerable_versions": ">=3.1.3 <3.1.9",
+        "patched_versions": ">=3.1.9",
+        "url": "https://github.com/advisories/GHSA-wjr9-j795-jxcr"
+      },
+      {
+        "module_name": "fast-uri",
+        "severity": "low",
+        "title": "fast-uri vulnerable to scheme injection via an unescaped first-segment colon in suffix references",
+        "vulnerable_versions": ">=3.0.0 <3.1.9",
+        "patched_versions": ">=3.1.9",
+        "url": "https://github.com/advisories/GHSA-333x-w4r6-6crp"
+      }
+    ]
+  },
+  "productionAuditAfter": {
+    "advisories": {},
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "dependencies": 136,
+      "devDependencies": 0,
+      "optionalDependencies": 83,
+      "totalDependencies": 219
+    }
+  },
+  "initialLintBeforeSeparateCleanup": {
+    "fullProject": {
+      "errors": 50,
+      "warnings": 13699,
+      "includesGeneratedPagesPreview": true
+    },
+    "sourceOnly": {
+      "errors": 45,
+      "warnings": 32
+    },
+    "status": "Reported to the owner; a separate source/config cleanup is in progress. No global rules were disabled by this dependency change."
+  },
+  "references": [
+    "https://github.com/advisories/GHSA-2464-fhr4-w9xw",
+    "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+    "https://zod.dev/v4/changelog#zrecord",
+    "https://github.com/advisories/GHSA-wx67-qw84-cm4g",
+    "https://github.com/advisories/GHSA-wx4j-mvgx-mqwp"
+  ],
+  "validationStatus": "Dependency edits complete. Final source-freeze TypeScript, full-suite, lint and both-framework checks are owned by the root release workflow; the staged results below are not a final release certificate.",
+  "allDependencyAuditBeforeBuildToolPatches": {
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 9,
+        "moderate": 30,
+        "high": 29,
+        "critical": 0
+      },
+      "dependencies": 189,
+      "devDependencies": 607,
+      "optionalDependencies": 215,
+      "totalDependencies": 831
+    },
+    "status": "Residual findings; production-only zero must not be presented as a clean full dependency audit",
+    "packages": {
+      "esbuild": {
+        "severities": {
+          "moderate": 1,
+          "low": 1
+        },
+        "installedVersions": [
+          "0.18.20",
+          "0.27.3",
+          "0.28.0"
+        ],
+        "patchedRanges": [
+          ">=0.25.0",
+          ">=0.28.1"
+        ],
+        "directRoots": [
+          "@cloudflare/vite-plugin",
+          "@vitejs/plugin-react",
+          "@vitejs/plugin-rsc",
+          "drizzle-kit",
+          "react-server-dom-webpack",
+          "vinext",
+          "vite",
+          "wrangler"
+        ]
+      },
+      "ws": {
+        "severities": {
+          "moderate": 1,
+          "high": 1
+        },
+        "installedVersions": [
+          "8.18.0"
+        ],
+        "patchedRanges": [
+          ">=8.20.1",
+          ">=8.21.0"
+        ],
+        "directRoots": [
+          "@cloudflare/vite-plugin",
+          "wrangler"
+        ]
+      },
+      "vite": {
+        "severities": {
+          "moderate": 5,
+          "high": 1,
+          "low": 1
+        },
+        "installedVersions": [
+          "8.0.13"
+        ],
+        "patchedRanges": [
+          ">=8.0.16",
+          ">=8.1.6"
+        ],
+        "directRoots": [
+          "@cloudflare/vite-plugin",
+          "@vitejs/plugin-react",
+          "@vitejs/plugin-rsc",
+          "vinext",
+          "vite"
+        ]
+      },
+      "undici": {
+        "severities": {
+          "high": 10,
+          "moderate": 14,
+          "low": 5
+        },
+        "installedVersions": [
+          "7.24.8"
+        ],
+        "patchedRanges": [
+          ">=7.28.0",
+          ">=7.29.0",
+          ">=7.29.1",
+          ">=7.30.1"
+        ],
+        "directRoots": [
+          "@cloudflare/vite-plugin",
+          "wrangler"
+        ]
+      },
+      "js-yaml": {
+        "severities": {
+          "moderate": 1,
+          "high": 3
+        },
+        "installedVersions": [
+          "4.1.1"
+        ],
+        "patchedRanges": [
+          ">=4.2.0",
+          ">=4.3.0",
+          ">=4.3.1",
+          ">=4.3.2"
+        ],
+        "directRoots": [
+          "eslint",
+          "eslint-config-next"
+        ]
+      },
+      "brace-expansion": {
+        "severities": {
+          "high": 10,
+          "moderate": 2
+        },
+        "installedVersions": [
+          "1.1.14",
+          "5.0.6"
+        ],
+        "patchedRanges": [
+          ">=1.1.16",
+          ">=1.1.17",
+          ">=1.1.18",
+          ">=1.1.19",
+          ">=1.1.20",
+          ">=1.1.21",
+          ">=5.0.10",
+          ">=5.0.11",
+          ">=5.0.12",
+          ">=5.0.7",
+          ">=5.0.8",
+          ">=5.0.9"
+        ],
+        "directRoots": [
+          "eslint",
+          "eslint-config-next"
+        ]
+      },
+      "react-server-dom-webpack": {
+        "severities": {
+          "high": 1
+        },
+        "installedVersions": [
+          "19.2.6"
+        ],
+        "patchedRanges": [
+          ">=19.2.8"
+        ],
+        "directRoots": [
+          "@vitejs/plugin-rsc",
+          "react-server-dom-webpack",
+          "vinext"
+        ]
+      },
+      "fflate": {
+        "severities": {
+          "moderate": 1
+        },
+        "installedVersions": [
+          "0.7.4"
+        ],
+        "patchedRanges": [
+          ">=0.7.5"
+        ],
+        "directRoots": [
+          "vinext"
+        ]
+      },
+      "image-size": {
+        "severities": {
+          "high": 2
+        },
+        "installedVersions": [
+          "2.0.2"
+        ],
+        "patchedRanges": [
+          ">=2.0.3"
+        ],
+        "directRoots": [
+          "vinext"
+        ]
+      },
+      "fast-uri": {
+        "severities": {
+          "moderate": 3,
+          "low": 2
+        },
+        "installedVersions": [
+          "3.1.7"
+        ],
+        "patchedRanges": [
+          ">=3.1.8",
+          ">=3.1.9"
+        ],
+        "directRoots": [
+          "@vitejs/plugin-rsc",
+          "react-server-dom-webpack",
+          "vinext"
+        ]
+      },
+      "zod": {
+        "severities": {
+          "high": 1
+        },
+        "installedVersions": [
+          "3.25.76"
+        ],
+        "patchedRanges": [
+          ">=4.6.6"
+        ],
+        "directRoots": [
+          "eslint-config-next"
+        ]
+      },
+      "satori": {
+        "severities": {
+          "moderate": 1
+        },
+        "installedVersions": [
+          "0.16.0"
+        ],
+        "patchedRanges": [
+          ">=0.33.5"
+        ],
+        "directRoots": [
+          "vinext"
+        ]
+      },
+      "minimatch": {
+        "severities": {
+          "moderate": 1
+        },
+        "installedVersions": [
+          "10.2.5"
+        ],
+        "patchedRanges": [
+          ">=11.0.1"
+        ],
+        "directRoots": [
+          "eslint-config-next"
+        ]
+      }
+    }
+  },
+  "allDependencyAuditIncludingDevelopment": {
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 1,
+        "moderate": 3,
+        "high": 0,
+        "critical": 0
+      },
+      "dependencies": 184,
+      "devDependencies": 615,
+      "optionalDependencies": 218,
+      "totalDependencies": 834
+    },
+    "status": "Zero high/critical; four residual advisories require dependency branches outside the bounded compatible patch scope",
+    "advisories": [
+      {
+        "module_name": "esbuild",
+        "severity": "moderate",
+        "title": "esbuild enables any website to send any requests to the development server and read the response",
+        "vulnerable_versions": "<=0.24.2",
+        "patched_versions": ">=0.25.0",
+        "url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99",
+        "findings": [
+          {
+            "version": "0.18.20",
+            "paths": [
+              ".>drizzle-kit>@esbuild-kit/esm-loader>@esbuild-kit/core-utils>esbuild"
+            ],
+            "dev": true,
+            "optional": false,
+            "bundled": false
+          }
+        ]
+      },
+      {
+        "module_name": "esbuild",
+        "severity": "low",
+        "title": "esbuild allows arbitrary file read when running the development server on Windows",
+        "vulnerable_versions": ">=0.27.3 <0.28.1",
+        "patched_versions": ">=0.28.1",
+        "url": "https://github.com/advisories/GHSA-g7r4-m6w7-qqqr",
+        "findings": [
+          {
+            "version": "0.27.3",
+            "paths": [
+              ".>@cloudflare/vite-plugin>wrangler>esbuild",
+              ".>wrangler>esbuild"
+            ],
+            "dev": true,
+            "optional": false,
+            "bundled": false
+          }
+        ]
+      },
+      {
+        "module_name": "satori",
+        "severity": "moderate",
+        "title": "Satori-generated SVG has improper escaping",
+        "vulnerable_versions": ">=0.0.27 <0.33.5",
+        "patched_versions": ">=0.33.5",
+        "url": "https://github.com/advisories/GHSA-wx4j-mvgx-mqwp",
+        "findings": [
+          {
+            "version": "0.16.0",
+            "paths": [
+              ".>vinext>@vercel/og>satori"
+            ],
+            "dev": true,
+            "optional": false,
+            "bundled": false
+          }
+        ]
+      },
+      {
+        "module_name": "minimatch",
+        "severity": "moderate",
+        "title": "minimatch has potential denial of service via globparts amplification",
+        "vulnerable_versions": ">=7.0.0 <11.0.1",
+        "patched_versions": ">=11.0.1",
+        "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+        "findings": [
+          {
+            "version": "10.2.5",
+            "paths": [
+              ".>eslint-config-next>eslint-import-resolver-typescript>eslint-plugin-import>eslint-module-utils>@typescript-eslint/parser>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>eslint-import-resolver-typescript>eslint-plugin-import>@typescript-eslint/parser>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>eslint-plugin-import>eslint-module-utils>@typescript-eslint/parser>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>eslint-plugin-import>@typescript-eslint/parser>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/parser>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/type-utils>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/type-utils>@typescript-eslint/utils>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/utils>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>typescript-eslint>@typescript-eslint/parser>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>typescript-eslint>@typescript-eslint/typescript-estree>minimatch",
+              ".>eslint-config-next>typescript-eslint>@typescript-eslint/utils>@typescript-eslint/typescript-estree>minimatch"
+            ],
+            "dev": true,
+            "optional": false,
+            "bundled": false
+          }
+        ]
+      }
+    ]
+  },
+  "residualReasons": {
+    "satori": "Vinext beta.5 depends on @vercel/og^0.8.6 with Satori0.16.0. Current patched Vinext1.4.4 requires a coordinated React/RSC19.3.1 and plugin-rsc^0.5.37 upgrade, beyond this bounded compatible patch. No application ImageResponse input path was added.",
+    "minimatch": "Even current typescript-eslint8.72.2 declares minimatch^10.2.2; advisory requires11.0.1. Forcing the new major would violate the upstream dependency range.",
+    "esbuild-0.18": "Drizzle-kit0.31.10 and current0.31.11 retain @esbuild-kit/esm-loader→esbuild0.18.20; fixing requires a toolchain change. Drizzle platform support was retained.",
+    "esbuild-0.27": "Wrangler4.92.0 pins esbuild0.27.3. Moving to0.28.1 crosses an esbuild0.x minor boundary; current Cloudflare latest also introduces Miniflare5 beta. The known-compatible platform stack was retained."
+  },
+  "initialCheckedAt": "2026-11-09T17:14:40.882999+00:00",
+  "initialSourceBaseCommit": "85cadb4b2e864af2b7c9b973bc5800dd401f81e9",
+  "initialProductionPatchChecks": [
+    {
+      "command": "CI=true pnpm install --frozen-lockfile",
+      "result": "passed",
+      "lockfileChangedByFrozenInstall": false
+    },
+    {
+      "command": "pnpm audit --prod --json",
+      "result": "passed",
+      "advisories": 0
+    },
+    {
+      "command": "pnpm exec tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "command": "pnpm test",
+      "result": "passed",
+      "tests": 367,
+      "failed": 0
+    },
+    {
+      "command": "pnpm build",
+      "result": "passed",
+      "engine": "vinext"
+    },
+    {
+      "command": "pnpm build:next",
+      "result": "passed",
+      "engine": "Next.js 16.4.1"
+    },
+    {
+      "command": "pnpm exec eslint components/ui/button.tsx scripts/connector-preview/protocol.mjs tests/connector-protocol.test.mjs --max-warnings 0",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "checks": [
+    {
+      "command": "CI=true pnpm install --frozen-lockfile",
+      "result": "passed",
+      "stage": "final package set",
+      "lockfileChangedByFrozenInstall": false
+    },
+    {
+      "command": "pnpm audit --prod --json",
+      "result": "passed",
+      "stage": "final package set",
+      "advisories": 0
+    },
+    {
+      "command": "pnpm audit --json",
+      "result": "four residual advisories",
+      "stage": "final package set",
+      "high": 0,
+      "critical": 0,
+      "moderate": 3,
+      "low": 1
+    },
+    {
+      "command": "pnpm build",
+      "result": "passed",
+      "stage": "final package set, parallel source cleanup still in progress",
+      "engine": "vinext"
+    },
+    {
+      "command": "pnpm test (connector-protocol cases)",
+      "result": "passed",
+      "stage": "final package set",
+      "tests": 8,
+      "failed": 0
+    },
+    {
+      "command": "pnpm exec tsc --noEmit",
+      "result": "failed at concurrent Atlas GeometryCollection narrowing",
+      "details": "Owner reported that the narrow type was replaced by shared routeGeometryPositions after this run. Final source freeze rerun is delegated to root."
+    },
+    {
+      "command": "pnpm test",
+      "result": "370 passed; 1 source-test mismatch during concurrent edits",
+      "tests": 371,
+      "failed": 1,
+      "failure": "tests/ui-smoothness.test.mjs:81 expects an old message string in tools/pages-preview/browser-smoke.mjs",
+      "followup": "Root owns final full-suite rerun after all source edits."
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "finalSourceFreezeChecksOwnedByRoot": true,
+  "mixedFrameworkGeneratedCache": {
+    "observed": "Next build writes .next/types/validator.ts importing Next-specific route exports; a later Vinext build replaces routes.d.ts with its own declarations. Mixing these generated files caused four TypeScript errors without a source error.",
+    "localCleanup": "Removed only the stale, git-ignored Next-generated validator.ts after verifying both generated headers; kept the current Vinext routes types.",
+    "finalGateAdvice": "Use a clean .next/types directory or isolated output directories when switching build engines. Final checks are owned by the root release workflow."
+  }
+}

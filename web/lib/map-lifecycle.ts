@@ -1,5 +1,29 @@
 export type MapBaseMode = 'detail' | 'overview' | 'satellite';
 
+/** Leaflet ignores camera changes during CSS zoom animation. Hold only the
+ * newest intent and apply it after zoomend, using current layout measurements.
+ * Manual navigation and unmount discard pending work rather than replay it. */
+export class LatestMapNavigation {
+  private pending: (() => void) | undefined;
+  private disposed = false;
+  private readonly blocked: () => boolean;
+
+  constructor(blocked: () => boolean) {this.blocked = blocked;}
+  request(run: () => void): void {
+    if (this.disposed) return;
+    this.pending = run;
+    this.flush();
+  }
+  flush(): void {
+    if (this.disposed || this.blocked() || !this.pending) return;
+    const run = this.pending;
+    this.pending = undefined;
+    run();
+  }
+  cancel(): void {this.pending = undefined;}
+  dispose(): void {this.disposed = true; this.cancel();}
+}
+
 type MapStyleOptions<Style> = {
   online: boolean;
   preference: MapBaseMode;

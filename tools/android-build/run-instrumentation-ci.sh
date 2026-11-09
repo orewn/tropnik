@@ -63,6 +63,10 @@ fi
 "$tropnik_adb" -s "$tropnik_serial" install --no-incremental -r -t "$tropnik_artifacts/tropnik-preview.apk"
 "$tropnik_adb" -s "$tropnik_serial" install --no-incremental -r -t "$tropnik_artifacts/tropnik-instrumentation-tests.apk"
 python3 "$tropnik_root/tools/android-build/preview_artifacts.py" installed --directory "$tropnik_artifacts" --root "$tropnik_root" --sdk "$tropnik_sdk" --serial "$tropnik_serial" --output "$tropnik_output/installed-apks.json"
+# A boot-time Pixel Launcher ANR blocked real MotionEvent delivery in API 35.
+# Recover only that exact active system window before starting the app tests.
+python3 "$tropnik_root/tools/android-build/device-preflight.py" \
+  --adb "$tropnik_adb" --serial "$tropnik_serial" --output "$tropnik_output"
 set +e
 timeout --signal=TERM --kill-after=30s 12m "$tropnik_adb" -s "$tropnik_serial" shell am instrument -w -r \
   -e class ru.tropa.app.LocalExperienceTest \

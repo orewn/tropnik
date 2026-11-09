@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {buildTrailConnectionIndex} from '../scripts/build-trail-connections.mjs';
 import {coordinateKey, planTrailSequence, resolvePlanGeometry} from '../lib/trail-connections.ts';
-import {createHikeDraft, validateHikeDraft, serializeHikeDraft, safeHikeFilename, exportHikeGpx, getHikeGpxExportState} from '../lib/hike-draft.ts';
+import {createHikeDraft, validateHikeDraft, serializeHikeDraft, safeHikeFilename, exportHikeGpx, getHikeGpxExportState, hikeDraftPathKey} from '../lib/hike-draft.ts';
 
 const now = '2026-11-09T12:00:00.000Z';
 const line = coordinates => ({type: 'LineString', coordinates});
@@ -16,6 +16,20 @@ const index = buildTrailConnectionIndex(Object.entries(geometries).map(([id, geo
 const pointId = (id, point) => `${id}@${index.routes[id].nodes.findIndex(node => coordinateKey([node[0], node[1]]) === coordinateKey(point))}`;
 const connection = (first, second) => index.connections.find(item => [item.trailA, item.trailB].includes(first) && [item.trailA, item.trailB].includes(second));
 const create = (seed = 'a') => createHikeDraft(index, seed, {id: 'draft-test', now});
+
+test('path identity stays stable for metadata and day edits but invalidates for every geometric choice', () => {
+  const draft = {...create(), start: pointId('a', [40, 45]), finish: pointId('a', [40.002, 45])};
+  const key = hikeDraftPathKey(draft);
+  assert.equal(hikeDraftPathKey({...draft, name: 'Другое имя', notes: 'Заметка', updatedAt: '2026-11-10T12:00:00.000Z', stages: draft.stages.map(stage => ({...stage, day: 2, via: []}))}), key);
+  for (const changed of [
+    {...draft, start: draft.finish}, {...draft, finish: draft.start},
+    {...draft, stages: [{...draft.stages[0], via: [draft.finish]}]},
+    {...draft, stages: [...draft.stages, {trailId: 'b', day: 1, entryConnectionId: connection('a', 'b').id}]},
+  ]) assert.notEqual(hikeDraftPathKey(changed), key);
+  const two = {...draft, stages: [...draft.stages, {trailId: 'b', day: 1, entryConnectionId: connection('a', 'b').id}]};
+  assert.notEqual(hikeDraftPathKey({...two, stages: [two.stages[0], {...two.stages[1], entryConnectionId: 'other'}]}), hikeDraftPathKey(two));
+  assert.deepEqual(JSON.parse(key).via, {0: []});
+});
 const planFor = draft => planTrailSequence(index, {trailIds: draft.stages.map(stage => stage.trailId),
   connectionIds: draft.stages.slice(1).map(stage => stage.entryConnectionId), start: draft.start, finish: draft.finish,
   via: Object.fromEntries(draft.stages.map((stage, i) => [i, stage.via || []]))});

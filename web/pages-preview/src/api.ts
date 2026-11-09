@@ -12,6 +12,7 @@ export class ApiError extends Error {
 }
 export function isAbort(error: unknown) {return error instanceof Error && error.name === 'AbortError';}
 export const errorText = (error: unknown) => error instanceof Error ? error.message : PREVIEW_API_MESSAGE;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Preserve the shared API signature; static Pages has no account session.
 export function announceAuth(_user: User | null) { /* There is no account session in this deployment. */ }
 export async function apiEnvelope<T>(_path: string, init?: RequestInit): Promise<Envelope<T>> {
   if (init?.signal?.aborted) throw new DOMException('Aborted', 'AbortError');

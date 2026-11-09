@@ -33,7 +33,9 @@ export function GuidePanel() {
     } finally { if (request === sequence.current) setLoading(false); }
   }, []);
   useEffect(() => {
-    const controller = new AbortController();
+    const activeSequence = sequence, controller = new AbortController();
+    // Synchronize the external account before accepting guide actions.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void sync(controller.signal);
     const changed = (event: Event) => {
       const detail = (event as CustomEvent<AuthChange>).detail;
@@ -47,7 +49,7 @@ export function GuidePanel() {
     const storage = (event: StorageEvent) => { if (event.key === 'tropa-auth-change') void sync(); };
     window.addEventListener(AUTH_EVENT, changed);
     window.addEventListener('storage', storage);
-    return () => { ++sequence.current; controller.abort(); window.removeEventListener(AUTH_EVENT, changed); window.removeEventListener('storage', storage); };
+    return () => { ++activeSequence.current; controller.abort(); window.removeEventListener(AUTH_EVENT, changed); window.removeEventListener('storage', storage); };
   }, [sync]);
   const close = useCallback(() => setAuth(false), []);
 

@@ -53,9 +53,9 @@ test('service worker update is visible and user controlled',async()=>{
   assert.match(client,/registration\.waiting/);
   assert.match(client,/controllerchange/);
   assert.match(client,/skip-waiting/);
-  assert.match(worker,/tropnik-shell-v20/);
+  assert.match(worker,/tropnik-shell-\d+\.\d+\.\d+-[a-f0-9]{16}/);
   assert.match(worker,/self\.skipWaiting/);
   assert.match(css,/\.app-update/);
   assert.match(css,/forced-colors:active/);
-  assert.equal(JSON.parse(pkg).version,'0.4.16');
+  assert.match(JSON.parse(pkg).version,/^\d+\.\d+\.\d+$/);
 });

@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {UsersThree, Compass, ArrowRight, ArrowLeft, Plus, CalendarBlank, ShieldCheck, ArrowClockwise, ChatCircleDots, Star, Info, CheckCircle, UserCircle, Flag} from '@/components/TropnikIcons';
@@ -172,8 +173,11 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
   }, [routeCursor, loading]);
 
   useEffect(() => {
+    const listEpoch = listSequence, detailEpoch = detailSequence, sessionEpoch = authEpoch;
     try {
       const local: unknown = JSON.parse(localStorage.getItem('tropa-requests') || '[]');
+      // Hydrate local drafts after SSR; subsequent edits remain explicit user actions.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (Array.isArray(local)) setDrafts(local.filter((item): item is Draft => !!item && ['id', 'routeId', 'title', 'preferredDate', 'note', 'createdAt'].every(key => typeof item[key] === 'string')));
     } catch { setError('Не удалось прочитать черновики этого устройства.'); }
     const query = new URLSearchParams(window.location.search);
@@ -201,12 +205,13 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
     const clock = setInterval(() => setNow(Date.now()), 30000);
     setNow(Date.now());
     return () => {
-      ++listSequence.current; ++detailSequence.current; ++authEpoch.current;
+      ++listEpoch.current; ++detailEpoch.current; ++sessionEpoch.current;
       listController.current?.abort(); routePageController.current?.abort(); detailController.current?.abort();
       window.removeEventListener(AUTH_EVENT, changed); window.removeEventListener('storage', storage); clearInterval(clock);
     };
   }, [load]);
 
+  const userId = user?.id;
   const refreshDetail = useCallback(async () => {
     if (!selected || service !== 'configured') return;
     const request = ++detailSequence.current;
@@ -222,12 +227,12 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
         setReviewTarget(previous => departure.reviewTargets && !departure.reviewTargets.includes(previous) ? departure.reviewTargets[0] || previous : previous);
         const [written, roster] = await Promise.all([
           api<Review[]>('departures/' + encodeURIComponent(selected.id) + '/reviews', {signal: controller.signal}),
-          departure.guideId === user?.id ? api<Participant[]>('departures/' + encodeURIComponent(selected.id) + '/participants', {signal: controller.signal}) : Promise.resolve([]),
+          departure.guideId === userId ? api<Participant[]>('departures/' + encodeURIComponent(selected.id) + '/participants', {signal: controller.signal}) : Promise.resolve([]),
         ]);
         if (request !== detailSequence.current) return;
         setReviews(written); setParticipants(roster);
       } else {
-        if (!user) { setRequestAccess(false); return; }
+        if (!userId) { setRequestAccess(false); return; }
         const items = await api<RecruitmentRequest[]>('recruitment-requests', {signal: controller.signal});
         if (request !== detailSequence.current) return;
         setRequests(items);
@@ -247,9 +252,11 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
         if (error instanceof ApiError && [401, 403, 404].includes(error.status)) setCurrent(null);
       }
     } finally { if (request === detailSequence.current) setDetailLoading(false); }
-  }, [selected, service, user?.id]);
+  }, [selected, service, userId]);
 
-  useEffect(() => { setCurrent(null); setParticipants([]); setReviews([]); setRequestAccess(false); void refreshDetail(); return () => { ++detailSequence.current; detailController.current?.abort(); }; }, [refreshDetail]);
+  // Clear the previous server entity before loading the newly selected item.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { const activeSequence = detailSequence; setCurrent(null); setParticipants([]); setReviews([]); setRequestAccess(false); void refreshDetail(); return () => { ++activeSequence.current; detailController.current?.abort(); }; }, [refreshDetail]);
   useEffect(() => {
     const id = current?.routeId || currentRequest?.routeId;
     if (!id || routes.some(route => route.id === id)) return;
@@ -392,7 +399,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
     </>}
     {auth && <AuthDialog onClose={closeAuth} onUser={setUser}/>}
     {create && <Modal title="Предложите свой поход" onClose={closeCreate}>
-      {service !== 'configured' || !routes.some(route => route.status === 'published') ? <div className="small-empty"><Compass size={37}/><h3>Начните с маршрута на карте</h3><p>В карточке маршрута можно сохранить личный план и вернуться к нему позже.</p><a className="button primary" href="/">Выбрать маршрут <ArrowRight size={16}/></a></div> : <form className="stack" onSubmit={createRequest}>
+      {service !== 'configured' || !routes.some(route => route.status === 'published') ? <div className="small-empty"><Compass size={37}/><h3>Начните с маршрута на карте</h3><p>В карточке маршрута можно сохранить личный план и вернуться к нему позже.</p><Link prefetch={false} className="button primary" href="/">Выбрать маршрут <ArrowRight size={16}/></Link></div> : <form className="stack" onSubmit={createRequest}>
         <label>Маршрут<select required disabled={!!busy} value={routeId} onChange={event => setRouteId(event.target.value)}><option value="">Выберите опубликованный маршрут</option>{routes.filter(route => route.status === 'published').map(route => <option key={route.id} value={route.id}>{route.title}</option>)}</select></label>
         {routeCursor && <button type="button" className="button secondary" disabled={routeLoading || loading || !!busy} onClick={() => void loadMoreRoutes()}>{routeLoading ? 'Загружаем маршруты…' : 'Загрузить ещё маршруты'}</button>}
         <label>Желаемая дата<input type="date" disabled={!!busy} value={date} min={new Date().toLocaleDateString('en-CA')} onChange={event => setDate(event.target.value)}/></label>
@@ -425,7 +432,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
 }
 
 function Empty({title, description, onLogin}: {title: string; description: string; onLogin?: () => void}) {
-  return <div className="empty-state"><UsersThree size={46}/><h2>{title}</h2><p>{description}</p><div className="empty-actions">{onLogin && <button className="button primary" onClick={onLogin}><UserCircle size={18}/>Войти</button>}<a className={onLogin ? 'button secondary' : 'button primary'} href="/">Исследовать карту <ArrowRight size={17}/></a></div></div>;
+  return <div className="empty-state"><UsersThree size={46}/><h2>{title}</h2><p>{description}</p><div className="empty-actions">{onLogin && <button className="button primary" onClick={onLogin}><UserCircle size={18}/>Войти</button>}<Link prefetch={false} className={onLogin ? 'button secondary' : 'button primary'} href="/">Исследовать карту <ArrowRight size={17}/></Link></div></div>;
 }
 
 function TripRouteHeading({title, categories}: {title: string; categories: readonly EventCategoryId[]}) {

@@ -248,17 +248,20 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
 export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
   const root=viewport.closest('.explore-layout')??viewport.parentElement??viewport;
   const selector=MAP_LABEL_OBSTACLE_SELECTORS.join(',');
-  let frame=0;
+  let frame=0,disposed=false;
   const queue=()=>{
-    if(frame)return;
-    frame=requestAnimationFrame(()=>{frame=0;schedule();});
+    if(disposed||frame)return;
+    frame=requestAnimationFrame(()=>{frame=0;if(!disposed)schedule();});
   };
   const resize=new ResizeObserver(queue),observed=new Set<Element>();
   const observe=()=>{
-    for(const element of [viewport,...root.querySelectorAll(selector)])if(!observed.has(element)){observed.add(element);resize.observe(element);}
+    const current=new Set<Element>([viewport,...root.querySelectorAll(selector)]);
+    for(const element of observed)if(!current.has(element)){resize.unobserve(element);observed.delete(element);}
+    for(const element of current)if(!observed.has(element)){observed.add(element);resize.observe(element);}
   };
   observe();
   const mutation=new MutationObserver(records=>{
+    if(disposed)return;
     const relevant=records.some(record=>{
       const target=record.target;return !(target instanceof Element)||!target.closest('.atlas-canvas');
     });
@@ -281,8 +284,9 @@ export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
   visual?.addEventListener('scroll',queue,{passive:true});
   queue();
   return()=>{
+    disposed=true;
     if(frame)cancelAnimationFrame(frame);
-    resize.disconnect();mutation.disconnect();
+    resize.disconnect();mutation.disconnect();observed.clear();
     root.removeEventListener('focusin',relevantEvent,true);
     root.removeEventListener('transitionend',relevantEvent,true);
     fonts.removeEventListener('loadingdone',queue);

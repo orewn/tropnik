@@ -223,7 +223,7 @@ export function buildTrailConnectionIndex(inputs, {nearbyMeters = 300, catalogue
 export async function readCatalogueInputs() {
   const require = createRequire(resolve(web, 'package.json')), ts = require('typescript');
   const source = await readFile(resolve(web, 'lib/content.ts'), 'utf8');
-  const module = {exports: {}}, imports = new Map();
+  const catalogueModule = {exports: {}}, imports = new Map();
   const tree = ts.createSourceFile('content.ts', source, ts.ScriptTarget.Latest, true);
   for (const node of tree.statements) if (ts.isImportDeclaration(node) && !node.importClause?.isTypeOnly) {
     const id = node.moduleSpecifier.text;
@@ -233,8 +233,8 @@ export async function readCatalogueInputs() {
     imports.set(id, JSON.parse(await readFile(path, 'utf8')));
   }
   const code = ts.transpileModule(source, {compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, esModuleInterop: true}}).outputText;
-  new Function('require', 'module', 'exports', code)(id => {if (!imports.has(id)) throw new Error('Unexpected catalogue import.'); return imports.get(id);}, module, module.exports);
-  const trails = module.exports.trails;
+  new Function('require', 'module', 'exports', code)(id => {if (!imports.has(id)) throw new Error('Unexpected catalogue import.'); return imports.get(id);}, catalogueModule, catalogueModule.exports);
+  const trails = catalogueModule.exports.trails;
   const inputs = await Promise.all(trails.filter(trail => trail.geometryUrl).map(async trail => {
     const path = resolve(web, 'public', trail.geometryUrl.slice(1));
     if (!path.startsWith(resolve(web, 'public/data') + sep)) throw new Error('Route geometry escaped the public data directory.');

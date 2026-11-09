@@ -12,8 +12,6 @@ new Script(renderer+'\n'+bootstrap, {filename:'terrain-standalone.js'});
 const json=value=>JSON.stringify(value).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
 const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const css=read('scripts/landscape-shell.css');
-const spacing=grid.sampleSpacingApproxM;
-const gridDescription=`Сетка ${grid.width}×${grid.height} точек, шаг около ${Math.round(spacing.eastWest)}×${Math.round(spacing.northSouth)} м. Номинальный шаг источника 30 м; это не заявленная точность измерений.`;
 const fonts=[400,600].flatMap(weight=>['latin','cyrillic'].map(subset=>{
  const data=fs.readFileSync(path.join(root,`node_modules/@fontsource/manrope/files/manrope-${subset}-${weight}-normal.woff2`)).toString('base64');
  return `@font-face{font-family:Manrope;font-style:normal;font-weight:${weight};font-display:swap;src:url(data:font/woff2;base64,${data}) format('woff2');unicode-range:${subset==='cyrillic'?'U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116':'U+0000-00FF,U+2000-206F,U+20AC,U+2122,U+2191,U+2193'}}`;

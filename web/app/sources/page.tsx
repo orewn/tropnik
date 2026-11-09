@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type {Metadata} from 'next';
 import {ContentPage} from '@/components/ContentPage';
 
@@ -66,6 +67,6 @@ export default function Sources() {
         <li>Protomaps — © Protomaps LLC, <a href="/maps/PROTOMAPS-LEAFLET-LICENSE.txt">лицензия и уведомление об авторстве</a>.</li>
       </ul>
     </details>
-    <div className="section-actions"><a className="button primary" href="/">Вернуться к карте</a><a className="button secondary" href="/offline">Проверить сохранённые материалы</a></div>
+    <div className="section-actions"><Link prefetch={false} className="button primary" href="/">Вернуться к карте</Link><a className="button secondary" href="/offline">Проверить сохранённые материалы</a></div>
   </ContentPage>;
 }

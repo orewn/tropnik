@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {validateApkManifest} from './apk-artifact.mjs';
+import {assertBrowserReport} from './browser-report.mjs';
 
 const [address, expectedBuild, expectedCommit] = process.argv.slice(2);
 assert.match(expectedBuild || '', /^[a-f0-9]{16}$/, 'Pass the build ID produced by the build job');
@@ -61,16 +62,7 @@ assert.equal(verification.pages, build.pages);
 const pages = JSON.parse((await request('page-manifest.json')).text);
 assert.equal(pages.length, build.pages);
 const browser = JSON.parse((await request('browser-verification.json')).text);
-assert.equal(browser.verified, true);
-assert.equal(browser.sourceCommit, expectedCommit);
-assert.ok(Array.isArray(browser.profiles) && browser.profiles.length >= 4);
-for (const profile of browser.profiles) {
-  assert.equal(profile.interactionTested, true, `${profile.name}: story touch was not tested`);
-  assert.equal(profile.sheetTested, true, `${profile.name}: mobile sheet was not tested`);
-  assert.ok(profile.sheetHeightDelta < 1.1, `${profile.name}: mobile sheet changed layout height`);
-  assert.ok(profile.layoutShift < .12, `${profile.name}: excessive layout shift`);
-  assert.ok(profile.longestTaskMs < 350, `${profile.name}: excessive long task`);
-}
+assertBrowserReport(browser,expectedCommit);
 
 const home = (await request('')).text;
 assert.match(home, /Тропник/);

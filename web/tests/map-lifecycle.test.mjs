@@ -3,7 +3,46 @@ import assert from 'node:assert/strict';
 import {setImmediate as nextTurn} from 'node:timers/promises';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
-import {MapStyleSession, loadMapSelection, applyMapLayerVisibility} from '../lib/map-lifecycle.ts';
+import {MapStyleSession, LatestMapNavigation, loadMapSelection, applyMapLayerVisibility} from '../lib/map-lifecycle.ts';
+
+test('camera choices made during CSS zoom keep the newest intent and current insets', () => {
+  let zooming = true, inset = 160;
+  const visits = [], navigation = new LatestMapNavigation(() => zooming);
+  navigation.request(() => visits.push(['region A', inset]));
+  navigation.request(() => visits.push(['route B', inset]));
+  navigation.flush();
+  assert.deepEqual(visits, [], 'Leaflet must not receive ignored camera commands during zoom');
+  inset = 240; zooming = false;
+  navigation.flush(); navigation.flush();
+  assert.deepEqual(visits, [['route B', 240]], 'one latest selection uses the settled drawer layout');
+  navigation.request(() => visits.push(['overview', inset]));
+  assert.deepEqual(visits.at(-1), ['overview', 240], 'idle camera choices apply immediately');
+});
+
+test('manual input and map disposal prevent delayed camera movement', () => {
+  for (const action of ['cancel', 'dispose']) {
+    let zooming = true;
+    const visits = [], navigation = new LatestMapNavigation(() => zooming);
+    navigation.request(() => visits.push('old region'));
+    navigation[action](); zooming = false; navigation.flush();
+    assert.deepEqual(visits, []);
+    navigation.request(() => visits.push('new region'));
+    assert.deepEqual(visits, action === 'dispose' ? [] : ['new region']);
+  }
+});
+
+test('a flushed camera callback cannot replay or overwrite a newer reentrant request', () => {
+  let zooming = true;
+  const visits = [], navigation = new LatestMapNavigation(() => zooming);
+  navigation.request(() => {
+    visits.push('region'); zooming = true;
+    navigation.request(() => visits.push('route'));
+  });
+  zooming = false; navigation.flush();
+  assert.deepEqual(visits, ['region']);
+  zooming = false; navigation.flush(); navigation.flush();
+  assert.deepEqual(visits, ['region', 'route']);
+});
 
 function deferred() {
   let resolve, reject;

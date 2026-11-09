@@ -50,7 +50,10 @@ export function ChatPanel({kind, id, user}: {kind: 'departures' | 'recruitment-r
   }, [endpoint]);
 
   useEffect(() => {
+    const activeGeneration = generation;
     generation.current++;
+    // Clear the previous private conversation before polling the new scope.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMessages([]);
     setText('');
     setReadError('');
@@ -74,7 +77,7 @@ export function ChatPanel({kind, id, user}: {kind: 'departures' | 'recruitment-r
     document.addEventListener('visibilitychange', state);
     setOnline(navigator.onLine);
     return () => {
-      generation.current++;
+      activeGeneration.current++;
       readController.current?.abort();
       clearInterval(timer);
       window.removeEventListener('online', state);

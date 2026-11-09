@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import {useDeferredValue, useEffect, useMemo, useRef, useState} from 'react';
 import {ArrowLeft, ArrowRight, Clock, MagnifyingGlass, MapPin, NotePencil, Path, Stack, X} from '@/components/TropnikIcons';
@@ -96,7 +97,7 @@ export function SiteSearch({initialState}: {initialState: SearchViewState}) {
     </div>}
     {response.correctedQuery && <p className={`${styles.correction} body-6`}>Показаны совпадения для <button type="button" onClick={() => changeQuery(response.correctedQuery!)}>«{response.correctedQuery}»</button></p>}
     <section id="site-search-results" aria-label="Результаты поиска" aria-busy={pending}>
-      {page.items.length ? <ul className={styles.results}>{page.items.map(hit => <Result key={`${hit.kind}:${hit.id}`} hit={hit}/>)}</ul> : <div className={styles.empty}><h3 className="heading-5">Пока ничего не нашлось</h3><p className="body-3">Попробуйте другое название, более короткий запрос или выберите все материалы. Можно также посмотреть направления на карте.</p><div className="button-row"><button className="button secondary" type="button" onClick={() => {setKind('all'); setIncludeUnspecified(true); changeQuery('');}}>Показать всё</button><a className="text-link" href="/">Открыть карту <ArrowRight size={18}/></a></div></div>}
+      {page.items.length ? <ul className={styles.results}>{page.items.map(hit => <Result key={`${hit.kind}:${hit.id}`} hit={hit}/>)}</ul> : <div className={styles.empty}><h3 className="heading-5">Пока ничего не нашлось</h3><p className="body-3">Попробуйте другое название, более короткий запрос или выберите все материалы. Можно также посмотреть направления на карте.</p><div className="button-row"><button className="button secondary" type="button" onClick={() => {setKind('all'); setIncludeUnspecified(true); changeQuery('');}}>Показать всё</button><Link prefetch={false} className="text-link" href="/">Открыть карту <ArrowRight size={18}/></Link></div></div>}
       {response.total > 0 && <div className={styles.pagination}><p className="caption-4">{number(page.start + 1)}–{number(page.end)} из {number(response.total)}</p>{page.pages > 1 && <nav className={`${styles.pages} body-5`} aria-label="Страницы результатов">
         {page.page > 1 && <a href={pageHref(page.page - 1)} aria-label="Предыдущая страница" onClick={event => navigatePage(event, page.page - 1)}><ArrowLeft size={19}/></a>}
         {searchPageNumbers(page.page, page.pages).map((value, index) => value === 'gap' ? <span className={styles.gap} aria-hidden="true" key={`gap:${index}`}>…</span> : <a key={value} className={value !== 1 && value !== page.pages && value !== page.page ? styles.neighbor : undefined} href={pageHref(value)} aria-current={value === page.page ? 'page' : undefined} aria-label={`Страница ${value}`} onClick={event => navigatePage(event, value)}>{value}</a>)}

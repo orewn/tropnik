@@ -37,7 +37,7 @@ test('the rendered real Footer keeps its map and section links inside each Pages
     const links = [...html.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
     assert.equal(links.find(link => link[2] === 'Карта маршрутов')?.[1], base);
     assert.ok(links.length > 1);
-    for (const link of links) assert.ok(link[1].startsWith(base), `Footer link escapes ${base}: ${link[1]}`);
+    for (const link of links) assert.ok(link[1] === base.slice(0,-1) || link[1].startsWith(base), `Footer link escapes ${base}: ${link[1]}`);
   }
 });
 

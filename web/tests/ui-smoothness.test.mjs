@@ -26,8 +26,9 @@ test('camera movement does not run full DOM collision layout on every frame',()=
   assert.doesNotMatch(canvas,/map\.on\('zoom',scheduleDirectionLayout\)/);
   assert.match(atlas,/map\.on\('movestart'/);
   assert.match(canvas,/map\.on\('movestart'/);
-  assert.match(labels,/let frame=0/);
-  assert.match(labels,/requestAnimationFrame\(\(\)=>\{frame=0;schedule\(\);\}\)/);
+  assert.match(labels,/requestAnimationFrame/);
+  assert.match(labels,/if\(!disposed\)schedule\(\)/);
+  assert.match(labels,/cancelAnimationFrame/);
   assert.doesNotMatch(labels,/root\.addEventListener\('pointerover'/);
 });
 
@@ -85,8 +86,9 @@ test('mobile touch profiles avoid the heavy WebGL startup path',()=>{
   assert.match(preload,/window\.innerWidth<=900/);
   assert.match(preload,/supportsMapWebGL\(\)&&!preferCanvasMap\(\)/);
   assert.match(atlas,/preferCanvasMap\(\)\|\|!supportsMapWebGL\(\)/);
-  assert.match(browser,/mobile profile loaded the heavy/);
-  assert.match(browser,/geometry\.engine,'leaflet'/);
+  assert.match(browser,/assert\.equal\(geometry\.engine,profile\.engine/);
+  assert.equal((browser.match(/mobile:true,engine:'leaflet'/g)||[]).length,4);
+  assert.match(browser,/mobile:false,engine:'maplibre'/);
 });
 
 

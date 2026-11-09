@@ -2,6 +2,7 @@
 import {useEffect,useId,useRef,useState} from 'react';
 import {MapIcon} from './MapIcon';
 import {SATELLITE_MAX_ZOOM} from '@/lib/map-satellite';
+import {bindMapAttributionCollapse} from '@/lib/map-attribution';
 
 const SESSION_KEY='tropnik-map-attribution-seen';
 
@@ -15,20 +16,15 @@ export function MapAttribution({ready=true,terrain=false,satellite=false,zoom=0}
   const ref=useRef<HTMLDivElement>(null),id=useId();
   useEffect(()=>{
     if(!ready||pinned)return;
+    // Hydrate the browser-only credit preference after SSR/initial paint.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     try{if(sessionStorage.getItem(SESSION_KEY)==='1'){setExpanded(false);return;}}catch{}
     const collapse=()=>{
       setExpanded(false);
       try{sessionStorage.setItem(SESSION_KEY,'1');}catch{}
     };
     const host=ref.current?.closest('.atlas-wrap');
-    host?.addEventListener('pointerdown',collapse,{once:true});
-    host?.addEventListener('wheel',collapse,{once:true,passive:true});
-    const timer=setTimeout(collapse,5000);
-    return()=>{
-      clearTimeout(timer);
-      host?.removeEventListener('pointerdown',collapse);
-      host?.removeEventListener('wheel',collapse);
-    };
+    return bindMapAttributionCollapse(host??null,ref.current,collapse);
   },[ready,pinned]);
   return <div ref={ref} className={`map-attribution ${terrain?'terrain-data-credit':''}`} hidden={!ready}>
     {satellite&&<div className="map-satellite-credit"><a href="https://cloudless.eox.at" target="_blank" rel="noreferrer">EOxCloudless</a><span> · </span><a href="https://eox.at" target="_blank" rel="noreferrer">EOX</a>{zoom>SATELLITE_MAX_ZOOM&&<span className="map-satellite-detail">Достигнута детализация снимка</span>}</div>}

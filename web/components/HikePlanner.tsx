@@ -4,12 +4,12 @@ import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, useSy
 import {Header} from './Header';
 import {Footer} from './Footer';
 import {ArrowRight, BookmarkSimple, DownloadSimple, Flag, MapPin, Path, Plus, Trash, X} from './TropnikIcons';
-import type {PlannerMapPoint} from './Atlas';
+import type {PlannerMapPoint} from '@/lib/map-types';
 import {regions, trails, trailById, regionById, type Trail} from '@/lib/content';
 import {loadPublicJSON} from '@/lib/map-preload';
 import connectionData from '@/lib/trail-connections.generated.json';
-import {getTrailConnections, getTrailEndpoints, normalizeTrailGeometry, planTrailSequence, resolvePlanGeometry, type TrailConnection, type TrailConnectionIndex, type TrailEndpoint} from '@/lib/trail-connections';
-import {createHikeDraft, validateHikeDraft, serializeHikeDraft, exportHikeGpx, getHikeGpxExportState, safeHikeFilename, type HikeDraft} from '@/lib/hike-draft';
+import {getTrailConnections, getTrailEndpoints, normalizeTrailGeometry, planTrailSequence, preparePlanGeometry, resolvePreparedPlanGeometry, type CompositePlanOptions, type TrailConnection, type TrailConnectionIndex, type TrailEndpoint} from '@/lib/trail-connections';
+import {createHikeDraft, validateHikeDraft, serializeHikeDraft, exportHikeGpx, getHikeGpxExportState, hikeDraftPathKey, safeHikeFilename, type HikeDraft} from '@/lib/hike-draft';
 import styles from './HikePlanner.module.css';
 
 const PlannerAtlas = lazy(() => import('./Atlas2D').then(module => ({default: module.Atlas2D})));
@@ -84,14 +84,11 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
     return () => {cancelled = true;};
   }, [geometryKey, loadKey, retry]);
 
-  const pathKey = JSON.stringify({
-    trailIds: draft.stages.map(stage => stage.trailId),
-    connectionIds: draft.stages.slice(1).map(stage => stage.entryConnectionId || ''),
-    start: draft.start, finish: draft.finish,
-    via: Object.fromEntries(draft.stages.map((stage, i) => [i, stage.via ?? []])),
-  });
-  const plan = useMemo(() => planTrailSequence(index, JSON.parse(pathKey)), [pathKey]);
-  const resolved = useMemo(() => resolvePlanGeometry(index, plan, loadedGeometry), [plan, loadedGeometry]);
+  const pathKey = hikeDraftPathKey(draft);
+  const pathOptions = useMemo<CompositePlanOptions>(() => JSON.parse(pathKey), [pathKey]);
+  const plan = useMemo(() => planTrailSequence(index, pathOptions), [pathOptions]);
+  const preparedGeometry = useMemo(() => preparePlanGeometry(index, loadedGeometry), [loadedGeometry]);
+  const resolved = useMemo(() => resolvePreparedPlanGeometry(index, plan, preparedGeometry), [plan, preparedGeometry]);
   const gpxExport = useMemo(() => getHikeGpxExportState(draft, plan, resolved), [draft, plan, resolved]);
   const first = draft.stages[0], last = draft.stages[draft.stages.length - 1];
   const firstId = first?.trailId, lastId = last?.trailId;
@@ -124,12 +121,16 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
     update({stages: draft.stages.slice(0, position), finish: undefined, ...(position === 0 ? {start: undefined} : {})}); setPicker(null);
   }
   const choosePoint = useCallback((id: string, target: Picker) => {
-    if (target.role === 'via') {
-      const stage = draft.stages[target.stage]; if (!stage || (stage.via?.length ?? 0) >= 10) return;
-      update({stages: draft.stages.map((item, i) => i === target.stage ? {...item, via: [...(item.via || []), id]} : item)});
-    } else update({[target.role]: id});
-    setPicker(null);
-  }, [draft.stages, update]);
+    setDraft(current => {
+      const stage = current.stages[target.stage];
+      if (!stage || !id.startsWith(`${stage.trailId}@`) || target.role === 'via' && (stage.via?.length ?? 0) >= 10) return current;
+      const change = target.role === 'via'
+        ? {stages: current.stages.map((item, i) => i === target.stage ? {...item, via: [...(item.via || []), id]} : item)}
+        : {[target.role]: id};
+      return {...current, ...change, updatedAt: new Date().toISOString()};
+    });
+    setNotice(''); setPicker(null);
+  }, []);
   function openPicker(target: Picker) {
     setPicker(target); mapSection.current?.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'center'});
   }
@@ -185,18 +186,18 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
       if (!id) return; const [trailId, number] = id.split('@'), node = index.routes[trailId]?.nodes[Number(number)];
       if (node) result.push({id: `${kind}-${id}-${result.length}`, point: [node[0], node[1]], kind, label: `${label}: ${coords(node)}`});
     };
-    draft.stages.slice(1).forEach((stage, i) => {
-      const connection = index.connections.find(item => item.id === stage.entryConnectionId); if (!connection) return;
+    pathOptions.connectionIds.forEach((connectionId, i) => {
+      const connection = index.connections.find(item => item.id === connectionId); if (!connection) return;
       result.push({id: `join-${i}`, point: connection.a.point, kind: 'join', label: `Стык этапов ${i + 1} и ${i + 2}: ${connectionLabel(connection)}`});
       if (connection.gapM > 0) result.push({id: `join-end-${i}`, point: connection.b.point, kind: 'join', label: `Другой конец перехода: ${Math.round(connection.gapM)} м по прямой`});
     });
-    draft.stages.forEach((stage, i) => (stage.via || []).forEach(id => add(id, 'via', `Через, этап ${i + 1}`)));
-    add(draft.start, 'start', 'Старт'); add(draft.finish, 'finish', 'Финиш');
-    if (picker && draft.stages[picker.stage]) for (const endpoint of getTrailEndpoints(index, draft.stages[picker.stage].trailId)) {
+    pathOptions.trailIds.forEach((_id, i) => (pathOptions.via?.[i] || []).forEach(id => add(id, 'via', `Через, этап ${i + 1}`)));
+    add(pathOptions.start, 'start', 'Старт'); add(pathOptions.finish, 'finish', 'Финиш');
+    if (picker && pathOptions.trailIds[picker.stage]) for (const endpoint of getTrailEndpoints(index, pathOptions.trailIds[picker.stage])) {
       result.push({id: `choice-${endpoint.id}`, point: endpoint.point, kind: 'choice', label: `Выбрать: ${pointLabel(endpoint)}`, onSelect: () => choosePoint(endpoint.id, picker)});
     }
     return result;
-  }, [draft, picker, choosePoint]);
+  }, [pathOptions, picker, choosePoint]);
   const mapTrail = useMemo<Trail | undefined>(() => {
     const source = firstId && trailById(firstId); if (!source || !loadedGeometry[source.id]) return;
     const sourceIds = picker ? [plan.trailIds[picker.stage]] : resolved.features.length ? [] : plan.trailIds;

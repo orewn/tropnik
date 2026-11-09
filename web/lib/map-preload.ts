@@ -3,6 +3,7 @@ import type {TerrainGrid} from '@/public/terrain/terrain-renderer.js';
 import {MapResourcePool, routeTilePlan} from './map-resource-pool';
 import {createMapTransport, publicMapResourceKey} from './map-transport';
 import {TerrainPreparation} from './terrain-preparation';
+import {MAP_CONFIG} from './map-config';
 
 export const TERRAIN_BOUNDS = [40.29, 43.64, 40.49, 43.82] as const;
 const TERRAIN_VERSION = '20261106-3';
@@ -67,7 +68,7 @@ export function warmMap() {
   if (!mapWarm) mapWarm = import('maplibre-gl').then(ml => {
     ml.addProtocol('tropnik-map', transport.load);
     ml.setWorkerUrl('/maps/maplibre-worker.js');
-    ml.setWorkerCount(Math.max(1, Math.min(3, (navigator.hardwareConcurrency || 4) - 1))); ml.prewarm();
+    ml.setWorkerCount(Math.max(1, Math.min(MAP_CONFIG.maxWorkers, (navigator.hardwareConcurrency || 4) - 1))); ml.prewarm();
   }).catch(() => {mapWarm = undefined;});
   return mapWarm;
 }
@@ -103,7 +104,7 @@ export function preloadTrail(trail: Trail): Promise<PreviewResult> {
       resources.push((async () => {
         const url = await template();
         const connection = (navigator as Navigator & {connection?: {saveData?: boolean; effectiveType?: string}}).connection;
-        const budget = connection?.saveData || connection?.effectiveType === '2g' ? 4 : 12;
+        const budget = connection?.saveData || connection?.effectiveType === '2g' ? MAP_CONFIG.constrainedPrefetchTiles : MAP_CONFIG.prefetchTiles;
         const results = await Promise.allSettled(routeTilePlan(b, budget).flatMap(({z, x, y}) => [
           pool.get(url.replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y)), 2),
           pool.get(`https://tiles.mapterhorn.com/${z}/${x}/${y}.webp`, 2),

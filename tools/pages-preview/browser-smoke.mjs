@@ -5,15 +5,23 @@ import {spawn, spawnSync} from 'node:child_process';
 import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
+import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-projection.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const REPORT = new URL('browser-verification.json', ROOT);
 const profiles = [
-  {name:'compact-android',width:320,height:640},
-  {name:'iphone-portrait',width:390,height:844},
-  {name:'android-portrait',width:412,height:915},
-  {name:'phone-landscape',width:844,height:390},
+  {name:'compact-android',width:320,height:640,mobile:true,engine:'leaflet'},
+  {name:'iphone-portrait',width:390,height:844,mobile:true,engine:'leaflet'},
+  {name:'android-portrait',width:412,height:915,mobile:true,engine:'leaflet',mapInteraction:true},
+  {name:'phone-landscape',width:844,height:390,mobile:true,engine:'leaflet'},
+  {name:'desktop-webgl',width:1440,height:1000,mobile:false,engine:'maplibre',mapInteraction:true},
 ];
+const catalogSources=await Promise.all(['catalog.generated.json','yandex-routes.generated.json','discovery-routes.generated.json','russiadiscovery-east.generated.json','telegram-reviewed.generated.json'].map(async name=>JSON.parse(await readFile(new URL(`../../web/lib/${name}`,import.meta.url),'utf8'))));
+const mapTrails=catalogSources.flatMap(source=>Array.isArray(source)?source:source.routes||[]).map(trail=>{
+ let current=trail;for(const source of catalogSources)if(source.updatesByRouteId?.[trail.id])current={...current,...source.updatesByRouteId[trail.id],id:trail.id};return current;
+}).filter(trail=>Array.isArray(trail.center)&&trail.center.length===2);
+const administrativeFeatures=JSON.parse(await readFile(new URL('../../web/public/data/territories.geojson',import.meta.url),'utf8')).features;
+const territoryRecords=JSON.parse(await readFile(new URL('../../web/lib/territories.generated.json',import.meta.url),'utf8')).territories;
 const mime = new Map([
   ['.html','text/html; charset=utf-8'],['.js','text/javascript; charset=utf-8'],['.css','text/css; charset=utf-8'],
   ['.json','application/json; charset=utf-8'],['.svg','image/svg+xml'],['.png','image/png'],['.woff','font/woff'],
@@ -77,9 +85,13 @@ class CDP{
       this.listeners.set(message.method,[]);for(const waiter of waiters)waiter(message.params);
     });
   }
-  call(method,params={}){
+  call(method,params={},timeout=15000){
     const id=this.next++;
-    return new Promise((resolve,reject)=>{this.pending.set(id,{resolve,reject});this.socket.send(JSON.stringify({id,method,params}));});
+    return new Promise((resolve,reject)=>{
+      const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error(`Timed out waiting for CDP ${method}`));},timeout);
+      this.pending.set(id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject:error=>{clearTimeout(timer);reject(error);}});
+      this.socket.send(JSON.stringify({id,method,params}));
+    });
   }
   event(method,timeout=15000){
     return new Promise((resolve,reject)=>{
@@ -96,8 +108,8 @@ async function evaluate(cdp,expression){
   return result.result.value;
 }
 async function loadProfile(cdp,url,profile){
-  await cdp.call('Emulation.setDeviceMetricsOverride',{width:profile.width,height:profile.height,deviceScaleFactor:2,mobile:true,screenWidth:profile.width,screenHeight:profile.height});
-  await cdp.call('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:5});
+  await cdp.call('Emulation.setDeviceMetricsOverride',{width:profile.width,height:profile.height,deviceScaleFactor:profile.mobile?2:1,mobile:profile.mobile,screenWidth:profile.width,screenHeight:profile.height});
+  await cdp.call('Emulation.setTouchEmulationEnabled',profile.mobile?{enabled:true,maxTouchPoints:5}:{enabled:false});
   const loaded=cdp.event('Page.loadEventFired');
   await cdp.call('Page.navigate',{url});
   await loaded;
@@ -108,6 +120,7 @@ async function loadProfile(cdp,url,profile){
     await sleep(100);
   }
   await sleep(1800);
+  await settledMap(cdp,profile.engine);
   await evaluate(cdp,`window.__tropnikPerf={cls:0,longest:0}`);
   return evaluate(cdp,`(()=>{
     const visible=element=>{const style=getComputedStyle(element),rect=element.getBoundingClientRect();return style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)!==0&&rect.width>1&&rect.height>1};
@@ -264,6 +277,215 @@ async function touchPrevious(cdp,profile){
   return result;
 }
 
+async function waitValue(label,read,accept,timeout=12000){
+  const deadline=Date.now()+timeout;let last;
+  do{last=await read();if(accept(last))return last;await sleep(100);}while(Date.now()<deadline);
+  throw new Error(`${label}: ${JSON.stringify(last).slice(0,2500)}`);
+}
+async function selectionState(cdp){
+  return evaluate(cdp,`(()=>{const params=new URLSearchParams(location.search);return{region:params.get('region')||'',route:params.get('route')||'',title:document.querySelector('.explore-panel h1')?.textContent?.replace(/\\s+/g,' ').trim()||'',sheet:document.querySelector('.explore-layout')?.dataset.sheetState};})()`);
+}
+async function expectSelection(cdp,expected){
+  return waitValue(`Map selection did not become ${JSON.stringify(expected)}`,()=>selectionState(cdp),state=>Object.entries(expected).every(([key,value])=>state[key]===value));
+}
+async function mapState(cdp){
+  return evaluate(cdp,`(()=>{
+    const element=document.querySelector('.atlas-canvas[data-map-engine]');if(!element)return null;
+    const r=element.getBoundingClientRect(),s=getComputedStyle(element),d=element.dataset;
+    return{camera:{longitude:Number(d.mapLongitude),latitude:Number(d.mapLatitude),zoom:Number(d.mapZoom),tileSize:Number(d.mapTileSize),...(d.mapCenterX!==undefined?{centerX:Number(d.mapCenterX),centerY:Number(d.mapCenterY)}:{})},engine:d.mapEngine,route:d.mapRouteId||'',moving:element.hasAttribute('data-map-camera'),visible:s.visibility!=='hidden'&&s.display!=='none'&&r.width>20&&r.height>20,rect:{left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom},width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth};
+  })()`);
+}
+async function settledMap(cdp,engine){
+  let signature='',stable=0;
+  return waitValue(`The ${engine} map did not settle`,()=>mapState(cdp),state=>{
+    if(!state?.visible||state.moving||state.engine!==engine||!Object.values(state.camera).every(Number.isFinite)){stable=0;return false;}
+    const next=JSON.stringify([state.camera,state.rect,state.route]);stable=next===signature?stable+1:0;signature=next;return stable>=3;
+  },15000);
+}
+async function pointerAt(cdp,point,profile){
+  assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y),'Pointer coordinates must be finite');
+  if(profile.mobile){
+    await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id:51,radiusX:3,radiusY:3,force:1}]});
+    await sleep(45);await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  }else{
+    await cdp.call('Input.dispatchMouseEvent',{type:'mouseMoved',x:point.x,y:point.y,pointerType:'mouse'});
+    await cdp.call('Input.dispatchMouseEvent',{type:'mousePressed',x:point.x,y:point.y,button:'left',clickCount:1,pointerType:'mouse'});
+    await cdp.call('Input.dispatchMouseEvent',{type:'mouseReleased',x:point.x,y:point.y,button:'left',clickCount:1,pointerType:'mouse'});
+  }
+}
+async function elementPoint(cdp,selector){
+  return evaluate(cdp,`(()=>{const element=document.querySelector(${JSON.stringify(selector)});if(!element)return null;const r=element.getBoundingClientRect(),s=getComputedStyle(element);if(element.hidden||s.visibility==='hidden'||s.display==='none'||r.width<2||r.height<2)return null;const x=r.left+r.width/2,y=r.top+r.height/2;if(x<0||y<0||x>=innerWidth||y>=innerHeight)return null;const hit=document.elementFromPoint(x,y);return{x,y,label:element.getAttribute('aria-label')||element.textContent?.trim(),hit:hit?.tagName,unobscured:!!hit&&element.contains(hit)};})()`);
+}
+async function pointerSelector(cdp,selector,profile){
+  const point=await waitValue(`Missing pointer target ${selector}`,()=>elementPoint(cdp,selector),Boolean);
+  await pointerAt(cdp,point,profile);return point;
+}
+async function closeMapSheet(cdp,profile){
+  if(!profile.mobile)return;
+  if((await selectionState(cdp)).sheet!=='closed')await pointerSelector(cdp,'.sheet-handle',profile);
+  await settledSheet(cdp,'closed');
+}
+async function clearMapStories(cdp,profile){
+  if(await elementPoint(cdp,'.fact-dismiss'))await pointerSelector(cdp,'.fact-dismiss',profile);
+  const message=await elementPoint(cdp,'.map-message button');
+  if(message?.label==='Понятно')await pointerAt(cdp,message,profile);
+}
+async function selectMapDirection(cdp,profile,id,title){
+  const progress=[];
+  for(let step=0;step<7;step++){
+    const before=await settledMap(cdp,profile.engine);
+    if((await selectionState(cdp)).region===id){await expectSelection(cdp,{region:id,route:'',title});return progress;}
+    const target=await evaluate(cdp,`(()=>{
+      const elements=[...document.querySelectorAll('.region-marker')];
+      const element=elements.find(button=>!button.hidden&&(button.getAttribute('data-map-group-key')||'').split('|').includes(${JSON.stringify(id)}));
+      if(!element)return{missing:true,groups:elements.filter(button=>!button.hidden).map(button=>button.getAttribute('data-map-group-key'))};
+      const r=element.getBoundingClientRect(),s=getComputedStyle(element),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);
+      return{x,y,label:element.getAttribute('aria-label'),group:element.getAttribute('data-map-group-key'),visible:s.visibility!=='hidden'&&s.display!=='none'&&x>=0&&y>=0&&x<innerWidth&&y<innerHeight,hit:hit?.tagName,hitPane:hit?.parentElement?.className};
+    })()`);
+    assert.equal(target.visible,true,`${profile.name}: direction ${id} is unreachable: ${JSON.stringify(target)}`);
+    await pointerAt(cdp,target,profile);
+    await waitValue(`${profile.name}: direction touch did not select or expand ${id}; hit=${JSON.stringify(target)}`,async()=>({selection:await selectionState(cdp),map:await mapState(cdp)}),state=>state.selection.region===id||!!state.map&&state.map.camera.zoom>before.camera.zoom+.2);
+    const after=await settledMap(cdp,profile.engine),selection=await selectionState(cdp);
+    progress.push({group:target.group,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom,selected:selection.region});
+    if(selection.region===id){await expectSelection(cdp,{region:id,route:'',title});return progress;}
+    assert.ok(after.camera.zoom>=before.camera.zoom+.7,`${profile.name}: a direction cluster repeated the same view`);
+  }
+  throw new Error(`${profile.name}: direction ${id} never became selectable: ${JSON.stringify(progress)}`);
+}
+async function canvasPoints(cdp,points){
+  if(!points.length)return[];
+  return evaluate(cdp,`(${JSON.stringify(points)}).filter(point=>{
+    if(point.x<12||point.y<12||point.x>=innerWidth-12||point.y>=innerHeight-12)return false;
+    const hit=document.elementFromPoint(point.x,point.y);return !!hit&&hit.tagName==='CANVAS'&&!!hit.closest('.atlas-canvas');
+  })`);
+}
+async function trailTouch(cdp,profile,regionId){
+  const regional=mapTrails.filter(trail=>trail.regionId===regionId||trail.regionIds?.includes(regionId));
+  for(let attempt=0;attempt<4;attempt++){
+    const state=await settledMap(cdp,profile.engine),candidates=[];
+    const locations=regional.map(trail=>({trail,point:projectMapPoint(trail.center,state.camera,state.rect)}));
+    for(const {trail,point} of locations){
+      if(!trail.geometryUrl?.startsWith('/data/'))continue;
+      for(const [dx,dy] of [[14,0],[-14,0],[0,14],[0,-14]]){
+        const x=point.x+dx,y=point.y+dy;
+        if(locations.some(other=>other.trail.id!==trail.id&&Math.hypot(other.point.x-x,other.point.y-y)<25))continue;
+        candidates.push({x,y,id:trail.id,title:trail.title,geometryUrl:trail.geometryUrl,center:trail.center,offset:Math.hypot(dx,dy)});
+      }
+    }
+    const target=(await canvasPoints(cdp,candidates))[0];
+    if(target){
+      await pointerAt(cdp,target,profile);
+      await expectSelection(cdp,{region:regionId,route:target.id,title:target.title,...(profile.mobile?{sheet:'open'}:{})});
+      await waitValue(`${profile.name}: selected route geometry was not rendered`,()=>mapState(cdp),map=>map?.route===target.id);
+      await settledMap(cdp,profile.engine);return target;
+    }
+    if(attempt<3)await pointerSelector(cdp,'.map-controls button[aria-label="Увеличить масштаб"]',profile);
+  }
+  throw new Error(`${profile.name}: no unobscured, isolated route touch target in ${regionId}`);
+}
+function lineParts(value){
+  if(value?.type==='FeatureCollection')return value.features.flatMap(lineParts);
+  if(value?.type==='Feature')return lineParts(value.geometry);
+  if(value?.type==='GeometryCollection')return value.geometries.flatMap(lineParts);
+  if(value?.type==='LineString')return[value.coordinates];
+  if(value?.type==='MultiLineString')return value.coordinates;
+  return[];
+}
+async function reopenSelectedLine(cdp,profile,trail){
+  await closeMapSheet(cdp,profile);
+  const state=await settledMap(cdp,profile.engine);
+  const geometry=JSON.parse(await readFile(new URL(`../../web/public${trail.geometryUrl}`,import.meta.url),'utf8'));
+  const candidates=[],pointLocations=mapTrails.map(item=>projectMapPoint(item.center,state.camera,state.rect));
+  for(const line of lineParts(geometry?.data?.geometry||geometry)){
+    const step=Math.max(1,Math.floor(line.length/100));
+    for(let index=1;index<line.length;index+=step){
+      const a=projectMapPoint(line[index-1],state.camera,state.rect),b=projectMapPoint(line[index],state.camera,state.rect),point={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+      if(pointLocations.every(other=>Math.hypot(other.x-point.x,other.y-point.y)>28))candidates.push(point);
+    }
+  }
+  const target=(await canvasPoints(cdp,candidates))[0];
+  assert.ok(target,`${profile.name}: selected line has no visible test segment away from route points`);
+  await pointerAt(cdp,target,profile);
+  await expectSelection(cdp,{region:'altai',route:trail.id,title:trail.title,...(profile.mobile?{sheet:'open'}:{})});
+  return{point:target,route:trail.id,clicked:true,selectionRetained:true,reopened:profile.mobile};
+}
+async function polygonTouch(cdp,profile){
+  await closeMapSheet(cdp,profile);
+  const state=await settledMap(cdp,profile.engine),candidates=[];
+  const points=mapTrails.map(trail=>projectMapPoint(trail.center,state.camera,state.rect));
+  for(const fy of [.5,.62,.38,.74,.26,.82])for(const fx of [.5,.35,.65,.2,.8]){
+    const point={x:state.rect.left+state.rect.width*fx,y:state.rect.top+state.rect.height*fy};
+    if(points.some(other=>Math.hypot(point.x-other.x,point.y-other.y)<30))continue;
+    const coordinate=unprojectMapPoint(point,state.camera,state.rect);
+    const feature=administrativeFeatures.find(feature=>pointInPolygonGeometry(coordinate,feature.geometry)&&[[8,0],[-8,0],[0,8],[0,-8]].every(([dx,dy])=>pointInPolygonGeometry(unprojectMapPoint({x:point.x+dx,y:point.y+dy},state.camera,state.rect),feature.geometry)));
+    const territory=feature&&territoryRecords.find(item=>item.shapeNames.includes(feature.properties?.shapeName));
+    if(territory)candidates.push({...point,coordinate,id:territory.id,title:territory.name});
+  }
+  const target=(await canvasPoints(cdp,candidates))[0];
+  assert.ok(target,`${profile.name}: no unobscured administrative polygon point away from routes`);
+  await pointerAt(cdp,target,profile);
+  await expectSelection(cdp,{region:target.id,route:'',title:target.title,...(profile.mobile?{sheet:'open'}:{})});
+  await settledMap(cdp,profile.engine);return target;
+}
+async function freeCanvasPoint(cdp,state){
+  const candidates=[];
+  for(const fy of [.45,.55,.65,.35,.75])for(const fx of [.5,.35,.65,.25,.75])candidates.push({x:state.rect.left+state.rect.width*fx,y:state.rect.top+state.rect.height*fy});
+  const point=(await canvasPoints(cdp,candidates))[0];assert.ok(point,'No visible Canvas position for a real map gesture');return point;
+}
+async function mapGestures(cdp,profile){
+  await closeMapSheet(cdp,profile);
+  const selection=await selectionState(cdp),before=await settledMap(cdp,profile.engine);
+  if(profile.mobile)await pointerSelector(cdp,'.map-controls button[aria-label="Увеличить масштаб"]',profile);
+  else{
+    const point=await freeCanvasPoint(cdp,before);
+    await cdp.call('Input.dispatchMouseEvent',{type:'mouseWheel',x:point.x,y:point.y,deltaX:0,deltaY:-400,pointerType:'mouse'});
+  }
+  await waitValue(`${profile.name}: zoom input had no effect`,()=>mapState(cdp),state=>state?.camera.zoom>before.camera.zoom+.2);
+  const zoomed=await settledMap(cdp,profile.engine),start=await freeCanvasPoint(cdp,zoomed);
+  const dx=start.x+70<Math.min(zoomed.width,zoomed.rect.right)?48:-48,dy=12;
+  if(profile.mobile)await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...start,id:61,radiusX:3,radiusY:3,force:1}]});
+  else await cdp.call('Input.dispatchMouseEvent',{type:'mousePressed',...start,button:'left',buttons:1,clickCount:1,pointerType:'mouse'});
+  for(let step=1;step<=8;step++){
+    const point={x:start.x+dx*step/8,y:start.y+dy*step/8};
+    if(profile.mobile)await cdp.call('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...point,id:61,radiusX:3,radiusY:3,force:1}]});
+    else await cdp.call('Input.dispatchMouseEvent',{type:'mouseMoved',...point,button:'left',buttons:1,pointerType:'mouse'});
+    await sleep(25);
+  }
+  if(profile.mobile)await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  else await cdp.call('Input.dispatchMouseEvent',{type:'mouseReleased',x:start.x+dx,y:start.y+dy,button:'left',buttons:0,clickCount:1,pointerType:'mouse'});
+  const moved=await settledMap(cdp,profile.engine);
+  assert.ok(Math.abs(moved.camera.longitude-zoomed.camera.longitude)>1e-5||Math.abs(moved.camera.latitude-zoomed.camera.latitude)>1e-5,`${profile.name}: drag did not move the map`);
+  await expectSelection(cdp,{region:selection.region,route:selection.route,title:selection.title});
+  const dimensions=profile.mobile?{width:profile.height,height:profile.width}:{width:profile.width-180,height:profile.height-100};
+  await cdp.call('Emulation.setDeviceMetricsOverride',{...dimensions,deviceScaleFactor:profile.mobile?2:1,mobile:profile.mobile,screenWidth:dimensions.width,screenHeight:dimensions.height});
+  await waitValue(`${profile.name}: viewport did not resize`,()=>mapState(cdp),state=>state?.width===dimensions.width&&state.height===dimensions.height);
+  const resized=await settledMap(cdp,profile.engine);
+  assert.ok(resized.scrollWidth<=resized.width+1,`${profile.name}: resize caused horizontal overflow`);
+  await expectSelection(cdp,{region:selection.region,route:selection.route,title:selection.title});
+  const afterResize=await polygonTouch(cdp,profile);
+  return{zoomInput:profile.mobile?'touch-control':'mouse-wheel',beforeZoom:before.camera.zoom,afterZoom:zoomed.camera.zoom,dragged:true,dragCameras:{before:zoomed.camera,after:moved.camera},selectionPreserved:true,resizedTo:dimensions,postResizePolygon:afterResize.id};
+}
+async function mapInteraction(cdp,profile){
+  const started=Date.now();await clearMapStories(cdp,profile);await closeMapSheet(cdp,profile);
+  const country=await settledMap(cdp,profile.engine);
+  await evaluate(cdp,'window.__tropnikPerf={cls:0,longest:0}');
+  const firstDirection=await selectMapDirection(cdp,profile,'altai','Алтай');
+  await closeMapSheet(cdp,profile);
+  const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
+  await pointerSelector(cdp,'.explore-panel .back-link',profile);
+  await expectSelection(cdp,{region:'altai',route:'',title:'Алтай'});
+  await pointerSelector(cdp,'.explore-panel .back-link',profile);
+  await expectSelection(cdp,{region:'',route:''});
+  await closeMapSheet(cdp,profile);
+  const returned=await settledMap(cdp,profile.engine);
+  assert.ok(Math.abs(returned.camera.longitude-country.camera.longitude)<.1&&Math.abs(returned.camera.latitude-country.camera.latitude)<.1&&Math.abs(returned.camera.zoom-country.camera.zoom)<.05,`${profile.name}: return to directions displaced the country after the sheet settled: ${JSON.stringify({initial:country.camera,returned:returned.camera})}`);
+  const secondDirection=await selectMapDirection(cdp,profile,'baikal','Байкал');
+  const polygon=await polygonTouch(cdp,profile),gestures=await mapGestures(cdp,profile);
+  const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
+  assert.ok(perf.longest<(profile.mobile?350:750),`${profile.name}: map interaction long task ${perf.longest}ms`);
+  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+}
+
 const httpPort=await freePort(),debugPort=await freePort();
 const server=serve(ROOT);
 await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(httpPort,'127.0.0.1',resolve);});
@@ -271,10 +493,11 @@ const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browser=spawn(browserBinary(),[
   '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
   '--disable-default-apps','--disable-extensions','--disable-features=Translate,MediaRouter','--mute-audio',
+  '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
   `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
 ],{stdio:['ignore','ignore','pipe']});
 let browserErrors='';browser.stderr.on('data',chunk=>{browserErrors+=chunk;});
-let cdp;
+let cdp,currentProfile;
 try{
   await waitFor(`http://127.0.0.1:${debugPort}/json/version`);
   const target=await (await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(`http://127.0.0.1:${httpPort}/tropnik/`)}`,{method:'PUT'})).json();
@@ -285,14 +508,22 @@ try{
     try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput)window.__tropnikPerf.cls+=entry.value;}).observe({type:'layout-shift',buffered:true});}catch{}
     try{new PerformanceObserver(list=>{for(const entry of list.getEntries())window.__tropnikPerf.longest=Math.max(window.__tropnikPerf.longest,entry.duration);}).observe({type:'longtask',buffered:true});}catch{}
   `});
-  const results=[];
+  const results=[],desktopProfiles=[],mapInteractions=[];
   for(const profile of profiles){
+    currentProfile=profile.name;
     const geometry=await loadProfile(cdp,`http://127.0.0.1:${httpPort}/tropnik/`,profile);
-    assert.equal(geometry.engine,'leaflet',`${profile.name}: mobile profile loaded the heavy ${geometry.engine} engine`);
+    assert.equal(geometry.engine,profile.engine,`${profile.name}: expected ${profile.engine}, actually loaded ${geometry.engine}`);
     assert.ok(geometry.scrollWidth<=geometry.width+1,`${profile.name}: horizontal overflow ${geometry.scrollWidth}>${geometry.width}`);
     assert.deepEqual(geometry.escaping,[],`${profile.name}: labels escaped the map viewport`);
     assert.deepEqual(geometry.undersized,[],`${profile.name}: interactive targets smaller than 44 CSS px`);
     if(geometry.card)assert.ok(geometry.card.left>=-1&&geometry.card.right<=geometry.width+1&&geometry.card.top>=-1&&geometry.card.bottom<=geometry.height+1,`${profile.name}: story card escaped the visual viewport`);
+    if(!profile.mobile){
+      const coarse=await evaluate(cdp,"matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0");
+      assert.equal(coarse,false,'The desktop MapLibre check must use a fine pointer');
+      const interaction=await mapInteraction(cdp,profile);mapInteractions.push(interaction);
+      desktopProfiles.push({name:profile.name,width:profile.width,height:profile.height,engine:geometry.engine,coarse:false,mapInteractionTested:true});
+      continue;
+    }
     const sheet=await touchSheet(cdp);
     if(sheet.available){
       assert.equal(sheet.closed.state,'closed',`${profile.name}: initial sheet state`);
@@ -313,11 +544,21 @@ try{
       assert.ok(touch.cls<.12,`${profile.name}: interaction layout shift ${touch.cls}`);
       assert.ok(touch.longest<350,`${profile.name}: long task ${touch.longest}ms`);
     }
-    results.push({...profile,geometry,sheet,mapGeometry,touch});
+    const interaction=profile.mapInteraction?await mapInteraction(cdp,profile):null;
+    if(interaction)mapInteractions.push(interaction);
+    results.push({...profile,geometry,sheet,mapGeometry,touch,interaction});
   }
-  const report={verified:true,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,sheet,mapGeometry,touch})=>({name,width,height,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,mapGeometry,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0)})),sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,mapInteractionSchemaVersion:1,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,mapGeometry,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,mapGeometry,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
+}catch(error){
+  const failure={profile:currentProfile,error:error.stack||String(error)};
+  if(cdp){
+    try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);}catch{}
+    try{const screenshot=await cdp.call('Page.captureScreenshot',{format:'png'});await writeFile(new URL('browser-failure.png',ROOT),Buffer.from(screenshot.data,'base64'));}catch{}
+  }
+  await writeFile(new URL('browser-failure.json',ROOT),JSON.stringify(failure,null,2)+'\n');
+  throw error;
 }finally{
   cdp?.close();browser.kill('SIGTERM');server.close();
   await sleep(100);

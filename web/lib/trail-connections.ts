@@ -43,6 +43,11 @@ export type ResolvedPlanGeometry = {
   type: 'FeatureCollection'; features: {type: 'Feature'; properties: {trailId: string; stage: number}; geometry: {type: 'LineString'; coordinates: LngLat[]}}[];
   segments: LngLat[][]; issues: CompositePlanIssue[];
 };
+/** An owned, immutable snapshot. Its coordinates are kept private so neither
+ * raw-source edits nor a caller editing resolved output can poison later plans. */
+export type PreparedPlanGeometry = Readonly<{sourceDigest: string}>;
+type PreparedRouteGeometry = {geometry: TrailGeometry; fingerprint: string};
+const preparedPlanGeometries = new WeakMap<PreparedPlanGeometry, ReadonlyMap<string, PreparedRouteGeometry>>();
 
 const EARTH_RADIUS_M = 6371008.8;
 const radians = Math.PI / 180;
@@ -50,6 +55,8 @@ const roundM = (value: number) => Math.round(value * 1000) / 1000;
 const clamp = (value: number, low = 0, high = 1) => Math.max(low, Math.min(high, value));
 export function longitudeDelta(from: number, to: number): number {return ((to - from + 540) % 360) - 180;}
 export function coordinateKey(point: LngLat): string {return `${point[0] === 180 ? -180 : point[0]},${point[1]}`;}
+const sameCoordinate = (a: LngLat, b: LngLat) => a[1] === b[1] &&
+  (a[0] === b[0] || a[0] === 180 && b[0] === -180 || a[0] === -180 && b[0] === 180);
 export function distanceMeters(a: LngLat, b: LngLat): number {
   const dLat = (b[1] - a[1]) * radians, dLon = longitudeDelta(a[0], b[0]) * radians;
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[1] * radians) * Math.cos(b[1] * radians) * Math.sin(dLon / 2) ** 2;
@@ -77,7 +84,7 @@ export function normalizeTrailGeometry(value: unknown): TrailGeometry {
         result.invalidPositions++; finish(); continue;
       }
       const point: LngLat = [item[0], item[1]];
-      if (!part.length || coordinateKey(part[part.length - 1]) !== coordinateKey(point)) part.push(point);
+      if (!part.length || !sameCoordinate(part[part.length - 1], point)) part.push(point);
     }
     finish();
   }
@@ -274,18 +281,38 @@ function pointAt(part: LngLat[], index: number): LngLat | null {
   const position = Math.floor(index);
   return position === part.length - 1 ? [...part[position]] : interpolatePoint(part[position], part[position + 1], index - position);
 }
+/** Normalize and verify one loaded snapshot, outside repeated point-selection
+ * renders. Call again for new data or a retry; raw objects are never trusted as
+ * immutable cache keys. The raw resolver below still validates every call. */
+export function preparePlanGeometry(index: TrailConnectionIndex, loaded: Record<string, unknown>): PreparedPlanGeometry {
+  const snapshot = Object.freeze({sourceDigest: index.sourceDigest});
+  const routes = new Map<string, PreparedRouteGeometry>();
+  for (const [trailId, value] of Object.entries(loaded)) {
+    if (!Object.hasOwn(index.routes, trailId)) continue;
+    const geometry = normalizeTrailGeometry(value), fingerprint = geometryFingerprint(geometry.parts);
+    for (const part of geometry.parts) {for (const point of part) Object.freeze(point); Object.freeze(part);}
+    Object.freeze(geometry.parts); Object.freeze(geometry);
+    routes.set(trailId, {geometry, fingerprint});
+  }
+  preparedPlanGeometries.set(snapshot, routes);
+  return snapshot;
+}
 export function resolvePlanGeometry(index: TrailConnectionIndex, plan: CompositePlan, loaded: Record<string, unknown>): ResolvedPlanGeometry {
+  const selected = Object.fromEntries([...new Set(plan.stages.filter(stage => stage.connected && stage.refs.length).map(stage => stage.trailId))].map(id => [id, loaded[id]]));
+  return resolvePreparedPlanGeometry(index, plan, preparePlanGeometry(index, selected));
+}
+export function resolvePreparedPlanGeometry(index: TrailConnectionIndex, plan: CompositePlan, prepared: PreparedPlanGeometry): ResolvedPlanGeometry {
   const result: ResolvedPlanGeometry = {type: 'FeatureCollection', features: [], segments: [], issues: []};
-  if (plan.sourceDigest !== index.sourceDigest) {result.issues.push({code: 'stale_plan', message: 'Исходные данные изменились: пересчитайте сохранённый план.'}); return result;}
-  const normalized = new Map<string, TrailGeometry>();
+  if (plan.sourceDigest !== index.sourceDigest || prepared.sourceDigest !== index.sourceDigest) {result.issues.push({code: 'stale_plan', message: 'Исходные данные изменились: пересчитайте сохранённый план.'}); return result;}
+  const normalized = preparedPlanGeometries.get(prepared);
+  if (!normalized) {result.issues.push({code: 'geometry_mismatch', message: 'Исходные линии не подготовлены. Перезагрузите геометрию.'}); return result;}
   const connectionMap = new Map(index.connections.map(connection => [connection.id, connection]));
   let precedingStage = -2;
   plan.stages.forEach((stage, stageIndex) => {
     if (!stage.connected || !stage.refs.length) return;
     const route = index.routes[stage.trailId];
-    let geometry = normalized.get(stage.trailId);
-    if (!geometry) {geometry = normalizeTrailGeometry(loaded[stage.trailId]); normalized.set(stage.trailId, geometry);}
-    if (!route || geometry.parts.length !== route.partCount || geometryFingerprint(geometry.parts) !== route.geometryFingerprint) {
+    const cached = normalized.get(stage.trailId), geometry = cached?.geometry;
+    if (!route || !geometry || geometry.parts.length !== route.partCount || cached.fingerprint !== route.geometryFingerprint) {
       result.issues.push({code: 'geometry_mismatch', message: 'Геометрия этапа не совпадает с индексом. Перезагрузите исходные данные.', trailId: stage.trailId}); return;
     }
     let coordinates: LngLat[] = [];
@@ -293,10 +320,10 @@ export function resolvePlanGeometry(index: TrailConnectionIndex, plan: Composite
       const part = geometry.parts[ref.part], start = part && pointAt(part, ref.from), finish = part && pointAt(part, ref.to);
       if (!start || !finish) {result.issues.push({code: 'invalid_reference', message: 'Исходный участок этапа отсутствует.', trailId: stage.trailId}); coordinates = []; break;}
       const forward = ref.to >= ref.from;
-      const interior = part.filter((_point, i) => i > Math.min(ref.from, ref.to) && i < Math.max(ref.from, ref.to));
+      const interior = part.slice(Math.floor(Math.min(ref.from, ref.to)) + 1, Math.ceil(Math.max(ref.from, ref.to))).map(point => [...point] as LngLat);
       if (!forward) interior.reverse();
-      const segment = [start, ...interior, finish].filter((point, i, points) => !i || coordinateKey(point) !== coordinateKey(points[i - 1]));
-      if (coordinates.length && coordinateKey(coordinates[coordinates.length - 1]) !== coordinateKey(start)) {
+      const segment = [start, ...interior, finish].filter((point, i, points) => !i || !sameCoordinate(point, points[i - 1]));
+      if (coordinates.length && !sameCoordinate(coordinates[coordinates.length - 1], start)) {
         result.issues.push({code: 'broken_reference', message: 'Исходные части не соединены. Линия через разрыв не построена.', trailId: stage.trailId}); coordinates = []; break;
       }
       coordinates.push(...(coordinates.length ? segment.slice(1) : segment));
@@ -305,7 +332,7 @@ export function resolvePlanGeometry(index: TrailConnectionIndex, plan: Composite
     result.features.push({type: 'Feature', properties: {trailId: stage.trailId, stage: stageIndex}, geometry: {type: 'LineString', coordinates}});
     const previous = result.segments[result.segments.length - 1];
     const join = connectionMap.get(plan.connectionIds[stageIndex - 1]);
-    if (precedingStage === stageIndex - 1 && join?.sourceVertex && previous && coordinateKey(previous[previous.length - 1]) === coordinateKey(coordinates[0])) previous.push(...coordinates.slice(1));
+    if (precedingStage === stageIndex - 1 && join?.sourceVertex && previous && sameCoordinate(previous[previous.length - 1], coordinates[0])) previous.push(...coordinates.slice(1));
     else result.segments.push([...coordinates]);
     precedingStage = stageIndex;
   });

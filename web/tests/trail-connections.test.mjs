@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {buildTrailConnectionIndex, readCatalogueInputs} from '../scripts/build-trail-connections.mjs';
-import {closestSegmentPoints, coordinateKey, distanceMeters, getTrailConnections, getTrailEndpoints, normalizeTrailGeometry, planTrailSequence, resolvePlanGeometry} from '../lib/trail-connections.ts';
+import {closestSegmentPoints, coordinateKey, distanceMeters, getTrailConnections, getTrailEndpoints, normalizeTrailGeometry, planTrailSequence, preparePlanGeometry, resolvePlanGeometry, resolvePreparedPlanGeometry} from '../lib/trail-connections.ts';
 
 const line = coordinates => ({type: 'LineString', coordinates});
 const multi = coordinates => ({type: 'MultiLineString', coordinates});
@@ -25,6 +25,7 @@ test('normalization preserves MultiLineString and invalid-position gaps without 
   assert.equal(normalized.parts.length, 4);
   assert.equal(normalized.invalidPositions, 1);
   assert.ok(normalized.parts.every(part => part.length === 2));
+  assert.deepEqual(normalizeTrailGeometry(line([[180, 0], [-180, -0], [-179, 0]])).parts, [[[180, 0], [-179, 0]]], 'numeric comparison retains the exact antimeridian and signed-zero equivalence of coordinate keys');
   const index = buildTrailConnectionIndex([route('a', value)]);
   assert.equal(index.routes.a.componentCount, 4);
   assert.equal(index.routes.a.invalidPositions, 1);
@@ -176,6 +177,31 @@ test('the resolver rejects stale coordinates even if their count and endpoints s
   assert.equal(result.segments.length, 0); assert.equal(result.features.length, 0);
   assert.ok(result.issues.some(issue => issue.code === 'geometry_mismatch'));
   assert.equal(resolvePlanGeometry(index, {...plan, sourceDigest: 'old'}, {a}).issues[0].code, 'stale_plan');
+});
+
+test('prepared geometry is an independent snapshot and retains source and fingerprint gates across path edits', () => {
+  const geometry = line([[0, 0], [.001, 0], [.002, 0]]), index = buildTrailConnectionIndex([route('a', geometry)]);
+  const start = nodeIdAt(index, 'a', [0, 0]), finish = nodeIdAt(index, 'a', [.002, 0]);
+  const options = {trailIds: ['a'], connectionIds: [], start, finish};
+  const plan = planTrailSequence(index, options), prepared = preparePlanGeometry(index, {a: geometry});
+  const forward = resolvePreparedPlanGeometry(index, plan, prepared);
+  assert.deepEqual(forward, resolvePlanGeometry(index, plan, {a: geometry}));
+  const reverse = planTrailSequence(index, {...options, start: finish, finish: start});
+  assert.deepEqual(resolvePreparedPlanGeometry(index, reverse, prepared).segments[0], [...forward.segments[0]].reverse());
+
+  geometry.coordinates[1][1] = .001;
+  forward.segments[0][1][0] = 99;
+  forward.features[0].geometry.coordinates[0][0] = 88;
+  assert.deepEqual(resolvePreparedPlanGeometry(index, plan, prepared).segments[0], [[0, 0], [.001, 0], [.002, 0]], 'neither raw-source mutation nor returned-output mutation can poison the owned verified snapshot');
+  for (const result of [resolvePlanGeometry(index, plan, {a: geometry}), resolvePreparedPlanGeometry(index, plan, preparePlanGeometry(index, {a: geometry}))]) {
+    assert.equal(result.segments.length, 0);
+    assert.equal(result.issues[0].code, 'geometry_mismatch', 'a retry with changed source coordinates must revalidate, including equal-length drift');
+  }
+  assert.equal(resolvePreparedPlanGeometry(index, {...plan, sourceDigest: 'old'}, prepared).issues[0].code, 'stale_plan');
+  assert.equal(resolvePreparedPlanGeometry({...index, sourceDigest: 'new'}, {...plan, sourceDigest: 'new'}, prepared).issues[0].code, 'stale_plan');
+  const changedRoute = {...index, routes: {...index.routes, a: {...index.routes.a, geometryFingerprint: 'changed'}}};
+  assert.equal(resolvePreparedPlanGeometry(changedRoute, plan, prepared).issues[0].code, 'geometry_mismatch');
+  assert.equal(resolvePreparedPlanGeometry(index, plan, {sourceDigest: index.sourceDigest}).issues[0].code, 'geometry_mismatch', 'a forged snapshot cannot bypass normalization and fingerprint verification');
 });
 
 test('the generated index matches every active geometry and its provenance, with no invented reference-card coordinates', async () => {

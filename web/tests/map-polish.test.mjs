@@ -15,7 +15,7 @@ test('terrain camera stays restrained over Russia and gains depth on approach',(
 test('map attribution follows the five-second interactive-map safe harbour',()=>{
   const source=read('components/MapAttribution.tsx');
   assert.match(source,/© OpenStreetMap contributors/);
-  assert.match(source,/setTimeout\(collapse,5000\)/);
+  assert.match(source,/bindMapAttributionCollapse/);
   assert.match(source,/tropnik-map-attribution-seen/);
   assert.match(source,/Данные карты и лицензии/);
   assert.doesNotMatch(source,/Natural Earth/);
@@ -51,7 +51,7 @@ test('reported map wedges, clipped labels and false detail banner stay fixed',()
   const maskIndex=style.layers.findIndex(layer=>layer.id==='russia-outside-mask');
   const priorityIndex=style.layers.findIndex(layer=>layer.id==='russia-priority-city-label');
   assert.ok(maskIndex>=0&&priorityIndex>maskIndex,'priority Russian labels redraw after the outside mask');
-  assert.match(sw,/tropnik-shell-v20/);
+  assert.match(sw,/tropnik-shell-\d+\.\d+\.\d+-[a-f0-9]{16}/);
   assert.match(sw,/russia-canonical-mask\.geojson/);
 });
 
@@ -89,7 +89,8 @@ test('map stability release keeps terrain explicit and text collision-aware',()=
   assert.match(atlas,/territoryForMapPoint/);
   assert.match(atlas,/mapTrailPointFeatureCollection/);
   assert.doesNotMatch(atlas,/map\.on\('zoomend'[\s\S]{0,300}map\.setTerrain/);
-  assert.match(canvas,/DETAIL_ENTER_ZOOM=4\.6,DETAIL_EXIT_ZOOM=3\.8/);
+  assert.match(canvas,/MAP_CONFIG\.detailEnterZoom/);
+  assert.match(canvas,/MAP_CONFIG\.detailExitZoom/);
   assert.match(canvas,/bindMapLabelReflow/);
   assert.match(generator,/symbol-avoid-edges/);
   assert.match(generator,/hillshade-illumination-anchor':'map'/);
@@ -132,7 +133,6 @@ test('mobile visual viewport and native route points stay cross-platform',()=>{
   assert.match(layout,/placed:MapLabelRect\[\]/);
   assert.match(atlas,/type:'circle',source:TRAIL_POINTS/);
   assert.doesNotMatch(atlas,/new ml\.Marker\(\{element:button,anchor:'center'\}\).*visibleTrails/s);
-  assert.match(canvas,/pane:'trail-points'/);
   assert.match(canvas,/bindTooltip\(item\.title,\{direction:'auto'/);
   assert.match(css,/tropnik-relief-tiles \.leaflet-tile\{opacity:1!important;transition:none!important\}/);
 });

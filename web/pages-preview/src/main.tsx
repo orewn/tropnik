@@ -26,10 +26,10 @@ const loaders = {
 async function start() {
   const page = resolvePage(window.location.pathname);
   const key = (page?.kind || 'missing') as keyof typeof loaders;
-  const module = await (loaders[key] || loaders.missing)();
+  const pageModule = await (loaders[key] || loaders.missing)();
   // The reused app pages are pure server page functions. Resolve their async data boundary once,
   // then mount the original client components normally; no Next server is shipped or required.
-  const renderPage = module.default as (props: {params: Promise<{id?: string}>; searchParams: Promise<Record<string, string>>}) => ReactNode | Promise<ReactNode>;
+  const renderPage = pageModule.default as (props: {params: Promise<{id?: string}>; searchParams: Promise<Record<string, string>>}) => ReactNode | Promise<ReactNode>;
   let content: ReactNode;
   try {content = await renderPage({params: Promise.resolve({id: page?.id}), searchParams: Promise.resolve(Object.fromEntries(new URLSearchParams(location.search)))});}
   catch (error) {console.error('Static page unavailable', error); content = (await loaders.missing()).default();}

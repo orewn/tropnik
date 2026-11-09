@@ -2,7 +2,7 @@
 import {MapIcon} from './MapIcon';
 import {MapAttribution} from './MapAttribution';
 import {ArrowSquareOut} from './TropnikIcons';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import type {Trail} from '@/lib/content';
 import type {TerrainRenderer,TerrainGrid} from '@/public/terrain/terrain-renderer.js';
 import {loadTerrain,loadPublicJSON,TERRAIN_BOUNDS} from '@/lib/map-preload';
@@ -13,9 +13,11 @@ export function TerrainScene({trail,onClose,visible=true}:{trail?:Trail;onClose:
  const surface=useRef<HTMLElement>(null);
  const canvas=useRef<HTMLCanvasElement>(null),renderer=useRef<SceneRenderer|null>(null),visibility=useRef(visible);
  const [phase,setPhase]=useState('Открываем рельеф…'),[error,setError]=useState(''),[source,setSource]=useState<TerrainGrid['source']|null>(null),[info,setInfo]=useState(false),[ready,setReady]=useState(false),[attempt,setAttempt]=useState(0),[revision,setRevision]=useState(0);
- visibility.current=visible;
+ useLayoutEffect(()=>{visibility.current=visible;},[visible]);
  useEffect(()=>{
   let stale=false,failed=false,first=true,owned:SceneRenderer|null=null;const consumer=new AbortController();
+  // Reset the external renderer's lifecycle state before a fresh load/retry.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   setError('');setReady(false);setPhase('Открываем рельеф…');
   loadTerrain(consumer.signal).then(([module,grid,preparedModel])=>{
    if(stale||!canvas.current)return;
@@ -31,7 +33,7 @@ export function TerrainScene({trail,onClose,visible=true}:{trail?:Trail;onClose:
    renderer.current.setVisible?.(visibility.current);
    renderer.current.warmup();
    setRevision(v=>v+1);
-  }).catch(e=>{if(!stale)setError('Не удалось открыть рельеф. Проверьте подключение и попробуйте ещё раз.');});
+  }).catch(()=>{if(!stale)setError('Не удалось открыть рельеф. Проверьте подключение и попробуйте ещё раз.');});
   return()=>{stale=true;consumer.abort();owned?.destroy();if(renderer.current===owned)renderer.current=null;};
  },[attempt]);
  useEffect(()=>{renderer.current?.setVisible?.(visible);},[visible]);
@@ -68,7 +70,7 @@ export function TerrainScene({trail,onClose,visible=true}:{trail?:Trail;onClose:
    target.warmup();
   }).catch(()=>{if(!stale)setError('Нитка маршрута не загрузилась. Ландшафт доступен, повторите открытие маршрута при устойчивой связи.');});
   return()=>{stale=true;};
- },[trail?.id,trail?.geometryUrl,revision]);
+ },[trail?.id,trail?.geometryUrl,trail?.geometry,revision]);
  const b=trail?.bbox;
  const partial=!!b&&(b[0]<TERRAIN_BOUNDS[0]||b[1]<TERRAIN_BOUNDS[1]||b[2]>TERRAIN_BOUNDS[2]||b[3]>TERRAIN_BOUNDS[3]);
  const retry=()=>{

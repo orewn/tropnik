@@ -46,8 +46,11 @@ export function TripHistory() {
   }, []);
 
   useEffect(() => {
+    const activeSequence = sequence;
+    // Load private server history on mount; invalidate late responses on cleanup.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
-    return () => { ++sequence.current; inFlight.current = false; active.current?.abort(); };
+    return () => { ++activeSequence.current; inFlight.current = false; active.current?.abort(); };
   }, [load]);
 
   return <section aria-labelledby="trip-history-title">

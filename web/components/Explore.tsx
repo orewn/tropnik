@@ -58,6 +58,9 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
   const url=new URL(location.href);
   if(nextRegion)url.searchParams.set('region',nextRegion);else url.searchParams.delete('region');
   if(nextTrail)url.searchParams.set('route',nextTrail);else url.searchParams.delete('route');
+  // Reopening the already selected map point/line must not insert a duplicate
+  // history entry: one Back action still returns to the region catalogue.
+  if(mode==='push'&&url.href===window.location.href)return;
   const current=history.state&&typeof history.state==='object'?history.state:{};
   const state={...current,tropnikExplore:true,tropnikExploreLevel:nextTrail?2:nextRegion?1:0,tropnikExplorePushed:mode==='push'||current.tropnikExplorePushed===true};
   history[mode==='push'?'pushState':'replaceState'](state,'',url);

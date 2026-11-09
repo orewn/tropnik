@@ -94,6 +94,8 @@ function tokenScore(token:string,list:readonly string[]):number {
   return list.some(word=>word.length>=4&&distance(token,word,budget)<=budget)?.57:0;
 }
 function visibleHit(document:SearchDocument,score:number,unspecified:boolean):SearchHit {
+  // Search-only text is intentionally omitted from the public hit payload.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {body:_body,keywords:_keywords,...hit}=document;
   return {...hit,score,...(unspecified?{unspecifiedParameters:true}:{})};
 }
