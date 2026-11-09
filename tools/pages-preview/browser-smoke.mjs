@@ -107,6 +107,16 @@ async function evaluate(cdp,expression){
   if(result.exceptionDetails)throw new Error(result.exceptionDetails.text||'Browser evaluation failed');
   return result.result.value;
 }
+async function diagnosticPhase(cdp,name){
+  return evaluate(cdp,`(()=>{
+    const name=${JSON.stringify(name)},box=selector=>{const element=document.querySelector(selector);if(!element)return null;const r=element.getBoundingClientRect(),s=getComputedStyle(element);return{x:r.x,y:r.y,width:r.width,height:r.height,display:s.display,visibility:s.visibility,transform:s.transform};};
+    const state={name,time:performance.now(),perf:{...window.__tropnikPerf},fonts:document.fonts?.status,sheet:document.querySelector('.explore-layout')?.dataset.sheetState,story:box('.fact-card'),storyPhoto:box('.fact-photo'),panel:box('.explore-panel'),canvas:box('.atlas-canvas'),firstDirection:box('.region-marker:not([hidden])'),attribution:box('.map-attribution'),mapMessage:box('.map-message')};
+    window.__tropnikPhase=name;window.__tropnikPhases.push(state);if(window.__tropnikPhases.length>32)window.__tropnikPhases.shift();return state;
+  })()`);
+}
+async function performanceDiagnostics(cdp){
+  return evaluate(cdp,'({current:window.__tropnikPerf,counterStart:window.__tropnikPerfStart,phase:window.__tropnikPhase,phases:window.__tropnikPhases,layoutShifts:window.__tropnikLayoutShifts})');
+}
 async function loadProfile(cdp,url,profile){
   await cdp.call('Emulation.setDeviceMetricsOverride',{width:profile.width,height:profile.height,deviceScaleFactor:profile.mobile?2:1,mobile:profile.mobile,screenWidth:profile.width,screenHeight:profile.height});
   await cdp.call('Emulation.setTouchEmulationEnabled',profile.mobile?{enabled:true,maxTouchPoints:5}:{enabled:false});
@@ -121,7 +131,8 @@ async function loadProfile(cdp,url,profile){
   }
   await sleep(1800);
   await settledMap(cdp,profile.engine);
-  await evaluate(cdp,`window.__tropnikPerf={cls:0,longest:0}`);
+  await evaluate(cdp,`window.__tropnikPerf={cls:0,longest:0};window.__tropnikPerfStart=performance.now()`);
+  await diagnosticPhase(cdp,'profile-ready');
   return evaluate(cdp,`(()=>{
     const visible=element=>{const style=getComputedStyle(element),rect=element.getBoundingClientRect();return style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)!==0&&rect.width>1&&rect.height>1};
     const atlas=document.querySelector('.atlas-wrap')?.getBoundingClientRect();
@@ -465,10 +476,11 @@ async function mapGestures(cdp,profile){
   const afterResize=await polygonTouch(cdp,profile);
   return{zoomInput:profile.mobile?'touch-control':'mouse-wheel',beforeZoom:before.camera.zoom,afterZoom:zoomed.camera.zoom,dragged:true,dragCameras:{before:zoomed.camera,after:moved.camera},selectionPreserved:true,resizedTo:dimensions,postResizePolygon:afterResize.id};
 }
-async function mapInteraction(cdp,profile){
+async function mapInteraction(cdp,profile,performanceIssues){
   const started=Date.now();await clearMapStories(cdp,profile);await closeMapSheet(cdp,profile);
   const country=await settledMap(cdp,profile.engine);
-  await evaluate(cdp,'window.__tropnikPerf={cls:0,longest:0}');
+  await evaluate(cdp,'window.__tropnikPerf={cls:0,longest:0};window.__tropnikPerfStart=performance.now()');
+  await diagnosticPhase(cdp,'map-interactions');
   const firstDirection=await selectMapDirection(cdp,profile,'altai','Алтай');
   await closeMapSheet(cdp,profile);
   const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
@@ -482,7 +494,9 @@ async function mapInteraction(cdp,profile){
   const secondDirection=await selectMapDirection(cdp,profile,'baikal','Байкал');
   const polygon=await polygonTouch(cdp,profile),gestures=await mapGestures(cdp,profile);
   const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
-  assert.ok(perf.longest<(profile.mobile?350:750),`${profile.name}: map interaction long task ${perf.longest}ms`);
+  if(profile.mobile){
+    if(!(perf.longest<350))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:350});
+  }else assert.ok(perf.longest<750,`${profile.name}: map interaction long task ${perf.longest}ms`);
   return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
@@ -498,6 +512,7 @@ const browser=spawn(browserBinary(),[
 ],{stdio:['ignore','ignore','pipe']});
 let browserErrors='';browser.stderr.on('data',chunk=>{browserErrors+=chunk;});
 let cdp,currentProfile;
+const results=[],desktopProfiles=[],mapInteractions=[],profilePerformance=[],performanceIssues=[];
 try{
   await waitFor(`http://127.0.0.1:${debugPort}/json/version`);
   const target=await (await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(`http://127.0.0.1:${httpPort}/tropnik/`)}`,{method:'PUT'})).json();
@@ -505,10 +520,16 @@ try{
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
     window.__tropnikPerf={cls:0,longest:0};
-    try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput)window.__tropnikPerf.cls+=entry.value;}).observe({type:'layout-shift',buffered:true});}catch{}
+    window.__tropnikPerfStart=0;window.__tropnikPhase='loading';window.__tropnikPhases=[];window.__tropnikLayoutShifts=[];
+    try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput){
+      window.__tropnikPerf.cls+=entry.value;
+      const rect=value=>({x:value.x,y:value.y,width:value.width,height:value.height});
+      const nodePath=node=>{let element=node?.nodeType===1?node:node?.parentElement;const parts=[];for(let i=0;element&&i<4;i++,element=element.parentElement)parts.push(element.tagName.toLowerCase()+(element.id?'#'+element.id:'')+'['+(element.getAttribute('class')||'').slice(0,180)+']');return parts.join(' < ');};
+      window.__tropnikLayoutShifts.push({time:entry.startTime,observedAt:performance.now(),lastInputTime:entry.lastInputTime,counterStart:window.__tropnikPerfStart,phase:window.__tropnikPhase,value:entry.value,cumulative:window.__tropnikPerf.cls,sources:(entry.sources||[]).slice(0,5).map(source=>({node:nodePath(source.node),previous:rect(source.previousRect),current:rect(source.currentRect)}))});
+      if(window.__tropnikLayoutShifts.length>40)window.__tropnikLayoutShifts.shift();
+    }}).observe({type:'layout-shift',buffered:true});}catch{}
     try{new PerformanceObserver(list=>{for(const entry of list.getEntries())window.__tropnikPerf.longest=Math.max(window.__tropnikPerf.longest,entry.duration);}).observe({type:'longtask',buffered:true});}catch{}
   `});
-  const results=[],desktopProfiles=[],mapInteractions=[];
   for(const profile of profiles){
     currentProfile=profile.name;
     const geometry=await loadProfile(cdp,`http://127.0.0.1:${httpPort}/tropnik/`,profile);
@@ -520,11 +541,14 @@ try{
     if(!profile.mobile){
       const coarse=await evaluate(cdp,"matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0");
       assert.equal(coarse,false,'The desktop MapLibre check must use a fine pointer');
-      const interaction=await mapInteraction(cdp,profile);mapInteractions.push(interaction);
+      const interaction=await mapInteraction(cdp,profile,performanceIssues);mapInteractions.push(interaction);
       desktopProfiles.push({name:profile.name,width:profile.width,height:profile.height,engine:geometry.engine,coarse:false,mapInteractionTested:true});
+      profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
       continue;
     }
+    await diagnosticPhase(cdp,'sheet-before');
     const sheet=await touchSheet(cdp);
+    await diagnosticPhase(cdp,'sheet-after');
     if(sheet.available){
       assert.equal(sheet.closed.state,'closed',`${profile.name}: initial sheet state`);
       assert.equal(sheet.closed.summaryVisible,true,`${profile.name}: collapsed preview is not visible`);
@@ -536,25 +560,34 @@ try{
       assert.equal(sheet.final.focused,false,`${profile.name}: sheet handle retained touch focus`);
       assert.ok(sheet.heightDelta<1.1,`${profile.name}: panel height changed during transform animation (${sheet.heightDelta}px)`);
     }
+    await diagnosticPhase(cdp,'layers-before');
     const mapGeometry=await checkMapGeometry(cdp,profile);
+    await diagnosticPhase(cdp,'layers-after');
+    await diagnosticPhase(cdp,'story-before');
     const touch=await touchPrevious(cdp,profile);
+    await diagnosticPhase(cdp,'story-after');
     if(touch.available){
       assert.equal(touch.focused,false,`${profile.name}: story navigation retained touch focus`);
       assert.equal(touch.background,touch.nextBackground,`${profile.name}: previous-story control kept a sticky visual state`);
-      assert.ok(touch.cls<.12,`${profile.name}: interaction layout shift ${touch.cls}`);
-      assert.ok(touch.longest<350,`${profile.name}: long task ${touch.longest}ms`);
+      if(!(touch.cls<.12))performanceIssues.push({profile:profile.name,phase:'story-after',metric:'layoutShift',value:touch.cls,limit:.12});
+      if(!(touch.longest<350))performanceIssues.push({profile:profile.name,phase:'story-after',metric:'longestTaskMs',value:touch.longest,limit:350});
     }
-    const interaction=profile.mapInteraction?await mapInteraction(cdp,profile):null;
+    const interaction=profile.mapInteraction?await mapInteraction(cdp,profile,performanceIssues):null;
     if(interaction)mapInteractions.push(interaction);
     results.push({...profile,geometry,sheet,mapGeometry,touch,interaction});
+    profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
   }
+  // Preserve all functional pointer evidence when only a mobile performance
+  // budget fails. The same strict limits still block verified output/upload.
+  assert.deepEqual(performanceIssues,[],'Mobile rendering exceeded the unchanged CLS/long-task budgets');
   const report={verified:true,mapInteractionSchemaVersion:1,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,mapGeometry,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,mapGeometry,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
 }catch(error){
-  const failure={profile:currentProfile,error:error.stack||String(error)};
+  const failure={profile:currentProfile,error:error.stack||String(error),performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(cdp){
     try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);}catch{}
+    try{failure.performance=await performanceDiagnostics(cdp);}catch{}
     try{const screenshot=await cdp.call('Page.captureScreenshot',{format:'png'});await writeFile(new URL('browser-failure.png',ROOT),Buffer.from(screenshot.data,'base64'));}catch{}
   }
   await writeFile(new URL('browser-failure.json',ROOT),JSON.stringify(failure,null,2)+'\n');

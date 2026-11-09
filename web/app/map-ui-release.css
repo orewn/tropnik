@@ -1,4 +1,5 @@
 /* Map UI release pass: one control grid, protected edges and photo-led stories. */
+.atlas-wrap .leaflet-route-tooltip{width:max-content;max-width:230px;overflow-wrap:break-word}
 :root{
  --map-ui-edge:24px;
  --map-ui-top:24px;

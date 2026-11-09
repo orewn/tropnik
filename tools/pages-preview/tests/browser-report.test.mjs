@@ -16,6 +16,8 @@ test('both upload and public verification require real mobile and desktop map in
   value=>value.sourceCommit='b'.repeat(40),
   value=>value.profiles.pop(),
   value=>value.profiles[0].sheetTested=false,
+  value=>value.profiles[0].layoutShift=.12,
+  value=>value.profiles[0].longestTaskMs=350,
   value=>value.desktopProfiles[0].engine='leaflet',
   value=>value.desktopProfiles[0].coarse=true,
   value=>value.mapInteractions.pop(),
