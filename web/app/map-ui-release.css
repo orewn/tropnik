@@ -114,7 +114,19 @@
  .explore-layout .fact-closed{top:calc(var(--map-top) + 60px);bottom:auto}
  .explore-layout .fact-card{max-height:calc(100% - var(--sheet-peek,156px) - var(--map-top) - 72px);overflow:auto;overscroll-behavior:contain}
 }
-@media(max-height:620px) and (orientation:landscape){.explore-layout .map-context{min-height:48px}.explore-layout .map-style-switch{min-height:48px}.explore-layout .map-controls{top:calc(var(--map-top) + 60px)}.explore-layout .layer-control{top:auto;bottom:calc(var(--map-bottom-inset,0px) + 12px)}.explore-layout .fact-card.fact-card--compact{top:calc(var(--map-top) + 60px);max-height:160px}}
+@media(max-height:620px) and (orientation:landscape){
+ .explore-layout .map-context{min-height:48px}
+ .explore-layout .map-style-switch{min-height:48px}
+ .explore-layout .map-controls{top:calc(var(--map-top) + 60px)}
+ .explore-layout .layer-control{top:auto;bottom:calc(var(--map-bottom-inset,0px) + 12px)}
+ /* Keep the scrollable story above the sheet or bottom control row. */
+ .explore-layout .fact-card.fact-card--compact{
+  top:calc(var(--map-top) + 60px);bottom:auto;
+  left:calc(var(--explore-panel-width) + var(--map-left));right:auto;
+  max-height:min(160px,calc(100% - max(var(--sheet-peek,0px),76px) - var(--map-top) - 72px));
+  overflow:auto;overscroll-behavior:contain;
+ }
+}
 @media(prefers-reduced-motion:reduce){.fact-photo img,.explore-layout .map-style-switch button,.explore-layout .map-controls button,.explore-layout .layer-button{transition:none!important}.fact-card:hover .fact-photo img{transform:none}}
 @media(prefers-reduced-transparency:reduce){.explore-layout .map-context,.explore-layout .map-style-switch,.explore-layout .map-controls,.explore-layout .layer-button,.explore-layout .layer-menu{backdrop-filter:none;background:var(--surface)}}
 
