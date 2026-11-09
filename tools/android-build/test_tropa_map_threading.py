@@ -21,7 +21,7 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
     def test_focus_effect_keeps_io_off_main_and_maplibre_on_main(self) -> None:
         effect = between(
             self.source,
-            "LaunchedEffect(map, styleRevision, displayArea, selected?.id, route?.id) {",
+            "LaunchedEffect(map, styleRevision, displayArea, selected?.id, route?.id, route?.apiRevisionId, route?.geometryAsset, route?.inlineGeometry) {",
             "LaunchedEffect(map, styleRevision, displayArea, position) {",
         )
         io_marker = "withContext(Dispatchers.IO)"
@@ -36,6 +36,13 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
         self.assertIn("if (lastFittedFocus == focusKey) return@ui", ui_block)
         self.assertIn("nativeMap.setLatLngBoundsForCameraTarget", ui_block)
         self.assertIn("nativeMap.animateCamera", ui_block)
+
+    def test_route_revision_or_geometry_changes_restart_the_source_effect(self) -> None:
+        effect_key = self.source.split("LaunchedEffect(map, styleRevision, displayArea, selected?.id", 1)[1].split(" {", 1)[0]
+        for field in ["route?.id", "route?.apiRevisionId", "route?.geometryAsset", "route?.inlineGeometry"]:
+            self.assertIn(field, effect_key)
+        self.assertNotIn("hashCode", effect_key)
+        self.assertNotIn("MessageDigest", effect_key)
 
     def test_position_effect_mutates_map_only_from_main_dispatcher(self) -> None:
         effect = between(

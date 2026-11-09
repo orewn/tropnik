@@ -1,11 +1,17 @@
 package ru.tropa.app
 
 import android.view.View
+import android.view.ViewGroup
+import android.view.InputDevice
+import android.view.MotionEvent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.PointF
 import android.graphics.Rect
+import android.graphics.RectF
+import android.os.SystemClock
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebView
 import androidx.compose.ui.test.*
@@ -24,6 +30,11 @@ import org.junit.runner.RunWith
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
+import ru.tropa.app.data.Catalog
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -61,13 +72,86 @@ class LocalExperienceTest {
     }
 
     @Test fun canOpenRegionAndReadOfficialRestrictionWithoutAnAccount() {
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_krasnodar"))
-        app.onNodeWithTag("region_krasnodar").performClick()
+        tapRegionMarker("krasnodar")
+        app.onNodeWithText("Обзор района").assertExists()
+        app.onNodeWithTag("go_back").assertExists()
         app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
         app.onNodeWithTag("route_kavkaz-8a").performClick()
         app.onNodeWithText("Ограничение доступа").assertExists()
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("save_route"))
         app.onNodeWithTag("save_route").assertIsEnabled()
+    }
+
+    private fun tapRegionMarker(regionId: String) {
+        val region = Catalog.load(app.activity).regions.single { it.id == regionId }
+        // The map is the third catalogue item. Bring its full height into view
+        // before using the SDK projection; no region-list click or callback is used.
+        app.onNodeWithTag("explore_list").performScrollToIndex(2)
+        fun findMapView(view: View): MapView? {
+            if (view is MapView) return view
+            if (view is ViewGroup) for (index in 0 until view.childCount) {
+                findMapView(view.getChildAt(index))?.let { return it }
+            }
+            return null
+        }
+        var view: MapView? = null
+        app.waitUntil(timeoutMillis = 10_000) {
+            var attached = false
+            app.runOnUiThread {
+                view = findMapView(app.activity.window.decorView)
+                attached = view?.isAttachedToWindow == true
+            }
+            attached
+        }
+        val mapView = requireNotNull(view)
+        val ready = CountDownLatch(1)
+        var nativeMap: MapLibreMap? = null
+        app.runOnUiThread { mapView.getMapAsync { nativeMap = it; ready.countDown() } }
+        assertTrue("MapLibre did not initialize", ready.await(10, TimeUnit.SECONDS))
+        val map = requireNotNull(nativeMap)
+        app.waitUntil(timeoutMillis = 20_000) {
+            var loaded = false
+            app.runOnUiThread { loaded = map.style?.isFullyLoaded == true }
+            loaded && app.onAllNodes(hasText("Открываем карту России…")).fetchSemanticsNodes().isEmpty()
+        }
+        app.waitForIdle()
+        // Separate nearby region markers at a normal map zoom. This changes
+        // only the viewport; selection must still travel through a real touch.
+        app.runOnUiThread { map.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(region.latitude, region.longitude), 6.0)) }
+        var point = PointF()
+        app.waitUntil(timeoutMillis = 15_000) {
+            var rendered = false
+            app.runOnUiThread {
+                point = map.projection.toScreenLocation(LatLng(region.latitude, region.longitude))
+                val hits = map.queryRenderedFeatures(RectF(point.x - 8, point.y - 8, point.x + 8, point.y + 8), "region-markers")
+                rendered = hits.any { it.hasProperty("regionId") && it.getStringProperty("regionId") == regionId }
+            }
+            rendered
+        }
+        val location = IntArray(2)
+        val visible = Rect()
+        app.runOnUiThread {
+            mapView.getLocationOnScreen(location)
+            assertTrue("Map must be visible for touch injection", mapView.getGlobalVisibleRect(visible))
+        }
+        val x = location[0] + point.x
+        val y = location[1] + point.y
+        assertTrue("Projected marker must be on screen", visible.contains(x.toInt(), y.toInt()))
+        screenshot("map-region-before-tap")
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        val downTime = SystemClock.uptimeMillis()
+        for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
+            val event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action, x, y, 0)
+            event.source = InputDevice.SOURCE_TOUCHSCREEN
+            try { assertTrue("Map touch injection failed", automation.injectInputEvent(event, true)) }
+            finally { event.recycle() }
+        }
+        app.waitUntil(timeoutMillis = 10_000) {
+            app.onAllNodes(hasText("Обзор района")).fetchSemanticsNodes().isNotEmpty()
+        }
+        app.onNodeWithTag("explore_list").performScrollToIndex(0)
+        app.onNodeWithText(region.name).assertExists()
+        screenshot("map-region-after-tap")
     }
 
     @Test fun noServerMeansExplicitConfigurationNotInventedSocialActivity() {

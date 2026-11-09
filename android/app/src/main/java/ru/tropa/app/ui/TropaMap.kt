@@ -61,6 +61,9 @@ import ru.tropa.app.data.mapStyleForConnection
 import ru.tropa.app.data.Region
 import ru.tropa.app.data.RussiaDisplayArea
 import ru.tropa.app.data.TrailRoute
+import ru.tropa.app.data.prepareMapRouteGeometry
+
+private const val ROUTE_GEOMETRY_ERROR = "Линия маршрута не загрузилась. Карточка и обзорная карта доступны."
 
 @Composable
 fun TropaMap(
@@ -208,7 +211,7 @@ fun TropaMap(
         }
     }
 
-    LaunchedEffect(map, styleRevision, displayArea, selected?.id, route?.id) {
+    LaunchedEffect(map, styleRevision, displayArea, selected?.id, route?.id, route?.apiRevisionId, route?.geometryAsset, route?.inlineGeometry) {
         val nativeMap = map ?: return@LaunchedEffect
         if (styleRevision == 0 || styleLoading) return@LaunchedEffect
         val area = displayArea ?: return@LaunchedEffect
@@ -217,21 +220,26 @@ fun TropaMap(
                 runCatching { context.assets.open(asset).bufferedReader().use { it.readText() } }.getOrNull()
             }
         }
+        val prepared = geometry?.let { json ->
+            withContext(Dispatchers.Default) { runCatching { prepareMapRouteGeometry(json) } }
+        }
         withContext(Dispatchers.Main.immediate) ui@{
             nativeMap.setLatLngBoundsForCameraTarget(area.cameraBounds)
             scopeNotice = null
             val style = nativeMap.style ?: return@ui
             style.getSourceAs<GeoJsonSource>("regions")?.setGeoJson(regionPoints(regions))
             style.getSourceAs<GeoJsonSource>("focus")?.setGeoJson(points(selected?.let { listOf(it.longitude to it.latitude) } ?: emptyList()))
-            style.getSourceAs<GeoJsonSource>("route")?.setGeoJson(geometry ?: points(emptyList()))
+            val routeData = prepared?.getOrNull()
+            style.getSourceAs<GeoJsonSource>("route")?.setGeoJson(routeData?.json ?: points(emptyList()))
+            if (prepared?.isFailure == true) error = ROUTE_GEOMETRY_ERROR
+            else if (error == ROUTE_GEOMETRY_ERROR) error = null
             val focusKey = "${selected?.id}:${route?.id}"
             if (lastFittedFocus == focusKey) return@ui
             lastFittedFocus = focusKey
-            if (geometry != null) {
-                val coordinates = mutableListOf<LatLng>()
-                collectCoordinates(JSONObject(geometry), coordinates)
-                if (coordinates.size > 1) {
-                    nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.Builder().includes(coordinates).build(), 52), 500)
+            if (routeData != null) {
+                routeData.frame?.let { frame ->
+                    val bounds = LatLngBounds.from(frame.north, frame.east, frame.south, frame.west)
+                    nativeMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 52), 500)
                 }
             } else if (selected != null) {
                 nativeMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
@@ -321,19 +329,3 @@ private fun points(locations: List<Pair<Double, Double>>): String = JSONObject()
         JSONObject().put("type", "Feature").put("properties", JSONObject())
             .put("geometry", JSONObject().put("type", "Point").put("coordinates", JSONArray(listOf(longitude, latitude))))
     })).toString()
-
-private fun collectCoordinates(value: Any?, result: MutableList<LatLng>) {
-    when (value) {
-        is JSONObject -> {
-            if (value.has("coordinates")) collectCoordinates(value.get("coordinates"), result)
-            if (value.has("geometry")) collectCoordinates(value.get("geometry"), result)
-            if (value.has("features")) collectCoordinates(value.get("features"), result)
-        }
-        is JSONArray -> {
-            if (value.length() >= 2 && value.opt(0) is Number && value.opt(1) is Number) {
-                val longitude = value.getDouble(0); val latitude = value.getDouble(1)
-                if (longitude in -180.0..180.0 && latitude in -90.0..90.0) result += LatLng(latitude, longitude)
-            } else for (i in 0 until value.length()) collectCoordinates(value.get(i), result)
-        }
-    }
-}

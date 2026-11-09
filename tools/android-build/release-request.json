@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "requestId": "android-0-4-17-preview-viewport-height-20261109",
-  "version": "0.4.17-preview",
-  "versionCode": 9,
-  "notesFile": "tools/android-build/release-notes/0.4.17-preview.md"
+  "requestId": "android-0-4-18-preview-map-interaction-20261109",
+  "version": "0.4.18-preview",
+  "versionCode": 10,
+  "notesFile": "tools/android-build/release-notes/0.4.18-preview.md"
 }
