@@ -70,11 +70,12 @@ export function bindMapFrameRefit(surface:HTMLElement,panel:Element|null,refit:M
  const keyboard=(event:KeyboardEvent)=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','+','=','-','−','Home','End','PageUp','PageDown'].includes(event.key))stop();};
  const transition=(event:Event)=>{
   const property=(event as TransitionEvent).propertyName;
-  if(event.target!==panel||(property!=='transform'&&property!=='height'))return;
-  // Insets belong to the visible layout even when a manual camera or an open
-  // route prevents automatic territory framing.
-  onGeometrySettled?.();
-  refit.settled();
+  if(event.target===panel&&(property==='transform'||property==='height')){
+   // Insets belong to the visible layout even when a manual camera or an open
+   // route prevents automatic territory framing.
+   onGeometrySettled?.();
+   refit.settled();
+  }
  };
  surface.addEventListener('pointerdown',stop,{passive:true});
  surface.addEventListener('touchstart',stop,{passive:true});
