@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "version": "0.4.16",
+  "preparedDate": "2026-11-09",
+  "web": {
+    "url": "https://orewn.github.io/tropnik/",
+    "plannerUrl": "https://orewn.github.io/tropnik/planner/",
+    "publishedIdentityUrl": "https://orewn.github.io/tropnik/build-info.json",
+    "workflowUrl": "https://github.com/orewn/tropnik/actions/workflows/pages.yml",
+    "checks": {
+      "unitTestsPassed": 332,
+      "typeScriptProjectsPassed": 2,
+      "apkAndPathTestsPassed": 12,
+      "androidToolTestsPassed": 50,
+      "releasePipelineTestsPassed": 16,
+      "landscapeBootstrapTestsPassed": 7,
+      "publicArchiveBoundaryTestsPassed": 2
+    },
+    "browserRegression": "A real two-stage plan switches from 3.46 km ready/GPX enabled to 1.95 km with an empty second stage/GPX disabled, then restores ready/export when the endpoint is restored.",
+    "browserRegressionVerifiedOnPublicSite": true,
+    "footerLinksVerifiedOnPublicSite": true,
+    "screenshot": {
+      "file": "tropnik-planner-release-1794239972897.jpg",
+      "sha256": "56b76aa8ebc88a441bc5446fbbd3ab583ced629fdbf352c8c7371ae56d5b8f03",
+      "capturedSourceCommit": "f2907eec8493cc699cbe96cfc7b074daea2e07ca"
+    }
+  },
+  "android": {
+    "version": "0.4.17-preview",
+    "versionCode": 9,
+    "architecture": "arm64-v8a",
+    "releaseRequestId": "android-0-4-17-preview-viewport-height-20261109",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "bytes": 24524434,
+    "sha256": "300bdcf1080df6f4902bd72ed1773b1a5ab4e7463a4bf7e6e7211385064bf6da",
+    "signature": "development / debug",
+    "compatibleWithPreviousPreview": false,
+    "signingCertificateSha256": "1d1c38c1200a7f77a752f36830b3b3306d50c5c723f7aff557d7ebc6e868a26c",
+    "sourceCommit": "59bbe08f0b03cae49ab5803a9fa0cde08118dcde",
+    "workflowRunId": 42649975534,
+    "jvmTestsPassed": 40,
+    "deviceTestCount": 6,
+    "deviceTestEnvironment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / SwiftShader",
+    "physicalDeviceVerified": false,
+    "deviceExecutionVerified": false,
+    "releasePayloadDeviceVerified": false,
+    "codeDeviceExecutionVerified": true,
+    "universalReleasePayloadDeviceVerified": true,
+    "testedUniversalSha256": "0e197053664033c4e1ac9bedd369240b31d3385dcc4b8da0629d5028b91c7ec0",
+    "plannerMode": "browser",
+    "plannerUrl": "https://orewn.github.io/tropnik/planner/",
+    "fullRussiaDetailedOffline": false,
+    "losslessPayloadVerified": true,
+    "onlineDetailedMapAvailable": true,
+    "russiaCoverageProvenanceSha256": "b8bc96450cc3777d454d87da3018a76db4bc10323720d76cf512831d0e66ac93",
+    "sceneGridDimensions": [
+      513,
+      513
+    ],
+    "russiaOverviewTileCount": 341,
+    "russiaOverviewManifestSha256": "0be4600a67f7696c74846dfdb2873016e1fc31e7d386353a6afa180f9fa3a4f3",
+    "catalogReferenceRouteCount": 306,
+    "catalogRegionCount": 15,
+    "catalogLearningRouteCount": 1,
+    "catalogReferenceOnlyRouteCount": 29,
+    "catalogSha256": "62f04958424b7ef7c366c480828ffec3c4206429752a864f3d73a947ccbc0a3a",
+    "catalogManifestSha256": "f75be35b2c3660e3b25f63c8000b7608b55bcb8cb238a77528dd74df0c97c4b8",
+    "localRouteGeometryCount": 277,
+    "releaseUrl": "https://github.com/orewn/tropnik/releases/tag/v0.4.17-preview",
+    "releaseId": 439345244,
+    "releasePublished": true,
+    "releasePrerelease": true,
+    "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/42649975534",
+    "universal": {
+      "bytes": 31680468,
+      "sha256": "0e197053664033c4e1ac9bedd369240b31d3385dcc4b8da0629d5028b91c7ec0",
+      "releasePayloadDeviceVerified": true,
+      "testedArchitecture": "x86_64"
+    },
+    "manifestSha256": "0197dd9a172e0902af73709e1465f46eb2dc3b2873c4ec1d01343f337f018089",
+    "landscapeVisibleFrameChecksPassed": 6,
+    "landscapeManualScreenshotReviewPassed": true,
+    "landscapeVerificationReport": "android-0.4.17-pixels.json",
+    "publicAssetSha256": {
+      "tropnik-preview.apk": "0e197053664033c4e1ac9bedd369240b31d3385dcc4b8da0629d5028b91c7ec0",
+      "android-manifest.json": "0197dd9a172e0902af73709e1465f46eb2dc3b2873c4ec1d01343f337f018089",
+      "tropnik-arm64-preview.apk": "300bdcf1080df6f4902bd72ed1773b1a5ab4e7463a4bf7e6e7211385064bf6da",
+      "checksums.sha256": "c77fb473b7bc96884294a85c50d29350202ad1fefd95c6f3c5f18fb75c2c3ace",
+      "tropnik-0.4.17-preview-source.tar.gz": "8c8b7d6e1baf49a5d9c0e1e2dda25b772f677a81ab57f95d916067d79192b2e5",
+      "verification-reports.zip": "bd8a9b00dec057d719bc06e06ab9a578ada7f070682eaa438a4781b8c58a37c8"
+    }
+  },
+  "limitations": [
+    "Android development/debug signature; production/store signing not configured",
+    "Preview signing certificate differs from previous release; update compatibility is false",
+    "No physical ARM64 device execution",
+    "Planner runs in the browser and stores local browser plans",
+    "No live social backend on public static Pages",
+    "No field-verified trail navigation; reference geometry and unsupported transfers remain explicit"
+  ]
+}

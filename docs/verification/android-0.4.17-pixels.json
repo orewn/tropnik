@@ -1,0 +1,356 @@
+{
+  "schemaVersion": 1,
+  "accepted": true,
+  "sourceCommit": "59bbe08f0b03cae49ab5803a9fa0cde08118dcde",
+  "workflowRunId": "42649975534",
+  "version": "0.4.17-preview",
+  "versionCode": 9,
+  "buildArtifact": {
+    "id": 13689970401,
+    "name": "tropnik-android-preview-1",
+    "size_in_bytes": 55802787,
+    "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13689970401",
+    "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13689970401/zip",
+    "expired": false,
+    "created_at": "2026-11-09T16:00:24Z",
+    "expires_at": "2026-11-23T16:00:21Z",
+    "updated_at": "2026-11-09T16:00:24Z",
+    "digest": "sha256:db1cc06bcf4c5fbffdb525f397f2884f56d9f98375ec1201c09c883ac8196d41",
+    "workflow_run": {
+      "id": 42649975534,
+      "repository_id": 1447843944,
+      "head_repository_id": 1447843944,
+      "head_branch": "main",
+      "head_sha": "59bbe08f0b03cae49ab5803a9fa0cde08118dcde"
+    }
+  },
+  "deviceArtifact": {
+    "id": 13688919497,
+    "name": "tropnik-android-api35-instrumentation-1",
+    "size_in_bytes": 4361517,
+    "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13688919497",
+    "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13688919497/zip",
+    "expired": false,
+    "created_at": "2026-11-09T16:03:46Z",
+    "expires_at": "2026-11-23T16:03:44Z",
+    "updated_at": "2026-11-09T16:03:46Z",
+    "digest": "sha256:ed4ddd7fae0ba9386e972d334b4e3a2844c1ef4cd819c7cdee9fd37d0d39311f",
+    "workflow_run": {
+      "id": 42649975534,
+      "repository_id": 1447843944,
+      "head_repository_id": 1447843944,
+      "head_branch": "main",
+      "head_sha": "59bbe08f0b03cae49ab5803a9fa0cde08118dcde"
+    }
+  },
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "rawCasesReparsed": true,
+  "installedArtifactBytesVerified": true,
+  "installedApks": {
+    "tropnik-preview.apk": {
+      "bytes": 31680468,
+      "sha256": "0e197053664033c4e1ac9bedd369240b31d3385dcc4b8da0629d5028b91c7ec0"
+    },
+    "tropnik-instrumentation-tests.apk": {
+      "bytes": 1093281,
+      "sha256": "193c8027120b9246a543ca363422221d005d6de3b1612e677910981a8c750b56"
+    }
+  },
+  "thresholds": {
+    "minimumColors": 12,
+    "maximumDominantFractionExclusive": 0.95,
+    "minimumVariedTiles": 4
+  },
+  "expectedFrameChecks": 6,
+  "capturedFrameChecks": 6,
+  "frames": [
+    {
+      "name": "recovery-after-retry",
+      "reportSha256": "1078fe7eecda8920b7155b15237f1f7823a05254ead830d612eada6a616fc1b2",
+      "passed": true,
+      "nativeBounds": [
+        0,
+        277,
+        1080,
+        2188
+      ],
+      "nativeHeightPx": 1911,
+      "layoutParams": [
+        -1,
+        -1
+      ],
+      "density": 2.625,
+      "viewportCss": [
+        412,
+        728
+      ],
+      "rootAndCanvasCssHeights": {
+        "html": 728,
+        "body": 728,
+        "landscape": 728,
+        "canvas": 728
+      },
+      "viewportHeightMatchesNative": true,
+      "colors": 76,
+      "dominantFraction": 0.564453125,
+      "variedTiles": 7,
+      "sampleCount": 3072,
+      "roi": [
+        216,
+        926,
+        864,
+        1767
+      ]
+    },
+    {
+      "name": "recovery-before-error",
+      "reportSha256": "1078fe7eecda8920b7155b15237f1f7823a05254ead830d612eada6a616fc1b2",
+      "passed": true,
+      "nativeBounds": [
+        0,
+        277,
+        1080,
+        2188
+      ],
+      "nativeHeightPx": 1911,
+      "layoutParams": [
+        -1,
+        -1
+      ],
+      "density": 2.625,
+      "viewportCss": [
+        412,
+        728
+      ],
+      "rootAndCanvasCssHeights": {
+        "html": 728,
+        "body": 728,
+        "landscape": 728,
+        "canvas": 728
+      },
+      "viewportHeightMatchesNative": true,
+      "colors": 76,
+      "dominantFraction": 0.564453125,
+      "variedTiles": 7,
+      "sampleCount": 3072,
+      "roi": [
+        216,
+        926,
+        864,
+        1767
+      ]
+    },
+    {
+      "name": "scene-landscape",
+      "reportSha256": "09a19c7aa47d28cdd0a159c5c8157692131a1930cea1ae21ea6bfe099d2664f4",
+      "passed": true,
+      "nativeBounds": [
+        128,
+        189,
+        2400,
+        1017
+      ],
+      "nativeHeightPx": 828,
+      "layoutParams": [
+        -1,
+        -1
+      ],
+      "density": 2.625,
+      "viewportCss": [
+        866,
+        316
+      ],
+      "rootAndCanvasCssHeights": {
+        "html": 316.19049072265625,
+        "body": 316.19049072265625,
+        "landscape": 316.19049072265625,
+        "canvas": 316.19049072265625
+      },
+      "viewportHeightMatchesNative": true,
+      "colors": 73,
+      "dominantFraction": 0.72265625,
+      "variedTiles": 6,
+      "sampleCount": 3072,
+      "roi": [
+        582,
+        470,
+        1945,
+        834
+      ],
+      "screenshot": {
+        "name": "scene-landscape.png",
+        "bytes": 272188,
+        "sha256": "76cbefd6308a6f226dd97a9469b565272a891e06c56d807823a19e10c062aed8",
+        "dimensions": [
+          2400,
+          1080
+        ],
+        "independentPixelCheck": {
+          "colors": 73,
+          "dominantFraction": 0.72265625,
+          "variedTiles": 6
+        }
+      },
+      "retainedScreenshot": "android-0.4.17-scene-landscape.png"
+    },
+    {
+      "name": "scene-portrait",
+      "reportSha256": "1078fe7eecda8920b7155b15237f1f7823a05254ead830d612eada6a616fc1b2",
+      "passed": true,
+      "nativeBounds": [
+        0,
+        277,
+        1080,
+        2188
+      ],
+      "nativeHeightPx": 1911,
+      "layoutParams": [
+        -1,
+        -1
+      ],
+      "density": 2.625,
+      "viewportCss": [
+        412,
+        728
+      ],
+      "rootAndCanvasCssHeights": {
+        "html": 728,
+        "body": 728,
+        "landscape": 728,
+        "canvas": 728
+      },
+      "viewportHeightMatchesNative": true,
+      "colors": 76,
+      "dominantFraction": 0.564453125,
+      "variedTiles": 7,
+      "sampleCount": 3072,
+      "roi": [
+        216,
+        926,
+        864,
+        1767
+      ],
+      "screenshot": {
+        "name": "scene-portrait.png",
+        "bytes": 346581,
+        "sha256": "bd45473c5895ca876264829b9b3285bd3264a321c64c7c426eec69d62e2e5a5d",
+        "dimensions": [
+          1080,
+          2400
+        ],
+        "independentPixelCheck": {
+          "colors": 60,
+          "dominantFraction": 0.6572265625,
+          "variedTiles": 7
+        }
+      },
+      "retainedScreenshot": "android-0.4.17-scene-portrait.png"
+    },
+    {
+      "name": "scene-reopened",
+      "reportSha256": "670da8bfdba3f036908c638d5026c2bea062c8634afe71cd63c050b27d55a24d",
+      "passed": true,
+      "nativeBounds": [
+        0,
+        277,
+        1080,
+        2188
+      ],
+      "nativeHeightPx": 1911,
+      "layoutParams": [
+        -1,
+        -1
+      ],
+      "density": 2.625,
+      "viewportCss": [
+        412,
+        728
+      ],
+      "rootAndCanvasCssHeights": {
+        "html": 728,
+        "body": 728,
+        "landscape": 728,
+        "canvas": 728
+      },
+      "viewportHeightMatchesNative": true,
+      "colors": 65,
+      "dominantFraction": 0.5221354166666666,
+      "variedTiles": 8,
+      "sampleCount": 3072,
+      "roi": [
+        216,
+        926,
+        864,
+        1767
+      ]
+    },
+    {
+      "name": "scene-zoom",
+      "reportSha256": "eec52f71aa1e54ceab62c8df2595561a13256c6731a9a1233866412af5b57359",
+      "passed": true,
+      "nativeBounds": [
+        0,
+        277,
+        1080,
+        2188
+      ],
+      "nativeHeightPx": 1911,
+      "layoutParams": [
+        -1,
+        -1
+      ],
+      "density": 2.625,
+      "viewportCss": [
+        412,
+        728
+      ],
+      "rootAndCanvasCssHeights": {
+        "html": 728,
+        "body": 728,
+        "landscape": 728,
+        "canvas": 728
+      },
+      "viewportHeightMatchesNative": true,
+      "colors": 60,
+      "dominantFraction": 0.6572265625,
+      "variedTiles": 7,
+      "sampleCount": 3072,
+      "roi": [
+        216,
+        926,
+        864,
+        1767
+      ],
+      "screenshot": {
+        "name": "scene-zoom.png",
+        "bytes": 439833,
+        "sha256": "1958b7c5009f9dc5581770e37ea8a99ca5e7c43b5c6a3de959fc57decba7d028",
+        "dimensions": [
+          1080,
+          2400
+        ],
+        "independentPixelCheck": {
+          "colors": 65,
+          "dominantFraction": 0.5221354166666666,
+          "variedTiles": 8
+        }
+      },
+      "retainedScreenshot": "android-0.4.17-scene-zoom.png"
+    }
+  ],
+  "physicalDeviceVerified": false,
+  "arm64DeviceExecutionVerified": false,
+  "note": "Six actual emulator screen-pixel checks passed. Three retained scene screenshots were independently sampled. Portrait, zoom, rotation, reopen and recovery are represented; this does not claim ARM64/physical-device execution.",
+  "manualVisualReview": {
+    "passed": true,
+    "views": [
+      "scene-portrait",
+      "scene-zoom",
+      "scene-landscape"
+    ],
+    "result": "Terrain, trail and HTML controls are visibly rendered; zoom changes the visible terrain scale and landscape remains inside the viewport."
+  }
+}
