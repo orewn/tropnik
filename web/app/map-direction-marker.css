@@ -132,20 +132,15 @@
   overflow-wrap: anywhere;
   transform: translate(calc(-50% + var(--map-label-shift-x, 0px)), var(--map-label-shift-y, 0px));
   transform-origin: 50% 0;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
   transition: opacity 300ms cubic-bezier(.22, 1, .36, 1) !important;
 }
 .explore-layout .region-marker[data-map-label-placement='top'] .region-marker-label {
   top: auto;
   bottom: calc(50% + 18px);
   transform-origin: 50% 100%;
-}
-.explore-layout .region-marker:is(:hover, :focus-visible, .is-selected, .direction-cluster) .region-marker-label {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
 }
 .explore-layout .region-marker:is(:hover, :focus-visible, .is-selected) .region-marker-label {
   border-color: var(--forest);

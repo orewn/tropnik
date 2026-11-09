@@ -1,0 +1,487 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-09T22:13:10.939092+00:00",
+  "reviewer": "zoom_visual_review",
+  "candidate": "candidate7",
+  "commitPrefix": "03de50de",
+  "verdict": "issues-found-and-desktop-matrix-incomplete",
+  "allAvailableDesktopPngsReviewed": true,
+  "reviewedFrameCount": 23,
+  "releasePass": false,
+  "source": {
+    "manifest": "desktop-webgl.json",
+    "artifactVerification": "artifact-verification.json",
+    "artifactId": 13714427116,
+    "archiveSha256": "6fe444f7c1e1b944ff4883f1fd1c2883e27b5ffcfbff9271efc7fd385cd72682",
+    "verifiedAgainstGitHubDigest": true,
+    "reviewerRecheckedAllFrameHashes": true
+  },
+  "profile": {
+    "name": "desktop-webgl",
+    "engine": "maplibre",
+    "viewport": [
+      1440,
+      1000
+    ],
+    "mapAvailable": {
+      "left": 384,
+      "right": 1425,
+      "top": 72,
+      "bottom": 1000
+    },
+    "routeId": "kavkaz-8a",
+    "routeGeometry": "multipart; absence of source A/B annotations is intentional"
+  },
+  "scope": {
+    "routeFit": [
+      12.403718027935334
+    ],
+    "overview": [
+      1.90540610449558
+    ],
+    "detail": [
+      2.90540610449558,
+      5.9054061044955795,
+      8.90540610449558,
+      11.90540610449558,
+      14.90540610449558,
+      18
+    ],
+    "satellite": [
+      2,
+      5,
+      8,
+      11,
+      14,
+      18
+    ],
+    "savedOverview": [
+      2.90540610449558,
+      5.9054061044955795,
+      8.90540610449558,
+      11.90540610449558,
+      14.90540610449558,
+      18
+    ],
+    "terrain": [
+      2.90540610449558,
+      5.9054061044955795,
+      8.90540610449558
+    ]
+  },
+  "issues": [
+    {
+      "id": "desktop-legend-contrast",
+      "severity": "design-defect",
+      "status": "confirmed-in-candidate7",
+      "frames": [
+        "desktop-webgl-route-fit-z12_40.png",
+        "desktop-webgl-detail-z11_91-key11.png",
+        "desktop-webgl-detail-z14_91-key14.png"
+      ],
+      "description": "The transparent desktop legend uses muted text directly on dark relief, making its line sample, direction key and access hint difficult to read.",
+      "cssCause": "map-polish.css supplies --muted; map-detail.css gives an opaque --surface backing only when data-map-imagery is satellite.",
+      "proposedScopedFix": "Generalize the existing .atlas-wrap[data-map-imagery=satellite] .map-legend backing rule to .atlas-wrap .map-legend, preserving all declarations and mobile display:none rules.",
+      "fixStateAtReview": "proposal sent to parent; no CSS edited by reviewer at report creation",
+      "remediation": {
+        "state": "fixed-in-working-tree-awaiting-candidate8-ci-visual-evidence",
+        "implementedBy": "root",
+        "file": "web/app/map-detail.css",
+        "change": "Generalized existing opaque satellite legend rule to .atlas-wrap .map-legend.",
+        "parentPreviewObservation": "Root reports HMR paper background rgb(255,254,250), forest text, 34px legend height and no control/source-caption overlap in desktop Leaflet fallback. Reviewer did not independently operate that preview."
+      }
+    }
+  ],
+  "positiveChecks": [
+    "No detected overlap between context, style switch, map controls, source credits, layer button and left panel in the 23 reviewed frames.",
+    "No clipped UI text in the reviewed frames; viewport-edge basemap labels naturally clip.",
+    "Source line has legible light halo in route-fit, detailed 11.91/14.91 and satellite 11/14 frames.",
+    "Satellite image age is absent in all six satellite frames; source credit remains visible.",
+    "Satellite z18 shows maximum-detail disclosure.",
+    "Saved overview consistently discloses limited boundary detail; close zooms show overview-without-details caption."
+  ],
+  "limitations": [
+    "The workflow stopped at its 12-minute budget. Native terrain z11/14/18, independent prepared 3D scene and short-source endpoints were not captured on desktop.",
+    "At z18 the fixed camera is between branches of this multipart route. These frames do not prove selected-line appearance at maximum zoom.",
+    "These screenshots do not establish physical-device performance, FPS or successful completion of all desktop audit gates.",
+    "Candidate7 uses pre-fix runtime. The mobile stale-relief palette issue and native-pan final-caption proof require new candidate8 browser evidence.",
+    "Satellite network audit records 304 finished image responses and 2 failed responses; six screenshot frames contain imagery, but this is not a claim of zero network failures."
+  ],
+  "auditContext": {
+    "schemaVersion": 4,
+    "geometryPassed": false,
+    "startedAt": "2026-11-09T21:57:09.144Z",
+    "satelliteFinishedImageResponses": 304,
+    "satelliteFailedResponses": 2
+  },
+  "frames": [
+    {
+      "file": "desktop-webgl-route-fit-z12_40.png",
+      "mode": "route-fit",
+      "zoom": 12.403718027935334,
+      "sha256": "22c68ae9ea73bcb00d6f8e5532778f947ba5fef34a392608ad2d9c3e755731ce",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "issue",
+      "findings": [
+        "Selected multipart source line remains legible with a light halo over dark relief.",
+        "Context, style switch, controls, left panel and credits toggle are separated.",
+        "Bottom transparent legend loses contrast against the shaded background."
+      ]
+    },
+    {
+      "file": "desktop-webgl-overview-z1_91.png",
+      "mode": "overview",
+      "zoom": 1.90540610449558,
+      "sha256": "9fca15b8016e39d8cba7c7c991c30161ef0ec553e36cec7d8b2f449e499a1b12",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Wide-area grouping labels are distinct and unclipped.",
+        "UI and bottom legend remain legible against the light map."
+      ]
+    },
+    {
+      "file": "desktop-webgl-detail-z2_91-key2.png",
+      "mode": "detail",
+      "zoom": 2.90540610449558,
+      "sha256": "4df4cb5cda3a8ac98e343d9d20142cfd8b5763a64d1e6d8e8741313d2a3c4081",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Region grouping is legible; no UI overlap or stranded loading message."
+      ]
+    },
+    {
+      "file": "desktop-webgl-detail-z5_91-key5.png",
+      "mode": "detail",
+      "zoom": 5.9054061044955795,
+      "sha256": "5a01b5a690e95edea3fd7c3ff0c727fb479d579b932cf97b4c3979956fc04dd1",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Selected regional cluster label is separated from controls; point groups remain visible."
+      ]
+    },
+    {
+      "file": "desktop-webgl-detail-z8_91-key8.png",
+      "mode": "detail",
+      "zoom": 8.90540610449558,
+      "sha256": "b369160f173fde533309d85b9b87a78f316717cbb1516d07e57f64673613dba7",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Region label is readable over relief; source points are outlined.",
+        "Small source line is visible at its selected marker."
+      ]
+    },
+    {
+      "file": "desktop-webgl-detail-z11_91-key11.png",
+      "mode": "detail",
+      "zoom": 11.90540610449558,
+      "sha256": "0eca2cad8010eab8e851de021c84ed2610d78e67812623f302a67a1e9acb979d",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "issue",
+      "findings": [
+        "Selected source branches and light route halo are legible; no false A/B endpoints on multipart geometry.",
+        "Bottom legend text and line sample lose contrast over dark relief, especially access hint and direction key."
+      ]
+    },
+    {
+      "file": "desktop-webgl-detail-z14_91-key14.png",
+      "mode": "detail",
+      "zoom": 14.90540610449558,
+      "sha256": "9148a355a5ee2f436f33f5a2c58a7c9aaa00def447f2920ec521f42425bca930",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "issue",
+      "findings": [
+        "Selected route segment on the left is clear at close scale and distinguishes itself from dashed basemap paths.",
+        "Bottom transparent legend has inconsistent contrast over shaded terrain."
+      ]
+    },
+    {
+      "file": "desktop-webgl-detail-z18_00-key18.png",
+      "mode": "detail",
+      "zoom": 18,
+      "sha256": "f550ebda022b70504dcfab5842863ea4c0817d3ac130ffa3efed7c684a44c68c",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass-with-scope-limit",
+      "findings": [
+        "Controls, context and panel remain legible and separated.",
+        "Camera is between source branches; this image shows a source-empty close-up and does not prove line appearance at z18.",
+        "No selected line disappearance is inferred from this static frame."
+      ]
+    },
+    {
+      "file": "desktop-webgl-satellite-z18_00-key18.png",
+      "mode": "satellite",
+      "zoom": 18,
+      "sha256": "e7a38040df95e173757bcafda595b7c76ec7ffc1b368818c38b8a777bf76e4a6",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass-with-scope-limit",
+      "findings": [
+        "Source credit is visible and image age is absent.",
+        "Maximum imagery-detail disclosure is visible; blurred imagery is not represented as new high-resolution detail.",
+        "White-backed legend and controls remain legible.",
+        "Source route is outside this fixed close-up camera."
+      ]
+    },
+    {
+      "file": "desktop-webgl-satellite-z14_00-key14.png",
+      "mode": "satellite",
+      "zoom": 14,
+      "sha256": "6e0ac746d604467144ec8f45375dc52e070720d01e0d8b14e35c94f73006eda9",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Selected route segment has a continuous light halo over imagery; basemap waterways and labels remain distinct.",
+        "Imagery credit is separate from legend and attribution toggle; age is absent."
+      ]
+    },
+    {
+      "file": "desktop-webgl-satellite-z11_00-key11.png",
+      "mode": "satellite",
+      "zoom": 11,
+      "sha256": "da9de0e9e53bf7a7eb1902255eb9c56cdb1fc43270e36f22ea17093177379076",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Selected route branches are visible with light halo over dark imagery.",
+        "POI text is outlined; controls and credits do not overlap.",
+        "Image age is absent."
+      ]
+    },
+    {
+      "file": "desktop-webgl-satellite-z8_00-key8.png",
+      "mode": "satellite",
+      "zoom": 8,
+      "sha256": "29c8b3d8b92160cbd19ea0cfea9650ddfb6b5f5b81191ab5c42c6b643feb5d6e",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Region label and point groups remain visible over imagery.",
+        "White-backed legend and source credit are readable; age is absent."
+      ]
+    },
+    {
+      "file": "desktop-webgl-satellite-z5_00-key5.png",
+      "mode": "satellite",
+      "zoom": 5,
+      "sha256": "fa053ca206d143ab3b94f57a2fac97a04cb362c3e6b83265a4e728fe048354de",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Regional grouping remains distinct; masked overview geography is visible.",
+        "Legend and imagery credit remain separate; age is absent."
+      ]
+    },
+    {
+      "file": "desktop-webgl-satellite-z2_00-key2.png",
+      "mode": "satellite",
+      "zoom": 2,
+      "sha256": "e4aebdcb60c5959b3b4e6aff839b8cedd7c0cddf78739a9809a8177722e3860d",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Wide-area grouping labels and source imagery remain visible.",
+        "No UI overlap; source credit is visible and age is absent."
+      ]
+    },
+    {
+      "file": "desktop-webgl-saved-overview-z2_91-key2.png",
+      "mode": "saved-overview",
+      "zoom": 2.90540610449558,
+      "sha256": "251bdbd93c29722d611dc111e001922da7dbf49ec217375c065f1b5c1a89f7f2",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Overview boundary limitation is explicitly shown.",
+        "Grouping labels and controls are legible."
+      ]
+    },
+    {
+      "file": "desktop-webgl-saved-overview-z5_91-key5.png",
+      "mode": "saved-overview",
+      "zoom": 5.9054061044955795,
+      "sha256": "01f75f0d01c3250b437b0e04ee1f2dbd2c0cdfd186325c3ea4cb4df58f9d81de",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Overview limitation remains visible; large-scale region boundaries are not presented as detailed trails."
+      ]
+    },
+    {
+      "file": "desktop-webgl-saved-overview-z8_91-key8.png",
+      "mode": "saved-overview",
+      "zoom": 8.90540610449558,
+      "sha256": "0aab008dcc04285abd4553a17ffd7723f42ed3f5509af3a268a6dec2ab3f6798",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Persistent overview-without-details caption and limitation are visible.",
+        "Selected source line and points contrast against broad polygons."
+      ]
+    },
+    {
+      "file": "desktop-webgl-saved-overview-z11_91-key11.png",
+      "mode": "saved-overview",
+      "zoom": 11.90540610449558,
+      "sha256": "5626f9cf7a4ac33d0a1291fe507801e18085703c303e49ad8fe35f331bc7ccd0",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Source branches are clear on the plain overview background.",
+        "Overview-without-details caption and limitation persist."
+      ]
+    },
+    {
+      "file": "desktop-webgl-saved-overview-z14_91-key14.png",
+      "mode": "saved-overview",
+      "zoom": 14.90540610449558,
+      "sha256": "171db1ee090644cc12fc5d56e87d40786848bbae55e741a7ba3bc5840919c750",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Source segment stays legible; overview limitation and caption persist."
+      ]
+    },
+    {
+      "file": "desktop-webgl-saved-overview-z18_00-key18.png",
+      "mode": "saved-overview",
+      "zoom": 18,
+      "sha256": "984e9c641368b1093fc941208f98f983f45f0bbc9103d451a23cac9678b597c0",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass-with-scope-limit",
+      "findings": [
+        "Overview-without-details caption and limitation remain explicit at maximum zoom.",
+        "Source route is outside this fixed close-up camera; this is not route-line close-up evidence."
+      ]
+    },
+    {
+      "file": "desktop-webgl-terrain-z2_91-key2.png",
+      "mode": "terrain",
+      "zoom": 2.90540610449558,
+      "sha256": "cd899683da80691dde9a9f9aef0c3c58b002cee98a02977c32c0fa232fb0175c",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Terrain style is clearly active; projected grouping labels remain legible.",
+        "No UI overlap."
+      ]
+    },
+    {
+      "file": "desktop-webgl-terrain-z5_91-key5.png",
+      "mode": "terrain",
+      "zoom": 5.9054061044955795,
+      "sha256": "a6594150d4cf3ffbd59ac5854377429c8e2f98be3081fbb3cf0c3e461630cbeb",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Pitched regional map retains readable grouping, control separation and legend."
+      ]
+    },
+    {
+      "file": "desktop-webgl-terrain-z8_91-key8.png",
+      "mode": "terrain",
+      "zoom": 8.90540610449558,
+      "sha256": "25ffc445162e6fc03352c03785b5db997c11bd65819e21db7880e42e013b26ce",
+      "pixelSize": [
+        1440,
+        1000
+      ],
+      "visuallyViewedIndividually": true,
+      "status": "pass",
+      "findings": [
+        "Pitched relief is visible; region label and selected point remain legible.",
+        "No controls cover another control or panel text."
+      ]
+    }
+  ]
+}

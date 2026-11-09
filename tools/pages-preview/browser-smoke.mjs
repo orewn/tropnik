@@ -9,6 +9,8 @@ import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-pr
 import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving} from './browser-zoom-audit.mjs';
 import {traceDesktopSelection} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
+import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
+import {assertDirectionHitGrid,assertDirectionHitAreas} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const REPORT = new URL('browser-verification.json', ROOT);
@@ -427,23 +429,30 @@ async function clearMapStories(cdp,profile){
   const message=await elementPoint(cdp,'.map-message button');
   if(message?.label==='Понятно')await pointerAt(cdp,message,profile);
 }
-async function selectMapDirection(cdp,profile,id,title){
+async function selectMapDirection(cdp,profile,id,title,{kind,actions}){
   const progress=[];
   for(let step=0;step<7;step++){
     const before=await settledMap(cdp,profile.engine);
-    if((await selectionState(cdp)).region===id){await expectSelection(cdp,{region:id,route:'',title});return progress;}
-    const target=await evaluate(cdp,`(()=>{
-      const elements=[...document.querySelectorAll('.region-marker')];
-      const element=elements.find(button=>!button.hidden&&(button.getAttribute('data-map-group-key')||'').split('|').includes(${JSON.stringify(id)}));
-      if(!element)return{missing:true,groups:elements.filter(button=>!button.hidden).map(button=>button.getAttribute('data-map-group-key'))};
-      const r=element.getBoundingClientRect(),s=getComputedStyle(element),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);
-      return{x,y,label:element.getAttribute('aria-label'),group:element.getAttribute('data-map-group-key'),visible:s.visibility!=='hidden'&&s.display!=='none'&&x>=0&&y>=0&&x<innerWidth&&y<innerHeight,hit:hit?.tagName,hitPane:hit?.parentElement?.className};
-    })()`);
-    assert.equal(target.visible,true,`${profile.name}: direction ${id} is unreachable: ${JSON.stringify(target)}`);
-    await pointerAt(cdp,target,profile);
-    await waitValue(`${profile.name}: direction touch did not select or expand ${id}; hit=${JSON.stringify(target)}`,async()=>({selection:await selectionState(cdp),map:await mapState(cdp)}),state=>state.selection.region===id||!!state.map&&state.map.camera.zoom>before.camera.zoom+.2);
+    const selectedBefore=await selectionState(cdp);
+    if(selectedBefore.region===id){await expectSelection(cdp,{region:id,route:'',title});return progress;}
+    let previous=null,stable=0;
+    const {grid,point}=await waitValue(`${profile.name}: external ${kind} of ${id} did not become stable and reachable`,async()=>{
+      const grid=await evaluate(cdp,`(()=>{const directionHitGrid=${directionHitGrid.toString()};return (${inspectDirectionHitAreas.toString()})(${JSON.stringify(id)});})()`);
+      return{grid,point:directionExternalPoint(grid,kind)};
+    },current=>{
+      const point=current.point,stopped=point&&previous&&point.anchorId===previous.anchorId&&point.groupKey===previous.groupKey&&point.name===previous.name&&Math.abs(point.x-previous.x)<.25&&Math.abs(point.y-previous.y)<.25;
+      stable=stopped?stable+1:0;previous=point;return stable>=2;
+    });
+    assertDirectionHitGrid(grid,`${profile.name}/${id}/${kind}`,profile.engine);
+    await evaluate(cdp,'window.__tropnikInputEvents=[]');
+    await pointerAt(cdp,{...point,label:grid.ariaLabel},profile);
+    await waitValue(`${profile.name}: external ${kind} did not select or expand ${id}`,async()=>({selection:await selectionState(cdp),map:await mapState(cdp)}),state=>state.selection.region===id||!!state.map&&state.map.camera.zoom>before.camera.zoom+.2);
     const after=await settledMap(cdp,profile.engine),selection=await selectionState(cdp);
-    progress.push({group:target.group,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom,selected:selection.region});
+    const events=await evaluate(cdp,'window.__tropnikInputEvents');
+    actions.push({kind,input:profile.mobile?'touch':'mouse',grid,point,events,
+      before:{region:selectedBefore.region,route:selectedBefore.route,zoom:before.camera.zoom},
+      after:{region:selection.region,route:selection.route,zoom:after.camera.zoom}});
+    progress.push({group:grid.groupKey,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom,selected:selection.region});
     if(selection.region===id){await expectSelection(cdp,{region:id,route:'',title});return progress;}
     assert.ok(after.camera.zoom>=before.camera.zoom+.7,`${profile.name}: a direction cluster repeated the same view`);
   }
@@ -568,7 +577,8 @@ async function mapInteraction(cdp,profile,performanceIssues){
   const country=await settledMap(cdp,profile.engine);
   await evaluate(cdp,'window.__tropnikPerf={cls:0,longest:0};window.__tropnikPerfStart=performance.now()');
   await diagnosticPhase(cdp,'map-interactions');
-  const selectFirstDirection=()=>selectMapDirection(cdp,profile,'altai','Алтай');
+  const directionActions=[];
+  const selectFirstDirection=()=>selectMapDirection(cdp,profile,'altai','Алтай',{kind:'label',actions:directionActions});
   const firstSelection=profile.mobile?{value:await selectFirstDirection(),trace:null}:await traceDesktopSelection(cdp,selectFirstDirection,{sourceCommit:process.env.GITHUB_SHA||null});
   const firstDirection=firstSelection.value;
   const catalogScroll=profile.mobile?await scrollSheetContent(cdp,profile,{stableExtent:true}):null;
@@ -581,12 +591,14 @@ async function mapInteraction(cdp,profile,performanceIssues){
   await closeMapSheet(cdp,profile);
   const returned=await settledMap(cdp,profile.engine);
   assert.ok(Math.abs(returned.camera.longitude-country.camera.longitude)<.1&&Math.abs(returned.camera.latitude-country.camera.latitude)<.1&&Math.abs(returned.camera.zoom-country.camera.zoom)<.05,`${profile.name}: return to directions displaced the country after the sheet settled: ${JSON.stringify({initial:country.camera,returned:returned.camera})}`);
-  const secondDirection=await selectMapDirection(cdp,profile,'baikal','Байкал');
+  const secondDirection=await selectMapDirection(cdp,profile,'baikal','Байкал',{kind:'count',actions:directionActions});
+  const directionHitAreas={schemaVersion:1,passed:true,engine:profile.engine,input:profile.mobile?'touch':'mouse',actions:directionActions};
+  assertDirectionHitAreas(directionHitAreas,profile.name,profile.engine,profile.mobile);
   const polygon=await polygonTouch(cdp,profile),gestures=await mapGestures(cdp,profile);
   const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
   const longTaskLimit=profile.mobile?350:750;
   if(!(perf.longest<longTaskLimit))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:longTaskLimit});
-  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
 const httpPort=await freePort(),debugPort=await freePort();
@@ -622,7 +634,7 @@ try{
     window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;window.__tropnikLongTasks=[];
     for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,event=>{
       const node=event.target?.nodeType===1?event.target:event.target?.parentElement,button=node?.closest('button,a'),r=button?.getBoundingClientRect();
-      window.__tropnikInputEvents.push({type,time:performance.now(),timestamp:event.timeStamp,pointerType:event.pointerType||'',pointerId:Number.isInteger(event.pointerId)?event.pointerId:null,x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
+      window.__tropnikInputEvents.push({type,time:performance.now(),timestamp:event.timeStamp,pointerType:event.pointerType||'',pointerId:Number.isInteger(event.pointerId)?event.pointerId:null,x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),regionId:button.dataset.regionId||null,groupKey:button.dataset.mapGroupKey||null,rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
       if(window.__tropnikInputEvents.length>36)window.__tropnikInputEvents.shift();
     },{capture:true,passive:true});
     try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput){

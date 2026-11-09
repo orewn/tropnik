@@ -1,6 +1,6 @@
 {
   "task": "Region direction flags and complete native hit areas",
-  "checkedAt": "2026-11-09T22:43:53.820824+00:00",
+  "checkedAt": "2026-11-09T23:09:29.291598+00:00",
   "sourceBaseCommit": "3a2026afd7e14fdebb15c4e32224a98cc8a7c588",
   "scope": {
     "catalogueDirections": 15,
@@ -18,18 +18,21 @@
     "GPS, zoom and navigation queues are cancelled before activation; stationary maps are not reset.",
     "Selected, hovered and keyboard-focused markers rise above ordinary markers without covering fixed controls.",
     "Old region-only CSS rules are consolidated; unrelated CSS is retained.",
-    "Group footprints include the full pennant and label; unchanged text and attributes are not rewritten."
+    "Group footprints include the full pennant and label; unchanged text and attributes are not rewritten.",
+    "Available direction labels stay visible while the pointer crosses a collision-layout offset; hover no longer removes a reachable label."
   ],
   "verification": {
     "applicationTests": {
       "passed": 460,
-      "failed": 0
+      "failed": 0,
+      "finalPersistentLabelCssIncluded": true
     },
     "pagesBuildTests": {
-      "passed": 55,
-      "failed": 0
+      "passed": 66,
+      "failed": 0,
+      "includesHitAreasAndBoundedTerrainDiagnostics": true
     },
-    "typescript": "passed --noEmit --incremental false",
+    "typescript": "passed: app and Pages static client; no emit",
     "targetedEslint": "passed",
     "productionBuild": "passed node scripts/build-tropnik.mjs",
     "gitDiffCheck": "passed",
@@ -46,16 +49,94 @@
       "actualHit": "CANVAS.leaflet-zoom-animated",
       "result": "group did not open; map container received focus"
     },
-    "newCandidateBrowserVerification": "pending; the shared preview was retained for the parallel session"
+    "newCandidateBrowserVerification": {
+      "status": "manual Leaflet checks passed; full CI engine/touch matrix pending",
+      "svgFlags": 15,
+      "oldRegionDots": 0,
+      "overviewLabelSideHits": {
+        "visibleLabels": 6,
+        "sidesPerLabel": 4,
+        "allCorrect": true
+      },
+      "nativeActions": [
+        {
+          "surface": "Karelia/Murmansk group label external left edge",
+          "point": {
+            "x": 428,
+            "y": 619
+          },
+          "result": "group expanded",
+          "zoomAfter": 6.367404416915879
+        },
+        {
+          "surface": "shifted Murmansk ordinary label external right edge",
+          "point": {
+            "x": 962,
+            "y": 267
+          },
+          "result": "selected region murmansk"
+        },
+        {
+          "surface": "southern group count external right edge",
+          "point": {
+            "x": 524,
+            "y": 735
+          },
+          "result": "7-direction group expanded",
+          "zoomBefore": 2.7782941865922406,
+          "zoomAfter": 5.735319075859126
+        },
+        {
+          "surface": "focused Crimea direction button",
+          "input": "Space",
+          "result": "selected region krym"
+        }
+      ],
+      "inactiveLeafletWrappers": {
+        "checked": 3,
+        "pointerEvents": "none",
+        "capturedCenter": 0
+      },
+      "mobileLayout": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "method": "same-origin viewport iframe, native mouse input; not a physical or emulated touch device",
+        "groupLabelExternalEdge": "expanded 15-direction group",
+        "altaiLabelSides": "all four hit Altai",
+        "sheetOpenSelectClose": "passed"
+      }
+    },
+    "eslint": "passed: full application lint",
+    "staticBuild": {
+      "passed": true,
+      "pages": 339,
+      "referenceRoutes": 306,
+      "httpChecks": 52,
+      "browserRenderingTested": false
+    }
   },
   "beforeMerge": [
-    "Reconcile the latest main without overwriting the parallel session.",
-    "Verify native clicks on label text, edges, corners and count badges in both engines.",
-    "Check grouped hidden anchors, keyboard focus, mobile 390px layout and changed zooms."
+    "Run the full CI browser matrix on the exact merged source."
   ],
   "publication": {
     "liveSiteChanged": false,
     "mainBranchChanged": false,
-    "status": "held for later integration and publication as requested"
+    "status": "integration and publication authorized; final gates in progress",
+    "sitePackage": {
+      "commitSha": "2e97390d97a0cac33c6b6904e14d01fb6ad62e51",
+      "cleanBuild": true,
+      "deployed": false
+    }
+  },
+  "integration": {
+    "secondSessionBase": "3a2026afd7e14fdebb15c4e32224a98cc8a7c588",
+    "sourceAlreadyAncestor": true,
+    "uncommittedSourceInSecondSession": false,
+    "preservedReports": [
+      "web-0.4.19-seventh-visual.json",
+      "web-0.4.19-eighth-site-build.json"
+    ]
   }
 }

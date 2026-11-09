@@ -1,0 +1,64 @@
+{
+  "release": "0.4.19",
+  "candidate": 8,
+  "checkedAt": "2026-11-09T22:19:58.866455+00:00",
+  "sourceCommit": "3a2026afd7e14fdebb15c4e32224a98cc8a7c588",
+  "siteCommit": "05f5de25b6a7b29bec95a17f8888449d1843aac5",
+  "buildPassed": true,
+  "publicationPerformed": false,
+  "publicationHeldFor": "Full exact-source browser matrix and final visual review",
+  "archive": {
+    "filename": "tropnik-0.4.19-site-eighth-clean.tar.gz",
+    "bytes": 39030563,
+    "sha256": "3835e5bcb30a18320980467576c34a5956340e483d2d1986d4bce5421869fef8",
+    "files": 1194
+  },
+  "canonicalWebFilesByteIdentical": 1229,
+  "sourceCheckoutClean": true,
+  "serviceWorker": {
+    "identity": "tropnik-shell-0.4.19-67dc6047fdbd043b",
+    "sha256": "eb9e35fcd7b870e4684a2d20ed16d09b7ee233cde9df3b50651f5ce729b35157",
+    "legacyShellRemovedOnActivation": true,
+    "pagesCacheNamespaceRewriteConsistent": true,
+    "existingClientUpdateNoticeSupported": true
+  },
+  "apk": {
+    "version": "0.4.18-preview",
+    "bytes": 24528530,
+    "sha256": "b80c36174a87eb70cc8e010af7535847b3fe9374586a87a535718bc25bf3d40f",
+    "verifiedCopies": 5
+  },
+  "accessBeforePublication": {
+    "ownerOnly": true,
+    "externalVisitorCount": 0,
+    "editorCount": 0,
+    "groupCount": 0,
+    "version": 20,
+    "publishOnPushAccepted": false
+  },
+  "existingBuildWarnings": {
+    "largeChunks": "reported; no budget change",
+    "duplicateFooterCss": {
+      "identicalAcrossClientServerAndSsr": true,
+      "bytes": 3177,
+      "sha256": "92233fee01460b0d245b74ab16700896c5cfcd6aa35a2a27d25da656ca85c4e3"
+    }
+  },
+  "dataPreservation": [
+    "no localStorage or IndexedDB clearing",
+    "offline map packages and plans retained",
+    "existing offline packages retain their own pilot-style.json",
+    "route geometry and source provenance unchanged"
+  ],
+  "initialArchive": {
+    "filename": "tropnik-0.4.19-site-eighth.tar.gz",
+    "bytes": 39631903,
+    "sha256": "8099fd513853546f17ca2a5665553aef2a3b33360e402ec8550dffbd630dd80c"
+  },
+  "cleanBuild": {
+    "generatedDistRemovedBeforeCompleteBuild": true,
+    "canonicalSourceUnchanged": true,
+    "oldPlannerChunkAbsent": true,
+    "reason": "Previous persistent build retained unreferenced hashed client chunks; clean output contains only current manifests and assets"
+  }
+}

@@ -5,25 +5,25 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
-import {traceDesktopSelection,DESKTOP_TRACE_LIMITS} from '../browser-trace.mjs';
+import {traceDesktopSelection,DESKTOP_TRACE_LIMITS,TERRAIN_TRACE_LIMITS} from '../browser-trace.mjs';
 
 const traceJSON=JSON.stringify({traceEvents:[{name:'ProfileChunk',args:{data:{cpuProfile:{samples:[1,2,3]}}}},{name:'RunTask'},{name:'Layout'}]});
 async function outputDirectory(t){const directory=await mkdtemp(join(tmpdir(),'tropnik-trace-'));t.after(()=>rm(directory,{recursive:true,force:true}));return pathToFileURL(directory+'/');}
 function controlledTimers(){
  let next=0;const pending=new Map();
- return{pending,schedule:(fn,ms)=>{const id=++next;pending.set(id,{fn,ms});return id;},cancel:id=>pending.delete(id),fireDuration(){const timer=[...pending.values()].find(value=>value.ms===DESKTOP_TRACE_LIMITS.durationMs);assert.ok(timer);timer.fn();}};
+ return{pending,schedule:(fn,ms)=>{const id=++next;pending.set(id,{fn,ms});return id;},cancel:id=>pending.delete(id),fireDuration(duration=DESKTOP_TRACE_LIMITS.durationMs){const timer=[...pending.values()].find(value=>value.ms===duration);assert.ok(timer);timer.fn();}};
 }
-function protocol({readError,startError,endError,endAck,oversized=false,dataLossOccurred=false,onRead}={}){
+function protocol({readError,startError,endError,endAck,oversized=false,dataLossOccurred=false,onRead,limits=DESKTOP_TRACE_LIMITS}={}){
  const calls=[],observers=new Map();let readIndex=0;
  return{calls,observers,
   observe(name,callback){assert.equal(name,'Tracing.tracingComplete');observers.set(name,callback);return()=>observers.delete(name);},
   async call(method,params,timeout){
-   calls.push({method,params,timeout});assert.ok(timeout>0&&timeout<=DESKTOP_TRACE_LIMITS.drainMs);
+   calls.push({method,params,timeout});assert.ok(timeout>0&&timeout<=limits.drainMs);
    if(method==='Tracing.start'){
     assert.ok(observers.has('Tracing.tracingComplete'),'Listen before an early completion event');
     assert.equal(params.transferMode,'ReturnAsStream');assert.equal(params.streamFormat,'json');
     assert.equal(params.traceConfig.recordMode,'recordUntilFull');assert.equal(params.traceConfig.enableSampling,true);
-    assert.equal(params.traceConfig.traceBufferSizeInKb,DESKTOP_TRACE_LIMITS.bufferSizeKiB);
+    assert.equal(params.traceConfig.traceBufferSizeInKb,limits.bufferSizeKiB);
     assert.ok(params.traceConfig.includedCategories.includes('disabled-by-default-v8.cpu_profiler'));
     if(startError)throw startError;return{};
    }
@@ -32,7 +32,7 @@ function protocol({readError,startError,endError,endAck,oversized=false,dataLoss
     if(endError)throw endError;if(endAck)await endAck;return{};
    }
    if(method==='IO.read'){
-    assert.equal(params.handle,'trace-stream');assert.ok(params.size>0&&params.size<=DESKTOP_TRACE_LIMITS.chunkBytes);
+    assert.equal(params.handle,'trace-stream');assert.ok(params.size>0&&params.size<=limits.chunkBytes);
     if(readError)throw readError;
     onRead?.();
     if(oversized)return{data:'x'.repeat(128),eof:false};
@@ -43,7 +43,7 @@ function protocol({readError,startError,endError,endAck,oversized=false,dataLoss
   },
  };
 }
-async function metadata(output){return JSON.parse(await readFile(new URL('desktop-webgl-first-altai.trace-meta.json',output),'utf8'));}
+async function metadata(output,prefix='desktop-webgl-first-altai'){return JSON.parse(await readFile(new URL(`${prefix}.trace-meta.json`,output),'utf8'));}
 
 test('a failed native selection still stops, drains and closes its trace without replacing the assertion',async t=>{
  const output=await outputDirectory(t),timers=controlledTimers(),failure=new Error('Actual route selection failed');
@@ -116,4 +116,40 @@ test('an ambiguous start failure receives bounded end cleanup without skipping o
  assert.equal(actions,1);assert.equal(result.value,1);assert.equal(result.trace.status,'error');
  assert.deepEqual(cdp.calls.map(call=>call.method),['Tracing.start','Tracing.end']);
  assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
+});
+
+test('the terrain scope has isolated files and explicit larger caps without changing Altai defaults',async t=>{
+ const output=await outputDirectory(t),prefix='desktop-webgl-terrain-zoom',scope='first-desktop-terrain-zoom-4-to-6';let actions=0;
+ const altai=await traceDesktopSelection(protocol(),async()=>++actions,{output,...controlledTimers()});
+ const terrain=await traceDesktopSelection(protocol({limits:TERRAIN_TRACE_LIMITS}),async()=>++actions,{output,prefix,scope,limits:TERRAIN_TRACE_LIMITS,...controlledTimers()});
+ assert.equal(actions,2);assert.equal(altai.value,1);assert.equal(terrain.value,2);
+ assert.equal(altai.trace.scope,'first-desktop-altai-selection');assert.equal(altai.trace.file,'desktop-webgl-first-altai.trace.json');
+ assert.deepEqual(altai.trace.limits,{durationMs:8000,drainMs:5000,closeMs:1000,maxBytes:32*1024*1024,bufferSizeKiB:16*1024,chunkBytes:256*1024});
+ assert.equal(terrain.trace.scope,scope);assert.equal(terrain.trace.file,`${prefix}.trace.json`);
+ assert.equal(terrain.trace.limits.durationMs,20000);assert.equal(terrain.trace.limits.bufferSizeKiB,64*1024);assert.equal(terrain.trace.limits.maxBytes,96*1024*1024);
+ assert.deepEqual(await metadata(output),altai.trace);assert.deepEqual(await metadata(output,prefix),terrain.trace);
+ assert.equal(await readFile(new URL(altai.trace.file,output),'utf8'),traceJSON);assert.equal(await readFile(new URL(terrain.trace.file,output),'utf8'),traceJSON);
+});
+
+test('the terrain time cap drains while settle is pending and preserves its later original failure',async t=>{
+ const output=await outputDirectory(t),timers=controlledTimers(),cdp=protocol({limits:TERRAIN_TRACE_LIMITS}),prefix='desktop-webgl-terrain-zoom';
+ const failure=new Error('The maplibre map did not settle');failure.settleDiagnostics={sampleLimit:16,samples:[{phase:'observed',frameMs:6026,state:{camera:{zoom:5.905}}}]};
+ let rejectAction,actions=0,now=0;
+ const observed=traceDesktopSelection(cdp,()=>{actions++;return new Promise((_,reject)=>{rejectAction=reject;});},{output,prefix,scope:'first-desktop-terrain-zoom-4-to-6',limits:TERRAIN_TRACE_LIMITS,...timers,clock:()=>now}).then(()=>null,error=>error);
+ await new Promise(resolve=>setImmediate(resolve));now=20000;timers.fireDuration(20000);
+ await new Promise(resolve=>setImmediate(resolve));assert.equal(cdp.calls.at(-1).method,'IO.close');assert.equal(actions,1);
+ rejectAction(failure);assert.equal(await observed,failure);
+ const receipt=await metadata(output,prefix);
+ assert.equal(receipt.stopReason,'time-limit');assert.equal(receipt.status,'partial');assert.equal(receipt.recordedDurationMs,20000);assert.match(receipt.actionError,/did not settle/);
+ assert.deepEqual(failure.traceReceipt,receipt);assert.equal(failure.settleDiagnostics.samples[0].frameMs,6026);
+ assert.equal(cdp.calls.filter(call=>call.method==='Tracing.end').length,1);assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
+});
+
+test('a failed terrain capture cannot replace the settle failure or discard its diagnostic samples',async t=>{
+ const output=await outputDirectory(t),prefix='desktop-webgl-terrain-zoom',cdp=protocol({limits:TERRAIN_TRACE_LIMITS,readError:new Error('Trace stream failed')});
+ const failure=new Error('Exact camera never settled'),diagnostics={sampleLimit:16,samples:[{index:1,state:{camera:{centerX:520.5000000000027}}}]};failure.settleDiagnostics=diagnostics;
+ const observed=await traceDesktopSelection(cdp,async()=>{throw failure;},{output,prefix,scope:'first-desktop-terrain-zoom-4-to-6',limits:TERRAIN_TRACE_LIMITS,...controlledTimers()}).then(()=>null,error=>error);
+ assert.equal(observed,failure);assert.equal(observed.settleDiagnostics,diagnostics);
+ assert.equal(observed.traceReceipt.status,'error');assert.match(observed.traceReceipt.errors[0],/Trace stream failed/);
+ assert.equal(cdp.calls.at(-1).method,'IO.close');assert.deepEqual(await metadata(output,prefix),observed.traceReceipt);
 });

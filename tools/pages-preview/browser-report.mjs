@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {projectMapPoint} from './map-projection.mjs';
 import {assertSourceEndPanInput,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
+import {directionHitGrid} from './browser-direction-hitareas.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -272,6 +273,103 @@ function assertZoomDesign(design,name,engine,mobile){
  assertCloseTrailAudit(design.closeTrail,name,engine,mobile,design.screenshots);
 }
 
+/** Validate actual painted hit samples rather than trusting an overall pass
+ * flag. Hidden labels are not targets; hidden SDK wrappers must not capture. */
+export function assertDirectionHitGrid(grid, context, engine) {
+ const rect=(value,name)=>{
+  assert.ok(value&&['left','right','top','bottom'].every(key=>Number.isFinite(value[key])),`${context}: missing ${name} rectangle`);
+  assert.ok(value.right>=value.left&&value.bottom>=value.top,`${context}: invalid ${name} rectangle`);
+  if(value.width!==undefined)assert.ok(Number.isFinite(value.width)&&Math.abs(value.right-value.left-value.width)<.01);
+  if(value.height!==undefined)assert.ok(Number.isFinite(value.height)&&Math.abs(value.bottom-value.top-value.height)<.01);
+ };
+ assert.equal(grid?.schemaVersion,1,`${context}: missing direction hit-area grid`);
+ assert.equal(grid.engine,engine);
+ assert.ok(typeof grid.anchorId==='string'&&grid.anchorId&&typeof grid.regionId==='string'&&grid.regionId);
+ const members=typeof grid.groupKey==='string'?grid.groupKey.split('|'):[];
+ assert.ok(members.includes(grid.anchorId)&&members.includes(grid.regionId),`${context}: grid targets another direction`);
+ assert.equal(grid.cluster,members.length>1);
+ rect(grid.anchorRect,'anchor');rect(grid.available,'viewport');
+ assert.ok(grid.anchorRect.width>=43.5&&grid.anchorRect.height>=43.5,`${context}: direction anchor is smaller than44px`);
+ const inside=point=>point.x>=grid.available.left&&point.x<grid.available.right&&point.y>=grid.available.top&&point.y<grid.available.bottom;
+ const sampleGrid=(samples,expected,validate)=>{
+  assert.equal(samples?.length,expected.length,`${context}: incomplete inner-corner/edge grid`);
+  expected.forEach((point,index)=>{
+   const sample=samples[index];assert.equal(sample.name,point.name);
+   assert.ok(Number.isFinite(sample.x)&&Number.isFinite(sample.y)&&Math.abs(sample.x-point.x)<.01&&Math.abs(sample.y-point.y)<.01,`${context}: hit sample differs from the painted rectangle`);
+   assert.equal(sample.outsideAnchor,point.outsideAnchor);
+   assert.equal(sample.withinViewport,inside(point));
+   if(sample.withinViewport)validate(sample);
+  });
+ };
+ assert.deepEqual(grid.surfaces?.map(surface=>surface.kind),['label','count']);
+ for(const surface of grid.surfaces){
+  assert.equal(surface.present,true,`${context}: direction ${surface.kind} is absent`);
+  assert.equal(typeof surface.visible,'boolean');
+  if(!surface.visible){assert.deepEqual(surface.samples,[]);continue;}
+  rect(surface.rect,surface.kind);assert.ok(surface.rect.width>1&&surface.rect.height>1);
+  assert.ok(surface.text?.trim());assert.equal(surface.pointerEvents,'auto',`${context}: visible ${surface.kind} passes clicks through`);
+  sampleGrid(surface.samples,directionHitGrid(surface.rect,grid.anchorRect,surface.kind==='count'?4:8),sample=>{
+   assert.equal(sample.owned,true,`${context}: ${surface.kind}/${sample.name} is intercepted by ${sample.hitTag||'nothing'}`);
+   assert.equal(sample.hitRegionId,grid.anchorId,`${context}: ${surface.kind}/${sample.name} hits another region`);
+   assert.equal(sample.hitHidden,false,`${context}: ${surface.kind}/${sample.name} hits a hidden control`);
+  });
+ }
+ assert.ok(Array.isArray(grid.hiddenControls),`${context}: hidden controls were not inspected`);
+ for(const hidden of grid.hiddenControls){
+  assert.ok(hidden.regionId&&hidden.regionId!==grid.anchorId);assert.equal(hidden.hidden,true);assert.equal(hidden.display,'none');rect(hidden.rect,'hidden control');
+  assert.ok(hidden.rect.width===0&&hidden.rect.height===0,`${context}: hidden direction still has a hit box`);
+  if(engine==='maplibre'){assert.equal(hidden.wrapper,null);continue;}
+  assert.ok(hidden.wrapper,`${context}: Leaflet hidden wrapper was omitted`);
+  rect(hidden.wrapper.rect,'hidden wrapper');assert.equal(hidden.wrapper.pointerEvents,'none',`${context}: inactive Leaflet wrapper can capture input`);
+  const expected=hidden.wrapper.rect.width>1&&hidden.wrapper.rect.height>1?directionHitGrid(hidden.wrapper.rect,hidden.wrapper.rect):[];
+  sampleGrid(hidden.wrapper.samples,expected,sample=>assert.equal(sample.captures,false,`${context}: inactive Leaflet wrapper intercepted ${sample.name}`));
+ }
+ return grid;
+}
+
+export function assertDirectionHitAreas(receipt,name,engine,mobile){
+ const input=mobile?'touch':'mouse';
+ assert.equal(receipt?.schemaVersion,1,`${name}: missing external direction hit-area evidence`);
+ assert.equal(receipt.passed,true);assert.equal(receipt.engine,engine);assert.equal(receipt.input,input);
+ assert.ok(Array.isArray(receipt.actions)&&receipt.actions.length>=2&&receipt.actions.length<=14,`${name}: bounded direction input evidence is missing`);
+ let ordinaryLabel=false,count=false,hiddenControls=0,hiddenWrapperProbes=0;
+ for(const [index,action] of receipt.actions.entries()){
+  const context=`${name}/directions/${index}`,grid=assertDirectionHitGrid(action.grid,context,engine);
+  assert.ok(['label','count'].includes(action.kind));assert.equal(action.input,input);
+  const surface=grid.surfaces.find(item=>item.kind===action.kind);
+  assert.equal(surface.visible,true,`${context}: clicked surface was hidden`);
+  const sample=surface.samples.find(item=>item.name===action.point?.name);
+  assert.ok(sample?.withinViewport&&sample.outsideAnchor&&sample.owned,`${context}: native input missed the external painted area`);
+  assert.ok(Math.abs(sample.x-action.point.x)<.01&&Math.abs(sample.y-action.point.y)<.01);
+  assert.equal(action.point.kind,action.kind);assert.equal(action.point.anchorId,grid.anchorId);assert.equal(action.point.groupKey,grid.groupKey);
+  assertNativeBurstEventOrder(action.events,input,1);
+  for(const event of action.events){
+   assert.ok(Number.isFinite(event.x)&&Number.isFinite(event.y)&&Math.abs(event.x-action.point.x)<=1&&Math.abs(event.y-action.point.y)<=1,`${context}: native event was delivered somewhere else`);
+   assert.equal(event.button?.regionId,grid.anchorId,`${context}: native event reached another region`);
+   assert.equal(event.button?.groupKey,grid.groupKey,`${context}: native input used a stale group`);
+  }
+  assert.ok(action.before&&action.after&&Number.isFinite(action.before.zoom)&&Number.isFinite(action.after.zoom));
+  assert.equal(typeof action.before.region,'string');assert.equal(typeof action.after.region,'string');
+  assert.equal(action.before.route,'');assert.equal(action.after.route,'');
+  if(grid.cluster){
+   assert.equal(action.after.region,action.before.region);
+   assert.ok(action.after.zoom>=action.before.zoom+.7,`${context}: external cluster input did not expand directions`);
+  }else{
+   assert.notEqual(action.before.region,grid.regionId,`${context}: clicking an already selected direction proves no change`);
+   assert.equal(action.after.region,grid.regionId,`${context}: external input did not select its direction`);
+   if(action.kind==='label')ordinaryLabel=true;
+  }
+  if(action.kind==='count')count=true;
+  hiddenControls+=grid.hiddenControls.length;
+  for(const hidden of grid.hiddenControls)hiddenWrapperProbes+=hidden.wrapper?.samples.filter(point=>point.withinViewport).length||0;
+ }
+ assert.equal(ordinaryLabel,true,`${name}: no ordinary label was selected through its external edge`);
+ assert.equal(count,true,`${name}: no external count/cluster input was verified`);
+ assert.ok(hiddenControls>0,`${name}: no inactive directions were inspected`);
+ if(engine==='leaflet')assert.ok(hiddenWrapperProbes>0,`${name}: inactive Leaflet wrappers were never hit-tested`);
+ return receipt;
+}
+
 /** The same evidence gate runs before upload and against the public artifact. */
 export function assertBrowserReport(browser,expectedCommit){
  assert.equal(browser.verified,true);
@@ -301,6 +399,7 @@ export function assertBrowserReport(browser,expectedCommit){
   assert.equal(result.passed,true);
   assert.equal(result.engine,engine);
   assert.equal(result.mobile,mobile);
+  assertDirectionHitAreas(result.directionHitAreas,name,engine,mobile);
   assert.equal(result.firstDirection?.at(-1)?.selected,'altai');
   assert.equal(result.secondDirection?.at(-1)?.selected,'baikal');
   assert.ok(result.route?.id&&result.route.offsetPx>=12&&result.route.offsetPx<=22,`${name}: route hit target was not tested away from the small visual dot`);

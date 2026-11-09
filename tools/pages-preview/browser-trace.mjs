@@ -3,12 +3,13 @@ import {createHash} from 'node:crypto';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 export const DESKTOP_TRACE_LIMITS=Object.freeze({durationMs:8000,drainMs:5000,closeMs:1000,maxBytes:32*1024*1024,bufferSizeKiB:16*1024,chunkBytes:256*1024});
+export const TERRAIN_TRACE_LIMITS=Object.freeze({...DESKTOP_TRACE_LIMITS,durationMs:20000,maxBytes:96*1024*1024,bufferSizeKiB:64*1024});
 // The previous 2MiB buffer filled before the observed long task. Broad toplevel
 // events duplicated RunTask and consumed half the evidence. Keep renderer task,
 // layout, CPU stack and GPU evidence without the redundant scheduler stream.
 const CATEGORIES=['devtools.timeline','blink.user_timing','gpu','disabled-by-default-devtools.timeline','disabled-by-default-devtools.timeline.stack','disabled-by-default-v8.cpu_profiler'];
 
-/** Diagnostic only: one cold desktop selection, with native input unchanged.
+/** Diagnostic only: one desktop action, with native input unchanged.
  * CDP Tracing.start/end and IO.read/close are documented in the upstream PDL:
  * https://github.com/ChromeDevTools/devtools-protocol/blob/master/pdl/domains/Tracing.pdl
  * https://github.com/ChromeDevTools/devtools-protocol/blob/master/pdl/domains/IO.pdl
@@ -16,10 +17,11 @@ const CATEGORIES=['devtools.timeline','blink.user_timing','gpu','disabled-by-def
  * stay explicit; they cannot replace the existing interaction/performance gates. */
 export async function traceDesktopSelection(cdp,action,{
  output=OUTPUT,sourceCommit=null,limits=DESKTOP_TRACE_LIMITS,
+ prefix='desktop-webgl-first-altai',scope='first-desktop-altai-selection',
  clock=()=>performance.now(),schedule=setTimeout,cancel=clearTimeout,
 }={}){
- const prefix='desktop-webgl-first-altai',started=clock(),chunks=[];
- const receipt={schemaVersion:1,scope:'first-desktop-altai-selection',sourceCommit,instrumented:true,startedAtEpochMs:Date.now(),limits:{...limits},categories:CATEGORIES,status:'recording',stopReason:null,bytes:0,eof:false,dataLossOccurred:false,errors:[]};
+ const started=clock(),chunks=[];
+ const receipt={schemaVersion:1,scope,sourceCommit,instrumented:true,startedAtEpochMs:Date.now(),limits:{...limits},categories:CATEGORIES,status:'recording',stopReason:null,bytes:0,eof:false,dataLossOccurred:false,errors:[]};
  let completion,resolveCompletion,startRequested=false,stopPromise,timer,value,actionError;
  const completed=new Promise(resolve=>{resolveCompletion=resolve;});
  // The completion event is allowed to arrive before Tracing.end is acknowledged.
@@ -98,6 +100,6 @@ export async function traceDesktopSelection(cdp,action,{
   if(receipt.status!=='complete')process.stderr.write(`Bounded desktop trace ${receipt.status}: ${JSON.stringify(receipt)}\n`);
  }
  // Diagnostics must not replace a genuine input/assertion failure.
- if(actionError)throw actionError;
+ if(actionError){actionError.traceReceipt=receipt;throw actionError;}
  return{value,trace:receipt};
 }

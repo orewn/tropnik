@@ -3,6 +3,7 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {CLOSE_TRAIL_FIXTURE,assertCloseTrailAudit,assertNativeBurstEventOrder,assertRouteEdgeFrame,assertReliefPalette} from './browser-report.mjs';
 import {dispatchSourceEndPan,sourceEndPanPlans,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
+import {traceDesktopSelection,TERRAIN_TRACE_LIMITS} from './browser-trace.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -17,12 +18,40 @@ export function mapCameraIsMoving(element){
 /** A dataset can stay unchanged between zoomend and the next queued RAF.
  * Advance the real compositor before every sample, then require the same
  * idle camera on four observations. No renderer callbacks are invoked. */
-export async function settleMapCamera({engine,read,frame,wait}){
- let signature='',stable=0;
- return wait(`The ${engine} map did not settle`,async()=>{await frame();return read();},state=>{
-  if(!state?.visible||state.moving||state.engine!==engine||!Object.values(state.camera).every(Number.isFinite)){signature='';stable=0;return false;}
-  const next=JSON.stringify([state.camera,state.rect,state.route]);stable=next===signature?stable+1:0;signature=next;return stable>=3;
- },15000);
+export async function settleMapCamera({engine,read,frame,wait,clock=()=>performance.now()}){
+ const started=clock(),startedAtEpochMs=Date.now(),samples=[];
+ let signature='',stable=0,totalSamples=0,current,previous;
+ try{return await wait(`The ${engine} map did not settle`,async()=>{
+  const began=clock();current={index:++totalSamples,startedAtEpochMs:Date.now(),startOffsetMs:began-started,phase:'frame',frameMs:null,readMs:null};
+  samples.push(current);if(samples.length>16)samples.shift();
+  let readStarted;
+  try{
+   await frame();current.frameMs=clock()-began;current.phase='read';readStarted=clock();
+   const state=await read();current.readMs=clock()-readStarted;current.phase='observed';current.state=structuredClone(state);
+   current.changedFields=[];
+   if(previous){
+    for(const key of ['engine','route','moving','visible','width','height','scrollWidth'])if(!Object.is(previous[key],state?.[key]))current.changedFields.push(key);
+    for(const group of ['camera','rect'])for(const key of new Set([...Object.keys(previous[group]||{}),...Object.keys(state?.[group]||{})]))if(!Object.is(previous[group]?.[key],state?.[group]?.[key]))current.changedFields.push(`${group}.${key}`);
+   }
+   previous=current.state;return state;
+  }catch(error){
+   if(current.phase==='frame')current.frameMs=clock()-began;else if(readStarted!==undefined)current.readMs=clock()-readStarted;
+   current.error=error?.message||String(error);throw error;
+  }finally{current.durationMs=clock()-began;current.endOffsetMs=clock()-started;}
+ },state=>{
+  if(!state?.visible||state.moving||state.engine!==engine||!Object.values(state.camera).every(Number.isFinite)){
+   signature='';stable=0;current.idleObservations=0;current.signatureUnchanged=false;return false;
+  }
+  const next=JSON.stringify([state.camera,state.rect,state.route]);current.signatureUnchanged=next===signature;stable=next===signature?stable+1:0;signature=next;current.idleObservations=stable+1;return stable>=3;
+ },15000);}catch(error){
+  error.settleDiagnostics={schemaVersion:1,engine,timeoutMs:15000,requiredIdleObservations:4,comparison:'exact-camera-rect-route',sampleLimit:16,startedAtEpochMs,elapsedMs:clock()-started,totalSamples,discardedSamples:totalSamples-samples.length,samples};
+  throw error;
+ }
+}
+
+/** One existing +1 input around the terrain failure, never a diagnostic retry. */
+export function shouldTraceTerrainZoom(profile,mode,direction,beforeZoom,alreadyTraced){
+ return !alreadyTraced&&profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile&&mode==='terrain'&&direction>0&&beforeZoom>=4&&beforeZoom<5;
 }
 
 /** Bounds of independent overlays. Parents and children must not both enter
@@ -84,6 +113,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase}=helpers;
  await mkdir(OUTPUT,{recursive:true});
  const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:5,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
+ let terrainTraceStarted=false;
  const save=()=>writeFile(new URL(`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');
  const network=new Map();
  const forget=cdp.observe('Network.responseReceived',({requestId,response})=>{
@@ -128,12 +158,18 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
   const evidence={file:name,mode,...(Number.isFinite(state?.zoom)?{zoom:state.zoom}:{}),bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
   report.screenshots.push(evidence);await save();return evidence;
  }
- async function zoom(direction){
+ async function zoom(direction,{mode}={}){
   const before=await settledMap(cdp,profile.engine),target=await elementPoint(cdp,direction>0?PLUS:MINUS);
   assert.ok(target?.unobscured,`${profile.name}: zoom control is unavailable`);
-  await pointerAt(cdp,target,profile);
-  await sleep(70);
-  const after=await settledMap(cdp,profile.engine);
+  const pressAndSettle=async()=>{await pointerAt(cdp,target,profile);await sleep(70);return settledMap(cdp,profile.engine);};
+  let after;
+  if(shouldTraceTerrainZoom(profile,mode,direction,before.camera.zoom,terrainTraceStarted)){
+   terrainTraceStarted=true;
+   try{
+    const captured=await traceDesktopSelection(cdp,pressAndSettle,{prefix:'desktop-webgl-terrain-zoom',scope:'first-desktop-terrain-zoom-4-to-6',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS});
+    after=captured.value;report.terrainZoomTrace={...captured.trace,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom};
+   }catch(error){report.terrainZoomTrace={...error.traceReceipt,beforeZoom:before.camera.zoom};throw error;}
+  }else after=await pressAndSettle();
   assert.ok(direction>0?after.camera.zoom>=before.camera.zoom-.001:after.camera.zoom<=before.camera.zoom+.001,`${profile.name}: zoom moved in the wrong direction`);
   return{before:before.camera.zoom,after:after.camera.zoom,changed:Math.abs(after.camera.zoom-before.camera.zoom)>.001};
  }
@@ -204,7 +240,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
     if(crossed&&!captured.has(threshold)){await capture(mode,state,`key${threshold}`);captured.add(threshold);}
    }
    if(direction>0&&state.zoom>=17.999)break;
-   previous=state.zoom;const step=await zoom(direction);
+   previous=state.zoom;const step=await zoom(direction,{mode});
    if(!step.changed){if(direction>0)assert.ok(state.zoom>=17.999,`${profile.name}: zoom stopped below18`);break;}
    if(count===28)throw new Error(`${profile.name}: zoom sweep exceeded its bounded range`);
   }
@@ -425,6 +461,6 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
   report.performance=modePerformance;
   const edges=await closeTrailEdges();
   report.geometryPassed=true;report.performance={layoutShift:Math.max(modePerformance.layoutShift,edges.performance.layoutShift),longestTaskMs:Math.max(modePerformance.longestTaskMs,edges.performance.longestTaskMs)};report.completedAt=new Date().toISOString();await save();return report;
- }catch(error){report.error=error.stack||String(error);await save();throw error;}
+ }catch(error){report.error=error.stack||String(error);if(error.settleDiagnostics)report.settleDiagnostics=error.settleDiagnostics;await save();throw error;}
  finally{forget();forgetFinished();forgetFailed();}
 }

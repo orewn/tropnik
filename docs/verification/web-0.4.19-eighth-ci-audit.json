@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-11-09T23:06:47Z",
+  "candidate": "candidate8",
+  "releasePass": false,
+  "verdict": "desktop-terrain-camera-settle-failed",
+  "source": {
+    "repository": "orewn/tropnik",
+    "commit": "3a2026afd7e14fdebb15c4e32224a98cc8a7c588",
+    "branch": "main",
+    "workflowRunId": 42709880457,
+    "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42709880457",
+    "workflowConclusion": "failure",
+    "buildJobId": 129476281523,
+    "buildJobConclusion": "failure",
+    "buildId": "11086057ed2501de",
+    "evidence": [
+      "GitHub workflow run jobs and decoded build-job log",
+      "browser-failure.json",
+      "desktop-webgl.json",
+      "android-portrait.json",
+      "desktop-webgl-first-altai.trace-meta.json"
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 13716181992,
+      "name": "tropnik-pages-design-1",
+      "bytes": 25308788,
+      "sha256": "a14d67ec079a24c7b8c996719781e6c6189f74186ccd6272bb192840bbff1c50",
+      "archiveHashRecheckedAgainstGitHubDigest": true
+    },
+    {
+      "id": 13715843108,
+      "name": "tropnik-pages-browser-failure-1",
+      "bytes": 592014,
+      "sha256": "84e4a1fe84838c563ca838b8d60f5626f679c869ae946662f8f047a78c843835",
+      "archiveHashRecheckedAgainstGitHubDigest": true
+    }
+  ],
+  "checks": {
+    "toolingTests": "passed",
+    "webTests": "passed",
+    "lint": "passed",
+    "types": "passed",
+    "staticBuildAndHttpChecks": "passed",
+    "browser": "failed",
+    "deploy": "skipped"
+  },
+  "failure": {
+    "profile": "desktop-webgl",
+    "engine": "maplibre",
+    "phase": "zoom-design-terrain",
+    "operation": "sweep('terrain', 1), after terrain activation and reachBottom()",
+    "error": "The maplibre map did not settle",
+    "browserStepStartedAt": "2026-11-09T22:14:45.4153409Z",
+    "errorLoggedAt": "2026-11-09T22:27:45.3378493Z",
+    "workflowTimeBudgetExceeded": false,
+    "settleTimeoutMs": 15000,
+    "requiredIdenticalIdleSamples": 4,
+    "comparison": "Exact JSON equality of camera, rect and route after compositor frames",
+    "sourceStack": [
+      "tools/pages-preview/browser-smoke.mjs:379 waitValue",
+      "tools/pages-preview/browser-zoom-audit.mjs:136 zoom",
+      "tools/pages-preview/browser-zoom-audit.mjs:207 sweep",
+      "tools/pages-preview/browser-zoom-audit.mjs:387 runZoomDesignAudit"
+    ],
+    "lastState": {
+      "camera": {
+        "longitude": 40.39729094373706,
+        "latitude": 43.72871233957537,
+        "zoom": 5.9054061044955795,
+        "tileSize": 512,
+        "centerX": 520.5000000000027,
+        "centerY": 464.0000000000007
+      },
+      "moving": false,
+      "visible": true,
+      "route": "kavkaz-8a",
+      "region": "krasnodar",
+      "rect": {"left": 384, "top": 72, "width": 1041, "height": 928}
+    }
+  },
+  "nativeZoomResult": {
+    "input": "mouse",
+    "button": "Увеличить масштаб",
+    "eventOrder": ["pointerdown", "pointerup", "click"],
+    "allEventsTrusted": true,
+    "lastClickAt": "2026-11-09T22:27:28.907700Z",
+    "lastClickDocumentTimeMs": 389501.50000000006,
+    "beforeZoom": 4.9054061044955795,
+    "afterZoom": 5.9054061044955795,
+    "delta": 1,
+    "selectedRoutePreserved": true,
+    "finding": "This native plus input reached its exact +1 target; the failure is subsequent camera settling, not evidence of a lost click."
+  },
+  "terrainLongTasks": {
+    "source": "browser-failure.json performance.recentLongTasks, phase zoom-design-terrain",
+    "recordedCount": 26,
+    "recordedDurationSumMs": 48050,
+    "recordedMedianDurationMs": 1792,
+    "maximumDurationMs": 6026,
+    "maximumBeforeTerrainMs": 376,
+    "lastTask": {
+      "startDocumentTimeMs": 393762.00000000006,
+      "durationMs": 6026,
+      "observedAtDocumentTimeMs": 399804.89999999997,
+      "startsAfterLastClickMs": 4260.5
+    },
+    "interpretation": "A long task overlaps the failed settle interval. Existing all-mode zoom performance is recorded separately; this is not a distinct failure of the map-interaction <750 ms gate or proof of a particular application/GPU stack."
+  },
+  "completedCoverage": {
+    "mobileProfiles": 4,
+    "androidDesignSchema": 5,
+    "androidGeometryPassed": true,
+    "androidSourceEndsZoom17Passed": true,
+    "androidPrepared3D": "ready",
+    "desktopMapInteractionsPassed": true,
+    "desktopMapInteractionLongestTaskMs": 544,
+    "androidMapInteractionLongestTaskMs": 143,
+    "recordedPerformanceIssues": [],
+    "desktopCompletedModes": ["detail to zoom 18", "satellite", "saved overview to zoom 18"],
+    "desktopScreenshotCount": 21,
+    "desktopTerrainCapturedZooms": [2.90540610449558],
+    "desktopGeometryPassed": false
+  },
+  "diagnosticLimits": {
+    "cameraSampleHistoryCaptured": false,
+    "settleFrameAndReadTimingCaptured": false,
+    "availableTraceScope": "first-desktop-altai-selection",
+    "availableTraceDurationMs": 3750.591819000023,
+    "availableTraceCoversTerrainFailure": false,
+    "rootCauseEstablished": false,
+    "notEstablished": ["subpixel camera drift", "repeated navigation", "specific rendering or GPU bottleneck"]
+  },
+  "nextEvidenceRequired": [
+    "Bounded camera sample history and per-sample frame/read timing at settle failure, retaining exact comparison, four idle samples and the 15000 ms timeout.",
+    "Bounded trace spanning the failing native terrain zoom and settle interval; the existing 8-second Altai trace cap would end before the observed 6-second task finishes.",
+    "Complete browser and visual acceptance on the merged final source, including desktop terrain, prepared 3D, source endpoints and new direction hit areas before publication."
+  ]
+}

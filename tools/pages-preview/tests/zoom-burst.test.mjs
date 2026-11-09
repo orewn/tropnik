@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assertMapUIBounds,dispatchZoomBurst,settleMapCamera,mapCameraIsMoving} from '../browser-zoom-audit.mjs';
+import {assertMapUIBounds,dispatchZoomBurst,settleMapCamera,mapCameraIsMoving,shouldTraceTerrainZoom} from '../browser-zoom-audit.mjs';
 import {assertNativeBurstEventOrder} from '../browser-report.mjs';
 
 function nativeBurstEvents(input,delivery='deferred',rounded=false){
@@ -133,6 +133,7 @@ test('settling observes a queued camera only after compositor progress and conse
   wait:async(_label,read,accept,timeout)=>{assert.equal(timeout,15000);for(let index=0;index<12;index++){const sample=await read();if(accept(sample))return sample;}throw new Error('Did not settle');},
  });
  assert.equal(result.camera.zoom,3.270198667,'The stale pre-RAF camera must not become a false lower bound');
+ assert.equal(reads,7,'Exactly four idle observations are still required after the two moving samples');
  assert.ok(observed.some(item=>item.moving),'An in-progress transition must reset idle stability');
  assert.equal(observed.slice(-4).every(item=>!item.moving&&item.camera.zoom===result.camera.zoom),true);
 });
@@ -147,4 +148,47 @@ test('a Leaflet child-pane transition remains moving after the old camera datase
  assert.equal(mapCameraIsMoving(element),true,'The animation class belongs to the child pane');
  paneAnimating=false;assert.equal(mapCameraIsMoving(element),false);
  datasetMoving=true;assert.equal(mapCameraIsMoving(element),true,'Other camera motion still uses the public dataset');
+});
+
+test('settle failure retains only the last16 timed samples without rounding camera drift',async()=>{
+ let now=0,frames=0,reads=0;
+ const failure=new Error('The maplibre map did not settle'),state={visible:true,moving:false,engine:'maplibre',camera:{longitude:40,latitude:43,zoom:5.9054061044955795,tileSize:512,centerX:520.5,centerY:464},rect:{left:384,top:72,width:1041,height:928},route:'kavkaz-8a'};
+ const observed=await settleMapCamera({engine:'maplibre',clock:()=>now,
+  frame:async()=>{frames++;now+=frames===16?6026:10;},
+  read:async()=>{reads++;now+=3;state.camera.centerX=reads%2?520.5000000000027:520.5;return state;},
+  wait:async(label,read,accept,timeout)=>{assert.equal(label,'The maplibre map did not settle');assert.equal(timeout,15000);for(let index=0;index<24;index++)assert.equal(accept(await read()),false,'Subpixel drift must not bypass exact equality');throw failure;},
+ }).then(()=>null,error=>error);
+ assert.equal(observed,failure);const diagnostic=observed.settleDiagnostics;
+ assert.equal(diagnostic.timeoutMs,15000);assert.equal(diagnostic.requiredIdleObservations,4);assert.equal(diagnostic.comparison,'exact-camera-rect-route');
+ assert.equal(diagnostic.totalSamples,24);assert.equal(diagnostic.sampleLimit,16);assert.equal(diagnostic.discardedSamples,8);assert.equal(diagnostic.samples.length,16);
+ assert.deepEqual(diagnostic.samples.map(sample=>sample.index),Array.from({length:16},(_,index)=>index+9));
+ assert.equal(diagnostic.samples[0].state.camera.centerX,520.5000000000027,'The ring must retain a snapshot even when the reader reuses an object');
+ assert.equal(diagnostic.samples.find(sample=>sample.index===16).frameMs,6026);
+ assert.ok(diagnostic.samples.every(sample=>sample.readMs===3&&sample.phase==='observed'&&sample.idleObservations===1&&!sample.signatureUnchanged));
+ assert.ok(diagnostic.samples.every(sample=>sample.changedFields.includes('camera.centerX')&&Number.isFinite(sample.startedAtEpochMs)&&sample.endOffsetMs>=sample.startOffsetMs));
+ assert.equal(diagnostic.elapsedMs,now);assert.doesNotThrow(()=>JSON.stringify(diagnostic));assert.equal(frames,reads);
+});
+
+test('failed compositor frames and state reads keep their phase timing and original errors',async()=>{
+ for(const phase of ['frame','read']){
+  let now=0;const failure=new Error(`${phase} unavailable`);
+  const observed=await settleMapCamera({engine:'maplibre',clock:()=>now,
+   frame:async()=>{now+=10;if(phase==='frame')throw failure;},
+   read:async()=>{now+=20;throw failure;},
+   wait:async(_label,read)=>read(),
+  }).then(()=>null,error=>error);
+  assert.equal(observed,failure);const sample=observed.settleDiagnostics.samples[0];
+  assert.equal(observed.settleDiagnostics.totalSamples,1);assert.equal(sample.phase,phase);assert.equal(sample.frameMs,10);assert.equal(sample.readMs,phase==='read'?20:null);
+  assert.equal(sample.durationMs,phase==='read'?30:10);assert.equal(sample.error,`${phase} unavailable`);
+ }
+});
+
+test('terrain tracing covers only the first existing desktop upward4–5 step',()=>{
+ const profile={name:'desktop-webgl',engine:'maplibre',mobile:false};
+ for(const zoom of [4,4.9054061044955795,4.999])assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false),true);
+ for(const zoom of [2,3.999,5,5.905,18,NaN])assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false),false);
+ assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,4.905,true),false);
+ for(const mode of ['detail','satellite',undefined])assert.equal(shouldTraceTerrainZoom(profile,mode,1,4.905,false),false);
+ assert.equal(shouldTraceTerrainZoom(profile,'terrain',-1,4.905,false),false);
+ for(const changed of [{mobile:true},{engine:'leaflet'},{name:'android-portrait'}])assert.equal(shouldTraceTerrainZoom({...profile,...changed},'terrain',1,4.905,false),false);
 });
