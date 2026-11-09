@@ -6,6 +6,7 @@ import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import type {Trail} from '@/lib/content';
 import type {TerrainRenderer,TerrainGrid} from '@/public/terrain/terrain-renderer.js';
 import {loadTerrain,loadPublicJSON,TERRAIN_BOUNDS} from '@/lib/map-preload';
+import {observeTerrainViewport} from '@/lib/terrain-viewport';
 
 type SceneRenderer = TerrainRenderer & {setVisible?: (visible: boolean) => void};
 const readableSceneError=(message:string)=>message.startsWith('Графический контекст прерван')?'Восстанавливаем изображение…':message.startsWith('Геометрия не помещается')?'Не удалось показать линию маршрута на рельефе. Откройте её на основной карте.':'Не удалось показать рельеф. Попробуйте открыть его заново.';
@@ -40,22 +41,7 @@ export function TerrainScene({trail,onClose,visible=true}:{trail?:Trail;onClose:
  useEffect(()=>{
   const element=surface.current,target=renderer.current;
   if(!element||!target)return;
-  const panel=element.closest('.explore-layout')?.querySelector('.explore-panel');
-  let last='';
-  const fit=()=>{
-   const area=element.getBoundingClientRect(),drawer=panel?.getBoundingClientRect();
-   const overlaps=drawer&&drawer.right>area.left&&drawer.left<area.right&&drawer.top<area.bottom&&drawer.bottom>area.top;
-   const covered=overlaps?Math.min(area.height,Math.max(0,area.bottom-Math.max(area.top,drawer.top))):0;
-   const narrow=area.width<700;
-   const insets={top:narrow?192:176,right:narrow?64:80,bottom:covered?covered+16:64,left:narrow?16:32};
-   const key=JSON.stringify(insets);
-   if(key!==last){last=key;target.setViewportInsets(insets);target.warmup();}
-  };
-  fit();
-  const observer=typeof ResizeObserver==='undefined'?null:new ResizeObserver(fit);
-  observer?.observe(element);if(panel)observer?.observe(panel);
-  window.addEventListener('resize',fit);
-  return()=>{observer?.disconnect();window.removeEventListener('resize',fit);};
+  return observeTerrainViewport(element,target);
  },[revision]);
  useEffect(()=>{
   let stale=false;
@@ -80,7 +66,7 @@ export function TerrainScene({trail,onClose,visible=true}:{trail?:Trail;onClose:
  };
  return <section ref={surface} className={`terrain-scene ${visible?'is-visible':'is-warming'} ${ready?'is-ready':''}`} aria-label="Объёмный ландшафт Бзерпинского района" aria-hidden={!visible} inert={!visible}>
   <canvas key={attempt} ref={canvas} className="terrain-canvas" tabIndex={visible?0:-1} aria-label="Трёхмерный рельеф: поворот перетаскиванием или стрелками, масштаб жестом двумя пальцами, колёсиком или клавишами плюс и минус."/>
-  <div className="terrain-heading"><span className="eyebrow caption-3">Западный Кавказ</span><h2 className="heading-2">Бзерпинский<br/>карниз</h2><p className="caption-2">Увидеть маршрут среди гор</p></div>
+  <div className="terrain-heading"><span className="eyebrow caption-3">Западный Кавказ</span><h2 className="heading-2">Бзерпинский карниз</h2><p className="caption-2">Увидеть маршрут среди гор</p></div>
   <div className="terrain-controls" aria-label="Управление ландшафтом">
    <button onClick={onClose} aria-label="Вернуться к карте" title="Вернуться к карте"><MapIcon name="back"/></button><span/>
    <button aria-label="Приблизить ландшафт" onClick={()=>renderer.current?.zoomBy(1.2)}><MapIcon name="plus"/></button>

@@ -50,7 +50,9 @@ export function canvasStyle(p,showPaths=true,satellite=false){
  const is=(key,values)=>(_z,f)=>values.includes(f.props[key]);
  const poly=(dataLayer,fill,filter,extras={})=>({dataLayer,symbolizer:new p.PolygonSymbolizer({fill}),...(filter?{filter}:{}),...extras});
  const line=(dataLayer,color,width,filter,extras={})=>({dataLayer,symbolizer:new p.LineSymbolizer({color,width,...(extras.dash?{dash:extras.dash}:{}),opacity:extras.opacity??1,lineCap:'round'}),...(filter?{filter}:{}),...(extras.minzoom!==undefined?{minzoom:extras.minzoom}:{}),...(extras.maxzoom!==undefined?{maxzoom:extras.maxzoom}:{})});
- const label=(dataLayer,size,color,filter,extras={})=>({dataLayer,symbolizer:new p.CenteredTextSymbolizer({labelProps:['name:ru','name','name:latin'],font:typeof size==='function'?z=>`500 ${size(z)}px Manrope, sans-serif`:`500 ${size}px Manrope, sans-serif`,fill:color,stroke:'#f6f4e8',width:2,maxLineChars:20,...(extras.upper?{textTransform:'uppercase'}:{})}),...(filter?{filter}:{}),...(extras.minzoom!==undefined?{minzoom:extras.minzoom}:{}),...(extras.maxzoom!==undefined?{maxzoom:extras.maxzoom}:{})});
+ // TextSymbolizer's collision box contains the glyphs, but not its painted
+ // halo. Reserve the 2px halo and 2px breathing room without moving labels.
+ const label=(dataLayer,size,color,filter,extras={})=>({dataLayer,symbolizer:new p.Padding(4,new p.CenteredTextSymbolizer({labelProps:['name:ru','name','name:latin'],font:typeof size==='function'?z=>`500 ${size(z)}px Manrope, sans-serif`:`500 ${size}px Manrope, sans-serif`,fill:color,stroke:'#f6f4e8',width:2,maxLineChars:20,...(extras.upper?{textTransform:'uppercase'}:{})})),...(filter?{filter}:{}),...(extras.minzoom!==undefined?{minzoom:extras.minzoom}:{}),...(extras.maxzoom!==undefined?{maxzoom:extras.maxzoom}:{})});
  const paintRules=[
  poly('landcover','#E3E9D8',is('class',['grass','farmland'])),poly('landcover','#BACEAF',is('class',['wood','forest'])),poly('landcover','#D2DFC5',is('class',['scrub','heath'])),poly('landcover','#f6f5ee',is('class',['ice'])),poly('landuse','#e7e8db',is('class',['residential','commercial','industrial']),{minzoom:9}),poly('park','#d4e1c1'),
  poly('water','#C5DEE5'),line('waterway','#82ADB9',z=>Math.max(.6,Math.min(3,(z-8)*.3)),null,{minzoom:7}),line('boundary','#8F9E87',.65,(_z,f)=>Number(f.props.admin_level)<=4,{dash:[4,3],opacity:z=>Math.max(.18,.58-Math.max(0,z-7)*.08)}),
@@ -58,7 +60,7 @@ export function canvasStyle(p,showPaths=true,satellite=false){
  ...(showPaths?[line('transportation',satellite?'#F2DCB4':'#9C7950',z=>Math.max(.8,Math.min(2.4,(z-9)*.3)),is('class',['track','path']),{dash:[3,3],minzoom:11})]:[]),poly('building','#CFCBB9',null,{minzoom:14}),line('transportation','#acb2a3',1,is('class',['rail']),{dash:[2,4],minzoom:11})
  ];
  const labelRules=[
- {dataLayer:'place',minzoom:3,filter:(_z,f)=>isPriorityCity(f.props),symbolizer:new p.CenteredTextSymbolizer({labelProps:['name:ru','name','name:latin'],font:z=>`600 ${priorityCityFontSize(z)}px Manrope, sans-serif`,fill:'#263F32',stroke:'#FFFEFA',width:2.4,maxLineChars:20})},
+ {dataLayer:'place',minzoom:3,filter:(_z,f)=>isPriorityCity(f.props),symbolizer:new p.Padding(4,new p.CenteredTextSymbolizer({labelProps:['name:ru','name','name:latin'],font:z=>`600 ${priorityCityFontSize(z)}px Manrope, sans-serif`,fill:'#263F32',stroke:'#FFFEFA',width:2.4,maxLineChars:20}))},
  label('place',12,'#687d66',is('class',['country']),{upper:true,maxzoom:5}),label('place',12,'#849477',is('class',['state']),{minzoom:4,maxzoom:8}),label('place',z=>z<9?12:16,'#314F3D',(_z,f)=>f.props.class==='city'&&!isPriorityCity(f.props),{minzoom:4,maxzoom:15}),label('place',z=>z<11?12:14,'#405E47',is('class',['town']),{minzoom:8,maxzoom:17}),
  {dataLayer:'mountain_peak',symbolizer:new OutdoorPOISymbolizer(p,'mountain_peak'),filter:(_z,f)=>!!outdoorPoiKey(f.props,'mountain_peak'),minzoom:11},
  label('mountain_peak',12,'#736348',(_z,f)=>!outdoorPoiKey(f.props,'mountain_peak'),{minzoom:11}),

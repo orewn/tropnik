@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - 'docs/**'
+      - 'README.md'
   workflow_dispatch:
 
 permissions:
@@ -67,7 +68,7 @@ jobs:
       - name: Build and verify the static site
         run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
       - name: Verify real mobile rendering and sheet interaction and desktop map interactions
-        timeout-minutes: 8
+        timeout-minutes: 12
         env:
           GITHUB_SHA: ${{ github.sha }}
         run: node tools/pages-preview/browser-smoke.mjs

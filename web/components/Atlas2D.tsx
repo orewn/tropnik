@@ -20,16 +20,23 @@ import {publishMapCamera} from '@/lib/map-interaction';
 import {MapZoomButtons,MAP_ZOOM_BUTTONS} from '@/lib/map-zoom-buttons';
 import {canvasStyle} from '@/public/maps/canvas-style.js';
 import {createCanvasRelief} from '@/lib/canvas-relief';
+import {createLeafletCanvas} from '@/lib/leaflet-canvas';
 import {LatestMapNavigation,loadMapSelection} from '@/lib/map-lifecycle';
 import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {mapTrailPointEntries,type MapTrailPoint} from '@/lib/map-trail-points';
-import {ROUTE_PRESENTATION,routeStrokeWidth,territoryDetailOpacity,routeLineEdges,createRouteEdgeElement} from '@/lib/map-route-presentation';
+import {ROUTE_PRESENTATION,overviewContextCaption,overviewModeStatus,routeStrokeWidth,territoryDetailOpacity,routeLineEdges,createRouteEdgeElement} from '@/lib/map-route-presentation';
 import {SATELLITE_TILES,SATELLITE_MAX_ZOOM,SATELLITE_ERROR} from '@/lib/map-satellite';
 import 'leaflet/dist/leaflet.css';
 
 type Coverage=Awaited<ReturnType<typeof loadRussiaGeometry>>;
 type CanvasDetailLayer=Layer&{paintRules:ReturnType<typeof canvasStyle>['paintRules'];backgroundColor?:string;rerenderTiles:()=>void};
 type CanvasTrailPointLayers={marker:LeafletCircleMarker;hit:LeafletCircleMarker};
+export function createCanvasRussiaMask(L:typeof import('leaflet'),mask:GeoJSON.GeoJsonObject){
+ // These published cells already share a simplified boundary. Leaflet's
+ // per-ring simplifier can cut a shared corner and open a long visible slit.
+ const style:import('leaflet').PolylineOptions={renderer:createLeafletCanvas(L,{pane:'russia-mask',padding:.15}),smoothFactor:0,stroke:false,fillColor:MAP_OUTSIDE_COLOR,fillOpacity:1,fillRule:'evenodd'};
+ return L.geoJSON(leafletRussiaMask(mask),{pane:'russia-mask',interactive:false,style});
+}
 export function createCanvasTrailPoint(L:typeof import('leaflet'),item:MapTrailPoint,onSelect:()=>void,onHover:()=>void):CanvasTrailPointLayers{
  const center:[number,number]=[item.center[1],russiaLongitude(item.center[0])];
  // Use the same default renderer as the territories. A separate Canvas pane
@@ -255,7 +262,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
     if(!coverage.area.features?.length||!coverage.mask.features?.length)throw new Error('Coverage geometry missing');
     (window as unknown as {L:typeof L}).L=L;coverageRef.current=coverage;
     const element=container.current,{camera}=russiaView(element,256);cameraFloor.current=camera;
-    const map=L.map(element,{center:[camera.center[1],camera.center[0]],zoom:camera.zoom,zoomControl:false,attributionControl:false,minZoom:camera.zoom,maxZoom:18,zoomSnap:0,zoomDelta:MAP_ZOOM_BUTTONS.leafletStep,preferCanvas:true,scrollWheelZoom:true,worldCopyJump:false,zoomAnimation:true,markerZoomAnimation:true,fadeAnimation:false});
+    const map=L.map(element,{center:[camera.center[1],camera.center[0]],zoom:camera.zoom,zoomControl:false,attributionControl:false,minZoom:camera.zoom,maxZoom:18,zoomSnap:0,zoomDelta:MAP_ZOOM_BUTTONS.leafletStep,renderer:createLeafletCanvas(L),preferCanvas:true,scrollWheelZoom:true,worldCopyJump:false,zoomAnimation:true,markerZoomAnimation:true,fadeAnimation:false});
     mapRef.current=map;element.style.background=MAP_OUTSIDE_COLOR;
     const zoomControl=new MapZoomButtons({zoom:()=>map.getZoom(),bounds:()=>({min:map.getMinZoom(),max:map.getMaxZoom()}),busy:()=>zooming.current,
      apply:target=>map.setZoom(target,{animate:!window.matchMedia('(prefers-reduced-motion: reduce)').matches})});
@@ -280,7 +287,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
     map.createPane('russia-satellite');Object.assign(map.getPane('russia-satellite')!.style,{zIndex:'180',pointerEvents:'none'});
     map.createPane('russia-relief');Object.assign(map.getPane('russia-relief')!.style,{zIndex:'350',pointerEvents:'none'});
     map.createPane('russia-mask');Object.assign(map.getPane('russia-mask')!.style,{zIndex:'450',pointerEvents:'none'});
-    L.geoJSON(coverage.area,{pane:'russia-land',style:{renderer:L.canvas({pane:'russia-land',padding:.15}),color:'#aebda2',weight:.65,fillColor:'#dbe4cd',fillOpacity:1},interactive:false}).addTo(map);
+    L.geoJSON(coverage.area,{pane:'russia-land',style:{renderer:createLeafletCanvas(L,{pane:'russia-land',padding:.15}),color:'#aebda2',weight:.65,fillColor:'#dbe4cd',fillOpacity:1},interactive:false}).addTo(map);
     L.tileLayer('/maps/russia-relief/{z}/{x}/{y}.png',{pane:'russia-overview-relief',minZoom:0,maxNativeZoom:4,maxZoom:6,tileSize:256,keepBuffer:4,updateWhenIdle:false,updateWhenZooming:true}).addTo(map);
     ensureRelief();
     territoryLayer.current=L.geoJSON(displayGeoJSON(admin),{style:territoryStyle,onEachFeature:(feature,layer)=>{
@@ -291,7 +298,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
     }}).addTo(map);
     // The non-interactive mask sits above tiles and route paths; validated marker labels stay above it. Leaflet
     // does not repeat GeoJSON, so its two adjacent world copies are covered too.
-    L.geoJSON(leafletRussiaMask(coverage.mask),{pane:'russia-mask',interactive:false,style:{renderer:L.canvas({pane:'russia-mask',padding:.15}),stroke:false,fillColor:MAP_OUTSIDE_COLOR,fillOpacity:1,fillRule:'evenodd'}}).addTo(map);
+    createCanvasRussiaMask(L,coverage.mask).addTo(map);
     for(const item of planning?[]:regions){
      if(!inRussiaCoverage(...item.center,coverage.area))continue;
      const button=document.createElement('button');button.type='button';button.className='region-marker region-marker-'+item.id;button.setAttribute('aria-label',`Открыть ${item.name}`);directionButtons.current.set(item.id,button);
@@ -467,7 +474,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
  },[planning,planPoints,loaded]);
  async function changeMode(next:'overview'|'detail'){
   wantsSatellite.current=false;removeSatellite();setScene(false);
-  setStatus('');
+  setStatus(previous=>overviewModeStatus(previous,next));
   if(next==='overview'){wantsDetail.current=false;++detailRequest.current;detailLoading.current=false;setTilesLoading(false);if(baseRef.current&&mapRef.current)mapRef.current.removeLayer(baseRef.current);baseRef.current=null;setMode(next);reliefRef.current?.layer.remove();reliefRef.current?.setOverview(true);setReliefReady(false);}
   else try{wantsDetail.current=true;ensureReliefRef.current?.();if(await addDetail()&&baseRef.current&&wantsDetail.current&&navigator.onLine)setMode(next);}catch(error){setStatus(error instanceof Error?error.message:'Карта недоступна.');}
  }
@@ -491,7 +498,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
  return <div className={`atlas-wrap ${scene?'showing-terrain':''}`} data-map-imagery={satellite?'satellite':undefined} data-map-detail={mapZoom>=ROUTE_PRESENTATION.closeZoom?'close':undefined} data-map-route={trail&&!planning?'selected':undefined}>
   <div className="atlas-canvas" ref={container} style={{visibility:loaded?'visible':'hidden'}} role="region" aria-label="Интерактивная плоская карта России"/>
   {!loaded&&!status&&<div className="map-skeleton"><MapIcon name="compass" size={38}/><span>Открываем карту России</span></div>}
-  {trail&&!planning?<MapRouteContext title={trail.title}/>:<div className="map-context"><span className="live-dot"/><span>{planning?'План похода':region?.name||'Россия'}</span><span className="context-divider"/><span>{satellite?'Спутник':planning?'Выбранные участки':region?(mode==='detail'?'Тропы и местность':'Обзор'):routeCountLabel(visibleTrails.length)}</span></div>}
+  {trail&&!planning?<MapRouteContext title={trail.title} caption={overviewContextCaption(satellite?'satellite':mode,mapZoom,scene)}/>:<div className="map-context"><span className="live-dot"/><span>{planning?'План похода':region?.name||'Россия'}</span><span className="context-divider"/><span>{satellite?'Спутник':planning?'Выбранные участки':region?(mode==='detail'?'Тропы и местность':'Обзор'):routeCountLabel(visibleTrails.length)}</span></div>}
   {tilesLoading&&!scene&&!status&&<div className="map-preload-status" role="status">Подгружаем детали текущего ракурса</div>}
   <div className="map-style-switch"><button aria-label="Карта сверху" className={!scene&&!satellite?'active':''} onClick={()=>{setScene(false);if(satellite)void changeMode('detail');}}><MapIcon name="map" size={18}/>Карта</button>{sceneAvailable&&<button aria-label="3D ландшафт Бзерпинского района" className={scene?'active':''} onClick={()=>setScene(true)} onPointerEnter={()=>void preloadTerrain()} title="Объёмная сцена Бзерпинского района"><MapIcon name="terrain" size={19}/>3D</button>}</div>
   <div className="map-controls"><button aria-label="Увеличить масштаб" disabled={!loaded} onClick={()=>zoomBy(MAP_ZOOM_BUTTONS.leafletStep)}><MapIcon name="plus" size={20}/></button><button aria-label="Уменьшить масштаб" disabled={!loaded} onClick={()=>zoomBy(-MAP_ZOOM_BUTTONS.leafletStep)}><MapIcon name="minus" size={20}/></button><span/><button aria-label="Север сверху" title="На плоской карте север всегда сверху" disabled><MapIcon name="compass" size={22}/></button><button aria-label="Моё местоположение" disabled={!loaded} onClick={locate}><MapIcon name="location" size={21}/></button><button aria-label={planning&&trail?'Показать поход целиком':'Показать Россию целиком'} disabled={!loaded} onClick={()=>{cancelNavigation();setScene(false);if(!planning||!requestPlanFit())fitRussia(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);}}><MapIcon name="fit" size={19}/></button></div>

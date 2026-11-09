@@ -90,7 +90,7 @@ function assertZoomDesign(design,name,engine,mobile){
  assert.ok(['active','not-offered'].includes(design.modes?.terrain?.state),`${name}: global terrain availability was not recorded`);
  const scene=design.modes?.scene3d;
  assert.ok(['ready','error','not-ready','not-offered'].includes(scene?.state),`${name}: prepared3D availability was not recorded`);
- if(scene.state==='ready'){assert.equal(scene.zoomInputs,28);assert.equal(scene.resetInput,true);assert.equal(scene.imageChanged,true);}
+ if(scene.state==='ready'){assert.equal(scene.retainedMapNoticeVisible,false,`${name}: a retained 2D notice covers the ready 3D scene`);assert.equal(scene.zoomInputs,28);assert.equal(scene.resetInput,true);assert.equal(scene.imageChanged,true);}
  assert.ok(Array.isArray(design.screenshots)&&design.screenshots.filter(item=>item.mode==='detail').length>=6,`${name}: key-scale review images are missing`);
  assert.ok(design.screenshots.filter(item=>item.mode==='saved-overview').length>=6,`${name}: saved-overview review images are missing`);
  for(const screenshot of design.screenshots){assert.match(screenshot.file,/^[a-z0-9_.-]+\.png$/);assert.match(screenshot.sha256,/^[a-f0-9]{64}$/);assert.ok(screenshot.bytes>1000);}

@@ -7,6 +7,22 @@ const KEY_ZOOMS=[2,5,8,11,14,18];
 const PLUS='.map-controls button[aria-label="Увеличить масштаб"]';
 const MINUS='.map-controls button[aria-label="Уменьшить масштаб"]';
 
+/** Leaflet animates its child map pane, not the outer atlas canvas. */
+export function mapCameraIsMoving(element){
+ return element.hasAttribute('data-map-camera')||!!element.querySelector('.leaflet-map-pane.leaflet-zoom-anim');
+}
+
+/** A dataset can stay unchanged between zoomend and the next queued RAF.
+ * Advance the real compositor before every sample, then require the same
+ * idle camera on four observations. No renderer callbacks are invoked. */
+export async function settleMapCamera({engine,read,frame,wait}){
+ let signature='',stable=0;
+ return wait(`The ${engine} map did not settle`,async()=>{await frame();return read();},state=>{
+  if(!state?.visible||state.moving||state.engine!==engine||!Object.values(state.camera).every(Number.isFinite)){signature='';stable=0;return false;}
+  const next=JSON.stringify([state.camera,state.rect,state.route]);stable=next===signature?stable+1:0;signature=next;return stable>=3;
+ },15000);
+}
+
 /** Bounds of independent overlays. Parents and children must not both enter
  * ui: credit text, the credit toggle and its popover are separate surfaces. */
 export function assertMapUIBounds(layout,context){
@@ -105,7 +121,16 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
   return{before:before.camera.zoom,after:after.camera.zoom,changed:Math.abs(after.camera.zoom-before.camera.zoom)>.001};
  }
  async function reachBottom(){
-  for(let count=0;count<28;count++){const result=await zoom(-1);if(!result.changed)return result.after;}
+  for(let count=0;count<28;count++){
+   const result=await zoom(-1);
+   if(!result.changed){
+    // Confirm without another press: a delayed queued movement must not be
+    // mistaken for the lower bound or hidden by an extra zoom input.
+    const confirmed=await settledMap(cdp,profile.engine);
+    assert.ok(confirmed.camera.zoom<=result.before+.001,`${profile.name}: the lower-bound confirmation moved upwards`);
+    if(Math.abs(confirmed.camera.zoom-result.before)<.001)return confirmed.camera.zoom;
+   }
+  }
   throw new Error(`${profile.name}: zoom did not reach its lower bound`);
  }
  async function reachZoom(target){
@@ -246,11 +271,12 @@ export async function runZoomDesignAudit(cdp,profile,helpers){
   const sceneAvailable=await elementPoint(cdp,sceneButton);
   if(sceneAvailable?.unobscured){
    await diagnosticPhase(cdp,'zoom-design-scene');await pointerSelector(cdp,sceneButton,profile);
-   const sceneState=()=>evaluate(cdp,`(()=>{const scene=document.querySelector('.terrain-scene.is-visible'),canvas=scene?.querySelector('canvas'),r=canvas?.getBoundingClientRect(),data=canvas?.dataset;return{visible:!!scene,ready:scene?.classList.contains('is-ready')===true,error:scene?.querySelector('.terrain-progress')?.textContent?.trim()||'',canvas:r?{width:r.width,height:r.height,renderer:data.renderer||'',triangles:Number(data.triangles||0),sourceVertices:Number(data.sourceVertices||0),meshStride:Number(data.meshStride||0),renderMs:Number(data.renderMs||0)}:null}})()`);
+   const sceneState=()=>evaluate(cdp,`(()=>{const scene=document.querySelector('.terrain-scene.is-visible'),canvas=scene?.querySelector('canvas'),r=canvas?.getBoundingClientRect(),data=canvas?.dataset,notice=document.querySelector('.atlas-wrap>.map-message'),noticeRect=notice?.getBoundingClientRect(),noticeStyle=notice&&getComputedStyle(notice);return{visible:!!scene,ready:scene?.classList.contains('is-ready')===true,retainedMapNoticeVisible:!!noticeRect&&noticeRect.width>0&&noticeRect.height>0&&noticeStyle.display!=='none'&&noticeStyle.visibility!=='hidden'&&Number(noticeStyle.opacity)!==0,error:scene?.querySelector('.terrain-progress')?.textContent?.trim()||'',canvas:r?{width:r.width,height:r.height,renderer:data.renderer||'',triangles:Number(data.triangles||0),sourceVertices:Number(data.sourceVertices||0),meshStride:Number(data.meshStride||0),renderMs:Number(data.renderMs||0)}:null}})()`);
    let scene;
    for(let attempt=0;attempt<60;attempt++){scene=await sceneState();if(scene.ready||scene.error)break;await sleep(250);}
    const initial=await capture('scene3d',null,'overview');
    if(scene.ready){
+    assert.equal(scene.retainedMapNoticeVisible,false,`${profile.name}: a retained 2D map notice covers the ready 3D scene`);
     assert.ok(scene.canvas?.triangles>0&&['webgl2','canvas2d'].includes(scene.canvas.renderer),`${profile.name}: a ready3D scene has no recorded rendered mesh`);
     const sceneZoom=async label=>{
      const point=await elementPoint(cdp,`.terrain-controls button[aria-label="${label}"]`);

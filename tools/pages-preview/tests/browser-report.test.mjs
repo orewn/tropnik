@@ -16,7 +16,7 @@ function zoomDesign(profile,engine,mobile){
  const burst=(direction,beforeZoom,afterZoom)=>({passed:true,input,count:4,receivedClicks:4,direction,step,beforeZoom,afterZoom,expectedZoom:afterZoom,eventSpanMs:40,durationMs:50,pageScrollDeltaPx:0,selectionPreserved:true});
  return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:2,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),
   zoomBurst:{passed:true,input,returnedToStart:true,increase:burst(1,10,high),decrease:burst(-1,high,10)},
-  modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview'})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:mobile?'not-offered':'active'},scene3d:{state:'ready',zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true}},
+  modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview'})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:mobile?'not-offered':'active'},scene3d:{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true}},
   screenshots:['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)})))};
 }
 function evidence(){
@@ -65,6 +65,8 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
   value=>value.zoomDesigns[0].modes.overview.keySteps[2].zoom=11,
   value=>delete value.zoomDesigns[0].modes.overview.sourceEvidence,
   value=>value.zoomDesigns[0].modes.scene3d.imageChanged=false,
+  value=>value.zoomDesigns[0].modes.scene3d.retainedMapNoticeVisible=true,
+  value=>delete value.zoomDesigns[0].modes.scene3d.retainedMapNoticeVisible,
   value=>delete value.zoomDesigns[0].zoomBurst,
   value=>value.zoomDesigns[0].zoomBurst.increase.receivedClicks=3,
   value=>value.zoomDesigns[0].zoomBurst.increase.afterZoom-=.75,

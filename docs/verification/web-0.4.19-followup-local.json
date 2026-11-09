@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "scope": "follow-up local source validation; publication and exact-commit browser CI remain pending",
+  "recordedAt": "2026-11-09T19:52:15.951753+00:00",
+  "parentCommit": "ec94bf00ad3a170ac5bea3dc529d775a8d45269a",
+  "webTests": {
+    "passed": 425,
+    "failed": 0,
+    "skipped": 0
+  },
+  "pagesToolingTests": {
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0
+  },
+  "typeScript": {
+    "web": "PASS",
+    "pages": "PASS"
+  },
+  "eslint": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "testHarnessLintFollowup": {
+    "change": "avoid aliasing this in mock ResizeObserver",
+    "viewportTestsPassed": 8
+  },
+  "serviceWorker": "tropnik-shell-0.4.19-67dc6047fdbd043b",
+  "manualBrowserChecks": [
+    "320px and390px prepared3D: sheet open/closed, zoom/reset, six44pxcontrols",
+    "Desktop preview: planner navigation, back to selected route, prepared3D opened"
+  ],
+  "limitations": [
+    "Cloud browser and responsive iframe checks are not a physical Android/Brave benchmark.",
+    "Browser CI and source availability require separate exact-commit evidence."
+  ],
+  "changedWebFileSHA256": {
+    "web/app/map-detail.css": "3c750443eb068b9b3b767bf16f911664f2d82bb334d11aae7c731a93f4c1a6a1",
+    "web/components/Atlas.tsx": "1a0f46045fba49540a25108c4d5e2662e3bae351dfdac3004974e1e32b3d8a6b",
+    "web/components/Atlas2D.tsx": "ac1a7aea8377613125938e5e1c8535b4c1f77e07bd79ea090f44f3701cfec691",
+    "web/components/MapRouteContext.tsx": "f21d5d9fbec1f72feb44909f73e8b6dd902bd659f8f49964b1fd8adaff80f481",
+    "web/components/TerrainScene.tsx": "8c0693851af4128a9235ccc9fa4ed8e87e1d40f98154152bdb1ba5cc4c169112",
+    "web/lib/leaflet-canvas.ts": "ebf20be1769683695e198185ee456c11bdc9ad2191dec6034db02ba5c9d0032a",
+    "web/lib/map-route-presentation.ts": "4b88f4fdd4081a19f508b141bc688b11d98ec6829390aa90bac860967a73700a",
+    "web/lib/terrain-viewport.ts": "21e3e9b1f0986c1c55e6f8b0f4a4c1a1f0b5583e841a7545ff57306b1a934b39",
+    "web/public/maps/canvas-style.js": "217555d5d68781969836598dfe22bb202b8f64685c4d39c9cda1096e9313d778",
+    "web/public/sw.js": "eb9e35fcd7b870e4684a2d20ed16d09b7ee233cde9df3b50651f5ce729b35157",
+    "web/tests/atlas-canvas-interactions.test.mjs": "6525b91e1704fdd935c2b6711aeb1eea4cb9138f014ef97d87074f3cb0cd9a4a",
+    "web/tests/leaflet-canvas.test.mjs": "6f6c48c3a5a62ac4b285324c595a36fe369bfff55f966f559560e9bb3a4628ed",
+    "web/tests/map-route-presentation.test.mjs": "5f085cf30b8ebfd842098314baa8229743a3e2c28305c6bbed3237cd70654f9b",
+    "web/tests/map-satellite.test.mjs": "271526a5d7da72a8a360fb1536e0d5a9529ffda015d666b75b4fed3abf04a6af",
+    "web/tests/terrain-viewport.test.mjs": "1222b6f2c62aa0a47aa94928520b9a1f0b848b8d514db2111e722d64f1acc76a"
+  }
+}

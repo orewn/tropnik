@@ -17,7 +17,7 @@ import {MapStyleSession,loadMapSelection,applyMapLayerVisibility,type MapBaseMod
 import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {terrainExaggerationForZoom,terrainPitchForZoom} from '@/lib/map-camera-profile';
 import {mapTrailPointFeatureCollection} from '@/lib/map-trail-points';
-import {ROUTE_PRESENTATION,routeLineEdges,createRouteEdgeElement} from '@/lib/map-route-presentation';
+import {ROUTE_PRESENTATION,OVERVIEW_MESSAGE,overviewContextCaption,routeLineEdges,createRouteEdgeElement} from '@/lib/map-route-presentation';
 import {EMPTY_MAP_TRAILS,type AtlasProps} from '@/lib/map-types';
 import {MAP_CONFIG,viewportRegionId,directionExpansionZoom} from '@/lib/map-config';
 import {coalesceMapFrame,publishMapCamera,resolveRenderedTrail} from '@/lib/map-interaction';
@@ -31,7 +31,6 @@ type Coverage=Awaited<ReturnType<typeof loadRussiaGeometry>>;
 const EMPTY:GeoJSON.FeatureCollection={type:'FeatureCollection',features:[]};
 const MASK='russia-outside-mask';
 const OFFLINE_MESSAGE='Нет сети. Доступна сохранённая обзорная карта.';
-const OVERVIEW_MESSAGE='Обзорные границы. Для ориентирования по тропе нужен детальный пакет.';
 const ROUTE_ERROR='Линия маршрута не загрузилась. Попробуйте ещё раз при устойчивой связи.';
 const ROUTE_COVERAGE_MESSAGE='У этой линии нет точек внутри доступного покрытия России. Карточка остаётся доступной.';
 const TRAIL_POINTS='trail-points',TRAIL_POINT_HALO='trail-point-halo',TRAIL_POINT_DOT='trail-point-dot',TRAIL_POINT_HIT='trail-point-hit';
@@ -442,7 +441,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  return <div className={`atlas-wrap ${scene?'showing-terrain':''}`} data-map-imagery={baseMode==='satellite'?'satellite':undefined} data-map-detail={mapZoom>=ROUTE_PRESENTATION.closeZoom?'close':undefined} data-map-route={trail?'selected':undefined}>
   <div ref={container} className="atlas-canvas" style={{visibility:painted?'visible':'hidden'}} role="region" aria-label="Интерактивная карта направлений России"/>
   {!painted&&!status&&<div className="map-skeleton"><MapIcon name="compass" size={38}/><span>Открываем карту России</span></div>}
-  {trail?<MapRouteContext title={trail.title}/>:<div className="map-context"><span className="live-dot"/><span>{region?region.name:'Россия'}</span><span className="context-divider"/><span>{baseMode==='satellite'?'Спутник':region?(baseMode==='detail'?'Тропы и местность':'Обзорная карта'):routeCountLabel(visibleTrails.length)}</span></div>}
+  {trail?<MapRouteContext title={trail.title} caption={overviewContextCaption(baseMode,mapZoom,scene)}/>:<div className="map-context"><span className="live-dot"/><span>{region?region.name:'Россия'}</span><span className="context-divider"/><span>{baseMode==='satellite'?'Спутник':region?(baseMode==='detail'?'Тропы и местность':'Обзорная карта'):routeCountLabel(visibleTrails.length)}</span></div>}
   {loaded&&tilesLoading&&!scene&&!status&&<div className="map-preload-status" role="status">Подгружаем детали текущего ракурса</div>}
   <div className="map-style-switch"><button aria-label="Карта сверху" className={!terrain&&!scene&&baseMode!=='satellite'?'active':''} onClick={()=>{setScene(false);if(baseMode==='satellite')void changeBase('detail');else setTerrainMode(false);}}><MapIcon name="map" size={18}/>Карта</button><button aria-label="Рельеф всей карты" className={terrain&&!scene?'active':''} onClick={()=>{setScene(false);setTerrainMode(true);}} disabled={offline||baseMode==='overview'} title="Объёмный рельеф на основе данных высот"><MapIcon name="terrain" size={19}/>Рельеф</button>{sceneAvailable&&<button aria-label="3D ландшафт Бзерпинского района" className={scene?'active':''} onPointerEnter={()=>void preloadTerrain()} onFocus={()=>void preloadTerrain()} onClick={()=>setScene(true)}><MapIcon name="peak" size={19}/>3D</button>}</div>
   <div className="map-controls"><button aria-label="Увеличить масштаб" onClick={()=>zoomBy(MAP_ZOOM_BUTTONS.maplibreStep)}><MapIcon name="plus" size={20}/></button><button aria-label="Уменьшить масштаб" onClick={()=>zoomBy(-MAP_ZOOM_BUTTONS.maplibreStep)}><MapIcon name="minus" size={20}/></button><span/><button aria-label="Север сверху" onClick={()=>setTerrainMode(false)}><MapIcon name="compass" size={22}/></button><button aria-label="Моё местоположение" onClick={locate}><MapIcon name="location" size={21}/></button><button aria-label="Показать Россию целиком" onClick={()=>{setScene(false);fitRussia(window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:700);}}><MapIcon name="fit" size={19}/></button></div>

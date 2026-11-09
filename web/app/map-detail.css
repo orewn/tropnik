@@ -40,6 +40,26 @@
   background:var(--surface);color:var(--forest);
 }
 .explore-layout .map-message button{min-width:44px;min-height:44px}
+/* The independent 3D scene owns its own loading/error state. Keep a retained
+   2D tile notice for the return to the map, without covering the scene title. */
+.atlas-wrap.showing-terrain>.map-message{display:none}
+.explore-layout:has(.atlas-wrap.showing-terrain)>.fact-closed,
+.explore-layout:has(.atlas-wrap.showing-terrain)>.fact-card{display:none}
+.explore-layout .terrain-heading{
+  top:calc(var(--map-top) + 68px);left:var(--map-left);
+  padding:12px 16px;max-width:min(360px,calc(100% - 112px));
+  border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  box-shadow:0 4px 16px #183B2C0D;
+}
+.explore-layout .terrain-heading h2{font-size:20px;line-height:24px;letter-spacing:-.02em;margin:4px 0}
+.explore-layout .terrain-heading p{font-size:12px;line-height:16px;color:var(--muted)}
+.explore-layout .terrain-bottom,
+.explore-layout:has(.explore-panel.collapsed) .terrain-bottom{
+  left:var(--map-left);right:auto;bottom:calc(var(--map-bottom-inset,0px) + 12px);
+  width:max-content;max-width:calc(100% - var(--map-left) - var(--map-right) - 64px);padding:8px 12px;gap:8px;
+  border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);
+}
+.explore-layout .terrain-bottom .terrain-live{padding:0;background:none}
 /* Keep notices in the context column, clear of stories and the bottom rail. */
 @media(min-width:901px),(min-width:701px) and (min-height:621px){
   .explore-layout .map-message{top:calc(var(--map-top) + 68px);bottom:auto}
@@ -51,6 +71,39 @@
   .explore-layout .map-route-context{padding:8px 12px;gap:8px}
   .map-route-context>svg{width:20px;height:20px}
   .route-edge-label{display:none}
+}
+
+/* All six scene actions fit in a 320px viewport without covering the drawer.
+   Attribution uses the upper right slot; the scene keeps its own info control. */
+@media(max-width:700px),(min-width:701px) and (max-width:900px) and (max-height:620px) and (orientation:landscape) and (pointer:coarse){
+  .explore-layout .terrain-controls{
+    top:auto;bottom:calc(var(--map-bottom-inset,0px) + 12px);
+    left:var(--map-left);right:var(--map-right);width:auto;max-width:352px;
+    flex-direction:row;justify-content:space-between;gap:0;padding:4px;
+  }
+  .explore-layout .terrain-controls>button{
+    display:grid;place-items:center;width:44px;height:44px;min-width:44px;min-height:44px;
+  }
+  .explore-layout .terrain-controls>span{display:none}
+  .explore-layout .terrain-bottom,
+  .explore-layout:has(.explore-panel.collapsed) .terrain-bottom{
+    bottom:calc(var(--map-bottom-inset,0px) + 76px);
+    max-width:calc(100% - var(--map-left) - var(--map-right));
+  }
+  .explore-layout.sheet-open .terrain-bottom,
+  .explore-layout.sheet-open .terrain-heading{display:none}
+  .explore-layout .terrain-info{
+    top:calc(var(--map-top) + 60px);left:var(--map-left);right:calc(var(--map-right) + 52px);
+    width:auto;max-width:none;max-height:max(64px,calc(100dvh - var(--header) - var(--map-bottom-inset,0px) - 144px));
+  }
+  .explore-layout .terrain-scene>.map-attribution{
+    top:calc(var(--map-top) + 60px);right:var(--map-right);bottom:auto;left:auto;
+    align-items:flex-start;
+  }
+  .explore-layout .terrain-scene .map-attribution-content{
+    top:0;right:52px;bottom:auto;left:auto;max-height:calc(100dvh - var(--header) - var(--map-bottom-inset,0px) - 104px);
+    overflow:auto;overscroll-behavior:contain;
+  }
 }
 
 /* An expanded portrait sheet leaves too little height for a vertical rail.

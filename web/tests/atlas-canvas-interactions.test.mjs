@@ -4,16 +4,17 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import vm from 'node:vm';
 import {MAP_CONFIG} from '../lib/map-config.ts';
-import {russiaLongitude} from '../public/maps/russia-viewport.js';
+import {russiaLongitude,leafletRussiaMask,MAP_OUTSIDE_COLOR} from '../public/maps/russia-viewport.js';
 import * as routePresentation from '../lib/map-route-presentation.ts';
+import {createLeafletCanvas} from '../lib/leaflet-canvas.ts';
 
 const require=createRequire(new URL('../package.json',import.meta.url));
 const ts=require('typescript');
 const source=readFileSync(new URL('../components/Atlas2D.tsx',import.meta.url),'utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 const component={exports:{}};
-new Function('require','module','exports',compiled)(id=>id==='@/lib/map-config'?{MAP_CONFIG}:id==='@/public/maps/russia-viewport.js'?{russiaLongitude}:id==='@/lib/map-route-presentation'?routePresentation:{},component,component.exports);
-const {createCanvasTrailPoint,createCanvasTrailLine,raiseCanvasTrailPoints}=component.exports;
+new Function('require','module','exports',compiled)(id=>id==='@/lib/map-config'?{MAP_CONFIG}:id==='@/public/maps/russia-viewport.js'?{russiaLongitude,leafletRussiaMask,MAP_OUTSIDE_COLOR}:id==='@/lib/map-route-presentation'?routePresentation:id==='@/lib/leaflet-canvas'?{createLeafletCanvas}:{},component,component.exports);
+const {createCanvasTrailPoint,createCanvasTrailLine,raiseCanvasTrailPoints,createCanvasRussiaMask}=component.exports;
 
 // Use the installed Leaflet implementation for renderer ownership, projection,
 // draw order, hit testing and event bubbling. Only DOM painting is omitted;
@@ -27,10 +28,32 @@ vm.runInNewContext(readFileSync(require.resolve('leaflet/dist/leaflet-src.js'),'
 });
 const L=leaflet.exports;
 
+test('the real mask keeps its shared 45-degree cell edge after Leaflet projects and clips it',()=>{
+ const data=JSON.parse(readFileSync(new URL('../public/data/russia-outside-mask.geojson',import.meta.url),'utf8'));
+ const original=JSON.stringify(data),zoom=4.5,center=L.latLng(43.719248501487606,40.40214788181817);
+ const origin=L.CRS.EPSG3857.latLngToPoint(center,zoom).subtract([206,423.5]).round();
+ const map={latLngToLayerPoint:latlng=>L.CRS.EPSG3857.latLngToPoint(latlng,zoom).round().subtract(origin)};
+ const renderer={options:{},_bounds:L.bounds([-62,-128],[474,975])};
+ const prepare=group=>{
+  const layers=[];group.eachLayer(layer=>{layer._map=map;layer._renderer=renderer;layer._project();layer._clipPoints();layer._simplifyPoints();layers.push(layer);});return layers;
+ };
+ const previous=prepare(L.geoJSON(leafletRussiaMask(data),{style:{stroke:false,fill:true,smoothFactor:1}}));
+ const fixed=prepare(createCanvasRussiaMask(L,data));
+ for(const y of [450,475,500,525]){
+  const point=L.point(280.25,y);
+  assert.equal(previous.some(layer=>layer._containsPoint(point)),false,'independent SDK simplification reproduces the visible seam');
+  assert.equal(fixed.some(layer=>layer._containsPoint(point)),true,'the existing coverage cells must meet without changing their geometry');
+ }
+ assert.equal(fixed.length,previous.length,'mask partitions and world copies remain intact');
+ assert.ok(fixed.every(layer=>layer.options.interactive===false&&layer.options.stroke===false));
+ assert.ok(fixed.every(layer=>layer.options.noClip===false),'viewport clipping remains enabled');
+ assert.equal(JSON.stringify(data),original,'the published geometry and provenance cannot be edited by rendering');
+});
+
 function mapHarness(){
  const layers=new Set(),renderers=new Set();
  const map=Object.assign(Object.create(L.Map.prototype),{
-  options:{preferCanvas:true},_paneRenderers:{},
+  options:{preferCanvas:true,renderer:createLeafletCanvas(L)},_paneRenderers:{},
   hasLayer:layer=>layers.has(layer),
   addLayer(layer){
    if(layers.has(layer))return this;

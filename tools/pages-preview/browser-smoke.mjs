@@ -6,7 +6,7 @@ import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
 import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-projection.mjs';
-import {runZoomDesignAudit} from './browser-zoom-audit.mjs';
+import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving} from './browser-zoom-audit.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const REPORT = new URL('browser-verification.json', ROOT);
@@ -394,15 +394,11 @@ async function mapState(cdp){
   return evaluate(cdp,`(()=>{
     const element=document.querySelector('.atlas-canvas[data-map-engine]');if(!element)return null;
     const r=element.getBoundingClientRect(),s=getComputedStyle(element),d=element.dataset;
-    return{camera:{longitude:Number(d.mapLongitude),latitude:Number(d.mapLatitude),zoom:Number(d.mapZoom),tileSize:Number(d.mapTileSize),...(d.mapCenterX!==undefined?{centerX:Number(d.mapCenterX),centerY:Number(d.mapCenterY)}:{})},engine:d.mapEngine,route:d.mapRouteId||'',moving:element.hasAttribute('data-map-camera'),visible:s.visibility!=='hidden'&&s.display!=='none'&&r.width>20&&r.height>20,rect:{left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom},width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth};
+    return{camera:{longitude:Number(d.mapLongitude),latitude:Number(d.mapLatitude),zoom:Number(d.mapZoom),tileSize:Number(d.mapTileSize),...(d.mapCenterX!==undefined?{centerX:Number(d.mapCenterX),centerY:Number(d.mapCenterY)}:{})},engine:d.mapEngine,route:d.mapRouteId||'',moving:(${mapCameraIsMoving.toString()})(element),visible:s.visibility!=='hidden'&&s.display!=='none'&&r.width>20&&r.height>20,rect:{left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom},width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth};
   })()`);
 }
 async function settledMap(cdp,engine){
-  let signature='',stable=0;
-  return waitValue(`The ${engine} map did not settle`,()=>mapState(cdp),state=>{
-    if(!state?.visible||state.moving||state.engine!==engine||!Object.values(state.camera).every(Number.isFinite)){stable=0;return false;}
-    const next=JSON.stringify([state.camera,state.rect,state.route]);stable=next===signature?stable+1:0;signature=next;return stable>=3;
-  },15000);
+  return settleMapCamera({engine,read:()=>mapState(cdp),frame:()=>compositorFrame(cdp),wait:waitValue});
 }
 async function pointerAt(cdp,point,profile){
   assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y),'Pointer coordinates must be finite');

@@ -2,13 +2,26 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
-import {routeLineEdges,routeStrokeWidth,territoryDetailOpacity} from '../lib/map-route-presentation.ts';
+import {routeLineEdges,routeStrokeWidth,territoryDetailOpacity,overviewContextCaption,overviewModeStatus,OVERVIEW_MESSAGE} from '../lib/map-route-presentation.ts';
 import {canvasStyle} from '../public/maps/canvas-style.js';
 import {satelliteStyle} from '../lib/map-satellite.ts';
 
 const require=createRequire(new URL('../package.json',import.meta.url));
 const spec=createRequire(require.resolve('maplibre-gl/package.json'))('@maplibre/maplibre-gl-style-spec');
 const style=JSON.parse(readFileSync(new URL('../public/maps/tropa-style.json',import.meta.url),'utf8'));
+
+test('overview limits stay visible at close zoom without leaking into detailed imagery or replacing real errors',()=>{
+  for(const zoom of [6,11,14,18])assert.equal(overviewContextCaption('overview',zoom,false),'Обзор без деталей');
+  for(const zoom of [0,5.99,NaN,Infinity])assert.equal(overviewContextCaption('overview',zoom,false),undefined);
+  for(const mode of ['detail','satellite'])assert.equal(overviewContextCaption(mode,18,false),undefined);
+  assert.equal(overviewContextCaption('overview',18,true),undefined,'a prepared 3D scene has its own detail');
+  assert.equal(overviewModeStatus('','overview'),OVERVIEW_MESSAGE);
+  assert.equal(overviewModeStatus(OVERVIEW_MESSAGE,'detail'),'');
+  for(const error of ['Линия маршрута не загрузилась. Проверьте подключение.','Без сети: обзор.']){
+    assert.equal(overviewModeStatus(error,'overview'),error);
+    assert.equal(overviewModeStatus(error,'detail'),error);
+  }
+});
 
 test('the two edges annotate an actual single line without changing any source vertices',()=>{
   const geometry={type:'LineString',coordinates:[[44,43,920],[44.01,43.02,1010],[44.1,43.04,1100]]};
@@ -89,7 +102,8 @@ test('the actual cartographic and satellite styles validate against the installe
 
 test('Canvas styles stay bounded from the country view through street scale in both imagery modes',()=>{
   class Symbolizer{constructor(options){this.options=options;}}
-  const p={PolygonSymbolizer:Symbolizer,LineSymbolizer:Symbolizer,CenteredTextSymbolizer:Symbolizer};
+  class Padding{constructor(padding,symbolizer){this.padding=padding;this.symbolizer=symbolizer;}}
+  const p={PolygonSymbolizer:Symbolizer,LineSymbolizer:Symbolizer,CenteredTextSymbolizer:Symbolizer,Padding};
   for(const satellite of [false,true])for(const showPaths of [false,true]){
     const view=canvasStyle(p,showPaths,satellite);
     for(let zoom=0;zoom<=18;zoom++)for(const rule of view.paintRules){
@@ -103,5 +117,31 @@ test('Canvas styles stay bounded from the country view through street scale in b
       }
     }
     if(satellite)assert.ok(view.paintRules.every(rule=>!['landcover','landuse','park','water','building'].includes(rule.dataLayer)));
+  }
+});
+
+test('Canvas label collision includes the painted halo and keeps source anchors unchanged',()=>{
+  const p=require('protomaps-leaflet');
+  const layout={zoom:5,scratch:{font:'',measureText:text=>({width:text.length*6,actualBoundingBoxAscent:8,actualBoundingBoxDescent:2})}};
+  const feature=name=>({geomType:1,props:{class:'state','name:ru':name}});
+  const first=feature('Калужская область'),second=feature('Рязанская область');
+  for(const satellite of [false,true]){
+    const rule=canvasStyle(p,true,satellite).labelRules.find(rule=>rule.dataLayer==='place'&&rule.filter?.(5,first));
+    const raw=rule.symbolizer.symbolizer;
+    const a=raw.place(layout,[[{x:100,y:100}]],first)[0];
+    const widthA=a.bboxes[0].maxX-a.bboxes[0].minX;
+    const sampleB=raw.place(layout,[[{x:100,y:100}]],second)[0],widthB=sampleB.bboxes[0].maxX-sampleB.bboxes[0].minX;
+    const anchorB={x:100+(widthA+widthB)/2+3,y:100};
+    const b=raw.place(layout,[[anchorB]],second)[0];
+    const oldIndex=new p.Index(8192,16);oldIndex.insert(a,0,'tile');
+    assert.equal(oldIndex.labelCollides(b,Infinity),false,'the SDK considers the unpadded glyphs separate');
+    assert.ok(a.bboxes[0].maxX+2>b.bboxes[0].minX-2,'their real 2px halos nevertheless overlap');
+    const paddedA=rule.symbolizer.place(layout,[[{x:100,y:100}]],first)[0];
+    const paddedB=rule.symbolizer.place(layout,[[anchorB]],second)[0];
+    const index=new p.Index(8192,16);index.insert(paddedA,0,'tile');
+    assert.equal(index.labelCollides(paddedB,Infinity),true,'the existing collision engine must suppress halo collisions');
+    assert.deepEqual(paddedA.anchor,a.anchor);assert.deepEqual(paddedB.anchor,b.anchor);
+    const clear=rule.symbolizer.place(layout,[[{x:anchorB.x+16,y:100}]],second)[0];
+    assert.equal(index.labelCollides(clear,Infinity),false,'adequately separated real labels stay available');
   }
 });

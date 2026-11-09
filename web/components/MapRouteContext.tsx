@@ -1,11 +1,11 @@
 import {MapIcon} from './MapIcon';
 
 /** Occupies the existing map-context slot, so detail never adds another overlay. */
-export function MapRouteContext({title}: {title: string}) {
+export function MapRouteContext({title,caption='Выбранная тропа'}: {title: string;caption?:string}) {
   return <div className="map-context map-route-context" aria-label={`Выбранная тропа: ${title}`}>
     <MapIcon name="map" size={24}/>
     <div className="map-route-context-copy">
-      <small>Выбранная тропа</small>
+      <small>{caption}</small>
       <strong title={title}>{title}</strong>
     </div>
   </div>;

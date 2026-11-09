@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assertMapUIBounds,dispatchZoomBurst} from '../browser-zoom-audit.mjs';
+import {assertMapUIBounds,dispatchZoomBurst,settleMapCamera,mapCameraIsMoving} from '../browser-zoom-audit.mjs';
 
 test('rapid zoom uses four serial native presses and releases without camera callbacks',async()=>{
  for(const mobile of [true,false]){
@@ -49,4 +49,29 @@ test('map overlay checks reject the observed notice/story collision and obscured
  assert.throws(()=>assertMapUIBounds(layout,'Small launcher'),/smaller than 44px/);
  layout.targets=[];layout.ui[2].rect=rect(1330,802,44,44);
  assert.throws(()=>assertMapUIBounds(layout,'Clipped attribution'),/map-attribution-toggle leaves the usable map/);
+});
+
+test('settling observes a queued camera only after compositor progress and consecutive idle samples',async()=>{
+ let frames=0,reads=0;const observed=[];
+ const state=zoom=>({visible:true,moving:false,engine:'leaflet',camera:{longitude:40,latitude:43,zoom,tileSize:256},rect:{left:0,top:68,width:412,height:847},route:'kavkaz-8a'});
+ const result=await settleMapCamera({engine:'leaflet',
+  frame:async()=>{frames+=2;},
+  read:async()=>{reads++;assert.equal(frames,reads*2,'Every sample must follow compositor frames');const sample=frames<4?state(4.020198667):state(3.270198667);if(frames===4||frames===6)sample.moving=true;observed.push(sample);return sample;},
+  wait:async(_label,read,accept,timeout)=>{assert.equal(timeout,15000);for(let index=0;index<12;index++){const sample=await read();if(accept(sample))return sample;}throw new Error('Did not settle');},
+ });
+ assert.equal(result.camera.zoom,3.270198667,'The stale pre-RAF camera must not become a false lower bound');
+ assert.ok(observed.some(item=>item.moving),'An in-progress transition must reset idle stability');
+ assert.equal(observed.slice(-4).every(item=>!item.moving&&item.camera.zoom===result.camera.zoom),true);
+});
+
+test('a Leaflet child-pane transition remains moving after the old camera dataset clears',()=>{
+ let datasetMoving=false,paneAnimating=true;
+ const element={
+  hasAttribute:name=>name==='data-map-camera'&&datasetMoving,
+  classList:{contains:()=>false},
+  querySelector:selector=>selector==='.leaflet-map-pane.leaflet-zoom-anim'&&paneAnimating?{className:'leaflet-map-pane leaflet-zoom-anim'}:null,
+ };
+ assert.equal(mapCameraIsMoving(element),true,'The animation class belongs to the child pane');
+ paneAnimating=false;assert.equal(mapCameraIsMoving(element),false);
+ datasetMoving=true;assert.equal(mapCameraIsMoving(element),true,'Other camera motion still uses the public dataset');
 });

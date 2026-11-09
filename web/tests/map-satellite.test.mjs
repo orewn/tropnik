@@ -43,7 +43,8 @@ test('satellite selection is lazy, restores after offline fallback and ignores o
 
 test('canvas satellite overlay keeps paths and labels on a transparent ground',()=>{
   class Symbolizer{constructor(options){this.options=options;}}
-  const p={PolygonSymbolizer:Symbolizer,LineSymbolizer:Symbolizer,CenteredTextSymbolizer:Symbolizer};
+  class Padding{constructor(padding,symbolizer){this.padding=padding;this.symbolizer=symbolizer;}}
+  const p={PolygonSymbolizer:Symbolizer,LineSymbolizer:Symbolizer,CenteredTextSymbolizer:Symbolizer,Padding};
   const ordinary=canvasStyle(p,true),imagery=canvasStyle(p,true,true),withoutPaths=canvasStyle(p,false,true);
   assert.equal(ordinary.backgroundColor,'#e9ecdf');
   assert.equal(imagery.backgroundColor,'rgba(0,0,0,0)');
@@ -52,7 +53,7 @@ test('canvas satellite overlay keeps paths and labels on a transparent ground',(
   assert.equal(imagery.paintRules.length,withoutPaths.paintRules.length+1);
   const priority=imagery.labelRules[0],city={props:{class:'city','name:ru':'Санкт-Петербург'}};
   assert.equal(priority.filter(5,city),true);
-  assert.match(priority.symbolizer.options.font(6),/^600 17px /);
+  assert.match(priority.symbolizer.symbolizer.options.font(6),/^600 17px /);
   assert.equal(priority.filter(5,{props:{class:'village',name:'Москва'}}),false,'a name alone must not turn a village into a large city');
   assert.equal(priority.filter(5,{props:{class:'city',name:'Invented place'}}),false);
 });

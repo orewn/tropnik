@@ -6,6 +6,19 @@ export const ROUTE_PRESENTATION = Object.freeze({
   closeZoom: 10,
 });
 
+export const OVERVIEW_MESSAGE = 'Обзорные границы. Для ориентирования по тропе нужен детальный пакет.';
+
+/** Keep the source limitation visible in the existing context slot even after
+ * an informational notice is dismissed. The selected route itself is retained. */
+export function overviewContextCaption(mode: 'detail' | 'overview' | 'satellite', zoom: number, scene: boolean): string | undefined {
+  return mode === 'overview' && Number.isFinite(zoom) && zoom >= 6 && !scene ? 'Обзор без деталей' : undefined;
+}
+
+/** A mode explanation must not overwrite a current geometry/network error. */
+export function overviewModeStatus(current: string, mode: 'detail' | 'overview'): string {
+  return mode === 'overview' ? current || OVERVIEW_MESSAGE : current === OVERVIEW_MESSAGE ? '' : current;
+}
+
 export function routeStrokeWidth(zoom: number): number {
   const value = Number.isFinite(zoom) ? zoom : 10;
   return 3 + Math.max(0, Math.min(1, (value - 8) / 6)) * 2;
