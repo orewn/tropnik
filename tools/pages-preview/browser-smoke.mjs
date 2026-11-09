@@ -219,18 +219,36 @@ async function checkMapGeometry(cdp,profile){
   return{...geometry,layersInteraction:{opened,closed}};
 }
 async function touchPrevious(cdp){
-  const point=await evaluate(cdp,`(()=>{const button=document.querySelector('.fact-controls button[aria-label="Предыдущая история"]');if(!button)return null;const r=button.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`);
-  if(!point)return{available:false};
+  if(await evaluate(cdp,`!!document.querySelector('.fact-closed')`)){
+    assert.equal(await tapSelector(cdp,'.fact-closed',12),true,'The stories opener must accept a touch');
+  }
+  let point;
+  for(let attempt=0;attempt<40;attempt++){
+    point=await evaluate(cdp,`(()=>{
+      const button=document.querySelector('.fact-controls button[aria-label="Предыдущая история"]');
+      if(!button)return null;
+      button.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+      const r=button.getBoundingClientRect(),style=getComputedStyle(button),x=r.left+r.width/2,y=r.top+r.height/2;
+      if(style.display==='none'||style.visibility==='hidden'||r.width<1||r.height<1||!button.contains(document.elementFromPoint(x,y)))return null;
+      return{x,y,title:document.querySelector('.fact-copy h3')?.textContent};
+    })()`);
+    if(point)break;
+    await sleep(50);
+  }
+  assert.ok(point,'Story navigation did not become visible after opening the stories');
   await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id:1,radiusX:2,radiusY:2,force:1}]});
   await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   await sleep(240);
-  return evaluate(cdp,`(()=>{
+  const result=await evaluate(cdp,`(()=>{
     const previous=document.querySelector('.fact-controls button[aria-label="Предыдущая история"]');
     const next=document.querySelector('.fact-controls button[aria-label="Следующая история"]');
     if(!previous||!next)return{available:false};
     const a=getComputedStyle(previous),b=getComputedStyle(next);
-    return{available:true,focused:document.activeElement===previous,hovered:previous.matches(':hover'),background:a.backgroundColor,nextBackground:b.backgroundColor,transition:a.transitionDuration,cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0};
+    return{available:true,title:document.querySelector('.fact-copy h3')?.textContent,focused:document.activeElement===previous,hovered:previous.matches(':hover'),background:a.backgroundColor,nextBackground:b.backgroundColor,transition:a.transitionDuration,cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0};
   })()`);
+  assert.equal(result.available,true,'Story controls disappeared after the touch');
+  assert.notEqual(result.title,point.title,'The previous-story touch must change the displayed story');
+  return result;
 }
 
 const httpPort=await freePort(),debugPort=await freePort();
