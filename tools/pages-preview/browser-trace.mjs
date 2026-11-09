@@ -2,8 +2,11 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
-export const DESKTOP_TRACE_LIMITS=Object.freeze({durationMs:8000,drainMs:5000,closeMs:1000,maxBytes:12*1024*1024,bufferSizeKiB:2048,chunkBytes:64*1024});
-const CATEGORIES=['toplevel','devtools.timeline','blink.user_timing','v8.execute','gpu','disabled-by-default-devtools.timeline','disabled-by-default-devtools.timeline.stack','disabled-by-default-v8.cpu_profiler'];
+export const DESKTOP_TRACE_LIMITS=Object.freeze({durationMs:8000,drainMs:5000,closeMs:1000,maxBytes:32*1024*1024,bufferSizeKiB:16*1024,chunkBytes:256*1024});
+// The previous 2MiB buffer filled before the observed long task. Broad toplevel
+// events duplicated RunTask and consumed half the evidence. Keep renderer task,
+// layout, CPU stack and GPU evidence without the redundant scheduler stream.
+const CATEGORIES=['devtools.timeline','blink.user_timing','gpu','disabled-by-default-devtools.timeline','disabled-by-default-devtools.timeline.stack','disabled-by-default-v8.cpu_profiler'];
 
 /** Diagnostic only: one cold desktop selection, with native input unchanged.
  * CDP Tracing.start/end and IO.read/close are documented in the upstream PDL:

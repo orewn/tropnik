@@ -1,0 +1,240 @@
+{
+  "sourceCommit": "92a3604ab248df0fd6dfc660d328d87613e58f62",
+  "runId": 42703339818,
+  "runAttempt": 1,
+  "buildJobId": 129453551511,
+  "buildId": "185d036259217274",
+  "conclusion": "FAIL: desktop interaction performance budget; publication skipped",
+  "checks": {
+    "webTests": 438,
+    "toolingTests": 45,
+    "lint": "PASS",
+    "webTypes": "PASS",
+    "pagesTypes": "PASS",
+    "staticPages": 339,
+    "referenceRoutes": 306,
+    "routingChecks": 1022,
+    "httpChecks": 52
+  },
+  "startup": {
+    "status": "ready",
+    "readyAfterMs": 7002.818748000001,
+    "probes": 56,
+    "version": {
+      "browser": "Chrome/156.0.8078.79",
+      "protocol": "1.3"
+    },
+    "cleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 101.57677099999273
+    }
+  },
+  "mobileProfiles": [
+    {
+      "name": "compact-android",
+      "engine": "leaflet",
+      "sheetTested": true,
+      "storyTested": true,
+      "layoutShift": 0,
+      "longestTaskMs": 156
+    },
+    {
+      "name": "iphone-portrait",
+      "engine": "leaflet",
+      "sheetTested": true,
+      "storyTested": true,
+      "layoutShift": 0,
+      "longestTaskMs": 68
+    },
+    {
+      "name": "android-portrait",
+      "engine": "leaflet",
+      "sheetTested": true,
+      "storyTested": true,
+      "layoutShift": 0,
+      "longestTaskMs": 0
+    },
+    {
+      "name": "phone-landscape",
+      "engine": "leaflet",
+      "sheetTested": true,
+      "storyTested": true,
+      "layoutShift": 0,
+      "longestTaskMs": 187
+    }
+  ],
+  "mobileMapInteraction": {
+    "profile": "android-portrait",
+    "engine": "leaflet",
+    "passed": true,
+    "returnedToRegion": true,
+    "returnedToDirections": true,
+    "countryCameraRestored": true,
+    "longestTaskMs": 151,
+    "layoutShift": 0
+  },
+  "mobileZoom": {
+    "schemaVersion": 4,
+    "geometryPassed": true,
+    "detailSteps": 24,
+    "keyZooms": [
+      2,
+      5,
+      8,
+      11,
+      14,
+      18
+    ],
+    "screenshots": 27,
+    "minimumZoom": 1.337721595206259,
+    "maximumZoom": 18,
+    "performance": {
+      "layoutShift": 0,
+      "longestTaskMs": 85
+    },
+    "closeTrail": {
+      "passed": true,
+      "source": {
+        "featureCount": 1,
+        "partCount": 1,
+        "vertexCount": 12,
+        "endpoints": [
+          [
+            40.6882934,
+            45.5459288
+          ],
+          [
+            40.6891574,
+            45.5427913
+          ]
+        ],
+        "sha256": "b0108f4c547cd0aa032043602809f5aabd23c59b4df113b2f1a51566cdc3d241"
+      },
+      "nativeZoomClicks": 12,
+      "frames": [
+        {
+          "zoom": 11,
+          "density": [
+            "hidden",
+            "hidden"
+          ],
+          "scrollY": 0
+        },
+        {
+          "zoom": 14,
+          "density": [
+            "compact",
+            "compact"
+          ],
+          "scrollY": 0
+        },
+        {
+          "zoom": 17,
+          "density": [
+            "full",
+            "full"
+          ],
+          "scrollY": 0
+        }
+      ]
+    }
+  },
+  "desktop": {
+    "engine": "maplibre",
+    "longestTaskMs": 759,
+    "budgetMs": 750,
+    "layoutShift": 0,
+    "firstClickTime": 6259.300000000047,
+    "longTask": {
+      "startTime": 7206.100000000035,
+      "duration": 759,
+      "name": "self",
+      "observedAt": 7986.800000000047,
+      "phase": "map-interactions"
+    },
+    "delayAfterFirstClickMs": 946.7999999999884,
+    "nextLongTask": {
+      "startTime": 8175.400000000023,
+      "duration": 373,
+      "name": "self",
+      "observedAt": 8580,
+      "phase": "map-interactions"
+    },
+    "scrollYAtFailure": 0,
+    "innerScrollAtFailure": 0,
+    "historyLevelAtFailure": 1,
+    "limitation": "Map-interaction assert is after native route/Back/region/polygon/zoom/drag/resize checks, which were reached without assertion failure; no complete desktop profile or zoom manifest was emitted because performance assert stopped run."
+  },
+  "trace": {
+    "file": "desktop-webgl-first-altai.trace.json",
+    "sha256": "b7ce2ad7ae39ce8c90e8f9b877ad3f08f875e58a2fe3884681bfc936f85e6a5c",
+    "metadata": {
+      "schemaVersion": 1,
+      "scope": "first-desktop-altai-selection",
+      "sourceCommit": "92a3604ab248df0fd6dfc660d328d87613e58f62",
+      "instrumented": true,
+      "startedAtEpochMs": 1794260347597,
+      "limits": {
+        "durationMs": 8000,
+        "drainMs": 5000,
+        "closeMs": 1000,
+        "maxBytes": 12582912,
+        "bufferSizeKiB": 2048,
+        "chunkBytes": 65536
+      },
+      "categories": [
+        "toplevel",
+        "devtools.timeline",
+        "blink.user_timing",
+        "v8.execute",
+        "gpu",
+        "disabled-by-default-devtools.timeline",
+        "disabled-by-default-devtools.timeline.stack",
+        "disabled-by-default-v8.cpu_profiler"
+      ],
+      "status": "partial",
+      "stopReason": "action-complete",
+      "bytes": 5404975,
+      "eof": true,
+      "dataLossOccurred": true,
+      "errors": [],
+      "recordedDurationMs": 4455.516723000037,
+      "eventCount": 20882,
+      "cpuProfileChunks": 186,
+      "cpuSamples": 8987,
+      "timelineEvents": 4304,
+      "file": "desktop-webgl-first-altai.trace.json",
+      "sha256": "b7ce2ad7ae39ce8c90e8f9b877ad3f08f875e58a2fe3884681bfc936f85e6a5c"
+    },
+    "retainedStartUs": 520091215,
+    "retainedEndUs": 521415899,
+    "retainedSpanMs": 1324.684,
+    "longTaskCaptured": false,
+    "finding": "Buffer filled before 759 ms task. First Altai click and preceding115 ms frame retained; no attribution of failing task is possible from this trace. No shader/layout cause proven."
+  },
+  "artifacts": [
+    {
+      "id": 13712872236,
+      "name": "tropnik-pages-design-1",
+      "bytes": 12808632,
+      "sha256": "47401d181cf12aba9d5d196cf9610d95299951b23f3d8f8942937a4385db4b52",
+      "verifiedAgainstGitHubDigest": true
+    },
+    {
+      "id": 13712637781,
+      "name": "tropnik-pages-browser-failure-1",
+      "bytes": 1212232,
+      "sha256": "b24043ca7bbbc41b5df496f73dfd81786f5b554c6e9b36be8511f7f8b5410574",
+      "verifiedAgainstGitHubDigest": true
+    }
+  ],
+  "limitations": [
+    "No rerun of unchanged source requested",
+    "No native Android/Brave or physical FPS evidence",
+    "Mobile visual review delegated separately; geometry assertions do not replace image review"
+  ]
+}

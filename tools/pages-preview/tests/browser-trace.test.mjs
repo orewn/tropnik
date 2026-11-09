@@ -13,7 +13,7 @@ function controlledTimers(){
  let next=0;const pending=new Map();
  return{pending,schedule:(fn,ms)=>{const id=++next;pending.set(id,{fn,ms});return id;},cancel:id=>pending.delete(id),fireDuration(){const timer=[...pending.values()].find(value=>value.ms===DESKTOP_TRACE_LIMITS.durationMs);assert.ok(timer);timer.fn();}};
 }
-function protocol({readError,startError,endError,endAck,oversized=false,onRead}={}){
+function protocol({readError,startError,endError,endAck,oversized=false,dataLossOccurred=false,onRead}={}){
  const calls=[],observers=new Map();let readIndex=0;
  return{calls,observers,
   observe(name,callback){assert.equal(name,'Tracing.tracingComplete');observers.set(name,callback);return()=>observers.delete(name);},
@@ -23,12 +23,12 @@ function protocol({readError,startError,endError,endAck,oversized=false,onRead}=
     assert.ok(observers.has('Tracing.tracingComplete'),'Listen before an early completion event');
     assert.equal(params.transferMode,'ReturnAsStream');assert.equal(params.streamFormat,'json');
     assert.equal(params.traceConfig.recordMode,'recordUntilFull');assert.equal(params.traceConfig.enableSampling,true);
-    assert.equal(params.traceConfig.traceBufferSizeInKb,2048);
+    assert.equal(params.traceConfig.traceBufferSizeInKb,DESKTOP_TRACE_LIMITS.bufferSizeKiB);
     assert.ok(params.traceConfig.includedCategories.includes('disabled-by-default-v8.cpu_profiler'));
     if(startError)throw startError;return{};
    }
    if(method==='Tracing.end'){
-    if(!startError)observers.get('Tracing.tracingComplete')?.({stream:'trace-stream',dataLossOccurred:false});
+    if(!startError)observers.get('Tracing.tracingComplete')?.({stream:'trace-stream',dataLossOccurred});
     if(endError)throw endError;if(endAck)await endAck;return{};
    }
    if(method==='IO.read'){
@@ -91,6 +91,15 @@ test('the trace byte cap discards unread backing storage and marks partial evide
  assert.equal((await stat(new URL(result.trace.file,output))).size,32);
  assert.equal(cdp.calls.filter(call=>call.method==='IO.read').length,1);assert.equal(cdp.calls.at(-1).method,'IO.close');
  assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
+});
+
+test('a complete JSON export cannot hide a browser buffer overflow',async t=>{
+ const output=await outputDirectory(t),timers=controlledTimers(),cdp=protocol({dataLossOccurred:true});
+ const result=await traceDesktopSelection(cdp,async()=>29,{output,...timers});
+ assert.equal(result.value,29);assert.equal(result.trace.eof,true);
+ assert.equal(result.trace.status,'partial');assert.equal(result.trace.dataLossOccurred,true);
+ assert.equal(result.trace.cpuSamples,3);assert.equal(result.trace.errors.length,0);
+ assert.equal((await metadata(output)).dataLossOccurred,true);
 });
 
 test('a failed trace read still closes its stream and leaves the original action result intact',async t=>{

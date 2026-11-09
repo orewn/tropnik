@@ -85,6 +85,16 @@ test('publication accepts deferred native clicks only with the matching complete
  const bad=structuredClone(report);bad.zoomDesigns[0].zoomBurst.increase.events[8].pointerId=999;
  assert.throws(()=>assertBrowserReport(bad,commit),/another pointer pair/);
 });
+test('publication rejects the exact mobile and desktop long-task boundaries even with complete zoom evidence',()=>{
+ for(const [index,limit] of [[0,350],[1,750]]){
+  const below=evidence();below.mapInteractions[index].longestTaskMs=limit-1;
+  assert.equal(assertBrowserReport(below,commit),below);
+  for(const duration of [limit,limit+9,NaN]){
+   const over=evidence();over.mapInteractions[index].longestTaskMs=duration;
+   assert.throws(()=>assertBrowserReport(over,commit));
+  }
+ }
+});
 test('zoom evidence requires all increments and keeps unavailable imagery explicit',()=>{
  const changes=[
   value=>delete value.zoomDesigns,

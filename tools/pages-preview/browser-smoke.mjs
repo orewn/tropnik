@@ -584,9 +584,8 @@ async function mapInteraction(cdp,profile,performanceIssues){
   const secondDirection=await selectMapDirection(cdp,profile,'baikal','Байкал');
   const polygon=await polygonTouch(cdp,profile),gestures=await mapGestures(cdp,profile);
   const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
-  if(profile.mobile){
-    if(!(perf.longest<350))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:350});
-  }else assert.ok(perf.longest<750,`${profile.name}: map interaction long task ${perf.longest}ms`);
+  const longTaskLimit=profile.mobile?350:750;
+  if(!(perf.longest<longTaskLimit))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:longTaskLimit});
   return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
@@ -682,9 +681,9 @@ try{
     profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
     if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`}));
   }
-  // Preserve all functional pointer evidence when only a mobile performance
-  // budget fails. The same strict limits still block verified output/upload.
-  assert.deepEqual(performanceIssues,[],'Mobile rendering exceeded the unchanged CLS/long-task budgets');
+  // Keep all pointer and zoom images for diagnosis even when a performance
+  // budget fails. Both original strict limits still block verified output/upload.
+  assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');
   const report={verified:true,mapInteractionSchemaVersion:2,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
