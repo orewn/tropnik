@@ -1,11 +1,45 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
 import {readFile} from 'node:fs/promises';
-import {pagesPath, rewriteScript, rewriteHTML} from '../paths.mjs';
+import {pagesPath, rewriteScript, rewriteHTML, ts} from '../paths.mjs';
 import {androidPageDownload} from '../apk-page.mjs';
 
 const androidSource = await readFile(new URL('../../../web/app/android/page.tsx', import.meta.url), 'utf8');
 const androidManifest = JSON.parse(await readFile(new URL('../../../web/public/downloads/android-manifest.json', import.meta.url), 'utf8'));
+
+test('the rendered real Footer keeps its map and section links inside each Pages project base', async () => {
+  const require = createRequire(new URL('../../../web/package.json', import.meta.url));
+  const {createElement} = require('react');
+  const {renderToStaticMarkup} = require('react-dom/server');
+  const sources = Object.fromEntries(await Promise.all(['Footer', 'Brand'].map(async name =>
+    [name, await readFile(new URL(`../../../web/components/${name}.tsx`, import.meta.url), 'utf8')])));
+  for (const base of ['/tropnik/', '/another-project/']) {
+    const modules = new Map();
+    function load(name) {
+      if (modules.has(name)) return modules.get(name);
+      const transformed = rewriteScript(sources[name], `${name}.tsx`, {base});
+      assert.equal(rewriteScript(transformed, `${name}.tsx`, {base}), transformed);
+      const compiled = ts.transpileModule(transformed, {compilerOptions: {
+        target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true,
+      }}).outputText;
+      const exports = {};
+      new Function('require', 'exports', compiled)(specifier => {
+        if (specifier === './Brand') return load('Brand');
+        if (specifier === './TropnikIcons') return {DownloadSimple: () => null, ShieldCheck: () => null};
+        if (specifier === './Footer.module.css') return {__esModule: true, default: {}};
+        return require(specifier);
+      }, exports);
+      modules.set(name, exports);
+      return exports;
+    }
+    const html = renderToStaticMarkup(createElement(load('Footer').Footer));
+    const links = [...html.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
+    assert.equal(links.find(link => link[2] === 'Карта маршрутов')?.[1], base);
+    assert.ok(links.length > 1);
+    for (const link of links) assert.ok(link[1].startsWith(base), `Footer link escapes ${base}: ${link[1]}`);
+  }
+});
 
 test('search and account actions stay inside the published project for links and imperative navigation',()=>{
   const base='/tropnik/';

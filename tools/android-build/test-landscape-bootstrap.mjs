@@ -13,12 +13,14 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
 
 // Execute the real generated host lifecycle code with a controllable renderer.
 // This proves cancellation/readiness/reuse; it does not emulate WebView or GPU.
-function host() {
+function host(initialHeights = {}) {
   const events = new EventTarget(), preparations = [], renderers = [];
-  const node = () => ({dataset: {}, hidden: false, textContent: '', addEventListener() {},
-    getBoundingClientRect: () => ({width: 360, height: 620, top: 0, bottom: 64})});
-  const elements = new Map(['terrain-canvas', 'scene-status', 'zoom-in', 'zoom-out', 'reset'].map(id => [id, node()]));
-  const document = {documentElement: {dataset: {}}, getElementById: id => elements.get(id),
+  const heights = {html: 620, body: 620, 'terrain-canvas': 620, ...initialHeights};
+  events.innerHeight = 620;
+  const node = (id) => ({dataset: {}, hidden: false, textContent: '', addEventListener() {},
+    getBoundingClientRect: () => ({width: 360, height: heights[id] ?? 620, top: 0, bottom: 64})});
+  const elements = new Map(['terrain-canvas', 'scene-status', 'zoom-in', 'zoom-out', 'reset'].map(id => [id, node(id)]));
+  const document = {documentElement: node('html'), body: node('body'), getElementById: id => elements.get(id),
     querySelector: () => node(), fonts: {ready: Promise.resolve()}};
   class Renderer {
     constructor(canvas, grid, options) { this.options = options; this.visibility = []; this.destroyed = false; this.warmups = 0; renderers.push(this); }
@@ -34,12 +36,35 @@ function host() {
   const context = vm.createContext({document, window: events, Event, AbortController, TerrainRenderer: Renderer, createTerrainModelAsync});
   vm.runInContext(scripts[0], context);
   vm.runInContext(bootstrap, context);
-  return {document, preparations, renderers, dispatch: type => events.dispatchEvent(new Event(type))};
+  return {document, preparations, renderers, heights, viewport: events, dispatch: type => events.dispatchEvent(new Event(type))};
 }
 
 test('all generated scripts parse as classic offline WebView scripts', () => {
   assert.equal(scripts.length, 2);
   for (const script of scripts) new vm.Script(script);
+});
+
+test('a rendered canvas clipped by zero-height roots is not ready, including after viewport changes', async () => {
+  // Real failed-device geometry: native viewport exists, CSS root height is 0,
+  // and the canvas has only its old 240px minimum. Renderer callbacks still ran.
+  const state = host({html: 0, body: 0, 'terrain-canvas': 240});
+  state.viewport.innerHeight = 728;
+  state.dispatch('tropnik-scene-resume');
+  state.preparations[0].resolve({});
+  await flush();
+  const renderer = state.renderers[0];
+  renderer.options.onRender();
+  assert.equal(state.document.documentElement.dataset.sceneState, 'loading');
+  assert.equal(state.document.getElementById('scene-status').hidden, false);
+  for (const id of ['html', 'body', 'terrain-canvas']) state.heights[id] = 728;
+  renderer.options.onRender();
+  assert.equal(state.document.documentElement.dataset.sceneState, 'ready');
+  state.viewport.innerHeight = 180;
+  renderer.options.onRender();
+  assert.equal(state.document.documentElement.dataset.sceneState, 'loading');
+  for (const id of ['html', 'body', 'terrain-canvas']) state.heights[id] = 180;
+  renderer.options.onRender();
+  assert.equal(state.document.documentElement.dataset.sceneState, 'ready');
 });
 
 test('preparation waits for foreground, cancels on pause, then retains the first committed scene', async () => {

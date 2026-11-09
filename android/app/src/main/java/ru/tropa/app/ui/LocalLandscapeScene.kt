@@ -107,6 +107,9 @@ internal class LocalLandscapeViewer(private val context: Context) {
         try {
             val view = WebView(context).apply {
                 id = R.id.landscape_viewer
+                // WebView forces a zero CSS layout viewport for WRAP_CONTENT,
+                // even when Compose has measured a nonzero exact native size.
+                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = false
                 settings.databaseEnabled = false

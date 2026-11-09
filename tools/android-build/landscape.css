@@ -1,7 +1,7 @@
 __FONT_CSS__
 :root{color-scheme:light;--surface:#fffefa;--ink:#14271e;--muted:#667569;--forest:#244d3c;--line:#d8ddce;--canvas:#e5eadb}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--canvas);color:var(--ink);font-family:Manrope,sans-serif;font-synthesis:none}
+html,body{margin:0;width:100%;height:100vh;height:100dvh;overflow:hidden;background:var(--canvas);color:var(--ink);font-family:Manrope,sans-serif;font-synthesis:none}
 button,summary{font-family:inherit}
 .heading-5{font-size:24px;line-height:32px;font-weight:600;text-wrap:balance}
 .body-6{font-size:14px;line-height:20px;font-weight:400;text-wrap:pretty}
@@ -10,7 +10,7 @@ button,summary{font-family:inherit}
 .caption-2{font-size:14px;line-height:20px;font-weight:400}
 .caption-3{font-size:12px;line-height:16px;font-weight:600}
 .caption-5{font-size:12px;line-height:16px;font-weight:400;text-wrap:pretty}
-.landscape{position:relative;width:100%;height:100%;min-height:240px}
+.landscape{position:relative;width:100%;height:100%;min-height:0}
 #terrain-canvas{display:block;width:100%;height:100%;touch-action:none;outline:none}
 #terrain-canvas:focus-visible{outline:2px solid var(--forest);outline-offset:-4px}
 .heading{position:absolute;top:16px;left:16px;right:80px;max-width:360px;pointer-events:none}

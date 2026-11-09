@@ -245,7 +245,7 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
             <label className={styles.field}>Направление<select value={regionFilter} onChange={event => setRegionFilter(event.target.value)}><option value="">Все направления</option>{regions.map(region => <option value={region.id} key={region.id}>{region.name}</option>)}</select></label>
             <div className={styles.catalogue}>{suggestions.map(trail => <button type="button" key={trail.id} onClick={() => startWith(trail.id)}><span><b>{trail.title}</b><small>{regionById(trail.regionId)?.name} · стыков: {getTrailConnections(index, trail.id).length}</small></span><ArrowRight size={20}/></button>)}</div>
             {!suggestions.length && <p className={styles.empty}>Подходящих троп с геометрией нет. Измените запрос или направление.</p>}
-            <p className={styles.help}>{index.stats.missingGeometryRoutes} карточок пока без линии. Их нельзя использовать для расчёта пути.</p>
+            <p className={styles.help}>{index.stats.missingGeometryRoutes} {plural(index.stats.missingGeometryRoutes, ['карточка', 'карточки', 'карточек'])} пока без линии. Их нельзя использовать для расчёта пути.</p>
           </> : <>
             <label className={styles.field}>Старт<select aria-label="Старт похода" value={draft.start || ''} onChange={event => update({start: event.target.value || undefined})}><option value="">Выберите точку первой тропы</option>{startPoints.map(point => <option key={point.id} value={point.id}>{pointLabel(point)}</option>)}</select></label>
             <button type="button" className={styles.mapPick} onClick={() => openPicker({stage: 0, role: 'start'})}><MapPin size={17}/>Выбрать старт на карте</button>

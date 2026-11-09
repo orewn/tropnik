@@ -131,6 +131,12 @@ const terrainGrid=__GRID__;
 let renderer=null,active=false,disposed=false,terminal=false,layoutObserver=null,preparation=null;
 document.documentElement.dataset.sceneState='loading';
 function failure(){status.hidden=false;status.textContent='Не удалось открыть рельеф. Попробуйте снова или вернитесь к сохранённой карте.';}
+function viewportReady(){
+ const height=window.innerHeight;
+ return height>0&&[document.documentElement,document.body,canvas].every(function(node){
+  return node&&Math.abs(node.getBoundingClientRect().height-height)<=2;
+ });
+}
 function terminalFailure(message){
  if(disposed||terminal)return;terminal=true;active=false;
  if(preparation)preparation.abort();if(renderer){renderer.destroy();renderer=null;}
@@ -157,6 +163,7 @@ async function start(){
  if(disposed||!active||controller.signal.aborted)return;
  renderer=new TerrainRenderer(canvas,terrainGrid,{preparedModel,compactViewport:false,onRender:function(){
   if(disposed||terminal)return;
+  if(!viewportReady()){status.hidden=false;document.documentElement.dataset.sceneState='loading';return;}
   status.hidden=true;document.documentElement.dataset.sceneState='ready';
   if(!active&&renderer)renderer.setVisible(false);
  },onError:failure,onFatal:terminalFailure});

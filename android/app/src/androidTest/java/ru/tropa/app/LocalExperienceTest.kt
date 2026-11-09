@@ -193,7 +193,7 @@ class LocalExperienceTest {
             app.runOnUiThread {
                 val view = app.activity.findViewById<WebView>(R.id.landscape_viewer)
                 if (view == null) completed.countDown()
-                else view.evaluateJavascript("(function(){var c=document.getElementById('terrain-canvas');if(!c)return false;var r=c.getBoundingClientRect();return window.__tropnikQaDrawn===true&&document.documentElement.dataset.sceneState==='ready'&&c.height>0&&r.height>0&&Math.abs(c.width/c.height-r.width/r.height)<0.02;})()") {
+                else view.evaluateJavascript("(function(){var c=document.getElementById('terrain-canvas');if(!c)return false;var r=c.getBoundingClientRect();var fitted=innerHeight>0&&[document.documentElement,document.body,c].every(function(n){return Math.abs(n.getBoundingClientRect().height-innerHeight)<=2;});return window.__tropnikQaDrawn===true&&document.documentElement.dataset.sceneState==='ready'&&fitted&&c.height>0&&r.height>0&&Math.abs(c.width/c.height-r.width/r.height)<0.02;})()") {
                     matched = it == "true"; completed.countDown()
                 }
             }
@@ -229,6 +229,7 @@ class LocalExperienceTest {
                 view.getLocationOnScreen(location)
                 bounds.set(location[0], location[1], location[0] + view.width, location[1] + view.height)
                 details.put("boundsOnScreen", JSONArray(listOf(bounds.left, bounds.top, bounds.right, bounds.bottom)))
+                    .put("layoutParamsWidth", view.layoutParams?.width).put("layoutParamsHeight", view.layoutParams?.height)
                     .put("visibility", view.visibility).put("windowVisibility", view.windowVisibility)
                     .put("alpha", view.alpha).put("shown", view.isShown).put("attached", view.isAttachedToWindow)
                     .put("scrollX", view.scrollX).put("scrollY", view.scrollY)
@@ -332,6 +333,8 @@ class LocalExperienceTest {
                 passed = pixels.optBoolean("passed") && native.details.optBoolean("shown") && native.details.optBoolean("attached")
                 passed
             }
+        } catch (error: ComposeTimeoutException) {
+            failure = error
         } catch (error: Exception) {
             failure = error
         } finally {
