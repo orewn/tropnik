@@ -10,6 +10,7 @@ const loaders = {
   region: () => import('../../app/regions/[id]/page'),
   route: () => import('../../app/routes/[id]/page'),
   about: () => import('../../app/about/page'), safety: () => import('../../app/safety/page'),
+  'safety/registration': () => import('../../app/safety/registration/page'),
   sources: () => import('../../app/sources/page'), privacy: () => import('../../app/privacy/page'),
   terms: () => import('../../app/terms/page'), offline: () => import('../../app/offline/page'),
   trips: () => import('../../app/trips/page'), community: () => import('../../app/community/page'),

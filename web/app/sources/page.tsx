@@ -27,7 +27,7 @@ export default function Sources() {
     <p>Рельеф помогает увидеть форму склонов. Он может учитывать деревья и сооружения, а мелкие препятствия на тропе не показывает. Цвета и освещение условны. По этой карте нельзя определить текущий снег, состояние переправ, лавинную обстановку или допустимость выхода.</p>
 
     <h2>Истории о местах</h2>
-    <p>Короткие истории опираются на публикации <a href="https://whc.unesco.org/en/list/" target="_blank" rel="noreferrer">Центра Всемирного наследия ЮНЕСКО</a>, <a href="https://www.kavkazzapoved.ru/" target="_blank" rel="noreferrer">Кавказского заповедника</a>, <a href="https://www.ras.ru/" target="_blank" rel="noreferrer">Российской академии наук</a> и других указанных авторов. Прямая ссылка на первоисточник находится в каждой истории.</p>
+    <p>Истории составлены по русскоязычным материалам заповедников, национальных парков и научных организаций. Ссылки на публикации и даты проверки собраны в <a href="/terms#story-references">справочном приложении к условиям использования</a>. Сведения об авторах фотографий сохранены вместе с изображениями.</p>
 
     <h2>Что сохраняется без сети</h2>
     <p>Сохранённая карточка содержит описание, источник и доступную линию маршрута. Подробную карту и рельеф нужно сохранять отдельно, когда такая возможность предлагается. Перед поездкой откройте раздел «Офлайн» и проверьте, какие материалы действительно есть на этом устройстве.</p>
@@ -44,6 +44,10 @@ export default function Sources() {
         <li><a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a> — общественное достояние.</li>
         <li><a href="https://www.geoboundaries.org/" target="_blank" rel="noreferrer">geoBoundaries</a>, OpenStreetMap / Wambacher — выбранные наборы распространяются по ODbL 1.0.</li>
       </ul>
+    </details>
+    <details id="satellite-attribution">
+      <summary>Авторство спутниковых снимков</summary>
+      <p lang="en"><a href="https://cloudless.eox.at" target="_blank" rel="noreferrer">EOxCloudless</a> by <a href="https://eox.at" target="_blank" rel="noreferrer">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016 &amp; 2017). <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>.</p>
     </details>
     <details>
       <summary>Авторство рельефа</summary>

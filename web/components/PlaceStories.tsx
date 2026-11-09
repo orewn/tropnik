@@ -12,7 +12,8 @@ export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeI
  const regionKey=useRef(''),swipe=useRef<{x:number;y:number;id:number}|null>(null),card=useRef<HTMLElement|null>(null);
  const fact=facts.length?facts[index%facts.length]:undefined;
 
- useEffect(()=>{const media=window.matchMedia('(max-width: 700px)');const sync=()=>setNarrow(media.matches);sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
+ useEffect(()=>{const media=window.matchMedia('(max-width: 1024px), (max-height: 620px)');const sync=()=>setNarrow(media.matches);sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
+ useEffect(()=>{const media=window.matchMedia('(max-width: 700px) and (max-height: 720px), (max-width: 900px) and (max-height: 620px)');const sync=()=>{if(media.matches)setDismissed(true);};sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
  useEffect(()=>{const media=window.matchMedia('(hover: hover) and (pointer: fine)');const sync=()=>setCanHover(media.matches);sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
  useEffect(()=>{const key=`${regionId||'all'}:${routeId||''}`;if(key!==regionKey.current){setIndex(0);setExpanded(false);setPaused(false);regionKey.current=key;}},[regionId,routeId]);
  useEffect(()=>{if(routeId)queueMicrotask(()=>setDismissed(true));},[routeId]);
@@ -85,7 +86,6 @@ export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeI
    <div className="fact-copy" key={fact.id} aria-live={paused?'polite':'off'}>
     <h3 className={compact?'title-2':undefined}>{fact.title}</h3>
     <div className="fact-story-body" id={storyId} hidden={compact}><p>{fact.body}</p>{collapsible&&<button className="fact-place" onClick={()=>{setPaused(true);onPlace(fact);}} title="Открыть направление на карте">{fact.place}<ArrowRight size={12}/></button>}</div>
-    <span className="fact-source-label caption-5" title={`Материал проверен ${fact.checkedAt}`}>{fact.source}</span>
    </div>
   </div>
   <div className="fact-card-footer">

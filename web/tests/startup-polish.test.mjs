@@ -24,7 +24,7 @@ test('service worker registers after load and warms maps only during idle map se
  assert.match(client,/registrationRef\.current\.update/);
  assert.match(client,/visibilitychange/);
  assert.match(client,/controllerchange/);
- assert.match(worker,/tropnik-shell-v19/);
+ assert.match(worker,/tropnik-shell-v20/);
  assert.match(worker,/addEventListener\('message'/);
  assert.match(worker,/warmMapCache/);
  const install=worker.match(/addEventListener\('install'[\s\S]*?addEventListener\('activate'/)?.[0]||'';
@@ -47,7 +47,7 @@ test('final visual layer owns touch, viewport and reduced-motion guardrails',asy
  assert.match(css,/content-visibility:auto/);
  assert.match(css,/safe-area-inset/);
  assert.match(css,/prefers-reduced-motion/);
- assert.equal(JSON.parse(pkg).version,'0.4.13');
+ assert.equal(JSON.parse(pkg).version,'0.4.14');
 });
 
 test('mobile navigation traps focus and restores both document scroll containers',async()=>{

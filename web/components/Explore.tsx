@@ -45,12 +45,12 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  useEffect(()=>{panelContent.current?.scrollTo({top:0});},[trail?.id,region?.id]);
  const [query,setQuery]=useState(''),[filter,setFilter]=useState(false),[duration,setDuration]=useState('any'),[onlySaved,setOnlySaved]=useState(false),[difficulty,setDifficulty]=useState('all');
  const deferredQuery=useDeferredValue(query),searchPending=query!==deferredQuery;
- const [saved,setSaved]=useState<SavedPack[]>([]),[notice,setNotice]=useState(''),[saving,setSaving]=useState(''),[request,setRequest]=useState(false),[date,setDate]=useState(''),[note,setNote]=useState(''),[offline,setOffline]=useState(()=>typeof navigator!=='undefined'&&!navigator.onLine),[draftSaved,setDraftSaved]=useState(false),[sheetOpen,setSheetOpen]=useState(false);
+ const [saved,setSaved]=useState<SavedPack[]>([]),[notice,setNotice]=useState(''),[saving,setSaving]=useState(''),[request,setRequest]=useState(false),[date,setDate]=useState(''),[note,setNote]=useState(''),[offline,setOffline]=useState(false),[draftSaved,setDraftSaved]=useState(false),[sheetOpen,setSheetOpen]=useState(false);
  const [viewportRegion,setViewportRegion]=useState<string|undefined>();
  const listKey=`${region?.id||'all'}:${deferredQuery}:${difficulty}:${duration}:${onlySaved}`;
  const [page,setPage]=useState({key:'',limit:12});
  const limit=page.key===listKey?page.limit:12;
- useEffect(()=>{packs().then(setSaved).catch(()=>{});const sync=()=>setOffline(!navigator.onLine);window.addEventListener('online',sync);window.addEventListener('offline',sync);return()=>{window.removeEventListener('online',sync);window.removeEventListener('offline',sync);};},[]);
+ useEffect(()=>{packs().then(setSaved).catch(()=>{});const sync=()=>setOffline(navigator.onLine===false);sync();window.addEventListener('online',sync);window.addEventListener('offline',sync);return()=>{window.removeEventListener('online',sync);window.removeEventListener('offline',sync);};},[]);
  useEffect(()=>{if(!notice)return;const id=setTimeout(()=>setNotice(''),7000);return()=>clearTimeout(id);},[notice]);
  const closeRequest=useCallback(()=>{setRequest(false);setDraftSaved(false);},[]);
  const writeExploreState=useCallback((nextRegion?:string,nextTrail?:string,mode:'push'|'replace'='push')=>{

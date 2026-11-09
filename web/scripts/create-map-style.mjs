@@ -2,6 +2,7 @@ import {mkdirSync,writeFileSync,copyFileSync,existsSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {dirname,join} from 'node:path';
 import {RUSSIA_AREA_URL,RUSSIA_CANONICAL_MASK_URL,MAP_OUTSIDE_COLOR} from '../public/maps/russia-viewport.js';
+import {priorityCityNames} from '../public/maps/map-city-labels.js';
 const require=createRequire(import.meta.url);
 const target=join(process.cwd(),'public/maps');mkdirSync(target,{recursive:true});
 const font=['Noto Sans Regular'];
@@ -11,7 +12,6 @@ const is=(key,value)=>['==',['get',key],value];
 const oneOf=(key,values)=>['in',['get',key],['literal',values]];
 /* Russia-only label re-layer: keep outside labels masked, but redraw key Russian
  * cities above the geographic mask so their names aren't cut at the coastline. */
-const priorityCityNames=['Москва','Санкт-Петербург','Петропавловск-Камчатский','Владивосток','Хабаровск','Анадырь','Мурманск','Калининград','Архангельск','Магадан','Южно-Сахалинск','Якутск','Салехард','Новосибирск','Красноярск','Екатеринбург','Иркутск','Казань','Сочи'];
 const priorityCity=['in',name,['literal',priorityCityNames]];
 
 const layer=(id,type,sourceLayer,paint,options={})=>({id,type,source,'source-layer':sourceLayer,paint,...options});

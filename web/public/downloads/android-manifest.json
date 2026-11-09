@@ -7,11 +7,7 @@
   "bytes": 24516242,
   "sha256": "ecad172008d4c19006a9a7e7aa30a88d71a6afc395a044f79fe3056457ce520d",
   "signature": "development / debug",
-  "deviceExecutionVerified": true,
-  "sourceCommit": "92afc73cc7c769136299468df5d6765eab569f48",
-  "workflowRunId": 42323767146,
-  "deviceTestEnvironment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / SwiftShader",
-  "deviceTestCount": 5,
+  "deviceExecutionVerified": false,
   "russiaCoverageProvenanceSha256": "b8bc96450cc3777d454d87da3018a76db4bc10323720d76cf512831d0e66ac93",
   "sceneGridDimensions": [
     513,
@@ -25,5 +21,18 @@
   "localRouteGeometryCount": 277,
   "onlineDetailedMapAvailable": true,
   "fullRussiaDetailedOffline": false,
-  "losslessPayloadVerified": true
+  "losslessPayloadVerified": true,
+  "catalogReferenceOnlyRouteCount": 29,
+  "catalogSha256": "62f04958424b7ef7c366c480828ffec3c4206429752a864f3d73a947ccbc0a3a",
+  "catalogManifestSha256": "f75be35b2c3660e3b25f63c8000b7608b55bcb8cb238a77528dd74df0c97c4b8",
+  "compatibleWithPreviousPreview": false,
+  "signingCertificateSha256": "7b7da820c87812fed027d3e16b54d6b78e7d88ce454568610ae766291923f85a",
+  "sourceCommit": "92afc73cc7c769136299468df5d6765eab569f48",
+  "jvmTestsPassed": 36,
+  "physicalDeviceVerified": false,
+  "workflowRunId": 42323767146,
+  "codeDeviceExecutionVerified": true,
+  "releasePayloadDeviceVerified": false,
+  "deviceTestEnvironment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / SwiftShader",
+  "deviceTestCount": 5
 }

@@ -5,9 +5,11 @@ export type {SearchHit,SearchKind,SearchOptions,SearchResponse} from './search';
 const places=new Map(regions.map(region=>[region.id,region.name]));
 const pages:SearchDocument[]=[
   {id:'map',kind:'page',title:'Карта маршрутов России',description:'Направления, тропы и места для походов на общей карте.',keywords:'карта россия регионы направления рельеф',href:'/'},
+  {id:'search',kind:'page',title:'Поиск по Тропнику',description:'Найдите маршрут, направление, историю места или нужный раздел сервиса.',keywords:'поиск найти маршрут направление истории разделы фильтры',href:'/search'},
   {id:'offline',kind:'page',title:'Карты с собой',description:'Скачать карты и сохранить маршруты для просмотра без интернета.',keywords:'офлайн скачать сохраненные избранное интернет связь карта',href:'/offline'},
   {id:'android',kind:'page',title:'Тропник для Android',description:'Приложение и карта маршрутов на телефоне.',keywords:'андроид android приложение apk установить скачать телефон',href:'/android'},
   {id:'safety',kind:'page',title:'Подготовка к походу',description:'Снаряжение, условия посещения, сложность и план выхода.',keywords:'безопасность экипировка рюкзак аптечка список снаряжение памятка',href:'/safety'},
+  {id:'safety-registration',kind:'page',title:'Паспорт безопасности и регистрация похода в МЧС',description:'Подготовьте маршрут, состав группы и аварийные контакты. Сохраните паспорт на устройстве и перенесите сведения в официальную форму МЧС.',keywords:'мчс паспорт безопасности регистрация уведомление туристической группы поход спасатели 112 аварийная карточка контакты руководитель план возвращения',href:'/safety/registration'},
   {id:'trips',kind:'page',title:'Походы и группы',description:'Обсуждение маршрутов и участие в походах с гидом.',keywords:'запрос набор участники попутчики группа заявка походы',href:'/trips'},
   {id:'community',kind:'page',title:'Сообщество',description:'Обсуждения, впечатления и отзывы о совместных походах.',keywords:'отзывы сообщения общение сообщество чат',href:'/community'},
   {id:'guides',kind:'page',title:'Гиды и инструкторы',description:'Подготовка и сопровождение группы на маршруте.',keywords:'гид инструктор проводник квалификация',href:'/guides'},

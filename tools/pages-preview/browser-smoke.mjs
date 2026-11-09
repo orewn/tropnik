@@ -137,22 +137,86 @@ async function sheetSnapshot(cdp){
     const root=document.querySelector('.explore-layout'),panel=document.querySelector('.explore-panel'),handle=document.querySelector('.sheet-handle'),summary=document.querySelector('.sheet-peek-summary'),content=document.querySelector('.explore-panel-content');
     if(!root||!panel||!handle)return{available:false};
     const rect=panel.getBoundingClientRect();
-    return{available:true,state:root.dataset.sheetState,height:rect.height,top:rect.top,transform:getComputedStyle(panel).transform,summaryVisible:visible(summary),contentVisible:visible(content),focused:document.activeElement===handle};
+    return{available:true,state:root.dataset.sheetState,height:rect.height,top:rect.top,transform:getComputedStyle(panel).transform,animating:panel.getAnimations().some(animation=>animation.playState==='running'||animation.pending),summaryVisible:visible(summary),contentVisible:visible(content),focused:document.activeElement===handle};
   })()`);
+}
+async function settledSheet(cdp,state){
+  let previous,stable=0;
+  for(let attempt=0;attempt<60;attempt++){
+    const current=await sheetSnapshot(cdp);
+    if(!current.available)return current;
+    const stopped=current.state===state&&!current.animating&&previous?.state===state&&Math.abs(current.top-previous.top)<.25&&Math.abs(current.height-previous.height)<.25&&current.transform===previous.transform;
+    stable=stopped?stable+1:0;
+    if(stable>=2)return current;
+    previous=current;
+    await sleep(50);
+  }
+  throw new Error(`The ${state} sheet did not settle: ${JSON.stringify(previous)}`);
 }
 async function touchSheet(cdp){
   let closed=await sheetSnapshot(cdp);
   if(!closed.available)return{available:false};
   if(closed.state!=='closed'){
     assert.equal(await tapSelector(cdp,'.sheet-handle',7),true);
-    await sleep(380);closed=await sheetSnapshot(cdp);
   }
+  closed=await settledSheet(cdp,'closed');
   assert.equal(await tapSelector(cdp,'.sheet-handle',8),true);
-  await sleep(380);const open=await sheetSnapshot(cdp);
+  const open=await settledSheet(cdp,'open');
   assert.equal(await tapSelector(cdp,'.sheet-handle',9),true);
-  await sleep(380);const final=await sheetSnapshot(cdp);
+  const final=await settledSheet(cdp,'closed');
   const perf=await evaluate(cdp,`(()=>({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0}))()`);
   return{available:true,closed,open,final,heightDelta:Math.max(Math.abs(open.height-closed.height),Math.abs(final.height-closed.height)),cls:perf.cls,longest:perf.longest};
+}
+async function mapGeometrySnapshot(cdp){
+  await settledSheet(cdp,'closed');
+  return evaluate(cdp,`(()=>{
+    const visible=element=>{if(!element)return false;const style=getComputedStyle(element),r=element.getBoundingClientRect();return style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)!==0&&r.width>1&&r.height>1};
+    const box=element=>{if(!visible(element))return null;const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+    const root=document.querySelector('.explore-layout'),atlas=document.querySelector('.atlas-wrap'),panel=document.querySelector('.explore-panel');
+    const layout=box(root),map=box(atlas),sheet=box(panel);
+    const overlays=Object.fromEntries(Object.entries({stories:document.querySelector('.fact-card')||document.querySelector('.fact-closed'),context:document.querySelector('.map-context'),styles:document.querySelector('.map-style-switch'),rail:document.querySelector('.map-controls'),layers:document.querySelector('.layer-button')}).map(([name,element])=>[name,box(element)]).filter(([,rect])=>rect));
+    const targets=[...document.querySelectorAll('.map-controls button:not([disabled]),.layer-button')].filter(visible).map(element=>{
+      const r=element.getBoundingClientRect(),samples=[[.5,.5],[.3,.3],[.7,.3],[.3,.7],[.7,.7]];
+      const blocked=samples.map(([x,y])=>{const hit=document.elementFromPoint(r.left+r.width*x,r.top+r.height*y);return hit&&element.contains(hit)?null:hit?hit.tagName.toLowerCase()+(hit.id?'#'+hit.id:'')+(hit.getAttribute('class')?'.'+hit.getAttribute('class').trim().replace(/\\s+/g,'.'):''):'outside-viewport'}).filter(Boolean);
+      return{label:element.getAttribute('aria-label')||element.textContent?.trim(),rect:box(element),blocked};
+    });
+    const overlaps=[];
+    const entries=Object.entries(overlays);
+    for(let i=0;i<entries.length;i++)for(let j=i+1;j<entries.length;j++){
+      const [a,first]=entries[i],[b,second]=entries[j];
+      const width=Math.min(first.right,second.right)-Math.max(first.left,second.left),height=Math.min(first.bottom,second.bottom)-Math.max(first.top,second.top);
+      if(width>1&&height>1)overlaps.push({first:a,second:b,width,height});
+    }
+    const available=map?{left:Math.max(0,map.left),right:Math.min(innerWidth,map.right),top:Math.max(0,map.top),bottom:Math.min(innerHeight,map.bottom,root?.dataset.sheetState==='closed'&&sheet?sheet.top:Infinity)}:null;
+    return{width:innerWidth,height:innerHeight,coarse:matchMedia('(pointer:coarse)').matches,state:root?.dataset.sheetState,layout,atlas:map,available,overlays,targets,overlaps};
+  })()`);
+}
+async function layerMenuState(cdp,expanded){
+  for(let attempt=0;attempt<40;attempt++){
+    const state=await evaluate(cdp,`(()=>{const button=document.querySelector('.layer-button'),menu=document.querySelector('.layer-menu'),r=menu?.getBoundingClientRect();return{expanded:button?.getAttribute('aria-expanded')==='true',visible:!!r&&r.width>0&&r.height>0&&getComputedStyle(menu).visibility!=='hidden'};})()`);
+    if(state.expanded===expanded&&state.visible===expanded)return state;
+    await sleep(50);
+  }
+  throw new Error(`Layers menu did not ${expanded?'open':'close'} after a touch`);
+}
+async function checkMapGeometry(cdp,profile){
+  const geometry=await mapGeometrySnapshot(cdp);
+  assert.equal(geometry.state,'closed',`${profile.name}: map geometry was measured before the sheet closed`);
+  assert.ok(geometry.atlas&&geometry.layout&&geometry.available,`${profile.name}: map viewport is missing`);
+  assert.deepEqual(geometry.overlaps,[],`${profile.name}: map controls, stories or context overlap`);
+  const inside=(rect,bounds)=>rect.left>=bounds.left-1&&rect.right<=bounds.right+1&&rect.top>=bounds.top-1&&rect.bottom<=bounds.bottom+1;
+  for(const [name,rect] of Object.entries(geometry.overlays))assert.ok(inside(rect,geometry.available),`${profile.name}: ${name} escapes the usable map above the closed sheet: ${JSON.stringify({rect,available:geometry.available})}`);
+  for(const label of ['Увеличить масштаб','Уменьшить масштаб','Моё местоположение','Показать Россию целиком','Слои'])assert.ok(geometry.targets.some(target=>target.label===label),`${profile.name}: missing enabled map control ${label}`);
+  for(const target of geometry.targets)assert.deepEqual(target.blocked,[],`${profile.name}: ${target.label} is obscured in the map hit-test`);
+  if(profile.name==='phone-landscape'){
+    assert.equal(geometry.coarse,true,'Landscape verification must use a coarse pointer');
+    assert.ok(Math.abs(geometry.atlas.left-geometry.layout.left)<=1&&Math.abs(geometry.atlas.width-geometry.layout.width)<=1&&geometry.atlas.width>=geometry.width-2,`${profile.name}: the map retained a sidebar column: ${JSON.stringify({atlas:geometry.atlas,layout:geometry.layout,width:geometry.width})}`);
+  }
+  assert.equal(await tapSelector(cdp,'.layer-button',10),true,`${profile.name}: Layers button is absent`);
+  const opened=await layerMenuState(cdp,true);
+  assert.equal(await tapSelector(cdp,'.layer-button',11),true);
+  const closed=await layerMenuState(cdp,false);
+  return{...geometry,layersInteraction:{opened,closed}};
 }
 async function touchPrevious(cdp){
   const point=await evaluate(cdp,`(()=>{const button=document.querySelector('.fact-controls button[aria-label="Предыдущая история"]');if(!button)return null;const r=button.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`);
@@ -210,6 +274,7 @@ try{
       assert.equal(sheet.final.focused,false,`${profile.name}: sheet handle retained touch focus`);
       assert.ok(sheet.heightDelta<1.1,`${profile.name}: panel height changed during transform animation (${sheet.heightDelta}px)`);
     }
+    const mapGeometry=await checkMapGeometry(cdp,profile);
     const touch=await touchPrevious(cdp);
     if(touch.available){
       assert.equal(touch.focused,false,`${profile.name}: story navigation retained touch focus`);
@@ -217,9 +282,9 @@ try{
       assert.ok(touch.cls<.12,`${profile.name}: interaction layout shift ${touch.cls}`);
       assert.ok(touch.longest<350,`${profile.name}: long task ${touch.longest}ms`);
     }
-    results.push({...profile,geometry,sheet,touch});
+    results.push({...profile,geometry,sheet,mapGeometry,touch});
   }
-  const report={verified:true,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,sheet,touch})=>({name,width,height,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0)})),sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,sheet,mapGeometry,touch})=>({name,width,height,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,mapGeometry,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0)})),sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
 }finally{

@@ -15,8 +15,8 @@ export type PlaceFact = {
  routeIds?:string[];
 };
 
-// Editorially selected facts. The public card keeps the source name in Russian,
-// while the URL remains internal metadata for editorial verification.
+// Editorially selected facts. Text sources stay in the terms' reference section;
+// the map card displays the story, with the required photograph attribution.
 const checkedAt='2026-11-07';
 const commons=(name:string)=>`https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(name)}?width=1280`;
 

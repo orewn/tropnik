@@ -19,6 +19,8 @@ assert.ok(report.bundledModules.includes('pages-preview/src/api.ts'));
 assert.ok(report.bundledModules.includes('components/Explore.tsx'));
 assert.ok(report.bundledModules.includes('components/Header.tsx'));
 assert.ok(report.bundledModules.includes('components/Footer.tsx'));
+assert.ok(report.bundledModules.includes('app/safety/registration/page.tsx'), 'The published safety page must have an executable page loader');
+assert.ok(report.bundledModules.includes('components/SafetyRegistration.tsx'), 'The public safety form must be present in the browser bundle');
 
 // Catch the dangerous blanket replacement of slash separators and external URLs.
 const sample = `const separator='/';const chunks=x.split('/');const absolute=x.startsWith('/');const data='/data/a.json';const outside='https://tiles.example/a';const historyTest=window.location.pathname==='/';history.replaceState(null,'','/');const logical='/'+pathname.slice(base.length);const route=\`/routes/\${id}\`;const el=<a href="/"/>;`;
@@ -113,6 +115,7 @@ if (report.hasApk) {
   assert.equal(apk.length, metadata.bytes);
   assert.equal(createHash('sha256').update(apk).digest('hex'), metadata.sha256);
   assert.equal(metadata.sha256, report.apk.sha256);
+  assert.equal(report.apk.downloadHref, `${report.apk.path}?sha256=${metadata.sha256}`);
   assert.equal(metadata.russiaCoverageProvenanceSha256, coverageInput.sha256);
   assert.equal(report.apk.architecture, metadata.architecture);
 }

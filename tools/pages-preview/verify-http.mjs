@@ -49,7 +49,8 @@ try {
     assert.notEqual(response.headers.get('content-length'),'0');
   }
   if (report.hasApk) {
-    const response=await request(base+report.apk.path.slice(1),200,{method:'HEAD'});
+    assert.equal(report.apk.downloadHref,`${report.apk.path}?sha256=${report.apk.sha256}`);
+    const response=await request(base+report.apk.downloadHref.slice(1),200,{method:'HEAD'});
     assert.equal(response.headers.get('content-type'),'application/vnd.android.package-archive');
     assert.equal(Number(response.headers.get('content-length')),report.apk.bytes);
   }

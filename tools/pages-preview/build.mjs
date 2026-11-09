@@ -6,6 +6,7 @@ import {mkdir, readFile, writeFile, readdir, rm, access} from 'node:fs/promises'
 import {spawnSync} from 'node:child_process';
 import {normalizeBase, rewriteScript, rewriteJSON, rewriteHTML, rewriteCSS, ts} from './paths.mjs';
 import {APK_FILE, ensureApk, readApkManifest, verifyApk} from './apk-artifact.mjs';
+import {androidPageDownload} from './apk-page.mjs';
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const web = join(project, 'web');
@@ -119,10 +120,9 @@ if (new Set(pages.map(page => page.path)).size !== pages.length) throw new Error
 const apkManifestPath = join(source, 'public/downloads/android-manifest.json');
 const metadata = await readApkManifest(apkManifestPath);
 const androidPage = await readFile(join(source, 'app/android/page.tsx'), 'utf8');
-const urls = [...androidPage.matchAll(/href=["'](\/downloads\/[^"']+\.apk)["']/g)].map(match => match[1]);
-if (urls.length !== 1 || urls[0] !== `/downloads/${APK_FILE}`) throw new Error('Android page must name the checksum-pinned ARM64 APK.');
-const verifiedApk = await verifyApk(join(source, 'public', urls[0].slice(1)), metadata);
-const apk = {path: urls[0], ...verifiedApk, architecture: metadata.architecture, signature: metadata.signature, deviceExecutionVerified: metadata.deviceExecutionVerified === true};
+const androidDownload = androidPageDownload(androidPage, metadata);
+const verifiedApk = await verifyApk(join(source, 'public', androidDownload.path.slice(1)), metadata);
+const apk = {...androidDownload, ...verifiedApk, architecture: metadata.architecture, signature: metadata.signature, deviceExecutionVerified: metadata.deviceExecutionVerified === true};
 const config = {id: buildId, base, origin, hasApk: true, pages};
 
 // The archived offline pack is copied byte-for-byte. Only its separate application style gets a base path.

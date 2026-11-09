@@ -1,10 +1,11 @@
-export type MapBaseMode = 'detail' | 'overview';
+export type MapBaseMode = 'detail' | 'overview' | 'satellite';
 
 type MapStyleOptions<Style> = {
   online: boolean;
   preference: MapBaseMode;
   currentMode: MapBaseMode;
   detail: () => Promise<Style>;
+  satellite?: () => Promise<Style>;
   overview: () => Style;
   apply: (style: Style, mode: MapBaseMode) => void;
   onError: (error: unknown) => void;
@@ -52,7 +53,8 @@ export class MapStyleSession<Style> {
     const mode = this.online ? this.preference : 'overview';
     if (mode === this.currentMode) return false;
     try {
-      const style = mode === 'overview' ? this.options.overview() : await this.options.detail();
+      const style = mode === 'overview' ? this.options.overview()
+        : mode === 'satellite' ? await this.requireSatellite() : await this.options.detail();
       if (this.disposed || revision !== this.revision) return false;
       this.options.apply(style, mode);
       // MapLibre may emit a synchronous error while applying a style. Its
@@ -64,6 +66,11 @@ export class MapStyleSession<Style> {
       if (!this.disposed && revision === this.revision) this.options.onError(error);
       return false;
     }
+  }
+
+  private requireSatellite(): Promise<Style> {
+    if (!this.options.satellite) throw new Error('Satellite imagery is unavailable.');
+    return this.options.satellite();
   }
 }
 

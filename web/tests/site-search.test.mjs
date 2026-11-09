@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-import {readFileSync} from 'node:fs';
+import {readFileSync, readdirSync} from 'node:fs';
 import {dirname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -37,6 +37,26 @@ test('every published route and region is represented exactly once in the live i
   }
   assert.ok(!searchDocuments.some(doc => /moderation|account\/action|qa-mobile/.test(doc.href)));
   assert.ok(searchSite('конфиденциальность').results.some(doc => doc.href === '/privacy'));
+});
+
+test('every public app section is searchable, including the safety passport and MChS preparation', () => {
+  const excluded = new Set(['/moderation', '/account/action', '/qa-mobile']);
+  function publicPages(directory, prefix = '') {
+    return readdirSync(directory, {withFileTypes: true}).flatMap(entry => {
+      if (entry.isDirectory() && entry.name !== 'api' && !entry.name.includes('[')) {
+        return publicPages(resolve(directory, entry.name), `${prefix}/${entry.name}`);
+      }
+      return entry.isFile() && entry.name === 'page.tsx' && !excluded.has(prefix)
+        ? [prefix || '/'] : [];
+    });
+  }
+  const indexedPages = searchDocuments.filter(doc => doc.kind === 'page');
+  const expectedPages = publicPages(resolve(web, 'app'));
+  assert.equal(indexedPages.length, expectedPages.length, 'public sections must be indexed exactly once');
+  assert.deepEqual(new Set(indexedPages.map(doc => doc.href)), new Set(expectedPages));
+  for (const query of ['МЧС', 'паспорт безопасности', 'регистрация похода', 'аварийная карточка', '112']) {
+    assert.ok(searchSite(query, {kind: 'page'}).results.some(hit => hit.href === '/safety/registration'), `missing safety result for: ${query}`);
+  }
 });
 
 test('reviewed source-only cards are discoverable and do not acquire invented map geometry', () => {

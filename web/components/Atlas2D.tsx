@@ -6,7 +6,7 @@ import {hasTerrainPreview,preloadTerrain,preloadTrail,loadPublicJSON} from '@/li
 import {loadRussiaGeometry,russiaView} from '@/lib/russia-map';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,leafletRussiaMask,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
 import {useEffect,useRef,useState} from 'react';
-import type {Map as LeafletMap,Marker as LeafletMarker,CircleMarker as LeafletCircleMarker,Layer,LayerGroup,GeoJSON as LeafletGeoJSON,Path as LeafletPath,PathOptions} from 'leaflet';
+import type {Map as LeafletMap,Marker as LeafletMarker,CircleMarker as LeafletCircleMarker,TileLayer,Layer,LayerGroup,GeoJSON as LeafletGeoJSON,Path as LeafletPath,PathOptions} from 'leaflet';
 import {Check} from '@/components/TropnikIcons';
 import {regions,routeCountLabel,type Region} from '@/lib/content';
 import {mapDirectionCounts} from '@/lib/map-catalog';
@@ -18,10 +18,11 @@ import {createCanvasRelief} from '@/lib/canvas-relief';
 import {loadMapSelection} from '@/lib/map-lifecycle';
 import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {mapTrailPointEntries} from '@/lib/map-trail-points';
+import {SATELLITE_TILES,SATELLITE_MAX_ZOOM,SATELLITE_ERROR} from '@/lib/map-satellite';
 import 'leaflet/dist/leaflet.css';
 
 type Coverage=Awaited<ReturnType<typeof loadRussiaGeometry>>;
-type CanvasDetailLayer=Layer&{paintRules:ReturnType<typeof canvasStyle>['paintRules'];rerenderTiles:()=>void};
+type CanvasDetailLayer=Layer&{paintRules:ReturnType<typeof canvasStyle>['paintRules'];backgroundColor?:string;rerenderTiles:()=>void};
 function positions(data: unknown): [number,number][] {
  const result:[number,number][]=[];
  const walk=(value:unknown):void=>{
@@ -40,7 +41,7 @@ const regionBoxes:Record<string,number[]>={altai:[82,48,91,53],krasnodar:[36,42.
 
 export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNote,onViewportRegion}:AtlasProps){
  const container=useRef<HTMLDivElement>(null),mapRef=useRef<LeafletMap|null>(null),baseRef=useRef<CanvasDetailLayer|null>(null);
- const points=useRef<LayerGroup|null>(null),selected=useRef<LeafletGeoJSON|null>(null),positionMarker=useRef<Layer|null>(null);
+ const points=useRef<LayerGroup|null>(null),selected=useRef<LayerGroup|null>(null),positionMarker=useRef<Layer|null>(null);
  const directionButtons=useRef(new Map<string,HTMLButtonElement>()),routePointLayers=useRef(new Map<string,LeafletCircleMarker>());
  const directionGroups=useRef(new Map<string,MapDirectionGroup<Region>>()),updateDirections=useRef<(()=>void)|null>(null),visibleTrailsRef=useRef(visibleTrails);
  const territoryLayer=useRef<LeafletGeoJSON|null>(null),regionRef=useRef(region);
@@ -52,6 +53,8 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
  const wantsDetail=useRef(true),detailLoading=useRef(false),pathVisibility=useRef(true);
  const protomapsRef=useRef<typeof import('protomaps-leaflet')|null>(null),ensureReliefRef=useRef<(()=>void)|null>(null),trailRef=useRef(trail);
  const reliefRef=useRef<ReturnType<typeof createCanvasRelief>|null>(null);
+ const satelliteLayer=useRef<TileLayer|null>(null),wantsSatellite=useRef(false),satelliteActive=useRef(false);
+ const [satellite,setSatellite]=useState(false),[mapZoom,setMapZoom]=useState(2);
  const [reliefReady,setReliefReady]=useState(false);
  const [scene,setScene]=useState(false),[loaded,setLoaded]=useState(false),[tilesLoading,setTilesLoading]=useState(false);
  const [status,setStatus]=useState(''),[layers,setLayers]=useState(false),[mode,setMode]=useState<'detail'|'overview'>('overview');
@@ -95,13 +98,14 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
    if(baseRef.current){
     // Preserve the canvases, labels and decoded tile cache. Redrawing the whole
     // Leaflet layer removed the ready map while the replacement was still loading.
-    baseRef.current.paintRules=canvasStyle(p,pathVisibility.current).paintRules;
+    const style=canvasStyle(p,pathVisibility.current,satelliteActive.current);
+    baseRef.current.paintRules=style.paintRules;baseRef.current.backgroundColor=style.backgroundColor;
     baseRef.current.rerenderTiles();return true;
    }
    const tilejson=await loadPublicJSON<{tiles:string[]}>('https://tiles.openfreemap.org/planet/latest');
    if(!current())return false;
    if(!tilejson.tiles?.[0]?.startsWith('https://tiles.openfreemap.org/'))throw new Error('Источник карты не подтверждён.');
-   const detail=p.leafletLayer({url:tilejson.tiles[0],...canvasStyle(p,pathVisibility.current),attribution:'OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors',devicePixelRatio:Math.min(window.devicePixelRatio,2)}) as unknown as CanvasDetailLayer;
+   const detail=p.leafletLayer({url:tilejson.tiles[0],...canvasStyle(p,pathVisibility.current,satelliteActive.current),attribution:'OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors',devicePixelRatio:Math.min(window.devicePixelRatio,2)}) as unknown as CanvasDetailLayer;
    const attached=()=>map===mapRef.current&&baseRef.current===detail;
    detail.on('loading',()=>{if(attached())setTilesLoading(true);});
    detail.on('load',()=>{if(attached())setTilesLoading(false);});
@@ -125,21 +129,44 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
   if(zoom<DETAIL_ENTER_ZOOM||!navigator.onLine||!wantsDetail.current||baseRef.current||detailLoading.current)return;
   void addDetail().then(added=>{if(added&&map===mapRef.current&&baseRef.current&&wantsDetail.current&&navigator.onLine)setMode('detail');}).catch(()=>{if(map===mapRef.current)setStatus('Детали не загрузились. Обзор России доступен.');});
  }
+ function refreshGround(){
+  const detail=baseRef.current,p=protomapsRef.current;if(!detail||!p)return;
+  const style=canvasStyle(p,pathVisibility.current,satelliteActive.current);
+  detail.paintRules=style.paintRules;detail.backgroundColor=style.backgroundColor;detail.rerenderTiles();
+ }
+ function removeSatellite(){
+  satelliteLayer.current?.remove();satelliteLayer.current=null;satelliteActive.current=false;setSatellite(false);refreshGround();
+ }
+ function showSatellite(){
+  const map=mapRef.current,L=leafletRef.current;if(!map||!L||!navigator.onLine||satelliteLayer.current)return;
+  const layer=L.tileLayer(SATELLITE_TILES,{pane:'russia-satellite',minZoom:0,maxNativeZoom:SATELLITE_MAX_ZOOM,maxZoom:18,tileSize:256,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false,crossOrigin:'anonymous'});
+  satelliteLayer.current=layer;satelliteActive.current=true;setSatellite(true);
+  reliefRef.current?.layer.remove();setReliefReady(false);refreshGround();
+  layer.on('tileerror',()=>{
+   if(map!==mapRef.current||layer!==satelliteLayer.current)return;
+   removeSatellite();setTilesLoading(false);setStatus(SATELLITE_ERROR);ensureReliefRef.current?.();ensureDetail();
+  });
+  layer.addTo(map);ensureDetail();
+ }
+ function chooseSatellite(){
+  if(!navigator.onLine)return;
+  wantsSatellite.current=true;wantsDetail.current=true;setScene(false);setStatus('');showSatellite();
+ }
  useEffect(()=>{
   const routePointRegistry=routePointLayers.current;
   let cancelled=false,resize:ResizeObserver|undefined,panelChanges:MutationObserver|undefined,resizeFrame=0,paintFrame=0,directionLayoutFrame=0,clamping=false,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined;
   const directionMarkers=new Map<string,LeafletMarker>();
   let leaflet:typeof import('leaflet')|undefined;
   const ensureRelief=()=>{
-   const map=mapRef.current;if(cancelled||!leaflet||!map||!navigator.onLine||!wantsDetail.current||typeof Worker==='undefined'||typeof OffscreenCanvas==='undefined')return;
+   const map=mapRef.current;if(cancelled||!leaflet||!map||!navigator.onLine||satelliteActive.current||!wantsDetail.current||typeof Worker==='undefined'||typeof OffscreenCanvas==='undefined')return;
    if(!reliefRef.current)reliefRef.current=createCanvasRelief(leaflet,ready=>{if(!cancelled){setReliefReady(ready);setStatus(previous=>ready?(previous==='Рельеф пока не загрузился. Доступна основная карта.'?'':previous):(previous||'Рельеф пока не загрузился. Доступна основная карта.'));}});
    reliefRef.current.setOverview(!baseRef.current);reliefRef.current.layer.addTo(map);
   };
   ensureReliefRef.current=ensureRelief;
   const connection=()=>{
    setOffline(!navigator.onLine);
-   if(!navigator.onLine){++detailRequest.current;detailLoading.current=false;setTilesLoading(false);if(baseRef.current&&mapRef.current)mapRef.current.removeLayer(baseRef.current);baseRef.current=null;reliefRef.current?.layer.remove();reliefRef.current?.setOverview(true);setReliefReady(false);setMode('overview');setStatus('Без сети: обзор. Скачанные подробные карты открываются в разделе «Офлайн».');}
-   else{setStatus(previous=>previous==='Без сети: обзор. Скачанные подробные карты открываются в разделе «Офлайн».'?'':previous);ensureRelief();ensureDetail();}
+   if(!navigator.onLine){++detailRequest.current;detailLoading.current=false;setTilesLoading(false);if(baseRef.current&&mapRef.current)mapRef.current.removeLayer(baseRef.current);baseRef.current=null;removeSatellite();reliefRef.current?.layer.remove();reliefRef.current?.setOverview(true);setReliefReady(false);setMode('overview');setStatus('Без сети: обзор. Скачанные подробные карты открываются в разделе «Офлайн».');}
+   else{setStatus(previous=>previous==='Без сети: обзор. Скачанные подробные карты открываются в разделе «Офлайн».'?'':previous);if(wantsSatellite.current)showSatellite();ensureRelief();ensureDetail();}
   };
   window.addEventListener('online',connection);window.addEventListener('offline',connection);setOffline(!navigator.onLine);setLoaded(false);
   (async()=>{
@@ -160,6 +187,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     map.on('dragstart',()=>frameRefit.current?.cancel());
     map.createPane('russia-land');map.getPane('russia-land')!.style.zIndex='150';
     map.createPane('russia-overview-relief');Object.assign(map.getPane('russia-overview-relief')!.style,{zIndex:'160',pointerEvents:'none'});
+    map.createPane('russia-satellite');Object.assign(map.getPane('russia-satellite')!.style,{zIndex:'180',pointerEvents:'none'});
     map.createPane('russia-relief');Object.assign(map.getPane('russia-relief')!.style,{zIndex:'350',pointerEvents:'none'});
     map.createPane('russia-mask');Object.assign(map.getPane('russia-mask')!.style,{zIndex:'450',pointerEvents:'none'});
     map.createPane('trail-points');Object.assign(map.getPane('trail-points')!.style,{zIndex:'650',pointerEvents:'auto'});
@@ -210,7 +238,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     scheduleDirectionLayout();
     map.on('movestart',()=>{element.dataset.mapCamera='moving';});
     map.on('zoomstart',()=>{element.dataset.mapCamera='moving';});
-    map.on('zoomend',()=>{scheduleDirectionLayout();requestAnimationFrame(()=>{if(!cancelled){delete element.dataset.mapCamera;scheduleDirectionLayout();}});});
+    map.on('zoomend',()=>{setMapZoom(map.getZoom());scheduleDirectionLayout();requestAnimationFrame(()=>{if(!cancelled){delete element.dataset.mapCamera;scheduleDirectionLayout();}});});
     points.current=L.layerGroup().addTo(map);
     const clampCamera=()=>{
      const floor=cameraFloor.current;if(cancelled||clamping||!floor)return;
@@ -240,7 +268,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     ensureDetail();
    }catch(error){if(!cancelled){frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();setStatus('Не удалось загрузить географию России. Карточки маршрутов доступны в списке.');console.error('Russia canvas map failed',error);}}
   })();
-  return()=>{cancelled=true;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();++detailRequest.current;detailLoading.current=false;ensureReliefRef.current=null;cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);cancelAnimationFrame(directionLayoutFrame);if(container.current)delete container.current.dataset.mapCamera;directionMarkers.clear();resize?.disconnect();panelChanges?.disconnect();reliefRef.current?.destroy();reliefRef.current=null;mapRef.current?.remove();mapRef.current=null;directionButtons.current.clear();routePointRegistry.clear();leafletRef.current=null;baseRef.current=null;territoryLayer.current=null;points.current=null;selected.current=null;positionMarker.current=null;coverageRef.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
+  return()=>{cancelled=true;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();++detailRequest.current;detailLoading.current=false;ensureReliefRef.current=null;cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);cancelAnimationFrame(directionLayoutFrame);if(container.current)delete container.current.dataset.mapCamera;directionMarkers.clear();resize?.disconnect();panelChanges?.disconnect();reliefRef.current?.destroy();reliefRef.current=null;mapRef.current?.remove();mapRef.current=null;directionButtons.current.clear();routePointRegistry.clear();leafletRef.current=null;baseRef.current=null;satelliteLayer.current=null;satelliteActive.current=false;territoryLayer.current=null;points.current=null;selected.current=null;positionMarker.current=null;coverageRef.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
  },[]);
  useEffect(()=>{
   const map=mapRef.current,element=container.current,L=leafletRef.current;if(!map||!element||!L||!loaded)return;
@@ -299,9 +327,13 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
     const [L,fetched]=await Promise.all([import('leaflet'),trail.geometry??loadPublicJSON<any>(trail.geometryUrl!).then(value=>value?.data?.geometry||value)]);
     return{L,data:displayGeoJSON(fetched) as GeoJSON.GeoJsonObject};
    },apply:result=>{
+   clear();
    if(!result)return;
    const {L,data}=result;
-   selected.current=L.geoJSON(data,{style:{color:'#244d3c',weight:4,opacity:.95,dashArray:'9 4'},interactive:false}).addTo(map);
+   selected.current=L.layerGroup([
+    L.geoJSON(data,{style:{color:'#FFFEFA',weight:8,opacity:.96},interactive:false}),
+    L.geoJSON(data,{style:{color:'#244d3c',weight:4,opacity:.95,dashArray:'9 4'},interactive:false}),
+   ]).addTo(map);
    const covered=coveredRussiaBounds(positions(data),coverage.area);
    if(!covered){setStatus('У этой линии нет точек внутри доступного покрытия России. Карточка остаётся доступной.');return;}
    const bounds=L.latLngBounds([[covered[1],covered[0]],[covered[3],covered[2]]]),element=container.current;if(!element)return;
@@ -311,6 +343,7 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
   });
  },[trail?.id,trail?.geometryUrl,trail?.geometry,loaded]);
  async function changeMode(next:'overview'|'detail'){
+  wantsSatellite.current=false;removeSatellite();setScene(false);
   setStatus('');
   if(next==='overview'){wantsDetail.current=false;++detailRequest.current;detailLoading.current=false;setTilesLoading(false);if(baseRef.current&&mapRef.current)mapRef.current.removeLayer(baseRef.current);baseRef.current=null;setMode(next);reliefRef.current?.layer.remove();reliefRef.current?.setOverview(true);setReliefReady(false);}
   else try{wantsDetail.current=true;ensureReliefRef.current?.();if(await addDetail()&&baseRef.current&&wantsDetail.current&&navigator.onLine)setMode(next);}catch(error){setStatus(error instanceof Error?error.message:'Карта недоступна.');}
@@ -329,17 +362,17 @@ export function Atlas2D({region,trail,visibleTrails=[],onTrail,onRegion,onMapNot
    fullView.current=false;map.setView([latitude,russiaLongitude(longitude)],13);setStatus(`Точность около ${Math.round(accuracy)} м. Позиция никому не передаётся.`);
   },()=>setStatus('Позиция недоступна. Проверьте разрешение и сигнал.'),{enableHighAccuracy:true,timeout:15000});
  }
- return <div className={`atlas-wrap ${scene?'showing-terrain':''}`}>
+ return <div className={`atlas-wrap ${scene?'showing-terrain':''}`} data-map-imagery={satellite?'satellite':undefined}>
   <div className="atlas-canvas" ref={container} style={{visibility:loaded?'visible':'hidden'}} role="region" aria-label="Интерактивная плоская карта России"/>
   {!loaded&&!status&&<div className="map-skeleton"><MapIcon name="compass" size={38}/><span>Открываем карту России</span></div>}
-  <div className="map-context"><span className="live-dot"/><span>{region?.name||'Россия'}</span><span className="context-divider"/><span>{region?(mode==='detail'?'Тропы и местность':'Обзор'):routeCountLabel(visibleTrails.length)}</span></div>
+  <div className="map-context"><span className="live-dot"/><span>{region?.name||'Россия'}</span><span className="context-divider"/><span>{satellite?'Спутник':region?(mode==='detail'?'Тропы и местность':'Обзор'):routeCountLabel(visibleTrails.length)}</span></div>
   {tilesLoading&&!scene&&!status&&<div className="map-preload-status" role="status">Подгружаем детали текущего ракурса</div>}
-  <div className="map-style-switch"><button aria-label="Карта сверху" className={!scene?'active':''} onClick={()=>setScene(false)}><MapIcon name="map" size={18}/>Карта</button>{sceneAvailable&&<button aria-label="3D ландшафт Бзерпинского района" className={scene?'active':''} onClick={()=>setScene(true)} onPointerEnter={()=>void preloadTerrain()} title="Объёмная сцена Бзерпинского района"><MapIcon name="terrain" size={19}/>3D</button>}</div>
+  <div className="map-style-switch"><button aria-label="Карта сверху" className={!scene&&!satellite?'active':''} onClick={()=>{setScene(false);if(satellite)void changeMode('detail');}}><MapIcon name="map" size={18}/>Карта</button>{sceneAvailable&&<button aria-label="3D ландшафт Бзерпинского района" className={scene?'active':''} onClick={()=>setScene(true)} onPointerEnter={()=>void preloadTerrain()} title="Объёмная сцена Бзерпинского района"><MapIcon name="terrain" size={19}/>3D</button>}</div>
   <div className="map-controls"><button aria-label="Увеличить масштаб" disabled={!loaded} onClick={()=>{frameRefit.current?.cancel();mapRef.current?.zoomIn();}}><MapIcon name="plus" size={20}/></button><button aria-label="Уменьшить масштаб" disabled={!loaded} onClick={()=>{frameRefit.current?.cancel();mapRef.current?.zoomOut();}}><MapIcon name="minus" size={20}/></button><span/><button aria-label="Север сверху" title="На плоской карте север всегда сверху" disabled><MapIcon name="compass" size={22}/></button><button aria-label="Моё местоположение" disabled={!loaded} onClick={locate}><MapIcon name="location" size={21}/></button><button aria-label="Показать Россию целиком" disabled={!loaded} onClick={()=>{setScene(false);fitRussia(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);}}><MapIcon name="fit" size={19}/></button></div>
-  <div className="layer-control"><button className={layers?'layer-button active':'layer-button'} aria-expanded={layers} onClick={()=>setLayers(!layers)}><MapIcon name="layers" size={20}/>Слои</button>{layers&&<div className="layer-menu"><strong>Ваша карта</strong><button disabled={offline||!loaded} onClick={()=>changeMode('detail')}>Детальные тропы онлайн{mode==='detail'&&<Check size={17}/>}</button><button disabled={!loaded} onClick={()=>changeMode('overview')}>Сохранённый обзор{mode==='overview'&&<Check size={17}/>}</button><label><input type="checkbox" checked={showPaths} onChange={event=>{pathVisibility.current=event.target.checked;setShowPaths(event.target.checked);if(mode==='detail')void addDetail().catch(()=>setStatus('Не удалось обновить слой.'));}}/>Тропы и грунтовые дороги</label><a href="/offline">Подробная офлайн-карта</a><span className="source-note">Плоский режим · без объёмного рельефа</span><a href="/sources">Источники карты</a></div>}</div>
+  <div className="layer-control"><button className={layers?'layer-button active':'layer-button'} aria-expanded={layers} onClick={()=>setLayers(!layers)}><MapIcon name="layers" size={20}/>Слои</button>{layers&&<div className="layer-menu"><strong>Ваша карта</strong><button disabled={offline||!loaded} onClick={()=>changeMode('detail')}>Детальные тропы онлайн{mode==='detail'&&!satellite&&<Check size={17}/>}</button><button disabled={offline||!loaded} aria-pressed={satellite} onClick={chooseSatellite}>Спутник{satellite&&<Check size={17}/>}</button><button disabled={!loaded} onClick={()=>changeMode('overview')}>Сохранённый обзор{mode==='overview'&&!satellite&&<Check size={17}/>}</button><label><input type="checkbox" checked={showPaths} onChange={event=>{pathVisibility.current=event.target.checked;setShowPaths(event.target.checked);if(mode==='detail')void addDetail().catch(()=>setStatus('Не удалось обновить слой.'));}}/>Тропы и грунтовые дороги</label><a href="/offline">Подробная офлайн-карта</a><span className="source-note">Плоский режим · без объёмного рельефа</span><a href="/sources">Источники карты</a></div>}</div>
   {status&&<div className="map-message" role="status"><MapIcon name="info" size={18}/><span>{status}</span><button onClick={()=>setStatus('')}>Понятно</button></div>}
   <div className="map-legend"><span className="legend-line"/>Тропа<span className="legend-region"/>Направление<span className="legend-hint">{region?'Нажмите на маршрут':'Выберите регион, чтобы приблизить'}</span></div>
   {sceneAvailable&&<TerrainScene trail={trail} visible={scene} onClose={()=>setScene(false)}/>}
-  {!scene&&<MapAttribution ready={loaded} terrain={reliefReady}/>}
+  {!scene&&<MapAttribution ready={loaded} terrain={reliefReady} satellite={satellite} zoom={mapZoom}/>}
  </div>;
 }
