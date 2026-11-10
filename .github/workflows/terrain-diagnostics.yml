@@ -1,14 +1,15 @@
 name: Focused terrain diagnosis
+# Diagnostic only: compare RTT granularity; this workflow never publishes.
 
 on:
   push:
-    branches: [diagnostics/terrain-close]
+    branches: [diagnostics/terrain-rtt256]
 
 permissions:
   contents: read
 
 concurrency:
-  group: terrain-diagnostics
+  group: terrain-rtt256
   cancel-in-progress: false
 
 jobs:

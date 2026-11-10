@@ -55,6 +55,9 @@ function overviewStyle(coverage:Coverage):StyleSpecification {
 }
 function detailStyle(style:StyleSpecification,coverage:Coverage):StyleSpecification {
  const next=structuredClone(style);
+ // Diagnostic only: compare smaller terrain RTT tiles; not accepted for production.
+ const terrainSource=next.sources['terrain-dem'];
+ if(terrainSource?.type==='raster-dem')terrainSource.tileSize=256;
  next.sources['overview-land']={type:'geojson',data:coverage.area};
  next.sources['russia-mask']={type:'geojson',data:coverage.mask};
  if(!next.layers.some(layer=>layer.id===MASK))next.layers.push({id:MASK,type:'fill',source:'russia-mask',paint:{'fill-color':MAP_OUTSIDE_COLOR,'fill-antialias':false}});
@@ -427,7 +430,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
   frameRefit.current?.cancel();zoomButtons.current?.cancel();terrainPitchControl.current?.reset();terrainRef.current=next;map.stop();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(next){
-   if(!map.getSource('terrain-dem'))map.addSource('terrain-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'});
+   if(!map.getSource('terrain-dem'))map.addSource('terrain-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json',tileSize:256});
    const zoom=map.getZoom(),pitch=terrainPitchForZoom(zoom,!!regionRef.current||!!trailRef.current);
    map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(zoom)});
    terrainPitchControl.current?.remember(pitch);map.easeTo({pitch,duration:reduced?0:420});
