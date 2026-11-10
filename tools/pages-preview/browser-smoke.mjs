@@ -12,10 +12,12 @@ import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas} from './browser-report.mjs';
 import {inspectPageActivity} from './browser-process-cpu.mjs';
+import {browserGPUDrawsEnabled,installTerrainGPUDraws} from './browser-gpu-draws.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
 const traceEnabled=browserTraceEnabled(process.env.TROPNIK_BROWSER_TRACE,runPolicy.diagnostic);
+const gpuDrawsEnabled=browserGPUDrawsEnabled(process.env.TROPNIK_BROWSER_GPU_DRAWS,runPolicy.diagnostic);
 const REPORT = new URL(runPolicy.reportFile, ROOT);
 const profiles = [
   {name:'compact-android',width:320,height:640,mobile:true,engine:'leaflet'},
@@ -632,6 +634,7 @@ try{
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
+    ${gpuDrawsEnabled?`(${installTerrainGPUDraws.toString()})(globalThis);`:''}
     window.__tropnikPerf={cls:0,longest:0};
     window.__tropnikPerfStart=0;window.__tropnikPhase='loading';window.__tropnikPhases=[];window.__tropnikLayoutShifts=[];
     window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;window.__tropnikLongTasks=[];
@@ -665,7 +668,7 @@ try{
         })();
         return(await systemConnection).call(method,{},3000);
       };
-      const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo:()=>systemCall('SystemInfo.getInfo'),systemProcessInfo:()=>systemCall('SystemInfo.getProcessInfo'),url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic});
+      const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo:()=>systemCall('SystemInfo.getInfo'),systemProcessInfo:()=>systemCall('SystemInfo.getProcessInfo'),url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic,gpuDrawsEnabled});
       assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
       assert.notEqual(runPolicy.reportFile,'browser-verification.json');
       await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

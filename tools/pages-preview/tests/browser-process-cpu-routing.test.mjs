@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {observeProcessCPU} from '../browser-process-cpu.mjs';
+import {observeTerrainGPUDraws,shouldObserveTerrainGPUDraws} from '../browser-gpu-draws.mjs';
 import {shouldTraceTerrainDiagnostic,shouldTraceTerrainZoom} from '../browser-zoom-audit.mjs';
 import {TERRAIN_TRACE_LIMITS} from '../browser-trace.mjs';
 
@@ -13,7 +14,7 @@ assert.ok(start>=0&&end>start);const dispatch=source.slice(start,end),AsyncFunct
 
 async function invokeZoom({beforeZoom=15.905,diagnostic='terrain-close',failure=null,traceStopReason='action-error'}={}){
  const order=[],report={nativeZooms:[],processCPUZooms:[]},page={visibilityState:'visible',hidden:false,hasFocus:true};let settles=0,presses=0,reads=0;
- const bindings={assert,report,diagnostic,profile:{name:'desktop-webgl',engine:'maplibre',mobile:false},cdp:{},PLUS:'plus',MINUS:'minus',traceEnabled:false,TERRAIN_TRACE_LIMITS,observeProcessCPU,shouldTraceTerrainDiagnostic,shouldTraceTerrainZoom,
+ const bindings={assert,report,diagnostic,profile:{name:'desktop-webgl',engine:'maplibre',mobile:false},cdp:{},PLUS:'plus',MINUS:'minus',traceEnabled:false,gpuDrawsEnabled:false,TERRAIN_TRACE_LIMITS,observeProcessCPU,observeTerrainGPUDraws,shouldObserveTerrainGPUDraws,shouldTraceTerrainDiagnostic,shouldTraceTerrainZoom,
   helpers:{systemProcessInfo:async()=>{order.push(++reads===1?'cpu-before':'cpu-after');return{processInfo:[{id:1,type:'GPU',cpuTime:reads}]};}},
   settledMap:async()=>{if(++settles===1)return{camera:{zoom:beforeZoom},pageActivity:page};order.push('settle');if(failure)throw failure;return{camera:{zoom:beforeZoom+1},pageActivity:page};},
   elementPoint:async()=>({unobscured:true,x:1,y:2}),pointerAt:async()=>{presses++;order.push('native-input');},sleep:async duration=>{assert.equal(duration,70);},
@@ -25,7 +26,7 @@ async function invokeZoom({beforeZoom=15.905,diagnostic='terrain-close',failure=
   },
  };
  let caught,value;
- try{value=await new AsyncFunction(...Object.keys(bindings),`let terrainTraceStarted=false;${dispatch}\nreturn zoom(1,{mode:${JSON.stringify(diagnostic?'terrain-diagnostic':'terrain')}});`)(...Object.values(bindings));}catch(error){caught=error;}
+ try{value=await new AsyncFunction(...Object.keys(bindings),`let terrainTraceStarted=false,terrainGPUDrawsStarted=false;${dispatch}\nreturn zoom(1,{mode:${JSON.stringify(diagnostic?'terrain-diagnostic':'terrain')}});`)(...Object.values(bindings));}catch(error){caught=error;}
  return{caught,value,report,order,presses,reads};
 }
 

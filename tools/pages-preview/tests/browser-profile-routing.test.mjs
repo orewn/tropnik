@@ -21,7 +21,7 @@ async function dispatchProfiles(traceEnabled,audit,{diagnostic=null,overrides={}
  const unavailable=async()=>({available:false});
  const notInvoked=()=>assert.fail('The routing test must not invoke browser helpers');
  const bindings={
-  assert,profiles,runPolicy:{diagnostic,profiles:diagnostic?['desktop-webgl']:null,reportFile:diagnostic?'browser-terrain-diagnostic.json':'browser-verification.json'},traceEnabled,cdp:{},httpPort:4200,
+  assert,profiles,runPolicy:{diagnostic,profiles:diagnostic?['desktop-webgl']:null,reportFile:diagnostic?'browser-terrain-diagnostic.json':'browser-verification.json'},traceEnabled,gpuDrawsEnabled:false,cdp:{},httpPort:4200,
   results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],profilePerformance:[],performanceIssues:[],
   runZoomDesignAudit:audit,
   loadProfile:async(_cdp,_url,profile)=>({engine:profile.engine,width:profile.width,scrollWidth:profile.width,escaping:[],undersized:[]}),
@@ -67,7 +67,7 @@ test('diagnostic GPU and process queries reuse only the advertised browser targe
   async call(method,params,timeout){assert.deepEqual(params,{});assert.equal(timeout,3000);calls.push(method);return method==='SystemInfo.getInfo'?{gpu:{devices:[]}}:{processInfo:[{id:1,type:'browser',cpuTime:10}]};}
  }
  const result=await dispatchProfiles(true,async(_cdp,profile,helpers,options)=>{
-  assert.equal(profile.name,'desktop-webgl');assert.deepEqual(options,{diagnostic:'terrain-close'});
+  assert.equal(profile.name,'desktop-webgl');assert.deepEqual(options,{diagnostic:'terrain-close',gpuDrawsEnabled:false});
   assert.deepEqual(await helpers.systemInfo(),{gpu:{devices:[]}});
   for(let count=0;count<2;count++)assert.deepEqual(await helpers.systemProcessInfo(),{processInfo:[{id:1,type:'browser',cpuTime:10}]});
   return{diagnosticOnly:true,verified:false,releaseEligible:false};

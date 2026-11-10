@@ -5,6 +5,7 @@ import {CLOSE_TRAIL_FIXTURE,assertCloseTrailAudit,assertNativeBurstEventOrder,as
 import {dispatchSourceEndPan,sourceEndPanPlans,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
 import {traceDesktopSelection,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES} from './browser-trace.mjs';
 import {observeProcessCPU} from './browser-process-cpu.mjs';
+import {observeTerrainGPUDraws,shouldObserveTerrainGPUDraws} from './browser-gpu-draws.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -189,14 +190,15 @@ export async function dispatchZoomBurst(cdp,point,profile,count=4){
 /** Real-input zoom coverage plus reviewable images. Network/source availability
  * is reported separately from geometry checks; a fallback is never called a
  * successfully rendered satellite or 3D scene. */
-export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,traceEnabled=false}={}){
+export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,traceEnabled=false,gpuDrawsEnabled=false}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase}=helpers;
  assert.ok(diagnostic===null||diagnostic==='terrain-close','Unknown zoom diagnostic mode');
+ assert.ok(!gpuDrawsEnabled||diagnostic==='terrain-close','GPU draw recording requires diagnostic-only evidence');
  if(diagnostic)assert.ok(profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
  await mkdir(OUTPUT,{recursive:true});
  const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:5,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
  if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[],processCPUZooms:[]});
- let terrainTraceStarted=false;
+ let terrainTraceStarted=false,terrainGPUDrawsStarted=false;
  const terrainResources=diagnostic?observeTerrainResources(cdp,()=>report.diagnosticStage):null;
  const save=()=>{if(terrainResources)report.dem=terrainResources.snapshot();return writeFile(new URL(diagnostic?'desktop-webgl-terrain-diagnostic.json':`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');};
  const network=new Map();
@@ -255,15 +257,23 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
    try{const state=await observeProcessCPU(pressAndSettle,{read:helpers.systemProcessInfo,receipt:processCPU});processCPU.pageActivityAfter=state.pageActivity??null;processCPU.pageActivityAfterSource='settled-state';return state;}
    catch(error){processCPU.pageActivityAfter=error?.settleDiagnostics?.samples?.findLast(sample=>sample.state?.pageActivity)?.state.pageActivity??null;processCPU.pageActivityAfterSource=processCPU.pageActivityAfter?'last-settle-observation':'unavailable';throw error;}
   }:pressAndSettle;
+  // This observer arms at 14.905, before the later trace trigger. CPU counters
+  // still bracket only the native action; timer collection follows them.
+  let measuredPressAndSettle=observedPressAndSettle;
+  if(shouldObserveTerrainGPUDraws(profile,mode,direction,before.camera.zoom,terrainGPUDrawsStarted,gpuDrawsEnabled)){
+   terrainGPUDrawsStarted=true;
+   const receipt={...report.lastNativeZoom,label:{beforeZoom:before.camera.zoom,direction,mode}};report.gpuDrawZoom=receipt;
+   measuredPressAndSettle=()=>observeTerrainGPUDraws(observedPressAndSettle,{receipt,sleep,control:(method,value)=>evaluate(cdp,`window.__tropnikTerrainGPUDraws[${JSON.stringify(method)}](${JSON.stringify(value)})`)});
+  }
   let after;
   if((diagnostic?shouldTraceTerrainDiagnostic:shouldTraceTerrainZoom)(profile,mode,direction,before.camera.zoom,terrainTraceStarted,traceEnabled)){
    terrainTraceStarted=true;
    const recordTrace=trace=>{if(processCPU)processCPU.trace={instrumented:trace?.instrumented??null,startedAtEpochMs:trace?.startedAtEpochMs??null,recordedDurationMs:trace?.recordedDurationMs??null,stopReason:trace?.stopReason??null,status:trace?.status??null,drainMayOverlapCounterInterval:!trace||!['action-complete','action-error'].includes(trace.stopReason)||(trace.errors?.length??0)>0};};
    try{
-    const captured=await traceDesktopSelection(cdp,observedPressAndSettle,{prefix:diagnostic?'desktop-webgl-terrain-high-zoom':'desktop-webgl-terrain-zoom',scope:diagnostic?'diagnostic-desktop-terrain-15-to-17':'first-desktop-terrain-zoom-4-to-6',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{} )});
+    const captured=await traceDesktopSelection(cdp,measuredPressAndSettle,{prefix:diagnostic?'desktop-webgl-terrain-high-zoom':'desktop-webgl-terrain-zoom',scope:diagnostic?'diagnostic-desktop-terrain-15-to-17':'first-desktop-terrain-zoom-4-to-6',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{} )});
     recordTrace(captured.trace);after=captured.value;report.terrainZoomTrace={...captured.trace,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom};
    }catch(error){recordTrace(error.traceReceipt);report.terrainZoomTrace={...error.traceReceipt,beforeZoom:before.camera.zoom};throw error;}
-  }else after=await observedPressAndSettle();
+  }else after=await measuredPressAndSettle();
   assert.ok(direction>0?after.camera.zoom>=before.camera.zoom-.001:after.camera.zoom<=before.camera.zoom+.001,`${profile.name}: zoom moved in the wrong direction`);
   const movement={before:before.camera.zoom,after:after.camera.zoom,changed:Math.abs(after.camera.zoom-before.camera.zoom)>.001};
   if(diagnostic)report.nativeZooms.push({...report.lastNativeZoom,...movement,pageActivityAfter:after.pageActivity??null});

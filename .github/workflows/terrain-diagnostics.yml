@@ -1,14 +1,14 @@
-name: Terrain process CPU diagnosis
+name: Terrain GPU draw diagnosis
 
 on:
   push:
-    branches: [diagnostics/terrain-process-cpu]
+    branches: [diagnostics/terrain-gpu-draws]
 
 permissions:
   contents: read
 
 concurrency:
-  group: terrain-process-cpu-diagnostics
+  group: terrain-gpu-draws-diagnostics
   cancel-in-progress: false
 
 jobs:
@@ -40,6 +40,7 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
           TROPNIK_BROWSER_DIAGNOSTIC: terrain-close
+          TROPNIK_BROWSER_GPU_DRAWS: '1'
         run: node tools/pages-preview/browser-smoke.mjs
       - name: Preserve diagnostic evidence without a release artifact
         if: always()
