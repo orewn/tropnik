@@ -1,0 +1,550 @@
+{
+  "schemaVersion": 1,
+  "kind": "focused-map-and-offline-diagnostic",
+  "sourceCommit": "aa8bb4bce1d1c725eace531bb4c04c4f1230e9d8",
+  "webTree": "76904dc3f56841c63830aac602b17c6ae2b332d0",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "workflow": {
+    "runId": 42859458839,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42859458839",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-11-10T16:55:01Z",
+    "completedAt": "2026-11-10T16:57:48Z",
+    "jobs": [
+      {
+        "id": 129981333908,
+        "name": "Diagnose map-interactions",
+        "conclusion": "success"
+      },
+      {
+        "id": 129981334645,
+        "name": "Diagnose offline-safety",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 13784072806,
+      "name": "tropnik-map-interactions-diagnostic-42859458839",
+      "bytes": 2712163,
+      "sha256": "14207c504f9e2baba100a60dd49ea1091ab14a2fd7d5e9df1e28b6f08fe23888",
+      "verifiedAfterDownload": true
+    },
+    {
+      "id": 13785200449,
+      "name": "tropnik-offline-safety-diagnostic-42859458839",
+      "bytes": 170406,
+      "sha256": "50fcd42f85c27092076114d02f84eca10308ee9a53df1f51447f3942db48e768",
+      "verifiedAfterDownload": true
+    }
+  ],
+  "map": {
+    "profile": "desktop-webgl",
+    "engine": "maplibre",
+    "interactionsPassed": true,
+    "performancePassed": false,
+    "performanceIssues": [
+      {
+        "profile": "desktop-webgl",
+        "phase": "map-interactions",
+        "metric": "longestTaskMs",
+        "value": 839,
+        "limit": 750
+      }
+    ],
+    "timeOrigin": 1794329791056.5,
+    "counterStart": 6275.299999999988,
+    "peakLongTask": {
+      "startTime": 8447.799999999988,
+      "duration": 839,
+      "name": "self",
+      "observedAt": 9288.399999999994,
+      "phase": "map-interactions/first-altai"
+    },
+    "durationMs": 67879,
+    "layoutShift": 0.003712818344105879,
+    "polygon": {
+      "id": "territory-28173009B78872068540735",
+      "title": "Иркутская область",
+      "coordinate": [
+        106.28448486328125,
+        53.29999999999998
+      ],
+      "input": "mouse"
+    },
+    "requestMapLayout": {
+      "schemaVersion": 1,
+      "scope": "desktop-request-dialog",
+      "limit": 32,
+      "active": false,
+      "overflow": false,
+      "observers": {
+        "resize": true,
+        "canvasAttributes": true
+      },
+      "errors": [],
+      "samples": [
+        {
+          "time": 35927.600000000006,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "baseline",
+          "mutations": []
+        },
+        {
+          "time": 36641.600000000006,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1440,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 37993.79999999999,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 38302.899999999994,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1440,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 38408.5,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 43818.600000000006,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1440,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 44808.399999999994,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 45245,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "final",
+          "mutations": []
+        }
+      ]
+    },
+    "requestMapLayoutVerified": true,
+    "phases": [
+      {
+        "name": "profile-ready",
+        "time": 5533.699999999997,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "map-interactions",
+        "time": 6276.099999999991,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "map-interactions/first-altai",
+        "time": 6277,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "map-interactions/saved-filter",
+        "time": 12539.5,
+        "longestTaskMs": 839
+      },
+      {
+        "name": "map-interactions/route-selection",
+        "time": 18719.5,
+        "longestTaskMs": 839
+      },
+      {
+        "name": "map-interactions/style-camera",
+        "time": 22190.59999999999,
+        "longestTaskMs": 839
+      },
+      {
+        "name": "map-interactions/request-ownership",
+        "time": 35734,
+        "longestTaskMs": 839
+      },
+      {
+        "name": "map-interactions/return-to-country",
+        "time": 45536.899999999994,
+        "longestTaskMs": 839
+      },
+      {
+        "name": "map-interactions/second-baikal",
+        "time": 49553.399999999994,
+        "longestTaskMs": 839
+      },
+      {
+        "name": "map-interactions/sibling-polygon",
+        "time": 52893,
+        "longestTaskMs": 839
+      },
+      {
+        "name": "map-interactions/map-gestures",
+        "time": 62299.19999999998,
+        "longestTaskMs": 839
+      }
+    ],
+    "reportSha256": "f912a27b053f30791e938b5280384e3ec91ec75be539cbeecc4989df1c8b3521",
+    "traces": [
+      {
+        "scope": "first-desktop-altai-selection",
+        "sourceCommit": "aa8bb4bce1d1c725eace531bb4c04c4f1230e9d8",
+        "limits": {
+          "durationMs": 8000,
+          "drainMs": 5000,
+          "closeMs": 1000,
+          "maxBytes": 33554432,
+          "bufferSizeKiB": 16384,
+          "chunkBytes": 262144
+        },
+        "status": "complete",
+        "stopReason": "action-complete",
+        "bytes": 7287989,
+        "eof": true,
+        "dataLossOccurred": false,
+        "errors": [],
+        "recordedDurationMs": 5026.266631999999,
+        "eventCount": 27196,
+        "cpuProfileChunks": 898,
+        "cpuSamples": 68103,
+        "file": "desktop-webgl-first-altai.trace.json",
+        "sha256": "d86e9526e96b21afc11ef07aef0938f97221bebecada796ea029052b2f7fef19"
+      },
+      {
+        "scope": "desktop-route-request-ownership",
+        "sourceCommit": "aa8bb4bce1d1c725eace531bb4c04c4f1230e9d8",
+        "limits": {
+          "durationMs": 8000,
+          "drainMs": 5000,
+          "closeMs": 1000,
+          "maxBytes": 33554432,
+          "bufferSizeKiB": 16384,
+          "chunkBytes": 262144
+        },
+        "status": "partial",
+        "stopReason": "time-limit",
+        "bytes": 10015920,
+        "eof": true,
+        "dataLossOccurred": false,
+        "errors": [],
+        "recordedDurationMs": 8000.6010529999985,
+        "eventCount": 36974,
+        "cpuProfileChunks": 1188,
+        "cpuSamples": 99146,
+        "file": "desktop-webgl-request-ownership.trace.json",
+        "sha256": "5006b4f6cfb38940872b5e75d3fe095e6c38d729b9122ce9399b5b249216ae6f"
+      },
+      {
+        "scope": "desktop-sibling-polygon-selection",
+        "sourceCommit": "aa8bb4bce1d1c725eace531bb4c04c4f1230e9d8",
+        "limits": {
+          "durationMs": 8000,
+          "drainMs": 5000,
+          "closeMs": 1000,
+          "maxBytes": 33554432,
+          "bufferSizeKiB": 16384,
+          "chunkBytes": 262144
+        },
+        "status": "partial",
+        "stopReason": "time-limit",
+        "bytes": 10030668,
+        "eof": true,
+        "dataLossOccurred": false,
+        "errors": [],
+        "recordedDurationMs": 7999.686151999995,
+        "eventCount": 35778,
+        "cpuProfileChunks": 1466,
+        "cpuSamples": 128178,
+        "file": "desktop-webgl-sibling-polygon.trace.json",
+        "sha256": "d10b7a2667faebcfc9ce0bb1445d1d55e5d105b1ea8f95cba70069d6f2928efb"
+      }
+    ],
+    "attribution": "Trace attribution is recorded separately; this immutable receipt preserves the measured 839 ms first-Altai peak."
+  },
+  "offline": {
+    "profile": "android-portrait",
+    "passed": true,
+    "nativeInputs": 4,
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "originTransport": {
+      "method": "origin-socket-destroy",
+      "startedAt": "2026-11-10T16:56:22.561Z",
+      "restoredAt": "2026-11-10T16:56:22.989Z",
+      "blockedRequests": 4,
+      "requests": [
+        {
+          "path": "/tropnik/_offline-transport-probe",
+          "method": "GET",
+          "at": "2026-11-10T16:56:22.565Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T16:56:22.570Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T16:56:22.570Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T16:56:22.571Z"
+        }
+      ],
+      "probe": {
+        "passed": true,
+        "errorCode": "ECONNRESET",
+        "path": "/tropnik/_offline-transport-probe"
+      },
+      "active": false
+    },
+    "offline": true,
+    "titleRestored": true,
+    "contactRestored": true,
+    "draftExplicit": true,
+    "privateApiNotCached": true,
+    "networkSuccessfulResponses": 0,
+    "screenshot": {
+      "file": "android-offline-emergency-card.png",
+      "bytes": 176259,
+      "sha256": "159c657e9b4ec4b4f1da1295d1b33af487fed6bfaa267a22c2b6223db1ab23d4"
+    },
+    "inputs": [
+      {
+        "selector": "#route-title",
+        "passed": true,
+        "valueLength": 20,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      },
+      {
+        "selector": "#region",
+        "passed": true,
+        "valueLength": 21,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      },
+      {
+        "selector": "#leader-name",
+        "passed": true,
+        "valueLength": 27,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      },
+      {
+        "selector": "#leader-phone",
+        "passed": true,
+        "valueLength": 12,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      }
+    ],
+    "reportSha256": "7be43e8ba82d2108106b2271aa07c6e2240e70fa248ba7136bb4ac4488b850f0",
+    "visualReview": {
+      "viewedOriginalPng": true,
+      "screenshotHashVerified": true,
+      "standaloneEmergencyViewerVisible": true,
+      "savedTestRouteVisible": true,
+      "localDraftNoticeVisible": true,
+      "note": "Screenshot shows the standalone emergency viewer with the saved CI route and explicit local-draft notice; contact restoration is verified by the DOM assertion in the raw report."
+    }
+  },
+  "limitations": [
+    "Focused diagnostics are not a full release run.",
+    "The instrumented map measurement still exceeds the unchanged 750 ms desktop limit.",
+    "This diagnostic does not execute the coastline zoom matrix or mobile map interaction profiles.",
+    "The same-code full main run 5af55a7 failed during Chromium startup before any application navigation, so it provides no uninstrumented map result."
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "version": "0.4.23",
+  "assembledAt": "2026-11-10T15:52:41+00:00",
+  "evidenceScope": "Records checks already completed for the release candidate; no new test run was performed while assembling this record.",
+  "source": {
+    "testedCiCommit": "d7670cf5622cb51d7b0240384d00113e4688196b",
+    "testedCiCommitUrl": "https://github.com/orewn/tropnik/commit/d7670cf5622cb51d7b0240384d00113e4688196b",
+    "currentWebCommit": "052c1482ed30ad63eb71287010c1e1e86fe21183",
+    "unchangedBetweenCommits": true,
+    "gitObjects": {
+      "backend": "6a0d869fa9c71e81c6bc5097fbfd143eb40649d8",
+      "contracts/openapi.yaml": "e9c62b309d808472c02722e3b12732d42e88467b",
+      "infra/.env.example": "ed51d57a28e5c023a87006ba49b27403a07936de",
+      "infra/compose.yaml": "2a20f0ed16d2924fa47d90c26321be9c8c77eaae",
+      ".github/workflows/backend.yml": "5f9005474b994be34d8ad40215dc549d1ae933fb"
+    },
+    "binding": "The backend tree and each listed contract, infrastructure and workflow blob are byte-identical at the tested CI commit and the current web commit."
+  },
+  "localChecks": {
+    "goVersion": "1.27.3",
+    "testCommand": "go test -race -count=1 -tags=integration ./...",
+    "result": "passed",
+    "topLevelTests": 81,
+    "unitTests": 52,
+    "databaseIntegrationTests": 29,
+    "raceDetector": true,
+    "failures": 0,
+    "skipped": 0,
+    "countBasis": "52 unit and 29 integration-tagged top-level test definitions in the passing full-suite source; subtests and repeated CI execution are not added to this total.",
+    "testOutputSha256": "a287576f828791b9ef138c614bfb40e36f83b53366dbaa9cd5b373fd7df3d57d",
+    "database": {
+      "postgresqlVersion": "18.6",
+      "postgisVersion": "3.7.0",
+      "realDatabase": true,
+      "restrictedRuntimeRoleExercised": true
+    },
+    "goVet": "passed",
+    "cgoDisabledCommandBuilds": "passed"
+  },
+  "workflow": {
+    "id": 42830778878,
+    "jobId": 129879891153,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42830778878",
+    "name": "Backend and native PostGIS",
+    "conclusion": "success",
+    "unitRaceDetector": "passed",
+    "goVet": "passed",
+    "nativePostgisIntegration": "passed",
+    "integrationGateTopLevelPassEntries": 33,
+    "integrationGateDatabaseTests": 29,
+    "integrationGatePackageUnitTests": 4,
+    "integrationGateFailures": 0,
+    "integrationGateSkipped": 0,
+    "logSha256": "390bc2092c9fc473a5a886532b23ee5c1e9e320c3096c202e75dcbdee4fbb133",
+    "artifact": {
+      "id": 13770698991,
+      "name": "tropnik-native-postgis-d7670cf5622cb51d7b0240384d00113e4688196b",
+      "reportedSha256": "ffff551938ba419a9e94a4402ad28caa4ea0404c3761689b5e37410b62ebb275",
+      "createdAt": "2026-11-10T14:08:17Z",
+      "expiresAt": "2026-11-24T14:08:17Z"
+    }
+  },
+  "safetyCoverage": [
+    "Encrypted private payload is bound to departure and passport version; absent or invalid keys and contacts fail closed.",
+    "Required-route attendance, preparation, independent confirmation, roster amendment and concurrent confirmation.",
+    "A stale start contact is rejected by application and database rules; renewal permits the restricted runtime role to start.",
+    "Restricted-role emergency card, check-in, completion, return report and immutable safety evidence lifecycle."
+  ],
+  "openapi": {
+    "version": "0.4.23",
+    "safetyEndpoints": 8,
+    "newSafetySchemas": 20,
+    "schemaComponentsTotal": 22,
+    "allComponentCategoriesTotal": 26,
+    "referencesChecked": 203,
+    "unresolvedReferences": 0,
+    "schemaBaselineCommit": "0ed9122",
+    "endpoints": [
+      "GET /departures/{id}/safety-passport",
+      "POST /departures/{id}/safety-passport/prepare",
+      "POST /departures/{id}/mchs/submission",
+      "POST /departures/{id}/mchs/confirmation",
+      "POST /departures/{id}/mchs/start-contact",
+      "POST /departures/{id}/mchs/return-report",
+      "POST /departures/{id}/safety-check-ins",
+      "GET /departures/{id}/emergency-card"
+    ]
+  },
+  "limits": {
+    "operationalApiDeployed": false,
+    "productionApiVerified": false,
+    "productionMailDeliveryVerified": false,
+    "productionBackupRestoreVerified": false,
+    "note": "These are source, automated test and local database checks. They do not establish an operational API deployment or production migrations, mail delivery or backup/restore."
+  }
+}

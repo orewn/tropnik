@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "dd246828bad0fbd700c2a308882d9d5c6282f291",
+  "workflowRunId": 42856953078,
+  "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42856953078",
+  "conclusion": "success",
+  "releaseRequestBlob": "48c3e9c989ac527398e58db55c1d3105a3982092",
+  "releaseRequested": false,
+  "releaseVersion": "",
+  "deviceTests": {
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "jobs": [
+    {
+      "id": 129972473508,
+      "name": "build",
+      "conclusion": "success"
+    },
+    {
+      "id": 129974503496,
+      "name": "Android device scenarios",
+      "conclusion": "success"
+    },
+    {
+      "id": 129977602467,
+      "name": "Publish the requested Android prerelease",
+      "conclusion": "skipped"
+    }
+  ],
+  "publicRelease": {
+    "url": "https://github.com/orewn/tropnik/releases/tag/v0.4.23-preview",
+    "id": 440549485,
+    "tag": "v0.4.23-preview",
+    "target": "2a6372f9b60661db3e2766619f4259bb094145b7",
+    "updated": "2026-11-10T15:35:23Z",
+    "assets": [
+      {
+        "id": 731943357,
+        "name": "android-manifest.json",
+        "bytes": 1874,
+        "digest": "sha256:a56e659400d121fe85491f54b76e141d35ec26fb6770e96ded6dbbd7fae3794e"
+      },
+      {
+        "id": 731943835,
+        "name": "checksums.sha256",
+        "bytes": 460,
+        "digest": "sha256:15c80ac198b6d0e06b34394189000e20025675e80a07311e5f7f9948e53ad9a0"
+      },
+      {
+        "id": 731943507,
+        "name": "tropnik-0.4.23-preview-source.tar.gz",
+        "bytes": 130061006,
+        "digest": "sha256:ce1ce5df38d3a4bf529b886687295eafde8950f77317c5363cd908c40b457567"
+      },
+      {
+        "id": 731942828,
+        "name": "tropnik-arm64-preview.apk",
+        "bytes": 72190713,
+        "digest": "sha256:4fdaecd0ea99d70295569dcf6c5d1362f81237891e3e88688f549dff345c9555"
+      },
+      {
+        "id": 731943052,
+        "name": "tropnik-preview.apk",
+        "bytes": 79346747,
+        "digest": "sha256:17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692"
+      },
+      {
+        "id": 731943427,
+        "name": "verification-reports.zip",
+        "bytes": 54656,
+        "digest": "sha256:cfdd3af2f768fd17054be736b7d8e7051575502ea585f303d889b795a17bcf39"
+      }
+    ],
+    "tagCommit": "2a6372f9b60661db3e2766619f4259bb094145b7",
+    "allSixAssetIdsSizesDigestsUnchanged": true
+  },
+  "verificationMethod": "CI job logs and GitHub release metadata; no release mutations or artifact replacement.",
+  "logs": {
+    "build-job.log": {
+      "bytes": 88024,
+      "sha256": "3d12d22cbbaa0b00f80ed766e43b8b85ec04f6167b99efbbffe3627ac232e7e3"
+    },
+    "device-job.log": {
+      "bytes": 69718,
+      "sha256": "59c38323cd6b629dccf01b9cc42b785b4340ce923163e096d765839dd81642ac"
+    }
+  }
+}

@@ -1,0 +1,398 @@
+{
+  "schemaVersion": 1,
+  "assembledAt": "2026-11-10T17:55:54+00:00",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "sourceCommit": "17b3616868067acba189ddfb232403798150a910",
+  "webTree": "2c8c56702a47f16760bff81fab09d9b16f4f6935",
+  "workflowRun": 42867634322,
+  "workflowJob": 130010123045,
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/42867634322",
+  "artifact": {
+    "id": 13788725722,
+    "bytes": 2981922,
+    "sha256": "eb5698711b8f1faf90b5b830ef8a0c6ed5344be7bf9e0ec9eb42b876128bbb2c"
+  },
+  "scenarioReport": {
+    "file": "browser-map-interactions-diagnostic.json",
+    "bytes": 176584,
+    "sha256": "34f1ef873ec6ef345deeb01cbea5d47173f6fe03d0393fea6f8a7b8004fe977b"
+  },
+  "traces": [
+    {
+      "scope": "first-desktop-altai-selection",
+      "file": "desktop-webgl-first-altai.trace.json",
+      "sha256": "ab72c5d2f953a5d91ebcf156b0abbd9089db738efefac92120e7f53479932b03",
+      "bytes": 8144923,
+      "status": "complete",
+      "stopReason": "action-complete",
+      "recordedDurationMs": 6556.011241,
+      "eof": true,
+      "dataLossOccurred": false,
+      "cpuSamples": 93033,
+      "errors": []
+    },
+    {
+      "scope": "desktop-route-request-ownership",
+      "file": "desktop-webgl-request-ownership.trace.json",
+      "sha256": "0111c2e8894d89454061b9a648ecd14077b820b4a34cb5fffde19f2d6b4cb0d4",
+      "bytes": 11554586,
+      "status": "partial",
+      "stopReason": "time-limit",
+      "recordedDurationMs": 8000.299124999998,
+      "eof": true,
+      "dataLossOccurred": false,
+      "cpuSamples": 100678,
+      "errors": []
+    },
+    {
+      "scope": "desktop-sibling-polygon-selection",
+      "file": "desktop-webgl-sibling-polygon.trace.json",
+      "sha256": "9dd44f5cb5cbc0aeb30212ff5b6ad7ab03fe228942c67da251feae1ef29a706d",
+      "bytes": 10768771,
+      "status": "partial",
+      "stopReason": "time-limit",
+      "recordedDurationMs": 7999.57286,
+      "eof": true,
+      "dataLossOccurred": false,
+      "cpuSamples": 126237,
+      "errors": []
+    }
+  ],
+  "instrumentedScenario": {
+    "completed": true,
+    "performancePassed": false,
+    "acceptance": "longestTaskMs < 750",
+    "limitMs": 750,
+    "observedLongestTaskMs": 1295,
+    "performanceTimeOrigin": 1794332610557,
+    "peak": {
+      "startTime": 12081.300000000003,
+      "duration": 1295,
+      "name": "self",
+      "observedAt": 13419.999999999985,
+      "phase": "map-interactions/first-altai"
+    },
+    "durationMs": 71378,
+    "cls": 0
+  },
+  "circlePeak": {
+    "rendererPid": 2804,
+    "rendererTid": 2804,
+    "traceStartUs": 134373597,
+    "durationMs": 1295.0,
+    "animationFrameMs": 1254.088,
+    "maplibreFunctionCallMs": 1232.133,
+    "rendererSamples": 4653,
+    "drawCircleInclusiveSamples": 4202,
+    "programConstructorInclusiveSamples": 4200,
+    "getUniformBlockIndexLeafSamples": 2998,
+    "getProgramParameterLeafSamples": 1196,
+    "stack": [
+      "Map._render",
+      "Painter.render",
+      "Painter.renderLayer",
+      "drawCircle (qM)",
+      "Painter.useProgram(circle)",
+      "ProgramCache.getProgram",
+      "Program constructor (xj)",
+      "applyUBOBindings (UA)"
+    ],
+    "linkStatusQuery": {
+      "name": "GLES2Implementation::GetProgramiv",
+      "traceStartUs": 134497426,
+      "wallMs": 331.866,
+      "threadCpuMs": 9.526
+    },
+    "uniformBlockQueries": [
+      {
+        "name": "GLES2::GetUniformBlockIndex",
+        "traceStartUs": 134829597,
+        "wallMs": 776.199,
+        "threadCpuMs": 24.642,
+        "callOrdinal": 1
+      },
+      {
+        "name": "GLES2::GetUniformBlockIndex",
+        "traceStartUs": 135605830,
+        "wallMs": 0.002,
+        "threadCpuMs": 0.001,
+        "callOrdinal": 2
+      },
+      {
+        "name": "GLES2::GetUniformBlockIndex",
+        "traceStartUs": 135605835,
+        "wallMs": 0.001,
+        "threadCpuMs": 0.001,
+        "callOrdinal": 3
+      }
+    ],
+    "nonoverlappingPrimaryQueryWallMs": 1108.065,
+    "queryWaitStack": [
+      "ImplementationBase::GetBucketContents",
+      "ImplementationBase::WaitForCmd",
+      "CommandBufferHelper::Finish",
+      "CommandBufferProxyImpl::WaitForGetOffset"
+    ],
+    "gpuQueueContention": [
+      {
+        "gpuPid": 2726,
+        "gpuTid": 2726,
+        "taskStartUs": 134375613,
+        "taskWallMs": 425.684,
+        "taskThreadCpuMs": 0.953,
+        "context": "0x4",
+        "scheduledOn": "VizCompositorThread",
+        "schedulingTid": 2764,
+        "scheduledAtUs": 134372216,
+        "scheduleFlowId": 442,
+        "runFlowId": 481,
+        "sequenceUnblockedFlowId": 445
+      },
+      {
+        "gpuPid": 2726,
+        "gpuTid": 2726,
+        "taskStartUs": 134828370,
+        "taskWallMs": 776.886,
+        "taskThreadCpuMs": 1.334,
+        "context": "0x4",
+        "scheduledOn": "VizCompositorThread",
+        "schedulingTid": 2764,
+        "scheduledAtUs": 134801571,
+        "scheduleFlowId": 605,
+        "runFlowId": 611
+      }
+    ],
+    "separateWebglLinkCommand": {
+      "name": "GLES2DecoderPassthroughImpl::DoLinkProgram",
+      "traceStartUs": 134824627,
+      "wallMs": 0.351,
+      "threadCpuMs": 0.35
+    },
+    "uboOrderInference": "The source order in pinned MapLibre GL JS 6.16.0 is ProjectionUBO, TerrainUBO, FrameUBO. The trace records the three calls but not block-name arguments. The first call contains the 776.199ms wait; the subsequent calls take 0.002ms and 0.001ms. Moving later binding writes cannot remove the measured first-call wait."
+  },
+  "hillshadeTask": {
+    "traceStartUs": 136571787,
+    "durationMs": 754.605,
+    "exceedsSame750msLimit": true,
+    "rendererSamples": 2270,
+    "drawHillshadeInclusiveSamples": 1963,
+    "programConstructorInclusiveSamples": 1917,
+    "getProgramParameterLeafSamples": 1911,
+    "stack": [
+      "Map._render",
+      "Painter.render",
+      "Painter.renderLayer",
+      "drawHillshade (yN)",
+      "Painter.useProgram",
+      "ProgramCache.getProgram",
+      "Program constructor (xj)"
+    ],
+    "synchronousQueries": [
+      {
+        "name": "GLES2Implementation::GetProgramiv",
+        "traceStartUs": 136621781,
+        "wallMs": 655.249,
+        "threadCpuMs": 17.171
+      },
+      {
+        "name": "GLES2Implementation::GetProgramiv",
+        "traceStartUs": 137292590,
+        "wallMs": 15.36,
+        "threadCpuMs": 0.676
+      }
+    ],
+    "gpuQueueContention": [
+      {
+        "gpuPid": 2726,
+        "gpuTid": 2726,
+        "taskStartUs": 136567582,
+        "taskWallMs": 701.883,
+        "taskThreadCpuMs": 1.258,
+        "context": "0x4",
+        "scheduledOn": "VizCompositorThread",
+        "schedulingTid": 2764,
+        "scheduledAtUs": 136561698,
+        "scheduleFlowId": 1908,
+        "runFlowId": 2717,
+        "sequenceUnblockedFlowId": 1911
+      }
+    ],
+    "separateWebglLinkCommands": [
+      {
+        "name": "GLES2DecoderPassthroughImpl::DoLinkProgram",
+        "traceStartUs": 137275493,
+        "wallMs": 0.327,
+        "threadCpuMs": 0.307
+      },
+      {
+        "name": "GLES2DecoderPassthroughImpl::DoLinkProgram",
+        "traceStartUs": 137303832,
+        "wallMs": 0.684,
+        "threadCpuMs": 0.405
+      }
+    ]
+  },
+  "requestDialogLayout": {
+    "sampleCount": 8,
+    "sampleRangeMs": [
+      42270.8,
+      51865.2
+    ],
+    "container": {
+      "x": 384,
+      "y": 72,
+      "width": 1041,
+      "height": 928
+    },
+    "canvas": {
+      "x": 384,
+      "y": 72,
+      "width": 1041,
+      "height": 928
+    },
+    "backing": {
+      "width": 1041,
+      "height": 928
+    },
+    "rootClientWidths": [
+      1425,
+      1440
+    ],
+    "canvasAttributeMutationCount": 0,
+    "activeAfterAudit": false,
+    "overflow": false,
+    "errors": [],
+    "observedRendererGetGLErrorCount": 0,
+    "observedRendererCheckFramebufferStatusCount": 0,
+    "longestCapturedTask": {
+      "traceStartUs": 164336204,
+      "wallMs": 227.148,
+      "classification": "Trace-start EvaluateScript; four renderer CPU samples, not attributed to a map action."
+    },
+    "nextLongestCapturedTask": {
+      "traceStartUs": 170851254,
+      "wallMs": 109.546
+    }
+  },
+  "separateGeometryTransferTasks": [
+    {
+      "scope": "first-altai",
+      "traceStartUs": 135935844,
+      "wallMs": 135.068,
+      "rendererSamples": 269,
+      "sendWorkerUpdateInclusiveSamples": 176
+    },
+    {
+      "scope": "sibling-polygon",
+      "traceStartUs": 183333058,
+      "wallMs": 300.065,
+      "rendererSamples": 654,
+      "sendWorkerUpdateInclusiveSamples": 599
+    },
+    {
+      "scope": "sibling-polygon",
+      "traceStartUs": 187633770,
+      "wallMs": 322.105,
+      "rendererSamples": 1243,
+      "sendWorkerUpdateInclusiveSamples": 965
+    }
+  ],
+  "siblingBufferUpload": {
+    "traceStartUs": 184609461,
+    "wallMs": 369.639,
+    "rendererSamples": 1671,
+    "bufferDataLeafSamples": 1389,
+    "waitForToken": {
+      "name": "CommandBufferProxyImpl::WaitForToken",
+      "traceStartUs": 184635027,
+      "wallMs": 327.776,
+      "threadCpuMs": 10.481
+    }
+  },
+  "comparison": {
+    "baselineSource": "aa8bb4bce1d1c725eace531bb4c04c4f1230e9d8",
+    "baselineRun": 42859458839,
+    "baselineFirstAltaiTraceSha256": "d86e9526e96b21afc11ef07aef0938f97221bebecada796ea029052b2f7fef19",
+    "baselinePeakTaskMs": 839.523,
+    "baselineCircleQueryWallMs": [
+      495.868,
+      320.093
+    ],
+    "baselineFirstSecondThirdUboWallMs": [
+      320.093,
+      0.002,
+      0.001
+    ],
+    "freshPeakTaskMs": 1295,
+    "freshCircleQueryWallMs": [
+      331.866,
+      776.199
+    ],
+    "runtimeExperiment": "Two CSS files replace desktop control/attribution backdrop blur and translucent backgrounds with opaque surfaces. The existing 60s browser-start bound is also present.",
+    "result": "The fresh instrumented scenario still fails the unchanged performance limit. These observations do not establish a performance benefit or a causal regression from the CSS experiment.",
+    "modalResult": "Both baseline and fresh receipts retain a constant 1041 by 928 canvas through the request-dialog actions; the former 15px modal canvas reflow is absent."
+  },
+  "profileOwnership": {
+    "grouping": "pid plus profile id; sampled owner thread and start time come from Profile, not the ProfileChunk emission thread.",
+    "sampleTimestampMethod": "Profile.startTime plus cumulative ProfileChunk timeDeltas, in trace microseconds.",
+    "sampleInterpretation": "Sample counts identify observed stacks; they are not CPU or wall durations. Native dur is elapsed wall time and tdur is the recorded CPU time on that thread.",
+    "streams": [
+      {
+        "traceFile": "desktop-webgl-first-altai.trace.json",
+        "pid": 2804,
+        "ownerTid": 2804,
+        "ownerThread": "CrRendererMain",
+        "profileId": "0x1",
+        "profileStartUs": 132413271,
+        "chunkEmitterTids": [
+          2989
+        ],
+        "rendererSamples": 23513
+      },
+      {
+        "traceFile": "desktop-webgl-request-ownership.trace.json",
+        "pid": 2804,
+        "ownerTid": 2804,
+        "ownerThread": "CrRendererMain",
+        "profileId": "0x6",
+        "profileStartUs": 164336457,
+        "chunkEmitterTids": [
+          2804,
+          3004
+        ],
+        "rendererSamples": 34131
+      },
+      {
+        "traceFile": "desktop-webgl-sibling-polygon.trace.json",
+        "pid": 2804,
+        "ownerTid": 2804,
+        "ownerThread": "CrRendererMain",
+        "profileId": "0xb",
+        "profileStartUs": 181936134,
+        "chunkEmitterTids": [
+          3015
+        ],
+        "rendererSamples": 30555
+      }
+    ]
+  },
+  "bundleFrameMapping": {
+    "asset": "maplibre-gl-gSiY3OKT.js",
+    "maplibreVersion": "6.16.0",
+    "referenceReceipt": "web-0.4.23-map-profile-5ab527b.json",
+    "method": "Recorded function names and zero-based bundle positions are matched to the same content-addressed bundle and pinned source."
+  },
+  "conclusion": "The fresh first-Altai failure contains long synchronous program and UBO metadata waits on the renderer thread, with overlapping GPU tasks scheduled by VizCompositorThread on context 0x4. A separate hillshade program task also exceeds the limit. The trace supports shared GPU queue contention; it does not establish that the elapsed waits are shader compiler CPU time.",
+  "limits": [
+    "This is an instrumented diagnostic, not a release pass. The successful collection job does not override performancePassed:false, verified:false or releaseEligible:false.",
+    "The full uninstrumented main 76eed8e run separately failed at 1135ms but captured no CPU trace; its exact stack is not inferred from this diagnostic.",
+    "No compiler internal events, CSS effect-tree attribution or compositor render-pass costs were captured. The specific cause of the long Viz GPU work is not established.",
+    "DoLinkProgram event durations describe only those observed commands and do not measure total shader compilation or exclude deferred driver work.",
+    "No causal claim is made that country GeoJSON transfer, backdrop blur, trace overhead or the number of circle variants caused the shared GPU queue delay.",
+    "The request and sibling traces reached their bounded 8s capture limit. They are valid EOF traces without reported loss, but do not cover all later actions.",
+    "Current-context KHR_parallel_shader_compile support was not recorded. Neither extension support nor absence is inferred from the driver name.",
+    "No runtime source changes, gate changes, prewarming, SDK patches or new broad tests were performed for this attribution."
+  ]
+}

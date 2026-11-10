@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "evidenceType": "failed-candidate-receipt",
+  "repository": "orewn/tropnik",
+  "sourceCommit": "052c1482ed30ad63eb71287010c1e1e86fe21183",
+  "runId": 42846832446,
+  "buildJobId": 129936455196,
+  "buildId": "c6f3ef84f0cef4a5",
+  "conclusion": "failure",
+  "releaseEligible": false,
+  "failedStage": "full-browser-wall-clock-timeout",
+  "failureEvidence": [
+    "2026-11-10T16:01:00.2499452Z ##[error]The action 'Verify real mobile rendering and sheet interaction and desktop map interactions' has timed out after 18 minutes."
+  ],
+  "separatePendingPerformanceIssues": [
+    {
+      "profile": "desktop-webgl",
+      "phase": "map-interactions",
+      "metric": "longestTaskMs",
+      "value": 851,
+      "limit": 750
+    }
+  ],
+  "deployment": {
+    "jobId": 129949087078,
+    "conclusion": "skipped"
+  },
+  "lastCheckpoint": {
+    "phase": "before-zoom-audit",
+    "profile": "desktop-webgl",
+    "updatedAt": "2026-11-10T15:53:05.777Z"
+  },
+  "mapInteractions": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "passed": true,
+      "longestTaskMs": 255,
+      "durationMs": 69962,
+      "polygon": {
+        "id": "territory-28173009B49563687485750",
+        "title": "Республика Бурятия",
+        "input": "touch",
+        "coordinate": [
+          109.96875000000001,
+          52.68970242806751
+        ]
+      }
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "passed": true,
+      "longestTaskMs": 851,
+      "durationMs": 64014,
+      "polygon": {
+        "id": "territory-28173009B78872068540735",
+        "title": "Иркутская область",
+        "input": "mouse",
+        "coordinate": [
+          106.28448486328125,
+          53.29999999999998
+        ]
+      }
+    }
+  ],
+  "performance": [
+    {
+      "profile": "compact-android",
+      "timeOrigin": 1794325379428.7,
+      "counterStart": 4202.600000000035,
+      "longestTaskMs": 274,
+      "maxRetainedLongTask": {
+        "startTime": 987.1000000000349,
+        "duration": 936,
+        "name": "self",
+        "observedAt": 1975.100000000035,
+        "phase": "loading"
+      },
+      "retainedLongTasks": 7
+    },
+    {
+      "profile": "iphone-portrait",
+      "timeOrigin": 1794325405484.4,
+      "counterStart": 3315.100000000035,
+      "longestTaskMs": 102,
+      "maxRetainedLongTask": {
+        "startTime": 214.90000000002328,
+        "duration": 513,
+        "name": "self",
+        "observedAt": 731.2999999999884,
+        "phase": "loading"
+      },
+      "retainedLongTasks": 14
+    },
+    {
+      "profile": "android-portrait",
+      "timeOrigin": 1794325433807.8,
+      "counterStart": 29878.899999999965,
+      "longestTaskMs": 255,
+      "maxRetainedLongTask": {
+        "startTime": 1171,
+        "duration": 431,
+        "name": "self",
+        "observedAt": 1638.399999999965,
+        "phase": "loading"
+      },
+      "retainedLongTasks": 32
+    },
+    {
+      "profile": "phone-landscape",
+      "timeOrigin": 1794325898475.3,
+      "counterStart": 2935,
+      "longestTaskMs": 323,
+      "maxRetainedLongTask": {
+        "startTime": 559,
+        "duration": 457,
+        "name": "self",
+        "observedAt": 1056.1000000000931,
+        "phase": "loading"
+      },
+      "retainedLongTasks": 10
+    },
+    {
+      "profile": "desktop-webgl",
+      "timeOrigin": 1794325915039.9,
+      "counterStart": 7421.20000000007,
+      "longestTaskMs": 851,
+      "maxRetainedLongTask": {
+        "startTime": 54166.90000000002,
+        "duration": 779,
+        "name": "self",
+        "observedAt": 55003,
+        "phase": "map-interactions"
+      },
+      "retainedLongTasks": 32
+    }
+  ],
+  "coastProfiles": [
+    {
+      "profile": "android-portrait",
+      "passed": true,
+      "completedSteps": 6,
+      "expectedSteps": 6,
+      "steps": [
+        {
+          "fixture": "primorsk",
+          "targetZoom": 7,
+          "zoom": 7.121307459879884,
+          "centerErrorPx": 1.9467061844009763
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 9,
+          "zoom": 9.371307459879883,
+          "centerErrorPx": 7.4530824980028135e-06
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 12,
+          "zoom": 12.371307459879883,
+          "centerErrorPx": 2.2238667383478044
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 15,
+          "zoom": 15.371307459879883,
+          "centerErrorPx": 1.3628112963004433e-05
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 18,
+          "zoom": 18,
+          "centerErrorPx": 2.9226088636008765
+        },
+        {
+          "fixture": "gogland",
+          "targetZoom": 11,
+          "zoom": 11.621307459879883,
+          "centerErrorPx": 0.719312499872712
+        }
+      ],
+      "screenshots": 6,
+      "visualReviewed": false
+    },
+    {
+      "profile": "desktop-webgl",
+      "passed": false,
+      "completedSteps": 2,
+      "expectedSteps": 6,
+      "steps": [
+        {
+          "fixture": "primorsk",
+          "targetZoom": 7,
+          "zoom": 7.18899196916921,
+          "centerErrorPx": 0.13895552584361104
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 9,
+          "zoom": 9.18899196916921,
+          "centerErrorPx": 0.5558221016812461
+        }
+      ],
+      "screenshots": 2,
+      "visualReviewed": false
+    }
+  ],
+  "offlineSafety": {
+    "status": "not-reached",
+    "passed": false,
+    "reason": "The full browser step was killed before the remaining desktop coast matrix completed."
+  },
+  "causalTraceAvailable": false,
+  "knownSeparateIssue": "Desktop duplicate place captions observed in prior c087 coast screenshots; not newly attributed to this candidate or silently claimed fixed.",
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/42846832446",
+  "tests": {
+    "web": {
+      "tests": 600,
+      "passed": 600,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "pagesTools": {
+      "tests": 117,
+      "passed": 117,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    }
+  },
+  "browserStage": {
+    "startedAt": "2026-11-10T15:42:47.718Z",
+    "timedOutAt": "2026-11-10T16:01:00.249Z",
+    "timeoutMinutes": 18,
+    "completed": false,
+    "browserVerificationProduced": false
+  },
+  "artifacts": [
+    {
+      "id": 13779812646,
+      "name": "tropnik-pages-design-1",
+      "bytes": 36225117,
+      "sha256": "8fdefc732ae71431608059a6a1f2433b019e03aedee12eba113ce61d370427b0",
+      "url": "https://github.com/orewn/tropnik/actions/runs/42846832446/artifacts/13779812646"
+    }
+  ],
+  "evidenceLimits": [
+    "This receipt describes a failed candidate and cannot authorize deployment.",
+    "The outer timeout killed the browser process before the final performance assertion; the pending 851 ms task still exceeds the unchanged 750 ms desktop limit.",
+    "Original Buryatia and Irkutsk native polygon interactions completed; desktop coast and cold offline safety proof did not complete.",
+    "The 851 ms maximum was recorded by the performance counter but its individual entry fell out of the prior 32-item recent ring; this artifact has no causal CPU trace.",
+    "Screenshots from this candidate have not been separately visually reviewed in this receipt."
+  ]
+}

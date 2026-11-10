@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {MapStyleSession} from '../lib/map-lifecycle.ts';
-import {satelliteStyle,SATELLITE_SOURCE,SATELLITE_TILES,SATELLITE_MAX_ZOOM} from '../lib/map-satellite.ts';
+import {satelliteStyle,satelliteSourceForBounds,SATELLITE_SOURCE,SATELLITE_TILES,SATELLITE_MAX_ZOOM,SATELLITE_OVERVIEW_SOURCE,SATELLITE_OVERVIEW_TILES,SATELLITE_OVERVIEW_MAX_ZOOM} from '../lib/map-satellite.ts';
 import {canvasStyle} from '../public/maps/canvas-style.js';
 import {isPriorityCity,priorityCityFontSize,priorityCityNames} from '../public/maps/map-city-labels.js';
 
@@ -21,6 +21,27 @@ test('real satellite imagery replaces ground surfaces, retaining Russia mask, la
   }
   assert.ok(!view.layers.some(layer=>layer.type==='hillshade'));
   assert.ok(!view.layers.some(layer=>['water','forest','buildings'].includes(layer.id)),'opaque fills must not cover photography');
+  assert.equal(view.sources[SATELLITE_OVERVIEW_SOURCE].maxzoom,8);
+  assert.equal(SATELLITE_OVERVIEW_MAX_ZOOM,8);
+  assert.equal(view.sources[SATELLITE_OVERVIEW_SOURCE].tiles[0],SATELLITE_OVERVIEW_TILES);
+  assert.match(SATELLITE_OVERVIEW_TILES,/^https:\/\/tiles\.maps\.eox\.at\/wmts\/1\.0\.0\/bluemarble_3857\/default\/g\/\{z\}\/\{y\}\/\{x\}\.jpg$/);
+  for(const id of [SATELLITE_SOURCE,SATELLITE_OVERVIEW_SOURCE]){
+    const layer=view.layers.find(layer=>layer.id===id);
+    assert.equal(layer.layout.visibility,'none','unused imagery must not request tiles');
+    assert.equal(layer.paint['raster-opacity'],0);
+    assert.deepEqual(layer.paint['raster-opacity-transition'],{duration:0},'replacement is atomic after ready');
+    assert.ok(view.layers.findIndex(layer=>layer.id===id)<view.layers.findIndex(layer=>layer.id==='russia-outside-mask'));
+  }
+});
+
+test('known source gaps select real overview imagery across either dateline representation',()=>{
+  const source=(west,south,east,north)=>satelliteSourceForBounds({west,south,east,north});
+  for(const bounds of [[157.73,61.8,190.96,71.61],[178.5,66,180.5,68],[178.5,70.8,181.2,71.7],[-181.5,66,-179.5,68],[179,66,-179,68],[-180,41,180,82],[19,41,191,82],[539,66,541,68]]){
+    assert.equal(source(...bounds),'eox-bluemarble',JSON.stringify(bounds));
+  }
+  for(const bounds of [[30,66,36,71],[169,64,175.9,68],[183.1,65,190,70],[178,55,181,60.9],[178,72.6,181,74],[NaN,66,181,68]]){
+    assert.equal(source(...bounds),'eox-s2',JSON.stringify(bounds));
+  }
 });
 
 test('satellite selection is lazy, restores after offline fallback and ignores obsolete loads',async()=>{

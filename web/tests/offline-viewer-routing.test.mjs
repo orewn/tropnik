@@ -10,7 +10,7 @@ const safetyViewer = await readFile(new URL('../public/offline-safety.html', imp
 const origin = 'https://offline-fixture.invalid';
 
 function worker({ base = '/', connected = false } = {}) {
-  const handlers = {}, cacheReads = [], requests = [];
+  const handlers = {}, cacheReads = [], cacheOpens = [], requests = [];
   const cache = {
     async match(path) {
       cacheReads.push(path);
@@ -21,7 +21,7 @@ function worker({ base = '/', connected = false } = {}) {
   const script = base === '/' ? source : rewriteScript(source, 'sw.js', { base });
   vm.runInNewContext(script, {
     self: { location: { origin }, addEventListener(name, listener) { handlers[name] = listener; } },
-    URL, Response, caches: { async open() { return cache; } },
+    URL, Response, caches: { async open(name) { cacheOpens.push(name); return cache; } },
     async fetch(request) {
       requests.push(request.url);
       if (!connected) throw new Error('Offline fixture');
@@ -34,7 +34,13 @@ function worker({ base = '/', connected = false } = {}) {
       respondWith(value) { response = value; } });
     return response;
   }
-  return { navigate, cacheReads, requests };
+  async function resource(url) {
+    let response;
+    handlers.fetch({request: {url, mode: 'cors', method: 'GET', headers: new Headers()},
+      respondWith(value) {response = value;}});
+    return response;
+  }
+  return { navigate, resource, cacheReads, cacheOpens, requests };
 }
 
 test('connected navigation to offline management uses the framework response', async () => {
@@ -62,6 +68,20 @@ test('private API navigation never receives an offline viewer or cache response'
   assert.equal(await env.navigate('/api/backend/me'), undefined);
   assert.deepEqual(env.cacheReads, []);
   assert.deepEqual(env.requests, []);
+});
+
+test('remote satellite imagery never enters service-worker offline storage at either deployment base', async t => {
+  for (const base of ['/', '/tropnik-test/']) await t.test(base, async () => {
+    const env = worker({base});
+    for (const url of [
+      'https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/8/63/255.jpg',
+      'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/8/72/255.jpg',
+      'https://tiles.maps.eox.at/api/private',
+    ]) assert.equal(await env.resource(url), undefined);
+    assert.deepEqual(env.cacheOpens, []);
+    assert.deepEqual(env.cacheReads, []);
+    assert.deepEqual(env.requests, []);
+  });
 });
 
 test('a cold offline safety navigation opens the emergency card at either deployment base', async t => {

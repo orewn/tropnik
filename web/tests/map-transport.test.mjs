@@ -65,6 +65,17 @@ test('private API, alternate origins and unsafe URL forms never enter the public
   assert.equal(publicMapResourceKey(origin() + '/terrain/terrain-grid.json?v=3', origin()), '/terrain/terrain-grid.json?v=3');
 });
 
+test('both satellite providers retain native loading without widening the shared public-cache allowlist', async () => {
+  const pool = {has() {assert.fail('Satellite imagery must not enter the preview pool');}};
+  const transport = createMapTransport(pool, origin);
+  for (const layer of ['s2cloudless_3857', 'bluemarble_3857']) {
+    const url = `https://tiles.maps.eox.at/wmts/1.0.0/${layer}/default/g/8/63/255.jpg`;
+    assert.equal(publicMapResourceKey(url, origin()), null);
+    assert.equal(transport.transformRequest(url).url, url);
+    await assert.rejects(transport.load({url: 'tropnik-map://' + encodeURIComponent(url)}, new AbortController()), /Unknown public map resource/);
+  }
+});
+
 test('an opened map can replace queued speculative work without exceeding concurrency', async () => {
   let release;
   const gate = new Promise(resolve => {release = resolve;});

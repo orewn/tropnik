@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-10T15:38:03.445115+00:00",
+  "release": {
+    "tag": "v0.4.23-preview",
+    "url": "https://github.com/orewn/tropnik/releases/tag/v0.4.23-preview",
+    "publishedAt": "2026-11-10T15:35:23Z",
+    "draft": false,
+    "prerelease": true,
+    "requestId": "android-0-4-23-preview-angle-gles-verification-20261110"
+  },
+  "source": {
+    "commit": "2a6372f9b60661db3e2766619f4259bb094145b7",
+    "url": "https://github.com/orewn/tropnik/commit/2a6372f9b60661db3e2766619f4259bb094145b7",
+    "tagCommit": "2a6372f9b60661db3e2766619f4259bb094145b7",
+    "tagApiUrl": "https://api.github.com/repos/orewn/tropnik/git/refs/tags/v0.4.23-preview"
+  },
+  "workflow": {
+    "id": 42844181659,
+    "attempt": 1,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42844181659",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 129927082464,
+        "name": "build",
+        "conclusion": "success"
+      },
+      {
+        "id": 129929326983,
+        "name": "Android device scenarios",
+        "conclusion": "success"
+      },
+      {
+        "id": 129932401652,
+        "name": "Publish the requested Android prerelease",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "universalApk": {
+    "name": "tropnik-preview.apk",
+    "url": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/tropnik-preview.apk",
+    "version": "0.4.23-preview",
+    "versionCode": 11,
+    "applicationId": "ru.tropa.app.preview",
+    "bytes": 79346747,
+    "sha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "minSdk": 26,
+    "targetSdk": 36,
+    "signature": "development / debug",
+    "signingCertificateSha256": "a45e5fcbd9edcf0d1c4df1a8df7209b2417f13e7f95f64c36304ce4b9bd39dac",
+    "compatibleWithPreviousPreview": false
+  },
+  "jvm": {
+    "tests": 62,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "instrumentationApkCompiled": true
+  },
+  "pipelinePythonTestsPassed": 62,
+  "device": {
+    "status": "passed",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "processExitCode": 0,
+    "instrumentationResultCodes": [
+      -1
+    ],
+    "caseClass": "ru.tropa.app.LocalExperienceTest",
+    "passedCases": [
+      "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+      "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+      "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
+      "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+      "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+      "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+      "noServerMeansExplicitConfigurationNotInventedSocialActivity"
+    ],
+    "testSource": "android/app/src/androidTest/java/ru/tropa/app/LocalExperienceTest.kt",
+    "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+    "testedArchitecture": "x86_64",
+    "testedArtifact": "tropnik-preview.apk",
+    "installedArtifactBytesVerified": true,
+    "releasePayloadDeviceVerified": true,
+    "installedApks": {
+      "tropnik-preview.apk": {
+        "bytes": 79346747,
+        "sha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692"
+      },
+      "tropnik-instrumentation-tests.apk": {
+        "bytes": 1104973,
+        "sha256": "1037eabdce53c21d3341e8d177ea0f9a570a0cfceb3afabc1d1cc536415a0c52"
+      }
+    },
+    "buildReceiptSha256": "1470d382bbeeb0b5890b49004f8eac6c6eeb9eb11de8cc51f7bdf5149c50207c",
+    "graphicsDriver": {
+      "mode": "swangle",
+      "appBackend": "OpenGL ES",
+      "renderer": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.17841 git hash: 5fa2e61da947))",
+      "diagnosticSha256": "85ae23e5865073c83b6d561fa5f90861c12bebbf1507542023c9edc0a736990a",
+      "verified": true
+    }
+  },
+  "publicEvidence": {
+    "reportsUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/verification-reports.zip",
+    "reportsMembers": [
+      "build/preview-build.json",
+      "build/unit-tests.json",
+      "device/device-result.json",
+      "device/installed-apks.json",
+      "device/raw-instrumentation.log",
+      "device/TEST-LocalExperienceTest.xml",
+      "device/graphics-driver.txt"
+    ],
+    "exactBuildAndDeviceReceiptsVerified": true,
+    "allSixAssetBytesAndDigestsVerified": true,
+    "assetVerificationMethod": "Compared the public GitHub release asset size and SHA-256 against the downloaded workflow release-candidate bytes.",
+    "assets": [
+      {
+        "name": "tropnik-arm64-preview.apk",
+        "bytes": 72190713,
+        "sha256": "4fdaecd0ea99d70295569dcf6c5d1362f81237891e3e88688f549dff345c9555",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/tropnik-arm64-preview.apk"
+      },
+      {
+        "name": "tropnik-preview.apk",
+        "bytes": 79346747,
+        "sha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/tropnik-preview.apk"
+      },
+      {
+        "name": "android-manifest.json",
+        "bytes": 1874,
+        "sha256": "a56e659400d121fe85491f54b76e141d35ec26fb6770e96ded6dbbd7fae3794e",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/android-manifest.json"
+      },
+      {
+        "name": "verification-reports.zip",
+        "bytes": 54656,
+        "sha256": "cfdd3af2f768fd17054be736b7d8e7051575502ea585f303d889b795a17bcf39",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/verification-reports.zip"
+      },
+      {
+        "name": "tropnik-0.4.23-preview-source.tar.gz",
+        "bytes": 130061006,
+        "sha256": "ce1ce5df38d3a4bf529b886687295eafde8950f77317c5363cd908c40b457567",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/tropnik-0.4.23-preview-source.tar.gz"
+      },
+      {
+        "name": "checksums.sha256",
+        "bytes": 460,
+        "sha256": "15c80ac198b6d0e06b34394189000e20025675e80a07311e5f7f9948e53ad9a0",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/checksums.sha256"
+      }
+    ]
+  },
+  "visualReview": {
+    "wholeDomesticLabelAcrossOpaqueMask": true,
+    "blueRectangleAbsent": true,
+    "nativeRealMapDuplicatePlaceCaptions": "Not established: the saved region/route screenshots contain too few place captions."
+  },
+  "limits": {
+    "physicalDeviceVerified": false,
+    "arm64DeviceExecutionVerified": false,
+    "armeabiV7aDeviceExecutionVerified": false,
+    "physicalGpuVerified": false,
+    "gpsVerified": false,
+    "batteryVerified": false,
+    "productionApiVerified": false,
+    "note": "The exact universal payload passed on the API 35 x86_64 KVM emulator using ANGLE + SwiftShader. Packaged ARM ABIs were inspected, not executed. The development/debug signing certificate does not establish update compatibility with earlier previews."
+  }
+}

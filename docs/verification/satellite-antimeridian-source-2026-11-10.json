@@ -1,0 +1,441 @@
+{
+  "schemaVersion": 1,
+  "kind": "satellite-source-investigation",
+  "checkedAt": "2026-11-10",
+  "examinedBaseCommit": "6ecc9938f3297c743bbb95aab3b711d020e2fdc8",
+  "sourceEvidenceOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "applicationDeploymentVerified": false,
+  "reproduction": {
+    "territory": "Чукотский автономный округ",
+    "publicUrl": "https://orewn.github.io/tropnik/?region=territory-28173009B11091203162490",
+    "selection": "Слои → Спутник",
+    "cause": "Missing land imagery is encoded in the original EOX2016 opaque JPEGs at both sides of180degrees; it is not caused by application world wrapping."
+  },
+  "originalProviderTiles": [
+    {
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/5/6/31.jpg",
+      "httpStatus": 200,
+      "bytes": 2552,
+      "sha256": "89e9b5b2e5d24c3a0bfb3fd041e8d1c37ab3ff360c3ea769f2c68492ac4272a4",
+      "decodedSize": [
+        256,
+        256
+      ],
+      "decodedFormat": "JPEG",
+      "tile": {
+        "z": 5,
+        "x": 31,
+        "y": 6
+      },
+      "boundsWestSouthEastNorth": [
+        168.75,
+        70.61261423801925,
+        180.0,
+        74.01954331150226
+      ],
+      "observations": [
+        "Original opaque JPEG contains blank white land near the dateline.",
+        "Observed independently of any application renderer or country mask."
+      ]
+    },
+    {
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/5/6/0.jpg",
+      "httpStatus": 200,
+      "bytes": 4136,
+      "sha256": "b2e7ce6ed64731ec632c135323934eabcb0816de1c796cc4eee7d18be80b602c",
+      "decodedSize": [
+        256,
+        256
+      ],
+      "decodedFormat": "JPEG",
+      "tile": {
+        "z": 5,
+        "x": 0,
+        "y": 6
+      },
+      "boundsWestSouthEastNorth": [
+        -180.0,
+        70.61261423801925,
+        -168.75,
+        74.01954331150226
+      ],
+      "observations": [
+        "Original opaque JPEG contains blank white land near the dateline.",
+        "Observed independently of any application renderer or country mask."
+      ]
+    },
+    {
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/5/7/31.jpg",
+      "httpStatus": 200,
+      "bytes": 15169,
+      "sha256": "a5726259d8acd6e2525c8dcbdceb4e9c259a855db4ea3589821378e09ce3ffcf",
+      "decodedSize": [
+        256,
+        256
+      ],
+      "decodedFormat": "JPEG",
+      "tile": {
+        "z": 5,
+        "x": 31,
+        "y": 7
+      },
+      "boundsWestSouthEastNorth": [
+        168.75,
+        66.51326044311186,
+        180.0,
+        70.61261423801925
+      ],
+      "observations": [
+        "Original opaque JPEG contains blank white land near the dateline.",
+        "Observed independently of any application renderer or country mask."
+      ]
+    },
+    {
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/5/7/0.jpg",
+      "httpStatus": 200,
+      "bytes": 7031,
+      "sha256": "39c9c3349d2550edc4f25a337ed2ebe785d699242e528956374677aa0f21d6bb",
+      "decodedSize": [
+        256,
+        256
+      ],
+      "decodedFormat": "JPEG",
+      "tile": {
+        "z": 5,
+        "x": 0,
+        "y": 7
+      },
+      "boundsWestSouthEastNorth": [
+        -180.0,
+        66.51326044311186,
+        -168.75,
+        70.61261423801925
+      ],
+      "observations": [
+        "Original opaque JPEG contains blank white land near the dateline.",
+        "Observed independently of any application renderer or country mask."
+      ]
+    },
+    {
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/5/8/31.jpg",
+      "httpStatus": 200,
+      "bytes": 13000,
+      "sha256": "a3cefa511e7b74a59c3f6755be7a10b9b450ab32f288fa390da790a08422fa84",
+      "decodedSize": [
+        256,
+        256
+      ],
+      "decodedFormat": "JPEG",
+      "tile": {
+        "z": 5,
+        "x": 31,
+        "y": 8
+      },
+      "boundsWestSouthEastNorth": [
+        168.75,
+        61.60639637138628,
+        180.0,
+        66.51326044311186
+      ],
+      "observations": [
+        "Original opaque JPEG contains blank white land near the dateline.",
+        "Observed independently of any application renderer or country mask."
+      ]
+    },
+    {
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/5/8/0.jpg",
+      "httpStatus": 200,
+      "bytes": 9028,
+      "sha256": "7c06c35bd4b3c0a11b44586a9eba2fa601a0d37c5c82901e60c40ccc29cff943",
+      "decodedSize": [
+        256,
+        256
+      ],
+      "decodedFormat": "JPEG",
+      "tile": {
+        "z": 5,
+        "x": 0,
+        "y": 8
+      },
+      "boundsWestSouthEastNorth": [
+        -180.0,
+        61.60639637138628,
+        -168.75,
+        66.51326044311186
+      ],
+      "observations": [
+        "Original opaque JPEG contains blank white land near the dateline.",
+        "Observed independently of any application renderer or country mask."
+      ]
+    }
+  ],
+  "chosenProvider": {
+    "id": "eox-bluemarble",
+    "dataset": "Blue Marble",
+    "dataAttribution": "NASA Earth Observatory",
+    "deliveryAttribution": "EOX::Maps, EOX IT Services GmbH",
+    "template": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/{z}/{y}/{x}.jpg",
+    "configuredNativeMaxZoom": 8,
+    "intrinsicMetresPerPixelClaimed": null,
+    "vintageClaimed": null,
+    "fallbackEnvelopeWestSouthEastNorth": [
+      176,
+      61,
+      183,
+      72.5
+    ],
+    "envelopeIsNodataMask": false,
+    "scope": "Whole visible satellite backdrop while viewport overlaps this conservative regional envelope; detailedEOXrestores outside.",
+    "samples": [
+      {
+        "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/5/7/31.jpg",
+        "httpStatus": 200,
+        "bytes": 152150,
+        "sha256": "80c8ff0bd39b5b0f97016920294f1d276e16916b949a21677c5d99c51d2261d5",
+        "decodedSize": [
+          256,
+          256
+        ],
+        "decodedFormat": "PNG",
+        "tile": {
+          "z": 5,
+          "x": 31,
+          "y": 7
+        },
+        "boundsWestSouthEastNorth": [
+          168.75,
+          66.51326044311186,
+          180.0,
+          70.61261423801925
+        ],
+        "observations": [
+          "Personally inspected unmodified source image.",
+          "Real terrain continues through the sampled dateline edge; no broad opaque white or black gap.",
+          "Overview imagery contains natural bright/snowy terrain and lower detail."
+        ],
+        "cors": "*"
+      },
+      {
+        "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/5/7/0.jpg",
+        "httpStatus": 200,
+        "bytes": 95478,
+        "sha256": "7a137cfbf645fd51b99bc723ce8408b0d479b6d5774c28e35e4d5c7d29b049b6",
+        "decodedSize": [
+          256,
+          256
+        ],
+        "decodedFormat": "PNG",
+        "tile": {
+          "z": 5,
+          "x": 0,
+          "y": 7
+        },
+        "boundsWestSouthEastNorth": [
+          -180.0,
+          66.51326044311186,
+          -168.75,
+          70.61261423801925
+        ],
+        "observations": [
+          "Personally inspected unmodified source image.",
+          "Real terrain continues through the sampled dateline edge; no broad opaque white or black gap.",
+          "Overview imagery contains natural bright/snowy terrain and lower detail."
+        ],
+        "cors": "*"
+      },
+      {
+        "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/5/6/31.jpg",
+        "httpStatus": 200,
+        "bytes": 116545,
+        "sha256": "61558bc29b8544b07c8df4fdbd1ebd4055d5b1167af5a7ca54c03e5725b238f1",
+        "decodedSize": [
+          256,
+          256
+        ],
+        "decodedFormat": "PNG",
+        "tile": {
+          "z": 5,
+          "x": 31,
+          "y": 6
+        },
+        "boundsWestSouthEastNorth": [
+          168.75,
+          70.61261423801925,
+          180.0,
+          74.01954331150226
+        ],
+        "observations": [
+          "Personally inspected unmodified source image.",
+          "Real terrain continues through the sampled dateline edge; no broad opaque white or black gap.",
+          "Overview imagery contains natural bright/snowy terrain and lower detail."
+        ],
+        "cors": "*"
+      },
+      {
+        "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/5/6/0.jpg",
+        "httpStatus": 200,
+        "bytes": 103883,
+        "sha256": "cdfe90dad1003f824507a2a3b0f08fea3179bd69abd095d98ea9780679a8e45c",
+        "decodedSize": [
+          256,
+          256
+        ],
+        "decodedFormat": "PNG",
+        "tile": {
+          "z": 5,
+          "x": 0,
+          "y": 6
+        },
+        "boundsWestSouthEastNorth": [
+          -180.0,
+          70.61261423801925,
+          -168.75,
+          74.01954331150226
+        ],
+        "observations": [
+          "Personally inspected unmodified source image.",
+          "Real terrain continues through the sampled dateline edge; no broad opaque white or black gap.",
+          "Overview imagery contains natural bright/snowy terrain and lower detail."
+        ],
+        "cors": "*"
+      },
+      {
+        "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/8/63/255.jpg",
+        "httpStatus": 200,
+        "bytes": 74252,
+        "sha256": "b1ae465e1581338e1be789607d34afe52d992b052ed922dc79fb9573489364ed",
+        "decodedSize": [
+          256,
+          256
+        ],
+        "decodedFormat": "PNG",
+        "tile": {
+          "z": 8,
+          "x": 255,
+          "y": 63
+        },
+        "boundsWestSouthEastNorth": [
+          178.59375,
+          66.51326044311186,
+          180.0,
+          67.06743335108297
+        ],
+        "observations": [
+          "Personally inspected unmodified source image.",
+          "Real terrain continues through the sampled dateline edge; no broad opaque white or black gap.",
+          "Overview imagery contains natural bright/snowy terrain and lower detail."
+        ],
+        "cors": "*"
+      },
+      {
+        "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/8/63/0.jpg",
+        "httpStatus": 200,
+        "bytes": 80441,
+        "sha256": "47c95ed770d6cf66017a651b052cc73295383c0e5986f9c53c85d05181d1b6db",
+        "decodedSize": [
+          256,
+          256
+        ],
+        "decodedFormat": "PNG",
+        "tile": {
+          "z": 8,
+          "x": 0,
+          "y": 63
+        },
+        "boundsWestSouthEastNorth": [
+          -180.0,
+          66.51326044311186,
+          -178.59375,
+          67.06743335108297
+        ],
+        "observations": [
+          "Personally inspected unmodified source image.",
+          "Real terrain continues through the sampled dateline edge; no broad opaque white or black gap.",
+          "Overview imagery contains natural bright/snowy terrain and lower detail."
+        ],
+        "cors": "*"
+      }
+    ]
+  },
+  "capabilities": {
+    "url": "https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml",
+    "bytes": 67911,
+    "sha256": "a8fab71589757f0e861007173ea7598a569e4cf06b38bba2b2abb05eeeb0176f",
+    "selectedLayer": "<ns0:Layer xmlns:ns0=\"http://www.opengis.net/wmts/1.0\" xmlns:ns1=\"http://www.opengis.net/ows/1.1\"><ns1:Title>Blue marble background layer by EOX - 3857</ns1:Title><ns1:Abstract>&lt;a href=\"https://maps.eox.at\"&gt;Blue Marble&lt;/a&gt; { &amp;copy; &lt;a href=\"http://nasa.gov\"&gt;NASA&lt;/a&gt; }</ns1:Abstract><ns1:Identifier>bluemarble_3857</ns1:Identifier><ns0:Style isDefault=\"true\"><ns1:Identifier>default</ns1:Identifier></ns0:Style><ns0:Format>image/jpeg</ns0:Format><ns0:TileMatrixSetLink><ns0:TileMatrixSet>g</ns0:TileMatrixSet></ns0:TileMatrixSetLink><ns0:ResourceURL format=\"image/jpeg\" resourceType=\"tile\" template=\"http://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.jpg\" /></ns0:Layer>"
+  },
+  "licenceSources": [
+    "https://maps.eox.at/#data",
+    "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+    "https://cloudless.eox.at/documentation/faq"
+  ],
+  "rejectedGibsMercatorSamples": [
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_NextGeneration/default/GoogleMapsCompatible_Level8/8/63/255.jpeg",
+      "httpStatus": 200,
+      "bytes": 8504,
+      "sha256": "ffee74797123f1f4879e4e04ca5249201cd2d6acbe64babc3b26691f351d1daa",
+      "decodedSize": [
+        256,
+        256
+      ],
+      "decodedFormat": "JPEG",
+      "tile": {
+        "z": 8,
+        "x": 255,
+        "y": 63
+      },
+      "boundsWestSouthEastNorth": [
+        178.59375,
+        66.51326044311186,
+        180.0,
+        67.06743335108297
+      ],
+      "observations": [
+        "Compared only, not selected for application.",
+        "Native western dateline tile has an opaque dark edge which expands during overzoom."
+      ]
+    },
+    {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_NextGeneration/default/GoogleMapsCompatible_Level8/8/63/0.jpeg",
+      "httpStatus": 200,
+      "bytes": 10882,
+      "sha256": "d5649e108b815a8b61d7f552f0a09b97ef87506094e2aa3a891fa2946baff9b3",
+      "decodedSize": [
+        256,
+        256
+      ],
+      "decodedFormat": "JPEG",
+      "tile": {
+        "z": 8,
+        "x": 0,
+        "y": 63
+      },
+      "boundsWestSouthEastNorth": [
+        -180.0,
+        66.51326044311186,
+        -178.59375,
+        67.06743335108297
+      ],
+      "observations": [
+        "Compared only, not selected for application.",
+        "Native western dateline tile has an opaque dark edge which expands during overzoom."
+      ]
+    }
+  ],
+  "alternateChecks": {
+    "eoxGeographic2016": "Same white gap in original geographicWMTSsamples.",
+    "eoxHigherZoom2016": "Same gap in original Mercator8/63/255and0.",
+    "eox2017": "Sampled ChukotkaandWrangel land mostlyblank; rejected.",
+    "eoxWmsTransparentPng": "Both /wms and /map returned byte-identical opaque JPEG to5/7/31 even with FORMAT=image/png and TRANSPARENT=TRUE.",
+    "eoxWmsComposite": "Adding BlueMarble underneath did not remove opaque white pixels.",
+    "nasaGeographicSourceWms3857": "A bounded GetMap returned valid edge pixels, but this distinct deliverypath was not selected or integrated; no applicationvalidationclaimed."
+  },
+  "implementationLimits": [
+    "No RGBwhiteness masking, pixel synthesis or geographical stretching.",
+    "No provider rawtiles committed or added to offlinepacks.",
+    "Source images are coarse, may differ in colours/season and are not a claim about present trailconditions.",
+    "These source receipts are not full browser, performance, or deployment acceptance."
+  ]
+}

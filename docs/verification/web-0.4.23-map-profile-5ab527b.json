@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "assembledAt": "2026-11-10T16:19:54+00:00",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "sourceCommit": "5ab527b652b107dc0103f1d740ae3f23256ff7e5",
+  "workflowRun": 42852063372,
+  "workflowJob": 129955116179,
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/42852063372",
+  "traces": [
+    {
+      "scope": "first-desktop-altai-selection",
+      "sourceCommit": "5ab527b652b107dc0103f1d740ae3f23256ff7e5",
+      "file": "desktop-webgl-first-altai.trace.json",
+      "sha256": "986a43c800af4dd6c96a4145b5b426c1d4aaac7e9ada31bcb5e3acb8a3bb8d39",
+      "bytes": 8175597,
+      "status": "complete",
+      "eof": true,
+      "dataLossOccurred": false,
+      "recordedDurationMs": 5222.546829000003,
+      "cpuSamples": 93604,
+      "errors": []
+    },
+    {
+      "scope": "desktop-sibling-polygon-selection",
+      "sourceCommit": "5ab527b652b107dc0103f1d740ae3f23256ff7e5",
+      "file": "desktop-webgl-sibling-polygon.trace.json",
+      "sha256": "f9a3043d0c2d73b470a3aba099b0c6c67fc7ec077c65c5d3b065a7d7dfec2fd7",
+      "bytes": 11569690,
+      "status": "complete",
+      "eof": true,
+      "dataLossOccurred": false,
+      "recordedDurationMs": 6896.955961,
+      "cpuSamples": 149697,
+      "errors": []
+    }
+  ],
+  "instrumentedScenario": {
+    "completed": true,
+    "performancePassed": false,
+    "limitMs": 750,
+    "observedLongestTaskMs": 796,
+    "performanceTimeOrigin": 1794327185008.4,
+    "peak": {
+      "startTime": 8558.699999999997,
+      "duration": 796,
+      "name": "self",
+      "observedAt": 9407.100000000006,
+      "phase": "map-interactions/first-altai"
+    },
+    "acceptance": "longestTaskMs < 750"
+  },
+  "peakAttribution": {
+    "rendererPid": 2587,
+    "rendererTid": 2587,
+    "traceStartUs": 127286960,
+    "durationMs": 796.824,
+    "animationFrameMs": 765.448,
+    "maplibreFunctionCallMs": 736.309,
+    "sampleCount": 3120,
+    "getUniformBlockIndexLeafSamples": 1471,
+    "getProgramParameterLeafSamples": 1357,
+    "sampleInterpretation": "Counts identify sampled stacks and are not measurements of CPU duration.",
+    "stack": [
+      "Map._render",
+      "Painter.render",
+      "Painter.renderLayer",
+      "drawCircle (qM)",
+      "Painter.useProgram(circle)",
+      "ProgramCache.getProgram",
+      "Program constructor (xj)",
+      "shared UBO binding (UA)"
+    ],
+    "bundleFrameMapping": {
+      "asset": "maplibre-gl-gSiY3OKT.js",
+      "localAssetSha256": "c4348a69e44590d0e85952599d9bd0e8b27fe9a61e433b5758dd2588a583e01a",
+      "method": "Matched recorded function names and zero-based line/column positions to the existing local build asset of the same content-addressed name."
+    },
+    "synchronousQueries": [
+      {
+        "name": "GLES2Implementation::GetProgramiv",
+        "traceStartUs": 127381787,
+        "wallMs": 293.514,
+        "threadCpuMs": 5.267
+      },
+      {
+        "name": "GLES2::GetUniformBlockIndex",
+        "traceStartUs": 127675377,
+        "wallMs": 314.783,
+        "threadCpuMs": 5.637
+      }
+    ],
+    "nonoverlappingQueryWallMs": 608.297,
+    "gpuQueueContention": [
+      {
+        "gpuPid": 2511,
+        "gpuTid": 2511,
+        "taskStartUs": 127295591,
+        "taskWallMs": 355.417,
+        "taskThreadCpuMs": 1.643,
+        "context": "0x4",
+        "scheduledOn": "VizCompositorThread",
+        "schedulingTid": 2547,
+        "scheduledAtUs": 127286746,
+        "scheduleFlowId": 671,
+        "sequenceUnblockedFlowId": 674,
+        "runFlowId": 1450
+      },
+      {
+        "gpuPid": 2511,
+        "gpuTid": 2511,
+        "taskStartUs": 127675148,
+        "taskWallMs": 314.255,
+        "taskThreadCpuMs": 1.412,
+        "context": "0x4",
+        "scheduledOn": "VizCompositorThread",
+        "schedulingTid": 2547,
+        "scheduledAtUs": 127653642,
+        "scheduleFlowId": 1529,
+        "runFlowId": 1535
+      }
+    ],
+    "separateWebglLinkCommand": {
+      "traceStartUs": 127670642,
+      "wallMs": 1.273,
+      "threadCpuMs": 0.398,
+      "enclosingWebglTaskStartUs": 127663602,
+      "enclosingTaskWallMs": 11.538
+    },
+    "conclusion": "The reproduced first-Altai peak is dominated by synchronous circle-program/UBO queries waiting on a shared GPU queue. Both long GPU tasks are scheduled by VizCompositorThread. The trace does not attribute these waits solely to circle shader compilation or to the number of circle variants."
+  },
+  "separateGeometryTransferTasks": [
+    {
+      "scope": "first-altai",
+      "traceStartUs": 128220672,
+      "wallMs": 403.234,
+      "rendererSamples": 1219,
+      "sendWorkerUpdateInclusiveSamples": 1057
+    },
+    {
+      "scope": "sibling-polygon",
+      "traceStartUs": 167490129,
+      "wallMs": 505.008,
+      "rendererSamples": 1788,
+      "sendWorkerUpdateInclusiveSamples": 1663
+    },
+    {
+      "scope": "sibling-polygon-return",
+      "traceStartUs": 171054649,
+      "wallMs": 396.722,
+      "rendererSamples": 2001,
+      "sendWorkerUpdateInclusiveSamples": 1678
+    }
+  ],
+  "geometryTransferStack": [
+    "GeoJSONSource._sendWorkerUpdate",
+    "Actor.sendAsync",
+    "recursive serialize (Yc)",
+    "postMessage / garbage collection"
+  ],
+  "limits": [
+    "The original 052c148 full-run 851ms task has no retained stack; this fresh 796ms failure has direct trace evidence.",
+    "No shader/compiler internal events were captured; synchronous driver-query wall time is not shader CPU time.",
+    "The cause of the compositor GPU work is not established by these categories; country geometry transfer and compositor contention are not proven causally linked.",
+    "Reducing three data-driven circle program variants to a shared constant-paint variant is an unverified optimization hypothesis until a fresh identical cold diagnostic is measured.",
+    "Cell-aware GeoJSON diffs target a separate measured transfer cost; they are not demonstrated to fix the 796ms peak.",
+    "No runtime source edits, budget changes, prewarming, or broad tests were performed for this analysis.",
+    "The diagnostic workflow succeeded in collecting evidence; performancePassed is false, verified is false, and releaseEligible is false. Its job conclusion is not a release pass."
+  ],
+  "profileOwnership": {
+    "grouping": "pid + profile id; inherit sampled owner thread and start time from Profile. ProfileChunk emission thread is not the sampled thread.",
+    "sampleTimestampMethod": "Profile.startTime plus cumulative ProfileChunk timeDeltas, in trace microseconds.",
+    "streams": [
+      {
+        "traceFile": "desktop-webgl-first-altai.trace.json",
+        "pid": 2587,
+        "profileId": "0x1",
+        "ownerTid": 2587,
+        "ownerThread": "CrRendererMain",
+        "profileStartUs": 125402589,
+        "chunkEmitters": [
+          {
+            "tid": 2685,
+            "thread": "v8:ProfEvntProc"
+          }
+        ],
+        "rendererSamples": 23539
+      },
+      {
+        "traceFile": "desktop-webgl-sibling-polygon.trace.json",
+        "pid": 2587,
+        "profileId": "0x6",
+        "ownerTid": 2587,
+        "ownerThread": "CrRendererMain",
+        "profileStartUs": 166051949,
+        "chunkEmitters": [
+          {
+            "tid": 2787,
+            "thread": "v8:ProfEvntProc"
+          }
+        ],
+        "rendererSamples": 34333
+      }
+    ]
+  },
+  "verified": false
+}

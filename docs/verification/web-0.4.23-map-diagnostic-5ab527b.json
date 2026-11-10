@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "evidenceType": "focused-map-interaction-diagnostic",
+  "repository": "orewn/tropnik",
+  "sourceCommit": "5ab527b652b107dc0103f1d740ae3f23256ff7e5",
+  "releaseSourceCommit": "052c1482ed30ad63eb71287010c1e1e86fe21183",
+  "branch": "diagnostics/map-interactions",
+  "runId": 42852063372,
+  "jobId": 129955116179,
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/42852063372",
+  "workflowConclusion": "success",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "status": "completed",
+  "profile": "desktop-webgl",
+  "engine": "maplibre",
+  "durationMs": 58548,
+  "performancePassed": false,
+  "performanceIssues": [
+    {
+      "profile": "desktop-webgl",
+      "phase": "map-interactions",
+      "metric": "longestTaskMs",
+      "value": 796,
+      "limit": 750
+    }
+  ],
+  "peakLongTask": {
+    "startTime": 8558.699999999997,
+    "duration": 796,
+    "name": "self",
+    "observedAt": 9407.100000000006,
+    "phase": "map-interactions/first-altai"
+  },
+  "timeOrigin": 1794327185008.4,
+  "counterStart": 6659.699999999997,
+  "phases": [
+    {
+      "name": "profile-ready",
+      "time": 5952.699999999997,
+      "longestTaskMs": 0
+    },
+    {
+      "name": "map-interactions",
+      "time": 6660.400000000009,
+      "longestTaskMs": 0
+    },
+    {
+      "name": "map-interactions/first-altai",
+      "time": 6661.300000000003,
+      "longestTaskMs": 0
+    },
+    {
+      "name": "map-interactions/saved-filter",
+      "time": 12767.000000000015,
+      "longestTaskMs": 796
+    },
+    {
+      "name": "map-interactions/route-selection",
+      "time": 17986.300000000003,
+      "longestTaskMs": 796
+    },
+    {
+      "name": "map-interactions/style-camera",
+      "time": 20979.59999999999,
+      "longestTaskMs": 796
+    },
+    {
+      "name": "map-interactions/request-ownership",
+      "time": 32485.90000000001,
+      "longestTaskMs": 796
+    },
+    {
+      "name": "map-interactions/return-to-country",
+      "time": 40678.7,
+      "longestTaskMs": 796
+    },
+    {
+      "name": "map-interactions/second-baikal",
+      "time": 44433.59999999999,
+      "longestTaskMs": 796
+    },
+    {
+      "name": "map-interactions/sibling-polygon",
+      "time": 47318.8,
+      "longestTaskMs": 796
+    },
+    {
+      "name": "map-interactions/map-gestures",
+      "time": 55552.59999999999,
+      "longestTaskMs": 796
+    }
+  ],
+  "nativePolygon": {
+    "id": "territory-28173009B78872068540735",
+    "title": "Иркутская область",
+    "coordinate": [
+      106.28448486328125,
+      53.29999999999998
+    ],
+    "input": "mouse",
+    "trustedEvents": true,
+    "clickTime": 47836.59999999999
+  },
+  "traces": [
+    {
+      "scope": "first-desktop-altai-selection",
+      "file": "desktop-webgl-first-altai.trace.json",
+      "sourceCommit": "5ab527b652b107dc0103f1d740ae3f23256ff7e5",
+      "status": "complete",
+      "stopReason": "action-complete",
+      "bytes": 8175597,
+      "sha256": "986a43c800af4dd6c96a4145b5b426c1d4aaac7e9ada31bcb5e3acb8a3bb8d39",
+      "recordedDurationMs": 5222.546829000003,
+      "eventCount": 31014,
+      "cpuProfileChunks": 1130,
+      "cpuSamples": 93604,
+      "timelineEvents": 11780,
+      "eof": true,
+      "dataLossOccurred": false,
+      "errors": []
+    },
+    {
+      "scope": "desktop-sibling-polygon-selection",
+      "file": "desktop-webgl-sibling-polygon.trace.json",
+      "sourceCommit": "5ab527b652b107dc0103f1d740ae3f23256ff7e5",
+      "status": "complete",
+      "stopReason": "action-complete",
+      "bytes": 11569690,
+      "sha256": "f9a3043d0c2d73b470a3aba099b0c6c67fc7ec077c65c5d3b065a7d7dfec2fd7",
+      "recordedDurationMs": 6896.955961,
+      "eventCount": 46215,
+      "cpuProfileChunks": 1665,
+      "cpuSamples": 149697,
+      "timelineEvents": 16712,
+      "eof": true,
+      "dataLossOccurred": false,
+      "errors": []
+    }
+  ],
+  "artifact": {
+    "id": 13780947615,
+    "name": "tropnik-map-interaction-diagnostic-42852063372",
+    "bytes": 1882878,
+    "sha256": "2cc2692f9d2e5aa51d5ef414604b9323de4d22ee6a032c9104357ee2d7ea0032",
+    "url": "https://github.com/orewn/tropnik/actions/runs/42852063372/artifacts/13780947615"
+  },
+  "evidenceLimits": [
+    "This focused run used a fresh desktop profile and the existing mapInteraction path once; it is not the complete release matrix.",
+    "The unchanged desktop 750 ms limit failed at 796 ms during the first Altai selection; a successful diagnostic workflow does not establish release eligibility.",
+    "Both traces are complete and hash-verified; causal attribution belongs in a separate analysis.",
+    "No coastline zoom matrix, mobile profile matrix, cold offline safety gate, deployment or public verification ran in this focused workflow."
+  ]
+}

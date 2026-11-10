@@ -3,6 +3,7 @@ import {projectMapPoint} from './map-projection.mjs';
 import {assertSourceEndPanInput,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
 import {directionHitGrid} from './browser-direction-hitareas.mjs';
 import {assertCoastAudit} from './browser-coast-audit.mjs';
+import {assertSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
 import {assertOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {assertRequestMapLayout} from './browser-request-layout.mjs';
 
@@ -211,8 +212,10 @@ export function assertCloseTrailAudit(audit,name,engine,mobile,screenshots){
 
 function assertZoomDesign(design,name,engine,mobile){
  assert.equal(design?.geometryPassed,true,`${name}: missing zoom-level design geometry evidence`);
- assert.equal(design.schemaVersion,6,'The design report predates source coastline checks');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
+ assert.equal(design.schemaVersion,7,'The design report predates satellite continuity checks');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
  assertCoastAudit(design.coast,name,engine);
+ assertSatelliteContinuityAudit(design.satelliteContinuity,name,engine);
+ assert.deepEqual(satellitePerformanceIssues(design.satelliteContinuity,{name,mobile}),[],`${name}: satellite rendering exceeded the unchanged performance budget`);
  assert.equal(design.visualReviewRequired,true,'DOM bounds must not be reported as human visual review');
  assert.equal(design.maximumZoom,18);assert.equal(design.routeId,'kavkaz-8a');
  assert.ok(Number.isFinite(design.minimumZoom)&&design.minimumZoom<4,`${name}: zoom coverage omitted the overview`);
@@ -275,6 +278,13 @@ function assertZoomDesign(design,name,engine,mobile){
  assert.ok(design.screenshots.filter(item=>item.mode==='saved-overview').length>=6,`${name}: saved-overview review images are missing`);
  for(const screenshot of design.screenshots){assert.match(screenshot.file,/^[a-z0-9_.-]+\.png$/);assert.match(screenshot.sha256,/^[a-f0-9]{64}$/);assert.ok(screenshot.bytes>1000);}
  assertCloseTrailAudit(design.closeTrail,name,engine,mobile,design.screenshots);
+ const intervals=design.performanceIntervals;
+ assert.deepEqual(Object.keys(intervals||{}).sort(),['modes','satellite','sourceEnds']);
+ assert.deepEqual(intervals.satellite,design.satelliteContinuity.performance);assert.deepEqual(intervals.sourceEnds,design.closeTrail.performance);
+ for(const key of ['layoutShift','longestTaskMs']){
+  assert.ok(Object.values(intervals).every(value=>Number.isFinite(value[key])));
+  assert.equal(design.performance?.[key],Math.max(...Object.values(intervals).map(value=>value[key])),`${name}: a prior performance interval was lost`);
+ }
 }
 
 /** Validate actual painted hit samples rather than trusting an overall pass

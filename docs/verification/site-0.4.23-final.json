@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "webVersion": "0.4.23",
+  "webSourceCommit": "052c1482ed30ad63eb71287010c1e1e86fe21183",
+  "site": {
+    "versionNumber": 26,
+    "sourceCommit": "5290d933ef0d6af2513797595912736f372ddb48",
+    "deploymentStatus": "succeeded",
+    "publishedAt": "2026-11-10T15:45:44.630348+00:00",
+    "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+    "audience": "owner-private",
+    "audiencePreserved": true
+  },
+  "sourceVerification": {
+    "equalTrackedWebFiles": 1845,
+    "allTrackedWebFilesMatch": true,
+    "workingTreeCleanAfterBuild": true
+  },
+  "archive": {
+    "local": {
+      "format": "tar.gz",
+      "bytes": 62426132,
+      "sha256": "2680c5c2fb4e1675e96847fd3cedae61d6932a384aa32969014cba54beaf6907",
+      "fileCount": 1782
+    },
+    "saved": {
+      "format": "tar",
+      "bytes": 153712640,
+      "sha256": "556da3383184be7ea8d3837c178c99f6db2e9c4d9e6c00df1e3fecdbfbc25be8",
+      "fileCount": 1782
+    }
+  },
+  "downloads": {
+    "version": "0.4.23-preview",
+    "architecture": "universal",
+    "sha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+    "route": "/downloads/tropnik-preview.apk",
+    "target": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/tropnik-preview.apk",
+    "transport": "Worker 307 redirect to immutable GitHub release",
+    "buildRouteClassification": "API",
+    "apkIncludedInStaticArchive": false,
+    "clientAssetsOver25MiB": 0
+  },
+  "verificationLimits": {
+    "deploymentConfirmedByNativeSitesResult": true,
+    "livePrivatePageRenderedInBrowser": false,
+    "browserResult": "Existing cloud browser reached ChatGPT login; no user credentials requested. Publication and source provenance are confirmed by Sites.",
+    "liveDownloadRedirectChecked": false
+  }
+}

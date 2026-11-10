@@ -19,7 +19,7 @@ jobs:
   build:
     if: ${{ github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 30
     permissions:
       contents: read
       pages: read
@@ -68,9 +68,10 @@ jobs:
       - name: Build and verify the static site
         run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
       - name: Verify real mobile rendering and sheet interaction and desktop map interactions
-        # All mobile profiles plus every desktop map/terrain scale exceeded
-        # twelve minutes. Per-input, CLS and long-task limits remain in code.
-        timeout-minutes: 18
+        # The full mobile/desktop coast matrix reached desktop z9 at 18 min
+        # before the remaining coast and cold-offline checks. Keep a bounded
+        # 24 min run; per-input, CLS and long-task limits remain unchanged.
+        timeout-minutes: 24
         env:
           GITHUB_SHA: ${{ github.sha }}
         run: node tools/pages-preview/browser-smoke.mjs

@@ -14,6 +14,7 @@ import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
 import {runOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {createOfflineOriginTransport} from './browser-origin-transport.mjs';
 import {observeRequestMapLayout,assertRequestMapLayout} from './browser-request-layout.mjs';
+import {runSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
@@ -843,7 +844,7 @@ await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(h
 const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browserLaunchStarted=performance.now();
 let browser,cdp,currentProfile,failure,currentExploreExperience=null;
-const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],profilePerformance=[],performanceIssues=[];
+const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],satelliteAudits=[],profilePerformance=[],performanceIssues=[];
 // GitHub can terminate this process before catch/finally. Preserve completed
 // interactions before the long zoom matrix, without marking them as a release.
 const progressDirectory=new URL('../../web/pages-preview/design-qa/',import.meta.url);
@@ -861,7 +862,7 @@ try{
     `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
   ]);
   await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
-  const initialUrl=runPolicy.diagnostic==='offline-safety'?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
+  const initialUrl=['offline-safety','satellite-continuity'].includes(runPolicy.diagnostic)?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
   const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(initialUrl)}`,{method:'PUT'});
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
@@ -896,6 +897,15 @@ try{
   `});
   for(const profile of profiles.filter(profile=>!runPolicy.profiles||runPolicy.profiles.includes(profile.name))){
     currentProfile=profile.name;
+    if(runPolicy.diagnostic==='satellite-continuity'){
+      const audit=await runSatelliteContinuityAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,url:`http://127.0.0.1:${httpPort}/tropnik/`});
+      satelliteAudits.push(audit);performanceIssues.push(...satellitePerformanceIssues(audit,profile));
+      profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
+      assert.notEqual(runPolicy.reportFile,'browser-verification.json');
+      const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:satelliteAudits.length===runPolicy.profiles.length?'completed':'running',sourceCommit:process.env.GITHUB_SHA||null,profiles:satelliteAudits,performanceIssues,performancePassed:performanceIssues.length===0,profilePerformance,updatedAt:new Date().toISOString()};
+      await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
+      await checkpoint('satellite-continuity-profile-complete');continue;
+    }
     if(runPolicy.diagnostic==='terrain-close'){
       const systemInfo=async()=>{
         const version=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/version`);
@@ -928,7 +938,7 @@ try{
         await checkpoint('map-interactions-diagnostic-complete');continue;
       }
       await checkpoint('before-zoom-audit');
-      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
+      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
       await checkpoint('profile-complete');
       continue;
     }
@@ -967,7 +977,7 @@ try{
     results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction});
     profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
     await checkpoint(interaction?'before-zoom-audit':'profile-complete');
-    if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
+    if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
     if(profile.mapInteraction)await checkpoint('profile-complete');
   }
   if(!runPolicy.diagnostic||runPolicy.diagnostic==='offline-safety'){
@@ -991,6 +1001,7 @@ try{
   failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
   if(error.nativeScroll)failure.nativeScroll=error.nativeScroll;
+  if(satelliteAudits.length)failure.completedSatelliteAudits=satelliteAudits;
   if(error.pointerTarget)failure.pointerTarget=error.pointerTarget;
   if(currentExploreExperience)failure.exploreExperience=currentExploreExperience;
   if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed',...(error.settleDiagnostics?{settleDiagnostics:error.settleDiagnostics}:{})});

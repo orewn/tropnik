@@ -49,6 +49,8 @@ export default function Sources() {
     <details id="satellite-attribution">
       <summary>Авторство спутниковых снимков</summary>
       <p lang="en"><a href="https://cloudless.eox.at" target="_blank" rel="noreferrer">EOxCloudless</a> by <a href="https://eox.at" target="_blank" rel="noreferrer">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016 &amp; 2017). <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>.</p>
+      <p>В районе Чукотки и острова Врангеля исходная подробная мозаика содержит белые пробелы. Когда эта область попадает в кадр, показывается настоящий обзорный спутниковый снимок <a href="https://science.nasa.gov/earth/earth-observatory/" target="_blank" rel="noreferrer">NASA Blue Marble</a> через <a href="https://maps.eox.at/#data" target="_blank" rel="noreferrer">EOX::Maps</a>. Это обзорная мозаика с меньшей детализацией; увеличение не добавляет новых деталей. За пределами этой области подробный источник восстанавливается автоматически.</p>
+      <p lang="en">Blue Marble: NASA Earth Observatory. Imagery delivery: EOX::Maps, EOX IT Services GmbH.</p>
     </details>
     <details>
       <summary>Авторство рельефа</summary>
