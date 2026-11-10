@@ -1,14 +1,14 @@
-name: Terrain GPU draw diagnosis
+name: Terrain software RTT quality diagnosis
 
 on:
   push:
-    branches: [diagnostics/terrain-gpu-draws]
+    branches: [diagnostics/terrain-rtt-quality]
 
 permissions:
   contents: read
 
 concurrency:
-  group: terrain-gpu-draws-diagnostics
+  group: terrain-rtt-quality-diagnostics
   cancel-in-progress: false
 
 jobs:

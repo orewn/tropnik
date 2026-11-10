@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "maplibre-6.16.0-swiftshader-terrain-rtt",
+  "package": "maplibre-gl",
+  "version": "6.16.0",
+  "upstream": {
+    "repository": "https://github.com/maplibre/maplibre-gl-js",
+    "tag": "v6.16.0",
+    "npmIntegrity": "sha512-gApO66EMtoDZuio680RUBvskR7ahFd/NNhLN4tBAs+Y7FeT4gQV8zVFgYVMRmFxQznOEzecW19w6xOd9XjZjiA==",
+    "license": "BSD-3-Clause; upstream notices retained"
+  },
+  "policy": {
+    "renderer": "Known SwiftShader unmasked renderer string only",
+    "swiftShaderQualityFactor": 1,
+    "hardwareAndUnknownQualityFactor": 2,
+    "detection": "Public WEBGL_debug_renderer_info once per Terrain construction; unavailable or failed reads preserve 2",
+    "unchanged": [
+      "DEM source and coverage",
+      "terrain tile size",
+      "meshSize 128",
+      "canvas pixel ratio",
+      "terrain depth buffers",
+      "anisotropy",
+      "style layers and symbols",
+      "worker and CSS"
+    ]
+  },
+  "sourceMaps": {
+    "policy": "Remove sourceMappingURL from the two changed main bundles rather than attribute modified code to upstream mappings",
+    "unchanged": "Worker bundles and their source maps"
+  },
+  "reason": {
+    "evidenceSourceCommit": "701149643684770954107256bd36e3b034888ce8",
+    "measurement": "Public disjoint timer queries: 8 sampled 2048x2048 hillshade draws total 2102.930535 ms; sustained samples about 243–249 ms. Samples do not estimate total action GPU time.",
+    "intent": "Reduce terrain RTT dimensions to the existing terrain tile size only on SwiftShader; performance and visual acceptance remain required"
+  },
+  "patch": {
+    "path": "patches/maplibre-gl@6.16.0.patch",
+    "sha256": "62b23d0f95d66d482d417896db89cb0151246a9f274e66f68fc00a521fca8f4a",
+    "bytes": 1259541
+  },
+  "files": [
+    {
+      "path": "dist/maplibre-gl-dev.mjs",
+      "upstreamSHA256": "6b18e66c2f8a7f2eb12b582c441a9b8043a76b165ee0b0d1206e827dc9999e32",
+      "patchedSHA256": "2a329e8a8321d3d6568bd5c05eb921c757b8b8b42e25ff32a5aee0e31fec1dad",
+      "upstreamBytes": 2490629,
+      "patchedBytes": 2491169
+    },
+    {
+      "path": "dist/maplibre-gl.mjs",
+      "upstreamSHA256": "fbbdf8ddd9a48e49059a4be6795a4f214a711314bb5809f72d3730b48e7897e3",
+      "patchedSHA256": "f76bb5d82a6f7d7b6bdd444a095ea28f9c4fafac3cde0bc1aec3f3756852c35f",
+      "upstreamBytes": 1108049,
+      "patchedBytes": 1108593
+    },
+    {
+      "path": "src/render/terrain.ts",
+      "upstreamSHA256": "f6c5aa12793d015713b2148489d95b1e03000183124c78458e1bb412560a5884",
+      "patchedSHA256": "dd5665f5dd9bf139fcb90bd865833b387e4e02cc056268770ebd9f73a544206d",
+      "upstreamBytes": 26552,
+      "patchedBytes": 27074
+    }
+  ],
+  "offlineBundle": {
+    "path": "public/maps/maplibre-gl.mjs",
+    "sameBytesAs": "dist/maplibre-gl.mjs",
+    "sha256": "f76bb5d82a6f7d7b6bdd444a095ea28f9c4fafac3cde0bc1aec3f3756852c35f"
+  }
+}
