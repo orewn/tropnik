@@ -61,7 +61,7 @@ body{background:var(--paper);color:var(--ink)}
 .explore-layout .map-context,.explore-layout .map-style-switch,.explore-layout .map-controls,
 .explore-layout .layer-button,.explore-layout .layer-menu,.explore-layout .map-message{
   border-color:rgba(90,112,93,.48);
-  background:var(--surface);
+  background:rgba(255,254,250,.96);
   box-shadow:var(--shadow-control);
 }
 .explore-layout .map-controls button,.explore-layout .map-style-switch button,.explore-layout .layer-button{

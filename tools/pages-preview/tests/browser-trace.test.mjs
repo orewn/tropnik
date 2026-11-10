@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
-import {browserTraceEnabled,traceDesktopSelection,DESKTOP_TRACE_LIMITS,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES,traceCategoryEvidence,recordBrowserLongTask} from '../browser-trace.mjs';
+import {browserTraceEnabled,traceDesktopSelection,DESKTOP_TRACE_LIMITS,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,traceCategoryEvidence,recordBrowserLongTask} from '../browser-trace.mjs';
 
 const traceJSON=JSON.stringify({traceEvents:[{name:'ProfileChunk',cat:'disabled-by-default-v8.cpu_profiler',args:{data:{cpuProfile:{samples:[1,2,3]}}}},{name:'RunTask',cat:'gpu'},{name:'Layout',cat:'cc,viz'}]});
 async function outputDirectory(t){const directory=await mkdtemp(join(tmpdir(),'tropnik-trace-'));t.after(()=>rm(directory,{recursive:true,force:true}));return pathToFileURL(directory+'/');}
@@ -93,8 +93,40 @@ test('explicit full-matrix and dedicated diagnostic tracing each wrap the same a
   assert.equal(actions,1);assert.equal(result.value,nativeResult);assert.equal(result.trace.status,'complete');
   assert.equal(cdp.calls.filter(call=>call.method==='Tracing.start').length,1);
   assert.equal(cdp.calls.filter(call=>call.method==='Tracing.end').length,1);
+  assert.deepEqual(result.trace.categories,DESKTOP_TRACE_CATEGORIES);
   assert.deepEqual(await metadata(output),result.trace);
  }
+});
+
+test('only the actual focused desktop first-Altai call captures Viz work with the existing bounds and input',async t=>{
+ const source=await readFile(new URL('../browser-smoke.mjs',import.meta.url),'utf8');
+ const start=source.indexOf('  const selectFirstDirection=');
+ const end=source.indexOf('  const firstDirection=firstSelection.value;',start);
+ assert.ok(start>=0&&end>start,'The actual first direction call must be available');
+ const AsyncFunction=(async()=>{}).constructor;
+ const invoke=new AsyncFunction('selectMapDirection','traceDesktopSelection','cdp','profile','directionActions','traceEnabled','focusedDiagnostic','process','FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES',source.slice(start,end)+'\nreturn firstSelection;');
+ for(const [focusedDiagnostic,mobile,traceEnabled] of [[true,false,true],[false,false,false],[false,false,true],[true,true,true]]){
+  const output=await outputDirectory(t),cdp=protocol(),timers=controlledTimers(),profile={mobile},directionActions=[],value={selected:'altai'};let actions=0;
+  const result=await invoke(async(connection,actualProfile,id,title,options)=>{
+   actions++;assert.equal(connection,cdp);assert.equal(actualProfile,profile);assert.equal(id,'altai');assert.equal(title,'Алтай');
+   assert.equal(options.kind,'label');assert.equal(options.actions,directionActions);return value;
+  },(connection,action,options)=>traceDesktopSelection(connection,action,{...options,output,...timers}),cdp,profile,directionActions,traceEnabled,focusedDiagnostic,{env:{GITHUB_SHA:'b'.repeat(40)}},FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES);
+  assert.equal(actions,1);assert.equal(result.value,value);
+  const tracing=traceEnabled&&!mobile;
+  assert.equal(cdp.calls.filter(call=>call.method==='Tracing.start').length,tracing?1:0);
+  if(tracing){
+   const expected=focusedDiagnostic?FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES:DESKTOP_TRACE_CATEGORIES;
+   assert.deepEqual(cdp.calls.find(call=>call.method==='Tracing.start').params.traceConfig.includedCategories,expected);
+   assert.deepEqual(result.trace.categories,expected);assert.deepEqual(result.trace.limits,DESKTOP_TRACE_LIMITS);
+   assert.equal(result.trace.limits.durationMs,8000);assert.equal(result.trace.limits.bufferSizeKiB,16*1024);assert.equal(result.trace.limits.maxBytes,32*1024*1024);
+   assert.equal(result.trace.status,'complete');assert.equal(result.trace.file,'desktop-webgl-first-altai.trace.json');
+   if(focusedDiagnostic)assert.deepEqual(result.trace.capturedCategories.counts.find(item=>item.name==='viz'),{name:'viz',events:1});
+   else assert.equal('capturedCategories' in result.trace,false);
+   assert.deepEqual(await metadata(output),result.trace);
+  }else{assert.equal(result.trace,null);assert.deepEqual(await readdir(output),[]);}
+  assert.equal(timers.pending.size,0);assert.equal(cdp.observers.size,0);
+ }
+ assert.deepEqual(FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES.filter(name=>!DESKTOP_TRACE_CATEGORIES.includes(name)),['cc','viz','skia','disabled-by-default-viz.quads','disabled-by-default-skia.gpu']);
 });
 
 test('the actual request-ownership audit gets one bounded diagnostic trace without changing full or mobile actions',async t=>{
@@ -114,6 +146,7 @@ test('the actual request-ownership audit gets one bounded diagnostic trace witho
   if(enabled){
    assert.equal(result.trace.file,'desktop-webgl-request-ownership.trace.json');assert.equal(result.trace.scope,'desktop-route-request-ownership');
    assert.equal(result.trace.limits.durationMs,8000);assert.equal(result.trace.limits.maxBytes,32*1024*1024);assert.equal(result.trace.status,'complete');
+   assert.deepEqual(result.trace.categories,DESKTOP_TRACE_CATEGORIES);
    assert.deepEqual(await metadata(output,'desktop-webgl-request-ownership'),result.trace);
   }else{assert.equal(result.trace,null);assert.deepEqual(await readdir(output),[]);}
  }

@@ -7,7 +7,7 @@ import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
 import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-projection.mjs';
 import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving,browserAuditRunPolicy} from './browser-zoom-audit.mjs';
-import {browserTraceEnabled,traceDesktopSelection,recordBrowserLongTask} from './browser-trace.mjs';
+import {browserTraceEnabled,traceDesktopSelection,recordBrowserLongTask,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
@@ -795,7 +795,7 @@ async function mapInteraction(cdp,profile,performanceIssues){
   const directionActions=[];
   await phase('first-altai');
   const selectFirstDirection=()=>selectMapDirection(cdp,profile,'altai','Алтай',{kind:'label',actions:directionActions});
-  const firstSelection=profile.mobile?{value:await selectFirstDirection(),trace:null}:await traceDesktopSelection(cdp,selectFirstDirection,{enabled:traceEnabled,sourceCommit:process.env.GITHUB_SHA||null});
+  const firstSelection=profile.mobile?{value:await selectFirstDirection(),trace:null}:await traceDesktopSelection(cdp,selectFirstDirection,{enabled:traceEnabled,sourceCommit:process.env.GITHUB_SHA||null,...(focusedDiagnostic?{categories:FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,captureCategoryEvidence:true}:{})});
   const firstDirection=firstSelection.value;
   currentExploreExperience.step='saved-filter';await phase('saved-filter');await checkSavedFilterReset(cdp,profile,experience.filterReset);
   const catalogScroll=profile.mobile?await scrollSheetContent(cdp,profile,{stableExtent:true}):null;
