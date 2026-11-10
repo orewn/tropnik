@@ -1,6 +1,7 @@
 import {spawn as spawnProcess} from 'node:child_process';
 
-export const BROWSER_STARTUP_LIMITS=Object.freeze({readyMs:30000,probeMs:1000,pollMs:100,stderrBytes:32*1024,termMs:1500,killMs:1000});
+// Process/CDP readiness only; navigation and interaction budgets remain separate.
+export const BROWSER_STARTUP_LIMITS=Object.freeze({readyMs:60000,probeMs:1000,pollMs:100,stderrBytes:32*1024,termMs:1500,killMs:1000});
 const errorText=error=>(error?.stack||String(error)).slice(0,4096);
 export function browserErrorDetails(error,depth=0){
  const result={name:String(error?.name||'Error').slice(0,128),message:String(error?.message??error).slice(0,4096),stack:errorText(error)};
