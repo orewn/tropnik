@@ -159,7 +159,9 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     setBaseMode(initialMode);
     const initial=russiaView(container.current).camera;cameraFloor.current=initial;
     const map=new ml.Map({container:container.current,transformRequest:mapRequest,style:initialMode==='detail'?detailRef.current!:overviewStyle(coverage),...initial,
-     minZoom:Math.max(-2,initial.zoom),maxZoom:18,attributionControl:false,renderWorldCopies:true,
+     // Clip overzoomed vector geometry into local tiles through zoom 17;
+     // the source's original maximum-zoom data still supplies every slice.
+     minZoom:Math.max(-2,initial.zoom),maxZoom:18,zoomLevelsToOverscale:1,attributionControl:false,renderWorldCopies:true,
      transformConstrain:(point,zoom)=>{const next=constrainFramedCamera(point.lng,point.lat,zoom,cameraFloor.current,framedCamera.current);return{center:new ml.LngLat(...next.center),zoom:next.zoom};},
      dragRotate:true,touchPitch:true,pitchWithRotate:true,maxPitch:75,fadeDuration:0,crossSourceCollisions:true,pixelRatio:Math.min(devicePixelRatio,MAP_CONFIG.maxPixelRatio),maxTileCacheZoomLevels:6,
      // Text and line shaders smooth their own edges. Extra canvas MSAA can

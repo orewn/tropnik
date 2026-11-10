@@ -11,6 +11,7 @@ import {browserTraceEnabled,traceDesktopSelection} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas} from './browser-report.mjs';
+import {inspectPageActivity} from './browser-process-cpu.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
@@ -392,7 +393,7 @@ async function mapState(cdp){
   return evaluate(cdp,`(()=>{
     const element=document.querySelector('.atlas-canvas[data-map-engine]');if(!element)return null;
     const r=element.getBoundingClientRect(),s=getComputedStyle(element),d=element.dataset;
-    return{camera:{longitude:Number(d.mapLongitude),latitude:Number(d.mapLatitude),zoom:Number(d.mapZoom),tileSize:Number(d.mapTileSize),...(d.mapCenterX!==undefined?{centerX:Number(d.mapCenterX),centerY:Number(d.mapCenterY)}:{})},engine:d.mapEngine,route:d.mapRouteId||'',moving:(${mapCameraIsMoving.toString()})(element),visible:s.visibility!=='hidden'&&s.display!=='none'&&r.width>20&&r.height>20,rect:{left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom},width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth${runPolicy.diagnostic?',terrainCamera:(()=>{try{return JSON.parse(d.mapTerrainCamera||\'null\')}catch{return null}})()':''}};
+    return{camera:{longitude:Number(d.mapLongitude),latitude:Number(d.mapLatitude),zoom:Number(d.mapZoom),tileSize:Number(d.mapTileSize),...(d.mapCenterX!==undefined?{centerX:Number(d.mapCenterX),centerY:Number(d.mapCenterY)}:{})},engine:d.mapEngine,route:d.mapRouteId||'',moving:(${mapCameraIsMoving.toString()})(element),visible:s.visibility!=='hidden'&&s.display!=='none'&&r.width>20&&r.height>20,rect:{left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom},width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth${runPolicy.diagnostic?`,terrainCamera:(()=>{try{return JSON.parse(d.mapTerrainCamera||'null')}catch{return null}})(),pageActivity:(${inspectPageActivity.toString()})()`:''}};
   })()`);
 }
 async function settledMap(cdp,engine){
@@ -608,7 +609,7 @@ const server=serve(ROOT);
 await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(httpPort,'127.0.0.1',resolve);});
 const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browserLaunchStarted=performance.now();
-let browser,cdp,currentProfile,failure;
+let browser,cdp,browserSystemCdp,currentProfile,failure;
 const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],profilePerformance=[],performanceIssues=[];
 // GitHub can terminate this process before catch/finally. Preserve completed
 // interactions before the long zoom matrix, without marking them as a release.
@@ -655,13 +656,16 @@ try{
   for(const profile of profiles.filter(profile=>!runPolicy.profiles||runPolicy.profiles.includes(profile.name))){
     currentProfile=profile.name;
     if(runPolicy.diagnostic){
-      const systemInfo=async()=>{
-        const version=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/version`);
-        assert.ok(version.webSocketDebuggerUrl,'The browser target does not advertise SystemInfo access');
-        const gpuCdp=new CDP(version.webSocketDebuggerUrl);
-        try{await gpuCdp.open();return await gpuCdp.call('SystemInfo.getInfo',{},3000);}finally{gpuCdp.close();}
+      let systemConnection;
+      const systemCall=async method=>{
+        systemConnection??=(async()=>{
+          const version=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/version`);
+          assert.ok(version.webSocketDebuggerUrl,'The browser target does not advertise SystemInfo access');
+          browserSystemCdp=new CDP(version.webSocketDebuggerUrl);await browserSystemCdp.open();return browserSystemCdp;
+        })();
+        return(await systemConnection).call(method,{},3000);
       };
-      const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo,url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic});
+      const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo:()=>systemCall('SystemInfo.getInfo'),systemProcessInfo:()=>systemCall('SystemInfo.getProcessInfo'),url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic});
       assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
       assert.notEqual(runPolicy.reportFile,'browser-verification.json');
       await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
@@ -743,6 +747,7 @@ try{
   throw error;
 }finally{
   cdp?.close();
+  browserSystemCdp?.close();
   const cleanup=await browser?.close();server.closeAllConnections();server.close();
   if(failure){
     failure.browserStartup=browser?.diagnostics()??failure.browserStartup;

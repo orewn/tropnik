@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {CLOSE_TRAIL_FIXTURE,assertCloseTrailAudit,assertNativeBurstEventOrder,assertRouteEdgeFrame,assertReliefPalette} from './browser-report.mjs';
 import {dispatchSourceEndPan,sourceEndPanPlans,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
 import {traceDesktopSelection,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES} from './browser-trace.mjs';
+import {observeProcessCPU} from './browser-process-cpu.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -62,8 +63,8 @@ export function inspectTerrainWebGL(doc=document){
  const canvas=doc.querySelector('.maplibregl-canvas');if(!canvas)return{available:false,reason:'map-canvas-missing'};
  let type='webgl2',gl=canvas.getContext(type);if(!gl){type='webgl';gl=canvas.getContext(type);}
  if(!gl)return{available:false,reason:'context-unavailable'};
- const debug=gl.getExtension('WEBGL_debug_renderer_info');
- return{available:true,type,contextLost:gl.isContextLost(),attributes:gl.getContextAttributes(),renderer:gl.getParameter(gl.RENDERER),vendor:gl.getParameter(gl.VENDOR),version:gl.getParameter(gl.VERSION),unmaskedRenderer:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):null,unmaskedVendor:debug?gl.getParameter(debug.UNMASKED_VENDOR_WEBGL):null,samples:gl.getParameter(gl.SAMPLES),sampleBuffers:gl.getParameter(gl.SAMPLE_BUFFERS),sampleScope:'currently-bound-framebuffer',defaultFramebufferBound:gl.getParameter(gl.FRAMEBUFFER_BINDING)===null,drawingBuffer:{width:gl.drawingBufferWidth,height:gl.drawingBufferHeight}};
+ const debug=gl.getExtension('WEBGL_debug_renderer_info'),rect=canvas.getBoundingClientRect?.();
+ return{available:true,type,contextLost:gl.isContextLost(),attributes:gl.getContextAttributes(),renderer:gl.getParameter(gl.RENDERER),vendor:gl.getParameter(gl.VENDOR),version:gl.getParameter(gl.VERSION),unmaskedRenderer:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):null,unmaskedVendor:debug?gl.getParameter(debug.UNMASKED_VENDOR_WEBGL):null,samples:gl.getParameter(gl.SAMPLES),sampleBuffers:gl.getParameter(gl.SAMPLE_BUFFERS),sampleScope:'currently-bound-framebuffer',defaultFramebufferBound:gl.getParameter(gl.FRAMEBUFFER_BINDING)===null,drawingBuffer:{width:gl.drawingBufferWidth,height:gl.drawingBufferHeight},canvas:{width:canvas.width??null,height:canvas.height??null,cssWidth:rect?.width??null,cssHeight:rect?.height??null,devicePixelRatio:doc.defaultView?.devicePixelRatio??null}};
 }
 export function shouldTraceTerrainDiagnostic(profile,mode,direction,zoom,alreadyTraced){
  return !alreadyTraced&&profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile&&mode==='terrain-diagnostic'&&direction>0&&zoom>=15&&zoom<16;
@@ -75,6 +76,7 @@ export async function runTerrainCloseDiagnostic({report,phase,gpu,geometry,captu
  await phase('terrain-diagnostic-route-ready');report.gpu=await gpu();
  await capture('terrain-diagnostic',await geometry('terrain-diagnostic'),'route-ready');
  await reachZoom(11);await phase('terrain-diagnostic-enable');await toggleTerrain();
+ report.terrainEnabledGPU=await gpu();await save();
  await capture('terrain-diagnostic',await geometry('terrain-diagnostic'),'terrain-ready');
  await phase('terrain-diagnostic-lower-bound');report.minimumZoom=await reachBottom();
  await phase('terrain-diagnostic-upward');
@@ -193,7 +195,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
  if(diagnostic)assert.ok(profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
  await mkdir(OUTPUT,{recursive:true});
  const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:5,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
- if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[]});
+ if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[],processCPUZooms:[]});
  let terrainTraceStarted=false;
  const terrainResources=diagnostic?observeTerrainResources(cdp,()=>report.diagnosticStage):null;
  const save=()=>{if(terrainResources)report.dem=terrainResources.snapshot();return writeFile(new URL(diagnostic?'desktop-webgl-terrain-diagnostic.json':`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');};
@@ -230,7 +232,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   assert.equal(map.route,'kavkaz-8a',`${profile.name}/${mode}: changing zoom/base map lost the selected route`);
   assertMapUIBounds(layout,`${profile.name}/${mode}/${map.camera.zoom}`);
   assert.ok(layout.routeEdgeCount<=2,`${profile.name}/${mode}: route edge annotations grew with vertex count`);
-  return{mode,zoom:map.camera.zoom,camera:map.camera,routeId:map.route,...layout,...(diagnostic?{terrainCamera:map.terrainCamera??null}:{})};
+  return{mode,zoom:map.camera.zoom,camera:map.camera,routeId:map.route,...layout,...(diagnostic?{terrainCamera:map.terrainCamera??null,pageActivity:map.pageActivity??null}:{})};
  }
  async function capture(mode,state,label=''){
   const zoom=Number.isFinite(state?.zoom)?`z${state.zoom.toFixed(2).replace('.','_')}`:label||'scene';
@@ -243,19 +245,28 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
  async function zoom(direction,{mode}={}){
   const before=await settledMap(cdp,profile.engine),target=await elementPoint(cdp,direction>0?PLUS:MINUS);
   assert.ok(target?.unobscured,`${profile.name}: zoom control is unavailable`);
-  if(diagnostic)report.lastNativeZoom={direction,beforeZoom:before.camera.zoom,point:{x:target.x,y:target.y},startedAtEpochMs:Date.now()};
+  if(diagnostic)report.lastNativeZoom={direction,beforeZoom:before.camera.zoom,point:{x:target.x,y:target.y},startedAtEpochMs:Date.now(),pageActivityBefore:before.pageActivity??null};
   const pressAndSettle=async()=>{await pointerAt(cdp,target,profile);await sleep(70);return settledMap(cdp,profile.engine);};
+  // Include 14→15: an observed failure occurred before the 15→17 trace trigger.
+  // Browser-target counters include all process threads without requesting a frame.
+  const processCPU=diagnostic&&mode==='terrain-diagnostic'&&direction>0&&before.camera.zoom>=14?{...report.lastNativeZoom}:null;
+  if(processCPU)report.processCPUZooms.push(processCPU);
+  const observedPressAndSettle=processCPU?async()=>{
+   try{const state=await observeProcessCPU(pressAndSettle,{read:helpers.systemProcessInfo,receipt:processCPU});processCPU.pageActivityAfter=state.pageActivity??null;processCPU.pageActivityAfterSource='settled-state';return state;}
+   catch(error){processCPU.pageActivityAfter=error?.settleDiagnostics?.samples?.findLast(sample=>sample.state?.pageActivity)?.state.pageActivity??null;processCPU.pageActivityAfterSource=processCPU.pageActivityAfter?'last-settle-observation':'unavailable';throw error;}
+  }:pressAndSettle;
   let after;
   if((diagnostic?shouldTraceTerrainDiagnostic:shouldTraceTerrainZoom)(profile,mode,direction,before.camera.zoom,terrainTraceStarted,traceEnabled)){
    terrainTraceStarted=true;
+   const recordTrace=trace=>{if(processCPU)processCPU.trace={instrumented:trace?.instrumented??null,startedAtEpochMs:trace?.startedAtEpochMs??null,recordedDurationMs:trace?.recordedDurationMs??null,stopReason:trace?.stopReason??null,status:trace?.status??null,drainMayOverlapCounterInterval:!trace||!['action-complete','action-error'].includes(trace.stopReason)||(trace.errors?.length??0)>0};};
    try{
-    const captured=await traceDesktopSelection(cdp,pressAndSettle,{prefix:diagnostic?'desktop-webgl-terrain-high-zoom':'desktop-webgl-terrain-zoom',scope:diagnostic?'diagnostic-desktop-terrain-15-to-17':'first-desktop-terrain-zoom-4-to-6',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{} )});
-    after=captured.value;report.terrainZoomTrace={...captured.trace,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom};
-   }catch(error){report.terrainZoomTrace={...error.traceReceipt,beforeZoom:before.camera.zoom};throw error;}
-  }else after=await pressAndSettle();
+    const captured=await traceDesktopSelection(cdp,observedPressAndSettle,{prefix:diagnostic?'desktop-webgl-terrain-high-zoom':'desktop-webgl-terrain-zoom',scope:diagnostic?'diagnostic-desktop-terrain-15-to-17':'first-desktop-terrain-zoom-4-to-6',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{} )});
+    recordTrace(captured.trace);after=captured.value;report.terrainZoomTrace={...captured.trace,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom};
+   }catch(error){recordTrace(error.traceReceipt);report.terrainZoomTrace={...error.traceReceipt,beforeZoom:before.camera.zoom};throw error;}
+  }else after=await observedPressAndSettle();
   assert.ok(direction>0?after.camera.zoom>=before.camera.zoom-.001:after.camera.zoom<=before.camera.zoom+.001,`${profile.name}: zoom moved in the wrong direction`);
   const movement={before:before.camera.zoom,after:after.camera.zoom,changed:Math.abs(after.camera.zoom-before.camera.zoom)>.001};
-  if(diagnostic)report.nativeZooms.push({...report.lastNativeZoom,...movement});
+  if(diagnostic)report.nativeZooms.push({...report.lastNativeZoom,...movement,pageActivityAfter:after.pageActivity??null});
   return movement;
  }
  async function reachBottom(){

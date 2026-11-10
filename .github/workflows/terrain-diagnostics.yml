@@ -1,14 +1,14 @@
-name: Focused terrain diagnosis
+name: Terrain vector slicing diagnosis
 
 on:
   push:
-    branches: [diagnostics/terrain-close]
+    branches: [diagnostics/terrain-vector-slices]
 
 permissions:
   contents: read
 
 concurrency:
-  group: terrain-diagnostics
+  group: terrain-vector-slices-diagnostics
   cancel-in-progress: false
 
 jobs:
