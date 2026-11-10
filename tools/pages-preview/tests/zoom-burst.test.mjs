@@ -209,12 +209,16 @@ test('failed compositor frames and state reads keep their phase timing and origi
  }
 });
 
-test('terrain tracing covers only the first existing desktop upward4–5 step',()=>{
+test('opt-in terrain tracing covers only the first existing desktop upward4–5 step',()=>{
  const profile={name:'desktop-webgl',engine:'maplibre',mobile:false};
- for(const zoom of [4,4.9054061044955795,4.999])assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false),true);
- for(const zoom of [2,3.999,5,5.905,18,NaN])assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false),false);
- assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,4.905,true),false);
- for(const mode of ['detail','satellite',undefined])assert.equal(shouldTraceTerrainZoom(profile,mode,1,4.905,false),false);
- assert.equal(shouldTraceTerrainZoom(profile,'terrain',-1,4.905,false),false);
- for(const changed of [{mobile:true},{engine:'leaflet'},{name:'android-portrait'}])assert.equal(shouldTraceTerrainZoom({...profile,...changed},'terrain',1,4.905,false),false);
+ for(const zoom of [4,4.9054061044955795,4.999]){
+  assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false),false);
+  assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false,false),false);
+  assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false,true),true);
+ }
+ for(const zoom of [2,3.999,5,5.905,18,NaN])assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false,true),false);
+ assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,4.905,true,true),false);
+ for(const mode of ['detail','satellite',undefined])assert.equal(shouldTraceTerrainZoom(profile,mode,1,4.905,false,true),false);
+ assert.equal(shouldTraceTerrainZoom(profile,'terrain',-1,4.905,false,true),false);
+ for(const changed of [{mobile:true},{engine:'leaflet'},{name:'android-portrait'}])assert.equal(shouldTraceTerrainZoom({...profile,...changed},'terrain',1,4.905,false,true),false);
 });

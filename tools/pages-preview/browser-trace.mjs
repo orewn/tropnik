@@ -1,5 +1,6 @@
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 export const DESKTOP_TRACE_LIMITS=Object.freeze({durationMs:8000,drainMs:5000,closeMs:1000,maxBytes:32*1024*1024,bufferSizeKiB:16*1024,chunkBytes:256*1024});
@@ -8,6 +9,13 @@ export const TERRAIN_TRACE_LIMITS=Object.freeze({...DESKTOP_TRACE_LIMITS,duratio
 // events duplicated RunTask and consumed half the evidence. Keep renderer task,
 // layout, CPU stack and GPU evidence without the redundant scheduler stream.
 export const DESKTOP_TRACE_CATEGORIES=Object.freeze(['devtools.timeline','blink.user_timing','gpu','disabled-by-default-devtools.timeline','disabled-by-default-devtools.timeline.stack','disabled-by-default-v8.cpu_profiler']);
+
+/** Validate before browser startup. Recording is optional evidence; the full
+ * native-input and performance gates run regardless of this setting. */
+export function browserTraceEnabled(value,diagnostic=null){
+ assert.ok(value===undefined||value===''||value==='1','Unknown TROPNIK_BROWSER_TRACE value; use 1 to record diagnostic traces');
+ return diagnostic==='terrain-close'||value==='1';
+}
 
 export function traceCategoryEvidence(events){
  const counts=new Map(),limit=128;
@@ -23,12 +31,14 @@ export function traceCategoryEvidence(events){
  * A time/buffer cap never cancels or repeats the action. Partial/error receipts
  * stay explicit; they cannot replace the existing interaction/performance gates. */
 export async function traceDesktopSelection(cdp,action,{
+ enabled=true,
  output=OUTPUT,sourceCommit=null,limits=DESKTOP_TRACE_LIMITS,
  prefix='desktop-webgl-first-altai',scope='first-desktop-altai-selection',
  categories=DESKTOP_TRACE_CATEGORIES,
  captureCategoryEvidence=false,
  clock=()=>performance.now(),schedule=setTimeout,cancel=clearTimeout,
 }={}){
+ if(!enabled)return{value:await action(),trace:null};
  const started=clock(),chunks=[];
  const receipt={schemaVersion:1,scope,sourceCommit,instrumented:true,startedAtEpochMs:Date.now(),limits:{...limits},categories:[...categories],status:'recording',stopReason:null,bytes:0,eof:false,dataLossOccurred:false,errors:[]};
  let completion,resolveCompletion,startRequested=false,stopPromise,timer,value,actionError;

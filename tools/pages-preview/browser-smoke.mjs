@@ -7,13 +7,14 @@ import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
 import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-projection.mjs';
 import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving,browserAuditRunPolicy} from './browser-zoom-audit.mjs';
-import {traceDesktopSelection} from './browser-trace.mjs';
+import {browserTraceEnabled,traceDesktopSelection} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
+const traceEnabled=browserTraceEnabled(process.env.TROPNIK_BROWSER_TRACE,runPolicy.diagnostic);
 const REPORT = new URL(runPolicy.reportFile, ROOT);
 const profiles = [
   {name:'compact-android',width:320,height:640,mobile:true,engine:'leaflet'},
@@ -580,7 +581,7 @@ async function mapInteraction(cdp,profile,performanceIssues){
   await diagnosticPhase(cdp,'map-interactions');
   const directionActions=[];
   const selectFirstDirection=()=>selectMapDirection(cdp,profile,'altai','Алтай',{kind:'label',actions:directionActions});
-  const firstSelection=profile.mobile?{value:await selectFirstDirection(),trace:null}:await traceDesktopSelection(cdp,selectFirstDirection,{sourceCommit:process.env.GITHUB_SHA||null});
+  const firstSelection=profile.mobile?{value:await selectFirstDirection(),trace:null}:await traceDesktopSelection(cdp,selectFirstDirection,{enabled:traceEnabled,sourceCommit:process.env.GITHUB_SHA||null});
   const firstDirection=firstSelection.value;
   const catalogScroll=profile.mobile?await scrollSheetContent(cdp,profile,{stableExtent:true}):null;
   await closeMapSheet(cdp,profile);
@@ -717,7 +718,7 @@ try{
     results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,touch,interaction});
     profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
     await checkpoint(interaction?'before-zoom-audit':'profile-complete');
-    if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`}));
+    if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
     if(profile.mapInteraction)await checkpoint('profile-complete');
   }
   if(!runPolicy.diagnostic){

@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,rm,stat} from 'node:fs/promises';
+import {mkdtemp,readFile,readdir,rm,stat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
-import {traceDesktopSelection,DESKTOP_TRACE_LIMITS,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES,traceCategoryEvidence} from '../browser-trace.mjs';
+import {browserTraceEnabled,traceDesktopSelection,DESKTOP_TRACE_LIMITS,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES,traceCategoryEvidence} from '../browser-trace.mjs';
 
 const traceJSON=JSON.stringify({traceEvents:[{name:'ProfileChunk',cat:'disabled-by-default-v8.cpu_profiler',args:{data:{cpuProfile:{samples:[1,2,3]}}}},{name:'RunTask',cat:'gpu'},{name:'Layout',cat:'cc,viz'}]});
 async function outputDirectory(t){const directory=await mkdtemp(join(tmpdir(),'tropnik-trace-'));t.after(()=>rm(directory,{recursive:true,force:true}));return pathToFileURL(directory+'/');}
@@ -45,14 +45,55 @@ function protocol({readError,startError,endError,endAck,oversized=false,dataLoss
 }
 async function metadata(output,prefix='desktop-webgl-first-altai'){return JSON.parse(await readFile(new URL(`${prefix}.trace-meta.json`,output),'utf8'));}
 
+test('full-matrix tracing requires an explicit flag while dedicated terrain diagnostics keep recording',()=>{
+ for(const value of [undefined,''])assert.equal(browserTraceEnabled(value),false);
+ assert.equal(browserTraceEnabled('1'),true);
+ for(const value of [undefined,'','1'])assert.equal(browserTraceEnabled(value,'terrain-close'),true);
+ for(const value of ['0','true','false','all',' 1 ','2',true,1,null]){
+  assert.throws(()=>browserTraceEnabled(value),/Unknown TROPNIK_BROWSER_TRACE/);
+  assert.throws(()=>browserTraceEnabled(value,'terrain-close'),/Unknown TROPNIK_BROWSER_TRACE/);
+ }
+});
+
+test('default full-matrix action runs once without tracer calls, timers or evidence files',async t=>{
+ const output=await outputDirectory(t),value={selected:'altai'};let actions=0;
+ const forbidden=()=>assert.fail('Disabled tracing must not start diagnostics');
+ const result=await traceDesktopSelection({observe:forbidden,call:forbidden},async()=>{actions++;return value;},
+  {enabled:browserTraceEnabled(undefined),output,clock:forbidden,schedule:forbidden,cancel:forbidden});
+ assert.equal(actions,1);assert.equal(result.value,value);assert.equal(result.trace,null);
+ assert.deepEqual(await readdir(output),[]);
+});
+
+test('disabled tracing preserves the original action failure and settle evidence without retrying',async t=>{
+ const output=await outputDirectory(t),failure=new Error('The maplibre map did not settle');let actions=0;
+ failure.settleDiagnostics={timeoutMs:15000,requiredIdleObservations:4,samples:[{frameMs:6026}]};
+ const forbidden=()=>assert.fail('Disabled tracing must not touch the protocol');
+ const observed=await traceDesktopSelection({observe:forbidden,call:forbidden},async()=>{actions++;throw failure;},
+  {enabled:browserTraceEnabled(''),output}).then(()=>null,error=>error);
+ assert.equal(observed,failure);assert.equal(actions,1);assert.equal('traceReceipt' in failure,false);
+ assert.equal(observed.settleDiagnostics.samples[0].frameMs,6026);assert.deepEqual(await readdir(output),[]);
+});
+
+test('explicit full-matrix and dedicated diagnostic tracing each wrap the same action exactly once',async t=>{
+ for(const [label,value,diagnostic] of [['full-opt-in','1',null],['dedicated',undefined,'terrain-close']]){
+  const output=await outputDirectory(t),cdp=protocol(),nativeResult={label};let actions=0;
+  const result=await traceDesktopSelection(cdp,async()=>{actions++;return nativeResult;},
+   {enabled:browserTraceEnabled(value,diagnostic),output,...controlledTimers()});
+  assert.equal(actions,1);assert.equal(result.value,nativeResult);assert.equal(result.trace.status,'complete');
+  assert.equal(cdp.calls.filter(call=>call.method==='Tracing.start').length,1);
+  assert.equal(cdp.calls.filter(call=>call.method==='Tracing.end').length,1);
+  assert.deepEqual(await metadata(output),result.trace);
+ }
+});
+
 test('a failed native selection still stops, drains and closes its trace without replacing the assertion',async t=>{
  const output=await outputDirectory(t),timers=controlledTimers(),failure=new Error('Actual route selection failed');
- let acknowledgeEnd;const cdp=protocol({endAck:new Promise(resolve=>{acknowledgeEnd=resolve;})});
- const observed=traceDesktopSelection(cdp,async()=>{throw failure;},{output,sourceCommit:'a'.repeat(40),...timers}).then(()=>null,error=>error);
+ let acknowledgeEnd,actions=0;const cdp=protocol({endAck:new Promise(resolve=>{acknowledgeEnd=resolve;})});
+ const observed=traceDesktopSelection(cdp,async()=>{actions++;throw failure;},{enabled:browserTraceEnabled('1'),output,sourceCommit:'a'.repeat(40),...timers}).then(()=>null,error=>error);
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(cdp.calls.filter(call=>call.method==='Tracing.end').length,1);
  assert.equal(cdp.calls.some(call=>call.method==='IO.read'),false,'Completion can precede its end acknowledgement');
- acknowledgeEnd();assert.equal(await observed,failure);
+ acknowledgeEnd();assert.equal(await observed,failure);assert.equal(actions,1);
  assert.deepEqual(cdp.calls.map(call=>call.method),['Tracing.start','Tracing.end','IO.read','IO.read','IO.close']);
  assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
  const receipt=await metadata(output),bytes=await readFile(new URL(receipt.file,output));

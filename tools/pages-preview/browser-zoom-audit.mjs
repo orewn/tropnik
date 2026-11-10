@@ -127,9 +127,9 @@ export async function settleMapCamera({engine,read,frame,wait,clock=()=>performa
  }
 }
 
-/** One existing +1 input around the terrain failure, never a diagnostic retry. */
-export function shouldTraceTerrainZoom(profile,mode,direction,beforeZoom,alreadyTraced){
- return !alreadyTraced&&profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile&&mode==='terrain'&&direction>0&&beforeZoom>=4&&beforeZoom<5;
+/** Opt-in recording around one existing +1 input, never a diagnostic retry. */
+export function shouldTraceTerrainZoom(profile,mode,direction,beforeZoom,alreadyTraced,traceEnabled=false){
+ return traceEnabled&&!alreadyTraced&&profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile&&mode==='terrain'&&direction>0&&beforeZoom>=4&&beforeZoom<5;
 }
 
 /** Bounds of independent overlays. Parents and children must not both enter
@@ -187,7 +187,7 @@ export async function dispatchZoomBurst(cdp,point,profile,count=4){
 /** Real-input zoom coverage plus reviewable images. Network/source availability
  * is reported separately from geometry checks; a fallback is never called a
  * successfully rendered satellite or 3D scene. */
-export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null}={}){
+export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,traceEnabled=false}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase}=helpers;
  assert.ok(diagnostic===null||diagnostic==='terrain-close','Unknown zoom diagnostic mode');
  if(diagnostic)assert.ok(profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
@@ -246,7 +246,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null}={
   if(diagnostic)report.lastNativeZoom={direction,beforeZoom:before.camera.zoom,point:{x:target.x,y:target.y},startedAtEpochMs:Date.now()};
   const pressAndSettle=async()=>{await pointerAt(cdp,target,profile);await sleep(70);return settledMap(cdp,profile.engine);};
   let after;
-  if((diagnostic?shouldTraceTerrainDiagnostic:shouldTraceTerrainZoom)(profile,mode,direction,before.camera.zoom,terrainTraceStarted)){
+  if((diagnostic?shouldTraceTerrainDiagnostic:shouldTraceTerrainZoom)(profile,mode,direction,before.camera.zoom,terrainTraceStarted,traceEnabled)){
    terrainTraceStarted=true;
    try{
     const captured=await traceDesktopSelection(cdp,pressAndSettle,{prefix:diagnostic?'desktop-webgl-terrain-high-zoom':'desktop-webgl-terrain-zoom',scope:diagnostic?'diagnostic-desktop-terrain-15-to-17':'first-desktop-terrain-zoom-4-to-6',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{} )});

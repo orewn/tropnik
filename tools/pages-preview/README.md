@@ -28,6 +28,8 @@ node tools/pages-preview/verify-http.mjs web/pages-preview/dist
 node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json
 ```
 
+Полный браузерный проход `node tools/pages-preview/browser-smoke.mjs` по умолчанию выполняет все нативные действия, проверки производительности, ожидания неподвижной камеры и снимки без CDP Tracing. Для записи диагностических CPU/GPU-трасс первого выбора Алтая и перехода рельефа z4–5 запустите `TROPNIK_BROWSER_TRACE=1 node tools/pages-preview/browser-smoke.mjs`. Набор профилей, пороги допуска и схема итогового отчёта при этом не меняются. Другие непустые значения `TROPNIK_BROWSER_TRACE` отклоняются до запуска браузера. Отдельный режим `TROPNIK_BROWSER_DIAGNOSTIC=terrain-close` автоматически записывает трассу высокого масштаба; его отчёт остаётся диагностическим и не допускает публикацию.
+
 Проверка другого префикса без изменения первой сборки:
 
 ```sh
