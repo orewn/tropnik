@@ -24,7 +24,7 @@ TREES = (
     "backend", "contracts", "docs", "infra", "tools", ".github/workflows",
     "android/app/src", "android/app/schemas", "android/gradle/wrapper",
     "web/app", "web/components", "web/lib", "web/hooks", "web/public",
-    "web/scripts", "web/worker", "web/vendor", "web/db", "web/drizzle",
+    "web/scripts", "web/worker", "web/vendor", "web/patches", "web/db", "web/drizzle",
     "web/examples", "web/tests", "web/verification", "web/docs", "web/pages-preview/src",
     "data/catalog", "data/boundaries", "data/pilot-map", "data/terrain-pilot/runtime", "data/overview-relief",
 )

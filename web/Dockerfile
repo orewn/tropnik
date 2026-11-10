@@ -6,7 +6,8 @@ ARG SITE_ORIGIN
 ARG TROPA_PUBLIC_INDEXING=false
 ENV NEXT_PUBLIC_SITE_URL=${SITE_ORIGIN} TROPA_PUBLIC_INDEXING=${TROPA_PUBLIC_INDEXING}
 RUN npm install --global pnpm@11.25.0
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches ./patches
 RUN pnpm install --frozen-lockfile
 COPY . .
 RUN test -n "$NEXT_PUBLIC_SITE_URL" && TROPA_STANDALONE=true pnpm run build:next

@@ -35,3 +35,5 @@ overrides:
   'esbuild@>=0.28.0 <0.28.1': 0.28.1
   # The hooks plugin explicitly supports either Zod 3 or 4; retain the patched branch.
   eslint-plugin-react-hooks>zod: 4.6.6
+patchedDependencies:
+  maplibre-gl@6.16.0: patches/maplibre-gl@6.16.0.patch

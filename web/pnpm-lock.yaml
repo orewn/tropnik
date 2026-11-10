@@ -21,6 +21,9 @@ overrides:
   esbuild@>=0.28.0 <0.28.1: 0.28.1
   eslint-plugin-react-hooks>zod: 4.6.6
 
+patchedDependencies:
+  maplibre-gl@6.16.0: 62b23d0f95d66d482d417896db89cb0151246a9f274e66f68fc00a521fca8f4a
+
 importers:
 
   .:
@@ -48,7 +51,7 @@ importers:
         version: 1.31.0(react@19.2.8)
       maplibre-gl:
         specifier: 6.16.0
-        version: 6.16.0
+        version: 6.16.0(patch_hash=62b23d0f95d66d482d417896db89cb0151246a9f274e66f68fc00a521fca8f4a)
       next:
         specifier: 16.4.1
         version: 16.4.1(@babel/core@7.29.6(supports-color@10.2.2))(@types/node@22.19.19)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -7943,7 +7946,7 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  maplibre-gl@6.16.0:
+  maplibre-gl@6.16.0(patch_hash=62b23d0f95d66d482d417896db89cb0151246a9f274e66f68fc00a521fca8f4a):
     dependencies:
       '@mapbox/point-geometry': 1.1.0
       '@mapbox/tiny-sdf': 2.3.0

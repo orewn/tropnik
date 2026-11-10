@@ -19,7 +19,7 @@ class SourceExportTest(unittest.TestCase):
     def test_build_and_credential_paths_are_excluded_but_runtime_tiles_survive(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            wanted = ["web/public/offline-map/localtiles/12/2507/1493.pbf", "android/app/src/main/assets/licenses/notice.txt", "infra/.env.example", "android/gradle/wrapper/gradle-wrapper.jar"]
+            wanted = ["web/public/offline-map/localtiles/12/2507/1493.pbf", "android/app/src/main/assets/licenses/notice.txt", "infra/.env.example", "android/gradle/wrapper/gradle-wrapper.jar", "web/patches/maplibre-gl@6.16.0.patch", "web/patches/maplibre-gl@6.16.0.swiftshader-rtt.json"]
             blocked = ["web/node_modules/module/a.js", "android/app/build/result.apk", "web/public/downloads/app.apk", "android/local.properties", "infra/.env", "android/app/src/release/signing.keystore", "tools/import-data/_deps/library.py"]
             for rel in wanted + blocked:
                 self.put(root, rel)

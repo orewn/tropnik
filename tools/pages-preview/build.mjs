@@ -7,9 +7,11 @@ import {spawnSync} from 'node:child_process';
 import {normalizeBase, rewriteScript, rewriteJSON, rewriteHTML, rewriteCSS, ts} from './paths.mjs';
 import {APK_FILE, ensureApk, readApkManifest, verifyApk} from './apk-artifact.mjs';
 import {androidPageDownload} from './apk-page.mjs';
+import {verifyMapLibreTerrainPatch} from '../../web/scripts/maplibre-terrain-patch.mjs';
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const web = join(project, 'web');
+const maplibreTerrainPatch = await verifyMapLibreTerrainPatch({webRoot: web});
 const require = createRequire(join(web, 'package.json'));
 const {build: viteBuild} = await import(require.resolve('vite'));
 const {default: react} = await import(require.resolve('@vitejs/plugin-react'));
@@ -89,7 +91,7 @@ for (const path of await files(join(web, 'public'))) {
   if (/(?:\.map|\.d\.ts|\.original\.txt)$/.test(name)) continue;
   await snapshot(path, join(source, 'public', name));
 }
-for (const name of ['web/package.json', 'web/pnpm-lock.yaml', ...(await files(join(project, 'tools/pages-preview'))).map(path => relative(project, path))]) {
+for (const name of ['web/package.json', 'web/pnpm-lock.yaml', 'web/pnpm-workspace.yaml', 'web/scripts/maplibre-terrain-patch.mjs', ...(await files(join(web, 'patches'))).map(path => relative(project, path)), ...(await files(join(project, 'tools/pages-preview'))).map(path => relative(project, path))]) {
   const path = join(project, name);
   if (await exists(path)) {const bytes = await readFile(path); inputs.push({path: name, bytes: bytes.length, sha256: sha(bytes)});}
 }
@@ -239,7 +241,7 @@ const report = {
   schemaVersion: 1, buildId, sourceCommit, base, origin, renderer: 'Existing public terrain module from the input snapshot',
   apiConnected: false, serverCodeIncluded: false, fakeServerResponses: false, pages: pages.length,
   regions: regions.length, referenceRoutes: trails.length, hasApk: config.hasApk, apk, layoutStyles,
-  storageNamespace: base.slice(1, -1), immutableOfflinePack: true, inputs, bundledModules, thirdParty,
+  storageNamespace: base.slice(1, -1), immutableOfflinePack: true, inputs, bundledModules, thirdParty, dependencyPatches: [maplibreTerrainPatch],
 };
 await writeFile(join(out, 'build-info.json'), JSON.stringify(report, null, 2) + '\n');
 await writeFile(join(out, 'page-manifest.json'), JSON.stringify(pages, null, 2) + '\n');
