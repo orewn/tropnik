@@ -11,6 +11,7 @@ export const MAP_CONFIG = Object.freeze({
   planMaxZoom: 16,
   viewportRegionMinZoom: 4,
   maxPixelRatio: 2,
+  softwareTerrainPixelRatio: .5,
   maxWorkers: 3,
   prefetchTiles: 12,
   constrainedPrefetchTiles: 4,
