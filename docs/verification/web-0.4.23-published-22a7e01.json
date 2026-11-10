@@ -1,0 +1,776 @@
+{
+  "schemaVersion": 1,
+  "kind": "web-0.4.23-release-and-publication-verification",
+  "sourceCommit": "22a7e01bcd1517e6dd1248cccf3bd242721acda2",
+  "tree": "7c4e2390fd694be8a0cc863e0d72d940df5d6e86",
+  "webTree": "2f3f867b7254da7786d2912caa88002171483285",
+  "buildId": "ebe81176fac99c80",
+  "runId": 42895220863,
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/42895220863",
+  "status": "verified-and-publicly-deployed",
+  "browserContractRechecked": true,
+  "publicDeploymentVerified": true,
+  "buildJob": {
+    "id": 130106449141,
+    "conclusion": "success",
+    "startedAt": "2026-11-10T20:26:00Z",
+    "completedAt": "2026-11-10T20:46:43Z",
+    "durationSeconds": 1243.0,
+    "browserStartedAt": "2026-11-10T20:27:44Z",
+    "browserCompletedAt": "2026-11-10T20:46:31Z",
+    "browserDurationSeconds": 1127.0
+  },
+  "report": {
+    "file": "browser-verification.json",
+    "bytes": 2731312,
+    "sha256": "b4c3d61d4d3bcaeab0ebc0c3a0ebcdeb98002bc916173b062a0f0e7eeb7de082",
+    "verified": true,
+    "mapInteractionSchemaVersion": 3,
+    "zoomSchemas": [
+      7,
+      7
+    ]
+  },
+  "buildInfo": {
+    "file": "build-info.json",
+    "bytes": 330305,
+    "sha256": "f036004c7be7fe3cf9bef9821a683af9da64e40ab8c1ad0558425c61dc20c3fc"
+  },
+  "buildLog": {
+    "file": "build.log",
+    "bytes": 5482340,
+    "sha256": "d8c52c118ee44ee8fdc9aff96c4cdfb1f591eb692df98a4171ac329a3174ab45"
+  },
+  "artifacts": [
+    {
+      "id": 13800189682,
+      "name": "github-pages-42895220863-1",
+      "size_in_bytes": 59675846,
+      "digest": "sha256:df6a75a2471cfa50e5d8e5611c8d995c7c1337eb600ed989408ac2046388b7aa",
+      "created_at": "2026-11-10T20:46:40Z"
+    },
+    {
+      "id": 13801971668,
+      "name": "tropnik-pages-design-1",
+      "size_in_bytes": 46028368,
+      "digest": "sha256:5dc3b4103036b076565494fa99059787048ea3c8497b00377623d265d0e18a36",
+      "created_at": "2026-11-10T20:46:34Z"
+    }
+  ],
+  "artifactInventory": {
+    "artifactId": 13800189682,
+    "zipBytes": 59675846,
+    "zipSha256": "df6a75a2471cfa50e5d8e5611c8d995c7c1337eb600ed989408ac2046388b7aa",
+    "tarBytes": 153118720,
+    "regularFileCount": 1951,
+    "regularFileBytes": 151398494,
+    "apkFiles": [],
+    "otherNonDirectoryEntries": [],
+    "largest20Assets": [
+      {
+        "path": "./terrain/terrain-grid.json",
+        "bytes": 3087398
+      },
+      {
+        "path": "./data/map-coverage/base.coverage",
+        "bytes": 2938837
+      },
+      {
+        "path": "./browser-verification.json",
+        "bytes": 2731312
+      },
+      {
+        "path": "./terrain/landscape.html",
+        "bytes": 1960942
+      },
+      {
+        "path": "./offline-map/terrain/landscape.html",
+        "bytes": 1960942
+      },
+      {
+        "path": "./data/imported/osm-relation-18162201.geojson",
+        "bytes": 1454712
+      },
+      {
+        "path": "./data/russia-canonical-mask.geojson",
+        "bytes": 1233406
+      },
+      {
+        "path": "./data/russia-outside-mask.geojson",
+        "bytes": 1231143
+      },
+      {
+        "path": "./data/imported/osm-relation-14594896.geojson",
+        "bytes": 1216022
+      },
+      {
+        "path": "./data/russia-canonical-area.geojson",
+        "bytes": 1110525
+      },
+      {
+        "path": "./data/russia-display-area.geojson",
+        "bytes": 1109110
+      },
+      {
+        "path": "./maps/maplibre-gl.mjs",
+        "bytes": 1108593
+      },
+      {
+        "path": "./assets/maplibre-gl-gSiY3OKT.js",
+        "bytes": 1104477
+      },
+      {
+        "path": "./assets/page-DfTXRliK.js",
+        "bytes": 961125
+      },
+      {
+        "path": "./data/map-coverage/cells/0209-230source.coverage",
+        "bytes": 872541
+      },
+      {
+        "path": "./data/map-coverage/cells/0209-22source.coverage",
+        "bytes": 838710
+      },
+      {
+        "path": "./data/map-coverage/cells/0c0a-0source.coverage",
+        "bytes": 745179
+      },
+      {
+        "path": "./data/map-coverage/cells/0809-source.coverage",
+        "bytes": 744993
+      },
+      {
+        "path": "./data/map-coverage/cells/060a-23source.coverage",
+        "bytes": 738113
+      },
+      {
+        "path": "./data/map-coverage/cells/0209-03source.coverage",
+        "bytes": 711898
+      }
+    ]
+  },
+  "regressions": {
+    "pagesTools": {
+      "tests": 148,
+      "passed": 148,
+      "failed": 0,
+      "skipped": 0
+    },
+    "web": {
+      "tests": 633,
+      "passed": 633,
+      "failed": 0,
+      "skipped": 0
+    },
+    "telegram": {
+      "tests": 19,
+      "passed": 19
+    },
+    "lint": "success",
+    "staticTypes": "success"
+  },
+  "staticVerification": {
+    "verified": true,
+    "pages": 339,
+    "referenceRoutes": 306,
+    "productionRoutingChecks": 1022,
+    "mapPolicyChecks": 14,
+    "staticApiNetworkCalls": 0,
+    "checkedScripts": 64,
+    "publicAssetChecks": 341,
+    "outputFiles": 1948,
+    "offlineFilesVerified": 252,
+    "overviewReliefTilesVerified": 341,
+    "terrainGrid": [
+      513,
+      513
+    ],
+    "apkVerified": true,
+    "coverageExcludedRoutes": [
+      "osm-relation-14407325"
+    ],
+    "base": "/tropnik/"
+  },
+  "httpVerification": {
+    "verified": true,
+    "base": "/tropnik/",
+    "httpChecks": 57,
+    "browserRenderingTested": false,
+    "backendConnected": false
+  },
+  "mobileProfiles": [
+    {
+      "name": "compact-android",
+      "engine": "leaflet",
+      "longestTaskMs": 202,
+      "layoutShift": 0,
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0
+    },
+    {
+      "name": "iphone-portrait",
+      "engine": "leaflet",
+      "longestTaskMs": 91,
+      "layoutShift": 0,
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0
+    },
+    {
+      "name": "android-portrait",
+      "engine": "leaflet",
+      "longestTaskMs": 205,
+      "layoutShift": 0,
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0
+    },
+    {
+      "name": "phone-landscape",
+      "engine": "leaflet",
+      "longestTaskMs": 291,
+      "layoutShift": 0,
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0
+    }
+  ],
+  "mapInteractions": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "passed": true,
+      "longestTaskMs": 205,
+      "layoutShift": 0.23144224886044312,
+      "durationMs": 62501,
+      "strictLongTaskLimitMs": 350,
+      "filterRequestSiblingContractPassed": true
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "passed": true,
+      "longestTaskMs": 323,
+      "layoutShift": 0,
+      "durationMs": 49747,
+      "strictLongTaskLimitMs": 750,
+      "filterRequestSiblingContractPassed": true
+    }
+  ],
+  "designs": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "schemaVersion": 7,
+      "geometryPassed": true,
+      "keyZooms": [
+        2,
+        5,
+        8,
+        11,
+        14,
+        18
+      ],
+      "detailStepCount": 24,
+      "modeStates": {
+        "detail": "checked",
+        "satellite": "active",
+        "overview": "active",
+        "terrain": "not-offered",
+        "scene3d": "ready"
+      },
+      "retainedDiagnosticMaximum": {
+        "layoutShift": 0.3172081051392909,
+        "longestTaskMs": 371
+      },
+      "performanceIntervals": {
+        "modes": {
+          "layoutShift": 0.3172081051392909,
+          "longestTaskMs": 371
+        },
+        "sourceEnds": {
+          "layoutShift": 0,
+          "longestTaskMs": 58
+        },
+        "satellite": {
+          "layoutShift": 0.02728854598539384,
+          "longestTaskMs": 141
+        }
+      },
+      "modeIntervalIsNotTheStrictInteractionGate": true,
+      "coast": {
+        "passed": true,
+        "stepCount": 6,
+        "targetZooms": [
+          7,
+          9,
+          12,
+          15,
+          18,
+          11
+        ],
+        "allFramesReady": true,
+        "maximumCenterErrorPx": 2.9226088636008765,
+        "centerErrorLimitPx": 6,
+        "coverageVersions": [
+          "e0ce67282bfd3694"
+        ],
+        "nativePans": 8,
+        "screenshotHashesVerified": 6,
+        "independentVisualReview": "completed",
+        "originalPngsPersonallyInspected": 6
+      },
+      "satellite": {
+        "passed": true,
+        "durationMs": 63495,
+        "performance": {
+          "layoutShift": 0.02728854598539384,
+          "longestTaskMs": 141
+        },
+        "strictLongTaskLimitMs": 350,
+        "layoutShiftLimit": 0.12,
+        "stages": [
+          "dateline-overview",
+          "dateline-native8",
+          "dateline-overzoom",
+          "west-eox",
+          "dateline-return",
+          "detail-restored"
+        ],
+        "sourceSequence": [
+          {
+            "stage": "dateline-overview",
+            "source": "eox-bluemarble",
+            "state": "ready"
+          },
+          {
+            "stage": "dateline-native8",
+            "source": "eox-bluemarble",
+            "state": "ready"
+          },
+          {
+            "stage": "dateline-overzoom",
+            "source": "eox-bluemarble",
+            "state": "ready"
+          },
+          {
+            "stage": "west-eox",
+            "source": "eox-s2",
+            "state": "ready"
+          },
+          {
+            "stage": "dateline-return",
+            "source": "eox-bluemarble",
+            "state": "ready"
+          },
+          {
+            "stage": "detail-restored",
+            "source": "",
+            "state": ""
+          }
+        ],
+        "cameraRectViewportPreservedOnToggles": true,
+        "currentSourceReadyAtCaptures": true,
+        "noPendingOrFailedCurrentSourceAtCaptures": true,
+        "maximumCenterErrorPx": 0.7927647178635736,
+        "screenshotHashesVerified": 6,
+        "independentVisualReview": "completed",
+        "originalPngsPersonallyInspected": 6,
+        "native8BothDatelineColumnsVerified": true,
+        "visualScope": "Broad empty band absent; conspicuous source mosaic seam, horizontal streaks and coarse overzoom remain. Mobile overzoom can show a geometry-detail loading notice; readiness here applies to the imagery source."
+      }
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "schemaVersion": 7,
+      "geometryPassed": true,
+      "keyZooms": [
+        2,
+        5,
+        8,
+        11,
+        14,
+        18
+      ],
+      "detailStepCount": 18,
+      "modeStates": {
+        "detail": "checked",
+        "satellite": "active",
+        "overview": "active",
+        "terrain": "active",
+        "scene3d": "ready"
+      },
+      "retainedDiagnosticMaximum": {
+        "layoutShift": 0.03137042123730378,
+        "longestTaskMs": 1353
+      },
+      "performanceIntervals": {
+        "modes": {
+          "layoutShift": 0.03137042123730378,
+          "longestTaskMs": 1353
+        },
+        "sourceEnds": {
+          "layoutShift": 0,
+          "longestTaskMs": 154
+        },
+        "satellite": {
+          "layoutShift": 0.03130173961218836,
+          "longestTaskMs": 284
+        }
+      },
+      "modeIntervalIsNotTheStrictInteractionGate": true,
+      "coast": {
+        "passed": true,
+        "stepCount": 6,
+        "targetZooms": [
+          7,
+          9,
+          12,
+          15,
+          18,
+          11
+        ],
+        "allFramesReady": true,
+        "maximumCenterErrorPx": 4.44657680766724,
+        "centerErrorLimitPx": 6,
+        "coverageVersions": [
+          "e0ce67282bfd3694"
+        ],
+        "nativePans": 5,
+        "screenshotHashesVerified": 6,
+        "independentVisualReview": "completed",
+        "originalPngsPersonallyInspected": 6
+      },
+      "satellite": {
+        "passed": true,
+        "durationMs": 85277,
+        "performance": {
+          "layoutShift": 0.03130173961218836,
+          "longestTaskMs": 284
+        },
+        "strictLongTaskLimitMs": 750,
+        "layoutShiftLimit": 0.12,
+        "stages": [
+          "dateline-overview",
+          "dateline-native8",
+          "dateline-overzoom",
+          "west-eox",
+          "dateline-return",
+          "detail-restored"
+        ],
+        "sourceSequence": [
+          {
+            "stage": "dateline-overview",
+            "source": "eox-bluemarble",
+            "state": "ready"
+          },
+          {
+            "stage": "dateline-native8",
+            "source": "eox-bluemarble",
+            "state": "ready"
+          },
+          {
+            "stage": "dateline-overzoom",
+            "source": "eox-bluemarble",
+            "state": "ready"
+          },
+          {
+            "stage": "west-eox",
+            "source": "eox-s2",
+            "state": "ready"
+          },
+          {
+            "stage": "dateline-return",
+            "source": "eox-bluemarble",
+            "state": "ready"
+          },
+          {
+            "stage": "detail-restored",
+            "source": "",
+            "state": ""
+          }
+        ],
+        "cameraRectViewportPreservedOnToggles": true,
+        "currentSourceReadyAtCaptures": true,
+        "noPendingOrFailedCurrentSourceAtCaptures": true,
+        "maximumCenterErrorPx": 1.6414169532236838,
+        "screenshotHashesVerified": 6,
+        "independentVisualReview": "completed",
+        "originalPngsPersonallyInspected": 6,
+        "native8BothDatelineColumnsVerified": true,
+        "visualScope": "Broad empty band absent; conspicuous source mosaic seam, horizontal streaks and coarse overzoom remain. Mobile overzoom can show a geometry-detail loading notice; readiness here applies to the imagery source."
+      }
+    }
+  ],
+  "allReportedPngHashesVerified": {
+    "count": 85,
+    "totalPngsInDesignArtifact": 85,
+    "unreferenced": 0
+  },
+  "apk": {
+    "delivery": "github-release",
+    "sourcePath": "/downloads/tropnik-preview.apk",
+    "downloadHref": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/tropnik-preview.apk",
+    "bytes": 79346747,
+    "sha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+    "version": "0.4.23-preview",
+    "architecture": "universal",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "signature": "development / debug",
+    "signingCertificateSha256": "a45e5fcbd9edcf0d1c4df1a8df7209b2417f13e7f95f64c36304ce4b9bd39dac",
+    "sourceCommit": "2a6372f9b60661db3e2766619f4259bb094145b7",
+    "workflowRunId": 42844181659,
+    "testedArchitecture": "x86_64",
+    "deviceExecutionVerified": true,
+    "physicalDeviceVerified": false
+  },
+  "fullyRepairedImageryQuality": false,
+  "offlineSafety": {
+    "passed": true,
+    "nativeInputs": 4,
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "offline": true,
+    "titleRestored": true,
+    "contactRestored": true,
+    "draftExplicit": true,
+    "privateApiNotCached": true,
+    "networkSuccessfulResponses": 0,
+    "screenshot": {
+      "file": "android-offline-emergency-card.png",
+      "bytes": 177201,
+      "sha256": "ed493072bc69e969ec263b3d59af34dbcd26a7d0f221cfacedb14e7c1c732d15"
+    },
+    "originTransport": {
+      "method": "origin-socket-destroy",
+      "startedAt": "2026-11-10T20:46:30.097Z",
+      "restoredAt": "2026-11-10T20:46:30.436Z",
+      "blockedRequests": 4,
+      "active": false
+    },
+    "allNativeInputEventsTrusted": true,
+    "screenshotHashVerified": true,
+    "originalScreenshotPersonallyInspected": true,
+    "visualScope": "Standalone emergency-card page and explicit local-draft notice visible; contact restoration additionally asserted from DOM evidence."
+  },
+  "buryatiaCanvasRegression": {
+    "passed": true,
+    "selectedTerritoryId": "territory-28173009B49563687485750",
+    "title": "Республика Бурятия",
+    "coordinate": [
+      109.96875000000001,
+      52.68970242806751
+    ],
+    "input": "touch",
+    "nativeEvents": [
+      "pointerdown",
+      "pointerup",
+      "click"
+    ],
+    "allEventsTrusted": true,
+    "experiencePassed": true
+  },
+  "publicDeployGuard": {
+    "attempt": 2,
+    "status": "success",
+    "jobId": 130124845098,
+    "jobConclusion": "success",
+    "startedAt": "2026-11-10T20:58:52Z",
+    "completedAt": "2026-11-10T21:00:30Z",
+    "deploymentStepStartedAt": "2026-11-10T20:59:13Z",
+    "deploymentStepCompletedAt": "2026-11-10T21:00:24Z",
+    "deploymentCreatedAt": "2026-11-10T20:59:15.5086820Z",
+    "deploymentReportedSuccessAt": "2026-11-10T21:00:24.3876287Z",
+    "guardStartedAt": "2026-11-10T21:00:24Z",
+    "guardCompletedAt": "2026-11-10T21:00:28Z",
+    "guardReceiptAt": "2026-11-10T21:00:28.0022901Z",
+    "configuredTimeoutMs": 600000,
+    "artifactId": 13800189682,
+    "artifactName": "github-pages-42895220863-1",
+    "sameArtifactAsAttempt1": true,
+    "noNewBuildOrBrowserRun": true,
+    "sourceCommit": "22a7e01bcd1517e6dd1248cccf3bd242721acda2",
+    "publicBuildReportApkGuardRan": true,
+    "receipt": {
+      "verified": true,
+      "url": "https://orewn.github.io/tropnik/",
+      "buildId": "ebe81176fac99c80",
+      "sourceCommit": "22a7e01bcd1517e6dd1248cccf3bd242721acda2",
+      "publicHttpChecks": 25,
+      "apkDelivery": "github-release",
+      "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/tropnik-preview.apk",
+      "apkBytes": 79346747,
+      "apkSha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+      "browserRenderingTested": true,
+      "browserProfiles": 4
+    },
+    "log": {
+      "file": "deploy-attempt2-success.log",
+      "bytes": 19380,
+      "sha256": "b58215b6ae8ef3c5948c937619150eef790ea12590585f20fb13bbf4f02fd826"
+    }
+  },
+  "limitations": [
+    "The full browser contract passes; separately recorded mode intervals retain mobile371ms/CLS0.3172081051392909 and desktop1353ms/CLS0.03137042123730378. These are outside the strict map-interaction and satellite intervals.",
+    "The real overview imagery removes the broad empty band; native/overzoom source mosaic seams remain. All12 fresh satellite originals were independently viewed. Imagery readiness does not claim every unrelated geometry request is settled.",
+    "No new physical-device or ARM64 execution claim is added to the unchanged Android release.",
+    "All12 fresh coast originals were independently viewed. Desktop z12 duplicate captions and softer mobile Gogland relief remain; no blanket visual-perfection claim.",
+    "Deployment attempt1 timed out during server syncing_files. A single deployment-only retry succeeded with the identical artifact and preserved build/browser proof. Neither reduced artifact size nor retry success establishes the cause of the first timeout."
+  ],
+  "coastIndependentReview": {
+    "file": "coast-22a7e01-independent-review.json",
+    "bytes": 14390,
+    "sha256": "85171731b6fdbd3727538555f3d71c886fe6f9f94270e9bd4f2c7c23044dab78",
+    "originalPngsPersonallyInspected": 12,
+    "allHashesMatched": true,
+    "reportedScope": "Fresh contours show no visible gaps. Desktop z12 still has duplicate Primorsk/Malye Sopki/Karasevka captions; previous z7 duplicates are not reasserted for the new frame. Mobile Gogland relief appears softer than WebGL; no claim that a prior tonal transition was fixed. Capture coverage is ready with no pending/error, without claiming all cumulative requests finished."
+  },
+  "deploymentAttempts": [
+    {
+      "attempt": 1,
+      "status": "skipped",
+      "jobId": 130118194575,
+      "jobConclusion": "failure",
+      "startedAt": "2026-11-10T20:46:48Z",
+      "completedAt": "2026-11-10T20:57:23Z",
+      "deploymentStepStartedAt": "2026-11-10T20:47:07Z",
+      "deploymentStepCompletedAt": "2026-11-10T20:57:21Z",
+      "failureStage": "Deploy the verified artifact",
+      "configuredTimeoutMs": 600000,
+      "actionEnforcedTimeoutMs": 600000,
+      "lastObservedNonemptyDeploymentStatus": "syncing_files",
+      "lastStatusAt": "2026-11-10T20:57:20.3807029Z",
+      "timeoutAt": "2026-11-10T20:57:20.3828601Z",
+      "deploymentCancelledAt": "2026-11-10T20:57:21.1663497Z",
+      "artifactId": 13800189682,
+      "artifactName": "github-pages-42895220863-1",
+      "sourceCommit": "22a7e01bcd1517e6dd1248cccf3bd242721acda2",
+      "publicBuildReportApkGuardRan": false,
+      "log": {
+        "file": "deploy-attempt1-failed.log",
+        "bytes": 20324,
+        "sha256": "24632e47cd74f2a49de9e6384e43a51c1a175253a525b0f03a831ccfa9694a52"
+      },
+      "cause": "The Pages service remained syncing_files until the supported600000ms action timeout; deployment was cancelled. The smaller artifact did not establish a resolution of the external synchronization failure."
+    },
+    {
+      "attempt": 2,
+      "status": "success",
+      "jobId": 130124845098,
+      "jobConclusion": "success",
+      "startedAt": "2026-11-10T20:58:52Z",
+      "completedAt": "2026-11-10T21:00:30Z",
+      "deploymentStepStartedAt": "2026-11-10T20:59:13Z",
+      "deploymentStepCompletedAt": "2026-11-10T21:00:24Z",
+      "deploymentCreatedAt": "2026-11-10T20:59:15.5086820Z",
+      "deploymentReportedSuccessAt": "2026-11-10T21:00:24.3876287Z",
+      "guardStartedAt": "2026-11-10T21:00:24Z",
+      "guardCompletedAt": "2026-11-10T21:00:28Z",
+      "guardReceiptAt": "2026-11-10T21:00:28.0022901Z",
+      "configuredTimeoutMs": 600000,
+      "artifactId": 13800189682,
+      "artifactName": "github-pages-42895220863-1",
+      "sameArtifactAsAttempt1": true,
+      "noNewBuildOrBrowserRun": true,
+      "sourceCommit": "22a7e01bcd1517e6dd1248cccf3bd242721acda2",
+      "publicBuildReportApkGuardRan": true,
+      "receipt": {
+        "verified": true,
+        "url": "https://orewn.github.io/tropnik/",
+        "buildId": "ebe81176fac99c80",
+        "sourceCommit": "22a7e01bcd1517e6dd1248cccf3bd242721acda2",
+        "publicHttpChecks": 25,
+        "apkDelivery": "github-release",
+        "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.23-preview/tropnik-preview.apk",
+        "apkBytes": 79346747,
+        "apkSha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+        "browserRenderingTested": true,
+        "browserProfiles": 4
+      },
+      "log": {
+        "file": "deploy-attempt2-success.log",
+        "bytes": 19380,
+        "sha256": "b58215b6ae8ef3c5948c937619150eef790ea12590585f20fb13bbf4f02fd826"
+      }
+    }
+  ],
+  "workflow": {
+    "status": "completed",
+    "conclusion": "success",
+    "runAttempt": 2,
+    "updatedAt": "2026-11-10T21:00:31Z"
+  },
+  "satelliteIndependentReview": {
+    "originalPngsPersonallyInspected": 12,
+    "allHashesMatched": true,
+    "fullReportSource": "22a7e01bcd1517e6dd1248cccf3bd242721acda2",
+    "fullReportSha256": "b4c3d61d4d3bcaeab0ebc0c3a0ebcdeb98002bc916173b062a0f0e7eeb7de082",
+    "standaloneReportsEqualFullReport": true,
+    "cameraRectViewportScrollYPreserved": true,
+    "native8BothDatelineColumnsVerified": true,
+    "native8TileCoordinates": {
+      "z": 8,
+      "y": 62,
+      "x": [
+        0,
+        255
+      ]
+    },
+    "reportedScope": "Wide blank band absent. Strong vertical source-texture seam, horizontal streaks and coarse overzoom remain in both engines; imagery readiness does not imply the unrelated geometry-detail status is idle."
+  },
+  "verified": true,
+  "releaseEligible": true,
+  "postPublicationBrowser": {
+    "url": "https://orewn.github.io/tropnik/?region=territory-28173009B11091203162490",
+    "region": "Чукотский автономный округ",
+    "actions": [
+      "reload published page",
+      "open Layers",
+      "select Satellite",
+      "close Layers"
+    ],
+    "engine": "Leaflet / Canvas fallback in managed browser; MapLibre covered by full CI",
+    "visibleAttribution": [
+      "NASA Blue Marble",
+      "EOX"
+    ],
+    "visibleQualityLabel": "Обзорный снимок · детализация ниже",
+    "loadingNoticeGone": true,
+    "broadOpaqueWhiteBandAbsent": true,
+    "mapGeometryNotAlteredByVerification": true,
+    "nativeBrowserTabMarkedDeliverable": true,
+    "screenshot": {
+      "file": "web-0.4.23-chukotka-published.jpg",
+      "format": "JPEG",
+      "bytes": 158157,
+      "sha256": "30d2c37fca93dc19b598217f6d18ba4c33d17b15dbafce08d0e38d5dcdab9f00",
+      "width": 1348,
+      "height": 926,
+      "savedAt": "2026-11-10T21:02:53.739269+00:00",
+      "originalBrowserBytesUnmodified": true
+    },
+    "scope": "Published regional overview personally inspected. Native8/overzoom coarse mosaic seam and streaks remain, as documented in the fresh CI visual review."
+  },
+  "sitePublication": {
+    "version": 27,
+    "sourceCommit": "20f6e5affc38c9c6ebc6a58ff4c2e213959acf64",
+    "webSourceCommit": "aabfaf9ed1fdb7e1cd386638bb16def71523e411",
+    "sameWebTreeAsPublishedPages": "2f3f867b7254da7786d2912caa88002171483285",
+    "sourceWebFilesWithByteParity": 1848,
+    "status": "succeeded",
+    "deploymentId": "appgdep_6af378df1cf481918244c6e4c1ff72d8",
+    "versionId": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_01948e6c1a988191a3a9480c0b89b3a0",
+    "publishedAt": "2026-11-10T20:05:12.144165+00:00",
+    "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+    "ownerOnlyAccessPreserved": true,
+    "republicationRequiredForPagesOnlyPackagingChange": false,
+    "receipt": "site-0.4.23-version27.json"
+  }
+}
