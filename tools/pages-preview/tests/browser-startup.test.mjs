@@ -35,7 +35,23 @@ test('one healthy process may become ready after eight seconds without relaunchi
  const version=await drive(browser.waitUntilReady('http://127.0.0.1:9222/json/version'),time);
  assert.equal(version.Browser,'Chrome/test');assert.equal(spawns,1);assert.ok(probes>80);
  const diagnostics=browser.diagnostics();assert.equal(diagnostics.status,'ready');assert.equal(diagnostics.readyAfterMs,9000);assert.equal(diagnostics.binary,'test-chrome');
- assert.equal(BROWSER_STARTUP_LIMITS.readyMs,30000);assert.equal(BROWSER_STARTUP_LIMITS.probeMs,1000);
+ assert.equal(BROWSER_STARTUP_LIMITS.readyMs,60000);assert.equal(BROWSER_STARTUP_LIMITS.probeMs,1000);
+ assert.ok(time.delays.every(ms=>ms<=1000));assert.equal(time.pending.size,0);
+});
+
+test('a single blank browser may finish cold process startup after the old thirty-second cutoff',async()=>{
+ const time=controlledTime(),child=processStub();let spawns=0,probes=0;
+ const endpoint='http://127.0.0.1:9222/json/version';
+ const browser=launchBrowser('test-chrome',['--headless=new','about:blank'],{...time,platform:'linux',
+  spawn(_binary,args){spawns++;assert.deepEqual(args,['--headless=new','about:blank']);return child;},
+  fetch:async(url,{signal})=>{probes++;assert.equal(url,endpoint,'Startup only polls CDP health; it never loads the app');assert.equal(signal.aborted,false);if(time.clock()<45000)throw new Error('ECONNREFUSED');return ready();},
+ });
+ const waiting=browser.waitUntilReady(endpoint);assert.equal(browser.waitUntilReady(endpoint),waiting);
+ const version=await drive(waiting,time);
+ assert.equal(version.Browser,'Chrome/test');assert.equal(spawns,1);assert.equal(probes,451);
+ const diagnostics=browser.diagnostics();assert.equal(diagnostics.status,'ready');assert.equal(diagnostics.readyAfterMs,45000);
+ assert.ok(diagnostics.readyAfterMs>30000&&diagnostics.readyAfterMs<diagnostics.limits.readyMs);
+ assert.equal(diagnostics.limits.readyMs,60000);assert.equal(diagnostics.limits.probeMs,1000);assert.equal(diagnostics.limits.pollMs,100);
  assert.ok(time.delays.every(ms=>ms<=1000));assert.equal(time.pending.size,0);
 });
 
@@ -43,18 +59,18 @@ test('a hanging health response body is aborted per probe and cannot exceed the 
  const time=controlledTime(),child=processStub(),signals=[];let spawns=0;
  const browser=launchBrowser('test-chrome',[],{...time,platform:'linux',spawn:()=>{spawns++;return child;},fetch:async(_url,{signal})=>{signals.push(signal);return{ok:true,json:()=>new Promise(()=>{})};}});
  const failure=await drive(browser.waitUntilReady('http://127.0.0.1:9222/json/version').then(()=>assert.fail('Must time out'),error=>error),time);
- assert.match(failure.message,/readiness deadline exceeded 30000 ms/);assert.equal(spawns,1);assert.ok(signals.length>1);
- assert.ok(signals.every(signal=>signal.aborted));assert.ok(time.delays.every(ms=>ms<=1000));assert.equal(time.clock(),30000);assert.equal(time.pending.size,0);
- const diagnostics=browser.diagnostics();assert.equal(diagnostics.status,'failed');assert.equal(diagnostics.elapsedMs,30000);assert.equal(diagnostics.exitCode,null);assert.equal(diagnostics.signalCode,null);
+ assert.match(failure.message,/readiness deadline exceeded 60000 ms/);assert.equal(spawns,1);assert.ok(signals.length>1);
+ assert.ok(signals.every(signal=>signal.aborted));assert.ok(time.delays.every(ms=>ms<=1000));assert.equal(time.clock(),60000);assert.equal(time.pending.size,0);
+ const diagnostics=browser.diagnostics();assert.equal(diagnostics.status,'failed');assert.equal(diagnostics.elapsedMs,60000);assert.equal(diagnostics.exitCode,null);assert.equal(diagnostics.signalCode,null);
  assert.match(diagnostics.lastProbeError,/probe exceeded/);assert.equal(diagnostics.startupFailure.code,'BROWSER_STARTUP_TIMEOUT');assert.equal(diagnostics.lastProbeFailure.code,'BROWSER_PROBE_TIMEOUT');
 });
 
 test('an early process exit interrupts an in-flight health request and preserves a bounded stderr tail',async()=>{
- const time=controlledTime(),child=processStub();let requestSignal;
- const browser=launchBrowser('test-chrome',[],{...time,platform:'linux',limits:{...BROWSER_STARTUP_LIMITS,stderrBytes:12},spawn:()=>child,fetch:(_url,{signal})=>{requestSignal=signal;return new Promise(()=>{});}});
+ const time=controlledTime(),child=processStub();let requestSignal,spawns=0;
+ const browser=launchBrowser('test-chrome',[],{...time,platform:'linux',limits:{...BROWSER_STARTUP_LIMITS,stderrBytes:12},spawn:()=>{spawns++;return child;},fetch:(_url,{signal})=>{requestSignal=signal;return new Promise(()=>{});}});
  const observed=browser.waitUntilReady('http://127.0.0.1:9222/json/version').then(()=>assert.fail('Must fail'),error=>error);
  await flush();child.stderr.emit('data',Buffer.from('prefix-that-must-be-discarded:'));child.stderr.emit('data',Buffer.from('fatal reason'));child.finish(7,null);
- const failure=await observed;assert.match(failure.message,/exited.*code 7/);assert.equal(time.clock(),0);assert.equal(time.pending.size,0);assert.equal(requestSignal.aborted,true);
+ const failure=await observed;assert.match(failure.message,/exited.*code 7/);assert.equal(spawns,1);assert.equal(time.clock(),0);assert.equal(time.pending.size,0);assert.equal(requestSignal.aborted,true);
  const diagnostics=browser.diagnostics();assert.equal(diagnostics.exitCode,7);assert.equal(diagnostics.signalCode,null);assert.equal(diagnostics.stderrTail,'fatal reason');assert.equal(diagnostics.stderrBytesCaptured,12);assert.equal(diagnostics.stderrTruncated,true);assert.equal(diagnostics.stderrBytesTotal,42);
 });
 
