@@ -21,6 +21,7 @@ import {MAP_CONFIG,directionExpansionZoom,viewportRegionId} from '@/lib/map-conf
 import {publishMapCamera} from '@/lib/map-interaction';
 import {MapZoomButtons,MAP_ZOOM_BUTTONS} from '@/lib/map-zoom-buttons';
 import {canvasStyle} from '@/public/maps/canvas-style.js';
+import {createCanvasLabelLayer} from '@/public/maps/canvas-label-coverage.js';
 import {createCanvasRelief} from '@/lib/canvas-relief';
 import {createLeafletCanvas} from '@/lib/leaflet-canvas';
 import {maskViewportCulling} from '@/lib/leaflet-mask-viewport';
@@ -32,7 +33,8 @@ import {SATELLITE_TILES,SATELLITE_MAX_ZOOM,SATELLITE_ERROR} from '@/lib/map-sate
 import 'leaflet/dist/leaflet.css';
 
 type Coverage=Awaited<ReturnType<typeof loadRussiaGeometry>>;
-type CanvasDetailLayer=Layer&{paintRules:ReturnType<typeof canvasStyle>['paintRules'];backgroundColor?:string;rerenderTiles:()=>void};
+type CanvasVectorLayer=Layer&{paintRules:ReturnType<typeof canvasStyle>['paintRules'];backgroundColor?:string;rerenderTiles:()=>void;views:Map<string,import('protomaps-leaflet').View>};
+type CanvasDetailLayer=LayerGroup&{ground:CanvasVectorLayer;labels:CanvasVectorLayer};
 type CanvasTrailPointLayers={marker:LeafletCircleMarker;hit:LeafletCircleMarker};
 export function createCanvasRussiaMask(L:typeof import('leaflet'),mask:GeoJSON.GeoJsonObject){
  // These published cells already share a simplified boundary. Leaflet's
@@ -176,17 +178,23 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
     // Preserve the canvases, labels and decoded tile cache. Redrawing the whole
     // Leaflet layer removed the ready map while the replacement was still loading.
     const style=canvasStyle(p,pathVisibility.current,satelliteActive.current);
-    baseRef.current.paintRules=style.paintRules;baseRef.current.backgroundColor=style.backgroundColor;
-    baseRef.current.rerenderTiles();return true;
+    baseRef.current.ground.paintRules=style.paintRules;baseRef.current.ground.backgroundColor=style.backgroundColor;
+    baseRef.current.ground.rerenderTiles();return true;
    }
    const tilejson=await loadPublicJSON<{tiles:string[]}>('https://tiles.openfreemap.org/planet/latest');
    if(!current())return false;
    if(!tilejson.tiles?.[0]?.startsWith('https://tiles.openfreemap.org/'))throw new Error('Источник карты не подтверждён.');
-   const detail=p.leafletLayer({url:tilejson.tiles[0],...canvasStyle(p,pathVisibility.current,satelliteActive.current),attribution:'OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors',devicePixelRatio:Math.min(window.devicePixelRatio,MAP_CONFIG.maxPixelRatio)}) as unknown as CanvasDetailLayer;
+   const L=leafletRef.current,coverage=coverageRef.current;if(!L||!coverage)return false;
+   const style=canvasStyle(p,pathVisibility.current,satelliteActive.current),devicePixelRatio=Math.min(window.devicePixelRatio,MAP_CONFIG.maxPixelRatio);
+   const ground=p.leafletLayer({url:tilejson.tiles[0],...style,labelRules:[],attribution:'OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors',devicePixelRatio}) as unknown as CanvasVectorLayer;
+   const labels=createCanvasLabelLayer(p,ground,style.labelRules,coverage.area,{devicePixelRatio}) as unknown as CanvasVectorLayer;
+   // One lifecycle removes both layers on overview, connectivity loss and
+   // unmount. Only coverage-checked labels rise above the opaque RF mask.
+   const detail=Object.assign(L.layerGroup([ground,labels]),{ground,labels}) as CanvasDetailLayer;
    const attached=()=>map===mapRef.current&&baseRef.current===detail;
-   detail.on('loading',()=>{if(attached())setTilesLoading(true);});
-   detail.on('load',()=>{if(attached())setTilesLoading(false);});
-   detail.on('tileerror',()=>{if(attached())setTilesLoading(false);});
+   ground.on('loading',()=>{if(attached())setTilesLoading(true);});
+   ground.on('load',()=>{if(attached())setTilesLoading(false);});
+   ground.on('tileerror',()=>{if(attached())setTilesLoading(false);});
    baseRef.current=detail;detail.addTo(map);reliefRef.current?.setOverview(false);return true;
   }catch(error){if(current())throw error;return false;}
   finally{if(request===detailRequest.current)detailLoading.current=false;}
@@ -209,7 +217,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
  const refreshGround=useCallback(()=>{
   const detail=baseRef.current,p=protomapsRef.current;if(!detail||!p)return;
   const style=canvasStyle(p,pathVisibility.current,satelliteActive.current);
-  detail.paintRules=style.paintRules;detail.backgroundColor=style.backgroundColor;detail.rerenderTiles();
+  detail.ground.paintRules=style.paintRules;detail.ground.backgroundColor=style.backgroundColor;detail.ground.rerenderTiles();
  },[]);
  const removeSatellite=useCallback(()=>{
   satelliteLayer.current?.remove();satelliteLayer.current=null;satelliteActive.current=false;setSatellite(false);refreshGround();
@@ -299,6 +307,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
     map.createPane('russia-satellite');Object.assign(map.getPane('russia-satellite')!.style,{zIndex:'180',pointerEvents:'none'});
     map.createPane('russia-relief');Object.assign(map.getPane('russia-relief')!.style,{zIndex:'350',pointerEvents:'none'});
     map.createPane('russia-mask');Object.assign(map.getPane('russia-mask')!.style,{zIndex:'450',pointerEvents:'none'});
+    map.createPane('russia-labels');Object.assign(map.getPane('russia-labels')!.style,{zIndex:'460',pointerEvents:'none'});
     L.geoJSON(coverage.area,{pane:'russia-land',style:{renderer:createLeafletCanvas(L,{pane:'russia-land',padding:.15}),color:'#aebda2',weight:.65,fillColor:'#dbe4cd',fillOpacity:1},interactive:false}).addTo(map);
     L.tileLayer('/maps/russia-relief/{z}/{x}/{y}.png',{pane:'russia-overview-relief',minZoom:0,maxNativeZoom:4,maxZoom:6,tileSize:256,keepBuffer:4,updateWhenIdle:false,updateWhenZooming:true}).addTo(map);
     ensureRelief();

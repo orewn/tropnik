@@ -1338,15 +1338,6 @@
       }
     },
     {
-      "id": "russia-outside-mask",
-      "type": "fill",
-      "source": "russia-mask",
-      "paint": {
-        "fill-color": "#e7ebe2",
-        "fill-antialias": false
-      }
-    },
-    {
       "id": "russia-priority-city-label",
       "type": "symbol",
       "source": "openmaptiles",
@@ -1460,6 +1451,15 @@
         "symbol-avoid-edges": true,
         "text-allow-overlap": false,
         "text-ignore-placement": false
+      }
+    },
+    {
+      "id": "russia-outside-mask",
+      "type": "fill",
+      "source": "russia-mask",
+      "paint": {
+        "fill-color": "#e7ebe2",
+        "fill-antialias": false
       }
     }
   ]

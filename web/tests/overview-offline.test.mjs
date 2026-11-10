@@ -31,7 +31,7 @@ test('idle map warm saves all 341 actual RF overview tiles using 57 verified til
  assert.equal(calls.filter(path=>path.endsWith('.png')).length,57);
  for(const file of manifest.files)assert.equal(saved.get('/maps/russia-relief/'+file.path)?.byteLength,file.bytes,file.path);
  assert.ok(!calls.some(path=>path.includes('/api/')));
- for(const dependency of ['canvas-style.js','map-city-labels.js','tropnik-pictograms.js'])assert.ok(saved.has('/maps/'+dependency),`offline renderer dependency ${dependency} is cached`);
+ for(const dependency of ['canvas-style.js','canvas-label-coverage.js','map-label-coverage.js','map-label-geometry.js','map-city-labels.js','tropnik-pictograms.js'])assert.ok(saved.has('/maps/'+dependency),`offline renderer dependency ${dependency} is cached`);
 });
 test('corrupt overview bytes reject warmup instead of claiming a complete offline map',async()=>{
  await assert.rejects(run(true),/integrity mismatch/);

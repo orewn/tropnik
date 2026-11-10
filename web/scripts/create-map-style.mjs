@@ -10,8 +10,8 @@ const name=['coalesce',['get','name:ru'],['get','name'],['get','name:latin'],'']
 const source='openmaptiles';
 const is=(key,value)=>['==',['get',key],value];
 const oneOf=(key,values)=>['in',['get',key],['literal',values]];
-/* Russia-only label re-layer: keep outside labels masked, but redraw key Russian
- * cities above the geographic mask so their names aren't cut at the coastline. */
+/* Priority only controls typography. Geographic eligibility is checked for
+ * every source label by map-label-coverage before it is drawn above the mask. */
 const priorityCity=['in',name,['literal',priorityCityNames]];
 
 const layer=(id,type,sourceLayer,paint,options={})=>({id,type,source,'source-layer':sourceLayer,paint,...options});
@@ -53,11 +53,13 @@ const style={version:8,name:'Тропник · ландшафт',metadata:{autho
 style.sources['overview-land'].data=RUSSIA_AREA_URL;
 style.sources['russia-relief']={type:'raster',tiles:['/maps/russia-relief/{z}/{x}/{y}.png'],tileSize:256,minzoom:0,maxzoom:4};
 style.sources['russia-mask']={type:'geojson',data:RUSSIA_CANONICAL_MASK_URL};
-style.layers.push({id:'russia-outside-mask',type:'fill',source:'russia-mask',paint:{'fill-color':MAP_OUTSIDE_COLOR,'fill-antialias':false}});
 style.layers.push(text('russia-priority-city-label','place',3,
  ['interpolate',['linear'],['zoom'],3,13,6,17,10,20],
  ['all',is('class','city'),priorityCity],
  {'text-color':'#263F32','text-halo-color':'#FFFEFA','text-halo-width':2.4,'text-halo-blur':.5}));
+// Safe source ordering for consumers which have not installed the verified
+// label overlay. The browser helper replaces all symbol sources atomically.
+style.layers.push({id:'russia-outside-mask',type:'fill',source:'russia-mask',paint:{'fill-color':MAP_OUTSIDE_COLOR,'fill-antialias':false}});
 
 for(const l of style.layers)if(l.filter===undefined)delete l.filter;
 writeFileSync(join(target,'tropa-style.json'),JSON.stringify(style,null,2));

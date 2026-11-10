@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {terrainExaggerationForZoom,terrainPitchForZoom} from '../lib/map-camera-profile.ts';
+import {withMapLabelCoverage,MAP_LABEL_SOURCE} from '../public/maps/map-label-coverage.js';
 
 const read=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
@@ -50,7 +51,12 @@ test('reported map wedges, clipped labels and false detail banner stay fixed',()
   assert.match(generator,/russia-priority-city-label/);
   const maskIndex=style.layers.findIndex(layer=>layer.id==='russia-outside-mask');
   const priorityIndex=style.layers.findIndex(layer=>layer.id==='russia-priority-city-label');
-  assert.ok(maskIndex>=0&&priorityIndex>maskIndex,'priority Russian labels redraw after the outside mask');
+  assert.ok(maskIndex>=0&&priorityIndex<maskIndex,'the raw style has no unchecked geographic whitelist exception');
+  const covered=withMapLabelCoverage(style),coveredMask=covered.layers.findIndex(layer=>layer.id==='russia-outside-mask');
+  for(const layer of covered.layers.filter(layer=>layer.type==='symbol')){
+    assert.ok(covered.layers.indexOf(layer)>coveredMask,`${layer.id} draws its complete text above the mask`);
+    assert.equal(layer.source,MAP_LABEL_SOURCE,`${layer.id} uses only verified geographic features`);
+  }
   assert.match(sw,/tropnik-shell-\d+\.\d+\.\d+-[a-f0-9]{16}/);
   assert.match(sw,/russia-canonical-mask\.geojson/);
 });

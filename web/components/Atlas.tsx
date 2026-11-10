@@ -28,6 +28,7 @@ import {MapZoomButtons,MAP_ZOOM_BUTTONS,bindZoomButtonCancellation} from '@/lib/
 import {MapTerrainPitch} from '@/lib/map-terrain-pitch';
 import {readRouteGeometry,routeGeometryPositions,identifyRouteGeometry,RENDERED_TRAIL_ID} from '@/lib/route-geometry';
 import {satelliteStyle,SATELLITE_SOURCE,SATELLITE_ERROR} from '@/lib/map-satellite';
+import {withMapLabelCoverage,bindMapLabelCoverage} from '@/public/maps/map-label-coverage.js';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -61,7 +62,7 @@ function detailStyle(style:StyleSpecification,coverage:Coverage):StyleSpecificat
  next.sources['overview-land']={type:'geojson',data:coverage.area};
  next.sources['russia-mask']={type:'geojson',data:coverage.mask};
  if(!next.layers.some(layer=>layer.id===MASK))next.layers.push({id:MASK,type:'fill',source:'russia-mask',paint:{'fill-color':MAP_OUTSIDE_COLOR,'fill-antialias':false}});
- return next;
+ return withMapLabelCoverage(next);
 }
 function highlightRegion(map:MapInstance,region?:MapRegion){
  const filter:import('maplibre-gl').FilterSpecification=region?['in',['get','shapeName'],['literal',region.shapeNames]]:['==',['get','shapeName'],'__none'];
@@ -142,7 +143,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  }
  useEffect(()=>{
   const containerElement=container.current,locationEpoch=locationRevision,styleEpoch=styleGeneration,displayedSelection=displayedTrail,edgeAnnotations=routeAnnotations.current;
-  let cancelled=false,geographyPainted=false,overviewFallback=false,satelliteFailed=false,directionLayoutFrame=0,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined,unbindZoom:(()=>void)|undefined;
+  let cancelled=false,geographyPainted=false,overviewFallback=false,satelliteFailed=false,directionLayoutFrame=0,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined,unbindZoom:(()=>void)|undefined,unbindCoverageLabels:(()=>void)|undefined;
   let resizeFrame:ReturnType<typeof coalesceMapFrame>|undefined,hoverFrame:ReturnType<typeof coalesceMapFrame>|undefined,terrainPitch:MapTerrainPitch|undefined;
   let sources:MapSourceLoading|undefined;
   const unbindDirectionButtons:(()=>void)[]=[];
@@ -177,6 +178,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      // back up DEM uploads on constrained GPUs without improving those layers.
      canvasContextAttributes:{antialias:false,preserveDrawingBuffer:false,powerPreference:'high-performance'}});
     mapRef.current=map;
+    unbindCoverageLabels=bindMapLabelCoverage(map,coverage);
     selectionCamera.current=new MapSelectionCamera();
     const selectedRoute=trailRef.current;selectionCamera.current.beginRouteSelection(selectedRoute?.id?{id:selectedRoute.id,url:selectedRoute.geometryUrl,geometry:selectedRoute.geometry}:undefined);
     setSourceFailures([]);setTilesLoading(false);setStyleRetrying(false);
@@ -362,10 +364,10 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     resize=new ResizeObserver(()=>resizeFrame?.schedule());
     resize.observe(container.current);const panel=container.current.closest('.explore-layout')?.querySelector('.explore-panel');if(panel)resize.observe(panel);
    }catch(error){
-    if(cancelled)return;console.error('Map initialization failed',error);sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
+    if(cancelled)return;console.error('Map initialization failed',error);sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
    }
   })();
-  return()=>{cancelled=true;sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];edgeAnnotations.length=0;markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
+  return()=>{cancelled=true;sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];edgeAnnotations.length=0;markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
  },[planning]);
  useEffect(()=>{
   const map=mapRef.current;if(!map||!loaded)return;
