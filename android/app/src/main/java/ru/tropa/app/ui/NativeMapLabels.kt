@@ -41,11 +41,15 @@ internal class NativeMapLabels(
     private val moved = MapLibreMap.OnCameraMoveStartedListener { moving = true; job?.cancel() }
     private val idle = MapLibreMap.OnCameraIdleListener { moving = false; schedule() }
     private val changed = MapView.OnSourceChangedListener { source -> if (source in sourceIds) schedule() }
+    // Camera idle and source-data changes can precede asynchronous GeoJSON
+    // tiling. Retry once the map settles so an early empty query cannot stick.
+    private val rendered = MapView.OnDidBecomeIdleListener { schedule() }
 
     init {
         map.addOnCameraMoveStartedListener(moved)
         map.addOnCameraIdleListener(idle)
         view.addOnSourceChangedListener(changed)
+        view.addOnDidBecomeIdleListener(rendered)
         schedule()
     }
 
@@ -84,8 +88,11 @@ internal class NativeMapLabels(
         if (disposed) return
         disposed = true
         scope.cancel()
+        job = null
+        previous = null
         map.removeOnCameraMoveStartedListener(moved)
         map.removeOnCameraIdleListener(idle)
         view.removeOnSourceChangedListener(changed)
+        view.removeOnDidBecomeIdleListener(rendered)
     }
 }

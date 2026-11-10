@@ -49,7 +49,9 @@ internal fun withMapLabelCoverage(rawStyle: String): CoveredMapStyle {
             var id = "tropnik-label-query-" + retainedSources.size
             while (!layerIds.add(id)) id += "-query"
             ground.add(JSONObject().put("id", id).put("type", "circle").put("source", source)
-                .put("filter", JSONArray().put("==").put(1).put(0)))
+                // An explicit expression operand avoids legacy filter syntax,
+                // where ["==", 1, 0] is invalid: its property must be a string.
+                .put("filter", JSONArray().put("==").put(JSONArray().put("literal").put(1)).put(0)))
         }
         groups.getOrPut(key) { ArrayList() }.add(JSONObject(layer.toString()))
         origins[key] = source to sourceLayer

@@ -199,14 +199,28 @@ class LocalExperienceTest {
                 }
             }
             assertTrue("Synthetic style did not load", loaded.await(20, TimeUnit.SECONDS))
-            app.waitUntil(timeoutMillis = 20_000) {
-                var ready = false
-                app.runOnUiThread {
-                    val accepted = map.style?.getSourceAs<GeoJsonSource>(MAP_LABEL_SOURCE)?.querySourceFeatures(null).orEmpty()
-                    val rendered = map.queryRenderedFeatures(RectF(0f, 0f, mapView.width.toFloat(), mapView.height.toFloat()), "fixture-label")
-                    ready = accepted.isNotEmpty() && accepted.all { it.getStringProperty("name") == "ПРИМОРСК" } && rendered.isNotEmpty()
+            app.runOnUiThread {
+                assertNotNull("The SDK rejected the source-retention layer", map.style?.getLayer("tropnik-label-query-1"))
+            }
+            var originalCount = 0; var acceptedNames = emptySet<String>(); var renderedCount = 0
+            var labelsReady = false
+            try {
+                app.waitUntil(timeoutMillis = 20_000) {
+                    var ready = false
+                    app.runOnUiThread {
+                        originalCount = map.style?.getSourceAs<GeoJsonSource>("fixture")?.querySourceFeatures(null).orEmpty().size
+                        val accepted = map.style?.getSourceAs<GeoJsonSource>(MAP_LABEL_SOURCE)?.querySourceFeatures(null).orEmpty()
+                        val rendered = map.queryRenderedFeatures(RectF(0f, 0f, mapView.width.toFloat(), mapView.height.toFloat()), "fixture-label")
+                        acceptedNames = accepted.map { it.getStringProperty("name") }.toSet()
+                        renderedCount = rendered.size
+                        ready = accepted.isNotEmpty() && accepted.all { it.getStringProperty("name") == "ПРИМОРСК" } && rendered.isNotEmpty()
+                    }
+                    ready
                 }
-                ready
+                labelsReady = true
+            } finally {
+                android.util.Log.i("TropnikLabelTest", "original=$originalCount accepted=$acceptedNames rendered=$renderedCount ready=$labelsReady")
+                if (!labelsReady) screenshot("map-labels-not-ready")
             }
             var boundary = PointF(); val location = IntArray(2)
             app.runOnUiThread {

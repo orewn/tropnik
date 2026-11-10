@@ -106,6 +106,18 @@ class MapLabelCoverageTest {
             }
             assertEquals(0, style.getJSONObject("sources").getJSONObject(MAP_LABEL_SOURCE).getJSONObject("data").getJSONArray("features").length())
             assertTrue(prepared.groups.all { "name:ru" in it.properties && "name" in it.properties })
+            val retained = after.filter { it.getString("id").startsWith("tropnik-label-query-") }
+            assertEquals(prepared.groups.filter {
+                original.getJSONObject("sources").getJSONObject(it.source).getString("type") == "geojson"
+            }.map { it.source }.toSet(), retained.map { it.getString("source") }.toSet())
+            for (layer in retained) {
+                val filter = layer.getJSONArray("filter")
+                assertEquals("==", filter.getString(0))
+                // A nested operand is required for native expression syntax;
+                // a numeric legacy property name drops the retention layer.
+                assertEquals("literal", filter.getJSONArray(1).getString(0))
+                assertNotEquals(filter.getJSONArray(1).getInt(1), filter.getInt(2))
+            }
         }
     }
 
