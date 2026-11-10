@@ -7,7 +7,7 @@ import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
 import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-projection.mjs';
 import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving,browserAuditRunPolicy} from './browser-zoom-audit.mjs';
-import {browserTraceEnabled,traceDesktopSelection} from './browser-trace.mjs';
+import {browserTraceEnabled,traceDesktopSelection,recordBrowserLongTask} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
@@ -117,7 +117,7 @@ async function diagnosticPhase(cdp,name){
   return evaluate(cdp,`(()=>{
     const name=${JSON.stringify(name)},box=selector=>{const element=document.querySelector(selector);if(!element)return null;const r=element.getBoundingClientRect(),s=getComputedStyle(element);return{x:r.x,y:r.y,width:r.width,height:r.height,display:s.display,visibility:s.visibility,transform:s.transform};};
     const state={name,time:performance.now(),perf:{...window.__tropnikPerf},fonts:document.fonts?.status,sheet:document.querySelector('.explore-layout')?.dataset.sheetState,story:box('.fact-card'),storyPhoto:box('.fact-photo'),panel:box('.explore-panel'),canvas:box('.atlas-canvas'),firstDirection:box('.region-marker:not([hidden])'),attribution:box('.map-attribution'),mapMessage:box('.map-message')};
-    window.__tropnikPhase=name;window.__tropnikPhases.push(state);if(window.__tropnikPhases.length>32)window.__tropnikPhases.shift();return state;
+    window.__tropnikPhase=name;performance.mark('tropnik:'+name);window.__tropnikPhases.push(state);if(window.__tropnikPhases.length>32)window.__tropnikPhases.shift();return state;
   })()`);
 }
 async function performanceDiagnostics(cdp){
@@ -764,6 +764,8 @@ async function checkStyleCameraRoundtrip(cdp,profile,trail){
   const receipt={schemaVersion:1,passed:true,input:'mouse',routeId:selection.route,selection,before,zoomed,zoom,pan,manual,transitions};assertStyleCameraRoundtrip(receipt,profile.name);return receipt;
 }
 async function mapInteraction(cdp,profile,performanceIssues){
+  const focusedDiagnostic=runPolicy.diagnostic==='map-interactions';
+  const phase=async name=>{if(focusedDiagnostic)await diagnosticPhase(cdp,'map-interactions/'+name);};
   const experience={schemaVersion:1,passed:false,input:profile.mobile?'touch':'mouse',filterReset:{}};
   currentExploreExperience={profile:profile.name,step:'overview-before',receipt:experience};
   const started=Date.now();await clearMapStories(cdp,profile);await closeMapSheet(cdp,profile);
@@ -772,17 +774,20 @@ async function mapInteraction(cdp,profile,performanceIssues){
   await evaluate(cdp,'window.__tropnikPerf={cls:0,longest:0};window.__tropnikPerfStart=performance.now()');
   await diagnosticPhase(cdp,'map-interactions');
   const directionActions=[];
+  await phase('first-altai');
   const selectFirstDirection=()=>selectMapDirection(cdp,profile,'altai','Алтай',{kind:'label',actions:directionActions});
   const firstSelection=profile.mobile?{value:await selectFirstDirection(),trace:null}:await traceDesktopSelection(cdp,selectFirstDirection,{enabled:traceEnabled,sourceCommit:process.env.GITHUB_SHA||null});
   const firstDirection=firstSelection.value;
-  currentExploreExperience.step='saved-filter';await checkSavedFilterReset(cdp,profile,experience.filterReset);
+  currentExploreExperience.step='saved-filter';await phase('saved-filter');await checkSavedFilterReset(cdp,profile,experience.filterReset);
   const catalogScroll=profile.mobile?await scrollSheetContent(cdp,profile,{stableExtent:true}):null;
   await closeMapSheet(cdp,profile);
-  const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
+  await phase('route-selection');const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
   currentExploreExperience.step='style-camera';
+  await phase('style-camera');
   const styleCameraRoundtrip=profile.engine==='maplibre'?await checkStyleCameraRoundtrip(cdp,profile,trail):null;
   currentExploreExperience.styleCameraRoundtrip=styleCameraRoundtrip;
-  currentExploreExperience.step='request-ownership';experience.requestOwnership=await checkRequestOwnership(cdp,profile,trail);
+  currentExploreExperience.step='request-ownership';await phase('request-ownership');experience.requestOwnership=await checkRequestOwnership(cdp,profile,trail);
+  await phase('return-to-country');
   await pointerSelector(cdp,'.explore-panel .back-link',profile);
   await expectSelection(cdp,{region:'altai',route:'',title:'Алтай'});
   await pointerSelector(cdp,'.explore-panel .back-link',profile);
@@ -790,17 +795,22 @@ async function mapInteraction(cdp,profile,performanceIssues){
   await closeMapSheet(cdp,profile);
   const returned=await settledMap(cdp,profile.engine);
   assert.ok(Math.abs(returned.camera.longitude-country.camera.longitude)<.1&&Math.abs(returned.camera.latitude-country.camera.latitude)<.1&&Math.abs(returned.camera.zoom-country.camera.zoom)<.05,`${profile.name}: return to directions displaced the country after the sheet settled: ${JSON.stringify({initial:country.camera,returned:returned.camera})}`);
-  const secondDirection=await selectMapDirection(cdp,profile,'baikal','Байкал',{kind:'count',actions:directionActions});
+  await phase('second-baikal');const secondDirection=await selectMapDirection(cdp,profile,'baikal','Байкал',{kind:'count',actions:directionActions});
   const directionHitAreas={schemaVersion:1,passed:true,engine:profile.engine,input:profile.mobile?'touch':'mouse',actions:directionActions};
   assertDirectionHitAreas(directionHitAreas,profile.name,profile.engine,profile.mobile);
-  currentExploreExperience.step='sibling-parent';const previous=await selectionState(cdp),polygon=await polygonTouch(cdp,profile);
-  experience.siblingParent=await checkSiblingParent(cdp,profile,previous,polygon);const gestures=await mapGestures(cdp,profile);
+  currentExploreExperience.step='sibling-parent';await phase('sibling-polygon');const previous=await selectionState(cdp);
+  const siblingSelection=await traceDesktopSelection(cdp,async()=>{
+    const polygon=await polygonTouch(cdp,profile),siblingParent=await checkSiblingParent(cdp,profile,previous,polygon);
+    return{polygon,siblingParent};
+  },{enabled:focusedDiagnostic&&!profile.mobile,sourceCommit:process.env.GITHUB_SHA||null,prefix:'desktop-webgl-sibling-polygon',scope:'desktop-sibling-polygon-selection'});
+  const {polygon,siblingParent}=siblingSelection.value;experience.siblingParent=siblingParent;
+  await phase('map-gestures');const gestures=await mapGestures(cdp,profile);
   currentExploreExperience.step='validation';assertExploreExperience({...experience,passed:true},profile.name,profile.engine,profile.mobile);experience.passed=true;
   const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
   const longTaskLimit=profile.mobile?350:750;
   if(!(perf.longest<longTaskLimit))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:longTaskLimit});
   currentExploreExperience=null;
-  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,siblingSelectionTrace:siblingSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
 const httpPort=await freePort(),debugPort=await freePort();
@@ -834,6 +844,7 @@ try{
     window.__tropnikPerf={cls:0,longest:0};
     window.__tropnikPerfStart=0;window.__tropnikPhase='loading';window.__tropnikPhases=[];window.__tropnikLayoutShifts=[];
     window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;window.__tropnikLongTasks=[];
+    window.__tropnikRecordLongTask=${recordBrowserLongTask.toString()};
     window.__tropnikScrollEvents=[];window.__tropnikFormInputs=[];window.__tropnikFormSubmits=0;
     for(const type of ['touchstart','touchmove','touchend','wheel'])document.addEventListener(type,event=>{
       const point=event.changedTouches?.[0]||event;
@@ -855,14 +866,12 @@ try{
       if(window.__tropnikLayoutShifts.length>40)window.__tropnikLayoutShifts.shift();
     }}).observe({type:'layout-shift',buffered:true});}catch{}
     try{new PerformanceObserver(list=>{for(const entry of list.getEntries()){
-      window.__tropnikPerf.longest=Math.max(window.__tropnikPerf.longest,entry.duration);
-      window.__tropnikLongTasks.push({startTime:entry.startTime,duration:entry.duration,name:entry.name,observedAt:performance.now(),phase:window.__tropnikPhase});
-      if(window.__tropnikLongTasks.length>32)window.__tropnikLongTasks.shift();
+      window.__tropnikRecordLongTask(window,{startTime:entry.startTime,duration:entry.duration,name:entry.name,observedAt:performance.now(),phase:window.__tropnikPhase});
     }}).observe({type:'longtask',buffered:true});}catch{}
   `});
   for(const profile of profiles.filter(profile=>!runPolicy.profiles||runPolicy.profiles.includes(profile.name))){
     currentProfile=profile.name;
-    if(runPolicy.diagnostic){
+    if(runPolicy.diagnostic==='terrain-close'){
       const systemInfo=async()=>{
         const version=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/version`);
         assert.ok(version.webSocketDebuggerUrl,'The browser target does not advertise SystemInfo access');
@@ -887,6 +896,12 @@ try{
       const interaction=await mapInteraction(cdp,profile,performanceIssues);mapInteractions.push(interaction);
       desktopProfiles.push({name:profile.name,width:profile.width,height:profile.height,engine:geometry.engine,coarse:false,mapInteractionTested:true});
       profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
+      if(runPolicy.diagnostic==='map-interactions'){
+        assert.notEqual(runPolicy.reportFile,'browser-verification.json');
+        const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:profile.name,engine:profile.engine,interaction,performanceIssues,performancePassed:performanceIssues.length===0,performance:profilePerformance.at(-1),completedAt:new Date().toISOString()};
+        await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
+        await checkpoint('map-interactions-diagnostic-complete');continue;
+      }
       await checkpoint('before-zoom-audit');
       zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
       await checkpoint('profile-complete');

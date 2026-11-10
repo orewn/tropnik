@@ -14,7 +14,17 @@ export const DESKTOP_TRACE_CATEGORIES=Object.freeze(['devtools.timeline','blink.
  * native-input and performance gates run regardless of this setting. */
 export function browserTraceEnabled(value,diagnostic=null){
  assert.ok(value===undefined||value===''||value==='1','Unknown TROPNIK_BROWSER_TRACE value; use 1 to record diagnostic traces');
- return diagnostic==='terrain-close'||value==='1';
+ return diagnostic==='terrain-close'||diagnostic==='map-interactions'||value==='1';
+}
+
+/** Keep the actual maximum beside the bounded recent ring. The performance
+ * counter itself is still reset only by the existing audit phase boundaries. */
+export function recordBrowserLongTask(target,task){
+ const perf=target.__tropnikPerf;
+ perf.longest=Math.max(perf.longest,task.duration);
+ if(!perf.peakLongTask||task.duration>perf.peakLongTask.duration)perf.peakLongTask=task;
+ target.__tropnikLongTasks.push(task);
+ if(target.__tropnikLongTasks.length>32)target.__tropnikLongTasks.shift();
 }
 
 export function traceCategoryEvidence(events){

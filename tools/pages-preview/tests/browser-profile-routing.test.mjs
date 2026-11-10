@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {browserTraceEnabled} from '../browser-trace.mjs';
+import {browserAuditRunPolicy} from '../browser-zoom-audit.mjs';
+import {assertBrowserReport} from '../browser-report.mjs';
 
 // Execute the actual profile dispatch loop with audit boundaries substituted.
 // This checks option forwarding and invocation counts, not browser rendering.
@@ -19,16 +21,17 @@ const profiles=[
  {name:'phone-landscape',width:844,height:390,engine:'leaflet',mobile:true,mapInteraction:false},
 ];
 
-async function dispatchProfiles(traceEnabled,audit){
+async function dispatchProfiles(traceEnabled,audit,policy={diagnostic:null,profiles:null},issues=[]){
  const unavailable=async()=>({available:false});
  const notInvoked=()=>assert.fail('The routing test must not invoke browser helpers');
- const layerMenuCalls=[];
+ const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[];
  const bindings={
-  assert,profiles,runPolicy:{diagnostic:null,profiles:null},traceEnabled,cdp:{},httpPort:4200,
-  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],profilePerformance:[],performanceIssues:[],
+  assert,profiles,runPolicy:policy,traceEnabled,cdp:{},httpPort:4200,
+  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],profilePerformance:[],performanceIssues:issues,
+  REPORT:policy.reportFile,reports,loadCalls,mapCalls,process:{env:{GITHUB_SHA:'a'.repeat(40)}},console:{log(){}},writeFile:async(path,text)=>reports.push({path,report:JSON.parse(text)}),
   runZoomDesignAudit:audit,
-  loadProfile:async(_cdp,_url,profile)=>({engine:profile.engine,width:profile.width,scrollWidth:profile.width,escaping:[],undersized:[]}),
-  evaluate:async()=>false,mapInteraction:async(_cdp,profile)=>({profile:profile.name,passed:true}),
+  loadProfile:async(_cdp,_url,profile)=>{loadCalls.push(profile.name);return{engine:profile.engine,width:profile.width,scrollWidth:profile.width,escaping:[],undersized:[]};},
+  evaluate:async()=>false,mapInteraction:async(_cdp,profile)=>{mapCalls.push(profile.name);return{profile:profile.name,passed:true};},
   performanceDiagnostics:async()=>({}),checkpoint:async()=>{},diagnosticPhase:async()=>{},
   touchSheet:unavailable,touchSheetGestures:async()=>({}),checkMapGeometry:async()=>({}),touchPrevious:unavailable,
   layerMenuCalls,checkPortraitLayerMenus:async(_cdp,profile)=>{layerMenuCalls.push(profile.name);return{profile:profile.name,passed:true};},
@@ -64,4 +67,16 @@ test('a desktop audit failure propagates unchanged without repeating or continui
  const failure=new Error('The maplibre map did not settle'),calls=[];
  const observed=await dispatchProfiles(true,async(_cdp,profile)=>{calls.push(profile.name);throw failure;}).then(()=>null,error=>error);
  assert.equal(observed,failure);assert.deepEqual(calls,['desktop-webgl']);
+});
+
+test('focused map diagnosis runs the exact fresh desktop interaction once and cannot produce release or zoom evidence',async()=>{
+ const policy=browserAuditRunPolicy('map-interactions'),issues=[{profile:'desktop-webgl',phase:'map-interactions',metric:'longestTaskMs',value:851,limit:750}];
+ const run=await dispatchProfiles(browserTraceEnabled(undefined,policy.diagnostic),()=>assert.fail('The diagnostic must not run any zoom matrix'),policy,issues);
+ assert.deepEqual(run.loadCalls,['desktop-webgl']);assert.deepEqual(run.mapCalls,['desktop-webgl']);
+ assert.deepEqual(run.zoomDesigns,[]);assert.deepEqual(run.results,[]);assert.equal(run.reports.length,1);
+ const {path,report}=run.reports[0];assert.equal(path,'browser-map-interactions-diagnostic.json');
+ assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
+ assert.equal(report.sourceCommit,'a'.repeat(40));assert.deepEqual(report.interaction,run.mapInteractions[0]);
+ assert.equal(report.performancePassed,false);assert.deepEqual(report.performanceIssues,issues,'A diagnostic retains the unchanged failed750ms gate');
+ assert.throws(()=>assertBrowserReport(report,report.sourceCommit));
 });

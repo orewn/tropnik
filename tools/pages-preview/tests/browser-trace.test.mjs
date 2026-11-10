@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
-import {browserTraceEnabled,traceDesktopSelection,DESKTOP_TRACE_LIMITS,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES,traceCategoryEvidence} from '../browser-trace.mjs';
+import {browserTraceEnabled,traceDesktopSelection,DESKTOP_TRACE_LIMITS,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES,traceCategoryEvidence,recordBrowserLongTask} from '../browser-trace.mjs';
 
 const traceJSON=JSON.stringify({traceEvents:[{name:'ProfileChunk',cat:'disabled-by-default-v8.cpu_profiler',args:{data:{cpuProfile:{samples:[1,2,3]}}}},{name:'RunTask',cat:'gpu'},{name:'Layout',cat:'cc,viz'}]});
 async function outputDirectory(t){const directory=await mkdtemp(join(tmpdir(),'tropnik-trace-'));t.after(()=>rm(directory,{recursive:true,force:true}));return pathToFileURL(directory+'/');}
@@ -49,10 +49,21 @@ test('full-matrix tracing requires an explicit flag while dedicated terrain diag
  for(const value of [undefined,''])assert.equal(browserTraceEnabled(value),false);
  assert.equal(browserTraceEnabled('1'),true);
  for(const value of [undefined,'','1'])assert.equal(browserTraceEnabled(value,'terrain-close'),true);
+ for(const value of [undefined,'','1'])assert.equal(browserTraceEnabled(value,'map-interactions'),true);
  for(const value of ['0','true','false','all',' 1 ','2',true,1,null]){
   assert.throws(()=>browserTraceEnabled(value),/Unknown TROPNIK_BROWSER_TRACE/);
   assert.throws(()=>browserTraceEnabled(value,'terrain-close'),/Unknown TROPNIK_BROWSER_TRACE/);
  }
+});
+
+test('the actual maximum long task survives the32-entry recent ring without changing audit counter resets',()=>{
+ const state={__tropnikPerf:{cls:0,longest:0},__tropnikLongTasks:[]};
+ const worst={startTime:8100,duration:851,phase:'map-interactions/first-altai'};recordBrowserLongTask(state,worst);
+ for(let i=0;i<40;i++)recordBrowserLongTask(state,{startTime:10000+i*100,duration:55,phase:'map-interactions/sibling-polygon'});
+ assert.equal(state.__tropnikLongTasks.length,32);assert.equal(state.__tropnikLongTasks.includes(worst),false);
+ assert.equal(state.__tropnikPerf.longest,851);assert.equal(state.__tropnikPerf.peakLongTask,worst);
+ state.__tropnikPerf={cls:0,longest:0};const next={startTime:20000,duration:79,phase:'next-audit'};recordBrowserLongTask(state,next);
+ assert.equal(state.__tropnikPerf.longest,79);assert.equal(state.__tropnikPerf.peakLongTask,next);
 });
 
 test('default full-matrix action runs once without tracer calls, timers or evidence files',async t=>{

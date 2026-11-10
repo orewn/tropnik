@@ -9,6 +9,7 @@ test('terrain diagnostics select only desktop and can never select the release r
  assert.deepEqual(browserAuditRunPolicy(''),browserAuditRunPolicy(undefined));
  const policy=browserAuditRunPolicy('terrain-close');
  assert.deepEqual(policy.profiles,['desktop-webgl']);assert.equal(policy.diagnostic,'terrain-close');assert.equal(policy.reportFile,'browser-terrain-diagnostic.json');
+ assert.deepEqual(browserAuditRunPolicy('map-interactions'),{diagnostic:'map-interactions',reportFile:'browser-map-interactions-diagnostic.json',profiles:['desktop-webgl']});
  for(const invalid of ['true','terrain','terrain-high-zoom','release',' terrain-close '])assert.throws(()=>browserAuditRunPolicy(invalid),/Unknown TROPNIK_BROWSER_DIAGNOSTIC/);
 });
 

@@ -14,8 +14,8 @@ const MINUS='.map-controls button[aria-label="Уменьшить масштаб"
 /** A diagnostic receipt is deliberately incompatible with release verification. */
 export function browserAuditRunPolicy(value){
  if(value===undefined||value==='')return{diagnostic:null,reportFile:'browser-verification.json',profiles:null};
- assert.equal(value,'terrain-close','Unknown TROPNIK_BROWSER_DIAGNOSTIC mode');
- return{diagnostic:'terrain-close',reportFile:'browser-terrain-diagnostic.json',profiles:['desktop-webgl']};
+ assert.ok(value==='terrain-close'||value==='map-interactions','Unknown TROPNIK_BROWSER_DIAGNOSTIC mode');
+ return{diagnostic:value,reportFile:value==='terrain-close'?'browser-terrain-diagnostic.json':'browser-map-interactions-diagnostic.json',profiles:['desktop-webgl']};
 }
 export function terrainDiagnosticTraceCategories(available=[]){
  const candidates=['cc','viz','disabled-by-default-gpu.service','disabled-by-default-gpu.device'];
