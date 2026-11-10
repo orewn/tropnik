@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assertLayerMenuAudit,assertExploreExperience,assertStyleCameraRoundtrip} from '../browser-report.mjs';
-import {layerMenusFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
+import {assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from '../browser-report.mjs';
+import {layerMenusFixture,overviewCountsFixture,savedReentryFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
 
 function rejectsEach(make,validate,changes){
  for(const [name,change] of changes){const receipt=make();change(receipt);assert.throws(()=>validate(receipt),undefined,name);}
@@ -58,6 +58,61 @@ test('Explore receipts accept native touch and mouse with actual browser Back an
  for(const mobile of [true,false]){const receipt=exploreExperienceFixture(mobile);assert.equal(checkExplore(mobile)(receipt),receipt);}
 });
 
+test('fully clustered country receipts retain count evidence through native ordinary Altai reentry',()=>{
+ for(const mobile of [true,false]){
+  const receipt=exploreExperienceFixture(mobile);
+  receipt.filterReset.overviewBefore=overviewCountsFixture(true);receipt.filterReset.overviewAfter=overviewCountsFixture(true);
+  receipt.filterReset.reentryActions=savedReentryFixture(mobile,true);
+  assert.equal(checkExplore(mobile)(receipt),receipt);
+  assert.equal(receipt.filterReset.overviewAfter.markers[0].count,2,'A cluster counts directions, not its 21 routes');
+  assert.equal(receipt.filterReset.reentryActions.at(-1).grid.surfaces.find(item=>item.kind==='count').text,'11');
+ }
+});
+
+test('overview requires nonempty visible groups with unique known members and accurate badge semantics',()=>{
+ const validate=receipt=>assertOverviewCounts(receipt,'country');
+ assert.deepEqual(validate(overviewCountsFixture(true)),validate(overviewCountsFixture(false)));
+ rejectsEach(()=>overviewCountsFixture(true),validate,[
+  ['missing catalogue',value=>value.catalog=[]],
+  ['missing all visible controls',value=>value.markers=[]],
+  ['missing catalogue ID',value=>delete value.catalog[0].id],
+  ['duplicate catalogue ID',value=>value.catalog[1].id='altai'],
+  ['group badge mistaken for route sum',value=>value.markers[0].count=21],
+  ['unknown group member',value=>value.markers[0].groupKey='altai|unknown'],
+  ['duplicated group member',value=>value.markers[0].groupKey='altai|altai'],
+  ['nonmember anchor',value=>value.markers[0].id='another'],
+  ['missing membership',value=>delete value.markers[0].groupKey],
+  ['group mislabeled ordinary',value=>value.markers[0].cluster=false],
+  ['direction repeated across controls',value=>value.markers.push(overviewCountsFixture().markers[1])],
+  ['all represented directions secretly empty',value=>{for(const item of value.catalog)item.count=0;}],
+ ]);
+ rejectsEach(overviewCountsFixture,validate,[
+  ['ordinary count secretly filtered',value=>value.markers[0].count=0],
+  ['ordinary name mapped to wrong ID',value=>value.markers[0].name='Байкал'],
+ ]);
+});
+
+test('Saved reset always needs delivered native expansion and an ordinary Altai count of eleven',()=>{
+ const make=()=>{const value=exploreExperienceFixture();value.filterReset.reentryActions=savedReentryFixture(true,true);return value;};
+ rejectsEach(make,checkExplore(true),[
+  ['old catalogue-only reentry',value=>delete value.filterReset.reentryActions],
+  ['no native reentry',value=>value.filterReset.reentryActions=[]],
+  ['unbounded reentry',value=>value.filterReset.reentryActions=Array(8).fill(value.filterReset.reentryActions[0])],
+  ['group-only proof',value=>value.filterReset.reentryActions.pop()],
+  ['synthetic expansion',value=>value.filterReset.reentryActions[0].events[2].trusted=false],
+  ['expansion made no progress',value=>value.filterReset.reentryActions[0].after.zoom=2],
+  ['cluster shows route sum',value=>value.filterReset.reentryActions[0].grid.surfaces.find(item=>item.kind==='count').text='21'],
+  ['ordinary Altai remains filtered',value=>value.filterReset.reentryActions[1].grid.surfaces.find(item=>item.kind==='count').text='0'],
+  ['ordinary Altai count hidden',value=>value.filterReset.reentryActions[1].grid.surfaces.find(item=>item.kind==='count').visible=false],
+  ['ordinary input missing',value=>value.filterReset.reentryActions[1].events=[]],
+  ['ordinary input used stale group',value=>value.filterReset.reentryActions[1].events[2].button.groupKey='altai|baikal'],
+  ['ordinary input reached elsewhere',value=>value.filterReset.reentryActions[1].events[2].x+=10],
+  ['wrong region selected',value=>value.filterReset.reentryActions[1].after.region='baikal'],
+  ['count was not observed in overview',value=>value.filterReset.reentryActions[1].before.region='altai'],
+  ['disconnected camera progression',value=>value.filterReset.reentryActions[1].before.zoom+=.2],
+ ]);
+});
+
 test('hidden Saved filters cannot pass when overview counts or reentered controls disagree',()=>{
  rejectsEach(exploreExperienceFixture,checkExplore(true),[
   ['Saved did not activate',value=>value.filterReset.filtered.pressed='false'],
@@ -69,10 +124,10 @@ test('hidden Saved filters cannot pass when overview counts or reentered control
   ['country count secretly filtered',value=>value.filterReset.overviewAfter.mapTotal=0],
   ['flag secretly filtered',value=>value.filterReset.overviewAfter.markers[0].count=0],
   ['catalogue secretly filtered',value=>{value.filterReset.overviewAfter.catalog[0].count=0;value.filterReset.overviewAfter.markers[0].count=0;}],
-  ['all flags empty',value=>{value.filterReset.overviewAfter.markers=[{id:'empty',name:'Другое',count:0}];value.filterReset.overviewAfter.catalog.push({name:'Другое',count:0});}],
+  ['all flags empty',value=>{value.filterReset.overviewAfter.markers=[{id:'empty',name:'Другое',count:0,groupKey:'empty',cluster:false,ariaLabel:'Открыть Другое'}];value.filterReset.overviewAfter.catalog.push({id:'empty',name:'Другое',count:0});}],
   ['unrelated marker',value=>value.filterReset.overviewAfter.markers[0].name='Другой регион'],
   ['no native toggle',value=>value.filterReset.enabled.events=[]],
-  ['different reentry control',value=>{value.filterReset.reentered.selector='.trail-list';value.filterReset.reentered.point.selector='.trail-list';}],
+  ['reentry did not use count',value=>value.filterReset.reentryActions[0].kind='label'],
  ]);
 });
 

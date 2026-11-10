@@ -11,7 +11,7 @@ import {browserTraceEnabled,traceDesktopSelection} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
-import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
+import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
@@ -516,25 +516,25 @@ async function browserBack(cdp,expected){
 async function overviewCounts(cdp){
   return evaluate(cdp,`(()=>{
     const number=text=>Number((text||'').match(/[0-9][0-9\\s\\u00a0]*/)?.[0].replace(/\\D/g,'')||0);
-    const catalog=[...document.querySelectorAll('.region-option')].map(element=>({name:element.querySelector('strong')?.textContent?.trim(),count:number(element.querySelector('small')?.textContent)}));
-    const markers=[...document.querySelectorAll('.region-marker:not([hidden]):not(.direction-cluster)')].map(element=>({id:element.dataset.regionId,name:element.querySelector('.region-marker-label')?.textContent?.trim(),count:number(element.querySelector('.region-marker-count')?.textContent)}));
+    const catalog=[...document.querySelectorAll('.region-option')].map(element=>({id:[...element.querySelector('.region-thumbnail').classList].find(name=>name.startsWith('region-thumbnail-'))?.slice('region-thumbnail-'.length),name:element.querySelector('strong')?.textContent?.trim(),count:number(element.querySelector('small')?.textContent)}));
+    const markers=[...document.querySelectorAll('.region-marker:not([hidden])')].map(element=>({id:element.dataset.regionId,name:element.querySelector('.region-marker-label')?.textContent?.trim(),count:number(element.querySelector('.region-marker-count')?.textContent),groupKey:element.dataset.mapGroupKey,cluster:element.classList.contains('direction-cluster'),ariaLabel:element.getAttribute('aria-label')}));
     return{region:new URLSearchParams(location.search).get('region')||'',catalog,markers,total:number(document.querySelector('.sheet-peek-copy>span')?.textContent),mapTotal:number(document.querySelector('.map-context>span:last-child')?.textContent)};
   })()`);
 }
 async function filterState(cdp){
   return evaluate(cdp,`(()=>({pressed:document.querySelector('.filter-row button[aria-pressed]')?.getAttribute('aria-pressed')??null,count:Number(document.querySelector('.explore-panel .section-heading>span')?.textContent?.replace(/\\D/g,'')||0),expanded:document.querySelector('.filter-row button[aria-expanded]')?.getAttribute('aria-expanded'),empty:!!document.querySelector('.catalog-empty')}))()`);
 }
-async function checkSavedFilterReset(cdp,profile,overviewBefore){
-  const baseline=await filterState(cdp);assert.equal(baseline.pressed,'false');assert.ok(baseline.count>0);
-  const enabled=await recordedClick(cdp,'.filter-row button[aria-pressed]',profile);
-  const filtered=await waitValue('Saved filter did not become active',()=>filterState(cdp),state=>state.pressed==='true'&&state.count===0&&state.empty);
-  const parent=await recordedClick(cdp,'.explore-panel .back-link',profile);await expectSelection(cdp,{region:'',route:''});await closeMapSheet(cdp,profile);await settledMap(cdp,profile.engine);
-  const overviewAfter=await overviewCounts(cdp);
-  if(profile.mobile){await recordedClick(cdp,'.sheet-handle',profile);await settledSheet(cdp,'open');}
-  const selector=await evaluate(cdp,`(()=>{const index=[...document.querySelectorAll('.region-option')].findIndex(element=>element.querySelector('strong')?.textContent?.trim()==='Алтай');return index>=0?'.region-list .region-option:nth-child('+(index+1)+')':null;})()`);assert.ok(selector,'Altai is missing from the overview catalogue');
-  const scrolls=await revealNative(cdp,selector,'.explore-panel-content',profile),reentered=await recordedClick(cdp,selector,profile);
-  await expectSelection(cdp,{region:'altai',route:'',title:'Алтай'});const restored=await filterState(cdp);
-  return{baseline,enabled,filtered,parent,overviewBefore,overviewAfter,scrolls,reentered,restored};
+async function checkSavedFilterReset(cdp,profile,receipt){
+  receipt.baseline=await filterState(cdp);assert.equal(receipt.baseline.pressed,'false');assert.ok(receipt.baseline.count>0);
+  receipt.enabled=await recordedClick(cdp,'.filter-row button[aria-pressed]',profile);
+  receipt.filtered=await waitValue('Saved filter did not become active',()=>filterState(cdp),state=>state.pressed==='true'&&state.count===0&&state.empty);
+  receipt.parent=await recordedClick(cdp,'.explore-panel .back-link',profile);await expectSelection(cdp,{region:'',route:''});await closeMapSheet(cdp,profile);await settledMap(cdp,profile.engine);
+  currentExploreExperience.step='overview-after';receipt.overviewAfter=await overviewCounts(cdp);
+  assertOverviewCounts(receipt.overviewAfter,`${profile.name}/explore/after-filter`);
+  currentExploreExperience.step='saved-filter-map-reentry';receipt.reentryActions=[];
+  await selectMapDirection(cdp,profile,'altai','Алтай',{kind:'count',actions:receipt.reentryActions});
+  await expectSelection(cdp,{region:'altai',route:'',title:'Алтай'});receipt.restored=await filterState(cdp);
+  return receipt;
 }
 async function requestDialogState(cdp){
   return evaluate(cdp,`(()=>{const dialog=document.querySelector('[role="dialog"]');return{open:!!dialog,heading:dialog?.querySelector('h2')?.textContent||'',routeTitle:dialog?.querySelector('form>p')?.textContent||'',date:dialog?.querySelector('input[type=date]')?.value??null,note:dialog?.querySelector('textarea')?.value??null,error:!!dialog?.querySelector('[role=alert]'),success:!!dialog?.querySelector('.success-panel'),submitted:window.__tropnikFormSubmits||0};})()`);
@@ -744,20 +744,24 @@ async function checkStyleCameraRoundtrip(cdp,profile,trail){
   const receipt={schemaVersion:1,passed:true,input:'mouse',routeId:selection.route,selection,before,zoomed,zoom,pan,manual,transitions};assertStyleCameraRoundtrip(receipt,profile.name);return receipt;
 }
 async function mapInteraction(cdp,profile,performanceIssues){
+  const experience={schemaVersion:1,passed:false,input:profile.mobile?'touch':'mouse',filterReset:{}};
+  currentExploreExperience={profile:profile.name,step:'overview-before',receipt:experience};
   const started=Date.now();await clearMapStories(cdp,profile);await closeMapSheet(cdp,profile);
-  const country=await settledMap(cdp,profile.engine),overviewBefore=await overviewCounts(cdp);
+  const country=await settledMap(cdp,profile.engine);experience.filterReset.overviewBefore=await overviewCounts(cdp);
+  assertOverviewCounts(experience.filterReset.overviewBefore,`${profile.name}/explore/before-filter`);
   await evaluate(cdp,'window.__tropnikPerf={cls:0,longest:0};window.__tropnikPerfStart=performance.now()');
   await diagnosticPhase(cdp,'map-interactions');
   const directionActions=[];
   const selectFirstDirection=()=>selectMapDirection(cdp,profile,'altai','Алтай',{kind:'label',actions:directionActions});
   const firstSelection=profile.mobile?{value:await selectFirstDirection(),trace:null}:await traceDesktopSelection(cdp,selectFirstDirection,{enabled:traceEnabled,sourceCommit:process.env.GITHUB_SHA||null});
   const firstDirection=firstSelection.value;
-  const filterReset=await checkSavedFilterReset(cdp,profile,overviewBefore);
+  currentExploreExperience.step='saved-filter';await checkSavedFilterReset(cdp,profile,experience.filterReset);
   const catalogScroll=profile.mobile?await scrollSheetContent(cdp,profile,{stableExtent:true}):null;
   await closeMapSheet(cdp,profile);
   const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
+  currentExploreExperience.step='style-camera';
   const styleCameraRoundtrip=profile.engine==='maplibre'?await checkStyleCameraRoundtrip(cdp,profile,trail):null;
-  const requestOwnership=await checkRequestOwnership(cdp,profile,trail);
+  currentExploreExperience.step='request-ownership';experience.requestOwnership=await checkRequestOwnership(cdp,profile,trail);
   await pointerSelector(cdp,'.explore-panel .back-link',profile);
   await expectSelection(cdp,{region:'altai',route:'',title:'Алтай'});
   await pointerSelector(cdp,'.explore-panel .back-link',profile);
@@ -768,11 +772,13 @@ async function mapInteraction(cdp,profile,performanceIssues){
   const secondDirection=await selectMapDirection(cdp,profile,'baikal','Байкал',{kind:'count',actions:directionActions});
   const directionHitAreas={schemaVersion:1,passed:true,engine:profile.engine,input:profile.mobile?'touch':'mouse',actions:directionActions};
   assertDirectionHitAreas(directionHitAreas,profile.name,profile.engine,profile.mobile);
-  const previous=await selectionState(cdp),polygon=await polygonTouch(cdp,profile),siblingParent=await checkSiblingParent(cdp,profile,previous,polygon),gestures=await mapGestures(cdp,profile);
-  const experience={schemaVersion:1,passed:true,input:profile.mobile?'touch':'mouse',filterReset,requestOwnership,siblingParent};assertExploreExperience(experience,profile.name,profile.engine,profile.mobile);
+  currentExploreExperience.step='sibling-parent';const previous=await selectionState(cdp),polygon=await polygonTouch(cdp,profile);
+  experience.siblingParent=await checkSiblingParent(cdp,profile,previous,polygon);const gestures=await mapGestures(cdp,profile);
+  currentExploreExperience.step='validation';assertExploreExperience({...experience,passed:true},profile.name,profile.engine,profile.mobile);experience.passed=true;
   const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
   const longTaskLimit=profile.mobile?350:750;
   if(!(perf.longest<longTaskLimit))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:longTaskLimit});
+  currentExploreExperience=null;
   return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
@@ -781,7 +787,7 @@ const server=serve(ROOT);
 await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(httpPort,'127.0.0.1',resolve);});
 const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browserLaunchStarted=performance.now();
-let browser,cdp,currentProfile,failure;
+let browser,cdp,currentProfile,failure,currentExploreExperience=null;
 const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],profilePerformance=[],performanceIssues=[];
 // GitHub can terminate this process before catch/finally. Preserve completed
 // interactions before the long zoom matrix, without marking them as a release.
@@ -914,6 +920,7 @@ try{
 }catch(error){
   failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
+  if(currentExploreExperience)failure.exploreExperience=currentExploreExperience;
   if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed',...(error.settleDiagnostics?{settleDiagnostics:error.settleDiagnostics}:{})});
   if(cdp){
     try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);failure.sheet=await sheetSnapshot(cdp);}catch{}

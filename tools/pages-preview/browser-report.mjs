@@ -327,14 +327,8 @@ export function assertDirectionHitGrid(grid, context, engine) {
  return grid;
 }
 
-export function assertDirectionHitAreas(receipt,name,engine,mobile){
- const input=mobile?'touch':'mouse';
- assert.equal(receipt?.schemaVersion,1,`${name}: missing external direction hit-area evidence`);
- assert.equal(receipt.passed,true);assert.equal(receipt.engine,engine);assert.equal(receipt.input,input);
- assert.ok(Array.isArray(receipt.actions)&&receipt.actions.length>=2&&receipt.actions.length<=14,`${name}: bounded direction input evidence is missing`);
- let ordinaryLabel=false,count=false,hiddenControls=0,hiddenWrapperProbes=0;
- for(const [index,action] of receipt.actions.entries()){
-  const context=`${name}/directions/${index}`,grid=assertDirectionHitGrid(action.grid,context,engine);
+function assertDirectionAction(action,context,engine,input){
+  const grid=assertDirectionHitGrid(action.grid,context,engine);
   assert.ok(['label','count'].includes(action.kind));assert.equal(action.input,input);
   const surface=grid.surfaces.find(item=>item.kind===action.kind);
   assert.equal(surface.visible,true,`${context}: clicked surface was hidden`);
@@ -357,8 +351,19 @@ export function assertDirectionHitAreas(receipt,name,engine,mobile){
   }else{
    assert.notEqual(action.before.region,grid.regionId,`${context}: clicking an already selected direction proves no change`);
    assert.equal(action.after.region,grid.regionId,`${context}: external input did not select its direction`);
-   if(action.kind==='label')ordinaryLabel=true;
   }
+  return grid;
+}
+
+export function assertDirectionHitAreas(receipt,name,engine,mobile){
+ const input=mobile?'touch':'mouse';
+ assert.equal(receipt?.schemaVersion,1,`${name}: missing external direction hit-area evidence`);
+ assert.equal(receipt.passed,true);assert.equal(receipt.engine,engine);assert.equal(receipt.input,input);
+ assert.ok(Array.isArray(receipt.actions)&&receipt.actions.length>=2&&receipt.actions.length<=14,`${name}: bounded direction input evidence is missing`);
+ let ordinaryLabel=false,count=false,hiddenControls=0,hiddenWrapperProbes=0;
+ for(const [index,action] of receipt.actions.entries()){
+  const grid=assertDirectionAction(action,`${name}/directions/${index}`,engine,input);
+  if(!grid.cluster&&action.kind==='label')ordinaryLabel=true;
   if(action.kind==='count')count=true;
   hiddenControls+=grid.hiddenControls.length;
   for(const hidden of grid.hiddenControls)hiddenWrapperProbes+=hidden.wrapper?.samples.filter(point=>point.withinViewport).length||0;
@@ -481,20 +486,54 @@ export function assertLayerMenuAudit(receipt,name){
  return receipt;
 }
 
-function assertOverviewCounts(frame,context){
+export function assertOverviewCounts(frame,context){
  assert.equal(frame?.region,'');assert.ok(Number.isInteger(frame.total)&&frame.total>0);assert.equal(frame.mapTotal,frame.total,`${context}: country map and catalogue totals differ`);
- assert.ok(Array.isArray(frame.catalog)&&frame.catalog.length>0&&Array.isArray(frame.markers)&&frame.markers.length>0);
- const catalog=new Map();
- for(const item of frame.catalog){assert.ok(typeof item.name==='string'&&item.name.length>0&&!catalog.has(item.name));assert.ok(Number.isInteger(item.count)&&item.count>=0&&item.count<=frame.total);catalog.set(item.name,item.count);}
- const ids=new Set();let positive=false;
+ assert.ok(Array.isArray(frame.catalog)&&frame.catalog.length>0,`${context}: catalogue directions are missing`);
+ assert.ok(Array.isArray(frame.markers)&&frame.markers.length>0,`${context}: visible direction controls are missing`);
+ const catalog=new Map(),names=new Set();
+ for(const item of frame.catalog){
+  assert.ok(typeof item.id==='string'&&item.id.length>0&&!catalog.has(item.id),`${context}: missing or duplicate catalogue ID`);
+  assert.ok(typeof item.name==='string'&&item.name.length>0&&!names.has(item.name));names.add(item.name);
+  assert.ok(Number.isInteger(item.count)&&item.count>=0&&item.count<=frame.total);catalog.set(item.id,{name:item.name,count:item.count});
+ }
+ const ids=new Set(),grouped=new Set();let positive=false;
  for(const marker of frame.markers){
   assert.ok(typeof marker.id==='string'&&marker.id.length>0&&!ids.has(marker.id));ids.add(marker.id);
-  assert.ok(catalog.has(marker.name),`${context}: a flag has no matching catalogue direction`);
-  assert.equal(marker.count,catalog.get(marker.name),`${context}: a hidden filter changed a flag count`);
-  positive ||= marker.count>0;
+  assert.ok(typeof marker.groupKey==='string'&&marker.groupKey.length>0,`${context}: direction membership is missing`);
+  const members=marker.groupKey.split('|');
+  assert.equal(new Set(members).size,members.length,`${context}: duplicate group member`);
+  assert.deepEqual(members,[...members].sort((a,b)=>a.localeCompare(b)),`${context}: direction group key is not canonical`);
+  assert.ok(members.includes(marker.id),`${context}: anchor is not a member of its group`);
+  for(const id of members){assert.ok(catalog.has(id),`${context}: group has an unknown catalogue direction`);assert.ok(!grouped.has(id),`${context}: direction appears in multiple visible controls`);grouped.add(id);}
+  assert.equal(marker.cluster,members.length>1);
+  assert.ok(typeof marker.name==='string'&&marker.name.length>0&&typeof marker.ariaLabel==='string'&&marker.ariaLabel.length>0);
+  if(marker.cluster){
+   // A group badge counts directions, not routes. Hidden member controls keep
+   // old labels/counts, so only the current visible group is evidence here.
+   assert.equal(marker.count,members.length,`${context}: cluster badge differs from its direction membership`);
+  }else{
+   assert.equal(marker.name,catalog.get(marker.id).name,`${context}: flag name differs from its catalogue direction`);
+   assert.equal(marker.count,catalog.get(marker.id).count,`${context}: a hidden filter changed a flag count`);
+  }
+  positive ||= members.some(id=>catalog.get(id).count>0);
  }
- assert.equal(positive,true,`${context}: all measured flags have empty counts`);
+ assert.equal(positive,true,`${context}: no visible direction control represents a populated catalogue`);
  return [...catalog].sort(([a],[b])=>a.localeCompare(b));
+}
+
+function assertSavedDirectionReentry(actions,context,engine,input,count){
+ assert.ok(Array.isArray(actions)&&actions.length>=1&&actions.length<=7,`${context}: bounded native direction reentry is missing`);
+ for(const [index,action] of actions.entries()){
+  const grid=assertDirectionAction(action,`${context}/${index}`,engine,input);
+  assert.equal(action.kind,'count');assert.equal(grid.regionId,'altai');assert.equal(action.before.region,'');
+  const last=index===actions.length-1;
+  assert.equal(grid.cluster,!last,`${context}: reentry must finish with an ordinary Altai flag`);
+  const members=grid.groupKey.split('|'),surface=grid.surfaces.find(item=>item.kind==='count');
+  assert.equal(new Set(members).size,members.length);assert.ok(members.includes('altai'));
+  assert.equal(surface.text.trim(),String(last?count:members.length),`${context}: displayed count does not match the native reentry target`);
+  if(last){assert.equal(grid.anchorId,'altai');assert.equal(grid.groupKey,'altai');assert.equal(action.after.region,'altai');}
+  if(index)assert.ok(Math.abs(action.before.zoom-actions[index-1].after.zoom)<.01,`${context}: reentry camera measurements are disconnected`);
+ }
 }
 function assertRequestDialog(dialog,context,{open,title='',note='',date=''}={}){
  assert.equal(dialog?.open,open,`${context}: unexpected modal visibility`);assert.equal(dialog.error,false);assert.equal(dialog.success,false);
@@ -513,11 +552,11 @@ export function assertExploreExperience(receipt,name,engine,mobile){
  assert.equal(filter.restored.count,filter.baseline.count);
  assertExperienceClick(filter.enabled,input,`${context}/saved`,'.filter-row button[aria-pressed]');
  assertExperienceClick(filter.parent,input,`${context}/filter-parent`,'.explore-panel .back-link');
- assertExperienceClick(filter.reentered,input,`${context}/reenter`);assert.match(filter.reentered.selector,/^\.region-list \.region-option:nth-child\([1-9]\d*\)$/);
- assertExperienceScrolls(filter.scrolls,input,`${context}/filter-scroll`);
  const before=assertOverviewCounts(filter.overviewBefore,`${context}/before-filter`),after=assertOverviewCounts(filter.overviewAfter,`${context}/after-filter`);
  assert.deepEqual(after,before,`${context}: a hidden filter changed overview catalogue counts`);assert.equal(filter.overviewAfter.total,filter.overviewBefore.total);
- assert.equal(new Map(before).get('Алтай'),filter.baseline.count,`${context}: restored Altai differs from the overview count`);
+ const altai=new Map(before).get('altai');assert.equal(altai?.name,'Алтай');assert.equal(altai.count,11);
+ assert.equal(altai.count,filter.baseline.count,`${context}: restored Altai differs from the overview count`);
+ assertSavedDirectionReentry(filter.reentryActions,`${context}/saved-reentry`,engine,input,altai.count);
 
  const request=receipt.requestOwnership;assert.ok(request&&typeof request.route?.id==='string'&&request.route.id&&typeof request.route.title==='string'&&request.route.title);
  const action='.route-actions button.primary',close='[role="dialog"] button[aria-label="Закрыть"]';

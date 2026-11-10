@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.20",
+  "candidate": 2,
+  "checkedAt": "2026-11-10T04:19:47.202800+00:00",
+  "built": true,
+  "published": false,
+  "githubSource": "be7796b8d6fc9f33405e6863e510b95dd3d95e19",
+  "localEquivalentCommit": "ed27482b740036bda36d5289e5a1e3634fcebd3e",
+  "webTree": "eabf3e44f45f5a0d9d5bb195f97fa547080044da",
+  "siteSource": "15c7d689fdccfa3a83a0e35f1736e1222f72cfda",
+  "siteTree": "545a4f24260dd7c76c3d29d58dd0372ecde5ffbe",
+  "archive": {
+    "filename": "tropnik-0.4.20-candidate-2-site.tar.gz",
+    "bytes": 40238821,
+    "sha256": "cb4f0ff1c0c2e5be44d9be2d4688d69b89a9fc0f4d22b7abf8ab6b0afd5ab8fb",
+    "regularFiles": 1236
+  },
+  "matchingTrackedWebFiles": 1248,
+  "differences": [],
+  "comparisonAfterBuild": true,
+  "siteCheckoutClean": true,
+  "limitations": [
+    "This receipt records source and package identity; publication and final native acceptance are separate.",
+    "The root tracked next-env.d.ts is generated and ignored in the Site checkout; the pinned Android APK is restored by Pages but tracked in Site. Git tree hashes for root/web and Site are therefore not claimed to be identical."
+  ]
+}

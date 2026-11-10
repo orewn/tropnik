@@ -1,3 +1,6 @@
+import {directionGridFixture} from './direction-hitareas-fixture.mjs';
+import {directionExternalPoint} from '../browser-direction-hitareas.mjs';
+
 const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
 const clone=value=>structuredClone(value);
 
@@ -43,11 +46,29 @@ const selectionURL=value=>{
 const browserBack=(from,after)=>({method:'Page.navigateToHistoryEntry',from:{id:9,url:selectionURL(from)},target:{id:8,url:selectionURL(after)},url:selectionURL(after),after:clone(after)});
 const dialog=(open,title='',note='')=>({open,heading:open?'Какой поход планируете?':'',routeTitle:title,date:open?'':null,note:open?note:null,error:false,success:false,submitted:0});
 
+export function overviewCountsFixture(clustered=false){
+ const catalog=[{id:'altai',name:'Алтай',count:11},{id:'baikal',name:'Байкал',count:10}];
+ const markers=clustered?[{id:'altai',name:'2 направления',count:2,groupKey:'altai|baikal',cluster:true,ariaLabel:'Приблизить 2 направления: Алтай, Байкал'}]:catalog.map(item=>({...item,groupKey:item.id,cluster:false,ariaLabel:`Открыть ${item.name}, маршрутов в каталоге: ${item.count}`}));
+ return{region:'',catalog,markers,total:21,mapTotal:21};
+}
+
+export function savedReentryFixture(mobile=true,clustered=false){
+ const engine=mobile?'leaflet':'maplibre',input=mobile?'touch':'mouse';
+ return(clustered?[true,false]:[false]).map((cluster,index)=>{
+  const grid=directionGridFixture('altai',engine);grid.cluster=cluster;grid.groupKey=cluster?'altai|baikal':'altai';
+  grid.ariaLabel=cluster?'Приблизить 2 направления: Алтай, Байкал':'Открыть Алтай, маршрутов в каталоге: 11';
+  grid.surfaces.find(item=>item.kind==='label').text=cluster?'2 направления':'Алтай';grid.surfaces.find(item=>item.kind==='count').text=cluster?'2':'11';
+  const point=directionExternalPoint(grid,'count'),click=nativeClickFixture(input,'canvas',point);
+  for(const event of click.events)event.button={regionId:'altai',groupKey:grid.groupKey};
+  return{kind:'count',input,grid,point,events:click.events,before:{region:'',route:'',zoom:2+index},after:{region:cluster?'':'altai',route:'',zoom:cluster?3:7}};
+ });
+}
+
 export function exploreExperienceFixture(mobile=true,routeId='route'){
  const input=mobile?'touch':'mouse',click=(selector,label)=>nativeClickFixture(input,selector,undefined,label),scroll=()=>nativeScrollFixture(input);
- const overview={region:'',catalog:[{name:'Алтай',count:11},{name:'Байкал',count:10}],markers:[{id:'altai',name:'Алтай',count:11},{id:'baikal',name:'Байкал',count:10}],total:21,mapTotal:21};
+ const overview=overviewCountsFixture();
  const baseline={pressed:'false',count:11,expanded:'false',empty:false};
- const filterReset={baseline:clone(baseline),enabled:click('.filter-row button[aria-pressed]','Сохранённые'),filtered:{pressed:'true',count:0,expanded:'false',empty:true},parent:click('.explore-panel .back-link','Все направления'),overviewBefore:clone(overview),overviewAfter:clone(overview),scrolls:[scroll()],reentered:click('.region-list .region-option:nth-child(1)','Алтай'),restored:clone(baseline)};
+ const filterReset={baseline:clone(baseline),enabled:click('.filter-row button[aria-pressed]','Сохранённые'),filtered:{pressed:'true',count:0,expanded:'false',empty:true},parent:click('.explore-panel .back-link','Все направления'),overviewBefore:clone(overview),overviewAfter:clone(overview),reentryActions:savedReentryFixture(mobile),restored:clone(baseline)};
  const route={id:routeId,title:'Маршрут А'},note='Проверка принадлежности запроса маршруту',action='.route-actions button.primary',close='[role="dialog"] button[aria-label="Закрыть"]';
  const requestOwnership={route,scrolls:[scroll()],opened:click(action),first:dialog(true,route.title),edit:{method:'Input.insertText',note,events:[{trusted:true,tag:'TEXTAREA',value:note}]},edited:dialog(true,route.title,note),closedSame:click(close),reopened:click(action),same:dialog(true,route.title,note),back:browserBack(selection('altai',routeId,route.title),selection('altai','','Алтай')),afterBack:dialog(false),next:{selection:selection('altai','route-b','Маршрут Б'),scrolls:[scroll()],selected:click('.trail-list .trail-card:nth-child(2) .trail-card-main'),before:dialog(false),actionScrolls:[scroll()],opened:click(action),dialog:dialog(true,'Маршрут Б'),closed:click(close)},returnScrolls:[scroll()]};
  const sibling=selection('buryatia','','Бурятия'),overviewSelection=selection('','','Все направления'),polygon=click('canvas');
