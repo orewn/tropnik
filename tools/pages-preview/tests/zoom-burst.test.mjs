@@ -137,6 +137,19 @@ test('the C9 terrain preload notice must occupy a separate row above the story l
  assert.doesNotThrow(()=>assertMapUIBounds(layout,'Separate loading row'));
 });
 
+test('first-visit desktop credits leave the full labelled Layers button unobscured',()=>{
+ const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
+ const layout={width:1440,scrollWidth:1425,scrollY:0,available:rect(384,72,1041,928),ui:[
+  {kind:'map-attribution-content',rect:rect(966.4375,852,370,80)},
+  {kind:'layer-button',rect:rect(1307,872,93,44)},
+  {kind:'map-attribution-toggle',rect:rect(1357,940,44,44)},
+ ],targets:[]};
+ assert.throws(()=>assertMapUIBounds(layout,'First-visit desktop credits'),/map-attribution-content overlaps layer-button/);
+ layout.ui[0].rect=rect(922.4375,852,370,80);
+ assert.ok(layout.ui[1].rect.left-layout.ui[0].rect.right>=12);
+ assert.doesNotThrow(()=>assertMapUIBounds(layout,'Credits beside the complete rail'));
+});
+
 test('settling observes a queued camera only after compositor progress and consecutive idle samples',async()=>{
  let frames=0,reads=0;const observed=[];
  const state=zoom=>({visible:true,moving:false,engine:'leaflet',camera:{longitude:40,latitude:43,zoom,tileSize:256},rect:{left:0,top:68,width:412,height:847},route:'kavkaz-8a'});

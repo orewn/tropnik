@@ -18,7 +18,20 @@ export function browserAuditRunPolicy(value){
 }
 export function terrainDiagnosticTraceCategories(available=[]){
  const candidates=['cc','viz','disabled-by-default-gpu.service','disabled-by-default-gpu.device'];
- return{requested:candidates,supported:candidates.filter(category=>available.includes(category)),selected:[...DESKTOP_TRACE_CATEGORIES,...candidates.filter(category=>available.includes(category))]};
+ const enumerated=Array.isArray(available)&&available.length>0;
+ const supported=enumerated?candidates.filter(category=>available.includes(category)):[];
+ // An empty enumeration is not proof that no categories exist: the CI traces
+ // contain GPU events while getCategories returns[]. Request only this fixed
+ // small allowlist when availability is unknown; the trace reports real events.
+ return{availability:enumerated?'enumerated':Array.isArray(available)?'unknown-empty-enumeration':'unknown-query-failed',availableCount:Array.isArray(available)?available.length:null,requested:candidates,supported,unverified:enumerated?[]:candidates,selected:[...DESKTOP_TRACE_CATEGORIES,...(enumerated?supported:candidates)]};
+}
+export async function queryTerrainTraceCategories(cdp){
+ try{
+  // CDP.call already resolves message.result, so this is the method payload.
+  const payload=await cdp.call('Tracing.getCategories',{},3000);
+  assert.ok(Array.isArray(payload?.categories)&&payload.categories.every(category=>typeof category==='string'),'Tracing.getCategories returned an invalid categories payload');
+  return terrainDiagnosticTraceCategories(payload.categories);
+ }catch(error){return{...terrainDiagnosticTraceCategories(null),error:error.message};}
 }
 export function terrainResource(url){
  let parsed;try{parsed=new URL(url);}catch{return null;}
@@ -236,7 +249,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null}={
   if((diagnostic?shouldTraceTerrainDiagnostic:shouldTraceTerrainZoom)(profile,mode,direction,before.camera.zoom,terrainTraceStarted)){
    terrainTraceStarted=true;
    try{
-    const captured=await traceDesktopSelection(cdp,pressAndSettle,{prefix:diagnostic?'desktop-webgl-terrain-high-zoom':'desktop-webgl-terrain-zoom',scope:diagnostic?'diagnostic-desktop-terrain-15-to-17':'first-desktop-terrain-zoom-4-to-6',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected}:{} )});
+    const captured=await traceDesktopSelection(cdp,pressAndSettle,{prefix:diagnostic?'desktop-webgl-terrain-high-zoom':'desktop-webgl-terrain-zoom',scope:diagnostic?'diagnostic-desktop-terrain-15-to-17':'first-desktop-terrain-zoom-4-to-6',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{} )});
     after=captured.value;report.terrainZoomTrace={...captured.trace,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom};
    }catch(error){report.terrainZoomTrace={...error.traceReceipt,beforeZoom:before.camera.zoom};throw error;}
   }else after=await pressAndSettle();
@@ -469,7 +482,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null}={
     phase:async name=>{report.diagnosticStage=name;await diagnosticPhase(cdp,name);await save();},
     gpu:async()=>{
      const result={traceCategories:report.gpu?.traceCategories,systemInfo:report.gpu?.systemInfo};
-     if(!result.traceCategories)try{const available=await cdp.call('Tracing.getCategories',{},3000);result.traceCategories={availableCount:available.categories.length,...terrainDiagnosticTraceCategories(available.categories)};}catch(error){result.traceCategories={error:error.message,...terrainDiagnosticTraceCategories()};}
+     if(!result.traceCategories)result.traceCategories=await queryTerrainTraceCategories(cdp);
      if(!result.systemInfo)try{assert.ok(helpers.systemInfo,'No browser-level SystemInfo target');const info=await helpers.systemInfo();result.systemInfo={available:true,gpu:info.gpu,modelName:info.modelName,modelVersion:info.modelVersion};}catch(error){result.systemInfo={available:false,error:error.message};}
      try{result.webgl=await evaluate(cdp,`(${inspectTerrainWebGL.toString()})()`);}catch(error){result.webgl={available:false,error:error.message};}
      return result;

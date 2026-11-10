@@ -1,0 +1,54 @@
+name: Focused terrain pitch diagnosis
+
+on:
+  push:
+    branches: [diagnostics/terrain-pitch]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terrain-pitch-diagnostics
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out the diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          pnpm --dir web install --frozen-lockfile
+      - name: Prepare the existing Android artifact and static site
+        run: |
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Inspect public elevation coverage near the observed failure
+        run: node tools/pages-preview/inspect-terrain-source.mjs
+      - name: Record the native high zoom transition
+        timeout-minutes: 8
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: terrain-close
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Preserve diagnostic evidence without a release artifact
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-terrain-pitch-diagnostic-${{ github.run_id }}
+          path: |
+            web/pages-preview/design-qa
+            web/pages-preview/dist/browser-terrain-diagnostic.json
+            web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7

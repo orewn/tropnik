@@ -9,6 +9,13 @@ export const TERRAIN_TRACE_LIMITS=Object.freeze({...DESKTOP_TRACE_LIMITS,duratio
 // layout, CPU stack and GPU evidence without the redundant scheduler stream.
 export const DESKTOP_TRACE_CATEGORIES=Object.freeze(['devtools.timeline','blink.user_timing','gpu','disabled-by-default-devtools.timeline','disabled-by-default-devtools.timeline.stack','disabled-by-default-v8.cpu_profiler']);
 
+export function traceCategoryEvidence(events){
+ const counts=new Map(),limit=128;
+ for(const event of events)if(typeof event.cat==='string')for(const name of new Set(event.cat.split(',').map(value=>value.trim()).filter(Boolean)))counts.set(name,(counts.get(name)||0)+1);
+ const sorted=[...counts].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+ return{available:true,source:'traceEvents[].cat',categoryCount:counts.size,limit,truncated:counts.size>limit,counts:sorted.slice(0,limit).map(([name,events])=>({name,events}))};
+}
+
 /** Diagnostic only: one desktop action, with native input unchanged.
  * CDP Tracing.start/end and IO.read/close are documented in the upstream PDL:
  * https://github.com/ChromeDevTools/devtools-protocol/blob/master/pdl/domains/Tracing.pdl
@@ -19,6 +26,7 @@ export async function traceDesktopSelection(cdp,action,{
  output=OUTPUT,sourceCommit=null,limits=DESKTOP_TRACE_LIMITS,
  prefix='desktop-webgl-first-altai',scope='first-desktop-altai-selection',
  categories=DESKTOP_TRACE_CATEGORIES,
+ captureCategoryEvidence=false,
  clock=()=>performance.now(),schedule=setTimeout,cancel=clearTimeout,
 }={}){
  const started=clock(),chunks=[];
@@ -89,9 +97,11 @@ export async function traceDesktopSelection(cdp,action,{
     receipt.cpuProfileChunks=events.filter(event=>event.name==='ProfileChunk').length;
     receipt.cpuSamples=events.reduce((total,event)=>total+(event.args?.data?.cpuProfile?.samples?.length||0),0);
     receipt.timelineEvents=events.filter(event=>['RunTask','FunctionCall','Layout','UpdateLayoutTree','EventDispatch','FireAnimationFrame'].includes(event.name)).length;
+    if(captureCategoryEvidence)receipt.capturedCategories=traceCategoryEvidence(events);
    }catch(error){receipt.errors.push(errorText(error));}
   }
   receipt.status=receipt.errors.length?'error':!receipt.eof||receipt.dataLossOccurred||receipt.stopReason==='time-limit'?'partial':'complete';
+  if(captureCategoryEvidence&&!receipt.capturedCategories)receipt.capturedCategories={available:false,source:'traceEvents[].cat',reason:receipt.eof?'invalid-trace-json':'incomplete-trace-stream'};
   if(bytes.length){receipt.file=`${prefix}.trace${receipt.eof?'':'.partial'}.json`;receipt.sha256=createHash('sha256').update(bytes).digest('hex');}
   try{
    await mkdir(output,{recursive:true});
