@@ -16,6 +16,9 @@ const priorityCity=['in',name,['literal',priorityCityNames]];
 
 const layer=(id,type,sourceLayer,paint,options={})=>({id,type,source,'source-layer':sourceLayer,paint,...options});
 const text=(id,sourceLayer,minzoom,size,filter,paint={})=>layer(id,'symbol',sourceLayer,{'text-color':'#3F5144','text-halo-color':'#FFFEFA','text-halo-width':1.75,'text-halo-blur':.3,...paint},{minzoom,filter,layout:{'text-field':name,'text-font':font,'text-size':size,'text-max-width':9,'text-padding':10,'text-variable-anchor':['top','bottom','left','right'],'text-justify':'auto','text-radial-offset':.55,'symbol-avoid-edges':true,'text-allow-overlap':false,'text-ignore-placement':false}});
+// Retain the city layer in terrain's visible-layer set without hidden text blocking other labels.
+const cityLabel=text('city-label','place',3,['interpolate',['linear'],['zoom'],3,12,9,16],['all',is('class','city'),['!',priorityCity]],{'text-color':'#314F3D','text-opacity':['step',['zoom'],1,16,0]});
+cityLabel.layout['text-ignore-placement']=['step',['zoom'],false,16,true];
 const style={version:8,name:'Тропник · ландшафт',metadata:{author:'Tropa project',description:'Original outdoor style. OSM paths are not field-verified hiking permissions.'},glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',sprite:'/maps/tropnik-sprite',sky:{'sky-color':'#BFD8D8','horizon-color':'#E8ECE1','fog-color':'#DDE6DE','sky-horizon-blend':.34,'horizon-fog-blend':.38,'fog-ground-blend':.14,'atmosphere-blend':['interpolate',['linear'],['zoom'],0,.12,8,.06,12,0]},sources:{'overview-land':{type:'geojson',data:'/data/world.geojson'},'terrain-dem':{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'},'hillshade-dem':{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'},openmaptiles:{type:'vector',url:'https://tiles.openfreemap.org/planet/latest',attribution:'<a href="https://openfreemap.org">OpenFreeMap</a> · <a href="https://openmaptiles.org">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>'}},layers:[
  {id:'background',type:'background',paint:{'background-color':'#D7E5E9'}},
  // A local geographic base remains visible while live provider tiles load.
@@ -41,7 +44,7 @@ const style={version:8,name:'Тропник · ландшафт',metadata:{autho
  text('water-label','water_name',7,13,undefined,{'text-color':'#547C8D','text-halo-color':'#D5E7E9'}),
  {...text('country-label','place',1,['interpolate',['linear'],['zoom'],1,12,5,18],is('class','country'),{'text-color':'#7C8978','text-halo-width':1.2}),maxzoom:6},
  {...text('state-label','place',4,12,is('class','state'),{'text-color':'#74866E'}),maxzoom:9},
- {...text('city-label','place',3,['interpolate',['linear'],['zoom'],3,12,9,16],['all',is('class','city'),['!',priorityCity]],{'text-color':'#314F3D'}),maxzoom:16},
+ cityLabel,
  {...text('town-label','place',7,['interpolate',['linear'],['zoom'],7,12,12,14],is('class','town')),maxzoom:18},
  text('village-label','place',10,12,oneOf('class',['village','hamlet','suburb'])),
  text('peak-label','mountain_peak',10,12,undefined,{'text-color':'#78664E'}),
