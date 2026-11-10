@@ -1,0 +1,43 @@
+{
+  "id": "appgdep_6af378df1cf481918244c6e4c1ff72d8",
+  "project_id": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+  "title": "Тропник — маршруты и объёмный ландшафт",
+  "version_id": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_01948e6c1a988191a3a9480c0b89b3a0",
+  "type": "publish",
+  "status": "succeeded",
+  "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+  "has_mcp": false,
+  "screenshot_asset_pointer": null,
+  "provider_deployment_id": "site---6aed4db0a81881919cc3840d28cfad27",
+  "failure_message": null,
+  "env_set_revision": 1,
+  "updated_at": "2026-11-10T20:05:12.144165+00:00",
+  "source_commit": "20f6e5affc38c9c6ebc6a58ff4c2e213959acf64",
+  "web_source_commit": "aabfaf9ed1fdb7e1cd386638bb16def71523e411",
+  "access": "owner-only preserved",
+  "archive_sha256": "0aee92ae1c398feb80adde0126bac5bc221099728186b69a7b260c20b2f0e774",
+  "version_number": 27,
+  "submittedArchive": {
+    "format": "tar.gz",
+    "sha256": "0aee92ae1c398feb80adde0126bac5bc221099728186b69a7b260c20b2f0e774",
+    "bytes": 62435154,
+    "entries": 1910,
+    "regularFiles": 1782,
+    "uncompressedSha256": "a78fa3da5faf42f92b19c10c8ce11c6d4bf8e6c28b4d6672e97fd6e220a09beb",
+    "uncompressedBytes": 153804800
+  },
+  "serviceStoredArchive": {
+    "format": "tar",
+    "content_hash": "sha256:7c0c22a5ea8c03a8fb7159b9333d995a24f6b4059dbea81916fceaa284433948",
+    "size_bytes": 153743360,
+    "file_count": 1782,
+    "note": "Service-reported stored tar hash is distinct from submitted gzip and its input tar; 1782 regular files agree. Do not equate the archive hashes."
+  },
+  "postPublicationAccess": {
+    "owner": true,
+    "accessMode": "custom",
+    "allowedUsers": 1,
+    "allowedGroups": 0,
+    "externalVisitors": 0
+  }
+}

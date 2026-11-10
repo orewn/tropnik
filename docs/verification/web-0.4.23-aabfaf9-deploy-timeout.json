@@ -1,0 +1,603 @@
+{
+  "schemaVersion": 1,
+  "kind": "full-browser-pass-pages-deployment-timeout",
+  "sourceCommit": "aabfaf9ed1fdb7e1cd386638bb16def71523e411",
+  "buildId": "b9d70001f407ef63",
+  "runId": 42887288052,
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/42887288052",
+  "status": "browser-verified-pages-deploy-action-timeout",
+  "browserContractRechecked": true,
+  "publicDeploymentVerified": false,
+  "buildJob": {
+    "id": 130078859605,
+    "conclusion": "success",
+    "startedAt": "2026-11-10T19:38:33Z",
+    "completedAt": "2026-11-10T20:01:44Z",
+    "durationSeconds": 1391.0,
+    "browserStartedAt": "2026-11-10T19:40:30Z",
+    "browserCompletedAt": "2026-11-10T20:01:29Z",
+    "browserDurationSeconds": 1259.0
+  },
+  "report": {
+    "file": "browser-verification.json",
+    "bytes": 2718619,
+    "sha256": "d9554803cd4f0817cd6dd08afe7884f564ce9376cbca56cb1fb8795d8f712054",
+    "verified": true,
+    "mapInteractionSchemaVersion": 3,
+    "zoomSchemas": [
+      7,
+      7
+    ]
+  },
+  "buildInfo": {
+    "file": "build-info.json",
+    "bytes": 330181,
+    "sha256": "1cbd46492d9f2ae7d5e322c6cae0208fcc87bcbdeb8bc4cfd2a5d817887533b3"
+  },
+  "artifacts": [
+    {
+      "id": 13799550015,
+      "name": "tropnik-pages-design-1",
+      "bytes": 46030752,
+      "sha256": "304ff493877a2e3d54014c73852784f3ec4b47e81880ee783b1e2b4dec7930cb",
+      "sourceCommit": "aabfaf9ed1fdb7e1cd386638bb16def71523e411",
+      "zipHashVerified": true
+    },
+    {
+      "id": 13797489667,
+      "name": "github-pages-42887288052-1",
+      "bytes": 125266964,
+      "sha256": "5b9e49ee88ffd52a6d5ceac725103c70a3e8221d775aec9909273d588eedd9a3",
+      "sourceCommit": "aabfaf9ed1fdb7e1cd386638bb16def71523e411",
+      "zipHashVerified": true
+    }
+  ],
+  "regressions": {
+    "pagesTools": {
+      "tests": 143,
+      "passed": 143,
+      "failed": 0
+    },
+    "web": {
+      "tests": 633,
+      "passed": 633,
+      "failed": 0
+    },
+    "telegram": {
+      "tests": 19,
+      "passed": 19
+    },
+    "lint": "success",
+    "staticTypes": "success"
+  },
+  "staticVerification": {
+    "verified": true,
+    "pages": 339,
+    "referenceRoutes": 306,
+    "productionRoutingChecks": 1022,
+    "mapPolicyChecks": 14,
+    "staticApiNetworkCalls": 0,
+    "checkedScripts": 64,
+    "publicAssetChecks": 342,
+    "outputFiles": 1949,
+    "offlineFilesVerified": 252,
+    "overviewReliefTilesVerified": 341,
+    "terrainGrid": [
+      513,
+      513
+    ],
+    "apkVerified": true,
+    "coverageExcludedRoutes": [
+      "osm-relation-14407325"
+    ],
+    "base": "/tropnik/"
+  },
+  "mobileProfiles": [
+    {
+      "name": "compact-android",
+      "engine": "leaflet",
+      "longestTaskMs": 236,
+      "layoutShift": 0,
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0
+    },
+    {
+      "name": "iphone-portrait",
+      "engine": "leaflet",
+      "longestTaskMs": 91,
+      "layoutShift": 0,
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0
+    },
+    {
+      "name": "android-portrait",
+      "engine": "leaflet",
+      "longestTaskMs": 257,
+      "layoutShift": 0,
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0
+    },
+    {
+      "name": "phone-landscape",
+      "engine": "leaflet",
+      "longestTaskMs": 294,
+      "layoutShift": 0,
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0
+    }
+  ],
+  "mapInteractions": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "passed": true,
+      "longestTaskMs": 257,
+      "layoutShift": 0.38573708143407187,
+      "durationMs": 74433,
+      "strictLongTaskLimitMs": 350,
+      "filterRequestSiblingContractPassed": true
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "passed": true,
+      "longestTaskMs": 535,
+      "layoutShift": 0,
+      "durationMs": 54794,
+      "strictLongTaskLimitMs": 750,
+      "filterRequestSiblingContractPassed": true
+    }
+  ],
+  "designs": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "schemaVersion": 7,
+      "geometryPassed": true,
+      "keyZooms": [
+        2,
+        5,
+        8,
+        11,
+        14,
+        18
+      ],
+      "detailStepCount": 24,
+      "modeStates": {
+        "detail": "checked",
+        "satellite": "active",
+        "overview": "active",
+        "terrain": "not-offered",
+        "scene3d": "ready"
+      },
+      "retainedDiagnosticMaximum": {
+        "layoutShift": 0.3172081051392909,
+        "longestTaskMs": 600
+      },
+      "performanceIntervals": {
+        "modes": {
+          "layoutShift": 0.3172081051392909,
+          "longestTaskMs": 600
+        },
+        "sourceEnds": {
+          "layoutShift": 0,
+          "longestTaskMs": 69
+        },
+        "satellite": {
+          "layoutShift": 0.06297297156260845,
+          "longestTaskMs": 157
+        }
+      },
+      "modeIntervalIsNotTheStrictInteractionGate": true,
+      "allObservedTasksBelowStrictInteractionThreshold": false,
+      "sourceEndsPassed": true,
+      "coast": {
+        "passed": true,
+        "stepCount": 6,
+        "targetZooms": [
+          7,
+          9,
+          12,
+          15,
+          18,
+          11
+        ],
+        "allFramesReady": true,
+        "maximumCenterErrorPx": 2.9226088636008765,
+        "centerErrorLimitPx": 6,
+        "nativePans": 8,
+        "screenshotHashesVerified": 6,
+        "independentVisualReview": "completed",
+        "originalPngsPersonallyInspected": 6
+      },
+      "satellite": {
+        "passed": true,
+        "durationMs": 68198,
+        "performance": {
+          "layoutShift": 0.06297297156260845,
+          "longestTaskMs": 157
+        },
+        "strictLongTaskLimitMs": 350,
+        "layoutShiftLimit": 0.12,
+        "stages": [
+          "dateline-overview",
+          "dateline-native8",
+          "dateline-overzoom",
+          "west-eox",
+          "dateline-return",
+          "detail-restored"
+        ],
+        "maximumCenterErrorPx": 0.7927647178635736,
+        "cameraRectViewportPreservedOnToggles": true,
+        "currentSourceReadyAtCaptures": true,
+        "noPendingOrFailedCurrentSourceAtCaptures": true,
+        "network": {
+          "observed": 141,
+          "finished": 136,
+          "canceled": 5,
+          "allRequestsFinished": false
+        },
+        "native8BothDatelineColumnsVerified": true,
+        "screenshotHashesVerified": 6,
+        "independentOriginalPngsReviewed": 6,
+        "visualScope": "Broad empty band absent; a conspicuous coarse vertical mosaic seam and horizontal resampling streaks remain at native8 and overzoom. Not a complete repair of imagery quality."
+      }
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "schemaVersion": 7,
+      "geometryPassed": true,
+      "keyZooms": [
+        2,
+        5,
+        8,
+        11,
+        14,
+        18
+      ],
+      "detailStepCount": 18,
+      "modeStates": {
+        "detail": "checked",
+        "satellite": "active",
+        "overview": "active",
+        "terrain": "active",
+        "scene3d": "ready"
+      },
+      "retainedDiagnosticMaximum": {
+        "layoutShift": 0.03137042123730378,
+        "longestTaskMs": 1051
+      },
+      "performanceIntervals": {
+        "modes": {
+          "layoutShift": 0.03137042123730378,
+          "longestTaskMs": 1051
+        },
+        "sourceEnds": {
+          "layoutShift": 0,
+          "longestTaskMs": 156
+        },
+        "satellite": {
+          "layoutShift": 0.02290389852262234,
+          "longestTaskMs": 347
+        }
+      },
+      "modeIntervalIsNotTheStrictInteractionGate": true,
+      "allObservedTasksBelowStrictInteractionThreshold": false,
+      "sourceEndsPassed": true,
+      "coast": {
+        "passed": true,
+        "stepCount": 6,
+        "targetZooms": [
+          7,
+          9,
+          12,
+          15,
+          18,
+          11
+        ],
+        "allFramesReady": true,
+        "maximumCenterErrorPx": 4.44657680766724,
+        "centerErrorLimitPx": 6,
+        "nativePans": 5,
+        "screenshotHashesVerified": 6,
+        "independentVisualReview": "completed",
+        "originalPngsPersonallyInspected": 6
+      },
+      "satellite": {
+        "passed": true,
+        "durationMs": 95901,
+        "performance": {
+          "layoutShift": 0.02290389852262234,
+          "longestTaskMs": 347
+        },
+        "strictLongTaskLimitMs": 750,
+        "layoutShiftLimit": 0.12,
+        "stages": [
+          "dateline-overview",
+          "dateline-native8",
+          "dateline-overzoom",
+          "west-eox",
+          "dateline-return",
+          "detail-restored"
+        ],
+        "maximumCenterErrorPx": 1.6414169532236838,
+        "cameraRectViewportPreservedOnToggles": true,
+        "currentSourceReadyAtCaptures": true,
+        "noPendingOrFailedCurrentSourceAtCaptures": true,
+        "network": {
+          "observed": 104,
+          "finished": 98,
+          "canceled": 6,
+          "allRequestsFinished": false
+        },
+        "native8BothDatelineColumnsVerified": true,
+        "screenshotHashesVerified": 6,
+        "independentOriginalPngsReviewed": 6,
+        "visualScope": "Broad empty band absent; a conspicuous coarse vertical mosaic seam and horizontal resampling streaks remain at native8 and overzoom. Not a complete repair of imagery quality."
+      }
+    }
+  ],
+  "allReportedPngHashesVerified": {
+    "count": 85,
+    "totalPngsInDesignArtifact": 85,
+    "unreferenced": 0
+  },
+  "publicDeployGuard": {
+    "status": "skipped",
+    "jobId": 130092303919,
+    "jobConclusion": "failure",
+    "startedAt": "2026-11-10T20:01:49Z",
+    "completedAt": "2026-11-10T20:12:36Z",
+    "failureStage": "Deploy the verified artifact",
+    "configuredTimeoutMs": 1200000,
+    "actionEnforcedTimeoutMs": 600000,
+    "lastObservedNonemptyDeploymentStatus": "syncing_files",
+    "deploymentCreatedAt": "2026-11-10T20:02:12.0086049Z",
+    "timeoutAt": "2026-11-10T20:12:33.3131001Z",
+    "deploymentCancelledAt": "2026-11-10T20:12:33.8754398Z",
+    "artifactId": 13797489667,
+    "sourceCommit": "aabfaf9ed1fdb7e1cd386638bb16def71523e411",
+    "publicBuildReportApkGuardRan": false,
+    "log": {
+      "file": "deploy-failed.log",
+      "bytes": 20700,
+      "sha256": "1c628f05c49eef53d4ae8e82a3a97f816eb35a50dc28b49f3385b35320c00705"
+    },
+    "cause": "The pinned deploy-pages action clamps its input to 600000 ms, despite the workflow requesting 1200000 ms. The service remained syncing_files until the action timed out and cancelled this deployment."
+  },
+  "offlineSafety": {
+    "passed": true,
+    "nativeInputs": 4,
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "offline": true,
+    "titleRestored": true,
+    "contactRestored": true,
+    "draftExplicit": true,
+    "privateApiNotCached": true,
+    "networkSuccessfulResponses": 0,
+    "screenshot": {
+      "file": "android-offline-emergency-card.png",
+      "bytes": 176381,
+      "sha256": "a4f68bc4f70a6c34e973944a8ab567ea222b136ec010f3ff6e67858793519aa8"
+    },
+    "originTransport": {
+      "method": "origin-socket-destroy",
+      "startedAt": "2026-11-10T20:01:27.871Z",
+      "restoredAt": "2026-11-10T20:01:28.271Z",
+      "blockedRequests": 4,
+      "active": false
+    },
+    "allNativeInputEventsTrusted": true,
+    "screenshotHashVerified": true,
+    "originalScreenshotPersonallyInspected": true,
+    "visualScope": "Standalone emergency-card page and explicit local-draft notice visible; saved contact restoration is additionally asserted from DOM evidence."
+  },
+  "buryatiaCanvasRegression": {
+    "passed": true,
+    "selectedTerritoryId": "territory-28173009B49563687485750",
+    "title": "Республика Бурятия",
+    "coordinate": [
+      109.96875000000001,
+      52.68970242806751
+    ],
+    "input": "touch",
+    "nativeEvents": [
+      "pointerdown",
+      "pointerup",
+      "click"
+    ],
+    "allEventsTrusted": true,
+    "canvasTargets": [
+      "CANVAS[leaflet-zoom-animated]",
+      "CANVAS[leaflet-zoom-animated]",
+      "CANVAS[leaflet-zoom-animated leaflet-interactive]"
+    ],
+    "siblingSelectionAndBrowserBackRestored": true
+  },
+  "apk": {
+    "path": "/downloads/tropnik-preview.apk",
+    "downloadHref": "/downloads/tropnik-preview.apk?sha256=17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+    "bytes": 79346747,
+    "sha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+    "version": "0.4.23-preview",
+    "architecture": "universal",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "signature": "development / debug",
+    "signingCertificateSha256": "a45e5fcbd9edcf0d1c4df1a8df7209b2417f13e7f95f64c36304ce4b9bd39dac",
+    "testedArchitecture": "x86_64",
+    "deviceExecutionVerified": true,
+    "physicalDeviceVerified": false
+  },
+  "limitations": [
+    "The existing full browser contract passes; this does not mean every recorded zoom/mode task was below 350/750 ms. The separately recorded mode intervals retain mobile 600 ms/CLS0.3172081051392909 and desktop 1051 ms/CLS0.03137042123730378.",
+    "The satellite broad empty band is removed by a real lower-detail overview source; the native/overzoom mosaic seam remains visible.",
+    "No physical-device or ARM64 execution claim is added to the immutable Android receipt.",
+    "The coast review retains existing duplicate desktop labels and a mobile Gogland relief-tone transition; passing contour checks is not a claim of visual perfection.",
+    "The first public Pages deployment failed at the action-enforced 10-minute synchronization limit; the anonymous public build/report/APK guard was skipped. Build/browser verification remains successful."
+  ],
+  "coastIndependentReview": {
+    "file": "coast-aabfaf9-independent-review.json",
+    "bytes": 15036,
+    "sha256": "7d5ff0d881b6d4b9b7d2e549318b7b7e8382c68f5b48708f2f62da56f1ec82c3",
+    "originalPngsPersonallyInspected": 12,
+    "allHashesMatched": true,
+    "reportedScope": "Contours show no visible gaps at the six required frames per engine. Desktop duplicate labels remain at z7/z12; mobile Gogland relief has a tone transition with an intact contour. Captures are ready with no pending coverage/error; cumulative network entries are not claimed universally finished."
+  },
+  "tree": "baa899098c0d55664322fe1bf0a4fa3f83b63c23",
+  "webTree": "2f3f867b7254da7786d2912caa88002171483285",
+  "fullyRepairedImageryQuality": false,
+  "publicationLimits": {
+    "officialDocs": "https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits",
+    "maintainerExplanation": "https://github.com/actions/deploy-pages/issues/165",
+    "serverLimitMs": 600000,
+    "configuredInputMs": 1200000,
+    "effectiveActionLimitMs": 600000,
+    "largerTimeoutIsNotSupportedRecovery": true
+  },
+  "artifactInventory": {
+    "sourceCommit": "aabfaf9ed1fdb7e1cd386638bb16def71523e411",
+    "buildId": "b9d70001f407ef63",
+    "artifactId": 13797489667,
+    "zipBytes": 125266964,
+    "tarFileName": "artifact.tar",
+    "tarBytes": 232448000,
+    "regularFileCount": 1952,
+    "regularFileBytes": 230732448,
+    "otherNonDirectoryEntries": [],
+    "apkFileCount": 1,
+    "apkBytes": 79346747,
+    "apkShareOfRegularBytesPercent": 34.3890717095846,
+    "remainingWithoutApk": {
+      "regularFileCount": 1951,
+      "regularFileBytes": 151385701
+    },
+    "apkFiles": [
+      {
+        "path": "downloads/tropnik-preview.apk",
+        "bytes": 79346747,
+        "sha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+        "streamedBytes": 79346747,
+        "shareOfRegularFileBytesPercent": 34.3890717095846
+      }
+    ],
+    "largest20Assets": [
+      {
+        "path": "downloads/tropnik-preview.apk",
+        "bytes": 79346747,
+        "shareOfRegularFileBytesPercent": 34.3890717095846
+      },
+      {
+        "path": "terrain/terrain-grid.json",
+        "bytes": 3087398,
+        "shareOfRegularFileBytesPercent": 1.3380857468300253
+      },
+      {
+        "path": "data/map-coverage/base.coverage",
+        "bytes": 2938837,
+        "shareOfRegularFileBytesPercent": 1.273699050772434
+      },
+      {
+        "path": "browser-verification.json",
+        "bytes": 2718619,
+        "shareOfRegularFileBytesPercent": 1.1782560379197293
+      },
+      {
+        "path": "offline-map/terrain/landscape.html",
+        "bytes": 1960942,
+        "shareOfRegularFileBytesPercent": 0.8498769969276277
+      },
+      {
+        "path": "terrain/landscape.html",
+        "bytes": 1960942,
+        "shareOfRegularFileBytesPercent": 0.8498769969276277
+      },
+      {
+        "path": "data/imported/osm-relation-18162201.geojson",
+        "bytes": 1454712,
+        "shareOfRegularFileBytesPercent": 0.6304756927816239
+      },
+      {
+        "path": "data/russia-canonical-mask.geojson",
+        "bytes": 1233406,
+        "shareOfRegularFileBytesPercent": 0.5345611381022577
+      },
+      {
+        "path": "data/russia-outside-mask.geojson",
+        "bytes": 1231143,
+        "shareOfRegularFileBytesPercent": 0.5335803484388983
+      },
+      {
+        "path": "data/imported/osm-relation-14594896.geojson",
+        "bytes": 1216022,
+        "shareOfRegularFileBytesPercent": 0.5270268705336147
+      },
+      {
+        "path": "data/russia-canonical-area.geojson",
+        "bytes": 1110525,
+        "shareOfRegularFileBytesPercent": 0.4813042160416033
+      },
+      {
+        "path": "data/russia-display-area.geojson",
+        "bytes": 1109110,
+        "shareOfRegularFileBytesPercent": 0.48069095162549486
+      },
+      {
+        "path": "maps/maplibre-gl.mjs",
+        "bytes": 1108593,
+        "shareOfRegularFileBytesPercent": 0.4804668825773478
+      },
+      {
+        "path": "assets/maplibre-gl-gSiY3OKT.js",
+        "bytes": 1104477,
+        "shareOfRegularFileBytesPercent": 0.47868299824045557
+      },
+      {
+        "path": "assets/page-BjS_zjGM.js",
+        "bytes": 961125,
+        "shareOfRegularFileBytesPercent": 0.41655389535848897
+      },
+      {
+        "path": "data/map-coverage/cells/0209-230source.coverage",
+        "bytes": 872541,
+        "shareOfRegularFileBytesPercent": 0.3781613758980272
+      },
+      {
+        "path": "data/map-coverage/cells/0209-22source.coverage",
+        "bytes": 838710,
+        "shareOfRegularFileBytesPercent": 0.36349893882285683
+      },
+      {
+        "path": "data/map-coverage/cells/0c0a-0source.coverage",
+        "bytes": 745179,
+        "shareOfRegularFileBytesPercent": 0.32296237761929353
+      },
+      {
+        "path": "data/map-coverage/cells/0809-source.coverage",
+        "bytes": 744993,
+        "shareOfRegularFileBytesPercent": 0.32288176477025027
+      },
+      {
+        "path": "data/map-coverage/cells/060a-23source.coverage",
+        "bytes": 738113,
+        "shareOfRegularFileBytesPercent": 0.319899956160479
+      }
+    ],
+    "limitations": [
+      "These are exact archive inventory sizes, not evidence that the APK caused the Pages synchronization timeout.",
+      "The compressed size of a future artifact without the APK has not been measured.",
+      "The existing APK was hashed from the already downloaded immutable artifact; no extra public network download was performed."
+    ]
+  },
+  "nextAction": "Reduce Pages payload by serving the unchanged, fully verified universal APK from its existing exact GitHub Release URL; run the full strict CI again. Artifact size does not establish the cause of syncing_files timeout."
+}

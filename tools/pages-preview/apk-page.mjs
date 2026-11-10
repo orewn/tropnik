@@ -1,15 +1,17 @@
-import {APK_FILES, apkFileName, validateApkManifest} from './apk-artifact.mjs';
+import {APK_FILES, apkFileName, publicApkUrl, validateApkManifest} from './apk-artifact.mjs';
 import {pagesPath, ts} from './paths.mjs';
 
 /** Inspect the real download anchor without executing page code. */
-function inspectAndroidPageDownload(code, metadata, {base = ''} = {}) {
+function inspectAndroidPageDownload(code, metadata, {base = '', delivery = 'local'} = {}) {
   validateApkManifest(metadata);
+  if (!['local', 'github-release'].includes(delivery)) throw new Error('Unknown Android download delivery.');
   const source = ts.createSourceFile('android/page.tsx', code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const manifestImport = source.statements.find(node => ts.isImportDeclaration(node) &&
     ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === '@/public/downloads/android-manifest.json');
   const manifestName = !manifestImport?.importClause?.isTypeOnly && manifestImport?.importClause?.name?.text;
   const path = `/downloads/${apkFileName(metadata)}`;
-  const expected = `${base ? pagesPath(path, base) : path}?sha256=${metadata.sha256}`;
+  const expected = delivery === 'github-release' ? publicApkUrl(metadata)
+    : `${base ? pagesPath(path, base) : path}?sha256=${metadata.sha256}`;
   const downloads = [];
   const isManifestProperty = (node, name) => ts.isPropertyAccessExpression(node) &&
     ts.isIdentifier(node.expression) && node.expression.text === manifestName && node.name.text === name;
@@ -25,6 +27,9 @@ function inspectAndroidPageDownload(code, metadata, {base = ''} = {}) {
     return href === expectedHref ? href : undefined;
   }
   function selectedHref(value) {
+    if (delivery === 'github-release') {
+      return value && ts.isStringLiteral(value) && value.text === expected ? value.text : undefined;
+    }
     if (!value || !ts.isConditionalExpression(value)) return pinnedHref(value, metadata.architecture);
     const condition = value.condition;
     if (!ts.isBinaryExpression(condition) || condition.operatorToken.kind !== ts.SyntaxKind.EqualsEqualsEqualsToken ||
@@ -52,7 +57,7 @@ function inspectAndroidPageDownload(code, metadata, {base = ''} = {}) {
   }
   visit(source);
   if (downloads.length !== 1 || downloads[0].href !== expected) {
-    throw new Error('Android page must advertise exactly one manifest-selected APK with its SHA256 cache key.');
+    throw new Error('Android page must advertise exactly one manifest-selected APK with its pinned delivery URL.');
   }
   return {path, downloadHref: downloads[0].href, initializer: downloads[0].initializer, source};
 }
@@ -62,9 +67,12 @@ export function androidPageDownload(code, metadata, options) {
   return {path, downloadHref};
 }
 
-/** A static publication contains only its selected APK. Validate both source
- * branches first, then keep only that build's pinned URL in the staged page. */
-export function pinAndroidPageDownload(code, metadata, options) {
-  const {downloadHref, initializer, source} = inspectAndroidPageDownload(code, metadata, options);
+/** Validate both original local source branches, then replace only the staged
+ * anchor with the selected local or immutable public release URL. */
+export function pinAndroidPageDownload(code, metadata, {base = '', delivery = 'local'} = {}) {
+  if (!['local', 'github-release'].includes(delivery)) throw new Error('Unknown Android download delivery.');
+  const inspected = inspectAndroidPageDownload(code, metadata, {base});
+  const {initializer, source} = inspected;
+  const downloadHref = delivery === 'github-release' ? publicApkUrl(metadata) : inspected.downloadHref;
   return code.slice(0, initializer.getStart(source)) + JSON.stringify(downloadHref) + code.slice(initializer.end);
 }

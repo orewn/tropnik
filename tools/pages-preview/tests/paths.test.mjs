@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 import {readFile} from 'node:fs/promises';
 import {pagesPath, rewriteScript, rewriteHTML, ts} from '../paths.mjs';
 import {androidPageDownload, pinAndroidPageDownload} from '../apk-page.mjs';
-import {apkFileName, validateApkManifest} from '../apk-artifact.mjs';
+import {apkFileName, publicApkUrl, validateApkManifest} from '../apk-artifact.mjs';
 import {arm64Manifest, universalManifest} from './fixtures/apk.mjs';
 
 const androidSource = await readFile(new URL('../../../web/app/android/page.tsx', import.meta.url), 'utf8');
@@ -78,8 +78,9 @@ test('the rendered Android page selects the advertised file and compatibility fr
   const require = createRequire(new URL('../../../web/package.json', import.meta.url));
   const {createElement} = require('react');
   const {renderToStaticMarkup} = require('react-dom/server');
-  for (const manifest of [arm64Manifest, universalManifest]) for (const base of ['/tropnik/', '/another-project/']) {
-    const transformed = rewriteScript(androidSource, 'android/page.tsx', {base});
+  for (const manifest of [arm64Manifest, universalManifest]) for (const base of ['/tropnik/', '/another-project/']) for (const delivery of ['local', 'github-release']) {
+    const staged = delivery === 'github-release' ? pinAndroidPageDownload(androidSource, manifest, {delivery}) : androidSource;
+    const transformed = rewriteScript(staged, 'android/page.tsx', {base});
     const compiled = ts.transpileModule(transformed, {compilerOptions: {
       target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true,
     }}).outputText;
@@ -95,10 +96,30 @@ test('the rendered Android page selects the advertised file and compatibility fr
     const anchors = [...html.matchAll(/<a\b[^>]*\bdownload(?:="[^"]*")?[^>]*>/g)];
     assert.equal(anchors.length, 1);
     const href = anchors[0][0].match(/\bhref="([^"]+)"/)[1];
-    assert.equal(href, androidPageDownload(transformed, manifest, {base}).downloadHref);
+    assert.equal(href, androidPageDownload(transformed, manifest, {base, delivery}).downloadHref);
+    if (delivery === 'github-release') assert.equal(href, publicApkUrl(manifest));
     assert.equal(html.includes('ARM 32 бит или x86_64'), manifest.architecture === 'universal');
     assert.match(html, /Android 8\.0 или новее/);
     assert.match(html, /Этот файл не подходит для обновления ранее установленного Тропника/);
+  }
+});
+
+test('a Pages release snapshot has only the exact public selected anchor after either base rewrite order', () => {
+  for (const manifest of [arm64Manifest, universalManifest]) for (const base of ['/tropnik/', '/another-project/']) {
+    const staged = pinAndroidPageDownload(androidSource, manifest, {delivery: 'github-release'});
+    const afterBase = rewriteScript(staged, 'android/page.tsx', {base});
+    const beforeBase = pinAndroidPageDownload(rewriteScript(androidSource, 'android/page.tsx', {base}), manifest, {base, delivery: 'github-release'});
+    for (const pinned of [afterBase, beforeBase]) {
+      assert.deepEqual(androidPageDownload(pinned, manifest, {base, delivery: 'github-release'}), {
+        path: `/downloads/${apkFileName(manifest)}`, downloadHref: publicApkUrl(manifest),
+      });
+      assert.ok(!pinned.includes(`/downloads/${apkFileName(manifest)}`), 'The emitted page must not reference an absent local APK');
+      const inactiveFile = manifest.architecture === 'universal' ? 'tropnik-arm64-preview.apk' : 'tropnik-preview.apk';
+      assert.ok(!pinned.includes(inactiveFile));
+    }
+    for (const wrong of [publicApkUrl(manifest).replace('/orewn/', '/other/'), publicApkUrl(manifest).replace(`/v${manifest.version}/`, '/latest/'), publicApkUrl(manifest) + '?override=1']) {
+      assert.throws(() => androidPageDownload(afterBase.replace(publicApkUrl(manifest), wrong), manifest, {base, delivery: 'github-release'}), /Android page/);
+    }
   }
 });
 
@@ -134,6 +155,7 @@ test('the Android page gate rejects a wrong payload, missing cache key, dynamic 
     for (const manifest of [arm64Manifest, universalManifest]) {
       assert.throws(() => androidPageDownload(page, manifest), /Android download|Android page/);
       assert.throws(() => pinAndroidPageDownload(page, manifest), /Android download|Android page/);
+      assert.throws(() => pinAndroidPageDownload(page, manifest, {delivery: 'github-release'}), /Android download|Android page/);
     }
   }
 });

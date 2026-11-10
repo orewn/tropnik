@@ -3,7 +3,7 @@ import {mkdtemp, readFile, readdir, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import test from 'node:test';
-import {apkFileName, ensureApk, publicApkUrl, validateApkManifest} from '../apk-artifact.mjs';
+import {apkFileName, ensureApk, publicApkUrl, validateApkDelivery, validateApkManifest, verifyPublicApk} from '../apk-artifact.mjs';
 import {payload, arm64Manifest as metadata, universalManifest} from './fixtures/apk.mjs';
 
 async function fixture(t, manifest = metadata) {
@@ -48,6 +48,7 @@ test('a public release redirect downloads exact pinned bytes before publication'
     const result = await ensureApk(path, manifest, {fetchImpl: async (url, options) => {
       calls.push(url);
       assert.equal(options.redirect, 'manual');
+      assert.equal(options.credentials, 'omit');
       assert.equal(options.headers.Authorization, undefined);
       if (calls.length === 1) return new Response(null, {status: 302, headers: {Location: 'https://release-assets.githubusercontent.com/tropnik.apk?signature=fixture'}});
       return new Response(payload, {headers: {'Content-Length': String(payload.length)}});
@@ -57,6 +58,85 @@ test('a public release redirect downloads exact pinned bytes before publication'
     assert.equal(result.source, 'public-release');
     assert.deepEqual(await readFile(path), payload);
     assert.deepEqual(await readdir(directory), [apkFileName(manifest)]);
+  }
+});
+
+test('the deployed release verifier consumes all anonymous chunks without requiring Content-Length', async () => {
+  for (const manifest of [metadata, universalManifest]) {
+    const calls = [];
+    let delivered = 0;
+    const result = await verifyPublicApk(manifest, {fetchImpl: async (url, options) => {
+      calls.push(url);
+      assert.equal(options.redirect, 'manual');
+      assert.equal(options.credentials, 'omit');
+      assert.deepEqual(options.headers, {Accept: 'application/octet-stream'});
+      assert.ok(options.signal instanceof AbortSignal);
+      if (calls.length === 1) return new Response(null, {status: 302, headers: {Location: 'https://release-assets.githubusercontent.com/tropnik.apk?signature=fixture'}});
+      return new Response(new ReadableStream({pull(controller) {
+        if (delivered === payload.length) return controller.close();
+        const end = Math.min(payload.length, delivered + 3);
+        controller.enqueue(payload.subarray(delivered, end));
+        delivered = end;
+      }}));
+    }});
+    assert.equal(calls[0], publicApkUrl(manifest));
+    assert.equal(calls.length, 2);
+    assert.equal(delivered, payload.length);
+    assert.deepEqual(result, {bytes: payload.length, sha256: manifest.sha256, version: manifest.version, source: 'public-release', url: publicApkUrl(manifest)});
+  }
+});
+
+test('the deployed release verifier rejects false lengths, changed bytes, truncation and oversized bodies', async () => {
+  for (const length of ['invalid', String(payload.length - 1), String(payload.length + 1)]) {
+    await assert.rejects(verifyPublicApk(metadata, {fetchImpl: async () => new Response(payload, {headers: {'Content-Length': length}})}), /Content-Length/);
+  }
+  for (const body of [Buffer.alloc(payload.length, 66), payload.subarray(0, payload.length - 1), Buffer.concat([payload, Buffer.from('extra')])]) {
+    await assert.rejects(verifyPublicApk(metadata, {fetchImpl: async () => new Response(body)}), /SHA256 or size|exceeds/);
+  }
+  await assert.rejects(verifyPublicApk(metadata, {fetchImpl: async () => new Response('Not found', {status: 404})}), /HTTP 404/);
+});
+
+test('the deployed release verifier never follows untrusted or excessive redirects', async () => {
+  for (const location of ['https://private.example.invalid/file.apk', 'http://github.com/orewn/tropnik/file.apk',
+    'https://user:password@github.com/orewn/tropnik/file.apk', 'https://github.com:8443/orewn/tropnik/file.apk']) {
+    let calls = 0;
+    await assert.rejects(verifyPublicApk(metadata, {fetchImpl: async () => {
+      calls++;
+      return new Response(null, {status: 302, headers: {Location: location}});
+    }}), /outside the public GitHub release hosts/);
+    assert.equal(calls, 1);
+  }
+  let calls = 0;
+  await assert.rejects(verifyPublicApk(metadata, {fetchImpl: async () => {
+    calls++;
+    return new Response(null, {status: 302, headers: {Location: 'https://github.com/orewn/tropnik/again'}});
+  }}), /excessive redirect/);
+  assert.equal(calls, 5);
+});
+
+test('the external delivery receipt rejects a different source, URL, artifact or verification claim', () => {
+  for (const manifest of [metadata, universalManifest]) {
+    const delivery = {
+      delivery: 'github-release', sourcePath: `/downloads/${apkFileName(manifest)}`,
+      downloadHref: publicApkUrl(manifest), bytes: manifest.bytes, sha256: manifest.sha256,
+      version: manifest.version, architecture: manifest.architecture,
+      abis: manifest.abis || [manifest.architecture], signature: manifest.signature,
+      signingCertificateSha256: manifest.signingCertificateSha256,
+      sourceCommit: manifest.sourceCommit, workflowRunId: manifest.workflowRunId,
+      testedArchitecture: manifest.testedArchitecture || null,
+      deviceExecutionVerified: manifest.deviceExecutionVerified === true,
+      physicalDeviceVerified: false,
+    };
+    assert.equal(validateApkDelivery(delivery, manifest), delivery);
+    const wrongUrls = [delivery.downloadHref.replace('/orewn/', '/other/'), delivery.downloadHref.replace('/tropnik/', '/other/'),
+      delivery.downloadHref.replace(`/v${manifest.version}/`, '/latest/'), delivery.downloadHref.replace('.apk', '-other.apk'),
+      delivery.downloadHref.replace('github.com', 'github.com:443'), delivery.downloadHref.replace('https://', 'https://user@'),
+      delivery.downloadHref + '?url=https://private.example.invalid/'];
+    for (const patch of [...wrongUrls.map(downloadHref => ({downloadHref})), {delivery: 'local'}, {bytes: manifest.bytes + 1},
+      {sha256: '0'.repeat(64)}, {sourceCommit: '0'.repeat(40)}, {workflowRunId: manifest.workflowRunId + 1},
+      {signingCertificateSha256: '0'.repeat(64)}, {physicalDeviceVerified: true}, {abis: ['x86_64']}]) {
+      assert.throws(() => validateApkDelivery({...delivery, ...patch}, manifest), /manifest-pinned public release/);
+    }
   }
 });
 

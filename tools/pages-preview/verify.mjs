@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import {readFile, readdir, access, writeFile} from 'node:fs/promises';
-import {join, resolve} from 'node:path';
+import {dirname, join, resolve} from 'node:path';
 import {createHash} from 'node:crypto';
-import {pathToFileURL} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {rewriteScript, rewriteJSON, rewriteHTML, pagesPath, ts} from './paths.mjs';
+import {apkFileName, validateApkDelivery, validateApkManifest, verifyApk} from './apk-artifact.mjs';
 
 const out = resolve(process.argv[2]);
 const report = JSON.parse(await readFile(join(out, 'build-info.json')));
@@ -14,7 +15,7 @@ const exists = async path => access(path).then(() => true, () => false);
 assert.equal(report.apiConnected, false);
 assert.equal(report.serverCodeIncluded, false);
 assert.equal(report.fakeServerResponses, false);
-assert.equal(report.hasApk, true, 'The public Pages build must include its advertised Android download');
+assert.equal(report.hasApk, true, 'The public Pages build must retain its verified Android download');
 assert.ok(report.bundledModules.includes('pages-preview/src/api.ts'));
 assert.ok(report.bundledModules.includes('components/Explore.tsx'));
 assert.ok(report.bundledModules.includes('components/Header.tsx'));
@@ -113,14 +114,16 @@ for (const [name, asset] of Object.entries(coverage.assets)) {
   assert.equal(createHash('sha256').update(data).digest('hex'), asset.sha256, `Pinned RF geometry ${name}`);
 }
 if (report.hasApk) {
-  const apk = await readFile(join(out, report.apk.path.slice(1)));
-  const metadata = JSON.parse(await readFile(join(out, 'downloads/android-manifest.json')));
-  assert.equal(apk.length, metadata.bytes);
-  assert.equal(createHash('sha256').update(apk).digest('hex'), metadata.sha256);
-  assert.equal(metadata.sha256, report.apk.sha256);
-  assert.equal(report.apk.downloadHref, `${report.apk.path}?sha256=${metadata.sha256}`);
+  const metadata = validateApkManifest(JSON.parse(await readFile(join(out, 'downloads/android-manifest.json'))));
+  validateApkDelivery(report.apk, metadata);
+  const project = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+  const verified = await verifyApk(join(project, 'web/public/downloads', apkFileName(metadata)), metadata);
+  assert.equal(verified.sha256, report.apk.sha256);
+  assert.equal(verified.bytes, report.apk.bytes);
+  const input = report.inputs.find(input => input.path === `web/public${report.apk.sourcePath}`);
+  assert.equal(input?.sha256, verified.sha256, 'The release APK remains a verified build input');
+  assert.equal(input?.bytes, verified.bytes);
   assert.equal(metadata.russiaCoverageProvenanceSha256, coverageInput.sha256);
-  assert.equal(report.apk.architecture, metadata.architecture);
 }
 const world = JSON.parse(await readFile(join(out, 'data/world.geojson')));
 assert.ok(world.features.length > 100);
@@ -178,6 +181,7 @@ async function walk(path) {
   return result;
 }
 const outputFiles = await walk(out);
+assert.ok(outputFiles.every(path => !/\.apk$/i.test(path)), 'Pages must link the verified release without publishing any APK binary');
 assert.ok(outputFiles.every(path => !/\.(?:tsx?|py|sql|sqlite|env)$/.test(path)), 'Only deployable public files may be published');
 assert.ok(outputFiles.every(path => !/\/(?:backend|api)\//.test(path)), 'No backend directory in output');
 

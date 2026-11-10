@@ -2,6 +2,7 @@ import {createHash, randomUUID} from 'node:crypto';
 import {createReadStream} from 'node:fs';
 import {lstat, mkdir, open, readFile, rename, rm} from 'node:fs/promises';
 import {dirname} from 'node:path';
+import {isDeepStrictEqual} from 'node:util';
 
 export const APK_FILES = Object.freeze({
   'arm64-v8a': 'tropnik-arm64-preview.apk',
@@ -58,6 +59,24 @@ export function publicApkUrl(metadata) {
   return `https://github.com/orewn/tropnik/releases/download/v${metadata.version}/${filename}`;
 }
 
+/** Keep the emitted link and its proof bound to the selected manifest. */
+export function validateApkDelivery(value, metadata) {
+  validateApkManifest(metadata);
+  const expected = {
+    delivery: 'github-release', sourcePath: `/downloads/${apkFileName(metadata)}`,
+    downloadHref: publicApkUrl(metadata), bytes: metadata.bytes, sha256: metadata.sha256,
+    version: metadata.version, architecture: metadata.architecture,
+    abis: metadata.abis || [metadata.architecture], signature: metadata.signature,
+    signingCertificateSha256: metadata.signingCertificateSha256,
+    sourceCommit: metadata.sourceCommit, workflowRunId: metadata.workflowRunId,
+    testedArchitecture: metadata.testedArchitecture || null,
+    deviceExecutionVerified: metadata.deviceExecutionVerified === true,
+    physicalDeviceVerified: metadata.physicalDeviceVerified === true,
+  };
+  if (!isDeepStrictEqual(value, expected)) throw new Error('APK delivery must match the exact manifest-pinned public release and its verification fields.');
+  return value;
+}
+
 export async function verifyApk(path, metadata) {
   validateApkManifest(metadata);
   const stat = await lstat(path);
@@ -81,22 +100,14 @@ function requirePublicReleaseUrl(value) {
   return url.href;
 }
 
-/** Use an existing verified binary, or publish a complete verified download atomically. */
-export async function ensureApk(path, metadata, {fetchImpl = globalThis.fetch, download = true} = {}) {
+async function publicApkResponse(metadata, fetchImpl) {
   validateApkManifest(metadata);
-  const existing = await lstat(path).catch(error => {
-    if (error.code === 'ENOENT') return null;
-    throw error;
-  });
-  if (existing) return {...await verifyApk(path, metadata), source: 'local'};
-  if (!download) throw new Error('Required APK is absent. Run node tools/pages-preview/fetch-apk.mjs before building Pages.');
-
   const releaseUrl = publicApkUrl(metadata);
   let url = releaseUrl;
   let response;
   const signal = AbortSignal.timeout(120_000);
   for (let redirects = 0; redirects <= 4; redirects++) {
-    response = await fetchImpl(requirePublicReleaseUrl(url), {redirect: 'manual', signal, headers: {Accept: 'application/octet-stream'}});
+    response = await fetchImpl(requirePublicReleaseUrl(url), {redirect: 'manual', credentials: 'omit', signal, headers: {Accept: 'application/octet-stream'}});
     if (![301, 302, 303, 307, 308].includes(response.status)) break;
     const location = response.headers.get('location');
     await response.body?.cancel();
@@ -112,26 +123,51 @@ export async function ensureApk(path, metadata, {fetchImpl = globalThis.fetch, d
     await response.body.cancel();
     throw new Error('APK download Content-Length does not match the manifest.');
   }
+  return {response, releaseUrl};
+}
+
+async function consumeVerifiedApk(response, metadata, consumeChunk) {
+  const hash = createHash('sha256');
+  let bytes = 0;
+  for await (const chunk of response.body) {
+    bytes += chunk.length;
+    if (bytes > metadata.bytes) throw new Error('APK download exceeds its manifest size.');
+    hash.update(chunk);
+    if (consumeChunk) await consumeChunk(chunk);
+  }
+  if (bytes !== metadata.bytes || hash.digest('hex') !== metadata.sha256) throw new Error('Downloaded APK SHA256 or size does not match the manifest.');
+  return {bytes, sha256: metadata.sha256, version: metadata.version};
+}
+
+/** Verify the complete anonymous release response without retaining its binary. */
+export async function verifyPublicApk(metadata, {fetchImpl = globalThis.fetch} = {}) {
+  const {response, releaseUrl} = await publicApkResponse(metadata, fetchImpl);
+  return {...await consumeVerifiedApk(response, metadata), source: 'public-release', url: releaseUrl};
+}
+
+/** Use an existing verified binary, or publish a complete verified download atomically. */
+export async function ensureApk(path, metadata, {fetchImpl = globalThis.fetch, download = true} = {}) {
+  validateApkManifest(metadata);
+  const existing = await lstat(path).catch(error => {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  });
+  if (existing) return {...await verifyApk(path, metadata), source: 'local'};
+  if (!download) throw new Error('Required APK is absent. Run node tools/pages-preview/fetch-apk.mjs before building Pages.');
+
+  const {response, releaseUrl} = await publicApkResponse(metadata, fetchImpl);
 
   await mkdir(dirname(path), {recursive: true});
   const temporary = `${path}.${randomUUID()}.part`;
   let handle;
   try {
     handle = await open(temporary, 'wx', 0o644);
-    const hash = createHash('sha256');
-    let bytes = 0;
-    for await (const chunk of response.body) {
-      bytes += chunk.length;
-      if (bytes > metadata.bytes) throw new Error('APK download exceeds its manifest size.');
-      hash.update(chunk);
-      await handle.writeFile(chunk);
-    }
-    if (bytes !== metadata.bytes || hash.digest('hex') !== metadata.sha256) throw new Error('Downloaded APK SHA256 or size does not match the manifest.');
+    const verified = await consumeVerifiedApk(response, metadata, chunk => handle.writeFile(chunk));
     await handle.sync();
     await handle.close();
     handle = null;
     await rename(temporary, path);
-    return {bytes, sha256: metadata.sha256, version: metadata.version, source: 'public-release', url: releaseUrl};
+    return {...verified, source: 'public-release', url: releaseUrl};
   } finally {
     await handle?.close();
     await rm(temporary, {force: true});

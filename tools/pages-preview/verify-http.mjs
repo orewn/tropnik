@@ -3,10 +3,11 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {once} from 'node:events';
 import {createPreviewServer} from './serve.mjs';
+import {APK_FILES, validateApkDelivery, validateApkManifest} from './apk-artifact.mjs';
 
 const out=resolve(process.argv[2]);
 const report=JSON.parse(await readFile(join(out,'build-info.json'),'utf8'));
-assert.equal(report.hasApk,true,'A public Pages build cannot omit its advertised APK');
+assert.equal(report.hasApk,true,'A public Pages build cannot omit its verified Android download');
 const pages=JSON.parse(await readFile(join(out,'page-manifest.json'),'utf8'));
 const {server,base}=await createPreviewServer(out);
 server.listen(0,'127.0.0.1');
@@ -50,10 +51,10 @@ try {
     assert.notEqual(response.headers.get('content-length'),'0');
   }
   if (report.hasApk) {
-    assert.equal(report.apk.downloadHref,`${report.apk.path}?sha256=${report.apk.sha256}`);
-    const response=await request(base+report.apk.downloadHref.slice(1),200,{method:'HEAD'});
-    assert.equal(response.headers.get('content-type'),'application/vnd.android.package-archive');
-    assert.equal(Number(response.headers.get('content-length')),report.apk.bytes);
+    const response=await request(base+'downloads/android-manifest.json',200);
+    const metadata=validateApkManifest(await response.json());
+    validateApkDelivery(report.apk,metadata);
+    for(const file of Object.values(APK_FILES)) await request(base+'downloads/'+file,404,{method:'HEAD'});
   }
   const result={verified:true,base,httpChecks:checks,browserRenderingTested:false,backendConnected:false};
   await writeFile(join(out,'http-verification.json'),JSON.stringify(result,null,2)+'\n');

@@ -25,6 +25,7 @@ jobs:
       pages: read
     outputs:
       build_id: ${{ steps.build_metadata.outputs.build_id }}
+      artifact_name: ${{ steps.build_metadata.outputs.artifact_name }}
     steps:
       - name: Check out the exact source revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -89,6 +90,9 @@ jobs:
           assert.equal(build.hasApk, true);
           assertBrowserReport(browser, process.env.GITHUB_SHA);
           appendFileSync(process.env.GITHUB_OUTPUT, `build_id=${build.buildId}\n`);
+          assert.match(process.env.GITHUB_RUN_ID, /^\d+$/);
+          assert.match(process.env.GITHUB_RUN_ATTEMPT, /^\d+$/);
+          appendFileSync(process.env.GITHUB_OUTPUT, `artifact_name=github-pages-${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}\n`);
           NODE
       - name: Preserve browser failure evidence
         if: failure()
@@ -109,7 +113,7 @@ jobs:
       - name: Upload the verified static artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+          name: ${{ steps.build_metadata.outputs.artifact_name }}
           path: web/pages-preview/dist
           include-hidden-files: true
           retention-days: 7
@@ -141,10 +145,12 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         with:
-          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
-          # The service can remain in syncing_files beyond the default 10 min.
-          # Keep a bounded wait and the public build/APK verification below.
-          timeout: '1200000'
+          # Retain the successful build's exact artifact when only deployment
+          # is retried: that job can have a later github.run_attempt.
+          artifact_name: ${{ needs.build.outputs.artifact_name }}
+          # GitHub Pages enforces a ten-minute deployment limit server-side.
+          # Larger inputs are clamped by deploy-pages and cannot extend it.
+          timeout: '600000'
       - name: Verify the public build, browser report and APK without authentication
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}

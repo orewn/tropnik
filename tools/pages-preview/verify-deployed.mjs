@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
-import {validateApkManifest} from './apk-artifact.mjs';
+import {validateApkDelivery, validateApkManifest, verifyPublicApk} from './apk-artifact.mjs';
 import {assertBrowserReport} from './browser-report.mjs';
 
 const [address, expectedBuild, expectedCommit] = process.argv.slice(2);
@@ -80,10 +80,10 @@ for (const asset of ['offline-safety.html','offline-safety.js','offline-safety.c
 await request('sw.js');
 await request('data/territories.geojson');
 const android = validateApkManifest(JSON.parse((await request('downloads/android-manifest.json')).text));
-assert.equal(android.sha256, build.apk.sha256);
-assert.equal(android.version, build.apk.version);
-assert.equal(build.apk.downloadHref, `${build.apk.path}?sha256=${android.sha256}`);
-const apk = await request(build.apk.downloadHref.slice(1), android.bytes, true);
+validateApkDelivery(build.apk, android);
+// The site probes remain strictly same-origin. The separately bounded anonymous
+// release request follows only the existing GitHub asset redirect allowlist.
+const apk = await verifyPublicApk(android);
 assert.equal(apk.bytes, android.bytes);
 assert.equal(apk.sha256, android.sha256, 'The public APK is not the pinned Android build');
-console.log(JSON.stringify({verified: true, url: site.href, buildId: build.buildId, sourceCommit: build.sourceCommit, publicHttpChecks: checks, apkSha256: apk.sha256, browserRenderingTested: true, browserProfiles: browser.profiles.length}, null, 2));
+console.log(JSON.stringify({verified: true, url: site.href, buildId: build.buildId, sourceCommit: build.sourceCommit, publicHttpChecks: checks, apkDelivery: build.apk.delivery, apkUrl: apk.url, apkBytes: apk.bytes, apkSha256: apk.sha256, browserRenderingTested: true, browserProfiles: browser.profiles.length}, null, 2));
