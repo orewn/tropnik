@@ -401,7 +401,7 @@ async function settledMap(cdp,engine){
 }
 async function pointerAt(cdp,point,profile){
   assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y),'Pointer coordinates must be finite');
-  await evaluate(cdp,`window.__tropnikExpectedPointer={time:performance.now(),x:${point.x},y:${point.y},selector:${JSON.stringify(point.selector||null)},label:${JSON.stringify(point.label||point.title||null)}}`);
+  await evaluate(cdp,`window.__tropnikExpectedPointer={time:performance.now(),x:${point.x},y:${point.y},selector:${JSON.stringify(point.selector||null)},label:${JSON.stringify(point.label||point.title||null)},sampledAt:${JSON.stringify(point.sampledAt??null)},animating:${JSON.stringify(point.animating??null)},animations:${JSON.stringify(point.animations??[])}}`);
   if(profile.mobile){
     await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id:51,radiusX:3,radiusY:3,force:1}]});
     await sleep(45);await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
@@ -412,15 +412,23 @@ async function pointerAt(cdp,point,profile){
   }
 }
 async function elementPoint(cdp,selector){
-  return evaluate(cdp,`(()=>{const element=document.querySelector(${JSON.stringify(selector)});if(!element)return null;const r=element.getBoundingClientRect(),s=getComputedStyle(element);if(element.hidden||s.visibility==='hidden'||s.display==='none'||r.width<2||r.height<2)return null;const x=r.left+r.width/2,y=r.top+r.height/2;if(x<0||y<0||x>=innerWidth||y>=innerHeight)return null;const hit=document.elementFromPoint(x,y);return{x,y,width:r.width,height:r.height,label:element.getAttribute('aria-label')||element.textContent?.trim(),hit:hit?.tagName,unobscured:!!hit&&element.contains(hit)};})()`);
+  return evaluate(cdp,`(()=>{
+    const element=document.querySelector(${JSON.stringify(selector)});if(!element)return null;const r=element.getBoundingClientRect(),s=getComputedStyle(element);if(element.hidden||s.visibility==='hidden'||s.display==='none'||r.width<2||r.height<2)return null;
+    const x=r.left+r.width/2,y=r.top+r.height/2;if(x<0||y<0||x>=innerWidth||y>=innerHeight)return null;
+    const animations=[];for(let node=element;node;node=node.parentElement)for(const animation of node.getAnimations())if(animation.pending||animation.playState==='running')animations.push({tag:node.tagName,classes:node.getAttribute('class'),name:animation.animationName||animation.transitionProperty||'',pending:animation.pending,playState:animation.playState,currentTime:typeof animation.currentTime==='number'?animation.currentTime:null});
+    const hit=document.elementFromPoint(x,y);return{x,y,width:r.width,height:r.height,label:element.getAttribute('aria-label')||element.textContent?.trim(),hit:hit?.tagName,unobscured:!!hit&&element.contains(hit),sampledAt:performance.now(),animating:animations.length>0,animations};
+  })()`);
 }
 async function pointerSelector(cdp,selector,profile){
-  let previous=null,stable=0;
-  const point=await waitValue(`Pointer target ${selector} did not become stable and unobscured`,()=>elementPoint(cdp,selector),current=>{
-    const stopped=current?.unobscured&&previous?.unobscured&&['x','y','width','height'].every(key=>Math.abs(current[key]-previous[key])<.25);
-    stable=stopped?stable+1:0;previous=current;return stable>=2;
-  });
-  const target={...point,selector};await pointerAt(cdp,target,profile);return target;
+  let previous=null,stable=0;const samples=[];
+  try{
+    const point=await waitValue(`Pointer target ${selector} did not become stable and unobscured`,async()=>{await compositorFrame(cdp);return elementPoint(cdp,selector);},current=>{
+      samples.push(current);if(samples.length>16)samples.shift();
+      const stopped=current?.unobscured&&!current.animating&&previous?.unobscured&&!previous.animating&&['x','y','width','height'].every(key=>Math.abs(current[key]-previous[key])<.25);
+      stable=stopped?stable+1:0;previous=current;return stable>=2;
+    });
+    const target={...point,selector};await pointerAt(cdp,target,profile);return target;
+  }catch(error){error.pointerTarget={selector,requiredIdleObservations:3,geometryTolerancePx:.25,samples};throw error;}
 }
 async function closeMapSheet(cdp,profile){
   if(!profile.mobile)return;
@@ -933,6 +941,7 @@ try{
   failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
   if(error.nativeScroll)failure.nativeScroll=error.nativeScroll;
+  if(error.pointerTarget)failure.pointerTarget=error.pointerTarget;
   if(currentExploreExperience)failure.exploreExperience=currentExploreExperience;
   if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed',...(error.settleDiagnostics?{settleDiagnostics:error.settleDiagnostics}:{})});
   if(cdp){
