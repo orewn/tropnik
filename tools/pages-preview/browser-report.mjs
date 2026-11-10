@@ -4,6 +4,7 @@ import {assertSourceEndPanInput,sourceEndsAreFramed} from './browser-source-end-
 import {directionHitGrid} from './browser-direction-hitareas.mjs';
 import {assertCoastAudit} from './browser-coast-audit.mjs';
 import {assertOfflineSafetyAudit} from './browser-offline-safety.mjs';
+import {assertRequestMapLayout} from './browser-request-layout.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -562,6 +563,7 @@ export function assertExploreExperience(receipt,name,engine,mobile){
  assertSavedDirectionReentry(filter.reentryActions,`${context}/saved-reentry`,engine,input,altai.count);
 
  const request=receipt.requestOwnership;assert.ok(request&&typeof request.route?.id==='string'&&request.route.id&&typeof request.route.title==='string'&&request.route.title);
+ if(!mobile)assertRequestMapLayout(request.mapLayout,`${context}/request-layout`);
  const action='.route-actions button.primary',close='[role="dialog"] button[aria-label="Закрыть"]';
  assertExperienceScrolls(request.scrolls,input,`${context}/request-scroll`);assertExperienceScrolls(request.returnScrolls,input,`${context}/request-return-scroll`);
  assertExperienceClick(request.opened,input,`${context}/request-open`,action);assertExperienceClick(request.closedSame,input,`${context}/request-close`,close);assertExperienceClick(request.reopened,input,`${context}/request-reopen`,action);

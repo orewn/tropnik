@@ -169,6 +169,15 @@ test('request ownership rejects stale dialogs, lost same-route drafts and copied
  ]);
 });
 
+test('desktop request ownership requires measured layout evidence while mobile keeps its viewport behavior',()=>{
+ rejectsEach(()=>exploreExperienceFixture(false),checkExplore(false),[
+  ['missing layout proof',value=>delete value.requestOwnership.mapLayout],
+  ['observers still attached',value=>value.requestOwnership.mapLayout.active=true],
+  ['transient map expansion',value=>{const layout=value.requestOwnership.mapLayout,expanded=structuredClone(layout.samples[0]);expanded.time=150;expanded.reason='resize';expanded.canvas.width+=15;layout.samples.splice(1,0,expanded);}],
+ ]);
+ const mobile=exploreExperienceFixture(true);assert.equal(mobile.requestOwnership.mapLayout,undefined);assert.equal(checkExplore(true)(mobile),mobile);
+});
+
 test('Explore catalogue scrolling validates each touch and mouse gesture without page or sheet movement',()=>{
  for(const mobile of [true,false])rejectsEach(()=>exploreExperienceFixture(mobile),checkExplore(mobile),[
   ['no scroll evidence',value=>delete value.requestOwnership.returnScrolls],

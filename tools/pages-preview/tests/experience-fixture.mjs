@@ -46,6 +46,11 @@ const selectionURL=value=>{
 const browserBack=(from,after)=>({method:'Page.navigateToHistoryEntry',from:{id:9,url:selectionURL(from)},target:{id:8,url:selectionURL(after)},url:selectionURL(after),after:clone(after)});
 const dialog=(open,title='',note='')=>({open,heading:open?'Какой поход планируете?':'',routeTitle:title,date:open?'':null,note:open?note:null,error:false,success:false,submitted:0});
 
+export function requestMapLayoutFixture(){
+ const frame={viewport:{width:1440,height:1000,dpr:1},rootClientWidth:1425,container:{x:384,y:72,width:1041,height:928},canvas:{x:384,y:72,width:1041,height:928},backing:{width:1041,height:928},connected:true,mutations:[]};
+ return{schemaVersion:1,scope:'desktop-request-dialog',limit:32,active:false,overflow:false,observers:{resize:true,canvasAttributes:true},errors:[],samples:[{...clone(frame),time:100,reason:'baseline'},{...clone(frame),time:200,reason:'final'}]};
+}
+
 export function overviewCountsFixture(clustered=false){
  const catalog=[{id:'altai',name:'Алтай',count:11},{id:'baikal',name:'Байкал',count:10}];
  const markers=clustered?[{id:'altai',name:'2 направления',count:2,groupKey:'altai|baikal',cluster:true,ariaLabel:'Приблизить 2 направления: Алтай, Байкал'}]:catalog.map(item=>({...item,groupKey:item.id,cluster:false,ariaLabel:`Открыть ${item.name}, маршрутов в каталоге: ${item.count}`}));
@@ -71,6 +76,7 @@ export function exploreExperienceFixture(mobile=true,routeId='route'){
  const filterReset={baseline:clone(baseline),enabled:click('.filter-row button[aria-pressed]','Сохранённые'),filtered:{pressed:'true',count:0,expanded:'false',empty:true},parent:click('.explore-panel .back-link','Все направления'),overviewBefore:clone(overview),overviewAfter:clone(overview),reentryActions:savedReentryFixture(mobile),restored:clone(baseline)};
  const route={id:routeId,title:'Маршрут А'},note='Проверка принадлежности запроса маршруту',action='.route-actions button.primary',close='[role="dialog"] button[aria-label="Закрыть"]';
  const requestOwnership={route,scrolls:[scroll()],opened:click(action),first:dialog(true,route.title),edit:{method:'Input.insertText',note,events:[{trusted:true,tag:'TEXTAREA',value:note}]},edited:dialog(true,route.title,note),closedSame:click(close),reopened:click(action),same:dialog(true,route.title,note),back:browserBack(selection('altai',routeId,route.title),selection('altai','','Алтай')),afterBack:dialog(false),next:{selection:selection('altai','route-b','Маршрут Б'),scrolls:[scroll()],selected:click('.trail-list .trail-card:nth-child(2) .trail-card-main'),before:dialog(false),actionScrolls:[scroll()],opened:click(action),dialog:dialog(true,'Маршрут Б'),closed:click(close)},returnScrolls:[scroll()]};
+ if(!mobile)requestOwnership.mapLayout=requestMapLayoutFixture();
  const sibling=selection('buryatia','','Бурятия'),overviewSelection=selection('','','Все направления'),polygon=click('canvas');
  const siblingParent={previous:selection('baikal','','Байкал'),sibling,selected:{input,point:{x:polygon.point.x,y:polygon.point.y,id:sibling.region,title:sibling.title},events:polygon.events},parent:click('.explore-panel .back-link','Все направления'),overview:overviewSelection,back:browserBack(overviewSelection,sibling)};
  return{schemaVersion:1,passed:true,input,filterReset,requestOwnership,siblingParent};
