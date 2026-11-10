@@ -119,6 +119,8 @@ def prepare(root: Path, directory: Path, device_directory: Path, output: Path):
     parsed = checker.inspect_raw(raw.read_text(errors="replace"), device["processExitCode"])
     require(parsed["deviceExecutionVerified"] and parsed["cases"] == device["cases"], "Raw device results differ from receipt")
     checker.bind_artifact(parsed, directory, root, device_directory / "installed-apks.json")
+    require(parsed["graphicsDriver"] == device.get("graphicsDriver") and parsed["environment"] == device.get("environment"),
+            "Device graphics proof differs from its observed driver")
     require(not output.exists() or not any(output.iterdir()), "Release output must be empty")
     output.mkdir(parents=True, exist_ok=True)
     for name in (ARM64, UNIVERSAL):
@@ -150,7 +152,7 @@ def prepare(root: Path, directory: Path, device_directory: Path, output: Path):
     with zipfile.ZipFile(output / "verification-reports.zip", "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         reports = [(directory / name, "build/" + name) for name in (RECEIPT,) + REPORT_NAMES]
         reports += [(device_directory / name, "device/" + name) for name in (
-            "device-result.json", "installed-apks.json", "raw-instrumentation.log", "TEST-LocalExperienceTest.xml", "tested-apks.sha256")]
+            "device-result.json", "installed-apks.json", "raw-instrumentation.log", "TEST-LocalExperienceTest.xml", "tested-apks.sha256", "graphics-driver.txt")]
         for path, name in sorted(reports, key=lambda item: item[1]):
             require(path.is_file() and not path.is_symlink() and path.stat().st_size < 20_000_000, "Missing/invalid verification report")
             info = zipfile.ZipInfo(name, (1980, 1, 1, 0, 0, 0))

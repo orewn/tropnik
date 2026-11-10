@@ -135,6 +135,7 @@ class ReleaseFixture(unittest.TestCase):
             "installedApks": {name: self.build["files"][name] for name in (artifacts.UNIVERSAL, artifacts.TEST_APK)}})
         raw = raw_results()
         (self.device / "raw-instrumentation.log").write_text(raw)
+        (self.device / "graphics-driver.txt").write_text("GLES: Google, ANGLE (Google, SwiftShader Device (Subzero), Vulkan 1.3.0), OpenGL ES 3.0\n")
         device = checker.bind_artifact(checker.inspect_raw(raw, 0), self.dist, self.root, self.device / "installed-apks.json")
         self.json(self.device / "device-result.json", device)
         checker.write_junit(device, self.device / "TEST-LocalExperienceTest.xml")
@@ -161,6 +162,17 @@ class ReleaseFixture(unittest.TestCase):
         path.write_text(path.read_text().replace("ab" * 32, "cd" * 32))
         with self.assertRaises(ValueError):
             artifacts.build_receipt(self.dist, self.root)
+
+    def test_missing_or_legacy_graphics_driver_cannot_be_device_verified(self):
+        path = self.device / "graphics-driver.txt"
+        for text in ("", "GLES: Google, Android Emulator OpenGL ES Translator (Google SwiftShader), OpenGL ES 3.0\n",
+                     "Requested mode: swangle\nGLES: Google SwiftShader\n"):
+            path.write_text(text)
+            with self.assertRaises(ValueError):
+                checker.bind_artifact(checker.inspect_raw(raw_results(), 0), self.dist, self.root, self.device / "installed-apks.json")
+        path.unlink()
+        with self.assertRaises(ValueError):
+            checker.bind_artifact(checker.inspect_raw(raw_results(), 0), self.dist, self.root, self.device / "installed-apks.json")
 
     def test_real_unversioned_instrumentation_badging_does_not_relax_app_checks(self):
         # Exact first-line shape produced by AGP/AAPT2 in run 42641770635.
@@ -237,6 +249,13 @@ class ReleaseFixture(unittest.TestCase):
     def test_missing_or_forged_raw_proof_prevents_preparation(self):
         (self.device / "raw-instrumentation.log").write_text("OK (6 tests)\nINSTRUMENTATION_CODE: -1\n")
         with self.assertRaises(ValueError):
+            release.prepare(self.root, self.dist, self.device, self.base / "bad")
+
+    def test_changed_observed_graphics_driver_prevents_preparation(self):
+        path = self.device / "graphics-driver.txt"
+        path.write_text(path.read_text().replace("Vulkan 1.3.0", "Vulkan 1.3.1"))
+        self.assertTrue(checker.graphics_driver(path)["verified"])
+        with self.assertRaisesRegex(ValueError, "graphics proof differs"):
             release.prepare(self.root, self.dist, self.device, self.base / "bad")
 
     def test_existing_tag_or_changed_published_asset_never_writes(self):

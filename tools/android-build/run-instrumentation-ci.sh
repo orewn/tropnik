@@ -36,7 +36,11 @@ cleanup() {
 trap cleanup EXIT
 
 "$tropnik_adb" start-server
-"$tropnik_emulator" -avd tropnik-ci-api35 -port 5554 -accel on -gpu swiftshader \
+# Linux's legacy SwiftShader GLES misreads MapLibre uniform blocks (#4625),
+# producing blue/transparent symbols. SwANGLE keeps the shipped OpenGL renderer
+# and runs its GLSL through ANGLE over software SwiftShader Vulkan instead.
+# https://developer.android.com/studio/run/emulator-acceleration
+"$tropnik_emulator" -avd tropnik-ci-api35 -port 5554 -accel on -gpu swangle \
   -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -memory 2048 -cores 2 \
   -camera-back none -camera-front none > "$tropnik_output/emulator.log" 2>&1 &
 tropnik_emulator_pid=$!
@@ -52,6 +56,21 @@ if [[ "$tropnik_booted" != 'true' ]]; then
   printf '%s\n' 'The KVM emulator did not boot within 240 seconds; no device test is claimed.' >&2
   exit 1
 fi
+# Retain the observed driver, and reject a silent fallback to the legacy GLES
+# path before installing/running the same seven pixel and interaction cases.
+timeout 10s "$tropnik_adb" -s "$tropnik_serial" shell dumpsys SurfaceFlinger > "$tropnik_output/graphics-driver.txt"
+python3 - "$tropnik_root" "$tropnik_output/graphics-driver.txt" <<'PY'
+import importlib.util
+import json
+from pathlib import Path
+import sys
+path = Path(sys.argv[1]) / "tools/android-build/check-instrumentation.py"
+sys.path.insert(0, str(path.parent))
+spec = importlib.util.spec_from_file_location("graphics_check", path)
+checker = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(checker)
+print(json.dumps(checker.graphics_driver(Path(sys.argv[2]))))
+PY
 "$tropnik_adb" -s "$tropnik_serial" shell settings put global window_animation_scale 0
 "$tropnik_adb" -s "$tropnik_serial" shell settings put global transition_animation_scale 0
 "$tropnik_adb" -s "$tropnik_serial" shell settings put global animator_duration_scale 0

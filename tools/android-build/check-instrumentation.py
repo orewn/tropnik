@@ -89,6 +89,15 @@ def inspect_raw(text: str, process_exit: int) -> dict:
             "parseErrors": parse_errors, "cases": cases}
 
 
+def graphics_driver(path: Path):
+    require(path.is_file() and path.stat().st_size < 1_000_000, "Missing or oversized graphics driver diagnostic")
+    lines = [line.strip() for line in path.read_text(errors="replace").splitlines() if line.strip().startswith("GLES:")]
+    require(len(lines) == 1 and "ANGLE" in lines[0] and "SwiftShader" in lines[0],
+            "Device must use the requested ANGLE/SwiftShader GLES driver, without legacy fallback")
+    return {"mode": "swangle", "appBackend": "OpenGL ES", "renderer": lines[0],
+            "diagnosticSha256": fingerprint(path)["sha256"], "verified": True}
+
+
 def bind_artifact(report: dict, directory: Path, root: Path, installed_path: Path):
     build = verify_receipt(directory, root)
     installed = read_json(installed_path)
@@ -100,6 +109,7 @@ def bind_artifact(report: dict, directory: Path, root: Path, installed_path: Pat
             installed.get("buildReceiptSha256") == digest, "Installed receipt belongs to another build")
     require(installed.get("installedApks") == {name: build["files"][name] for name in (UNIVERSAL, TEST_APK)},
             "Installed APKs are not the build artifacts")
+    graphics = graphics_driver(installed_path.with_name("graphics-driver.txt"))
     report.update({"schemaVersion": 2, "recordedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                    "sourceCommit": build["sourceCommit"], "workflowRunId": build["workflowRunId"],
                    "buildReceiptSha256": digest, "testedApks": installed["installedApks"],
@@ -107,7 +117,8 @@ def bind_artifact(report: dict, directory: Path, root: Path, installed_path: Pat
                    "releasePayloadDeviceVerified": report["deviceExecutionVerified"],
                    "testedArchitecture": "x86_64", "testedArtifact": UNIVERSAL,
                    "arm64DeviceExecutionVerified": False, "physicalDeviceVerified": False,
-                   "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / SwiftShader",
+                   "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+                   "graphicsDriver": graphics,
                    "note": "All seven actual cases must pass on the exact installed universal preview. ARM64, physical GPU, GPS, battery and a production API are not device-verified."})
     return report
 
