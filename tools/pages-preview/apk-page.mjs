@@ -1,8 +1,8 @@
 import {APK_FILES, apkFileName, validateApkManifest} from './apk-artifact.mjs';
 import {pagesPath, ts} from './paths.mjs';
 
-/** Read the real download anchor without executing page code or treating its query as a file path. */
-export function androidPageDownload(code, metadata, {base = ''} = {}) {
+/** Inspect the real download anchor without executing page code. */
+function inspectAndroidPageDownload(code, metadata, {base = ''} = {}) {
   validateApkManifest(metadata);
   const source = ts.createSourceFile('android/page.tsx', code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const manifestImport = source.statements.find(node => ts.isImportDeclaration(node) &&
@@ -42,16 +42,29 @@ export function androidPageDownload(code, metadata, {base = ''} = {}) {
         if (attributes.some(ts.isJsxSpreadAttribute)) throw new Error('Android download attributes must be explicit.');
         const hrefs = attributes.filter(attribute => ts.isJsxAttribute(attribute) && attribute.name.getText(source) === 'href');
         if (hrefs.length !== 1) throw new Error('Android download must have exactly one href.');
-        let value = hrefs[0].initializer;
+        const initializer = hrefs[0].initializer;
+        let value = initializer;
         if (value && ts.isJsxExpression(value)) value = value.expression;
-        downloads.push(selectedHref(value));
+        downloads.push({href: selectedHref(value), initializer});
       }
     }
     ts.forEachChild(node, visit);
   }
   visit(source);
-  if (downloads.length !== 1 || downloads[0] !== expected) {
+  if (downloads.length !== 1 || downloads[0].href !== expected) {
     throw new Error('Android page must advertise exactly one manifest-selected APK with its SHA256 cache key.');
   }
-  return {path, downloadHref: downloads[0]};
+  return {path, downloadHref: downloads[0].href, initializer: downloads[0].initializer, source};
+}
+
+export function androidPageDownload(code, metadata, options) {
+  const {path, downloadHref} = inspectAndroidPageDownload(code, metadata, options);
+  return {path, downloadHref};
+}
+
+/** A static publication contains only its selected APK. Validate both source
+ * branches first, then keep only that build's pinned URL in the staged page. */
+export function pinAndroidPageDownload(code, metadata, options) {
+  const {downloadHref, initializer, source} = inspectAndroidPageDownload(code, metadata, options);
+  return code.slice(0, initializer.getStart(source)) + JSON.stringify(downloadHref) + code.slice(initializer.end);
 }

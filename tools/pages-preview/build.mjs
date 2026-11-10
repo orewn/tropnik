@@ -6,7 +6,7 @@ import {mkdir, readFile, writeFile, readdir, rm, access} from 'node:fs/promises'
 import {spawnSync} from 'node:child_process';
 import {normalizeBase, rewriteScript, rewriteJSON, rewriteHTML, rewriteCSS, ts} from './paths.mjs';
 import {apkFileName, ensureApk, readApkManifest, verifyApk} from './apk-artifact.mjs';
-import {androidPageDownload} from './apk-page.mjs';
+import {androidPageDownload, pinAndroidPageDownload} from './apk-page.mjs';
 import {verifyMapLibreTerrainPatch} from '../../web/scripts/maplibre-terrain-patch.mjs';
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -127,8 +127,10 @@ const pages = [
 if (new Set(pages.map(page => page.path)).size !== pages.length) throw new Error('Duplicate catalogue page path.');
 const apkManifestPath = join(source, 'public/downloads/android-manifest.json');
 const metadata = await readApkManifest(apkManifestPath);
-const androidPage = await readFile(join(source, 'app/android/page.tsx'), 'utf8');
+const androidPagePath = join(source, 'app/android/page.tsx');
+const androidPage = await readFile(androidPagePath, 'utf8');
 const androidDownload = androidPageDownload(androidPage, metadata);
+await writeFile(androidPagePath, pinAndroidPageDownload(androidPage, metadata));
 const verifiedApk = await verifyApk(join(source, 'public', androidDownload.path.slice(1)), metadata);
 const apk = {...androidDownload, ...verifiedApk, architecture: metadata.architecture,
   abis: metadata.abis || [metadata.architecture], signature: metadata.signature,

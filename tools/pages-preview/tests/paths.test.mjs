@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {readFile} from 'node:fs/promises';
 import {pagesPath, rewriteScript, rewriteHTML, ts} from '../paths.mjs';
-import {androidPageDownload} from '../apk-page.mjs';
+import {androidPageDownload, pinAndroidPageDownload} from '../apk-page.mjs';
 import {apkFileName, validateApkManifest} from '../apk-artifact.mjs';
 import {arm64Manifest, universalManifest} from './fixtures/apk.mjs';
 
@@ -102,6 +102,18 @@ test('the rendered Android page selects the advertised file and compatibility fr
   }
 });
 
+test('a static Android snapshot references only its selected verified APK', () => {
+  for (const manifest of [arm64Manifest, universalManifest]) for (const base of ['/tropnik/', '/another-project/']) {
+    const transformed = rewriteScript(androidSource, 'android/page.tsx', {base});
+    const pinned = pinAndroidPageDownload(transformed, manifest, {base});
+    assert.deepEqual(androidPageDownload(pinned, manifest, {base}), androidPageDownload(transformed, manifest, {base}));
+    assert.equal(pinAndroidPageDownload(pinned, manifest, {base}), pinned);
+    const inactiveFile = manifest.architecture === 'universal' ? 'tropnik-arm64-preview.apk' : 'tropnik-preview.apk';
+    assert.ok(!pinned.includes(inactiveFile), 'The bundle must not reference an absent inactive APK');
+    assert.ok(pinned.includes(`href="${base}downloads/${apkFileName(manifest)}?sha256=${manifest.sha256}"`));
+  }
+});
+
 test('the Android page gate rejects a wrong payload, missing cache key, dynamic override or second download', () => {
   const badPages = [
     androidSource.replace('tropnik-arm64-preview.apk?', 'unverified.apk?'),
@@ -121,6 +133,7 @@ test('the Android page gate rejects a wrong payload, missing cache key, dynamic 
     assert.notEqual(page, androidSource, 'The invalid page fixture must change the source');
     for (const manifest of [arm64Manifest, universalManifest]) {
       assert.throws(() => androidPageDownload(page, manifest), /Android download|Android page/);
+      assert.throws(() => pinAndroidPageDownload(page, manifest), /Android download|Android page/);
     }
   }
 });
