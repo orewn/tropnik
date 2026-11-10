@@ -12,6 +12,36 @@ export const COAST_FIXTURES=Object.freeze([
  {id:'gogland',coordinate:[26.9596752,60.0633158],zooms:[11]},
 ]);
 
+/** Small native touch translations can remain taps. Move away first, then
+ * return in a second deliberate drag; their sum is the exact correction. */
+export function coastPanPlan(dx,dy,rect,mobile){
+ assert.ok([dx,dy,rect.width,rect.height].every(Number.isFinite)&&rect.width>0&&rect.height>0);
+ const scale=Math.min(1,rect.width*.35/Math.max(1,Math.abs(dx)),rect.height*.3/Math.max(1,Math.abs(dy)));
+ const delta={dx:dx*scale,dy:dy*scale},distance=Math.hypot(delta.dx,delta.dy);
+ assert.ok(distance>3,'A coastline pan needs a measurable correction');
+ const approach=Math.min(48,rect.width*.35/2,rect.height*.3/2);
+ if(mobile&&distance<approach){
+  assert.ok(approach>=24,'The exposed map is too small for a deliberate touch pan');
+  const away={dx:-delta.dx/distance*approach,dy:-delta.dy/distance*approach};
+  return[away,{dx:delta.dx-away.dx,dy:delta.dy-away.dy}];
+ }
+ return[delta];
+}
+
+export function assertCoastPanInput(pan,input,context){
+ assertSourceEndPanInput(pan,input,context);
+ assert.ok(!pan.events.some(event=>event.type==='click'),`${context}: a tap cannot count as a coastline pan`);
+ assert.ok(pan.before?.camera&&pan.after?.camera&&pan.before?.rect&&pan.after?.rect,`${context}: native pan camera evidence is missing`);
+ const before=pan.before,after=pan.after;
+ for(const frame of [before,after])assert.ok(['longitude','latitude','zoom','tileSize'].every(key=>Number.isFinite(frame.camera[key])));
+ assert.ok(Math.abs(before.camera.zoom-after.camera.zoom)<.001,`${context}: a pan must preserve the inspected zoom`);
+ for(const key of ['left','top','width','height'])assert.equal(before.rect[key],after.rect[key],`${context}: map viewport changed during the pan`);
+ const coordinate=[before.camera.longitude,before.camera.latitude];
+ const first=projectMapPoint(coordinate,before.camera,before.rect),last=projectMapPoint(coordinate,after.camera,after.rect);
+ assert.ok(Math.hypot(last.x-first.x,last.y-first.y)>3,`${context}: native pan did not move the actual camera`);
+ return true;
+}
+
 export function assertCoastAudit(report,profile,engine){
  assert.equal(report?.schemaVersion,1,`${profile}: missing coastline regression evidence`);
  assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);
@@ -35,7 +65,7 @@ export function assertCoastAudit(report,profile,engine){
  }
  assert.equal(versions.size,1,'A coastline audit mixed geometry publications');
  assert.ok(report.pans.length>=2,'Coastlines must be reached through native map gestures');
- for(const pan of report.pans)assertSourceEndPanInput(pan,engine==='leaflet'?'touch':'mouse',profile+'/coast');
+ for(const pan of report.pans)assertCoastPanInput(pan,engine==='leaflet'?'touch':'mouse',profile+'/coast');
  assert.ok(report.resources.some(resource=>resource.status===200&&resource.finished&&resource.path.endsWith('/data/map-coverage/manifest.json')),'No loaded geometry manifest');
  assert.ok(report.resources.some(resource=>resource.status===200&&resource.finished&&resource.path.includes('/data/map-coverage/cells/')),'No loaded coastal geometry cells');
  return report;
@@ -62,22 +92,33 @@ export async function runCoastAudit(cdp,profile,helpers){
    const center={x:map.rect.left+(map.camera.centerX??map.rect.width/2),y:map.rect.top+(map.camera.centerY??map.rect.height/2)};
    const dx=center.x-point.x,dy=center.y-point.y,distance=Math.hypot(dx,dy);
    if(distance<=6)return{map,centerErrorPx:distance};
-   const scale=Math.min(1,map.rect.width*.35/Math.max(1,Math.abs(dx)),map.rect.height*.3/Math.max(1,Math.abs(dy)));
-   const delta={dx:dx*scale,dy:dy*scale};
+   for(const [leg,planned] of coastPanPlan(dx,dy,map.rect,profile.mobile).entries()){
+   const before=await settledMap(cdp,profile.engine);
+   let delta=planned;
+   if(leg>0){
+    // Use the settled first drag, not its requested displacement: native
+    // rounding or residual inertia must not become an assumed camera move.
+    const actual=projectMapPoint(coordinate,before.camera,before.rect);
+    const cx=before.rect.left+(before.camera.centerX??before.rect.width/2),cy=before.rect.top+(before.camera.centerY??before.rect.height/2);
+    [delta]=coastPanPlan(cx-actual.x,cy-actual.y,before.rect,false);
+    assert.ok(Math.hypot(delta.dx,delta.dy)>=24,`${profile.name}: the native approach did not create a deliberate return drag`);
+   }
    const start=await evaluate(cdp,`(()=>{
     const map=document.querySelector('.atlas-canvas[data-map-engine]'),r=map.getBoundingClientRect(),delta=${JSON.stringify(delta)};
     for(const fy of [.45,.6,.3,.75])for(const fx of [.5,.65,.35,.8,.2]){
      const point={x:r.left+r.width*fx,y:r.top+r.height*fy};let clear=true;
-     for(let index=0;index<=12;index++){const x=point.x+delta.dx*index/12,y=point.y+delta.dy*index/12,hit=document.elementFromPoint(x,y);if(!hit||!map.contains(hit)||hit.closest('button,a,input,select,textarea')){clear=false;break;}}
+     for(let index=0;index<=12;index++){const x=point.x+delta.dx*index/12,y=point.y+delta.dy*index/12,hit=document.elementFromPoint(x,y);if(!hit||hit.tagName!=='CANVAS'||!map.contains(hit)){clear=false;break;}}
      if(clear)return point;
     }return null;
    })()`);
    assert.ok(start,`${profile.name}: no unobscured native pan path to the coastline`);
    await evaluate(cdp,'window.__tropnikInputEvents=[]');
    const pan=await dispatchSourceEndPan(cdp,start,delta,profile,sleep);
-   await settledMap(cdp,profile.engine);
+   const after=await settledMap(cdp,profile.engine);
+   Object.assign(pan,{coordinate,attempt,leg,before:{camera:before.camera,rect:before.rect},after:{camera:after.camera,rect:after.rect}});
    pan.events=await evaluate(cdp,'window.__tropnikInputEvents');
-   assertSourceEndPanInput(pan,profile.mobile?'touch':'mouse',profile.name+'/coast');report.pans.push(pan);
+   report.pans.push(pan);assertCoastPanInput(pan,profile.mobile?'touch':'mouse',profile.name+'/coast');
+   }
   }
   throw new Error(`${profile.name}: native panning did not center the source coastline`);
  }
