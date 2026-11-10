@@ -26,7 +26,7 @@ import {createCanvasRelief} from '@/lib/canvas-relief';
 import {createLeafletCanvas} from '@/lib/leaflet-canvas';
 import {maskViewportCulling} from '@/lib/leaflet-mask-viewport';
 import {LatestMapNavigation,MapSelectionCamera,loadMapSelection} from '@/lib/map-lifecycle';
-import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
+import {constrainFramedCamera,canRefitMapOverview,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {mapTrailPointEntries,type MapTrailPoint} from '@/lib/map-trail-points';
 import {ROUTE_PRESENTATION,ROUTE_EDGE_LAYOUT,overviewContextCaption,overviewModeStatus,routeStrokeWidth,territoryDetailOpacity,routeLineEdges,createRouteEdgeElement,syncRouteEdgeAnnotations,type RouteEdgeAnnotation} from '@/lib/map-route-presentation';
 import {SATELLITE_TILES,SATELLITE_MAX_ZOOM,SATELLITE_ERROR} from '@/lib/map-satellite';
@@ -82,6 +82,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
  const directionGroups=useRef(new Map<string,MapDirectionGroup<Region>>()),updateDirections=useRef<(()=>void)|null>(null),visibleTrailsRef=useRef(visibleTrails);
  const territoryLayer=useRef<LeafletGeoJSON|null>(null),regionRef=useRef(region);
  const coverageRef=useRef<Coverage|null>(null),cameraFloor=useRef<RussiaCamera|null>(null),fullView=useRef(true),detailRequest=useRef(0);
+ const overviewRequested=useRef(false);
  const framedCamera=useRef<RussiaCamera|null>(null);
  const frameRefit=useRef<MapFrameRefit|null>(null);
  const selectionCamera=useRef(new MapSelectionCamera());
@@ -118,6 +119,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
  },[]);
 
  const fitRussia=useCallback((animate=false)=>{
+  overviewRequested.current=true;
   selectionCamera.current.cancelNavigation();
   cancelLocation();zoomButtons.current?.cancel();
   frameRefit.current?.cancel();
@@ -243,6 +245,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
   callbacks.current={onRegion,onTrail,onMapNote,onViewportRegion};
   selectionCamera.current.beginRouteSelection(trail?.id?{id:trail.id,url:trail.geometryUrl,geometry:trail.geometry}:undefined);
  },[showPaths,trail,region,visibleTrails,planning,onRegion,onTrail,onMapNote,onViewportRegion]);
+ useLayoutEffect(()=>{overviewRequested.current=false;},[region?.id,trail?.id,trail?.geometryUrl,trail?.geometry]);
  useEffect(()=>{if(planning)onMapNote?.(status);},[planning,status,onMapNote]);
  // A new selection ends the external 3D scene lifecycle before optional warmup.
  // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -281,7 +284,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
     (window as unknown as {L:typeof L}).L=L;coverageRef.current=coverage;
     const element=container.current,{camera}=russiaView(element,256);cameraFloor.current=camera;
     const map=L.map(element,{center:[camera.center[1],camera.center[0]],zoom:camera.zoom,zoomControl:false,attributionControl:false,minZoom:camera.zoom,maxZoom:18,zoomSnap:0,zoomDelta:MAP_ZOOM_BUTTONS.leafletStep,renderer:createLeafletCanvas(L),preferCanvas:true,scrollWheelZoom:true,worldCopyJump:false,zoomAnimation:true,markerZoomAnimation:true,fadeAnimation:false});
-    mapRef.current=map;selectionCamera.current=new MapSelectionCamera();element.style.background=MAP_OUTSIDE_COLOR;
+    mapRef.current=map;selectionCamera.current=new MapSelectionCamera();overviewRequested.current=false;element.style.background=MAP_OUTSIDE_COLOR;
     const selectedRoute=trailRef.current;selectionCamera.current.beginRouteSelection(selectedRoute?.id?{id:selectedRoute.id,url:selectedRoute.geometryUrl,geometry:selectedRoute.geometry}:undefined);
     const zoomControl=new MapZoomButtons({zoom:()=>map.getZoom(),bounds:()=>({min:map.getMinZoom(),max:map.getMaxZoom()}),busy:()=>zooming.current,
      apply:target=>map.setZoom(target,{animate:!window.matchMedia('(prefers-reduced-motion: reduce)').matches})});
@@ -298,7 +301,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
     });
     unbindFrame=bindMapFrameRefit(element,element.closest('.explore-layout')?.querySelector('.explore-panel')??null,frameRefit.current,()=>{
      if(cancelled||map!==mapRef.current)return;
-     if(fullView.current&&!regionRef.current&&!trailRef.current)fitRussia(false);
+     if(canRefitMapOverview(fullView.current,regionRef.current,trailRef.current,overviewRequested.current))fitRussia(false);
      else russiaView(element,256);
     });
     map.on('dragstart',()=>{cancelNavigation();frameRefit.current?.cancel();});
@@ -377,7 +380,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
       if(cancelled||!container.current)return;
       const wasOverview=fullView.current;
       map.invalidateSize({pan:false});const {camera:next}=russiaView(container.current,256);cameraFloor.current=next;map.setMinZoom(next.zoom);
-      if(wasOverview&&!hasPlanFrame())fitRussia(false);else{clampCamera();frameRefit.current?.resized();}
+      if(canRefitMapOverview(wasOverview,regionRef.current,trailRef.current,overviewRequested.current)&&!hasPlanFrame())fitRussia(false);else{clampCamera();frameRefit.current?.resized();}
       scheduleDirectionLayout();
      });
     };

@@ -1,5 +1,12 @@
 import {constrainRussiaCamera,russiaLongitude,type RussiaCamera} from '../public/maps/russia-viewport.js';
 
+/** The initial country camera is only a loading placeholder when a card is
+ * selected. A layout observer must not turn that placeholder into a new
+ * overview command which cancels the selection's pending camera fit. */
+export function canRefitMapOverview(fullView:boolean,region:unknown,trail:unknown,overviewRequested=false):boolean{
+ return fullView&&(overviewRequested||!region&&!trail);
+}
+
 /** A covered viewport can require a camera centre just outside the geographic
  * rectangle even when every fitted feature is inside it. Permit only the
  * calculated frame's extra offset; the normal clamp returns within two zooms. */

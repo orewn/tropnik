@@ -5,6 +5,8 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {MapStyleSession, MapSelectionCamera, LatestMapNavigation, loadMapSelection, applyMapLayerVisibility} from '../lib/map-lifecycle.ts';
 import {bindZoomButtonCancellation} from '../lib/map-zoom-buttons.ts';
+import {canRefitMapOverview} from '../lib/map-framing.ts';
+import {russiaCamera,russiaPadding} from '../public/maps/russia-viewport.js';
 
 test('camera choices made during CSS zoom keep the newest intent and current insets', () => {
   let zooming = true, inset = 160;
@@ -373,6 +375,84 @@ test('late route geometry is drawn without moving a camera the visitor already n
     const nextNavigation = selection.captureNavigation();
     assert.equal(selection.routeChanged(nextRoute) && nextNavigation(), true, 'a new deliberate selection can navigate');
     unbind(); assert.equal(events.size, 0);
+  }
+});
+
+test('initial layout resizing cannot cancel a selected route before or during its asynchronous load', async () => {
+  for (const resizePhase of ['before-load-effect', 'during-load']) {
+    for (const region of [undefined, {id:'krasnodar'}]) {
+      const selection=new MapSelectionCamera(), gate=deferred(), overlays=[], visits=[];
+      const route={id:'osm-relation-2244794',url:'/data/imported/osm-relation-2244794.geojson'};
+      selection.beginRouteSelection(route);
+      const fitRussia=()=>{selection.cancelNavigation();visits.push('russia');};
+      const initialResize=()=>{if(canRefitMapOverview(true,region,route))fitRussia();};
+      const permissionAtMount=selection.captureNavigation();
+      if(resizePhase==='before-load-effect')initialResize();
+      const canNavigate=selection.captureNavigation();
+      loadMapSelection({clear:()=>{},load:()=>gate.promise,current:()=>true,
+        apply:geometry=>{overlays.push(geometry);if(selection.routeChanged(route)&&canNavigate())visits.push(route.id);},
+        onError:error=>assert.fail(String(error))});
+      await nextTurn();
+      if(resizePhase==='during-load')initialResize();
+      assert.equal(permissionAtMount(),true,`${resizePhase}: a ResizeObserver is not manual navigation`);
+      gate.resolve('source geometry');await nextTurn();
+      assert.deepEqual(overlays,['source geometry']);
+      assert.deepEqual(visits,[route.id],`${resizePhase}: the source geometry still owns its initial fit`);
+    }
+  }
+});
+
+test('an explicit Home command still cancels a pending route, while unselected overview layout may refit', async () => {
+  const selection=new MapSelectionCamera(), gate=deferred(), visits=[], overlays=[];
+  const route={id:'pending-route'};
+  selection.beginRouteSelection(route);
+  const canNavigate=selection.captureNavigation();
+  const fitRussia=()=>{selection.cancelNavigation();visits.push('russia');};
+  loadMapSelection({clear:()=>{},load:()=>gate.promise,current:()=>true,
+    apply:geometry=>{overlays.push(geometry);if(selection.routeChanged(route)&&canNavigate())visits.push(route.id);},
+    onError:error=>assert.fail(String(error))});
+  await nextTurn();fitRussia();
+  assert.equal(canNavigate(),false,'the Home control remains a newer deliberate camera choice');
+  gate.resolve('source geometry');await nextTurn();
+  assert.deepEqual(overlays,['source geometry']);assert.deepEqual(visits,['russia']);
+  assert.equal(canRefitMapOverview(true,undefined,undefined),true);
+  assert.equal(canRefitMapOverview(false,undefined,undefined),false,'manual navigation is not an overview');
+  assert.equal(canRefitMapOverview(true,{id:'krasnodar'},undefined),false,'a pending region also owns its framing');
+});
+
+test('explicit Home with a retained card still fits Russia after a physical viewport resize', () => {
+  const region={id:'krasnodar'}, route={id:'selected-route'}, selection=new MapSelectionCamera();
+  selection.beginRouteSelection(route);
+  const pendingRoute=selection.captureNavigation();
+  let overviewRequested=false, camera;
+  const fitOverview=(width,height)=>{camera=russiaCamera(width,height,russiaPadding(width,height),256);};
+  const home=(width,height)=>{overviewRequested=true;selection.cancelNavigation();fitOverview(width,height);};
+  const resize=(width,height)=>{if(canRefitMapOverview(true,region,route,overviewRequested))fitOverview(width,height);};
+  assert.equal(canRefitMapOverview(true,region,route,overviewRequested),false,'the loading placeholder is not an overview choice');
+  home(1000,700);
+  assert.equal(pendingRoute(),false,'Home owns the camera before layout changes');
+  const wide=camera;
+  resize(412,700);
+  const narrow=russiaCamera(412,700,russiaPadding(412,700),256);
+  assert.deepEqual(camera,narrow);assert.ok(camera.zoom<wide.zoom-1,'the full country must fit the narrower viewport');
+  assert.equal(pendingRoute(),false,'resizing cannot revive the old route');
+  resize(1000,700);assert.deepEqual(camera,wide,'widening restores both overview scale and centre');
+  // A different selection revokes the overview intent synchronously, even
+  // while the actual camera still shows the previous whole-country view.
+  overviewRequested=false;selection.beginRouteSelection({id:'next-route'});
+  const nextRoute=selection.captureNavigation();resize(412,700);
+  assert.deepEqual(camera,wide);assert.equal(nextRoute(),true,'the new selection keeps its future fit');
+});
+
+test('both renderers guard their actual layout observers with the shared overview permission', () => {
+  for(const file of ['Atlas.tsx','Atlas2D.tsx']){
+    const source=readFileSync(new URL(`../components/${file}`,import.meta.url),'utf8');
+    const resize=source.slice(source.indexOf(file==='Atlas2D.tsx'?'const queueResize=':'resizeFrame=coalesceMapFrame('),source.indexOf('resize=new ResizeObserver'));
+    assert.match(resize,/canRefitMapOverview\((?:wasOverview|fullView\.current),regionRef\.current,trailRef\.current,overviewRequested\.current\)/,file);
+    const home=source.slice(source.indexOf(file==='Atlas2D.tsx'?'const fitRussia=':'function fitRussia('));
+    assert.match(home.slice(0,500),/selectionCamera\.current\.cancelNavigation\(\)/,`${file}: explicit Home must keep cancellation`);
+    assert.match(home.slice(0,500),/overviewRequested\.current=true/,`${file}: explicit Home retains overview layout intent`);
+    assert.match(source,/useLayoutEffect\(\(\)=>\{overviewRequested\.current=false;\},\[region\?\.id,trail\?\.id,trail\?\.geometryUrl,trail\?\.geometry\]\)/,`${file}: new selection resets the previous overview choice`);
   }
 });
 
