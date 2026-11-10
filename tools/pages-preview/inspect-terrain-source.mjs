@@ -42,6 +42,7 @@ for(let z=11;z<=18;z++){
   tiles.push({z,x,y,...publicResult(await read(url))});
 }
 await mkdir(directory,{recursive:true});
+if(coverage)await writeFile(new URL('terrain-high-resolution-index.json',directory),urls.body);
 const receipt={verified:false,releaseEligible:false,sourceCommit:process.env.GITHUB_SHA||null,checkedAt:new Date().toISOString(),center,coverageCell:{z:6,...cell},tileJSON:{...publicResult(tileJSON),metadata},highResolutionIndex:{...publicResult(urls),matchingCoverage},tiles};
 await writeFile(new URL('terrain-source-evidence.json',directory),JSON.stringify(receipt,null,2)+'\n');
 console.log(JSON.stringify(receipt,null,2));

@@ -459,6 +459,11 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null}={
   const route=await waitValue(`${profile.name}: the zoom audit route did not render`,()=>helpers.mapState(cdp),state=>state?.route==='kavkaz-8a');
   report.routeId=route.route;
   if(diagnostic){
+   // A fresh diagnostic profile has not performed the earlier map interactions
+   // that collapse initial credits in the release matrix. Use the same native UI.
+   const creditsButton='.map-attribution-toggle[aria-label="Свернуть сведения об источниках"]';
+   if(await elementPoint(cdp,creditsButton))await pointerSelector(cdp,creditsButton,profile);
+   await waitValue('Diagnostic source credits did not collapse',()=>evaluate(cdp,"!document.querySelector('.atlas-wrap > .map-attribution .map-attribution-content') && document.querySelector('.atlas-wrap > .map-attribution .map-attribution-toggle')?.getAttribute('aria-expanded') !== 'true'"),Boolean);
    const terrainButton='.map-style-switch button[aria-label="Рельеф всей карты"]';
    const result=await runTerrainCloseDiagnostic({report,geometry,capture,reachZoom,reachBottom,zoom,save,
     phase:async name=>{report.diagnosticStage=name;await diagnosticPhase(cdp,name);await save();},
