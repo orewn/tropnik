@@ -10,7 +10,8 @@ import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving,browserAuditRunPoli
 import {browserTraceEnabled,traceDesktopSelection} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
-import {assertDirectionHitGrid,assertDirectionHitAreas} from './browser-report.mjs';
+import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
+import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
@@ -426,6 +427,131 @@ async function closeMapSheet(cdp,profile){
   if((await selectionState(cdp)).sheet!=='closed')await pointerSelector(cdp,'.sheet-handle',profile);
   await settledSheet(cdp,'closed');
 }
+async function recordedClick(cdp,selector,profile){
+  await evaluate(cdp,'window.__tropnikInputEvents=[]');
+  const point=await pointerSelector(cdp,selector,profile);
+  const events=await waitValue(`Native click on ${selector} was not delivered`,()=>evaluate(cdp,'window.__tropnikInputEvents'),events=>events.some(event=>event.type==='click'),2000);
+  const input=profile.mobile?'touch':'mouse';assertNativeBurstEventOrder(events,input,1);
+  return{input,selector,point,events};
+}
+async function scrollContainerState(cdp,selector){
+  return evaluate(cdp,`(()=>{const element=document.querySelector(${JSON.stringify(selector)});if(!element)return null;const r=element.getBoundingClientRect();return{rect:{left:r.left,right:r.right,top:Math.max(0,r.top),bottom:Math.min(innerHeight,r.bottom),width:r.width,height:Math.min(innerHeight,r.bottom)-Math.max(0,r.top)},scrollTop:element.scrollTop,scrollHeight:element.scrollHeight,clientHeight:element.clientHeight,scrollY, sheet:document.querySelector('.explore-layout')?.dataset.sheetState};})()`);
+}
+/** Native scrolling only: never set scrollTop or call an application handler. */
+async function scrollContainer(cdp,selector,profile,direction=1){
+  const before=await scrollContainerState(cdp,selector);assert.ok(before,`Missing scroll container ${selector}`);
+  const remaining=direction>0?before.scrollHeight-before.clientHeight-before.scrollTop:before.scrollTop;
+  assert.ok(remaining>0,`No remaining content in ${selector}`);
+  const distance=Math.min(240,before.rect.height-48,Math.max(32,remaining));
+  assert.ok(distance>=12,`No remaining native scroll travel in ${selector}: ${JSON.stringify(before)}`);
+  const start={x:before.rect.left+before.rect.width/2,y:direction>0?before.rect.bottom-24:before.rect.top+24},end={x:start.x,y:start.y-direction*distance};
+  const owned=await evaluate(cdp,`document.querySelector(${JSON.stringify(selector)}).contains(document.elementFromPoint(${start.x},${start.y}))`);assert.equal(owned,true,`${selector}: native scroll starts behind another control`);
+  await evaluate(cdp,'window.__tropnikScrollEvents=[]');
+  const commands=[];
+  const send=async(method,params)=>{await cdp.call(method,params);commands.push({method,type:params.type,status:'fulfilled'});};
+  if(profile.mobile){
+    await send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...start,id:73,radiusX:3,radiusY:3,force:1}]});
+    for(let step=1;step<=8;step++){await send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:start.x,y:start.y-direction*distance*step/8,id:73,radiusX:3,radiusY:3,force:1}]});await sleep(25);}
+    await sleep(100);await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  }else await send('Input.dispatchMouseEvent',{type:'mouseWheel',x:start.x,y:start.y,deltaX:0,deltaY:direction*distance,pointerType:'mouse'});
+  let previous=-1,stable=0;
+  const after=await waitValue(`${selector}: native scroll did not settle`,()=>scrollContainerState(cdp,selector),value=>{stable=Math.abs(value.scrollTop-previous)<.5?stable+1:0;previous=value.scrollTop;return stable>=3;},4000);
+  const events=await evaluate(cdp,'window.__tropnikScrollEvents');
+  assert.ok(direction*(after.scrollTop-before.scrollTop)>1,`${selector}: native scrolling made no progress`);
+  assert.ok(Math.abs(after.scrollY-before.scrollY)<=1,`${selector}: internal scrolling moved the page`);assert.equal(after.sheet,before.sheet);
+  return{input:profile.mobile?'touch':'mouse',selector,direction,start,end,distance,before,after,commands,events};
+}
+async function revealNative(cdp,selector,container,profile,limit=12){
+  const scrolls=[];
+  for(let attempt=0;attempt<=limit;attempt++){
+    const target=await evaluate(cdp,`(()=>{const element=document.querySelector(${JSON.stringify(selector)}),parent=document.querySelector(${JSON.stringify(container)});if(!element||!parent)return null;const r=element.getBoundingClientRect(),p=parent.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);return{inside:r.top>=Math.max(0,p.top)-1&&r.bottom<=Math.min(innerHeight,p.bottom)+1&&r.width>0&&r.height>0,unobscured:!!hit&&element.contains(hit),direction:r.top<Math.max(0,p.top)?-1:1};})()`);
+    assert.ok(target,`Missing ${selector} inside ${container}`);
+    if(target.inside&&target.unobscured)return scrolls;
+    assert.ok(attempt<limit,`Native scrolling could not reveal ${selector} within ${limit} gestures`);
+    scrolls.push(await scrollContainer(cdp,container,profile,target.direction));
+  }
+}
+async function layerMenuFrame(cdp){
+  return evaluate(cdp,`(()=>{
+    const box=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
+    const root=document.querySelector('.explore-layout'),atlas=document.querySelector('.atlas-wrap'),panel=document.querySelector('.explore-panel'),menu=document.querySelector('.layer-menu'),button=document.querySelector('.layer-button');
+    if(!menu||!atlas||!button)return null;const map=box(atlas),sheet=box(panel),rect=box(menu),usable={left:Math.max(0,map.left),right:Math.min(innerWidth,map.right),top:Math.max(0,map.top),bottom:Math.min(innerHeight,map.bottom,sheet.top)};usable.width=usable.right-usable.left;usable.height=usable.bottom-usable.top;
+    const controls=[...menu.querySelectorAll('button,input,a')].map((element,index)=>{const r=box(element),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y),inside=r.top>=rect.top-1&&r.bottom<=rect.bottom+1&&r.left>=rect.left-1&&r.right<=rect.right+1;return{index,tag:element.tagName,label:(element.getAttribute('aria-label')||(element.tagName==='INPUT'?element.closest('label')?.textContent:element.textContent)||'').trim(),rect:r,inside,unobscured:!!hit&&element.contains(hit),point:{x,y}};});
+    return{sheet:root.dataset.sheetState,map,usable,menu:rect,button:box(button),scrollTop:menu.scrollTop,scrollHeight:menu.scrollHeight,clientHeight:menu.clientHeight,scrollY,controls};
+  })()`);
+}
+async function checkPortraitLayerMenus(cdp,profile){
+  const states=[];await clearMapStories(cdp,profile);
+  for(const sheet of ['closed','open']){
+    if((await selectionState(cdp)).sheet!==sheet){await recordedClick(cdp,'.sheet-handle',profile);await settledSheet(cdp,sheet);}
+    await settledMap(cdp,profile.engine);
+    const opened=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,true);
+    const frames=[await layerMenuFrame(cdp)],scrolls=[];
+    const reached=new Set();
+    for(let attempt=0;attempt<=8;attempt++){
+      for(const control of frames.at(-1).controls)if(control.inside&&control.unobscured)reached.add(control.index);
+      if(reached.size===frames[0].controls.length)break;
+      assert.ok(attempt<8,`${profile.name}/${sheet}: not all Layers controls became reachable`);
+      scrolls.push(await scrollContainer(cdp,'.layer-menu',profile));frames.push(await layerMenuFrame(cdp));
+    }
+    const closed=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,false);
+    states.push({sheet,opened,frames,scrolls,closed});
+  }
+  await closeMapSheet(cdp,profile);
+  const receipt={schemaVersion:1,passed:true,input:'touch',states};assertLayerMenuAudit(receipt,profile.name);return receipt;
+}
+async function browserBack(cdp,expected){
+  const history=await cdp.call('Page.getNavigationHistory'),from=history.entries[history.currentIndex],target=history.entries[history.currentIndex-1];
+  assert.ok(target,'Browser Back has no previous entry');await cdp.call('Page.navigateToHistoryEntry',{entryId:target.id});
+  const after=await expectSelection(cdp,expected);
+  const url=await evaluate(cdp,'location.href');assert.equal(url,target.url,'Browser Back did not restore its actual history entry');
+  return{method:'Page.navigateToHistoryEntry',from:{id:from.id,url:from.url},target:{id:target.id,url:target.url},url,after};
+}
+async function overviewCounts(cdp){
+  return evaluate(cdp,`(()=>{
+    const number=text=>Number((text||'').match(/[0-9][0-9\\s\\u00a0]*/)?.[0].replace(/\\D/g,'')||0);
+    const catalog=[...document.querySelectorAll('.region-option')].map(element=>({name:element.querySelector('strong')?.textContent?.trim(),count:number(element.querySelector('small')?.textContent)}));
+    const markers=[...document.querySelectorAll('.region-marker:not([hidden]):not(.direction-cluster)')].map(element=>({id:element.dataset.regionId,name:element.querySelector('.region-marker-label')?.textContent?.trim(),count:number(element.querySelector('.region-marker-count')?.textContent)}));
+    return{region:new URLSearchParams(location.search).get('region')||'',catalog,markers,total:number(document.querySelector('.sheet-peek-copy>span')?.textContent),mapTotal:number(document.querySelector('.map-context>span:last-child')?.textContent)};
+  })()`);
+}
+async function filterState(cdp){
+  return evaluate(cdp,`(()=>({pressed:document.querySelector('.filter-row button[aria-pressed]')?.getAttribute('aria-pressed')??null,count:Number(document.querySelector('.explore-panel .section-heading>span')?.textContent?.replace(/\\D/g,'')||0),expanded:document.querySelector('.filter-row button[aria-expanded]')?.getAttribute('aria-expanded'),empty:!!document.querySelector('.catalog-empty')}))()`);
+}
+async function checkSavedFilterReset(cdp,profile,overviewBefore){
+  const baseline=await filterState(cdp);assert.equal(baseline.pressed,'false');assert.ok(baseline.count>0);
+  const enabled=await recordedClick(cdp,'.filter-row button[aria-pressed]',profile);
+  const filtered=await waitValue('Saved filter did not become active',()=>filterState(cdp),state=>state.pressed==='true'&&state.count===0&&state.empty);
+  const parent=await recordedClick(cdp,'.explore-panel .back-link',profile);await expectSelection(cdp,{region:'',route:''});await closeMapSheet(cdp,profile);await settledMap(cdp,profile.engine);
+  const overviewAfter=await overviewCounts(cdp);
+  if(profile.mobile){await recordedClick(cdp,'.sheet-handle',profile);await settledSheet(cdp,'open');}
+  const selector=await evaluate(cdp,`(()=>{const index=[...document.querySelectorAll('.region-option')].findIndex(element=>element.querySelector('strong')?.textContent?.trim()==='Алтай');return index>=0?'.region-list .region-option:nth-child('+(index+1)+')':null;})()`);assert.ok(selector,'Altai is missing from the overview catalogue');
+  const scrolls=await revealNative(cdp,selector,'.explore-panel-content',profile),reentered=await recordedClick(cdp,selector,profile);
+  await expectSelection(cdp,{region:'altai',route:'',title:'Алтай'});const restored=await filterState(cdp);
+  return{baseline,enabled,filtered,parent,overviewBefore,overviewAfter,scrolls,reentered,restored};
+}
+async function requestDialogState(cdp){
+  return evaluate(cdp,`(()=>{const dialog=document.querySelector('[role="dialog"]');return{open:!!dialog,heading:dialog?.querySelector('h2')?.textContent||'',routeTitle:dialog?.querySelector('form>p')?.textContent||'',date:dialog?.querySelector('input[type=date]')?.value??null,note:dialog?.querySelector('textarea')?.value??null,error:!!dialog?.querySelector('[role=alert]'),success:!!dialog?.querySelector('.success-panel'),submitted:window.__tropnikFormSubmits||0};})()`);
+}
+async function checkRequestOwnership(cdp,profile,route){
+  const action='.route-actions button.primary',scrolls=await revealNative(cdp,action,'.explore-panel-content',profile),opened=await recordedClick(cdp,action,profile);
+  const first=await waitValue('Route request did not open',()=>requestDialogState(cdp),state=>state.open&&state.routeTitle===route.title);
+  await recordedClick(cdp,'[role="dialog"] textarea',profile);await evaluate(cdp,'window.__tropnikFormInputs=[]');
+  const note='Проверка принадлежности запроса маршруту';await cdp.call('Input.insertText',{text:note});
+  const edited=await waitValue('Native request note input was not delivered',()=>requestDialogState(cdp),state=>state.note===note),editEvents=await evaluate(cdp,'window.__tropnikFormInputs');
+  const closedSame=await recordedClick(cdp,'[role="dialog"] button[aria-label="Закрыть"]',profile);await waitValue('Request did not close',()=>requestDialogState(cdp),state=>!state.open);
+  const reopened=await recordedClick(cdp,action,profile);const same=await waitValue('Same-route draft was not restored',()=>requestDialogState(cdp),state=>state.open&&state.note===note);
+  const back=await browserBack(cdp,{region:'altai',route:'',title:'Алтай'}),afterBack=await waitValue('Browser Back retained the previous route request',()=>requestDialogState(cdp),state=>!state.open);
+  if(profile.mobile)await settledSheet(cdp,'open');
+  const next=await evaluate(cdp,`(()=>{const cards=[...document.querySelectorAll('.trail-card')],index=cards.findIndex(element=>element.querySelector('h3')?.textContent!==${JSON.stringify(route.title)}&&!element.querySelector('.source-status')?.textContent?.includes('Закрыт'));return index<0?null:{selector:'.trail-list .trail-card:nth-child('+(index+1)+') .trail-card-main',title:cards[index].querySelector('h3').textContent};})()`);assert.ok(next,'No sibling route is available for request ownership');
+  const nextScrolls=await revealNative(cdp,next.selector,'.explore-panel-content',profile),nextSelected=await recordedClick(cdp,next.selector,profile);
+  const nextSelection=await expectSelection(cdp,{region:'altai',title:next.title});assert.ok(nextSelection.route);assert.notEqual(nextSelection.route,route.id);
+  const beforeNext=await requestDialogState(cdp);assert.equal(beforeNext.open,false);
+  const nextActionScrolls=await revealNative(cdp,action,'.explore-panel-content',profile),nextOpened=await recordedClick(cdp,action,profile),second=await waitValue('Sibling route request did not open',()=>requestDialogState(cdp),state=>state.open&&state.routeTitle===next.title);
+  const nextClosed=await recordedClick(cdp,'[role="dialog"] button[aria-label="Закрыть"]',profile);await waitValue('Sibling request did not close',()=>requestDialogState(cdp),state=>!state.open);
+  const returnScrolls=await revealNative(cdp,'.explore-panel .back-link','.explore-panel-content',profile);
+  return{route:{id:route.id,title:route.title},scrolls,opened,first,edit:{method:'Input.insertText',note,events:editEvents},edited,closedSame,reopened,same,back,afterBack,next:{selection:nextSelection,scrolls:nextScrolls,selected:nextSelected,before:beforeNext,actionScrolls:nextActionScrolls,opened:nextOpened,dialog:second,closed:nextClosed},returnScrolls};
+}
 async function clearMapStories(cdp,profile){
   if(await elementPoint(cdp,'.fact-dismiss'))await pointerSelector(cdp,'.fact-dismiss',profile);
   const message=await elementPoint(cdp,'.map-message button');
@@ -513,10 +639,12 @@ async function reopenSelectedLine(cdp,profile,trail){
   }
   const target=(await canvasPoints(cdp,candidates))[0];
   assert.ok(target,`${profile.name}: selected line has no visible test segment away from route points`);
+  await evaluate(cdp,'window.__tropnikInputEvents=[]');
   await pointerAt(cdp,target,profile);
   await expectSelection(cdp,{region:'altai',route:trail.id,title:trail.title,...(profile.mobile?{sheet:'open'}:{})});
   if(profile.mobile)await settledSheet(cdp,'open');
-  return{point:target,route:trail.id,clicked:true,selectionRetained:true,reopened:profile.mobile};
+  const events=await evaluate(cdp,'window.__tropnikInputEvents');assertNativeBurstEventOrder(events,profile.mobile?'touch':'mouse',1);
+  return{point:target,route:trail.id,clicked:true,selectionRetained:true,reopened:profile.mobile,events};
 }
 async function polygonTouch(cdp,profile){
   await closeMapSheet(cdp,profile);
@@ -532,9 +660,11 @@ async function polygonTouch(cdp,profile){
   }
   const target=(await canvasPoints(cdp,candidates))[0];
   assert.ok(target,`${profile.name}: no unobscured administrative polygon point away from routes`);
+  await evaluate(cdp,'window.__tropnikInputEvents=[]');
   await pointerAt(cdp,target,profile);
   await expectSelection(cdp,{region:target.id,route:'',title:target.title,...(profile.mobile?{sheet:'open'}:{})});
-  await settledMap(cdp,profile.engine);return target;
+  await settledMap(cdp,profile.engine);const events=await evaluate(cdp,'window.__tropnikInputEvents');assertNativeBurstEventOrder(events,profile.mobile?'touch':'mouse',1);
+  return{...target,input:profile.mobile?'touch':'mouse',events};
 }
 async function freeCanvasPoint(cdp,state){
   const candidates=[];
@@ -574,18 +704,54 @@ async function mapGestures(cdp,profile){
   const afterResize=await polygonTouch(cdp,profile);
   return{zoomInput:profile.mobile?'touch-control':'mouse-wheel',beforeZoom:before.camera.zoom,afterZoom:zoomed.camera.zoom,dragged:true,dragCameras:{before:zoomed.camera,after:moved.camera},selectionPreserved:true,resizedTo:dimensions,postResizePolygon:afterResize.id};
 }
+async function checkSiblingParent(cdp,profile,previous,polygon){
+  const sibling=await selectionState(cdp);assert.ok(sibling.region&&sibling.region!==previous.region);assert.equal(sibling.route,'');
+  const parent=await recordedClick(cdp,'.explore-panel .back-link',profile),overview=await expectSelection(cdp,{region:'',route:''});
+  const back=await browserBack(cdp,{region:sibling.region,route:'',title:sibling.title});await settledMap(cdp,profile.engine);
+  return{previous,sibling,selected:{input:polygon.input,point:{x:polygon.x,y:polygon.y,id:polygon.id,title:polygon.title},events:polygon.events},parent,overview,back};
+}
+async function checkStyleCameraRoundtrip(cdp,profile,trail){
+  const selection=await selectionState(cdp);assert.ok(selection.route,'Style preservation needs an actual selected route');
+  const before=await settledMap(cdp,profile.engine),zoom=await recordedClick(cdp,'.map-controls button[aria-label="Увеличить масштаб"]',profile);
+  await waitValue('The genuine route zoom had no effect',()=>mapState(cdp),state=>state?.camera.zoom>before.camera.zoom+.2);
+  const zoomed=await settledMap(cdp,profile.engine),delta={dx:48,dy:12},starts=[];
+  for(const fy of [.45,.55,.65,.35,.75])for(const fx of [.5,.35,.65,.25,.75])starts.push({x:zoomed.rect.left+zoomed.rect.width*fx,y:zoomed.rect.top+zoomed.rect.height*fy});
+  const paths=starts.flatMap((point,candidate)=>Array.from({length:13},(_,index)=>({x:point.x+delta.dx*index/12,y:point.y+delta.dy*index/12,candidate})));
+  const owned=await canvasPoints(cdp,paths),start=starts.find((_,candidate)=>owned.filter(point=>point.candidate===candidate).length===13);
+  assert.ok(start,'No entire native route pan path is clear of UI overlays');
+  await evaluate(cdp,'window.__tropnikInputEvents=[]');
+  const pan=await dispatchSourceEndPan(cdp,start,delta,profile,sleep),manual=await settledMap(cdp,profile.engine);
+  pan.events=await evaluate(cdp,'window.__tropnikInputEvents');pan.before=zoomed;pan.after=manual;
+  const transitions=[];
+  for(const label of ['Сохранённый обзор','Детальные тропы онлайн']){
+    const opened=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,true);
+    const selector=await evaluate(cdp,`(()=>{const buttons=[...document.querySelectorAll('.layer-menu>button')],index=buttons.findIndex(button=>button.textContent?.trim()===${JSON.stringify(label)});return index<0?null:'.layer-menu>button:nth-of-type('+(index+1)+')';})()`);assert.ok(selector,`Missing layer ${label}`);
+    const scrolls=await revealNative(cdp,selector,'.layer-menu',profile);
+    await evaluate(cdp,`(()=>{window.__tropnikRouteRestoreObserver?.disconnect();window.__tropnikRouteRestores=[];window.__tropnikRouteEdgesBefore=[...document.querySelectorAll('.atlas-wrap .route-edge-marker')];const element=document.querySelector('.atlas-canvas[data-map-engine]');window.__tropnikRouteRestoreObserver=new MutationObserver(records=>{for(const record of records)window.__tropnikRouteRestores.push({old:record.oldValue,current:element.getAttribute('data-map-route-id')});});window.__tropnikRouteRestoreObserver.observe(element,{attributes:true,attributeFilter:['data-map-route-id'],attributeOldValue:true});})()`);
+    const selected=await recordedClick(cdp,selector,profile);
+    const restored=await waitValue(`${label}: route overlays were not reinstalled`,()=>evaluate(cdp,`(()=>{const current=[...document.querySelectorAll('.atlas-wrap .route-edge-marker')],prior=window.__tropnikRouteEdgesBefore;return{route:document.querySelector('.atlas-canvas[data-map-engine]')?.dataset.mapRouteId,selected:!![...document.querySelectorAll('.layer-menu>button')].find(button=>button.textContent?.trim()===${JSON.stringify(label)})?.querySelector('svg'),mutations:window.__tropnikRouteRestores,edges:{before:prior.length,after:current.length,replaced:current.filter(element=>!prior.includes(element)).length}};})()`),value=>value.route===selection.route&&value.selected&&value.mutations.some(item=>item.current===selection.route)&&value.edges.after===value.edges.before&&value.edges.replaced===value.edges.after);
+    await evaluate(cdp,'window.__tropnikRouteRestoreObserver.disconnect()');
+    const closed=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,false);
+    const frame=await settledMap(cdp,profile.engine),line=await reopenSelectedLine(cdp,profile,trail),lineFrame=await settledMap(cdp,profile.engine),currentSelection=await selectionState(cdp);
+    transitions.push({label,opened,scrolls,selected,closed,frame,line,lineFrame,selection:currentSelection,restored});
+  }
+  const receipt={schemaVersion:1,passed:true,input:'mouse',routeId:selection.route,selection,before,zoomed,zoom,pan,manual,transitions};assertStyleCameraRoundtrip(receipt,profile.name);return receipt;
+}
 async function mapInteraction(cdp,profile,performanceIssues){
   const started=Date.now();await clearMapStories(cdp,profile);await closeMapSheet(cdp,profile);
-  const country=await settledMap(cdp,profile.engine);
+  const country=await settledMap(cdp,profile.engine),overviewBefore=await overviewCounts(cdp);
   await evaluate(cdp,'window.__tropnikPerf={cls:0,longest:0};window.__tropnikPerfStart=performance.now()');
   await diagnosticPhase(cdp,'map-interactions');
   const directionActions=[];
   const selectFirstDirection=()=>selectMapDirection(cdp,profile,'altai','Алтай',{kind:'label',actions:directionActions});
   const firstSelection=profile.mobile?{value:await selectFirstDirection(),trace:null}:await traceDesktopSelection(cdp,selectFirstDirection,{enabled:traceEnabled,sourceCommit:process.env.GITHUB_SHA||null});
   const firstDirection=firstSelection.value;
+  const filterReset=await checkSavedFilterReset(cdp,profile,overviewBefore);
   const catalogScroll=profile.mobile?await scrollSheetContent(cdp,profile,{stableExtent:true}):null;
   await closeMapSheet(cdp,profile);
   const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
+  const styleCameraRoundtrip=profile.engine==='maplibre'?await checkStyleCameraRoundtrip(cdp,profile,trail):null;
+  const requestOwnership=await checkRequestOwnership(cdp,profile,trail);
   await pointerSelector(cdp,'.explore-panel .back-link',profile);
   await expectSelection(cdp,{region:'altai',route:'',title:'Алтай'});
   await pointerSelector(cdp,'.explore-panel .back-link',profile);
@@ -596,11 +762,12 @@ async function mapInteraction(cdp,profile,performanceIssues){
   const secondDirection=await selectMapDirection(cdp,profile,'baikal','Байкал',{kind:'count',actions:directionActions});
   const directionHitAreas={schemaVersion:1,passed:true,engine:profile.engine,input:profile.mobile?'touch':'mouse',actions:directionActions};
   assertDirectionHitAreas(directionHitAreas,profile.name,profile.engine,profile.mobile);
-  const polygon=await polygonTouch(cdp,profile),gestures=await mapGestures(cdp,profile);
+  const previous=await selectionState(cdp),polygon=await polygonTouch(cdp,profile),siblingParent=await checkSiblingParent(cdp,profile,previous,polygon),gestures=await mapGestures(cdp,profile);
+  const experience={schemaVersion:1,passed:true,input:profile.mobile?'touch':'mouse',filterReset,requestOwnership,siblingParent};assertExploreExperience(experience,profile.name,profile.engine,profile.mobile);
   const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
   const longTaskLimit=profile.mobile?350:750;
   if(!(perf.longest<longTaskLimit))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:longTaskLimit});
-  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
 const httpPort=await freePort(),debugPort=await freePort();
@@ -634,6 +801,14 @@ try{
     window.__tropnikPerf={cls:0,longest:0};
     window.__tropnikPerfStart=0;window.__tropnikPhase='loading';window.__tropnikPhases=[];window.__tropnikLayoutShifts=[];
     window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;window.__tropnikLongTasks=[];
+    window.__tropnikScrollEvents=[];window.__tropnikFormInputs=[];window.__tropnikFormSubmits=0;
+    for(const type of ['touchstart','touchmove','touchend','wheel'])document.addEventListener(type,event=>{
+      const point=event.changedTouches?.[0]||event;
+      window.__tropnikScrollEvents.push({type,time:performance.now(),trusted:event.isTrusted,x:point.clientX,y:point.clientY});
+      if(window.__tropnikScrollEvents.length>64)window.__tropnikScrollEvents.shift();
+    },{capture:true,passive:true});
+    document.addEventListener('input',event=>{if(event.target?.closest('[role="dialog"]'))window.__tropnikFormInputs.push({trusted:event.isTrusted,tag:event.target.tagName,value:event.target.value});},{capture:true,passive:true});
+    document.addEventListener('submit',event=>{if(event.target?.closest('[role="dialog"]'))window.__tropnikFormSubmits++;},{capture:true,passive:true});
     for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,event=>{
       const node=event.target?.nodeType===1?event.target:event.target?.parentElement,button=node?.closest('button,a'),r=button?.getBoundingClientRect();
       window.__tropnikInputEvents.push({type,time:performance.now(),timestamp:event.timeStamp,pointerType:event.pointerType||'',pointerId:Number.isInteger(event.pointerId)?event.pointerId:null,x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),regionId:button.dataset.regionId||null,groupKey:button.dataset.mapGroupKey||null,rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
@@ -703,6 +878,7 @@ try{
     await diagnosticPhase(cdp,'sheet-gestures-after');
     await diagnosticPhase(cdp,'layers-before');
     const mapGeometry=await checkMapGeometry(cdp,profile);
+    const layerMenus=profile.width<profile.height?await checkPortraitLayerMenus(cdp,profile):null;
     await diagnosticPhase(cdp,'layers-after');
     await diagnosticPhase(cdp,'story-before');
     const touch=await touchPrevious(cdp,profile);
@@ -715,7 +891,7 @@ try{
     }
     const interaction=profile.mapInteraction?await mapInteraction(cdp,profile,performanceIssues):null;
     if(interaction)mapInteractions.push(interaction);
-    results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,touch,interaction});
+    results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction});
     profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
     await checkpoint(interaction?'before-zoom-audit':'profile-complete');
     if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
@@ -725,7 +901,7 @@ try{
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');
-  const report={verified:true,mapInteractionSchemaVersion:2,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,mapInteractionSchemaVersion:3,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
   }

@@ -1,0 +1,62 @@
+{
+  "release": "0.4.20",
+  "recordedAt": "2026-11-10T03:56:36Z",
+  "releasePass": false,
+  "stage": "local verification; native CI and deployment pending",
+  "baseline": {
+    "runtimeSource": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "publishedVersion": "0.4.19",
+    "url": "https://orewn.github.io/tropnik/",
+    "observedFailures": [
+      "Altai -> country camera -> Baikal -> All directions returned Altai instead of overview",
+      "Saved-only filter -> All directions left map total and direction flags at zero while the catalogue retained Altai 11 and Baikal 10"
+    ],
+    "screenshot": "hidden-filter-before.jpg",
+    "screenshotSHA256": "453d14b7150e2bf5dfe35975a2f24bcb2ac3c00b95171cf83da7b7181d446505"
+  },
+  "checks": {
+    "canonicalFrozenInstall": "passed; dependency inputs unchanged",
+    "installedMapLibrePatchAndOfflineParity": "passed",
+    "webSuiteInitial": {"total": 520, "passed": 519, "failed": 1, "durationMs": 29640.499881},
+    "initialFailure": "service-polish source guard expected inline history API after it moved into a behavior-tested helper",
+    "correction": "consumer wiring assertion updated; behavioral history checks retained",
+    "correctedServiceAndExploreTests": {"total": 18, "passed": 18, "failed": 0},
+    "fullTypeScript": "passed",
+    "pagesTypeScript": "passed",
+    "fullESLint": "passed with zero warnings",
+    "independentRuntimeReview": "no proven blocker",
+    "pagesTooling": {"total": 95, "passed": 95, "failed": 0},
+    "toolingFixtureCorrection": "profile routing fixture now supplies and verifies the three portrait Layers calls; no browser or performance gate changed",
+    "nativeHarnessSyntax": "passed",
+    "independentNativeHarnessReview": "no proven blocker; actual browser run pending"
+  },
+  "manualPreview": {
+    "url": "http://terminal.local:4173/",
+    "input": "CUA native mouse and browser Back; supported locator click for the request action",
+    "rendererObserved": "leaflet",
+    "parentAfterSiblingDirections": "passed: Altai -> country camera -> Baikal -> All directions reached base URL and overview",
+    "hiddenSavedFilter": "passed: overview map 306, Altai flag 11, Baikal flag 10; re-entered region has Saved off",
+    "requestOwnership": {
+      "firstRoute": "osm-relation-6040458",
+      "secondRoute": "osm-relation-7547535",
+      "firstNote": "Проверка привязки к первому маршруту",
+      "browserBackClosedForm": true,
+      "secondFormBlank": true,
+      "submitted": false
+    },
+    "limits": "Preview is not the production release. No physical handset or MapLibre camera preservation was established by these manual checks. Leaflet reported unavailable relief while retaining the map. Native CI remains required."
+  },
+  "sitePackage": {
+    "sourceCommit": "90b04671843538fae2b93a700b12c8106f46b10e",
+    "archive": "tropnik-0.4.20-site.tar.gz",
+    "bytes": 39642172,
+    "sha256": "626092e1a1d16d918233db999fc363ac3a917b175a7ba7541cee42bf94ba2f67",
+    "sourceFilesCompared": 1248,
+    "siteSourceTree": "e295a6d0412dfa06a77956ae0a11d7ceff26cc8c",
+    "gitTreeDifference": "All 1247 common tracked paths have equal blob and mode. Web tracks next-env.d.ts, generated in the Site checkout; Site tracks the existing APK that the Pages workflow restores from its pinned manifest.",
+    "sourceMismatches": [],
+    "sourceCheckoutClean": true,
+    "build": "passed",
+    "published": false
+  }
+}

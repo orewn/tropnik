@@ -9,7 +9,9 @@ test('route discovery stays responsive and browser history restores map state',a
   assert.match(explore,/const liveIds=new Set/);
   assert.match(explore,/const savedIds=useMemo/);
   assert.match(explore,/addEventListener\('popstate'/);
-  assert.match(explore,/pushState':'replaceState/);
+  // History semantics are exercised by explore-navigation.test.mjs and the
+  // native browser flow; retain this check only for the component wiring.
+  assert.match(explore,/writeExploreHistory\(window,\{regionId:nextRegion,trailId:nextTrail\},mode\)/);
   assert.match(explore,/aria-busy=\{searchPending\}/);
   assert.match(browser,/const routeCounts = useMemo/);
   assert.doesNotMatch(browser,/catalog\.filter\(trail => trailBelongsToRegion/);

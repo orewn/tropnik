@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {CLOSE_TRAIL_FIXTURE,assertBrowserReport,assertRouteEdgeFrame} from '../browser-report.mjs';
 import {projectMapPoint,unprojectMapPoint} from '../map-projection.mjs';
 import {directionHitAreasFixture} from './direction-hitareas-fixture.mjs';
+import {layerMenusFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
 
 const commit='a'.repeat(40);
 const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
@@ -48,16 +49,17 @@ function zoomDesign(profile,engine,mobile){
   screenshots:[...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
 }
 function evidence(){
- return{verified:true,sourceCommit:commit,mapInteractionSchemaVersion:2,
-  profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'leaflet',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
+ return{verified:true,sourceCommit:commit,mapInteractionSchemaVersion:3,
+  profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'leaflet',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
   desktopProfiles:[{name:'desktop-webgl',engine:'maplibre',coarse:false,mapInteractionTested:true}],
   zoomDesigns:[zoomDesign('android-portrait','leaflet',true),zoomDesign('desktop-webgl','maplibre',false)],
-  mapInteractions:[['android-portrait','leaflet',true],['desktop-webgl','maplibre',false]].map(([profile,engine,mobile])=>({profile,engine,mobile,passed:true,directionHitAreas:directionHitAreasFixture(engine,mobile),catalogScroll:mobile?{passed:true,input:'touch',deltaPx:100,scrollHeightDelta:0,pageScrollDeltaPx:0,sheetDisplacementPx:0}:null,firstDirection:[{selected:'altai'}],secondDirection:[{selected:'baikal'}],route:{id:'route',offsetPx:14},line:{route:'route',clicked:true,selectionRetained:true,reopened:mobile},returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,polygon:{id:'territory'},gestures:{zoomInput:mobile?'touch-control':'mouse-wheel',beforeZoom:5,afterZoom:6,dragged:true,selectionPreserved:true,resizedTo:{width:900,height:412},postResizePolygon:'territory'},longestTaskMs:100}))};
+  mapInteractions:[['android-portrait','leaflet',true],['desktop-webgl','maplibre',false]].map(([profile,engine,mobile])=>({profile,engine,mobile,passed:true,directionHitAreas:directionHitAreasFixture(engine,mobile),experience:exploreExperienceFixture(mobile),...(mobile?{}:{styleCameraRoundtrip:styleCameraRoundtripFixture()}),catalogScroll:mobile?{passed:true,input:'touch',deltaPx:100,scrollHeightDelta:0,pageScrollDeltaPx:0,sheetDisplacementPx:0}:null,firstDirection:[{selected:'altai'}],secondDirection:[{selected:'baikal'}],route:{id:'route',offsetPx:14},line:{route:'route',clicked:true,selectionRetained:true,reopened:mobile},returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,polygon:{id:'territory'},gestures:{zoomInput:mobile?'touch-control':'mouse-wheel',beforeZoom:5,afterZoom:6,dragged:true,selectionPreserved:true,resizedTo:{width:900,height:412},postResizePolygon:'territory'},longestTaskMs:100}))};
 }
 test('both upload and public verification require real mobile and desktop map interaction evidence',()=>{
  const report=evidence();assert.equal(assertBrowserReport(report,commit),report);
  const changes=[
   value=>delete value.mapInteractionSchemaVersion,
+  value=>value.mapInteractionSchemaVersion=2,
   value=>value.sourceCommit='b'.repeat(40),
   value=>value.profiles.pop(),
   value=>value.profiles[0].sheetTested=false,
@@ -66,6 +68,14 @@ test('both upload and public verification require real mobile and desktop map in
   value=>value.desktopProfiles[0].engine='leaflet',
   value=>value.desktopProfiles[0].coarse=true,
   value=>value.mapInteractions.pop(),
+  value=>delete value.profiles[0].layerMenus,
+  value=>delete value.profiles[1].layerMenus,
+  value=>delete value.profiles[2].layerMenus,
+  value=>delete value.mapInteractions[0].experience,
+  value=>delete value.mapInteractions[1].experience,
+  value=>delete value.mapInteractions[1].styleCameraRoundtrip,
+  value=>value.mapInteractions[0].experience=exploreExperienceFixture(true,'another-route'),
+  value=>value.mapInteractions[1].styleCameraRoundtrip=styleCameraRoundtripFixture('another-route'),
   value=>delete value.mapInteractions[0].directionHitAreas,
   value=>delete value.mapInteractions[1].directionHitAreas,
   value=>value.mapInteractions[0].directionHitAreas.actions[0].events[2].trusted=false,

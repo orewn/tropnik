@@ -370,11 +370,231 @@ export function assertDirectionHitAreas(receipt,name,engine,mobile){
  return receipt;
 }
 
+const experienceInside=(rect,bounds)=>rect.left>=bounds.left-1&&rect.right<=bounds.right+1&&rect.top>=bounds.top-1&&rect.bottom<=bounds.bottom+1;
+function assertExperienceRect(rect,context){
+ assert.ok(rect&&['left','right','top','bottom','width','height'].every(key=>Number.isFinite(rect[key])),`${context}: missing measured rectangle`);
+ assert.ok(rect.width>0&&rect.height>0&&Math.abs(rect.right-rect.left-rect.width)<.01&&Math.abs(rect.bottom-rect.top-rect.height)<.01,`${context}: inconsistent measured rectangle`);
+}
+function assertExperienceClick(click,input,context,selector){
+ assert.equal(click?.input,input,`${context}: wrong native input`);
+ assert.ok(Number.isFinite(click.point?.x)&&Number.isFinite(click.point?.y),`${context}: missing click coordinates`);
+ if(selector!==false){
+  assert.equal(typeof click.selector,'string');assert.ok(click.selector.length>0);
+  if(selector)assert.equal(click.selector,selector,`${context}: another control was clicked`);
+  assert.equal(click.point.selector,click.selector);assert.equal(click.point.unobscured,true,`${context}: target was obscured`);
+ }
+ assertNativeBurstEventOrder(click.events,input,1);
+ for(const event of click.events)assert.ok(Number.isFinite(event.x)&&Number.isFinite(event.y)&&Math.abs(event.x-click.point.x)<=1&&Math.abs(event.y-click.point.y)<=1,`${context}: delivered click differs from its target`);
+}
+function assertExperienceScroll(scroll,input,context,selector){
+ assert.equal(scroll?.input,input);assert.equal(scroll.selector,selector);assert.ok(scroll.direction===1||scroll.direction===-1);
+ assert.ok(Number.isFinite(scroll.distance)&&scroll.distance>=12&&scroll.distance<=240);
+ assert.ok([scroll.start?.x,scroll.start?.y,scroll.end?.x,scroll.end?.y].every(Number.isFinite));
+ assert.ok(Math.abs(scroll.start.x-scroll.end.x)<.01&&Math.abs(scroll.end.y-scroll.start.y+scroll.direction*scroll.distance)<.01,`${context}: scroll path differs from its distance`);
+ for(const state of [scroll.before,scroll.after]){
+  assertExperienceRect(state?.rect,context);
+  assert.ok([state.scrollTop,state.scrollHeight,state.clientHeight,state.scrollY].every(Number.isFinite));
+  assert.ok(state.clientHeight>0&&state.scrollHeight>=state.clientHeight&&state.scrollTop>=-1&&state.scrollTop<=state.scrollHeight-state.clientHeight+1);
+  assert.ok(['closed','open'].includes(state.sheet));
+ }
+ assert.ok(scroll.direction*(scroll.after.scrollTop-scroll.before.scrollTop)>1,`${context}: native scrolling made no progress`);
+ assert.ok(Math.abs(scroll.after.scrollY-scroll.before.scrollY)<=1,`${context}: scrolling moved the page`);
+ assert.equal(scroll.after.sheet,scroll.before.sheet,`${context}: scrolling changed the sheet`);
+ const types=input==='touch'?['touchStart',...Array(8).fill('touchMove'),'touchEnd']:['mouseWheel'];
+ assert.deepEqual(scroll.commands?.map(command=>command.type),types,`${context}: native scroll commands are missing`);
+ for(const command of scroll.commands){assert.equal(command.method,input==='touch'?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent');assert.equal(command.status,'fulfilled');}
+ assert.ok(Array.isArray(scroll.events)&&scroll.events.length>0&&scroll.events.length<=64,`${context}: delivered scroll events are missing`);
+ for(const [index,event] of scroll.events.entries()){
+  assert.equal(event.trusted,true);assert.ok([event.time,event.x,event.y].every(Number.isFinite));
+  if(index)assert.ok(event.time>=scroll.events[index-1].time);
+ }
+ if(input==='touch'){
+  assert.equal(scroll.events[0].type,'touchstart');assert.equal(scroll.events.at(-1).type,'touchend');
+  assert.ok(scroll.events.length>=3&&scroll.events.slice(1,-1).every(event=>event.type==='touchmove'),`${context}: no delivered touch scroll`);
+  assert.ok(Math.hypot(scroll.events.at(-1).x-scroll.end.x,scroll.events.at(-1).y-scroll.end.y)<=3);
+ }else assert.deepEqual(scroll.events.map(event=>event.type),['wheel']);
+ assert.ok(Math.hypot(scroll.events[0].x-scroll.start.x,scroll.events[0].y-scroll.start.y)<=3,`${context}: native scroll started elsewhere`);
+}
+function assertExperienceScrolls(scrolls,input,context,selector='.explore-panel-content'){
+ assert.ok(Array.isArray(scrolls)&&scrolls.length<=12,`${context}: missing or unbounded native scroll history`);
+ for(const [index,scroll] of scrolls.entries())assertExperienceScroll(scroll,input,`${context}/${index}`,selector);
+}
+function assertExperienceSelection(selection,context){
+ assert.ok(selection&&['region','route','title'].every(key=>typeof selection[key]==='string'),`${context}: missing selection`);
+ assert.ok(['closed','open'].includes(selection.sheet));
+ assert.equal(selection.history?.explore,true);assert.equal(selection.history.level,selection.route?2:selection.region?1:0);
+ assert.ok(Number.isInteger(selection.history.length)&&selection.history.length>0);assert.equal(typeof selection.history.pushed,'boolean');
+}
+function assertExperienceBack(back,expected,context,from){
+ assert.equal(back?.method,'Page.navigateToHistoryEntry',`${context}: history was not restored by the browser`);
+ for(const entry of [back.from,back.target])assert.ok(Number.isInteger(entry?.id)&&typeof entry.url==='string');
+ assert.notEqual(back.from.id,back.target.id);assert.equal(back.url,back.target.url);
+ const previous=new URL(back.from.url),target=new URL(back.target.url);
+ assert.equal(target.origin,previous.origin);assert.equal(target.pathname,previous.pathname);
+ for(const [key,param] of [['region','region'],['route','route']]){
+  assert.equal(target.searchParams.get(param)||'',expected[key],`${context}: wrong history target ${key}`);
+  if(from)assert.equal(previous.searchParams.get(param)||'',from[key],`${context}: wrong history source ${key}`);
+ }
+ assertExperienceSelection(back.after,context);
+ for(const key of ['region','route','title'])assert.equal(back.after[key],expected[key],`${context}: browser history restored another selection`);
+}
+
+/** Recompute the menu geometry and reachability from every measured scroll
+ * frame. An overall pass flag cannot substitute for native input evidence. */
+export function assertLayerMenuAudit(receipt,name){
+ assert.equal(receipt?.schemaVersion,1);assert.equal(receipt.passed,true);assert.equal(receipt.input,'touch');
+ assert.deepEqual(receipt.states?.map(state=>state.sheet),['closed','open'],`${name}: both portrait sheet states need Layers coverage`);
+ const controls=[['BUTTON','Детальные тропы онлайн'],['BUTTON','Спутник'],['BUTTON','Сохранённый обзор'],['INPUT','Тропы и грунтовые дороги'],['A','Подробная офлайн-карта'],['A','Источники карты']];
+ for(const state of receipt.states){
+  const context=`${name}/layers/${state.sheet}`;
+  assertExperienceClick(state.opened,'touch',`${context}/open`,'.layer-button');assertExperienceClick(state.closed,'touch',`${context}/close`,'.layer-button');
+  assert.ok(Array.isArray(state.frames)&&state.frames.length>=1&&state.frames.length<=9);
+  assert.ok(Array.isArray(state.scrolls)&&state.scrolls.length===state.frames.length-1&&state.scrolls.length<=8);
+  const reached=new Set();
+  for(const [index,frame] of state.frames.entries()){
+   assert.equal(frame.sheet,state.sheet);
+   for(const key of ['map','usable','menu','button'])assertExperienceRect(frame[key],`${context}/${key}`);
+   assert.ok(experienceInside(frame.usable,frame.map)&&experienceInside(frame.menu,frame.usable)&&experienceInside(frame.button,frame.usable),`${context}: Layers menu or button extends outside the usable map`);
+   assert.ok(frame.usable.left>=0&&frame.usable.top>=0);
+   assert.ok([frame.scrollTop,frame.scrollHeight,frame.clientHeight,frame.scrollY].every(Number.isFinite));
+   assert.ok(frame.clientHeight>0&&frame.scrollHeight>=frame.clientHeight&&frame.scrollTop>=-1&&frame.scrollTop<=frame.scrollHeight-frame.clientHeight+1);
+   assert.deepEqual(frame.controls?.map(control=>[control.tag,control.label]),controls,`${context}: actionable Layers controls changed or are missing`);
+   for(const [controlIndex,control] of frame.controls.entries()){
+    assert.equal(control.index,controlIndex);assertExperienceRect(control.rect,`${context}/${control.label}`);
+    assert.equal(control.inside,experienceInside(control.rect,frame.menu),`${context}: reported control containment differs from its bounds`);
+    assert.equal(typeof control.unobscured,'boolean');
+    assert.ok(Number.isFinite(control.point?.x)&&Number.isFinite(control.point?.y)&&Math.abs(control.point.x-control.rect.left-control.rect.width/2)<.01&&Math.abs(control.point.y-control.rect.top-control.rect.height/2)<.01);
+    if(control.inside&&control.unobscured){assert.ok(experienceInside(control.rect,frame.usable));reached.add(control.index);}
+   }
+   for(const click of [state.opened,state.closed])assert.ok(Math.abs(click.point.x-frame.button.left-frame.button.width/2)<=1&&Math.abs(click.point.y-frame.button.top-frame.button.height/2)<=1,`${context}: Layers input did not reach its measured button`);
+   if(index){
+    const scroll=state.scrolls[index-1],before=state.frames[index-1];
+    assertExperienceScroll(scroll,'touch',`${context}/scroll-${index}`,'.layer-menu');assert.equal(scroll.direction,1);
+    assert.equal(scroll.before.sheet,state.sheet);assert.equal(scroll.after.sheet,state.sheet);
+    assert.ok(Math.abs(scroll.before.scrollTop-before.scrollTop)<=1&&Math.abs(scroll.after.scrollTop-frame.scrollTop)<=1,`${context}: scroll receipt does not connect the measured frames`);
+    assert.ok(Math.abs(frame.scrollY-before.scrollY)<=1);
+    for(const key of ['menu','button','usable'])for(const field of ['left','right','top','bottom'])assert.ok(Math.abs(frame[key][field]-before[key][field])<=1,`${context}: native menu scrolling displaced the layout`);
+   }
+  }
+  assert.equal(reached.size,controls.length,`${context}: an actionable Layers control never became fully visible and reachable`);
+ }
+ return receipt;
+}
+
+function assertOverviewCounts(frame,context){
+ assert.equal(frame?.region,'');assert.ok(Number.isInteger(frame.total)&&frame.total>0);assert.equal(frame.mapTotal,frame.total,`${context}: country map and catalogue totals differ`);
+ assert.ok(Array.isArray(frame.catalog)&&frame.catalog.length>0&&Array.isArray(frame.markers)&&frame.markers.length>0);
+ const catalog=new Map();
+ for(const item of frame.catalog){assert.ok(typeof item.name==='string'&&item.name.length>0&&!catalog.has(item.name));assert.ok(Number.isInteger(item.count)&&item.count>=0&&item.count<=frame.total);catalog.set(item.name,item.count);}
+ const ids=new Set();let positive=false;
+ for(const marker of frame.markers){
+  assert.ok(typeof marker.id==='string'&&marker.id.length>0&&!ids.has(marker.id));ids.add(marker.id);
+  assert.ok(catalog.has(marker.name),`${context}: a flag has no matching catalogue direction`);
+  assert.equal(marker.count,catalog.get(marker.name),`${context}: a hidden filter changed a flag count`);
+  positive ||= marker.count>0;
+ }
+ assert.equal(positive,true,`${context}: all measured flags have empty counts`);
+ return [...catalog].sort(([a],[b])=>a.localeCompare(b));
+}
+function assertRequestDialog(dialog,context,{open,title='',note='',date=''}={}){
+ assert.equal(dialog?.open,open,`${context}: unexpected modal visibility`);assert.equal(dialog.error,false);assert.equal(dialog.success,false);
+ assert.equal(dialog.submitted,0,`${context}: the ownership audit must not submit a request`);
+ assert.equal(dialog.routeTitle,title,`${context}: the modal belongs to another route`);
+ assert.equal(dialog.note,open?note:null,`${context}: another request's note survived`);assert.equal(dialog.date,open?date:null,`${context}: another request's date survived`);
+ assert.equal(dialog.heading,open?'Какой поход планируете?':'');
+}
+
+export function assertExploreExperience(receipt,name,engine,mobile){
+ const input=mobile?'touch':'mouse',context=`${name}/explore`;
+ assert.equal(engine,mobile?'leaflet':'maplibre');assert.equal(receipt?.schemaVersion,1);assert.equal(receipt.passed,true);assert.equal(receipt.input,input);
+ const filter=receipt.filterReset;assert.ok(filter,`${context}: filter-reset evidence is missing`);
+ for(const state of [filter.baseline,filter.restored]){assert.equal(state?.pressed,'false');assert.ok(Number.isInteger(state.count)&&state.count>0);assert.equal(state.expanded,'false');assert.equal(state.empty,false);}
+ assert.equal(filter.filtered?.pressed,'true');assert.equal(filter.filtered.count,0);assert.equal(filter.filtered.empty,true);
+ assert.equal(filter.restored.count,filter.baseline.count);
+ assertExperienceClick(filter.enabled,input,`${context}/saved`,'.filter-row button[aria-pressed]');
+ assertExperienceClick(filter.parent,input,`${context}/filter-parent`,'.explore-panel .back-link');
+ assertExperienceClick(filter.reentered,input,`${context}/reenter`);assert.match(filter.reentered.selector,/^\.region-list \.region-option:nth-child\([1-9]\d*\)$/);
+ assertExperienceScrolls(filter.scrolls,input,`${context}/filter-scroll`);
+ const before=assertOverviewCounts(filter.overviewBefore,`${context}/before-filter`),after=assertOverviewCounts(filter.overviewAfter,`${context}/after-filter`);
+ assert.deepEqual(after,before,`${context}: a hidden filter changed overview catalogue counts`);assert.equal(filter.overviewAfter.total,filter.overviewBefore.total);
+ assert.equal(new Map(before).get('Алтай'),filter.baseline.count,`${context}: restored Altai differs from the overview count`);
+
+ const request=receipt.requestOwnership;assert.ok(request&&typeof request.route?.id==='string'&&request.route.id&&typeof request.route.title==='string'&&request.route.title);
+ const action='.route-actions button.primary',close='[role="dialog"] button[aria-label="Закрыть"]';
+ assertExperienceScrolls(request.scrolls,input,`${context}/request-scroll`);assertExperienceScrolls(request.returnScrolls,input,`${context}/request-return-scroll`);
+ assertExperienceClick(request.opened,input,`${context}/request-open`,action);assertExperienceClick(request.closedSame,input,`${context}/request-close`,close);assertExperienceClick(request.reopened,input,`${context}/request-reopen`,action);
+ assertRequestDialog(request.first,`${context}/request-first`,{open:true,title:request.route.title});
+ assert.equal(request.edit?.method,'Input.insertText');assert.ok(typeof request.edit.note==='string'&&request.edit.note.length>0);
+ assert.ok(Array.isArray(request.edit.events)&&request.edit.events.length>0&&request.edit.events.length<=16);
+ for(const event of request.edit.events){assert.equal(event.trusted,true);assert.equal(event.tag,'TEXTAREA');assert.equal(typeof event.value,'string');}
+ assert.equal(request.edit.events.at(-1).value,request.edit.note);
+ for(const key of ['edited','same'])assertRequestDialog(request[key],`${context}/${key}`,{open:true,title:request.route.title,note:request.edit.note});
+ assertExperienceBack(request.back,{region:'altai',route:'',title:'Алтай'},`${context}/request-history`,{region:'altai',route:request.route.id});
+ assertRequestDialog(request.afterBack,`${context}/after-history`,{open:false});
+ const next=request.next;assertExperienceSelection(next?.selection,`${context}/next-route`);
+ assert.equal(next.selection.region,'altai');assert.ok(next.selection.route&&next.selection.title);assert.notEqual(next.selection.route,request.route.id);assert.notEqual(next.selection.title,request.route.title);
+ assertRequestDialog(next.before,`${context}/before-next-request`,{open:false});
+ assertRequestDialog(next.dialog,`${context}/next-request`,{open:true,title:next.selection.title});
+ assertExperienceScrolls(next.scrolls,input,`${context}/next-route-scroll`);assertExperienceScrolls(next.actionScrolls,input,`${context}/next-action-scroll`);
+ assertExperienceClick(next.selected,input,`${context}/next-route-select`);assert.match(next.selected.selector,/^\.trail-list \.trail-card:nth-child\([1-9]\d*\) \.trail-card-main$/);
+ assertExperienceClick(next.opened,input,`${context}/next-request-open`,action);assertExperienceClick(next.closed,input,`${context}/next-request-close`,close);
+
+ const sibling=receipt.siblingParent;assert.ok(sibling,`${context}: sibling-parent evidence is missing`);
+ for(const [key,selection] of Object.entries({previous:sibling.previous,sibling:sibling.sibling,overview:sibling.overview}))assertExperienceSelection(selection,`${context}/${key}`);
+ assert.equal(sibling.previous.region,'baikal');assert.equal(sibling.previous.route,'');
+ assert.ok(sibling.sibling.region&&sibling.sibling.title);assert.notEqual(sibling.sibling.region,sibling.previous.region);assert.equal(sibling.sibling.route,'');
+ assertExperienceClick(sibling.selected,input,`${context}/sibling-select`,false);assert.equal(sibling.selected.point.id,sibling.sibling.region);assert.equal(sibling.selected.point.title,sibling.sibling.title);
+ assertExperienceClick(sibling.parent,input,`${context}/sibling-parent`,'.explore-panel .back-link');
+ assert.equal(sibling.overview.region,'');assert.equal(sibling.overview.route,'');
+ assertExperienceBack(sibling.back,sibling.sibling,`${context}/parent-history`,sibling.overview);
+ return receipt;
+}
+
+function assertStyleCameraFrame(frame,routeId,context){
+ assert.equal(frame?.engine,'maplibre');assert.equal(frame.route,routeId);assert.equal(frame.moving,false);assert.equal(frame.visible,true);
+ assert.ok([frame.camera?.longitude,frame.camera?.latitude,frame.camera?.zoom].every(Number.isFinite));assert.equal(frame.camera.tileSize,512);
+ assertExperienceRect(frame.rect,context);
+}
+function assertSameStyleCamera(actual,expected,context){
+ for(const key of ['longitude','latitude'])assert.ok(Math.abs(actual[key]-expected[key])<=1e-5,`${context}: style replacement displaced the manually panned camera`);
+ assert.ok(Math.abs(actual.zoom-expected.zoom)<.01,`${context}: style replacement changed manual zoom`);
+}
+export function assertStyleCameraRoundtrip(receipt,name){
+ const context=`${name}/style-camera`;
+ assert.equal(receipt?.schemaVersion,1);assert.equal(receipt.passed,true);assert.equal(receipt.input,'mouse');assert.ok(typeof receipt.routeId==='string'&&receipt.routeId);
+ assertExperienceSelection(receipt.selection,context);assert.equal(receipt.selection.route,receipt.routeId);
+ for(const frame of [receipt.before,receipt.zoomed,receipt.pan?.before,receipt.pan?.after,receipt.manual])assertStyleCameraFrame(frame,receipt.routeId,context);
+ assertExperienceClick(receipt.zoom,'mouse',`${context}/zoom`,'.map-controls button[aria-label="Увеличить масштаб"]');
+ assert.ok(Math.abs(receipt.zoomed.camera.zoom-receipt.before.camera.zoom-1)<.01,`${context}: native zoom did not advance one step`);
+ assertSourceEndPanInput(receipt.pan,'mouse',`${context}/pan`);
+ assert.deepEqual(receipt.pan.before.camera,receipt.zoomed.camera);assert.deepEqual(receipt.pan.after.camera,receipt.manual.camera);
+ assert.ok(Math.abs(receipt.manual.camera.longitude-receipt.zoomed.camera.longitude)>1e-5||Math.abs(receipt.manual.camera.latitude-receipt.zoomed.camera.latitude)>1e-5,`${context}: no genuine manual pan was measured`);
+ assert.ok(Math.abs(receipt.manual.camera.zoom-receipt.zoomed.camera.zoom)<.01,`${context}: panning changed scale`);
+ assert.deepEqual(receipt.transitions?.map(transition=>transition.label),['Сохранённый обзор','Детальные тропы онлайн']);
+ for(const transition of receipt.transitions){
+  assertExperienceClick(transition.opened,'mouse',`${context}/layers-open`,'.layer-button');assertExperienceClick(transition.closed,'mouse',`${context}/layers-close`,'.layer-button');
+  assertExperienceClick(transition.selected,'mouse',`${context}/base-select`);assert.match(transition.selected.selector,/^\.layer-menu>button:nth-of-type\([1-9]\d*\)$/);assert.equal(transition.selected.point.label,transition.label);
+  assertExperienceScrolls(transition.scrolls,'mouse',`${context}/layers-scroll`,'.layer-menu');
+  assertStyleCameraFrame(transition.frame,receipt.routeId,context);assertSameStyleCamera(transition.frame.camera,receipt.manual.camera,context);
+  const line=transition.line;assert.equal(line?.route,receipt.routeId);assert.equal(line.clicked,true);assert.equal(line.selectionRetained,true);assert.equal(line.reopened,false);
+  assertExperienceClick({input:'mouse',point:line.point,events:line.events},'mouse',`${context}/restored-line`,false);
+  assertStyleCameraFrame(transition.lineFrame,receipt.routeId,context);assertSameStyleCamera(transition.lineFrame.camera,receipt.manual.camera,context);
+  assertExperienceSelection(transition.selection,context);for(const key of ['region','route','title'])assert.equal(transition.selection[key],receipt.selection[key]);
+  const restored=transition.restored;assert.equal(restored?.route,receipt.routeId);assert.equal(restored.selected,true);
+  assert.ok(Array.isArray(restored.mutations)&&restored.mutations.some(mutation=>mutation.current===receipt.routeId),`${context}: no post-switch route assignment`);
+  // Multipart routes intentionally have no single-line end markers. The native
+  // line hit above still proves their route overlay after each style change.
+  assert.ok(Number.isInteger(restored.edges?.before)&&restored.edges.before>=0,`${context}: missing original route-edge count`);
+  assert.equal(restored.edges.after,restored.edges.before);assert.equal(restored.edges.replaced,restored.edges.after,`${context}: route overlays were retained instead of reinstalled`);
+ }
+ return receipt;
+}
+
 /** The same evidence gate runs before upload and against the public artifact. */
 export function assertBrowserReport(browser,expectedCommit){
  assert.equal(browser.verified,true);
  assert.equal(browser.sourceCommit,expectedCommit);
- assert.equal(browser.mapInteractionSchemaVersion,2,'The browser report predates real sheet drag and map pointer checks');
+ assert.equal(browser.mapInteractionSchemaVersion,3,'The browser report predates native Layers, exploration and manual-camera regressions');
  assert.ok(Array.isArray(browser.profiles));
  for(const name of MOBILE_PROFILES){
   const profile=browser.profiles.find(item=>item.name===name);
@@ -383,6 +603,7 @@ export function assertBrowserReport(browser,expectedCommit){
   assert.equal(profile.interactionTested,true,`${name}: story touch was not tested`);
   assert.equal(profile.sheetTested,true,`${name}: mobile sheet was not tested`);
   assertSheetGestures(profile.sheetGestures,name);
+  if(name!=='phone-landscape')assertLayerMenuAudit(profile.layerMenus,name);
   assert.ok(profile.sheetHeightDelta<1.1,`${name}: mobile sheet changed layout height`);
   assert.ok(profile.layoutShift<.12,`${name}: excessive layout shift`);
   assert.ok(profile.longestTaskMs<350,`${name}: excessive long task`);
@@ -400,6 +621,9 @@ export function assertBrowserReport(browser,expectedCommit){
   assert.equal(result.engine,engine);
   assert.equal(result.mobile,mobile);
   assertDirectionHitAreas(result.directionHitAreas,name,engine,mobile);
+  assertExploreExperience(result.experience,name,engine,mobile);
+  assert.equal(result.experience.requestOwnership.route.id,result.route?.id,`${name}: request ownership used another selected route`);
+  if(engine==='maplibre'){assertStyleCameraRoundtrip(result.styleCameraRoundtrip,name);assert.equal(result.styleCameraRoundtrip.routeId,result.route?.id);}
   assert.equal(result.firstDirection?.at(-1)?.selected,'altai');
   assert.equal(result.secondDirection?.at(-1)?.selected,'baikal');
   assert.ok(result.route?.id&&result.route.offsetPx>=12&&result.route.offsetPx<=22,`${name}: route hit target was not tested away from the small visual dot`);

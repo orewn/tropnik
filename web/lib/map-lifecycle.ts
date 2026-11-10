@@ -1,5 +1,28 @@
 export type MapBaseMode = 'detail' | 'overview' | 'satellite';
 
+type RouteCameraIdentity = {id?: string; url?: string; geometry?: unknown};
+
+/** New styles need fresh overlays, but only new selections own navigation.
+ * Remember the last applied selection across style and connectivity changes. */
+export class MapSelectionCamera {
+  private regionInitialized = false;
+  private regionId: string | undefined;
+  private route: RouteCameraIdentity | undefined;
+
+  regionChanged(id: string | undefined): boolean {
+    if (this.regionInitialized && id === this.regionId) return false;
+    this.regionInitialized = true;
+    this.regionId = id;
+    return true;
+  }
+
+  routeChanged(identity: RouteCameraIdentity | undefined): boolean {
+    const previous = this.route;
+    this.route = identity;
+    return previous?.id !== identity?.id || previous?.url !== identity?.url || previous?.geometry !== identity?.geometry;
+  }
+}
+
 /** Leaflet ignores camera changes during CSS zoom animation. Hold only the
  * newest intent and apply it after zoomend, using current layout measurements.
  * Manual navigation and unmount discard pending work rather than replay it. */

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {setImmediate as nextTurn} from 'node:timers/promises';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
-import {MapStyleSession, LatestMapNavigation, loadMapSelection, applyMapLayerVisibility} from '../lib/map-lifecycle.ts';
+import {MapStyleSession, MapSelectionCamera, LatestMapNavigation, loadMapSelection, applyMapLayerVisibility} from '../lib/map-lifecycle.ts';
 
 test('camera choices made during CSS zoom keep the newest intent and current insets', () => {
   let zooming = true, inset = 160;
@@ -284,4 +284,50 @@ test('failed geometry leaves no stale line and reports only the current selectio
   await nextTurn();
   assert.equal(geometry, null);
   assert.deepEqual(errors, [error]);
+});
+
+test('style and reconnect replacements restore route overlays without replaying selection navigation', async () => {
+  const selection = new MapSelectionCamera(), overlays = [], fits = [];
+  let selected = {id: 'route-a', url: '/data/route-a.geojson'};
+  const restore = () => loadMapSelection({
+    clear: () => {}, load: async () => selected, current: () => true,
+    apply: identity => {overlays.push(identity.id); if (selection.routeChanged(identity)) fits.push(identity.id);},
+    onError: error => assert.fail(String(error)),
+  });
+  restore(); await nextTurn();
+  const session = new MapStyleSession({online: true, preference: 'detail', currentMode: 'detail',
+    detail: async () => 'detail', overview: () => 'overview', apply: restore, onError: error => assert.fail(String(error))});
+  await session.select('overview'); await nextTurn();
+  await session.select('detail'); await nextTurn();
+  await session.connect(false); await nextTurn();
+  await session.connect(true); await nextTurn();
+  assert.equal(overlays.length, 5, 'all replacement styles reinstall the selected overlay');
+  assert.deepEqual(fits, ['route-a'], 'a manually changed camera is not replaced by a route fit');
+  selected = {id: 'route-b', url: '/data/route-b.geojson'}; restore(); await nextTurn();
+  assert.deepEqual(fits, ['route-a', 'route-b'], 'a genuine new selection still owns navigation');
+});
+
+test('region navigation runs once per selection, including the return to Russia, across style replacement', () => {
+  const selection = new MapSelectionCamera(), visits = [];
+  for (const id of [undefined, undefined, 'altai', 'altai', 'karelia', 'karelia', undefined, undefined]) {
+    if (selection.regionChanged(id)) visits.push(id ?? 'russia');
+  }
+  assert.deepEqual(visits, ['russia', 'altai', 'karelia', 'russia']);
+});
+
+test('new route geometry or reselection can navigate while a cancelled stale response cannot claim ownership', async () => {
+  const selection = new MapSelectionCamera(), old = deferred(), visits = [];
+  const a = {id: 'route-a', url: '/data/a.geojson'}, b = {id: 'route-b', geometry: {type: 'FeatureCollection', features: []}};
+  let current = true;
+  loadMapSelection({clear: () => {}, load: () => old.promise, current: () => current,
+    apply: identity => {if (selection.routeChanged(identity)) visits.push(identity.id);}, onError: error => assert.fail(String(error))});
+  await nextTurn(); current = false; old.resolve(a); await nextTurn();
+  assert.deepEqual(visits, []);
+  assert.equal(selection.routeChanged(a), true);
+  assert.equal(selection.routeChanged({...a}), false);
+  assert.equal(selection.routeChanged({...a, url: '/data/a-revised.geojson'}), true);
+  assert.equal(selection.routeChanged(b), true);
+  assert.equal(selection.routeChanged({...b}), false);
+  selection.routeChanged(undefined);
+  assert.equal(selection.routeChanged(b), true);
 });

@@ -15,11 +15,14 @@ const profiles=[
  {name:'desktop-webgl',width:1280,height:800,engine:'maplibre',mobile:false,mapInteraction:true},
  {name:'android-portrait',width:412,height:915,engine:'leaflet',mobile:true,mapInteraction:true},
  {name:'compact-android',width:320,height:640,engine:'leaflet',mobile:true,mapInteraction:false},
+ {name:'iphone-portrait',width:390,height:844,engine:'leaflet',mobile:true,mapInteraction:false},
+ {name:'phone-landscape',width:844,height:390,engine:'leaflet',mobile:true,mapInteraction:false},
 ];
 
 async function dispatchProfiles(traceEnabled,audit){
  const unavailable=async()=>({available:false});
  const notInvoked=()=>assert.fail('The routing test must not invoke browser helpers');
+ const layerMenuCalls=[];
  const bindings={
   assert,profiles,runPolicy:{diagnostic:null,profiles:null},traceEnabled,cdp:{},httpPort:4200,
   results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],profilePerformance:[],performanceIssues:[],
@@ -28,6 +31,7 @@ async function dispatchProfiles(traceEnabled,audit){
   evaluate:async()=>false,mapInteraction:async(_cdp,profile)=>({profile:profile.name,passed:true}),
   performanceDiagnostics:async()=>({}),checkpoint:async()=>{},diagnosticPhase:async()=>{},
   touchSheet:unavailable,touchSheetGestures:async()=>({}),checkMapGeometry:async()=>({}),touchPrevious:unavailable,
+  layerMenuCalls,checkPortraitLayerMenus:async(_cdp,profile)=>{layerMenuCalls.push(profile.name);return{profile:profile.name,passed:true};},
   waitValue:notInvoked,sleep:notInvoked,settledMap:notInvoked,closeMapSheet:notInvoked,clearMapStories:notInvoked,
   elementPoint:notInvoked,pointerAt:notInvoked,pointerSelector:notInvoked,mapState:notInvoked,
  };
@@ -48,7 +52,11 @@ for(const [label,flag] of [['default',undefined],['explicit opt-in','1']]){
    {name:'android-portrait',options:{traceEnabled}},
   ]);
   assert.deepEqual(result.zoomDesigns.map(item=>item.profile),['desktop-webgl','android-portrait']);
-  assert.deepEqual(result.results.map(item=>item.name),['android-portrait','compact-android']);
+  assert.deepEqual(result.results.map(item=>item.name),['android-portrait','compact-android','iphone-portrait','phone-landscape']);
+  assert.deepEqual(result.layerMenuCalls,['android-portrait','compact-android','iphone-portrait'],'Layers must run once for each portrait phone, never for landscape or desktop');
+  assert.deepEqual(result.results.map(item=>item.layerMenus),[
+   {profile:'android-portrait',passed:true},{profile:'compact-android',passed:true},{profile:'iphone-portrait',passed:true},null,
+  ],'The profile results must retain each portrait Layers receipt');
  });
 }
 

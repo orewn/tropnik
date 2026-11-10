@@ -124,6 +124,12 @@
   /* A transient map notice owns the secondary slot. Restore the story launcher
      immediately when it closes; an already opened story is never hidden. */
   .explore-layout:has(.atlas-wrap>.map-message)>.fact-closed{display:none}
+  /* The closed sheet's menu ends beside the 50px Layers button, below the
+     72px control offset and the renderer's rail. Keep its top inside the map. */
+  .explore-layout .layer-menu{
+    max-height:min(360px,65dvh,calc(72px + var(--map-rail-height) + 50px));
+    overflow:auto;overscroll-behavior:contain;
+  }
   .explore-layout.sheet-open .map-controls{
     top:auto;right:var(--map-right);bottom:calc(var(--map-bottom-inset,0px) + 12px);
     width:auto;height:52px;padding:3px 0;gap:0;flex-direction:row;
@@ -132,7 +138,12 @@
   .explore-layout.sheet-open .layer-control{
     top:auto;right:auto;left:var(--map-left);bottom:calc(var(--map-bottom-inset,0px) + 12px);
   }
-  .explore-layout.sheet-open .layer-menu{left:0;right:auto;bottom:60px;top:auto}
+  /* The open sheet moves the button up by its measured inset plus 12px.
+     The menu ends another 60px above that baseline; reserve the safe top too. */
+  .explore-layout.sheet-open .layer-menu{
+    left:0;right:auto;bottom:60px;top:auto;
+    max-height:min(360px,65dvh,max(0px,calc(100dvh - var(--header) - var(--map-bottom-inset,0px) - 12px - 60px - var(--map-top))));
+  }
   .explore-layout.sheet-open .map-attribution{
     top:calc(var(--map-top) + 60px);right:var(--map-right);bottom:auto;left:auto;
     align-items:flex-start;
