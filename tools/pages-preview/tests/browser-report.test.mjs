@@ -51,7 +51,7 @@ function zoomDesign(profile,engine,mobile){
 }
 function evidence(){
  return{verified:true,sourceCommit:commit,mapInteractionSchemaVersion:3,
-  offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,inputs:['route-title','region','leader-name','leader-phone'].map(id=>({selector:'#'+id,passed:true,focusedBeforeTyping:true,valueLength:10,events:[{type:'input',trusted:true,id,valueLength:10}]})),networkSuccessfulResponses:0,screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
+  offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,inputs:['route-title','region','leader-name','leader-phone'].map(id=>({selector:'#'+id,passed:true,focusedBeforeTyping:true,valueLength:10,events:[{type:'input',trusted:true,id,valueLength:10}]})),networkSuccessfulResponses:0,originTransport:{method:'origin-socket-destroy',active:false,startedAt:'2026-11-10T00:00:00Z',restoredAt:'2026-11-10T00:00:01Z',blockedRequests:1,requests:[{path:'/tropnik/_offline-transport-probe',method:'GET'}],probe:{passed:true,errorCode:'ECONNRESET',path:'/tropnik/_offline-transport-probe'}},screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
   profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'leaflet',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
   desktopProfiles:[{name:'desktop-webgl',engine:'maplibre',coarse:false,mapInteractionTested:true}],
   zoomDesigns:[zoomDesign('android-portrait','leaflet',true),zoomDesign('desktop-webgl','maplibre',false)],
@@ -65,6 +65,10 @@ test('both upload and public verification require real mobile and desktop map in
   value=>value.offlineSafety.coldNavigation=false,
   value=>value.offlineSafety.savedThroughUI=false,
   value=>value.offlineSafety.networkSuccessfulResponses=1,
+  value=>delete value.offlineSafety.originTransport,
+  value=>value.offlineSafety.originTransport.probe.passed=false,
+  value=>value.offlineSafety.originTransport.active=true,
+  value=>delete value.offlineSafety.originTransport.restoredAt,
   value=>value.offlineSafety.draftExplicit=false,
   value=>value.offlineSafety.contactRestored=false,
   value=>value.offlineSafety.inputs[0].focusedBeforeTyping=false,

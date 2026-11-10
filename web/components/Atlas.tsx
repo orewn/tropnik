@@ -19,7 +19,7 @@ import {MapStyleSession,MapSelectionCamera,loadMapSelection,applyMapLayerVisibil
 import {MapSourceLoading,retryMapSourceMetadata,type MapSourceFailure,type MapSourceSignal} from '@/lib/map-source-loading';
 import {constrainFramedCamera,canRefitMapOverview,MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {terrainExaggerationForZoom,terrainPitchForZoom} from '@/lib/map-camera-profile';
-import {mapTrailPointFeatureCollection} from '@/lib/map-trail-points';
+import {mapTrailPointFeatureCollection,mapTrailPointLayers} from '@/lib/map-trail-points';
 import {ROUTE_PRESENTATION,OVERVIEW_MESSAGE,overviewContextCaption,routeLineEdges,createRouteEdgeElement,syncRouteEdgeAnnotations,type RouteEdgeAnnotation} from '@/lib/map-route-presentation';
 import {EMPTY_MAP_TRAILS,type AtlasProps} from '@/lib/map-types';
 import {MAP_CONFIG,viewportRegionId,directionExpansionZoom} from '@/lib/map-config';
@@ -30,7 +30,7 @@ import {readRouteGeometry,routeGeometryPositions,identifyRouteGeometry,RENDERED_
 import {satelliteStyle,SATELLITE_SOURCE,SATELLITE_ERROR} from '@/lib/map-satellite';
 import {withMapLabelCoverage,bindMapLabelCoverage} from '@/public/maps/map-label-coverage.js';
 import {bindMapCoverage} from '@/public/maps/map-coverage-lod.js';
-import {applyMapLibreCoverage} from '@/public/maps/map-coverage-renderers.js';
+import {createMapLibreCoverage} from '@/public/maps/map-coverage-renderers.js';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -42,7 +42,7 @@ const DETAIL_ERROR='Детальная карта не загрузилась. �
 const TERRAIN_ERROR='Рельеф не загрузился. Карта и маршруты доступны.';
 const ROUTE_ERROR='Линия маршрута не загрузилась. Попробуйте ещё раз при устойчивой связи.';
 const ROUTE_COVERAGE_MESSAGE='У этой линии нет точек внутри доступного покрытия России. Карточка остаётся доступной.';
-const TRAIL_POINTS='trail-points',TRAIL_POINT_HALO='trail-point-halo',TRAIL_POINT_DOT='trail-point-dot',TRAIL_POINT_HIT='trail-point-hit';
+const TRAIL_POINTS='trail-points',TRAIL_POINT_HIT='trail-point-hit';
 function overviewStyle(coverage:Coverage):StyleSpecification {
  return {version:8,name:'Тропник · Россия',sources:{
   land:{type:'geojson',data:coverage.area,tolerance:0,maxzoom:18},regions:{type:'geojson',data:coverage.territories,tolerance:0,maxzoom:18},'regions-outline':{type:'geojson',data:coverage.boundaries,tolerance:0,maxzoom:18},
@@ -75,21 +75,7 @@ function highlightRegion(map:MapInstance,region?:MapRegion){
 }
 function ensureTrailPointLayers(map:MapInstance){
  if(!map.getSource(TRAIL_POINTS))map.addSource(TRAIL_POINTS,{type:'geojson',data:EMPTY});
- if(!map.getLayer(TRAIL_POINT_HALO))map.addLayer({id:TRAIL_POINT_HALO,type:'circle',source:TRAIL_POINTS,paint:{
-  'circle-radius':['case',['==',['get','selected'],true],11,9],
-  'circle-color':'#FFFEFA','circle-opacity':.98,'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport',
- }});
- if(!map.getLayer(TRAIL_POINT_DOT))map.addLayer({id:TRAIL_POINT_DOT,type:'circle',source:TRAIL_POINTS,paint:{
-  'circle-radius':['case',['==',['get','selected'],true],7.5,6],
-  'circle-color':['case',['==',['get','selected'],true],'#244D3C','#A56736'],
-  'circle-stroke-color':['case',['==',['get','selected'],true],'#A56736','#876A43'],
-  'circle-stroke-width':['case',['==',['get','selected'],true],2,1],
-  'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport',
- }});
- if(!map.getLayer(TRAIL_POINT_HIT))map.addLayer({id:TRAIL_POINT_HIT,type:'circle',source:TRAIL_POINTS,paint:{
-  'circle-radius':MAP_CONFIG.trailHitRadiusPx,'circle-color':'#000000','circle-opacity':.001,'circle-stroke-opacity':0,
-  'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport',
- }});
+ for(const layer of mapTrailPointLayers(TRAIL_POINTS,MAP_CONFIG.trailHitRadiusPx))if(!map.getLayer(layer.id))map.addLayer(layer);
 }
 function fitTerritory(map:MapInstance,region:MapRegion,element:HTMLElement,duration:number,frame:{current:RussiaCamera|null}){
  const b=region.bounds;if(!b)return false;
@@ -320,7 +306,9 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      applyMapLayerVisibility(map,layerVisibility.current);
      ensureTrailPointLayers(map);
     });
-    unbindCoverage=bindMapCoverage(map,coverage,container.current,current=>applyMapLibreCoverage(map,current));
+    const coverageRenderer=createMapLibreCoverage(map);
+    const unbindCoverageSession=bindMapCoverage(map,coverage,container.current,coverageRenderer.apply);
+    unbindCoverage=()=>{unbindCoverageSession();coverageRenderer.destroy();};
     const hitLayers=()=>[TRAIL_POINT_HIT,'trail-casing','region-fill'].filter(id=>!!map.getLayer(id));
     let hoverPoint:import('maplibre-gl').Point|undefined,hoveredTrail:string|undefined;
     hoverFrame=coalesceMapFrame(()=>{
