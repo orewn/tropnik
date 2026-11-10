@@ -2,13 +2,13 @@ name: Focused terrain diagnosis
 
 on:
   push:
-    branches: [diagnostics/terrain-close]
+    branches: [diagnostics/terrain-resources]
 
 permissions:
   contents: read
 
 concurrency:
-  group: terrain-diagnostics
+  group: terrain-diagnostics-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
