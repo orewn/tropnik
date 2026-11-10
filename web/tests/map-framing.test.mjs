@@ -119,6 +119,15 @@ test('opening a track prevents a queued territory refit from replacing its camer
  assert.equal(env.count(),0);assert.equal(env.timers.size,0);assert.equal(env.frames.size,0);
 });
 
+test('returning from a route rearms its parent frame after manual navigation cancelled it',()=>{
+ const env=refitHarness();env.refit.select('altai');env.refit.cancel();
+ env.refit.select(undefined); // The route owns the camera while its card is open.
+ env.refit.select('altai');env.refit.settled();env.flushFrames();
+ assert.equal(env.count(),1,'the same parent is a fresh selection after leaving its child');
+ env.refit.cancel();env.refit.select('altai');env.refit.settled();env.flushFrames();
+ assert.equal(env.count(),1,'a style reload still cannot reactivate a manually cancelled frame');
+});
+
 test('a stale settle callback cannot refit or cancel a newer territory request',()=>{
  const env=refitHarness();env.refit.select('dagestan');env.refit.resized();
  const stale=[...env.timers.values()][0];env.refit.select('chukotka');env.refit.resized();

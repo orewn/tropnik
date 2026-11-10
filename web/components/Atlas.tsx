@@ -120,18 +120,21 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
   onRegionRef.current=onRegion;onTrailRef.current=onTrail;regionRef.current=region;trailRef.current=trail;viewportRef.current=onViewportRegion;terrainRef.current=terrain;
   visibleTrailsRef.current=visibleTrails;
   layerVisibility.current={paths:pathLayer,boundaries:boundaryLayer};
+  selectionCamera.current.beginRouteSelection(trail?.id?{id:trail.id,url:trail.geometryUrl,geometry:trail.geometry}:undefined);
  },[onRegion,onTrail,region,trail,onViewportRegion,terrain,visibleTrails,pathLayer,boundaryLayer]);
  useEffect(()=>{locationRevision.current++;zoomButtons.current?.cancel();},[region?.id,trail?.id,trail?.geometryUrl,trail?.geometry]);
  // A selected route owns the imperative 3D scene; close that scene when its owner changes.
  // eslint-disable-next-line react-hooks/set-state-in-effect
  useEffect(()=>{setScene(false);if(sceneAvailable)void preloadTerrain();},[region?.id,trail?.id,sceneAvailable]);
  function zoomBy(delta:number){
+  selectionCamera.current.cancelNavigation();
   locationRevision.current++;frameRefit.current?.cancel();fullView.current=false;
   setStatus(previous=>previous==='Определяем местоположение…'?'':previous);
   zoomButtons.current?.request(delta);
  }
  function fitRussia(duration=0){
   const map=mapRef.current,element=container.current;if(!map||!element)return;
+  selectionCamera.current.cancelNavigation();
   frameRefit.current?.cancel();zoomButtons.current?.cancel();terrainPitchControl.current?.reset();
   const {camera}=russiaView(element);cameraFloor.current=camera;framedCamera.current=null;fullView.current=true;
   map.setMinZoom(Math.max(-2,camera.zoom));if(map.getStyle())map.setTerrain(null);map.stop();map.easeTo({...camera,padding:{top:0,right:0,bottom:0,left:0},duration});
@@ -175,6 +178,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      canvasContextAttributes:{antialias:false,preserveDrawingBuffer:false,powerPreference:'high-performance'}});
     mapRef.current=map;
     selectionCamera.current=new MapSelectionCamera();
+    const selectedRoute=trailRef.current;selectionCamera.current.beginRouteSelection(selectedRoute?.id?{id:selectedRoute.id,url:selectedRoute.geometryUrl,geometry:selectedRoute.geometry}:undefined);
     setSourceFailures([]);setTilesLoading(false);setStyleRetrying(false);
     sources=new MapSourceLoading({
      getSource:id=>map.getSource(id),isSourceLoaded:id=>map.isSourceLoaded(id),
@@ -188,7 +192,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     terrainPitch=new MapTerrainPitch({camera:map,enabled:()=>!cancelled&&map===mapRef.current&&terrainRef.current&&!!map.getTerrain(),
      focused:()=>!!regionRef.current||!!trailRef.current,reducedMotion:()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches});
     terrainPitchControl.current=terrainPitch;
-    zoomButtons.current=zoomControl;unbindZoom=bindZoomButtonCancellation(container.current,zoomControl);
+    zoomButtons.current=zoomControl;unbindZoom=bindZoomButtonCancellation(container.current,zoomControl,()=>selectionCamera.current.cancelNavigation());
     frameRefit.current=new MapFrameRefit({
      allowed:()=>!cancelled&&map===mapRef.current&&!!map.getStyle()&&!!regionRef.current?.bounds&&!trailRef.current&&!!container.current,
      refit:()=>{if(regionRef.current&&container.current){terrainPitch?.remember(0);fitTerritory(map,regionRef.current,container.current,window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:250,framedCamera);}},
@@ -242,7 +246,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
        if(fit?.zoom!==undefined&&fit.zoom>=target-.01)fitTerritory(map,{...group.anchor,bounds:group.bounds},container.current,duration,framedCamera);
        else{framedCamera.current=null;map.easeTo({center:[russiaLongitude(group.anchor.center[0]),group.anchor.center[1]],zoom:target,padding,pitch:0,bearing:0,duration});}
       }else onRegionRef.current(r);
-     },()=>{locationRevision.current++;zoomControl.cancel();frameRefit.current?.cancel();setStatus(previous=>previous==='Определяем местоположение…'?'':previous);if(map.isMoving())map.stop();}));
+     },()=>{locationRevision.current++;selectionCamera.current.cancelNavigation();zoomControl.cancel();frameRefit.current?.cancel();setStatus(previous=>previous==='Определяем местоположение…'?'':previous);if(map.isMoving())map.stop();}));
      const marker=new ml.Marker({element:el,anchor:'center'}).setLngLat([russiaLongitude(r.center[0]),r.center[1]]).addTo(map);
      directionMarkers.set(r.id,marker);markers.current.push(marker);
     }
@@ -285,7 +289,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      scheduleDirectionLayout();
      const c=map.getCenter();viewportRef.current?.(viewportRegionId(c.lng,c.lat,map.getZoom()));
     });
-    map.on('dragstart',()=>{zoomControl.cancel();fullView.current=false;frameRefit.current?.cancel();});
+    map.on('dragstart',()=>{selectionCamera.current.cancelNavigation();zoomControl.cancel();fullView.current=false;frameRefit.current?.cancel();});
     map.on('movestart',()=>{terrainPitch?.moving();locationRevision.current++;setStatus(previous=>previous==='Определяем местоположение…'?'':previous);if(container.current)container.current.dataset.mapCamera='moving';});
     map.on('zoomstart',event=>{if(event.originalEvent){zoomControl.cancel();fullView.current=false;frameRefit.current?.cancel();}if(container.current)container.current.dataset.mapCamera='moving';});
     map.on('style.load',()=>{
@@ -366,8 +370,11 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  useEffect(()=>{
   const map=mapRef.current;if(!map||!loaded)return;
   highlightRegion(map,region);
-  if(!selectionCamera.current.regionChanged(region?.id))return;
-  frameRefit.current?.select(region?.bounds?region.id:undefined);
+  const navigate=selectionCamera.current.regionChanged(region?.id,trail?.id);
+  // A route suspends territory framing. Returning to its parent must arm a
+  // fresh frame even if a gesture cancelled the previous frame for this ID.
+  frameRefit.current?.select(!trail?.id&&region?.bounds?region.id:undefined);
+  if(!navigate)return;
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const terrainActive=terrainRef.current&&!!map.getSource('terrain-dem');
   if(region){
@@ -382,12 +389,12 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     map.flyTo({center:region.center,zoom:region.zoom,pitch,bearing:terrainActive?-8:0,offset:window.innerWidth<=700?[0,-Math.round(container.current!.clientHeight*.23)]:[0,0],duration:reduced?0:650,essential:false});
    }
   }else fitRussia(0);
- },[region,loaded,styleRevision]);
+ },[region,trail?.id,loaded,styleRevision]);
  useEffect(()=>{
   const map=mapRef.current;if(!map)return;
   const clear=()=>{displayedTrail.current=undefined;routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];routeAnnotations.current.length=0;if(container.current)delete container.current.dataset.mapRouteId;(map.getSource('selected-trail')as GeoJSONSource|undefined)?.setData(EMPTY);};
   if(!loaded){if(!trail?.id)selectionCamera.current.routeChanged(undefined);clear();return;}
-  const generation=styleGeneration.current,identity={id:trail?.id,url:trail?.geometryUrl,geometry:trail?.geometry};
+  const generation=styleGeneration.current,identity={id:trail?.id,url:trail?.geometryUrl,geometry:trail?.geometry},canNavigate=selectionCamera.current.captureNavigation();
   // Clear the previous SDK request's error before starting a new selection request.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   setStatus(previous=>previous===ROUTE_ERROR||previous===ROUTE_COVERAGE_MESSAGE?'':previous);
@@ -395,7 +402,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
    current:()=>map===mapRef.current&&generation===styleGeneration.current&&identity.id===trailRef.current?.id&&identity.url===trailRef.current?.geometryUrl&&identity.geometry===trailRef.current?.geometry&&!!map.getStyle(),
    load:async()=>identifyRouteGeometry(displayGeoJSON(readRouteGeometry(trail?.geometry??(trail?.geometryUrl?await loadPublicJSON<unknown>(trail.geometryUrl):EMPTY))),trail?.id??''),
    apply:data=>{
-   const navigate=selectionCamera.current.routeChanged(trail?.id?identity:undefined);
+   const navigate=selectionCamera.current.routeChanged(trail?.id?identity:undefined)&&canNavigate();
    routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];routeAnnotations.current.length=0;
    displayedTrail.current=trailRef.current;
    if(map.getSource('selected-trail'))(map.getSource('selected-trail')as GeoJSONSource).setData(data);
@@ -459,6 +466,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  }
  function setTerrainMode(next:boolean){
   const map=mapRef.current;if(!map||!loaded||(next&&(baseMode==='overview'||offline)))return;
+  selectionCamera.current.cancelNavigation();
   frameRefit.current?.cancel();zoomButtons.current?.cancel();terrainPitchControl.current?.reset();terrainRef.current=next;map.stop();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(next){
@@ -470,6 +478,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
   else{map.setTerrain(null);map.easeTo({pitch:0,bearing:0,duration:reduced?0:300});}setTerrain(next);
  }
  function locate(){
+  selectionCamera.current.cancelNavigation();
   frameRefit.current?.cancel();zoomButtons.current?.cancel();
   if(!navigator.geolocation){setStatus('Этот браузер не поддерживает геолокацию.');return;}
   const revision=++locationRevision.current,requestedMap=mapRef.current;

@@ -35,6 +35,11 @@
   text-wrap: balance;
   margin-bottom: 12px;
 }
+.explore-layout .explore-panel h1[tabindex='-1']:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
 .explore-layout .panel-intro {font: var(--body-6); letter-spacing: 0; text-wrap: pretty}
 .explore-layout .eyebrow {font: var(--caption-3); letter-spacing: .1em}
 .explore-layout .pilot-label,
@@ -78,8 +83,16 @@
 .explore-layout .catalog-empty h3,
 .explore-layout .small-empty h3 {font: var(--title-2); letter-spacing: -.015em; text-wrap: balance}
 
-.explore-layout .region-list {gap: 4px}
+.explore-layout .region-list {
+  /* A drawer is a vertical catalogue at every width. The old two-column
+     mobile grid let long region names widen its intrinsic tracks. */
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+}
 .explore-layout .region-option {
+  min-width: 0;
   gap: 12px;
   padding: 8px;
   border: 1px solid transparent;
@@ -90,7 +103,7 @@
 .explore-layout .region-option:active {transform: scale(.98)}
 .explore-layout .region-option > svg {width: 24px; height: 24px; flex-shrink: 0; transition: transform 500ms cubic-bezier(.22,1,.36,1)}
 .explore-layout .region-option-text {gap: 4px; min-width: 0}
-.explore-layout .region-option-text strong {font: var(--title-3); letter-spacing: -.01em; text-wrap: balance}
+.explore-layout .region-option-text strong {font: var(--title-3); letter-spacing: -.01em; text-wrap: balance; overflow-wrap: anywhere}
 .explore-layout .region-option-text small {font: var(--caption-5); letter-spacing: 0; text-wrap: pretty}
 .explore-layout .region-thumbnail {
   width: 64px;
@@ -302,7 +315,7 @@
 
 /* Territory navigation: source silhouettes, readable labels and full touch targets. */
 .territory-switch{display:flex;gap:4px;padding:4px;margin:20px 0 0;background:#e9eddf;border:1px solid #d3dcc7;border-radius:12px}
-.territory-switch button{flex:1;min-height:44px;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:14px;line-height:20px;border-radius:8px;background:transparent}
+.territory-switch button{flex:1 1 0;min-width:0;min-height:44px;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:14px;line-height:20px;border-radius:8px;background:transparent}
 .territory-switch button[aria-pressed=true]{background:var(--surface);color:var(--forest);box-shadow:0 1px 4px #243d2317;font-weight:600}
 .territory-switch button span{font-size:12px;line-height:16px;font-variant-numeric:tabular-nums;opacity:.7}
 .territory-browser-note{font-size:14px;line-height:20px;color:var(--muted);margin:0 0 12px}

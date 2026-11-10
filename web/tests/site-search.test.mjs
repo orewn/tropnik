@@ -26,7 +26,8 @@ function load(path) {
   return loadedModule.exports;
 }
 const {trails, regions} = load(resolve(web, 'lib/content.ts'));
-const {searchSite, searchDocuments} = load(resolve(web, 'lib/site-search.ts'));
+const {searchSite, searchDocuments, createRouteSearch} = load(resolve(web, 'lib/site-search.ts'));
+const {publishedTrail} = load(resolve(web, 'lib/route-adapter.ts'));
 
 test('every published route and region is represented exactly once in the live index', () => {
   for (const [kind, records] of [['route', trails], ['region', regions]]) {
@@ -101,4 +102,68 @@ test('dated legacy closure notices also reach search, while partial access remai
   assert.equal(trails.find(trail => trail.id === 'kavkaz-8a').accessStatus, 'restricted');
   assert.equal(trails.find(trail => trail.id === 'osm-relation-14397487').accessStatus, 'restricted', 'closed tower does not assert closure of its entire approach');
   assert.equal(trails.find(trail => trail.id === 'osm-relation-14376203').accessStatus, undefined, 'no inferred open or closed status for an unconfirmed future visit');
+});
+
+
+test('the map search includes live routes added after the reference catalogue was built', () => {
+  const live = {
+    ...trails[0], id: 'live-search-fixture', title: 'Сапфировая поляна',
+    subtitle: 'Тестовая опубликованная карточка', description: 'Тестовое описание',
+    regionId: 'baikal', regionIds: ['baikal'], publicationStatus: 'published',
+    sourceTitle: '', sourceName: '', season: '', notes: [], operatingNotice: undefined, officialEvidence: undefined,
+    distanceKm: 7.5, duration: '3 ч',
+  };
+  const catalog = [live, ...trails];
+  const searchRoutes = createRouteSearch(catalog);
+  assert.equal(searchRoutes('').total, catalog.length);
+  assert.deepEqual(searchRoutes('Сапфировая поляна').results.map(hit => hit.id), [live.id]);
+  assert.deepEqual(searchRoutes('Сапфировая поляна до 8 км').results.map(hit => hit.id), [live.id]);
+  assert.equal(searchRoutes('Сапфировая поляна до 6 км').total, 0);
+  assert.equal(searchSite('Сапфировая поляна').results.some(hit => hit.id === live.id), false, 'the page-wide reference index remains isolated');
+});
+
+test('a catalogue revision replaces searchable names and distance limits for an existing route ID', () => {
+  const original = {
+    ...trails[0], title: 'Сапфировая поляна', subtitle: '', description: '',
+    sourceTitle: '', sourceName: '', season: '', notes: [], operatingNotice: undefined, officialEvidence: undefined,
+    distanceKm: 19, duration: '6 ч',
+  };
+  const updated = {...original, title: 'Янтарный причал', distanceKm: 7.5, duration: '2 ч', publicationStatus: 'published'};
+  const before = createRouteSearch([original]);
+  const after = createRouteSearch([updated, ...trails.filter(trail => trail.id !== updated.id)]);
+  assert.equal(before('Сапфировая поляна').results[0]?.id, original.id);
+  assert.equal(after('Сапфировая поляна').results.some(hit => hit.id === original.id), false, 'old text must not match a replaced card');
+  assert.equal(after('').total, trails.length, 'replacement keeps one searchable record per ID');
+  const hit = after('Янтарный причал до 8 км до 3 ч').results.find(item => item.id === updated.id);
+  assert.ok(hit, 'both text and numeric constraints use the updated record');
+  assert.equal(hit.title, updated.title);
+  assert.equal(hit.distanceKm, 7.5);
+  assert.equal(hit.duration, '2 ч');
+  assert.equal(after('Янтарный причал до 7 км').results.some(item => item.id === updated.id), false);
+});
+
+
+test('a server-closed route retains its closure through the adapter and catalogue search', () => {
+  const route = {
+    id: 'server-closed-fixture', slug: 'server-closed-fixture', regionId: 'krasnodar',
+    title: 'Сапфировая долина', description: 'Тестовая карточка оператора', difficulty: 'easy', activity: 'hiking',
+    distanceKm: 7.5, ascentM: 240, durationMin: 180, minPeople: 4, maxGroupSize: 8, requiredGuides: 1,
+    status: 'closed', revisionId: 'revision-fixture', revision: 3, verifiedAt: '2026-11-08T10:00:00Z',
+    source: {name: 'Источник оператора', url: 'https://example.test/routes/server-closed-fixture', license: 'Test fixture', retrievedAt: '2026-11-08T09:00:00Z'},
+    geometry: {type: 'LineString', coordinates: [[40, 45], [40.01, 45.01]]}, geometryDetail: 'full',
+    season: 'Лето', updatedAt: '2026-11-10T09:30:00Z',
+  };
+  const closed = publishedTrail(route);
+  assert.equal(closed.accessStatus, 'closed', 'Explore and TrailCard use this field for closure eligibility and labels');
+  assert.deepEqual(closed.operatingNotice, {
+    title: 'Маршрут закрыт', body: 'Новые выходы и старт групп недоступны до изменения статуса оператором.',
+    url: route.source.url, effectiveAt: '2026-11-10',
+  }, 'operator notice, evidence link and closure date remain intact');
+  const closedHit = createRouteSearch([closed])(route.title).results[0];
+  assert.equal(closedHit?.id, route.id);
+  assert.equal(closedHit.accessStatus, 'closed');
+  const published = publishedTrail({...route, status: 'published'});
+  assert.equal(published.accessStatus, undefined, 'publication does not invent confirmed open access');
+  assert.equal(published.operatingNotice, undefined);
+  assert.equal(createRouteSearch([published])(route.title).results[0].accessStatus, undefined);
 });

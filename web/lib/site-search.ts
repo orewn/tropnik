@@ -1,4 +1,4 @@
-import {trails,regions} from './content';
+import {trails,regions,type Trail} from './content';
 import {placeFacts} from './facts';
 import {createSearchIndex,type SearchDocument,type SearchOptions} from './search';
 export type {SearchHit,SearchKind,SearchOptions,SearchResponse} from './search';
@@ -20,8 +20,18 @@ const pages:SearchDocument[]=[
   {id:'privacy',kind:'page',title:'Конфиденциальность',description:'Как хранятся сведения профиля, сохранённые маршруты и история походов.',keywords:'данные личные конфиденциальность удалить профиль',href:'/privacy'},
   {id:'terms',kind:'page',title:'Как пользоваться Тропником',description:'Правила сервиса, участие в походах и ответственность за подготовку.',keywords:'правила условия пользование ответственность',href:'/terms'},
 ];
+function trailSearchDocument(trail:Trail):SearchDocument {
+  return {id:trail.id,kind:'route',title:trail.title,description:trail.description,href:`/routes/${trail.id}`,regionName:places.get(trail.regionId),regionId:trail.regionId,distanceKm:trail.distanceKm,duration:trail.duration,accessStatus:trail.accessStatus,missingGeometry:!trail.geometryUrl&&!trail.geometry,keywords:[trail.subtitle,trail.sourceTitle||'',trail.id,...(trail.regionIds||[]).map(id=>places.get(id)||''),trail.sourceName].join(' '),body:[trail.season,...trail.notes,trail.operatingNotice?.body||'',trail.officialEvidence?.summary||''].join(' ')};
+}
+
+/** Build once per catalogue revision so live routes and their updated fields
+ * are searched by the same index rules as the reference catalogue. */
+export function createRouteSearch(catalog:readonly Trail[]) {
+  return createSearchIndex(catalog.map(trailSearchDocument));
+}
+
 export const searchDocuments:SearchDocument[]=[
-  ...trails.map(trail=>({id:trail.id,kind:'route' as const,title:trail.title,description:trail.description,href:`/routes/${trail.id}`,regionName:places.get(trail.regionId),regionId:trail.regionId,distanceKm:trail.distanceKm,duration:trail.duration,accessStatus:trail.accessStatus,missingGeometry:!trail.geometryUrl&&!trail.geometry,keywords:[trail.subtitle,trail.sourceTitle||'',trail.id,...(trail.regionIds||[]).map(id=>places.get(id)||''),trail.sourceName].join(' '),body:[trail.season,...trail.notes,trail.operatingNotice?.body||'',trail.officialEvidence?.summary||''].join(' ')})),
+  ...trails.map(trailSearchDocument),
   ...regions.map(region=>({id:region.id,kind:'region' as const,title:region.name,description:region.description,keywords:`${region.caption} ${region.terrain}`,href:`/regions/${region.id}`})),
   ...placeFacts.map(fact=>({id:fact.id,kind:'story' as const,title:fact.title,description:fact.body,regionName:places.get(fact.regionId),keywords:fact.place,href:`/?region=${encodeURIComponent(fact.regionId)}${fact.routeIds?.[0]?`&route=${encodeURIComponent(fact.routeIds[0])}`:''}`})),
   ...pages,

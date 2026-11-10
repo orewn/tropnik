@@ -80,8 +80,8 @@ export class MapZoomButtons {
   }
 }
 
-export function bindZoomButtonCancellation(surface: HTMLElement, zoom: MapZoomButtons): () => void {
-  const cancel = () => zoom.cancel();
+export function bindZoomButtonCancellation(surface: HTMLElement, zoom: MapZoomButtons, onNavigation?: () => void): () => void {
+  const cancel = () => {zoom.cancel(); onNavigation?.();};
   const keyboard = (event: KeyboardEvent) => {
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', '+', '=', '-', '−', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) cancel();
   };

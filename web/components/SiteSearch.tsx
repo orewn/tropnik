@@ -65,15 +65,21 @@ export function SiteSearch({initialState}: {initialState: SearchViewState}) {
 
   function changeQuery(value: string) { setQuery(value.slice(0, 160)); setPage(1); }
   function chooseSuggestion(value: string) { changeQuery(value); setKind('all'); setIncludeUnspecified(true); input.current?.focus({preventScroll: true}); }
+  function pushSearchState(next: SearchViewState) {
+    const url = new URL(location.pathname + searchStateQuery(next), location.href);
+    // Live search already replaces the current entry. Submitting it again or
+    // selecting the current result page must not create a no-op Back step.
+    if (url.href !== location.href) history.pushState(history.state, '', url);
+  }
   function submit(event: React.FormEvent) {
     event.preventDefault(); setPage(1);
-    history.pushState(history.state, '', location.pathname + searchStateQuery({...state, page: 1}));
+    pushSearchState({...state, page: 1});
     heading.current?.focus({preventScroll: true});
   }
   function navigatePage(event: React.MouseEvent<HTMLAnchorElement>, value: number) {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); setPage(value);
-    history.pushState(history.state, '', location.pathname + searchStateQuery({...state, page: value}));
+    pushSearchState({...state, page: value});
     heading.current?.focus({preventScroll: true});
     heading.current?.scrollIntoView({block: 'start'});
   }

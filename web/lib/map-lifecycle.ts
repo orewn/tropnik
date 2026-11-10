@@ -1,25 +1,58 @@
 export type MapBaseMode = 'detail' | 'overview' | 'satellite';
 
 type RouteCameraIdentity = {id?: string; url?: string; geometry?: unknown};
+const sameRouteIdentity = (a: RouteCameraIdentity | undefined, b: RouteCameraIdentity | undefined) =>
+  a?.id === b?.id && a?.url === b?.url && a?.geometry === b?.geometry;
 
 /** New styles need fresh overlays, but only new selections own navigation.
  * Remember the last applied selection across style and connectivity changes. */
 export class MapSelectionCamera {
   private regionInitialized = false;
   private regionId: string | undefined;
+  private regionRouteId: string | undefined;
   private route: RouteCameraIdentity | undefined;
+  private navigationRevision = 0;
+  private selectedRoute: RouteCameraIdentity | undefined;
+  private routeSelectionInitialized = false;
+  private routeSelectionRevision = 0;
+  private routeNavigationRevision = 0;
 
-  regionChanged(id: string | undefined): boolean {
-    if (this.regionInitialized && id === this.regionId) return false;
+  /** Bind camera permission to the visible selection before starting its
+   * asynchronous load. Recreating layers/effects cannot revive a cancelled fit. */
+  beginRouteSelection(identity: RouteCameraIdentity | undefined): void {
+    if (this.routeSelectionInitialized && sameRouteIdentity(this.selectedRoute, identity)) return;
+    this.routeSelectionInitialized = true;
+    this.selectedRoute = identity;
+    this.routeSelectionRevision++;
+    this.routeNavigationRevision = this.navigationRevision;
+    this.route = undefined;
+  }
+
+  /** Geometry can arrive after the visitor has moved the camera. Keep drawing
+   * the selected route, but do not replace a newer manual camera position. */
+  captureNavigation(): () => boolean {
+    const revision = this.routeNavigationRevision, selection = this.routeSelectionRevision;
+    return () => revision === this.navigationRevision && selection === this.routeSelectionRevision;
+  }
+
+  cancelNavigation(): void {this.navigationRevision++;}
+
+  regionChanged(id: string | undefined, routeId?: string): boolean {
+    // A route card is a child view of its region. Closing it is a new camera
+    // intent even when the region ID is unchanged. Track the visible card,
+    // not the asynchronously applied geometry: users can leave before it loads.
+    const changed = !this.regionInitialized || id !== this.regionId
+      || (this.regionRouteId !== undefined && routeId === undefined);
     this.regionInitialized = true;
     this.regionId = id;
-    return true;
+    this.regionRouteId = routeId;
+    return changed;
   }
 
   routeChanged(identity: RouteCameraIdentity | undefined): boolean {
     const previous = this.route;
     this.route = identity;
-    return previous?.id !== identity?.id || previous?.url !== identity?.url || previous?.geometry !== identity?.geometry;
+    return !sameRouteIdentity(previous, identity);
   }
 }
 

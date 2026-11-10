@@ -4,6 +4,7 @@ import {setImmediate as nextTurn} from 'node:timers/promises';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {MapStyleSession, MapSelectionCamera, LatestMapNavigation, loadMapSelection, applyMapLayerVisibility} from '../lib/map-lifecycle.ts';
+import {bindZoomButtonCancellation} from '../lib/map-zoom-buttons.ts';
 
 test('camera choices made during CSS zoom keep the newest intent and current insets', () => {
   let zooming = true, inset = 160;
@@ -313,6 +314,149 @@ test('region navigation runs once per selection, including the return to Russia,
     if (selection.regionChanged(id)) visits.push(id ?? 'russia');
   }
   assert.deepEqual(visits, ['russia', 'altai', 'karelia', 'russia']);
+});
+
+test('returning from a route to its same parent region restores the region camera once', () => {
+  const selection = new MapSelectionCamera(), visits = [];
+  const show = (region, route) => {
+    if (selection.regionChanged(region, route)) visits.push(region ?? 'russia');
+  };
+  show('altai');
+  show('altai', 'route-77');
+  show('altai', 'route-77'); // A style reload restores overlays, not navigation.
+  show('altai', 'route-77'); // A user pan and unrelated rerender stay authoritative.
+  show('altai');
+  show('altai');
+  assert.deepEqual(visits, ['altai', 'altai']);
+  show('altai', 'route-77');
+  show('altai', 'route-78');
+  show('altai');
+  assert.deepEqual(visits, ['altai', 'altai', 'altai'], 'switching routes must not visit the parent between them');
+});
+
+test('leaving a route before its geometry loads still returns to its parent camera', () => {
+  const selection = new MapSelectionCamera();
+  assert.equal(selection.regionChanged('baikal'), true);
+  assert.equal(selection.regionChanged('baikal', 'pending-route'), false);
+  // No routeChanged call: the fetch may still be pending or may have failed.
+  assert.equal(selection.regionChanged('baikal'), true);
+  assert.equal(selection.regionChanged('baikal'), false);
+  assert.equal(selection.regionChanged('baikal', 'another-route'), false);
+  assert.equal(selection.regionChanged(undefined), true, 'returning to all directions visits Russia');
+  assert.equal(selection.regionChanged(undefined), false);
+});
+
+test('late route geometry is drawn without moving a camera the visitor already navigated', async () => {
+  for (const action of ['pointerdown', 'touchstart', 'wheel', 'ArrowRight', 'camera-button']) {
+    const selection = new MapSelectionCamera(), gate = deferred(), events = new Map();
+    const surface = {addEventListener: (name, callback) => events.set(name, callback), removeEventListener: name => events.delete(name)};
+    const unbind = bindZoomButtonCancellation(surface, {cancel() {}}, () => selection.cancelNavigation());
+    const route = {id: 'route-a', url: '/route-a.geojson'};
+    selection.beginRouteSelection(route);
+    const canNavigate = selection.captureNavigation();
+    const overlays = [], camera = [];
+    loadMapSelection({clear: () => {}, load: () => gate.promise, current: () => true,
+      apply: geometry => {
+        overlays.push(geometry);
+        if (selection.routeChanged(route) && canNavigate()) camera.push(route.id);
+      }, onError: error => assert.fail(String(error))});
+    await nextTurn();
+    if (action === 'camera-button') selection.cancelNavigation();
+    else if (action === 'ArrowRight') events.get('keydown')({key: action});
+    else events.get(action)({});
+    gate.resolve('fresh geometry'); await nextTurn();
+    assert.deepEqual(overlays, ['fresh geometry'], action + ': navigation cancellation must not lose route data');
+    assert.deepEqual(camera, [], action + ': late geometry must not snap the visitor back');
+    assert.equal(selection.routeChanged(route), false, 'style restoration cannot revive the cancelled navigation');
+    const nextRoute = {id: 'route-b', url: '/route-b.geojson'};
+    selection.beginRouteSelection(nextRoute);
+    const nextNavigation = selection.captureNavigation();
+    assert.equal(selection.routeChanged(nextRoute) && nextNavigation(), true, 'a new deliberate selection can navigate');
+    unbind(); assert.equal(events.size, 0);
+  }
+});
+
+test('manual navigation also cancels a route fit already waiting for Leaflet zoom to settle', async () => {
+  const selection = new MapSelectionCamera(), gate = deferred(), visits = [], overlays = [];
+  let zooming = true;
+  selection.beginRouteSelection({id: 'route-a'});
+  const navigation = new LatestMapNavigation(() => zooming), canNavigate = selection.captureNavigation();
+  loadMapSelection({clear: () => {}, load: () => gate.promise, current: () => true,
+    apply: geometry => {
+      overlays.push(geometry);
+      if (selection.routeChanged({id: 'route-a'}) && canNavigate()) {
+        navigation.request(() => {if (canNavigate()) visits.push('route-a');});
+      }
+    }, onError: error => assert.fail(String(error))});
+  gate.resolve('route-a geometry'); await nextTurn();
+  selection.cancelNavigation(); zooming = false; navigation.flush();
+  assert.deepEqual(overlays, ['route-a geometry']);
+  assert.deepEqual(visits, [], 'pending zoom completion must not replay an obsolete camera intent');
+});
+
+test('a style replacement during pending route geometry cannot revive navigation cancelled by a pan', async () => {
+  for (const manualPan of [false, true]) {
+    const selection = new MapSelectionCamera(), geometry = deferred();
+    const route = {id: 'uncached-route', url: '/uncached-route.geojson'}, overlays = [], camera = [];
+    let generation = 0, cleanup;
+    selection.beginRouteSelection(route);
+    const mountRouteLayer = () => {
+      cleanup?.();
+      const currentGeneration = ++generation;
+      // A newly loaded style reruns the component effects for the same card.
+      selection.beginRouteSelection({...route});
+      const canNavigate = selection.captureNavigation();
+      cleanup = loadMapSelection({clear: () => {}, load: () => geometry.promise,
+        current: () => currentGeneration === generation,
+        apply: data => {
+          overlays.push([currentGeneration, data]);
+          if (selection.routeChanged(route) && canNavigate()) camera.push(route.id);
+        }, onError: error => assert.fail(String(error))});
+    };
+    mountRouteLayer(); await nextTurn();
+    if (manualPan) selection.cancelNavigation();
+    const style = new MapStyleSession({online: true, preference: 'detail', currentMode: 'detail',
+      detail: async () => 'detail', overview: () => 'overview', apply: mountRouteLayer,
+      onError: error => assert.fail(String(error))});
+    await style.select('overview'); await nextTurn();
+    assert.deepEqual(overlays, [], 'the original request is still pending when the style changes');
+    geometry.resolve('selected route geometry'); await nextTurn();
+    assert.deepEqual(overlays, [[2, 'selected route geometry']], 'only the new style receives the geometry');
+    assert.deepEqual(camera, manualPan ? [] : [route.id], 'the same pending selection retains its original camera permission');
+    await style.select('detail'); await nextTurn();
+    assert.equal(overlays.length, 2, 'subsequent style restoration still draws the route');
+    assert.deepEqual(camera, manualPan ? [] : [route.id], 'no replacement style may replay that selection');
+    cleanup(); style.dispose();
+  }
+});
+
+test('route camera permission starts with selection, survives rerenders, and renews only for a new identity', () => {
+  const selection = new MapSelectionCamera(), route = {id: 'route-a', url: '/route-a.geojson'};
+  selection.beginRouteSelection(route);
+  const first = selection.captureNavigation();
+  selection.cancelNavigation();
+  selection.beginRouteSelection({...route});
+  assert.equal(selection.captureNavigation()(), false, 'a pan before the loading effect also cancels its future fit');
+  assert.equal(first(), false);
+  selection.beginRouteSelection({...route, url: '/route-a-revised.geojson'});
+  const revised = selection.captureNavigation();
+  assert.equal(revised(), true, 'an explicitly changed geometry URL is a new camera selection');
+  selection.beginRouteSelection(undefined);
+  selection.beginRouteSelection(route);
+  assert.equal(selection.captureNavigation()(), true, 'leaving then choosing the same route renews the intent');
+  assert.equal(first(), false, 'new permission must not validate an old callback');
+  assert.equal(revised(), false, 'changing selection invalidates a callback even without a manual pan');
+});
+
+test('reselecting the displayed route after a different pending selection is a new camera intent', () => {
+  const selection = new MapSelectionCamera(), first = {id: 'route-a'}, pending = {id: 'route-b'};
+  selection.beginRouteSelection(first);
+  assert.equal(selection.routeChanged(first), true);
+  selection.beginRouteSelection(pending); // The replacement geometry has not arrived.
+  selection.beginRouteSelection(first);
+  assert.equal(selection.routeChanged(first) && selection.captureNavigation()(), true);
+  selection.beginRouteSelection({...first});
+  assert.equal(selection.routeChanged(first), false, 'ordinary rerenders remain camera-neutral');
 });
 
 test('new route geometry or reselection can navigate while a cancelled stale response cannot claim ownership', async () => {
