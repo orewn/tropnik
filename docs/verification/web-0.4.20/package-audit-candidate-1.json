@@ -1,0 +1,400 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.20",
+  "recordedAt": "2026-11-10T04:14:08.962145Z",
+  "audit": "bounded static Site package comparison",
+  "status": "passed",
+  "releasePass": false,
+  "sourceProvenance": {
+    "currentSiteSourceCommit": "90b04671843538fae2b93a700b12c8106f46b10e",
+    "previousSiteSourceCommit": "588bbf1bebc9b926a051d7e919a317980b3dbe1b",
+    "runtimeSourceCommit": "b2297ce7568eefa34ea720868970c3e57d168e35",
+    "basis": "Archive hashes independently computed and matched to local.json and web-0.4.19-final.json; source commit associations come from those existing build records. No build or source checkout mutation performed."
+  },
+  "archives": {
+    "previous": {
+      "filename": "tropnik-0.4.19-c14-final-site.tar.gz",
+      "sha256": "47b888d0ef316bfbe2311a55c106d7211fc1ca45d6c4e3812d4a49ae303a161e",
+      "gzipBytes": 39037193,
+      "uncompressedFileBytes": 61811023,
+      "fileCount": 1194
+    },
+    "current": {
+      "filename": "tropnik-0.4.20-site.tar.gz",
+      "sha256": "626092e1a1d16d918233db999fc363ac3a917b175a7ba7541cee42bf94ba2f67",
+      "gzipBytes": 39642172,
+      "uncompressedFileBytes": 63831018,
+      "fileCount": 1215
+    },
+    "delta": {
+      "files": 21,
+      "uncompressedFileBytes": 2019995,
+      "gzipBytes": 604979
+    }
+  },
+  "currentEntryAndManifests": {
+    "buildId": "ca52a545-26b9-4ca6-af8b-e22a1d6980f8",
+    "assets": {
+      "virtual:vinext-app-browser-entry": "_next/static/chunks/index-yriQomHE.js",
+      "components/Explore.tsx": "_next/static/chunks/Explore-DpzuNkmw.js",
+      "Atlas2D": "_next/static/chunks/Atlas2D-D6iuzaFM.js",
+      "components/HikePlanner.tsx": "_next/static/chunks/HikePlanner-DgBfH5fd.js"
+    },
+    "checkedMetadataFiles": [
+      "dist/client/vinext-client-entry-manifest.json",
+      "dist/server/vinext-client-assets.js",
+      "dist/server/__vite_rsc_assets_manifest.js",
+      "dist/server/ssr/__vite_rsc_assets_manifest.js"
+    ],
+    "clientManifest": "dist/client/.vite/manifest.json",
+    "serverManifest": "dist/server/.vite/manifest.json",
+    "entryAndRscAssetsAgree": true,
+    "retiredAssetReferencesFromCurrentSources": {},
+    "referenceSearchScope": "Every current server file, every asset in the current manifest-derived client set, current client manifest/entry metadata and sw.js; exact obsolete hashed filenames and obsolete build-id directory token."
+  },
+  "retainedPreviousAssets": {
+    "fileCount": 21,
+    "bytes": 2026600,
+    "allByteIdenticalToPreviousArchive": true,
+    "files": [
+      {
+        "file": "dist/client/_next/static/936850ec-07d8-4188-8a03-05fb9771f481/_buildManifest.js",
+        "bytes": 159,
+        "sha256": "47f02b34be6dc481257b6efce4c19e19111f37ef5c437f8ffed44f0da97fa9bb"
+      },
+      {
+        "file": "dist/client/_next/static/936850ec-07d8-4188-8a03-05fb9771f481/_ssgManifest.js",
+        "bytes": 76,
+        "sha256": "653f3e53e89b4f8548ff86c19e92bb3c6b84b6be7485a320b1e00893ed877479"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/Atlas2D-D2VNd9-Q.js",
+        "bytes": 411504,
+        "sha256": "fc880da62f72f425e9a32343efccd56dfc621922c9d3e42f3a26e7b68a61072e"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/Community-Be4QwkZq.js",
+        "bytes": 177,
+        "sha256": "68078406c34707807e2192eb67252ebc1df08dc0b23872201f3d295e6a89e2a8"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/Explore-DkhdoFrV.js",
+        "bytes": 120243,
+        "sha256": "fcfdf184add80de5e7819726393345f59184177a961874c4b1bf4566c694f475"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/Footer-DqB8jYUS.js",
+        "bytes": 2526,
+        "sha256": "c7981a389761a3f42bff3b4c66681abef281dc4d90017fe7e11a1a6081289ac7"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/Header-CF0i9ZgJ.js",
+        "bytes": 8452,
+        "sha256": "c740c38e464e03b73bb8d107c0aff7639251fdd14eb1edfba60fea9c112db09e"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/HikePlanner-BPM_2Dso.js",
+        "bytes": 958969,
+        "sha256": "879cef331d3cf19a57eaaf39ed8835a06d4e217c78099568455002c31f922fae"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/Offline-Ddqad_Cr.js",
+        "bytes": 13716,
+        "sha256": "e61ac7478dc6bcf848b3a9492d30ae1c5c8a0bcd91c0c25981ac87a1d1ec8a82"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/SafetyRegistration-gSfrusiP.js",
+        "bytes": 43056,
+        "sha256": "d2d1f39b995a04322e97fe80a3d5adb81ade884d79481e9720e8d1f592c6b15a"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/SiteSearch-BSsYUX4j.js",
+        "bytes": 10748,
+        "sha256": "64a5852d868e2d20b85cbd1125fe191e61c546bc85a3f97a5472cfb75efb2454"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/Trips-C3b9Qvr0.js",
+        "bytes": 40736,
+        "sha256": "b7d0506f538bc02a71aa06401648340963bb63cfd129a12b18fd9d18ab73ffab"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/app-route-prefetch-policy-BF6vQbYf.js",
+        "bytes": 1104,
+        "sha256": "12c22057fee0fac1b8f55f2f0939221787953fe019918b68193e476bc7434c48"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/app-rsc-cache-busting-CVCYW7m-.js",
+        "bytes": 4962,
+        "sha256": "03a23a5213aad3be42e8421bf11313c708bc21b996bcae4bb99fe5f7e55606b9"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/error-CF0ZShJ5.js",
+        "bytes": 1029,
+        "sha256": "a42591b8383df5f5597f7f2f3bb3cc8e07a557c6a5168ee8f57818fcdbbc7638"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/hybrid-client-route-owner-B34jIlPG.js",
+        "bytes": 19514,
+        "sha256": "249d27876bbd7a139f1273474f5c1a211e2ef940442388135001adea787cdf26"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/index-ND6Y46Cm.js",
+        "bytes": 199033,
+        "sha256": "754a1674afa1788535ce10fa480499c5f2f19281ff3b17b59dea25a971c8e449"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/layout-segment-context-D2C7zlAN.js",
+        "bytes": 534,
+        "sha256": "c8068e41837a0f9e1f96ace0f6e60a46ac060b61b25763f2bc7c3bf889c7ade7"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/link-BFYomhlN.js",
+        "bytes": 13712,
+        "sha256": "997af205f56c3d92f4aefd27774898436f2b615bb5ea4ee29c7e2ad959e8ce75"
+      },
+      {
+        "file": "dist/client/_next/static/chunks/map-preload-Pb11CcKD.js",
+        "bytes": 11749,
+        "sha256": "2531bc2783b3ee58aedcc8ec6382eff40189b45e4c058642c3c37989abed9d62"
+      },
+      {
+        "file": "dist/client/_next/static/css/layout.C4UMAeTr.css",
+        "bytes": 164601,
+        "sha256": "3c594cfea12679a08ccfba31a425c6c82a708189b648c7431bd09b774f591bd6"
+      }
+    ],
+    "interpretation": "Previous hashed client assets remain addressable for cached older clients. They are absent from current executable/manifest references. No cleanup is required for the current runtime to select the new assets."
+  },
+  "manifestReferencedClientAssets": {
+    "definition": "Unique client files declared by the client Vite manifest, client CSS/media declared by the server manifest, and the current build-id manifests. This includes lazy and alternate-route assets and is not an initial-page transfer measurement.",
+    "previous": {
+      "fileCount": 81,
+      "rawBytes": 4733732,
+      "perFileGzipBytes": 1401222
+    },
+    "current": {
+      "fileCount": 81,
+      "rawBytes": 4740729,
+      "perFileGzipBytes": 1403315
+    },
+    "deltaRawBytes": 6997,
+    "deltaPerFileGzipBytes": 2093,
+    "compressionMethod": "Sum of independently gzip-compressed file payloads with Python gzip.compress(compresslevel=9, mtime=0); comparison only, not observed HTTP transfer encoding.",
+    "changedJavaScriptChunks": [
+      {
+        "name": "Atlas2D",
+        "oldFile": "_next/static/chunks/Atlas2D-D2VNd9-Q.js",
+        "newFile": "_next/static/chunks/Atlas2D-D6iuzaFM.js",
+        "oldBytes": 411504,
+        "newBytes": 411791,
+        "deltaBytes": 287,
+        "perFileGzipDeltaBytes": 117,
+        "equalAfterUpdatingHashedImportReferences": false
+      },
+      {
+        "name": "Footer",
+        "oldFile": "_next/static/chunks/Footer-DqB8jYUS.js",
+        "newFile": "_next/static/chunks/Footer-Dw7dh0kk.js",
+        "oldBytes": 2526,
+        "newBytes": 2526,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": 1,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "app-route-prefetch-policy",
+        "oldFile": "_next/static/chunks/app-route-prefetch-policy-BF6vQbYf.js",
+        "newFile": "_next/static/chunks/app-route-prefetch-policy-D8v5UrqX.js",
+        "oldBytes": 1104,
+        "newBytes": 1104,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": -5,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "app-rsc-cache-busting",
+        "oldFile": "_next/static/chunks/app-rsc-cache-busting-CVCYW7m-.js",
+        "newFile": "_next/static/chunks/app-rsc-cache-busting-D_fUdI1P.js",
+        "oldBytes": 4962,
+        "newBytes": 4962,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": 2,
+        "equalAfterUpdatingHashedImportReferences": false
+      },
+      {
+        "name": "link",
+        "oldFile": "_next/static/chunks/link-BFYomhlN.js",
+        "newFile": "_next/static/chunks/link-CyRvEoDF.js",
+        "oldBytes": 13712,
+        "newBytes": 13712,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": -3,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "map-preload",
+        "oldFile": "_next/static/chunks/map-preload-Pb11CcKD.js",
+        "newFile": "_next/static/chunks/map-preload-Ds_YAK1y.js",
+        "oldBytes": 11749,
+        "newBytes": 11749,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": -1,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "error",
+        "oldFile": "_next/static/chunks/error-CF0ZShJ5.js",
+        "newFile": "_next/static/chunks/error-DUG0ocrC.js",
+        "oldBytes": 1029,
+        "newBytes": 1029,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": 0,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "Community",
+        "oldFile": "_next/static/chunks/Community-Be4QwkZq.js",
+        "newFile": "_next/static/chunks/Community-PciRdewv.js",
+        "oldBytes": 177,
+        "newBytes": 177,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": 1,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "Explore",
+        "oldFile": "_next/static/chunks/Explore-DkhdoFrV.js",
+        "newFile": "_next/static/chunks/Explore-DpzuNkmw.js",
+        "oldBytes": 120243,
+        "newBytes": 126685,
+        "deltaBytes": 6442,
+        "perFileGzipDeltaBytes": 1947,
+        "equalAfterUpdatingHashedImportReferences": false
+      },
+      {
+        "name": "Header",
+        "oldFile": "_next/static/chunks/Header-CF0i9ZgJ.js",
+        "newFile": "_next/static/chunks/Header-HXwz2PfM.js",
+        "oldBytes": 8452,
+        "newBytes": 8452,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": -1,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "HikePlanner",
+        "oldFile": "_next/static/chunks/HikePlanner-BPM_2Dso.js",
+        "newFile": "_next/static/chunks/HikePlanner-DgBfH5fd.js",
+        "oldBytes": 958969,
+        "newBytes": 958969,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": 3,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "Offline",
+        "oldFile": "_next/static/chunks/Offline-Ddqad_Cr.js",
+        "newFile": "_next/static/chunks/Offline-D0P9-vdf.js",
+        "oldBytes": 13716,
+        "newBytes": 13716,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": 0,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "SafetyRegistration",
+        "oldFile": "_next/static/chunks/SafetyRegistration-gSfrusiP.js",
+        "newFile": "_next/static/chunks/SafetyRegistration-CcdsuKAq.js",
+        "oldBytes": 43056,
+        "newBytes": 43056,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": -4,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "SiteSearch",
+        "oldFile": "_next/static/chunks/SiteSearch-BSsYUX4j.js",
+        "newFile": "_next/static/chunks/SiteSearch-BNz60pPb.js",
+        "oldBytes": 10748,
+        "newBytes": 10748,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": 1,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "Trips",
+        "oldFile": "_next/static/chunks/Trips-C3b9Qvr0.js",
+        "newFile": "_next/static/chunks/Trips-C69z3SAR.js",
+        "oldBytes": 40736,
+        "newBytes": 40736,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": 0,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "hybrid-client-route-owner",
+        "oldFile": "_next/static/chunks/hybrid-client-route-owner-B34jIlPG.js",
+        "newFile": "_next/static/chunks/hybrid-client-route-owner-CeE77PkU.js",
+        "oldBytes": 19514,
+        "newBytes": 19514,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": -1,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "layout-segment-context",
+        "oldFile": "_next/static/chunks/layout-segment-context-D2C7zlAN.js",
+        "newFile": "_next/static/chunks/layout-segment-context-DLHOSoXq.js",
+        "oldBytes": 534,
+        "newBytes": 534,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": -2,
+        "equalAfterUpdatingHashedImportReferences": true
+      },
+      {
+        "name": "index",
+        "oldFile": "_next/static/chunks/index-ND6Y46Cm.js",
+        "newFile": "_next/static/chunks/index-yriQomHE.js",
+        "oldBytes": 199033,
+        "newBytes": 199033,
+        "deltaBytes": 0,
+        "perFileGzipDeltaBytes": 2,
+        "equalAfterUpdatingHashedImportReferences": true
+      }
+    ],
+    "layoutStylesheets": [
+      {
+        "build": "old",
+        "file": "dist/client/_next/static/css/layout.C4UMAeTr.css",
+        "bytes": 164601,
+        "perFileGzipBytes": 30552
+      },
+      {
+        "build": "new",
+        "file": "dist/client/_next/static/css/layout.Dh15stLU.css",
+        "bytes": 164869,
+        "perFileGzipBytes": 30588
+      }
+    ]
+  },
+  "uncompressedDeltaDecomposition": {
+    "retainedOldClientAssetsBytes": 2026600,
+    "currentReferencedClientGrowthBytes": 6997,
+    "serverNetChangeBytes": -13602,
+    "sumBytes": 2019995,
+    "equalsArchiveUncompressedDelta": true
+  },
+  "serviceWorker": {
+    "version": "tropnik-shell-0.4.20-e7873ca8a8c2f02b",
+    "retiredHashedAssetsInPrecacheLists": false,
+    "observation": "Install caches the explicit SHELL list; _next/static files are cached on request. The retained obsolete hashes are not eagerly enumerated or precached."
+  },
+  "conclusion": "The +2,019,995-byte uncompressed package increase is explained by retaining 21 prior client assets, with only +6,997 bytes in the current manifest-referenced client asset set and -13,602 bytes net in server output. Current entry and RSC manifests consistently select the new Explore/Atlas2D chunks. HikePlanner remains 958,969 bytes and is byte-identical after updating hashed dependency filenames.",
+  "scopeAndLimits": [
+    "Read-only archive and generated-reference inspection; only this audit record was written. No archive cleanup, application changes, rebuild, or browser run.",
+    "No page-load timing, request waterfall, cache state, execution cost, interaction performance, or real user transfer size was measured. Native CI and deployment verification remain separate gates.",
+    "The manifest-referenced client asset set includes all declared routes and lazy resources; its total must not be represented as the home-page payload.",
+    "The archive does not contain a baked home-page HTML entry. Entry selection was verified through generated browser-entry and RSC/server asset manifests, without executing the server.",
+    "Retained prior hashed assets may still be requested by previously cached clients; they are unreferenced by the current generated entry and current server/client asset metadata."
+  ]
+}

@@ -124,6 +124,9 @@
   /* A transient map notice owns the secondary slot. Restore the story launcher
      immediately when it closes; an already opened story is never hidden. */
   .explore-layout:has(.atlas-wrap>.map-message)>.fact-closed{display:none}
+  /* Stories sit outside the isolated atlas stacking context. The launcher
+     must yield to an open Layers menu and return when the menu closes. */
+  .explore-layout:has(.atlas-wrap .layer-menu)>.fact-closed{display:none}
   /* The closed sheet's menu ends beside the 50px Layers button, below the
      72px control offset and the renderer's rail. Keep its top inside the map. */
   .explore-layout .layer-menu{

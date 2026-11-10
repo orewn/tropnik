@@ -1,0 +1,471 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.20",
+  "recordedAt": "2026-11-10T04:15:21.242453+00:00",
+  "releasePass": false,
+  "ciReleaseGatePassed": false,
+  "publicationPerformedByAudit": false,
+  "scope": "Independent read-only review of the first full Public GitHub Pages run for this source. The run failed before any completed native profile; no browser release pass, deployment, or complete visual review is claimed.",
+  "source": {
+    "githubCommit": "34b9ef994a02273baad5e8ec1a0c3d42858e58ba",
+    "localEquivalentCommit": "c94caa4187e31a25ac24ee37aff4dbe1f8078cf8",
+    "tree": "14af5e967ae1485a28bbc96cb218e67dbaf97a62",
+    "webTree": "cc47fad50b141127e15613ac56b5f6c8e270a9c4",
+    "remoteTreeVerified": true,
+    "localTreeEquivalent": true,
+    "branch": "main",
+    "validatorFiles": [
+      {
+        "path": "tools/pages-preview/browser-report.mjs",
+        "bytes": 55690,
+        "sha256": "4a4fdeb7205ecdf803d616be0aa0d071fa71617680b4cff1fb0febdb3041e033",
+        "blob": "ba2adab4b2004c7a92d7f6e377cfae3eb60e1da2",
+        "equalsFrozenCommit": true
+      },
+      {
+        "path": "tools/pages-preview/map-projection.mjs",
+        "bytes": 2245,
+        "sha256": "eb4eaf848f1f70f4679a6f710201ea28f9307747b7d00679ff2d18d9b0e10f48",
+        "blob": "488eb8cc8ce91f28eb0f0d55758de7cd8cbc9f4d",
+        "equalsFrozenCommit": true
+      },
+      {
+        "path": "tools/pages-preview/browser-source-end-pan.mjs",
+        "bytes": 7754,
+        "sha256": "5a4d396f6d811f843c7e7e5a0529fe964903b753bce34284125f4dc6727b8cc0",
+        "blob": "277ae927f48426fe05fbeb2ab5b681e2f889e367",
+        "equalsFrozenCommit": true
+      },
+      {
+        "path": "tools/pages-preview/browser-direction-hitareas.mjs",
+        "bytes": 5273,
+        "sha256": "5aa6eac4ec8c7f7338fc0f81c0341fedcdb4f91d13c81ae492297e9459dc9081",
+        "blob": "d8a41bb639ce212cd91bfad7515f0186070afcc3",
+        "equalsFrozenCommit": true
+      }
+    ]
+  },
+  "workflow": {
+    "name": "Public GitHub Pages",
+    "runId": 42754034552,
+    "runAttempt": 1,
+    "runUrl": "https://github.com/orewn/tropnik/actions/runs/42754034552",
+    "status": "completed",
+    "conclusion": "failure",
+    "createdAt": "2026-11-10T04:09:31Z",
+    "updatedAt": "2026-11-10T04:11:38Z",
+    "buildJobId": 129624110829,
+    "deployJobId": 129624867522,
+    "deployConclusion": "skipped",
+    "verifiedPagesArtifactUploaded": false,
+    "rerunPerformedByAudit": false
+  },
+  "checks": {
+    "pagesTooling": {
+      "tests": 95,
+      "passed": 95,
+      "failed": 0
+    },
+    "web": {
+      "tests": 520,
+      "passed": 520,
+      "failed": 0
+    },
+    "telegramReferenceTests": 19,
+    "frozenInstall": "passed",
+    "lint": "passed",
+    "staticClientTypes": "passed",
+    "destinationGuard": "passed",
+    "staticVerification": {
+      "verified": true,
+      "pages": 339,
+      "referenceRoutes": 306,
+      "productionRoutingChecks": 1022,
+      "mapPolicyChecks": 14,
+      "staticApiNetworkCalls": 0,
+      "checkedScripts": 57,
+      "publicAssetChecks": 334,
+      "outputFiles": 1370,
+      "offlineFilesVerified": 252,
+      "overviewReliefTilesVerified": 341,
+      "terrainGrid": [
+        513,
+        513
+      ],
+      "apkVerified": true,
+      "coverageExcludedRoutes": [
+        "osm-relation-14407325"
+      ],
+      "base": "/tropnik/"
+    },
+    "staticHTTPVerification": {
+      "verified": true,
+      "base": "/tropnik/",
+      "httpChecks": 52,
+      "browserRenderingTested": false,
+      "backendConnected": false
+    },
+    "staticBuild": {
+      "buildId": "4d5d2c93c5845dc1",
+      "output": "/home/runner/work/tropnik/tropnik/web/pages-preview/dist",
+      "archive": "/home/runner/work/tropnik/tropnik/web/pages-preview/tropnik.zip",
+      "base": "/tropnik/",
+      "pages": 339,
+      "referenceRoutes": 306
+    },
+    "jobSteps": {
+      "build": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Check out the exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Set up Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Install the pinned package manager and frozen dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Restore and verify the public Android preview",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Verify APK download failure boundaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Verify reviewed Telegram reference boundaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run web regression checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Check web lint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Check static client types",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Read the configured Pages destination",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Require the intended public destination",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Build and verify the static site",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 14
+        },
+        {
+          "name": "Record the verified build identity",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15
+        },
+        {
+          "name": "Preserve browser failure evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Preserve map design checks across zoom levels",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Upload the verified static artifact",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18
+        },
+        {
+          "name": "Post Set up Node.js",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35
+        },
+        {
+          "name": "Post Check out the exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
+        }
+      ],
+      "deploy": []
+    }
+  },
+  "nativeGate": {
+    "requiredSchemaVersion": 3,
+    "result": "failed",
+    "finalBrowserReportProduced": false,
+    "assertBrowserReport": {
+      "expectedCommit": "34b9ef994a02273baad5e8ec1a0c3d42858e58ba",
+      "browserReportAvailable": false,
+      "result": "failed native run; no final report produced",
+      "failureReceiptRejected": true,
+      "error": {
+        "name": "AssertionError",
+        "message": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- true\n",
+        "code": "ERR_ASSERTION"
+      }
+    },
+    "completedMobileProfiles": 0,
+    "completedDesktopProfiles": 0,
+    "completedMapInteractions": 0,
+    "completedZoomDesigns": 0,
+    "newRequiredReceipts": {
+      "portraitLayers": "failed in first compact-android open-sheet audit; no complete receipt",
+      "hiddenSavedFilterReset": "not reached",
+      "siblingRegionParentAndBrowserBack": "not reached",
+      "requestDraftOwnershipAndBrowserBack": "not reached",
+      "manualCameraStyleRoundtrip": "not reached"
+    }
+  },
+  "failure": {
+    "profile": "compact-android",
+    "phase": "layers-before / checkPortraitLayerMenus",
+    "message": "No remaining content in .layer-menu",
+    "stack": "AssertionError [ERR_ASSERTION]: No remaining content in .layer-menu\n    at scrollContainer (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:444:10)\n    at async checkPortraitLayerMenus (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:495:20)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:881:51",
+    "map": {
+      "camera": {
+        "longitude": 134.96020290370367,
+        "latitude": 41.07826247664898,
+        "zoom": 0.8258225566748263,
+        "tileSize": 256
+      },
+      "engine": "leaflet",
+      "route": "",
+      "moving": false,
+      "visible": true,
+      "rect": {
+        "left": 0,
+        "top": 68,
+        "width": 320,
+        "height": 572,
+        "right": 320,
+        "bottom": 640
+      },
+      "width": 320,
+      "height": 640,
+      "scrollWidth": 320
+    },
+    "selection": {
+      "region": "",
+      "route": "",
+      "title": "Найдите свою тропу.",
+      "sheet": "open",
+      "history": {
+        "length": 1,
+        "level": 0,
+        "pushed": false,
+        "explore": true
+      },
+      "activeElement": {
+        "tag": "BUTTON",
+        "classes": "layer-button active",
+        "label": null
+      }
+    },
+    "sheet": {
+      "available": true,
+      "state": "open",
+      "height": 358.390625,
+      "top": 281.609375,
+      "transform": "matrix(1, 0, 0, 1, 0, 0)",
+      "animating": false,
+      "summaryVisible": false,
+      "contentVisible": true,
+      "focused": false,
+      "dragging": false,
+      "scrollY": 0,
+      "contentScrollTop": 125,
+      "contentScrollHeight": 1846,
+      "contentClientHeight": 278
+    },
+    "browser": {
+      "binary": "google-chrome",
+      "version": {
+        "browser": "Chrome/156.0.8078.79",
+        "protocol": "1.3"
+      },
+      "readyAfterMs": 18191.661952,
+      "cleanup": {
+        "status": "stopped",
+        "signals": [
+          "SIGTERM"
+        ],
+        "errors": [],
+        "elapsedMs": 55.878068999998504
+      }
+    },
+    "causalClassification": "Not established by this CI audit. Saved screenshot and input telemetry were sent to the UI owner for diagnosis; the exhaustion assertion alone does not distinguish product clipping/occlusion from a harness reveal error."
+  },
+  "performance": {
+    "completeGateResult": "not reached",
+    "unchangedLimitsMs": {
+      "mobileInteraction": 350,
+      "desktopInteraction": 750
+    },
+    "partialFirstProfile": {
+      "scope": "compact-android observations through failed Layers phase only",
+      "current": {
+        "cls": 0,
+        "longest": 104
+      },
+      "phase": "layers-before",
+      "recordedBudgetIssuesBeforeFailure": [],
+      "loadingPhaseLongestTaskMs": 527
+    },
+    "limits": "The partial current longest task (104 ms) and empty performanceIssues do not establish a full profile or release pass. The recorded initial loading phase includes 527 ms; no all-rendering-under-budget claim."
+  },
+  "artifacts": {
+    "failure": {
+      "id": 13734727036,
+      "name": "tropnik-pages-browser-failure-1",
+      "bytes": 126491,
+      "expectedDigest": "sha256:0a3351f7b5f32e00477c3436cd6b11727ec6d8ea11f146a63630d370707dece1",
+      "actualSha256": "0a3351f7b5f32e00477c3436cd6b11727ec6d8ea11f146a63630d370707dece1",
+      "sourceBindingVerified": true,
+      "zipIntegrityAndPathsVerified": true,
+      "members": [
+        {
+          "file": "browser-failure.json",
+          "bytes": 21826,
+          "sha256": "d5c047c966e1829b4163617fda7111794222f67c530e319319d043b1c1330105"
+        },
+        {
+          "file": "browser-failure.png",
+          "bytes": 125146,
+          "sha256": "48d9ebc1bc94b1aca8534657b6aa8faaa6200a6b3baaf6ddcd1c166fd8b9b4bb"
+        }
+      ]
+    },
+    "designArtifactProduced": false,
+    "designPngReceiptCount": 0,
+    "failurePngHashVerified": true,
+    "failurePngVisualReviewByThisAudit": false,
+    "pagesArchiveDownloaded": false
+  },
+  "limits": [
+    "GitHub native run failed before a full profile was saved. No five-profile pass, completed Layers reachability, Explore regression, manual MapLibre camera, zoom design, or public deployment is established by this run.",
+    "The failure artifact is source-bound through the GitHub workflow/artifact metadata. The failure JSON itself does not carry sourceCommit; it must not be presented as a successful browser-verification report.",
+    "The frozen assertBrowserReport rejects the failure receipt. This rejection proves it is not release eligible; it is not a substitute for validating a completed source-bound browser report.",
+    "Desktop same-route line clicks retain an already selected route and open panel. Trusted input plus unchanged selection/camera alone does not independently prove that the route handler fired; post-style dataset mutation separately shows the selection effect reapplied. The desktop scenario was not reached in this run.",
+    "Artifact SHA-256 and PNG hashes verify identity and integrity, not visual quality. UI owner independently reviews the actual failure PNG.",
+    "No physical handset, production backend request, new Android APK, whole-network source recovery, or private Site deployment was exercised by this audit.",
+    "No rerun, runtime change, gate relaxation, commit, or publication was performed by this audit."
+  ],
+  "evidenceFiles": [
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/build-job.log",
+      "bytes": 130706,
+      "sha256": "8244f6c66f804a5fc4458515e9b10a32a8513ec6af1355760d541a8850be7859"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/build-job-normalized.log",
+      "bytes": 96802,
+      "sha256": "390f618847b24eaeb588643e7bfe5423571fb5411bdc7bff7b67c1c7d76631a1"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/run-terminal.json",
+      "bytes": 13167,
+      "sha256": "f6d0fa5c801ab0ea652f7c05fc67582165e3fbf23e64d73ed426f06d2d696af2"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/jobs-terminal.json",
+      "bytes": 3933,
+      "sha256": "bb0a34c229924e0d2f3255803540eba79e523d3976c6c42a5394da16d18adf02"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/artifacts.json",
+      "bytes": 820,
+      "sha256": "190a4adb21274aa4590e9efe5f42d18e6e2c6e545d259aa72a21bc84030a3dc7"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/source-tree.json",
+      "bytes": 3269,
+      "sha256": "16a55c3287070e59469a590acc93b8bc9d30e1463292f59ca5037f03413c96e7"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/local-source-binding.json",
+      "bytes": 1286,
+      "sha256": "4829b67806e25ce88459692e3c7cedf58f0a8848cf79f9984f7fc850a0d82e17"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/failure-artifact.zip",
+      "bytes": 126491,
+      "sha256": "0a3351f7b5f32e00477c3436cd6b11727ec6d8ea11f146a63630d370707dece1"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/failure-artifact-validation.json",
+      "bytes": 511,
+      "sha256": "ea8bfa92bef5917612707b884e1cbfd41b487ea62dfea21c91baaf3653e9ea0a"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/browser-failure.json",
+      "bytes": 21826,
+      "sha256": "d5c047c966e1829b4163617fda7111794222f67c530e319319d043b1c1330105"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/browser-failure.png",
+      "bytes": 125146,
+      "sha256": "48d9ebc1bc94b1aca8534657b6aa8faaa6200a6b3baaf6ddcd1c166fd8b9b4bb"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/tropnik-ci-0.4.20-run-42754034552/browser-receipt-validation.json",
+      "bytes": 373,
+      "sha256": "9ba430488b0175291461530b07c7795d148c6e3468deaa4be19bbe34f0a8a7f8"
+    }
+  ]
+}

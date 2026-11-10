@@ -476,29 +476,35 @@ async function layerMenuFrame(cdp){
     const box=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
     const root=document.querySelector('.explore-layout'),atlas=document.querySelector('.atlas-wrap'),panel=document.querySelector('.explore-panel'),menu=document.querySelector('.layer-menu'),button=document.querySelector('.layer-button');
     if(!menu||!atlas||!button)return null;const map=box(atlas),sheet=box(panel),rect=box(menu),usable={left:Math.max(0,map.left),right:Math.min(innerWidth,map.right),top:Math.max(0,map.top),bottom:Math.min(innerHeight,map.bottom,sheet.top)};usable.width=usable.right-usable.left;usable.height=usable.bottom-usable.top;
-    const controls=[...menu.querySelectorAll('button,input,a')].map((element,index)=>{const r=box(element),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y),inside=r.top>=rect.top-1&&r.bottom<=rect.bottom+1&&r.left>=rect.left-1&&r.right<=rect.right+1;return{index,tag:element.tagName,label:(element.getAttribute('aria-label')||(element.tagName==='INPUT'?element.closest('label')?.textContent:element.textContent)||'').trim(),rect:r,inside,unobscured:!!hit&&element.contains(hit),point:{x,y}};});
+    const controls=[...menu.querySelectorAll('button,input,a')].map((element,index)=>{const r=box(element),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y),inside=r.top>=rect.top-1&&r.bottom<=rect.bottom+1&&r.left>=rect.left-1&&r.right<=rect.right+1;return{index,tag:element.tagName,label:(element.getAttribute('aria-label')||(element.tagName==='INPUT'?element.closest('label')?.textContent:element.textContent)||'').trim(),rect:r,inside,unobscured:!!hit&&element.contains(hit),point:{x,y},hit:hit?{tag:hit.tagName,classes:hit.getAttribute('class'),label:(hit.closest('button,a,label')?.textContent||'').trim()}:null};});
     return{sheet:root.dataset.sheetState,map,usable,menu:rect,button:box(button),scrollTop:menu.scrollTop,scrollHeight:menu.scrollHeight,clientHeight:menu.clientHeight,scrollY,controls};
   })()`);
 }
 async function checkPortraitLayerMenus(cdp,profile){
-  const states=[];await clearMapStories(cdp,profile);
-  for(const sheet of ['closed','open']){
-    if((await selectionState(cdp)).sheet!==sheet){await recordedClick(cdp,'.sheet-handle',profile);await settledSheet(cdp,sheet);}
-    await settledMap(cdp,profile.engine);
-    const opened=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,true);
-    const frames=[await layerMenuFrame(cdp)],scrolls=[];
-    const reached=new Set();
-    for(let attempt=0;attempt<=8;attempt++){
-      for(const control of frames.at(-1).controls)if(control.inside&&control.unobscured)reached.add(control.index);
-      if(reached.size===frames[0].controls.length)break;
-      assert.ok(attempt<8,`${profile.name}/${sheet}: not all Layers controls became reachable`);
-      scrolls.push(await scrollContainer(cdp,'.layer-menu',profile));frames.push(await layerMenuFrame(cdp));
+  const states=[];let current=null;
+  try{
+    await clearMapStories(cdp,profile);
+    for(const sheet of ['closed','open']){
+      if((await selectionState(cdp)).sheet!==sheet){await recordedClick(cdp,'.sheet-handle',profile);await settledSheet(cdp,sheet);}
+      await settledMap(cdp,profile.engine);
+      const opened=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,true);
+      const frames=[await layerMenuFrame(cdp)],scrolls=[];current={sheet,opened,frames,scrolls};
+      const reached=new Set();
+      for(let attempt=0;attempt<=8;attempt++){
+        for(const control of frames.at(-1).controls)if(control.inside&&control.unobscured)reached.add(control.index);
+        if(reached.size===frames[0].controls.length)break;
+        assert.ok(attempt<8,`${profile.name}/${sheet}: not all Layers controls became reachable`);
+        scrolls.push(await scrollContainer(cdp,'.layer-menu',profile));frames.push(await layerMenuFrame(cdp));
+      }
+      const closed=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,false);
+      states.push({...current,closed});current=null;
     }
-    const closed=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,false);
-    states.push({sheet,opened,frames,scrolls,closed});
+    await closeMapSheet(cdp,profile);
+    const receipt={schemaVersion:1,passed:true,input:'touch',states};assertLayerMenuAudit(receipt,profile.name);return receipt;
+  }catch(error){
+    let frame=null;try{frame=await layerMenuFrame(cdp);}catch{}
+    error.layerMenuAudit={profile:profile.name,states,current,frame};throw error;
   }
-  await closeMapSheet(cdp,profile);
-  const receipt={schemaVersion:1,passed:true,input:'touch',states};assertLayerMenuAudit(receipt,profile.name);return receipt;
 }
 async function browserBack(cdp,expected){
   const history=await cdp.call('Page.getNavigationHistory'),from=history.entries[history.currentIndex],target=history.entries[history.currentIndex-1];
@@ -907,6 +913,7 @@ try{
   }
 }catch(error){
   failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
+  if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
   if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed',...(error.settleDiagnostics?{settleDiagnostics:error.settleDiagnostics}:{})});
   if(cdp){
     try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);failure.sheet=await sheetSnapshot(cdp);}catch{}
