@@ -24,7 +24,9 @@ import ru.tropa.app.data.MapLabelGeometry
 import ru.tropa.app.data.MapLabelGroup
 import kotlin.math.pow
 
-private val coverageWorker = Dispatchers.Default.limitedParallelism(1)
+// Initialization and viewport decoding share one queue across all native maps.
+// This also gives the application-owned mutable coverage cache one owner.
+internal val mapCoverageWorker = Dispatchers.Default.limitedParallelism(1)
 private const val EMPTY_FEATURES = "{\"type\":\"FeatureCollection\",\"features\":[]}"
 
 /** Owns one style generation. Panning cancels obsolete decoding; each settled
@@ -71,7 +73,7 @@ internal class NativeMapCoverage(
             // outside the visible rectangle, including a rotated viewport.
             val viewport = MapCoverageBounds.around(target.longitude, points, 360.0 / 2.0.pow(camera.zoom))
             val frame = try {
-                withContext(coverageWorker) {
+                withContext(mapCoverageWorker) {
                     val context = currentCoroutineContext()
                     assets.frame(camera.zoom, viewport) { context.ensureActive() }
                 }
@@ -97,7 +99,9 @@ internal class NativeMapCoverage(
         if (disposed) return
         disposed = true
         scope.cancel()
+        job = null
         labels?.dispose()
+        labels = null
         map.removeOnCameraMoveStartedListener(moved)
         map.removeOnCameraIdleListener(idle)
         view.removeOnLayoutChangeListener(resized)

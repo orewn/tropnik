@@ -1,4 +1,5 @@
 import {spawnSync} from 'node:child_process';
+import {rmSync} from 'node:fs';
 import path from 'node:path';
 import {verifyMapLibreTerrainPatch} from './maplibre-terrain-patch.mjs';
 const cwd=path.resolve(import.meta.dirname,'..');
@@ -9,4 +10,10 @@ for(const args of[['--experimental-strip-types','scripts/build-trail-connections
  const result=spawnSync(process.execPath,args,{cwd,stdio:'inherit',env:process.env});
  if(result.error)throw result.error;
  if(result.status!==0)process.exit(result.status??1);
+}
+// Worker static assets have a 25 MiB per-file limit. The /downloads/[file]
+// route redirects the selected APK to its pinned GitHub release. Pages uses
+// its separate builder and retains the checksum-verified local APK download.
+for(const file of ['tropnik-preview.apk','tropnik-arm64-preview.apk']) {
+ rmSync(path.join(cwd,'dist/client/downloads',file),{force:true});
 }

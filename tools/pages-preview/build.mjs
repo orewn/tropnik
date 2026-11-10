@@ -5,7 +5,7 @@ import {dirname, join, resolve, relative, extname, isAbsolute} from 'node:path';
 import {mkdir, readFile, writeFile, readdir, rm, access} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {normalizeBase, rewriteScript, rewriteJSON, rewriteHTML, rewriteCSS, ts} from './paths.mjs';
-import {APK_FILE, ensureApk, readApkManifest, verifyApk} from './apk-artifact.mjs';
+import {apkFileName, ensureApk, readApkManifest, verifyApk} from './apk-artifact.mjs';
 import {androidPageDownload} from './apk-page.mjs';
 import {verifyMapLibreTerrainPatch} from '../../web/scripts/maplibre-terrain-patch.mjs';
 
@@ -39,7 +39,8 @@ if (connectionsCheck.status !== 0) throw new Error('The trail connection index m
 // A successful release must include the download advertised on the Android page.
 // Fetching is a separate explicit preparation step; the build never uses the network.
 const androidMetadata = await readApkManifest(join(web, 'public/downloads/android-manifest.json'));
-await ensureApk(join(web, 'public/downloads', APK_FILE), androidMetadata, {download: false});
+const androidApkFile = apkFileName(androidMetadata);
+await ensureApk(join(web, 'public/downloads', androidApkFile), androidMetadata, {download: false});
 const sourceCommit = process.env.GITHUB_SHA || null;
 if (sourceCommit !== null && !/^[a-f0-9]{40}$/.test(sourceCommit)) throw new Error('GITHUB_SHA must be a full source commit.');
 
@@ -89,6 +90,7 @@ for (const path of await files(join(web, 'pages-preview/src'))) await snapshot(p
 for (const path of await files(join(web, 'public'))) {
   const name = relative(join(web, 'public'), path);
   if (/(?:\.map|\.d\.ts|\.original\.txt)$/.test(name)) continue;
+  if (name.startsWith('downloads/') && name.endsWith('.apk') && name !== `downloads/${androidApkFile}`) continue;
   await snapshot(path, join(source, 'public', name));
 }
 for (const name of ['web/package.json', 'web/pnpm-lock.yaml', 'web/pnpm-workspace.yaml', 'web/scripts/maplibre-terrain-patch.mjs', ...(await files(join(web, 'patches'))).map(path => relative(project, path)), ...(await files(join(project, 'tools/pages-preview'))).map(path => relative(project, path))]) {
@@ -128,7 +130,12 @@ const metadata = await readApkManifest(apkManifestPath);
 const androidPage = await readFile(join(source, 'app/android/page.tsx'), 'utf8');
 const androidDownload = androidPageDownload(androidPage, metadata);
 const verifiedApk = await verifyApk(join(source, 'public', androidDownload.path.slice(1)), metadata);
-const apk = {...androidDownload, ...verifiedApk, architecture: metadata.architecture, signature: metadata.signature, deviceExecutionVerified: metadata.deviceExecutionVerified === true};
+const apk = {...androidDownload, ...verifiedApk, architecture: metadata.architecture,
+  abis: metadata.abis || [metadata.architecture], signature: metadata.signature,
+  signingCertificateSha256: metadata.signingCertificateSha256,
+  testedArchitecture: metadata.testedArchitecture || null,
+  deviceExecutionVerified: metadata.deviceExecutionVerified === true,
+  physicalDeviceVerified: metadata.physicalDeviceVerified === true};
 const config = {id: buildId, base, origin, hasApk: true, pages};
 
 // The archived offline pack is copied byte-for-byte. Only its separate application style gets a base path.

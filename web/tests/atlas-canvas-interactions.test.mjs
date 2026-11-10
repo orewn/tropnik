@@ -8,6 +8,8 @@ import {russiaLongitude,leafletRussiaMask,MAP_OUTSIDE_COLOR} from '../public/map
 import * as routePresentation from '../lib/map-route-presentation.ts';
 import {createLeafletCanvas} from '../lib/leaflet-canvas.ts';
 import {maskViewportCulling} from '../lib/leaflet-mask-viewport.ts';
+import {createCanvasCoverage} from '../public/maps/map-coverage-renderers.js';
+import {decodeCoverage} from '../public/maps/map-coverage-lod.js';
 
 const require=createRequire(new URL('../package.json',import.meta.url));
 const ts=require('typescript');
@@ -62,8 +64,10 @@ test('the real mask keeps its shared 45-degree cell edge after Leaflet projects 
  assert.equal(JSON.stringify(data),original,'the published geometry and provenance cannot be edited by rendering');
 });
 
-function mapHarness(){
+function mapHarness(camera){
  const layers=new Set(),renderers=new Set();
+ const origin=camera?L.CRS.EPSG3857.latLngToPoint(L.latLng(camera.latitude,camera.longitude),camera.zoom).subtract([camera.width/2,camera.height/2]).round():null;
+ const project=latlng=>camera?L.CRS.EPSG3857.latLngToPoint(latlng,camera.zoom).round().subtract(origin):L.point(latlng.lng,latlng.lat);
  const map=Object.assign(Object.create(L.Map.prototype),{
   options:{preferCanvas:true,renderer:createLeafletCanvas(L)},_paneRenderers:{},
   hasLayer:layer=>layers.has(layer),
@@ -71,7 +75,7 @@ function mapHarness(){
    if(layers.has(layer))return this;
    layers.add(layer);layer._map=this;
    if(layer instanceof L.Renderer){
-    renderers.add(layer);layer._bounds=L.bounds([-100,-100],[200,200]);layer._requestRedraw=()=>{};
+    renderers.add(layer);layer._bounds=L.bounds([-100,-100],[camera?camera.width+100:200,camera?camera.height+100:200]);layer._requestRedraw=()=>{};
    }else if(layer instanceof L.LayerGroup)layer.onAdd(this);
    else{layer.beforeAdd(this);layer.onAdd(this);}
    return this;
@@ -80,19 +84,21 @@ function mapHarness(){
    if(!layers.has(layer))return this;
    layer.onRemove(this);layer._map=null;layers.delete(layer);return this;
   },
-  latLngToLayerPoint:latlng=>L.point(latlng.lng,latlng.lat),
-  latLngToContainerPoint:latlng=>L.point(latlng.lng,latlng.lat),
+  latLngToLayerPoint:project,
+  latLngToContainerPoint:project,
   mouseEventToLayerPoint:event=>L.point(event.x,event.y),
   mouseEventToContainerPoint:event=>L.point(event.x,event.y),
   containerPointToLayerPoint:point=>point,
-  layerPointToLatLng:point=>L.latLng(point.y,point.x),
+  layerPointToLatLng:point=>camera?L.CRS.EPSG3857.pointToLatLng(point.add(origin),camera.zoom):L.latLng(point.y,point.x),
   _draggableMoved:()=>false,_findEventTargets:()=>[],
  });
  const click=(x,y)=>{
   assert.equal(renderers.size,1,'Territories, routes and touch targets must share one interactive Canvas');
   [...renderers][0]._onClick({type:'click',x,y});
  };
- return{map,renderers,click};
+ // A browser sends the event only to the top Canvas, even where it is clear.
+ const clickTopCanvas=point=>[...renderers].filter(renderer=>renderer.options.pane==='overlayPane').at(-1)._onClick({type:'click',x:point.x,y:point.y});
+ return{map,renderers,click,clickTopCanvas,project};
 }
 function region(map,onSelect){
  return L.polygon([[0,0],[0,100],[100,100],[100,0]]).on('click',onSelect).addTo(map);
@@ -112,6 +118,31 @@ test('one Canvas keeps territories reachable before, during and after route mark
  h.click(50,50);
  assert.deepEqual(selected,['region','route','region','region']);
  assert.deepEqual(Object.keys(h.map._paneRenderers),[],'No empty elevated pane may survive returning to directions');
+});
+
+test('published Buryatia coverage stays selectable through route Canvas pixels and LOD replacement',()=>{
+ // Exact settled camera and geographic touch from the failed Pages run.
+ const h=mapHarness({longitude:108.61083984375001,latitude:52.68970242806752,zoom:6,width:412,height:847}),selected=[];
+ const manifest=JSON.parse(readFileSync(new URL('../public/data/map-coverage/manifest.json',import.meta.url),'utf8'));
+ const cell=manifest.cells.find(cell=>cell.id==='0709-0');
+ const coverage=level=>({cellFeatures:new Map([[cell.id,decodeCoverage(JSON.parse(readFileSync(new URL(`../public${cell.levels[level].url}`,import.meta.url),'utf8'))).features]])});
+ const drawing=createCanvasCoverage(L,h.map,{renderer:options=>createLeafletCanvas(L,options),onTerritory:(feature,layer)=>layer.on('click',()=>selected.push(feature.properties.shapeName))});
+ drawing.apply(coverage('regional'));
+ const target=h.project(L.latLng(52.68970242806751,109.96875));
+ h.clickTopCanvas(target);
+ assert.deepEqual(selected,['Buryatia'],'the published regional polygon covers the native touch coordinate');
+ const route={id:'osm-relation-5458405',title:'В бухту Змеёвая',center:[109.0071813,53.7690463],selected:false};
+ const point=createCanvasTrailPoint(L,route,()=>selected.push(route.id),()=>{}),routePoint=h.project(L.latLng(route.center[1],route.center[0]));
+ const group=L.layerGroup([point.hit,point.marker]).addTo(h.map);
+ assert.ok(routePoint.distanceTo(target)>30,'the CI touch is outside the route hit target');
+ h.clickTopCanvas(routePoint);h.clickTopCanvas(target);
+ assert.deepEqual(selected,['Buryatia',route.id,'Buryatia'],'empty route Canvas pixels must still deliver polygon selection');
+ drawing.apply(coverage('local'));
+ h.clickTopCanvas(routePoint);h.clickTopCanvas(target);
+ assert.deepEqual(selected,['Buryatia',route.id,'Buryatia',route.id,'Buryatia'],'an asynchronous coverage replacement keeps routes above territories');
+ group.clearLayers();h.clickTopCanvas(target);
+ assert.deepEqual(selected,['Buryatia',route.id,'Buryatia',route.id,'Buryatia','Buryatia'],'returning to directions must not leave an empty Canvas blocking regions');
+ assert.equal([...h.renderers].filter(renderer=>renderer.options.pane==='overlayPane').length,1);
 });
 
 test('a 44px touch target preserves the small dot and selects only inside its radius',()=>{

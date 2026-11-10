@@ -67,6 +67,7 @@ import ru.tropa.app.data.Region
 import ru.tropa.app.data.RussiaDisplayArea
 import ru.tropa.app.data.TrailRoute
 import ru.tropa.app.data.prepareMapRouteGeometry
+import ru.tropa.app.TropaApplication
 
 private const val ROUTE_GEOMETRY_ERROR = "Линия маршрута не загрузилась. Карточка и обзорная карта доступны."
 
@@ -81,6 +82,7 @@ fun TropaMap(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val application = context.applicationContext as TropaApplication
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val mapView = remember { MapView(context).apply { onCreate(Bundle()) } }
     var map by remember { mutableStateOf<MapLibreMap?>(null) }
@@ -110,16 +112,16 @@ fun TropaMap(
         }
         if (value == null) error = "Карта не загрузилась. Карточки и источники доступны ниже."
     }
-    val displayArea by produceState<RussiaDisplayArea?>(null, context) {
-        val result = withContext(Dispatchers.IO) {
-            runCatching { RussiaDisplayArea.load { path -> context.assets.open(path).bufferedReader().use { it.readText() } } }
+    val displayArea by produceState<RussiaDisplayArea?>(null, application) {
+        val result = withContext(mapCoverageWorker) {
+            runCatching { application.mapDisplayArea }
         }
         value = result.getOrNull()
         if (result.isFailure) scopeError = "Обзорная область карты недоступна. Карточки и источники доступны ниже."
     }
     val currentDisplayArea by rememberUpdatedState(displayArea)
-    val coverageAssets by produceState<MapCoverage?>(null, context) {
-        value = withContext(Dispatchers.IO) { runCatching { MapCoverage.load(readAsset = { path -> context.assets.open(path).use { it.readBytes() } }) }.getOrNull() }
+    val coverageAssets by produceState<MapCoverage?>(null, application) {
+        value = withContext(mapCoverageWorker) { runCatching { application.mapCoverage }.getOrNull() }
     }
     var activeCoverage by remember { mutableStateOf<MapLabelGeometry?>(null) }
     val currentCoverage by rememberUpdatedState(activeCoverage)

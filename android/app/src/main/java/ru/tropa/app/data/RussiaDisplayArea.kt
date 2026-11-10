@@ -14,8 +14,11 @@ internal class RussiaDisplayArea private constructor(
     val fitBounds: LatLngBounds,
     val cameraBounds: LatLngBounds,
     private val polygons: List<Geometry>,
-    val labelCoverage: MapLabelGeometry,
 ) {
+    // Native viewport coverage supplies its own label index. Keep this fallback
+    // available without constructing a second country-wide index at startup.
+    val labelCoverage: MapLabelGeometry by lazy { MapLabelGeometry.fromPolygons(polygons) }
+
     fun contains(longitude: Double, latitude: Double): Boolean {
         if (!longitude.isFinite() || !latitude.isFinite() || latitude !in -90.0..90.0) return false
         val canonical = ((longitude + 180) % 360 + 360) % 360 - 180
@@ -41,7 +44,7 @@ internal class RussiaDisplayArea private constructor(
             val area = FeatureCollection.fromJson(readAsset("maps/russia/russia-canonical-area.geojson"))
             val polygons = area.features().orEmpty().mapNotNull { it.geometry() }
             require(polygons.isNotEmpty() && polygons.all { it is Polygon || it is MultiPolygon })
-            return RussiaDisplayArea(bounds("fitBounds"), bounds("recommendedMaxBounds"), polygons, MapLabelGeometry.fromPolygons(polygons))
+            return RussiaDisplayArea(bounds("fitBounds"), bounds("recommendedMaxBounds"), polygons)
         }
     }
 }

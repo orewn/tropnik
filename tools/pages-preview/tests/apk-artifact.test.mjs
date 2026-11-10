@@ -1,21 +1,23 @@
 import assert from 'node:assert/strict';
-import {createHash} from 'node:crypto';
 import {mkdtemp, readFile, readdir, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import test from 'node:test';
-import {APK_FILE, ensureApk, publicApkUrl, validateApkManifest} from '../apk-artifact.mjs';
+import {apkFileName, ensureApk, publicApkUrl, validateApkManifest} from '../apk-artifact.mjs';
+import {payload, arm64Manifest as metadata, universalManifest} from './fixtures/apk.mjs';
 
-const payload = Buffer.from('A bounded binary fixture, never an actual installable APK.');
-const metadata = {
-  version: '0.4.2-preview', versionCode: 6, architecture: 'arm64-v8a',
-  bytes: payload.length, sha256: createHash('sha256').update(payload).digest('hex'),
-};
-async function fixture(t) {
+async function fixture(t, manifest = metadata) {
   const directory = await mkdtemp(join(tmpdir(), 'tropnik-apk-test-'));
   t.after(() => rm(directory, {recursive: true, force: true}));
-  return {directory, path: join(directory, APK_FILE)};
+  return {directory, path: join(directory, apkFileName(manifest))};
 }
+
+test('the pinned architecture selects only its known release asset', () => {
+  assert.equal(apkFileName(metadata), 'tropnik-arm64-preview.apk');
+  assert.equal(apkFileName(universalManifest), 'tropnik-preview.apk');
+  assert.equal(publicApkUrl(metadata), 'https://github.com/orewn/tropnik/releases/download/v0.4.2-preview/tropnik-arm64-preview.apk');
+  assert.equal(publicApkUrl(universalManifest), 'https://github.com/orewn/tropnik/releases/download/v0.4.2-preview/tropnik-preview.apk');
+});
 
 test('an existing verified APK is reused without a network call', async t => {
   const {path} = await fixture(t);
@@ -40,20 +42,22 @@ test('an absent APK cannot pass the offline build preparation gate', async t => 
 });
 
 test('a public release redirect downloads exact pinned bytes before publication', async t => {
-  const {path, directory} = await fixture(t);
-  const calls = [];
-  const result = await ensureApk(path, metadata, {fetchImpl: async (url, options) => {
-    calls.push(url);
-    assert.equal(options.redirect, 'manual');
-    assert.equal(options.headers.Authorization, undefined);
-    if (calls.length === 1) return new Response(null, {status: 302, headers: {Location: 'https://release-assets.githubusercontent.com/tropnik.apk?signature=fixture'}});
-    return new Response(payload, {headers: {'Content-Length': String(payload.length)}});
-  }});
-  assert.equal(calls[0], publicApkUrl(metadata));
-  assert.equal(calls.length, 2);
-  assert.equal(result.source, 'public-release');
-  assert.deepEqual(await readFile(path), payload);
-  assert.deepEqual(await readdir(directory), [APK_FILE]);
+  for (const manifest of [metadata, universalManifest]) {
+    const {path, directory} = await fixture(t, manifest);
+    const calls = [];
+    const result = await ensureApk(path, manifest, {fetchImpl: async (url, options) => {
+      calls.push(url);
+      assert.equal(options.redirect, 'manual');
+      assert.equal(options.headers.Authorization, undefined);
+      if (calls.length === 1) return new Response(null, {status: 302, headers: {Location: 'https://release-assets.githubusercontent.com/tropnik.apk?signature=fixture'}});
+      return new Response(payload, {headers: {'Content-Length': String(payload.length)}});
+    }});
+    assert.equal(calls[0], publicApkUrl(manifest));
+    assert.equal(calls.length, 2);
+    assert.equal(result.source, 'public-release');
+    assert.deepEqual(await readFile(path), payload);
+    assert.deepEqual(await readdir(directory), [apkFileName(manifest)]);
+  }
 });
 
 test('missing public release asset fails before producing an APK', async t => {
@@ -83,7 +87,44 @@ test('wrong digest, truncation and oversized streamed bodies leave no published 
 });
 
 test('manifest cannot redirect versions into a different release path or remove resource bounds', () => {
-  for (const patch of [{version: '../latest'}, {versionCode: 0}, {architecture: 'x86_64'}, {bytes: 0}, {bytes: 101 * 1024 * 1024}, {sha256: 'not-a-digest'}]) {
+  for (const patch of [{version: '../latest'}, {versionCode: 0}, {architecture: 'x86_64'}, {architecture: ['universal']},
+    {architecture: 'constructor'}, {minSdk: 27}, {bytes: 0}, {bytes: 101 * 1024 * 1024}, {sha256: 'not-a-digest'}]) {
     assert.throws(() => validateApkManifest({...metadata, ...patch}), /manifest must pin/);
   }
+});
+
+test('preview metadata cannot omit the signing certificate or source-run provenance', () => {
+  for (const patch of [{signature: 'release'}, {signature: undefined}, {signingCertificateSha256: undefined},
+    {signingCertificateSha256: 'not-a-certificate'}, {sourceCommit: 'main'}, {workflowRunId: 0}, {workflowRunId: '1'}]) {
+    assert.throws(() => validateApkManifest({...metadata, ...patch}), /signing certificate, source commit and workflow run/);
+  }
+});
+
+test('universal selection requires exactly the packaged ABI set', () => {
+  assert.equal(validateApkManifest({...universalManifest, abis: ['x86_64', 'armeabi-v7a', 'arm64-v8a']}).architecture, 'universal');
+  for (const abis of [undefined, 'universal', ['arm64-v8a'], ['arm64-v8a', 'x86_64', 'x86_64'],
+    ['arm64-v8a', 'armeabi-v7a', 'x86'], ['arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86']]) {
+    assert.throws(() => validateApkManifest({...universalManifest, abis}), /three ABIs/);
+  }
+  assert.throws(() => validateApkManifest({...metadata, abis: universalManifest.abis}), /cannot describe another ABI/);
+});
+
+test('universal selection requires the exact installed emulator payload without overstating device coverage', () => {
+  for (const patch of [{testedArtifact: 'tropnik-arm64-preview.apk'}, {testedArchitecture: 'arm64-v8a'},
+    {testedUniversalSha256: '0'.repeat(64)}, {deviceTestCount: 0}, {physicalDeviceVerified: true},
+    {arm64DeviceExecutionVerified: true}, {arm64DeviceExecutionVerified: undefined},
+    ...['deviceExecutionVerified', 'releasePayloadDeviceVerified', 'universalReleasePayloadDeviceVerified',
+      'installedArtifactBytesVerified'].map(key => ({[key]: false}))]) {
+    assert.throws(() => validateApkManifest({...universalManifest, ...patch}), /exact emulator-tested release payload/);
+  }
+});
+
+test('a universal receipt for different bytes fails before any network request', async t => {
+  const {path, directory} = await fixture(t, universalManifest);
+  let requests = 0;
+  await assert.rejects(ensureApk(path, {...universalManifest, testedUniversalSha256: '0'.repeat(64)}, {
+    fetchImpl() {requests++; throw new Error('Unexpected network');},
+  }), /exact emulator-tested release payload/);
+  assert.equal(requests, 0);
+  assert.deepEqual(await readdir(directory), []);
 });

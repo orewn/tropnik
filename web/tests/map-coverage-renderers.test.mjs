@@ -12,8 +12,29 @@ const L=leaflet.exports;
 const polygon=x=>({type:'Polygon',coordinates:[[[x,50],[x+1,50],[x+1,51],[x,51],[x,50]]]});
 const cell=(id,x)=>['area','mask','territory','territory-boundary'].map(role=>({type:'Feature',id:`${id}:${role}`,properties:{cell:id,role,shapeName:'Source'},geometry:role==='territory-boundary'?{type:'LineString',coordinates:[[x+.2,50.1],[x+.8,50.7]]}:polygon(x)}));
 
+function canvasMap(){
+  const attached=new Set();
+  const map=Object.assign(Object.create(L.Map.prototype),{
+    options:{preferCanvas:true},_paneRenderers:{},hasLayer:layer=>attached.has(layer),
+    addLayer(layer){
+      if(attached.has(layer))return this;
+      attached.add(layer);layer._map=this;
+      if(layer instanceof L.Renderer){layer._bounds=L.bounds([-1000,-1000],[1000,1000]);layer._requestRedraw=()=>{};}
+      else if(layer instanceof L.LayerGroup)layer.onAdd(this);
+      else{layer.beforeAdd(this);layer.onAdd(this);}
+      return this;
+    },
+    removeLayer(layer){
+      if(!attached.has(layer))return this;
+      layer.onRemove(this);attached.delete(layer);layer._map=undefined;return this;
+    },
+    latLngToLayerPoint:latlng=>L.point((latlng.lng-20)*100,(latlng.lat-50)*100),
+  });
+  return{map,paths:()=>[...attached].filter(layer=>!(layer instanceof L.Renderer))};
+}
+
 test('actual Leaflet cell layers retain geometry and never outline a clipping perimeter',()=>{
-  const attached=new Set(),map={addLayer(layer){attached.add(layer);layer._map=this;return this;},removeLayer(layer){if(layer instanceof L.LayerGroup)layer.onRemove(this);attached.delete(layer);layer._map=undefined;return this;}};
+  const {map,paths}=canvasMap();
   const first=cell('a',20),second=cell('b',25),coverage={cellFeatures:new Map([['a',first],['b',second]])};
   const drawing=createCanvasCoverage(L,map,{territoryStyle:()=>({color:'#486b45',fillOpacity:.1})});
   drawing.apply(coverage);
@@ -24,11 +45,11 @@ test('actual Leaflet cell layers retain geometry and never outline a clipping pe
   drawing.apply({cellFeatures:new Map([['a',cell('a',20.1)],['b',second]])});
   assert.ok(retained.every(layer=>drawing.territories.hasLayer(layer)),'unchanged base cells keep their actual Leaflet paths');
   assert.ok(layers.filter(layer=>layer.feature.properties.cell==='a').every(layer=>!drawing.territories.hasLayer(layer)),'only the replaced cell leaves the renderer');
-  drawing.destroy();assert.equal(attached.size,0);
+  drawing.destroy();assert.equal(paths().length,0);
 });
 
 test('actual Leaflet Canvas selects a territory through its decorative boundary',()=>{
-  const attached=new Set(),map={addLayer(layer){attached.add(layer);layer._map=this;return this;},removeLayer(layer){if(layer instanceof L.LayerGroup)layer.onRemove(this);attached.delete(layer);layer._map=undefined;return this;}};
+  const {map,paths}=canvasMap();
   const selected=[];
   const drawing=createCanvasCoverage(L,map,{onTerritory:(feature,layer)=>layer.on('click',()=>selected.push(feature.id))});
   drawing.apply({cellFeatures:new Map([['a',cell('a',20)]])});
@@ -49,7 +70,7 @@ test('actual Leaflet Canvas selects a territory through its decorative boundary'
   assert.equal(picked.feature.properties.role,'territory');
   assert.deepEqual(selected,['a:territory']);
   assert.equal(layers[1].options.stroke,true,'the boundary remains visible');
-  drawing.destroy();assert.equal(attached.size,0);
+  drawing.destroy();assert.equal(paths().length,0);
 });
 
 function glHarness(){

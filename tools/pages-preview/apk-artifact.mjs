@@ -3,19 +3,50 @@ import {createReadStream} from 'node:fs';
 import {lstat, mkdir, open, readFile, rename, rm} from 'node:fs/promises';
 import {dirname} from 'node:path';
 
-export const APK_FILE = 'tropnik-arm64-preview.apk';
+export const APK_FILES = Object.freeze({
+  'arm64-v8a': 'tropnik-arm64-preview.apk',
+  universal: 'tropnik-preview.apk',
+});
+const UNIVERSAL_ABIS = ['arm64-v8a', 'armeabi-v7a', 'x86_64'];
 const MAX_APK_BYTES = 100 * 1024 * 1024;
 const RELEASE_HOSTS = new Set(['github.com', 'release-assets.githubusercontent.com', 'objects.githubusercontent.com']);
 
+function hasExactAbis(actual, expected) {
+  return Array.isArray(actual) && actual.length === expected.length &&
+    new Set(actual).size === expected.length && actual.every(abi => expected.includes(abi));
+}
+
 export function validateApkManifest(value) {
-  if (!value || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(value.version) ||
+  if (!value || typeof value.version !== 'string' || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(value.version) ||
       !Number.isSafeInteger(value.versionCode) || value.versionCode < 1 ||
-      value.architecture !== 'arm64-v8a' ||
+      typeof value.architecture !== 'string' || !Object.hasOwn(APK_FILES, value.architecture) || value.minSdk !== 26 ||
       !Number.isSafeInteger(value.bytes) || value.bytes < 1 || value.bytes > MAX_APK_BYTES ||
-      !/^[a-f0-9]{64}$/.test(value.sha256)) {
-    throw new Error('Android manifest must pin a version, ARM64 architecture, bounded size and SHA256.');
+      typeof value.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(value.sha256)) {
+    throw new Error('Android manifest must pin a version, supported architecture, Android API 26 minimum, bounded size and SHA256.');
+  }
+  if (value.signature !== 'development / debug' ||
+      typeof value.signingCertificateSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(value.signingCertificateSha256) ||
+      typeof value.sourceCommit !== 'string' || !/^[a-f0-9]{40}$/.test(value.sourceCommit) ||
+      !Number.isSafeInteger(value.workflowRunId) || value.workflowRunId < 1) {
+    throw new Error('Android manifest must pin its preview signing certificate, source commit and workflow run.');
+  }
+  if (value.architecture === 'arm64-v8a' && value.abis !== undefined && !hasExactAbis(value.abis, ['arm64-v8a'])) {
+    throw new Error('ARM64 Android manifest cannot describe another ABI.');
+  }
+  if (value.architecture === 'universal' &&
+      (!hasExactAbis(value.abis, UNIVERSAL_ABIS) || value.testedArtifact !== APK_FILES.universal ||
+       value.testedArchitecture !== 'x86_64' || value.testedUniversalSha256 !== value.sha256 ||
+       value.deviceExecutionVerified !== true || value.releasePayloadDeviceVerified !== true ||
+       value.universalReleasePayloadDeviceVerified !== true || value.installedArtifactBytesVerified !== true ||
+       value.physicalDeviceVerified !== false || value.arm64DeviceExecutionVerified !== false ||
+       !Number.isSafeInteger(value.deviceTestCount) || value.deviceTestCount < 1)) {
+    throw new Error('Universal Android manifest must pin its three ABIs and the exact emulator-tested release payload.');
   }
   return value;
+}
+
+export function apkFileName(metadata) {
+  return APK_FILES[validateApkManifest(metadata).architecture];
 }
 
 export async function readApkManifest(path) {
@@ -23,8 +54,8 @@ export async function readApkManifest(path) {
 }
 
 export function publicApkUrl(metadata) {
-  validateApkManifest(metadata);
-  return `https://github.com/orewn/tropnik/releases/download/v${metadata.version}/${APK_FILE}`;
+  const filename = apkFileName(metadata);
+  return `https://github.com/orewn/tropnik/releases/download/v${metadata.version}/${filename}`;
 }
 
 export async function verifyApk(path, metadata) {

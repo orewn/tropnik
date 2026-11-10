@@ -1,11 +1,14 @@
 package ru.tropa.app.data
 
+import com.google.gson.JsonParser
 import org.json.JSONArray
 import org.json.JSONObject
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.LineString
 import org.maplibre.geojson.MultiLineString
 import org.maplibre.geojson.MultiPolygon
+import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 import java.security.MessageDigest
 import kotlin.math.floor
@@ -32,6 +35,7 @@ internal data class MapCoverageFile(val path: String, val bytes: Int, val sha256
 internal data class MapCoverageCell(val id: String, val bounds: MapCoverageBounds, val levels: Map<String, MapCoverageFile>)
 internal data class MapCoverageFrame(val key: String, val json: String, val geometry: MapLabelGeometry,
                                      val detailedCells: Set<String>)
+internal data class DecodedMapCoverage(val features: List<Feature>, val estimatedBytes: Long)
 
 /** Reads only the overview and selected viewport cells. All four roles of a
  * leaf are replaced in one source update; true boundary lines never acquire
@@ -43,10 +47,13 @@ internal class MapCoverage private constructor(
     private val base: Map<String, List<Feature>>,
     private val readAsset: (String) -> ByteArray,
     private val cacheBudget: Int,
+    private val includeTerritory: Boolean,
 ) {
-    private data class Cached(val features: List<Feature>, val bytes: Int)
-    private val cache = LinkedHashMap<String, Cached>(16, .75f, true)
-    private var cacheBytes = 0
+    private val cache = LinkedHashMap<String, DecodedMapCoverage>(16, .75f, true)
+    // This is the decoded detail LRU budget. The single shared overview and
+    // last complete frame are separate; encoded bytes are not a heap bound.
+    internal var cachedDecodedBytes = 0L
+        private set
     private var previous: MapCoverageFrame? = null
     private val cellBounds = cells.associate { it.id to it.bounds }
 
@@ -63,6 +70,7 @@ internal class MapCoverage private constructor(
     // One background worker owns this small LRU. Canceled camera requests may
     // finish one asset read but can never publish an obsolete frame.
     fun frame(zoom: Double, viewport: MapCoverageBounds, checkCurrent: () -> Unit = {}): MapCoverageFrame {
+        checkCurrent()
         val level = level(zoom)
         val selected = selected(zoom, viewport)
         val key = level + ":" + selected.joinToString(",") { it.id }
@@ -74,11 +82,16 @@ internal class MapCoverage private constructor(
             val cached = cache[file.path] ?: run {
                 val data = verified(readAsset, file)
                 checkCurrent()
-                val features = decodeCoverage(data, version, cell.id, level, cellBounds)
-                Cached(features, data.size).also { entry ->
-                    cache[file.path] = entry; cacheBytes += entry.bytes
-                    while (cacheBytes > cacheBudget && cache.size > 1) {
-                        val oldest = cache.entries.first(); cacheBytes -= oldest.value.bytes; cache.remove(oldest.key)
+                decodeCoverage(data, version, cell.id, level, cellBounds, includeTerritory, checkCurrent).also { entry ->
+                    // A single large cell is usable for this frame, but must
+                    // not silently exceed the retained cache limit.
+                    if (entry.estimatedBytes <= cacheBudget) {
+                        cache[file.path] = entry; cachedDecodedBytes += entry.estimatedBytes
+                        while (cachedDecodedBytes > cacheBudget) {
+                            val oldest = cache.entries.first()
+                            cachedDecodedBytes -= oldest.value.estimatedBytes
+                            cache.remove(oldest.key)
+                        }
                     }
                 }
             }
@@ -89,12 +102,14 @@ internal class MapCoverage private constructor(
         val areas = features.filter { it.getStringProperty("role") == "area" }.mapNotNull { it.geometry() }
         val geometry = MapLabelGeometry.fromPolygons(areas)
         checkCurrent()
-        return MapCoverageFrame(key, FeatureCollection.fromFeatures(features).toJson(), geometry, replacement.keys.toSet())
-            .also { previous = it }
+        val json = FeatureCollection.fromFeatures(features).toJson()
+        checkCurrent()
+        return MapCoverageFrame(key, json, geometry, replacement.keys.toSet()).also { previous = it }
     }
 
     companion object {
-        fun load(readAsset: (String) -> ByteArray, cacheBudget: Int = 12 * 1024 * 1024): MapCoverage {
+        fun load(readAsset: (String) -> ByteArray, cacheBudget: Int = 12 * 1024 * 1024,
+                 includeTerritory: Boolean = true): MapCoverage {
             require(cacheBudget > 0)
             val manifest = JSONObject(readAsset(COVERAGE_PREFIX + "manifest.json").toString(Charsets.UTF_8))
             require(manifest.getInt("schemaVersion") == 1 && manifest.getString("nativeDecoder") == "indexed-delta-1e7-v1")
@@ -125,10 +140,11 @@ internal class MapCoverage private constructor(
                 })
             } }
             require(cells.isNotEmpty() && cells.map { it.id }.distinct().size == cells.size)
-            val features = decodeCoverage(verified(readAsset, file(manifest.getJSONObject("base"))), version, null, "overview", cells.associate { it.id to it.bounds })
-            val base = features.groupBy { it.getStringProperty("cell") }
+            val features = decodeCoverage(verified(readAsset, file(manifest.getJSONObject("base"))), version, null,
+                "overview", cells.associate { it.id to it.bounds }, includeTerritory)
+            val base = features.features.groupBy { it.getStringProperty("cell") }
             require(base.keys == cells.map { it.id }.toSet())
-            return MapCoverage(version, cells, levels, base, readAsset, cacheBudget)
+            return MapCoverage(version, cells, levels, base, readAsset, cacheBudget, includeTerritory)
         }
 
         private fun verified(read: (String) -> ByteArray, file: MapCoverageFile): ByteArray {
@@ -144,8 +160,11 @@ internal class MapCoverage private constructor(
 /** Lossless shared coordinate encoding. The accumulator resets per file, not
  * per ring. Canonical conversion applies to a complete east-of-180 cell. */
 internal fun decodeCoverage(data: ByteArray, version: String, cell: String?, level: String,
-                            bounds: Map<String, MapCoverageBounds>): List<Feature> {
+                            bounds: Map<String, MapCoverageBounds>, includeTerritory: Boolean = true,
+                            checkCurrent: () -> Unit = {}): DecodedMapCoverage {
+    checkCurrent()
     val encoded = JSONObject(data.toString(Charsets.UTF_8))
+    checkCurrent()
     require(encoded.getString("type") == "TropnikCoverage" && encoded.getString("encoding") == "indexed-delta-1e7-v1" &&
         encoded.getString("coverageVersion") == version && encoded.getString("lod") == level &&
         (cell == null || encoded.getString("cell") == cell))
@@ -158,34 +177,76 @@ internal fun decodeCoverage(data: ByteArray, version: String, cell: String?, lev
     val xs = DoubleArray(positions.length() / 2); val ys = DoubleArray(xs.size)
     var x = 0L; var y = 0L
     for (i in xs.indices) {
+        if (i % 1024 == 0) checkCurrent()
         val dx = integer(positions.get(2 * i)); val dy = integer(positions.get(2 * i + 1))
         require(dx in -3_600_000_000L..3_600_000_000L && dy in -1_800_000_000L..1_800_000_000L)
         x += dx; y += dy
         require(x in 0..3_600_000_000L && y in -850_511_290L..850_511_290L)
         xs[i] = x / 1e7; ys[i] = y / 1e7
     }
-    fun coordinates(value: Any, shift: Double): JSONArray = if (value is JSONArray) {
-        JSONArray().apply { for (i in 0 until value.length()) put(coordinates(value.get(i), shift)) }
-    } else {
+    // Point/list graphs are built directly from the shared indexes. Expanding
+    // all coordinates into JSON and parsing it again retained both graphs
+    // during the entire decode, and repeated the same Point across roles.
+    val pointPool = arrayOfNulls<Point>(xs.size)
+    var estimatedBytes = 64L
+    fun point(value: Any, shift: Double): Point {
         val index = integer(value); require(index >= 0 && index < xs.size)
-        JSONArray().put(xs[index.toInt()] + shift).put(ys[index.toInt()])
+        val slot = index.toInt(); val longitude = xs[slot] + shift
+        pointPool[slot]?.takeIf { it.longitude() == longitude }?.let { return it }
+        // A point on 180 can belong to either canonical half. Never reuse
+        // +180 in an eastern cell, or -180 in a western cell.
+        estimatedBytes += 160 // Point, coordinate list, boxed doubles and alignment.
+        return Point.fromLngLat(longitude, ys[slot]).also { pointPool[slot] = it }
+    }
+    fun line(values: JSONArray, shift: Double): List<Point> {
+        estimatedBytes += 48L + 8L * values.length()
+        return ArrayList<Point>(values.length()).apply {
+            for (i in 0 until values.length()) {
+                if (i % 512 == 0) checkCurrent()
+                add(point(values.get(i), shift))
+            }
+        }
+    }
+    fun rings(values: JSONArray, shift: Double): List<List<Point>> {
+        estimatedBytes += 48L + 8L * values.length()
+        return (0 until values.length()).map { line(values.getJSONArray(it), shift) }
     }
     val items = encoded.getJSONArray("features")
     require(items.length() > 0)
     val result = ArrayList<Feature>(items.length())
     for (i in 0 until items.length()) {
+        checkCurrent()
         val feature = items.getJSONObject(i); val properties = feature.getJSONObject("properties")
         val id = properties.getString("cell"); val box = requireNotNull(bounds[id])
         require(cell == null || id == cell)
         val geometry = feature.getJSONObject("geometry")
         val type = geometry.getString("type")
-        require(when (properties.getString("role")) {
+        val role = properties.getString("role")
+        require(when (role) {
             "area", "mask", "territory" -> type == "Polygon" || type == "MultiPolygon"
             "territory-boundary" -> type == "LineString" || type == "MultiLineString"
             else -> false
         })
-        geometry.put("coordinates", coordinates(geometry.get("coordinates"), if (box.west >= 180) -360.0 else 0.0))
-        result.add(Feature.fromJson(feature.toString()))
+        // Native styling only consumes the area, mask and true boundary
+        // lines. The shared package retains territory for the web renderer.
+        if (!includeTerritory && role == "territory") continue
+        val shift = if (box.west >= 180) -360.0 else 0.0
+        val coordinates = geometry.getJSONArray("coordinates")
+        val decoded = when (type) {
+            "Polygon" -> Polygon.fromLngLats(rings(coordinates, shift))
+            "MultiPolygon" -> {
+                estimatedBytes += 48L + 8L * coordinates.length()
+                MultiPolygon.fromLngLats((0 until coordinates.length()).map { rings(coordinates.getJSONArray(it), shift) })
+            }
+            "LineString" -> LineString.fromLngLats(line(coordinates, shift))
+            "MultiLineString" -> MultiLineString.fromLngLats(rings(coordinates, shift))
+            else -> throw IllegalArgumentException("Unknown coverage geometry")
+        }
+        val json = properties.toString()
+        estimatedBytes += 512L + json.length * 4L
+        result.add(Feature.fromGeometry(decoded, JsonParser.parseString(json).asJsonObject,
+            if (feature.has("id") && !feature.isNull("id")) feature.getString("id") else null))
     }
-    return result
+    checkCurrent()
+    return DecodedMapCoverage(result, estimatedBytes)
 }

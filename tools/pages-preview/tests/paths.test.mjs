@@ -4,6 +4,8 @@ import {createRequire} from 'node:module';
 import {readFile} from 'node:fs/promises';
 import {pagesPath, rewriteScript, rewriteHTML, ts} from '../paths.mjs';
 import {androidPageDownload} from '../apk-page.mjs';
+import {apkFileName, validateApkManifest} from '../apk-artifact.mjs';
+import {arm64Manifest, universalManifest} from './fixtures/apk.mjs';
 
 const androidSource = await readFile(new URL('../../../web/app/android/page.tsx', import.meta.url), 'utf8');
 const androidManifest = JSON.parse(await readFile(new URL('../../../web/public/downloads/android-manifest.json', import.meta.url), 'utf8'));
@@ -57,20 +59,56 @@ test('search and account actions stay inside the published project for links and
 });
 
 test('the real Android download uses its manifest checksum and retains the Pages base exactly once', () => {
-  const path = '/downloads/tropnik-arm64-preview.apk';
-  const original = androidPageDownload(androidSource, androidManifest);
-  assert.deepEqual(original, {path, downloadHref: `${path}?sha256=${androidManifest.sha256}`});
-  const base = '/tropnik/';
-  const transformed = rewriteScript(androidSource, 'android/page.tsx', {base});
-  assert.deepEqual(androidPageDownload(transformed, androidManifest, {base}), {
-    path, downloadHref: `${base}${path.slice(1)}?sha256=${androidManifest.sha256}`,
-  });
-  assert.equal(rewriteScript(transformed, 'android/page.tsx', {base}), transformed);
+  for (const manifest of [androidManifest, arm64Manifest, universalManifest]) {
+    validateApkManifest(manifest);
+    const path = `/downloads/${apkFileName(manifest)}`;
+    const original = androidPageDownload(androidSource, manifest);
+    assert.deepEqual(original, {path, downloadHref: `${path}?sha256=${manifest.sha256}`});
+    for (const base of ['/tropnik/', '/another-project/']) {
+      const transformed = rewriteScript(androidSource, 'android/page.tsx', {base});
+      assert.deepEqual(androidPageDownload(transformed, manifest, {base}), {
+        path, downloadHref: `${base}${path.slice(1)}?sha256=${manifest.sha256}`,
+      });
+      assert.equal(rewriteScript(transformed, 'android/page.tsx', {base}), transformed);
+    }
+  }
+});
+
+test('the rendered Android page selects the advertised file and compatibility from the same manifest', () => {
+  const require = createRequire(new URL('../../../web/package.json', import.meta.url));
+  const {createElement} = require('react');
+  const {renderToStaticMarkup} = require('react-dom/server');
+  for (const manifest of [arm64Manifest, universalManifest]) for (const base of ['/tropnik/', '/another-project/']) {
+    const transformed = rewriteScript(androidSource, 'android/page.tsx', {base});
+    const compiled = ts.transpileModule(transformed, {compilerOptions: {
+      target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true,
+    }}).outputText;
+    const exports = {};
+    new Function('require', 'exports', compiled)(specifier => {
+      if (specifier === '@/public/downloads/android-manifest.json') return {__esModule: true, default: manifest};
+      if (specifier === '@/components/Header') return {Header: () => null};
+      if (specifier === '@/components/Footer') return {Footer: () => null};
+      if (specifier === '@/components/TropnikIcons') return {Mountains: () => null, ArrowDown: () => null, MapTrifold: () => null, ShieldCheck: () => null};
+      return require(specifier);
+    }, exports);
+    const html = renderToStaticMarkup(createElement(exports.default));
+    const anchors = [...html.matchAll(/<a\b[^>]*\bdownload(?:="[^"]*")?[^>]*>/g)];
+    assert.equal(anchors.length, 1);
+    const href = anchors[0][0].match(/\bhref="([^"]+)"/)[1];
+    assert.equal(href, androidPageDownload(transformed, manifest, {base}).downloadHref);
+    assert.equal(html.includes('ARM 32 бит или x86_64'), manifest.architecture === 'universal');
+    assert.match(html, /Android 8\.0 или новее/);
+    assert.match(html, /Этот файл не подходит для обновления ранее установленного Тропника/);
+  }
 });
 
 test('the Android page gate rejects a wrong payload, missing cache key, dynamic override or second download', () => {
   const badPages = [
     androidSource.replace('tropnik-arm64-preview.apk?', 'unverified.apk?'),
+    androidSource.replace('tropnik-preview.apk?', 'unverified.apk?'),
+    androidSource.replace("androidBuild.architecture === 'universal'", "androidBuild.architecture === 'arm64-v8a'"),
+    androidSource.replace("androidBuild.architecture === 'universal'", "other.architecture === 'universal'"),
+    androidSource.replace("androidBuild.architecture === 'universal'", "androidBuild.architecture == 'universal'"),
     androidSource.replace('?sha256=${androidBuild.sha256}', ''),
     androidSource.replace('androidBuild.sha256}', 'androidBuild.version}'),
     androidSource.replace('androidBuild.sha256}', 'other.sha256}'),
@@ -79,5 +117,10 @@ test('the Android page gate rejects a wrong payload, missing cache key, dynamic 
     androidSource.replace(' download>', '>'),
     androidSource + '<a href="/downloads/other.apk" download>Other</a>',
   ];
-  for (const page of badPages) assert.throws(() => androidPageDownload(page, androidManifest), /Android download|Android page/);
+  for (const page of badPages) {
+    assert.notEqual(page, androidSource, 'The invalid page fixture must change the source');
+    for (const manifest of [arm64Manifest, universalManifest]) {
+      assert.throws(() => androidPageDownload(page, manifest), /Android download|Android page/);
+    }
+  }
 });

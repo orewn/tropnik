@@ -1,4 +1,4 @@
-import {APK_FILE, validateApkManifest} from './apk-artifact.mjs';
+import {APK_FILES, apkFileName, validateApkManifest} from './apk-artifact.mjs';
 import {pagesPath, ts} from './paths.mjs';
 
 /** Read the real download anchor without executing page code or treating its query as a file path. */
@@ -8,9 +8,33 @@ export function androidPageDownload(code, metadata, {base = ''} = {}) {
   const manifestImport = source.statements.find(node => ts.isImportDeclaration(node) &&
     ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === '@/public/downloads/android-manifest.json');
   const manifestName = !manifestImport?.importClause?.isTypeOnly && manifestImport?.importClause?.name?.text;
-  const path = `/downloads/${APK_FILE}`;
+  const path = `/downloads/${apkFileName(metadata)}`;
   const expected = `${base ? pagesPath(path, base) : path}?sha256=${metadata.sha256}`;
   const downloads = [];
+  const isManifestProperty = (node, name) => ts.isPropertyAccessExpression(node) &&
+    ts.isIdentifier(node.expression) && node.expression.text === manifestName && node.name.text === name;
+  function pinnedHref(value, architecture) {
+    const payloadPath = `/downloads/${APK_FILES[architecture]}`;
+    const expectedHref = `${base ? pagesPath(payloadPath, base) : payloadPath}?sha256=${metadata.sha256}`;
+    let href;
+    if (value && (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value))) href = value.text;
+    else if (value && ts.isTemplateExpression(value) && value.templateSpans.length === 1) {
+      const span = value.templateSpans[0];
+      if (span.literal.text === '' && isManifestProperty(span.expression, 'sha256')) href = value.head.text + metadata.sha256;
+    }
+    return href === expectedHref ? href : undefined;
+  }
+  function selectedHref(value) {
+    if (!value || !ts.isConditionalExpression(value)) return pinnedHref(value, metadata.architecture);
+    const condition = value.condition;
+    if (!ts.isBinaryExpression(condition) || condition.operatorToken.kind !== ts.SyntaxKind.EqualsEqualsEqualsToken ||
+        !isManifestProperty(condition.left, 'architecture') || !ts.isStringLiteral(condition.right) || condition.right.text !== 'universal') return undefined;
+    // Check both branches so a later manifest promotion cannot activate an unchecked URL.
+    const universal = pinnedHref(value.whenTrue, 'universal');
+    const arm64 = pinnedHref(value.whenFalse, 'arm64-v8a');
+    if (!universal || !arm64) return undefined;
+    return metadata.architecture === 'universal' ? universal : arm64;
+  }
   function visit(node) {
     if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && node.tagName.getText(source) === 'a') {
       const attributes = node.attributes.properties;
@@ -20,24 +44,14 @@ export function androidPageDownload(code, metadata, {base = ''} = {}) {
         if (hrefs.length !== 1) throw new Error('Android download must have exactly one href.');
         let value = hrefs[0].initializer;
         if (value && ts.isJsxExpression(value)) value = value.expression;
-        let href;
-        if (value && (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value))) href = value.text;
-        else if (value && ts.isTemplateExpression(value) && value.templateSpans.length === 1) {
-          const span = value.templateSpans[0];
-          const expression = span.expression;
-          if (span.literal.text === '' && ts.isPropertyAccessExpression(expression) &&
-              ts.isIdentifier(expression.expression) && expression.expression.text === manifestName && expression.name.text === 'sha256') {
-            href = value.head.text + metadata.sha256;
-          }
-        }
-        downloads.push(href);
+        downloads.push(selectedHref(value));
       }
     }
     ts.forEachChild(node, visit);
   }
   visit(source);
   if (downloads.length !== 1 || downloads[0] !== expected) {
-    throw new Error('Android page must advertise exactly one ARM64 APK with the manifest SHA256 cache key.');
+    throw new Error('Android page must advertise exactly one manifest-selected APK with its SHA256 cache key.');
   }
   return {path, downloadHref: downloads[0]};
 }

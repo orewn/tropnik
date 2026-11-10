@@ -27,7 +27,10 @@ export function applyMapLibreCoverage(map,coverage) {
 export function createCanvasCoverage(L,map,options={}) {
   const renderer=options.renderer??(settings=>L.canvas(settings));
   const landRenderer=renderer({pane:'russia-land',padding:.15}),maskRenderer=renderer({pane:'russia-mask',padding:.15});
-  const adminRenderer=renderer({padding:.15});
+  // Routes and regions must share the map's interactive Canvas: a later
+  // route Canvas intercepts clicks even through all of its transparent pixels.
+  const adminRenderer=map.options.renderer??renderer({padding:.15});
+  map.options.renderer??=adminRenderer;
   const cullLand=options.cull?.(landRenderer),cullMask=options.cull?.(maskRenderer),cullAdmin=options.cull?.(adminRenderer);
   const land=L.geoJSON(null).addTo(map),mask=L.geoJSON(null).addTo(map),territories=L.geoJSON(null).addTo(map),cells=new Map();
   const style=feature=>({...options.territoryStyle?.(feature),smoothFactor:0,stroke:feature?.properties?.role==='territory-boundary',fill:feature?.properties?.role==='territory'});
@@ -49,7 +52,11 @@ export function createCanvasCoverage(L,map,options={}) {
           if(layer instanceof L.Polyline)cullAdmin?.(layer);
           if(feature.properties.role==='territory')options.onTerritory?.(feature,layer);
         }}),
-      };cells.set(id,next);
+      };
+      // A late LOD leaf must stay below routes already in the shared Canvas.
+      // Reverse insertion preserves the fill-before-outline order of the cell.
+      for(let index=next.territories.length-1;index>=0;index--)next.territories[index].bringToBack();
+      cells.set(id,next);
     }
   };
   return {apply,territories,restyle:()=>territories.setStyle(style),destroy:()=>{land.remove();mask.remove();territories.remove();cells.clear();}};
