@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": 14,
+  "checkedAt": "2026-11-10T03:21:17.164636+00:00",
+  "releasePass": true,
+  "publicationPerformed": true,
+  "sourceCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+  "localEquivalentCommit": "93477dae52a077c4754b042e3753d88f319ef1f1",
+  "sourceTree": "ece82954993f48281fd8ed1dc564b5b5bd5c4f3e",
+  "webTree": "48683c3549aa7d3e32ea902de85e1ad65f884345",
+  "siteCommit": "588bbf1bebc9b926a051d7e919a317980b3dbe1b",
+  "buildPassed": true,
+  "helperExitCode": 0,
+  "buildResultConfirmedBy": "root successful final Sites build",
+  "installation": {
+    "command": "scripts/install-pnpm.sh",
+    "status": "passed",
+    "reused": 1,
+    "downloaded": 0,
+    "policyUnchanged": true,
+    "confirmedBy": "root"
+  },
+  "archive": {
+    "filename": "tropnik-0.4.19-c14-final-site.tar.gz",
+    "bytes": 39037193,
+    "sha256": "47b888d0ef316bfbe2311a55c106d7211fc1ca45d6c4e3812d4a49ae303a161e",
+    "members": 1320,
+    "regularFiles": 1194,
+    "directories": 126,
+    "bytesHashAndFileCountRechecked": true,
+    "safety": {
+      "unsafePaths": 0,
+      "symbolicLinks": 0,
+      "hardLinks": 0,
+      "specialNodes": 0,
+      "duplicateNormalizedPaths": 0
+    },
+    "verification": "Independent direct archive reads by terrain_cpu_evidence/harness_flags_review; no extraction.",
+    "runtimeFiles": [
+      {
+        "member": "dist/client/maps/maplibre-gl.mjs",
+        "bytes": 1108593,
+        "sha256": "f76bb5d82a6f7d7b6bdd444a095ea28f9c4fafac3cde0bc1aec3f3756852c35f",
+        "uniqueMember": true,
+        "matchesTrackedSource": true
+      },
+      {
+        "member": "dist/client/sw.js",
+        "bytes": 6309,
+        "sha256": "02b4752e3e1cd434c70741b32332f182d5fdc1d69ff7a8b37c3b127d95687a07",
+        "version": "tropnik-shell-0.4.19-441824b7751ad7e2",
+        "uniqueMember": true,
+        "matchesTrackedSource": true
+      }
+    ]
+  },
+  "canonicalWebFilesByteIdentical": 1242,
+  "localTrackedWebFileCountRechecked": true,
+  "byteComparisonAfterBuild": true,
+  "canonicalFileComparisonConfirmedBy": "root independent byte comparison of all 1242 tracked web files after the successful build",
+  "buildGuard": {
+    "script": "web/scripts/build-tropnik.mjs",
+    "verifier": "verifyMapLibreTerrainPatch",
+    "position": "Before the first of nine build preparation/framework child invocations",
+    "requires": "Installed patched source/prod/dev, tracked patch/provenance and checked-in offline bundle must already match.",
+    "regressionTest": "web/tests/build-maplibre-patch-guard.test.mjs",
+    "regressionTestsPassed": 3
+  },
+  "earlierRejectedBuild": {
+    "reason": "The build helper reused stock installed MapLibre and prepare-offline copied the stock SDK over the patched public bundle. Root found drift only in public/maps/maplibre-gl.mjs.",
+    "archive": "tropnik-0.4.19-c14-rejected-site.tar.gz",
+    "rejected": true,
+    "publicationPerformed": false,
+    "supersededByThisReceipt": true,
+    "confirmedBy": "root"
+  },
+  "releaseCi": {
+    "runId": 42746521929,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42746521929",
+    "sourceCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "status": "in-progress",
+    "conclusion": null,
+    "statusConfirmedBy": "root task handoff"
+  },
+  "publicationHeldFor": [],
+  "accessRequirement": "Preserve owner-only access; this build receipt does not claim a deployment or a fresh access audit.",
+  "finalPublicationReceipt": "web-0.4.19-final.json",
+  "deployment": {
+    "projectId": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+    "versionId": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_298af1ef7b6c819185b5ebfb168d1458",
+    "versionNumber": 21,
+    "deploymentId": "appgdep_6af28c6c7eac81918a05cb56180e5b85",
+    "sourceCommit": "588bbf1bebc9b926a051d7e919a317980b3dbe1b",
+    "status": "succeeded",
+    "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+    "updatedAt": "2026-11-10T03:16:08.574289+00:00",
+    "archive": {
+      "filename": "tropnik-0.4.19-c14-final-site.tar.gz",
+      "bytes": 39037193,
+      "sha256": "47b888d0ef316bfbe2311a55c106d7211fc1ca45d6c4e3812d4a49ae303a161e",
+      "regularFiles": 1194
+    },
+    "matchingTrackedWebFiles": 1242,
+    "sourceDifferences": [],
+    "sourceComparisonAfterBuild": true,
+    "access": {
+      "id": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+      "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+      "latestVersion": 21,
+      "status": "active",
+      "currentUserRole": "owner",
+      "accessMode": "custom",
+      "ownerCount": 1,
+      "editors": 0,
+      "groups": 0,
+      "externalVisitors": 0,
+      "accessRevision": 1
+    },
+    "browserUiCheck": "Expected ChatGPT sign-in gate observed; no authenticated private app interaction claimed."
+  }
+}

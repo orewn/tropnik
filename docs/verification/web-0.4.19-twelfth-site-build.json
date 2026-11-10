@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": 12,
+  "checkedAt": "2026-11-10T00:50:01.719786+00:00",
+  "releasePass": false,
+  "sourceCommit": "fff436e776e1eda12a889dd4861a92b9f5a1b813",
+  "localEquivalentCommit": "80ee91bf883226c459e8fb36e3c8bb7526683d15",
+  "sourceTree": "8a9894fc7e23ba6384342c43c6ab5fb88104b317",
+  "siteCommit": "746b438e001f6fb22e5a5904f3b1957f49112f4f",
+  "buildPassed": true,
+  "helperExitCode": 0,
+  "sourcePushed": true,
+  "publicationPerformed": false,
+  "archive": {
+    "filename": "tropnik-0.4.19-c12-site.tar.gz",
+    "bytes": 39031137,
+    "sha256": "bcb2d8a71c0cf234b93690bd1c993088c990e8bf4792c3a5d521d59948a83c0d",
+    "regularFiles": 1194,
+    "bytesHashAndFileCountRechecked": true
+  },
+  "canonicalWebFilesByteIdentical": 1236,
+  "byteComparisonAfterBuild": true,
+  "canonicalFileComparisonConfirmedBy": "root independent byte comparison after the successful build",
+  "publicationHeldFor": [
+    "Full exact-source release CI 42731010553.",
+    "Final PNG visual review.",
+    "Pages and private Site publication receipts."
+  ],
+  "accessRequirement": "Preserve owner-only access; this receipt does not claim a deployment or a fresh access audit."
+}

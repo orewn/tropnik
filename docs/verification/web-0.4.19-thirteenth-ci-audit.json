@@ -1,0 +1,1226 @@
+{
+  "schemaVersion": 1,
+  "release": "web-0.4.19",
+  "candidate": "C13, workflow attempt 2",
+  "auditedAt": "2026-11-10T02:12:27.500989+00:00",
+  "releasePass": false,
+  "verdict": "Full native browser gate failed while waiting for desktop terrain compositor observations at zoom17.90540610449558. Deployment was skipped.",
+  "source": {
+    "commit": "d814cf4dd2ba091975d68d033747ba3d7c1c151b",
+    "tree": "8b1f1ac1713c498467f70cad7ea03b5fcc2aa863",
+    "workflowRunId": 42732799075,
+    "workflowRunAttempt": 2,
+    "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42732799075/attempts/2",
+    "attemptStartedAt": "2026-11-10T01:53:04Z",
+    "runCompletedAt": "2026-11-10T02:06:54Z",
+    "buildJobId": 129574782018,
+    "buildJobConclusion": "failure",
+    "deployJobId": 129579980489,
+    "deployConclusion": "skipped",
+    "buildId": "778d540d2795cef0",
+    "webTests": {
+      "passed": 474,
+      "failed": 0
+    },
+    "toolingTests": {
+      "passed": 84,
+      "failed": 0
+    },
+    "preBrowserChecks": "Passed: frozen dependency install, tooling/web regressions, lint, typechecks, destination validation, static build and HTTP verification.",
+    "staticBuild": {
+      "pages": 339,
+      "referenceRoutes": 306,
+      "httpChecks": 52
+    },
+    "binding": "Run API attempt2/head_sha; Git commit tree; artifact workflow_run SHA and names ending -2; artifact creation after restart; browser-progress.sourceCommit; checkout/GITHUB_SHA/buildId in job log.",
+    "firstAttempt": "Cancelled after44seconds; artifacts here belong only to attempt2."
+  },
+  "artifacts": [
+    {
+      "id": 13729455740,
+      "name": "tropnik-pages-design-2",
+      "bytes": 28547925,
+      "sha256": "4fc4009da6d0fb2f99a14977c0934766909b89a74b3d55cd2e01dfc321d7437b",
+      "createdAt": "2026-11-10T02:06:51Z",
+      "archiveHashRechecked": true,
+      "zipPathsChecked": true
+    },
+    {
+      "id": 13728204990,
+      "name": "tropnik-pages-browser-failure-2",
+      "bytes": 289037,
+      "sha256": "2f1fbcb0133721ef23b987991314397b2c6e800f3e3fcdd464de9547d7f33111",
+      "createdAt": "2026-11-10T02:06:48Z",
+      "archiveHashRechecked": true,
+      "zipPathsChecked": true
+    }
+  ],
+  "directionHitAreas": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "input": "touch",
+      "validated": true,
+      "actions": 6,
+      "clusterActions": 4,
+      "points": [
+        {
+          "kind": "label",
+          "point": {
+            "name": "s",
+            "kind": "label",
+            "x": 145,
+            "y": 560,
+            "anchorId": "altai",
+            "groupKey": "adygea|altai|baikal|kabardino-balkaria|kaliningrad|kamchatka|karachay-cherkessia|karelia|krasnodar|krasnoyarsk|krym|murmansk|primorye|sakhalin|voronezh"
+          },
+          "after": {
+            "region": "",
+            "route": "",
+            "zoom": 2.337721595206259
+          }
+        },
+        {
+          "kind": "label",
+          "point": {
+            "name": "s",
+            "kind": "label",
+            "x": 178,
+            "y": 489,
+            "anchorId": "altai",
+            "groupKey": "altai|baikal"
+          },
+          "after": {
+            "region": "",
+            "route": "",
+            "zoom": 4.352647277348736
+          }
+        },
+        {
+          "kind": "label",
+          "point": {
+            "name": "s",
+            "kind": "label",
+            "x": 43,
+            "y": 522,
+            "anchorId": "altai",
+            "groupKey": "altai"
+          },
+          "after": {
+            "region": "altai",
+            "route": "",
+            "zoom": 6.1
+          }
+        },
+        {
+          "kind": "count",
+          "point": {
+            "name": "e",
+            "kind": "count",
+            "x": 173.890625,
+            "y": 512,
+            "anchorId": "altai",
+            "groupKey": "adygea|altai|baikal|kabardino-balkaria|kaliningrad|kamchatka|karachay-cherkessia|karelia|krasnodar|krasnoyarsk|krym|murmansk|primorye|sakhalin|voronezh"
+          },
+          "after": {
+            "region": "",
+            "route": "",
+            "zoom": 2.337721595206259
+          }
+        },
+        {
+          "kind": "count",
+          "point": {
+            "name": "e",
+            "kind": "count",
+            "x": 206,
+            "y": 441,
+            "anchorId": "altai",
+            "groupKey": "altai|baikal"
+          },
+          "after": {
+            "region": "",
+            "route": "",
+            "zoom": 4.352647277348736
+          }
+        },
+        {
+          "kind": "count",
+          "point": {
+            "name": "e",
+            "kind": "count",
+            "x": 360.890625,
+            "y": 408,
+            "anchorId": "baikal",
+            "groupKey": "baikal"
+          },
+          "after": {
+            "region": "baikal",
+            "route": "",
+            "zoom": 6
+          }
+        }
+      ],
+      "visibleGridProbes": 96,
+      "outsideAnchorProbes": 66,
+      "unowned": 0,
+      "hiddenControls": 56,
+      "hiddenWrapperProbes": 324,
+      "hiddenWrapperCaptures": 0,
+      "longestTaskMs": 98,
+      "layoutShift": 0,
+      "catalogScroll": {
+        "passed": true,
+        "input": "touch",
+        "before": 0,
+        "after": 125,
+        "deltaPx": 125,
+        "pageScrollDeltaPx": 0,
+        "sheetDisplacementPx": 0,
+        "scrollHeightBefore": 3622,
+        "scrollHeightAfter": 3622,
+        "scrollHeightDelta": 0,
+        "selectionPreserved": true
+      },
+      "routeKeys": [
+        "id",
+        "title",
+        "offsetPx"
+      ],
+      "lineKeys": [
+        "point",
+        "route",
+        "clicked",
+        "selectionRetained",
+        "reopened"
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "input": "mouse",
+      "validated": true,
+      "actions": 2,
+      "clusterActions": 0,
+      "points": [
+        {
+          "kind": "label",
+          "point": {
+            "name": "s",
+            "kind": "label",
+            "x": 782,
+            "y": 795.25,
+            "anchorId": "altai",
+            "groupKey": "altai"
+          },
+          "after": {
+            "region": "altai",
+            "route": "",
+            "zoom": 6.1
+          }
+        },
+        {
+          "kind": "count",
+          "point": {
+            "name": "e",
+            "kind": "count",
+            "x": 923.890625,
+            "y": 719,
+            "anchorId": "baikal",
+            "groupKey": "baikal"
+          },
+          "after": {
+            "region": "baikal",
+            "route": "",
+            "zoom": 6
+          }
+        }
+      ],
+      "visibleGridProbes": 32,
+      "outsideAnchorProbes": 22,
+      "unowned": 0,
+      "hiddenControls": 18,
+      "hiddenWrapperProbes": 0,
+      "hiddenWrapperCaptures": 0,
+      "longestTaskMs": 360,
+      "layoutShift": 0,
+      "catalogScroll": null,
+      "routeKeys": [
+        "id",
+        "title",
+        "offsetPx"
+      ],
+      "lineKeys": [
+        "point",
+        "route",
+        "clicked",
+        "selectionRetained",
+        "reopened"
+      ]
+    }
+  ],
+  "completedNativeMapInteractions": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "passed": true,
+      "route": {
+        "id": "osm-relation-6040458",
+        "title": "Всесоюзный горнопешеходный маршрут № 77",
+        "offsetPx": 14
+      },
+      "line": {
+        "point": {
+          "x": 24.360571571437532,
+          "y": 475.8984449321372
+        },
+        "route": "osm-relation-6040458",
+        "clicked": true,
+        "selectionRetained": true,
+        "reopened": true
+      },
+      "returnedToRegion": true,
+      "returnedToDirections": true,
+      "countryCameraRestored": true,
+      "secondDirection": [
+        {
+          "group": "adygea|altai|baikal|kabardino-balkaria|kaliningrad|kamchatka|karachay-cherkessia|karelia|krasnodar|krasnoyarsk|krym|murmansk|primorye|sakhalin|voronezh",
+          "beforeZoom": 1.337721595206259,
+          "afterZoom": 2.337721595206259,
+          "selected": ""
+        },
+        {
+          "group": "altai|baikal",
+          "beforeZoom": 2.337721595206259,
+          "afterZoom": 4.352647277348736,
+          "selected": ""
+        },
+        {
+          "group": "baikal",
+          "beforeZoom": 4.352647277348736,
+          "afterZoom": 6,
+          "selected": "baikal"
+        }
+      ],
+      "polygon": {
+        "x": 267.8,
+        "y": 491.5,
+        "coordinate": [
+          109.96875000000001,
+          52.68970242806751
+        ],
+        "id": "territory-28173009B49563687485750",
+        "title": "Республика Бурятия"
+      },
+      "gestures": {
+        "zoomInput": "touch-control",
+        "beforeZoom": 4.5657444906979014,
+        "afterZoom": 5.3157444906979014,
+        "dragged": true,
+        "dragCameras": {
+          "before": {
+            "longitude": 109.41359607724925,
+            "latitude": 52.11852855301879,
+            "zoom": 5.3157444906979014,
+            "tileSize": 256
+          },
+          "after": {
+            "longitude": 107.71884768006635,
+            "latitude": 52.3779265194021,
+            "zoom": 5.3157444906979014,
+            "tileSize": 256
+          }
+        },
+        "selectionPreserved": true,
+        "resizedTo": {
+          "width": 915,
+          "height": 412
+        },
+        "postResizePolygon": "territory-28173009B49563687485750"
+      },
+      "catalogScroll": {
+        "passed": true,
+        "input": "touch",
+        "before": 0,
+        "after": 125,
+        "deltaPx": 125,
+        "pageScrollDeltaPx": 0,
+        "sheetDisplacementPx": 0,
+        "scrollHeightBefore": 3622,
+        "scrollHeightAfter": 3622,
+        "scrollHeightDelta": 0,
+        "selectionPreserved": true
+      },
+      "longestTaskMs": 98,
+      "layoutShift": 0
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "passed": true,
+      "route": {
+        "id": "osm-relation-6040458",
+        "title": "Всесоюзный горнопешеходный маршрут № 77",
+        "offsetPx": 14
+      },
+      "line": {
+        "point": {
+          "x": 424.11929556307564,
+          "y": 626.5058129960987
+        },
+        "route": "osm-relation-6040458",
+        "clicked": true,
+        "selectionRetained": true,
+        "reopened": false
+      },
+      "returnedToRegion": true,
+      "returnedToDirections": true,
+      "countryCameraRestored": true,
+      "secondDirection": [
+        {
+          "group": "baikal",
+          "beforeZoom": 1.90540610449558,
+          "afterZoom": 6,
+          "selected": "baikal"
+        }
+      ],
+      "polygon": {
+        "x": 748.3499999999999,
+        "y": 536,
+        "coordinate": [
+          106.28448486328125,
+          53.29999999999998
+        ],
+        "id": "territory-28173009B78872068540735",
+        "title": "Иркутская область"
+      },
+      "gestures": {
+        "zoomInput": "mouse-wheel",
+        "beforeZoom": 4.36935063832489,
+        "afterZoom": 4.872517842089215,
+        "dragged": true,
+        "dragCameras": {
+          "before": {
+            "longitude": 108.20021893346598,
+            "latitude": 58.58120638934062,
+            "zoom": 4.872517842089215,
+            "tileSize": 512,
+            "centerX": 520.5000000000014,
+            "centerY": 464.0000000000007
+          },
+          "after": {
+            "longitude": 107.04809353077553,
+            "latitude": 58.73103235096889,
+            "zoom": 4.872517842089215,
+            "tileSize": 512,
+            "centerX": 520.5,
+            "centerY": 464
+          }
+        },
+        "selectionPreserved": true,
+        "resizedTo": {
+          "width": 1260,
+          "height": 900
+        },
+        "postResizePolygon": "territory-28173009B78872068540735"
+      },
+      "catalogScroll": null,
+      "longestTaskMs": 360,
+      "layoutShift": 0
+    }
+  ],
+  "failure": {
+    "profile": "desktop-webgl",
+    "mode": "terrain",
+    "routeId": "kavkaz-8a",
+    "error": "Error: The maplibre map did not settle: {\"camera\":{\"longitude\":40.397290943721146,\"latitude\":43.72871233957949,\"zoom\":17.90540610449558,\"tileSize\":512,\"centerX\":520.5000000109618,\"centerY\":464},\"engine\":\"maplibre\",\"route\":\"kavkaz-8a\",\"moving\":false,\"visible\":true,\"rect\":{\"left\":384,\"top\":72,\"width\":1041,\"height\":928,\"right\":1425,\"bottom\":1000},\"width\":1440,\"height\":1000,\"scrollWidth\":1425}",
+    "settleEvidence": "design-qa/desktop-webgl.json: settleDiagnostics",
+    "timeoutMs": 15000,
+    "elapsedMs": 15891.61857400008,
+    "requiredIdleObservations": 4,
+    "totalSamples": 3,
+    "samples": [
+      {
+        "index": 1,
+        "frameMs": 1260.8842840000289,
+        "readMs": 0.7559389999369159,
+        "zoom": 17.853972890508693,
+        "moving": true,
+        "idleObservations": 0,
+        "signatureUnchanged": false,
+        "changedFields": []
+      },
+      {
+        "index": 2,
+        "frameMs": 9610.535333000007,
+        "readMs": 1.4312819999177009,
+        "zoom": 17.90540610449558,
+        "moving": false,
+        "idleObservations": 1,
+        "signatureUnchanged": false,
+        "changedFields": [
+          "moving",
+          "camera.longitude",
+          "camera.latitude",
+          "camera.zoom",
+          "camera.centerX"
+        ]
+      },
+      {
+        "index": 3,
+        "frameMs": 4712.24945699994,
+        "readMs": 4.761966999969445,
+        "zoom": 17.90540610449558,
+        "moving": false,
+        "idleObservations": 2,
+        "signatureUnchanged": true,
+        "changedFields": []
+      }
+    ],
+    "finalCamera": {
+      "longitude": 40.397290943721146,
+      "latitude": 43.72871233957949,
+      "zoom": 17.90540610449558,
+      "tileSize": 512,
+      "centerX": 520.5000000109618,
+      "centerY": 464
+    },
+    "finalMoving": false,
+    "finalTwoStatesExactlyEqual": true,
+    "finalIdleObservations": 2,
+    "finalTargetReached": true,
+    "currentPerformance": {
+      "cls": 0,
+      "longest": 3424
+    },
+    "earlierPerformanceIssues": [],
+    "interpretation": "The final target is correct. Only two idle observations arrived after the moving sample; four were required. Long frame waits persist without GPU tracing."
+  },
+  "partialCompletion": {
+    "mobileProfiles": [
+      {
+        "name": "compact-android",
+        "engine": "leaflet",
+        "sheetTested": true,
+        "storyTested": true,
+        "layoutShift": 0,
+        "longestTaskMs": 121,
+        "sheetGestures": {
+          "passed": true,
+          "input": "touch",
+          "repeatedDrags": 4,
+          "reversalPassed": true,
+          "cancellationPassed": true,
+          "scrollPassed": true,
+          "tapAfterCancel": true,
+          "tapAfterDrag": true,
+          "listPositionRetained": true,
+          "selectionPreserved": true,
+          "maxTrackingErrorPx": 1.2207031261368684e-05,
+          "maxPageScrollDeltaPx": 0,
+          "finalState": "closed"
+        }
+      },
+      {
+        "name": "iphone-portrait",
+        "engine": "leaflet",
+        "sheetTested": true,
+        "storyTested": true,
+        "layoutShift": 0,
+        "longestTaskMs": 62,
+        "sheetGestures": {
+          "passed": true,
+          "input": "touch",
+          "repeatedDrags": 4,
+          "reversalPassed": true,
+          "cancellationPassed": true,
+          "scrollPassed": true,
+          "tapAfterCancel": true,
+          "tapAfterDrag": true,
+          "listPositionRetained": true,
+          "selectionPreserved": true,
+          "maxTrackingErrorPx": 2.4414062522737368e-05,
+          "maxPageScrollDeltaPx": 0,
+          "finalState": "closed"
+        }
+      },
+      {
+        "name": "android-portrait",
+        "engine": "leaflet",
+        "sheetTested": true,
+        "storyTested": true,
+        "layoutShift": 0,
+        "longestTaskMs": 0,
+        "sheetGestures": {
+          "passed": true,
+          "input": "touch",
+          "repeatedDrags": 4,
+          "reversalPassed": true,
+          "cancellationPassed": true,
+          "scrollPassed": true,
+          "tapAfterCancel": true,
+          "tapAfterDrag": true,
+          "listPositionRetained": true,
+          "selectionPreserved": true,
+          "maxTrackingErrorPx": 2.4414062522737368e-05,
+          "maxPageScrollDeltaPx": 0,
+          "finalState": "closed"
+        }
+      },
+      {
+        "name": "phone-landscape",
+        "engine": "leaflet",
+        "sheetTested": true,
+        "storyTested": true,
+        "layoutShift": 0,
+        "longestTaskMs": 207,
+        "sheetGestures": {
+          "passed": true,
+          "input": "touch",
+          "repeatedDrags": 4,
+          "reversalPassed": true,
+          "cancellationPassed": true,
+          "scrollPassed": true,
+          "tapAfterCancel": true,
+          "tapAfterDrag": true,
+          "listPositionRetained": true,
+          "selectionPreserved": true,
+          "maxTrackingErrorPx": 1.2207031261368684e-05,
+          "maxPageScrollDeltaPx": 0,
+          "finalState": "closed"
+        }
+      }
+    ],
+    "mobileZoom": {
+      "profile": "android-portrait",
+      "geometryPassed": true,
+      "detail": {
+        "state": "checked",
+        "stepCount": 24,
+        "firstZoom": 1.337721595206259,
+        "lastZoom": 18
+      },
+      "satellite": {
+        "state": "active",
+        "active": true,
+        "status": "",
+        "loadedTiles": 4,
+        "finishedImageResponses": 185,
+        "failedResponses": 0,
+        "stepCount": 24,
+        "visualReviewRequired": true
+      },
+      "overview": {
+        "state": "active",
+        "selectedControl": true,
+        "keyZooms": [
+          2.087721595206259,
+          5.0877215952062596,
+          8.08772159520626,
+          11.08772159520626,
+          14.08772159520626,
+          18
+        ]
+      },
+      "terrain": {
+        "state": "not-offered",
+        "reason": "The mobile map offers its prepared 3D scene instead of global WebGL terrain."
+      },
+      "scene3d": {
+        "state": "ready",
+        "visible": true,
+        "ready": true,
+        "retainedMapNoticeVisible": false,
+        "error": "",
+        "canvas": {
+          "width": 412,
+          "height": 847,
+          "renderer": "webgl2",
+          "triangles": 131072,
+          "sourceVertices": 263169,
+          "meshStride": 2,
+          "renderMs": 5.7
+        },
+        "zoomInputs": 28,
+        "resetInput": true,
+        "imageChanged": true,
+        "visualReviewRequired": true
+      },
+      "closeTrail": {
+        "validated": true,
+        "routeId": "osm-relation-2244794",
+        "nativeZoomClicks": 12,
+        "frames": [
+          {
+            "targetZoom": 11,
+            "zoom": 11
+          },
+          {
+            "targetZoom": 14,
+            "zoom": 14
+          },
+          {
+            "targetZoom": 17,
+            "zoom": 17
+          }
+        ],
+        "sourceSHA256": "b0108f4c547cd0aa032043602809f5aabd23c59b4df113b2f1a51566cdc3d241"
+      },
+      "performance": {
+        "layoutShift": 0,
+        "longestTaskMs": 88
+      }
+    },
+    "desktopZoom": {
+      "profile": "desktop-webgl",
+      "geometryPassed": false,
+      "detail": {
+        "state": "checked",
+        "stepCount": 18,
+        "firstZoom": 1.90540610449558,
+        "lastZoom": 18
+      },
+      "satellite": {
+        "state": "active",
+        "active": true,
+        "status": "",
+        "loadedTiles": 0,
+        "finishedImageResponses": 302,
+        "failedResponses": 3,
+        "stepCount": 18,
+        "visualReviewRequired": true
+      },
+      "overview": {
+        "state": "active",
+        "selectedControl": true,
+        "keyZooms": [
+          2.90540610449558,
+          5.9054061044955795,
+          8.90540610449558,
+          11.90540610449558,
+          14.90540610449558,
+          18
+        ]
+      },
+      "terrainCompleted": false,
+      "scene3dReached": false,
+      "closeTrailReached": false,
+      "lastSuccessfulInspection": {
+        "mode": "terrain",
+        "zoom": 16.90540610449558,
+        "detail": "close",
+        "selectedRoute": "selected"
+      }
+    },
+    "zoomBursts": [
+      {
+        "profile": "android-portrait",
+        "direction": "increase",
+        "input": "touch",
+        "validated": true,
+        "receivedClicks": 4,
+        "beforeZoom": 9.58772159520626,
+        "afterZoom": 12.58772159520626,
+        "expectedZoom": 12.58772159520626,
+        "pageScrollDeltaPx": 0
+      },
+      {
+        "profile": "android-portrait",
+        "direction": "decrease",
+        "input": "touch",
+        "validated": true,
+        "receivedClicks": 4,
+        "beforeZoom": 12.58772159520626,
+        "afterZoom": 9.58772159520626,
+        "expectedZoom": 9.58772159520626,
+        "pageScrollDeltaPx": 0
+      },
+      {
+        "profile": "desktop-webgl",
+        "direction": "increase",
+        "input": "mouse",
+        "validated": true,
+        "receivedClicks": 4,
+        "beforeZoom": 9.90540610449558,
+        "afterZoom": 13.90540610449558,
+        "expectedZoom": 13.90540610449558,
+        "pageScrollDeltaPx": 0
+      },
+      {
+        "profile": "desktop-webgl",
+        "direction": "decrease",
+        "input": "mouse",
+        "validated": true,
+        "receivedClicks": 4,
+        "beforeZoom": 13.90540610449558,
+        "afterZoom": 9.90540610449558,
+        "expectedZoom": 9.90540610449558,
+        "pageScrollDeltaPx": 0
+      }
+    ],
+    "completedDesktopProfiles": 1
+  },
+  "screenshots": {
+    "verifiedReceiptCount": 52,
+    "allReceiptBytesAndSHA256Match": true,
+    "visualAcceptance": false,
+    "receipts": [
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-route-fit-z12_27.png",
+        "mode": "route-fit",
+        "zoom": 12.270198667060493,
+        "bytes": 922876,
+        "sha256": "18070a0f0e6ee6f117612f394d2e1d942b60dc5cc21b99410feeb4892504d7ae"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-overview-z1_34.png",
+        "mode": "overview",
+        "zoom": 1.337721595206259,
+        "bytes": 194043,
+        "sha256": "69a65bcf3bd8b6c7a0096a4d23f06a945636d6686b8754e16b251ec64e97af70"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-detail-z2_09-key2.png",
+        "mode": "detail",
+        "zoom": 2.087721595206259,
+        "bytes": 234432,
+        "sha256": "4be6044822b67b8cbfacd88caa175353308e40a9d411edcf47ee1af057b50d62"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-detail-z5_09-key5.png",
+        "mode": "detail",
+        "zoom": 5.0877215952062596,
+        "bytes": 366046,
+        "sha256": "3fc12de43be1f6c7a410c2c2a223c6bafeb18319f1cb989219080015cfb1a12f"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-detail-z8_09-key8.png",
+        "mode": "detail",
+        "zoom": 8.08772159520626,
+        "bytes": 679736,
+        "sha256": "2cfb06da3127d9fd0acd84cb200b15806bebb00618c7961c1a12441a8e2a899d"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-detail-z11_09-key11.png",
+        "mode": "detail",
+        "zoom": 11.08772159520626,
+        "bytes": 1123884,
+        "sha256": "e16b360ea5180eb67cc3c939fcf12b25802a442a5d9d2b91b0fd3899b8d87d6e"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-detail-z14_09-key14.png",
+        "mode": "detail",
+        "zoom": 14.08772159520626,
+        "bytes": 578671,
+        "sha256": "31fb3889bb8c17562cc203938e6b78dd8e0da379b8ae0010c7b12f716ab49d99"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-detail-z18_00-key18.png",
+        "mode": "detail",
+        "zoom": 18,
+        "bytes": 184780,
+        "sha256": "d7cc9c44167ce9fa145f5ca6a4638a963a5ec85310b710e4def6bfe1a0b3c2ce"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-satellite-z18_00-key18.png",
+        "mode": "satellite",
+        "zoom": 18,
+        "bytes": 207817,
+        "sha256": "8886472897c6049dc82125d46ec720ee9cff4af03888f274d5a311c673e9aa36"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-satellite-z13_50-key14.png",
+        "mode": "satellite",
+        "zoom": 13.5,
+        "bytes": 984407,
+        "sha256": "f698acb2a30125d5e304043eedd0554d21dd7a349e97fdc92a757c04cc9214b7"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-satellite-z10_50-key11.png",
+        "mode": "satellite",
+        "zoom": 10.5,
+        "bytes": 1293345,
+        "sha256": "4fc7e669fe58b02e5e603001aaf33c8fd467a131b86c83218159e18a902d5037"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-satellite-z7_50-key8.png",
+        "mode": "satellite",
+        "zoom": 7.5,
+        "bytes": 867436,
+        "sha256": "a9aee9d0bcd65c077f3fc01fe8ce6a59d3243681fbc0cee0d84c8a11762fa0f2"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-satellite-z4_50-key5.png",
+        "mode": "satellite",
+        "zoom": 4.5,
+        "bytes": 630859,
+        "sha256": "aae2e7d37ebe0141f5db919082b5fff205ed12d766e97a38a5afe8fd92691ab7"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-satellite-z1_50-key2.png",
+        "mode": "satellite",
+        "zoom": 1.5,
+        "bytes": 260710,
+        "sha256": "520ca23badb98fe93e81f03839e7ad91ac456b07c8d83b3e57ec38270c5c5f8a"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-saved-overview-z2_09-key2.png",
+        "mode": "saved-overview",
+        "zoom": 2.087721595206259,
+        "bytes": 243631,
+        "sha256": "a6c3647a8de2f603c00f9d0a3164bb3618ce29e338760eedb8304e243981e897"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-saved-overview-z5_09-key5.png",
+        "mode": "saved-overview",
+        "zoom": 5.0877215952062596,
+        "bytes": 314510,
+        "sha256": "370a8bede56a2e868d5ab793ace6e7ad7f1c1b69c9c1ece19cd9aefa2baa52e9"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-saved-overview-z8_09-key8.png",
+        "mode": "saved-overview",
+        "zoom": 8.08772159520626,
+        "bytes": 181292,
+        "sha256": "9cf2105069e51571078831ccfe02b9937105241ddbbe3f6ac1c609417290d065"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-saved-overview-z11_09-key11.png",
+        "mode": "saved-overview",
+        "zoom": 11.08772159520626,
+        "bytes": 128447,
+        "sha256": "30b0d13a3a3797b293394f81f82a3d43c0c22b73c93a97c5e44c567501210050"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-saved-overview-z14_09-key14.png",
+        "mode": "saved-overview",
+        "zoom": 14.08772159520626,
+        "bytes": 111855,
+        "sha256": "b59e82ce2b209dbf43d88ccd97e5cc6832ffad102ec65771add0bdadd78ff862"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-saved-overview-z18_00-key18.png",
+        "mode": "saved-overview",
+        "zoom": 18,
+        "bytes": 104755,
+        "sha256": "6af7bae91ac3e51216d8cc33b05e7ed3f95d724c597aa52044dcf87909d91e6f"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-scene3d-overview.png",
+        "mode": "scene3d",
+        "bytes": 335258,
+        "sha256": "97dcdfff5381679bbaa3e3f011b5c1d7a3ab66a6a0ae5ca8c00cea16f952b311"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-scene3d-close.png",
+        "mode": "scene3d",
+        "bytes": 891497,
+        "sha256": "f728c1aca5d5552c4139df063aa15a9898bbb6ea90bcfcd2636d2b99bf34b04c"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-scene3d-wide.png",
+        "mode": "scene3d",
+        "bytes": 214760,
+        "sha256": "c8415a3ea8f3875c9121ad6a7ef08acf5c60bd14a40eb2148a9dfe870d077419"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-scene3d-reset.png",
+        "mode": "scene3d",
+        "bytes": 335828,
+        "sha256": "64a1d40c2291d6969289308178756b8601d829ca0fba077a755a855d7398c9e8"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-source-ends-z11_00-crowded.png",
+        "mode": "source-ends",
+        "zoom": 11,
+        "bytes": 489160,
+        "sha256": "53689835cc42bfb2cd667ce34375bc705597ddd0465043bbe31802654af565e7"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-source-ends-z14_00-separated.png",
+        "mode": "source-ends",
+        "zoom": 14,
+        "bytes": 251253,
+        "sha256": "db56f6c44e4e241974a4fd99c423544d9da4e16dc53c70c4535afd48b565b850"
+      },
+      {
+        "profile": "android-portrait",
+        "file": "android-portrait-source-ends-z17_00-close.png",
+        "mode": "source-ends",
+        "zoom": 17,
+        "bytes": 204040,
+        "sha256": "dc61a2d187d517037ba2f25feeb58fe6c112d83e2635773181cbbdaeebef44f6"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-route-fit-z12_40.png",
+        "mode": "route-fit",
+        "zoom": 12.403718027935334,
+        "bytes": 1130621,
+        "sha256": "41e2205f087cd303cca662527b8a90b581a04dd256d62f731b9266a6af6b9102"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-overview-z1_91.png",
+        "mode": "overview",
+        "zoom": 1.90540610449558,
+        "bytes": 383093,
+        "sha256": "ab6f0fec754f810fcf5266295e2e5b66abe90e00efbcf213597cac68c16f075d"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-detail-z2_91-key2.png",
+        "mode": "detail",
+        "zoom": 2.90540610449558,
+        "bytes": 420248,
+        "sha256": "64068e3dc93bf646d3db6cdb1c2449ff462147d66569a62e917861825ed73034"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-detail-z5_91-key5.png",
+        "mode": "detail",
+        "zoom": 5.9054061044955795,
+        "bytes": 549692,
+        "sha256": "4936250314807ae669d136a2d1cb60e6b12efe596564cd0ceacc4fc5c153f576"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-detail-z8_91-key8.png",
+        "mode": "detail",
+        "zoom": 8.90540610449558,
+        "bytes": 1394371,
+        "sha256": "8b62df799a34e5e6c9410ff60eb60df9521c2458048a0377b60219e8fbcfee32"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-detail-z11_91-key11.png",
+        "mode": "detail",
+        "zoom": 11.90540610449558,
+        "bytes": 1212819,
+        "sha256": "aaa9d57be3054784de2ac927a74669d4adc377d2fcf8245918369de10be99653"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-detail-z14_91-key14.png",
+        "mode": "detail",
+        "zoom": 14.90540610449558,
+        "bytes": 529085,
+        "sha256": "509cd07680887f350c1e7357203a1fd0954f09710b8afc17a77917dd94556a77"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-detail-z18_00-key18.png",
+        "mode": "detail",
+        "zoom": 18,
+        "bytes": 210691,
+        "sha256": "97544e18c912b005f418c53ba72b4dea558d5ac58d2558099fdcae9a8b1b9820"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-satellite-z18_00-key18.png",
+        "mode": "satellite",
+        "zoom": 18,
+        "bytes": 296245,
+        "sha256": "9d7d2c8deb080c24470fe7e2af318bd692ef581eddfb53ff867e49320a0f67b6"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-satellite-z14_00-key14.png",
+        "mode": "satellite",
+        "zoom": 14,
+        "bytes": 837842,
+        "sha256": "fb879943152e2a876c23807d4734468fd057999679e988fef69f9f251bdfc719"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-satellite-z11_00-key11.png",
+        "mode": "satellite",
+        "zoom": 11,
+        "bytes": 1583745,
+        "sha256": "82b18361b856de2aa4cdf430deba8c32b51c474d978fa04c0d956ee66ffa1ab0"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-satellite-z8_00-key8.png",
+        "mode": "satellite",
+        "zoom": 8,
+        "bytes": 978105,
+        "sha256": "79a7a14bbc7453f30a1f957595547e5dbb95c52b3340e2848904c43ff95ab480"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-satellite-z5_00-key5.png",
+        "mode": "satellite",
+        "zoom": 5,
+        "bytes": 608312,
+        "sha256": "d47a471b18c48900ddcf6a74b876e21fd1af8ae0afe2cb87ef429b646fc88e8c"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-satellite-z2_00-key2.png",
+        "mode": "satellite",
+        "zoom": 2,
+        "bytes": 446701,
+        "sha256": "80c34892284865d0680bb166f92596d4493b7d10b1ded630056bd786d0a64e84"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-saved-overview-z2_91-key2.png",
+        "mode": "saved-overview",
+        "zoom": 2.90540610449558,
+        "bytes": 393608,
+        "sha256": "649542f9a6d1579df143c068e5c88b816fa23490874bbcc773280b7ac0914063"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-saved-overview-z5_91-key5.png",
+        "mode": "saved-overview",
+        "zoom": 5.9054061044955795,
+        "bytes": 270412,
+        "sha256": "464a4958299dfc25eb407e2a04a666304633fcb3afccc1f0237b88df1cf6eaee"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-saved-overview-z8_91-key8.png",
+        "mode": "saved-overview",
+        "zoom": 8.90540610449558,
+        "bytes": 235115,
+        "sha256": "b426b0f37827b7e1db9afac3ddfea75b6960f00065e394550e4ee3d827b937c4"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-saved-overview-z11_91-key11.png",
+        "mode": "saved-overview",
+        "zoom": 11.90540610449558,
+        "bytes": 205369,
+        "sha256": "0c8977c576f5364b8dbcefa2fbd907d6c28fe22ca31187caeb9aa2564f042e77"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-saved-overview-z14_91-key14.png",
+        "mode": "saved-overview",
+        "zoom": 14.90540610449558,
+        "bytes": 188693,
+        "sha256": "65125ae1dbce6ee5331c0a3baae936db1ff8fee89b0c5ab5b05caae8cef081eb"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-saved-overview-z18_00-key18.png",
+        "mode": "saved-overview",
+        "zoom": 18,
+        "bytes": 173396,
+        "sha256": "b4c41145283d86cf54a1ba81e72447c0e2661f62b75c0daae56c7599d8cb3b25"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-terrain-z2_91-key2.png",
+        "mode": "terrain",
+        "zoom": 2.90540610449558,
+        "bytes": 413956,
+        "sha256": "f486139023522e5d37cea32a8421a18500cb4a7e3dddd0e0493613842ec3035d"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-terrain-z5_91-key5.png",
+        "mode": "terrain",
+        "zoom": 5.9054061044955795,
+        "bytes": 545944,
+        "sha256": "82b8f6fd25134eeaac88bd7aabca1eb033089af8fc2072bb98cbf9e0b51534fb"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-terrain-z8_91-key8.png",
+        "mode": "terrain",
+        "zoom": 8.90540610449558,
+        "bytes": 1385924,
+        "sha256": "b7727c528dba35b225daed0abac438fd6d2d9e26aba77cda1251422771e4fc62"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-terrain-z11_91-key11.png",
+        "mode": "terrain",
+        "zoom": 11.90540610449558,
+        "bytes": 1238593,
+        "sha256": "99d09a5fec131880d40b94bfac3dd6c99f3938c2dd130fb5b926c47e5c181a4d"
+      },
+      {
+        "profile": "desktop-webgl",
+        "file": "desktop-webgl-terrain-z14_91-key14.png",
+        "mode": "terrain",
+        "zoom": 14.90540610449558,
+        "bytes": 674566,
+        "sha256": "9f9b02c911781a0b0b03d57ba0956a9a2d412d31f7e83b5c611bdfa09ae02a03"
+      }
+    ],
+    "failurePNG": {
+      "file": "failure/browser-failure.png",
+      "sha256": "d3845fff624b3f4a61339e1947978d6b200c7eb71cdf36b9cc6dbe0023948013",
+      "visuallyReviewed": true,
+      "observation": "Readable UI and broad coarse terrain with a shallow diagonal fill boundary; no obvious new controls overlap. This frame does not establish loaded terrain detail or completed rendering."
+    }
+  },
+  "traceRecording": {
+    "fullMatrixOptIn": false,
+    "firstSelectionTracesPresent": false,
+    "terrainTracePresent": false,
+    "traceArtifactCount": 0
+  },
+  "reviewBasis": {
+    "existingReportValidatorsMatchedExactC13Source": true,
+    "localC13Commit": "2bfa4a1b6e5fab8364e0dff45c1633bcba56a70e",
+    "replayedOnRealReceipts": [
+      "assertDirectionHitAreas (both engines)",
+      "assertNativeBurstEventOrder (four increase/decrease bursts)",
+      "assertCloseTrailAudit (completed Android audit)"
+    ],
+    "screenshotReceiptHashesRechecked": true,
+    "fullBrowserGatePassed": false
+  },
+  "evidenceRoot": "/workspace/scratch/13d796f593db/ci-evidence-d814cf4d-attempt2",
+  "evidenceHashes": {
+    "failure/browser-failure.json": "642079743493d71f8e650de8522f7b3030468724a967dbbc7037ee7d6e6e8da0",
+    "failure/browser-failure.png": "d3845fff624b3f4a61339e1947978d6b200c7eb71cdf36b9cc6dbe0023948013",
+    "design-qa/browser-progress.json": "686889272a39330b0190b4ea1f6f0613899db28fe1ec0b0d9bfb4c5b5355479c",
+    "design-qa/desktop-webgl.json": "3f8634e772c1cef64cc59df237c5ff836e08dc6e8fa8fe3bc1ce0ea34910ee4b",
+    "design-qa/android-portrait.json": "4fdf915a5587574e5597cd62c9a978f567819c72c53c8032775a6608ce7a7a2c",
+    "native-receipt-validation.json": "05394ad7776a24666feadd2491b9411e73d2513d880c5310023d391a5da1cc23",
+    "build-job.log": "96a26c17d1dd6403d79f4ce5fb71faec88d7ce578ffcf512eb3c1842336359d1",
+    "artifact-manifest-design.json": "a8cc59316bc314e958ae514e184cc48bf7e1bdd5371a2e13fc4f13f2496122e4",
+    "artifact-manifest-failure.json": "e91c5f9a63ea0a1338ff2662c5cd3a5d39222a8c9e2c6d2d004b779953a12b21"
+  },
+  "limits": [
+    "The full browser gate and desktop terrain audit did not complete; no public release acceptance.",
+    "Completed mobile and direction receipts remain partial coverage; they do not substitute for the failed full gate.",
+    "52 screenshot hashes prove integrity, not visual acceptance of52 images.",
+    "No GPU process CPU counters or numeric pitch/elevation telemetry exist in this full run.",
+    "Separate cold diagnostics are not used to override this full-run failure.",
+    "No rerun or publication was performed by this audit."
+  ],
+  "publicationPerformed": false
+}

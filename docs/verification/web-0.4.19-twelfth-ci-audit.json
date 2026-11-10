@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": "candidate12",
+  "auditedAt": "2026-11-10T01:07:09.255118+00:00",
+  "releasePass": false,
+  "verdict": "native-hit-areas-passed-terminal-zoom-exact-but-frame-starvation-remains-without-optional-tracing",
+  "source": {
+    "commit": "fff436e776e1eda12a889dd4861a92b9f5a1b813",
+    "workflowRunId": 42731010553,
+    "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42731010553",
+    "buildJobId": 129548705056,
+    "buildJobConclusion": "failure",
+    "deployJobId": 129555022257,
+    "deployConclusion": "skipped",
+    "buildId": "23924a7758dfc5b8",
+    "preBrowserChecks": "passed: build, lint, typecheck, web and tooling tests",
+    "webTests": {
+      "passed": 474,
+      "failed": 0
+    },
+    "toolingTests": {
+      "passed": 81,
+      "failed": 0
+    },
+    "staticBuild": {
+      "pages": 339,
+      "referenceRoutes": 306,
+      "httpChecks": 52
+    },
+    "buildIdAndTestCountsVerifiedInJobLog": true,
+    "binding": "GitHub artifact workflow_run head_sha; browser-progress.sourceCommit; checkout and GITHUB_SHA in job log"
+  },
+  "artifacts": [
+    {
+      "id": 13726215186,
+      "name": "tropnik-pages-design-1",
+      "bytes": 28550385,
+      "sha256": "581525f6631aa8b3bdca0e90058c8d74d07d19db5d6824a806af22b8e9c1cbc7",
+      "archiveHashRechecked": true
+    },
+    {
+      "id": 13724913155,
+      "name": "tropnik-pages-browser-failure-1",
+      "bytes": 289755,
+      "sha256": "bf9bcdf4fef929c272d960abc4d701217022ca9dbdf7c9089829c49cb2172dd0",
+      "archiveHashRechecked": true
+    }
+  ],
+  "directionHitAreas": {
+    "requiredBothEngineChecksPassed": true,
+    "schemaVersion": 1,
+    "evidence": "browser-failure.json completedMapInteractions[].directionHitAreas",
+    "profiles": [
+      {
+        "profile": "android-portrait",
+        "engine": "leaflet",
+        "input": "touch",
+        "passed": true,
+        "nativeActions": 6,
+        "ordinaryLabelSelected": "altai",
+        "ordinaryCountSelected": "baikal",
+        "clusterExpansionActions": 4,
+        "allNativeActionsOutside44pxAnchor": true,
+        "allEventTriplesTrusted": true,
+        "visibleHitProbes": 96,
+        "outsideAnchorHitProbes": 66,
+        "unownedVisibleHitProbes": 0,
+        "hiddenControlObservations": 56,
+        "hiddenControlsDisplayNone": true,
+        "inViewportHiddenWrapperProbes": 324,
+        "hiddenWrapperCaptures": 0,
+        "mapInteractionLongestTaskMs": 160,
+        "mapInteractionCls": 0
+      },
+      {
+        "profile": "desktop-webgl",
+        "engine": "maplibre",
+        "input": "mouse",
+        "passed": true,
+        "nativeActions": 2,
+        "ordinaryLabelSelected": "altai",
+        "ordinaryCountSelected": "baikal",
+        "clusterExpansionActions": 0,
+        "allNativeActionsOutside44pxAnchor": true,
+        "allEventTriplesTrusted": true,
+        "visibleHitProbes": 32,
+        "outsideAnchorHitProbes": 22,
+        "unownedVisibleHitProbes": 0,
+        "hiddenControlObservations": 18,
+        "hiddenControlsDisplayNone": true,
+        "inViewportHiddenWrapperProbes": 0,
+        "hiddenWrapperCaptures": 0,
+        "mapInteractionLongestTaskMs": 488,
+        "mapInteractionCls": 0
+      }
+    ],
+    "scope": "Trusted native browser inputs outside ordinary label/count anchors, cluster expansion where present, edge probes and hidden wrappers; not physical-device measurements or individual clicks on all 15 directions."
+  },
+  "failure": {
+    "profile": "desktop-webgl",
+    "phase": "zoom-design-terrain",
+    "route": "kavkaz-8a",
+    "error": "The maplibre map did not settle",
+    "terminalZoom": 17.90540610449558,
+    "settle": {
+      "timeoutMs": 15000,
+      "elapsedMs": 16283.600386000006,
+      "requiredIdleObservations": 4,
+      "totalSamples": 3,
+      "finalIdleObservations": 2,
+      "samples": [
+        {
+          "index": 1,
+          "frameMs": 1450.0251040000003,
+          "readMs": 9.005728000076488,
+          "zoom": 17.85397288980205,
+          "moving": true,
+          "idleObservations": 0,
+          "signatureUnchanged": false
+        },
+        {
+          "index": 2,
+          "frameMs": 10060.323570000008,
+          "readMs": 3.8112810000311583,
+          "zoom": 17.90540610449558,
+          "moving": false,
+          "idleObservations": 1,
+          "signatureUnchanged": false
+        },
+        {
+          "index": 3,
+          "frameMs": 4456.9042129999725,
+          "readMs": 1.8775300000561401,
+          "zoom": 17.90540610449558,
+          "moving": false,
+          "idleObservations": 2,
+          "signatureUnchanged": true
+        }
+      ],
+      "lastTwoStatesExactlyEqual": true,
+      "diagnosis": "Three total observations, first still moving; only the final two were identical idle states. Multi-second frame waits exhausted the unchanged 15-second boundary. No final idle camera drift was observed."
+    }
+  },
+  "partialCompletion": {
+    "mobileProfiles": [
+      "compact-android",
+      "iphone-portrait",
+      "android-portrait",
+      "phone-landscape"
+    ],
+    "androidDesignSchema5Passed": true,
+    "nativeDirectionGatesBothEngines": true,
+    "screenshotHashesVerified": 52,
+    "desktopTerrainComplete": false,
+    "desktopPrepared3DAndSourceEndsComplete": false,
+    "visualReview": "pending"
+  },
+  "traceRecording": {
+    "optionalTraceArtifactsPresent": false,
+    "expectedDefault": "disabled",
+    "conclusion": "Disabling optional tracing did not resolve the full-matrix high-zoom frame starvation."
+  },
+  "limits": [
+    "The final zoom equals 17.90540610449558 at this step, whereas the prior pitch diagnostic fell short at 17.853972889498323; terrain zoom through 18 was not accepted.",
+    "No trace was captured for the failing step; this receipt does not identify a native GPU/compositor cause or prove a measured speedup.",
+    "Screenshot hashes confirm artifact identity, not visual acceptance. Existing thresholds were unchanged."
+  ],
+  "evidenceHashes": {
+    "failure/browser-failure.json": "9a685cac07abd9a8316a94553c57f7629e33cb662327ce37e81f48da8e2b7785",
+    "design-qa/desktop-webgl.json": "fec588ae9cdea5e6bbe65c7f27266bdaf5d0ffd90908046ba2c288b83e4132b3",
+    "design-qa/android-portrait.json": "9a026ba2517a906c63d2cd21e5d9c130a9d06fda6dfaa3ac5482e07046b7706a",
+    "build-job.log": "49fca6255628e20c7cb02ac4a8df5d6100c64a1e5367ccf6de1aec5f0d9ae3c5"
+  },
+  "reviewBasis": "interaction_skeptic audit-summary plus direct raw settle/hit-area JSON and job-log checks; archive SHA-256 values rechecked during receipt creation",
+  "publicationPerformed": false,
+  "historicalPitchEvidence": {
+    "report": "region-direction-controls-2026-11-10.json",
+    "field": "pendingFollowUp.diagnostic",
+    "sourceCommit": "c329c3873b09a4c7efa3ee8d4ff2f2769378bb30",
+    "workflowRunId": 42729158656,
+    "evidence": "Raw desktop-webgl-terrain-diagnostic.json nativeZooms; separate prior diagnostic, not inferred from C12"
+  }
+}

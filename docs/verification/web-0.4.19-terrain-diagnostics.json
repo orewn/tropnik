@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "updatedAt": "2026-11-10",
+  "purpose": "Isolated terrain diagnosis; these runs cannot satisfy the release browser gate",
+  "verified": false,
+  "releaseEligible": false,
+  "fullReleaseGate": {
+    "run": 42721623552,
+    "commit": "8f4c328b2d6b746b62d9b5172058c89bf35ea96f",
+    "status": "failed",
+    "reason": "Only three of four exact idle observations delivered within the unchanged15s boundary at zoom16.90540610449558"
+  },
+  "runs": [
+    {
+      "name": "c65158",
+      "commit": "c65158705a8922267d6de2326f848255e9ebdbed",
+      "run": 42725253637,
+      "url": "https://github.com/orewn/tropnik/actions/runs/42725253637",
+      "artifactSha256": "020a876503244ee0e4b6f4308a43d07390cd6889bec3c1fac25886f0ed20c889",
+      "diagnosticStatus": "completed",
+      "nativeActions": 29,
+      "dem": {
+        "sampleLimit": 256,
+        "observedRequests": 828,
+        "discardedRequests": 572,
+        "tileLevels": [
+          13,
+          14,
+          15,
+          16,
+          17,
+          18
+        ],
+        "retainedStatusCounts": {
+          "404": 254,
+          "None": 2
+        }
+      },
+      "releaseEligible": false,
+      "highZoomTrace": {
+        "recordedDurationMs": 10358.391913,
+        "bytes": 5820388,
+        "sha256": "3b978887e0eadc56b5237446e6624bf23aec698c3d89b40e111edb8f29a04af4",
+        "status": "complete",
+        "eof": true,
+        "dataLossOccurred": false,
+        "categories": [
+          "devtools.timeline",
+          "blink.user_timing",
+          "gpu",
+          "disabled-by-default-devtools.timeline",
+          "disabled-by-default-devtools.timeline.stack",
+          "disabled-by-default-v8.cpu_profiler"
+        ]
+      }
+    },
+    {
+      "name": "dem12",
+      "commit": "355dc1701c8f553092d1925b8e5166b4b4e9be41",
+      "run": 42726021727,
+      "url": "https://github.com/orewn/tropnik/actions/runs/42726021727",
+      "artifactSha256": "9484e908d6ed06ae385725a04918d3720812b52a01e94073ed7051b98cab5019",
+      "diagnosticStatus": "completed",
+      "nativeActions": 29,
+      "dem": {
+        "sampleLimit": 256,
+        "observedRequests": 339,
+        "discardedRequests": 83,
+        "tileLevels": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "retainedStatusCounts": {
+          "200": 243,
+          "None": 13
+        }
+      },
+      "releaseEligible": false,
+      "highZoomTrace": {
+        "recordedDurationMs": 12350.264129999996,
+        "bytes": 5636908,
+        "sha256": "7b018bbc161522d5dc1b647a5f9d3d25f5372064b864a4e4712ddb0d6b94c722",
+        "status": "complete",
+        "eof": true,
+        "dataLossOccurred": false,
+        "categories": [
+          "devtools.timeline",
+          "blink.user_timing",
+          "gpu",
+          "disabled-by-default-devtools.timeline",
+          "disabled-by-default-devtools.timeline.stack",
+          "disabled-by-default-v8.cpu_profiler"
+        ]
+      }
+    },
+    {
+      "name": "city",
+      "commit": "b207b49990e405cba805a5a7a1d76650add05917",
+      "run": 42726115466,
+      "url": "https://github.com/orewn/tropnik/actions/runs/42726115466",
+      "artifactSha256": "4dec707f40a7d76ad9ffdc97718ff8c08bd3c05fd29ec320a2e94c9891af1fd6",
+      "diagnosticStatus": "failed",
+      "nativeActions": 6,
+      "dem": {
+        "sampleLimit": 256,
+        "observedRequests": 191,
+        "discardedRequests": 0,
+        "tileLevels": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "retainedStatusCounts": {
+          "200": 165,
+          "None": 26
+        }
+      },
+      "releaseEligible": false,
+      "settleDiagnostics": {
+        "schemaVersion": 1,
+        "engine": "maplibre",
+        "timeoutMs": 15000,
+        "requiredIdleObservations": 4,
+        "comparison": "exact-camera-rect-route",
+        "sampleLimit": 16,
+        "startedAtEpochMs": 1794269520550,
+        "elapsedMs": 15480.829899999997,
+        "totalSamples": 3,
+        "discardedSamples": 0,
+        "samples": [
+          {
+            "index": 1,
+            "startedAtEpochMs": 1794269520550,
+            "startOffsetMs": 0.012333000006037764,
+            "phase": "observed",
+            "frameMs": 3361.636222999994,
+            "readMs": 25.377116000003298,
+            "state": {
+              "camera": {
+                "longitude": 40.39729094372069,
+                "latitude": 43.72871233957622,
+                "zoom": 6.403718027935334,
+                "tileSize": 512,
+                "centerX": 520.5,
+                "centerY": 464.00000000000136
+              },
+              "engine": "maplibre",
+              "route": "kavkaz-8a",
+              "moving": false,
+              "visible": true,
+              "rect": {
+                "left": 384,
+                "top": 72,
+                "width": 1041,
+                "height": 928,
+                "right": 1425,
+                "bottom": 1000
+              },
+              "width": 1440,
+              "height": 1000,
+              "scrollWidth": 1425,
+              "terrainCamera": {
+                "pitch": 50,
+                "bearing": 0,
+                "centerElevation": 2442.038220483475,
+                "targetElevation": 2442.038220483475,
+                "terrainElevation": 2442.038220483475,
+                "centerClampedToGround": true,
+                "verticalFieldOfView": 36.86989764584402,
+                "pixelRatio": 1,
+                "terrain": {
+                  "source": "terrain-dem",
+                  "exaggeration": 1.12
+                },
+                "activeLayers": [
+                  "background",
+                  "overview-land",
+                  "natural-grass",
+                  "forest",
+                  "scrub",
+                  "ice",
+                  "terrain-shading",
+                  "water",
+                  "waterway",
+                  "boundaries",
+                  "road-outline",
+                  "roads",
+                  "state-label",
+                  "city-label",
+                  "region-fill",
+                  "region-boundary",
+                  "region-selected",
+                  "region-selected-outline",
+                  "trail-casing",
+                  "trail-line",
+                  "russia-outside-mask",
+                  "russia-priority-city-label",
+                  "trail-point-halo",
+                  "trail-point-dot",
+                  "trail-point-hit"
+                ]
+              }
+            },
+            "changedFields": [],
+            "durationMs": 3387.063421999992,
+            "endOffsetMs": 3387.1022550000052,
+            "signatureUnchanged": false,
+            "idleObservations": 1
+          },
+          {
+            "index": 2,
+            "startedAtEpochMs": 1794269524040,
+            "startOffsetMs": 3490.1946400000015,
+            "phase": "observed",
+            "frameMs": 5176.335621000006,
+            "readMs": 4.504860000000917,
+            "state": {
+              "camera": {
+                "longitude": 40.3972909437241,
+                "latitude": 43.72871233957622,
+                "zoom": 5.403718027935334,
+                "tileSize": 512,
+                "centerX": 520.5,
+                "centerY": 463.99999999999966
+              },
+              "engine": "maplibre",
+              "route": "kavkaz-8a",
+              "moving": false,
+              "visible": true,
+              "rect": {
+                "left": 384,
+                "top": 72,
+                "width": 1041,
+                "height": 928,
+                "right": 1425,
+                "bottom": 1000
+              },
+              "width": 1440,
+              "height": 1000,
+              "scrollWidth": 1425,
+              "terrainCamera": {
+                "pitch": 50,
+                "bearing": 0,
+                "centerElevation": 2281.2927806114994,
+                "targetElevation": 2281.2927806114994,
+                "terrainElevation": 2281.2927806114994,
+                "centerClampedToGround": true,
+                "verticalFieldOfView": 36.86989764584402,
+                "pixelRatio": 1,
+                "terrain": {
+                  "source": "terrain-dem",
+                  "exaggeration": 1.12
+                },
+                "activeLayers": [
+                  "background",
+                  "overview-land",
+                  "overview-relief",
+                  "natural-grass",
+                  "forest",
+                  "scrub",
+                  "ice",
+                  "terrain-shading",
+                  "water",
+                  "waterway",
+                  "boundaries",
+                  "country-label",
+                  "state-label",
+                  "city-label",
+                  "region-fill",
+                  "region-boundary",
+                  "region-selected",
+                  "region-selected-outline",
+                  "trail-casing",
+                  "trail-line",
+                  "russia-outside-mask",
+                  "russia-priority-city-label",
+                  "trail-point-halo",
+                  "trail-point-dot",
+                  "trail-point-hit"
+                ]
+              }
+            },
+            "changedFields": [
+              "camera.longitude",
+              "camera.zoom",
+              "camera.centerY"
+            ],
+            "durationMs": 5180.944134999998,
+            "endOffsetMs": 8671.139435999998,
+            "signatureUnchanged": false,
+            "idleObservations": 1
+          },
+          {
+            "index": 3,
+            "startedAtEpochMs": 1794269529322,
+            "startOffsetMs": 8771.442276999995,
+            "phase": "observed",
+            "frameMs": 6603.122104000009,
+            "readMs": 5.821020999996108,
+            "state": {
+              "camera": {
+                "longitude": 40.3972909437241,
+                "latitude": 43.72871233957622,
+                "zoom": 5.403718027935334,
+                "tileSize": 512,
+                "centerX": 520.5,
+                "centerY": 463.99999999999966
+              },
+              "engine": "maplibre",
+              "route": "kavkaz-8a",
+              "moving": false,
+              "visible": true,
+              "rect": {
+                "left": 384,
+                "top": 72,
+                "width": 1041,
+                "height": 928,
+                "right": 1425,
+                "bottom": 1000
+              },
+              "width": 1440,
+              "height": 1000,
+              "scrollWidth": 1425,
+              "terrainCamera": {
+                "pitch": 50,
+                "bearing": 0,
+                "centerElevation": 2281.2927806114994,
+                "targetElevation": 2281.2927806114994,
+                "terrainElevation": 2281.2927806114994,
+                "centerClampedToGround": true,
+                "verticalFieldOfView": 36.86989764584402,
+                "pixelRatio": 1,
+                "terrain": {
+                  "source": "terrain-dem",
+                  "exaggeration": 1.12
+                },
+                "activeLayers": [
+                  "background",
+                  "overview-land",
+                  "overview-relief",
+                  "natural-grass",
+                  "forest",
+                  "scrub",
+                  "ice",
+                  "terrain-shading",
+                  "water",
+                  "waterway",
+                  "boundaries",
+                  "country-label",
+                  "state-label",
+                  "city-label",
+                  "region-fill",
+                  "region-boundary",
+                  "region-selected",
+                  "region-selected-outline",
+                  "trail-casing",
+                  "trail-line",
+                  "russia-outside-mask",
+                  "russia-priority-city-label",
+                  "trail-point-halo",
+                  "trail-point-dot",
+                  "trail-point-hit"
+                ]
+              }
+            },
+            "changedFields": [],
+            "durationMs": 6609.009740000009,
+            "endOffsetMs": 15380.452447999996,
+            "signatureUnchanged": true,
+            "idleObservations": 2
+          }
+        ]
+      }
+    }
+  ],
+  "conclusions": [
+    "The uncapped cold baseline completed, so it did not reproduce the full warm C10 failure.",
+    "DEM12 reduced observed requests828to339 and preserved all18 recorded camera/terrain-camera samples, but the measured high transition was not faster. It is not accepted as a performance fix or global production cap.",
+    "City visibility reached no high-zoom trace: it failed on native zoom6.403718to5.403718, with only two stable final observations and no observed DEM404. It is not accepted as a fix.",
+    "Provider index0.0.13 gives the global planet archive0to12, but14 regional archive bounding boxes intersect the app footprint and advertise levels13to16. A global12cap is not justified.",
+    "Trace category enumeration returned an empty list; these three traces recorded the original six base categories. Additional requested categories were not captured in these runs."
+  ]
+}

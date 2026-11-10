@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": 11,
+  "checkedAt": "2026-11-10T00:43:26.272599+00:00",
+  "releasePass": false,
+  "sourceCommit": "971658415202f903149190c80f8c55da9c9c5cde",
+  "localEquivalentCommit": "3ca13d268d70ad779b3914a28b138b4862ed8a9a",
+  "sourceTree": "1037c9e103a30a731d0723bb3aa9522c727c86f1",
+  "siteCommit": "625dca756eb63389a8627efb5c2e4787f1225c27",
+  "archivePrepared": true,
+  "publicationPerformed": false,
+  "archive": {
+    "filename": "tropnik-0.4.19-c11-site.tar.gz",
+    "bytes": 39037000,
+    "sha256": "079a37787a60e399ffccffa6ead2d1d9cc63993f46b1e293e9306b8441318e18",
+    "regularFiles": 1194,
+    "bytesHashAndFileCountRechecked": true
+  },
+  "canonicalWebFilesByteIdentical": 1236,
+  "matchesCandidate": "candidate11",
+  "publicationHeldFor": [
+    "Confirmed pitch diagnostic stopped below zoom 18; C12 fix and exact-source checks are pending.",
+    "Full release browser matrix and final visual review.",
+    "Final candidate package and publication receipts."
+  ],
+  "pitchDiagnostic": {
+    "workflowRunId": 42729158656,
+    "sourceCommit": "c329c3873b09a4c7efa3ee8d4ff2f2769378bb30",
+    "status": "failed",
+    "error": "Terrain diagnostic native zoom stopped below18",
+    "details": "region-direction-controls-2026-11-10.json pendingFollowUp"
+  },
+  "accessRequirement": "Preserve owner-only access; this receipt does not claim a deployment or a fresh access audit."
+}

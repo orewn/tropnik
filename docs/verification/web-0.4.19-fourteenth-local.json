@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "candidate": 14,
+  "checkedAt": "2026-11-10T03:21:17.164636+00:00",
+  "releasePass": true,
+  "publicationPerformed": true,
+  "source": {
+    "remoteMainCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "localCommit": "93477dae52a077c4754b042e3753d88f319ef1f1",
+    "tree": "ece82954993f48281fd8ed1dc564b5b5bd5c4f3e",
+    "webTree": "48683c3549aa7d3e32ea902de85e1ad65f884345",
+    "localTreeRechecked": true,
+    "matchingRemoteTreeConfirmedBy": "root integration verification"
+  },
+  "localChecks": {
+    "evidence": "Commands observed earlier in this session by terrain_cpu_evidence. This documentation update runs no new tests or installations.",
+    "runtimePatchCommit": {
+      "commit": "a9b793cde338dfa578590db536921003da88e0b2",
+      "tree": "55887b3b5af69fd3e914e39e8edd7918c930aa8b",
+      "webTree": "48bacc7047d8ffdc1e7c45a7b20f44ca05c5fea7",
+      "webTests": {
+        "command": "node --experimental-strip-types --test tests/*.test.mjs",
+        "cwd": "web",
+        "passed": 488,
+        "failed": 0,
+        "includedActualSdkPatchTests": 14
+      },
+      "toolingTests": {
+        "command": "node --test tools/pages-preview/tests/*.test.mjs",
+        "passed": 84,
+        "failed": 0
+      },
+      "sourceArchiveTests": {
+        "command": "python3 tools/test-package-project.py",
+        "passed": 8,
+        "failed": 0
+      },
+      "typeScript": [
+        {
+          "command": "node web/node_modules/typescript/bin/tsc -p web/tsconfig.json --noEmit",
+          "status": "passed"
+        },
+        {
+          "command": "node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit",
+          "status": "passed"
+        }
+      ],
+      "eslint": {
+        "command": "node node_modules/eslint/bin/eslint.js . --ignore-pattern dist --ignore-pattern .next",
+        "cwd": "web",
+        "scope": "full web tree",
+        "status": "passed"
+      },
+      "syntaxChecks": {
+        "files": [
+          "web/scripts/maplibre-terrain-patch.mjs",
+          "tools/pages-preview/build.mjs"
+        ],
+        "status": "passed"
+      },
+      "patchRegeneration": {
+        "status": "passed",
+        "byteIdenticalToPnpmPatchCommit": true,
+        "registeredPatchSHA256": "62b23d0f95d66d482d417896db89cb0151246a9f274e66f68fc00a521fca8f4a",
+        "bytes": 1259541,
+        "installedProductionAndOfflineSHA256": "f76bb5d82a6f7d7b6bdd444a095ea28f9c4fafac3cde0bc1aec3f3756852c35f"
+      },
+      "gitDiffCheck": {
+        "authoredFiles": "passed",
+        "canonicalPatch": "Only upstream context-line indentation and blank-line prefixes produce whitespace diagnostics. Canonical patch bytes were preserved unchanged."
+      }
+    },
+    "fullBuildGuardCommit": {
+      "commit": "93477dae52a077c4754b042e3753d88f319ef1f1",
+      "parent": "a9b793cde338dfa578590db536921003da88e0b2",
+      "buildRouteTests": {
+        "command": "node --test web/tests/build-maplibre-patch-guard.test.mjs",
+        "passed": 3,
+        "failed": 0,
+        "scope": "Actual full-build entry point and patch guard in temporary fixtures; only the nine downstream build scripts are invocation recorders.",
+        "verified": [
+          "Stock installed SDK with patched offline bundle stops before any child or file mutation.",
+          "Patched installed SDK with stock offline bundle stops before any child or file mutation.",
+          "Matching inputs preserve all nine child invocations, Node flags, arguments and order."
+        ]
+      },
+      "targetedExistingTests": {
+        "command": "node --test web/tests/map-software-terrain-quality.test.mjs web/tests/service-worker-version.test.mjs",
+        "passed": 15,
+        "failed": 0,
+        "composition": {
+          "actualSdkPatchTests": 14,
+          "serviceWorkerVersionTests": 1
+        }
+      },
+      "eslint": {
+        "scope": "web/scripts/build-tropnik.mjs, web/public/sw.js and web/tests/build-maplibre-patch-guard.test.mjs",
+        "status": "passed"
+      },
+      "syntaxChecks": {
+        "files": [
+          "web/scripts/build-tropnik.mjs"
+        ],
+        "status": "passed"
+      },
+      "gitDiffCheck": "passed",
+      "serviceWorkerStamp": {
+        "generator": "web/scripts/stamp-service-worker.mjs",
+        "version": "tropnik-shell-0.4.19-441824b7751ad7e2",
+        "repeatedGenerationReturnedSameVersion": true,
+        "repeatedGenerationByteIdentical": true
+      },
+      "runtimePatchLockAndSdkBytesUnchanged": true,
+      "fullWebSuiteRerunOnThisCommit": false,
+      "full491TestPassClaimed": false
+    }
+  },
+  "installation": {
+    "localOfflineAttempt": {
+      "command": "node /opt/codex/tools/pnpm/bin/pnpm.cjs --dir web install --offline --frozen-lockfile --reporter=append-only",
+      "status": "failed",
+      "exitCode": 1,
+      "lockfileResolution": "Lockfile is up to date, resolution step is skipped; already up to date.",
+      "policyFailure": {
+        "code": "ERR_PNPM_NO_OFFLINE_META",
+        "package": "@cloudflare/workers-types",
+        "missingMetadata": "/workspace/.sites-runtime/pnpm-store/policy-cache/v11/metadata-full/registry.npmjs.org/@cloudflare/workers-types.jsonl"
+      },
+      "policyRelaxed": false,
+      "metadataFabricated": false
+    },
+    "laterSitesInstall": {
+      "command": "scripts/install-pnpm.sh",
+      "status": "passed",
+      "confirmedBy": "root ordinary Sites installation",
+      "reused": 1,
+      "downloaded": 0,
+      "policyUnchanged": true
+    },
+    "interpretation": "The later Sites installation does not reclassify the earlier local offline policy-cache failure as a pass."
+  },
+  "dependencyPatch": {
+    "package": "maplibre-gl",
+    "version": "6.16.0",
+    "registeredPatchSHA256": "62b23d0f95d66d482d417896db89cb0151246a9f274e66f68fc00a521fca8f4a",
+    "policy": "Known SwiftShader only: terrain qualityFactor 1; hardware, other software, unknown and failed renderer queries retain 2.",
+    "preserved": [
+      "DEM source and coverage",
+      "terrain tile size",
+      "meshSize 128",
+      "canvas pixel ratio",
+      "terrain depth buffers",
+      "anisotropy",
+      "style layers and symbols",
+      "worker and CSS"
+    ],
+    "productionDiagnosticTelemetryIncluded": false,
+    "provenance": "web/patches/maplibre-gl@6.16.0.swiftshader-rtt.json"
+  },
+  "ci": {
+    "runId": 42746521929,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42746521929",
+    "sourceCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "status": "completed",
+    "conclusion": "success",
+    "statusConfirmedBy": "root task handoff; interaction_skeptic owns subsequent monitoring",
+    "buildId": "0e74033994be61b1",
+    "finalWebTests": 491,
+    "finalToolingTests": 84,
+    "receipt": "web-0.4.19-fourteenth-ci-audit.json"
+  },
+  "site": {
+    "sourceCommit": "588bbf1bebc9b926a051d7e919a317980b3dbe1b",
+    "byteIdenticalTrackedWebFiles": 1242,
+    "localTrackedWebFileCountRechecked": true,
+    "byteComparisonAfterBuild": true,
+    "sourceSyncConfirmedBy": "root independent byte comparison of all tracked web files after build",
+    "freshBuildStatus": "passed",
+    "helperExitCode": 0,
+    "archive": {
+      "filename": "tropnik-0.4.19-c14-final-site.tar.gz",
+      "bytes": 39037193,
+      "sha256": "47b888d0ef316bfbe2311a55c106d7211fc1ca45d6c4e3812d4a49ae303a161e",
+      "members": 1320,
+      "regularFiles": 1194,
+      "directories": 126,
+      "bytesHashAndFileCountRechecked": true,
+      "safety": {
+        "unsafePaths": 0,
+        "symbolicLinks": 0,
+        "hardLinks": 0,
+        "specialNodes": 0,
+        "duplicateNormalizedPaths": 0
+      },
+      "verification": "Independent direct archive reads by terrain_cpu_evidence/harness_flags_review; no extraction.",
+      "runtimeFiles": [
+        {
+          "member": "dist/client/maps/maplibre-gl.mjs",
+          "bytes": 1108593,
+          "sha256": "f76bb5d82a6f7d7b6bdd444a095ea28f9c4fafac3cde0bc1aec3f3756852c35f",
+          "uniqueMember": true,
+          "matchesTrackedSource": true
+        },
+        {
+          "member": "dist/client/sw.js",
+          "bytes": 6309,
+          "sha256": "02b4752e3e1cd434c70741b32332f182d5fdc1d69ff7a8b37c3b127d95687a07",
+          "version": "tropnik-shell-0.4.19-441824b7751ad7e2",
+          "uniqueMember": true,
+          "matchesTrackedSource": true
+        }
+      ]
+    },
+    "publicationPerformed": true,
+    "receipt": "web-0.4.19-fourteenth-site-build.json",
+    "versionNumber": 21,
+    "deploymentId": "appgdep_6af28c6c7eac81918a05cb56180e5b85"
+  },
+  "remaining": [],
+  "finalPublicationReceipt": "web-0.4.19-final.json"
+}

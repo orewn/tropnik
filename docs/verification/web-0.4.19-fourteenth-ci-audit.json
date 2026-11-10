@@ -1,0 +1,1361 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-10T03:20:08.578860+00:00",
+  "releasePass": true,
+  "scope": "Full unchanged Pages release gate; deployment verification is recorded from the source-bound successful CI job. Private Site publication and live CUA acceptance are owned by the root agent.",
+  "source": {
+    "remoteCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "localCommit": "93477dae52a077c4754b042e3753d88f319ef1f1",
+    "tree": "ece82954993f48281fd8ed1dc564b5b5bd5c4f3e",
+    "webTree": "48683c3549aa7d3e32ea902de85e1ad65f884345",
+    "branch": "main",
+    "run": 42746521929,
+    "attempt": 1,
+    "runCreatedAt": "2026-11-10T03:00:15Z",
+    "runUpdatedAt": "2026-11-10T03:14:07Z",
+    "conclusion": "success",
+    "buildJob": 129599838626,
+    "deployJob": 129604757011,
+    "buildId": "0e74033994be61b1"
+  },
+  "checks": {
+    "web": {
+      "tests": 491,
+      "passed": 491,
+      "failed": 0
+    },
+    "pagesTooling": {
+      "tests": 84,
+      "passed": 84,
+      "failed": 0
+    },
+    "telegramReferenceTests": 19,
+    "frozenInstall": "passed",
+    "lint": "passed",
+    "staticClientTypes": "passed",
+    "destinationGuard": "passed",
+    "staticBuild": {
+      "buildId": "0e74033994be61b1",
+      "output": "/home/runner/work/tropnik/tropnik/web/pages-preview/dist",
+      "archive": "/home/runner/work/tropnik/tropnik/web/pages-preview/tropnik.zip",
+      "base": "/tropnik/",
+      "pages": 339,
+      "referenceRoutes": 306
+    },
+    "staticHTTPVerification": {
+      "verified": true,
+      "base": "/tropnik/",
+      "httpChecks": 52,
+      "browserRenderingTested": false,
+      "backendConnected": false
+    },
+    "assertBrowserReport": {
+      "result": "passed",
+      "expectedCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+      "validatorSourceRevision": "93477dae52a077c4754b042e3753d88f319ef1f1",
+      "validatorFilesVerifiedByteEqual": [
+        "tools/pages-preview/browser-report.mjs",
+        "tools/pages-preview/browser-direction-hitareas.mjs"
+      ]
+    },
+    "jobSteps": {
+      "build": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Check out the exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Set up Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Install the pinned package manager and frozen dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Restore and verify the public Android preview",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Verify APK download failure boundaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Verify reviewed Telegram reference boundaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run web regression checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Check web lint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Check static client types",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Read the configured Pages destination",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Require the intended public destination",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Build and verify the static site",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Record the verified build identity",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Preserve browser failure evidence",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16
+        },
+        {
+          "name": "Preserve map design checks across zoom levels",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Upload the verified static artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Post Set up Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35
+        },
+        {
+          "name": "Post Check out the exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
+        }
+      ],
+      "deploy": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Check out the matching verification tools",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Set up Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Deploy the verified artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Verify the public build, browser report and APK without authentication",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Post Set up Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Post Check out the matching verification tools",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        }
+      ]
+    }
+  },
+  "artifact": {
+    "id": 13731702129,
+    "name": "tropnik-pages-design-1",
+    "bytes": 32604366,
+    "expectedDigest": "sha256:8fd45bc7caabd35df61d726a7129601514953399ea6ce32e18c9e56af6ec7ced",
+    "actualSHA256": "8fd45bc7caabd35df61d726a7129601514953399ea6ce32e18c9e56af6ec7ced",
+    "memberCount": 63,
+    "uncompressedBytes": 34147906,
+    "sourceBindingVerified": true,
+    "ZIPIntegrityAndPathsVerified": true,
+    "pagesArchiveDownloaded": false
+  },
+  "evidenceIntegrity": {
+    "finalReportRecoveredFromJobLog": true,
+    "logNormalization": "Only per-line GitHub timestamps and BOM shard prefixes were removed. browser-verification-printed.json preserves the resulting exact printed JSON bytes plus trailing newline; browser-verification.json is a semantically identical normalized JSON copy.",
+    "artifactDesignObjectsExactlyMatchFinalReport": true,
+    "screenshotSHAAndSizeReceiptsVerified": 60,
+    "receiptFile": "browser-receipt-validation.json",
+    "allImagesHumanReviewed": false,
+    "defaultGPUTraceArtifacts": 0
+  },
+  "mobileProfiles": [
+    {
+      "name": "compact-android",
+      "width": 320,
+      "height": 640,
+      "engine": "leaflet",
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0,
+      "layoutShift": 0,
+      "longestTaskMs": 209,
+      "sheet": {
+        "passed": true,
+        "input": "touch",
+        "listPositionRetained": true,
+        "selectionPreserved": true,
+        "finalState": "closed",
+        "maxTrackingErrorPx": 1.2207031261368684e-05,
+        "maxPageScrollDeltaPx": 0
+      }
+    },
+    {
+      "name": "iphone-portrait",
+      "width": 390,
+      "height": 844,
+      "engine": "leaflet",
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0,
+      "layoutShift": 0,
+      "longestTaskMs": 60,
+      "sheet": {
+        "passed": true,
+        "input": "touch",
+        "listPositionRetained": true,
+        "selectionPreserved": true,
+        "finalState": "closed",
+        "maxTrackingErrorPx": 2.4414062522737368e-05,
+        "maxPageScrollDeltaPx": 0
+      }
+    },
+    {
+      "name": "android-portrait",
+      "width": 412,
+      "height": 915,
+      "engine": "leaflet",
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0,
+      "layoutShift": 0,
+      "longestTaskMs": 130,
+      "sheet": {
+        "passed": true,
+        "input": "touch",
+        "listPositionRetained": true,
+        "selectionPreserved": true,
+        "finalState": "closed",
+        "maxTrackingErrorPx": 2.4414062522737368e-05,
+        "maxPageScrollDeltaPx": 0
+      }
+    },
+    {
+      "name": "phone-landscape",
+      "width": 844,
+      "height": 390,
+      "engine": "leaflet",
+      "interactionTested": true,
+      "sheetTested": true,
+      "sheetHeightDelta": 0,
+      "layoutShift": 0,
+      "longestTaskMs": 206,
+      "sheet": {
+        "passed": true,
+        "input": "touch",
+        "listPositionRetained": true,
+        "selectionPreserved": true,
+        "finalState": "closed",
+        "maxTrackingErrorPx": 1.2207031261368684e-05,
+        "maxPageScrollDeltaPx": 0
+      }
+    }
+  ],
+  "mapInteractions": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "mobile": true,
+      "passed": true,
+      "route": {
+        "id": "osm-relation-6040458",
+        "title": "Всесоюзный горнопешеходный маршрут № 77",
+        "offsetPx": 14
+      },
+      "line": {
+        "point": {
+          "x": 24.360571571437532,
+          "y": 475.8984449321372
+        },
+        "route": "osm-relation-6040458",
+        "clicked": true,
+        "selectionRetained": true,
+        "reopened": true
+      },
+      "returnedToRegion": true,
+      "returnedToDirections": true,
+      "countryCameraRestored": true,
+      "catalogScroll": {
+        "passed": true,
+        "input": "touch",
+        "before": 0,
+        "after": 125,
+        "deltaPx": 125,
+        "pageScrollDeltaPx": 0,
+        "sheetDisplacementPx": 0,
+        "scrollHeightBefore": 3622,
+        "scrollHeightAfter": 3622,
+        "scrollHeightDelta": 0,
+        "selectionPreserved": true
+      },
+      "gestures": {
+        "zoomInput": "touch-control",
+        "beforeZoom": 4.5657444906979014,
+        "afterZoom": 5.3157444906979014,
+        "dragged": true,
+        "dragCameras": {
+          "before": {
+            "longitude": 109.41359607724925,
+            "latitude": 52.11852855301879,
+            "zoom": 5.3157444906979014,
+            "tileSize": 256
+          },
+          "after": {
+            "longitude": 107.71884768006635,
+            "latitude": 52.3779265194021,
+            "zoom": 5.3157444906979014,
+            "tileSize": 256
+          }
+        },
+        "selectionPreserved": true,
+        "resizedTo": {
+          "width": 915,
+          "height": 412
+        },
+        "postResizePolygon": "territory-28173009B49563687485750"
+      },
+      "longestTaskMs": 130,
+      "layoutShift": 0,
+      "externalHitAreas": {
+        "counts": {
+          "nativeActions": 6,
+          "clusterExpansions": 4,
+          "hiddenControlObservations": 56,
+          "visibleHitProbes": 96,
+          "outsideAnchorHitProbes": 66,
+          "wrongOwners": 0,
+          "hiddenWrapperProbes": 324,
+          "hiddenWrapperCaptures": 0,
+          "events": 18,
+          "untrustedEvents": 0,
+          "pointerdown": 6,
+          "pointerup": 6,
+          "click": 6
+        },
+        "actions": [
+          {
+            "kind": "label",
+            "input": "touch",
+            "cluster": true,
+            "anchorId": "altai",
+            "groupKey": "adygea|altai|baikal|kabardino-balkaria|kaliningrad|kamchatka|karachay-cherkessia|karelia|krasnodar|krasnoyarsk|krym|murmansk|primorye|sakhalin|voronezh",
+            "point": {
+              "name": "s",
+              "kind": "label",
+              "x": 145,
+              "y": 560,
+              "anchorId": "altai",
+              "groupKey": "adygea|altai|baikal|kabardino-balkaria|kaliningrad|kamchatka|karachay-cherkessia|karelia|krasnodar|krasnoyarsk|krym|murmansk|primorye|sakhalin|voronezh"
+            },
+            "before": {
+              "region": "",
+              "route": "",
+              "zoom": 1.337721595206259
+            },
+            "after": {
+              "region": "",
+              "route": "",
+              "zoom": 2.337721595206259
+            }
+          },
+          {
+            "kind": "label",
+            "input": "touch",
+            "cluster": true,
+            "anchorId": "altai",
+            "groupKey": "altai|baikal",
+            "point": {
+              "name": "s",
+              "kind": "label",
+              "x": 178,
+              "y": 489,
+              "anchorId": "altai",
+              "groupKey": "altai|baikal"
+            },
+            "before": {
+              "region": "",
+              "route": "",
+              "zoom": 2.337721595206259
+            },
+            "after": {
+              "region": "",
+              "route": "",
+              "zoom": 4.352647277348736
+            }
+          },
+          {
+            "kind": "label",
+            "input": "touch",
+            "cluster": false,
+            "anchorId": "altai",
+            "groupKey": "altai",
+            "point": {
+              "name": "s",
+              "kind": "label",
+              "x": 43,
+              "y": 522,
+              "anchorId": "altai",
+              "groupKey": "altai"
+            },
+            "before": {
+              "region": "",
+              "route": "",
+              "zoom": 4.352647277348736
+            },
+            "after": {
+              "region": "altai",
+              "route": "",
+              "zoom": 6.1
+            }
+          },
+          {
+            "kind": "count",
+            "input": "touch",
+            "cluster": true,
+            "anchorId": "altai",
+            "groupKey": "adygea|altai|baikal|kabardino-balkaria|kaliningrad|kamchatka|karachay-cherkessia|karelia|krasnodar|krasnoyarsk|krym|murmansk|primorye|sakhalin|voronezh",
+            "point": {
+              "name": "e",
+              "kind": "count",
+              "x": 173.890625,
+              "y": 512,
+              "anchorId": "altai",
+              "groupKey": "adygea|altai|baikal|kabardino-balkaria|kaliningrad|kamchatka|karachay-cherkessia|karelia|krasnodar|krasnoyarsk|krym|murmansk|primorye|sakhalin|voronezh"
+            },
+            "before": {
+              "region": "",
+              "route": "",
+              "zoom": 1.337721595206259
+            },
+            "after": {
+              "region": "",
+              "route": "",
+              "zoom": 2.337721595206259
+            }
+          },
+          {
+            "kind": "count",
+            "input": "touch",
+            "cluster": true,
+            "anchorId": "altai",
+            "groupKey": "altai|baikal",
+            "point": {
+              "name": "e",
+              "kind": "count",
+              "x": 206,
+              "y": 441,
+              "anchorId": "altai",
+              "groupKey": "altai|baikal"
+            },
+            "before": {
+              "region": "",
+              "route": "",
+              "zoom": 2.337721595206259
+            },
+            "after": {
+              "region": "",
+              "route": "",
+              "zoom": 4.352647277348736
+            }
+          },
+          {
+            "kind": "count",
+            "input": "touch",
+            "cluster": false,
+            "anchorId": "baikal",
+            "groupKey": "baikal",
+            "point": {
+              "name": "e",
+              "kind": "count",
+              "x": 360.890625,
+              "y": 408,
+              "anchorId": "baikal",
+              "groupKey": "baikal"
+            },
+            "before": {
+              "region": "",
+              "route": "",
+              "zoom": 4.352647277348736
+            },
+            "after": {
+              "region": "baikal",
+              "route": "",
+              "zoom": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "mobile": false,
+      "passed": true,
+      "route": {
+        "id": "osm-relation-6040458",
+        "title": "Всесоюзный горнопешеходный маршрут № 77",
+        "offsetPx": 14
+      },
+      "line": {
+        "point": {
+          "x": 424.11929556307564,
+          "y": 626.5058129960987
+        },
+        "route": "osm-relation-6040458",
+        "clicked": true,
+        "selectionRetained": true,
+        "reopened": false
+      },
+      "returnedToRegion": true,
+      "returnedToDirections": true,
+      "countryCameraRestored": true,
+      "catalogScroll": null,
+      "gestures": {
+        "zoomInput": "mouse-wheel",
+        "beforeZoom": 4.36935063832489,
+        "afterZoom": 4.872517842089215,
+        "dragged": true,
+        "dragCameras": {
+          "before": {
+            "longitude": 108.20021893346325,
+            "latitude": 58.58120638934085,
+            "zoom": 4.872517842089215,
+            "tileSize": 512,
+            "centerX": 520.5,
+            "centerY": 464
+          },
+          "after": {
+            "longitude": 107.04809353076678,
+            "latitude": 58.731032350971134,
+            "zoom": 4.872517842089215,
+            "tileSize": 512,
+            "centerX": 520.5,
+            "centerY": 464
+          }
+        },
+        "selectionPreserved": true,
+        "resizedTo": {
+          "width": 1260,
+          "height": 900
+        },
+        "postResizePolygon": "territory-28173009B78872068540735"
+      },
+      "longestTaskMs": 351,
+      "layoutShift": 0,
+      "externalHitAreas": {
+        "counts": {
+          "nativeActions": 2,
+          "clusterExpansions": 0,
+          "hiddenControlObservations": 18,
+          "visibleHitProbes": 32,
+          "outsideAnchorHitProbes": 22,
+          "wrongOwners": 0,
+          "events": 6,
+          "untrustedEvents": 0,
+          "pointerdown": 2,
+          "pointerup": 2,
+          "click": 2
+        },
+        "actions": [
+          {
+            "kind": "label",
+            "input": "mouse",
+            "cluster": false,
+            "anchorId": "altai",
+            "groupKey": "altai",
+            "point": {
+              "name": "s",
+              "kind": "label",
+              "x": 782,
+              "y": 795.25,
+              "anchorId": "altai",
+              "groupKey": "altai"
+            },
+            "before": {
+              "region": "",
+              "route": "",
+              "zoom": 1.90540610449558
+            },
+            "after": {
+              "region": "altai",
+              "route": "",
+              "zoom": 6.1
+            }
+          },
+          {
+            "kind": "count",
+            "input": "mouse",
+            "cluster": false,
+            "anchorId": "baikal",
+            "groupKey": "baikal",
+            "point": {
+              "name": "e",
+              "kind": "count",
+              "x": 923.890625,
+              "y": 719,
+              "anchorId": "baikal",
+              "groupKey": "baikal"
+            },
+            "before": {
+              "region": "",
+              "route": "",
+              "zoom": 1.90540610449558
+            },
+            "after": {
+              "region": "baikal",
+              "route": "",
+              "zoom": 6
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "zoomDesigns": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "geometryPassed": true,
+      "visualReviewRequired": true,
+      "detailStepCount": 24,
+      "detailZooms": [
+        1.337721595206259,
+        2.087721595206259,
+        2.837721595206259,
+        3.587721595206259,
+        4.3377215952062596,
+        5.0877215952062596,
+        5.8377215952062596,
+        6.5877215952062596,
+        7.3377215952062596,
+        8.08772159520626,
+        8.83772159520626,
+        9.58772159520626,
+        10.33772159520626,
+        11.08772159520626,
+        11.83772159520626,
+        12.58772159520626,
+        13.33772159520626,
+        14.08772159520626,
+        14.83772159520626,
+        15.58772159520626,
+        16.33772159520626,
+        17.08772159520626,
+        17.83772159520626,
+        18
+      ],
+      "screenshotCount": 27,
+      "screenshotModes": {
+        "route-fit": 1,
+        "overview": 1,
+        "detail": 6,
+        "satellite": 6,
+        "saved-overview": 6,
+        "scene3d": 4,
+        "source-ends": 3
+      },
+      "modes": {
+        "detail": {
+          "state": "checked",
+          "stepCount": 24,
+          "firstZoom": 1.337721595206259,
+          "lastZoom": 18
+        },
+        "satellite": {
+          "state": "active",
+          "active": true,
+          "status": "",
+          "loadedTiles": 4,
+          "finishedImageResponses": 185,
+          "failedResponses": 0,
+          "stepCount": 24,
+          "visualReviewRequired": true,
+          "zoomSteps": [
+            18,
+            17.25,
+            16.5,
+            15.75,
+            15,
+            14.25,
+            13.5,
+            12.75,
+            12,
+            11.25,
+            10.5,
+            9.75,
+            9,
+            8.25,
+            7.5,
+            6.75,
+            6,
+            5.25,
+            4.5,
+            3.75,
+            3,
+            2.25,
+            1.5,
+            1.337721595206259
+          ]
+        },
+        "overview": {
+          "state": "active",
+          "selectedControl": true,
+          "sourceEvidence": {
+            "geoJSON": [
+              {
+                "source": "overview",
+                "path": "/tropnik/data/russia-display-area.geojson",
+                "status": 200,
+                "mimeType": "application/geo+json",
+                "fromDiskCache": true,
+                "finished": true,
+                "bytes": 0
+              },
+              {
+                "source": "overview",
+                "path": "/tropnik/data/russia-outside-mask.geojson",
+                "status": 200,
+                "mimeType": "application/geo+json",
+                "fromDiskCache": true,
+                "finished": true,
+                "bytes": 0
+              },
+              {
+                "source": "overview",
+                "path": "/tropnik/data/territories.geojson",
+                "status": 200,
+                "mimeType": "application/geo+json",
+                "fromDiskCache": true,
+                "finished": true,
+                "bytes": 0
+              }
+            ],
+            "finishedReliefImageResponses": 183,
+            "failedResponses": 0,
+            "loadedReliefTiles": 0
+          },
+          "visualReviewRequired": true,
+          "zoomSteps": [
+            {
+              "target": 2,
+              "actual": 2.087721595206259
+            },
+            {
+              "target": 5,
+              "actual": 5.0877215952062596
+            },
+            {
+              "target": 8,
+              "actual": 8.08772159520626
+            },
+            {
+              "target": 11,
+              "actual": 11.08772159520626
+            },
+            {
+              "target": 14,
+              "actual": 14.08772159520626
+            },
+            {
+              "target": 18,
+              "actual": 18
+            }
+          ]
+        },
+        "terrain": {
+          "state": "not-offered",
+          "reason": "The mobile map offers its prepared 3D scene instead of global WebGL terrain."
+        },
+        "scene3d": {
+          "state": "ready",
+          "visible": true,
+          "ready": true,
+          "retainedMapNoticeVisible": false,
+          "error": "",
+          "canvas": {
+            "width": 412,
+            "height": 847,
+            "renderer": "webgl2",
+            "triangles": 131072,
+            "sourceVertices": 263169,
+            "meshStride": 2,
+            "renderMs": 8.5
+          },
+          "zoomInputs": 28,
+          "resetInput": true,
+          "imageChanged": true,
+          "visualReviewRequired": true
+        }
+      },
+      "zoomBursts": {
+        "increase": {
+          "count": 4,
+          "dispatchMode": "ordered-native",
+          "startedAtEpochMs": 1794279837885,
+          "producerDurationMs": 0.4082789999956731,
+          "durationMs": 17.956650999985868,
+          "input": "touch",
+          "direction": 1,
+          "step": 0.75,
+          "beforeZoom": 9.58772159520626,
+          "expectedZoom": 12.58772159520626,
+          "afterZoom": 12.58772159520626,
+          "receivedClicks": 4,
+          "eventSpanMs": 0.7999999999883585,
+          "eventOrderVerified": true,
+          "domSampleStartedAtMs": 67951,
+          "domTimeOrigin": 1794279769933.9,
+          "firstInputLagMs": 15.599853515625,
+          "performance": {
+            "cls": 0,
+            "longest": 59
+          },
+          "pageScrollDeltaPx": 0,
+          "selectionPreserved": true,
+          "passed": true
+        },
+        "decrease": {
+          "count": 4,
+          "dispatchMode": "ordered-native",
+          "startedAtEpochMs": 1794279839235,
+          "producerDurationMs": 0.23511499998858199,
+          "durationMs": 19.373853999975836,
+          "input": "touch",
+          "direction": -1,
+          "step": 0.75,
+          "beforeZoom": 12.58772159520626,
+          "expectedZoom": 9.58772159520626,
+          "afterZoom": 9.58772159520626,
+          "receivedClicks": 4,
+          "eventSpanMs": 0.8999999999941792,
+          "eventOrderVerified": true,
+          "domSampleStartedAtMs": 69301,
+          "domTimeOrigin": 1794279769933.9,
+          "firstInputLagMs": 15.599853515625,
+          "performance": {
+            "cls": 0,
+            "longest": 59
+          },
+          "pageScrollDeltaPx": 0,
+          "selectionPreserved": true,
+          "passed": true
+        }
+      },
+      "sourceEnds": {
+        "passed": true,
+        "routeId": "osm-relation-2244794",
+        "source": {
+          "featureCount": 1,
+          "partCount": 1,
+          "vertexCount": 12,
+          "endpoints": [
+            [
+              40.6882934,
+              45.5459288
+            ],
+            [
+              40.6891574,
+              45.5427913
+            ]
+          ],
+          "sha256": "b0108f4c547cd0aa032043602809f5aabd23c59b4df113b2f1a51566cdc3d241"
+        },
+        "setupClicks": 0,
+        "nativeZoomClicks": 12,
+        "frames": [
+          {
+            "targetZoom": 11,
+            "zoom": 11,
+            "screenshot": "android-portrait-source-ends-z11_00-crowded.png"
+          },
+          {
+            "targetZoom": 14,
+            "zoom": 14,
+            "screenshot": "android-portrait-source-ends-z14_00-separated.png"
+          },
+          {
+            "targetZoom": 17,
+            "zoom": 17,
+            "screenshot": "android-portrait-source-ends-z17_00-close.png"
+          }
+        ],
+        "closeFramingPassed": true,
+        "closeFramingRequired": true,
+        "closeFramingGestures": 1
+      },
+      "performance": {
+        "layoutShift": 0,
+        "longestTaskMs": 68
+      }
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "geometryPassed": true,
+      "visualReviewRequired": true,
+      "detailStepCount": 18,
+      "detailZooms": [
+        1.90540610449558,
+        2.90540610449558,
+        3.90540610449558,
+        4.9054061044955795,
+        5.9054061044955795,
+        6.9054061044955795,
+        7.9054061044955795,
+        8.90540610449558,
+        9.90540610449558,
+        10.90540610449558,
+        11.90540610449558,
+        12.90540610449558,
+        13.90540610449558,
+        14.90540610449558,
+        15.90540610449558,
+        16.90540610449558,
+        17.90540610449558,
+        18
+      ],
+      "screenshotCount": 33,
+      "screenshotModes": {
+        "route-fit": 1,
+        "overview": 1,
+        "detail": 6,
+        "satellite": 6,
+        "saved-overview": 6,
+        "terrain": 6,
+        "scene3d": 4,
+        "source-ends": 3
+      },
+      "modes": {
+        "detail": {
+          "state": "checked",
+          "stepCount": 18,
+          "firstZoom": 1.90540610449558,
+          "lastZoom": 18
+        },
+        "satellite": {
+          "state": "active",
+          "active": true,
+          "status": "",
+          "loadedTiles": 0,
+          "finishedImageResponses": 305,
+          "failedResponses": 2,
+          "stepCount": 18,
+          "visualReviewRequired": true,
+          "zoomSteps": [
+            18,
+            17,
+            16,
+            15,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1.90540610449558
+          ]
+        },
+        "overview": {
+          "state": "active",
+          "selectedControl": true,
+          "sourceEvidence": {
+            "geoJSON": [
+              {
+                "source": "overview",
+                "path": "/tropnik/data/russia-display-area.geojson",
+                "status": 200,
+                "mimeType": "application/geo+json",
+                "fromDiskCache": true,
+                "finished": true,
+                "bytes": 0
+              },
+              {
+                "source": "overview",
+                "path": "/tropnik/data/russia-canonical-mask.geojson",
+                "status": 200,
+                "mimeType": "application/geo+json",
+                "fromDiskCache": true,
+                "finished": true,
+                "bytes": 0
+              },
+              {
+                "source": "overview",
+                "path": "/tropnik/data/territories.geojson",
+                "status": 200,
+                "mimeType": "application/geo+json",
+                "fromDiskCache": true,
+                "finished": true,
+                "bytes": 0
+              }
+            ],
+            "finishedReliefImageResponses": 66,
+            "failedResponses": 0,
+            "loadedReliefTiles": 0
+          },
+          "visualReviewRequired": true,
+          "zoomSteps": [
+            {
+              "target": 2,
+              "actual": 2.90540610449558
+            },
+            {
+              "target": 5,
+              "actual": 5.9054061044955795
+            },
+            {
+              "target": 8,
+              "actual": 8.90540610449558
+            },
+            {
+              "target": 11,
+              "actual": 11.90540610449558
+            },
+            {
+              "target": 14,
+              "actual": 14.90540610449558
+            },
+            {
+              "target": 18,
+              "actual": 18
+            }
+          ]
+        },
+        "terrain": {
+          "state": "active",
+          "stepCount": 18,
+          "visualReviewRequired": true,
+          "zoomSteps": [
+            1.90540610449558,
+            2.90540610449558,
+            3.90540610449558,
+            4.9054061044955795,
+            5.9054061044955795,
+            6.9054061044955795,
+            7.9054061044955795,
+            8.90540610449558,
+            9.90540610449558,
+            10.90540610449558,
+            11.90540610449558,
+            12.90540610449558,
+            13.90540610449558,
+            14.90540610449558,
+            15.90540610449558,
+            16.90540610449558,
+            17.90540610449558,
+            17.999999982027813
+          ]
+        },
+        "scene3d": {
+          "state": "ready",
+          "visible": true,
+          "ready": true,
+          "retainedMapNoticeVisible": false,
+          "error": "",
+          "canvas": {
+            "width": 1041,
+            "height": 928,
+            "renderer": "webgl2",
+            "triangles": 524288,
+            "sourceVertices": 263169,
+            "meshStride": 1,
+            "renderMs": 9
+          },
+          "zoomInputs": 28,
+          "resetInput": true,
+          "imageChanged": true,
+          "visualReviewRequired": true
+        }
+      },
+      "zoomBursts": {
+        "increase": {
+          "count": 4,
+          "dispatchMode": "ordered-native",
+          "startedAtEpochMs": 1794280088025,
+          "producerDurationMs": 0.2639070000150241,
+          "durationMs": 2.694009000028018,
+          "input": "mouse",
+          "direction": 1,
+          "step": 1,
+          "beforeZoom": 9.90540610449558,
+          "expectedZoom": 13.90540610449558,
+          "afterZoom": 13.90540610449558,
+          "receivedClicks": 4,
+          "eventSpanMs": 1.2999999999883585,
+          "eventOrderVerified": true,
+          "domSampleStartedAtMs": 47996.100000000035,
+          "domTimeOrigin": 1794280040028.8,
+          "firstInputLagMs": 1,
+          "performance": {
+            "cls": 0,
+            "longest": 267
+          },
+          "pageScrollDeltaPx": 0,
+          "selectionPreserved": true,
+          "passed": true
+        },
+        "decrease": {
+          "count": 4,
+          "dispatchMode": "ordered-native",
+          "startedAtEpochMs": 1794280089641,
+          "producerDurationMs": 0.2531109999981709,
+          "durationMs": 3.440296999993734,
+          "input": "mouse",
+          "direction": -1,
+          "step": 1,
+          "beforeZoom": 13.90540610449558,
+          "expectedZoom": 9.90540610449558,
+          "afterZoom": 9.90540610449558,
+          "receivedClicks": 4,
+          "eventSpanMs": 1.5,
+          "eventOrderVerified": true,
+          "domSampleStartedAtMs": 49612.70000000001,
+          "domTimeOrigin": 1794280040028.8,
+          "firstInputLagMs": 2,
+          "performance": {
+            "cls": 0,
+            "longest": 267
+          },
+          "pageScrollDeltaPx": 0,
+          "selectionPreserved": true,
+          "passed": true
+        }
+      },
+      "sourceEnds": {
+        "passed": true,
+        "routeId": "osm-relation-2244794",
+        "source": {
+          "featureCount": 1,
+          "partCount": 1,
+          "vertexCount": 12,
+          "endpoints": [
+            [
+              40.6882934,
+              45.5459288
+            ],
+            [
+              40.6891574,
+              45.5427913
+            ]
+          ],
+          "sha256": "b0108f4c547cd0aa032043602809f5aabd23c59b4df113b2f1a51566cdc3d241"
+        },
+        "setupClicks": 0,
+        "nativeZoomClicks": 9,
+        "frames": [
+          {
+            "targetZoom": 11,
+            "zoom": 11,
+            "screenshot": "desktop-webgl-source-ends-z11_00-crowded.png"
+          },
+          {
+            "targetZoom": 14,
+            "zoom": 14,
+            "screenshot": "desktop-webgl-source-ends-z14_00-separated.png"
+          },
+          {
+            "targetZoom": 17,
+            "zoom": 17,
+            "screenshot": "desktop-webgl-source-ends-z17_00-close.png"
+          }
+        ],
+        "closeFramingPassed": true,
+        "closeFramingRequired": true,
+        "closeFramingGestures": 1
+      },
+      "performance": {
+        "layoutShift": 0,
+        "longestTaskMs": 1362
+      }
+    }
+  ],
+  "publicDeployment": {
+    "verified": true,
+    "url": "https://orewn.github.io/tropnik/",
+    "buildId": "0e74033994be61b1",
+    "sourceCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "publicHttpChecks": 23,
+    "apkSha256": "b80c36174a87eb70cc8e010af7535847b3fe9374586a87a535718bc25bf3d40f",
+    "browserRenderingTested": true,
+    "browserProfiles": 4
+  },
+  "selectedVisualReview": {
+    "method": "Opened the original local PNGs individually after verifying all screenshot receipts.",
+    "files": [
+      {
+        "file": "desktop-webgl-terrain-z18_00-key18.png",
+        "finding": "Reached upper zoom; controls and selected route context remain visible. Broad coarse fill and shallow diagonal boundary resemble prior diagnostic frames; no new obvious UI obstruction. This does not establish higher underlying DEM detail."
+      },
+      {
+        "file": "desktop-webgl-scene3d-reset.png",
+        "finding": "Prepared terrain mesh, route and controls are visible after zoom/reset; retained 2D loading notice is absent."
+      },
+      {
+        "file": "desktop-webgl-source-ends-z17_00-close.png",
+        "finding": "Both endpoint badges and full captions are visible and separated from context/legend controls; route line remains visible."
+      }
+    ],
+    "scopeLimit": "The 60 SHA/size checks verify image receipts, not human visual review of all 60 frames. Root independently owns final live published-region click and publication visual acceptance."
+  },
+  "interpretation": [
+    "The full warm release matrix now completes, including the desktop terrain step that blocked C12 and C13, with unchanged native input, per-input settle, performance and schema gates.",
+    "The separate cold GPU diagnostic established a bounded RTT cost reduction. This full pass establishes this release candidate met the existing gate; it is not a guarantee of uniform performance on every device or network.",
+    "Map interaction longest tasks are 130ms mobile and351ms desktop, with CLS0. The broader desktop design phase records longestTaskMs1362; do not describe every rendering task as below750ms.",
+    "Terrain end zoom is17.999999982027813 after18 inspected steps; no final camera-drift failure is reported.",
+    "No rerun, gate weakening, Pages archive download or runtime modification was performed by this audit."
+  ],
+  "files": [
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/build-job.log",
+      "bytes": 3080076,
+      "sha256": "50592286e1f3944b5bd7c117b929d89ab8cd672f68870aafd40ef1980571c024"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/deploy-job.log",
+      "bytes": 18794,
+      "sha256": "ca19b9f1e695890c4170d18e448205e652749aa8d0f62a7f46f77421d04f87fc"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/run-terminal.json",
+      "bytes": 19205,
+      "sha256": "91bf55a810276d1594d5471ce4c01d17253deb838579be05b01ea8da8d25fea9"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/design-artifact.zip",
+      "bytes": 32604366,
+      "sha256": "8fd45bc7caabd35df61d726a7129601514953399ea6ce32e18c9e56af6ec7ced"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/design-artifact-manifest.json",
+      "bytes": 4107,
+      "sha256": "42f016f3e9332ec530042cedf3e60c010ef589c924af4f3fdfbea5a64ecae002"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/browser-verification-printed.json",
+      "bytes": 1474807,
+      "sha256": "d4455805d302c491432b033c437661ccbb8dcac787a1fe7d50477b8ec924e6ac"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/browser-verification.json",
+      "bytes": 1474682,
+      "sha256": "010f6054083b06ec4081e64a0b65d1a4370b55db6dcc219130be3c70573c4e58"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/browser-receipt-validation.json",
+      "bytes": 17342,
+      "sha256": "b30f9846b00ae6a2a7fd398c650c6aef01a7384501cf3ce86f93a4ace5222476"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/design-qa/android-portrait.json",
+      "bytes": 425744,
+      "sha256": "b0923600c0b471ceb69d5fbd956191c9387a6dd3e5008f48f0a5ed1696f0fa39"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/design-qa/desktop-webgl.json",
+      "bytes": 541489,
+      "sha256": "2678587422abbaa1a30dca54d211e788eafe30973f27c4dd6e35b0e569a596c2"
+    },
+    {
+      "path": "/workspace/scratch/13d796f593db/ci-evidence-bf133e1a/design-qa/browser-progress.json",
+      "bytes": 469400,
+      "sha256": "04b1773d5c03d36d63ab10c4519d82f48a23615fe6323a19b923ab84fd405073"
+    }
+  ]
+}

@@ -1,0 +1,1645 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "runtimeBaseline": "d814cf4dd2ba091975d68d033747ba3d7c1c151b",
+  "runs": [
+    {
+      "name": "matched-baseline",
+      "sourceCommit": "059e711da1fa3abb4ecd436bae21d7a9a617f51c",
+      "runId": 42733729752,
+      "jobId": 129557793705,
+      "status": "failed",
+      "url": "https://github.com/orewn/tropnik/actions/runs/42733729752",
+      "archiveSha256": "38d1bc1b8a24835a25f56409006bd0e2b343579a74f08c9d5c98d2c5054d6b0f",
+      "reportSha256": "fa0ee627cc423e550d647abddc2445a7da36afccf533e54f4535668d26aa7f2d",
+      "settle": {
+        "timeoutMs": 15000,
+        "requiredIdleObservations": 4,
+        "elapsedMs": 18270.854177,
+        "totalSamples": 3,
+        "frameWaitsMs": [
+          1301.636830000003,
+          10562.729879999999,
+          6072.634837999998
+        ],
+        "idleObservations": [
+          1,
+          2,
+          3
+        ],
+        "finalCamera": {
+          "longitude": 40.39729094372467,
+          "latitude": 43.72871233957642,
+          "zoom": 16.90540610449558,
+          "tileSize": 512,
+          "centerX": 520.5,
+          "centerY": 464
+        },
+        "finalMoving": false,
+        "changedFields": [
+          [],
+          [],
+          []
+        ]
+      },
+      "beforeActivationBacking": {
+        "width": 1041,
+        "height": 928
+      },
+      "highZoomBacking": {
+        "width": 1041,
+        "height": 928
+      }
+    },
+    {
+      "name": "software-density",
+      "sourceCommit": "3c846f5011718280bc69891fd275a655443567b6",
+      "runId": 42734473534,
+      "jobId": 129560187852,
+      "status": "failed",
+      "url": "https://github.com/orewn/tropnik/actions/runs/42734473534",
+      "archiveSha256": "5837af18684449813cb618b61db0972aa2f3469f9bb8564f0a4bc9fb7070929a",
+      "reportSha256": "557bb218ca4095da6dc307233a83f3aebe1cc28bac7b4918dbb6b01b6a6d7fe0",
+      "settle": {
+        "timeoutMs": 15000,
+        "requiredIdleObservations": 4,
+        "elapsedMs": 15026.486441000015,
+        "totalSamples": 3,
+        "frameWaitsMs": [
+          440.5475429999933,
+          4035.702086000005,
+          10219.02627100001
+        ],
+        "idleObservations": [
+          1,
+          1,
+          2
+        ],
+        "finalCamera": {
+          "longitude": 40.397290943725466,
+          "latitude": 43.72871233957653,
+          "zoom": 15.90540610449558,
+          "tileSize": 512,
+          "centerX": 520.5000000027404,
+          "centerY": 464.00000000068513
+        },
+        "finalMoving": false,
+        "changedFields": [
+          [],
+          [
+            "camera.latitude",
+            "camera.zoom",
+            "camera.centerX",
+            "camera.centerY"
+          ],
+          []
+        ]
+      },
+      "beforeActivationBacking": {
+        "width": 1041,
+        "height": 928
+      },
+      "highZoomBacking": null
+    },
+    {
+      "name": "terrain-rtt256",
+      "sourceCommit": "75b5bf7f639eb085fea41b72939699e53381a024",
+      "runId": 42734730091,
+      "jobId": 129561069281,
+      "status": "failed",
+      "url": "https://github.com/orewn/tropnik/actions/runs/42734730091",
+      "archiveSha256": "2eff7607db5bf3d9c3c86a2305cd488182a79bf56fb45e5f604e42027d555523",
+      "reportSha256": "af0abf3c78dc2bc1d6a85da8c40ccf71149ff4803d820c7c0bb53641403db972",
+      "settle": {
+        "timeoutMs": 15000,
+        "requiredIdleObservations": 4,
+        "elapsedMs": 15996.156732999982,
+        "totalSamples": 3,
+        "frameWaitsMs": [
+          2593.430024000001,
+          12053.78343499999,
+          1030.2140169999911
+        ],
+        "idleObservations": [
+          1,
+          2,
+          3
+        ],
+        "finalCamera": {
+          "longitude": 40.39729094372626,
+          "latitude": 43.728712339582444,
+          "zoom": 16.90540610449558,
+          "tileSize": 512,
+          "centerX": 520.5,
+          "centerY": 464
+        },
+        "finalMoving": false,
+        "changedFields": [
+          [],
+          [],
+          []
+        ]
+      },
+      "beforeActivationBacking": {
+        "width": 1041,
+        "height": 928
+      },
+      "highZoomBacking": {
+        "width": 1041,
+        "height": 928
+      }
+    },
+    {
+      "name": "software renderer pitch 30",
+      "sourceCommit": "7845f82abb2eb2aeba774f0e644453b9ac2bc0c8",
+      "runId": 42736783231,
+      "jobId": 129567848833,
+      "status": "failed",
+      "url": "https://github.com/orewn/tropnik/actions/runs/42736783231",
+      "archiveSha256": "ddd54916a9e56ef97a4fbaf21121acffcf558845058008a6819909bb7de7f85c",
+      "reportSha256": "1edb298b74f558f3227996b8616bb3a9897e90e70e69ca0014d8f4af937fdf65",
+      "releaseEligible": false,
+      "settle": {
+        "schemaVersion": 1,
+        "engine": "maplibre",
+        "timeoutMs": 15000,
+        "requiredIdleObservations": 4,
+        "comparison": "exact-camera-rect-route",
+        "sampleLimit": 16,
+        "startedAtEpochMs": 1794274791663,
+        "elapsedMs": 18299.744210999983,
+        "totalSamples": 3,
+        "discardedSamples": 0,
+        "samples": [
+          {
+            "index": 1,
+            "startedAtEpochMs": 1794274791663,
+            "startOffsetMs": 0.009676999994553626,
+            "phase": "observed",
+            "frameMs": 1275.896269000019,
+            "readMs": 9.078807000012603,
+            "state": {
+              "camera": {
+                "longitude": 40.39729094372706,
+                "latitude": 43.72871233957849,
+                "zoom": 16.90540610449558,
+                "tileSize": 512,
+                "centerX": 520.5000000054808,
+                "centerY": 463.9999999972596
+              },
+              "engine": "maplibre",
+              "route": "kavkaz-8a",
+              "moving": false,
+              "visible": true,
+              "rect": {
+                "left": 384,
+                "top": 72,
+                "width": 1041,
+                "height": 928,
+                "right": 1425,
+                "bottom": 1000
+              },
+              "width": 1440,
+              "height": 1000,
+              "scrollWidth": 1425,
+              "terrainCamera": {
+                "pitch": 30,
+                "bearing": 0,
+                "centerElevation": 2471.38445645595,
+                "targetElevation": 2471.38445645595,
+                "pixelRatio": 1,
+                "softwareRenderer": "swiftshader",
+                "terrain": {
+                  "source": "terrain-dem",
+                  "exaggeration": 1.12
+                }
+              }
+            },
+            "changedFields": [],
+            "durationMs": 1285.0423319999827,
+            "endOffsetMs": 1285.0523340000072,
+            "signatureUnchanged": false,
+            "idleObservations": 1
+          },
+          {
+            "index": 2,
+            "startedAtEpochMs": 1794274793048,
+            "startOffsetMs": 1385.2773980000056,
+            "phase": "observed",
+            "frameMs": 8587.218165000028,
+            "readMs": 3.593713000009302,
+            "state": {
+              "camera": {
+                "longitude": 40.39729094372706,
+                "latitude": 43.72871233957849,
+                "zoom": 16.90540610449558,
+                "tileSize": 512,
+                "centerX": 520.5000000054808,
+                "centerY": 463.9999999972596
+              },
+              "engine": "maplibre",
+              "route": "kavkaz-8a",
+              "moving": false,
+              "visible": true,
+              "rect": {
+                "left": 384,
+                "top": 72,
+                "width": 1041,
+                "height": 928,
+                "right": 1425,
+                "bottom": 1000
+              },
+              "width": 1440,
+              "height": 1000,
+              "scrollWidth": 1425,
+              "terrainCamera": {
+                "pitch": 30,
+                "bearing": 0,
+                "centerElevation": 2471.38445645595,
+                "targetElevation": 2471.38445645595,
+                "pixelRatio": 1,
+                "softwareRenderer": "swiftshader",
+                "terrain": {
+                  "source": "terrain-dem",
+                  "exaggeration": 1.12
+                }
+              }
+            },
+            "changedFields": [],
+            "durationMs": 8590.867985000019,
+            "endOffsetMs": 9976.145697999978,
+            "signatureUnchanged": true,
+            "idleObservations": 2
+          },
+          {
+            "index": 3,
+            "startedAtEpochMs": 1794274801739,
+            "startOffsetMs": 10076.369918000011,
+            "phase": "observed",
+            "frameMs": 8116.830183000013,
+            "readMs": 5.678580000007059,
+            "state": {
+              "camera": {
+                "longitude": 40.39729094372706,
+                "latitude": 43.72871233957849,
+                "zoom": 16.90540610449558,
+                "tileSize": 512,
+                "centerX": 520.5000000054808,
+                "centerY": 463.9999999972596
+              },
+              "engine": "maplibre",
+              "route": "kavkaz-8a",
+              "moving": false,
+              "visible": true,
+              "rect": {
+                "left": 384,
+                "top": 72,
+                "width": 1041,
+                "height": 928,
+                "right": 1425,
+                "bottom": 1000
+              },
+              "width": 1440,
+              "height": 1000,
+              "scrollWidth": 1425,
+              "terrainCamera": {
+                "pitch": 30,
+                "bearing": 0,
+                "centerElevation": 2471.38445645595,
+                "targetElevation": 2471.38445645595,
+                "pixelRatio": 1,
+                "softwareRenderer": "swiftshader",
+                "terrain": {
+                  "source": "terrain-dem",
+                  "exaggeration": 1.12
+                }
+              }
+            },
+            "changedFields": [],
+            "durationMs": 8122.815302999981,
+            "endOffsetMs": 18199.18590099999,
+            "signatureUnchanged": true,
+            "idleObservations": 3
+          }
+        ]
+      },
+      "maximumObservedZoom": 15.90540610449558,
+      "beforeActivationBacking": {
+        "width": 1041,
+        "height": 928
+      },
+      "afterActivationBacking": null,
+      "highZoomBacking": {
+        "width": 1041,
+        "height": 928
+      },
+      "confirmedCamera": {
+        "pitch": 30,
+        "bearing": 0,
+        "centerElevation": 2471.38445645595,
+        "targetElevation": 2471.38445645595,
+        "pixelRatio": 1,
+        "softwareRenderer": "swiftshader",
+        "terrain": {
+          "source": "terrain-dem",
+          "exaggeration": 1.12
+        }
+      }
+    },
+    {
+      "name": "unchanged runtime with browser process CPU counters",
+      "sourceCommit": "7df78dfaf2157ce77fc345e2ef7f26432a1d00b5",
+      "runId": 42737687035,
+      "jobId": 129570814303,
+      "status": "completed",
+      "url": "https://github.com/orewn/tropnik/actions/runs/42737687035",
+      "archiveSha256": "bfd95a6a37c23942e1acdd0699f68418c6a0c8d06fdf641ac006c55428c99c7d",
+      "reportSha256": "c7d8de911e274e2e49f9948a155e760f4083b636d7570776870e1629df24dcde",
+      "releaseEligible": false,
+      "settle": null,
+      "maximumObservedZoom": 17.999999981970795,
+      "beforeActivationBacking": {
+        "width": 1041,
+        "height": 928
+      },
+      "afterActivationBacking": {
+        "width": 1041,
+        "height": 928
+      },
+      "highZoomBacking": {
+        "width": 1041,
+        "height": 928
+      },
+      "runtimeWebTree": "6403fc24e5b2eba91647b8678e2ebfb6f06c4da1",
+      "cpuSteps": [
+        {
+          "beforeZoom": 14.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 9931.898623000016,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 9931.928809000005,
+              "maximum": 9933.442784000013,
+              "midpoint": 9932.685796500009
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 35.50999999999996,
+            "averageLogicalCores": 3.575065267091471,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.07000000000000028,
+                "averageLogicalCores": 0.007047439276158948
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 34.97999999999996,
+                "averageLogicalCores": 3.521706084000553
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.06000000000000005,
+                "averageLogicalCores": 0.0060406622367076505
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 0.3999999999999986,
+                "averageLogicalCores": 0.04027108157805082
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              }
+            ],
+            "processes": [
+              {
+                "id": 2461,
+                "type": "browser",
+                "beforeCPUSeconds": 2.36,
+                "afterCPUSeconds": 2.43,
+                "cpuTimeDeltaSeconds": 0.07000000000000028,
+                "averageLogicalCores": 0.007047439276158948,
+                "status": "comparable"
+              },
+              {
+                "id": 2499,
+                "type": "GPU",
+                "beforeCPUSeconds": 447.16,
+                "afterCPUSeconds": 482.14,
+                "cpuTimeDeltaSeconds": 34.97999999999996,
+                "averageLogicalCores": 3.521706084000553,
+                "status": "comparable"
+              },
+              {
+                "id": 2505,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 1.51,
+                "afterCPUSeconds": 1.57,
+                "cpuTimeDeltaSeconds": 0.06000000000000005,
+                "averageLogicalCores": 0.0060406622367076505,
+                "status": "comparable"
+              },
+              {
+                "id": 2529,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0,
+                "afterCPUSeconds": 0,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2544,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.27,
+                "afterCPUSeconds": 0.27,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2555,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.04,
+                "afterCPUSeconds": 0.04,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2577,
+                "type": "renderer",
+                "beforeCPUSeconds": 20.16,
+                "afterCPUSeconds": 20.56,
+                "cpuTimeDeltaSeconds": 0.3999999999999986,
+                "averageLogicalCores": 0.04027108157805082,
+                "status": "comparable"
+              },
+              {
+                "id": 2603,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2682,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0,
+                "afterCPUSeconds": 0,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794274987318.6,
+            "time": 156328.7,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794274987318.6,
+            "time": 166261.7,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "trace": null
+        },
+        {
+          "beforeZoom": 15.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 10852.134824000008,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 10852.158361000009,
+              "maximum": 10853.300844000012,
+              "midpoint": 10852.72960250001
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 38.330000000000034,
+            "averageLogicalCores": 3.5318303693082354,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.15000000000000036,
+                "averageLogicalCores": 0.013821407654480462
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 33.59000000000003,
+                "averageLogicalCores": 3.0950738874266537
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.11999999999999988,
+                "averageLogicalCores": 0.011057126123584332
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 4.450000000000003,
+                "averageLogicalCores": 0.41003509374958635
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.02,
+                "averageLogicalCores": 0.001842854353930724
+              }
+            ],
+            "processes": [
+              {
+                "id": 2461,
+                "type": "browser",
+                "beforeCPUSeconds": 2.57,
+                "afterCPUSeconds": 2.72,
+                "cpuTimeDeltaSeconds": 0.15000000000000036,
+                "averageLogicalCores": 0.013821407654480462,
+                "status": "comparable"
+              },
+              {
+                "id": 2499,
+                "type": "GPU",
+                "beforeCPUSeconds": 484.27,
+                "afterCPUSeconds": 517.86,
+                "cpuTimeDeltaSeconds": 33.59000000000003,
+                "averageLogicalCores": 3.0950738874266537,
+                "status": "comparable"
+              },
+              {
+                "id": 2505,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 1.57,
+                "afterCPUSeconds": 1.69,
+                "cpuTimeDeltaSeconds": 0.11999999999999988,
+                "averageLogicalCores": 0.011057126123584332,
+                "status": "comparable"
+              },
+              {
+                "id": 2529,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0,
+                "afterCPUSeconds": 0,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2544,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.27,
+                "afterCPUSeconds": 0.27,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2555,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.04,
+                "afterCPUSeconds": 0.04,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2577,
+                "type": "renderer",
+                "beforeCPUSeconds": 20.58,
+                "afterCPUSeconds": 25.03,
+                "cpuTimeDeltaSeconds": 4.450000000000003,
+                "averageLogicalCores": 0.41003509374958635,
+                "status": "comparable"
+              },
+              {
+                "id": 2603,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2682,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0.02,
+                "averageLogicalCores": 0.001842854353930724,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794274987318.6,
+            "time": 167728.2,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794274987318.6,
+            "time": 178581,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "trace": {
+            "instrumented": true,
+            "startedAtEpochMs": 1794275155047,
+            "recordedDurationMs": 10856.772471999982,
+            "stopReason": "action-complete",
+            "status": "complete",
+            "drainMayOverlapCounterInterval": false
+          }
+        },
+        {
+          "beforeZoom": 16.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 13011.762917999993,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 13011.781656000006,
+              "maximum": 13012.836068000004,
+              "midpoint": 13012.308862000005
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 46.57000000000001,
+            "averageLogicalCores": 3.578919044567019,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.16999999999999993,
+                "averageLogicalCores": 0.013064553093759777
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 45.49000000000001,
+                "averageLogicalCores": 3.495920707265486
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.15000000000000013,
+                "averageLogicalCores": 0.011527546847435113
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 0.759999999999998,
+                "averageLogicalCores": 0.0584062373603377
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              }
+            ],
+            "processes": [
+              {
+                "id": 2461,
+                "type": "browser",
+                "beforeCPUSeconds": 2.81,
+                "afterCPUSeconds": 2.98,
+                "cpuTimeDeltaSeconds": 0.16999999999999993,
+                "averageLogicalCores": 0.013064553093759777,
+                "status": "comparable"
+              },
+              {
+                "id": 2499,
+                "type": "GPU",
+                "beforeCPUSeconds": 517.92,
+                "afterCPUSeconds": 563.41,
+                "cpuTimeDeltaSeconds": 45.49000000000001,
+                "averageLogicalCores": 3.495920707265486,
+                "status": "comparable"
+              },
+              {
+                "id": 2505,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 1.69,
+                "afterCPUSeconds": 1.84,
+                "cpuTimeDeltaSeconds": 0.15000000000000013,
+                "averageLogicalCores": 0.011527546847435113,
+                "status": "comparable"
+              },
+              {
+                "id": 2529,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0,
+                "afterCPUSeconds": 0,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2544,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.27,
+                "afterCPUSeconds": 0.27,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2555,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.04,
+                "afterCPUSeconds": 0.04,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2577,
+                "type": "renderer",
+                "beforeCPUSeconds": 25.05,
+                "afterCPUSeconds": 25.81,
+                "cpuTimeDeltaSeconds": 0.759999999999998,
+                "averageLogicalCores": 0.0584062373603377,
+                "status": "comparable"
+              },
+              {
+                "id": 2603,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2682,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0.48,
+                "afterCPUSeconds": 0.48,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794274987318.6,
+            "time": 179977.2,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794274987318.6,
+            "time": 192989.5,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "trace": null
+        },
+        {
+          "beforeZoom": 17.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 7332.004863000009,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 7332.021979000012,
+              "maximum": 7333.160836999974,
+              "midpoint": 7332.591407999993
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 27.31999999999995,
+            "averageLogicalCores": 3.725831493923598,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.040000000000000036,
+                "averageLogicalCores": 0.005455097355671461
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 26.92999999999995,
+                "averageLogicalCores": 3.672644294705801
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.030000000000000027,
+                "averageLogicalCores": 0.004091323016753596
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 0.3200000000000003,
+                "averageLogicalCores": 0.04364077884537169
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              }
+            ],
+            "processes": [
+              {
+                "id": 2461,
+                "type": "browser",
+                "beforeCPUSeconds": 2.98,
+                "afterCPUSeconds": 3.02,
+                "cpuTimeDeltaSeconds": 0.040000000000000036,
+                "averageLogicalCores": 0.005455097355671461,
+                "status": "comparable"
+              },
+              {
+                "id": 2499,
+                "type": "GPU",
+                "beforeCPUSeconds": 594.96,
+                "afterCPUSeconds": 621.89,
+                "cpuTimeDeltaSeconds": 26.92999999999995,
+                "averageLogicalCores": 3.672644294705801,
+                "status": "comparable"
+              },
+              {
+                "id": 2505,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 1.84,
+                "afterCPUSeconds": 1.87,
+                "cpuTimeDeltaSeconds": 0.030000000000000027,
+                "averageLogicalCores": 0.004091323016753596,
+                "status": "comparable"
+              },
+              {
+                "id": 2529,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0,
+                "afterCPUSeconds": 0,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2544,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.27,
+                "afterCPUSeconds": 0.27,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2555,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.04,
+                "afterCPUSeconds": 0.04,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2577,
+                "type": "renderer",
+                "beforeCPUSeconds": 25.94,
+                "afterCPUSeconds": 26.26,
+                "cpuTimeDeltaSeconds": 0.3200000000000003,
+                "averageLogicalCores": 0.04364077884537169,
+                "status": "comparable"
+              },
+              {
+                "id": 2603,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2682,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0.48,
+                "afterCPUSeconds": 0.48,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794274987318.6,
+            "time": 201643.09999999998,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794274987318.6,
+            "time": 208975.7,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "trace": null
+        }
+      ]
+    },
+    {
+      "name": "public vector overzoom slicing at zoomLevelsToOverscale 1",
+      "sourceCommit": "8a6b8f75c3f8d03306953d0677ee6a31947a1757",
+      "runId": 42739413249,
+      "jobId": 129576499550,
+      "status": "failed",
+      "url": "https://github.com/orewn/tropnik/actions/runs/42739413249",
+      "archiveSha256": "c0e5fdf5b012e1a11842edb14df793d1024c1130fc765f6c24094f25d7549d6c",
+      "reportSha256": "6354623d8848593c231621693820a492e7c22024ac17e77678fbdad07adaa43f",
+      "releaseEligible": false,
+      "accepted": false,
+      "maximumObservedZoom": 16.90540610449558,
+      "error": "Error: Timed out waiting for CDP Runtime.evaluate\n    at Timeout._onTimeout (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:92:66)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)",
+      "settle": {
+        "schemaVersion": 1,
+        "engine": "maplibre",
+        "timeoutMs": 15000,
+        "requiredIdleObservations": 4,
+        "comparison": "exact-camera-rect-route",
+        "sampleLimit": 16,
+        "startedAtEpochMs": 1794276143415,
+        "elapsedMs": 17465.124252999987,
+        "totalSamples": 2,
+        "discardedSamples": 0,
+        "samples": [
+          {
+            "index": 1,
+            "startedAtEpochMs": 1794276143415,
+            "startOffsetMs": 0.007641000003786758,
+            "phase": "observed",
+            "frameMs": 2358.305576999992,
+            "readMs": 2.7249169999849983,
+            "state": {
+              "camera": {
+                "longitude": 40.39729094372774,
+                "latitude": 43.72871233957113,
+                "zoom": 17.8539728891923,
+                "tileSize": 512,
+                "centerX": 520.5000000109618,
+                "centerY": 464
+              },
+              "engine": "maplibre",
+              "route": "kavkaz-8a",
+              "moving": true,
+              "visible": true,
+              "rect": {
+                "left": 384,
+                "top": 72,
+                "width": 1041,
+                "height": 928,
+                "right": 1425,
+                "bottom": 1000
+              },
+              "width": 1440,
+              "height": 1000,
+              "scrollWidth": 1425,
+              "terrainCamera": null,
+              "pageActivity": {
+                "timeOrigin": 1794275900919.7,
+                "time": 244856.5,
+                "visibilityState": "visible",
+                "hidden": false,
+                "hasFocus": true,
+                "activeElement": {
+                  "tag": "BUTTON",
+                  "label": "Увеличить масштаб"
+                }
+              }
+            },
+            "changedFields": [],
+            "durationMs": 2361.0703229999926,
+            "endOffsetMs": 2361.0784850000055,
+            "idleObservations": 0,
+            "signatureUnchanged": false
+          },
+          {
+            "index": 2,
+            "startedAtEpochMs": 1794276145878,
+            "startOffsetMs": 2462.868885999982,
+            "phase": "frame",
+            "frameMs": 15002.175348999997,
+            "readMs": null,
+            "error": "Timed out waiting for CDP Runtime.evaluate",
+            "durationMs": 15002.19118200001,
+            "endOffsetMs": 17465.064866
+          }
+        ]
+      },
+      "cpuSteps": [
+        {
+          "beforeZoom": 14.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 11397.647280000005,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 11397.671646000003,
+              "maximum": 11399.028831999982,
+              "midpoint": 11398.350238999992
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 41.949999999999946,
+            "averageLogicalCores": 3.6803571675193876,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.07000000000000028,
+                "averageLogicalCores": 0.006141239612070525
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 41.18999999999994,
+                "averageLogicalCores": 3.613680851731193
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.07000000000000006,
+                "averageLogicalCores": 0.006141239612070505
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 0.6199999999999979,
+                "averageLogicalCores": 0.05439383656405281
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              }
+            ],
+            "processes": [
+              {
+                "id": 2474,
+                "type": "browser",
+                "beforeCPUSeconds": 2.65,
+                "afterCPUSeconds": 2.72,
+                "cpuTimeDeltaSeconds": 0.07000000000000028,
+                "averageLogicalCores": 0.006141239612070525,
+                "status": "comparable"
+              },
+              {
+                "id": 2511,
+                "type": "GPU",
+                "beforeCPUSeconds": 664.71,
+                "afterCPUSeconds": 705.9,
+                "cpuTimeDeltaSeconds": 41.18999999999994,
+                "averageLogicalCores": 3.613680851731193,
+                "status": "comparable"
+              },
+              {
+                "id": 2514,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 1.9,
+                "afterCPUSeconds": 1.97,
+                "cpuTimeDeltaSeconds": 0.07000000000000006,
+                "averageLogicalCores": 0.006141239612070505,
+                "status": "comparable"
+              },
+              {
+                "id": 2538,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2553,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.33,
+                "afterCPUSeconds": 0.35,
+                "cpuTimeDeltaSeconds": 0.019999999999999962,
+                "averageLogicalCores": 0.0017546398891629966,
+                "status": "comparable"
+              },
+              {
+                "id": 2563,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.05,
+                "afterCPUSeconds": 0.05,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2591,
+                "type": "renderer",
+                "beforeCPUSeconds": 25.17,
+                "afterCPUSeconds": 25.77,
+                "cpuTimeDeltaSeconds": 0.5999999999999979,
+                "averageLogicalCores": 0.05263919667488981,
+                "status": "comparable"
+              },
+              {
+                "id": 2615,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2673,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              }
+            ]
+          },
+          "trace": null
+        },
+        {
+          "beforeZoom": 15.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 14928.21796899999,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 14928.239171000023,
+              "maximum": 14929.339558999985,
+              "midpoint": 14928.789365000004
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 53.97999999999995,
+            "averageLogicalCores": 3.6158323813285267,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.17999999999999972,
+                "averageLogicalCores": 0.01205724024896507
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 46.559999999999945,
+                "averageLogicalCores": 3.118806144398966
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.15999999999999992,
+                "averageLogicalCores": 0.010717546887968962
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 7.060000000000002,
+                "averageLogicalCores": 0.4729117564316308
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.019999999999999997,
+                "averageLogicalCores": 0.0013396933609961207
+              }
+            ],
+            "processes": [
+              {
+                "id": 2474,
+                "type": "browser",
+                "beforeCPUSeconds": 2.89,
+                "afterCPUSeconds": 3.07,
+                "cpuTimeDeltaSeconds": 0.17999999999999972,
+                "averageLogicalCores": 0.01205724024896507,
+                "status": "comparable"
+              },
+              {
+                "id": 2511,
+                "type": "GPU",
+                "beforeCPUSeconds": 706.11,
+                "afterCPUSeconds": 752.67,
+                "cpuTimeDeltaSeconds": 46.559999999999945,
+                "averageLogicalCores": 3.118806144398966,
+                "status": "comparable"
+              },
+              {
+                "id": 2514,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 1.97,
+                "afterCPUSeconds": 2.13,
+                "cpuTimeDeltaSeconds": 0.15999999999999992,
+                "averageLogicalCores": 0.010717546887968962,
+                "status": "comparable"
+              },
+              {
+                "id": 2538,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2553,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.35,
+                "afterCPUSeconds": 0.35,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2563,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.05,
+                "afterCPUSeconds": 0.05,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2591,
+                "type": "renderer",
+                "beforeCPUSeconds": 25.79,
+                "afterCPUSeconds": 32.85,
+                "cpuTimeDeltaSeconds": 7.060000000000002,
+                "averageLogicalCores": 0.4729117564316308,
+                "status": "comparable"
+              },
+              {
+                "id": 2615,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2673,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.03,
+                "cpuTimeDeltaSeconds": 0.019999999999999997,
+                "averageLogicalCores": 0.0013396933609961207,
+                "status": "comparable"
+              }
+            ]
+          },
+          "trace": {
+            "instrumented": true,
+            "startedAtEpochMs": 1794276126329,
+            "recordedDurationMs": 14933.025510000007,
+            "stopReason": "action-complete",
+            "status": "complete",
+            "drainMayOverlapCounterInterval": false
+          }
+        },
+        {
+          "beforeZoom": 16.90540610449558,
+          "status": "failed",
+          "actionDurationMs": 17551.979889999988,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 17551.995091999997,
+              "maximum": 17557.513879000006,
+              "midpoint": 17554.7544855
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 65.25999999999999,
+            "averageLogicalCores": 3.7175114043266113,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.18000000000000016,
+                "averageLogicalCores": 0.010253632436083217
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 63.50999999999999,
+                "averageLogicalCores": 3.6178233111980247
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.20000000000000018,
+                "averageLogicalCores": 0.011392924928981352
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 1.3699999999999974,
+                "averageLogicalCores": 0.07804153576352205
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              }
+            ],
+            "processes": [
+              {
+                "id": 2474,
+                "type": "browser",
+                "beforeCPUSeconds": 3.28,
+                "afterCPUSeconds": 3.46,
+                "cpuTimeDeltaSeconds": 0.18000000000000016,
+                "averageLogicalCores": 0.010253632436083217,
+                "status": "comparable"
+              },
+              {
+                "id": 2511,
+                "type": "GPU",
+                "beforeCPUSeconds": 752.67,
+                "afterCPUSeconds": 816.18,
+                "cpuTimeDeltaSeconds": 63.50999999999999,
+                "averageLogicalCores": 3.6178233111980247,
+                "status": "comparable"
+              },
+              {
+                "id": 2514,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 2.13,
+                "afterCPUSeconds": 2.33,
+                "cpuTimeDeltaSeconds": 0.20000000000000018,
+                "averageLogicalCores": 0.011392924928981352,
+                "status": "comparable"
+              },
+              {
+                "id": 2538,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2553,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.35,
+                "afterCPUSeconds": 0.35,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2563,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.05,
+                "afterCPUSeconds": 0.05,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2591,
+                "type": "renderer",
+                "beforeCPUSeconds": 32.89,
+                "afterCPUSeconds": 34.26,
+                "cpuTimeDeltaSeconds": 1.3699999999999974,
+                "averageLogicalCores": 0.07804153576352205,
+                "status": "comparable"
+              },
+              {
+                "id": 2615,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2673,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0.99,
+                "afterCPUSeconds": 0.99,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              }
+            ]
+          },
+          "trace": null
+        }
+      ]
+    },
+    {
+      "name": "unchanged runtime with bounded public GPU draw queries",
+      "sourceCommit": "701149643684770954107256bd36e3b034888ce8",
+      "runId": 42742442952,
+      "jobId": 129586542806,
+      "status": "success",
+      "url": "https://github.com/orewn/tropnik/actions/runs/42742442952",
+      "archiveSha256": "d57e2c08fce06393b49925e3aa4714e0140f9f381720ac64ae380849652dd8a7",
+      "reportSha256": "58e8c50fb06bd39744e6d7ed720d81f3fc9dec95625092949db0ac0d56941aa5",
+      "releaseEligible": false,
+      "runtimeWebTree": "6403fc24e5b2eba91647b8678e2ebfb6f06c4da1",
+      "diagnosisReport": "web-0.4.19-hillshade-gpu-diagnosis.json",
+      "validQueries": 120,
+      "actualDrawCalls": 1115,
+      "mipmapCalls": 48,
+      "groups": 15,
+      "hillshadeSample": {
+        "timedCalls": 8,
+        "totalObservedCalls": 24,
+        "gpuMilliseconds": 2102.930535,
+        "renderTarget": [
+          2048,
+          2048
+        ],
+        "inputTexture": [
+          514,
+          514
+        ]
+      },
+      "actualSDKCompiledLightCount": 1,
+      "limits": [
+        "First eight calls per group; no extrapolation to total GPU cost.",
+        "Offline actual SDK pipeline confirms compile-time light count one; configured arrays of three do not demonstrate three executed lights.",
+        "Cold diagnostic success does not replace the failed full release matrix."
+      ]
+    },
+    {
+      "name": "SwiftShader-only RTT quality factor one",
+      "sourceCommit": "bceae5c46269bea80c55c197718d61cb1d8044da",
+      "runId": 42745379532,
+      "jobId": 129596098617,
+      "status": "success",
+      "url": "https://github.com/orewn/tropnik/actions/runs/42745379532",
+      "archiveSha256": "651c310948f4aac1f4a06da2d716e388855eb3861b4eac17e8bb1c0267ef9102",
+      "reportSha256": "a591532be91ac1e28b445c3eaa0c38ae366e7e0b89376fff9893112ec19df1be",
+      "runtimeWebTree": "48bacc7047d8ffdc1e7c45a7b20f44ca05c5fea7",
+      "diagnosisReport": "web-0.4.19-swiftshader-rtt-comparison.json",
+      "releaseEligible": false,
+      "acceptance": "Targeted cost reduction observed; promoted to candidate14 for unchanged full release gate.",
+      "maximumObservedZoom": 17.99999998199918,
+      "validQueries": 120,
+      "hillshadeSample": {
+        "timedCalls": 8,
+        "totalObservedCalls": 22,
+        "gpuMilliseconds": 1196.96786,
+        "medianMilliseconds": 132.895829,
+        "renderTarget": [
+          1024,
+          1024
+        ]
+      },
+      "mipmapSample": {
+        "timedCalls": 8,
+        "totalObservedCalls": 44,
+        "gpuMilliseconds": 56.42792,
+        "medianMilliseconds": 7.0218325
+      },
+      "nativeIntervalLimit": "The last partial zoom action became slower; no uniform end-to-end speedup claim.",
+      "fullReleaseRun": 42746521929,
+      "fullReleaseSource": "bf133e1a1040c5c46c1164dda013737191e40e1c"
+    }
+  ],
+  "conclusions": [
+    "The confirmed native direction controls and exact zoom queue are retained. The initial matched-baseline, backing-density and RTT-size diagnostics all failed the unchanged settling gate.",
+    "Software backing-density reduction has no demonstrated improvement; the failed run never recorded its post-activation buffer dimensions.",
+    "Smaller terrain source tileSize changes RTT granularity and DEM LOD; this diagnostic still failed and is not accepted for production.",
+    "Single runs on separate runners do not establish statistical speed differences.",
+    "The software pitch 30 policy was applied but did not pass the same high-zoom transition; it was not accepted for production.",
+    "The unchanged application reached zoom 18 in the process CPU diagnostic. This cold diagnostic success does not replace the full five-profile release gate.",
+    "Untraced high zoom actions consumed 34.98, 45.49 and 26.93 cumulative CPU seconds in the GPU process, averaging 3.52, 3.50 and 3.67 logical cores respectively. Renderer CPU was under one second on those same untraced intervals. This demonstrates expensive software GPU-process work, not its precise draw/texture cause.",
+    "All observed CPU intervals retained a visible focused document; actual numeric pitch was not instrumented in this CPU baseline.",
+    "The vector slicing candidate was rejected: untraced 14.905→15.905 and 16.905→17.905 actions consumed more GPU-process CPU and took longer than the corresponding CPU baseline; the latter timed out. None of the earlier density, terrain-source-size, pitch or slicing variants is merged into the release.",
+    "Public GPU queries identify 2048-square offscreen hillshade rasterization as the dominant sampled operation: eight calls cost 2102.931 ms, compared with 111.042 ms for eight terrain mesh draws. These bounded samples are not a total-cost estimate.",
+    "The current installed SDK compiles one hillshade illumination source despite three configured direction and altitude values; a claimed three-to-one light optimization was rejected before implementation.",
+    "The distinct SwiftShader-only RTT quality factor candidate was measured at actual1024-square targets while preserving screen/depth resolution, DEM, terrain coverage and mesh. Eight hillshade samples cost43.1% less and eight mipmap samples67.1% less, including lower medians. Terrain drape samples and the final partial zoom action were slower; these bounded observations do not establish uniform speed or full release acceptance. Candidate14 subsequently passed the unchanged full native gate and was published; see the separate exact-source final receipt."
+  ],
+  "finalReleaseAcceptance": {
+    "sourceCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "runId": 42746521929,
+    "status": "success",
+    "receipt": "web-0.4.19-final.json",
+    "diagnosticsRemainNonReleaseEvidence": true
+  }
+}

@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-11-09T23:53:47.575179+00:00",
+  "candidate": "candidate10",
+  "releasePass": false,
+  "verdict": "native-hit-areas-passed-early-main-thread-stall-reduced-high-zoom-frame-starvation-remains",
+  "source": {
+    "repository": "orewn/tropnik",
+    "commit": "8f4c328b2d6b746b62d9b5172058c89bf35ea96f",
+    "workflowRunId": 42721623552,
+    "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42721623552",
+    "buildJobId": 129516728337,
+    "buildJobConclusion": "failure",
+    "buildId": "be160aa1a650a429",
+    "buildIdVerifiedInJobLog": true,
+    "preBrowserChecks": "passed",
+    "webTests": {
+      "passed": 461,
+      "failed": 0
+    },
+    "toolingTests": {
+      "passed": 67,
+      "failed": 0
+    },
+    "testCountsVerifiedInJobLog": true,
+    "staticBuild": {
+      "pages": 339,
+      "referenceRoutes": 306,
+      "httpChecks": 52
+    },
+    "deployJobId": 129522874910,
+    "deployConclusion": "skipped"
+  },
+  "artifacts": [
+    {
+      "id": 13721432738,
+      "name": "tropnik-pages-design-1",
+      "bytes": 29351585,
+      "sha256": "db01dcfa7551c8fdc8df67a8b92531adf1e0ae1ebe787fff4c01cebbe7ba40e1",
+      "archiveHashRecheckedAgainstGitHubDigest": true
+    },
+    {
+      "id": 13720759214,
+      "name": "tropnik-pages-browser-failure-1",
+      "bytes": 394409,
+      "sha256": "0d38d196d2f4a8930ae88d07486b019f77c6ef74c2dc75f8ebf99ebc8284ebe2",
+      "archiveHashRecheckedAgainstGitHubDigest": true
+    }
+  ],
+  "directionHitAreas": {
+    "requiredBothEngineChecksPassed": true,
+    "schemaVersion": 1,
+    "evidence": "browser-failure.json completedMapInteractions[].directionHitAreas",
+    "scope": "Trusted native browser inputs outside ordinary label/count anchors, cluster expansion where present, visible edge grids and hidden wrappers. Not physical-device measurements or a click audit of all 15 individual regions. Hidden observations and probes can repeat across actions.",
+    "profiles": [
+      {
+        "profile": "android-portrait",
+        "engine": "leaflet",
+        "input": "touch",
+        "passed": true,
+        "nativeActions": 6,
+        "ordinaryLabelSelected": "altai",
+        "ordinaryCountSelected": "baikal",
+        "clusterExpansionActions": 4,
+        "allNativeActionsOutside44pxAnchor": true,
+        "allEventTriplesTrusted": true,
+        "visibleHitProbes": 96,
+        "outsideAnchorHitProbes": 66,
+        "unownedVisibleHitProbes": 0,
+        "hiddenControlObservations": 56,
+        "hiddenControlsDisplayNone": true,
+        "inViewportHiddenWrapperProbes": 324,
+        "hiddenWrapperCaptures": 0,
+        "mapInteractionLongestTaskMs": 117,
+        "mapInteractionCls": 0.002949387525305368
+      },
+      {
+        "profile": "desktop-webgl",
+        "engine": "maplibre",
+        "input": "mouse",
+        "passed": true,
+        "nativeActions": 2,
+        "ordinaryLabelSelected": "altai",
+        "ordinaryCountSelected": "baikal",
+        "clusterExpansionActions": 0,
+        "allNativeActionsOutside44pxAnchor": true,
+        "allEventTriplesTrusted": true,
+        "visibleHitProbes": 32,
+        "outsideAnchorHitProbes": 22,
+        "unownedVisibleHitProbes": 0,
+        "hiddenControlObservations": 18,
+        "hiddenControlsDisplayNone": true,
+        "inViewportHiddenWrapperProbes": 0,
+        "hiddenWrapperCaptures": 0,
+        "mapInteractionLongestTaskMs": 465,
+        "mapInteractionCls": 0
+      }
+    ]
+  },
+  "failure": {
+    "profile": "desktop-webgl",
+    "phase": "zoom-design-terrain",
+    "error": "The maplibre map did not settle",
+    "errorLoggedAt": "2026-11-09T23:48:32.5571188Z",
+    "beforeZoom": 15.90540610449558,
+    "afterZoom": 16.90540610449558,
+    "nativePlusReachedExactTarget": true,
+    "selectedRoute": "kavkaz-8a",
+    "workflowTimeBudgetExceeded": false,
+    "settle": {
+      "timeoutMs": 15000,
+      "elapsedMs": 15773.973618999938,
+      "requiredIdleObservations": 4,
+      "observedIdleSamples": 3,
+      "cameraRectRouteExactlyIdenticalAcrossSamples": true,
+      "allSamplesMoving": false,
+      "changedFieldsAcrossSamples": [],
+      "frameMs": [
+        1023.0627490000334,
+        8303.07371799997,
+        6140.852008000016
+      ],
+      "readMs": [
+        3.199574000085704,
+        1.641624000039883,
+        1.070860999985598
+      ],
+      "recordedLongTasksOverlappingSettle": 0,
+      "diagnosis": "Only three identical idle observations arrived. Multi-second frame waits consumed the interval; no floating-point drift or repeated navigation is observed in these samples. The retained long-task journal has no task overlapping the final settle interval."
+    },
+    "evidence": "desktop-webgl.json settleDiagnostics and browser-failure.json performance journal"
+  },
+  "earlyTerrainTrace": {
+    "file": "desktop-webgl-terrain-zoom.trace.json",
+    "metadataFile": "desktop-webgl-terrain-zoom.trace-meta.json",
+    "sha256": "c07f1c39140ae41073fc28f7d22819fc698d91fc2b5ce4cc2bb0710494450c58",
+    "hashRecheckedAgainstMetadata": true,
+    "bytes": 3502527,
+    "status": "complete",
+    "eof": true,
+    "dataLossOccurred": false,
+    "recordedDurationMs": 9465.943597000092,
+    "eventCount": 11590,
+    "cpuSamplesAllProfiles": 150923,
+    "beforeZoom": 4.9054061044955795,
+    "afterZoom": 5.9054061044955795,
+    "directlyCoversFinalFailureZoom": false,
+    "largestMainThreadTask": {
+      "wallMs": 85.251,
+      "threadCpuMs": 85.147,
+      "gpuWaitUnionMs": 0.0
+    },
+    "mainThreadGpuWaitUnionMs": 0.0,
+    "mainThreadIdleSampleSharePct": 95.594,
+    "gpuSchedulerTotalWallMs": 9275.384,
+    "longestGpuSchedulerTasks": [
+      {
+        "startMs": 3527.128,
+        "durationMs": 4148.064,
+        "threadCpuMs": 0.983
+      },
+      {
+        "startMs": 576.48,
+        "durationMs": 2647.137,
+        "threadCpuMs": 1.103
+      }
+    ],
+    "longestRafGapsMs": [
+      4144.95,
+      2639.209
+    ],
+    "observedFrameCorrelation": "RAF gaps 3531.803→7676.753 ms and 585.649→3224.858 ms coincide with GPU scheduler intervals 3527.128→7675.192 ms and 576.480→3223.617 ms. The longest GPU interval records only MakeCurrent (179 us) and FinishTask (5 us) inside it; its native backend wait is not exposed.",
+    "comparisonWithC9": {
+      "audit": "web-0.4.19-ninth-ci-audit.json",
+      "sameZoomTransition": true,
+      "traceDurationMs": {
+        "c9": 14615.774088000064,
+        "c10": 9465.943597000092
+      },
+      "largestMainTaskWallMs": {
+        "c9": 7061.741,
+        "c10": 85.251
+      },
+      "mainThreadGpuWaitUnionMs": {
+        "c9": 7034.606,
+        "c10": 0.0
+      },
+      "largestGpuSchedulerWallMs": {
+        "c9": 4978.666,
+        "c10": 4148.064
+      }
+    },
+    "conclusion": "The captured low-zoom action no longer has the C9 multi-second main-thread GPU-token stall. Multi-second GPU scheduler intervals and matching RAF gaps remain; this is not evidence that high-zoom rendering or the release performance gate has passed."
+  },
+  "recordedTerrainLongTasks": {
+    "c9": {
+      "count": 27,
+      "sumMs": 62232,
+      "maxMs": 7061
+    },
+    "c10": {
+      "count": 19,
+      "sumMs": 22647,
+      "maxMs": 3921
+    },
+    "limit": "Different elapsed phase intervals and one CI run each; these counts and sums are not a controlled benchmark."
+  },
+  "evidenceLimits": [
+    "Both complete traces cover the successful early terrain zoom, not the final failing zoom 16.905.",
+    "The lack of a recorded long task in the final settle interval does not identify the native GPU/compositor wait. A targeted trace of that exact step is still required.",
+    "GPU scheduler wall time is not measured GPU computation time; thread CPU and trace CPU sample shares are separate metrics.",
+    "Canvas antialias and DEM LOD ratio changed together; their individual effects are not isolated. Actual gl.SAMPLES remains unknown, so 4x MSAA or multisampled terrain RTT must not be inferred.",
+    "Four unmatched begin events at the C10 trace boundaries were excluded; metadata reports full EOF and no data loss."
+  ],
+  "remainingAcceptance": {
+    "mobileProfilesCompleted": 4,
+    "androidDesignSchema5Passed": true,
+    "desktopTerrainComplete": false,
+    "desktopPrepared3DAndSourceEndsComplete": false,
+    "targetedHighZoomDiagnosis": "pending",
+    "finalVisualReview": "pending",
+    "publication": "pending",
+    "gateThresholds": "unchanged: exact camera/rect/route, four idle observations within 15000 ms, existing performance budgets"
+  }
+}

@@ -1,6 +1,6 @@
 {
   "task": "Region direction flags and complete native hit areas",
-  "checkedAt": "2026-11-09T23:09:29.291598+00:00",
+  "checkedAt": "2026-11-10T03:21:17.164636+00:00",
   "sourceBaseCommit": "3a2026afd7e14fdebb15c4e32224a98cc8a7c588",
   "scope": {
     "catalogueDirections": 15,
@@ -19,23 +19,50 @@
     "Selected, hovered and keyboard-focused markers rise above ordinary markers without covering fixed controls.",
     "Old region-only CSS rules are consolidated; unrelated CSS is retained.",
     "Group footprints include the full pennant and label; unchanged text and attributes are not rewritten.",
-    "Available direction labels stay visible while the pointer crosses a collision-layout offset; hover no longer removes a reachable label."
+    "Available direction labels stay visible while the pointer crosses a collision-layout offset; hover no longer removes a reachable label.",
+    "C10 requests antialias:false and DEM tileCountMaxMinRatio:1 through the public SDK API; vector ratio remains 2. The early trace lost the multi-second main-thread GPU-token stall, but the high-zoom release gate still failed; no general speedup is established.",
+    "C10 places the preload status row 12px above the story launcher at desktop and applicable tablet sizes; direction/trail label layout and browser overlay QA now treat the row as an obstacle.",
+    "C12 remembers the requested terrain pitch profile, including explicit activation/selection cameras, so SDK ground-clearance output does not repeatedly reapply the same request. Exact-source browser acceptance remains pending.",
+    "C11 places expanded desktop source credits to the left of the labelled Layers button.",
+    "C12 Chrome trace collection requires explicit TROPNIK_BROWSER_TRACE=1 or a separate terrain diagnostic run; full native-input, performance and exact-camera gates remain unchanged. Production diagnostic telemetry was not included."
   ],
   "verification": {
     "applicationTests": {
-      "passed": 460,
+      "passed": 474,
       "failed": 0,
-      "finalPersistentLabelCssIncluded": true
+      "finalPersistentLabelCssIncluded": true,
+      "scope": "Full C12 local and completed CI web suite; overall browser CI failed later in terrain",
+      "candidate10Ci": {
+        "passed": 461,
+        "failed": 0
+      },
+      "candidate10AuditReport": "web-0.4.19-tenth-ci-audit.json",
+      "receipt": "web-0.4.19-twelfth-local.json",
+      "candidate12Ci": {
+        "passed": 474,
+        "failed": 0
+      }
     },
     "pagesBuildTests": {
-      "passed": 66,
+      "passed": 81,
       "failed": 0,
-      "includesHitAreasAndBoundedTerrainDiagnostics": true
+      "includesHitAreasAndBoundedTerrainDiagnostics": true,
+      "scope": "Full C12 local and completed CI tooling suite; C13 local 84-test follow-up is recorded separately",
+      "includesPreloadStatusOverlayRegression": true,
+      "candidate10Ci": {
+        "passed": 67,
+        "failed": 0
+      },
+      "receipt": "web-0.4.19-twelfth-local.json",
+      "candidate12Ci": {
+        "passed": 81,
+        "failed": 0
+      }
     },
-    "typescript": "passed: app and Pages static client; no emit",
-    "targetedEslint": "passed",
-    "productionBuild": "passed node scripts/build-tropnik.mjs",
-    "gitDiffCheck": "passed",
+    "typescript": "passed: both local C12 checks and completed C12 CI typecheck",
+    "targetedEslint": "passed: C12 scoped lint of changed files",
+    "productionBuild": "C12 CI static build passed: 339 pages, 306 reference routes, 52 HTTP checks, buildId23924a7758dfc5b8. Fresh Site archive also passed, but browser CI failed and publication was skipped.",
+    "gitDiffCheck": "passed: C12 root verification",
     "independentReview": "completed; extra stationary Leaflet map.stop() resets found and fixed",
     "baselineBrowserReproduction": {
       "engine": "Leaflet",
@@ -50,7 +77,7 @@
       "result": "group did not open; map container received focus"
     },
     "newCandidateBrowserVerification": {
-      "status": "manual Leaflet checks passed; full CI engine/touch matrix pending",
+      "status": "Manual Leaflet checks and required C9/C10/C12 native hit-area checks on both engines passed. C12 full browser CI failed later at terrain zoom 17.90540610449558; C13 CI was cancelled. C14 source and outcome remain pending.",
       "svgFlags": 15,
       "oldRegionDots": 0,
       "overviewLabelSideHits": {
@@ -108,27 +135,213 @@
         "sheetOpenSelectClose": "passed"
       }
     },
-    "eslint": "passed: full application lint",
+    "eslint": "passed: C12 scoped local lint and full C12 CI lint",
     "staticBuild": {
       "passed": true,
       "pages": 339,
       "referenceRoutes": 306,
       "httpChecks": 52,
-      "browserRenderingTested": false
+      "browserRenderingTested": false,
+      "scope": "Completed C12 CI build; not release/browser acceptance",
+      "workflowRunId": 42731010553,
+      "buildId": "23924a7758dfc5b8"
+    },
+    "targetedTests": {
+      "passed": 47,
+      "failed": 0,
+      "scope": "C10 local targeted suite; overlaps the full application suite and is not additive"
+    },
+    "nativeCiHitAreas": {
+      "candidate": "candidate12",
+      "sourceCommit": "fff436e776e1eda12a889dd4861a92b9f5a1b813",
+      "workflowRunId": 42731010553,
+      "buildId": "23924a7758dfc5b8",
+      "auditReport": "web-0.4.19-twelfth-ci-audit.json",
+      "requiredBothEngineChecksPassed": true,
+      "schemaVersion": 1,
+      "evidence": "browser-failure.json completedMapInteractions[].directionHitAreas",
+      "profiles": [
+        {
+          "profile": "android-portrait",
+          "engine": "leaflet",
+          "input": "touch",
+          "passed": true,
+          "nativeActions": 6,
+          "ordinaryLabelSelected": "altai",
+          "ordinaryCountSelected": "baikal",
+          "clusterExpansionActions": 4,
+          "allNativeActionsOutside44pxAnchor": true,
+          "allEventTriplesTrusted": true,
+          "visibleHitProbes": 96,
+          "outsideAnchorHitProbes": 66,
+          "unownedVisibleHitProbes": 0,
+          "hiddenControlObservations": 56,
+          "hiddenControlsDisplayNone": true,
+          "inViewportHiddenWrapperProbes": 324,
+          "hiddenWrapperCaptures": 0,
+          "mapInteractionLongestTaskMs": 160,
+          "mapInteractionCls": 0
+        },
+        {
+          "profile": "desktop-webgl",
+          "engine": "maplibre",
+          "input": "mouse",
+          "passed": true,
+          "nativeActions": 2,
+          "ordinaryLabelSelected": "altai",
+          "ordinaryCountSelected": "baikal",
+          "clusterExpansionActions": 0,
+          "allNativeActionsOutside44pxAnchor": true,
+          "allEventTriplesTrusted": true,
+          "visibleHitProbes": 32,
+          "outsideAnchorHitProbes": 22,
+          "unownedVisibleHitProbes": 0,
+          "hiddenControlObservations": 18,
+          "hiddenControlsDisplayNone": true,
+          "inViewportHiddenWrapperProbes": 0,
+          "hiddenWrapperCaptures": 0,
+          "mapInteractionLongestTaskMs": 488,
+          "mapInteractionCls": 0
+        }
+      ],
+      "scope": "Trusted native browser inputs outside ordinary label/count anchors, cluster expansion where present, edge probes and hidden wrappers; not physical-device measurements or individual clicks on all 15 directions.",
+      "overallReleasePass": false,
+      "overallFailure": "Three total observations, first still moving; only the final two were identical idle states. Multi-second frame waits exhausted the unchanged 15-second boundary. No final idle camera drift was observed.",
+      "finalCandidateRecheck": "pending"
+    },
+    "previousNativeCiHitAreas": {
+      "candidate": "candidate9",
+      "sourceCommit": "24639180d9f77cb56457e41e9ef5eb3a3e619332",
+      "workflowRunId": 42718225706,
+      "buildId": "987c147cde39c707",
+      "auditReport": "web-0.4.19-ninth-ci-audit.json",
+      "requiredBothEngineChecksPassed": true
+    },
+    "candidate10Ci": {
+      "status": "failed",
+      "sourceCommit": "8f4c328b2d6b746b62d9b5172058c89bf35ea96f",
+      "workflowRunId": 42721623552,
+      "buildId": "be160aa1a650a429",
+      "webTests": {
+        "passed": 461,
+        "failed": 0
+      },
+      "toolingTests": {
+        "passed": 67,
+        "failed": 0
+      },
+      "mobileProfilesCompleted": 4,
+      "failurePhase": "zoom-design-terrain",
+      "error": "The maplibre map did not settle",
+      "idleObservations": 3,
+      "requiredIdleObservations": 4,
+      "frameMs": [
+        1023.0627490000334,
+        8303.07371799997,
+        6140.852008000016
+      ],
+      "cameraRectRouteExactlyIdenticalAcrossSamples": true,
+      "deployment": "skipped",
+      "auditReport": "web-0.4.19-tenth-ci-audit.json",
+      "preparedSitePackage": {
+        "commitSha": "2dcee27cb264181431782c4d05ef7c991c00191a",
+        "archiveName": "tropnik-0.4.19-c10-site.tar.gz",
+        "bytes": 39033787,
+        "sha256": "7444b10c7964f78bdabc8cc4d366b8119bc7e105c4d94573a545d303805a1c46",
+        "regularFiles": 1194,
+        "byteIdenticalTrackedWebFiles": 1234,
+        "matchesCandidate": "candidate10",
+        "cleanBuild": true,
+        "sourcePushed": true,
+        "apkUnchanged": true,
+        "deployed": false
+      }
+    },
+    "candidate12Ci": {
+      "status": "failed",
+      "sourceCommit": "fff436e776e1eda12a889dd4861a92b9f5a1b813",
+      "workflowRunId": 42731010553,
+      "buildId": "23924a7758dfc5b8",
+      "webTests": {
+        "passed": 474,
+        "failed": 0
+      },
+      "toolingTests": {
+        "passed": 81,
+        "failed": 0
+      },
+      "auditReport": "web-0.4.19-twelfth-ci-audit.json",
+      "mobileProfilesCompleted": 4,
+      "nativeDirectionGatesBothEngines": true,
+      "screenshotHashesVerified": 52,
+      "visualReview": "pending",
+      "deployment": "skipped"
     }
   },
-  "beforeMerge": [
-    "Run the full CI browser matrix on the exact merged source."
-  ],
   "publication": {
-    "liveSiteChanged": false,
-    "mainBranchChanged": false,
-    "status": "integration and publication authorized; final gates in progress",
-    "sitePackage": {
-      "commitSha": "2e97390d97a0cac33c6b6904e14d01fb6ad62e51",
-      "cleanBuild": true,
-      "deployed": false
-    }
+    "pages": {
+      "url": "https://orewn.github.io/tropnik/",
+      "runId": 42746521929,
+      "runAttempt": 1,
+      "runUrl": "https://github.com/orewn/tropnik/actions/runs/42746521929",
+      "buildJobId": 129599838626,
+      "deployJobId": 129604757011,
+      "conclusion": "success",
+      "buildId": "0e74033994be61b1",
+      "webTests": 491,
+      "toolingTests": 84,
+      "publicHttpChecks": 23,
+      "reportSha256": "010f6054083b06ec4081e64a0b65d1a4370b55db6dcc219130be3c70573c4e58",
+      "assertBrowserReport": "passed",
+      "profiles": {
+        "mobile": 4,
+        "desktopMapLibre": 1
+      },
+      "designScreenshots": {
+        "total": 60,
+        "android": 27,
+        "desktop": 33,
+        "allHashesVerified": true
+      },
+      "artifact": {
+        "id": 13731702129,
+        "sha256": "8fd45bc7caabd35df61d726a7129601514953399ea6ce32e18c9e56af6ec7ced"
+      }
+    },
+    "site": {
+      "projectId": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+      "versionId": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_298af1ef7b6c819185b5ebfb168d1458",
+      "versionNumber": 21,
+      "deploymentId": "appgdep_6af28c6c7eac81918a05cb56180e5b85",
+      "sourceCommit": "588bbf1bebc9b926a051d7e919a317980b3dbe1b",
+      "status": "succeeded",
+      "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+      "updatedAt": "2026-11-10T03:16:08.574289+00:00",
+      "archive": {
+        "filename": "tropnik-0.4.19-c14-final-site.tar.gz",
+        "bytes": 39037193,
+        "sha256": "47b888d0ef316bfbe2311a55c106d7211fc1ca45d6c4e3812d4a49ae303a161e",
+        "regularFiles": 1194
+      },
+      "matchingTrackedWebFiles": 1242,
+      "sourceDifferences": [],
+      "sourceComparisonAfterBuild": true,
+      "access": {
+        "id": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+        "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+        "latestVersion": 21,
+        "status": "active",
+        "currentUserRole": "owner",
+        "accessMode": "custom",
+        "ownerCount": 1,
+        "editors": 0,
+        "groups": 0,
+        "externalVisitors": 0,
+        "accessRevision": 1
+      },
+      "browserUiCheck": "Expected ChatGPT sign-in gate observed; no authenticated private app interaction claimed."
+    },
+    "finalReceipt": "web-0.4.19-final.json"
   },
   "integration": {
     "secondSessionBase": "3a2026afd7e14fdebb15c4e32224a98cc8a7c588",
@@ -138,5 +351,287 @@
       "web-0.4.19-seventh-visual.json",
       "web-0.4.19-eighth-site-build.json"
     ]
+  },
+  "releasePass": true,
+  "currentCandidate": {
+    "candidate": "candidate14",
+    "sourceCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "localEquivalentCommit": "93477dae52a077c4754b042e3753d88f319ef1f1",
+    "tree": "ece82954993f48281fd8ed1dc564b5b5bd5c4f3e",
+    "webTree": "48683c3549aa7d3e32ea902de85e1ad65f884345",
+    "workflowRunId": 42746521929,
+    "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42746521929",
+    "runAttempt": 1,
+    "workflowStartedAt": "2026-11-10T03:00:15Z",
+    "workflowStatus": "completed",
+    "finalCiResult": "success",
+    "releaseEligible": true,
+    "publication": "Pages and owner-private Site21 succeeded",
+    "ciAuditReport": "web-0.4.19-fourteenth-ci-audit.json",
+    "changes": [
+      "Pinned SwiftShader-only terrain RTT quality factor; other renderers retain upstream quality.",
+      "Source, production/development bundles and offline copy verified together.",
+      "All web build paths reject a missing or stale SDK patch before preparation.",
+      "Offline shell cache key updated."
+    ],
+    "siteSourceCommit": "588bbf1bebc9b926a051d7e919a317980b3dbe1b",
+    "buildId": "0e74033994be61b1",
+    "preBrowserChecks": "491 web /84 tooling, lint, static client types, static build and52 HTTP checks passed",
+    "finalVisualReview": "60 screenshot receipts verified; representative final terrain/3D/endpoints viewed, plus a fresh public Altai native-click screenshot. No claim of exhaustive high-resolution visual inspection.",
+    "buildJob": {
+      "id": 129599838626,
+      "conclusion": "success"
+    },
+    "deployJob": {
+      "id": 129604757011,
+      "conclusion": "success"
+    }
+  },
+  "beforePublication": [],
+  "pendingFollowUp": [],
+  "excludedExperiments": {
+    "terrainAuditReport": "web-0.4.19-terrain-diagnostics.json",
+    "dem12": "Fewer observed requests, no measured high-zoom speedup; no global production maxzoom 12 adopted.",
+    "cityVisibility": "Failed at lower zoom; not accepted as a fix.",
+    "resourceBudget": "Cache 3 plus mounting 3D only while visible did not establish a GPU gain; richer trace categories confound duration comparison. C12 retains cache 6 and the existing TerrainScene lifecycle.",
+    "sceneLifecycle": "View-preserving GPU-resource cleanup patch is isolated, tested locally and unmerged; reopen latency and actual performance benefit are unmeasured.",
+    "softwareRendererReport": "web-0.4.19-software-renderer-diagnostics.json",
+    "softwareDensity": "Density0.5 failed; no after-activation GPU receipt proved the applied backing in that run. Unmerged.",
+    "terrainSource256": "Terrain source tileSize256 failed the same high transition. Unmerged.",
+    "softwarePitch30": "Actual30-degree pitch confirmed, but high transition still failed. Unmerged.",
+    "vectorSlicing": "Public zoomLevelsToOverscale1 preserved source data but increased untraced GPU-process CPU and failed17.905. Unmerged."
+  },
+  "previousCandidate": {
+    "candidate": "candidate11",
+    "sourceCommit": "971658415202f903149190c80f8c55da9c9c5cde",
+    "localEquivalentCommit": "3ca13d268d70ad779b3914a28b138b4862ed8a9a",
+    "tree": "1037c9e103a30a731d0723bb3aa9522c727c86f1",
+    "workflowRunId": 42729481252,
+    "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42729481252",
+    "workflowStatus": "completed",
+    "finalCiResult": "cancelled",
+    "preBrowserChecks": "No final C11 CI acceptance: workflow/build/deploy cancelled. Previously recorded local 469 web, 77 tooling, lint and both TypeScript checks passed.",
+    "releaseEligible": false,
+    "measuredSpeedup": null,
+    "finalVisualReview": "pending",
+    "publication": "pending",
+    "role": "Cancelled C11; preserved historical candidate",
+    "buildJob": {
+      "id": 129543551564,
+      "conclusion": "cancelled"
+    },
+    "deployJob": {
+      "id": 129547017532,
+      "conclusion": "cancelled"
+    },
+    "statusEvidence": "Cancellation confirmed by root through the native GitHub workflow UI",
+    "localVerification": {
+      "webTests": 469,
+      "toolingTests": 77,
+      "fullEslint": "passed",
+      "bothTypeScript": "passed"
+    },
+    "sitePackage": {
+      "commitSha": "625dca756eb63389a8627efb5c2e4787f1225c27",
+      "archiveName": "tropnik-0.4.19-c11-site.tar.gz",
+      "bytes": 39037000,
+      "sha256": "079a37787a60e399ffccffa6ead2d1d9cc63993f46b1e293e9306b8441318e18",
+      "regularFiles": 1194,
+      "byteIdenticalTrackedWebFiles": 1236,
+      "matchesCandidate": "candidate11",
+      "deployed": false,
+      "receipt": "web-0.4.19-eleventh-site-build.json"
+    }
+  },
+  "activeVerification": {
+    "candidate": "candidate14",
+    "workflowRunId": 42746521929,
+    "runAttempt": 1,
+    "sourceCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "tree": "ece82954993f48281fd8ed1dc564b5b5bd5c4f3e",
+    "startedAt": "2026-11-10T03:00:15Z",
+    "status": "completed",
+    "phase": "full native matrix and both publications complete",
+    "releasePass": true,
+    "conclusion": "success"
+  },
+  "priorCompletedCandidate": {
+    "candidate": "candidate13",
+    "sourceCommit": "d814cf4dd2ba091975d68d033747ba3d7c1c151b",
+    "localEquivalentCommit": "2bfa4a1b6e5fab8364e0dff45c1633bcba56a70e",
+    "tree": "8b1f1ac1713c498467f70cad7ea03b5fcc2aa863",
+    "workflowRunId": 42732799075,
+    "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42732799075",
+    "runAttempt": 2,
+    "workflowStartedAt": "2026-11-10T01:53:04Z",
+    "workflowStatus": "completed",
+    "finalCiResult": "failure",
+    "buildId": "778d540d2795cef0",
+    "preBrowserChecks": "474 web /84 tooling, lint, types, 339 pages /306 routes /52 HTTP checks passed",
+    "releaseEligible": false,
+    "measuredSpeedup": null,
+    "finalVisualReview": "incomplete; all52 PNG receipts verified, terrain gate failed before remaining desktop modes",
+    "publication": "skipped",
+    "ciAuditReport": "web-0.4.19-thirteenth-ci-audit.json",
+    "buildJob": {
+      "id": 129574782018,
+      "conclusion": "failure"
+    },
+    "deployJob": {
+      "id": 129579980489,
+      "conclusion": "skipped"
+    }
+  },
+  "c13ScreenshotOverviewReview": {
+    "sourceCommit": "d814cf4dd2ba091975d68d033747ba3d7c1c151b",
+    "runId": 42732799075,
+    "attempt": 2,
+    "reviewedDesignScreenshots": 52,
+    "method": "Visual overview of eight labelled contact sheets generated from source-bound original PNG receipts; not full-resolution pixel acceptance",
+    "findings": [
+      "Distinct pennant-shaped directions and round trail points remain visible at overview and regional scales.",
+      "Visible navigation, sheet and map controls retain separate areas in the retained desktop and Android frames.",
+      "Prepared Android 3D close, wide and reset views show the selected route and controls.",
+      "Source-end labels are hidden when crowded, compact when separated, and fully labelled at close zoom.",
+      "At zoom 18, fixed-center zoom can move the selected route outside the frame; coarse terrain and satellite detail remain visible limitations."
+    ],
+    "releasePass": false,
+    "limits": [
+      "Desktop terrain sequence stopped before zoom 18, prepared 3D and source-end checks.",
+      "Contact-sheet review does not replace the failed performance gate, final-source images, or a physical device test."
+    ]
+  },
+  "currentSourceUiAudit": {
+    "sourceCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "localEquivalentCommit": "93477dae52a077c4754b042e3753d88f319ef1f1",
+    "verifiedBy": "direction_click_audit read-only final source review",
+    "catalogDirections": 15,
+    "sharedMarkerAndInputFactoryInBothEngines": true,
+    "uiCatalogAndRelevantTestFilesUnchangedFromC13": 12,
+    "directions": [
+      "Алтай",
+      "Краснодарский край",
+      "Карелия",
+      "Крым",
+      "Байкал",
+      "Камчатка",
+      "Воронежская область",
+      "Приморский край",
+      "Калининградская область",
+      "Красноярский край",
+      "Сахалинская область",
+      "Мурманская область",
+      "Республика Адыгея",
+      "Карачаево-Черкесская Республика",
+      "Кабардино-Балкарская Республика"
+    ],
+    "coverageLimit": "All15 are covered by shared code and catalog/grouping tests. Native browser actions cover representative labels, counts and group expansion; no claim that every individual direction was clicked on a physical phone.",
+    "physicalDeviceTested": false,
+    "newTestRunPerformedByThisAudit": false
+  },
+  "finalNativeVerification": {
+    "trustedTouchActions": 6,
+    "trustedMouseActions": 2,
+    "visibleHitProbes": 128,
+    "outsideAnchorProbes": 88,
+    "wrongOwners": 0,
+    "hiddenWrapperProbes": 324,
+    "hiddenWrapperCaptures": 0,
+    "all15CoveredBySharedCodeAndCatalogGroupingTests": true,
+    "each15IndividuallyClicked": false,
+    "physicalPhoneTested": false
+  },
+  "publishedManualCheck": {
+    "url": "https://orewn.github.io/tropnik/?region=altai",
+    "input": "native mouse click through CUA",
+    "point": [
+      777.4921875,
+      746
+    ],
+    "buttonRect": {
+      "left": 730,
+      "top": 676,
+      "right": 774,
+      "bottom": 720
+    },
+    "labelRect": {
+      "left": 718.5078125,
+      "top": 716,
+      "right": 785.4921875,
+      "bottom": 754
+    },
+    "outsideButtonAnchor": true,
+    "hitOwner": "altai",
+    "result": {
+      "regionHeading": "Алтай",
+      "catalogRoutes": 11,
+      "urlChanged": true,
+      "flagVisuallyDistinctFromRoundTrailMarkers": true
+    },
+    "screenshot": {
+      "path": "docs/verification/region-flags-altai-published-2026-11-10.jpg",
+      "bytes": 101716,
+      "sha256": "0f8c45f80ffaa4fcd5efb2b503c1ee26194aa4401373a0cd9394afe0547696f3"
+    }
+  },
+  "historicalFollowUps": {
+    "nextCandidate": {
+      "candidate": "candidate14",
+      "sourceCommit": null,
+      "tree": null,
+      "workflowRunId": null,
+      "status": "not prepared; isolated experiments rejected",
+      "localVerification": "pending",
+      "browserVerification": "pending",
+      "publication": "pending",
+      "remainingProblem": "Both full C12 and C13 attempt2 reached the exact17.905 target but could not deliver4idle compositor observations in15s. No isolated candidate has established a production gain.",
+      "diagnostic": "Bounded public WebGL GPU timer queries are being prepared; application code unchanged."
+    },
+    "toolingFollowUp": {
+      "candidate": "candidate13",
+      "sourceCommit": "d814cf4dd2ba091975d68d033747ba3d7c1c151b",
+      "localEquivalentCommit": "2bfa4a1b6e5fab8364e0dff45c1633bcba56a70e",
+      "tree": "8b1f1ac1713c498467f70cad7ea03b5fcc2aa863",
+      "localTreeRechecked": true,
+      "changedFiles": [
+        "tools/pages-preview/browser-smoke.mjs",
+        "tools/pages-preview/tests/browser-profile-routing.test.mjs"
+      ],
+      "scope": "Forward the optional traceEnabled setting in the desktop full-matrix call and cover the actual profile loop with a regression test.",
+      "localToolingTests": {
+        "passed": 84,
+        "failed": 0
+      },
+      "webFilesByteIdenticalToCandidate12": 1236,
+      "workflowRunId": 42732799075,
+      "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42732799075",
+      "workflowCreatedAt": "2026-11-10T01:02:12Z",
+      "workflowStatus": "completed",
+      "finalCiResult": "cancelled",
+      "concurrency": {
+        "queuedBehindRun": 42731010553,
+        "cancelInProgress": false
+      },
+      "candidate12FullGateStillValid": true,
+      "gateScope": "Both an omitted trace option and explicit false disable tracing; all default native-input, exact-camera and performance gates remain unchanged.",
+      "sitePackageUnchanged": {
+        "commitSha": "746b438e001f6fb22e5a5904f3b1957f49112f4f",
+        "archiveSha256": "bcb2d8a71c0cf234b93690bd1c993088c990e8bf4792c3a5d521d59948a83c0d",
+        "receipt": "web-0.4.19-twelfth-site-build.json"
+      },
+      "releasePass": false,
+      "buildJob": {
+        "id": 129555023204,
+        "conclusion": "cancelled",
+        "durationSeconds": 44
+      },
+      "deployJob": {
+        "id": 129555350317,
+        "conclusion": "cancelled",
+        "durationSeconds": 0
+      },
+      "statusEvidence": "Cancellation confirmed by root through the native GitHub workflow UI",
+      "publicationPerformed": false
+    }
   }
 }

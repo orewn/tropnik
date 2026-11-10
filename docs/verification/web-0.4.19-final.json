@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.19",
+  "checkedAt": "2026-11-10T03:18:31Z",
+  "releasePass": true,
+  "publicationPerformed": true,
+  "source": {
+    "githubCommit": "bf133e1a1040c5c46c1164dda013737191e40e1c",
+    "localEquivalentCommit": "93477dae52a077c4754b042e3753d88f319ef1f1",
+    "tree": "ece82954993f48281fd8ed1dc564b5b5bd5c4f3e",
+    "webTree": "48683c3549aa7d3e32ea902de85e1ad65f884345",
+    "secondSessionMergedAncestor": "3a2026afd7e14fdebb15c4e32224a98cc8a7c588"
+  },
+  "pages": {
+    "url": "https://orewn.github.io/tropnik/",
+    "runId": 42746521929,
+    "runAttempt": 1,
+    "runUrl": "https://github.com/orewn/tropnik/actions/runs/42746521929",
+    "buildJobId": 129599838626,
+    "deployJobId": 129604757011,
+    "conclusion": "success",
+    "buildId": "0e74033994be61b1",
+    "webTests": 491,
+    "toolingTests": 84,
+    "publicHttpChecks": 23,
+    "reportSha256": "010f6054083b06ec4081e64a0b65d1a4370b55db6dcc219130be3c70573c4e58",
+    "assertBrowserReport": "passed",
+    "profiles": {
+      "mobile": 4,
+      "desktopMapLibre": 1
+    },
+    "designScreenshots": {
+      "total": 60,
+      "android": 27,
+      "desktop": 33,
+      "allHashesVerified": true
+    },
+    "artifact": {
+      "id": 13731702129,
+      "sha256": "8fd45bc7caabd35df61d726a7129601514953399ea6ce32e18c9e56af6ec7ced"
+    }
+  },
+  "nativeDirections": {
+    "trustedTouchActions": 6,
+    "trustedMouseActions": 2,
+    "visibleHitProbes": 128,
+    "outsideAnchorProbes": 88,
+    "wrongOwners": 0,
+    "hiddenWrapperProbes": 324,
+    "hiddenWrapperCaptures": 0,
+    "all15CoveredBySharedCodeAndCatalogGroupingTests": true,
+    "each15IndividuallyClicked": false,
+    "physicalPhoneTested": false
+  },
+  "site": {
+    "projectId": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+    "versionId": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_298af1ef7b6c819185b5ebfb168d1458",
+    "versionNumber": 21,
+    "deploymentId": "appgdep_6af28c6c7eac81918a05cb56180e5b85",
+    "sourceCommit": "588bbf1bebc9b926a051d7e919a317980b3dbe1b",
+    "status": "succeeded",
+    "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+    "updatedAt": "2026-11-10T03:16:08.574289+00:00",
+    "archive": {
+      "filename": "tropnik-0.4.19-c14-final-site.tar.gz",
+      "bytes": 39037193,
+      "sha256": "47b888d0ef316bfbe2311a55c106d7211fc1ca45d6c4e3812d4a49ae303a161e",
+      "regularFiles": 1194
+    },
+    "matchingTrackedWebFiles": 1242,
+    "sourceDifferences": [],
+    "sourceComparisonAfterBuild": true,
+    "access": {
+      "id": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+      "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+      "latestVersion": 21,
+      "status": "active",
+      "currentUserRole": "owner",
+      "accessMode": "custom",
+      "ownerCount": 1,
+      "editors": 0,
+      "groups": 0,
+      "externalVisitors": 0,
+      "accessRevision": 1
+    },
+    "browserUiCheck": "Expected ChatGPT sign-in gate observed; no authenticated private app interaction claimed."
+  },
+  "publishedManualCheck": {
+    "url": "https://orewn.github.io/tropnik/?region=altai",
+    "input": "native mouse click through CUA",
+    "point": [
+      777.4921875,
+      746
+    ],
+    "buttonRect": {
+      "left": 730,
+      "top": 676,
+      "right": 774,
+      "bottom": 720
+    },
+    "labelRect": {
+      "left": 718.5078125,
+      "top": 716,
+      "right": 785.4921875,
+      "bottom": 754
+    },
+    "outsideButtonAnchor": true,
+    "hitOwner": "altai",
+    "result": {
+      "regionHeading": "Алтай",
+      "catalogRoutes": 11,
+      "urlChanged": true,
+      "flagVisuallyDistinctFromRoundTrailMarkers": true
+    },
+    "screenshot": {
+      "path": "docs/verification/region-flags-altai-published-2026-11-10.jpg",
+      "bytes": 101716,
+      "sha256": "0f8c45f80ffaa4fcd5efb2b503c1ee26194aa4401373a0cd9394afe0547696f3"
+    }
+  },
+  "performanceLimits": [
+    "Native map-interaction longest tasks were130ms mobile and351ms desktop, CLS0. These values do not describe every map mode.",
+    "Desktop design-phase longest task1362ms was recorded separately; no all-rendering-tasks-under750ms claim.",
+    "The bounded SwiftShader GPU diagnostic shows lower sampled hillshade/mipmap cost; it is not a uniform end-to-end or hardware benchmark.",
+    "At high terrain zoom the pre-existing coarse fill and loading-detail notice can remain visible; camera stability does not prove all network details have loaded."
+  ],
+  "android": {
+    "publishedVersion": "0.4.18-preview",
+    "versionCode": 10,
+    "apkSha256": "b80c36174a87eb70cc8e010af7535847b3fe9374586a87a535718bc25bf3d40f",
+    "newApkPublished": false
+  },
+  "reports": [
+    "web-0.4.19-fourteenth-ci-audit.json",
+    "web-0.4.19-fourteenth-local.json",
+    "web-0.4.19-fourteenth-site-build.json",
+    "web-0.4.19-swiftshader-rtt-comparison.json",
+    "region-direction-controls-2026-11-10.json"
+  ]
+}

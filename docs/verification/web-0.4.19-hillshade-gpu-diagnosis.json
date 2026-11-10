@@ -1,0 +1,1465 @@
+{
+  "schemaVersion": 1,
+  "release": "web-0.4.19",
+  "kind": "source-bound public WebGL GPU draw diagnosis",
+  "auditedAt": "2026-11-10T02:37:47.603223+00:00",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "releasePass": false,
+  "publicationPerformed": false,
+  "source": {
+    "commit": "701149643684770954107256bd36e3b034888ce8",
+    "tree": "3e0ccee49793e50b28a2ef628d7813c3a7514299",
+    "localCommit": "86481095c51c7a4c1fe3d059da26400041f311b2",
+    "workflowRunId": 42742442952,
+    "workflowRunAttempt": 1,
+    "workflowRunUrl": "https://github.com/orewn/tropnik/actions/runs/42742442952",
+    "jobId": 129586542806,
+    "jobConclusion": "success",
+    "run": {
+      "id": 42742442952,
+      "source": "701149643684770954107256bd36e3b034888ce8",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-10T02:23:37Z",
+      "updatedAt": "2026-11-10T02:28:10Z"
+    },
+    "webMatchesProcessCPUBaseline": true,
+    "binding": "Run API source and attempt; Git commit tree; artifact workflow_run SHA; diagnostic report sourceCommit; archive digest."
+  },
+  "artifact": {
+    "id": 13729748614,
+    "name": "tropnik-terrain-diagnostic-42742442952",
+    "bytes": 4131477,
+    "sha256": "d57e2c08fce06393b49925e3aa4714e0140f9f381720ac64ae380849652dd8a7",
+    "sha256Rechecked": true,
+    "safeZipPathsChecked": true
+  },
+  "nativeOutcome": {
+    "status": "completed",
+    "routeId": "kavkaz-8a",
+    "nativeInputsCompleted": 29,
+    "diagnosticSteps": 18,
+    "minimumZoom": 1.90540610449558,
+    "lastNativeZoom": 17.99999998199918,
+    "recordedActionBeforeZoom": 14.90540610449558,
+    "recordedActionAfterZoom": 15.90540610449558,
+    "cameraSettleGateUnchanged": true,
+    "requiredIdleObservations": 4,
+    "timeoutMs": 15000,
+    "currentPerformance": {
+      "cls": 0,
+      "longest": 2218
+    },
+    "geometryPassed": false
+  },
+  "gpuEnvironment": {
+    "gpu": {
+      "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "drawingBuffer": {
+        "width": 1041,
+        "height": 928
+      },
+      "canvas": {
+        "width": 1041,
+        "height": 928,
+        "cssWidth": 1041,
+        "cssHeight": 928,
+        "devicePixelRatio": 1
+      },
+      "contextLost": false,
+      "samples": 0
+    },
+    "terrainEnabledGPU": {
+      "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "drawingBuffer": {
+        "width": 1041,
+        "height": 928
+      },
+      "canvas": {
+        "width": 1041,
+        "height": 928,
+        "cssWidth": 1041,
+        "cssHeight": 928,
+        "devicePixelRatio": 1
+      },
+      "contextLost": false,
+      "samples": 0
+    },
+    "highZoomGPU": {
+      "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "drawingBuffer": {
+        "width": 1041,
+        "height": 928
+      },
+      "canvas": {
+        "width": 1041,
+        "height": 928,
+        "cssWidth": 1041,
+        "cssHeight": 928,
+        "devicePixelRatio": 1
+      },
+      "contextLost": false,
+      "samples": 0
+    }
+  },
+  "timerValidity": {
+    "method": "EXT_disjoint_timer_query_webgl2",
+    "primarySpecification": "https://registry.khronos.org/webgl/extensions/EXT_disjoint_timer_query_webgl2/",
+    "context": {
+      "id": 1,
+      "canvas": {
+        "className": "maplibregl-canvas",
+        "width": 1041,
+        "height": 928
+      },
+      "timer": {
+        "supported": true,
+        "counterBits": 64,
+        "disjointAtStart": false
+      }
+    },
+    "queries": {
+      "attempted": 120,
+      "started": 120,
+      "pending": 0,
+      "completed": 120,
+      "unsupported": 0,
+      "interference": 0,
+      "limitSkipped": 0,
+      "groupLimitSkipped": 1043,
+      "disjoint": 0,
+      "unavailable": 0,
+      "errors": 0
+    },
+    "recording": false,
+    "stopped": true,
+    "collectionPasses": 1,
+    "collectionFinal": false,
+    "collectionErrors": [],
+    "observerErrors": [],
+    "validQueriedSamples": 120,
+    "interpretation": "All120 started queries returned available, non-disjoint results. Collection stopped after the first pass because no query remained pending."
+  },
+  "sampling": {
+    "strategy": "first-calls-per-program-framebuffer-viewport-group",
+    "scope": "one-native-action-maplibre-canvas-only",
+    "limits": {
+      "maxQueries": 128,
+      "maxQueriesPerGroup": 8,
+      "maxEvents": 2048,
+      "maxGroups": 128
+    },
+    "totals": {
+      "calls": 1163,
+      "drawCalls": 1115,
+      "mipmapCalls": 48,
+      "submittedVerticesOrIndices": 21007616,
+      "eventsDropped": 0,
+      "groupsDropped": 0
+    },
+    "groupsRecorded": 15,
+    "queriedDrawCalls": 112,
+    "queriedMipmapCalls": 8,
+    "callsNotTimedBecausePerGroupLimit": 1043,
+    "representativeSample": false,
+    "noExtrapolation": "Each group records only its first8 calls. Do not multiply sampled hillshade durations by24/8, or treat sampled cost shares as whole-action shares.",
+    "drawCountBasis": "Observed actual WebGL draw methods; generic Chrome WebGL trace events are not used as draw counts."
+  },
+  "costByProgramFramebufferViewport": [
+    {
+      "id": 1,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 14,
+      "programLabel": "terrain_depth",
+      "framebufferKind": "offscreen",
+      "framebufferId": 10,
+      "viewport": [
+        0,
+        0,
+        1041,
+        928
+      ],
+      "mode": 4,
+      "calls": 39,
+      "submittedVerticesOrIndices": 3953664,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 1,
+      "lastSequence": 263,
+      "shaderFamilyFromCapturedSource": "terrain depth",
+      "timedCallCoverage": "8/39",
+      "sampledGPUMs": 61.145683,
+      "sampleMinimumMs": 4.070047,
+      "sampleMedianMs": 8.133169,
+      "sampleMaximumMs": 11.173685
+    },
+    {
+      "id": 2,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 15,
+      "programLabel": "program-15",
+      "framebufferKind": "default",
+      "framebufferId": 0,
+      "viewport": [
+        0,
+        0,
+        1041,
+        928
+      ],
+      "mode": 4,
+      "calls": 8,
+      "submittedVerticesOrIndices": 48,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 11,
+      "lastSequence": 1114,
+      "shaderFamilyFromCapturedSource": "sky",
+      "timedCallCoverage": "8/8",
+      "sampledGPUMs": 114.863173,
+      "sampleMinimumMs": 12.492147,
+      "sampleMedianMs": 14.028411,
+      "sampleMaximumMs": 17.982625
+    },
+    {
+      "id": 3,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 23,
+      "programLabel": "terrain",
+      "framebufferKind": "default",
+      "framebufferId": 0,
+      "viewport": [
+        0,
+        0,
+        1041,
+        928
+      ],
+      "mode": 4,
+      "calls": 166,
+      "submittedVerticesOrIndices": 16828416,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 12,
+      "lastSequence": 1160,
+      "shaderFamilyFromCapturedSource": "terrain drape",
+      "timedCallCoverage": "8/166",
+      "sampledGPUMs": 111.041625,
+      "sampleMinimumMs": 2.670122,
+      "sampleMedianMs": 7.546978,
+      "sampleMaximumMs": 47.851786
+    },
+    {
+      "id": 4,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 24,
+      "programLabel": "program-24",
+      "framebufferKind": "default",
+      "framebufferId": 0,
+      "viewport": [
+        0,
+        0,
+        1041,
+        928
+      ],
+      "mode": 4,
+      "calls": 98,
+      "submittedVerticesOrIndices": 6564,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 22,
+      "lastSequence": 1149,
+      "shaderFamilyFromCapturedSource": "SDF symbol",
+      "timedCallCoverage": "8/98",
+      "sampledGPUMs": 0.342638,
+      "sampleMinimumMs": 0.025438,
+      "sampleMedianMs": 0.037522,
+      "sampleMaximumMs": 0.098509
+    },
+    {
+      "id": 5,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 25,
+      "programLabel": "program-25",
+      "framebufferKind": "default",
+      "framebufferId": 0,
+      "viewport": [
+        0,
+        0,
+        1041,
+        928
+      ],
+      "mode": 4,
+      "calls": 8,
+      "submittedVerticesOrIndices": 48,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 52,
+      "lastSequence": 1161,
+      "shaderFamilyFromCapturedSource": "circle variant",
+      "timedCallCoverage": "8/8",
+      "sampledGPUMs": 0.520988,
+      "sampleMinimumMs": 0.055784,
+      "sampleMedianMs": 0.06406200000000001,
+      "sampleMaximumMs": 0.076646
+    },
+    {
+      "id": 6,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 26,
+      "programLabel": "program-26",
+      "framebufferKind": "default",
+      "framebufferId": 0,
+      "viewport": [
+        0,
+        0,
+        1041,
+        928
+      ],
+      "mode": 4,
+      "calls": 8,
+      "submittedVerticesOrIndices": 48,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 53,
+      "lastSequence": 1162,
+      "shaderFamilyFromCapturedSource": "circle variant",
+      "timedCallCoverage": "8/8",
+      "sampledGPUMs": 0.37765899999999997,
+      "sampleMinimumMs": 0.042233,
+      "sampleMedianMs": 0.047481499999999996,
+      "sampleMaximumMs": 0.051668
+    },
+    {
+      "id": 7,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 27,
+      "programLabel": "program-27",
+      "framebufferKind": "default",
+      "framebufferId": 0,
+      "viewport": [
+        0,
+        0,
+        1041,
+        928
+      ],
+      "mode": 4,
+      "calls": 8,
+      "submittedVerticesOrIndices": 48,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 54,
+      "lastSequence": 1163,
+      "shaderFamilyFromCapturedSource": "circle variant",
+      "timedCallCoverage": "8/8",
+      "sampledGPUMs": 0.459823,
+      "sampleMinimumMs": 0.054342,
+      "sampleMedianMs": 0.0555135,
+      "sampleMaximumMs": 0.06645
+    },
+    {
+      "id": 8,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 16,
+      "programLabel": "program-16",
+      "framebufferKind": "offscreen",
+      "framebufferId": 11,
+      "viewport": [
+        0,
+        0,
+        2048,
+        2048
+      ],
+      "mode": 4,
+      "calls": 25,
+      "submittedVerticesOrIndices": 150,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 116,
+      "lastSequence": 1115,
+      "shaderFamilyFromCapturedSource": "background/solid-color quad",
+      "timedCallCoverage": "8/25",
+      "sampledGPUMs": 127.586341,
+      "sampleMinimumMs": 14.050258,
+      "sampleMedianMs": 15.048906,
+      "sampleMaximumMs": 23.609689
+    },
+    {
+      "id": 9,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 17,
+      "programLabel": "program-17",
+      "framebufferKind": "offscreen",
+      "framebufferId": 11,
+      "viewport": [
+        0,
+        0,
+        2048,
+        2048
+      ],
+      "mode": 4,
+      "calls": 208,
+      "submittedVerticesOrIndices": 1248,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 117,
+      "lastSequence": 1119,
+      "shaderFamilyFromCapturedSource": "solid-white clipping quad",
+      "timedCallCoverage": "8/208",
+      "sampledGPUMs": 30.109045,
+      "sampleMinimumMs": 1.214093,
+      "sampleMedianMs": 4.587545,
+      "sampleMaximumMs": 6.905474
+    },
+    {
+      "id": 10,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 18,
+      "programLabel": "program-18",
+      "framebufferKind": "offscreen",
+      "framebufferId": 11,
+      "viewport": [
+        0,
+        0,
+        2048,
+        2048
+      ],
+      "mode": 4,
+      "calls": 169,
+      "submittedVerticesOrIndices": 60378,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 119,
+      "lastSequence": 1128,
+      "shaderFamilyFromCapturedSource": "fill",
+      "timedCallCoverage": "8/169",
+      "sampledGPUMs": 53.402151,
+      "sampleMinimumMs": 0.109605,
+      "sampleMedianMs": 4.997078,
+      "sampleMaximumMs": 18.266663
+    },
+    {
+      "id": 11,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 19,
+      "programLabel": "program-19",
+      "framebufferKind": "offscreen",
+      "framebufferId": 11,
+      "viewport": [
+        0,
+        0,
+        2048,
+        2048
+      ],
+      "mode": 1,
+      "calls": 169,
+      "submittedVerticesOrIndices": 41552,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 121,
+      "lastSequence": 1129,
+      "shaderFamilyFromCapturedSource": "fill outline",
+      "timedCallCoverage": "8/169",
+      "sampledGPUMs": 0.99422,
+      "sampleMinimumMs": 0.044067,
+      "sampleMedianMs": 0.0852535,
+      "sampleMaximumMs": 0.282286
+    },
+    {
+      "id": 12,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 20,
+      "programLabel": "program-20",
+      "framebufferKind": "offscreen",
+      "framebufferId": 11,
+      "viewport": [
+        0,
+        0,
+        2048,
+        2048
+      ],
+      "mode": 4,
+      "calls": 61,
+      "submittedVerticesOrIndices": 34446,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 132,
+      "lastSequence": 1131,
+      "shaderFamilyFromCapturedSource": "SDF/dashed line",
+      "timedCallCoverage": "8/61",
+      "sampledGPUMs": 2.118747,
+      "sampleMinimumMs": 0.044106,
+      "sampleMedianMs": 0.067437,
+      "sampleMaximumMs": 0.831295
+    },
+    {
+      "id": 13,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 21,
+      "programLabel": "program-21",
+      "framebufferKind": "offscreen",
+      "framebufferId": 11,
+      "viewport": [
+        0,
+        0,
+        2048,
+        2048
+      ],
+      "mode": 4,
+      "calls": 24,
+      "submittedVerticesOrIndices": 144,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 133,
+      "lastSequence": 1127,
+      "shaderFamilyFromCapturedSource": "hillshade",
+      "timedCallCoverage": "8/24",
+      "sampledGPUMs": 2102.930535,
+      "sampleMinimumMs": 243.678602,
+      "sampleMedianMs": 246.30798099999998,
+      "sampleMaximumMs": 378.94129
+    },
+    {
+      "id": 14,
+      "method": "drawElements",
+      "contextId": 1,
+      "programId": 22,
+      "programLabel": "program-22",
+      "framebufferKind": "offscreen",
+      "framebufferId": 11,
+      "viewport": [
+        0,
+        0,
+        2048,
+        2048
+      ],
+      "mode": 4,
+      "calls": 124,
+      "submittedVerticesOrIndices": 80862,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 136,
+      "lastSequence": 1130,
+      "shaderFamilyFromCapturedSource": "line",
+      "timedCallCoverage": "8/124",
+      "sampledGPUMs": 2.244657,
+      "sampleMinimumMs": 0.018237,
+      "sampleMedianMs": 0.10288,
+      "sampleMaximumMs": 0.977015
+    },
+    {
+      "id": 15,
+      "method": "generateMipmap",
+      "contextId": 1,
+      "programId": null,
+      "programLabel": "generateMipmap",
+      "framebufferKind": "offscreen",
+      "framebufferId": 11,
+      "viewport": [
+        0,
+        0,
+        2048,
+        2048
+      ],
+      "mode": null,
+      "calls": 48,
+      "submittedVerticesOrIndices": 0,
+      "queryAttempts": 8,
+      "timedCalls": 8,
+      "firstSequence": 137,
+      "lastSequence": 1132,
+      "shaderFamilyFromCapturedSource": "generateMipmap",
+      "timedCallCoverage": "8/48",
+      "sampledGPUMs": 171.570655,
+      "sampleMinimumMs": 21.078428,
+      "sampleMedianMs": 21.435056000000003,
+      "sampleMaximumMs": 21.836873
+    }
+  ],
+  "sampledCostByTarget": [
+    {
+      "category": "default framebuffer draws",
+      "calls": 296,
+      "timedCalls": 48,
+      "sampledGPUMs": 227.605906,
+      "programIds": [
+        15,
+        23,
+        24,
+        25,
+        26,
+        27
+      ]
+    },
+    {
+      "category": "terrain depth framebuffer",
+      "calls": 39,
+      "timedCalls": 8,
+      "sampledGPUMs": 61.145683,
+      "programIds": [
+        14
+      ]
+    },
+    {
+      "category": "RTT style draws",
+      "calls": 780,
+      "timedCalls": 56,
+      "sampledGPUMs": 2319.385696,
+      "programIds": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ]
+    },
+    {
+      "category": "mipmap generation",
+      "calls": 48,
+      "timedCalls": 8,
+      "sampledGPUMs": 171.570655,
+      "programIds": [
+        null
+      ]
+    }
+  ],
+  "hillshadeHotspot": {
+    "programId": 21,
+    "framebufferId": 11,
+    "framebufferSize": [
+      2048,
+      2048
+    ],
+    "totalRecordedCalls": 24,
+    "timedCalls": 8,
+    "sampledGPUMs": 2102.930535,
+    "samples": [
+      {
+        "sequence": 133,
+        "gpuMs": 378.94129,
+        "indices": 6
+      },
+      {
+        "sequence": 153,
+        "gpuMs": 247.346058,
+        "indices": 6
+      },
+      {
+        "sequence": 169,
+        "gpuMs": 248.813713,
+        "indices": 6
+      },
+      {
+        "sequence": 185,
+        "gpuMs": 245.184215,
+        "indices": 6
+      },
+      {
+        "sequence": 282,
+        "gpuMs": 243.678602,
+        "indices": 6
+      },
+      {
+        "sequence": 299,
+        "gpuMs": 248.947876,
+        "indices": 6
+      },
+      {
+        "sequence": 350,
+        "gpuMs": 245.269904,
+        "indices": 6
+      },
+      {
+        "sequence": 389,
+        "gpuMs": 244.748877,
+        "indices": 6
+      }
+    ],
+    "capturedFragment": {
+      "fullSourceLength": 4754,
+      "retainedTailLength": 4096,
+      "fullSourceFNV1a32": "6b7fd0d2",
+      "retainedTailSHA256": "188db7811c949b7c3a31fae08f3c75536e967f8756b833429c93decdf7a2d678",
+      "capturedSignatures": [
+        "uniform sampler2D u_image;",
+        "uniform vec2 u_latrange;",
+        "uniform float u_exaggeration;",
+        "uniform int u_method;",
+        "void multidirectional_hillshade(vec2 deriv)",
+        "for(int i=0; i < NUM_ILLUMINATION_SOURCES; i++)",
+        "u_method==MULTIDIRECTIONAL"
+      ],
+      "compiledDefineCaptured": false,
+      "runtimeMethodUniformCaptured": false
+    },
+    "conclusion": "Hillshade is an observed expensive sampled RTT draw family. This is separate from terrain mesh/depth, mipmaps and sampler anisotropy; it is not a measurement of all24 hillshade calls."
+  },
+  "textureEvidence": [
+    {
+      "programId": 21,
+      "uniform": "u_image",
+      "distinctObservedTextureIds": 1,
+      "shapes": [
+        {
+          "width": 514,
+          "height": 514,
+          "levels": 1,
+          "anisotropy": 1,
+          "minFilterGL": 9729,
+          "magFilterGL": 9729,
+          "observations": 24
+        }
+      ]
+    },
+    {
+      "programId": 23,
+      "uniform": "u_texture",
+      "distinctObservedTextureIds": 22,
+      "shapes": [
+        {
+          "width": 2048,
+          "height": 2048,
+          "levels": 12,
+          "anisotropy": 16,
+          "minFilterGL": 9987,
+          "magFilterGL": 9729,
+          "observations": 166
+        }
+      ]
+    },
+    {
+      "programId": 23,
+      "uniform": "u_terrain",
+      "distinctObservedTextureIds": 3,
+      "shapes": [
+        {
+          "width": 516,
+          "height": 516,
+          "levels": 1,
+          "anisotropy": 1,
+          "minFilterGL": 9728,
+          "magFilterGL": 9728,
+          "observations": 166
+        }
+      ]
+    }
+  ],
+  "configuredStyle": {
+    "id": "terrain-shading",
+    "type": "hillshade",
+    "source": "hillshade-dem",
+    "minzoom": 2,
+    "paint": {
+      "hillshade-method": "multidirectional",
+      "hillshade-illumination-anchor": "map",
+      "hillshade-illumination-direction": [
+        315,
+        270,
+        355
+      ],
+      "hillshade-illumination-altitude": [
+        42,
+        52,
+        36
+      ],
+      "hillshade-exaggeration": [
+        "interpolate",
+        [
+          "linear"
+        ],
+        [
+          "zoom"
+        ],
+        2,
+        0.34,
+        5,
+        0.52,
+        9,
+        0.66,
+        13,
+        0.72
+      ],
+      "hillshade-shadow-color": "#29423A",
+      "hillshade-highlight-color": "#FFF2DC",
+      "hillshade-accent-color": "#3D6253"
+    }
+  },
+  "offlineInstalledSDKPipeline": {
+    "evidenceKind": "Offline installed-SDK TypeScript execution, distinct from captured browser/GPU evidence",
+    "sourceScript": "/workspace/scratch/13d796f593db/hillshade-sdk-light-count.mjs",
+    "sourceScriptSHA256": "b4de1f61def4ad2a91aa1e34ef7d52b9c855a01bf67b92a05d78af84ea7e8d5b",
+    "result": "/workspace/scratch/13d796f593db/hillshade-sdk-light-count.json",
+    "resultSHA256": "ac99d223c513722ae22170970110164d82a12b5269d82e13189d113c99f55469",
+    "sourceHashesRechecked": true,
+    "sdkVersion": "6.16.0",
+    "sources": {
+      "style": {
+        "path": "/workspace/scratch/13d796f593db/tropnik-ui/web/public/maps/tropa-style.json",
+        "sha256": "fd11ed452c30750ab93c61d7da531d2a6b7dc2f06feba900b76e990429b0371b"
+      },
+      "layer": {
+        "path": "/workspace/scratch/13d796f593db/tropnik-ui/web/node_modules/.pnpm/maplibre-gl@6.16.0/node_modules/maplibre-gl/src/style/style_layer/hillshade_style_layer.ts",
+        "sha256": "1313aec9ce46f0a81f4e258f876ae3787a72b70d61b0d8cdfb528b1561e0e104"
+      },
+      "uniforms": {
+        "path": "/workspace/scratch/13d796f593db/tropnik-ui/web/node_modules/.pnpm/maplibre-gl@6.16.0/node_modules/maplibre-gl/src/webgl/program/hillshade_program.ts",
+        "sha256": "7f66254be06a4e3dd2b4fcba51632078db0119cd74272e067200953f2e578f76"
+      },
+      "draw": {
+        "path": "/workspace/scratch/13d796f593db/tropnik-ui/web/node_modules/.pnpm/maplibre-gl@6.16.0/node_modules/maplibre-gl/src/webgl/draw/draw_hillshade.ts",
+        "sha256": "72c098d62042a668f58eea70560d51a49ee415f278786a8a9fbb13bd37bb08c7"
+      },
+      "shader": {
+        "path": "/workspace/scratch/13d796f593db/tropnik-ui/web/node_modules/.pnpm/maplibre-gl@6.16.0/node_modules/maplibre-gl/src/shaders/glsl/hillshade.fragment.glsl",
+        "sha256": "8d53b455567423c86dfe810df791527b5df1467b4590b5d72574275fa40a8d7a"
+      }
+    },
+    "method": "Actual HillshadeStyleLayer.recalculate, getIlluminationProperties, hillshadeUniformValues and drawHillshade; recording painter stub and util/browser reduced-motion stub; no browser or GPU draw.",
+    "evaluatedRawLengths": {
+      "hillshade-illumination-direction": 3,
+      "hillshade-illumination-altitude": 3,
+      "hillshade-highlight-color": 1,
+      "hillshade-shadow-color": 1
+    },
+    "paddedIlluminationLengths": {
+      "directionRadians": 3,
+      "altitudeRadians": 3,
+      "shadowColor": 3,
+      "highlightColor": 3
+    },
+    "programCalls": [
+      [
+        "hillshade",
+        null,
+        false,
+        [
+          "#define NUM_ILLUMINATION_SOURCES 1"
+        ]
+      ]
+    ],
+    "uniformMethod": 3,
+    "uniformExaggeration": 0.72,
+    "interpretation": "Directions/altitudes have3 configured entries, raw scalar highlight/shadow colors have length1. Returned illumination arrays are padded to3, but actual drawHillshade requests NUM_ILLUMINATION_SOURCES1. Configuration alone therefore does not prove3 executed lights; no3-to-1 loop reduction may be claimed for a basic-method candidate."
+  },
+  "processCPUComparison": {
+    "baselineSourceCommit": "7df78dfaf2157ce77fc345e2ef7f26432a1d00b5",
+    "baselineRunId": 42737687035,
+    "baselineReportSHA256": "c7d8de911e274e2e49f9948a155e760f4083b636d7570776870e1629df24dcde",
+    "unit": "Cumulative all-thread process CPU seconds; averageLogicalCores=CPU seconds/wall seconds",
+    "rows": [
+      {
+        "beforeZoom": 14.90540610449558,
+        "currentDrawQueriesEnabled": true,
+        "chromeTraceEnabled": false,
+        "baseline": {
+          "status": "completed",
+          "actionDurationMs": 9931.898623000016,
+          "counterReadMs": [
+            0.6752489999926183,
+            0.8387260000163224
+          ],
+          "intervalMs": {
+            "minimum": 9931.928809000005,
+            "maximum": 9933.442784000013,
+            "midpoint": 9932.685796500009
+          },
+          "allProcessesComparable": true,
+          "byType": [
+            {
+              "type": "browser",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.07000000000000028,
+              "averageLogicalCores": 0.007047439276158948
+            },
+            {
+              "type": "GPU",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 34.97999999999996,
+              "averageLogicalCores": 3.521706084000553
+            },
+            {
+              "type": "network.mojom.NetworkService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.06000000000000005,
+              "averageLogicalCores": 0.0060406622367076505
+            },
+            {
+              "type": "storage.mojom.StorageService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            },
+            {
+              "type": "renderer",
+              "processCount": 4,
+              "cpuTimeDeltaSeconds": 0.3999999999999986,
+              "averageLogicalCores": 0.04027108157805082
+            },
+            {
+              "type": "tracing.mojom.TracingService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            }
+          ],
+          "pageActivityBefore": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          },
+          "pageActivityAfter": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          }
+        },
+        "gpuDiagnostic": {
+          "status": "completed",
+          "actionDurationMs": 11213.866088999988,
+          "counterReadMs": [
+            0.7155510000011418,
+            0.7567820000112988
+          ],
+          "intervalMs": {
+            "minimum": 11213.896995999996,
+            "maximum": 11215.369329000008,
+            "midpoint": 11214.633162500002
+          },
+          "allProcessesComparable": true,
+          "byType": [
+            {
+              "type": "browser",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.08000000000000007,
+              "averageLogicalCores": 0.007133536945952694
+            },
+            {
+              "type": "GPU",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 40.15999999999997,
+              "averageLogicalCores": 3.5810355468682467
+            },
+            {
+              "type": "network.mojom.NetworkService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.07000000000000006,
+              "averageLogicalCores": 0.006241844827708607
+            },
+            {
+              "type": "storage.mojom.StorageService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            },
+            {
+              "type": "renderer",
+              "processCount": 4,
+              "cpuTimeDeltaSeconds": 0.5199999999999996,
+              "averageLogicalCores": 0.04636799014869243
+            },
+            {
+              "type": "tracing.mojom.TracingService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.01,
+              "averageLogicalCores": 0.000891692118244086
+            }
+          ],
+          "pageActivityBefore": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          },
+          "pageActivityAfter": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          }
+        }
+      },
+      {
+        "beforeZoom": 15.90540610449558,
+        "currentDrawQueriesEnabled": false,
+        "chromeTraceEnabled": true,
+        "baseline": {
+          "status": "completed",
+          "actionDurationMs": 10852.134824000008,
+          "counterReadMs": [
+            0.45005899999523535,
+            0.6924240000080317
+          ],
+          "intervalMs": {
+            "minimum": 10852.158361000009,
+            "maximum": 10853.300844000012,
+            "midpoint": 10852.72960250001
+          },
+          "allProcessesComparable": true,
+          "byType": [
+            {
+              "type": "browser",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.15000000000000036,
+              "averageLogicalCores": 0.013821407654480462
+            },
+            {
+              "type": "GPU",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 33.59000000000003,
+              "averageLogicalCores": 3.0950738874266537
+            },
+            {
+              "type": "network.mojom.NetworkService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.11999999999999988,
+              "averageLogicalCores": 0.011057126123584332
+            },
+            {
+              "type": "storage.mojom.StorageService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            },
+            {
+              "type": "renderer",
+              "processCount": 4,
+              "cpuTimeDeltaSeconds": 4.450000000000003,
+              "averageLogicalCores": 0.41003509374958635
+            },
+            {
+              "type": "tracing.mojom.TracingService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.02,
+              "averageLogicalCores": 0.001842854353930724
+            }
+          ],
+          "pageActivityBefore": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          },
+          "pageActivityAfter": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          }
+        },
+        "gpuDiagnostic": {
+          "status": "completed",
+          "actionDurationMs": 11977.153371000022,
+          "counterReadMs": [
+            0.47297400000388734,
+            0.7093699999968521
+          ],
+          "intervalMs": {
+            "minimum": 11977.193872999982,
+            "maximum": 11978.376216999983,
+            "midpoint": 11977.785044999982
+          },
+          "allProcessesComparable": true,
+          "byType": [
+            {
+              "type": "browser",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.1599999999999997,
+              "averageLogicalCores": 0.013358062396251653
+            },
+            {
+              "type": "GPU",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 36.91000000000008,
+              "averageLogicalCores": 3.081538019035316
+            },
+            {
+              "type": "network.mojom.NetworkService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.15000000000000013,
+              "averageLogicalCores": 0.01252318349648596
+            },
+            {
+              "type": "storage.mojom.StorageService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            },
+            {
+              "type": "renderer",
+              "processCount": 4,
+              "cpuTimeDeltaSeconds": 5.27,
+              "averageLogicalCores": 0.43998118017653964
+            },
+            {
+              "type": "tracing.mojom.TracingService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.019999999999999997,
+              "averageLogicalCores": 0.0016697577995314597
+            }
+          ],
+          "pageActivityBefore": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          },
+          "pageActivityAfter": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          }
+        }
+      },
+      {
+        "beforeZoom": 16.90540610449558,
+        "currentDrawQueriesEnabled": false,
+        "chromeTraceEnabled": false,
+        "baseline": {
+          "status": "completed",
+          "actionDurationMs": 13011.762917999993,
+          "counterReadMs": [
+            0.43306400001165457,
+            0.6213479999860283
+          ],
+          "intervalMs": {
+            "minimum": 13011.781656000006,
+            "maximum": 13012.836068000004,
+            "midpoint": 13012.308862000005
+          },
+          "allProcessesComparable": true,
+          "byType": [
+            {
+              "type": "browser",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.16999999999999993,
+              "averageLogicalCores": 0.013064553093759777
+            },
+            {
+              "type": "GPU",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 45.49000000000001,
+              "averageLogicalCores": 3.495920707265486
+            },
+            {
+              "type": "network.mojom.NetworkService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.15000000000000013,
+              "averageLogicalCores": 0.011527546847435113
+            },
+            {
+              "type": "storage.mojom.StorageService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            },
+            {
+              "type": "renderer",
+              "processCount": 4,
+              "cpuTimeDeltaSeconds": 0.759999999999998,
+              "averageLogicalCores": 0.0584062373603377
+            },
+            {
+              "type": "tracing.mojom.TracingService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            }
+          ],
+          "pageActivityBefore": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          },
+          "pageActivityAfter": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          }
+        },
+        "gpuDiagnostic": {
+          "status": "completed",
+          "actionDurationMs": 14678.088285000005,
+          "counterReadMs": [
+            0.5311119999969378,
+            3.8324499999871477
+          ],
+          "intervalMs": {
+            "minimum": 14678.108244000003,
+            "maximum": 14682.471805999987,
+            "midpoint": 14680.290024999995
+          },
+          "allProcessesComparable": true,
+          "byType": [
+            {
+              "type": "browser",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.20999999999999996,
+              "averageLogicalCores": 0.014304894497477754
+            },
+            {
+              "type": "GPU",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 51.70999999999992,
+              "averageLogicalCores": 3.5224099736408268
+            },
+            {
+              "type": "network.mojom.NetworkService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.19999999999999973,
+              "averageLogicalCores": 0.013623709045216892
+            },
+            {
+              "type": "storage.mojom.StorageService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            },
+            {
+              "type": "renderer",
+              "processCount": 4,
+              "cpuTimeDeltaSeconds": 1.1499999999999986,
+              "averageLogicalCores": 0.07833632700999714
+            },
+            {
+              "type": "tracing.mojom.TracingService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.010000000000000009,
+              "averageLogicalCores": 0.0006811854522608461
+            }
+          ],
+          "pageActivityBefore": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          },
+          "pageActivityAfter": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          }
+        }
+      },
+      {
+        "beforeZoom": 17.90540610449558,
+        "currentDrawQueriesEnabled": false,
+        "chromeTraceEnabled": false,
+        "baseline": {
+          "status": "completed",
+          "actionDurationMs": 7332.004863000009,
+          "counterReadMs": [
+            0.4766889999737032,
+            0.6621689999883529
+          ],
+          "intervalMs": {
+            "minimum": 7332.021979000012,
+            "maximum": 7333.160836999974,
+            "midpoint": 7332.591407999993
+          },
+          "allProcessesComparable": true,
+          "byType": [
+            {
+              "type": "browser",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.040000000000000036,
+              "averageLogicalCores": 0.005455097355671461
+            },
+            {
+              "type": "GPU",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 26.92999999999995,
+              "averageLogicalCores": 3.672644294705801
+            },
+            {
+              "type": "network.mojom.NetworkService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.030000000000000027,
+              "averageLogicalCores": 0.004091323016753596
+            },
+            {
+              "type": "storage.mojom.StorageService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            },
+            {
+              "type": "renderer",
+              "processCount": 4,
+              "cpuTimeDeltaSeconds": 0.3200000000000003,
+              "averageLogicalCores": 0.04364077884537169
+            },
+            {
+              "type": "tracing.mojom.TracingService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            }
+          ],
+          "pageActivityBefore": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          },
+          "pageActivityAfter": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          }
+        },
+        "gpuDiagnostic": {
+          "status": "completed",
+          "actionDurationMs": 7689.726297999994,
+          "counterReadMs": [
+            0.5353980000072625,
+            4.9354070000117645
+          ],
+          "intervalMs": {
+            "minimum": 7689.745667999989,
+            "maximum": 7695.216473000008,
+            "midpoint": 7692.481070499998
+          },
+          "allProcessesComparable": true,
+          "byType": [
+            {
+              "type": "browser",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.050000000000000266,
+              "averageLogicalCores": 0.006499853498729553
+            },
+            {
+              "type": "GPU",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 28.82000000000005,
+              "averageLogicalCores": 3.746515556667701
+            },
+            {
+              "type": "network.mojom.NetworkService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0.029999999999999805,
+              "averageLogicalCores": 0.0038999120992376855
+            },
+            {
+              "type": "storage.mojom.StorageService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            },
+            {
+              "type": "renderer",
+              "processCount": 4,
+              "cpuTimeDeltaSeconds": 0.38000000000000256,
+              "averageLogicalCores": 0.04939888659034467
+            },
+            {
+              "type": "tracing.mojom.TracingService",
+              "processCount": 1,
+              "cpuTimeDeltaSeconds": 0,
+              "averageLogicalCores": 0
+            }
+          ],
+          "pageActivityBefore": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          },
+          "pageActivityAfter": {
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true
+          }
+        }
+      }
+    ],
+    "interpretation": "Runtime web files are unchanged. Differences include observer overhead and run variation; this is a diagnostic comparison, not evidence of app speedup. Query collection follows the native action and CPU snapshots."
+  },
+  "screenshots": {
+    "allFourSHA256AndByteCountsVerified": true,
+    "allFourVisuallyReviewed": true,
+    "receipts": [
+      {
+        "file": "desktop-webgl-terrain-diagnostic-z12_40-route-ready.png",
+        "mode": "terrain-diagnostic",
+        "zoom": 12.403718027935334,
+        "bytes": 1130621,
+        "sha256": "41e2205f087cd303cca662527b8a90b581a04dd256d62f731b9266a6af6b9102",
+        "sha256MatchesCPUBase": true
+      },
+      {
+        "file": "desktop-webgl-terrain-diagnostic-z12_40-terrain-ready.png",
+        "mode": "terrain-diagnostic",
+        "zoom": 12.403718027935334,
+        "bytes": 1127605,
+        "sha256": "6a8e1b724bed933754c79a4745a8ef339afe59963a1d2ba401f290e789779f54",
+        "sha256MatchesCPUBase": false
+      },
+      {
+        "file": "desktop-webgl-terrain-diagnostic-z15_91-before-target.png",
+        "mode": "terrain-diagnostic",
+        "zoom": 15.90540610449558,
+        "bytes": 550849,
+        "sha256": "d60260b2e84ffc291e7c1314c61f3e0516d8ba076ff1979bf567f26ab06c9e46",
+        "sha256MatchesCPUBase": false
+      },
+      {
+        "file": "desktop-webgl-terrain-diagnostic-z18_00-upper-bound.png",
+        "mode": "terrain-diagnostic",
+        "zoom": 17.99999998199918,
+        "bytes": 232705,
+        "sha256": "f0c3ac2fa81972bedd2dc10857fa32f0abb89caa4b520845403049e612efe52b",
+        "sha256MatchesCPUBase": false
+      }
+    ],
+    "observations": [
+      "Flat route-ready12.4 is byte-identical to the process-CPU baseline.",
+      "Terrain12.4 retains recognizable route and labels, with readable separated controls.",
+      "High15.91 has coarse blurred relief and route segments concentrated in the upper/left portion.",
+      "Zoom18 contains broad coarse shading and a shallow diagonal fill boundary, also visible in prior baseline images; screenshot alone cannot distinguish legitimate fill geometry from a tile/RTT seam.",
+      "The detail-loading notice remains visible at18 after camera settling; complete content loading and route fidelity at18 are not established.",
+      "No obvious new control overlap, duplicate label, or black/transparent tile hole observed."
+    ]
+  },
+  "trace": {
+    "scope": "diagnostic-desktop-terrain-15-to-17",
+    "beforeZoom": 15.90540610449558,
+    "afterZoom": 16.90540610449558,
+    "status": "complete",
+    "stopReason": "action-complete",
+    "bytes": 7312136,
+    "sha256": "a11f43cd44d2aaf0d4754b9757fc328eb7a362e55643350764d518d6cd2c21bf",
+    "recordedDurationMs": 11982.35055600002,
+    "dataLossOccurred": false,
+    "errors": []
+  },
+  "evidenceRoot": "/workspace/scratch/13d796f593db/ci-terrain-gpu-draws",
+  "evidenceHashes": {
+    "report": "58e8c50fb06bd39744e6d7ed720d81f3fc9dec95625092949db0ac0d56941aa5",
+    "distReport": "58e8c50fb06bd39744e6d7ed720d81f3fc9dec95625092949db0ac0d56941aa5",
+    "artifactManifest": "a936587db83b4cad26fba3bf9285abbab00ecf60446e64eb870f8593b39b4b76",
+    "trace": "a11f43cd44d2aaf0d4754b9757fc328eb7a362e55643350764d518d6cd2c21bf",
+    "traceMetadata": "b5b1f3572dca6ab761ed8b7bf955b8ec1d9c4d1a1081c9a60d8c53e7bef1722b"
+  },
+  "logRetrieval": {
+    "available": false,
+    "reason": "Two read-only workflow-job-log connector calls returned Transport closed; artifact and run metadata were successfully verified."
+  },
+  "limits": [
+    "This cold diagnostic completion does not supersede failed full release attempts C12 or C13 attempt2.",
+    "No full-release visual or performance acceptance is claimed.",
+    "120 valid samples cover only first calls per group; cost shares are not extrapolated to the full1115-draw action.",
+    "Captured shader tail lacks the NUM_ILLUMINATION_SOURCES definition; the one-light define is separate offline SDK evidence.",
+    "Program and FBO IDs are local to this run; new runs must identify families from shader signatures.",
+    "Observed texture IDs are not resident resource counts or proof of a memory leak.",
+    "Terrain drape anisotropy16 is observed but is not established as the dominant sampled cost.",
+    "No app/runtime mutation, rerun, cancellation or publication was performed by this audit."
+  ]
+}

@@ -1,0 +1,4826 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-10T03:01:49.589685+00:00",
+  "diagnosticOnly": true,
+  "releasePass": false,
+  "publicationPerformed": false,
+  "candidateBinding": {
+    "remoteCommit": "bceae5c46269bea80c55c197718d61cb1d8044da",
+    "tree": "140da971c208b1c6c56b82ffca6d71733da8eabe",
+    "localCommit": "275839eeb33522ab6d7a3e3e6c51e4548074b255",
+    "runtimeCommit": "a9b793cde338dfa578590db536921003da88e0b2",
+    "webTree": "48bacc7047d8ffdc1e7c45a7b20f44ca05c5fea7",
+    "run": 42745379532,
+    "attempt": 1,
+    "job": 129596098617,
+    "conclusion": "success",
+    "frozenInstallStep": "success"
+  },
+  "comparison": {
+    "capturedShaderFingerprintsEqual": true,
+    "codeEqualityChecks": [
+      {
+        "path": "web/components/Atlas.tsx",
+        "sha256ByRevision": {
+          "baseline": "a1ff17808b748504ec5519dd599cac5c6a6ea94dc5c47976642d591d659fc5e4",
+          "candidate": "a1ff17808b748504ec5519dd599cac5c6a6ea94dc5c47976642d591d659fc5e4"
+        },
+        "byteEqual": true
+      },
+      {
+        "path": "web/public/maps/tropa-style.json",
+        "sha256ByRevision": {
+          "baseline": "fd11ed452c30750ab93c61d7da531d2a6b7dc2f06feba900b76e990429b0371b",
+          "candidate": "fd11ed452c30750ab93c61d7da531d2a6b7dc2f06feba900b76e990429b0371b"
+        },
+        "byteEqual": true
+      },
+      {
+        "path": "tools/pages-preview/browser-smoke.mjs",
+        "sha256ByRevision": {
+          "baseline": "9c313af0faa4fabbbb6285de76ff593ec33d457777308e3ba9cd985c60ab41be",
+          "candidate": "9c313af0faa4fabbbb6285de76ff593ec33d457777308e3ba9cd985c60ab41be"
+        },
+        "byteEqual": true
+      },
+      {
+        "path": "tools/pages-preview/browser-report.mjs",
+        "sha256ByRevision": {
+          "baseline": "a459b464fdcd9b3404263b0878a19495095acfd76a7691423b2e2ae49f7fd438",
+          "candidate": "a459b464fdcd9b3404263b0878a19495095acfd76a7691423b2e2ae49f7fd438"
+        },
+        "byteEqual": true
+      },
+      {
+        "path": "tools/pages-preview/browser-process-cpu.mjs",
+        "sha256ByRevision": {
+          "baseline": "7930fe068b47505e5ec1e14d63a1adc21da3c470e555b1026ded60058406e652",
+          "candidate": "7930fe068b47505e5ec1e14d63a1adc21da3c470e555b1026ded60058406e652"
+        },
+        "byteEqual": true
+      },
+      {
+        "path": "tools/pages-preview/browser-gpu-draws.mjs",
+        "sha256ByRevision": {
+          "baseline": "579e79a58ffac6afb4a62ca9e35293000732cce1be40d51fd97b89d7a2081587",
+          "candidate": "579e79a58ffac6afb4a62ca9e35293000732cce1be40d51fd97b89d7a2081587"
+        },
+        "byteEqual": true
+      }
+    ],
+    "gpuFamilies": [
+      {
+        "family": "hillshade",
+        "programId": 21,
+        "baselineCalls": 24,
+        "candidateCalls": 22,
+        "timedCallsEach": 8,
+        "baselineSampleTotalMs": 2102.930535,
+        "candidateSampleTotalMs": 1196.96786,
+        "sampleTotalChangePercent": -43.080960589123784,
+        "baselineSampleMedianMs": 246.30798099999998,
+        "candidateSampleMedianMs": 132.895829,
+        "sampleMedianChangePercent": -46.044854713822694
+      },
+      {
+        "family": "mipmap",
+        "programId": null,
+        "baselineCalls": 48,
+        "candidateCalls": 44,
+        "timedCallsEach": 8,
+        "baselineSampleTotalMs": 171.570655,
+        "candidateSampleTotalMs": 56.42792,
+        "sampleTotalChangePercent": -67.11097244455935,
+        "baselineSampleMedianMs": 21.435056000000003,
+        "candidateSampleMedianMs": 7.0218325,
+        "sampleMedianChangePercent": -67.24136153411496
+      },
+      {
+        "family": "terrain_drape",
+        "programId": 23,
+        "baselineCalls": 166,
+        "candidateCalls": 166,
+        "timedCallsEach": 8,
+        "baselineSampleTotalMs": 111.041625,
+        "candidateSampleTotalMs": 182.439862,
+        "sampleTotalChangePercent": 64.29862405201654,
+        "baselineSampleMedianMs": 7.546978,
+        "candidateSampleMedianMs": 12.914575,
+        "sampleMedianChangePercent": 71.12246782751983
+      },
+      {
+        "family": "terrain_depth",
+        "programId": 14,
+        "baselineCalls": 39,
+        "candidateCalls": 39,
+        "timedCallsEach": 8,
+        "baselineSampleTotalMs": 61.145683,
+        "candidateSampleTotalMs": 89.169825,
+        "sampleTotalChangePercent": 45.831758883125076,
+        "baselineSampleMedianMs": 8.133169,
+        "candidateSampleMedianMs": 5.9240715,
+        "sampleMedianChangePercent": -27.161583633636532
+      }
+    ],
+    "nativeIntervals": [
+      {
+        "beforeZoom": 14.90540610449558,
+        "observer": "GPU queries; no Chrome trace",
+        "baselineActionMs": 11213.866088999988,
+        "candidateActionMs": 8007.911132999987,
+        "changePercent": -28.589203139716613,
+        "baselineGPUCPUSeconds": 40.15999999999997,
+        "candidateGPUCPUSeconds": 29.46999999999997
+      },
+      {
+        "beforeZoom": 15.90540610449558,
+        "observer": "Chrome trace; no GPU queries",
+        "baselineActionMs": 11977.153371000022,
+        "candidateActionMs": 11792.054395000014,
+        "changePercent": -1.5454337960486009,
+        "baselineGPUCPUSeconds": 36.91000000000008,
+        "candidateGPUCPUSeconds": 36.76999999999998
+      },
+      {
+        "beforeZoom": 16.90540610449558,
+        "observer": "No Chrome trace or GPU query observer",
+        "baselineActionMs": 14678.088285000005,
+        "candidateActionMs": 11990.959704000008,
+        "changePercent": -18.30707466002952,
+        "baselineGPUCPUSeconds": 51.70999999999992,
+        "candidateGPUCPUSeconds": 43.400000000000034
+      },
+      {
+        "beforeZoom": 17.90540610449558,
+        "observer": "No Chrome trace or GPU query observer",
+        "baselineActionMs": 7689.726297999994,
+        "candidateActionMs": 10913.816358000011,
+        "changePercent": 41.927240776288286,
+        "baselineGPUCPUSeconds": 28.82000000000005,
+        "candidateGPUCPUSeconds": 41.620000000000005
+      }
+    ],
+    "fourIntervalTotals": {
+      "baselineActionMs": 45558.83404300001,
+      "candidateActionMs": 42704.74159000002,
+      "baselineGPUCPUSeconds": 157.60000000000002,
+      "candidateGPUCPUSeconds": 151.26
+    },
+    "flatScreenshotByteEqual": true
+  },
+  "visualReview": {
+    "method": "Viewed each of the four original candidate PNGs at native resolution, and the corresponding baseline terrain PNGs; baseline flat image also checked by receipt hash.",
+    "findings": [
+      "At z12.4 route-ready, flat image is byte-identical to baseline; no RTT change applies while terrain is disabled.",
+      "At z12.4 terrain-ready, route, waypoint, labels, relief silhouette and controls remain visible. No material new missing geometry or UI occlusion was identified in this frame.",
+      "At z15.91 both variants show the same broad coarse hillshade field and visible route, water lines and waypoint near the upper-left/top; no new obvious discontinuity was identified.",
+      "At z18 both variants retain coarse broad fill, a shallow diagonal boundary and the loading-details notice. This pre-existing appearance is not proof that all map content is loaded."
+    ],
+    "limitations": [
+      "These four DPR1 desktop frames do not establish hardware-GPU, mobile or all-zoom visual quality.",
+      "No pixel-identical rendering claim for terrain frames; reducing only SwiftShader RTT sampling resolution is an intentional quality/performance tradeoff."
+    ]
+  },
+  "interpretation": {
+    "supported": [
+      "The patch activates on the observed SwiftShader context: captured drape textures and hillshade RTT viewport are 1024 by 1024 instead of 2048 by 2048.",
+      "Canvas and depth target remain 1041 by 928 at DPR1; terrain DEM texture remains 516 by 516, hillshade input 514 by 514, and drape anisotropy 16.",
+      "All recorded terrain and terrain-depth draws retain 101376 indices per draw and the same 166 plus 39 draw counts.",
+      "All 120 timer queries completed with no disjoint, unavailable, errors, interference, event drops or group drops.",
+      "The sampled hillshade and mipmap costs are lower, including the sample medians; the gain is not confined to the first expensive sample.",
+      "The candidate cold diagnostic reaches the exact upper bound 17.99999998199918."
+    ],
+    "notEstablished": [
+      "The first eight calls of each program/FBO/viewport group are not a random or full-workload sample. Do not extrapolate their total to all 22 candidate or 24 baseline hillshade calls.",
+      "Lower sampled RTT cost does not establish uniform end-to-end improvement: the final partial zoom step is slower, and terrain drape samples are slower.",
+      "One cold diagnostic per source is not a statistically controlled benchmark or a full release pass. The unchanged warm full-matrix gate is still required.",
+      "Observed texture IDs and calls are not counts of resident resources; no memory-growth or resource-leak conclusion is made.",
+      "Generic Chrome WebGL trace event counts are not used as draw counts.",
+      "The configured three illumination directions do not establish three executed shader lights. Offline actual-SDK evidence records NUM_ILLUMINATION_SOURCES 1; see the separate hillshade diagnosis."
+    ]
+  },
+  "runs": {
+    "baseline": {
+      "source": "701149643684770954107256bd36e3b034888ce8",
+      "artifactManifest": "/workspace/scratch/13d796f593db/ci-terrain-gpu-draws/artifact-manifest.json",
+      "run": 42742442952,
+      "job": 129586542806,
+      "artifactId": 13729748614,
+      "artifactSHA256": "d57e2c08fce06393b49925e3aa4714e0140f9f381720ac64ae380849652dd8a7",
+      "report": "/workspace/scratch/13d796f593db/ci-terrain-gpu-draws/design-qa/desktop-webgl-terrain-diagnostic.json",
+      "reportSHA256": "58e8c50fb06bd39744e6d7ed720d81f3fc9dec95625092949db0ac0d56941aa5",
+      "status": "completed",
+      "diagnosticOnly": true,
+      "verified": false,
+      "releaseEligible": false,
+      "startedAt": "2026-11-10T02:24:09.255Z",
+      "completedAt": "2026-11-10T02:28:03.439Z",
+      "lastZoom": 17.99999998199918,
+      "nativeInputCount": 29,
+      "nativeDirections": {
+        "-1": 12,
+        "1": 17
+      },
+      "nativeNoChangeCount": 1,
+      "inspectionCount": 18,
+      "screenshots": [
+        {
+          "file": "desktop-webgl-terrain-diagnostic-z12_40-route-ready.png",
+          "mode": "terrain-diagnostic",
+          "zoom": 12.403718027935334,
+          "bytes": 1130621,
+          "sha256": "41e2205f087cd303cca662527b8a90b581a04dd256d62f731b9266a6af6b9102",
+          "receiptVerified": true,
+          "localPath": "/workspace/scratch/13d796f593db/ci-terrain-gpu-draws/design-qa/desktop-webgl-terrain-diagnostic-z12_40-route-ready.png"
+        },
+        {
+          "file": "desktop-webgl-terrain-diagnostic-z12_40-terrain-ready.png",
+          "mode": "terrain-diagnostic",
+          "zoom": 12.403718027935334,
+          "bytes": 1127605,
+          "sha256": "6a8e1b724bed933754c79a4745a8ef339afe59963a1d2ba401f290e789779f54",
+          "receiptVerified": true,
+          "localPath": "/workspace/scratch/13d796f593db/ci-terrain-gpu-draws/design-qa/desktop-webgl-terrain-diagnostic-z12_40-terrain-ready.png"
+        },
+        {
+          "file": "desktop-webgl-terrain-diagnostic-z15_91-before-target.png",
+          "mode": "terrain-diagnostic",
+          "zoom": 15.90540610449558,
+          "bytes": 550849,
+          "sha256": "d60260b2e84ffc291e7c1314c61f3e0516d8ba076ff1979bf567f26ab06c9e46",
+          "receiptVerified": true,
+          "localPath": "/workspace/scratch/13d796f593db/ci-terrain-gpu-draws/design-qa/desktop-webgl-terrain-diagnostic-z15_91-before-target.png"
+        },
+        {
+          "file": "desktop-webgl-terrain-diagnostic-z18_00-upper-bound.png",
+          "mode": "terrain-diagnostic",
+          "zoom": 17.99999998199918,
+          "bytes": 232705,
+          "sha256": "f0c3ac2fa81972bedd2dc10857fa32f0abb89caa4b520845403049e612efe52b",
+          "receiptVerified": true,
+          "localPath": "/workspace/scratch/13d796f593db/ci-terrain-gpu-draws/design-qa/desktop-webgl-terrain-diagnostic-z18_00-upper-bound.png"
+        }
+      ],
+      "gpu": {
+        "scope": "one-native-action-maplibre-canvas-only",
+        "method": "EXT_disjoint_timer_query_webgl2",
+        "sampling": "first-calls-per-program-framebuffer-viewport-group",
+        "limits": {
+          "maxQueries": 128,
+          "maxQueriesPerGroup": 8,
+          "maxEvents": 2048,
+          "maxGroups": 128
+        },
+        "contexts": [
+          {
+            "id": 1,
+            "canvas": {
+              "className": "maplibregl-canvas",
+              "width": 1041,
+              "height": 928
+            },
+            "timer": {
+              "supported": true,
+              "counterBits": 64,
+              "disjointAtStart": false
+            }
+          }
+        ],
+        "totals": {
+          "calls": 1163,
+          "drawCalls": 1115,
+          "mipmapCalls": 48,
+          "submittedVerticesOrIndices": 21007616,
+          "eventsDropped": 0,
+          "groupsDropped": 0
+        },
+        "queries": {
+          "attempted": 120,
+          "started": 120,
+          "pending": 0,
+          "completed": 120,
+          "unsupported": 0,
+          "interference": 0,
+          "limitSkipped": 0,
+          "groupLimitSkipped": 1043,
+          "disjoint": 0,
+          "unavailable": 0,
+          "errors": 0
+        },
+        "errors": [],
+        "collectionErrors": [],
+        "programs": [
+          {
+            "id": 14,
+            "contextId": 1,
+            "label": "terrain_depth",
+            "labelSource": "installed-shader-main-signature",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "432394e5",
+                "length": 4628,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "a8d47cd0",
+                "length": 1138,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 15,
+            "contextId": 1,
+            "label": "program-15",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "08f60cf4",
+                "length": 4554,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "e75466bb",
+                "length": 2474,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 23,
+            "contextId": 1,
+            "label": "terrain",
+            "labelSource": "installed-shader-main-signature",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_texture",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "79f28959",
+                "length": 4756,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "a9f500fa",
+                "length": 1974,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_texture"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 24,
+            "contextId": 1,
+            "label": "program-24",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_depth",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_texture",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "def1177f",
+                "length": 9952,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "cc3ff891",
+                "length": 3341,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_texture"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 25,
+            "contextId": 1,
+            "label": "program-25",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_depth",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "acce8d2c",
+                "length": 8741,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "c3a57648",
+                "length": 2963,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 26,
+            "contextId": 1,
+            "label": "program-26",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_depth",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "28b8290a",
+                "length": 8643,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "2e04f54a",
+                "length": 2865,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 27,
+            "contextId": 1,
+            "label": "program-27",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_depth",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "82dd4e98",
+                "length": 8770,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "839314ac",
+                "length": 2992,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 16,
+            "contextId": 1,
+            "label": "program-16",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "b250dfcc",
+                "length": 4441,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "9a348a09",
+                "length": 1008,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 17,
+            "contextId": 1,
+            "label": "program-17",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "b250dfcc",
+                "length": 4441,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "de95e3ea",
+                "length": 900,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 18,
+            "contextId": 1,
+            "label": "program-18",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "e249db77",
+                "length": 5398,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "b7cb4519",
+                "length": 1530,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 19,
+            "contextId": 1,
+            "label": "program-19",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "0ff08535",
+                "length": 5656,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "85286207",
+                "length": 1779,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 20,
+            "contextId": 1,
+            "label": "program-20",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_image",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "5673de4e",
+                "length": 10046,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "b12bc771",
+                "length": 3423,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_image"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 21,
+            "contextId": 1,
+            "label": "program-21",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_image",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "2fadb99f",
+                "length": 4606,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "6b7fd0d2",
+                "length": 4754,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_image"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 22,
+            "contextId": 1,
+            "label": "program-22",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "13587495",
+                "length": 8275,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "ce169e70",
+                "length": 2216,
+                "samplers": []
+              }
+            ]
+          }
+        ],
+        "groups": [
+          {
+            "id": 1,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 14,
+            "programLabel": "terrain_depth",
+            "framebufferKind": "offscreen",
+            "framebufferId": 10,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 39,
+            "submittedVerticesOrIndices": 3953664,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 61145683,
+            "firstSequence": 1,
+            "lastSequence": 263,
+            "sampleMilliseconds": [
+              10.168527,
+              5.098611,
+              9.012041,
+              7.254297,
+              11.173685,
+              4.070047,
+              10.255884,
+              4.112591
+            ],
+            "sampleMedianMilliseconds": 8.133169,
+            "eventIndexCounts": {
+              "101376": 39
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 15,
+            "programLabel": "program-15",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 8,
+            "submittedVerticesOrIndices": 48,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 114863173,
+            "firstSequence": 11,
+            "lastSequence": 1114,
+            "sampleMilliseconds": [
+              12.492147,
+              12.745449,
+              17.982625,
+              13.198483,
+              14.858339,
+              12.588592,
+              14.877046,
+              16.120492
+            ],
+            "sampleMedianMilliseconds": 14.028411,
+            "eventIndexCounts": {
+              "6": 8
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 3,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 23,
+            "programLabel": "terrain",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 166,
+            "submittedVerticesOrIndices": 16828416,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 111041625,
+            "firstSequence": 12,
+            "lastSequence": 1160,
+            "sampleMilliseconds": [
+              20.959004,
+              6.944578,
+              2.670122,
+              2.802583,
+              8.149378,
+              2.686237,
+              47.851786,
+              18.977937
+            ],
+            "sampleMedianMilliseconds": 7.546978,
+            "eventIndexCounts": {
+              "101376": 166
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 2048,
+                "height": 2048,
+                "levels": 12,
+                "internalFormat": 32856,
+                "anisotropy": 16,
+                "minFilter": 9987,
+                "magFilter": 9729,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 24,
+            "programLabel": "program-24",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 98,
+            "submittedVerticesOrIndices": 6564,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 342638,
+            "firstSequence": 22,
+            "lastSequence": 1149,
+            "sampleMilliseconds": [
+              0.098509,
+              0.038038,
+              0.044297,
+              0.038899,
+              0.027982,
+              0.025438,
+              0.037006,
+              0.032469
+            ],
+            "sampleMedianMilliseconds": 0.037522,
+            "eventIndexCounts": {
+              "30": 16,
+              "120": 8,
+              "48": 2,
+              "90": 8,
+              "42": 10,
+              "288": 4,
+              "60": 6,
+              "36": 16,
+              "24": 16,
+              "186": 4,
+              "84": 8
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_depth",
+                "target": 3553,
+                "width": 1041,
+                "height": 928,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 86,
+                "height": 115,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 108,
+                "height": 118,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 85,
+                "height": 97,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 109,
+                "height": 118,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 102,
+                "height": 136,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 84,
+                "height": 94,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 25,
+            "programLabel": "program-25",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 8,
+            "submittedVerticesOrIndices": 48,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 520988,
+            "firstSequence": 52,
+            "lastSequence": 1161,
+            "sampleMilliseconds": [
+              0.057777,
+              0.055784,
+              0.063807,
+              0.063576,
+              0.064317,
+              0.066681,
+              0.076646,
+              0.0724
+            ],
+            "sampleMedianMilliseconds": 0.06406200000000001,
+            "eventIndexCounts": {
+              "6": 8
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_depth",
+                "target": 3553,
+                "width": 1041,
+                "height": 928,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 6,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 26,
+            "programLabel": "program-26",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 8,
+            "submittedVerticesOrIndices": 48,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 377659,
+            "firstSequence": 53,
+            "lastSequence": 1162,
+            "sampleMilliseconds": [
+              0.044617,
+              0.050266,
+              0.047422,
+              0.042233,
+              0.047541,
+              0.045779,
+              0.051668,
+              0.048133
+            ],
+            "sampleMedianMilliseconds": 0.047481499999999996,
+            "eventIndexCounts": {
+              "6": 8
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_depth",
+                "target": 3553,
+                "width": 1041,
+                "height": 928,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 7,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 27,
+            "programLabel": "program-27",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 8,
+            "submittedVerticesOrIndices": 48,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 459823,
+            "firstSequence": 54,
+            "lastSequence": 1163,
+            "sampleMilliseconds": [
+              0.055874,
+              0.055153,
+              0.054502,
+              0.054342,
+              0.055033,
+              0.056536,
+              0.061933,
+              0.06645
+            ],
+            "sampleMedianMilliseconds": 0.0555135,
+            "eventIndexCounts": {
+              "6": 8
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_depth",
+                "target": 3553,
+                "width": 1041,
+                "height": 928,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 8,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 16,
+            "programLabel": "program-16",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              2048,
+              2048
+            ],
+            "mode": 4,
+            "calls": 25,
+            "submittedVerticesOrIndices": 150,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 127586341,
+            "firstSequence": 116,
+            "lastSequence": 1115,
+            "sampleMilliseconds": [
+              23.609689,
+              15.171011,
+              15.163569,
+              14.934243,
+              15.794342,
+              14.050258,
+              14.744146,
+              14.119083
+            ],
+            "sampleMedianMilliseconds": 15.048906,
+            "eventIndexCounts": {
+              "6": 25
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 9,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 17,
+            "programLabel": "program-17",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              2048,
+              2048
+            ],
+            "mode": 4,
+            "calls": 208,
+            "submittedVerticesOrIndices": 1248,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 30109045,
+            "firstSequence": 117,
+            "lastSequence": 1119,
+            "sampleMilliseconds": [
+              1.929267,
+              1.555708,
+              6.905474,
+              4.624641,
+              1.214093,
+              4.58392,
+              4.704772,
+              4.59117
+            ],
+            "sampleMedianMilliseconds": 4.587545,
+            "eventIndexCounts": {
+              "6": 208
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 10,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 18,
+            "programLabel": "program-18",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              2048,
+              2048
+            ],
+            "mode": 4,
+            "calls": 169,
+            "submittedVerticesOrIndices": 60378,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 53402151,
+            "firstSequence": 119,
+            "lastSequence": 1128,
+            "sampleMilliseconds": [
+              7.115991,
+              8.369464,
+              2.878165,
+              0.109605,
+              2.491211,
+              18.266663,
+              0.1655,
+              14.005552
+            ],
+            "sampleMedianMilliseconds": 4.997078,
+            "eventIndexCounts": {
+              "6": 79,
+              "255": 3,
+              "51": 3,
+              "564": 3,
+              "63": 3,
+              "849": 3,
+              "816": 3,
+              "2493": 6,
+              "2946": 6,
+              "1632": 2,
+              "459": 2,
+              "693": 2,
+              "261": 2,
+              "915": 2,
+              "795": 2,
+              "729": 2,
+              "288": 2,
+              "471": 2,
+              "90": 2,
+              "18": 2,
+              "12": 2,
+              "48": 2,
+              "1701": 2,
+              "465": 2,
+              "42": 2,
+              "174": 2,
+              "105": 2,
+              "117": 8,
+              "21": 8,
+              "72": 8
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 11,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 19,
+            "programLabel": "program-19",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              2048,
+              2048
+            ],
+            "mode": 1,
+            "calls": 169,
+            "submittedVerticesOrIndices": 41552,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 994220,
+            "firstSequence": 121,
+            "lastSequence": 1129,
+            "sampleMilliseconds": [
+              0.143406,
+              0.111408,
+              0.249657,
+              0.047221,
+              0.282286,
+              0.057076,
+              0.059099,
+              0.044067
+            ],
+            "sampleMedianMilliseconds": 0.0852535,
+            "eventIndexCounts": {
+              "8": 79,
+              "174": 3,
+              "42": 3,
+              "384": 3,
+              "50": 3,
+              "550": 3,
+              "572": 3,
+              "1650": 6,
+              "2004": 6,
+              "1116": 2,
+              "314": 2,
+              "494": 2,
+              "178": 2,
+              "646": 2,
+              "546": 2,
+              "498": 2,
+              "196": 2,
+              "326": 2,
+              "72": 2,
+              "16": 4,
+              "36": 4,
+              "1158": 2,
+              "322": 2,
+              "144": 2,
+              "86": 10,
+              "18": 8,
+              "56": 8
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 12,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 20,
+            "programLabel": "program-20",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              2048,
+              2048
+            ],
+            "mode": 4,
+            "calls": 61,
+            "submittedVerticesOrIndices": 34446,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 2118747,
+            "firstSequence": 132,
+            "lastSequence": 1131,
+            "sampleMilliseconds": [
+              0.044106,
+              0.068373,
+              0.166441,
+              0.064788,
+              0.820598,
+              0.056645,
+              0.831295,
+              0.066501
+            ],
+            "sampleMedianMilliseconds": 0.067437,
+            "eventIndexCounts": {
+              "84": 32,
+              "198": 3,
+              "2247": 6,
+              "711": 2,
+              "1761": 2,
+              "1278": 2,
+              "42": 2,
+              "357": 2,
+              "108": 2,
+              "1143": 4,
+              "1149": 4
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_image",
+                "target": 3553,
+                "width": 256,
+                "height": 512,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              }
+            ]
+          },
+          {
+            "id": 13,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 21,
+            "programLabel": "program-21",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              2048,
+              2048
+            ],
+            "mode": 4,
+            "calls": 24,
+            "submittedVerticesOrIndices": 144,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 2102930535,
+            "firstSequence": 133,
+            "lastSequence": 1127,
+            "sampleMilliseconds": [
+              378.94129,
+              247.346058,
+              248.813713,
+              245.184215,
+              243.678602,
+              248.947876,
+              245.269904,
+              244.748877
+            ],
+            "sampleMedianMilliseconds": 246.30798099999998,
+            "eventIndexCounts": {
+              "6": 24
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_image",
+                "target": 3553,
+                "width": 514,
+                "height": 514,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 14,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 22,
+            "programLabel": "program-22",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              2048,
+              2048
+            ],
+            "mode": 4,
+            "calls": 124,
+            "submittedVerticesOrIndices": 80862,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 2244657,
+            "firstSequence": 136,
+            "lastSequence": 1130,
+            "sampleMilliseconds": [
+              0.158609,
+              0.68215,
+              0.977015,
+              0.280223,
+              0.045689,
+              0.035583,
+              0.018237,
+              0.047151
+            ],
+            "sampleMedianMilliseconds": 0.10288,
+            "eventIndexCounts": {
+              "150": 2,
+              "2016": 2,
+              "1902": 4,
+              "84": 41,
+              "72": 2,
+              "432": 2,
+              "195": 2,
+              "1308": 2,
+              "2460": 2,
+              "1344": 2,
+              "1326": 2,
+              "936": 1,
+              "534": 2,
+              "2268": 4,
+              "48": 4,
+              "1218": 4,
+              "1500": 4,
+              "1023": 4,
+              "576": 4,
+              "369": 4,
+              "252": 4,
+              "558": 2,
+              "291": 2,
+              "204": 2,
+              "123": 4,
+              "156": 2,
+              "2040": 1,
+              "954": 1,
+              "2280": 4,
+              "1926": 2,
+              "165": 2,
+              "144": 2,
+              "345": 2
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 15,
+            "method": "generateMipmap",
+            "contextId": 1,
+            "programId": null,
+            "programLabel": "generateMipmap",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              2048,
+              2048
+            ],
+            "mode": null,
+            "calls": 48,
+            "submittedVerticesOrIndices": 0,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 171570655,
+            "firstSequence": 137,
+            "lastSequence": 1132,
+            "sampleMilliseconds": [
+              21.710672,
+              21.836873,
+              21.790002,
+              21.511842,
+              21.078428,
+              21.104727,
+              21.179841,
+              21.35827
+            ],
+            "sampleMedianMilliseconds": 21.435056000000003,
+            "eventIndexCounts": {
+              "0": 48
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": null,
+                "target": 3553,
+                "width": 2048,
+                "height": 2048,
+                "levels": 12,
+                "internalFormat": 32856,
+                "anisotropy": 16,
+                "minFilter": 9987,
+                "magFilter": 9729,
+                "allocation": "texStorage2D"
+              }
+            ]
+          }
+        ],
+        "highZoomWebgl": {
+          "available": true,
+          "type": "webgl2",
+          "contextLost": false,
+          "attributes": {
+            "alpha": true,
+            "antialias": false,
+            "depth": true,
+            "desynchronized": false,
+            "failIfMajorPerformanceCaveat": false,
+            "powerPreference": "high-performance",
+            "premultipliedAlpha": true,
+            "preserveDrawingBuffer": false,
+            "stencil": true,
+            "xrCompatible": false
+          },
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+          "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "unmaskedVendor": "Google Inc. (Google)",
+          "samples": 0,
+          "sampleBuffers": 0,
+          "sampleScope": "currently-bound-framebuffer",
+          "defaultFramebufferBound": true,
+          "drawingBuffer": {
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "width": 1041,
+            "height": 928,
+            "cssWidth": 1041,
+            "cssHeight": 928,
+            "devicePixelRatio": 1
+          }
+        }
+      },
+      "processCPUIntervals": [
+        {
+          "direction": 1,
+          "beforeZoom": 14.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 11213.866088999988,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 11213.896995999996,
+              "maximum": 11215.369329000008,
+              "midpoint": 11214.633162500002
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 40.83999999999997,
+            "averageLogicalCores": 3.6416706109088444,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.08000000000000007,
+                "averageLogicalCores": 0.007133536945952694
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 40.15999999999997,
+                "averageLogicalCores": 3.5810355468682467
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.07000000000000006,
+                "averageLogicalCores": 0.006241844827708607
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 0.5199999999999996,
+                "averageLogicalCores": 0.04636799014869243
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.01,
+                "averageLogicalCores": 0.000891692118244086
+              }
+            ],
+            "processes": [
+              {
+                "id": 2464,
+                "type": "browser",
+                "beforeCPUSeconds": 2.83,
+                "afterCPUSeconds": 2.91,
+                "cpuTimeDeltaSeconds": 0.08000000000000007,
+                "averageLogicalCores": 0.007133536945952694,
+                "status": "comparable"
+              },
+              {
+                "id": 2501,
+                "type": "GPU",
+                "beforeCPUSeconds": 476,
+                "afterCPUSeconds": 516.16,
+                "cpuTimeDeltaSeconds": 40.15999999999997,
+                "averageLogicalCores": 3.5810355468682467,
+                "status": "comparable"
+              },
+              {
+                "id": 2504,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 1.92,
+                "afterCPUSeconds": 1.99,
+                "cpuTimeDeltaSeconds": 0.07000000000000006,
+                "averageLogicalCores": 0.006241844827708607,
+                "status": "comparable"
+              },
+              {
+                "id": 2528,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2543,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.32,
+                "afterCPUSeconds": 0.32,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2556,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.04,
+                "afterCPUSeconds": 0.04,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2581,
+                "type": "renderer",
+                "beforeCPUSeconds": 23.41,
+                "afterCPUSeconds": 23.93,
+                "cpuTimeDeltaSeconds": 0.5199999999999996,
+                "averageLogicalCores": 0.04636799014869243,
+                "status": "comparable"
+              },
+              {
+                "id": 2605,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2667,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0.01,
+                "averageLogicalCores": 0.000891692118244086,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794277450625.7,
+            "time": 164386.2,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794277450625.7,
+            "time": 175602.4,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          }
+        },
+        {
+          "direction": 1,
+          "beforeZoom": 15.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 11977.153371000022,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 11977.193872999982,
+              "maximum": 11978.376216999983,
+              "midpoint": 11977.785044999982
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 42.51000000000008,
+            "averageLogicalCores": 3.549070202904125,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.1599999999999997,
+                "averageLogicalCores": 0.013358062396251653
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 36.91000000000008,
+                "averageLogicalCores": 3.081538019035316
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.15000000000000013,
+                "averageLogicalCores": 0.01252318349648596
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 5.27,
+                "averageLogicalCores": 0.43998118017653964
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.019999999999999997,
+                "averageLogicalCores": 0.0016697577995314597
+              }
+            ],
+            "processes": [
+              {
+                "id": 2464,
+                "type": "browser",
+                "beforeCPUSeconds": 3.1,
+                "afterCPUSeconds": 3.26,
+                "cpuTimeDeltaSeconds": 0.1599999999999997,
+                "averageLogicalCores": 0.013358062396251653,
+                "status": "comparable"
+              },
+              {
+                "id": 2501,
+                "type": "GPU",
+                "beforeCPUSeconds": 516.41,
+                "afterCPUSeconds": 553.32,
+                "cpuTimeDeltaSeconds": 36.91000000000008,
+                "averageLogicalCores": 3.081538019035316,
+                "status": "comparable"
+              },
+              {
+                "id": 2504,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 1.99,
+                "afterCPUSeconds": 2.14,
+                "cpuTimeDeltaSeconds": 0.15000000000000013,
+                "averageLogicalCores": 0.01252318349648596,
+                "status": "comparable"
+              },
+              {
+                "id": 2528,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2543,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.32,
+                "afterCPUSeconds": 0.32,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2556,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.04,
+                "afterCPUSeconds": 0.04,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2581,
+                "type": "renderer",
+                "beforeCPUSeconds": 24.11,
+                "afterCPUSeconds": 29.38,
+                "cpuTimeDeltaSeconds": 5.27,
+                "averageLogicalCores": 0.43998118017653964,
+                "status": "comparable"
+              },
+              {
+                "id": 2605,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2667,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.03,
+                "cpuTimeDeltaSeconds": 0.019999999999999997,
+                "averageLogicalCores": 0.0016697577995314597,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794277450625.7,
+            "time": 176769.1,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794277450625.7,
+            "time": 188750.8,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          }
+        },
+        {
+          "direction": 1,
+          "beforeZoom": 16.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 14678.088285000005,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 14678.108244000003,
+              "maximum": 14682.471805999987,
+              "midpoint": 14680.290024999995
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 53.27999999999992,
+            "averageLogicalCores": 3.6293560896457797,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.20999999999999996,
+                "averageLogicalCores": 0.014304894497477754
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 51.70999999999992,
+                "averageLogicalCores": 3.5224099736408268
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.19999999999999973,
+                "averageLogicalCores": 0.013623709045216892
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 1.1499999999999986,
+                "averageLogicalCores": 0.07833632700999714
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.010000000000000009,
+                "averageLogicalCores": 0.0006811854522608461
+              }
+            ],
+            "processes": [
+              {
+                "id": 2464,
+                "type": "browser",
+                "beforeCPUSeconds": 3.38,
+                "afterCPUSeconds": 3.59,
+                "cpuTimeDeltaSeconds": 0.20999999999999996,
+                "averageLogicalCores": 0.014304894497477754,
+                "status": "comparable"
+              },
+              {
+                "id": 2501,
+                "type": "GPU",
+                "beforeCPUSeconds": 553.46,
+                "afterCPUSeconds": 605.17,
+                "cpuTimeDeltaSeconds": 51.70999999999992,
+                "averageLogicalCores": 3.5224099736408268,
+                "status": "comparable"
+              },
+              {
+                "id": 2504,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 2.14,
+                "afterCPUSeconds": 2.34,
+                "cpuTimeDeltaSeconds": 0.19999999999999973,
+                "averageLogicalCores": 0.013623709045216892,
+                "status": "comparable"
+              },
+              {
+                "id": 2528,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2543,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.32,
+                "afterCPUSeconds": 0.32,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2556,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.04,
+                "afterCPUSeconds": 0.04,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2581,
+                "type": "renderer",
+                "beforeCPUSeconds": 29.42,
+                "afterCPUSeconds": 30.57,
+                "cpuTimeDeltaSeconds": 1.1499999999999986,
+                "averageLogicalCores": 0.07833632700999714,
+                "status": "comparable"
+              },
+              {
+                "id": 2605,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2667,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0.6,
+                "afterCPUSeconds": 0.61,
+                "cpuTimeDeltaSeconds": 0.010000000000000009,
+                "averageLogicalCores": 0.0006811854522608461,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794277450625.7,
+            "time": 190318.5,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794277450625.7,
+            "time": 204997.2,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          }
+        },
+        {
+          "direction": 1,
+          "beforeZoom": 17.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 7689.726297999994,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 7689.745667999989,
+              "maximum": 7695.216473000008,
+              "midpoint": 7692.481070499998
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 29.280000000000054,
+            "averageLogicalCores": 3.806314208856013,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.050000000000000266,
+                "averageLogicalCores": 0.006499853498729553
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 28.82000000000005,
+                "averageLogicalCores": 3.746515556667701
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.029999999999999805,
+                "averageLogicalCores": 0.0038999120992376855
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 0.38000000000000256,
+                "averageLogicalCores": 0.04939888659034467
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              }
+            ],
+            "processes": [
+              {
+                "id": 2464,
+                "type": "browser",
+                "beforeCPUSeconds": 3.61,
+                "afterCPUSeconds": 3.66,
+                "cpuTimeDeltaSeconds": 0.050000000000000266,
+                "averageLogicalCores": 0.006499853498729553,
+                "status": "comparable"
+              },
+              {
+                "id": 2501,
+                "type": "GPU",
+                "beforeCPUSeconds": 640.9,
+                "afterCPUSeconds": 669.72,
+                "cpuTimeDeltaSeconds": 28.82000000000005,
+                "averageLogicalCores": 3.746515556667701,
+                "status": "comparable"
+              },
+              {
+                "id": 2504,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 2.35,
+                "afterCPUSeconds": 2.38,
+                "cpuTimeDeltaSeconds": 0.029999999999999805,
+                "averageLogicalCores": 0.0038999120992376855,
+                "status": "comparable"
+              },
+              {
+                "id": 2528,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2543,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.32,
+                "afterCPUSeconds": 0.32,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2556,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.04,
+                "afterCPUSeconds": 0.04,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2581,
+                "type": "renderer",
+                "beforeCPUSeconds": 30.72,
+                "afterCPUSeconds": 31.1,
+                "cpuTimeDeltaSeconds": 0.38000000000000256,
+                "averageLogicalCores": 0.04939888659034467,
+                "status": "comparable"
+              },
+              {
+                "id": 2605,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.02,
+                "afterCPUSeconds": 0.02,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2667,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0.61,
+                "afterCPUSeconds": 0.61,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794277450625.7,
+            "time": 214734.2,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794277450625.7,
+            "time": 222424.7,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          }
+        }
+      ],
+      "performanceCurrent": {
+        "cls": 0,
+        "longest": 2218
+      },
+      "terrainCameraValuesRecorded": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "candidate": {
+      "source": "bceae5c46269bea80c55c197718d61cb1d8044da",
+      "artifactManifest": "/workspace/scratch/13d796f593db/ci-terrain-rtt-quality/artifact-manifest.json",
+      "run": 42745379532,
+      "job": 129596098617,
+      "artifactId": 13730289465,
+      "artifactSHA256": "651c310948f4aac1f4a06da2d716e388855eb3861b4eac17e8bb1c0267ef9102",
+      "report": "/workspace/scratch/13d796f593db/ci-terrain-rtt-quality/design-qa/desktop-webgl-terrain-diagnostic.json",
+      "reportSHA256": "a591532be91ac1e28b445c3eaa0c38ae366e7e0b89376fff9893112ec19df1be",
+      "status": "completed",
+      "diagnosticOnly": true,
+      "verified": false,
+      "releaseEligible": false,
+      "startedAt": "2026-11-10T02:50:13.968Z",
+      "completedAt": "2026-11-10T02:53:51.910Z",
+      "lastZoom": 17.99999998199918,
+      "nativeInputCount": 29,
+      "nativeDirections": {
+        "-1": 12,
+        "1": 17
+      },
+      "nativeNoChangeCount": 1,
+      "inspectionCount": 18,
+      "screenshots": [
+        {
+          "file": "desktop-webgl-terrain-diagnostic-z12_40-route-ready.png",
+          "mode": "terrain-diagnostic",
+          "zoom": 12.403718027935334,
+          "bytes": 1130621,
+          "sha256": "41e2205f087cd303cca662527b8a90b581a04dd256d62f731b9266a6af6b9102",
+          "receiptVerified": true,
+          "localPath": "/workspace/scratch/13d796f593db/ci-terrain-rtt-quality/design-qa/desktop-webgl-terrain-diagnostic-z12_40-route-ready.png"
+        },
+        {
+          "file": "desktop-webgl-terrain-diagnostic-z12_40-terrain-ready.png",
+          "mode": "terrain-diagnostic",
+          "zoom": 12.403718027935334,
+          "bytes": 1131230,
+          "sha256": "466e3c443fb2550edca7d9a249b24f2319c77e401c544b026669ce87a9ff46e1",
+          "receiptVerified": true,
+          "localPath": "/workspace/scratch/13d796f593db/ci-terrain-rtt-quality/design-qa/desktop-webgl-terrain-diagnostic-z12_40-terrain-ready.png"
+        },
+        {
+          "file": "desktop-webgl-terrain-diagnostic-z15_91-before-target.png",
+          "mode": "terrain-diagnostic",
+          "zoom": 15.90540610449558,
+          "bytes": 540633,
+          "sha256": "5c5542811232403cce2c34abcdaf1ff6e6db286a6d0ed4ab0f950423bc0f61ae",
+          "receiptVerified": true,
+          "localPath": "/workspace/scratch/13d796f593db/ci-terrain-rtt-quality/design-qa/desktop-webgl-terrain-diagnostic-z15_91-before-target.png"
+        },
+        {
+          "file": "desktop-webgl-terrain-diagnostic-z18_00-upper-bound.png",
+          "mode": "terrain-diagnostic",
+          "zoom": 17.99999998199918,
+          "bytes": 232559,
+          "sha256": "3b359d67c0b43465fe47cc3e855396a001e9b5683b88f503eac914dba4db3677",
+          "receiptVerified": true,
+          "localPath": "/workspace/scratch/13d796f593db/ci-terrain-rtt-quality/design-qa/desktop-webgl-terrain-diagnostic-z18_00-upper-bound.png"
+        }
+      ],
+      "gpu": {
+        "scope": "one-native-action-maplibre-canvas-only",
+        "method": "EXT_disjoint_timer_query_webgl2",
+        "sampling": "first-calls-per-program-framebuffer-viewport-group",
+        "limits": {
+          "maxQueries": 128,
+          "maxQueriesPerGroup": 8,
+          "maxEvents": 2048,
+          "maxGroups": 128
+        },
+        "contexts": [
+          {
+            "id": 1,
+            "canvas": {
+              "className": "maplibregl-canvas",
+              "width": 1041,
+              "height": 928
+            },
+            "timer": {
+              "supported": true,
+              "counterBits": 64,
+              "disjointAtStart": false
+            }
+          }
+        ],
+        "totals": {
+          "calls": 1109,
+          "drawCalls": 1065,
+          "mipmapCalls": 44,
+          "submittedVerticesOrIndices": 20999442,
+          "eventsDropped": 0,
+          "groupsDropped": 0
+        },
+        "queries": {
+          "attempted": 120,
+          "started": 120,
+          "pending": 0,
+          "completed": 120,
+          "unsupported": 0,
+          "interference": 0,
+          "limitSkipped": 0,
+          "groupLimitSkipped": 989,
+          "disjoint": 0,
+          "unavailable": 0,
+          "errors": 0
+        },
+        "errors": [],
+        "collectionErrors": [],
+        "programs": [
+          {
+            "id": 14,
+            "contextId": 1,
+            "label": "terrain_depth",
+            "labelSource": "installed-shader-main-signature",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "432394e5",
+                "length": 4628,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "a8d47cd0",
+                "length": 1138,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 15,
+            "contextId": 1,
+            "label": "program-15",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "08f60cf4",
+                "length": 4554,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "e75466bb",
+                "length": 2474,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 23,
+            "contextId": 1,
+            "label": "terrain",
+            "labelSource": "installed-shader-main-signature",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_texture",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "79f28959",
+                "length": 4756,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "a9f500fa",
+                "length": 1974,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_texture"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 24,
+            "contextId": 1,
+            "label": "program-24",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_depth",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_texture",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "def1177f",
+                "length": 9952,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "cc3ff891",
+                "length": 3341,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_texture"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 25,
+            "contextId": 1,
+            "label": "program-25",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_depth",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "acce8d2c",
+                "length": 8741,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "c3a57648",
+                "length": 2963,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 26,
+            "contextId": 1,
+            "label": "program-26",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_depth",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "28b8290a",
+                "length": 8643,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "2e04f54a",
+                "length": 2865,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 27,
+            "contextId": 1,
+            "label": "program-27",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_terrain",
+                "type": 35678,
+                "size": 1
+              },
+              {
+                "name": "u_depth",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "82dd4e98",
+                "length": 8770,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "839314ac",
+                "length": 2992,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 16,
+            "contextId": 1,
+            "label": "program-16",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "b250dfcc",
+                "length": 4441,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "9a348a09",
+                "length": 1008,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 17,
+            "contextId": 1,
+            "label": "program-17",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "b250dfcc",
+                "length": 4441,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "de95e3ea",
+                "length": 900,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 18,
+            "contextId": 1,
+            "label": "program-18",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "e249db77",
+                "length": 5398,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "b7cb4519",
+                "length": 1530,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 19,
+            "contextId": 1,
+            "label": "program-19",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "0ff08535",
+                "length": 5656,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "85286207",
+                "length": 1779,
+                "samplers": []
+              }
+            ]
+          },
+          {
+            "id": 20,
+            "contextId": 1,
+            "label": "program-20",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_image",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "5673de4e",
+                "length": 10046,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "b12bc771",
+                "length": 3423,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_image"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 21,
+            "contextId": 1,
+            "label": "program-21",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [
+              {
+                "name": "u_image",
+                "type": 35678,
+                "size": 1
+              }
+            ],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "2fadb99f",
+                "length": 4606,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "6b7fd0d2",
+                "length": 4754,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_image"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 22,
+            "contextId": 1,
+            "label": "program-22",
+            "labelSource": "public-shader-source-hash",
+            "samplers": [],
+            "samplerEnumeration": "public-active-uniforms",
+            "shaders": [
+              {
+                "type": "vertex",
+                "shaderName": null,
+                "hash": "13587495",
+                "length": 8275,
+                "samplers": [
+                  {
+                    "type": "sampler2D",
+                    "name": "u_terrain"
+                  },
+                  {
+                    "type": "sampler2D",
+                    "name": "u_depth"
+                  }
+                ]
+              },
+              {
+                "type": "fragment",
+                "shaderName": null,
+                "hash": "ce169e70",
+                "length": 2216,
+                "samplers": []
+              }
+            ]
+          }
+        ],
+        "groups": [
+          {
+            "id": 1,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 14,
+            "programLabel": "terrain_depth",
+            "framebufferKind": "offscreen",
+            "framebufferId": 10,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 39,
+            "submittedVerticesOrIndices": 3953664,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 89169825,
+            "firstSequence": 1,
+            "lastSequence": 207,
+            "sampleMilliseconds": [
+              44.733211,
+              6.295575,
+              4.549914,
+              4.398393,
+              5.552568,
+              4.539412,
+              12.102912,
+              6.99784
+            ],
+            "sampleMedianMilliseconds": 5.9240715,
+            "eventIndexCounts": {
+              "101376": 39
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 15,
+            "programLabel": "program-15",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 8,
+            "submittedVerticesOrIndices": 48,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 196101624,
+            "firstSequence": 11,
+            "lastSequence": 1060,
+            "sampleMilliseconds": [
+              20.942499,
+              20.662119,
+              27.213709,
+              20.912614,
+              31.830147,
+              21.490486,
+              28.036285,
+              25.013765
+            ],
+            "sampleMedianMilliseconds": 23.2521255,
+            "eventIndexCounts": {
+              "6": 8
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 3,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 23,
+            "programLabel": "terrain",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 166,
+            "submittedVerticesOrIndices": 16828416,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 182439862,
+            "firstSequence": 12,
+            "lastSequence": 1106,
+            "sampleMilliseconds": [
+              33.606369,
+              11.840879,
+              5.33997,
+              5.380345,
+              13.988271,
+              5.367622,
+              76.643357,
+              30.273049
+            ],
+            "sampleMedianMilliseconds": 12.914575,
+            "eventIndexCounts": {
+              "101376": 166
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 1024,
+                "height": 1024,
+                "levels": 11,
+                "internalFormat": 32856,
+                "anisotropy": 16,
+                "minFilter": 9987,
+                "magFilter": 9729,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 24,
+            "programLabel": "program-24",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 98,
+            "submittedVerticesOrIndices": 6564,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 452720,
+            "firstSequence": 22,
+            "lastSequence": 1095,
+            "sampleMilliseconds": [
+              0.081511,
+              0.05891,
+              0.066223,
+              0.063217,
+              0.040004,
+              0.036838,
+              0.054832,
+              0.051185
+            ],
+            "sampleMedianMilliseconds": 0.056871,
+            "eventIndexCounts": {
+              "30": 16,
+              "120": 8,
+              "48": 2,
+              "90": 8,
+              "42": 10,
+              "288": 4,
+              "60": 6,
+              "36": 16,
+              "24": 16,
+              "186": 4,
+              "84": 8
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_depth",
+                "target": 3553,
+                "width": 1041,
+                "height": 928,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 86,
+                "height": 115,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 108,
+                "height": 118,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 85,
+                "height": 97,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 109,
+                "height": 118,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 102,
+                "height": 136,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              },
+              {
+                "uniform": "u_texture",
+                "target": 3553,
+                "width": 84,
+                "height": 94,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 25,
+            "programLabel": "program-25",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 8,
+            "submittedVerticesOrIndices": 48,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 458021,
+            "firstSequence": 52,
+            "lastSequence": 1107,
+            "sampleMilliseconds": [
+              0.054842,
+              0.064811,
+              0.052507,
+              0.066213,
+              0.057757,
+              0.053509,
+              0.056505,
+              0.051877
+            ],
+            "sampleMedianMilliseconds": 0.0556735,
+            "eventIndexCounts": {
+              "6": 8
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_depth",
+                "target": 3553,
+                "width": 1041,
+                "height": 928,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 6,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 26,
+            "programLabel": "program-26",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 8,
+            "submittedVerticesOrIndices": 48,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 396405,
+            "firstSequence": 53,
+            "lastSequence": 1108,
+            "sampleMilliseconds": [
+              0.052327,
+              0.046306,
+              0.044773,
+              0.051635,
+              0.044883,
+              0.050344,
+              0.052017,
+              0.05412
+            ],
+            "sampleMedianMilliseconds": 0.0509895,
+            "eventIndexCounts": {
+              "6": 8
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_depth",
+                "target": 3553,
+                "width": 1041,
+                "height": 928,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 7,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 27,
+            "programLabel": "program-27",
+            "framebufferKind": "default",
+            "framebufferId": 0,
+            "viewport": [
+              0,
+              0,
+              1041,
+              928
+            ],
+            "mode": 4,
+            "calls": 8,
+            "submittedVerticesOrIndices": 48,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 553568,
+            "firstSequence": 54,
+            "lastSequence": 1109,
+            "sampleMilliseconds": [
+              0.060543,
+              0.063107,
+              0.073726,
+              0.076933,
+              0.066734,
+              0.081041,
+              0.071122,
+              0.060362
+            ],
+            "sampleMedianMilliseconds": 0.068928,
+            "eventIndexCounts": {
+              "6": 8
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_terrain",
+                "target": 3553,
+                "width": 516,
+                "height": 516,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              },
+              {
+                "uniform": "u_depth",
+                "target": 3553,
+                "width": 1041,
+                "height": 928,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9728,
+                "magFilter": 9728,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 8,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 16,
+            "programLabel": "program-16",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              1024,
+              1024
+            ],
+            "mode": 4,
+            "calls": 23,
+            "submittedVerticesOrIndices": 138,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 48772538,
+            "firstSequence": 116,
+            "lastSequence": 1061,
+            "sampleMilliseconds": [
+              7.278469,
+              7.81821,
+              5.18306,
+              5.770136,
+              5.508223,
+              5.317469,
+              6.49231,
+              5.404661
+            ],
+            "sampleMedianMilliseconds": 5.6391795,
+            "eventIndexCounts": {
+              "6": 23
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 9,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 17,
+            "programLabel": "program-17",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              1024,
+              1024
+            ],
+            "mode": 4,
+            "calls": 196,
+            "submittedVerticesOrIndices": 1176,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 25576204,
+            "firstSequence": 117,
+            "lastSequence": 1065,
+            "sampleMilliseconds": [
+              5.019746,
+              3.795915,
+              3.120282,
+              3.531739,
+              2.607589,
+              2.339893,
+              2.325006,
+              2.836034
+            ],
+            "sampleMedianMilliseconds": 2.978158,
+            "eventIndexCounts": {
+              "6": 196
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 10,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 18,
+            "programLabel": "program-18",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              1024,
+              1024
+            ],
+            "mode": 4,
+            "calls": 157,
+            "submittedVerticesOrIndices": 57744,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 54270973,
+            "firstSequence": 118,
+            "lastSequence": 1074,
+            "sampleMilliseconds": [
+              9.257853,
+              9.597062,
+              3.794522,
+              8.557594,
+              7.715439,
+              5.580578,
+              0.213125,
+              9.5548
+            ],
+            "sampleMedianMilliseconds": 8.136516499999999,
+            "eventIndexCounts": {
+              "6": 73,
+              "2493": 6,
+              "2946": 6,
+              "255": 2,
+              "51": 2,
+              "564": 2,
+              "63": 2,
+              "849": 2,
+              "816": 2,
+              "1632": 2,
+              "459": 2,
+              "693": 2,
+              "261": 2,
+              "915": 2,
+              "795": 2,
+              "729": 2,
+              "288": 2,
+              "471": 2,
+              "90": 2,
+              "18": 2,
+              "12": 2,
+              "48": 2,
+              "1701": 2,
+              "465": 2,
+              "42": 2,
+              "174": 2,
+              "105": 2,
+              "117": 8,
+              "21": 8,
+              "72": 8
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 11,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 19,
+            "programLabel": "program-19",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              1024,
+              1024
+            ],
+            "mode": 1,
+            "calls": 157,
+            "submittedVerticesOrIndices": 39732,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 3069768,
+            "firstSequence": 119,
+            "lastSequence": 1075,
+            "sampleMilliseconds": [
+              0.157202,
+              0.85771,
+              0.554959,
+              0.709908,
+              0.316711,
+              0.203938,
+              0.181968,
+              0.087372
+            ],
+            "sampleMedianMilliseconds": 0.2603245,
+            "eventIndexCounts": {
+              "8": 73,
+              "1650": 6,
+              "2004": 6,
+              "174": 2,
+              "42": 2,
+              "384": 2,
+              "50": 2,
+              "550": 2,
+              "572": 2,
+              "1116": 2,
+              "314": 2,
+              "494": 2,
+              "178": 2,
+              "646": 2,
+              "546": 2,
+              "498": 2,
+              "196": 2,
+              "326": 2,
+              "72": 2,
+              "16": 4,
+              "36": 4,
+              "1158": 2,
+              "322": 2,
+              "144": 2,
+              "86": 10,
+              "18": 8,
+              "56": 8
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 12,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 20,
+            "programLabel": "program-20",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              1024,
+              1024
+            ],
+            "mode": 4,
+            "calls": 58,
+            "submittedVerticesOrIndices": 34080,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 2918811,
+            "firstSequence": 127,
+            "lastSequence": 1077,
+            "sampleMilliseconds": [
+              0.211683,
+              1.827312,
+              0.072385,
+              0.53523,
+              0.046086,
+              0.054377,
+              0.117868,
+              0.05387
+            ],
+            "sampleMedianMilliseconds": 0.0951265,
+            "eventIndexCounts": {
+              "84": 30,
+              "2247": 6,
+              "198": 2,
+              "711": 2,
+              "1761": 2,
+              "1278": 2,
+              "42": 2,
+              "357": 2,
+              "108": 2,
+              "1143": 4,
+              "1149": 4
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_image",
+                "target": 3553,
+                "width": 256,
+                "height": 512,
+                "levels": null,
+                "internalFormat": 6406,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texImage2D"
+              }
+            ]
+          },
+          {
+            "id": 13,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 21,
+            "programLabel": "program-21",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              1024,
+              1024
+            ],
+            "mode": 4,
+            "calls": 22,
+            "submittedVerticesOrIndices": 132,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 1196967860,
+            "firstSequence": 128,
+            "lastSequence": 1073,
+            "sampleMilliseconds": [
+              226.522285,
+              166.591564,
+              132.874384,
+              132.917274,
+              142.653796,
+              132.029877,
+              132.037682,
+              131.340998
+            ],
+            "sampleMedianMilliseconds": 132.895829,
+            "eventIndexCounts": {
+              "6": 22
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": "u_image",
+                "target": 3553,
+                "width": 514,
+                "height": 514,
+                "levels": 1,
+                "internalFormat": 32856,
+                "anisotropy": 1,
+                "minFilter": 9729,
+                "magFilter": 9729,
+                "allocation": "texStorage2D"
+              }
+            ]
+          },
+          {
+            "id": 14,
+            "method": "drawElements",
+            "contextId": 1,
+            "programId": 22,
+            "programLabel": "program-22",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              1024,
+              1024
+            ],
+            "mode": 4,
+            "calls": 117,
+            "submittedVerticesOrIndices": 77604,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 2227766,
+            "firstSequence": 129,
+            "lastSequence": 1076,
+            "sampleMilliseconds": [
+              1.331524,
+              0.27524,
+              0.037339,
+              0.040976,
+              0.040395,
+              0.034144,
+              0.098683,
+              0.369465
+            ],
+            "sampleMedianMilliseconds": 0.0698295,
+            "eventIndexCounts": {
+              "1902": 4,
+              "84": 40,
+              "195": 2,
+              "150": 1,
+              "2016": 1,
+              "1308": 2,
+              "2460": 2,
+              "1344": 2,
+              "1326": 2,
+              "936": 1,
+              "534": 2,
+              "2268": 4,
+              "48": 4,
+              "1218": 4,
+              "1500": 4,
+              "1023": 4,
+              "576": 4,
+              "369": 4,
+              "252": 4,
+              "558": 2,
+              "291": 2,
+              "204": 2,
+              "123": 4,
+              "156": 2,
+              "2040": 1,
+              "954": 1,
+              "2280": 4,
+              "1926": 2,
+              "165": 2,
+              "144": 2,
+              "345": 2
+            },
+            "observedTextureShapes": []
+          },
+          {
+            "id": 15,
+            "method": "generateMipmap",
+            "contextId": 1,
+            "programId": null,
+            "programLabel": "generateMipmap",
+            "framebufferKind": "offscreen",
+            "framebufferId": 11,
+            "viewport": [
+              0,
+              0,
+              1024,
+              1024
+            ],
+            "mode": null,
+            "calls": 44,
+            "submittedVerticesOrIndices": 0,
+            "queryAttempts": 8,
+            "timedCalls": 8,
+            "gpuNanoseconds": 56427920,
+            "firstSequence": 131,
+            "lastSequence": 1078,
+            "sampleMilliseconds": [
+              7.30106,
+              7.046158,
+              7.000633,
+              6.998439,
+              7.039566,
+              7.011113,
+              7.032552,
+              6.998399
+            ],
+            "sampleMedianMilliseconds": 7.0218325,
+            "eventIndexCounts": {
+              "0": 44
+            },
+            "observedTextureShapes": [
+              {
+                "uniform": null,
+                "target": 3553,
+                "width": 1024,
+                "height": 1024,
+                "levels": 11,
+                "internalFormat": 32856,
+                "anisotropy": 16,
+                "minFilter": 9987,
+                "magFilter": 9729,
+                "allocation": "texStorage2D"
+              }
+            ]
+          }
+        ],
+        "highZoomWebgl": {
+          "available": true,
+          "type": "webgl2",
+          "contextLost": false,
+          "attributes": {
+            "alpha": true,
+            "antialias": false,
+            "depth": true,
+            "desynchronized": false,
+            "failIfMajorPerformanceCaveat": false,
+            "powerPreference": "high-performance",
+            "premultipliedAlpha": true,
+            "preserveDrawingBuffer": false,
+            "stencil": true,
+            "xrCompatible": false
+          },
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+          "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "unmaskedVendor": "Google Inc. (Google)",
+          "samples": 0,
+          "sampleBuffers": 0,
+          "sampleScope": "currently-bound-framebuffer",
+          "defaultFramebufferBound": true,
+          "drawingBuffer": {
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "width": 1041,
+            "height": 928,
+            "cssWidth": 1041,
+            "cssHeight": 928,
+            "devicePixelRatio": 1
+          }
+        }
+      },
+      "processCPUIntervals": [
+        {
+          "direction": 1,
+          "beforeZoom": 14.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 8007.911132999987,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 8007.937141000002,
+              "maximum": 8009.361094000022,
+              "midpoint": 8008.649117500012
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 30.289999999999967,
+            "averageLogicalCores": 3.782160955686285,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.07000000000000028,
+                "averageLogicalCores": 0.008740550244240386
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 29.46999999999997,
+                "averageLogicalCores": 3.6797716528251843
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.06000000000000005,
+                "averageLogicalCores": 0.0074919002093488795
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 0.6899999999999977,
+                "averageLogicalCores": 0.08615685240751175
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              }
+            ],
+            "processes": [
+              {
+                "id": 2697,
+                "type": "browser",
+                "beforeCPUSeconds": 3.28,
+                "afterCPUSeconds": 3.35,
+                "cpuTimeDeltaSeconds": 0.07000000000000028,
+                "averageLogicalCores": 0.008740550244240386,
+                "status": "comparable"
+              },
+              {
+                "id": 2734,
+                "type": "GPU",
+                "beforeCPUSeconds": 430.72,
+                "afterCPUSeconds": 460.19,
+                "cpuTimeDeltaSeconds": 29.46999999999997,
+                "averageLogicalCores": 3.6797716528251843,
+                "status": "comparable"
+              },
+              {
+                "id": 2737,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 2.27,
+                "afterCPUSeconds": 2.33,
+                "cpuTimeDeltaSeconds": 0.06000000000000005,
+                "averageLogicalCores": 0.0074919002093488795,
+                "status": "comparable"
+              },
+              {
+                "id": 2761,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2776,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.45,
+                "afterCPUSeconds": 0.45,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2789,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.05,
+                "afterCPUSeconds": 0.05,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2813,
+                "type": "renderer",
+                "beforeCPUSeconds": 29.01,
+                "afterCPUSeconds": 29.7,
+                "cpuTimeDeltaSeconds": 0.6899999999999977,
+                "averageLogicalCores": 0.08615685240751175,
+                "status": "comparable"
+              },
+              {
+                "id": 2837,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.03,
+                "afterCPUSeconds": 0.03,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2897,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0,
+                "afterCPUSeconds": 0,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794279014695.3,
+            "time": 147509.69999999998,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794279014695.3,
+            "time": 155520.6,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          }
+        },
+        {
+          "direction": 1,
+          "beforeZoom": 15.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 11792.054395000014,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 11792.077519000013,
+              "maximum": 11793.885437999998,
+              "midpoint": 11792.981478500005
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 43.75999999999998,
+            "averageLogicalCores": 3.7106816524540136,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.18999999999999995,
+                "averageLogicalCores": 0.016111277741459387
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 36.76999999999998,
+                "averageLogicalCores": 3.117956223965587
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.14000000000000012,
+                "averageLogicalCores": 0.011871467809496404
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 6.629999999999999,
+                "averageLogicalCores": 0.5621987969782934
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.03,
+                "averageLogicalCores": 0.0025438859591777985
+              }
+            ],
+            "processes": [
+              {
+                "id": 2697,
+                "type": "browser",
+                "beforeCPUSeconds": 3.61,
+                "afterCPUSeconds": 3.8,
+                "cpuTimeDeltaSeconds": 0.18999999999999995,
+                "averageLogicalCores": 0.016111277741459387,
+                "status": "comparable"
+              },
+              {
+                "id": 2734,
+                "type": "GPU",
+                "beforeCPUSeconds": 460.38,
+                "afterCPUSeconds": 497.15,
+                "cpuTimeDeltaSeconds": 36.76999999999998,
+                "averageLogicalCores": 3.117956223965587,
+                "status": "comparable"
+              },
+              {
+                "id": 2737,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 2.33,
+                "afterCPUSeconds": 2.47,
+                "cpuTimeDeltaSeconds": 0.14000000000000012,
+                "averageLogicalCores": 0.011871467809496404,
+                "status": "comparable"
+              },
+              {
+                "id": 2761,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2776,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.45,
+                "afterCPUSeconds": 0.45,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2789,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.05,
+                "afterCPUSeconds": 0.05,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2813,
+                "type": "renderer",
+                "beforeCPUSeconds": 29.84,
+                "afterCPUSeconds": 36.47,
+                "cpuTimeDeltaSeconds": 6.629999999999999,
+                "averageLogicalCores": 0.5621987969782934,
+                "status": "comparable"
+              },
+              {
+                "id": 2837,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.03,
+                "afterCPUSeconds": 0.03,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2897,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 0,
+                "afterCPUSeconds": 0.03,
+                "cpuTimeDeltaSeconds": 0.03,
+                "averageLogicalCores": 0.0025438859591777985,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794279014695.3,
+            "time": 156759.4,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794279014695.3,
+            "time": 168554.19999999998,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          }
+        },
+        {
+          "direction": 1,
+          "beforeZoom": 16.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 11990.959704000008,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 11990.976636000007,
+              "maximum": 11992.357258000004,
+              "midpoint": 11991.666947000005
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 45.28000000000004,
+            "averageLogicalCores": 3.7759554363980965,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.25,
+                "averageLogicalCores": 0.02084781049248064
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 43.400000000000034,
+                "averageLogicalCores": 3.619179901494642
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.20999999999999996,
+                "averageLogicalCores": 0.017512160813683734
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 1.4200000000000017,
+                "averageLogicalCores": 0.11841556359729018
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              }
+            ],
+            "processes": [
+              {
+                "id": 2697,
+                "type": "browser",
+                "beforeCPUSeconds": 4.04,
+                "afterCPUSeconds": 4.29,
+                "cpuTimeDeltaSeconds": 0.25,
+                "averageLogicalCores": 0.02084781049248064,
+                "status": "comparable"
+              },
+              {
+                "id": 2734,
+                "type": "GPU",
+                "beforeCPUSeconds": 505.17,
+                "afterCPUSeconds": 548.57,
+                "cpuTimeDeltaSeconds": 43.400000000000034,
+                "averageLogicalCores": 3.619179901494642,
+                "status": "comparable"
+              },
+              {
+                "id": 2737,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 2.47,
+                "afterCPUSeconds": 2.68,
+                "cpuTimeDeltaSeconds": 0.20999999999999996,
+                "averageLogicalCores": 0.017512160813683734,
+                "status": "comparable"
+              },
+              {
+                "id": 2761,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2776,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.45,
+                "afterCPUSeconds": 0.45,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2789,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.05,
+                "afterCPUSeconds": 0.05,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2813,
+                "type": "renderer",
+                "beforeCPUSeconds": 36.53,
+                "afterCPUSeconds": 37.95,
+                "cpuTimeDeltaSeconds": 1.4200000000000017,
+                "averageLogicalCores": 0.11841556359729018,
+                "status": "comparable"
+              },
+              {
+                "id": 2837,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.03,
+                "afterCPUSeconds": 0.03,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2897,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 1.45,
+                "afterCPUSeconds": 1.45,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794279014695.3,
+            "time": 171925.4,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794279014695.3,
+            "time": 183917.4,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          }
+        },
+        {
+          "direction": 1,
+          "beforeZoom": 17.90540610449558,
+          "status": "completed",
+          "actionDurationMs": 10913.816358000011,
+          "delta": {
+            "available": true,
+            "complete": true,
+            "intervalMs": {
+              "minimum": 10913.834101000015,
+              "maximum": 10915.334506999992,
+              "midpoint": 10914.584304000004
+            },
+            "comparableProcessCount": 9,
+            "incomparableProcessCount": 0,
+            "totalComparableCPUSeconds": 42.27,
+            "averageLogicalCores": 3.872799808281181,
+            "byType": [
+              {
+                "type": "browser",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.05000000000000071,
+                "averageLogicalCores": 0.004581026506128739
+              },
+              {
+                "type": "GPU",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 41.620000000000005,
+                "averageLogicalCores": 3.8132464637015087
+              },
+              {
+                "type": "network.mojom.NetworkService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0.040000000000000036,
+                "averageLogicalCores": 0.0036648212049029422
+              },
+              {
+                "type": "storage.mojom.StorageService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              },
+              {
+                "type": "renderer",
+                "processCount": 4,
+                "cpuTimeDeltaSeconds": 0.5600000000000023,
+                "averageLogicalCores": 0.051307496868641354
+              },
+              {
+                "type": "tracing.mojom.TracingService",
+                "processCount": 1,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0
+              }
+            ],
+            "processes": [
+              {
+                "id": 2697,
+                "type": "browser",
+                "beforeCPUSeconds": 4.31,
+                "afterCPUSeconds": 4.36,
+                "cpuTimeDeltaSeconds": 0.05000000000000071,
+                "averageLogicalCores": 0.004581026506128739,
+                "status": "comparable"
+              },
+              {
+                "id": 2734,
+                "type": "GPU",
+                "beforeCPUSeconds": 589.13,
+                "afterCPUSeconds": 630.75,
+                "cpuTimeDeltaSeconds": 41.620000000000005,
+                "averageLogicalCores": 3.8132464637015087,
+                "status": "comparable"
+              },
+              {
+                "id": 2737,
+                "type": "network.mojom.NetworkService",
+                "beforeCPUSeconds": 2.68,
+                "afterCPUSeconds": 2.72,
+                "cpuTimeDeltaSeconds": 0.040000000000000036,
+                "averageLogicalCores": 0.0036648212049029422,
+                "status": "comparable"
+              },
+              {
+                "id": 2761,
+                "type": "storage.mojom.StorageService",
+                "beforeCPUSeconds": 0.01,
+                "afterCPUSeconds": 0.01,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2776,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.45,
+                "afterCPUSeconds": 0.45,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2789,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.05,
+                "afterCPUSeconds": 0.05,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2813,
+                "type": "renderer",
+                "beforeCPUSeconds": 38.12,
+                "afterCPUSeconds": 38.68,
+                "cpuTimeDeltaSeconds": 0.5600000000000023,
+                "averageLogicalCores": 0.051307496868641354,
+                "status": "comparable"
+              },
+              {
+                "id": 2837,
+                "type": "renderer",
+                "beforeCPUSeconds": 0.03,
+                "afterCPUSeconds": 0.03,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              },
+              {
+                "id": 2897,
+                "type": "tracing.mojom.TracingService",
+                "beforeCPUSeconds": 1.46,
+                "afterCPUSeconds": 1.46,
+                "cpuTimeDeltaSeconds": 0,
+                "averageLogicalCores": 0,
+                "status": "comparable"
+              }
+            ]
+          },
+          "pageActivityBefore": {
+            "timeOrigin": 1794279014695.3,
+            "time": 194607.8,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          },
+          "pageActivityAfter": {
+            "timeOrigin": 1794279014695.3,
+            "time": 205522.69999999998,
+            "visibilityState": "visible",
+            "hidden": false,
+            "hasFocus": true,
+            "activeElement": {
+              "tag": "BUTTON",
+              "label": "Увеличить масштаб"
+            }
+          }
+        }
+      ],
+      "performanceCurrent": {
+        "cls": 0,
+        "longest": 1715
+      },
+      "terrainCameraValuesRecorded": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  }
+}
