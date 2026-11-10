@@ -22,7 +22,8 @@ export function canvasLabelsInCoverage(rules, area) {
       place(layout, geom, feature) {
         const candidates = symbolizer.place(layout, geom, feature);
         if (!candidates) return undefined;
-        const accepted = candidates.filter(label => coveredAnchor(label.anchor, layout.zoom, area));
+        const current = typeof area === 'function' ? area() : area;
+        const accepted = candidates.filter(label => coveredAnchor(label.anchor, layout.zoom, current));
         return accepted.length ? accepted : undefined;
       },
     }};

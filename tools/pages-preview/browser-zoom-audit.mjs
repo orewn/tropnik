@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {CLOSE_TRAIL_FIXTURE,assertCloseTrailAudit,assertNativeBurstEventOrder,assertRouteEdgeFrame,assertReliefPalette} from './browser-report.mjs';
 import {dispatchSourceEndPan,sourceEndPanPlans,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
 import {traceDesktopSelection,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES} from './browser-trace.mjs';
+import {runCoastAudit} from './browser-coast-audit.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -192,7 +193,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
  assert.ok(diagnostic===null||diagnostic==='terrain-close','Unknown zoom diagnostic mode');
  if(diagnostic)assert.ok(profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
  await mkdir(OUTPUT,{recursive:true});
- const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:5,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
+ const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:6,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
  if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[]});
  let terrainTraceStarted=false;
  const terrainResources=diagnostic?observeTerrainResources(cdp,()=>report.diagnosticStage):null;
@@ -569,6 +570,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   const modePerformance=await evaluate(cdp,'({layoutShift:window.__tropnikPerf?.cls||0,longestTaskMs:window.__tropnikPerf?.longest||0})');
   report.performance=modePerformance;
   const edges=await closeTrailEdges();
+  report.coast=await runCoastAudit(cdp,profile,helpers);
   report.geometryPassed=true;report.performance={layoutShift:Math.max(modePerformance.layoutShift,edges.performance.layoutShift),longestTaskMs:Math.max(modePerformance.longestTaskMs,edges.performance.longestTaskMs)};report.completedAt=new Date().toISOString();await save();return report;
  }catch(error){report.error=error.stack||String(error);if(error.settleDiagnostics)report.settleDiagnostics=error.settleDiagnostics;if(diagnostic){report.status='failed';if(helpers.performanceDiagnostics)try{report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);}catch{} }await save();throw error;}
  finally{forget();forgetFinished();forgetFailed();terrainResources?.dispose();}

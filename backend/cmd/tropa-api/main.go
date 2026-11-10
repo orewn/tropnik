@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -100,6 +101,13 @@ func run() error {
 	}
 	if e := cfg.Validate(); e != nil {
 		return e
+	}
+	safetyKey, e := store.ParseSafetyKey(os.Getenv("TROPA_SAFETY_DATA_KEY"))
+	if e != nil || (mode == "production" && len(safetyKey) != 32) {
+		return errors.New("TROPA_SAFETY_DATA_KEY must contain an independent 256-bit encryption key")
+	}
+	if len(safetyKey) == 32 && (subtle.ConstantTimeCompare(safetyKey, rateKey) == 1 || subtle.ConstantTimeCompare(safetyKey, proxyToken) == 1) {
+		return errors.New("safety encryption, authentication rate and proxy keys must be independent")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()

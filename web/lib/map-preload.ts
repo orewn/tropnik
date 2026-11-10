@@ -4,6 +4,7 @@ import {MapResourcePool, routeTilePlan} from './map-resource-pool';
 import {createMapTransport, publicMapResourceKey} from './map-transport';
 import {TerrainPreparation} from './terrain-preparation';
 import {MAP_CONFIG} from './map-config';
+import {loadMapCoverage} from '@/public/maps/map-coverage-lod.js';
 
 export const TERRAIN_BOUNDS = [40.29, 43.64, 40.49, 43.82] as const;
 const TERRAIN_VERSION = '20261106-3';
@@ -62,8 +63,8 @@ export function preferCanvasMap() {
 export function warmMap() {
   if (typeof window === 'undefined') return;
   const webgl=supportsMapWebGL()&&!preferCanvasMap();
-  void preloadPublic('/data/russia-display-area.geojson'); void preloadPublic(webgl?'/data/russia-canonical-mask.geojson':'/data/russia-outside-mask.geojson');
-  void preloadPublic('/data/territories.geojson'); void preloadPublic('/maps/tropa-style.json');
+  void loadMapCoverage().then(coverage=>coverage.dispose()).catch(()=>undefined);
+  void preloadPublic('/maps/tropa-style.json');
   if(!webgl)return Promise.resolve();
   if (!mapWarm) mapWarm = import('maplibre-gl').then(ml => {
     ml.addProtocol('tropnik-map', transport.load);

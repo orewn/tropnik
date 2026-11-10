@@ -1,4 +1,4 @@
-import type {Bounds, Canvas, LatLngBounds, Map as LeafletMap, Point, Polygon} from 'leaflet';
+import type {Bounds, Canvas, LatLngBounds, Map as LeafletMap, Point, Polyline, Polygon} from 'leaflet';
 
 type GeographicBounds = {west: number; south: number; east: number; north: number};
 type MaskRenderer = {
@@ -8,7 +8,7 @@ type MaskRenderer = {
   _updatePaths: () => void;
   _reset: () => void;
 };
-type MaskPolygon = Polygon & {
+type MaskPolygon = (Polyline|Polygon) & {
   _project: () => void;
   _update: () => void;
   _rings: Point[][];
@@ -48,7 +48,7 @@ function bufferedViewport(renderer: MaskRenderer): GeographicBounds | undefined 
 /** Skip whole off-screen mask cells before Leaflet projects every vertex.
  * Source rings, world copies, pixel clipping and smoothing stay untouched.
  * Hooks belong only to this mask renderer and its polygon instances. */
-export function maskViewportCulling(canvas: Canvas): (polygon: Polygon) => void {
+export function maskViewportCulling(canvas: Canvas): (polygon: Polyline|Polygon) => void {
   const renderer = canvas as unknown as MaskRenderer;
   let inPass = false, viewport: GeographicBounds | undefined;
   // zoomend projects paths; moveend/resize update clipping; reset can nest both.

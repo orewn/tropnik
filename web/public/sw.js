@@ -1,9 +1,44 @@
 /* Тропник. Only public static assets are cached. Auth, chat and API responses never enter CacheStorage. */
-const VERSION='tropnik-shell-0.4.22-11b1d88dae0b051c';
-const SHELL=['/maps/russia-viewport.js','/maps/map-label-coverage.js','/maps/map-label-geometry.js','/data/russia-display-area.geojson','/data/russia-outside-mask.geojson','/data/russia-canonical-mask.geojson','/data/russia-boundaries-provenance.json','/offline-fonts.css','/fonts/MANROPE-LICENSE.txt','/fonts/manrope-latin-400.woff2','/fonts/manrope-cyrillic-400.woff2','/fonts/manrope-latin-600.woff2','/fonts/manrope-cyrillic-600.woff2','/maps/leaflet.js','/maps/leaflet.css','/maps/protomaps-leaflet.js','/maps/canvas-style.js','/maps/canvas-label-coverage.js','/maps/map-city-labels.js','/offline-viewer.html','/offline.js','/offline.css','/favicon.svg','/data/world.geojson','/data/regions.geojson','/data/territories.geojson'];
+const VERSION='tropnik-shell-0.4.23-087ca91618009acb';
+const SHELL=['/maps/map-coverage-lod.js','/maps/map-coverage-renderers.js','/data/map-coverage/manifest.json','/data/map-coverage/base.coverage','/maps/russia-viewport.js','/maps/map-label-coverage.js','/maps/map-label-geometry.js','/data/russia-display-area.geojson','/data/russia-outside-mask.geojson','/data/russia-canonical-mask.geojson','/data/russia-boundaries-provenance.json','/offline-fonts.css','/fonts/MANROPE-LICENSE.txt','/fonts/manrope-latin-400.woff2','/fonts/manrope-cyrillic-400.woff2','/fonts/manrope-latin-600.woff2','/fonts/manrope-cyrillic-600.woff2','/maps/leaflet.js','/maps/leaflet.css','/maps/protomaps-leaflet.js','/maps/canvas-style.js','/maps/canvas-label-coverage.js','/maps/map-city-labels.js','/offline-safety.html','/offline-safety.js','/offline-safety.css','/offline-viewer.html','/offline.js','/offline.css','/favicon.svg','/data/world.geojson','/data/regions.geojson','/data/territories.geojson'];
 const MAP_WARM=['/maps/tropa-style.json','/maps/tropnik-pictograms.js','/maps/tropnik-sprite.png','/maps/tropnik-sprite.json','/maps/tropnik-sprite@2x.png','/maps/tropnik-sprite@2x.json','/maps/tropnik-sprite-provenance.json'];
 const WEBGL_WARM=['/terrain/ATTRIBUTION.txt','/terrain/sources/Copernicus-GLO30-LICENSE.pdf','/terrain/landscape.html','/maps/maplibre-gl.mjs','/maps/maplibre-gl.css','/maps/maplibre-worker.js'];
 const warmJobs=new Map();
+const SAFETY_PAGES=['/safety/registration','/safety/registration/','/offline-safety','/offline-safety.html'];
+const COVERAGE_CELLS='/data/map-coverage/cells/';
+const COVERAGE_CACHE_LIMITS={bytes:32*1024*1024,entries:64,cellBytes:3*1024*1024};
+let coverageWrites=Promise.resolve();
+function coverageCell(path){return path.startsWith(COVERAGE_CELLS)&&/^[a-z0-9_-]+\.coverage$/i.test(path.slice(COVERAGE_CELLS.length));}
+function rememberCoverage(cache,path,response){
+ const job=coverageWrites.then(async()=>{
+  if(Number(response.headers.get('content-length'))>COVERAGE_CACHE_LIMITS.cellBytes){response.body?.cancel().catch(()=>{});return;}
+  const reader=response.body?.getReader();if(!reader)return;
+  const parts=[];let size=0;
+  try{for(;;){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;if(size>COVERAGE_CACHE_LIMITS.cellBytes){reader.cancel().catch(()=>{});return;}parts.push(value);}}finally{reader.releaseLock();}
+  if(!size)return;
+  const retained=[];let total=0;
+  for(const request of await cache.keys()){
+   if(!coverageCell(new URL(request.url).pathname))continue;
+   if(new URL(request.url).pathname===path){await cache.delete(request);continue;}
+   const cached=await cache.match(request),bytes=Number(cached?.headers.get('x-tropnik-coverage-bytes'));
+   if(!Number.isSafeInteger(bytes)||bytes<=0||bytes>COVERAGE_CACHE_LIMITS.cellBytes){await cache.delete(request);continue;}
+   retained.push({request,bytes});total+=bytes;
+  }
+  while(retained.length&&(retained.length>=COVERAGE_CACHE_LIMITS.entries||total+size>COVERAGE_CACHE_LIMITS.bytes)){const old=retained.shift();await cache.delete(old.request);total-=old.bytes;}
+  const bytes=new Uint8Array(size);let offset=0;for(const part of parts){bytes.set(part,offset);offset+=part.byteLength;}
+  await cache.put(path,new Response(bytes,{headers:{'Content-Type':response.headers.get('Content-Type')||'application/json','X-Tropnik-Coverage-Bytes':String(size)}}));
+ });
+ // Cache pressure must never turn a successful map download into an error.
+ coverageWrites=job.catch(()=>{});return coverageWrites;
+}
+async function coverageResponse(request,url){
+ if(request.cache==='no-store'||request.cache==='reload')return{response:await fetch(request)};
+ const cache=await caches.open(VERSION),found=await cache.match(url.pathname);
+ if(found)return{response:found};
+ const response=await fetch(request);
+ const write=response.ok&&response.type==='basic'?rememberCoverage(cache,url.pathname,response.clone()):undefined;
+ return{response,write};
+}
 async function cacheOverview(cache){
  const base='/maps/russia-relief/',response=await fetch(base+'manifest.json',{cache:'no-store'});
  if(!response.ok)throw new Error('Overview manifest unavailable');
@@ -45,8 +80,9 @@ self.addEventListener('activate',event=>{event.waitUntil((async()=>{for(const na
 self.addEventListener('message',event=>{if(event.data?.type==='skip-waiting')event.waitUntil(self.skipWaiting());else if(event.data?.type==='warm-map')event.waitUntil(warmMapCache(event.data.engine));});
 async function verifiedResource(request){const names=(await caches.keys()).filter(n=>n.startsWith('tropnik-map-')).sort().reverse();for(const name of names){const cache=await caches.open(name);if(await cache.match('/_offline/verified-map')){const match=await cache.match(request);if(match)return match;}}return null;}
 self.addEventListener('fetch',event=>{const req=event.request,url=new URL(req.url);if(req.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/')||req.headers.get('RSC'))return;
+ if(coverageCell(url.pathname)){const result=coverageResponse(req,url);event.respondWith(result.then(value=>value.response));event.waitUntil(result.then(value=>value.write).catch(()=>{}));return;}
  if(url.pathname.startsWith('/offline-map/')||url.pathname==='/maps/pilot-style.json'){event.respondWith((async()=>{if(req.cache==='no-store'||req.cache==='reload')return fetch(req);const found=await verifiedResource(req);if(found)return found;return fetch(req);})());return;}
- if(req.mode==='navigate'){event.respondWith(fetch(req).catch(async()=>{const cache=await caches.open(VERSION);return await cache.match(url.pathname)||await cache.match('/offline-viewer.html')||Response.error();}));return;}
+ if(req.mode==='navigate'){event.respondWith(fetch(req).catch(async()=>{const cache=await caches.open(VERSION);if(SAFETY_PAGES.includes(url.pathname))return await cache.match('/offline-safety.html')||Response.error();return await cache.match(url.pathname)||await cache.match('/offline-viewer.html')||Response.error();}));return;}
  const permitted=['/terrain/terrain-grid.json','/terrain/terrain-preview.json'].includes(url.pathname)||SHELL.includes(url.pathname)||MAP_WARM.includes(url.pathname)||WEBGL_WARM.includes(url.pathname)||url.pathname.startsWith('/_next/static/')||url.pathname.startsWith('/assets/')||url.pathname.startsWith('/data/routes/')||url.pathname.startsWith('/maps/russia-relief/');if(!permitted)return;
  event.respondWith((async()=>{const cache=await caches.open(VERSION);const found=await cache.match(req);if(found)return found;const res=await fetch(req);if(res.ok&&res.type==='basic')await cache.put(req,res.clone());return res;})());
 });

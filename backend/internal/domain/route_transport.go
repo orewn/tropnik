@@ -25,6 +25,9 @@ var routeSegment = regexp.MustCompile(`^[A-Za-z0-9_-]{1,128}$`)
 // full geometry or silently truncating route descriptions. It does not approve
 // a route for publication; editorial review remains a separate operator action.
 func ValidateRouteImport(route Route) error {
+	if err := NormalizeRouteSafety(&route); err != nil {
+		return err
+	}
 	if !routeSegment.MatchString(route.Slug) || !routeSegment.MatchString(route.RegionID) {
 		return fmt.Errorf("route slug and region must be 1..128 ASCII letters, digits, hyphens or underscores")
 	}

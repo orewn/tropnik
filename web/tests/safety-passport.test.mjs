@@ -6,7 +6,6 @@ import {
   buildSafetyPackage,
   invalidateOfficialStatus,
   newSafetyPassport,
-  notificationDeadline,
   parseSafetyPassport,
   safetyReadiness,
   safetyPassportSnapshot,
@@ -33,11 +32,6 @@ function completePassport() {
   });
   return passport;
 }
-
-test('notification deadline counts weekdays rather than calendar days', () => {
-  assert.equal(notificationDeadline('2026-11-23'), '2026-11-09');
-  assert.equal(notificationDeadline(''), undefined);
-});
 
 test('passport readiness requires route, contacts, dates and a real participant', () => {
   const empty = newSafetyPassport('empty');
@@ -95,4 +89,35 @@ test('registration UI remains local-first and links to the official MChS form', 
   assert.match(component, /Переход по ссылке сам по себе не является регистрацией/);
   assert.doesNotMatch(component, /api<|fetch\(/);
   assert.match(page, /SafetyRegistration/);
+});
+
+
+test('every participant and a real return deadline in the trip time zone are required', () => {
+ const passport = completePassport();
+ passport.participants.push({id:'empty',name:'',phone:'',emergencyName:'',emergencyPhone:'',minor:false});
+ assert.equal(safetyReadiness(passport).complete,false);
+ passport.participants.pop();
+ passport.returnDeadline = '2026-02-30T12:00';
+ assert.equal(safetyReadiness(passport).complete,false);
+ passport.returnDeadline = '2026-11-20T12:00';
+ assert.equal(safetyReadiness(passport).complete,false);
+ passport.returnDeadline = '2026-11-25T20:00';
+ passport.timeZone='not-a-timezone';
+ assert.equal(safetyReadiness(passport).complete,false);
+});
+
+test('an amended passport cannot reuse evidence and contact timestamps from the prior content', () => {
+ const passport = {...completePassport(),status:'confirmed',mchsReference:'OLD-REF',submittedAt:'2026-11-01T10:00:00Z',confirmedAt:'2026-11-01T12:00:00Z',prestartCallAt:'2026-11-22T10:00:00Z'};
+ const changed = invalidateOfficialStatus({...passport,routeTitle:'Changed route'});
+ assert.equal(changed.status,'amendment_required');
+ for(const key of ['mchsReference','submittedAt','confirmedAt','prestartCallAt','returnedAt'])assert.equal(changed[key],'',key);
+ const submitted = transitionSafetyPassport(changed,'submitted',new Date('2026-11-02T10:00:00Z'));
+ assert.throws(()=>transitionSafetyPassport(submitted,'confirmed'),/номер|подтверждение/i);
+ assert.equal(invalidateOfficialStatus({...completePassport(),status:'ready'}).status,'draft');
+});
+
+test('local exports do not calculate or claim a statutory ten-working-day deadline', () => {
+ const text = buildSafetyPackage(completePassport());
+ assert.doesNotMatch(text,/крайний срок подачи|10 рабочих/iu);
+ assert.match(text,/Часовой пояс похода: Europe\/Moscow/);
 });

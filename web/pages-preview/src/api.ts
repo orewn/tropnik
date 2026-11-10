@@ -1,7 +1,7 @@
 /** No network or simulated successful server action exists in this public static build. */
 import type {Envelope, User} from '../../lib/contract';
 import build from 'virtual:pages-build';
-export type {User, Departure, RecruitmentRequest, Route, Review, Participant, Guide, Message as ChatMessage, RecruitmentMessage} from '../../lib/contract';
+export type {User, Departure, RecruitmentRequest, Route, Review, Participant, Guide, Message as ChatMessage, RecruitmentMessage, SafetyPassport, EmergencyCard, SafetyCheckIn, MCHSStatus, MCHSNotificationPolicy} from '../../lib/contract';
 export type AuthChange = {user: User | null};
 export const AUTH_EVENT = `${build.base.slice(1, -1)}-auth-unavailable`;
 export const PREVIEW_API_MESSAGE = 'Сейчас это действие недоступно. Попробуйте позже. Сохранённые маршруты остаются на вашем устройстве.';

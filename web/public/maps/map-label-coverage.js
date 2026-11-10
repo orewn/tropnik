@@ -63,7 +63,7 @@ function sourceGroups(style) {
  * Original source events and settled navigation schedule one bounded refresh;
  * the overlay's own source events can never start a refresh loop. */
 export function bindMapLabelCoverage(map, coverage, environment = {}) {
-  const area = coverage?.area ?? coverage;
+  let area = coverage?.area ?? coverage;
   const defer = environment.defer ?? (callback => setTimeout(callback,48));
   const cancelDefer = environment.cancelDefer ?? clearTimeout;
   let disposed = false, timer, revision = 0, groups = [], sourceIds = new Set(), previousKeys;
@@ -142,11 +142,16 @@ export function bindMapLabelCoverage(map, coverage, environment = {}) {
   const sourceLoaded = event => {
     if (sourceIds.has(event.sourceId) && (event.sourceDataType === 'content' || event.isSourceLoaded)) schedule();
   };
+  const unsubscribeCoverage = coverage?.subscribe?.(() => {
+    if (coverage.area === area) return;
+    area = coverage.area;geometryCache.clear();previousKeys = undefined;schedule();
+  });
   const dispose = () => {
     if (disposed) return;
     disposed = true; revision++;
     if (timer !== undefined) cancelDefer(timer);
     timer = undefined; geometryCache.clear(); groups = []; sourceIds.clear(); previousKeys = [];
+    unsubscribeCoverage?.();
     map.off('style.load',styleLoaded);map.off('sourcedata',sourceLoaded);map.off('moveend',schedule);map.off('remove',dispose);
   };
   map.on('style.load',styleLoaded);map.on('sourcedata',sourceLoaded);map.on('moveend',schedule);map.on('remove',dispose);

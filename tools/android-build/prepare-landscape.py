@@ -20,6 +20,7 @@ from asset_integrity import digest, require, safe_relative, verify_landscape, ve
 from display_scope import NATIVE_SCOPE_FILES, PROVENANCE_FILE, restrict_style, verify_display_scope
 from russia_relief import OVERVIEW_SIDECARS, add_overview_sources, add_overview_style, verify_overview
 from online_sources import add_online_style, add_online_source_text
+from map_coverage import native_package, add_coverage_style, verify_coverage
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -272,6 +273,10 @@ def prepare(root: Path = ROOT, *, check: bool = False) -> dict:
         read_local(TOOLS / "sources", "openfreemap-tilejson.json"),
         read_local(runtime / "sources", "mapterhorn-tilejson.json"))
     style = restrict_style(style, scope_provenance)
+    coverage_root = root / "web/public/data/map-coverage"
+    coverage_files = native_package(read_local(coverage_root, "manifest.json"), lambda p: read_local(coverage_root, p))
+    style = add_coverage_style(style, coverage_files["manifest.json"])
+    coverage_report = verify_coverage(coverage_files["manifest.json"], coverage_files.__getitem__, actual_files=coverage_files, style=style)
     source_text = add_overview_sources(read_local(assets, "SOURCES.txt"), overview_manifest, overview_copies["ATTRIBUTION.txt"])
     source_text = add_online_source_text(source_text)
     verify_overview(overview_manifest, overview_copies.__getitem__, style=style, provenance_bytes=scope_provenance)
@@ -283,6 +288,8 @@ def prepare(root: Path = ROOT, *, check: bool = False) -> dict:
         write_or_check(assets / "maps/russia" / relative, read_local(scope_root, relative), check)
     for relative, data in sorted(overview_copies.items()):
         write_or_check(assets / "maps/russia-relief" / relative, data, check)
+    for relative, data in sorted(coverage_files.items()):
+        write_or_check(assets / "maps/coverage" / relative, data, check)
     write_or_check(assets / "maps/style.json", json_bytes(style), check)
     write_or_check(assets / "maps/online-sources.json", online_manifest, check)
     write_or_check(assets / "SOURCES.txt", source_text, check)
@@ -298,7 +305,10 @@ def prepare(root: Path = ROOT, *, check: bool = False) -> dict:
     verify_overview(overview_manifest, lambda p: read_local(installed_overview, p), style=style,
         actual_files=[str(path.relative_to(installed_overview)) for path in installed_overview.rglob("*") if path.is_file()],
         provenance_bytes=scope_provenance)
-    return {"checkOnly": check, **report, **scope_report, **overview_report, "russiaMaskConfigured": True}
+    installed_coverage = assets / "maps/coverage"
+    verify_coverage(coverage_files["manifest.json"], lambda p: read_local(installed_coverage, p), style=style,
+        actual_files=[str(path.relative_to(installed_coverage)) for path in installed_coverage.rglob("*") if path.is_file()])
+    return {"checkOnly": check, **report, **scope_report, **overview_report, **coverage_report, "russiaMaskConfigured": True}
 
 
 def main() -> None:

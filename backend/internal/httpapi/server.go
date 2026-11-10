@@ -95,6 +95,10 @@ func (s *Server) Handler() http.Handler {
 	m := http.NewServeMux()
 	m.HandleFunc("GET /api/v1/health/live", func(w http.ResponseWriter, r *http.Request) { respond(w, 200, map[string]string{"status": "ok"}) })
 	m.HandleFunc("GET /api/v1/health/ready", func(w http.ResponseWriter, r *http.Request) {
+		if s.DB == nil || len(s.DB.SafetyKey) != 32 {
+			failure(w, 503, "safety_not_configured", "Сервис безопасности не настроен.")
+			return
+		}
 		if e := s.DB.Ready(r.Context()); e != nil {
 			failure(w, 503, "not_ready", "База данных недоступна.")
 			return
@@ -134,6 +138,14 @@ func (s *Server) Handler() http.Handler {
 	m.HandleFunc("POST /api/v1/departures/{id}/leave", s.leave)
 	m.HandleFunc("POST /api/v1/departures/{id}/check-in", s.checkIn)
 	m.HandleFunc("POST /api/v1/departures/{id}/transition", s.transition)
+	m.HandleFunc("GET /api/v1/departures/{id}/safety-passport", s.safetyPassport)
+	m.HandleFunc("POST /api/v1/departures/{id}/safety-passport/prepare", s.prepareSafetyPassport)
+	m.HandleFunc("POST /api/v1/departures/{id}/mchs/submission", s.recordMCHSSubmission)
+	m.HandleFunc("POST /api/v1/departures/{id}/mchs/confirmation", s.confirmMCHSRegistration)
+	m.HandleFunc("POST /api/v1/departures/{id}/mchs/start-contact", s.confirmMCHSStartContact)
+	m.HandleFunc("POST /api/v1/departures/{id}/mchs/return-report", s.reportMCHSReturn)
+	m.HandleFunc("POST /api/v1/departures/{id}/safety-check-ins", s.safetyCheckIn)
+	m.HandleFunc("GET /api/v1/departures/{id}/emergency-card", s.emergencyCard)
 	m.HandleFunc("GET /api/v1/departures/{id}/messages", s.messages)
 	m.HandleFunc("POST /api/v1/departures/{id}/messages", s.sendMessage)
 	m.HandleFunc("GET /api/v1/departures/{id}/reviews", s.reviews)
@@ -242,6 +254,8 @@ func fail(w http.ResponseWriter, e error) {
 		failure(w, 429, "repeated_content", "Этот текст уже публиковался недавно. Новое сообщение не отправлено. Проверьте историю обсуждения.")
 	case errors.Is(e, domain.ErrLinkLimit):
 		failure(w, 429, "link_limit", "Сообщение не отправлено: слишком много ссылок для текущего лимита аккаунта. Сократите их количество.")
+	case errors.Is(e, domain.ErrSafetyUnavailable):
+		failure(w, 503, "safety_not_configured", "Контур безопасности временно не настроен. Данные не были сохранены.")
 	default:
 		slog.Error("database operation failed", "error_type", fmtErrorType(e))
 		failure(w, 503, "temporarily_unavailable", "Сервис временно недоступен. Повторите позже.")
@@ -595,11 +609,16 @@ func (s *Server) checkIn(w http.ResponseWriter, r *http.Request) {
 	var in struct {
 		UserID          string `json:"userId"`
 		ExpectedVersion int64  `json:"expectedVersion"`
+		Present         *bool  `json:"present,omitempty"`
 	}
 	if !decode(w, r, &in) {
 		return
 	}
-	x, e := s.DB.Mutate(r.Context(), u.ID, r.PathValue("id"), "check-in", in.UserID, in.ExpectedVersion)
+	action := "check-in"
+	if in.Present != nil && !*in.Present {
+		action = "mark-absent"
+	}
+	x, e := s.DB.Mutate(r.Context(), u.ID, r.PathValue("id"), action, in.UserID, in.ExpectedVersion)
 	if e != nil {
 		fail(w, e)
 		return

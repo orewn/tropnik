@@ -6,6 +6,7 @@ import { rewriteScript } from '../../tools/pages-preview/paths.mjs';
 
 const source = await readFile(new URL('../public/sw.js', import.meta.url), 'utf8');
 const viewer = await readFile(new URL('../public/offline-viewer.html', import.meta.url), 'utf8');
+const safetyViewer = await readFile(new URL('../public/offline-safety.html', import.meta.url), 'utf8');
 const origin = 'https://offline-fixture.invalid';
 
 function worker({ base = '/', connected = false } = {}) {
@@ -13,7 +14,8 @@ function worker({ base = '/', connected = false } = {}) {
   const cache = {
     async match(path) {
       cacheReads.push(path);
-      return path === base + 'offline-viewer.html' ? new Response(viewer, { headers: { 'Content-Type': 'text/html' } }) : undefined;
+      const content = path === base + 'offline-viewer.html' ? viewer : path === base + 'offline-safety.html' ? safetyViewer : undefined;
+      return content === undefined ? undefined : new Response(content, { headers: { 'Content-Type': 'text/html' } });
     },
   };
   const script = base === '/' ? source : rewriteScript(source, 'sw.js', { base });
@@ -60,4 +62,16 @@ test('private API navigation never receives an offline viewer or cache response'
   assert.equal(await env.navigate('/api/backend/me'), undefined);
   assert.deepEqual(env.cacheReads, []);
   assert.deepEqual(env.requests, []);
+});
+
+test('a cold offline safety navigation opens the emergency card at either deployment base', async t => {
+  for (const base of ['/', '/tropnik-test/']) await t.test(base, async () => {
+    const env = worker({ base });
+    for (const path of ['safety/registration', 'safety/registration/', 'offline-safety', 'offline-safety.html']) {
+      const result = await env.navigate(base + path);
+      assert.equal(result.status, 200);
+      assert.equal(await result.text(), safetyViewer);
+    }
+    assert.equal(env.cacheReads.includes(base + 'offline-viewer.html'), false);
+  });
 });

@@ -17,6 +17,7 @@ from asset_integrity import require, safe_relative, verify_landscape, verify_ter
 from display_scope import PROVENANCE_FILE, verify_display_scope
 from russia_relief import OVERVIEW_SOURCES_HEADING, verify_overview
 from catalog_integrity import verify_catalog, verify_map_resources
+from map_coverage import verify_coverage
 
 
 def verify_apk(apk: Path) -> dict:
@@ -56,6 +57,10 @@ def verify_apk(apk: Path) -> dict:
         scope_prefix = "assets/maps/russia/"
         scope_report = verify_display_scope(archive.read(scope_prefix + PROVENANCE_FILE),
             lambda path: archive.read(scope_prefix + path), style)
+        coverage_prefix = "assets/maps/coverage/"
+        coverage_report = verify_coverage(archive.read(coverage_prefix + "manifest.json"),
+            lambda path: archive.read(coverage_prefix + path), style=style,
+            actual_files=[name[len(coverage_prefix):] for name in names if name.startswith(coverage_prefix) and not name.endswith("/")])
         overview_prefix = "assets/maps/russia-relief/"
         overview_report = verify_overview(archive.read(overview_prefix + "manifest.json"),
             lambda path: archive.read(overview_prefix + path), style=style,
@@ -115,7 +120,7 @@ def verify_apk(apk: Path) -> dict:
             "manifestBytesVerified": verified_bytes,
             "cyrillicGlyphsPresent": True, "closureAdvisoryPresent": True,
             "native64BitElfLoadAlignment": native_alignment,
-            **terrain_report, **landscape_report, **scope_report, **overview_report, **catalog_report, **map_resources_report,
+            **terrain_report, **landscape_report, **scope_report, **overview_report, **catalog_report, **map_resources_report, **coverage_report,
             "terrainRendererSha256": json.loads(landscape_manifest)["rendererSha256"],
             "nativeHillshadeCameraRelative": True,
             "nativeHillshadeCameraAnchored": True,

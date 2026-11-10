@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {projectMapPoint} from './map-projection.mjs';
 import {assertSourceEndPanInput,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
 import {directionHitGrid} from './browser-direction-hitareas.mjs';
+import {assertCoastAudit} from './browser-coast-audit.mjs';
+import {assertOfflineSafetyAudit} from './browser-offline-safety.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -208,7 +210,8 @@ export function assertCloseTrailAudit(audit,name,engine,mobile,screenshots){
 
 function assertZoomDesign(design,name,engine,mobile){
  assert.equal(design?.geometryPassed,true,`${name}: missing zoom-level design geometry evidence`);
- assert.equal(design.schemaVersion,5,'The design report predates live relief palette checks');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
+ assert.equal(design.schemaVersion,6,'The design report predates source coastline checks');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
+ assertCoastAudit(design.coast,name,engine);
  assert.equal(design.visualReviewRequired,true,'DOM bounds must not be reported as human visual review');
  assert.equal(design.maximumZoom,18);assert.equal(design.routeId,'kavkaz-8a');
  assert.ok(Number.isFinite(design.minimumZoom)&&design.minimumZoom<4,`${name}: zoom coverage omitted the overview`);
@@ -632,6 +635,7 @@ export function assertStyleCameraRoundtrip(receipt,name){
 /** The same evidence gate runs before upload and against the public artifact. */
 export function assertBrowserReport(browser,expectedCommit){
  assert.equal(browser.verified,true);
+ assertOfflineSafetyAudit(browser.offlineSafety);
  assert.equal(browser.sourceCommit,expectedCommit);
  assert.equal(browser.mapInteractionSchemaVersion,3,'The browser report predates native Layers, exploration and manual-camera regressions');
  assert.ok(Array.isArray(browser.profiles));

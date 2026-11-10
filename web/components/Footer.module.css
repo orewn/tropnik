@@ -6,3 +6,10 @@
 @media(pointer:coarse){.group a{min-height:44px}}
 @media(prefers-reduced-motion:reduce){.group a,.group a:after{transition:none}}
 @media(forced-colors:active){.footer{border-top:2px solid CanvasText!important}.badges span{border:1px solid CanvasText}}
+
+/* The footer owns its two rows. The legacy global footer grid otherwise
+   puts .inner and .bottom next to each other and compresses the legal text. */
+.footer:global(.site-footer){display:block}
+.footer .group nav{grid-template-columns:minmax(0,1fr)}
+.footer .group a{color:#f1f4ee;font-size:14px;line-height:20px}
+.footer .brandColumn>p{color:#c8d7ce;font-size:14px;line-height:20px}

@@ -1,5 +1,5 @@
-import {russiaCamera,russiaPadding, RUSSIA_AREA_URL,RUSSIA_MASK_URL,RUSSIA_CANONICAL_MASK_URL} from '@/public/maps/russia-viewport.js';
-import {loadPublicJSON} from './map-preload';
+import {russiaCamera,russiaPadding} from '@/public/maps/russia-viewport.js';
+import {loadMapCoverage} from '@/public/maps/map-coverage-lod.js';
 
 export function russiaView(element: HTMLElement, tileSize = 512) {
   const rect=element.getBoundingClientRect();
@@ -12,9 +12,5 @@ export function russiaView(element: HTMLElement, tileSize = 512) {
 }
 
 export async function loadRussiaGeometry(canonicalMask = false) {
-  const [area,mask]=await Promise.all([
-    loadPublicJSON<GeoJSON.FeatureCollection>(RUSSIA_AREA_URL),
-    loadPublicJSON<GeoJSON.FeatureCollection>(canonicalMask?RUSSIA_CANONICAL_MASK_URL:RUSSIA_MASK_URL),
-  ]);
-  return {area,mask};
+  return loadMapCoverage({canonicalMask});
 }

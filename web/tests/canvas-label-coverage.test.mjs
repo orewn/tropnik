@@ -44,6 +44,16 @@ test('accepted coastal labels retain complete glyph boxes, halos and draw functi
   assert.notEqual(rule.symbolizer, original.symbolizer, 'wrap without mutating shared style instances');
 });
 
+test('existing Canvas rules read the newly committed coverage for each actual label anchor',()=>{
+  let current=rectangle;
+  const label=candidate(project([15,55],12));
+  const [rule]=canvasLabelsInCoverage([{dataLayer:'place',symbolizer:{place:()=>[label]}}],()=>current);
+  assert.equal(rule.symbolizer.place({zoom:12},[],{})[0],label);
+  current={type:'Polygon',coordinates:[...rectangle.coordinates,[[14,54],[16,54],[16,56],[14,56],[14,54]]]};
+  assert.equal(rule.symbolizer.place({zoom:12},[],{}),undefined);
+  current=rectangle;assert.equal(rule.symbolizer.place({zoom:12},[],{})[0],label);
+});
+
 test('every point and line candidate uses its own world anchor, regardless of text or source geometry origin', () => {
   const zoom = 11;
   const inside = candidate(project([15, 55], zoom), 'English source label');

@@ -51,6 +51,9 @@ export async function verifyMapShell(webRoot = defaultRoot) {
   const source = await readFile(path.join(publicRoot, 'sw.js'), 'utf8');
   const paths = shellPaths(source);
   if (!paths.includes('/offline-viewer.html')) throw new Error('SHELL omits the standalone offline viewer');
+  for (const asset of ['/offline-safety.html', '/offline-safety.js', '/offline-safety.css']) {
+    if (!paths.includes(asset)) throw new Error('SHELL omits the emergency card asset: ' + asset);
+  }
   const version = /\bconst\s+VERSION\s*=\s*(['"])([^'"]+)\1/.exec(source)?.[2];
   if (!version) throw new Error('Service worker cache version is missing');
   const checked = new Map();

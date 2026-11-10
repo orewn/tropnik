@@ -13,7 +13,7 @@ export class ApiError extends Error {
   }
 }
 
-export type {User, Departure, RecruitmentRequest, Route, Review, Participant, Guide, Message as ChatMessage, RecruitmentMessage} from './contract';
+export type {User, Departure, RecruitmentRequest, Route, Review, Participant, Guide, Message as ChatMessage, RecruitmentMessage, SafetyPassport, EmergencyCard, SafetyCheckIn, MCHSStatus, MCHSNotificationPolicy} from './contract';
 export const AUTH_EVENT = 'tropnik-auth';
 export type AuthChange = {user: User | null};
 

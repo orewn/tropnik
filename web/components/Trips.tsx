@@ -8,6 +8,7 @@ import {joinAllowed, startAllowed, reviewAllowed, routePolicy, zonedISO} from '@
 import {AuthDialog} from './AuthDialog';
 import {Modal} from './Modal';
 import {ChatPanel} from './ChatPanel';
+import {SafetyPanel} from './SafetyPanel';
 import {ReportDialog} from './ReportDialog';
 import {regions, trails} from '@/lib/content';
 import {deriveRouteCategories, type EventCategoryId} from '@/lib/event-categories';
@@ -52,6 +53,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
   const [reviewTarget, setReviewTarget] = useState<'route' | 'guide'>('route');
   const [report, setReport] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<{action: Action; version: number} | null>(null);
+  const [absent, setAbsent] = useState<{departureId: string; person: Participant; version: number} | null>(null);
   const [routeId, setRouteId] = useState('');
   const [date, setDate] = useState('');
   const [body, setBody] = useState('');
@@ -74,7 +76,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
   const closeAuth = useCallback(() => setAuth(false), []);
   const closeCreate = useCallback(() => { if (!inFlight.current) setCreate(false); }, []);
   const closeDeparture = useCallback(() => { if (!inFlight.current) setDepartureForm(null); }, []);
-  const closeConfirm = useCallback(() => { if (!inFlight.current) setConfirm(null); }, []);
+  const closeConfirm = useCallback(() => { if (!inFlight.current) setConfirm(null); setAbsent(null); }, []);
   const title = (id: string) => routes.find(route => route.id === id)?.title || trails.find(route => route.id === id)?.title || 'Маршрут';
   const routeCategories = (id: string, pinnedTitle?: string, revisionId?: string) => {
     const route = routes.find(item => item.id === id);
@@ -96,7 +98,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
     setParticipants([]);
     setReviews([]);
     setRequestAccess(false);
-    setConfirm(null);
+    setConfirm(null); setAbsent(null);
     setRating(0);
     setReviewBody('');
     setReviewTarget('route');
@@ -193,7 +195,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
       setBusy('');
       ++detailSequence.current;
       detailController.current?.abort();
-      setCurrent(null); setParticipants([]); setReviews([]); setRequests([]); setRequestAccess(false); setConfirm(null); setDepartureForm(null);
+      setCurrent(null); setParticipants([]); setReviews([]); setRequests([]); setRequestAccess(false); setConfirm(null); setAbsent(null); setDepartureForm(null);
       attempts.current = {};
       const detail = (event as CustomEvent<AuthChange>).detail;
       if (detail && Object.prototype.hasOwnProperty.call(detail, 'user')) setUser(detail.user);
@@ -283,7 +285,7 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
       if (epoch !== authEpoch.current) return {ok: false};
       setError(errorText(error));
       if (error instanceof ApiError && error.status === 401) { announceAuth(null); setAuth(true); }
-      if (error instanceof ApiError && error.status === 409) { setConfirm(null); await refreshDetail(); }
+      if (error instanceof ApiError && error.status === 409) { setConfirm(null); setAbsent(null); await refreshDetail(); }
       return {ok: false, error};
     } finally { if (action === actionSequence.current) { inFlight.current = false; setBusy(''); } }
   }
@@ -359,13 +361,15 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
               {['none', 'cancelled'].includes(current.membership) && <button className="button primary full" onClick={() => void join(current)} disabled={!!busy || !joinAllowed(current, now)}>Подтвердить участие</button>}
               {activeMember && beforeStart && <button className="text-link" disabled={!!busy} onClick={() => setConfirm({action: 'leave', version: current.version})}>Выйти из группы</button>}
             </div>
+            {user && (activeMember || user.staffRole !== 'none') && <SafetyPanel key={current.id + ':' + user.id} departure={current} user={user} participants={participants} onChanged={refreshDetail}/>}
             {assignedGuide && <div className="prose-card"><h3>Решение гида</h3><p>Подтвердите, кто пришёл на место встречи. Для старта нужны подходящий состав, допуск гида и актуальный маршрут.</p>
               <div className="stack">{participants.map(person => <div className="roster-row" key={person.userId}><span>{person.displayName}<small>{person.role === 'guide' ? 'Гид' : 'Турист'}</small></span>
                 {person.status === 'checked_in' || person.status === 'completed' ? <span title={person.status === 'completed' ? 'Поход завершён' : 'Явка подтверждена'}><CheckCircle size={20}/></span>
-                  : person.status === 'no_show' ? <small>Не был на старте</small>
+                  : person.status === 'no_show' ? <button className="button secondary small" disabled={!!busy || !canCheckIn} onClick={() => void write('departures/' + encodeURIComponent(current.id) + '/check-in', {userId: person.userId, expectedVersion: current.version})}>Вернуть в состав</button>
                   : <button className="button secondary small" disabled={!!busy || !canCheckIn} onClick={() => void write('departures/' + encodeURIComponent(current.id) + '/check-in', {userId: person.userId, expectedVersion: current.version})}>На месте</button>}
+                {beforeStart && person.role !== 'guide' && ['confirmed','checked_in'].includes(person.status) && <button className="text-link" disabled={!!busy} onClick={() => setAbsent({departureId: current.id, person, version: current.version})}>Не выходит</button>}
               </div>)}
-                {beforeStart && <><p className="fineprint">Старт доступен в назначенное время после явки минимум {current.minPeople} человек вместе с гидом.</p><button className="button primary full" disabled={!!busy || !startAllowed(current, participants, user!.id, now)} onClick={() => setConfirm({action: 'start', version: current.version})}>Подтвердить старт</button></>}
+                {beforeStart && <><p className="fineprint">Старт доступен в назначенное время после явки минимум {current.minPeople} человек вместе с гидом.</p>{current.mchsNotificationPolicy === 'required' && <p className="fineprint">Для этого маршрута также нужны проверенное уведомление, предвыходный контакт и явка всего зарегистрированного состава. Если кто-то не выходит, обновите состав, паспорт и уведомление до старта.</p>}<button className="button primary full" disabled={!!busy || !startAllowed(current, participants, user!.id, now)} onClick={() => setConfirm({action: 'start', version: current.version})}>Подтвердить старт</button></>}
                 {current.status === 'in_progress' && <><button className="button primary full" onClick={() => setConfirm({action: 'complete', version: current.version})} disabled={!!busy}>Завершить поход</button><button className="button danger full" onClick={() => setConfirm({action: 'abort', version: current.version})} disabled={!!busy}>Прекратить поход</button></>}
                 {beforeStart && <button className="text-link" disabled={!!busy} onClick={() => setConfirm({action: 'cancel', version: current.version})}>Отменить выход</button>}
               </div>
@@ -425,8 +429,9 @@ export function Trips({initialTab = 'departures'}: {initialTab?: 'departures' | 
     {confirm && current && <Modal title={{start: 'Подтвердить начало похода?', complete: 'Завершить поход?', cancel: 'Отменить выход?', abort: 'Прекратить поход?', leave: 'Выйти из группы?'}[confirm.action]} onClose={closeConfirm}>
       <p className="muted">{confirm.action === 'start' ? 'Подтвердите готовность группы. Для старта нужны явка участников, действующий допуск гида и доступный маршрут.' : confirm.action === 'complete' ? 'Подтвердите, что выход завершён. У участников с подтверждённой явкой появится возможность оставить отзыв.' : confirm.action === 'leave' ? assignedGuide ? 'После вашего выхода группа останется без гида и потеряет готовность к старту. Участники смогут обсудить дальнейшие действия.' : 'Ваше участие перестанет быть подтверждённым. Состав и готовность группы будут пересчитаны.' : 'Участники увидят новый статус. Это действие не отправляет автоматический вызов экстренным службам.'}</p>
       {error && <p className="error-message" role="alert">{error}</p>}
-      <div className="section-actions"><button className="button primary" disabled={!!busy} onClick={async () => { const result = confirm.action === 'leave' ? await write<Departure>('departures/' + encodeURIComponent(current.id) + '/leave', {}) : await write<Departure>('departures/' + encodeURIComponent(current.id) + '/transition', {action: confirm.action, expectedVersion: confirm.version}); if (result.ok) setConfirm(null); }}>{busy ? 'Ожидаем ответ…' : 'Подтвердить'}</button><button className="button secondary" disabled={!!busy} onClick={closeConfirm}>Вернуться</button></div>
+      <div className="section-actions"><button className="button primary" disabled={!!busy} onClick={async () => { const result = confirm.action === 'leave' ? await write<Departure>('departures/' + encodeURIComponent(current.id) + '/leave', {}) : await write<Departure>('departures/' + encodeURIComponent(current.id) + '/transition', {action: confirm.action, expectedVersion: confirm.version}); if (result.ok) setConfirm(null); setAbsent(null); }}>{busy ? 'Ожидаем ответ…' : 'Подтвердить'}</button><button className="button secondary" disabled={!!busy} onClick={closeConfirm}>Вернуться</button></div>
     </Modal>}
+    {absent && current?.id === absent.departureId && <Modal title="Участник не выходит на маршрут?" onClose={() => {if (!busy) setAbsent(null);}}><p>{absent.person.displayName} будет исключён из фактического состава. Подготовленный паспорт потребует обновления; проверенное уведомление нужно актуализировать до старта.</p><div className="section-actions"><button className="button primary" disabled={!!busy} onClick={async () => {const result = await write<Departure>('departures/' + encodeURIComponent(absent.departureId) + '/check-in', {userId: absent.person.userId, expectedVersion: absent.version, present: false}); if (result.ok) setAbsent(null);}}>Подтвердить отсутствие</button><button className="button secondary" disabled={!!busy} onClick={() => setAbsent(null)}>Вернуться</button></div></Modal>}
     {report && <ReportDialog targetType="review" targetId={report} onClose={() => setReport(null)}/>}
   </>;
 }

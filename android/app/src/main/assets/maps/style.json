@@ -111,6 +111,13 @@
       "minzoom": 5,
       "maxzoom": 12,
       "attribution": "Terrain © Mapterhorn; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved"
+    },
+    "tropnik-map-coverage": {
+      "type": "geojson",
+      "data": "asset://maps/coverage/native-base.geojson",
+      "tolerance": 0,
+      "maxzoom": 18,
+      "attribution": "© OpenStreetMap contributors · geoBoundaries (OpenStreetMap / Wambacher, 2017)"
     }
   },
   "layers": [
@@ -124,11 +131,19 @@
     {
       "id": "land",
       "type": "fill",
-      "source": "world",
+      "source": "tropnik-map-coverage",
       "paint": {
         "fill-color": "#E5EADB",
         "fill-opacity": 1
-      }
+      },
+      "filter": [
+        "==",
+        [
+          "get",
+          "role"
+        ],
+        "area"
+      ]
     },
     {
       "id": "russia-overview-relief",
@@ -156,25 +171,24 @@
       }
     },
     {
-      "id": "borders",
-      "type": "line",
-      "source": "world",
-      "paint": {
-        "line-color": "#A7B6A3",
-        "line-width": 0.6
-      }
-    },
-    {
       "id": "admin-boundary-lines",
       "type": "line",
-      "source": "admin-boundaries",
+      "source": "tropnik-map-coverage",
       "minzoom": 2,
       "maxzoom": 7,
       "paint": {
         "line-color": "#94A38F",
         "line-width": 0.6,
         "line-opacity": 0.7
-      }
+      },
+      "filter": [
+        "==",
+        [
+          "get",
+          "role"
+        ],
+        "territory-boundary"
+      ]
     },
     {
       "id": "online-natural-grass",
@@ -1973,12 +1987,20 @@
     {
       "id": "russia-outside-mask",
       "type": "fill",
-      "source": "russia-outside",
+      "source": "tropnik-map-coverage",
       "paint": {
         "fill-color": "#F5F3E8",
         "fill-opacity": 1,
         "fill-antialias": false
-      }
+      },
+      "filter": [
+        "==",
+        [
+          "get",
+          "role"
+        ],
+        "mask"
+      ]
     }
   ],
   "glyphs": "asset://maps/pilot/fonts/{fontstack}/{range}.pbf",
@@ -1987,7 +2009,7 @@
     "tropnik:russiaBoundaryProvenanceSha256": "b8bc96450cc3777d454d87da3018a76db4bc10323720d76cf512831d0e66ac93",
     "tropnik:displayScope": "russia-only",
     "tropnik:russiaReliefManifestSha256": "0be4600a67f7696c74846dfdb2873016e1fc31e7d386353a6afa180f9fa3a4f3",
-    "tropnik:onlineSourcesManifestSha256": "6984b52e533d485f37292851203f467bfa8056d25848e73b59c8a6f7d8840dfa",
+    "tropnik:onlineSourcesManifestSha256": "c5e387d394f4dcc2cfb3e39338491e3bc0344b7e4dbe5da3140e87ff0ed27780",
     "tropnik:onlineLayerIds": [
       "online-natural-grass",
       "online-forest",
@@ -2015,6 +2037,7 @@
       "online-outdoor-poi-dot",
       "online-outdoor-poi-label",
       "online-path-label"
-    ]
+    ],
+    "tropnik:coverageManifestSha256": "7bec7b3b7668a9be6d0f3a2bb359c4e7d71efa86879dcf3e5178dbffaf5408ae"
   }
 }

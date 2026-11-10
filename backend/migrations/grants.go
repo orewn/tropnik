@@ -22,7 +22,7 @@ func GrantRuntime(ctx context.Context, pool *pgxpool.Pool, role string) error {
 	quotedSchema := pgx.Identifier{schema}.Sanitize()
 	statements := []string{
 		"GRANT USAGE ON SCHEMA " + quotedSchema + " TO " + r,
-		"GRANT SELECT ON users,sessions,guide_qualifications,regions,routes,route_regions,route_revisions,departures,memberships,idempotency_keys,messages,reviews,offline_observations,recruitment_requests,recruitment_members,recruitment_messages,schema_migrations TO " + r,
+		"GRANT SELECT ON users,sessions,guide_qualifications,regions,routes,route_regions,route_revisions,departures,memberships,idempotency_keys,messages,reviews,offline_observations,recruitment_requests,recruitment_members,recruitment_messages,departure_safety,safety_passport_versions,safety_events,safety_check_ins,schema_migrations TO " + r,
 		"GRANT INSERT(email,password_hash,display_name,role,guide_status) ON users TO " + r,
 		"GRANT UPDATE(display_name,role,guide_status,email,password_hash,email_verified,disabled,deleted_at) ON users TO " + r,
 		"GRANT SELECT,INSERT,UPDATE ON account_action_tokens TO " + r,
@@ -34,6 +34,8 @@ func GrantRuntime(ctx context.Context, pool *pgxpool.Pool, role string) error {
 		// Reviewed revision triggers reject modification; no publication/status rights.
 		"GRANT UPDATE(updated_at) ON routes TO " + r,
 		"GRANT UPDATE(source_retrieved_at) ON route_revisions TO " + r,
+		"GRANT SELECT,INSERT,UPDATE ON departure_safety TO " + r,
+		"GRANT INSERT ON safety_passport_versions,safety_events,safety_check_ins TO " + r,
 		"GRANT INSERT ON audit_events,outbox_events TO " + r,
 		"GRANT SELECT ON posting_guards,submission_events,reports,moderation_actions,appeals,notifications TO " + r,
 		"GRANT INSERT ON posting_guards,submission_events,reports,moderation_actions,appeals,notifications TO " + r,

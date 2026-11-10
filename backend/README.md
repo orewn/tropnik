@@ -1,6 +1,10 @@
 # TROPA backend
 
-Release verification for 0.4.18 is recorded in
+The 0.4.23 safety integration passed the complete native race/integration suite
+on 2026-11-10: 52 unit tests and 29 PostGIS integration tests on Go 1.27.3,
+PostgreSQL 18.6 and PostGIS 3.7.0. `go vet ./...` and the CGO-disabled command
+build also passed. See [the safety workflow](SAFETY-PASSPORT.md).
+Earlier release verification for 0.4.18 is recorded in
 [`docs/runtime-audit-2026-11-09.md`](../docs/runtime-audit-2026-11-09.md).
 The backend gate runs `go test -race -count=1 ./...`, `go vet ./...` and native
 PostGIS integration against the exact release source. Passing this gate does
@@ -49,6 +53,10 @@ routes, verified guides, departures, participants or ratings**.
   **do not authorize a start or modify the authoritative roster**.
 - Transactional outbox and an append-only audit table for the API database role.
   The outbox is durable storage, not a claim that push/email delivery exists.
+- Versioned safety passports with encrypted private contacts, an immutable event
+  chain, independent staff review of external registration evidence and a fresh
+  predeparture contact gate. Participants receive an emergency card without
+  gaining access to other participants' private passport contacts.
 - Separate staff roles, case-scoped moderation, reporting and independent appeals.
   Guide qualification never grants staff permissions. Sanctions require a reason,
   generate a stored account notification and commit with their audit entry.
@@ -95,6 +103,10 @@ Key operations:
 | Interest chat | `GET/POST /recruitment-requests/{id}/messages` |
 | Guide accepts interest | `POST /recruitment-requests/{id}/accept` |
 | Reconcile field notes | `POST /sync/observations` |
+| Read / prepare safety passport | `GET /departures/{id}/safety-passport`, `POST /departures/{id}/safety-passport/prepare` |
+| External registration evidence | `POST /departures/{id}/mchs/submission`, `POST /departures/{id}/mchs/confirmation` |
+| Predeparture contact / return report | `POST /departures/{id}/mchs/start-contact`, `POST /departures/{id}/mchs/return-report` |
+| Field safety observation / emergency card | `POST /departures/{id}/safety-check-ins`, `GET /departures/{id}/emergency-card` |
 
 `POST /departures/{id}/join` requires a unique `Idempotency-Key` of 16–128 ASCII
 letters, numbers, `_` or `-`. Use a random UUID and retain it for retries of the
@@ -149,12 +161,16 @@ Generate a separate 64-character hexadecimal auth key once (for example with
 ```bash
 export DATABASE_URL='postgres://your_dev_user:your_dev_password@127.0.0.1:5432/tropa_dev?sslmode=disable'
 export TROPA_AUTH_RATE_KEY='REPLACE_WITH_YOUR_64_HEXADECIMAL_CHARACTERS'
+export TROPA_SAFETY_DATA_KEY='REPLACE_WITH_A_DIFFERENT_64_HEXADECIMAL_KEY'
 go run ./cmd/tropa-migrate
 APP_ENV=development PUBLIC_ORIGIN=http://localhost:3000 go run ./cmd/tropa-api
 ```
 
 The development example intentionally names placeholders. No default account or
-default password is installed. The API binds `127.0.0.1:8080` unless `HTTP_ADDR`
+default password is installed. Generate the safety key separately and retain it
+with encrypted database backups; existing private passports cannot be decrypted
+if it is lost. Readiness remains closed without the safety key. The API binds
+`127.0.0.1:8080` unless `HTTP_ADDR`
 is specified. Use the production container instructions in `../infra/README.md`
 for real users. Do not point a development process at a production database.
 
@@ -185,7 +201,7 @@ is also an operator action:
 go run ./cmd/tropa-admin import-route --actor OPERATOR_UUID --file reviewed-input.json
 go run ./cmd/tropa-admin publish-route --actor OPERATOR_UUID --route ROUTE_UUID \
   --evidence INTERNAL_ROUTE_REVIEW_REFERENCE --min-people 4 \
-  --max-group-size REVIEWED_MAXIMUM --required-guides 1
+  --max-group-size REVIEWED_MAXIMUM --required-guides 1 --mchs-policy REVIEWED_POLICY
 ```
 
 The input is the `Route` shape in `contracts/api.ts`; supply a slug, region, title,
@@ -201,6 +217,8 @@ guide; it is not a universal recommendation. The CLI deliberately requires the
 maximum and guide count rather than assuming every route has the same safe or
 lawful ratio. The current publication flow accepts one required guide only.
 The minimum, maximum and guide count are part of the immutable route revision.
+`REVIEWED_POLICY` must be explicitly chosen as `required`, `recommended` or
+`not_required` from the route's review. It is also immutable after publication.
 
 The region center/bounds records are approximate overview camera bounds, not
 legal border polygons. The route's original source/license remains explicit.
@@ -432,20 +450,23 @@ removes only its own random schema. Fixtures are clearly test-only. This suite
 checks actual concurrent joins, replay, membership access, review uniqueness,
 offline conflicts, recruitment conversion, runtime privileges, reviewed route
 policies, concurrent posting across channels, moderation visibility, mute/appeal
-transactions, notification ownership and award evidence. Its executable was compiled in
-the build environment, but the suite was **not executed there**: neither Docker
-nor PostgreSQL was available, and the normal package setup could not switch
-system users. No privilege workaround was used. Do not treat a unit-test pass
-as a PostgreSQL transaction test or a container deployment test.
+transactions, notification ownership and award evidence. The 0.4.23 verification
+ran `go test -race -count=1 -tags=integration ./...` against isolated native
+PostgreSQL 18.6 / PostGIS 3.7.0. All 81 top-level tests passed, including the
+complete safety workflow through a restricted runtime database login, expired
+contact renewal, concurrent manifest amendments, immutable evidence and audit
+tail detection. This is a native database result, not a production deployment
+or container/backup restoration result.
 
 An additional [isolated SQL compatibility harness](../tools/db-compat/README.md)
 executes serial test bodies with pgx against PostgreSQL 18.6 / experimental
 PostGIS 3.6.2 in PGlite. Nine serial scenarios passed before this auth change;
 the three affected auth/expiry/cleanup, schema-readiness and `SET ROLE` grant
 scenarios passed again after migration 003. It deliberately excludes native
-concurrency and network role authentication. The native integration suite now
-also contains a two-pool simultaneous auth-budget test; its compilation is not
-an execution result. The exact current scope and source hashes are recorded in
+concurrency and network role authentication. The native integration suite also
+contains a two-pool simultaneous auth-budget test, included in the current
+successful gate. The historical scope and hashes of the earlier
+compatibility-only check are recorded in
 [`verification/auth-proxy-2026-11-06.json`](verification/auth-proxy-2026-11-06.json).
 
 ## Required before public production launch

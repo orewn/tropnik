@@ -24,6 +24,7 @@ EXPECTED = {
     "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
     "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
     "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+    "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
 }
 CLASS_NAME = "ru.tropa.app.LocalExperienceTest"
 
@@ -107,7 +108,7 @@ def bind_artifact(report: dict, directory: Path, root: Path, installed_path: Pat
                    "testedArchitecture": "x86_64", "testedArtifact": UNIVERSAL,
                    "arm64DeviceExecutionVerified": False, "physicalDeviceVerified": False,
                    "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / SwiftShader",
-                   "note": "All six actual cases must pass on the exact installed universal preview. ARM64, physical GPU, GPS, battery and a production API are not device-verified."})
+                   "note": "All seven actual cases must pass on the exact installed universal preview. ARM64, physical GPU, GPS, battery and a production API are not device-verified."})
     return report
 
 

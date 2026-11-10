@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: TROPA API
-  version: 0.1.0
+  version: 0.4.23
   description: 'Server-authoritative guided hiking groups. Minimum four people includes the
 
     guide by default. No guide obtains verified status through self-registration.
@@ -25,12 +25,12 @@ paths:
           description: Process is serving requests
   /health/ready:
     get:
-      summary: Database readiness
+      summary: Database, schema and safety encryption readiness
       responses:
         '200':
-          description: Database reachable and schema initialized
+          description: Database reachable, current schema initialized and 256-bit safety key configured
         '503':
-          description: Database unavailable
+          description: Database or schema unavailable, or safety encryption is not configured
   /regions:
     get:
       summary: Regions with real published route counts
@@ -233,7 +233,7 @@ paths:
     parameters:
     - $ref: '#/components/parameters/ID'
     post:
-      summary: Assigned eligible guide records physical attendance online
+      summary: Assigned eligible guide records physical attendance or absence online
       security:
       - bearerAuth: []
       requestBody:
@@ -250,6 +250,10 @@ paths:
                   type: string
                 expectedVersion:
                   type: integer
+                present:
+                  type: boolean
+                  default: true
+                  description: Set false to mark a participant absent before start; this invalidates a prepared safety manifest. The guide cannot mark themselves absent.
       responses:
         '200':
           description: Envelope<Departure>
@@ -258,6 +262,7 @@ paths:
     - $ref: '#/components/parameters/ID'
     post:
       summary: Guide starts, completes, cancels or aborts; start rechecks all gates
+      description: A required safety policy additionally needs the current independently confirmed passport, a fresh predeparture contact and attendance for every registered active participant. Expired contact returns 409 departure_not_ready.
       security:
       - bearerAuth: []
       requestBody:
@@ -284,6 +289,300 @@ paths:
           description: Envelope<Departure>
         '409':
           $ref: '#/components/responses/Error'
+  /departures/{id}/safety-passport:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      summary: Read the current versioned safety passport
+      description: Assigned guide, active/completed participant or staff only. Participants receive only the public
+        payload; private details are restricted to the assigned guide and staff. A not-yet-prepared passport has version
+        0 and no public/private payload.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<SafetyPassport>
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SafetyPassport'
+                  meta:
+                    type: object
+        '401': &id001
+          $ref: '#/components/responses/Error'
+        '403': *id001
+        '404': *id001
+        '429': *id001
+        '503': *id001
+  /departures/{id}/safety-passport/prepare:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Assigned guide prepares a new encrypted passport version
+      description: Before trip start and end only. The exact active roster and pinned route revision are snapshotted;
+        earlier submission/confirmation/contact state is cleared. Retries with the same key and input create no duplicate
+        version and return the currently authorized passport view. Missing encryption configuration returns 503 without
+        storing plaintext.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SafetyPrepareInput'
+      responses:
+        '201':
+          description: Envelope<SafetyPassport>
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SafetyPassport'
+                  meta:
+                    type: object
+        '400': *id001
+        '401': *id001
+        '403': *id001
+        '404': *id001
+        '409': *id001
+        '429': *id001
+        '503': *id001
+  /departures/{id}/mchs/submission:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Record an external MChS submission reference
+      description: Assigned guide only. Current passport must be ready_to_submit and require or recommend notification.
+        submittedAt must not precede the latest safety change or exceed server time by five minutes. Only records
+        submitted_unverified; opening the official form never confirms submission.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MCHSSubmissionInput'
+      responses:
+        '200':
+          description: Envelope<SafetyPassport>
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SafetyPassport'
+                  meta:
+                    type: object
+        '400': *id001
+        '401': *id001
+        '403': *id001
+        '404': *id001
+        '409': *id001
+        '429': *id001
+        '503': *id001
+  /departures/{id}/mchs/confirmation:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Independent staff member verifies external registration evidence
+      description: Moderator/admin only; the assigned guide and any active participant cannot approve their own trip,
+        even with staff privileges. Current version must be submitted_unverified. Stores evidence reference and enters
+        start_contact_pending. This endpoint does not contact a government API.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MCHSConfirmationInput'
+      responses:
+        '200':
+          description: Envelope<SafetyPassport>
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SafetyPassport'
+                  meta:
+                    type: object
+        '400': *id001
+        '401': *id001
+        '403': *id001
+        '404': *id001
+        '409': *id001
+        '429': *id001
+        '503': *id001
+  /departures/{id}/mchs/start-contact:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Assigned guide records or renews the completed predeparture contact
+      description: Current version must be start_contact_pending or confirmed before start. contactedAt must be within
+        the last 24 hours, no earlier than 24 hours before scheduled start, before scheduled end, and no more than
+        five minutes ahead of server time. A delayed departure needs a fresh contact after the previous one expires.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MCHSStartContactInput'
+      responses:
+        '200':
+          description: Envelope<SafetyPassport>
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SafetyPassport'
+                  meta:
+                    type: object
+        '400': *id001
+        '401': *id001
+        '403': *id001
+        '404': *id001
+        '409': *id001
+        '429': *id001
+        '503': *id001
+  /departures/{id}/mchs/return-report:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Assigned guide records the actual return notification
+      description: Current passport must be return_report_pending and the trip completed or aborted. reportedAt cannot
+        precede scheduled start or exceed server time by five minutes. Records method/time and closes the safety workflow;
+        does not submit a message to emergency services.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MCHSReturnReportInput'
+      responses:
+        '200':
+          description: Envelope<SafetyPassport>
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SafetyPassport'
+                  meta:
+                    type: object
+        '400': *id001
+        '401': *id001
+        '403': *id001
+        '404': *id001
+        '409': *id001
+        '429': *id001
+        '503': *id001
+  /departures/{id}/safety-check-ins:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    post:
+      summary: Assigned guide appends a field safety observation
+      description: Available only during an active trip. Stores observedAt separately from serverReceivedAt; retries
+        with the same key/input return the original observation without duplication. Does not change the authoritative
+        roster or authorize a trip start.
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SafetyCheckInInput'
+      responses:
+        '201':
+          description: Envelope<SafetyCheckIn>
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SafetyCheckIn'
+                  meta:
+                    type: object
+        '400': *id001
+        '401': *id001
+        '403': *id001
+        '404': *id001
+        '409': *id001
+        '429': *id001
+        '503': *id001
+  /departures/{id}/emergency-card:
+    parameters:
+    - $ref: '#/components/parameters/ID'
+    get:
+      summary: Read the participant emergency card
+      description: Assigned guide, active/completed participant or staff only. Includes 112, route/date information
+        and leader/emergency contact details from the latest encrypted passport. Other participants' contacts are
+        excluded. This response is private and must not enter shared caches.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Envelope<EmergencyCard>
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/EmergencyCard'
+                  meta:
+                    type: object
+        '401': *id001
+        '403': *id001
+        '404': *id001
+        '429': *id001
+        '503': *id001
   /departures/{id}/messages:
     parameters:
     - $ref: '#/components/parameters/ID'
@@ -1122,6 +1421,639 @@ components:
           type: string
           format: email
           maxLength: 254
+    MCHSNotificationPolicy:
+      type: string
+      enum:
+      - not_required
+      - recommended
+      - required
+    MCHSStatus:
+      type: string
+      enum:
+      - not_required
+      - recommended
+      - required
+      - preparing
+      - ready_to_submit
+      - submitted_unverified
+      - start_contact_pending
+      - confirmed
+      - amendment_required
+      - active
+      - return_report_pending
+      - closed
+      - rejected
+      - cancelled
+      description: Platform state of external evidence. No state represents a response from an MChS API or a rescue
+        guarantee.
+    SafetyPhone:
+      type: string
+      minLength: 7
+      maxLength: 25
+      pattern: ^[+0-9][0-9 ()-]{6,24}$
+      description: Trimmed phone number containing 7 to 15 ASCII digits.
+    SafetyPoint:
+      type: object
+      additionalProperties: false
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 240
+        description:
+          type: string
+          maxLength: 2000
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+      description: Coordinates, when supplied, must form a complete finite WGS84 pair.
+    SafetyCheckInRule:
+      type: object
+      additionalProperties: false
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 240
+        offsetHour:
+          type: integer
+          minimum: 0
+          maximum: 720
+        at:
+          type: string
+          format: date-time
+    RouteSafetyMetadata:
+      type: object
+      additionalProperties: false
+      required: []
+      properties:
+        riskClass:
+          type: string
+          enum:
+          - standard
+          - elevated
+          - high
+          - extreme
+        routeType:
+          type: string
+          enum:
+          - pedestrian
+          - mountain
+          - water
+          - ski
+          - speleo
+          - combined
+        legalDifficultyCategory:
+          type: string
+          minLength: 1
+          maxLength: 40
+        mchsNotificationPolicy:
+          $ref: '#/components/schemas/MCHSNotificationPolicy'
+        mchsTerritorialUnitId:
+          type: string
+          maxLength: 120
+        emergencyExits:
+          type: array
+          items:
+            $ref: '#/components/schemas/SafetyPoint'
+          maxItems: 50
+        controlPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/SafetyPoint'
+          maxItems: 50
+        defaultCheckInSchedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/SafetyCheckInRule'
+          maxItems: 50
+        safetyRevision:
+          type: integer
+          minimum: 1
+      description: Safety fields included in Route responses and pinned into each reviewed route revision.
+    DepartureSafetyState:
+      type: object
+      additionalProperties: false
+      required:
+      - safetyStatus
+      - safetyPassportVersion
+      - mchsNotificationPolicy
+      - mchsConfirmed
+      - startContactConfirmed
+      - returnReported
+      - safetyClosed
+      properties:
+        safetyStatus:
+          $ref: '#/components/schemas/MCHSStatus'
+        safetyPassportVersion:
+          type: integer
+          minimum: 0
+        mchsNotificationPolicy:
+          $ref: '#/components/schemas/MCHSNotificationPolicy'
+        mchsSubmissionId:
+          type: string
+        mchsConfirmed:
+          type: boolean
+        startContactConfirmed:
+          type: boolean
+          description: Before start, true only while the confirmed contact remains valid within the current 24-hour
+            window. Active/completed/aborted trips retain the historical confirmation.
+        returnReported:
+          type: boolean
+        safetyClosed:
+          type: boolean
+      description: Safety fields present in Departure responses. Stale contacts and roster amendments cannot authorize
+        a required start.
+    SafetyParticipantContact:
+      type: object
+      additionalProperties: false
+      required:
+      - userId
+      - phone
+      properties:
+        userId:
+          type: string
+          minLength: 1
+        displayName:
+          type: string
+        role:
+          type: string
+          enum:
+          - tourist
+          - guide
+        phone:
+          $ref: '#/components/schemas/SafetyPhone'
+      description: Private contact. Participant ID must match the current roster; displayName and role are read from
+        the server and ignore client claims.
+    SafetyRouteSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+      - routeId
+      - routeRevisionId
+      - title
+      - description
+      - riskClass
+      - routeType
+      - legalDifficultyCategory
+      - emergencyExits
+      - controlPoints
+      - defaultCheckInSchedule
+      - safetyRevision
+      properties:
+        routeId:
+          type: string
+        routeRevisionId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        riskClass:
+          type: string
+        routeType:
+          type: string
+        legalDifficultyCategory:
+          type: string
+        territorialUnitId:
+          type: string
+        emergencyExits:
+          type: array
+          items:
+            $ref: '#/components/schemas/SafetyPoint'
+        controlPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/SafetyPoint'
+        defaultCheckInSchedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/SafetyCheckInRule'
+        safetyRevision:
+          type: integer
+          minimum: 1
+    SafetyPublicPayload:
+      type: object
+      additionalProperties: false
+      required:
+      - route
+      - startsAt
+      - endsAt
+      - timeZone
+      - leaderName
+      - participantCount
+      - preparedAt
+      properties:
+        route:
+          $ref: '#/components/schemas/SafetyRouteSnapshot'
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        timeZone:
+          type: string
+        leaderName:
+          type: string
+        participantCount:
+          type: integer
+          minimum: 1
+          maximum: 50
+        preparedAt:
+          type: string
+          format: date-time
+    SafetyPrivateDetails:
+      type: object
+      additionalProperties: false
+      required:
+      - leaderPhone
+      - emergencyContactName
+      - emergencyContactPhone
+      - communicationPlan
+      - transport
+      - backupRoute
+      - equipment
+      - firstAid
+      - insurance
+      - notes
+      - participants
+      properties:
+        leaderPhone:
+          $ref: '#/components/schemas/SafetyPhone'
+        emergencyContactName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        emergencyContactPhone:
+          $ref: '#/components/schemas/SafetyPhone'
+        communicationPlan:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        transport:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        backupRoute:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        equipment:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        firstAid:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        insurance:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        notes:
+          type: string
+          maxLength: 4000
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/SafetyParticipantContact'
+          minItems: 1
+          maxItems: 50
+      description: Decrypted private data available only to the assigned guide and platform staff. Never returned in
+        a participant passport or public departure response.
+    SafetyPrepareInput:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedVersion
+      - leaderPhone
+      - emergencyContactName
+      - emergencyContactPhone
+      - communicationPlan
+      - transport
+      - backupRoute
+      - equipment
+      - firstAid
+      - insurance
+      - participants
+      properties:
+        expectedVersion:
+          type: integer
+          minimum: 0
+        leaderPhone:
+          $ref: '#/components/schemas/SafetyPhone'
+        emergencyContactName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        emergencyContactPhone:
+          $ref: '#/components/schemas/SafetyPhone'
+        communicationPlan:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        transport:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        backupRoute:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        equipment:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        firstAid:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        insurance:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        notes:
+          type: string
+          maxLength: 4000
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/SafetyParticipantContact'
+          minItems: 1
+          maxItems: 50
+      description: Creates the next immutable encrypted passport version. expectedVersion must match the current version
+        (0 for the first passport); participants must exactly match the current active roster with unique userIds.
+    SafetyPassport:
+      type: object
+      additionalProperties: false
+      required:
+      - departureId
+      - version
+      - status
+      - notificationPolicy
+      - officialFormUrl
+      properties:
+        departureId:
+          type: string
+        version:
+          type: integer
+          minimum: 0
+        status:
+          $ref: '#/components/schemas/MCHSStatus'
+        notificationPolicy:
+          $ref: '#/components/schemas/MCHSNotificationPolicy'
+        officialFormUrl:
+          type: string
+          format: uri
+        submissionId:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        confirmedAt:
+          type: string
+          format: date-time
+        startContactConfirmedAt:
+          type: string
+          format: date-time
+        returnReportedAt:
+          type: string
+          format: date-time
+        passportHash:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        manifestHash:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        public:
+          $ref: '#/components/schemas/SafetyPublicPayload'
+        private:
+          $ref: '#/components/schemas/SafetyPrivateDetails'
+    MCHSSubmissionInput:
+      type: object
+      additionalProperties: false
+      required:
+      - passportVersion
+      - submissionId
+      - submittedAt
+      properties:
+        passportVersion:
+          type: integer
+          minimum: 1
+        submissionId:
+          type: string
+          minLength: 3
+          maxLength: 160
+        submittedAt:
+          type: string
+          format: date-time
+    MCHSConfirmationInput:
+      type: object
+      additionalProperties: false
+      required:
+      - passportVersion
+      - confirmationRef
+      properties:
+        passportVersion:
+          type: integer
+          minimum: 1
+        confirmationRef:
+          type: string
+          minLength: 3
+          maxLength: 240
+        confirmationSha256:
+          type: string
+          pattern: ^([0-9a-fA-F]{64})?$
+          description: Optional SHA-256 of the reviewed external evidence.
+    MCHSStartContactInput:
+      type: object
+      additionalProperties: false
+      required:
+      - passportVersion
+      - contactedAt
+      properties:
+        passportVersion:
+          type: integer
+          minimum: 1
+        contactedAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 1000
+    MCHSReturnReportInput:
+      type: object
+      additionalProperties: false
+      required:
+      - passportVersion
+      - reportedAt
+      - method
+      properties:
+        passportVersion:
+          type: integer
+          minimum: 1
+        reportedAt:
+          type: string
+          format: date-time
+        method:
+          type: string
+          minLength: 2
+          maxLength: 120
+        note:
+          type: string
+          maxLength: 1000
+    SafetyCheckInInput:
+      type: object
+      additionalProperties: false
+      required:
+      - kind
+      - observedAt
+      properties:
+        kind:
+          type: string
+          enum:
+          - start
+          - control_point
+          - return
+          - incident
+        observedAt:
+          type: string
+          format: date-time
+        latitude:
+          type:
+          - number
+          - 'null'
+          minimum: -90
+          maximum: 90
+        longitude:
+          type:
+          - number
+          - 'null'
+          minimum: -180
+          maximum: 180
+        note:
+          type: string
+          maxLength: 1000
+      description: Assigned guide only while the trip is in progress. Coordinates must both be finite WGS84 values or
+        both absent/null. observedAt cannot precede the scheduled start or be more than five minutes in the future.
+        Recording an incident does not call emergency services.
+    SafetyCheckIn:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - departureId
+      - actorId
+      - kind
+      - observedAt
+      - serverReceivedAt
+      properties:
+        id:
+          type: string
+        departureId:
+          type: string
+        actorId:
+          type: string
+        kind:
+          type: string
+          enum:
+          - start
+          - control_point
+          - return
+          - incident
+        observedAt:
+          type: string
+          format: date-time
+        latitude:
+          type:
+          - number
+          - 'null'
+          minimum: -90
+          maximum: 90
+        longitude:
+          type:
+          - number
+          - 'null'
+          minimum: -180
+          maximum: 180
+        note:
+          type: string
+          maxLength: 1000
+        serverReceivedAt:
+          type: string
+          format: date-time
+    EmergencyCard:
+      type: object
+      additionalProperties: false
+      required:
+      - departureId
+      - emergencyNumber
+      - routeTitle
+      - startsAt
+      - endsAt
+      - timeZone
+      - leaderName
+      - mchsStatus
+      - controlPoints
+      - emergencyExits
+      - messageTemplate
+      properties:
+        departureId:
+          type: string
+        emergencyNumber:
+          type: string
+          const: '112'
+        routeTitle:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        timeZone:
+          type: string
+        leaderName:
+          type: string
+        leaderPhone:
+          type: string
+        emergencyContactName:
+          type: string
+        emergencyContactPhone:
+          type: string
+        mchsStatus:
+          $ref: '#/components/schemas/MCHSStatus'
+        mchsSubmissionId:
+          type: string
+        territorialUnitId:
+          type: string
+        controlPoints:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/SafetyPoint'
+        emergencyExits:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/SafetyPoint'
+        messageTemplate:
+          type: string
+      description: Private card for the assigned guide, active/completed participants and staff. Exposes leader/emergency
+        contacts, never other participants' contacts. Before a passport is prepared, contact fields are omitted and
+        safety-point arrays may be null. An already saved offline copy cannot be remotely revoked while disconnected.
   securitySchemes:
     bearerAuth:
       type: http

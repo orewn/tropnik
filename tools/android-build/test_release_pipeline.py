@@ -39,15 +39,15 @@ def raw_results(names=None, result=0, final=-1):
                       "INSTRUMENTATION_STATUS: stream=.",
                       f"INSTRUMENTATION_STATUS_CODE: {code}"]
     if final is not None:
-        lines += ["INSTRUMENTATION_RESULT: stream=", "OK (6 tests)", f"INSTRUMENTATION_CODE: {final}"]
+        lines += ["INSTRUMENTATION_RESULT: stream=", f"OK ({len(checker.EXPECTED)} tests)", f"INSTRUMENTATION_CODE: {final}"]
     return "\n".join(lines) + "\n"
 
 
 class RawResultsTest(unittest.TestCase):
-    def test_actual_six_start_completion_pairs_pass(self):
+    def test_all_required_start_completion_pairs_pass(self):
         result = checker.inspect_raw(raw_results(), 0)
         self.assertTrue(result["deviceExecutionVerified"])
-        self.assertEqual(result["tests"], 6)
+        self.assertEqual(result["tests"], len(checker.EXPECTED))
 
     def test_process_success_alone_never_means_test_success(self):
         bad = ["", "OK (6 tests)\nINSTRUMENTATION_CODE: -1\n",
@@ -64,7 +64,7 @@ class RawResultsTest(unittest.TestCase):
         names = sorted(checker.EXPECTED)
         bad = [raw_results(names[:-1]), raw_results(names + [names[0]]),
                raw_results(names[:-1] + [names[0]]), raw_results().replace(checker.CLASS_NAME, "another.Class"),
-               raw_results().replace("numtests=6", "numtests=5"),
+               raw_results().replace(f"numtests={len(checker.EXPECTED)}", "numtests=1"),
                raw_results().replace("INSTRUMENTATION_STATUS_CODE: 1\n", "", 1),
                raw_results() + "INSTRUMENTATION_STATUS: class=truncated\n"]
         for value in bad:

@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useMemo, useState} from 'react';
+import Link from 'next/link';
 import {Header} from './Header';
 import {Footer} from './Footer';
 import {ArrowSquareOut, Check, CheckCircle, Clock, DownloadSimple, Export, Info, MapPin, NotePencil, Plus, ShieldCheck, Trash, UsersThree, X} from './TropnikIcons';
@@ -11,8 +12,6 @@ import {
   buildSafetyPackage,
   invalidateOfficialStatus,
   newSafetyPassport,
-  notificationDeadline,
-  notificationDeadlineState,
   parseSafetyPassportList,
   safetyReadiness,
   safetyPassportSnapshot,
@@ -39,8 +38,8 @@ function loadSafetyCatalog(): Promise<SafetyCatalog> {
 const statusLabels: Record<SafetyStatus, string> = {
   draft: 'Черновик',
   ready: 'Пакет готов',
-  submitted: 'Отправлено в МЧС',
-  confirmed: 'Подтверждение сохранено',
+  submitted: 'Отправка отмечена лично',
+  confirmed: 'Личная запись о подтверждении',
   amendment_required: 'Нужно обновить уведомление',
   active: 'Группа на маршруте',
   closed: 'Поход закрыт',
@@ -52,14 +51,14 @@ const statusDescriptions: Record<SafetyStatus, string> = {
   submitted: 'Сохраните полученный номер или иное подтверждение.',
   confirmed: 'Перед выходом уточните сведения в территориальном органе МЧС.',
   amendment_required: 'После изменения маршрута, сроков или состава уведомление нужно актуализировать.',
-  active: 'Контрольная карточка доступна офлайн на этом устройстве.',
+  active: 'Сохраните карточку на устройстве и откройте автономный просмотр перед выходом.',
   closed: 'Возвращение отмечено. Черновик можно сохранить для истории или удалить.',
 };
 
 const criticalFields = new Set<keyof SafetyPassport>([
   'routeId', 'routeTitle', 'region', 'startDate', 'endDate', 'startPoint', 'finishPoint', 'routeDescription',
   'reserveRoute', 'emergencyExits', 'transport', 'communication', 'equipment', 'leaderName', 'leaderPhone',
-  'leaderEmail', 'outsideContactName', 'outsideContactPhone', 'returnDeadline', 'participants',
+  'leaderEmail', 'outsideContactName', 'outsideContactPhone', 'returnDeadline', 'timeZone', 'participants',
 ]);
 
 function id(prefix: string): string {
@@ -127,8 +126,6 @@ export function SafetyRegistration() {
   const [catalogState, setCatalogState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const readiness = useMemo(() => safetyReadiness(passport), [passport]);
   const dirty = useMemo(() => safetyPassportSnapshot(passport) !== savedSnapshot, [passport, savedSnapshot]);
-  const deadline = notificationDeadline(passport.startDate);
-  const deadlineState = notificationDeadlineState(passport.startDate);
   const locked = passport.status === 'closed';
 
   useEffect(() => {
@@ -186,6 +183,7 @@ export function SafetyRegistration() {
   }, [dirty]);
 
   function update<K extends keyof SafetyPassport>(key: K, value: SafetyPassport[K]) {
+    if (criticalFields.has(key)) setSubmittedCheck(false);
     setPassport(previous => {
       const changed = {...previous, [key]: value} as SafetyPassport;
       if (previous.status === 'ready' && criticalFields.has(key)) return {...changed, status: 'draft', updatedAt: new Date().toISOString()};
@@ -202,6 +200,7 @@ export function SafetyRegistration() {
   }
 
   function selectRoute(routeId: string) {
+    setSubmittedCheck(false);
     if (!routeId) { update('routeId', undefined); return; }
     const route = catalog?.routes.find(item => item.id === routeId);
     if (!route) return;
@@ -365,9 +364,10 @@ export function SafetyRegistration() {
             <div className={styles.fieldGridThree} style={{marginTop: 16}}>
               <div className={styles.field}><label htmlFor="start-date">Дата выхода *</label><input id="start-date" type="date" value={passport.startDate} disabled={locked} onChange={event => update('startDate', event.target.value)}/></div>
               <div className={styles.field}><label htmlFor="end-date">Дата возвращения *</label><input id="end-date" type="date" value={passport.endDate} disabled={locked} onChange={event => update('endDate', event.target.value)}/></div>
+              <div className={styles.field}><label htmlFor="trip-time-zone">Часовой пояс похода *</label><select id="trip-time-zone" value={passport.timeZone} disabled={locked} onChange={event => update('timeZone', event.target.value)}><option value="">Уточните часовой пояс</option>{['Europe/Kaliningrad','Europe/Moscow','Europe/Samara','Asia/Yekaterinburg','Asia/Omsk','Asia/Krasnoyarsk','Asia/Irkutsk','Asia/Yakutsk','Asia/Vladivostok','Asia/Magadan','Asia/Kamchatka'].map(zone=><option key={zone} value={zone}>{zone}</option>)}</select></div>
               <div className={styles.field}><label htmlFor="return-deadline">Контрольный срок *</label><input id="return-deadline" type="datetime-local" value={passport.returnDeadline} disabled={locked} onChange={event => update('returnDeadline', event.target.value)}/><span className={styles.hint}>Время, после которого контакт вне группы должен начать проверку.</span></div>
             </div>
-            <div className={styles.deadline} data-state={deadlineState} style={{marginTop: 16}}><Clock size={19}/><div>{deadline ? <>Ориентир для подачи уведомления: <strong>{dateLabel(deadline)}</strong>. Расчёт учитывает выходные, но не переносы государственных праздников — безопаснее подать раньше.</> : <>Укажите дату выхода, чтобы рассчитать ориентир подачи.</>}</div></div>
+            <div className={styles.deadline} style={{marginTop: 16}}><Clock size={19}/><div>До выхода проверьте порядок уведомления на официальной форме МЧС и уточните актуальный состав в территориальном органе. Тропник не рассчитывает юридический крайний срок подачи.</div></div>
             <div className={styles.fieldGrid} style={{marginTop: 16}}>
               <div className={styles.field}><label htmlFor="start-point">Точка старта *</label><input id="start-point" value={passport.startPoint} disabled={locked} onChange={event => update('startPoint', event.target.value)} placeholder="Населённый пункт, кордон, координаты"/></div>
               <div className={styles.field}><label htmlFor="finish-point">Точка завершения *</label><input id="finish-point" value={passport.finishPoint} disabled={locked} onChange={event => update('finishPoint', event.target.value)} placeholder="Финиш и способ выхода к связи"/></div>
@@ -438,8 +438,8 @@ export function SafetyRegistration() {
           </section>
 
           <section className={`${styles.card} ${styles.saveBar}`}>
-            <p>{statusDescriptions[passport.status]}</p>
-            <div className={styles.saveActions}><button className={styles.secondaryButton} onClick={() => window.print()}>Печать</button><button className={styles.primaryLink} onClick={() => persist()}><NotePencil size={18}/>Сохранить на устройстве</button></div>
+            <div className={styles.saveDescription}><p>{statusDescriptions[passport.status]}</p><p>Все отметки этой формы хранятся на устройстве. Они не являются проверкой регистрации МЧС со стороны Тропника.</p></div>
+            <div className={styles.saveActions}><Link prefetch={false} className={styles.secondaryButton} href="/offline-safety.html">Открыть автономную карточку</Link><button className={styles.secondaryButton} onClick={() => window.print()}>Печать</button><button className={styles.primaryLink} onClick={() => persist()}><NotePencil size={18}/>Сохранить на устройстве</button></div>
           </section>
         </div>
 
@@ -451,7 +451,7 @@ export function SafetyRegistration() {
               <div className={styles.summaryRow}><span>Маршрут</span><strong>{passport.routeTitle || 'не указан'}</strong></div>
               <div className={styles.summaryRow}><span>Период</span><strong>{passport.startDate && passport.endDate ? `${dateLabel(passport.startDate)} — ${dateLabel(passport.endDate)}` : 'не указан'}</strong></div>
               <div className={styles.summaryRow}><span>Участники</span><strong>{passport.participants.filter(item => item.name.trim()).length}</strong></div>
-              <div className={styles.summaryRow}><span>Подача</span><strong>{deadline ? dateLabel(deadline) : 'после выбора даты'}</strong></div>
+              <div className={styles.summaryRow}><span>Уведомление</span><strong>через официальный ресурс</strong></div>
               <div className={styles.summaryRow}><span>МЧС</span><strong>{passport.mchsReference || 'подтверждение не указано'}</strong></div>
               <div className={styles.summaryRow}><span>Предвыходное уточнение</span><strong>{timeLabel(passport.prestartCallAt)}</strong></div>
               <div className={styles.summaryRow}><span>Возвращение</span><strong>{timeLabel(passport.returnedAt)}</strong></div>

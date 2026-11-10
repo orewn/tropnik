@@ -3,8 +3,8 @@ import {readFile, writeFile, readdir} from 'node:fs/promises';
 import {resolve, relative, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-/** The Sites build also needs a new cache identity when public map scripts
- * change. GitHub Pages additionally namespaces its worker by the full build ID. */
+/** Stable-URL geometry and manifests need the same cache invalidation as the
+ * renderer. GitHub Pages additionally namespaces its worker by the build ID. */
 export async function stampServiceWorker(root) {
   const publicRoot = join(root, 'public');
   const workerPath = join(publicRoot, 'sw.js');
@@ -19,7 +19,7 @@ export async function stampServiceWorker(root) {
     for (const entry of entries) {
       const path = join(directory, entry.name);
       if (entry.isDirectory()) await walk(path);
-      else if (entry.isFile() && path !== workerPath && /\.(?:[cm]?js|css|html)$/.test(entry.name)) {
+      else if (entry.isFile() && path !== workerPath && /\.(?:[cm]?js|css|html|json|geojson|coverage|webmanifest)$/.test(entry.name)) {
         hash.update(relative(publicRoot, path)).update(await readFile(path));
       }
     }

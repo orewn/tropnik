@@ -34,6 +34,14 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.Style
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.geojson.Point
+import org.maplibre.geojson.Polygon
+import ru.tropa.app.data.MAP_LABEL_SOURCE
+import ru.tropa.app.data.MapLabelGeometry
+import ru.tropa.app.data.withMapLabelCoverage
+import ru.tropa.app.ui.NativeMapLabels
 import ru.tropa.app.data.Catalog
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -82,8 +90,7 @@ class LocalExperienceTest {
         app.onNodeWithTag("save_route").assertIsEnabled()
     }
 
-    private fun tapRegionMarker(regionId: String) {
-        val region = Catalog.load(app.activity).regions.single { it.id == regionId }
+    private fun readyMap(): Pair<MapView, MapLibreMap> {
         // The map is the third catalogue item. Bring its full height into view
         // before using the SDK projection; no region-list click or callback is used.
         app.onNodeWithTag("explore_list").performScrollToIndex(2)
@@ -115,6 +122,12 @@ class LocalExperienceTest {
             loaded && app.onAllNodes(hasText("Открываем карту России…")).fetchSemanticsNodes().isEmpty()
         }
         app.waitForIdle()
+        return mapView to map
+    }
+
+    private fun tapRegionMarker(regionId: String) {
+        val region = Catalog.load(app.activity).regions.single { it.id == regionId }
+        val (mapView, map) = readyMap()
         // Separate nearby region markers at a normal map zoom. This changes
         // only the viewport; selection must still travel through a real touch.
         app.runOnUiThread { map.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(region.latitude, region.longitude), 6.0)) }
@@ -152,6 +165,71 @@ class LocalExperienceTest {
         app.onNodeWithTag("explore_list").performScrollToIndex(0)
         app.onNodeWithText(region.name).assertExists()
         screenshot("map-region-after-tap")
+    }
+
+    @Test fun nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline() {
+        val (mapView, map) = readyMap()
+        val bundled = JSONObject(app.activity.assets.open("maps/style.json").bufferedReader().use { it.readText() })
+        // Synthetic boundary/labels isolate symbol placement from a changing
+        // upstream tile. The real SDK query, coverage predicate, worker,
+        // source update and rasterized glyphs are all exercised offline.
+        val fixture = JSONObject().put("version", 8).put("glyphs", bundled.getString("glyphs"))
+            .put("sources", JSONObject()
+                .put("fixture", JSONObject().put("type", "geojson").put("data", JSONObject("""{"type":"FeatureCollection","features":[
+                    {"type":"Feature","id":"domestic","properties":{"name":"ПРИМОРСК"},"geometry":{"type":"Point","coordinates":[29.98,60]}},
+                    {"type":"Feature","id":"foreign","properties":{"name":"ЗАРУБЕЖНЫЙ"},"geometry":{"type":"Point","coordinates":[30.18,60]}}
+                ]}""")))
+                .put("mask", JSONObject().put("type", "geojson").put("data", JSONObject("""{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[30,58],[40,58],[40,62],[30,62],[30,58]]]}}"""))))
+            .put("layers", JSONArray()
+                .put(JSONObject("""{"id":"background","type":"background","paint":{"background-color":"#FFFFFF"}}"""))
+                .put(JSONObject("""{"id":"fixture-label","type":"symbol","source":"fixture","layout":{"text-field":["get","name"],"text-font":["Noto Sans Regular"],"text-size":24,"text-anchor":"left","text-allow-overlap":true},"paint":{"text-color":"#102018","text-halo-width":0}}"""))
+                .put(JSONObject("""{"id":"russia-outside-mask","type":"fill","source":"mask","paint":{"fill-color":"#F5F3E8","fill-opacity":1,"fill-antialias":false}}""")))
+        val prepared = withMapLabelCoverage(fixture.toString())
+        val coverage = MapLabelGeometry.fromPolygons(listOf(Polygon.fromLngLats(listOf(listOf(
+            Point.fromLngLat(29.0, 59.0), Point.fromLngLat(30.0, 59.0), Point.fromLngLat(30.0, 61.0),
+            Point.fromLngLat(29.0, 61.0), Point.fromLngLat(29.0, 59.0))))))
+        val loaded = CountDownLatch(1)
+        var labels: NativeMapLabels? = null
+        try {
+            app.runOnUiThread {
+                map.setStyle(Style.Builder().fromJson(prepared.json)) {
+                    labels = NativeMapLabels(mapView, map, prepared.groups, coverage)
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(60.0, 30.0), 8.0))
+                    loaded.countDown()
+                }
+            }
+            assertTrue("Synthetic style did not load", loaded.await(20, TimeUnit.SECONDS))
+            app.waitUntil(timeoutMillis = 20_000) {
+                var ready = false
+                app.runOnUiThread {
+                    val accepted = map.style?.getSourceAs<GeoJsonSource>(MAP_LABEL_SOURCE)?.querySourceFeatures(null).orEmpty()
+                    val rendered = map.queryRenderedFeatures(RectF(0f, 0f, mapView.width.toFloat(), mapView.height.toFloat()), "fixture-label")
+                    ready = accepted.isNotEmpty() && accepted.all { it.getStringProperty("name") == "ПРИМОРСК" } && rendered.isNotEmpty()
+                }
+                ready
+            }
+            var boundary = PointF(); val location = IntArray(2)
+            app.runOnUiThread {
+                boundary = map.projection.toScreenLocation(LatLng(60.0, 30.0))
+                mapView.getLocationOnScreen(location)
+                val original = map.style!!.getSourceAs<GeoJsonSource>("fixture")!!.querySourceFeatures(null)
+                assertEquals(setOf("ПРИМОРСК", "ЗАРУБЕЖНЫЙ"), original.map { it.getStringProperty("name") }.toSet())
+            }
+            screenshot("map-labels-cross-mask")
+            val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+            assertNotNull("No map screenshot", bitmap)
+            try {
+                val x = location[0] + boundary.x.toInt(); val y = location[1] + boundary.y.toInt()
+                var inkBeyondBorder = 0
+                for (px in (x + 8)..minOf(x + 95, bitmap.width - 1)) for (py in maxOf(0, y - 20)..minOf(bitmap.height - 1, y + 20)) {
+                    val color = bitmap.getPixel(px, py)
+                    if (Color.red(color) < 90 && Color.green(color) < 100 && Color.blue(color) < 90) inkBeyondBorder++
+                }
+                assertTrue("Domestic text was clipped by the opaque mask ($inkBeyondBorder ink pixels)", inkBeyondBorder > 20)
+            } finally { bitmap.recycle() }
+        } finally {
+            app.runOnUiThread { labels?.dispose() }
+        }
     }
 
     @Test fun noServerMeansExplicitConfigurationNotInventedSocialActivity() {

@@ -17,6 +17,18 @@ test('public map changes invalidate the Sites shell without deleting offline pac
     await writeFile(join(root, 'public/maps/canvas-style.js'), 'export const style=2;');
     const next = await stampServiceWorker(root);
     assert.notEqual(next, first, 'changed stable-URL map assets must receive a new shell cache');
+    await mkdir(join(root, 'public/data'), {recursive: true});
+    const coverage = join(root, 'public/data/russia-display-area.geojson');
+    await writeFile(coverage, JSON.stringify({type: 'Point', coordinates: [27, 60]}));
+    const withCoverage = await stampServiceWorker(root);
+    await writeFile(coverage, JSON.stringify({type: 'Point', coordinates: [27.001, 60]}));
+    const repairedCoverage = await stampServiceWorker(root);
+    assert.notEqual(repairedCoverage, withCoverage, 'a data-only coastline repair must replace cached geometry');
+    await writeFile(join(root, 'public/data/geometry-manifest.json'), JSON.stringify({revision: 1}));
+    const withManifest = await stampServiceWorker(root);
+    await writeFile(join(root, 'public/data/geometry-manifest.json'), JSON.stringify({revision: 2}));
+    assert.notEqual(await stampServiceWorker(root), withManifest, 'a new geometry manifest must invalidate the shell');
+    assert.equal(await stampServiceWorker(root), await stampServiceWorker(root));
     assert.match(await readFile(join(root, 'public/sw.js'), 'utf8'), /tropnik-map-/);
   } finally {await rm(root, {recursive: true, force: true});}
 });

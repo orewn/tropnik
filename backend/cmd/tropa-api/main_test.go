@@ -50,3 +50,20 @@ func TestProductionRejectsMissingRateKeyAndPartialProxyTrust(t *testing.T) {
 		}
 	}
 }
+
+func TestProductionRequiresIndependentSafetyDataKey(t *testing.T) {
+	for _, key := range []string{"", "bad-private-value", strings.Repeat("ab", 32)} {
+		t.Setenv("APP_ENV", "production")
+		t.Setenv("PUBLIC_ORIGIN", "https://tropa.example")
+		t.Setenv("DATABASE_URL", "postgres://tropa_app:unique-long-password-for-tests@db/tropa?sslmode=verify-full")
+		t.Setenv("DEMO_MODE", "")
+		t.Setenv("TRUSTED_PROXY_CIDRS", "")
+		t.Setenv("TROPA_PROXY_TOKEN", "")
+		t.Setenv("TROPA_AUTH_RATE_KEY", strings.Repeat("ab", 32))
+		t.Setenv("TROPA_SAFETY_DATA_KEY", key)
+		err := run()
+		if err == nil || (!strings.Contains(err.Error(), "TROPA_SAFETY_DATA_KEY") && !strings.Contains(err.Error(), "independent")) || strings.Contains(err.Error(), "bad-private-value") {
+			t.Fatalf("expected safe key configuration error, got %v", err)
+		}
+	}
+}

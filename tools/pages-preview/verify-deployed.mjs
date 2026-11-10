@@ -76,6 +76,7 @@ for (const kind of ['region', 'route', 'android', 'offline', 'sources']) {
   assert.match((await request(page.path.slice(1) + '/')).text, /noindex,nofollow/);
 }
 await request('offline-viewer.html');
+for (const asset of ['offline-safety.html','offline-safety.js','offline-safety.css']) await request(asset);
 await request('sw.js');
 await request('data/territories.geojson');
 const android = validateApkManifest(JSON.parse((await request('downloads/android-manifest.json')).text));

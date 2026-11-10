@@ -22,6 +22,8 @@ import {publishMapCamera} from '@/lib/map-interaction';
 import {MapZoomButtons,MAP_ZOOM_BUTTONS} from '@/lib/map-zoom-buttons';
 import {canvasStyle} from '@/public/maps/canvas-style.js';
 import {createCanvasLabelLayer} from '@/public/maps/canvas-label-coverage.js';
+import {bindMapCoverage} from '@/public/maps/map-coverage-lod.js';
+import {createCanvasCoverage} from '@/public/maps/map-coverage-renderers.js';
 import {createCanvasRelief} from '@/lib/canvas-relief';
 import {createLeafletCanvas} from '@/lib/leaflet-canvas';
 import {maskViewportCulling} from '@/lib/leaflet-mask-viewport';
@@ -33,7 +35,7 @@ import {SATELLITE_TILES,SATELLITE_MAX_ZOOM,SATELLITE_ERROR} from '@/lib/map-sate
 import 'leaflet/dist/leaflet.css';
 
 type Coverage=Awaited<ReturnType<typeof loadRussiaGeometry>>;
-type CanvasVectorLayer=Layer&{paintRules:ReturnType<typeof canvasStyle>['paintRules'];backgroundColor?:string;rerenderTiles:()=>void;views:Map<string,import('protomaps-leaflet').View>};
+type CanvasVectorLayer=Layer&{paintRules:ReturnType<typeof canvasStyle>['paintRules'];backgroundColor?:string;clearLayout:()=>void;rerenderTiles:()=>void;views:Map<string,import('protomaps-leaflet').View>};
 type CanvasDetailLayer=LayerGroup&{ground:CanvasVectorLayer;labels:CanvasVectorLayer};
 type CanvasTrailPointLayers={marker:LeafletCircleMarker;hit:LeafletCircleMarker};
 export function createCanvasRussiaMask(L:typeof import('leaflet'),mask:GeoJSON.GeoJsonObject){
@@ -189,7 +191,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
    const L=leafletRef.current,coverage=coverageRef.current;if(!L||!coverage)return false;
    const style=canvasStyle(p,pathVisibility.current,satelliteActive.current),devicePixelRatio=Math.min(window.devicePixelRatio,MAP_CONFIG.maxPixelRatio);
    const ground=p.leafletLayer({url:tilejson.tiles[0],...style,labelRules:[],attribution:'OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors',devicePixelRatio}) as unknown as CanvasVectorLayer;
-   const labels=createCanvasLabelLayer(p,ground,style.labelRules,coverage.area,{devicePixelRatio}) as unknown as CanvasVectorLayer;
+   const labels=createCanvasLabelLayer(p,ground,style.labelRules,()=>coverage.area,{devicePixelRatio}) as unknown as CanvasVectorLayer;
    // One lifecycle removes both layers on overview, connectivity loss and
    // unmount. Only coverage-checked labels rise above the opaque RF mask.
    const detail=Object.assign(L.layerGroup([ground,labels]),{ground,labels}) as CanvasDetailLayer;
@@ -256,7 +258,8 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
  useEffect(()=>{
   const routePointRegistry=routePointLayers.current,buttonRegistry=directionButtons.current,edgeAnnotations=routeAnnotations.current;
   const locationEpoch=locationRevision,detailEpoch=detailRequest,mountElement=container.current;
-  let cancelled=false,resize:ResizeObserver|undefined,resizeFrame=0,paintFrame=0,directionLayoutFrame=0,clamping=false,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined,unbindLocationGestures:(()=>void)|undefined;
+  let cancelled=false,resize:ResizeObserver|undefined,resizeFrame=0,paintFrame=0,directionLayoutFrame=0,clamping=false,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined,unbindLocationGestures:(()=>void)|undefined,unbindCoverage:(()=>void)|undefined;
+  let canvasCoverage:ReturnType<typeof createCanvasCoverage>|undefined;
   const navigation=new LatestMapNavigation(()=>zooming.current);navigationRef.current=navigation;
   const directionMarkers=new Map<string,LeafletMarker>();
   const unbindDirectionButtons:(()=>void)[]=[];
@@ -277,7 +280,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
   window.addEventListener('online',connection);window.addEventListener('offline',connection);setOffline(!navigator.onLine);setLoaded(false);
   (async()=>{
    try{
-    const [L,coverage,admin]=await Promise.all([import('leaflet'),loadRussiaGeometry(),loadPublicJSON<GeoJSON.GeoJsonObject>('/data/territories.geojson')]);
+    const [L,coverage]=await Promise.all([import('leaflet'),loadRussiaGeometry()]);
     if(cancelled||!container.current)return;
     leaflet=L;leafletRef.current=L;
     if(!coverage.area.features?.length||!coverage.mask.features?.length)throw new Error('Coverage geometry missing');
@@ -311,18 +314,19 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
     map.createPane('russia-relief');Object.assign(map.getPane('russia-relief')!.style,{zIndex:'350',pointerEvents:'none'});
     map.createPane('russia-mask');Object.assign(map.getPane('russia-mask')!.style,{zIndex:'450',pointerEvents:'none'});
     map.createPane('russia-labels');Object.assign(map.getPane('russia-labels')!.style,{zIndex:'460',pointerEvents:'none'});
-    L.geoJSON(coverage.area,{pane:'russia-land',style:{renderer:createLeafletCanvas(L,{pane:'russia-land',padding:.15}),color:'#aebda2',weight:.65,fillColor:'#dbe4cd',fillOpacity:1},interactive:false}).addTo(map);
     L.tileLayer('/maps/russia-relief/{z}/{x}/{y}.png',{pane:'russia-overview-relief',minZoom:0,maxNativeZoom:4,maxZoom:6,tileSize:256,keepBuffer:4,updateWhenIdle:false,updateWhenZooming:true}).addTo(map);
     ensureRelief();
-    territoryLayer.current=L.geoJSON(displayGeoJSON(admin),{style:territoryStyle,onEachFeature:(feature,layer)=>{
+    canvasCoverage=createCanvasCoverage(L,map,{renderer:settings=>createLeafletCanvas(L,settings),cull:maskViewportCulling,territoryStyle,onTerritory:(feature,layer)=>{
      layer.on('click',(event:{latlng?:{lng:number;lat:number}})=>{
       if(planning||!event.latlng||!inRussiaCoverage(event.latlng.lng,event.latlng.lat,coverage.area))return;
       const shape=feature.properties?.shapeName;const territory=typeof shape==='string'?territoryForMapPoint([shape],[russiaLongitude(event.latlng.lng),event.latlng.lat]):undefined;if(territory){map.stop();frameRefit.current?.cancel();callbacks.current.onRegion(territory);}
      });
-    }}).addTo(map);
-    // The non-interactive mask sits above tiles and route paths; validated marker labels stay above it. Leaflet
-    // does not repeat GeoJSON, so its two adjacent world copies are covered too.
-    createCanvasRussiaMask(L,coverage.mask).addTo(map);
+    }});
+    territoryLayer.current=canvasCoverage.territories;
+    unbindCoverage=bindMapCoverage(map,coverage,element,current=>{
+     canvasCoverage?.apply(current);baseRef.current?.labels.clearLayout();baseRef.current?.labels.rerenderTiles();
+     return new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));
+    });
     for(const item of planning?[]:regions){
      if(!inRussiaCoverage(...item.center,coverage.area))continue;
      const button=createDirectionMarker(item);directionButtons.current.set(item.id,button);
@@ -394,7 +398,7 @@ export function Atlas2D({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onR
     ensureDetail();
    }catch(error){if(!cancelled){unbindDirectionButtons.splice(0).forEach(unbind=>unbind());zoomButtons.current?.dispose();zoomButtons.current=null;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();setStatus('Не удалось загрузить географию России. Карточки маршрутов доступны в списке.');console.error('Russia canvas map failed',error);}}
   })();
-  return()=>{cancelled=true;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());zoomButtons.current?.dispose();zoomButtons.current=null;navigation.dispose();if(navigationRef.current===navigation)navigationRef.current=null;locationEpoch.current++;unbindLocationGestures?.();unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;planFrame.current=null;zooming.current=false;unbindFrame?.();++detailEpoch.current;detailLoading.current=false;ensureReliefRef.current=null;cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);cancelAnimationFrame(directionLayoutFrame);if(mountElement)delete mountElement.dataset.mapCamera;directionMarkers.clear();resize?.disconnect();reliefRef.current?.destroy();reliefRef.current=null;mapRef.current?.remove();mapRef.current=null;buttonRegistry.clear();routePointRegistry.clear();leafletRef.current=null;baseRef.current=null;satelliteLayer.current=null;satelliteActive.current=false;territoryLayer.current=null;points.current=null;selected.current=null;routeEdges.current=null;edgeAnnotations.length=0;positionMarker.current=null;coverageRef.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
+  return()=>{cancelled=true;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());zoomButtons.current?.dispose();zoomButtons.current=null;navigation.dispose();if(navigationRef.current===navigation)navigationRef.current=null;locationEpoch.current++;unbindLocationGestures?.();unbindLabels?.();unbindCoverage?.();canvasCoverage?.destroy();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;planFrame.current=null;zooming.current=false;unbindFrame?.();++detailEpoch.current;detailLoading.current=false;ensureReliefRef.current=null;cancelAnimationFrame(resizeFrame);cancelAnimationFrame(paintFrame);cancelAnimationFrame(directionLayoutFrame);if(mountElement)delete mountElement.dataset.mapCamera;directionMarkers.clear();resize?.disconnect();reliefRef.current?.destroy();reliefRef.current=null;mapRef.current?.remove();mapRef.current=null;buttonRegistry.clear();routePointRegistry.clear();leafletRef.current=null;baseRef.current=null;satelliteLayer.current=null;satelliteActive.current=false;territoryLayer.current=null;points.current=null;selected.current=null;routeEdges.current=null;edgeAnnotations.length=0;positionMarker.current=null;coverageRef.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
  },[planning,cancelNavigation,ensureDetail,fitPlanFrame,fitRussia,fitTerritoryBounds,hasPlanFrame,removeSatellite,showSatellite,territoryStyle]);
  useEffect(()=>{
   const map=mapRef.current,element=container.current,L=leafletRef.current;if(!map||!element||!L||!loaded)return;

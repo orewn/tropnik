@@ -40,6 +40,7 @@ func run() error {
 	minPeople := f.Int("min-people", 4, "reviewed minimum including the guide")
 	maxGroup := f.Int("max-group-size", 0, "required for publication: reviewed maximum including the guide")
 	requiredGuides := f.Int("required-guides", 0, "required for publication; this release supports exactly one")
+	mchsPolicy := f.String("mchs-policy", "", "required for publication: required, recommended or not_required after a safety review")
 	until := f.String("valid-until", "", "RFC3339 expiry")
 	if e := f.Parse(os.Args[2:]); e != nil {
 		return e
@@ -156,6 +157,9 @@ func run() error {
 		if e = json.Unmarshal(b, &r); e != nil {
 			return e
 		}
+		if e = domain.NormalizeRouteSafety(&r); e != nil {
+			return e
+		}
 		if e = domain.ValidateRouteImport(r); e != nil {
 			return e
 		}
@@ -166,6 +170,13 @@ func run() error {
 		}
 		var rev string
 		e = tx.QueryRow(ctx, `INSERT INTO route_revisions(route_id,revision,geometry,distance_km,ascent_m,duration_min,difficulty,season,source_name,source_url,source_license,source_retrieved_at) VALUES($1,1,ST_SetSRID(ST_GeomFromGeoJSON($2),4326),ST_Length(ST_SetSRID(ST_GeomFromGeoJSON($2),4326)::geography)/1000,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id::text`, entity, string(geo), r.AscentM, r.DurationMin, r.Difficulty, r.Season, r.Source.Name, r.Source.URL, r.Source.License, r.Source.RetrievedAt).Scan(&rev)
+		if e != nil {
+			return e
+		}
+		exits, _ := json.Marshal(r.EmergencyExits)
+		controls, _ := json.Marshal(r.ControlPoints)
+		schedule, _ := json.Marshal(r.DefaultCheckInSchedule)
+		_, e = tx.Exec(ctx, `UPDATE route_revisions SET risk_class=$2,route_type=$3,legal_difficulty_category=$4,mchs_notification_policy=$5,mchs_territorial_unit_id=NULLIF($6,''),emergency_exits=$7,control_points=$8,default_check_in_schedule=$9,safety_revision=$10 WHERE id=$1`, rev, r.RiskClass, r.RouteType, r.LegalDifficultyCategory, r.MCHSNotificationPolicy, r.MCHSTerritorialUnitID, exits, controls, schedule, r.SafetyRevision)
 		if e != nil {
 			return e
 		}
@@ -180,19 +191,23 @@ func run() error {
 			return e
 		}
 		if command == "publish-route" {
+			if !domain.ValidNotificationPolicy(*mchsPolicy) {
+				return fmt.Errorf("publication requires explicit reviewed --mchs-policy required, recommended or not_required")
+			}
 			if *minPeople < 4 || *maxGroup < *minPeople || *maxGroup > 50 || *requiredGuides != 1 {
 				return fmt.Errorf("publication requires reviewed --min-people >=4, --max-group-size and --required-guides 1; multi-guide routes are not supported")
 			}
 			var reviewed bool
 			var oldMin, oldMax, oldGuides int
-			e = tx.QueryRow(ctx, "SELECT reviewed_at IS NOT NULL,min_people,max_group_size,required_guides FROM route_revisions WHERE id=$1", rev).Scan(&reviewed, &oldMin, &oldMax, &oldGuides)
+			var oldPolicy string
+			e = tx.QueryRow(ctx, "SELECT reviewed_at IS NOT NULL,min_people,max_group_size,required_guides,mchs_notification_policy FROM route_revisions WHERE id=$1", rev).Scan(&reviewed, &oldMin, &oldMax, &oldGuides, &oldPolicy)
 			if e != nil {
 				return e
 			}
-			if reviewed && (oldMin != *minPeople || oldMax != *maxGroup || oldGuides != *requiredGuides) {
+			if reviewed && (oldMin != *minPeople || oldMax != *maxGroup || oldGuides != *requiredGuides || oldPolicy != *mchsPolicy) {
 				return fmt.Errorf("reviewed policy is immutable; create a new revision")
 			}
-			_, e = tx.Exec(ctx, "UPDATE route_revisions SET reviewed_at=now(),reviewed_by=$2,review_evidence=$3,min_people=$4,max_group_size=$5,required_guides=$6 WHERE id=$1 AND reviewed_at IS NULL", rev, *actor, *evidence, *minPeople, *maxGroup, *requiredGuides)
+			_, e = tx.Exec(ctx, "UPDATE route_revisions SET reviewed_at=now(),reviewed_by=$2,review_evidence=$3,min_people=$4,max_group_size=$5,required_guides=$6,mchs_notification_policy=$7 WHERE id=$1 AND reviewed_at IS NULL", rev, *actor, *evidence, *minPeople, *maxGroup, *requiredGuides, *mchsPolicy)
 			if e != nil {
 				return e
 			}
@@ -206,7 +221,7 @@ func run() error {
 	default:
 		return fmt.Errorf("unknown command")
 	}
-	details, _ := json.Marshal(map[string]string{"evidence": *evidence, "staffRole": *staffRole})
+	details, _ := json.Marshal(map[string]string{"evidence": *evidence, "staffRole": *staffRole, "mchsNotificationPolicy": *mchsPolicy})
 	_, e = tx.Exec(ctx, "INSERT INTO audit_events(actor_id,action,entity_id,details) VALUES($1,$2,$3,$4)", *actor, "operator."+command, entity, details)
 	if e != nil {
 		return e

@@ -1,0 +1,14 @@
+export type CoverageLevel='overview'|'regional'|'local'|'source';
+export type CoverageDescriptor={url:string;bytes:number;sha256:string};
+export type CoverageCell={id:string;bounds:[number,number,number,number];levels:Partial<Record<CoverageLevel,CoverageDescriptor>>};
+export type CoverageManifest={schemaVersion:1;version:string;encoding:string;base:CoverageDescriptor;cells:CoverageCell[];bounds:number[];totals:Record<string,{bytes:number;files:number;vertices:number}>};
+export type MapCoverage={manifest:CoverageManifest;version:string;area:GeoJSON.FeatureCollection;mask:GeoJSON.FeatureCollection;territories:GeoJSON.FeatureCollection;boundaries:GeoJSON.FeatureCollection;cellFeatures:Map<string,GeoJSON.Feature[]>;
+ status:{version:string;lod:CoverageLevel;cells:string[];pending:number;error:string;ready:boolean;revision:number};subscribe(callback:(coverage:MapCoverage)=>void):()=>void;updateView(bounds:number[],zoom:number):Promise<void>;dispose():void};
+export const MAP_COVERAGE_MANIFEST:string;
+export const MAP_COVERAGE_LIMITS:Readonly<{manifestBytes:number;baseBytes:number;cellBytes:number;viewBytes:number;cacheBytes:number;concurrent:number;cells:number}>;
+export function decodeCoverage(document:unknown):GeoJSON.FeatureCollection;
+export function coverageLevel(zoom:number):CoverageLevel;
+export function coverageCells(manifest:CoverageManifest,bounds:number[],zoom:number):CoverageCell[];
+export function createMapCoverage(manifest:CoverageManifest,base:GeoJSON.FeatureCollection,options?:{canonicalMask?:boolean;fetch?:typeof fetch}):MapCoverage;
+export function loadMapCoverage(options?:{canonicalMask?:boolean;manifestURL?:string;fetch?:typeof fetch}):Promise<MapCoverage>;
+export function bindMapCoverage(map:{getBounds():{getWest():number;getSouth():number;getEast():number;getNorth():number};getZoom():number;on(type:string,callback:()=>void):unknown;off(type:string,callback:()=>void):unknown},coverage:MapCoverage,element:HTMLElement,apply:(coverage:MapCoverage)=>void|Promise<void>):()=>void;

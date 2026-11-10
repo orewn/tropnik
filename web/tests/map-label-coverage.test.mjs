@@ -128,6 +128,18 @@ test('water and path lines require their complete geometry to stay covered, incl
   assert.equal(h.writes.at(-1).features.filter(feature=>feature.geometry.type==='LineString').length,2);
 });
 
+test('a coverage LOD commit invalidates cached admissions without reloading vector tiles',()=>{
+  const h=harness(undefined,{[keyFor('openmaptiles','place')]:[point(1,[15,55],{class:'city',name:'Source coast'})]});
+  const listeners=new Set(),coverage={area:rectangle,subscribe(callback){listeners.add(callback);return()=>listeners.delete(callback);}};
+  const dispose=bindMapLabelCoverage(h.map,coverage,h.environment);h.flush();
+  assert.equal(h.writes.at(-1).features.length,1);
+  coverage.area=withHole;for(const notify of listeners)notify();h.flush();
+  assert.equal(h.writes.at(-1).features.length,0,'same feature must be rechecked against the source-level hole');
+  coverage.area=rectangle;for(const notify of listeners)notify();h.flush();
+  assert.equal(h.writes.at(-1).features.length,1);
+  dispose();assert.equal(listeners.size,0);
+});
+
 test('source queries use active original filters before expensive geometry conversion',()=>{
   const poi=[point(1,[15,55],{class:'shop'}),point(2,[15,55],{class:'viewpoint'}),point(3,[15,55],{class:'shop',subclass:'camp_site'})];
   const place=['city','town','village','country','state','continent'].map((value,index)=>point(index,[15,55],{class:value,name:value}));

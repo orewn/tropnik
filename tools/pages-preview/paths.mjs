@@ -2,7 +2,7 @@ import {createRequire} from 'node:module';
 
 const require = createRequire(new URL('../../web/package.json', import.meta.url));
 const ts = require('typescript');
-const publicRoot = /^\/(?:data|maps|terrain|api|offline-map|_offline|_next|assets|fonts|downloads|regions|routes|guides|trips|community|account|moderation|about|safety|sources|privacy|terms|android|search|planner|offline-fonts\.css|offline(?:-viewer\.html|\.js|\.css)?|preview|sw\.js|manifest\.webmanifest|favicon\.svg|og-cover\.png|icon-(?:192|512)\.png)(?:[/?#.]|$)/;
+const publicRoot = /^\/(?:data|maps|terrain|api|offline-map|_offline|_next|assets|fonts|downloads|regions|routes|guides|trips|community|account|moderation|about|safety|sources|privacy|terms|android|search|planner|offline-fonts\.css|offline-safety(?:\.(?:html|js|css))?|offline(?:-viewer\.html|\.js|\.css)?|preview|sw\.js|manifest\.webmanifest|favicon\.svg|og-cover\.png|icon-(?:192|512)\.png)(?:[/?#.]|$)/;
 const storagePrefixes = ['tropnik-shell-', 'tropnik-map-', 'tropnik-staging-', 'tropnik-hike-plans-', 'tropa-local-', 'tropa-auth-change', 'tropa-requests', 'tropnik-checklist', 'tropnik-download-map', 'tropnik-offline-map-change'];
 
 export function normalizeBase(value = '/tropnik/') {

@@ -58,6 +58,11 @@ import ru.tropa.app.data.PositionState
 import ru.tropa.app.data.ConnectionState
 import ru.tropa.app.data.canUseOnlineMap
 import ru.tropa.app.data.mapStyleForConnection
+import ru.tropa.app.data.withMapLabelCoverage
+import ru.tropa.app.data.MapLabelGroup
+import ru.tropa.app.data.MapCoverage
+import ru.tropa.app.data.MapLabelGeometry
+import org.maplibre.geojson.Point
 import ru.tropa.app.data.Region
 import ru.tropa.app.data.RussiaDisplayArea
 import ru.tropa.app.data.TrailRoute
@@ -82,6 +87,7 @@ fun TropaMap(
     var styleRevision by remember { mutableStateOf(0) }
     var styleGeneration by remember { mutableStateOf(0) }
     var styleLoading by remember { mutableStateOf(true) }
+    var labelGroups by remember { mutableStateOf<List<MapLabelGroup>>(emptyList()) }
     var onlineRequested by remember { mutableStateOf(true) }
     var onlineFailed by remember { mutableStateOf(false) }
     val onlineMode = canUseOnlineMap(connection, onlineRequested, onlineFailed)
@@ -112,6 +118,11 @@ fun TropaMap(
         if (result.isFailure) scopeError = "Обзорная область карты недоступна. Карточки и источники доступны ниже."
     }
     val currentDisplayArea by rememberUpdatedState(displayArea)
+    val coverageAssets by produceState<MapCoverage?>(null, context) {
+        value = withContext(Dispatchers.IO) { runCatching { MapCoverage.load(readAsset = { path -> context.assets.open(path).use { it.readBytes() } }) }.getOrNull() }
+    }
+    var activeCoverage by remember { mutableStateOf<MapLabelGeometry?>(null) }
+    val currentCoverage by rememberUpdatedState(activeCoverage)
     val selectRegion by rememberUpdatedState(onSelectRegion)
 
     DisposableEffect(lifecycle, mapView) {
@@ -154,7 +165,9 @@ fun TropaMap(
                     }
                 }
                 nativeMap.addOnMapClickListener { coordinate ->
-                    if (currentDisplayArea?.contains(coordinate.longitude, coordinate.latitude) != true) return@addOnMapClickListener false
+                    val inside = currentCoverage?.contains(Point.fromLngLat(coordinate.longitude, coordinate.latitude))
+                        ?: currentDisplayArea?.contains(coordinate.longitude, coordinate.latitude)
+                    if (inside != true) return@addOnMapClickListener false
                     val point = nativeMap.projection.toScreenLocation(coordinate)
                     val radius = 24f * context.resources.displayMetrics.density
                     val hits = nativeMap.queryRenderedFeatures(RectF(point.x - radius, point.y - radius, point.x + radius, point.y + radius), "region-markers")
@@ -183,11 +196,13 @@ fun TropaMap(
         val styleText = rawStyle ?: return@LaunchedEffect
         val generation = ++styleGeneration
         styleLoading = true
+        activeCoverage = null
         error = null
-        val prepared = withContext(Dispatchers.Default) { mapStyleForConnection(styleText, onlineMode) }
+        val prepared = withContext(Dispatchers.Default) { withMapLabelCoverage(mapStyleForConnection(styleText, onlineMode)) }
         withContext(Dispatchers.Main.immediate) {
-            nativeMap.setStyle(Style.Builder().fromJson(prepared)) {
+            nativeMap.setStyle(Style.Builder().fromJson(prepared.json)) {
                 if (styleGeneration == generation) {
+                    labelGroups = prepared.groups
                     styleLoading = false
                     error = null
                     styleRevision = generation
@@ -199,6 +214,13 @@ fun TropaMap(
             if (onlineMode) onlineFailed = true
             else error = "Локальная карта не открылась. Карточки и источники доступны ниже."
         }
+    }
+    DisposableEffect(map, mapView, styleRevision, styleLoading, coverageAssets, labelGroups) {
+        val nativeMap = map
+        val assets = coverageAssets
+        val coverage = if (nativeMap != null && assets != null && styleRevision > 0 && !styleLoading)
+            NativeMapCoverage(mapView, nativeMap, assets, labelGroups) { activeCoverage = it } else null
+        onDispose { coverage?.dispose() }
     }
     LaunchedEffect(eco, mapView) {
         withContext(Dispatchers.Main.immediate) { mapView.setMaximumFps(if (eco) 30 else 60) }
@@ -249,13 +271,14 @@ fun TropaMap(
         }
     }
 
-    LaunchedEffect(map, styleRevision, displayArea, position) {
+    LaunchedEffect(map, styleRevision, displayArea, activeCoverage, position) {
         val nativeMap = map ?: return@LaunchedEffect
         if (styleRevision == 0 || styleLoading) return@LaunchedEffect
         val area = displayArea ?: return@LaunchedEffect
         withContext(Dispatchers.Main.immediate) {
             val ready = position as? PositionState.Ready
-            val inside = ready?.fix?.let { area.contains(it.longitude, it.latitude) } == true
+            val inside = ready?.fix?.let { activeCoverage?.contains(Point.fromLngLat(it.longitude, it.latitude))
+                ?: area.contains(it.longitude, it.latitude) } == true
             nativeMap.style?.getSourceAs<GeoJsonSource>("position")?.setGeoJson(
                 points(if (inside) ready?.fix?.let { listOf(it.longitude to it.latitude) }.orEmpty() else emptyList()))
             scopeNotice = if (ready != null && !inside) "Геопозиция получена. Точка находится вне области карты России." else null

@@ -57,7 +57,7 @@
     "https://tiles.openfreemap.org/planet/latest",
     "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"
   ],
-  "webStyleSha256": "3e9add191f6da742d11d9e337995c04c970224c5a762ac5eec269d85a5720f43",
+  "webStyleSha256": "608a39863b00a59376c5ed905e32e1d8949a3bf822545fa61623bbe50ed1f457",
   "vectorTileJsonSnapshot": {
     "sourceUrl": "https://tiles.openfreemap.org/planet/latest",
     "retrievedAt": "2026-11-06",

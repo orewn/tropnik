@@ -29,6 +29,8 @@ import {MapTerrainPitch} from '@/lib/map-terrain-pitch';
 import {readRouteGeometry,routeGeometryPositions,identifyRouteGeometry,RENDERED_TRAIL_ID} from '@/lib/route-geometry';
 import {satelliteStyle,SATELLITE_SOURCE,SATELLITE_ERROR} from '@/lib/map-satellite';
 import {withMapLabelCoverage,bindMapLabelCoverage} from '@/public/maps/map-label-coverage.js';
+import {bindMapCoverage} from '@/public/maps/map-coverage-lod.js';
+import {applyMapLibreCoverage} from '@/public/maps/map-coverage-renderers.js';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -43,24 +45,27 @@ const ROUTE_COVERAGE_MESSAGE='У этой линии нет точек внут�
 const TRAIL_POINTS='trail-points',TRAIL_POINT_HALO='trail-point-halo',TRAIL_POINT_DOT='trail-point-dot',TRAIL_POINT_HIT='trail-point-hit';
 function overviewStyle(coverage:Coverage):StyleSpecification {
  return {version:8,name:'Тропник · Россия',sources:{
-  land:{type:'geojson',data:coverage.area},regions:{type:'geojson',data:'/data/territories.geojson'},
+  land:{type:'geojson',data:coverage.area,tolerance:0,maxzoom:18},regions:{type:'geojson',data:coverage.territories,tolerance:0,maxzoom:18},'regions-outline':{type:'geojson',data:coverage.boundaries,tolerance:0,maxzoom:18},
   'russia-relief':{type:'raster',tiles:['/maps/russia-relief/{z}/{x}/{y}.png'],tileSize:256,minzoom:0,maxzoom:4},
-  'russia-mask':{type:'geojson',data:coverage.mask},
+  'russia-mask':{type:'geojson',data:coverage.mask,tolerance:0,maxzoom:18},
  },layers:[
   {id:'background',type:'background',paint:{'background-color':MAP_OUTSIDE_COLOR}},
-  {id:'land',type:'fill',source:'land',paint:{'fill-color':'#DDE6D5','fill-outline-color':'#A7B69D'}},
+  {id:'land',type:'fill',source:'land',paint:{'fill-color':'#DDE6D5','fill-antialias':false}},
   {id:'overview-relief',type:'raster',source:'russia-relief',maxzoom:6,paint:{'raster-opacity':['interpolate',['linear'],['zoom'],0,.92,4,.88,6,0],'raster-contrast':.28,'raster-saturation':-.18,'raster-brightness-min':.08,'raster-brightness-max':.92,'raster-fade-duration':0}},
   {id:'region-fill',type:'fill',source:'regions',paint:{'fill-color':'#D7E0D0','fill-opacity':.18}},
-  {id:'region-boundary',type:'line',source:'regions',paint:{'line-color':'#748675','line-width':.7,'line-opacity':.32}},
+  {id:'region-boundary',type:'line',source:'regions-outline',paint:{'line-color':'#748675','line-width':.7,'line-opacity':.32}},
   {id:'region-selected',type:'fill',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'fill-color':'#91AC82','fill-opacity':.34}},
-  {id:'region-selected-outline',type:'line',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'line-color':'#315B45','line-width':['interpolate',['linear'],['zoom'],5,1.6,11,1],'line-opacity':['interpolate',['linear'],['zoom'],5,.86,11,.2]}},
+  {id:'region-selected-outline',type:'line',source:'regions-outline',filter:['==',['get','shapeName'],'__none'],paint:{'line-color':'#315B45','line-width':['interpolate',['linear'],['zoom'],5,1.6,11,1],'line-opacity':['interpolate',['linear'],['zoom'],5,.86,11,.2]}},
   {id:MASK,type:'fill',source:'russia-mask',paint:{'fill-color':MAP_OUTSIDE_COLOR,'fill-antialias':false}},
  ]};
 }
 function detailStyle(style:StyleSpecification,coverage:Coverage):StyleSpecification {
  const next=structuredClone(style);
- next.sources['overview-land']={type:'geojson',data:coverage.area};
- next.sources['russia-mask']={type:'geojson',data:coverage.mask};
+ next.sources['overview-land']={type:'geojson',data:coverage.area,tolerance:0,maxzoom:18};
+ next.sources['russia-mask']={type:'geojson',data:coverage.mask,tolerance:0,maxzoom:18};
+ next.sources.regions={type:'geojson',data:coverage.territories,tolerance:0,maxzoom:18};
+ next.sources['regions-outline']={type:'geojson',data:coverage.boundaries,tolerance:0,maxzoom:18};
+ for(const layer of next.layers)if(layer.id==='overview-land'&&layer.type==='fill'){delete layer.paint?.['fill-outline-color'];layer.paint={...layer.paint,'fill-antialias':false};}
  if(!next.layers.some(layer=>layer.id===MASK))next.layers.push({id:MASK,type:'fill',source:'russia-mask',paint:{'fill-color':MAP_OUTSIDE_COLOR,'fill-antialias':false}});
  return withMapLabelCoverage(next);
 }
@@ -146,7 +151,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  }
  useEffect(()=>{
   const containerElement=container.current,locationEpoch=locationRevision,styleEpoch=styleGeneration,displayedSelection=displayedTrail,edgeAnnotations=routeAnnotations.current;
-  let cancelled=false,geographyPainted=false,overviewFallback=false,satelliteFailed=false,directionLayoutFrame=0,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined,unbindZoom:(()=>void)|undefined,unbindCoverageLabels:(()=>void)|undefined;
+  let cancelled=false,geographyPainted=false,overviewFallback=false,satelliteFailed=false,directionLayoutFrame=0,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined,unbindZoom:(()=>void)|undefined,unbindCoverageLabels:(()=>void)|undefined,unbindCoverage:(()=>void)|undefined;
   let resizeFrame:ReturnType<typeof coalesceMapFrame>|undefined,hoverFrame:ReturnType<typeof coalesceMapFrame>|undefined,terrainPitch:MapTerrainPitch|undefined;
   let sources:MapSourceLoading|undefined;
   const unbindDirectionButtons:(()=>void)[]=[];
@@ -305,15 +310,17 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      // Keep pitched DEM coverage within the flat-view tile budget; vector
      // labels and trails retain their independent detail budget.
      if(map.getSource('terrain-dem')){map.setSourceTileLodParams(4,1,'terrain-dem');map.setSourceTileLodParams(3,1,'hillshade-dem');map.setSourceTileLodParams(3,2,'openmaptiles');}
-     if(!map.getSource('regions'))map.addSource('regions',{type:'geojson',data:'/data/territories.geojson'});
+     if(!map.getSource('regions'))map.addSource('regions',{type:'geojson',data:coverage.territories,tolerance:0,maxzoom:18});
+     if(!map.getSource('regions-outline'))map.addSource('regions-outline',{type:'geojson',data:coverage.boundaries,tolerance:0,maxzoom:18});
      if(!map.getLayer('region-fill'))map.addLayer({id:'region-fill',type:'fill',source:'regions',paint:{'fill-color':'#9CB48E','fill-opacity':['interpolate',['linear'],['zoom'],2,.1,7,0]}},MASK);
-     if(!map.getLayer('region-boundary'))map.addLayer({id:'region-boundary',type:'line',source:'regions',maxzoom:8,paint:{'line-color':'#718371','line-width':.7,'line-opacity':.34}},MASK);
+     if(!map.getLayer('region-boundary'))map.addLayer({id:'region-boundary',type:'line',source:'regions-outline',maxzoom:8,paint:{'line-color':'#718371','line-width':.7,'line-opacity':.34}},MASK);
      if(!map.getLayer('region-selected'))map.addLayer({id:'region-selected',type:'fill',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'fill-color':'#91AC82','fill-opacity':['interpolate',['linear'],['zoom'],2,.3,8,0]}},MASK);
-     if(!map.getLayer('region-selected-outline'))map.addLayer({id:'region-selected-outline',type:'line',source:'regions',filter:['==',['get','shapeName'],'__none'],paint:{'line-color':'#315B45','line-width':['interpolate',['linear'],['zoom'],5,1.6,11,1],'line-opacity':['interpolate',['linear'],['zoom'],5,.86,11,.2]}},MASK);
+     if(!map.getLayer('region-selected-outline'))map.addLayer({id:'region-selected-outline',type:'line',source:'regions-outline',filter:['==',['get','shapeName'],'__none'],paint:{'line-color':'#315B45','line-width':['interpolate',['linear'],['zoom'],5,1.6,11,1],'line-opacity':['interpolate',['linear'],['zoom'],5,.86,11,.2]}},MASK);
      highlightRegion(map,regionRef.current);
      applyMapLayerVisibility(map,layerVisibility.current);
      ensureTrailPointLayers(map);
     });
+    unbindCoverage=bindMapCoverage(map,coverage,container.current,current=>applyMapLibreCoverage(map,current));
     const hitLayers=()=>[TRAIL_POINT_HIT,'trail-casing','region-fill'].filter(id=>!!map.getLayer(id));
     let hoverPoint:import('maplibre-gl').Point|undefined,hoveredTrail:string|undefined;
     hoverFrame=coalesceMapFrame(()=>{
@@ -367,10 +374,10 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     resize=new ResizeObserver(()=>resizeFrame?.schedule());
     resize.observe(container.current);const panel=container.current.closest('.explore-layout')?.querySelector('.explore-panel');if(panel)resize.observe(panel);
    }catch(error){
-    if(cancelled)return;console.error('Map initialization failed',error);sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
+    if(cancelled)return;console.error('Map initialization failed',error);sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();unbindCoverage?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
    }
   })();
-  return()=>{cancelled=true;sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];edgeAnnotations.length=0;markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
+  return()=>{cancelled=true;sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();unbindCoverage?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];edgeAnnotations.length=0;markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
  },[planning]);
  useEffect(()=>{
   const map=mapRef.current;if(!map||!loaded)return;

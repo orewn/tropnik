@@ -5,7 +5,8 @@ export function joinAllowed(d: Departure, now = Date.now()) {
 }
 
 export function startAllowed(d: Departure, roster: Participant[], userId: string, now = Date.now()) {
-  return d.status === 'ready' && d.guideId === userId && d.guideEligible && d.routeOpen && now >= Date.parse(d.startsAt) && now < Date.parse(d.endsAt) && roster.some(p => p.userId === userId && p.status === 'checked_in') && roster.filter(p => p.status === 'checked_in').length >= d.minPeople;
+  const safetyReady = d.mchsNotificationPolicy !== 'required' || (d.safetyStatus === 'confirmed' && !!d.mchsConfirmed && !!d.startContactConfirmed && !roster.some(person => person.status === 'confirmed'));
+  return safetyReady && d.status === 'ready' && d.guideId === userId && d.guideEligible && d.routeOpen && now >= Date.parse(d.startsAt) && now < Date.parse(d.endsAt) && roster.some(p => p.userId === userId && p.status === 'checked_in') && roster.filter(p => p.status === 'checked_in').length >= d.minPeople;
 }
 
 export function reviewAllowed(d: Departure, user: User | null, reviews: Review[], target: 'guide' | 'route') {

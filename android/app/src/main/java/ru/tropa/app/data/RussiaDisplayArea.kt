@@ -14,6 +14,7 @@ internal class RussiaDisplayArea private constructor(
     val fitBounds: LatLngBounds,
     val cameraBounds: LatLngBounds,
     private val polygons: List<Geometry>,
+    val labelCoverage: MapLabelGeometry,
 ) {
     fun contains(longitude: Double, latitude: Double): Boolean {
         if (!longitude.isFinite() || !latitude.isFinite() || latitude !in -90.0..90.0) return false
@@ -40,7 +41,7 @@ internal class RussiaDisplayArea private constructor(
             val area = FeatureCollection.fromJson(readAsset("maps/russia/russia-canonical-area.geojson"))
             val polygons = area.features().orEmpty().mapNotNull { it.geometry() }
             require(polygons.isNotEmpty() && polygons.all { it is Polygon || it is MultiPolygon })
-            return RussiaDisplayArea(bounds("fitBounds"), bounds("recommendedMaxBounds"), polygons)
+            return RussiaDisplayArea(bounds("fitBounds"), bounds("recommendedMaxBounds"), polygons, MapLabelGeometry.fromPolygons(polygons))
         }
     }
 }

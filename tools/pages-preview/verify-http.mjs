@@ -41,6 +41,7 @@ try {
   await request('/',404);
   await request(base+'%invalid',400);
   await request(base+'api/auth/login',405,{method:'POST'});
+  for (const asset of ['offline-safety.html','offline-safety.js','offline-safety.css']) await request(base+asset,200);
   const index=await readFile(join(out,'index.html'),'utf8');
   const emitted=[...index.matchAll(/(?:src|href)="(\/[^"<>]+)"/g)].map(match=>match[1]);
   for (const url of new Set([...emitted,base+'data/russia-display-area.geojson',base+'data/russia-canonical-mask.geojson',base+'maps/russia-viewport.js',base+'maps/tropnik-sprite@2x.png',base+'maps/russia-relief/tilejson.json',base+'maps/russia-relief/manifest.json',base+'maps/russia-relief/0/0/0.png',base+'maps/russia-relief/4/0/0.png',base+'terrain/terrain-grid.json',base+'offline-fonts.css',base+'offline-map/manifest.json',base+'offline-map/terrain/landscape.html',base+'offline.js',base+'sw.js'])) {

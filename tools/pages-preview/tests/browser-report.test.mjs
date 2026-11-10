@@ -4,6 +4,7 @@ import {CLOSE_TRAIL_FIXTURE,assertBrowserReport,assertRouteEdgeFrame} from '../b
 import {projectMapPoint,unprojectMapPoint} from '../map-projection.mjs';
 import {directionHitAreasFixture} from './direction-hitareas-fixture.mjs';
 import {layerMenusFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
+import {coastFixture} from './coast-fixture.mjs';
 
 const commit='a'.repeat(40);
 const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
@@ -43,13 +44,14 @@ function zoomDesign(profile,engine,mobile){
   events:Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+tap*10+index*2,timestamp:100+tap*10+(index?2:0),trusted:true,pointerType:input,pointerId:mobile?tap+2:1}))).flat(),
   commands:[...(mobile?[]:['mouseMoved']),...Array.from({length:4},()=>mobile?['touchStart','touchEnd']:['mousePressed','mouseReleased']).flat()].map((type,index)=>({index,type,method:mobile?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent',status:'fulfilled',sentAtEpochMs:10000+index*.1,ackAtEpochMs:10040+index,sentOffsetMs:index*.1,ackOffsetMs:40+index,ackDurationMs:40+index*.9})),
  });
- return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:5,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),closeTrail:edges,
+ return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:6,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),closeTrail:edges,coast:coastFixture(profile,engine),
   zoomBurst:{passed:true,input,returnedToStart:true,increase:burst(1,10,high),decrease:burst(-1,high,10)},
   modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview'})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:mobile?'not-offered':'active'},scene3d:{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true}},
   screenshots:[...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
 }
 function evidence(){
  return{verified:true,sourceCommit:commit,mapInteractionSchemaVersion:3,
+  offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,networkSuccessfulResponses:0,screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
   profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'leaflet',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
   desktopProfiles:[{name:'desktop-webgl',engine:'maplibre',coarse:false,mapInteractionTested:true}],
   zoomDesigns:[zoomDesign('android-portrait','leaflet',true),zoomDesign('desktop-webgl','maplibre',false)],
@@ -58,6 +60,13 @@ function evidence(){
 test('both upload and public verification require real mobile and desktop map interaction evidence',()=>{
  const report=evidence();assert.equal(assertBrowserReport(report,commit),report);
  const changes=[
+  value=>delete value.offlineSafety,
+  value=>value.offlineSafety.offline=false,
+  value=>value.offlineSafety.coldNavigation=false,
+  value=>value.offlineSafety.savedThroughUI=false,
+  value=>value.offlineSafety.networkSuccessfulResponses=1,
+  value=>value.offlineSafety.draftExplicit=false,
+  value=>value.offlineSafety.contactRestored=false,
   value=>delete value.mapInteractionSchemaVersion,
   value=>value.mapInteractionSchemaVersion=2,
   value=>value.sourceCommit='b'.repeat(40),
@@ -119,6 +128,19 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
   value=>value.zoomDesigns[0].schemaVersion=2,
   value=>value.zoomDesigns[0].schemaVersion=3,
   value=>value.zoomDesigns[0].schemaVersion=4,
+  value=>value.zoomDesigns[0].schemaVersion=5,
+  value=>delete value.zoomDesigns[0].coast,
+  value=>value.zoomDesigns[0].coast.steps.pop(),
+  value=>value.zoomDesigns[0].coast.steps[0].pending=1,
+  value=>value.zoomDesigns[0].coast.steps[0].ready=false,
+  value=>value.zoomDesigns[0].coast.steps[0].error='cell-integrity',
+  value=>value.zoomDesigns[0].coast.steps[0].version='e'.repeat(16),
+  value=>value.zoomDesigns[0].coast.steps[0].centerErrorPx=20,
+  value=>value.zoomDesigns[0].coast.steps[4].lod='regional',
+  value=>value.zoomDesigns[0].coast.steps[4].cells=[],
+  value=>value.zoomDesigns[0].coast.resources[1].finished=false,
+  value=>value.zoomDesigns[0].coast.pans[0].events[0].trusted=false,
+  value=>value.zoomDesigns[0].coast.screenshots.pop(),
   value=>value.zoomDesigns[0].visualReviewRequired=false,
   value=>value.zoomDesigns[0].detailSteps.splice(6,1),
   value=>value.zoomDesigns[0].detailSteps.pop(),

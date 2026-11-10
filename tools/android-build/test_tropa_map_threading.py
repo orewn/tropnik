@@ -22,7 +22,7 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
         effect = between(
             self.source,
             "LaunchedEffect(map, styleRevision, displayArea, selected?.id, route?.id, route?.apiRevisionId, route?.geometryAsset, route?.inlineGeometry) {",
-            "LaunchedEffect(map, styleRevision, displayArea, position) {",
+            "LaunchedEffect(map, styleRevision, displayArea, activeCoverage, position) {",
         )
         io_marker = "withContext(Dispatchers.IO)"
         ui_marker = "withContext(Dispatchers.Main.immediate) ui@{"
@@ -47,7 +47,7 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
     def test_position_effect_mutates_map_only_from_main_dispatcher(self) -> None:
         effect = between(
             self.source,
-            "LaunchedEffect(map, styleRevision, displayArea, position) {",
+            "LaunchedEffect(map, styleRevision, displayArea, activeCoverage, position) {",
             "Box(modifier.background(Palette.Water)) {",
         )
         ui_marker = "withContext(Dispatchers.Main.immediate) {"

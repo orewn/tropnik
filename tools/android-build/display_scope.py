@@ -38,9 +38,10 @@ def verify_display_scope(provenance_bytes: bytes, read, style: dict | None = Non
         require(source.get("type") == "geojson" and source.get("data") == "asset://maps/russia/russia-canonical-mask.geojson",
                 "Native map does not use its canonical outside mask")
         layer = style["layers"][-1]
+        layer_source = "tropnik-map-coverage" if style.get("metadata", {}).get("tropnik:coverageManifestSha256") else "russia-outside"
         require(layer.get("id") == "russia-outside-mask" and layer.get("type") == "fill"
-                and layer.get("source") == "russia-outside" and layer.get("paint", {}).get("fill-opacity") == 1
-                and "fill-outline-color" not in layer.get("paint", {}), "Outside mask must cover labels without a strip stroke")
+                and layer.get("source") == layer_source and layer.get("paint", {}).get("fill-opacity") == 1
+                and "fill-outline-color" not in layer.get("paint", {}), "Stored style must initialize an opaque outside mask without a strip stroke")
         require(style.get("metadata", {}).get("tropnik:russiaBoundaryProvenanceSha256") == digest(provenance_bytes),
                 "Map style refers to a different display selection")
     return {"russiaDisplayAssetCount": 2, "russiaDisplayAssetBytesVerified": verified_bytes,

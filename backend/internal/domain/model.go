@@ -6,19 +6,20 @@ import (
 )
 
 var (
-	ErrNotFound     = errors.New("not_found")
-	ErrForbidden    = errors.New("forbidden")
-	ErrUnauthorized = errors.New("unauthorized")
-	ErrConflict     = errors.New("conflict")
-	ErrFull         = errors.New("departure_full")
-	ErrNotReady     = errors.New("departure_not_ready")
-	ErrClosed       = errors.New("route_closed")
-	ErrInvalid      = errors.New("invalid_request")
-	ErrDuplicate    = errors.New("already_exists")
-	ErrMuted        = errors.New("temporarily_muted")
-	ErrSpamCooldown = errors.New("posting_cooldown")
-	ErrRepeated     = errors.New("repeated_content")
-	ErrLinkLimit    = errors.New("link_limit")
+	ErrNotFound          = errors.New("not_found")
+	ErrForbidden         = errors.New("forbidden")
+	ErrUnauthorized      = errors.New("unauthorized")
+	ErrConflict          = errors.New("conflict")
+	ErrFull              = errors.New("departure_full")
+	ErrNotReady          = errors.New("departure_not_ready")
+	ErrClosed            = errors.New("route_closed")
+	ErrInvalid           = errors.New("invalid_request")
+	ErrDuplicate         = errors.New("already_exists")
+	ErrMuted             = errors.New("temporarily_muted")
+	ErrSpamCooldown      = errors.New("posting_cooldown")
+	ErrRepeated          = errors.New("repeated_content")
+	ErrLinkLimit         = errors.New("link_limit")
+	ErrSafetyUnavailable = errors.New("safety_not_configured")
 )
 
 type User struct {
@@ -54,50 +55,67 @@ type Geometry struct {
 }
 
 type Route struct {
-	ID             string     `json:"id"`
-	Slug           string     `json:"slug"`
-	RegionID       string     `json:"regionId"`
-	Title          string     `json:"title"`
-	Description    string     `json:"description"`
-	Difficulty     string     `json:"difficulty"`
-	Activity       string     `json:"activity"`
-	DistanceKM     float64    `json:"distanceKm"`
-	AscentM        int        `json:"ascentM"`
-	DurationMin    int        `json:"durationMin"`
-	MinPeople      int        `json:"minPeople"`
-	MaxGroupSize   int        `json:"maxGroupSize"`
-	RequiredGuides int        `json:"requiredGuides"`
-	Status         string     `json:"status"`
-	RevisionID     string     `json:"revisionId"`
-	Revision       int        `json:"revision"`
-	VerifiedAt     *time.Time `json:"verifiedAt"`
-	Source         Source     `json:"source"`
-	Geometry       Geometry   `json:"geometry"`
-	GeometryDetail string     `json:"geometryDetail"`
-	Season         string     `json:"season"`
-	UpdatedAt      time.Time  `json:"updatedAt"`
+	ID                      string              `json:"id"`
+	Slug                    string              `json:"slug"`
+	RegionID                string              `json:"regionId"`
+	Title                   string              `json:"title"`
+	Description             string              `json:"description"`
+	Difficulty              string              `json:"difficulty"`
+	Activity                string              `json:"activity"`
+	DistanceKM              float64             `json:"distanceKm"`
+	AscentM                 int                 `json:"ascentM"`
+	DurationMin             int                 `json:"durationMin"`
+	MinPeople               int                 `json:"minPeople"`
+	MaxGroupSize            int                 `json:"maxGroupSize"`
+	RequiredGuides          int                 `json:"requiredGuides"`
+	Status                  string              `json:"status"`
+	RevisionID              string              `json:"revisionId"`
+	Revision                int                 `json:"revision"`
+	VerifiedAt              *time.Time          `json:"verifiedAt"`
+	Source                  Source              `json:"source"`
+	Geometry                Geometry            `json:"geometry"`
+	GeometryDetail          string              `json:"geometryDetail"`
+	Season                  string              `json:"season"`
+	UpdatedAt               time.Time           `json:"updatedAt"`
+	RiskClass               string              `json:"riskClass"`
+	RouteType               string              `json:"routeType"`
+	LegalDifficultyCategory string              `json:"legalDifficultyCategory"`
+	MCHSNotificationPolicy  string              `json:"mchsNotificationPolicy"`
+	MCHSTerritorialUnitID   string              `json:"mchsTerritorialUnitId,omitempty"`
+	EmergencyExits          []SafetyPoint       `json:"emergencyExits"`
+	ControlPoints           []SafetyPoint       `json:"controlPoints"`
+	DefaultCheckInSchedule  []SafetyCheckInRule `json:"defaultCheckInSchedule"`
+	SafetyRevision          int                 `json:"safetyRevision"`
 }
 
 type Departure struct {
-	ID               string    `json:"id"`
-	RouteID          string    `json:"routeId"`
-	RouteRevisionID  string    `json:"routeRevisionId"`
-	RouteTitle       string    `json:"routeTitle"`
-	GuideID          *string   `json:"guideId"`
-	GuideName        *string   `json:"guideName"`
-	StartsAt         time.Time `json:"startsAt"`
-	EndsAt           time.Time `json:"endsAt"`
-	TimeZone         string    `json:"timeZone"`
-	MinPeople        int       `json:"minPeople"`
-	Capacity         int       `json:"capacity"`
-	ParticipantCount int       `json:"participantCount"`
-	Status           string    `json:"status"`
-	Version          int64     `json:"version"`
-	RouteOpen        bool      `json:"routeOpen"`
-	GuideEligible    bool      `json:"guideEligible"`
-	Membership       string    `json:"membership"`
-	CreatedAt        time.Time `json:"createdAt"`
-	ReviewTargets    *[]string `json:"reviewTargets,omitempty"`
+	ID                     string    `json:"id"`
+	RouteID                string    `json:"routeId"`
+	RouteRevisionID        string    `json:"routeRevisionId"`
+	RouteTitle             string    `json:"routeTitle"`
+	GuideID                *string   `json:"guideId"`
+	GuideName              *string   `json:"guideName"`
+	StartsAt               time.Time `json:"startsAt"`
+	EndsAt                 time.Time `json:"endsAt"`
+	TimeZone               string    `json:"timeZone"`
+	MinPeople              int       `json:"minPeople"`
+	Capacity               int       `json:"capacity"`
+	ParticipantCount       int       `json:"participantCount"`
+	Status                 string    `json:"status"`
+	Version                int64     `json:"version"`
+	RouteOpen              bool      `json:"routeOpen"`
+	GuideEligible          bool      `json:"guideEligible"`
+	Membership             string    `json:"membership"`
+	CreatedAt              time.Time `json:"createdAt"`
+	ReviewTargets          *[]string `json:"reviewTargets,omitempty"`
+	SafetyStatus           string    `json:"safetyStatus"`
+	SafetyPassportVersion  int       `json:"safetyPassportVersion"`
+	MCHSNotificationPolicy string    `json:"mchsNotificationPolicy"`
+	MCHSSubmissionID       *string   `json:"mchsSubmissionId,omitempty"`
+	MCHSConfirmed          bool      `json:"mchsConfirmed"`
+	StartContactConfirmed  bool      `json:"startContactConfirmed"`
+	ReturnReported         bool      `json:"returnReported"`
+	SafetyClosed           bool      `json:"safetyClosed"`
 }
 
 type Member struct{ UserID, Role, Status string }
@@ -203,15 +221,19 @@ func (g *Group) CheckIn(actor, userID string, expected int64, now time.Time) err
 		return ErrNotReady
 	}
 	m, ok := g.Members[userID]
-	if !ok || (m.Status != "confirmed" && m.Status != "checked_in") {
+	if !ok || (m.Status != "confirmed" && m.Status != "checked_in" && m.Status != "no_show") {
 		return ErrInvalid
 	}
 	if m.Status == "checked_in" {
 		return nil
 	}
+	if m.Status == "no_show" && g.ActiveCount() >= g.Capacity {
+		return ErrFull
+	}
 	m.Status = "checked_in"
 	g.Members[userID] = m
 	g.Version++
+	g.Refresh()
 	return nil
 }
 
@@ -270,6 +292,32 @@ func (g *Group) Transition(actor, action string, expected int64, now time.Time) 
 	default:
 		return ErrInvalid
 	}
+	g.Version++
+	g.Refresh()
+	return nil
+}
+
+// MarkAbsent settles the actual manifest before any required registration is
+// reconfirmed. Attendance is a guide decision, never a participant role claim.
+func (g *Group) MarkAbsent(actor, userID string, expected int64, now time.Time) error {
+	if !g.IsGuide(actor) || actor == userID {
+		return ErrForbidden
+	}
+	if expected != g.Version {
+		return ErrConflict
+	}
+	if (g.Status != "ready" && g.Status != "recruiting") || !now.Before(g.EndsAt) {
+		return ErrNotReady
+	}
+	m, ok := g.Members[userID]
+	if !ok || (m.Status != "confirmed" && m.Status != "checked_in" && m.Status != "no_show") {
+		return ErrInvalid
+	}
+	if m.Status == "no_show" {
+		return nil
+	}
+	m.Status = "no_show"
+	g.Members[userID] = m
 	g.Version++
 	g.Refresh()
 	return nil
