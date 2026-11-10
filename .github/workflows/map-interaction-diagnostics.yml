@@ -1,4 +1,4 @@
-name: Focused map interaction diagnosis
+name: Focused map and offline diagnosis
 
 on:
   push:
@@ -13,8 +13,13 @@ concurrency:
 
 jobs:
   inspect:
+    name: Diagnose ${{ matrix.diagnostic }}
     runs-on: ubuntu-24.04
     timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        diagnostic: [map-interactions, offline-safety]
     steps:
       - name: Check out the diagnostic source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -33,21 +38,22 @@ jobs:
         run: |
           node tools/pages-preview/fetch-apk.mjs
           node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
-      - name: Trace the existing desktop map interaction
+      - name: Run the existing focused browser audit
         timeout-minutes: 8
         env:
           GITHUB_SHA: ${{ github.sha }}
-          TROPNIK_BROWSER_DIAGNOSTIC: map-interactions
-          TROPNIK_BROWSER_TRACE: '1'
+          TROPNIK_BROWSER_DIAGNOSTIC: ${{ matrix.diagnostic }}
+          TROPNIK_BROWSER_TRACE: ${{ matrix.diagnostic == 'map-interactions' && '1' || '' }}
         run: node tools/pages-preview/browser-smoke.mjs
       - name: Preserve diagnostics without a release artifact
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: tropnik-map-interaction-diagnostic-${{ github.run_id }}
+          name: tropnik-${{ matrix.diagnostic }}-diagnostic-${{ github.run_id }}
           path: |
             web/pages-preview/design-qa
             web/pages-preview/dist/browser-map-interactions-diagnostic.json
+            web/pages-preview/dist/browser-offline-safety-diagnostic.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7

@@ -837,7 +837,8 @@ try{
     `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
   ]);
   await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
-  const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(`http://127.0.0.1:${httpPort}/tropnik/`)}`,{method:'PUT'});
+  const initialUrl=runPolicy.diagnostic==='offline-safety'?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
+  const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(initialUrl)}`,{method:'PUT'});
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
@@ -945,15 +946,22 @@ try{
     if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
     if(profile.mapInteraction)await checkpoint('profile-complete');
   }
-  if(!runPolicy.diagnostic){
+  if(!runPolicy.diagnostic||runPolicy.diagnostic==='offline-safety'){
   currentProfile='android-offline-safety';
+  if(runPolicy.diagnostic==='offline-safety')await cdp.call('Network.enable');
   const offlineSafety=await runOfflineSafetyAudit(cdp,{evaluate,waitValue,sleep,pointerAt,pointerSelector,url:`http://127.0.0.1:${httpPort}/tropnik/`});
+  if(runPolicy.diagnostic==='offline-safety'){
+    assert.notEqual(runPolicy.reportFile,'browser-verification.json');
+    const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:offlineSafety.profile,offlineSafety,completedAt:new Date().toISOString()};
+    await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
+  }else{
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');
   const report={verified:true,mapInteractionSchemaVersion:3,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
+  }
   }
 }catch(error){
   failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
