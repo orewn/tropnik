@@ -45,6 +45,8 @@
   background:var(--surface);color:var(--forest);
 }
 .explore-layout .map-message button{min-width:44px;min-height:44px}
+/* An open popup owns the atlas controls layer above later status notices. */
+.explore-layout .layer-control:has(.layer-menu){z-index:30}
 /* The independent 3D scene owns its own loading/error state. Keep a retained
    2D tile notice for the return to the map, without covering the scene title. */
 .atlas-wrap.showing-terrain>.map-message{display:none}
