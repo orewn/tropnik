@@ -1,0 +1,485 @@
+{
+  "schemaVersion": 1,
+  "assembledAt": "2026-11-10T19:06:47+00:00",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "sourceCommit": "107370e96c49b5b1cdb8a50ab91951ed7748a83c",
+  "workflowRun": 42879782173,
+  "workflowJob": 130052645006,
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/42879782173",
+  "artifact": {
+    "id": 13793511951,
+    "bytes": 3646037,
+    "sha256": "13b459d36d3adb080a03ad4bbd0be687d7a3715838b0f80fdb78d8ea2e9ef61d"
+  },
+  "scenarioReport": {
+    "file": "browser-map-interactions-diagnostic.json",
+    "bytes": 177852,
+    "sha256": "07c348c6216c4eefc8b53b93aec71ff1abd7c826d412432806b094fa9edc8b13"
+  },
+  "traces": [
+    {
+      "scope": "first-desktop-altai-selection",
+      "file": "desktop-webgl-first-altai.trace.json",
+      "bytes": 13865240,
+      "sha256": "75481a54ea0903d73aec75b87c47ef0981075e4da01d32c836c5f0bc39cd5f44",
+      "status": "complete",
+      "stopReason": "action-complete",
+      "recordedDurationMs": 4099.684794000001,
+      "eof": true,
+      "dataLossOccurred": false,
+      "cpuSamples": 63307,
+      "errors": [],
+      "metadataSha256": "175429f8540e9df932612a738e776c790f96d23d2541ec29dbd0e443463bd2b9"
+    },
+    {
+      "scope": "desktop-route-request-ownership",
+      "file": "desktop-webgl-request-ownership.trace.json",
+      "bytes": 13499079,
+      "sha256": "34aaeb0931c43d1a0b8ef32c613b2bfa0d402a239093b1016d45bdb63eb2fa78",
+      "status": "complete",
+      "stopReason": "action-complete",
+      "recordedDurationMs": 7844.089139999996,
+      "eof": true,
+      "dataLossOccurred": false,
+      "cpuSamples": 123156,
+      "errors": [],
+      "metadataSha256": "b84d2052c54b75e19f0f4ec4bb4da02599c503aa7491614ff185790b2d9299e5"
+    },
+    {
+      "scope": "desktop-sibling-polygon-selection",
+      "file": "desktop-webgl-sibling-polygon.trace.json",
+      "bytes": 11274546,
+      "sha256": "8f04144202c099ec880be7ba18ac935ecadf39a45600df345f98374f54fcaaa9",
+      "status": "complete",
+      "stopReason": "action-complete",
+      "recordedDurationMs": 7308.592522999992,
+      "eof": true,
+      "dataLossOccurred": false,
+      "cpuSamples": 142429,
+      "errors": [],
+      "metadataSha256": "2564189639e031999c202fc4da1aa73ae2119a76c3174742df36ac6e38fbe0c7"
+    }
+  ],
+  "capture": {
+    "limits": {
+      "durationMs": 8000,
+      "drainMs": 5000,
+      "closeMs": 1000,
+      "maxBytes": 33554432,
+      "bufferSizeKiB": 16384,
+      "chunkBytes": 262144
+    },
+    "firstAltaiCategories": [
+      "devtools.timeline",
+      "blink.user_timing",
+      "gpu",
+      "disabled-by-default-devtools.timeline",
+      "disabled-by-default-devtools.timeline.stack",
+      "disabled-by-default-v8.cpu_profiler",
+      "cc",
+      "viz",
+      "skia",
+      "disabled-by-default-viz.quads",
+      "disabled-by-default-skia.gpu"
+    ],
+    "extraCategoryScope": "The five Viz/Skia categories are enabled only for the first-Altai window under the existing map-interactions diagnostic flag. Full-matrix defaults and the other two windows retain their existing categories.",
+    "firstAltaiEventCount": 48303,
+    "firstAltaiCapturedCategoryCounts": [
+      {
+        "name": "disabled-by-default-skia.gpu",
+        "events": 11106
+      },
+      {
+        "name": "cc",
+        "events": 6266
+      },
+      {
+        "name": "disabled-by-default-viz.quads",
+        "events": 2923
+      },
+      {
+        "name": "viz",
+        "events": 1944
+      },
+      {
+        "name": "skia",
+        "events": 2
+      }
+    ],
+    "categoriesTruncated": false
+  },
+  "instrumentedScenario": {
+    "completed": true,
+    "functionalPassed": true,
+    "performancePassed": true,
+    "performanceIssues": [],
+    "acceptance": "longestTaskMs < 750",
+    "limitMs": 750,
+    "observedLongestTaskMs": 657,
+    "performanceTimeOrigin": 1794336904087.2,
+    "peak": {
+      "startTime": 7124.799999999988,
+      "duration": 657,
+      "name": "self",
+      "observedAt": 7781.799999999988,
+      "phase": "map-interactions/first-altai"
+    },
+    "durationMs": 58963,
+    "cls": 0.0011691622037550017,
+    "interpretation": "This single instrumented diagnostic passes its unchanged limit. It is not a full release acceptance run and does not establish a performance improvement in the application."
+  },
+  "nativeFirstSelection": {
+    "input": "mouse",
+    "target": "Altai direction label outside the 44px anchor",
+    "point": {
+      "x": 782,
+      "y": 795.25
+    },
+    "before": {
+      "region": "",
+      "route": "",
+      "zoom": 1.90540610449558
+    },
+    "after": {
+      "region": "altai",
+      "route": "",
+      "zoom": 6.1
+    },
+    "events": [
+      {
+        "type": "pointerdown",
+        "time": 6763.5,
+        "trusted": true,
+        "pointerType": "mouse"
+      },
+      {
+        "type": "pointerup",
+        "time": 6773.5,
+        "trusted": true,
+        "pointerType": "mouse"
+      },
+      {
+        "type": "click",
+        "time": 6773.899999999994,
+        "trusted": true,
+        "pointerType": "mouse"
+      }
+    ],
+    "traceDispatch": [
+      {
+        "type": "pointerdown",
+        "traceStartUs": 109880502,
+        "wallMs": 1.015
+      },
+      {
+        "type": "pointerup",
+        "traceStartUs": 109890531,
+        "wallMs": 0.628
+      },
+      {
+        "type": "click",
+        "traceStartUs": 109891494,
+        "wallMs": 41.215
+      }
+    ],
+    "peakStartAfterClickMs": 350.915,
+    "noSyntheticDomClick": true,
+    "actionWasNotRepeatedOrPrewarmedByTracing": true
+  },
+  "circlePeak": {
+    "rendererPid": 2575,
+    "rendererTid": 2575,
+    "traceStartUs": 110242409,
+    "durationMs": 656.944,
+    "performanceObserverRoundedMs": 657,
+    "rendererSamples": 3008,
+    "drawCircleInclusiveSamples": 2733,
+    "programConstructorInclusiveSamples": 2733,
+    "getProgramParameterLeafSamples": 2067,
+    "getUniformBlockIndexLeafSamples": 664,
+    "stack": [
+      "Map._render",
+      "Painter.render",
+      "drawCircle (qM)",
+      "ProgramCache.getProgram",
+      "Program constructor (xj)",
+      "applyUBOBindings (UA)"
+    ],
+    "linkStatusQuery": {
+      "name": "GLES2Implementation::GetProgramiv",
+      "traceStartUs": 110261652,
+      "wallMs": 462.475,
+      "threadCpuMs": 13.148
+    },
+    "uniformBlockQueries": [
+      {
+        "name": "GLES2::GetUniformBlockIndex",
+        "traceStartUs": 110724319,
+        "wallMs": 124.523,
+        "threadCpuMs": 3.854,
+        "callOrdinal": 1
+      },
+      {
+        "name": "GLES2::GetUniformBlockIndex",
+        "traceStartUs": 110848876,
+        "wallMs": 0.002,
+        "threadCpuMs": 0.001,
+        "callOrdinal": 2
+      },
+      {
+        "name": "GLES2::GetUniformBlockIndex",
+        "traceStartUs": 110848881,
+        "wallMs": 0.001,
+        "threadCpuMs": 0.001,
+        "callOrdinal": 3
+      }
+    ],
+    "nonoverlappingPrimaryQueryWallMs": 586.998,
+    "separateWebglLinkCommand": {
+      "name": "GLES2DecoderPassthroughImpl::DoLinkProgram",
+      "traceStartUs": 110722899,
+      "wallMs": 0.277,
+      "threadCpuMs": 0.276
+    },
+    "uboOrderInference": "The trace does not name block arguments. Pinned MapLibre 6.16.0 queries ProjectionUBO, TerrainUBO, FrameUBO in that order. The first query contains the material wait; the later two calls are microseconds."
+  },
+  "vizPresentation": {
+    "gpuPid": 2497,
+    "gpuMainTid": 2497,
+    "vizCompositorTid": 2524,
+    "overlappingTasks": [
+      {
+        "overlaps": "linkStatusQuery",
+        "task": {
+          "name": "Scheduler::RunTask",
+          "traceStartUs": 110273826,
+          "wallMs": 446.254,
+          "threadCpuMs": 3.605
+        },
+        "finishPaint": {
+          "name": "SkiaOutputSurfaceImplOnGpu::FinishPaintCurrentFrame",
+          "traceStartUs": 110273830,
+          "wallMs": 1.075,
+          "threadCpuMs": 0.682
+        },
+        "beginAccessImages": {
+          "name": "SkiaOutputSurfaceImplOnGpu::BeginAccessImages",
+          "traceStartUs": 110273836,
+          "wallMs": 0.015,
+          "threadCpuMs": 0.014
+        },
+        "swapBuffers": {
+          "name": "SkiaOutputSurfaceImplOnGpu::SwapBuffers",
+          "traceStartUs": 110274908,
+          "wallMs": 445.163,
+          "threadCpuMs": 2.911
+        },
+        "postSubmit": {
+          "name": "Graphics.Pipeline",
+          "traceStartUs": 110274918,
+          "wallMs": 445.116,
+          "threadCpuMs": 2.865
+        }
+      },
+      {
+        "overlaps": "uniformBlockQueries[0]",
+        "task": {
+          "name": "Scheduler::RunTask",
+          "traceStartUs": 110724042,
+          "wallMs": 124.509,
+          "threadCpuMs": 1.155
+        },
+        "finishPaint": {
+          "name": "SkiaOutputSurfaceImplOnGpu::FinishPaintCurrentFrame",
+          "traceStartUs": 110724183,
+          "wallMs": 0.708,
+          "threadCpuMs": 0.639
+        },
+        "swapBuffers": {
+          "name": "SkiaOutputSurfaceImplOnGpu::SwapBuffers",
+          "traceStartUs": 110724893,
+          "wallMs": 123.65,
+          "threadCpuMs": 0.367
+        },
+        "postSubmit": {
+          "name": "Graphics.Pipeline",
+          "traceStartUs": 110724904,
+          "wallMs": 123.599,
+          "threadCpuMs": 0.318
+        }
+      }
+    ],
+    "postSubmitStep": "STEP_BUFFER_SWAP_POST_SUBMIT",
+    "completePostSubmitSpanCount": 14,
+    "completePostSubmitTotalMs": 3029.366,
+    "finishPaintSpanCount": 15,
+    "maximumFinishPaintWallMs": 5.692,
+    "copyOutputEventCount": 0,
+    "interpretation": "Both primary metadata-query waits overlap long GPU presentation spans. The measured time is primarily inside SwapBuffers/PostSubmit rather than the preceding FinishPaint section. These thread durations do not measure all software-driver worker CPU time."
+  },
+  "requestDialogLayout": {
+    "sampleCount": 8,
+    "limit": 32,
+    "viewport": {
+      "width": 1440,
+      "height": 1000,
+      "dpr": 1
+    },
+    "container": {
+      "x": 384,
+      "y": 72,
+      "width": 1041,
+      "height": 928
+    },
+    "canvas": {
+      "x": 384,
+      "y": 72,
+      "width": 1041,
+      "height": 928
+    },
+    "backing": {
+      "width": 1041,
+      "height": 928
+    },
+    "rootClientWidths": [
+      1425,
+      1440
+    ],
+    "canvasAttributeMutationCount": 0,
+    "activeAfterAudit": false,
+    "overflow": false,
+    "errors": []
+  },
+  "offlineSafety": {
+    "workflowJob": 130052644669,
+    "artifact": {
+      "id": 13794470248,
+      "bytes": 171339,
+      "sha256": "d0799943d11b8b72e3f9dee5b43b393d391e91303685b84347a62c60203dc29a"
+    },
+    "scenarioReport": {
+      "file": "browser-offline-safety-diagnostic.json",
+      "bytes": 8353,
+      "sha256": "d8773d93702c1a263860eeb9069a1e710ea1b52cdb136390e9fea81104fd130b"
+    },
+    "diagnosticOnly": true,
+    "verified": false,
+    "releaseEligible": false,
+    "profile": "android-portrait",
+    "passed": true,
+    "nativeInputs": 4,
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "offline": true,
+    "titleRestored": true,
+    "contactRestored": true,
+    "draftExplicit": true,
+    "privateApiNotCached": true,
+    "networkSuccessfulResponses": 0,
+    "allInputEventsTrusted": true,
+    "originTransport": {
+      "method": "origin-socket-destroy",
+      "blockedRequests": 4,
+      "probePassed": true,
+      "probeErrorCode": "ECONNRESET",
+      "restored": true,
+      "active": false
+    },
+    "screenshot": {
+      "file": "android-offline-emergency-card.png",
+      "bytes": 177174,
+      "sha256": "6aabf6727911036be3cb4faa4546e3990f2a540fc3c4492470f848868546a5a1"
+    }
+  },
+  "browserAndSourceInference": {
+    "observedRevision": "a21ce95c24ce3964416f09ae1862f53f319eb4d0-refs/branch-heads/8078@{#1704}",
+    "inspectedCommit": "a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+    "inspectedTag": "156.0.8078.79",
+    "revisionSource": "Current first-Altai trace.metadata.revision; the tag-to-commit mapping was also verified against the public Chromium repository.",
+    "observedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+    "observedFlags": [
+      "--headless=new",
+      "--use-gl=angle",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+      "--ozone-platform=headless"
+    ],
+    "sources": [
+      {
+        "url": "https://github.com/chromium/chromium/blob/a21ce95c24ce3964416f09ae1862f53f319eb4d0/components/viz/service/display_embedder/skia_output_surface_impl_on_gpu.cc",
+        "finding": "The traced POST_SUBMIT section invokes PresentFrame and output-device Present."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/a21ce95c24ce3964416f09ae1862f53f319eb4d0/components/viz/service/display_embedder/skia_output_device_gl.cc",
+        "finding": "The GL output device delegates presentation to GLSurface SwapBuffers."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/a21ce95c24ce3964416f09ae1862f53f319eb4d0/ui/ozone/platform/headless/headless_surface_factory.cc",
+        "finding": "Headless view surfaces derive from GLSurfaceEglReadback; an empty file-output location does not bypass base readback."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/a21ce95c24ce3964416f09ae1862f53f319eb4d0/ui/ozone/common/gl_surface_egl_readback.cc",
+        "finding": "SwapBuffers calls ReadPixels before HandlePixels; ReadPixels calls glReadPixels using the full surface width and height."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/a21ce95c24ce3964416f09ae1862f53f319eb4d0/ui/gl/gl_implementation.cc",
+        "finding": "IsSoftwareGLImplementation classifies ANGLE SwiftShader as software GL."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/a21ce95c24ce3964416f09ae1862f53f319eb4d0/ui/ozone/platform/x11/x11_surface_factory.cc",
+        "finding": "For software GL, the X11 factory creates GLSurfaceEglReadbackX11."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/a21ce95c24ce3964416f09ae1862f53f319eb4d0/ui/ozone/platform/x11/gl_surface_egl_readback_x11.cc",
+        "finding": "The X11 surface inherits the same base readback and then draws the resulting pixmap into X11."
+      }
+    ],
+    "readbackInference": "The observed headless/SwiftShader configuration selects a readback surface in the inspected source. Its presentation path performs a full-surface glReadPixels. The native readPixels call itself was not separately traced; the measured evidence is the encompassing presentation span.",
+    "readbackLimit": "This trace does not separate pixel-transfer cost from synchronization with previously queued rendering, deferred driver work, or other software-driver workers.",
+    "x11Alternative": {
+      "sameSwiftShaderAvoidsReadback": false,
+      "reason": "X11 also selects GLSurfaceEglReadbackX11 for ANGLE SwiftShader, inheriting the same readback before its X11 pixel copy.",
+      "headedConfigurationWasExecuted": false,
+      "runnerImage": "ubuntu-24.04",
+      "runnerImageVersion": "20261101.360.1",
+      "runnerVersionEvidence": "The actual diagnostic job setup log records this image version.",
+      "runnerManifestUrl": "https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/Ubuntu2404-Readme.md",
+      "documentedXvfb": "2:21.1.12-1ubuntu1.9",
+      "documentedChrome": "156.0.8078.79",
+      "conclusion": "Availability of Xvfb is confirmed by the pinned image manifest, but a headed/X11 switch with the same backend is not an evidenced remedy for this readback."
+    }
+  },
+  "profileOwnership": {
+    "method": "Group V8 profiles by pid and profile id; Profile identifies the sampled owner thread, while ProfileChunk may be emitted on another thread. Sample timestamps are Profile.startTime plus cumulative timeDeltas.",
+    "rendererStream": {
+      "pid": 2575,
+      "tid": 2575,
+      "id": "0x1",
+      "startUs": 109024931,
+      "endUs": 112966473,
+      "nodes": 1681,
+      "samples": 16888,
+      "largestSampleGapMs": 116.629
+    },
+    "parseWarnings": [],
+    "sampleInterpretation": "Sample counts identify observed call stacks, not CPU or wall duration. Native dur is elapsed wall time; tdur is recorded CPU time on that thread.",
+    "bundle": "maplibre-gl-gSiY3OKT.js",
+    "maplibreVersion": "6.16.0",
+    "mappingReference": "web-0.4.23-map-profile-5ab527b.json"
+  },
+  "priorEvidencePreserved": [
+    "web-0.4.23-map-profile-17b3616.json",
+    "web-0.4.23-map-profile-aa8bb4b.json"
+  ],
+  "limits": [
+    "This focused diagnostic does not supersede failed full Pages acceptance or authorize publication. No application-performance improvement is claimed from this single 657ms observation.",
+    "The current diagnostic restores the original control CSS and adds bounded diagnostic categories. It does not adopt an SDK patch, change rendering quality, change performance thresholds, or prewarm the tested map selection.",
+    "All three traces reached action completion within their existing 8s limits and parsed with EOF and no reported loss; they do not constitute full-scenario CPU coverage.",
+    "No native glReadPixels stack, software-driver internal worker profile, or complete frame backpressure experiment was captured. The exact readback/synchronization cost split remains unresolved.",
+    "The short observed DoLinkProgram command does not exclude deferred compiler or driver work.",
+    "The X11 alternative is a source review, not a new browser execution or performance result."
+  ]
+}

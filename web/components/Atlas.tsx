@@ -27,7 +27,8 @@ import {coalesceMapFrame,publishMapCamera,resolveRenderedTrail} from '@/lib/map-
 import {MapZoomButtons,MAP_ZOOM_BUTTONS,bindZoomButtonCancellation} from '@/lib/map-zoom-buttons';
 import {MapTerrainPitch} from '@/lib/map-terrain-pitch';
 import {readRouteGeometry,routeGeometryPositions,identifyRouteGeometry,RENDERED_TRAIL_ID} from '@/lib/route-geometry';
-import {satelliteStyle,SATELLITE_SOURCE,SATELLITE_ERROR} from '@/lib/map-satellite';
+import {satelliteStyle,satelliteSourceForBounds,SATELLITE_PROVIDERS,SATELLITE_SOURCE,SATELLITE_OVERVIEW_SOURCE,SATELLITE_ERROR} from '@/lib/map-satellite';
+import {SatelliteImagerySession,prepareMapLibreSatellite,EMPTY_SATELLITE_STATE,type SatelliteImageryState} from '@/lib/map-satellite-session';
 import {withMapLabelCoverage,bindMapLabelCoverage} from '@/public/maps/map-label-coverage.js';
 import {bindMapCoverage} from '@/public/maps/map-coverage-lod.js';
 import {createMapLibreCoverage} from '@/public/maps/map-coverage-renderers.js';
@@ -106,6 +107,8 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  const [fallback,setFallback]=useState(false),[scene,setScene]=useState(false);
  const [loaded,setLoaded]=useState(false),[painted,setPainted]=useState(false),[tilesLoading,setTilesLoading]=useState(false),[offline,setOffline]=useState(false);
  const [baseMode,setBaseMode]=useState<MapBaseMode>('detail'),[terrain,setTerrain]=useState(false),[layersOpen,setLayersOpen]=useState(false),[status,setStatus]=useState('');
+  const [satelliteState,setSatelliteState]=useState<SatelliteImageryState>(EMPTY_SATELLITE_STATE);
+  const [satelliteGridLoading,setSatelliteGridLoading]=useState(false);
  const [sourceFailures,setSourceFailures]=useState<MapSourceFailure[]>([]),[styleUnavailable,setStyleUnavailable]=useState(false),[styleRetrying,setStyleRetrying]=useState(false);
  const [pathLayer,setPathLayer]=useState(true),[boundaryLayer,setBoundaryLayer]=useState(true),[mapZoom,setMapZoom]=useState(2),[styleRevision,setStyleRevision]=useState(0);
  const sceneAvailable=hasTerrainPreview(trail,region?.id);
@@ -140,6 +143,10 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
   let cancelled=false,geographyPainted=false,overviewFallback=false,satelliteFailed=false,directionLayoutFrame=0,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined,unbindZoom:(()=>void)|undefined,unbindCoverageLabels:(()=>void)|undefined,unbindCoverage:(()=>void)|undefined;
   let resizeFrame:ReturnType<typeof coalesceMapFrame>|undefined,hoverFrame:ReturnType<typeof coalesceMapFrame>|undefined,terrainPitch:MapTerrainPitch|undefined;
   let sources:MapSourceLoading|undefined;
+  let satelliteSession:SatelliteImagerySession|undefined,applyingStyle=false,satelliteGridPending=false;
+  let currentSatelliteState:SatelliteImageryState=EMPTY_SATELLITE_STATE;
+  const satellitePending=(value:boolean)=>{if(value!==satelliteGridPending){satelliteGridPending=value;if(!cancelled)setSatelliteGridLoading(value);}};
+  const stopSatellite=()=>{satelliteSession?.dispose();satelliteSession=undefined;currentSatelliteState=EMPTY_SATELLITE_STATE;satellitePending(false);if(!cancelled)setSatelliteState(EMPTY_SATELLITE_STATE);};
   const unbindDirectionButtons:(()=>void)[]=[];
   const disconnect=()=>{
    setOffline(!navigator.onLine);
@@ -172,6 +179,21 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      // back up DEM uploads on constrained GPUs without improving those layers.
      canvasContextAttributes:{antialias:false,preserveDrawingBuffer:false,powerPreference:'high-performance'}});
     mapRef.current=map;
+    const updateSatellite=()=>{
+     if(cancelled||applyingStyle||map!==mapRef.current||basePreference.current!=='satellite'||!map.getLayer(SATELLITE_SOURCE)||!map.getLayer(SATELLITE_OVERVIEW_SOURCE))return;
+     if(!satelliteSession){
+      const generation=styleGeneration.current;
+      const current=()=>!cancelled&&map===mapRef.current&&styleGeneration.current===generation;
+      satelliteSession=new SatelliteImagerySession({
+       prepare:source=>prepareMapLibreSatellite(map,SATELLITE_PROVIDERS[source].source,current),
+       onState:state=>{if(current()){currentSatelliteState=state;setSatelliteState(state);satellitePending(!!state.active||state.loading);}},
+       onError:()=>{if(current()&&!satelliteFailed){satelliteFailed=true;styleSession.current?.fallback();setStatus(SATELLITE_ERROR);}},
+      });
+     }
+     const bounds=map.getBounds();
+     void satelliteSession.choose(satelliteSourceForBounds({west:bounds.getWest(),south:bounds.getSouth(),east:bounds.getEast(),north:bounds.getNorth()}));
+    };
+    map.on('move',updateSatellite);map.on('resize',updateSatellite);
     unbindCoverageLabels=bindMapLabelCoverage(map,coverage);
     selectionCamera.current=new MapSelectionCamera();overviewRequested.current=false;
     const selectedRoute=trailRef.current;selectionCamera.current.beginRouteSelection(selectedRoute?.id?{id:selectedRoute.id,url:selectedRoute.geometryUrl,geometry:selectedRoute.geometry}:undefined);
@@ -205,6 +227,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      satellite:async()=>satelliteStyle(detailRef.current??await loadPublicJSON<StyleSpecification>('/maps/tropa-style.json').then(style=>detailRef.current=detailStyle(style,coverage)).catch(()=>overviewStyle(coverage))),
      apply:(next,mode)=>{
       if(cancelled||map!==mapRef.current)return;
+       applyingStyle=true;stopSatellite();
       if(mode==='satellite')satelliteFailed=false;
       if(mode!=='overview')setStyleUnavailable(false);
       sources?.beforeStyleChange();
@@ -212,15 +235,18 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
       map.stop();const center=map.getCenter(),zoom=map.getZoom();
       const hadStyle=!!map.getStyle();
       if(hadStyle)map.setTerrain(null);
-      map.jumpTo({center:[center.lng,center.lat],zoom,pitch:0});map.setStyle(next,{diff:hadStyle});
+       try{map.jumpTo({center:[center.lng,center.lat],zoom,pitch:0});map.setStyle(next,{diff:hadStyle});}
+       finally{applyingStyle=false;}
+       updateSatellite();
      },
      onError:()=>{if(!cancelled)setStyleUnavailable(true);},
     });
-    map.on('sourcedataloading',event=>sources?.loading(event));
+    map.on('sourcedataloading',event=>{sources?.loading(event);if(currentSatelliteState.active&&event.sourceId===SATELLITE_PROVIDERS[currentSatelliteState.active].source)satellitePending(true);});
     map.on('sourcedata',event=>sources?.data(event));
     map.on('sourcedataabort',event=>sources?.aborted(event));
     map.on('idle',()=>{if(!cancelled){sources?.reconcile();syncRouteEdgeAnnotations(edgeAnnotations);}});
     map.on('render',()=>{
+     if(!cancelled&&currentSatelliteState.active){const source=SATELLITE_PROVIDERS[currentSatelliteState.active].source;satellitePending(currentSatelliteState.loading||map.isMoving()||!map.getSource(source)||!map.isSourceLoaded(source));}
      if(cancelled||geographyPainted)return;
      const land=map.getLayer('overview-land')?'overview-land':map.getLayer('land')?'land':null;
      if(land&&map.isSourceLoaded(land)&&map.getSource('russia-mask')&&map.isSourceLoaded('russia-mask')&&map.queryRenderedFeatures({layers:[land]}).length){geographyPainted=true;setPainted(true);}
@@ -286,10 +312,10 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      const c=map.getCenter();viewportRef.current?.(viewportRegionId(c.lng,c.lat,map.getZoom()));
     });
     map.on('dragstart',()=>{selectionCamera.current.cancelNavigation();zoomControl.cancel();fullView.current=false;frameRefit.current?.cancel();});
-    map.on('movestart',()=>{terrainPitch?.moving();locationRevision.current++;setStatus(previous=>previous==='Определяем местоположение…'?'':previous);if(container.current)container.current.dataset.mapCamera='moving';});
+    map.on('movestart',()=>{terrainPitch?.moving();if(currentSatelliteState.active)satellitePending(true);locationRevision.current++;setStatus(previous=>previous==='Определяем местоположение…'?'':previous);if(container.current)container.current.dataset.mapCamera='moving';});
     map.on('zoomstart',event=>{if(event.originalEvent){zoomControl.cancel();fullView.current=false;frameRefit.current?.cancel();}if(container.current)container.current.dataset.mapCamera='moving';});
     map.on('style.load',()=>{
-     if(cancelled)return;displayedTrail.current=undefined;routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];routeAnnotations.current.length=0;geographyPainted=false;styleGeneration.current++;setLoaded(true);setStyleRevision(v=>v+1);
+     if(cancelled)return;stopSatellite();displayedTrail.current=undefined;routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];routeAnnotations.current.length=0;geographyPainted=false;styleGeneration.current++;setLoaded(true);setStyleRevision(v=>v+1);
      sources?.styleLoaded();
      if(map.getSource('openmaptiles'))overviewFallback=false;
      setStatus(!navigator.onLine?OFFLINE_MESSAGE:satelliteFailed&&basePreference.current==='satellite'?SATELLITE_ERROR:overviewFallback?'Детальная карта недоступна. Показан сохранённый обзор.':basePreference.current==='overview'?OVERVIEW_MESSAGE:'');
@@ -305,6 +331,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      highlightRegion(map,regionRef.current);
      applyMapLayerVisibility(map,layerVisibility.current);
      ensureTrailPointLayers(map);
+      updateSatellite();
     });
     const coverageRenderer=createMapLibreCoverage(map);
     const unbindCoverageSession=bindMapCoverage(map,coverage,container.current,coverageRenderer.apply);
@@ -342,12 +369,12 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      const territory=territoryForMapPoint(direct.length?direct:fallback,[russiaLongitude(event.lngLat.lng),event.lngLat.lat]);
      if(territory){map.stop();frameRefit.current?.cancel();onRegionRef.current(territory);}
     });
-    map.on('webglcontextlost',()=>setStatus('Графический контекст карты прерван. Восстанавливаем отображение.'));
-    map.on('webglcontextrestored',()=>setStatus(''));
+    map.on('webglcontextlost',()=>{stopSatellite();setStatus('Графический контекст карты прерван. Восстанавливаем отображение.');});
+    map.on('webglcontextrestored',()=>{setStatus('');updateSatellite();});
     map.on('error',event=>{
      if(cancelled)return;const sourceEvent=event as typeof event&MapSourceSignal,sourceId=sourceEvent.sourceId;
      sources?.error(sourceEvent);
-     if(sourceId===SATELLITE_SOURCE&&basePreference.current==='satellite'&&map.getSource(SATELLITE_SOURCE)&&!satelliteFailed){satelliteFailed=true;styleSession.current?.fallback();setStatus(SATELLITE_ERROR);}
+     if([SATELLITE_SOURCE,SATELLITE_OVERVIEW_SOURCE].includes(sourceId??'')&&basePreference.current==='satellite'&&map.getLayer(sourceId!)&&map.getLayoutProperty(sourceId!,'visibility')==='visible'&&!satelliteFailed){satelliteFailed=true;styleSession.current?.fallback();setStatus(SATELLITE_ERROR);}
      else if(!map.getStyle()&&!overviewFallback){overviewFallback=true;setStyleUnavailable(true);styleSession.current?.fallback();setStatus('Детальная карта недоступна. Открываем сохранённый обзор.');}
      else if(['overview-land','land','regions','russia-mask'].includes(sourceId||''))setStatus('Не удалось загрузить географию России. Обновите страницу.');
      else console.warn('Non-critical map detail failed; keeping the rendered overview.');
@@ -362,10 +389,10 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     resize=new ResizeObserver(()=>resizeFrame?.schedule());
     resize.observe(container.current);const panel=container.current.closest('.explore-layout')?.querySelector('.explore-panel');if(panel)resize.observe(panel);
    }catch(error){
-    if(cancelled)return;console.error('Map initialization failed',error);sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();unbindCoverage?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
+    if(cancelled)return;console.error('Map initialization failed',error);stopSatellite();sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();unbindCoverage?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
    }
   })();
-  return()=>{cancelled=true;sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();unbindCoverage?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];edgeAnnotations.length=0;markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
+  return()=>{cancelled=true;stopSatellite();sources?.dispose();if(sourceLoading.current===sources)sourceLoading.current=null;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();unbindCoverageLabels?.();unbindCoverage?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();if(terrainPitchControl.current===terrainPitch)terrainPitchControl.current=null;displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];edgeAnnotations.length=0;markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
  },[planning]);
  useEffect(()=>{
   const map=mapRef.current;if(!map||!loaded)return;
@@ -497,7 +524,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  if(fallback)return <Atlas2D region={region} trail={trail} visibleTrails={visibleTrails} onTrail={onTrail} onRegion={onRegion} onMapNote={onMapNote} onViewportRegion={onViewportRegion} planning={planning} planPoints={planPoints}/>;
  const availabilityMessage=styleUnavailable||sourceFailures.some(failure=>failure.id==='openmaptiles')?DETAIL_ERROR:sourceFailures.length?TERRAIN_ERROR:'';
  const message=offline?OFFLINE_MESSAGE:availabilityMessage||status,retryAvailable=!!availabilityMessage&&!offline,retrying=styleRetrying||sourceFailures.some(failure=>failure.retrying);
- return <div className={`atlas-wrap ${scene?'showing-terrain':''}`} data-map-imagery={baseMode==='satellite'?'satellite':undefined} data-map-detail={mapZoom>=ROUTE_PRESENTATION.closeZoom?'close':undefined} data-map-route={trail?'selected':undefined}>
+ return <div className={`atlas-wrap ${scene?'showing-terrain':''}`} data-map-imagery={baseMode==='satellite'?'satellite':undefined} data-map-imagery-source={baseMode==='satellite'?satelliteState.active??undefined:undefined} data-map-imagery-target={baseMode==='satellite'?satelliteState.target??undefined:undefined} data-map-imagery-state={baseMode==='satellite'?(satelliteState.loading||satelliteGridLoading?'loading':satelliteState.active?'ready':'loading'):undefined} data-map-detail={mapZoom>=ROUTE_PRESENTATION.closeZoom?'close':undefined} data-map-route={trail?'selected':undefined}>
   <div ref={container} className="atlas-canvas" style={{visibility:painted?'visible':'hidden'}} role="region" aria-label="Интерактивная карта направлений России"/>
   {!painted&&!message&&<div className="map-skeleton"><MapIcon name="compass" size={38}/><span>Открываем карту России</span></div>}
   {trail?<MapRouteContext title={trail.title} caption={overviewContextCaption(baseMode,mapZoom,scene)}/>:<div className="map-context"><span className="live-dot"/><span>{region?region.name:'Россия'}</span><span className="context-divider"/><span>{baseMode==='satellite'?'Спутник':region?(baseMode==='detail'?'Тропы и местность':'Обзорная карта'):routeCountLabel(visibleTrails.length)}</span></div>}
@@ -508,6 +535,6 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
   {message&&<div className="map-message" role="status">{offline?<WifiSlash size={18}/>:<MapIcon name="info" size={18}/>}<span>{message}</span>{retryAvailable&&<button onClick={()=>void retryMap()} disabled={retrying}>{retrying?'Загружаем…':'Повторить'}</button>}{baseMode==='detail'&&<button onClick={()=>void changeBase('overview')}>Обзор</button>}</div>}
   <div className="map-legend"><span className="legend-line"/>Тропа на карте<span className="legend-region"/>Направление<span className="legend-hint">{mapZoom<6?'Выберите регион, чтобы приблизить':'Условия и доступ проверяйте в карточке'}</span></div>
   {sceneAvailable&&<TerrainScene trail={trail} visible={scene} onClose={()=>setScene(false)}/>}
-  {!scene&&<MapAttribution ready={painted} terrain={terrain||(baseMode==='detail'&&mapZoom>=5)} satellite={baseMode==='satellite'} zoom={mapZoom}/>}
+  {!scene&&<MapAttribution ready={painted} terrain={terrain||(baseMode==='detail'&&mapZoom>=5)} satellite={baseMode==='satellite'} satelliteSource={satelliteState.active??satelliteState.target??'eox-s2'} satelliteLoading={satelliteState.loading||satelliteGridLoading} zoom={mapZoom}/>}
  </div>;
 }

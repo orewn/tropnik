@@ -1,0 +1,34 @@
+import {coastFixture} from './coast-fixture.mjs';
+import {unprojectMapPoint} from '../map-projection.mjs';
+import {SATELLITE_REGION} from '../browser-satellite-audit.mjs';
+
+export function satelliteFixture(profile,engine){
+ const mobile=engine==='leaflet',input=mobile?'touch':'mouse',zoomStep=mobile?.75:1;
+ const rect={left:mobile?0:384,top:mobile?68:72,width:mobile?412:1041,height:mobile?847:928};rect.right=rect.left+rect.width;rect.bottom=rect.top+rect.height;
+ const viewport={width:mobile?412:1440,height:mobile?915:1000,dpr:mobile?2:1};
+ const click=()=>({input,point:{x:100,y:100,unobscured:true},events:['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+index,trusted:true,pointerType:input,pointerId:1}))});
+ const frame=(longitude=180,zoom=4,source='eox-bluemarble')=>({engine,region:SATELLITE_REGION,imagery:source?'satellite':'',source,target:source,state:source?'ready':'',
+  credit:{visible:!!source,text:source==='eox-bluemarble'?'NASA Blue Marble · EOX · Обзорный снимок · детализация ниже'+(zoom>8?' · Увеличен обзорный снимок':''):source?'EOxCloudless by EOX':''},
+  viewport:{...viewport},rect:{...rect},camera:{longitude,latitude:67.5,zoom,tileSize:mobile?256:512},scrollY:0,
+  ...(source?{resolution:source==='eox-bluemarble'?'overview':'detail',successfulRequestIds:source==='eox-bluemarble'?[source,'eox-bluemarble-west']:[source],pendingRequestIds:[],failedRequestIds:[],resourceSequence:9,resourcePhase:'enable-satellite'}:{}),
+ });
+ const native8=4+Math.ceil(4/zoomStep)*zoomStep,upwardCount=Math.ceil(4/zoomStep)+2;
+ const steps=[['dateline-overview',180,4,'eox-bluemarble'],['dateline-native8',180,native8,'eox-bluemarble'],['dateline-overzoom',180,native8+2*zoomStep,'eox-bluemarble'],['west-eox',140,4,'eox-s2'],['dateline-return',180,4,'eox-bluemarble'],['detail-restored',180,4,'']].map(([stage,longitude,zoom,source])=>({stage,...frame(longitude,zoom,source),...(source?{coordinate:[longitude,67.5],centerErrorPx:0,resourcePhase:stage}:{})}));
+ const pan=(stage,coordinate)=>{
+  const result=structuredClone(coastFixture(profile,engine).pans[0]),after=frame(coordinate[0]).camera;
+  const beforeCenter=unprojectMapPoint({x:rect.left+rect.width/2+result.delta.dx,y:rect.top+rect.height/2+result.delta.dy},after,rect);
+  result.stage=stage;result.coordinate=coordinate;result.before={camera:{...after,longitude:beforeCenter[0],latitude:beforeCenter[1]},rect:{...rect}};result.after={camera:after,rect:{...rect}};
+  result.start.x+=rect.left;result.end.x+=rect.left;for(const event of result.events)event.x+=rect.left;for(const command of result.commands)command.x+=rect.left;return result;
+ };
+ const zooms=[];let z=4;for(const direction of [...Array(upwardCount).fill(1),...Array(upwardCount).fill(-1)]){const before=frame(180,z);z+=direction*zoomStep;zooms.push({direction,click:click(),before,after:frame(180,z)});}
+ const resources={limit:512,sequence:9,observedRequests:3,discardedRequests:0,requests:[
+  {requestId:'eox-bluemarble',source:'eox-bluemarble',url:'https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/8/62/0.jpg',tile:{z:8,x:0,y:62},status:200,mimeType:'image/png',finished:true,bytes:9000},
+  {requestId:'eox-bluemarble-west',source:'eox-bluemarble',url:'https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/8/62/255.jpg',tile:{z:8,x:255,y:62},status:200,mimeType:'image/png',finished:true,bytes:9000},
+  {requestId:'eox-s2',source:'eox-s2',url:'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/4/3/14.jpg',tile:{z:4,x:14,y:3},status:200,mimeType:'image/jpeg',finished:true,bytes:10000},
+ ]};
+ resources.requests.forEach((item,index)=>Object.assign(item,{firstSequence:index*3+1,requestedSequence:index*3+1,responseSequence:index*3+2,finishedSequence:index*3+3,phase:index===2?'west-eox':'enable-satellite',responsePhase:index===2?'west-eox':'enable-satellite'}));
+ return{schemaVersion:1,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
+  pans:[pan('dateline-overview',[180,67.5]),pan('west-eox',[140,67.5]),pan('dateline-return',[180,67.5])],zooms,
+  toggles:[{label:'Спутник',open:click(),select:click(),close:null,before:frame(180,4,''),after:frame()},{label:'Детальные тропы онлайн',open:click(),select:click(),close:null,before:frame(),after:frame(180,4,'')}],
+  screenshots:steps.map(({stage})=>({stage,file:`${profile}-satellite-${stage}.png`,bytes:10000,sha256:'b'.repeat(64)})),resources,performance:{layoutShift:0,longestTaskMs:100}};
+}

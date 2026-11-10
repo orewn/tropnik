@@ -9,6 +9,13 @@ export const TERRAIN_TRACE_LIMITS=Object.freeze({...DESKTOP_TRACE_LIMITS,duratio
 // events duplicated RunTask and consumed half the evidence. Keep renderer task,
 // layout, CPU stack and GPU evidence without the redundant scheduler stream.
 export const DESKTOP_TRACE_CATEGORIES=Object.freeze(['devtools.timeline','blink.user_timing','gpu','disabled-by-default-devtools.timeline','disabled-by-default-devtools.timeline.stack','disabled-by-default-v8.cpu_profiler']);
+// The first-Altai diagnostic needs the work inside Viz's opaque GPU scheduler
+// task, not just the WebGL query waiting behind it. Chrome 156 traces frame/pass
+// painting, CopyOutput and SwapBuffers under viz; viz.quads adds quad material.
+// https://github.com/chromium/chromium/blob/156.0.8078.79/components/viz/service/display_embedder/skia_output_surface_impl_on_gpu.cc
+// https://github.com/chromium/chromium/blob/156.0.8078.79/components/viz/service/display/skia_renderer.cc
+// Keep this fixed allowlist out of other windows and the full-matrix defaults.
+export const FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES=Object.freeze([...DESKTOP_TRACE_CATEGORIES,'cc','viz','skia','disabled-by-default-viz.quads','disabled-by-default-skia.gpu']);
 
 /** Validate before browser startup. Recording is optional evidence; the full
  * native-input and performance gates run regardless of this setting. */

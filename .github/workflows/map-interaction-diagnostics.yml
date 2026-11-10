@@ -1,4 +1,4 @@
-name: Focused map and offline diagnosis
+name: Focused map, satellite and offline diagnosis
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        diagnostic: [map-interactions, offline-safety]
+        diagnostic: [map-interactions, offline-safety, satellite-continuity]
     steps:
       - name: Check out the diagnostic source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -54,6 +54,7 @@ jobs:
             web/pages-preview/design-qa
             web/pages-preview/dist/browser-map-interactions-diagnostic.json
             web/pages-preview/dist/browser-offline-safety-diagnostic.json
+            web/pages-preview/dist/browser-satellite-continuity-diagnostic.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7

@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {browserTraceEnabled} from '../browser-trace.mjs';
 import {browserAuditRunPolicy} from '../browser-zoom-audit.mjs';
 import {assertBrowserReport} from '../browser-report.mjs';
+import {satellitePerformanceIssues} from '../browser-satellite-audit.mjs';
 
 // Execute the actual profile dispatch loop with audit boundaries substituted.
 // This checks option forwarding and invocation counts, not browser rendering.
@@ -21,15 +22,16 @@ const profiles=[
  {name:'phone-landscape',width:844,height:390,engine:'leaflet',mobile:true,mapInteraction:false},
 ];
 
-async function dispatchProfiles(traceEnabled,audit,policy=browserAuditRunPolicy(undefined),issues=[],offlineAudit){
+async function dispatchProfiles(traceEnabled,audit,policy=browserAuditRunPolicy(undefined),issues=[],offlineAudit,satelliteAudit){
  const unavailable=async()=>({available:false});
  const notInvoked=()=>assert.fail('The routing test must not invoke browser helpers');
- const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[],offlineCalls=[],cdpCalls=[];
+ const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[],offlineCalls=[],satelliteCalls=[],cdpCalls=[];
  const bindings={
   assert,profiles,runPolicy:policy,traceEnabled,cdp:{call:async(method,parameters)=>cdpCalls.push({method,parameters})},httpPort:4200,
-  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],profilePerformance:[],performanceIssues:issues,
+  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],satelliteAudits:[],profilePerformance:[],performanceIssues:issues,
   REPORT:policy.reportFile,reports,loadCalls,mapCalls,process:{env:{GITHUB_SHA:'a'.repeat(40)}},console:{log(){}},writeFile:async(path,text)=>reports.push({path,report:JSON.parse(text)}),
   runZoomDesignAudit:audit,
+  satelliteCalls,satellitePerformanceIssues,runSatelliteContinuityAudit:async(cdp,profile,helpers)=>{satelliteCalls.push(profile.name);return satelliteAudit? satelliteAudit(cdp,profile,helpers):{profile:profile.name,performance:{layoutShift:0,longestTaskMs:100}};},
   server:{},offlineOriginTransport:{start:notInvoked,snapshot:notInvoked,restore:notInvoked},
   offlineCalls,cdpCalls,runOfflineSafetyAudit:async(cdp,helpers)=>{offlineCalls.push({cdp,helpers});return offlineAudit?offlineAudit(cdp,helpers):{schemaVersion:1,profile:'android-portrait',passed:true};},
   loadProfile:async(_cdp,_url,profile)=>{loadCalls.push(profile.name);return{engine:profile.engine,width:profile.width,scrollWidth:profile.width,escaping:[],undersized:[]};},
@@ -50,6 +52,7 @@ for(const [label,flag] of [['default',undefined],['explicit opt-in','1']]){
   const result=await dispatchProfiles(traceEnabled,async(_cdp,profile,helpers,options)=>{
    calls.push({name:profile.name,options});
    assert.equal(helpers.url,'http://127.0.0.1:4200/tropnik/');
+   assert.equal(Array.isArray(helpers.performanceIssues),true,'The new satellite interval must feed the existing delayed performance gate');
    return{profile:profile.name};
   });
   assert.deepEqual(calls,[
@@ -71,6 +74,27 @@ for(const [label,flag] of [['default',undefined],['explicit opt-in','1']]){
 test('a desktop audit failure propagates unchanged without repeating or continuing the matrix',async()=>{
  const failure=new Error('The maplibre map did not settle'),calls=[];
  const observed=await dispatchProfiles(true,async(_cdp,profile)=>{calls.push(profile.name);throw failure;}).then(()=>null,error=>error);
+ assert.equal(observed,failure);assert.deepEqual(calls,['desktop-webgl']);
+});
+
+test('satellite diagnosis runs both real renderer profiles once without the normal map/zoom matrix or release output',async()=>{
+ const policy=browserAuditRunPolicy('satellite-continuity');
+ assert.deepEqual(policy,{diagnostic:'satellite-continuity',reportFile:'browser-satellite-continuity-diagnostic.json',profiles:['android-portrait','desktop-webgl']});
+ assert.equal(browserTraceEnabled(undefined,policy.diagnostic),false,'Satellite diagnosis does not enable CPU/GPU tracing');
+ const run=await dispatchProfiles(false,()=>assert.fail('Satellite diagnosis must not invoke the full zoom matrix'),policy,[],undefined,async(cdp,profile,helpers)=>{
+  assert.equal(helpers.url,'http://127.0.0.1:4200/tropnik/');assert.equal(typeof cdp.call,'function');
+  return{profile:profile.name,engine:profile.engine,passed:true,performance:{layoutShift:0,longestTaskMs:profile.mobile?351:100}};
+ });
+ assert.deepEqual(run.satelliteCalls,['desktop-webgl','android-portrait']);assert.deepEqual(run.loadCalls,[]);assert.deepEqual(run.mapCalls,[]);assert.equal(run.offlineCalls.length,0);assert.deepEqual(run.zoomDesigns,[]);
+ assert.equal(run.reports.length,2);assert.equal(run.reports[0].report.status,'running');
+ const {path,report}=run.reports[1];assert.equal(path,'browser-satellite-continuity-diagnostic.json');assert.equal(report.status,'completed');
+ assert.equal(report.profiles.length,2);assert.equal(report.performancePassed,false);assert.equal(report.performanceIssues[0].limit,350);assert.equal(report.performanceIssues[0].value,351);
+ assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);assert.throws(()=>assertBrowserReport(report,'a'.repeat(40)));
+});
+
+test('satellite failures propagate without retrying a profile or claiming a complete diagnostic',async()=>{
+ const failure=new Error('NASA imagery transfer failed'),calls=[];
+ const observed=await dispatchProfiles(false,()=>assert.fail('No full matrix fallback'),browserAuditRunPolicy('satellite-continuity'),[],undefined,async(_cdp,profile)=>{calls.push(profile.name);throw failure;}).then(()=>null,error=>error);
  assert.equal(observed,failure);assert.deepEqual(calls,['desktop-webgl']);
 });
 

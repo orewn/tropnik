@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "kind": "focused-satellite-continuity-review",
+  "sourceCommit": "e749d9917d430d11f86be75a784a279b41fe704f",
+  "workflowRunId": 42885781512,
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/42885781512",
+  "jobId": 130073627453,
+  "jobStatus": "completed",
+  "jobConclusion": "success",
+  "jobStartedAt": "2026-11-10T19:29:35Z",
+  "jobCompletedAt": "2026-11-10T19:33:35Z",
+  "jobDurationSeconds": 240.0,
+  "browserStepStartedAt": "2026-11-10T19:30:40Z",
+  "browserStepCompletedAt": "2026-11-10T19:33:31Z",
+  "browserStepDurationSeconds": 171.0,
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "artifact": {
+    "id": 13796880901,
+    "name": "tropnik-satellite-continuity-diagnostic-42885781512",
+    "bytes": 8247683,
+    "sha256": "caffd99237dbd10d8a1dd8e0ceffcb502bcdf2f8ca30e8da3e44274a1c76d2f9",
+    "downloadHashMatched": true
+  },
+  "diagnosticReport": {
+    "path": "dist/browser-satellite-continuity-diagnostic.json",
+    "bytes": 558406,
+    "sha256": "35721daf83c816357f723d58bb2f5b35c8e6a88b8d9d06f900923ecd200e9c53",
+    "status": "completed",
+    "performancePassed": true,
+    "performanceIssues": []
+  },
+  "automatedAssertionsRechecked": true,
+  "profiles": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "input": "touch",
+      "passed": true,
+      "startedAt": "2026-11-10T19:30:41.437Z",
+      "completedAt": "2026-11-10T19:31:53.615Z",
+      "durationMs": 72178,
+      "performance": {
+        "layoutShift": 0.06297297156260845,
+        "longestTaskMs": 268,
+        "longestTaskLimitMs": 350,
+        "layoutShiftLimit": 0.12,
+        "passed": true
+      },
+      "rawReport": {
+        "path": "design-qa/android-portrait-satellite-continuity.json",
+        "bytes": 225077,
+        "sha256": "256be24f2cc4c44a3d3fb89b5797ffb7a162f4fc01e35bfb18933d0e0c624744"
+      },
+      "nativePanCount": 9,
+      "nativeZoomClicks": 16,
+      "providerToggleCount": 2,
+      "cameraRectViewportDprPreservedOnToggles": true,
+      "maximumCenterErrorPx": 0.7927647178635736,
+      "centerErrorLimitPx": 6,
+      "network": {
+        "totalObserved": 131,
+        "finished": 126,
+        "canceled": 5,
+        "nonCanceledFailures": 0,
+        "discarded": 0,
+        "allImageryCapturesHadNoPendingOrFailedSourceRequests": true,
+        "allRequestsCompleted": false
+      },
+      "native8SeamColumns": [
+        {
+          "tile": {
+            "z": 8,
+            "x": 255,
+            "y": 62
+          },
+          "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/8/62/255.jpg",
+          "status": 200,
+          "finished": true,
+          "mimeType": "image/png",
+          "encodedNetworkBytes": 83405,
+          "fromDiskCache": false,
+          "fromServiceWorker": false
+        },
+        {
+          "tile": {
+            "z": 8,
+            "x": 0,
+            "y": 62
+          },
+          "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/8/62/0.jpg",
+          "status": 200,
+          "finished": true,
+          "mimeType": "image/png",
+          "encodedNetworkBytes": 77012,
+          "fromDiskCache": false,
+          "fromServiceWorker": false
+        }
+      ],
+      "frames": [
+        {
+          "stage": "dateline-overview",
+          "file": "design-qa/android-portrait-satellite-dateline-overview.png",
+          "bytes": 455118,
+          "sha256": "910229d0e8307479ace8cc65316d1769c33196a126d5d4078672d53dfff86e49",
+          "dimensions": [
+            824,
+            1830
+          ],
+          "source": "eox-bluemarble",
+          "state": "ready",
+          "zoom": 3.7046647410674476,
+          "centerErrorPx": 0.37150901134625,
+          "personallyInspected": true,
+          "observations": "Chukotka and Wrangel contain visible overview imagery; the original broad blank band is absent. Source and lower-detail notice are readable."
+        },
+        {
+          "stage": "dateline-native8",
+          "file": "design-qa/android-portrait-satellite-dateline-native8.png",
+          "bytes": 861930,
+          "sha256": "3d46b7cb1c909c16d1995e061fee6317d0bdbc549789dd04c8b428aba2e7874d",
+          "dimensions": [
+            824,
+            1830
+          ],
+          "source": "eox-bluemarble",
+          "state": "ready",
+          "zoom": 8.204664741067447,
+          "centerErrorPx": 5.423546516952132e-06,
+          "personallyInspected": true,
+          "observations": "Real but coarse imagery fills both sides; a strong vertical mosaic seam with horizontal resampling streaks is plainly visible at 180 degrees."
+        },
+        {
+          "stage": "dateline-overzoom",
+          "file": "design-qa/android-portrait-satellite-dateline-overzoom.png",
+          "bytes": 500985,
+          "sha256": "d1f213d0d503b41c59db5c095a509afa61ed1da5511531a1563d2dc72ece549c",
+          "dimensions": [
+            824,
+            1830
+          ],
+          "source": "eox-bluemarble",
+          "state": "ready",
+          "zoom": 9.704664741067447,
+          "centerErrorPx": 0.7927647178635736,
+          "personallyInspected": true,
+          "observations": "The same coarse seam and horizontal streaks become more prominent under overzoom; no broad empty band. Lower-detail and enlarged-overview notices remain visible."
+        },
+        {
+          "stage": "west-eox",
+          "file": "design-qa/android-portrait-satellite-west-eox.png",
+          "bytes": 786690,
+          "sha256": "04a0469c505c602f4cec9a7fe537ad57ba52b4641c284d8eb595105fff53494b",
+          "dimensions": [
+            824,
+            1830
+          ],
+          "source": "eox-s2",
+          "state": "ready",
+          "zoom": 3.7046647410674467,
+          "centerErrorPx": 1.670694663694098e-05,
+          "personallyInspected": true,
+          "observations": "Detailed EOxCloudless backdrop and its attribution restore west of the problem envelope."
+        },
+        {
+          "stage": "dateline-return",
+          "file": "design-qa/android-portrait-satellite-dateline-return.png",
+          "bytes": 456447,
+          "sha256": "8e447287662cf9154e61b4dd669f86f12504d1565e323f101da7a5afdf0c5f82",
+          "dimensions": [
+            824,
+            1830
+          ],
+          "source": "eox-bluemarble",
+          "state": "ready",
+          "zoom": 3.7046647410674467,
+          "centerErrorPx": 1.6007463528535038e-05,
+          "personallyInspected": true,
+          "observations": "EOX Blue Marble overview and lower-detail attribution return at the dateline; the broad blank band does not return."
+        },
+        {
+          "stage": "detail-restored",
+          "file": "design-qa/android-portrait-satellite-detail-restored.png",
+          "bytes": 317912,
+          "sha256": "5d7a74ecb83174db3419d52ea861f894aee6ea56184fa940fb952495f1fa59ca",
+          "dimensions": [
+            824,
+            1830
+          ],
+          "source": "",
+          "state": "",
+          "zoom": 3.7046647410674467,
+          "centerErrorPx": null,
+          "personallyInspected": true,
+          "observations": "Ordinary map with vector geography/relief returns; satellite credit is absent and camera is preserved."
+        }
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "input": "mouse",
+      "passed": true,
+      "startedAt": "2026-11-10T19:31:53.627Z",
+      "completedAt": "2026-11-10T19:33:31.354Z",
+      "durationMs": 97727,
+      "performance": {
+        "layoutShift": 0.03953054561403507,
+        "longestTaskMs": 276,
+        "longestTaskLimitMs": 750,
+        "layoutShiftLimit": 0.12,
+        "passed": true
+      },
+      "rawReport": {
+        "path": "design-qa/desktop-webgl-satellite-continuity.json",
+        "bytes": 212513,
+        "sha256": "c234632aa352b1bc0b6f8c0c2b1d799581372bdefdc23d9d66f98da298b67e21"
+      },
+      "nativePanCount": 10,
+      "nativeZoomClicks": 12,
+      "providerToggleCount": 2,
+      "cameraRectViewportDprPreservedOnToggles": true,
+      "maximumCenterErrorPx": 1.6414169532236838,
+      "centerErrorLimitPx": 6,
+      "network": {
+        "totalObserved": 118,
+        "finished": 100,
+        "canceled": 18,
+        "nonCanceledFailures": 0,
+        "discarded": 0,
+        "allImageryCapturesHadNoPendingOrFailedSourceRequests": true,
+        "allRequestsCompleted": false
+      },
+      "native8SeamColumns": [
+        {
+          "tile": {
+            "z": 8,
+            "x": 255,
+            "y": 62
+          },
+          "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/8/62/255.jpg",
+          "status": 200,
+          "finished": true,
+          "mimeType": "image/png",
+          "encodedNetworkBytes": 0,
+          "fromDiskCache": true,
+          "fromServiceWorker": false
+        },
+        {
+          "tile": {
+            "z": 8,
+            "x": 0,
+            "y": 62
+          },
+          "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/8/62/0.jpg",
+          "status": 200,
+          "finished": true,
+          "mimeType": "image/png",
+          "encodedNetworkBytes": 0,
+          "fromDiskCache": true,
+          "fromServiceWorker": false
+        }
+      ],
+      "frames": [
+        {
+          "stage": "dateline-overview",
+          "file": "design-qa/desktop-webgl-satellite-dateline-overview.png",
+          "bytes": 768115,
+          "sha256": "4e8db01e3f14726ea3342ad80b3c2fb713391c150bafa90b593edc0dc6e68c0e",
+          "dimensions": [
+            1440,
+            1000
+          ],
+          "source": "eox-bluemarble",
+          "state": "ready",
+          "zoom": 4.272349250356768,
+          "centerErrorPx": 0.6838273469480332,
+          "personallyInspected": true,
+          "observations": "Chukotka and Wrangel contain visible overview imagery; the original broad blank band is absent. Source and lower-detail notice are readable."
+        },
+        {
+          "stage": "dateline-native8",
+          "file": "design-qa/desktop-webgl-satellite-dateline-native8.png",
+          "bytes": 843106,
+          "sha256": "8c3a769750631310d1ac7429830570494768f6319a1ff2e2d0c38629515ea823",
+          "dimensions": [
+            1440,
+            1000
+          ],
+          "source": "eox-bluemarble",
+          "state": "ready",
+          "zoom": 8.272349250356768,
+          "centerErrorPx": 0.4103542389671822,
+          "personallyInspected": true,
+          "observations": "Real but coarse imagery fills both sides; a strong vertical mosaic seam with horizontal resampling streaks is plainly visible at 180 degrees."
+        },
+        {
+          "stage": "dateline-overzoom",
+          "file": "design-qa/desktop-webgl-satellite-dateline-overzoom.png",
+          "bytes": 439046,
+          "sha256": "15a99b9989442acf32f3ecee0ed3e3d763872142e9f39275aded81063851744b",
+          "dimensions": [
+            1440,
+            1000
+          ],
+          "source": "eox-bluemarble",
+          "state": "ready",
+          "zoom": 10.272349250356768,
+          "centerErrorPx": 1.6414169532236838,
+          "personallyInspected": true,
+          "observations": "The same coarse seam and horizontal streaks become more prominent under overzoom; no broad empty band. Lower-detail and enlarged-overview notices remain visible."
+        },
+        {
+          "stage": "west-eox",
+          "file": "design-qa/desktop-webgl-satellite-west-eox.png",
+          "bytes": 1264682,
+          "sha256": "a683f927cbcb971ee6bc244eefa50c5215ea1c1bc3990028455184f9c6882c08",
+          "dimensions": [
+            1440,
+            1000
+          ],
+          "source": "eox-s2",
+          "state": "ready",
+          "zoom": 4.272349250356768,
+          "centerErrorPx": 0.3672144348177794,
+          "personallyInspected": true,
+          "observations": "Detailed EOxCloudless backdrop and its attribution restore west of the problem envelope."
+        },
+        {
+          "stage": "dateline-return",
+          "file": "design-qa/desktop-webgl-satellite-dateline-return.png",
+          "bytes": 769189,
+          "sha256": "e3a255d648e3bad51e27def7a4cb427c3bbbfaea300badfeb7ae2302af0e0dce",
+          "dimensions": [
+            1440,
+            1000
+          ],
+          "source": "eox-bluemarble",
+          "state": "ready",
+          "zoom": 4.272349250356768,
+          "centerErrorPx": 0.025647143860570692,
+          "personallyInspected": true,
+          "observations": "EOX Blue Marble overview and lower-detail attribution return at the dateline; the broad blank band does not return."
+        },
+        {
+          "stage": "detail-restored",
+          "file": "design-qa/desktop-webgl-satellite-detail-restored.png",
+          "bytes": 736471,
+          "sha256": "aa1c968bb70584b0720017f216579f0fd8796d8d3bb2c35b501734aadb6d350e",
+          "dimensions": [
+            1440,
+            1000
+          ],
+          "source": "",
+          "state": "",
+          "zoom": 4.272349250356768,
+          "centerErrorPx": null,
+          "personallyInspected": true,
+          "observations": "Ordinary map with vector geography/relief returns; satellite credit is absent and camera is preserved."
+        }
+      ]
+    }
+  ],
+  "visualReview": {
+    "originalPngCount": 12,
+    "everyOriginalPersonallyInspected": true,
+    "everyPngHashAndByteCountMatched": true,
+    "originalBroadBlankBandAbsent": true,
+    "sourceSwitchingAndOrdinaryMapRestorationObserved": true,
+    "overviewAttributionAndLowerDetailNoticeVisible": true,
+    "coarseMosaicSeamStillVisible": true,
+    "fullyRepairedImageryQuality": false,
+    "remainingLimitations": [
+      "At native8 and overzoom, a conspicuous vertical mosaic seam and horizontal resampling streaks remain at 180 degrees in both engines. The original broad empty white/black band is absent.",
+      "Overview imagery is visibly coarse and becomes blurred/pixelated on overzoom; it does not recover missing detailed EOxCloudless data.",
+      "The mobile overzoom frame also shows the independent vector-detail loading notice. Satellite readiness is independently proven by current source state and completed imagery requests.",
+      "The desktop overzoom frame contains a repeated river caption; this review does not claim label deduplication was repaired.",
+      "This diagnostic does not run the complete release suite, deploy a site, or verify a public deployment."
+    ]
+  },
+  "summedProfileDurationMs": 169905
+}

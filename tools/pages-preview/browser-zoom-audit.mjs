@@ -5,6 +5,7 @@ import {CLOSE_TRAIL_FIXTURE,assertCloseTrailAudit,assertNativeBurstEventOrder,as
 import {dispatchSourceEndPan,sourceEndPanPlans,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
 import {traceDesktopSelection,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES} from './browser-trace.mjs';
 import {runCoastAudit} from './browser-coast-audit.mjs';
+import {runSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -15,6 +16,7 @@ const MINUS='.map-controls button[aria-label="Уменьшить масштаб"
 export function browserAuditRunPolicy(value){
  if(value===undefined||value==='')return{diagnostic:null,reportFile:'browser-verification.json',profiles:null};
  if(value==='offline-safety')return{diagnostic:value,reportFile:'browser-offline-safety-diagnostic.json',profiles:[]};
+ if(value==='satellite-continuity')return{diagnostic:value,reportFile:'browser-satellite-continuity-diagnostic.json',profiles:['android-portrait','desktop-webgl']};
  assert.ok(value==='terrain-close'||value==='map-interactions','Unknown TROPNIK_BROWSER_DIAGNOSTIC mode');
  return{diagnostic:value,reportFile:value==='terrain-close'?'browser-terrain-diagnostic.json':'browser-map-interactions-diagnostic.json',profiles:['desktop-webgl']};
 }
@@ -194,7 +196,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
  assert.ok(diagnostic===null||diagnostic==='terrain-close','Unknown zoom diagnostic mode');
  if(diagnostic)assert.ok(profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
  await mkdir(OUTPUT,{recursive:true});
- const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:6,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
+ const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:7,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
  if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[]});
  let terrainTraceStarted=false;
  const terrainResources=diagnostic?observeTerrainResources(cdp,()=>report.diagnosticStage):null;
@@ -572,7 +574,15 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   report.performance=modePerformance;
   const edges=await closeTrailEdges();
   report.coast=await runCoastAudit(cdp,profile,helpers);
-  report.geometryPassed=true;report.performance={layoutShift:Math.max(modePerformance.layoutShift,edges.performance.layoutShift),longestTaskMs:Math.max(modePerformance.longestTaskMs,edges.performance.longestTaskMs)};report.completedAt=new Date().toISOString();await save();return report;
+  report.satelliteContinuity=await runSatelliteContinuityAudit(cdp,profile,helpers);
+  // Preserve both existing intervals before the satellite document load. Its
+  // own counter covers every source switch/pan; never substitute only the last
+  // frame or the last coast fixture for a whole audit's performance interval.
+  report.performanceIntervals={modes:modePerformance,sourceEnds:edges.performance,satellite:report.satelliteContinuity.performance};
+  const intervals=Object.values(report.performanceIntervals);
+  report.performance={layoutShift:Math.max(...intervals.map(value=>value.layoutShift)),longestTaskMs:Math.max(...intervals.map(value=>value.longestTaskMs))};
+  helpers.performanceIssues?.push(...satellitePerformanceIssues(report.satelliteContinuity,profile));
+  report.geometryPassed=true;report.completedAt=new Date().toISOString();await save();return report;
  }catch(error){report.error=error.stack||String(error);if(error.settleDiagnostics)report.settleDiagnostics=error.settleDiagnostics;if(diagnostic){report.status='failed';if(helpers.performanceDiagnostics)try{report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);}catch{} }await save();throw error;}
  finally{forget();forgetFinished();forgetFailed();terrainResources?.dispose();}
 }

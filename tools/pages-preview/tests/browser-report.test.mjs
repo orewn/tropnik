@@ -5,6 +5,7 @@ import {projectMapPoint,unprojectMapPoint} from '../map-projection.mjs';
 import {directionHitAreasFixture} from './direction-hitareas-fixture.mjs';
 import {layerMenusFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
 import {coastFixture} from './coast-fixture.mjs';
+import {satelliteFixture} from './satellite-fixture.mjs';
 
 const commit='a'.repeat(40);
 const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
@@ -26,7 +27,7 @@ function closeTrail(profile,engine,mobile){
  }
  return{passed:true,input,region:CLOSE_TRAIL_FIXTURE.region,routeId:CLOSE_TRAIL_FIXTURE.routeId,geometryURL:CLOSE_TRAIL_FIXTURE.geometryURL,
   source:{featureCount:1,partCount:1,vertexCount:12,endpoints:CLOSE_TRAIL_FIXTURE.endpoints,sha256:'c'.repeat(64)},
-  initialZoom:14,setupClicks:1,nativeZoomClicks:inputs.length,inputs,frames,visualReviewRequired:true,
+  initialZoom:14,setupClicks:1,nativeZoomClicks:inputs.length,inputs,frames,visualReviewRequired:true,performance:{layoutShift:0,longestTaskMs:100},
   closeFraming:{required:false,passed:true,before:frames.at(-1),gestures:[]}};
 }
 function sheetGestures(){
@@ -44,7 +45,8 @@ function zoomDesign(profile,engine,mobile){
   events:Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+tap*10+index*2,timestamp:100+tap*10+(index?2:0),trusted:true,pointerType:input,pointerId:mobile?tap+2:1}))).flat(),
   commands:[...(mobile?[]:['mouseMoved']),...Array.from({length:4},()=>mobile?['touchStart','touchEnd']:['mousePressed','mouseReleased']).flat()].map((type,index)=>({index,type,method:mobile?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent',status:'fulfilled',sentAtEpochMs:10000+index*.1,ackAtEpochMs:10040+index,sentOffsetMs:index*.1,ackOffsetMs:40+index,ackDurationMs:40+index*.9})),
  });
- return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:6,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),closeTrail:edges,coast:coastFixture(profile,engine),
+ return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:7,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),closeTrail:edges,coast:coastFixture(profile,engine),satelliteContinuity:satelliteFixture(profile,engine),
+  performance:{layoutShift:0,longestTaskMs:100},performanceIntervals:{modes:{layoutShift:0,longestTaskMs:100},sourceEnds:edges.performance,satellite:{layoutShift:0,longestTaskMs:100}},
   zoomBurst:{passed:true,input,returnedToStart:true,increase:burst(1,10,high),decrease:burst(-1,high,10)},
   modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview'})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:mobile?'not-offered':'active'},scene3d:{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true}},
   screenshots:[...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
@@ -136,6 +138,15 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
   value=>value.zoomDesigns[0].schemaVersion=3,
   value=>value.zoomDesigns[0].schemaVersion=4,
   value=>value.zoomDesigns[0].schemaVersion=5,
+  value=>value.zoomDesigns[0].schemaVersion=6,
+  value=>delete value.zoomDesigns[0].satelliteContinuity,
+  value=>value.zoomDesigns[0].satelliteContinuity.steps[0].resolution='detail',
+  value=>value.zoomDesigns[0].satelliteContinuity.resources.requests[0].finished=false,
+  value=>value.zoomDesigns[0].satelliteContinuity.performance.longestTaskMs=350,
+  value=>value.zoomDesigns[1].satelliteContinuity.performance.longestTaskMs=750,
+  value=>delete value.zoomDesigns[0].performanceIntervals.modes,
+  value=>value.zoomDesigns[0].performanceIntervals.modes.longestTaskMs=130,
+  value=>value.zoomDesigns[0].performanceIntervals.sourceEnds={layoutShift:0,longestTaskMs:0},
   value=>delete value.zoomDesigns[0].coast,
   value=>value.zoomDesigns[0].coast.steps.pop(),
   value=>value.zoomDesigns[0].coast.steps[0].pending=1,
