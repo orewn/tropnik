@@ -428,7 +428,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
   frameRefit.current?.cancel();zoomButtons.current?.cancel();terrainRef.current=next;map.stop();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(next){
-   if(!map.getSource('terrain-dem'))map.addSource('terrain-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'});
+   if(!map.getSource('terrain-dem'))map.addSource('terrain-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json',maxzoom:12});
    const zoom=map.getZoom();
    map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(zoom)});
    map.easeTo({pitch:terrainPitchForZoom(zoom,!!regionRef.current||!!trailRef.current),duration:reduced?0:420});
