@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "kind": "full-pages-candidate-startup-failure",
+  "sourceCommit": "5af55a7320cc6b567461d0834e9d3c28a8a1f63f",
+  "tree": "6049911588ffa9bf47c31b219522d08945bcdc20",
+  "webTree": "76904dc3f56841c63830aac602b17c6ae2b332d0",
+  "verified": false,
+  "releaseEligible": false,
+  "workflow": {
+    "runId": 42859433788,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42859433788",
+    "status": "completed",
+    "conclusion": "failure",
+    "startedAt": "2026-11-10T16:54:53Z",
+    "completedAt": "2026-11-10T16:57:41Z"
+  },
+  "buildJob": {
+    "id": 129981245739,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42859433788/job/129981245739",
+    "conclusion": "failure",
+    "failedStage": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+    "browserStageStartedAt": "2026-11-10T16:57:05.206Z",
+    "browserStageFailedAt": "2026-11-10T16:57:36.856Z"
+  },
+  "regressions": {
+    "pagesTools": {
+      "tests": 132,
+      "passed": 132,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "web": {
+      "tests": 611,
+      "passed": 611,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "lint": "passed",
+    "staticClientTypes": "passed"
+  },
+  "staticBuild": {
+    "passed": true,
+    "buildId": "8af58a5123d5ffde",
+    "base": "/tropnik/",
+    "pages": 339,
+    "referenceRoutes": 306,
+    "archiveBytes": 126265665
+  },
+  "browserStartup": {
+    "code": "BROWSER_STARTUP_TIMEOUT",
+    "timeoutMs": 30000,
+    "causeCode": "BROWSER_PROBE_TIMEOUT",
+    "lastProbeTimeoutMs": 414.60642099999677,
+    "binary": "google-chrome",
+    "status": "failed",
+    "startedAtEpochMs": 1794329825298,
+    "limits": {
+      "readyMs": 30000,
+      "probeMs": 1000,
+      "pollMs": 100,
+      "stderrBytes": 32768,
+      "termMs": 1500,
+      "killMs": 1000
+    },
+    "probes": 264,
+    "firstCapturedStderrAt": "2026-11-10T16:57:25.846Z",
+    "devToolsListeningLineObserved": true,
+    "exitCode": null,
+    "signalCode": "SIGKILL",
+    "spawnError": null,
+    "elapsedMs": 31556.864995,
+    "cleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM",
+        "SIGKILL"
+      ],
+      "errors": [],
+      "elapsedMs": 1553.9701630000018
+    },
+    "stderrTruncated": false,
+    "stderrBytesCaptured": 1053
+  },
+  "applicationAudit": {
+    "navigationStarted": false,
+    "completedProfiles": 0,
+    "completedMapInteractions": 0,
+    "completedZoomDesigns": 0,
+    "performanceIssuesObserved": 0,
+    "result": "not-executed"
+  },
+  "deployment": {
+    "jobId": 129982971094,
+    "conclusion": "skipped"
+  },
+  "artifact": {
+    "id": 13784816974,
+    "name": "tropnik-pages-browser-failure-1",
+    "url": "https://github.com/orewn/tropnik/actions/runs/42859433788/artifacts/13784816974",
+    "bytes": 1270,
+    "sha256": "fddc20eccaf51790ecd760577a7cf43a01538af28ee476de03346263273579a0",
+    "verifiedAfterDownload": true,
+    "failureReportSha256": "8749b6ac9c6479268952a61e0531b04dac4382c09eb3d248a5f0d0b54fcc332b"
+  },
+  "limitations": [
+    "This failure occurred before application navigation and supplies no uninstrumented performance, coastline or cold-offline acceptance.",
+    "Chromium emitted its DevTools listener but did not return an accepted readiness response before the bounded deadline; the exact transport-level cause is not established by this artifact.",
+    "The same-code instrumented aa8bb diagnostic passes modal layout and cold-offline checks but retains an 839 ms first-Altai long task.",
+    "No verified Pages upload or deployment was produced."
+  ]
+}

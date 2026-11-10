@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "kind": "focused-map-and-offline-diagnostic",
+  "sourceCommit": "53946453156df887f2ec1426ce67d6438ef1dcfb",
+  "webTree": "1aace8a82f01bf45a857aaad9d11802e07ea43f6",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "workflow": {
+    "runId": 42856855014,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42856855014",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-11-10T16:40:10Z",
+    "completedAt": "2026-11-10T16:42:54Z",
+    "jobs": [
+      {
+        "id": 129972125085,
+        "name": "Diagnose map-interactions",
+        "conclusion": "success"
+      },
+      {
+        "id": 129972125551,
+        "name": "Diagnose offline-safety",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 13782009461,
+      "name": "tropnik-map-interactions-diagnostic-42856855014",
+      "bytes": 2804302,
+      "sha256": "e5d8e138d11f37bf9954796cbb65c0d8461acaff6e50826ec9dabf3dd762873a",
+      "verifiedAfterDownload": true
+    },
+    {
+      "id": 13782598582,
+      "name": "tropnik-offline-safety-diagnostic-42856855014",
+      "bytes": 170458,
+      "sha256": "8ff197fb51c56036b8f971b2cdff986e04eb40175085a9751ebe86f1750bc576",
+      "verifiedAfterDownload": true
+    }
+  ],
+  "map": {
+    "profile": "desktop-webgl",
+    "engine": "maplibre",
+    "interactionsPassed": true,
+    "performancePassed": false,
+    "performanceIssues": [
+      {
+        "profile": "desktop-webgl",
+        "phase": "map-interactions",
+        "metric": "longestTaskMs",
+        "value": 798,
+        "limit": 750
+      }
+    ],
+    "timeOrigin": 1794328893432,
+    "counterStart": 5398.100000000006,
+    "peakLongTask": {
+      "startTime": 39701.8,
+      "duration": 798,
+      "name": "self",
+      "observedAt": 40727.40000000001,
+      "phase": "map-interactions/request-ownership"
+    },
+    "durationMs": 70011,
+    "layoutShift": 0.003712818344105879,
+    "firstAltaiMaximumMs": 685,
+    "polygon": {
+      "id": "territory-28173009B78872068540735",
+      "title": "Иркутская область",
+      "coordinate": [
+        106.28448486328125,
+        53.29999999999998
+      ],
+      "input": "mouse"
+    },
+    "phases": [
+      {
+        "name": "profile-ready",
+        "time": 4655.800000000003,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "map-interactions",
+        "time": 5398.699999999997,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "map-interactions/first-altai",
+        "time": 5399.600000000006,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "map-interactions/saved-filter",
+        "time": 11704.400000000009,
+        "longestTaskMs": 685
+      },
+      {
+        "name": "map-interactions/route-selection",
+        "time": 17790.90000000001,
+        "longestTaskMs": 685
+      },
+      {
+        "name": "map-interactions/style-camera",
+        "time": 21498.5,
+        "longestTaskMs": 685
+      },
+      {
+        "name": "map-interactions/request-ownership",
+        "time": 35339.09999999999,
+        "longestTaskMs": 685
+      },
+      {
+        "name": "map-interactions/return-to-country",
+        "time": 47418.8,
+        "longestTaskMs": 798
+      },
+      {
+        "name": "map-interactions/second-baikal",
+        "time": 51352.90000000001,
+        "longestTaskMs": 798
+      },
+      {
+        "name": "map-interactions/sibling-polygon",
+        "time": 54556.500000000015,
+        "longestTaskMs": 798
+      },
+      {
+        "name": "map-interactions/map-gestures",
+        "time": 64031.59999999999,
+        "longestTaskMs": 798
+      }
+    ],
+    "reportSha256": "65e4091d4402c21ae71cee3b1b8486228ca8cbc30fb1bcc7a6bda97cd754e5c8",
+    "traces": [
+      {
+        "scope": "first-desktop-altai-selection",
+        "sourceCommit": "53946453156df887f2ec1426ce67d6438ef1dcfb",
+        "limits": {
+          "durationMs": 8000,
+          "drainMs": 5000,
+          "closeMs": 1000,
+          "maxBytes": 33554432,
+          "bufferSizeKiB": 16384,
+          "chunkBytes": 262144
+        },
+        "status": "complete",
+        "stopReason": "action-complete",
+        "bytes": 7338706,
+        "eof": true,
+        "dataLossOccurred": false,
+        "errors": [],
+        "recordedDurationMs": 5014.206313999999,
+        "eventCount": 28151,
+        "cpuProfileChunks": 859,
+        "cpuSamples": 66800,
+        "file": "desktop-webgl-first-altai.trace.json",
+        "sha256": "804de5d261dadfcd4884d5c958bc2baa92e5a2836e013b626155b64577d84a93"
+      },
+      {
+        "scope": "desktop-route-request-ownership",
+        "sourceCommit": "53946453156df887f2ec1426ce67d6438ef1dcfb",
+        "limits": {
+          "durationMs": 8000,
+          "drainMs": 5000,
+          "closeMs": 1000,
+          "maxBytes": 33554432,
+          "bufferSizeKiB": 16384,
+          "chunkBytes": 262144
+        },
+        "status": "partial",
+        "stopReason": "time-limit",
+        "bytes": 11036292,
+        "eof": true,
+        "dataLossOccurred": false,
+        "errors": [],
+        "recordedDurationMs": 8000.4128030000065,
+        "eventCount": 42658,
+        "cpuProfileChunks": 1034,
+        "cpuSamples": 84675,
+        "file": "desktop-webgl-request-ownership.trace.json",
+        "sha256": "c838eee5e89e595c685a129ab5463b05065367f4046742edc50d94f0d2c99f5c"
+      },
+      {
+        "scope": "desktop-sibling-polygon-selection",
+        "sourceCommit": "53946453156df887f2ec1426ce67d6438ef1dcfb",
+        "limits": {
+          "durationMs": 8000,
+          "drainMs": 5000,
+          "closeMs": 1000,
+          "maxBytes": 33554432,
+          "bufferSizeKiB": 16384,
+          "chunkBytes": 262144
+        },
+        "status": "partial",
+        "stopReason": "time-limit",
+        "bytes": 10648664,
+        "eof": true,
+        "dataLossOccurred": false,
+        "errors": [],
+        "recordedDurationMs": 8000.58829,
+        "eventCount": 39186,
+        "cpuProfileChunks": 1490,
+        "cpuSamples": 127666,
+        "file": "desktop-webgl-sibling-polygon.trace.json",
+        "sha256": "2f5d6fc785e7905b9f03981a042c0426df7ffa52f2f9e8ac0d1cb04d4eaee6eb"
+      }
+    ],
+    "attribution": "The request-ownership trace captures the remaining798ms peak; causal analysis is separate from this immutable run receipt."
+  },
+  "offline": {
+    "profile": "android-portrait",
+    "passed": true,
+    "nativeInputs": 4,
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "originTransport": {
+      "method": "origin-socket-destroy",
+      "startedAt": "2026-11-10T16:42:01.602Z",
+      "restoredAt": "2026-11-10T16:42:02.240Z",
+      "blockedRequests": 4,
+      "requests": [
+        {
+          "path": "/tropnik/_offline-transport-probe",
+          "method": "GET",
+          "at": "2026-11-10T16:42:01.606Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T16:42:01.616Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T16:42:01.616Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T16:42:01.617Z"
+        }
+      ],
+      "probe": {
+        "passed": true,
+        "errorCode": "ECONNRESET",
+        "path": "/tropnik/_offline-transport-probe"
+      },
+      "active": false
+    },
+    "offline": true,
+    "titleRestored": true,
+    "contactRestored": true,
+    "draftExplicit": true,
+    "privateApiNotCached": true,
+    "networkSuccessfulResponses": 0,
+    "screenshot": {
+      "file": "android-offline-emergency-card.png",
+      "bytes": 176303,
+      "sha256": "a4f62f51007006401cf44b7429be85c78a285f075cc2da56c73b5d173e298332"
+    },
+    "inputs": [
+      {
+        "selector": "#route-title",
+        "passed": true,
+        "valueLength": 20,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      },
+      {
+        "selector": "#region",
+        "passed": true,
+        "valueLength": 21,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      },
+      {
+        "selector": "#leader-name",
+        "passed": true,
+        "valueLength": 27,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      },
+      {
+        "selector": "#leader-phone",
+        "passed": true,
+        "valueLength": 12,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      }
+    ],
+    "reportSha256": "98cf41630c2579365a1fd43d224705ff817e0f2680e27051072665b68bfbbdcc",
+    "visualReview": {
+      "viewedOriginalPng": true,
+      "screenshotHashVerified": true,
+      "standaloneEmergencyViewerVisible": true,
+      "savedTestRouteVisible": true,
+      "localDraftNoticeVisible": true,
+      "note": "Screenshot shows the standalone emergency viewer with the saved CI route and explicit local-draft notice; contact restoration is verified by the DOM assertion in the raw report."
+    }
+  },
+  "limitations": [
+    "Focused diagnostics are not a full release run.",
+    "Map performance still exceeds the unchanged750ms desktop limit.",
+    "This diagnostic does not execute the coastline zoom matrix or mobile map interaction profiles.",
+    "Full main run dd246828 failed an existing source-location test before its browser stage; deployment was skipped."
+  ]
+}

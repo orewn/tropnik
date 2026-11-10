@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "assembledAt": "2026-11-10T16:32:16+00:00",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "baselineSourceCommit": "5ab527b652b107dc0103f1d740ae3f23256ff7e5",
+  "sourceCommit": "921191103d6d95341e73f67e2b6dfef47c50ef83",
+  "workflowRun": 42854457281,
+  "workflowJob": 129963560009,
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/42854457281",
+  "traces": [
+    {
+      "file": "desktop-webgl-first-altai.trace.json",
+      "sha256": "31fb4012341b12746aa4bbc07d2e015a17e2eff02bd94d378f510957d908b9d3",
+      "bytes": 8256389,
+      "status": "complete",
+      "stopReason": "action-complete",
+      "eof": true,
+      "dataLossOccurred": false,
+      "errors": [],
+      "recordedDurationMs": 4951.420225999998,
+      "cpuSamples": 88772
+    },
+    {
+      "file": "desktop-webgl-sibling-polygon.trace.json",
+      "sha256": "d67f2030eb48ef3df7006623764011e9eae0e5b7cd0a153b580393095d9258fa",
+      "bytes": 12306324,
+      "status": "partial",
+      "stopReason": "time-limit",
+      "eof": true,
+      "dataLossOccurred": false,
+      "errors": [],
+      "recordedDurationMs": 8000.3680779999995,
+      "cpuSamples": 161273
+    }
+  ],
+  "performancePassed": false,
+  "strictLimitMs": 750,
+  "scenarioLongestTaskMs": 1315,
+  "scenarioPeak": {
+    "startTime": 38701.8,
+    "duration": 1315,
+    "name": "self",
+    "observedAt": 40058.3,
+    "phase": "map-interactions/request-ownership"
+  },
+  "firstAltai": {
+    "baselineTaskMs": 796.824,
+    "taskMs": 733.841,
+    "traceStartUs": 110801590,
+    "rendererPid": 2787,
+    "rendererTid": 2787,
+    "baselineProgramLinkCallsInPeak": 3,
+    "programLinkCallsInPeak": 1,
+    "linkCallWallMs": 0.481,
+    "rendererSamples": 3228,
+    "getProgramParameterLeafSamples": 1448,
+    "getUniformBlockIndexLeafSamples": 1416,
+    "getProgramParameterWallMs": 302.952,
+    "getProgramParameterThreadCpuMs": 7.797,
+    "getUniformBlockIndexWallMs": 290.686,
+    "getUniformBlockIndexThreadCpuMs": 6.456,
+    "queryWallMsTotal": 593.638,
+    "baselineQueryWallMsTotal": 608.297,
+    "uboOverlappingGpuTask": {
+      "pid": 2717,
+      "tid": 2717,
+      "traceStartUs": 111171671,
+      "wallMs": 291.858,
+      "threadCpuMs": 1.427,
+      "scheduleFlowId": 769,
+      "scheduledAtUs": 111155186,
+      "schedulerTid": 2743,
+      "schedulerThread": "VizCompositorThread"
+    },
+    "conclusion": "The recorded first-action circle program setup performs one link instead of three. Its main-thread peak is lower in this run but remains dominated by synchronous driver queries and shared GPU-queue contention; a single run does not establish stable headroom."
+  },
+  "capturedSerializationFailures": [
+    {
+      "traceStartUs": 162194046,
+      "wallMs": 873.493,
+      "rendererSamples": 3914,
+      "sendWorkerUpdateInclusiveSamples": 3578,
+      "stack": [
+        "GeoJSONSource._sendWorkerUpdate",
+        "Actor.sendAsync",
+        "recursive serialize (Yc)",
+        "postMessage / garbage collection"
+      ]
+    },
+    {
+      "traceStartUs": 157457379,
+      "wallMs": 842.607,
+      "rendererSamples": 4048,
+      "sendWorkerUpdateInclusiveSamples": 3871,
+      "stack": [
+        "GeoJSONSource._sendWorkerUpdate",
+        "Actor.sendAsync",
+        "recursive serialize (Yc)",
+        "postMessage / garbage collection"
+      ]
+    }
+  ],
+  "secondaryAltaiSerialization": {
+    "traceStartUs": 111702221,
+    "wallMs": 625.501,
+    "rendererSamples": 2499,
+    "sendWorkerUpdateInclusiveSamples": 2444
+  },
+  "untracedScenarioMaximum": {
+    "durationMs": 1315,
+    "performanceStartMs": 38701.8,
+    "phase": "map-interactions/request-ownership",
+    "precedingRecordedEvent": "Request modal reopened through a trusted native click",
+    "clickPerformanceMs": 38604.6,
+    "deltaMs": 97.2,
+    "causeEstablished": false
+  },
+  "method": "Reconstructed Profile/Chunk streams by pid + profile id and inherited owner thread/start time from Profile; used timeline duration for wall time and sample counts only for stack attribution.",
+  "limits": [
+    "The sibling trace reached its eight-second recording cap; its JSON is complete with eof=true, zero data loss and no errors. The two reported long tasks have complete duration records inside that capture.",
+    "The global 1315ms request-ownership maximum is outside the two recorded trace windows. No stack-based cause is claimed for it.",
+    "The 842.607ms and 873.493ms tasks independently establish source serialization as a performance failure in the recorded sibling scenario.",
+    "Driver query wall time is not shader compilation CPU time. No causal link between source serialization and compositor work is established.",
+    "This remains a failed performance diagnostic and cannot serve as browser release verification."
+  ]
+}

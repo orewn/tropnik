@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "0.4.23-preview",
+  "releaseUrl": "https://github.com/orewn/tropnik/releases/tag/v0.4.23-preview",
+  "sourceCommit": "2a6372f9b60661db3e2766619f4259bb094145b7",
+  "checkedAt": "2026-11-10T17:54:10.356540+00:00",
+  "browserObservation": {
+    "releaseHeadingVisible": true,
+    "preReleaseBadgeVisible": true,
+    "sourceCommitVisible": true,
+    "jvmTestsShown": 62,
+    "deviceScenariosPassedShown": 7,
+    "universalBytesShown": 79346747,
+    "universalSHA256Shown": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692",
+    "assetListFinishedLoading": false,
+    "downloadClickPerformed": false,
+    "limits": "Browser verified the public release heading and exact delivery table. The dynamic asset list remained loading. APK download, full-byte digest and identity were verified separately in android-0.4.23-final.json."
+  },
+  "screenshot": {
+    "file": "android-0.4.23-published-release.png",
+    "bytes": 226258,
+    "sha256": "9ad8dbcee7beebadfcaf16e765e875d6fbc8a18ea534e82b80623c777a00d707",
+    "originalBrowserScreenshot": true,
+    "edited": false
+  }
+}

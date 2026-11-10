@@ -1,0 +1,850 @@
+{
+  "schemaVersion": 1,
+  "kind": "full-pages-candidate-performance-failure",
+  "sourceCommit": "76eed8e26594a5502ee95fd8662e64b74a95b557",
+  "tree": "e611da31c0e273c7daea5bc5c5c01117c2a40019",
+  "webTree": "76904dc3f56841c63830aac602b17c6ae2b332d0",
+  "verified": false,
+  "releaseEligible": false,
+  "workflow": {
+    "runId": 42860724979,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42860724979",
+    "status": "completed",
+    "conclusion": "failure",
+    "startedAt": "2026-11-10T17:02:11Z",
+    "buildJobId": 129985802659,
+    "failedStage": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+    "browserStageStartedAt": "2026-11-10T17:04:20.0865846Z",
+    "browserStageFailedAt": "2026-11-10T17:24:56.6986747Z",
+    "failureIsOuterTimeout": false,
+    "buildLimitMinutes": 30,
+    "browserStageLimitMinutes": 24,
+    "completedAt": "2026-11-10T17:25:03Z"
+  },
+  "regressions": {
+    "pagesTools": {
+      "tests": 133,
+      "passed": 133,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "web": {
+      "tests": 611,
+      "passed": 611,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "lint": "passed",
+    "staticClientTypes": "passed"
+  },
+  "staticBuild": {
+    "passed": true,
+    "buildId": "7820942a0b1e24fd"
+  },
+  "browserStartup": {
+    "status": "ready",
+    "readyAfterMs": 21050.220256,
+    "probes": 176,
+    "version": {
+      "browser": "Chrome/156.0.8078.79",
+      "protocol": "1.3"
+    },
+    "limits": {
+      "readyMs": 60000,
+      "probeMs": 1000,
+      "pollMs": 100,
+      "stderrBytes": 32768,
+      "termMs": 1500,
+      "killMs": 1000
+    },
+    "cleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 109.74051000014879
+    }
+  },
+  "performanceIssues": [
+    {
+      "profile": "desktop-webgl",
+      "phase": "map-interactions",
+      "metric": "longestTaskMs",
+      "value": 1135,
+      "limit": 750
+    }
+  ],
+  "peak": {
+    "timeOrigin": 1794330876620.8,
+    "counterStart": 8312.70000000007,
+    "longTask": {
+      "startTime": 9139.70000000007,
+      "duration": 1135,
+      "name": "self",
+      "observedAt": 10319,
+      "phase": "map-interactions"
+    },
+    "precedingFirstAltaiClick": {
+      "time": 8915.300000000047,
+      "timestamp": 8914,
+      "trusted": true,
+      "pointerType": "mouse",
+      "target": "SPAN[region-marker-label]"
+    },
+    "millisecondsAfterFirstAltaiClick": 224.40000000002328,
+    "cpuTraceCaptured": false,
+    "attributionLimit": "The uninstrumented peak follows the first Altai selection. Its exact call stack was not captured; separate instrumented traces cannot prove this specific task stack."
+  },
+  "mobileProfiles": [
+    {
+      "name": "compact-android",
+      "engine": "leaflet",
+      "sheetTested": true,
+      "storyTested": true,
+      "sheetGesturesPassed": true,
+      "layoutShift": 0,
+      "longestTaskMs": 252,
+      "exclusiveLongTaskLimitMs": 350
+    },
+    {
+      "name": "iphone-portrait",
+      "engine": "leaflet",
+      "sheetTested": true,
+      "storyTested": true,
+      "sheetGesturesPassed": true,
+      "layoutShift": 0,
+      "longestTaskMs": 111,
+      "exclusiveLongTaskLimitMs": 350
+    },
+    {
+      "name": "android-portrait",
+      "engine": "leaflet",
+      "sheetTested": true,
+      "storyTested": true,
+      "sheetGesturesPassed": true,
+      "layoutShift": 0,
+      "longestTaskMs": 77,
+      "exclusiveLongTaskLimitMs": 350
+    },
+    {
+      "name": "phone-landscape",
+      "engine": "leaflet",
+      "sheetTested": true,
+      "storyTested": true,
+      "sheetGesturesPassed": true,
+      "layoutShift": 0,
+      "longestTaskMs": 333,
+      "exclusiveLongTaskLimitMs": 350
+    }
+  ],
+  "mapInteractions": [
+    {
+      "profile": "android-portrait",
+      "functionalActionsPassed": true,
+      "longestTaskMs": 309,
+      "exclusiveLongTaskLimitMs": 350,
+      "performancePassed": true,
+      "durationMs": 79102,
+      "nativePolygon": {
+        "id": "territory-28173009B49563687485750",
+        "title": "Республика Бурятия",
+        "coordinate": [
+          109.96875000000001,
+          52.68970242806751
+        ],
+        "input": "touch"
+      },
+      "polygonEventsTrusted": true
+    },
+    {
+      "profile": "desktop-webgl",
+      "functionalActionsPassed": true,
+      "longestTaskMs": 1135,
+      "exclusiveLongTaskLimitMs": 750,
+      "performancePassed": false,
+      "durationMs": 63297,
+      "nativePolygon": {
+        "id": "territory-28173009B78872068540735",
+        "title": "Иркутская область",
+        "coordinate": [
+          106.28448486328125,
+          53.29999999999998
+        ],
+        "input": "mouse"
+      },
+      "polygonEventsTrusted": true
+    }
+  ],
+  "desktopRequestMapLayout": {
+    "schemaVersion": 1,
+    "scope": "desktop-request-dialog",
+    "limit": 32,
+    "active": false,
+    "overflow": false,
+    "observers": {
+      "resize": true,
+      "canvasAttributes": true
+    },
+    "errors": [],
+    "samples": [
+      {
+        "time": 35528.90000000002,
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "rootClientWidth": 1425,
+        "container": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "canvas": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "backing": {
+          "width": 1041,
+          "height": 928
+        },
+        "connected": true,
+        "reason": "baseline",
+        "mutations": []
+      },
+      {
+        "time": 36224.59999999998,
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "rootClientWidth": 1440,
+        "container": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "canvas": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "backing": {
+          "width": 1041,
+          "height": 928
+        },
+        "connected": true,
+        "reason": "dialog-state",
+        "mutations": []
+      },
+      {
+        "time": 37485.5,
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "rootClientWidth": 1425,
+        "container": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "canvas": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "backing": {
+          "width": 1041,
+          "height": 928
+        },
+        "connected": true,
+        "reason": "dialog-state",
+        "mutations": []
+      },
+      {
+        "time": 37789.09999999998,
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "rootClientWidth": 1440,
+        "container": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "canvas": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "backing": {
+          "width": 1041,
+          "height": 928
+        },
+        "connected": true,
+        "reason": "dialog-state",
+        "mutations": []
+      },
+      {
+        "time": 37865,
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "rootClientWidth": 1425,
+        "container": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "canvas": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "backing": {
+          "width": 1041,
+          "height": 928
+        },
+        "connected": true,
+        "reason": "dialog-state",
+        "mutations": []
+      },
+      {
+        "time": 42805.5,
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "rootClientWidth": 1440,
+        "container": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "canvas": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "backing": {
+          "width": 1041,
+          "height": 928
+        },
+        "connected": true,
+        "reason": "dialog-state",
+        "mutations": []
+      },
+      {
+        "time": 43768.09999999998,
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "rootClientWidth": 1425,
+        "container": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "canvas": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "backing": {
+          "width": 1041,
+          "height": 928
+        },
+        "connected": true,
+        "reason": "dialog-state",
+        "mutations": []
+      },
+      {
+        "time": 44196.80000000005,
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "dpr": 1
+        },
+        "rootClientWidth": 1425,
+        "container": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "canvas": {
+          "x": 384,
+          "y": 72,
+          "width": 1041,
+          "height": 928
+        },
+        "backing": {
+          "width": 1041,
+          "height": 928
+        },
+        "connected": true,
+        "reason": "final",
+        "mutations": []
+      }
+    ]
+  },
+  "zoomDesigns": [
+    {
+      "profile": "android-portrait",
+      "geometryPassed": true,
+      "maximumZoom": 18,
+      "performanceObserved": {
+        "layoutShift": 0,
+        "longestTaskMs": 629
+      },
+      "performanceObservationIsNotTheMapInteractionBudget": true,
+      "closeTrailPassed": true,
+      "coastPassed": true
+    },
+    {
+      "profile": "desktop-webgl",
+      "geometryPassed": true,
+      "maximumZoom": 18,
+      "performanceObserved": {
+        "layoutShift": 0,
+        "longestTaskMs": 1870
+      },
+      "performanceObservationIsNotTheMapInteractionBudget": true,
+      "closeTrailPassed": true,
+      "coastPassed": true
+    }
+  ],
+  "coastline": [
+    {
+      "profile": "android-portrait",
+      "engine": "leaflet",
+      "passed": true,
+      "frameCount": 6,
+      "sourceVersion": [
+        "e0ce67282bfd3694"
+      ],
+      "maximumCenterErrorPx": 2.9226088636008765,
+      "centerErrorLimitPx": 6,
+      "nativePans": 8,
+      "trustedNativeEvents": true,
+      "clicksDuringPans": 0,
+      "frames": [
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 7,
+          "zoom": 7.121307459879884,
+          "centerErrorPx": 1.9467061844009763,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "regional"
+        },
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 9,
+          "zoom": 9.371307459879883,
+          "centerErrorPx": 7.4530824980028135e-06,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "local"
+        },
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 12,
+          "zoom": 12.371307459879883,
+          "centerErrorPx": 2.2238667383478044,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "source"
+        },
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 15,
+          "zoom": 15.371307459879883,
+          "centerErrorPx": 1.3628112963004433e-05,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "source"
+        },
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 18,
+          "zoom": 18,
+          "centerErrorPx": 2.9226088636008765,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "source"
+        },
+        {
+          "fixture": "gogland",
+          "coordinate": [
+            26.9596752,
+            60.0633158
+          ],
+          "targetZoom": 11,
+          "zoom": 11.621307459879883,
+          "centerErrorPx": 0.719312499872712,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "local"
+        }
+      ],
+      "screenshots": [
+        {
+          "fixture": "primorsk",
+          "targetZoom": 7,
+          "file": "android-portrait-coast-primorsk-z7.png",
+          "bytes": 313203,
+          "sha256": "c6c200f3b0822077b48c37942fc6f34353ea0534d7a80199235a1110bc12ac34"
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 9,
+          "file": "android-portrait-coast-primorsk-z9.png",
+          "bytes": 643086,
+          "sha256": "83a8155505f6865bc12ace17f1a7310a99fd01229f979a0f9ad01d185d7ebc89"
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 12,
+          "file": "android-portrait-coast-primorsk-z12.png",
+          "bytes": 505811,
+          "sha256": "e763aa9cd8af5e4b1f79d98b8f067f1c1484c42956913ea720dd7c7957bf7835"
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 15,
+          "file": "android-portrait-coast-primorsk-z15.png",
+          "bytes": 358155,
+          "sha256": "3e80fe1b78a511aed57ae41cd4b8a441c67912e02ecc73b5fd7ccd82fcdfd760"
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 18,
+          "file": "android-portrait-coast-primorsk-z18.png",
+          "bytes": 99352,
+          "sha256": "45a7e0e7a9cef454043373a3a85470e75a9c5217a110167ceff3165006874a44"
+        },
+        {
+          "fixture": "gogland",
+          "targetZoom": 11,
+          "file": "android-portrait-coast-gogland-z11.png",
+          "bytes": 228778,
+          "sha256": "c2cae3bc9fc6cc0b6c8bd7a19ca07374d034da451e8efceaa5572bd3fbf42ad5"
+        }
+      ],
+      "allImageBytesAndHashesVerified": true,
+      "originalImagesVisuallyReviewed": true,
+      "visualReview": {
+        "scope": "All six original candidate screenshots",
+        "finding": "No obvious missing land cells, rectangular mask gaps or clipped coastline were seen at the tested Primorsk and Gogland views.",
+        "reviewReceiptSha256": "35d841668e42829079ad25677e23ec18d1a1afc79b07f11636829d28323a3bd3",
+        "knownIssue": null
+      },
+      "rawCoastReportSha256": "dc7557fdeed2477c6a0415050d737460150199833f0aac467b9574350984289f"
+    },
+    {
+      "profile": "desktop-webgl",
+      "engine": "maplibre",
+      "passed": true,
+      "frameCount": 6,
+      "sourceVersion": [
+        "e0ce67282bfd3694"
+      ],
+      "maximumCenterErrorPx": 4.44657680766724,
+      "centerErrorLimitPx": 6,
+      "nativePans": 5,
+      "trustedNativeEvents": true,
+      "clicksDuringPans": 0,
+      "frames": [
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 7,
+          "zoom": 7.18899196916921,
+          "centerErrorPx": 0.13895552584361104,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "regional"
+        },
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 9,
+          "zoom": 9.18899196916921,
+          "centerErrorPx": 0.5558221016812461,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "local"
+        },
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 12,
+          "zoom": 12.18899196916921,
+          "centerErrorPx": 4.44657680766724,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "source"
+        },
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 15,
+          "zoom": 15.18899196916921,
+          "centerErrorPx": 0.5123065322351674,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "source"
+        },
+        {
+          "fixture": "primorsk",
+          "coordinate": [
+            28.6069513,
+            60.3623846
+          ],
+          "targetZoom": 18,
+          "zoom": 18,
+          "centerErrorPx": 3.595238094168962,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "source"
+        },
+        {
+          "fixture": "gogland",
+          "coordinate": [
+            26.9596752,
+            60.0633158
+          ],
+          "targetZoom": 11,
+          "zoom": 11.18899196916921,
+          "centerErrorPx": 0.35187909610737367,
+          "ready": true,
+          "pending": 0,
+          "error": "",
+          "version": "e0ce67282bfd3694",
+          "lod": "local"
+        }
+      ],
+      "screenshots": [
+        {
+          "fixture": "primorsk",
+          "targetZoom": 7,
+          "file": "desktop-webgl-coast-primorsk-z7.png",
+          "bytes": 756650,
+          "sha256": "ce6d672bbee5a0178d361abe381bd7ae66d1c5a144c1d225dcc5be1e941eb432"
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 9,
+          "file": "desktop-webgl-coast-primorsk-z9.png",
+          "bytes": 779441,
+          "sha256": "bc7a54a5f73b1fde6dec7dc1d96cb3bae6d1002ab9c355af174df5913d036836"
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 12,
+          "file": "desktop-webgl-coast-primorsk-z12.png",
+          "bytes": 722474,
+          "sha256": "f2e88bf178a0071ebf249fe5bb804f17c31a5d364816fbc888e1a4d3023341e2"
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 15,
+          "file": "desktop-webgl-coast-primorsk-z15.png",
+          "bytes": 258361,
+          "sha256": "00a527bd669318c9fa39750357b7ff42afe2684b44666ceb3ceb7e845a6b9c32"
+        },
+        {
+          "fixture": "primorsk",
+          "targetZoom": 18,
+          "file": "desktop-webgl-coast-primorsk-z18.png",
+          "bytes": 131154,
+          "sha256": "2b046da75a53788b48c7eefaea5af8bf41094580c3ff9e776413ddbb493ed73a"
+        },
+        {
+          "fixture": "gogland",
+          "targetZoom": 11,
+          "file": "desktop-webgl-coast-gogland-z11.png",
+          "bytes": 269666,
+          "sha256": "1a0a782d8593f938807c8bff0fd63830f2622ece5841d3d7603f5c58f6645f6c"
+        }
+      ],
+      "allImageBytesAndHashesVerified": true,
+      "originalImagesVisuallyReviewed": true,
+      "visualReview": {
+        "scope": "All six original candidate screenshots",
+        "finding": "No obvious missing land cells, rectangular mask gaps or clipped coastline were seen at the tested Primorsk and Gogland views.",
+        "reviewReceiptSha256": null,
+        "knownIssue": "Repeated place captions remain visible at desktop z7, z9 and z12; this was observed before this candidate and has no verified raw-source pair diagnosis."
+      },
+      "rawCoastReportSha256": "84ce42eb6055ea01eaa4ad5424488384e523faf4ca85b936f78e21dff423e144"
+    }
+  ],
+  "offline": {
+    "profile": "android-portrait",
+    "passed": true,
+    "nativeInputs": 4,
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "originTransport": {
+      "method": "origin-socket-destroy",
+      "startedAt": "2026-11-10T17:24:55.955Z",
+      "restoredAt": "2026-11-10T17:24:56.402Z",
+      "blockedRequests": 4,
+      "requests": [
+        {
+          "path": "/tropnik/_offline-transport-probe",
+          "method": "GET",
+          "at": "2026-11-10T17:24:55.959Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T17:24:55.968Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T17:24:55.968Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T17:24:55.970Z"
+        }
+      ],
+      "probe": {
+        "passed": true,
+        "errorCode": "ECONNRESET",
+        "path": "/tropnik/_offline-transport-probe"
+      },
+      "active": false
+    },
+    "offline": true,
+    "titleRestored": true,
+    "contactRestored": true,
+    "draftExplicit": true,
+    "privateApiNotCached": true,
+    "networkSuccessfulResponses": 0,
+    "screenshot": {
+      "file": "android-offline-emergency-card.png",
+      "bytes": 176610,
+      "sha256": "c8f1cbfc66947438ddd9264ec6e218ffaa7ab890958467b3037a116056624e18"
+    },
+    "originalPngVisuallyReviewed": true,
+    "imageBytesAndHashVerified": true,
+    "rawReportSha256": "fbe1db40867e72bedb2d674c4c596d9f62c7e59c7cf70ca6a7ff2d76379fbd05"
+  },
+  "artifacts": [
+    {
+      "id": 13787041150,
+      "name": "tropnik-pages-design-1",
+      "bytes": 37769271,
+      "sha256": "956cea64ccd580d697688a4dc14fe4a03071a6f3518dc7e59ec70cce72bca01a",
+      "verifiedAfterDownload": true
+    },
+    {
+      "id": 13785863106,
+      "name": "tropnik-pages-browser-failure-1",
+      "bytes": 277835,
+      "sha256": "3c0c4fc9db890b895fe375290964038dd7e3e58c7b9a3a51baa82a4cec6002e3",
+      "verifiedAfterDownload": true
+    }
+  ],
+  "rawFailureReportSha256": "cfd125d50087c22e22a39ae3bbc41fcf00f09b2d9f9cbfe4f7902ff6fe595a89",
+  "deployment": {
+    "jobId": 129999886615,
+    "conclusion": "skipped",
+    "anonymousDeployedVerificationExecuted": false
+  },
+  "limitations": [
+    "The release remains blocked by the measured 1135 ms desktop task against the unchanged 750 ms exclusive limit.",
+    "Functional, coast and cold-offline evidence passed for this candidate; these do not override the performance failure.",
+    "The visual review covers twelve specified coastline fixtures, not every coastline location.",
+    "Existing repeated desktop place captions remain documented.",
+    "No public Pages deployment or anonymous deployed APK verification was produced by this run."
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "kind": "full-pages-candidate-failure",
+  "sourceCommit": "dd246828bad0fbd700c2a308882d9d5c6282f291",
+  "tree": "0811bd64df5ab9788a293d39c146d4d4518232d4",
+  "webTree": "1aace8a82f01bf45a857aaad9d11802e07ea43f6",
+  "verified": false,
+  "releaseEligible": false,
+  "workflow": {
+    "runId": 42856953343,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42856953343",
+    "status": "completed",
+    "conclusion": "failure",
+    "startedAt": "2026-11-10T16:40:44Z",
+    "completedAt": "2026-11-10T16:42:14Z"
+  },
+  "buildJob": {
+    "id": 129972477049,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42856953343/job/129972477049",
+    "conclusion": "failure",
+    "failedStage": "Run web regression checks",
+    "priorStagesPassed": [
+      "Install the pinned package manager and frozen dependencies",
+      "Restore and verify the public Android preview",
+      "Verify APK download failure boundaries",
+      "Verify reviewed Telegram reference boundaries"
+    ]
+  },
+  "regressions": {
+    "pagesTools": {
+      "tests": 126,
+      "passed": 126,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 1096.567958
+    },
+    "web": {
+      "tests": 611,
+      "passed": 610,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 28405.879109
+    },
+    "failure": {
+      "file": "web/tests/map-polish.test.mjs",
+      "line": 132,
+      "test": "mobile visual viewport and native route points stay cross-platform",
+      "assertion": "ERR_ASSERTION",
+      "expectedSourcePattern": "/type:'circle',source:TRAIL_POINTS/",
+      "actualSource": "Atlas.tsx imports and calls mapTrailPointLayers(TRAIL_POINTS,MAP_CONFIG.trailHitRadiusPx); circle layer definitions moved into web/lib/map-trail-points.ts.",
+      "diagnosis": "The old source-location assertion still requires inline layer definitions after the extraction. This receipt records the failed revision, not a later test fix."
+    }
+  },
+  "browser": {
+    "executed": false,
+    "reason": "Web regression stage failed before browser audit."
+  },
+  "deployment": {
+    "jobId": 129973410717,
+    "status": "completed",
+    "conclusion": "skipped"
+  },
+  "rawLog": {
+    "bytes": 155959,
+    "sha256": "25f485e666ac8147eadb631a3d0a1f9bfc870061093f7790470f4bffeff5666b",
+    "source": "GitHub workflow job log downloaded after completion"
+  },
+  "limitations": [
+    "This main run provides no browser, coastline or cold-offline acceptance.",
+    "Separate diagnostic539 uses the same exact web tree, passes cold-offline behavior, and still records798ms above the750ms desktop map limit.",
+    "No verified Pages artifact or deployment was produced by this run."
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "kind": "tropnik-web-map-trace-attribution-comparison",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "candidate": {
+    "sourceCommit": "53946453156df887f2ec1426ce67d6438ef1dcfb",
+    "githubActionsRunId": 42856855014,
+    "githubActionsJobId": 129972125085,
+    "sameWebTreeAsMainCommit": "dd246828bad0fbd700c2a308882d9d5c6282f291",
+    "webTree": "1aace8a82f01bf45a857aaad9d11802e07ea43f6",
+    "artifactZipBytes": 2804302,
+    "artifactZipSha256": "e5d8e138d11f37bf9954796cbb65c0d8461acaff6e50826ec9dabf3dd762873a",
+    "workflowJobConclusion": "success",
+    "performancePassed": false,
+    "scenarioElapsedMs": 70011,
+    "browserObservedPeak": {
+      "durationMs": 798,
+      "startTimeMs": 39701.8,
+      "observedAtMs": 40727.4,
+      "phase": "map-interactions/request-ownership"
+    },
+    "longTaskLimitMs": 750,
+    "limitChanged": false
+  },
+  "method": {
+    "profileOwnership": "Group Profile and ProfileChunk by process ID plus profile ID, inheriting start time and sampled owner thread from Profile; ProfileChunk emitter thread is not the sampled thread.",
+    "rendererProcessId": 2802,
+    "rendererThreadId": 2802,
+    "rendererProfileId": "0x6",
+    "requestOwnershipProfileStartUs": 135653619,
+    "sampleTimestamps": "Profile.startTime plus cumulative ProfileChunk.timeDeltas",
+    "sampleInterpretation": "Stack sample counts show sampled attribution; they are not exact CPU duration. Native event dur is elapsed wall time; tdur is the recorded thread CPU time.",
+    "traceIntegrity": "All three file byte counts and SHA-256 values independently matched their capture metadata. Capped traces are parseable to EOF with no reported data loss or capture errors; only completed tasks inside their recorded windows are compared."
+  },
+  "traces": [
+    {
+      "name": "desktop-webgl-first-altai.trace.json",
+      "sha256": "804de5d261dadfcd4884d5c958bc2baa92e5a2836e013b626155b64577d84a93",
+      "bytes": 7338706,
+      "status": "complete",
+      "reason": "action-complete",
+      "durationMs": 5014.206314,
+      "cpuSamples": 66800
+    },
+    {
+      "name": "desktop-webgl-request-ownership.trace.json",
+      "sha256": "c838eee5e89e595c685a129ab5463b05065367f4046742edc50d94f0d2c99f5c",
+      "bytes": 11036292,
+      "status": "partial",
+      "reason": "time-cap",
+      "durationMs": 8000.412803,
+      "cpuSamples": 84675,
+      "eof": true,
+      "dataLoss": false,
+      "errors": []
+    },
+    {
+      "name": "desktop-webgl-sibling-polygon.trace.json",
+      "sha256": "2f5d6fc785e7905b9f03981a042c0426df7ffa52f2f9e8ac0d1cb04d4eaee6eb",
+      "bytes": 10648664,
+      "status": "partial",
+      "reason": "time-cap",
+      "durationMs": 8000.58829,
+      "cpuSamples": 127666,
+      "eof": true,
+      "dataLoss": false,
+      "errors": []
+    }
+  ],
+  "requestOwnershipPeak": {
+    "traceTaskStartUs": 140011502,
+    "traceTaskDurationMs": 798.391,
+    "rendererSamples": 3071,
+    "leafResizeCanvasSamples": 2228,
+    "inclusiveResizeSamples": 2237,
+    "inclusiveResizeInternalSamples": 2232,
+    "inclusiveSourceWorkerUpdateSamples": 287,
+    "callback": {
+      "startUs": 140159120,
+      "durationMs": 640.081,
+      "bundle": "maplibre-gl-gSiY3OKT.js",
+      "lineOneBased": 814,
+      "columnOneBased": 180599,
+      "path": [
+        "Map._setupResizeObserver observer callback",
+        "throttled resize callback",
+        "Map.resize",
+        "Map._resizeInternal",
+        "Map._resizeCanvas"
+      ]
+    },
+    "nativeWaits": [
+      {
+        "name": "GLES2::GetGLError",
+        "startUs": 140159210,
+        "durationMs": 106.896,
+        "threadCpuMs": 2.559
+      },
+      {
+        "name": "GLES2Implementation::CheckFramebufferStatus",
+        "startUs": 140266170,
+        "durationMs": 528.497,
+        "threadCpuMs": 15.885
+      }
+    ],
+    "nonoverlappingNativeWaitTotalMs": 635.393,
+    "gpuOverlap": {
+      "processId": 2724,
+      "threadId": 2724,
+      "threadName": "CrGpuMain",
+      "schedulerTaskStartUs": 140265330,
+      "schedulerTaskDurationMs": 528.651,
+      "schedulerThreadCpuMs": 1.155,
+      "scheduledByThreadId": 2752,
+      "scheduledByThreadName": "VizCompositorThread",
+      "scheduledAtUs": 140254726,
+      "scheduleFlowId": 1337,
+      "runTaskFlowId": 2044
+    },
+    "nativeActionCorrelation": {
+      "requestPhaseStartMs": 35339.1,
+      "trustedModalReopenClickMs": 38958.6,
+      "taskStartAfterReopenMs": 743.2,
+      "nextRouteSelectionClickMs": 42196.2,
+      "limit": "The receipt does not timestamp the intervening history Back operation, so no exact Back-to-peak latency is asserted."
+    },
+    "paintDimensions": {
+      "documentNodeId": 81,
+      "mapCanvasNodeId": 97,
+      "mapCanvasNodeName": "CANVAS class='maplibregl-canvas'",
+      "beforeReopen": {
+        "documentPaintUs": 139263317,
+        "documentWidth": 1425,
+        "canvasPaintUs": 138522918,
+        "canvasWidth": 1041,
+        "canvasHeight": 928
+      },
+      "afterReopen": {
+        "documentPaintUs": 139290706,
+        "documentWidth": 1440,
+        "canvasPaintUs": 139309878,
+        "canvasWidth": 1056,
+        "canvasHeight": 928
+      },
+      "afterModalClosure": {
+        "documentPaintUs": 140802061,
+        "documentWidth": 1425,
+        "canvasPaintUs": 140976282,
+        "canvasWidth": 1041,
+        "canvasHeight": 928
+      },
+      "widthDeltaCssPixels": 15
+    },
+    "finding": "The captured failing task is dominated by the SDK ResizeObserver path writing WebGL canvas dimensions and waiting for GPU queries. The trace also records a reversible 15 CSS-pixel document and map width change across the modal lifecycle.",
+    "limits": [
+      "No shader compilation CPU duration is inferred from query wall time.",
+      "The long GPU scheduler span has no captured internal compiler or driver work sufficient to attribute its wall time further.",
+      "Source serialization also occurs within this task but is not the dominant sampled stack."
+    ]
+  },
+  "comparisonWithPreviousCandidate": {
+    "previousSourceCommit": "921191103d6d95341e73f67e2b6dfef47c50ef83",
+    "previousRunId": 42854457281,
+    "previousAltaiTraceSha256": "31fb4012341b12746aa4bbc07d2e015a17e2eff02bd94d378f510957d908b9d3",
+    "previousSiblingTraceSha256": "d67f2030eb48ef3df7006623764011e9eae0e5b7cd0a153b580393095d9258fa",
+    "firstAltaiTransferDominatedTask": {
+      "previousDurationMs": 625.501,
+      "currentDurationMs": 239.427,
+      "currentStartUs": 108285126,
+      "currentSamples": 415,
+      "currentInclusiveSourceWorkerUpdateSamples": 394
+    },
+    "siblingTransferDominatedTasksChronological": [
+      {
+        "previousDurationMs": 842.607,
+        "currentDurationMs": 571.901,
+        "currentStartUs": 156551424,
+        "currentSamples": 2075,
+        "currentInclusiveSourceWorkerUpdateSamples": 1987
+      },
+      {
+        "previousDurationMs": 873.493,
+        "currentDurationMs": 503.203,
+        "currentStartUs": 160543067,
+        "currentSamples": 1853,
+        "currentInclusiveSourceWorkerUpdateSamples": 1588
+      }
+    ],
+    "transferStack": [
+      "GeoJSONSource._sendWorkerUpdate",
+      "Actor.sendAsync",
+      "recursive serializer Yc",
+      "structured data construction/postMessage"
+    ],
+    "currentAltaiCircleSetup": {
+      "taskStartUs": 107363324,
+      "taskDurationMs": 686.65,
+      "browserPhaseLongestTaskMs": 685,
+      "samples": 2539,
+      "programConstructorInclusiveSamples": 2035,
+      "nativeGetProgramivMs": 128.827,
+      "nativeUniformBlockIndexMs": 400.199,
+      "nonoverlappingQueryWaitTotalMs": 529.026
+    },
+    "previousAltaiCircleSetupTaskMs": 733.841,
+    "limits": [
+      "These are individual captured runs, not a repeated statistical benchmark.",
+      "The same source-transfer stacks remain but the observed transfer-dominated task durations decreased after incremental source updates.",
+      "The previous 1315 ms request-ownership peak was outside both previous trace windows; its cause remains unproven and must not be assigned retrospectively from the new 798 ms capture.",
+      "The current 798 ms peak still fails the unchanged 750 ms performance gate.",
+      "Successful diagnostic workflow execution and functional map checks do not make this a release verification receipt."
+    ]
+  }
+}

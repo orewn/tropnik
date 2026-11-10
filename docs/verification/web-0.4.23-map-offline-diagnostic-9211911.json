@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "evidenceType": "focused-map-and-offline-diagnostic",
+  "repository": "orewn/tropnik",
+  "sourceCommit": "921191103d6d95341e73f67e2b6dfef47c50ef83",
+  "runId": 42854457281,
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/42854457281",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "map": {
+    "jobId": 129963560009,
+    "workflowConclusion": "success",
+    "performancePassed": false,
+    "performanceIssues": [
+      {
+        "profile": "desktop-webgl",
+        "phase": "map-interactions",
+        "metric": "longestTaskMs",
+        "value": 1315,
+        "limit": 750
+      }
+    ],
+    "durationMs": 67900,
+    "peakLongTask": {
+      "startTime": 38701.8,
+      "duration": 1315,
+      "name": "self",
+      "observedAt": 40058.3,
+      "phase": "map-interactions/request-ownership"
+    },
+    "timeOrigin": 1794328046753,
+    "peakCausalTraceCaptured": false,
+    "peakTraceLimitation": "The 1315 ms request-ownership peak falls between the first Altai and sibling-polygon trace windows.",
+    "traces": [
+      {
+        "scope": "first-desktop-altai-selection",
+        "file": "desktop-webgl-first-altai.trace.json",
+        "sourceCommit": "921191103d6d95341e73f67e2b6dfef47c50ef83",
+        "status": "complete",
+        "stopReason": "action-complete",
+        "recordedDurationMs": 4951.420225999998,
+        "bytes": 8256389,
+        "sha256": "31fb4012341b12746aa4bbc07d2e015a17e2eff02bd94d378f510957d908b9d3",
+        "eof": true,
+        "dataLossOccurred": false,
+        "eventCount": 30730,
+        "cpuSamples": 88772,
+        "errors": []
+      },
+      {
+        "scope": "desktop-sibling-polygon-selection",
+        "file": "desktop-webgl-sibling-polygon.trace.json",
+        "sourceCommit": "921191103d6d95341e73f67e2b6dfef47c50ef83",
+        "status": "partial",
+        "stopReason": "time-limit",
+        "recordedDurationMs": 8000.3680779999995,
+        "bytes": 12306324,
+        "sha256": "d67f2030eb48ef3df7006623764011e9eae0e5b7cd0a153b580393095d9258fa",
+        "eof": true,
+        "dataLossOccurred": false,
+        "eventCount": 48105,
+        "cpuSamples": 161273,
+        "errors": []
+      }
+    ],
+    "firstAltaiPhaseMaximumMs": 733
+  },
+  "offlineSafety": {
+    "jobId": 129963559541,
+    "workflowConclusion": "failure",
+    "passed": false,
+    "error": "Error: Offline safety viewer did not mount after a cold navigation: false",
+    "nativeInputs": 4,
+    "inputs": [
+      {
+        "selector": "#route-title",
+        "passed": true,
+        "focusedBeforeTyping": true,
+        "valueLength": 20,
+        "trustedIntendedInput": true
+      },
+      {
+        "selector": "#region",
+        "passed": true,
+        "focusedBeforeTyping": true,
+        "valueLength": 21,
+        "trustedIntendedInput": true
+      },
+      {
+        "selector": "#leader-name",
+        "passed": true,
+        "focusedBeforeTyping": true,
+        "valueLength": 27,
+        "trustedIntendedInput": true
+      },
+      {
+        "selector": "#leader-phone",
+        "passed": true,
+        "focusedBeforeTyping": true,
+        "valueLength": 12,
+        "trustedIntendedInput": true
+      }
+    ],
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "standaloneViewerMounted": false,
+    "visualObserved": "The failure screenshot shows the normal SafetyRegistration application page with a saved draft, not the standalone emergency viewer. No transport cause is claimed by this receipt.",
+    "failureScreenshot": {
+      "file": "browser-failure.png",
+      "bytes": 238140,
+      "sha256": "a60b280f9a53dda89be6a790299c68401046b0481bd71f1374820399d125c752",
+      "visuallyReviewed": true
+    }
+  },
+  "artifacts": [
+    {
+      "id": 13782077202,
+      "name": "tropnik-map-interactions-diagnostic-42854457281",
+      "bytes": 2023042,
+      "sha256": "82b39dfddf9325ffca0cbb48151848d9196189e1d6e3065bed7843ad31874b54"
+    },
+    {
+      "id": 13781912307,
+      "name": "tropnik-offline-safety-diagnostic-42854457281",
+      "bytes": 236558,
+      "sha256": "2528f4086daa34f930d2289ab7bdb1d04f86ba1e0d12462e2e446b6d28b8451e"
+    }
+  ],
+  "evidenceLimits": [
+    "The map diagnostic job completed but the unchanged 750 ms gate still failed; successful job status is not a release pass.",
+    "The prior intended-field input fix passed real browser evidence for all four fields.",
+    "The first Altai phase maximum is lower than baseline 796 ms, but the complete interaction remains outside budget.",
+    "No full coastline/profile matrix, deployment or public verification was performed by this focused workflow."
+  ]
+}

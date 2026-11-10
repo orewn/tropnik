@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "kind": "tropnik-web-map-trace-attribution-comparison",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "candidate": {
+    "sourceCommit": "aa8bb4bce1d1c725eace531bb4c04c4f1230e9d8",
+    "githubActionsRunId": 42859458839,
+    "githubActionsJobId": 129981333908,
+    "sameWebTreeAsMainCommit": "5af55a7320cc6b567461d0834e9d3c28a8a1f63f",
+    "webTree": "76904dc3f56841c63830aac602b17c6ae2b332d0",
+    "artifactZipBytes": 2712163,
+    "artifactZipSha256": "14207c504f9e2baba100a60dd49ea1091ab14a2fd7d5e9df1e28b6f08fe23888",
+    "performancePassed": false,
+    "longTaskLimitMs": 750,
+    "scenarioElapsedMs": 67879,
+    "browserTimeOriginEpochMs": 1794329791056.5,
+    "browserPeak": {
+      "startTime": 8447.799999999988,
+      "duration": 839,
+      "name": "self",
+      "observedAt": 9288.399999999994,
+      "phase": "map-interactions/first-altai"
+    }
+  },
+  "method": {
+    "profileOwnership": "Profile and ProfileChunk are joined by process ID plus profile ID; sampled owner thread and start time come from Profile, not the ProfileChunk emitter thread.",
+    "rendererProcessId": 2834,
+    "rendererThreadId": 2834,
+    "nativeTimingUnits": "dur is elapsed wall time; tdur is recorded thread CPU time. Sample counts identify sampled stacks and are not exact CPU duration.",
+    "limits": [
+      "Two traces stop at the unchanged8-second capture cap; each is valid JSON to EOF with no reported loss or errors. Only completed tasks inside each recorded window are attributed.",
+      "This instrumented diagnostic failed its unchanged750ms performance limit. It does not provide a release-eligible browser result.",
+      "Tracing can affect execution, but these records do not establish trace overhead as the sole cause of the failed measurement.",
+      "Single-run comparisons do not establish a statistical performance guarantee."
+    ]
+  },
+  "traces": [
+    {
+      "file": "desktop-webgl-first-altai.trace.json",
+      "scope": "first-desktop-altai-selection",
+      "sha256": "d86e9526e96b21afc11ef07aef0938f97221bebecada796ea029052b2f7fef19",
+      "bytes": 7287989,
+      "status": "complete",
+      "stopReason": "action-complete",
+      "eof": true,
+      "dataLossOccurred": false,
+      "errors": [],
+      "recordedDurationMs": 5026.266631999999,
+      "cpuSamples": 68103
+    },
+    {
+      "file": "desktop-webgl-request-ownership.trace.json",
+      "scope": "desktop-route-request-ownership",
+      "sha256": "5006b4f6cfb38940872b5e75d3fe095e6c38d729b9122ce9399b5b249216ae6f",
+      "bytes": 10015920,
+      "status": "partial",
+      "stopReason": "time-limit",
+      "eof": true,
+      "dataLossOccurred": false,
+      "errors": [],
+      "recordedDurationMs": 8000.6010529999985,
+      "cpuSamples": 99146
+    },
+    {
+      "file": "desktop-webgl-sibling-polygon.trace.json",
+      "scope": "desktop-sibling-polygon-selection",
+      "sha256": "d10b7a2667faebcfc9ce0bb1445d1d55e5d105b1ea8f95cba70069d6f2928efb",
+      "bytes": 10030668,
+      "status": "partial",
+      "stopReason": "time-limit",
+      "eof": true,
+      "dataLossOccurred": false,
+      "errors": [],
+      "recordedDurationMs": 7999.686151999995,
+      "cpuSamples": 128178
+    }
+  ],
+  "firstAltaiPeak": {
+    "taskStartUs": 114495402,
+    "taskDurationMs": 839.523,
+    "rendererSamples": 3106,
+    "programConstructorInclusiveSamples": 2941,
+    "drawCircleInclusiveSamples": 2941,
+    "getProgramParameterLeafSamples": 1683,
+    "getUniformBlockIndexLeafSamples": 1258,
+    "sourceWorkerUpdateSamplesInPeak": 0,
+    "resizeCanvasSamplesInPeak": 0,
+    "stack": [
+      "Map._render",
+      "Painter.render",
+      "Painter.renderLayer",
+      "drawCircle(qM)",
+      "Painter.useProgram",
+      "ProgramCache.getProgram",
+      "Program constructor(xj)",
+      "program status / shared UBO query"
+    ],
+    "nativeWaits": [
+      {
+        "name": "GLES2Implementation::GetProgramiv",
+        "startUs": 114507883,
+        "durationMs": 495.868,
+        "threadCpuMs": 14.019
+      },
+      {
+        "name": "GLES2::GetUniformBlockIndex",
+        "startUs": 115003828,
+        "durationMs": 320.093,
+        "threadCpuMs": 9.609
+      }
+    ],
+    "nonoverlappingQueryWaitTotalMs": 815.961,
+    "actualGpuLinkProgram": {
+      "name": "GLES2DecoderPassthroughImpl::DoLinkProgram",
+      "startUs": 114997751,
+      "durationMs": 0.93,
+      "threadCpuMs": 0.516
+    },
+    "overlappingGpuTasks": [
+      {
+        "processId": 2758,
+        "threadId": 2758,
+        "name": "Scheduler::RunTask",
+        "startUs": 114495558,
+        "durationMs": 479.635,
+        "threadCpuMs": 1.417,
+        "scheduledBy": "VizCompositorThread",
+        "scheduledByThreadId": 2786,
+        "scheduleStartUs": 114484950,
+        "scheduleFlowId": 716,
+        "sequenceUnblockedFlowId": 719,
+        "runFlowId": 845
+      },
+      {
+        "processId": 2758,
+        "threadId": 2758,
+        "name": "Scheduler::RunTask",
+        "startUs": 115004353,
+        "durationMs": 319.027,
+        "threadCpuMs": 1.939,
+        "scheduledBy": "VizCompositorThread",
+        "scheduledByThreadId": 2786,
+        "scheduleStartUs": 114975608,
+        "scheduleFlowId": 938,
+        "runFlowId": 1506
+      }
+    ],
+    "finding": "The actual failing task is the cold circle program setup path blocked in synchronous GPU queries. Both long query intervals overlap compositor-scheduled GPU work. Neither source transfer nor canvas resize appears in the peak sampled stack.",
+    "limits": [
+      "The query wall time is not shader compilation CPU time.",
+      "The trace does not expose enough internal driver/compiler events to assign the long compositor GPU wall time more specifically.",
+      "No change to program setup, graphics driver or performance budget is implied by this attribution."
+    ]
+  },
+  "modalLayoutFix": {
+    "observed": true,
+    "receiptScope": "desktop-request-dialog",
+    "sampleCount": 8,
+    "firstSampleMs": 35927.600000000006,
+    "lastSampleMs": 45245,
+    "containerAndCanvasCssRect": {
+      "x": 384,
+      "y": 72,
+      "width": 1041,
+      "height": 928
+    },
+    "canvasBacking": {
+      "width": 1041,
+      "height": 928
+    },
+    "totalBackingAttributeMutations": 0,
+    "rootClientWidthsObserved": [
+      1425,
+      1440
+    ],
+    "observerActiveAtEnd": false,
+    "observerOverflow": false,
+    "observerErrors": [],
+    "requestTraceGetGLErrorEvents": 0,
+    "requestTraceCheckFramebufferStatusEvents": 0,
+    "requestTraceLongestTaskMs": 189.156,
+    "requestTraceLongestTaskContext": "Trace startup/EvaluateScript observer installation, with only3 captured renderer samples; not a resize task.",
+    "nextLongestRequestActionTaskMs": 119.109,
+    "finding": "The full modal action receipt preserves1041x928 CSS and backing dimensions across all8 snapshots with zero backing mutations, while root.clientWidth still toggles1425/1440. The recorded request trace no longer contains the prior framebuffer/error waits.",
+    "limits": [
+      "The8-second request trace does not cover the entire9.3174-second layout-observer interval; the independent layout receipt covers the full action interval.",
+      "Stable modal layout is verified separately from the overall failed first-Altai performance gate."
+    ]
+  },
+  "comparison": {
+    "previousSourceCommit": "53946453156df887f2ec1426ce67d6438ef1dcfb",
+    "previousRunId": 42856855014,
+    "previousAttributionSha256": "12377b57d18fc162dae4945c1e0726f44cca3656eb4befe75b7e8b7934c9bacd",
+    "firstAltai": {
+      "previousTaskMs": 686.65,
+      "currentTaskMs": 839.523,
+      "previousSequentialQueryWaitMs": 529.026,
+      "currentSequentialQueryWaitMs": 815.961
+    },
+    "requestOwnership": {
+      "previousResizeTaskMs": 798.391,
+      "previousFramebufferAndErrorQueryWaitMs": 635.393,
+      "currentMeasuredCanvasDimensionsStable": true,
+      "currentRecordedFramebufferAndErrorQueryCount": 0
+    },
+    "siblingSourceTransferTasksChronological": {
+      "previousTaskMs": [
+        571.901,
+        503.203
+      ],
+      "currentTaskMs": [
+        293.005,
+        308.696
+      ],
+      "currentStartsUs": [
+        160845063,
+        164664432
+      ]
+    },
+    "interpretation": "The scrollbar-gutter change removed the observed modal width/backing churn. The remaining diagnostic failure is a separately captured cold circle program/query wait. Lower individual source-transfer tasks are descriptive comparisons only; the gutter change is not asserted to have caused those reductions."
+  }
+}

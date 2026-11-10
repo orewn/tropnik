@@ -1,0 +1,650 @@
+{
+  "schemaVersion": 1,
+  "kind": "focused-map-and-offline-diagnostic",
+  "sourceCommit": "17b3616868067acba189ddfb232403798150a910",
+  "webTree": "2c8c56702a47f16760bff81fab09d9b16f4f6935",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "candidateChange": {
+    "application": "Five CSS background/backdrop declarations on map controls; selectors, geometry, interaction and performance limits unchanged.",
+    "sourceFiles": {
+      "web/app/map-polish.css": "6119717f36a40c69181f03777cf5f81798ceca8d",
+      "web/app/interface-refresh.css": "7a33e880da4727ce3a5c1b1a315e9bc21c4a6a59"
+    },
+    "infrastructure": "Also carries the already-main 60-second blank-browser startup deadline and its test. This is not an application performance limit."
+  },
+  "workflow": {
+    "runId": 42867634322,
+    "url": "https://github.com/orewn/tropnik/actions/runs/42867634322",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-11-10T17:42:09Z",
+    "completedAt": "2026-11-10T17:45:00Z",
+    "jobs": [
+      {
+        "id": 130010122782,
+        "name": "Diagnose offline-safety",
+        "conclusion": "success"
+      },
+      {
+        "id": 130010123045,
+        "name": "Diagnose map-interactions",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 13788725722,
+      "name": "tropnik-map-interactions-diagnostic-42867634322",
+      "bytes": 2981922,
+      "sha256": "eb5698711b8f1faf90b5b830ef8a0c6ed5344be7bf9e0ec9eb42b876128bbb2c",
+      "verifiedAfterDownload": true
+    },
+    {
+      "id": 13788600676,
+      "name": "tropnik-offline-safety-diagnostic-42867634322",
+      "bytes": 170096,
+      "sha256": "fb71df8766927d169104c27da911695e6da6e7c9199f327fc71efb5411eb8397",
+      "verifiedAfterDownload": true
+    }
+  ],
+  "map": {
+    "profile": "desktop-webgl",
+    "engine": "maplibre",
+    "interactionsPassed": true,
+    "performancePassed": false,
+    "performanceIssues": [
+      {
+        "profile": "desktop-webgl",
+        "phase": "map-interactions",
+        "metric": "longestTaskMs",
+        "value": 1295,
+        "limit": 750
+      }
+    ],
+    "timeOrigin": 1794332610557,
+    "counterStart": 10102.400000000009,
+    "peakLongTask": {
+      "startTime": 12081.300000000003,
+      "duration": 1295,
+      "name": "self",
+      "observedAt": 13419.999999999985,
+      "phase": "map-interactions/first-altai"
+    },
+    "durationMs": 71378,
+    "layoutShift": 0,
+    "polygon": {
+      "x": 748.3499999999999,
+      "y": 536,
+      "coordinate": [
+        106.28448486328125,
+        53.29999999999998
+      ],
+      "id": "territory-28173009B78872068540735",
+      "title": "Иркутская область",
+      "input": "mouse",
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 60219.59999999999,
+          "timestamp": 60218.40000000001,
+          "pointerType": "mouse",
+          "pointerId": 1,
+          "x": 748.3499755859375,
+          "y": 536,
+          "trusted": true,
+          "target": "CANVAS[maplibregl-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 60221.40000000001,
+          "timestamp": 60221.09999999999,
+          "pointerType": "mouse",
+          "pointerId": 1,
+          "x": 748.3499755859375,
+          "y": 536,
+          "trusted": true,
+          "target": "CANVAS[maplibregl-canvas]",
+          "button": null
+        },
+        {
+          "type": "click",
+          "time": 60222.09999999999,
+          "timestamp": 60221.09999999999,
+          "pointerType": "mouse",
+          "pointerId": 1,
+          "x": 748,
+          "y": 536,
+          "trusted": true,
+          "target": "CANVAS[maplibregl-canvas]",
+          "button": null
+        }
+      ]
+    },
+    "requestMapLayout": {
+      "schemaVersion": 1,
+      "scope": "desktop-request-dialog",
+      "limit": 32,
+      "active": false,
+      "overflow": false,
+      "observers": {
+        "resize": true,
+        "canvasAttributes": true
+      },
+      "errors": [],
+      "samples": [
+        {
+          "time": 42270.8,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "baseline",
+          "mutations": []
+        },
+        {
+          "time": 43008.2,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1440,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 44515.499999999985,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 44825.999999999985,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1440,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 44906.8,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 50460.90000000001,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1440,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 51428.8,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "dialog-state",
+          "mutations": []
+        },
+        {
+          "time": 51865.2,
+          "viewport": {
+            "width": 1440,
+            "height": 1000,
+            "dpr": 1
+          },
+          "rootClientWidth": 1425,
+          "container": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "canvas": {
+            "x": 384,
+            "y": 72,
+            "width": 1041,
+            "height": 928
+          },
+          "backing": {
+            "width": 1041,
+            "height": 928
+          },
+          "connected": true,
+          "reason": "final",
+          "mutations": []
+        }
+      ]
+    },
+    "requestMapLayoutVerified": true,
+    "phases": [
+      {
+        "name": "profile-ready",
+        "time": 9338.599999999991,
+        "cls": 0,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "map-interactions",
+        "time": 10103.400000000009,
+        "cls": 0,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "map-interactions/first-altai",
+        "time": 10104.400000000009,
+        "cls": 0,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "map-interactions/saved-filter",
+        "time": 18300.40000000001,
+        "cls": 0,
+        "longestTaskMs": 1295
+      },
+      {
+        "name": "map-interactions/route-selection",
+        "time": 23506.90000000001,
+        "cls": 0,
+        "longestTaskMs": 1295
+      },
+      {
+        "name": "map-interactions/style-camera",
+        "time": 26831.999999999985,
+        "cls": 0,
+        "longestTaskMs": 1295
+      },
+      {
+        "name": "map-interactions/request-ownership",
+        "time": 42038.90000000001,
+        "cls": 0,
+        "longestTaskMs": 1295
+      },
+      {
+        "name": "map-interactions/return-to-country",
+        "time": 52082.59999999999,
+        "cls": 0,
+        "longestTaskMs": 1295
+      },
+      {
+        "name": "map-interactions/second-baikal",
+        "time": 55837.40000000001,
+        "cls": 0,
+        "longestTaskMs": 1295
+      },
+      {
+        "name": "map-interactions/sibling-polygon",
+        "time": 59637.999999999985,
+        "cls": 0,
+        "longestTaskMs": 1295
+      },
+      {
+        "name": "map-interactions/map-gestures",
+        "time": 69333.59999999999,
+        "cls": 0,
+        "longestTaskMs": 1295
+      }
+    ],
+    "reportSha256": "34f1ef873ec6ef345deeb01cbea5d47173f6fe03d0393fea6f8a7b8004fe977b",
+    "traces": [
+      {
+        "schemaVersion": 1,
+        "scope": "first-desktop-altai-selection",
+        "sourceCommit": "17b3616868067acba189ddfb232403798150a910",
+        "instrumented": true,
+        "startedAtEpochMs": 1794332620662,
+        "limits": {
+          "durationMs": 8000,
+          "drainMs": 5000,
+          "closeMs": 1000,
+          "maxBytes": 33554432,
+          "bufferSizeKiB": 16384,
+          "chunkBytes": 262144
+        },
+        "categories": [
+          "devtools.timeline",
+          "blink.user_timing",
+          "gpu",
+          "disabled-by-default-devtools.timeline",
+          "disabled-by-default-devtools.timeline.stack",
+          "disabled-by-default-v8.cpu_profiler"
+        ],
+        "status": "complete",
+        "stopReason": "action-complete",
+        "bytes": 8144923,
+        "eof": true,
+        "dataLossOccurred": false,
+        "errors": [],
+        "recordedDurationMs": 6556.011241,
+        "eventCount": 30947,
+        "cpuProfileChunks": 1135,
+        "cpuSamples": 93033,
+        "timelineEvents": 10518,
+        "file": "desktop-webgl-first-altai.trace.json",
+        "sha256": "ab72c5d2f953a5d91ebcf156b0abbd9089db738efefac92120e7f53479932b03",
+        "verifiedAfterDownload": true
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "desktop-route-request-ownership",
+        "sourceCommit": "17b3616868067acba189ddfb232403798150a910",
+        "instrumented": true,
+        "startedAtEpochMs": 1794332652596,
+        "limits": {
+          "durationMs": 8000,
+          "drainMs": 5000,
+          "closeMs": 1000,
+          "maxBytes": 33554432,
+          "bufferSizeKiB": 16384,
+          "chunkBytes": 262144
+        },
+        "categories": [
+          "devtools.timeline",
+          "blink.user_timing",
+          "gpu",
+          "disabled-by-default-devtools.timeline",
+          "disabled-by-default-devtools.timeline.stack",
+          "disabled-by-default-v8.cpu_profiler"
+        ],
+        "status": "partial",
+        "stopReason": "time-limit",
+        "bytes": 11554586,
+        "eof": true,
+        "dataLossOccurred": false,
+        "errors": [],
+        "recordedDurationMs": 8000.299124999998,
+        "eventCount": 46694,
+        "cpuProfileChunks": 1212,
+        "cpuSamples": 100678,
+        "timelineEvents": 13037,
+        "file": "desktop-webgl-request-ownership.trace.json",
+        "sha256": "0111c2e8894d89454061b9a648ecd14077b820b4a34cb5fffde19f2d6b4cb0d4",
+        "verifiedAfterDownload": true
+      },
+      {
+        "schemaVersion": 1,
+        "scope": "desktop-sibling-polygon-selection",
+        "sourceCommit": "17b3616868067acba189ddfb232403798150a910",
+        "instrumented": true,
+        "startedAtEpochMs": 1794332670196,
+        "limits": {
+          "durationMs": 8000,
+          "drainMs": 5000,
+          "closeMs": 1000,
+          "maxBytes": 33554432,
+          "bufferSizeKiB": 16384,
+          "chunkBytes": 262144
+        },
+        "categories": [
+          "devtools.timeline",
+          "blink.user_timing",
+          "gpu",
+          "disabled-by-default-devtools.timeline",
+          "disabled-by-default-devtools.timeline.stack",
+          "disabled-by-default-v8.cpu_profiler"
+        ],
+        "status": "partial",
+        "stopReason": "time-limit",
+        "bytes": 10768771,
+        "eof": true,
+        "dataLossOccurred": false,
+        "errors": [],
+        "recordedDurationMs": 7999.57286,
+        "eventCount": 40582,
+        "cpuProfileChunks": 1477,
+        "cpuSamples": 126237,
+        "timelineEvents": 11918,
+        "file": "desktop-webgl-sibling-polygon.trace.json",
+        "sha256": "9dd44f5cb5cbc0aeb30212ff5b6ad7ab03fe228942c67da251feae1ef29a706d",
+        "verifiedAfterDownload": true
+      }
+    ],
+    "attribution": "Recorded separately after independent CPU/timeline analysis; this receipt does not infer a stack from the long-task duration."
+  },
+  "offline": {
+    "profile": "android-portrait",
+    "passed": true,
+    "nativeInputs": 4,
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "originTransport": {
+      "method": "origin-socket-destroy",
+      "startedAt": "2026-11-10T17:43:14.166Z",
+      "restoredAt": "2026-11-10T17:43:14.513Z",
+      "blockedRequests": 4,
+      "requests": [
+        {
+          "path": "/tropnik/_offline-transport-probe",
+          "method": "GET",
+          "at": "2026-11-10T17:43:14.169Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T17:43:14.239Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T17:43:14.240Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-10T17:43:14.240Z"
+        }
+      ],
+      "probe": {
+        "passed": true,
+        "errorCode": "ECONNRESET",
+        "path": "/tropnik/_offline-transport-probe"
+      },
+      "active": false
+    },
+    "offline": true,
+    "titleRestored": true,
+    "contactRestored": true,
+    "draftExplicit": true,
+    "privateApiNotCached": true,
+    "networkSuccessfulResponses": 0,
+    "screenshot": {
+      "file": "android-offline-emergency-card.png",
+      "bytes": 175958,
+      "sha256": "3c5a6a5e9e1082194ee1a759c684320f4fd56640c1432b58e23ddc4bdcf80a1a"
+    },
+    "inputs": [
+      {
+        "selector": "#route-title",
+        "passed": true,
+        "valueLength": 20,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      },
+      {
+        "selector": "#region",
+        "passed": true,
+        "valueLength": 21,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      },
+      {
+        "selector": "#leader-name",
+        "passed": true,
+        "valueLength": 27,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      },
+      {
+        "selector": "#leader-phone",
+        "passed": true,
+        "valueLength": 12,
+        "focusedBeforeTyping": true,
+        "allRecordedEventsTrusted": true
+      }
+    ],
+    "reportSha256": "7714c1c83f986dcdffffa1dc21cc4eeb3a13ed02f361e54f5f6e1e7281e7ab28",
+    "visualReview": {
+      "viewedOriginalPng": true,
+      "screenshotHashVerified": true,
+      "standaloneEmergencyViewerVisible": true,
+      "savedTestRouteVisible": true,
+      "localDraftNoticeVisible": true,
+      "note": "Screenshot shows the standalone emergency viewer with the saved CI route and explicit local-draft notice; contact restoration is verified by the DOM assertion in the raw report."
+    }
+  },
+  "limitations": [
+    "Focused diagnostics are not a full release run.",
+    "The instrumented map measurement exceeds the unchanged 750 ms desktop limit: 1295 ms during the first Altai selection.",
+    "This single fresh run does not demonstrate a performance improvement from removing control backdrop blur; it does not isolate every source of runner variation.",
+    "This diagnostic does not execute the coastline zoom matrix or mobile map interaction profiles.",
+    "Main 76eed8e remains a separately recorded full-run failure at 1135 ms; that uninstrumented peak has no captured CPU stack.",
+    "The application controls were statically reviewed and locally previewed, but this CI receipt does not contain computed CSS values."
+  ]
+}
