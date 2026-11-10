@@ -2,13 +2,13 @@ name: Focused terrain diagnosis
 
 on:
   push:
-    branches: [diagnostics/terrain-close]
+    branches: [diagnostics/terrain-density-base]
 
 permissions:
   contents: read
 
 concurrency:
-  group: terrain-diagnostics
+  group: terrain-density-base
   cancel-in-progress: false
 
 jobs:
