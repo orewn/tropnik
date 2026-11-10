@@ -12,6 +12,7 @@ import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
 import {runOfflineSafetyAudit} from './browser-offline-safety.mjs';
+import {createOfflineOriginTransport} from './browser-origin-transport.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
@@ -51,8 +52,10 @@ function browserBinary(){
   throw new Error('No Chromium-compatible browser is installed on the runner');
 }
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+const offlineOriginTransport=createOfflineOriginTransport();
 function serve(rootUrl){
   return createServer(async(request,response)=>{
+    if(offlineOriginTransport.intercept(request))return;
     try{
       const url=new URL(request.url||'/', 'http://127.0.0.1');
       let path=decodeURIComponent(url.pathname);
@@ -66,11 +69,12 @@ function serve(rootUrl){
       try{info=await stat(target);}catch{info=undefined;}
       if(info?.isDirectory())target=new URL('index.html',target.href.endsWith('/')?target:new URL(`${target.href}/`));
       const body=await readFile(target);
+      if(offlineOriginTransport.intercept(request))return;
       response.writeHead(200,{'content-type':mime.get(extname(target.pathname))||'application/octet-stream','cache-control':'no-store'});
       response.end(body);
     }catch{
-      try{const body=await readFile(new URL('404.html',rootUrl));response.writeHead(404,{'content-type':'text/html; charset=utf-8'});response.end(body);}
-      catch{response.writeHead(404);response.end('Not found');}
+      try{const body=await readFile(new URL('404.html',rootUrl));if(offlineOriginTransport.intercept(request))return;response.writeHead(404,{'content-type':'text/html; charset=utf-8'});response.end(body);}
+      catch{if(offlineOriginTransport.intercept(request))return;response.writeHead(404);response.end('Not found');}
     }
   });
 }
@@ -786,7 +790,12 @@ async function mapInteraction(cdp,profile,performanceIssues){
   await phase('style-camera');
   const styleCameraRoundtrip=profile.engine==='maplibre'?await checkStyleCameraRoundtrip(cdp,profile,trail):null;
   currentExploreExperience.styleCameraRoundtrip=styleCameraRoundtrip;
-  currentExploreExperience.step='request-ownership';await phase('request-ownership');experience.requestOwnership=await checkRequestOwnership(cdp,profile,trail);
+  currentExploreExperience.step='request-ownership';await phase('request-ownership');
+  const requestOwnership=await traceDesktopSelection(cdp,()=>checkRequestOwnership(cdp,profile,trail),{
+    enabled:focusedDiagnostic&&!profile.mobile,sourceCommit:process.env.GITHUB_SHA||null,
+    prefix:'desktop-webgl-request-ownership',scope:'desktop-route-request-ownership',
+  });
+  experience.requestOwnership=requestOwnership.value;
   await phase('return-to-country');
   await pointerSelector(cdp,'.explore-panel .back-link',profile);
   await expectSelection(cdp,{region:'altai',route:'',title:'Алтай'});
@@ -810,7 +819,7 @@ async function mapInteraction(cdp,profile,performanceIssues){
   const longTaskLimit=profile.mobile?350:750;
   if(!(perf.longest<longTaskLimit))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:longTaskLimit});
   currentExploreExperience=null;
-  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,siblingSelectionTrace:siblingSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,requestOwnershipTrace:requestOwnership.trace,siblingSelectionTrace:siblingSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
 const httpPort=await freePort(),debugPort=await freePort();
@@ -949,7 +958,7 @@ try{
   if(!runPolicy.diagnostic||runPolicy.diagnostic==='offline-safety'){
   currentProfile='android-offline-safety';
   if(runPolicy.diagnostic==='offline-safety')await cdp.call('Network.enable');
-  const offlineSafety=await runOfflineSafetyAudit(cdp,{evaluate,waitValue,sleep,pointerAt,pointerSelector,url:`http://127.0.0.1:${httpPort}/tropnik/`});
+  const offlineSafety=await runOfflineSafetyAudit(cdp,{evaluate,waitValue,sleep,pointerAt,pointerSelector,originTransport:{start:()=>offlineOriginTransport.start(server),snapshot:offlineOriginTransport.snapshot,restore:offlineOriginTransport.restore},url:`http://127.0.0.1:${httpPort}/tropnik/`});
   if(runPolicy.diagnostic==='offline-safety'){
     assert.notEqual(runPolicy.reportFile,'browser-verification.json');
     const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:offlineSafety.profile,offlineSafety,completedAt:new Date().toISOString()};

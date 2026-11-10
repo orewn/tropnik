@@ -30,6 +30,7 @@ async function dispatchProfiles(traceEnabled,audit,policy=browserAuditRunPolicy(
   results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],profilePerformance:[],performanceIssues:issues,
   REPORT:policy.reportFile,reports,loadCalls,mapCalls,process:{env:{GITHUB_SHA:'a'.repeat(40)}},console:{log(){}},writeFile:async(path,text)=>reports.push({path,report:JSON.parse(text)}),
   runZoomDesignAudit:audit,
+  server:{},offlineOriginTransport:{start:notInvoked,snapshot:notInvoked,restore:notInvoked},
   offlineCalls,cdpCalls,runOfflineSafetyAudit:async(cdp,helpers)=>{offlineCalls.push({cdp,helpers});return offlineAudit?offlineAudit(cdp,helpers):{schemaVersion:1,profile:'android-portrait',passed:true};},
   loadProfile:async(_cdp,_url,profile)=>{loadCalls.push(profile.name);return{engine:profile.engine,width:profile.width,scrollWidth:profile.width,escaping:[],undersized:[]};},
   evaluate:async()=>false,mapInteraction:async(_cdp,profile)=>{mapCalls.push(profile.name);return{profile:profile.name,passed:true};},
@@ -98,7 +99,8 @@ test('offline diagnosis starts blank, runs the exact final audit once and cannot
  const receipt={schemaVersion:1,profile:'android-portrait',passed:true,coldNavigation:true};
  const run=await dispatchProfiles(false,()=>assert.fail('Offline diagnosis must not invoke zoom audits'),policy,[],async(cdp,helpers)=>{
   assert.equal(typeof cdp.call,'function');assert.equal(helpers.url,'http://127.0.0.1:4200/tropnik/');
-  assert.deepEqual(Object.keys(helpers).sort(),['evaluate','pointerAt','pointerSelector','sleep','url','waitValue']);return receipt;
+  assert.deepEqual(Object.keys(helpers).sort(),['evaluate','originTransport','pointerAt','pointerSelector','sleep','url','waitValue']);
+  assert.deepEqual(Object.keys(helpers.originTransport).sort(),['restore','snapshot','start']);return receipt;
  });
  assert.deepEqual(run.loadCalls,[]);assert.deepEqual(run.mapCalls,[]);assert.deepEqual(run.zoomDesigns,[]);assert.deepEqual(run.results,[]);
  assert.equal(run.offlineCalls.length,1);assert.deepEqual(run.cdpCalls,[{method:'Network.enable',parameters:undefined}]);

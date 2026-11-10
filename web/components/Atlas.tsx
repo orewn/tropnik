@@ -30,7 +30,7 @@ import {readRouteGeometry,routeGeometryPositions,identifyRouteGeometry,RENDERED_
 import {satelliteStyle,SATELLITE_SOURCE,SATELLITE_ERROR} from '@/lib/map-satellite';
 import {withMapLabelCoverage,bindMapLabelCoverage} from '@/public/maps/map-label-coverage.js';
 import {bindMapCoverage} from '@/public/maps/map-coverage-lod.js';
-import {applyMapLibreCoverage} from '@/public/maps/map-coverage-renderers.js';
+import {createMapLibreCoverage} from '@/public/maps/map-coverage-renderers.js';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -306,7 +306,9 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      applyMapLayerVisibility(map,layerVisibility.current);
      ensureTrailPointLayers(map);
     });
-    unbindCoverage=bindMapCoverage(map,coverage,container.current,current=>applyMapLibreCoverage(map,current));
+    const coverageRenderer=createMapLibreCoverage(map);
+    const unbindCoverageSession=bindMapCoverage(map,coverage,container.current,coverageRenderer.apply);
+    unbindCoverage=()=>{unbindCoverageSession();coverageRenderer.destroy();};
     const hitLayers=()=>[TRAIL_POINT_HIT,'trail-casing','region-fill'].filter(id=>!!map.getLayer(id));
     let hoverPoint:import('maplibre-gl').Point|undefined,hoveredTrail:string|undefined;
     hoverFrame=coalesceMapFrame(()=>{

@@ -97,6 +97,28 @@ test('explicit full-matrix and dedicated diagnostic tracing each wrap the same a
  }
 });
 
+test('the actual request-ownership audit gets one bounded diagnostic trace without changing full or mobile actions',async t=>{
+ const source=await readFile(new URL('../browser-smoke.mjs',import.meta.url),'utf8');
+ const start=source.indexOf("  currentExploreExperience.step='request-ownership';");
+ const end=source.indexOf("  await phase('return-to-country');",start);
+ assert.ok(start>=0&&end>start,'The actual request-ownership call must be available');
+ const AsyncFunction=(async()=>{}).constructor;
+ const invoke=new AsyncFunction('currentExploreExperience','phase','traceDesktopSelection','cdp','checkRequestOwnership','profile','trail','focusedDiagnostic','process','experience',source.slice(start,end)+'\nreturn requestOwnership;');
+ for(const [focusedDiagnostic,mobile,enabled] of [[true,false,true],[false,false,false],[true,true,false]]){
+  const output=await outputDirectory(t),cdp=protocol(),timers=controlledTimers(),profile={mobile},trail={id:'same-route'},value={passed:true},experience={},phases=[];let actions=0;
+  const result=await invoke({},async name=>phases.push(name),(connection,action,options)=>traceDesktopSelection(connection,action,{...options,output,...timers}),cdp,async(connection,actualProfile,actualTrail)=>{
+   actions++;assert.equal(connection,cdp);assert.equal(actualProfile,profile);assert.equal(actualTrail,trail);return value;
+  },profile,trail,focusedDiagnostic,{env:{GITHUB_SHA:'a'.repeat(40)}},experience);
+  assert.equal(actions,1);assert.equal(result.value,value);assert.equal(experience.requestOwnership,value);assert.deepEqual(phases,['request-ownership']);
+  assert.equal(cdp.calls.filter(call=>call.method==='Tracing.start').length,enabled?1:0);
+  if(enabled){
+   assert.equal(result.trace.file,'desktop-webgl-request-ownership.trace.json');assert.equal(result.trace.scope,'desktop-route-request-ownership');
+   assert.equal(result.trace.limits.durationMs,8000);assert.equal(result.trace.limits.maxBytes,32*1024*1024);assert.equal(result.trace.status,'complete');
+   assert.deepEqual(await metadata(output,'desktop-webgl-request-ownership'),result.trace);
+  }else{assert.equal(result.trace,null);assert.deepEqual(await readdir(output),[]);}
+ }
+});
+
 test('a failed native selection still stops, drains and closes its trace without replacing the assertion',async t=>{
  const output=await outputDirectory(t),timers=controlledTimers(),failure=new Error('Actual route selection failed');
  let acknowledgeEnd,actions=0;const cdp=protocol({endAck:new Promise(resolve=>{acknowledgeEnd=resolve;})});

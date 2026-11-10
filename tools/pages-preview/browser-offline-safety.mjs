@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mkdir,writeFile} from 'node:fs/promises';
+import {assertOfflineOriginTransport} from './browser-origin-transport.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const TITLE='CI · Берег Приморска';
@@ -43,9 +44,22 @@ export function assertOfflineSafetyAudit(report){
  assert.equal(report.passed,true);assert.equal(report.profile,'android-portrait');
  for(const key of ['savedThroughUI','workerControlled','coldNavigation','offline','titleRestored','contactRestored','draftExplicit','privateApiNotCached'])assert.equal(report[key],true,`Offline safety: missing ${key}`);
  assert.ok(report.nativeInputs>=4);assert.equal(report.networkSuccessfulResponses,0);
+ assertOfflineOriginTransport(report.originTransport);
  for(const selector of INPUT_SELECTORS)assertOfflineSafetyInput(report.inputs?.find(input=>input.selector===selector));
  assert.ok(report.screenshot?.bytes>1000);assert.match(report.screenshot.sha256,/^[a-f0-9]{64}$/);
  return report;
+}
+
+export async function restoreOfflineSafetyEnvironment(cdp,report,originTransport,save){
+ const transport=originTransport?.restore();if(transport)report.originTransport=transport;
+ const results=await Promise.allSettled([
+  cdp.call('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1}),
+  cdp.call('Network.setCacheDisabled',{cacheDisabled:false}),
+ ]);
+ const errors=results.filter(result=>result.status==='rejected').map(result=>result.reason);
+ if(errors.length){report.passed=false;report.cleanupError=errors.map(error=>String(error?.message||error));}
+ await save();
+ if(errors.length)throw new AggregateError(errors,'Offline safety environment restoration failed');
 }
 
 /** Save a local draft through the form, discard its document, then reopen its
@@ -81,6 +95,7 @@ export async function runOfflineSafetyAudit(cdp,helpers){
   await navigate('about:blank');report.coldNavigation=true;
   await cdp.call('Network.setCacheDisabled',{cacheDisabled:true});
   await cdp.call('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:-1,uploadThroughput:-1});
+  report.originTransport=await helpers.originTransport.start();
   observingOffline=true;
   await navigate(url);
   await waitValue('Offline safety viewer did not mount after a cold navigation',()=>evaluate(cdp,"!!document.querySelector('#safety-status')&&!!document.querySelector('#safety-detail')"),Boolean,15000);
@@ -88,11 +103,11 @@ export async function runOfflineSafetyAudit(cdp,helpers){
   report.offline=card.offline;report.titleRestored=card.text.includes(TITLE);report.contactRestored=card.text.includes(LEADER)&&card.text.includes(PHONE);
   report.draftExplicit=/черновик|не.*регистрац/i.test(card.text+' '+card.status);
   report.privateApiNotCached=await evaluate(cdp,"(async()=>{for(const name of await caches.keys()){for(const request of await(await caches.open(name)).keys()){if(/\\/api\\//.test(new URL(request.url).pathname))return false;}}return true;})()");
-  await sleep(100);report.networkSuccessfulResponses=successfulResponses;
+  await sleep(100);report.networkSuccessfulResponses=successfulResponses;report.originTransport=helpers.originTransport.snapshot();
   const shot=await cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false}),bytes=Buffer.from(shot.data,'base64');
   const file='android-offline-emergency-card.png';await mkdir(OUTPUT,{recursive:true});await writeFile(new URL(file,OUTPUT),bytes);
   report.screenshot={file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};report.passed=true;
   assertOfflineSafetyAudit(report);await save();return report;
  }catch(error){report.passed=false;report.error=error.stack||String(error);await save();throw error;}
- finally{observingOffline=false;forget();await cdp.call('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});await cdp.call('Network.setCacheDisabled',{cacheDisabled:false});}
+ finally{observingOffline=false;forget();await restoreOfflineSafetyEnvironment(cdp,report,helpers.originTransport,save);}
 }

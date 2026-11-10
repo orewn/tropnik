@@ -636,6 +636,8 @@ export function assertStyleCameraRoundtrip(receipt,name){
 export function assertBrowserReport(browser,expectedCommit){
  assert.equal(browser.verified,true);
  assertOfflineSafetyAudit(browser.offlineSafety);
+ assert.equal(browser.offlineSafety.originTransport.active,false,'Offline transport was not restored after the audit');
+ assert.ok(Number.isFinite(Date.parse(browser.offlineSafety.originTransport.restoredAt)),'Offline transport cleanup is not recorded');
  assert.equal(browser.sourceCommit,expectedCommit);
  assert.equal(browser.mapInteractionSchemaVersion,3,'The browser report predates native Layers, exploration and manual-camera regressions');
  assert.ok(Array.isArray(browser.profiles));
