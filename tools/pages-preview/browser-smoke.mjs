@@ -932,7 +932,7 @@ try{
   }
   if(!runPolicy.diagnostic){
   currentProfile='android-offline-safety';
-  const offlineSafety=await runOfflineSafetyAudit(cdp,{evaluate,waitValue,sleep,pointerAt,url:`http://127.0.0.1:${httpPort}/tropnik/`});
+  const offlineSafety=await runOfflineSafetyAudit(cdp,{evaluate,waitValue,sleep,pointerAt,pointerSelector,url:`http://127.0.0.1:${httpPort}/tropnik/`});
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');

@@ -51,7 +51,7 @@ function zoomDesign(profile,engine,mobile){
 }
 function evidence(){
  return{verified:true,sourceCommit:commit,mapInteractionSchemaVersion:3,
-  offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,networkSuccessfulResponses:0,screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
+  offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,inputs:['route-title','region','leader-name','leader-phone'].map(id=>({selector:'#'+id,passed:true,focusedBeforeTyping:true,valueLength:10,events:[{type:'input',trusted:true,id,valueLength:10}]})),networkSuccessfulResponses:0,screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
   profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'leaflet',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
   desktopProfiles:[{name:'desktop-webgl',engine:'maplibre',coarse:false,mapInteractionTested:true}],
   zoomDesigns:[zoomDesign('android-portrait','leaflet',true),zoomDesign('desktop-webgl','maplibre',false)],
@@ -67,6 +67,9 @@ test('both upload and public verification require real mobile and desktop map in
   value=>value.offlineSafety.networkSuccessfulResponses=1,
   value=>value.offlineSafety.draftExplicit=false,
   value=>value.offlineSafety.contactRestored=false,
+  value=>value.offlineSafety.inputs[0].focusedBeforeTyping=false,
+  value=>value.offlineSafety.inputs[0].events[0].id='region',
+  value=>value.offlineSafety.inputs[0].events[0].trusted=false,
   value=>delete value.mapInteractionSchemaVersion,
   value=>value.mapInteractionSchemaVersion=2,
   value=>value.sourceCommit='b'.repeat(40),

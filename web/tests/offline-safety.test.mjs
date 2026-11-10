@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {parseOfflineSafety, saveOfflineEmergencyCard, EMERGENCY_CARD_KEY} from '../public/offline-safety.js';
+import {parseOfflineSafety, saveLocalSafetyPassports, saveOfflineEmergencyCard, LOCAL_SAFETY_KEY, EMERGENCY_CARD_KEY, MAX_SAFETY_STORAGE_LENGTH} from '../public/offline-safety.js';
 
 const draft = {schemaVersion:1,id:'offline-fixture',status:'draft',updatedAt:'2026-11-10T10:00:00Z',routeTitle:'Тестовая тропа',leaderName:'Тестовый руководитель',leaderPhone:'+70000000000',returnDeadline:'2026-11-12T18:00',timeZone:'Europe/Moscow',participants:[]};
 const card = {departureId:'test-departure',routeTitle:'Тестовый выход',startsAt:'2026-11-11T10:00:00Z',endsAt:'2026-11-11T16:00:00Z',timeZone:'Europe/Moscow',leaderName:'Тестовый гид',leaderPhone:'+71111111111',mchsStatus:'submitted_unverified',emergencyContactName:'Тестовый контакт',emergencyContactPhone:'+72222222222',controlPoints:[],emergencyExits:[],messageTemplate:'Тестовое сообщение'};
@@ -13,6 +13,23 @@ test('cold offline parsing accepts an incomplete saved draft and labels its loca
  assert.equal(value.facts.find(([label])=>label==='Часовой пояс')[1],'Europe/Moscow');
  assert.match(value.notice,/черновик.*Не регистрация в МЧС/u);
  assert.equal(parseOfflineSafety(JSON.stringify([{...draft,status:'confirmed',mchsReference:'user-entered'}]),null)[0].notice,value.notice);
+});
+
+test('local saves honor the exact viewer code-unit limit and preserve prior data on an oversized draft',()=>{
+ const values=new Map();let writes=0;
+ const storage={setItem:(key,value)=>{values.set(key,value);writes++;}};
+ const empty={...draft,routeDescription:''};
+ const atLimit={...empty,routeDescription:'Я'.repeat(MAX_SAFETY_STORAGE_LENGTH-JSON.stringify([empty]).length)};
+ saveLocalSafetyPassports(storage,[atLimit]);
+ const previous=values.get(LOCAL_SAFETY_KEY);
+ assert.equal(previous.length,MAX_SAFETY_STORAGE_LENGTH);
+ assert.ok(Buffer.byteLength(previous,'utf8')>MAX_SAFETY_STORAGE_LENGTH);
+ assert.equal(parseOfflineSafety(previous,null)[0].title,draft.routeTitle);
+ const oversized={...atLimit,routeDescription:atLimit.routeDescription+'Я'};
+ assert.throws(()=>saveLocalSafetyPassports(storage,[oversized]),error=>error instanceof RangeError&&/Изменения не сохранены/u.test(error.message));
+ assert.equal(values.get(LOCAL_SAFETY_KEY),previous);
+ assert.equal(writes,1);
+ assert.equal(oversized.routeDescription.length,atLimit.routeDescription.length+1);
 });
 
 test('malformed and oversized storage fail closed and caller-owned text stays inert data',()=>{

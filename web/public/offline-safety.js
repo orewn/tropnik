@@ -2,14 +2,15 @@
 // user's local storage and never enter the service worker's public asset cache.
 export const LOCAL_SAFETY_KEY = 'tropnik-safety-passports-v1';
 export const EMERGENCY_CARD_KEY = 'tropnik-emergency-cards-v1';
-const MAX_STORAGE = 512 * 1024;
+// Match the serialized string's UTF-16 code units on both write and cold read.
+export const MAX_SAFETY_STORAGE_LENGTH = 512 * 1024;
 const localStatuses = new Set(['draft','ready','submitted','confirmed','amendment_required','active','closed']);
 const serverStatuses = new Set(['not_required','recommended','required','preparing','ready_to_submit','submitted_unverified','start_contact_pending','confirmed','amendment_required','active','return_report_pending','closed','rejected','cancelled']);
 const record = value => !!value && typeof value === 'object' && !Array.isArray(value);
 const text = (value, max = 240) => typeof value === 'string' ? value.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').slice(0, max).trim() : '';
 const date = value => typeof value === 'string' && value.length <= 40 && Number.isFinite(Date.parse(value)) ? value : '';
 function records(raw) {
-  if (typeof raw !== 'string' || raw.length > MAX_STORAGE) return [];
+  if (typeof raw !== 'string' || raw.length > MAX_SAFETY_STORAGE_LENGTH) return [];
   try { const data = JSON.parse(raw); return Array.isArray(data) ? data.slice(0, 20).filter(record) : []; } catch { return []; }
 }
 function points(value) {
@@ -59,13 +60,19 @@ export function parseOfflineSafety(localRaw, serverRaw) {
   return cards.sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
 }
 
+export function saveLocalSafetyPassports(storage, passports) {
+  const raw = JSON.stringify(passports);
+  if (raw.length > MAX_SAFETY_STORAGE_LENGTH) throw new RangeError('Паспорта занимают слишком много места для автономного просмотра. Сократите описания или удалите старые паспорта. Изменения не сохранены.');
+  storage.setItem(LOCAL_SAFETY_KEY, raw);
+}
+
 export function saveOfflineEmergencyCard(storage, card, now = new Date()) {
   const value = serverRecord({schemaVersion:1,savedAt:now.toISOString(),card});
   if (!value) throw new Error('Сервис вернул неполную аварийную карточку. Обновите сведения перед сохранением.');
   const existing = records(storage.getItem(EMERGENCY_CARD_KEY)).map(serverRecord).filter(Boolean);
   const next = [value,...existing.filter(item=>item.card.departureId!==value.card.departureId)].slice(0,20);
   const raw = JSON.stringify(next);
-  if (raw.length>MAX_STORAGE) throw new Error('Карточки занимают слишком много места. Удалите старую локальную копию.');
+  if (raw.length>MAX_SAFETY_STORAGE_LENGTH) throw new Error('Карточки занимают слишком много места. Удалите старую локальную копию.');
   storage.setItem(EMERGENCY_CARD_KEY, raw);
 }
 

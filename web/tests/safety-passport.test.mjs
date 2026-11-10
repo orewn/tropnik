@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {LOCAL_SAFETY_KEY} from '../public/offline-safety.js';
 import {
+  SAFETY_STORAGE_KEY,
   buildEmergencyMessage,
   buildSafetyPackage,
   invalidateOfficialStatus,
@@ -82,7 +84,8 @@ test('registration UI remains local-first and links to the official MChS form', 
   const page = await readFile(new URL('../app/safety/registration/page.tsx', import.meta.url), 'utf8');
   assert.match(policy, /forms\.mchs\.gov\.ru\/registration_tourist_groups/);
   assert.match(component, /MCHS_REGISTRATION_URL/);
-  assert.match(component, /localStorage\.setItem\(SAFETY_STORAGE_KEY/);
+  assert.match(component, /saveLocalSafetyPassports\(localStorage, list\)/);
+  assert.equal(SAFETY_STORAGE_KEY, LOCAL_SAFETY_KEY);
   assert.match(component, /Не удалось записать данные в браузер/);
   assert.match(component, /aria-live="polite"/);
   assert.match(component, /href="tel:112"/);

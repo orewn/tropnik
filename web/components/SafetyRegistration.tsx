@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {Header} from './Header';
 import {Footer} from './Footer';
 import {ArrowSquareOut, Check, CheckCircle, Clock, DownloadSimple, Export, Info, MapPin, NotePencil, Plus, ShieldCheck, Trash, UsersThree, X} from './TropnikIcons';
+import {saveLocalSafetyPassports} from '@/public/offline-safety.js';
 import {
   MCHS_REGISTRATION_URL,
   SAFETY_STORAGE_KEY,
@@ -228,8 +229,11 @@ export function SafetyRegistration() {
   }
 
   function writeSavedPassports(list: SafetyPassport[]): boolean {
-    try { localStorage.setItem(SAFETY_STORAGE_KEY, JSON.stringify(list)); return true; }
-    catch { setNotice('Не удалось записать данные в браузер. Скачайте JSON-копию и проверьте свободное место.'); return false; }
+    try { saveLocalSafetyPassports(localStorage, list); return true; }
+    catch (error) {
+      setNotice(error instanceof RangeError ? error.message : 'Не удалось записать данные в браузер. Скачайте JSON-копию и проверьте свободное место.');
+      return false;
+    }
   }
 
   function persist(next = passport, message = 'Черновик сохранён только на этом устройстве.') {

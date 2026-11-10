@@ -6,12 +6,44 @@ const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const TITLE='CI · Берег Приморска';
 const LEADER='Проверочный руководитель CI';
 const PHONE='+79990000000';
+const INPUT_SELECTORS=['#route-title','#region','#leader-name','#leader-phone'];
+
+export function assertOfflineSafetyInput(input){
+ assert.equal(input?.passed,true,'Safety input did not complete');
+ assert.equal(input.focusedBeforeTyping,true,'Safety text was sent before its native focus arrived');
+ assert.ok(input.events?.some(event=>event.type==='input'&&event.trusted&&'#'+event.id===input.selector&&event.valueLength===input.valueLength),'Safety text lacks a trusted input event on the intended field');
+ return input;
+}
+
+export async function inputOfflineSafetyText(cdp,helpers,profile,selector,value,inputs){
+ const {evaluate,waitValue,pointerSelector}=helpers;
+ const input={selector,valueLength:value.length,passed:false};inputs.push(input);
+ await evaluate(cdp,`(()=>{const events=[];const record=event=>{const target=event.target;events.push({type:event.type,id:target?.id||'',tag:target?.tagName||'',trusted:event.isTrusted,valueLength:typeof target?.value==='string'?target.value.length:null});if(events.length>40)events.shift();};const types=['pointerdown','pointerup','click','focusin','beforeinput','input'];for(const type of types)document.addEventListener(type,record,true);window.__tropnikSafetyInput={events,cleanup:()=>{for(const type of types)document.removeEventListener(type,record,true);}};document.querySelector(${JSON.stringify(selector)}).scrollIntoView({block:'center'});})()`);
+ try{
+  // Smooth scrolling can expose a field before it stops moving. Use the same
+  // compositor/geometry gate as other native taps, then await the actual focus.
+  input.point=await pointerSelector(cdp,selector,profile);
+  const focus=await waitValue('Safety input did not receive native focus: '+selector,()=>evaluate(cdp,`({focused:document.activeElement===document.querySelector(${JSON.stringify(selector)}),activeId:document.activeElement?.id||''})`),state=>state.focused);
+  input.focusedBeforeTyping=focus.focused;
+  await cdp.call('Input.dispatchKeyEvent',{type:'keyDown',key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});
+  await cdp.call('Input.dispatchKeyEvent',{type:'keyUp',key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});
+  await cdp.call('Input.insertText',{text:value});
+  await waitValue('Safety form did not accept native text: '+selector,()=>evaluate(cdp,`document.querySelector(${JSON.stringify(selector)}).value`),current=>current===value);
+  input.events=await evaluate(cdp,'window.__tropnikSafetyInput.events');
+  input.passed=true;assertOfflineSafetyInput(input);return input;
+ }catch(error){input.passed=false;input.error=error.message;throw error;}
+ finally{
+  const state=await evaluate(cdp,`(()=>{const probe=window.__tropnikSafetyInput;probe?.cleanup();delete window.__tropnikSafetyInput;return{events:probe?.events||[],activeId:document.activeElement?.id||'',valueLength:document.querySelector(${JSON.stringify(selector)})?.value.length??null};})()`);
+  input.events=state.events;input.finalActiveId=state.activeId;input.finalValueLength=state.valueLength;
+ }
+}
 
 export function assertOfflineSafetyAudit(report){
  assert.equal(report?.schemaVersion,1,'Missing offline emergency-card cold-start gate');
  assert.equal(report.passed,true);assert.equal(report.profile,'android-portrait');
  for(const key of ['savedThroughUI','workerControlled','coldNavigation','offline','titleRestored','contactRestored','draftExplicit','privateApiNotCached'])assert.equal(report[key],true,`Offline safety: missing ${key}`);
  assert.ok(report.nativeInputs>=4);assert.equal(report.networkSuccessfulResponses,0);
+ for(const selector of INPUT_SELECTORS)assertOfflineSafetyInput(report.inputs?.find(input=>input.selector===selector));
  assert.ok(report.screenshot?.bytes>1000);assert.match(report.screenshot.sha256,/^[a-f0-9]{64}$/);
  return report;
 }
@@ -21,7 +53,7 @@ export function assertOfflineSafetyAudit(report){
 export async function runOfflineSafetyAudit(cdp,helpers){
  const {evaluate,waitValue,sleep,pointerAt}=helpers;
  const profile={name:'android-portrait',width:412,height:915,mobile:true,engine:'leaflet'};
- const report={schemaVersion:1,profile:profile.name,passed:false,nativeInputs:0};
+ const report={schemaVersion:1,profile:profile.name,passed:false,nativeInputs:0,inputs:[]};
  const url=new URL('safety/registration/',helpers.url).href;
  let observingOffline=false,successfulResponses=0;
  const forget=cdp.observe('Network.responseReceived',({response})=>{
@@ -30,13 +62,7 @@ export async function runOfflineSafetyAudit(cdp,helpers){
  const save=async()=>{await mkdir(OUTPUT,{recursive:true});await writeFile(new URL('offline-safety.json',OUTPUT),JSON.stringify(report,null,2)+'\n');};
  const navigate=async target=>{const loaded=cdp.event('Page.loadEventFired',30000);await cdp.call('Page.navigate',{url:target});await loaded;};
  async function input(selector,value){
-  await evaluate(cdp,`document.querySelector(${JSON.stringify(selector)}).scrollIntoView({block:'center'})`);
-  const point=await waitValue('Safety input is not visible: '+selector,()=>evaluate(cdp,`(()=>{const input=document.querySelector(${JSON.stringify(selector)}),r=input?.getBoundingClientRect();if(!r)return null;const x=r.left+r.width/2,y=r.top+r.height/2;return document.elementFromPoint(x,y)===input?{x,y}:null;})()`),Boolean);
-  await pointerAt(cdp,point,profile);
-  await cdp.call('Input.dispatchKeyEvent',{type:'keyDown',key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});
-  await cdp.call('Input.dispatchKeyEvent',{type:'keyUp',key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});
-  await cdp.call('Input.insertText',{text:value});
-  await waitValue('Safety form did not accept native text',()=>evaluate(cdp,`document.querySelector(${JSON.stringify(selector)}).value`),current=>current===value);
+  await inputOfflineSafetyText(cdp,helpers,profile,selector,value,report.inputs);
   report.nativeInputs++;
  }
  try{
