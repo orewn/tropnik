@@ -25,6 +25,7 @@ import {MAP_CONFIG,viewportRegionId,directionExpansionZoom} from '@/lib/map-conf
 import {coalesceMapFrame,publishMapCamera,resolveRenderedTrail} from '@/lib/map-interaction';
 import {MapZoomButtons,MAP_ZOOM_BUTTONS,bindZoomButtonCancellation} from '@/lib/map-zoom-buttons';
 import {MapTerrainPitch} from '@/lib/map-terrain-pitch';
+import {readSoftwareMapRenderer,type SoftwareMapRenderer} from '@/lib/map-renderer-capabilities';
 import {readRouteGeometry,routeGeometryPositions,identifyRouteGeometry,RENDERED_TRAIL_ID} from '@/lib/route-geometry';
 import {satelliteStyle,SATELLITE_SOURCE,SATELLITE_ERROR} from '@/lib/map-satellite';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
@@ -103,6 +104,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  const coverageRef=useRef<Coverage|null>(null),detailRef=useRef<StyleSpecification|null>(null),fullView=useRef(!region),cameraFloor=useRef<RussiaCamera>({center:[105,62],zoom:0});
  const framedCamera=useRef<RussiaCamera|null>(null),terrainRef=useRef(false);
  const frameRefit=useRef<MapFrameRefit|null>(null),zoomButtons=useRef<MapZoomButtons|null>(null),terrainPitchControl=useRef<MapTerrainPitch|null>(null);
+ const softwareRenderer=useRef<SoftwareMapRenderer|undefined>(undefined);
  const locationRevision=useRef(0);
  const styleSession=useRef<MapStyleSession<StyleSpecification>|null>(null),basePreference=useRef<MapBaseMode>('detail'),styleGeneration=useRef(0);
  const layerVisibility=useRef({paths:true,boundaries:true});
@@ -166,10 +168,11 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      // back up DEM uploads on constrained GPUs without improving those layers.
      canvasContextAttributes:{antialias:false,preserveDrawingBuffer:false,powerPreference:'high-performance'}});
     mapRef.current=map;
+    softwareRenderer.current=readSoftwareMapRenderer(map.getCanvas());
     const zoomControl=new MapZoomButtons({zoom:()=>map.getZoom(),bounds:()=>({min:map.getMinZoom(),max:map.getMaxZoom()}),busy:()=>map.isZooming(),
      apply:target=>map.zoomTo(target,{duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:MAP_ZOOM_BUTTONS.durationMs})});
     terrainPitch=new MapTerrainPitch({camera:map,enabled:()=>!cancelled&&map===mapRef.current&&terrainRef.current&&!!map.getTerrain(),
-     focused:()=>!!regionRef.current||!!trailRef.current,reducedMotion:()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches});
+     focused:()=>!!regionRef.current||!!trailRef.current,softwareRenderer:()=>softwareRenderer.current,reducedMotion:()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches});
     terrainPitchControl.current=terrainPitch;
     zoomButtons.current=zoomControl;unbindZoom=bindZoomButtonCancellation(container.current,zoomControl);
     frameRefit.current=new MapFrameRefit({
@@ -229,6 +232,9 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      if(cancelled||map!==mapRef.current||!container.current)return;
      syncRouteEdgeAnnotations(routeAnnotations.current);
      const center=map.getCenter(),screenCenter=map.project(center);publishMapCamera(container.current,{longitude:center.lng,latitude:center.lat,zoom:map.getZoom(),tileSize:512,engine:'maplibre',centerX:screenCenter.x,centerY:screenCenter.y});
+     // Diagnostic branch only: expose public camera reads for the native receipt.
+     const terrainCamera=JSON.stringify({pitch:map.getPitch(),bearing:map.getBearing(),centerElevation:map.getCenterElevation(),targetElevation:map.getCameraTargetElevation(),pixelRatio:map.getPixelRatio(),softwareRenderer:softwareRenderer.current??null,terrain:map.getTerrain()});
+     if(container.current.dataset.mapTerrainCamera!==terrainCamera)container.current.dataset.mapTerrainCamera=terrainCamera;
      const items=directionItems;
      const projected=new Map(items.map(item=>{const point=map.project([russiaLongitude(item.center[0]),item.center[1]]);return[item.id,{x:point.x,y:point.y}] as const;}));
      for(const item of items){
@@ -316,7 +322,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      if(territory){map.stop();frameRefit.current?.cancel();onRegionRef.current(territory);}
     });
     map.on('webglcontextlost',()=>setStatus('Графический контекст карты прерван. Восстанавливаем отображение.'));
-    map.on('webglcontextrestored',()=>setStatus(''));
+    map.on('webglcontextrestored',()=>{softwareRenderer.current=readSoftwareMapRenderer(map.getCanvas());setStatus('');});
     map.on('error',event=>{
      if(cancelled)return;const sourceId=(event as typeof event&{sourceId?:string}).sourceId;
      if(sourceId===SATELLITE_SOURCE&&basePreference.current==='satellite'&&map.getSource(SATELLITE_SOURCE)&&!satelliteFailed){satelliteFailed=true;styleSession.current?.fallback();setStatus(SATELLITE_ERROR);setTilesLoading(false);}
@@ -351,7 +357,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     fullView.current=false;framedCamera.current=null;map.stop();
     if(terrainActive&&!map.getTerrain())map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(region.zoom)});
     if(!terrainActive&&map.getTerrain())map.setTerrain(null);
-    const regionPitch=terrainPitchForZoom(region.zoom,true),pitch=terrainActive?(region.id==='karelia'?Math.min(regionPitch,26):regionPitch):0;
+    const regionPitch=terrainPitchForZoom(region.zoom,true,softwareRenderer.current),pitch=terrainActive?(region.id==='karelia'?Math.min(regionPitch,26):regionPitch):0;
     terrainPitchControl.current?.remember(pitch);
     map.flyTo({center:region.center,zoom:region.zoom,pitch,bearing:terrainActive?-8:0,offset:window.innerWidth<=700?[0,-Math.round(container.current!.clientHeight*.23)]:[0,0],duration:reduced?0:650,essential:false});
    }
@@ -395,7 +401,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     if(covered){
      const routeZoom=11;fullView.current=false;const terrainActive=terrainRef.current&&!!map.getTerrain();
      const padding=container.current?russiaView(container.current).padding:80;
-     const pitch=terrainActive?terrainPitchForZoom(routeZoom,true):0;
+     const pitch=terrainActive?terrainPitchForZoom(routeZoom,true,softwareRenderer.current):0;
      zoomButtons.current?.cancel();map.stop();terrainPitchControl.current?.remember(pitch);map.fitBounds([[covered[0],covered[1]],[covered[2],covered[3]]],{padding,maxZoom:MAP_CONFIG.routeMaxZoom,pitch,bearing:terrainActive?-12:0,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:450});
     }else if(coordinates.length)setStatus(ROUTE_COVERAGE_MESSAGE);
    }
@@ -428,7 +434,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(next){
    if(!map.getSource('terrain-dem'))map.addSource('terrain-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json'});
-   const zoom=map.getZoom(),pitch=terrainPitchForZoom(zoom,!!regionRef.current||!!trailRef.current);
+   const zoom=map.getZoom(),pitch=terrainPitchForZoom(zoom,!!regionRef.current||!!trailRef.current,softwareRenderer.current);
    map.setTerrain({source:'terrain-dem',exaggeration:terrainExaggerationForZoom(zoom)});
    terrainPitchControl.current?.remember(pitch);map.easeTo({pitch,duration:reduced?0:420});
   }

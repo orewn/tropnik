@@ -1,4 +1,5 @@
 import {terrainPitchForZoom} from './map-camera-profile.ts';
+import type {SoftwareMapRenderer} from './map-renderer-capabilities.ts';
 
 type TerrainPitchCamera = {
   getZoom: () => number;
@@ -10,6 +11,7 @@ type TerrainPitchOptions = {
   camera: TerrainPitchCamera;
   enabled: () => boolean;
   focused: () => boolean;
+  softwareRenderer?: () => SoftwareMapRenderer | undefined;
   reducedMotion: () => boolean;
   requestFrame?: (callback: () => void) => number;
   cancelFrame?: (id: number) => void;
@@ -38,7 +40,7 @@ export class MapTerrainPitch {
       if (camera.isMoving()) return;
       const zoom = camera.getZoom(), current = camera.getPitch();
       if (!Number.isFinite(zoom) || !Number.isFinite(current)) return;
-      const pitch = terrainPitchForZoom(zoom, this.options.focused());
+      const pitch = terrainPitchForZoom(zoom, this.options.focused(), this.options.softwareRenderer?.());
       // Terrain clearance can lower both rendered pitch and zoom. Retrying the
       // same requested pitch fights that safe camera and subtracts zoom again.
       // A manual angle also remains authoritative until the profile changes.

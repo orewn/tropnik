@@ -2,13 +2,13 @@ name: Focused terrain diagnosis
 
 on:
   push:
-    branches: [diagnostics/terrain-close]
+    branches: [diagnostics/terrain-pitch-budget]
 
 permissions:
   contents: read
 
 concurrency:
-  group: terrain-diagnostics
+  group: terrain-pitch-budget-diagnostics
   cancel-in-progress: false
 
 jobs:
