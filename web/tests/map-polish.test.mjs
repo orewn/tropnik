@@ -139,7 +139,9 @@ test('mobile visual viewport and native route points stay cross-platform',()=>{
   assert.match(layout,/--map-label-max-width/);
   // Label collision order and actual measured boxes are covered behaviorally
   // in map-label-dom.test.mjs; a local array name is not that contract.
-  assert.match(atlas,/type:'circle',source:TRAIL_POINTS/);
+  // The extracted layer factory is checked against MapLibre's actual paint
+  // compiler in map-trail-point-layers.test.mjs; the atlas must use that factory.
+  assert.match(atlas,/mapTrailPointLayers\(TRAIL_POINTS,MAP_CONFIG\.trailHitRadiusPx\)/);
   assert.doesNotMatch(atlas,/new ml\.Marker\(\{element:button,anchor:'center'\}\).*visibleTrails/s);
   assert.match(canvas,/bindTooltip\(item\.title,\{direction:'auto'/);
   assert.match(css,/tropnik-relief-tiles \.leaflet-tile\{opacity:1!important;transition:none!important\}/);

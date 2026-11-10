@@ -13,6 +13,7 @@ import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from '
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
 import {runOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {createOfflineOriginTransport} from './browser-origin-transport.mjs';
+import {observeRequestMapLayout,assertRequestMapLayout} from './browser-request-layout.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
@@ -561,9 +562,23 @@ async function checkSavedFilterReset(cdp,profile,receipt){
   return receipt;
 }
 async function requestDialogState(cdp){
-  return evaluate(cdp,`(()=>{const dialog=document.querySelector('[role="dialog"]');return{open:!!dialog,heading:dialog?.querySelector('h2')?.textContent||'',routeTitle:dialog?.querySelector('form>p')?.textContent||'',date:dialog?.querySelector('input[type=date]')?.value??null,note:dialog?.querySelector('textarea')?.value??null,error:!!dialog?.querySelector('[role=alert]'),success:!!dialog?.querySelector('.success-panel'),submitted:window.__tropnikFormSubmits||0};})()`);
+  return evaluate(cdp,`(()=>{window.__tropnikRequestMapLayout?.sample();const dialog=document.querySelector('[role="dialog"]');return{open:!!dialog,heading:dialog?.querySelector('h2')?.textContent||'',routeTitle:dialog?.querySelector('form>p')?.textContent||'',date:dialog?.querySelector('input[type=date]')?.value??null,note:dialog?.querySelector('textarea')?.value??null,error:!!dialog?.querySelector('[role=alert]'),success:!!dialog?.querySelector('.success-panel'),submitted:window.__tropnikFormSubmits||0};})()`);
 }
 async function checkRequestOwnership(cdp,profile,route){
+  if(profile.mobile)return performRequestOwnership(cdp,profile,route);
+  await evaluate(cdp,`window.__tropnikRequestMapLayout=(${observeRequestMapLayout.toString()})();true`);
+  let result,layout,failure;
+  try{result=await performRequestOwnership(cdp,profile,route);}catch(error){failure=error;}
+  finally{
+    try{layout=await evaluate(cdp,'(()=>{try{return window.__tropnikRequestMapLayout.stop();}finally{delete window.__tropnikRequestMapLayout;}})()');}
+    catch(error){if(failure)failure.requestLayoutCleanup=String(error);else failure=error;}
+  }
+  if(currentExploreExperience)currentExploreExperience.requestMapLayout=layout??{error:String(failure)};
+  if(failure)throw failure;
+  assertRequestMapLayout(layout,`${profile.name}/request`);
+  return{...result,mapLayout:layout};
+}
+async function performRequestOwnership(cdp,profile,route){
   const action='.route-actions button.primary',scrolls=await revealNative(cdp,action,'.explore-panel-content',profile),opened=await recordedClick(cdp,action,profile);
   const first=await waitValue('Route request did not open',()=>requestDialogState(cdp),state=>state.open&&state.routeTitle===route.title);
   await recordedClick(cdp,'[role="dialog"] textarea',profile);await evaluate(cdp,'window.__tropnikFormInputs=[]');
