@@ -57,18 +57,19 @@ test('WebGL evidence uses public getters on the existing canvas without changing
  const reads=[],contexts=[],keys=['RENDERER','VENDOR','VERSION','SAMPLES','SAMPLE_BUFFERS','FRAMEBUFFER_BINDING'];
  const gl={drawingBufferWidth:1440,drawingBufferHeight:1000,getExtension:name=>{assert.equal(name,'WEBGL_debug_renderer_info');return{UNMASKED_RENDERER_WEBGL:7,UNMASKED_VENDOR_WEBGL:8};},isContextLost:()=>false,getContextAttributes:()=>({antialias:false}),getParameter(key){reads.push(key);return new Map([[1,'WebKit WebGL'],[2,'WebKit'],[3,'WebGL 2.0'],[4,0],[5,0],[6,null],[7,'ANGLE SwiftShader'],[8,'Google']]).get(key);},bindFramebuffer(){assert.fail('Diagnostic reads must not bind a framebuffer');}};
  keys.forEach((key,index)=>{gl[key]=index+1;});
- const doc={querySelector(selector){assert.equal(selector,'.maplibregl-canvas');return{getContext(...args){contexts.push(args);return gl;}};}};
+ const doc={defaultView:{devicePixelRatio:1},querySelector(selector){assert.equal(selector,'.maplibregl-canvas');return{width:1440,height:1000,getBoundingClientRect:()=>({width:1440,height:1000}),getContext(...args){contexts.push(args);return gl;}};}};
  const result=inspectTerrainWebGL(doc);assert.deepEqual(contexts,[['webgl2']]);assert.equal(result.available,true);assert.equal(result.attributes.antialias,false);assert.equal(result.samples,0);assert.equal(result.unmaskedRenderer,'ANGLE SwiftShader');assert.equal(result.defaultFramebufferBound,true);assert.equal(result.sampleScope,'currently-bound-framebuffer');assert.equal(reads.length,8);
+ assert.deepEqual(result.canvas,{width:1440,height:1000,cssWidth:1440,cssHeight:1000,devicePixelRatio:1});
  assert.equal(inspectTerrainWebGL({querySelector:()=>null}).available,false);
 });
 
-function nativeDiagnosticFixture(failure){
- let current=12.4,toggles=0,bottoms=0,saves=0;const movements=[],captures=[],profile={name:'desktop-webgl',engine:'maplibre',mobile:false},report={geometryPassed:false,verified:true};
- const actions={report,phase:async()=>{},gpu:async()=>({webgl:{available:true,attributes:{antialias:false}}}),geometry:async()=>({zoom:current,routeId:'kavkaz-8a'}),capture:async(_mode,state,label)=>{captures.push({zoom:state.zoom,label});},reachZoom:async value=>{assert.equal(value,11);current=Math.max(current,value);},reachBottom:async()=>{bottoms++;current=2.9054061044955795;return current;},toggleTerrain:async()=>{toggles++;},zoom:async(direction,{mode})=>{
+function nativeDiagnosticFixture(failure,failAt=15){
+ let current=12.4,toggles=0,bottoms=0,saves=0;const movements=[],captures=[],gpuSnapshots=[],profile={name:'desktop-webgl',engine:'maplibre',mobile:false},report={geometryPassed:false,verified:true};
+ const actions={report,phase:async()=>{},gpu:async()=>{const sample={webgl:{available:true,attributes:{antialias:false}},terrainEnabled:toggles>0,zoom:current};gpuSnapshots.push(sample);return sample;},geometry:async()=>({zoom:current,routeId:'kavkaz-8a'}),capture:async(_mode,state,label)=>{captures.push({zoom:state.zoom,label});},reachZoom:async value=>{assert.equal(value,11);current=Math.max(current,value);},reachBottom:async()=>{assert.ok(report.terrainEnabledGPU?.terrainEnabled,'Capture the enabled terrain GPU before lowering the camera');bottoms++;current=2.9054061044955795;return current;},toggleTerrain:async()=>{toggles++;},zoom:async(direction,{mode})=>{
   assert.equal(direction,1);assert.equal(mode,'terrain-diagnostic');const before=current,traced=shouldTraceTerrainDiagnostic(profile,mode,direction,before,false);movements.push({before,traced});
-  if(traced&&failure)throw failure;current=Math.min(18,current+1);return{before,after:current,changed:true};
+  if(failure&&before>=failAt)throw failure;current=Math.min(18,current+1);return{before,after:current,changed:true};
  },save:async()=>{saves++;}};
- return{actions,report,movements,captures,counts:()=>({toggles,bottoms,saves})};
+ return{actions,report,movements,captures,gpuSnapshots,counts:()=>({toggles,bottoms,saves})};
 }
 
 test('the diagnostic uses the lower clamp and existing native increments to reproduce15.905→16.905',async()=>{
@@ -77,6 +78,7 @@ test('the diagnostic uses the lower clamp and existing native increments to repr
  assert.deepEqual(env.captures.map(item=>item.label),['route-ready','terrain-ready','before-target','upper-bound']);
  assert.equal(env.movements.length,16);assert.equal(env.movements.filter(item=>item.traced).length,1);assert.ok(Math.abs(report.targetBeforeZoom-15.9054061044955795)<1e-9);
  assert.equal(env.counts().toggles,1);assert.equal(env.counts().bottoms,1);assert.equal(report.diagnosticSteps.at(-1).zoom,18);
+ assert.equal(report.terrainEnabledGPU,env.gpuSnapshots[1]);assert.equal(report.terrainEnabledGPU.terrainEnabled,true);assert.equal(report.terrainEnabledGPU.zoom,12.4);
  assert.throws(()=>assertBrowserReport({...report,sourceCommit:'a'.repeat(40)},'a'.repeat(40)),'A completed diagnostic is never publication evidence');
 });
 
@@ -86,4 +88,12 @@ test('a high-zoom settle failure is not retried or converted into diagnostic/rel
  assert.equal(env.movements.filter(item=>item.traced).length,1);assert.equal(env.movements.at(-1).traced,true);assert.equal(env.captures.some(item=>item.label==='upper-bound'),false);assert.notEqual(env.report.status,'completed');assert.equal(env.report.verified,false);assert.equal(env.report.releaseEligible,false);
  const profile={name:'desktop-webgl',engine:'maplibre',mobile:false};for(const zoom of [4.905,14.905,16,17.905])assert.equal(shouldTraceTerrainDiagnostic(profile,'terrain-diagnostic',1,zoom,false),false);
  assert.equal(shouldTraceTerrainDiagnostic(profile,'terrain-diagnostic',1,15.905,true),false);assert.equal(shouldTraceTerrainDiagnostic(profile,'terrain',1,15.905,false),false);
+});
+
+test('terrain backing evidence survives a failure before the high-zoom trace and screenshot',async()=>{
+ const failure=new Error('The maplibre map did not settle'),env=nativeDiagnosticFixture(failure,14);
+ const observed=await runTerrainCloseDiagnostic(env.actions).then(()=>null,error=>error);
+ assert.equal(observed,failure);assert.equal(env.report.terrainEnabledGPU.terrainEnabled,true);assert.equal(env.gpuSnapshots.length,2);
+ assert.equal(env.report.highZoomGPU,undefined);assert.equal(env.movements.filter(movement=>movement.traced).length,0);
+ assert.equal(env.movements.at(-1).before,14.90540610449558);assert.equal(env.report.verified,false);assert.equal(env.report.releaseEligible,false);
 });

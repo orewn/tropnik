@@ -1,14 +1,14 @@
-name: Focused terrain diagnosis
+name: Terrain process CPU diagnosis
 
 on:
   push:
-    branches: [diagnostics/terrain-close]
+    branches: [diagnostics/terrain-process-cpu]
 
 permissions:
   contents: read
 
 concurrency:
-  group: terrain-diagnostics
+  group: terrain-process-cpu-diagnostics
   cancel-in-progress: false
 
 jobs:
