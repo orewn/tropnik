@@ -439,27 +439,38 @@ async function scrollContainerState(cdp,selector){
 }
 /** Native scrolling only: never set scrollTop or call an application handler. */
 async function scrollContainer(cdp,selector,profile,direction=1){
-  const before=await scrollContainerState(cdp,selector);assert.ok(before,`Missing scroll container ${selector}`);
-  const remaining=direction>0?before.scrollHeight-before.clientHeight-before.scrollTop:before.scrollTop;
-  assert.ok(remaining>0,`No remaining content in ${selector}`);
-  const distance=Math.min(240,before.rect.height-48,Math.max(32,remaining));
-  assert.ok(distance>=12,`No remaining native scroll travel in ${selector}: ${JSON.stringify(before)}`);
-  const start={x:before.rect.left+before.rect.width/2,y:direction>0?before.rect.bottom-24:before.rect.top+24},end={x:start.x,y:start.y-direction*distance};
-  const owned=await evaluate(cdp,`document.querySelector(${JSON.stringify(selector)}).contains(document.elementFromPoint(${start.x},${start.y}))`);assert.equal(owned,true,`${selector}: native scroll starts behind another control`);
-  await evaluate(cdp,'window.__tropnikScrollEvents=[]');
-  const commands=[];
-  const send=async(method,params)=>{await cdp.call(method,params);commands.push({method,type:params.type,status:'fulfilled'});};
-  if(profile.mobile){
-    await send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...start,id:73,radiusX:3,radiusY:3,force:1}]});
-    for(let step=1;step<=8;step++){await send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:start.x,y:start.y-direction*distance*step/8,id:73,radiusX:3,radiusY:3,force:1}]});await sleep(25);}
-    await sleep(100);await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-  }else await send('Input.dispatchMouseEvent',{type:'mouseWheel',x:start.x,y:start.y,deltaX:0,deltaY:direction*distance,pointerType:'mouse'});
-  let previous=-1,stable=0;
-  const after=await waitValue(`${selector}: native scroll did not settle`,()=>scrollContainerState(cdp,selector),value=>{stable=Math.abs(value.scrollTop-previous)<.5?stable+1:0;previous=value.scrollTop;return stable>=3;},4000);
-  const events=await evaluate(cdp,'window.__tropnikScrollEvents');
-  assert.ok(direction*(after.scrollTop-before.scrollTop)>1,`${selector}: native scrolling made no progress`);
-  assert.ok(Math.abs(after.scrollY-before.scrollY)<=1,`${selector}: internal scrolling moved the page`);assert.equal(after.sheet,before.sheet);
-  return{input:profile.mobile?'touch':'mouse',selector,direction,start,end,distance,before,after,commands,events};
+  const input=profile.mobile?'touch':'mouse',commands=[],observations=[];
+  let before,after,start,end,distance,events=[];
+  try{
+    before=await scrollContainerState(cdp,selector);assert.ok(before,`Missing scroll container ${selector}`);
+    const remaining=direction>0?before.scrollHeight-before.clientHeight-before.scrollTop:before.scrollTop;
+    assert.ok(remaining>0,`No remaining content in ${selector}`);
+    distance=Math.min(240,before.rect.height-48,Math.max(32,remaining));
+    assert.ok(distance>=12,`No remaining native scroll travel in ${selector}: ${JSON.stringify(before)}`);
+    start={x:before.rect.left+before.rect.width/2,y:direction>0?before.rect.bottom-24:before.rect.top+24};end={x:start.x,y:start.y-direction*distance};
+    const owned=await evaluate(cdp,`document.querySelector(${JSON.stringify(selector)}).contains(document.elementFromPoint(${start.x},${start.y}))`);assert.equal(owned,true,`${selector}: native scroll starts behind another control`);
+    await evaluate(cdp,'window.__tropnikScrollEvents=[]');
+    const send=async(method,params)=>{await cdp.call(method,params);commands.push({method,type:params.type,status:'fulfilled'});};
+    if(profile.mobile){
+      await send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...start,id:73,radiusX:3,radiusY:3,force:1}]});
+      for(let step=1;step<=8;step++){await send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:start.x,y:start.y-direction*distance*step/8,id:73,radiusX:3,radiusY:3,force:1}]});await sleep(25);}
+      await sleep(100);await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    }else await send('Input.dispatchMouseEvent',{type:'mouseWheel',x:start.x,y:start.y,deltaX:0,deltaY:direction*distance,pointerType:'mouse'});
+    let previous=-1,stable=0;
+    after=await waitValue(`${selector}: native scroll did not settle`,()=>scrollContainerState(cdp,selector),value=>{
+      after=value;observations.push(value);if(observations.length>16)observations.shift();
+      const progressed=direction*(value.scrollTop-before.scrollTop)>1;
+      stable=progressed&&Math.abs(value.scrollTop-previous)<.5?stable+1:0;previous=value.scrollTop;return stable>=3;
+    },4000);
+    events=await evaluate(cdp,'window.__tropnikScrollEvents');
+    assert.ok(direction*(after.scrollTop-before.scrollTop)>1,`${selector}: native scrolling made no progress`);
+    assert.ok(Math.abs(after.scrollY-before.scrollY)<=1,`${selector}: internal scrolling moved the page`);assert.equal(after.sheet,before.sheet);
+    return{input,selector,direction,start,end,distance,before,after,commands,events};
+  }catch(error){
+    let current=null;try{current=await scrollContainerState(cdp,selector);}catch{}
+    if(commands.length)try{events=await evaluate(cdp,'window.__tropnikScrollEvents');}catch{}
+    error.nativeScroll={input,selector,direction,start,end,distance,before,after,current,commands,events,observations};throw error;
+  }
 }
 async function revealNative(cdp,selector,container,profile,limit=12){
   const scrolls=[];
@@ -761,6 +772,7 @@ async function mapInteraction(cdp,profile,performanceIssues){
   const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
   currentExploreExperience.step='style-camera';
   const styleCameraRoundtrip=profile.engine==='maplibre'?await checkStyleCameraRoundtrip(cdp,profile,trail):null;
+  currentExploreExperience.styleCameraRoundtrip=styleCameraRoundtrip;
   currentExploreExperience.step='request-ownership';experience.requestOwnership=await checkRequestOwnership(cdp,profile,trail);
   await pointerSelector(cdp,'.explore-panel .back-link',profile);
   await expectSelection(cdp,{region:'altai',route:'',title:'Алтай'});
@@ -920,6 +932,7 @@ try{
 }catch(error){
   failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
+  if(error.nativeScroll)failure.nativeScroll=error.nativeScroll;
   if(currentExploreExperience)failure.exploreExperience=currentExploreExperience;
   if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed',...(error.settleDiagnostics?{settleDiagnostics:error.settleDiagnostics}:{})});
   if(cdp){
