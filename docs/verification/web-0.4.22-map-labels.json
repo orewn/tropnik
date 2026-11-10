@@ -1,0 +1,182 @@
+{
+  "release": "0.4.22",
+  "sourceCommit": "1ab1aee0193b6f432004601deede43125c0ef283",
+  "siteSourceCommit": "09d713e3376a9293b6681ed905bea1134863c857",
+  "checks": {
+    "webTests": {
+      "pass": 557,
+      "fail": 0,
+      "skipped": 0,
+      "durationMs": 11053.238081
+    },
+    "applicationTypes": "passed",
+    "staticClientTypes": "passed",
+    "siteBuild": "passed",
+    "staticPagesBuild": {
+      "pages": 339,
+      "referenceRoutes": 306,
+      "ciBuildId": "9f1f4d389f00307a"
+    },
+    "whitespace": "passed",
+    "lint": "passed"
+  },
+  "manualBrowser": {
+    "surface": "managed preview",
+    "engine": "Leaflet / Protomaps",
+    "desktopZooms": [
+      7.061880051265861,
+      8.561880051265861,
+      9.311880051265861
+    ],
+    "phone": {
+      "width": 390,
+      "height": 844,
+      "zoom": 5.425983281741606
+    },
+    "placeLabels": [
+      "Выборг",
+      "Высоцк",
+      "Советский",
+      "Приморск",
+      "Санкт-Петербург"
+    ],
+    "baseRoundtrip": [
+      "detail",
+      "satellite",
+      "overview",
+      "detail"
+    ],
+    "overviewLabelCanvases": 0,
+    "restoredDetailLabelCanvases": 12,
+    "screenshot": "web-0.4.22-labels-preview.png",
+    "note": "Manual visual checks cover the recorded scenes. Continuous-zoom eligibility is tested separately; this is not a claim of pixel verification at every possible camera."
+  },
+  "automaticGeography": {
+    "canvasZoomRange": [
+      0,
+      18
+    ],
+    "canvasZoomStep": 0.25,
+    "additionalCanvasZoom": 7.06188,
+    "pinnedPointFixtures": 22,
+    "worldCopies": 3,
+    "canvasPointChecks": 4884,
+    "lineCases": [
+      "Mercator projection",
+      "concave coast",
+      "narrow holes",
+      "outer/hole boundaries",
+      "polygon unions",
+      "antimeridian",
+      "malformed inputs"
+    ]
+  },
+  "deployment": {
+    "sites": {
+      "status": "succeeded",
+      "deploymentId": "appgdep_6af301dfa7648191bd37cd073f33c868",
+      "updatedAt": "2026-11-10T11:37:22.543318+00:00"
+    },
+    "pages": {
+      "status": "succeeded",
+      "runId": 42808876819,
+      "url": "https://github.com/orewn/tropnik/actions/runs/42808876819",
+      "completedAt": "2026-11-10T11:52:38Z",
+      "buildId": "9f1f4d389f00307a",
+      "publicHttpChecks": 23,
+      "sourceCommitVerified": true,
+      "finalBrowserReportVerified": true
+    }
+  },
+  "matchingWebFiles": 21,
+  "initialCameraRegression": {
+    "firstRunId": 42806071331,
+    "firstRunConclusion": "failure",
+    "routeId": "osm-relation-2244794",
+    "beforeZoom": 7,
+    "afterZoom": 14,
+    "source": "native managed preview",
+    "cause": "Initial ResizeObserver cancelled the pending route fit while the selected route was loading.",
+    "fix": "Preserve pending selection framing and distinguish explicit overview intent, including Home followed by physical resize.",
+    "browserAuditRequirementsChanged": false
+  },
+  "publicBrowser": {
+    "url": "https://orewn.github.io/tropnik/?region=territory-28173009B90810482533567",
+    "engine": "Leaflet / Protomaps",
+    "zooms": [
+      7.061880051265861,
+      8.561880051265861,
+      9.311880051265861
+    ],
+    "finalCamera": {
+      "longitude": 28.816248250927305,
+      "latitude": 60.443776774817266,
+      "zoom": 9.311880051265861
+    },
+    "wholeLabels": [
+      "Выборг",
+      "Высоцк",
+      "Советский",
+      "Приморск",
+      "Санкт-Петербург"
+    ],
+    "finalLabelCanvases": 30,
+    "screenshot": "web-0.4.22-labels-public.png"
+  },
+  "nodeDiagnostics": {
+    "nodeDiagnosticOnly": true,
+    "realPbfTiles": 16,
+    "sourceZoom": 14,
+    "matchedFeatures": 261,
+    "keptFeatures": 146,
+    "payloadKiB": 68.5,
+    "firstWarmIndexRefreshMs": 41.3,
+    "cachedRefreshMedianMs": 3.9,
+    "coldCoverageIndexesMs": 112,
+    "note": "Node measurements from actual local PBFs, not browser FPS or a universal performance guarantee."
+  },
+  "browserCI": {
+    "verified": true,
+    "mobileProfiles": 4,
+    "desktopEngine": "MapLibre",
+    "designArtifactId": 13762555151,
+    "designArtifactSha256": "2edacc13de20970534d53f53106a403261874cb523ac9e6ac5a5a4b7828e29fd",
+    "reports": [
+      {
+        "profile": "android-portrait",
+        "engine": "leaflet",
+        "geometryPassed": true,
+        "maximumZoom": 18,
+        "detailSteps": 24,
+        "screenshots": 27,
+        "closeTrailPassed": true,
+        "initialRouteZoom": 14,
+        "rapidZoomPassed": true,
+        "performance": {
+          "layoutShift": 0,
+          "longestTaskMs": 84
+        }
+      },
+      {
+        "profile": "desktop-webgl",
+        "engine": "maplibre",
+        "geometryPassed": true,
+        "maximumZoom": 18,
+        "detailSteps": 18,
+        "screenshots": 33,
+        "closeTrailPassed": true,
+        "initialRouteZoom": 14,
+        "rapidZoomPassed": true,
+        "performance": {
+          "layoutShift": 0,
+          "longestTaskMs": 1254
+        }
+      }
+    ],
+    "reviewedScreenshots": [
+      "desktop-webgl-detail-z8_91-key8.png",
+      "desktop-webgl-source-ends-z14_00-separated.png"
+    ],
+    "note": "The incremental browser-progress.json keeps verified:false; the final browser report and deployed-build verification passed. The all-mode desktop sweep recorded a 1254 ms longest task."
+  }
+}
