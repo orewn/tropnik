@@ -5,9 +5,9 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
-import {traceDesktopSelection,DESKTOP_TRACE_LIMITS,TERRAIN_TRACE_LIMITS} from '../browser-trace.mjs';
+import {traceDesktopSelection,DESKTOP_TRACE_LIMITS,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES,traceCategoryEvidence} from '../browser-trace.mjs';
 
-const traceJSON=JSON.stringify({traceEvents:[{name:'ProfileChunk',args:{data:{cpuProfile:{samples:[1,2,3]}}}},{name:'RunTask'},{name:'Layout'}]});
+const traceJSON=JSON.stringify({traceEvents:[{name:'ProfileChunk',cat:'disabled-by-default-v8.cpu_profiler',args:{data:{cpuProfile:{samples:[1,2,3]}}}},{name:'RunTask',cat:'gpu'},{name:'Layout',cat:'cc,viz'}]});
 async function outputDirectory(t){const directory=await mkdtemp(join(tmpdir(),'tropnik-trace-'));t.after(()=>rm(directory,{recursive:true,force:true}));return pathToFileURL(directory+'/');}
 function controlledTimers(){
  let next=0;const pending=new Map();
@@ -85,12 +85,13 @@ test('the stream drain deadline stops further reads but still closes the protoco
 
 test('the trace byte cap discards unread backing storage and marks partial evidence',async t=>{
  const output=await outputDirectory(t),timers=controlledTimers(),cdp=protocol({oversized:true});
- const result=await traceDesktopSelection(cdp,async()=>17,{output,...timers,limits:{...DESKTOP_TRACE_LIMITS,maxBytes:32}});
+ const result=await traceDesktopSelection(cdp,async()=>17,{output,...timers,limits:{...DESKTOP_TRACE_LIMITS,maxBytes:32},captureCategoryEvidence:true});
  assert.equal(result.value,17);assert.equal(result.trace.status,'partial');assert.equal(result.trace.truncated,'byte-limit');
  assert.equal(result.trace.bytes,32);assert.equal(result.trace.eof,false);assert.match(result.trace.file,/\.partial\.json$/);
  assert.equal((await stat(new URL(result.trace.file,output))).size,32);
  assert.equal(cdp.calls.filter(call=>call.method==='IO.read').length,1);assert.equal(cdp.calls.at(-1).method,'IO.close');
  assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
+ assert.deepEqual(result.trace.capturedCategories,{available:false,source:'traceEvents[].cat',reason:'incomplete-trace-stream'});
 });
 
 test('a complete JSON export cannot hide a browser buffer overflow',async t=>{
@@ -125,6 +126,7 @@ test('the terrain scope has isolated files and explicit larger caps without chan
  assert.equal(actions,2);assert.equal(altai.value,1);assert.equal(terrain.value,2);
  assert.equal(altai.trace.scope,'first-desktop-altai-selection');assert.equal(altai.trace.file,'desktop-webgl-first-altai.trace.json');
  assert.deepEqual(altai.trace.limits,{durationMs:8000,drainMs:5000,closeMs:1000,maxBytes:32*1024*1024,bufferSizeKiB:16*1024,chunkBytes:256*1024});
+ assert.equal('capturedCategories' in altai.trace,false,'The release trace keeps its default evidence fields');
  assert.equal(terrain.trace.scope,scope);assert.equal(terrain.trace.file,`${prefix}.trace.json`);
  assert.equal(terrain.trace.limits.durationMs,20000);assert.equal(terrain.trace.limits.bufferSizeKiB,64*1024);assert.equal(terrain.trace.limits.maxBytes,96*1024*1024);
  assert.deepEqual(await metadata(output),altai.trace);assert.deepEqual(await metadata(output,prefix),terrain.trace);
@@ -152,4 +154,24 @@ test('a failed terrain capture cannot replace the settle failure or discard its 
  assert.equal(observed,failure);assert.equal(observed.settleDiagnostics,diagnostics);
  assert.equal(observed.traceReceipt.status,'error');assert.match(observed.traceReceipt.errors[0],/Trace stream failed/);
  assert.equal(cdp.calls.at(-1).method,'IO.close');assert.deepEqual(await metadata(output,prefix),observed.traceReceipt);
+});
+
+test('explicit diagnostic compositor categories reach CDP and the receipt without mutating defaults',async t=>{
+ const output=await outputDirectory(t),cdp=protocol({limits:TERRAIN_TRACE_LIMITS}),categories=[...DESKTOP_TRACE_CATEGORIES,'cc','viz','disabled-by-default-gpu.service'];
+ const result=await traceDesktopSelection(cdp,async()=>5,{output,prefix:'desktop-webgl-terrain-high-zoom',scope:'diagnostic-desktop-terrain-15-to-17',limits:TERRAIN_TRACE_LIMITS,categories,captureCategoryEvidence:true,...controlledTimers()});
+ assert.deepEqual(cdp.calls[0].params.traceConfig.includedCategories,categories);assert.deepEqual(result.trace.categories,categories);
+ assert.equal(result.trace.limits.durationMs,20000);assert.equal(DESKTOP_TRACE_CATEGORIES.includes('cc'),false);assert.equal(DESKTOP_TRACE_CATEGORIES.includes('viz'),false);
+ assert.deepEqual((await metadata(output,'desktop-webgl-terrain-high-zoom')).categories,categories);
+ assert.deepEqual(result.trace.capturedCategories.counts.map(item=>item.name),['cc','disabled-by-default-v8.cpu_profiler','gpu','viz']);
+ assert.equal(result.trace.capturedCategories.counts.some(item=>item.name==='disabled-by-default-gpu.service'),false,'Requested categories are not claimed as observed');
+});
+
+test('observed category evidence is bounded and remains available when the traced action fails',async t=>{
+ const events=Array.from({length:140},(_,index)=>({cat:`category-${index}`}));events.push({cat:'gpu, viz, gpu'},{cat:'gpu'});
+ const bounded=traceCategoryEvidence(events);assert.equal(bounded.categoryCount,142);assert.equal(bounded.counts.length,128);assert.equal(bounded.truncated,true);assert.deepEqual(bounded.counts[0],{name:'gpu',events:2});
+ const output=await outputDirectory(t),failure=new Error('Native terrain settle failed'),categories=[...DESKTOP_TRACE_CATEGORIES,'cc','viz'];
+ const observed=await traceDesktopSelection(protocol(),async()=>{throw failure;},{output,prefix:'failed-terrain',categories,captureCategoryEvidence:true,...controlledTimers()}).then(()=>null,error=>error);
+ assert.equal(observed,failure);assert.equal(observed.traceReceipt.stopReason,'action-error');assert.equal(observed.traceReceipt.capturedCategories.available,true);
+ assert.deepEqual(observed.traceReceipt.capturedCategories.counts,traceCategoryEvidence(JSON.parse(traceJSON).traceEvents).counts);
+ assert.deepEqual((await metadata(output,'failed-terrain')).capturedCategories,observed.traceReceipt.capturedCategories);
 });

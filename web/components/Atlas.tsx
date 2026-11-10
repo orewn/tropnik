@@ -24,6 +24,7 @@ import {EMPTY_MAP_TRAILS,type AtlasProps} from '@/lib/map-types';
 import {MAP_CONFIG,viewportRegionId,directionExpansionZoom} from '@/lib/map-config';
 import {coalesceMapFrame,publishMapCamera,resolveRenderedTrail} from '@/lib/map-interaction';
 import {MapZoomButtons,MAP_ZOOM_BUTTONS,bindZoomButtonCancellation} from '@/lib/map-zoom-buttons';
+import {MapTerrainPitch} from '@/lib/map-terrain-pitch';
 import {readRouteGeometry,routeGeometryPositions,identifyRouteGeometry,RENDERED_TRAIL_ID} from '@/lib/route-geometry';
 import {satelliteStyle,SATELLITE_SOURCE,SATELLITE_ERROR} from '@/lib/map-satellite';
 import {displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude,MAP_OUTSIDE_COLOR,type RussiaCamera} from '@/public/maps/russia-viewport.js';
@@ -134,7 +135,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
  useEffect(()=>{
   const containerElement=container.current,locationEpoch=locationRevision,styleEpoch=styleGeneration,displayedSelection=displayedTrail,edgeAnnotations=routeAnnotations.current;
   let cancelled=false,geographyPainted=false,overviewFallback=false,satelliteFailed=false,directionLayoutFrame=0,tileStatus:ReturnType<typeof setTimeout>|undefined,resize:ResizeObserver|undefined,unbindFrame:(()=>void)|undefined,unbindLabels:(()=>void)|undefined,unbindZoom:(()=>void)|undefined;
-  let resizeFrame:ReturnType<typeof coalesceMapFrame>|undefined,hoverFrame:ReturnType<typeof coalesceMapFrame>|undefined;
+  let resizeFrame:ReturnType<typeof coalesceMapFrame>|undefined,hoverFrame:ReturnType<typeof coalesceMapFrame>|undefined,terrainPitch:MapTerrainPitch|undefined;
   const unbindDirectionButtons:(()=>void)[]=[];
   const disconnect=()=>{
    setOffline(!navigator.onLine);
@@ -167,6 +168,8 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     mapRef.current=map;
     const zoomControl=new MapZoomButtons({zoom:()=>map.getZoom(),bounds:()=>({min:map.getMinZoom(),max:map.getMaxZoom()}),busy:()=>map.isZooming(),
      apply:target=>map.zoomTo(target,{duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:MAP_ZOOM_BUTTONS.durationMs})});
+    terrainPitch=new MapTerrainPitch({camera:map,enabled:()=>!cancelled&&map===mapRef.current&&terrainRef.current&&!!map.getTerrain(),
+     focused:()=>!!regionRef.current||!!trailRef.current,reducedMotion:()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches});
     zoomButtons.current=zoomControl;unbindZoom=bindZoomButtonCancellation(container.current,zoomControl);
     frameRefit.current=new MapFrameRefit({
      allowed:()=>!cancelled&&map===mapRef.current&&!!map.getStyle()&&!!regionRef.current?.bounds&&!trailRef.current&&!!container.current,
@@ -247,13 +250,10 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     if(regionRef.current&&!fitTerritory(map,regionRef.current,container.current,0,framedCamera))map.jumpTo({center:regionRef.current.center,zoom:regionRef.current.zoom});
     map.on('zoomend',()=>{
      zoomControl.settled();
+     terrainPitch?.settled();
      const zoom=map.getZoom();setMapZoom(zoom);
-     if(terrainRef.current&&map.getTerrain()&&!trailRef.current){
-      const pitch=terrainPitchForZoom(zoom,!!regionRef.current);
-      if(Math.abs(map.getPitch()-pitch)>1.5)map.easeTo({pitch,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:180});
-     }
      scheduleDirectionLayout();
-     requestAnimationFrame(()=>{if(!cancelled&&container.current){delete container.current.dataset.mapCamera;scheduleDirectionLayout();}});
+     requestAnimationFrame(()=>{if(!cancelled&&map===mapRef.current&&!map.isMoving()&&container.current){delete container.current.dataset.mapCamera;scheduleDirectionLayout();}});
     });
     // The style's viewport-anchored hillshade follows the camera itself.
     // Keep contrast stable instead of restarting a paint transition on each pitch frame.
@@ -263,7 +263,7 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
      const c=map.getCenter();viewportRef.current?.(viewportRegionId(c.lng,c.lat,map.getZoom()));
     });
     map.on('dragstart',()=>{zoomControl.cancel();fullView.current=false;frameRefit.current?.cancel();});
-    map.on('movestart',()=>{locationRevision.current++;setStatus(previous=>previous==='Определяем местоположение…'?'':previous);if(container.current)container.current.dataset.mapCamera='moving';});
+    map.on('movestart',()=>{terrainPitch?.moving();locationRevision.current++;setStatus(previous=>previous==='Определяем местоположение…'?'':previous);if(container.current)container.current.dataset.mapCamera='moving';});
     map.on('zoomstart',event=>{if(event.originalEvent){zoomControl.cancel();fullView.current=false;frameRefit.current?.cancel();}if(container.current)container.current.dataset.mapCamera='moving';});
     map.on('style.load',()=>{
      if(cancelled)return;displayedTrail.current=undefined;routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];routeAnnotations.current.length=0;geographyPainted=false;styleGeneration.current++;setLoaded(true);setStyleRevision(v=>v+1);
@@ -333,10 +333,10 @@ export function Atlas({region,trail,visibleTrails=EMPTY_MAP_TRAILS,onTrail,onReg
     resize=new ResizeObserver(()=>resizeFrame?.schedule());
     resize.observe(container.current);const panel=container.current.closest('.explore-layout')?.querySelector('.explore-panel');if(panel)resize.observe(panel);
    }catch(error){
-    if(cancelled)return;console.error('Map initialization failed',error);unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();zoomButtons.current?.dispose();zoomButtons.current=null;frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
+    if(cancelled)return;console.error('Map initialization failed',error);unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleSession.current?.dispose();styleSession.current=null;markers.current.forEach(marker=>marker.remove());markers.current=[];mapRef.current?.remove();mapRef.current=null;setFallback(true);
    }
   })();
-  return()=>{cancelled=true;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();zoomButtons.current?.dispose();zoomButtons.current=null;displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];edgeAnnotations.length=0;markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
+  return()=>{cancelled=true;unbindDirectionButtons.splice(0).forEach(unbind=>unbind());unbindZoom?.();zoomButtons.current?.dispose();zoomButtons.current=null;terrainPitch?.dispose();displayedSelection.current=undefined;locationEpoch.current++;cancelAnimationFrame(directionLayoutFrame);resizeFrame?.dispose();hoverFrame?.dispose();if(containerElement)delete containerElement.dataset.mapCamera;unbindLabels?.();updateDirections.current=null;directionGroups.current.clear();frameRefit.current?.dispose();frameRefit.current=null;unbindFrame?.();styleEpoch.current++;styleSession.current?.dispose();styleSession.current=null;clearTimeout(tileStatus);resize?.disconnect();markers.current.forEach(marker=>marker.remove());markers.current=[];routeEdges.current.forEach(marker=>marker.remove());routeEdges.current=[];edgeAnnotations.length=0;markerConstructor.current=null;positionMarker.current?.remove();mapRef.current?.remove();mapRef.current=null;window.removeEventListener('online',disconnect);window.removeEventListener('offline',disconnect);};
  },[planning]);
  useEffect(()=>{
   const map=mapRef.current;if(!map||!loaded)return;

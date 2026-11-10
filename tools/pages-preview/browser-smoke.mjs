@@ -6,14 +6,15 @@ import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
 import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-projection.mjs';
-import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving} from './browser-zoom-audit.mjs';
+import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving,browserAuditRunPolicy} from './browser-zoom-audit.mjs';
 import {traceDesktopSelection} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
-const REPORT = new URL('browser-verification.json', ROOT);
+const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
+const REPORT = new URL(runPolicy.reportFile, ROOT);
 const profiles = [
   {name:'compact-android',width:320,height:640,mobile:true,engine:'leaflet'},
   {name:'iphone-portrait',width:390,height:844,mobile:true,engine:'leaflet'},
@@ -390,7 +391,7 @@ async function mapState(cdp){
   return evaluate(cdp,`(()=>{
     const element=document.querySelector('.atlas-canvas[data-map-engine]');if(!element)return null;
     const r=element.getBoundingClientRect(),s=getComputedStyle(element),d=element.dataset;
-    return{camera:{longitude:Number(d.mapLongitude),latitude:Number(d.mapLatitude),zoom:Number(d.mapZoom),tileSize:Number(d.mapTileSize),...(d.mapCenterX!==undefined?{centerX:Number(d.mapCenterX),centerY:Number(d.mapCenterY)}:{})},engine:d.mapEngine,route:d.mapRouteId||'',moving:(${mapCameraIsMoving.toString()})(element),visible:s.visibility!=='hidden'&&s.display!=='none'&&r.width>20&&r.height>20,rect:{left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom},width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth};
+    return{camera:{longitude:Number(d.mapLongitude),latitude:Number(d.mapLatitude),zoom:Number(d.mapZoom),tileSize:Number(d.mapTileSize),...(d.mapCenterX!==undefined?{centerX:Number(d.mapCenterX),centerY:Number(d.mapCenterY)}:{})},engine:d.mapEngine,route:d.mapRouteId||'',moving:(${mapCameraIsMoving.toString()})(element),visible:s.visibility!=='hidden'&&s.display!=='none'&&r.width>20&&r.height>20,rect:{left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom},width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth${runPolicy.diagnostic?',terrainCamera:(()=>{try{return JSON.parse(d.mapTerrainCamera||\'null\')}catch{return null}})()':''}};
   })()`);
 }
 async function settledMap(cdp,engine){
@@ -650,8 +651,21 @@ try{
       if(window.__tropnikLongTasks.length>32)window.__tropnikLongTasks.shift();
     }}).observe({type:'longtask',buffered:true});}catch{}
   `});
-  for(const profile of profiles){
+  for(const profile of profiles.filter(profile=>!runPolicy.profiles||runPolicy.profiles.includes(profile.name))){
     currentProfile=profile.name;
+    if(runPolicy.diagnostic){
+      const systemInfo=async()=>{
+        const version=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/version`);
+        assert.ok(version.webSocketDebuggerUrl,'The browser target does not advertise SystemInfo access');
+        const gpuCdp=new CDP(version.webSocketDebuggerUrl);
+        try{await gpuCdp.open();return await gpuCdp.call('SystemInfo.getInfo',{},3000);}finally{gpuCdp.close();}
+      };
+      const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo,url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic});
+      assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
+      assert.notEqual(runPolicy.reportFile,'browser-verification.json');
+      await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
+      continue;
+    }
     const geometry=await loadProfile(cdp,`http://127.0.0.1:${httpPort}/tropnik/`,profile);
     assert.equal(geometry.engine,profile.engine,`${profile.name}: expected ${profile.engine}, actually loaded ${geometry.engine}`);
     assert.ok(geometry.scrollWidth<=geometry.width+1,`${profile.name}: horizontal overflow ${geometry.scrollWidth}>${geometry.width}`);
@@ -706,14 +720,17 @@ try{
     if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,url:`http://127.0.0.1:${httpPort}/tropnik/`}));
     if(profile.mapInteraction)await checkpoint('profile-complete');
   }
+  if(!runPolicy.diagnostic){
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');
   const report={verified:true,mapInteractionSchemaVersion:2,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
+  }
 }catch(error){
   failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
+  if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed',...(error.settleDiagnostics?{settleDiagnostics:error.settleDiagnostics}:{})});
   if(cdp){
     try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);failure.sheet=await sheetSnapshot(cdp);}catch{}
     try{failure.navigationHistory=await cdp.call('Page.getNavigationHistory');}catch{}
@@ -721,6 +738,7 @@ try{
     try{const screenshot=await cdp.call('Page.captureScreenshot',{format:'png'});await writeFile(new URL('browser-failure.png',ROOT),Buffer.from(screenshot.data,'base64'));}catch{}
   }
   await writeFile(new URL('browser-failure.json',ROOT),JSON.stringify(failure,null,2)+'\n');
+  if(runPolicy.diagnostic)await writeFile(REPORT,JSON.stringify(failure,null,2)+'\n');
   throw error;
 }finally{
   cdp?.close();

@@ -72,6 +72,14 @@
     max-height:calc(100% - var(--map-top) - 240px);overflow:auto;
   }
 }
+/* The labelled desktop Layers button is wider than the icon-only rail.
+   Keep the expanded credit panel to its left, including on the first visit. */
+@media(min-width:931px){
+  .explore-layout .map-attribution-content{
+    right:calc(var(--map-control-size) + 64px);
+    max-width:min(370px,calc(100vw - var(--explore-panel-width,0px) - 160px));
+  }
+}
 @media(max-width:700px){
   .explore-layout .map-route-context{padding:8px 12px;gap:8px}
   .map-route-context>svg{width:20px;height:20px}
