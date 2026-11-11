@@ -1,0 +1,154 @@
+name: Inspect exact final Pages tile-settle failure
+
+on:
+  push:
+    branches: [diagnostics/pages-f7-failure-inspection]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pages-f7-failure-inspection
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    name: Read sealed failing Pages evidence without rerunning the app
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Verify the exact artifact and failed producer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-pages-f7-failure-inspection
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          from pathlib import Path
+          SOURCE="f7c2e3738dd4df471da5cd81d4a6f40b3f194372"
+          headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","User-Agent":"Tropnik-retained-evidence"}
+          def get(path):
+              request=urllib.request.Request("https://api.github.com/repos/orewn/tropnik/"+path,headers=headers)
+              with urllib.request.urlopen(request,timeout=30) as response:
+                  data=response.read(1024*1024+1)
+              assert len(data)<=1024*1024, "Unbounded API response"
+              return json.loads(data)
+          artifact=get("actions/artifacts/13888712797")
+          producer=get("actions/runs/43090337179")
+          job=get("actions/jobs/130768333257")
+          assert artifact["id"]==13888712797 and artifact["name"]=="tropnik-pages-browser-failure-1"
+          assert artifact["size_in_bytes"]==1288017 and artifact["expired"] is False
+          assert artifact["digest"]=="sha256:31b4fde09f33966b3a953c9b95e7afb99decc509ac5b1dfee01ef43c8950eaf0"
+          assert artifact["workflow_run"]["id"]==43090337179 and artifact["workflow_run"]["head_sha"]==SOURCE
+          assert artifact["workflow_run"]["repository_id"]==artifact["workflow_run"]["head_repository_id"]==1447843944
+          assert artifact["workflow_run"]["head_branch"]=="main"
+          assert producer["id"]==43090337179 and producer["head_sha"]==SOURCE and producer["head_branch"]=="main"
+          assert producer["status"]=="completed" and producer["conclusion"]=="failure" and producer["run_attempt"]==1
+          assert job["id"]==130768333257 and job["run_id"]==43090337179 and job["head_sha"]==SOURCE
+          assert job["status"]=="completed" and job["conclusion"]=="failure"
+          failed=[step for step in job["steps"] if step["conclusion"]=="failure"]
+          assert len(failed)==1 and failed[0]["name"]=="Verify real mobile rendering and sheet interaction and desktop map interactions"
+          metadata={"artifact":{key:artifact[key] for key in ("id","name","size_in_bytes","digest","workflow_run")},
+              "producer":{key:producer[key] for key in ("id","head_sha","head_branch","status","conclusion","run_attempt")},
+              "job":{key:job[key] for key in ("id","run_id","head_sha","name","status","conclusion")},
+              "originalFailedSteps":failed}
+          root=Path(os.environ["TROPNIK_INSPECTION_ROOT"]); (root/"inspection").mkdir(parents=True)
+          (root/"inspection/source-metadata.json").write_text(json.dumps(metadata,indent=2)+"\n")
+          print("TROPNIK_F7_FAILURE_SOURCE="+json.dumps(metadata,separators=(",",":")))
+          PY
+      - name: Download the exact sealed failure artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          repository: orewn/tropnik
+          run-id: '43090337179'
+          artifact-ids: '13888712797'
+          github-token: ${{ github.token }}
+          digest-mismatch: error
+          merge-multiple: true
+          path: ${{ runner.temp }}/tropnik-pages-f7-failure-inspection/original
+      - name: Print bounded original network, map and settle evidence
+        env:
+          TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-pages-f7-failure-inspection
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, shutil
+          from pathlib import Path
+          SOURCE="f7c2e3738dd4df471da5cd81d4a6f40b3f194372"
+          root=Path(os.environ["TROPNIK_INSPECTION_ROOT"])
+          source=root/"original"; output=root/"inspection"
+          entries=[]; total=0
+          for path in sorted(source.rglob("*")):
+              assert not path.is_symlink(), "Symlinked artifact entry"
+              if path.is_dir(): continue
+              assert path.is_file(), "Nonregular artifact entry"
+              size=path.stat().st_size; total+=size
+              assert 0<=size<=32*1024*1024 and total<=64*1024*1024, "Artifact exceeds the inspection read bound"
+              digest=hashlib.sha256()
+              with path.open("rb") as stream:
+                  for chunk in iter(lambda:stream.read(1024*1024),b""): digest.update(chunk)
+              entries.append({"path":path.relative_to(source).as_posix(),"bytes":size,"sha256":digest.hexdigest()})
+              assert len(entries)<=64, "Too many files"
+          limit=3*1024*1024; written=0
+          def encoded_line(kind,data):
+              return kind+"="+json.dumps(data,ensure_ascii=False,separators=(",",":"),allow_nan=False)
+          def emit(kind,data):
+              global written
+              line=encoded_line(kind,data)
+              written+=len(line.encode("utf-8"))+1
+              assert written<=limit, "Bounded output exceeded; no silent truncation"
+              print(line)
+          emit("TROPNIK_F7_FAILURE_FILES",entries)
+          reports=[item for item in entries if Path(item["path"]).name=="browser-failure.json"]
+          assert len(reports)==1, "Expected one original browser-failure.json"
+          entry=reports[0]; original=source/entry["path"]
+          report=json.loads(original.read_bytes())
+          assert isinstance(report,dict)
+          emit("TROPNIK_F7_FAILURE_HEADER",{"file":entry,"keys":list(report),"profile":report.get("profile"),"error":report.get("error"),"environmentSourceCommit":report.get("environment",{}).get("sourceCommit")})
+          assert report["environment"]["sourceCommit"]==SOURCE
+          assert isinstance(report.get("error"),str) and report["error"]
+          assert report.get("verified") is not True, "This reader is for the original failure, not a success receipt"
+          shutil.copyfile(original,output/"original-browser-failure.json")
+          copied=output/"original-browser-failure.json"
+          assert hashlib.sha256(copied.read_bytes()).hexdigest()==entry["sha256"]
+          full_line=encoded_line("TROPNIK_F7_FAILURE_ORIGINAL",report)
+          omitted=[]; printed_fields=[]
+          # Keep the whole original object if it fits; otherwise print complete
+          # priority fields without trimming their arrays or inventing summaries.
+          if written+len(full_line.encode("utf-8"))+1+16384<=limit:
+              emit("TROPNIK_F7_FAILURE_ORIGINAL",report)
+              original_complete=True
+              printed_fields=list(report)
+          else:
+              original_complete=False
+              for key in ("network","customMap","settleDiagnostics","map","selection","errorDetails","environment","performance","profile","error","sheet","navigationHistory","performanceIssues","profilePerformance","completedProfiles","completedMapInteractions","completedZoomDesigns","completedSiteSmoothness","completedSatelliteAudits","exploreExperience","browserStartup"):
+                  if key not in report: continue
+                  value={"field":key,"originalValue":report[key]}
+                  size=len(encoded_line("TROPNIK_F7_FAILURE_FIELD",value).encode("utf-8"))+1
+                  if written+size+16384<=limit:
+                      emit("TROPNIK_F7_FAILURE_FIELD",value); printed_fields.append(key)
+                  else:
+                      omitted.append({"field":key,"encodedBytes":size,"reason":"3 MiB combined log bound; exact original retained"})
+              omitted.extend({"field":key,"reason":"Not in selected field list; exact original retained"} for key in report if key not in printed_fields and not any(item["field"]==key for item in omitted))
+          inspection={"schemaVersion":1,"diagnosticOnly":True,"releaseEligible":False,"status":"inspected-original-failure",
+              "producerRunId":43090337179,"producerJobId":130768333257,"sourceCommit":SOURCE,
+              "artifactId":13888712797,"artifactDigest":"sha256:31b4fde09f33966b3a953c9b95e7afb99decc509ac5b1dfee01ef43c8950eaf0",
+              "originalProducerConclusion":"failure","sourceReport":entry,
+              "rawZipIndependentlyHashed":False,"archiveIntegrityMethod":"Exact API metadata and pinned actions/download-artifact v8.0.2 digest-mismatch:error",
+              "originalFailureCopiedByteForByte":True,"originalObjectCompleteInLog":original_complete,
+              "printedOriginalFields":printed_fields,"omittedLogFields":omitted,
+              "selectedFieldsWereTruncated":False,"logLimitBytes":limit,
+              "limitations":["No application, build, browser or gate was rerun.","This inspection retains the original failed outcome and does not confer release eligibility.","No missing network or map state is synthesized."]}
+          (output/"inspection.json").write_text(json.dumps(inspection,ensure_ascii=False,indent=2,allow_nan=False)+"\n")
+          emit("TROPNIK_F7_FAILURE_INSPECTION",inspection)
+          PY
+      - name: Preserve the unchanged failure and inspection metadata
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-pages-f7-failure-inspection-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tropnik-pages-f7-failure-inspection/inspection/
+          if-no-files-found: error
+          retention-days: 7
