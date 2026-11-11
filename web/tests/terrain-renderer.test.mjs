@@ -98,8 +98,8 @@ function environment(t,{gpuFailure=false,gl=null,cloneFails=false,width=80,heigh
   return {canvas,ctx,parent,frames,doc,listeners,flush(){const ready=[...frames.values()];frames.clear();ready.forEach(fn=>fn(0));}};
 }
 
-function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready'}={}){
-  const counts={framebuffers:0,renderbuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[],shaderSources:[],stencilState:[],draws:[],resolves:[],polls:[],maxPendingSyncs:0,deletedSyncs:0},enums=new Map(),generations=new WeakMap(),liveTextures=new Set(),liveSyncs=new Set();let next=1,gl,generation=0,error=0,drawFramebuffer=null,readFramebuffer=null,renderbuffer=null,program=null;
+function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready',loseRenderbufferBinding=false}={}){
+  const counts={framebuffers:0,renderbuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[],shaderSources:[],stencilState:[],draws:[],resolves:[],polls:[],maxPendingSyncs:0,deletedSyncs:0,renderbufferQueries:[],missingRenderbufferBindings:0},enums=new Map(),generations=new WeakMap(),liveTextures=new Set(),liveSyncs=new Set();let next=1,gl,generation=0,error=0,drawFramebuffer=null,readFramebuffer=null,renderbuffer=null,nativeRenderbuffer=null,program=null;
   const create=type=>{const object={};generations.set(object,generation);if(type==='Texture')liveTextures.add(object);if(type==='Sync'){liveSyncs.add(object);counts.maxPendingSyncs=Math.max(counts.maxPendingSyncs,liveSyncs.size);}return object;};
   const remove=(type,object)=>{
     if(generations.get(object)!==generation){counts.invalidObjectCalls++;error=gl.INVALID_OPERATION;return;}
@@ -114,14 +114,20 @@ function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready'}=
     getFramebufferAttachmentParameter:()=>deferred?gl.LINEAR:gl.SRGB,
     getInternalformatParameter:()=>new Int32Array([samples]),
     bindFramebuffer:(target,object)=>{if(target===gl.FRAMEBUFFER||target===gl.DRAW_FRAMEBUFFER)drawFramebuffer=object;if(target===gl.FRAMEBUFFER||target===gl.READ_FRAMEBUFFER)readFramebuffer=object;},
-    bindRenderbuffer:(_target,object)=>{renderbuffer=object;},
-    renderbufferStorageMultisample:(_target,count,format,width,height)=>Object.assign(renderbuffer,{samples:count,format,width,height}),
-    renderbufferStorage:(_target,format,width,height)=>Object.assign(renderbuffer,{samples:0,format,width,height}),
+    // Model a command cache separately from the native driver binding. A same-object
+    // bind is elided; a native reset need not update that cache.
+    bindRenderbuffer:(_target,object)=>{if(renderbuffer!==object)nativeRenderbuffer=object;renderbuffer=object;},
+    renderbufferStorageMultisample:(_target,count,format,width,height)=>{Object.assign(nativeRenderbuffer,{samples:count,format,width,height});if(loseRenderbufferBinding)nativeRenderbuffer=null;},
+    renderbufferStorage:(_target,format,width,height)=>{Object.assign(nativeRenderbuffer,{samples:0,format,width,height});if(loseRenderbufferBinding)nativeRenderbuffer=null;},
     getRenderbufferParameter:(_target,parameter)=>{
-      if(parameter===gl.RENDERBUFFER_SAMPLES)return renderbuffer.samples;
-      if([gl.RENDERBUFFER_RED_SIZE,gl.RENDERBUFFER_GREEN_SIZE,gl.RENDERBUFFER_BLUE_SIZE].includes(parameter))return renderbuffer.format===gl.RGB8?8:0;
-      if(parameter===gl.RENDERBUFFER_DEPTH_SIZE)return renderbuffer.format===gl.RGB8?0:24;
-      if(parameter===gl.RENDERBUFFER_STENCIL_SIZE)return renderbuffer.format===gl.DEPTH24_STENCIL8?8:0;return 0;
+      if(!nativeRenderbuffer){counts.missingRenderbufferBindings++;error=gl.INVALID_OPERATION;return null;}
+      const buffer=nativeRenderbuffer;let value=0;
+      if(parameter===gl.RENDERBUFFER_SAMPLES)value=buffer.samples;
+      else if([gl.RENDERBUFFER_RED_SIZE,gl.RENDERBUFFER_GREEN_SIZE,gl.RENDERBUFFER_BLUE_SIZE].includes(parameter))value=buffer.format===gl.RGB8?8:0;
+      else if(parameter===gl.RENDERBUFFER_DEPTH_SIZE)value=buffer.format===gl.RGB8?0:24;
+      else if(parameter===gl.RENDERBUFFER_STENCIL_SIZE)value=buffer.format===gl.DEPTH24_STENCIL8?8:0;
+      counts.renderbufferQueries.push({parameter,value,format:buffer.format,width:buffer.width,height:buffer.height});
+      if(loseRenderbufferBinding)nativeRenderbuffer=null;return value;
     },
     useProgram:value=>{program=value;},
     drawArrays:(...args)=>counts.draws.push({kind:'arrays',framebuffer:drawFramebuffer,program,args}),
@@ -144,7 +150,7 @@ function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready'}=
     if(String(key).startsWith('create'))return()=>create(String(key).slice(6));
     if(String(key).startsWith('delete'))return object=>remove(String(key).slice(6),object);return()=>{};
   }});
-  return{gl,counts,setFrameStatus(value){frameStatus=value;},pendingSyncs:()=>liveSyncs.size,loseContext(){generation++;counts.contextReleasedTextures+=liveTextures.size;liveTextures.clear();liveSyncs.clear();drawFramebuffer=null;readFramebuffer=null;renderbuffer=null;program=null;}};
+  return{gl,counts,setFrameStatus(value){frameStatus=value;},pendingSyncs:()=>liveSyncs.size,loseContext(){generation++;counts.contextReleasedTextures+=liveTextures.size;liveTextures.clear();liveSyncs.clear();drawFramebuffer=null;readFramebuffer=null;renderbuffer=null;nativeRenderbuffer=null;program=null;}};
 }
 
 test('LOD hysteresis avoids toggling near a zoom threshold while retaining hard limits',()=>{
@@ -210,6 +216,36 @@ test('deferred terrain preserves MSAA and keeps the default canvas untouched unt
   assert.deepEqual([env.canvas.width,env.canvas.height],[160,120]);assert.equal(env.canvas.dataset.terrainPresentation,'deferred-msaa');assert.equal(env.canvas.dataset.terrainPending,'false');
   const visible=record.counts.draws.filter(draw=>draw.framebuffer===null);assert.equal(visible.length,1);assert.equal(visible[0].program,renderer.gpu.present.program);
   assert.equal(record.pendingSyncs(),0);assert.equal(record.counts.maxPendingSyncs,1);assert.equal(env.frames.size,0);renderer.destroy();
+});
+
+test('allocation restores native renderbuffer binding for every checked parameter, including resize and depth-only targets',t=>{
+  for(const masked of[false,true]){
+    const record=recordingGL({loseRenderbufferBinding:true}),env=environment(t,{gl:record.gl}),source=grid(3,3),frames=[];
+    let width=80,height=60;env.canvas.getBoundingClientRect=()=>({width,height,left:0,top:0,right:width,bottom:height});
+    const renderer=new TerrainRenderer(env.canvas,source,{...(masked?{displayMask:displayMask(source,[255,0,0,255])}:{}),onRender:info=>frames.push(info)});
+    env.flush();assert.ok(renderer.gpu,'a stale native binding must not force the Canvas fallback');
+    assert.equal(frames.length,1);assert.equal(frames[0].renderer,'webgl2');assert.equal(frames[0].graphicsFallback,null);
+    assert.equal(record.counts.missingRenderbufferBindings,0);assert.equal(record.counts.renderbufferQueries.length,8);
+    assert.deepEqual(record.counts.renderbufferQueries.filter(query=>query.parameter===record.gl.RENDERBUFFER_SAMPLES).map(query=>query.value),[4,4]);
+    assert.equal(record.counts.renderbufferQueries.find(query=>query.parameter===record.gl.RENDERBUFFER_DEPTH_SIZE).value,24);
+    assert.equal(record.counts.renderbufferQueries.find(query=>query.parameter===record.gl.RENDERBUFFER_STENCIL_SIZE).value,masked?8:0);
+    width=110;height=75;renderer.request();env.flush();
+    assert.equal(frames.length,2);assert.equal(frames[1].renderer,'webgl2');assert.equal(frames[1].graphicsFallback,null);
+    assert.equal(record.counts.renderbufferQueries.length,16);assert.equal(record.counts.missingRenderbufferBindings,0);
+    assert.ok(record.counts.renderbufferQueries.slice(8).every(query=>query.width===110&&query.height===75));
+    assert.equal(record.counts.resolves.length,2);assert.equal(record.pendingSyncs(),0);renderer.destroy();
+  }
+});
+
+test('restoring the binding never admits a changed sample count or color/depth precision',t=>{
+  for(const [parameter,value,reason]of[['RENDERBUFFER_SAMPLES',2,/sample count changed/],['RENDERBUFFER_RED_SIZE',7,/precision changed/],['RENDERBUFFER_DEPTH_SIZE',16,/precision changed/]]){
+    const record=recordingGL({loseRenderbufferBinding:true}),read=record.gl.getRenderbufferParameter,frames=[];
+    record.gl.getRenderbufferParameter=(target,key)=>{const actual=read(target,key);return key===record.gl[parameter]?value:actual;};
+    const env=environment(t,{gl:record.gl}),renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:info=>frames.push(info)});
+    env.flush();assert.equal(frames.length,0,'an invalid target cannot be presented as ready WebGL');assert.equal(record.counts.resolves.length,0);assert.equal(record.pendingSyncs(),0);
+    env.flush();assert.equal(frames.length,1);assert.equal(frames[0].renderer,'canvas2d');assert.equal(frames[0].graphicsFallback.stage,'render');assert.match(frames[0].graphicsFallback.reason,reason);
+    assert.equal(record.counts.missingRenderbufferBindings,0);renderer.destroy();
+  }
 });
 
 test('pending frames coalesce camera, cartography, route and resize without publishing or clearing an obsolete view',t=>{

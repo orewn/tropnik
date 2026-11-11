@@ -72,6 +72,10 @@ jobs:
         run: |
           node --test tools/pages-preview/tests/terrain-presentation.browser.mjs
           node tools/pages-preview/terrain-presentation-report.mjs
+      - name: Verify unmasked Android terrain, GPU allocation and resize pixel parity
+        run: |
+          node --test tools/pages-preview/tests/terrain-unmasked.browser.mjs
+          node tools/pages-preview/terrain-unmasked-report.mjs
       - name: Run the complete production browser audit before main
         timeout-minutes: 26
         env:
@@ -88,6 +92,7 @@ jobs:
           import {assertMapAttributionReceipt} from './tools/pages-preview/map-attribution-verification.mjs';
           import {assertTerrainFullMaskReport} from './tools/pages-preview/terrain-full-mask-report.mjs';
           import {assertTerrainPresentationReport} from './tools/pages-preview/terrain-presentation-report.mjs';
+          import {assertTerrainUnmaskedReport} from './tools/pages-preview/terrain-unmasked-report.mjs';
           const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
           const browser = JSON.parse(readFileSync('web/pages-preview/dist/browser-verification.json', 'utf8'));
           assert.match(build.buildId, /^[a-f0-9]{16}$/);
@@ -105,6 +110,9 @@ jobs:
           assert.equal(fullMask.rendererSHA256, mask.rendererSHA256);
           const presentation = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-presentation-verification.json', 'utf8'));
           assertTerrainPresentationReport(presentation, {sourceCommit:process.env.GITHUB_SHA, environment:browser.environment});
+          const unmasked = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-unmasked-verification.json', 'utf8'));
+          assertTerrainUnmaskedReport(unmasked, {sourceCommit:process.env.GITHUB_SHA, environment:browser.environment});
+          assert.equal(unmasked.rendererSHA256, presentation.rendererSHA256);
           assert.equal(presentation.rendererSHA256, mask.rendererSHA256);
           const attribution = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-attribution-verification.json', 'utf8'));
           assertMapAttributionReceipt(attribution, {sourceCommit:process.env.GITHUB_SHA, environment:browser.environment});
@@ -185,6 +193,7 @@ jobs:
             web/pages-preview/dist/browser-terrain-mask-verification.json
             web/pages-preview/dist/browser-terrain-full-mask-verification.json
             web/pages-preview/dist/browser-terrain-presentation-verification.json
+            web/pages-preview/dist/browser-terrain-unmasked-verification.json
             web/pages-preview/dist/browser-map-attribution-verification.json
             web/pages-preview/dist/browser-map-underlay-verification.json
             web/pages-preview/dist/browser-map-controls-verification.json

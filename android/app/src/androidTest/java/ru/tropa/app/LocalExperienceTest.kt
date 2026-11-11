@@ -454,9 +454,7 @@ class LocalExperienceTest {
         app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
         app.onNodeWithTag("route_kavkaz-8a").performClick()
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("open_landscape"))
-        app.waitUntil(timeoutMillis = 30_000) {
-            app.onAllNodes(hasTestTag("open_landscape") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
-        }
+        waitForLandscapeWarmup("scene-warmup")
         var prepared: WebView? = null
         app.runOnIdle {
             prepared = app.activity.findViewById(R.id.landscape_viewer)
@@ -470,14 +468,14 @@ class LocalExperienceTest {
         waitForLandscapeFrame("scene-portrait")
         screenshot("scene-portrait")
         app.runOnUiThread { prepared!!.evaluateJavascript("document.getElementById('zoom-in').click()", null) }
-        waitForLandscapeFrame("scene-zoom")
+        waitForLandscapeFrame("scene-zoom", expectedZoom = 1.2)
         screenshot("scene-zoom")
         val originalOrientation = app.activity.requestedOrientation
         val originalConfiguration = app.activity.resources.configuration.orientation
         try {
             app.runOnUiThread { app.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
             app.waitUntil(timeoutMillis = 10_000) { app.activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE }
-            waitForLandscapeFrame("scene-landscape")
+            waitForLandscapeFrame("scene-landscape", expectedZoom = 1.2)
             screenshot("scene-landscape")
         } finally {
             app.runOnUiThread { app.activity.requestedOrientation = originalOrientation }
@@ -492,7 +490,7 @@ class LocalExperienceTest {
         }
         app.onNodeWithTag("open_landscape").performClick()
         app.runOnIdle { assertSame("Second opening must reuse its context", prepared, app.activity.findViewById(R.id.landscape_viewer)) }
-        waitForLandscapeFrame("scene-reopened")
+        waitForLandscapeFrame("scene-reopened", expectedZoom = 1.2)
     }
 
     @Test fun rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable() {
@@ -501,9 +499,7 @@ class LocalExperienceTest {
         app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
         app.onNodeWithTag("route_kavkaz-8a").performClick()
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("open_landscape"))
-        app.waitUntil(timeoutMillis = 30_000) {
-            app.onAllNodes(hasTestTag("open_landscape") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
-        }
+        waitForLandscapeWarmup("renderer-exit-warmup")
         // Exercise our cleanup callback without crashing a shared WebView process.
         app.runOnIdle {
             val view = requireNotNull(app.activity.findViewById<WebView>(R.id.landscape_viewer))
@@ -523,9 +519,7 @@ class LocalExperienceTest {
         app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
         app.onNodeWithTag("route_kavkaz-8a").performClick()
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("open_landscape"))
-        app.waitUntil(timeoutMillis = 30_000) {
-            app.onAllNodes(hasTestTag("open_landscape") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
-        }
+        waitForLandscapeWarmup("recovery-warmup")
         var original: WebView? = null
         app.runOnIdle { original = app.activity.findViewById(R.id.landscape_viewer) }
         app.onNodeWithTag("open_landscape").performClick()
@@ -539,9 +533,7 @@ class LocalExperienceTest {
         app.runOnIdle { assertNull(app.activity.findViewById<WebView>(R.id.landscape_viewer)) }
         app.onNodeWithTag("landscape_retry").performClick()
         app.onNodeWithTag("landscape_back").performClick()
-        app.waitUntil(timeoutMillis = 30_000) {
-            app.onAllNodes(hasTestTag("open_landscape") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
-        }
+        waitForLandscapeWarmup("recovery-retry-warmup")
         app.runOnIdle {
             val replacement = app.activity.findViewById<WebView>(R.id.landscape_viewer)
             assertNotNull(replacement)
@@ -551,33 +543,109 @@ class LocalExperienceTest {
         waitForLandscapeFrame("recovery-after-retry")
     }
 
-    private fun waitForLandscapeFrame(name: String) {
-        // The document and viewport must be ready before checking actual screen
-        // pixels. Neither rAF nor VisualStateCallback proves screen composition.
-        app.runOnUiThread {
-            app.activity.findViewById<WebView>(R.id.landscape_viewer).evaluateJavascript(
-                "window.__tropnikQaDrawn=false;requestAnimationFrame(function(){requestAnimationFrame(function(){window.__tropnikQaDrawn=true;});});", null)
-        }
-        app.waitUntil(timeoutMillis = 20_000) {
-            val completed = CountDownLatch(1)
-            var matched = false
+    private fun waitForLandscapeFrame(name: String, expectedZoom: Double = 1.0) {
+        try {
+            // The document and viewport must be ready before checking actual screen
+            // pixels. Neither rAF nor VisualStateCallback proves screen composition.
             app.runOnUiThread {
-                val view = app.activity.findViewById<WebView>(R.id.landscape_viewer)
-                if (view == null) completed.countDown()
-                else view.evaluateJavascript("(function(){var c=document.getElementById('terrain-canvas');if(!c)return false;var r=c.getBoundingClientRect();var fitted=innerHeight>0&&[document.documentElement,document.body,c].every(function(n){return Math.abs(n.getBoundingClientRect().height-innerHeight)<=2;});return window.__tropnikQaDrawn===true&&document.documentElement.dataset.sceneState==='ready'&&fitted&&c.height>0&&r.height>0&&Math.abs(c.width/c.height-r.width/r.height)<0.02;})()") {
-                    matched = it == "true"; completed.countDown()
-                }
+                app.activity.findViewById<WebView>(R.id.landscape_viewer).evaluateJavascript(
+                    "window.__tropnikQaDrawn=false;requestAnimationFrame(function(){requestAnimationFrame(function(){window.__tropnikQaDrawn=true;});});", null)
             }
-            completed.await(2, TimeUnit.SECONDS) && matched
+            app.waitUntil(timeoutMillis = 20_000) {
+                val completed = CountDownLatch(1)
+                var matched = false
+                app.runOnUiThread {
+                    val view = app.activity.findViewById<WebView>(R.id.landscape_viewer)
+                    if (view == null) completed.countDown()
+                    else view.evaluateJavascript("(function(){var c=document.getElementById('terrain-canvas');if(!c)return false;var r=c.getBoundingClientRect();var fitted=innerHeight>0&&[document.documentElement,document.body,c].every(function(n){return Math.abs(n.getBoundingClientRect().height-innerHeight)<=2;});return window.__tropnikQaDrawn===true&&document.documentElement.dataset.sceneState==='ready'&&c.dataset.terrainPending==='false'&&fitted&&c.height>0&&r.height>0&&Math.abs(c.width/c.height-r.width/r.height)<0.02;})()") {
+                        matched = it == "true"; completed.countDown()
+                    }
+                }
+                completed.await(2, TimeUnit.SECONDS) && matched
+            }
+            val drawn = CountDownLatch(1)
+            app.runOnUiThread {
+                app.activity.findViewById<WebView>(R.id.landscape_viewer).postVisualStateCallback(1, object : WebView.VisualStateCallback() {
+                    override fun onComplete(requestId: Long) { drawn.countDown() }
+                })
+            }
+            assertTrue("WebView did not report a drawable document", drawn.await(10, TimeUnit.SECONDS))
+            waitForLandscapePixels(name, expectedZoom)
+        } catch (error: Throwable) {
+            writeLandscapeWaitFailure(name, error)
+            throw error
         }
-        val drawn = CountDownLatch(1)
-        app.runOnUiThread {
-            app.activity.findViewById<WebView>(R.id.landscape_viewer).postVisualStateCallback(1, object : WebView.VisualStateCallback() {
-                override fun onComplete(requestId: Long) { drawn.countDown() }
-            })
+    }
+
+    private fun waitForLandscapeWarmup(name: String) {
+        var failure: Throwable? = null
+        try {
+            app.waitUntil(timeoutMillis = 30_000) {
+                app.onAllNodes(hasTestTag("open_landscape") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+            }
+        } catch (error: Throwable) {
+            failure = error
         }
-        assertTrue("WebView did not report a drawable document", drawn.await(10, TimeUnit.SECONDS))
-        waitForLandscapePixels(name)
+        val document = documentSceneSnapshot()
+        if (failure == null) {
+            try {
+                // Hidden warmup can retain a queued dirty frame after pause.
+                // Its completed frame must still come from the real WebGL path.
+                assertLandscapeGraphics(document, expectedZoom = 1.0, allowPending = true)
+            } catch (error: Throwable) {
+                failure = error
+            }
+        }
+        val diagnostics = JSONObject().put("passed", failure == null).put("phase", "warmup")
+            .put("native", nativeSceneSnapshot().details).put("document", document)
+            .put("failure", failure?.toString()?.take(1024) ?: JSONObject.NULL)
+        val report = File(app.activity.filesDir, "qa/$name-frame.json")
+        report.parentFile!!.mkdirs()
+        report.writeText(diagnostics.toString(2))
+        failure?.let { throw it }
+    }
+
+    private fun writeLandscapeWaitFailure(name: String, error: Throwable) {
+        // This runs after the original wait has failed; it never extends its
+        // deadline, issues input, creates a context or asks GL to synchronize.
+        try {
+            val diagnostics = JSONObject().put("passed", false).put("phase", "frame-wait")
+                .put("failure", error.toString().take(1024))
+                .put("native", nativeSceneSnapshot().details).put("document", documentSceneSnapshot())
+            val report = File(app.activity.filesDir, "qa/$name-wait-failed.json")
+            report.parentFile!!.mkdirs()
+            report.writeText(diagnostics.toString(2))
+        } catch (diagnosticError: Throwable) {
+            error.addSuppressed(diagnosticError)
+        }
+    }
+
+    private fun assertLandscapeGraphics(document: Any, expectedZoom: Double, allowPending: Boolean = false) {
+        val snapshot = document as? JSONObject
+        assertNotNull("Missing document graphics snapshot: $document", snapshot)
+        val terrain = snapshot!!.optJSONObject("terrain")
+        assertNotNull("Missing actual completed-frame metadata: $snapshot", terrain)
+        val frame = terrain!!.optJSONObject("frame")
+        assertNotNull("Missing actual completed terrain frame: $terrain", frame)
+        val completed = frame!!.optLong("frameNumber")
+        assertTrue("No completed renderer callback: $frame", completed > 0)
+        assertEquals("Frame counter must describe the retained callback", completed, terrain.optLong("completedFrames"))
+        assertEquals("The emulator must retain WebGL2", "webgl2", frame.optString("renderer"))
+        assertEquals("Canvas backend must match the completed frame", "webgl2", terrain.optString("backend"))
+        assertTrue("A graphics fallback cannot count as WebGL success: $frame",
+            frame.has("graphicsFallback") && frame.isNull("graphicsFallback"))
+        assertTrue("Missing real presentation path: $terrain",
+            terrain.optString("presentation") in setOf("deferred-msaa", "direct"))
+        assertEquals("Presentation must match the completed frame", frame.optString("presentation"), terrain.optString("presentation"))
+        if (!allowPending) assertEquals("A visible captured frame must be complete", "false", terrain.optString("pending"))
+        val canvas = snapshot.optJSONObject("canvas")
+        assertNotNull("Completed frame has no current DOM canvas", canvas)
+        assertTrue("Completed frame backing size must be nonzero", frame.optInt("backingWidth") > 0 && frame.optInt("backingHeight") > 0)
+        assertEquals("Completed width must match the current canvas", canvas!!.optInt("width"), frame.optInt("backingWidth"))
+        assertEquals("Completed height must match the current canvas", canvas.optInt("height"), frame.optInt("backingHeight"))
+        val view = frame.optJSONObject("view")
+        assertNotNull("Completed frame has no actual camera view", view)
+        assertEquals("The completed view must include the existing zoom input", expectedZoom, view!!.optDouble("zoom"), 0.000000001)
     }
 
     private data class NativeSceneSnapshot(val bounds: Rect, val details: JSONObject)
@@ -671,7 +739,13 @@ class LocalExperienceTest {
                       visibility:s.visibility,opacity:s.opacity,transform:s.transform,
                       position:s.position,background:s.backgroundColor,width:e.width,height:e.height};}
                   var hit=document.elementFromPoint(innerWidth/2,innerHeight/2);
-                  return JSON.stringify({sceneState:document.documentElement.dataset.sceneState,
+                  var root=document.documentElement,c=document.getElementById('terrain-canvas'),frame=null,frameError=null;
+                  try{frame=root.dataset.terrainFrame?JSON.parse(root.dataset.terrainFrame):null;}
+                  catch(error){frameError=String(error).slice(0,256);}
+                  var terrain={frame:frame,frameError:frameError,completedFrames:Number(root.dataset.terrainFrameCount||0),
+                    backend:c?c.dataset.renderer||null:null,presentation:c?c.dataset.terrainPresentation||null:null,
+                    pending:c?c.dataset.terrainPending||null:null};
+                  return JSON.stringify({sceneState:document.documentElement.dataset.sceneState,terrain:terrain,
                     visibility:document.visibilityState,innerWidth:innerWidth,innerHeight:innerHeight,
                     devicePixelRatio:devicePixelRatio,scrollX:scrollX,scrollY:scrollY,
                     html:element('html'),body:element('body'),landscape:element('.landscape'),
@@ -687,12 +761,13 @@ class LocalExperienceTest {
         return result
     }
 
-    private fun waitForLandscapePixels(name: String) {
+    private fun waitForLandscapePixels(name: String, expectedZoom: Double) {
         var lastBitmap: Bitmap? = null
         var native = NativeSceneSnapshot(Rect(), JSONObject())
         var pixels = JSONObject().put("passed", false).put("reason", "No screenshot captured")
         var passed = false
         var failure: Throwable? = null
+        var document: Any? = null
         try {
             app.waitUntil(timeoutMillis = 12_000) {
                 native = nativeSceneSnapshot()
@@ -704,13 +779,22 @@ class LocalExperienceTest {
                 passed = pixels.optBoolean("passed") && native.details.optBoolean("shown") && native.details.optBoolean("attached")
                 passed
             }
+            val completedDocument = documentSceneSnapshot()
+            document = completedDocument
+            assertLandscapeGraphics(completedDocument, expectedZoom)
+        } catch (error: AssertionError) {
+            passed = false
+            failure = error
         } catch (error: ComposeTimeoutException) {
+            passed = false
             failure = error
         } catch (error: Exception) {
+            passed = false
             failure = error
         } finally {
             val diagnostics = JSONObject().put("passed", passed).put("native", native.details)
-                .put("pixels", pixels).put("document", documentSceneSnapshot())
+                .put("pixels", pixels).put("document", document ?: documentSceneSnapshot())
+                .put("failure", failure?.toString()?.take(1024) ?: JSONObject.NULL)
             val report = File(app.activity.filesDir, "qa/$name-frame.json")
             report.parentFile!!.mkdirs()
             report.writeText(diagnostics.toString(2))

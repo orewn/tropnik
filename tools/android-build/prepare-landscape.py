@@ -130,12 +130,32 @@ window.addEventListener('unhandledrejection',function(){fail('Не удалос�
 const canvas=document.getElementById('terrain-canvas');
 const status=document.getElementById('scene-status');
 const terrainGrid=__GRID__;
-let renderer=null,active=false,disposed=false,terminal=false,layoutObserver=null,preparation=null;
+let renderer=null,active=false,disposed=false,terminal=false,layoutObserver=null,preparation=null,completedFrames=0;
 document.documentElement.dataset.sceneState='loading';
 function failure(){status.hidden=false;status.textContent='Не удалось открыть рельеф. Попробуйте снова или вернитесь к сохранённой карте.';}
+function rememberFrame(info){
+ if(!info||typeof info!=='object')return;
+ const number=function(value){return typeof value==='number'&&Number.isFinite(value)?value:null;};
+ const text=function(value,limit){return typeof value==='string'?value.slice(0,limit):null;};
+ const current=document.getElementById('terrain-canvas');
+ const frame={frameNumber:++completedFrames,ms:number(info.ms),triangles:number(info.triangles),
+  quality:text(info.quality,16),renderer:text(info.renderer,16),pixelRatio:number(info.pixelRatio),
+  meshStride:number(info.meshStride),sourceVertices:number(info.sourceVertices),
+  presentation:text(current?.dataset.terrainPresentation,32),
+  backingWidth:number(current?.width),backingHeight:number(current?.height),
+  view:info.view?{yaw:number(info.view.yaw),pitch:number(info.view.pitch),zoom:number(info.view.zoom),
+   offset:Array.isArray(info.view.offset)?info.view.offset.slice(0,2).map(number):null}:null,
+  cartography:info.cartography?{loadedTiles:number(info.cartography.loadedTiles),requestedTiles:number(info.cartography.requestedTiles),
+   width:number(info.cartography.width),height:number(info.cartography.height)}:info.cartography,
+  displayMask:info.displayMask?{width:number(info.displayMask.width),height:number(info.displayMask.height),
+   allowedPixels:number(info.displayMask.allowedPixels),coverageVersion:text(info.displayMask.coverageVersion,64)}:info.displayMask,
+  graphicsFallback:info.graphicsFallback?{stage:text(info.graphicsFallback.stage,64),reason:text(info.graphicsFallback.reason,512)}:info.graphicsFallback};
+ document.documentElement.dataset.terrainFrame=JSON.stringify(frame);
+ document.documentElement.dataset.terrainFrameCount=String(completedFrames);
+}
 function viewportReady(){
  const height=window.innerHeight;
- return height>0&&[document.documentElement,document.body,canvas].every(function(node){
+ return height>0&&[document.documentElement,document.body,document.getElementById('terrain-canvas')].every(function(node){
   return node&&Math.abs(node.getBoundingClientRect().height-height)<=2;
  });
 }
@@ -163,8 +183,8 @@ async function start(){
  try{
  const preparedModel=await createTerrainModelAsync(terrainGrid,{signal:controller.signal});
  if(disposed||!active||controller.signal.aborted)return;
- renderer=new TerrainRenderer(canvas,terrainGrid,{preparedModel,compactViewport:false,onRender:function(){
-  if(disposed||terminal)return;
+ renderer=new TerrainRenderer(canvas,terrainGrid,{preparedModel,compactViewport:false,onRender:function(info){
+  if(disposed||terminal)return;rememberFrame(info);
   if(!viewportReady()){status.hidden=false;document.documentElement.dataset.sceneState='loading';return;}
   status.hidden=true;document.documentElement.dataset.sceneState='ready';
   if(!active&&renderer)renderer.setVisible(false);

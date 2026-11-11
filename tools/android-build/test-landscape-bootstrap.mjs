@@ -36,7 +36,15 @@ function host(initialHeights = {}) {
   const context = vm.createContext({document, window: events, Event, AbortController, TerrainRenderer: Renderer, createTerrainModelAsync});
   vm.runInContext(scripts[0], context);
   vm.runInContext(bootstrap, context);
-  return {document, preparations, renderers, heights, viewport: events, dispatch: type => events.dispatchEvent(new Event(type))};
+  return {document, preparations, renderers, heights, viewport: events, dispatch: type => events.dispatchEvent(new Event(type)),
+    replaceCanvas() {
+      const previous = elements.get('terrain-canvas'), replacement = node('terrain-canvas');
+      // TerrainRenderer.useCanvas(true) replaces the DOM node after GPU failure.
+      // A detached original has no layout box even when the new canvas is sized.
+      previous.getBoundingClientRect = () => ({width: 0, height: 0, top: 0, bottom: 0});
+      elements.set('terrain-canvas', replacement);
+      return {previous, replacement};
+    }};
 }
 
 test('all generated scripts parse as classic offline WebView scripts', () => {
@@ -65,6 +73,83 @@ test('a rendered canvas clipped by zero-height roots is not ready, including aft
   for (const id of ['html', 'body', 'terrain-canvas']) state.heights[id] = 180;
   renderer.options.onRender();
   assert.equal(state.document.documentElement.dataset.sceneState, 'ready');
+});
+
+test('readiness follows the current DOM canvas after graphics fallback and still rejects a clipped replacement', async () => {
+  const state = host();
+  state.dispatch('tropnik-scene-resume');
+  state.preparations[0].resolve({});
+  await flush();
+  const renderer = state.renderers[0];
+  renderer.options.onRender();
+  assert.equal(state.document.documentElement.dataset.sceneState, 'ready');
+
+  const {previous, replacement} = state.replaceCanvas();
+  assert.notEqual(previous, replacement);
+  assert.equal(previous.getBoundingClientRect().height, 0);
+  assert.equal(state.document.getElementById('terrain-canvas'), replacement);
+  assert.equal(replacement.getBoundingClientRect().height, state.viewport.innerHeight);
+  renderer.options.onRender();
+  assert.equal(state.document.documentElement.dataset.sceneState, 'ready');
+  assert.equal(state.document.getElementById('scene-status').hidden, true);
+
+  // The live replacement must satisfy the original viewport constraint.
+  state.heights['terrain-canvas'] = 0;
+  renderer.options.onRender();
+  assert.equal(state.document.documentElement.dataset.sceneState, 'loading');
+  assert.equal(state.document.getElementById('scene-status').hidden, false);
+  state.heights['terrain-canvas'] = state.viewport.innerHeight;
+  renderer.options.onRender();
+  assert.equal(state.document.documentElement.dataset.sceneState, 'ready');
+});
+
+test('completed-frame diagnostics retain actual callback values, replacement canvas and bounded fallback details', async () => {
+  const state = host();
+  state.dispatch('tropnik-scene-resume');
+  state.preparations[0].resolve({});
+  await flush();
+  const renderer = state.renderers[0], canvas = state.document.getElementById('terrain-canvas');
+  canvas.width = 720; canvas.height = 1240; canvas.dataset.terrainPresentation = 'deferred-msaa';
+  const info = {ms: 7.25, triangles: 131072, quality: 'full', renderer: 'webgl2', pixelRatio: 2,
+    meshStride: 2, sourceVertices: 263169, graphicsFallback: null,
+    view: {yaw: -.48, pitch: .72, zoom: 1.2, offset: [.125, -.25]},
+    cartography: null, displayMask: null, ignored: 'x'.repeat(10000)};
+  renderer.options.onRender(info);
+  const first = JSON.parse(state.document.documentElement.dataset.terrainFrame);
+  assert.equal(first.frameNumber, 1);
+  assert.equal(state.document.documentElement.dataset.terrainFrameCount, '1');
+  for (const key of ['ms', 'triangles', 'quality', 'renderer', 'pixelRatio', 'meshStride', 'sourceVertices',
+    'graphicsFallback', 'cartography', 'displayMask']) assert.equal(first[key], info[key]);
+  assert.equal(JSON.stringify(first.view), JSON.stringify(info.view));
+  assert.equal(first.presentation, 'deferred-msaa');
+  assert.equal(first.backingWidth, 720);
+  assert.equal(first.backingHeight, 1240);
+  assert.equal(Object.hasOwn(first, 'ignored'), false);
+  info.view.zoom = 4;
+  assert.equal(JSON.parse(state.document.documentElement.dataset.terrainFrame).view.zoom, 1.2);
+
+  const {replacement} = state.replaceCanvas();
+  replacement.width = 540; replacement.height = 930; replacement.dataset.terrainPresentation = 'canvas2d';
+  renderer.options.onRender({...info, renderer: 'canvas2d', pixelRatio: 1.5,
+    graphicsFallback: {stage: 'render', reason: 'lost '.repeat(200)}});
+  const fallback = JSON.parse(state.document.documentElement.dataset.terrainFrame);
+  assert.equal(fallback.frameNumber, 2);
+  assert.equal(state.document.documentElement.dataset.terrainFrameCount, '2');
+  assert.equal(fallback.renderer, 'canvas2d');
+  assert.equal(fallback.presentation, 'canvas2d');
+  assert.equal(fallback.backingWidth, 540);
+  assert.equal(fallback.backingHeight, 930);
+  assert.equal(fallback.graphicsFallback.stage, 'render');
+  assert.equal(fallback.graphicsFallback.reason, 'lost '.repeat(200).slice(0, 512));
+  assert.ok(state.document.documentElement.dataset.terrainFrame.length < 2048);
+
+  state.heights['terrain-canvas'] = 0;
+  renderer.options.onRender({...info, renderer: 'canvas2d'});
+  assert.equal(JSON.parse(state.document.documentElement.dataset.terrainFrame).frameNumber, 3);
+  assert.equal(state.document.documentElement.dataset.sceneState, 'loading');
+  renderer.options.onFatal('Ended graphics session');
+  renderer.options.onRender(info);
+  assert.equal(JSON.parse(state.document.documentElement.dataset.terrainFrame).frameNumber, 3);
 });
 
 test('preparation waits for foreground, cancels on pause, then retains the first committed scene', async () => {

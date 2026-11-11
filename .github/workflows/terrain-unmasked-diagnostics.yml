@@ -1,0 +1,84 @@
+name: Unmasked terrain allocation and immutable pixel parity
+
+on:
+  push:
+    branches: [diagnostics/terrain-unmasked-pixels]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terrain-unmasked-diagnostics-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  unmasked-pixels:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - name: Check out the exact diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Verify the receipt rejects missing or mismatched graphics evidence
+        run: |
+          node --test web/tests/terrain-renderer.test.mjs
+          node --test tools/pages-preview/tests/terrain-presentation-report.test.mjs tools/pages-preview/tests/terrain-unmasked-report.test.mjs
+      - name: Compare unmasked ground, rim, resize and trusted recovery at both DPRs
+        run: node --test tools/pages-preview/tests/terrain-unmasked.browser.mjs
+      - name: Compare immutable f36 and actual deferred presentation at both DPRs
+        run: node --test tools/pages-preview/tests/terrain-presentation.browser.mjs
+      - name: Retain the original full-mask shader specialization proof
+        run: |
+          node --test tools/pages-preview/tests/terrain-full-mask.browser.mjs
+          node tools/pages-preview/terrain-full-mask-report.mjs
+      - name: Retain the independent mixed-mask and Canvas correctness gate
+        run: node --test tools/pages-preview/tests/terrain-mask.browser.mjs
+      - name: Bind source, actual environment, restored shaders and retained pixels
+        run: |
+          node tools/pages-preview/terrain-unmasked-report.mjs
+          node tools/pages-preview/terrain-presentation-report.mjs
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFileSync} from 'node:fs';
+          import {assertTerrainUnmaskedReport} from './tools/pages-preview/terrain-unmasked-report.mjs';
+          import {assertTerrainMaskReport} from './tools/pages-preview/terrain-mask-report.mjs';
+          import {assertTerrainFullMaskReport} from './tools/pages-preview/terrain-full-mask-report.mjs';
+          const full = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-presentation-verification.json', 'utf8'));
+          const unmasked = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-unmasked-verification.json', 'utf8'));
+          assertTerrainUnmaskedReport(unmasked, {sourceCommit: process.env.GITHUB_SHA, environment: full.environment});
+          assert.equal(unmasked.rendererSHA256, full.rendererSHA256);
+          const shaders = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-full-mask-verification.json', 'utf8'));
+          assertTerrainFullMaskReport(shaders, {sourceCommit: process.env.GITHUB_SHA, environment: full.environment});
+          assert.equal(shaders.rendererSHA256, full.rendererSHA256);
+          const mixed = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-mask-verification.json', 'utf8'));
+          assertTerrainMaskReport(mixed, {sourceCommit: process.env.GITHUB_SHA, rendererSHA256: full.rendererSHA256, environment: full.environment});
+          NODE
+      - name: Preserve the actual presentation and mask pixel evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-terrain-unmasked-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            web/pages-preview/dist/browser-terrain-unmasked-verification.json
+            web/pages-preview/design-qa/terrain-unmasked
+            web/pages-preview/dist/browser-terrain-presentation-verification.json
+            web/pages-preview/design-qa/terrain-presentation
+            web/pages-preview/dist/browser-terrain-mask-verification.json
+            web/pages-preview/design-qa/terrain-mask
+            web/pages-preview/dist/browser-terrain-full-mask-verification.json
+            web/pages-preview/design-qa/terrain-full-mask
+          if-no-files-found: error
+          retention-days: 7
