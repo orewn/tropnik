@@ -172,7 +172,14 @@ jobs:
                   if parsed.scheme != "https" or not trusted or parsed.username or parsed.password:
                       return {"available": False, "errorType": "UnrecognizedLogRedirect"}
                   # No authorization header crosses the API origin. Signed queries stay private.
-                  public_headers = {"User-Agent": HEADERS["User-Agent"], "Range": f"bytes=-{TAIL_BYTES}", "Accept-Encoding": "identity"}
+                  public_headers = {"User-Agent": HEADERS["User-Agent"], "Accept-Encoding": "identity"}
+                  with opener.open(urllib.request.Request(location, headers=public_headers, method="HEAD"), timeout=remaining_timeout()) as metadata:
+                      total_header = metadata.headers.get("Content-Length", "")
+                      if metadata.status != 200 or not total_header.isdigit() or int(total_header) <= 0:
+                          return {"available": False, "errorType": "LogLengthUnavailable", "httpStatus": metadata.status}
+                      total_bytes = int(total_header)
+                  # Azure Blob accepts positive start/end ranges, not suffix ranges.
+                  public_headers["Range"] = f"bytes={max(0, total_bytes - TAIL_BYTES)}-{total_bytes - 1}"
                   response = opener.open(urllib.request.Request(location, headers=public_headers, method="GET"), timeout=remaining_timeout())
               with response:
                   status = response.status
@@ -243,7 +250,7 @@ jobs:
                   time.sleep(3)
               results.append(item)
           result = {"schemaVersion": 1, "diagnosticOnly": True, "releaseEligible": False,
-                    "controllerCommit": os.environ.get("GITHUB_SHA"), "method": "GET only; no checkout, build, application, upload or retry API",
+                    "controllerCommit": os.environ.get("GITHUB_SHA"), "method": "GET/HEAD only; no checkout, build, application, upload or retry API",
                     "limits": {"readsPerJob": 2, "httpTimeoutSeconds": 10, "requestStartDeadlineSeconds": 210, "logTailBytes": TAIL_BYTES},
                     "causeNotInferredFromMissingAnnotationsOrUnpublishedLogs": True,
                     "targets": [{"source": item["target"], "metadataObservations": len(item["observations"]),
