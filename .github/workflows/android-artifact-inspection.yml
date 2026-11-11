@@ -1,4 +1,4 @@
-name: Inspect retained Android baseline evidence
+name: Inspect retained Android renderer-fix evidence
 on:
   push:
     branches: [diagnostics/android-artifact-inspection]
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   inspect:
-    name: Read exact passing baseline artifact (diagnostic only)
+    name: Read exact passing renderer-fix artifact (diagnostic only)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -21,17 +21,17 @@ jobs:
           TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-android-inspection
         run: |
           mkdir -p "$TROPNIK_INSPECTION_ROOT"
-          gh api repos/orewn/tropnik/actions/artifacts/13865854185 > "$TROPNIK_INSPECTION_ROOT/artifact-metadata.json"
+          gh api repos/orewn/tropnik/actions/artifacts/13882063227 > "$TROPNIK_INSPECTION_ROOT/artifact-metadata.json"
           python3 - <<'PY'
           import json, os
           from pathlib import Path
           path=Path(os.environ["TROPNIK_INSPECTION_ROOT"])/"artifact-metadata.json"
           meta=json.loads(path.read_text())
-          expected={"id":13865854185,"name":"tropnik-android-api35-instrumentation-1","size_in_bytes":5865981,
-                    "digest":"sha256:463dc09c43c5a2e4c4e2ef34a48d9bad32b6d6eb377a9bf92ec9a5059fbc4ba4","expired":False}
+          expected={"id":13882063227,"name":"tropnik-android-api35-instrumentation-1","size_in_bytes":6149567,
+                    "digest":"sha256:133efda03133e83a944d3d6009a9438b46d21f3872bf0c402ddab171548021c3","expired":False}
           assert all(meta.get(k)==v for k,v in expected.items()), "Artifact metadata changed"
           run=meta["workflow_run"]
-          assert run["id"]==43043809909 and run["head_sha"]=="4ae449676ee2ab3be5f45b9e3666a39d31e518ff", "Wrong producer"
+          assert run["id"]==43075898441 and run["head_sha"]=="f836dce11579eae0e4596ee5b73f8bbe7246128f", "Wrong producer"
           assert run["repository_id"]==1447843944 and run["head_repository_id"]==1447843944, "Wrong repository"
           print("TROPNIK_ANDROID_ARTIFACT_METADATA="+json.dumps({**expected,"workflow_run":run},separators=(",",":")))
           PY
@@ -39,8 +39,8 @@ jobs:
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           repository: orewn/tropnik
-          run-id: 43043809909
-          artifact-ids: 13865854185
+          run-id: 43075898441
+          artifact-ids: 13882063227
           github-token: ${{ github.token }}
           digest-mismatch: error
           merge-multiple: true
@@ -74,13 +74,13 @@ jobs:
           print("TROPNIK_ANDROID_INSTALLED_RECEIPT_RAW="+json.dumps(installed,separators=(",",":")))
           print("TROPNIK_ANDROID_DEVICE_RECEIPT_RAW="+json.dumps(device,separators=(",",":")))
           for receipt in (device,installed):
-              assert receipt["sourceCommit"]=="565f8788f99d43ee2816674bc084ec4ba75d2667", "Wrong source commit"
-              assert receipt["workflowRunId"]=="43043809909", "Wrong workflow run"
+              assert receipt["sourceCommit"]=="b8bcc91bc2f34aea2f2fe37f166c5e68066cddbc", "Wrong source commit"
+              assert receipt["workflowRunId"]=="43075898441", "Wrong workflow run"
           assert installed["installedArtifactBytesVerified"] is True and device["installedArtifactBytesVerified"] is True
           assert device["testedApks"]==installed["installedApks"], "Installed/tested APKs differ"
           assert device["buildReceiptSha256"]==installed["buildReceiptSha256"], "Build receipt binding differs"
           universal=installed["installedApks"]["tropnik-preview.apk"]
-          assert universal=={"bytes":67854589,"sha256":"fe0302cfa7852ae9f8c45fb466e770952457b333e58d4a65299ca503e7ca531f"}, "Unexpected universal APK"
+          assert universal=={"bytes":67858685,"sha256":"4da9906667f6ae04af92a98464199aa6fb8b4c08c062c0c03b439a849166ca39"}, "Unexpected universal APK"
           assert device["tests"]==8 and device["failures"]==0 and device["errors"]==0 and device["skipped"]==0
           assert device["status"]=="passed" and device["deviceExecutionVerified"] is True
           print("TROPNIK_ANDROID_INSTALLED_RECEIPT="+json.dumps(installed,separators=(",",":")))
@@ -102,7 +102,7 @@ jobs:
           assert logcat.is_file(), "Missing logcat"
           loglines=logcat.read_text(errors="replace").splitlines()
           critical=[{"line":i+1,"text":line[:3000]} for i,line in enumerate(loglines) if re.search(r"GetRenderbufferParameteriv|boundRenderbuffer|GL_INVALID|WebGL|framebuffer",line,re.I)]
-          print("TROPNIK_ANDROID_GL_BASELINE="+json.dumps({"totalLogcatLines":len(loglines),"matchingLines":len(critical),"getRenderbufferParameterivCount":sum("GetRenderbufferParameteriv" in line for line in loglines),"boundRenderbufferCount":sum("boundRenderbuffer" in line for line in loglines),"truncated":len(critical)>200,"lines":critical if len(critical)<=200 else critical[:100]+critical[-100:]},separators=(",",":")))
+          print("TROPNIK_ANDROID_GL_DIAGNOSTIC="+json.dumps({"totalLogcatLines":len(loglines),"matchingLines":len(critical),"getRenderbufferParameterivCount":sum("GetRenderbufferParameteriv" in line for line in loglines),"boundRenderbufferCount":sum("boundRenderbuffer" in line for line in loglines),"truncated":len(critical)>200,"lines":critical if len(critical)<=200 else critical[:100]+critical[-100:]},separators=(",",":")))
           pattern=re.compile(r"CONSOLE|chromium|cr_[A-Za-z]|WebView|LocalExperienceTest|TestRunner|landscape|tropnik|FATAL EXCEPTION|EGL|GLES|GpuProcess|RenderProcess|GPU process|ANR",re.I)
           matches=[{"line":i+1,"text":line[:3000]} for i,line in enumerate(loglines) if pattern.search(line)]
           count=len(matches)
@@ -139,12 +139,12 @@ jobs:
                       (output/name.name).write_bytes(data)
                       print("TROPNIK_ANDROID_PNG="+json.dumps({**item,"base64":base64.b64encode(data).decode()},separators=(",",":")))
           print("TROPNIK_ANDROID_QA_FILES="+json.dumps(qa,separators=(",",":")))
-          report={"schemaVersion":1,"diagnosticOnly":True,"producerRunId":"43043809909",
-                  "producerHead":"4ae449676ee2ab3be5f45b9e3666a39d31e518ff","sourceCommit":device["sourceCommit"],
-                  "artifactId":13865854185,"artifactDigest":"sha256:463dc09c43c5a2e4c4e2ef34a48d9bad32b6d6eb377a9bf92ec9a5059fbc4ba4",
+          report={"schemaVersion":1,"diagnosticOnly":True,"producerRunId":"43075898441",
+                  "producerHead":"f836dce11579eae0e4596ee5b73f8bbe7246128f","sourceCommit":device["sourceCommit"],
+                  "artifactId":13882063227,"artifactDigest":"sha256:133efda03133e83a944d3d6009a9438b46d21f3872bf0c402ddab171548021c3",
                   "rawZipIndependentlyHashed":False,"archiveIntegrityMethod":"pinned actions/download-artifact v8.0.2 with digest-mismatch:error and exact API metadata binding",
                   "files":entries,"qaFiles":qa,"device":device,"installed":installed,
-                  "limitations":["This inspects an existing passing baseline run and does not rerun or certify the current candidate.",
+                  "limitations":["This reads an existing passing candidate run; it does not rerun tests or promote any release.",
                                   "JSON/PNG records were captured by the original test; missing failure snapshots are not fabricated.",
                                   "No independent raw ZIP hash is claimed; the downloader validates the API-bound digest."]}
           (output/"inspection.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
@@ -154,7 +154,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: tropnik-android-baseline-inspection
+          name: tropnik-android-renderer-fix-inspection
           path: ${{ runner.temp }}/tropnik-android-inspection/inspection/
           if-no-files-found: warn
           retention-days: 14
