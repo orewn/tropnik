@@ -133,6 +133,29 @@ test('preload acceptance rejects early ground removal, stale/finished requests, 
  for(const change of changes){const report=make();change(report);assert.throws(()=>assertSatellitePreload(report.preload,report.resources,'preload'));}
 });
 
+test('preload accepts the actual low-zoom overview batch without claiming detail or hiding missing ground',()=>{
+ const make=()=>{
+  const report=satelliteFixture('android-portrait','tropnik-canvas');
+  for(const frame of [report.preload.before,report.preload.pending]){
+   frame.base.committed='overview';frame.customMap.state.committedMode='overview';
+   frame.customMap.tiles.detail=[];frame.customMap.tiles.relief=[];
+  }
+  return report;
+ };
+ const valid=make();assert.equal(assertSatellitePreload(valid.preload,valid.resources,'overview preload'),valid.preload);
+ for(const change of [
+  report=>report.preload.before.base.target='satellite',
+  report=>report.preload.before.customMap.state.mode='overview',
+  report=>report.preload.before.customMap.state.committedMode='detail',
+  report=>{for(const frame of [report.preload.before,report.preload.pending,report.preload.after]){frame.camera.zoom=5;frame.customMap.camera.zoom=5;}},
+  report=>report.preload.before.customMap.camera.zoom=3,
+  report=>report.preload.before.customMap.tiles.overview=[],
+  report=>report.preload.before.customMap.tiles.detail.push(structuredClone(report.preload.before.customMap.tiles.overview[0])),
+  report=>report.preload.before.customMap.tiles.imagery.push(structuredClone(report.preload.after.customMap.tiles.imagery[0])),
+  report=>report.preload.pending.customMap.tiles.overview=[],
+ ]){const invalid=make();change(invalid);assert.throws(()=>assertSatellitePreload(invalid.preload,invalid.resources,'overview preload'));}
+});
+
 test('the native pan planner uses the nearest dateline world copy without writing map coordinates',()=>{
  const rect={left:0,top:68,width:412,height:847},camera={longitude:-179,latitude:67.5,zoom:4,tileSize:256};
  const point=projectMapPoint([180,67.5],camera,rect),dx=206-point.x,dy=491.5-point.y;

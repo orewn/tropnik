@@ -10,7 +10,7 @@ export function satelliteFixture(profile,engine){
  const initialZoom=engine==='tropnik-canvas'&&!mobile?5:4;
  const click=()=>({input,point:{x:100,y:100,unobscured:true},events:['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+index,trusted:true,pointerType:input,pointerId:1}))});
  const frame=(longitude=180,zoom=initialZoom,source='eox-bluemarble')=>({engine,...(engine==='tropnik-canvas'?{customMap:customMapFixture({camera:{longitude,latitude:67.5,zoom},mode:source?'satellite':'detail',routeId:'',imagerySource:source})}:{}),region:SATELLITE_REGION,imagery:source?'satellite':'',source,target:source,state:source?'ready':'',
-  base:{committed:source?'satellite':'detail',target:source?'satellite':'detail',state:'ready'},
+  base:{committed:source?'satellite':zoom<5?'overview':'detail',target:source?'satellite':'detail',state:'ready'},
   credit:{visible:!!source,text:source==='eox-bluemarble'?'NASA Blue Marble · EOX · Обзорный снимок · детализация ниже'+(zoom>8?' · Увеличен обзорный снимок':''):source?'EOxCloudless by EOX':''},
   viewport:{...viewport},rect:{...rect},camera:{longitude,latitude:67.5,zoom,tileSize:256},scrollY:0,
   ...(source?{resolution:source==='eox-bluemarble'?'overview':'detail',successfulRequestIds:source==='eox-bluemarble'?[source,'eox-bluemarble-west']:[source],pendingRequestIds:[],failedRequestIds:[],resourceSequence:9,resourcePhase:'enable-satellite'}:{}),
@@ -33,9 +33,9 @@ export function satelliteFixture(profile,engine){
  const result={schemaVersion:3,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
   setupZooms:initialZoom>4?[{direction:1,click:click(),before:frame(180,4,''),after:frame(180,initialZoom,'')}]:[],
   pans:[pan('dateline-overview',[180,67.5]),pan('west-eox',[140,67.5]),pan('dateline-return',[180,67.5])],zooms,
-  toggles:[{label:'Спутник',open:click(),select:click(),close:null,before:frame(180,initialZoom,''),after:frame()},{label:'Детальные тропы онлайн',open:click(),select:click(),close:null,before:frame(),after:frame(180,initialZoom,'')}],
+  toggles:[{label:'Спутник',open:click(),select:click(),close:null,before:frame(180,initialZoom,''),after:frame()},{label:'Тропы и ландшафт',open:click(),select:click(),close:null,before:frame(),after:frame(180,initialZoom,'')}],
   screenshots:steps.map(({stage})=>({stage,file:`${profile}-satellite-${stage}.png`,bytes:10000,sha256:'b'.repeat(64)})),resources,performance:{layoutShift:0,longestTaskMs:100}};
- const pending={...frame(180,initialZoom,''),imagery:'satellite',target:'eox-bluemarble',state:'loading',base:{committed:'detail',target:'satellite',state:'loading'},resourceSequence:1};
+ const pending={...frame(180,initialZoom,''),imagery:'satellite',target:'eox-bluemarble',state:'loading',base:{committed:initialZoom<5?'overview':'detail',target:'satellite',state:'loading'},resourceSequence:1};
  if(engine==='tropnik-canvas'){pending.customMap.state.imageryLoading=true;pending.customMap.state.loading=true;pending.customMap.state.mode='satellite';}
  const held={schemaVersion:1,limit:64,timeoutMs:8000,observed:1,records:[{requestId:'fetch-image',networkId:'eox-bluemarble',url:resources.requests[0].url,source:'eox-bluemarble',pausedAt:100,resumedAt:null}],pending:1,reason:null,closed:false,errors:[]};
  const released={...structuredClone(held),pending:0,reason:'capture',closed:true};released.records[0].resumedAt=200;

@@ -382,15 +382,8 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
      overlays:[...document.querySelectorAll('.map-context,.map-style-switch,.map-controls,.layer-button,.map-message,.map-preload-status,.fact-closed,.map-attribution-toggle,.map-attribution-content,.map-satellite-credit,.map-legend')].filter(visible).map(element=>({kind:element.className,rect:box(element)})),
      markers:[...document.querySelectorAll('.route-edge-marker[role="img"]')].map(element=>({role:element.getAttribute('role'),ariaLabel:element.getAttribute('aria-label'),density:element.dataset.routeEdgeDensity||'',pointerEvents:getComputedStyle(element).pointerEvents,rect:box(element),badge:part(element.querySelector('.route-edge-badge')),caption:part(element.querySelector('.route-edge-label'))}))};
    })()`);
-   const reliefPalette=await waitValue(`${profile.name}: relief tiles retained a stale palette`,()=>evaluate(cdp,`(()=>{
-    const map=document.querySelector('.atlas-canvas'),bounds=map.getBoundingClientRect();
-    const tiles=[...document.querySelectorAll('canvas[data-relief-job]')].map(tile=>{
-     const r=tile.getBoundingClientRect();let visible=r.width>1&&r.height>1&&r.right>bounds.left&&r.left<bounds.right&&r.bottom>bounds.top&&r.top<bounds.bottom;
-     for(let parent=tile;visible&&parent;parent=parent.parentElement){const s=getComputedStyle(parent);if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0||parent.hidden)visible=false;}
-     return{visible,state:tile.dataset.reliefState||'pending',paintedMode:tile.dataset.reliefMode||'',desiredMode:tile.dataset.reliefDesiredMode||''};
-    });return{engine:map.dataset.mapEngine,tiles};
-   })()`),value=>value.tiles.every(tile=>!tile.visible||!tile.paintedMode||tile.paintedMode===tile.desiredMode),15000);
-   if(profile.engine==='tropnik-canvas')reliefPalette.bitmapInspection=await evaluate(cdp,`(${inspectCustomMapDOM.toString()})()`);
+   const bitmapInspection=await waitValue(`${profile.name}: relief did not commit its actual current bitmap batch`,()=>evaluate(cdp,`(${inspectCustomMapDOM.toString()})()`),value=>value?.state?.loading===false&&value.state.reliefReady===true&&value.tiles?.relief?.length>0,15000);
+   const reliefPalette={engine:profile.engine,bitmapInspection};
    assertReliefPalette(reliefPalette,`${profile.name}/source-ends/${map.camera.zoom}`,profile.engine);
    return{targetZoom,zoom:map.camera.zoom,camera:map.camera,mapRect:map.rect,routeId:map.route,inputCount:audit.inputs.length,reliefPalette,...layout};
   }
@@ -476,7 +469,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
    await capture('satellite-unavailable',await geometry('fallback'));
   }
   await savedOverview();
-  await layerButton('Детальные тропы онлайн');
+  await layerButton('Тропы и ландшафт');
   await waitValue(`${profile.name}: leaving satellite did not restore map controls`,()=>evaluate(cdp,"document.querySelector('.atlas-wrap')?.dataset.mapImagery!=='satellite'"),Boolean);
   await settledMap(cdp,profile.engine);
   }
@@ -485,7 +478,10 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   const sceneButton=terrainButton;
   const sceneAvailable=await elementPoint(cdp,sceneButton);
   if(sceneAvailable?.unobscured){
-   await diagnosticPhase(cdp,'zoom-design-scene');await reachZoom(14);const beforeScene=await settledMap(cdp,profile.engine);await pointerSelector(cdp,sceneButton,profile);
+   await diagnosticPhase(cdp,'zoom-design-scene');await reachZoom(14);const beforeScene=await settledMap(cdp,profile.engine);
+   beforeScene.bitmapInspection=await evaluate(cdp,`(${inspectCustomMapDOM.toString()})()`);
+   beforeScene.viewportLayout=await evaluate(cdp,`(()=>{const element=document.querySelector('.atlas-canvas'),panel=element?.closest('.explore-layout')?.querySelector('.explore-panel'),r=panel?.getBoundingClientRect();return{width:innerWidth,height:innerHeight,panel:r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom}:null};})()`);
+   await pointerSelector(cdp,sceneButton,profile);
    const sceneState=()=>evaluate(cdp,`(()=>{const scene=document.querySelector('.terrain-scene.is-visible'),canvas=scene?.querySelector('canvas'),r=canvas?.getBoundingClientRect(),data=canvas?.dataset,notice=document.querySelector('.atlas-wrap>.map-message'),noticeRect=notice?.getBoundingClientRect(),noticeStyle=notice&&getComputedStyle(notice);return{inspection:JSON.parse(scene?.dataset.terrainInspection||'null'),visible:!!scene,ready:scene?.classList.contains('is-ready')===true,retainedMapNoticeVisible:!!noticeRect&&noticeRect.width>0&&noticeRect.height>0&&noticeStyle.display!=='none'&&noticeStyle.visibility!=='hidden'&&Number(noticeStyle.opacity)!==0,error:scene?.querySelector('.terrain-progress')?.textContent?.trim()||'',canvas:r?{width:r.width,height:r.height,renderer:data.renderer||'',triangles:Number(data.triangles||0),sourceVertices:Number(data.sourceVertices||0),meshStride:Number(data.meshStride||0),renderMs:Number(data.renderMs||0)}:null}})()`);
    let scene;
    for(let attempt=0;attempt<60;attempt++){scene=await sceneState();if(scene.error||scene.ready&&(scene.inspection?.cartography?.state!=='loading'&&scene.inspection?.frame?.cartography?.loadedTiles===scene.inspection?.cartography?.source?.loadedTiles))break;await sleep(250);}

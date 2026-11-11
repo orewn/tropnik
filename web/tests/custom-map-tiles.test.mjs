@@ -161,6 +161,16 @@ test('paint zoom separates output cache entries while preserving geographic XYZ 
   assert.equal((await env.store.load({...tile,paintZoom:17})).bitmap,a.bitmap);assert.equal((await env.store.load(variant)).bitmap,b.bitmap);assert.equal(env.downloads.length,2);
 });
 
+test('boundary visibility has distinct cached bitmaps while omitted and explicit true share one output',async t=>{
+  const env=fixture();t.after(()=>env.store.destroy());const tile={kind:'vector',z:17,x:802,y:1603},hidden={...tile,boundaries:false};
+  assert.equal(env.key(tile),env.key({...tile,boundaries:true}));assert.notEqual(env.key(tile),env.key(hidden));env.store.pin([env.key(tile),env.key(hidden)]);
+  const enabled=env.store.load(tile),disabled=env.store.load(hidden);assert.notEqual(enabled,disabled);await turn();env.resolveDownloads();await turn();
+  const first=env.workers[0].complete(),second=env.workers[0].complete();const [a,b]=await Promise.all([enabled,disabled]);
+  assert.equal(first.boundaries,true);assert.equal(second.boundaries,false);assert.equal(second.sourceKey,first.sourceKey);assert.equal(second.sourceZ,first.sourceZ);
+  assert.notEqual(a.bitmap,b.bitmap);assert.equal(env.store.resident,2);
+  assert.equal((await env.store.load({...tile,boundaries:true})).bitmap,a.bitmap);assert.equal((await env.store.load(hidden)).bitmap,b.bitmap);assert.equal(env.downloads.length,2);
+});
+
 test('invalid paint zoom cannot consume a queue slot or start a source request',async t=>{
   const env=fixture();t.after(()=>env.store.destroy());
   for(const paintZoom of [16,17.5,19,-1,NaN,Infinity,null])await assert.rejects(env.store.load({kind:'vector',z:17,x:802,y:1603,paintZoom}),/paint zoom/);

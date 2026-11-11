@@ -130,12 +130,23 @@ class LocalExperienceTest {
     }
 
     private fun mapSnapshot(view: CustomMapWebView): JSONObject {
-        var previous: JSONObject? = null
-        app.runOnUiThread {previous = view.debugSnapshot;view.requestDebugSnapshot()}
+        var requestId = 0L
+        app.runOnUiThread {requestId = view.requestDebugSnapshot()}
         var value: JSONObject? = null
-        app.waitUntil(timeoutMillis = 5_000) {
-            app.runOnUiThread {value = view.debugSnapshot}
-            value != null && value !== previous
+        var completed = false
+        try {
+            app.waitUntil(timeoutMillis = 5_000) {
+                app.runOnUiThread {value = view.debugSnapshot}
+                value?.optLong("requestId") == requestId
+            }
+            completed = true
+        } finally {
+            if (!completed) {
+                var diagnostics = JSONObject()
+                app.runOnUiThread {diagnostics = view.debugDiagnostics()}
+                val report = File(app.activity.filesDir, "qa/map-snapshot-timeout.json")
+                report.parentFile!!.mkdirs();report.writeText(diagnostics.toString(2))
+            }
         }
         return requireNotNull(value)
     }
@@ -188,18 +199,24 @@ class LocalExperienceTest {
         var snapshot = JSONObject()
         var labelsReady = false
         try {
+            // Prepare actual geometry and wait for the submitted fixture frame
+            // before starting the separate bounded diagnostic round trip.
             app.waitUntil(timeoutMillis = 20_000) {
-                snapshot = mapSnapshot(map)
-                val labels = snapshot.optJSONArray("labels") ?: JSONArray()
-                (0 until labels.length()).map {labels.getJSONObject(it)}.any {it.optString("id") == "domestic" && it.optBoolean("visible")} &&
-                    snapshot.optJSONObject("coverage")?.optBoolean("ready") == true
+                var ready = false
+                app.runOnUiThread {ready = map.debugFixtureState?.optString("status") == "ready"}
+                ready
             }
+            snapshot = mapSnapshot(map)
+            assertEquals("ready", snapshot.getJSONObject("labelFixture").getString("status"))
+            assertTrue("The exact fixture coverage did not settle", snapshot.getJSONObject("coverage").getBoolean("ready"))
             labelsReady = true
         } finally {
             if (!labelsReady) {
                 runCatching {screenshot("map-labels-not-ready")}
+                var diagnostics = JSONObject()
+                app.runOnUiThread {diagnostics = map.debugDiagnostics()}
                 val report = File(app.activity.filesDir, "qa/map-labels-not-ready.json")
-                report.parentFile!!.mkdirs();report.writeText(snapshot.toString(2))
+                report.parentFile!!.mkdirs();report.writeText(JSONObject().put("snapshot", snapshot).put("diagnostics", diagnostics).toString(2))
             }
         }
         val labels = snapshot.getJSONArray("labels")

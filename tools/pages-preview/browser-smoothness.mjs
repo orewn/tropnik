@@ -233,7 +233,7 @@ export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1,
   });
   await measure('map-zoom',async()=>{for(const [label,direction]of [['Увеличить масштаб',1],['Уменьшить масштаб',-1]]){const before=await settledMap(cdp,profile.engine);await pointerSelector(cdp,`.map-controls button[aria-label="${label}"]`,profile);const after=await settledMap(cdp,profile.engine);assert.ok((after.camera.zoom-before.camera.zoom)*direction>.1,`${label}: native input made no zoom progress`);}});
   await measure('layer-switch',async()=>{
-   for(const [label,mode]of [['Сохранённый обзор','overview'],['Детальные тропы онлайн','detail']]){
+   for(const [label,mode]of [['Сохранённый обзор','overview'],['Тропы и ландшафт','detail']]){
     await pointerSelector(cdp,'.layer-button',profile);
     const selector=await inspect(`(()=>{const buttons=[...document.querySelectorAll('.layer-menu>button')],index=buttons.findIndex(node=>node.textContent?.trim()===${JSON.stringify(label)});return index<0?null:'.layer-menu>button:nth-of-type('+(index+1)+')'})()`);assert.ok(selector);
     await revealNative(cdp,selector,'.layer-menu',profile);await pointerSelector(cdp,selector,profile);

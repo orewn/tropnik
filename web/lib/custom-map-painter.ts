@@ -12,7 +12,7 @@ export const CARTOGRAPHY = Object.freeze({
 export type MapTileLabel = {x:number;y:number;text:string;kind:'place'|'peak'|'water'|'poi'|'path';rank:number;elevation?:number;priorityCity?:boolean;symbol?:MapSymbol};
 export type PaintContext = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 export type TilePaintBounds = {left:number;top:number;right:number;bottom:number};
-export type VectorPaintOptions = {symbolScale?:number;labelBounds?:TilePaintBounds;geometryBounds?:TilePaintBounds};
+export type VectorPaintOptions = {symbolScale?:number;labelBounds?:TilePaintBounds;geometryBounds?:TilePaintBounds;boundaries?:boolean};
 export type ReliefHaloOffset={dx:-1|0|1;dy:-1|0|1};
 export type ReliefHaloKey='-1,-1'|'0,-1'|'1,-1'|'-1,0'|'1,0'|'-1,1'|'0,1'|'1,1';
 export type ReliefHalo=Partial<Record<ReliefHaloKey,Float32Array>>;
@@ -122,7 +122,7 @@ export function paintVectorTile(context:PaintContext,tile:VectorTile,z:number,si
   }
   if(z>=9)each('park',(f,e)=>{if(f.type===3)stroke(context,f,e,size,'rgba(120,155,101,.65)',.9*ratio,[2.7*ratio,2.7*ratio]);});
   each('waterway',(f,e)=>{if(f.type!==2)return;const c=classes(f);stroke(context,f,e,size,CARTOGRAPHY.waterLine,(c==='river'?1.5:.6)*ratio);});
-  each('boundary',(f,e)=>{if(f.type!==2||Number(f.properties.admin_level)>4)return;stroke(context,f,e,size,transparent?'#e5eee1':'#97aa8e',.65*ratio,[3*ratio,4*ratio]);});
+  if(options.boundaries!==false)each('boundary',(f,e)=>{if(f.type!==2||Number(f.properties.admin_level)>4)return;stroke(context,f,e,size,transparent?'#e5eee1':'#97aa8e',.65*ratio,[3*ratio,4*ratio]);});
   const roads=tile.layers.transportation;
   if(roads){
     for(const f of roads.features){

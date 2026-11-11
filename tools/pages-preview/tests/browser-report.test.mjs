@@ -255,6 +255,12 @@ test('publication rejects missing or stale committed relief from the own rendere
 test('publication requires the current visible terrain bounds, unchanged source and real progress after every native3D phase',()=>{
  for(const change of [
   scene=>scene.beforeMap.camera.longitude+=.01,
+  scene=>delete scene.beforeMap.bitmapInspection,
+  scene=>scene.beforeMap.bitmapInspection.viewport.padding.bottom=0,
+  scene=>scene.beforeMap.bitmapInspection.viewport.width+=16,
+  scene=>scene.beforeMap.bitmapInspection.visibleBounds=null,
+  scene=>scene.beforeMap.bitmapInspection.pitch=40,
+  scene=>scene.beforeMap.viewportLayout.panel.top=160,
   scene=>scene.states.initial.provenance.requestedBounds=[0,0,1,1],
   scene=>scene.states.close.grid.source.url='another-source',
   scene=>scene.states.wide.frames=scene.states.close.frames,

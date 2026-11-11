@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {inspectCustomMapDOM,assertCustomMapInspection,assertCustomSceneInspection} from '../browser-custom-map.mjs';
+import {inspectCustomMapDOM,assertCustomMapInspection,assertCustomDetailInspection,assertCustomSceneInspection} from '../browser-custom-map.mjs';
 import {settleMapCamera} from '../browser-zoom-audit.mjs';
 import {customMapFixture,customSceneFixture} from './custom-map-fixture.mjs';
 
@@ -21,6 +21,20 @@ test('a ready dataset cannot replace actual bitmap, coverage, canvas and painted
   value=>value.drawnRoute='',value=>value.state.committedMode='overview',value=>delete value.tiles.detail,
   value=>value.tiles.detail=Array(97).fill(value.tiles.detail[0]),value=>value.tiles.detail[0].bounds=[1,1,0,0],
  ]){const invalid=structuredClone(good);change(invalid);assert.throws(()=>assertCustomMapInspection(invalid,'invalid',{routeId:'kavkaz-8a',mode:'detail'}));}
+});
+
+test('each selected detail scale must prove its actual overview or vector batch without accepting close-view fallback',()=>{
+ for(const zoom of [2,4.999,5,11,18]){
+  const actual=customMapFixture({camera:{longitude:40,latitude:43,zoom}});
+  assert.equal(assertCustomDetailInspection(actual,'scale'),actual);
+  for(const change of [
+   value=>value.state.mode='overview',value=>value.state.error='Source failed',
+   value=>value.state.committedMode=zoom<5?'detail':'overview',
+   value=>{if(zoom<5)value.tiles.overview=[];else value.tiles.detail=[];},
+  ]){const invalid=structuredClone(actual);change(invalid);assert.throws(()=>assertCustomDetailInspection(invalid,'bad scale'));}
+ }
+ const stale=customMapFixture({camera:{longitude:40,latitude:43,zoom:4}});stale.tiles.detail=[customMapFixture().tiles.detail[0]];
+ assert.throws(()=>assertCustomDetailInspection(stale,'stale close detail'),/unexpected detail/);
 });
 
 test('settling requires four real draws of the current route; only an explicit held preload permits loading',async()=>{

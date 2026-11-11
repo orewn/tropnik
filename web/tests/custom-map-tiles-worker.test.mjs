@@ -17,7 +17,7 @@ const bytes=()=>new Uint8Array([1,2,3]).buffer;
 const job=(id,overrides={})=>({id,kind:'vector',bytes:bytes(),z:18,x:1605,y:3207,sourceZ:14,sourceKey:'https://tiles.example/14/100/200.pbf',paths:true,...overrides});
 const scalarPixel=height=>{const value=height+32768;return[Math.floor(value/256),Math.floor(value)%256,Math.round(value%1*256),255];};
 
-function fixture({failTransfer=false,unavailablePixel=false,images=new Map()}={}){
+function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vectorTile=vector}={}){
   const messages=[],canvases=[],outputs=[],decoded=[],shadeSources=[],contourViews=[],vectorViews=[];let vectorDecodes=0,imageDecodes=0,failedTransfer=false;
   const rgba=new Uint8ClampedArray(Array.from({length:16},(_,i)=>scalarPixel((i%4)*25+Math.floor(i/4))).flat());
   if(unavailablePixel)rgba[3]=0;
@@ -49,7 +49,7 @@ function fixture({failTransfer=false,unavailablePixel=false,images=new Map()}={}
   const scope={exports:{},Error,Blob,DecompressionStream,Uint8Array,Uint8ClampedArray,Float32Array,ArrayBuffer,OffscreenCanvas,ImageData,
     createImageBitmap:async blob=>{imageDecodes++;const input=new Uint8Array(await blob.arrayBuffer()),image=images.get(input[0]);const bitmap=blob.type==='image/jpeg'?new Bitmap(512,512):new Bitmap(image?.size??4,image?.size??4,image?.rgba??rgba);decoded.push(bitmap);return bitmap;},
     require:name=>{
-      if(name==='./custom-map-vector')return{decodeVectorTile:()=>{vectorDecodes++;return vector;}};
+      if(name==='./custom-map-vector')return{decodeVectorTile:()=>{vectorDecodes++;return vectorTile;}};
       assert.equal(name,'./custom-map-painter');return{...painter,
         paintVectorTile:(...args)=>{vectorViews.push({z:args[2],size:args[3],options:args[6]});return painter.paintVectorTile(...args);},
         reliefPixels:(heights,size,y,z,halo)=>{shadeSources.push({y,z,heights:[...heights],halo:copy(halo)});return painter.reliefPixels(heights,size,y,z,halo);},
@@ -86,6 +86,18 @@ test('neighbouring display children share one decoded parent, retain crisp width
   assert.equal(first.bitmap.context.strokes[1].width,2.2);assert.deepEqual(first.bitmap.context.strokes[1].dash,[6,5]);
   assert.ok(env.canvases.every(canvas=>canvas.width<=512&&canvas.height<=512),'no parent-sized render target is allocated');
   assert.ok(env.outputs.every(bitmap=>bitmap.closed===0),'transferred child bitmaps belong to the receiver');
+});
+
+test('boundary variants repaint the same decoded source and preserve child roads and labels',async()=>{
+  const tile=structuredClone(vector);tile.layers.boundary={name:'boundary',extent:4096,features:[{type:2,properties:{admin_level:4},geometry:[[{x:1331.2,y:1960},{x:1484.8,y:1960}]]}]};
+  const original=structuredClone(tile),env=fixture({vectorTile:tile});
+  const enabled=await env.send(job(1)),hidden=await env.send(job(2,{boundaries:false})),restored=await env.send(job(3,{boundaries:true}));
+  assert.equal(env.counts().vectorDecodes,1,'Visibility changes must not invalidate measured parent geometry');
+  assert.equal(enabled.bitmap.context.strokes.length,3);assert.equal(hidden.bitmap.context.strokes.length,2);
+  assert.deepEqual(hidden.bitmap.context.strokes,enabled.bitmap.context.strokes.slice(1));
+  assert.deepEqual(restored.bitmap.context.strokes,enabled.bitmap.context.strokes);
+  assert.deepEqual(copy(hidden.labels),copy(enabled.labels));assert.deepEqual(copy(restored.labels),copy(enabled.labels));
+  assert.ok([enabled,hidden,restored].every(result=>result.bitmap.width===512&&result.bitmap.height===512));assert.deepEqual(tile,original);
 });
 
 test('decoded parent LRU has four entries and separates exact source URLs',async()=>{

@@ -135,8 +135,9 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     },()=>{if(epoch===locationEpoch.current)note('Позиция недоступна. Проверьте разрешение и сигнал.');},{enableHighAccuracy:true,timeout:MAP_CONFIG.geolocationTimeoutMs,maximumAge:MAP_CONFIG.geolocationMaximumAgeMs});
   };
   const openLandscape=()=>{
-    const map=engine.current;if(!map)return;
-    const selected=shown.current,bounds=map.getBounds();
+    const map=engine.current,element=container.current;if(!map||!element)return;
+    map.setPadding(russiaView(element,256).padding);
+    const selected=shown.current,bounds=map.getVisibleBounds();
     setScene({bounds,title:trail?.title||region?.name||'Ландшафт России',geometry:selected.geometry});
   };
   const satellite=state.mode==='satellite',message=status||(state.error!==dismissedError?state.error:'');

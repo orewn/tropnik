@@ -8,7 +8,7 @@ import {assertOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {assertRequestMapLayout} from './browser-request-layout.mjs';
 import {assertCatalogueExpectations} from './catalogue-expectations.mjs';
 import {assertSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
-import {assertCustomMapInspection,assertCustomSceneInspection} from './browser-custom-map.mjs';
+import {assertCustomMapInspection,assertCustomDetailInspection,assertCustomSceneInspection,assertCustomVisibleBounds} from './browser-custom-map.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -220,7 +220,10 @@ function assertZoomDesign(design,name,engine,mobile){
  assert.ok(Math.abs(steps.at(-1).zoom-18)<.01,`${name}: close zoom18 was not inspected`);
  for(let index=0;index<steps.length;index++){
   assert.ok(Number.isFinite(steps[index].zoom));
-  if(engine==='tropnik-canvas')assertCustomMapInspection(steps[index].bitmapInspection,`${name}/detail/${steps[index].zoom}`,{mode:'detail',routeId:design.routeId});
+  if(engine==='tropnik-canvas'){
+   const bitmap=assertCustomDetailInspection(steps[index].bitmapInspection,`${name}/detail/${steps[index].zoom}`,{routeId:design.routeId});
+   assert.ok(Math.abs(bitmap.camera.zoom-steps[index].zoom)<.01,`${name}: bitmap inspection has a stale zoom`);
+  }
   if(index){const increment=steps[index].zoom-steps[index-1].zoom;assert.ok(increment>0&&increment<=1.01,`${name}: zoom coverage skipped an available increment`);}
  }
  const bursts=design.zoomBurst,step=1;
@@ -281,9 +284,7 @@ function assertZoomDesign(design,name,engine,mobile){
   assert.equal(close.frame.view.zoom,5);assert.equal(wide.frame.view.zoom,.65);assert.notEqual(rotated.frame.view.yaw,wide.frame.view.yaw);
   assert.deepEqual(reset.frame.view,initial.frame.view);assert.equal(reset.frame.view.zoom,1);
   const before=scene.beforeMap;assertStyleCameraFrame(before,design.routeId,`${name}/3d-before-map`,engine);
-  const northwest=unprojectMapPoint({x:before.rect.left,y:before.rect.top},before.camera,before.rect),southeast=unprojectMapPoint({x:before.rect.right,y:before.rect.bottom},before.camera,before.rect);
-  const expected=[northwest[0],southeast[1],southeast[0],northwest[1]];
-  for(let i=0;i<4;i++)assert.ok(Math.abs(initial.requestedBounds[i]-expected[i])<1e-6,`${name}: 3D used another area instead of the visible map`);
+  assertCustomVisibleBounds(before,initial.requestedBounds,`${name}/3d-before-map`);
   assert.equal(scene.nativeInputs?.length,30);const labels=scene.nativeInputs.map(item=>item.label);
   assert.deepEqual(labels,[...Array(14).fill('Приблизить ландшафт'),...Array(14).fill('Отдалить ландшафт'),'Повернуть ландшафт','Вернуть исходный ракурс']);
   for(const press of scene.nativeInputs){assert.equal(press.input,mobile?'touch':'mouse');assert.equal(press.point?.unobscured,true);assertNativeBurstEventOrder(press.events,press.input,1);}
@@ -472,7 +473,7 @@ function assertExperienceBack(back,expected,context,from){
 export function assertLayerMenuAudit(receipt,name){
  assert.equal(receipt?.schemaVersion,1);assert.equal(receipt.passed,true);assert.equal(receipt.input,'touch');
  assert.deepEqual(receipt.states?.map(state=>state.sheet),['closed','open'],`${name}: both portrait sheet states need Layers coverage`);
- const controls=[['BUTTON','Детальные тропы онлайн'],['BUTTON','Спутник'],['BUTTON','Сохранённый обзор'],['INPUT','Тропы и грунтовые дороги'],['A','Подробная офлайн-карта'],['A','Источники карты']];
+ const controls=[['BUTTON','Тропы и ландшафт'],['BUTTON','Спутник'],['BUTTON','Сохранённый обзор'],['INPUT','Тропы и грунтовые дороги'],['INPUT','Рельеф и линии высот'],['INPUT','Границы территорий'],['A','Подробная офлайн-карта'],['A','Источники карты']];
  for(const state of receipt.states){
   const context=`${name}/layers/${state.sheet}`;
   assertExperienceClick(state.opened,'touch',`${context}/open`,'.layer-button');assertExperienceClick(state.closed,'touch',`${context}/close`,'.layer-button');
@@ -643,7 +644,7 @@ export function assertStyleCameraRoundtrip(receipt,name){
  assert.deepEqual(receipt.pan.before.camera,receipt.zoomed.camera);assert.deepEqual(receipt.pan.after.camera,receipt.manual.camera);
  assert.ok(Math.abs(receipt.manual.camera.longitude-receipt.zoomed.camera.longitude)>1e-5||Math.abs(receipt.manual.camera.latitude-receipt.zoomed.camera.latitude)>1e-5,`${context}: no genuine manual pan was measured`);
  assert.ok(Math.abs(receipt.manual.camera.zoom-receipt.zoomed.camera.zoom)<.01,`${context}: panning changed scale`);
- assert.deepEqual(receipt.transitions?.map(transition=>transition.label),['Сохранённый обзор','Детальные тропы онлайн']);
+ assert.deepEqual(receipt.transitions?.map(transition=>transition.label),['Сохранённый обзор','Тропы и ландшафт']);
  for(const transition of receipt.transitions){
   assertExperienceClick(transition.opened,'mouse',`${context}/layers-open`,'.layer-button');assertExperienceClick(transition.closed,'mouse',`${context}/layers-close`,'.layer-button');
   assertExperienceClick(transition.selected,'mouse',`${context}/base-select`);assert.match(transition.selected.selector,/^\.layer-menu>button:nth-of-type\([1-9]\d*\)$/);assert.equal(transition.selected.point.label,transition.label);

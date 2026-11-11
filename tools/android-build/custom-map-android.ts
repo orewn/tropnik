@@ -2,6 +2,7 @@ import {CustomMapEngine, inRussiaCoverage} from './custom-map-entry';
 import type {CustomMapCamera} from '../../web/lib/custom-map-camera';
 import type {CustomMapMarker} from '../../web/lib/custom-map-engine';
 import {NativeMapRouteLoader, type NativeMapRoute} from './native-map-route';
+import {encodeDiagnosticMessage, prepareOutsideLabelEvidence, type OutsideLabelEvidence} from './native-map-diagnostics';
 
 // Only a native-owned, exact-origin transferred port can command this view.
 // No JavascriptInterface, DOM storage, service worker or account bridge exists.
@@ -14,6 +15,7 @@ let error = '', frame = 0, initialized = false, sentSourceFrame = false;
 let position: [number, number] | null = null;
 let markerCoordinates = new Map<string, [number, number]>();
 let labelFixture: {longitude: number; latitude: number} | undefined;
+let fixtureVersion = 0, fixtureEvidence: {key: string; value: OutsideLabelEvidence} | undefined, preparingEvidence = '';
 
 function send(type: string, payload: unknown = {}) {port?.postMessage(JSON.stringify({version: 1, generation, type, payload}));}
 function failure(message: string) {error = message;document.documentElement.dataset.mapState = 'failed';send('error', {message});}
@@ -24,26 +26,44 @@ function camera(value: unknown): CustomMapCamera {
 }
 function snapshot() {
   const map = engine;
-  const outsideLabelProbes: number[][] = [];
-  const domestic = labelFixture && map?.getLabelDiagnostics().find(label => label.id === 'domestic' && label.visible);
-  if (debug && labelFixture && domestic?.rect && map?.getCoverage()) {
-    const boundary = map.project([labelFixture.longitude, labelFixture.latitude]);
-    for (let y = Math.ceil(domestic.rect.top); y < domestic.rect.bottom; y++) for (let x = Math.ceil(Math.max(domestic.rect.left, boundary.x + 2)); x < domestic.rect.right && outsideLabelProbes.length < 2048; x++) {
-      const coordinate = map.unproject({x: x + .5, y: y + .5});
-      if (!inRussiaCoverage(coordinate[0], coordinate[1], map.getCoverage()!.area)) outsideLabelProbes.push([x + .5, y + .5]);
-    }
-  }
-  return {ready: !!map?.getState().ready && sentSourceFrame, frame, error, camera: map?.getCamera(), pitch: map?.getPitch(), state: map?.getState(), rendered: map?.inspect(),
+  const {labels, ...rendered} = map?.inspect() || {};
+  const evidence = fixtureEvidence?.key === labelEvidenceKey() ? fixtureEvidence.value : undefined;
+  return {ready: !!map?.getState().ready && sentSourceFrame, frame, error, camera: map?.getCamera(), pitch: map?.getPitch(), state: map?.getState(), rendered,
     size: map?.getSize(), routeId: element.dataset.mapDrawnRoute || '', coverage: map?.getCoverage()?.status,
     markers: [...element.querySelectorAll<HTMLButtonElement>('[data-map-marker-id]')].map(button => {
       const r = button.getBoundingClientRect(), base = element.getBoundingClientRect();
       return {id: button.dataset.mapMarkerId, hidden: button.hidden || getComputedStyle(button).display === 'none',
         x: r.x - base.x + r.width / 2, y: r.y - base.y + r.height / 2, width: r.width, height: r.height};
-    }), labels: map?.getLabelDiagnostics(), outsideLabelProbes, labelFixture: labelFixture && {...labelFixture, point: map?.project([labelFixture.longitude, labelFixture.latitude])}};
+    }), labels, outsideLabelProbes: evidence?.probes || [], labelEvidence: evidence && {examined: evidence.examined, limited: evidence.limited},
+    labelFixture: labelFixture && {...labelFixture, status: evidence ? 'ready' : 'preparing', point: map?.project([labelFixture.longitude, labelFixture.latitude])}};
+}
+function labelEvidenceKey() {
+  if (!labelFixture || !engine) return '';
+  const map = engine, domestic = map?.getLabelDiagnostics().find(label => label.id === 'domestic' && label.visible);
+  return labelFixture && map?.getCoverage()?.status.ready && domestic?.rect
+    ? JSON.stringify([fixtureVersion, map.getCamera(), map.getPitch(), map.getSize(), map.getCoverage()?.status.revision, domestic.rect]) : '';
+}
+function prepareFixtureFrame() {
+  if (!debug || !labelFixture) return;
+  const map = engine, key = labelEvidenceKey(), version = fixtureVersion;
+  if (!debug || !map || !key || key === fixtureEvidence?.key || key === preparingEvidence || !labelFixture) return;
+  const domestic = map.getLabelDiagnostics().find(label => label.id === 'domestic' && label.visible)!, area = map.getCoverage()!.area;
+  const boundary = map.project([labelFixture.longitude, labelFixture.latitude]);
+  preparingEvidence = key;const startedAt = performance.now();
+  void prepareOutsideLabelEvidence(domestic.rect!, boundary.x, point => map.unproject(point), coordinate => inRussiaCoverage(coordinate[0], coordinate[1], area),
+    () => engine === map && fixtureVersion === version && labelEvidenceKey() === key).then(value => {
+      if (engine !== map || labelEvidenceKey() !== key) return;
+      fixtureEvidence = {key, value};
+      send('fixture', {status: 'ready', frame, version, examined: value.examined, probes: value.probes.length, limited: value.limited, preparationMs: performance.now() - startedAt});
+    }, caught => {
+      if (caught?.name !== 'AbortError') send('fixture', {status: 'error', version, message: 'Label evidence could not be prepared'});
+    }).finally(() => {if (preparingEvidence === key) preparingEvidence = '';});
 }
 async function installLabelFixture() {
   if (!debug || !engine?.getCoverage()) throw new Error('Debug map fixture is unavailable');
   const coverage = engine.getCoverage()!;
+  fixtureVersion++;fixtureEvidence = undefined;labelFixture = undefined;
+  send('fixture', {status: 'preparing', version: fixtureVersion});
   engine.setCamera({center: [132, 43.1], zoom: 10}, false);
   if (!coverage.status.ready) await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => {unsubscribe();reject(new Error('Coverage fixture did not settle'));}, 10000);
@@ -104,7 +124,15 @@ async function command(type: string, payload: Record<string, unknown>) {
       // Switching modes invalidates source requests without discarding the view.
       engine.setMode('overview');engine.setMode('detail');break;
     }
-    case 'snapshot': if (!debug) throw new Error('Debug command disabled');send('snapshot', snapshot());break;
+    case 'snapshot': {
+      if (!debug || !Number.isSafeInteger(payload.requestId)) throw new Error('Debug command disabled');
+      const startedAt = performance.now();send('debugReceipt', {phase: 'snapshot-start', requestId: payload.requestId, startedAt, frame});
+      const value = {...snapshot(), requestId: payload.requestId, timing: {startedAt, preparedAt: performance.now()}};
+      const encoded = encodeDiagnosticMessage({version: 1, generation, type: 'snapshot', payload: value});
+      if (encoded.encoded) {port?.postMessage(encoded.encoded);send('debugReceipt', {phase: 'snapshot-sent', requestId: payload.requestId, finishedAt: performance.now(), chars: encoded.chars, utf8Bytes: encoded.utf8Bytes});}
+      else send('debugReceipt', {phase: 'snapshot-rejected', requestId: payload.requestId, reason: 'message-budget', chars: encoded.chars, utf8Bytes: encoded.utf8Bytes});
+      break;
+    }
     case 'labelFixture': if (!debug) throw new Error('Debug command disabled');await installLabelFixture();break;
     case 'destroy': routeLoader.dispose();engine.destroy();engine = undefined;port?.close();port = undefined;break;
     default: throw new Error('Unknown map command');
@@ -122,7 +150,7 @@ window.addEventListener('message', event => {
       if (data.version !== 1 || data.generation !== generation || !Number.isSafeInteger(data.sequence) || data.sequence <= sequence || typeof data.type !== 'string' || !data.payload || typeof data.payload !== 'object') return;
       sequence = data.sequence;const seq = sequence;
       void command(data.type, data.payload).then(() => send('ack', {sequence: seq}), caught => {
-        if (caught?.name !== 'AbortError') send('commandError', {sequence: seq, message: data.type === 'route' ? 'Линия маршрута не загрузилась. Карточка и обзорная карта доступны.' : 'Карта не смогла выполнить действие.'});
+        if (caught?.name !== 'AbortError') send('commandError', {sequence: seq, command: data.type, ...(debug ? {detail: String(caught?.message || caught).slice(0, 240)} : {}), message: data.type === 'route' ? 'Линия маршрута не загрузилась. Карточка и обзорная карта доступны.' : 'Карта не смогла выполнить действие.'});
       });
     } catch {failure('Не удалось обработать состояние карты.');}
   };
@@ -134,6 +162,7 @@ window.addEventListener('message', event => {
         frame++;element.dataset.mapDetail = engine && engine.getCamera().zoom >= 10 ? 'close' : 'wide';
         const sourceTiles = engine?.getState().residentTiles || 0;
         if (!sentSourceFrame && sourceTiles > 0) {sentSourceFrame = true;send('frame', {frame, sourceTiles});}
+        prepareFixtureFrame();
       },
       onSettled: value => {if (value.zoom < 10 && engine && engine.getPitch() > 0) engine.setPitch(0);send('camera', {camera: value, pitch: engine?.getPitch() || 0});},
       onMarker: id => {const coordinate = markerCoordinates.get(id), coverage = engine?.getCoverage();if (coordinate && coverage && inRussiaCoverage(coordinate[0], coordinate[1], coverage.area)) send('marker', {id});},onState: state => send('state', state)});

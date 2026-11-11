@@ -181,6 +181,20 @@ test('source symbol labels still apply the child crop before the shared 96-label
 });
 
 const archiveTile=path=>decodeVectorTile(readFileSync(new URL(`../public/offline-map/localtiles/${path}`,import.meta.url)));
+test('the territorial switch removes real archived admin lines while preserving roads, water and park borders',()=>{
+  const tile=archiveTile('10/626/373.pbf'),original=structuredClone(tile);
+  assert.equal(tile.layers.boundary.features.filter(feature=>feature.type===2&&Number(feature.properties.admin_level)<=4).length,2);
+  for(const transparent of [false,true]){
+    const enabled=new Context(),hidden=new Context(),borderColor=transparent?'#e5eee1':'#97aa8e';
+    const labels=paintVectorTile(enabled,tile,14,512,true,transparent),without=paintVectorTile(hidden,tile,14,512,true,transparent,{boundaries:false});
+    assert.equal(enabled.strokes.filter(stroke=>stroke.color===borderColor).length,2);
+    assert.deepEqual(hidden.strokes,enabled.strokes.filter(stroke=>stroke.color!==borderColor));
+    assert.deepEqual(hidden.fills,enabled.fills);assert.deepEqual(without,labels);
+    assert.ok(hidden.strokes.some(stroke=>stroke.color==='rgba(120,155,101,.65)'),'Protected-area outlines remain a separate real layer');
+  }
+  assert.deepEqual(structuredClone(tile),original);
+});
+
 test('the real archived Caucasus reserve polygon retains its fill, dashed boundary and exact rings',()=>{
   const tile=archiveTile('10/626/373.pbf'),park=tile.layers.park;
   const reserve=park.features.find(feature=>feature.type===3&&feature.properties.name==='Кавказский заповедник');assert.ok(reserve);

@@ -4,8 +4,8 @@ import type {MapTileLabel,ReliefCoverage,ReliefHaloOffset,ReliefHaloPayload,Reli
 import tileWorkerURL from './custom-map-tiles.worker.ts?worker&url';
 
 export type CustomTileKind='vector'|'relief'|'overview'|SatelliteSourceId;
-export type CustomMapTile={key:string;kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;bitmap:ImageBitmap;labels:MapTileLabel[];contours:number;local:boolean;paths?:boolean;transparent?:boolean;reliefCoverage?:ReliefCoverage};
-export type CustomTileRequest={kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;paths?:boolean;transparent?:boolean};
+export type CustomMapTile={key:string;kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;bitmap:ImageBitmap;labels:MapTileLabel[];contours:number;local:boolean;paths?:boolean;transparent?:boolean;boundaries?:boolean;reliefCoverage?:ReliefCoverage};
+export type CustomTileRequest={kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;paths?:boolean;transparent?:boolean;boundaries?:boolean};
 type Work={id:number;request:CustomTileRequest;key:string;resolve:(tile:CustomMapTile)=>void;reject:(error:Error)=>void;bytes?:ArrayBuffer;halo?:ReliefHaloPayload;local?:boolean;mime?:string;sourceZ?:number;sourceKey?:string;stage:'queued'|'fetching'|'ready'|'decoding'};
 const MAX_RESIDENT=96,MAX_BITMAPS=288,MAX_PENDING=160,MAX_FETCHING=3,MAX_READY=6,MAX_TILE_BYTES=8*1024*1024;
 const canonicalX=(x:number,z:number)=>((x%2**z)+2**z)%2**z;
@@ -14,7 +14,7 @@ function paintZoomFor(tile:CustomTileRequest):number{
   if(!Number.isInteger(tile.z)||tile.z<0||!Number.isInteger(zoom)||zoom<tile.z||zoom>18)throw new Error('Invalid map paint zoom');
   return zoom;
 }
-export function customTileKey(tile:CustomTileRequest):string{return `${tile.kind}:${tile.z}/${tile.x}/${tile.y}:${tile.paths!==false?1:0}:${tile.transparent?1:0}:${paintZoomFor(tile)}`;}
+export function customTileKey(tile:CustomTileRequest):string{return `${tile.kind}:${tile.z}/${tile.x}/${tile.y}:${tile.paths!==false?1:0}:${tile.transparent?1:0}:${paintZoomFor(tile)}:${tile.boundaries!==false?1:0}`;}
 /** Only children touching a real parent boundary need adjacent measurements.
  * The maximum overzoom factor is 64, so even a PNG256 child is four samples
  * wide: the next interior child never enters a border pixel's filter support. */
@@ -152,7 +152,7 @@ export class CustomMapTiles {
       }
       this.active=work;work.stage='decoding';const bytes=work.bytes!,halo=work.halo;work.bytes=undefined;work.halo=undefined;
       this.timer=setTimeout(()=>this.failWorker(),15000);
-      this.worker.postMessage({id:work.id,kind:work.request.kind==='vector'?'vector':work.request.kind==='relief'?'relief':'raster',bytes,z:work.request.z,x:work.request.x,y:work.request.y,paintZoom:paintZoomFor(work.request),sourceZ:work.sourceZ,sourceKey:work.sourceKey,paths:work.request.paths!==false,transparent:work.request.transparent,mime:work.mime,halo},[...new Set([bytes,...(halo?.tiles.map(item=>item.bytes)??[])])]);
+      this.worker.postMessage({id:work.id,kind:work.request.kind==='vector'?'vector':work.request.kind==='relief'?'relief':'raster',bytes,z:work.request.z,x:work.request.x,y:work.request.y,paintZoom:paintZoomFor(work.request),sourceZ:work.sourceZ,sourceKey:work.sourceKey,paths:work.request.paths!==false,transparent:work.request.transparent,boundaries:work.request.boundaries!==false,mime:work.mime,halo},[...new Set([bytes,...(halo?.tiles.map(item=>item.bytes)??[])])]);
     }catch(error){this.active=undefined;clearTimeout(this.timer);this.finish(work,undefined,error instanceof Error?error:new Error('Map worker unavailable'));}
   }
   private failWorker(message='Map tile worker failed'){

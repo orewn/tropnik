@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.webkit.CookieManager
 import android.webkit.PermissionRequest
 import android.webkit.RenderProcessGoneDetail
@@ -34,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
@@ -70,12 +70,14 @@ private class CustomMapResources(context: Context, private val networkFailure: (
     private val assets = context.applicationContext.assets
     private val manifest = JSONObject(assets.open("custom-map/manifest.json").bufferedReader().use { it.readText() })
     private val allowed = mutableMapOf<String, MapAsset>()
-    private val online = AtomicBoolean(false)
-    private val closed = AtomicBoolean(false)
     private val calls = ConcurrentHashMap.newKeySet<Call>()
     private val networkPermits = Semaphore(3, true)
     private val client = OkHttpClient.Builder().followRedirects(false).followSslRedirects(false)
         .connectTimeout(8, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).callTimeout(12, TimeUnit.SECONDS).build()
+    private val network = MapNetworkLifetime(
+        cancelCalls = { calls.forEach { runCatching { it.cancel() } } },
+        releaseNetwork = { try { client.connectionPool.evictAll() } finally { client.dispatcher.executorService.shutdown() } },
+    )
     @Volatile private var route: CurrentMapRoute? = null
 
     init {
@@ -98,8 +100,7 @@ private class CustomMapResources(context: Context, private val networkFailure: (
     }
 
     fun setOnline(value: Boolean) {
-        online.set(value)
-        if (!value) calls.forEach { it.cancel() }
+        network.setOnline(value)
     }
 
     fun setRoute(url: String?, bytes: ByteArray?) {
@@ -127,7 +128,7 @@ private class CustomMapResources(context: Context, private val networkFailure: (
     }
 
     fun intercept(request: WebResourceRequest): WebResourceResponse {
-        if (closed.get() || request.method != "GET") return denied()
+        if (network.isClosed || request.method != "GET") return denied()
         val url = request.url
         if (url.scheme == "https" && url.host == "map.tropnik.invalid" && url.port == -1 && url.userInfo == null && url.fragment == null) {
             val path = url.path ?: return denied()
@@ -146,14 +147,14 @@ private class CustomMapResources(context: Context, private val networkFailure: (
                 response(bytes, mime(asset.path))
             }.getOrElse { denied() }
         }
-        if (!online.get() || !CustomMapResourcePolicy.remoteAllowed(url.toString())) return denied()
+        if (!network.isOnline || !CustomMapResourcePolicy.remoteAllowed(url.toString())) return denied()
         if (!runCatching {networkPermits.tryAcquire(1, TimeUnit.SECONDS)}.getOrDefault(false)) return denied()
         val call = client.newCall(Request.Builder().url(url.toString()).get().build())
         calls.add(call)
         return try {
-            if (!online.get() || closed.get()) return denied()
+            if (!network.isOnline || network.isClosed) return denied()
             call.execute().use { result ->
-                if (!result.isSuccessful || !online.get() || closed.get()) {networkFailure();return denied()}
+                if (!result.isSuccessful || !network.isOnline || network.isClosed) {networkFailure();return denied()}
                 val body = result.body ?: return denied()
                 if (body.contentLength() > MAX_MAP_RESOURCE_BYTES) return denied()
                 val bytes = ByteArrayOutputStream()
@@ -161,26 +162,26 @@ private class CustomMapResources(context: Context, private val networkFailure: (
                     val buffer = ByteArray(16 * 1024)
                     while (true) {
                         val count = input.read(buffer);if (count < 0) break
-                        if (!online.get() || closed.get() || bytes.size() + count > MAX_MAP_RESOURCE_BYTES) return denied()
+                        if (!network.isOnline || network.isClosed || bytes.size() + count > MAX_MAP_RESOURCE_BYTES) return denied()
                         bytes.write(buffer, 0, count)
                     }
                 }
                 val type = if (url.path == "/planet/latest") "application/json" else mime(url.path.orEmpty())
                 response(bytes.toByteArray(), type)
             }
-        } catch (_: Exception) {if (online.get() && !closed.get()) networkFailure();denied()}
+        } catch (_: Exception) {if (network.isOnline && !network.isClosed) networkFailure();denied()}
         finally {calls.remove(call);networkPermits.release()}
     }
 
     fun close() {
-        if (closed.getAndSet(true)) return
-        setOnline(false);route = null;client.connectionPool.evictAll();client.dispatcher.executorService.shutdown()
+        route = null;network.close()
     }
 }
 
 /** Restricted main-map host, separate from LocalLandscapeScene's fully
  * network-blocked document. The bridge exposes typed map commands only. */
 @SuppressLint("SetJavaScriptEnabled")
+@Suppress("DEPRECATION")
 internal class CustomMapWebView(context: Context) : WebView(context) {
     var onReady: (() -> Unit)? = null
     var onCamera: ((JSONObject) -> Unit)? = null
@@ -191,6 +192,10 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
     var onMapState: ((JSONObject) -> Unit)? = null
     var ready = false;private set
     var debugSnapshot: JSONObject? = null;private set
+    var debugFixtureState: JSONObject? = null;private set
+    private val debugReceipts = java.util.ArrayDeque<JSONObject>()
+    private var debugSnapshotRequest = 0L
+    private var debugSnapshotSentAt = 0L
     private val generation = serial.incrementAndGet()
     private val handler = Handler(Looper.getMainLooper())
     @Volatile private var disposed = false
@@ -218,8 +223,8 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
         settings.databaseEnabled = false
         settings.allowFileAccess = false
         settings.allowContentAccess = false
-        @Suppress("DEPRECATION") settings.allowFileAccessFromFileURLs = false
-        @Suppress("DEPRECATION") settings.allowUniversalAccessFromFileURLs = false
+        settings.allowFileAccessFromFileURLs = false
+        settings.allowUniversalAccessFromFileURLs = false
         settings.blockNetworkLoads = true
         settings.blockNetworkImage = false // Images are supplied only by the broker.
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
@@ -280,7 +285,8 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
     private fun fail(message: String) {if (!disposed) {ready = false;handler.removeCallbacks(timeout);onFailure?.invoke(message, true)}}
 
     private fun receive(data: String?) {
-        if (disposed || data == null || data.length > 256 * 1024) return
+        if (disposed || data == null) return
+        if (data.length > 256 * 1024) {recordDebugReceipt(JSONObject().put("phase", "message-rejected").put("reason", "message-budget").put("chars", data.length));return}
         val message = runCatching {JSONObject(data)}.getOrNull() ?: return
         if (message.optInt("version") != 1 || message.optLong("generation") != generation) return
         val payload = message.optJSONObject("payload") ?: return
@@ -295,10 +301,37 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
             "marker" -> payload.optString("id").takeIf {it in allowedMarkerIds}?.let {onMarker?.invoke(it)}
             "state" -> onMapState?.invoke(payload)
             "position" -> onPosition?.invoke(payload.optBoolean("inside"), if (payload.has("measuredAt")) payload.optLong("measuredAt") else null)
-            "snapshot" -> if (BuildConfig.DEBUG) debugSnapshot = payload
+            "snapshot" -> if (BuildConfig.DEBUG) {
+                val requestId = payload.optLong("requestId")
+                recordDebugReceipt(JSONObject().put("phase", "snapshot-received").put("requestId", requestId).put("chars", data.length))
+                if (requestId == debugSnapshotRequest) debugSnapshot = payload.put("nativeRoundTripMs", SystemClock.uptimeMillis() - debugSnapshotSentAt)
+            }
+            "debugReceipt" -> recordDebugReceipt(payload)
+            "fixture" -> if (BuildConfig.DEBUG) {
+                val version = payload.optInt("version")
+                if (payload.optString("status") != "ready") debugFixtureState = payload
+                else postVisualStateCallback(version.toLong(), object : VisualStateCallback() {
+                    override fun onComplete(requestId: Long) {
+                        if (!disposed && debugFixtureState?.optInt("version") == version) debugFixtureState = payload
+                    }
+                })
+            }
             "error" -> fail(payload.optString("message").take(240))
-            "commandError" -> onFailure?.invoke(payload.optString("message").take(240), false)
+            "commandError" -> {recordDebugReceipt(JSONObject().put("phase", "command-error").put("payload", payload));onFailure?.invoke(payload.optString("message").take(240), false)}
         }
+    }
+
+    private fun recordDebugReceipt(value: JSONObject) {
+        if (!BuildConfig.DEBUG) return
+        if (debugReceipts.size == 16) debugReceipts.removeFirst()
+        debugReceipts.addLast(value.put("nativeReceivedAt", SystemClock.uptimeMillis()))
+    }
+
+    fun debugDiagnostics(): JSONObject {
+        check(BuildConfig.DEBUG && Looper.myLooper() == Looper.getMainLooper())
+        return JSONObject().put("ready", ready).put("disposed", disposed).put("pageReady", pageReady).put("frameReady", frameReady)
+            .put("snapshotRequest", debugSnapshotRequest).put("snapshotSentAt", debugSnapshotSentAt)
+            .put("fixture", debugFixtureState).put("receipts", JSONArray(debugReceipts.toList())).put("lastSnapshot", debugSnapshot)
     }
 
     private fun checkReady() {
@@ -347,7 +380,13 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
         command("active", JSONObject().put("active", enabled))
         if (!enabled) onPause()
     }
-    fun requestDebugSnapshot() {check(BuildConfig.DEBUG);command("snapshot")}
+    fun requestDebugSnapshot(): Long {
+        check(BuildConfig.DEBUG)
+        debugSnapshotSentAt = SystemClock.uptimeMillis()
+        val request = ++debugSnapshotRequest
+        command("snapshot", JSONObject().put("requestId", request))
+        return request
+    }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         // A map gesture owns its stream, including a second finger. Native

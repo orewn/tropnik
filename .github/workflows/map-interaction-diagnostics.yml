@@ -83,6 +83,7 @@ jobs:
             web/pages-preview/dist/build-info.json
             web/pages-preview/dist/verification.json
             web/pages-preview/dist/http-verification.json
+            web/pages-preview/dist/browser-native-text-verification.json
             web/pages-preview/dist/browser-verification.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
@@ -136,6 +137,7 @@ jobs:
             web/pages-preview/dist/browser-satellite-continuity-diagnostic.json
             web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
             web/pages-preview/dist/browser-ui-smoothness-cpu-diagnostic.json
+            web/pages-preview/dist/browser-native-text-verification.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7
@@ -180,6 +182,7 @@ jobs:
           path: |
             web/pages-preview/design-qa
             web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            web/pages-preview/dist/browser-native-text-verification.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7

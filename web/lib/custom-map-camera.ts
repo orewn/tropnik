@@ -169,9 +169,13 @@ export function fitBounds(bounds: GeographicBounds, viewport: MapViewport, optio
   const zoom = limitZoom(Number.isFinite(scale) ? Math.log2(scale / CUSTOM_MAP_TILE_SIZE) : maximum, {...options, maxZoom: maximum});
   return anchoredCamera(center, {x: padding.left + width / 2, y: padding.top + height / 2}, viewport, zoom, bearing);
 }
-/** Envelope of all four screen corners, in one continuous longitude domain. */
-export function cameraBounds(camera: CustomMapCamera, viewport: MapViewport): GeographicBounds {
-  const view = transform(camera, viewport), corners = [{x: 0, y: 0}, {x: viewport.width, y: 0}, {x: viewport.width, y: viewport.height}, {x: 0, y: viewport.height}];
+/** Envelope of four screen corners, optionally excluding the same insets used
+ * for framing. The camera stays fixed, in one continuous longitude domain. */
+export function cameraBounds(camera: CustomMapCamera, viewport: MapViewport, padding?: MapFitOptions['padding']): GeographicBounds {
+  const view = transform(camera, viewport), inset = insets(padding);
+  const left = inset.left, right = viewport.width - inset.right, top = inset.top, bottom = viewport.height - inset.bottom;
+  if (right <= left || bottom <= top) throw new RangeError('Insets leave no map viewport');
+  const corners = [{x: left, y: top}, {x: right, y: top}, {x: right, y: bottom}, {x: left, y: bottom}];
   const points = corners.map(point => mercatorUnproject(screenToWorld(point, view)));
   return [Math.min(...points.map(point => point[0])), Math.min(...points.map(point => point[1])), Math.max(...points.map(point => point[0])), Math.max(...points.map(point => point[1]))];
 }

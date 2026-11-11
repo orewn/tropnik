@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {mkdtemp,rm} from 'node:fs/promises';
+import {mkdtemp,rm,mkdir,writeFile} from 'node:fs/promises';
 import {createServer} from 'node:net';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,resolve} from 'node:path';
 import {launchBrowser,BROWSER_STARTUP_LIMITS} from '../browser-startup.mjs';
 import {sendNativeText} from '../browser-native-text.mjs';
 
@@ -15,15 +15,23 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 // proves that keyboard default actions, trusted events and recent-input CLS
 // attribution come from Chromium rather than a mocked JS event dispatcher.
 test('native keyboard typing supplies trusted key pairs, honors cancellation and refreshes recent-input CLS',{
- timeout:15000,
+ timeout:BROWSER_STARTUP_LIMITS.readyMs+12000,
 },async t=>{
  assert.ok(binary,'A Chromium binary is required for the native text browser gate');
  const directory=await mkdtemp(join(tmpdir(),'tropnik-native-text-'));
  const server=createServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;await new Promise(resolve=>server.close(resolve));
- const browser=launchBrowser(binary,['--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--no-first-run','--disable-extensions','--disable-gpu',`--remote-debugging-port=${port}`,`--user-data-dir=${directory}`,'about:blank'],{limits:{...BROWSER_STARTUP_LIMITS,readyMs:8000}});
- let socket;
- t.after(async()=>{socket?.close();await browser.close();await rm(directory,{recursive:true,force:true});});
+ // This waits only for the blank Chromium process. Use the same bounded cold
+ // startup allowance as the product harness; no application timing starts here.
+ const browser=launchBrowser(binary,['--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--no-first-run','--disable-extensions','--disable-gpu',`--remote-debugging-port=${port}`,`--user-data-dir=${directory}`,'about:blank']);
+ let socket,phase='browser-startup',verified=false;
+ t.after(async()=>{
+  socket?.close();await browser.close();await rm(directory,{recursive:true,force:true});
+  const output=resolve(import.meta.dirname,'../../../web/pages-preview/dist');
+  await mkdir(output,{recursive:true});
+  await writeFile(join(output,'browser-native-text-verification.json'),JSON.stringify({schemaVersion:1,verified,phase,browserStartup:browser.diagnostics()},null,2)+'\n');
+ });
  await browser.waitUntilReady(`http://127.0.0.1:${port}/json/version`);
+ phase='keyboard-fixture';
  const target=await browser.requestJSON(`http://127.0.0.1:${port}/json/new?about:blank`,{method:'PUT'});
  socket=new WebSocket(target.webSocketDebuggerUrl);await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true});});
  let next=0;const pending=new Map();
@@ -60,4 +68,5 @@ test('native keyboard typing supplies trusted key pairs, honors cancellation and
  await evaluate("events=[];blockKey='Ж';true");await sendNativeText(cdp,'Ж');
  const cancelled=await evaluate('({events,value:query.value})');assert.equal(cancelled.value,'x'+text);
  assert.deepEqual(cancelled.events.map(event=>event.type),['keydown','keyup']);assert.ok(cancelled.events.every(event=>event.trusted));
+ verified=true;phase='complete';
 });

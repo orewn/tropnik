@@ -21,8 +21,8 @@
  .tropnik-custom-atlas .terrain-heading{max-width:calc(100% - 144px)}
  .tropnik-custom-atlas .terrain-heading h2{font-size:20px}
  .tropnik-custom-atlas .layer-menu{max-height:min(440px,60dvh);overflow:auto}
- .tropnik-custom-atlas .terrain-controls{display:grid;grid-template-columns:repeat(2,44px);gap:4px}
+ /* The shared mobile layout reserves one horizontal row above the drawer.
+    Keep all six actions in that row so the status never covers a button. */
  .tropnik-custom-atlas .terrain-controls>button{display:grid;min-width:44px;min-height:44px;width:44px;height:44px}
  .tropnik-custom-atlas .terrain-controls>span{display:none}
- .tropnik-custom-atlas .terrain-info{right:116px;max-width:calc(100% - 132px)}
 }

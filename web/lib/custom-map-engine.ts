@@ -49,7 +49,7 @@ function geometryPath(geometry:FeatureGeometry):PathCollection{
     else if(g.type==='MultiPolygon')g.coordinates.forEach(p=>p.forEach(c=>line(c,true)));
   };visit(geometry);return{path,bounds};
 }
-function tileRequests(camera:CustomMapCamera,size:MapViewport,z:number,kind:CustomTileKind,paths=true,transparent=false):CustomTileRequest[]{
+function tileRequests(camera:CustomMapCamera,size:MapViewport,z:number,kind:CustomTileKind,paths=true,transparent=false,boundaries=true):CustomTileRequest[]{
   let level=Math.max(0,Math.floor(z));
   const bounds=cameraBounds(camera,size),sw=mercatorProject([bounds[0],bounds[1]]),ne=mercatorProject([bounds[2],bounds[3]]);
   const middle=mercatorProject(camera.center),angle=(camera.bearingDegrees??0)*Math.PI/180,cos=Math.cos(angle),sin=Math.sin(angle),scale=256*2**camera.zoom;
@@ -68,7 +68,7 @@ function tileRequests(camera:CustomMapCamera,size:MapViewport,z:number,kind:Cust
     result=[];
     if((x1-x0+1)*(y1-y0+1)>MAX_VISIBLE_TILES*4&&level>0)continue;
     outer:for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(visible(x,y,n)){
-      result.push({kind,z:level,x,y,paths,transparent,...(kind==='vector'||kind==='relief'?{paintZoom:Math.max(level,Math.min(18,Math.floor(z)))}:{})});
+      result.push({kind,z:level,x,y,paths,transparent,...(kind==='vector'?{boundaries}:{}),...(kind==='vector'||kind==='relief'?{paintZoom:Math.max(level,Math.min(18,Math.floor(z)))}:{})});
       if(result.length>MAX_VISIBLE_TILES&&level>0)break outer;
     }
     if(result.length<=MAX_VISIBLE_TILES||level===0)break;
@@ -123,6 +123,7 @@ export class CustomMapEngine {
   private drawRevision=0;
   private frame=0;
   private animation=0;
+  private zoomTarget:number|null=null;
   private settleTimer?:ReturnType<typeof setTimeout>;
   private resize:ResizeObserver;
   private unbindCoverage?:()=>void;
@@ -150,16 +151,26 @@ export class CustomMapEngine {
   getCamera():CustomMapCamera{return{...this.camera,center:[...this.camera.center]};}
   getSize():MapViewport{return{...this.size};}
   getBounds():GeographicBounds{return cameraBounds(this.camera,this.virtualSize());}
+  /** Current unobscured ground; reading it never recentres the camera. Insets
+   * are CSS pixels, so undo the flat renderer's pitch compression as well. */
+  getVisibleBounds(padding:Partial<MapInsets>=this.padding):GeographicBounds{
+    const pitchScale=Math.cos(this.pitch*Math.PI/180);
+    return cameraBounds(this.camera,this.virtualSize(),{...padding,top:(padding.top??0)/pitchScale,bottom:(padding.bottom??0)/pitchScale});
+  }
   getPitch(){return this.pitch;}
   getCoverage(){return this.coverage;}
   getState(){return{...this.state};}
   inspect(){
     const describe=(batch?:TileBatch)=>batch?.tiles.map(tile=>{const n=2**tile.z,sw=mercatorUnproject({x:tile.x/n,y:(tile.y+1)/n}),ne=mercatorUnproject({x:(tile.x+1)/n,y:tile.y/n});return{key:tile.key,kind:tile.kind,z:tile.z,x:tile.x,y:tile.y,local:tile.local,width:tile.bitmap.width,height:tile.bitmap.height,bounds:[sw[0],sw[1],ne[0],ne[1]],transparent:!!tile.transparent,...(tile.reliefCoverage?{reliefCoverage:tile.reliefCoverage}:{})};})||[];
-    return{engine:'tropnik-canvas',camera:this.getCamera(),pitch:this.pitch,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',drawRevision:this.drawRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
+    const padding={top:this.padding.top??0,right:this.padding.right??0,bottom:this.padding.bottom??0,left:this.padding.left??0};
+    // During resize the previous sheet insets can briefly exceed the new size.
+    // Inspection must stay safe until the layout observer supplies fresh values.
+    const visible=Object.values(padding).every(value=>Number.isFinite(value)&&value>=0)&&padding.left+padding.right<this.size.width&&padding.top+padding.bottom<this.size.height;
+    return{engine:'tropnik-canvas',camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',drawRevision:this.drawRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
   }
   private publishInspection(){if(this.disposed)return;this.element.dataset.mapTilesState=this.state.loading?'loading':this.state.error?'error':'ready';this.element.dataset.mapInspection=JSON.stringify(this.inspect());}
   private setMoving(moving:boolean){this.element.dataset.mapMoving=String(moving);if(moving)this.element.dataset.mapCamera='moving';else delete this.element.dataset.mapCamera;}
-  setActive(active:boolean){if(this.active===active)return;this.active=active;this.tiles.setActive(active);if(!active){this.pointer.cancel();cancelAnimationFrame(this.animation);this.animation=0;cancelAnimationFrame(this.frame);this.frame=0;clearTimeout(this.settleTimer);this.setMoving(false);}else{this.schedule();this.settled();}}
+  setActive(active:boolean){if(this.active===active)return;this.active=active;this.tiles.setActive(active);if(!active){this.pointer.cancel();this.stopAnimation();cancelAnimationFrame(this.frame);this.frame=0;clearTimeout(this.settleTimer);this.setMoving(false);}else{this.schedule();this.settled();}}
   setEco(enabled:boolean){if(this.eco===enabled)return;this.eco=enabled;this.canvas.width=1;this.resizeCanvas();}
   setLabels(labels:readonly CustomMapLabel[]){this.additionalLabels=labels.slice(0,256).map(label=>({...label,coordinate:[...label.coordinate]}));this.schedule();}
   getLabelDiagnostics():CustomMapLabelDiagnostic[]{return this.labelDiagnostics.map(record=>({...record,coordinate:[...record.coordinate],...(record.rect?{rect:{...record.rect}}:{})}));}
@@ -168,27 +179,35 @@ export class CustomMapEngine {
   private flatPoint(point:MapPoint){return{x:point.x,y:this.size.height/2+(point.y-this.size.height/2)/Math.cos(this.pitch*Math.PI/180)};}
   private virtualSize(){return{width:this.size.width,height:this.size.height/Math.cos(this.pitch*Math.PI/180)};}
   setPitch(degrees:number){if(!Number.isFinite(degrees))return;this.pitch=Math.max(0,Math.min(60,degrees));this.element.dataset.mapPitch=String(this.pitch);this.currentKeys='';this.pointer.cancel();this.settled();}
-  setPadding(padding:Partial<MapInsets>){this.padding=padding;}
+  setPadding(padding:Partial<MapInsets>){
+    if((['top','right','bottom','left'] as const).every(side=>(padding[side]??0)===(this.padding[side]??0)))return;
+    this.padding={...padding};this.publishInspection();
+  }
   setFloor(camera:CustomMapCamera){this.floor={...camera};}
   setObstacles(rectangles:typeof this.obstacles){this.obstacles=rectangles;this.schedule();}
-  setCamera(next:CustomMapCamera,animate=false){
+  private stopAnimation(){cancelAnimationFrame(this.animation);this.animation=0;this.zoomTarget=null;}
+  setCamera(next:CustomMapCamera,animate=false){this.moveCamera(next,animate);}
+  private moveCamera(next:CustomMapCamera,animate:boolean,zoomControl=false){
     if(this.disposed)return;
-    this.pointer.cancel();cancelAnimationFrame(this.animation);this.animation=0;
+    this.pointer.cancel();this.stopAnimation();
     const constrained=constrainFramedCamera(next.center[0],next.center[1],next.zoom,{...this.floor,center:[...this.floor.center]},this.framed?{...this.framed,center:[...this.framed.center]}:null);
     const target:CustomMapCamera={center:constrained.center as [number,number],zoom:Math.min(this.options.maxZoom??18,constrained.zoom),bearingDegrees:next.bearingDegrees??0};
     if(!animate||!this.active||this.eco||matchMedia('(prefers-reduced-motion: reduce)').matches){this.camera=target;this.schedule();this.settled();return;}
     const start=this.getCamera(),from=mercatorProject(start.center),to=mercatorProject(target.center),at=performance.now();
+    // A burst owns one clamped destination. Interpolated frames must not eat
+    // subsequent button/key steps or accumulate debt beyond either limit.
+    this.zoomTarget=zoomControl?target.zoom:null;
     this.setMoving(true);
     const tick=()=>{
       if(this.disposed)return;const t=Math.min(1,(performance.now()-at)/240),eased=1-(1-t)**3;
       this.camera={center:mercatorUnproject({x:from.x+(to.x-from.x)*eased,y:from.y+(to.y-from.y)*eased}),zoom:start.zoom+(target.zoom-start.zoom)*eased,bearingDegrees:(start.bearingDegrees??0)+((target.bearingDegrees??0)-(start.bearingDegrees??0))*eased};
-      this.draw();if(t<1)this.animation=requestAnimationFrame(tick);else{this.animation=0;this.settled();}
+      this.draw();if(t<1)this.animation=requestAnimationFrame(tick);else{this.animation=0;this.zoomTarget=null;this.settled();}
     };this.animation=requestAnimationFrame(tick);
   }
   fit(bounds:GeographicBounds,padding:Partial<MapInsets>={},maxZoom=14,animate=true){
     this.padding=padding;this.framed=fitBounds(bounds,this.size,{padding,maxZoom,minZoom:this.floor.zoom,referenceLongitude:105});this.setCamera(this.framed,animate);
   }
-  zoomBy(delta:number){this.options.onGesture?.();this.setCamera(zoomAt(this.camera,this.size,this.camera.zoom+delta,undefined,{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18}),true);}
+  zoomBy(delta:number){if(this.disposed||!Number.isFinite(delta))return;const zoom=(this.zoomTarget??this.camera.zoom)+delta;this.options.onGesture?.();this.moveCamera(zoomAt(this.camera,this.size,zoom,undefined,{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18}),true,true);}
   north(){this.setCamera({...this.camera,bearingDegrees:0},true);}
   setMode(mode:CustomMapMode){
     if(this.mode===mode&&!this.state.error)return;this.mode=mode;this.currentKeys='';
@@ -200,7 +219,7 @@ export class CustomMapEngine {
   }
   setLayers(layers:{paths?:boolean;boundaries?:boolean;relief?:boolean}){
     if(layers.paths!==undefined&&layers.paths!==this.paths){this.paths=layers.paths;this.currentKeys='';}
-    if(layers.boundaries!==undefined)this.boundaryVisible=layers.boundaries;
+    if(layers.boundaries!==undefined&&layers.boundaries!==this.boundaryVisible){this.boundaryVisible=layers.boundaries;this.currentKeys='';}
     if(layers.relief!==undefined)this.reliefVisible=layers.relief;
     this.refreshTiles();this.schedule();
   }
@@ -257,7 +276,7 @@ export class CustomMapEngine {
     const local=(event:PointerEvent|WheelEvent)=>{const rect=this.pointerRect??this.canvas.getBoundingClientRect();return{x:event.clientX-rect.left,y:event.clientY-rect.top};};
     this.listen(this.canvas,'pointerdown',((event:PointerEvent)=>{
       if(event.button!==0||!this.state.ready||!this.active)return;event.preventDefault();this.canvas.focus({preventScroll:true});
-      cancelAnimationFrame(this.animation);this.animation=0;clearTimeout(this.settleTimer);this.options.onGesture?.();
+      this.stopAnimation();clearTimeout(this.settleTimer);this.options.onGesture?.();
       this.pointerRect=this.canvas.getBoundingClientRect();const point=local(event);this.pointer.begin(event.pointerId,this.flatPoint(point),this.camera,this.size);
       this.setMoving(true);
       if(this.pointer.activePointers===1){this.pointerStart={...point,time:performance.now(),id:event.pointerId};this.pointerMoved=false;}else this.pointerMoved=true;
@@ -281,7 +300,7 @@ export class CustomMapEngine {
       if(wasActive&&!this.pointer.activePointers){this.pointerRect=undefined;this.pointerStart=undefined;this.canvas.classList.remove('is-moving');this.settled();}
     }) as EventListener);
     this.listen(this.canvas,'wheel',((event:WheelEvent)=>{
-      if(!this.state.ready||!this.active)return;event.preventDefault();this.options.onGesture?.();cancelAnimationFrame(this.animation);this.animation=0;
+      if(!this.state.ready||!this.active)return;event.preventDefault();this.options.onGesture?.();this.stopAnimation();
       const next=zoomAt(this.camera,this.size,this.camera.zoom+wheelZoomDelta(event.deltaY,event.deltaMode,this.size.height),this.flatPoint(local(event)),{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18});
       const constrained=constrainFramedCamera(next.center[0],next.center[1],next.zoom,{...this.floor,center:[...this.floor.center]},this.framed?{...this.framed,center:[...this.framed.center]}:null);
       this.camera={...next,center:constrained.center as [number,number],zoom:constrained.zoom};this.setMoving(true);this.schedule();
@@ -289,7 +308,9 @@ export class CustomMapEngine {
     }) as EventListener,{passive:false});
     this.listen(this.canvas,'dblclick',((event:MouseEvent)=>{if(!this.state.ready||!this.active)return;event.preventDefault();const rect=this.canvas.getBoundingClientRect();this.options.onGesture?.();this.setCamera(zoomAt(this.camera,this.size,this.camera.zoom+1,this.flatPoint({x:event.clientX-rect.left,y:event.clientY-rect.top}),{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18}),true);}) as EventListener);
     this.listen(this.canvas,'keydown',((event:KeyboardEvent)=>{
-      if(event.altKey||event.ctrlKey||event.metaKey)return;const next=keyboardCameraAction(this.camera,this.size,event.key,{minZoom:this.floor.zoom,maxZoom:18});
+      if(event.altKey||event.ctrlKey||event.metaKey||!this.state.ready||!this.active)return;
+      if(['+','=','Add','PageUp','-','−','Subtract','PageDown'].includes(event.key)){event.preventDefault();this.zoomBy(['+','=','Add','PageUp'].includes(event.key)?1:-1);return;}
+      const next=keyboardCameraAction(this.camera,this.size,event.key,{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18});
       if(next){event.preventDefault();this.options.onGesture?.();this.setCamera(next,true);}else if(event.key==='Home'){event.preventDefault();this.setCamera(this.floor,true);}
     }) as EventListener);
     this.listen(window,'blur',()=>{this.pointer.cancel();this.canvas.classList.remove('is-moving');this.settled();});
@@ -321,7 +342,7 @@ export class CustomMapEngine {
     if(this.disposed||!this.active||!this.coverage)return;
     const view=this.virtualSize(),z=Math.max(0,Math.floor(this.camera.zoom)),overviewRequests=tileRequests(this.camera,view,Math.min(4,z),'overview');
     const detailLevel=Math.min(18,Math.ceil(this.camera.zoom));
-    const detailRequests=this.mode!=='overview'&&z>=5?tileRequests(this.camera,view,detailLevel,'vector',this.paths,this.mode==='satellite'):[];
+    const detailRequests=this.mode!=='overview'&&z>=5?tileRequests(this.camera,view,detailLevel,'vector',this.paths,this.mode==='satellite',this.boundaryVisible):[];
     const reliefRequests=this.mode==='detail'&&this.reliefVisible&&z>=5?tileRequests(this.camera,view,detailLevel,'relief'):[];
     const b=this.getBounds(),source=satelliteSourceForBounds({west:b[0],south:b[1],east:b[2],north:b[3]});
     const imageryRequests=this.mode==='satellite'?tileRequests(this.camera,view,Math.min(source==='eox-s2'?14:8,z),source):[];
@@ -424,7 +445,7 @@ export class CustomMapEngine {
     }
   }
   destroy(){
-    if(this.disposed)return;this.disposed=true;cancelAnimationFrame(this.frame);cancelAnimationFrame(this.animation);clearTimeout(this.settleTimer);
+    if(this.disposed)return;this.disposed=true;cancelAnimationFrame(this.frame);this.stopAnimation();clearTimeout(this.settleTimer);
     this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
   }

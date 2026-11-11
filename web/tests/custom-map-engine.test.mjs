@@ -281,3 +281,116 @@ test('4K fallback stays bounded and preserves the display paint zoom without cla
 test('a released view disposes a late coverage source without loading or invoking ready callbacks',async()=>{
  const env=fixture({delayedCoverage:true});env.engine.destroy();env.coverageResolve(env.coverage);await env.settle();assert.equal(env.coverage.disposed,1);assert.equal(env.store.requests.length,0);assert.equal(env.states.length,0);assert.equal(env.frames.size,0);
 });
+
+test('landscape reads the current visible ground through framing, bearing and pitch without changing the map',async t=>{
+ const width=373,height=774,env=fixture({width,height,view:{center:[179.9,66],zoom:8,bearingDegrees:37}});t.after(()=>env.engine.destroy());await env.ready();
+ const map=env.engine,padding={left:24,right:80,top:88,bottom:525};map.setPadding(padding);
+ const envelope=points=>{const values=points.map(point=>map.unproject(point));return[Math.min(...values.map(p=>p[0])),Math.min(...values.map(p=>p[1])),Math.max(...values.map(p=>p[0])),Math.max(...values.map(p=>p[1]))];};
+ const close=(actual,expected)=>actual.forEach((value,index)=>assert.ok(Math.abs(value-expected[index])<1e-9,`${value} differs from ${expected[index]}`));
+ for(const pitch of [0,40,60]){
+  map.setPitch(pitch);
+  const before=plain(map.getCamera()),whole=plain(map.getBounds()),draws=map.inspect().drawRevision,requests=env.store.requests.length;
+  close(whole,envelope([{x:0,y:0},{x:width,y:0},{x:width,y:height},{x:0,y:height}]));
+  close(map.getVisibleBounds(),envelope([{x:24,y:88},{x:293,y:88},{x:293,y:249},{x:24,y:249}]));
+  // A sheet can finish moving before its queued layout observer updates the
+  // stored insets. The caller can supply its fresh measured rectangle directly.
+  const current={...padding,bottom:300};
+  close(map.getVisibleBounds(current),envelope([{x:24,y:88},{x:293,y:88},{x:293,y:474},{x:24,y:474}]));
+  assert.deepEqual(plain(map.getBounds()),whole,'Default bounds must retain the complete canvas');
+  assert.deepEqual(plain(map.getCamera()),before,'Opening the scene must not refit or move the map');
+  assert.equal(map.inspect().drawRevision,draws);assert.equal(env.store.requests.length,requests,'A bounds read must not start new source work');
+ }
+});
+
+test('public inspection publishes fresh scene insets without refitting and tolerates a transient covered resize',async t=>{
+ const env=fixture({width:373,height:774});t.after(()=>env.engine.destroy());await env.ready();
+ const map=env.engine,padding={left:24,right:80,top:88,bottom:525};map.setPadding(padding);
+ let published=JSON.parse(env.host.dataset.mapInspection);
+ assert.deepEqual(published.viewport,{width:373,height:774,padding});assert.deepEqual(published.visibleBounds,plain(map.getVisibleBounds()));
+ const camera=plain(map.getCamera()),whole=plain(map.getBounds()),draws=map.inspect().drawRevision,requests=env.store.requests.length;
+ const current={...padding,bottom:300};map.setPadding(current);published=JSON.parse(env.host.dataset.mapInspection);
+ assert.equal(published.viewport.padding.bottom,300);assert.deepEqual(published.visibleBounds,plain(map.getVisibleBounds()));
+ assert.notDeepEqual(published.visibleBounds,whole);assert.deepEqual(plain(map.getCamera()),camera);assert.equal(map.inspect().drawRevision,draws);assert.equal(env.store.requests.length,requests);
+ current.bottom=100;assert.equal(map.inspect().viewport.padding.bottom,300,'The published framing must not retain a caller-owned mutable object');
+ env.host.clientHeight=200;
+ assert.doesNotThrow(()=>env.observers[0].callback());assert.equal(map.inspect().visibleBounds,null,'Old sheet insets can temporarily cover the resized canvas');
+ map.setPadding({left:24,right:80,top:40,bottom:64});published=JSON.parse(env.host.dataset.mapInspection);
+ assert.equal(published.viewport.height,200);assert.ok(published.visibleBounds?.every(Number.isFinite));assert.deepEqual(published.visibleBounds,plain(map.getVisibleBounds()));
+ assert.deepEqual(plain(map.getCamera()),camera,'Publishing geometry must not change the manually selected view');
+});
+
+test('zoom controls accumulate every rapid input across RAF, reversals and both clamped ends',async t=>{
+ for(const elapsed of [0,16,40]){
+  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();const map=env.engine;
+  const burst=directions=>{for(const delta of directions){map.zoomBy(delta);if(elapsed)env.tick(elapsed);}env.flush();};
+  burst([1,1,1,1]);assert.equal(map.getCamera().zoom,12,`Four plus inputs separated by ${elapsed}ms must all count`);
+  burst([-1,-1,-1,-1]);assert.equal(map.getCamera().zoom,8,`Four minus inputs separated by ${elapsed}ms must all count`);
+  burst([1,1,1,-1]);assert.equal(map.getCamera().zoom,10,'A reversal applies to the requested scale, not an intermediate frame');
+  map.setCamera({...camera,zoom:17});env.flush();burst([1,1,1,1]);assert.equal(map.getCamera().zoom,18);
+  burst([-1]);assert.equal(map.getCamera().zoom,17,'Inputs beyond maximum cannot create a hidden zoom debt');
+  map.setCamera({...camera,zoom:2});env.flush();burst([-1,-1,-1,-1]);assert.equal(map.getCamera().zoom,1);
+  burst([1]);assert.equal(map.getCamera().zoom,2,'Inputs below the floor cannot create a hidden zoom debt');
+  assert.equal(env.host.dataset.mapMoving,'false');assert.equal(env.frames.size,0);
+ }
+});
+
+test('manual gestures, programmatic camera and fit discard a superseded zoom-control target',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();const map=env.engine;
+ const pending=()=>{map.setCamera(camera);env.flush();for(let i=0;i<4;i++)map.zoomBy(1);env.tick(48);};
+ pending();map.setCamera({...camera,zoom:6});map.zoomBy(1);env.flush();assert.equal(map.getCamera().zoom,7);
+ pending();map.fit([40.5,43.5,40.51,43.51],{top:24,right:24,bottom:24,left:24},9,false);const fit=plain(map.getCamera());
+ map.zoomBy(1);env.flush();assert.ok(Math.abs(map.getCamera().zoom-fit.zoom-1)<1e-9,'The next zoom must begin from the fitted view');
+ pending();const interruptedZoom=map.getCamera().zoom;
+ map.canvas.dispatch('pointerdown',{pointerId:37,clientX:300,clientY:250});map.canvas.dispatch('pointermove',{pointerId:37,clientX:340,clientY:280});map.canvas.dispatch('pointerup',{pointerId:37,clientX:340,clientY:280});
+ const panned=plain(map.getCamera());assert.equal(panned.zoom,interruptedZoom);assert.notDeepEqual(panned.center,camera.center);
+ map.zoomBy(1);env.flush();assert.ok(Math.abs(map.getCamera().zoom-panned.zoom-1)<1e-9,'Dragging owns the displayed camera and cancels its old button target');
+ pending();map.canvas.dispatch('wheel',{clientX:310,clientY:240,deltaY:-80,deltaMode:0});const wheeled=plain(map.getCamera());
+ map.zoomBy(1);env.flush();assert.ok(Math.abs(map.getCamera().zoom-wheeled.zoom-1)<1e-9,'A new wheel anchor must not inherit the old button target');
+});
+
+test('pausing or disposing during a zoom burst cancels future camera work',async()=>{
+ const env=fixture();await env.ready();const map=env.engine;
+ for(let i=0;i<4;i++)map.zoomBy(1);env.tick(48);const paused=plain(map.getCamera());map.setActive(false);env.tick(1000);
+ assert.deepEqual(plain(map.getCamera()),paused);assert.equal(env.frames.size,0);
+ map.setActive(true);map.zoomBy(1);env.flush();assert.ok(Math.abs(map.getCamera().zoom-paused.zoom-1)<1e-9,'A paused animation cannot survive as a stale button target');
+ for(let i=0;i<4;i++)map.zoomBy(1);env.tick(32);const before=plain(map.getCamera()),draws=map.inspect().drawRevision;
+ map.destroy();env.complete();await env.settle();env.tick(1000);
+ assert.deepEqual(plain(map.getCamera()),before);assert.equal(map.inspect().drawRevision,draws);assert.equal(env.frames.size,0);assert.equal(env.timers.size,0);
+});
+
+test('every map zoom key accumulates native autorepeat and leaves modified browser shortcuts alone',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();const map=env.engine;
+ for(const [keys,delta]of [[['+','=','Add','PageUp'],1],[['-','−','Subtract','PageDown'],-1]])for(const key of keys){
+  map.setCamera(camera);env.flush();
+  for(let index=0;index<4;index++){
+   const event=map.canvas.dispatch('keydown',{key,repeat:index>0});assert.equal(event.defaultPrevented,true,`${key} must be handled by the map`);env.tick(16);
+  }
+  env.flush();assert.equal(map.getCamera().zoom,8+4*delta,`${key} autorepeat lost a zoom step`);
+  for(const modifier of ['altKey','ctrlKey','metaKey']){
+   const before=plain(map.getCamera()),event=map.canvas.dispatch('keydown',{key,repeat:true,[modifier]:true});env.flush();
+   assert.equal(event.defaultPrevented,undefined);assert.deepEqual(plain(map.getCamera()),before,`${key} must not steal a modified browser shortcut`);
+  }
+ }
+ map.setCamera(camera);env.flush();for(let index=0;index<4;index++)map.zoomBy(1);env.tick(48);
+ const interrupted=plain(map.getCamera());map.canvas.dispatch('keydown',{key:'ArrowRight'});env.flush();
+ assert.equal(map.getCamera().zoom,interrupted.zoom);assert.notDeepEqual(plain(map.getCamera().center),interrupted.center);
+ map.canvas.dispatch('keydown',{key:'+'});env.flush();assert.ok(Math.abs(map.getCamera().zoom-interrupted.zoom-1)<1e-9,'Arrow navigation replaces the pending button target');
+ map.canvas.dispatch('keydown',{key:'Home'});env.flush();assert.equal(map.getCamera().zoom,1);map.canvas.dispatch('keydown',{key:'+'});env.flush();assert.equal(map.getCamera().zoom,2);
+ assert.equal(env.frames.size,0);assert.equal(env.host.dataset.mapMoving,'false');
+});
+
+test('territorial boundaries toggle actual vector bitmaps in detail and satellite without reloading unrelated layers',async t=>{
+ for(const mode of ['detail','satellite']){
+  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();const map=env.engine;
+  map.setRoute({type:'LineString',coordinates:[[40.4,43.4],[40.6,43.6]]},'kept-route');
+  if(mode==='satellite'){map.setMode(mode);env.complete();await env.settle();}else env.flush();
+  const before=plain(map.inspect()),keys=before.tiles.detail.map(tile=>tile.key),camera=plain(map.getCamera());assert.ok(keys.length>0);
+  map.setLayers({boundaries:false});const replacements=env.pending();
+  assert.ok(replacements.length>0);assert.ok(replacements.every(job=>job.request.kind==='vector'&&job.request.boundaries===false));
+  assert.ok(replacements.every(job=>job.request.transparent===(mode==='satellite')));env.complete();await env.settle();
+  const hidden=plain(map.inspect());assert.ok(hidden.tiles.detail.every(tile=>!keys.includes(tile.key)));assert.deepEqual(hidden.tiles.overview,before.tiles.overview);assert.deepEqual(hidden.tiles.relief,before.tiles.relief);assert.deepEqual(hidden.tiles.imagery,before.tiles.imagery);
+  assert.equal(hidden.drawnRoute,'kept-route');assert.deepEqual(plain(map.getCamera()),camera);
+  map.setLayers({boundaries:true});assert.equal(env.pending().length,0,'Re-enabling uses the retained boundary-enabled bitmap cache');await env.settle();
+  assert.deepEqual(plain(map.inspect().tiles.detail.map(tile=>tile.key)),keys);assert.equal(map.inspect().drawnRoute,'kept-route');assert.equal(map.getState().error,'');
+ }
+});

@@ -26,15 +26,16 @@ export function nativeScrollFixture(input='touch',selector='.explore-panel-conte
 }
 
 export function layerMenusFixture(){
- const controls=[['BUTTON','Детальные тропы онлайн'],['BUTTON','Спутник'],['BUTTON','Сохранённый обзор'],['INPUT','Тропы и грунтовые дороги'],['A','Подробная офлайн-карта'],['A','Источники карты']];
+ const controls=[['BUTTON','Тропы и ландшафт'],['BUTTON','Спутник'],['BUTTON','Сохранённый обзор'],['INPUT','Тропы и грунтовые дороги'],['INPUT','Рельеф и линии высот'],['INPUT','Границы территорий'],['A','Подробная офлайн-карта'],['A','Источники карты']];
  const states=['closed','open'].map(sheet=>{
-  const map=rect(0,72,320,568),usable=rect(0,72,320,sheet==='open'?288:488),menu=rect(16,152,288,sheet==='open'?180:300),button=rect(16,90,40,40),scrollHeight=sheet==='open'?280:300;
+  const map=rect(0,72,320,568),usable=rect(0,72,320,sheet==='open'?288:488),menu=rect(16,152,288,sheet==='open'?180:300),button=rect(16,90,40,40),scrollHeight=controls.length*44+16;
   const frame=scrollTop=>({sheet,map:clone(map),usable:clone(usable),menu:clone(menu),button:clone(button),scrollTop,scrollHeight,clientHeight:menu.height,scrollY:0,controls:controls.map(([tag,label],index)=>{
    const box=rect(menu.left+8,menu.top+8+index*44-scrollTop,240,32),inside=box.top>=menu.top-1&&box.bottom<=menu.bottom+1;
    return{index,tag,label,rect:box,inside,unobscured:inside,point:{x:box.left+box.width/2,y:box.top+box.height/2}};
   })});
   const click=()=>nativeClickFixture('touch','.layer-button',{x:36,y:110},'Слои');
-  return{sheet,opened:click(),frames:sheet==='open'?[frame(0),frame(100)]:[frame(0)],scrolls:sheet==='open'?[nativeScrollFixture('touch','.layer-menu',{sheet,box:menu,top:0,after:100,scrollHeight,clientHeight:menu.height})]:[],closed:click()};
+  const overflow=scrollHeight-menu.height,positions=sheet==='open'?[0,overflow/2,overflow]:[0,overflow];
+  return{sheet,opened:click(),frames:positions.map(frame),scrolls:positions.slice(1).map((after,index)=>nativeScrollFixture('touch','.layer-menu',{sheet,box:menu,top:positions[index],after,scrollHeight,clientHeight:menu.height})),closed:click()};
  });
  return{schemaVersion:1,passed:true,input:'touch',states};
 }
@@ -96,7 +97,7 @@ export function styleCameraRoundtripFixture(routeId='route',{edgeCount=0,engine=
  });
  const pan={input:'mouse',start,end,delta,holdBeforeReleaseMs:200,commands,durationMs:commands.at(-1).ackOffsetMs,events:[{type:'pointerdown',time:100,trusted:true,pointerType:'mouse',pointerId:1,...start},{type:'pointerup',time:800,trusted:true,pointerType:'mouse',pointerId:1,...end}],before:clone(zoomed),after:clone(manual)};
  const click=(selector,label)=>nativeClickFixture('mouse',selector,undefined,label);
- const transitions=['Сохранённый обзор','Детальные тропы онлайн'].map((label,index)=>{
+ const transitions=['Сохранённый обзор','Тропы и ландшафт'].map((label,index)=>{
   const lineClick=nativeClickFixture('mouse','canvas',{x:800,y:350});
   return{label,opened:click('.layer-button','Слои'),scrolls:[],selected:click(`.layer-menu>button:nth-of-type(${index?1:3})`,label),closed:click('.layer-button','Слои'),frame:clone(manual),line:{point:{x:lineClick.point.x,y:lineClick.point.y},route:routeId,clicked:true,selectionRetained:true,reopened:false,events:lineClick.events},lineFrame:clone(manual),selection:clone(current),restored:{route:routeId,selected:true,mutations:[{old:routeId,current:routeId}],...(engine==='tropnik-canvas'?{drawnRoute:routeId,tilesState:'ready',drawRevision:2,beforeDrawRevision:1,mode:index?'detail':'overview'}:{}),edges:{before:edgeCount,after:edgeCount,replaced:0}}};
  });

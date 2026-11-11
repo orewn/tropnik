@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from '../map-projection.mjs';
+import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry,visibleMapBounds} from '../map-projection.mjs';
 
 const rect={left:100,top:72,width:800,height:600};
 test('map pointer projection uses CSS pixels and the actual renderer tile size',()=>{
@@ -27,6 +27,16 @@ test('retained camera padding uses the actual noncentral projection origin',()=>
  assert.ok(Math.abs(restored[0]-point[0])<1e-9);
  assert.ok(Math.abs(restored[1]-point[1])<1e-9);
  assert.throws(()=>projectMapPoint(point,{...camera,centerY:NaN},rect),/origin/);
+});
+test('visible terrain bounds independently undo pitch and bearing at all four inset corners',()=>{
+ const camera={longitude:0,latitude:0,zoom:1,tileSize:256,bearingDegrees:90},box={left:100,top:72,width:256,height:256},padding={left:32,right:64,top:16,bottom:48};
+ const expected=[-112.5,-40.97989806962013,157.5,55.77657301866769],actual=visibleMapBounds(camera,box,padding,60);
+ actual.forEach((value,index)=>assert.ok(Math.abs(value-expected[index])<1e-9));
+ const dateline=visibleMapBounds({...camera,longitude:180,latitude:60,zoom:12,bearingDegrees:45},box,padding,40);
+ assert.ok(dateline[0]<180&&dateline[2]>180&&dateline[2]-dateline[0]<1,'Crossing the meridian keeps one continuous small geographic area');
+ for(const bad of [{...padding,bottom:240},{...padding,left:-1},{...padding,right:NaN},{}])assert.throws(()=>visibleMapBounds(camera,box,bad,40),/padding/);
+ for(const pitch of [-1,61,NaN])assert.throws(()=>visibleMapBounds(camera,box,padding,pitch),/angles/);
+ assert.throws(()=>visibleMapBounds({...camera,bearingDegrees:NaN},box,padding,40),/angles/);
 });
 test('polygon touch fixtures exclude holes and accept a separate multipolygon part',()=>{
  const outer=[[0,0],[10,0],[10,10],[0,10],[0,0]],hole=[[3,3],[7,3],[7,7],[3,7],[3,3]];

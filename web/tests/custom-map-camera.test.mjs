@@ -109,6 +109,31 @@ test('rotated camera bounds include all corners in one continuous world',()=>{
  }
 });
 
+test('landscape bounds use the framed visible rectangle without including the covered mobile sheet',()=>{
+ const view={width:373,height:774},padding={left:24,right:80,top:88,bottom:525};
+ const routeBounds=[86.2,50.1,86.3,50.13],fitted=fitBounds(routeBounds,view,{padding,maxZoom:18}),before=structuredClone(fitted);
+ const full=cameraBounds(fitted,view),visible=cameraBounds(fitted,view,padding);
+ for(const coordinate of [[routeBounds[0],routeBounds[1]],[routeBounds[2],routeBounds[3]]]){
+  assert.ok(coordinate[0]>=visible[0]-1e-9&&coordinate[0]<=visible[2]+1e-9);
+  assert.ok(coordinate[1]>=visible[1]-1e-9&&coordinate[1]<=visible[3]+1e-9);
+ }
+ const height=bounds=>mercatorProject([0,bounds[1]]).y-mercatorProject([0,bounds[3]]).y;
+ near(height(visible)/height(full),(774-88-525)/774,1e-8);
+ assert.ok(height(visible)<height(full)/4,'The covered sheet must not enlarge the terrain grid');
+ samePoint(project(fitted,view,[visible[0],visible[3]]),{x:24,y:88});
+ samePoint(project(fitted,view,[visible[2],visible[1]]),{x:293,y:249});
+ assert.deepEqual(fitted,before,'Reading a landscape crop must not refit the source camera');
+ for(const bearingDegrees of [0,37,90]){
+  const c={center:[179.9,66],zoom:7.25,bearingDegrees},bounds=cameraBounds(c,view,padding);
+  const corners=[{x:24,y:88},{x:293,y:88},{x:293,y:249},{x:24,y:249}].map(p=>unproject(c,view,p));
+  [Math.min(...corners.map(p=>p[0])),Math.min(...corners.map(p=>p[1])),Math.max(...corners.map(p=>p[0])),Math.max(...corners.map(p=>p[1]))].forEach((value,index)=>near(bounds[index],value));
+  assert.ok(bounds[2]>bounds[0]&&bounds[2]-bounds[0]<3,'The crop stays in one continuous dateline world');
+ }
+ assert.deepEqual(cameraBounds(fitted,view,{}),full);
+ assert.throws(()=>cameraBounds(fitted,view,{bottom:774}),RangeError);
+ assert.throws(()=>cameraBounds(fitted,view,{top:-1}),RangeError);
+});
+
 test('pinch translates its centroid and clamps zoom without losing the anchor',()=>{
  const start=[{x:100,y:220},{x:260,y:220}],current=[{x:80,y:280},{x:400,y:280}];
  const anchor=unproject(camera,viewport,{x:180,y:220});

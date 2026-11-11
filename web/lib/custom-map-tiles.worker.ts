@@ -1,7 +1,7 @@
 import {decodeVectorTile,type VectorTile} from './custom-map-vector';
 import {decodeTerrarium,elevationBorder,paintContours,paintVectorTile,reliefPixels,type TilePaintBounds,type ReliefCoverage,type ReliefHalo,type ReliefHaloKey,type ReliefHaloOffset,type ReliefHaloPayload,type ReliefHaloSource} from './custom-map-painter';
 
-type TileJob={id:number;kind:'vector'|'relief'|'raster';bytes:ArrayBuffer;z:number;x?:number;y:number;paintZoom?:number;sourceZ?:number;sourceKey?:string;paths:boolean;transparent?:boolean;mime?:string;halo?:ReliefHaloPayload};
+type TileJob={id:number;kind:'vector'|'relief'|'raster';bytes:ArrayBuffer;z:number;x?:number;y:number;paintZoom?:number;sourceZ?:number;sourceKey?:string;paths:boolean;transparent?:boolean;boundaries?:boolean;mime?:string;halo?:ReliefHaloPayload};
 type RenderWindow={factor:number;childX:number;childY:number;sourceX:number;sourceY:number;sourceZ:number;paintSize:number;bounds:TilePaintBounds};
 type ParentBase={bytes:number};
 type VectorParent=ParentBase&{kind:'vector';tile:VectorTile};
@@ -159,7 +159,7 @@ self.onmessage=async({data:job}:MessageEvent<TileJob>)=>{
       try{
         if(parent.kind==='vector'){
           labels=paintVectorTile(context,parent.tile,paintZoom,view.paintSize,job.paths,!!job.transparent,
-            {symbolScale:2*paintScale,labelBounds:view.bounds,geometryBounds:view.bounds})
+            {symbolScale:2*paintScale,labelBounds:view.bounds,geometryBounds:view.bounds,boundaries:job.boundaries})
             .map(label=>({...label,x:label.x*view.factor-view.childX,y:label.y*view.factor-view.childY}));
         }else{
           reliefCoverage=await prepareRelief(parent,job,view);

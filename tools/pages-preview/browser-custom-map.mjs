@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {visibleMapBounds} from './map-projection.mjs';
 
 /** Read the public, bounded diagnostic after real rendering; never discover a
  * component/renderer instance or call application methods from the harness. */
@@ -30,6 +31,45 @@ export function assertCustomMapInspection(value,context,{mode,routeId,settled=tr
  }
  assert.ok(Array.isArray(value.labels)&&value.labels.length<=512);
  return value;
+}
+
+export function assertCustomDetailInspection(value,context,{routeId}={}){
+ const map=assertCustomMapInspection(value,context,{routeId});
+ assert.equal(map.state.mode,'detail',`${context}: the detail mode is not selected`);
+ if(map.camera.zoom<5){
+  assert.equal(map.state.committedMode,'overview',`${context}: low zoom must identify its actual overview ground`);
+  assert.ok(map.tiles.overview.length>0,`${context}: the overview ground is missing`);
+  for(const kind of ['detail','relief','imagery'])assert.equal(map.tiles[kind].length,0,`${context}: low zoom contains an unexpected ${kind} batch`);
+  assert.equal(map.state.reliefReady,false);
+ }else{
+  assert.equal(map.state.committedMode,'detail',`${context}: close view did not commit vector detail`);
+  assert.ok(map.tiles.detail.length>0,`${context}: close view has no vector detail bitmap`);
+ }
+ return map;
+}
+
+export function assertCustomVisibleBounds(frame,requestedBounds,context){
+ const map=assertCustomMapInspection(frame.bitmapInspection,context),viewport=map.viewport,padding=viewport?.padding,layout=frame.viewportLayout,rect=frame.rect;
+ assert.ok(layout&&Number.isFinite(layout.width)&&Number.isFinite(layout.height)&&layout.width>0&&layout.height>0,`${context}: no actual browser viewport`);
+ for(const dimension of ['width','height']){
+  assert.ok(Math.abs(viewport?.[dimension]-rect[dimension])<1,`${context}: inspection has stale canvas dimensions`);
+  const canvasDimension=dimension==='width'?'cssWidth':'cssHeight';
+  assert.ok(Math.abs(map.canvas[canvasDimension]-rect[dimension])<1,`${context}: rendered canvas and map bounds differ`);
+ }
+ assert.ok(Math.abs(map.camera.center[0]-frame.camera.longitude)<1e-8&&Math.abs(map.camera.center[1]-frame.camera.latitude)<1e-8&&Math.abs(map.camera.zoom-frame.camera.zoom)<1e-8,`${context}: inspection has a stale camera`);
+ const expected=visibleMapBounds({...frame.camera,bearingDegrees:map.camera.bearingDegrees??0},rect,padding,map.pitch);
+ const visible={left:rect.left+padding.left,right:rect.right-padding.right,top:rect.top+padding.top,bottom:rect.bottom-padding.bottom};
+ assert.ok(visible.left>=-1&&visible.right<=layout.width+1&&visible.top>=-1&&visible.bottom<=layout.height+1,`${context}: terrain includes ground outside the browser viewport`);
+ if(layout.panel){
+  const panel=layout.panel;
+  for(const edge of ['left','right','top','bottom'])assert.ok(Number.isFinite(panel[edge]),`${context}: panel bounds are missing`);
+  if(panel.right>rect.left&&panel.left<rect.right&&panel.top<rect.bottom&&panel.bottom>rect.top)assert.ok(visible.bottom<=panel.top+1,`${context}: terrain includes ground hidden by the sheet`);
+ }
+ for(const [label,bounds]of [['inspection',map.visibleBounds],['terrain',requestedBounds]]){
+  assert.ok(Array.isArray(bounds)&&bounds.length===4&&bounds.every(Number.isFinite),`${context}: ${label} bounds are missing`);
+  for(let index=0;index<4;index++)assert.ok(Math.abs(bounds[index]-expected[index])<1e-6,`${context}: ${label} used another area instead of the unobscured map`);
+ }
+ return expected;
 }
 
 export function assertCustomSceneInspection(value,context){

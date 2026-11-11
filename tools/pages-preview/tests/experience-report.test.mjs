@@ -12,8 +12,9 @@ const checkStyle=receipt=>assertStyleCameraRoundtrip(receipt,'desktop-webgl');
 
 test('portrait Layers validates closed and expanded geometry with real native scroll progress',()=>{
  const receipt=layerMenusFixture();assert.equal(checkLayers(receipt),receipt);
- assert.equal(receipt.states[0].scrolls.length,0);
- assert.equal(receipt.states[1].scrolls.length,1);
+ assert.equal(receipt.states[0].frames[0].controls.length,8);
+ assert.equal(receipt.states[0].scrolls.length,1);
+ assert.equal(receipt.states[1].scrolls.length,2);
  assert.ok(receipt.states[1].frames[0].controls.some(control=>!control.inside));
  assert.ok(receipt.states[1].scrolls[0].events.length<receipt.states[1].scrolls[0].commands.length,'Coalesced trusted touch moves are valid');
 });

@@ -772,7 +772,7 @@ async function checkStyleCameraRoundtrip(cdp,profile,trail){
   const pan=await dispatchSourceEndPan(cdp,start,delta,profile,sleep),manual=await settledMap(cdp,profile.engine);
   pan.events=await evaluate(cdp,'window.__tropnikInputEvents');pan.before=zoomed;pan.after=manual;
   const transitions=[];
-  for(const label of ['Сохранённый обзор','Детальные тропы онлайн']){
+  for(const label of ['Сохранённый обзор','Тропы и ландшафт']){
     const opened=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,true);
     const selector=await evaluate(cdp,`(()=>{const buttons=[...document.querySelectorAll('.layer-menu>button')],index=buttons.findIndex(button=>button.textContent?.trim()===${JSON.stringify(label)});return index<0?null:'.layer-menu>button:nth-of-type('+(index+1)+')';})()`);assert.ok(selector,`Missing layer ${label}`);
     const scrolls=await revealNative(cdp,selector,'.layer-menu',profile);
