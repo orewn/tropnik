@@ -1,0 +1,155 @@
+name: Inspect retained Android failure evidence
+on:
+  push:
+    branches: [diagnostics/android-artifact-inspection]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: android-artifact-inspection
+  cancel-in-progress: false
+jobs:
+  inspect:
+    name: Read exact failed device artifact (diagnostic only)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-android-inspection
+    steps:
+      - name: Bind the exact original artifact metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$TROPNIK_INSPECTION_ROOT"
+          gh api repos/orewn/tropnik/actions/artifacts/13877466623 > "$TROPNIK_INSPECTION_ROOT/artifact-metadata.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          path=Path(os.environ["TROPNIK_INSPECTION_ROOT"])/"artifact-metadata.json"
+          meta=json.loads(path.read_text())
+          expected={"id":13877466623,"name":"tropnik-android-api35-instrumentation-1","size_in_bytes":5847700,
+                    "digest":"sha256:c17b041317620b248bae4f34e1133d3e0111ef49b5145c4ed3bba12097b0e28a","expired":False}
+          assert all(meta.get(k)==v for k,v in expected.items()), "Artifact metadata changed"
+          run=meta["workflow_run"]
+          assert run["id"]==43068767298 and run["head_sha"]=="e772d12dded4875186c02396788900a42727dda1", "Wrong producer"
+          assert run["repository_id"]==1447843944 and run["head_repository_id"]==1447843944, "Wrong repository"
+          print("TROPNIK_ANDROID_ARTIFACT_METADATA="+json.dumps({**expected,"workflow_run":run},separators=(",",":")))
+          PY
+      - name: Download retained diagnostic bytes with a digest gate
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          repository: orewn/tropnik
+          run-id: 43068767298
+          artifact-ids: 13877466623
+          github-token: ${{ github.token }}
+          digest-mismatch: error
+          merge-multiple: true
+          path: ${{ runner.temp }}/tropnik-android-inspection/files
+      - name: Print bounded original receipts, logcat and QA captures
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, os, re, tarfile
+          from pathlib import Path, PurePosixPath
+          root=Path(os.environ["TROPNIK_INSPECTION_ROOT"])
+          source=root/"files"
+          output=root/"inspection"
+          output.mkdir()
+          entries=[]
+          for path in sorted(source.rglob("*")):
+              if path.is_dir(): continue
+              assert path.is_file() and not path.is_symlink(), "Non-regular artifact entry"
+              assert path.stat().st_size<=32_000_000, "Oversized artifact entry"
+              data=path.read_bytes()
+              entries.append({"path":path.relative_to(source).as_posix(),"sizeBytes":len(data),"sha256":hashlib.sha256(data).hexdigest()})
+          assert len(entries)<=256 and sum(x["sizeBytes"] for x in entries)<=128_000_000, "Unbounded artifact"
+          print("TROPNIK_ANDROID_ARTIFACT_FILES="+json.dumps(entries,separators=(",",":")))
+          def get_json(name):
+              path=source/name
+              assert path.is_file() and path.stat().st_size<=1_000_000, "Missing or oversized JSON: "+name
+              return json.loads(path.read_text())
+          device=get_json("device-result.json")
+          installed=get_json("installed-apks.json")
+          for receipt in (device,installed):
+              assert receipt["sourceCommit"]=="1b01aebd441541e6636af7ccaa36bd7cdc936014", "Wrong source commit"
+              assert receipt["workflowRunId"]=="43068767298", "Wrong workflow run"
+          assert installed["installedArtifactBytesVerified"] is True and device["installedArtifactBytesVerified"] is True
+          assert device["testedApks"]==installed["installedApks"], "Installed/tested APKs differ"
+          assert device["buildReceiptSha256"]==installed["buildReceiptSha256"], "Build receipt binding differs"
+          universal=installed["installedApks"]["tropnik-preview.apk"]
+          assert universal=={"bytes":67858685,"sha256":"a98a3854d00ee5b8c29987b04a7185eb05ea9b8b003d113797c9da77654ba099"}, "Unexpected universal APK"
+          assert device["tests"]==8 and device["failures"]==2 and device["errors"]==0 and device["skipped"]==0
+          assert device["status"]=="failed" and device["deviceExecutionVerified"] is False
+          print("TROPNIK_ANDROID_INSTALLED_RECEIPT="+json.dumps(installed,separators=(",",":")))
+          print("TROPNIK_ANDROID_DEVICE_RECEIPT="+json.dumps(device,separators=(",",":")))
+          for name in ("webview-version.txt","graphics-driver.txt","tested-apks.sha256","emulator.log"):
+              path=source/name
+              if not path.is_file(): continue
+              text=path.read_text(errors="replace")
+              if name=="graphics-driver.txt":
+                  selected=[line for line in text.splitlines() if "GLES:" in line or "RenderEngine" in line]
+              elif name=="emulator.log":
+                  selected=[line for line in text.splitlines() if re.search(r"error|warn|fatal|crash|angle|swiftshader|vulkan|gpu",line,re.I)]
+              else:
+                  selected=text.splitlines()
+              total=len(selected)
+              if total>120: selected=selected[:40]+selected[-80:]
+              print("TROPNIK_ANDROID_DIAGNOSTIC_TEXT="+json.dumps({"path":name,"matchingLines":total,"truncated":total>120,"lines":[line[:3000] for line in selected]},separators=(",",":")))
+          logcat=source/"logcat.txt"
+          assert logcat.is_file(), "Missing logcat"
+          loglines=logcat.read_text(errors="replace").splitlines()
+          pattern=re.compile(r"CONSOLE|chromium|cr_[A-Za-z]|WebView|LocalExperienceTest|TestRunner|landscape|tropnik|FATAL EXCEPTION|EGL|GLES|GpuProcess|RenderProcess|GPU process|ANR",re.I)
+          matches=[{"line":i+1,"text":line[:3000]} for i,line in enumerate(loglines) if pattern.search(line)]
+          count=len(matches)
+          if count>1000: matches=matches[:250]+matches[-750:]
+          print("TROPNIK_ANDROID_LOGCAT_META="+json.dumps({"totalLines":len(loglines),"matchedLines":count,"truncated":count>1000,"selection":"first250+last750 if more than1000; each line at most3000chars"},separators=(",",":")))
+          for line in matches:
+              print("TROPNIK_ANDROID_LOGCAT_LINE="+json.dumps(line,separators=(",",":")))
+          qa=[]
+          archive=source/"test-screenshots.tar"
+          assert archive.is_file(), "Missing retained app diagnostics tar"
+          with tarfile.open(archive,"r:*") as tar:
+              members=tar.getmembers()
+              assert len(members)<=128, "Too many QA entries"
+              total=0
+              for member in members:
+                  name=PurePosixPath(member.name)
+                  assert not name.is_absolute() and ".." not in name.parts and name.parts[0]=="qa", "Unsafe QA member"
+                  if member.isdir(): continue
+                  assert member.isfile() and 0<=member.size<=2_000_000, "Nonregular or oversized QA member"
+                  total+=member.size
+                  assert total<=32_000_000, "Unbounded QA archive"
+                  stream=tar.extractfile(member)
+                  assert stream is not None
+                  data=stream.read(member.size+1)
+                  assert len(data)==member.size
+                  item={"path":member.name,"sizeBytes":len(data),"sha256":hashlib.sha256(data).hexdigest()}
+                  qa.append(item)
+                  if name.suffix==".json":
+                      assert len(data)<=300_000, "Oversized QA JSON"
+                      document=json.loads(data)
+                      print("TROPNIK_ANDROID_QA_JSON="+json.dumps({**item,"data":document},ensure_ascii=False,separators=(",",":")))
+                  if member.name in ("qa/scene-zoom.png","qa/recovery-after-retry.png") and len(data)<=1_000_000:
+                      assert data[:8]==b"\x89PNG\r\n\x1a\n"
+                      (output/name.name).write_bytes(data)
+                      print("TROPNIK_ANDROID_PNG="+json.dumps({**item,"base64":base64.b64encode(data).decode()},separators=(",",":")))
+          print("TROPNIK_ANDROID_QA_FILES="+json.dumps(qa,separators=(",",":")))
+          report={"schemaVersion":1,"diagnosticOnly":True,"producerRunId":"43068767298",
+                  "producerHead":"e772d12dded4875186c02396788900a42727dda1","sourceCommit":device["sourceCommit"],
+                  "artifactId":13877466623,"artifactDigest":"sha256:c17b041317620b248bae4f34e1133d3e0111ef49b5145c4ed3bba12097b0e28a",
+                  "rawZipIndependentlyHashed":False,"archiveIntegrityMethod":"pinned actions/download-artifact v8.0.2 with digest-mismatch:error and exact API metadata binding",
+                  "files":entries,"qaFiles":qa,"device":device,"installed":installed,
+                  "limitations":["This inspects an existing failed run and does not rerun, fix or certify the application.",
+                                  "JSON/PNG records were captured by the original test; missing failure snapshots are not fabricated.",
+                                  "No independent raw ZIP hash is claimed; the downloader validates the API-bound digest."]}
+          (output/"inspection.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          print("TROPNIK_ANDROID_INSPECTION="+json.dumps(report,ensure_ascii=False,separators=(",",":")))
+          PY
+      - name: Retain the read-only inspection
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-android-failure-inspection
+          path: ${{ runner.temp }}/tropnik-android-inspection/inspection/
+          if-no-files-found: warn
+          retention-days: 14
