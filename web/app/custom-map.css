@@ -3,6 +3,8 @@
    count or scrolling the catalogue must not replay the full software canvas.
    will-change retains the layer even when translateZ(0) is an identity matrix. */
 .tropnik-map-canvas{position:absolute;inset:0;display:block;touch-action:none;cursor:grab;outline-offset:-4px;contain:strict;transform:translateZ(0);will-change:transform}
+.tropnik-map-labels{position:absolute;inset:0;display:block;pointer-events:none;contain:strict;transform:translateZ(0);will-change:transform}
+.tropnik-map-labels[hidden]{display:none}
 .tropnik-map-canvas.is-moving{cursor:grabbing}
 .tropnik-marker-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .tropnik-point-marker{position:absolute;left:0;top:0;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border:0;background:transparent;pointer-events:auto;cursor:pointer;touch-action:manipulation;z-index:15}

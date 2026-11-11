@@ -15,7 +15,12 @@ export function coastFixture(profile,engine){
  const center=unprojectMapPoint({x:rect.left+rect.width/2-delta.dx,y:rect.top+rect.height/2-delta.dy},camera,rect);
  const selection={pathname:'/tropnik/explore/',region:'coast',route:'',routeId:'',drawnRoute:'',mode:'detail',committedMode:'detail'};
  pan.before={camera,rect,selection:{...selection}};pan.after={camera:{...camera,longitude:center[0],latitude:center[1]},rect,selection:{...selection}};
- const steps=COAST_FIXTURES.flatMap(fixture=>fixture.zooms.map(targetZoom=>({fixture:fixture.id,coordinate:[...fixture.coordinate],targetZoom,zoom:targetZoom,camera:{longitude:28.6,latitude:60.36,zoom:targetZoom,tileSize:camera.tileSize},centerErrorPx:0,ready:true,pending:0,error:'',version:'c'.repeat(16),lod:targetZoom>=15?'source':targetZoom>=12?'local':'regional',cells:['coastal-cell']})));
+ const steps=COAST_FIXTURES.flatMap(fixture=>fixture.zooms.map(targetZoom=>{
+  const frameCamera={longitude:28.6,latitude:60.36,zoom:targetZoom,tileSize:camera.tileSize};
+  const coverage={ready:true,pending:0,error:'',version:'c'.repeat(16),lod:targetZoom>=15?'source':targetZoom>=12?'local':'regional',cells:['coastal-cell'],revision:4};
+  const bitmapInspection=customMapFixture({camera:frameCamera,routeId:''});bitmapInspection.coverage=structuredClone(coverage);
+  return{fixture:fixture.id,coordinate:[...fixture.coordinate],targetZoom,zoom:targetZoom,camera:frameCamera,centerErrorPx:0,...coverage,bitmapInspection};
+ }));
  const screenshots=steps.map(({fixture,targetZoom})=>({fixture,targetZoom,file:`${profile}-coast-${fixture}-z${targetZoom}.png`,bytes:10000,sha256:'d'.repeat(64)}));
  const labelDiagnostics=steps.filter(step=>step.fixture==='primorsk').map(frame=>{
   const screenshot=screenshots.find(shot=>shot.fixture===frame.fixture&&shot.targetZoom===frame.targetZoom),camera={longitude:28.6,latitude:60.36,zoom:frame.zoom,bearing:0,pitch:0};

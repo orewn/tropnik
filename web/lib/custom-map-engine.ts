@@ -84,6 +84,8 @@ export class CustomMapEngine {
   readonly canvas:HTMLCanvasElement;
   readonly element:HTMLElement;
   private context:CanvasRenderingContext2D;
+  private labelCanvas:HTMLCanvasElement;
+  private labelContext:CanvasRenderingContext2D;
   private options:CustomMapOptions;
   private tiles:CustomMapTiles;
   private rasterPolicy:MapCanvasPolicy;
@@ -124,8 +126,10 @@ export class CustomMapEngine {
   private additionalLabels:CustomMapLabel[]=[];
   private labelDiagnostics:CustomMapLabelDiagnostic[]=[];
   private drawRevision=0;
+  private labelRevision=0;
   private frame=0;
   private paintRequested=false;
+  private labelsRequested=false;
   private animation=0;
   private zoomTarget:number|null=null;
   private settleTimer?:ReturnType<typeof setTimeout>;
@@ -144,10 +148,13 @@ export class CustomMapEngine {
     this.canvas=document.createElement('canvas');this.canvas.className='tropnik-map-canvas';this.canvas.tabIndex=0;
     this.canvas.setAttribute('aria-label','Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб.');
     this.canvas.setAttribute('role','img');element.appendChild(this.canvas);
+    this.labelCanvas=document.createElement('canvas');this.labelCanvas.className='tropnik-map-labels';this.labelCanvas.hidden=true;
+    this.labelCanvas.setAttribute('aria-hidden','true');element.appendChild(this.labelCanvas);
     this.markerLayer=document.createElement('div');this.markerLayer.className='tropnik-marker-layer';element.appendChild(this.markerLayer);
     // Map pixels and the DOM controls share the normal compositor. A forced
     // low-latency surface uses a different presentation path on some devices.
     const context=this.canvas.getContext('2d',{alpha:false,willReadFrequently:this.rasterPolicy.softwareRaster});if(!context)throw new Error('Canvas map is unavailable');this.context=context;
+    const labelContext=this.labelCanvas.getContext('2d',{alpha:true,willReadFrequently:this.rasterPolicy.softwareRaster});if(!labelContext)throw new Error('Canvas map labels are unavailable');this.labelContext=labelContext;
     this.resize=new ResizeObserver(()=>this.resizeCanvas());this.resize.observe(element);this.resizeCanvas();this.bindInput();
     void loadRussiaGeometry().then(coverage=>{
       if(this.disposed){coverage.dispose();return;}
@@ -173,13 +180,13 @@ export class CustomMapEngine {
     // During resize the previous sheet insets can briefly exceed the new size.
     // Inspection must stay safe until the layout observer supplies fresh values.
     const visible=Object.values(padding).every(value=>Number.isFinite(value)&&value>=0)&&padding.left+padding.right<this.size.width&&padding.top+padding.bottom<this.size.height;
-    return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',drawRevision:this.drawRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
+    return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',drawRevision:this.drawRevision,labelRevision:this.labelRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
   }
   private publishInspection(){if(this.disposed)return;this.element.dataset.mapTilesState=this.state.loading?'loading':this.state.error?'error':'ready';this.element.dataset.mapInspection=JSON.stringify(this.inspect());}
   private setMoving(moving:boolean){this.element.dataset.mapMoving=String(moving);if(moving)this.element.dataset.mapCamera='moving';else delete this.element.dataset.mapCamera;}
   setActive(active:boolean){if(this.active===active)return;this.active=active;this.tiles.setActive(active);if(!active){this.pointer.cancel();this.stopAnimation();cancelAnimationFrame(this.frame);this.frame=0;clearTimeout(this.settleTimer);this.setMoving(false);}else{this.schedule();this.settled();}}
   setEco(enabled:boolean){if(this.eco===enabled)return;this.eco=enabled;this.canvas.width=1;this.resizeCanvas();}
-  setLabels(labels:readonly CustomMapLabel[]){this.additionalLabels=labels.slice(0,256).map(label=>({...label,coordinate:[...label.coordinate]}));this.schedule();}
+  setLabels(labels:readonly CustomMapLabel[]){this.additionalLabels=labels.slice(0,256).map(label=>({...label,coordinate:[...label.coordinate]}));this.scheduleLabels();}
   getLabelDiagnostics():CustomMapLabelDiagnostic[]{return this.labelDiagnostics.map(record=>({...record,coordinate:[...record.coordinate],...(record.rect?{rect:{...record.rect}}:{})}));}
   project(coordinate:readonly number[]){const point=project(this.camera,this.size,coordinate);return{x:point.x,y:this.size.height/2+(point.y-this.size.height/2)*Math.cos(this.pitch*Math.PI/180)};}
   unproject(point:MapPoint){return unproject(this.camera,this.size,this.flatPoint(point));}
@@ -197,7 +204,7 @@ export class CustomMapEngine {
     if(rectangles.length===this.obstacles.length&&rectangles.every((rect,index)=>{
       const previous=this.obstacles[index];return rect.left===previous.left&&rect.top===previous.top&&rect.right===previous.right&&rect.bottom===previous.bottom;
     }))return;
-    this.obstacles=rectangles.map(rect=>({...rect}));this.schedule();
+    this.obstacles=rectangles.map(rect=>({...rect}));this.scheduleLabels();
   }
   private stopAnimation(){cancelAnimationFrame(this.animation);this.animation=0;this.zoomTarget=null;}
   setCamera(next:CustomMapCamera,animate=false){this.moveCamera(next,animate);}
@@ -341,7 +348,9 @@ export class CustomMapEngine {
     if(width===this.size.width&&height===this.size.height&&this.canvas.width>1)return;
     this.pointer.cancel();this.size={width,height};this.pixelRatio=this.eco?1:Math.min(devicePixelRatio||1,matchMedia('(pointer:coarse)').matches?1.5:2);
     this.canvas.width=Math.round(width*this.pixelRatio);this.canvas.height=Math.round(height*this.pixelRatio);
-    this.canvas.style.width=`${width}px`;this.canvas.style.height=`${height}px`;this.currentKeys='';this.schedule();if(this.state.ready)this.settled();
+    this.labelCanvas.width=this.canvas.width;this.labelCanvas.height=this.canvas.height;
+    for(const surface of [this.canvas,this.labelCanvas]){surface.style.width=`${width}px`;surface.style.height=`${height}px`;}
+    this.currentKeys='';this.schedule();if(this.state.ready)this.settled();
   }
   private updateState(change:Partial<CustomMapState>){
     if(this.disposed)return;this.state={...this.state,...change,residentTiles:this.tiles.resident,pendingTiles:this.tiles.pending};this.publishInspection();this.options.onState?.({...this.state});
@@ -349,10 +358,14 @@ export class CustomMapEngine {
   private schedule(paint=true){
     this.paintRequested||=paint;
     if(!this.frame&&!this.disposed&&this.active)this.frame=requestAnimationFrame(()=>{
-      this.frame=0;const repaint=this.paintRequested;this.paintRequested=false;
-      if(repaint)this.draw();else this.drawMarkers();
+      this.frame=0;const repaint=this.paintRequested,relabel=this.labelsRequested;this.paintRequested=false;this.labelsRequested=false;
+      if(repaint)this.draw();else{
+        if(relabel){this.drawLabels();this.publishInspection();}
+        this.drawMarkers();
+      }
     });
   }
+  private scheduleLabels(){this.labelsRequested=true;this.schedule(false);}
   private settled(){
     if(this.disposed||!this.active)return;
     this.setMoving(false);
@@ -423,7 +436,7 @@ export class CustomMapEngine {
     if(this.selectedArea){ctx.fillStyle='rgba(92,128,70,.10)';ctx.fill(this.selectedArea,'evenodd');ctx.strokeStyle=satellite?'#e7eacc':'#688360';ctx.lineWidth=1.3/scale;ctx.stroke(this.selectedArea);}
     if(this.route){ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#fffef5';ctx.lineWidth=(routeStrokeWidth(this.camera.zoom)+3)/scale;ctx.stroke(this.route.path);ctx.strokeStyle='#244d3c';ctx.lineWidth=routeStrokeWidth(this.camera.zoom)/scale;ctx.stroke(this.route.path);}
     if(this.mask){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fill(this.mask,'evenodd');}
-    ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);this.drawLabels();
+    this.drawLabels();
     this.element.dataset.mapPainted='true';this.element.dataset.mapCanvas='custom';this.element.dataset.mapDrawnRoute=this.routeId||'';
     this.drawRevision++;this.drawMarkers();if(!this.pointer.activePointers&&!this.animation)this.publishInspection();this.options.onFrame?.(this.getCamera());
   }
@@ -441,8 +454,12 @@ export class CustomMapEngine {
   }
   private drawLabels(){
     this.labelDiagnostics=[];
-    if(!this.coverage)return;
-    const ctx=this.context,occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>();
+    // Control widths and the sheet affect label collisions, not terrain. Keep
+    // those pixels on their own surface so input never replays the base paths.
+    const ctx=this.labelContext;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,this.labelCanvas.width,this.labelCanvas.height);
+    ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);this.labelRevision++;
+    if(!this.coverage){this.labelCanvas.hidden=true;return;}
+    const occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>();
     const candidates:Array<{id:string;coordinate:[number,number];label:MapTileLabel;color?:string}>=this.additionalLabels.map(label=>({id:label.id,coordinate:label.coordinate,label:{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},color:label.color}));
     const detail=this.displayDetail();
     if(detail&&this.mode!=='overview'&&this.camera.zoom>=5)for(const tile of detail.tiles)for(const label of tile.labels){const n=2**tile.z;candidates.push({id:`${tile.key}:${label.text}`,coordinate:mercatorUnproject({x:(tile.x+label.x)/n,y:(tile.y+label.y)/n}),label});}
@@ -468,11 +485,12 @@ export class CustomMapEngine {
         ctx.strokeStyle='rgba(255,254,245,.95)';ctx.strokeText(value,p.x,textY);ctx.fillStyle=color&&/^#[\da-f]{6}$/i.test(color)?color:label.kind==='water'?'#427c88':'#344e3a';ctx.fillText(value,p.x,textY);}
       count++;diagnostic.visible=true;diagnostic.reason='drawn';
     }
+    this.labelCanvas.hidden=count===0;
   }
   destroy(){
     if(this.disposed)return;this.disposed=true;cancelAnimationFrame(this.frame);this.stopAnimation();clearTimeout(this.settleTimer);
     this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
-    this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
+    this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
   }
 }
 export {COUNTRY_BOUNDS,geometryPath,tileRequests};

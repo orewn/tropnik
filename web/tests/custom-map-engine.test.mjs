@@ -31,17 +31,21 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   moveTo(...args){this.commands.push(['moveTo',...args]);}lineTo(...args){this.commands.push(['lineTo',...args]);}
   rect(...args){this.commands.push(['rect',...args]);}closePath(){this.commands.push(['closePath']);}addPath(path){this.commands.push(['addPath',path]);}
  }
+ function createContext(surface){
+ const record=call=>calls.push({...call,surface});
  const context={font:'10px sans-serif',fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,globalAlpha:1,stack:[],
-  save(){this.stack.push(Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','globalAlpha','textAlign','textBaseline'].map(key=>[key,this[key]])));calls.push({op:'save'});},
-  restore(){Object.assign(this,this.stack.pop());calls.push({op:'restore'});},
-  measureText(text){const fontSize=Number(this.font.match(/([\d.]+)px/)?.[1]||10),width=text.length*fontSize*.55;calls.push({op:'measureText',text,font:this.font,width});return{width,actualBoundingBoxAscent:fontSize*.8,actualBoundingBoxDescent:fontSize*.2};},
-  fill(path,rule){calls.push({op:'fill',path,rule,color:this.fillStyle});},
-  stroke(path){calls.push({op:'stroke',path,color:this.strokeStyle,width:this.lineWidth});},
-  drawImage(bitmap,...args){calls.push({op:'drawImage',key:bitmap.key,bitmap,args,alpha:this.globalAlpha});},
-  strokeText(text,x,y){calls.push({op:'strokeText',text,x,y,font:this.font});},
-  fillText(text,x,y){calls.push({op:'fillText',text,x,y,font:this.font});},
+  save(){this.stack.push(Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','globalAlpha','textAlign','textBaseline'].map(key=>[key,this[key]])));record({op:'save'});},
+  restore(){Object.assign(this,this.stack.pop());record({op:'restore'});},
+  measureText(text){const fontSize=Number(this.font.match(/([\d.]+)px/)?.[1]||10),width=text.length*fontSize*.55;record({op:'measureText',text,font:this.font,width});return{width,actualBoundingBoxAscent:fontSize*.8,actualBoundingBoxDescent:fontSize*.2};},
+  fill(path,rule){record({op:'fill',path,rule,color:this.fillStyle});},
+  stroke(path){record({op:'stroke',path,color:this.strokeStyle,width:this.lineWidth});},
+  drawImage(bitmap,...args){record({op:'drawImage',key:bitmap.key,bitmap,args,alpha:this.globalAlpha});},
+  strokeText(text,x,y){record({op:'strokeText',text,x,y,font:this.font});},
+  fillText(text,x,y){record({op:'fillText',text,x,y,font:this.font});},
  };
- for(const name of ['setTransform','resetTransform','translate','scale','rotate','fillRect','clearRect','strokeRect','beginPath','closePath','moveTo','lineTo','arc','ellipse','bezierCurveTo','quadraticCurveTo','roundRect','rect','clip','setLineDash'])context[name]=function(...args){calls.push({op:name,args});};
+ for(const name of ['setTransform','resetTransform','translate','scale','rotate','fillRect','clearRect','strokeRect','beginPath','closePath','moveTo','lineTo','arc','ellipse','bezierCurveTo','quadraticCurveTo','roundRect','rect','clip','setLineDash'])context[name]=function(...args){record({op:name,args});};
+ return context;
+ }
  function matches(element,selector){
   if(selector.startsWith(':'))return false;
   const classes=[...selector.matchAll(/\.([\w-]+)/g)].map(match=>match[1]);
@@ -61,7 +65,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   closest(selector){return matches(this,selector)?this:this.parentElement?.closest(selector)||null;}
   matches(selector){return matches(this,selector);}
   getBoundingClientRect(){const w=Number.parseFloat(this.style.width)||this.clientWidth,h=Number.parseFloat(this.style.height)||this.clientHeight;return{x:0,y:0,left:0,top:0,right:w,bottom:h,width:w,height:h};}
-  getContext(type){assert.equal(type,'2d');return context;}
+  getContext(type,attributes){assert.equal(type,'2d');if(!this.context){this.context=createContext(this.className);this.context.getContextAttributes=()=>attributes;}return this.context;}
   focus(){}setPointerCapture(id){this.pointerCapture.add(id);}hasPointerCapture(id){return this.pointerCapture.has(id);}releasePointerCapture(id){this.pointerCapture.delete(id);}
  }
  const document={createElement:tag=>new Element(tag),createElementNS:(_namespace,tag)=>new Element(tag)},window=new Target(),host=new Element('div');
@@ -111,8 +115,9 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const store=stores[0],pending=(kind)=>store.requests.filter(job=>!job.settled&&(!kind||job.request.kind===kind));
  const complete=(selector=()=>true,options=()=>({}))=>{const jobs=pending().filter(selector);for(const job of jobs)store.resolve(job,options(job));return jobs;};
  const ready=async()=>{coverageResolve(coverage);await turn();complete();await turn();flush();return engine;};
- const lastDraw=()=>calls.slice(calls.findLastIndex(call=>call.op==='fillRect'));
- return{engine,host,context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,
+ const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
+ const lastDraw=()=>[...lastSurface('tropnik-map-canvas','fillRect'),...lastSurface('tropnik-map-labels','clearRect')];
+ return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
   coordinateAt:point=>engine.unproject(point),labelFor(job,coordinate,text,options={}){const p=load(resolve(root,'lib/custom-map-camera.ts')).mercatorProject(coordinate),n=2**job.request.z;return{x:p.x*n-job.request.x,y:p.y*n-job.request.y,text,kind:'place',rank:4,...options};}};
 }
@@ -127,7 +132,7 @@ test('production engine coalesces changes, has no idle draw loop and pauses anim
  env.engine.setActive(true);await env.settle();assert.equal(env.store.active,true);assert.ok(env.engine.inspect().drawRevision>paused);assert.equal(env.frames.size,0);
 });
 
-test('search markers and identical obstacle measurements preserve the painted map',async t=>{
+test('search markers and changing label obstacles preserve every retained base pixel',async t=>{
  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
  const before=env.engine.inspect().drawRevision,paintCalls=env.calls.length;
  const marker={id:'search-result',coordinate:[40.3,43.3],label:'Найденный маршрут',kind:'trail'};
@@ -136,12 +141,34 @@ test('search markers and identical obstacle measurements preserve the painted ma
  const button=env.host.querySelector('.tropnik-point-marker');assert.ok(button);assert.equal(button.getAttribute('aria-label'),'Открыть маршрут Найденный маршрут');
  env.engine.setMarkers([{...marker,active:true}]);env.engine.setObstacles([]);env.flush();
  assert.equal(button.classList.contains('is-selected'),true);assert.equal(env.engine.inspect().drawRevision,before);
- const obstacle={left:20,top:30,right:80,bottom:90};env.engine.setObstacles([obstacle]);env.flush();
- const moved=env.engine.inspect().drawRevision;assert.equal(moved,before+1);
- env.engine.setObstacles([{...obstacle}]);env.flush();assert.equal(env.engine.inspect().drawRevision,moved);
- obstacle.right=120;env.engine.setObstacles([obstacle]);env.flush();assert.equal(env.engine.inspect().drawRevision,moved+1,'Caller mutation must not change the retained obstacle snapshot');
+ const baseCalls=env.calls.filter(call=>call.surface==='tropnik-map-canvas');
+ const labelBefore=env.engine.inspect().labelRevision,obstacle={left:20,top:30,right:80,bottom:90};env.engine.setObstacles([obstacle]);env.flush();
+ assert.equal(env.engine.inspect().drawRevision,before);assert.equal(env.engine.inspect().labelRevision,labelBefore+1);
+ env.engine.setObstacles([{...obstacle}]);env.flush();assert.equal(env.engine.inspect().labelRevision,labelBefore+1);
+ obstacle.right=120;env.engine.setObstacles([obstacle]);env.flush();assert.equal(env.engine.inspect().labelRevision,labelBefore+2,'Caller mutation must not change the retained obstacle snapshot');
  env.engine.setLabels([{id:'new-label',coordinate:[40.2,43.2],label:'Новая подпись'}]);env.engine.setMarkers([]);env.flush();
- assert.equal(env.engine.inspect().drawRevision,moved+2,'A marker-only update must not cancel an already queued map paint');assert.equal(env.host.querySelector('.tropnik-point-marker'),null);
+ assert.equal(env.engine.inspect().labelRevision,labelBefore+3,'A marker-only update must not cancel an already queued label paint');assert.equal(env.host.querySelector('.tropnik-point-marker'),null);
+ assert.equal(env.engine.inspect().drawRevision,before);assert.deepEqual(env.calls.filter(call=>call.surface==='tropnik-map-canvas'),baseCalls,'No terrain, tile, mask or route command may replay for an obstacle or text update');
+ env.engine.setRegion([]);env.engine.setLabels([]);env.engine.setMarkers([]);env.flush();
+ assert.equal(env.engine.inspect().drawRevision,before+1,'A queued full geographic paint must survive later marker and label updates');
+});
+
+test('independent labels retain collision, density and lifecycle without an extra empty compositor surface',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+ const labels=env.host.querySelector('.tropnik-map-labels');assert.ok(labels);assert.equal(labels.hidden,true);assert.equal(labels.getAttribute('aria-hidden'),'true');
+ assert.equal(labels.width,env.engine.canvas.width);assert.equal(labels.height,env.engine.canvas.height);assert.equal(labels.style.width,env.engine.canvas.style.width);assert.equal(labels.style.height,env.engine.canvas.style.height);
+ assert.equal(labels.context.getContextAttributes().alpha,true);assert.equal(env.engine.canvas.context.getContextAttributes().alpha,false);
+ const label={id:'centre',coordinate:[...camera.center],label:'Проверяемая подпись'};
+ env.engine.setLabels([label]);env.flush();assert.equal(labels.hidden,false);assert.equal(env.engine.getLabelDiagnostics()[0].visible,true);
+ const ground=env.engine.inspect().drawRevision,point=env.engine.project(label.coordinate);
+ env.engine.setObstacles([{left:point.x-120,right:point.x+120,top:point.y-30,bottom:point.y+30}]);env.flush();
+ assert.equal(env.engine.getLabelDiagnostics()[0].reason,'collision');assert.equal(labels.hidden,true);assert.equal(env.engine.inspect().drawRevision,ground);
+ env.engine.setObstacles([]);env.flush();assert.equal(labels.hidden,false);assert.equal(env.engine.getLabelDiagnostics()[0].visible,true);
+ const latest=JSON.parse(env.host.dataset.mapInspection);assert.equal(latest.labelRevision,env.engine.inspect().labelRevision);assert.equal(latest.labels[0].visible,true,'Read-only inspection must describe the actually refreshed label surface');
+ env.host.clientWidth=620;env.host.clientHeight=460;env.observers[0].callback();env.flush();assert.equal(labels.width,env.engine.canvas.width);assert.equal(labels.height,env.engine.canvas.height);assert.equal(labels.width,620);assert.equal(labels.height,460);
+ const labelPaints=env.engine.inspect().labelRevision;env.engine.setActive(false);env.engine.setLabels([]);env.tick();assert.equal(env.engine.inspect().labelRevision,labelPaints);
+ env.engine.setActive(true);await env.settle();assert.equal(labels.hidden,true);
+ env.engine.setLabels([label]);env.engine.destroy();env.flush();assert.equal(labels.isConnected,false);assert.equal(env.host.children.length,0);assert.equal(env.frames.size,0);
 });
 
 test('late source batches cannot replace a newer camera or resurrect state after destroy',async()=>{

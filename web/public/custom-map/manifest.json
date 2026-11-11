@@ -79,8 +79,8 @@
     },
     {
       "path": "web/app/custom-map.css",
-      "sizeBytes": 3774,
-      "sha256": "ee8e89bb5cb60d4f333fe27819e17f243cbd9c71960c42aa093bfbd4b39c6398"
+      "sizeBytes": 3958,
+      "sha256": "0475037722b8b532d6aaf6acddc6c34f789e12a90db5b23e35a98fd676393e58"
     },
     {
       "path": "web/app/map-detail.css",
@@ -99,8 +99,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 41753,
-      "sha256": "4b26a2da88d164604e088536d8b6cc01a12cb353c2f8da5a730081c74c3760e7"
+      "sizeBytes": 43146,
+      "sha256": "70b54e18ac519762f132ae93d9d8d683f5a3207d837519e95d36aa50767efc50"
     },
     {
       "path": "web/lib/custom-map-painter.ts",
@@ -238,17 +238,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "6fd96645475c85348ca3f7a94d027e8fbaae0cb6ee0cee70dc04d15ca62e8fdd",
+  "sourceInputsSha256": "35d2ad296bb0ba407d9a16d6be51256b64e0750b1f31370cf88ec0e0d1d07a8a",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "82820acce42181d421790c581d7a81143117d57bb47057cce355c6ac183c3703"
+      "sha256": "1c875468ccbfa33f0760ca4af16b92309cb487dcfd09a650937519c9c7684d4f"
     },
     {
-      "path": "chunks/custom-map-entry-YBJ4-aDy.js",
-      "sizeBytes": 94767,
-      "sha256": "9cc58bfce1281a9b2a0b1e588b882b94858b0b6b47038c93211f462373a17207"
+      "path": "chunks/custom-map-entry-vUafR8wV.js",
+      "sizeBytes": 95855,
+      "sha256": "2708a34341ae0f643c6b898cc091344df406e3eb51c3d732af08c075715982f6"
     },
     {
       "path": "chunks/terrain-renderer-DQ47YevM.js",
@@ -268,12 +268,12 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "e392b48f3bde7ea7ae939c4c704bd1d50bf22442c1a077a372889e6ca86e01ef"
+      "sha256": "fd68806cfb22337c6120ec1dfda98259ec086eaaca952370f01750b18d22e877"
     },
     {
       "path": "map.css",
-      "sizeBytes": 75073,
-      "sha256": "64696e9f2b40be44d1a386c8934dc8ae97232e2bdffbf124af4553e04919182e"
+      "sizeBytes": 75255,
+      "sha256": "66a2a17f1cb861b4b3f60e74861f2ddf1232f21d3561cf1b16bba9a15d29540c"
     },
     {
       "path": "offline-manifest.json",

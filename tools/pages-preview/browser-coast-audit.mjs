@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {captureCoastLabels,assertCoastLabelInspection} from './browser-label-audit.mjs';
+import {inspectCustomMapDOM,assertCustomMapInspection} from './browser-custom-map.mjs';
 import {projectMapPoint} from './map-projection.mjs';
 import {dispatchSourceEndPan,assertSourceEndPanInput} from './browser-source-end-pan.mjs';
 
@@ -36,6 +37,17 @@ export function inspectCoastPanSelection(doc=document,loc=location){
  if(!map||!wrap)return null;
  const params=new URLSearchParams(loc.search);
  return{pathname:loc.pathname,region:params.get('region')||'',route:params.get('route')||'',routeId:map.dataset.mapRouteId||'',drawnRoute:map.dataset.mapDrawnRoute||'',mode:wrap.dataset.mapBaseTarget||'',committedMode:wrap.dataset.mapBaseCommitted||''};
+}
+
+/** The own renderer publishes one coverage status in its bounded, read-only
+ * frame inspection. Removed SDK dataset flags are not a second source of truth.
+ * Keep the original receipt so acceptance can bind the summary to its actual
+ * canvas, camera, bitmaps and geographic publication. Never coerce missing
+ * pending/error values into a successful empty queue. */
+export function inspectCoastCoverage(inspection){
+ if(inspection?.engine!=='tropnik-canvas'||inspection.readOnly!==true||!inspection.coverage)return null;
+ const {ready,pending,error,version,lod,cells,revision}=inspection.coverage;
+ return{ready,pending,error,version,lod,cells:Array.isArray(cells)?[...cells]:null,revision,bitmapInspection:inspection};
 }
 
 export function assertCoastPanInput(pan,input,context){
@@ -84,6 +96,10 @@ export function assertCoastAudit(report,profile,engine){
   assert.ok(frame.zoom>=targetZoom-.01&&frame.zoom<targetZoom+1.01);
   assert.ok(frame.centerErrorPx<=6,`${profile}: the coastline left the inspected viewport`);
   assert.equal(frame.ready,true);assert.equal(frame.pending,0);assert.equal(frame.error,'');
+  const actual=assertCustomMapInspection(frame.bitmapInspection,`${profile}/coast/${fixture.id}/${targetZoom}`,{mode:'detail'});
+  for(const key of ['ready','pending','error','version','lod','cells','revision'])assert.deepEqual(frame[key],actual.coverage[key],`${profile}: coastline ${key} differs from its rendered inspection`);
+  assert.ok(Number.isInteger(frame.revision)&&frame.revision>=0,`${profile}: missing geographic revision`);
+  assert.ok(Math.abs(actual.camera.center[0]-frame.camera.longitude)<1e-8&&Math.abs(actual.camera.center[1]-frame.camera.latitude)<1e-8&&Math.abs(actual.camera.zoom-frame.zoom)<1e-8&&Math.abs(actual.camera.zoom-frame.camera.zoom)<1e-8,`${profile}: coastline inspection has a stale camera`);
   assert.match(frame.version,/^[a-f0-9]{16}$/);versions.add(frame.version);
   assert.ok(['overview','regional','local','source'].includes(frame.lod));
   if(targetZoom===18)assert.equal(frame.lod,'source','Maximum zoom must use the source geometry');
@@ -171,10 +187,8 @@ export async function runCoastAudit(cdp,profile,helpers){
    for(const targetZoom of fixture.zooms){
     await reachZoom(targetZoom);
     const centered=await panTo(fixture.coordinate);
-    const geometry=await waitValue(`${profile.name}: ${fixture.id} geometry did not settle at ${targetZoom}`,()=>evaluate(cdp,`(()=>{
-     const d=document.querySelector('.atlas-canvas[data-map-engine]').dataset;
-     return{ready:d.mapCoverageReady==='true',pending:Number(d.mapCoveragePending),error:d.mapCoverageError??'',version:d.mapCoverageVersion??'',lod:d.mapCoverageLod??'',cells:(d.mapCoverageCells||'').split(',').filter(Boolean)};
-    })()`),state=>state.ready&&state.pending===0&&!state.error,20000);
+    const geometry=await waitValue(`${profile.name}: ${fixture.id} geometry did not settle at ${targetZoom}`,()=>evaluate(cdp,
+     `(${inspectCoastCoverage.toString()})((${inspectCustomMapDOM.toString()})())`),state=>state?.ready===true&&state.pending===0&&state.error==='',20000);
     const frame={fixture:fixture.id,coordinate:fixture.coordinate,targetZoom,zoom:centered.map.camera.zoom,camera:centered.map.camera,centerErrorPx:centered.centerErrorPx,...geometry};
     report.steps.push(frame);
     const screenshot=await cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});

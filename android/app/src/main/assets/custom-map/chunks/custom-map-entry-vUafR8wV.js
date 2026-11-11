@@ -1884,7 +1884,7 @@ var jt = class {
 		this.framed = null, this.pitch = 0, this.padding = {}, this.size = {
 			width: 1,
 			height: 1
-		}, this.pixelRatio = 1, this.coverageRevision = -1, this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.drawRevision = 0, this.frame = 0, this.paintRequested = !1, this.animation = 0, this.zoomTarget = null, this.pointer = new ie({
+		}, this.pixelRatio = 1, this.coverageRevision = -1, this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.drawRevision = 0, this.labelRevision = 0, this.frame = 0, this.paintRequested = !1, this.labelsRequested = !1, this.animation = 0, this.zoomTarget = null, this.pointer = new ie({
 			minZoom: -2,
 			maxZoom: 18,
 			rotate: !0
@@ -1899,13 +1899,19 @@ var jt = class {
 			error: "",
 			residentTiles: 0,
 			pendingTiles: 0
-		}, this.element = e, this.options = t, this.camera = { ...t.camera }, this.floor = { ...t.camera }, this.rasterPolicy = At(e.ownerDocument ?? document), this.tiles = new Ye(this.rasterPolicy.softwareRaster), this.canvas = document.createElement("canvas"), this.canvas.className = "tropnik-map-canvas", this.canvas.tabIndex = 0, this.canvas.setAttribute("aria-label", "Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб."), this.canvas.setAttribute("role", "img"), e.appendChild(this.canvas), this.markerLayer = document.createElement("div"), this.markerLayer.className = "tropnik-marker-layer", e.appendChild(this.markerLayer);
+		}, this.element = e, this.options = t, this.camera = { ...t.camera }, this.floor = { ...t.camera }, this.rasterPolicy = At(e.ownerDocument ?? document), this.tiles = new Ye(this.rasterPolicy.softwareRaster), this.canvas = document.createElement("canvas"), this.canvas.className = "tropnik-map-canvas", this.canvas.tabIndex = 0, this.canvas.setAttribute("aria-label", "Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб."), this.canvas.setAttribute("role", "img"), e.appendChild(this.canvas), this.labelCanvas = document.createElement("canvas"), this.labelCanvas.className = "tropnik-map-labels", this.labelCanvas.hidden = !0, this.labelCanvas.setAttribute("aria-hidden", "true"), e.appendChild(this.labelCanvas), this.markerLayer = document.createElement("div"), this.markerLayer.className = "tropnik-marker-layer", e.appendChild(this.markerLayer);
 		let n = this.canvas.getContext("2d", {
 			alpha: !1,
 			willReadFrequently: this.rasterPolicy.softwareRaster
 		});
 		if (!n) throw Error("Canvas map is unavailable");
-		this.context = n, this.resize = new ResizeObserver(() => this.resizeCanvas()), this.resize.observe(e), this.resizeCanvas(), this.bindInput(), Xe().then((e) => {
+		this.context = n;
+		let r = this.labelCanvas.getContext("2d", {
+			alpha: !0,
+			willReadFrequently: this.rasterPolicy.softwareRaster
+		});
+		if (!r) throw Error("Canvas map labels are unavailable");
+		this.labelContext = r, this.resize = new ResizeObserver(() => this.resizeCanvas()), this.resize.observe(e), this.resizeCanvas(), this.bindInput(), Xe().then((e) => {
 			if (this.disposed) {
 				e.dispose();
 				return;
@@ -1991,6 +1997,7 @@ var jt = class {
 			routeId: this.routeId || "",
 			drawnRoute: this.element.dataset.mapDrawnRoute || "",
 			drawRevision: this.drawRevision,
+			labelRevision: this.labelRevision,
 			tiles: {
 				overview: e(this.overview),
 				detail: e(this.displayDetail()),
@@ -2017,7 +2024,7 @@ var jt = class {
 		this.additionalLabels = e.slice(0, 256).map((e) => ({
 			...e,
 			coordinate: [...e.coordinate]
-		})), this.schedule();
+		})), this.scheduleLabels();
 	}
 	getLabelDiagnostics() {
 		return this.labelDiagnostics.map((e) => ({
@@ -2066,7 +2073,7 @@ var jt = class {
 		e.length === this.obstacles.length && e.every((e, t) => {
 			let n = this.obstacles[t];
 			return e.left === n.left && e.top === n.top && e.right === n.right && e.bottom === n.bottom;
-		}) || (this.obstacles = e.map((e) => ({ ...e })), this.schedule());
+		}) || (this.obstacles = e.map((e) => ({ ...e })), this.scheduleLabels());
 	}
 	stopAnimation() {
 		cancelAnimationFrame(this.animation), this.animation = 0, this.zoomTarget = null;
@@ -2334,10 +2341,14 @@ var jt = class {
 	resizeCanvas() {
 		if (this.disposed) return;
 		let e = Math.max(1, this.element.clientWidth), t = Math.max(1, this.element.clientHeight);
-		e === this.size.width && t === this.size.height && this.canvas.width > 1 || (this.pointer.cancel(), this.size = {
-			width: e,
-			height: t
-		}, this.pixelRatio = this.eco ? 1 : Math.min(devicePixelRatio || 1, matchMedia("(pointer:coarse)").matches ? 1.5 : 2), this.canvas.width = Math.round(e * this.pixelRatio), this.canvas.height = Math.round(t * this.pixelRatio), this.canvas.style.width = `${e}px`, this.canvas.style.height = `${t}px`, this.currentKeys = "", this.schedule(), this.state.ready && this.settled());
+		if (!(e === this.size.width && t === this.size.height && this.canvas.width > 1)) {
+			this.pointer.cancel(), this.size = {
+				width: e,
+				height: t
+			}, this.pixelRatio = this.eco ? 1 : Math.min(devicePixelRatio || 1, matchMedia("(pointer:coarse)").matches ? 1.5 : 2), this.canvas.width = Math.round(e * this.pixelRatio), this.canvas.height = Math.round(t * this.pixelRatio), this.labelCanvas.width = this.canvas.width, this.labelCanvas.height = this.canvas.height;
+			for (let n of [this.canvas, this.labelCanvas]) n.style.width = `${e}px`, n.style.height = `${t}px`;
+			this.currentKeys = "", this.schedule(), this.state.ready && this.settled();
+		}
 	}
 	updateState(e) {
 		this.disposed || (this.state = {
@@ -2350,9 +2361,12 @@ var jt = class {
 	schedule(e = !0) {
 		this.paintRequested ||= e, !this.frame && !this.disposed && this.active && (this.frame = requestAnimationFrame(() => {
 			this.frame = 0;
-			let e = this.paintRequested;
-			this.paintRequested = !1, e ? this.draw() : this.drawMarkers();
+			let e = this.paintRequested, t = this.labelsRequested;
+			this.paintRequested = !1, this.labelsRequested = !1, e ? this.draw() : (t && (this.drawLabels(), this.publishInspection()), this.drawMarkers());
 		}));
+	}
+	scheduleLabels() {
+		this.labelsRequested = !0, this.schedule(!1);
 	}
 	settled() {
 		if (this.disposed || !this.active) return;
@@ -2472,7 +2486,7 @@ var jt = class {
 		let n = this.mode === "satellite" && !!this.imagery;
 		n && this.drawTiles(this.imagery);
 		let r = this.displayDetail();
-		this.mode !== "overview" && this.camera.zoom >= 4.7 && (!n || r?.tiles[0]?.transparent) && this.drawTiles(r), !n && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), this.boundaryVisible && this.boundaries && (e.strokeStyle = n ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / t, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd"), e.strokeStyle = n ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / t, e.stroke(this.selectedArea)), this.route && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (Ze(this.camera.zoom) + 3) / t, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = Ze(this.camera.zoom) / t, e.stroke(this.route.path)), this.mask && (e.fillStyle = me, e.fill(this.mask, "evenodd")), e.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0), this.drawLabels(), this.element.dataset.mapPainted = "true", this.element.dataset.mapCanvas = "custom", this.element.dataset.mapDrawnRoute = this.routeId || "", this.drawRevision++, this.drawMarkers(), !this.pointer.activePointers && !this.animation && this.publishInspection(), this.options.onFrame?.(this.getCamera());
+		this.mode !== "overview" && this.camera.zoom >= 4.7 && (!n || r?.tiles[0]?.transparent) && this.drawTiles(r), !n && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), this.boundaryVisible && this.boundaries && (e.strokeStyle = n ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / t, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd"), e.strokeStyle = n ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / t, e.stroke(this.selectedArea)), this.route && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (Ze(this.camera.zoom) + 3) / t, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = Ze(this.camera.zoom) / t, e.stroke(this.route.path)), this.mask && (e.fillStyle = me, e.fill(this.mask, "evenodd")), this.drawLabels(), this.element.dataset.mapPainted = "true", this.element.dataset.mapCanvas = "custom", this.element.dataset.mapDrawnRoute = this.routeId || "", this.drawRevision++, this.drawMarkers(), !this.pointer.activePointers && !this.animation && this.publishInspection(), this.options.onFrame?.(this.getCamera());
 	}
 	drawMarkers() {
 		let e = [...this.markers.values()].filter((e) => e.marker.kind === "direction"), t = xt(e.map(({ marker: e }) => ({
@@ -2491,8 +2505,13 @@ var jt = class {
 		}
 	}
 	drawLabels() {
-		if (this.labelDiagnostics = [], !this.coverage) return;
-		let e = this.context, t = this.obstacles.map((e) => ({ ...e })), n = /* @__PURE__ */ new Set(), r = this.additionalLabels.map((e) => ({
+		this.labelDiagnostics = [];
+		let e = this.labelContext;
+		if (e.setTransform(1, 0, 0, 1, 0, 0), e.clearRect(0, 0, this.labelCanvas.width, this.labelCanvas.height), e.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0), this.labelRevision++, !this.coverage) {
+			this.labelCanvas.hidden = !0;
+			return;
+		}
+		let t = this.obstacles.map((e) => ({ ...e })), n = /* @__PURE__ */ new Set(), r = this.additionalLabels.map((e) => ({
 			id: e.id,
 			coordinate: e.coordinate,
 			label: {
@@ -2555,9 +2574,10 @@ var jt = class {
 			}
 			t.push(g), n.add(l), s.symbol && Dt(e, s.symbol, u.x, u.y), f && (e.textAlign = "center", e.textBaseline = "middle", e.lineWidth = 3, e.strokeStyle = "rgba(255,254,245,.95)", e.strokeText(f, u.x, p), e.fillStyle = c && /^#[\da-f]{6}$/i.test(c) ? c : s.kind === "water" ? "#427c88" : "#344e3a", e.fillText(f, u.x, p)), a++, r.visible = !0, r.reason = "drawn";
 		}
+		this.labelCanvas.hidden = a === 0;
 	}
 	destroy() {
-		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = []);
+		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = []);
 	}
 }, Mt = Object.freeze({
 	version: 1,
