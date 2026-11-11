@@ -2567,12 +2567,12 @@ var Ft = class {
 	}
 	draw() {
 		if (this.disposed || !this.active) return;
-		let e = this.context;
-		e.setTransform(1, 0, 0, 1, 0, 0), e.fillStyle = me, e.fillRect(0, 0, this.canvas.width, this.canvas.height);
-		let t = this.worldTransform(), n = this.displayDetail();
-		this.detailCoversViewport(n) || (this.area && (e.fillStyle = "#dce5cf", e.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95));
-		let r = this.mode === "satellite" && !!this.imagery;
-		r && this.drawTiles(this.imagery), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!r || n?.tiles[0]?.transparent) && this.drawTiles(n), !r && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), this.boundaryVisible && this.boundaries && (e.strokeStyle = r ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / t, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (e.strokeStyle = r ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / t, e.stroke(this.selectedBoundary)), this.route && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (Xe(this.camera.zoom) + 3) / t, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = Xe(this.camera.zoom) / t, e.stroke(this.route.path)), this.mask && (e.fillStyle = me, e.fill(this.mask, "evenodd")), this.drawLabels(), this.element.dataset.mapPainted = "true", this.element.dataset.mapCanvas = "custom", this.element.dataset.mapDrawnRoute = this.routeId || "", this.drawRevision++, this.drawMarkers(), !this.pointer.activePointers && !this.animation && this.publishInspection(), this.options.onFrame?.(this.getCamera());
+		let e = this.context, t = this.displayDetail(), n = this.detailCoversViewport(t);
+		e.setTransform(1, 0, 0, 1, 0, 0), n || (e.fillStyle = me, e.fillRect(0, 0, this.canvas.width, this.canvas.height));
+		let r = this.worldTransform();
+		n || (this.area && (e.fillStyle = "#dce5cf", e.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95));
+		let i = this.mode === "satellite" && !!this.imagery;
+		i && this.drawTiles(this.imagery), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!i || t?.tiles[0]?.transparent) && this.drawTiles(t), !i && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), this.boundaryVisible && this.boundaries && (e.strokeStyle = i ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / r, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (e.strokeStyle = i ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / r, e.stroke(this.selectedBoundary)), this.route && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (Xe(this.camera.zoom) + 3) / r, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = Xe(this.camera.zoom) / r, e.stroke(this.route.path)), this.mask && (e.fillStyle = me, e.fill(this.mask, "evenodd")), this.drawLabels(), this.element.dataset.mapPainted = "true", this.element.dataset.mapCanvas = "custom", this.element.dataset.mapDrawnRoute = this.routeId || "", this.drawRevision++, this.drawMarkers(), !this.pointer.activePointers && !this.animation && this.publishInspection(), this.options.onFrame?.(this.getCamera());
 	}
 	drawMarkers() {
 		let e = [...this.markers.values()].filter((e) => e.marker.kind === "direction"), t = bt(e.map(({ marker: e }) => ({
