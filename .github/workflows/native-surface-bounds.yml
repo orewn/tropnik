@@ -1,0 +1,101 @@
+name: Native surface bounds A/B diagnostic
+
+on:
+  push:
+    branches: [diagnostics/native-surface-bounds]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-surface-bounds-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    outputs:
+      artifactDigest: ${{ steps.build-artifact.outputs.artifact-digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Validate the diagnostic surface contract
+        run: node --test tools/pages-preview/tests/browser-surface-bounds-diagnostic.test.mjs
+      - name: Build the unchanged product once
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          pnpm --dir web install --frozen-lockfile
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Preserve the exact shared static build
+        id: build-artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: native-surface-bounds-static-build
+          path: web/pages-preview/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  compare:
+    needs: prepare
+    name: Untraced UI smoothness (${{ matrix.bounds }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    strategy:
+      fail-fast: false
+      matrix:
+        bounds: [existing, cover]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Download the identical shared build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: native-surface-bounds-static-build
+          path: web/pages-preview/dist
+      - name: Run all existing normal UI windows without tracing
+        timeout-minutes: 8
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_SURFACE: headless-software
+          TROPNIK_BROWSER_SURFACE_BOUNDS: ${{ matrix.bounds }}
+          TROPNIK_DIAGNOSTIC_BUILD_ARTIFACT_SHA256: ${{ needs.prepare.outputs.artifactDigest }}
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Prove unchanged WebGL2 pixels and recovery on the fully covered output
+        if: always() && matrix.bounds == 'cover'
+        timeout-minutes: 4
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_SURFACE: headless-software
+          TROPNIK_BROWSER_SURFACE_BOUNDS: cover
+          TROPNIK_TERRAIN_MASK_SOFTWARE: '1'
+          TROPNIK_DIAGNOSTIC_BUILD_ARTIFACT_SHA256: ${{ needs.prepare.outputs.artifactDigest }}
+        run: node --test tools/pages-preview/tests/terrain-mask.browser.mjs
+      - name: Preserve raw measurements and actual output dimensions
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: native-surface-bounds-${{ matrix.bounds }}-${{ github.run_id }}
+          path: |
+            web/pages-preview/design-qa
+            web/pages-preview/dist/browser-surface-diagnostic.json
+            web/pages-preview/dist/browser-native-surface-bounds-diagnostic.json
+            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            web/pages-preview/dist/browser-terrain-mask-software-diagnostic.json
+            web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7

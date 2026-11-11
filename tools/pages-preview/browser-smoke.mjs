@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {nativeSurfaceBoundsMode,nativeSurfaceBoundsFlags,collectNativeSurfaceBoundsDiagnostic} from './browser-surface-bounds-diagnostic.mjs';
 import {createHash} from 'node:crypto';
 import {createServer} from 'node:http';
 import {mkdir, readFile, rename, writeFile, stat} from 'node:fs/promises';
@@ -25,6 +26,8 @@ const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const catalogue=JSON.parse(await readFile(new URL('build-info.json',ROOT),'utf8')).catalogue;
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
 const diagnosticSurface=process.env.TROPNIK_BROWSER_SURFACE||null;
+const nativeBounds=nativeSurfaceBoundsMode();
+let surfaceDiagnosticReceipt=null;
 assert.ok(diagnosticSurface===null||diagnosticSurface==='headless'||diagnosticSurface==='x11'||diagnosticSurface==='headless-software','Unknown TROPNIK_BROWSER_SURFACE; use headless, x11 or headless-software for the surface diagnostic');
 const surfaceTrace=process.env.TROPNIK_BROWSER_SURFACE_TRACE==='1';
 assert.ok(process.env.TROPNIK_BROWSER_SURFACE_TRACE===undefined||process.env.TROPNIK_BROWSER_SURFACE_TRACE===''||surfaceTrace,'Unknown TROPNIK_BROWSER_SURFACE_TRACE');
@@ -877,9 +880,11 @@ async function checkpoint(phase){
 }
 try{
   browser=launchBrowser(browserBinary(),[
-    ...(diagnosticSurface==='x11'?['--ozone-platform=x11']:['--headless=new']),'--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
-    '--disable-default-apps','--disable-extensions','--disable-features=Translate,MediaRouter','--mute-audio',
-    '--use-gl=angle',diagnosticSurface==='headless-software'?'--use-angle=swiftshader-webgl':'--use-angle=swiftshader','--enable-unsafe-swiftshader',
+    ...(nativeBounds?nativeSurfaceBoundsFlags(nativeBounds):[
+      ...(diagnosticSurface==='x11'?['--ozone-platform=x11']:['--headless=new']),'--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
+      '--disable-default-apps','--disable-extensions','--disable-features=Translate,MediaRouter','--mute-audio',
+      '--use-gl=angle',diagnosticSurface==='headless-software'?'--use-angle=swiftshader-webgl':'--use-angle=swiftshader','--enable-unsafe-swiftshader',
+    ]),
     `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
   ]);
   const browserVersion=await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
@@ -893,12 +898,23 @@ try{
     assert.equal(commandLine.includes('--headless'),diagnosticSurface!=='x11','The browser mode differs from the requested surface');
     assert.ok(commandLine.split(' ').includes(`--use-angle=${requestedAngle}`),'Surface A/B must retain the requested SwiftShader/WebGL renderer');
     const receipt={schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,sourceCommit:process.env.GITHUB_SHA||null,surface:diagnosticSurface,requestedOzone,requestedAngle,chromiumVersion:browserVersion.Browser,commandLine,gpu:info.gpu,display:process.env.DISPLAY||null,staticBuildInfoSha256:createHash('sha256').update(await readFile(new URL('build-info.json',ROOT))).digest('hex'),inputArtifactSha256:process.env.TROPNIK_DIAGNOSTIC_BUILD_ARTIFACT_SHA256||null,profiles:profiles.filter(profile=>runPolicy.profiles.includes(profile.name)).map(profile=>({name:profile.name,width:profile.width,height:profile.height,deviceScaleFactor:profile.mobile?2:1,mobile:profile.mobile})),traceEnabled:surfaceTrace,instrumented:surfaceTrace,scope:'Diagnostic comparison of full SwiftShader GL on Ozone headless/X11 versus native software compositor plus SwiftShader WebGL; identical application, viewport, input and budgets; this cannot certify release',capturedAt:new Date().toISOString()};
+    surfaceDiagnosticReceipt=receipt;
     await writeFile(new URL('browser-surface-diagnostic.json',ROOT),JSON.stringify(receipt,null,2)+'\n');
   }
   const initialUrl=['offline-safety','satellite-continuity','ui-smoothness','ui-smoothness-cpu'].includes(runPolicy.diagnostic)?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
   const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(initialUrl)}`,{method:'PUT'});
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
+  if(nativeBounds){
+    const receipt=await collectNativeSurfaceBoundsDiagnostic(cdp,{mode:nativeBounds,sourceCommit:process.env.GITHUB_SHA||null,
+      chromiumVersion:surfaceDiagnosticReceipt.chromiumVersion,commandLine:surfaceDiagnosticReceipt.commandLine,
+      inputArtifactSha256:surfaceDiagnosticReceipt.inputArtifactSha256,staticBuildInfoSha256:surfaceDiagnosticReceipt.staticBuildInfoSha256,
+      profiles:profiles.map(({name,width,height,mobile})=>({name,width,height,deviceScaleFactor:mobile?2:1}))});
+    await writeFile(new URL('browser-native-surface-bounds-diagnostic.json',ROOT),JSON.stringify(receipt,null,2)+'\n');
+    surfaceDiagnosticReceipt.nativeBounds=nativeBounds;surfaceDiagnosticReceipt.nativeSurface=receipt.nativeSurface;
+    await writeFile(new URL('browser-surface-diagnostic.json',ROOT),JSON.stringify(surfaceDiagnosticReceipt,null,2)+'\n');
+    if(nativeBounds==='cover')assert.equal(receipt.coveragePassed,true,receipt.coverageError);
+  }
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
     (${installSmoothnessRecorder.toString()})(window);
     window.__tropnikPerf={cls:0,longest:0};
@@ -1074,3 +1090,4 @@ try{
     if(!failure){await writeFile(new URL('browser-failure.json',ROOT),JSON.stringify({error:error.message,browserStartup:browser.diagnostics()},null,2)+'\n');throw error;}
   }
 }
+

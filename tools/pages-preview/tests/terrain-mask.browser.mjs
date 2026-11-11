@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {nativeSurfaceBoundsMode,nativeSurfaceBoundsFlags,collectNativeSurfaceBoundsDiagnostic,collectNativeBoundsBrowserInfo} from '../browser-surface-bounds-diagnostic.mjs';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
@@ -12,6 +13,8 @@ import {launchBrowser,BROWSER_STARTUP_LIMITS,browserErrorDetails} from '../brows
 const binary=['google-chrome','google-chrome-stable','chromium','chromium-browser'].find(name=>spawnSync('which',[name],{stdio:'ignore'}).status===0);
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const diagnosticSoftware=process.env.TROPNIK_TERRAIN_MASK_SOFTWARE==='1';
+const nativeBounds=nativeSurfaceBoundsMode();
+if(nativeBounds){assert.equal(nativeBounds,'cover','The bounds A/B pixel proof uses the fully covered native output');assert.equal(diagnosticSoftware,true,'The native bounds proof must retain actual WebGL2 under the software compositor');}
 assert.ok(process.env.TROPNIK_TERRAIN_MASK_SOFTWARE===undefined||process.env.TROPNIK_TERRAIN_MASK_SOFTWARE===''||diagnosticSoftware,'Unknown TROPNIK_TERRAIN_MASK_SOFTWARE');
 if(diagnosticSoftware){
  assert.equal(process.env.TROPNIK_BROWSER_DIAGNOSTIC,'ui-smoothness','Software-compositor pixel proof is diagnostic-only');
@@ -41,14 +44,14 @@ test('RF display mask clips actual terrain and thick route pixels in WebGL2 and 
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const origin=`http://127.0.0.1:${server.address().port}`,lease=createNetServer();
  await new Promise(resolve=>lease.listen(0,'127.0.0.1',resolve));const port=lease.address().port;await new Promise(resolve=>lease.close(resolve));
- const browser=launchBrowser(binary,['--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--no-first-run','--disable-extensions','--use-gl=angle',`--use-angle=${requestedAngle}`,'--enable-unsafe-swiftshader',`--remote-debugging-port=${port}`,`--user-data-dir=${directory}`,'about:blank']);
+ const browser=launchBrowser(binary,[...(nativeBounds?nativeSurfaceBoundsFlags(nativeBounds):['--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--no-first-run','--disable-extensions','--use-gl=angle',`--use-angle=${requestedAngle}`,'--enable-unsafe-swiftshader']),`--remote-debugging-port=${port}`,`--user-data-dir=${directory}`,'about:blank']);
  let socket;
  t.after(async()=>{
   socket?.close();await browser.close();await new Promise(resolve=>server.close(resolve));await rm(directory,{recursive:true,force:true});
   await mkdir(output,{recursive:true});report.browserStartup=browser.diagnostics();await writeFile(join(output,reportFile),JSON.stringify(report,null,2)+'\n');
  });
  try{
-  await browser.waitUntilReady(`http://127.0.0.1:${port}/json/version`);
+  const browserVersion=await browser.waitUntilReady(`http://127.0.0.1:${port}/json/version`);
   const target=await browser.requestJSON(`http://127.0.0.1:${port}/json/new?about:blank`,{method:'PUT'});
   socket=new WebSocket(target.webSocketDebuggerUrl);await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true});});
   let next=0;const pending=new Map();
@@ -58,6 +61,14 @@ test('RF display mask clips actual terrain and thick route pixels in WebGL2 and 
    pending.set(id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject:error=>{clearTimeout(timer);reject(error);}});socket.send(JSON.stringify({id,method,params}));
   })};
   const evaluate=async(expression,timeout)=>{const result=await cdp.call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true},timeout);if(result.exceptionDetails)throw new Error(result.exceptionDetails.exception?.description||result.exceptionDetails.text);return result.result.value;};
+  if(nativeBounds){
+   const actual=await collectNativeBoundsBrowserInfo(browserVersion.webSocketDebuggerUrl);
+   report.browserInfo={chromiumVersion:actual.browser.product,version:actual.browser,commandLine:actual.info.commandLine,gpu:actual.info.gpu};
+   report.nativeSurfaceBounds=await collectNativeSurfaceBoundsDiagnostic(cdp,{mode:nativeBounds,sourceCommit:process.env.GITHUB_SHA||null,
+    chromiumVersion:actual.browser.product,commandLine:actual.info.commandLine,inputArtifactSha256:process.env.TROPNIK_DIAGNOSTIC_BUILD_ARTIFACT_SHA256||null,
+    staticBuildInfoSha256:createHash('sha256').update(await readFile(join(output,'build-info.json'))).digest('hex')});
+   assert.equal(report.nativeSurfaceBounds.coveragePassed,true,report.nativeSurfaceBounds.coverageError);
+  }
   await cdp.call('Emulation.setDeviceMetricsOverride',{width:512,height:384,deviceScaleFactor:1,mobile:false});
   await cdp.call('Page.navigate',{url:origin+'/'});
   let loaded=false;for(let attempt=0;attempt<60;attempt++){if(await evaluate("typeof window.runMaskGate==='function'")){loaded=true;break;}await sleep(50);}assert.ok(loaded,'The real renderer fixture did not load');
@@ -78,3 +89,4 @@ test('RF display mask clips actual terrain and thick route pixels in WebGL2 and 
   assert.equal(report.cases.length,4);assert.ok(report.cases.some(item=>item.recovery?.restored===1));report.verified=!diagnosticSoftware;if(diagnosticSoftware)report.pixelVerified=true;report.phase='complete';
  }catch(error){report.error=browserErrorDetails(error);throw error;}
 });
+
