@@ -490,6 +490,9 @@ export class CustomMapEngine {
     if(this.disposed||!this.active)return;const ctx=this.context;
     const detail=this.displayDetail(),covered=this.detailCoversViewport(detail);
     ctx.setTransform(1,0,0,1,0,0);
+    // Discard obsolete recorded operations before rebuilding this complete
+    // frame. The opaque detail proof or the original paper fill covers it.
+    ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
     // Fully opaque detail overwrites every backing pixel, including the guard
     // margin. A missing cell or exposed pan edge retains the original clear.
     if(!covered){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fillRect(0,0,this.canvas.width,this.canvas.height);}
