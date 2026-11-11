@@ -17,9 +17,9 @@ function fixture({files=[],online=true,softwareRaster}={}){
   }
   const testModule={exports:{}};
   const navigator={onLine:online};
-  vm.runInNewContext(compiled,{module:testModule,exports:testModule.exports,URL,Worker,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,console,
+  vm.runInNewContext(compiled,{module:testModule,exports:testModule.exports,URL,Worker,AbortController,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,console,
     require(name){
-      if(name==='./map-preload')return {loadPublicBytes:url=>new Promise((resolve,reject)=>downloads.push({url,resolve,reject})),loadPublicJSON:async url=>url.includes('manifest')?{files:files.map(path=>({path}))}:{tiles:['https://tiles.openfreemap.org/snapshot/{z}/{x}/{y}.pbf']}};
+      if(name==='./map-preload')return {loadPublicBytes:(url,priority,signal)=>new Promise((resolve,reject)=>{const request={url,resolve,reject,signal};downloads.push(request);signal?.addEventListener('abort',()=>{request.done=true;request.aborted=true;reject(signal.reason);},{once:true});}),loadPublicJSON:async url=>url.includes('manifest')?{files:files.map(path=>({path}))}:{tiles:['https://tiles.openfreemap.org/snapshot/{z}/{x}/{y}.pbf']}};
       if(name==='./map-satellite')return {SATELLITE_PROVIDERS:{'eox-s2':{tiles:'https://tiles.maps.eox.at/s2/{z}/{x}/{y}.jpg'},'eox-bluemarble':{tiles:'https://tiles.maps.eox.at/bm/{z}/{x}/{y}.jpg'}}};
       if(name.endsWith('?worker&url'))return {__esModule:true,default:'/custom-map/workers/tiles.js'};
       throw new Error(`Unmocked runtime dependency ${name}`);
@@ -74,6 +74,20 @@ test('rapid tile demand bounds both network concurrency and decoded-source backl
   env.store.destroy();await Promise.all(outcomes);assert.equal(env.workers[0].terminated,true);
 });
 
+test('a cold mixed viewport starts measured relief alongside vectors within the original three slots',async t=>{
+  const env=fixture();t.after(()=>env.store.destroy());env.store.setActive(false);
+  const vectors=Array.from({length:32},(_,i)=>({kind:'vector',z:18,x:1605+i,y:3207}));
+  const relief=Array.from({length:32},(_,i)=>({kind:'relief',z:18,x:1605+i,y:3207}));
+  const requests=[...vectors,...relief],outcomes=requests.map(value=>env.store.load(value).catch(error=>error));env.store.pin(requests.map(env.key));
+  env.store.setActive(true);await turn();assert.equal(env.downloads.length,3);assert.equal(env.store.snapshot().fetching,3);
+  assert.ok(env.downloads.some(value=>value.url.includes('mapterhorn')),'DEM acquisition must not wait for all 32 vector sources');
+  assert.ok(env.downloads.some(value=>value.url.includes('openfreemap')));
+  env.resolveDownloads();await turn();const first=env.workers[0].complete();await turn();const second=env.workers[0].complete();await turn();
+  assert.deepEqual([first.kind,second.kind].sort(),['relief','vector'],'the single decoder also shares capacity between demanded layers');
+  assert.ok(env.store.snapshot().fetching<=3);assert.ok((env.store.snapshot().stages.ready||0)+env.store.snapshot().fetching<=6);
+  env.store.destroy();await Promise.all(outcomes);
+});
+
 test('duplicate consumers share one decode and source bytes stay owned by the fetch pool',async t=>{
   const env=fixture();t.after(()=>env.store.destroy());const r=request();env.store.pin([env.key(r)]);
   const a=env.store.load(r),b=env.store.load(r);assert.equal(a,b);await turn();
@@ -88,6 +102,19 @@ test('view changes reject unstarted work and destruction releases images without
   env.store.pin([]);assert.match((await abandoned).message,/view changed/);
   env.store.setActive(true);const pending=env.store.load(request(2)).catch(error=>error);await turn();
   env.store.destroy();env.resolveDownloads();await turn();assert.match((await pending).message,/released/);assert.equal(env.workers.length,0);assert.equal(env.store.pending,0);
+});
+
+test('a new view cancels obsolete reads and reclaims all three fetch slots without waiting for network timeouts',async t=>{
+  const env=fixture();t.after(()=>env.store.destroy());
+  const oldRequests=[request(1),request(2),request(3)],newRequests=[request(4),request(5),request(6)];
+  env.store.pin(oldRequests.map(env.key));const old=oldRequests.map(value=>env.store.load(value).catch(error=>error));await turn();
+  assert.equal(env.downloads.length,3);assert.ok(env.downloads.every(value=>!value.signal.aborted));
+  env.store.pin(newRequests.map(env.key));const current=newRequests.map(value=>env.store.load(value));await turn();
+  assert.ok(env.downloads.slice(0,3).every(value=>value.signal.aborted&&value.aborted));
+  assert.equal(env.downloads.length,6,'new reads start before any abandoned source resolves');
+  assert.equal(env.store.snapshot().fetching,3);assert.ok((await Promise.all(old)).every(error=>/view changed/.test(error.message)));
+  env.resolveDownloads();await turn();for(let index=0;index<3;index++){env.workers[0].complete();await turn();}
+  assert.equal((await Promise.all(current)).length,3);assert.equal(env.store.pending,0);assert.equal(env.store.snapshot().errors.length,0,'expected cancellation is not a visible map failure');
 });
 
 test('overzoomed vector and DEM children share the correct real parent, also across the dateline',async t=>{

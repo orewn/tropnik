@@ -50,6 +50,41 @@ test('bounded queue rejects extra speculative work and still completes accepted 
   const a=pool.get('/a'),b=pool.get('/b');await assert.rejects(pool.get('/c'),/queue/);release();await Promise.all([a,b]);
 });
 
+test('one view cancellation preserves another lease and the completed shared byte cache', async () => {
+  let release,requestSignal,calls=0;
+  const pool=new MapResourcePool({fetcher:async(_url,{signal})=>{calls++;requestSignal=signal;await new Promise(resolve=>{release=resolve;});return new Response('shared');}});
+  const first=new AbortController(),second=new AbortController();
+  const a=pool.get('/data/shared',0,first.signal).catch(error=>error),b=pool.get('/data/shared',0,second.signal);
+  first.abort();assert.equal((await a).name,'AbortError');assert.equal(requestSignal.aborted,false);assert.equal(calls,1);
+  release();assert.equal(new TextDecoder().decode(await b),'shared');second.abort();
+  assert.equal(new TextDecoder().decode(await pool.get('/data/shared')),'shared');assert.equal(calls,1);assert.equal(pool.stats().bytes,6);
+});
+
+test('the last cancelled lease releases HTTP capacity and cannot remove a newer request for the same URL', async () => {
+  const reads=[];
+  const pool=new MapResourcePool({concurrency:1,fetcher:(url,{signal})=>new Promise((resolve,reject)=>{
+    reads.push({url,signal,resolve,reject});signal.addEventListener('abort',()=>reject(signal.reason),{once:true});
+  })});
+  const old=new AbortController(),oldResult=pool.get('/data/view',0,old.signal).catch(error=>error);
+  old.abort();const replacement=pool.get('/data/view',0);
+  assert.equal((await oldResult).name,'AbortError');await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(reads.length,2);assert.equal(reads[0].signal.aborted,true);assert.equal(reads[1].signal.aborted,false);
+  assert.equal(pool.has('/data/view'),true,'late cleanup from the old read must retain the replacement');
+  reads[1].resolve(new Response('fresh'));assert.equal(new TextDecoder().decode(await replacement),'fresh');
+  assert.equal(new TextDecoder().decode(await pool.get('/data/view')),'fresh');assert.equal(reads.length,2);assert.equal(pool.stats().bytes,5);
+});
+
+test('cancelled queued views never start and a prefetch keeps its independent shared lease', async () => {
+  let release,requestSignal;const urls=[];
+  const pool=new MapResourcePool({concurrency:1,fetcher:async(url,{signal})=>{urls.push(url);requestSignal=signal;await new Promise(resolve=>{release=resolve;});return new Response('ok');}});
+  const prefetch=pool.get('/data/retained',2),view=new AbortController(),queued=new AbortController();
+  const shared=pool.get('/data/retained',0,view.signal).catch(error=>error),waiting=pool.get('/data/obsolete',0,queued.signal).catch(error=>error);
+  view.abort();queued.abort();assert.equal((await shared).name,'AbortError');assert.equal((await waiting).name,'AbortError');
+  assert.equal(requestSignal.aborted,false);assert.equal(pool.stats().queued,0);assert.equal(pool.has('/data/obsolete'),false);
+  release();await prefetch;await new Promise(resolve=>setImmediate(resolve));assert.deepEqual(urls,['/data/retained']);
+  const already=new AbortController();already.abort();await assert.rejects(pool.get('/data/never',0,already.signal),{name:'AbortError'});assert.equal(pool.has('/data/never'),false);
+});
+
 test('route tile plan covers bounds without truncating at the centre', () => {
   const bounds=[40.29,43.64,40.49,43.82],tiles=routeTilePlan(bounds,12);
   assert.ok(tiles.length>1&&tiles.length<=12);

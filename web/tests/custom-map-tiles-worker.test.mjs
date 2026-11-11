@@ -211,6 +211,33 @@ test('all eight neighbours are decoded serially and only four rows, four columns
   assert.ok(env.decoded.every(image=>image.closed===1));assert.equal(env.canvases.filter(canvas=>canvas.context.draws.some(draw=>draw.image.rgba)&&canvas.width>1).length,0,'every temporary neighbouring raster is released');
 });
 
+test('adjacent measured parents reuse compact neighbour borders without decoding the same image again',async()=>{
+  const images=new Map([[1,sourceImage(4,(x,y)=>x*25+y)],[2,sourceImage(4,(x,y)=>(x-4)*25+y)]]),env=fixture({images});
+  const primary={kind:'relief',z:12,sourceZ:12,x:25,y:50,sourceKey:'https://tiles.example/12/25/50.webp'};
+  const first=await env.send(job(1,{...primary,halo:{tiles:[haloSource(-1,0)],missing:[]}}));
+  assert.equal(first.error,undefined);assert.equal(env.counts().imageDecodes,2);
+  const adjacent=await env.send(job(2,{...primary,y:51,sourceKey:'https://tiles.example/12/25/51.webp',halo:{tiles:[haloSource(-1,-1,2,{sourceKey:'https://tiles.example/12/24/50.webp'})],missing:[]}}));
+  assert.equal(adjacent.error,undefined);assert.equal(env.counts().imageDecodes,3,'only the new full primary raster is decoded');
+  assert.equal(adjacent.reliefCoverage.available,1);assert.equal(adjacent.reliefCoverage.missingDataFilled,false);
+  assert.deepEqual(Object.values(env.shadeSources.at(-1).halo['-1,-1']),[-22],'the reused corner is the actual neighbour sample');
+  assert.ok(env.decoded.every(image=>image.closed===1));
+});
+
+test('compact measured borders retain exactly 64 source entries independently of four full parents',async()=>{
+  for(const fillerCount of [62,63]){
+    const env=fixture(),target='https://tiles.example/12/49/50.webp';let id=0;
+    const primary=(x,y,sourceKey)=>job(++id,{kind:'relief',z:12,sourceZ:12,x,y,sourceKey});
+    await env.send(primary(49,50,target));
+    for(let index=0;index<fillerCount;index++)await env.send(primary(1000+index,1000,`https://tiles.example/12/${1000+index}/1000.webp`));
+    const last=primary(50,50,'https://tiles.example/12/50/50.webp');await env.send(last);
+    const before=env.counts().imageDecodes;
+    const result=await env.send({...last,id:++id,halo:{tiles:[haloSource(-1,0,1,{sourceKey:target})],missing:[]}});
+    assert.equal(result.error,undefined);assert.equal(result.reliefCoverage.available,1);
+    assert.equal(env.counts().imageDecodes-before,fillerCount===62?0:1,'the 65th distinct source evicts the oldest compact border, without retaining full DEM rasters');
+    assert.ok(env.canvases.filter(canvas=>canvas.context.imageData&&canvas.width>1).length<=4);
+  }
+});
+
 test('invalid or mismatched neighbour pixels degrade only that boundary and remain explicit',async()=>{
   const invalid=sourceImage(4,(x,y)=>x+y);invalid.rgba[3]=0;
   const env=fixture({images:new Map([[2,invalid],[3,sourceImage(8,(x,y)=>x+y)]])});

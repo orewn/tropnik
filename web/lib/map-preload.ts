@@ -37,9 +37,9 @@ export function loadPublicJSON<T>(url: string, priority = 0): Promise<T> {
   const key = allowed(url); if (!key) return Promise.reject(new Error('Unknown public map resource'));
   return pool.json<T>(key, priority);
 }
-export function loadPublicBytes(url:string,priority=1):Promise<ArrayBuffer>{
+export function loadPublicBytes(url:string,priority=1,signal?:AbortSignal):Promise<ArrayBuffer>{
   const key=allowed(url);if(!key)return Promise.reject(new Error('Unknown public map resource'));
-  return pool.get(key,priority);
+  return pool.get(key,priority,signal);
 }
 export function warmMap() {
   if (typeof window === 'undefined') return;

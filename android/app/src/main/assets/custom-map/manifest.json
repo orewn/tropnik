@@ -89,8 +89,8 @@
     },
     {
       "path": "web/app/map-direction-marker.css",
-      "sizeBytes": 5056,
-      "sha256": "459fbb8052a3f377ca051b566013239bd2f3e33cbcab20ec503c1e89aea08992"
+      "sizeBytes": 5294,
+      "sha256": "39ad2e70d14928a1c021db16070c46f4069994258d1e6661ed5517fa78322251"
     },
     {
       "path": "web/lib/custom-map-camera.ts",
@@ -114,13 +114,13 @@
     },
     {
       "path": "web/lib/custom-map-tiles.ts",
-      "sizeBytes": 13642,
-      "sha256": "bf31a2766762315dc58256b54f68af98bf767168474e77f0f6659267591ad32f"
+      "sizeBytes": 14552,
+      "sha256": "b15e25a1bc8e6b616b33c8e54fa0b635915387572f4cf4505241bb9ddb0092f9"
     },
     {
       "path": "web/lib/custom-map-tiles.worker.ts",
-      "sizeBytes": 13175,
-      "sha256": "6eba664fe851dfb85556413b6f1cc9edad5bf4f266a40f3600defe39119a4b8c"
+      "sizeBytes": 15008,
+      "sha256": "5f0754baa9aee259a19388b7559a0fbaa0eca5b02ecb34069c5fcbd056d7a944"
     },
     {
       "path": "web/lib/custom-map-vector.ts",
@@ -139,8 +139,8 @@
     },
     {
       "path": "web/lib/map-direction-layout.ts",
-      "sizeBytes": 25292,
-      "sha256": "13bd5ea6cd2858d3ab53f4f8947031993237a255d93f133c03337ebe7433dc0c"
+      "sizeBytes": 29768,
+      "sha256": "3fcb18ac4e448624e2520b71e57f1f1139fcbc4b3c66ca1b6023d4c7487ef6c7"
     },
     {
       "path": "web/lib/map-direction-marker.ts",
@@ -159,13 +159,13 @@
     },
     {
       "path": "web/lib/map-preload.ts",
-      "sizeBytes": 5737,
-      "sha256": "dadd6bb1617e24f6bf1d22154101da260f1e4c6225c3a54fc4c1e684f0ebf2b3"
+      "sizeBytes": 5764,
+      "sha256": "5e382ea60ee5ef0360ae62b545a37a42414fc884ef2f949636d975a7cdd11593"
     },
     {
       "path": "web/lib/map-resource-pool.ts",
-      "sizeBytes": 6419,
-      "sha256": "aaa69e4acf220f32e9606c5446260023369d7b906be52a6ef3f4a1c8fd6e3049"
+      "sizeBytes": 8302,
+      "sha256": "f84691bba7a8baa5bd0677c360ecc716c9a292304c2741688a08d73b687a8b91"
     },
     {
       "path": "web/lib/map-route-presentation.ts",
@@ -238,17 +238,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "81d02f1f3f13d1e14763e46742d0175ec79f5fcdd3fc28c1db4fbb2af0e0574c",
+  "sourceInputsSha256": "5e46e7687359f229a335e909812e7043dd270bbf10d22d584c0024cdfea018b6",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "3c7ded2dbef3f6f7854bdb217b193c867492bb016f9a5f1a0b25ea67183a2581"
+      "sha256": "4c9e7d7688524db7fefc05d6bb3ae9b27eac960e27346ff379810c43b3ea9841"
     },
     {
-      "path": "chunks/custom-map-entry-BVbjg3ke.js",
-      "sizeBytes": 90854,
-      "sha256": "2efaba783f8b3b1c921ae79bc9dc8634e38c395d09a079a10554b56abdb59209"
+      "path": "chunks/custom-map-entry-jmtZFlIn.js",
+      "sizeBytes": 94403,
+      "sha256": "7a2013b6c29df0e6014adc6032beb52b81cb137ba39af0fab668202bd1d47f8e"
     },
     {
       "path": "chunks/terrain-renderer-pEGv39m9.js",
@@ -268,12 +268,12 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "4ccefad9432eef08d7275e488f3a03acd34040f3acd297f5f3e467461075e703"
+      "sha256": "e780f96acdf7df40e39379693eb82e366a5726a7f0e6705048e3b37433e81bc7"
     },
     {
       "path": "map.css",
-      "sizeBytes": 74246,
-      "sha256": "544389a5ad262b1edce69fd246d558808c6775f82c08dadce38a39226bdc7452"
+      "sizeBytes": 74474,
+      "sha256": "2a2caafb135518eda0785ebac322b86b74a6c0c8b4e89394a027d0054c8715d7"
     },
     {
       "path": "offline-manifest.json",
@@ -281,9 +281,9 @@
       "sha256": "54075549afdea2aee6d10c3cf70d53429b0ba457eda890a8ad93c1124c508c10"
     },
     {
-      "path": "workers/custom-map-tiles.worker-BERbKOzS.js",
-      "sizeBytes": 23289,
-      "sha256": "296f5d069a1c91006bdafd5b1977ee68a8f05f55f57519bb5fa811a359ef8a25"
+      "path": "workers/custom-map-tiles.worker-GtnvHQzs.js",
+      "sizeBytes": 23922,
+      "sha256": "0be3c1608bf8135ec24615bb5cdac7f721fd1a4f66cb73c3c5522df7975c8a31"
     },
     {
       "path": "workers/terrain-preparation.worker-B8lieq38.js",

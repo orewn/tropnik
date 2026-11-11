@@ -5,7 +5,7 @@ import {Check} from './TropnikIcons';
 import {MapIcon} from './MapIcon';
 import {MapAttribution} from './MapAttribution';
 import {MapRouteContext} from './MapRouteContext';
-import {MapLandscapeScene} from './MapLandscapeScene';
+import {MapLandscapeScene,type LandscapeRouteStatus} from './MapLandscapeScene';
 import {CustomMapEngine,type CustomMapMarker,type CustomMapMode,type CustomMapState} from '@/lib/custom-map-engine';
 import {hitGeometry,mercatorProject,mercatorUnproject,type GeographicBounds} from '@/lib/custom-map-camera';
 import {regions,routeCountLabel,type Trail} from '@/lib/content';
@@ -15,21 +15,21 @@ import {russiaView} from '@/lib/russia-map';
 import {loadPublicJSON} from '@/lib/map-preload';
 import {mapTrailPointEntries} from '@/lib/map-trail-points';
 import {readRouteGeometry,routeGeometryPositions} from '@/lib/route-geometry';
-import {coveredRussiaBounds,inRussiaCoverage} from '@/public/maps/russia-viewport.js';
+import {coveredRussiaBounds,inRussiaCoverage,RUSSIA_BOUNDS} from '@/public/maps/russia-viewport.js';
 import {MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
 import {bindMapLabelReflow,constrainDirectionLabels,MAP_LABEL_OBSTACLE_SELECTORS} from '@/lib/map-direction-layout';
 import {MAP_CONFIG,viewportRegionId} from '@/lib/map-config';
 import {OVERVIEW_MESSAGE,overviewContextCaption,ROUTE_PRESENTATION} from '@/lib/map-route-presentation';
 import {EMPTY_MAP_TRAILS,type AtlasProps} from '@/lib/map-types';
 
-type SceneRequest={bounds:GeographicBounds;title:string;geometry?:GeoJSON.GeoJSON};
+type SceneRequest={bounds:GeographicBounds;title:string;geometry?:GeoJSON.GeoJSON;routeStatus?:LandscapeRouteStatus};
 const INITIAL:CustomMapState={ready:false,loading:false,mode:'detail',committedMode:'overview',imageryLoading:false,reliefReady:false,localDetail:false,error:'',residentTiles:0,pendingTiles:0};
 
 export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
   const {region,trail,visibleTrails=EMPTY_MAP_TRAILS,planning=false,planPoints}=props;
   const container=useRef<HTMLDivElement>(null),engine=useRef<CustomMapEngine|null>(null),latest=useRef(props);
   const frame=useRef<MapFrameRefit|null>(null),navigation=useRef(0),manual=useRef(false),fullView=useRef(!region),fitCurrent=useRef<(animate?:boolean)=>void>(()=>{});
-  const shown=useRef<{trail?:Trail;geometry?:GeoJSON.GeoJSON;bounds?:GeographicBounds}>({});
+  const shown=useRef<{trail?:Trail;geometry?:GeoJSON.GeoJSON;bounds?:GeographicBounds;routeStatus?:LandscapeRouteStatus}>({});
   const locationEpoch=useRef(0),position=useRef<[number,number]|null>(null);
   const [state,setState]=useState(INITIAL),[zoom,setZoom]=useState(2),[status,setStatus]=useState(''),[layers,setLayers]=useState(false);
   const [paths,setPaths]=useState(true),[boundaries,setBoundaries]=useState(true),[relief,setRelief]=useState(true);
@@ -95,22 +95,31 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     return()=>{alive=false;cancelAnimationFrame(layoutFrame);navigationEpoch.current++;locationRevision.current++;resize.disconnect();unbindFrame();unbindLabels();refit.dispose();frame.current=null;map.destroy();if(engine.current===map)engine.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
   },[]);
   useEffect(()=>{engine.current?.setActive(!scene);},[scene]);
-  useEffect(()=>{
+  useLayoutEffect(()=>{
     if(!state.ready||!engine.current)return;
     const map=engine.current,revision=++navigation.current;locationEpoch.current++;manual.current=false;fullView.current=!region;
     frame.current?.select(JSON.stringify([region?.id,trail?.id,trail?.geometryUrl]));map.setRegion(region?.shapeNames||[]);
-    // A new selection owns its landscape and pending source response.
+    // Clear before paint and before I/O: a newly selected card cannot inherit
+    // another route's line, click target, frame or landscape geometry.
     setScene(null);setStatus('');
-    if(!trail?.geometry&&!trail?.geometryUrl){shown.current={trail};map.setRoute(undefined);fitCurrent.current(!!region);return;}
+    const routeStatus=trail?(trail.geometry||trail.geometryUrl?'loading':'unavailable'):undefined;
+    shown.current={trail,routeStatus};map.setRoute(undefined);
+    if(!trail?.geometry&&!trail?.geometryUrl){fitCurrent.current(!!region);return;}
     const load=trail.geometry?Promise.resolve(trail.geometry):loadPublicJSON<unknown>(trail.geometryUrl!);
     let active=true;
+    const ownsSelection=()=>active&&map===engine.current&&latest.current.trail===trail&&latest.current.region===region;
     void load.then(payload=>{
-      if(!active||map!==engine.current)return;const geometry=readRouteGeometry(payload),coverage=map.getCoverage();if(!coverage)return;
+      if(!ownsSelection())return;const geometry=readRouteGeometry(payload),coverage=map.getCoverage();if(!coverage)return;
       const bounds=coveredRussiaBounds(routeGeometryPositions(geometry),coverage.area) as GeographicBounds|null;
-      shown.current={trail,geometry,bounds:bounds??undefined};map.setRoute(geometry,trail.id);
+      shown.current={trail,geometry,bounds:bounds??undefined,routeStatus:'ready'};map.setRoute(geometry,trail.id);
+      setScene(current=>current?{...current,geometry,routeStatus:'ready'}:null);
       if(!bounds){note('У этой линии нет точек внутри доступного покрытия России. Карточка остаётся доступной.');return;}
       if(revision===navigation.current&&!manual.current){fullView.current=false;fitCurrent.current(true);}
-    }).catch(()=>{if(active)note('Линия маршрута не загрузилась. Проверьте подключение и повторите выбор.');});
+    }).catch(()=>{if(ownsSelection()){
+      shown.current={trail,routeStatus:'unavailable'};
+      setScene(current=>current?{...current,geometry:undefined,routeStatus:'unavailable'}:null);
+      note('Линия маршрута не загрузилась. Проверьте подключение и повторите выбор.');
+    }});
     return()=>{active=false;};
   },[region,trail,state.ready]);
   useEffect(()=>{
@@ -137,8 +146,15 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
   const openLandscape=()=>{
     const map=engine.current,element=container.current;if(!map||!element)return;
     map.setPadding(russiaView(element,256).padding);
-    const selected=shown.current,bounds=map.getVisibleBounds();
-    setScene({bounds,title:trail?.title||region?.name||'Ландшафт России',geometry:selected.geometry});
+    const selected=shown.current,visible=map.getVisibleBounds(),owned=selected.trail===trail;
+    // A portrait overview includes masked space beyond the DEM's latitude
+    // range. Use only the visible intersection of our sourced display extent;
+    // never expand the camera or ask the loader to invent polar elevations.
+    const bounds:GeographicBounds=[Math.max(visible[0],RUSSIA_BOUNDS[0][0]),Math.max(visible[1],RUSSIA_BOUNDS[0][1]),
+      Math.min(visible[2],RUSSIA_BOUNDS[1][0]),Math.min(visible[3],RUSSIA_BOUNDS[1][1])];
+    if(!(bounds[0]<bounds[2]&&bounds[1]<bounds[3])){note('Выберите участок карты России для просмотра рельефа.');return;}
+    setScene({bounds,title:trail?.title||region?.name||'Ландшафт России',geometry:owned?selected.geometry:undefined,
+      routeStatus:trail?(owned?selected.routeStatus:trail.geometry||trail.geometryUrl?'loading':'unavailable'):undefined});
   };
   const satellite=state.mode==='satellite',message=status||(state.error!==dismissedError?state.error:'');
   return <div className={`atlas-wrap tropnik-custom-atlas ${scene?'showing-terrain':''}`} data-map-renderer="tropnik" data-map-base-committed={state.committedMode} data-map-base-target={state.mode} data-map-base-state={state.imageryLoading?'loading':'ready'} data-map-imagery={satellite?'satellite':undefined} data-map-imagery-source={satellite?state.imagerySource:undefined} data-map-imagery-target={satellite?state.imageryTarget:undefined} data-map-imagery-state={satellite?(state.imageryLoading?'loading':state.imagerySource?'ready':'loading'):undefined} data-map-detail={zoom>=ROUTE_PRESENTATION.closeZoom?'close':undefined} data-map-route={trail&&!planning?'selected':undefined}>

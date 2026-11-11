@@ -6,7 +6,7 @@ import tileWorkerURL from './custom-map-tiles.worker.ts?worker&url';
 export type CustomTileKind='vector'|'relief'|'overview'|SatelliteSourceId;
 export type CustomMapTile={key:string;kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;bitmap:ImageBitmap;labels:MapTileLabel[];contours:number;local:boolean;paths?:boolean;transparent?:boolean;boundaries?:boolean;reliefCoverage?:ReliefCoverage};
 export type CustomTileRequest={kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;paths?:boolean;transparent?:boolean;boundaries?:boolean};
-type Work={id:number;request:CustomTileRequest;key:string;resolve:(tile:CustomMapTile)=>void;reject:(error:Error)=>void;bytes?:ArrayBuffer;halo?:ReliefHaloPayload;local?:boolean;mime?:string;sourceZ?:number;sourceKey?:string;stage:'queued'|'fetching'|'ready'|'decoding'};
+type Work={id:number;request:CustomTileRequest;key:string;resolve:(tile:CustomMapTile)=>void;reject:(error:Error)=>void;controller:AbortController;bytes?:ArrayBuffer;halo?:ReliefHaloPayload;local?:boolean;mime?:string;sourceZ?:number;sourceKey?:string;stage:'queued'|'fetching'|'ready'|'decoding'};
 const MAX_RESIDENT=96,MAX_BITMAPS=288,MAX_PENDING=160,MAX_FETCHING=3,MAX_READY=6,MAX_TILE_BYTES=8*1024*1024;
 const canonicalX=(x:number,z:number)=>((x%2**z)+2**z)%2**z;
 function paintZoomFor(tile:CustomTileRequest):number{
@@ -37,6 +37,8 @@ export class CustomMapTiles {
   private active?:Work;
   private timer?:ReturnType<typeof setTimeout>;
   private fetching=0;
+  private lastFetchKind?:CustomTileKind;
+  private lastDecodeKind?:CustomTileKind;
   private serial=0;
   private disposed=false;
   private enabled=true;
@@ -50,7 +52,7 @@ export class CustomMapTiles {
   setActive(active:boolean){this.enabled=active;if(active)this.pump();}
   pin(keys:Iterable<string>){
     this.pinned=new Set(keys);
-    for(const [key,{work}] of this.jobs)if(!this.pinned.has(key)&&work.stage!=='decoding'){this.jobs.delete(key);work.bytes=undefined;work.halo=undefined;work.reject(new Error('Map view changed'));}
+    for(const [key,{work}] of this.jobs)if(!this.pinned.has(key)&&work.stage!=='decoding'){this.jobs.delete(key);work.controller.abort();work.bytes=undefined;work.halo=undefined;work.reject(new Error('Map view changed'));}
     this.evict(true);
   }
   peek(key:string){return this.cache.get(key);}
@@ -63,7 +65,7 @@ export class CustomMapTiles {
     if(this.jobs.size>=MAX_PENDING)return Promise.reject(new Error('Map tile queue is full'));
     let resolve!:(tile:CustomMapTile)=>void,reject!:(error:Error)=>void;
     const promise=new Promise<CustomMapTile>((yes,no)=>{resolve=yes;reject=no;});
-    const work:Work={id:++this.serial,request,key,resolve,reject,stage:'queued'};
+    const work:Work={id:++this.serial,request,key,resolve,reject,controller:new AbortController(),stage:'queued'};
     this.jobs.set(key,{work,promise});this.pump();return promise;
   }
   private files(){
@@ -87,7 +89,7 @@ export class CustomMapTiles {
   private async fetch(work:Work){
     const source=await this.source(work);if(!this.current(work))return;
     work.local=source.local;work.mime=source.mime;work.sourceKey=source.url;
-    const bytes=await loadPublicBytes(source.url,0);if(!this.current(work))return;
+    const bytes=await loadPublicBytes(source.url,0,work.controller.signal);if(!this.current(work))return;
     if(!bytes.byteLength||bytes.byteLength>MAX_TILE_BYTES)throw new Error('Map source exceeds tile budget');
     // The shared byte pool keeps its copy when the whole bounded payload is
     // transferred. A halo uses the same three fetching slots, never a new pool.
@@ -111,7 +113,7 @@ export class CustomMapTiles {
             if(total>=MAX_TILE_BYTES){halo.missing.push({...offset,reason:'budget'});continue;}
             // Sequential within each Work, hence at most three simultaneous
             // primary/halo reads even when all six ready slots are occupied.
-            const neighbour=await loadPublicBytes(sourceKey,0);if(!this.current(work))return;
+            const neighbour=await loadPublicBytes(sourceKey,0,work.controller.signal);if(!this.current(work))return;
             if(!neighbour.byteLength){halo.missing.push({...offset,reason:'invalid'});continue;}
             if(total+neighbour.byteLength>MAX_TILE_BYTES){halo.missing.push({...offset,reason:'budget'});continue;}
             copy=neighbour.slice(0);copies.set(sourceKey,copy);total+=copy.byteLength;
@@ -160,19 +162,30 @@ export class CustomMapTiles {
     const work=this.active;this.active=undefined;clearTimeout(this.timer);this.worker?.terminate();this.worker=undefined;
     if(work)this.finish(work,undefined,new Error(message));
   }
+  private next(stage:Work['stage'],after?:CustomTileKind){
+    // Overview, cartography and elevations arrive as separate batches. FIFO
+    // made every DEM wait behind up to 64 vector sources on a cold region.
+    // Share the same three HTTP slots across demanded layers from the start.
+    const kinds:CustomTileKind[]=['overview','vector','relief','eox-s2','eox-bluemarble'];
+    const start=after===undefined?-1:kinds.indexOf(after);
+    for(let offset=1;offset<=kinds.length;offset++){
+      const kind=kinds[(start+offset)%kinds.length];
+      for(const {work} of this.jobs.values())if(work.stage===stage&&work.request.kind===kind)return work;
+    }
+  }
   private pump(){
     if(this.disposed||!this.enabled)return;
-    if(!this.active){const ready=[...this.jobs.values()].find(j=>j.work.stage==='ready');if(ready)this.decode(ready.work);}
+    if(!this.active){const ready=this.next('ready',this.lastDecodeKind);if(ready){this.lastDecodeKind=ready.request.kind;this.decode(ready);}}
     while(this.fetching<MAX_FETCHING&&[...this.jobs.values()].filter(job=>job.work.stage==='ready').length+this.fetching<MAX_READY){
-      const queued=[...this.jobs.values()].find(j=>j.work.stage==='queued');if(!queued)break;
-      const work=queued.work;work.stage='fetching';this.fetching++;
+      const work=this.next('queued',this.lastFetchKind);if(!work)break;
+      this.lastFetchKind=work.request.kind;work.stage='fetching';this.fetching++;
       void this.fetch(work).catch(error=>this.finish(work,undefined,error instanceof Error?error:new Error('Tile download failed')))
         .finally(()=>{this.fetching--;this.pump();});
     }
   }
   destroy(){
     if(this.disposed)return;this.disposed=true;clearTimeout(this.timer);this.worker?.terminate();this.worker=undefined;
-    for(const {work} of this.jobs.values()){work.bytes=undefined;work.halo=undefined;work.reject(new Error('Map resources released'));}
+    for(const {work} of this.jobs.values()){work.controller.abort();work.bytes=undefined;work.halo=undefined;work.reject(new Error('Map resources released'));}
     this.jobs.clear();for(const tile of this.cache.values())tile.bitmap.close();this.cache.clear();this.pinned.clear();this.active=undefined;
   }
 }

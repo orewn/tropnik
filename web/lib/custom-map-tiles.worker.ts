@@ -7,8 +7,10 @@ type ParentBase={bytes:number};
 type VectorParent=ParentBase&{kind:'vector';tile:VectorTile};
 type ReliefParent=ParentBase&{kind:'relief';heights:Float32Array;size:number;shade:OffscreenCanvas;shaded:boolean;halo:ReliefHalo;haloSources:Partial<Record<ReliefHaloKey,{key:string;resampled:boolean}>>};
 type Parent=VectorParent|ReliefParent;
-const TILE_SIZE=512,MAX_BYTES=8*1024*1024,MAX_PARENTS=4,MAX_PARENT_BYTES=24*1024*1024;
+type ElevationBorders={size:number;sourceSize:number;values:ReliefHalo;bytes:number;resampled:boolean};
+const TILE_SIZE=512,MAX_BYTES=8*1024*1024,MAX_PARENTS=4,MAX_PARENT_BYTES=24*1024*1024,MAX_BORDER_TILES=64,MAX_BORDER_BYTES=2*1024*1024;
 const parents=new Map<string,Parent>();let parentBytes=0,busy=false;
+const borders=new Map<string,ElevationBorders>();let borderBytes=0;
 
 /** Display tiles retain their own 512px raster even above the source's zoom.
  * Negative/world-copy x values select the same parent and positive child. */
@@ -66,6 +68,23 @@ async function elevationParent(bytes:ArrayBuffer,mime:string|undefined):Promise<
     bytes:heights.byteLength+size*size*4+(4*size+4)*4};
 }
 function haloKey(offset:ReliefHaloOffset):ReliefHaloKey{return `${offset.dx},${offset.dy}` as ReliefHaloKey;}
+function borderKey(sourceKey:string,size:number,allowReduction=false){return `${sourceKey}:border:${size}:${allowReduction?1:0}`;}
+function measuredBorders(source:{heights:Float32Array;size:number},size:number,reduce=false):ElevationBorders{
+  const values:ReliefHalo={};let bytes=0;
+  for(const dy of [-1,0,1] as const)for(const dx of [-1,0,1] as const)if(dx||dy){
+    const strip=elevationBorder(source.heights,source.size,size,dx,dy,reduce);values[haloKey({dx,dy})]=strip;bytes+=strip.byteLength;
+  }
+  return{size,sourceSize:source.size,values,bytes,resampled:reduce};
+}
+function rememberBorders(key:string,value:ElevationBorders){
+  const old=borders.get(key);if(old){borders.delete(key);borderBytes-=old.bytes;}
+  while(borders.size>=MAX_BORDER_TILES||borderBytes+value.bytes>MAX_BORDER_BYTES){
+    const oldest=borders.keys().next().value;if(oldest===undefined)break;
+    borderBytes-=borders.get(oldest)!.bytes;borders.delete(oldest);
+  }
+  if(value.bytes<=MAX_BORDER_BYTES){borders.set(key,value);borderBytes+=value.bytes;}
+  return value;
+}
 function validateHalo(job:TileJob){
   const halo=job.halo;if(!halo)return;
   if(!Array.isArray(halo.tiles)||!Array.isArray(halo.missing)||halo.tiles.length+halo.missing.length>8)throw new Error('Invalid elevation halo payload');
@@ -98,14 +117,23 @@ async function prepareRelief(parent:ReliefParent,job:TileJob,view:RenderWindow):
   // Existing measured parents can supply those pixels without another decode.
   for(const [signature,items] of groups){
     const first=items[0],count=2**view.sourceZ,nx=((view.sourceX+first.dx)%count+count)%count,ny=view.sourceY+first.dy;
-    const cached=first.sourceKey===job.sourceKey&&nx===view.sourceX&&ny===view.sourceY?parent:parents.get(`relief:${view.sourceZ}/${nx}/${ny}:${first.sourceKey}`);
+    const sourceKey=`relief:${view.sourceZ}/${nx}/${ny}:${first.sourceKey}`;
+    const cached=first.sourceKey===job.sourceKey&&nx===view.sourceX&&ny===view.sourceY?parent:parents.get(sourceKey);
     try{
-      const source=cached?.kind==='relief'?cached:await readElevation(await unpack(first.bytes),first.mime);
-      const reduce=!!first.reduceToArchive&&job.mime==='image/png'&&job.sourceKey?.startsWith('/offline-map/terrain/tiles/')&&first.sourceKey.startsWith('https://tiles.mapterhorn.com/')&&parent.size===256&&source.size===512;
-      if(source.size!==parent.size&&!reduce){for(const item of items)missing.set(haloKey(item),'resolution');continue;}
+      const allowReduction=!!first.reduceToArchive&&job.mime==='image/png'&&!!job.sourceKey?.startsWith('/offline-map/terrain/tiles/')&&first.sourceKey.startsWith('https://tiles.mapterhorn.com/')&&parent.size===256;
+      const key=borderKey(sourceKey,parent.size,allowReduction);let border=borders.get(key);
+      if(border){borders.delete(key);borders.set(key,border);}
+      else{
+        const source=cached?.kind==='relief'?cached:await readElevation(await unpack(first.bytes),first.mime);
+        const reduce=allowReduction&&source.size===512;
+        if(source.size!==parent.size&&!reduce){for(const item of items)missing.set(haloKey(item),'resolution');continue;}
+        // A viewport's neighbouring parents repeatedly need the same measured
+        // edges. Retain only those strips, never 64 full DEMs or GPU targets.
+        border=rememberBorders(key,measuredBorders(source,parent.size,reduce));
+      }
       for(const item of items){
-        const key=haloKey(item);parent.halo[key]=elevationBorder(source.heights,source.size,parent.size,item.dx,item.dy,!!reduce);
-        parent.haloSources[key]={key:signature,resampled:!!reduce};missing.delete(key);changed=true;
+        const key=haloKey(item);parent.halo[key]=border.values[key];
+        parent.haloSources[key]={key:signature,resampled:border.resampled};missing.delete(key);changed=true;
       }
     }catch{for(const item of items)missing.set(haloKey(item),'invalid');}
   }
@@ -152,7 +180,10 @@ self.onmessage=async({data:job}:MessageEvent<TileJob>)=>{
       else{
         const bytes=await unpack(job.bytes);
         if(job.kind==='vector'){const tile=decodeVectorTile(bytes);parent={kind:'vector',tile,bytes:vectorBytes(tile)};}
-        else parent=await elevationParent(bytes,job.mime);
+        else{
+          parent=await elevationParent(bytes,job.mime);
+          if(key)rememberBorders(borderKey(key,parent.size),measuredBorders(parent,parent.size));
+        }
         retained=remember(key,parent);
       }
       context.save();context.translate(-view.childX*TILE_SIZE,-view.childY*TILE_SIZE);

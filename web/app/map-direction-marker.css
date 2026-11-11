@@ -90,6 +90,7 @@
   color: var(--forest);
   font: var(--caption-3);
   font-variant-numeric: tabular-nums;
+  transform: translate(var(--map-count-shift-x, 0px), var(--map-count-shift-y, 0px));
   pointer-events: auto;
 }
 .explore-layout .region-marker:is(.is-overview, .direction-cluster) .region-marker-count:not(:empty) {display: grid}
@@ -141,7 +142,9 @@
 }
 .explore-layout .region-marker.direction-cluster .region-marker-label {min-width: 132px}
 .explore-layout .region-marker[data-map-label-hidden='true'] .region-marker-label,
-.explore-layout .atlas-canvas[data-map-camera] .region-marker-label {
+.explore-layout .region-marker[data-map-count-hidden='true'] .region-marker-count,
+.explore-layout .atlas-canvas[data-map-camera] .region-marker-label,
+.explore-layout .atlas-canvas[data-map-camera] .region-marker-count {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none;
