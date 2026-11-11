@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {createServer} from 'node:http';
 import {mkdir, readFile, rename, writeFile, stat} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
@@ -23,6 +24,12 @@ import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrd
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
 const catalogue=JSON.parse(await readFile(new URL('build-info.json',ROOT),'utf8')).catalogue;
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
+const diagnosticSurface=process.env.TROPNIK_BROWSER_SURFACE||null;
+assert.ok(diagnosticSurface===null||diagnosticSurface==='headless'||diagnosticSurface==='x11','Unknown TROPNIK_BROWSER_SURFACE; use headless or x11 for the surface diagnostic');
+if(diagnosticSurface){
+  assert.equal(runPolicy.diagnostic,'ui-smoothness','Surface A/B is diagnostic-only and cannot certify release');
+  assert.notEqual(process.env.TROPNIK_BROWSER_TRACE,'1','Surface A/B performance windows must remain untraced');
+}
 const traceEnabled=browserTraceEnabled(process.env.TROPNIK_BROWSER_TRACE,runPolicy.diagnostic);
 const REPORT = new URL(runPolicy.reportFile, ROOT);
 const profiles = [
@@ -864,12 +871,23 @@ async function checkpoint(phase){
 }
 try{
   browser=launchBrowser(browserBinary(),[
-    '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
+    ...(diagnosticSurface==='x11'?['--ozone-platform=x11']:['--headless=new']),'--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
     '--disable-default-apps','--disable-extensions','--disable-features=Translate,MediaRouter','--mute-audio',
     '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
     `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
   ]);
-  await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
+  const browserVersion=await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
+  if(diagnosticSurface){
+    const infoCdp=new CDP(browserVersion.webSocketDebuggerUrl);let info;
+    try{await infoCdp.open();info=await infoCdp.call('SystemInfo.getInfo',{},3000);}finally{infoCdp.close();}
+    const commandLine=info.commandLine;
+    assert.equal(typeof commandLine,'string');
+    assert.ok(commandLine.includes(`--ozone-platform=${diagnosticSurface}`),'The browser did not select the requested Ozone surface');
+    assert.equal(commandLine.includes('--headless'),diagnosticSurface==='headless','The browser mode differs from the requested surface');
+    assert.ok(commandLine.includes('--use-angle=swiftshader'),'Surface A/B must retain the SwiftShader renderer');
+    const receipt={schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,sourceCommit:process.env.GITHUB_SHA||null,surface:diagnosticSurface,chromiumVersion:browserVersion.Browser,commandLine,gpu:info.gpu,display:process.env.DISPLAY||null,staticBuildInfoSha256:createHash('sha256').update(await readFile(new URL('build-info.json',ROOT))).digest('hex'),inputArtifactSha256:process.env.TROPNIK_DIAGNOSTIC_BUILD_ARTIFACT_SHA256||null,profiles:profiles.filter(profile=>runPolicy.profiles.includes(profile.name)).map(profile=>({name:profile.name,width:profile.width,height:profile.height,deviceScaleFactor:profile.mobile?2:1,mobile:profile.mobile})),traceEnabled:false,scope:'Ozone headless versus X11 with identical application, input and budgets; both SwiftShader paths may use synchronous framebuffer readback',capturedAt:new Date().toISOString()};
+    await writeFile(new URL('browser-surface-diagnostic.json',ROOT),JSON.stringify(receipt,null,2)+'\n');
+  }
   const initialUrl=['offline-safety','satellite-continuity','ui-smoothness','ui-smoothness-cpu'].includes(runPolicy.diagnostic)?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
   const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(initialUrl)}`,{method:'PUT'});
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();

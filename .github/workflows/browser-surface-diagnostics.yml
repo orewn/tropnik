@@ -1,0 +1,95 @@
+name: Browser surface A/B diagnostics
+
+on:
+  push:
+    branches: [diagnostics/browser-surface-ab]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-surface-ab-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    outputs:
+      artifactDigest: ${{ steps.build-artifact.outputs.artifact-digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Build one candidate for both surfaces
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          pnpm --dir web install --frozen-lockfile
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Preserve the exact shared static build
+        id: build-artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: surface-ab-static-build
+          path: web/pages-preview/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  compare:
+    needs: prepare
+    name: Untraced UI smoothness (${{ matrix.surface }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        surface: [headless, x11]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Download the identical shared build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: surface-ab-static-build
+          path: web/pages-preview/dist
+      - name: Record the installed browser and virtual display
+        run: |
+          google-chrome --version
+          command -v Xvfb
+          command -v xvfb-run
+      - name: Run the existing native-input audit without tracing
+        timeout-minutes: 8
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_SURFACE: ${{ matrix.surface }}
+          TROPNIK_DIAGNOSTIC_BUILD_ARTIFACT_SHA256: ${{ needs.prepare.outputs.artifactDigest }}
+        run: |
+          if [ "$TROPNIK_BROWSER_SURFACE" = x11 ]; then
+            xvfb-run -a -s '-screen 0 1920x1440x24 -nolisten tcp' node tools/pages-preview/browser-smoke.mjs
+          else
+            node tools/pages-preview/browser-smoke.mjs
+          fi
+      - name: Preserve diagnostics without release certification
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: surface-ab-${{ matrix.surface }}-${{ github.run_id }}
+          path: |
+            web/pages-preview/design-qa
+            web/pages-preview/dist/browser-surface-diagnostic.json
+            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7
