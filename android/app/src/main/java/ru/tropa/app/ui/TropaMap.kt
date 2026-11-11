@@ -143,26 +143,30 @@ fun TropaMap(
         if (!mapReady) return@LaunchedEffect
         val bounds = countryBounds ?: return@LaunchedEffect
         // A new card must not retain the previous line during native asset I/O.
-        mapView.setRoute(route?.id, null)
+        withContext(Dispatchers.Main.immediate) { mapView.setRoute(route?.id, null) }
         val geometry = route?.inlineGeometry ?: route?.geometryAsset?.let { asset ->
             withContext(Dispatchers.IO) {runCatching {context.assets.open(asset).bufferedReader().use {it.readText()}}.getOrNull()}
         }
         val prepared = geometry?.let { json -> withContext(Dispatchers.Default) {runCatching {prepareMapRouteGeometry(json)}} }
         val routeData = prepared?.getOrNull()
-        mapView.setRoute(route?.id, routeData?.utf8)
-        if (prepared?.isFailure == true || (route?.geometryAsset != null && geometry == null)) error = ROUTE_GEOMETRY_ERROR
-        else if (error == ROUTE_GEOMETRY_ERROR) error = null
-        val focusKey = "${selected?.id}:${route?.id}"
-        if (lastFittedFocus == focusKey) return@LaunchedEffect
-        lastFittedFocus = focusKey
-        scopeNotice = null
-        when {
-            routeData?.frame != null -> {
-                val frame = routeData.frame
-                mapView.command("fit", JSONObject().put("bounds", JSONArray(listOf(frame.west, frame.south, frame.east, frame.north))).put("padding", 52).put("maxZoom", 17).put("animate", true))
+        // The Compose test frame interceptor can resume an IO continuation on
+        // its worker. The WebView commit always selects Android Main explicitly.
+        withContext(Dispatchers.Main.immediate) {
+            mapView.setRoute(route?.id, routeData?.utf8)
+            if (prepared?.isFailure == true || (route?.geometryAsset != null && geometry == null)) error = ROUTE_GEOMETRY_ERROR
+            else if (error == ROUTE_GEOMETRY_ERROR) error = null
+            val focusKey = "${selected?.id}:${route?.id}"
+            if (lastFittedFocus == focusKey) return@withContext
+            lastFittedFocus = focusKey
+            scopeNotice = null
+            when {
+                routeData?.frame != null -> {
+                    val frame = routeData.frame
+                    mapView.command("fit", JSONObject().put("bounds", JSONArray(listOf(frame.west, frame.south, frame.east, frame.north))).put("padding", 52).put("maxZoom", 17).put("animate", true))
+                }
+                selected != null -> mapView.command("camera", JSONObject().put("camera", JSONObject().put("center", JSONArray(listOf(selected.longitude, selected.latitude))).put("zoom", selected.zoom)).put("animate", true))
+                else -> mapView.command("fit", JSONObject().put("bounds", bounds).put("padding", 24).put("maxZoom", 17).put("animate", true))
             }
-            selected != null -> mapView.command("camera", JSONObject().put("camera", JSONObject().put("center", JSONArray(listOf(selected.longitude, selected.latitude))).put("zoom", selected.zoom)).put("animate", true))
-            else -> mapView.command("fit", JSONObject().put("bounds", bounds).put("padding", 24).put("maxZoom", 17).put("animate", true))
         }
     }
     LaunchedEffect(mapView, mapReady, position) {

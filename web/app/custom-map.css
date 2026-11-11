@@ -15,12 +15,12 @@
 .tropnik-custom-atlas .route-edge-marker{transform:translate(-50%,-50%);pointer-events:none;z-index:18}
 .tropnik-custom-atlas .layer-menu label{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}
 .tropnik-custom-atlas .layer-menu input{width:18px;height:18px;accent-color:var(--forest)}
+.tropnik-custom-atlas .layer-menu>button,.tropnik-custom-atlas .layer-menu>a{min-height:44px;display:flex;align-items:center}
 .tropnik-custom-atlas .terrain-heading{max-width:min(360px,calc(100% - 112px));box-sizing:border-box}
 .tropnik-custom-atlas .terrain-heading h2{max-width:100%;font-size:24px;line-height:1.25;overflow-wrap:anywhere}
 @media(max-width:700px){
  .tropnik-custom-atlas .terrain-heading{max-width:calc(100% - 144px)}
  .tropnik-custom-atlas .terrain-heading h2{font-size:20px}
- .tropnik-custom-atlas .layer-menu{max-height:min(440px,60dvh);overflow:auto}
  /* The shared mobile layout reserves one horizontal row above the drawer.
     Keep all six actions in that row so the status never covers a button. */
  .tropnik-custom-atlas .terrain-controls>button{display:grid;min-width:44px;min-height:44px;width:44px;height:44px}

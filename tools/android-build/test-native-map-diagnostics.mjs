@@ -39,10 +39,10 @@ test('transport receipt counts actual UTF-16 characters and UTF-8 bytes and fail
   assert.ok(oversized.chars > 256 * 1024);
 });
 
-function bootstrap(labelCount, labelText) {
+function bootstrap(labelCount, labelText, markers = []) {
   const handlers = new Map(), messages = [];
   const labels = Array.from({length: labelCount}, (_, id) => ({id: String(id), label: labelText, coordinate: [132, 43.1], visible: false, reason: 'outside-viewport'}));
-  const element = {dataset: {}, querySelectorAll: () => []};
+  const element = {dataset: {}, querySelectorAll: () => markers, getBoundingClientRect: () => ({x: 0, y: 0})};
   class Engine {
     getState() {return {ready: true, residentTiles: 1};}
     getCamera() {return {center: [132, 43.1], zoom: 10};}
@@ -54,7 +54,7 @@ function bootstrap(labelCount, labelText) {
   }
   const port = {postMessage: value => messages.push(JSON.parse(value)), start() {}};
   const window = {addEventListener: (event, handler) => handlers.set(event, handler)};
-  const sandbox = {exports: {}, window, document: {getElementById: () => element, documentElement: {dataset: {}}}, location: {origin: 'https://map.tropnik.invalid'}, performance, TextEncoder, setTimeout,
+  const sandbox = {exports: {}, window, document: {getElementById: () => element, documentElement: {dataset: {}}}, location: {origin: 'https://map.tropnik.invalid'}, performance, TextEncoder, setTimeout, getComputedStyle: () => ({display: 'block'}),
     require: name => name === './custom-map-entry' ? {CustomMapEngine: Engine, inRussiaCoverage: () => false}
       : name === './native-map-route' ? {NativeMapRouteLoader: class {}}
         : name === './native-map-diagnostics' ? context.exports : assert.fail(name)};
@@ -83,4 +83,16 @@ test('an oversized snapshot reports its exact rejection instead of silently losi
   assert.equal(receipt.payload.reason, 'message-budget');
   assert.equal(receipt.payload.requestId, 37);
   assert.ok(receipt.payload.chars > 256 * 1024);
+});
+
+test('native diagnostics retain the real visible cluster and hidden member separately', () => {
+  const marker = (id, hidden, groupKey) => ({dataset: {mapMarkerId: id, mapGroupKey: groupKey}, hidden,
+    getBoundingClientRect: () => ({x: 100, y: 80, width: 44, height: 44})});
+  const key = 'adygea|kabardino-balkaria|karachay-cherkessia|krasnodar';
+  const messages = bootstrap(0, '', [marker('karachay-cherkessia', false, key), marker('krasnodar', true, undefined)]);
+  const markers = messages.find(message => message.type === 'snapshot').payload.markers;
+  assert.equal(markers[0].groupKey, key);
+  assert.equal(markers[0].hidden, false);
+  assert.equal(markers[1].hidden, true);
+  assert.equal(markers[1].groupKey, 'krasnodar');
 });

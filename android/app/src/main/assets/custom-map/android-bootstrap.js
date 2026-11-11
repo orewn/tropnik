@@ -1,4 +1,4 @@
-import { n as e, r as t } from "./chunks/custom-map-entry-CcPIhn4B.js";
+import { n as e, r as t } from "./chunks/custom-map-entry-DibkxEah.js";
 //#region tools/android-build/native-map-route.ts
 var n = class {
 	origin;
@@ -117,6 +117,7 @@ function E() {
 		error: p,
 		camera: e?.getCamera(),
 		pitch: e?.getPitch(),
+		moving: o.dataset.mapMoving === "true",
 		state: e?.getState(),
 		rendered: n,
 		size: e?.getSize(),
@@ -126,6 +127,7 @@ function E() {
 			let t = e.getBoundingClientRect(), n = o.getBoundingClientRect();
 			return {
 				id: e.dataset.mapMarkerId,
+				groupKey: e.dataset.mapGroupKey || e.dataset.mapMarkerId,
 				hidden: e.hidden || getComputedStyle(e).display === "none",
 				x: t.x - n.x + t.width / 2,
 				y: t.y - n.y + t.height / 2,

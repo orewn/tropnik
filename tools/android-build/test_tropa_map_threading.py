@@ -29,11 +29,15 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
         self.assertLess(effect.index("mapView.setRoute(route?.id, null)"), read)
         self.assertLess(read, parse)
         self.assertLess(parse, update)
-        # Compose resumes on Main after each scoped background data operation.
-        # A route revision refreshes its bytes without refitting a user's pan.
+        # Select Android Main explicitly after suspending IO/decode. Compose's
+        # test frame interceptor may resume that continuation on its worker.
+        commit = effect.index("withContext(Dispatchers.Main.immediate)", parse)
+        self.assertLess(parse, commit)
+        self.assertLess(commit, update)
         self.assertNotIn("withContext(Dispatchers.IO)", effect[update:])
         self.assertNotIn("withContext(Dispatchers.Default)", effect[update:])
-        self.assertIn("if (lastFittedFocus == focusKey) return@LaunchedEffect", effect[update:])
+        # A route revision refreshes its bytes without refitting a user's pan.
+        self.assertIn("if (lastFittedFocus == focusKey) return@withContext", effect[update:])
         self.assertIn('mapView.command("fit"', effect[update:])
 
     def test_source_changes_refresh_route_without_coupling_to_marker_filter(self) -> None:

@@ -1760,10 +1760,7 @@ var Dt = class {
 			residentTiles: 0,
 			pendingTiles: 0
 		}, this.element = e, this.options = t, this.camera = { ...t.camera }, this.floor = { ...t.camera }, this.canvas = document.createElement("canvas"), this.canvas.className = "tropnik-map-canvas", this.canvas.tabIndex = 0, this.canvas.setAttribute("aria-label", "Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб."), this.canvas.setAttribute("role", "img"), e.appendChild(this.canvas), this.markerLayer = document.createElement("div"), this.markerLayer.className = "tropnik-marker-layer", e.appendChild(this.markerLayer);
-		let n = this.canvas.getContext("2d", {
-			alpha: !1,
-			desynchronized: !0
-		});
+		let n = this.canvas.getContext("2d", { alpha: !1 });
 		if (!n) throw Error("Canvas map is unavailable");
 		this.context = n, this.resize = new ResizeObserver(() => this.resizeCanvas()), this.resize.observe(e), this.resizeCanvas(), this.bindInput(), Xe().then((e) => {
 			if (this.disposed) {
@@ -1837,6 +1834,7 @@ var Dt = class {
 		}, n = Object.values(t).every((e) => Number.isFinite(e) && e >= 0) && t.left + t.right < this.size.width && t.top + t.bottom < this.size.height;
 		return {
 			engine: "tropnik-canvas",
+			contextAttributes: this.context.getContextAttributes?.() ?? null,
 			camera: this.getCamera(),
 			pitch: this.pitch,
 			viewport: {

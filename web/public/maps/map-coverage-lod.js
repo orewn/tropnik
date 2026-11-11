@@ -185,29 +185,3 @@ export async function loadMapCoverage(options={}) {
   }
   const {manifest,base}=await bootstrap;return createMapCoverage(manifest,base,options);
 }
-
-/** The adapter supplies only SDK public bounds/events. Diagnostics describe the
- * requested viewport and the atomic generation that its renderer has applied. */
-export function bindMapCoverage(map,coverage,element,apply) {
-  let disposed=false,revision=-1,renderReady=true,renderError='',renderToken=0;
-  const publish=()=>{
-    if(disposed)return;
-    const state=coverage.status;
-    if(state.revision!==revision){
-      revision=state.revision;renderError='';const token=++renderToken;
-      try {
-        const result=apply(coverage);renderReady=!result?.then;
-        if(!renderReady)Promise.resolve(result).then(()=>{if(!disposed&&token===renderToken){renderReady=true;publish();}},()=>{if(!disposed&&token===renderToken){renderError='coverage-render';publish();}});
-      }catch{renderReady=false;renderError='coverage-render';}
-    }
-    Object.assign(element.dataset,{mapCoverageVersion:state.version,mapCoverageLod:state.lod,mapCoverageCells:state.cells.join(','),mapCoveragePending:String(state.pending),mapCoverageError:state.error||renderError,mapCoverageReady:String(state.ready&&renderReady&&!renderError)});
-  };
-  const update=()=>{
-    if(disposed)return;
-    const b=map.getBounds();void coverage.updateView([b.getWest(),b.getSouth(),b.getEast(),b.getNorth()],map.getZoom());
-  };
-  const style=()=>{revision=-1;publish();update();};
-  const unsubscribe=coverage.subscribe(publish);
-  map.on('moveend',update);map.on('resize',update);map.on('style.load',style);publish();update();
-  return()=>{disposed=true;unsubscribe();coverage.dispose();map.off('moveend',update);map.off('resize',update);map.off('style.load',style);};
-}

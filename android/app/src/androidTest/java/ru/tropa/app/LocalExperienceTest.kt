@@ -129,13 +129,14 @@ class LocalExperienceTest {
         return map
     }
 
-    private fun mapSnapshot(view: CustomMapWebView): JSONObject {
+    private fun mapSnapshot(view: CustomMapWebView, timeoutMillis: Long = 5_000): JSONObject {
+        require(timeoutMillis in 1L..5_000L)
         var requestId = 0L
         app.runOnUiThread {requestId = view.requestDebugSnapshot()}
         var value: JSONObject? = null
         var completed = false
         try {
-            app.waitUntil(timeoutMillis = 5_000) {
+            app.waitUntil(timeoutMillis = timeoutMillis) {
                 app.runOnUiThread {value = view.debugSnapshot}
                 value?.optLong("requestId") == requestId
             }
@@ -161,12 +162,53 @@ class LocalExperienceTest {
         }
         var marker: JSONObject? = null
         var snapshot = JSONObject()
-        app.waitUntil(timeoutMillis = 15_000) {
-            snapshot = mapSnapshot(map)
-            val markers = snapshot.getJSONArray("markers")
-            marker = (0 until markers.length()).map {markers.getJSONObject(it)}.firstOrNull {it.optString("id") == regionId && !it.optBoolean("hidden")}
-            marker != null && kotlin.math.abs(snapshot.getJSONObject("camera").getDouble("zoom") - 6.0) < .01
+        val startedAt = SystemClock.uptimeMillis()
+        val deadline = startedAt + 15_000
+        val groupTaps = JSONArray()
+        var lastGroupTap = ""
+        var prepared = false
+        try {
+            app.waitUntil(timeoutMillis = 15_000) {
+                val remaining = deadline - SystemClock.uptimeMillis()
+                if (remaining <= 0) return@waitUntil false
+                snapshot = mapSnapshot(map, minOf(5_000L, remaining))
+                if (SystemClock.uptimeMillis() > deadline || snapshot.optBoolean("moving")) return@waitUntil false
+                val zoom = snapshot.getJSONObject("camera").getDouble("zoom")
+                if (zoom < 5.99) return@waitUntil false
+                val markers = snapshot.getJSONArray("markers")
+                val visible = (0 until markers.length()).map {markers.getJSONObject(it)}.filter { !it.optBoolean("hidden") }
+                fun members(value: JSONObject) = value.optString("groupKey", value.getString("id")).split('|')
+                marker = visible.firstOrNull {it.optString("id") == regionId && members(it).size == 1}
+                if (marker == null) {
+                    val group = visible.firstOrNull {regionId in members(it) && members(it).size > 1}
+                    if (group != null) {
+                        val key = group.getString("groupKey") + "@" + kotlin.math.round(zoom * 100)
+                        if (key != lastGroupTap) {
+                            lastGroupTap = key
+                            groupTaps.put(JSONObject().put("groupKey", group.getString("groupKey")).put("zoom", zoom)
+                                .put("x", group.getDouble("x")).put("y", group.getDouble("y")).put("elapsedMs", SystemClock.uptimeMillis() - startedAt))
+                            tapMapMarker(map, group, snapshot)
+                        }
+                    }
+                }
+                marker != null && SystemClock.uptimeMillis() <= deadline
+            }
+            prepared = true
+        } finally {
+            val report = File(app.activity.filesDir, "qa/$screenshotPrefix-selection.json")
+            report.parentFile!!.mkdirs()
+            report.writeText(JSONObject().put("target", regionId).put("prepared", prepared).put("deadlineMs", 15_000)
+                .put("elapsedMs", SystemClock.uptimeMillis() - startedAt).put("trustedGroupTaps", groupTaps).put("snapshot", snapshot).toString(2))
         }
+        screenshot("$screenshotPrefix-before-tap")
+        tapMapMarker(map, requireNotNull(marker), snapshot)
+        app.waitUntil(timeoutMillis = 10_000) {app.onAllNodes(hasText("Обзор района")).fetchSemanticsNodes().isNotEmpty()}
+        app.onNodeWithTag("explore_list").performScrollToIndex(0)
+        app.onNodeWithText(region.name).assertExists()
+        screenshot("$screenshotPrefix-after-tap")
+    }
+
+    private fun tapMapMarker(map: CustomMapWebView, marker: JSONObject, snapshot: JSONObject) {
         val location = IntArray(2);val visible = Rect()
         var scaleX = 0f;var scaleY = 0f
         app.runOnUiThread {
@@ -175,10 +217,9 @@ class LocalExperienceTest {
             scaleX = map.width / snapshot.getJSONObject("size").getDouble("width").toFloat()
             scaleY = map.height / snapshot.getJSONObject("size").getDouble("height").toFloat()
         }
-        val x = location[0] + requireNotNull(marker).getDouble("x").toFloat() * scaleX
+        val x = location[0] + marker.getDouble("x").toFloat() * scaleX
         val y = location[1] + requireNotNull(marker).getDouble("y").toFloat() * scaleY
         assertTrue("Rendered marker must be on screen", visible.contains(x.toInt(), y.toInt()))
-        screenshot("$screenshotPrefix-before-tap")
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
         val downTime = SystemClock.uptimeMillis()
         for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
@@ -187,10 +228,6 @@ class LocalExperienceTest {
             try { assertTrue("Map touch injection failed", automation.injectInputEvent(event, true)) }
             finally { event.recycle() }
         }
-        app.waitUntil(timeoutMillis = 10_000) {app.onAllNodes(hasText("Обзор района")).fetchSemanticsNodes().isNotEmpty()}
-        app.onNodeWithTag("explore_list").performScrollToIndex(0)
-        app.onNodeWithText(region.name).assertExists()
-        screenshot("$screenshotPrefix-after-tap")
     }
 
     @Test fun nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline() {

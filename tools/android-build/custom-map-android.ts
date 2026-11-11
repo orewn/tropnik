@@ -28,11 +28,11 @@ function snapshot() {
   const map = engine;
   const {labels, ...rendered} = map?.inspect() || {};
   const evidence = fixtureEvidence?.key === labelEvidenceKey() ? fixtureEvidence.value : undefined;
-  return {ready: !!map?.getState().ready && sentSourceFrame, frame, error, camera: map?.getCamera(), pitch: map?.getPitch(), state: map?.getState(), rendered,
+  return {ready: !!map?.getState().ready && sentSourceFrame, frame, error, camera: map?.getCamera(), pitch: map?.getPitch(), moving: element.dataset.mapMoving === 'true', state: map?.getState(), rendered,
     size: map?.getSize(), routeId: element.dataset.mapDrawnRoute || '', coverage: map?.getCoverage()?.status,
     markers: [...element.querySelectorAll<HTMLButtonElement>('[data-map-marker-id]')].map(button => {
       const r = button.getBoundingClientRect(), base = element.getBoundingClientRect();
-      return {id: button.dataset.mapMarkerId, hidden: button.hidden || getComputedStyle(button).display === 'none',
+      return {id: button.dataset.mapMarkerId, groupKey: button.dataset.mapGroupKey || button.dataset.mapMarkerId, hidden: button.hidden || getComputedStyle(button).display === 'none',
         x: r.x - base.x + r.width / 2, y: r.y - base.y + r.height / 2, width: r.width, height: r.height};
     }), labels, outsideLabelProbes: evidence?.probes || [], labelEvidence: evidence && {examined: evidence.examined, limited: evidence.limited},
     labelFixture: labelFixture && {...labelFixture, status: evidence ? 'ready' : 'preparing', point: map?.project([labelFixture.longitude, labelFixture.latitude])}};

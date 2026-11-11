@@ -132,9 +132,10 @@
      must yield to an open Layers menu and return when the menu closes. */
   .explore-layout:has(.atlas-wrap .layer-menu)>.fact-closed{display:none}
   /* The closed sheet's menu ends beside the 50px Layers button, below the
-     72px control offset and the renderer's rail. Keep its top inside the map. */
+     72px control offset and the renderer's rail. Reserve a 16px map edge. */
   .explore-layout .layer-menu{
-    max-height:min(360px,65dvh,calc(72px + var(--map-rail-height) + 50px));
+    width:min(278px,calc(100vw - var(--map-right) - 76px));
+    max-height:min(360px,65dvh,calc(var(--map-top) + 72px + var(--map-rail-height) + 50px - max(16px,var(--map-top))));
     overflow:auto;overscroll-behavior:contain;
   }
   .explore-layout.sheet-open .map-controls{
@@ -148,8 +149,8 @@
   /* The open sheet moves the button up by its measured inset plus 12px.
      The menu ends another 60px above that baseline; reserve the safe top too. */
   .explore-layout.sheet-open .layer-menu{
-    left:0;right:auto;bottom:60px;top:auto;
-    max-height:min(360px,65dvh,max(0px,calc(100dvh - var(--header) - var(--sheet-control-inset,var(--map-bottom-inset,0px)) - 12px - 60px - var(--map-top))));
+    left:max(0px,calc(16px - var(--map-left)));right:auto;bottom:60px;top:auto;
+    max-height:min(360px,65dvh,max(0px,calc(100dvh - var(--header) - var(--sheet-control-inset,var(--map-bottom-inset,0px)) - 12px - 60px - max(16px,var(--map-top)))));
   }
   .explore-layout.sheet-open .map-attribution{
     top:calc(var(--map-top) + 60px);right:var(--map-right);bottom:auto;left:auto;

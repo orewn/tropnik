@@ -140,7 +140,9 @@ export class CustomMapEngine {
     this.canvas.setAttribute('aria-label','Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб.');
     this.canvas.setAttribute('role','img');element.appendChild(this.canvas);
     this.markerLayer=document.createElement('div');this.markerLayer.className='tropnik-marker-layer';element.appendChild(this.markerLayer);
-    const context=this.canvas.getContext('2d',{alpha:false,desynchronized:true});if(!context)throw new Error('Canvas map is unavailable');this.context=context;
+    // Map pixels and the DOM controls share the normal compositor. A forced
+    // low-latency surface uses a different presentation path on some devices.
+    const context=this.canvas.getContext('2d',{alpha:false});if(!context)throw new Error('Canvas map is unavailable');this.context=context;
     this.resize=new ResizeObserver(()=>this.resizeCanvas());this.resize.observe(element);this.resizeCanvas();this.bindInput();
     void loadRussiaGeometry().then(coverage=>{
       if(this.disposed){coverage.dispose();return;}
@@ -166,7 +168,7 @@ export class CustomMapEngine {
     // During resize the previous sheet insets can briefly exceed the new size.
     // Inspection must stay safe until the layout observer supplies fresh values.
     const visible=Object.values(padding).every(value=>Number.isFinite(value)&&value>=0)&&padding.left+padding.right<this.size.width&&padding.top+padding.bottom<this.size.height;
-    return{engine:'tropnik-canvas',camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',drawRevision:this.drawRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
+    return{engine:'tropnik-canvas',contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',drawRevision:this.drawRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
   }
   private publishInspection(){if(this.disposed)return;this.element.dataset.mapTilesState=this.state.loading?'loading':this.state.error?'error':'ready';this.element.dataset.mapInspection=JSON.stringify(this.inspect());}
   private setMoving(moving:boolean){this.element.dataset.mapMoving=String(moving);if(moving)this.element.dataset.mapCamera='moving';else delete this.element.dataset.mapCamera;}
