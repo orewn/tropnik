@@ -552,19 +552,19 @@ var fe = class {
 function O(e) {
 	return Number.isFinite(e) ? e + 360 * Math.round((105 - e) / 360) : NaN;
 }
-function he(e, t, n, r) {
+function k(e, t, n, r) {
 	let [[i, a], [o, s]] = pe, c = D(1 - (n - r.zoom) / 2, 0, 1), l = a + Math.min(0, r.center[1] - a) * c, u = s + Math.max(0, r.center[1] - s) * c;
 	return {
 		center: [D(O(e), Math.min(i, r.center[0]), Math.max(o, r.center[0])), D(t, l, u)],
 		zoom: D(n, Math.min(r.zoom, 18), 18)
 	};
 }
-function ge(e, t, n, r) {
+function he(e, t, n, r) {
 	let i = (e - n[0]) * (r[1] - n[1]) - (t - n[1]) * (r[0] - n[0]);
 	return Math.abs(i) < 1e-10 && e >= Math.min(n[0], r[0]) - 1e-10 && e <= Math.max(n[0], r[0]) + 1e-10 && t >= Math.min(n[1], r[1]) - 1e-10 && t <= Math.max(n[1], r[1]) + 1e-10;
 }
-var k = 1e-10, _e = /* @__PURE__ */ new WeakMap(), ve = (e, t, n) => e >= n[0] - k && e <= n[2] + k && t >= n[1] - k && t <= n[3] + k;
-function ye(e) {
+var A = 1e-10, ge = /* @__PURE__ */ new WeakMap(), _e = (e, t, n) => e >= n[0] - A && e <= n[2] + A && t >= n[1] - A && t <= n[3] + A;
+function ve(e) {
 	if (!e.length) return null;
 	let t = [
 		Infinity,
@@ -575,7 +575,7 @@ function ye(e) {
 	for (let [n, r] of e) t[0] = Math.min(t[0], n), t[1] = Math.min(t[1], r), t[2] = Math.max(t[2], n), t[3] = Math.max(t[3], r);
 	let n = Math.max(1, Math.min(512, Math.ceil(Math.sqrt(e.length) * 2))), r = t[3] > t[1] ? n / (t[3] - t[1]) : 0, i = (e) => D(Math.floor((e - t[1]) * r), 0, n - 1), a = Array.from({ length: n }, () => []);
 	for (let t = 0, n = e.length - 1; t < e.length; n = t++) {
-		let r = i(Math.min(e[t][1], e[n][1]) - k), o = i(Math.max(e[t][1], e[n][1]) + k);
+		let r = i(Math.min(e[t][1], e[n][1]) - A), o = i(Math.max(e[t][1], e[n][1]) + A);
 		for (let e = r; e <= o; e++) a[e].push(t);
 	}
 	return {
@@ -585,18 +585,18 @@ function ye(e) {
 		bucket: i
 	};
 }
-function A(e, t, n) {
-	if (!n || !ve(e, t, n.bounds)) return !1;
+function ye(e, t, n) {
+	if (!n || !_e(e, t, n.bounds)) return !1;
 	let r = !1;
 	for (let i of n.buckets[n.bucket(t)]) {
 		let a = n.points[i], o = n.points[i === 0 ? n.points.length - 1 : i - 1];
-		if (t < Math.min(a[1], o[1]) - k || t > Math.max(a[1], o[1]) + k || e > Math.max(a[0], o[0]) + k) continue;
+		if (t < Math.min(a[1], o[1]) - A || t > Math.max(a[1], o[1]) + A || e > Math.max(a[0], o[0]) + A) continue;
 		let s = a[1] > t != o[1] > t;
-		if (e < Math.min(a[0], o[0]) - k) {
+		if (e < Math.min(a[0], o[0]) - A) {
 			s && (r = !r);
 			continue;
 		}
-		if (ge(e, t, a, o)) return !0;
+		if (he(e, t, a, o)) return !0;
 		s && e < (o[0] - a[0]) * (t - a[1]) / (o[1] - a[1]) + a[0] && (r = !r);
 	}
 	return r;
@@ -617,10 +617,10 @@ function be(e) {
 				return;
 			}
 			for (let n of e.type === "Polygon" ? [e.coordinates] : e.type === "MultiPolygon" ? e.coordinates : []) {
-				let e = ye(n[0] || []);
+				let e = ve(n[0] || []);
 				e && t.push({
 					outer: e,
-					holes: n.slice(1).map(ye).filter(Boolean)
+					holes: n.slice(1).map(ve).filter(Boolean)
 				});
 			}
 		}
@@ -631,7 +631,7 @@ function be(e) {
 	};
 	let r = Math.min(...t.map((e) => e.outer.bounds[1])), i = Math.max(...t.map((e) => e.outer.bounds[3])), a = i > r ? 256 / (i - r) : 0, o = (e) => D(Math.floor((e - r) * a), 0, 255), s = Array.from({ length: 256 }, () => []);
 	for (let e of t) {
-		let t = o(e.outer.bounds[1] - k), n = o(e.outer.bounds[3] + k);
+		let t = o(e.outer.bounds[1] - A), n = o(e.outer.bounds[3] + A);
 		for (let r = t; r <= n; r++) s[r].push(e);
 	}
 	return {
@@ -644,8 +644,8 @@ function be(e) {
 function j(e, t, n) {
 	let r = O(e);
 	if (!Number.isFinite(r) || !Number.isFinite(t) || !n || typeof n != "object") return !1;
-	let i = _e.get(n);
-	return i || (i = be(n), _e.set(n, i)), !i.buckets.length || t < i.south - k || t > i.north + k ? !1 : i.buckets[i.bucket(t)].some((e) => A(r, t, e.outer) && !e.holes.some((e) => A(r, t, e)));
+	let i = ge.get(n);
+	return i || (i = be(n), ge.set(n, i)), !i.buckets.length || t < i.south - A || t > i.north + A ? !1 : i.buckets[i.bucket(t)].some((e) => ye(r, t, e.outer) && !e.holes.some((e) => ye(r, t, e)));
 }
 var M = Object.freeze({
 	manifestBytes: 512 * 1024,
@@ -660,39 +660,39 @@ var M = Object.freeze({
 	"mask",
 	"territory",
 	"territory-boundary"
-]), Se = {
+]), N = {
 	Point: 0,
 	MultiPoint: 1,
 	LineString: 1,
 	MultiLineString: 2,
 	Polygon: 2,
 	MultiPolygon: 3
-}, N = (e) => ({
+}, P = (e) => ({
 	type: "FeatureCollection",
 	features: e
-}), P = (e) => /* @__PURE__ */ Error(`coverage-${e}`);
-function Ce(e) {
-	if (e?.type !== "TropnikCoverage" || e.encoding !== "indexed-delta-1e7-v1" || !Array.isArray(e.positions) || e.positions.length % 2 || !Array.isArray(e.features)) throw P("encoding");
+}), F = (e) => /* @__PURE__ */ Error(`coverage-${e}`);
+function Se(e) {
+	if (e?.type !== "TropnikCoverage" || e.encoding !== "indexed-delta-1e7-v1" || !Array.isArray(e.positions) || e.positions.length % 2 || !Array.isArray(e.features)) throw F("encoding");
 	let t = [], n = 0, r = 0;
 	for (let i = 0; i < e.positions.length; i += 2) {
 		let a = e.positions[i], o = e.positions[i + 1];
-		if (!Number.isSafeInteger(a) || !Number.isSafeInteger(o) || (n += a, r += o, !Number.isSafeInteger(n) || !Number.isSafeInteger(r) || n < 0 || n > 36e8 || Math.abs(r) > 850511288)) throw P("coordinate");
+		if (!Number.isSafeInteger(a) || !Number.isSafeInteger(o) || (n += a, r += o, !Number.isSafeInteger(n) || !Number.isSafeInteger(r) || n < 0 || n > 36e8 || Math.abs(r) > 850511288)) throw F("coordinate");
 		t.push([n / 1e7, r / 1e7]);
 	}
 	let i = (e, n) => {
 		if (n === 0) {
-			if (!Number.isSafeInteger(e) || e < 0 || e >= t.length) throw P("index");
+			if (!Number.isSafeInteger(e) || e < 0 || e >= t.length) throw F("index");
 			return t[e];
 		}
-		if (!Array.isArray(e) || !e.length) throw P("nesting");
+		if (!Array.isArray(e) || !e.length) throw F("nesting");
 		return e.map((e) => i(e, n - 1));
 	}, a = e.features.map((e) => {
-		if (e?.type !== "Feature" || !xe.has(e.properties?.role) || typeof e.properties.cell != "string" || !(e.geometry?.type in Se)) throw P("feature");
+		if (e?.type !== "Feature" || !xe.has(e.properties?.role) || typeof e.properties.cell != "string" || !(e.geometry?.type in N)) throw F("feature");
 		return {
 			...e,
 			geometry: {
 				type: e.geometry.type,
-				coordinates: i(e.geometry.coordinates, Se[e.geometry.type])
+				coordinates: i(e.geometry.coordinates, N[e.geometry.type])
 			}
 		};
 	});
@@ -703,11 +703,11 @@ function Ce(e) {
 		features: a
 	};
 }
-function we(e) {
+function I(e) {
 	return e <= 4 ? "overview" : e <= 8 ? "regional" : e <= 12 ? "local" : "source";
 }
-function Te(e, t, n) {
-	let r = we(n);
+function Ce(e, t, n) {
+	let r = I(n);
 	if (r === "overview") return [];
 	let [i, a, o, s] = t;
 	if (![
@@ -716,7 +716,7 @@ function Te(e, t, n) {
 		o,
 		s,
 		n
-	].every(Number.isFinite) || a > s || (o < i && (o += 360 * Math.ceil((i - o) / 360)), !Number.isFinite(o - i))) throw P("viewport");
+	].every(Number.isFinite) || a > s || (o < i && (o += 360 * Math.ceil((i - o) / 360)), !Number.isFinite(o - i))) throw F("viewport");
 	let c = Math.min(360, o - i), l = O(i + c / 2);
 	i = l - c * .65, o = l + c * .65;
 	let u = s - a;
@@ -726,37 +726,37 @@ function Te(e, t, n) {
 		360
 	].some((t) => e.bounds[2] + t >= i && e.bounds[0] + t <= o && e.bounds[3] >= a && e.bounds[1] <= s));
 }
-function F(e) {
-	if (e?.schemaVersion !== 1 || e.encoding !== "indexed-delta-1e7-v1" || !/^[a-f0-9]{16}$/.test(e.version) || !Array.isArray(e.cells) || e.cells.length > 1024) throw P("manifest");
+function L(e) {
+	if (e?.schemaVersion !== 1 || e.encoding !== "indexed-delta-1e7-v1" || !/^[a-f0-9]{16}$/.test(e.version) || !Array.isArray(e.cells) || e.cells.length > 1024) throw F("manifest");
 	let t = (e, t) => {
-		if (!e || typeof e.url != "string" || !/^\/(?:[\w-]+\/)*data\/map-coverage\//.test(e.url) || e.url.includes("..") || !e.url.endsWith(".coverage") || !Number.isSafeInteger(e.bytes) || e.bytes < 1 || e.bytes > t || !/^[a-f0-9]{64}$/.test(e.sha256)) throw P("descriptor");
+		if (!e || typeof e.url != "string" || !/^\/(?:[\w-]+\/)*data\/map-coverage\//.test(e.url) || e.url.includes("..") || !e.url.endsWith(".coverage") || !Number.isSafeInteger(e.bytes) || e.bytes < 1 || e.bytes > t || !/^[a-f0-9]{64}$/.test(e.sha256)) throw F("descriptor");
 	};
 	t(e.base, M.baseBytes);
 	let n = /* @__PURE__ */ new Set();
 	for (let r of e.cells) {
-		if (typeof r.id != "string" || n.has(r.id) || !Array.isArray(r.bounds) || r.bounds.length !== 4 || !r.bounds.every(Number.isFinite) || r.bounds[0] < 0 || r.bounds[2] > 360 || r.bounds[0] >= r.bounds[2] || r.bounds[1] >= r.bounds[3] || !r.levels) throw P("cell");
+		if (typeof r.id != "string" || n.has(r.id) || !Array.isArray(r.bounds) || r.bounds.length !== 4 || !r.bounds.every(Number.isFinite) || r.bounds[0] < 0 || r.bounds[2] > 360 || r.bounds[0] >= r.bounds[2] || r.bounds[1] >= r.bounds[3] || !r.levels) throw F("cell");
 		n.add(r.id);
 		for (let [e, n] of Object.entries(r.levels)) {
 			if (![
 				"regional",
 				"local",
 				"source"
-			].includes(e)) throw P("level");
+			].includes(e)) throw F("level");
 			t(n, M.cellBytes);
 		}
 	}
 	return e;
 }
-async function I(e, t, n, r) {
+async function we(e, t, n, r) {
 	let i = await e(t, {
 		signal: r,
 		credentials: "same-origin"
 	});
-	if (!i.ok) throw P("http");
-	if (Number(i.headers?.get?.("content-length")) > n) throw await i.body?.cancel(), P("size");
+	if (!i.ok) throw F("http");
+	if (Number(i.headers?.get?.("content-length")) > n) throw await i.body?.cancel(), F("size");
 	if (!i.body?.getReader) {
 		let e = new Uint8Array(await i.arrayBuffer());
-		if (e.byteLength > n) throw P("size");
+		if (e.byteLength > n) throw F("size");
 		return e;
 	}
 	let a = i.body.getReader(), o = [], s = 0;
@@ -764,7 +764,7 @@ async function I(e, t, n, r) {
 		for (;;) {
 			let { value: e, done: t } = await a.read();
 			if (t) break;
-			if (s += e.byteLength, s > n) throw await a.cancel(), P("size");
+			if (s += e.byteLength, s > n) throw await a.cancel(), F("size");
 			o.push(e);
 		}
 	} finally {
@@ -774,18 +774,18 @@ async function I(e, t, n, r) {
 	for (let e of o) c.set(e, l), l += e.byteLength;
 	return c;
 }
-async function Ee(e, t, n, r, i, a) {
-	let o = await I(e, t.url, t.bytes, a);
+async function Te(e, t, n, r, i, a) {
+	let o = await we(e, t.url, t.bytes, a);
 	if (a?.aborted) throw new DOMException("Aborted", "AbortError");
-	if (o.byteLength !== t.bytes) throw P("size");
-	if ([...new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", o))].map((e) => e.toString(16).padStart(2, "0")).join("") !== t.sha256) throw P("integrity");
+	if (o.byteLength !== t.bytes) throw F("size");
+	if ([...new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", o))].map((e) => e.toString(16).padStart(2, "0")).join("") !== t.sha256) throw F("integrity");
 	let s = JSON.parse(new TextDecoder().decode(o));
-	if (s.coverageVersion !== n || s.lod !== r || i && s.cell !== i) throw P("identity");
-	let c = Ce(s);
-	if (i && c.features.some((e) => e.properties.cell !== i)) throw P("identity");
+	if (s.coverageVersion !== n || s.lod !== r || i && s.cell !== i) throw F("identity");
+	let c = Se(s);
+	if (i && c.features.some((e) => e.properties.cell !== i)) throw F("identity");
 	return c;
 }
-function De(e, t) {
+function Ee(e, t) {
 	if (!(t.get(e.properties.cell)?.bounds[0] >= 180)) return e;
 	let n = (e) => typeof e[0] == "number" ? [e[0] - 360, e[1]] : e.map(n);
 	return {
@@ -796,21 +796,21 @@ function De(e, t) {
 		}
 	};
 }
-function Oe(e, t, n = {}) {
-	F(e);
+function De(e, t, n = {}) {
+	L(e);
 	let r = n.fetch ?? globalThis.fetch.bind(globalThis), i = new Map(e.cells.map((e) => [e.id, e])), a = new Map(e.cells.map((e) => [e.id, []]));
 	for (let e of t.features) {
 		let t = a.get(e.properties.cell);
-		if (!t) throw P("identity");
+		if (!t) throw F("identity");
 		t.push(e);
 	}
 	let o = /* @__PURE__ */ new Set(), s = /* @__PURE__ */ new Map(), c = 0, l = 0, u, d = !1, f = "overview:", p = "overview:", m = {
 		manifest: e,
 		version: e.version,
-		area: N([]),
-		mask: N([]),
-		territories: N([]),
-		boundaries: N([]),
+		area: P([]),
+		mask: P([]),
+		territories: P([]),
+		boundaries: P([]),
 		cellFeatures: /* @__PURE__ */ new Map(),
 		status: {
 			version: e.version,
@@ -837,12 +837,12 @@ function Oe(e, t, n = {}) {
 			let i = e.get(n)?.features ?? r;
 			m.cellFeatures.set(n, i), t.push(...i);
 		}
-		m.area = N(t.filter((e) => e.properties.role === "area")), m.mask = N(((e) => n.canonicalMask ? e.map((e) => De(e, i)) : e)(t.filter((e) => e.properties.role === "mask"))), m.territories = N(t.filter((e) => e.properties.role === "territory")), m.boundaries = N(t.filter((e) => e.properties.role === "territory-boundary"));
+		m.area = P(t.filter((e) => e.properties.role === "area")), m.mask = P(((e) => n.canonicalMask ? e.map((e) => Ee(e, i)) : e)(t.filter((e) => e.properties.role === "mask"))), m.territories = P(t.filter((e) => e.properties.role === "territory")), m.boundaries = P(t.filter((e) => e.properties.role === "territory-boundary"));
 	};
 	g(/* @__PURE__ */ new Map());
 	async function _(t, n) {
 		if (d) return;
-		let i = we(n), a = Te(e, t, n), o = a.map((e) => e.id).sort(), _ = `${i}:${o.join(",")}`;
+		let i = I(n), a = Ce(e, t, n), o = a.map((e) => e.id).sort(), _ = `${i}:${o.join(",")}`;
 		if (_ === f && (m.status.ready || m.status.pending > 0)) return;
 		f = _;
 		let v = ++l;
@@ -857,7 +857,7 @@ function Oe(e, t, n = {}) {
 			ready: !1
 		}, h();
 		try {
-			if (a.length > M.cells || a.reduce((e, t) => e + t.levels[i].bytes, 0) > M.viewBytes) throw P("budget");
+			if (a.length > M.cells || a.reduce((e, t) => e + t.levels[i].bytes, 0) > M.viewBytes) throw F("budget");
 			let t = /* @__PURE__ */ new Map(), n = 0;
 			if (await Promise.all(Array.from({ length: Math.min(M.concurrent, a.length) }, async () => {
 				for (; n < a.length && b();) {
@@ -866,7 +866,7 @@ function Oe(e, t, n = {}) {
 						let e = s.get(u);
 						s.delete(u), s.set(u, e);
 					} else {
-						if (d = await Ee(r, l, e.version, i, o.id, y), !b()) return;
+						if (d = await Te(r, l, e.version, i, o.id, y), !b()) return;
 						for (s.set(u, {
 							bundle: d,
 							bytes: l.bytes
@@ -903,43 +903,43 @@ function Oe(e, t, n = {}) {
 	}
 	return m;
 }
-var L = /* @__PURE__ */ new Map();
-async function ke(e = {}) {
-	let t = e.manifestURL ?? "/data/map-coverage/manifest.json", n = e.fetch ?? globalThis.fetch.bind(globalThis), r = !e.fetch && L.get(t);
+var R = /* @__PURE__ */ new Map();
+async function Oe(e = {}) {
+	let t = e.manifestURL ?? "/data/map-coverage/manifest.json", n = e.fetch ?? globalThis.fetch.bind(globalThis), r = !e.fetch && R.get(t);
 	r || (r = (async () => {
-		let e = await I(n, t, M.manifestBytes), r = F(JSON.parse(new TextDecoder().decode(e)));
+		let e = await we(n, t, M.manifestBytes), r = L(JSON.parse(new TextDecoder().decode(e)));
 		return {
 			manifest: r,
-			base: await Ee(n, r.base, r.version, "overview")
+			base: await Te(n, r.base, r.version, "overview")
 		};
-	})(), e.fetch || (L.set(t, r), r.catch(() => L.delete(t))));
+	})(), e.fetch || (R.set(t, r), r.catch(() => R.delete(t))));
 	let { manifest: i, base: a } = await r;
-	return Oe(i, a, e);
+	return De(i, a, e);
 }
 //#endregion
 //#region web/lib/terrain-preparation.worker.ts?worker&url
-var Ae = "" + new URL("../workers/terrain-preparation.worker-B8lieq38.js", import.meta.url).href, je = "20261106-3", R = new le(), Me = () => typeof location > "u" ? "https://map-preview.local" : location.origin, z, Ne = `/terrain/terrain-grid.json?v=${je}`;
+var ke = "" + new URL("../workers/terrain-preparation.worker-B8lieq38.js", import.meta.url).href, Ae = "20261106-3", z = new le(), je = () => typeof location > "u" ? "https://map-preview.local" : location.origin, B, Me = `/terrain/terrain-grid.json?v=${Ae}`;
 new fe({
-	loadModule: () => (z ||= import("./terrain-renderer-qT471hOA.js").catch((e) => {
-		throw z = void 0, e;
-	}), z),
-	loadGrid: () => V(Ne),
-	createWorker: () => typeof Worker > "u" ? void 0 : new Worker(new URL(Ae, location.href), {
+	loadModule: () => (B ||= import("./terrain-renderer-qT471hOA.js").catch((e) => {
+		throw B = void 0, e;
+	}), B),
+	loadGrid: () => H(Me),
+	createWorker: () => typeof Worker > "u" ? void 0 : new Worker(new URL(ke, location.href), {
 		type: "module",
 		name: "tropnik-terrain"
 	}),
-	onFailure: () => R.invalidate(Ne)
+	onFailure: () => z.invalidate(Me)
 });
-function B(e) {
-	return ue(e, Me());
+function V(e) {
+	return ue(e, je());
 }
-function V(e, t = 0) {
-	let n = B(e);
-	return n ? R.json(n, t) : Promise.reject(/* @__PURE__ */ Error("Unknown public map resource"));
+function H(e, t = 0) {
+	let n = V(e);
+	return n ? z.json(n, t) : Promise.reject(/* @__PURE__ */ Error("Unknown public map resource"));
 }
-function H(e, t = 1, n) {
-	let r = B(e);
-	return r ? R.get(r, t, n) : Promise.reject(/* @__PURE__ */ Error("Unknown public map resource"));
+function Ne(e, t = 1, n) {
+	let r = V(e);
+	return r ? z.get(r, t, n) : Promise.reject(/* @__PURE__ */ Error("Unknown public map resource"));
 }
 //#endregion
 //#region web/lib/map-satellite.ts
@@ -995,7 +995,7 @@ function qe(e, t, n, r = Math.min(e, 12)) {
 }
 var Je = class {
 	constructor(e = !1) {
-		this.softwareRaster = e, this.cache = /* @__PURE__ */ new Map(), this.jobs = /* @__PURE__ */ new Map(), this.pinned = /* @__PURE__ */ new Set(), this.fetching = 0, this.serial = 0, this.disposed = !1, this.enabled = !0, this.errors = [];
+		this.softwareRaster = e, this.cache = /* @__PURE__ */ new Map(), this.jobs = /* @__PURE__ */ new Map(), this.pinned = /* @__PURE__ */ new Set(), this.fetching = 0, this.reading = /* @__PURE__ */ new Set(), this.lastHaloWork = 0, this.serial = 0, this.disposed = !1, this.enabled = !0, this.errors = [];
 	}
 	snapshot() {
 		return {
@@ -1019,7 +1019,7 @@ var Je = class {
 	}
 	pin(e) {
 		this.pinned = new Set(e);
-		for (let [e, { work: t }] of this.jobs) !this.pinned.has(e) && t.stage !== "decoding" && (this.jobs.delete(e), t.controller.abort(), t.bytes = void 0, t.halo = void 0, t.reject(/* @__PURE__ */ Error("Map view changed")));
+		for (let [e, { work: t }] of this.jobs) !this.pinned.has(e) && t.stage !== "decoding" && (this.jobs.delete(e), t.controller.abort(), t.bytes = void 0, t.halo = void 0, t.haloPlan = void 0, t.reject(/* @__PURE__ */ Error("Map view changed")));
 		this.evict(!0);
 	}
 	peek(e) {
@@ -1054,7 +1054,7 @@ var Je = class {
 		}), this.pump(), o;
 	}
 	files() {
-		return this.localFiles ??= V("/offline-map/manifest.json").then((e) => new Set(e.files.map((e) => e.path))).catch(() => /* @__PURE__ */ new Set());
+		return this.localFiles ??= H("/offline-map/manifest.json").then((e) => new Set(e.files.map((e) => e.path))).catch(() => /* @__PURE__ */ new Set());
 	}
 	async source(e) {
 		let { kind: t } = e.request, n = Math.min(e.request.z, t === "vector" ? 14 : t === "relief" ? 12 : e.request.z), r = 2 ** (e.request.z - n), i = Math.floor(e.request.x / r), a = Math.floor(e.request.y / r), o = W(i, n);
@@ -1080,7 +1080,7 @@ var Je = class {
 			local: !1,
 			mime: "image/webp"
 		} : {
-			url: (await (this.template ??= V("https://tiles.openfreemap.org/planet/latest").then((e) => {
+			url: (await (this.template ??= H("https://tiles.openfreemap.org/planet/latest").then((e) => {
 				let t = e.tiles?.[0];
 				if (!t?.startsWith("https://tiles.openfreemap.org/")) throw Error("Unrecognized vector source");
 				return t;
@@ -1094,90 +1094,120 @@ var Je = class {
 	current(e) {
 		return !this.disposed && this.jobs.get(e.key)?.work === e;
 	}
-	async fetch(e) {
-		let t = await this.source(e);
+	async readSource(e, t, n) {
+		this.reading.add(t);
+		try {
+			return await Ne(t, n, e.controller.signal);
+		} finally {
+			this.reading.delete(t);
+		}
+	}
+	async fetchPrimary(e) {
+		let t = e.source ?? await this.source(e);
 		if (!this.current(e)) return;
+		if (e.source = t, this.reading.has(t.url)) {
+			e.stage = "queued";
+			return;
+		}
 		e.local = t.local, e.mime = t.mime, e.sourceKey = t.url;
-		let n = await H(t.url, 0, e.controller.signal);
+		let n = await this.readSource(e, t.url, 0);
 		if (this.current(e)) {
 			if (!n.byteLength || n.byteLength > U) throw Error("Map source exceeds tile budget");
 			if (e.bytes = n.slice(0), e.request.kind === "relief") {
-				let { z: r, x: i, y: a } = e.request, o = e.sourceZ, s = 2 ** (r - o), c = Math.floor(i / s), l = Math.floor(a / s), u = {
+				let { z: r, x: i, y: a } = e.request, o = e.sourceZ, s = 2 ** (r - o), c = Math.floor(i / s), l = Math.floor(a / s), u = e.local ? await this.files() : void 0;
+				if (!this.current(e)) return;
+				e.halo = {
 					tiles: [],
 					missing: []
-				};
-				e.halo = u;
-				let d = /* @__PURE__ */ new Map([[t.url, e.bytes]]), f = n.byteLength, p = e.local ? await this.files() : void 0;
-				for (let t of qe(r, i, a, o)) {
-					if (!this.current(e)) return;
-					let n = W(c + t.dx, o), r = l + t.dy;
-					if (r < 0 || r >= 2 ** o) {
-						u.missing.push({
-							...t,
-							reason: "coverage"
-						});
-						continue;
-					}
-					let i = `terrain/tiles/${o}/${n}/${r}.png`, a = !!e.local && !!p?.has(i);
-					if (!a && !navigator.onLine) {
-						u.missing.push({
-							...t,
-							reason: "unavailable"
-						});
-						continue;
-					}
-					let s = a ? `/offline-map/${i}` : `https://tiles.mapterhorn.com/${o}/${n}/${r}.webp`, m = {
-						...t,
-						sourceKey: s,
-						mime: a ? "image/png" : "image/webp",
-						...!a && e.local ? { reduceToArchive: !0 } : {}
-					};
-					try {
-						let n = d.get(s);
-						if (!n) {
-							if (f >= U) {
-								u.missing.push({
-									...t,
-									reason: "budget"
-								});
-								continue;
-							}
-							let r = await H(s, 0, e.controller.signal);
-							if (!this.current(e)) return;
-							if (!r.byteLength) {
-								u.missing.push({
-									...t,
-									reason: "invalid"
-								});
-								continue;
-							}
-							if (f + r.byteLength > U) {
-								u.missing.push({
-									...t,
-									reason: "budget"
-								});
-								continue;
-							}
-							n = r.slice(0), d.set(s, n), f += n.byteLength;
-						}
-						u.tiles.push({
-							...m,
-							bytes: n
-						});
-					} catch {
-						if (!this.current(e)) return;
-						u.missing.push({
-							...t,
-							reason: "unavailable"
-						});
-					}
-				}
-			}
-			this.current(e) && (e.stage = "ready");
+				}, e.haloPlan = {
+					offsets: qe(r, i, a, o),
+					index: 0,
+					sourceZ: o,
+					parentX: c,
+					parentY: l,
+					files: u,
+					copies: /* @__PURE__ */ new Map([[t.url, e.bytes]]),
+					bytes: n.byteLength
+				}, e.stage = e.haloPlan.offsets.length ? "halo" : "ready";
+			} else e.stage = "ready";
 		}
 	}
+	haloDependency(e, t) {
+		let n = e.haloPlan, r = W(n.parentX + t.dx, n.sourceZ), i = n.parentY + t.dy;
+		if (i < 0 || i >= 2 ** n.sourceZ) return { reason: "coverage" };
+		let a = `terrain/tiles/${n.sourceZ}/${r}/${i}.png`, o = !!e.local && !!n.files?.has(a);
+		if (!o && !navigator.onLine) return { reason: "unavailable" };
+		let s = o ? `/offline-map/${a}` : `https://tiles.mapterhorn.com/${n.sourceZ}/${r}/${i}.webp`;
+		return { item: {
+			...t,
+			sourceKey: s,
+			mime: o ? "image/png" : "image/webp",
+			...!o && e.local ? { reduceToArchive: !0 } : {}
+		} };
+	}
+	async fetchHalo(e) {
+		let t = e.haloPlan, n = e.halo;
+		for (; t.index < t.offsets.length;) {
+			if (!this.current(e)) return;
+			let r = t.offsets[t.index], i = this.haloDependency(e, r);
+			if ("reason" in i) {
+				n.missing.push({
+					...r,
+					reason: i.reason
+				}), t.index++;
+				continue;
+			}
+			let { item: a } = i, o = t.copies.get(a.sourceKey);
+			if (o) {
+				n.tiles.push({
+					...a,
+					bytes: o
+				}), t.index++;
+				continue;
+			}
+			if (t.bytes >= U) {
+				n.missing.push({
+					...r,
+					reason: "budget"
+				}), t.index++;
+				continue;
+			}
+			if (this.reading.has(a.sourceKey)) {
+				e.stage = "halo";
+				return;
+			}
+			try {
+				let i = await this.readSource(e, a.sourceKey, 1);
+				if (!this.current(e)) return;
+				if (!i.byteLength) n.missing.push({
+					...r,
+					reason: "invalid"
+				});
+				else if (t.bytes + i.byteLength > U) n.missing.push({
+					...r,
+					reason: "budget"
+				});
+				else {
+					let e = i.slice(0);
+					t.copies.set(a.sourceKey, e), t.bytes += e.byteLength, n.tiles.push({
+						...a,
+						bytes: e
+					});
+				}
+			} catch {
+				if (!this.current(e)) return;
+				n.missing.push({
+					...r,
+					reason: "unavailable"
+				});
+			}
+			t.index++, e.stage = t.index < t.offsets.length ? "halo" : "ready";
+			return;
+		}
+		this.current(e) && (e.stage = "ready");
+	}
 	finish(e, t, n) {
-		if (e.bytes = void 0, e.halo = void 0, this.jobs.get(e.key)?.work !== e) {
+		if (e.bytes = void 0, e.halo = void 0, e.haloPlan = void 0, this.jobs.get(e.key)?.work !== e) {
 			t?.bitmap.close();
 			return;
 		}
@@ -1221,7 +1251,7 @@ var Je = class {
 			}
 			this.active = e, e.stage = "decoding";
 			let t = e.bytes, n = e.halo;
-			e.bytes = void 0, e.halo = void 0, this.timer = setTimeout(() => this.failWorker(), 15e3), this.worker.postMessage({
+			e.bytes = void 0, e.halo = void 0, e.haloPlan = void 0, this.timer = setTimeout(() => this.failWorker(), 15e3), this.worker.postMessage({
 				id: e.id,
 				kind: e.request.kind === "vector" ? "vector" : e.request.kind === "relief" ? "relief" : "raster",
 				bytes: t,
@@ -1256,8 +1286,17 @@ var Je = class {
 		], r = t === void 0 ? -1 : n.indexOf(t);
 		for (let t = 1; t <= n.length; t++) {
 			let i = n[(r + t) % n.length];
-			for (let { work: t } of this.jobs.values()) if (t.stage === e && t.request.kind === i) return t;
+			for (let { work: t } of this.jobs.values()) if (t.stage === e && t.request.kind === i && !(e === "queued" && t.source && this.reading.has(t.source.url))) return t;
 		}
+	}
+	nextHalo() {
+		let e, t;
+		for (let { work: n } of this.jobs.values()) {
+			if (n.stage !== "halo") continue;
+			let r = n.haloPlan, i = r.offsets[r.index], a = i ? this.haloDependency(n, i) : void 0;
+			a && "item" in a && !r.copies.has(a.item.sourceKey) && r.bytes < U && this.reading.has(a.item.sourceKey) || ((!e || n.id < e.id) && (e = n), n.id > this.lastHaloWork && (!t || n.id < t.id) && (t = n));
+		}
+		return t ?? e;
 	}
 	pump() {
 		if (!(this.disposed || !this.enabled)) {
@@ -1265,10 +1304,11 @@ var Je = class {
 				let e = this.next("ready", this.lastDecodeKind);
 				e && (this.lastDecodeKind = e.request.kind, this.decode(e));
 			}
-			for (; this.fetching < Ge && [...this.jobs.values()].filter((e) => e.work.stage === "ready").length + this.fetching < Ke;) {
-				let e = this.next("queued", this.lastFetchKind);
+			for (; this.fetching < Ge;) {
+				let e = ([...this.jobs.values()].filter(({ work: e }) => e.stage === "fetching" || e.stage === "halo" || e.stage === "ready").length < Ke ? this.next("queued", this.lastFetchKind) : void 0) ?? this.nextHalo();
 				if (!e) break;
-				this.lastFetchKind = e.request.kind, e.stage = "fetching", this.fetching++, this.fetch(e).catch((t) => this.finish(e, void 0, t instanceof Error ? t : /* @__PURE__ */ Error("Tile download failed"))).finally(() => {
+				let t = e.stage === "halo";
+				t && (this.lastHaloWork = e.id), this.lastFetchKind = e.request.kind, e.stage = "fetching", this.fetching++, (t ? this.fetchHalo(e) : this.fetchPrimary(e)).catch((t) => this.finish(e, void 0, t instanceof Error ? t : /* @__PURE__ */ Error("Tile download failed"))).finally(() => {
 					this.fetching--, this.pump();
 				});
 			}
@@ -1277,7 +1317,7 @@ var Je = class {
 	destroy() {
 		if (!this.disposed) {
 			this.disposed = !0, clearTimeout(this.timer), this.worker?.terminate(), this.worker = void 0;
-			for (let { work: e } of this.jobs.values()) e.controller.abort(), e.bytes = void 0, e.halo = void 0, e.reject(/* @__PURE__ */ Error("Map resources released"));
+			for (let { work: e } of this.jobs.values()) e.controller.abort(), e.bytes = void 0, e.halo = void 0, e.haloPlan = void 0, e.reject(/* @__PURE__ */ Error("Map resources released"));
 			this.jobs.clear();
 			for (let e of this.cache.values()) e.bitmap.close();
 			this.cache.clear(), this.pinned.clear(), this.active = void 0;
@@ -1287,16 +1327,16 @@ var Je = class {
 //#endregion
 //#region web/lib/russia-map.ts
 async function Ye(e = !1) {
-	return ke({ canonicalMask: e });
+	return Oe({ canonicalMask: e });
 }
 //#endregion
 //#region web/lib/map-framing.ts
 function q(e, t, n, r, i) {
-	let a = he(e, t, n, r);
+	let a = k(e, t, n, r);
 	if (!i || ![...i.center, i.zoom].every(Number.isFinite)) return a;
 	let o = Math.max(0, Math.min(1, 1 - (n - i.zoom) / 2));
 	if (!o) return a;
-	let s = he(...i.center, n, r), c = i.center.map((e, t) => s.center[t] + (e - s.center[t]) * o), l = [O(e), t];
+	let s = k(...i.center, n, r), c = i.center.map((e, t) => s.center[t] + (e - s.center[t]) * o), l = [O(e), t];
 	return {
 		...a,
 		center: a.center.map((e, t) => Math.max(Math.min(e, c[t]), Math.min(Math.max(e, c[t]), l[t])))

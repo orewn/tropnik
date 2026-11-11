@@ -119,8 +119,8 @@
     },
     {
       "path": "web/lib/custom-map-tiles.ts",
-      "sizeBytes": 14552,
-      "sha256": "b15e25a1bc8e6b616b33c8e54fa0b635915387572f4cf4505241bb9ddb0092f9"
+      "sizeBytes": 17191,
+      "sha256": "dff4cc7a9c02504a7dce05566f40a7d602bdb5921465b1853a8f7fd7964e9f6e"
     },
     {
       "path": "web/lib/custom-map-tiles.worker.ts",
@@ -243,17 +243,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "070c4faffb1dd91b15f9ad84c2f8dbf6af2cf94b03975b7e9a3d84eacfc3f4b2",
+  "sourceInputsSha256": "751186c4e13e3240c1af71985fc2bbb46f72ed5f26a6f23f020cbdce98408dd0",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "0819cb3d0471ee025aae46d61dbe7ec92efea5fc3a4dfb938ba52ecff27518cc"
+      "sha256": "f08254b8288434e522b9af6ec0215a22a2f4e1186cc2dfa23a4c7200c5cfe847"
     },
     {
-      "path": "chunks/custom-map-entry-hATS_idL.js",
-      "sizeBytes": 100277,
-      "sha256": "960215d2982f1d3f7326a623fbd16b869f71a367e0e542778d664ee61f88da3f"
+      "path": "chunks/custom-map-entry-DBXJbbtb.js",
+      "sizeBytes": 101955,
+      "sha256": "bf3f918f998ed7392ac4f8156a0d19b45c2d29a4bdcc571413eaffb96f09098f"
     },
     {
       "path": "chunks/terrain-renderer-qT471hOA.js",
@@ -273,7 +273,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "a97ec103117d0a30cbab87190a81d1ec8939e7b69e5185e61e13f7c1e0e9fc45"
+      "sha256": "67fbc2af9d0afdf9e07425383c59130d1cae832626516839d2c43a8d6918cf6c"
     },
     {
       "path": "map.css",
