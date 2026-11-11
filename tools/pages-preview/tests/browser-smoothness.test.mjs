@@ -9,7 +9,7 @@ import {installSmoothnessRecorder,sessionLayoutShift,summarizeSmoothness,smoothn
 import {DESKTOP_TRACE_LIMITS,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from '../browser-trace.mjs';
 import {smoothnessFixture,smoothnessWindowFixture} from './smoothness-fixture.mjs';
 
-const mobile={name:'android-portrait',engine:'leaflet',mobile:true};
+const mobile={name:'android-portrait',engine:'tropnik-canvas',mobile:true};
 const summarize=mutate=>{const raw=structuredClone(smoothnessWindowFixture().raw);mutate(raw);return summarizeSmoothness(raw);};
 
 test('smoothness tracing needs the explicit normal-speed focused diagnostic opt-in',()=>{
@@ -154,7 +154,7 @@ test('all declared scenarios are required and CPU simulation cannot certify a no
  const throttled=structuredClone(report);throttled.cpuSlowdownRate=4;assert.equal(assertSmoothnessAudit(throttled,mobile,{release:false}),throttled);
 });
 test('persisted smoothness reports reject missing or forged native pan delivery',()=>{
- for(const profile of [mobile,{name:'desktop-webgl',engine:'maplibre',mobile:false}]){
+ for(const profile of [mobile,{name:'desktop-webgl',engine:'tropnik-canvas',mobile:false}]){
   const report=smoothnessFixture(profile.name,profile.engine);assert.equal(assertSmoothnessAudit(report,profile),report);
   for(const mutate of [r=>delete r.pan,r=>delete r.pan.events,r=>r.pan.events.pop(),r=>r.pan.events[0].trusted=false,r=>r.pan.events[1].pointerId++,r=>r.pan.events[1].x+=20,r=>r.pan.commands[4].status='rejected',r=>r.pan.durationMs=0]){
    const saved=JSON.parse(JSON.stringify(report));mutate(saved);assert.throws(()=>assertSmoothnessAudit(saved,profile));

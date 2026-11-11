@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Verify native APK assets without claiming a device navigation test.
 
-Checks bundled offline bytes, full catalogue, font coverage and the explicit
+Checks bundled offline bytes, full catalogue, shared font coverage and the explicit
 online source allowlist. Android signature/ZIP alignment are checked separately
 with the SDK apksigner and zipalign tools by build.sh.
 """
@@ -10,14 +10,18 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import struct
 from pathlib import Path
 import zipfile
 from asset_integrity import require, safe_relative, verify_landscape, verify_terrain
 from display_scope import PROVENANCE_FILE, verify_display_scope
 from russia_relief import OVERVIEW_SOURCES_HEADING, verify_overview
-from catalog_integrity import verify_catalog, verify_map_resources
+from catalog_integrity import verify_catalog
 from map_coverage import verify_coverage
+from custom_map import verify_custom_map
+from online_sources import verify_online_sources
+from pilot_map import verify_pilot
 
 
 def verify_apk(apk: Path) -> dict:
@@ -25,45 +29,33 @@ def verify_apk(apk: Path) -> dict:
         names = archive.namelist()
         require(len(names) == len(set(names)), "Duplicate APK entry")
         require(archive.testzip() is None, "APK CRC failure")
+        custom_map_report = verify_custom_map(archive.read("assets/custom-map/manifest.json"),
+            lambda path: archive.read("assets/" + path),
+            actual_files=[name.removeprefix("assets/") for name in names if name.startswith("assets/custom-map/") and not name.endswith("/")])
+        require(not any("libmaplibre" in name.lower() or "libmapbox" in name.lower() for name in names),
+                "A vendor native map renderer is still packaged")
+        for name in names:
+            if re.fullmatch(r"classes\d*\.dex", name):
+                require(not any(prefix in archive.read(name) for prefix in (b"Lorg/maplibre/", b"Lcom/mapbox/mapboxsdk/")), "A vendor map SDK is still packaged")
         prefix = "assets/maps/pilot/"
-        manifest = json.loads(archive.read(prefix + "manifest.json"))
-        # The source manifest is preserved verbatim in the APK.
-        require(manifest.get("complete") is True, "Offline map manifest is incomplete")
-        records = manifest.get("files", manifest.get("assets", []))
-        if isinstance(records, dict):
-            records = [{"path": key, **value} for key, value in records.items()]
-        verified_bytes = 0
-        for record in records:
-            relative = safe_relative(record.get("path"))
-            data = archive.read(prefix + relative)
-            expected_size = record.get("size", record.get("bytes"))
-            require(len(data) == expected_size, f"Asset length mismatch: {relative}")
-            require(hashlib.sha256(data).hexdigest() == record["sha256"], f"Asset digest mismatch: {relative}")
-            verified_bytes += len(data)
-        tiles = [name for name in names if name.startswith(prefix + "localtiles/") and name.endswith(".pbf")]
-        require(len(tiles) == 193, "Offline vector tile count differs")
-        for block in ("0-255", "1024-1279", "8192-8447", "9472-9727"):
-            require(prefix + f"fonts/Noto Sans Regular/{block}.pbf" in names, "Offline font glyph block is missing")
-        style = json.loads(archive.read("assets/maps/style.json"))
-        map_resources_report = verify_map_resources(style)
-        online_manifest_bytes = archive.read("assets/maps/online-sources.json")
-        online_manifest = json.loads(online_manifest_bytes)
-        require(style.get("metadata", {}).get("tropnik:onlineSourcesManifestSha256") == hashlib.sha256(online_manifest_bytes).hexdigest()
-                and online_manifest.get("sources") == {key: value for key, value in style["sources"].items() if key.startswith("online-")}
-                and online_manifest.get("layerIds") == [layer["id"] for layer in style["layers"] if layer["id"].startswith("online-")]
-                and online_manifest.get("fullRussiaDetailedOffline") is False,
-                "Native online source provenance or scope differs")
-        map_resources_report["onlineSourcesManifestSha256"] = hashlib.sha256(online_manifest_bytes).hexdigest()
+        pilot_report = verify_pilot(archive.read(prefix + "manifest.json"),
+            lambda path: archive.read(prefix + path),
+            actual_files=[name[len(prefix):] for name in names if name.startswith(prefix) and not name.endswith("/")])
+        require("assets/maps/style.json" not in names and not any(
+            name.startswith(prefix + "fonts/") or re.search(r"(?:^|/)(?:maplibre|leaflet|protomaps)[^/]*\.(?:js|mjs|css)$", name, re.I)
+            for name in names), "A retired map style, glyph atlas or vendor runtime is packaged")
+        online_report = verify_online_sources(archive.read("assets/maps/online-sources.json"),
+            lambda path: archive.read("assets/" + path))
         scope_prefix = "assets/maps/russia/"
         scope_report = verify_display_scope(archive.read(scope_prefix + PROVENANCE_FILE),
-            lambda path: archive.read(scope_prefix + path), style)
+            lambda path: archive.read(scope_prefix + path))
         coverage_prefix = "assets/maps/coverage/"
         coverage_report = verify_coverage(archive.read(coverage_prefix + "manifest.json"),
-            lambda path: archive.read(coverage_prefix + path), style=style,
+            lambda path: archive.read(coverage_prefix + path),
             actual_files=[name[len(coverage_prefix):] for name in names if name.startswith(coverage_prefix) and not name.endswith("/")])
         overview_prefix = "assets/maps/russia-relief/"
         overview_report = verify_overview(archive.read(overview_prefix + "manifest.json"),
-            lambda path: archive.read(overview_prefix + path), style=style,
+            lambda path: archive.read(overview_prefix + path),
             actual_files=[name[len(overview_prefix):] for name in names if name.startswith(overview_prefix) and not name.endswith("/")],
             provenance_bytes=archive.read(scope_prefix + PROVENANCE_FILE))
         require(OVERVIEW_SOURCES_HEADING in archive.read("assets/SOURCES.txt").decode("utf-8"),
@@ -73,17 +65,6 @@ def verify_apk(apk: Path) -> dict:
         terrain_report = verify_terrain(terrain_manifest,
             lambda path: archive.read(terrain_prefix + path),
             actual_files=[name[len(terrain_prefix):] for name in names if name.startswith(terrain_prefix) and not name.endswith("/")])
-        source = style["sources"].get("pilot-dem", {})
-        require(source.get("type") == "raster-dem" and source.get("encoding") == "terrarium"
-                and source.get("tileSize") == 256 and source.get("bounds") == terrain_report["terrainBounds"]
-                and source.get("tiles") == ["asset://maps/terrain-pilot/tiles/{z}/{x}/{y}.png"],
-                "Native map does not use the bundled DEM")
-        shading = [layer for layer in style["layers"] if layer.get("id") == "pilot-hillshade"]
-        require(len(shading) == 1 and shading[0].get("type") == "hillshade" and shading[0].get("source") == "pilot-dem"
-                and shading[0].get("paint", {}).get("hillshade-illumination-anchor") == "viewport",
-                "Native camera-relative hillshade is missing")
-        require(style.get("metadata", {}).get("tropnik:terrainManifestSha256") == terrain_report["terrainManifestSha256"],
-                "Native style and terrain package differ")
         landscape_prefix = "assets/landscape/"
         landscape_manifest = archive.read(landscape_prefix + "manifest.json")
         landscape_report = verify_landscape(landscape_manifest,
@@ -116,15 +97,14 @@ def verify_apk(apk: Path) -> dict:
         result = {
             "apk": apk.name, "sizeBytes": apk.stat().st_size,
             "sha256": hashlib.sha256(apk.read_bytes()).hexdigest(), "abis": abis,
-            "offlineTileCount": len(tiles), "manifestFilesVerified": len(records),
-            "manifestBytesVerified": verified_bytes,
-            "cyrillicGlyphsPresent": True, "closureAdvisoryPresent": True,
+            **pilot_report, **online_report,
+            "closureAdvisoryPresent": True,
             "native64BitElfLoadAlignment": native_alignment,
-            **terrain_report, **landscape_report, **scope_report, **overview_report, **catalog_report, **map_resources_report, **coverage_report,
+            **terrain_report, **landscape_report, **scope_report, **overview_report, **catalog_report, **coverage_report, **custom_map_report,
             "terrainRendererSha256": json.loads(landscape_manifest)["rendererSha256"],
-            "nativeHillshadeCameraRelative": True,
-            "nativeHillshadeCameraAnchored": True,
-            "nativeMapLibreTerrainMeshSupported": False,
+            "mapReliefRenderer": "own-terrarium-worker",
+            "mapReliefLighting": "geographic",
+            "mapProjectedTiltDegrees": [0, 40],
             "separateLocalMeshViewer": True,
             "manropeFontBundled": True,
             "terrainTilesVerified": terrain_report["terrainTileCount"],

@@ -8,9 +8,8 @@ test('map hints stay on map surfaces and article pages avoid map startup work',a
  assert.doesNotMatch(layout,/tiles\.openfreemap|russia-display-area\.geojson|tropa-style\.json/);
  assert.match(explore,/MapResourceHints/);
  assert.match(hints,/rel="preconnect"/);
- assert.match(hints,/russia-display-area\.geojson/);
- assert.match(hints,/tropa-style\.json/);
- assert.match(hints,/media="\(hover: hover\) and \(pointer: fine\)"/);
+ assert.match(hints,/data\/map-coverage\/manifest\.json/);
+ assert.doesNotMatch(hints,/tropa-style|maplibre|leaflet|protomaps/);
  assert.doesNotMatch(staticBuild,/<link rel="preconnect" href="https:\/\/tiles\./);
 });
 

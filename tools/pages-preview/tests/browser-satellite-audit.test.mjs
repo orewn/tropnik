@@ -40,8 +40,8 @@ test('completed image responses are independent of ready state and preserve fail
  observer.dispose();assert.equal(listeners.size,0);
 });
 
-for(const engine of ['leaflet','maplibre'])test(`${engine} continuity requires native gestures, provider transfers, lower-detail credit and camera-preserving toggles`,()=>{
- const profile=engine==='leaflet'?'android-portrait':'desktop-webgl',fixture=satelliteFixture(profile,engine);
+for(const profile of ['android-portrait','desktop-webgl'])test(`${profile} custom-map continuity requires native gestures, provider transfers, lower-detail credit and camera-preserving toggles`,()=>{
+ const engine='tropnik-canvas',fixture=satelliteFixture(profile,engine);
  assert.equal(assertSatelliteContinuityAudit(fixture,profile,engine),fixture);
  const changes=[
   value=>delete value.steps,
@@ -78,7 +78,7 @@ for(const engine of ['leaflet','maplibre'])test(`${engine} continuity requires n
 });
 
 test('capture sequence derives pending/errors from raw events and does not apply future failures to earlier frames',()=>{
- const make=()=>satelliteFixture('desktop-webgl','maplibre');
+ const make=()=>satelliteFixture('desktop-webgl','tropnik-canvas');
  const extra=(report,{finished=true,status=404}={})=>{
   const item={...structuredClone(report.resources.requests[0]),requestId:'late',phase:'dateline-native8',responsePhase:'dateline-native8',firstSequence:10,requestedSequence:10,responseSequence:11,finishedSequence:12,status};
   if(!finished){delete item.responseSequence;delete item.finishedSequence;delete item.status;delete item.mimeType;delete item.bytes;item.finished=false;}
@@ -94,11 +94,26 @@ test('capture sequence derives pending/errors from raw events and does not apply
  assert.throws(()=>assertSatelliteContinuityAudit(delayed,delayed.profile,delayed.engine));
  const eastOnly=make();eastOnly.resources.requests.splice(1,1);eastOnly.resources.observedRequests--;
  for(const frame of [...eastOnly.steps,eastOnly.toggles[0].after,eastOnly.preload.after])if(frame.successfulRequestIds)frame.successfulRequestIds=frame.successfulRequestIds.filter(id=>id!=='eox-bluemarble-west');
+ assert.throws(()=>assertSatelliteContinuityAudit(eastOnly,eastOnly.profile,eastOnly.engine),/committed bitmap has no completed public imagery response/);
+ for(const frame of [...eastOnly.steps,eastOnly.toggles[0].after,eastOnly.preload.after])frame.customMap.tiles.imagery=frame.customMap.tiles.imagery.filter(tile=>((tile.x%2**tile.z)+2**tile.z)%2**tile.z!==255);
  assert.throws(()=>assertSatelliteContinuityAudit(eastOnly,eastOnly.profile,eastOnly.engine),/both dateline columns/);
 });
 
+test('custom imagery requires a committed decoded batch, retained ground during preload and actual separable provider viewports',()=>{
+ const valid=satelliteFixture('desktop-webgl','tropnik-canvas');
+ for(const change of [
+  value=>value.toggles[0].after.customMap.tiles.imagery=[],
+  value=>value.toggles[0].after.customMap.tiles.imagery[0].x=1,
+  value=>value.preload.pending.customMap.tiles.detail=[],
+  value=>value.preload.pending.customMap.state.imageryLoading=false,
+  value=>value.setupZooms[0].click.events[2].trusted=false,
+  value=>value.setupZooms[0].after.camera.zoom=4,
+  value=>value.steps[3].camera.zoom=4,
+ ]){const invalid=structuredClone(valid);change(invalid);assert.throws(()=>assertSatelliteContinuityAudit(invalid,invalid.profile,invalid.engine));}
+});
+
 test('preload acceptance rejects early ground removal, stale/finished requests, unbounded holds and missing intermediate images',()=>{
- const make=()=>satelliteFixture('desktop-webgl','maplibre');
+ const make=()=>satelliteFixture('desktop-webgl','tropnik-canvas');
  const valid=make();assert.equal(assertSatellitePreload(valid.preload,valid.resources,'preload'),valid.preload);
  const changes=[
   report=>report.preload.pending.base.committed='satellite',
@@ -133,6 +148,6 @@ test('satellite intervals retain the unchanged strict mobile/desktop budgets',()
   const issues=satellitePerformanceIssues({performance:{layoutShift:.12,longestTaskMs:limit}},profile);assert.equal(issues.length,2);assert.equal(issues[1].limit,limit);assert.equal(issues[1].phase,'satellite-continuity');
  }
  assert.throws(()=>satellitePerformanceIssues({}, {name:'desktop-webgl',mobile:false}),/performance evidence/);
- const frame=satelliteFixture('desktop-webgl','maplibre').steps[0],changed=structuredClone(frame);changed.viewport.width-=15;
+ const frame=satelliteFixture('desktop-webgl','tropnik-canvas').steps[0],changed=structuredClone(frame);changed.viewport.width-=15;
  assert.throws(()=>assertSatelliteCameraUnchanged(frame,changed,'satellite'),/viewport/);
 });

@@ -15,11 +15,11 @@ assert.ok(start>=0&&end>start,'The production profile loop and final audit dispa
 const dispatch=source.slice(start,end);
 const AsyncFunction=(async()=>{}).constructor;
 const profiles=[
- {name:'desktop-webgl',width:1280,height:800,engine:'maplibre',mobile:false,mapInteraction:true},
- {name:'android-portrait',width:412,height:915,engine:'leaflet',mobile:true,mapInteraction:true},
- {name:'compact-android',width:320,height:640,engine:'leaflet',mobile:true,mapInteraction:false},
- {name:'iphone-portrait',width:390,height:844,engine:'leaflet',mobile:true,mapInteraction:false},
- {name:'phone-landscape',width:844,height:390,engine:'leaflet',mobile:true,mapInteraction:false},
+ {name:'desktop-webgl',width:1280,height:800,engine:'tropnik-canvas',mobile:false,mapInteraction:true},
+ {name:'android-portrait',width:412,height:915,engine:'tropnik-canvas',mobile:true,mapInteraction:true},
+ {name:'compact-android',width:320,height:640,engine:'tropnik-canvas',mobile:true,mapInteraction:false},
+ {name:'iphone-portrait',width:390,height:844,engine:'tropnik-canvas',mobile:true,mapInteraction:false},
+ {name:'phone-landscape',width:844,height:390,engine:'tropnik-canvas',mobile:true,mapInteraction:false},
 ];
 
 async function dispatchProfiles(traceEnabled,audit,policy=browserAuditRunPolicy(undefined),issues=[],offlineAudit,satelliteAudit){
@@ -73,7 +73,7 @@ for(const [label,flag] of [['default',undefined],['explicit opt-in','1']]){
 }
 
 test('a desktop audit failure propagates unchanged without repeating or continuing the matrix',async()=>{
- const failure=new Error('The maplibre map did not settle'),calls=[];
+ const failure=new Error('The tropnik-canvas map did not settle'),calls=[];
  const observed=await dispatchProfiles(true,async(_cdp,profile)=>{calls.push(profile.name);throw failure;}).then(()=>null,error=>error);
  assert.equal(observed,failure);assert.deepEqual(calls,['desktop-webgl']);
 });

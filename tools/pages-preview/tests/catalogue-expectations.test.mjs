@@ -35,6 +35,6 @@ test('the native exploration gate accepts the exact expanded source catalogue wi
     action.grid.ariaLabel=action.grid.ariaLabel.replace('11','12');
     action.grid.surfaces.find(item=>item.kind==='count').text='12';
   }
-  assertExploreExperience(receipt,'android-portrait','leaflet',true,expected);
-  assert.throws(()=>assertExploreExperience(receipt,'android-portrait','leaflet',true,catalogueFixture),/source catalogue/);
+  assertExploreExperience(receipt,'android-portrait','tropnik-canvas',true,expected);
+  assert.throws(()=>assertExploreExperience(receipt,'android-portrait','tropnik-canvas',true,catalogueFixture),/source catalogue/);
 });

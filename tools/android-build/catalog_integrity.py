@@ -7,12 +7,6 @@ import re
 from urllib.parse import urlsplit
 from asset_integrity import AssetError, digest, require, safe_relative
 
-ONLINE_SOURCES = {
-    "online-openmaptiles": {"type": "vector", "url": "https://tiles.openfreemap.org/planet/latest"},
-    "online-dem": {"type": "raster-dem", "tiles": ["https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"]},
-}
-
-
 def _vertices(geometry):
     require(isinstance(geometry, dict), "Catalogue geometry is missing")
     kind = geometry.get("type")
@@ -189,39 +183,3 @@ def verify_catalog(manifest_bytes: bytes, read, *, actual_geometry=None, source_
             "catalogGeometryBytesVerified": size, "catalogGeometryVerticesVerified": vertices,
             "catalogRegionMembership": membership, "catalogFieldVerifiedCount": 0, "catalogNavigationReadyCount": 0,
             "catalogSourceByteParityVerified": source_read is not None}
-
-
-def verify_map_resources(style: dict) -> dict:
-    """Permit exactly two explicit online sources; all offline resources stay local."""
-    for key in ("glyphs", "sprite"):
-        require(not style.get(key) or style[key].startswith("asset://"), "Native fonts/sprites are not local")
-    sources = style.get("sources", {})
-    require({key for key in sources if key.startswith("online-")} == ONLINE_SOURCES.keys(), "Unexpected online source set")
-    remote_urls = []
-    for source_id, source in sources.items():
-        urls = [source[field] for field in ("url", "data") if isinstance(source.get(field), str)] + source.get("tiles", [])
-        if source_id in ONLINE_SOURCES:
-            expected = ONLINE_SOURCES[source_id]
-            require(all(source.get(key) == value for key, value in expected.items()), "Online map endpoint differs from its allowlist")
-            allowed = ([expected["url"]] if "url" in expected else []) + expected.get("tiles", [])
-            require(urls == allowed, "Unexpected online map resource")
-            remote_urls += urls
-        else:
-            require(all(url.startswith("asset://") for url in urls), "Unexpected remote resource in a local map source")
-    dem = sources["online-dem"]
-    require(dem.get("encoding") == "terrarium" and dem.get("tileSize") == 512 and dem.get("maxzoom") == 12,
-            "Online elevation encoding or resolution differs")
-    layers = style.get("layers", [])
-    online = [(i, layer) for i, layer in enumerate(layers) if layer.get("id", "").startswith("online-")]
-    require(bool(online) and layers[-1]["id"] == "russia-outside-mask", "Online map lacks the final RF mask")
-    pilot_start = min(i for i, layer in enumerate(layers) if layer.get("source") in {"openmaptiles", "pilot-dem"})
-    for index, layer in enumerate(layers):
-        if layer.get("source") in ONLINE_SOURCES:
-            require(layer.get("id", "").startswith("online-") and layer.get("minzoom", 0) >= 5
-                    and index < pilot_start, "Online map overlays local pilot data or leaks into overview")
-    hillshade = [layer for _, layer in online if layer.get("id") == "online-hillshade"]
-    require(len(hillshade) == 1 and hillshade[0].get("source") == "online-dem"
-            and hillshade[0].get("paint", {}).get("hillshade-illumination-anchor") == "viewport", "Online hillshade is not camera anchored")
-    return {"localOnlyMapResources": False, "bundledOfflineMapAvailable": True,
-            "onlineMapSourcesExplicitlyAllowlisted": True, "onlineMapSourceUrls": remote_urls,
-            "onlineMapLayerCount": len(online), "onlineMapMinZoom": 5, "russiaMaskAboveOnlineMap": True}

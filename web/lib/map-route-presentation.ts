@@ -1,3 +1,4 @@
+import type * as GeoJSON from 'geojson';
 /** Display-only route treatment. It never simplifies, joins or reorders tracks. */
 export const ROUTE_PRESENTATION = Object.freeze({
   ink: '#244D3C',

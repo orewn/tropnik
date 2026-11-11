@@ -181,14 +181,3 @@ export function coveredRussiaBounds(positions, area) {
   }
   return bounds;
 }
-
-/** Leaflet does not repeat GeoJSON with raster/vector tiles. Cover the adjacent world copies explicitly. */
-export function leafletRussiaMask(mask) {
-  const shift = (value, offset) => {
-    if (Array.isArray(value)) return typeof value[0] === 'number' ? [value[0] + offset, ...value.slice(1)] : value.map(v => shift(v, offset));
-    return value;
-  };
-  const features = mask.type === 'FeatureCollection' ? mask.features : [mask.type === 'Feature' ? mask : {type: 'Feature', properties: {}, geometry: mask}];
-  return {type: 'FeatureCollection', features: [-360, 0, 360].flatMap(offset => features.map(feature => ({...feature,
-    geometry: {...feature.geometry, coordinates: shift(feature.geometry.coordinates, offset)}})))};
-}

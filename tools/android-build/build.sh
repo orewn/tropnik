@@ -18,12 +18,15 @@ else
   # Local development intentionally regenerates assets before checking them.
   node "$tropnik_root/tools/android-build/prepare-catalog.mjs"
   python3 "$tropnik_root/tools/android-build/prepare-landscape.py"
+  node "$tropnik_root/tools/android-build/prepare-custom-map.mjs"
 fi
 node "$tropnik_root/tools/android-build/prepare-catalog.mjs" --check
 python3 "$tropnik_root/tools/android-build/prepare-landscape.py" --check
+node "$tropnik_root/tools/android-build/prepare-custom-map.mjs" --check
 python3 -m unittest discover -s "$tropnik_root/tools/android-build" -p 'test_*.py'
 node --test "$tropnik_root/tools/android-build/test-landscape-bootstrap.mjs"
 node --test "$tropnik_root/tools/android-build/test-catalog-regions.mjs"
+node --test "$tropnik_root/tools/android-build/test-custom-map.mjs" "$tropnik_root/tools/android-build/test-native-map-route.mjs"
 cd "$tropnik_root/android"
 tropnik_gradle="${TROPNIK_GRADLE:-./gradlew}"
 tropnik_gradle_flags=(--no-daemon --console=plain)

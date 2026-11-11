@@ -26,6 +26,7 @@ export default function Sources() {
     <h2>Что показывает рельеф</h2>
     <p>Высоты предоставлены <a href="https://mapterhorn.com/attribution/" target="_blank" rel="noreferrer">Mapterhorn</a>. Для Бзерпинского района используется модель <a href="https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM" target="_blank" rel="noreferrer">Copernicus GLO-30</a> с детализацией около 30 метров. Основная съёмка выполнена в 2011–2015 годах. Дата загрузки карты не означает новую съёмку местности.</p>
     <p>Рельеф помогает увидеть форму склонов. Он может учитывать деревья и сооружения, а мелкие препятствия на тропе не показывает. Цвета и освещение условны. По этой карте нельзя определить текущий снег, состояние переправ, лавинную обстановку или допустимость выхода.</p>
+    <p>Объёмная карта открывает участок, который сейчас виден на экране. Приблизьте нужное место перед открытием, чтобы рассмотреть его подробнее. Шаг высот и источник можно посмотреть внутри сцены. Лес, вода и тропы совмещаются с рельефом по координатам; более сильное увеличение не добавляет отсутствующих в исходных данных сведений.</p>
 
     <h2>Истории о местах</h2>
     <p>Истории составлены по русскоязычным материалам заповедников, национальных парков и научных организаций. Ссылки на публикации и даты проверки собраны в <a href="/terms#story-references">справочном приложении к условиям использования</a>. Сведения об авторах фотографий сохранены вместе с изображениями.</p>
@@ -64,9 +65,7 @@ export default function Sources() {
       <ul>
         <li>Manrope — © The Manrope Project Authors, <a href="/fonts/MANROPE-LICENSE.txt">SIL Open Font License 1.1</a>.</li>
         <li>Noto Sans — © The Noto Project Authors, <a href="/offline-map/licenses/Noto-Sans-OFL-1.1.txt">SIL Open Font License 1.1</a>.</li>
-        <li>MapLibre — © MapLibre contributors, <a href="/maps/MAPLIBRE-LICENSE.txt">лицензия и уведомление об авторстве</a>.</li>
-        <li>Leaflet — © Volodymyr Agafonkin и CloudMade, <a href="/maps/LEAFLET-LICENSE.txt">лицензия и уведомление об авторстве</a>.</li>
-        <li>Protomaps — © Protomaps LLC, <a href="/maps/PROTOMAPS-LEAFLET-LICENSE.txt">лицензия и уведомление об авторстве</a>.</li>
+        <li>Отрисовка карты и объёмного рельефа — собственный движок Тропника. Авторство географических данных указано отдельно выше.</li>
       </ul>
     </details>
     <div className="section-actions"><Link prefetch={false} className="button primary" href="/">Вернуться к карте</Link><a className="button secondary" href="/offline">Проверить сохранённые материалы</a></div>

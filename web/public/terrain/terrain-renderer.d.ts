@@ -1,5 +1,7 @@
 export type TerrainGrid = {
   schemaVersion: number;
+  /** Continuous [west,south,east,north], east > west and span <= 360 degrees.
+   * Dateline grids may extend beyond 180; source routes are wrapped to that world. */
   bounds: [number, number, number, number];
   width: number;
   height: number;
@@ -32,6 +34,17 @@ export type TerrainModel = {
   shadowPyramid?: Array<{width: number; height: number; data: Float32Array}>;
 };
 export type TerrainPoint = [number, number, number];
+/** Cartographic colour only. Pixels are georeferenced samples at the grid bounds,
+ * with transparent coverage where the source has no available vector tile. */
+export type TerrainCartography = {
+  width: number; height: number; pixels: Uint8ClampedArray;
+  source: {name: string; bounds: [number, number, number, number];
+    projection: 'regular-longitude-latitude'; sampleLayout: 'grid-nodes';
+    rowOrder: 'north-to-south'; columnOrder: 'west-to-east';
+    requestedTiles: number; loadedTiles: number; [key: string]: unknown};
+};
+export function validateTerrainCartography(surface: TerrainCartography, grid: Pick<TerrainGrid, 'bounds'>): TerrainCartography;
+export function sampleTerrainCartography(surface: TerrainCartography | null, u: number, v: number, output?: number[]): number[];
 export type TerrainSegment = [TerrainPoint, TerrainPoint];
 export type TerrainMesh = {uv: Float32Array; sampleIds: Uint32Array; indices: Uint16Array | Uint32Array; count: number; step: number; triangles: number};
 export function validateTerrainGrid(grid: TerrainGrid): {min: number; max: number};
@@ -56,6 +69,8 @@ export type TerrainRenderInfo = {
   pixelRatio: number;
   meshStride: number;
   sourceVertices: number;
+  view: {yaw: number; pitch: number; zoom: number; offset: [number, number]};
+  cartography: {loadedTiles: number; requestedTiles: number; width: number; height: number} | null;
 };
 export type TerrainViewportInsets = Partial<{top: number; right: number; bottom: number; left: number}>;
 export type TerrainRendererOptions = {
@@ -74,6 +89,8 @@ export class TerrainRenderer {
   constructor(canvas: HTMLCanvasElement, grid: TerrainGrid, options?: TerrainRendererOptions);
   readonly failed: boolean;
   setGeometry(data: unknown): { segments: number; clipped: boolean } | undefined;
+  /** Retains an owned pixel copy; null clears cover colours. Heights never change. */
+  setCartography(surface: TerrainCartography | null): void;
   setVisible(visible: boolean): void;
   setViewportInsets(insets: TerrainViewportInsets | null): void;
   /** Schedules one actual frame even while setVisible(false); repeated calls coalesce and do not start an idle loop. */

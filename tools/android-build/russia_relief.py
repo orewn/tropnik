@@ -7,14 +7,11 @@ from asset_integrity import AssetError, digest, require, safe_relative, verify_f
 
 
 OVERVIEW_SIDECARS = ("manifest.json", "tilejson.json", "ATTRIBUTION.txt")
-OVERVIEW_SOURCE = "russia-overview-relief"
-OVERVIEW_LAYER = "russia-overview-relief"
-OVERVIEW_TILES = "asset://maps/russia-relief/{z}/{x}/{y}.png"
 OVERVIEW_SOURCES_HEADING = "ОБЗОРНЫЙ РЕЛЬЕФ РОССИИ"
 
 
 def verify_overview(manifest_bytes: bytes, read, *, actual_files=None,
-                    style: dict | None = None, provenance_bytes: bytes | None = None) -> dict:
+                    provenance_bytes: bytes | None = None) -> dict:
     manifest = json.loads(manifest_bytes)
     count, size = verify_files(manifest, read)
     require(manifest.get("terrainElevationData") is False and manifest.get("navigationReady") is False,
@@ -58,53 +55,14 @@ def verify_overview(manifest_bytes: bytes, read, *, actual_files=None,
         require(manifest["mask"].get("provenanceSha256") == digest(provenance_bytes)
                 and manifest["mask"].get("sha256") == provenance["assets"]["russia-canonical-area.geojson"]["sha256"],
                 "Overview belongs to another RF display mask")
-    if style is not None:
-        source = style["sources"].get(OVERVIEW_SOURCE, {})
-        require(source.get("type") == "raster" and source.get("tiles") == [OVERVIEW_TILES]
-                and source.get("scheme") == "xyz" and source.get("tileSize") == 256
-                and source.get("minzoom") == 0 and source.get("maxzoom") == 4
-                and source.get("bounds") == manifest["bounds"], "Native overview must use only the bundled raster tiles")
-        layers = style["layers"]
-        ids = [layer["id"] for layer in layers]
-        require(ids.count(OVERVIEW_LAYER) == 1 and "land" in ids and "russia-outside-mask" in ids,
-                "Native overview or mask layer is missing/duplicated")
-        index = ids.index(OVERVIEW_LAYER)
-        layer = layers[index]
-        require(layer.get("type") == "raster" and layer.get("source") == OVERVIEW_SOURCE
-                and layer.get("minzoom") == 0 and layer.get("maxzoom") == 6,
-                "Native overview must disappear at detailed zoom")
-        protected = [i for i, item in enumerate(layers) if item.get("source") in {"regions", "admin-boundaries", "route", "focus", "position"}
-                     or item.get("type") == "symbol" or item.get("id") == "russia-outside-mask"]
-        require(ids.index("land") < index and all(index < i for i in protected)
-                and ids[-1] == "russia-outside-mask", "Overview must stay below regional labels, routes and the RF mask")
-        require(style.get("metadata", {}).get("tropnik:russiaReliefManifestSha256") == digest(manifest_bytes),
-                "Native style and overview package differ")
     return {"russiaOverviewTileCount": count, "russiaOverviewTileBytesVerified": size,
             "russiaOverviewFilesVerified": count + len(OVERVIEW_SIDECARS),
             "russiaOverviewManifestSha256": digest(manifest_bytes),
             "russiaOverviewTilejsonSha256": digest(tilejson_bytes),
             "russiaOverviewAttributionSha256": digest(attribution_bytes),
-            "russiaOverviewMaxNativeZoom": 4, "russiaOverviewLayerMaxZoom": 6,
+            "russiaOverviewMaxNativeZoom": 4,
             "russiaOverviewLocalOnly": True, "russiaOverviewCompleteWrappedXYZ": True,
             "russiaOverviewIsElevationData": False}
-
-
-def add_overview_style(style: dict, manifest_bytes: bytes) -> dict:
-    manifest = json.loads(manifest_bytes)
-    style["sources"][OVERVIEW_SOURCE] = {
-        "type": "raster", "tiles": [OVERVIEW_TILES], "scheme": "xyz", "tileSize": 256,
-        "minzoom": 0, "maxzoom": 4, "bounds": manifest["bounds"], "attribution": manifest["attribution"],
-    }
-    layers = [layer for layer in style["layers"] if layer["id"] != OVERVIEW_LAYER]
-    land = next((i for i, layer in enumerate(layers) if layer["id"] == "land"), None)
-    require(land is not None, "Native overview needs the existing land layer")
-    layers.insert(land + 1, {"id": OVERVIEW_LAYER, "type": "raster", "source": OVERVIEW_SOURCE,
-                           "minzoom": 0, "maxzoom": 6,
-                           "paint": {"raster-opacity": ["interpolate", ["linear"], ["zoom"], 0, 1, 4, 1, 6, 0],
-                                     "raster-fade-duration": 200}})
-    style["layers"] = layers
-    style.setdefault("metadata", {})["tropnik:russiaReliefManifestSha256"] = digest(manifest_bytes)
-    return style
 
 
 def add_overview_sources(existing: bytes, manifest_bytes: bytes, attribution_bytes: bytes) -> bytes:
@@ -112,7 +70,7 @@ def add_overview_sources(existing: bytes, manifest_bytes: bytes, attribution_byt
     text = existing.decode("utf-8").split("\n" + OVERVIEW_SOURCES_HEADING, 1)[0].rstrip()
     block = ("\n\n" + OVERVIEW_SOURCES_HEADING + "\n"
              f"{source['name']}, использована версия {source['usedVersion']}. Картографический масштаб 1:50 000 000, не разрешение 50 метров.\n"
-             "341 локальный PNG тайл z0–4 включён в APK; более крупные масштабы используют этот же обзор, слой скрывается на zoom 6.\n"
+             "341 локальный PNG тайл z0–4 включён в APK. Увеличение обзорного рисунка не добавляет исходной детализации.\n"
              "Полная XYZ-сетка включает прозрачные тайлы и обе стороны линии перемены даты. Сеть для этого слоя не требуется.\n"
              "Это исторический тонированный обзорный рисунок рельефа, не DEM, актуальная съёмка, текущий свет или подробная навигационная карта всей России.\n"
              "Маска покрытия совпадает с maps/russia/russia-boundaries-provenance.json.\n"

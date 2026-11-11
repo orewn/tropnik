@@ -1,6 +1,7 @@
+import {customMapFixture,customSceneFixture} from './custom-map-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CLOSE_TRAIL_FIXTURE,assertBrowserReport as verifyBrowserReport,assertRouteEdgeFrame} from '../browser-report.mjs';
+import {CLOSE_TRAIL_FIXTURE,assertBrowserReport as verifyBrowserReport,assertRouteEdgeFrame,assertReliefPalette} from '../browser-report.mjs';
 import {projectMapPoint,unprojectMapPoint} from '../map-projection.mjs';
 import {directionHitAreasFixture} from './direction-hitareas-fixture.mjs';
 import {catalogueFixture,layerMenusFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
@@ -12,20 +13,20 @@ const commit='a'.repeat(40);
 const assertBrowserReport=(report,source)=>verifyBrowserReport(report,source,catalogueFixture);
 const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
 function closeTrail(profile,engine,mobile){
- const input=mobile?'touch':'mouse',step=engine==='leaflet'?.75:1,inputs=[],frames=[];let zoom=14;
+ const input=mobile?'touch':'mouse',step=1,inputs=[],frames=[];let zoom=14;
  for(const targetZoom of [11,14,17]){
   while(zoom!==targetZoom){
    const direction=targetZoom>zoom?1:-1,index=inputs.length;
    inputs.push({input,direction,before:zoom,after:zoom+direction*step,events:['pointerdown','pointerup','click'].map((type,event)=>({type,time:100+index*10+event,timestamp:100+index*10+(event?1:0),trusted:true,pointerType:input,pointerId:mobile?index+2:1}))});zoom+=direction*step;
   }
-  const mapRect=rect(0,72,mobile?412:1000,mobile?700:928),camera={longitude:40.6887254,latitude:45.54436005,zoom,tileSize:mobile?256:512};
+  const mapRect=rect(0,72,mobile?412:1000,mobile?700:928),camera={longitude:40.6887254,latitude:45.54436005,zoom,tileSize:256};
   const markers=CLOSE_TRAIL_FIXTURE.endpoints.map((coordinate,index)=>{
    const letter=['А','Б'][index],point=projectMapPoint(coordinate,camera,mapRect);
    return{role:'img',ariaLabel:`Край ${letter} исходной линии`,pointerEvents:'none',rect:rect(point.x-16,point.y-16,32,32),
     badge:{text:letter,visible:zoom!==11,pointerEvents:'none',rect:rect(point.x-16,point.y-16,32,32)},
-    caption:{text:`Точка ${letter}`,visible:zoom===17||!mobile&&zoom===14,pointerEvents:'none',rect:rect(point.x-32,point.y+20,64,24)}};
+    caption:{text:`Точка ${letter}`,visible:zoom===17,pointerEvents:'none',rect:rect(point.x-32,point.y+20,64,24)}};
   });
-  frames.push({targetZoom,zoom,camera,mapRect,routeId:CLOSE_TRAIL_FIXTURE.routeId,inputCount:inputs.length,available:mapRect,scrollY:0,region:CLOSE_TRAIL_FIXTURE.region,queryRoute:CLOSE_TRAIL_FIXTURE.routeId,selectedRoute:'selected',imagery:'',sceneVisible:false,markers,overlays:[],reliefPalette:{engine,tiles:mobile?[{visible:true,state:'ready',paintedMode:'detail',desiredMode:'detail'}]:[]},screenshot:`${profile}-source-ends-z${zoom}.png`});
+  frames.push({targetZoom,zoom,camera,mapRect,routeId:CLOSE_TRAIL_FIXTURE.routeId,inputCount:inputs.length,available:mapRect,scrollY:0,region:CLOSE_TRAIL_FIXTURE.region,queryRoute:CLOSE_TRAIL_FIXTURE.routeId,selectedRoute:'selected',imagery:'',sceneVisible:false,markers,overlays:[],reliefPalette:{engine,...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera,routeId:CLOSE_TRAIL_FIXTURE.routeId})}:{})},screenshot:`${profile}-source-ends-z${zoom}.png`});
  }
  return{passed:true,input,region:CLOSE_TRAIL_FIXTURE.region,routeId:CLOSE_TRAIL_FIXTURE.routeId,geometryURL:CLOSE_TRAIL_FIXTURE.geometryURL,
   source:{featureCount:1,partCount:1,vertexCount:12,endpoints:CLOSE_TRAIL_FIXTURE.endpoints,sha256:'c'.repeat(64)},
@@ -41,26 +42,26 @@ function sheetGestures(){
   tapAfterCancel:true,tapAfterDrag:true,listPositionRetained:true,selectionPreserved:true,finalState:'closed'};
 }
 function zoomDesign(profile,engine,mobile){
- const step=mobile?.75:1,input=mobile?'touch':'mouse',high=10+4*step,edges=closeTrail(profile,engine,mobile);
+ const step=1,input=mobile?'touch':'mouse',high=10+4*step,edges=closeTrail(profile,engine,mobile);
  const burst=(direction,beforeZoom,afterZoom)=>({passed:true,input,count:4,receivedClicks:4,direction,step,beforeZoom,afterZoom,expectedZoom:afterZoom,eventSpanMs:30,durationMs:50,pageScrollDeltaPx:0,selectionPreserved:true,
   dispatchMode:'ordered-native',eventOrderVerified:true,producerDurationMs:1,firstInputLagMs:100,domTimeOrigin:10000,domSampleStartedAtMs:90,recentLongTasks:[],
   events:Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+tap*10+index*2,timestamp:100+tap*10+(index?2:0),trusted:true,pointerType:input,pointerId:mobile?tap+2:1}))).flat(),
   commands:[...(mobile?[]:['mouseMoved']),...Array.from({length:4},()=>mobile?['touchStart','touchEnd']:['mousePressed','mouseReleased']).flat()].map((type,index)=>({index,type,method:mobile?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent',status:'fulfilled',sentAtEpochMs:10000+index*.1,ackAtEpochMs:10040+index,sentOffsetMs:index*.1,ackOffsetMs:40+index,ackDurationMs:40+index*.9})),
  });
- return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:7,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2})),closeTrail:edges,coast:coastFixture(profile,engine),satelliteContinuity:satelliteFixture(profile,engine),
+ return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:8,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2,...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera:{longitude:40,latitude:43,zoom:index+2}})}:{})})),closeTrail:edges,coast:coastFixture(profile,engine),satelliteContinuity:satelliteFixture(profile,engine),
   performance:{layoutShift:0,longestTaskMs:100},performanceIntervals:{modes:{layoutShift:0,longestTaskMs:100},sourceEnds:edges.performance,satellite:{layoutShift:0,longestTaskMs:100}},
   zoomBurst:{passed:true,input,returnedToStart:true,increase:burst(1,10,high),decrease:burst(-1,high,10)},
-  modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview'})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:mobile?'not-offered':'active'},scene3d:{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true}},
+  modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview',...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera:{longitude:40,latitude:43,zoom},mode:'overview'})}:{})})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:engine==='tropnik-canvas'?'scene':mobile?'not-offered':'active'},scene3d:engine==='tropnik-canvas'?customSceneFixture(mobile):{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true}},
   screenshots:[...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
 }
 function evidence(){
- return{verified:true,catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:3,
+ return{verified:true,catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:4,
   offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,inputs:['route-title','region','leader-name','leader-phone'].map(id=>({selector:'#'+id,passed:true,focusedBeforeTyping:true,valueLength:10,events:[{type:'input',trusted:true,id,valueLength:10}]})),networkSuccessfulResponses:0,originTransport:{method:'origin-socket-destroy',active:false,startedAt:'2026-11-10T00:00:00Z',restoredAt:'2026-11-10T00:00:01Z',blockedRequests:1,requests:[{path:'/tropnik/_offline-transport-probe',method:'GET'}],probe:{passed:true,errorCode:'ECONNRESET',path:'/tropnik/_offline-transport-probe'}},screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
-  profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'leaflet',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
-  desktopProfiles:[{name:'desktop-webgl',engine:'maplibre',coarse:false,mapInteractionTested:true}],
-  zoomDesigns:[zoomDesign('android-portrait','leaflet',true),zoomDesign('desktop-webgl','maplibre',false)],
-  siteSmoothness:[smoothnessFixture('android-portrait','leaflet'),smoothnessFixture('desktop-webgl','maplibre')],
-  mapInteractions:[['android-portrait','leaflet',true],['desktop-webgl','maplibre',false]].map(([profile,engine,mobile])=>({profile,engine,mobile,passed:true,directionHitAreas:directionHitAreasFixture(engine,mobile),experience:exploreExperienceFixture(mobile),...(mobile?{}:{styleCameraRoundtrip:styleCameraRoundtripFixture()}),catalogScroll:mobile?{passed:true,input:'touch',deltaPx:100,scrollHeightDelta:0,pageScrollDeltaPx:0,sheetDisplacementPx:0}:null,firstDirection:[{selected:'altai'}],secondDirection:[{selected:'baikal'}],route:{id:'route',offsetPx:14},line:{route:'route',clicked:true,selectionRetained:true,reopened:mobile},returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,polygon:{id:'territory'},gestures:{zoomInput:mobile?'touch-control':'mouse-wheel',beforeZoom:5,afterZoom:6,dragged:true,selectionPreserved:true,resizedTo:{width:900,height:412},postResizePolygon:'territory'},longestTaskMs:100,layoutShift:0}))};
+  profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'tropnik-canvas',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
+  desktopProfiles:[{name:'desktop-webgl',engine:'tropnik-canvas',coarse:false,mapInteractionTested:true}],
+  zoomDesigns:[zoomDesign('android-portrait','tropnik-canvas',true),zoomDesign('desktop-webgl','tropnik-canvas',false)],
+  siteSmoothness:[smoothnessFixture('android-portrait','tropnik-canvas'),smoothnessFixture('desktop-webgl','tropnik-canvas')],
+  mapInteractions:[['android-portrait','tropnik-canvas',true],['desktop-webgl','tropnik-canvas',false]].map(([profile,engine,mobile])=>({profile,engine,mobile,passed:true,directionHitAreas:directionHitAreasFixture(engine,mobile),experience:exploreExperienceFixture(mobile,'route',engine),...(mobile?{}:{styleCameraRoundtrip:styleCameraRoundtripFixture('route',{engine})}),catalogScroll:mobile?{passed:true,input:'touch',deltaPx:100,scrollHeightDelta:0,pageScrollDeltaPx:0,sheetDisplacementPx:0}:null,firstDirection:[{selected:'altai'}],secondDirection:[{selected:'baikal'}],route:{id:'route',offsetPx:14},line:{route:'route',clicked:true,selectionRetained:true,reopened:mobile},returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,polygon:{id:'territory'},gestures:{zoomInput:mobile?'touch-control':'mouse-wheel',beforeZoom:5,afterZoom:6,dragged:true,selectionPreserved:true,resizedTo:{width:900,height:412},postResizePolygon:'territory'},longestTaskMs:100,layoutShift:0}))};
 }
 test('both upload and public verification require real mobile and desktop map interaction evidence',()=>{
  const report=evidence();assert.equal(assertBrowserReport(report,commit),report);
@@ -203,7 +204,7 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
  const fallback=evidence();
  fallback.zoomDesigns[0].modes.satellite={state:'fallback',status:'External imagery did not load',visualReviewRequired:true};
  fallback.zoomDesigns[0].modes.scene3d={state:'error',error:'Terrain could not prepare',visualReviewRequired:true};
- assert.equal(assertBrowserReport(fallback,commit),fallback,'A recorded external-source fallback must stay explicit, without becoming a false rendering PASS');
+ assert.throws(()=>assertBrowserReport(fallback,commit),'A failed custom3D scene must stay explicit and cannot become a rendering PASS');
 });
 test('publication requires native single-line source-end coverage and all three review images',()=>{
  const changes=[
@@ -229,7 +230,7 @@ test('publication requires native single-line source-end coverage and all three 
  const missing=evidence();delete missing.zoomDesigns[0].closeTrail;assert.throws(()=>assertBrowserReport(missing,commit),/single-line source-end coverage/);
 });
 test('source-end geometry rejects overlapping badges and cross-end labels from actual rendered rectangles',()=>{
- const audit=closeTrail('android-portrait','leaflet',true),crowded=structuredClone(audit.frames[0]),separated=structuredClone(audit.frames[1]);
+ const audit=closeTrail('android-portrait','tropnik-canvas',true),crowded=structuredClone(audit.frames[0]),separated=structuredClone(audit.frames[1]);
  assert.equal(assertRouteEdgeFrame(crowded,'Crowded source ends'),true,'Both passive source nodes may stay hidden at the crowded scale');
  for(const marker of crowded.markers)marker.badge.visible=true;
  assert.throws(()=>assertRouteEdgeFrame(crowded,'Observed zoom11'),/badge overlaps .* badge/);
@@ -239,16 +240,31 @@ test('source-end geometry rejects overlapping badges and cross-end labels from a
  const shifted=structuredClone(audit.frames[1]);shifted.markers[0].rect.left+=10;shifted.markers[0].rect.right+=10;
  assert.throws(()=>assertRouteEdgeFrame(shifted,'Shifted source marker'),/original coordinates/,'Collision avoidance must never move the source coordinate');
 });
-test('publication rejects an opaque old relief palette even while its replacement is pending',()=>{
- for(const state of ['ready','pending','unavailable']){
-  const mixed=evidence(),tile=mixed.zoomDesigns[0].closeTrail.frames[0].reliefPalette.tiles[0];
-  tile.paintedMode='overview';tile.state=state;
-  assert.throws(()=>assertBrowserReport(mixed,commit),/stale relief palette/);
-  tile.visible=false;
-  assert.equal(assertBrowserReport(mixed,commit),mixed,'An explicitly hidden unavailable or in-progress tile is not claimed as rendered');
- }
- const missing=evidence();delete missing.zoomDesigns[0].closeTrail.frames[0].reliefPalette;
- assert.throws(()=>assertBrowserReport(missing,commit),/missing relief palette/);
+test('publication rejects missing or stale committed relief from the own renderer',()=>{
+ const valid={engine:'tropnik-canvas',bitmapInspection:customMapFixture()};
+ assert.equal(assertReliefPalette(valid,'actual relief','tropnik-canvas'),true);
+ for(const mutate of [
+  value=>value.bitmapInspection.state.committedMode='overview',
+  value=>value.bitmapInspection.state.loading=true,
+  value=>value.bitmapInspection.state.reliefReady=false,
+  value=>value.bitmapInspection.tiles.relief=[],
+  value=>value.bitmapInspection.drawRevision=0,
+  value=>delete value.bitmapInspection,
+ ]){const changed=structuredClone(valid);mutate(changed);assert.throws(()=>assertReliefPalette(changed,'invalid relief','tropnik-canvas'));}
+});
+test('publication requires the current visible terrain bounds, unchanged source and real progress after every native3D phase',()=>{
+ for(const change of [
+  scene=>scene.beforeMap.camera.longitude+=.01,
+  scene=>scene.states.initial.provenance.requestedBounds=[0,0,1,1],
+  scene=>scene.states.close.grid.source.url='another-source',
+  scene=>scene.states.wide.frames=scene.states.close.frames,
+  scene=>scene.states.rotated.frame.view.yaw=scene.states.wide.frame.view.yaw,
+  scene=>scene.states.reset.frame.view.zoom=2,
+  scene=>scene.states.reset.cartography.state='unavailable',
+  scene=>scene.states.close.frame.cartography=null,
+  scene=>scene.nativeInputs[0].events[2].trusted=false,
+  scene=>scene.nativeInputs.pop(),
+ ]){const invalid=evidence();change(invalid.zoomDesigns[0].modes.scene3d);assert.throws(()=>assertBrowserReport(invalid,commit));}
 });
 test('publication requires both full close-up annotations inside the map and clear of interface panels',()=>{
  const changes=[

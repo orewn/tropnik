@@ -142,9 +142,6 @@ export async function downloadMap(onProgress: (loaded: number, total: number) =>
         await Promise.allSettled(workers);
         throw error;
       }
-      const style = await fetch('/maps/pilot-style.json', { cache: 'no-store', signal: transfer.signal });
-      if (!style.ok) throw new Error('Не удалось сохранить оформление карты.');
-      await cache.put('/maps/pilot-style.json', style);
       // Keep the exact manifest whose hashes were checked, including across a deployment.
       await cache.put('/offline-map/manifest.json', response);
       transfer.signal.throwIfAborted();

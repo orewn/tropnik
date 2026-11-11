@@ -2,7 +2,7 @@ import {createRequire} from 'node:module';
 
 const require = createRequire(new URL('../../web/package.json', import.meta.url));
 const ts = require('typescript');
-const publicRoot = /^\/(?:data|maps|terrain|api|offline-map|_offline|_next|assets|fonts|downloads|regions|routes|guides|trips|community|account|moderation|about|safety|sources|privacy|terms|android|search|planner|offline-fonts\.css|offline-safety(?:\.(?:html|js|css))?|offline(?:-viewer\.html|\.js|\.css)?|preview|sw\.js|manifest\.webmanifest|favicon\.svg|og-cover\.png|icon-(?:192|512)\.png)(?:[/?#.]|$)/;
+const publicRoot = /^\/(?:data|maps|custom-map|terrain|api|offline-map|_offline|_next|assets|fonts|downloads|regions|routes|guides|trips|community|account|moderation|about|safety|sources|privacy|terms|android|search|planner|offline-fonts\.css|offline-safety(?:\.(?:html|js|css))?|offline(?:-viewer\.html|\.js|\.css)?|preview|sw\.js|manifest\.webmanifest|favicon\.svg|og-cover\.png|icon-(?:192|512)\.png)(?:[/?#.]|$)/;
 const storagePrefixes = ['tropnik-shell-', 'tropnik-map-', 'tropnik-staging-', 'tropnik-hike-plans-', 'tropa-local-', 'tropa-auth-change', 'tropa-requests', 'tropnik-checklist', 'tropnik-download-map', 'tropnik-offline-map-change'];
 
 export function normalizeBase(value = '/tropnik/') {
@@ -42,7 +42,14 @@ export function rewriteScript(code, filename, {base, namespace = base.slice(1, -
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node) || ts.isTemplateHead(node)) {
       if ((ts.isImportDeclaration(node.parent) || ts.isExportDeclaration(node.parent)) && node.parent.moduleSpecifier === node && !publicRoot.test(node.text)) return;
       const before = node.text;
-      const after = storageName(pagesPath(before, base, isNavigationRoot(node)), namespace);
+      const rewrite = value => storageName(pagesPath(value, base, isNavigationRoot(node)), namespace);
+      // The shared production bundle can pack URL arrays into a literal split.
+      // Rewrite every resulting URL, preserving the exact separator and values.
+      const member=node.parent,call=member?.parent;
+      const separator=member&&ts.isPropertyAccessExpression(member)&&member.expression===node&&member.name.text==='split'
+        &&call&&ts.isCallExpression(call)&&call.expression===member&&call.arguments.length===1?call.arguments[0]:null;
+      const split=separator&&(ts.isStringLiteral(separator)||ts.isNoSubstitutionTemplateLiteral(separator))&&separator.text;
+      const after = split ? before.split(split).map(rewrite).join(split) : rewrite(before);
       if (before !== after) {
         const start = node.getStart(source) + 1;
         const end = node.end - (ts.isTemplateHead(node) ? 2 : 1);

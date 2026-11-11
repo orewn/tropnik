@@ -1,5 +1,6 @@
-import {readFile,writeFile,copyFile} from 'node:fs/promises';
+import {readFile,writeFile,rm} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import {verifyCustomMap} from './verify-custom-map.mjs';
 
 // The committed vector and DEM archives are the build inputs. A Sites checkout
 // contains only web/, so production builds must not read ../data or fetch tiles.
@@ -7,6 +8,7 @@ const root=new URL('../',import.meta.url);
 const dest=new URL('public/offline-map/',root);
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const scenePath='terrain/landscape.html';
+const customMap=await verifyCustomMap();
 function records(files,sizeKey){
  if(!Array.isArray(files)||!files.length||files.length>1000)throw new Error('Invalid offline archive file list');
  const found=new Map();
@@ -21,7 +23,7 @@ const manifest=JSON.parse(await readFile(new URL('manifest.json',dest),'utf8'));
 if(!manifest.complete)throw new Error('Offline vector archive is incomplete');
 const committed=records(manifest.files,'bytes');
 // Only the embedded scene is generated. All original source records, tiles,
-// glyphs and licences must still match their committed byte lengths and hashes.
+// licences must still match their committed byte lengths and hashes.
 for(const [path,file] of committed){
  if(path===scenePath)continue;
  const bytes=await readFile(new URL(path,dest));
@@ -38,10 +40,25 @@ for(const [path,file] of terrainFiles){
 }
 for(const path of committed.keys())if(path.startsWith('terrain/')&&path!==scenePath&&path!==terrainManifestPath&&!terrainFiles.has(path.slice('terrain/'.length)))throw new Error('Unlisted DEM archive resource: '+path);
 
+const sourceManifestPath='source-manifest.json';
+const sourceManifestBytes=await readFile(new URL(sourceManifestPath,dest));
+const vectorSource=JSON.parse(sourceManifestBytes.toString('utf8'));
+if(!vectorSource.complete||vectorSource.tileCount!==193)throw new Error('Original vector source archive is incomplete');
+const vectorRecords=records(vectorSource.files,'bytes');
+for(const [path,file] of vectorRecords){
+ if(path.startsWith('fonts/'))continue;
+ const actual=committed.get(path);
+ if(!actual||actual.bytes!==file.bytes||actual.sha256!==file.sha256)throw new Error('Original vector source data changed: '+path);
+}
 const scene=await readFile(new URL('public/terrain/landscape.html',root));
 const sceneHash=hash(scene);
-if(committed.get(scenePath)?.sha256!==sceneHash)manifest.builtAt=new Date().toISOString();
-manifest.files=manifest.files.filter(file=>file.path!==scenePath);
+delete manifest.builtAt;
+for(const key of ['glyphRangesExpected','fontstack','localGlyphs'])delete manifest[key];
+manifest.runtime='tropnik-canvas';
+manifest.sourceArchive={manifestPath:sourceManifestPath,sha256:hash(sourceManifestBytes)};
+manifest.ipRights=manifest.ipRights.filter(item=>!/glyph/i.test(item.component));
+manifest.files=manifest.files.filter(file=>file.path!==scenePath&&file.path!==sourceManifestPath&&!file.path.startsWith('fonts/'));
+manifest.files.push({path:sourceManifestPath,bytes:sourceManifestBytes.length,sha256:hash(sourceManifestBytes)});
 manifest.files.push({path:scenePath,bytes:scene.length,sha256:sceneHash});
 manifest.title='Бзерпинский район · карта и рельеф';
 manifest.limitations='Bounded map and DEM only. No satellite imagery, live weather, live closures, field verification or guaranteed navigation accuracy. Offline changes never authorize a group start.';
@@ -57,16 +74,16 @@ for(let attempt=0;attempt<10;attempt++){
  if(attempt===9)throw new Error('Offline manifest byte total did not converge');
 }
 
-const source=JSON.parse(await readFile(new URL('public/maps/tropa-style.json',root),'utf8'));
-source.name='Тропник · Бзерпин · офлайн';
-source.glyphs='/offline-map/fonts/{fontstack}/{range}.pbf';
-source.sources.openmaptiles={type:'vector',tiles:['/offline-map/localtiles/{z}/{x}/{y}.pbf'],minzoom:manifest.minzoom,maxzoom:manifest.maxzoom,bounds:manifest.bbox,attribution:'OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors'};
-for(const id of ['terrain-dem','hillshade-dem'])source.sources[id]={type:'raster-dem',tiles:['/offline-map/terrain/tiles/{z}/{x}/{y}.png'],minzoom:terrain.minzoom,maxzoom:terrain.maxzoom,tileSize:terrain.tileSize,encoding:terrain.encoding,bounds:terrain.bounds,attribution:'Terrain © Mapterhorn · Copernicus WorldDEM-30 · see /sources'};
-source.terrain={source:'terrain-dem',exaggeration:1};
 // Validation precedes every output write; an invalid source archive fails closed.
 await writeFile(new URL(scenePath,dest),scene);
 await writeFile(new URL('manifest.json',dest),JSON.stringify(manifest));
-await writeFile(new URL('public/maps/pilot-style.json',root),JSON.stringify(source));
-for(const file of ['maplibre-gl.mjs','maplibre-gl.css'])await copyFile(new URL('node_modules/maplibre-gl/dist/'+file,root),new URL('public/maps/'+file,root));
-for(const [from,to] of [['leaflet/dist/leaflet.js','leaflet.js'],['leaflet/dist/leaflet.css','leaflet.css'],['protomaps-leaflet/dist/protomaps-leaflet.js','protomaps-leaflet.js'],['leaflet/LICENSE','LEAFLET-LICENSE.txt'],['protomaps-leaflet/LICENSE','PROTOMAPS-LEAFLET-LICENSE.txt']])await copyFile(new URL('node_modules/'+from,root),new URL('public/maps/'+to,root));
-console.log(JSON.stringify({files:manifest.totalFiles,vectorTiles:manifest.tileCount,terrainTiles:manifest.terrainTileCount,packageBytes:manifest.packageBytesIncludingManifest,landscapeBytes:scene.length,allArchiveHashesVerified:true,networkRequests:0}));
+await rm(new URL('fonts/',dest),{recursive:true,force:true});
+// A reused checkout may contain generated vendor files from an older build.
+// They are not loaded, copied or precached by the own map runtime.
+for(const file of ['maplibre-gl.mjs','maplibre-gl.css','maplibre-worker.js','leaflet.js','leaflet.css','protomaps-leaflet.js','tropa-style.json','pilot-style.json','tropnik-sprite.png','tropnik-sprite.json','tropnik-sprite@2x.png','tropnik-sprite@2x.json'])await rm(new URL('public/maps/'+file,root),{force:true});
+const shellFiles=[...customMap.files,customMap.manifest].map(file=>({path:'/custom-map/'+file.path,sizeBytes:file.sizeBytes,sha256:file.sha256}));
+const workerURL=new URL('public/sw.js',root),worker=await readFile(workerURL,'utf8');
+const start='// BEGIN GENERATED CUSTOM MAP',end='// END GENERATED CUSTOM MAP';
+if(!worker.includes(start)||!worker.includes(end))throw new Error('Service worker shared-map boundary is missing');
+await writeFile(workerURL,worker.slice(0,worker.indexOf(start))+start+'\nconst CUSTOM_MAP_RESOURCES='+JSON.stringify(shellFiles)+';\n'+end+worker.slice(worker.indexOf(end)+end.length));
+console.log(JSON.stringify({files:manifest.totalFiles,vectorTiles:manifest.tileCount,terrainTiles:manifest.terrainTileCount,packageBytes:manifest.packageBytesIncludingManifest,landscapeBytes:scene.length,sharedMapFiles:shellFiles.length,sharedMapManifestSha256:customMap.manifestSha256,allArchiveHashesVerified:true,networkRequests:0}));

@@ -3,6 +3,13 @@ name: Focused map, satellite and offline diagnosis
 on:
   push:
     branches: [diagnostics/map-interactions, perf/full-site-smoothness-0.4.24]
+  workflow_dispatch:
+    inputs:
+      traceSmoothness:
+        description: Also capture instrumented panel and search traces in a separate diagnostic job
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -12,6 +19,75 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  full-candidate-audit:
+    name: Full candidate browser audit
+    if: github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/perf/full-site-smoothness-0.4.24'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 32
+    steps:
+      - name: Check out the exact candidate source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Verify browser harness boundaries
+        run: node --test tools/pages-preview/tests/*.test.mjs
+      - name: Run web regression checks
+        working-directory: web
+        run: node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs
+      - name: Check web lint and static client types
+        run: |
+          pnpm --dir web lint
+          node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit
+      - name: Prepare the verified Android link and static candidate
+        run: |
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify native keyboard events and layout-shift attribution
+        run: node --test tools/pages-preview/tests/browser-native-text.browser.mjs
+      - name: Run the complete production browser audit before main
+        timeout-minutes: 26
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Verify the full report belongs to this candidate
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFileSync} from 'node:fs';
+          import {assertBrowserReport} from './tools/pages-preview/browser-report.mjs';
+          const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
+          const browser = JSON.parse(readFileSync('web/pages-preview/dist/browser-verification.json', 'utf8'));
+          assert.match(build.buildId, /^[a-f0-9]{16}$/);
+          assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(build.hasApk, true);
+          assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue);
+          console.log(JSON.stringify({verified:true,sourceCommit:build.sourceCommit,buildId:build.buildId,profiles:browser.profiles.length}));
+          NODE
+      - name: Preserve candidate evidence without publication
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-candidate-browser-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            web/pages-preview/design-qa
+            web/pages-preview/dist/build-info.json
+            web/pages-preview/dist/verification.json
+            web/pages-preview/dist/http-verification.json
+            web/pages-preview/dist/browser-verification.json
+            web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7
+
   inspect:
     name: Diagnose ${{ matrix.diagnostic }}
     runs-on: ubuntu-24.04
@@ -38,12 +114,15 @@ jobs:
         run: |
           node tools/pages-preview/fetch-apk.mjs
           node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify native keyboard events and layout-shift attribution
+        if: matrix.diagnostic == 'ui-smoothness'
+        run: node --test tools/pages-preview/tests/browser-native-text.browser.mjs
       - name: Run the existing focused browser audit
         timeout-minutes: 8
         env:
           GITHUB_SHA: ${{ github.sha }}
           TROPNIK_BROWSER_DIAGNOSTIC: ${{ matrix.diagnostic }}
-          TROPNIK_BROWSER_TRACE: ${{ (matrix.diagnostic == 'map-interactions' || matrix.diagnostic == 'ui-smoothness') && '1' || '' }}
+          TROPNIK_BROWSER_TRACE: ${{ matrix.diagnostic == 'map-interactions' && '1' || '' }}
         run: node tools/pages-preview/browser-smoke.mjs
       - name: Preserve diagnostics without a release artifact
         if: always()
@@ -57,6 +136,50 @@ jobs:
             web/pages-preview/dist/browser-satellite-continuity-diagnostic.json
             web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
             web/pages-preview/dist/browser-ui-smoothness-cpu-diagnostic.json
+            web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7
+
+  trace-smoothness:
+    name: Diagnose UI smoothness with explicit tracing
+    if: github.event_name == 'workflow_dispatch' && inputs.traceSmoothness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out the diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          pnpm --dir web install --frozen-lockfile
+      - name: Prepare the verified Android artifact and static site
+        run: |
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify native keyboard events and layout-shift attribution
+        run: node --test tools/pages-preview/tests/browser-native-text.browser.mjs
+      - name: Capture bounded panel and search traces
+        timeout-minutes: 8
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: '1'
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Preserve instrumented diagnostics without a release artifact
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-ui-smoothness-trace-diagnostic-${{ github.run_id }}
+          path: |
+            web/pages-preview/design-qa
+            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7

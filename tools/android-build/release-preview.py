@@ -142,6 +142,7 @@ def prepare(root: Path, directory: Path, device_directory: Path, output: Path):
                 "onlineDetailedMapAvailable": True,
                 "russiaCoverageProvenanceSha256": verification["russiaDisplayProvenanceSha256"],
                 "sceneGridDimensions": verification["landscapeGridDimensions"]}
+    metadata.update(build["mapRuntime"])
     for name in ("russiaOverviewTileCount", "russiaOverviewManifestSha256", "catalogReferenceRouteCount",
                  "catalogRegionCount", "catalogLearningRouteCount", "catalogReferenceOnlyRouteCount",
                  "catalogSha256", "catalogManifestSha256"):

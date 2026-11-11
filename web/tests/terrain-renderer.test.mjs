@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createTerrainModel, createTerrainModelAsync, validatePreparedTerrainModel, buildTerrainMesh, selectTerrainMeshStride, drapeTerrainRoute, sampleTerrainMeshElevation, sampleTerrainShadow, TerrainRenderer} from '../public/terrain/terrain-renderer.js';
+import {createTerrainModel, createTerrainModelAsync, validatePreparedTerrainModel, buildTerrainMesh, selectTerrainMeshStride, drapeTerrainRoute, sampleTerrainMeshElevation, sampleTerrainShadow, TerrainRenderer, validateTerrainCartography, sampleTerrainCartography} from '../public/terrain/terrain-renderer.js';
 
 const grid = (width=6,height=5) => ({width,height,bounds:[40,43,40.02,43.02],elevations:Array.from({length:width*height},(_,i)=>100+(i%width)*12+Math.floor(i/width)*5+(i%3===0?90:0))});
 
@@ -98,12 +98,16 @@ function environment(t,{gpuFailure=false,gl=null,cloneFails=false,width=80,heigh
   return {canvas,ctx,parent,frames,doc,listeners,flush(){const ready=[...frames.values()];frames.clear();ready.forEach(fn=>fn(0));}};
 }
 
-function recordingGL(){
-  const counts={framebuffers:0,buffers:0,shadowBudgets:[]},enums=new Map();let next=1,gl;
-  const methods={NO_ERROR:0,getParameter:()=>16384,getError:()=>0,getExtension:()=>null,getShaderParameter:()=>true,getProgramParameter:()=>true,
+function recordingGL({anisotropy=0}={}){
+  const counts={framebuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,uploads:[],anisotropyQueries:0,anisotropyValues:[]},enums=new Map();let next=1,gl;
+  const extension={MAX_TEXTURE_MAX_ANISOTROPY_EXT:0x84ff,TEXTURE_MAX_ANISOTROPY_EXT:0x84fe};
+  const methods={NO_ERROR:0,getParameter:key=>key===extension.MAX_TEXTURE_MAX_ANISOTROPY_EXT?anisotropy:16384,getError:()=>0,getExtension:name=>{if(name!=='EXT_texture_filter_anisotropic')return null;counts.anisotropyQueries++;return anisotropy?extension:null;},getShaderParameter:()=>true,getProgramParameter:()=>true,
+    texParameterf:(_target,key,value)=>{if(key===extension.TEXTURE_MAX_ANISOTROPY_EXT)counts.anisotropyValues.push(value);},
     checkFramebufferStatus:()=>gl.FRAMEBUFFER_COMPLETE,getUniformLocation:(_program,name)=>name,
     uniform1i:(name,value)=>{if(name==='uSteps')counts.shadowBudgets.push(value);},
     createFramebuffer:()=>{counts.framebuffers++;return{};},createBuffer:()=>{counts.buffers++;return{};},
+    createTexture:()=>{counts.textures++;return{};},deleteTexture:()=>{counts.deletedTextures++;},
+    texImage2D:(_target,_level,_internal,width,height,_border,_format,_type,data)=>counts.uploads.push({width,height,pixels:data?.slice(0,16)}),
   };
   gl=new Proxy(methods,{get(target,key){
     if(key in target)return target[key];
@@ -140,6 +144,62 @@ test('pointerdown/up and wheel state cannot recreate buffers, switch LOD or allo
 test('renderer retains validated prepared buffers instead of recomputing the model',t=>{
   const env=environment(t),source=grid(3,3),prepared=createTerrainModel(source),renderer=new TerrainRenderer(env.canvas,source,{forceCanvas:true,preparedModel:prepared});
   assert.equal(renderer.model,prepared);assert.equal(renderer.model.normals,prepared.normals);renderer.destroy();
+});
+
+function cartography(source,color=[180,60,30,255]){
+ const pixels=new Uint8ClampedArray(16);for(let at=0;at<16;at+=4)pixels.set(color,at);
+ return{width:2,height:2,pixels,source:{name:'Source map',bounds:[...source.bounds],projection:'regular-longitude-latitude',sampleLayout:'grid-nodes',rowOrder:'north-to-south',columnOrder:'west-to-east',requestedTiles:1,loadedTiles:1}};
+}
+test('cartography validates bounded pixels, exact geographic grid alignment and source coverage',()=>{
+ const source=grid(),valid=cartography(source);assert.equal(validateTerrainCartography(valid,source),valid);
+ for(const change of[s=>s.width=2048,s=>s.height=1,s=>s.pixels=new Uint8ClampedArray(15),s=>s.source.bounds[0]+=.0001,s=>s.source.projection='EPSG:3857',s=>s.source.sampleLayout='pixel-centres',s=>s.source.rowOrder='south-to-north',s=>s.source.loadedTiles=2,s=>s.source.requestedTiles=17]){
+  const value=structuredClone(valid);change(value);assert.throws(()=>validateTerrainCartography(value,source),/cartography/);
+ }
+});
+test('cartography pixel sampling matches DEM grid nodes and uses premultiplied coverage at gaps',()=>{
+ const surface=cartography(grid());surface.pixels.set([255,0,0,255,0,255,0,255,0,0,255,255,0,0,0,0]);
+ assert.deepEqual(sampleTerrainCartography(surface,0,0),[255,0,0,255]);
+ assert.deepEqual(sampleTerrainCartography(surface,1,0),[0,255,0,255]);
+ assert.deepEqual(sampleTerrainCartography(surface,0,1),[0,0,255,255]);
+ assert.deepEqual(sampleTerrainCartography(surface,1,1),[0,0,0,0]);
+ assert.deepEqual(sampleTerrainCartography(surface,.5,.5),[85,85,85,191.25]);
+ assert.deepEqual(sampleTerrainCartography(null,.5,.5),[0,0,0,0]);
+});
+test('Canvas cartography changes actual pixels while retaining heights, source buffers and idle lifecycle',t=>{
+ const env=environment(t),source=grid(3,3),renderer=new TerrainRenderer(env.canvas,source,{forceCanvas:true});env.flush();
+ const neutral=env.ctx.lastImage.data.slice(),heights=renderer.model.heights.slice(),normals=renderer.model.normals.slice(),surface=cartography(source);
+ renderer.setVisible(false);renderer.setCartography(surface);assert.equal(env.frames.size,0);
+ assert.notEqual(renderer.cartography.pixels,surface.pixels);surface.pixels.fill(0);
+ renderer.warmup();env.flush();assert.notDeepEqual(env.ctx.lastImage.data,neutral);
+ assert.equal(renderer.cartography.pixels[0],180);assert.equal(renderer.canvas.dataset.cartography,'source');
+ assert.deepEqual(renderer.model.heights,heights);assert.deepEqual(renderer.model.normals,normals);
+ renderer.setCartography(null);renderer.warmup();env.flush();assert.deepEqual(env.ctx.lastImage.data,neutral);
+ assert.equal(env.frames.size,0);assert.equal(renderer.software.cartography,null);
+ renderer.destroy();assert.equal(renderer.cartography,null);
+});
+test('GPU cartography replaces one texture, restores source cover after context loss and releases all textures',t=>{
+ const record=recordingGL(),env=environment(t,{gl:record.gl}),source=grid(3,3),renderer=new TerrainRenderer(env.canvas,source);env.flush();
+ const before={textures:record.counts.textures,deleted:record.counts.deletedTextures,uploads:record.counts.uploads.length};
+ renderer.setCartography(cartography(source,[180,60,30,128]));
+ assert.equal(record.counts.textures,before.textures+1);assert.equal(record.counts.deletedTextures,before.deleted+1);
+ assert.equal(record.counts.uploads.length,before.uploads+1,'cover updates must never replace the DEM texture');
+ assert.deepEqual([...record.counts.uploads.at(-1).pixels.slice(0,4)],[90,30,15,128]);
+ env.flush();env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();
+ assert.deepEqual(renderer.gpu.cartographySize,[2,2]);assert.equal(renderer.cartography.pixels[0],180);
+ renderer.setCartography(null);assert.deepEqual(renderer.gpu.cartographySize,[1,1]);assert.equal(renderer.cartography,null);
+ renderer.destroy();assert.equal(record.counts.deletedTextures,record.counts.textures);assert.equal(env.frames.size,0);
+});
+
+test('oblique cartography filtering respects device limits and never queries extensions per frame',t=>{
+ for(const available of[0,2,16]){
+  const record=recordingGL({anisotropy:available}),env=environment(t,{gl:record.gl}),source=grid(3,3),renderer=new TerrainRenderer(env.canvas,source);env.flush();
+  const before=record.counts.anisotropyValues.length;
+  renderer.setCartography(cartography(source));env.flush();renderer.rotate(.1);env.flush();
+  assert.equal(record.counts.anisotropyQueries,1);
+  assert.equal(record.counts.anisotropyValues.length,before+(available?1:0));
+  assert.ok(record.counts.anisotropyValues.every(value=>value===Math.min(4,available)));
+  renderer.destroy();
+ }
 });
 
 test('hidden warmup renders one real frame, coalesces calls, and stays idle afterwards',t=>{

@@ -110,6 +110,13 @@ if '--check' in sys.argv:
     if path.read_text()!='fresh\\n': raise SystemExit('fixture stale terrain')
 else: path.write_text('fresh\\n')
 """)
+        (scripts / "prepare-custom-map.mjs").write_text("""
+import {readFileSync,writeFileSync} from 'node:fs';
+const path=new URL('../../android/app/src/main/assets/custom-map.js',import.meta.url);
+if(process.argv.includes('--check')) {
+  if(readFileSync(path,'utf8')!=='fresh\\n') throw Error('fixture stale shared map');
+} else writeFileSync(path,'fresh\\n');
+""")
         (scripts / "test-landscape-bootstrap.mjs").write_text(
             "console.error('fixture stopped before Gradle');process.exit(83);\n")
         (scripts / "test_fixture.py").write_text("""
@@ -118,7 +125,7 @@ import unittest
 class PreparedInputs(unittest.TestCase):
     def test_derivatives_reached_the_test_stage(self):
         assets=Path(__file__).resolve().parents[2]/'android/app/src/main/assets'
-        for name in ('catalog.json','landscape.html'):
+        for name in ('catalog.json','landscape.html','custom-map.js'):
             self.assertEqual((assets/name).read_text(),'fresh\\n')
 """)
         (self.root / ".gitignore").write_text("__pycache__/\n")
@@ -132,6 +139,7 @@ class PreparedInputs(unittest.TestCase):
     def run_build(self, *, ci, catalogue="stale", terrain="stale"):
         (self.assets / "catalog.json").write_text(catalogue + "\n")
         (self.assets / "landscape.html").write_text(terrain + "\n")
+        (self.assets / "custom-map.js").write_text("fresh\n")
         def git(*args):
             return subprocess.check_output(["git", *args], cwd=self.root, stderr=subprocess.DEVNULL, text=True).strip()
         git("init", "--initial-branch=main")

@@ -1,3 +1,4 @@
+import type * as GeoJSON from 'geojson';
 type ObjectValue = Record<string, unknown>;
 export const RENDERED_TRAIL_ID = '__tropnikTrailId';
 const object = (value: unknown): value is ObjectValue => !!value && typeof value === 'object' && !Array.isArray(value);

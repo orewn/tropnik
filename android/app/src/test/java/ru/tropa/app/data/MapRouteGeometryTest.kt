@@ -11,6 +11,7 @@ class MapRouteGeometryTest {
         val source = File(assets, "maps/routes/route-11566519.geojson").readText()
         val prepared = prepareMapRouteGeometry(source)
         assertSame(source, prepared.json)
+        assertArrayEquals(source.toByteArray(Charsets.UTF_8), prepared.utf8)
         assertEquals(RouteCameraFrame(43.7632088, 40.4380182, 43.694196, 40.3503352), prepared.frame)
     }
 
@@ -32,14 +33,15 @@ class MapRouteGeometryTest {
         }
         val prepared = prepareMapRouteGeometry(source)
         assertSame(source, prepared.json)
+        assertArrayEquals(source.toByteArray(Charsets.UTF_8), prepared.utf8)
         assertEquals(RouteCameraFrame(60.99999, 30.99999, 60.0, 30.0), prepared.frame)
     }
 
     @Test fun invalidCoordinatesDoNotEnterCameraBoundsAndSinglePointDoesNotFit() {
         val prepared = prepareMapRouteGeometry("""{"type":"LineString","coordinates":[[181,60],[30,91],[40,50]]}""")
         assertNull(prepared.frame)
-        // Preserve the previous camera interpretation at the dateline.
-        assertEquals(RouteCameraFrame(67.0, 179.0, 66.0, -179.0),
+        // Fit the continuous Russia world copy while retaining the source.
+        assertEquals(RouteCameraFrame(67.0, 181.0, 66.0, 179.0),
             prepareMapRouteGeometry("""{"type":"LineString","coordinates":[[-179,66],[179,67]]}""").frame)
     }
 

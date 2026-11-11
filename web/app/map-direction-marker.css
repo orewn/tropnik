@@ -10,14 +10,6 @@
   background: var(--forest);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
 }
-.explore-layout .leaflet-region-marker {
-  border: 0;
-  background: transparent;
-  overflow: visible;
-  pointer-events: none;
-}
-.explore-layout .leaflet-region-marker:has(> .region-marker.is-selected) {z-index: 10000 !important}
-.explore-layout .leaflet-region-marker:has(> .region-marker:hover, > .region-marker:focus-visible) {z-index: 10001 !important}
 .explore-layout .region-marker {
   position: absolute;
   top: 0;

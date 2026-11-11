@@ -49,6 +49,6 @@ test('map UI guardrails precede the focused sheet and detail layers', () => {
   const imports = [...layout.matchAll(/import "\.\/(.+?\.css)";/g)].map(match => match[1]);
   const releaseIndex = imports.indexOf('map-ui-release.css');
   assert.ok(releaseIndex > imports.indexOf('interface-refresh.css'), 'map release overrides must stay after every legacy map stylesheet');
-  assert.deepEqual(imports.slice(-4), ['final-polish.css', 'map-sheet.css', 'map-detail.css', 'map-direction-marker.css'], 'focused gesture, detail and direction rules must follow generic cross-platform defaults');
+  assert.deepEqual(imports.slice(-5), ['final-polish.css', 'map-sheet.css', 'map-detail.css', 'map-direction-marker.css', 'custom-map.css'], 'focused gesture, detail and custom map rules must follow generic cross-platform defaults');
   assert.ok(imports.indexOf('final-polish.css') > releaseIndex, 'generic guardrails must not replace map-specific release geometry');
 });

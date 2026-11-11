@@ -39,8 +39,8 @@ test('large coastal corrections remain bounded and mouse corrections need no tou
 });
 
 test('coastline proof rejects native taps and stationary cameras even when commands were acknowledged',()=>{
- for(const [engine,input] of [['leaflet','touch'],['maplibre','mouse']]){
-  const pan=coastFixture('fixture',engine).pans[0];
+ for(const [profile,input] of [['android-portrait','touch'],['desktop-webgl','mouse']]){
+  const pan=coastFixture(profile,'tropnik-canvas').pans[0];
   assert.equal(assertCoastPanInput(pan,input,'fixture'),true);
   const tap=structuredClone(pan);tap.events.push({type:'click',trusted:true,pointerType:input});
   assert.throws(()=>assertCoastPanInput(tap,input,'fixture'),/tap cannot count/);

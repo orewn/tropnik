@@ -37,9 +37,10 @@ FILES = APK_NAMES + REPORT_NAMES
 SOURCE_INPUTS = (
     "android/app", "android/gradle", "android/gradlew", "android/gradlew.bat",
     "android/build.gradle.kts", "android/settings.gradle.kts", "android/gradle.properties",
-    "tools/android-build", "tools/map-package", "data/terrain-pilot/runtime",
+    "tools/android-build", "tools/map-package", "data/terrain-pilot/runtime", "data/pilot-map",
     "web/lib", "web/public/data", "web/public/maps", "web/public/offline-map",
-    "web/public/terrain", "web/package.json", "web/pnpm-lock.yaml",
+    "web/public/terrain", "web/public/custom-map", "web/package.json", "web/pnpm-lock.yaml", "web/pnpm-workspace.yaml",
+    "web/app/custom-map.css", "web/app/map-direction-marker.css", "web/app/map-detail.css",
     ".github/workflows/android.yml",
 )
 
@@ -82,6 +83,40 @@ def read_json(path: Path):
     return json.loads(path.read_text())
 
 
+def expected_map_runtime(root: Path):
+    """Bind reports to the same reviewed runtime in both source targets."""
+    native = root / "android/app/src/main/assets/custom-map/manifest.json"
+    web = root / "web/public/custom-map/manifest.json"
+    manifest = read_json(native)
+    require(native.read_bytes() == web.read_bytes(), "Web and native map runtime manifests differ")
+    require(manifest.get("schemaVersion") == 1 and manifest.get("runtime") == "tropnik-canvas"
+            and manifest.get("bridge") == "exact-origin-web-message-port-v1", "Unknown shared map runtime")
+    inputs = manifest.get("sourceInputs")
+    require(isinstance(inputs, list) and 1 <= len(inputs) <= 256, "Shared map source inputs missing")
+    encoded = (json.dumps(inputs, indent=2, ensure_ascii=False, allow_nan=False) + "\n").encode()
+    require(hashlib.sha256(encoded).hexdigest() == manifest.get("sourceInputsSha256"), "Shared map source-input digest differs")
+    seen = set()
+    for record in inputs:
+        path = record.get("path")
+        require(isinstance(path, str) and re.fullmatch(r"[A-Za-z0-9_./-]+", path)
+                and not path.startswith("/") and all(part not in ("", ".", "..") for part in path.split("/"))
+                and path not in seen, "Unsafe or duplicate shared map input")
+        seen.add(path)
+        source = root / path
+        require(source.is_file() and not source.is_symlink() and source.resolve().is_relative_to(root.resolve()), "Shared map source input is missing")
+        data = source.read_bytes()
+        require(len(data) == record.get("sizeBytes") and hashlib.sha256(data).hexdigest() == record.get("sha256"), "Shared map source input changed: " + path)
+    files = manifest.get("files", [])
+    workers = [record for record in files if record.get("path", "").startswith("workers/") and record.get("path", "").endswith(".js")]
+    aliases = manifest.get("resourceAliases", [])
+    require(5 <= len(files) <= 64 and 1 <= len(workers) <= 16 and 500 <= len(aliases) <= 2048, "Incomplete shared map runtime proof")
+    return {"mapRenderer": "tropnik-canvas", "mapRendererManifestSha256": hashlib.sha256(native.read_bytes()).hexdigest(),
+            "mapRendererSourceInputsSha256": manifest["sourceInputsSha256"], "mapRendererFilesVerified": len(files),
+            "mapRendererWorkersVerified": len(workers), "mapRendererResourceAliasesVerified": len(aliases),
+            "mapRendererNativeSdkRequired": False, "mapRendererSharedWithWeb": True,
+            "mapRendererBridge": manifest["bridge"]}
+
+
 def fingerprint(path: Path):
     require(path.is_file() and not path.is_symlink() and 0 < path.stat().st_size <= 150_000_000,
             f"Missing, linked or oversized artifact: {path.name}")
@@ -121,6 +156,7 @@ def certificate(text):
 
 def inspect_payload(directory: Path, root: Path):
     version, code = source_version(root)
+    runtime = expected_map_runtime(root)
     files = {name: fingerprint(directory / name) for name in FILES}
     certificates = set()
     for name in APK_NAMES:
@@ -149,6 +185,9 @@ def inspect_payload(directory: Path, root: Path):
         require(verification.get("sha256") == files[name]["sha256"] and
                 verification.get("sizeBytes") == files[name]["bytes"],
                 "Static verification is not for this APK")
+        for key, value in runtime.items():
+            require(verification.get(key) == value and type(verification.get(key)) is type(value),
+                    "APK shared renderer proof differs from the source checkout: " + key)
         expected_abis = {"arm64-v8a"} if name == ARM64 else {"arm64-v8a", "armeabi-v7a", "x86_64"}
         require(set(verification.get("abis", [])) == expected_abis, "Wrong APK architecture")
         require("Verification successful" in (directory / (stem + ".alignment.txt")).read_text(),
@@ -163,7 +202,7 @@ def inspect_payload(directory: Path, root: Path):
             all(tests.get(key) == 0 for key in ("failures", "errors", "skipped")),
             "Executed JVM tests must pass without skips")
     return {"version": version, "versionCode": code, "applicationId": APP_ID,
-            "signingCertificateSha256": cert, "files": files, "jvmTestsPassed": tests["tests"]}
+            "signingCertificateSha256": cert, "files": files, "jvmTestsPassed": tests["tests"], "mapRuntime": runtime}
 
 
 def build_receipt(directory: Path, root: Path):

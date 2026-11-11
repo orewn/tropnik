@@ -5,7 +5,8 @@ from pathlib import Path
 import unittest
 
 from asset_integrity import AssetError, digest
-from catalog_integrity import verify_catalog, verify_map_resources
+from catalog_integrity import verify_catalog
+from online_sources import verify_online_sources
 
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "android/app/src/main/assets"
@@ -137,20 +138,20 @@ class CatalogIntegrityTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(AssetError):
                 self.verify_fixture(catalog, manifest)
 
-    def test_online_sources_are_bounded_and_cannot_replace_local_resources_or_mask(self):
-        style = json.loads(self.read("maps/style.json"))
-        report = verify_map_resources(style)
+    def test_online_sources_are_bounded_and_cannot_replace_local_resources(self):
+        data = self.read("maps/online-sources.json")
+        config = json.loads(data)
+        report = verify_online_sources(data, self.read)
         self.assertTrue(report["bundledOfflineMapAvailable"])
         for mutation in (
-            lambda s: s["sources"]["online-dem"].update(tiles=["https://example.invalid/{z}/{x}/{y}.png"]),
-            lambda s: s.update(glyphs="https://example.invalid/fonts/{fontstack}/{range}.pbf"),
-            lambda s: s["layers"].insert(0, s["layers"].pop()),
-            lambda s: next(l for l in s["layers"] if l["id"] == "online-hillshade").update(minzoom=0),
+            lambda value: value["sources"]["elevation"].update(tiles="https://example.invalid/{z}/{x}/{y}.png"),
+            lambda value: value.update(glyphs="https://example.invalid/fonts/{fontstack}/{range}.pbf"),
+            lambda value: value.update(fullRussiaDetailedOffline=True),
+            lambda value: value["snapshots"]["vector"].update(assetPath="../private.json"),
         ):
-            changed = copy.deepcopy(style)
-            mutation(changed)
-            with self.assertRaises(AssetError):
-                verify_map_resources(changed)
+            changed = copy.deepcopy(config); mutation(changed)
+            with self.subTest(config=changed), self.assertRaises(AssetError):
+                verify_online_sources((json.dumps(changed, ensure_ascii=False, indent=2) + "\n").encode(), self.read)
 
 
 if __name__ == "__main__":

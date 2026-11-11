@@ -1,7 +1,6 @@
 """Bind the native offline LOD cells to the exact shared, sourced map package."""
 from __future__ import annotations
 
-import copy
 import json
 import math
 import re
@@ -9,7 +8,6 @@ import re
 from asset_integrity import digest, require, safe_relative
 
 ENCODING = "indexed-delta-1e7-v1"
-SOURCE_ID = "tropnik-map-coverage"
 PREFIX = "/data/map-coverage/"
 ROLES = {"area", "mask", "territory", "territory-boundary"}
 
@@ -79,63 +77,28 @@ def decode(data, manifest, *, canonical=True):
 
 
 def native_package(source_manifest_bytes, read):
+    """Copy the shared compact format unchanged; Android uses the same decoder."""
     source = json.loads(source_manifest_bytes)
-    files = {}
+    files = {"manifest.json": source_manifest_bytes}
     for record in records(source):
         path = relative(record); data = read(path)
         require(len(data) == record.get("bytes") and digest(data) == record.get("sha256"), "Shared map coverage changed: " + path)
         files[path] = data
-    base = encoded(decode(files[relative(source["base"])], source))
-    files["native-base.geojson"] = base
-    manifest = copy.deepcopy(source)
-    manifest.update({"nativeDecoder": ENCODING, "sourceManifestSha256": digest(source_manifest_bytes),
-                     "nativeBase": {"path": "native-base.geojson", "bytes": len(base), "sha256": digest(base)}})
-    files["source-manifest.json"] = source_manifest_bytes
-    files["manifest.json"] = encoded(manifest)
+    decode(files[relative(source["base"])], source, canonical=False)
     return files
 
 
-def add_coverage_style(style, manifest_bytes):
+def verify_coverage(manifest_bytes, read, *, actual_files=None):
     manifest = json.loads(manifest_bytes)
-    style["sources"].pop(SOURCE_ID, None)
-    style["sources"][SOURCE_ID] = {"type": "geojson", "data": "asset://maps/coverage/native-base.geojson",
-                                    "tolerance": 0, "maxzoom": 18, "attribution": manifest["attribution"]}
-    # The coarse world outline cannot describe the new sourced coastline.
-    # Administrative outlines already contain real country/coastal edges.
-    style["layers"] = [layer for layer in style["layers"] if layer["id"] != "borders"]
-    for layer in style["layers"]:
-        role = {"land": "area", "admin-boundary-lines": "territory-boundary", "russia-outside-mask": "mask"}.get(layer["id"])
-        if role:
-            layer["source"] = SOURCE_ID
-            layer["filter"] = ["==", ["get", "role"], role]
-    style.setdefault("metadata", {})["tropnik:coverageManifestSha256"] = digest(manifest_bytes)
-    return style
-
-
-def verify_coverage(manifest_bytes, read, *, actual_files=None, style=None):
-    manifest = json.loads(manifest_bytes)
-    require(manifest.get("nativeDecoder") == ENCODING, "Native coverage decoder contract differs")
-    source_bytes = read("source-manifest.json")
-    require(digest(source_bytes) == manifest.get("sourceManifestSha256"), "Native coverage is not bound to its shared manifest")
-    source = json.loads(source_bytes)
-    require(all(manifest.get(key) == value for key, value in source.items()), "Native coverage changed a shared contract field")
-    expected = {"manifest.json", "source-manifest.json", "native-base.geojson"}
+    expected = {"manifest.json"}
     total = 0
     for record in records(manifest):
         path = relative(record); data = read(path)
         require(len(data) == record.get("bytes") and digest(data) == record.get("sha256"), "Native coverage asset changed: " + path)
         expected.add(path); total += len(data)
-    base = read("native-base.geojson")
-    require(manifest.get("nativeBase") == {"path": "native-base.geojson", "bytes": len(base), "sha256": digest(base)}, "Native overview receipt differs")
-    require(base == encoded(decode(read(relative(manifest["base"])), manifest)), "Native overview differs from its sourced canonical conversion")
+    decode(read(relative(manifest["base"])), manifest, canonical=False)
     if actual_files is not None:
         require(set(actual_files) == expected, "Unlisted or missing coverage asset")
-    if style is not None:
-        require(style.get("metadata", {}).get("tropnik:coverageManifestSha256") == digest(manifest_bytes), "Native style uses another coverage bundle")
-        require(style["sources"].get(SOURCE_ID, {}).get("data") == "asset://maps/coverage/native-base.geojson", "Native map does not initialize its sourced mask")
-        for layer_id, role in [("land", "area"), ("admin-boundary-lines", "territory-boundary"), ("russia-outside-mask", "mask")]:
-            layers = [layer for layer in style["layers"] if layer["id"] == layer_id]
-            require(len(layers) == 1 and layers[0].get("source") == SOURCE_ID and layers[0].get("filter") == ["==", ["get", "role"], role], "Native map coverage roles differ")
-    return {"mapCoverageVersion": manifest["version"], "mapCoverageSourceManifestSha256": manifest["sourceManifestSha256"],
-            "mapCoverageFilesVerified": len(expected), "mapCoverageBytesVerified": total + len(base),
-            "mapCoverageAllLevelsBundled": True, "mapCoverageDecodedOnlyForViewport": True}
+    return {"mapCoverageVersion": manifest["version"], "mapCoverageSourceManifestSha256": digest(manifest_bytes),
+            "mapCoverageFilesVerified": len(expected), "mapCoverageBytesVerified": total,
+            "mapCoverageAllLevelsBundled": True, "mapCoverageSharedEncoding": ENCODING}

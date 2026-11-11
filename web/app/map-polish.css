@@ -179,7 +179,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   opacity:1;
   visibility:visible;
 }
-.explore-layout .leaflet-route-marker{background:none;border:0}
 @media(max-width:700px){
   .explore-layout .trail-marker-label{max-width:min(190px,calc(100vw - 32px));font-size:10px}
 }

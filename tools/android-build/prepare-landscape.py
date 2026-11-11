@@ -17,10 +17,11 @@ import re
 from pathlib import Path
 
 from asset_integrity import digest, require, safe_relative, verify_landscape, verify_terrain
-from display_scope import NATIVE_SCOPE_FILES, PROVENANCE_FILE, restrict_style, verify_display_scope
-from russia_relief import OVERVIEW_SIDECARS, add_overview_sources, add_overview_style, verify_overview
-from online_sources import add_online_style, add_online_source_text
-from map_coverage import native_package, add_coverage_style, verify_coverage
+from display_scope import NATIVE_SCOPE_FILES, PROVENANCE_FILE, verify_display_scope
+from russia_relief import OVERVIEW_SIDECARS, add_overview_sources, verify_overview
+from online_sources import build_online_sources, add_online_source_text, verify_online_sources
+from map_coverage import native_package, verify_coverage
+from pilot_map import package_from_source, verify_pilot
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -210,29 +211,6 @@ async function start(){
     return files, {**terrain_report, **report}
 
 
-def update_style(style: dict, manifest: dict, manifest_bytes: bytes) -> dict:
-    style["sources"]["pilot-dem"] = {
-        "type": "raster-dem", "tiles": ["asset://maps/terrain-pilot/tiles/{z}/{x}/{y}.png"],
-        "tileSize": manifest["tileSize"], "encoding": manifest["encoding"],
-        "minzoom": manifest["minzoom"], "maxzoom": manifest["maxzoom"],
-        "bounds": manifest["bounds"], "attribution": manifest["attribution"],
-    }
-    existing = next((layer for layer in style["layers"] if layer["id"] == "pilot-hillshade"), {})
-    paint = dict(existing.get("paint", {}))
-    paint["hillshade-illumination-anchor"] = "viewport"
-    for name, value in {"hillshade-method": "igor", "hillshade-illumination-direction": 335,
-                        "hillshade-exaggeration": 0.48, "hillshade-shadow-color": "#344C3E",
-                        "hillshade-highlight-color": "#FFFEF5", "hillshade-accent-color": "#4B5C44"}.items():
-        paint.setdefault(name, value)
-    layers = [layer for layer in style["layers"] if layer["id"] != "pilot-hillshade"]
-    before = next((i for i, layer in enumerate(layers) if layer["id"] == "water"), len(layers))
-    layers.insert(before, {"id": "pilot-hillshade", "type": "hillshade", "source": "pilot-dem", "minzoom": 7,
-                          "paint": paint})
-    style["layers"] = layers
-    style.setdefault("metadata", {})["tropnik:terrainManifestSha256"] = digest(manifest_bytes)
-    return style
-
-
 def write_or_check(path: Path, data: bytes, check: bool) -> None:
     if path.exists() and path.read_bytes() == data:
         return
@@ -255,7 +233,8 @@ def prepare(root: Path = ROOT, *, check: bool = False) -> dict:
     # Validate all inputs before changing any generated source asset.
     copies = {entry["path"]: read_local(runtime, entry["path"]) for entry in manifest["files"]}
     copies["manifest.json"] = manifest_bytes
-    style = update_style(json.loads((assets / "maps/style.json").read_text()), manifest, manifest_bytes)
+    pilot_root = root / "data/pilot-map"
+    pilot_files = package_from_source(read_local(pilot_root, "manifest.json"), lambda p: read_local(pilot_root, p))
     scope_root = root / "web/public/data"
     scope_provenance = read_local(scope_root, PROVENANCE_FILE)
     scope_report = verify_display_scope(scope_provenance, lambda p: read_local(scope_root, p))
@@ -267,19 +246,25 @@ def prepare(root: Path = ROOT, *, check: bool = False) -> dict:
         provenance_bytes=scope_provenance)
     overview_copies = {entry["path"]: read_local(overview_root, entry["path"]) for entry in overview_records}
     overview_copies.update({name: read_local(overview_root, name) for name in OVERVIEW_SIDECARS})
-    style = add_overview_style(style, overview_manifest)
-    style, online_manifest = add_online_style(style,
-        read_local(root / "web/public/maps", "tropa-style.json"),
-        read_local(TOOLS / "sources", "openfreemap-tilejson.json"),
-        read_local(runtime / "sources", "mapterhorn-tilejson.json"))
-    style = restrict_style(style, scope_provenance)
+    vector_snapshot = read_local(TOOLS / "sources", "openfreemap-tilejson.json")
+    online_manifest = build_online_sources(vector_snapshot, read_local(runtime / "sources", "mapterhorn-tilejson.json"))
     coverage_root = root / "web/public/data/map-coverage"
     coverage_files = native_package(read_local(coverage_root, "manifest.json"), lambda p: read_local(coverage_root, p))
-    style = add_coverage_style(style, coverage_files["manifest.json"])
-    coverage_report = verify_coverage(coverage_files["manifest.json"], coverage_files.__getitem__, actual_files=coverage_files, style=style)
+    coverage_report = verify_coverage(coverage_files["manifest.json"], coverage_files.__getitem__, actual_files=coverage_files)
     source_text = add_overview_sources(read_local(assets, "SOURCES.txt"), overview_manifest, overview_copies["ATTRIBUTION.txt"])
     source_text = add_online_source_text(source_text)
-    verify_overview(overview_manifest, overview_copies.__getitem__, style=style, provenance_bytes=scope_provenance)
+    verify_overview(overview_manifest, overview_copies.__getitem__, provenance_bytes=scope_provenance)
+    # Retire only known renderer-specific outputs. Every data package below
+    # still validates its exact inventory and byte hashes before any mutation.
+    retired = [assets / "maps/style.json", assets / "maps/coverage/native-base.geojson",
+               assets / "maps/coverage/source-manifest.json"]
+    retired += [path for path in (assets / "maps/pilot/fonts").rglob("*") if path.is_file()]
+    for path in retired:
+        if path.exists():
+            require(not check, "Retired map SDK asset is still packaged: " + str(path))
+            path.unlink()
+    for relative, data in sorted(pilot_files.items()):
+        write_or_check(assets / "maps/pilot" / relative, data, check)
     for relative, data in sorted(copies.items()):
         write_or_check(assets / "maps/terrain-pilot" / relative, data, check)
     for relative, data in sorted(files.items()):
@@ -290,8 +275,8 @@ def prepare(root: Path = ROOT, *, check: bool = False) -> dict:
         write_or_check(assets / "maps/russia-relief" / relative, data, check)
     for relative, data in sorted(coverage_files.items()):
         write_or_check(assets / "maps/coverage" / relative, data, check)
-    write_or_check(assets / "maps/style.json", json_bytes(style), check)
     write_or_check(assets / "maps/online-sources.json", online_manifest, check)
+    write_or_check(assets / "maps/sources/openfreemap-tilejson.json", vector_snapshot, check)
     write_or_check(assets / "SOURCES.txt", source_text, check)
     # Preserve the existing full native TTF licence; the scene's supplied
     # webfont subset licence is a separate bundled file.
@@ -300,15 +285,19 @@ def prepare(root: Path = ROOT, *, check: bool = False) -> dict:
     installed = assets / "maps/terrain-pilot"
     verify_terrain(manifest_bytes, lambda p: read_local(installed, p),
                    actual_files=[str(path.relative_to(installed)) for path in installed.rglob("*") if path.is_file()])
-    verify_display_scope(scope_provenance, lambda p: read_local(assets / "maps/russia", p), style)
+    verify_display_scope(scope_provenance, lambda p: read_local(assets / "maps/russia", p))
     installed_overview = assets / "maps/russia-relief"
-    verify_overview(overview_manifest, lambda p: read_local(installed_overview, p), style=style,
+    verify_overview(overview_manifest, lambda p: read_local(installed_overview, p),
         actual_files=[str(path.relative_to(installed_overview)) for path in installed_overview.rglob("*") if path.is_file()],
         provenance_bytes=scope_provenance)
     installed_coverage = assets / "maps/coverage"
-    verify_coverage(coverage_files["manifest.json"], lambda p: read_local(installed_coverage, p), style=style,
+    verify_coverage(coverage_files["manifest.json"], lambda p: read_local(installed_coverage, p),
         actual_files=[str(path.relative_to(installed_coverage)) for path in installed_coverage.rglob("*") if path.is_file()])
-    return {"checkOnly": check, **report, **scope_report, **overview_report, **coverage_report, "russiaMaskConfigured": True}
+    installed_pilot = assets / "maps/pilot"
+    pilot_report = verify_pilot(pilot_files["manifest.json"], lambda p: read_local(installed_pilot, p),
+        actual_files=[str(path.relative_to(installed_pilot)) for path in installed_pilot.rglob("*") if path.is_file()])
+    online_report = verify_online_sources(online_manifest, lambda p: read_local(assets, p))
+    return {"checkOnly": check, **report, **scope_report, **overview_report, **coverage_report, **pilot_report, **online_report}
 
 
 def main() -> None:

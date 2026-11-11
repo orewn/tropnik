@@ -36,9 +36,9 @@ cleanup() {
 trap cleanup EXIT
 
 "$tropnik_adb" start-server
-# Linux's legacy SwiftShader GLES misreads MapLibre uniform blocks (#4625),
-# producing blue/transparent symbols. SwANGLE keeps the shipped OpenGL renderer
-# and runs its GLSL through ANGLE over software SwiftShader Vulkan instead.
+# Run the actual shared WebView Canvas/WebGL paths through ANGLE and software
+# SwiftShader Vulkan. These cases prove functional composition and recovery;
+# their timings do not establish physical-device GPU performance.
 # https://developer.android.com/studio/run/emulator-acceleration
 "$tropnik_emulator" -avd tropnik-ci-api35 -port 5554 -accel on -gpu swangle \
   -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -memory 2048 -cores 2 \

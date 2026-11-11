@@ -16,13 +16,6 @@
   "maxzoom": 14,
   "tileCountExpected": 193,
   "tileCount": 193,
-  "glyphRangesExpected": [
-    "0-255",
-    "1024-1279",
-    "8192-8447",
-    "9472-9727"
-  ],
-  "fontstack": "Noto Sans Regular",
   "source": {
     "provider": "OpenFreeMap",
     "tilejsonUrl": "https://tiles.openfreemap.org/planet/latest",
@@ -34,7 +27,6 @@
     "osmDataTimestamp": null
   },
   "localTiles": "localtiles/{z}/{x}/{y}.pbf",
-  "localGlyphs": "fonts/{fontstack}/{range}.pbf",
   "storedPbfEncoding": "identity",
   "policy": {
     "checkedAt": "2026-11-06",
@@ -69,13 +61,6 @@
       "noticePath": "licenses/OpenMapTiles-LICENSE.md"
     },
     {
-      "component": "Noto Sans Regular glyphs",
-      "license": "OFL-1.1",
-      "source": "https://github.com/hyperknot/openfreemap/blob/main/LICENSE.md",
-      "fontSource": "https://github.com/notofonts/latin-greek-cyrillic",
-      "noticePath": "licenses/Noto-Sans-OFL-1.1.txt"
-    },
-    {
       "component": "Natural Earth source data, where present upstream",
       "license": "Public domain",
       "source": "https://github.com/hyperknot/openfreemap/blob/main/LICENSE.md"
@@ -87,100 +72,11 @@
     "No satellite imagery, terrain DEM, hillshade, live closures, weather or emergency connectivity included.",
     "The real route relation contains branches and is not a verified navigation track.",
     "Snapshot date comes from the provider identifier; exact upstream OSM data age is not supplied.",
-    "Pack contains no provider style or sprites. Use the separate original application style.",
-    "Only the four specified glyph blocks are included; other writing systems may lack labels."
+    "Rendered by the shared Tropnik Canvas engine with bundled Manrope text, without provider styles, sprites or glyph PBFs."
   ],
   "failures": [],
   "complete": true,
   "files": [
-    {
-      "path": "fonts/Noto Sans Regular/0-255.pbf",
-      "bytes": 76580,
-      "sha256": "ef1f38a3f1978591e846e9eaddf8a54f7047f546fc6aaed7872cc53151a5de78",
-      "sourceUrl": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
-      "retrievedAt": "2026-11-06T04:01:48.165370+00:00",
-      "wireBytes": 76580,
-      "wireSha256": "ef1f38a3f1978591e846e9eaddf8a54f7047f546fc6aaed7872cc53151a5de78",
-      "responseContentType": "application/x-protobuf",
-      "responseContentEncoding": null,
-      "etag": "W/\"386d3570-12b24\"",
-      "lastModified": "Fri, 31 Dec 1999 23:00:00 GMT",
-      "storageTransform": "none",
-      "glyphStacks": [
-        {
-          "name": "Noto Sans Regular, Noto Naskh Arabic Regular, Noto Sans Armenian Regular, Noto Sans Balinese Regular, Noto Sans Bengali Regular, Noto Sans CJK TC Regular, Noto Sans Devanagari Regular, Noto Sans Ethiopic Regular, Noto Sans Georgian Regular, Noto Sans Gujarati Regular, Noto Sans Gurmukhi Regular, Noto Sans Hebrew Regular, Noto Sans Javanese Regular, Noto Sans Kannada Regular, Noto Sans Khmer Regular, Noto Sans Lao Regular, Noto Sans Mongolian Regular, Noto Sans Myanmar Regular, Noto Sans Oriya Regular, Noto Sans Sinhala Regular, Noto Sans Tamil Regular, Noto Sans Thai Regular, Noto Sans Tibetan Regular",
-          "range": "0-255",
-          "glyphCount": 223
-        }
-      ],
-      "kind": "glyph"
-    },
-    {
-      "path": "fonts/Noto Sans Regular/1024-1279.pbf",
-      "bytes": 125222,
-      "sha256": "834adb7f3ea9944ea530214841ee098e5482e85180f14df85036939261e0ffbb",
-      "sourceUrl": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/1024-1279.pbf",
-      "retrievedAt": "2026-11-06T04:01:48.257500+00:00",
-      "wireBytes": 125222,
-      "wireSha256": "834adb7f3ea9944ea530214841ee098e5482e85180f14df85036939261e0ffbb",
-      "responseContentType": "application/x-protobuf",
-      "responseContentEncoding": null,
-      "etag": "W/\"386d3570-1e926\"",
-      "lastModified": "Fri, 31 Dec 1999 23:00:00 GMT",
-      "storageTransform": "none",
-      "glyphStacks": [
-        {
-          "name": "Noto Sans Regular, Noto Naskh Arabic Regular, Noto Sans Armenian Regular, Noto Sans Balinese Regular, Noto Sans Bengali Regular, Noto Sans CJK TC Regular, Noto Sans Devanagari Regular, Noto Sans Ethiopic Regular, Noto Sans Georgian Regular, Noto Sans Gujarati Regular, Noto Sans Gurmukhi Regular, Noto Sans Hebrew Regular, Noto Sans Javanese Regular, Noto Sans Kannada Regular, Noto Sans Khmer Regular, Noto Sans Lao Regular, Noto Sans Mongolian Regular, Noto Sans Myanmar Regular, Noto Sans Oriya Regular, Noto Sans Sinhala Regular, Noto Sans Tamil Regular, Noto Sans Thai Regular, Noto Sans Tibetan Regular",
-          "range": "1024-1279",
-          "glyphCount": 256
-        }
-      ],
-      "kind": "glyph"
-    },
-    {
-      "path": "fonts/Noto Sans Regular/8192-8447.pbf",
-      "bytes": 34070,
-      "sha256": "f061e5b4e42e5925228534d8822b423a029569263db09f5ce44573600d45295f",
-      "sourceUrl": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/8192-8447.pbf",
-      "retrievedAt": "2026-11-06T04:01:48.205513+00:00",
-      "wireBytes": 34070,
-      "wireSha256": "f061e5b4e42e5925228534d8822b423a029569263db09f5ce44573600d45295f",
-      "responseContentType": "application/x-protobuf",
-      "responseContentEncoding": null,
-      "etag": "W/\"386d3570-8516\"",
-      "lastModified": "Fri, 31 Dec 1999 23:00:00 GMT",
-      "storageTransform": "none",
-      "glyphStacks": [
-        {
-          "name": "Noto Sans Regular, Noto Naskh Arabic Regular, Noto Sans Armenian Regular, Noto Sans Balinese Regular, Noto Sans Bengali Regular, Noto Sans CJK TC Regular, Noto Sans Devanagari Regular, Noto Sans Ethiopic Regular, Noto Sans Georgian Regular, Noto Sans Gujarati Regular, Noto Sans Gurmukhi Regular, Noto Sans Hebrew Regular, Noto Sans Javanese Regular, Noto Sans Kannada Regular, Noto Sans Khmer Regular, Noto Sans Lao Regular, Noto Sans Mongolian Regular, Noto Sans Myanmar Regular, Noto Sans Oriya Regular, Noto Sans Sinhala Regular, Noto Sans Tamil Regular, Noto Sans Thai Regular, Noto Sans Tibetan Regular",
-          "range": "8192-8447",
-          "glyphCount": 111
-        }
-      ],
-      "kind": "glyph"
-    },
-    {
-      "path": "fonts/Noto Sans Regular/9472-9727.pbf",
-      "bytes": 110982,
-      "sha256": "ca910fd782bf73975f26e6b6547731aefdc3e5f747adf36d672b8bde340e0fd1",
-      "sourceUrl": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/9472-9727.pbf",
-      "retrievedAt": "2026-11-06T04:01:48.217471+00:00",
-      "wireBytes": 110982,
-      "wireSha256": "ca910fd782bf73975f26e6b6547731aefdc3e5f747adf36d672b8bde340e0fd1",
-      "responseContentType": "application/x-protobuf",
-      "responseContentEncoding": null,
-      "etag": "W/\"386d3570-1b186\"",
-      "lastModified": "Fri, 31 Dec 1999 23:00:00 GMT",
-      "storageTransform": "none",
-      "glyphStacks": [
-        {
-          "name": "Noto Sans Regular, Noto Naskh Arabic Regular, Noto Sans Armenian Regular, Noto Sans Balinese Regular, Noto Sans Bengali Regular, Noto Sans CJK TC Regular, Noto Sans Devanagari Regular, Noto Sans Ethiopic Regular, Noto Sans Georgian Regular, Noto Sans Gujarati Regular, Noto Sans Gurmukhi Regular, Noto Sans Hebrew Regular, Noto Sans Javanese Regular, Noto Sans Kannada Regular, Noto Sans Khmer Regular, Noto Sans Lao Regular, Noto Sans Mongolian Regular, Noto Sans Myanmar Regular, Noto Sans Oriya Regular, Noto Sans Sinhala Regular, Noto Sans Tamil Regular, Noto Sans Thai Regular, Noto Sans Tibetan Regular",
-          "range": "9472-9727",
-          "glyphCount": 205
-        }
-      ],
-      "kind": "glyph"
-    },
     {
       "path": "licenses/Noto-Sans-OFL-1.1.txt",
       "bytes": 4396,
@@ -4922,8 +4818,18 @@
       "lastModified": "Sun, 01 Nov 2026 23:46:13 GMT",
       "storageTransform": "none",
       "kind": "metadata"
+    },
+    {
+      "path": "source-manifest.json",
+      "bytes": 179128,
+      "sha256": "82384a5c6111075e3505046e4c6e3287f45f35e83e55dab98c56e8dc4cceead0"
     }
   ],
-  "resourceBytes": 2593757,
-  "packageBytesIncludingManifest": 2772885
+  "resourceBytes": 2426031,
+  "runtime": "tropnik-canvas",
+  "sourceArchive": {
+    "manifestPath": "source-manifest.json",
+    "sha256": "82384a5c6111075e3505046e4c6e3287f45f35e83e55dab98c56e8dc4cceead0"
+  },
+  "totalFiles": 199
 }

@@ -1,0 +1,1077 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "fullRussiaDetailedOffline": false,
+  "files": [
+    {
+      "path": "localtiles/10/626/373.pbf",
+      "size": 56440,
+      "sha256": "24cf249dde6141390d15e9d03741718e4d0fab6d3061eb5b2c3a97b50b01b481"
+    },
+    {
+      "path": "localtiles/10/627/373.pbf",
+      "size": 107028,
+      "sha256": "efba3df2da22eb24e6ef7a6a3c9bcf12f9a33f7e2f2369039ab126af7f4ad0aa"
+    },
+    {
+      "path": "localtiles/11/1253/746.pbf",
+      "size": 31735,
+      "sha256": "75e362b388c416c98a4c809d7439e3c92d2f2df384d7c00d513a25ce6ee4ca7f"
+    },
+    {
+      "path": "localtiles/11/1253/747.pbf",
+      "size": 38597,
+      "sha256": "f0b0dd04218113068b2f59d23f27b8afc761e5dbdbb2015e50a5a845e906c296"
+    },
+    {
+      "path": "localtiles/11/1254/746.pbf",
+      "size": 35675,
+      "sha256": "6d622d0a7bafa1f7fcdf828ca80806255971e651ab1113f4959e345acf2f9603"
+    },
+    {
+      "path": "localtiles/11/1254/747.pbf",
+      "size": 50531,
+      "sha256": "6b2e788b7a404d7fce2a40560431ddc0a415706514b883c20e342f1af3eeed0a"
+    },
+    {
+      "path": "localtiles/12/2506/1492.pbf",
+      "size": 13798,
+      "sha256": "90b19944c65393d351167607d611ef8335c4dd9a9446dc7dca5555517d1afc12"
+    },
+    {
+      "path": "localtiles/12/2506/1493.pbf",
+      "size": 10723,
+      "sha256": "7c2fcc0c0c035702a160957db90acacedbcbce9451d272f7d27bf835b28f055f"
+    },
+    {
+      "path": "localtiles/12/2506/1494.pbf",
+      "size": 28130,
+      "sha256": "ef12aeb5e7091f725d8ccdfc7ecf158d48a1a2eb6570d3a7f29d0f32e7556a2b"
+    },
+    {
+      "path": "localtiles/12/2506/1495.pbf",
+      "size": 19005,
+      "sha256": "c637c42e13eec5a8a71f191db5652e9c607a213329b5162a8c4b5b0966b4a9be"
+    },
+    {
+      "path": "localtiles/12/2507/1492.pbf",
+      "size": 11405,
+      "sha256": "e4bb02f4e25f73ee71a8cbe30ac70996a68c41b6859a2b7fb46d47e13eeb2579"
+    },
+    {
+      "path": "localtiles/12/2507/1493.pbf",
+      "size": 14771,
+      "sha256": "435e289a3650391985e2a99cbbc3f5bdd3c5c4f7a90b9e8362da21c60a611833"
+    },
+    {
+      "path": "localtiles/12/2507/1494.pbf",
+      "size": 11828,
+      "sha256": "04b18e004a30cb0c2011ea7ca4308b56f847d99a21cca9d215557f47532f0e32"
+    },
+    {
+      "path": "localtiles/12/2507/1495.pbf",
+      "size": 13097,
+      "sha256": "317c873bc1a1aa196d774d769c05812ce76b771adac45cdfdb6fa6e64a880d96"
+    },
+    {
+      "path": "localtiles/12/2508/1492.pbf",
+      "size": 13759,
+      "sha256": "5bf97906146b66c4b7f47246970c11d309a90ace9cf214fb786602d82c099d85"
+    },
+    {
+      "path": "localtiles/12/2508/1493.pbf",
+      "size": 16467,
+      "sha256": "b1f6a96a4b4cf544c6b7d7dcaecde8978fb8d3a3c348172d7aca77e650e148f9"
+    },
+    {
+      "path": "localtiles/12/2508/1494.pbf",
+      "size": 21067,
+      "sha256": "0dfcd28bbb75f4389721cc9b5cb67a9bc28986a51a3253ff201fab6085fa68b3"
+    },
+    {
+      "path": "localtiles/12/2508/1495.pbf",
+      "size": 12654,
+      "sha256": "db2feb599e40299ec36d83e758dce2149d0485fbdf910caac41d4322dede9052"
+    },
+    {
+      "path": "localtiles/13/5012/2984.pbf",
+      "size": 8479,
+      "sha256": "71cbea09f4fa510ef11f60914fffb2f758453f51557595f020cbd3498ae75745"
+    },
+    {
+      "path": "localtiles/13/5012/2985.pbf",
+      "size": 12701,
+      "sha256": "24a8d2aabaa51836e45c57062ebfc95526860808c3e1c827804d9f76f959e99c"
+    },
+    {
+      "path": "localtiles/13/5012/2986.pbf",
+      "size": 7910,
+      "sha256": "2c18a88c3abb01f1c64e8f8c0221383ec0e4f11d5867b636781e91e8c1be5245"
+    },
+    {
+      "path": "localtiles/13/5012/2987.pbf",
+      "size": 3972,
+      "sha256": "926369ae1313e87c0a3df0d79e577617b38f9cdb0d18c5a6277e35e019aae1fd"
+    },
+    {
+      "path": "localtiles/13/5012/2988.pbf",
+      "size": 26652,
+      "sha256": "fdb34edd37a32871a8e74441ba84f9d92d47462b1483226dec3efdc3a2b949f7"
+    },
+    {
+      "path": "localtiles/13/5012/2989.pbf",
+      "size": 31703,
+      "sha256": "cb4396bc3786e57d5e4a64b5482f95cb75cb70d4c4fa8ed9939578f22e1b136d"
+    },
+    {
+      "path": "localtiles/13/5012/2990.pbf",
+      "size": 15284,
+      "sha256": "b6e8561f6bf9b4e49f69fb7ac4567afe3545105ff16e060238eed7fc8974f586"
+    },
+    {
+      "path": "localtiles/13/5013/2984.pbf",
+      "size": 5216,
+      "sha256": "440ad805637284adef240a4b59f059db44876fa3a56abc3306f8b4be59e1cc7f"
+    },
+    {
+      "path": "localtiles/13/5013/2985.pbf",
+      "size": 4285,
+      "sha256": "2c5dca04fcb851f84bda8cf39ae39715bd1a57fbb87fd3409d40962cd3ca3b6f"
+    },
+    {
+      "path": "localtiles/13/5013/2986.pbf",
+      "size": 5182,
+      "sha256": "6e1150c4aa29e42ab27f5a86d8f9d634d88d0192d5083612d8d383786dde29cf"
+    },
+    {
+      "path": "localtiles/13/5013/2987.pbf",
+      "size": 3480,
+      "sha256": "c1cdc956e2e3dedf7bdc296ebd4532e8dc71910fc2c29029f974e38ac1ac7f99"
+    },
+    {
+      "path": "localtiles/13/5013/2988.pbf",
+      "size": 12312,
+      "sha256": "6fa5c89b1ba1e206621f7713fbb7b6f9ba67177295b076b289de27ebccd3df43"
+    },
+    {
+      "path": "localtiles/13/5013/2989.pbf",
+      "size": 21114,
+      "sha256": "18672a7bfb9f36cd56e3b0f50bb24aca65bf00ef84689a60f2eeef3816bd6166"
+    },
+    {
+      "path": "localtiles/13/5013/2990.pbf",
+      "size": 25173,
+      "sha256": "88fe1d463277a1c7d60fe36b053a50d7c9327936037c83239f04dd7b3c1396c0"
+    },
+    {
+      "path": "localtiles/13/5014/2984.pbf",
+      "size": 5582,
+      "sha256": "4bc0f21933f2df746164b09a80b6a8800e10993238f957facc8faa99ae4689a8"
+    },
+    {
+      "path": "localtiles/13/5014/2985.pbf",
+      "size": 5258,
+      "sha256": "97caffb5cebf30610adf2c63aafbcc5d899ce64d32be0df3444c75980e2342b0"
+    },
+    {
+      "path": "localtiles/13/5014/2986.pbf",
+      "size": 6352,
+      "sha256": "132eb16c1241a677957ddd637ee8f75d34e8298a76228810dd6a608c65c804b6"
+    },
+    {
+      "path": "localtiles/13/5014/2987.pbf",
+      "size": 11082,
+      "sha256": "f3845cde72dcbbdb88afd1274333a33d2b70ccb12f9e2aa5ac86601322e98b3a"
+    },
+    {
+      "path": "localtiles/13/5014/2988.pbf",
+      "size": 8824,
+      "sha256": "253f1561112660ed3fe5d24e2b9afe9591c724a0f0a15510380b4732021f4632"
+    },
+    {
+      "path": "localtiles/13/5014/2989.pbf",
+      "size": 3219,
+      "sha256": "b872ba3826fc1d204189f4b6044ae6656830e2f7602b0b7d3be006f8aea7b807"
+    },
+    {
+      "path": "localtiles/13/5014/2990.pbf",
+      "size": 5148,
+      "sha256": "ca83d0d8f52abba74ca2e989dcc5276f50adaabc4079d22ec8d344ec570c29b9"
+    },
+    {
+      "path": "localtiles/13/5015/2984.pbf",
+      "size": 7252,
+      "sha256": "d5d38ff0804c44f62b4ac9397e49b9364fecaf601e0342fab3038e4425fa7bc5"
+    },
+    {
+      "path": "localtiles/13/5015/2985.pbf",
+      "size": 7541,
+      "sha256": "c44755deffc1694d9850b2d686c6bba1a5a3e90dadba7251540d7a6bd4db211e"
+    },
+    {
+      "path": "localtiles/13/5015/2986.pbf",
+      "size": 11751,
+      "sha256": "47d41e9e669b3dc8d481c90e73855cfd56e12056a295723473fdc269e4e88057"
+    },
+    {
+      "path": "localtiles/13/5015/2987.pbf",
+      "size": 10786,
+      "sha256": "e5350d7eafb05870f36e7ebc2af6a620374699100a528da28f4a48bf0303f808"
+    },
+    {
+      "path": "localtiles/13/5015/2988.pbf",
+      "size": 9106,
+      "sha256": "11c5c524a2f91086ddd81c3ec7398b832e0459adfad4c47fca3663b35e4fd5d3"
+    },
+    {
+      "path": "localtiles/13/5015/2989.pbf",
+      "size": 4915,
+      "sha256": "4abb8e5fd804dd8f935c35f31077839bf3984258ebed57bdd76bdeffd7abe4b1"
+    },
+    {
+      "path": "localtiles/13/5015/2990.pbf",
+      "size": 5109,
+      "sha256": "f0a72cb5b81c1d166f994a86ca788863f2a887c53f6e64acbce3235b670459e6"
+    },
+    {
+      "path": "localtiles/13/5016/2984.pbf",
+      "size": 7945,
+      "sha256": "86d3036f084fbbd3327d90046da00f8c45b1ec26a678cdc574658c8ba2df96aa"
+    },
+    {
+      "path": "localtiles/13/5016/2985.pbf",
+      "size": 7727,
+      "sha256": "e1075c522dc1014c4db05b54dfb6a388c3e2ebfc4ecb1c53d1c5fb902cef1696"
+    },
+    {
+      "path": "localtiles/13/5016/2986.pbf",
+      "size": 7774,
+      "sha256": "108eea7a11d0e2d28336e0a7abad225b9d8636a8038da06395a848b4b0809181"
+    },
+    {
+      "path": "localtiles/13/5016/2987.pbf",
+      "size": 6752,
+      "sha256": "49a0349179b5f85963fe5619eb1bcef5e6e01fff5696cbc4f190b6da1399ea94"
+    },
+    {
+      "path": "localtiles/13/5016/2988.pbf",
+      "size": 10285,
+      "sha256": "17153e8356cab655e26745e93fbc4c67a15dcfa2269c48ddb7a257ef43bbe26f"
+    },
+    {
+      "path": "localtiles/13/5016/2989.pbf",
+      "size": 9693,
+      "sha256": "73dedea950b5828e68c50d375afcd2b941ca8dec2d6b43ef901a727366cc76ed"
+    },
+    {
+      "path": "localtiles/13/5016/2990.pbf",
+      "size": 8537,
+      "sha256": "ee7e63d8110bae2a0681bcae0dd564e21b8cc049941acec6645436ebc8ed5e88"
+    },
+    {
+      "path": "localtiles/13/5017/2984.pbf",
+      "size": 4583,
+      "sha256": "c26dabdabefe282eceee8e6ea305c3c79792af302d8a287f19d17f0a32121b88"
+    },
+    {
+      "path": "localtiles/13/5017/2985.pbf",
+      "size": 9163,
+      "sha256": "7f390c1869466c0ead67bebc4a55b22b3ae177e062e49ba4857f908d58558b8f"
+    },
+    {
+      "path": "localtiles/13/5017/2986.pbf",
+      "size": 6765,
+      "sha256": "34ae86bbb34314aa79af3e12a2af68a143244cad2156b7599e0cf178dc455ec6"
+    },
+    {
+      "path": "localtiles/13/5017/2987.pbf",
+      "size": 10778,
+      "sha256": "a97a91f79bb7267f1690d685431a49ecf2849c0287a2481bfdad6fc32b6bc76a"
+    },
+    {
+      "path": "localtiles/13/5017/2988.pbf",
+      "size": 17979,
+      "sha256": "8a8186b9809e37b7754967cf794afe45e36ce62e054b0af6178eae4bfc13ca2c"
+    },
+    {
+      "path": "localtiles/13/5017/2989.pbf",
+      "size": 10086,
+      "sha256": "6a26dcdeada1f368b4e90b2475ab25b6f41f627f070a8b9d96dfa2cb60c4a4bf"
+    },
+    {
+      "path": "localtiles/13/5017/2990.pbf",
+      "size": 6040,
+      "sha256": "2b102b0595ffeff1e45b29466b9202174b3cd797e54562e134c385878d828917"
+    },
+    {
+      "path": "localtiles/14/10025/5968.pbf",
+      "size": 2327,
+      "sha256": "42e02a45719ba5a148f045a500f577437d41f9ff86d721437a382e48da2331bd"
+    },
+    {
+      "path": "localtiles/14/10025/5969.pbf",
+      "size": 1842,
+      "sha256": "7838c5492f6c43c445ce1b36c03f0c31f40c2bdd0e66ddec89ab212b01767bac"
+    },
+    {
+      "path": "localtiles/14/10025/5970.pbf",
+      "size": 2747,
+      "sha256": "e6033825c1700fa2bf1eac7e2b5ddac4cd47b2b5f1fd8cbf46ce57f88deb42e1"
+    },
+    {
+      "path": "localtiles/14/10025/5971.pbf",
+      "size": 4418,
+      "sha256": "da7e68c8813693d5a4cffbf5164a671342b690ef9c8fdc35c62ab0d2c5e158df"
+    },
+    {
+      "path": "localtiles/14/10025/5972.pbf",
+      "size": 2802,
+      "sha256": "1d4d1e48c2ec7a385e5f845fca566a136e2e8d662046b76204cfae941c8fd567"
+    },
+    {
+      "path": "localtiles/14/10025/5973.pbf",
+      "size": 2518,
+      "sha256": "4fc462325c8b8afe9b56484261976040feffd8ff4884b71be3f48b1f65b860e0"
+    },
+    {
+      "path": "localtiles/14/10025/5974.pbf",
+      "size": 1348,
+      "sha256": "ffc597e95b483bb88492f44a4a95ccdba247b89f3f480cf12a3421e003f33bc1"
+    },
+    {
+      "path": "localtiles/14/10025/5975.pbf",
+      "size": 2550,
+      "sha256": "1d59d53d2b1db3c8943e255f69e829d09227705ae51548abf8539df2609b2e81"
+    },
+    {
+      "path": "localtiles/14/10025/5976.pbf",
+      "size": 7672,
+      "sha256": "6cdd9dad3b0b752b54586d4c515e6a89e45d51924e182a45e79e9ebdd1949d0f"
+    },
+    {
+      "path": "localtiles/14/10025/5977.pbf",
+      "size": 40300,
+      "sha256": "e6ddbb9d45623808994039f3ddc4290b6d789b73f1018ae0a06cd572312ea25d"
+    },
+    {
+      "path": "localtiles/14/10025/5978.pbf",
+      "size": 36686,
+      "sha256": "b3eafc567914c91eb6a36d2246da50495bdbde05fe838051e20dbb1607826c02"
+    },
+    {
+      "path": "localtiles/14/10025/5979.pbf",
+      "size": 8239,
+      "sha256": "b031879ab7fbbdeacb4a645abf0fea8876a19c97a6d876831022783e5b3b2350"
+    },
+    {
+      "path": "localtiles/14/10025/5980.pbf",
+      "size": 10241,
+      "sha256": "923338ce0bb5cbd5309585bcc479ac8d456ba486c8caf0f0b1badb2129b7ac3b"
+    },
+    {
+      "path": "localtiles/14/10026/5968.pbf",
+      "size": 2378,
+      "sha256": "f64425a37be414fa06b6b6fb5556b66e6de600e99ca6fd1272ef48a7dfb46a66"
+    },
+    {
+      "path": "localtiles/14/10026/5969.pbf",
+      "size": 2129,
+      "sha256": "d79e3a9f668866f7685c3cca1e179ec47e02c43465002bf5eaeb71a31474dc6f"
+    },
+    {
+      "path": "localtiles/14/10026/5970.pbf",
+      "size": 2076,
+      "sha256": "9b5020e3801f29a2c1e5e1953a3bdf6f5dc99bd9b84c413e0f03e12376cd0a2e"
+    },
+    {
+      "path": "localtiles/14/10026/5971.pbf",
+      "size": 1847,
+      "sha256": "583b98ee8cacb51b8ac540ea5cb6785c7c989ecebd5304c2b7f91c30ff26aa1f"
+    },
+    {
+      "path": "localtiles/14/10026/5972.pbf",
+      "size": 2023,
+      "sha256": "824398b2e3cc5daeb6b3eac9958c3b504c39e1980b23559522f4cda4f91ccafe"
+    },
+    {
+      "path": "localtiles/14/10026/5973.pbf",
+      "size": 1502,
+      "sha256": "6a53288aca8144ef299bd7d711701906567a222da362ca4cde73cfbfc5390902"
+    },
+    {
+      "path": "localtiles/14/10026/5974.pbf",
+      "size": 894,
+      "sha256": "687072e5f51358ac9642d01d55f35a3550d4b0d7c62a2f32d74fca759e2dd7aa"
+    },
+    {
+      "path": "localtiles/14/10026/5975.pbf",
+      "size": 3048,
+      "sha256": "6067694a6589bea3d1da0804f4f82314c3b3254b302f94fa33299356a6d6ec2e"
+    },
+    {
+      "path": "localtiles/14/10026/5976.pbf",
+      "size": 13363,
+      "sha256": "78edd645175f569afc38326c2d66155031adf5890f4eb62460030f69c48294d8"
+    },
+    {
+      "path": "localtiles/14/10026/5977.pbf",
+      "size": 16841,
+      "sha256": "ae4bbe92b97336b042d6edac2804a8cb6c7cd1ffe43a52c51b1c32c142f70084"
+    },
+    {
+      "path": "localtiles/14/10026/5978.pbf",
+      "size": 48440,
+      "sha256": "1867909b4ef5362f6abc034f2bb2d01f9d58b0c78fb7badc8390b35c4fc9a6cf"
+    },
+    {
+      "path": "localtiles/14/10026/5979.pbf",
+      "size": 24212,
+      "sha256": "31c79202174a542a583250eaf221cb1dcd2f6df0e2cb65741021d5bf6cf1b3ac"
+    },
+    {
+      "path": "localtiles/14/10026/5980.pbf",
+      "size": 19586,
+      "sha256": "ee77a15bb765d24c0667f8f3c38c396f23b2bc3e56049c5c309dac282793a7cf"
+    },
+    {
+      "path": "localtiles/14/10027/5968.pbf",
+      "size": 1857,
+      "sha256": "353d0baf1edf03abba099fc86492bac54d66da20dde94cbf3cc390e4c378c1fb"
+    },
+    {
+      "path": "localtiles/14/10027/5969.pbf",
+      "size": 1894,
+      "sha256": "b1414270289f73a803ee3fe51f3c170ac657ab2bcd2faed72939aa9ffc3ff913"
+    },
+    {
+      "path": "localtiles/14/10027/5970.pbf",
+      "size": 2423,
+      "sha256": "21b17c13860040d45a4c95d3afb4a17a4e948e047161a1c96aadea1f6f8801d6"
+    },
+    {
+      "path": "localtiles/14/10027/5971.pbf",
+      "size": 1776,
+      "sha256": "67691010642843024e1b98a817415086e120ee96bcdf60a391545c2af861cdb8"
+    },
+    {
+      "path": "localtiles/14/10027/5972.pbf",
+      "size": 3296,
+      "sha256": "e9ed2219569af7f48762dcea12c29604fd2d9f6e6a116c9111feba27118ed82f"
+    },
+    {
+      "path": "localtiles/14/10027/5973.pbf",
+      "size": 1141,
+      "sha256": "32818ce7be92e27afb444f751a98b5d1a389e9f5f055acd46bd35b150c3e6413"
+    },
+    {
+      "path": "localtiles/14/10027/5974.pbf",
+      "size": 1193,
+      "sha256": "4fdcbdd28c403c601509ca01d475325b2382585d0a8a0ca8568b83bc201ec3d8"
+    },
+    {
+      "path": "localtiles/14/10027/5975.pbf",
+      "size": 2427,
+      "sha256": "25c15bc8e6a79ab771e99ed3ce1eca604408a37492240775bdca63f77dd6aba5"
+    },
+    {
+      "path": "localtiles/14/10027/5976.pbf",
+      "size": 16101,
+      "sha256": "50f4aa7a678ea42ab6c3bc3f0427214ab86530d008789babf6290ce0cacde951"
+    },
+    {
+      "path": "localtiles/14/10027/5977.pbf",
+      "size": 7031,
+      "sha256": "89c96e9a06742a94dd11f9696012135da9b4911c63628eea5fcd61fee7a0e46f"
+    },
+    {
+      "path": "localtiles/14/10027/5978.pbf",
+      "size": 17283,
+      "sha256": "1f40a6664149b244e7307f98dbdb40fc91561d0ebcbb8730fe96c2d6ce19b3b6"
+    },
+    {
+      "path": "localtiles/14/10027/5979.pbf",
+      "size": 31995,
+      "sha256": "cfc14edc39ebd2c6342e4f6a7577c56d9134cd46914143b369e328f4c7d0a3fc"
+    },
+    {
+      "path": "localtiles/14/10027/5980.pbf",
+      "size": 15689,
+      "sha256": "5d3edab9fbdf4c51af80210128e676bf21b3aa489d6e0974fbfbc38ff74a0706"
+    },
+    {
+      "path": "localtiles/14/10028/5968.pbf",
+      "size": 2386,
+      "sha256": "9e5af53f9f3c4d6285735e4ea83ee80ed8e6b8a99eeb919a701cbbc993645ece"
+    },
+    {
+      "path": "localtiles/14/10028/5969.pbf",
+      "size": 3115,
+      "sha256": "d951129e0c8caf211fb73e1acc3f2f0e908de7371784563db8c5e0b6acf254d5"
+    },
+    {
+      "path": "localtiles/14/10028/5970.pbf",
+      "size": 2747,
+      "sha256": "bf848e6bd98efcae6aa8f6e4ce33c6bb43a47d1b69c34808648fb6ebae86e2e2"
+    },
+    {
+      "path": "localtiles/14/10028/5971.pbf",
+      "size": 2117,
+      "sha256": "cb2cdabfb97bc15f9e4628570afa7ff4fac85a3338fc73d9d51801f9afa900e9"
+    },
+    {
+      "path": "localtiles/14/10028/5972.pbf",
+      "size": 1878,
+      "sha256": "1948da87239ce11883746f5b32ccfd18b49b14a38e7585f499ee9455f07a2a52"
+    },
+    {
+      "path": "localtiles/14/10028/5973.pbf",
+      "size": 3068,
+      "sha256": "fba29c19bb6531f3cae7e655be573a8350fc8f81eaf0750de2438c96021158b6"
+    },
+    {
+      "path": "localtiles/14/10028/5974.pbf",
+      "size": 2646,
+      "sha256": "cdd02e66e584fb38ce32b314d81c764fd27bcdd3f5bebcc3185561f5830601c2"
+    },
+    {
+      "path": "localtiles/14/10028/5975.pbf",
+      "size": 5237,
+      "sha256": "a383660f4e8df15dfe63f4d2c17882ae040d6972d7092b56183c51001691d008"
+    },
+    {
+      "path": "localtiles/14/10028/5976.pbf",
+      "size": 6423,
+      "sha256": "6a7c58e0208d28f290c6ae9c072568b7333e96794f9c684b6f9d86fc9810253f"
+    },
+    {
+      "path": "localtiles/14/10028/5977.pbf",
+      "size": 3187,
+      "sha256": "93299a38158e9e2b45de357a436bd7fa58c125865ed6f0ba796b692acde57875"
+    },
+    {
+      "path": "localtiles/14/10028/5978.pbf",
+      "size": 3364,
+      "sha256": "c6a847bbef0d32416223c70802a0b42014a7f4e68e59bd992133f686b3cfc9a3"
+    },
+    {
+      "path": "localtiles/14/10028/5979.pbf",
+      "size": 4080,
+      "sha256": "fa4940661ef0228503aa012b8a2e2e7d722b907f67be1be9bc422400c5a9f360"
+    },
+    {
+      "path": "localtiles/14/10028/5980.pbf",
+      "size": 3791,
+      "sha256": "feb10793c9dc2511f1de42eef87c012903ff078f87dd5e55e0b98c19a0079d94"
+    },
+    {
+      "path": "localtiles/14/10029/5968.pbf",
+      "size": 3389,
+      "sha256": "17924db862c5f2fbac978f7cd0111bf0f0e51709810052fb2734d10a389138b3"
+    },
+    {
+      "path": "localtiles/14/10029/5969.pbf",
+      "size": 3173,
+      "sha256": "323d06d07a8b45c9921f16d38f496379ce8d9d3d7592fafdbf87d084a422f515"
+    },
+    {
+      "path": "localtiles/14/10029/5970.pbf",
+      "size": 1666,
+      "sha256": "2d4659dd106e98ec4ad0b64e378fdd4ece49824690feb9ab2d7620ef34cdd1cf"
+    },
+    {
+      "path": "localtiles/14/10029/5971.pbf",
+      "size": 2844,
+      "sha256": "0dd8b9c8d7dcf2df6bd8264e6aaf3fd17899cb25521d62ff89d362a40d703f08"
+    },
+    {
+      "path": "localtiles/14/10029/5972.pbf",
+      "size": 3063,
+      "sha256": "bb2e26e02c17630e8a07fb6161ae9f6d8bcb1debcb5fc387c28bb3e0eea1c648"
+    },
+    {
+      "path": "localtiles/14/10029/5973.pbf",
+      "size": 4665,
+      "sha256": "9522fc2eddfb758bbecfceda7554ee19470c3836025b5d315d3feed4e191bc8a"
+    },
+    {
+      "path": "localtiles/14/10029/5974.pbf",
+      "size": 5185,
+      "sha256": "dcd183800b78d234ebe03ad5d44429d5d4f3bc50abfadf0c78579ef485d35624"
+    },
+    {
+      "path": "localtiles/14/10029/5975.pbf",
+      "size": 8452,
+      "sha256": "18441c379a8819a23606741ea798d603f897c4beeb2010a0e2498bde6c624e22"
+    },
+    {
+      "path": "localtiles/14/10029/5976.pbf",
+      "size": 7159,
+      "sha256": "43ad20be5123fca46ef39574a38bb5a779e45a220dbfdacd43b6394a2a91e1c7"
+    },
+    {
+      "path": "localtiles/14/10029/5977.pbf",
+      "size": 3364,
+      "sha256": "a69dc95863c29ad65cc4dae313c26deb052ada555e52890d6fb66ee2b0fc7b29"
+    },
+    {
+      "path": "localtiles/14/10029/5978.pbf",
+      "size": 1310,
+      "sha256": "7e4ab06c9d7b24b602588cdc6350df556adecab7100a27c48b94595258decda6"
+    },
+    {
+      "path": "localtiles/14/10029/5979.pbf",
+      "size": 1300,
+      "sha256": "dbb0a87031fafd3779963211cf8f12de066cf2c76955c16de50de6f5b3e75b7b"
+    },
+    {
+      "path": "localtiles/14/10029/5980.pbf",
+      "size": 1751,
+      "sha256": "b1f5d7585b6a749c6a592bc2b0826f32cf4aeb50837520fac7a694ad27b79955"
+    },
+    {
+      "path": "localtiles/14/10030/5968.pbf",
+      "size": 4644,
+      "sha256": "dd099bf7f209a9ce51d907fbbc16916c57de0248ac4521a245562c84d0a68804"
+    },
+    {
+      "path": "localtiles/14/10030/5969.pbf",
+      "size": 3428,
+      "sha256": "28df0e89e5cdf91b910315070def0ed06277d7fb42f72a9be995a5b0dabbdf61"
+    },
+    {
+      "path": "localtiles/14/10030/5970.pbf",
+      "size": 2208,
+      "sha256": "26562da3e8721b189b9c6af187eef68ec071514cc64cd58887e7727873c18864"
+    },
+    {
+      "path": "localtiles/14/10030/5971.pbf",
+      "size": 2274,
+      "sha256": "cf0cc4cf7b2852156cb1d212c17a4b8484f053aaa2f14c180026597d9187c24a"
+    },
+    {
+      "path": "localtiles/14/10030/5972.pbf",
+      "size": 3842,
+      "sha256": "3f517551ff76c41926cb37fd086fa813c08de92fcaa054fb54aff1811690e23b"
+    },
+    {
+      "path": "localtiles/14/10030/5973.pbf",
+      "size": 6367,
+      "sha256": "fc586225d270f6a0660b46a2b7c7f27909aa8c026de88f2ddd44e35f2a322c75"
+    },
+    {
+      "path": "localtiles/14/10030/5974.pbf",
+      "size": 5234,
+      "sha256": "04272f5f3f837c4e29a45f932fa88958e2f6892a616a9b7982d6f793fe10d395"
+    },
+    {
+      "path": "localtiles/14/10030/5975.pbf",
+      "size": 7866,
+      "sha256": "66f043c714dfb671471b6ab76da5f53e784e83037d1eea21744a6d6c0d09d20d"
+    },
+    {
+      "path": "localtiles/14/10030/5976.pbf",
+      "size": 4053,
+      "sha256": "89ff91be16159732878b316228e4904d4f8ee53cff21a5dc1831d2dd8ee28712"
+    },
+    {
+      "path": "localtiles/14/10030/5977.pbf",
+      "size": 3438,
+      "sha256": "ad097f5f2f26fa901e59d484cd8437f0e84e8a25eceb7db1680f22a2de5b6f5d"
+    },
+    {
+      "path": "localtiles/14/10030/5978.pbf",
+      "size": 3228,
+      "sha256": "a3183e391718daf46cd9b4cc8a0e23418886e17d1ee10f19ac9924efadb80309"
+    },
+    {
+      "path": "localtiles/14/10030/5979.pbf",
+      "size": 2157,
+      "sha256": "780c5b045fe255bfa8ba8042a18c01735c1925fb3631cf6b559e52f7378c9359"
+    },
+    {
+      "path": "localtiles/14/10030/5980.pbf",
+      "size": 1829,
+      "sha256": "463d257bb9e88d0729afd05926f056b5556de56487cee6464c82ba96392e6ab4"
+    },
+    {
+      "path": "localtiles/14/10031/5968.pbf",
+      "size": 2849,
+      "sha256": "ea080a509ac18655fbfef2a261d26a87066379e83359c118feb01e18e2ec00f3"
+    },
+    {
+      "path": "localtiles/14/10031/5969.pbf",
+      "size": 3712,
+      "sha256": "432b84a51b9f1279a53329934e0772c530917155694c0e08b2f921e85e53a398"
+    },
+    {
+      "path": "localtiles/14/10031/5970.pbf",
+      "size": 4309,
+      "sha256": "aab8be64d2199a5be9ee82cbe2426b0851cf00ab15640f6ce86cb12f442cbecb"
+    },
+    {
+      "path": "localtiles/14/10031/5971.pbf",
+      "size": 2968,
+      "sha256": "f7163969ccf9634e7f815cf09f7e8b1862746500144245eec4f5b06745efe792"
+    },
+    {
+      "path": "localtiles/14/10031/5972.pbf",
+      "size": 5041,
+      "sha256": "0e3a0269891e43419b65c21012fb15b4aed57c59384e4e360bdd002cca4428fb"
+    },
+    {
+      "path": "localtiles/14/10031/5973.pbf",
+      "size": 6052,
+      "sha256": "c77041b8d8f558366051a75cfae9fa748ba90c150cc4020408da22e78b9f77a4"
+    },
+    {
+      "path": "localtiles/14/10031/5974.pbf",
+      "size": 3243,
+      "sha256": "4b7fa2947a787a572ed3698817421d4848421cc7a3643cd6f94e498a03fccc1a"
+    },
+    {
+      "path": "localtiles/14/10031/5975.pbf",
+      "size": 3185,
+      "sha256": "a46a1a04fa13f47a139d34db930a0a065f3f5d311783dd063d8c7c1eea3bd0a5"
+    },
+    {
+      "path": "localtiles/14/10031/5976.pbf",
+      "size": 3706,
+      "sha256": "7da0d9249c05e7f14cbe26a02106d8506afd3f882cdc74dd585993a2f7c49a4d"
+    },
+    {
+      "path": "localtiles/14/10031/5977.pbf",
+      "size": 3286,
+      "sha256": "89ca24ac22a6fb04c6e91b937ed663b2f95e3cde20905e0ccc3e8ce9d74f4d82"
+    },
+    {
+      "path": "localtiles/14/10031/5978.pbf",
+      "size": 1345,
+      "sha256": "bebb69ca957f13f95eb8290e2ad17d2f767e3fed5fe1d7f5d2b8f8f7fa558536"
+    },
+    {
+      "path": "localtiles/14/10031/5979.pbf",
+      "size": 2215,
+      "sha256": "f4dd1d59c6103ecfe08c4de4c58fd7845dacc031448abd36600dc909a12ef239"
+    },
+    {
+      "path": "localtiles/14/10031/5980.pbf",
+      "size": 3812,
+      "sha256": "89f36721e8c13ad8e267e05dc408c5a251338d01e45579bf30242349f478862d"
+    },
+    {
+      "path": "localtiles/14/10032/5968.pbf",
+      "size": 4891,
+      "sha256": "484416cf38f3cc85acc81dbf9ac86a47d3d8583ca2c283355a55a72ab9baf31a"
+    },
+    {
+      "path": "localtiles/14/10032/5969.pbf",
+      "size": 4869,
+      "sha256": "0442e0084641dc12a2b1f6395c6bf8fd9182515ecd4b161a324065c7ac25045e"
+    },
+    {
+      "path": "localtiles/14/10032/5970.pbf",
+      "size": 4110,
+      "sha256": "2a743757863785b1aa17d3105a522b0600bc00becbffcf0a2847d6e9c0ab742b"
+    },
+    {
+      "path": "localtiles/14/10032/5971.pbf",
+      "size": 2257,
+      "sha256": "45ae3e8449c5b0414f4d4982591bffac8e6a63183bf61b9308764d44a6f969f7"
+    },
+    {
+      "path": "localtiles/14/10032/5972.pbf",
+      "size": 2839,
+      "sha256": "254b5d6f819aaad6847d5738a50c8cfaff377fc06c9a2b06ef677f96730f1cc5"
+    },
+    {
+      "path": "localtiles/14/10032/5973.pbf",
+      "size": 3837,
+      "sha256": "358441700b5af45684207102f77b1b453b5c35f255c957eddb7b61cdbbb145e5"
+    },
+    {
+      "path": "localtiles/14/10032/5974.pbf",
+      "size": 3154,
+      "sha256": "6548c8e88004a3255c1762c87f728d3c878d12035af8227dfbaa8eea353917cd"
+    },
+    {
+      "path": "localtiles/14/10032/5975.pbf",
+      "size": 4004,
+      "sha256": "a8dd177f7f787fa394284d854baa723e8dcd92aa31612c403feb2347417ec3bf"
+    },
+    {
+      "path": "localtiles/14/10032/5976.pbf",
+      "size": 2982,
+      "sha256": "730191b8a5f9c41d48ad7cbeaa311ea0f048939900f2ee1e2d192b1cb39717a4"
+    },
+    {
+      "path": "localtiles/14/10032/5977.pbf",
+      "size": 4307,
+      "sha256": "9f0d9259465696614c16fa5caf105e3866dc2c63ebd9638e88ec9f7054136718"
+    },
+    {
+      "path": "localtiles/14/10032/5978.pbf",
+      "size": 4760,
+      "sha256": "cdc1fa1e112c904413bdb6702335641043d7d19b81de6c4e8dcf7a29cd0fbb44"
+    },
+    {
+      "path": "localtiles/14/10032/5979.pbf",
+      "size": 6246,
+      "sha256": "e438d828e3234cb8257a8bd94e0185fcafa5dd1da71c3b22076e64452cda9176"
+    },
+    {
+      "path": "localtiles/14/10032/5980.pbf",
+      "size": 3359,
+      "sha256": "46911118b7b6d182a63694d1e6f3c0c329556d0ebd100391d0cf42441451b02f"
+    },
+    {
+      "path": "localtiles/14/10033/5968.pbf",
+      "size": 2815,
+      "sha256": "d927511e551870158abab432d46b194524b3371cb8fa45a6136c67243b242b0c"
+    },
+    {
+      "path": "localtiles/14/10033/5969.pbf",
+      "size": 3032,
+      "sha256": "41287c6094a1bc214c175a71a568ab84f2fe9d8934f13bb31a6ce4bae79e106b"
+    },
+    {
+      "path": "localtiles/14/10033/5970.pbf",
+      "size": 2589,
+      "sha256": "f956da4dadd71533f6a73eb075ef7a4600cfb936059739fc863a0736b31d9ad1"
+    },
+    {
+      "path": "localtiles/14/10033/5971.pbf",
+      "size": 3771,
+      "sha256": "73423b4d745f1e0d9d7d75b0628f398d3c64afd3b540f84293c83ac9d349f63e"
+    },
+    {
+      "path": "localtiles/14/10033/5972.pbf",
+      "size": 3736,
+      "sha256": "94de491e6cf108c39e64c98d2db02fb4c2f8d7823581be61a84e2c649b46bcfd"
+    },
+    {
+      "path": "localtiles/14/10033/5973.pbf",
+      "size": 2855,
+      "sha256": "df4b3d8995cc488982966eee8160fb0500228cd7fb2e13d3930f89aa2b60d2ed"
+    },
+    {
+      "path": "localtiles/14/10033/5974.pbf",
+      "size": 2475,
+      "sha256": "42902ca31f92ca382bd08dd763de22ca3f0bc35cac4d291b9a39a4a158652841"
+    },
+    {
+      "path": "localtiles/14/10033/5975.pbf",
+      "size": 3382,
+      "sha256": "3b5e9119567d9ef252b4b0316b716de5213683bc3cede0492d41a569eaa5d562"
+    },
+    {
+      "path": "localtiles/14/10033/5976.pbf",
+      "size": 2786,
+      "sha256": "2aeaaeefb320f8bc7394472abfaf2a77bc17a9158a17ad798a774553e28d4626"
+    },
+    {
+      "path": "localtiles/14/10033/5977.pbf",
+      "size": 6206,
+      "sha256": "1515041de4c261f265db4def49883cf274ee18bb2aa91b15e7cac4622ab64482"
+    },
+    {
+      "path": "localtiles/14/10033/5978.pbf",
+      "size": 6660,
+      "sha256": "ab31d3c8d3d24e7514a3daaa4b0800051dcea6a56e38197433d86ec226517815"
+    },
+    {
+      "path": "localtiles/14/10033/5979.pbf",
+      "size": 3306,
+      "sha256": "1e3e7bd1e197e3ce66c877f289549b67bd4a566db40c5c733c0824f8ff02d8df"
+    },
+    {
+      "path": "localtiles/14/10033/5980.pbf",
+      "size": 3860,
+      "sha256": "e6897568119b829378ecf8a325915eabddccc42c531537b38d545839bb591562"
+    },
+    {
+      "path": "localtiles/14/10034/5968.pbf",
+      "size": 1842,
+      "sha256": "e13917c68624309ea89a36643a0e7bc11f2e9542ae8e873366e92b1f8d1a5f01"
+    },
+    {
+      "path": "localtiles/14/10034/5969.pbf",
+      "size": 2087,
+      "sha256": "95678d8f98c35dc1cef11405e600a4875cc9e6c8f14445622a9598a8f792ef31"
+    },
+    {
+      "path": "localtiles/14/10034/5970.pbf",
+      "size": 2845,
+      "sha256": "33b5bfe43f086f76fde27e951d440c42dfe1e50e0624637e538910865a49e3cb"
+    },
+    {
+      "path": "localtiles/14/10034/5971.pbf",
+      "size": 4027,
+      "sha256": "c0254accb01a10f0d09dc02857786366c452186888473c6867a26cfc626c303a"
+    },
+    {
+      "path": "localtiles/14/10034/5972.pbf",
+      "size": 2914,
+      "sha256": "03a4c1b00437d0dd634bfc5422bcb0e608ceccafc706e640304659c38c4896c7"
+    },
+    {
+      "path": "localtiles/14/10034/5973.pbf",
+      "size": 2396,
+      "sha256": "fccef7c9ea9a76e24c31c4f86ab6acf231423198f92fd184ff904df73e12be3d"
+    },
+    {
+      "path": "localtiles/14/10034/5974.pbf",
+      "size": 4259,
+      "sha256": "8ca17e8620c2608a3a143409c6aadba94efc3d40b16235f158543be61d6744a9"
+    },
+    {
+      "path": "localtiles/14/10034/5975.pbf",
+      "size": 5813,
+      "sha256": "b97380bb1e41244f5e7d3e3cc418b71b4dc2aff31ae6694339245dcfd88209f3"
+    },
+    {
+      "path": "localtiles/14/10034/5976.pbf",
+      "size": 13356,
+      "sha256": "d98159d1ee10054d2366b015c364b8c40b47e9e65469f3dff81505cfc870eaa4"
+    },
+    {
+      "path": "localtiles/14/10034/5977.pbf",
+      "size": 10698,
+      "sha256": "83efab317f8ae386a9ffe91e0b722e0d62cc9bc0e405371325efb614f48b9ecb"
+    },
+    {
+      "path": "localtiles/14/10034/5978.pbf",
+      "size": 7941,
+      "sha256": "31ae39a096869919825dc394b8c3bc14f1830f6abfa67d671297db1f6ddd7669"
+    },
+    {
+      "path": "localtiles/14/10034/5979.pbf",
+      "size": 3878,
+      "sha256": "9bb33bdd2b389f8cb53114ca3d4dee08d8b2e760a63fde5c6b39a95fb70f7bd6"
+    },
+    {
+      "path": "localtiles/14/10034/5980.pbf",
+      "size": 2740,
+      "sha256": "0f650ba441ec99592579e085399fa0992abcfadaed1980d3cc67890dea6ae338"
+    },
+    {
+      "path": "localtiles/7/78/46.pbf",
+      "size": 242149,
+      "sha256": "377653b949af33792b377c16f3f77e7dd92711a082fa625ac437d4ee71f32091"
+    },
+    {
+      "path": "localtiles/8/156/93.pbf",
+      "size": 152068,
+      "sha256": "bb1dce1321f780615300adbd48112d857e15dbc0c6d52e294b0113bf356473b1"
+    },
+    {
+      "path": "localtiles/9/313/186.pbf",
+      "size": 160151,
+      "sha256": "e7302e96ce05b4aa9cb606a67e2bf4077b667ab61db0e7d88db84876e97d4f42"
+    },
+    {
+      "path": "terrain/tiles/10/626/373.png",
+      "size": 109072,
+      "sha256": "4b586f5305f444900dacbb90147487d210cd568eb702fcf06ef6e9779dbcb777"
+    },
+    {
+      "path": "terrain/tiles/10/627/373.png",
+      "size": 110943,
+      "sha256": "634ccac38fe9d56f3f6ee444f72dd61658c1f782ae55b80e2ffffd2d7aa0d3c6"
+    },
+    {
+      "path": "terrain/tiles/11/1253/746.png",
+      "size": 94431,
+      "sha256": "cf32c1571e024ee339e9ed91f695b26c26a22446a80e1bf4c96b5ff9cecff58f"
+    },
+    {
+      "path": "terrain/tiles/11/1253/747.png",
+      "size": 89929,
+      "sha256": "2dfa5edbd17e5deb18e4358bf8e6ec15cce62d90628cb9ea53db218aed88d045"
+    },
+    {
+      "path": "terrain/tiles/11/1254/746.png",
+      "size": 93793,
+      "sha256": "8d23542e716b9637bdff7ddc66177f25fe0596bf61b5bf0da85df4a2f1edede7"
+    },
+    {
+      "path": "terrain/tiles/11/1254/747.png",
+      "size": 92111,
+      "sha256": "8bacca884d1c3f816c8050752146b5235feabf2f246785a1b500b74bac21db26"
+    },
+    {
+      "path": "terrain/tiles/12/2506/1492.png",
+      "size": 91728,
+      "sha256": "8463130a95a480c3213c611c46bed4b088002c2168fcda5057b2c6061998ba7e"
+    },
+    {
+      "path": "terrain/tiles/12/2506/1493.png",
+      "size": 89460,
+      "sha256": "01602372206bc971dde3c012e2a8defe550453f984f927666f24c5f64ef79502"
+    },
+    {
+      "path": "terrain/tiles/12/2506/1494.png",
+      "size": 84429,
+      "sha256": "0f22d003fd23f306ce0815cee54fe45cc9c76ea72ff0cb55dac4b2005ebe79a6"
+    },
+    {
+      "path": "terrain/tiles/12/2506/1495.png",
+      "size": 86652,
+      "sha256": "77d86cf76e5d7af994f49624cffe932cefb9b4c911476cbb11ef5da6a46e30fe"
+    },
+    {
+      "path": "terrain/tiles/12/2507/1492.png",
+      "size": 86317,
+      "sha256": "aa932a03386dc78ba87b0737401827ab03b75786256c151aa43fc0f6ce4c19b5"
+    },
+    {
+      "path": "terrain/tiles/12/2507/1493.png",
+      "size": 89010,
+      "sha256": "556b1ad4b2a710353d3f969dc8b3774e44500206854c47eb0f4f346967002042"
+    },
+    {
+      "path": "terrain/tiles/12/2507/1494.png",
+      "size": 85578,
+      "sha256": "55099802e02103181e5aeda22e9b796bb57fb57eabede2a2fd831eb360ab0fdc"
+    },
+    {
+      "path": "terrain/tiles/12/2507/1495.png",
+      "size": 87416,
+      "sha256": "cfdb6afe9d8d3f07387c6436ff9a00b82a586e3729f78f8da30f6f76a0244df2"
+    },
+    {
+      "path": "terrain/tiles/12/2508/1492.png",
+      "size": 87369,
+      "sha256": "34bf5c573a7d8745c81a54d41b0ad6bb5000ef7c2b949c811c330e45f89a4fb1"
+    },
+    {
+      "path": "terrain/tiles/12/2508/1493.png",
+      "size": 89923,
+      "sha256": "494eabad7d58cdc02d9b6ab232049c10cfb74ccea7309954069a3eee0ba4138a"
+    },
+    {
+      "path": "terrain/tiles/12/2508/1494.png",
+      "size": 88051,
+      "sha256": "699fa72859ee6ec7c5fb6b9fef28ecab712a532827eb6b0af477fc00db602dce"
+    },
+    {
+      "path": "terrain/tiles/12/2508/1495.png",
+      "size": 83530,
+      "sha256": "f2442dbb3f26518d9ceaed147adf0bfa0c24de042f309391a3530c023d589605"
+    },
+    {
+      "path": "terrain/tiles/7/78/46.png",
+      "size": 103339,
+      "sha256": "76348cebab0d81b387bf9b27893a90d717d5ab08b907298f29072bfb1f80eac3"
+    },
+    {
+      "path": "terrain/tiles/8/156/93.png",
+      "size": 87304,
+      "sha256": "78afe47fa998ac3d366e36365b35e9c636914af2c11cae0eae544d704b996039"
+    },
+    {
+      "path": "terrain/tiles/9/313/186.png",
+      "size": 119921,
+      "sha256": "0a6e494f988a0b7c8dab52257aedc4c84e24dde4c12bc78302cf12f81a8402d8"
+    }
+  ]
+}

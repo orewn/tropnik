@@ -152,8 +152,8 @@ test('first-visit desktop credits leave the full labelled Layers button unobscur
 
 test('settling observes a queued camera only after compositor progress and consecutive idle samples',async()=>{
  let frames=0,reads=0;const observed=[];
- const state=zoom=>({visible:true,moving:false,engine:'leaflet',camera:{longitude:40,latitude:43,zoom,tileSize:256},rect:{left:0,top:68,width:412,height:847},route:'kavkaz-8a'});
- const result=await settleMapCamera({engine:'leaflet',
+ const state=zoom=>({visible:true,moving:false,engine:'tropnik-canvas',camera:{longitude:40,latitude:43,zoom,tileSize:256},rect:{left:0,top:68,width:412,height:847},route:'kavkaz-8a',rendering:{painted:true,coverageReady:true,drawnRoute:'kavkaz-8a',tilesState:'ready'}});
+ const result=await settleMapCamera({engine:'tropnik-canvas',
   frame:async()=>{frames+=2;},
   read:async()=>{reads++;assert.equal(frames,reads*2,'Every sample must follow compositor frames');const sample=frames<4?state(4.020198667):state(3.270198667);if(frames===4||frames===6)sample.moving=true;observed.push(sample);return sample;},
   wait:async(_label,read,accept,timeout)=>{assert.equal(timeout,15000);for(let index=0;index<12;index++){const sample=await read();if(accept(sample))return sample;}throw new Error('Did not settle');},
@@ -164,25 +164,20 @@ test('settling observes a queued camera only after compositor progress and conse
  assert.equal(observed.slice(-4).every(item=>!item.moving&&item.camera.zoom===result.camera.zoom),true);
 });
 
-test('a Leaflet child-pane transition remains moving after the old camera dataset clears',()=>{
- let datasetMoving=false,paneAnimating=true;
- const element={
-  hasAttribute:name=>name==='data-map-camera'&&datasetMoving,
-  classList:{contains:()=>false},
-  querySelector:selector=>selector==='.leaflet-map-pane.leaflet-zoom-anim'&&paneAnimating?{className:'leaflet-map-pane leaflet-zoom-anim'}:null,
- };
- assert.equal(mapCameraIsMoving(element),true,'The animation class belongs to the child pane');
- paneAnimating=false;assert.equal(mapCameraIsMoving(element),false);
- datasetMoving=true;assert.equal(mapCameraIsMoving(element),true,'Other camera motion still uses the public dataset');
+test('own camera motion and queued native transitions stay moving until both public markers clear',()=>{
+ const element={dataset:{mapMoving:'true'},hasAttribute:()=>false};
+ assert.equal(mapCameraIsMoving(element),true);
+ element.dataset.mapMoving='false';assert.equal(mapCameraIsMoving(element),false);
+ element.hasAttribute=()=>true;assert.equal(mapCameraIsMoving(element),true);
 });
 
 test('settle failure retains only the last16 timed samples without rounding camera drift',async()=>{
  let now=0,frames=0,reads=0;
- const failure=new Error('The maplibre map did not settle'),state={visible:true,moving:false,engine:'maplibre',camera:{longitude:40,latitude:43,zoom:5.9054061044955795,tileSize:512,centerX:520.5,centerY:464},rect:{left:384,top:72,width:1041,height:928},route:'kavkaz-8a'};
- const observed=await settleMapCamera({engine:'maplibre',clock:()=>now,
+ const failure=new Error('The tropnik-canvas map did not settle'),state={visible:true,moving:false,engine:'tropnik-canvas',camera:{longitude:40,latitude:43,zoom:5.9054061044955795,tileSize:256,centerX:520.5,centerY:464},rect:{left:384,top:72,width:1041,height:928},route:'kavkaz-8a',rendering:{painted:true,coverageReady:true,drawnRoute:'kavkaz-8a',tilesState:'ready'}};
+ const observed=await settleMapCamera({engine:'tropnik-canvas',clock:()=>now,
   frame:async()=>{frames++;now+=frames===16?6026:10;},
   read:async()=>{reads++;now+=3;state.camera.centerX=reads%2?520.5000000000027:520.5;return state;},
-  wait:async(label,read,accept,timeout)=>{assert.equal(label,'The maplibre map did not settle');assert.equal(timeout,15000);for(let index=0;index<24;index++)assert.equal(accept(await read()),false,'Subpixel drift must not bypass exact equality');throw failure;},
+  wait:async(label,read,accept,timeout)=>{assert.equal(label,'The tropnik-canvas map did not settle');assert.equal(timeout,15000);for(let index=0;index<24;index++)assert.equal(accept(await read()),false,'Subpixel drift must not bypass exact equality');throw failure;},
  }).then(()=>null,error=>error);
  assert.equal(observed,failure);const diagnostic=observed.settleDiagnostics;
  assert.equal(diagnostic.timeoutMs,15000);assert.equal(diagnostic.requiredIdleObservations,4);assert.equal(diagnostic.comparison,'exact-camera-rect-route');
@@ -198,7 +193,7 @@ test('settle failure retains only the last16 timed samples without rounding came
 test('failed compositor frames and state reads keep their phase timing and original errors',async()=>{
  for(const phase of ['frame','read']){
   let now=0;const failure=new Error(`${phase} unavailable`);
-  const observed=await settleMapCamera({engine:'maplibre',clock:()=>now,
+  const observed=await settleMapCamera({engine:'tropnik-canvas',clock:()=>now,
    frame:async()=>{now+=10;if(phase==='frame')throw failure;},
    read:async()=>{now+=20;throw failure;},
    wait:async(_label,read)=>read(),
@@ -210,15 +205,15 @@ test('failed compositor frames and state reads keep their phase timing and origi
 });
 
 test('opt-in terrain tracing covers only the first existing desktop upward4–5 step',()=>{
- const profile={name:'desktop-webgl',engine:'maplibre',mobile:false};
+ const profile={name:'desktop-webgl',engine:'tropnik-canvas',mobile:false};
  for(const zoom of [4,4.9054061044955795,4.999]){
-  assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false),false);
-  assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false,false),false);
-  assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false,true),true);
+  assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,zoom,false),false);
+  assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,zoom,false,false),false);
+  assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,zoom,false,true),true);
  }
- for(const zoom of [2,3.999,5,5.905,18,NaN])assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,zoom,false,true),false);
- assert.equal(shouldTraceTerrainZoom(profile,'terrain',1,4.905,true,true),false);
+ for(const zoom of [2,3.999,5,5.905,18,NaN])assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,zoom,false,true),false);
+ assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,4.905,true,true),false);
  for(const mode of ['detail','satellite',undefined])assert.equal(shouldTraceTerrainZoom(profile,mode,1,4.905,false,true),false);
- assert.equal(shouldTraceTerrainZoom(profile,'terrain',-1,4.905,false,true),false);
- for(const changed of [{mobile:true},{engine:'leaflet'},{name:'android-portrait'}])assert.equal(shouldTraceTerrainZoom({...profile,...changed},'terrain',1,4.905,false,true),false);
+ assert.equal(shouldTraceTerrainZoom(profile,'scene3d',-1,4.905,false,true),false);
+ for(const changed of [{mobile:true},{engine:'unsupported'},{name:'android-portrait'}])assert.equal(shouldTraceTerrainZoom({...profile,...changed},'scene3d',1,4.905,false,true),false);
 });

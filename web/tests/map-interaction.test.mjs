@@ -31,15 +31,15 @@ test('a resize or pointer burst performs one frame and can schedule the next', (
 
 test('settled camera diagnostics cannot publish nonfinite coordinates', () => {
   const element = {dataset: {}};
-  publishMapCamera(element, {longitude: 108, latitude: 53.3, zoom: 6, tileSize: 256, engine: 'leaflet'});
+  publishMapCamera(element, {longitude: 108, latitude: 53.3, zoom: 6, tileSize: 256, engine: 'tropnik-canvas'});
   const before = {...element.dataset};
-  publishMapCamera(element, {longitude: NaN, latitude: 53.3, zoom: 6, tileSize: 256, engine: 'leaflet'});
+  publishMapCamera(element, {longitude: NaN, latitude: 53.3, zoom: 6, tileSize: 256, engine: 'tropnik-canvas'});
   assert.deepEqual(element.dataset, before);
   assert.equal(element.dataset.mapLongitude, '108');
-  assert.equal(element.dataset.mapEngine, 'leaflet');
+  assert.equal(element.dataset.mapEngine, 'tropnik-canvas');
 });
 
-test('the two renderers share story areas and 44px route target size', () => {
+test('custom map story areas retain the 44px route target size', () => {
   assert.equal(MAP_CONFIG.trailHitRadiusPx * 2, 44);
   assert.equal(viewportRegionId(108, 53.3, 6), 'baikal');
   assert.equal(viewportRegionId(108, 53.3, 3), undefined);

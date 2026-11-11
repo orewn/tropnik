@@ -60,8 +60,8 @@ export function overviewCountsFixture(clustered=false){
  return{region:'',catalog,markers,total:21,mapTotal:21};
 }
 
-export function savedReentryFixture(mobile=true,clustered=false){
- const engine=mobile?'leaflet':'maplibre',input=mobile?'touch':'mouse';
+export function savedReentryFixture(mobile=true,clustered=false,engine='tropnik-canvas'){
+ const input=mobile?'touch':'mouse';
  return(clustered?[true,false]:[false]).map((cluster,index)=>{
   const grid=directionGridFixture('altai',engine);grid.cluster=cluster;grid.groupKey=cluster?'altai|baikal':'altai';
   grid.ariaLabel=cluster?'Приблизить 2 направления: Алтай, Байкал':'Открыть Алтай, маршрутов в каталоге: 11';
@@ -72,11 +72,11 @@ export function savedReentryFixture(mobile=true,clustered=false){
  });
 }
 
-export function exploreExperienceFixture(mobile=true,routeId='route'){
+export function exploreExperienceFixture(mobile=true,routeId='route',engine='tropnik-canvas'){
  const input=mobile?'touch':'mouse',click=(selector,label)=>nativeClickFixture(input,selector,undefined,label),scroll=()=>nativeScrollFixture(input);
  const overview=overviewCountsFixture();
  const baseline={pressed:'false',count:11,expanded:'false',empty:false};
- const filterReset={baseline:clone(baseline),enabled:click('.filter-row button[aria-pressed]','Сохранённые'),filtered:{pressed:'true',count:0,expanded:'false',empty:true},parent:click('.explore-panel .back-link','Все направления'),overviewBefore:clone(overview),overviewAfter:clone(overview),reentryActions:savedReentryFixture(mobile),restored:clone(baseline)};
+ const filterReset={baseline:clone(baseline),enabled:click('.filter-row button[aria-pressed]','Сохранённые'),filtered:{pressed:'true',count:0,expanded:'false',empty:true},parent:click('.explore-panel .back-link','Все направления'),overviewBefore:clone(overview),overviewAfter:clone(overview),reentryActions:savedReentryFixture(mobile,false,engine),restored:clone(baseline)};
  const route={id:routeId,title:'Маршрут А'},note='Проверка принадлежности запроса маршруту',action='.route-actions button.primary',close='[role="dialog"] button[aria-label="Закрыть"]';
  const requestOwnership={route,scrolls:[scroll()],opened:click(action),first:dialog(true,route.title),edit:{method:'Input.insertText',note,events:[{trusted:true,tag:'TEXTAREA',value:note}]},edited:dialog(true,route.title,note),closedSame:click(close),reopened:click(action),same:dialog(true,route.title,note),back:browserBack(selection('altai',routeId,route.title),selection('altai','','Алтай')),afterBack:dialog(false),next:{selection:selection('altai','route-b','Маршрут Б'),scrolls:[scroll()],selected:click('.trail-list .trail-card:nth-child(2) .trail-card-main'),before:dialog(false),actionScrolls:[scroll()],opened:click(action),dialog:dialog(true,'Маршрут Б'),closed:click(close)},returnScrolls:[scroll()]};
  if(!mobile)requestOwnership.mapLayout=requestMapLayoutFixture();
@@ -85,8 +85,8 @@ export function exploreExperienceFixture(mobile=true,routeId='route'){
  return{schemaVersion:1,passed:true,input,filterReset,requestOwnership,siblingParent};
 }
 
-export function styleCameraRoundtripFixture(routeId='route',{edgeCount=0}={}){
- const frame=(longitude,latitude,zoom)=>({engine:'maplibre',route:routeId,moving:false,visible:true,camera:{longitude,latitude,zoom,tileSize:512},rect:rect(400,72,1040,928),width:1440,height:1000,scrollWidth:1440});
+export function styleCameraRoundtripFixture(routeId='route',{edgeCount=0,engine='tropnik-canvas'}={}){
+ const frame=(longitude,latitude,zoom)=>({engine,route:routeId,moving:false,visible:true,...(engine==='tropnik-canvas'?{rendering:{painted:true,drawnRoute:routeId,coverageReady:true,tilesState:'ready'}}:{}),camera:{longitude,latitude,zoom,tileSize:256},rect:rect(400,72,1040,928),width:1440,height:1000,scrollWidth:1440});
  const before=frame(87.5,49.8,8),zoomed=frame(87.5,49.8,9),manual=frame(87.499,49.8003,9),current=selection('altai',routeId,'Маршрут А');
  const start={x:900,y:400},end={x:948,y:412},delta={dx:48,dy:12};
  const types=['mouseMoved','mousePressed',...Array(12).fill('mouseMoved'),'mouseReleased'];
@@ -98,7 +98,7 @@ export function styleCameraRoundtripFixture(routeId='route',{edgeCount=0}={}){
  const click=(selector,label)=>nativeClickFixture('mouse',selector,undefined,label);
  const transitions=['Сохранённый обзор','Детальные тропы онлайн'].map((label,index)=>{
   const lineClick=nativeClickFixture('mouse','canvas',{x:800,y:350});
-  return{label,opened:click('.layer-button','Слои'),scrolls:[],selected:click(`.layer-menu>button:nth-of-type(${index?1:3})`,label),closed:click('.layer-button','Слои'),frame:clone(manual),line:{point:{x:lineClick.point.x,y:lineClick.point.y},route:routeId,clicked:true,selectionRetained:true,reopened:false,events:lineClick.events},lineFrame:clone(manual),selection:clone(current),restored:{route:routeId,selected:true,mutations:[{old:routeId,current:routeId}],edges:{before:edgeCount,after:edgeCount,replaced:edgeCount}}};
+  return{label,opened:click('.layer-button','Слои'),scrolls:[],selected:click(`.layer-menu>button:nth-of-type(${index?1:3})`,label),closed:click('.layer-button','Слои'),frame:clone(manual),line:{point:{x:lineClick.point.x,y:lineClick.point.y},route:routeId,clicked:true,selectionRetained:true,reopened:false,events:lineClick.events},lineFrame:clone(manual),selection:clone(current),restored:{route:routeId,selected:true,mutations:[{old:routeId,current:routeId}],...(engine==='tropnik-canvas'?{drawnRoute:routeId,tilesState:'ready',drawRevision:2,beforeDrawRevision:1,mode:index?'detail':'overview'}:{}),edges:{before:edgeCount,after:edgeCount,replaced:0}}};
  });
- return{schemaVersion:1,passed:true,input:'mouse',routeId,selection:current,before,zoomed,zoom:click('.map-controls button[aria-label="Увеличить масштаб"]','Увеличить масштаб'),pan,manual,transitions};
+ return{schemaVersion:2,passed:true,input:'mouse',routeId,selection:current,before,zoomed,zoom:click('.map-controls button[aria-label="Увеличить масштаб"]','Увеличить масштаб'),pan,manual,transitions};
 }

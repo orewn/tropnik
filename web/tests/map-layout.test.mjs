@@ -7,10 +7,7 @@ const require = createRequire(import.meta.url);
 const postcss = createRequire(require.resolve('@tailwindcss/postcss'))('postcss');
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const app = read('../app/globals.css');
-const vendors = {
-  'maplibregl-map': read('../node_modules/maplibre-gl/dist/maplibre-gl.css'),
-  'leaflet-container': read('../node_modules/leaflet/dist/leaflet.css'),
-};
+const custom = read('../app/custom-map.css');
 
 // Evaluate the actual class-only container rules, including descendant/child
 // selectors and specificity. This deliberately does not claim to be a browser.
@@ -44,16 +41,13 @@ function containerStyle(sheets, classes) {
   return Object.fromEntries([...properties].map(([name, entry]) => [name, entry.value]));
 }
 
-test('real vendor stylesheet order cannot collapse the atlas container', () => {
-  for (const [className, css] of Object.entries(vendors)) for (const sheets of [[app, css], [css, app]]) {
-    const actual = containerStyle(sheets, ['atlas-canvas', className]);
-    assert.equal(actual.position, 'absolute', `${className}: vendor CSS must not move the empty container into normal flow`);
+test('the custom map surface remains full size in either stylesheet order', () => {
+  for (const sheets of [[app, custom], [custom, app]]) {
+    const actual = containerStyle(sheets, ['atlas-canvas', 'tropnik-map-surface']);
+    assert.equal(actual.position, 'absolute');
     assert.equal(actual.inset, '0');
     assert.equal(actual.width, '100%');
     assert.equal(actual.height, '100%');
+    assert.equal(actual.overflow, 'hidden');
   }
-  const broken = containerStyle(['.atlas-canvas{position:absolute;inset:0}', vendors['maplibregl-map']], ['atlas-canvas', 'maplibregl-map']);
-  assert.equal(broken.position, 'relative', 'the extracted vendor CSS must reproduce the original cascade conflict');
-  assert.equal(broken.height, undefined, 'an auto-height container with only absolute children can collapse to zero');
 });
-

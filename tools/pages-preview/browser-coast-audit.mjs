@@ -63,12 +63,12 @@ export function assertCoastAudit(report,profile,engine){
   assert.equal(new Set(frame.cells).size,frame.cells.length);
   const shot=report.screenshots.find(image=>image.fixture===fixture.id&&image.targetZoom===targetZoom);
   assert.ok(shot?.bytes>1000);assert.match(shot.sha256,/^[a-f0-9]{64}$/);
-  if(engine==='maplibre'&&fixture.id==='primorsk')assertCoastLabelInspection(report.labelDiagnostics?.find(capture=>capture.fixture===fixture.id&&capture.targetZoom===targetZoom),frame,shot);
+  if(fixture.id==='primorsk')assertCoastLabelInspection(report.labelDiagnostics?.find(capture=>capture.fixture===fixture.id&&capture.targetZoom===targetZoom),frame,shot);
  }
- assert.equal(report.labelDiagnostics?.length,engine==='maplibre'?5:0,'Unexpected coastline label inspection count');
+ assert.equal(report.labelDiagnostics?.length,5,'Unexpected coastline label inspection count');
  assert.equal(versions.size,1,'A coastline audit mixed geometry publications');
  assert.ok(report.pans.length>=2,'Coastlines must be reached through native map gestures');
- for(const pan of report.pans)assertCoastPanInput(pan,engine==='leaflet'?'touch':'mouse',profile+'/coast');
+ for(const pan of report.pans)assertCoastPanInput(pan,profile!=='desktop-webgl'?'touch':'mouse',profile+'/coast');
  assert.ok(report.resources.some(resource=>resource.status===200&&resource.finished&&resource.path.endsWith('/data/map-coverage/manifest.json')),'No loaded geometry manifest');
  assert.ok(report.resources.some(resource=>resource.status===200&&resource.finished&&resource.path.includes('/data/map-coverage/cells/')),'No loaded coastal geometry cells');
  return report;
@@ -154,7 +154,7 @@ export async function runCoastAudit(cdp,profile,helpers){
     await mkdir(OUTPUT,{recursive:true});await writeFile(new URL(file,OUTPUT),bytes);
     const shot={fixture:fixture.id,targetZoom,file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
     report.screenshots.push(shot);
-    if(profile.engine==='maplibre'&&fixture.id==='primorsk')report.labelDiagnostics.push(await captureCoastLabels(cdp,evaluate,frame,shot));
+    if(fixture.id==='primorsk')report.labelDiagnostics.push(await captureCoastLabels(cdp,evaluate,frame,shot));
     await save();
    }
   }

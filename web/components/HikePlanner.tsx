@@ -13,7 +13,7 @@ import {getTrailConnections, getTrailEndpoints, normalizeTrailGeometry, planTrai
 import {createHikeDraft, validateHikeDraft, serializeHikeDraft, exportHikeGpx, getHikeGpxExportState, hikeDraftPathKey, safeHikeFilename, type HikeDraft} from '@/lib/hike-draft';
 import styles from './HikePlanner.module.css';
 
-const PlannerAtlas = lazy(() => import('./Atlas2D').then(module => ({default: module.Atlas2D})));
+const PlannerAtlas = lazy(() => import('./CustomAtlas').then(module => ({default: module.CustomAtlas})));
 const index = connectionData as unknown as TrailConnectionIndex;
 const catalogue = trails.filter(trail => index.routes[trail.id]);
 const catalogueByRegion = createTrailRegionIndex(catalogue);

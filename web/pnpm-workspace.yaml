@@ -9,8 +9,8 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   workerd: true
-storeDir: ${SITES_PNPM_SHARED_STORE:-.sites-runtime/pnpm-store}
-cacheDir: ${SITES_PNPM_SHARED_STORE:-.sites-runtime/pnpm-store}/policy-cache
+storeDir: .sites-runtime/pnpm-store
+cacheDir: .sites-runtime/pnpm-store/policy-cache
 enableGlobalVirtualStore: false
 # Reuse store files with clones or hardlinks before falling back to copies.
 packageImportMethod: auto
@@ -35,5 +35,3 @@ overrides:
   'esbuild@>=0.28.0 <0.28.1': 0.28.1
   # The hooks plugin explicitly supports either Zod 3 or 4; retain the patched branch.
   eslint-plugin-react-hooks>zod: 4.6.6
-patchedDependencies:
-  maplibre-gl@6.16.0: patches/maplibre-gl@6.16.0.patch

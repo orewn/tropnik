@@ -3,15 +3,37 @@ import {readFile, readdir, access, writeFile} from 'node:fs/promises';
 import {dirname, join, resolve} from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath, pathToFileURL} from 'node:url';
-import {rewriteScript, rewriteJSON, rewriteHTML, pagesPath, ts} from './paths.mjs';
+import {rewriteScript, rewriteJSON, rewriteHTML, rewriteCSS, pagesPath, ts} from './paths.mjs';
 import {apkFileName, validateApkDelivery, validateApkManifest, verifyApk} from './apk-artifact.mjs';
 import {assertCatalogueExpectations} from './catalogue-expectations.mjs';
+import {verifyCustomMap} from '../../web/scripts/verify-custom-map.mjs';
+import {customMapWebRecords,customMapShellRecords,readCustomMapShellResources,legacyMapRuntime} from './custom-map-assets.mjs';
 
 const out = resolve(process.argv[2]);
 const report = JSON.parse(await readFile(join(out, 'build-info.json')));
 const pages = JSON.parse(await readFile(join(out, 'page-manifest.json')));
 const base = report.base;
 const namespace = base.slice(1, -1);
+const web = resolve(dirname(fileURLToPath(import.meta.url)), '../../web');
+const customMap = await verifyCustomMap({webRoot:web});
+const customMapFiles = customMapWebRecords(customMap);
+const {deployedFiles:deployedCustomMapFiles,...customMapProvenance} = report.customMap || {};
+assert.deepEqual(customMapProvenance,customMap,'The deployed map must describe the current verified shared renderer');
+assert.ok(Array.isArray(deployedCustomMapFiles)&&deployedCustomMapFiles.length===customMapFiles.length);
+for(const [index,file]of customMapFiles.entries()){
+ const name=file.path,original=await readFile(join(web,'public/custom-map',name));
+ let expected=original;
+ if(name!=='manifest.json'){
+  if(/\.[cm]?js$/.test(name))expected=Buffer.from(rewriteScript(original.toString('utf8'),name,{base}));
+  else if(name.endsWith('.css'))expected=Buffer.from(rewriteCSS(original.toString('utf8'),base));
+  else if(name.endsWith('.json'))expected=Buffer.from(JSON.stringify(rewriteJSON(JSON.parse(original),base),null,2)+'\n');
+ }
+ const bytes=await readFile(join(out,'custom-map',name));
+ assert.deepEqual(bytes,expected,`Shared map output differs from the verified source and Pages transform: ${name}`);
+ assert.deepEqual(deployedCustomMapFiles[index],{path:name,sizeBytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
+ const input=report.inputs.find(input=>input.path==='web/public/custom-map/'+name);
+ assert.equal(input?.sha256,file.sha256);assert.equal(input?.bytes,file.sizeBytes);
+}
 const exists = async path => access(path).then(() => true, () => false);
 assert.equal(report.apiConnected, false);
 assert.equal(report.serverCodeIncluded, false);
@@ -19,6 +41,10 @@ assert.equal(report.fakeServerResponses, false);
 assert.equal(report.hasApk, true, 'The public Pages build must retain its verified Android download');
 assert.ok(report.bundledModules.includes('pages-preview/src/api.ts'));
 assert.ok(report.bundledModules.includes('components/Explore.tsx'));
+assert.ok(report.bundledModules.includes('components/CustomAtlas.tsx'));
+assert.ok(report.bundledModules.includes('lib/custom-map-engine.ts'));
+assert.ok(report.bundledModules.includes('lib/custom-map-vector.ts'));
+assert.ok(report.thirdParty.every(item=>!['maplibre-gl','mapbox-gl','leaflet','protomaps-leaflet','pmtiles'].includes(item.name)),'The map must not bundle a third-party rendering engine');
 assert.ok(report.bundledModules.includes('components/Header.tsx'));
 assert.ok(report.bundledModules.includes('components/Footer.tsx'));
 assert.ok(report.bundledModules.includes('app/safety/registration/page.tsx'), 'The published safety page must have an executable page loader');
@@ -40,7 +66,7 @@ assert.ok(rewritten.includes('https://tiles.example/a'));
 assert.equal(pagesPath(base + 'data/a.json', base), base + 'data/a.json');
 assert.deepEqual(rewriteJSON({glyphs:'/offline-map/fonts/{fontstack}/{range}.pbf'}, base), {glyphs:base+'offline-map/fonts/{fontstack}/{range}.pbf'});
 assert.equal(rewriteHTML('<a href="/offline-viewer.html">', base), `<a href="${base}offline-viewer.html">`);
-assert.equal(rewriteScript("import {canvasStyle} from '/maps/canvas-style.js';", 'offline.js', {base}), `import {canvasStyle} from '${base}maps/canvas-style.js';`);
+assert.equal(rewriteScript("import {CustomMapEngine} from '/custom-map/map-runtime.js';", 'offline.js', {base}), `import {CustomMapEngine} from '${base}custom-map/map-runtime.js';`);
 assert.equal(rewriteScript("const fonts='/offline-fonts.css';", 'sw.js', {base}), `const fonts='${base}offline-fonts.css';`);
 
 // Execute the compiled router with its actual baked catalogue. HTTP 200 alone cannot prove routing.
@@ -72,7 +98,7 @@ const policyEntry = Object.values(viteManifest).find(value => value.isEntry && v
 assert.ok(policyEntry, 'Production map policy entry is required');
 const {publicMapResourceKey} = await import(pathToFileURL(join(out, policyEntry.file)).href);
 let mapPolicyChecks = 0;
-for (const path of ['data/russia-display-area.geojson', 'data/russia-canonical-mask.geojson', 'maps/tropa-style.json', 'terrain/terrain-grid.json?v=current']) {
+for (const path of ['data/russia-display-area.geojson', 'data/russia-canonical-mask.geojson', 'maps/russia-relief/manifest.json', 'terrain/terrain-grid.json?v=current']) {
   assert.equal(publicMapResourceKey(base + path, report.origin), base + path); mapPolicyChecks++;
   assert.equal(publicMapResourceKey(report.origin + base + path, report.origin), base + path); mapPolicyChecks++;
 }
@@ -102,7 +128,7 @@ for (const page of pages) {
   assert.ok(html.includes(`${base}assets/`), `${name} bundle path must have base`);
   for (const match of html.matchAll(/(?:href|src)=["'](\/[^"']*)["']/g)) assert.ok(match[1].startsWith(base), `${name}: root URL ${match[1]}`);
 }
-for (const path of ['data/world.geojson', 'data/regions.geojson', 'data/territories.geojson', 'data/russia-display-area.geojson', 'data/russia-outside-mask.geojson', 'data/russia-canonical-mask.geojson', 'data/russia-boundaries-provenance.json', 'maps/russia-viewport.js', 'maps/tropnik-sprite.png', 'maps/tropnik-sprite@2x.json', 'maps/maplibre-worker.js', 'terrain/terrain-grid.json', 'terrain/terrain-preview.json', 'offline-viewer.html', 'offline-safety.html', 'offline-safety.js', 'offline-safety.css', 'offline.js', 'offline-fonts.css', 'sw.js', '404.html', '.nojekyll']) assert.ok(await exists(join(out, path)), `Missing ${path}`);
+for (const path of ['data/world.geojson', 'data/regions.geojson', 'data/territories.geojson', 'data/russia-display-area.geojson', 'data/russia-outside-mask.geojson', 'data/russia-canonical-mask.geojson', 'data/russia-boundaries-provenance.json', 'maps/russia-viewport.js', 'custom-map/map-runtime.js', 'custom-map/manifest.json', 'terrain/terrain-grid.json', 'terrain/terrain-preview.json', 'offline-viewer.html', 'offline-safety.html', 'offline-safety.js', 'offline-safety.css', 'offline.js', 'offline-fonts.css', 'sw.js', '404.html', '.nojekyll']) assert.ok(await exists(join(out, path)), `Missing ${path}`);
 for (const css of ['globals.css', 'tropnik-system.css', 'gotham.css', 'terrain.css', 'map-design.css', 'place-stories.css']) {
   assert.ok(report.layoutStyles.includes('./' + css), `Current layout style omitted: ${css}`);
   assert.ok(report.bundledModules.includes('app/' + css), `Current layout style not bundled: ${css}`);
@@ -136,9 +162,6 @@ const world = JSON.parse(await readFile(join(out, 'data/world.geojson')));
 assert.ok(world.features.length > 100);
 const terrain = JSON.parse(await readFile(join(out, 'terrain/terrain-grid.json')));
 assert.equal(terrain.elevations.length, terrain.width * terrain.height);
-const style = JSON.parse(await readFile(join(out, 'maps/pilot-style.json')));
-assert.ok(style.glyphs.startsWith(base));
-assert.ok(style.sources.openmaptiles.tiles.every(url => url.startsWith(base)));
 const manifest = JSON.parse(await readFile(join(out, 'manifest.webmanifest')));
 assert.equal(manifest.scope, base); assert.equal(manifest.start_url, base); assert.equal(manifest.id, base);
 const sw = await readFile(join(out, 'sw.js'), 'utf8');
@@ -146,10 +169,11 @@ assert.ok(sw.includes(`${namespace}-tropnik-shell-${report.buildId}`));
 assert.ok(sw.includes(`${namespace}-tropnik-map-`));
 assert.ok(sw.includes(`${base}_offline/verified-map`));
 assert.ok(sw.includes(`${base}assets/`));
+assert.deepEqual(readCustomMapShellResources(sw),customMapShellRecords(deployedCustomMapFiles,base),'The offline shell must pin the actual deployed custom-map bytes');
 const offline = await readFile(join(out, 'offline.js'), 'utf8');
 assert.ok(offline.includes(`${namespace}-tropa-local-v1`));
-assert.ok(offline.includes(`${base}maps/maplibre-gl.mjs`));
-assert.ok(offline.includes(`${base}maps/canvas-style.js`));
+assert.ok(offline.includes(`${base}custom-map/map-runtime.js`));
+assert.ok(!/maps\/(?:maplibre|leaflet|protomaps)/.test(offline));
 
 // Public pack checksums remain valid because package bytes were never rewritten.
 const pack = JSON.parse(await readFile(join(out, 'offline-map/manifest.json')));
@@ -188,6 +212,8 @@ async function walk(path) {
   return result;
 }
 const outputFiles = await walk(out);
+assert.deepEqual(outputFiles.filter(path=>path.startsWith(join(out,'custom-map')+'/')).map(path=>path.slice(join(out,'custom-map').length+1)).sort(),customMapFiles.map(file=>file.path).sort(),'The public map output must contain exactly the verified common runtime');
+assert.ok(outputFiles.every(path=>!legacyMapRuntime.test(path.slice(out.length+1))),'A retired vendor map runtime remains in the deployable files');
 assert.ok(outputFiles.every(path => !/\.apk$/i.test(path)), 'Pages must link the verified release without publishing any APK binary');
 assert.ok(outputFiles.every(path => !/\.(?:tsx?|py|sql|sqlite|env)$/.test(path)), 'Only deployable public files may be published');
 assert.ok(outputFiles.every(path => !/\/(?:backend|api)\//.test(path)), 'No backend directory in output');
@@ -195,7 +221,7 @@ assert.ok(outputFiles.every(path => !/\/(?:backend|api)\//.test(path)), 'No back
 // Inspect the deployed code's URL literals, not a second implementation of the app.
 // Internal router keys are intentionally unprefixed; source provenance and the
 // cryptographically pinned offline pack describe their own original resource root.
-const rootAsset = /^\/(?:data|maps|terrain|offline-map|fonts|downloads|assets)(?:\/|$)|^\/offline(?:-fonts|-viewer)?\.(?:html|js|css)$/;
+const rootAsset = /^\/(?:data|maps|custom-map|terrain|offline-map|fonts|downloads|assets)(?:\/|$)|^\/offline(?:-fonts|-viewer)?\.(?:html|js|css)$/;
 const deployedUrls = new Set();
 let checkedScripts = 0;
 // Rolldown can compact a literal URL array into `a,b`.split(`,`). Inspect
@@ -214,7 +240,7 @@ function literalValues(node) {
 }
 for (const path of outputFiles) {
   const name = path.slice(out.length + 1);
-  if (name.startsWith('offline-map/') || /(?:^|\/)(?:maplibre|leaflet|protomaps-leaflet)[^/]*\.[cm]?js$/.test(name)) continue;
+  if (name.startsWith('offline-map/')) continue;
   if (!/\.[cm]?js$/.test(name)) continue;
   const code = await readFile(path, 'utf8');
   const source = ts.createSourceFile(name, code, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
@@ -232,15 +258,15 @@ for (const path of outputFiles) {
 let publicAssetChecks = 0;
 for (const value of deployedUrls) {
   const relativePath = value.slice(base.length).split(/[?#]/)[0];
-  if (!/^(?:data|maps|terrain|offline-map|fonts|downloads|assets)\//.test(relativePath) || /[{}]/.test(relativePath)) continue;
+  if (!/^(?:data|maps|custom-map|terrain|offline-map|fonts|downloads|assets)\//.test(relativePath) || /[{}]/.test(relativePath)) continue;
   // A template head can end within a filename, such as icon-${size}.png.
-  if (!relativePath.endsWith('/') && !/\.[a-z0-9]+$/i.test(relativePath) && !relativePath.endsWith('tropnik-sprite')) continue;
-  const present = await exists(join(out, relativePath)) || relativePath.endsWith('tropnik-sprite') && await exists(join(out, relativePath + '.json')) && await exists(join(out, relativePath + '.png'));
+  if (!relativePath.endsWith('/') && !/\.[a-z0-9]+$/i.test(relativePath)) continue;
+  const present = await exists(join(out, relativePath));
   assert.ok(present, `Missing referenced public asset: ${value}`); publicAssetChecks++;
 }
 for (const path of outputFiles.filter(path => path.endsWith('.html'))) {
   assert.match(await readFile(path, 'utf8'), /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i, `HTML must be noindex: ${path}`);
 }
-const verification = {verified:true, pages:pages.length, referenceRoutes:report.referenceRoutes, productionRoutingChecks:routingChecks + 5, mapPolicyChecks, staticApiNetworkCalls:attemptedNetwork, checkedScripts, publicAssetChecks, outputFiles:outputFiles.length, offlineFilesVerified:verified, overviewReliefTilesVerified:relief.files.length, terrainGrid:[terrain.width, terrain.height], apkVerified:report.hasApk, coverageExcludedRoutes:coverage.excludedCatalogRouteIds, base};
+const verification = {verified:true, pages:pages.length, referenceRoutes:report.referenceRoutes, productionRoutingChecks:routingChecks + 5, mapPolicyChecks, staticApiNetworkCalls:attemptedNetwork, checkedScripts, publicAssetChecks, outputFiles:outputFiles.length, offlineFilesVerified:verified, customMap:{runtime:customMap.runtime,sourceInputsSha256:customMap.sourceInputsSha256,manifestSha256:customMap.manifestSha256,deployedFilesVerified:deployedCustomMapFiles.length,workerCount:customMap.workerCount}, overviewReliefTilesVerified:relief.files.length, terrainGrid:[terrain.width, terrain.height], apkVerified:report.hasApk, coverageExcludedRoutes:coverage.excludedCatalogRouteIds, base};
 await writeFile(join(out, 'verification.json'), JSON.stringify(verification, null, 2) + '\n');
 console.log(JSON.stringify(verification, null, 2));

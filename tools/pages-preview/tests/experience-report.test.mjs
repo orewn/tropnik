@@ -7,7 +7,7 @@ function rejectsEach(make,validate,changes){
  for(const [name,change] of changes){const receipt=make();change(receipt);assert.throws(()=>validate(receipt),undefined,name);}
 }
 const checkLayers=receipt=>assertLayerMenuAudit(receipt,'compact-android');
-const checkExplore=mobile=>receipt=>assertExploreExperience(receipt,mobile?'android-portrait':'desktop-webgl',mobile?'leaflet':'maplibre',mobile,catalogueFixture);
+const checkExplore=mobile=>receipt=>assertExploreExperience(receipt,mobile?'android-portrait':'desktop-webgl',mobile?'tropnik-canvas':'tropnik-canvas',mobile,catalogueFixture);
 const checkStyle=receipt=>assertStyleCameraRoundtrip(receipt,'desktop-webgl');
 
 test('portrait Layers validates closed and expanded geometry with real native scroll progress',()=>{
@@ -225,7 +225,7 @@ test('each style must preserve camera and selection and prove restored interacti
   ['selection lost',value=>value.transitions[0].selection.region='baikal'],
   ['another rendered route',value=>value.transitions[0].frame.route='another'],
   ['map did not settle',value=>value.transitions[0].lineFrame.moving=true],
-  ['no post-switch route assignment',value=>value.transitions[0].restored.mutations=[]],
+  ['route cleared during unrelated base switch',value=>value.transitions[0].restored.mutations=[{old:'route',current:''}]],
   ['wrong style checked',value=>value.transitions[0].restored.selected=false],
   ['missing restored line',value=>delete value.transitions[0].line],
   ['line belongs to another route',value=>value.transitions[0].line.route='another'],
@@ -236,7 +236,7 @@ test('each style must preserve camera and selection and prove restored interacti
   ['multipart gained artificial edges',value=>value.transitions[0].restored.edges.after=2],
  ]);
  rejectsEach(()=>styleCameraRoundtripFixture('route',{edgeCount:2}),checkStyle,[
-  ['existing source ends retained',value=>value.transitions[0].restored.edges.replaced=0],
+  ['existing source ends replaced',value=>value.transitions[0].restored.edges.replaced=2],
   ['source end removed',value=>value.transitions[0].restored.edges.after=1],
  ]);
 });

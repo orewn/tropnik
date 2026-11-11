@@ -97,9 +97,6 @@ body{background:var(--paper);color:var(--ink)}
 .explore-layout .map-context,.explore-layout .map-style-switch,.explore-layout .map-controls,
 .explore-layout .layer-control,.explore-layout .map-message,.explore-layout .map-legend,
 .explore-layout .map-attribution,.explore-layout .fact-card,.explore-layout .fact-closed{z-index:20}
-.explore-layout .maplibregl-marker{z-index:12}
-.explore-layout .leaflet-marker-pane{z-index:600}
-.explore-layout .tropnik-relief-tiles .leaflet-tile{transition:opacity .12s linear}
 
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
   outline:2px solid var(--focus);
@@ -113,8 +110,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 }
 @media(prefers-reduced-motion:reduce){
-  :is(.button,.filter-button,.save-button,.icon-button,.back-link,.trail-card),
-  .explore-layout .trail-marker::before,.explore-layout .tropnik-relief-tiles .leaflet-tile{transition:none}
+  :is(.button,.filter-button,.save-button,.icon-button,.back-link,.trail-card),.explore-layout .trail-marker::before{transition:none}
 }
 
 .explore-layout .atlas-canvas[data-map-camera='zooming'] .trail-marker-label{

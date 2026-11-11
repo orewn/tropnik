@@ -1,4 +1,4 @@
-/** Shared region control for the WebGL and Canvas maps. The map engine owns
+/** Geographic direction control for the shared custom map. The map engine owns
  * the 44px button's coordinate; only its label may move during collision layout. */
 export function createDirectionMarker(
   direction: {id: string; name: string},

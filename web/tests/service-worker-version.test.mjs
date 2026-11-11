@@ -11,10 +11,10 @@ test('public map changes invalidate the Sites shell without deleting offline pac
     await mkdir(join(root, 'public/maps'), {recursive: true});
     await writeFile(join(root, 'package.json'), JSON.stringify({version: '0.4.18'}));
     await writeFile(join(root, 'public/sw.js'), "const VERSION='tropnik-shell-v20';\nconst saved='tropnik-map-';\n");
-    await writeFile(join(root, 'public/maps/canvas-style.js'), 'export const style=1;');
+    await writeFile(join(root, 'public/maps/map-city-labels.js'), 'export const style=1;');
     const first = await stampServiceWorker(root);
     assert.equal(await stampServiceWorker(root), first, 'repeated builds must be deterministic');
-    await writeFile(join(root, 'public/maps/canvas-style.js'), 'export const style=2;');
+    await writeFile(join(root, 'public/maps/map-city-labels.js'), 'export const style=2;');
     const next = await stampServiceWorker(root);
     assert.notEqual(next, first, 'changed stable-URL map assets must receive a new shell cache');
     await mkdir(join(root, 'public/data'), {recursive: true});

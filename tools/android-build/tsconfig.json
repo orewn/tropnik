@@ -1,0 +1,13 @@
+{
+  "extends": "../../web/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false,
+    "rootDir": "../..",
+    "types": ["node", "geojson"],
+    "typeRoots": ["../../web/node_modules/@types", "../../web/node_modules/.pnpm/node_modules/@types"],
+    "plugins": []
+  },
+  "include": ["custom-map-entry.ts", "custom-map-android.ts", "../../web/types/worker-url.d.ts"],
+  "exclude": []
+}

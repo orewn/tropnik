@@ -7,6 +7,7 @@ import {traceDesktopSelection,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES} fro
 import {runCoastAudit} from './browser-coast-audit.mjs';
 import {runSatelliteContinuityAudit} from './browser-satellite-audit.mjs';
 import {performanceBudgetIssues} from './browser-smoothness.mjs';
+import {inspectCustomMapDOM,assertCustomMapInspection,assertCustomSceneInspection} from './browser-custom-map.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -65,44 +66,21 @@ export function observeTerrainResources(cdp,phase=()=>null){
 /** Standard WebGL reads on the renderer's existing canvas. Never bind an FBO
  * or obtain an application/React/SDK instance through private fields. */
 export function inspectTerrainWebGL(doc=document){
- const canvas=doc.querySelector('.maplibregl-canvas');if(!canvas)return{available:false,reason:'map-canvas-missing'};
+ const canvas=doc.querySelector('.terrain-scene.is-visible .terrain-canvas');if(!canvas)return{available:false,reason:'map-canvas-missing'};
  let type='webgl2',gl=canvas.getContext(type);if(!gl){type='webgl';gl=canvas.getContext(type);}
  if(!gl)return{available:false,reason:'context-unavailable'};
  const debug=gl.getExtension('WEBGL_debug_renderer_info');
  return{available:true,type,contextLost:gl.isContextLost(),attributes:gl.getContextAttributes(),renderer:gl.getParameter(gl.RENDERER),vendor:gl.getParameter(gl.VENDOR),version:gl.getParameter(gl.VERSION),unmaskedRenderer:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):null,unmaskedVendor:debug?gl.getParameter(debug.UNMASKED_VENDOR_WEBGL):null,samples:gl.getParameter(gl.SAMPLES),sampleBuffers:gl.getParameter(gl.SAMPLE_BUFFERS),sampleScope:'currently-bound-framebuffer',defaultFramebufferBound:gl.getParameter(gl.FRAMEBUFFER_BINDING)===null,drawingBuffer:{width:gl.drawingBufferWidth,height:gl.drawingBufferHeight}};
 }
-export function shouldTraceTerrainDiagnostic(profile,mode,direction,zoom,alreadyTraced){
- return !alreadyTraced&&profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile&&mode==='terrain-diagnostic'&&direction>0&&zoom>=15&&zoom<16;
-}
-/** Reuse the native controls and strict settling boundary, without any base-map
- * sweeps or release success flag. The lower clamp preserves the C10 fraction. */
-export async function runTerrainCloseDiagnostic({report,phase,gpu,geometry,capture,reachZoom,reachBottom,toggleTerrain,zoom,save}){
- Object.assign(report,{diagnosticOnly:true,verified:false,releaseEligible:false,status:'running',diagnosticSteps:[]});
- await phase('terrain-diagnostic-route-ready');report.gpu=await gpu();
- await capture('terrain-diagnostic',await geometry('terrain-diagnostic'),'route-ready');
- await reachZoom(11);await phase('terrain-diagnostic-enable');await toggleTerrain();
- await capture('terrain-diagnostic',await geometry('terrain-diagnostic'),'terrain-ready');
- await phase('terrain-diagnostic-lower-bound');report.minimumZoom=await reachBottom();
- await phase('terrain-diagnostic-upward');
- for(let count=0;count<29;count++){
-  const state=await geometry('terrain-diagnostic');report.diagnosticSteps.push(state);await save();
-  if(state.zoom>=15&&state.zoom<16){report.targetBeforeZoom=state.zoom;report.highZoomGPU=await gpu();await capture('terrain-diagnostic',state,'before-target');}
-  if(state.zoom>=17.999){await capture('terrain-diagnostic',state,'upper-bound');report.status='completed';report.completedAt=new Date().toISOString();await save();return report;}
-  const movement=await zoom(1,{mode:'terrain-diagnostic'});
-  assert.equal(movement.changed,true,'Terrain diagnostic native zoom stopped below18');
- }
- throw new Error('Terrain diagnostic exceeded its bounded native zoom range');
-}
-
-/** Leaflet animates its child map pane, not the outer atlas canvas. */
+/** Camera animation is exposed by the own renderer through the DOM only. */
 export function mapCameraIsMoving(element){
- return element.hasAttribute('data-map-camera')||!!element.querySelector('.leaflet-map-pane.leaflet-zoom-anim');
+ return element.dataset?.mapMoving==='true'||element.hasAttribute('data-map-camera');
 }
 
 /** A dataset can stay unchanged between zoomend and the next queued RAF.
  * Advance the real compositor before every sample, then require the same
  * idle camera on four observations. No renderer callbacks are invoked. */
-export async function settleMapCamera({engine,read,frame,wait,clock=()=>performance.now()}){
+export async function settleMapCamera({engine,read,frame,wait,clock=()=>performance.now(),allowLoading=false}){
  const started=clock(),startedAtEpochMs=Date.now(),samples=[];
  let signature='',stable=0,totalSamples=0,current,previous;
  try{return await wait(`The ${engine} map did not settle`,async()=>{
@@ -123,7 +101,8 @@ export async function settleMapCamera({engine,read,frame,wait,clock=()=>performa
    current.error=error?.message||String(error);throw error;
   }finally{current.durationMs=clock()-began;current.endOffsetMs=clock()-started;}
  },state=>{
-  if(!state?.visible||state.moving||state.engine!==engine||!Object.values(state.camera).every(Number.isFinite)){
+  if(!state?.visible||state.moving||state.engine!==engine||!Object.values(state.camera).every(Number.isFinite)||
+    (engine==='tropnik-canvas'&&(!state.rendering?.painted||!state.rendering.coverageReady||!['ready',...(allowLoading?['loading']:[])].includes(state.rendering.tilesState)||state.rendering.drawnRoute!==state.route))){
    signature='';stable=0;current.idleObservations=0;current.signatureUnchanged=false;return false;
   }
   const next=JSON.stringify([state.camera,state.rect,state.route]);current.signatureUnchanged=next===signature;stable=next===signature?stable+1:0;signature=next;current.idleObservations=stable+1;return stable>=3;
@@ -135,7 +114,7 @@ export async function settleMapCamera({engine,read,frame,wait,clock=()=>performa
 
 /** Opt-in recording around one existing +1 input, never a diagnostic retry. */
 export function shouldTraceTerrainZoom(profile,mode,direction,beforeZoom,alreadyTraced,traceEnabled=false){
- return traceEnabled&&!alreadyTraced&&profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile&&mode==='terrain'&&direction>0&&beforeZoom>=4&&beforeZoom<5;
+ return traceEnabled&&!alreadyTraced&&profile.name==='desktop-webgl'&&profile.engine==='tropnik-canvas'&&!profile.mobile&&mode==='scene3d'&&direction>0&&beforeZoom>=4&&beforeZoom<5;
 }
 
 /** Bounds of independent overlays. Parents and children must not both enter
@@ -196,9 +175,9 @@ export async function dispatchZoomBurst(cdp,point,profile,count=4){
 export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,traceEnabled=false}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase}=helpers;
  assert.ok(diagnostic===null||diagnostic==='terrain-close','Unknown zoom diagnostic mode');
- if(diagnostic)assert.ok(profile.name==='desktop-webgl'&&profile.engine==='maplibre'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
+ if(diagnostic)assert.ok(profile.name==='desktop-webgl'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
  await mkdir(OUTPUT,{recursive:true});
- const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:7,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
+ const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:8,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
  if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[]});
  let terrainTraceStarted=false;
  const terrainResources=diagnostic?observeTerrainResources(cdp,()=>report.diagnosticStage):null;
@@ -230,13 +209,15 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
     const r=box(element),x=(r.left+r.right)/2,y=(r.top+r.bottom)/2,hit=document.elementFromPoint(x,y);return{label:element.getAttribute('aria-label')||element.textContent?.trim(),rect:r,minimumSize:44,unobscured:!!hit&&element.contains(hit)};
    });
    const labels=[...document.querySelectorAll('.region-marker-label,.route-edge-label')].filter(visible).map(element=>({label:element.textContent,rect:box(element)}));
-   return{width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollY:window.scrollY,available,ui,targets,labels,detail:atlas.dataset.mapDetail||'',selectedRoute:atlas.dataset.mapRoute||'',imagery:atlas.dataset.mapImagery||'',routeEdgeCount:document.querySelectorAll('.route-edge-marker[role="img"]').length,status:document.querySelector('.map-message')?.textContent?.trim()||'',loadedSatelliteTiles:[...document.querySelectorAll('.leaflet-russia-satellite-pane img')].filter(image=>image.complete&&image.naturalWidth>0).length};
+   return{width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollY:window.scrollY,available,ui,targets,labels,detail:atlas.dataset.mapDetail||'',selectedRoute:atlas.dataset.mapRoute||'',imagery:atlas.dataset.mapImagery||'',routeEdgeCount:document.querySelectorAll('.route-edge-marker[role="img"]').length,status:document.querySelector('.map-message')?.textContent?.trim()||'',loadedSatelliteTiles:(JSON.parse(document.querySelector('.atlas-canvas')?.dataset.mapInspection||'null')?.tiles?.imagery?.length||0)};
   })()`);
-  report.lastInspection={mode,zoom:map.camera.zoom,...layout};
+  const bitmapInspection=profile.engine==='tropnik-canvas'?await evaluate(cdp,`(${inspectCustomMapDOM.toString()})()`):undefined;
+  if(bitmapInspection)assertCustomMapInspection(bitmapInspection,`${profile.name}/${mode}`,{routeId:'kavkaz-8a'});
+  report.lastInspection={mode,zoom:map.camera.zoom,...layout,...(bitmapInspection?{bitmapInspection}:{})};
   assert.equal(map.route,'kavkaz-8a',`${profile.name}/${mode}: changing zoom/base map lost the selected route`);
   assertMapUIBounds(layout,`${profile.name}/${mode}/${map.camera.zoom}`);
   assert.ok(layout.routeEdgeCount<=2,`${profile.name}/${mode}: route edge annotations grew with vertex count`);
-  return{mode,zoom:map.camera.zoom,camera:map.camera,routeId:map.route,...layout,...(diagnostic?{terrainCamera:map.terrainCamera??null}:{})};
+  return{mode,zoom:map.camera.zoom,camera:map.camera,routeId:map.route,...layout,...(bitmapInspection?{bitmapInspection}:{}),...(diagnostic?{terrainCamera:map.terrainCamera??null}:{})};
  }
  async function capture(mode,state,label=''){
   const zoom=Number.isFinite(state?.zoom)?`z${state.zoom.toFixed(2).replace('.','_')}`:label||'scene';
@@ -251,14 +232,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   assert.ok(target?.unobscured,`${profile.name}: zoom control is unavailable`);
   if(diagnostic)report.lastNativeZoom={direction,beforeZoom:before.camera.zoom,point:{x:target.x,y:target.y},startedAtEpochMs:Date.now()};
   const pressAndSettle=async()=>{await pointerAt(cdp,target,profile);await sleep(70);return settledMap(cdp,profile.engine);};
-  let after;
-  if((diagnostic?shouldTraceTerrainDiagnostic:shouldTraceTerrainZoom)(profile,mode,direction,before.camera.zoom,terrainTraceStarted,traceEnabled)){
-   terrainTraceStarted=true;
-   try{
-    const captured=await traceDesktopSelection(cdp,pressAndSettle,{prefix:diagnostic?'desktop-webgl-terrain-high-zoom':'desktop-webgl-terrain-zoom',scope:diagnostic?'diagnostic-desktop-terrain-15-to-17':'first-desktop-terrain-zoom-4-to-6',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{} )});
-    after=captured.value;report.terrainZoomTrace={...captured.trace,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom};
-   }catch(error){report.terrainZoomTrace={...error.traceReceipt,beforeZoom:before.camera.zoom};throw error;}
-  }else after=await pressAndSettle();
+  const after=await pressAndSettle();
   assert.ok(direction>0?after.camera.zoom>=before.camera.zoom-.001:after.camera.zoom<=before.camera.zoom+.001,`${profile.name}: zoom moved in the wrong direction`);
   const movement={before:before.camera.zoom,after:after.camera.zoom,changed:Math.abs(after.camera.zoom-before.camera.zoom)>.001};
   if(diagnostic)report.nativeZooms.push({...report.lastNativeZoom,...movement});
@@ -289,7 +263,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   const before=await settledMap(cdp,profile.engine),label=direction>0?'Увеличить масштаб':'Уменьшить масштаб';
   const point=await elementPoint(cdp,direction>0?PLUS:MINUS);
   assert.ok(point?.unobscured,`${profile.name}: the burst zoom control is unavailable`);
-  const step=profile.engine==='leaflet'?.75:1,count=4;
+  const step=1,count=4;
   const expected=Math.min(18,Math.max(report.minimumZoom,before.camera.zoom+direction*step*count));
   const start=await evaluate(cdp,'({time:performance.now(),timeOrigin:performance.timeOrigin,scrollY:window.scrollY})');
   report.lastZoomBurst={direction,step,beforeZoom:before.camera.zoom,expectedZoom:expected,domSampleStartedAtMs:start.time};
@@ -347,7 +321,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   return{selectedControl:selected};
  }
  async function satelliteEvidence(){
-  const ui=await evaluate(cdp,`(()=>({active:document.querySelector('.atlas-wrap')?.dataset.mapImagery==='satellite',status:document.querySelector('.map-message')?.textContent?.trim()||'',loadedTiles:[...document.querySelectorAll('.leaflet-russia-satellite-pane img')].filter(image=>image.complete&&image.naturalWidth>0).length}))()`);
+  const ui=await evaluate(cdp,`(()=>({active:document.querySelector('.atlas-wrap')?.dataset.mapImagery==='satellite',status:document.querySelector('.map-message')?.textContent?.trim()||'',loadedTiles:(JSON.parse(document.querySelector('.atlas-canvas')?.dataset.mapInspection||'null')?.tiles?.imagery?.length||0)}))()`);
   const responses=[...network.values()].filter(item=>item.source==='satellite');
   return{...ui,finishedImageResponses:responses.filter(item=>item.finished&&item.status===200&&item.mimeType?.startsWith('image/')).length,failedResponses:responses.filter(item=>item.error||item.status>=400).length};
  }
@@ -366,7 +340,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
    geoJSON:responses.filter(item=>item.path.endsWith('.geojson')),
    finishedReliefImageResponses:responses.filter(item=>item.finished&&item.status===200&&item.mimeType?.startsWith('image/')).length,
    failedResponses:responses.filter(item=>item.error||item.status>=400).length,
-   loadedReliefTiles:await evaluate(cdp,"[...document.querySelectorAll('.leaflet-russia-overview-relief-pane img')].filter(image=>image.complete&&image.naturalWidth>0).length"),
+   loadedReliefTiles:await evaluate(cdp,"(JSON.parse(document.querySelector('.atlas-canvas')?.dataset.mapInspection||'null')?.tiles?.overview?.length||0)"),
   };
   // The checkmark confirms the selected UI mode. Source responses only prove
   // data availability; the screenshots still require a visual review.
@@ -416,6 +390,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
      return{visible,state:tile.dataset.reliefState||'pending',paintedMode:tile.dataset.reliefMode||'',desiredMode:tile.dataset.reliefDesiredMode||''};
     });return{engine:map.dataset.mapEngine,tiles};
    })()`),value=>value.tiles.every(tile=>!tile.visible||!tile.paintedMode||tile.paintedMode===tile.desiredMode),15000);
+   if(profile.engine==='tropnik-canvas')reliefPalette.bitmapInspection=await evaluate(cdp,`(${inspectCustomMapDOM.toString()})()`);
    assertReliefPalette(reliefPalette,`${profile.name}/source-ends/${map.camera.zoom}`,profile.engine);
    return{targetZoom,zoom:map.camera.zoom,camera:map.camera,mapRect:map.rect,routeId:map.route,inputCount:audit.inputs.length,reliefPalette,...layout};
   }
@@ -477,30 +452,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   await diagnosticPhase(cdp,diagnostic?'terrain-diagnostic-loading':'zoom-design-detail');
   const route=await waitValue(`${profile.name}: the zoom audit route did not render`,()=>helpers.mapState(cdp),state=>state?.route==='kavkaz-8a');
   report.routeId=route.route;
-  if(diagnostic){
-   // A fresh diagnostic profile has not performed the earlier map interactions
-   // that collapse initial credits in the release matrix. Use the same native UI.
-   const creditsButton='.map-attribution-toggle[aria-label="Свернуть сведения об источниках"]';
-   if(await elementPoint(cdp,creditsButton))await pointerSelector(cdp,creditsButton,profile);
-   await waitValue('Diagnostic source credits did not collapse',()=>evaluate(cdp,"!document.querySelector('.atlas-wrap > .map-attribution .map-attribution-content') && document.querySelector('.atlas-wrap > .map-attribution .map-attribution-toggle')?.getAttribute('aria-expanded') !== 'true'"),Boolean);
-   const terrainButton='.map-style-switch button[aria-label="Рельеф всей карты"]';
-   const result=await runTerrainCloseDiagnostic({report,geometry,capture,reachZoom,reachBottom,zoom,save,
-    phase:async name=>{report.diagnosticStage=name;await diagnosticPhase(cdp,name);await save();},
-    gpu:async()=>{
-     const result={traceCategories:report.gpu?.traceCategories,systemInfo:report.gpu?.systemInfo};
-     if(!result.traceCategories)result.traceCategories=await queryTerrainTraceCategories(cdp);
-     if(!result.systemInfo)try{assert.ok(helpers.systemInfo,'No browser-level SystemInfo target');const info=await helpers.systemInfo();result.systemInfo={available:true,gpu:info.gpu,modelName:info.modelName,modelVersion:info.modelVersion};}catch(error){result.systemInfo={available:false,error:error.message};}
-     try{result.webgl=await evaluate(cdp,`(${inspectTerrainWebGL.toString()})()`);}catch(error){result.webgl={available:false,error:error.message};}
-     return result;
-    },
-    toggleTerrain:async()=>{
-     await pointerSelector(cdp,terrainButton,profile);await settledMap(cdp,profile.engine);
-     assert.equal(await evaluate(cdp,`document.querySelector(${JSON.stringify(terrainButton)})?.classList.contains('active')===true`),true,'Diagnostic native terrain control did not activate');
-    },
-   });
-   if(helpers.performanceDiagnostics)report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);
-   await save();return result;
-  }
+  if(!diagnostic){
   await capture('route-fit',await geometry('detail'));
   report.minimumZoom=await reachBottom();
   await capture('overview',await geometry('detail'));
@@ -527,49 +479,55 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   await layerButton('Детальные тропы онлайн');
   await waitValue(`${profile.name}: leaving satellite did not restore map controls`,()=>evaluate(cdp,"document.querySelector('.atlas-wrap')?.dataset.mapImagery!=='satellite'"),Boolean);
   await settledMap(cdp,profile.engine);
+  }
   const terrainButton='.map-style-switch button[aria-label="Рельеф всей карты"]';
-  const terrainAvailable=await evaluate(cdp,`!!document.querySelector(${JSON.stringify(terrainButton)})&&!document.querySelector(${JSON.stringify(terrainButton)})?.disabled`);
-  if(terrainAvailable){
-   await diagnosticPhase(cdp,'zoom-design-terrain');
-   await reachZoom(11);
-   await pointerSelector(cdp,terrainButton,profile);await settledMap(cdp,profile.engine);
-   const active=await evaluate(cdp,`document.querySelector(${JSON.stringify(terrainButton)})?.classList.contains('active')===true`);
-   assert.equal(active,true,`${profile.name}: the terrain control did not activate`);
-   await reachBottom();const steps=await sweep('terrain',1);
-   report.modes.terrain={state:'active',stepCount:steps.length,steps,visualReviewRequired:true};
-   await pointerSelector(cdp,'.map-style-switch button[aria-label="Карта сверху"]',profile);await settledMap(cdp,profile.engine);
-  }else report.modes.terrain={state:'not-offered',reason:profile.engine==='leaflet'?'The mobile map offers its prepared 3D scene instead of global WebGL terrain.':'The current base map did not offer global terrain.'};
-  const sceneButton='.map-style-switch button[aria-label="3D ландшафт Бзерпинского района"]';
+  report.modes.terrain={state:'scene',kind:'georeferenced-current-viewport'};
+  const sceneButton=terrainButton;
   const sceneAvailable=await elementPoint(cdp,sceneButton);
   if(sceneAvailable?.unobscured){
-   await diagnosticPhase(cdp,'zoom-design-scene');await pointerSelector(cdp,sceneButton,profile);
-   const sceneState=()=>evaluate(cdp,`(()=>{const scene=document.querySelector('.terrain-scene.is-visible'),canvas=scene?.querySelector('canvas'),r=canvas?.getBoundingClientRect(),data=canvas?.dataset,notice=document.querySelector('.atlas-wrap>.map-message'),noticeRect=notice?.getBoundingClientRect(),noticeStyle=notice&&getComputedStyle(notice);return{visible:!!scene,ready:scene?.classList.contains('is-ready')===true,retainedMapNoticeVisible:!!noticeRect&&noticeRect.width>0&&noticeRect.height>0&&noticeStyle.display!=='none'&&noticeStyle.visibility!=='hidden'&&Number(noticeStyle.opacity)!==0,error:scene?.querySelector('.terrain-progress')?.textContent?.trim()||'',canvas:r?{width:r.width,height:r.height,renderer:data.renderer||'',triangles:Number(data.triangles||0),sourceVertices:Number(data.sourceVertices||0),meshStride:Number(data.meshStride||0),renderMs:Number(data.renderMs||0)}:null}})()`);
+   await diagnosticPhase(cdp,'zoom-design-scene');await reachZoom(14);const beforeScene=await settledMap(cdp,profile.engine);await pointerSelector(cdp,sceneButton,profile);
+   const sceneState=()=>evaluate(cdp,`(()=>{const scene=document.querySelector('.terrain-scene.is-visible'),canvas=scene?.querySelector('canvas'),r=canvas?.getBoundingClientRect(),data=canvas?.dataset,notice=document.querySelector('.atlas-wrap>.map-message'),noticeRect=notice?.getBoundingClientRect(),noticeStyle=notice&&getComputedStyle(notice);return{inspection:JSON.parse(scene?.dataset.terrainInspection||'null'),visible:!!scene,ready:scene?.classList.contains('is-ready')===true,retainedMapNoticeVisible:!!noticeRect&&noticeRect.width>0&&noticeRect.height>0&&noticeStyle.display!=='none'&&noticeStyle.visibility!=='hidden'&&Number(noticeStyle.opacity)!==0,error:scene?.querySelector('.terrain-progress')?.textContent?.trim()||'',canvas:r?{width:r.width,height:r.height,renderer:data.renderer||'',triangles:Number(data.triangles||0),sourceVertices:Number(data.sourceVertices||0),meshStride:Number(data.meshStride||0),renderMs:Number(data.renderMs||0)}:null}})()`);
    let scene;
-   for(let attempt=0;attempt<60;attempt++){scene=await sceneState();if(scene.ready||scene.error)break;await sleep(250);}
+   for(let attempt=0;attempt<60;attempt++){scene=await sceneState();if(scene.error||scene.ready&&(scene.inspection?.cartography?.state!=='loading'&&scene.inspection?.frame?.cartography?.loadedTiles===scene.inspection?.cartography?.source?.loadedTiles))break;await sleep(250);}
+   assert.equal(scene.ready,true,'Custom terrain never rendered its actual source grid');assertCustomSceneInspection(scene.inspection,profile.name+'/terrain');assert.equal(scene.inspection.cartography?.state,'ready','The known mapped area lost its real land-cover texture');
+   if(diagnostic){
+    report.gpu={traceCategories:await queryTerrainTraceCategories(cdp)};
+    try{assert.ok(helpers.systemInfo,'No browser-level SystemInfo target');const info=await helpers.systemInfo();report.gpu.systemInfo={available:true,gpu:info.gpu,modelName:info.modelName,modelVersion:info.modelVersion};}catch(error){report.gpu.systemInfo={available:false,error:error.message};}
+    try{report.gpu.webgl=await evaluate(cdp,`(${inspectTerrainWebGL.toString()})()`);}catch(error){report.gpu.webgl={available:false,error:error.message};}
+   }
    const initial=await capture('scene3d',null,'overview');
    if(scene.ready){
     assert.equal(scene.retainedMapNoticeVisible,false,`${profile.name}: a retained 2D map notice covers the ready 3D scene`);
     assert.ok(scene.canvas?.triangles>0&&['webgl2','canvas2d'].includes(scene.canvas.renderer),`${profile.name}: a ready3D scene has no recorded rendered mesh`);
-    const sceneZoom=async label=>{
+    const nativeInputs=[];const sceneZoom=async label=>{
+     await evaluate(cdp,'window.__tropnikInputEvents=[]');
      const point=await elementPoint(cdp,`.terrain-controls button[aria-label="${label}"]`);
      assert.ok(point?.unobscured,`${profile.name}: ${label} is not reachable`);
-     await pointerAt(cdp,point,profile);await sleep(70);
+     const press=async()=>{await pointerAt(cdp,point,profile);await sleep(70);const events=await evaluate(cdp,'window.__tropnikInputEvents');assertNativeBurstEventOrder(events,profile.mobile?'touch':'mouse',1);nativeInputs.push({label,input:profile.mobile?'touch':'mouse',point,events});};
+     const beforeZoom=traceEnabled?(await sceneState()).inspection?.frame?.view?.zoom:NaN;
+     if(shouldTraceTerrainZoom(profile,'scene3d',label==='Приблизить ландшафт'?1:-1,beforeZoom,terrainTraceStarted,traceEnabled)){
+      terrainTraceStarted=true;
+      try{const recorded=await traceDesktopSelection(cdp,press,{prefix:'desktop-webgl-landscape-close',scope:'own-landscape-close-view',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{})});report.terrainZoomTrace={...recorded.trace,beforeZoom,afterZoom:(await sceneState()).inspection?.frame?.view?.zoom};}
+      catch(error){report.terrainZoomTrace={...error.traceReceipt,beforeZoom};throw error;}
+     }else await press();
     };
     // Fourteen actual 1.2x steps reach each renderer's bounded zoom extreme
     // from its default view. Inspect both extremes, not just one small nudge.
     for(let i=0;i<14;i++)await sceneZoom('Приблизить ландшафт');
-    await sleep(250);const close=await capture('scene3d',null,'close');
+    await sleep(250);const close=await capture('scene3d',null,'close'),closeState=await sceneState();
     for(let i=0;i<14;i++)await sceneZoom('Отдалить ландшафт');
-    await sleep(250);const wide=await capture('scene3d',null,'wide');
-    await pointerSelector(cdp,'.terrain-controls button[aria-label="Вернуть исходный ракурс"]',profile);await sleep(250);
+    await sleep(250);const wide=await capture('scene3d',null,'wide'),wideState=await sceneState();
+    await sceneZoom('Повернуть ландшафт');await sleep(250);const rotatedState=await sceneState();await capture('scene3d',null,'rotated');
+    await sceneZoom('Вернуть исходный ракурс');await sleep(250);const resetState=await sceneState();
     await capture('scene3d',null,'reset');
-    report.modes.scene3d={state:'ready',...scene,zoomInputs:28,resetInput:true,imageChanged:initial.sha256!==close.sha256&&close.sha256!==wide.sha256,visualReviewRequired:true};
+    report.modes.scene3d={state:'ready',...scene,beforeMap:beforeScene,nativeInputs,states:{initial:scene.inspection,close:closeState.inspection,wide:wideState.inspection,rotated:rotatedState.inspection,reset:resetState.inspection},zoomInputs:28,rotateInput:true,resetInput:true,imageChanged:initial.sha256!==close.sha256&&close.sha256!==wide.sha256,visualReviewRequired:true};
     assert.equal(report.modes.scene3d.imageChanged,true,`${profile.name}: 3D zoom produced no rendered change`);
    }else report.modes.scene3d={state:scene.error?'error':'not-ready',...scene,zoomInputs:0,visualReviewRequired:true};
    await pointerSelector(cdp,'.terrain-controls button[aria-label="Вернуться к карте"]',profile);
    await waitValue(`${profile.name}: the 3D scene did not return to the map`,()=>evaluate(cdp,"!document.querySelector('.terrain-scene.is-visible')"),Boolean);
    await settledMap(cdp,profile.engine);
-  }else report.modes.scene3d={state:'not-offered',reason:'This selected source geometry does not expose the prepared scene control.'};
+  }else assert.fail('The own 3D control was unavailable');
+  if(diagnostic){report.status='completed';report.diagnosticScope='current-visible-map-terrain';report.completedAt=new Date().toISOString();if(helpers.performanceDiagnostics)report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);await save();return report;}
   // loadProfile starts a new document/performance interval. Preserve the
   // existing all-mode measurements when adding the separate source fixture.
   const modePerformance=await evaluate(cdp,'({layoutShift:window.__tropnikPerf?.cls||0,longestTaskMs:window.__tropnikPerf?.longest||0})');

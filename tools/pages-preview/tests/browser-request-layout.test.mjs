@@ -10,7 +10,7 @@ function environment(){
  const box=()=>({x:384,y:72,width,height:928});
  const container={isConnected:true,getBoundingClientRect:box};
  const canvas={isConnected:true,getBoundingClientRect:box,get width(){return Number(attributes.width);},height:928,getAttribute:name=>attributes[name]??null};
- const document={documentElement:{clientWidth:1425},querySelector:selector=>selector==='.atlas-canvas'?container:selector==='.maplibregl-canvas'?canvas:null};
+ const document={documentElement:{clientWidth:1425},querySelector:selector=>selector==='.atlas-canvas'?container:selector==='.tropnik-map-canvas'?canvas:null};
  class ResizeObserver{constructor(callback){this.callback=callback;this.targets=[];observers.resize=this;}observe(target){this.targets.push(target);}disconnect(){this.disconnected=true;}deliver(){this.callback([]);}}
  class MutationObserver{constructor(callback){this.callback=callback;this.pending=[];observers.mutation=this;}observe(target,options){this.target=target;this.options=options;}disconnect(){this.disconnected=true;}takeRecords(){return this.pending.splice(0);}deliver(){this.callback(this.takeRecords());}}
  const context={document,window:{innerWidth:1440,innerHeight:1000,devicePixelRatio:1},performance:{now:()=>time++},ResizeObserver,MutationObserver};

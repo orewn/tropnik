@@ -3,7 +3,7 @@ type MapCameraState = {
   latitude: number;
   zoom: number;
   tileSize: 256 | 512;
-  engine: 'leaflet' | 'maplibre';
+  engine: 'tropnik-canvas';
   centerX?: number;
   centerY?: number;
 };

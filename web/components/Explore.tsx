@@ -7,7 +7,7 @@ import {packs,saveReference,type SavedPack} from '@/lib/local';
 import {api,ApiError,errorText,type Route} from '@/lib/api';
 import {publishedTrail} from '@/lib/route-adapter';
 import {AuthDialog} from './AuthDialog';
-import {Atlas} from './Atlas';
+import {CustomAtlas as Atlas} from './CustomAtlas';
 import {PlaceStories} from './PlaceStories';
 import type {PlaceFact} from '@/lib/facts';
 import {warmMap,preloadTrail} from '@/lib/map-preload';

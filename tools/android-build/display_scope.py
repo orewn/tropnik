@@ -9,7 +9,7 @@ NATIVE_SCOPE_FILES = ("russia-canonical-area.geojson", "russia-canonical-mask.ge
 PROVENANCE_FILE = "russia-boundaries-provenance.json"
 
 
-def verify_display_scope(provenance_bytes: bytes, read, style: dict | None = None) -> dict:
+def verify_display_scope(provenance_bytes: bytes, read) -> dict:
     metadata = json.loads(provenance_bytes)
     require(metadata.get("schemaVersion") == 1 and metadata.get("validation", {}).get("passed") is True,
             "Display selection has not passed its source checks")
@@ -33,32 +33,7 @@ def verify_display_scope(provenance_bytes: bytes, read, style: dict | None = Non
         require(all(feature.get("geometry", {}).get("type") in {"Polygon", "MultiPolygon"}
                     for feature in collection["features"]), "Non-polygon display geometry")
         verified_bytes += len(data)
-    if style is not None:
-        source = style["sources"].get("russia-outside", {})
-        require(source.get("type") == "geojson" and source.get("data") == "asset://maps/russia/russia-canonical-mask.geojson",
-                "Native map does not use its canonical outside mask")
-        layer = style["layers"][-1]
-        layer_source = "tropnik-map-coverage" if style.get("metadata", {}).get("tropnik:coverageManifestSha256") else "russia-outside"
-        require(layer.get("id") == "russia-outside-mask" and layer.get("type") == "fill"
-                and layer.get("source") == layer_source and layer.get("paint", {}).get("fill-opacity") == 1
-                and "fill-outline-color" not in layer.get("paint", {}), "Stored style must initialize an opaque outside mask without a strip stroke")
-        require(style.get("metadata", {}).get("tropnik:russiaBoundaryProvenanceSha256") == digest(provenance_bytes),
-                "Map style refers to a different display selection")
     return {"russiaDisplayAssetCount": 2, "russiaDisplayAssetBytesVerified": verified_bytes,
             "russiaDisplayProvenanceSha256": digest(provenance_bytes),
-            "russiaFitBounds": metadata["fitBounds"], "russiaMaskConfigured": style is not None,
+            "russiaFitBounds": metadata["fitBounds"],
             "russiaExcludedCatalogRouteIds": metadata.get("excludedCatalogRouteIds", [])}
-
-
-def restrict_style(style: dict, provenance_bytes: bytes) -> dict:
-    metadata = json.loads(provenance_bytes)
-    style["sources"]["russia-outside"] = {"type": "geojson", "data": "asset://maps/russia/russia-canonical-mask.geojson",
-                                          "attribution": metadata["attribution"]}
-    # Country labels are not useful in a country-specific region picker. The
-    # inverse mask also covers every remaining basemap/route/location layer.
-    style["layers"] = [layer for layer in style["layers"] if layer["id"] not in {"russia-outside-mask", "country-label"}]
-    style["layers"].append({"id": "russia-outside-mask", "type": "fill", "source": "russia-outside",
-                            "paint": {"fill-color": "#F5F3E8", "fill-opacity": 1, "fill-antialias": False}})
-    style.setdefault("metadata", {})["tropnik:russiaBoundaryProvenanceSha256"] = digest(provenance_bytes)
-    style["metadata"]["tropnik:displayScope"] = "russia-only"
-    return style

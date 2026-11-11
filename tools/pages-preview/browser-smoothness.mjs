@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {dispatchSourceEndPan,assertSourceEndPanInput} from './browser-source-end-pan.mjs';
 import {traceDesktopSelection,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from './browser-trace.mjs';
+import {sendNativeText} from './browser-native-text.mjs';
 
 // These are controlled-browser interaction budgets, not a claim of physical
 // device FPS. RAF callbacks do not prove that the GPU presented every frame.
@@ -196,7 +197,7 @@ export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1,
   await wait('Search input is not editable',`(()=>{const input=document.querySelector(${JSON.stringify(selector)});return !!input&&!input.disabled&&!input.readOnly})()`,Boolean);
   await pointerSelector(cdp,selector,profile);
   await wait('Native search click did not focus its input',`document.activeElement===document.querySelector(${JSON.stringify(selector)})`,Boolean);
-  for(const character of text){await cdp.call('Input.insertText',{text:character});await sleep(45);}
+  await sendNativeText(cdp,text,{sleep});
  };
  const searchState=()=>inspect("({value:document.querySelector('.search-field input')?.value,busy:document.querySelector('.explore-panel-content')?.getAttribute('aria-busy'),regions:[...document.querySelectorAll('.region-option strong')].map(node=>node.textContent)})");
  try{

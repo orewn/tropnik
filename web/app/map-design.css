@@ -299,7 +299,6 @@
 .showing-terrain > .map-attribution {visibility: hidden}
 .terrain-info a {display: inline-flex; align-items: center; gap: 8px}
 .explore-layout .map-skeleton {background: #e7ebe2}
-.explore-layout .atlas-canvas.leaflet-container {background: #e7ebe2 !important}
 .explore-layout .map-legend {left: 88px}
 @media (min-width: 701px) {
   .explore-layout .terrain-bottom {left: 88px}

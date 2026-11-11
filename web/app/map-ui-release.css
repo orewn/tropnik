@@ -1,5 +1,4 @@
 /* Map UI release pass: one control grid, protected edges and photo-led stories. */
-.atlas-wrap .leaflet-route-tooltip{width:max-content;max-width:230px;overflow-wrap:break-word}
 :root{
  --map-ui-edge:24px;
  --map-ui-top:24px;
@@ -26,7 +25,6 @@
 .explore-layout .atlas-wrap{--map-rail-height:235px}
 /* Reserve one rail footprint before either renderer mounts. Layers stays put
    when the 2D renderer omits the north-reset action. */
-.explore-layout .atlas-wrap:has(.leaflet-container) .map-controls button[aria-label="Север сверху"]{display:none}
 .explore-layout .layer-control{right:var(--map-right)}
 .explore-layout .layer-button{min-height:var(--map-control-size);height:var(--map-control-size);padding:0 14px;justify-content:center;border-radius:12px;line-height:1}
 .explore-layout .layer-button svg{display:block;margin:0}
@@ -99,7 +97,6 @@
  .explore-layout .map-context>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .explore-layout .map-message,.explore-layout:has(.explore-panel.collapsed) .map-message{top:calc(var(--map-top) + 60px);bottom:auto;left:var(--map-left);right:calc(var(--map-right) + 58px);width:auto;height:auto;max-width:none;align-items:flex-start}
  .explore-layout .map-message>svg{flex-shrink:0;margin-top:12px}.explore-layout .map-message>span{min-width:0;align-self:center}.explore-layout .map-message button{flex-shrink:0;min-height:44px;min-width:44px;align-self:center}
- .maplibregl-ctrl-bottom-left{left:var(--map-left)!important}
  .explore-layout .fact-card.fact-card--compact,.explore-layout:has(.explore-panel.collapsed) .fact-card.fact-card--compact{top:calc(var(--map-top) + 60px);left:var(--map-left);right:auto;bottom:auto;width:320px;grid-template-columns:80px minmax(0,1fr);border-radius:16px}
  .fact-card--compact .fact-photo{min-height:118px}.fact-card--compact .fact-card-inner{padding:10px 11px 8px}.fact-card--compact .fact-topline{height:27px;margin:-6px -6px -4px 0}
  .fact-card.fact-card--compact h3{font-size:14px;line-height:20px}.fact-card--compact .fact-card-footer{padding:2px 4px 2px 8px;gap:4px;min-height:48px}.fact-card--compact .fact-story-toggle{min-width:0;font-size:12px;line-height:16px;white-space:normal;gap:4px;min-height:44px}
@@ -144,18 +141,10 @@
   transition:opacity .1s ease,visibility .1s ease!important;
 }
 .explore-layout [data-map-label-hidden='true'] :is(.region-marker-label,.trail-marker-label){opacity:0!important;visibility:hidden!important}
-.explore-layout .leaflet-route-tooltip{
-  max-width:min(230px,calc(100vw - 32px));
-  white-space:normal!important;
-  overflow-wrap:anywhere;
-  text-align:center;
-}
-.explore-layout .tropnik-relief-tiles .leaflet-tile{opacity:1!important;transition:none!important}
 @media(max-width:700px){
   .explore-layout .region-marker-label{max-width:var(--map-label-max-width,132px)!important;font-size:11px;line-height:1.3}
-  .explore-layout .leaflet-route-tooltip{display:none!important}
 }
-@media(hover:none),(pointer:coarse){.explore-layout .leaflet-route-tooltip{display:none!important}}
+@media(hover:none),(pointer:coarse){}
 
 
 /* Tropnik 0.4.8 interaction and rendering performance pass. */

@@ -82,7 +82,7 @@ test('default full-matrix action runs once without tracer calls, timers or evide
 });
 
 test('disabled tracing preserves the original action failure and settle evidence without retrying',async t=>{
- const output=await outputDirectory(t),failure=new Error('The maplibre map did not settle');let actions=0;
+ const output=await outputDirectory(t),failure=new Error('The tropnik-canvas map did not settle');let actions=0;
  failure.settleDiagnostics={timeoutMs:15000,requiredIdleObservations:4,samples:[{frameMs:6026}]};
  const forbidden=()=>assert.fail('Disabled tracing must not touch the protocol');
  const observed=await traceDesktopSelection({observe:forbidden,call:forbidden},async()=>{actions++;throw failure;},
@@ -276,7 +276,7 @@ test('the terrain scope has isolated files and explicit larger caps without chan
 
 test('the terrain time cap drains while settle is pending and preserves its later original failure',async t=>{
  const output=await outputDirectory(t),timers=controlledTimers(),cdp=protocol({limits:TERRAIN_TRACE_LIMITS}),prefix='desktop-webgl-terrain-zoom';
- const failure=new Error('The maplibre map did not settle');failure.settleDiagnostics={sampleLimit:16,samples:[{phase:'observed',frameMs:6026,state:{camera:{zoom:5.905}}}]};
+ const failure=new Error('The tropnik-canvas map did not settle');failure.settleDiagnostics={sampleLimit:16,samples:[{phase:'observed',frameMs:6026,state:{camera:{zoom:5.905}}}]};
  let rejectAction,actions=0,now=0;
  const observed=traceDesktopSelection(cdp,()=>{actions++;return new Promise((_,reject)=>{rejectAction=reject;});},{output,prefix,scope:'first-desktop-terrain-zoom-4-to-6',limits:TERRAIN_TRACE_LIMITS,...timers,clock:()=>now}).then(()=>null,error=>error);
  await new Promise(resolve=>setImmediate(resolve));now=20000;timers.fireDuration(20000);

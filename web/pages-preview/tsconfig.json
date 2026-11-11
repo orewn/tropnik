@@ -4,6 +4,6 @@
     "incremental": false,
     "plugins": []
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "../types/**/*.d.ts"],
   "exclude": ["dist", ".stage", "../node_modules", "../.next", "../dist"]
 }

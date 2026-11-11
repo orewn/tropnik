@@ -669,9 +669,9 @@
 test at tests/map-coverage-index.test.mjs:90:1
 ✖ fast frames equal full covered-vertex bounds for every shipped source route (2860.140405ms)
   AssertionError [ERR_ASSERTION]: check the complete source geometry set, including the excluded route
-  
+
   615 !== 280
-  
+
       at TestContext.<anonymous> (file:///workspace/scratch/ace555218d2a/tropnik-github/web/tests/map-coverage-index.test.mjs:100:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)

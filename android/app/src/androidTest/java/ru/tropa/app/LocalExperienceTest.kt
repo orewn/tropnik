@@ -8,9 +8,7 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.PointF
 import android.graphics.Rect
-import android.graphics.RectF
 import android.os.SystemClock
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebView
@@ -30,19 +28,8 @@ import org.junit.runner.RunWith
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.Style
-import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.geojson.Point
-import org.maplibre.geojson.Polygon
-import ru.tropa.app.data.MAP_LABEL_SOURCE
-import ru.tropa.app.data.MapLabelGeometry
-import ru.tropa.app.data.withMapLabelCoverage
-import ru.tropa.app.ui.NativeMapLabels
 import ru.tropa.app.data.Catalog
+import ru.tropa.app.ui.CustomMapWebView
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -118,66 +105,68 @@ class LocalExperienceTest {
         app.onNodeWithTag("save_route").assertIsEnabled()
     }
 
-    private fun readyMap(): Pair<MapView, MapLibreMap> {
-        // The map is the third catalogue item. Bring its full height into view
-        // before using the SDK projection; no region-list click or callback is used.
+    private fun readyMap(): CustomMapWebView {
         app.onNodeWithTag("explore_list").performScrollToIndex(2)
-        fun findMapView(view: View): MapView? {
-            if (view is MapView) return view
-            if (view is ViewGroup) for (index in 0 until view.childCount) {
-                findMapView(view.getChildAt(index))?.let { return it }
-            }
+        fun findMap(view: View): CustomMapWebView? {
+            if (view is CustomMapWebView) return view
+            if (view is ViewGroup) for (index in 0 until view.childCount) findMap(view.getChildAt(index))?.let { return it }
             return null
         }
-        var view: MapView? = null
-        app.waitUntil(timeoutMillis = 10_000) {
-            var attached = false
+        var view: CustomMapWebView? = null
+        app.waitUntil(timeoutMillis = 25_000) {
+            var ready = false
             app.runOnUiThread {
-                view = findMapView(app.activity.window.decorView)
-                attached = view?.isAttachedToWindow == true
+                view = findMap(app.activity.window.decorView)
+                ready = view?.isAttachedToWindow == true && view?.ready == true
             }
-            attached
+            ready && app.onAllNodes(hasText("Открываем карту России…")).fetchSemanticsNodes().isEmpty()
         }
-        val mapView = requireNotNull(view)
-        val ready = CountDownLatch(1)
-        var nativeMap: MapLibreMap? = null
-        app.runOnUiThread { mapView.getMapAsync { nativeMap = it; ready.countDown() } }
-        assertTrue("MapLibre did not initialize", ready.await(10, TimeUnit.SECONDS))
-        val map = requireNotNull(nativeMap)
-        app.waitUntil(timeoutMillis = 20_000) {
-            var loaded = false
-            app.runOnUiThread { loaded = map.style?.isFullyLoaded == true }
-            loaded && app.onAllNodes(hasText("Открываем карту России…")).fetchSemanticsNodes().isEmpty()
+        val map = requireNotNull(view)
+        val snapshot = mapSnapshot(map)
+        assertTrue("The shared map has no actual source frame", snapshot.optBoolean("ready"))
+        assertEquals("tropnik-canvas", snapshot.getJSONObject("rendered").getString("engine"))
+        assertTrue("The cartographic worker did not decode any tile", snapshot.getJSONObject("state").getInt("residentTiles") > 0)
+        return map
+    }
+
+    private fun mapSnapshot(view: CustomMapWebView): JSONObject {
+        var previous: JSONObject? = null
+        app.runOnUiThread {previous = view.debugSnapshot;view.requestDebugSnapshot()}
+        var value: JSONObject? = null
+        app.waitUntil(timeoutMillis = 5_000) {
+            app.runOnUiThread {value = view.debugSnapshot}
+            value != null && value !== previous
         }
-        app.waitForIdle()
-        return mapView to map
+        return requireNotNull(value)
     }
 
     private fun tapRegionMarker(regionId: String, screenshotPrefix: String = "map-region") {
         val region = Catalog.load(app.activity).regions.single { it.id == regionId }
-        val (mapView, map) = readyMap()
-        // Separate nearby region markers at a normal map zoom. This changes
-        // only the viewport; selection must still travel through a real touch.
-        app.runOnUiThread { map.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(region.latitude, region.longitude), 6.0)) }
-        var point = PointF()
-        app.waitUntil(timeoutMillis = 15_000) {
-            var rendered = false
-            app.runOnUiThread {
-                point = map.projection.toScreenLocation(LatLng(region.latitude, region.longitude))
-                val hits = map.queryRenderedFeatures(RectF(point.x - 8, point.y - 8, point.x + 8, point.y + 8), "region-markers")
-                rendered = hits.any { it.hasProperty("regionId") && it.getStringProperty("regionId") == regionId }
-            }
-            rendered
-        }
-        val location = IntArray(2)
-        val visible = Rect()
+        val map = readyMap()
+        // Test setup changes only the viewport. The native callback must still
+        // come from a real trusted touch on the rendered shared marker button.
         app.runOnUiThread {
-            mapView.getLocationOnScreen(location)
-            assertTrue("Map must be visible for touch injection", mapView.getGlobalVisibleRect(visible))
+            map.command("camera", JSONObject().put("camera", JSONObject().put("center", JSONArray(listOf(region.longitude, region.latitude))).put("zoom", 6)).put("animate", false))
         }
-        val x = location[0] + point.x
-        val y = location[1] + point.y
-        assertTrue("Projected marker must be on screen", visible.contains(x.toInt(), y.toInt()))
+        var marker: JSONObject? = null
+        var snapshot = JSONObject()
+        app.waitUntil(timeoutMillis = 15_000) {
+            snapshot = mapSnapshot(map)
+            val markers = snapshot.getJSONArray("markers")
+            marker = (0 until markers.length()).map {markers.getJSONObject(it)}.firstOrNull {it.optString("id") == regionId && !it.optBoolean("hidden")}
+            marker != null && kotlin.math.abs(snapshot.getJSONObject("camera").getDouble("zoom") - 6.0) < .01
+        }
+        val location = IntArray(2);val visible = Rect()
+        var scaleX = 0f;var scaleY = 0f
+        app.runOnUiThread {
+            map.getLocationOnScreen(location)
+            assertTrue("Map must be visible for touch injection", map.getGlobalVisibleRect(visible))
+            scaleX = map.width / snapshot.getJSONObject("size").getDouble("width").toFloat()
+            scaleY = map.height / snapshot.getJSONObject("size").getDouble("height").toFloat()
+        }
+        val x = location[0] + requireNotNull(marker).getDouble("x").toFloat() * scaleX
+        val y = location[1] + requireNotNull(marker).getDouble("y").toFloat() * scaleY
+        assertTrue("Rendered marker must be on screen", visible.contains(x.toInt(), y.toInt()))
         screenshot("$screenshotPrefix-before-tap")
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
         val downTime = SystemClock.uptimeMillis()
@@ -187,91 +176,70 @@ class LocalExperienceTest {
             try { assertTrue("Map touch injection failed", automation.injectInputEvent(event, true)) }
             finally { event.recycle() }
         }
-        app.waitUntil(timeoutMillis = 10_000) {
-            app.onAllNodes(hasText("Обзор района")).fetchSemanticsNodes().isNotEmpty()
-        }
+        app.waitUntil(timeoutMillis = 10_000) {app.onAllNodes(hasText("Обзор района")).fetchSemanticsNodes().isNotEmpty()}
         app.onNodeWithTag("explore_list").performScrollToIndex(0)
         app.onNodeWithText(region.name).assertExists()
         screenshot("$screenshotPrefix-after-tap")
     }
 
     @Test fun nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline() {
-        val (mapView, map) = readyMap()
-        val bundled = JSONObject(app.activity.assets.open("maps/style.json").bufferedReader().use { it.readText() })
-        // Synthetic boundary/labels isolate symbol placement from a changing
-        // upstream tile. The real SDK query, coverage predicate, worker,
-        // source update and rasterized glyphs are all exercised offline.
-        val fixture = JSONObject().put("version", 8).put("glyphs", bundled.getString("glyphs"))
-            .put("sources", JSONObject()
-                .put("fixture", JSONObject().put("type", "geojson").put("data", JSONObject("""{"type":"FeatureCollection","features":[
-                    {"type":"Feature","id":"domestic","properties":{"name":"ПРИМОРСК"},"geometry":{"type":"Point","coordinates":[29.98,60]}},
-                    {"type":"Feature","id":"foreign","properties":{"name":"ЗАРУБЕЖНЫЙ"},"geometry":{"type":"Point","coordinates":[30.18,60]}}
-                ]}""")))
-                .put("mask", JSONObject().put("type", "geojson").put("data", JSONObject("""{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[30,58],[40,58],[40,62],[30,62],[30,58]]]}}"""))))
-            .put("layers", JSONArray()
-                .put(JSONObject("""{"id":"background","type":"background","paint":{"background-color":"#FFFFFF"}}"""))
-                .put(JSONObject("""{"id":"fixture-label","type":"symbol","source":"fixture","layout":{"text-field":["get","name"],"text-font":["Noto Sans Regular"],"text-size":24,"text-anchor":"left","text-allow-overlap":true},"paint":{"text-color":"#102018","text-halo-width":0}}"""))
-                .put(JSONObject("""{"id":"russia-outside-mask","type":"fill","source":"mask","paint":{"fill-color":"#F5F3E8","fill-opacity":1,"fill-antialias":false}}""")))
-        val prepared = withMapLabelCoverage(fixture.toString())
-        val coverage = MapLabelGeometry.fromPolygons(listOf(Polygon.fromLngLats(listOf(listOf(
-            Point.fromLngLat(29.0, 59.0), Point.fromLngLat(30.0, 59.0), Point.fromLngLat(30.0, 61.0),
-            Point.fromLngLat(29.0, 61.0), Point.fromLngLat(29.0, 59.0))))))
-        val loaded = CountDownLatch(1)
-        var labels: NativeMapLabels? = null
+        val map = readyMap()
+        app.runOnUiThread {map.setOnline(false);map.command("labelFixture")}
+        var snapshot = JSONObject()
+        var labelsReady = false
         try {
-            app.runOnUiThread {
-                map.setStyle(Style.Builder().fromJson(prepared.json)) {
-                    labels = NativeMapLabels(mapView, map, prepared.groups, coverage)
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(60.0, 30.0), 8.0))
-                    loaded.countDown()
-                }
+            app.waitUntil(timeoutMillis = 20_000) {
+                snapshot = mapSnapshot(map)
+                val labels = snapshot.optJSONArray("labels") ?: JSONArray()
+                (0 until labels.length()).map {labels.getJSONObject(it)}.any {it.optString("id") == "domestic" && it.optBoolean("visible")} &&
+                    snapshot.optJSONObject("coverage")?.optBoolean("ready") == true
             }
-            assertTrue("Synthetic style did not load", loaded.await(20, TimeUnit.SECONDS))
-            app.runOnUiThread {
-                assertNotNull("The SDK rejected the source-retention layer", map.style?.getLayer("tropnik-label-query-1"))
-            }
-            var originalCount = 0; var acceptedNames = emptySet<String>(); var renderedCount = 0
-            var labelsReady = false
-            try {
-                app.waitUntil(timeoutMillis = 20_000) {
-                    var ready = false
-                    app.runOnUiThread {
-                        originalCount = map.style?.getSourceAs<GeoJsonSource>("fixture")?.querySourceFeatures(null).orEmpty().size
-                        val accepted = map.style?.getSourceAs<GeoJsonSource>(MAP_LABEL_SOURCE)?.querySourceFeatures(null).orEmpty()
-                        val rendered = map.queryRenderedFeatures(RectF(0f, 0f, mapView.width.toFloat(), mapView.height.toFloat()), "fixture-label")
-                        acceptedNames = accepted.map { it.getStringProperty("name") }.toSet()
-                        renderedCount = rendered.size
-                        ready = accepted.isNotEmpty() && accepted.all { it.getStringProperty("name") == "ПРИМОРСК" } && rendered.isNotEmpty()
-                    }
-                    ready
-                }
-                labelsReady = true
-            } finally {
-                android.util.Log.i("TropnikLabelTest", "original=$originalCount accepted=$acceptedNames rendered=$renderedCount ready=$labelsReady")
-                if (!labelsReady) screenshot("map-labels-not-ready")
-            }
-            var boundary = PointF(); val location = IntArray(2)
-            app.runOnUiThread {
-                boundary = map.projection.toScreenLocation(LatLng(60.0, 30.0))
-                mapView.getLocationOnScreen(location)
-                val original = map.style!!.getSourceAs<GeoJsonSource>("fixture")!!.querySourceFeatures(null)
-                assertEquals(setOf("ПРИМОРСК", "ЗАРУБЕЖНЫЙ"), original.map { it.getStringProperty("name") }.toSet())
-            }
-            screenshot("map-labels-cross-mask")
-            val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
-            assertNotNull("No map screenshot", bitmap)
-            try {
-                val x = location[0] + boundary.x.toInt(); val y = location[1] + boundary.y.toInt()
-                var inkBeyondBorder = 0
-                for (px in (x + 8)..minOf(x + 95, bitmap.width - 1)) for (py in maxOf(0, y - 20)..minOf(bitmap.height - 1, y + 20)) {
-                    val color = bitmap.getPixel(px, py)
-                    if (Color.red(color) < 90 && Color.green(color) < 100 && Color.blue(color) < 90) inkBeyondBorder++
-                }
-                assertTrue("Domestic text was clipped by the opaque mask ($inkBeyondBorder ink pixels)", inkBeyondBorder > 20)
-            } finally { bitmap.recycle() }
+            labelsReady = true
         } finally {
-            app.runOnUiThread { labels?.dispose() }
+            if (!labelsReady) {
+                runCatching {screenshot("map-labels-not-ready")}
+                val report = File(app.activity.filesDir, "qa/map-labels-not-ready.json")
+                report.parentFile!!.mkdirs();report.writeText(snapshot.toString(2))
+            }
         }
+        val labels = snapshot.getJSONArray("labels")
+        val annotations = (0 until labels.length()).map {labels.getJSONObject(it)}.filter {it.optString("id") in setOf("domestic", "foreign")}
+        assertEquals("Both source labels must be retained before admission", setOf("ПРИМОРСК", "ЗАРУБЕЖНЫЙ"), annotations.map {it.getString("label")}.toSet())
+        val domestic = annotations.single {it.getString("id") == "domestic"}
+        val foreign = annotations.single {it.getString("id") == "foreign"}
+        assertEquals("drawn", domestic.getString("reason"))
+        assertTrue(domestic.getBoolean("visible"))
+        assertEquals("outside-coverage", foreign.getString("reason"))
+        assertTrue(!foreign.getBoolean("visible"))
+        val boundary = snapshot.getJSONObject("labelFixture").getJSONObject("point")
+        assertTrue("The domestic whole-label rectangle must cross the real mask", domestic.getJSONObject("rect").getDouble("right") > boundary.getDouble("x") + 8)
+        val probes = snapshot.getJSONArray("outsideLabelProbes")
+        assertTrue("No actual outside-mask pixels were sampled", probes.length() > 40)
+        val location = IntArray(2);var scaleX = 0.0;var scaleY = 0.0
+        app.runOnUiThread {
+            map.getLocationOnScreen(location)
+            scaleX = map.width / snapshot.getJSONObject("size").getDouble("width")
+            scaleY = map.height / snapshot.getJSONObject("size").getDouble("height")
+        }
+        screenshot("map-labels-cross-mask")
+        val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+        assertNotNull("No map screenshot", bitmap)
+        try {
+            var inkBeyondBorder = 0
+            for (index in 0 until probes.length()) {
+                val probe = probes.getJSONArray(index)
+                val x = (location[0] + probe.getDouble(0) * scaleX).toInt()
+                val y = (location[1] + probe.getDouble(1) * scaleY).toInt()
+                if (x !in 0 until bitmap.width || y !in 0 until bitmap.height) continue
+                val color = bitmap.getPixel(x, y)
+                if (Color.red(color) < 70 && Color.green(color) < 90 && Color.blue(color) < 70) inkBeyondBorder++
+            }
+            val evidence = JSONObject().put("engine", "tropnik-canvas").put("sourceLabels", JSONArray(annotations))
+                .put("outsideMaskProbes", probes.length()).put("inkBeyondBorder", inkBeyondBorder).put("snapshot", snapshot)
+            val report = File(app.activity.filesDir, "qa/map-labels-cross-mask.json")
+            report.parentFile!!.mkdirs();report.writeText(evidence.toString(2))
+            assertTrue("Domestic text was clipped by the opaque mask ($inkBeyondBorder ink pixels)", inkBeyondBorder > 20)
+        } finally {bitmap.recycle()}
     }
 
     @Test fun noServerMeansExplicitConfigurationNotInventedSocialActivity() {
