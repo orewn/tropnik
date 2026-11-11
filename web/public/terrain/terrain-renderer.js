@@ -1071,7 +1071,7 @@ export class TerrainRenderer{
    displayMask:this.displayMask?{width:this.displayMask.width,height:this.displayMask.height,allowedPixels:this.displayMask.source.allowedPixels,coverageVersion:this.displayMask.source.coverageVersion}:null});
  }
  rotate(delta){if(this.destroyed||!Number.isFinite(delta))return;this.yaw=((this.yaw+delta+PI)%TAU+TAU)%TAU-PI;this.request();}
- zoomBy(factor){if(this.destroyed||!Number.isFinite(factor)||factor<=0)return;this.zoom=clamp(this.zoom*factor,.65,5);this.request();}
+ zoomBy(factor){if(this.destroyed||!Number.isFinite(factor)||factor<=0)return;const next=clamp(this.zoom*factor,.65,5);if(next===this.zoom)return;this.zoom=next;this.request();}
  reset(){if(this.destroyed)return;this.yaw=DEFAULT_VIEW.yaw;this.pitch=DEFAULT_VIEW.pitch;this.zoom=DEFAULT_VIEW.zoom;this.offset=[0,0];this.request();}
  destroy(){
   if(this.destroyed)return;this.destroyed=true;this.cancelFrame();clearTimeout(this.wheelTimer);clearTimeout(this.restoreTimer);

@@ -149,6 +149,27 @@ test('pointerdown/up and wheel state cannot recreate buffers, switch LOD or allo
   renderer.destroy();
 });
 
+test('clamped zoom no-ops neither redraw nor erase an already pending frame',t=>{
+  const record=recordingGL(),env=environment(t,{gl:record.gl});let rendered=0;
+  const renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:()=>rendered++});
+  const initial=renderer.frame;renderer.zoomBy(1);
+  assert.equal(renderer.frame,initial);assert.equal(renderer.dirty,true);assert.equal(env.frames.size,1);
+  env.flush();assert.equal(rendered,1);assert.equal(env.frames.size,0);
+  renderer.zoomBy(100);assert.equal(renderer.zoom,5);assert.equal(env.frames.size,1);
+  const firstClamp=renderer.frame;renderer.zoomBy(1.2);
+  assert.equal(renderer.frame,firstClamp);assert.equal(renderer.dirty,true);env.flush();assert.equal(rendered,2);
+  for(let i=0;i<12;i++)renderer.zoomBy(1.2);
+  assert.equal(env.frames.size,0);assert.equal(renderer.dirty,false);env.flush();assert.equal(rendered,2);
+  renderer.request();const pending=renderer.frame;renderer.zoomBy(1.2);
+  assert.equal(renderer.frame,pending);assert.equal(renderer.dirty,true);assert.equal(env.frames.size,1);env.flush();assert.equal(rendered,3);
+  renderer.zoomBy(.8);assert.equal(renderer.zoom,4);assert.equal(env.frames.size,1);env.flush();assert.equal(rendered,4);
+  renderer.zoomBy(.001);assert.equal(renderer.zoom,.65);assert.equal(env.frames.size,1);env.flush();assert.equal(rendered,5);
+  for(let i=0;i<12;i++)renderer.zoomBy(.8);
+  assert.equal(env.frames.size,0);assert.equal(renderer.dirty,false);env.flush();assert.equal(rendered,5);
+  renderer.zoomBy(2);assert.equal(renderer.zoom,1.3);assert.equal(env.frames.size,1);env.flush();assert.equal(rendered,6);
+  renderer.destroy();
+});
+
 test('renderer retains validated prepared buffers instead of recomputing the model',t=>{
   const env=environment(t),source=grid(3,3),prepared=createTerrainModel(source),renderer=new TerrainRenderer(env.canvas,source,{forceCanvas:true,preparedModel:prepared});
   assert.equal(renderer.model,prepared);assert.equal(renderer.model.normals,prepared.normals);renderer.destroy();
