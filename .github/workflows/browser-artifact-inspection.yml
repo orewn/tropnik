@@ -108,7 +108,7 @@ jobs:
               elif isinstance(value,list):
                   for index,child in enumerate(value):
                       if isinstance(child,(dict,list)): yield from walk(child,pointer+"["+str(index)+"]",depth+1)
-          pans=[]; source_bindings=[]; environments=[]; issues=[]
+          pans=[]; source_bindings=[]; environments=[]; issues=[]; environment_seen=set()
           for entry,document in documents:
               name=Path(entry["path"]).name
               if name in ("browser-failure.json","browser-progress.json","browser-verification.json","browser-ui-smoothness-diagnostic.json"):
@@ -124,23 +124,42 @@ jobs:
                   if isinstance(value.get("scenarios"),list) and "pan" in value:
                       emit("TROPNIK_BROWSER_PAN_INPUT",entry,pointer,{"profile":value.get("profile"),"engine":value.get("engine"),"pan":value["pan"],"renderSnapshots":value.get("renderSnapshots")})
                   if "environment" in value and isinstance(value["environment"],dict):
-                      emit("TROPNIK_BROWSER_ENVIRONMENT",entry,pointer+".environment",value["environment"])
-                      environments.append({"artifact":entry["artifact"],"path":entry["path"],"pointer":pointer+".environment"})
+                      signature=(entry["artifact"],hashlib.sha256(json.dumps(value["environment"],sort_keys=True,separators=(",",":")).encode()).hexdigest())
+                      if signature not in environment_seen:
+                          environment_seen.add(signature)
+                          emit("TROPNIK_BROWSER_ENVIRONMENT",entry,pointer+".environment",value["environment"])
+                      environments.append({"artifact":entry["artifact"],"path":entry["path"],"pointer":pointer+".environment","contentSha256":signature[1]})
                   if isinstance(value.get("performanceIssues"),list) and value["performanceIssues"]:
                       emit("TROPNIK_BROWSER_PERFORMANCE_ISSUES",entry,pointer+".performanceIssues",value["performanceIssues"])
                       issues.append({"artifact":entry["artifact"],"path":entry["path"],"pointer":pointer+".performanceIssues"})
           assert {p["artifact"] for p in pans}=={"full","normal"}, "Both full and normal actual map-pan receipts are required"
+          scene_seen=set()
           for entry,document in documents:
-              emit("TROPNIK_BROWSER_JSON",entry,"$",document)
+              for pointer,value in walk(document):
+                  if not isinstance(value,dict): continue
+                  scene=(value.get("modes") or {}).get("scene3d") if isinstance(value.get("modes"),dict) else None
+                  if not isinstance(scene,dict): continue
+                  selected={"profile":value.get("profile"),"engine":value.get("engine"),
+                            "scene":{key:scene[key] for key in ("state","at","opacity","visible","ready","retainedMapNoticeVisible","error","routeWarning","canvas","zoomInputs","rotateInput","resetInput","imageChanged","visualReviewRequired") if key in scene},
+                            "states":scene.get("states"),"nativeInputs":scene.get("nativeInputs"),
+                            "screenshots":[item for item in value.get("screenshots",[]) if isinstance(item,dict) and item.get("mode")=="scene3d"]}
+                  signature=(entry["artifact"],hashlib.sha256(json.dumps(selected,sort_keys=True,separators=(",",":")).encode()).hexdigest())
+                  if signature in scene_seen: continue
+                  scene_seen.add(signature)
+                  emit("TROPNIK_BROWSER_SCENES",entry,pointer,selected)
+              if isinstance(document,dict) and Path(entry["path"]).name in ("browser-failure.json","browser-progress.json","browser-ui-smoothness-diagnostic.json"):
+                  selected={key:document[key] for key in ("schemaVersion","sourceCommit","profile","phase","diagnostic","diagnosticOnly","status","verified","releaseEligible","error","errorDetails","browserStartup","performanceIssues","performance") if key in document}
+                  emit("TROPNIK_BROWSER_REPORT_HEADER",entry,"$",selected)
           report={"schemaVersion":1,"diagnosticOnly":True,"producerRunId":"43068744099",
                   "sourceCommit":"e772d12dded4875186c02396788900a42727dda1","artifacts":[13878976645,13877825250],
                   "rawZipIndependentlyHashed":False,
                   "archiveIntegrityMethod":"pinned actions/download-artifact v8.0.2 digest-mismatch:error and exact API metadata",
                   "files":entries,"skipped":skipped,"sourceBindings":source_bindings,"pans":pans,"environments":environments,"issues":issues,
-                  "allPrintedJsonDocumentsComplete":True,"mapPanFramesAndNativeEventsTruncated":False,
+                  "selectedOriginalRecordsComplete":True,"mapPanFramesAndNativeEventsTruncated":False,
                   "limitations":["This reads retained evidence only and does not rerun or certify the application.",
                                   "No new renderer state, counters, GL queries or screenshots are fabricated.",
-                                  "A field absent from the original receipt remains absent."]}
+                                  "Only selected original records are printed; complete original JSON remains in the sealed source artifacts.",
+                        "A field absent from the original receipt remains absent."]}
           (output/"inspection.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
           print("TROPNIK_BROWSER_INSPECTION="+json.dumps(report,ensure_ascii=False,separators=(",",":")))
           PY
