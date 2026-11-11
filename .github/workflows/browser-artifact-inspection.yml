@@ -1,0 +1,154 @@
+name: Inspect retained browser candidate evidence
+on:
+  push:
+    branches: [diagnostics/browser-artifact-inspection]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: browser-artifact-inspection
+  cancel-in-progress: false
+jobs:
+  inspect:
+    name: Read exact full and normal browser receipts (diagnostic only)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Bind both original artifact metadata records
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-browser-inspection
+        run: |
+          mkdir -p "$TROPNIK_INSPECTION_ROOT"
+          gh api repos/orewn/tropnik/actions/artifacts/13878976645 > "$TROPNIK_INSPECTION_ROOT/full-metadata.json"
+          gh api repos/orewn/tropnik/actions/artifacts/13877825250 > "$TROPNIK_INSPECTION_ROOT/normal-metadata.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["TROPNIK_INSPECTION_ROOT"])
+          expected=[
+           ("full",13878976645,"tropnik-candidate-browser-audit-43068744099-1",65707156,"5d1bfceca3d638390ff7a109e9983a3f12f9852696f334c594b1c6073b3d1373"),
+           ("normal",13877825250,"tropnik-ui-smoothness-diagnostic-43068744099",47378,"5b049b8ce9b7539d5a496d6a35251b3ab4a3a8ffe53cf0fa62e426837b1a83bc")]
+          for label,ident,name,size,digest in expected:
+              meta=json.loads((root/(label+"-metadata.json")).read_text())
+              assert meta["id"]==ident and meta["name"]==name and meta["size_in_bytes"]==size and meta["digest"]=="sha256:"+digest and meta["expired"] is False, "Artifact metadata mismatch"
+              run=meta["workflow_run"]
+              assert run["id"]==43068744099 and run["head_sha"]=="e772d12dded4875186c02396788900a42727dda1"
+              assert run["repository_id"]==1447843944 and run["head_repository_id"]==1447843944
+              print("TROPNIK_BROWSER_ARTIFACT_METADATA="+json.dumps({"label":label,"id":ident,"name":name,"bytes":size,"digest":meta["digest"],"workflow_run":run},separators=(",",":")))
+          PY
+      - name: Download the exact full browser artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          repository: orewn/tropnik
+          run-id: 43068744099
+          artifact-ids: 13878976645
+          github-token: ${{ github.token }}
+          digest-mismatch: error
+          merge-multiple: true
+          path: ${{ runner.temp }}/tropnik-browser-inspection/full
+      - name: Download the same-candidate normal UI diagnostic
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          repository: orewn/tropnik
+          run-id: 43068744099
+          artifact-ids: 13877825250
+          github-token: ${{ github.token }}
+          digest-mismatch: error
+          merge-multiple: true
+          path: ${{ runner.temp }}/tropnik-browser-inspection/normal
+      - name: Print complete report JSON and actual pan observations
+        env:
+          TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-browser-inspection
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root=Path(os.environ["TROPNIK_INSPECTION_ROOT"])
+          output=root/"inspection"; output.mkdir()
+          documents=[]; entries=[]; skipped=[]; input_bytes=0
+          for label in ("full","normal"):
+              source=root/label
+              for path in sorted(source.rglob("*")):
+                  if path.is_dir(): continue
+                  assert path.is_file() and not path.is_symlink(), "Nonregular input"
+                  size=path.stat().st_size
+                  input_bytes+=size
+                  assert size<=100_000_000 and input_bytes<=500_000_000, "Unbounded artifact bytes"
+                  digest=hashlib.sha256()
+                  with path.open("rb") as stream:
+                      for chunk in iter(lambda:stream.read(1024*1024),b""): digest.update(chunk)
+                  entry={"artifact":label,"path":path.relative_to(source).as_posix(),"bytes":size,"sha256":digest.hexdigest()}
+                  entries.append(entry)
+                  assert len(entries)<=4096, "Too many artifact files"
+                  if path.suffix!=".json": continue
+                  if path.name.endswith(".trace.json") or size>16_000_000:
+                      skipped.append({**entry,"reason":"raw trace or oversized non-report; not interpreted"}); continue
+                  document=json.loads(path.read_text())
+                  if isinstance(document,dict) and "traceEvents" in document:
+                      skipped.append({**entry,"reason":"raw trace events; not interpreted"}); continue
+                  documents.append((entry,document))
+          print("TROPNIK_BROWSER_ARTIFACT_FILES="+json.dumps(entries,separators=(",",":")))
+          print("TROPNIK_BROWSER_SKIPPED_FILES="+json.dumps(skipped,separators=(",",":")))
+          written=0
+          def emit(kind,entry,pointer,data):
+              global written
+              record={"artifact":entry["artifact"],"path":entry["path"],"sourceFileSha256":entry["sha256"],"pointer":pointer,"data":data}
+              encoded=json.dumps(record,ensure_ascii=False,separators=(",",":"))
+              written+=len(encoded.encode())
+              assert written<=16_000_000, "Inspection log bound reached; data is not silently truncated"
+              print(kind+"="+encoded)
+          def walk(value,pointer="$",depth=0):
+              assert depth<=80, "Unexpected report depth"
+              yield pointer,value
+              if isinstance(value,dict):
+                  for key,child in value.items():
+                      if isinstance(child,(dict,list)): yield from walk(child,pointer+"."+key,depth+1)
+              elif isinstance(value,list):
+                  for index,child in enumerate(value):
+                      if isinstance(child,(dict,list)): yield from walk(child,pointer+"["+str(index)+"]",depth+1)
+          pans=[]; source_bindings=[]; environments=[]; issues=[]
+          for entry,document in documents:
+              name=Path(entry["path"]).name
+              if name in ("browser-failure.json","browser-progress.json","browser-verification.json","browser-ui-smoothness-diagnostic.json"):
+                  candidates=[document.get("sourceCommit"),(document.get("environment") or {}).get("sourceCommit")]
+                  bound=[v for v in candidates if v is not None]
+                  assert bound and all(v=="e772d12dded4875186c02396788900a42727dda1" for v in bound), "Wrong browser source binding"
+                  source_bindings.append({"artifact":entry["artifact"],"path":entry["path"],"sourceCommit":bound[0]})
+              for pointer,value in walk(document):
+                  if not isinstance(value,dict): continue
+                  if value.get("name")=="map-pan" and isinstance(value.get("raw"),dict):
+                      emit("TROPNIK_BROWSER_MAP_PAN",entry,pointer,value)
+                      pans.append({"artifact":entry["artifact"],"path":entry["path"],"pointer":pointer,"rawFrameCount":len(value["raw"].get("frames",[])),"rawNativeInputCount":len(value["raw"].get("inputs",[]))})
+                  if isinstance(value.get("scenarios"),list) and "pan" in value:
+                      emit("TROPNIK_BROWSER_PAN_INPUT",entry,pointer,{"profile":value.get("profile"),"engine":value.get("engine"),"pan":value["pan"],"renderSnapshots":value.get("renderSnapshots")})
+                  if "environment" in value and isinstance(value["environment"],dict):
+                      emit("TROPNIK_BROWSER_ENVIRONMENT",entry,pointer+".environment",value["environment"])
+                      environments.append({"artifact":entry["artifact"],"path":entry["path"],"pointer":pointer+".environment"})
+                  if isinstance(value.get("performanceIssues"),list) and value["performanceIssues"]:
+                      emit("TROPNIK_BROWSER_PERFORMANCE_ISSUES",entry,pointer+".performanceIssues",value["performanceIssues"])
+                      issues.append({"artifact":entry["artifact"],"path":entry["path"],"pointer":pointer+".performanceIssues"})
+          assert {p["artifact"] for p in pans}=={"full","normal"}, "Both full and normal actual map-pan receipts are required"
+          for entry,document in documents:
+              emit("TROPNIK_BROWSER_JSON",entry,"$",document)
+          report={"schemaVersion":1,"diagnosticOnly":True,"producerRunId":"43068744099",
+                  "sourceCommit":"e772d12dded4875186c02396788900a42727dda1","artifacts":[13878976645,13877825250],
+                  "rawZipIndependentlyHashed":False,
+                  "archiveIntegrityMethod":"pinned actions/download-artifact v8.0.2 digest-mismatch:error and exact API metadata",
+                  "files":entries,"skipped":skipped,"sourceBindings":source_bindings,"pans":pans,"environments":environments,"issues":issues,
+                  "allPrintedJsonDocumentsComplete":True,"mapPanFramesAndNativeEventsTruncated":False,
+                  "limitations":["This reads retained evidence only and does not rerun or certify the application.",
+                                  "No new renderer state, counters, GL queries or screenshots are fabricated.",
+                                  "A field absent from the original receipt remains absent."]}
+          (output/"inspection.json").write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          print("TROPNIK_BROWSER_INSPECTION="+json.dumps(report,ensure_ascii=False,separators=(",",":")))
+          PY
+      - name: Retain inspection metadata
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-browser-e772-inspection
+          path: ${{ runner.temp }}/tropnik-browser-inspection/inspection/
+          if-no-files-found: warn
+          retention-days: 14
