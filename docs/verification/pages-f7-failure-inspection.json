@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "status": "inspected-original-failure",
+  "producerRunId": 43090337179,
+  "producerJobId": 130768333257,
+  "sourceCommit": "f7c2e3738dd4df471da5cd81d4a6f40b3f194372",
+  "artifactId": 13888712797,
+  "artifactDigest": "sha256:31b4fde09f33966b3a953c9b95e7afb99decc509ac5b1dfee01ef43c8950eaf0",
+  "originalProducerConclusion": "failure",
+  "sourceReport": {
+    "path": "browser-failure.json",
+    "bytes": 1076969,
+    "sha256": "65bbb7e18a9680b1747cd2b36ed266dd614bc7cf0cebbe141e8b94f21199be7d"
+  },
+  "rawZipIndependentlyHashed": false,
+  "archiveIntegrityMethod": "Exact API metadata and pinned actions/download-artifact v8.0.2 digest-mismatch:error",
+  "originalFailureCopiedByteForByte": true,
+  "originalObjectCompleteInLog": true,
+  "printedOriginalFields": [
+    "environment",
+    "profile",
+    "error",
+    "errorDetails",
+    "browserStartup",
+    "performanceIssues",
+    "profilePerformance",
+    "completedMapInteractions",
+    "completedZoomDesigns",
+    "completedDesktopProfiles",
+    "completedProfiles",
+    "network",
+    "completedSiteSmoothness",
+    "settleDiagnostics",
+    "map",
+    "selection",
+    "sheet",
+    "customMap",
+    "navigationHistory",
+    "performance"
+  ],
+  "omittedLogFields": [],
+  "selectedFieldsWereTruncated": false,
+  "logLimitBytes": 3145728,
+  "limitations": [
+    "No application, build, browser or gate was rerun.",
+    "This inspection retains the original failed outcome and does not confer release eligibility.",
+    "No missing network or map state is synthesized."
+  ]
+}

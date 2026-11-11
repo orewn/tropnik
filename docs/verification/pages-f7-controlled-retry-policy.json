@@ -1,0 +1,21 @@
+{
+  "declaredBeforeRerun": true,
+  "declaredAt": "2026-11-11 20:06:07 UTC",
+  "runId": 43090337179,
+  "sourceCommit": "f7c2e3738dd4df471da5cd81d4a6f40b3f194372",
+  "failedJobId": 130768333257,
+  "originalAttempt": 1,
+  "maximumAdditionalAttempts": 1,
+  "requestedAttempt": 2,
+  "reason": "Actual retained failure shows progressing finite external tile backlog at15s, no failed Fetch during settle and newly issued DEM requests115ms before snapshot. Same unchanged engine previously passed full1710 and initial main. This is a single controlled check of variability, not proof of external outage or a retry-until-green policy.",
+  "unchanged": [
+    "source commit",
+    "15s readiness bound",
+    "all performance budgets",
+    "all profiles and native inputs",
+    "DPR and all rendering detail",
+    "ordinary cold navigation/no preload"
+  ],
+  "failureMustRemainVisible": true,
+  "ifSameFailureRepeats": "No further unchanged retries; investigate reproducible aggregate queue latency and correct product before another release gate."
+}
