@@ -6,15 +6,15 @@
   "status": "prepared",
   "repository": "orewn/tropnik",
   "branch": "prepare/final-site-0.4.24",
-  "sourceCommit": "21a2eeeb96300725c8f6f04bb951affb4e24ec54",
-  "workflowRunId": "43075496053",
+  "sourceCommit": "27a6d93e2e327434f05039aa61fb09601bca8371",
+  "workflowRunId": "43077215241",
   "workflowRunAttempt": "1",
   "requiredNext": "Move the candidate PR branch with an expected-head lease, then run every unchanged release acceptance workflow on preparedCommit.",
-  "sourceTree": "7f5c838cb28e2ecb872cb3816252f038b4700da1",
-  "preparedTree": "03b8579242a0ced4eb5bf092d7b2634387bb316a",
+  "sourceTree": "4408df7ca980dd8dd6e10ea247f5f3b0925037b9",
+  "preparedTree": "c68e26dde3784535f63dba8c263276cff86eb83e",
   "protectedSource": {
     "entries": 5460,
-    "sha256": "a4b472201744e2c67e7d93abc07cd553673ec3f832c20bcf197c568a3a315f59",
+    "sha256": "b88ee0abaa0bfb90f69e401abb5e75a7b7bf6ff43627976b6d0a5e0fdbfd32ca",
     "unchanged": true
   },
   "generatorCommands": [
@@ -45,189 +45,108 @@
     {
       "path": "android/app/src/main/assets/custom-map/android-bootstrap.js",
       "status": "modified",
-      "previousBlob": "c112fcc4f33a41f1077374250a857764f7fe6939",
-      "blob": "6fe37b9b80cc26cc487306d38885b0ee3a5923ba",
+      "previousBlob": "6fe37b9b80cc26cc487306d38885b0ee3a5923ba",
+      "blob": "c021a326e23e64bf7b01c24a0d15806380210a45",
       "mode": "100644",
       "bytes": 15534,
-      "sha256": "1b4df607619f5971fdf8b24a8e613ed836a8715053fcb89ce04bbd604efaebb8"
+      "sha256": "617d8a0d979f6d04c4eee290a09f00b9814ccb4f21fa1ce668c45bd5a20e72c7"
     },
     {
       "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-B25YODzL.js",
-      "status": "added",
-      "previousBlob": null,
-      "blob": "91267123c06fb3d500ac775f8bbae7b0063a012e",
-      "mode": "100644",
-      "bytes": 100205,
-      "sha256": "84899706740ddec7e376f820798a6bc3e4651bee4ad92d9d4281c32318f9ee15"
-    },
-    {
-      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-MTh5lNV_.js",
       "status": "deleted",
-      "previousBlob": "7d801f2714d1f25b966e584bb2327b1fbd220e50",
+      "previousBlob": "91267123c06fb3d500ac775f8bbae7b0063a012e",
       "blob": null,
       "mode": "100644",
       "bytes": 0,
       "sha256": null
     },
     {
-      "path": "android/app/src/main/assets/custom-map/chunks/terrain-renderer-Do_PeK_1.js",
-      "status": "deleted",
-      "previousBlob": "d2bc78d545394201350fe2d7955127d3a77d1b2c",
-      "blob": null,
-      "mode": "100644",
-      "bytes": 0,
-      "sha256": null
-    },
-    {
-      "path": "android/app/src/main/assets/custom-map/chunks/terrain-renderer-qT471hOA.js",
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-XVkmYafs.js",
       "status": "added",
       "previousBlob": null,
-      "blob": "069151c4c7a6a09bf9afd2d784b1264a35cda867",
+      "blob": "2202837d901f87d422a9affebfb1e2c374917f36",
       "mode": "100644",
-      "bytes": 81381,
-      "sha256": "9f3097b89055aebc9493305ec0153a37cb63baa0e35d38aadb78a989a3ba17b3"
+      "bytes": 100219,
+      "sha256": "b3c998e23f8b9aae6129a1d489d62b4778a2f41ac849b33697c29b3099dd10e3"
     },
     {
       "path": "android/app/src/main/assets/custom-map/manifest.json",
       "status": "modified",
-      "previousBlob": "fabbb03a1b6e90a640c73c570ee58f075eabe43e",
-      "blob": "e777733b8a901498f1cb7028e4429a32b159c6a7",
+      "previousBlob": "e777733b8a901498f1cb7028e4429a32b159c6a7",
+      "blob": "fa8a3efce490ba0fc9d828c11ef5a7ff1d21dd47",
       "mode": "100644",
       "bytes": 342021,
-      "sha256": "5032de02ecaa7829ae0096f7b10a4f4ca098e5c999a53e43b9383e3483ead6a8"
+      "sha256": "93d109811dbd84cc60e936d8928a755eaf8867a35c58983e5bf6f3c9f7e47146"
     },
     {
       "path": "android/app/src/main/assets/custom-map/map-runtime.js",
       "status": "modified",
-      "previousBlob": "ad03b8564f7c16987b45f656e006ce1f007788b1",
-      "blob": "d2aa637b5e7fbfabe56bfae1b704ef957f3e1659",
+      "previousBlob": "d2aa637b5e7fbfabe56bfae1b704ef957f3e1659",
+      "blob": "e10c4c2fc74e7ceb940bc4c700ae051a69f71be5",
       "mode": "100644",
       "bytes": 156,
-      "sha256": "cb8a293dc5f5b582f0b8d5c4d38c78d889f0a8fade35aa4e5b4284d69c3d264e"
-    },
-    {
-      "path": "android/app/src/main/assets/landscape/landscape.html",
-      "status": "modified",
-      "previousBlob": "5c4cc5367048a886a12ed900dd0a4e6708ec88da",
-      "blob": "c99c98de504ef32299597aacbc3861d8824223a9",
-      "mode": "100644",
-      "bytes": 2013470,
-      "sha256": "850ea0f4d0e25e9c12204bdab7f9605a135e891661b945da2564d122ac70d9a1"
-    },
-    {
-      "path": "android/app/src/main/assets/landscape/manifest.json",
-      "status": "modified",
-      "previousBlob": "2ed175a87e30e3e7a819000cd3c7e11af44e6fd4",
-      "blob": "c1d00c0ca6bb1308559140b995e607fd3d99ae8e",
-      "mode": "100644",
-      "bytes": 2054,
-      "sha256": "cc139aa5354a79cc6dd7e774bbc04341042f305ac646d82abd3fe62b298fee0b"
+      "sha256": "fc61be90003bf26c47c838b32a6dac44578b627a2eb788fd87382a533d1a40cb"
     },
     {
       "path": "web/public/custom-map/android-bootstrap.js",
       "status": "modified",
-      "previousBlob": "c112fcc4f33a41f1077374250a857764f7fe6939",
-      "blob": "6fe37b9b80cc26cc487306d38885b0ee3a5923ba",
+      "previousBlob": "6fe37b9b80cc26cc487306d38885b0ee3a5923ba",
+      "blob": "c021a326e23e64bf7b01c24a0d15806380210a45",
       "mode": "100644",
       "bytes": 15534,
-      "sha256": "1b4df607619f5971fdf8b24a8e613ed836a8715053fcb89ce04bbd604efaebb8"
+      "sha256": "617d8a0d979f6d04c4eee290a09f00b9814ccb4f21fa1ce668c45bd5a20e72c7"
     },
     {
       "path": "web/public/custom-map/chunks/custom-map-entry-B25YODzL.js",
-      "status": "added",
-      "previousBlob": null,
-      "blob": "91267123c06fb3d500ac775f8bbae7b0063a012e",
-      "mode": "100644",
-      "bytes": 100205,
-      "sha256": "84899706740ddec7e376f820798a6bc3e4651bee4ad92d9d4281c32318f9ee15"
-    },
-    {
-      "path": "web/public/custom-map/chunks/custom-map-entry-MTh5lNV_.js",
       "status": "deleted",
-      "previousBlob": "7d801f2714d1f25b966e584bb2327b1fbd220e50",
+      "previousBlob": "91267123c06fb3d500ac775f8bbae7b0063a012e",
       "blob": null,
       "mode": "100644",
       "bytes": 0,
       "sha256": null
     },
     {
-      "path": "web/public/custom-map/chunks/terrain-renderer-Do_PeK_1.js",
-      "status": "deleted",
-      "previousBlob": "d2bc78d545394201350fe2d7955127d3a77d1b2c",
-      "blob": null,
-      "mode": "100644",
-      "bytes": 0,
-      "sha256": null
-    },
-    {
-      "path": "web/public/custom-map/chunks/terrain-renderer-qT471hOA.js",
+      "path": "web/public/custom-map/chunks/custom-map-entry-XVkmYafs.js",
       "status": "added",
       "previousBlob": null,
-      "blob": "069151c4c7a6a09bf9afd2d784b1264a35cda867",
+      "blob": "2202837d901f87d422a9affebfb1e2c374917f36",
       "mode": "100644",
-      "bytes": 81381,
-      "sha256": "9f3097b89055aebc9493305ec0153a37cb63baa0e35d38aadb78a989a3ba17b3"
+      "bytes": 100219,
+      "sha256": "b3c998e23f8b9aae6129a1d489d62b4778a2f41ac849b33697c29b3099dd10e3"
     },
     {
       "path": "web/public/custom-map/manifest.json",
       "status": "modified",
-      "previousBlob": "fabbb03a1b6e90a640c73c570ee58f075eabe43e",
-      "blob": "e777733b8a901498f1cb7028e4429a32b159c6a7",
+      "previousBlob": "e777733b8a901498f1cb7028e4429a32b159c6a7",
+      "blob": "fa8a3efce490ba0fc9d828c11ef5a7ff1d21dd47",
       "mode": "100644",
       "bytes": 342021,
-      "sha256": "5032de02ecaa7829ae0096f7b10a4f4ca098e5c999a53e43b9383e3483ead6a8"
+      "sha256": "93d109811dbd84cc60e936d8928a755eaf8867a35c58983e5bf6f3c9f7e47146"
     },
     {
       "path": "web/public/custom-map/map-runtime.js",
       "status": "modified",
-      "previousBlob": "ad03b8564f7c16987b45f656e006ce1f007788b1",
-      "blob": "d2aa637b5e7fbfabe56bfae1b704ef957f3e1659",
+      "previousBlob": "d2aa637b5e7fbfabe56bfae1b704ef957f3e1659",
+      "blob": "e10c4c2fc74e7ceb940bc4c700ae051a69f71be5",
       "mode": "100644",
       "bytes": 156,
-      "sha256": "cb8a293dc5f5b582f0b8d5c4d38c78d889f0a8fade35aa4e5b4284d69c3d264e"
-    },
-    {
-      "path": "web/public/offline-map/manifest.json",
-      "status": "modified",
-      "previousBlob": "7ca19fd1da7a2cce96e06fa236cc56fd5beb3ba1",
-      "blob": "589e913eef3cd200b142f24ccbe49fe6b9d263a0",
-      "mode": "100644",
-      "bytes": 142180,
-      "sha256": "49da7908b572d16451613eaab6bd1f99ff029ffb8e3b27484c5a8826f531b6f4"
-    },
-    {
-      "path": "web/public/offline-map/terrain/landscape.html",
-      "status": "modified",
-      "previousBlob": "4b826cef1d9fa1c5352fc95a68bfa0f92728f861",
-      "blob": "f4e4fceaa365c71c9a24a7ab7ad319fd6684ada7",
-      "mode": "100644",
-      "bytes": 1990176,
-      "sha256": "415d4ff7186f129d4e77a1cc9230e147eaf48ac28f75957a8c8c5156013b165d"
+      "sha256": "fc61be90003bf26c47c838b32a6dac44578b627a2eb788fd87382a533d1a40cb"
     },
     {
       "path": "web/public/sw.js",
       "status": "modified",
-      "previousBlob": "cb182759f6ecd4e251788c3446f170c18ab03694",
-      "blob": "b2f3836f57193398843676b1a75d8a97b9788f74",
+      "previousBlob": "b2f3836f57193398843676b1a75d8a97b9788f74",
+      "blob": "6989f04bea40c6992d273686169cf4d2153ac147",
       "mode": "100644",
       "bytes": 11469,
-      "sha256": "2fa45a470c7920726667b50b082ae862d356d822dbc5e4a169e55a89924ff284"
-    },
-    {
-      "path": "web/public/terrain/landscape.html",
-      "status": "modified",
-      "previousBlob": "4b826cef1d9fa1c5352fc95a68bfa0f92728f861",
-      "blob": "f4e4fceaa365c71c9a24a7ab7ad319fd6684ada7",
-      "mode": "100644",
-      "bytes": 1990176,
-      "sha256": "415d4ff7186f129d4e77a1cc9230e147eaf48ac28f75957a8c8c5156013b165d"
+      "sha256": "7d818b41cb2df3a974768e0cea58c221a97c992b4178c2725c8736eba6bdc1b7"
     }
   ],
-  "preparedCommit": "e7f0ae44863e5d6b0205307d2fd41350981029d2",
+  "preparedCommit": "84bc96e5932ecf2f396bf41205a1773b32da1438",
   "refUpdate": {
     "branch": "prepare/final-site-0.4.24",
-    "expectedParent": "21a2eeeb96300725c8f6f04bb951affb4e24ec54",
-    "observedCommit": "e7f0ae44863e5d6b0205307d2fd41350981029d2",
+    "expectedParent": "27a6d93e2e327434f05039aa61fb09601bca8371",
+    "observedCommit": "84bc96e5932ecf2f396bf41205a1773b32da1438",
     "force": false
   }
 }
