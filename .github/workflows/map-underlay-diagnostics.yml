@@ -54,7 +54,7 @@ jobs:
             assert.equal(hash, createHash('sha256').update(readFileSync(path)).digest('hex'));
           }
           assertBrowserEnvironment(underlay.environment, process.env.GITHUB_SHA);
-          const covers = {opaque:[true], 'fractional-zoom':[true], 'pan-sequence':[true,true,true,false,true], missing:[false], transparent:[false], rotated:[false], pitched:[false], satellite:[false], overview:[false], zoom12:[true], zoom13:[false], zoom18:[false], 'tiny-tile':[false], 'unwrapped-world':[true], 'boundaries-hidden':[true]};
+          const covers = {opaque:[true], 'fractional-zoom':[true], 'pan-sequence':[true,true,true,false,true], missing:[false], transparent:[false], rotated:[false], pitched:[false], satellite:[false], overview:[false], zoom12:[true,true,true,false,true], zoom13:[false], zoom18:[false], 'tiny-tile':[false], 'unwrapped-world':[true], 'boundaries-hidden':[true]};
           assert.deepEqual(underlay.cases.map(item => item.dpr + '/' + item.name).sort(), [1,2].flatMap(dpr => Object.keys(covers).map(name => dpr + '/' + name)).sort());
           let underlayFrames = 0;
           for (const item of underlay.cases) {
@@ -95,7 +95,7 @@ jobs:
               }
             }
           }
-          assert.equal(underlayFrames, 38);
+          assert.equal(underlayFrames, 46);
           NODE
       - name: Preserve the actual pixel proof
         if: always()

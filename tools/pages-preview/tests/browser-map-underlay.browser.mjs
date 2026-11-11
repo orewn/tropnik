@@ -27,7 +27,7 @@ const matrix=[
  {name:'pitched',pitch:25,cover:false},
  {name:'satellite',mode:'satellite',transparent:true,cover:false},
  {name:'overview',mode:'overview',cover:false},
- {name:'zoom12',zoom:12,cover:true},
+ {name:'zoom12',zoom:12,frames:[{x:0,y:0,cover:true},{x:.375,y:.625,cover:true},{x:120.25,y:.125,cover:true},{x:129.125,y:.125,cover:false},{x:.375,y:.625,cover:true}]},
  {name:'zoom13',zoom:13,cover:false},
  {name:'zoom18',zoom:18,cover:false},
  {name:'tiny-tile',tileZ:18,cover:false},
@@ -149,12 +149,15 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
      check(expected.every((value,c)=>current.pixels[at+c]===value)&&current.pixels[at+3]===255,'A route or tile leaked through a hole/outside mask witness');
     }
     for(const property of ['route','selectedBoundary','mask']){
-     const saved=baseline.engine[property];baseline.engine[property]=undefined;const changed=baseline.render();baseline.engine[property]=saved;
+     // A fresh context has exactly the baseline's initial paint state. Reusing
+     // a previous frame would also inherit the route's lineCap/lineJoin and
+     // could create a difference even if the removed feature painted nothing.
+     const control=make(true);control.engine[property]=undefined;const changed=control.render();
      const result=diff(old.pixels,changed.pixels);check(result.differentPixels>0,`${property}: the fixture must contain visible production pixels`);negativeControls.push({name:'remove-'+property,...result});
     }
    }
    if(options.name==='missing'||options.name==='transparent'){
-    const saved=optimized.engine.detailCoversViewport;optimized.engine.detailCoversViewport=()=>true;const wrong=optimized.render();optimized.engine.detailCoversViewport=saved;
+    const control=make();control.engine.detailCoversViewport=()=>true;const wrong=control.render();
     const result=diff(old.pixels,wrong.pixels);check(result.differentPixels>0,'The pixel comparison must detect an unsafe unconditional underlay skip');negativeControls.push({name:'force-unsafe-cover',...result});
    }
   }
@@ -205,7 +208,7 @@ test('production map underlay omission preserves every real Canvas pixel and all
     assert.equal(result.verified,true,result.error);assert.equal(result.dpr,dpr);
    }
   }
-  assert.equal(report.cases.length,matrix.length*2);assert.equal(report.cases.reduce((sum,item)=>sum+item.frames.length,0),38);
+  assert.equal(report.cases.length,matrix.length*2);assert.equal(report.cases.reduce((sum,item)=>sum+item.frames.length,0),46);
   report.verified=true;report.phase='complete';
  }catch(error){report.error=browserErrorDetails(error);throw error;}
 });
