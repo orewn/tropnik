@@ -2568,7 +2568,7 @@ var Ft = class {
 	draw() {
 		if (this.disposed || !this.active) return;
 		let e = this.context, t = this.displayDetail(), n = this.detailCoversViewport(t);
-		e.setTransform(1, 0, 0, 1, 0, 0), n || (e.fillStyle = me, e.fillRect(0, 0, this.canvas.width, this.canvas.height));
+		e.setTransform(1, 0, 0, 1, 0, 0), e.clearRect(0, 0, this.canvas.width, this.canvas.height), n || (e.fillStyle = me, e.fillRect(0, 0, this.canvas.width, this.canvas.height));
 		let r = this.worldTransform();
 		n || (this.area && (e.fillStyle = "#dce5cf", e.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95));
 		let i = this.mode === "satellite" && !!this.imagery;
