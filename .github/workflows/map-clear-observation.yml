@@ -1,0 +1,70 @@
+name: Observe native map pan CPU and production paint
+
+on:
+  push:
+    branches: [diagnostics/opaque-detail-clear-observation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: opaque-clear-observation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  observe-paint:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - name: Check out isolated observation tools
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: diagnostic
+          persist-credentials: false
+      - name: Check out the immutable application
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 1710b201bfeed52613659ae3e4ca7f26638cb6cb
+          path: application
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir application/web install --frozen-lockfile
+      - name: Prepare the checked application
+        working-directory: application
+        run: |
+          node tools/android-build/prepare-custom-map.mjs --check
+          node tools/pages-preview/fetch-apk.mjs
+          tropnik_source_sha="$(git rev-parse HEAD)"
+          test "$tropnik_source_sha" = '1710b201bfeed52613659ae3e4ca7f26638cb6cb'
+          env GITHUB_SHA="$tropnik_source_sha" node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Check observation module syntax
+        run: |
+          node --check diagnostic/tools/pages-preview/map-clear-paint-observer.mjs
+          node --check diagnostic/tools/pages-preview/map-clear-observation.mjs
+      - name: Observe native pan CPU and paint operations in a separate instrumented run
+        timeout-minutes: 8
+        run: node diagnostic/tools/pages-preview/map-clear-observation.mjs application observation-evidence
+      - name: Preserve CPU profiles, bounded traces and operation receipts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-map-clear-observation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            observation-evidence
+            application/web/pages-preview/design-qa
+            application/web/pages-preview/dist/build-info.json
+            application/web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            application/web/pages-preview/dist/browser-network.json
+            application/web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7
