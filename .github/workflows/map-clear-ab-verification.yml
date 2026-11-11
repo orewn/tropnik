@@ -1,0 +1,133 @@
+name: Verify the sealed opaque-clear A/B evidence
+
+on:
+  push:
+    branches: [diagnostics/opaque-detail-clear-ab-verification]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: opaque-clear-ab-verification-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-sealed-reports:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Check out the corrected evidence binder
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: diagnostic
+          persist-credentials: false
+      - name: Check out immutable baseline sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: f836dce11579eae0e4596ee5b73f8bbe7246128f
+          path: baseline-source
+          persist-credentials: false
+      - name: Check out immutable optimized sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 1710b201bfeed52613659ae3e4ca7f26638cb6cb
+          path: optimized-source
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Verify the exact failed producer and sealed artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          headers = {"Authorization": "Bearer " + os.environ["GH_TOKEN"], "Accept": "application/vnd.github+json", "User-Agent": "Tropnik-sealed-evidence"}
+          def get(path):
+              request = urllib.request.Request("https://api.github.com/repos/orewn/tropnik/" + path, headers=headers)
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  return json.load(response)
+          artifact = get("actions/artifacts/13883082699")
+          producer = get("actions/runs/43078797594")
+          expected = "e12454abef64c26f4348c9e2a074d2d2f4a11db9"
+          assert artifact["id"] == 13883082699
+          assert artifact["name"] == "tropnik-map-clear-ab-43078797594-1"
+          assert artifact["size_in_bytes"] == 272358
+          assert artifact["digest"] == "sha256:85ba1126b8589ff9fb4d54364411dc2b604f4e694a5528d2de7b0199f2cbd0d3"
+          assert artifact["expired"] is False
+          assert artifact["workflow_run"]["id"] == 43078797594
+          assert artifact["workflow_run"]["head_sha"] == expected
+          assert producer["id"] == 43078797594 and producer["head_sha"] == expected
+          assert producer["head_branch"] == "diagnostics/opaque-detail-clear-ab"
+          assert producer["conclusion"] == "failure"
+          receipt = {"schemaVersion": 1, "diagnosticOnly": True, "releaseEligible": False,
+              "producerRunId": producer["id"], "producerHead": producer["head_sha"], "producerConclusion": producer["conclusion"],
+              "artifact": {key: artifact[key] for key in ("id", "name", "size_in_bytes", "digest")},
+              "downloadIntegrity": "Pinned actions/download-artifact v8.0.2 with digest-mismatch:error",
+              "scope": "Revalidate the original retained bytes only; no build, app, browser or input is rerun."}
+          pathlib.Path("ab-sealed-evidence").mkdir()
+          pathlib.Path("ab-sealed-evidence/source-artifact.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("TROPNIK_SEALED_AB_SOURCE=" + json.dumps(receipt, separators=(",", ":")))
+          PY
+      - name: Download the exact artifact with digest failure enforced
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          artifact-ids: '13883082699'
+          run-id: '43078797594'
+          repository: orewn/tropnik
+          github-token: ${{ github.token }}
+          path: sealed
+          merge-multiple: true
+          digest-mismatch: error
+      - name: Bind original file hashes and immutable checkout/build identities
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib, shutil, subprocess
+          sealed = pathlib.Path("sealed")
+          files = sorted(path for path in sealed.rglob("*") if path.is_file())
+          listing = [{"path": path.relative_to(sealed).as_posix(), "bytes": path.stat().st_size} for path in files]
+          print("TROPNIK_SEALED_AB_FILES=" + json.dumps(listing, separators=(",", ":")))
+          names = ("build-info.json", "browser-ui-smoothness-diagnostic.json", "browser-network.json")
+          expected = sorted(f"{variant}/web/pages-preview/dist/{name}" for variant in ("baseline", "optimized") for name in names)
+          assert [item["path"] for item in listing] == expected
+          assert all(not path.is_symlink() and 0 < path.stat().st_size <= 8 * 1024 * 1024 for path in files)
+          bindings = {"baseline": ("f836dce11579eae0e4596ee5b73f8bbe7246128f", "5880c4c7831be10f"),
+              "optimized": ("1710b201bfeed52613659ae3e4ca7f26638cb6cb", "1ba12be7cff233d3")}
+          hashes = {}
+          for path in files:
+              relative = path.relative_to(sealed).as_posix()
+              hashes[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+          for variant, (commit, build_id) in bindings.items():
+              source = pathlib.Path(variant + "-source")
+              actual = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip()
+              assert actual == commit
+              retained = sealed / variant / "web/pages-preview/dist"
+              build = json.loads((retained / "build-info.json").read_bytes())
+              assert build["sourceCommit"] == commit and build["buildId"] == build_id and build["hasApk"] is True
+              raw = json.loads((retained / "browser-ui-smoothness-diagnostic.json").read_bytes())
+              assert raw["sourceCommit"] == raw["environment"]["sourceCommit"] == "e12454abef64c26f4348c9e2a074d2d2f4a11db9"
+              target = source / "web/pages-preview/dist"
+              target.mkdir(parents=True, exist_ok=True)
+              for name in names:
+                  shutil.copyfile(retained / name, target / name)
+                  assert (target / name).read_bytes() == (retained / name).read_bytes()
+          pathlib.Path("ab-sealed-evidence/original-file-hashes.json").write_text(json.dumps(hashes, indent=2) + "\n")
+          print("TROPNIK_SEALED_AB_FILE_HASHES=" + json.dumps(hashes, separators=(",", ":")))
+          PY
+      - name: Revalidate the same raw observations without rerunning either application
+        run: node diagnostic/tools/pages-preview/map-clear-ab-report.mjs baseline-source optimized-source ab-sealed-evidence e12454abef64c26f4348c9e2a074d2d2f4a11db9
+      - name: Preserve original bytes and corrected evidence binding
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-map-clear-ab-sealed-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            sealed
+            ab-sealed-evidence
+          if-no-files-found: error
+          retention-days: 7
