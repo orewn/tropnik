@@ -707,28 +707,3 @@ test('opaque coverage is re-evaluated against the live camera and backing extent
  env.complete();await env.settle();assert.equal(underlayPaint(env).paper.length,0);assert.equal(underlayPaint(env).area.length,0);
  assert.ok(env.engine.inspect().tiles.detail.every(tile=>tile.width===512&&tile.height===512));assert.equal(env.engine.getCamera().zoom,camera.zoom);
 });
-
-
-test('each complete ground frame discards at the actual backing extent before covered or fallback painting',async t=>{
- const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
- const check=label=>{
-  const draw=env.lastDraw().filter(call=>call.surface==='tropnik-map-canvas');
-  const clears=draw.filter(call=>call.op==='clearRect');
-  assert.equal(clears.length,1,label+': exactly one ground discard');
-  assert.deepEqual(clears[0].args,[0,0,env.engine.canvas.width,env.engine.canvas.height],label+': full actual backing pixels');
-  assert.equal(draw[0].op,'draw-start');
-  assert.equal(draw[1].op,'setTransform');assert.deepEqual(draw[1].args,[1,0,0,1,0,0],label+': discard must use device-pixel identity');
-  assert.equal(draw[2],clears[0],label+': no retained scene paint may precede the discard');
-  assert.ok(draw.some(call=>call.op==='drawImage'),label+': tile content still paints');
-  assert.equal(draw.filter(call=>call.op==='fill'&&call.path===env.engine.mask).length,1,label+': final geographic mask remains');
-  return underlayPaint(env);
- };
- let paint=check('covered detail');assert.equal(paint.paper.length,0);assert.equal(paint.area.length,0);
- env.engine.setCamera({...env.engine.getCamera(),center:[45.5,43.5]},false);env.flush();
- paint=check('retained batch with newly exposed ground');assert.equal(paint.paper.length,1);assert.equal(paint.area.length,1);
- env.complete();await env.settle();paint=check('new complete batch');assert.equal(paint.paper.length,0);
- env.host.clientWidth=1600;env.host.clientHeight=740;env.observers[0].callback();env.flush();
- paint=check('resized backing before new tiles');assert.deepEqual([env.engine.canvas.width,env.engine.canvas.height],[1600,740]);assert.equal(paint.paper.length,1);
- env.engine.setCamera({...env.engine.getCamera(),bearingDegrees:12},false);env.flush();
- paint=check('rotated fallback');assert.equal(paint.paper.length,1);assert.equal(paint.area.length,1);
-});

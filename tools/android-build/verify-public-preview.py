@@ -30,7 +30,7 @@ HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("public_preview_release", HERE / "release-preview.py")
 release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
-PREVIOUS_CERTIFICATE = "a45e5fcbd9edcf0d1c4df1a8df7209b2417f13e7f95f64c36304ce4b9bd39dac"
+PREVIOUS_CERTIFICATE = "b6269435d1981a12aba09454271e2aa767b95288c3a21cbb92729aa2f5981fa8"
 PUBLIC_HOSTS = {"github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com"}
 SHARED_FIELDS = {
     "russiaCoverageProvenanceSha256": "russiaDisplayProvenanceSha256",

@@ -2,7 +2,7 @@ name: Focused map, satellite and offline diagnosis
 
 on:
   push:
-    branches: [diagnostics/map-interactions, perf/full-site-smoothness-0.4.24]
+    branches: [diagnostics/map-interactions, perf/full-site-smoothness-0.4.24, release/fair-map-sources-0.4.25]
   workflow_dispatch:
     inputs:
       traceSmoothness:
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   full-candidate-audit:
     name: Full candidate browser audit
-    if: github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/perf/full-site-smoothness-0.4.24'
+    if: github.repository == 'orewn/tropnik' && (github.ref == 'refs/heads/perf/full-site-smoothness-0.4.24' || github.ref == 'refs/heads/release/fair-map-sources-0.4.25')
     runs-on: ubuntu-24.04
     timeout-minutes: 32
     steps:
@@ -269,7 +269,7 @@ jobs:
     name: Diagnose UI smoothness with explicit tracing
     # Candidate diagnosis is separate from the unchanged, untraced full gate.
     # Keep the bounded panel/search windows available while replacing the SDK.
-    if: (github.event_name == 'workflow_dispatch' && inputs.traceSmoothness) || (github.event_name == 'push' && github.ref == 'refs/heads/perf/full-site-smoothness-0.4.24')
+    if: (github.event_name == 'workflow_dispatch' && inputs.traceSmoothness) || (github.event_name == 'push' && (github.ref == 'refs/heads/perf/full-site-smoothness-0.4.24' || github.ref == 'refs/heads/release/fair-map-sources-0.4.25'))
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
