@@ -26,9 +26,15 @@ const catalogue=JSON.parse(await readFile(new URL('build-info.json',ROOT),'utf8'
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
 const diagnosticSurface=process.env.TROPNIK_BROWSER_SURFACE||null;
 assert.ok(diagnosticSurface===null||diagnosticSurface==='headless'||diagnosticSurface==='x11'||diagnosticSurface==='headless-software','Unknown TROPNIK_BROWSER_SURFACE; use headless, x11 or headless-software for the surface diagnostic');
+const surfaceTrace=process.env.TROPNIK_BROWSER_SURFACE_TRACE==='1';
+assert.ok(process.env.TROPNIK_BROWSER_SURFACE_TRACE===undefined||process.env.TROPNIK_BROWSER_SURFACE_TRACE===''||surfaceTrace,'Unknown TROPNIK_BROWSER_SURFACE_TRACE');
+if(surfaceTrace){
+  assert.equal(diagnosticSurface,'headless-software','Explicit surface traces require the native software compositor diagnostic');
+  assert.equal(process.env.TROPNIK_BROWSER_TRACE,'1','Explicit surface traces must use the existing bounded trace recorder');
+}
 if(diagnosticSurface){
   assert.equal(runPolicy.diagnostic,'ui-smoothness','Surface A/B is diagnostic-only and cannot certify release');
-  assert.notEqual(process.env.TROPNIK_BROWSER_TRACE,'1','Surface A/B performance windows must remain untraced');
+  assert.ok(process.env.TROPNIK_BROWSER_TRACE!=='1'||surfaceTrace,'Surface A/B performance windows must remain untraced; use a separate explicit native trace job');
 }
 const traceEnabled=browserTraceEnabled(process.env.TROPNIK_BROWSER_TRACE,runPolicy.diagnostic);
 const REPORT = new URL(runPolicy.reportFile, ROOT);
@@ -886,7 +892,7 @@ try{
     assert.ok(commandLine.split(' ').includes(`--ozone-platform=${requestedOzone}`),'The browser did not select the requested Ozone surface');
     assert.equal(commandLine.includes('--headless'),diagnosticSurface!=='x11','The browser mode differs from the requested surface');
     assert.ok(commandLine.split(' ').includes(`--use-angle=${requestedAngle}`),'Surface A/B must retain the requested SwiftShader/WebGL renderer');
-    const receipt={schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,sourceCommit:process.env.GITHUB_SHA||null,surface:diagnosticSurface,requestedOzone,requestedAngle,chromiumVersion:browserVersion.Browser,commandLine,gpu:info.gpu,display:process.env.DISPLAY||null,staticBuildInfoSha256:createHash('sha256').update(await readFile(new URL('build-info.json',ROOT))).digest('hex'),inputArtifactSha256:process.env.TROPNIK_DIAGNOSTIC_BUILD_ARTIFACT_SHA256||null,profiles:profiles.filter(profile=>runPolicy.profiles.includes(profile.name)).map(profile=>({name:profile.name,width:profile.width,height:profile.height,deviceScaleFactor:profile.mobile?2:1,mobile:profile.mobile})),traceEnabled:false,scope:'Diagnostic comparison of full SwiftShader GL on Ozone headless/X11 versus native software compositor plus SwiftShader WebGL; identical application, viewport, input and budgets; this cannot certify release',capturedAt:new Date().toISOString()};
+    const receipt={schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,sourceCommit:process.env.GITHUB_SHA||null,surface:diagnosticSurface,requestedOzone,requestedAngle,chromiumVersion:browserVersion.Browser,commandLine,gpu:info.gpu,display:process.env.DISPLAY||null,staticBuildInfoSha256:createHash('sha256').update(await readFile(new URL('build-info.json',ROOT))).digest('hex'),inputArtifactSha256:process.env.TROPNIK_DIAGNOSTIC_BUILD_ARTIFACT_SHA256||null,profiles:profiles.filter(profile=>runPolicy.profiles.includes(profile.name)).map(profile=>({name:profile.name,width:profile.width,height:profile.height,deviceScaleFactor:profile.mobile?2:1,mobile:profile.mobile})),traceEnabled:surfaceTrace,instrumented:surfaceTrace,scope:'Diagnostic comparison of full SwiftShader GL on Ozone headless/X11 versus native software compositor plus SwiftShader WebGL; identical application, viewport, input and budgets; this cannot certify release',capturedAt:new Date().toISOString()};
     await writeFile(new URL('browser-surface-diagnostic.json',ROOT),JSON.stringify(receipt,null,2)+'\n');
   }
   const initialUrl=['offline-safety','satellite-continuity','ui-smoothness','ui-smoothness-cpu'].includes(runPolicy.diagnostic)?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;

@@ -5,7 +5,7 @@ import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {installSmoothnessRecorder,sessionLayoutShift,summarizeSmoothness,smoothnessIssues,assertSmoothnessAudit,performanceBudgetIssues,observeSmoothnessPan,runSmoothnessAudit,measureSmoothnessWindow,smoothnessTraceEnabled,SMOOTHNESS_LIMITS,SMOOTHNESS_TRACE_SCENARIOS} from '../browser-smoothness.mjs';
+import {installSmoothnessRecorder,sessionLayoutShift,summarizeSmoothness,smoothnessIssues,assertSmoothnessAudit,performanceBudgetIssues,observeSmoothnessPan,runSmoothnessAudit,measureSmoothnessWindow,smoothnessTraceEnabled,SMOOTHNESS_LIMITS,SMOOTHNESS_SCENARIOS,SMOOTHNESS_TRACE_SCENARIOS} from '../browser-smoothness.mjs';
 import {DESKTOP_TRACE_LIMITS,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from '../browser-trace.mjs';
 import {smoothnessFixture,smoothnessWindowFixture} from './smoothness-fixture.mjs';
 
@@ -17,6 +17,11 @@ test('smoothness tracing needs the explicit normal-speed focused diagnostic opt-
   assert.equal(smoothnessTraceEnabled({diagnostic,traceValue,cpuSlowdownRate}),diagnostic==='ui-smoothness'&&traceValue==='1'&&cpuSlowdownRate===1);
  }
  assert.equal(smoothnessTraceEnabled(),false);
+});
+
+test('focused trace declarations follow the actual audit scenario order',()=>{
+ const measuredOrder=SMOOTHNESS_SCENARIOS.filter(name=>SMOOTHNESS_TRACE_SCENARIOS.includes(name));
+ assert.deepEqual(SMOOTHNESS_TRACE_SCENARIOS,measuredOrder,'Trace receipt order must match runSmoothnessAudit measurement order');
 });
 
 test('focused traces wrap each measured action once and drain outside its window, including a capture cap',async t=>{

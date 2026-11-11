@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import {dispatchSourceEndPan,assertSourceEndPanInput} from './browser-source-end-pan.mjs';
-import {traceDesktopSelection,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from './browser-trace.mjs';
+import {traceDesktopSelection,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,TERRAIN_TRACE_LIMITS} from './browser-trace.mjs';
 import {sendNativeText} from './browser-native-text.mjs';
 
 // These are controlled-browser interaction budgets, not a claim of physical
 // device FPS. RAF callbacks do not prove that the GPU presented every frame.
 export const SMOOTHNESS_LIMITS=Object.freeze({frameP95Ms:35,maxFrameGapMs:150,inputToFrameMs:200,eventDurationMs:200,layoutShift:.1});
 export const SMOOTHNESS_SCENARIOS=Object.freeze(['panel','explore-search','explore-filters','catalog-scroll','map-pan','map-zoom','layer-switch','site-search']);
-export const SMOOTHNESS_TRACE_SCENARIOS=Object.freeze(['panel','explore-search']);
+export const SMOOTHNESS_TRACE_SCENARIOS=Object.freeze(['panel','explore-search','map-zoom','layer-switch','site-search']);
 
 export function smoothnessTraceEnabled({diagnostic=null,traceValue,cpuSlowdownRate=1}={}){
  return diagnostic==='ui-smoothness'&&traceValue==='1'&&cpuSlowdownRate===1;
@@ -175,7 +175,7 @@ export async function measureSmoothnessWindow(cdp,name,action,{evaluate,report,t
   }finally{releaseDrain();}
  };
  if(!tracing||!SMOOTHNESS_TRACE_SCENARIOS.includes(name))return measure();
- const options={...traceOptions,enabled:true,sourceCommit,prefix:`${report.profile}-ui-smoothness-${name}`,scope:`ui-smoothness/${report.profile}/${name}`,categories:FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,captureCategoryEvidence:true,beforeDrain:()=>windowClosed};
+ const options={...traceOptions,...(name==='map-zoom'?{limits:TERRAIN_TRACE_LIMITS}:{}),enabled:true,sourceCommit,prefix:`${report.profile}-ui-smoothness-${name}`,scope:`ui-smoothness/${report.profile}/${name}`,categories:FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,captureCategoryEvidence:true,beforeDrain:()=>windowClosed};
  try{
   const {trace}=await traceDesktopSelection(cdp,measure,options);report.traces.push({scenario:name,...trace});
  }catch(error){if(error.traceReceipt)report.traces.push({scenario:name,...error.traceReceipt});throw error;}
