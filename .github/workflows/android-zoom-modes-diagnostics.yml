@@ -42,20 +42,19 @@ jobs:
           node tools/android-build/prepare-custom-map.mjs --check
           python tools/android-build/prepare-landscape.py --check
           node web/scripts/verify-custom-map.mjs
-      - name: Preserve the existing four-case WebGL2 mask proof
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-        run: node --test tools/pages-preview/tests/terrain-mask.browser.mjs
       - name: Prepare the verified Android link and static site
         run: |
           node tools/pages-preview/fetch-apk.mjs
           node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Preserve the existing four-case WebGL2 mask proof
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: node --test tools/pages-preview/tests/terrain-mask.browser.mjs
       - name: Run the existing Android detail, satellite, overview and 3D sequence
         timeout-minutes: 8
         env:
           GITHUB_SHA: ${{ github.sha }}
           TROPNIK_BROWSER_DIAGNOSTIC: zoom-modes
-          TROPNIK_BROWSER_TRACE: '0'
         run: node tools/pages-preview/browser-smoke.mjs
       - name: Verify the receipt is diagnostic only and retains mode attribution
         run: |
