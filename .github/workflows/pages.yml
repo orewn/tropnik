@@ -68,6 +68,8 @@ jobs:
           test "$PAGES_CONFIG_BASE" = '/tropnik'
       - name: Build and verify the static site
         run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify Russia mask pixels and GPU context recovery
+        run: node --test tools/pages-preview/tests/terrain-mask.browser.mjs
       - name: Verify real mobile rendering and sheet interaction and desktop map interactions
         # The prior full audit took 20m37s. The required satellite matrix adds
         # 169.905s measured in e749d99, including native8 and overzoom in both
@@ -81,6 +83,7 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
+          import {createHash} from 'node:crypto';
           import {readFileSync, appendFileSync} from 'node:fs';
           import {assertBrowserReport} from './tools/pages-preview/browser-report.mjs';
           const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
@@ -89,6 +92,11 @@ jobs:
           assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(build.hasApk, true);
           assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue);
+          const mask = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-mask-verification.json', 'utf8'));
+          assert.equal(mask.verified, true);
+          assert.equal(mask.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(mask.rendererSHA256, createHash('sha256').update(readFileSync('web/public/terrain/terrain-renderer.js')).digest('hex'));
+          assert.equal(mask.cases.length, 4);
           appendFileSync(process.env.GITHUB_OUTPUT, `build_id=${build.buildId}\n`);
           assert.match(process.env.GITHUB_RUN_ID, /^\d+$/);
           assert.match(process.env.GITHUB_RUN_ATTEMPT, /^\d+$/);
@@ -99,7 +107,9 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: tropnik-pages-browser-failure-${{ github.run_attempt }}
-          path: web/pages-preview/dist/browser-failure.*
+          path: |
+            web/pages-preview/dist/browser-failure.*
+            web/pages-preview/dist/browser-terrain-mask-verification.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Preserve map design checks across zoom levels

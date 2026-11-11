@@ -125,6 +125,7 @@ export class CustomMapEngine {
   private labelDiagnostics:CustomMapLabelDiagnostic[]=[];
   private drawRevision=0;
   private frame=0;
+  private paintRequested=false;
   private animation=0;
   private zoomTarget:number|null=null;
   private settleTimer?:ReturnType<typeof setTimeout>;
@@ -190,7 +191,14 @@ export class CustomMapEngine {
     this.padding={...padding};this.publishInspection();
   }
   setFloor(camera:CustomMapCamera){this.floor={...camera};}
-  setObstacles(rectangles:typeof this.obstacles){this.obstacles=rectangles;this.schedule();}
+  setObstacles(rectangles:typeof this.obstacles){
+    // Count/label reflow can measure the same controls after every keystroke.
+    // Their unchanged footprints do not invalidate any map pixels.
+    if(rectangles.length===this.obstacles.length&&rectangles.every((rect,index)=>{
+      const previous=this.obstacles[index];return rect.left===previous.left&&rect.top===previous.top&&rect.right===previous.right&&rect.bottom===previous.bottom;
+    }))return;
+    this.obstacles=rectangles.map(rect=>({...rect}));this.schedule();
+  }
   private stopAnimation(){cancelAnimationFrame(this.animation);this.animation=0;this.zoomTarget=null;}
   setCamera(next:CustomMapCamera,animate=false){this.moveCamera(next,animate);}
   private moveCamera(next:CustomMapCamera,animate:boolean,zoomControl=false){
@@ -262,7 +270,7 @@ export class CustomMapEngine {
         record.button.textContent=marker.kind==='plan'?marker.label.slice(0,2):'';
       }
     }
-    this.schedule();
+    this.schedule(false);
   }
   setPosition(coordinate:[number,number]|null){const others=[...this.markers.values()].map(r=>r.marker).filter(marker=>marker.id!=='current-position');if(coordinate)others.push({id:'current-position',coordinate,label:'Моё местоположение',kind:'position'});this.setMarkers(others);}
   private updateSelectedArea(){
@@ -338,7 +346,13 @@ export class CustomMapEngine {
   private updateState(change:Partial<CustomMapState>){
     if(this.disposed)return;this.state={...this.state,...change,residentTiles:this.tiles.resident,pendingTiles:this.tiles.pending};this.publishInspection();this.options.onState?.({...this.state});
   }
-  private schedule(){if(!this.frame&&!this.disposed&&this.active)this.frame=requestAnimationFrame(()=>{this.frame=0;this.draw();});}
+  private schedule(paint=true){
+    this.paintRequested||=paint;
+    if(!this.frame&&!this.disposed&&this.active)this.frame=requestAnimationFrame(()=>{
+      this.frame=0;const repaint=this.paintRequested;this.paintRequested=false;
+      if(repaint)this.draw();else this.drawMarkers();
+    });
+  }
   private settled(){
     if(this.disposed||!this.active)return;
     this.setMoving(false);

@@ -127,8 +127,10 @@ test('portrait and wide country views open only their real visible display exten
   assert.equal(map.cameras.length,moves);assert.equal(map.fits.length,fits);
 });
 
-function sceneFixture(initial){
+function sceneFixture(initial,{holdMask=false}={}){
   const renderers=[],loads=[],model=createTerrainModel(grid),source=deferred();let host;
+  const mask=deferred(),maskLoads=[],displayMask={width:2,height:2,pixels:new Uint8Array(4).fill(255),source:{allowedPixels:4,bounds:[...grid.bounds]}};
+  if(!holdMask)mask.resolve(displayMask);
   class Renderer{
     constructor(canvas,data,options){this.canvas=canvas;this.options=options;this.model=model;this.segments=[];this.yaw=.25;renderers.push(this);}
     setGeometry(geometry){const result=terrainRoute(this.model,geometry);this.segments=result.segments;this.canvas.dataset.routeSegments=String(result.segments.length);this.canvas.dataset.routeClipped=String(result.clipped);return{segments:result.segments.length,clipped:result.clipped};}
@@ -142,9 +144,10 @@ function sceneFixture(initial){
   host=componentHost('components/MapLandscapeScene.tsx','MapLandscapeScene',{
     './MapIcon':{MapIcon:'icon'},'./MapAttribution':{MapAttribution:'credit'},'@/lib/custom-map-landscape':{createCustomLandscapeLoader:()=>loader},
     '@/lib/custom-map-surface':{createLandscapeSurface:async()=>({width:1,height:1,source:{loadedTiles:0}})},'@/lib/terrain-viewport':{observeTerrainViewport:()=>()=>{}},
+    '@/lib/custom-map-mask':{prepareLandscapeDisplayMask:(bounds,options)=>{maskLoads.push({bounds,options});return mask.promise;}},
   });
   let props={bounds:grid.bounds,title:'Ландшафт',onClose(){},...initial};host.render(props);
-  return{host,loads,renderers,loader,source,
+  return{host,loads,renderers,loader,source,mask,maskLoads,displayMask,
     update(change){props={...props,...change};host.render(props);},
     async ready(){source.resolve({prepared:[{TerrainRenderer:Renderer},grid,model],provenance:{}});await host.settle();return renderers.at(-1);},
     inspection:()=>JSON.parse(host.find(node=>node.type==='section').props.ref.current.dataset.terrainInspection),
@@ -169,6 +172,29 @@ test('partial and failed route rendering stay disclosed after successful terrain
   env.update({geometry:line(41,41.1)});renderer.frame();assert.equal(env.inspection().route.state,'unavailable');assert.match(env.host.text(),/не отображается в пределах этого участка/);
 });
 
+test('a nonfatal route notice cannot be mistaken for a renderer error during cartography loading',async t=>{
+  const env=sceneFixture({geometry:line(41,41.1),routeStatus:'ready'});t.after(()=>env.host.unmount());const renderer=await env.ready();renderer.frame();
+  const notice=()=>env.host.find(node=>node.props?.className==='terrain-progress');
+  assert.equal(notice().props['data-terrain-status'],'route-warning');assert.equal(env.inspection().state,'ready');
+  renderer.options.onError('Восстанавливаем графический контекст');env.host.render();
+  assert.equal(notice().props['data-terrain-status'],'renderer-error');assert.equal(env.inspection().state,'recovering');
+  renderer.frame();assert.equal(notice().props['data-terrain-status'],'route-warning');assert.equal(env.inspection().state,'ready');
+});
+
 test('late terrain preparation after close cannot resurrect a scene',async()=>{
   const env=sceneFixture({geometry:line()});env.host.unmount();assert.equal(env.loads[0].options.signal.aborted,true);assert.equal(env.loader.disposed,true);await env.ready();assert.equal(env.renderers.length,0);
+});
+
+test('the real scene never creates an unmasked renderer while country coverage is pending or unavailable',async t=>{
+  const env=sceneFixture({geometry:line()},{holdMask:true});t.after(()=>env.host.unmount());await env.ready();
+  assert.equal(env.renderers.length,0);assert.equal(env.inspection().state,'loading');assert.equal(env.inspection().displayMask.state,'loading');
+  env.mask.resolve(env.displayMask);await env.host.settle();assert.equal(env.renderers.length,1);assert.equal(env.renderers[0].options.displayMask,env.displayMask);
+  assert.equal(env.inspection().state,'loading','mask readiness alone cannot claim a painted terrain frame');env.renderers[0].frame();assert.equal(env.inspection().state,'ready');assert.equal(env.inspection().displayMask.state,'ready');
+  const unavailable=sceneFixture({},{holdMask:true});t.after(()=>unavailable.host.unmount());await unavailable.ready();unavailable.mask.reject(new Error('coverage unavailable'));await unavailable.host.settle();
+  assert.equal(unavailable.renderers.length,0);assert.equal(unavailable.inspection().state,'failed');assert.equal(unavailable.inspection().displayMask.state,'failed');assert.match(unavailable.host.text(),/Не удалось подготовить границы/);assert.equal(unavailable.loads[0].options.signal.aborted,true);
+});
+
+test('closing a scene cancels mask preparation and a late mask cannot resurrect its renderer',async()=>{
+  const env=sceneFixture({geometry:line()},{holdMask:true});await env.ready();env.host.unmount();assert.equal(env.maskLoads[0].options.signal.aborted,true);
+  env.mask.resolve(env.displayMask);await env.host.settle();assert.equal(env.renderers.length,0);
 });

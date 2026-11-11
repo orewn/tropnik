@@ -3,9 +3,9 @@
   height:72px!important;min-height:72px;
   padding:0 clamp(16px,3vw,32px)!important;gap:24px!important;
   border-bottom:1px solid var(--line)!important;
-  background:rgba(255,254,248,.96)!important;
+  background:var(--surface)!important;
   box-shadow:0 8px 24px rgba(24,55,42,.055);
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  backdrop-filter:none;-webkit-backdrop-filter:none;
 }
 .header :global(.brand){position:relative;z-index:2;min-height:48px;flex-shrink:0}
 .header :global(.top-nav){

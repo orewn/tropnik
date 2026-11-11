@@ -920,7 +920,7 @@ async function Oe(e = {}) {
 //#region web/lib/terrain-preparation.worker.ts?worker&url
 var ke = "" + new URL("../workers/terrain-preparation.worker-B8lieq38.js", import.meta.url).href, Ae = "20261106-3", z = new le(), je = () => typeof location > "u" ? "https://map-preview.local" : location.origin, B, Me = `/terrain/terrain-grid.json?v=${Ae}`;
 new fe({
-	loadModule: () => (B ||= import("./terrain-renderer-pEGv39m9.js").catch((e) => {
+	loadModule: () => (B ||= import("./terrain-renderer-DNEByPg0.js").catch((e) => {
 		throw B = void 0, e;
 	}), B),
 	loadGrid: () => V(Me),
@@ -1884,7 +1884,7 @@ var jt = class {
 		this.framed = null, this.pitch = 0, this.padding = {}, this.size = {
 			width: 1,
 			height: 1
-		}, this.pixelRatio = 1, this.coverageRevision = -1, this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.drawRevision = 0, this.frame = 0, this.animation = 0, this.zoomTarget = null, this.pointer = new ie({
+		}, this.pixelRatio = 1, this.coverageRevision = -1, this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.drawRevision = 0, this.frame = 0, this.paintRequested = !1, this.animation = 0, this.zoomTarget = null, this.pointer = new ie({
 			minZoom: -2,
 			maxZoom: 18,
 			rotate: !0
@@ -2063,7 +2063,10 @@ var jt = class {
 		this.floor = { ...e };
 	}
 	setObstacles(e) {
-		this.obstacles = e, this.schedule();
+		e.length === this.obstacles.length && e.every((e, t) => {
+			let n = this.obstacles[t];
+			return e.left === n.left && e.top === n.top && e.right === n.right && e.bottom === n.bottom;
+		}) || (this.obstacles = e.map((e) => ({ ...e })), this.schedule());
 	}
 	stopAnimation() {
 		cancelAnimationFrame(this.animation), this.animation = 0, this.zoomTarget = null;
@@ -2188,7 +2191,7 @@ var jt = class {
 			}
 			e.marker = t, t.kind !== "direction" && (e.button.setAttribute("aria-label", t.kind === "trail" ? `Открыть маршрут ${t.label}` : t.label), e.button.dataset.trailId = t.kind === "trail" ? t.id : "", e.button.classList.toggle("is-selected", !!t.active), e.button.textContent = t.kind === "plan" ? t.label.slice(0, 2) : "");
 		}
-		this.schedule();
+		this.schedule(!1);
 	}
 	setPosition(e) {
 		let t = [...this.markers.values()].map((e) => e.marker).filter((e) => e.id !== "current-position");
@@ -2344,9 +2347,11 @@ var jt = class {
 			pendingTiles: this.tiles.pending
 		}, this.publishInspection(), this.options.onState?.({ ...this.state }));
 	}
-	schedule() {
-		!this.frame && !this.disposed && this.active && (this.frame = requestAnimationFrame(() => {
-			this.frame = 0, this.draw();
+	schedule(e = !0) {
+		this.paintRequested ||= e, !this.frame && !this.disposed && this.active && (this.frame = requestAnimationFrame(() => {
+			this.frame = 0;
+			let e = this.paintRequested;
+			this.paintRequested = !1, e ? this.draw() : this.drawMarkers();
 		}));
 	}
 	settled() {

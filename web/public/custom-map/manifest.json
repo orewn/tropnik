@@ -79,8 +79,8 @@
     },
     {
       "path": "web/app/custom-map.css",
-      "sizeBytes": 2625,
-      "sha256": "76e87a406e0f5a80981638ffaa845d9a8bcb404e4ea99c24621e657c930e6ff4"
+      "sizeBytes": 3518,
+      "sha256": "5de071c4122f6e2eee90ea342b4d0d88c5d4310baef8f1cb8b503c0094290b80"
     },
     {
       "path": "web/app/map-detail.css",
@@ -99,8 +99,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 41113,
-      "sha256": "2204683a1c783a9ce7906af6e88f89584ed580e40c402aa5394b9c3a9b93f2fe"
+      "sizeBytes": 41753,
+      "sha256": "4b26a2da88d164604e088536d8b6cc01a12cb353c2f8da5a730081c74c3760e7"
     },
     {
       "path": "web/lib/custom-map-painter.ts",
@@ -229,8 +229,8 @@
     },
     {
       "path": "web/public/terrain/terrain-renderer.js",
-      "sizeBytes": 72640,
-      "sha256": "f8393a82cbbcc5248497d93141c9d86c1099a8ac2c09105a2ad32a2096151747"
+      "sizeBytes": 77315,
+      "sha256": "725013003090e74eb48b18093da40a9847a08ac15e08614548281e4e1cccdc2d"
     },
     {
       "path": "web/tsconfig.json",
@@ -238,22 +238,22 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "5e46e7687359f229a335e909812e7043dd270bbf10d22d584c0024cdfea018b6",
+  "sourceInputsSha256": "c8c33de567e66d145d92386353ae4a511fb88331122d18974fa1db393f0f4d5e",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "4c9e7d7688524db7fefc05d6bb3ae9b27eac960e27346ff379810c43b3ea9841"
+      "sha256": "bb50d99dbbe56facdd00847c706fd34cc2c9d58e815f0f4df3140ea0fdf65486"
     },
     {
-      "path": "chunks/custom-map-entry-jmtZFlIn.js",
-      "sizeBytes": 94403,
-      "sha256": "7a2013b6c29df0e6014adc6032beb52b81cb137ba39af0fab668202bd1d47f8e"
+      "path": "chunks/custom-map-entry-DRdqM-8B.js",
+      "sizeBytes": 94767,
+      "sha256": "a09fa79e7d927e7be3d831a8d4021c758d1bcde022ba0fa46f788e00bf66664a"
     },
     {
-      "path": "chunks/terrain-renderer-pEGv39m9.js",
-      "sizeBytes": 67253,
-      "sha256": "310da5b0116577c1e0c787e545e281780d91c3c28b521da07cb9c5263c791f99"
+      "path": "chunks/terrain-renderer-DNEByPg0.js",
+      "sizeBytes": 71859,
+      "sha256": "86de3dcad306da24192733347c26c690d00e6ae5380d8247345d2395a435b695"
     },
     {
       "path": "index.html",
@@ -268,12 +268,12 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "e780f96acdf7df40e39379693eb82e366a5726a7f0e6705048e3b37433e81bc7"
+      "sha256": "5cf476133407e372ff3640df2ebd199d0d99b9da412bcc69ed0a161e91a5d11e"
     },
     {
       "path": "map.css",
-      "sizeBytes": 74474,
-      "sha256": "2a2caafb135518eda0785ebac322b86b74a6c0c8b4e89394a027d0054c8715d7"
+      "sizeBytes": 74999,
+      "sha256": "20f4d8a179e12adafa2d9742835143482c3c3a557f27da0fc03b239ecb0df5e1"
     },
     {
       "path": "offline-manifest.json",

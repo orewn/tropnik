@@ -22,7 +22,9 @@ test('home page uses the unified editorial service component',async()=>{
 test('header has one calm desktop navigation surface and a bounded mobile menu',async()=>{
   const css=await read('components/Header.module.css');
   assert.match(css,/position:sticky!important/);
-  assert.match(css,/backdrop-filter:blur\(18px\)/);
+  assert.match(css,/background:var\(--surface\)!important/);
+  assert.match(css,/backdrop-filter:none;-webkit-backdrop-filter:none/);
+  assert.doesNotMatch(css,/backdrop-filter:blur\(/);
   assert.match(css,/top-nav a\.active\).*background:#fffef9/);
   assert.match(css,/height:calc\(100dvh - 68px\)/);
   assert.match(css,/safe-area-inset-bottom/);

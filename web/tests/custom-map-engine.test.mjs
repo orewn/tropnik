@@ -127,6 +127,23 @@ test('production engine coalesces changes, has no idle draw loop and pauses anim
  env.engine.setActive(true);await env.settle();assert.equal(env.store.active,true);assert.ok(env.engine.inspect().drawRevision>paused);assert.equal(env.frames.size,0);
 });
 
+test('search markers and identical obstacle measurements preserve the painted map',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+ const before=env.engine.inspect().drawRevision,paintCalls=env.calls.length;
+ const marker={id:'search-result',coordinate:[40.3,43.3],label:'Найденный маршрут',kind:'trail'};
+ env.engine.setMarkers([marker]);env.flush();
+ assert.equal(env.engine.inspect().drawRevision,before);assert.equal(env.calls.length,paintCalls);
+ const button=env.host.querySelector('.tropnik-point-marker');assert.ok(button);assert.equal(button.getAttribute('aria-label'),'Открыть маршрут Найденный маршрут');
+ env.engine.setMarkers([{...marker,active:true}]);env.engine.setObstacles([]);env.flush();
+ assert.equal(button.classList.contains('is-selected'),true);assert.equal(env.engine.inspect().drawRevision,before);
+ const obstacle={left:20,top:30,right:80,bottom:90};env.engine.setObstacles([obstacle]);env.flush();
+ const moved=env.engine.inspect().drawRevision;assert.equal(moved,before+1);
+ env.engine.setObstacles([{...obstacle}]);env.flush();assert.equal(env.engine.inspect().drawRevision,moved);
+ obstacle.right=120;env.engine.setObstacles([obstacle]);env.flush();assert.equal(env.engine.inspect().drawRevision,moved+1,'Caller mutation must not change the retained obstacle snapshot');
+ env.engine.setLabels([{id:'new-label',coordinate:[40.2,43.2],label:'Новая подпись'}]);env.engine.setMarkers([]);env.flush();
+ assert.equal(env.engine.inspect().drawRevision,moved+2,'A marker-only update must not cancel an already queued map paint');assert.equal(env.host.querySelector('.tropnik-point-marker'),null);
+});
+
 test('late source batches cannot replace a newer camera or resurrect state after destroy',async()=>{
  const env=fixture();await turn();const old=env.pending();assert.ok(old.length>0);
  env.engine.setCamera({center:[100,55],zoom:8});const latest=env.pending().filter(job=>!old.includes(job));assert.ok(latest.length>0);
@@ -186,7 +203,7 @@ test('the engine keeps source priority-city typography and bounds diagnostic can
  env.complete(job=>job!==city);env.store.resolve(city,{labels:[env.labelFor(city,camera.center,'Москва',{rank:9,priorityCity:true})]});await env.settle();
  const painted=env.lastDraw().find(call=>call.op==='fillText'&&call.text==='Москва');assert.ok(painted);assert.match(painted.font,/20px/,'A source priority city must keep its geographic city typography');
  const labels=Array.from({length:1000},(_,index)=>env.labelFor(city,[39.8,43.5],'Outside '+index));
- const current=env.store.cache.get(city.key);current.labels=labels;env.engine.setObstacles([]);env.flush();assert.equal(env.engine.getLabelDiagnostics().length,512);assert.equal(env.lastDraw().some(call=>call.op==='fillText'&&call.text.startsWith('Outside ')),false);
+ const current=env.store.cache.get(city.key);current.labels=labels;env.engine.setLabels([]);env.flush();assert.equal(env.engine.getLabelDiagnostics().length,512);assert.equal(env.lastDraw().some(call=>call.op==='fillText'&&call.text.startsWith('Outside ')),false);
 });
 
 test('source outdoor glyphs and names share one whole collision footprint at the viewport edge',async t=>{

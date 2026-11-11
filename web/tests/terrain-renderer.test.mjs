@@ -150,6 +150,30 @@ function cartography(source,color=[180,60,30,255]){
  const pixels=new Uint8ClampedArray(16);for(let at=0;at<16;at+=4)pixels.set(color,at);
  return{width:2,height:2,pixels,source:{name:'Source map',bounds:[...source.bounds],projection:'regular-longitude-latitude',sampleLayout:'grid-nodes',rowOrder:'north-to-south',columnOrder:'west-to-east',requestedTiles:1,loadedTiles:1}};
 }
+function displayMask(source,values=[0,0,0,0]){return{width:2,height:2,pixels:new Uint8Array(values),source:{scope:'russia-display-area',coverageVersion:'a'.repeat(16),lod:'source',cells:['test'],bounds:[...source.bounds],projection:'regular-longitude-latitude',sampleLayout:'pixel-cells',rowOrder:'north-to-south',columnOrder:'west-to-east',boundaryRule:'exclude-intersecting-texels',allowedPixels:values.filter(value=>value===255).length}};}
+
+test('Canvas display mask clips terrain, cartography, rim and route before the first frame without changing elevations',t=>{
+  const env=environment(t),source=grid(3,3),original=structuredClone(source),prepared=createTerrainModel(source),heights=prepared.heights.slice(),mask=displayMask(source);
+  const renderer=new TerrainRenderer(env.canvas,source,{forceCanvas:true,preparedModel:prepared,displayMask:mask});
+  assert.notEqual(renderer.displayMask.pixels,mask.pixels);mask.pixels.fill(255);
+  renderer.setCartography(cartography(source));renderer.setGeometry({type:'LineString',coordinates:[[40.001,43.01],[40.019,43.01]]});env.flush();
+  const image=env.ctx.lastImage.data;for(let at=0;at<image.length;at+=4)assert.deepEqual([...image.subarray(at,at+4)],[223,230,218,255]);
+  assert.equal(renderer.canvas.dataset.displayMask,'russia-display-area');assert.deepEqual(source,original);assert.deepEqual(prepared.heights,heights);
+  assert.ok([...renderer.software.boundaries.values()].every(boundary=>boundary.count===0),'a rectangular decorative rim cannot expose excluded land');
+  assert.equal(env.frames.size,0);renderer.rotate(.4);env.flush();assert.ok(renderer.software.depth.every(value=>value===Infinity));
+  renderer.destroy();assert.equal(renderer.displayMask,null);assert.equal(renderer.software.displayMask,null);
+});
+
+test('GPU display mask retains one owned texture across frames and restores it after context loss or Canvas fallback',t=>{
+  const record=recordingGL(),env=environment(t,{gl:record.gl}),source=grid(3,3),mask=displayMask(source,[255,0,0,255]);
+  const renderer=new TerrainRenderer(env.canvas,source,{displayMask:mask});env.flush();assert.equal(renderer.gpu.displayMask,renderer.displayMask);
+  const before=record.counts.textures;renderer.rotate(.2);env.flush();assert.equal(record.counts.textures,before,'camera changes do not recreate the geographic mask');
+  const owned=renderer.displayMask;env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();
+  assert.equal(renderer.displayMask,owned);assert.equal(renderer.gpu.displayMask,owned);
+  env.canvas.events.get('webglcontextlost')({preventDefault(){}});renderer.fallbackAfterLoss();env.flush();
+  assert.equal(renderer.software.displayMask,owned);assert.equal(renderer.canvas.dataset.displayMask,'russia-display-area');
+  renderer.destroy();assert.equal(record.counts.deletedTextures,record.counts.textures);assert.equal(env.frames.size,0);
+});
 test('cartography validates bounded pixels, exact geographic grid alignment and source coverage',()=>{
  const source=grid(),valid=cartography(source);assert.equal(validateTerrainCartography(valid,source),valid);
  for(const change of[s=>s.width=2048,s=>s.height=1,s=>s.pixels=new Uint8ClampedArray(15),s=>s.source.bounds[0]+=.0001,s=>s.source.projection='EPSG:3857',s=>s.source.sampleLayout='pixel-centres',s=>s.source.rowOrder='south-to-north',s=>s.source.loadedTiles=2,s=>s.source.requestedTiles=17]){

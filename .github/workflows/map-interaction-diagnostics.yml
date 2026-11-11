@@ -54,6 +54,8 @@ jobs:
           node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
       - name: Verify native keyboard events and layout-shift attribution
         run: node --test tools/pages-preview/tests/browser-native-text.browser.mjs
+      - name: Verify Russia mask pixels and GPU context recovery
+        run: node --test tools/pages-preview/tests/terrain-mask.browser.mjs
       - name: Run the complete production browser audit before main
         timeout-minutes: 26
         env:
@@ -63,6 +65,7 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
+          import {createHash} from 'node:crypto';
           import {readFileSync} from 'node:fs';
           import {assertBrowserReport} from './tools/pages-preview/browser-report.mjs';
           const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
@@ -71,6 +74,11 @@ jobs:
           assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(build.hasApk, true);
           assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue);
+          const mask = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-mask-verification.json', 'utf8'));
+          assert.equal(mask.verified, true);
+          assert.equal(mask.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(mask.rendererSHA256, createHash('sha256').update(readFileSync('web/public/terrain/terrain-renderer.js')).digest('hex'));
+          assert.equal(mask.cases.length, 4);
           console.log(JSON.stringify({verified:true,sourceCommit:build.sourceCommit,buildId:build.buildId,profiles:browser.profiles.length}));
           NODE
       - name: Preserve candidate evidence without publication
@@ -84,6 +92,7 @@ jobs:
             web/pages-preview/dist/verification.json
             web/pages-preview/dist/http-verification.json
             web/pages-preview/dist/browser-native-text-verification.json
+            web/pages-preview/dist/browser-terrain-mask-verification.json
             web/pages-preview/dist/browser-verification.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
