@@ -95,8 +95,9 @@ test('satellite attribution retains exact geometry over loading cycles with all 
    await settle();assert.equal((await evaluate(geometryExpression)).expanded,expanded);
   };
   const capture=async filename=>{const {data}=await cdp.call('Page.captureScreenshot',{format:'png'}),bytes=Buffer.from(data,'base64');await writeFile(join(pictures,filename),bytes);return{path:'design-qa/map-attribution/'+filename,bytes:bytes.length,sha256:sha(bytes)};};
-  const licenceInteraction=async entry=>{
-   const before=await evaluate(`(()=>{const panel=document.querySelector('.map-attribution-content'),r=panel.getBoundingClientRect();window.__licenceInputs={tabs:[],wheels:[]};const tab=event=>{if(event.key==='Tab'&&window.__licenceInputs.tabs.length<16)window.__licenceInputs.tabs.push({key:event.key,trusted:event.isTrusted})},wheel=event=>{if(panel.contains(event.target)&&window.__licenceInputs.wheels.length<8)window.__licenceInputs.wheels.push({deltaY:event.deltaY,trusted:event.isTrusted})};document.addEventListener('keydown',tab);panel.addEventListener('wheel',wheel,{passive:true});window.__removeLicenceInputs=()=>{document.removeEventListener('keydown',tab);panel.removeEventListener('wheel',wheel)};return{scrollTop:panel.scrollTop,scrollHeight:panel.scrollHeight,clientHeight:panel.clientHeight,overflowY:getComputedStyle(panel).overflowY,center:{x:(r.left+r.right)/2,y:(r.top+r.bottom)/2},hrefs:[...panel.querySelectorAll('a')].map(a=>a.getAttribute('href'))}})()`);
+  const licenceInteraction=async(entry,profile)=>{
+   const before=await evaluate(`(()=>{const panel=document.querySelector('.map-attribution-content'),r=panel.getBoundingClientRect();window.__licenceInputs={tabs:[],wheels:[]};const tab=event=>{if(event.key==='Tab'&&window.__licenceInputs.tabs.length<16)window.__licenceInputs.tabs.push({key:event.key,trusted:event.isTrusted})},wheel=event=>{if(panel.contains(event.target)&&window.__licenceInputs.wheels.length<8)window.__licenceInputs.wheels.push({deltaY:event.deltaY,trusted:event.isTrusted})};document.addEventListener('keydown',tab);panel.addEventListener('wheel',wheel,{passive:true});window.__removeLicenceInputs=()=>{document.removeEventListener('keydown',tab);panel.removeEventListener('wheel',wheel)};return{devicePixelRatio,scrollTop:panel.scrollTop,scrollHeight:panel.scrollHeight,clientHeight:panel.clientHeight,overflowY:getComputedStyle(panel).overflowY,center:{x:(r.left+r.right)/2,y:(r.top+r.bottom)/2},hrefs:[...panel.querySelectorAll('a')].map(a=>a.getAttribute('href'))}})()`);
+   assert.equal(before.devicePixelRatio,profile.dpr,'Observe the actual DPR before converting wheel transport units');
    const scrollable=['auto','scroll'].includes(before.overflowY)&&before.scrollHeight>before.clientHeight+1,interaction={input:'native-cdp-wheel-and-tab',before,scrollable,links:[],wheelTransitions:[]};entry.licenseInteraction=interaction;
    await evaluate("document.querySelector('.map-attribution-content a').focus()");await settle();
    for(let index=0;index<before.hrefs.length;index++){
@@ -106,10 +107,13 @@ test('satellite attribution retains exact geometry over loading cycles with all 
    }
    if(scrollable){
     for(const [index,deltaY]of [-before.scrollHeight,before.scrollHeight,-before.scrollHeight].entries()){
-     const previous=await evaluate("document.querySelector('.map-attribution-content').scrollTop");await cdp.call('Input.dispatchMouseEvent',{type:'mouseWheel',x:before.center.x,y:before.center.y,deltaX:0,deltaY});
+     // Under this fixed Chromium emulation profile, the native wheel payload
+     // is divided by the actual DPR before the DOM event. Preserve both units
+     // and continue requiring the exact requested CSS delta in trusted input.
+     const nativeDeltaY=deltaY*before.devicePixelRatio,previous=await evaluate("document.querySelector('.map-attribution-content').scrollTop");await cdp.call('Input.dispatchMouseEvent',{type:'mouseWheel',x:before.center.x,y:before.center.y,deltaX:0,deltaY:nativeDeltaY});
      const expected=deltaY>0?before.scrollHeight-before.clientHeight:0;let observed;
      for(let attempt=0;attempt<40;attempt++){await settle();observed=await evaluate("document.querySelector('.map-attribution-content').scrollTop");if(Math.abs(observed-expected)<=1)break;await sleep(10);}
-     interaction.wheelTransitions.push({deltaY,before:previous,after:observed,expected});assert.ok(Math.abs(observed-expected)<=1,'Native wheel must expose the full licence panel');
+     interaction.wheelTransitions.push({deltaY,nativeDeltaY,before:previous,after:observed,expected});assert.ok(Math.abs(observed-expected)<=1,'Native wheel must expose the full licence panel');
      if(index===1&&entry.name.includes('-overview-limit-'))interaction.bottomScreenshot=await capture(entry.name+'-license-bottom.png');
     }
    }
@@ -138,7 +142,7 @@ test('satellite attribution retains exact geometry over loading cycles with all 
      const loadingGeometry=stableGeometry(loading),readyGeometry=stableGeometry(ready);entry.comparisons.push({cycle:cycle+1,loading:loadingGeometry,ready:readyGeometry});
      assertReadable(loading,profile,scenario,expanded,true);assertReadable(ready,profile,scenario,expanded,false);assert.deepEqual(readyGeometry,loadingGeometry,`${name}: a tile request must not move the source, licence popup, or control`);
     }
-    if(expanded)await licenceInteraction(entry);
+    if(expanded)await licenceInteraction(entry,profile);
     if(scenario.name===(expanded?'overview-limit':'detail'))entry.screenshot=await capture(name+'.png');
    }
   }

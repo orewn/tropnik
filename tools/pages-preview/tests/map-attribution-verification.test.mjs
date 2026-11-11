@@ -31,7 +31,7 @@ function fixture(t){
    if(expanded){
     const scrollable=profile.name==='phone-landscape'&&scenario.source==='eox-bluemarble',hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources',...(scenario.source==='eox-s2'?['https://cloudless.eox.at','https://eox.at','https://creativecommons.org/licenses/by/4.0/']:[]),'/sources#satellite-attribution'];
     const scrollHeight=scrollable?36:18,clientHeight=18,maxScroll=scrollHeight-clientHeight;
-    item.licenseInteraction={input:'native-cdp-wheel-and-tab',scrollable,before:{scrollTop:0,scrollHeight,clientHeight,overflowY:scrollable?'auto':'visible',center:{x:116,y:20},hrefs},links:hrefs.map(href=>({href,text:'Synthetic link',focused:true,visibleUnblocked:true,scrollTop:0})),wheelTransitions:scrollable?[{deltaY:-scrollHeight,before:maxScroll,after:0,expected:0},{deltaY:scrollHeight,before:0,after:maxScroll,expected:maxScroll},{deltaY:-scrollHeight,before:maxScroll,after:0,expected:0}]:[],observedInputs:{tabs:hrefs.slice(1).map(()=>({key:'Tab',trusted:true})),wheels:scrollable?[-scrollHeight,scrollHeight,-scrollHeight].map(deltaY=>({deltaY,trusted:true})):[]}};
+    item.licenseInteraction={input:'native-cdp-wheel-and-tab',scrollable,before:{devicePixelRatio:profile.dpr,scrollTop:0,scrollHeight,clientHeight,overflowY:scrollable?'auto':'visible',center:{x:116,y:20},hrefs},links:hrefs.map(href=>({href,text:'Synthetic link',focused:true,visibleUnblocked:true,scrollTop:0})),wheelTransitions:scrollable?[{deltaY:-scrollHeight,nativeDeltaY:-scrollHeight*profile.dpr,before:maxScroll,after:0,expected:0},{deltaY:scrollHeight,nativeDeltaY:scrollHeight*profile.dpr,before:0,after:maxScroll,expected:maxScroll},{deltaY:-scrollHeight,nativeDeltaY:-scrollHeight*profile.dpr,before:maxScroll,after:0,expected:0}]:[],observedInputs:{tabs:hrefs.slice(1).map(()=>({key:'Tab',trusted:true})),wheels:scrollable?[-scrollHeight,scrollHeight,-scrollHeight].map(deltaY=>({deltaY,trusted:true})):[]}};
     if(scrollable&&scenario.name==='overview-limit')item.licenseInteraction.bottomScreenshot=picture(name+'-license-bottom',profile);
    }
    if(scenario.name===(expanded?'overview-limit':'detail'))item.screenshot=picture(name,profile);
@@ -57,6 +57,9 @@ test('success bits cannot conceal stale source, missing loading cycles, removed 
   value=>value.cases[1].licenseInteraction.links[0].visibleUnblocked=false,value=>value.cases[1].licenseInteraction.observedInputs.tabs[0].trusted=false,
   value=>value.cases.find(item=>item.licenseInteraction?.scrollable).licenseInteraction.wheelTransitions[1].after=0,
   value=>value.cases.find(item=>item.licenseInteraction?.scrollable).licenseInteraction.observedInputs.wheels[0].trusted=false,
+  value=>value.cases.find(item=>item.licenseInteraction?.scrollable).licenseInteraction.observedInputs.wheels[0].deltaY/=2,
+  value=>value.cases.find(item=>item.licenseInteraction?.scrollable).licenseInteraction.wheelTransitions[0].nativeDeltaY/=2,
+  value=>value.cases.find(item=>item.licenseInteraction?.scrollable).licenseInteraction.before.devicePixelRatio=1,
   value=>value.negativeControls[0].ready=value.negativeControls[0].loading,value=>value.negativeControls[0].fonts[0].status='unloaded',
   value=>delete value.environment.nativeSurface,value=>value.environment.gpu.featureStatus.gpu_compositing='enabled',
  ];

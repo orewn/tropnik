@@ -68,7 +68,7 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
    const interaction=item.licenseInteraction,hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources',...(scenario.source==='eox-s2'?['https://cloudless.eox.at','https://eox.at','https://creativecommons.org/licenses/by/4.0/']:[]),'/sources#satellite-attribution'];
    assert.equal(interaction?.input,'native-cdp-wheel-and-tab');assert.deepEqual(interaction.before.hrefs,hrefs);assert.deepEqual(interaction.links.map(link=>link.href),hrefs);assert.ok(interaction.links.every(link=>link.focused&&link.visibleUnblocked&&link.text.length>0));
    assert.equal(interaction.observedInputs.tabs.length,hrefs.length-1);assert.ok(interaction.observedInputs.tabs.every(event=>event.key==='Tab'&&event.trusted));
-   const {scrollHeight,clientHeight,overflowY,center}=interaction.before,maxScroll=scrollHeight-clientHeight;assert.ok(Number.isFinite(scrollHeight)&&clientHeight>0&&clientHeight<=item.ready.content.height&&maxScroll>=0);assert.equal(interaction.before.scrollTop,0);
+   const {scrollHeight,clientHeight,overflowY,center,devicePixelRatio}=interaction.before,maxScroll=scrollHeight-clientHeight;assert.ok(Number.isFinite(scrollHeight)&&clientHeight>0&&clientHeight<=item.ready.content.height&&maxScroll>=0);assert.equal(interaction.before.scrollTop,0);assert.equal(devicePixelRatio,profile.dpr);
    assert.ok(center.x>item.ready.content.left&&center.x<item.ready.content.right&&center.y>item.ready.content.top&&center.y<item.ready.content.bottom);
    const scrollable=['auto','scroll'].includes(overflowY)&&maxScroll>1;assert.equal(interaction.scrollable,scrollable);assert.equal(scrollable,profile.name==='phone-landscape'&&scenario.source==='eox-bluemarble');
    assert.equal(interaction.wheelTransitions.length,scrollable?3:0);assert.equal(interaction.observedInputs.wheels.length,scrollable?3:0);
@@ -76,6 +76,7 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
     assert.deepEqual(interaction.wheelTransitions.map(step=>step.deltaY),[-scrollHeight,scrollHeight,-scrollHeight]);assert.deepEqual(interaction.wheelTransitions.map(step=>step.expected),[0,maxScroll,0]);
     for(const [index,step]of interaction.wheelTransitions.entries()){
      assert.ok(Math.abs(step.after-step.expected)<=1);assert.ok(step.before>=0&&step.before<=maxScroll);if(index)assert.ok(Math.abs(step.before-interaction.wheelTransitions[index-1].after)<=1);
+     assert.equal(step.nativeDeltaY,step.deltaY*devicePixelRatio,'Native wheel payload must preserve the requested CSS delta at actual DPR');
      assert.equal(interaction.observedInputs.wheels[index].deltaY,step.deltaY);assert.equal(interaction.observedInputs.wheels[index].trusted,true);
     }
    }
