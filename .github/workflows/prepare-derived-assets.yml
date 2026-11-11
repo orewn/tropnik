@@ -132,6 +132,8 @@ jobs:
               };
               const stageGenerated = () => {
                 assert.equal(value(["rev-parse","HEAD"]),source);
+                // Rebuild every staging pass from the immutable source index; -u is deliberately absent.
+                git(["read-tree",sourceTree]);
                 const changed = git(["diff","--no-ext-diff","--no-renames","--name-only","-z",source]).toString("utf8").split("\0").filter(Boolean);
                 const added = git(["ls-files","--others","--exclude-standard","-z"]).toString("utf8").split("\0").filter(Boolean);
                 const paths = [...new Set([...changed,...added])].sort();
@@ -222,10 +224,13 @@ jobs:
               receipt.status = "prepared";
               receipt.refUpdate = {branch,expectedParent:source,observedCommit:observed.object.sha,force:false};
               save();
+              console.log("TROPNIK_DERIVED_PREPARATION_MANIFEST=" + JSON.stringify(receipt));
               appendFileSync(process.env.GITHUB_OUTPUT,"prepared_commit=" + commit.sha + "\nprepared_tree=" + candidate.tree + "\nsource_commit=" + source + "\n");
               console.log(JSON.stringify({preparationOnly:true,verified:false,releaseEligible:false,sourceCommit:source,preparedCommit:commit.sha,preparedTree:candidate.tree,generatedFiles:changed.length,protectedSourceUnchanged:true}));
             } catch (error) {
-              receipt.status = "failed"; receipt.error = String(error.message); save(); throw error;
+              receipt.status = "failed"; receipt.error = String(error.message); save();
+              console.log("TROPNIK_DERIVED_PREPARATION_MANIFEST=" + JSON.stringify(receipt));
+              throw error;
             }
           })();
           NODE
