@@ -1,0 +1,3389 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "evidence": "same-host-untraced-opaque-clear-comparison",
+  "verified": true,
+  "order": [
+    "baseline",
+    "optimized"
+  ],
+  "measurementControllerCommit": "e12454abef64c26f4348c9e2a074d2d2f4a11db9",
+  "verificationRunId": "43083785701",
+  "sourceBindingCorrection": "The original and first sealed binders incorrectly equated the controller SHA in build/browser/environment headers with the application checkout SHA. Every original receipt remains unchanged. Application identity is established by the complete independently enumerated immutable checkout input bytes, committed-manifest APK record, verified source custom-map outputs and recomputed original build ID. No build or browser measurements are rerun.",
+  "profiles": [
+    "android-portrait",
+    "desktop-webgl"
+  ],
+  "scenarios": [
+    "panel",
+    "explore-search",
+    "explore-filters",
+    "catalog-scroll",
+    "map-pan",
+    "map-zoom",
+    "layer-switch",
+    "site-search"
+  ],
+  "baseline": {
+    "applicationSourceCommit": "f836dce11579eae0e4596ee5b73f8bbe7246128f",
+    "measurementControllerCommit": "e12454abef64c26f4348c9e2a074d2d2f4a11db9",
+    "engineSHA256": "bcb43c269a6b74b52956acd40aec48e666a4c40255c78f3e77e107210b60487a",
+    "reportSHA256": "417256afd0de18602a9479d12aae409d798bc6d11c9b1e1352f877ea7f0d08a8",
+    "buildSHA256": "98d1df3aeaba702454bb5d4fae680cb33ae51f2dc7a5ce57368668d1026dbc2d",
+    "buildId": "5880c4c7831be10f",
+    "sourceProof": {
+      "recomputedBuildId": "5880c4c7831be10f",
+      "inputCount": 2110,
+      "checkoutInputCount": 2109,
+      "inputsSHA256": "e2115f4a5118a5228c78ff023433b4cefd5be454f2f3d9bb5be208bac1c78b87",
+      "bundledModuleCount": 166,
+      "customMap": {
+        "runtime": "tropnik-canvas",
+        "sourceInputsSha256": "d0e3e0c4d26c53db17e3263310ad89db0ff7bc010dbebe1657b2d66593891950",
+        "manifestSha256": "5032de02ecaa7829ae0096f7b10a4f4ca098e5c999a53e43b9383e3483ead6a8",
+        "fileCount": 10,
+        "workerCount": 2,
+        "files": [
+          {
+            "path": "chunks/custom-map-entry-B25YODzL.js",
+            "sizeBytes": 100205,
+            "sha256": "84899706740ddec7e376f820798a6bc3e4651bee4ad92d9d4281c32318f9ee15"
+          },
+          {
+            "path": "chunks/terrain-renderer-qT471hOA.js",
+            "sizeBytes": 81381,
+            "sha256": "9f3097b89055aebc9493305ec0153a37cb63baa0e35d38aadb78a989a3ba17b3"
+          },
+          {
+            "path": "Manrope-OFL.txt",
+            "sizeBytes": 4383,
+            "sha256": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"
+          },
+          {
+            "path": "map-runtime.js",
+            "sizeBytes": 156,
+            "sha256": "cb8a293dc5f5b582f0b8d5c4d38c78d889f0a8fade35aa4e5b4284d69c3d264e"
+          },
+          {
+            "path": "map.css",
+            "sizeBytes": 75255,
+            "sha256": "66a2a17f1cb861b4b3f60e74861f2ddf1232f21d3561cf1b16bba9a15d29540c"
+          },
+          {
+            "path": "workers/custom-map-tiles.worker-GtnvHQzs.js",
+            "sizeBytes": 23922,
+            "sha256": "0be3c1608bf8135ec24615bb5cdac7f721fd1a4f66cb73c3c5522df7975c8a31"
+          },
+          {
+            "path": "workers/terrain-preparation.worker-B8lieq38.js",
+            "sizeBytes": 2849,
+            "sha256": "fb157dbeb3f394b9d9a3edd115cc30dc64f11e352255ca609a2191fa8be7ae0f"
+          }
+        ],
+        "manifest": {
+          "path": "manifest.json",
+          "sizeBytes": 342021,
+          "sha256": "5032de02ecaa7829ae0096f7b10a4f4ca098e5c999a53e43b9383e3483ead6a8"
+        }
+      },
+      "deployedFiles": [
+        {
+          "path": "chunks/custom-map-entry-B25YODzL.js",
+          "sizeBytes": 100285,
+          "sha256": "58754360369e639a3f89bb895be8e347493e6e6bc3e6e92a100d818a46c9e460"
+        },
+        {
+          "path": "chunks/terrain-renderer-qT471hOA.js",
+          "sizeBytes": 81381,
+          "sha256": "9f3097b89055aebc9493305ec0153a37cb63baa0e35d38aadb78a989a3ba17b3"
+        },
+        {
+          "path": "Manrope-OFL.txt",
+          "sizeBytes": 4383,
+          "sha256": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"
+        },
+        {
+          "path": "map-runtime.js",
+          "sizeBytes": 156,
+          "sha256": "cb8a293dc5f5b582f0b8d5c4d38c78d889f0a8fade35aa4e5b4284d69c3d264e"
+        },
+        {
+          "path": "map.css",
+          "sizeBytes": 75255,
+          "sha256": "66a2a17f1cb861b4b3f60e74861f2ddf1232f21d3561cf1b16bba9a15d29540c"
+        },
+        {
+          "path": "workers/custom-map-tiles.worker-GtnvHQzs.js",
+          "sizeBytes": 23930,
+          "sha256": "742a5df18690b78bcfdee91a2a422a38e8cb5253753d137ab15861b1cd2bf330"
+        },
+        {
+          "path": "workers/terrain-preparation.worker-B8lieq38.js",
+          "sizeBytes": 2849,
+          "sha256": "fb157dbeb3f394b9d9a3edd115cc30dc64f11e352255ca609a2191fa8be7ae0f"
+        },
+        {
+          "path": "manifest.json",
+          "sizeBytes": 342021,
+          "sha256": "5032de02ecaa7829ae0096f7b10a4f4ca098e5c999a53e43b9383e3483ead6a8"
+        }
+      ],
+      "appliedInventoryRulesSHA256": "87ec9ad665e2ad7123d8cc2c83ee80fa72732ba29a61ed32ab28d0e82b2c1695",
+      "deployedOutputBytesVerified": false,
+      "anonymousApkBytesVerified": false,
+      "apkRecord": {
+        "path": "web/public/downloads/tropnik-preview.apk",
+        "bytes": 79346747,
+        "sha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692"
+      },
+      "apkEvidence": "The original retained input and delivery record match the unchanged committed Android manifest. This verification does not download or independently verify APK bytes.",
+      "deployedEvidence": "Source custom-map outputs are read and hashed from the exact checkout. Base-rewritten deployedFiles are retained producer metadata; their output bytes were not retained in this six-file artifact.",
+      "applicationSourceCommit": "f836dce11579eae0e4596ee5b73f8bbe7246128f",
+      "originalBuildSourceCommit": "e12454abef64c26f4348c9e2a074d2d2f4a11db9",
+      "checkoutTrackedFilesUnchanged": true,
+      "buildCanonicalSHA256": "c6000b85a6bd2580b03c4d63922450c72defca8694825d6ddab6649e18a61dcd",
+      "immutableCheckoutInputBytes": 150675926
+    },
+    "environment": {
+      "schemaVersion": 1,
+      "profile": "chromium-headless-software-swiftshader-webgl-v1",
+      "collection": "browser-target-cdp-before-measurement",
+      "sourceCommit": "e12454abef64c26f4348c9e2a074d2d2f4a11db9",
+      "capturedAt": "2026-11-11T18:34:09.788Z",
+      "requestedFlags": [
+        "--headless=new",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-background-networking",
+        "--disable-component-update",
+        "--disable-default-apps",
+        "--disable-extensions",
+        "--disable-features=Translate,MediaRouter",
+        "--mute-audio",
+        "--no-first-run",
+        "--use-gl=angle",
+        "--use-angle=swiftshader-webgl",
+        "--enable-unsafe-swiftshader",
+        "--window-size=1920,1920",
+        "--ozone-override-screen-size=1920,1920"
+      ],
+      "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=44345 --user-data-dir=/tmp/tropnik-chrome-3180 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+      "browser": {
+        "product": "Chrome/156.0.8078.79",
+        "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+        "protocolVersion": "1.3",
+        "jsVersion": "15.6.75.27",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+      },
+      "gpu": {
+        "devices": [
+          {
+            "vendorId": 65535,
+            "deviceId": 65535,
+            "vendorString": "Google Inc. (Google)",
+            "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "driverVendor": "SwANGLE",
+            "driverVersion": "5.0.0"
+          }
+        ],
+        "auxAttributes": {
+          "displayType": "ANGLE_SWIFTSHADER",
+          "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+          "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "glVendor": "Google Inc. (Google)",
+          "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+          "skiaBackendType": "None",
+          "targetCpuBits": 64
+        },
+        "featureStatus": {
+          "2d_canvas": "unavailable_software",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "disabled_software",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "disabled_off",
+          "rasterization": "disabled_software",
+          "raw_draw": "disabled_off_ok",
+          "skia_graphite": "disabled_off",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "disabled_software",
+          "video_encode": "disabled_software",
+          "vulkan": "disabled_off",
+          "webgl": "unavailable_software",
+          "webgpu": "unavailable_software",
+          "webgpu_on_vk_via_gl_interop": "disabled_off",
+          "webnn": "unavailable_software"
+        }
+      },
+      "runner": {
+        "os": {
+          "platform": "linux",
+          "release": "7.0.0-1017-azure",
+          "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+          "arch": "x64"
+        },
+        "cpu": {
+          "models": [
+            "AMD EPYC 7763 64-Core Processor"
+          ],
+          "logicalCount": 4,
+          "availableParallelism": 4
+        },
+        "totalMemoryBytes": 16760344576,
+        "image": {
+          "os": "ubuntu24",
+          "version": "20261101.360.1"
+        }
+      },
+      "nativeSurface": {
+        "schemaVersion": 1,
+        "collection": "blank-target-before-emulation",
+        "window": {
+          "left": 10,
+          "top": 10,
+          "width": 1920,
+          "height": 1920,
+          "windowState": "normal"
+        },
+        "viewport": {
+          "url": "about:blank",
+          "visibilityState": "visible",
+          "innerWidth": 1920,
+          "innerHeight": 1833,
+          "outerWidth": 1920,
+          "outerHeight": 1920,
+          "devicePixelRatio": 1,
+          "screen": {
+            "width": 1920,
+            "height": 1920,
+            "availWidth": 1920,
+            "availHeight": 1920
+          }
+        }
+      }
+    },
+    "performanceIssues": []
+  },
+  "optimized": {
+    "applicationSourceCommit": "1710b201bfeed52613659ae3e4ca7f26638cb6cb",
+    "measurementControllerCommit": "e12454abef64c26f4348c9e2a074d2d2f4a11db9",
+    "engineSHA256": "c25b61c97602070d746706d977d50906217e4b1258ce5a482ae64bb914ee3127",
+    "reportSHA256": "9e8b5962ec27d87e1493092fe9c82bfcf5489abeb2b3e3765f6663c6fdac74c6",
+    "buildSHA256": "8ab7c8ee17e26af775efe9290d12e4712c136efdad3a45cf3445791dba062dbe",
+    "buildId": "1ba12be7cff233d3",
+    "sourceProof": {
+      "recomputedBuildId": "1ba12be7cff233d3",
+      "inputCount": 2110,
+      "checkoutInputCount": 2109,
+      "inputsSHA256": "1b4f5e46c436a0a22fb93300a3076b7c7c162b53f5d55f7ead298da669fe750d",
+      "bundledModuleCount": 166,
+      "customMap": {
+        "runtime": "tropnik-canvas",
+        "sourceInputsSha256": "0947f43d8c19d6c0467d832afd0c5943a1797ba7403a69da525533aa26354d62",
+        "manifestSha256": "93d109811dbd84cc60e936d8928a755eaf8867a35c58983e5bf6f3c9f7e47146",
+        "fileCount": 10,
+        "workerCount": 2,
+        "files": [
+          {
+            "path": "chunks/custom-map-entry-XVkmYafs.js",
+            "sizeBytes": 100219,
+            "sha256": "b3c998e23f8b9aae6129a1d489d62b4778a2f41ac849b33697c29b3099dd10e3"
+          },
+          {
+            "path": "chunks/terrain-renderer-qT471hOA.js",
+            "sizeBytes": 81381,
+            "sha256": "9f3097b89055aebc9493305ec0153a37cb63baa0e35d38aadb78a989a3ba17b3"
+          },
+          {
+            "path": "Manrope-OFL.txt",
+            "sizeBytes": 4383,
+            "sha256": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"
+          },
+          {
+            "path": "map-runtime.js",
+            "sizeBytes": 156,
+            "sha256": "fc61be90003bf26c47c838b32a6dac44578b627a2eb788fd87382a533d1a40cb"
+          },
+          {
+            "path": "map.css",
+            "sizeBytes": 75255,
+            "sha256": "66a2a17f1cb861b4b3f60e74861f2ddf1232f21d3561cf1b16bba9a15d29540c"
+          },
+          {
+            "path": "workers/custom-map-tiles.worker-GtnvHQzs.js",
+            "sizeBytes": 23922,
+            "sha256": "0be3c1608bf8135ec24615bb5cdac7f721fd1a4f66cb73c3c5522df7975c8a31"
+          },
+          {
+            "path": "workers/terrain-preparation.worker-B8lieq38.js",
+            "sizeBytes": 2849,
+            "sha256": "fb157dbeb3f394b9d9a3edd115cc30dc64f11e352255ca609a2191fa8be7ae0f"
+          }
+        ],
+        "manifest": {
+          "path": "manifest.json",
+          "sizeBytes": 342021,
+          "sha256": "93d109811dbd84cc60e936d8928a755eaf8867a35c58983e5bf6f3c9f7e47146"
+        }
+      },
+      "deployedFiles": [
+        {
+          "path": "chunks/custom-map-entry-XVkmYafs.js",
+          "sizeBytes": 100299,
+          "sha256": "2aba0b1161168f0c6dc3ab08e1d2811a8c499967fd638740ff8ea14e775ec78a"
+        },
+        {
+          "path": "chunks/terrain-renderer-qT471hOA.js",
+          "sizeBytes": 81381,
+          "sha256": "9f3097b89055aebc9493305ec0153a37cb63baa0e35d38aadb78a989a3ba17b3"
+        },
+        {
+          "path": "Manrope-OFL.txt",
+          "sizeBytes": 4383,
+          "sha256": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"
+        },
+        {
+          "path": "map-runtime.js",
+          "sizeBytes": 156,
+          "sha256": "fc61be90003bf26c47c838b32a6dac44578b627a2eb788fd87382a533d1a40cb"
+        },
+        {
+          "path": "map.css",
+          "sizeBytes": 75255,
+          "sha256": "66a2a17f1cb861b4b3f60e74861f2ddf1232f21d3561cf1b16bba9a15d29540c"
+        },
+        {
+          "path": "workers/custom-map-tiles.worker-GtnvHQzs.js",
+          "sizeBytes": 23930,
+          "sha256": "742a5df18690b78bcfdee91a2a422a38e8cb5253753d137ab15861b1cd2bf330"
+        },
+        {
+          "path": "workers/terrain-preparation.worker-B8lieq38.js",
+          "sizeBytes": 2849,
+          "sha256": "fb157dbeb3f394b9d9a3edd115cc30dc64f11e352255ca609a2191fa8be7ae0f"
+        },
+        {
+          "path": "manifest.json",
+          "sizeBytes": 342021,
+          "sha256": "93d109811dbd84cc60e936d8928a755eaf8867a35c58983e5bf6f3c9f7e47146"
+        }
+      ],
+      "appliedInventoryRulesSHA256": "87ec9ad665e2ad7123d8cc2c83ee80fa72732ba29a61ed32ab28d0e82b2c1695",
+      "deployedOutputBytesVerified": false,
+      "anonymousApkBytesVerified": false,
+      "apkRecord": {
+        "path": "web/public/downloads/tropnik-preview.apk",
+        "bytes": 79346747,
+        "sha256": "17f78032e3914ed2b0fa29ab3558f88ca903b3560a6b9ceae9776eeb167fd692"
+      },
+      "apkEvidence": "The original retained input and delivery record match the unchanged committed Android manifest. This verification does not download or independently verify APK bytes.",
+      "deployedEvidence": "Source custom-map outputs are read and hashed from the exact checkout. Base-rewritten deployedFiles are retained producer metadata; their output bytes were not retained in this six-file artifact.",
+      "applicationSourceCommit": "1710b201bfeed52613659ae3e4ca7f26638cb6cb",
+      "originalBuildSourceCommit": "e12454abef64c26f4348c9e2a074d2d2f4a11db9",
+      "checkoutTrackedFilesUnchanged": true,
+      "buildCanonicalSHA256": "992883967178442691c2e0cefb2262d4a6d00d80b0413ca254b0dfe32d639b60",
+      "immutableCheckoutInputBytes": 150677494
+    },
+    "environment": {
+      "schemaVersion": 1,
+      "profile": "chromium-headless-software-swiftshader-webgl-v1",
+      "collection": "browser-target-cdp-before-measurement",
+      "sourceCommit": "e12454abef64c26f4348c9e2a074d2d2f4a11db9",
+      "capturedAt": "2026-11-11T18:35:54.458Z",
+      "requestedFlags": [
+        "--headless=new",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-background-networking",
+        "--disable-component-update",
+        "--disable-default-apps",
+        "--disable-extensions",
+        "--disable-features=Translate,MediaRouter",
+        "--mute-audio",
+        "--no-first-run",
+        "--use-gl=angle",
+        "--use-angle=swiftshader-webgl",
+        "--enable-unsafe-swiftshader",
+        "--window-size=1920,1920",
+        "--ozone-override-screen-size=1920,1920"
+      ],
+      "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=37227 --user-data-dir=/tmp/tropnik-chrome-3617 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+      "browser": {
+        "product": "Chrome/156.0.8078.79",
+        "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+        "protocolVersion": "1.3",
+        "jsVersion": "15.6.75.27",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+      },
+      "gpu": {
+        "devices": [
+          {
+            "vendorId": 65535,
+            "deviceId": 65535,
+            "vendorString": "Google Inc. (Google)",
+            "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "driverVendor": "SwANGLE",
+            "driverVersion": "5.0.0"
+          }
+        ],
+        "auxAttributes": {
+          "displayType": "ANGLE_SWIFTSHADER",
+          "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+          "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "glVendor": "Google Inc. (Google)",
+          "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+          "skiaBackendType": "None",
+          "targetCpuBits": 64
+        },
+        "featureStatus": {
+          "2d_canvas": "unavailable_software",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "disabled_software",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "disabled_off",
+          "rasterization": "disabled_software",
+          "raw_draw": "disabled_off_ok",
+          "skia_graphite": "disabled_off",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "disabled_software",
+          "video_encode": "disabled_software",
+          "vulkan": "disabled_off",
+          "webgl": "unavailable_software",
+          "webgpu": "unavailable_software",
+          "webgpu_on_vk_via_gl_interop": "disabled_off",
+          "webnn": "unavailable_software"
+        }
+      },
+      "runner": {
+        "os": {
+          "platform": "linux",
+          "release": "7.0.0-1017-azure",
+          "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+          "arch": "x64"
+        },
+        "cpu": {
+          "models": [
+            "AMD EPYC 7763 64-Core Processor"
+          ],
+          "logicalCount": 4,
+          "availableParallelism": 4
+        },
+        "totalMemoryBytes": 16760344576,
+        "image": {
+          "os": "ubuntu24",
+          "version": "20261101.360.1"
+        }
+      },
+      "nativeSurface": {
+        "schemaVersion": 1,
+        "collection": "blank-target-before-emulation",
+        "window": {
+          "left": 10,
+          "top": 10,
+          "width": 1920,
+          "height": 1920,
+          "windowState": "normal"
+        },
+        "viewport": {
+          "url": "about:blank",
+          "visibilityState": "visible",
+          "innerWidth": 1920,
+          "innerHeight": 1833,
+          "outerWidth": 1920,
+          "outerHeight": 1920,
+          "devicePixelRatio": 1,
+          "screen": {
+            "width": 1920,
+            "height": 1920,
+            "availWidth": 1920,
+            "availHeight": 1920
+          }
+        }
+      }
+    },
+    "performanceIssues": []
+  },
+  "optimizedPerformancePassed": true,
+  "comparisons": [
+    {
+      "profile": "android-portrait",
+      "nativeInput": {
+        "input": "touch",
+        "start": {
+          "x": 206,
+          "y": 449.15000000000003
+        },
+        "end": {
+          "x": 270,
+          "y": 461.15000000000003
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchStart",
+            "x": 206,
+            "y": 449.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 211.33333333333334,
+            "y": 450.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 216.66666666666666,
+            "y": 451.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 222,
+            "y": 452.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 227.33333333333334,
+            "y": 453.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 232.66666666666666,
+            "y": 454.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 238,
+            "y": 455.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 243.33333333333334,
+            "y": 456.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 248.66666666666666,
+            "y": 457.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 254,
+            "y": 458.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 259.3333333333333,
+            "y": 459.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 264.6666666666667,
+            "y": 460.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 270,
+            "y": 461.15000000000003
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchEnd",
+            "x": 270,
+            "y": 461.15000000000003
+          }
+        ]
+      },
+      "baseline": [
+        {
+          "name": "panel",
+          "durationMs": 2024.9000000000087,
+          "frames": {
+            "samples": 122,
+            "callbackHz": 60.24988888340139,
+            "isPresentedFps": false,
+            "p95Ms": 16.89999999999418,
+            "maxGapMs": 25.60000000000582,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 6,
+            "p95Ms": 48,
+            "maxMs": 48,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 94,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 56,
+            "p95DurationMs": 56,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.6818756803784578,
+            "recentInputCount": 3
+          }
+        },
+        {
+          "name": "explore-search",
+          "durationMs": 1778.7999999999884,
+          "frames": {
+            "samples": 107,
+            "callbackHz": 60.15291207555695,
+            "isPresentedFps": false,
+            "p95Ms": 16.80000000000291,
+            "maxGapMs": 36.60000000000582,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 28,
+            "p95Ms": 47.90000000000873,
+            "maxMs": 47.90000000000873,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 169,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 40,
+            "p95DurationMs": 40,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.10071628622367525,
+            "recentInputCount": 8
+          }
+        },
+        {
+          "name": "explore-filters",
+          "durationMs": 2180.0999999999913,
+          "frames": {
+            "samples": 132,
+            "callbackHz": 60.547681299023225,
+            "isPresentedFps": false,
+            "p95Ms": 16.80000000000291,
+            "maxGapMs": 17.10000000000582,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 8,
+            "p95Ms": 48,
+            "maxMs": 48,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 129,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 40,
+            "p95DurationMs": 40,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.09222663752508793,
+            "recentInputCount": 2
+          }
+        },
+        {
+          "name": "catalog-scroll",
+          "durationMs": 777.3999999999942,
+          "frames": {
+            "samples": 47,
+            "callbackHz": 60.457936712117764,
+            "isPresentedFps": false,
+            "p95Ms": 23.09999999999127,
+            "maxGapMs": 27,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 1,
+            "p95Ms": 47.19999999999709,
+            "maxMs": 47.19999999999709,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 32,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 56,
+            "p95DurationMs": 40,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "map-pan",
+          "durationMs": 1280.3999999999942,
+          "frames": {
+            "samples": 77,
+            "callbackHz": 60.137457044673816,
+            "isPresentedFps": false,
+            "p95Ms": 23.20000000001164,
+            "maxGapMs": 23.80000000000291,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 1,
+            "p95Ms": 45.80000000000291,
+            "maxMs": 45.80000000000291,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 26,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 64,
+            "p95DurationMs": 48,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "map-zoom",
+          "durationMs": 7497.800000000003,
+          "frames": {
+            "samples": 441,
+            "callbackHz": 58.81725306089784,
+            "isPresentedFps": false,
+            "p95Ms": 19.5,
+            "maxGapMs": 37.29999999998836,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 4,
+            "p95Ms": 48,
+            "maxMs": 48,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 70,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 48,
+            "p95DurationMs": 48,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "layer-switch",
+          "durationMs": 3097,
+          "frames": {
+            "samples": 186,
+            "callbackHz": 60.05812076202777,
+            "isPresentedFps": false,
+            "p95Ms": 16.80000000000291,
+            "maxGapMs": 22.30000000000291,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 12,
+            "p95Ms": 48.10000000000582,
+            "maxMs": 48.10000000000582,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 196,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 48,
+            "p95DurationMs": 48,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "site-search",
+          "durationMs": 1618,
+          "frames": {
+            "samples": 97,
+            "callbackHz": 59.950556242274416,
+            "isPresentedFps": false,
+            "p95Ms": 17,
+            "maxGapMs": 53.79999999998836,
+            "over50ms": 1
+          },
+          "inputToNextFrame": {
+            "count": 34,
+            "p95Ms": 68.29999999998836,
+            "maxMs": 68.89999999999418,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 103,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 32,
+            "p95DurationMs": 32,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.12862321695545878,
+            "recentInputCount": 3
+          }
+        }
+      ],
+      "optimized": [
+        {
+          "name": "panel",
+          "durationMs": 2094.399999999994,
+          "frames": {
+            "samples": 126,
+            "callbackHz": 60.1604278074868,
+            "isPresentedFps": false,
+            "p95Ms": 16.800000000017462,
+            "maxGapMs": 21.60000000000582,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 6,
+            "p95Ms": 48.20000000001164,
+            "maxMs": 48.20000000001164,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 94,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 40,
+            "p95DurationMs": 40,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.6883270901588611,
+            "recentInputCount": 4
+          }
+        },
+        {
+          "name": "explore-search",
+          "durationMs": 1696.3999999999942,
+          "frames": {
+            "samples": 102,
+            "callbackHz": 60.12732846026901,
+            "isPresentedFps": false,
+            "p95Ms": 17.099999999976717,
+            "maxGapMs": 21.10000000000582,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 28,
+            "p95Ms": 47.60000000000582,
+            "maxMs": 48,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 168,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 40,
+            "p95DurationMs": 40,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.10071628622367525,
+            "recentInputCount": 8
+          }
+        },
+        {
+          "name": "explore-filters",
+          "durationMs": 2179.6999999999825,
+          "frames": {
+            "samples": 132,
+            "callbackHz": 60.55879249438045,
+            "isPresentedFps": false,
+            "p95Ms": 16.89999999999418,
+            "maxGapMs": 17,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 8,
+            "p95Ms": 48,
+            "maxMs": 48,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 129,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 40,
+            "p95DurationMs": 40,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.09222663752508793,
+            "recentInputCount": 2
+          }
+        },
+        {
+          "name": "catalog-scroll",
+          "durationMs": 760.7999999999884,
+          "frames": {
+            "samples": 46,
+            "callbackHz": 60.46267087276644,
+            "isPresentedFps": false,
+            "p95Ms": 22.900000000023283,
+            "maxGapMs": 27,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 1,
+            "p95Ms": 46.10000000000582,
+            "maxMs": 46.10000000000582,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 31,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 56,
+            "p95DurationMs": 40,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "map-pan",
+          "durationMs": 1280.7999999999884,
+          "frames": {
+            "samples": 77,
+            "callbackHz": 60.11867582760829,
+            "isPresentedFps": false,
+            "p95Ms": 23.199999999982538,
+            "maxGapMs": 24.10000000000582,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 1,
+            "p95Ms": 45.89999999999418,
+            "maxMs": 45.89999999999418,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 26,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 56,
+            "p95DurationMs": 56,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "map-zoom",
+          "durationMs": 7248,
+          "frames": {
+            "samples": 426,
+            "callbackHz": 58.77483443708609,
+            "isPresentedFps": false,
+            "p95Ms": 20,
+            "maxGapMs": 38.5,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 4,
+            "p95Ms": 48.10000000000582,
+            "maxMs": 48.10000000000582,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 70,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 48,
+            "p95DurationMs": 48,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "layer-switch",
+          "durationMs": 3096.899999999994,
+          "frames": {
+            "samples": 186,
+            "callbackHz": 60.060060060060174,
+            "isPresentedFps": false,
+            "p95Ms": 16.800000000017462,
+            "maxGapMs": 22.699999999982538,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 12,
+            "p95Ms": 48.30000000001746,
+            "maxMs": 48.30000000001746,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 196,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 48,
+            "p95DurationMs": 48,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "site-search",
+          "durationMs": 1579.0999999999767,
+          "frames": {
+            "samples": 96,
+            "callbackHz": 60.79412323475487,
+            "isPresentedFps": false,
+            "p95Ms": 16.800000000017462,
+            "maxGapMs": 25.199999999982538,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 34,
+            "p95Ms": 48.10000000000582,
+            "maxMs": 48.19999999998254,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 112,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 32,
+            "p95DurationMs": 32,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.12862321695545878,
+            "recentInputCount": 3
+          }
+        }
+      ],
+      "activePan": {
+        "baseline": {
+          "derivedFromUnchangedRaw": true,
+          "isAcceptanceGate": false,
+          "isPresentedFps": false,
+          "definition": "Every consecutive raw RAF interval overlapping the trusted pointerdown.time..pointerup.time span (from < up && to > down), retaining its full duration without clipping; fully-contained intervals are also summarized for boundary transparency.",
+          "pointerdown": {
+            "type": "pointerdown",
+            "time": 18168.899999999994,
+            "timestamp": 18156.09999999999,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 206,
+            "y": 449.1499938964844
+          },
+          "pointerup": {
+            "type": "pointerup",
+            "time": 18968.79999999999,
+            "timestamp": 18961.699999999997,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 270,
+            "y": 461.1499938964844
+          },
+          "pointerSpanMs": 799.8999999999942,
+          "nativeCommandDurationMs": 813.2493519999989,
+          "originalWindow": {
+            "startedAt": 18154.899999999994,
+            "endedAt": 19435.29999999999,
+            "durationMs": 1280.3999999999942,
+            "frameSamples": 77,
+            "p95Ms": 23.20000000001164
+          },
+          "overlapping": {
+            "count": 49,
+            "p95Ms": 23.30000000000291,
+            "maxMs": 23.80000000000291,
+            "meanMs": 16.6734693877551,
+            "referenceIntervalMs": 35,
+            "atOrAboveReferenceIntervalCount": 0
+          },
+          "fullyContained": {
+            "count": 47,
+            "p95Ms": 23.30000000000291,
+            "maxMs": 23.80000000000291,
+            "meanMs": 16.66382978723398,
+            "referenceIntervalMs": 35,
+            "atOrAboveReferenceIntervalCount": 0
+          },
+          "intervals": [
+            {
+              "rawFromIndex": 0,
+              "rawToIndex": 1,
+              "from": 18168.199999999997,
+              "to": 18184.899999999994,
+              "durationMs": 16.69999999999709,
+              "fullyContained": false
+            },
+            {
+              "rawFromIndex": 1,
+              "rawToIndex": 2,
+              "from": 18184.899999999994,
+              "to": 18201.899999999994,
+              "durationMs": 17,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 2,
+              "rawToIndex": 3,
+              "from": 18201.899999999994,
+              "to": 18225.199999999997,
+              "durationMs": 23.30000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 3,
+              "rawToIndex": 4,
+              "from": 18225.199999999997,
+              "to": 18234.899999999994,
+              "durationMs": 9.69999999999709,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 4,
+              "rawToIndex": 5,
+              "from": 18234.899999999994,
+              "to": 18251.699999999997,
+              "durationMs": 16.80000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 5,
+              "rawToIndex": 6,
+              "from": 18251.699999999997,
+              "to": 18275.5,
+              "durationMs": 23.80000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 6,
+              "rawToIndex": 7,
+              "from": 18275.5,
+              "to": 18284.79999999999,
+              "durationMs": 9.299999999988358,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 7,
+              "rawToIndex": 8,
+              "from": 18284.79999999999,
+              "to": 18301.79999999999,
+              "durationMs": 17,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 8,
+              "rawToIndex": 9,
+              "from": 18301.79999999999,
+              "to": 18325,
+              "durationMs": 23.20000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 9,
+              "rawToIndex": 10,
+              "from": 18325,
+              "to": 18334.899999999994,
+              "durationMs": 9.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 10,
+              "rawToIndex": 11,
+              "from": 18334.899999999994,
+              "to": 18351.79999999999,
+              "durationMs": 16.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 11,
+              "rawToIndex": 12,
+              "from": 18351.79999999999,
+              "to": 18373.699999999997,
+              "durationMs": 21.90000000000873,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 12,
+              "rawToIndex": 13,
+              "from": 18373.699999999997,
+              "to": 18384.899999999994,
+              "durationMs": 11.19999999999709,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 13,
+              "rawToIndex": 14,
+              "from": 18384.899999999994,
+              "to": 18401.699999999997,
+              "durationMs": 16.80000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 14,
+              "rawToIndex": 15,
+              "from": 18401.699999999997,
+              "to": 18424.79999999999,
+              "durationMs": 23.09999999999127,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 15,
+              "rawToIndex": 16,
+              "from": 18424.79999999999,
+              "to": 18434.79999999999,
+              "durationMs": 10,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 16,
+              "rawToIndex": 17,
+              "from": 18434.79999999999,
+              "to": 18451.79999999999,
+              "durationMs": 17,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 17,
+              "rawToIndex": 18,
+              "from": 18451.79999999999,
+              "to": 18475.09999999999,
+              "durationMs": 23.30000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 18,
+              "rawToIndex": 19,
+              "from": 18475.09999999999,
+              "to": 18484.79999999999,
+              "durationMs": 9.69999999999709,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 19,
+              "rawToIndex": 20,
+              "from": 18484.79999999999,
+              "to": 18501.699999999997,
+              "durationMs": 16.90000000000873,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 20,
+              "rawToIndex": 21,
+              "from": 18501.699999999997,
+              "to": 18524.59999999999,
+              "durationMs": 22.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 21,
+              "rawToIndex": 22,
+              "from": 18524.59999999999,
+              "to": 18534.899999999994,
+              "durationMs": 10.30000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 22,
+              "rawToIndex": 23,
+              "from": 18534.899999999994,
+              "to": 18551.79999999999,
+              "durationMs": 16.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 23,
+              "rawToIndex": 24,
+              "from": 18551.79999999999,
+              "to": 18574.699999999997,
+              "durationMs": 22.90000000000873,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 24,
+              "rawToIndex": 25,
+              "from": 18574.699999999997,
+              "to": 18584.79999999999,
+              "durationMs": 10.099999999991269,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 25,
+              "rawToIndex": 26,
+              "from": 18584.79999999999,
+              "to": 18601.79999999999,
+              "durationMs": 17,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 26,
+              "rawToIndex": 27,
+              "from": 18601.79999999999,
+              "to": 18623.199999999997,
+              "durationMs": 21.40000000000873,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 27,
+              "rawToIndex": 28,
+              "from": 18623.199999999997,
+              "to": 18634.79999999999,
+              "durationMs": 11.599999999991269,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 28,
+              "rawToIndex": 29,
+              "from": 18634.79999999999,
+              "to": 18651.699999999997,
+              "durationMs": 16.90000000000873,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 29,
+              "rawToIndex": 30,
+              "from": 18651.699999999997,
+              "to": 18673,
+              "durationMs": 21.30000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 30,
+              "rawToIndex": 31,
+              "from": 18673,
+              "to": 18684.79999999999,
+              "durationMs": 11.799999999988358,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 31,
+              "rawToIndex": 32,
+              "from": 18684.79999999999,
+              "to": 18701.699999999997,
+              "durationMs": 16.90000000000873,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 32,
+              "rawToIndex": 33,
+              "from": 18701.699999999997,
+              "to": 18723.899999999994,
+              "durationMs": 22.19999999999709,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 33,
+              "rawToIndex": 34,
+              "from": 18723.899999999994,
+              "to": 18734.79999999999,
+              "durationMs": 10.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 34,
+              "rawToIndex": 35,
+              "from": 18734.79999999999,
+              "to": 18751.699999999997,
+              "durationMs": 16.90000000000873,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 35,
+              "rawToIndex": 36,
+              "from": 18751.699999999997,
+              "to": 18773,
+              "durationMs": 21.30000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 36,
+              "rawToIndex": 37,
+              "from": 18773,
+              "to": 18784.79999999999,
+              "durationMs": 11.799999999988358,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 37,
+              "rawToIndex": 38,
+              "from": 18784.79999999999,
+              "to": 18801.5,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 38,
+              "rawToIndex": 39,
+              "from": 18801.5,
+              "to": 18818.09999999999,
+              "durationMs": 16.59999999999127,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 39,
+              "rawToIndex": 40,
+              "from": 18818.09999999999,
+              "to": 18834.899999999994,
+              "durationMs": 16.80000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 40,
+              "rawToIndex": 41,
+              "from": 18834.899999999994,
+              "to": 18851.5,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 41,
+              "rawToIndex": 42,
+              "from": 18851.5,
+              "to": 18868.09999999999,
+              "durationMs": 16.59999999999127,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 42,
+              "rawToIndex": 43,
+              "from": 18868.09999999999,
+              "to": 18884.899999999994,
+              "durationMs": 16.80000000000291,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 43,
+              "rawToIndex": 44,
+              "from": 18884.899999999994,
+              "to": 18901.5,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 44,
+              "rawToIndex": 45,
+              "from": 18901.5,
+              "to": 18918.09999999999,
+              "durationMs": 16.59999999999127,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 45,
+              "rawToIndex": 46,
+              "from": 18918.09999999999,
+              "to": 18934.79999999999,
+              "durationMs": 16.69999999999709,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 46,
+              "rawToIndex": 47,
+              "from": 18934.79999999999,
+              "to": 18951.5,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 47,
+              "rawToIndex": 48,
+              "from": 18951.5,
+              "to": 18968.09999999999,
+              "durationMs": 16.59999999999127,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 48,
+              "rawToIndex": 49,
+              "from": 18968.09999999999,
+              "to": 18985.199999999997,
+              "durationMs": 17.10000000000582,
+              "fullyContained": false
+            }
+          ]
+        },
+        "optimized": {
+          "derivedFromUnchangedRaw": true,
+          "isAcceptanceGate": false,
+          "isPresentedFps": false,
+          "definition": "Every consecutive raw RAF interval overlapping the trusted pointerdown.time..pointerup.time span (from < up && to > down), retaining its full duration without clipping; fully-contained intervals are also summarized for boundary transparency.",
+          "pointerdown": {
+            "type": "pointerdown",
+            "time": 19097.099999999977,
+            "timestamp": 19084.199999999983,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 206,
+            "y": 449.1499938964844
+          },
+          "pointerup": {
+            "type": "pointerup",
+            "time": 19898.399999999994,
+            "timestamp": 19889.5,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 270,
+            "y": 461.1499938964844
+          },
+          "pointerSpanMs": 801.3000000000175,
+          "nativeCommandDurationMs": 814.9432590000033,
+          "originalWindow": {
+            "startedAt": 19082.79999999999,
+            "endedAt": 20363.599999999977,
+            "durationMs": 1280.7999999999884,
+            "frameSamples": 77,
+            "p95Ms": 23.199999999982538
+          },
+          "overlapping": {
+            "count": 49,
+            "p95Ms": 23.199999999982538,
+            "maxMs": 24.10000000000582,
+            "meanMs": 16.681632653061104,
+            "referenceIntervalMs": 35,
+            "atOrAboveReferenceIntervalCount": 0
+          },
+          "fullyContained": {
+            "count": 47,
+            "p95Ms": 23.199999999982538,
+            "maxMs": 24.10000000000582,
+            "meanMs": 16.665957446808264,
+            "referenceIntervalMs": 35,
+            "atOrAboveReferenceIntervalCount": 0
+          },
+          "intervals": [
+            {
+              "rawFromIndex": 0,
+              "rawToIndex": 1,
+              "from": 19096.29999999999,
+              "to": 19113,
+              "durationMs": 16.70000000001164,
+              "fullyContained": false
+            },
+            {
+              "rawFromIndex": 1,
+              "rawToIndex": 2,
+              "from": 19113,
+              "to": 19130.099999999977,
+              "durationMs": 17.099999999976717,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 2,
+              "rawToIndex": 3,
+              "from": 19130.099999999977,
+              "to": 19152.399999999994,
+              "durationMs": 22.300000000017462,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 3,
+              "rawToIndex": 4,
+              "from": 19152.399999999994,
+              "to": 19163,
+              "durationMs": 10.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 4,
+              "rawToIndex": 5,
+              "from": 19163,
+              "to": 19179.899999999994,
+              "durationMs": 16.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 5,
+              "rawToIndex": 6,
+              "from": 19179.899999999994,
+              "to": 19201.399999999994,
+              "durationMs": 21.5,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 6,
+              "rawToIndex": 7,
+              "from": 19201.399999999994,
+              "to": 19213,
+              "durationMs": 11.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 7,
+              "rawToIndex": 8,
+              "from": 19213,
+              "to": 19229.899999999994,
+              "durationMs": 16.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 8,
+              "rawToIndex": 9,
+              "from": 19229.899999999994,
+              "to": 19253.099999999977,
+              "durationMs": 23.199999999982538,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 9,
+              "rawToIndex": 10,
+              "from": 19253.099999999977,
+              "to": 19263,
+              "durationMs": 9.900000000023283,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 10,
+              "rawToIndex": 11,
+              "from": 19263,
+              "to": 19279.899999999994,
+              "durationMs": 16.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 11,
+              "rawToIndex": 12,
+              "from": 19279.899999999994,
+              "to": 19302.599999999977,
+              "durationMs": 22.699999999982538,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 12,
+              "rawToIndex": 13,
+              "from": 19302.599999999977,
+              "to": 19313,
+              "durationMs": 10.400000000023283,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 13,
+              "rawToIndex": 14,
+              "from": 19313,
+              "to": 19329.899999999994,
+              "durationMs": 16.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 14,
+              "rawToIndex": 15,
+              "from": 19329.899999999994,
+              "to": 19354,
+              "durationMs": 24.10000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 15,
+              "rawToIndex": 16,
+              "from": 19354,
+              "to": 19363,
+              "durationMs": 9,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 16,
+              "rawToIndex": 17,
+              "from": 19363,
+              "to": 19379.899999999994,
+              "durationMs": 16.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 17,
+              "rawToIndex": 18,
+              "from": 19379.899999999994,
+              "to": 19403.29999999999,
+              "durationMs": 23.39999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 18,
+              "rawToIndex": 19,
+              "from": 19403.29999999999,
+              "to": 19413,
+              "durationMs": 9.700000000011642,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 19,
+              "rawToIndex": 20,
+              "from": 19413,
+              "to": 19429.899999999994,
+              "durationMs": 16.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 20,
+              "rawToIndex": 21,
+              "from": 19429.899999999994,
+              "to": 19452,
+              "durationMs": 22.10000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 21,
+              "rawToIndex": 22,
+              "from": 19452,
+              "to": 19463.099999999977,
+              "durationMs": 11.099999999976717,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 22,
+              "rawToIndex": 23,
+              "from": 19463.099999999977,
+              "to": 19479.899999999994,
+              "durationMs": 16.800000000017462,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 23,
+              "rawToIndex": 24,
+              "from": 19479.899999999994,
+              "to": 19502.5,
+              "durationMs": 22.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 24,
+              "rawToIndex": 25,
+              "from": 19502.5,
+              "to": 19513,
+              "durationMs": 10.5,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 25,
+              "rawToIndex": 26,
+              "from": 19513,
+              "to": 19530,
+              "durationMs": 17,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 26,
+              "rawToIndex": 27,
+              "from": 19530,
+              "to": 19551.399999999994,
+              "durationMs": 21.39999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 27,
+              "rawToIndex": 28,
+              "from": 19551.399999999994,
+              "to": 19563,
+              "durationMs": 11.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 28,
+              "rawToIndex": 29,
+              "from": 19563,
+              "to": 19580,
+              "durationMs": 17,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 29,
+              "rawToIndex": 30,
+              "from": 19580,
+              "to": 19602,
+              "durationMs": 22,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 30,
+              "rawToIndex": 31,
+              "from": 19602,
+              "to": 19613,
+              "durationMs": 11,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 31,
+              "rawToIndex": 32,
+              "from": 19613,
+              "to": 19629.79999999999,
+              "durationMs": 16.79999999998836,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 32,
+              "rawToIndex": 33,
+              "from": 19629.79999999999,
+              "to": 19651.29999999999,
+              "durationMs": 21.5,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 33,
+              "rawToIndex": 34,
+              "from": 19651.29999999999,
+              "to": 19663,
+              "durationMs": 11.700000000011642,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 34,
+              "rawToIndex": 35,
+              "from": 19663,
+              "to": 19679.79999999999,
+              "durationMs": 16.79999999998836,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 35,
+              "rawToIndex": 36,
+              "from": 19679.79999999999,
+              "to": 19701.29999999999,
+              "durationMs": 21.5,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 36,
+              "rawToIndex": 37,
+              "from": 19701.29999999999,
+              "to": 19713,
+              "durationMs": 11.700000000011642,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 37,
+              "rawToIndex": 38,
+              "from": 19713,
+              "to": 19729.599999999977,
+              "durationMs": 16.599999999976717,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 38,
+              "rawToIndex": 39,
+              "from": 19729.599999999977,
+              "to": 19746.29999999999,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 39,
+              "rawToIndex": 40,
+              "from": 19746.29999999999,
+              "to": 19763,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 40,
+              "rawToIndex": 41,
+              "from": 19763,
+              "to": 19779.599999999977,
+              "durationMs": 16.599999999976717,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 41,
+              "rawToIndex": 42,
+              "from": 19779.599999999977,
+              "to": 19796.29999999999,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 42,
+              "rawToIndex": 43,
+              "from": 19796.29999999999,
+              "to": 19813.099999999977,
+              "durationMs": 16.79999999998836,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 43,
+              "rawToIndex": 44,
+              "from": 19813.099999999977,
+              "to": 19829.699999999983,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 44,
+              "rawToIndex": 45,
+              "from": 19829.699999999983,
+              "to": 19846.29999999999,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 45,
+              "rawToIndex": 46,
+              "from": 19846.29999999999,
+              "to": 19863,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 46,
+              "rawToIndex": 47,
+              "from": 19863,
+              "to": 19879.699999999983,
+              "durationMs": 16.699999999982538,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 47,
+              "rawToIndex": 48,
+              "from": 19879.699999999983,
+              "to": 19896.29999999999,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 48,
+              "rawToIndex": 49,
+              "from": 19896.29999999999,
+              "to": 19913.699999999983,
+              "durationMs": 17.39999999999418,
+              "fullyContained": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "profile": "desktop-webgl",
+      "nativeInput": {
+        "input": "mouse",
+        "start": {
+          "x": 748.3499999999999,
+          "y": 489.6
+        },
+        "end": {
+          "x": 812.3499999999999,
+          "y": 501.6
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 748.3499999999999,
+            "y": 489.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mousePressed",
+            "x": 748.3499999999999,
+            "y": 489.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 753.6833333333333,
+            "y": 490.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 759.0166666666665,
+            "y": 491.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 764.3499999999999,
+            "y": 492.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 769.6833333333333,
+            "y": 493.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 775.0166666666665,
+            "y": 494.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 780.3499999999999,
+            "y": 495.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 785.6833333333333,
+            "y": 496.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 791.0166666666665,
+            "y": 497.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 796.3499999999999,
+            "y": 498.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 801.6833333333333,
+            "y": 499.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 807.0166666666665,
+            "y": 500.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 812.3499999999999,
+            "y": 501.6
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseReleased",
+            "x": 812.3499999999999,
+            "y": 501.6
+          }
+        ]
+      },
+      "baseline": [
+        {
+          "name": "panel",
+          "durationMs": 1206.7999999999884,
+          "frames": {
+            "samples": 73,
+            "callbackHz": 60.49055352999727,
+            "isPresentedFps": false,
+            "p95Ms": 16.80000000000291,
+            "maxGapMs": 17.30000000000291,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 4,
+            "p95Ms": 32.69999999999709,
+            "maxMs": 32.69999999999709,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 25,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 24,
+            "p95DurationMs": 24,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "explore-search",
+          "durationMs": 1532,
+          "frames": {
+            "samples": 92,
+            "callbackHz": 60.052219321148826,
+            "isPresentedFps": false,
+            "p95Ms": 17.69999999999709,
+            "maxGapMs": 19.69999999999709,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 28,
+            "p95Ms": 35.39999999999418,
+            "maxMs": 35.5,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 82,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 24,
+            "p95DurationMs": 24,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.323803973176362,
+            "recentInputCount": 13
+          }
+        },
+        {
+          "name": "explore-filters",
+          "durationMs": 1849.6000000000058,
+          "frames": {
+            "samples": 111,
+            "callbackHz": 60.012975778546526,
+            "isPresentedFps": false,
+            "p95Ms": 16.800000000017462,
+            "maxGapMs": 17.5,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 8,
+            "p95Ms": 33,
+            "maxMs": 33,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 42,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 32,
+            "p95DurationMs": 32,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.053738818344105876,
+            "recentInputCount": 2
+          }
+        },
+        {
+          "name": "catalog-scroll",
+          "durationMs": 446.4000000000233,
+          "frames": {
+            "samples": 27,
+            "callbackHz": 60.48387096773878,
+            "isPresentedFps": false,
+            "p95Ms": 17,
+            "maxGapMs": 19.400000000023283,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 1,
+            "p95Ms": 46.89999999999418,
+            "maxMs": 46.89999999999418,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 12,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 16,
+            "p95DurationMs": 16,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "map-pan",
+          "durationMs": 4747,
+          "frames": {
+            "samples": 271,
+            "callbackHz": 57.088687592163474,
+            "isPresentedFps": false,
+            "p95Ms": 30.10000000000582,
+            "maxGapMs": 41,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 2,
+            "p95Ms": 48.69999999998254,
+            "maxMs": 48.69999999998254,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 34,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 72,
+            "p95DurationMs": 64,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "map-zoom",
+          "durationMs": 12164.399999999994,
+          "frames": {
+            "samples": 716,
+            "callbackHz": 58.86028081944036,
+            "isPresentedFps": false,
+            "p95Ms": 17.5,
+            "maxGapMs": 47.39999999999418,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 4,
+            "p95Ms": 47.69999999998254,
+            "maxMs": 47.69999999998254,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 30,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 56,
+            "p95DurationMs": 56,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "layer-switch",
+          "durationMs": 2797.2999999999884,
+          "frames": {
+            "samples": 168,
+            "callbackHz": 60.057912987523935,
+            "isPresentedFps": false,
+            "p95Ms": 16.800000000017462,
+            "maxGapMs": 23.70000000001164,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 12,
+            "p95Ms": 39.70000000001164,
+            "maxMs": 39.70000000001164,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 68,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 40,
+            "p95DurationMs": 40,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "site-search",
+          "durationMs": 1473.8999999999942,
+          "frames": {
+            "samples": 90,
+            "callbackHz": 61.062487278648724,
+            "isPresentedFps": false,
+            "p95Ms": 17.29999999998836,
+            "maxGapMs": 23.10000000000582,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 34,
+            "p95Ms": 32.89999999999418,
+            "maxMs": 34.5,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 77,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 24,
+            "p95DurationMs": 24,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.8686109606648199,
+            "recentInputCount": 5
+          }
+        }
+      ],
+      "optimized": [
+        {
+          "name": "panel",
+          "durationMs": 1210.5,
+          "frames": {
+            "samples": 73,
+            "callbackHz": 60.30565881866997,
+            "isPresentedFps": false,
+            "p95Ms": 16.800000000017462,
+            "maxGapMs": 17.199999999982538,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 4,
+            "p95Ms": 32.90000000002328,
+            "maxMs": 32.90000000002328,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 25,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 24,
+            "p95DurationMs": 24,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "explore-search",
+          "durationMs": 1565.3999999999942,
+          "frames": {
+            "samples": 94,
+            "callbackHz": 60.048549891401784,
+            "isPresentedFps": false,
+            "p95Ms": 18.29999999998836,
+            "maxGapMs": 19.79999999998836,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 28,
+            "p95Ms": 35.70000000001164,
+            "maxMs": 35.79999999998836,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 85,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 32,
+            "p95DurationMs": 24,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.323803973176362,
+            "recentInputCount": 13
+          }
+        },
+        {
+          "name": "explore-filters",
+          "durationMs": 1850.1000000000058,
+          "frames": {
+            "samples": 111,
+            "callbackHz": 59.99675693205754,
+            "isPresentedFps": false,
+            "p95Ms": 16.800000000017462,
+            "maxGapMs": 17.300000000017462,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 8,
+            "p95Ms": 33,
+            "maxMs": 33,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 42,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 32,
+            "p95DurationMs": 32,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.053738818344105876,
+            "recentInputCount": 2
+          }
+        },
+        {
+          "name": "catalog-scroll",
+          "durationMs": 446.3999999999942,
+          "frames": {
+            "samples": 27,
+            "callbackHz": 60.483870967742725,
+            "isPresentedFps": false,
+            "p95Ms": 16.900000000023283,
+            "maxGapMs": 19.60000000000582,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 1,
+            "p95Ms": 46.79999999998836,
+            "maxMs": 46.79999999998836,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 12,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 16,
+            "p95DurationMs": 16,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "map-pan",
+          "durationMs": 8113.600000000006,
+          "frames": {
+            "samples": 472,
+            "callbackHz": 58.17393019128373,
+            "isPresentedFps": false,
+            "p95Ms": 17.29999999998836,
+            "maxGapMs": 44.89999999999418,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 2,
+            "p95Ms": 52,
+            "maxMs": 52,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 34,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 56,
+            "p95DurationMs": 56,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "map-zoom",
+          "durationMs": 10314.300000000017,
+          "frames": {
+            "samples": 604,
+            "callbackHz": 58.55947567939646,
+            "isPresentedFps": false,
+            "p95Ms": 17.899999999965075,
+            "maxGapMs": 50.20000000001164,
+            "over50ms": 1
+          },
+          "inputToNextFrame": {
+            "count": 4,
+            "p95Ms": 47.59999999997672,
+            "maxMs": 47.59999999997672,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 30,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 56,
+            "p95DurationMs": 56,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "layer-switch",
+          "durationMs": 2797,
+          "frames": {
+            "samples": 168,
+            "callbackHz": 60.06435466571327,
+            "isPresentedFps": false,
+            "p95Ms": 16.800000000046566,
+            "maxGapMs": 23.900000000023283,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 12,
+            "p95Ms": 39.79999999998836,
+            "maxMs": 39.79999999998836,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 68,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 40,
+            "p95DurationMs": 40,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0,
+            "recentInputCount": 0
+          }
+        },
+        {
+          "name": "site-search",
+          "durationMs": 1472.5,
+          "frames": {
+            "samples": 90,
+            "callbackHz": 61.120543293718164,
+            "isPresentedFps": false,
+            "p95Ms": 17.5,
+            "maxGapMs": 21.600000000034925,
+            "over50ms": 0
+          },
+          "inputToNextFrame": {
+            "count": 34,
+            "p95Ms": 32.59999999997672,
+            "maxMs": 34.59999999997672,
+            "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+          },
+          "eventTiming": {
+            "supported": true,
+            "observed": 72,
+            "durationThresholdMs": 16,
+            "maxDurationMs": 24,
+            "p95DurationMs": 24,
+            "isFieldINP": false
+          },
+          "longTasks": {
+            "supported": true,
+            "count": 0,
+            "totalMs": 0,
+            "maxMs": 0
+          },
+          "layout": {
+            "supported": true,
+            "sessionCLS": 0,
+            "unexpectedSum": 0,
+            "allShiftSum": 0.8686109606648199,
+            "recentInputCount": 5
+          }
+        }
+      ],
+      "activePan": {
+        "baseline": {
+          "derivedFromUnchangedRaw": true,
+          "isAcceptanceGate": false,
+          "isPresentedFps": false,
+          "definition": "Every consecutive raw RAF interval overlapping the trusted pointerdown.time..pointerup.time span (from < up && to > down), retaining its full duration without clipping; fully-contained intervals are also summarized for boundary transparency.",
+          "pointerdown": {
+            "type": "pointerdown",
+            "time": 17212,
+            "timestamp": 17209.5,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 748.3499755859375,
+            "y": 489.6000061035156
+          },
+          "pointerup": {
+            "type": "pointerup",
+            "time": 17836.899999999994,
+            "timestamp": 17836.600000000006,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812.3499755859375,
+            "y": 501.6000061035156
+          },
+          "pointerSpanMs": 624.8999999999942,
+          "nativeCommandDurationMs": 646.8815660000037,
+          "originalWindow": {
+            "startedAt": 17195.29999999999,
+            "endedAt": 21942.29999999999,
+            "durationMs": 4747,
+            "frameSamples": 271,
+            "p95Ms": 30.10000000000582
+          },
+          "overlapping": {
+            "count": 25,
+            "p95Ms": 37,
+            "maxMs": 41,
+            "meanMs": 25.324000000000233,
+            "referenceIntervalMs": 35,
+            "atOrAboveReferenceIntervalCount": 5
+          },
+          "fullyContained": {
+            "count": 23,
+            "p95Ms": 37,
+            "maxMs": 41,
+            "meanMs": 26.065217391304348,
+            "referenceIntervalMs": 35,
+            "atOrAboveReferenceIntervalCount": 5
+          },
+          "intervals": [
+            {
+              "rawFromIndex": 0,
+              "rawToIndex": 1,
+              "from": 17209,
+              "to": 17225.79999999999,
+              "durationMs": 16.79999999998836,
+              "fullyContained": false
+            },
+            {
+              "rawFromIndex": 1,
+              "rawToIndex": 2,
+              "from": 17225.79999999999,
+              "to": 17258.199999999983,
+              "durationMs": 32.39999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 2,
+              "rawToIndex": 3,
+              "from": 17258.199999999983,
+              "to": 17295.100000000006,
+              "durationMs": 36.90000000002328,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 3,
+              "rawToIndex": 4,
+              "from": 17295.100000000006,
+              "to": 17326.79999999999,
+              "durationMs": 31.699999999982538,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 4,
+              "rawToIndex": 5,
+              "from": 17326.79999999999,
+              "to": 17360.899999999994,
+              "durationMs": 34.10000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 5,
+              "rawToIndex": 6,
+              "from": 17360.899999999994,
+              "to": 17391,
+              "durationMs": 30.10000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 6,
+              "rawToIndex": 7,
+              "from": 17391,
+              "to": 17425.899999999994,
+              "durationMs": 34.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 7,
+              "rawToIndex": 8,
+              "from": 17425.899999999994,
+              "to": 17460.199999999983,
+              "durationMs": 34.29999999998836,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 8,
+              "rawToIndex": 9,
+              "from": 17460.199999999983,
+              "to": 17497.199999999983,
+              "durationMs": 37,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 9,
+              "rawToIndex": 10,
+              "from": 17497.199999999983,
+              "to": 17532.5,
+              "durationMs": 35.30000000001746,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 10,
+              "rawToIndex": 11,
+              "from": 17532.5,
+              "to": 17573.5,
+              "durationMs": 41,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 11,
+              "rawToIndex": 12,
+              "from": 17573.5,
+              "to": 17610.199999999983,
+              "durationMs": 36.69999999998254,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 12,
+              "rawToIndex": 13,
+              "from": 17610.199999999983,
+              "to": 17643.199999999983,
+              "durationMs": 33,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 13,
+              "rawToIndex": 14,
+              "from": 17643.199999999983,
+              "to": 17658.600000000006,
+              "durationMs": 15.400000000023283,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 14,
+              "rawToIndex": 15,
+              "from": 17658.600000000006,
+              "to": 17675.29999999999,
+              "durationMs": 16.699999999982538,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 15,
+              "rawToIndex": 16,
+              "from": 17675.29999999999,
+              "to": 17692,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 16,
+              "rawToIndex": 17,
+              "from": 17692,
+              "to": 17708.899999999994,
+              "durationMs": 16.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 17,
+              "rawToIndex": 18,
+              "from": 17708.899999999994,
+              "to": 17725.399999999994,
+              "durationMs": 16.5,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 18,
+              "rawToIndex": 19,
+              "from": 17725.399999999994,
+              "to": 17742,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 19,
+              "rawToIndex": 20,
+              "from": 17742,
+              "to": 17758.699999999983,
+              "durationMs": 16.699999999982538,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 20,
+              "rawToIndex": 21,
+              "from": 17758.699999999983,
+              "to": 17775.199999999983,
+              "durationMs": 16.5,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 21,
+              "rawToIndex": 22,
+              "from": 17775.199999999983,
+              "to": 17791.899999999994,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 22,
+              "rawToIndex": 23,
+              "from": 17791.899999999994,
+              "to": 17808.600000000006,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 23,
+              "rawToIndex": 24,
+              "from": 17808.600000000006,
+              "to": 17825.29999999999,
+              "durationMs": 16.699999999982538,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 24,
+              "rawToIndex": 25,
+              "from": 17825.29999999999,
+              "to": 17842.100000000006,
+              "durationMs": 16.800000000017462,
+              "fullyContained": false
+            }
+          ]
+        },
+        "optimized": {
+          "derivedFromUnchangedRaw": true,
+          "isAcceptanceGate": false,
+          "isPresentedFps": false,
+          "definition": "Every consecutive raw RAF interval overlapping the trusted pointerdown.time..pointerup.time span (from < up && to > down), retaining its full duration without clipping; fully-contained intervals are also summarized for boundary transparency.",
+          "pointerdown": {
+            "type": "pointerdown",
+            "time": 17644,
+            "timestamp": 17641.399999999994,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 748.3499755859375,
+            "y": 489.6000061035156
+          },
+          "pointerup": {
+            "type": "pointerup",
+            "time": 18289.5,
+            "timestamp": 18289.199999999983,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812.3499755859375,
+            "y": 501.6000061035156
+          },
+          "pointerSpanMs": 645.5,
+          "nativeCommandDurationMs": 667.573774000004,
+          "originalWindow": {
+            "startedAt": 17627.29999999999,
+            "endedAt": 25740.899999999994,
+            "durationMs": 8113.600000000006,
+            "frameSamples": 472,
+            "p95Ms": 17.29999999998836
+          },
+          "overlapping": {
+            "count": 25,
+            "p95Ms": 41.30000000001746,
+            "maxMs": 44.89999999999418,
+            "meanMs": 26.18,
+            "referenceIntervalMs": 35,
+            "atOrAboveReferenceIntervalCount": 8
+          },
+          "fullyContained": {
+            "count": 23,
+            "p95Ms": 41.30000000001746,
+            "maxMs": 44.89999999999418,
+            "meanMs": 26.791304347826593,
+            "referenceIntervalMs": 35,
+            "atOrAboveReferenceIntervalCount": 8
+          },
+          "intervals": [
+            {
+              "rawFromIndex": 0,
+              "rawToIndex": 1,
+              "from": 17641,
+              "to": 17657.699999999983,
+              "durationMs": 16.699999999982538,
+              "fullyContained": false
+            },
+            {
+              "rawFromIndex": 1,
+              "rawToIndex": 2,
+              "from": 17657.699999999983,
+              "to": 17693.399999999994,
+              "durationMs": 35.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 2,
+              "rawToIndex": 3,
+              "from": 17693.399999999994,
+              "to": 17732.79999999999,
+              "durationMs": 39.39999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 3,
+              "rawToIndex": 4,
+              "from": 17732.79999999999,
+              "to": 17763.599999999977,
+              "durationMs": 30.79999999998836,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 4,
+              "rawToIndex": 5,
+              "from": 17763.599999999977,
+              "to": 17793.599999999977,
+              "durationMs": 30,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 5,
+              "rawToIndex": 6,
+              "from": 17793.599999999977,
+              "to": 17823.399999999994,
+              "durationMs": 29.800000000017462,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 6,
+              "rawToIndex": 7,
+              "from": 17823.399999999994,
+              "to": 17858.699999999983,
+              "durationMs": 35.29999999998836,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 7,
+              "rawToIndex": 8,
+              "from": 17858.699999999983,
+              "to": 17896.699999999983,
+              "durationMs": 38,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 8,
+              "rawToIndex": 9,
+              "from": 17896.699999999983,
+              "to": 17937.29999999999,
+              "durationMs": 40.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 9,
+              "rawToIndex": 10,
+              "from": 17937.29999999999,
+              "to": 17977.29999999999,
+              "durationMs": 40,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 10,
+              "rawToIndex": 11,
+              "from": 17977.29999999999,
+              "to": 18022.199999999983,
+              "durationMs": 44.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 11,
+              "rawToIndex": 12,
+              "from": 18022.199999999983,
+              "to": 18063.5,
+              "durationMs": 41.30000000001746,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 12,
+              "rawToIndex": 13,
+              "from": 18063.5,
+              "to": 18096.399999999994,
+              "durationMs": 32.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 13,
+              "rawToIndex": 14,
+              "from": 18096.399999999994,
+              "to": 18107.29999999999,
+              "durationMs": 10.89999999999418,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 14,
+              "rawToIndex": 15,
+              "from": 18107.29999999999,
+              "to": 18123.899999999994,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 15,
+              "rawToIndex": 16,
+              "from": 18123.899999999994,
+              "to": 18140.699999999983,
+              "durationMs": 16.79999999998836,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 16,
+              "rawToIndex": 17,
+              "from": 18140.699999999983,
+              "to": 18157.399999999994,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 17,
+              "rawToIndex": 18,
+              "from": 18157.399999999994,
+              "to": 18173.899999999994,
+              "durationMs": 16.5,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 18,
+              "rawToIndex": 19,
+              "from": 18173.899999999994,
+              "to": 18190.5,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 19,
+              "rawToIndex": 20,
+              "from": 18190.5,
+              "to": 18207.29999999999,
+              "durationMs": 16.79999999998836,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 20,
+              "rawToIndex": 21,
+              "from": 18207.29999999999,
+              "to": 18223.899999999994,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 21,
+              "rawToIndex": 22,
+              "from": 18223.899999999994,
+              "to": 18240.599999999977,
+              "durationMs": 16.699999999982538,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 22,
+              "rawToIndex": 23,
+              "from": 18240.599999999977,
+              "to": 18257.29999999999,
+              "durationMs": 16.70000000001164,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 23,
+              "rawToIndex": 24,
+              "from": 18257.29999999999,
+              "to": 18273.899999999994,
+              "durationMs": 16.60000000000582,
+              "fullyContained": true
+            },
+            {
+              "rawFromIndex": 24,
+              "rawToIndex": 25,
+              "from": 18273.899999999994,
+              "to": 18295.5,
+              "durationMs": 21.60000000000582,
+              "fullyContained": false
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "The six-file artifact contains original receipts, not deployed bundle or APK payload bytes. Checkout/runtime input verification and retained output metadata are distinguished explicitly.",
+    "One predefined baseline-then-optimized pair is not a statistical hardware benchmark.",
+    "Whole-window P95 includes settling time. A longer settling tail can lower that P95 without improving active dragging; the separate raw native-span summaries are descriptive and do not change any acceptance budget.",
+    "The comparison preserves all original windows, budgets, profiles, native inputs and EventTiming entries.",
+    "Opaque-guard execution requires separate operation-observation evidence; timing receipts do not contain it.",
+    "This diagnostic does not replace the full browser gate or actual Android tests on the final candidate."
+  ]
+}

@@ -1,0 +1,727 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "producerRunId": 43077619318,
+  "producerJobId": 130727807052,
+  "sourceCommit": "1710b201bfeed52613659ae3e4ca7f26638cb6cb",
+  "artifactId": 13885721229,
+  "artifactDigest": "sha256:9957eec5374f7f00af845af2ea8fe24f8778e7bf1044fc1269352eff8ae23f77",
+  "sourceReport": {
+    "path": "dist/browser-verification.json",
+    "bytes": 16534673,
+    "sha256": "8753f34cab1c24cd9e763bc72369a001f8b5df7e2715f0b631230ab4d138165c"
+  },
+  "rawZipIndependentlyHashed": false,
+  "archiveIntegrityMethod": "Exact API metadata and pinned actions/download-artifact v8.0.2 digest-mismatch:error",
+  "selectedOriginalRecordsComplete": true,
+  "mapPanFramesAndNativeEventsTruncated": false,
+  "activePan": [
+    {
+      "profile": "android-portrait",
+      "derivedFromUnchangedRaw": true,
+      "isAcceptanceGate": false,
+      "isPresentedFps": false,
+      "definition": "Every consecutive original RAF interval overlapping trusted pointerdown.time..pointerup.time (from < up and to > down), retaining the complete gap duration without clipping. Fully-contained intervals are additionally reported.",
+      "pointerdown": {
+        "type": "pointerdown",
+        "time": 14825.700000000012,
+        "timestamp": 14812.5,
+        "pointerType": "touch",
+        "pointerId": 17,
+        "trusted": true,
+        "x": 206,
+        "y": 449.1499938964844
+      },
+      "pointerup": {
+        "type": "pointerup",
+        "time": 15625.5,
+        "timestamp": 15620.599999999977,
+        "pointerType": "touch",
+        "pointerId": 17,
+        "trusted": true,
+        "x": 270,
+        "y": 461.1499938964844
+      },
+      "pointerSpanMs": 799.7999999999884,
+      "nativeCommandDurationMs": 814.5168950000079,
+      "originalWindow": {
+        "startedAt": 14811.099999999977,
+        "endedAt": 16092.299999999988,
+        "durationMs": 1281.2000000000116,
+        "frameSamples": 77,
+        "p95Ms": 22.29999999998836
+      },
+      "overlapping": {
+        "count": 49,
+        "p95Ms": 22.29999999998836,
+        "maxMs": 24.300000000046566,
+        "meanMs": 16.675510204081156,
+        "referenceIntervalMs": 35,
+        "atOrAboveReferenceIntervalCount": 0
+      },
+      "fullyContained": {
+        "count": 47,
+        "p95Ms": 22.29999999998836,
+        "maxMs": 24.300000000046566,
+        "meanMs": 16.66382978723429,
+        "referenceIntervalMs": 35,
+        "atOrAboveReferenceIntervalCount": 0
+      },
+      "intervals": [
+        {
+          "rawFromIndex": 0,
+          "rawToIndex": 1,
+          "from": 14825,
+          "to": 14841.700000000012,
+          "durationMs": 16.70000000001164,
+          "fullyContained": false
+        },
+        {
+          "rawFromIndex": 1,
+          "rawToIndex": 2,
+          "from": 14841.700000000012,
+          "to": 14858.599999999977,
+          "durationMs": 16.899999999965075,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 2,
+          "rawToIndex": 3,
+          "from": 14858.599999999977,
+          "to": 14882.900000000023,
+          "durationMs": 24.300000000046566,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 3,
+          "rawToIndex": 4,
+          "from": 14882.900000000023,
+          "to": 14891.599999999977,
+          "durationMs": 8.699999999953434,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 4,
+          "rawToIndex": 5,
+          "from": 14891.599999999977,
+          "to": 14908.5,
+          "durationMs": 16.900000000023283,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 5,
+          "rawToIndex": 6,
+          "from": 14908.5,
+          "to": 14931.5,
+          "durationMs": 23,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 6,
+          "rawToIndex": 7,
+          "from": 14931.5,
+          "to": 14941.599999999977,
+          "durationMs": 10.099999999976717,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 7,
+          "rawToIndex": 8,
+          "from": 14941.599999999977,
+          "to": 14958.5,
+          "durationMs": 16.900000000023283,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 8,
+          "rawToIndex": 9,
+          "from": 14958.5,
+          "to": 14980.799999999988,
+          "durationMs": 22.29999999998836,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 9,
+          "rawToIndex": 10,
+          "from": 14980.799999999988,
+          "to": 14991.700000000012,
+          "durationMs": 10.900000000023283,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 10,
+          "rawToIndex": 11,
+          "from": 14991.700000000012,
+          "to": 15008.5,
+          "durationMs": 16.79999999998836,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 11,
+          "rawToIndex": 12,
+          "from": 15008.5,
+          "to": 15030.099999999977,
+          "durationMs": 21.599999999976717,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 12,
+          "rawToIndex": 13,
+          "from": 15030.099999999977,
+          "to": 15041.700000000012,
+          "durationMs": 11.600000000034925,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 13,
+          "rawToIndex": 14,
+          "from": 15041.700000000012,
+          "to": 15058.5,
+          "durationMs": 16.79999999998836,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 14,
+          "rawToIndex": 15,
+          "from": 15058.5,
+          "to": 15079.200000000012,
+          "durationMs": 20.70000000001164,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 15,
+          "rawToIndex": 16,
+          "from": 15079.200000000012,
+          "to": 15091.599999999977,
+          "durationMs": 12.399999999965075,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 16,
+          "rawToIndex": 17,
+          "from": 15091.599999999977,
+          "to": 15108.400000000023,
+          "durationMs": 16.800000000046566,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 17,
+          "rawToIndex": 18,
+          "from": 15108.400000000023,
+          "to": 15129.299999999988,
+          "durationMs": 20.899999999965075,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 18,
+          "rawToIndex": 19,
+          "from": 15129.299999999988,
+          "to": 15141.599999999977,
+          "durationMs": 12.299999999988358,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 19,
+          "rawToIndex": 20,
+          "from": 15141.599999999977,
+          "to": 15158.5,
+          "durationMs": 16.900000000023283,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 20,
+          "rawToIndex": 21,
+          "from": 15158.5,
+          "to": 15178.900000000023,
+          "durationMs": 20.400000000023283,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 21,
+          "rawToIndex": 22,
+          "from": 15178.900000000023,
+          "to": 15191.599999999977,
+          "durationMs": 12.699999999953434,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 22,
+          "rawToIndex": 23,
+          "from": 15191.599999999977,
+          "to": 15208.5,
+          "durationMs": 16.900000000023283,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 23,
+          "rawToIndex": 24,
+          "from": 15208.5,
+          "to": 15229.799999999988,
+          "durationMs": 21.29999999998836,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 24,
+          "rawToIndex": 25,
+          "from": 15229.799999999988,
+          "to": 15241.599999999977,
+          "durationMs": 11.799999999988358,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 25,
+          "rawToIndex": 26,
+          "from": 15241.599999999977,
+          "to": 15258.5,
+          "durationMs": 16.900000000023283,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 26,
+          "rawToIndex": 27,
+          "from": 15258.5,
+          "to": 15280.599999999977,
+          "durationMs": 22.099999999976717,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 27,
+          "rawToIndex": 28,
+          "from": 15280.599999999977,
+          "to": 15291.700000000012,
+          "durationMs": 11.100000000034925,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 28,
+          "rawToIndex": 29,
+          "from": 15291.700000000012,
+          "to": 15308.599999999977,
+          "durationMs": 16.899999999965075,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 29,
+          "rawToIndex": 30,
+          "from": 15308.599999999977,
+          "to": 15329.700000000012,
+          "durationMs": 21.100000000034925,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 30,
+          "rawToIndex": 31,
+          "from": 15329.700000000012,
+          "to": 15341.700000000012,
+          "durationMs": 12,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 31,
+          "rawToIndex": 32,
+          "from": 15341.700000000012,
+          "to": 15358.400000000023,
+          "durationMs": 16.70000000001164,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 32,
+          "rawToIndex": 33,
+          "from": 15358.400000000023,
+          "to": 15378.799999999988,
+          "durationMs": 20.399999999965075,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 33,
+          "rawToIndex": 34,
+          "from": 15378.799999999988,
+          "to": 15393.400000000023,
+          "durationMs": 14.600000000034925,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 34,
+          "rawToIndex": 35,
+          "from": 15393.400000000023,
+          "to": 15408.5,
+          "durationMs": 15.099999999976717,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 35,
+          "rawToIndex": 36,
+          "from": 15408.5,
+          "to": 15429.700000000012,
+          "durationMs": 21.20000000001164,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 36,
+          "rawToIndex": 37,
+          "from": 15429.700000000012,
+          "to": 15441.599999999977,
+          "durationMs": 11.899999999965075,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 37,
+          "rawToIndex": 38,
+          "from": 15441.599999999977,
+          "to": 15458.299999999988,
+          "durationMs": 16.70000000001164,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 38,
+          "rawToIndex": 39,
+          "from": 15458.299999999988,
+          "to": 15475,
+          "durationMs": 16.70000000001164,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 39,
+          "rawToIndex": 40,
+          "from": 15475,
+          "to": 15491.599999999977,
+          "durationMs": 16.599999999976717,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 40,
+          "rawToIndex": 41,
+          "from": 15491.599999999977,
+          "to": 15508.299999999988,
+          "durationMs": 16.70000000001164,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 41,
+          "rawToIndex": 42,
+          "from": 15508.299999999988,
+          "to": 15524.900000000023,
+          "durationMs": 16.600000000034925,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 42,
+          "rawToIndex": 43,
+          "from": 15524.900000000023,
+          "to": 15541.599999999977,
+          "durationMs": 16.699999999953434,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 43,
+          "rawToIndex": 44,
+          "from": 15541.599999999977,
+          "to": 15558.700000000012,
+          "durationMs": 17.100000000034925,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 44,
+          "rawToIndex": 45,
+          "from": 15558.700000000012,
+          "to": 15575,
+          "durationMs": 16.29999999998836,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 45,
+          "rawToIndex": 46,
+          "from": 15575,
+          "to": 15591.599999999977,
+          "durationMs": 16.599999999976717,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 46,
+          "rawToIndex": 47,
+          "from": 15591.599999999977,
+          "to": 15608.299999999988,
+          "durationMs": 16.70000000001164,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 47,
+          "rawToIndex": 48,
+          "from": 15608.299999999988,
+          "to": 15624.900000000023,
+          "durationMs": 16.600000000034925,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 48,
+          "rawToIndex": 49,
+          "from": 15624.900000000023,
+          "to": 15642.099999999977,
+          "durationMs": 17.199999999953434,
+          "fullyContained": false
+        }
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "derivedFromUnchangedRaw": true,
+      "isAcceptanceGate": false,
+      "isPresentedFps": false,
+      "definition": "Every consecutive original RAF interval overlapping trusted pointerdown.time..pointerup.time (from < up and to > down), retaining the complete gap duration without clipping. Fully-contained intervals are additionally reported.",
+      "pointerdown": {
+        "type": "pointerdown",
+        "time": 14273.899999999907,
+        "timestamp": 14271.199999999953,
+        "pointerType": "mouse",
+        "pointerId": 1,
+        "trusted": true,
+        "x": 748.3499755859375,
+        "y": 489.6000061035156
+      },
+      "pointerup": {
+        "type": "pointerup",
+        "time": 14900.5,
+        "timestamp": 14900.29999999993,
+        "pointerType": "mouse",
+        "pointerId": 1,
+        "trusted": true,
+        "x": 812.3499755859375,
+        "y": 501.6000061035156
+      },
+      "pointerSpanMs": 626.6000000000931,
+      "nativeCommandDurationMs": 649.6474090000847,
+      "originalWindow": {
+        "startedAt": 14257.099999999977,
+        "endedAt": 17387.699999999953,
+        "durationMs": 3130.5999999999767,
+        "frameSamples": 174,
+        "p95Ms": 33.59999999997672
+      },
+      "overlapping": {
+        "count": 25,
+        "p95Ms": 37.79999999993015,
+        "maxMs": 39.70000000006985,
+        "meanMs": 25.412000000001864,
+        "referenceIntervalMs": 35,
+        "atOrAboveReferenceIntervalCount": 6
+      },
+      "fullyContained": {
+        "count": 23,
+        "p95Ms": 37.79999999993015,
+        "maxMs": 39.70000000006985,
+        "meanMs": 26.06956521739029,
+        "referenceIntervalMs": 35,
+        "atOrAboveReferenceIntervalCount": 6
+      },
+      "intervals": [
+        {
+          "rawFromIndex": 0,
+          "rawToIndex": 1,
+          "from": 14270.79999999993,
+          "to": 14287.599999999977,
+          "durationMs": 16.800000000046566,
+          "fullyContained": false
+        },
+        {
+          "rawFromIndex": 1,
+          "rawToIndex": 2,
+          "from": 14287.599999999977,
+          "to": 14324.399999999907,
+          "durationMs": 36.79999999993015,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 2,
+          "rawToIndex": 3,
+          "from": 14324.399999999907,
+          "to": 14362,
+          "durationMs": 37.60000000009313,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 3,
+          "rawToIndex": 4,
+          "from": 14362,
+          "to": 14392.399999999907,
+          "durationMs": 30.399999999906868,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 4,
+          "rawToIndex": 5,
+          "from": 14392.399999999907,
+          "to": 14423.399999999907,
+          "durationMs": 31,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 5,
+          "rawToIndex": 6,
+          "from": 14423.399999999907,
+          "to": 14456.5,
+          "durationMs": 33.10000000009313,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 6,
+          "rawToIndex": 7,
+          "from": 14456.5,
+          "to": 14494.29999999993,
+          "durationMs": 37.79999999993015,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 7,
+          "rawToIndex": 8,
+          "from": 14494.29999999993,
+          "to": 14530.899999999907,
+          "durationMs": 36.59999999997672,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 8,
+          "rawToIndex": 9,
+          "from": 14530.899999999907,
+          "to": 14566.79999999993,
+          "durationMs": 35.90000000002328,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 9,
+          "rawToIndex": 10,
+          "from": 14566.79999999993,
+          "to": 14606.5,
+          "durationMs": 39.70000000006985,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 10,
+          "rawToIndex": 11,
+          "from": 14606.5,
+          "to": 14640.79999999993,
+          "durationMs": 34.29999999993015,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 11,
+          "rawToIndex": 12,
+          "from": 14640.79999999993,
+          "to": 14674.399999999907,
+          "durationMs": 33.59999999997672,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 12,
+          "rawToIndex": 13,
+          "from": 14674.399999999907,
+          "to": 14707.699999999953,
+          "durationMs": 33.300000000046566,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 13,
+          "rawToIndex": 14,
+          "from": 14707.699999999953,
+          "to": 14720.599999999977,
+          "durationMs": 12.900000000023283,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 14,
+          "rawToIndex": 15,
+          "from": 14720.599999999977,
+          "to": 14737.099999999977,
+          "durationMs": 16.5,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 15,
+          "rawToIndex": 16,
+          "from": 14737.099999999977,
+          "to": 14753.79999999993,
+          "durationMs": 16.699999999953434,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 16,
+          "rawToIndex": 17,
+          "from": 14753.79999999993,
+          "to": 14770.599999999977,
+          "durationMs": 16.800000000046566,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 17,
+          "rawToIndex": 18,
+          "from": 14770.599999999977,
+          "to": 14787.199999999953,
+          "durationMs": 16.599999999976717,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 18,
+          "rawToIndex": 19,
+          "from": 14787.199999999953,
+          "to": 14803.79999999993,
+          "durationMs": 16.599999999976717,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 19,
+          "rawToIndex": 20,
+          "from": 14803.79999999993,
+          "to": 14820.5,
+          "durationMs": 16.70000000006985,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 20,
+          "rawToIndex": 21,
+          "from": 14820.5,
+          "to": 14837.5,
+          "durationMs": 17,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 21,
+          "rawToIndex": 22,
+          "from": 14837.5,
+          "to": 14853.899999999907,
+          "durationMs": 16.399999999906868,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 22,
+          "rawToIndex": 23,
+          "from": 14853.899999999907,
+          "to": 14870.599999999977,
+          "durationMs": 16.70000000006985,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 23,
+          "rawToIndex": 24,
+          "from": 14870.599999999977,
+          "to": 14887.199999999953,
+          "durationMs": 16.599999999976717,
+          "fullyContained": true
+        },
+        {
+          "rawFromIndex": 24,
+          "rawToIndex": 25,
+          "from": 14887.199999999953,
+          "to": 14906.099999999977,
+          "durationMs": 18.900000000023283,
+          "fullyContained": false
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "No application/build/browser was rerun.",
+    "Original full receipt remains unchanged in the sealed source artifact.",
+    "Descriptive active-pointer intervals do not change any acceptance budget and are not presented FPS.",
+    "Producer full gate succeeded; this extraction does not replace or newly execute its validators."
+  ]
+}

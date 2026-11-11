@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "scope": "published-universal-android-promotion",
+  "verified": true,
+  "sourceCommit": "add4fd058d868066ef03b313cd2ca5b924756a6b",
+  "workflowRunId": 43088008974,
+  "buildArtifactId": 13888335329,
+  "deviceArtifactId": 13888620675,
+  "tag": "v0.4.24-preview",
+  "releaseUrl": "https://github.com/orewn/tropnik/releases/tag/v0.4.24-preview",
+  "anonymousAssetsVerified": 6,
+  "assets": [
+    {
+      "name": "tropnik-arm64-preview.apk",
+      "bytes": 67850318,
+      "sha256": "b3cf62d09b39a02184ae15c2f8bf86a9c5eea1bbe6b291a3abac5e3e52dfa149",
+      "anonymous": true
+    },
+    {
+      "name": "tropnik-preview.apk",
+      "bytes": 67858685,
+      "sha256": "b6888e20ba67fd2eb28780e2596c19fe7f5ada0067678adfaf01feb3674d0361",
+      "anonymous": true
+    },
+    {
+      "name": "android-manifest.json",
+      "bytes": 2358,
+      "sha256": "b45a66a80e08eb0a59c45a89f141d824cdba295bbc6685191de80c484f96e821",
+      "anonymous": true
+    },
+    {
+      "name": "verification-reports.zip",
+      "bytes": 63166,
+      "sha256": "4256a590564cf2d9d314a5d94e8ac8220f0922f2be73a3c4e22af35d287906b8",
+      "anonymous": true
+    },
+    {
+      "name": "tropnik-0.4.24-preview-source.tar.gz",
+      "bytes": 135162225,
+      "sha256": "d1266cabed180c9bd4ced170dd33acceca13f0d44c8c47ed5931f24c7fc44fe1",
+      "anonymous": true
+    },
+    {
+      "name": "checksums.sha256",
+      "bytes": 460,
+      "sha256": "4feb33293a430f1999f4e5fc82e1244bed17a571811f53a5cab4b8ece615dd39",
+      "anonymous": true
+    }
+  ],
+  "sourceArchiveRecreatedFromExactCommit": true,
+  "releaseReportsRecreatedFromExactReceipts": true,
+  "buildReceipt": {
+    "bytes": 3440,
+    "sha256": "f5d11b3012045607ac719b7ca3e4114f0673b85031029736a1642d63c3dab86c"
+  },
+  "deviceEvidence": {
+    "device-result.json": {
+      "bytes": 3688,
+      "sha256": "e7ac464fdeb6fb5f1333e46d9b14c1d8d839707f0b624266813a36a9b339d643"
+    },
+    "installed-apks.json": {
+      "bytes": 581,
+      "sha256": "fc51c07201e1af23db40fc6b2df605fc2df1b31e32f2590e15a4ee34ad07854d"
+    },
+    "raw-instrumentation.log": {
+      "bytes": 5398,
+      "sha256": "1cc878584738d67624d20d20f6a022ca4e288fefc6b9a2ffb7d7ca5a3a14b66e"
+    },
+    "graphics-driver.txt": {
+      "bytes": 23943,
+      "sha256": "2cfa96fc92c967b3c0cf14ba5ee2a25e859025b7e9effa2a081d43a7d3c78473"
+    }
+  },
+  "actualDeviceTests": 8,
+  "physicalDeviceVerified": false,
+  "arm64DeviceExecutionVerified": false,
+  "sdkSignaturesReverified": true,
+  "productionSigned": false,
+  "previousSigningCertificateSha256": "a45e5fcbd9edcf0d1c4df1a8df7209b2417f13e7f95f64c36304ce4b9bd39dac",
+  "signingCertificateSha256": "b6269435d1981a12aba09454271e2aa767b95288c3a21cbb92729aa2f5981fa8",
+  "sameCertificateAsPreviousPreview": false,
+  "updateInstallCompatibilityVerified": false,
+  "pagesGateStillRequired": true,
+  "recordedAt": "2026-11-11T19:44:24.831214+00:00"
+}

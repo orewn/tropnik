@@ -61,7 +61,7 @@ assert.equal(verification.base, build.base);
 assert.equal(verification.pages, build.pages);
 const pages = JSON.parse((await request('page-manifest.json')).text);
 assert.equal(pages.length, build.pages);
-const browser = JSON.parse((await request('browser-verification.json')).text);
+const browser = JSON.parse((await request('browser-verification.json', 32 * 1024 * 1024)).text);
 assertBrowserReport(browser,expectedCommit,build.catalogue);
 
 const home = (await request('')).text;
