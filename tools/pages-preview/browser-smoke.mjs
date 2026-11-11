@@ -16,6 +16,7 @@ import {createOfflineOriginTransport} from './browser-origin-transport.mjs';
 import {observeRequestMapLayout,assertRequestMapLayout} from './browser-request-layout.mjs';
 import {runSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
 import {installSmoothnessRecorder,runSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
+import {inspectCustomMapDOM} from './browser-custom-map.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
@@ -1022,9 +1023,11 @@ try{
   if(satelliteAudits.length)failure.completedSatelliteAudits=satelliteAudits;
   if(error.pointerTarget)failure.pointerTarget=error.pointerTarget;
   if(currentExploreExperience)failure.exploreExperience=currentExploreExperience;
-  if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed',...(error.settleDiagnostics?{settleDiagnostics:error.settleDiagnostics}:{})});
+  if(error.settleDiagnostics)failure.settleDiagnostics=error.settleDiagnostics;
+  if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed'});
   if(cdp){
     try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);failure.sheet=await sheetSnapshot(cdp);}catch{}
+    try{failure.customMap=await evaluate(cdp,`(${inspectCustomMapDOM.toString()})()`);}catch{}
     try{failure.navigationHistory=await cdp.call('Page.getNavigationHistory');}catch{}
     try{failure.performance=await performanceDiagnostics(cdp);}catch{}
     try{const screenshot=await cdp.call('Page.captureScreenshot',{format:'png'});await writeFile(new URL('browser-failure.png',ROOT),Buffer.from(screenshot.data,'base64'));}catch{}

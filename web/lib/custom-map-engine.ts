@@ -13,6 +13,7 @@ import type {MapCoverage} from '../public/maps/map-coverage-lod.js';
 import type {MapTileLabel} from './custom-map-painter';
 import {priorityCityFontSize} from '../public/maps/map-city-labels.js';
 import {drawMapSymbol} from './custom-map-symbols';
+import {mapCanvasPolicy,type MapCanvasPolicy} from './map-canvas-policy';
 
 export type CustomMapMode='detail'|'overview'|'satellite';
 export type CustomMapState={ready:boolean;loading:boolean;mode:CustomMapMode;committedMode:CustomMapMode;imagerySource?:SatelliteSourceId;imageryTarget?:SatelliteSourceId;imageryLoading:boolean;reliefReady:boolean;localDetail:boolean;error:string;residentTiles:number;pendingTiles:number};
@@ -84,7 +85,8 @@ export class CustomMapEngine {
   readonly element:HTMLElement;
   private context:CanvasRenderingContext2D;
   private options:CustomMapOptions;
-  private tiles=new CustomMapTiles();
+  private tiles:CustomMapTiles;
+  private rasterPolicy:MapCanvasPolicy;
   private camera:CustomMapCamera;
   private floor:CustomMapCamera;
   private framed:CustomMapCamera|null=null;
@@ -93,6 +95,7 @@ export class CustomMapEngine {
   private size:MapViewport={width:1,height:1};
   private pixelRatio=1;
   private coverage?:MapCoverage;
+  private coverageRevision=-1;
   private area?:Path2D;
   private mask?:Path2D;
   private boundaries?:Path2D;
@@ -136,13 +139,14 @@ export class CustomMapEngine {
   private state:CustomMapState={ready:false,loading:false,mode:'detail',committedMode:'overview',imageryLoading:false,reliefReady:false,localDetail:false,error:'',residentTiles:0,pendingTiles:0};
   constructor(element:HTMLElement,options:CustomMapOptions){
     this.element=element;this.options=options;this.camera={...options.camera};this.floor={...options.camera};
+    this.rasterPolicy=mapCanvasPolicy(element.ownerDocument??document);this.tiles=new CustomMapTiles(this.rasterPolicy.softwareRaster);
     this.canvas=document.createElement('canvas');this.canvas.className='tropnik-map-canvas';this.canvas.tabIndex=0;
     this.canvas.setAttribute('aria-label','Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб.');
     this.canvas.setAttribute('role','img');element.appendChild(this.canvas);
     this.markerLayer=document.createElement('div');this.markerLayer.className='tropnik-marker-layer';element.appendChild(this.markerLayer);
     // Map pixels and the DOM controls share the normal compositor. A forced
     // low-latency surface uses a different presentation path on some devices.
-    const context=this.canvas.getContext('2d',{alpha:false});if(!context)throw new Error('Canvas map is unavailable');this.context=context;
+    const context=this.canvas.getContext('2d',{alpha:false,willReadFrequently:this.rasterPolicy.softwareRaster});if(!context)throw new Error('Canvas map is unavailable');this.context=context;
     this.resize=new ResizeObserver(()=>this.resizeCanvas());this.resize.observe(element);this.resizeCanvas();this.bindInput();
     void loadRussiaGeometry().then(coverage=>{
       if(this.disposed){coverage.dispose();return;}
@@ -168,7 +172,7 @@ export class CustomMapEngine {
     // During resize the previous sheet insets can briefly exceed the new size.
     // Inspection must stay safe until the layout observer supplies fresh values.
     const visible=Object.values(padding).every(value=>Number.isFinite(value)&&value>=0)&&padding.left+padding.right<this.size.width&&padding.top+padding.bottom<this.size.height;
-    return{engine:'tropnik-canvas',contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',drawRevision:this.drawRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
+    return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',drawRevision:this.drawRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
   }
   private publishInspection(){if(this.disposed)return;this.element.dataset.mapTilesState=this.state.loading?'loading':this.state.error?'error':'ready';this.element.dataset.mapInspection=JSON.stringify(this.inspect());}
   private setMoving(moving:boolean){this.element.dataset.mapMoving=String(moving);if(moving)this.element.dataset.mapCamera='moving';else delete this.element.dataset.mapCamera;}
@@ -267,11 +271,16 @@ export class CustomMapEngine {
   }
   private applyCoverage(){
     if(!this.coverage)return;
-    this.area=geometryPath(this.coverage.area).path;this.boundaries=geometryPath(this.coverage.boundaries).path;
-    const mask=new Path2D();mask.rect(-3,-3,8,8);mask.addPath(this.area);this.mask=mask;
-    this.updateSelectedArea();const s=this.coverage.status;
+    const s=this.coverage.status,changed=s.revision!==this.coverageRevision;
+    // Coverage progress and errors keep the current immutable geometry. Only
+    // an atomic source commit advances its revision and needs new paths.
+    if(changed){
+      this.area=geometryPath(this.coverage.area).path;this.boundaries=geometryPath(this.coverage.boundaries).path;
+      const mask=new Path2D();mask.rect(-3,-3,8,8);mask.addPath(this.area);this.mask=mask;
+      this.updateSelectedArea();this.coverageRevision=s.revision;
+    }
     this.element.dataset.mapCoverage=JSON.stringify(s);this.element.dataset.mapCoverageLod=s.lod;this.element.dataset.mapCoverageState=s.ready?'ready':'loading';
-    this.schedule();
+    if(changed)this.schedule();else this.publishInspection();
   }
   private listen(target:EventTarget,name:string,fn:EventListener,options?:AddEventListenerOptions|boolean){target.addEventListener(name,fn,options);this.listeners.push([target,name,fn,options]);}
   private bindInput(){

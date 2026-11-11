@@ -17,7 +17,7 @@ const area={type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[
 const collection={type:'FeatureCollection',features:[]};
 
 function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false}={}){
- let now=0,serial=0,coverageResolve;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[];
+ let now=0,serial=0,coverageResolve;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[];
  class Target{
   listeners=new Map();
   addEventListener(type,listener){const listeners=this.listeners.get(type)||new Set();listeners.add(listener);this.listeners.set(type,listeners);}
@@ -27,7 +27,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  }
  class Path{
   commands=[];
-  constructor(source){this.source=source;}
+  constructor(source){this.source=source;paths.push(this);}
   moveTo(...args){this.commands.push(['moveTo',...args]);}lineTo(...args){this.commands.push(['lineTo',...args]);}
   rect(...args){this.commands.push(['rect',...args]);}closePath(){this.commands.push(['closePath']);}addPath(path){this.commands.push(['addPath',path]);}
  }
@@ -65,7 +65,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   focus(){}setPointerCapture(id){this.pointerCapture.add(id);}hasPointerCapture(id){return this.pointerCapture.has(id);}releasePointerCapture(id){this.pointerCapture.delete(id);}
  }
  const document={createElement:tag=>new Element(tag),createElementNS:(_namespace,tag)=>new Element(tag)},window=new Target(),host=new Element('div');
- const coverage={area:coverageArea,boundaries:collection,territories:collection,status:{ready:true,lod:'source',pending:0,error:'',version:'a'.repeat(16),cells:['test']},updates:[],subscribers:new Set(),disposed:0,
+ const coverage={area:coverageArea,boundaries:collection,territories:collection,status:{ready:true,lod:'source',pending:0,error:'',version:'a'.repeat(16),cells:['test'],revision:0},updates:[],subscribers:new Set(),disposed:0,
   subscribe(listener){this.subscribers.add(listener);return()=>this.subscribers.delete(listener);},
   async updateView(bounds,zoom){this.updates.push({bounds:[...bounds],zoom});},dispose(){this.disposed++;}};
  const coveragePromise=new Promise(done=>{coverageResolve=done;});
@@ -112,7 +112,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const complete=(selector=()=>true,options=()=>({}))=>{const jobs=pending().filter(selector);for(const job of jobs)store.resolve(job,options(job));return jobs;};
  const ready=async()=>{coverageResolve(coverage);await turn();complete();await turn();flush();return engine;};
  const lastDraw=()=>calls.slice(calls.findLastIndex(call=>call.op==='fillRect'));
- return{engine,host,context,window,coverage,store,states,calls,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,
+ return{engine,host,context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
   coordinateAt:point=>engine.unproject(point),labelFor(job,coordinate,text,options={}){const p=load(resolve(root,'lib/custom-map-camera.ts')).mercatorProject(coordinate),n=2**job.request.z;return{x:p.x*n-job.request.x,y:p.y*n-job.request.y,text,kind:'place',rank:4,...options};}};
 }
@@ -393,4 +393,84 @@ test('territorial boundaries toggle actual vector bitmaps in detail and satellit
   map.setLayers({boundaries:true});assert.equal(env.pending().length,0,'Re-enabling uses the retained boundary-enabled bitmap cache');await env.settle();
   assert.deepEqual(plain(map.inspect().tiles.detail.map(tile=>tile.key)),keys);assert.equal(map.inspect().drawnRoute,'kept-route');assert.equal(map.getState().error,'');
  }
+});
+
+function notifyCoverage(env,status){
+ env.coverage.status={...env.coverage.status,...status};
+ for(const listener of env.coverage.subscribers)listener(env.coverage);
+}
+
+function coveragePaint(env){
+ const draw=env.lastDraw();
+ return{
+  area:draw.find(call=>call.op==='fill'&&call.color==='#dce5cf')?.path,
+  mask:draw.findLast(call=>call.op==='fill'&&call.rule==='evenodd')?.path,
+  boundaries:draw.find(call=>call.op==='stroke'&&call.color==='rgba(95,123,87,.45)')?.path,
+  selected:draw.find(call=>call.op==='stroke'&&call.color==='#688360')?.path,
+  route:draw.find(call=>call.op==='stroke'&&call.color==='#244d3c')?.path,
+ };
+}
+
+function coverageFixture(){
+ const env=fixture();
+ const alpha={...plain(area),properties:{shapeName:'alpha'}};
+ const beta={type:'Feature',properties:{shapeName:'beta'},geometry:{type:'Polygon',coordinates:[[[40.8,43],[41.5,43],[41.5,44],[40.8,44],[40.8,43]]]}};
+ env.coverage.territories={type:'FeatureCollection',features:[alpha,beta]};
+ env.coverage.boundaries={type:'FeatureCollection',features:[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:[[40,42],[42,45]]}}]};
+ return env;
+}
+
+test('coverage progress and failure publish current status without rebuilding or redrawing unchanged geometry',async t=>{
+ const env=coverageFixture();t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setRoute({type:'LineString',coordinates:[[40.2,43.3],[40.4,43.4],[40.8,43.5]]},'coverage-route');
+ env.engine.setRegion(['alpha']);env.flush();
+ const painted=coveragePaint(env),pathCount=env.paths.length,drawRevision=env.engine.inspect().drawRevision;
+ const cameraBefore=plain(env.engine.getCamera()),requestsBefore=env.store.requests.length;
+ assert.ok(Object.values(painted).every(Boolean),'The fixture must paint every coverage role and its route');
+ const states=[
+  {pending:3,ready:false,error:''},{pending:2,ready:false,error:''},{pending:1,ready:false,error:''},
+  {pending:0,ready:false,error:'coverage-unavailable'},{pending:0,ready:true,error:''},
+ ];
+ for(const status of states){
+  notifyCoverage(env,status);
+  assert.deepEqual(JSON.parse(env.host.dataset.mapCoverage),plain(env.coverage.status),'Progress and error diagnostics must remain current');
+  assert.deepEqual(JSON.parse(env.host.dataset.mapInspection).coverage,plain(env.coverage.status),'Public renderer inspection must expose progress without waiting for another draw');
+  assert.equal(env.host.dataset.mapCoverageState,status.ready?'ready':'loading');
+ }
+ assert.equal(env.paths.length,pathCount,'Status-only coverage notifications must not allocate or reconstruct Path2D geometry');
+ assert.equal(env.frames.size,0,'A progress/error notification without new geometry must not queue a map repaint');
+ assert.equal(env.engine.inspect().drawRevision,drawRevision);
+ for(const role of Object.keys(painted))assert.equal(coveragePaint(env)[role],painted[role]);
+ assert.deepEqual(plain(env.engine.getCamera()),cameraBefore);assert.equal(env.store.requests.length,requestsBefore);
+ assert.equal(env.host.dataset.mapDrawnRoute,'coverage-route');
+});
+
+test('a committed coverage revision atomically refreshes real geometry and labels while same-revision selection still works',async t=>{
+ const env=coverageFixture();t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setRoute({type:'LineString',coordinates:[[40.2,43.3],[40.4,43.4],[40.8,43.5]]},'coverage-route');
+ env.engine.setRegion(['alpha']);env.engine.setLabels([{id:'new-ground',coordinate:[40.7,43.7],label:'Current source ground'}]);env.flush();
+ assert.equal(env.engine.getLabelDiagnostics().find(label=>label.id==='new-ground').reason,'outside-coverage');
+ const before=coveragePaint(env),drawRevision=env.engine.inspect().drawRevision;
+ const cameraBefore=plain(env.engine.getCamera()),requestsBefore=env.store.requests.length;
+ const next=plain(area);next.geometry.coordinates[1]=next.geometry.coordinates[1].map(([lng,lat])=>[lng,lat+.4]);
+ env.coverage.area=next;
+ env.coverage.boundaries={type:'FeatureCollection',features:[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:[[40,42],[41,44],[42,45]]}}]};
+ env.coverage.territories={type:'FeatureCollection',features:[{...plain(next),properties:{shapeName:'alpha'}},env.coverage.territories.features[1]]};
+ notifyCoverage(env,{revision:1,pending:0,ready:true,error:''});
+ assert.equal(env.engine.inspect().drawRevision,drawRevision,'An atomic source notification must not paint midway through its update');
+ assert.equal(env.frames.size,1);env.flush();
+ const after=coveragePaint(env);
+ for(const role of ['area','mask','boundaries','selected'])assert.notEqual(after[role],before[role],`${role} must use the newly committed source geometry`);
+ assert.notDeepEqual(after.area.commands,before.area.commands);
+ assert.notDeepEqual(after.boundaries.commands,before.boundaries.commands);
+ assert.equal(after.mask.commands.find(command=>command[0]==='addPath')[1],after.area,'The outside mask must reference this same committed area');
+ assert.equal(after.area.commands.filter(command=>command[0]==='closePath').length,2,'The source polygon hole must survive the update');
+ assert.equal(after.route,before.route);assert.equal(env.engine.inspect().drawRevision,drawRevision+1);
+ assert.equal(env.engine.getLabelDiagnostics().find(label=>label.id==='new-ground').visible,true,'Label source admission must use the same new coverage');
+ const allocations=env.paths.length;env.engine.setRegion(['beta']);env.flush();
+ const selected=coveragePaint(env);
+ for(const role of ['area','mask','boundaries','route'])assert.equal(selected[role],after[role]);
+ assert.notEqual(selected.selected,after.selected);assert.equal(env.paths.length,allocations+1,'A selection change needs only the selected territory path');
+ assert.deepEqual(plain(env.engine.getCamera()),cameraBefore);assert.equal(env.store.requests.length,requestsBefore);
+ assert.equal(env.host.dataset.mapDrawnRoute,'coverage-route');
 });

@@ -72,9 +72,8 @@ const centerDistance=(territory:MapRegion,[lng,lat]:readonly [number,number])=>{
   const dy=territory.center[1]-lat;return dx*dx+dy*dy;
 };
 
-/** Pick the most specific rendered territory under the pointer. MapLibre may
- * return several overlapping or wrapped features; relying on features[0]
- * makes the result dependent on renderer order. */
+/** Pick the most specific territory under the pointer. Overlapping or wrapped
+ * shapes are ranked geographically, independently of their drawing order. */
 export function territoryForMapPoint(shapeNames:readonly string[],point:readonly [number,number]){
   return territoriesForShapes(shapeNames).sort((a,b)=>{
     const inside=Number(containsPoint(b,point))-Number(containsPoint(a,point));

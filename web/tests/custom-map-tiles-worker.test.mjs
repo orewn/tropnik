@@ -42,7 +42,8 @@ function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vec
   }
   class OffscreenCanvas{
     constructor(width,height){this.width=width;this.height=height;this.context=new Context(this);canvases.push(this);}
-    getContext(){return this.context;}
+    contextRequests=[];
+    getContext(type,attributes){assert.equal(type,'2d');this.contextRequests.push({type,attributes:copy(attributes??{})});return this.context;}
     transferToImageBitmap(){const bitmap=new Bitmap(this.width,this.height);bitmap.context=this.context;outputs.push(bitmap);return bitmap;}
   }
   class ImageData{constructor(data,width,height){this.data=data;this.width=width;this.height=height;}}
@@ -75,6 +76,33 @@ test('display/source windows wrap dateline parents and crop the exact positive c
   const east=env.window(18,2**18+5,3207,14);assert.equal(east.sourceX,0);assert.equal(east.childX,5);
   assert.equal(env.window(18,1605,3207,12).factor,64);
   for(const values of [[19,0,0,14],[18,0,-1,14],[12,0,0,14],[18,NaN,0,14]])assert.throws(()=>env.window(...values),/coordinates/);
+});
+
+test('software raster targets preserve fixed child pixels, source shading and parent reuse',async()=>{
+  let expectedPaint;
+  for(const softwareRaster of [undefined,false,true]){
+    const env=fixture(),sourceKey='https://tiles.example/12/25/50.webp';
+    const first=await env.send(job(1,{softwareRaster}));
+    const second=await env.send(job(2,{softwareRaster,x:1606}));
+    const relief=await env.send(job(3,{softwareRaster,kind:'relief',sourceZ:12,sourceKey}));
+    const adjacent=await env.send(job(4,{softwareRaster,kind:'relief',sourceZ:12,sourceKey,x:1606}));
+    const raster=await env.send(job(5,{softwareRaster,kind:'raster',mime:'image/jpeg'}));
+    for(const result of [first,second,relief,adjacent,raster]){
+      assert.equal(result.error,undefined);assert.equal(result.bitmap.width,512);assert.equal(result.bitmap.height,512);
+      assert.deepEqual(result.bitmap.context.canvas.contextRequests[0].attributes,{alpha:true,willReadFrequently:softwareRaster===true});
+    }
+    assert.deepEqual(env.counts(),{vectorDecodes:1,imageDecodes:2},'Adjacent vector and DEM children must keep their shared decoded parents');
+    assert.equal(env.shadeSources.length,1,'The same measured parent is shaded once');
+    assert.equal(env.shadeSources[0].z,12);assert.equal(env.shadeSources[0].y,50);
+    const shade=env.canvases.find(canvas=>canvas.context.imageData);
+    assert.deepEqual(shade.contextRequests[0].attributes,{alpha:true,willReadFrequently:softwareRaster===true});
+    const read=env.canvases.find(canvas=>canvas.context.draws[0]?.image===env.decoded[0]);
+    assert.equal(read.contextRequests[0].attributes.willReadFrequently,true,'Measured elevation decoding retains its existing CPU readback context');
+    const paint={labels:[copy(first.labels),copy(second.labels)],strokes:first.bitmap.context.strokes,shade:[...shade.context.imageData.data],raster:raster.bitmap.context.draws[0].args,contours:copy(env.contourViews),coverage:copy(relief.reliefCoverage)};
+    if(expectedPaint)assert.deepEqual(paint,expectedPaint,'Raster policy must preserve coordinates, ink widths, heights, gaps and labels');else expectedPaint=paint;
+    assert.ok(env.canvases.every(canvas=>canvas.width<=512&&canvas.height<=512));
+    assert.ok(env.decoded.every(bitmap=>bitmap.closed===1));
+  }
 });
 
 test('neighbouring display children share one decoded parent, retain crisp widths, and receive their own labels',async()=>{

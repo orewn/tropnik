@@ -1,7 +1,7 @@
 import {decodeVectorTile,type VectorTile} from './custom-map-vector';
 import {decodeTerrarium,elevationBorder,paintContours,paintVectorTile,reliefPixels,type TilePaintBounds,type ReliefCoverage,type ReliefHalo,type ReliefHaloKey,type ReliefHaloOffset,type ReliefHaloPayload,type ReliefHaloSource} from './custom-map-painter';
 
-type TileJob={id:number;kind:'vector'|'relief'|'raster';bytes:ArrayBuffer;z:number;x?:number;y:number;paintZoom?:number;sourceZ?:number;sourceKey?:string;paths:boolean;transparent?:boolean;boundaries?:boolean;mime?:string;halo?:ReliefHaloPayload};
+type TileJob={id:number;kind:'vector'|'relief'|'raster';bytes:ArrayBuffer;z:number;x?:number;y:number;paintZoom?:number;sourceZ?:number;sourceKey?:string;paths:boolean;transparent?:boolean;boundaries?:boolean;softwareRaster?:boolean;mime?:string;halo?:ReliefHaloPayload};
 type RenderWindow={factor:number;childX:number;childY:number;sourceX:number;sourceY:number;sourceZ:number;paintSize:number;bounds:TilePaintBounds};
 type ParentBase={bytes:number};
 type VectorParent=ParentBase&{kind:'vector';tile:VectorTile};
@@ -110,7 +110,7 @@ async function prepareRelief(parent:ReliefParent,job:TileJob,view:RenderWindow):
     }catch{for(const item of items)missing.set(haloKey(item),'invalid');}
   }
   if(changed||!parent.shaded){
-    const context=parent.shade.getContext('2d');if(!context)throw new Error('Relief painter unavailable');
+    const context=parent.shade.getContext('2d',{alpha:true,willReadFrequently:!!job.softwareRaster});if(!context)throw new Error('Relief painter unavailable');
     // Physical spacing and latitude belong to the measured parent. Unknown
     // outside derivatives stay transparent; no edge-clamped terrain is made.
     context.putImageData(new ImageData(new Uint8ClampedArray(reliefPixels(parent.heights,parent.size,view.sourceY,view.sourceZ,parent.halo)),parent.size,parent.size),0,0);
@@ -136,7 +136,7 @@ self.onmessage=async({data:job}:MessageEvent<TileJob>)=>{
     // intended on-screen ink width. Keep the fixed 512px output allocation.
     const paintScale=2**(job.z-paintZoom);
     validateHalo(job);
-    const canvas=new OffscreenCanvas(TILE_SIZE,TILE_SIZE),context=canvas.getContext('2d',{alpha:true});
+    const canvas=new OffscreenCanvas(TILE_SIZE,TILE_SIZE),context=canvas.getContext('2d',{alpha:true,willReadFrequently:!!job.softwareRaster});
     if(!context)throw new Error('Tile painter unavailable');
     let labels:ReturnType<typeof paintVectorTile>=[],contours=0,reliefCoverage:ReliefCoverage|undefined;
     if(job.kind==='raster'){

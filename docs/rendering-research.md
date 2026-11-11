@@ -128,6 +128,16 @@ INP учитывает задержку до обработчика, обраб�
 
 Действующие пороги browser gates сохраняются при переходе на свой движок. Инструментированные трассы помогают определить причину задержек, а отдельный запуск без трассировки проверяет пользовательский бюджет. Результаты старого SDK не считаются сертификатом новой сборки.
 
+### Выбор пути растеризации по возможностям
+
+SwiftShader исполняет графические API программно на CPU. Поэтому наличие WebGL-контекста само по себе не подтверждает аппаратное ускорение. `failIfMajorPerformanceCaveat` позволяет отклонить контекст с существенной оговоркой производительности; недоступность необязательного расширения с именем renderer такой оговоркой не считается. [18][19]
+
+Текущий движок при первом создании карты в документе проверяет невидимый контекст 1×1 и освобождает его. Если WebGL2 недоступен или renderer явно программный, основной Canvas и worker запрашивают путь с `willReadFrequently`. Размеры изображений, DPR, данные и лимиты остаются прежними. Если браузер скрывает имя доступного renderer, сохраняется обычный путь. Это проверка возможностей, без определения тестового окружения или модели устройства по User-Agent. Реальные атрибуты контекста доступны через `getContextAttributes`; поддержка запроса и фактическое ускорение измеряются отдельно. [20]
+
+Режим `desynchronized` может обходить обычный DOM compositor, но допускает иной порядок представления и разрывы изображения. Он не является универсальным переключателем высокой скорости. Для основной карты сейчас используется обычное согласованное представление. Решение о будущем применении требует сравнения трасс и видимого результата на целевых устройствах. [21]
+
+Независимо от выбранного backend географические `Path2D` кэшируются по подтверждённой ревизии покрытия. Статус загрузки не является изменением геометрии. Это сокращает работу основного потока без изменения точности границ.
+
 ## 6. Android и удобство приложения
 
 Профили Baseline оптимизируют исполняемые ART пути Java/Kotlin через предварительную компиляцию. Они полезны для нативного запуска, Compose, каталога и host bridge. Они не компилируют JavaScript нашего painter и не устраняют задержки GPU. Проценты из общей документации нельзя переносить на Тропник без собственного сравнения. [13]
@@ -168,6 +178,10 @@ INP учитывает задержку до обработчика, обраб�
 15. Chromium: [Android WebView architecture](https://chromium.googlesource.com/chromium/src/+/HEAD/android_webview/docs/architecture.md).
 16. W3C: [Target Size, Enhanced](https://www.w3.org/WAI/WCAG22/Understanding/target-size-enhanced.html).
 17. W3C: [Dragging Movements](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html).
+18. Chromium: [SwiftShader](https://github.com/chromium/chromium/blob/main/docs/gpu/swiftshader.md).
+19. Khronos: [WebGL specification](https://github.com/KhronosGroup/WebGL/blob/main/specs/latest/1.0/index.html), `failIfMajorPerformanceCaveat`.
+20. MDN: [CanvasRenderingContext2D.getContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getContextAttributes).
+21. Chrome Developers: [Low-latency rendering with the desynchronized hint](https://developer.chrome.com/blog/desynchronized).
 
 ## Связанные файлы проекта
 

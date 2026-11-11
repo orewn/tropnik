@@ -193,7 +193,10 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
     var ready = false;private set
     var debugSnapshot: JSONObject? = null;private set
     var debugFixtureState: JSONObject? = null;private set
+    var debugDrawCount = 0L;private set
+    var debugLastDrawAt = 0L;private set
     private val debugReceipts = java.util.ArrayDeque<JSONObject>()
+    private val debugTouchEvents = java.util.ArrayDeque<JSONObject>()
     private var debugSnapshotRequest = 0L
     private var debugSnapshotSentAt = 0L
     private val generation = serial.incrementAndGet()
@@ -331,7 +334,9 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
         check(BuildConfig.DEBUG && Looper.myLooper() == Looper.getMainLooper())
         return JSONObject().put("ready", ready).put("disposed", disposed).put("pageReady", pageReady).put("frameReady", frameReady)
             .put("snapshotRequest", debugSnapshotRequest).put("snapshotSentAt", debugSnapshotSentAt)
-            .put("fixture", debugFixtureState).put("receipts", JSONArray(debugReceipts.toList())).put("lastSnapshot", debugSnapshot)
+            .put("drawCount", debugDrawCount).put("lastDrawAt", debugLastDrawAt)
+            .put("fixture", debugFixtureState).put("receipts", JSONArray(debugReceipts.toList()))
+            .put("nativeTouchEvents", JSONArray(debugTouchEvents.toList())).put("lastSnapshot", debugSnapshot)
     }
 
     private fun checkReady() {
@@ -388,11 +393,24 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
         return request
     }
 
+    override fun onDraw(canvas: android.graphics.Canvas) {
+        super.onDraw(canvas)
+        if (BuildConfig.DEBUG) {debugDrawCount++;debugLastDrawAt = SystemClock.uptimeMillis()}
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         // A map gesture owns its stream, including a second finger. Native
         // catalogue scrolling remains available outside this view.
         if (event.actionMasked == MotionEvent.ACTION_DOWN) parent?.requestDisallowInterceptTouchEvent(true)
+        val diagnostic = if (BuildConfig.DEBUG && event.actionMasked in setOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL)) {
+            JSONObject().put("action", event.actionMasked).put("x", event.x.toDouble()).put("y", event.y.toDouble())
+                .put("eventTime", event.eventTime).put("downTime", event.downTime).put("receivedAt", SystemClock.uptimeMillis())
+        } else null
         val handled = super.onTouchEvent(event)
+        if (diagnostic != null) {
+            if (debugTouchEvents.size == 12) debugTouchEvents.removeFirst()
+            debugTouchEvents.addLast(diagnostic.put("handled", handled))
+        }
         if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
             parent?.requestDisallowInterceptTouchEvent(false)
         }

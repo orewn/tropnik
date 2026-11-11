@@ -14,8 +14,8 @@
   "sourceInputs": [
     {
       "path": "tools/android-build/custom-map-android.ts",
-      "sizeBytes": 14710,
-      "sha256": "9b860f271e768f7f643ea1c3663a1c12b4e8ce95a41497fb3557dbcde7373983"
+      "sizeBytes": 16332,
+      "sha256": "aa6a792f38779e44feacc661b2b90e58b414b3245aaa9e28453e1ad4ddd291dd"
     },
     {
       "path": "tools/android-build/custom-map-entry.ts",
@@ -99,8 +99,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 40452,
-      "sha256": "c5553ef967f2e23cab40d68381510f50338caea2a594b093dce090aeea08d955"
+      "sizeBytes": 41113,
+      "sha256": "2204683a1c783a9ce7906af6e88f89584ed580e40c402aa5394b9c3a9b93f2fe"
     },
     {
       "path": "web/lib/custom-map-painter.ts",
@@ -114,18 +114,23 @@
     },
     {
       "path": "web/lib/custom-map-tiles.ts",
-      "sizeBytes": 13552,
-      "sha256": "dff303c40244f5691b2c9312b6faf23f594d5d057840b0fd611057d935fc6934"
+      "sizeBytes": 13642,
+      "sha256": "bf31a2766762315dc58256b54f68af98bf767168474e77f0f6659267591ad32f"
     },
     {
       "path": "web/lib/custom-map-tiles.worker.ts",
-      "sizeBytes": 13058,
-      "sha256": "d47ed4e8710f26a17586eb7eeb47d1a17240d762a2fe13de8a5bbda083150487"
+      "sizeBytes": 13175,
+      "sha256": "6eba664fe851dfb85556413b6f1cc9edad5bf4f266a40f3600defe39119a4b8c"
     },
     {
       "path": "web/lib/custom-map-vector.ts",
       "sizeBytes": 12737,
       "sha256": "87e145aa0d4c8a6b5007c0e1b53faba1b57a6c0d41b7782d7091575c1f5ebe48"
+    },
+    {
+      "path": "web/lib/map-canvas-policy.ts",
+      "sizeBytes": 2025,
+      "sha256": "eb8ee4bca63a563b8d755493dca4c10f4d66e089681306f1a8fce6795318cfda"
     },
     {
       "path": "web/lib/map-config.ts",
@@ -233,17 +238,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "f6989c23aeb9d16c18a41802ab414355d7a5126329bda3f9cb7f84c52dacd9d3",
+  "sourceInputsSha256": "ea4b1ffd9fea1f9d3a37907f8f8d3f3edfe060b589c6f4c60bf001a59d32aaa2",
   "files": [
     {
       "path": "android-bootstrap.js",
-      "sizeBytes": 13727,
-      "sha256": "96749405d4e7390a0baba0cdc87f67a27c2443bd1f414495ccf4c2a964e9f4ba"
+      "sizeBytes": 14771,
+      "sha256": "3c97ac0a5b996561414b6659902ca92a9bb8e10c9ac1edbeebc61b601499021b"
     },
     {
-      "path": "chunks/custom-map-entry-DibkxEah.js",
-      "sizeBytes": 89485,
-      "sha256": "8d0842831c7d19566c885b32f1108ccb24aa43c9cd33356894a9cfdb3c782e05"
+      "path": "chunks/custom-map-entry-BVbjg3ke.js",
+      "sizeBytes": 90854,
+      "sha256": "2efaba783f8b3b1c921ae79bc9dc8634e38c395d09a079a10554b56abdb59209"
     },
     {
       "path": "chunks/terrain-renderer-pEGv39m9.js",
@@ -263,7 +268,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "82a539b1b3172a8e3a847cb52dc90fbe7698e993adb2242b6b810a37d1076756"
+      "sha256": "4ccefad9432eef08d7275e488f3a03acd34040f3acd297f5f3e467461075e703"
     },
     {
       "path": "map.css",
@@ -276,9 +281,9 @@
       "sha256": "54075549afdea2aee6d10c3cf70d53429b0ba457eda890a8ad93c1124c508c10"
     },
     {
-      "path": "workers/custom-map-tiles.worker-BOjZjSbA.js",
-      "sizeBytes": 23202,
-      "sha256": "a2b9cbdadda0f5020c4be4524d580bd99e135190e19cc84f7d669fb8ce195009"
+      "path": "workers/custom-map-tiles.worker-BERbKOzS.js",
+      "sizeBytes": 23289,
+      "sha256": "296f5d069a1c91006bdafd5b1977ee68a8f05f55f57519bb5fa811a359ef8a25"
     },
     {
       "path": "workers/terrain-preparation.worker-B8lieq38.js",

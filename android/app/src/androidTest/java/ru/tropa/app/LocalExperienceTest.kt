@@ -4,6 +4,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.InputDevice
 import android.view.MotionEvent
+import android.view.ViewConfiguration
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -165,6 +166,7 @@ class LocalExperienceTest {
         val startedAt = SystemClock.uptimeMillis()
         val deadline = startedAt + 15_000
         val groupTaps = JSONArray()
+        val finalTap = JSONObject()
         var lastGroupTap = ""
         var prepared = false
         try {
@@ -185,30 +187,82 @@ class LocalExperienceTest {
                         val key = group.getString("groupKey") + "@" + kotlin.math.round(zoom * 100)
                         if (key != lastGroupTap) {
                             lastGroupTap = key
-                            groupTaps.put(JSONObject().put("groupKey", group.getString("groupKey")).put("zoom", zoom)
-                                .put("x", group.getDouble("x")).put("y", group.getDouble("y")).put("elapsedMs", SystemClock.uptimeMillis() - startedAt))
-                            tapMapMarker(map, group, snapshot)
+                            val tap = JSONObject().put("groupKey", group.getString("groupKey")).put("zoom", zoom)
+                                .put("x", group.getDouble("x")).put("y", group.getDouble("y")).put("elapsedMs", SystemClock.uptimeMillis() - startedAt)
+                            groupTaps.put(tap)
+                            tapMapMarker(map, group, snapshot, deadline, tap)
                         }
                     }
                 }
                 marker != null && SystemClock.uptimeMillis() <= deadline
             }
             prepared = true
+            screenshot("$screenshotPrefix-before-tap")
+            tapMapMarker(map, requireNotNull(marker), snapshot, deadline, finalTap)
         } finally {
+            var diagnostics = JSONObject()
+            app.runOnUiThread { diagnostics = map.debugDiagnostics() }
             val report = File(app.activity.filesDir, "qa/$screenshotPrefix-selection.json")
             report.parentFile!!.mkdirs()
             report.writeText(JSONObject().put("target", regionId).put("prepared", prepared).put("deadlineMs", 15_000)
-                .put("elapsedMs", SystemClock.uptimeMillis() - startedAt).put("trustedGroupTaps", groupTaps).put("snapshot", snapshot).toString(2))
+                .put("elapsedMs", SystemClock.uptimeMillis() - startedAt).put("trustedGroupTaps", groupTaps).put("finalTap", finalTap)
+                .put("snapshot", snapshot).put("diagnostics", diagnostics).toString(2))
+            if (!prepared || !finalTap.optBoolean("trustedClick")) screenshot("$screenshotPrefix-selection-failed")
         }
-        screenshot("$screenshotPrefix-before-tap")
-        tapMapMarker(map, requireNotNull(marker), snapshot)
         app.waitUntil(timeoutMillis = 10_000) {app.onAllNodes(hasText("Обзор района")).fetchSemanticsNodes().isNotEmpty()}
         app.onNodeWithTag("explore_list").performScrollToIndex(0)
         app.onNodeWithText(region.name).assertExists()
         screenshot("$screenshotPrefix-after-tap")
     }
 
-    private fun tapMapMarker(map: CustomMapWebView, marker: JSONObject, snapshot: JSONObject) {
+    private fun awaitMapDraw(map: CustomMapWebView, deadline: Long, receipt: JSONObject) {
+        val visual = CountDownLatch(1)
+        var active = true
+        var visualAt = 0L
+        var drawnAt = 0L
+        var countAtVisual = -1L
+        val startedAt = SystemClock.uptimeMillis()
+        app.runOnUiThread {
+            map.postVisualStateCallback(startedAt, object : WebView.VisualStateCallback() {
+                override fun onComplete(requestId: Long) {
+                    if (!active) return
+                    visualAt = SystemClock.uptimeMillis()
+                    countAtVisual = map.debugDrawCount
+                    map.invalidate()
+                    visual.countDown()
+                }
+            })
+        }
+        try {
+            val remaining = deadline - SystemClock.uptimeMillis()
+            assertTrue("The current map DOM did not reach the compositor before the original selection deadline", remaining > 0 && visual.await(remaining, TimeUnit.MILLISECONDS))
+            val drawRemaining = deadline - SystemClock.uptimeMillis()
+            assertTrue("No time remains for the current map frame", drawRemaining > 0)
+            app.waitUntil(timeoutMillis = drawRemaining) {
+                var drawn = false
+                app.runOnUiThread {
+                    drawn = map.debugDrawCount > countAtVisual
+                    if (drawn) drawnAt = map.debugLastDrawAt
+                }
+                drawn && SystemClock.uptimeMillis() <= deadline
+            }
+        } finally {
+            app.runOnUiThread {
+                active = false
+                receipt.put("visualState", JSONObject().put("requestedAt", startedAt).put("callbackAt", visualAt).put("drawnAt", drawnAt).put("countAtCallback", countAtVisual))
+            }
+        }
+    }
+
+    private fun tapMapMarker(map: CustomMapWebView, marker: JSONObject, snapshot: JSONObject, deadline: Long, receipt: JSONObject) {
+        val previousInput = snapshot.optJSONArray("trustedInput") ?: JSONArray()
+        val lastInputSequence = (0 until previousInput.length()).maxOfOrNull {previousInput.getJSONObject(it).optLong("sequence")} ?: 0L
+        receipt.put("markerId", marker.getString("id")).put("snapshotRequest", snapshot.getLong("requestId"))
+            .put("snapshotFrame", snapshot.getInt("frame")).put("hitAtMarker", marker.optJSONObject("hitAtMarker")).put("afterInputSequence", lastInputSequence)
+        assertEquals("A visible marker must also be the actual DOM hit target", marker.getString("id"), marker.getJSONObject("hitAtMarker").getString("markerId"))
+        // A JavaScript snapshot can precede WebView's compositor by seconds.
+        // Wait for this DOM state and a following native draw before touching.
+        awaitMapDraw(map, deadline, receipt)
         val location = IntArray(2);val visible = Rect()
         var scaleX = 0f;var scaleY = 0f
         app.runOnUiThread {
@@ -219,14 +273,49 @@ class LocalExperienceTest {
         }
         val x = location[0] + marker.getDouble("x").toFloat() * scaleX
         val y = location[1] + requireNotNull(marker).getDouble("y").toFloat() * scaleY
+        receipt.put("screenX", x.toDouble()).put("screenY", y.toDouble()).put("scaleX", scaleX.toDouble()).put("scaleY", scaleY.toDouble())
+            .put("viewLocation", JSONArray(location.toList())).put("globalVisible", JSONArray(listOf(visible.left, visible.top, visible.right, visible.bottom)))
         assertTrue("Rendered marker must be on screen", visible.contains(x.toInt(), y.toInt()))
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
         val downTime = SystemClock.uptimeMillis()
+        val dispatched = JSONArray()
+        receipt.put("nativeInput", dispatched)
+        var upTime = 0L
         for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
-            val event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action, x, y, 0)
+            if (action == MotionEvent.ACTION_UP) SystemClock.sleep(80)
+            val eventTime = SystemClock.uptimeMillis()
+            if (action == MotionEvent.ACTION_DOWN) assertTrue("No time remains for the real touch", eventTime <= deadline)
+            else upTime = eventTime
+            val event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0)
             event.source = InputDevice.SOURCE_TOUCHSCREEN
-            try { assertTrue("Map touch injection failed", automation.injectInputEvent(event, true)) }
+            try {
+                // The public API may still sync transactions before DOWN.
+                // Keep actual timestamps and check the resulting duration;
+                // never backdate UP or leave DOWN held when a deadline expires.
+                val accepted = automation.injectInputEvent(event, false)
+                dispatched.put(JSONObject().put("action", action).put("downTime", downTime).put("eventTime", eventTime)
+                    .put("returnedAt", SystemClock.uptimeMillis()).put("accepted", accepted))
+                assertTrue("Map touch injection failed", accepted)
+            }
             finally { event.recycle() }
+        }
+        val longPressMs = ViewConfiguration.getLongPressTimeout().toLong()
+        receipt.put("actualPressMs", upTime - downTime).put("longPressThresholdMs", longPressMs)
+        assertTrue("The actual native gesture became a long press instead of a tap", upTime - downTime < longPressMs)
+        assertTrue("The real touch exceeded the original selection deadline", upTime <= deadline)
+        val remaining = deadline - SystemClock.uptimeMillis()
+        assertTrue("No time remains for the trusted map click", remaining > 0)
+        app.waitUntil(timeoutMillis = remaining) {
+            var diagnostics = JSONObject()
+            app.runOnUiThread { diagnostics = map.debugDiagnostics() }
+            val events = diagnostics.getJSONArray("receipts")
+            val recent = (0 until events.length()).map {events.getJSONObject(it)}.filter {
+                it.optString("phase") == "trusted-input" && it.optLong("sequence") > lastInputSequence && it.optLong("nativeReceivedAt") >= downTime
+            }
+            receipt.put("domInput", JSONArray(recent)).put("nativeTouchEvents", diagnostics.getJSONArray("nativeTouchEvents"))
+            val clicked = recent.any {it.optString("type") == "click" && it.optBoolean("trusted") && it.optJSONObject("target")?.optString("markerId") == marker.getString("id")}
+            receipt.put("trustedClick", clicked)
+            clicked && SystemClock.uptimeMillis() <= deadline
         }
     }
 

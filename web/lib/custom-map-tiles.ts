@@ -43,6 +43,7 @@ export class CustomMapTiles {
   private template?:Promise<string>;
   private localFiles?:Promise<Set<string>>;
   private errors:Array<{key:string;message:string}>=[];
+  constructor(private readonly softwareRaster=false){}
   snapshot(){return{resident:this.cache.size,pending:this.jobs.size,fetching:this.fetching,decoding:!!this.active,enabled:this.enabled,stages:[...this.jobs.values()].reduce<Record<string,number>>((counts,{work})=>{counts[work.stage]=(counts[work.stage]||0)+1;return counts;},{}),errors:this.errors.map(error=>({...error}))};}
   get pending(){return this.jobs.size;}
   get resident(){return this.cache.size;}
@@ -152,7 +153,7 @@ export class CustomMapTiles {
       }
       this.active=work;work.stage='decoding';const bytes=work.bytes!,halo=work.halo;work.bytes=undefined;work.halo=undefined;
       this.timer=setTimeout(()=>this.failWorker(),15000);
-      this.worker.postMessage({id:work.id,kind:work.request.kind==='vector'?'vector':work.request.kind==='relief'?'relief':'raster',bytes,z:work.request.z,x:work.request.x,y:work.request.y,paintZoom:paintZoomFor(work.request),sourceZ:work.sourceZ,sourceKey:work.sourceKey,paths:work.request.paths!==false,transparent:work.request.transparent,boundaries:work.request.boundaries!==false,mime:work.mime,halo},[...new Set([bytes,...(halo?.tiles.map(item=>item.bytes)??[])])]);
+      this.worker.postMessage({id:work.id,kind:work.request.kind==='vector'?'vector':work.request.kind==='relief'?'relief':'raster',bytes,z:work.request.z,x:work.request.x,y:work.request.y,paintZoom:paintZoomFor(work.request),sourceZ:work.sourceZ,sourceKey:work.sourceKey,paths:work.request.paths!==false,transparent:work.request.transparent,boundaries:work.request.boundaries!==false,softwareRaster:this.softwareRaster,mime:work.mime,halo},[...new Set([bytes,...(halo?.tiles.map(item=>item.bytes)??[])])]);
     }catch(error){this.active=undefined;clearTimeout(this.timer);this.finish(work,undefined,error instanceof Error?error:new Error('Map worker unavailable'));}
   }
   private failWorker(message='Map tile worker failed'){

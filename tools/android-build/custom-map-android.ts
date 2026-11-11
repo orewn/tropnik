@@ -16,6 +16,28 @@ let position: [number, number] | null = null;
 let markerCoordinates = new Map<string, [number, number]>();
 let labelFixture: {longitude: number; latitude: number} | undefined;
 let fixtureVersion = 0, fixtureEvidence: {key: string; value: OutsideLabelEvidence} | undefined, preparingEvidence = '';
+const trustedInput: Record<string, unknown>[] = [];
+let inputSequence = 0;
+
+function inputTarget(target: EventTarget | null) {
+  const node = target as Element | null;
+  const marker = typeof node?.closest === 'function' ? node.closest<HTMLButtonElement>('[data-map-marker-id]') : null;
+  return {tag: node?.tagName?.toLowerCase() || '', markerId: marker?.dataset.mapMarkerId || '', groupKey: marker?.dataset.mapGroupKey || marker?.dataset.mapMarkerId || ''};
+}
+
+function installInputDiagnostics() {
+  // This port is enabled only by the DEBUG native host. Observe the browser's
+  // real trusted stream without synthesizing, cancelling or retargeting input.
+  for (const type of ['pointerdown', 'pointerup', 'pointercancel', 'click', 'contextmenu']) element.addEventListener(type, event => {
+    if (!debug || !event.isTrusted) return;
+    const pointer = event as PointerEvent;
+    const receipt = {sequence: ++inputSequence, type, trusted: true, timeStamp: event.timeStamp, receivedAt: performance.now(),
+      x: pointer.clientX, y: pointer.clientY, pointerId: pointer.pointerId, pointerType: pointer.pointerType,
+      target: inputTarget(event.target), frame, camera: engine?.getCamera()};
+    if (trustedInput.length === 16) trustedInput.shift();
+    trustedInput.push(receipt);send('debugReceipt', {phase: 'trusted-input', ...receipt});
+  }, {capture: true, passive: true});
+}
 
 function send(type: string, payload: unknown = {}) {port?.postMessage(JSON.stringify({version: 1, generation, type, payload}));}
 function failure(message: string) {error = message;document.documentElement.dataset.mapState = 'failed';send('error', {message});}
@@ -30,10 +52,14 @@ function snapshot() {
   const evidence = fixtureEvidence?.key === labelEvidenceKey() ? fixtureEvidence.value : undefined;
   return {ready: !!map?.getState().ready && sentSourceFrame, frame, error, camera: map?.getCamera(), pitch: map?.getPitch(), moving: element.dataset.mapMoving === 'true', state: map?.getState(), rendered,
     size: map?.getSize(), routeId: element.dataset.mapDrawnRoute || '', coverage: map?.getCoverage()?.status,
+    trustedInput: [...trustedInput],
     markers: [...element.querySelectorAll<HTMLButtonElement>('[data-map-marker-id]')].map(button => {
       const r = button.getBoundingClientRect(), base = element.getBoundingClientRect();
-      return {id: button.dataset.mapMarkerId, groupKey: button.dataset.mapGroupKey || button.dataset.mapMarkerId, hidden: button.hidden || getComputedStyle(button).display === 'none',
-        x: r.x - base.x + r.width / 2, y: r.y - base.y + r.height / 2, width: r.width, height: r.height};
+      const hidden = button.hidden || getComputedStyle(button).display === 'none';
+      const hit = hidden ? null : document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      return {id: button.dataset.mapMarkerId, groupKey: button.dataset.mapGroupKey || button.dataset.mapMarkerId, hidden,
+        x: r.x - base.x + r.width / 2, y: r.y - base.y + r.height / 2, width: r.width, height: r.height,
+        hitAtMarker: inputTarget(hit)};
     }), labels, outsideLabelProbes: evidence?.probes || [], labelEvidence: evidence && {examined: evidence.examined, limited: evidence.limited},
     labelFixture: labelFixture && {...labelFixture, status: evidence ? 'ready' : 'preparing', point: map?.project([labelFixture.longitude, labelFixture.latitude])}};
 }
@@ -144,6 +170,7 @@ window.addEventListener('message', event => {
   try {hello = JSON.parse(String(event.data));} catch {return;}
   if (hello.type !== 'tropnik-map-port' || hello.version !== 1 || !Number.isSafeInteger(hello.generation) || hello.generation! <= 0) return;
   initialized = true;generation = hello.generation!;debug = hello.debug === true;port = event.ports[0];
+  if (debug) installInputDiagnostics();
   port.onmessage = event => {
     try {
       const data = JSON.parse(String(event.data));

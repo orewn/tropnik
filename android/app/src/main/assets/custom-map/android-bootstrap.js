@@ -1,4 +1,4 @@
-import { n as e, r as t } from "./chunks/custom-map-entry-DibkxEah.js";
+import { n as e, r as t } from "./chunks/custom-map-entry-BVbjg3ke.js";
 //#region tools/android-build/native-map-route.ts
 var n = class {
 	origin;
@@ -88,8 +88,48 @@ function i(e, t = 256 * 1024) {
 }
 //#endregion
 //#region tools/android-build/custom-map-android.ts
-var a = "https://map.tropnik.invalid", o = document.getElementById("map"), s, c = 0, l = 0, u, d = !1, f = new n(a, (e, t) => u?.setRoute(e, t)), p = "", m = 0, h = !1, g = !1, _ = null, v = /* @__PURE__ */ new Map(), y, b = 0, x, S = "";
-function C(e, t = {}) {
+var a = "https://map.tropnik.invalid", o = document.getElementById("map"), s, c = 0, l = 0, u, d = !1, f = new n(a, (e, t) => u?.setRoute(e, t)), p = "", m = 0, h = !1, g = !1, _ = null, v = /* @__PURE__ */ new Map(), y, b = 0, x, S = "", C = [], w = 0;
+function T(e) {
+	let t = e, n = typeof t?.closest == "function" ? t.closest("[data-map-marker-id]") : null;
+	return {
+		tag: t?.tagName?.toLowerCase() || "",
+		markerId: n?.dataset.mapMarkerId || "",
+		groupKey: n?.dataset.mapGroupKey || n?.dataset.mapMarkerId || ""
+	};
+}
+function E() {
+	for (let e of [
+		"pointerdown",
+		"pointerup",
+		"pointercancel",
+		"click",
+		"contextmenu"
+	]) o.addEventListener(e, (t) => {
+		if (!d || !t.isTrusted) return;
+		let n = t, r = {
+			sequence: ++w,
+			type: e,
+			trusted: !0,
+			timeStamp: t.timeStamp,
+			receivedAt: performance.now(),
+			x: n.clientX,
+			y: n.clientY,
+			pointerId: n.pointerId,
+			pointerType: n.pointerType,
+			target: T(t.target),
+			frame: m,
+			camera: u?.getCamera()
+		};
+		C.length === 16 && C.shift(), C.push(r), D("debugReceipt", {
+			phase: "trusted-input",
+			...r
+		});
+	}, {
+		capture: !0,
+		passive: !0
+	});
+}
+function D(e, t = {}) {
 	s?.postMessage(JSON.stringify({
 		version: 1,
 		generation: c,
@@ -97,10 +137,10 @@ function C(e, t = {}) {
 		payload: t
 	}));
 }
-function w(e) {
-	p = e, document.documentElement.dataset.mapState = "failed", C("error", { message: e });
+function O(e) {
+	p = e, document.documentElement.dataset.mapState = "failed", D("error", { message: e });
 }
-function T(e) {
+function k(e) {
 	let t = e;
 	if (!t || !Array.isArray(t.center) || t.center.length !== 2 || !t.center.every(Number.isFinite) || Math.abs(t.center[0]) > 720 || Math.abs(t.center[1]) > 85.052 || !Number.isFinite(t.zoom) || t.zoom < 0 || t.zoom > 17 || t.bearingDegrees !== void 0 && !Number.isFinite(t.bearingDegrees)) throw Error("Invalid map camera");
 	return {
@@ -109,8 +149,8 @@ function T(e) {
 		bearingDegrees: t.bearingDegrees || 0
 	};
 }
-function E() {
-	let e = u, { labels: t, ...n } = e?.inspect() || {}, r = x?.key === D() ? x.value : void 0;
+function A() {
+	let e = u, { labels: t, ...n } = e?.inspect() || {}, r = x?.key === j() ? x.value : void 0;
 	return {
 		ready: !!e?.getState().ready && g,
 		frame: m,
@@ -123,16 +163,18 @@ function E() {
 		size: e?.getSize(),
 		routeId: o.dataset.mapDrawnRoute || "",
 		coverage: e?.getCoverage()?.status,
+		trustedInput: [...C],
 		markers: [...o.querySelectorAll("[data-map-marker-id]")].map((e) => {
-			let t = e.getBoundingClientRect(), n = o.getBoundingClientRect();
+			let t = e.getBoundingClientRect(), n = o.getBoundingClientRect(), r = e.hidden || getComputedStyle(e).display === "none", i = r ? null : document.elementFromPoint(t.x + t.width / 2, t.y + t.height / 2);
 			return {
 				id: e.dataset.mapMarkerId,
 				groupKey: e.dataset.mapGroupKey || e.dataset.mapMarkerId,
-				hidden: e.hidden || getComputedStyle(e).display === "none",
+				hidden: r,
 				x: t.x - n.x + t.width / 2,
 				y: t.y - n.y + t.height / 2,
 				width: t.width,
-				height: t.height
+				height: t.height,
+				hitAtMarker: T(i)
 			};
 		}),
 		labels: t,
@@ -148,7 +190,7 @@ function E() {
 		}
 	};
 }
-function D() {
+function j() {
 	if (!y || !u) return "";
 	let e = u, t = e?.getLabelDiagnostics().find((e) => e.id === "domestic" && e.visible);
 	return y && e?.getCoverage()?.status.ready && t?.rect ? JSON.stringify([
@@ -160,18 +202,18 @@ function D() {
 		t.rect
 	]) : "";
 }
-function O() {
+function M() {
 	if (!d || !y) return;
-	let e = u, n = D(), i = b;
+	let e = u, n = j(), i = b;
 	if (!d || !e || !n || n === x?.key || n === S || !y) return;
 	let a = e.getLabelDiagnostics().find((e) => e.id === "domestic" && e.visible), o = e.getCoverage().area, s = e.project([y.longitude, y.latitude]);
 	S = n;
 	let c = performance.now();
-	r(a.rect, s.x, (t) => e.unproject(t), (e) => t(e[0], e[1], o), () => u === e && b === i && D() === n).then((t) => {
-		u !== e || D() !== n || (x = {
+	r(a.rect, s.x, (t) => e.unproject(t), (e) => t(e[0], e[1], o), () => u === e && b === i && j() === n).then((t) => {
+		u !== e || j() !== n || (x = {
 			key: n,
 			value: t
-		}, C("fixture", {
+		}, D("fixture", {
 			status: "ready",
 			frame: m,
 			version: i,
@@ -181,7 +223,7 @@ function O() {
 			preparationMs: performance.now() - c
 		}));
 	}, (e) => {
-		e?.name !== "AbortError" && C("fixture", {
+		e?.name !== "AbortError" && D("fixture", {
 			status: "error",
 			version: i,
 			message: "Label evidence could not be prepared"
@@ -190,10 +232,10 @@ function O() {
 		S === n && (S = "");
 	});
 }
-async function k() {
+async function N() {
 	if (!d || !u?.getCoverage()) throw Error("Debug map fixture is unavailable");
 	let e = u.getCoverage();
-	b++, x = void 0, y = void 0, C("fixture", {
+	b++, x = void 0, y = void 0, D("fixture", {
 		status: "preparing",
 		version: b
 	}), u.setCamera({
@@ -240,11 +282,11 @@ async function k() {
 		color: "#102018"
 	}]);
 }
-async function A(e, n) {
+async function P(e, n) {
 	if (!u) throw Error("Map has not initialized");
 	switch (e) {
 		case "camera":
-			u.setCamera(T(n.camera), n.animate === !0);
+			u.setCamera(k(n.camera), n.animate === !0);
 			break;
 		case "fit": {
 			let e = n.bounds, t = Number(n.padding || 0);
@@ -274,7 +316,7 @@ async function A(e, n) {
 			let e = n.coordinate;
 			if (e !== null && (!Array.isArray(e) || e.length !== 2 || !e.every(Number.isFinite))) throw Error("Invalid position");
 			let r = e !== null && !!u.getCoverage() && t(e[0], e[1], u.getCoverage().area);
-			_ = r ? e : null, u.setPosition(_), C("position", {
+			_ = r ? e : null, u.setPosition(_), D("position", {
 				inside: r,
 				measuredAt: n.measuredAt
 			}), r && n.recenter === !0 && u.setCamera({
@@ -314,14 +356,14 @@ async function A(e, n) {
 		case "snapshot": {
 			if (!d || !Number.isSafeInteger(n.requestId)) throw Error("Debug command disabled");
 			let e = performance.now();
-			C("debugReceipt", {
+			D("debugReceipt", {
 				phase: "snapshot-start",
 				requestId: n.requestId,
 				startedAt: e,
 				frame: m
 			});
 			let t = {
-				...E(),
+				...A(),
 				requestId: n.requestId,
 				timing: {
 					startedAt: e,
@@ -333,13 +375,13 @@ async function A(e, n) {
 				type: "snapshot",
 				payload: t
 			});
-			r.encoded ? (s?.postMessage(r.encoded), C("debugReceipt", {
+			r.encoded ? (s?.postMessage(r.encoded), D("debugReceipt", {
 				phase: "snapshot-sent",
 				requestId: n.requestId,
 				finishedAt: performance.now(),
 				chars: r.chars,
 				utf8Bytes: r.utf8Bytes
-			})) : C("debugReceipt", {
+			})) : D("debugReceipt", {
 				phase: "snapshot-rejected",
 				requestId: n.requestId,
 				reason: "message-budget",
@@ -350,7 +392,7 @@ async function A(e, n) {
 		}
 		case "labelFixture":
 			if (!d) throw Error("Debug command disabled");
-			await k();
+			await N();
 			break;
 		case "destroy":
 			f.dispose(), u.destroy(), u = void 0, s?.close(), s = void 0;
@@ -367,14 +409,14 @@ window.addEventListener("message", (n) => {
 		return;
 	}
 	if (!(r.type !== "tropnik-map-port" || r.version !== 1 || !Number.isSafeInteger(r.generation) || r.generation <= 0)) {
-		h = !0, c = r.generation, d = r.debug === !0, s = n.ports[0], s.onmessage = (e) => {
+		h = !0, c = r.generation, d = r.debug === !0, s = n.ports[0], d && E(), s.onmessage = (e) => {
 			try {
 				let t = JSON.parse(String(e.data));
 				if (t.version !== 1 || t.generation !== c || !Number.isSafeInteger(t.sequence) || t.sequence <= l || typeof t.type != "string" || !t.payload || typeof t.payload != "object") return;
 				l = t.sequence;
 				let n = l;
-				A(t.type, t.payload).then(() => C("ack", { sequence: n }), (e) => {
-					e?.name !== "AbortError" && C("commandError", {
+				P(t.type, t.payload).then(() => D("ack", { sequence: n }), (e) => {
+					e?.name !== "AbortError" && D("commandError", {
 						sequence: n,
 						command: t.type,
 						...d ? { detail: String(e?.message || e).slice(0, 240) } : {},
@@ -382,7 +424,7 @@ window.addEventListener("message", (n) => {
 					});
 				});
 			} catch {
-				w("Не удалось обработать состояние карты.");
+				O("Не удалось обработать состояние карты.");
 			}
 		}, s.start();
 		try {
@@ -393,33 +435,33 @@ window.addEventListener("message", (n) => {
 				},
 				maxZoom: 17,
 				onReady: () => {
-					document.documentElement.dataset.mapState = "ready", C("ready");
+					document.documentElement.dataset.mapState = "ready", D("ready");
 				},
 				onFrame: () => {
 					m++, o.dataset.mapDetail = u && u.getCamera().zoom >= 10 ? "close" : "wide";
 					let e = u?.getState().residentTiles || 0;
-					!g && e > 0 && (g = !0, C("frame", {
+					!g && e > 0 && (g = !0, D("frame", {
 						frame: m,
 						sourceTiles: e
-					})), O();
+					})), M();
 				},
 				onSettled: (e) => {
-					e.zoom < 10 && u && u.getPitch() > 0 && u.setPitch(0), C("camera", {
+					e.zoom < 10 && u && u.getPitch() > 0 && u.setPitch(0), D("camera", {
 						camera: e,
 						pitch: u?.getPitch() || 0
 					});
 				},
 				onMarker: (e) => {
 					let n = v.get(e), r = u?.getCoverage();
-					n && r && t(n[0], n[1], r.area) && C("marker", { id: e });
+					n && r && t(n[0], n[1], r.area) && D("marker", { id: e });
 				},
-				onState: (e) => C("state", e)
+				onState: (e) => D("state", e)
 			}), document.documentElement.dataset.mapState = "loading";
 		} catch {
-			w("Карта не открылась. Карточки и источники доступны.");
+			O("Карта не открылась. Карточки и источники доступны.");
 		}
 	}
-}), window.addEventListener("error", () => w("Карта не открылась. Карточки и источники доступны.")), window.addEventListener("unhandledrejection", (e) => {
-	e.reason?.name !== "AbortError" && w("Карта не смогла загрузить данные. Сохранённые карточки доступны.");
+}), window.addEventListener("error", () => O("Карта не открылась. Карточки и источники доступны.")), window.addEventListener("unhandledrejection", (e) => {
+	e.reason?.name !== "AbortError" && O("Карта не смогла загрузить данные. Сохранённые карточки доступны.");
 });
 //#endregion

@@ -7,7 +7,7 @@ import ts from 'typescript';
 const turn=()=>new Promise(resolve=>setImmediate(resolve));
 const source=readFileSync(new URL('../lib/custom-map-tiles.ts',import.meta.url),'utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
-function fixture({files=[],online=true}={}){
+function fixture({files=[],online=true,softwareRaster}={}){
   const downloads=[],workers=[],bitmaps=[];
   class Worker {
     constructor(url){this.url=String(url);this.messages=[];this.transfers=[];this.terminated=false;workers.push(this);}
@@ -24,11 +24,34 @@ function fixture({files=[],online=true}={}){
       if(name.endsWith('?worker&url'))return {__esModule:true,default:'/custom-map/workers/tiles.js'};
       throw new Error(`Unmocked runtime dependency ${name}`);
     }});
-  const store=new testModule.exports.CustomMapTiles();
+  const store=new testModule.exports.CustomMapTiles(softwareRaster);
   const resolveDownloads=()=>{for(const request of downloads.filter(item=>!item.done)){request.done=true;request.resolve(new Uint8Array([1,2,3,4]).buffer);}};
   return{store,downloads,workers,bitmaps,navigator,resolveDownloads,key:testModule.exports.customTileKey};
 }
 const request=(x=0)=>({kind:'overview',z:4,x,y:5});
+
+test('a map raster policy reaches every worker job without changing source identity or bitmap caching',async t=>{
+  let expectedSources;
+  for(const softwareRaster of [undefined,false,true]){
+    const env=fixture({softwareRaster});t.after(()=>env.store.destroy());
+    const requests=[request(2),{kind:'vector',z:18,x:1605,y:3207},{kind:'relief',z:18,x:1605,y:3207}];
+    env.store.pin(requests.map(env.key));const pending=requests.map(value=>env.store.load(value));await turn();
+    assert.equal(env.downloads.length,3);env.resolveDownloads();await turn();
+    const jobs=[];
+    for(let index=0;index<requests.length;index++){jobs.push(env.workers[0].complete());await turn();}
+    const tiles=await Promise.all(pending),sources=env.downloads.map(item=>item.url).sort();
+    assert.ok(jobs.every(job=>job.softwareRaster===(softwareRaster===true)));
+    assert.deepEqual(jobs.map(job=>job.kind).sort(),['raster','relief','vector']);
+    assert.equal(jobs.find(job=>job.kind==='vector').sourceZ,14);assert.equal(jobs.find(job=>job.kind==='relief').sourceZ,12);
+    if(expectedSources)assert.deepEqual(sources,expectedSources);else expectedSources=sources;
+    for(let index=0;index<tiles.length;index++){
+      assert.equal(tiles[index].key,env.key(requests[index]));assert.equal(tiles[index].bitmap.width,512);assert.equal(tiles[index].bitmap.height,512);
+      assert.equal(await env.store.load(requests[index]),tiles[index],'Repeated consumers must keep the same cached bitmap');
+    }
+    assert.equal(env.downloads.length,3);assert.equal(env.workers.length,1);assert.equal(env.workers[0].messages.length,0);
+    assert.equal(env.store.snapshot().pending,0);assert.equal(env.store.snapshot().resident,3);
+  }
+});
 
 test('a paused map fetches nothing and resumes one actual decoder with an HTTP asset URL',async t=>{
   const env=fixture();t.after(()=>env.store.destroy());env.store.setActive(false);
