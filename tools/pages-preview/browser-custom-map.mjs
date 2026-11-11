@@ -82,6 +82,14 @@ export function assertCustomSceneInspection(value,context){
  assert.ok(grid.bounds[2]>grid.bounds[0]&&grid.bounds[2]-grid.bounds[0]<=360);assert.ok(grid.bounds[3]>grid.bounds[1]);
  assert.ok(typeof grid.source?.name==='string'&&grid.source.name);assert.ok(typeof grid.source.url==='string'&&grid.source.url);
  assert.deepEqual(provenance?.requestedBounds,grid.bounds,`${context}: rendered terrain has another geographic source`);
+ const mask=value.displayMask,maskSource=mask?.source;
+ assert.equal(mask?.state,'ready',`${context}: actual geographic display mask is not ready`);
+ for(const dimension of ['width','height'])assert.ok(Number.isInteger(mask[dimension])&&mask[dimension]>=2&&mask[dimension]<=2048,`${context}: invalid mask ${dimension}`);
+ assert.equal(maskSource?.scope,'russia-display-area');assert.deepEqual(maskSource.bounds,grid.bounds);
+ assert.match(maskSource.coverageVersion,/^[a-f0-9]{16,64}$/);assert.ok(Array.isArray(maskSource.cells)&&maskSource.cells.length>0);
+ assert.equal(maskSource.projection,'regular-longitude-latitude');assert.equal(maskSource.sampleLayout,'pixel-cells');
+ assert.ok(Number.isInteger(maskSource.allowedPixels)&&maskSource.allowedPixels>0&&maskSource.allowedPixels<=mask.width*mask.height);
+ assert.deepEqual(frame.displayMask,{width:mask.width,height:mask.height,allowedPixels:maskSource.allowedPixels,coverageVersion:maskSource.coverageVersion},`${context}: the prepared mask was not used by the rendered frame`);
  assert.ok(['yaw','pitch','zoom'].every(key=>Number.isFinite(frame.view?.[key])));assert.ok(frame.view.zoom>=.65&&frame.view.zoom<=5);
  assert.ok(Array.isArray(frame.view.offset)&&frame.view.offset.length===2&&frame.view.offset.every(Number.isFinite));
  if(value.cartography?.state==='ready'){

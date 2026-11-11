@@ -15,4 +15,4 @@ html{scrollbar-gutter:stable;-webkit-text-size-adjust:100%;text-size-adjust:100%
 @media(pointer:coarse){.save-button,.region-option{min-height:44px}}@media(forced-colors:active){:where(a,button,[role=button]):focus-visible{outline:3px solid Highlight}.app-update,.notice-block,:where(.prose-card,.account-card,.departure-card,.moderation-item){border:2px solid CanvasText;box-shadow:none}}
 .fact-photo-image{display:block;width:100%;height:100%;min-height:inherit;object-fit:cover;object-position:50% 50%;background:#dfe7d8}.fact-controls button:disabled{opacity:.52;transform:none;cursor:not-allowed}.top-nav.open{overscroll-behavior:contain}
 
-@media(pointer:coarse),(prefers-reduced-transparency:reduce){.modal-backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media(pointer:coarse),(prefers-reduced-transparency:reduce){.modal-backdrop{-webkit-backdrop-filter:none;backdrop-filter:none}}

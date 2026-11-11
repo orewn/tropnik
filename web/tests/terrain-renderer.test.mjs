@@ -99,22 +99,28 @@ function environment(t,{gpuFailure=false,gl=null,cloneFails=false,width=80,heigh
 }
 
 function recordingGL({anisotropy=0}={}){
-  const counts={framebuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,uploads:[],anisotropyQueries:0,anisotropyValues:[]},enums=new Map();let next=1,gl;
+  const counts={framebuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[]},enums=new Map(),generations=new WeakMap(),liveTextures=new Set();let next=1,gl,generation=0,error=0;
+  const create=type=>{const object={};generations.set(object,generation);if(type==='Texture')liveTextures.add(object);return object;};
+  const remove=(type,object)=>{
+    if(generations.get(object)!==generation){counts.invalidObjectCalls++;error=gl.INVALID_OPERATION;return;}
+    generations.delete(object);if(type==='Texture'){counts.deletedTextures++;liveTextures.delete(object);}
+  };
   const extension={MAX_TEXTURE_MAX_ANISOTROPY_EXT:0x84ff,TEXTURE_MAX_ANISOTROPY_EXT:0x84fe};
-  const methods={NO_ERROR:0,getParameter:key=>key===extension.MAX_TEXTURE_MAX_ANISOTROPY_EXT?anisotropy:16384,getError:()=>0,getExtension:name=>{if(name!=='EXT_texture_filter_anisotropic')return null;counts.anisotropyQueries++;return anisotropy?extension:null;},getShaderParameter:()=>true,getProgramParameter:()=>true,
+  const methods={NO_ERROR:0,getParameter:key=>key===extension.MAX_TEXTURE_MAX_ANISOTROPY_EXT?anisotropy:16384,getError:()=>{const result=error;error=0;return result;},getExtension:name=>{if(name!=='EXT_texture_filter_anisotropic')return null;counts.anisotropyQueries++;return anisotropy?extension:null;},getShaderParameter:()=>true,getProgramParameter:()=>true,
     texParameterf:(_target,key,value)=>{if(key===extension.TEXTURE_MAX_ANISOTROPY_EXT)counts.anisotropyValues.push(value);},
     checkFramebufferStatus:()=>gl.FRAMEBUFFER_COMPLETE,getUniformLocation:(_program,name)=>name,
     uniform1i:(name,value)=>{if(name==='uSteps')counts.shadowBudgets.push(value);},
-    createFramebuffer:()=>{counts.framebuffers++;return{};},createBuffer:()=>{counts.buffers++;return{};},
-    createTexture:()=>{counts.textures++;return{};},deleteTexture:()=>{counts.deletedTextures++;},
+    createFramebuffer:()=>{counts.framebuffers++;return create('Framebuffer');},createBuffer:()=>{counts.buffers++;return create('Buffer');},
+    createTexture:()=>{counts.textures++;return create('Texture');},deleteTexture:object=>remove('Texture',object),
     texImage2D:(_target,_level,_internal,width,height,_border,_format,_type,data)=>counts.uploads.push({width,height,pixels:data?.slice(0,16)}),
   };
   gl=new Proxy(methods,{get(target,key){
     if(key in target)return target[key];
     if(/^[A-Z0-9_]+$/.test(String(key))){if(!enums.has(key))enums.set(key,next++);return enums.get(key);}
-    if(String(key).startsWith('create'))return()=>({});return()=>{};
+    if(String(key).startsWith('create'))return()=>create(String(key).slice(6));
+    if(String(key).startsWith('delete'))return object=>remove(String(key).slice(6),object);return()=>{};
   }});
-  return{gl,counts};
+  return{gl,counts,loseContext(){generation++;counts.contextReleasedTextures+=liveTextures.size;liveTextures.clear();}};
 }
 
 test('LOD hysteresis avoids toggling near a zoom threshold while retaining hard limits',()=>{
@@ -168,11 +174,11 @@ test('GPU display mask retains one owned texture across frames and restores it a
   const record=recordingGL(),env=environment(t,{gl:record.gl}),source=grid(3,3),mask=displayMask(source,[255,0,0,255]);
   const renderer=new TerrainRenderer(env.canvas,source,{displayMask:mask});env.flush();assert.equal(renderer.gpu.displayMask,renderer.displayMask);
   const before=record.counts.textures;renderer.rotate(.2);env.flush();assert.equal(record.counts.textures,before,'camera changes do not recreate the geographic mask');
-  const owned=renderer.displayMask;env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();
+  const owned=renderer.displayMask;record.loseContext();env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();
   assert.equal(renderer.displayMask,owned);assert.equal(renderer.gpu.displayMask,owned);
-  env.canvas.events.get('webglcontextlost')({preventDefault(){}});renderer.fallbackAfterLoss();env.flush();
+  record.loseContext();env.canvas.events.get('webglcontextlost')({preventDefault(){}});renderer.fallbackAfterLoss();env.flush();
   assert.equal(renderer.software.displayMask,owned);assert.equal(renderer.canvas.dataset.displayMask,'russia-display-area');
-  renderer.destroy();assert.equal(record.counts.deletedTextures,record.counts.textures);assert.equal(env.frames.size,0);
+  renderer.destroy();assert.equal(record.counts.deletedTextures+record.counts.contextReleasedTextures,record.counts.textures);assert.equal(record.counts.invalidObjectCalls,0);assert.equal(env.frames.size,0);
 });
 test('cartography validates bounded pixels, exact geographic grid alignment and source coverage',()=>{
  const source=grid(),valid=cartography(source);assert.equal(validateTerrainCartography(valid,source),valid);
@@ -208,10 +214,10 @@ test('GPU cartography replaces one texture, restores source cover after context 
  assert.equal(record.counts.textures,before.textures+1);assert.equal(record.counts.deletedTextures,before.deleted+1);
  assert.equal(record.counts.uploads.length,before.uploads+1,'cover updates must never replace the DEM texture');
  assert.deepEqual([...record.counts.uploads.at(-1).pixels.slice(0,4)],[90,30,15,128]);
- env.flush();env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();
+ env.flush();record.loseContext();env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();
  assert.deepEqual(renderer.gpu.cartographySize,[2,2]);assert.equal(renderer.cartography.pixels[0],180);
  renderer.setCartography(null);assert.deepEqual(renderer.gpu.cartographySize,[1,1]);assert.equal(renderer.cartography,null);
- renderer.destroy();assert.equal(record.counts.deletedTextures,record.counts.textures);assert.equal(env.frames.size,0);
+ renderer.destroy();assert.equal(record.counts.deletedTextures+record.counts.contextReleasedTextures,record.counts.textures);assert.equal(record.counts.invalidObjectCalls,0);assert.equal(env.frames.size,0);
 });
 
 test('oblique cartography filtering respects device limits and never queries extensions per frame',t=>{
@@ -259,9 +265,9 @@ test('screen-space route thickness cannot pull an occluded trail through terrain
 test('fallback canvas is restored on destroy and the same original canvas can be retried',t=>{
   const env=environment(t,{gpuFailure:true});
   for(let attempt=0;attempt<2;attempt++){
-    const renderer=new TerrainRenderer(env.canvas,grid(3,3));
+    let frame;const renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:value=>{frame=value;}});
     assert.notEqual(env.parent.child,env.canvas);renderer.setVisible(false);renderer.warmup();env.flush();
-    assert.equal(renderer.canvas.dataset.renderer,'canvas2d');renderer.destroy();
+    assert.equal(renderer.canvas.dataset.renderer,'canvas2d');assert.deepEqual(frame.graphicsFallback,{stage:'initialization',reason:'Terrain shader: synthetic compiler failure'});renderer.destroy();
     assert.equal(env.parent.child,env.canvas);assert.equal(env.canvas.style.touchAction,'pan-y');assert.equal(env.frames.size,0);
   }
 });

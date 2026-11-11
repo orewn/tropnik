@@ -75,6 +75,8 @@ export type TerrainRenderInfo = {
   triangles: number;
   quality: 'motion' | 'full';
   renderer: 'webgl2' | 'canvas2d';
+  /** Bounded diagnostic evidence; a compatible software frame can still be ready. */
+  graphicsFallback?:{stage:'context-create'|'initialization'|'context-timeout'|'context-restoration'|'cartography'|'render';reason:string}|null;
   pixelRatio: number;
   meshStride: number;
   sourceVertices: number;

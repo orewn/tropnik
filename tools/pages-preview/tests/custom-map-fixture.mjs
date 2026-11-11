@@ -23,7 +23,8 @@ export function customSceneFixture(mobile,routeId='kavkaz-8a'){
  const view={yaw:-.48,pitch:.72,zoom:1,offset:[0,0]},source={name:'Observed source fixture',url:'test:source'};
  const initial={schemaVersion:1,engine:'tropnik-terrain',state:'ready',frames:2,requestedBounds:bounds,
   grid:{width:3,height:3,bounds,minElevation:100,maxElevation:200,source},provenance:{requestedBounds:bounds},
-  frame:{sourceVertices:9,triangles:8,renderer:'webgl2',view,cartography:{loadedTiles:1,requestedTiles:1,width:1024,height:1024}},
+  displayMask:{state:'ready',width:2048,height:2048,source:{scope:'russia-display-area',coverageVersion:'a'.repeat(16),bounds,cells:['test-cell'],projection:'regular-longitude-latitude',sampleLayout:'pixel-cells',allowedPixels:4194304}},
+  frame:{sourceVertices:9,triangles:8,renderer:'webgl2',view,displayMask:{width:2048,height:2048,allowedPixels:4194304,coverageVersion:'a'.repeat(16)},cartography:{loadedTiles:1,requestedTiles:1,width:1024,height:1024}},
   cartography:{state:'ready',width:1024,height:1024,source:{bounds,projection:'regular-longitude-latitude',sampleLayout:'grid-nodes',loadedTiles:1,requestedTiles:1}}};
  const state=(frames,patch)=>({...structuredClone(initial),frames,frame:{...structuredClone(initial.frame),view:{...structuredClone(view),...patch}}});
  const labels=[...Array(14).fill('Приблизить ландшафт'),...Array(14).fill('Отдалить ландшафт'),'Повернуть ландшафт','Вернуть исходный ракурс'];

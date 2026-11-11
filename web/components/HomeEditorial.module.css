@@ -6,4 +6,4 @@
 @media(prefers-reduced-motion:reduce){.serviceCard,.serviceCard a svg,.regionGrid a,.regionArrow svg{transition:none}}
 @media(forced-colors:active){.serviceCard,.regionGrid a,.cardIcon,.regionArrow{border:1px solid CanvasText;box-shadow:none}}
 
-@media(pointer:coarse),(prefers-reduced-transparency:reduce){.serviceCard{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)}}
+@media(pointer:coarse),(prefers-reduced-transparency:reduce){.serviceCard{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)}}

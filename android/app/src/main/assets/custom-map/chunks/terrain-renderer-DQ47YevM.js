@@ -908,10 +908,30 @@ void main(){
 		}
 		c.disable(c.STENCIL_TEST), c.bindVertexArray(null), c.flush();
 	}
+	abandon() {
+		this.resources = [], this.meshes.clear(), this.shadows.clear(), this.routeCount = 0;
+		for (let e of [
+			"terrain",
+			"shadow",
+			"line",
+			"boundary",
+			"ground",
+			"heightTexture",
+			"maskTexture",
+			"normalTexture",
+			"maxHeightTexture",
+			"surfaceTexture",
+			"cartographyTexture",
+			"emptyVAO",
+			"routeVAO",
+			"routeBuffer",
+			"anisotropy"
+		]) this[e] = null;
+	}
 	destroy() {
 		let e = this.gl;
 		for (let [t, n] of this.resources.reverse()) e["delete" + n](t);
-		this.resources = [], this.meshes.clear(), this.shadows.clear();
+		this.abandon();
 	}
 };
 function ce(e) {
@@ -1072,7 +1092,7 @@ var le = class {
 				bounds: [...i.source.bounds],
 				cells: [...i.source.cells]
 			}
-		} : null, this.model = n.preparedModel === void 0 ? w(t) : E(t, n.preparedModel), this.widthM = this.model.widthM, this.heightM = this.model.heightM, this.base = this.model.base, this.yaw = r.yaw, this.pitch = r.pitch, this.zoom = r.zoom, this.offset = [0, 0], this.viewportInsets = H(n.viewportInsets), this.visible = !0, this.destroyed = !1, this.failed = !1, this.contextLost = !1, this.frame = 0, this.dirty = !0, this.warmRequested = !1, this.pointers = /* @__PURE__ */ new Map(), this.events = [], this.meshes = /* @__PURE__ */ new Map(), this.meshStride = 0, this.renderProfile = null, this.route = [], this.routeMeshes = /* @__PURE__ */ new Map(), this.gpuRoute = null, this.dragging = !1, this.wheeling = !1, this.cartography = null, this.previousTouchAction = e.style?.touchAction, e.style && (e.style.touchAction = "none");
+		} : null, this.model = n.preparedModel === void 0 ? w(t) : E(t, n.preparedModel), this.widthM = this.model.widthM, this.heightM = this.model.heightM, this.base = this.model.base, this.yaw = r.yaw, this.pitch = r.pitch, this.zoom = r.zoom, this.offset = [0, 0], this.viewportInsets = H(n.viewportInsets), this.visible = !0, this.destroyed = !1, this.failed = !1, this.contextLost = !1, this.frame = 0, this.dirty = !0, this.warmRequested = !1, this.graphicsFallback = null, this.pointers = /* @__PURE__ */ new Map(), this.events = [], this.meshes = /* @__PURE__ */ new Map(), this.meshStride = 0, this.renderProfile = null, this.route = [], this.routeMeshes = /* @__PURE__ */ new Map(), this.gpuRoute = null, this.dragging = !1, this.wheeling = !1, this.cartography = null, this.previousTouchAction = e.style?.touchAction, e.style && (e.style.touchAction = "none");
 		try {
 			let t;
 			if (!n.forceCanvas) try {
@@ -1085,11 +1105,13 @@ var le = class {
 					powerPreference: "default",
 					failIfMajorPerformanceCaveat: !0
 				});
-			} catch {}
+			} catch (e) {
+				this.recordGraphicsFallback("context-create", e);
+			}
 			if (t) try {
 				this.gpu = new $(t, this.model, this.displayMask), this.gl = t;
-			} catch {
-				t.getExtension("WEBGL_lose_context")?.loseContext(), this.useCanvas(!0);
+			} catch (e) {
+				this.recordGraphicsFallback("initialization", e), t.getExtension("WEBGL_lose_context")?.loseContext(), this.useCanvas(!0);
 			}
 			else this.useCanvas(!1);
 			this.bindControls(), this.observe(), this.document = e.ownerDocument || (typeof document < "u" ? document : null), this.onVisibility = () => {
@@ -1105,6 +1127,12 @@ var le = class {
 		let n = t.getContext("2d", { alpha: !1 });
 		if (!n) throw Error("На этом устройстве недоступен рендер карты.");
 		e && (this.canvas.parentNode.replaceChild(t, this.canvas), this.canvas = t), this.software = new le(n, this.model, this.displayMask), this.software.setCartography(this.cartography), this.gl = null, this.gpu = null;
+	}
+	recordGraphicsFallback(e, t) {
+		this.graphicsFallback = {
+			stage: e,
+			reason: String(t?.message ?? t ?? "Graphics context unavailable").replace(/[\r\n\t ]+/g, " ").slice(0, 512)
+		};
 	}
 	notify(e, t) {
 		try {
@@ -1176,14 +1204,16 @@ var le = class {
 			else return;
 			e.preventDefault();
 		}), this.bind("webglcontextlost", (e) => {
-			e.preventDefault(), this.contextLost = !0, this.cancelFrame(), this.notify("onError", "Графический контекст прерван. Восстанавливаем сцену…"), clearTimeout(this.restoreTimer), this.restoreTimer = setTimeout(() => this.fallbackAfterLoss(), 2500);
+			e.preventDefault(), this.contextLost = !0, this.cancelFrame(), this.gpu?.abandon(), this.gpuRoute = null, this.notify("onError", "Графический контекст прерван. Восстанавливаем сцену…"), clearTimeout(this.restoreTimer), this.restoreTimer = setTimeout(() => {
+				this.recordGraphicsFallback("context-timeout", "Graphics context did not restore"), this.fallbackAfterLoss();
+			}, 2500);
 		}), this.bind("webglcontextrestored", () => {
 			if (!(this.destroyed || !this.gl)) {
 				clearTimeout(this.restoreTimer);
 				try {
-					this.gpu?.destroy(), this.gpu = new $(this.gl, this.model, this.displayMask), this.gpu.setCartography(this.cartography), this.gpuRoute = null, this.contextLost = !1, this.request();
-				} catch {
-					this.fallbackAfterLoss();
+					this.gpu?.abandon(), this.gpu = new $(this.gl, this.model, this.displayMask), this.gpu.setCartography(this.cartography), this.gpuRoute = null, this.contextLost = !1, this.request();
+				} catch (e) {
+					this.recordGraphicsFallback("context-restoration", e), this.fallbackAfterLoss();
 				}
 			}
 		});
@@ -1229,8 +1259,8 @@ var le = class {
 		this.cartography = t, this.software?.setCartography(t), this.canvas.dataset.cartography = t && t.source.loadedTiles > 0 ? "source" : "none", this.canvas.dataset.cartographyTiles = String(t?.source.loadedTiles || 0);
 		try {
 			this.gpu && !this.contextLost && this.gpu.setCartography(t);
-		} catch {
-			this.contextLost = !0, this.fallbackAfterLoss();
+		} catch (e) {
+			this.recordGraphicsFallback("cartography", e), this.contextLost = !0, this.fallbackAfterLoss();
 			return;
 		}
 		this.request();
@@ -1305,9 +1335,9 @@ var le = class {
 		let p = this.meshFor(f), m = L(this.yaw, this.pitch), h = this.routeFor(f);
 		try {
 			this.gpu ? (this.gpuRoute !== h && (this.gpu.setRoute(h), this.gpuRoute = h), this.gpu.render(p, u, m, c, l, s, a)) : this.software.render(p, u, m, c, l, s, a, h);
-		} catch {
+		} catch (t) {
 			if (this.gpu) {
-				this.warmRequested = e, this.contextLost = !0, this.fallbackAfterLoss();
+				this.recordGraphicsFallback("render", t), this.warmRequested = e, this.contextLost = !0, this.fallbackAfterLoss();
 				return;
 			}
 			this.terminalFailure("Не удалось нарисовать ландшафт. Подготовьте сцену заново.");
@@ -1322,6 +1352,7 @@ var le = class {
 			pixelRatio: s,
 			meshStride: f,
 			sourceVertices: this.grid.width * this.grid.height,
+			graphicsFallback: this.graphicsFallback ? { ...this.graphicsFallback } : null,
 			view: {
 				yaw: this.yaw,
 				pitch: this.pitch,

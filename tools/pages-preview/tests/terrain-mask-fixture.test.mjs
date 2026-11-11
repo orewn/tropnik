@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {terrainMaskFixture,inspectTerrainMaskPixels,assertTerrainMaskPixels} from './terrain-mask-fixture.mjs';
+import {terrainMaskFixture,inspectTerrainMaskPixels,assertTerrainMaskPixels,runTerrainMaskCase} from './terrain-mask-fixture.mjs';
 
 const frame=(paint)=>{
  const width=64,height=64,pixels=new Uint8Array(width*height*4);
@@ -38,4 +38,31 @@ test('blank output and a fully hidden route cannot pass by having zero outside p
 test('pixel inspection rejects incomplete or differently sized captures',()=>{
  const images=witnesses();images.route={...images.route,width:63};
  assert.throws(()=>inspectTerrainMaskPixels(images),/Invalid route pixel frame/);
+});
+test('graphics fallback reads the attached canvas and still fails the required WebGL gate',async()=>{
+ const previous=globalThis.document;
+ const makeNode=tag=>({tag,style:{},width:512,height:384,children:[],parent:null,
+  appendChild(child){child.parent=this;this.children.push(child);},
+  querySelector(name){return this.children.find(child=>child.tag===name)||null;},
+  remove(){if(this.parent)this.parent.children=this.parent.children.filter(child=>child!==this);this.parent=null;},
+  getContext(name){return name==='2d'&&this.software?{getImageData:()=>({data:new Uint8ClampedArray(this.width*this.height*4)})}:null;},
+  toDataURL(){return 'data:image/png;base64,';}
+ });
+ const body=makeNode('body');globalThis.document={body,createElement:makeNode};
+ class ReplacingRenderer{
+  constructor(original,grid,options){
+   this.original=original;this.host=original.parent;original.remove();
+   this.visible=makeNode('canvas');this.visible.software=true;this.host.appendChild(this.visible);
+   queueMicrotask(()=>options.onRender({renderer:'canvas2d',view:{}}));
+  }
+  setCartography(){}
+  destroy(){this.visible.remove();this.host.appendChild(this.original);}
+ }
+ try{
+  const result=await runTerrainMaskCase(ReplacingRenderer);
+  assert.equal(result.verified,false);
+  assert.match(result.error,/Expected webgl2, received canvas2d/);
+  assert.doesNotMatch(result.error,/getImageData|TypeError: Cannot read properties/);
+  assert.equal(body.children.length,0,'failed fixture must release the replacement surface');
+ }finally{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;}
 });

@@ -100,19 +100,22 @@ export async function runTerrainMaskCase(TerrainRenderer,{forceCanvas=false,rota
    if(gl.getError()!==gl.NO_ERROR)throw new Error('WebGL pixel read failed');
    pixels=new Uint8Array(raw.length);for(let row=0;row<height;row++)pixels.set(raw.subarray((height-1-row)*width*4,(height-row)*width*4),row*width*4);
   }else pixels=canvas.getContext('2d').getImageData(0,0,width,height).data;
-  return{width,height,pixels,png:canvas.toDataURL('image/png').split(',')[1],renderer:info.renderer,view:info.view};
+  return{width,height,pixels,png:canvas.toDataURL('image/png').split(',')[1],renderer:info.renderer,view:info.view,graphicsFallback:info.graphicsFallback??null};
  };
  const close=()=>{
   if(!current)return;
-  const {renderer,canvas}=current;renderer.destroy();
+  const {renderer,canvas,host}=current;renderer.destroy();
   if(!forceCanvas)canvas.getContext('webgl2')?.getExtension('WEBGL_lose_context')?.loseContext();
-  canvas.remove();current=undefined;
+  host.remove();current=undefined;
  };
  const open=async kind=>{
-  close();const canvas=document.createElement('canvas');canvas.style.cssText='display:block;width:512px;height:384px';document.body.appendChild(canvas);
+  close();const host=document.createElement('div'),canvas=document.createElement('canvas');canvas.style.cssText='display:block;width:512px;height:384px';host.appendChild(canvas);document.body.appendChild(host);
   let next,frame=0,last,fatal;const displayMask=mask(kind);
   const renderer=new TerrainRenderer(canvas,grid,{forceCanvas,displayMask,onError:message=>errors.push(String(message)),onFatal:message=>{fatal=new Error(String(message));next?.reject(fatal);},onRender:info=>{
-   try{last=capture(canvas,info);frame++;next?.resolve(last);}catch(error){fatal=error;next?.reject(error);}
+   // The renderer can replace a WebGL canvas after a graphics failure. Read
+   // the attached surface so a real fallback is reported as such, instead of
+   // hiding its cause behind getContext('2d') on the detached WebGL canvas.
+   try{const visible=host.querySelector('canvas');if(!visible)throw new Error('The terrain surface was removed');last=capture(visible,info);frame++;next?.resolve(last);}catch(error){fatal=error;next?.reject(error);}
   }});
   const wait=(before=frame)=>new Promise((resolve,reject)=>{
    if(fatal){reject(fatal);return;}if(frame>before){resolve(last);return;}
@@ -122,9 +125,9 @@ export async function runTerrainMaskCase(TerrainRenderer,{forceCanvas=false,rota
   // Caller-owned storage must never change an already constructed renderer,
   // including its very first frame and a later graphics-context restoration.
   if(kind==='known')displayMask.pixels.fill(255);
-  current={canvas,renderer,wait,get frame(){return frame;},get last(){return last;}};
+  current={canvas,host,renderer,wait,get frame(){return frame;},get last(){return last;}};
   renderer.setCartography(cartography);if(rotate)renderer.rotate(rotate);if(zoom!==1)renderer.zoomBy(zoom);
-  const initial=await wait(0);if(initial.renderer!==expected)throw new Error(`Expected ${expected}, received ${initial.renderer}`);
+  const initial=await wait(0);if(initial.renderer!==expected)throw new Error(`Expected ${expected}, received ${initial.renderer}; graphics fallback: ${JSON.stringify(initial.graphicsFallback)}`);
   return initial;
  };
  const retain=(phase,frame)=>{captures.push({phase,width:frame.width,height:frame.height,png:frame.png,renderer:frame.renderer,view:frame.view});};
@@ -155,7 +158,7 @@ export async function runTerrainMaskCase(TerrainRenderer,{forceCanvas=false,rota
    // before the loss event must never count as restored output.
    const lostFrame=current.frame;extension.restoreContext();
    const recovered=await current.wait(lostFrame);retain('context-restored',recovered);
-   if(lost!==1||restored!==1||!trusted||recovered.renderer!=='webgl2')throw new Error('The real WebGL context did not restore');
+   if(lost!==1||restored!==1||!trusted||recovered.renderer!=='webgl2')throw new Error(`The real WebGL context did not restore; graphics fallback: ${JSON.stringify(recovered.graphicsFallback)}`);
    recovery={lost,restored,trusted,metrics:inspectTerrainMaskPixels({reference,empty,terrain,route:recovered})};assertTerrainMaskPixels(recovery.metrics,'restored WebGL2');
   }
   return{verified:true,phase:'complete',renderer:expected,view:{rotate,zoom},callerMaskMutationChecked:true,metrics,recovery,captures,errors};

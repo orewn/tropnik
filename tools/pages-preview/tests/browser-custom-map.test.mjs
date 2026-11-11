@@ -55,5 +55,9 @@ test('terrain receipt requires its actual geographic grid, mesh, camera and uplo
   value=>value.frame.view.zoom=6,value=>value.frame.view.yaw=NaN,
   value=>value.cartography.source.bounds=[0,0,1,1],value=>value.cartography.source.loadedTiles=17,
   value=>value.frame.cartography=null,value=>value.frame.cartography.width=512,
+  value=>delete value.displayMask,value=>value.displayMask.state='loading',
+  value=>value.displayMask.source.bounds=[0,0,1,1],value=>value.displayMask.source.cells=[],
+  value=>value.displayMask.source.allowedPixels=0,value=>value.frame.displayMask=null,
+  value=>value.frame.displayMask.coverageVersion='b'.repeat(16),value=>value.frame.displayMask.allowedPixels--,
  ]){const invalid=structuredClone(good);change(invalid);assert.throws(()=>assertCustomSceneInspection(invalid,'invalid'));}
 });

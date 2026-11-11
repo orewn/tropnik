@@ -5,7 +5,7 @@
   border-bottom:1px solid var(--line)!important;
   background:var(--surface)!important;
   box-shadow:0 8px 24px rgba(24,55,42,.055);
-  backdrop-filter:none;-webkit-backdrop-filter:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
 }
 .header :global(.brand){position:relative;z-index:2;min-height:48px;flex-shrink:0}
 .header :global(.top-nav){
@@ -57,14 +57,14 @@
 @media(max-width:1024px){
   /* The map already occupies the complete mobile compositor surface. The
      nearly opaque header does not need a backdrop readback on every frame. */
-  .header{background:var(--surface)!important;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .header{background:var(--surface)!important;-webkit-backdrop-filter:none;backdrop-filter:none}
   .header :global(.top-nav){display:none}
   .actions :global(.menu-toggle){display:inline-flex}
   .header :global(.top-nav.open){
     position:fixed;inset:72px 0 0;height:calc(100dvh - 72px);max-height:none;
     margin:0;padding:24px max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
     display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;
-    border:0;border-radius:0;background:var(--surface);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+    border:0;border-radius:0;background:var(--surface);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;
     overflow:auto;overscroll-behavior:contain;
   }
   .header :global(.top-nav.open):before{content:"Навигация";padding:4px 12px 8px;color:var(--muted);font-size:12px;line-height:16px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
@@ -94,7 +94,7 @@
   .header :global(.top-nav.open a.active):after{max-width:88px;flex-shrink:0}
 }
 @media(prefers-reduced-motion:reduce){.header :global(.top-nav a),.searchLink,.offlineLink,.actions :global(.menu-toggle),.menuGlyph span{transition:none}}
-@media(prefers-reduced-transparency:reduce){.header{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)!important}}
+@media(prefers-reduced-transparency:reduce){.header{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)!important}}
 @media(forced-colors:active){.header,.header :global(.top-nav),.searchLink,.offlineLink,.actions :global(.menu-toggle){border:1px solid CanvasText!important}.header :global(.top-nav a.active){outline:2px solid Highlight}}
 
-@media(pointer:coarse){.header{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)!important}}
+@media(pointer:coarse){.header{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)!important}}

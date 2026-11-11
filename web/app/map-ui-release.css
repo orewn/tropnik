@@ -241,8 +241,8 @@
   .explore-layout .map-message,
   .map-attribution-content,
   .map-attribution-toggle{
-    backdrop-filter:none!important;
     -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
     background:rgba(255,254,250,.985)!important;
   }
   .explore-layout .map-style-switch,
@@ -400,7 +400,7 @@
   .explore-layout .layer-menu,
   .explore-layout .map-message,
   .map-attribution-content,
-  .map-attribution-toggle{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .map-attribution-toggle{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 }
 
 /* Short viewports keep the control rail inside the area above the sheet. */
