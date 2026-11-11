@@ -1,0 +1,56 @@
+name: Bounded UI latency diagnosis
+
+on:
+  push:
+    branches: [diagnostics/ui-latency-20261111]
+permissions:
+  contents: read
+concurrency:
+  group: ui-latency-diagnosis
+  cancel-in-progress: false
+jobs:
+  trace-smoothness:
+    name: Diagnose UI smoothness with explicit tracing
+    # Candidate diagnosis is separate from the unchanged, untraced full gate.
+    # Keep the bounded panel/search windows available while replacing the SDK.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out the diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          pnpm --dir web install --frozen-lockfile
+      - name: Prepare the verified Android artifact and static site
+        run: |
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify native keyboard events and layout-shift attribution
+        run: node --test tools/pages-preview/tests/browser-native-text.browser.mjs
+      - name: Capture bounded panel and search traces
+        timeout-minutes: 8
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: '1'
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Preserve instrumented diagnostics without a release artifact
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-ui-smoothness-trace-diagnostic-${{ github.run_id }}
+          path: |
+            web/pages-preview/design-qa
+            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            web/pages-preview/dist/browser-native-text-verification.json
+            web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7

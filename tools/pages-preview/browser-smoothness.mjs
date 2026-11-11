@@ -7,7 +7,7 @@ import {sendNativeText} from './browser-native-text.mjs';
 // device FPS. RAF callbacks do not prove that the GPU presented every frame.
 export const SMOOTHNESS_LIMITS=Object.freeze({frameP95Ms:35,maxFrameGapMs:150,inputToFrameMs:200,eventDurationMs:200,layoutShift:.1});
 export const SMOOTHNESS_SCENARIOS=Object.freeze(['panel','explore-search','explore-filters','catalog-scroll','map-pan','map-zoom','layer-switch','site-search']);
-export const SMOOTHNESS_TRACE_SCENARIOS=Object.freeze(['panel','explore-search']);
+export const SMOOTHNESS_TRACE_SCENARIOS=Object.freeze(['panel','explore-search','layer-switch','site-search']);
 
 export function smoothnessTraceEnabled({diagnostic=null,traceValue,cpuSlowdownRate=1}={}){
  return diagnostic==='ui-smoothness'&&traceValue==='1'&&cpuSlowdownRate===1;
