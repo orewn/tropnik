@@ -1,0 +1,63 @@
+name: Android headless launcher diagnostics
+on:
+  push:
+    branches: [diagnostics/android-headless-launcher]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Install the official emulator used by device checks
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          tropnik_sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          test -x "$tropnik_sdk/cmdline-tools/latest/bin/sdkmanager"
+          "$tropnik_sdk/cmdline-tools/latest/bin/sdkmanager" 'emulator'
+          printf 'TROPNIK_DIAG_SDK=%s\n' "$tropnik_sdk" >> "$GITHUB_ENV"
+      - name: Compare actual windowed and headless launcher dependencies
+        timeout-minutes: 2
+        run: |
+          python3 - <<'PY'
+          import ctypes, json, os, pathlib, subprocess, time
+          sdk = pathlib.Path(os.environ["TROPNIK_DIAG_SDK"])
+          out = pathlib.Path("headless-reports")
+          out.mkdir()
+          result = {"schemaVersion": 1, "diagnosticOnly": True, "releaseEligible": False, "sourceCommit": os.environ["GITHUB_SHA"], "commands": []}
+          try:
+              ctypes.CDLL("libpulse.so.0")
+              result["libpulseLoadable"] = True
+          except OSError:
+              result["libpulseLoadable"] = False
+          for name, args in [
+              ("windowed-version", [str(sdk / "emulator/emulator"), "-version"]),
+              ("headless-version", [str(sdk / "emulator/emulator"), "-no-window", "-version"]),
+              ("headless-help", [str(sdk / "emulator/emulator"), "-no-window", "-help"]),
+          ]:
+              started = time.monotonic()
+              try:
+                  run = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=25)
+                  (out / (name + ".txt")).write_text(run.stdout)
+                  result["commands"].append({"name": name, "arguments": args[1:], "returncode": run.returncode, "elapsedMs": round((time.monotonic()-started)*1000), "outputFile": name + ".txt"})
+              except subprocess.TimeoutExpired:
+                  result["commands"].append({"name": name, "arguments": args[1:], "timeout": True})
+          for name in ["qemu-system-x86_64", "qemu-system-x86_64-headless"]:
+              binary = sdk / "emulator/qemu/linux-x86_64" / name
+              run = subprocess.run(["ldd", str(binary)], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=10)
+              (out / (name + "-ldd.txt")).write_text(run.stdout)
+          (out / "source.properties").write_text((sdk / "emulator/source.properties").read_text())
+          (out / "result.json").write_text(json.dumps(result, indent=2)+"\n")
+          print(json.dumps(result, indent=2))
+          assert next(c for c in result["commands"] if c["name"] == "headless-version").get("returncode") == 0, "Actual headless engine failed to load"
+          PY
+      - name: Preserve actual launcher evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: android-headless-launcher-${{ github.run_id }}
+          path: headless-reports/
+          if-no-files-found: warn
+          retention-days: 7
