@@ -16,6 +16,7 @@ let position: [number, number] | null = null;
 let markerCoordinates = new Map<string, [number, number]>();
 let labelFixture: {longitude: number; latitude: number} | undefined;
 let fixtureVersion = 0, fixtureEvidence: {key: string; value: OutsideLabelEvidence} | undefined, preparingEvidence = '';
+let painted: {frame: number; camera: CustomMapCamera; pitch: number; size: {width: number; height: number}} | undefined;
 const trustedInput: Record<string, unknown>[] = [];
 let inputSequence = 0;
 
@@ -50,8 +51,19 @@ function snapshot() {
   const map = engine;
   const {labels, ...rendered} = map?.inspect() || {};
   const evidence = fixtureEvidence?.key === labelEvidenceKey() ? fixtureEvidence.value : undefined;
-  return {ready: !!map?.getState().ready && sentSourceFrame, frame, error, camera: map?.getCamera(), pitch: map?.getPitch(), moving: element.dataset.mapMoving === 'true', state: map?.getState(), rendered,
-    size: map?.getSize(), routeId: element.dataset.mapDrawnRoute || '', coverage: map?.getCoverage()?.status,
+  const camera = map?.getCamera(), pitch = map?.getPitch(), size = map?.getSize(), bounds = element.getBoundingClientRect();
+  const moving = element.dataset.mapMoving === 'true';
+  const ready = !!map?.getState().ready && sentSourceFrame;
+  // Camera setters commit their target before RAF draws the marker DOM. Input
+  // may use these coordinates only after the matching frame has really drawn.
+  const inputReady = ready && !!painted && !!camera && !!size && !moving &&
+    camera.center[0] === painted.camera.center[0] && camera.center[1] === painted.camera.center[1] &&
+    camera.zoom === painted.camera.zoom && (camera.bearingDegrees || 0) === (painted.camera.bearingDegrees || 0) &&
+    pitch === painted.pitch && size.width === painted.size.width && size.height === painted.size.height &&
+    size.width === element.clientWidth && size.height === element.clientHeight;
+  return {ready, frame, error, camera, pitch, moving, inputReady, painted, state: map?.getState(), rendered,
+    size, viewportSize: {width: element.clientWidth, height: element.clientHeight},
+    viewportBounds: {x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height}, routeId: element.dataset.mapDrawnRoute || '', coverage: map?.getCoverage()?.status,
     trustedInput: [...trustedInput],
     markers: [...element.querySelectorAll<HTMLButtonElement>('[data-map-marker-id]')].map(button => {
       const r = button.getBoundingClientRect(), base = element.getBoundingClientRect();
@@ -185,8 +197,9 @@ window.addEventListener('message', event => {
   try {
     engine = new CustomMapEngine(element, {camera: {center: [105, 62], zoom: 0}, maxZoom: 17,
       onReady: () => {document.documentElement.dataset.mapState = 'ready';send('ready');},
-      onFrame: () => {
+      onFrame: camera => {
         frame++;element.dataset.mapDetail = engine && engine.getCamera().zoom >= 10 ? 'close' : 'wide';
+        if (debug && engine) painted = {frame, camera: {...camera, center: [...camera.center]}, pitch: engine.getPitch(), size: {...engine.getSize()}};
         const sourceTiles = engine?.getState().residentTiles || 0;
         if (!sentSourceFrame && sourceTiles > 0) {sentSourceFrame = true;send('frame', {frame, sourceTiles});}
         prepareFixtureFrame();

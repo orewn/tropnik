@@ -13,7 +13,8 @@ export function coastFixture(profile,engine){
  const pan={input,start,end,delta,holdBeforeReleaseMs:200,commands,durationMs:commands.at(-1).ackOffsetMs,events:[{type:'pointerdown',time:100,trusted:true,pointerType:input,pointerId:1,...start},{type:'pointerup',time:800,trusted:true,pointerType:input,pointerId:1,...end}]};
  const rect={left:0,top:68,width:412,height:847},camera={longitude:28.6,latitude:60.36,zoom:9,tileSize:256};
  const center=unprojectMapPoint({x:rect.left+rect.width/2-delta.dx,y:rect.top+rect.height/2-delta.dy},camera,rect);
- pan.before={camera,rect};pan.after={camera:{...camera,longitude:center[0],latitude:center[1]},rect};
+ const selection={pathname:'/tropnik/explore/',region:'coast',route:'',routeId:'',drawnRoute:'',mode:'detail',committedMode:'detail'};
+ pan.before={camera,rect,selection:{...selection}};pan.after={camera:{...camera,longitude:center[0],latitude:center[1]},rect,selection:{...selection}};
  const steps=COAST_FIXTURES.flatMap(fixture=>fixture.zooms.map(targetZoom=>({fixture:fixture.id,coordinate:[...fixture.coordinate],targetZoom,zoom:targetZoom,camera:{longitude:28.6,latitude:60.36,zoom:targetZoom,tileSize:camera.tileSize},centerErrorPx:0,ready:true,pending:0,error:'',version:'c'.repeat(16),lod:targetZoom>=15?'source':targetZoom>=12?'local':'regional',cells:['coastal-cell']})));
  const screenshots=steps.map(({fixture,targetZoom})=>({fixture,targetZoom,file:`${profile}-coast-${fixture}-z${targetZoom}.png`,bytes:10000,sha256:'d'.repeat(64)}));
  const labelDiagnostics=steps.filter(step=>step.fixture==='primorsk').map(frame=>{

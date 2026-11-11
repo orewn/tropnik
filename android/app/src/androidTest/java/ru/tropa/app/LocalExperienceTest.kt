@@ -166,7 +166,7 @@ class LocalExperienceTest {
         val startedAt = SystemClock.uptimeMillis()
         val deadline = startedAt + 15_000
         val groupTaps = JSONArray()
-        val finalTap = JSONObject()
+        var finalTap = JSONObject()
         var lastGroupTap = ""
         var prepared = false
         try {
@@ -174,7 +174,7 @@ class LocalExperienceTest {
                 val remaining = deadline - SystemClock.uptimeMillis()
                 if (remaining <= 0) return@waitUntil false
                 snapshot = mapSnapshot(map, minOf(5_000L, remaining))
-                if (SystemClock.uptimeMillis() > deadline || snapshot.optBoolean("moving")) return@waitUntil false
+                if (SystemClock.uptimeMillis() > deadline || !mapInputReady(snapshot)) return@waitUntil false
                 val zoom = snapshot.getJSONObject("camera").getDouble("zoom")
                 if (zoom < 5.99) return@waitUntil false
                 val markers = snapshot.getJSONArray("markers")
@@ -186,19 +186,19 @@ class LocalExperienceTest {
                     if (group != null) {
                         val key = group.getString("groupKey") + "@" + kotlin.math.round(zoom * 100)
                         if (key != lastGroupTap) {
-                            lastGroupTap = key
                             val tap = JSONObject().put("groupKey", group.getString("groupKey")).put("zoom", zoom)
                                 .put("x", group.getDouble("x")).put("y", group.getDouble("y")).put("elapsedMs", SystemClock.uptimeMillis() - startedAt)
                             groupTaps.put(tap)
-                            tapMapMarker(map, group, snapshot, deadline, tap)
+                            if (tapMapMarker(map, group, snapshot, deadline, tap)) lastGroupTap = key
                         }
                     }
                 }
-                marker != null && SystemClock.uptimeMillis() <= deadline
+                if (marker == null || SystemClock.uptimeMillis() > deadline) return@waitUntil false
+                screenshot("$screenshotPrefix-before-tap")
+                finalTap = JSONObject()
+                tapMapMarker(map, requireNotNull(marker), snapshot, deadline, finalTap)
             }
             prepared = true
-            screenshot("$screenshotPrefix-before-tap")
-            tapMapMarker(map, requireNotNull(marker), snapshot, deadline, finalTap)
         } finally {
             var diagnostics = JSONObject()
             app.runOnUiThread { diagnostics = map.debugDiagnostics() }
@@ -213,6 +213,43 @@ class LocalExperienceTest {
         app.onNodeWithTag("explore_list").performScrollToIndex(0)
         app.onNodeWithText(region.name).assertExists()
         screenshot("$screenshotPrefix-after-tap")
+    }
+
+    private fun sameMapView(first: JSONObject, second: JSONObject): Boolean {
+        val a = first.optJSONObject("camera") ?: return false
+        val b = second.optJSONObject("camera") ?: return false
+        val ac = a.optJSONArray("center") ?: return false
+        val bc = b.optJSONArray("center") ?: return false
+        val sizeA = first.optJSONObject("size") ?: return false
+        val sizeB = second.optJSONObject("size") ?: return false
+        return ac.length() == 2 && bc.length() == 2 && ac.optDouble(0) == bc.optDouble(0) && ac.optDouble(1) == bc.optDouble(1) &&
+            a.optDouble("zoom") == b.optDouble("zoom") && a.optDouble("bearingDegrees", 0.0) == b.optDouble("bearingDegrees", 0.0) &&
+            first.optDouble("pitch") == second.optDouble("pitch") &&
+            sizeA.optDouble("width") == sizeB.optDouble("width") && sizeA.optDouble("height") == sizeB.optDouble("height")
+    }
+
+    private fun mapInputReady(snapshot: JSONObject): Boolean {
+        val painted = snapshot.optJSONObject("painted") ?: return false
+        val size = snapshot.optJSONObject("size") ?: return false
+        val viewport = snapshot.optJSONObject("viewportSize") ?: return false
+        val bounds = snapshot.optJSONObject("viewportBounds") ?: return false
+        return snapshot.optBoolean("inputReady") && snapshot.optBoolean("ready") && !snapshot.optBoolean("moving") &&
+            painted.optLong("frame") > 0 && painted.optLong("frame") == snapshot.optLong("frame") && sameMapView(snapshot, painted) &&
+            size.optDouble("width") == viewport.optDouble("width") && size.optDouble("height") == viewport.optDouble("height") &&
+            bounds.optDouble("width") > 0 && bounds.optDouble("height") > 0
+    }
+
+    private data class MapViewport(val x: Int, val y: Int, val width: Int, val height: Int, val visible: Rect)
+
+    private fun nativeMapViewport(map: CustomMapWebView): MapViewport {
+        var value: MapViewport? = null
+        app.runOnUiThread {
+            val location = IntArray(2);val visible = Rect()
+            map.getLocationOnScreen(location)
+            assertTrue("Map must be visible for touch injection", map.isAttachedToWindow && map.getGlobalVisibleRect(visible))
+            value = MapViewport(location[0], location[1], map.width, map.height, visible)
+        }
+        return requireNotNull(value)
     }
 
     private fun awaitMapDraw(map: CustomMapWebView, deadline: Long, receipt: JSONObject) {
@@ -254,28 +291,46 @@ class LocalExperienceTest {
         }
     }
 
-    private fun tapMapMarker(map: CustomMapWebView, marker: JSONObject, snapshot: JSONObject, deadline: Long, receipt: JSONObject) {
-        val previousInput = snapshot.optJSONArray("trustedInput") ?: JSONArray()
-        val lastInputSequence = (0 until previousInput.length()).maxOfOrNull {previousInput.getJSONObject(it).optLong("sequence")} ?: 0L
-        receipt.put("markerId", marker.getString("id")).put("snapshotRequest", snapshot.getLong("requestId"))
-            .put("snapshotFrame", snapshot.getInt("frame")).put("hitAtMarker", marker.optJSONObject("hitAtMarker")).put("afterInputSequence", lastInputSequence)
-        assertEquals("A visible marker must also be the actual DOM hit target", marker.getString("id"), marker.getJSONObject("hitAtMarker").getString("markerId"))
-        // A JavaScript snapshot can precede WebView's compositor by seconds.
-        // Wait for this DOM state and a following native draw before touching.
+    private fun tapMapMarker(map: CustomMapWebView, marker: JSONObject, snapshot: JSONObject, deadline: Long, receipt: JSONObject): Boolean {
+        assertTrue("Marker coordinates must belong to the actually drawn camera", mapInputReady(snapshot))
+        val initialViewport = nativeMapViewport(map)
+        // Confirm that the already coherent frame reached the compositor, then
+        // remeasure. A resize or a new camera never reuses old touch coordinates.
         awaitMapDraw(map, deadline, receipt)
-        val location = IntArray(2);val visible = Rect()
-        var scaleX = 0f;var scaleY = 0f
-        app.runOnUiThread {
-            map.getLocationOnScreen(location)
-            assertTrue("Map must be visible for touch injection", map.getGlobalVisibleRect(visible))
-            scaleX = map.width / snapshot.getJSONObject("size").getDouble("width").toFloat()
-            scaleY = map.height / snapshot.getJSONObject("size").getDouble("height").toFloat()
+        val remainingSnapshot = deadline - SystemClock.uptimeMillis()
+        assertTrue("No time remains to confirm map coordinates", remainingSnapshot > 0)
+        val current = mapSnapshot(map, minOf(5_000L, remainingSnapshot))
+        val viewport = nativeMapViewport(map)
+        val markers = current.getJSONArray("markers")
+        val target = (0 until markers.length()).map {markers.getJSONObject(it)}.firstOrNull {it.optString("id") == marker.getString("id")}
+        val sameMarker = target != null && !target.optBoolean("hidden") && target.optString("groupKey") == marker.optString("groupKey") &&
+            listOf("x", "y", "width", "height").all {kotlin.math.abs(target.optDouble(it) - marker.optDouble(it)) < .01}
+        receipt.put("coordinateSnapshot", JSONObject().put("requestId", current.getLong("requestId")).put("frame", current.getInt("frame"))
+            .put("painted", current.optJSONObject("painted")).put("viewportBounds", current.optJSONObject("viewportBounds")).put("marker", target))
+        val initialBounds = snapshot.getJSONObject("viewportBounds")
+        val currentBounds = current.getJSONObject("viewportBounds")
+        val sameBounds = listOf("x", "y", "width", "height").all {initialBounds.getDouble(it) == currentBounds.getDouble(it)}
+        if (!mapInputReady(current) || !sameMapView(snapshot, current) || !sameMarker || !sameBounds || viewport != initialViewport) {
+            receipt.put("retryReason", "Drawn camera, marker or native viewport changed before touch")
+            return false
         }
-        val x = location[0] + marker.getDouble("x").toFloat() * scaleX
-        val y = location[1] + requireNotNull(marker).getDouble("y").toFloat() * scaleY
+        val button = requireNotNull(target)
+        val previousInput = current.optJSONArray("trustedInput") ?: JSONArray()
+        val lastInputSequence = (0 until previousInput.length()).maxOfOrNull {previousInput.getJSONObject(it).optLong("sequence")} ?: 0L
+        receipt.put("markerId", button.getString("id")).put("snapshotRequest", current.getLong("requestId"))
+            .put("snapshotFrame", current.getInt("frame")).put("hitAtMarker", button.optJSONObject("hitAtMarker")).put("afterInputSequence", lastInputSequence)
+        assertEquals("A visible marker must also be the actual DOM hit target", button.getString("id"), button.getJSONObject("hitAtMarker").getString("markerId"))
+        // DOMRect retains subpixel layout at nonintegral Android density;
+        // engine.clientWidth intentionally rounds it for the canvas size.
+        val scaleX = viewport.width / currentBounds.getDouble("width").toFloat()
+        val scaleY = viewport.height / currentBounds.getDouble("height").toFloat()
+        val x = viewport.x + button.getDouble("x").toFloat() * scaleX
+        val y = viewport.y + button.getDouble("y").toFloat() * scaleY
         receipt.put("screenX", x.toDouble()).put("screenY", y.toDouble()).put("scaleX", scaleX.toDouble()).put("scaleY", scaleY.toDouble())
-            .put("viewLocation", JSONArray(location.toList())).put("globalVisible", JSONArray(listOf(visible.left, visible.top, visible.right, visible.bottom)))
-        assertTrue("Rendered marker must be on screen", visible.contains(x.toInt(), y.toInt()))
+            .put("viewLocation", JSONArray(listOf(viewport.x, viewport.y))).put("nativeSize", JSONArray(listOf(viewport.width, viewport.height)))
+            .put("globalVisible", JSONArray(listOf(viewport.visible.left, viewport.visible.top, viewport.visible.right, viewport.visible.bottom)))
+        assertTrue("Rendered marker must be on screen", viewport.visible.contains(x.toInt(), y.toInt()))
+        if (nativeMapViewport(map) != viewport) {receipt.put("retryReason", "Native viewport moved before touch");return false}
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
         val downTime = SystemClock.uptimeMillis()
         val dispatched = JSONArray()
@@ -313,10 +368,11 @@ class LocalExperienceTest {
                 it.optString("phase") == "trusted-input" && it.optLong("sequence") > lastInputSequence && it.optLong("nativeReceivedAt") >= downTime
             }
             receipt.put("domInput", JSONArray(recent)).put("nativeTouchEvents", diagnostics.getJSONArray("nativeTouchEvents"))
-            val clicked = recent.any {it.optString("type") == "click" && it.optBoolean("trusted") && it.optJSONObject("target")?.optString("markerId") == marker.getString("id")}
+            val clicked = recent.any {it.optString("type") == "click" && it.optBoolean("trusted") && it.optJSONObject("target")?.optString("markerId") == button.getString("id")}
             receipt.put("trustedClick", clicked)
             clicked && SystemClock.uptimeMillis() <= deadline
         }
+        return true
     }
 
     @Test fun nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline() {

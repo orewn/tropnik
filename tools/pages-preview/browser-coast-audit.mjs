@@ -29,11 +29,39 @@ export function coastPanPlan(dx,dy,rect,mobile){
  return[delta];
 }
 
+/** Read only the selected route/region and public layer state. A native mouse
+ * drag may end in a browser click, but it must not perform a map selection. */
+export function inspectCoastPanSelection(doc=document,loc=location){
+ const map=doc.querySelector('.atlas-canvas[data-map-engine]'),wrap=doc.querySelector('.atlas-wrap');
+ if(!map||!wrap)return null;
+ const params=new URLSearchParams(loc.search);
+ return{pathname:loc.pathname,region:params.get('region')||'',route:params.get('route')||'',routeId:map.dataset.mapRouteId||'',drawnRoute:map.dataset.mapDrawnRoute||'',mode:wrap.dataset.mapBaseTarget||'',committedMode:wrap.dataset.mapBaseCommitted||''};
+}
+
 export function assertCoastPanInput(pan,input,context){
  assertSourceEndPanInput(pan,input,context);
- assert.ok(!pan.events.some(event=>event.type==='click'),`${context}: a tap cannot count as a coastline pan`);
+ const clicks=pan.events.filter(event=>event.type==='click');
+ if(input==='touch')assert.equal(clicks.length,0,`${context}: a tap cannot count as a coastline pan`);
+ else{
+  assert.ok(clicks.length<=1,`${context}: a native drag emitted unexpected clicks`);
+  const up=pan.events.find(event=>event.type==='pointerup');
+  for(const click of clicks){
+   assert.equal(click.trusted,true);assert.equal(click.pointerType,'mouse');assert.equal(click.pointerId,up.pointerId);
+   assert.ok(pan.events.indexOf(click)>pan.events.indexOf(up),`${context}: a drag click preceded the delivered pointer release`);
+   assert.ok(Number.isFinite(click.time)&&click.time>=up.time,`${context}: a drag click preceded pointer release`);
+   assert.ok(Number.isFinite(click.x)&&Number.isFinite(click.y)&&Math.hypot(click.x-pan.end.x,click.y-pan.end.y)<=3,`${context}: a drag click belongs to another pointer target`);
+   assert.match(click.target,/^CANVAS\[(?:[\w-]+\s+)*tropnik-map-canvas(?:\s+[\w-]+)*\]$/,`${context}: a drag clicked an interactive map control`);
+   assert.equal(click.button,null,`${context}: a drag clicked a map marker`);
+  }
+ }
  assert.ok(pan.before?.camera&&pan.after?.camera&&pan.before?.rect&&pan.after?.rect,`${context}: native pan camera evidence is missing`);
  const before=pan.before,after=pan.after;
+ for(const frame of [before,after]){
+  assert.ok(frame.selection&&['pathname','region','route','routeId','drawnRoute'].every(key=>typeof frame.selection[key]==='string'),`${context}: native pan selection evidence is missing`);
+  assert.ok(frame.selection.pathname.startsWith('/'),`${context}: native pan pathname evidence is invalid`);
+  for(const key of ['mode','committedMode'])assert.ok(['overview','detail','satellite'].includes(frame.selection[key]),`${context}: native pan layer evidence is missing`);
+ }
+ assert.deepEqual(after.selection,before.selection,`${context}: native panning changed the pathname, route, region or layer selection`);
  for(const frame of [before,after])assert.ok(['longitude','latitude','zoom','tileSize'].every(key=>Number.isFinite(frame.camera[key])));
  assert.ok(Math.abs(before.camera.zoom-after.camera.zoom)<.001,`${context}: a pan must preserve the inspected zoom`);
  for(const key of ['left','top','width','height'])assert.equal(before.rect[key],after.rect[key],`${context}: map viewport changed during the pan`);
@@ -96,7 +124,7 @@ export async function runCoastAudit(cdp,profile,helpers){
    const dx=center.x-point.x,dy=center.y-point.y,distance=Math.hypot(dx,dy);
    if(distance<=6)return{map,centerErrorPx:distance};
    for(const [leg,planned] of coastPanPlan(dx,dy,map.rect,profile.mobile).entries()){
-   const before=await settledMap(cdp,profile.engine);
+   const before=await settledMap(cdp,profile.engine),beforeSelection=await evaluate(cdp,`(${inspectCoastPanSelection.toString()})()`);
    let delta=planned;
    if(leg>0){
     // Use the settled first drag, not its requested displacement: native
@@ -118,7 +146,7 @@ export async function runCoastAudit(cdp,profile,helpers){
    await evaluate(cdp,'window.__tropnikInputEvents=[]');
    const pan=await dispatchSourceEndPan(cdp,start,delta,profile,sleep);
    const after=await settledMap(cdp,profile.engine);
-   Object.assign(pan,{coordinate,attempt,leg,before:{camera:before.camera,rect:before.rect},after:{camera:after.camera,rect:after.rect}});
+   Object.assign(pan,{coordinate,attempt,leg,before:{camera:before.camera,rect:before.rect,selection:beforeSelection},after:{camera:after.camera,rect:after.rect,selection:await evaluate(cdp,`(${inspectCoastPanSelection.toString()})()`)}});
    pan.events=await evaluate(cdp,'window.__tropnikInputEvents');
    report.pans.push(pan);assertCoastPanInput(pan,profile.mobile?'touch':'mouse',profile.name+'/coast');
    }

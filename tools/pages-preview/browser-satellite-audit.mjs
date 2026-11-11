@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {projectMapPoint,unprojectMapPoint} from './map-projection.mjs';
-import {coastPanPlan,assertCoastPanInput} from './browser-coast-audit.mjs';
+import {coastPanPlan,assertCoastPanInput,inspectCoastPanSelection} from './browser-coast-audit.mjs';
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
 import {holdSatelliteImagery} from './browser-satellite-preload.mjs';
 import {inspectCustomMapDOM,assertCustomMapInspection} from './browser-custom-map.mjs';
@@ -316,12 +316,12 @@ export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OU
    const map=await settledMap(cdp,profile.engine),point=projectMapPoint(coordinate,map.camera,map.rect),cx=map.rect.left+(map.camera.centerX??map.rect.width/2),cy=map.rect.top+(map.camera.centerY??map.rect.height/2),distance=Math.hypot(cx-point.x,cy-point.y);
    if(distance<=6)return{centerErrorPx:distance};
    for(const [leg,planned]of coastPanPlan(cx-point.x,cy-point.y,map.rect,profile.mobile).entries()){
-    assert.ok(gestures<12,`${profile.name}: satellite native pan exceeded12 gestures`);const before=await settledMap(cdp,profile.engine);let delta=planned;
+    assert.ok(gestures<12,`${profile.name}: satellite native pan exceeded12 gestures`);const before=await settledMap(cdp,profile.engine),beforeSelection=await evaluate(cdp,`(${inspectCoastPanSelection.toString()})()`);let delta=planned;
     if(leg){const actual=projectMapPoint(coordinate,before.camera,before.rect);[delta]=coastPanPlan(before.rect.left+(before.camera.centerX??before.rect.width/2)-actual.x,before.rect.top+(before.camera.centerY??before.rect.height/2)-actual.y,before.rect,false);assert.ok(Math.hypot(delta.dx,delta.dy)>=24,'Satellite return drag did not cross native touch slop');}
     const start=await evaluate(cdp,`(()=>{const map=document.querySelector('.atlas-canvas[data-map-engine]'),r=map.getBoundingClientRect(),delta=${JSON.stringify(delta)};for(const fy of [.45,.6,.3,.75])for(const fx of [.5,.65,.35,.8,.2]){const point={x:r.left+r.width*fx,y:r.top+r.height*fy};let clear=true;for(let index=0;index<=12;index++){const hit=document.elementFromPoint(point.x+delta.dx*index/12,point.y+delta.dy*index/12);if(!hit||hit.tagName!=='CANVAS'||!map.contains(hit)){clear=false;break;}}if(clear)return point;}return null;})()`);
     assert.ok(start,`${profile.name}: no clear native pan path to ${stage}`);await evaluate(cdp,'window.__tropnikInputEvents=[]');
     const pan=await dispatchSourceEndPan(cdp,start,delta,profile,sleep),after=await settledMap(cdp,profile.engine);
-    Object.assign(pan,{stage,coordinate,gesture:++gestures,leg,before:{camera:before.camera,rect:before.rect},after:{camera:after.camera,rect:after.rect},events:await evaluate(cdp,'window.__tropnikInputEvents')});report.pans.push(pan);assertCoastPanInput(pan,report.input,profile.name+'/satellite/'+stage);
+    Object.assign(pan,{stage,coordinate,gesture:++gestures,leg,before:{camera:before.camera,rect:before.rect,selection:beforeSelection},after:{camera:after.camera,rect:after.rect,selection:await evaluate(cdp,`(${inspectCoastPanSelection.toString()})()`)},events:await evaluate(cdp,'window.__tropnikInputEvents')});report.pans.push(pan);assertCoastPanInput(pan,report.input,profile.name+'/satellite/'+stage);
    }
   }
   const map=await settledMap(cdp,profile.engine),point=projectMapPoint(coordinate,map.camera,map.rect),distance=Math.hypot(map.rect.left+(map.camera.centerX??map.rect.width/2)-point.x,map.rect.top+(map.camera.centerY??map.rect.height/2)-point.y);

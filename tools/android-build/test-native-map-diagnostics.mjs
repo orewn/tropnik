@@ -41,14 +41,16 @@ test('transport receipt counts actual UTF-16 characters and UTF-8 bytes and fail
 
 function bootstrap(labelCount, labelText, markers = [], {debug = true, hit = null} = {}) {
   const handlers = new Map(), inputHandlers = new Map(), messages = [];
+  let createdEngine;
   const labels = Array.from({length: labelCount}, (_, id) => ({id: String(id), label: labelText, coordinate: [132, 43.1], visible: false, reason: 'outside-viewport'}));
-  const element = {dataset: {}, querySelectorAll: () => markers, getBoundingClientRect: () => ({x: 0, y: 0}),
+  const element = {dataset: {}, clientWidth: 390, clientHeight: 260, querySelectorAll: () => markers, getBoundingClientRect: () => ({x: 0, y: 0, width: 390, height: 260}),
     addEventListener: (type, handler, options) => {assert.equal(options.capture, true);assert.equal(options.passive, true);inputHandlers.set(type, handler);}};
   class Engine {
+    constructor(element, options) {this.options = options;this.camera = {center: [132, 43.1], zoom: 10};this.pitch = 0;this.size = {width: 390, height: 260};createdEngine = this;}
     getState() {return {ready: true, residentTiles: 1};}
-    getCamera() {return {center: [132, 43.1], zoom: 10};}
-    getPitch() {return 0;}
-    getSize() {return {width: 390, height: 260};}
+    getCamera() {return {...this.camera, center: [...this.camera.center]};}
+    getPitch() {return this.pitch;}
+    getSize() {return {...this.size};}
     getCoverage() {return {status: {ready: true, revision: 1}, area: {}};}
     getLabelDiagnostics() {return labels;}
     inspect() {return {engine: 'tropnik-canvas', state: this.getState(), labels, tiles: {overview: []}};}
@@ -64,7 +66,7 @@ function bootstrap(labelCount, labelText, markers = [], {debug = true, hit = nul
   let sequence = 0;
   const snapshot = () => port.onmessage({data: JSON.stringify({type: 'snapshot', version: 1, generation: 7, sequence: ++sequence, payload: {requestId: 36 + sequence}})});
   if (debug) snapshot();
-  return {messages, inputHandlers, snapshot};
+  return {messages, inputHandlers, snapshot, engine: createdEngine, element};
 }
 
 test('native snapshot carries the matching request ID and one copy of actual labels', () => {
@@ -133,4 +135,32 @@ test('input diagnostics preserve only a bounded actual trusted stream and never 
   assert.equal(observed.at(-1).target.markerId, 'group');
   assert.equal(observed.every(receipt => receipt.trusted === true), true);
   assert.equal(bootstrap(0, '', [], {debug: false}).inputHandlers.size, 0);
+});
+
+test('desired camera changes cannot make stale marker coordinates input-ready before their actual drawn frame', () => {
+  const {messages, snapshot, engine, element} = bootstrap(0, '');
+  const latest = () => messages.filter(message => message.type === 'snapshot').at(-1).payload;
+  assert.equal(latest().inputReady, false);
+  engine.options.onFrame(engine.getCamera());snapshot();
+  assert.equal(latest().inputReady, true);
+  engine.camera = {center: [81.5695492, 58.2767055], zoom: 6};snapshot();
+  assert.equal(latest().camera.zoom, 6);
+  assert.equal(latest().painted.camera.zoom, 10);
+  assert.equal(latest().inputReady, false);
+  engine.options.onFrame(engine.getCamera());snapshot();
+  assert.equal(latest().inputReady, true);
+  assert.equal(latest().painted.camera.zoom, 6);
+  // clientWidth is an integer while native-density layout bounds can be
+  // fractional. Keep those real bounds for screen-coordinate conversion.
+  element.getBoundingClientRect = () => ({x: 0, y: 0, width: 389.625, height: 260});snapshot();
+  assert.equal(latest().inputReady, true);
+  assert.equal(latest().viewportBounds.width, 389.625);
+  assert.equal(latest().viewportSize.width, 390);
+  engine.pitch = 40;snapshot();assert.equal(latest().inputReady, false);
+  engine.options.onFrame(engine.getCamera());snapshot();assert.equal(latest().inputReady, true);
+  element.getBoundingClientRect = () => ({x: 0, y: 0, width: 400, height: 260});element.clientWidth = 400;snapshot();
+  assert.equal(latest().inputReady, false);
+  engine.size.width = 400;snapshot();assert.equal(latest().inputReady, false);
+  engine.options.onFrame(engine.getCamera());snapshot();assert.equal(latest().inputReady, true);
+  element.dataset.mapMoving = 'true';snapshot();assert.equal(latest().inputReady, false);
 });

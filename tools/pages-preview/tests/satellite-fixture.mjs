@@ -20,7 +20,8 @@ export function satelliteFixture(profile,engine){
  const pan=(stage,coordinate)=>{
   const result=structuredClone(coastFixture(profile,engine).pans[0]),after=frame(coordinate[0]).camera;
   const beforeCenter=unprojectMapPoint({x:rect.left+rect.width/2+result.delta.dx,y:rect.top+rect.height/2+result.delta.dy},after,rect);
-  result.stage=stage;result.coordinate=coordinate;result.before={camera:{...after,longitude:beforeCenter[0],latitude:beforeCenter[1]},rect:{...rect}};result.after={camera:after,rect:{...rect}};
+  const selection={pathname:'/tropnik/explore/',region:SATELLITE_REGION,route:'',routeId:'',drawnRoute:'',mode:'satellite',committedMode:'satellite'};
+  result.stage=stage;result.coordinate=coordinate;result.before={camera:{...after,longitude:beforeCenter[0],latitude:beforeCenter[1]},rect:{...rect},selection:{...selection}};result.after={camera:after,rect:{...rect},selection:{...selection}};
   result.start.x+=rect.left;result.end.x+=rect.left;for(const event of result.events)event.x+=rect.left;for(const command of result.commands)command.x+=rect.left;return result;
  };
  const zooms=[];let z=initialZoom;for(const direction of [...Array(upwardCount).fill(1),...Array(upwardCount).fill(-1)]){const before=frame(180,z);z+=direction*zoomStep;zooms.push({direction,click:click(),before,after:frame(180,z)});}

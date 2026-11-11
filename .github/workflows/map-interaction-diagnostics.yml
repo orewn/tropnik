@@ -144,7 +144,9 @@ jobs:
 
   trace-smoothness:
     name: Diagnose UI smoothness with explicit tracing
-    if: github.event_name == 'workflow_dispatch' && inputs.traceSmoothness
+    # Candidate diagnosis is separate from the unchanged, untraced full gate.
+    # Keep the bounded panel/search windows available while replacing the SDK.
+    if: (github.event_name == 'workflow_dispatch' && inputs.traceSmoothness) || (github.event_name == 'push' && github.ref == 'refs/heads/perf/full-site-smoothness-0.4.24')
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:

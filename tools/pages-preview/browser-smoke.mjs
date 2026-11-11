@@ -10,6 +10,7 @@ import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving,browserAuditRunPoli
 import {browserTraceEnabled,traceDesktopSelection,recordBrowserLongTask,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
+import {inspectTrailTouchTargets} from './browser-trail-hitareas.mjs';
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
 import {runOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {createOfflineOriginTransport} from './browser-origin-transport.mjs';
@@ -656,7 +657,7 @@ async function trailTouch(cdp,profile,regionId){
         candidates.push({x,y,id:trail.id,title:trail.title,geometryUrl:trail.geometryUrl,center:trail.center,offset:Math.hypot(dx,dy)});
       }
     }
-    const target=(await canvasPoints(cdp,candidates))[0];
+    const target=(await evaluate(cdp,`(${inspectTrailTouchTargets.toString()})(${JSON.stringify(candidates)})`))[0];
     if(target){
       await pointerAt(cdp,target,profile);
       await expectSelection(cdp,{region:regionId,route:target.id,title:target.title,...(profile.mobile?{sheet:'open'}:{})});
