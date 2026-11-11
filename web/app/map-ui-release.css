@@ -34,6 +34,7 @@
 .explore-layout .map-attribution:has(.map-satellite-credit){display:flex;align-items:flex-end;gap:8px;max-width:calc(100% - var(--map-left) - var(--map-right))}
 .map-satellite-credit{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:var(--caption-4);font-size:12px;line-height:16px;display:flex;flex-wrap:wrap;gap:0 4px;min-width:0;box-shadow:var(--shadow)}
 .map-satellite-detail{flex-basis:100%}
+.map-satellite-status[aria-hidden="true"]{visibility:hidden}
 .map-satellite-credit a{text-decoration:underline;text-underline-offset:2px}
 .explore-layout .map-style-switch button:active:not(:disabled),.explore-layout .map-controls button:active:not(:disabled),.explore-layout .layer-button:active:not(:disabled){transform:translateY(1px)}
 

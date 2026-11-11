@@ -1,0 +1,50 @@
+name: Satellite attribution loading geometry
+
+on:
+  push:
+    branches: [diagnostics/satellite-attribution]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: map-attribution-diagnostics-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  attribution-geometry:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Check out the exact diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Verify source credits with the real production component and fonts
+        run: |
+          node --test tools/pages-preview/tests/map-attribution-verification.test.mjs
+          node --test tools/pages-preview/tests/browser-map-attribution.browser.mjs
+      - name: Bind source, environment, loading cycles and retained PNGs
+        run: node tools/pages-preview/map-attribution-verification.mjs
+      - name: Preserve the actual attribution geometry proof
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-map-attribution-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            web/pages-preview/dist/browser-map-attribution-verification.json
+            web/pages-preview/design-qa/map-attribution
+          if-no-files-found: error
+          retention-days: 7
