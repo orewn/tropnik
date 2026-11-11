@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "requestId": "android-0-4-24-preview-national-catalogue-20261111",
-  "version": "0.4.24-preview",
-  "versionCode": 12,
-  "notesFile": "tools/android-build/release-notes/0.4.24-preview.md"
+  "requestId": "android-0-4-25-preview-fair-map-sources-20261111",
+  "version": "0.4.25-preview",
+  "versionCode": 13,
+  "notesFile": "tools/android-build/release-notes/0.4.25-preview.md"
 }

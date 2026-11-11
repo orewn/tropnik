@@ -3,12 +3,26 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
+import {MAP_RESOURCE_LIMITS} from '../lib/map-config.ts';
 
 const turn=()=>new Promise(resolve=>setImmediate(resolve));
+const preparedPayloads=state=>(state.stages.ready||0)+(state.stages.halo||0)+state.fetching;
 const source=readFileSync(new URL('../lib/custom-map-tiles.ts',import.meta.url),'utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
-function fixture({files=[],online=true,softwareRaster}={}){
+const poolSource=readFileSync(new URL('../lib/map-resource-pool.ts',import.meta.url),'utf8');
+const poolCompiled=ts.transpileModule(poolSource,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
+function fixture({files=[],online=true,softwareRaster,sourcePool=false}={}){
   const downloads=[],workers=[],bitmaps=[];
+  let pool;
+  if(sourcePool){
+    const poolModule={exports:{}};
+    vm.runInNewContext(poolCompiled,{module:poolModule,exports:poolModule.exports,AbortController,DOMException,TextDecoder,Uint8Array,setTimeout,clearTimeout,
+      require(name){if(name==='./map-config.ts')return{MAP_RESOURCE_LIMITS};throw new Error(`Unexpected pool dependency ${name}`);}});
+    pool=new poolModule.exports.MapResourcePool({fetcher:(url,{signal})=>new Promise((resolve,reject)=>{
+      const request={url,signal,resolve:bytes=>{request.done=true;resolve(new Response(bytes));},reject:error=>{request.done=true;reject(error);}};
+      downloads.push(request);signal.addEventListener('abort',()=>{if(request.done)return;request.done=true;request.aborted=true;reject(signal.reason);},{once:true});
+    })});
+  }
   class Worker {
     constructor(url){this.url=String(url);this.messages=[];this.transfers=[];this.terminated=false;workers.push(this);}
     postMessage(message,transfers){this.messages.push(message);this.transfers.push(transfers);}
@@ -19,14 +33,14 @@ function fixture({files=[],online=true,softwareRaster}={}){
   const navigator={onLine:online};
   vm.runInNewContext(compiled,{module:testModule,exports:testModule.exports,URL,Worker,AbortController,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,console,
     require(name){
-      if(name==='./map-preload')return {loadPublicBytes:(url,priority,signal)=>new Promise((resolve,reject)=>{const request={url,resolve,reject,signal};downloads.push(request);signal?.addEventListener('abort',()=>{request.done=true;request.aborted=true;reject(signal.reason);},{once:true});}),loadPublicJSON:async url=>url.includes('manifest')?{files:files.map(path=>({path}))}:{tiles:['https://tiles.openfreemap.org/snapshot/{z}/{x}/{y}.pbf']}};
+      if(name==='./map-preload')return {loadPublicBytes:(url,priority,signal)=>pool?pool.get(url,priority,signal):new Promise((resolve,reject)=>{const request={url,resolve,reject,signal,priority};downloads.push(request);signal?.addEventListener('abort',()=>{request.done=true;request.aborted=true;reject(signal.reason);},{once:true});}),loadPublicJSON:async url=>url.includes('manifest')?{files:files.map(path=>({path}))}:{tiles:['https://tiles.openfreemap.org/snapshot/{z}/{x}/{y}.pbf']}};
       if(name==='./map-satellite')return {SATELLITE_PROVIDERS:{'eox-s2':{tiles:'https://tiles.maps.eox.at/s2/{z}/{x}/{y}.jpg'},'eox-bluemarble':{tiles:'https://tiles.maps.eox.at/bm/{z}/{x}/{y}.jpg'}}};
       if(name.endsWith('?worker&url'))return {__esModule:true,default:'/custom-map/workers/tiles.js'};
       throw new Error(`Unmocked runtime dependency ${name}`);
     }});
   const store=new testModule.exports.CustomMapTiles(softwareRaster);
   const resolveDownloads=()=>{for(const request of downloads.filter(item=>!item.done)){request.done=true;request.resolve(new Uint8Array([1,2,3,4]).buffer);}};
-  return{store,downloads,workers,bitmaps,navigator,resolveDownloads,key:testModule.exports.customTileKey};
+  return{store,downloads,workers,bitmaps,navigator,resolveDownloads,pool,createStore:()=>new testModule.exports.CustomMapTiles(softwareRaster),key:testModule.exports.customTileKey};
 }
 const request=(x=0)=>({kind:'overview',z:4,x,y:5});
 
@@ -69,7 +83,7 @@ test('rapid tile demand bounds both network concurrency and decoded-source backl
   const outcomes=requests.map(value=>env.store.load(value).catch(error=>error));await turn();
   assert.equal(env.downloads.length,3);assert.equal(env.store.snapshot().fetching,3);
   for(let i=0;i<4;i++){env.resolveDownloads();await turn();}
-  const paused=env.store.snapshot();assert.equal(paused.decoding,true);assert.ok((paused.stages.ready||0)+paused.fetching<=6);assert.equal(env.workers[0].messages.length,1);
+  const paused=env.store.snapshot();assert.equal(paused.decoding,true);assert.ok(preparedPayloads(paused)<=6);assert.equal(env.workers[0].messages.length,1);
   assert.ok(env.downloads.length<=7,'a slow decoder must exert back pressure on downloads');
   env.store.destroy();await Promise.all(outcomes);assert.equal(env.workers[0].terminated,true);
 });
@@ -84,8 +98,110 @@ test('a cold mixed viewport starts measured relief alongside vectors within the 
   assert.ok(env.downloads.some(value=>value.url.includes('openfreemap')));
   env.resolveDownloads();await turn();const first=env.workers[0].complete();await turn();const second=env.workers[0].complete();await turn();
   assert.deepEqual([first.kind,second.kind].sort(),['relief','vector'],'the single decoder also shares capacity between demanded layers');
-  assert.ok(env.store.snapshot().fetching<=3);assert.ok((env.store.snapshot().stages.ready||0)+env.store.snapshot().fetching<=6);
+  assert.ok(env.store.snapshot().fetching<=3);assert.ok(preparedPayloads(env.store.snapshot())<=6);
   env.store.destroy();await Promise.all(outcomes);
+});
+
+test('a stalled DEM halo releases logical capacity for a queued primary while physical reads remain capped at three',async t=>{
+  const env=fixture({sourcePool:true}),outcomes=[];
+  t.after(async()=>{env.store.destroy();await Promise.all(outcomes);});
+  const first={kind:'relief',z:12,x:100,y:200},second={kind:'relief',z:12,x:103,y:200},third={kind:'relief',z:12,x:106,y:200};
+  const vector={kind:'vector',z:12,x:110,y:200};
+  env.store.pin([first,second,third,vector].map(env.key));
+  outcomes.push(env.store.load(first).catch(error=>error));await turn();
+  env.downloads[0].resolve(new Uint8Array([1,2,3,4]).buffer);await turn();
+  const stalled=env.downloads.find(item=>item.url==='https://tiles.mapterhorn.com/12/99/200.webp');
+  assert.ok(stalled&&!stalled.done,'the scenario must hold an actual first halo response open');
+  for(const tile of [second,third,vector])outcomes.push(env.store.load(tile).catch(error=>error));
+  await turn();
+  assert.equal(env.downloads.filter(item=>!item.done).length,3);
+  const primary=env.downloads.find(item=>item.url==='https://tiles.mapterhorn.com/12/103/200.webp');
+  assert.ok(primary&&!primary.done);
+  primary.resolve(new Uint8Array([5,6,7,8]).buffer);await turn();
+  assert.ok(env.downloads.some(item=>item.url==='https://tiles.openfreemap.org/snapshot/12/110/200.pbf'),
+    'a completed DEM primary must yield its read slot to the queued vector, without awaiting its remaining eight neighbours');
+  assert.equal(stalled.done,undefined,'the vector starts while the earlier real halo is still stalled');
+  assert.ok(env.downloads.filter(item=>!item.done).length<=3,'logical progress must not raise physical HTTP concurrency');
+  assert.ok(env.pool.stats().active<=3);
+  const state=env.store.snapshot();
+  assert.ok(preparedPayloads(state)<=6,'partially assembled halos consume payload backpressure');
+});
+
+test('overzoom siblings sharing a stalled DEM leave physical capacity for unrelated visible sources',async t=>{
+  const env=fixture({sourcePool:true}),outcomes=[];
+  t.after(async()=>{env.store.destroy();await Promise.all(outcomes);});
+  const siblings=[1601,1602,1603].map(x=>({kind:'relief',z:18,x,y:3207}));
+  const vectors=[110,111].map(x=>({kind:'vector',z:12,x,y:200}));
+  env.store.pin([...siblings,...vectors].map(env.key));
+  for(const tile of [...siblings,...vectors])outcomes.push(env.store.load(tile).catch(error=>error));
+  await turn();
+  assert.equal(env.downloads.filter(item=>item.url==='https://tiles.mapterhorn.com/12/25/50.webp').length,1,
+    'three overzoom children share a single actual DEM read');
+  assert.equal(env.downloads.filter(item=>item.url.includes('openfreemap')).length,2,
+    'waiters for the same parent must not occupy the other two physical read slots');
+  assert.equal(env.downloads.filter(item=>!item.done).length,3);
+  assert.equal(env.pool.stats().active,3);
+  assert.ok(preparedPayloads(env.store.snapshot())<=6);
+});
+
+test('cancelling parked partial halos releases their payloads without starting neighbours or interrupting retained primaries',async t=>{
+  const env=fixture(),outcomes=[];
+  t.after(async()=>{env.store.destroy();await Promise.all(outcomes);});
+  const relief=[100,103,106].map(x=>({kind:'relief',z:12,x,y:200}));
+  const overview=[request(10),request(11),request(12)];
+  env.store.pin([...relief,...overview].map(env.key));
+  const abandoned=relief.map(tile=>env.store.load(tile).catch(error=>error));outcomes.push(...abandoned);
+  await turn();
+  const retained=overview.map(tile=>env.store.load(tile));outcomes.push(...retained);
+  env.resolveDownloads();await turn();
+  assert.equal(env.store.snapshot().stages.halo,3,'all three real primary buffers must be parked behind new visible work');
+  assert.equal(env.downloads.filter(item=>!item.done).length,3);
+  const before=env.downloads.length;
+  env.store.pin(overview.map(env.key));
+  assert.ok((await Promise.all(abandoned)).every(error=>/view changed/.test(error.message)));
+  assert.equal(env.store.snapshot().stages.halo||0,0);
+  assert.ok(env.downloads.filter(item=>!item.done).every(item=>item.url.startsWith('/maps/russia-relief/')&&!item.signal.aborted),
+    'retained primary requests keep their own leases');
+  env.resolveDownloads();await turn();
+  for(let index=0;index<overview.length;index++){env.workers[0].complete();await turn();}
+  assert.equal((await Promise.all(retained)).length,3);
+  assert.equal(env.downloads.length,before,'unpinning a parked DEM cannot start any of its eight halo reads');
+  assert.equal(env.store.snapshot().pending,0);
+  assert.equal(env.store.snapshot().errors.length,0);
+});
+
+test('cancelling one map preserves a shared primary-halo source lease and all eight real neighbours for the other map',async t=>{
+  const env=fixture({sourcePool:true}),other=env.createStore(),outcomes=[];
+  t.after(async()=>{env.store.destroy();other.destroy();await Promise.all(outcomes);});
+  const original={kind:'relief',z:12,x:100,y:200},neighbour={kind:'relief',z:12,x:99,y:200};
+  env.store.pin([env.key(original)]);other.pin([env.key(neighbour)]);
+  const abandoned=env.store.load(original).catch(error=>error);outcomes.push(abandoned);await turn();
+  env.downloads[0].resolve(new Uint8Array([1,2,3,4]).buffer);await turn();
+  const shared=env.downloads.find(item=>item.url==='https://tiles.mapterhorn.com/12/99/200.webp');
+  assert.ok(shared&&!shared.done);
+  const kept=other.load(neighbour);outcomes.push(kept);await turn();
+  assert.equal(env.downloads.filter(item=>item.url===shared.url).length,1,'the halo and the other map primary must share actual HTTP');
+  env.store.pin([]);assert.match((await abandoned).message,/view changed/);
+  assert.equal(shared.signal.aborted,false,'another consumer retains the shared request');
+  let payload;
+  for(let index=0;index<30&&!payload;index++){
+    assert.ok(env.downloads.filter(item=>!item.done).length<=3);
+    assert.ok(preparedPayloads(other.snapshot())<=6);
+    env.resolveDownloads();await turn();
+    if(env.workers[0]?.messages.length)payload=env.workers[0].complete();
+  }
+  assert.ok(payload,'the retained neighbour must complete under bounded scheduling');
+  const tile=await kept;
+  assert.equal(tile.key,env.key(neighbour));
+  const expected=[];
+  for(const dy of [-1,0,1])for(const dx of [-1,0,1])if(dx||dy)expected.push(`${dx},${dy}:https://tiles.mapterhorn.com/12/${99+dx}/${200+dy}.webp`);
+  assert.deepEqual(Array.from(payload.halo.tiles,item=>`${item.dx},${item.dy}:${item.sourceKey}`).sort(),expected.sort());
+  assert.equal(payload.halo.missing.length,0,'fair scheduling must not skip required measured neighbours');
+  assert.equal(new Set(env.downloads.map(item=>item.url)).size,env.downloads.length,'shared cache keeps each actual source download unique');
+  const buffers=new Set([payload.bytes,...payload.halo.tiles.map(item=>item.bytes)]);
+  assert.ok([...buffers].reduce((sum,bytes)=>sum+bytes.byteLength,0)<=8*1024*1024);
+  assert.equal(env.store.resident,0,'late shared responses cannot republish the abandoned tile');
+  assert.equal(other.pending,0);
 });
 
 test('duplicate consumers share one decode and source bytes stay owned by the fetch pool',async t=>{
@@ -149,7 +265,7 @@ test('halo transfers preserve three active reads, six waiting jobs and one decod
   let maximum=0;
   for(let i=0;i<40;i++){
     const active=env.downloads.filter(item=>!item.done).length;maximum=Math.max(maximum,active);assert.ok(active<=3,'halo does not bypass the original HTTP limit');
-    const snapshot=env.store.snapshot();assert.ok((snapshot.stages.ready||0)+snapshot.fetching<=6);
+    const snapshot=env.store.snapshot();assert.ok(preparedPayloads(snapshot)<=6);
     env.resolveDownloads();await turn();
   }
   assert.equal(maximum,3);assert.equal(env.workers.length,1);assert.equal(env.workers[0].messages.length,1);
@@ -201,24 +317,24 @@ test('failed worker is replaced on a later tile and errors remain bounded diagno
 });
 
 test('paint zoom separates output cache entries while preserving geographic XYZ and the actual source parent',async t=>{
-  const env=fixture();t.after(()=>env.store.destroy());const tile={kind:'vector',z:17,x:802,y:1603},variant={...tile,paintZoom:18};
+  const env=fixture({sourcePool:true});t.after(()=>env.store.destroy());const tile={kind:'vector',z:17,x:802,y:1603},variant={...tile,paintZoom:18};
   assert.equal(env.key(tile),env.key({...tile,paintZoom:17}));assert.notEqual(env.key(tile),env.key(variant));env.store.pin([env.key(tile),env.key(variant)]);
   const original=env.store.load(tile),styled=env.store.load(variant);assert.notEqual(original,styled);await turn();
-  assert.equal(env.downloads.length,2);assert.ok(env.downloads.every(item=>item.url==='https://tiles.openfreemap.org/snapshot/14/100/200.pbf'));
+  assert.equal(env.downloads.length,1);assert.ok(env.downloads.every(item=>item.url==='https://tiles.openfreemap.org/snapshot/14/100/200.pbf'));
   env.resolveDownloads();await turn();const first=env.workers[0].complete(),second=env.workers[0].complete();
   const [a,b]=await Promise.all([original,styled]);assert.notEqual(a.bitmap,b.bitmap);assert.equal(env.store.resident,2);
   assert.equal(first.paintZoom,17);assert.equal(second.paintZoom,18);assert.equal(second.z,17);assert.equal(second.x,802);assert.equal(second.y,1603);assert.equal(second.sourceZ,14);assert.equal(second.sourceKey,first.sourceKey);
-  assert.equal((await env.store.load({...tile,paintZoom:17})).bitmap,a.bitmap);assert.equal((await env.store.load(variant)).bitmap,b.bitmap);assert.equal(env.downloads.length,2);
+  assert.equal((await env.store.load({...tile,paintZoom:17})).bitmap,a.bitmap);assert.equal((await env.store.load(variant)).bitmap,b.bitmap);assert.equal(env.downloads.length,1,'paint variants share the real source cache while keeping separate bitmaps');
 });
 
 test('boundary visibility has distinct cached bitmaps while omitted and explicit true share one output',async t=>{
-  const env=fixture();t.after(()=>env.store.destroy());const tile={kind:'vector',z:17,x:802,y:1603},hidden={...tile,boundaries:false};
+  const env=fixture({sourcePool:true});t.after(()=>env.store.destroy());const tile={kind:'vector',z:17,x:802,y:1603},hidden={...tile,boundaries:false};
   assert.equal(env.key(tile),env.key({...tile,boundaries:true}));assert.notEqual(env.key(tile),env.key(hidden));env.store.pin([env.key(tile),env.key(hidden)]);
   const enabled=env.store.load(tile),disabled=env.store.load(hidden);assert.notEqual(enabled,disabled);await turn();env.resolveDownloads();await turn();
   const first=env.workers[0].complete(),second=env.workers[0].complete();const [a,b]=await Promise.all([enabled,disabled]);
   assert.equal(first.boundaries,true);assert.equal(second.boundaries,false);assert.equal(second.sourceKey,first.sourceKey);assert.equal(second.sourceZ,first.sourceZ);
   assert.notEqual(a.bitmap,b.bitmap);assert.equal(env.store.resident,2);
-  assert.equal((await env.store.load({...tile,boundaries:true})).bitmap,a.bitmap);assert.equal((await env.store.load(hidden)).bitmap,b.bitmap);assert.equal(env.downloads.length,2);
+  assert.equal((await env.store.load({...tile,boundaries:true})).bitmap,a.bitmap);assert.equal((await env.store.load(hidden)).bitmap,b.bitmap);assert.equal(env.downloads.length,1,'boundary styling does not duplicate the actual parent download');
 });
 
 test('invalid paint zoom cannot consume a queue slot or start a source request',async t=>{
@@ -240,7 +356,7 @@ test('pinned old and new viewports retain at most 288 bitmaps and fall back to 9
     const results=batch.map(value=>env.store.load(value).catch(error=>error));let completed=0;
     for(let turnNumber=0;completed<batch.length&&turnNumber<batch.length+10;turnNumber++){
       env.resolveDownloads();await turn();const worker=env.workers[0];while(worker?.messages.length){worker.complete();completed++;}
-      const state=env.store.snapshot();assert.ok(state.fetching<=3);assert.ok((state.stages.ready||0)+state.fetching<=6);
+      const state=env.store.snapshot();assert.ok(state.fetching<=3);assert.ok(preparedPayloads(state)<=6);
     }
     assert.equal(completed,batch.length);return Promise.all(results);
   };
