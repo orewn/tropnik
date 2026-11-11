@@ -816,6 +816,10 @@ var $ = class {
 	release(e, t) {
 		e && (this.gl["delete" + t](e), this.resources = this.resources.filter(([t]) => t !== e));
 	}
+	renderbufferParameter(e, t) {
+		let n = this.gl;
+		return n.bindRenderbuffer(n.RENDERBUFFER, null), n.bindRenderbuffer(n.RENDERBUFFER, e), n.getRenderbufferParameter(n.RENDERBUFFER, t);
+	}
 	targetFor(e, t) {
 		if (this.frameTarget?.width === e && this.frameTarget?.height === t) return this.frameTarget;
 		if (this.frameTarget) for (let [e, t] of this.frameTarget.resources) this.release(e, t);
@@ -839,14 +843,14 @@ var $ = class {
 				r.depthFormat,
 				this.displayMask ? n.DEPTH_STENCIL_ATTACHMENT : n.DEPTH_ATTACHMENT
 			]]) {
-				if (n.bindRenderbuffer(n.RENDERBUFFER, i), r.samples ? n.renderbufferStorageMultisample(n.RENDERBUFFER, r.samples, a, e, t) : n.renderbufferStorage(n.RENDERBUFFER, a, e, t), n.getRenderbufferParameter(n.RENDERBUFFER, n.RENDERBUFFER_SAMPLES) !== r.samples) throw Error("Terrain framebuffer sample count changed");
+				if (n.bindRenderbuffer(n.RENDERBUFFER, i), r.samples ? n.renderbufferStorageMultisample(n.RENDERBUFFER, r.samples, a, e, t) : n.renderbufferStorage(n.RENDERBUFFER, a, e, t), this.renderbufferParameter(i, n.RENDERBUFFER_SAMPLES) !== r.samples) throw Error("Terrain framebuffer sample count changed");
 				let c = i === s ? [
 					[n.RENDERBUFFER_RED_SIZE, 8],
 					[n.RENDERBUFFER_GREEN_SIZE, 8],
 					[n.RENDERBUFFER_BLUE_SIZE, 8],
 					[n.RENDERBUFFER_ALPHA_SIZE, 0]
 				] : [[n.RENDERBUFFER_DEPTH_SIZE, r.depth], [n.RENDERBUFFER_STENCIL_SIZE, r.stencil]];
-				for (let [e, t] of c) if (n.getRenderbufferParameter(n.RENDERBUFFER, e) !== t) throw Error("Terrain framebuffer precision changed");
+				for (let [e, t] of c) if (this.renderbufferParameter(i, e) !== t) throw Error("Terrain framebuffer precision changed");
 				n.framebufferRenderbuffer(n.FRAMEBUFFER, o, n.RENDERBUFFER, i);
 			}
 			if (n.checkFramebufferStatus(n.FRAMEBUFFER) !== n.FRAMEBUFFER_COMPLETE) throw Error("Terrain multisample framebuffer unavailable");
