@@ -1,0 +1,181 @@
+name: Inspect exact successful 1710 full browser evidence
+
+on:
+  push:
+    branches: [diagnostics/browser-1710-artifact-inspection]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: browser-1710-artifact-inspection
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    name: Read sealed successful full report and active pan intervals
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Verify exact source artifact and successful producer job
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-browser-1710-inspection
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          from pathlib import Path
+          headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","User-Agent":"Tropnik-retained-evidence"}
+          def get(path):
+              request=urllib.request.Request("https://api.github.com/repos/orewn/tropnik/"+path,headers=headers)
+              with urllib.request.urlopen(request,timeout=30) as response: return json.load(response)
+          artifact=get("actions/artifacts/13885721229")
+          producer=get("actions/runs/43077619318")
+          job=get("actions/jobs/130727807052")
+          source="1710b201bfeed52613659ae3e4ca7f26638cb6cb"
+          assert artifact["id"]==13885721229 and artifact["name"]=="tropnik-candidate-browser-audit-43077619318-1"
+          assert artifact["size_in_bytes"]==69316881 and artifact["expired"] is False
+          assert artifact["digest"]=="sha256:9957eec5374f7f00af845af2ea8fe24f8778e7bf1044fc1269352eff8ae23f77"
+          assert artifact["workflow_run"]["id"]==43077619318 and artifact["workflow_run"]["head_sha"]==source
+          assert artifact["workflow_run"]["repository_id"]==artifact["workflow_run"]["head_repository_id"]==1447843944
+          assert producer["id"]==43077619318 and producer["head_sha"]==source and producer["head_branch"]=="perf/full-site-smoothness-0.4.24"
+          assert job["id"]==130727807052 and job["run_id"]==43077619318 and job["head_sha"]==source
+          assert job["status"]=="completed" and job["conclusion"]=="success"
+          result={"artifact":{key:artifact[key] for key in ("id","name","size_in_bytes","digest","workflow_run")},"producer":{"id":producer["id"],"head_sha":producer["head_sha"],"head_branch":producer["head_branch"],"conclusion":producer["conclusion"]},"job":{key:job[key] for key in ("id","run_id","head_sha","name","status","conclusion")}}
+          root=Path(os.environ["TROPNIK_INSPECTION_ROOT"]); (root/"inspection").mkdir(parents=True)
+          (root/"inspection/source-metadata.json").write_text(json.dumps(result,indent=2)+"\n")
+          print("TROPNIK_1710_FULL_SOURCE="+json.dumps(result,separators=(",",":")))
+          PY
+      - name: Download exact sealed full browser artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          repository: orewn/tropnik
+          run-id: '43077619318'
+          artifact-ids: '13885721229'
+          github-token: ${{ github.token }}
+          digest-mismatch: error
+          merge-multiple: true
+          path: ${{ runner.temp }}/tropnik-browser-1710-inspection/full
+      - name: Print bounded exact summaries and untruncated native pan records
+        env:
+          TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-browser-1710-inspection
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, math, os
+          from pathlib import Path
+          
+          root=Path(os.environ["TROPNIK_INSPECTION_ROOT"])
+          source=root/"full"
+          output=root/"inspection"
+          output.mkdir(exist_ok=True)
+          SOURCE="1710b201bfeed52613659ae3e4ca7f26638cb6cb"
+          entries=[]
+          total=0
+          for path in sorted(source.rglob("*")):
+              assert not path.is_symlink(), "Symlinked artifact entry"
+              if path.is_dir(): continue
+              assert path.is_file(), "Nonregular artifact entry"
+              size=path.stat().st_size
+              total+=size
+              assert 0<=size<=100_000_000 and total<=500_000_000, "Unbounded artifact"
+              digest=hashlib.sha256()
+              with path.open("rb") as stream:
+                  for chunk in iter(lambda:stream.read(1024*1024),b""): digest.update(chunk)
+              entries.append({"path":path.relative_to(source).as_posix(),"bytes":size,"sha256":digest.hexdigest()})
+              assert len(entries)<=4096, "Too many files"
+          files={item["path"]:item for item in entries}
+          written=0
+          def emit(kind,data):
+              global written
+              encoded=json.dumps(data,ensure_ascii=False,separators=(",",":"),allow_nan=False)
+              written+=len(encoded.encode())
+              assert written<=1_000_000, "Bounded selected output exceeded; no silent truncation"
+              print(kind+"="+encoded)
+          emit("TROPNIK_1710_FULL_FILES",entries)
+          reports=[item for item in entries if Path(item["path"]).name=="browser-verification.json"]
+          assert len(reports)==1, "Expected the unique successful full browser receipt"
+          entry=reports[0]
+          assert entry["bytes"]<=32*1024*1024, "Full report exceeds the read bound"
+          report=json.loads((source/entry["path"]).read_text())
+          emit("TROPNIK_1710_FULL_HEADER",{"file":entry,"keys":list(report),"verified":report.get("verified"),"sourceCommit":report.get("sourceCommit"),"mapInteractionSchemaVersion":report.get("mapInteractionSchemaVersion"),"performanceIssues":report.get("performanceIssues")})
+          assert report["verified"] is True and report["sourceCommit"]==SOURCE
+          assert report["environment"]["sourceCommit"]==SOURCE
+          assert report["mapInteractionSchemaVersion"]==4
+          emit("TROPNIK_1710_FULL_ENVIRONMENT",report["environment"])
+          def selected(value,keys):
+              assert isinstance(value,dict)
+              return {key:value[key] for key in keys if key in value}
+          emit("TROPNIK_1710_FULL_GATED_SUMMARIES",{
+              "profiles":[selected(value,["name","width","height","engine","interactionTested","sheetTested","sheetHeightDelta","layoutShift","longestTaskMs"]) for value in report["profiles"]],
+              "desktopProfiles":[selected(value,["name","width","height","engine","coarse","mapInteractionTested","layoutShift","longestTaskMs"]) for value in report["desktopProfiles"]],
+              "mapInteractions":[selected(value,["profile","engine","mobile","passed","longestTaskMs","layoutShift","returnedToRegion","returnedToDirections","countryCameraRestored"]) for value in report["mapInteractions"]],
+              "zoomDesigns":[selected(value,["profile","engine","geometryPassed","performance"]) for value in report["zoomDesigns"]],
+              "offlineSafety":selected(report["offlineSafety"],["schemaVersion","profile","passed","verified","originTransport"]),
+              "terrainMask":selected(report["terrainMask"],["schemaVersion","sourceCommit","verified","rendererSHA256","caseCount","pairCount","cases"])
+          })
+          expected={"android-portrait","desktop-webgl"}
+          audits=report["siteSmoothness"]
+          assert len(audits)==2 and {value["profile"] for value in audits}==expected
+          summaries=[]
+          def summarize(intervals):
+              values=sorted(item["durationMs"] for item in intervals)
+              assert values
+              return {"count":len(values),"p95Ms":values[math.ceil(len(values)*.95)-1],"maxMs":values[-1],"meanMs":sum(values)/len(values),"referenceIntervalMs":35,"atOrAboveReferenceIntervalCount":sum(value>=35 for value in values)}
+          for audit in audits:
+              profile=audit["profile"]
+              emit("TROPNIK_1710_FULL_UI_SUMMARY",{
+                  "profile":profile,**selected(audit,["schemaVersion","engine","cpuSlowdownRate","instrumented","passed","performancePassed","performanceIssues"]),
+                  "scenarios":[selected(window,["name","durationMs","supported","errors","overflow","hidden","pendingInputFrames","frames","inputToNextFrame","eventTiming","longTasks","layout"]) for window in audit["scenarios"]]
+              })
+              assert audit["instrumented"] is False and audit["cpuSlowdownRate"]==1
+              assert audit["performancePassed"] is True and audit["performanceIssues"]==[]
+              windows=[value for value in audit["scenarios"] if value["name"]=="map-pan"]
+              assert len(windows)==1
+              window=windows[0]
+              pan=audit["pan"]
+              emit("TROPNIK_1710_FULL_MAP_PAN",{"profile":profile,"sourceFileSha256":entry["sha256"],"originalWindow":window,"originalNativePan":pan})
+              down=[value for value in pan["events"] if value["type"]=="pointerdown"]
+              up=[value for value in pan["events"] if value["type"]=="pointerup"]
+              assert len(down)==len(up)==1
+              assert down[0]["trusted"] is True and up[0]["trusted"] is True and down[0]["pointerId"]==up[0]["pointerId"]
+              start,end=down[0]["time"],up[0]["time"]
+              raw=window["raw"]
+              assert math.isfinite(start) and math.isfinite(end) and raw["startedAt"]<=start<end<=raw["endedAt"]
+              frames=raw["frames"]
+              assert isinstance(frames,list) and len(frames)>=2
+              intervals=[]
+              for index in range(1,len(frames)):
+                  begin,finish=frames[index-1],frames[index]
+                  assert math.isfinite(begin) and math.isfinite(finish) and finish>begin
+                  if begin<end and finish>start:
+                      intervals.append({"rawFromIndex":index-1,"rawToIndex":index,"from":begin,"to":finish,"durationMs":finish-begin,"fullyContained":begin>=start and finish<=end})
+              inside=[value for value in intervals if value["fullyContained"]]
+              derived={"profile":profile,"derivedFromUnchangedRaw":True,"isAcceptanceGate":False,"isPresentedFps":False,
+                  "definition":"Every consecutive original RAF interval overlapping trusted pointerdown.time..pointerup.time (from < up and to > down), retaining the complete gap duration without clipping. Fully-contained intervals are additionally reported.",
+                  "pointerdown":down[0],"pointerup":up[0],"pointerSpanMs":end-start,"nativeCommandDurationMs":pan["durationMs"],
+                  "originalWindow":{"startedAt":raw["startedAt"],"endedAt":raw["endedAt"],"durationMs":window["durationMs"],"frameSamples":window["frames"]["samples"],"p95Ms":window["frames"]["p95Ms"]},
+                  "overlapping":summarize(intervals),"fullyContained":summarize(inside) if inside else None,"intervals":intervals}
+              emit("TROPNIK_1710_FULL_ACTIVE_PAN",derived)
+              summaries.append(derived)
+          inspection={"schemaVersion":1,"diagnosticOnly":True,"releaseEligible":False,"producerRunId":43077619318,
+              "producerJobId":130727807052,"sourceCommit":SOURCE,"artifactId":13885721229,
+              "artifactDigest":"sha256:9957eec5374f7f00af845af2ea8fe24f8778e7bf1044fc1269352eff8ae23f77",
+              "sourceReport":entry,"rawZipIndependentlyHashed":False,
+              "archiveIntegrityMethod":"Exact API metadata and pinned actions/download-artifact v8.0.2 digest-mismatch:error",
+              "selectedOriginalRecordsComplete":True,"mapPanFramesAndNativeEventsTruncated":False,
+              "activePan":summaries,
+              "limitations":["No application/build/browser was rerun.","Original full receipt remains unchanged in the sealed source artifact.","Descriptive active-pointer intervals do not change any acceptance budget and are not presented FPS.","Producer full gate succeeded; this extraction does not replace or newly execute its validators."]}
+          (output/"inspection.json").write_text(json.dumps(inspection,ensure_ascii=False,indent=2,allow_nan=False)+"\n")
+          emit("TROPNIK_1710_FULL_INSPECTION",inspection)
+          PY
+      - name: Preserve selected evidence metadata
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-browser-1710-inspection-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tropnik-browser-1710-inspection/inspection/
+          if-no-files-found: error
+          retention-days: 7
