@@ -8,6 +8,7 @@ import {spawnSync} from 'node:child_process';
 import {normalizeBase, rewriteScript, rewriteJSON, rewriteHTML, rewriteCSS, ts} from './paths.mjs';
 import {apkFileName, ensureApk, readApkManifest, validateApkDelivery} from './apk-artifact.mjs';
 import {androidPageDownload, pinAndroidPageDownload} from './apk-page.mjs';
+import {catalogueExpectations} from './catalogue-expectations.mjs';
 import {verifyMapLibreTerrainPatch} from '../../web/scripts/maplibre-terrain-patch.mjs';
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -259,7 +260,7 @@ await writeFile(join(out, 'THIRD_PARTY_NOTICES.txt'), 'Tropnik static preview: b
 const report = {
   schemaVersion: 1, buildId, sourceCommit, base, origin, renderer: 'Existing public terrain module from the input snapshot',
   apiConnected: false, serverCodeIncluded: false, fakeServerResponses: false, pages: pages.length,
-  regions: regions.length, referenceRoutes: trails.length, hasApk: config.hasApk, apk, layoutStyles,
+  regions: regions.length, referenceRoutes: trails.length, catalogue: catalogueExpectations(regions, trails), hasApk: config.hasApk, apk, layoutStyles,
   storageNamespace: base.slice(1, -1), immutableOfflinePack: true, inputs, bundledModules, thirdParty, dependencyPatches: [maplibreTerrainPatch],
 };
 await writeFile(join(out, 'build-info.json'), JSON.stringify(report, null, 2) + '\n');

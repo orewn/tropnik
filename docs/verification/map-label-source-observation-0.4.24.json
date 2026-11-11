@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "kind": "map-label-source-observation",
+  "createdAt": "2026-11-10T21:48:13.986566+00:00",
+  "sourceEvidenceOnly": true,
+  "browserCapture": false,
+  "verified": false,
+  "releaseEligible": false,
+  "scope": "Independent raw MVT snapshot, not a source-query capture from the browser frame",
+  "provider": "OpenFreeMap",
+  "dataset": "20261101_080013_pt",
+  "sourceLayer": "place",
+  "decoder": {
+    "vectorTile": "@mapbox/vector-tile 3.0.0",
+    "protobuf": "pbf 5.1.2"
+  },
+  "sources": [
+    {
+      "z": 7,
+      "x": 74,
+      "y": 36,
+      "url": "https://tiles.openfreemap.org/planet/20261101_080013_pt/7/74/36.pbf",
+      "bytes": 244124,
+      "sha256": "4d8aa4c6fbe2fc4fc445de11f82efaf612e1f4e42e33d969f2f1aa56c8374350"
+    },
+    {
+      "z": 8,
+      "x": 148,
+      "y": 73,
+      "url": "https://tiles.openfreemap.org/planet/20261101_080013_pt/8/148/73.pbf",
+      "bytes": 189212,
+      "sha256": "8d1ed18508217576d7ed5c397e6f6a81a9871d1aef1772af7402943cf7e8cfd7"
+    },
+    {
+      "z": 9,
+      "x": 296,
+      "y": 147,
+      "url": "https://tiles.openfreemap.org/planet/20261101_080013_pt/9/296/147.pbf",
+      "bytes": 64519,
+      "sha256": "88758c8a1124f958418c90a26b40b041c351fe3447bd5107db124f353169ab86"
+    },
+    {
+      "z": 10,
+      "x": 593,
+      "y": 295,
+      "url": "https://tiles.openfreemap.org/planet/20261101_080013_pt/10/593/295.pbf",
+      "bytes": 28974,
+      "sha256": "fd8f9423e111886a692200af62c6f9ee63c08aaf3514e9bb2c1a4ecdd083ece8"
+    },
+    {
+      "z": 11,
+      "x": 1186,
+      "y": 590,
+      "url": "https://tiles.openfreemap.org/planet/20261101_080013_pt/11/1186/590.pbf",
+      "bytes": 18810,
+      "sha256": "3c4777dbf83f4d9513e01eb32b8f763fe14e30629cd158b53c46ff30d5cde6fa"
+    },
+    {
+      "z": 12,
+      "x": 2373,
+      "y": 1181,
+      "url": "https://tiles.openfreemap.org/planet/20261101_080013_pt/12/2373/1181.pbf",
+      "bytes": 10274,
+      "sha256": "18cb4d29af7b4ca6ac1cda6f6ef61158d844ce5bb28ad906133697a5c7264713"
+    },
+    {
+      "z": 13,
+      "x": 4746,
+      "y": 2362,
+      "url": "https://tiles.openfreemap.org/planet/20261101_080013_pt/13/4746/2362.pbf",
+      "bytes": 4597,
+      "sha256": "abce5d71aae9f30cbc02c538da40ce5d38d00a9c75502a81ffe7e51506c4fb5f"
+    },
+    {
+      "z": 14,
+      "x": 9493,
+      "y": 4724,
+      "url": "https://tiles.openfreemap.org/planet/20261101_080013_pt/14/9493/4724.pbf",
+      "bytes": 13833,
+      "sha256": "6a5dd5657ec86572dd101a3f686fa4d9320c3c200cc8a2d108e9004f4d90c9cc"
+    }
+  ],
+  "features": [
+    {
+      "tile": {
+        "z": 7,
+        "x": 74,
+        "y": 36
+      },
+      "id": 10091351811,
+      "extent": 4096,
+      "coordinates": [
+        28.744354248046875,
+        60.70914389718132
+      ],
+      "properties": {
+        "class": "city",
+        "name": "Выборг",
+        "name:ru": "Выборг",
+        "name:latin": "Vyborg",
+        "rank": 6
+      }
+    },
+    {
+      "tile": {
+        "z": 7,
+        "x": 74,
+        "y": 36
+      },
+      "id": 343904761,
+      "extent": 4096,
+      "coordinates": [
+        28.61663818359375,
+        60.366694620758295
+      ],
+      "properties": {
+        "class": "town",
+        "name": "Приморск",
+        "name:ru": "Приморск",
+        "name:latin": "Primorsk",
+        "rank": 14
+      }
+    },
+    {
+      "tile": {
+        "z": 8,
+        "x": 148,
+        "y": 73
+      },
+      "id": 10091351811,
+      "extent": 4096,
+      "coordinates": [
+        28.74401092529297,
+        60.70914389718132
+      ],
+      "properties": {
+        "class": "city",
+        "name": "Выборг",
+        "name:ru": "Выборг",
+        "name:latin": "Vyborg",
+        "rank": 6
+      }
+    },
+    {
+      "tile": {
+        "z": 8,
+        "x": 148,
+        "y": 73
+      },
+      "id": 343904761,
+      "extent": 4096,
+      "coordinates": [
+        28.61663818359375,
+        60.366694620758295
+      ],
+      "properties": {
+        "class": "town",
+        "name": "Приморск",
+        "name:ru": "Приморск",
+        "name:latin": "Primorsk",
+        "rank": 12
+      }
+    },
+    {
+      "tile": {
+        "z": 9,
+        "x": 296,
+        "y": 147
+      },
+      "id": 10091351811,
+      "extent": 4096,
+      "coordinates": [
+        28.74401092529297,
+        60.70922788124517
+      ],
+      "properties": {
+        "class": "city",
+        "name": "Выборг",
+        "name:ru": "Выборг",
+        "name:latin": "Vyborg",
+        "rank": 6
+      }
+    },
+    {
+      "tile": {
+        "z": 9,
+        "x": 296,
+        "y": 147
+      },
+      "id": 343904761,
+      "extent": 4096,
+      "coordinates": [
+        28.61663818359375,
+        60.366694620758295
+      ],
+      "properties": {
+        "class": "town",
+        "name": "Приморск",
+        "name:ru": "Приморск",
+        "name:latin": "Primorsk",
+        "rank": 11
+      }
+    },
+    {
+      "tile": {
+        "z": 10,
+        "x": 593,
+        "y": 295
+      },
+      "id": 343904761,
+      "extent": 4096,
+      "coordinates": [
+        28.61663818359375,
+        60.36665218198618
+      ],
+      "properties": {
+        "class": "town",
+        "name": "Приморск",
+        "name:ru": "Приморск",
+        "name:latin": "Primorsk",
+        "rank": 11
+      }
+    },
+    {
+      "tile": {
+        "z": 11,
+        "x": 1186,
+        "y": 590
+      },
+      "id": 343904761,
+      "extent": 4096,
+      "coordinates": [
+        28.61668109893799,
+        60.36667340137913
+      ],
+      "properties": {
+        "class": "town",
+        "name": "Приморск",
+        "name:ru": "Приморск",
+        "name:latin": "Primorsk",
+        "rank": 11
+      }
+    },
+    {
+      "tile": {
+        "z": 11,
+        "x": 1186,
+        "y": 590
+      },
+      "id": 13594182841,
+      "extent": 4096,
+      "coordinates": [
+        28.677492141723633,
+        60.34742173507698
+      ],
+      "properties": {
+        "class": "suburb",
+        "name": "Карасевка",
+        "name:ru": "Карасевка",
+        "name:latin": "Karasevka",
+        "rank": 11
+      }
+    },
+    {
+      "tile": {
+        "z": 12,
+        "x": 2373,
+        "y": 1181
+      },
+      "id": 343904761,
+      "extent": 4096,
+      "coordinates": [
+        28.61668109893799,
+        60.366662791684405
+      ],
+      "properties": {
+        "class": "town",
+        "name": "Приморск",
+        "name:ru": "Приморск",
+        "name:latin": "Primorsk",
+        "rank": 11
+      }
+    },
+    {
+      "tile": {
+        "z": 12,
+        "x": 2373,
+        "y": 1181
+      },
+      "id": 13594182841,
+      "extent": 4096,
+      "coordinates": [
+        28.677513599395752,
+        60.34742173507698
+      ],
+      "properties": {
+        "class": "suburb",
+        "name": "Карасевка",
+        "name:ru": "Карасевка",
+        "name:latin": "Karasevka",
+        "rank": 11
+      }
+    },
+    {
+      "tile": {
+        "z": 13,
+        "x": 4746,
+        "y": 2362
+      },
+      "id": 343904761,
+      "extent": 4096,
+      "coordinates": [
+        28.61667037010193,
+        60.366662791684405
+      ],
+      "properties": {
+        "class": "town",
+        "name": "Приморск",
+        "name:ru": "Приморск",
+        "name:latin": "Primorsk",
+        "rank": 11
+      }
+    },
+    {
+      "tile": {
+        "z": 14,
+        "x": 9493,
+        "y": 4724
+      },
+      "id": 343904761,
+      "extent": 4096,
+      "coordinates": [
+        28.61667037010193,
+        60.366665444108406
+      ],
+      "properties": {
+        "class": "town",
+        "name": "Приморск",
+        "name:ru": "Приморск",
+        "name:latin": "Primorsk",
+        "rank": 11
+      }
+    }
+  ],
+  "primaryDocumentation": [
+    {
+      "url": "https://github.com/openmaptiles/planetiler-openmaptiles",
+      "finding": "The provider format documents default IDs encoded from OSM element ID and element type."
+    },
+    {
+      "url": "https://github.com/hyperknot/openfreemap/issues/44",
+      "finding": "OpenFreeMap owner explains use of the Planetiler source-ID encoding; the historic discussion concerns type digits."
+    },
+    {
+      "url": "https://github.com/hyperknot/openfreemap/blob/main/README.md",
+      "finding": "The provider identifies OpenMapTiles and Planetiler as its source generation tools."
+    }
+  ],
+  "observations": [
+    "Primorsk ID 343904761 appears in the examined z7 through z14 tiles; coordinates differ at the vector-tile quantization grid.",
+    "Karasevka ID 13594182841 appears at z11 and z12 with different quantized longitude.",
+    "The eight inspected tiles are independently downloaded data, not a list of the features actually retained by a browser frame.",
+    "An encoded stable ID alone does not prove which source copies produced a visible duplicate. No name-distance or guessed-radius merge is introduced."
+  ],
+  "nextEvidence": "Inspect original-source, geographic-overlay and rendered feature captures tied to actual coast PNGs in the full browser CI."
+}

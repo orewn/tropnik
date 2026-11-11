@@ -78,7 +78,7 @@ const cancelled=()=>new DOMException('Satellite source was replaced.','AbortErro
 /** Public raster APIs only. Opacity zero still loads visible raster sources;
  * visibility none does not. Readiness is checked only after a rendered frame
  * has updated the source's visible tile set, never on an unused source. */
-export function prepareMapLibreSatellite(map:MapLibreMap,id:string,current:()=>boolean):SatelliteCandidate {
+export function prepareMapLibreSatellite(map:MapLibreMap,id:string,current:()=>boolean,onShow:()=>void=()=>{}):SatelliteCandidate {
   let disposed=false,settled=false,rendered=false;
   let resolveReady:()=>void,rejectReady:(error:unknown)=>void;
   const ready=new Promise<void>((resolve,reject)=>{resolveReady=resolve;rejectReady=reject;});
@@ -101,6 +101,7 @@ export function prepareMapLibreSatellite(map:MapLibreMap,id:string,current:()=>b
   }catch(error){fail(error);}
   return {ready,show:()=>{
     if(disposed||!current()||!map.getLayer(id))throw cancelled();
+    onShow();
     map.setPaintProperty(id,'raster-opacity',1);
   },dispose:()=>{
     if(disposed)return;disposed=true;fail(cancelled());cleanup();

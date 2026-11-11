@@ -8,10 +8,15 @@
   contain-intrinsic-size:none;
 }
 @media (max-width:700px), (min-width:701px) and (max-width:900px) and (max-height:620px) and (orientation:landscape) and (pointer:coarse) {
+  /* Controls use the declared drawer endpoint in the same frame as the user's
+     action. Camera/label framing still consumes the settled measured inset.
+     Waiting for that measurement used to move the rail a second time. */
+  .explore-layout.sheet-closed {--sheet-control-inset:var(--sheet-peek)}
+  .explore-layout.sheet-open {--sheet-control-inset:min(var(--sheet-expanded-height),calc(100svh - var(--header) - 8px))}
   .explore-layout .explore-panel,
   .explore-layout .explore-panel.expanded,
   .explore-layout .explore-panel.collapsed {
-    transition:transform .2s cubic-bezier(.22,1,.36,1)!important;
+    transition:transform var(--motion-feedback) var(--ease-service)!important;
     will-change:auto;
   }
   .explore-layout .sheet-handle,
@@ -34,7 +39,7 @@
     background:var(--forest);
     opacity:.45;
     box-shadow:none;
-    transition:transform .2s cubic-bezier(.22,1,.36,1),opacity .2s cubic-bezier(.22,1,.36,1);
+    transition:transform var(--motion-feedback) var(--ease-service),opacity var(--motion-feedback) var(--ease-service);
   }
   .explore-layout .sheet-handle:active {transform:none}
   .explore-layout .sheet-handle:active>span,

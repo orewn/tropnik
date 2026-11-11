@@ -15,9 +15,11 @@ import {runOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {createOfflineOriginTransport} from './browser-origin-transport.mjs';
 import {observeRequestMapLayout,assertRequestMapLayout} from './browser-request-layout.mjs';
 import {runSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
+import {installSmoothnessRecorder,runSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
+const catalogue=JSON.parse(await readFile(new URL('build-info.json',ROOT),'utf8')).catalogue;
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
 const traceEnabled=browserTraceEnabled(process.env.TROPNIK_BROWSER_TRACE,runPolicy.diagnostic);
 const REPORT = new URL(runPolicy.reportFile, ROOT);
@@ -830,12 +832,15 @@ async function mapInteraction(cdp,profile,performanceIssues){
   },{enabled:focusedDiagnostic&&!profile.mobile,sourceCommit:process.env.GITHUB_SHA||null,prefix:'desktop-webgl-sibling-polygon',scope:'desktop-sibling-polygon-selection'});
   const {polygon,siblingParent}=siblingSelection.value;experience.siblingParent=siblingParent;
   await phase('map-gestures');const gestures=await mapGestures(cdp,profile);
-  currentExploreExperience.step='validation';assertExploreExperience({...experience,passed:true},profile.name,profile.engine,profile.mobile);experience.passed=true;
+  currentExploreExperience.step='validation';assertExploreExperience({...experience,passed:true},profile.name,profile.engine,profile.mobile,catalogue);experience.passed=true;
   const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
-  const longTaskLimit=profile.mobile?350:750;
-  if(!(perf.longest<longTaskLimit))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:longTaskLimit});
+  performanceIssues.push(...performanceBudgetIssues({layoutShift:perf.cls,longestTaskMs:perf.longest},profile,'map-interactions'));
   currentExploreExperience=null;
   return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,requestOwnershipTrace:requestOwnership.trace,siblingSelectionTrace:siblingSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+}
+
+async function siteSmoothnessAudit(cdp,profile,cpuSlowdownRate=1){
+  return runSmoothnessAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,settledSheet,closeMapSheet,clearMapStories,pointerSelector,revealNative,scrollContainer,freeCanvasPoint,url:`http://127.0.0.1:${httpPort}/tropnik/`},{cpuSlowdownRate});
 }
 
 const httpPort=await freePort(),debugPort=await freePort();
@@ -844,14 +849,14 @@ await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(h
 const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browserLaunchStarted=performance.now();
 let browser,cdp,currentProfile,failure,currentExploreExperience=null;
-const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],satelliteAudits=[],profilePerformance=[],performanceIssues=[];
+const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],satelliteAudits=[],siteSmoothness=[],profilePerformance=[],performanceIssues=[];
 // GitHub can terminate this process before catch/finally. Preserve completed
 // interactions before the long zoom matrix, without marking them as a release.
 const progressDirectory=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 async function checkpoint(phase){
   await mkdir(progressDirectory,{recursive:true});
   const temporary=new URL('browser-progress.tmp',progressDirectory);
-  await writeFile(temporary,JSON.stringify({verified:false,sourceCommit:process.env.GITHUB_SHA||null,updatedAt:new Date().toISOString(),profile:currentProfile,phase,performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest})),completedZoomProfiles:zoomDesigns.map(({profile,geometryPassed,performance})=>({profile,geometryPassed,performance}))},null,2)+'\n');
+  await writeFile(temporary,JSON.stringify({verified:false,releaseEligible:false,sourceCommit:process.env.GITHUB_SHA||null,catalogue,updatedAt:new Date().toISOString(),profile:currentProfile,phase,performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedSiteSmoothness:siteSmoothness,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest})),completedZoomProfiles:zoomDesigns.map(({profile,geometryPassed,performance})=>({profile,geometryPassed,performance}))},null,2)+'\n');
   await rename(temporary,new URL('browser-progress.json',progressDirectory));
 }
 try{
@@ -862,11 +867,12 @@ try{
     `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
   ]);
   await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
-  const initialUrl=['offline-safety','satellite-continuity'].includes(runPolicy.diagnostic)?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
+  const initialUrl=['offline-safety','satellite-continuity','ui-smoothness','ui-smoothness-cpu'].includes(runPolicy.diagnostic)?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
   const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(initialUrl)}`,{method:'PUT'});
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
+    (${installSmoothnessRecorder.toString()})(window);
     window.__tropnikPerf={cls:0,longest:0};
     window.__tropnikPerfStart=0;window.__tropnikPhase='loading';window.__tropnikPhases=[];window.__tropnikLayoutShifts=[];
     window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;window.__tropnikLongTasks=[];
@@ -884,7 +890,7 @@ try{
       window.__tropnikInputEvents.push({type,time:performance.now(),timestamp:event.timeStamp,pointerType:event.pointerType||'',pointerId:Number.isInteger(event.pointerId)?event.pointerId:null,x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),regionId:button.dataset.regionId||null,groupKey:button.dataset.mapGroupKey||null,rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
       if(window.__tropnikInputEvents.length>36)window.__tropnikInputEvents.shift();
     },{capture:true,passive:true});
-    try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput){
+    try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput&&entry.startTime>=window.__tropnikPerfStart){
       window.__tropnikPerf.cls+=entry.value;
       const rect=value=>({x:value.x,y:value.y,width:value.width,height:value.height});
       const nodePath=node=>{let element=node?.nodeType===1?node:node?.parentElement;const parts=[];for(let i=0;element&&i<4;i++,element=element.parentElement)parts.push(element.tagName.toLowerCase()+(element.id?'#'+element.id:'')+'['+(element.getAttribute('class')||'').slice(0,180)+']');return parts.join(' < ');};
@@ -897,6 +903,11 @@ try{
   `});
   for(const profile of profiles.filter(profile=>!runPolicy.profiles||runPolicy.profiles.includes(profile.name))){
     currentProfile=profile.name;
+    if(runPolicy.diagnostic==='ui-smoothness'||runPolicy.diagnostic==='ui-smoothness-cpu'){
+      const audit=await siteSmoothnessAudit(cdp,profile,runPolicy.diagnostic==='ui-smoothness-cpu'?4:1);siteSmoothness.push(audit);performanceIssues.push(...audit.performanceIssues);
+      const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:siteSmoothness.length===runPolicy.profiles.length?'completed':'running',sourceCommit:process.env.GITHUB_SHA||null,profiles:siteSmoothness,performanceIssues,performancePassed:performanceIssues.length===0,updatedAt:new Date().toISOString()};
+      await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));continue;
+    }
     if(runPolicy.diagnostic==='satellite-continuity'){
       const audit=await runSatelliteContinuityAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,url:`http://127.0.0.1:${httpPort}/tropnik/`});
       satelliteAudits.push(audit);performanceIssues.push(...satellitePerformanceIssues(audit,profile));
@@ -937,6 +948,7 @@ try{
         await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
         await checkpoint('map-interactions-diagnostic-complete');continue;
       }
+      const smoothness=await siteSmoothnessAudit(cdp,profile);siteSmoothness.push(smoothness);performanceIssues.push(...smoothness.performanceIssues);await checkpoint('site-smoothness-complete');
       await checkpoint('before-zoom-audit');
       zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
       await checkpoint('profile-complete');
@@ -977,7 +989,10 @@ try{
     results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction});
     profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
     await checkpoint(interaction?'before-zoom-audit':'profile-complete');
-    if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
+    if(profile.mapInteraction){
+      const smoothness=await siteSmoothnessAudit(cdp,profile);siteSmoothness.push(smoothness);performanceIssues.push(...smoothness.performanceIssues);await checkpoint('site-smoothness-complete');
+      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
+    }
     if(profile.mapInteraction)await checkpoint('profile-complete');
   }
   if(!runPolicy.diagnostic||runPolicy.diagnostic==='offline-safety'){
@@ -992,7 +1007,7 @@ try{
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');
-  const report={verified:true,mapInteractionSchemaVersion:3,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,catalogue,mapInteractionSchemaVersion:3,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,siteSmoothness,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
   }
@@ -1000,6 +1015,8 @@ try{
 }catch(error){
   failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
+  if(error.smoothnessAudit)failure.smoothnessAudit=error.smoothnessAudit;
+  if(siteSmoothness.length)failure.completedSiteSmoothness=siteSmoothness;
   if(error.nativeScroll)failure.nativeScroll=error.nativeScroll;
   if(satelliteAudits.length)failure.completedSatelliteAudits=satelliteAudits;
   if(error.pointerTarget)failure.pointerTarget=error.pointerTarget;

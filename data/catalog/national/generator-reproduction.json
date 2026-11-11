@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-10T22:05:31.168718+00:00",
+  "status": "passed",
+  "mode": "isolated scratch rebuild; shared source assets read only",
+  "generatorPath": "web/scripts/prepare-catalog.py",
+  "generatorSha256": "4b271c30f2cbcd68ae873cd5fe6cf7ff4c05397928c3ebcc8ee0a4dd703f6276",
+  "generatedFilesCompared": 614,
+  "generatedBytesCompared": 10805159,
+  "outputManifestSha256": "e51789cdcb41103d3fa29d65b0352f8b69f292f139829346339e6a73bd8a5f09",
+  "freshGeneratedBytesEqualSharedTree": true,
+  "secondRunBytesIdentical": true,
+  "historicalOrphansSeededThenRemoved": [
+    "osm-relation-12804258.geojson",
+    "osm-relation-2512647.geojson"
+  ],
+  "sharedTreeRewritten": false,
+  "generatorSummary": {
+    "importedCards": 612,
+    "allRoutePoints": 615,
+    "geometryFiles": 612,
+    "cardBytes": 985269,
+    "geometryBytes": 9705366
+  }
+}

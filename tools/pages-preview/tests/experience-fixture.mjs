@@ -1,5 +1,8 @@
 import {directionGridFixture} from './direction-hitareas-fixture.mjs';
 import {directionExternalPoint} from '../browser-direction-hitareas.mjs';
+import {catalogueExpectations} from '../catalogue-expectations.mjs';
+
+export const catalogueFixture=catalogueExpectations([{id:'altai',name:'Алтай'},{id:'baikal',name:'Байкал'}],Array.from({length:21},(_,index)=>({id:`fixture-${index}`,regionId:index<11?'altai':'baikal'})));
 
 const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
 const clone=value=>structuredClone(value);

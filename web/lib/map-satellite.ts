@@ -38,13 +38,13 @@ export function satelliteSourceForBounds({west,south,east,north}:SatelliteBounds
 
 /** Replace only the ground drawing. Keep the Russia mask, geographic anchors,
  * paths, roads, labels and selected route above the real satellite imagery. */
-export function satelliteStyle(base: StyleSpecification): StyleSpecification {
+export function satelliteStyle(base: StyleSpecification, options: {preserveGround?: boolean} = {}): StyleSpecification {
   const next = structuredClone(base);
   next.name = 'Тропник · спутниковая карта';
   for(const provider of Object.values(SATELLITE_PROVIDERS))next.sources[provider.source] = {type:'raster',tiles:[provider.tiles],tileSize:256,
     minzoom:0,maxzoom:provider.maxzoom,attribution:provider.attribution};
   const retainedFill = new Set(['land', 'overview-land', 'region-fill', 'region-selected', 'russia-outside-mask']);
-  next.layers = next.layers.filter(layer =>
+  if (!options.preserveGround) next.layers = next.layers.filter(layer =>
     layer.type !== 'raster' && layer.type !== 'hillshade' &&
     (layer.type !== 'fill' || retainedFill.has(layer.id)));
   const ground = next.layers.findIndex(layer => layer.id === 'land' || layer.id === 'overview-land');
@@ -52,7 +52,46 @@ export function satelliteStyle(base: StyleSpecification): StyleSpecification {
   // source, plus a transparent replacement while it loads behind that source.
   next.layers.splice(ground + 1, 0, ...Object.values(SATELLITE_PROVIDERS).map(provider=>({
     id:provider.source,type:'raster' as const,source:provider.source,layout:{visibility:'none' as const},
-    paint:{'raster-fade-duration':0,'raster-resampling':'linear' as const,'raster-opacity':0,'raster-opacity-transition':{duration:0}},
+    paint:{'raster-fade-duration':200,'raster-resampling':'linear' as const,'raster-opacity':0,'raster-opacity-transition':{duration:0}},
   })));
   return next;
+}
+
+/** Staging changes no existing layer. The normal basemap and route overlays
+ * stay live while the transparent imagery source prepares the current view. */
+export function attachSatelliteLayers(map: Pick<import('maplibre-gl').Map, 'getStyle' | 'getSource' | 'addSource' | 'getLayer' | 'addLayer'>): void {
+  if (Object.values(SATELLITE_PROVIDERS).every(provider => map.getSource(provider.source) && map.getLayer(provider.source))) return;
+  const style = map.getStyle();
+  if (!style) throw new Error('The map style is unavailable.');
+  const ground = style.layers.findIndex(layer => layer.id === 'land' || layer.id === 'overview-land');
+  const before = style.layers[ground + 1]?.id;
+  for (const provider of Object.values(SATELLITE_PROVIDERS)) {
+    if (!map.getSource(provider.source)) map.addSource(provider.source, {type:'raster',tiles:[provider.tiles],tileSize:256,minzoom:0,maxzoom:provider.maxzoom,attribution:provider.attribution});
+    if (!map.getLayer(provider.source)) map.addLayer({id:provider.source,type:'raster',source:provider.source,layout:{visibility:'none'},
+      paint:{'raster-fade-duration':200,'raster-resampling':'linear','raster-opacity':0,'raster-opacity-transition':{duration:0}}}, before);
+  }
+}
+
+/** Visibility changes preserve source tile caches, feature state and camera.
+ * Restore only the exact layer objects owned by this presentation, so cleanup
+ * cannot modify a newer style that reused the same IDs. */
+export function satelliteGroundPresentation(map: Pick<import('maplibre-gl').Map, 'getStyle' | 'getLayer' | 'setLayoutProperty'>) {
+  const saved = new Map<string, {layer: unknown; visibility: 'visible' | 'none'}>();
+  const retainedFill = new Set(['land', 'overview-land', 'region-fill', 'region-selected', 'russia-outside-mask']);
+  const imagery = new Set<string>(Object.values(SATELLITE_PROVIDERS).map(provider => provider.source));
+  return {
+    show() {
+      for (const layer of map.getStyle()?.layers ?? []) {
+        if (imagery.has(layer.id) || (layer.type !== 'raster' && layer.type !== 'hillshade' && (layer.type !== 'fill' || retainedFill.has(layer.id)))) continue;
+        if (saved.has(layer.id)) continue;
+        const visibility = layer.layout?.visibility === 'none' ? 'none' : 'visible';
+        saved.set(layer.id, {layer: map.getLayer(layer.id), visibility});
+        if (visibility !== 'none') map.setLayoutProperty(layer.id, 'visibility', 'none');
+      }
+    },
+    restore() {
+      for (const [id, previous] of saved) if (map.getLayer(id) === previous.layer) map.setLayoutProperty(id, 'visibility', previous.visibility);
+      saved.clear();
+    },
+  };
 }

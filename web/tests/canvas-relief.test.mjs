@@ -38,7 +38,7 @@ function fixture({autoResolve=false,byteLength=16}={}){
     document:{createElement(){return{dataset:{},style:{removeProperty(name){delete this[name];}},drawn:0,getContext(){return{putImageData:()=>{this.drawn++;}};}};}}};
   vm.runInNewContext(compiled,scope);
   const relief=scope.exports.createCanvasRelief(L,value=>states.push(value));
-  const add=()=>{const tile=relief.layer.createTile({z:6,x:39,y:20},(error,canvas)=>completed.push({error,canvas}));nodes.add(tile);return tile;};
+  const add=(coords={z:6,x:39,y:20})=>{const tile=relief.layer.createTile(coords,(error,canvas)=>completed.push({error,canvas}));nodes.add(tile);return tile;};
   const unload=tile=>{nodes.delete(tile);relief.layer.handlers.tileunload({tile});};
   const resolvePending=size=>{for(const request of requests.filter(item=>!item.settled))request.resolve(new ArrayBuffer(size??byteLength));};
   const drain=async predicate=>{
@@ -60,6 +60,17 @@ test('current map downloads are capped at three and decoding waits for the previ
   env.resolvePending();await tick();assert.equal(env.workers[0].messages.length,1);
   env.workers[0].reply();await tick();assert.equal(env.completed.length,1);assert.equal(env.completed[0].canvas.drawn,1);
   assert.equal(env.workers[0].messages.length,2);assert.ok(env.maxFetching()<=3);env.relief.destroy();
+});
+
+test('Chukotka elevation tiles wrap both sides of 180 degrees to canonical provider x values',async()=>{
+  const env=fixture();
+  env.add({z:5,x:32,y:8});env.add({z:5,x:-1,y:8});await tick();
+  assert.deepEqual(env.requests.map(request=>request.url),[
+    'https://tiles.mapterhorn.com/5/0/8.webp',
+    'https://tiles.mapterhorn.com/5/31/8.webp',
+  ]);
+  assert.equal(env.states.includes(false),false,'valid wrapped coordinates are not rejected or reported as missing relief');
+  assert.equal(env.completed.length,0);env.relief.destroy();
 });
 
 test('queue overflow is an explicit error, never a successfully ready blank tile',async()=>{

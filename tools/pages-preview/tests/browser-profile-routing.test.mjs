@@ -25,12 +25,13 @@ const profiles=[
 async function dispatchProfiles(traceEnabled,audit,policy=browserAuditRunPolicy(undefined),issues=[],offlineAudit,satelliteAudit){
  const unavailable=async()=>({available:false});
  const notInvoked=()=>assert.fail('The routing test must not invoke browser helpers');
- const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[],offlineCalls=[],satelliteCalls=[],cdpCalls=[];
+ const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[],offlineCalls=[],satelliteCalls=[],smoothnessCalls=[],cdpCalls=[];
  const bindings={
   assert,profiles,runPolicy:policy,traceEnabled,cdp:{call:async(method,parameters)=>cdpCalls.push({method,parameters})},httpPort:4200,
-  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],satelliteAudits:[],profilePerformance:[],performanceIssues:issues,
+  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],satelliteAudits:[],siteSmoothness:[],profilePerformance:[],performanceIssues:issues,catalogue:{schemaVersion:1,total:21},
   REPORT:policy.reportFile,reports,loadCalls,mapCalls,process:{env:{GITHUB_SHA:'a'.repeat(40)}},console:{log(){}},writeFile:async(path,text)=>reports.push({path,report:JSON.parse(text)}),
   runZoomDesignAudit:audit,
+  smoothnessCalls,siteSmoothnessAudit:async(_cdp,profile,rate=1)=>{smoothnessCalls.push({profile:profile.name,rate});return{profile:profile.name,performanceIssues:[]};},
   satelliteCalls,satellitePerformanceIssues,runSatelliteContinuityAudit:async(cdp,profile,helpers)=>{satelliteCalls.push(profile.name);return satelliteAudit? satelliteAudit(cdp,profile,helpers):{profile:profile.name,performance:{layoutShift:0,longestTaskMs:100}};},
   server:{},offlineOriginTransport:{start:notInvoked,snapshot:notInvoked,restore:notInvoked},
   offlineCalls,cdpCalls,runOfflineSafetyAudit:async(cdp,helpers)=>{offlineCalls.push({cdp,helpers});return offlineAudit?offlineAudit(cdp,helpers):{schemaVersion:1,profile:'android-portrait',passed:true};},
@@ -97,6 +98,17 @@ test('satellite failures propagate without retrying a profile or claiming a comp
  const observed=await dispatchProfiles(false,()=>assert.fail('No full matrix fallback'),browserAuditRunPolicy('satellite-continuity'),[],undefined,async(_cdp,profile)=>{calls.push(profile.name);throw failure;}).then(()=>null,error=>error);
  assert.equal(observed,failure);assert.deepEqual(calls,['desktop-webgl']);
 });
+
+for(const [mode,names,rate]of [['ui-smoothness',['desktop-webgl','android-portrait'],1],['ui-smoothness-cpu',['android-portrait'],4]]){
+ test(`${mode} runs only its short real-input profiles and cannot publish release evidence`,async()=>{
+  const policy=browserAuditRunPolicy(mode);
+  const run=await dispatchProfiles(false,()=>assert.fail('Short smoothness must not invoke zoom matrix'),policy);
+  assert.deepEqual(run.smoothnessCalls,names.map(profile=>({profile,rate})));
+  assert.deepEqual(run.mapCalls,[]);assert.deepEqual(run.loadCalls,[]);assert.equal(run.offlineCalls.length,0);assert.deepEqual(run.zoomDesigns,[]);
+  const report=run.reports.at(-1).report;assert.equal(report.status,'completed');assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);assert.equal(report.performancePassed,true);assert.equal(report.profiles.length,names.length);
+  assert.throws(()=>assertBrowserReport(report,'a'.repeat(40)));
+ });
+}
 
 test('focused map diagnosis runs the exact fresh desktop interaction once and cannot produce release or zoom evidence',async()=>{
  const policy=browserAuditRunPolicy('map-interactions'),issues=[{profile:'desktop-webgl',phase:'map-interactions',metric:'longestTaskMs',value:851,limit:750}];

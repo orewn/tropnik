@@ -16,7 +16,7 @@ const ts=require('typescript');
 const source=readFileSync(new URL('../components/Atlas2D.tsx',import.meta.url),'utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 const component={exports:{}};
-new Function('require','module','exports',compiled)(id=>id==='@/lib/map-config'?{MAP_CONFIG}:id==='@/public/maps/russia-viewport.js'?{russiaLongitude,leafletRussiaMask,MAP_OUTSIDE_COLOR}:id==='@/lib/map-route-presentation'?routePresentation:id==='@/lib/leaflet-canvas'?{createLeafletCanvas}:id==='@/lib/leaflet-mask-viewport'?{maskViewportCulling}:{},component,component.exports);
+new Function('require','module','exports',compiled)(id=>id==='react'?require('react'):id==='@/lib/map-config'?{MAP_CONFIG}:id==='@/public/maps/russia-viewport.js'?{russiaLongitude,leafletRussiaMask,MAP_OUTSIDE_COLOR}:id==='@/lib/map-route-presentation'?routePresentation:id==='@/lib/leaflet-canvas'?{createLeafletCanvas}:id==='@/lib/leaflet-mask-viewport'?{maskViewportCulling}:{},component,component.exports);
 const {createCanvasTrailPoint,createCanvasTrailLine,raiseCanvasTrailPoints,createCanvasRussiaMask}=component.exports;
 
 // Use the installed Leaflet implementation for renderer ownership, projection,

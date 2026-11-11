@@ -235,6 +235,17 @@ fun TropaMap(
         }
     }
 
+    // Catalogue mode can change without changing the focus or the style.
+    // Update only its points so switching lists neither reloads the route nor moves the camera.
+    LaunchedEffect(map, styleRevision, styleLoading, regions) {
+        val nativeMap = map ?: return@LaunchedEffect
+        if (styleRevision == 0 || styleLoading) return@LaunchedEffect
+        val data = withContext(Dispatchers.Default) { regionPoints(regions) }
+        withContext(Dispatchers.Main.immediate) {
+            nativeMap.style?.getSourceAs<GeoJsonSource>("regions")?.setGeoJson(data)
+        }
+    }
+
     LaunchedEffect(map, styleRevision, displayArea, selected?.id, route?.id, route?.apiRevisionId, route?.geometryAsset, route?.inlineGeometry) {
         val nativeMap = map ?: return@LaunchedEffect
         if (styleRevision == 0 || styleLoading) return@LaunchedEffect
@@ -251,7 +262,6 @@ fun TropaMap(
             nativeMap.setLatLngBoundsForCameraTarget(area.cameraBounds)
             scopeNotice = null
             val style = nativeMap.style ?: return@ui
-            style.getSourceAs<GeoJsonSource>("regions")?.setGeoJson(regionPoints(regions))
             style.getSourceAs<GeoJsonSource>("focus")?.setGeoJson(points(selected?.let { listOf(it.longitude to it.latitude) } ?: emptyList()))
             val routeData = prepared?.getOrNull()
             style.getSourceAs<GeoJsonSource>("route")?.setGeoJson(routeData?.json ?: points(emptyList()))

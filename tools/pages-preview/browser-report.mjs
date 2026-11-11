@@ -6,6 +6,8 @@ import {assertCoastAudit} from './browser-coast-audit.mjs';
 import {assertSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
 import {assertOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {assertRequestMapLayout} from './browser-request-layout.mjs';
+import {assertCatalogueExpectations} from './catalogue-expectations.mjs';
+import {assertSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -285,6 +287,7 @@ function assertZoomDesign(design,name,engine,mobile){
   assert.ok(Object.values(intervals).every(value=>Number.isFinite(value[key])));
   assert.equal(design.performance?.[key],Math.max(...Object.values(intervals).map(value=>value[key])),`${name}: a prior performance interval was lost`);
  }
+ for(const [phase,value]of Object.entries(intervals))assert.deepEqual(performanceBudgetIssues(value,{name,mobile},`zoom-${phase}`),[],`${name}: ${phase} exceeded the unchanged performance budget`);
 }
 
 /** Validate actual painted hit samples rather than trusting an overall pass
@@ -500,7 +503,7 @@ export function assertLayerMenuAudit(receipt,name){
  return receipt;
 }
 
-export function assertOverviewCounts(frame,context){
+export function assertOverviewCounts(frame,context,expectedCatalogue){
  assert.equal(frame?.region,'');assert.ok(Number.isInteger(frame.total)&&frame.total>0);assert.equal(frame.mapTotal,frame.total,`${context}: country map and catalogue totals differ`);
  assert.ok(Array.isArray(frame.catalog)&&frame.catalog.length>0,`${context}: catalogue directions are missing`);
  assert.ok(Array.isArray(frame.markers)&&frame.markers.length>0,`${context}: visible direction controls are missing`);
@@ -509,6 +512,13 @@ export function assertOverviewCounts(frame,context){
   assert.ok(typeof item.id==='string'&&item.id.length>0&&!catalog.has(item.id),`${context}: missing or duplicate catalogue ID`);
   assert.ok(typeof item.name==='string'&&item.name.length>0&&!names.has(item.name));names.add(item.name);
   assert.ok(Number.isInteger(item.count)&&item.count>=0&&item.count<=frame.total);catalog.set(item.id,{name:item.name,count:item.count});
+ }
+ if(expectedCatalogue){
+  assertCatalogueExpectations(expectedCatalogue);
+  assert.equal(frame.total,expectedCatalogue.total,`${context}: the country total differs from the source catalogue`);
+  const expected=new Map(expectedCatalogue.directions.map(({id,...value})=>[id,value]));
+  const ordered=value=>[...value].sort(([a],[b])=>a.localeCompare(b));
+  assert.deepEqual(ordered(catalog),ordered(expected),`${context}: direction counts differ from the source catalogue`);
  }
  const ids=new Set(),grouped=new Set();let positive=false;
  for(const marker of frame.markers){
@@ -557,7 +567,8 @@ function assertRequestDialog(dialog,context,{open,title='',note='',date=''}={}){
  assert.equal(dialog.heading,open?'Какой поход планируете?':'');
 }
 
-export function assertExploreExperience(receipt,name,engine,mobile){
+export function assertExploreExperience(receipt,name,engine,mobile,expectedCatalogue){
+ assertCatalogueExpectations(expectedCatalogue);
  const input=mobile?'touch':'mouse',context=`${name}/explore`;
  assert.equal(engine,mobile?'leaflet':'maplibre');assert.equal(receipt?.schemaVersion,1);assert.equal(receipt.passed,true);assert.equal(receipt.input,input);
  const filter=receipt.filterReset;assert.ok(filter,`${context}: filter-reset evidence is missing`);
@@ -566,9 +577,10 @@ export function assertExploreExperience(receipt,name,engine,mobile){
  assert.equal(filter.restored.count,filter.baseline.count);
  assertExperienceClick(filter.enabled,input,`${context}/saved`,'.filter-row button[aria-pressed]');
  assertExperienceClick(filter.parent,input,`${context}/filter-parent`,'.explore-panel .back-link');
- const before=assertOverviewCounts(filter.overviewBefore,`${context}/before-filter`),after=assertOverviewCounts(filter.overviewAfter,`${context}/after-filter`);
+ const before=assertOverviewCounts(filter.overviewBefore,`${context}/before-filter`,expectedCatalogue),after=assertOverviewCounts(filter.overviewAfter,`${context}/after-filter`,expectedCatalogue);
  assert.deepEqual(after,before,`${context}: a hidden filter changed overview catalogue counts`);assert.equal(filter.overviewAfter.total,filter.overviewBefore.total);
- const altai=new Map(before).get('altai');assert.equal(altai?.name,'Алтай');assert.equal(altai.count,11);
+ const altai=new Map(before).get('altai');assert.equal(altai?.name,'Алтай');
+ assert.equal(altai.count,expectedCatalogue.directions.find(item=>item.id==='altai')?.count);
  assert.equal(altai.count,filter.baseline.count,`${context}: restored Altai differs from the overview count`);
  assertSavedDirectionReentry(filter.reentryActions,`${context}/saved-reentry`,engine,input,altai.count);
 
@@ -645,12 +657,14 @@ export function assertStyleCameraRoundtrip(receipt,name){
 }
 
 /** The same evidence gate runs before upload and against the public artifact. */
-export function assertBrowserReport(browser,expectedCommit){
+export function assertBrowserReport(browser,expectedCommit,expectedCatalogue){
  assert.equal(browser.verified,true);
  assertOfflineSafetyAudit(browser.offlineSafety);
  assert.equal(browser.offlineSafety.originTransport.active,false,'Offline transport was not restored after the audit');
  assert.ok(Number.isFinite(Date.parse(browser.offlineSafety.originTransport.restoredAt)),'Offline transport cleanup is not recorded');
  assert.equal(browser.sourceCommit,expectedCommit);
+ assertCatalogueExpectations(expectedCatalogue);
+ assert.deepEqual(browser.catalogue,expectedCatalogue,'The browser report belongs to another catalogue snapshot');
  assert.equal(browser.mapInteractionSchemaVersion,3,'The browser report predates native Layers, exploration and manual-camera regressions');
  assert.ok(Array.isArray(browser.profiles));
  for(const name of MOBILE_PROFILES){
@@ -671,6 +685,7 @@ export function assertBrowserReport(browser,expectedCommit){
  assert.equal(desktop.coarse,false,'Desktop verification used a touch profile');
  assert.equal(desktop.mapInteractionTested,true);
  for(const [name,engine,mobile] of [['android-portrait','leaflet',true],['desktop-webgl','maplibre',false]]){
+  assertSmoothnessAudit(browser.siteSmoothness?.find(item=>item.profile===name),{name,engine,mobile});
   assertZoomDesign(browser.zoomDesigns?.find(item=>item.profile===name),name,engine,mobile);
   const result=browser.mapInteractions?.find(item=>item.profile===name);
   assert.ok(result,`${name}: missing real map interaction evidence`);
@@ -678,7 +693,7 @@ export function assertBrowserReport(browser,expectedCommit){
   assert.equal(result.engine,engine);
   assert.equal(result.mobile,mobile);
   assertDirectionHitAreas(result.directionHitAreas,name,engine,mobile);
-  assertExploreExperience(result.experience,name,engine,mobile);
+  assertExploreExperience(result.experience,name,engine,mobile,expectedCatalogue);
   assert.equal(result.experience.requestOwnership.route.id,result.route?.id,`${name}: request ownership used another selected route`);
   if(engine==='maplibre'){assertStyleCameraRoundtrip(result.styleCameraRoundtrip,name);assert.equal(result.styleCameraRoundtrip.routeId,result.route?.id);}
   assert.equal(result.firstDirection?.at(-1)?.selected,'altai');
@@ -704,6 +719,7 @@ export function assertBrowserReport(browser,expectedCommit){
   assert.ok(result.gestures.resizedTo?.width>0&&result.gestures.resizedTo?.height>0);
   assert.ok(result.gestures.postResizePolygon,`${name}: map input was not checked after resize`);
   assert.ok(Number.isFinite(result.longestTaskMs)&&result.longestTaskMs<(mobile?350:750));
+  assert.ok(Number.isFinite(result.layoutShift)&&result.layoutShift<.12,`${name}: map interaction layout shift exceeded the unchanged limit`);
  }
  return browser;
 }

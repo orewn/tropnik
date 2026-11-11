@@ -8,6 +8,7 @@ export function satelliteFixture(profile,engine){
  const viewport={width:mobile?412:1440,height:mobile?915:1000,dpr:mobile?2:1};
  const click=()=>({input,point:{x:100,y:100,unobscured:true},events:['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+index,trusted:true,pointerType:input,pointerId:1}))});
  const frame=(longitude=180,zoom=4,source='eox-bluemarble')=>({engine,region:SATELLITE_REGION,imagery:source?'satellite':'',source,target:source,state:source?'ready':'',
+  base:{committed:source?'satellite':'detail',target:source?'satellite':'detail',state:'ready'},
   credit:{visible:!!source,text:source==='eox-bluemarble'?'NASA Blue Marble · EOX · Обзорный снимок · детализация ниже'+(zoom>8?' · Увеличен обзорный снимок':''):source?'EOxCloudless by EOX':''},
   viewport:{...viewport},rect:{...rect},camera:{longitude,latitude:67.5,zoom,tileSize:mobile?256:512},scrollY:0,
   ...(source?{resolution:source==='eox-bluemarble'?'overview':'detail',successfulRequestIds:source==='eox-bluemarble'?[source,'eox-bluemarble-west']:[source],pendingRequestIds:[],failedRequestIds:[],resourceSequence:9,resourcePhase:'enable-satellite'}:{}),
@@ -27,8 +28,14 @@ export function satelliteFixture(profile,engine){
   {requestId:'eox-s2',source:'eox-s2',url:'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/4/3/14.jpg',tile:{z:4,x:14,y:3},status:200,mimeType:'image/jpeg',finished:true,bytes:10000},
  ]};
  resources.requests.forEach((item,index)=>Object.assign(item,{firstSequence:index*3+1,requestedSequence:index*3+1,responseSequence:index*3+2,finishedSequence:index*3+3,phase:index===2?'west-eox':'enable-satellite',responsePhase:index===2?'west-eox':'enable-satellite'}));
- return{schemaVersion:1,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
+ const result={schemaVersion:2,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
   pans:[pan('dateline-overview',[180,67.5]),pan('west-eox',[140,67.5]),pan('dateline-return',[180,67.5])],zooms,
   toggles:[{label:'Спутник',open:click(),select:click(),close:null,before:frame(180,4,''),after:frame()},{label:'Детальные тропы онлайн',open:click(),select:click(),close:null,before:frame(),after:frame(180,4,'')}],
   screenshots:steps.map(({stage})=>({stage,file:`${profile}-satellite-${stage}.png`,bytes:10000,sha256:'b'.repeat(64)})),resources,performance:{layoutShift:0,longestTaskMs:100}};
+ const pending={...frame(180,4,''),imagery:'satellite',target:'eox-bluemarble',state:'loading',base:{committed:'detail',target:'satellite',state:'loading'},resourceSequence:1};
+ const held={schemaVersion:1,limit:64,timeoutMs:8000,observed:1,records:[{requestId:'fetch-image',networkId:'eox-bluemarble',url:resources.requests[0].url,source:'eox-bluemarble',pausedAt:100,resumedAt:null}],pending:1,reason:null,closed:false,errors:[]};
+ const released={...structuredClone(held),pending:0,reason:'capture',closed:true};released.records[0].resumedAt=200;
+ result.preload={kind:'held-real-imagery-requests',before:structuredClone(result.toggles[0].before),pending,after:structuredClone(result.toggles[0].after),held,released,
+  screenshots:['preload-before','preload-pending','preload-committed'].map(stage=>({stage,file:`${profile}-satellite-${stage}.png`,bytes:10000,sha256:'c'.repeat(64)}))};
+ return result;
 }

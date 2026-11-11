@@ -2,13 +2,13 @@ name: Focused map, satellite and offline diagnosis
 
 on:
   push:
-    branches: [diagnostics/map-interactions]
+    branches: [diagnostics/map-interactions, perf/full-site-smoothness-0.4.24]
 
 permissions:
   contents: read
 
 concurrency:
-  group: map-interaction-diagnostics
+  group: map-interaction-diagnostics-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        diagnostic: [map-interactions, offline-safety, satellite-continuity]
+        diagnostic: [map-interactions, offline-safety, satellite-continuity, ui-smoothness, ui-smoothness-cpu]
     steps:
       - name: Check out the diagnostic source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -55,6 +55,8 @@ jobs:
             web/pages-preview/dist/browser-map-interactions-diagnostic.json
             web/pages-preview/dist/browser-offline-safety-diagnostic.json
             web/pages-preview/dist/browser-satellite-continuity-diagnostic.json
+            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            web/pages-preview/dist/browser-ui-smoothness-cpu-diagnostic.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7

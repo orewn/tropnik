@@ -1,13 +1,23 @@
 import json,shutil
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 root=Path(__file__).resolve().parents[1]
 catalog=root.parent/'data/catalog'
 records=json.loads((catalog/'routes.json').read_text())['routes']
+national_path=catalog/'national/routes.json'
+national_records=json.loads(national_path.read_text())['routes'] if national_path.exists() else []
+known_ids={row['id'] for row in records}
+if len(known_ids)!=len(records) or any(row['id'] in known_ids for row in national_records):
+ raise ValueError('National supplement duplicates a source route identity')
+if len({row['id'] for row in national_records})!=len(national_records):
+ raise ValueError('National supplement has duplicate identities')
+records=[*(dict(row,_sourceRoot=catalog) for row in records),*(dict(row,_sourceRoot=catalog/'national') for row in national_records)]
 evidence={r['osmRelationId']:r for r in json.loads((catalog/'verification-evidence.json').read_text())['records']}
 aliases={3748147:'kavkaz-16a',3748250:'kavkaz-16b',11566519:'kavkaz-8a'}
 points={};out=[];active_files=set();target=root/'public/data/imported';target.mkdir(parents=True,exist_ok=True)
 for r in records:
- geometry=json.loads((catalog/r['geometryPath']).read_text())
+ geometry=json.loads((r['_sourceRoot']/r['geometryPath']).read_text())
  lines=[]
  def readgeom(g):
   if g['type']=='LineString':lines.append(g['coordinates'])
@@ -36,7 +46,10 @@ for r in records:
  if e:description=e['summary']+' Геометрия OSM не сверена с полной официальной ниткой.'
  notes=['Проверить актуальный доступ и ограничения у администрации территории.','Оценить технические участки, набор высоты и подготовку группы с подходящим гидом.','Геометрия из открытой базы не является проверенным навигационным треком.']
  if e and e.get('sourceCaution'):notes.insert(0,e['sourceCaution'])
- item={'id':routeid,'regionId':r['regionIds'][0],'regionIds':r['regionIds'],'title':r['title'],'subtitle':('Маршрут '+str(r['ref'])+' · ' if r.get('ref') else '')+'Данные OpenStreetMap','description':description,'distanceKm':published.get('publishedDistanceKm'),'duration':duration,'ascentM':None,'difficulty':'unknown','difficultyLabel':'Сложность не оценена','geometryUrl':'/data/imported/'+geoout.name,'sourceUrl':r['sourceUrl'],'sourceName':'OpenStreetMap','checkedAt':r['retrievedAt'][:10],'publicationStatus':'reference','season':published.get('publishedSeason','Требует проверки'),'notes':notes,'sourceKind':'database',**points[routeid]}
+ region_id=r.get('regionId') or r['regionIds'][0]
+ retrieved_day=datetime.fromisoformat(r['retrievedAt']).astimezone(ZoneInfo('Europe/Moscow')).date().isoformat()
+ item={'id':routeid,'regionId':region_id,'regionIds':r['regionIds'],'title':r['title'],'subtitle':('Маршрут '+str(r['ref'])+' · ' if r.get('ref') else '')+'Данные OpenStreetMap','description':description,'distanceKm':published.get('publishedDistanceKm'),'duration':duration,'ascentM':None,'difficulty':'unknown','difficultyLabel':'Сложность не оценена','geometryUrl':'/data/imported/'+geoout.name,'sourceUrl':r['sourceUrl'],'sourceName':'OpenStreetMap','checkedAt':retrieved_day,'publicationStatus':'reference','season':published.get('publishedSeason','Требует проверки'),'notes':notes,'sourceKind':'database',**points[routeid]}
+ if r.get('territoryIds'):item['territoryIds']=r['territoryIds']
  if e:
   item['officialEvidence']={'url':e.get('officialDescriptionUrl',e['sourceUrl']),'summary':e['summary'],'checkedAt':e['checkedAt'][:10],'scope':e.get('displayScope','Официальное описание, без проверки геометрии')}
   if e.get('operatingStatus') not in [None,'unknown']:

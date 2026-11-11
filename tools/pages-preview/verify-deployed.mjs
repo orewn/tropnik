@@ -62,7 +62,7 @@ assert.equal(verification.pages, build.pages);
 const pages = JSON.parse((await request('page-manifest.json')).text);
 assert.equal(pages.length, build.pages);
 const browser = JSON.parse((await request('browser-verification.json')).text);
-assertBrowserReport(browser,expectedCommit);
+assertBrowserReport(browser,expectedCommit,build.catalogue);
 
 const home = (await request('')).text;
 assert.match(home, /Тропник/);

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {constrainFramedCamera,MapFrameRefit,bindMapFrameRefit} from '../lib/map-framing.ts';
+import {constrainFramedCamera,territoryFrameSelection,MapFrameRefit,bindMapFrameRefit} from '../lib/map-framing.ts';
 import {RUSSIA_BOUNDS,russiaPadding,russiaCamera,constrainRussiaCamera} from '../public/maps/russia-viewport.js';
 
 const territories=JSON.parse(readFileSync(new URL('../lib/territories.generated.json',import.meta.url))).territories;
@@ -88,6 +88,27 @@ function refitHarness(){
  const flush=jobs=>{const pending=[...jobs.values()];jobs.clear();pending.forEach(callback=>callback());};
  return{refit,timers,frames,setAllowed:value=>{allowed=value;},count:()=>refits,flushTimers:()=>flush(timers),flushFrames:()=>flush(frames)};
 }
+
+test('Whale Alley frames the actual Chukotka bounds without inventing a route location',()=>{
+ const source=JSON.parse(readFileSync(new URL('../lib/national-editorial.generated.json',import.meta.url))).routes.find(route=>route.id==='beringia-whale-alley');
+ assert.ok(source);
+ const territory=territories.find(item=>item.id===source.regionId),before=JSON.stringify(source);
+ assert.ok(territory?.bounds[2]>180,'use the real continuous Chukotka bounds');
+ for(const key of ['geometry','geometryUrl','center','bbox'])assert.equal(source[key],undefined);
+ const key=territoryFrameSelection(territory,source),env=refitHarness();
+ assert.ok(key);env.refit.select(key);env.refit.settled();env.flushFrames();
+ assert.equal(env.count(),1,'a source-only card no longer disables territory framing');
+ env.refit.cancel();env.refit.select(territoryFrameSelection(territory,{...source}));env.refit.settled();env.flushFrames();
+ assert.equal(env.count(),1,'a style or component rerender cannot override a manual camera');
+ const withLine={...source,geometryUrl:'/data/fixture-line.geojson'};
+ assert.equal(territoryFrameSelection(territory,withLine),undefined);
+ env.refit.select(territoryFrameSelection(territory,withLine));
+ env.refit.select(key);env.refit.settled();env.flushFrames();
+ assert.equal(env.count(),2,'returning from a source line rearms the territory frame');
+ assert.notEqual(territoryFrameSelection(territory),key,'closing the card is a fresh parent selection');
+ assert.equal(territoryFrameSelection({id:'no-bounds'},source),undefined,'never infer territory bounds from a route description');
+ assert.equal(JSON.stringify(source),before,'the source-only card acquires no coordinates');
+});
 
 test('an animated drawer produces one refit after its height settles, with bounded pending work',()=>{
  const env=refitHarness();env.refit.select('dagestan');

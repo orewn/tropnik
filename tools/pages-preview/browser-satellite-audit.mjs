@@ -4,6 +4,7 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {projectMapPoint,unprojectMapPoint} from './map-projection.mjs';
 import {coastPanPlan,assertCoastPanInput} from './browser-coast-audit.mjs';
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
+import {holdSatelliteImagery} from './browser-satellite-preload.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 export const SATELLITE_REGION='territory-28173009B11091203162490';
@@ -81,6 +82,7 @@ export function satelliteTileContains(tile,[longitude,latitude]){
 export function inspectSatelliteDOM(doc=document){
  const wrap=doc.querySelector('.atlas-wrap'),data=wrap?.dataset||{},credit=wrap?.querySelector('.map-satellite-credit'),r=credit?.getBoundingClientRect(),style=credit&&getComputedStyle(credit);
  return{imagery:data.mapImagery||'',source:data.mapImagerySource||'',target:data.mapImageryTarget||'',state:data.mapImageryState||'',
+  base:{committed:data.mapBaseCommitted||'',target:data.mapBaseTarget||'',state:data.mapBaseState||''},
   credit:{visible:!!r&&r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)!==0,text:credit?.textContent?.trim()||''},
   viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},scrollY,region:new URL(location.href).searchParams.get('region'),status:wrap?.querySelector('.map-message')?.textContent?.trim()||''};
 }
@@ -90,6 +92,30 @@ export function assertSatelliteCameraUnchanged(before,after,context){
  assert.deepEqual(after.rect,before.rect,`${context}: changing imagery resized the map`);
  assert.deepEqual(after.viewport,before.viewport,`${context}: changing imagery changed the viewport/DPR`);
  assert.ok(Math.abs(after.scrollY-before.scrollY)<=1,`${context}: changing imagery scrolled the page`);
+}
+
+export function assertSatellitePreload(preload,network,context){
+ assert.equal(preload?.kind,'held-real-imagery-requests',`${context}: cold preload proof is missing`);
+ const {before,pending,after,held,released,screenshots}=preload;
+ assert.ok(['detail','overview'].includes(before?.base?.committed));
+ assert.equal(before.base.target,before.base.committed);assert.equal(before.base.state,'ready');
+ assertSatelliteCameraUnchanged(before,pending,context+'/pending');assertSatelliteCameraUnchanged(before,after,context+'/committed');
+ assert.equal(pending.base.committed,before.base.committed,`${context}: old ground was removed before imagery was ready`);
+ assert.equal(pending.base.target,'satellite');assert.equal(pending.base.state,'loading');
+ assert.equal(pending.imagery,'satellite');assert.equal(pending.target,'eox-bluemarble');assert.equal(pending.state,'loading');assert.equal(pending.source,'');
+ assert.equal(after.base.committed,'satellite');assert.equal(after.base.target,'satellite');assert.equal(after.base.state,'ready');assert.equal(after.source,'eox-bluemarble');assert.equal(after.state,'ready');
+ assert.equal(held?.limit,64);assert.equal(held.timeoutMs,8000);assert.equal(held.closed,false);assert.equal(held.reason,null);assert.deepEqual(held.errors,[]);
+ assert.ok(held.pending>0&&held.pending<=64);assert.equal(held.records.length,held.pending);assert.equal(held.observed,held.records.length);
+ const captured=satelliteResourcesAt(network,pending.resourceSequence),requests=new Map(captured.requests.map(item=>[item.requestId,item]));
+ for(const record of held.records){
+  assert.equal(record.source,'eox-bluemarble');assert.equal(record.resumedAt,null);
+  const actual=requests.get(record.networkId);assert.ok(actual&&actual.url===record.url&&!actual.finished&&!actual.error,`${context}: paused imagery is not independently observed as pending`);
+ }
+ assert.equal(released?.reason,'capture');assert.equal(released.closed,true);assert.equal(released.pending,0);assert.deepEqual(released.errors,[]);
+ for(const record of held.records){const resumed=released.records.find(item=>item.requestId===record.requestId);assert.ok(resumed&&resumed.resumedAt>=record.pausedAt);}
+ assert.deepEqual(screenshots?.map(item=>item.stage),['preload-before','preload-pending','preload-committed']);
+ for(const shot of screenshots){assert.ok(shot.bytes>1000);assert.match(shot.sha256,/^[a-f0-9]{64}$/);assert.match(shot.file,/^[a-z0-9_.-]+\.png$/);}
+ return preload;
 }
 
 function assertClick(click,input,context){
@@ -130,7 +156,7 @@ export function satellitePerformanceIssues(report,profile){
 
 export function assertSatelliteContinuityAudit(report,profile,engine){
  const input=engine==='leaflet'?'touch':'mouse',context=profile+'/satellite';
- assert.equal(report?.schemaVersion,1,`${context}: satellite continuity evidence is missing`);assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);assert.equal(report.input,input);
+ assert.equal(report?.schemaVersion,2,`${context}: satellite preload/continuity evidence is missing`);assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);assert.equal(report.input,input);
  assert.equal(report.region,SATELLITE_REGION);assert.equal(report.visualReviewRequired,true);assert.deepEqual(report.steps?.map(frame=>frame.stage),STAGES);
  assert.ok(report.resources?.requests.length<=512);assert.equal(report.resources.discardedRequests,0,'Satellite resource proof overflowed its bounded recorder');
  assert.ok(Number.isInteger(report.resources.sequence)&&report.resources.sequence>0);
@@ -148,6 +174,8 @@ export function assertSatelliteContinuityAudit(report,profile,engine){
   assertClick(toggle.open,input,context+'/layers');assertClick(toggle.select,input,context+'/'+toggle.label);if(toggle.close)assertClick(toggle.close,input,context+'/close-layers');
  }
  assertReady(report.toggles[0].after,'eox-bluemarble',report.resources,context+'/initial');
+ assertSatellitePreload(report.preload,report.resources,context+'/preload');
+ assert.deepEqual(report.preload.before,report.toggles[0].before);assert.deepEqual(report.preload.after,report.toggles[0].after);
  assert.equal(report.toggles[0].after.resourcePhase,'enable-satellite');
  const expected=[SATELLITE_DATELINE,SATELLITE_DATELINE,SATELLITE_DATELINE,SATELLITE_WEST,SATELLITE_DATELINE];
  for(const [index,frame] of report.steps.entries()){
@@ -194,7 +222,7 @@ export function assertSatelliteContinuityAudit(report,profile,engine){
  * Its performance interval is never reset between providers or image captures. */
 export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OUTPUT}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,pointerSelector,elementPoint,diagnosticPhase}=helpers;
- const report={schemaVersion:1,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',region:SATELLITE_REGION,passed:false,visualReviewRequired:true,steps:[],pans:[],zooms:[],toggles:[],screenshots:[],startedAt:new Date().toISOString()};
+ const report={schemaVersion:2,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',region:SATELLITE_REGION,passed:false,visualReviewRequired:true,steps:[],pans:[],zooms:[],toggles:[],screenshots:[],startedAt:new Date().toISOString()};
  let currentStage='loading-region';const observer=observeSatelliteResources(cdp,()=>currentStage);
  const save=async()=>{report.resources=observer.snapshot();await mkdir(output,{recursive:true});await writeFile(new URL(`${profile.name}-satellite-continuity.json`,output),JSON.stringify(report,null,2)+'\n');};
  const phase=async name=>{currentStage=name;report.stage=name;await diagnosticPhase(cdp,'satellite-continuity/'+name);};
@@ -216,11 +244,27 @@ export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OU
   },frame=>frame.imagery==='satellite'&&frame.source===source&&frame.target===source&&frame.state==='ready'&&frame.centerTileLoaded&&frame.successfulRequestIds.length>0&&frame.pendingRequestIds.length===0&&frame.failedRequestIds.length===0,20000);
  }
  async function toggle(label){
-  const before=await snapshot(),open=await click('.layer-button');
+  const before=await waitValue(`${profile.name}: current base did not settle before a layer transition`,snapshot,value=>value.base.state==='ready');let gate;
+  if(label==='Спутник'){
+   report.preload={kind:'held-real-imagery-requests',before,screenshots:[await screenshot('preload-before')]};
+   gate=await holdSatelliteImagery(cdp,{match:satelliteResource});
+  }
+  try{
+  const open=await click('.layer-button');
   const point=await waitValue(`${profile.name}: ${label} layer is unavailable`,()=>evaluate(cdp,`(()=>{const buttons=[...document.querySelectorAll('.layer-menu button')],index=buttons.findIndex(item=>item.textContent?.trim()===${JSON.stringify(label)}),element=buttons[index];if(!element||element.disabled)return null;const r=element.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);return{selector:'.layer-menu button:nth-of-type('+(index+1)+')',unobscured:!!hit&&element.contains(hit)};})()`),value=>value?.unobscured);
   const select=await click(point.selector);let close=null;if(await elementPoint(cdp,'.layer-menu'))close=await click('.layer-button');
+  if(gate){
+   await waitValue(`${profile.name}: preload did not issue bounded real imagery requests`,()=>gate.snapshot(),value=>value.pending>0&&!value.closed,4000);
+   const pending=await snapshot();report.preload.held=gate.snapshot();pending.resourceSequence=observer.snapshot().sequence;report.preload.pending=pending;
+   report.preload.screenshots.push(await screenshot('preload-pending'));
+   report.preload.released=await gate.release('capture');
+   assert.equal(report.preload.released.reason,'capture',`${profile.name}: imagery preload gate exceeded its bounds`);
+   assert.deepEqual(report.preload.released.errors,[]);
+  }
   const after=label==='Спутник'?await ready('eox-bluemarble'):await waitValue(`${profile.name}: satellite mode did not exit`,snapshot,state=>state.imagery===''&&state.source===''&&state.target===''&&state.state==='');
+  if(gate){report.preload.after=after;report.preload.screenshots.push(await screenshot('preload-committed'));}
   assertSatelliteCameraUnchanged(before,after,profile.name+'/satellite/'+label);report.toggles.push({label,open,select,close,before,after});return after;
+  }finally{if(gate){const released=await gate.release('error');report.preload.released??=released;}}
  }
  async function panTo(coordinate,stage){
   let gestures=0;
@@ -242,11 +286,14 @@ export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OU
  async function zoom(direction){
   const before=await snapshot(),label=direction>0?'Увеличить масштаб':'Уменьшить масштаб',press=await click(`.map-controls button[aria-label="${label}"]`),after=await snapshot();report.zooms.push({direction,click:press,before,after});
  }
+ async function screenshot(stage){
+  const image=await cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false}),bytes=Buffer.from(image.data,'base64'),file=`${profile.name}-satellite-${stage}.png`;
+  await mkdir(output,{recursive:true});await writeFile(new URL(file,output),bytes);return{stage,file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
+ }
  async function capture(stage,coordinate,source){
   const frame=source?await ready(source):await snapshot();
   if(coordinate){const point=projectMapPoint(coordinate,frame.camera,frame.rect);Object.assign(frame,{coordinate,centerErrorPx:Math.hypot(frame.rect.left+(frame.camera.centerX??frame.rect.width/2)-point.x,frame.rect.top+(frame.camera.centerY??frame.rect.height/2)-point.y)});}
-  report.steps.push({stage,...frame});const image=await cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false}),bytes=Buffer.from(image.data,'base64'),file=`${profile.name}-satellite-${stage}.png`;
-  await mkdir(output,{recursive:true});await writeFile(new URL(file,output),bytes);report.screenshots.push({stage,file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});await save();
+  report.steps.push({stage,...frame});report.screenshots.push(await screenshot(stage));await save();
  }
  try{
   await cdp.call('Network.enable');const url=new URL(helpers.url);url.searchParams.set('region',SATELLITE_REGION);

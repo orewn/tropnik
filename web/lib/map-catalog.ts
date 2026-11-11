@@ -14,7 +14,7 @@ export function filterMapTrails<T extends Pick<Trail, 'id' | 'title' | 'subtitle
 ): T[] {
   const query = filters.query.trim().toLocaleLowerCase('ru').replaceAll('ё', 'е');
   return trails.filter(trail =>
-    `${trail.title} ${trail.subtitle}`.toLocaleLowerCase('ru').replaceAll('ё', 'е').includes(query)
+    (!query || `${trail.title} ${trail.subtitle}`.toLocaleLowerCase('ru').replaceAll('ё', 'е').includes(query))
     && (filters.difficulty === 'all' || trail.difficulty === filters.difficulty)
     && (!filters.onlySaved || filters.savedIds.has(trail.id))
     && (filters.duration === 'any' || trail.duration !== null && (trail.duration.includes('ч') || trail.duration.includes('мин'))));

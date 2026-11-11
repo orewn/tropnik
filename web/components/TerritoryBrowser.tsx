@@ -1,26 +1,24 @@
 'use client';
-import {useMemo, useState} from 'react';
+import {memo, useMemo, useState} from 'react';
 import {regions, routeCountLabel, type Trail} from '@/lib/content';
-import {territories, trailBelongsToRegion, type MapRegion} from '@/lib/territories';
+import {territories, type MapRegion} from '@/lib/territories';
 import {preloadTerrain} from '@/lib/map-preload';
 import {ArrowUpRight, MagnifyingGlass, CheckCircle} from './TropnikIcons';
 import {RegionArtwork} from './RegionArtwork';
 
 const searchableRegions = [...regions, ...territories];
+const regionSearchText = new Map(searchableRegions.map(region => [region.id, `${region.name} ${region.terrain}`.toLocaleLowerCase('ru').replaceAll('ё', 'е')]));
 
-export function TerritoryBrowser({query, catalog, onSelect, onClear}: {
-  query: string; catalog: Trail[]; onSelect: (region: MapRegion) => void; onClear: () => void;
+export const TerritoryBrowser = memo(function TerritoryBrowser({query, catalogByRegion, onSelect, onClear}: {
+  query: string; catalogByRegion: ReadonlyMap<string,readonly Trail[]>; onSelect: (region: MapRegion) => void; onClear: () => void;
 }) {
   const [mode, setMode] = useState<'directions' | 'territories'>('directions');
   const [page, setPage] = useState({key: '', limit: 18});
   const normalized = useMemo(() => query.trim().toLocaleLowerCase('ru').replaceAll('ё', 'е'), [query]);
   const all = mode === 'territories' || !!normalized;
-  const choices = useMemo(() => (normalized ? searchableRegions : all ? territories : regions).filter(item =>
-    `${item.name} ${item.terrain}`.toLocaleLowerCase('ru').replaceAll('ё', 'е').includes(normalized)), [all, normalized]);
-  const routeCounts = useMemo(() => new Map(searchableRegions.map(item => [
-    item.id,
-    catalog.reduce((count, trail) => count + Number(trailBelongsToRegion(trail, item)), 0),
-  ])), [catalog]);
+  const choices = useMemo(() => normalized
+    ? searchableRegions.filter(item => regionSearchText.get(item.id)!.includes(normalized))
+    : all ? territories : regions, [all, normalized]);
   const pageKey = `${mode}:${normalized}`;
   const limit = page.key === pageKey ? page.limit : 18;
   return <>
@@ -32,7 +30,7 @@ export function TerritoryBrowser({query, catalog, onSelect, onClear}: {
     {all && !normalized && <p className="territory-browser-note">Ищите по названию или нажмите на область карты.</p>}
     <div className={`region-list${all ? ' territory-list' : ''}`}>
       {choices.slice(0, limit).map(item => {
-        const count = routeCounts.get(item.id) ?? 0;
+        const count = catalogByRegion.get(item.id)?.length ?? 0;
         const warm = () => {
           const connection = (navigator as Navigator & {connection?: {saveData?: boolean; effectiveType?: string}}).connection;
           if (item.id === 'krasnodar' && !connection?.saveData && !/(?:^|-)2g$/.test(connection?.effectiveType || '')) void preloadTerrain();
@@ -48,4 +46,4 @@ export function TerritoryBrowser({query, catalog, onSelect, onClear}: {
     {!choices.length && <div className="small-empty"><MagnifyingGlass size={25}/><h3>Не нашли такую территорию</h3><p>Попробуйте другое название: например, «Дагестан» или «Тверская область».</p><button type="button" className="text-link" onClick={onClear}>Очистить поиск</button></div>}
     <div className="together-note"><div className="quorum-dots"><span/><span/><span/><span className="guide-dot"><CheckCircle size={13} weight="fill"/></span></div><div><strong>Вместе с гидом</strong><p>От четырёх человек, включая гида. Для сложных маршрутов условия строже.</p></div></div>
   </>;
-}
+});

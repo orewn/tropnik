@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {satelliteResource,observeSatelliteResources,successfulSatelliteResources,satelliteResourcesAt,satelliteTileContains,assertSatelliteContinuityAudit,assertSatelliteCameraUnchanged,satellitePerformanceIssues} from '../browser-satellite-audit.mjs';
+import {satelliteResource,observeSatelliteResources,successfulSatelliteResources,satelliteResourcesAt,satelliteTileContains,assertSatelliteContinuityAudit,assertSatelliteCameraUnchanged,assertSatellitePreload,satellitePerformanceIssues} from '../browser-satellite-audit.mjs';
 import {projectMapPoint} from '../map-projection.mjs';
 import {coastPanPlan} from '../browser-coast-audit.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
@@ -93,8 +93,29 @@ test('capture sequence derives pending/errors from raw events and does not apply
  assert.equal(successfulSatelliteResources(satelliteResourcesAt(delayed.resources,9),'eox-bluemarble').some(item=>item.requestId==='eox-bluemarble'),false,'A transfer completed later cannot certify earlier imagery');
  assert.throws(()=>assertSatelliteContinuityAudit(delayed,delayed.profile,delayed.engine));
  const eastOnly=make();eastOnly.resources.requests.splice(1,1);eastOnly.resources.observedRequests--;
- for(const frame of [...eastOnly.steps,eastOnly.toggles[0].after])if(frame.successfulRequestIds)frame.successfulRequestIds=frame.successfulRequestIds.filter(id=>id!=='eox-bluemarble-west');
+ for(const frame of [...eastOnly.steps,eastOnly.toggles[0].after,eastOnly.preload.after])if(frame.successfulRequestIds)frame.successfulRequestIds=frame.successfulRequestIds.filter(id=>id!=='eox-bluemarble-west');
  assert.throws(()=>assertSatelliteContinuityAudit(eastOnly,eastOnly.profile,eastOnly.engine),/both dateline columns/);
+});
+
+test('preload acceptance rejects early ground removal, stale/finished requests, unbounded holds and missing intermediate images',()=>{
+ const make=()=>satelliteFixture('desktop-webgl','maplibre');
+ const valid=make();assert.equal(assertSatellitePreload(valid.preload,valid.resources,'preload'),valid.preload);
+ const changes=[
+  report=>report.preload.pending.base.committed='satellite',
+  report=>report.preload.pending.base.state='ready',
+  report=>report.preload.pending.source='eox-bluemarble',
+  report=>report.preload.pending.camera.zoom+=1,
+  report=>report.preload.pending.resourceSequence=3,
+  report=>report.preload.held.records[0].networkId='invented',
+  report=>report.preload.held.records[0].resumedAt=150,
+  report=>report.preload.held.closed=true,
+  report=>report.preload.held.limit=1000,
+  report=>report.preload.released.reason='timeout',
+  report=>report.preload.released.errors=['resume failed'],
+  report=>report.preload.released.records[0].resumedAt=null,
+  report=>report.preload.screenshots.splice(1,1),
+ ];
+ for(const change of changes){const report=make();change(report);assert.throws(()=>assertSatellitePreload(report.preload,report.resources,'preload'));}
 });
 
 test('the native pan planner uses the nearest dateline world copy without writing map coordinates',()=>{

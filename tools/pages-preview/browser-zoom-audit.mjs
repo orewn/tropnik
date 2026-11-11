@@ -5,7 +5,8 @@ import {CLOSE_TRAIL_FIXTURE,assertCloseTrailAudit,assertNativeBurstEventOrder,as
 import {dispatchSourceEndPan,sourceEndPanPlans,sourceEndsAreFramed} from './browser-source-end-pan.mjs';
 import {traceDesktopSelection,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES} from './browser-trace.mjs';
 import {runCoastAudit} from './browser-coast-audit.mjs';
-import {runSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
+import {runSatelliteContinuityAudit} from './browser-satellite-audit.mjs';
+import {performanceBudgetIssues} from './browser-smoothness.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -17,6 +18,7 @@ export function browserAuditRunPolicy(value){
  if(value===undefined||value==='')return{diagnostic:null,reportFile:'browser-verification.json',profiles:null};
  if(value==='offline-safety')return{diagnostic:value,reportFile:'browser-offline-safety-diagnostic.json',profiles:[]};
  if(value==='satellite-continuity')return{diagnostic:value,reportFile:'browser-satellite-continuity-diagnostic.json',profiles:['android-portrait','desktop-webgl']};
+ if(value==='ui-smoothness'||value==='ui-smoothness-cpu')return{diagnostic:value,reportFile:`browser-${value}-diagnostic.json`,profiles:value==='ui-smoothness-cpu'?['android-portrait']:['android-portrait','desktop-webgl']};
  assert.ok(value==='terrain-close'||value==='map-interactions','Unknown TROPNIK_BROWSER_DIAGNOSTIC mode');
  return{diagnostic:value,reportFile:value==='terrain-close'?'browser-terrain-diagnostic.json':'browser-map-interactions-diagnostic.json',profiles:['desktop-webgl']};
 }
@@ -581,7 +583,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   report.performanceIntervals={modes:modePerformance,sourceEnds:edges.performance,satellite:report.satelliteContinuity.performance};
   const intervals=Object.values(report.performanceIntervals);
   report.performance={layoutShift:Math.max(...intervals.map(value=>value.layoutShift)),longestTaskMs:Math.max(...intervals.map(value=>value.longestTaskMs))};
-  helpers.performanceIssues?.push(...satellitePerformanceIssues(report.satelliteContinuity,profile));
+  for(const [phase,value]of Object.entries(report.performanceIntervals))helpers.performanceIssues?.push(...performanceBudgetIssues(value,profile,`zoom-${phase}`));
   report.geometryPassed=true;report.completedAt=new Date().toISOString();await save();return report;
  }catch(error){report.error=error.stack||String(error);if(error.settleDiagnostics)report.settleDiagnostics=error.settleDiagnostics;if(diagnostic){report.status='failed';if(helpers.performanceDiagnostics)try{report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);}catch{} }await save();throw error;}
  finally{forget();forgetFinished();forgetFailed();terrainResources?.dispose();}

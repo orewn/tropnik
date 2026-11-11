@@ -1,11 +1,12 @@
 'use client';
 
-import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
+import {lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
 import {Header} from './Header';
 import {Footer} from './Footer';
 import {ArrowRight, BookmarkSimple, DownloadSimple, Flag, MapPin, Path, Plus, Trash, X} from './TropnikIcons';
 import type {PlannerMapPoint} from '@/lib/map-types';
-import {regions, trails, trailById, regionById, type Trail} from '@/lib/content';
+import {regions, trails, trailById, type Trail} from '@/lib/content';
+import {mapRegionById,territories,createTrailRegionIndex} from '@/lib/territories';
 import {loadPublicJSON} from '@/lib/map-preload';
 import connectionData from '@/lib/trail-connections.generated.json';
 import {getTrailConnections, getTrailEndpoints, normalizeTrailGeometry, planTrailSequence, preparePlanGeometry, resolvePreparedPlanGeometry, type CompositePlanOptions, type TrailConnection, type TrailConnectionIndex, type TrailEndpoint} from '@/lib/trail-connections';
@@ -15,6 +16,16 @@ import styles from './HikePlanner.module.css';
 const PlannerAtlas = lazy(() => import('./Atlas2D').then(module => ({default: module.Atlas2D})));
 const index = connectionData as unknown as TrailConnectionIndex;
 const catalogue = trails.filter(trail => index.routes[trail.id]);
+const catalogueByRegion = createTrailRegionIndex(catalogue);
+const catalogueRegions = [...regions,...territories].filter(region => catalogueByRegion.has(region.id));
+const catalogueSearchText = new Map(catalogue.map(trail => [trail.id, `${trail.title} ${trail.subtitle} ${trail.id}`.toLocaleLowerCase('ru')]));
+const connectionById = new Map(index.connections.map(connection => [connection.id, connection]));
+const connectionCounts = new Map<string, number>();
+for (const connection of index.connections) {
+  if (connection.kind === 'nearby' && connection.gapM > index.parameters.nearbyMeters) continue;
+  connectionCounts.set(connection.trailA, (connectionCounts.get(connection.trailA) ?? 0) + 1);
+  if (connection.trailB !== connection.trailA) connectionCounts.set(connection.trailB, (connectionCounts.get(connection.trailB) ?? 0) + 1);
+}
 const storageKey = 'tropnik-hike-plans-v1';
 const storageEvent = 'tropnik-hike-plans-change';
 const colors = ['#244d3c', '#b16c38', '#486c97', '#785781'];
@@ -29,11 +40,9 @@ function endpointById(id: string): TrailEndpoint | undefined {
   const [trailId, suffix] = id.split('@'), node = Number(suffix), value = index.routes[trailId]?.nodes[node];
   return value ? {id, node, point: [value[0], value[1]], component: value[2], degree: value[3], kind: value[3] === 1 ? 'terminal' : value[3] > 2 ? 'junction' : 'loop'} : undefined;
 }
-function endpointOptions(trailId: string | undefined, selected: string | undefined): TrailEndpoint[] {
-  if (!trailId) return []; const points = getTrailEndpoints(index, trailId);
+function endpointOptions(points: readonly TrailEndpoint[], selected: string | undefined): readonly TrailEndpoint[] {
   const current = selected && endpointById(selected);
-  if (current && !points.some(point => point.id === current.id)) points.push(current);
-  return points;
+  return current && !points.some(point => point.id === current.id) ? [...points, current] : points;
 }
 const message = (error: unknown) => error instanceof Error ? error.message : 'Не удалось выполнить действие. Попробуйте ещё раз.';
 function connectionLabel(connection: TrailConnection) {
@@ -54,10 +63,21 @@ function download(content: string, filename: string, type: string) {
 }
 type Picker = {stage: number; role: 'start' | 'finish' | 'via'};
 
+type RouteChoice = {points: TrailEndpoint[]; connections: ReturnType<typeof getTrailConnections>};
+function routeGeometryKey(stages: HikeDraft['stages']): string {
+  return [...new Set(stages.map(stage => stage.trailId))].sort().join('|');
+}
+function prepareRouteChoices(key: string): Record<string, RouteChoice> {
+  return Object.fromEntries((key ? key.split('|') : []).map(id => [id, {
+    points: getTrailEndpoints(index, id), connections: getTrailConnections(index, id),
+  }]));
+}
+
 export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
   const [draft, setDraft] = useState<HikeDraft>(() => createHikeDraft(index, initialTrailId && Object.hasOwn(index.routes, initialTrailId) ? initialTrailId : undefined));
   const [query, setQuery] = useState(''), [regionFilter, setRegionFilter] = useState('');
   const [relatedQuery, setRelatedQuery] = useState(''), [showNearby, setShowNearby] = useState(true);
+  const deferredQuery = useDeferredValue(query), deferredRelatedQuery = useDeferredValue(relatedQuery);
   const [connectionChoice, setConnectionChoice] = useState<Record<string, string>>({});
   const [geometryResult, setGeometryResult] = useState<{key: string; values: Record<string, unknown>; error: string}>({key: '', values: emptyGeometry, error: ''});
   const [retry, setRetry] = useState(0);
@@ -69,7 +89,7 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
   const saved = useMemo(() => {
     try {const items: unknown = JSON.parse(savedRaw); return Array.isArray(items) ? items.filter(item => item && typeof item === 'object' && typeof item.id === 'string' && typeof item.name === 'string') as HikeDraft[] : [];} catch {return [];}
   }, [savedRaw]);
-  const trailIds = draft.stages.map(stage => stage.trailId), geometryKey = [...new Set(trailIds)].sort().join('|');
+  const trailIds = draft.stages.map(stage => stage.trailId), geometryKey = routeGeometryKey(draft.stages);
   const loadKey = `${geometryKey}:${retry}`;
   const loading = !!geometryKey && geometryResult.key !== loadKey;
   const loadedGeometry = geometryResult.key === loadKey ? geometryResult.values : emptyGeometry;
@@ -92,23 +112,31 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
   const gpxExport = useMemo(() => getHikeGpxExportState(draft, plan, resolved), [draft, plan, resolved]);
   const first = draft.stages[0], last = draft.stages[draft.stages.length - 1];
   const firstId = first?.trailId, lastId = last?.trailId;
-  const startPoints = useMemo(() => endpointOptions(firstId, draft.start), [firstId, draft.start]);
-  const finishPoints = useMemo(() => endpointOptions(lastId, draft.finish), [lastId, draft.finish]);
+  // Topology choices depend on selected routes, not names, notes, days, or cursor input.
+  const routeChoices = useMemo(() => prepareRouteChoices(geometryKey), [geometryKey]);
+  const startPoints = useMemo(() => endpointOptions(firstId ? routeChoices[firstId]?.points ?? [] : [], draft.start), [firstId, draft.start, routeChoices]);
+  const finishPoints = useMemo(() => endpointOptions(lastId ? routeChoices[lastId]?.points ?? [] : [], draft.finish), [lastId, draft.finish, routeChoices]);
+  const stageChoices = useMemo(() => pathOptions.trailIds.map((id, position) => ({
+    points: routeChoices[id]?.points ?? [],
+    join: position ? connectionById.get(pathOptions.connectionIds[position - 1]) : undefined,
+    alternatives: position ? (routeChoices[pathOptions.trailIds[position - 1]]?.connections ?? []).filter(candidate => candidate.otherTrailId === id) : [],
+  })), [pathOptions, routeChoices]);
   const suggestions = useMemo(() => {
-    const search = query.trim().toLocaleLowerCase('ru');
-    return catalogue.filter(trail => (!regionFilter || trail.regionId === regionFilter || trail.regionIds?.includes(regionFilter)) && (!search || `${trail.title} ${trail.subtitle} ${trail.id}`.toLocaleLowerCase('ru').includes(search))).slice(0, 12);
-  }, [query, regionFilter]);
+    const search = deferredQuery.trim().toLocaleLowerCase('ru');
+    return (regionFilter ? catalogueByRegion.get(regionFilter)??[] : catalogue).filter(trail => !search || catalogueSearchText.get(trail.id)!.includes(search)).slice(0, 12);
+  }, [deferredQuery, regionFilter]);
   const related = useMemo(() => {
     if (!lastId) return [];
     const groups = new Map<string, ReturnType<typeof getTrailConnections>>();
-    for (const candidate of getTrailConnections(index, lastId)) {
+    const search = deferredRelatedQuery.trim().toLocaleLowerCase('ru');
+    for (const candidate of routeChoices[lastId]?.connections ?? []) {
       if (!showNearby && !candidate.connection.sourceVertex) continue;
       const trail = trailById(candidate.otherTrailId); if (!trail) continue;
-      if (relatedQuery && !`${trail.title} ${trail.subtitle}`.toLocaleLowerCase('ru').includes(relatedQuery.toLocaleLowerCase('ru'))) continue;
+      if (search && !catalogueSearchText.get(trail.id)?.includes(search)) continue;
       const list = groups.get(trail.id) || []; list.push(candidate); groups.set(trail.id, list);
     }
     return [...groups.entries()].map(([id, choices]) => ({trail: trailById(id)!, choices}));
-  }, [lastId, relatedQuery, showNearby]);
+  }, [lastId, deferredRelatedQuery, showNearby, routeChoices]);
 
   const update = useCallback((change: Partial<HikeDraft>) => {setDraft(current => ({...current, ...change, updatedAt: new Date().toISOString()})); setNotice('');}, []);
   function startWith(trailId: string) {setDraft(createHikeDraft(index, trailId)); setPicker(null); setNotice('Выберите начало и конец пути. Затем можно добавить связанную тропу.');}
@@ -187,17 +215,17 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
       if (node) result.push({id: `${kind}-${id}-${result.length}`, point: [node[0], node[1]], kind, label: `${label}: ${coords(node)}`});
     };
     pathOptions.connectionIds.forEach((connectionId, i) => {
-      const connection = index.connections.find(item => item.id === connectionId); if (!connection) return;
+      const connection = connectionById.get(connectionId); if (!connection) return;
       result.push({id: `join-${i}`, point: connection.a.point, kind: 'join', label: `Стык этапов ${i + 1} и ${i + 2}: ${connectionLabel(connection)}`});
       if (connection.gapM > 0) result.push({id: `join-end-${i}`, point: connection.b.point, kind: 'join', label: `Другой конец перехода: ${Math.round(connection.gapM)} м по прямой`});
     });
     pathOptions.trailIds.forEach((_id, i) => (pathOptions.via?.[i] || []).forEach(id => add(id, 'via', `Через, этап ${i + 1}`)));
     add(pathOptions.start, 'start', 'Старт'); add(pathOptions.finish, 'finish', 'Финиш');
-    if (picker && pathOptions.trailIds[picker.stage]) for (const endpoint of getTrailEndpoints(index, pathOptions.trailIds[picker.stage])) {
+    if (picker && stageChoices[picker.stage]) for (const endpoint of stageChoices[picker.stage].points) {
       result.push({id: `choice-${endpoint.id}`, point: endpoint.point, kind: 'choice', label: `Выбрать: ${pointLabel(endpoint)}`, onSelect: () => choosePoint(endpoint.id, picker)});
     }
     return result;
-  }, [pathOptions, picker, choosePoint]);
+  }, [pathOptions, picker, choosePoint, stageChoices]);
   const mapTrail = useMemo<Trail | undefined>(() => {
     const source = firstId && trailById(firstId); if (!source || !loadedGeometry[source.id]) return;
     const sourceIds = picker ? [plan.trailIds[picker.stage]] : resolved.features.length ? [] : plan.trailIds;
@@ -243,8 +271,8 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
           <div className={styles.sectionHeading}><h2 id="stages-heading">{first ? 'Этапы похода' : 'С какой тропы начнём?'}</h2><span>{first ? `${draft.stages.length} / 20` : `${index.stats.geometryRoutes} с линией`}</span></div>
           {!first ? <>
             <label className={styles.field}>Найти тропу<input value={query} onChange={event => setQuery(event.target.value)} placeholder="Название или место"/></label>
-            <label className={styles.field}>Направление<select value={regionFilter} onChange={event => setRegionFilter(event.target.value)}><option value="">Все направления</option>{regions.map(region => <option value={region.id} key={region.id}>{region.name}</option>)}</select></label>
-            <div className={styles.catalogue}>{suggestions.map(trail => <button type="button" key={trail.id} onClick={() => startWith(trail.id)}><span><b>{trail.title}</b><small>{regionById(trail.regionId)?.name} · стыков: {getTrailConnections(index, trail.id).length}</small></span><ArrowRight size={20}/></button>)}</div>
+            <label className={styles.field}>Место похода<select value={regionFilter} onChange={event => setRegionFilter(event.target.value)}><option value="">Все направления и территории</option>{catalogueRegions.map(region => <option value={region.id} key={region.id}>{region.name}</option>)}</select></label>
+            <div className={styles.catalogue} aria-busy={query !== deferredQuery}>{suggestions.map(trail => <button type="button" key={trail.id} onClick={() => startWith(trail.id)}><span><b>{trail.title}</b><small>{mapRegionById(trail.regionId)?.name} · стыков: {connectionCounts.get(trail.id) ?? 0}</small></span><ArrowRight size={20}/></button>)}</div>
             {!suggestions.length && <p className={styles.empty}>Подходящих троп с геометрией нет. Измените запрос или направление.</p>}
             <p className={styles.help}>{index.stats.missingGeometryRoutes} {plural(index.stats.missingGeometryRoutes, ['карточка', 'карточки', 'карточек'])} пока без линии. Их нельзя использовать для расчёта пути.</p>
           </> : <>
@@ -252,9 +280,8 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
             <button type="button" className={styles.mapPick} onClick={() => openPicker({stage: 0, role: 'start'})}><MapPin size={17}/>Выбрать старт на карте</button>
             <ol className={styles.stages}>
               {draft.stages.map((stage, i) => {
-                const trail = trailById(stage.trailId)!, points = getTrailEndpoints(index, stage.trailId);
-                const join = i ? index.connections.find(connection => connection.id === stage.entryConnectionId) : undefined;
-                const alternatives = i ? getTrailConnections(index, draft.stages[i - 1].trailId).filter(candidate => candidate.otherTrailId === stage.trailId) : [];
+                const trail = trailById(stage.trailId)!;
+                const {points, join, alternatives} = stageChoices[i];
                 return <li key={`${i}-${stage.trailId}`} className={styles.stage}>
                   {join && <div className={styles.join}><span>{connectionLabel(join)}</span>{alternatives.length > 1 && <select aria-label={`Стык перед этапом ${i + 1}`} value={stage.entryConnectionId} onChange={event => update({stages: draft.stages.map((item, n) => n === i ? {...item, entryConnectionId: event.target.value} : item)})}>{alternatives.map((candidate, n) => <option key={candidate.connection.id} value={candidate.connection.id}>{n + 1}. {connectionLabel(candidate.connection)} · {coords(candidate.from.point)}</option>)}</select>}{!join.sourceVertex && <small>Переход не подтверждён. Проверьте его отдельно.</small>}</div>}
                   <div className={styles.stageTitle}><span className={styles.number} style={{background: colors[i % colors.length]}}>{i + 1}</span><h3><a href={`/routes/${trail.id}`}>{trail.title}</a></h3><button type="button" aria-label={`Убрать этап ${i + 1} и следующие`} title="Убрать этот и следующие этапы" onClick={() => removeFrom(i)}><Trash size={17}/></button></div>
@@ -279,7 +306,7 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
           <div className={styles.mapHeading}><h2>Ваш путь на карте</h2><span>{picker ? 'Исходная тропа и точки выбора' : resolved.features.length ? 'Выбранные участки' : first ? 'Исходные линии' : 'Выберите тропу или откройте пример'}</span></div>
           {picker && <div className={styles.picker} role="status"><span>Нажмите «+» на карте: {picker.role === 'start' ? 'старт' : picker.role === 'finish' ? 'финиш' : 'обязательная точка'} этапа {picker.stage + 1}</span><button type="button" onClick={() => setPicker(null)}>Отмена</button></div>}
           <div className={`explore-layout ${styles.map}`}>
-            <Suspense fallback={<div className={styles.mapLoading}>Открываем карту…</div>}><PlannerAtlas planning region={first ? regionById(trailById(first.trailId)!.regionId) : undefined} trail={mapTrail} planPoints={mapPoints} onRegion={noRegionChange} onMapNote={setMapNote}/></Suspense>
+            <Suspense fallback={<div className={styles.mapLoading}>Открываем карту…</div>}><PlannerAtlas planning region={first ? mapRegionById(trailById(first.trailId)!.regionId) : undefined} trail={mapTrail} planPoints={mapPoints} onRegion={noRegionChange} onMapNote={setMapNote}/></Suspense>
           </div>
           <div className={styles.mapCaption}><span><i className={styles.startDot}/>Старт</span><span><i className={styles.finishDot}/>Финиш</span><span><i className={styles.joinDot}/>Стык</span><span>Разрывы не соединяются прямой</span></div>
           {mapNote && <div className={styles.mapNote} role="status"><span>{mapNote}</span><button type="button" aria-label="Закрыть сообщение карты" onClick={() => setMapNote('')}><X size={18}/></button></div>}
@@ -290,11 +317,11 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
           <div className={styles.sectionHeading}><div><h2 id="connections-heading">{last ? 'Продолжить поход' : 'Как соединяются тропы'}</h2>{last && <p>Связи с тропой «{trailById(last.trailId)?.title}»</p>}</div><Path size={24}/></div>
           {!last ? <div className={styles.explanation}><p><b>Общая точка или участок.</b> Выберите место, где перейдёте с одной тропы на другую.</p><p><b>Пересечение линий или близость.</b> Конструктор покажет кандидата и оставит неподтверждённый переход отдельным разрывом.</p><p>Километраж считается по выбранным участкам. Условия доступа, переправы и состояние пути требуют отдельной проверки.</p></div> : <>
             <div className={styles.connectionFilters}><input aria-label="Поиск связанных троп" value={relatedQuery} onChange={event => setRelatedQuery(event.target.value)} placeholder="Поиск среди связанных троп"/><label><input type="checkbox" checked={showNearby} onChange={event => setShowNearby(event.target.checked)}/>Показывать переходы без подтверждённого стыка</label></div>
-            <div className={styles.relatedList}>{related.slice(0, 16).map(({trail, choices}) => {
+            <div className={styles.relatedList} aria-busy={relatedQuery !== deferredRelatedQuery}>{related.slice(0, 16).map(({trail, choices}) => {
               const selected = choices.find(candidate => candidate.connection.id === connectionChoice[trail.id]) || choices[0];
               return <article key={trail.id} className={styles.relatedCard}>
                 <span className={selected.connection.sourceVertex ? styles.connectionBadge : styles.gapBadge}>{connectionLabel(selected.connection)}</span>
-                <h3>{trail.title}</h3><p>{trail.subtitle || regionById(trail.regionId)?.name}</p>
+                <h3>{trail.title}</h3><p>{trail.subtitle || mapRegionById(trail.regionId)?.name}</p>
                 {choices.length > 1 && <label>Точка перехода<select aria-label={`Точка перехода на ${trail.title}`} value={selected.connection.id} onChange={event => setConnectionChoice(current => ({...current, [trail.id]: event.target.value}))}>{choices.map((candidate, n) => <option key={candidate.connection.id} value={candidate.connection.id}>{n + 1}. {connectionLabel(candidate.connection)} · {coords(candidate.from.point)}</option>)}</select></label>}
                 {!selected.connection.sourceVertex && <small>{selected.connection.kind === 'nearby' ? 'Длина и проходимость перехода неизвестны.' : 'Линии могут проходить на разных уровнях.'}</small>}
                 <button type="button" className="button secondary" disabled={draft.stages.length >= 20} onClick={() => addTrail(trail.id, selected.connection.id)}><Plus size={17}/>{trailIds.includes(trail.id) ? 'Добавить повторный этап' : 'Добавить этап'}</button>

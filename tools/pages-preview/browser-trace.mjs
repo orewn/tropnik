@@ -28,8 +28,12 @@ export function browserTraceEnabled(value,diagnostic=null){
  * counter itself is still reset only by the existing audit phase boundaries. */
 export function recordBrowserLongTask(target,task){
  const perf=target.__tropnikPerf;
- perf.longest=Math.max(perf.longest,task.duration);
- if(!perf.peakLongTask||task.duration>perf.peakLongTask.duration)perf.peakLongTask=task;
+ // Delivery is asynchronous. Preserve a startup/previous-window task in the
+ // diagnostic ring without attributing it to a newly reset interaction.
+ if(task.startTime>=(target.__tropnikPerfStart??0)){
+  perf.longest=Math.max(perf.longest,task.duration);
+  if(!perf.peakLongTask||task.duration>perf.peakLongTask.duration)perf.peakLongTask=task;
+ }
  target.__tropnikLongTasks.push(task);
  if(target.__tropnikLongTasks.length>32)target.__tropnikLongTasks.shift();
 }

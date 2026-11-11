@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       run_instrumentation:
-        description: 'Run seven device scenarios on the exact universal APK'
+        description: 'Run eight device scenarios on the exact universal APK'
         type: boolean
         required: false
         default: false

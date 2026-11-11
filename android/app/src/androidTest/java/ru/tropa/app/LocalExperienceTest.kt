@@ -52,6 +52,34 @@ import java.util.concurrent.TimeUnit
 class LocalExperienceTest {
     @get:Rule val app = createAndroidComposeRule<MainActivity>()
 
+    @Test fun nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute() {
+        val catalogue = Catalog.load(app.activity)
+        val route = catalogue.referenceRoutes().first { it.regionId.startsWith("territory-") && it.geometryAsset != null }
+        val territory = requireNotNull(catalogue.region(route.regionId))
+        assertTrue(territory.territory)
+        readyMap()
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("catalog_territories"))
+        app.onNodeWithTag("catalog_territories").performClick()
+        app.onNodeWithTag("catalog_territories").assertIsSelected()
+        tapRegionMarker(territory.id, "catalog-national-map")
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_${route.id}"))
+        app.onNodeWithTag("route_${route.id}").performClick()
+        app.onNodeWithTag("route_detail").assertExists()
+        app.onNodeWithText(route.title).assertExists()
+        screenshot("catalog-national-route")
+        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("save_route"))
+        app.onNodeWithTag("save_route").assertIsEnabled().performClick()
+        app.waitUntil(timeoutMillis = 10_000) {
+            app.onAllNodes(hasTestTag("save_route") and hasText("Сохранено · убрать")).fetchSemanticsNodes().isNotEmpty()
+        }
+        app.onNodeWithTag("go_back").performClick()
+        app.onNodeWithTag("explore_list").assertExists()
+        app.onNodeWithTag("go_back").performClick()
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("catalog_territories"))
+        app.onNodeWithTag("catalog_territories").assertIsSelected()
+        screenshot("catalog-national-territories")
+    }
+
     @Test fun browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp() {
         app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("open_planner"))
         app.onNodeWithTag("open_planner").performClick()
@@ -125,7 +153,7 @@ class LocalExperienceTest {
         return mapView to map
     }
 
-    private fun tapRegionMarker(regionId: String) {
+    private fun tapRegionMarker(regionId: String, screenshotPrefix: String = "map-region") {
         val region = Catalog.load(app.activity).regions.single { it.id == regionId }
         val (mapView, map) = readyMap()
         // Separate nearby region markers at a normal map zoom. This changes
@@ -150,7 +178,7 @@ class LocalExperienceTest {
         val x = location[0] + point.x
         val y = location[1] + point.y
         assertTrue("Projected marker must be on screen", visible.contains(x.toInt(), y.toInt()))
-        screenshot("map-region-before-tap")
+        screenshot("$screenshotPrefix-before-tap")
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
         val downTime = SystemClock.uptimeMillis()
         for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
@@ -164,7 +192,7 @@ class LocalExperienceTest {
         }
         app.onNodeWithTag("explore_list").performScrollToIndex(0)
         app.onNodeWithText(region.name).assertExists()
-        screenshot("map-region-after-tap")
+        screenshot("$screenshotPrefix-after-tap")
     }
 
     @Test fun nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline() {

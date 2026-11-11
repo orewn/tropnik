@@ -97,9 +97,9 @@
   padding: 8px;
   border: 1px solid transparent;
   border-radius: 12px;
-  transition: background-color 300ms cubic-bezier(.22,1,.36,1), border-color 300ms cubic-bezier(.22,1,.36,1);
+  transition: transform var(--motion-position) var(--ease-service), background-color var(--motion-color) var(--ease-service), border-color var(--motion-color) var(--ease-service);
 }
-.explore-layout .region-option:hover {padding: 8px; background: #f0f2e9; border-color: #d8e0d0}
+.explore-layout .region-option:hover {background: #f0f2e9; border-color: #d8e0d0}
 .explore-layout .region-option:active {transform: scale(.98)}
 .explore-layout .region-option > svg {width: 24px; height: 24px; flex-shrink: 0; transition: transform 500ms cubic-bezier(.22,1,.36,1)}
 .explore-layout .region-option-text {gap: 4px; min-width: 0}
@@ -121,7 +121,7 @@
 .region-artwork-symbol {display: grid; place-items: center}
 .region-artwork-symbol .map-icon {width: 24px; height: 24px}
 
-.explore-layout .trail-card {border-radius: 12px; transition: border-color 300ms cubic-bezier(.22,1,.36,1)}
+.explore-layout .trail-card {border-radius: 12px; transition: transform var(--motion-position) var(--ease-service), border-color var(--motion-color) var(--ease-service)}
 .explore-layout .trail-card-main {padding: 16px}
 .explore-layout .trail-card-top {margin-bottom: 12px; gap: 8px}
 .explore-layout .trail-card h3 {font: var(--title-2); letter-spacing: -.015em; text-wrap: balance}
@@ -263,7 +263,7 @@
   position: absolute;
   z-index: 20;
   left: 24px;
-  bottom: calc(var(--map-bottom-inset, 0px) + 16px);
+  bottom: calc(var(--sheet-control-inset,var(--map-bottom-inset, 0px)) + 16px);
   color: var(--forest);
 }
 .map-attribution[hidden] {display: none}
@@ -305,7 +305,7 @@
   .explore-layout .terrain-bottom {left: 88px}
 }
 @media (max-width: 700px) {
-  .map-attribution {left: auto; right: 16px; bottom: calc(var(--map-bottom-inset, 0px) + 12px)}
+  .map-attribution {left: auto; right: 16px; bottom: calc(var(--sheet-control-inset,var(--map-bottom-inset, 0px)) + 12px)}
   .map-attribution-content {left: auto; right: 0; max-width: calc(100vw - 32px)}
 }
 @media (prefers-reduced-motion: reduce) {

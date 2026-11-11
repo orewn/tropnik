@@ -75,13 +75,17 @@ def verify_catalog(manifest_bytes: bytes, read, *, actual_geometry=None, source_
     catalog = json.loads(catalog_bytes)
     require(catalog.get("schemaVersion") == 1, "Unsupported catalogue schema")
     regions = catalog.get("regions", [])
-    require(isinstance(regions, list) and 1 <= len(regions) <= 200, "Invalid curated region count")
+    require(isinstance(regions, list) and 1 <= len(regions) <= 200, "Invalid catalogue region count")
     region_ids = [region.get("id") for region in regions]
-    require(all(isinstance(value, str) and re.fullmatch(r"[a-z0-9-]{1,64}", value) for value in region_ids)
+    require(all(isinstance(value, str) and re.fullmatch(r"(?:[a-z0-9-]{1,64}|territory-[A-Za-z0-9]{1,54})", value) for value in region_ids)
             and len(set(region_ids)) == len(region_ids), "Duplicate or invalid curated region")
     region_set = set(region_ids)
     require(manifest.get("regionIds") == region_ids, "Native/web curated region parity differs")
+    territory_ids = {value for value in region_ids if value.startswith("territory-")}
     for region in regions:
+        require(type(region.get("territory", False)) is bool
+                and region.get("territory", False) == (region["id"] in territory_ids),
+                "Catalogue territory classification differs from its identity")
         require(all(isinstance(region.get(key), (int, float)) and not isinstance(region[key], bool) and math.isfinite(region[key])
                     for key in ("latitude", "longitude", "zoom"))
                 and -90 <= region["latitude"] <= 90 and -180 <= region["longitude"] <= 180 and 0 <= region["zoom"] <= 22,
@@ -174,8 +178,12 @@ def verify_catalog(manifest_bytes: bytes, read, *, actual_geometry=None, source_
     require({"tools/android-build/prepare-catalog.mjs", "tools/android-build/fixtures/learning-route.json", "web/lib/content.ts",
              "web/lib/catalog.generated.json", "web/lib/route-points.generated.json", "web/public/data/russia-boundaries-provenance.json"} <= input_paths,
             "Catalogue omits a required source input")
+    if territory_ids:
+        require({"tools/android-build/catalog-regions.mjs", "web/lib/territories.generated.json"} <= input_paths,
+                "Territory catalogue omits its membership source inputs")
     return {"catalogManifestSha256": digest(manifest_bytes), "catalogSha256": digest(catalog_bytes),
             "catalogRegionCount": len(regions), "catalogReferenceRouteCount": len(references),
+            "catalogTourismDirectionCount": len(regions) - len(territory_ids), "catalogTerritoryCount": len(territory_ids),
             "catalogLearningRouteCount": len(learning), "catalogGeometryFilesVerified": len(records),
             "catalogReferenceOnlyRouteCount": len(reference_only),
             "catalogGeometryBytesVerified": size, "catalogGeometryVerticesVerified": vertices,

@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {rewriteScript, rewriteJSON, rewriteHTML, pagesPath, ts} from './paths.mjs';
 import {apkFileName, validateApkDelivery, validateApkManifest, verifyApk} from './apk-artifact.mjs';
+import {assertCatalogueExpectations} from './catalogue-expectations.mjs';
 
 const out = resolve(process.argv[2]);
 const report = JSON.parse(await readFile(join(out, 'build-info.json')));
@@ -59,6 +60,12 @@ assert.equal(resolvePage(base.slice(0, -1))?.kind, 'home');
 for (const missing of ['/', '/outside/', base + 'not-a-real-page/', base + '%invalid']) assert.equal(resolvePage(missing), undefined, `Unknown path ${missing} must not become home`);
 assert.equal(pages.filter(page => page.kind === 'route').length, report.referenceRoutes);
 assert.equal(pages.filter(page => page.kind === 'region').length, report.regions);
+const catalogue = assertCatalogueExpectations(report.catalogue);
+assert.equal(catalogue.total, report.referenceRoutes, 'Source catalogue count must match the emitted route inventory');
+assert.equal(catalogue.directions.length, report.regions);
+assert.deepEqual(new Set(catalogue.directions.map(region => region.id)),
+  new Set(pages.filter(page => page.kind === 'region').map(page => page.id)),
+  'Browser count expectations must describe exactly the emitted directions');
 
 // Exercise the real transformed production policy, including the new map preload boundary.
 const policyEntry = Object.values(viteManifest).find(value => value.isEntry && value.src === 'source/lib/map-transport.ts');

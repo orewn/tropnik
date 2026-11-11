@@ -64,7 +64,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .map-attribution{
   left:auto;
   right:24px;
-  bottom:calc(var(--map-bottom-inset,0px) + 16px);
+  bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 16px);
   color:var(--forest);
 }
 .map-attribution-content{
@@ -100,7 +100,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:700px){
   .explore-layout .map-message{left:16px;right:16px;width:auto;max-width:none;bottom:calc(50% + 22px)}
   .explore-layout:has(.explore-panel.collapsed) .map-message{bottom:136px}
-  .map-attribution{right:16px;bottom:calc(var(--map-bottom-inset,0px) + 12px)}
+  .map-attribution{right:16px;bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 12px)}
   .map-attribution-content{max-width:calc(100vw - 96px)}
 }
 @media(prefers-reduced-transparency:reduce){

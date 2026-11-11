@@ -62,3 +62,32 @@ test('query length and fuzzy work are bounded; search is pure and never fetches'
  assert.equal(result.total,0);
  assert.throws(()=>createSearchIndex([docs[0],docs[0]]),/Duplicate/);
 });
+
+test('field weights preserve exact, prefix and typo ranking when words repeat across fields',()=>{
+ const make=(id,title,regionName='',description='')=>({id,kind:'route',title,regionName,description,href:`/routes/${id}`});
+ const ranked=createSearchIndex([
+  make('body','Тропа через лес','','Сапфир'),
+  make('place','Сапфирыы','Сапфир'),
+  make('typo','Сапфр'),
+  make('prefix','Сапфирный','Сапфир','Сапфир'),
+  make('exact','Сапфир','Сапфир','Сапфир'),
+ ]);
+ assert.deepEqual(ranked('сапфир').results.map(hit=>hit.id),['exact','prefix','place','typo','body']);
+ assert.equal(ranked('сапфир').results.find(hit=>hit.id==='exact').score,20,'a repeated word never accumulates title and body weights');
+});
+
+test('cached token matches never cache result filters or expose an older catalogue revision',()=>{
+ const original=[...docs,{id:'exact',kind:'route',title:'Сапфир',description:'',href:'/routes/exact',distanceKm:5,duration:'1 ч'}];
+ const indexed=createSearchIndex(original);
+ const unconstrained=indexed('Байкал');
+ assert.equal(indexed('Байкал',{kind:'page'}).total,0);
+ assert.equal(indexed('Байкал',{kind:'story'}).results[0].id,'story');
+ assert.deepEqual(indexed('Байкал до 15 км',{includeUnspecified:false}).results.map(hit=>hit.id),['lake']);
+ assert.deepEqual(indexed('Байкал'),unconstrained);
+ for(let i=0;i<24;i++)indexed(`несуществующий${i}`);
+ assert.deepEqual(indexed('Байкал'),unconstrained,'bounded cache eviction does not change ranking or fields');
+ const revised=createSearchIndex(original.map(doc=>doc.id==='exact'?{...doc,title:'Янтарь'}:doc));
+ assert.equal(indexed('Сапфир').results[0]?.id,'exact');
+ assert.equal(revised('Сапфир').total,0);
+ assert.equal(revised('Янтарь').results[0]?.id,'exact');
+});

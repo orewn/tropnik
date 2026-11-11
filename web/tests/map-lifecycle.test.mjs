@@ -348,6 +348,20 @@ test('leaving a route before its geometry loads still returns to its parent came
   assert.equal(selection.regionChanged(undefined), false);
 });
 
+test('source-only cards visit their known parent once and never revive a cancelled frame on rerender', () => {
+  const selection = new MapSelectionCamera();
+  assert.equal(selection.regionChanged('chukotka', 'whale-alley', false), true, 'direct description links frame the territory');
+  selection.cancelNavigation();
+  assert.equal(selection.regionChanged('chukotka', 'whale-alley', false), false, 'style restoration preserves manual navigation');
+  assert.equal(selection.regionChanged('chukotka', 'source-track', true), false, 'a source line owns its separate route fit');
+  assert.equal(selection.regionChanged('chukotka', 'whale-alley', false), true, 'returning from a line fits the known parent');
+  assert.equal(selection.regionChanged('chukotka', 'another-description', false), true, 'a different description is a new selection');
+  assert.equal(selection.regionChanged('chukotka', 'another-description', true), false);
+  assert.equal(selection.regionChanged('chukotka', 'another-description', false), true, 'removing geometry from a revision returns to parent bounds');
+  assert.equal(selection.regionChanged('chukotka'), true);
+  assert.equal(selection.regionChanged('chukotka'), false);
+});
+
 test('late route geometry is drawn without moving a camera the visitor already navigated', async () => {
   for (const action of ['pointerdown', 'touchstart', 'wheel', 'ArrowRight', 'camera-button']) {
     const selection = new MapSelectionCamera(), gate = deferred(), events = new Map();

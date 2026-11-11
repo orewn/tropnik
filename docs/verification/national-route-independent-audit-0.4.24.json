@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-10T22:02:19.974886+00:00",
+  "scope": "Independent spatial and primary-response checks; no field/access/safety verification.",
+  "auditorSha256": "4478ed7b2b413f3f50f3ba674199a6d77d24cf5b6f29b16e5d43c1707c299651",
+  "inputSha256": {
+    "catalog": "d998d364e66825270c83c731192e7fb8d587a10ae64ca9ce7bfa792419eaf9f2",
+    "geometry": "98e5d4aa9e32bbbdff843d5807d630ad640895ed3c6574eeab63fc0abc7fec5c",
+    "territories": "e470f86a415025be16e6061e7b74892cc0955bcd5159a422f2b8d7914947114d",
+    "displayArea": "d0817261cf4ab8f12ba29c0fc175072378e04f695b6a06d02adf2e9392c07dcf"
+  },
+  "nationalRoutes": 337,
+  "territoriesWithPositiveLengthNewGeometry": 44,
+  "boundaryTouchOnlyMemberships": [],
+  "sampleCount": 10,
+  "samples": [
+    {
+      "osmId": 2227014,
+      "title": "Шунут и Платонида",
+      "territories": [
+        "Свердловская область"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/2227014",
+      "segments": 8,
+      "points": 387,
+      "geometryLengthKm": 40.334,
+      "sourceSha256": "7c1b276830d0af83521691ccf9f87beebaa2dc872b88f749937e55bfed596ecc",
+      "geometryMatchesOriginalMembers": true
+    },
+    {
+      "osmId": 2516104,
+      "title": "a",
+      "territories": [
+        "Республика Саха (Якутия)"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/2516104",
+      "segments": 6,
+      "points": 118,
+      "geometryLengthKm": 12.676,
+      "sourceSha256": "6edee15118dbd81b772560621fe7b90aeaeba5acc21f4fae935d3bc26b4a5bf8",
+      "geometryMatchesOriginalMembers": true
+    },
+    {
+      "osmId": 2886435,
+      "title": "Маршрут OSM 2886435",
+      "territories": [
+        "Новгородская область"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/2886435",
+      "segments": 8,
+      "points": 266,
+      "geometryLengthKm": 7.469,
+      "sourceSha256": "45bfccc4e262b6869c19cc039c3601c73c1b89ceb1977db91158c973046f2e88",
+      "geometryMatchesOriginalMembers": true
+    },
+    {
+      "osmId": 3095794,
+      "title": "1",
+      "territories": [
+        "Курганская область"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/3095794",
+      "segments": 1,
+      "points": 23,
+      "geometryLengthKm": 2.252,
+      "sourceSha256": "8fc42541c07feb5ad336fa154a976b85b4bcf0bf9d1dbf8971d35a6af53d19c7",
+      "geometryMatchesOriginalMembers": true
+    },
+    {
+      "osmId": 6423462,
+      "title": "Легенды святой горы",
+      "territories": [
+        "Астраханская область"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/6423462",
+      "segments": 7,
+      "points": 83,
+      "geometryLengthKm": 1.822,
+      "sourceSha256": "789d3cd598a0cf11e6fa84c2e956730397c528543728f527abb21fb967256009",
+      "geometryMatchesOriginalMembers": true
+    },
+    {
+      "osmId": 7770898,
+      "title": "Фиолетовый (к Манской Бабе)",
+      "territories": [
+        "Красноярский край"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/7770898",
+      "segments": 11,
+      "points": 190,
+      "geometryLengthKm": 3.596,
+      "sourceSha256": "8c1dc87d19e9b583e97bfe9d6b30f105364c47189bdd944eb1d72ee2aa839e59",
+      "geometryMatchesOriginalMembers": true
+    },
+    {
+      "osmId": 15577314,
+      "title": "Экотропа \"Северное кольцо\"",
+      "territories": [
+        "Сахалинская область"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/15577314",
+      "segments": 5,
+      "points": 264,
+      "geometryLengthKm": 5.366,
+      "sourceSha256": "c9759f1bd3c26f62880c6d5bb7ce1be3d45eff430af0ba6e9391e3ae6d75773b",
+      "geometryMatchesOriginalMembers": true
+    },
+    {
+      "osmId": 16502403,
+      "title": "Большая уральская тропа",
+      "territories": [
+        "Челябинская область",
+        "Республика Башкортостан",
+        "Оренбургская область",
+        "Пермский край",
+        "Свердловская область"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/16502403",
+      "segments": 1751,
+      "points": 37137,
+      "geometryLengthKm": 2352.174,
+      "sourceSha256": "b94cf766f6a38bc3bebfd3a20b993fc12596ba36e63a466453570aeb0dc077b6",
+      "geometryMatchesOriginalMembers": true
+    },
+    {
+      "osmId": 17826118,
+      "title": "Псковская тропа",
+      "territories": [
+        "Псковская область"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/17826118",
+      "segments": 255,
+      "points": 3226,
+      "geometryLengthKm": 169.138,
+      "sourceSha256": "7cc86b39b5655f7d91e27c02bd2e3c5c92787d66362ed2b56f6eeaa326b9047f",
+      "geometryMatchesOriginalMembers": true
+    },
+    {
+      "osmId": 18328943,
+      "title": "Маршрут OSM 18328943",
+      "territories": [
+        "Сахалинская область"
+      ],
+      "sourceUrl": "https://www.openstreetmap.org/relation/18328943",
+      "segments": 1,
+      "points": 2,
+      "geometryLengthKm": 0.018,
+      "sourceSha256": "47ddc16ab006c70b871fcdd5911c2e75557fbf9740902d3bd5c5c9fbfc9bc1f3",
+      "geometryMatchesOriginalMembers": true
+    }
+  ],
+  "errors": [],
+  "status": "passed"
+}

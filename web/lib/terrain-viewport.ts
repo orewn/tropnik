@@ -8,7 +8,7 @@ type TerrainViewportTarget = {
 export function observeTerrainViewport(element: HTMLElement, target: TerrainViewportTarget): () => void {
   const panel = element.closest('.explore-layout')?.querySelector('.explore-panel');
   const atlas = element.closest('.atlas-wrap');
-  let last = '', disposed = false;
+  let last = '', disposed = false, frame: number | null = null;
   const fit = () => {
     if (disposed) return;
     const area = element.getBoundingClientRect(), drawer = panel?.getBoundingClientRect();
@@ -35,23 +35,31 @@ export function observeTerrainViewport(element: HTMLElement, target: TerrainView
     const key = JSON.stringify(insets);
     if (key !== last) {last = key; target.setViewportInsets(insets); target.warmup();}
   };
-  const settled = (event: Event) => {if (event.target === panel) fit();};
+  // ResizeObserver, window resize and sheet-settled can describe the same
+  // change. Read every rectangle together once before the next paint, then
+  // update the renderer; never alternate layout reads and writes per event.
+  const queue = () => {
+    if (disposed || frame !== null) return;
+    frame = window.requestAnimationFrame(() => {frame = null; fit();});
+  };
+  const settled = (event: Event) => {if (event.target === panel) queue();};
   const transition = (event: Event) => {
     const property = (event as TransitionEvent).propertyName;
     if (property === 'transform' || property === 'height') settled(event);
   };
   fit();
-  const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
+  const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(queue);
   observer?.observe(element); if (panel) observer?.observe(panel);
-  window.addEventListener('resize', fit);
+  window.addEventListener('resize', queue, {passive: true});
   panel?.addEventListener('transitionend', transition);
   // Reduced motion, interrupted gestures and instant sheet changes settle
   // without a native CSS transitionend.
   panel?.addEventListener('tropnik:sheet-settled', settled);
   return () => {
     disposed = true;
+    if (frame !== null) {window.cancelAnimationFrame(frame); frame = null;}
     observer?.disconnect();
-    window.removeEventListener('resize', fit);
+    window.removeEventListener('resize', queue);
     panel?.removeEventListener('transitionend', transition);
     panel?.removeEventListener('tropnik:sheet-settled', settled);
   };

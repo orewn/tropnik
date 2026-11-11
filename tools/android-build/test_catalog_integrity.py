@@ -111,6 +111,20 @@ class CatalogIntegrityTests(unittest.TestCase):
         with self.assertRaisesRegex(AssetError, "region parity"):
             verify_catalog(json.dumps(manifest).encode(), self.read)
 
+    def test_territory_membership_requires_its_pinned_source_inputs(self):
+        for omitted in ("tools/android-build/catalog-regions.mjs", "web/lib/territories.generated.json"):
+            manifest = copy.deepcopy(self.manifest)
+            manifest["sourceInputs"] = [record for record in manifest["sourceInputs"] if record["path"] != omitted]
+            with self.subTest(omitted=omitted), self.assertRaisesRegex(AssetError, "membership source inputs"):
+                verify_catalog(json.dumps(manifest).encode(), self.read)
+
+    def test_rehashed_catalogue_cannot_reclassify_a_territory_as_a_tourism_direction(self):
+        catalog = json.loads(self.read("catalog.json"))
+        territory = next(region for region in catalog["regions"] if region["id"].startswith("territory-"))
+        territory["territory"] = False
+        with self.assertRaisesRegex(AssetError, "territory classification"):
+            self.verify_fixture(catalog, copy.deepcopy(self.manifest))
+
     def test_additional_sources_cannot_smuggle_participants_or_wrong_message_identity(self):
         source = {"url": "https://t.me/poiskpohod/101", "name": "Сообщество poiskpohod", "messageId": 101,
                   "publishedAt": "2026-11-01T12:00:00", "reviewedAt": "2026-11-06", "scope": "community_mention"}

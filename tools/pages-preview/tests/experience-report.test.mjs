@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from '../browser-report.mjs';
-import {layerMenusFixture,overviewCountsFixture,savedReentryFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
+import {catalogueFixture,layerMenusFixture,overviewCountsFixture,savedReentryFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
 
 function rejectsEach(make,validate,changes){
  for(const [name,change] of changes){const receipt=make();change(receipt);assert.throws(()=>validate(receipt),undefined,name);}
 }
 const checkLayers=receipt=>assertLayerMenuAudit(receipt,'compact-android');
-const checkExplore=mobile=>receipt=>assertExploreExperience(receipt,mobile?'android-portrait':'desktop-webgl',mobile?'leaflet':'maplibre',mobile);
+const checkExplore=mobile=>receipt=>assertExploreExperience(receipt,mobile?'android-portrait':'desktop-webgl',mobile?'leaflet':'maplibre',mobile,catalogueFixture);
 const checkStyle=receipt=>assertStyleCameraRoundtrip(receipt,'desktop-webgl');
 
 test('portrait Layers validates closed and expanded geometry with real native scroll progress',()=>{

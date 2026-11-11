@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mkdir,writeFile} from 'node:fs/promises';
+import {captureCoastLabels,assertCoastLabelInspection} from './browser-label-audit.mjs';
 import {projectMapPoint} from './map-projection.mjs';
 import {dispatchSourceEndPan,assertSourceEndPanInput} from './browser-source-end-pan.mjs';
 
@@ -43,7 +44,7 @@ export function assertCoastPanInput(pan,input,context){
 }
 
 export function assertCoastAudit(report,profile,engine){
- assert.equal(report?.schemaVersion,1,`${profile}: missing coastline regression evidence`);
+ assert.equal(report?.schemaVersion,2,`${profile}: missing coastline regression evidence`);
  assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);
  assert.equal(report.visualReviewRequired,true);
  assert.equal(report.steps?.length,6);
@@ -62,7 +63,9 @@ export function assertCoastAudit(report,profile,engine){
   assert.equal(new Set(frame.cells).size,frame.cells.length);
   const shot=report.screenshots.find(image=>image.fixture===fixture.id&&image.targetZoom===targetZoom);
   assert.ok(shot?.bytes>1000);assert.match(shot.sha256,/^[a-f0-9]{64}$/);
+  if(engine==='maplibre'&&fixture.id==='primorsk')assertCoastLabelInspection(report.labelDiagnostics?.find(capture=>capture.fixture===fixture.id&&capture.targetZoom===targetZoom),frame,shot);
  }
+ assert.equal(report.labelDiagnostics?.length,engine==='maplibre'?5:0,'Unexpected coastline label inspection count');
  assert.equal(versions.size,1,'A coastline audit mixed geometry publications');
  assert.ok(report.pans.length>=2,'Coastlines must be reached through native map gestures');
  for(const pan of report.pans)assertCoastPanInput(pan,engine==='leaflet'?'touch':'mouse',profile+'/coast');
@@ -75,7 +78,7 @@ export function assertCoastAudit(report,profile,engine){
  * This runs on CI Chromium, alongside the existing map acceptance matrix. */
 export async function runCoastAudit(cdp,profile,helpers){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,pointerSelector}=helpers;
- const report={schemaVersion:1,profile:profile.name,engine:profile.engine,passed:false,visualReviewRequired:true,steps:[],pans:[],screenshots:[],resources:[]};
+ const report={schemaVersion:2,profile:profile.name,engine:profile.engine,passed:false,visualReviewRequired:true,steps:[],pans:[],screenshots:[],resources:[],labelDiagnostics:[]};
  const resources=new Map();
  const unobserve=[
   cdp.observe('Network.responseReceived',({requestId,response})=>{
@@ -144,12 +147,14 @@ export async function runCoastAudit(cdp,profile,helpers){
      const d=document.querySelector('.atlas-canvas[data-map-engine]').dataset;
      return{ready:d.mapCoverageReady==='true',pending:Number(d.mapCoveragePending),error:d.mapCoverageError??'',version:d.mapCoverageVersion??'',lod:d.mapCoverageLod??'',cells:(d.mapCoverageCells||'').split(',').filter(Boolean)};
     })()`),state=>state.ready&&state.pending===0&&!state.error,20000);
-    const frame={fixture:fixture.id,coordinate:fixture.coordinate,targetZoom,zoom:centered.map.camera.zoom,centerErrorPx:centered.centerErrorPx,...geometry};
+    const frame={fixture:fixture.id,coordinate:fixture.coordinate,targetZoom,zoom:centered.map.camera.zoom,camera:centered.map.camera,centerErrorPx:centered.centerErrorPx,...geometry};
     report.steps.push(frame);
     const screenshot=await cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
     const bytes=Buffer.from(screenshot.data,'base64'),file=`${profile.name}-coast-${fixture.id}-z${targetZoom}.png`;
     await mkdir(OUTPUT,{recursive:true});await writeFile(new URL(file,OUTPUT),bytes);
-    report.screenshots.push({fixture:fixture.id,targetZoom,file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
+    const shot={fixture:fixture.id,targetZoom,file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
+    report.screenshots.push(shot);
+    if(profile.engine==='maplibre'&&fixture.id==='primorsk')report.labelDiagnostics.push(await captureCoastLabels(cdp,evaluate,frame,shot));
     await save();
    }
   }

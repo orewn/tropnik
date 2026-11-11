@@ -7,6 +7,69 @@ const LABEL_ORIGIN = 'tropnik:label-origin';
 const EMPTY = {type:'FeatureCollection',features:[]};
 const MAX_GEOMETRY_CACHE = 4096;
 
+
+export const MAP_LABEL_DIAGNOSTIC_EVENT = 'tropnik:inspect-map-labels';
+const LABEL_DIAGNOSTIC_LIMIT = 100;
+const LABEL_DIAGNOSTIC_PROPERTIES = ['class','name','name:ru','name:latin','rank','osm_id','osm_type','place_id','feature_id','wikidata','ref',LABEL_GROUP];
+
+/** Explicit, read-only inspection for the native browser audit. Nothing is
+ * polled or retained. Layer IDs must refer to this map's covered place labels;
+ * filters, counts and returned tile metadata are observations, not a promise
+ * that tile-local feature IDs identify the same real place across zooms. */
+export function inspectMapLabels(map, request) {
+  const result={schemaVersion:1,readOnly:true,idScope:'not-established',tileMetadata:'observed-optional',limit:LABEL_DIAGNOSTIC_LIMIT};
+  try {
+    if(request?.schemaVersion!==1||!Array.isArray(request.layerIds)||!request.layerIds.length||request.layerIds.length>16
+      ||!request.layerIds.every(id=>typeof id==='string'&&id.length>0&&id.length<=128)
+      ||!Array.isArray(request.names)||!request.names.length||request.names.length>8
+      ||!request.names.every(name=>typeof name==='string'&&name.length>0&&name.length<=128)
+      ||!Number.isInteger(request.limit)||request.limit<1||request.limit>LABEL_DIAGNOSTIC_LIMIT)throw new Error('Invalid bounded label inspection');
+    result.limit=request.limit;
+    const style=map.getStyle(),byId=new Map((style.layers??[]).map(layer=>[layer.id,layer]));
+    const layers=[...new Set(request.layerIds)].map(id=>byId.get(id));
+    if(layers.some(layer=>layer?.type!=='symbol'||layer.source!==MAP_LABEL_SOURCE||layer.metadata?.[LABEL_ORIGIN]?.sourceLayer!=='place'))throw new Error('Only covered place-label layers may be inspected');
+    const camera=()=>{const center=map.getCenter();return{longitude:center.lng,latitude:center.lat,zoom:map.getZoom(),bearing:map.getBearing(),pitch:map.getPitch()};};
+    const before=camera(),names=[...new Set(request.names)],nameFilter=['in',['coalesce',['get','name:ru'],['get','name'],['get','name:latin'],''],['literal',names]];
+    Object.assign(result,{names,layerIds:layers.map(layer=>layer.id),before});
+    result.layers=layers.map(layer=>({id:layer.id,minzoom:layer.minzoom??0,maxzoom:layer.maxzoom??24,
+      origin:structuredClone(layer.metadata[LABEL_ORIGIN]),layout:Object.fromEntries(['text-field','text-variable-anchor','text-anchor','text-padding','text-radial-offset','text-allow-overlap','text-ignore-placement','symbol-avoid-edges'].filter(key=>Object.hasOwn(layer.layout??{},key)).map(key=>[key,structuredClone(layer.layout[key])]))}));
+    const snapshot=features=>{
+      const points=features.filter(feature=>feature.geometry?.type==='Point');
+      return{total:features.length,pointCount:points.length,truncated:points.length>request.limit,features:points.slice(0,request.limit).map(feature=>{
+        const coordinates=feature.geometry.coordinates.slice(0,2),projected=map.project(coordinates),properties={};
+        for(const key of LABEL_DIAGNOSTIC_PROPERTIES){const value=feature.properties?.[key];if(typeof value==='number'&&Number.isFinite(value)||typeof value==='string')properties[key]=typeof value==='string'?value.slice(0,256):value;}
+        const tile=feature.tile,validTile=tile&&['z','x','y'].every(key=>Number.isInteger(tile[key]))&&tile.z>=0&&tile.z<=24&&tile.x>=0&&tile.x<2**tile.z&&tile.y>=0&&tile.y<2**tile.z;
+        return{id:typeof feature.id==='number'?feature.id:typeof feature.id==='string'?feature.id.slice(0,128):null,idTruncated:typeof feature.id==='string'&&feature.id.length>128,idSafe:typeof feature.id==='number'?Number.isSafeInteger(feature.id):typeof feature.id==='string',
+          ...(feature.layer?.id?{layerId:feature.layer.id}:{}),coordinates,screen:{x:projected.x,y:projected.y},
+          observedTile:validTile?{z:tile.z,x:tile.x,y:tile.y}:null,properties,propertyKeys:Object.keys(feature.properties??{}).sort().slice(0,40).map(key=>key.slice(0,128))};
+      })};
+    };
+    const groups=new Map();
+    for(const layer of layers){
+      if(before.zoom<(layer.minzoom??0)||before.zoom>=(layer.maxzoom??24))continue;
+      const origin=layer.metadata[LABEL_ORIGIN];let group=groups.get(origin.key);
+      if(!group){group={source:origin.source,sourceLayer:origin.sourceLayer,filters:[]};groups.set(origin.key,group);}group.filters.push(origin.filter);
+    }
+    result.sources=[...groups.values()].map(group=>{
+      const filter=group.filters.some(value=>!value)?nameFilter:['all',nameFilter,['any',...group.filters]];
+      return{source:group.source,sourceLayer:group.sourceLayer,filter,...snapshot(map.querySourceFeatures(group.source,{sourceLayer:group.sourceLayer,filter}))};
+    });
+    const overlayFilter=['all',nameFilter,['in',['get',LABEL_GROUP],['literal',[...new Set(layers.map(layer=>layer.metadata[LABEL_ORIGIN].key))]]]];
+    result.overlay={source:MAP_LABEL_SOURCE,filter:overlayFilter,...snapshot(map.querySourceFeatures(MAP_LABEL_SOURCE,{filter:overlayFilter}))};
+    result.rendered={layerIds:layers.map(layer=>layer.id),filter:nameFilter,...snapshot(map.queryRenderedFeatures({layers:layers.map(layer=>layer.id),filter:nameFilter}))};
+    result.after=camera();result.cameraPreserved=JSON.stringify(result.before)===JSON.stringify(result.after);
+  } catch(error) {result.error=error?.message??String(error);}
+  return result;
+}
+
+function bindMapLabelInspection(map) {
+  const container=map.getContainer?.();
+  if(!container?.addEventListener)return()=>{};
+  const inspect=event=>{const detail=event.detail;if(!detail||typeof detail!=='object'||!Object.isExtensible(detail))return;detail.result=inspectMapLabels(map,detail.request);};
+  container.addEventListener(MAP_LABEL_DIAGNOSTIC_EVENT,inspect);
+  return()=>container.removeEventListener(MAP_LABEL_DIAGNOSTIC_EVENT,inspect);
+}
+
 function originFor(layer, sources) {
   const previous = layer.metadata?.[LABEL_ORIGIN];
   if (previous && typeof previous.source === 'string' && typeof previous.key === 'string') return previous;
@@ -68,6 +131,7 @@ export function bindMapLabelCoverage(map, coverage, environment = {}) {
   const cancelDefer = environment.cancelDefer ?? clearTimeout;
   let disposed = false, timer, revision = 0, groups = [], sourceIds = new Set(), previousKeys;
   const geometryCache = new Map();
+  const unbindInspection = bindMapLabelInspection(map);
 
   const allowed = (geometry, key) => {
     if (geometryCache.has(key)) return geometryCache.get(key);
@@ -151,7 +215,7 @@ export function bindMapLabelCoverage(map, coverage, environment = {}) {
     disposed = true; revision++;
     if (timer !== undefined) cancelDefer(timer);
     timer = undefined; geometryCache.clear(); groups = []; sourceIds.clear(); previousKeys = [];
-    unsubscribeCoverage?.();
+    unsubscribeCoverage?.();unbindInspection();
     map.off('style.load',styleLoaded);map.off('sourcedata',sourceLoaded);map.off('moveend',schedule);map.off('remove',dispose);
   };
   map.on('style.load',styleLoaded);map.on('sourcedata',sourceLoaded);map.on('moveend',schedule);map.on('remove',dispose);

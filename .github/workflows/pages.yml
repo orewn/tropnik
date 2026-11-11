@@ -88,7 +88,7 @@ jobs:
           assert.match(build.buildId, /^[a-f0-9]{16}$/);
           assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(build.hasApk, true);
-          assertBrowserReport(browser, process.env.GITHUB_SHA);
+          assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue);
           appendFileSync(process.env.GITHUB_OUTPUT, `build_id=${build.buildId}\n`);
           assert.match(process.env.GITHUB_RUN_ID, /^\d+$/);
           assert.match(process.env.GITHUB_RUN_ATTEMPT, /^\d+$/);

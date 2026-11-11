@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "phase": "local-candidate-before-browser-ci",
+  "verified": false,
+  "releaseEligible": false,
+  "baselineCommit": "169b0bee9b2bbdb45adfbe71f4162f35f37344d1",
+  "checkedAt": "2026-11-11T03:09:58.865529+00:00",
+  "webTests": {
+    "passed": 659,
+    "failed": 0,
+    "command": "node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs"
+  },
+  "pagesTooling": {
+    "passedBeforeFinalEvidenceHardening": 170,
+    "finalSmoothnessSubsetPassed": 10,
+    "failed": 0
+  },
+  "webLint": {
+    "passed": true,
+    "maxWarnings": 0
+  },
+  "webTypes": {
+    "passed": true
+  },
+  "pagesTypes": {
+    "passed": true
+  },
+  "localStaticBuild": {
+    "buildId": "b8fa1230ef7c525f",
+    "pages": 713,
+    "referenceRoutes": 680,
+    "productionRoutingChecks": 2144,
+    "publicAssetChecks": 676,
+    "httpChecks": 57,
+    "browserRenderingTested": false
+  },
+  "androidLocal": {
+    "catalogueParity": true,
+    "pythonTests": 64,
+    "nodeTests": 11,
+    "newKotlinOfflineMembershipRegressionExecuted": false
+  },
+  "pending": [
+    "Fresh browser native-input and imagery preload matrix",
+    "Exact final Android APK and eight installed-device scenarios",
+    "Publication and anonymous deployed artifact verification"
+  ],
+  "changes": [
+    "Cancel satellite tiles on Leaflet tileabort as well as tileunload",
+    "Explicit top-view terrain reset from satellite",
+    "Shared readiness and bounded warmup for imagery",
+    "Stable indexed and deferred catalogue rendering",
+    "Compositor transitions and story lifecycle fixes",
+    "Detailed Android offline pack follows pilot route membership",
+    "Require smoothness and every map mode interval in release report"
+  ],
+  "limitations": [
+    "No physical-device performance claim",
+    "The existing EOX overview source retains coarse mosaic seams near the dateline",
+    "Preview signing currently changes between independent builds; no in-place upgrade claim"
+  ],
+  "logs": [
+    {
+      "name": "web-tests-candidate.log",
+      "sha256": "93599d30312c748bdfc9b112a1d2c6758bd28ef918a210483a4b9a19a475fe9b",
+      "bytes": 64434
+    },
+    {
+      "name": "pages-tools-candidate.log",
+      "sha256": "7fabcc2a24b1445418801b8839db6a4ebe72ff2d5f056493e833535c3379ed8d",
+      "bytes": 26794
+    },
+    {
+      "name": "web-lint-candidate.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "pages-types-candidate.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "pages-build-candidate.log",
+      "sha256": "df287c617463b4b362031c586a5305844e6e2a396d36b4495d0371d8c4c977f7",
+      "bytes": 10003
+    },
+    {
+      "name": "android-python-tests.log",
+      "sha256": "fff4c270121ffea59d5dcf5c0c54bc0f1b15de8b6b268bda3f26568928f6b637",
+      "bytes": 441
+    },
+    {
+      "name": "android-node-tests.log",
+      "sha256": "41de05268608044338bf9d7794f22f5f9a0f879d0474682795e2561a4d5a1bb3",
+      "bytes": 1205
+    }
+  ]
+}

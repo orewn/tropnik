@@ -65,6 +65,12 @@ test('the actual maximum long task survives the32-entry recent ring without chan
  state.__tropnikPerf={cls:0,longest:0};const next={startTime:20000,duration:79,phase:'next-audit'};recordBrowserLongTask(state,next);
  assert.equal(state.__tropnikPerf.longest,79);assert.equal(state.__tropnikPerf.peakLongTask,next);
 });
+test('late startup task delivery stays diagnostic and does not contaminate the next interaction window',()=>{
+ const state={__tropnikPerf:{cls:0,longest:0},__tropnikPerfStart:1000,__tropnikLongTasks:[]};
+ const old={startTime:800,duration:900},current={startTime:1000,duration:60};
+ recordBrowserLongTask(state,old);assert.equal(state.__tropnikPerf.longest,0);assert.deepEqual(state.__tropnikLongTasks,[old]);
+ recordBrowserLongTask(state,current);assert.equal(state.__tropnikPerf.longest,60);assert.equal(state.__tropnikPerf.peakLongTask,current);
+});
 
 test('default full-matrix action runs once without tracer calls, timers or evidence files',async t=>{
  const output=await outputDirectory(t),value={selected:'altai'};let actions=0;

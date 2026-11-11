@@ -7,7 +7,8 @@ import {Header} from '@/components/Header';
 import {Footer} from '@/components/Footer';
 import {Explore} from '@/components/Explore';
 import {getPublishedTrail} from '@/lib/server';
-import {trailById, regionById, isPublicIndexingEnabled} from '@/lib/content';
+import {trailById, isPublicIndexingEnabled} from '@/lib/content';
+import {mapRegionById} from '@/lib/territories';
 import {formatEvidenceDate, sourceDateLabel, trailGeometryDescription} from '@/lib/trail-evidence';
 
 export async function generateMetadata({params}: {params: Promise<{id: string}>}): Promise<Metadata> {
@@ -28,7 +29,7 @@ export default async function RoutePage({params}: {params: Promise<{id: string}>
   return <><Header/><main id="main">
     <Explore initialPublished={trail.publicationStatus === 'published' ? [trail] : []} initialRegion={trail.regionId} initialTrail={trail.id}/>
     <article className="region-article">
-      <span className="eyebrow">Паспорт маршрута · {regionById(trail.regionId)?.name}</span>
+      <span className="eyebrow">Паспорт маршрута · {mapRegionById(trail.regionId)?.name}</span>
       <h2>{trail.title}</h2>
       <p>{trail.description}</p>
       <dl className="facts-grid">

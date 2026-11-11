@@ -2,6 +2,37 @@
 
 These scripts ingest OpenStreetMap data through two public distribution channels. Geofabrik and Waymarked Trails are not two independent field-verification databases: both derive their map data from OSM. No MAPS.ME proprietary database, commercial GPX library, photographs, profiles or ratings are copied.
 
+## National supplement
+
+The `national/` snapshot extends the original six-destination acquisition to every territory already present in the application's sourced display dataset. It does not rename the old acquisition, update its retrieval dates, change the territorial display source, or claim to enumerate every physical trail in Russia.
+
+```sh
+python tools/import-data/import_national_waymarked.py discover
+python tools/import-data/import_national_waymarked.py collect
+python tools/import-data/audit_national_catalog.py
+python web/scripts/prepare-catalog.py
+python -m unittest discover -s tools/import-data -p test_national_waymarked.py
+```
+
+`discover` makes an initial request for all 85 existing display territories. Bounds crossing 180° are split before conversion to the API's Mercator coordinates. A listing of 100 results is subdivided; depth and total-query limits are explicit, and any saturated leaf, request failure or unqueried subarea remains visible in `national/discovery.json`. These queries retrieve top-level relations indexed by Waymarked Trails, not every child relation or individual OSM path. A zero means no indexed candidate was returned by that snapshot, not that the area has no hiking paths.
+
+`collect` skips the 278 original relation identities and fetches only new candidates, using two concurrent requests, a 35 second per-request timeout and a 12 MB response bound. Source responses are cached only with matching URL, byte length and SHA256. Reusing the cache preserves its original retrieval time. The acquisition is finite: 512 list requests, subdivision depth 6 and at most 4,000 new relation details. The report records any omitted work instead of silently claiming completeness.
+
+New hiking, foot and walking relations are accepted only when their complete real member geometry is covered by the existing display polygon. A boundary-crossing or foreign route is neither clipped nor moved into the catalogue. Such exclusions are retained for separate editorial review; a rejection can also reflect the resolution of the selected display source. Original member segments remain separate, including gaps and branches. Conversion from source Mercator to WGS84 and rounding to seven decimal places are the only coordinate operations. A segment crossing the dateline requires explicit review rather than becoming a line across the world.
+
+Every accepted route has exact geographic `territoryIds`. Existing tourism directions are reused where applicable; otherwise the primary ID is its existing `territory-*` identifier. No synthetic tourism destination or itinerary is created. Routes remain `reference`, not field verified or navigation ready. OSM segment length remains distinct from official itinerary distance, and no current access, difficulty, elevation profile, review or guided departure is invented.
+
+The new repository files are `national/discovery.json`, `national/import-report.json`, `national/routes.json`, `national/routes.geojson` and individual `national/geometry/` files. The complete original responses and hash sidecars under the local `national/raw/` cache are delivered separately in a deterministic source archive, including successful responses for rejected foreign/border candidates. `national/source-archive.json` pins its filename, bytes, SHA256, internal manifest and exact inventory. It deliberately excludes the absent historical raw snapshot and does not claim to revalidate those old raw bytes.
+
+```sh
+python tools/import-data/package_national_sources.py /path/to/tropnik-national-route-sources-2026-11-11.tar.gz
+python tools/import-data/audit_national_catalog.py --archive /path/to/tropnik-national-route-sources-2026-11-11.tar.gz
+```
+
+The archive audit first verifies the whole compressed artifact, then its manifest and every original file, and only extracts regular files under a new temporary directory. Absolute paths, traversal, links, duplicate entries and unexpected members are rejected. A local raw cache is not required for this form of verification.
+
+`national/catalog-audit.json` checks every accepted geometry against the retained source members, counts every territory including zeroes, verifies raw hashes and confirms that no candidate disappeared from the accepted/rejected/error/limit accounting. It is a data-integrity audit, not a field safety certification. The web generator merges the supplement with the original catalogue and preserves on-demand individual geometry loading. The existing source, licence and ODbL attribution rules below apply to the supplement as well.
+
 ## Reproduce
 
 Use Python 3 and install `requirements.txt` in the project's Python environment. Alternatively, install into this directory's optional `_deps/` directory for `import_geofabrik.py`; `_deps` is an execution dependency and need not be shipped in the source archive.

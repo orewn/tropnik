@@ -45,6 +45,9 @@ web/public/downloads/*
 !web/public/downloads/android-manifest.json
 data/catalog/raw/geofabrik/*.osm.pbf
 data/catalog/raw-trails-krym.geojson
+# The complete national upstream responses are delivered as a hash-pinned
+# source archive; reports and accepted geometry remain repository-backed.
+data/catalog/national/raw/
 
 # Current dependency source is pnpm-lock.yaml
 web/package-lock.json

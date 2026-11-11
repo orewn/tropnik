@@ -32,6 +32,14 @@
 .sessionLabel{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .actions :global(.menu-toggle){display:none;width:44px;height:44px;align-items:center;justify-content:center;background:var(--surface-soft);border-color:var(--line)}
 .actions :global(.menu-toggle):hover{background:var(--surface-selected)}
+.menuGlyph{position:relative;display:block;width:24px;height:24px;pointer-events:none}
+.menuGlyph span{position:absolute;left:4px;width:16px;height:2px;border-radius:2px;background:currentColor;transform-origin:center;transition:transform var(--motion-position) var(--ease-service),opacity var(--motion-feedback) var(--ease-service)}
+.menuGlyph span:nth-child(1){top:5px}
+.menuGlyph span:nth-child(2){top:11px}
+.menuGlyph span:nth-child(3){top:17px}
+.actions :global(.menu-toggle[aria-expanded=true]) .menuGlyph span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.actions :global(.menu-toggle[aria-expanded=true]) .menuGlyph span:nth-child(2){opacity:0;transform:scaleX(.5)}
+.actions :global(.menu-toggle[aria-expanded=true]) .menuGlyph span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
 
 @media(hover:hover) and (pointer:fine){
   .header :global(.top-nav a:hover){background:var(--surface);color:var(--forest)}
@@ -53,7 +61,7 @@
     position:fixed;inset:72px 0 0;height:calc(100dvh - 72px);max-height:none;
     margin:0;padding:24px max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
     display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;
-    border:0;border-radius:0;background:var(--surface);box-shadow:none;
+    border:0;border-radius:0;background:var(--surface);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;
     overflow:auto;overscroll-behavior:contain;
   }
   .header :global(.top-nav.open):before{content:"Навигация";padding:4px 12px 8px;color:var(--muted);font-size:12px;line-height:16px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
@@ -82,6 +90,8 @@
   .header :global(.top-nav.open) .menuOfflineLink{display:flex}
   .header :global(.top-nav.open a.active):after{max-width:88px;flex-shrink:0}
 }
-@media(prefers-reduced-motion:reduce){.header :global(.top-nav a),.searchLink,.offlineLink,.actions :global(.menu-toggle){transition:none}}
+@media(prefers-reduced-motion:reduce){.header :global(.top-nav a),.searchLink,.offlineLink,.actions :global(.menu-toggle),.menuGlyph span{transition:none}}
 @media(prefers-reduced-transparency:reduce){.header{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)!important}}
 @media(forced-colors:active){.header,.header :global(.top-nav),.searchLink,.offlineLink,.actions :global(.menu-toggle){border:1px solid CanvasText!important}.header :global(.top-nav a.active){outline:2px solid Highlight}}
+
+@media(pointer:coarse){.header{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)!important}}

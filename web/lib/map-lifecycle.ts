@@ -10,6 +10,7 @@ export class MapSelectionCamera {
   private regionInitialized = false;
   private regionId: string | undefined;
   private regionRouteId: string | undefined;
+  private regionRouteOwnsCamera = true;
   private route: RouteCameraIdentity | undefined;
   private navigationRevision = 0;
   private selectedRoute: RouteCameraIdentity | undefined;
@@ -37,15 +38,19 @@ export class MapSelectionCamera {
 
   cancelNavigation(): void {this.navigationRevision++;}
 
-  regionChanged(id: string | undefined, routeId?: string): boolean {
+  regionChanged(id: string | undefined, routeId?: string, routeOwnsCamera = true): boolean {
     // A route card is a child view of its region. Closing it is a new camera
     // intent even when the region ID is unchanged. Track the visible card,
     // not the asynchronously applied geometry: users can leave before it loads.
+    // A source-only card has no route camera. Opening one is a fresh request
+    // for its parent's frame, including a track -> description transition.
     const changed = !this.regionInitialized || id !== this.regionId
-      || (this.regionRouteId !== undefined && routeId === undefined);
+      || (this.regionRouteId !== undefined && routeId === undefined)
+      || (routeId !== undefined && !routeOwnsCamera && (routeId !== this.regionRouteId || this.regionRouteOwnsCamera));
     this.regionInitialized = true;
     this.regionId = id;
     this.regionRouteId = routeId;
+    this.regionRouteOwnsCamera = routeOwnsCamera;
     return changed;
   }
 

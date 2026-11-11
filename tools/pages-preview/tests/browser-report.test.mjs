@@ -1,13 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CLOSE_TRAIL_FIXTURE,assertBrowserReport,assertRouteEdgeFrame} from '../browser-report.mjs';
+import {CLOSE_TRAIL_FIXTURE,assertBrowserReport as verifyBrowserReport,assertRouteEdgeFrame} from '../browser-report.mjs';
 import {projectMapPoint,unprojectMapPoint} from '../map-projection.mjs';
 import {directionHitAreasFixture} from './direction-hitareas-fixture.mjs';
-import {layerMenusFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
+import {catalogueFixture,layerMenusFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
 import {coastFixture} from './coast-fixture.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
+import {smoothnessFixture} from './smoothness-fixture.mjs';
 
 const commit='a'.repeat(40);
+const assertBrowserReport=(report,source)=>verifyBrowserReport(report,source,catalogueFixture);
 const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
 function closeTrail(profile,engine,mobile){
  const input=mobile?'touch':'mouse',step=engine==='leaflet'?.75:1,inputs=[],frames=[];let zoom=14;
@@ -52,12 +54,13 @@ function zoomDesign(profile,engine,mobile){
   screenshots:[...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
 }
 function evidence(){
- return{verified:true,sourceCommit:commit,mapInteractionSchemaVersion:3,
+ return{verified:true,catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:3,
   offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,inputs:['route-title','region','leader-name','leader-phone'].map(id=>({selector:'#'+id,passed:true,focusedBeforeTyping:true,valueLength:10,events:[{type:'input',trusted:true,id,valueLength:10}]})),networkSuccessfulResponses:0,originTransport:{method:'origin-socket-destroy',active:false,startedAt:'2026-11-10T00:00:00Z',restoredAt:'2026-11-10T00:00:01Z',blockedRequests:1,requests:[{path:'/tropnik/_offline-transport-probe',method:'GET'}],probe:{passed:true,errorCode:'ECONNRESET',path:'/tropnik/_offline-transport-probe'}},screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
   profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'leaflet',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
   desktopProfiles:[{name:'desktop-webgl',engine:'maplibre',coarse:false,mapInteractionTested:true}],
   zoomDesigns:[zoomDesign('android-portrait','leaflet',true),zoomDesign('desktop-webgl','maplibre',false)],
-  mapInteractions:[['android-portrait','leaflet',true],['desktop-webgl','maplibre',false]].map(([profile,engine,mobile])=>({profile,engine,mobile,passed:true,directionHitAreas:directionHitAreasFixture(engine,mobile),experience:exploreExperienceFixture(mobile),...(mobile?{}:{styleCameraRoundtrip:styleCameraRoundtripFixture()}),catalogScroll:mobile?{passed:true,input:'touch',deltaPx:100,scrollHeightDelta:0,pageScrollDeltaPx:0,sheetDisplacementPx:0}:null,firstDirection:[{selected:'altai'}],secondDirection:[{selected:'baikal'}],route:{id:'route',offsetPx:14},line:{route:'route',clicked:true,selectionRetained:true,reopened:mobile},returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,polygon:{id:'territory'},gestures:{zoomInput:mobile?'touch-control':'mouse-wheel',beforeZoom:5,afterZoom:6,dragged:true,selectionPreserved:true,resizedTo:{width:900,height:412},postResizePolygon:'territory'},longestTaskMs:100}))};
+  siteSmoothness:[smoothnessFixture('android-portrait','leaflet'),smoothnessFixture('desktop-webgl','maplibre')],
+  mapInteractions:[['android-portrait','leaflet',true],['desktop-webgl','maplibre',false]].map(([profile,engine,mobile])=>({profile,engine,mobile,passed:true,directionHitAreas:directionHitAreasFixture(engine,mobile),experience:exploreExperienceFixture(mobile),...(mobile?{}:{styleCameraRoundtrip:styleCameraRoundtripFixture()}),catalogScroll:mobile?{passed:true,input:'touch',deltaPx:100,scrollHeightDelta:0,pageScrollDeltaPx:0,sheetDisplacementPx:0}:null,firstDirection:[{selected:'altai'}],secondDirection:[{selected:'baikal'}],route:{id:'route',offsetPx:14},line:{route:'route',clicked:true,selectionRetained:true,reopened:mobile},returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,polygon:{id:'territory'},gestures:{zoomInput:mobile?'touch-control':'mouse-wheel',beforeZoom:5,afterZoom:6,dragged:true,selectionPreserved:true,resizedTo:{width:900,height:412},postResizePolygon:'territory'},longestTaskMs:100,layoutShift:0}))};
 }
 test('both upload and public verification require real mobile and desktop map interaction evidence',()=>{
  const report=evidence();assert.equal(assertBrowserReport(report,commit),report);
@@ -86,6 +89,9 @@ test('both upload and public verification require real mobile and desktop map in
   value=>value.desktopProfiles[0].engine='leaflet',
   value=>value.desktopProfiles[0].coarse=true,
   value=>value.mapInteractions.pop(),
+  value=>delete value.siteSmoothness,
+  value=>value.siteSmoothness.pop(),
+  value=>value.mapInteractions[0].layoutShift=.12,
   value=>delete value.profiles[0].layerMenus,
   value=>delete value.profiles[1].layerMenus,
   value=>delete value.profiles[2].layerMenus,
@@ -126,6 +132,13 @@ test('publication rejects the exact mobile and desktop long-task boundaries even
    const over=evidence();over.mapInteractions[index].longestTaskMs=duration;
    assert.throws(()=>assertBrowserReport(over,commit));
   }
+ }
+});
+test('publication cannot hide all-mode freezes or source-end layout shifts behind a passing satellite interval',()=>{
+ for(const [index,limit]of [[0,350],[1,750]])for(const phase of ['modes','sourceEnds'])for(const [metric,value]of [['longestTaskMs',limit],['layoutShift',.12]]){
+  const report=evidence(),design=report.zoomDesigns[index];design.performanceIntervals[phase][metric]=value;
+  if(phase==='sourceEnds')design.closeTrail.performance[metric]=value;
+  design.performance[metric]=value;assert.throws(()=>assertBrowserReport(report,commit),/performance budget/);
  }
 });
 test('zoom evidence requires all increments and keeps unavailable imagery explicit',()=>{

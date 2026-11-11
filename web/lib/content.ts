@@ -2,6 +2,8 @@ import importedCatalog from './catalog.generated.json';
 import importedPoints from './route-points.generated.json';
 import telegramReviewed from './telegram-reviewed.generated.json';
 import editorialRegions from './editorial-regions.generated.json';
+import territorialRegions from './territories.generated.json';
+import nationalEditorial from './national-editorial.generated.json';
 import yandexReviewed from './yandex-routes.generated.json';
 import discoveryReviewed from './discovery-routes.generated.json';
 import discoveryEastReviewed from './russiadiscovery-east.generated.json';
@@ -21,6 +23,7 @@ const initialRegions: Region[] = [
 ];
 
 export const regions: Region[] = [...initialRegions, ...(editorialRegions.regions as Region[])];
+const regionNames = new Map([...regions,...territorialRegions.territories].map(region => [region.id,region.name]));
 
 export type SourceReference = {
   url: string; name: string; messageId?: number; publishedAt?: string; reviewedAt: string;
@@ -154,7 +157,7 @@ const reviewedCatalogues = [yandexReviewed, discoveryReviewed, discoveryEastRevi
 export const trails: Trail[] = [
   ...initialTrails.map(t => ({...t, ...(importedPoints as Record<string, unknown>)[t.id] as object})),
   ...(importedCatalog as Trail[]), ...reviewedCatalogues.flatMap(source => source.routes),
-  ...(telegramReviewed.routes as Trail[]),
+  ...(telegramReviewed.routes as Trail[]), ...(nationalEditorial.routes as Trail[]),
 ].filter(trail => !outsideDisplayCoverage.has(trail.id)).map(trail => {
   let merged = reviewedOperatingStatus[trail.id] && !trail.accessStatus
     ? {...trail, accessStatus: reviewedOperatingStatus[trail.id]} : trail;
@@ -179,8 +182,10 @@ export const trails: Trail[] = [
     .replaceAll('Данные OpenStreetMap', 'Описание маршрута');
   const sourceTitle = merged.title;
   const title = /^Маршрут OSM \d+$/.test(sourceTitle)
-    ? `Тропа без названия · ${regions.find(region => region.id === merged.regionId)?.name || 'Россия'}` : sourceTitle;
-  return {...merged, title, ...(title !== sourceTitle ? {sourceTitle} : {}),
+    ? `Тропа без названия · ${regionNames.get(merged.regionId) || 'Россия'}`
+    : /^[\p{L}\p{N}]$/u.test(sourceTitle.trim())
+      ? `Маршрут ${sourceTitle.trim()} · ${regionNames.get(merged.regionId) || 'Россия'}` : sourceTitle;
+  return {...merged, title, ...(title !== sourceTitle ? {sourceTitle: merged.sourceTitle || sourceTitle} : {}),
     description: clean(merged.description), subtitle: clean(merged.subtitle), notes: merged.notes.map(clean),
     ...(merged.operatingNotice ? {operatingNotice: {...merged.operatingNotice, title: clean(merged.operatingNotice.title), body: clean(merged.operatingNotice.body)}} : {}),
     ...(merged.officialEvidence ? {officialEvidence: {...merged.officialEvidence, summary: clean(merged.officialEvidence.summary)}} : {}),
@@ -188,9 +193,15 @@ export const trails: Trail[] = [
   };
 });
 
-export const regionById = (id: string) => regions.find(r => r.id === id);
-export const trailById = (id: string) => trails.find(r => r.id === id);
-export const getRegionTrails = (id: string) => trails.filter(r => r.regionId === id||r.regionIds?.includes(id));
+const regionsById = new Map(regions.map(region => [region.id, region]));
+const trailsById = new Map(trails.map(trail => [trail.id, trail]));
+const trailsByRegion = new Map<string,Trail[]>();
+for(const trail of trails)for(const id of new Set([trail.regionId,...(trail.regionIds??[])])){
+  let list=trailsByRegion.get(id);if(!list){list=[];trailsByRegion.set(id,list);}list.push(trail);
+}
+export const regionById = (id: string) => regionsById.get(id);
+export const trailById = (id: string) => trailsById.get(id);
+export const getRegionTrails = (id: string) => (trailsByRegion.get(id)??[]).slice();
 export const getOrigin = () => process.env.NEXT_PUBLIC_SITE_URL || 'https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site';
 export const isPublicIndexingEnabled = () => process.env.TROPA_PUBLIC_INDEXING === 'true';
 

@@ -1,5 +1,5 @@
 import data from './territories.generated.json';
-import type {Region, Trail} from './content';
+import {regionById,type Region,type Trail} from './content';
 
 /** A geographic selection is independent of an editorial tourism collection. */
 export type MapRegion = Omit<Region, 'timezone'> & {
@@ -28,7 +28,27 @@ for(const territory of territories)for(const name of territory.shapeNames){
   const list=byShape.get(name)??[];list.push(territory);byShape.set(name,list);
 }
 const routeMembership = new Map(territories.map(item => [item.id, new Set(item.geometryUrls)]));
+const territoriesByGeometry = new Map<string,Set<string>>();
+for(const territory of territories)for(const url of territory.geometryUrls??[]){
+  let ids=territoriesByGeometry.get(url);if(!ids){ids=new Set();territoriesByGeometry.set(url,ids);}ids.add(territory.id);
+}
 export const territoryById = (id: string) => byId.get(id);
+/** Resolve a route's editorial direction or its exact administrative territory. */
+export const mapRegionById = (id: string): MapRegion | undefined => territoryById(id) ?? regionById(id);
+
+/** Index memberships once per catalogue revision. Only explicit identifiers
+ * and the existing geometry membership are used; tourism groups never imply
+ * administrative coverage. Arrays retain catalogue order and object identity. */
+export function createTrailRegionIndex<T extends Trail>(catalog:readonly T[]) {
+  const result=new Map<string,T[]>();
+  for(const trail of catalog){
+    const ids=new Set([trail.regionId,...(trail.regionIds??[])]);
+    for(const id of trail.territoryIds??[])if(byId.has(id))ids.add(id);
+    for(const id of territoriesByGeometry.get(trail.geometryUrl??'')??[])ids.add(id);
+    for(const id of ids){let matches=result.get(id);if(!matches){matches=[];result.set(id,matches);}matches.push(trail);}
+  }
+  return result;
+}
 export const territoriesForShapes = (names: readonly string[]) => {
   const result=new Map<string,MapRegion>();
   for(const name of names)for(const territory of byShape.get(name)??[])result.set(territory.id,territory);

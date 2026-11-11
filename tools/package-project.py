@@ -134,6 +134,8 @@ def excluded(path: str, profile: str) -> str | None:
         return "rebuildable_boundary_processing_cache"
     if under(path, "tools/github-publish/generated") or under(path, "tools/db-compat/.work"):
         return "rebuildable_verification_transport"
+    if under(path, "data/catalog/national/raw"):
+        return "separate_hash_pinned_national_source_archive"
     if p.name in SKIP_NAMES or path == "web/package-lock.json":
         return "local_config_or_stale_lock"
     if (p.name.startswith(".env") and not p.name.endswith(".example")) or p.name.startswith(".dev.vars"):

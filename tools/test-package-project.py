@@ -53,6 +53,20 @@ class SourceExportTest(unittest.TestCase):
                 selected, _ = package.select_files(root, profile, require_project=False)
                 self.assertEqual({manifest, page}, {p.relative_to(root).as_posix() for p in selected})
 
+    def test_national_source_archive_is_separate_but_accepted_routes_and_provenance_survive(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wanted = ["data/catalog/national/routes.json", "data/catalog/national/source-archive.json",
+                      "data/catalog/national/geometry/osm-relation-1.geojson"]
+            blocked = ["data/catalog/national/raw/lists/a.json", "data/catalog/national/raw/relations/1.json",
+                       "data/catalog/national/raw/relations/1.json.source.json"]
+            for rel in wanted + blocked:
+                self.put(root, rel)
+            for profile in ("source", "github"):
+                selected, skipped = package.select_files(root, profile, require_project=False)
+                self.assertEqual(set(wanted), {p.relative_to(root).as_posix() for p in selected})
+                self.assertGreater(skipped.get("separate_hash_pinned_national_source_archive", 0), 0)
+
     def test_boundary_raw_sources_and_renderer_docs_survive_without_processing_cache(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

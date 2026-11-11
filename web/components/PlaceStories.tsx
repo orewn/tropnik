@@ -1,22 +1,21 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
-import {useEffect,useMemo,useState,useRef,useId} from 'react';
+import {memo,useEffect,useMemo,useState,useRef,useId} from 'react';
 import type {KeyboardEvent as ReactKeyboardEvent,PointerEvent as ReactPointerEvent} from 'react';
 import {ArrowRight,CaretLeft,CaretRight,Pause,Play,Compass,X} from '@/components/TropnikIcons';
 import {factsForPlace,type PlaceFact} from '@/lib/facts';
 
-export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeId?:string;onPlace:(f:PlaceFact)=>void}){
+export const PlaceStories=memo(function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeId?:string;onPlace:(f:PlaceFact)=>void}){
  const facts=useMemo(()=>factsForPlace(regionId,routeId),[regionId,routeId]);
  const [index,setIndex]=useState(0),[paused,setPaused]=useState(false),[hovered,setHovered]=useState(false),[hidden,setHidden]=useState(false),[dismissed,setDismissed]=useState(Boolean(routeId)),[reduced,setReduced]=useState(false),[expanded,setExpanded]=useState(false),[narrow,setNarrow]=useState(false),[failedPhoto,setFailedPhoto]=useState(''),[canHover,setCanHover]=useState(false),[inViewport,setInViewport]=useState(true);
  const storyId=useId(),overview=!regionId,collapsible=overview||narrow,compact=collapsible&&!expanded;
- const regionKey=useRef(''),swipe=useRef<{x:number;y:number;id:number}|null>(null),card=useRef<HTMLElement|null>(null);
+ const [selection,setSelection]=useState({regionId,routeId});
+ const swipe=useRef<{x:number;y:number;id:number}|null>(null),card=useRef<HTMLElement|null>(null);
  const fact=facts.length?facts[index%facts.length]:undefined;
 
  useEffect(()=>{const media=window.matchMedia('(max-width: 1024px), (max-height: 620px)');const sync=()=>setNarrow(media.matches);sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
  useEffect(()=>{const media=window.matchMedia('(max-width: 700px) and (max-height: 720px), (max-width: 900px) and (max-height: 620px)');const sync=()=>{if(media.matches)setDismissed(true);};sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
  useEffect(()=>{const media=window.matchMedia('(hover: hover) and (pointer: fine)');const sync=()=>setCanHover(media.matches);sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
- useEffect(()=>{const key=`${regionId||'all'}:${routeId||''}`;if(key!==regionKey.current){setIndex(0);setExpanded(false);setPaused(false);regionKey.current=key;}},[regionId,routeId]);
- useEffect(()=>{if(routeId)queueMicrotask(()=>setDismissed(true));},[routeId]);
  useEffect(()=>{const media=window.matchMedia('(prefers-reduced-motion: reduce)');const sync=()=>setReduced(media.matches);sync();media.addEventListener('change',sync);const visibility=()=>setHidden(document.hidden);visibility();document.addEventListener('visibilitychange',visibility);return()=>{media.removeEventListener('change',sync);document.removeEventListener('visibilitychange',visibility);};},[]);
  useEffect(()=>{
   const node=card.current;
@@ -37,8 +36,14 @@ export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeI
  },[fact,facts,index,dismissed,hidden,inViewport]);
 
  const stopped=paused||hovered||hidden||reduced||dismissed||!inViewport||(collapsible&&expanded);
- useEffect(()=>{if(stopped||facts.length<2)return;const timer=setTimeout(()=>setIndex(i=>(i+1)%facts.length),16000);return()=>clearTimeout(timer);},[index,stopped,facts.length]);
+ useEffect(()=>{if(stopped||facts.length<2)return;const timer=setTimeout(()=>setIndex(i=>(i+1)%facts.length),16000);return()=>clearTimeout(timer);},[index,stopped,facts]);
 
+ // Adjust selection before committing its DOM: a changed place must never
+ // briefly show the previous story index or expand a route's story overlay.
+ if(selection.regionId!==regionId||selection.routeId!==routeId){
+  setSelection({regionId,routeId});setIndex(0);setExpanded(false);setPaused(false);
+  if(routeId&&selection.routeId!==routeId)setDismissed(true);
+ }
  if(!fact)return null;
  function manual(delta:number){setPaused(true);setIndex(i=>(i+delta+facts.length)%facts.length);}
  function releaseTouchFocus(button:HTMLButtonElement){
@@ -99,4 +104,4 @@ export function PlaceStories({regionId,routeId,onPlace}:{regionId?:string;routeI
   </div>
   <div className={`fact-progress ${stopped?'paused':''}`} aria-hidden="true"><span key={`${fact.id}-${paused}`}/></div>
  </aside>;
-}
+});

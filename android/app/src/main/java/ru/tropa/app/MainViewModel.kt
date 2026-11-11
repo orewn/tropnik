@@ -28,6 +28,7 @@ data class AppState(
     val regionId: String? = null,
     val routeId: String? = null,
     val search: String = "",
+    val catalogTerritories: Boolean = false,
     val connection: ConnectionState = ConnectionState.OFFLINE,
     val position: PositionState = PositionState.Idle,
     val savedRoutes: List<SavedRouteEntity> = emptyList(),
@@ -54,7 +55,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun switchScreen(screen: Screen) { mutableState.update { it.copy(screen = screen, routeId = null, regionId = null, search = "") } }
     fun selectRegion(id: String) {
-        if (catalog.regions.any { it.id == id }) mutableState.update { it.copy(screen = Screen.EXPLORE, regionId = id, routeId = null, search = "") }
+        if (catalog.region(id) != null) mutableState.update { it.copy(screen = Screen.EXPLORE, regionId = id, routeId = null, search = "") }
     }
     fun selectRoute(id: String) { if (route(id) != null) mutableState.update { it.copy(routeId = id) } }
     fun selectPublishedRoute(route: PublishedRoute) {
@@ -64,9 +65,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun back() { mutableState.update { if (it.routeId != null) it.copy(routeId = null) else it.copy(regionId = null, search = "") } }
     fun search(query: String) { mutableState.update { it.copy(search = query.take(100)) } }
+    fun showTerritories(enabled: Boolean) { mutableState.update { it.copy(catalogTerritories = enabled, search = "") } }
     fun clearNotice() { mutableState.update { it.copy(notice = null) } }
-    fun region(id: String?) = catalog.regions.firstOrNull { it.id == id }
-    fun route(id: String?): TrailRoute? = catalog.routes.firstOrNull { it.id == id }
+    fun region(id: String?) = catalog.region(id)
+    fun route(id: String?): TrailRoute? = catalog.route(id)
         ?: loadedPublishedRoutes[id]
         ?: mutableState.value.savedRoutes.firstOrNull { it.routeId == id }?.let { runCatching { JSONObject(it.snapshotJson).toRoute() }.getOrNull() }
 

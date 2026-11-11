@@ -13,6 +13,7 @@ data class Region(
     val latitude: Double,
     val longitude: Double,
     val zoom: Double,
+    val territory: Boolean = false,
 )
 
 data class TrailRoute(
@@ -64,15 +65,35 @@ data class RouteSourceReference(
 )
 
 data class Catalog(val version: String, val regions: List<Region>, val routes: List<TrailRoute>) {
+    private val regionsById by lazy { regions.associateBy { it.id } }
+    private val routesById by lazy { routes.associateBy { it.id } }
+    private val references by lazy { routes.filterNot { it.illustrative } }
+    private val referencesByRegion by lazy {
+        buildMap<String, MutableList<TrailRoute>> {
+            for (route in references) for (id in route.regionIds.distinct()) {
+                getOrPut(id) { mutableListOf() }.add(route)
+            }
+        }
+    }
+    private val searchByRoute by lazy {
+        references.associate { route -> route.id to searchText(listOf(route.title, route.summary,
+            route.description, route.regionIds.mapNotNull { regionsById[it]?.name }.joinToString(" ")).joinToString(" ")) }
+    }
+
+    fun region(id: String?): Region? = id?.let(regionsById::get)
+    fun route(id: String?): TrailRoute? = id?.let(routesById::get)
+
+    /** The same bundled pilot is available through its direction and territory. */
+    fun hasDetailedOfflineMap(regionId: String): Boolean {
+        val pilot = route("kavkaz-8a") ?: return false
+        return pilot.geometryAsset != null && regionId in pilot.regionIds
+    }
+
     /** Cards remain discoverable even when no route line has been published. */
     fun referenceRoutes(query: String = "", regionId: String? = null): List<TrailRoute> {
         val needle = searchText(query.take(100))
-        val regionNames = regions.associate { it.id to it.name }
-        return routes.filter { route ->
-            !route.illustrative && (regionId == null || regionId in route.regionIds) &&
-                (needle.isBlank() || searchText(listOf(route.title, route.summary, route.description,
-                    route.regionIds.mapNotNull(regionNames::get).joinToString(" ")).joinToString(" ")).contains(needle))
-        }
+        val candidates = if (regionId == null) references else referencesByRegion[regionId].orEmpty()
+        return if (needle.isBlank()) candidates.toList() else candidates.filter { searchByRoute.getValue(it.id).contains(needle) }
     }
 
     companion object {
@@ -82,12 +103,13 @@ data class Catalog(val version: String, val regions: List<Region>, val routes: L
             val regions = json.getJSONArray("regions").objects().map {
                 Region(it.getString("id"), it.getString("name"), it.getString("subtitle"),
                     it.getString("description"), it.getDouble("latitude"), it.getDouble("longitude"),
-                    it.getDouble("zoom"))
+                    it.getDouble("zoom"), it.optBoolean("territory", false))
             }
             val routes = json.getJSONArray("routes").objects().map { it.toRoute() }
             require(regions.map { it.id }.toSet().size == regions.size)
             require(routes.map { it.id }.toSet().size == routes.size)
-            require(routes.all { route -> regions.any { it.id == route.regionId } })
+            val regionIds = regions.mapTo(mutableSetOf()) { it.id }
+            require(routes.all { route -> route.regionId in route.regionIds && route.regionIds.all(regionIds::contains) })
             return Catalog(json.getString("version"), regions, routes)
         }
     }
