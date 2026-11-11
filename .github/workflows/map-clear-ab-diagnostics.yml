@@ -1,0 +1,210 @@
+name: Same-host full-canvas discard comparison
+
+on:
+  push:
+    branches: [diagnostics/canvas-recording-reset-ab]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: canvas-recording-reset-ab-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  BASELINE_SOURCE: 1710b201bfeed52613659ae3e4ca7f26638cb6cb
+  OPTIMIZED_SOURCE: 8a12cf6e58643b9286b89e8e528afbeeaf9c2133
+
+jobs:
+  same-host-comparison:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - name: Check out the isolated diagnostic tools
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: diagnostic
+          persist-credentials: false
+      - name: Check out the immutable baseline
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BASELINE_SOURCE }}
+          path: baseline
+          persist-credentials: false
+      - name: Check out the immutable optimized candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.OPTIMIZED_SOURCE }}
+          path: optimized
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install the identical frozen dependencies
+        run: |
+          cmp baseline/web/pnpm-lock.yaml optimized/web/pnpm-lock.yaml
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir optimized/web install --frozen-lockfile --store-dir "$RUNNER_TEMP/tropnik-ab-pnpm-store"
+          pnpm --dir baseline/web install --frozen-lockfile --offline --store-dir "$RUNNER_TEMP/tropnik-ab-pnpm-store"
+      - name: Verify immutable checkouts and diagnostic validators
+        run: |
+          test "$(git -C baseline rev-parse HEAD)" = "$BASELINE_SOURCE"
+          test "$(git -C optimized rev-parse HEAD)" = "$OPTIMIZED_SOURCE"
+          git -C baseline diff --exit-code
+          git -C optimized diff --exit-code
+          node --check diagnostic/tools/pages-preview/map-clear-ab-report.mjs
+          node --test diagnostic/tools/pages-preview/tests/map-clear-build-source.test.mjs
+          node diagnostic/tools/pages-preview/map-clear-ab-report.mjs --self-test
+      - name: Run all 31 engine and discard unit tests
+        working-directory: optimized
+        run: node --experimental-strip-types --test web/tests/custom-map-engine.test.mjs
+      - name: Prepare baseline from its immutable generated assets
+        working-directory: baseline
+        run: |
+          tropnik_source_sha="$(git rev-parse HEAD)"
+          test "$tropnik_source_sha" = "$BASELINE_SOURCE"
+          node tools/android-build/prepare-custom-map.mjs --check
+          node tools/pages-preview/fetch-apk.mjs
+          env GITHUB_SHA="$tropnik_source_sha" node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Prepare candidate from its immutable generated assets
+        working-directory: optimized
+        run: |
+          tropnik_source_sha="$(git rev-parse HEAD)"
+          test "$tropnik_source_sha" = "$OPTIMIZED_SOURCE"
+          node tools/android-build/prepare-custom-map.mjs --check
+          node tools/pages-preview/fetch-apk.mjs
+          env GITHUB_SHA="$tropnik_source_sha" node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Prove all 46 actual production pixel triples before timing
+        working-directory: optimized
+        run: env GITHUB_SHA="$OPTIMIZED_SOURCE" node --test tools/pages-preview/tests/browser-map-underlay.browser.mjs
+      - name: Bind every original pixel, operation and source invariant
+        working-directory: optimized
+        run: |
+          env GITHUB_SHA="$OPTIMIZED_SOURCE" node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {createHash} from 'node:crypto';
+          import {readFileSync} from 'node:fs';
+          import {assertBrowserEnvironment} from './tools/pages-preview/browser-environment.mjs';
+          const underlay = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-underlay-verification.json', 'utf8'));
+          assert.equal(underlay.schemaVersion, 1);
+          assert.equal(underlay.evidence, 'production-canvas-underlay-pixel-parity');
+          assert.equal(underlay.baseline, 'immutable-1710-production-draw');
+          assert.equal(underlay.underlayControl, 'immutable-1710-draw-with-fixture-only-coverage-false');
+          assert.equal(underlay.baselineSourceCommit, '1710b201bfeed52613659ae3e4ca7f26638cb6cb');
+          assert.equal(underlay.baselineRendererSHA256, 'c25b61c97602070d746706d977d50906217e4b1258ce5a482ae64bb914ee3127');
+          const underlayResetBlock = "    // Discard obsolete recorded operations before rebuilding this complete\n    // frame. The opaque detail proof or the original paper fill covers it.\n    ctx.clearRect(0,0,this.canvas.width,this.canvas.height);\n";
+          const underlayCandidateSource = readFileSync('web/lib/custom-map-engine.ts', 'utf8');
+          assert.equal(underlayCandidateSource.split(underlayResetBlock).length, 2);
+          assert.equal(createHash('sha256').update(underlayCandidateSource.replace(underlayResetBlock, '')).digest('hex'), underlay.baselineRendererSHA256);
+          assert.notEqual(underlay.rendererSHA256, underlay.baselineRendererSHA256);
+          assert.equal(underlay.verified, true);
+          assert.equal(underlay.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(underlay.rendererSHA256, createHash('sha256').update(readFileSync('web/lib/custom-map-engine.ts')).digest('hex'));
+          assert.equal(underlay.sources['web/lib/custom-map-engine.ts'], underlay.rendererSHA256);
+          for (const [path, hash] of Object.entries(underlay.sources)) {
+            assert.match(path, /^web\/(?:[\w.-]+\/)*[\w.-]+$/);
+            assert.equal(hash, createHash('sha256').update(readFileSync(path)).digest('hex'));
+          }
+          assertBrowserEnvironment(underlay.environment, process.env.GITHUB_SHA);
+          const covers = {opaque:[true], 'fractional-zoom':[true], 'pan-sequence':[true,true,true,false,true], missing:[false], transparent:[false], rotated:[false], pitched:[false], satellite:[false], overview:[false], zoom12:[true,true,true,false,true], zoom13:[false], zoom18:[false], 'tiny-tile':[false], 'unwrapped-world':[true], 'boundaries-hidden':[true]};
+          assert.deepEqual(underlay.cases.map(item => item.dpr + '/' + item.name).sort(), [1,2].flatMap(dpr => Object.keys(covers).map(name => dpr + '/' + name)).sort());
+          let underlayFrames = 0, underlayCaptures = 0;
+          for (const item of underlay.cases) {
+            assert.equal(item.verified, true);
+            assert.equal(item.contextAttributes.alpha, false);
+            assert.equal(item.contextAttributes.willReadFrequently, item.policy.softwareRaster);
+            assert.deepEqual(item.bitmapDimensions, [512,512]);
+            assert.equal(item.priorFrame.kind, 'distinct-opaque-checkerboards');
+            assert.equal(item.priorFrame.comparison.differentPixels, 512*384*item.dpr*item.dpr);
+            assert.equal(item.priorFrame.comparison.totalPixels, 512*384*item.dpr*item.dpr);
+            assert.ok(item.priorFrame.comparison.maxChannelDelta > 0 && item.priorFrame.comparison.maxChannelDelta <= 255);
+            assert.match(item.priorFrame.baselinePixelSHA256, /^[a-f0-9]{64}$/);
+            assert.match(item.priorFrame.optimizedPixelSHA256, /^[a-f0-9]{64}$/);
+            assert.notEqual(item.priorFrame.baselinePixelSHA256, item.priorFrame.optimizedPixelSHA256);
+            assert.deepEqual(item.frames.map(frame => frame.actualCoverage), covers[item.name]);
+            assert.deepEqual(item.frames.map(frame => frame.expectedCoverage), covers[item.name]);
+            if (item.name === 'tiny-tile') assert.ok(item.tileDeviceSpan <= 1);
+            const negatives = item.name === 'opaque' ? ['remove-route','remove-selectedBoundary','remove-mask'] : ['missing','transparent'].includes(item.name) ? ['force-unsafe-cover'] : [];
+            assert.deepEqual(item.negativeControls.map(control => control.name), negatives);
+            for (const control of item.negativeControls) assert.ok(control.differentPixels > 0);
+            for (const frame of item.frames) {
+              underlayFrames++;
+              assert.deepEqual([frame.width,frame.height], [512*item.dpr,384*item.dpr]);
+              assert.deepEqual(frame.comparison, {differentPixels:0,maxChannelDelta:0,totalPixels:frame.width*frame.height});
+              assert.match(frame.baselinePixelSHA256, /^[a-f0-9]{64}$/);
+              assert.equal(frame.optimizedPixelSHA256, frame.baselinePixelSHA256);
+              assert.deepEqual(frame.underlayComparison, frame.comparison);
+              assert.equal(frame.underlayControlPixelSHA256, frame.baselinePixelSHA256);
+              const {baseline,optimized,underlayControl} = frame.operations;
+              assert.equal(underlayControl.area, 1);
+              assert.ok(underlayControl.overview > 0);
+              assert.equal(underlayControl.clear, 1);
+              assert.equal(underlayControl.discard, 0);
+              assert.equal(underlayControl.proofCalls, 1);
+              assert.equal(optimized.area, frame.actualCoverage ? 0 : 1);
+              assert.equal(optimized.overview, frame.actualCoverage ? 0 : underlayControl.overview);
+              for (const key of ['clear','area','overview','mask','selectedArea','detail','relief','imagery','proofCalls']) assert.equal(optimized[key], baseline[key]);
+              for (const key of ['mask','selectedArea','detail','relief','imagery']) assert.equal(optimized[key], underlayControl[key]);
+              assert.equal(baseline.discard, 0);
+              assert.equal(optimized.discard, 1);
+              assert.equal(optimized.clear, frame.actualCoverage ? 0 : 1);
+              assert.equal(optimized.mask, 1);
+              assert.equal(optimized.proofCalls, 1);
+              if (frame.actualCoverage) assert.ok(item.tileDeviceSpan > 1);
+              assert.deepEqual(frame.captures.map(capture => capture.phase), ['baseline','optimized','underlay-control']);
+              for (const capture of frame.captures) {
+                underlayCaptures++;
+                assert.match(capture.file, /^[a-zA-Z0-9.-]+\.png$/);
+                const png = readFileSync('web/pages-preview/design-qa/map-underlay/' + capture.file);
+                assert.equal(png.length, capture.bytes);
+                assert.equal(createHash('sha256').update(png).digest('hex'), capture.sha256);
+                assert.equal(png.subarray(0,8).toString('hex'), '89504e470d0a1a0a');
+                assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)], [frame.width,frame.height]);
+              }
+            }
+          }
+          assert.equal(underlayFrames, 46);
+          assert.equal(underlayCaptures, 138);
+          NODE
+      - name: Run the unchanged baseline normal UI audit once
+        working-directory: baseline
+        timeout-minutes: 8
+        run: |
+          tropnik_source_sha="$(git rev-parse HEAD)"
+          test "$tropnik_source_sha" = "$BASELINE_SOURCE"
+          env -u TROPNIK_BROWSER_TRACE GITHUB_SHA="$tropnik_source_sha" TROPNIK_BROWSER_DIAGNOSTIC=ui-smoothness node tools/pages-preview/browser-smoke.mjs
+      - name: Run the unchanged candidate normal UI audit once
+        working-directory: optimized
+        timeout-minutes: 8
+        run: |
+          tropnik_source_sha="$(git rev-parse HEAD)"
+          test "$tropnik_source_sha" = "$OPTIMIZED_SOURCE"
+          env -u TROPNIK_BROWSER_TRACE GITHUB_SHA="$tropnik_source_sha" TROPNIK_BROWSER_DIAGNOSTIC=ui-smoothness node tools/pages-preview/browser-smoke.mjs
+      - name: Bind actual sources, runtime bytes, environments and native intervals
+        if: always()
+        run: node diagnostic/tools/pages-preview/map-clear-ab-report.mjs baseline optimized ab-evidence
+      - name: Preserve the predefined pair even when the candidate is rejected
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-canvas-discard-ab-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ab-evidence
+            baseline/web/pages-preview/design-qa
+            baseline/web/pages-preview/dist/build-info.json
+            baseline/web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            baseline/web/pages-preview/dist/browser-network.json
+            baseline/web/pages-preview/dist/browser-failure.*
+            optimized/web/pages-preview/design-qa
+            optimized/web/pages-preview/dist/build-info.json
+            optimized/web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            optimized/web/pages-preview/dist/browser-map-underlay-verification.json
+            optimized/web/pages-preview/dist/browser-network.json
+            optimized/web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7
