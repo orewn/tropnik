@@ -48,10 +48,10 @@ test('attribution fixture bundles the actual interactive component, complete CSS
 const geometryExpression=`(()=>{
  const box=element=>{if(!element)return null;const r=element.getBoundingClientRect();return{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
  const attribution=document.querySelector('.map-attribution'),credit=document.querySelector('.map-satellite-credit'),status=document.querySelector('.map-satellite-status'),toggle=document.querySelector('.map-attribution-toggle'),content=document.querySelector('.map-attribution-content'),rect=box(toggle),creditStyle=getComputedStyle(credit);
- const text=element=>{const range=document.createRange();range.selectNodeContents(element);return{value:element.textContent,rect:box(range),visible:getComputedStyle(element).visibility==='visible'}};
- return{rect:box(attribution),credit:box(credit),content:box(content),toggle:rect,expanded:toggle.getAttribute('aria-expanded')==='true',source:credit.dataset.imagerySource,fontFamily:creditStyle.fontFamily,fontSize:creditStyle.fontSize,lineHeight:creditStyle.lineHeight,anchors:[...credit.querySelectorAll('a')].map(element=>({...text(element),href:element.href})),details:[...credit.querySelectorAll('.map-satellite-detail:not(.map-satellite-status)')].map(text),status:{...text(status),ariaHidden:status.getAttribute('aria-hidden'),focusableChildren:status.querySelectorAll('a,button,input,select,textarea,[tabindex]').length},contentText:content?.textContent||null,blocked:[[.5,.5],[.3,.3],[.7,.3],[.3,.7],[.7,.7]].some(([x,y])=>!toggle.contains(document.elementFromPoint(rect.left+rect.width*x,rect.top+rect.height*y))),documentWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth};
+ const text=element=>{const range=document.createRange();range.selectNodeContents(element);return{value:element.textContent,rect:box(range),visible:getComputedStyle(element).visibility==='visible',visibleUnblocked:[...range.getClientRects()].some(r=>element.contains(document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2)))}};
+ return{rect:box(attribution),atlas:box(document.querySelector('.atlas-wrap')),credit:box(credit),content:box(content),toggle:rect,expanded:toggle.getAttribute('aria-expanded')==='true',source:credit.dataset.imagerySource,fontFamily:creditStyle.fontFamily,fontSize:creditStyle.fontSize,lineHeight:creditStyle.lineHeight,anchors:[...credit.querySelectorAll('a')].map(element=>({...text(element),href:element.href})),details:[...credit.querySelectorAll('.map-satellite-detail:not(.map-satellite-status)')].map(text),status:{...text(status),ariaHidden:status.getAttribute('aria-hidden'),focusableChildren:status.querySelectorAll('a,button,input,select,textarea,[tabindex]').length},contentText:content?.textContent||null,blocked:[[.5,.5],[.3,.3],[.7,.3],[.3,.7],[.7,.7]].some(([x,y])=>!toggle.contains(document.elementFromPoint(rect.left+rect.width*x,rect.top+rect.height*y))),documentWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth};
 })()`;
-const stableGeometry=value=>({rect:value.rect,credit:value.credit,content:value.content,toggle:value.toggle,anchors:value.anchors,details:value.details,statusRect:value.status.rect,contentText:value.contentText});
+const stableGeometry=value=>({rect:value.rect,atlas:value.atlas,credit:value.credit,content:value.content,toggle:value.toggle,anchors:value.anchors,details:value.details,statusRect:value.status.rect,contentText:value.contentText});
 function assertReadable(value,profile,scenario,expanded,loading){
  assert.equal(value.expanded,expanded);assert.equal(value.source,scenario.source);assert.equal(value.blocked,false,'The actual 44px licence control must remain reachable');
  assert.ok(value.toggle.width>=44&&value.toggle.height>=44);assert.ok(value.credit.left>=0&&value.credit.right<=profile.width,'The entire source card must fit the viewport');
@@ -59,10 +59,13 @@ function assertReadable(value,profile,scenario,expanded,loading){
  assert.match(value.fontFamily,/Manrope/);assert.equal(value.fontSize,'12px');assert.equal(value.lineHeight,'16px');assert.equal(value.anchors.length,2);
  assert.equal(value.anchors[0].value,scenario.source==='eox-s2'?'EOxCloudless':'NASA Blue Marble');assert.equal(value.anchors[1].value,'EOX');
  for(const text of [...value.anchors,...value.details,...(loading?[value.status]:[])]){
-  assert.equal(text.visible,true);assert.ok(text.rect.left>=value.credit.left&&text.rect.right<=value.credit.right&&text.rect.top>=value.credit.top&&text.rect.bottom<=value.credit.bottom,'All visible source text must fit its card');
+  assert.equal(text.visible,true);assert.equal(text.visibleUnblocked,true,'The licence panel must not obscure the source text');assert.ok(text.rect.left>=value.credit.left&&text.rect.right<=value.credit.right&&text.rect.top>=value.credit.top&&text.rect.bottom<=value.credit.bottom,'All visible source text must fit its card');
  }
  assert.equal(value.status.value,'Загружаем снимки…');assert.equal(value.status.visible,loading);assert.equal(value.status.ariaHidden,String(!loading));assert.equal(value.status.focusableChildren,0);
- if(expanded){assert.match(value.contentText,/OpenStreetMap contributors/);assert.match(value.contentText,/Данные и лицензии/);assert.match(value.contentText,scenario.source==='eox-s2'?/CC BY 4\.0/:/NASA Earth Observatory/);}
+ if(expanded){
+  assert.match(value.contentText,/OpenStreetMap contributors/);assert.match(value.contentText,/Данные и лицензии/);assert.match(value.contentText,scenario.source==='eox-s2'?/CC BY 4\.0/:/NASA Earth Observatory/);
+  assert.ok(value.content.left>=value.atlas.left&&value.content.right<=value.atlas.right&&value.content.top>=value.atlas.top&&value.content.bottom<=value.atlas.bottom,'The licence panel must stay inside the actual map viewport');
+ }
 }
 
 test('satellite attribution retains exact geometry over loading cycles with all visible credits and 44px controls',{
@@ -91,6 +94,28 @@ test('satellite attribution retains exact geometry over loading cycles with all 
    await evaluate("Promise.race([Promise.all(document.querySelector('.map-attribution-toggle').getAnimations().map(animation=>animation.finished.catch(()=>{}))),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Attribution toggle transition did not finish')),1000))])");
    await settle();assert.equal((await evaluate(geometryExpression)).expanded,expanded);
   };
+  const capture=async filename=>{const {data}=await cdp.call('Page.captureScreenshot',{format:'png'}),bytes=Buffer.from(data,'base64');await writeFile(join(pictures,filename),bytes);return{path:'design-qa/map-attribution/'+filename,bytes:bytes.length,sha256:sha(bytes)};};
+  const licenceInteraction=async entry=>{
+   const before=await evaluate(`(()=>{const panel=document.querySelector('.map-attribution-content'),r=panel.getBoundingClientRect();window.__licenceInputs={tabs:[],wheels:[]};const tab=event=>{if(event.key==='Tab'&&window.__licenceInputs.tabs.length<16)window.__licenceInputs.tabs.push({key:event.key,trusted:event.isTrusted})},wheel=event=>{if(panel.contains(event.target)&&window.__licenceInputs.wheels.length<8)window.__licenceInputs.wheels.push({deltaY:event.deltaY,trusted:event.isTrusted})};document.addEventListener('keydown',tab);panel.addEventListener('wheel',wheel,{passive:true});window.__removeLicenceInputs=()=>{document.removeEventListener('keydown',tab);panel.removeEventListener('wheel',wheel)};return{scrollTop:panel.scrollTop,scrollHeight:panel.scrollHeight,clientHeight:panel.clientHeight,overflowY:getComputedStyle(panel).overflowY,center:{x:(r.left+r.right)/2,y:(r.top+r.bottom)/2},hrefs:[...panel.querySelectorAll('a')].map(a=>a.getAttribute('href'))}})()`);
+   const scrollable=['auto','scroll'].includes(before.overflowY)&&before.scrollHeight>before.clientHeight+1,interaction={input:'native-cdp-wheel-and-tab',before,scrollable,links:[],wheelTransitions:[]};entry.licenseInteraction=interaction;
+   await evaluate("document.querySelector('.map-attribution-content a').focus()");await settle();
+   for(let index=0;index<before.hrefs.length;index++){
+    if(index){for(const type of ['keyDown','keyUp'])await cdp.call('Input.dispatchKeyEvent',{type,key:'Tab',code:'Tab',windowsVirtualKeyCode:9,nativeVirtualKeyCode:9});await settle();}
+    const link=await evaluate(`(()=>{const panel=document.querySelector('.map-attribution-content'),active=document.activeElement,bounds=panel.getBoundingClientRect();return{href:active.getAttribute('href'),text:active.textContent,focused:active.tagName==='A'&&panel.contains(active),visibleUnblocked:[...active.getClientRects()].some(rect=>{const left=Math.max(rect.left,bounds.left+1),right=Math.min(rect.right,bounds.right-1),top=Math.max(rect.top,bounds.top+1),bottom=Math.min(rect.bottom,bounds.bottom-1);return right>left&&bottom>top&&active.contains(document.elementFromPoint((left+right)/2,(top+bottom)/2))}),scrollTop:panel.scrollTop}})()`);
+    interaction.links.push(link);assert.equal(link.href,before.hrefs[index]);assert.equal(link.focused,true);assert.equal(link.visibleUnblocked,true,'Every licence link must be reachable with native Tab navigation');
+   }
+   if(scrollable){
+    for(const [index,deltaY]of [-before.scrollHeight,before.scrollHeight,-before.scrollHeight].entries()){
+     const previous=await evaluate("document.querySelector('.map-attribution-content').scrollTop");await cdp.call('Input.dispatchMouseEvent',{type:'mouseWheel',x:before.center.x,y:before.center.y,deltaX:0,deltaY});
+     const expected=deltaY>0?before.scrollHeight-before.clientHeight:0;let observed;
+     for(let attempt=0;attempt<40;attempt++){await settle();observed=await evaluate("document.querySelector('.map-attribution-content').scrollTop");if(Math.abs(observed-expected)<=1)break;await sleep(10);}
+     interaction.wheelTransitions.push({deltaY,before:previous,after:observed,expected});assert.ok(Math.abs(observed-expected)<=1,'Native wheel must expose the full licence panel');
+     if(index===1&&entry.name.includes('-overview-limit-'))interaction.bottomScreenshot=await capture(entry.name+'-license-bottom.png');
+    }
+   }
+   interaction.observedInputs=await evaluate("(()=>{const result=window.__licenceInputs;window.__removeLicenceInputs();document.activeElement.blur();return result})()");
+   assert.equal(interaction.observedInputs.tabs.length,before.hrefs.length-1);assert.ok(interaction.observedInputs.tabs.every(event=>event.trusted));assert.equal(interaction.observedInputs.wheels.length,interaction.wheelTransitions.length);assert.ok(interaction.observedInputs.wheels.every(event=>event.trusted));await settle();
+  };
   report.environment.nativeSurface=await collectNativeBrowserSurface(cdp);await mkdir(pictures,{recursive:true});
   for(const profile of profiles){
    report.phase=profile.name;await cdp.call('Emulation.setDeviceMetricsOverride',{width:profile.width,height:profile.height,deviceScaleFactor:profile.dpr,mobile:profile.mobile,screenWidth:profile.width,screenHeight:profile.height});await cdp.call('Emulation.setTouchEmulationEnabled',{enabled:profile.mobile,maxTouchPoints:profile.mobile?5:1});
@@ -113,9 +138,8 @@ test('satellite attribution retains exact geometry over loading cycles with all 
      const loadingGeometry=stableGeometry(loading),readyGeometry=stableGeometry(ready);entry.comparisons.push({cycle:cycle+1,loading:loadingGeometry,ready:readyGeometry});
      assertReadable(loading,profile,scenario,expanded,true);assertReadable(ready,profile,scenario,expanded,false);assert.deepEqual(readyGeometry,loadingGeometry,`${name}: a tile request must not move the source, licence popup, or control`);
     }
-    if(scenario.name===(expanded?'overview-limit':'detail')){
-     const {data}=await cdp.call('Page.captureScreenshot',{format:'png'}),bytes=Buffer.from(data,'base64'),filename=name+'.png';await writeFile(join(pictures,filename),bytes);entry.screenshot={path:'design-qa/map-attribution/'+filename,bytes:bytes.length,sha256:sha(bytes)};
-    }
+    if(expanded)await licenceInteraction(entry);
+    if(scenario.name===(expanded?'overview-limit':'detail'))entry.screenshot=await capture(name+'.png');
    }
   }
   assert.equal(report.cases.length,40);assert.equal(report.negativeControls.length,5);report.phase='complete';report.verified=true;

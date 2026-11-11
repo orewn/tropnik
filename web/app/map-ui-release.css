@@ -419,6 +419,15 @@
  .explore-layout .layer-menu{top:auto;right:0;bottom:60px;max-height:calc(100dvh - var(--header) - var(--sheet-control-inset,var(--map-bottom-inset,0px)) - 96px);overflow:auto}
  .explore-layout .map-legend{display:none}
  .explore-layout .map-attribution{bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 76px)}
+ /* Text rows give the source card its actual longest-line width. The licence
+    panel fits beside it, inside the map area above the measured sheet. */
+ .explore-layout .map-satellite-credit,.explore-layout .map-satellite-detail{display:block}
+ .explore-layout .map-attribution-content{
+  top:auto;right:calc(100% + 8px);bottom:0;
+  max-width:min(370px,calc(100vw - var(--explore-panel-width,0px) - var(--map-right) - 100% - var(--map-left) - 8px));
+  max-height:calc(100dvh - var(--header) - var(--sheet-control-inset,var(--map-bottom-inset,0px)) - 76px - var(--map-top));
+  overflow:auto;overscroll-behavior:contain;
+ }
  .explore-layout .fact-closed{top:calc(var(--map-top) + 60px);bottom:auto;left:calc(var(--explore-panel-width) + var(--map-left))}
  .explore-layout .fact-card{max-height:calc(100% - var(--sheet-peek,0px) - var(--map-top) - 72px);overflow:auto}
 }
