@@ -18,10 +18,19 @@ const MINUS='.map-controls button[aria-label="Уменьшить масштаб"
 export function browserAuditRunPolicy(value){
  if(value===undefined||value==='')return{diagnostic:null,reportFile:'browser-verification.json',profiles:null};
  if(value==='offline-safety')return{diagnostic:value,reportFile:'browser-offline-safety-diagnostic.json',profiles:[]};
+ if(value==='zoom-modes')return{diagnostic:value,reportFile:'browser-zoom-modes-diagnostic.json',profiles:['android-portrait']};
  if(value==='satellite-continuity')return{diagnostic:value,reportFile:'browser-satellite-continuity-diagnostic.json',profiles:['android-portrait','desktop-webgl']};
  if(value==='ui-smoothness'||value==='ui-smoothness-cpu')return{diagnostic:value,reportFile:`browser-${value}-diagnostic.json`,profiles:value==='ui-smoothness-cpu'?['android-portrait']:['android-portrait','desktop-webgl']};
  assert.ok(value==='terrain-close'||value==='map-interactions','Unknown TROPNIK_BROWSER_DIAGNOSTIC mode');
  return{diagnostic:value,reportFile:value==='terrain-close'?'browser-terrain-diagnostic.json':'browser-map-interactions-diagnostic.json',profiles:['desktop-webgl']};
+}
+/** Freeze the original budget counters before reading attribution. The next
+ * fixture navigates to another document and destroys these observer records. */
+export async function captureZoomModePerformance(cdp,{evaluate,performanceDiagnostics}){
+ const performance=await evaluate(cdp,'({layoutShift:window.__tropnikPerf?.cls||0,longestTaskMs:window.__tropnikPerf?.longest||0})');
+ let diagnostics={available:false,reason:'performance-diagnostics-helper-unavailable'};
+ if(performanceDiagnostics)try{diagnostics=await performanceDiagnostics(cdp);}catch(error){diagnostics={available:false,error:error?.message||String(error)};}
+ return{performance,diagnostics};
 }
 export function terrainDiagnosticTraceCategories(available=[]){
  const candidates=['cc','viz','disabled-by-default-gpu.service','disabled-by-default-gpu.device'];
@@ -174,14 +183,16 @@ export async function dispatchZoomBurst(cdp,point,profile,count=4){
  * successfully rendered satellite or 3D scene. */
 export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,traceEnabled=false}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase}=helpers;
- assert.ok(diagnostic===null||diagnostic==='terrain-close','Unknown zoom diagnostic mode');
- if(diagnostic)assert.ok(profile.name==='desktop-webgl'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
+ assert.ok(diagnostic===null||diagnostic==='terrain-close'||diagnostic==='zoom-modes','Unknown zoom diagnostic mode');
+ const terrainDiagnostic=diagnostic==='terrain-close',modesDiagnostic=diagnostic==='zoom-modes';
+ if(terrainDiagnostic)assert.ok(profile.name==='desktop-webgl'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
+ if(modesDiagnostic)assert.ok(profile.name==='android-portrait'&&profile.mobile,'The zoom-modes diagnostic requires the Android portrait profile');
  await mkdir(OUTPUT,{recursive:true});
  const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:8,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
  if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[]});
  let terrainTraceStarted=false;
- const terrainResources=diagnostic?observeTerrainResources(cdp,()=>report.diagnosticStage):null;
- const save=()=>{if(terrainResources)report.dem=terrainResources.snapshot();return writeFile(new URL(diagnostic?'desktop-webgl-terrain-diagnostic.json':`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');};
+ const terrainResources=terrainDiagnostic?observeTerrainResources(cdp,()=>report.diagnosticStage):null;
+ const save=()=>{if(terrainResources)report.dem=terrainResources.snapshot();return writeFile(new URL(terrainDiagnostic?'desktop-webgl-terrain-diagnostic.json':modesDiagnostic?'android-portrait-zoom-modes-diagnostic.json':`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');};
  const network=new Map();
  const forget=cdp.observe('Network.responseReceived',({requestId,response})=>{
   if(!response?.url)return;
@@ -442,10 +453,10 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   // Bzerpin area. The earlier map suite separately proves pointer selection.
   await loadProfile(cdp,`${helpers.url}?region=krasnodar&route=kavkaz-8a`,profile);
   await clearMapStories(cdp,profile);await closeMapSheet(cdp,profile);
-  await diagnosticPhase(cdp,diagnostic?'terrain-diagnostic-loading':'zoom-design-detail');
+  await diagnosticPhase(cdp,terrainDiagnostic?'terrain-diagnostic-loading':'zoom-design-detail');
   const route=await waitValue(`${profile.name}: the zoom audit route did not render`,()=>helpers.mapState(cdp),state=>state?.route==='kavkaz-8a');
   report.routeId=route.route;
-  if(!diagnostic){
+  if(!terrainDiagnostic){
   await capture('route-fit',await geometry('detail'));
   report.minimumZoom=await reachBottom();
   await capture('overview',await geometry('detail'));
@@ -486,7 +497,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
    let scene;
    for(let attempt=0;attempt<60;attempt++){scene=await sceneState();if(scene.error||scene.ready&&(scene.inspection?.cartography?.state!=='loading'&&scene.inspection?.frame?.cartography?.loadedTiles===scene.inspection?.cartography?.source?.loadedTiles))break;await sleep(250);}
    assert.equal(scene.ready,true,'Custom terrain never rendered its actual source grid');assertCustomSceneInspection(scene.inspection,profile.name+'/terrain');assert.equal(scene.inspection.cartography?.state,'ready','The known mapped area lost its real land-cover texture');
-   if(diagnostic){
+   if(terrainDiagnostic){
     report.gpu={traceCategories:await queryTerrainTraceCategories(cdp)};
     try{assert.ok(helpers.systemInfo,'No browser-level SystemInfo target');const info=await helpers.systemInfo();report.gpu.systemInfo={available:true,gpu:info.gpu,modelName:info.modelName,modelVersion:info.modelVersion};}catch(error){report.gpu.systemInfo={available:false,error:error.message};}
     try{report.gpu.webgl=await evaluate(cdp,`(${inspectTerrainWebGL.toString()})()`);}catch(error){report.gpu.webgl={available:false,error:error.message};}
@@ -523,11 +534,18 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
    await waitValue(`${profile.name}: the 3D scene did not return to the map`,()=>evaluate(cdp,"!document.querySelector('.terrain-scene.is-visible')"),Boolean);
    await settledMap(cdp,profile.engine);
   }else assert.fail('The own 3D control was unavailable');
-  if(diagnostic){report.status='completed';report.diagnosticScope='current-visible-map-terrain';report.completedAt=new Date().toISOString();if(helpers.performanceDiagnostics)report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);await save();return report;}
+  if(terrainDiagnostic){report.status='completed';report.diagnosticScope='current-visible-map-terrain';report.completedAt=new Date().toISOString();if(helpers.performanceDiagnostics)report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);await save();return report;}
   // loadProfile starts a new document/performance interval. Preserve the
   // existing all-mode measurements when adding the separate source fixture.
-  const modePerformance=await evaluate(cdp,'({layoutShift:window.__tropnikPerf?.cls||0,longestTaskMs:window.__tropnikPerf?.longest||0})');
+  const {performance:modePerformance,diagnostics:modePerformanceDiagnostics}=await captureZoomModePerformance(cdp,helpers);
   report.performance=modePerformance;
+  report.modePerformanceDiagnostics=modePerformanceDiagnostics;
+  // This focused diagnostic runs every preceding mode action unchanged. It
+  // cannot stand in for the source-end, coast or release verification suite.
+  if(modesDiagnostic){
+   report.performanceIntervals={modes:modePerformance};report.performanceIssues=performanceBudgetIssues(modePerformance,profile,'zoom-modes');report.performancePassed=report.performanceIssues.length===0;
+   report.status='completed';report.diagnosticScope='android-existing-zoom-modes';report.completedAt=new Date().toISOString();await save();return report;
+  }
   const edges=await closeTrailEdges();
   report.coast=await runCoastAudit(cdp,profile,helpers);
   report.satelliteContinuity=await runSatelliteContinuityAudit(cdp,profile,helpers);
@@ -539,6 +557,10 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   report.performance={layoutShift:Math.max(...intervals.map(value=>value.layoutShift)),longestTaskMs:Math.max(...intervals.map(value=>value.longestTaskMs))};
   for(const [phase,value]of Object.entries(report.performanceIntervals))helpers.performanceIssues?.push(...performanceBudgetIssues(value,profile,`zoom-${phase}`));
   report.geometryPassed=true;report.completedAt=new Date().toISOString();await save();return report;
- }catch(error){report.error=error.stack||String(error);if(error.settleDiagnostics)report.settleDiagnostics=error.settleDiagnostics;if(diagnostic){report.status='failed';if(helpers.performanceDiagnostics)try{report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);}catch{} }await save();throw error;}
+ }catch(error){
+  report.error=error.stack||String(error);if(error.settleDiagnostics)report.settleDiagnostics=error.settleDiagnostics;if(diagnostic)report.status='failed';
+  if(helpers.performanceDiagnostics)try{report.failurePerformanceDiagnostics=await helpers.performanceDiagnostics(cdp);if(diagnostic)report.performanceDiagnostics=report.failurePerformanceDiagnostics;}catch(diagnosticError){report.failurePerformanceDiagnostics={available:false,error:diagnosticError?.message||String(diagnosticError)};}
+  await save();throw error;
+ }
  finally{forget();forgetFinished();forgetFailed();terrainResources?.dispose();}
 }
