@@ -1,0 +1,903 @@
+{
+  "schemaVersion": 1,
+  "kind": "release-blocker-observation",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "observedAt": "2026-11-11T20:57:32Z",
+  "repository": "orewn/tropnik",
+  "activeVersion": "0.4.25-preview",
+  "producerCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+  "observationNotice": "Actual API snapshots and an assistant-authored recovery decision. This document is not an instrumentation, performance or public-release acceptance receipt.",
+  "nativeJobs": {
+    "total_count": 2,
+    "jobs": [
+      {
+        "id": 130776598478,
+        "run_id": 43093581429,
+        "workflow_name": "Android preview",
+        "head_branch": "main",
+        "run_url": "https://api.github.com/repos/orewn/tropnik/actions/runs/43093581429",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVkxYaM8AAAAecuSHzg",
+        "head_sha": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/jobs/130776598478",
+        "html_url": "https://github.com/orewn/tropnik/actions/runs/43093581429/job/130776598478",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-11T20:07:49Z",
+        "started_at": "2026-11-11T20:07:51Z",
+        "completed_at": "2026-11-11T20:13:47Z",
+        "name": "build",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-11T20:07:51Z",
+            "completed_at": "2026-11-11T20:07:53Z"
+          },
+          {
+            "name": "Checkout",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-11T20:07:53Z",
+            "completed_at": "2026-11-11T20:07:56Z"
+          },
+          {
+            "name": "Check explicit release request",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-11T20:07:56Z",
+            "completed_at": "2026-11-11T20:07:56Z"
+          },
+          {
+            "name": "Set up the shared map compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-11T20:07:56Z",
+            "completed_at": "2026-11-11T20:07:59Z"
+          },
+          {
+            "name": "Install frozen shared map dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-11T20:07:59Z",
+            "completed_at": "2026-11-11T20:08:14Z"
+          },
+          {
+            "name": "JDK17",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-11T20:08:14Z",
+            "completed_at": "2026-11-11T20:08:30Z"
+          },
+          {
+            "name": "Expose the hosted Android command-line tools",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-11T20:08:30Z",
+            "completed_at": "2026-11-11T20:08:30Z"
+          },
+          {
+            "name": "Android SDK",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-11T20:08:30Z",
+            "completed_at": "2026-11-11T20:08:38Z"
+          },
+          {
+            "name": "Local terrain verifier dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-11T20:08:38Z",
+            "completed_at": "2026-11-11T20:08:45Z"
+          },
+          {
+            "name": "Build, test and verify",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-11T20:08:45Z",
+            "completed_at": "2026-11-11T20:13:35Z"
+          },
+          {
+            "name": "Save preview APKs and reports",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-11T20:13:35Z",
+            "completed_at": "2026-11-11T20:13:39Z"
+          },
+          {
+            "name": "Post JDK17",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-11-11T20:13:39Z",
+            "completed_at": "2026-11-11T20:13:45Z"
+          },
+          {
+            "name": "Post Set up the shared map compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-11-11T20:13:45Z",
+            "completed_at": "2026-11-11T20:13:45Z"
+          },
+          {
+            "name": "Post Checkout",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-11-11T20:13:45Z",
+            "completed_at": "2026-11-11T20:13:46Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-11-11T20:13:46Z",
+            "completed_at": "2026-11-11T20:13:46Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/orewn/tropnik/check-runs/130776598478",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "runner_id": 1000001079,
+        "runner_name": "GitHub Actions 1000001079",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 130779797114,
+        "run_id": 43093581429,
+        "workflow_name": "Android preview",
+        "head_branch": "main",
+        "run_url": "https://api.github.com/repos/orewn/tropnik/actions/runs/43093581429",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVkxYaM8AAAAecxVWeg",
+        "head_sha": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/jobs/130779797114",
+        "html_url": "https://github.com/orewn/tropnik/actions/runs/43093581429/job/130779797114",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-11-11T20:13:48Z",
+        "started_at": "2026-11-11T20:13:50Z",
+        "completed_at": null,
+        "name": "Android device scenarios",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-11T20:13:51Z",
+            "completed_at": "2026-11-11T20:13:53Z"
+          },
+          {
+            "name": "Checkout",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-11T20:13:53Z",
+            "completed_at": "2026-11-11T20:13:57Z"
+          },
+          {
+            "name": "Download the APKs from the successful build job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-11T20:13:57Z",
+            "completed_at": "2026-11-11T20:14:03Z"
+          },
+          {
+            "name": "JDK17 for official SDK tools",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-11T20:14:03Z",
+            "completed_at": "2026-11-11T20:14:03Z"
+          },
+          {
+            "name": "Expose the hosted Android command-line tools",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-11T20:14:03Z",
+            "completed_at": "2026-11-11T20:14:03Z"
+          },
+          {
+            "name": "Install official SDK and one emulator image",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-11T20:14:03Z",
+            "completed_at": "2026-11-11T20:14:35Z"
+          },
+          {
+            "name": "Require KVM on the disposable Linux runner",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-11T20:14:35Z",
+            "completed_at": "2026-11-11T20:14:35Z"
+          },
+          {
+            "name": "Install and test the exact optimized universal artifact",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-11T20:14:35Z",
+            "completed_at": "2026-11-11T20:18:11Z"
+          },
+          {
+            "name": "Save actual device results and diagnostics",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 9,
+            "started_at": "2026-11-11T20:18:11Z",
+            "completed_at": "2026-11-11T20:29:25Z"
+          },
+          {
+            "name": "Post JDK17 for official SDK tools",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-11-11T20:29:25Z",
+            "completed_at": "2026-11-11T20:29:25Z"
+          },
+          {
+            "name": "Post Checkout",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-11-11T20:29:25Z",
+            "completed_at": "2026-11-11T20:29:26Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-11-11T20:29:26Z",
+            "completed_at": "2026-11-11T20:29:26Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/orewn/tropnik/check-runs/130779797114",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "runner_id": 1000001080,
+        "runner_name": "GitHub Actions 1000001080",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  },
+  "previousPagesJobs": {
+    "total_count": 3,
+    "jobs": [
+      {
+        "id": 130768333257,
+        "run_id": 43090337179,
+        "workflow_name": "Public GitHub Pages",
+        "head_branch": "main",
+        "run_url": "https://api.github.com/repos/orewn/tropnik/actions/runs/43090337179",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVkxYaM8AAAAecmZpyQ",
+        "head_sha": "f7c2e3738dd4df471da5cd81d4a6f40b3f194372",
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/jobs/130768333257",
+        "html_url": "https://github.com/orewn/tropnik/actions/runs/43090337179/job/130768333257",
+        "status": "completed",
+        "conclusion": "failure",
+        "created_at": "2026-11-11T19:52:11Z",
+        "started_at": "2026-11-11T19:52:13Z",
+        "completed_at": "2026-11-11T19:57:58Z",
+        "name": "build",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-11T19:52:14Z",
+            "completed_at": "2026-11-11T19:52:17Z"
+          },
+          {
+            "name": "Check out the exact source revision",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-11T19:52:17Z",
+            "completed_at": "2026-11-11T19:52:20Z"
+          },
+          {
+            "name": "Set up Node.js",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-11T19:52:20Z",
+            "completed_at": "2026-11-11T19:52:21Z"
+          },
+          {
+            "name": "Install the pinned package manager and frozen dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-11T19:52:21Z",
+            "completed_at": "2026-11-11T19:52:32Z"
+          },
+          {
+            "name": "Restore and verify the public Android preview",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-11T19:52:32Z",
+            "completed_at": "2026-11-11T19:52:34Z"
+          },
+          {
+            "name": "Verify APK download failure boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-11T19:52:34Z",
+            "completed_at": "2026-11-11T19:52:40Z"
+          },
+          {
+            "name": "Verify reviewed Telegram reference boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-11T19:52:40Z",
+            "completed_at": "2026-11-11T19:52:41Z"
+          },
+          {
+            "name": "Run web regression checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-11T19:52:41Z",
+            "completed_at": "2026-11-11T19:53:02Z"
+          },
+          {
+            "name": "Check web lint",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-11T19:53:02Z",
+            "completed_at": "2026-11-11T19:53:12Z"
+          },
+          {
+            "name": "Check static client types",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-11T19:53:12Z",
+            "completed_at": "2026-11-11T19:53:19Z"
+          },
+          {
+            "name": "Read the configured Pages destination",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-11T19:53:19Z",
+            "completed_at": "2026-11-11T19:53:19Z"
+          },
+          {
+            "name": "Require the intended public destination",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-11-11T19:53:19Z",
+            "completed_at": "2026-11-11T19:53:19Z"
+          },
+          {
+            "name": "Build and verify the static site",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-11-11T19:53:19Z",
+            "completed_at": "2026-11-11T19:53:46Z"
+          },
+          {
+            "name": "Verify production map controls in phone landscape",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-11-11T19:53:46Z",
+            "completed_at": "2026-11-11T19:53:49Z"
+          },
+          {
+            "name": "Verify source credit geometry across satellite loading",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-11-11T19:53:49Z",
+            "completed_at": "2026-11-11T19:54:12Z"
+          },
+          {
+            "name": "Verify production Canvas underlay pixel parity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-11-11T19:54:12Z",
+            "completed_at": "2026-11-11T19:54:15Z"
+          },
+          {
+            "name": "Verify Russia mask pixels and GPU context recovery",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-11-11T19:54:15Z",
+            "completed_at": "2026-11-11T19:54:17Z"
+          },
+          {
+            "name": "Verify full-mask shader pixel parity at both device pixel ratios",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-11-11T19:54:17Z",
+            "completed_at": "2026-11-11T19:54:28Z"
+          },
+          {
+            "name": "Verify completed-frame presentation against the immutable direct renderer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-11-11T19:54:28Z",
+            "completed_at": "2026-11-11T19:54:38Z"
+          },
+          {
+            "name": "Verify unmasked Android terrain, GPU allocation and resize pixel parity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-11-11T19:54:38Z",
+            "completed_at": "2026-11-11T19:54:44Z"
+          },
+          {
+            "name": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 21,
+            "started_at": "2026-11-11T19:54:44Z",
+            "completed_at": "2026-11-11T19:57:52Z"
+          },
+          {
+            "name": "Record the verified build identity",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 22,
+            "started_at": "2026-11-11T19:57:52Z",
+            "completed_at": "2026-11-11T19:57:52Z"
+          },
+          {
+            "name": "Preserve browser failure evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-11-11T19:57:52Z",
+            "completed_at": "2026-11-11T19:57:53Z"
+          },
+          {
+            "name": "Preserve map design checks across zoom levels",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24,
+            "started_at": "2026-11-11T19:57:53Z",
+            "completed_at": "2026-11-11T19:57:56Z"
+          },
+          {
+            "name": "Upload the verified static artifact",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 25,
+            "started_at": "2026-11-11T19:57:56Z",
+            "completed_at": "2026-11-11T19:57:56Z"
+          },
+          {
+            "name": "Post Set up Node.js",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 49,
+            "started_at": "2026-11-11T19:57:56Z",
+            "completed_at": "2026-11-11T19:57:56Z"
+          },
+          {
+            "name": "Post Check out the exact source revision",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 50,
+            "started_at": "2026-11-11T19:57:56Z",
+            "completed_at": "2026-11-11T19:57:56Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 51,
+            "started_at": "2026-11-11T19:57:56Z",
+            "completed_at": "2026-11-11T19:57:56Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/orewn/tropnik/check-runs/130768333257",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "runner_id": 1000001075,
+        "runner_name": "GitHub Actions 1000001075",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 130771327720,
+        "run_id": 43090337179,
+        "workflow_name": "Public GitHub Pages",
+        "head_branch": "main",
+        "run_url": "https://api.github.com/repos/orewn/tropnik/actions/runs/43090337179",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVkxYaM8AAAAecpQa6A",
+        "head_sha": "f7c2e3738dd4df471da5cd81d4a6f40b3f194372",
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/jobs/130771327720",
+        "html_url": "https://github.com/orewn/tropnik/actions/runs/43090337179/job/130771327720",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-11-11T19:57:58Z",
+        "started_at": "2026-11-11T19:57:58Z",
+        "completed_at": "2026-11-11T19:57:58Z",
+        "name": "deploy",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/orewn/tropnik/check-runs/130771327720",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      },
+      {
+        "id": 130775710983,
+        "run_id": 43090337179,
+        "workflow_name": "Public GitHub Pages",
+        "head_branch": "main",
+        "run_url": "https://api.github.com/repos/orewn/tropnik/actions/runs/43090337179",
+        "run_attempt": 2,
+        "node_id": "CR_kwDOVkxYaM8AAAAectb9Bw",
+        "head_sha": "f7c2e3738dd4df471da5cd81d4a6f40b3f194372",
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/jobs/130775710983",
+        "html_url": "https://github.com/orewn/tropnik/actions/runs/43090337179/job/130775710983",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-11-11T20:06:11Z",
+        "started_at": "2026-11-11T20:06:13Z",
+        "completed_at": null,
+        "name": "build",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-11T20:06:14Z",
+            "completed_at": "2026-11-11T20:06:15Z"
+          },
+          {
+            "name": "Check out the exact source revision",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-11T20:06:15Z",
+            "completed_at": "2026-11-11T20:06:18Z"
+          },
+          {
+            "name": "Set up Node.js",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-11T20:06:18Z",
+            "completed_at": "2026-11-11T20:06:19Z"
+          },
+          {
+            "name": "Install the pinned package manager and frozen dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-11T20:06:19Z",
+            "completed_at": "2026-11-11T20:06:31Z"
+          },
+          {
+            "name": "Restore and verify the public Android preview",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-11T20:06:31Z",
+            "completed_at": "2026-11-11T20:06:32Z"
+          },
+          {
+            "name": "Verify APK download failure boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-11T20:06:32Z",
+            "completed_at": "2026-11-11T20:06:37Z"
+          },
+          {
+            "name": "Verify reviewed Telegram reference boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-11T20:06:37Z",
+            "completed_at": "2026-11-11T20:06:38Z"
+          },
+          {
+            "name": "Run web regression checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-11T20:06:38Z",
+            "completed_at": "2026-11-11T20:06:59Z"
+          },
+          {
+            "name": "Check web lint",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-11T20:06:59Z",
+            "completed_at": "2026-11-11T20:07:10Z"
+          },
+          {
+            "name": "Check static client types",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-11T20:07:10Z",
+            "completed_at": "2026-11-11T20:07:17Z"
+          },
+          {
+            "name": "Read the configured Pages destination",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-11T20:07:17Z",
+            "completed_at": "2026-11-11T20:07:17Z"
+          },
+          {
+            "name": "Require the intended public destination",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-11-11T20:07:17Z",
+            "completed_at": "2026-11-11T20:07:17Z"
+          },
+          {
+            "name": "Build and verify the static site",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-11-11T20:07:17Z",
+            "completed_at": "2026-11-11T20:07:45Z"
+          },
+          {
+            "name": "Verify production map controls in phone landscape",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-11-11T20:07:45Z",
+            "completed_at": "2026-11-11T20:07:58Z"
+          },
+          {
+            "name": "Verify source credit geometry across satellite loading",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-11-11T20:07:58Z",
+            "completed_at": "2026-11-11T20:08:21Z"
+          },
+          {
+            "name": "Verify production Canvas underlay pixel parity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-11-11T20:08:21Z",
+            "completed_at": "2026-11-11T20:08:25Z"
+          },
+          {
+            "name": "Verify Russia mask pixels and GPU context recovery",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-11-11T20:08:25Z",
+            "completed_at": "2026-11-11T20:08:28Z"
+          },
+          {
+            "name": "Verify full-mask shader pixel parity at both device pixel ratios",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-11-11T20:08:28Z",
+            "completed_at": "2026-11-11T20:08:39Z"
+          },
+          {
+            "name": "Verify completed-frame presentation against the immutable direct renderer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-11-11T20:08:39Z",
+            "completed_at": "2026-11-11T20:08:49Z"
+          },
+          {
+            "name": "Verify unmasked Android terrain, GPU allocation and resize pixel parity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-11-11T20:08:49Z",
+            "completed_at": "2026-11-11T20:08:55Z"
+          },
+          {
+            "name": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-11-11T20:08:55Z",
+            "completed_at": "2026-11-11T20:25:25Z"
+          },
+          {
+            "name": "Record the verified build identity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-11-11T20:25:25Z",
+            "completed_at": "2026-11-11T20:25:26Z"
+          },
+          {
+            "name": "Preserve browser failure evidence",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 23,
+            "started_at": "2026-11-11T20:25:26Z",
+            "completed_at": "2026-11-11T20:25:26Z"
+          },
+          {
+            "name": "Preserve map design checks across zoom levels",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 24,
+            "started_at": "2026-11-11T20:25:26Z",
+            "completed_at": "2026-11-11T20:36:51Z"
+          },
+          {
+            "name": "Upload the verified static artifact",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 25,
+            "started_at": "2026-11-11T20:36:51Z",
+            "completed_at": "2026-11-11T20:36:51Z"
+          },
+          {
+            "name": "Post Set up Node.js",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 49,
+            "started_at": "2026-11-11T20:36:51Z",
+            "completed_at": "2026-11-11T20:36:51Z"
+          },
+          {
+            "name": "Post Check out the exact source revision",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 50,
+            "started_at": "2026-11-11T20:36:51Z",
+            "completed_at": "2026-11-11T20:36:52Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 51,
+            "started_at": "2026-11-11T20:36:52Z",
+            "completed_at": "2026-11-11T20:36:52Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/orewn/tropnik/check-runs/130775710983",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "runner_id": 1000001078,
+        "runner_name": "GitHub Actions 1000001078",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  },
+  "buildArtifactMetadata": {
+    "artifacts": [
+      {
+        "id": 13890865289,
+        "name": "tropnik-android-preview-1",
+        "size_in_bytes": 109338777,
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13890865289",
+        "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13890865289/zip",
+        "expired": false,
+        "created_at": "2026-11-11T20:13:39Z",
+        "expires_at": "2026-11-25T20:13:35Z",
+        "updated_at": "2026-11-11T20:13:39Z",
+        "digest": "sha256:e5263de2d628f69b3d5175d16e9ebdff24d3f5341a9c4a84e1277e01a39fca80",
+        "workflow_run": {
+          "id": 43093581429,
+          "repository_id": 1447843944,
+          "head_repository_id": 1447843944,
+          "head_branch": "main",
+          "head_sha": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0"
+        }
+      }
+    ]
+  },
+  "recoveryPolicy": {
+    "declaredAt": "2026-11-11 20:56:35 UTC",
+    "declaredBeforeRequest": true,
+    "runId": 43093581429,
+    "jobId": 130779797114,
+    "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+    "originalAttempt": 1,
+    "maximumAdditionalAcceptedAttempts": 1,
+    "buildArtifactId": 13890865289,
+    "universalSha256": "016aa309d22b1fc34d89949817d3e8fc61162e2c20f8b50a4a803e0feadb88e4",
+    "actualKnownFailure": "Save actual device results and diagnostics upload step only; exact underlying upload error not yet available",
+    "evidence": {
+      "testStep": "success",
+      "testCompletedAt": "2026-11-11T20:18:11Z",
+      "uploadFailureAt": "2026-11-11T20:29:25Z",
+      "cleanupCompleteAt": "2026-11-11T20:29:26Z",
+      "jobMetadata": "in_progress after all steps completed, beyond 25min timeout",
+      "readOnlyDiagnostics": "two queued runs with no runner/jobs as of20:55"
+    },
+    "scope": "Use the standard rerun-job tool once; preserve original logs/history, same immutable successful build artifact and exact source. Repeat full unmodified device tests, retain all same-run artifact/public-byte gates.",
+    "ifRejected": "Do not repeat this request or bypass permissions; record the actual rejection and continue only supported read-only diagnosis.",
+    "f7Attempt3Forbidden": true,
+    "underlyingCauseClaimed": false
+  },
+  "recoveryResponse": {
+    "error": "GitHub API error 403: {\"message\":\"The workflow run containing this job is already running\",\"documentation_url\":\"https://docs.github.com/rest/actions/workflow-runs#re-run-a-job-from-a-workflow-run\",\"status\":\"403\"}",
+    "error_code": "FORBIDDEN",
+    "error_data": {
+      "message": "The workflow run containing this job is already running",
+      "documentation_url": "https://docs.github.com/rest/actions/workflow-runs#re-run-a-job-from-a-workflow-run",
+      "status": "403"
+    }
+  },
+  "diagnosticRuns": [
+    {
+      "id": 43098657591,
+      "sourceCommit": "da6879327b3a1667cf0b13786217cf96bcf9ef82",
+      "status": "queued",
+      "jobsObserved": []
+    },
+    {
+      "id": 43098750847,
+      "sourceCommit": "6e03c3487e8e45dbcce29ada31d56e9c643a37d8",
+      "status": "queued",
+      "jobsObserved": []
+    }
+  ],
+  "knownCause": "Artifact preservation step failed in both original jobs; underlying upload error unavailable.",
+  "missingEvidence": [
+    "new main saved device artifact",
+    "new public release proof",
+    "final latest-version Pages and public-byte verification"
+  ],
+  "permissionsBypassed": false,
+  "productBudgetsWeakened": false,
+  "publicCompletionClaimed": false
+}
