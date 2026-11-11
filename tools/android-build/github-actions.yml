@@ -186,9 +186,7 @@ jobs:
       # launcher even when the subsequent device runs with -no-audio.
       - name: Install emulator shared-library dependency
         timeout-minutes: 5
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends libpulse0
+        run: bash tools/android-build/install-ci-libpulse.sh
       - name: Install official SDK and one emulator image
         timeout-minutes: 8
         run: |

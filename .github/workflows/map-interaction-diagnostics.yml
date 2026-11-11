@@ -94,6 +94,7 @@ jobs:
             web/pages-preview/dist/browser-native-text-verification.json
             web/pages-preview/dist/browser-terrain-mask-verification.json
             web/pages-preview/dist/browser-verification.json
+            web/pages-preview/dist/browser-network.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7
@@ -147,6 +148,7 @@ jobs:
             web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
             web/pages-preview/dist/browser-ui-smoothness-cpu-diagnostic.json
             web/pages-preview/dist/browser-native-text-verification.json
+            web/pages-preview/dist/browser-network.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7
@@ -194,6 +196,7 @@ jobs:
             web/pages-preview/design-qa
             web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
             web/pages-preview/dist/browser-native-text-verification.json
+            web/pages-preview/dist/browser-network.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7

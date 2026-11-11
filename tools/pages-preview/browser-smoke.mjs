@@ -15,6 +15,7 @@ import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
 import {runOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {createOfflineOriginTransport} from './browser-origin-transport.mjs';
 import {observeRequestMapLayout,assertRequestMapLayout} from './browser-request-layout.mjs';
+import {observePublicMapNetwork} from './browser-network.mjs';
 import {runSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
 import {installSmoothnessRecorder,runSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
 import {inspectCustomMapDOM} from './browser-custom-map.mjs';
@@ -851,7 +852,7 @@ const server=serve(ROOT);
 await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(httpPort,'127.0.0.1',resolve);});
 const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browserLaunchStarted=performance.now();
-let browser,cdp,currentProfile,failure,currentExploreExperience=null;
+let browser,cdp,network,currentProfile,failure,currentExploreExperience=null;
 const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],satelliteAudits=[],siteSmoothness=[],profilePerformance=[],performanceIssues=[];
 // GitHub can terminate this process before catch/finally. Preserve completed
 // interactions before the long zoom matrix, without marking them as a release.
@@ -874,6 +875,7 @@ try{
   const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(initialUrl)}`,{method:'PUT'});
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
+  network=await observePublicMapNetwork(cdp,{baseURL:`http://127.0.0.1:${httpPort}/tropnik/`});
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
     (${installSmoothnessRecorder.toString()})(window);
     window.__tropnikPerf={cls:0,longest:0};
@@ -1017,6 +1019,7 @@ try{
   }
 }catch(error){
   failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
+  if(network)failure.network=network.snapshot();
   if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
   if(error.smoothnessAudit)failure.smoothnessAudit=error.smoothnessAudit;
   if(siteSmoothness.length)failure.completedSiteSmoothness=siteSmoothness;
@@ -1037,6 +1040,11 @@ try{
   if(runPolicy.diagnostic)await writeFile(REPORT,JSON.stringify(failure,null,2)+'\n');
   throw error;
 }finally{
+  if(network){
+    network.dispose();
+    try{await writeFile(new URL('browser-network.json',ROOT),JSON.stringify(network.snapshot(),null,2)+'\n');}
+    catch(error){console.error('Could not save the network diagnostic:',error.message);}
+  }
   cdp?.close();
   const cleanup=await browser?.close();server.closeAllConnections();server.close();
   if(failure){
