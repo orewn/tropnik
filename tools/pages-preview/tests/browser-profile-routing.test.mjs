@@ -27,7 +27,7 @@ async function dispatchProfiles(traceEnabled,audit,policy=browserAuditRunPolicy(
  const notInvoked=()=>assert.fail('The routing test must not invoke browser helpers');
  const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[],offlineCalls=[],satelliteCalls=[],smoothnessCalls=[],cdpCalls=[];
  const bindings={
-  assert,profiles,runPolicy:policy,traceEnabled,cdp:{call:async(method,parameters)=>cdpCalls.push({method,parameters})},httpPort:4200,
+  environment:{routingFixture:true},terrainMask:{routingFixture:true},assert,profiles,runPolicy:policy,traceEnabled,cdp:{call:async(method,parameters)=>cdpCalls.push({method,parameters})},httpPort:4200,
   results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],satelliteAudits:[],siteSmoothness:[],profilePerformance:[],performanceIssues:issues,catalogue:{schemaVersion:1,total:21},
   REPORT:policy.reportFile,reports,loadCalls,mapCalls,process:{env:{GITHUB_SHA:'a'.repeat(40)}},console:{log(){}},writeFile:async(path,text)=>reports.push({path,report:JSON.parse(text)}),
   runZoomDesignAudit:audit,
@@ -127,11 +127,15 @@ test('offline diagnosis starts blank, runs the exact final audit once and cannot
  const policy=browserAuditRunPolicy('offline-safety');
  assert.deepEqual(policy,{diagnostic:'offline-safety',reportFile:'browser-offline-safety-diagnostic.json',profiles:[]});
  const bootstrapStart=source.indexOf('  const initialUrl=');
- const bootstrapEnd=source.indexOf('\n  cdp=new CDP(',bootstrapStart);
+ const bootstrapEnd=source.indexOf("\n  await cdp.call('Page.enable')",bootstrapStart);
  assert.ok(bootstrapStart>=0&&bootstrapEnd>bootstrapStart,'The actual initial tab navigation must be available');
- const opened=[];
- await new AsyncFunction('runPolicy','browser','debugPort','httpPort',source.slice(bootstrapStart,bootstrapEnd))(policy,{requestJSON:async(url,options)=>{opened.push({url,options});return{};}},4300,4200);
+ const opened=[],startupCalls=[],environment={};
+ class BlankCDP{async open(){}async call(method){startupCalls.push(method);}}
+ const bootstrap=source.slice(bootstrapStart,bootstrapEnd).replaceAll('import.meta.url',JSON.stringify(new URL('../browser-smoke.mjs',import.meta.url).href));
+ await new AsyncFunction('runPolicy','browser','debugPort','httpPort','CDP','environment','collectNativeBrowserSurface',`let cdp;${bootstrap}`)(policy,{requestJSON:async(url,options)=>{opened.push({url,options});return{};}},4300,4200,BlankCDP,environment,async()=>{startupCalls.push('native-surface');return{blank:true};});
  assert.deepEqual(opened,[{url:'http://127.0.0.1:4300/json/new?about%3Ablank',options:{method:'PUT'}}],'Do not warm the map or its service worker before the safety audit');
+ assert.deepEqual(startupCalls,['native-surface'],'Environment collection must not navigate to the application before the cold offline audit');
+ assert.deepEqual(environment.nativeSurface,{blank:true});
  const receipt={schemaVersion:1,profile:'android-portrait',passed:true,coldNavigation:true};
  const run=await dispatchProfiles(false,()=>assert.fail('Offline diagnosis must not invoke zoom audits'),policy,[],async(cdp,helpers)=>{
   assert.equal(typeof cdp.call,'function');assert.equal(helpers.url,'http://127.0.0.1:4200/tropnik/');

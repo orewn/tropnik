@@ -68,6 +68,8 @@ jobs:
           test "$PAGES_CONFIG_BASE" = '/tropnik'
       - name: Build and verify the static site
         run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify production map controls in phone landscape
+        run: node --test tools/pages-preview/tests/browser-map-controls.browser.mjs
       - name: Verify Russia mask pixels and GPU context recovery
         run: node --test tools/pages-preview/tests/terrain-mask.browser.mjs
       - name: Verify real mobile rendering and sheet interaction and desktop map interactions
@@ -86,6 +88,7 @@ jobs:
           import {createHash} from 'node:crypto';
           import {readFileSync, appendFileSync} from 'node:fs';
           import {assertBrowserReport} from './tools/pages-preview/browser-report.mjs';
+          import {assertMatchingBrowserEnvironments} from './tools/pages-preview/browser-environment.mjs';
           const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
           const browser = JSON.parse(readFileSync('web/pages-preview/dist/browser-verification.json', 'utf8'));
           assert.match(build.buildId, /^[a-f0-9]{16}$/);
@@ -97,6 +100,11 @@ jobs:
           assert.equal(mask.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(mask.rendererSHA256, createHash('sha256').update(readFileSync('web/public/terrain/terrain-renderer.js')).digest('hex'));
           assert.equal(mask.cases.length, 4);
+          assert.deepEqual(browser.terrainMask, mask, 'The full browser report must include the exact graphics proof from this run');
+          const controls = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-controls-verification.json', 'utf8'));
+          assert.equal(controls.verified, true);
+          assert.equal(controls.sourceCommit, process.env.GITHUB_SHA);
+          assertMatchingBrowserEnvironments(controls.environment, browser.environment, process.env.GITHUB_SHA);
           appendFileSync(process.env.GITHUB_OUTPUT, `build_id=${build.buildId}\n`);
           assert.match(process.env.GITHUB_RUN_ID, /^\d+$/);
           assert.match(process.env.GITHUB_RUN_ATTEMPT, /^\d+$/);
@@ -110,6 +118,7 @@ jobs:
           path: |
             web/pages-preview/dist/browser-failure.*
             web/pages-preview/dist/browser-terrain-mask-verification.json
+            web/pages-preview/dist/browser-map-controls-verification.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Preserve map design checks across zoom levels

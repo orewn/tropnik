@@ -20,7 +20,11 @@ python3 "$tropnik_root/tools/android-build/preview_artifacts.py" verify --direct
 # Keep preflight diagnostics in both the job log and the retained artifact.
 # pipefail preserves a launcher/linker failure instead of letting tee mask it.
 "$tropnik_emulator" -accel-check 2>&1 | tee "$tropnik_output/acceleration.txt"
-"$tropnik_emulator" -version 2>&1 | tee "$tropnik_output/emulator-version.txt"
+# Probe the same headless engine that runs the device below. A bare -version
+# loads the windowed QEMU binary and its unrelated PulseAudio/Qt dependencies.
+# Both paths were compared on SDK emulator 37.2.13, build 16740729:
+# https://github.com/orewn/tropnik/actions/runs/43041565686
+timeout 30s "$tropnik_emulator" -no-window -version 2>&1 | tee "$tropnik_output/emulator-version.txt"
 cp "$tropnik_sdk/system-images/android-35/google_apis/x86_64/source.properties" "$tropnik_output/system-image.properties"
 
 tropnik_emulator_pid=''

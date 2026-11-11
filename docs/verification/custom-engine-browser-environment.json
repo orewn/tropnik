@@ -1,0 +1,1028 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "b424f850356d73dd707f190add54f24e4ecd427d",
+  "parentCommit": "ac60e88bf54f3dfb20ce2fdaf6ae5eb772c6d846",
+  "runId": 43041620451,
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43041620451",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "artifacts": [
+    {
+      "id": 13865870756,
+      "role": "shared-static-build",
+      "sha256": "d7f78f8ca678b9e82bf4f1bf824698fcbe5005ece2bfc771bef3dfe8ddd3bc12",
+      "bytes": 61732774,
+      "files": 2627
+    },
+    {
+      "id": 13866385282,
+      "role": "cover",
+      "sha256": "622001d9f584e64e156609c3558f253e1baa853700196fb30753c4445ec1e6b8"
+    },
+    {
+      "id": 13865078045,
+      "role": "existing",
+      "sha256": "22adb266c5cc7d2a94b583009cc3358c6d1daff32edb0a72b47ed2eb5aac2443"
+    }
+  ],
+  "controlledComparison": {
+    "identicalSharedArtifact": true,
+    "identicalBuildInfo": true,
+    "identicalChromeAndGPU": true,
+    "identicalRequestedViewportsAndDPRs": true,
+    "identicalNormalEightScenarios": true,
+    "identicalNativeInputDelta": true,
+    "cpuSlowdownRate": 1,
+    "instrumented": false,
+    "onlyLaunchDifferencesBeyondEphemeralPortAndDirectory": [
+      "--window-size=1920,1920",
+      "--ozone-override-screen-size=1920,1920 instead of automatic800,600"
+    ],
+    "sameMeasurementSourceFile": "tools/pages-preview/browser-smoothness.mjs",
+    "note": "The static product is the unchanged ac60/4a87 product; coverage geometry cache is not present in this A/B."
+  },
+  "modes": {
+    "existing": {
+      "chromiumVersion": "Chrome/156.0.8078.79",
+      "inputArtifactSha256": "d7f78f8ca678b9e82bf4f1bf824698fcbe5005ece2bfc771bef3dfe8ddd3bc12",
+      "staticBuildInfoSha256": "6fe50c0bbbcc9b6edea06d85cc37a5293d132047f070077fa66374da2a6526d1",
+      "nativeSurface": {
+        "schemaVersion": 1,
+        "collection": "blank-target-before-emulation",
+        "window": {
+          "left": 10,
+          "top": 10,
+          "width": 780,
+          "height": 580,
+          "windowState": "normal"
+        },
+        "viewport": {
+          "url": "about:blank",
+          "visibilityState": "visible",
+          "innerWidth": 780,
+          "innerHeight": 493,
+          "outerWidth": 780,
+          "outerHeight": 580,
+          "devicePixelRatio": 1,
+          "screen": {
+            "width": 800,
+            "height": 600,
+            "availWidth": 800,
+            "availHeight": 600
+          }
+        }
+      },
+      "nativePhysicalCoveragePassed": false,
+      "requestedProfiles": [
+        {
+          "name": "compact-android",
+          "width": 320,
+          "height": 640,
+          "deviceScaleFactor": 2
+        },
+        {
+          "name": "iphone-portrait",
+          "width": 390,
+          "height": 844,
+          "deviceScaleFactor": 2
+        },
+        {
+          "name": "android-portrait",
+          "width": 412,
+          "height": 915,
+          "deviceScaleFactor": 2
+        },
+        {
+          "name": "phone-landscape",
+          "width": 844,
+          "height": 390,
+          "deviceScaleFactor": 2
+        },
+        {
+          "name": "desktop-webgl",
+          "width": 1440,
+          "height": 1000,
+          "deviceScaleFactor": 1
+        }
+      ],
+      "gpu": {
+        "devices": [
+          {
+            "vendorId": 65535,
+            "deviceId": 65535,
+            "vendorString": "Google Inc. (Google)",
+            "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "driverVendor": "SwANGLE",
+            "driverVersion": "5.0.0"
+          }
+        ],
+        "gpuCompositing": "disabled_software",
+        "rasterization": "disabled_software",
+        "skiaBackendType": "None",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)"
+      },
+      "measurementProfiles": [
+        {
+          "name": "android-portrait",
+          "width": 412,
+          "height": 915,
+          "deviceScaleFactor": 2,
+          "mobile": true
+        },
+        {
+          "name": "desktop-webgl",
+          "width": 1440,
+          "height": 1000,
+          "deviceScaleFactor": 1,
+          "mobile": false
+        }
+      ],
+      "performancePassed": false,
+      "performanceIssues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-zoom",
+          "metric": "maxFrameGapMs",
+          "value": 153.8000000000029,
+          "limit": 150
+        },
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/layer-switch",
+          "metric": "eventDurationMs",
+          "value": 368,
+          "limit": 200
+        }
+      ],
+      "receiptFiles": {
+        "browser-native-surface-bounds-diagnostic.json": {
+          "path": "/workspace/scratch/75758a090e5a/native-bounds-b424/existing/dist/browser-native-surface-bounds-diagnostic.json",
+          "sha256": "36f32b5bf1aba48d97f46a1d6440f42263e412ac7d342659f163af0adc31d89a"
+        },
+        "browser-surface-diagnostic.json": {
+          "path": "/workspace/scratch/75758a090e5a/native-bounds-b424/existing/dist/browser-surface-diagnostic.json",
+          "sha256": "00055e61a27b05ebfffa96a4d32c39af69617d9556959fc1bfd8ea0c692a1a5d"
+        },
+        "browser-ui-smoothness-diagnostic.json": {
+          "path": "/workspace/scratch/75758a090e5a/native-bounds-b424/existing/dist/browser-ui-smoothness-diagnostic.json",
+          "sha256": "14a5209263d19a105cb85bd3fb0544108b7cdbdde7bf9072631e83ec8e61afc9"
+        }
+      }
+    },
+    "cover": {
+      "chromiumVersion": "Chrome/156.0.8078.79",
+      "inputArtifactSha256": "d7f78f8ca678b9e82bf4f1bf824698fcbe5005ece2bfc771bef3dfe8ddd3bc12",
+      "staticBuildInfoSha256": "6fe50c0bbbcc9b6edea06d85cc37a5293d132047f070077fa66374da2a6526d1",
+      "nativeSurface": {
+        "schemaVersion": 1,
+        "collection": "blank-target-before-emulation",
+        "window": {
+          "left": 10,
+          "top": 10,
+          "width": 1920,
+          "height": 1920,
+          "windowState": "normal"
+        },
+        "viewport": {
+          "url": "about:blank",
+          "visibilityState": "visible",
+          "innerWidth": 1920,
+          "innerHeight": 1833,
+          "outerWidth": 1920,
+          "outerHeight": 1920,
+          "devicePixelRatio": 1,
+          "screen": {
+            "width": 1920,
+            "height": 1920,
+            "availWidth": 1920,
+            "availHeight": 1920
+          }
+        }
+      },
+      "nativePhysicalCoveragePassed": true,
+      "requestedProfiles": [
+        {
+          "name": "compact-android",
+          "width": 320,
+          "height": 640,
+          "deviceScaleFactor": 2
+        },
+        {
+          "name": "iphone-portrait",
+          "width": 390,
+          "height": 844,
+          "deviceScaleFactor": 2
+        },
+        {
+          "name": "android-portrait",
+          "width": 412,
+          "height": 915,
+          "deviceScaleFactor": 2
+        },
+        {
+          "name": "phone-landscape",
+          "width": 844,
+          "height": 390,
+          "deviceScaleFactor": 2
+        },
+        {
+          "name": "desktop-webgl",
+          "width": 1440,
+          "height": 1000,
+          "deviceScaleFactor": 1
+        }
+      ],
+      "gpu": {
+        "devices": [
+          {
+            "vendorId": 65535,
+            "deviceId": 65535,
+            "vendorString": "Google Inc. (Google)",
+            "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "driverVendor": "SwANGLE",
+            "driverVersion": "5.0.0"
+          }
+        ],
+        "gpuCompositing": "disabled_software",
+        "rasterization": "disabled_software",
+        "skiaBackendType": "None",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)"
+      },
+      "measurementProfiles": [
+        {
+          "name": "android-portrait",
+          "width": 412,
+          "height": 915,
+          "deviceScaleFactor": 2,
+          "mobile": true
+        },
+        {
+          "name": "desktop-webgl",
+          "width": 1440,
+          "height": 1000,
+          "deviceScaleFactor": 1,
+          "mobile": false
+        }
+      ],
+      "performancePassed": false,
+      "performanceIssues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-pan",
+          "metric": "frameP95Ms",
+          "value": 36.5,
+          "limit": 35
+        },
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-zoom",
+          "metric": "maxFrameGapMs",
+          "value": 158,
+          "limit": 150
+        }
+      ],
+      "receiptFiles": {
+        "browser-native-surface-bounds-diagnostic.json": {
+          "path": "/workspace/scratch/75758a090e5a/native-bounds-b424/cover/dist/browser-native-surface-bounds-diagnostic.json",
+          "sha256": "b7ea26e2afde95c289bcfb45c14911b8f87d643cbeb394672cc285ca02cde13d"
+        },
+        "browser-surface-diagnostic.json": {
+          "path": "/workspace/scratch/75758a090e5a/native-bounds-b424/cover/dist/browser-surface-diagnostic.json",
+          "sha256": "0221d5b2450275f3c53e607b0503855d5506af4e7c250d8038198d38e2a0bb50"
+        },
+        "browser-ui-smoothness-diagnostic.json": {
+          "path": "/workspace/scratch/75758a090e5a/native-bounds-b424/cover/dist/browser-ui-smoothness-diagnostic.json",
+          "sha256": "534a8725a50f4e61e8c7287dcff352fe39c136d4d7ea353fe987a5cdf8cf4799"
+        }
+      }
+    }
+  },
+  "metrics": [
+    {
+      "mode": "existing",
+      "profile": "android-portrait",
+      "scenario": "panel",
+      "durationMs": 2078.9000000000015,
+      "p95FrameMs": 16.900000000001455,
+      "maxFrameGapMs": 17.5,
+      "maxInputToFrameMs": 48.299999999995634,
+      "maxEventDurationMs": 120,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "android-portrait",
+      "scenario": "explore-search",
+      "durationMs": 1779.9000000000015,
+      "p95FrameMs": 17,
+      "maxFrameGapMs": 36.900000000001455,
+      "maxInputToFrameMs": 48.19999999999709,
+      "maxEventDurationMs": 104,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "android-portrait",
+      "scenario": "explore-filters",
+      "durationMs": 2180,
+      "p95FrameMs": 16.900000000001455,
+      "maxFrameGapMs": 17.099999999998545,
+      "maxInputToFrameMs": 48,
+      "maxEventDurationMs": 88,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "android-portrait",
+      "scenario": "catalog-scroll",
+      "durationMs": 763,
+      "p95FrameMs": 22.900000000001455,
+      "maxFrameGapMs": 27.200000000004366,
+      "maxInputToFrameMs": 48.599999999998545,
+      "maxEventDurationMs": 56,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "android-portrait",
+      "scenario": "map-pan",
+      "durationMs": 1280.9000000000015,
+      "p95FrameMs": 24.19999999999709,
+      "maxFrameGapMs": 25,
+      "maxInputToFrameMs": 46.299999999995634,
+      "maxEventDurationMs": 56,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "android-portrait",
+      "scenario": "map-zoom",
+      "durationMs": 6415.4000000000015,
+      "p95FrameMs": 19.299999999995634,
+      "maxFrameGapMs": 132.20000000000437,
+      "maxInputToFrameMs": 48.19999999999709,
+      "maxEventDurationMs": 48,
+      "longTaskCount": 2,
+      "longTaskMaxMs": 127,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "android-portrait",
+      "scenario": "layer-switch",
+      "durationMs": 3097.2999999999956,
+      "p95FrameMs": 16.80000000000291,
+      "maxFrameGapMs": 23.700000000004366,
+      "maxInputToFrameMs": 48.5,
+      "maxEventDurationMs": 48,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "android-portrait",
+      "scenario": "site-search",
+      "durationMs": 1574.300000000003,
+      "p95FrameMs": 17,
+      "maxFrameGapMs": 36.19999999999709,
+      "maxInputToFrameMs": 48.19999999999709,
+      "maxEventDurationMs": 32,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "desktop-webgl",
+      "scenario": "panel",
+      "durationMs": 1206.800000000003,
+      "p95FrameMs": 16.89999999999418,
+      "maxFrameGapMs": 17.19999999999709,
+      "maxInputToFrameMs": 32.70000000001164,
+      "maxEventDurationMs": 16,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "desktop-webgl",
+      "scenario": "explore-search",
+      "durationMs": 1531.5,
+      "p95FrameMs": 17.40000000000873,
+      "maxFrameGapMs": 18.20000000001164,
+      "maxInputToFrameMs": 34.30000000000291,
+      "maxEventDurationMs": 24,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "desktop-webgl",
+      "scenario": "explore-filters",
+      "durationMs": 1850.199999999997,
+      "p95FrameMs": 16.80000000000291,
+      "maxFrameGapMs": 17.40000000000873,
+      "maxInputToFrameMs": 33,
+      "maxEventDurationMs": 24,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "desktop-webgl",
+      "scenario": "catalog-scroll",
+      "durationMs": 446.59999999999127,
+      "p95FrameMs": 16.80000000000291,
+      "maxFrameGapMs": 19.09999999999127,
+      "maxInputToFrameMs": 44.10000000000582,
+      "maxEventDurationMs": null,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "desktop-webgl",
+      "scenario": "map-pan",
+      "durationMs": 3780.899999999994,
+      "p95FrameMs": 31.59999999999127,
+      "maxFrameGapMs": 38.29999999998836,
+      "maxInputToFrameMs": 52.90000000000873,
+      "maxEventDurationMs": 56,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "desktop-webgl",
+      "scenario": "map-zoom",
+      "durationMs": 9398.5,
+      "p95FrameMs": 22.10000000000582,
+      "maxFrameGapMs": 153.8000000000029,
+      "maxInputToFrameMs": 46.19999999999709,
+      "maxEventDurationMs": 72,
+      "longTaskCount": 2,
+      "longTaskMaxMs": 144,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "desktop-webgl",
+      "scenario": "layer-switch",
+      "durationMs": 2797.5,
+      "p95FrameMs": 16.80000000000291,
+      "maxFrameGapMs": 26.30000000000291,
+      "maxInputToFrameMs": 42.19999999999709,
+      "maxEventDurationMs": 368,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "existing",
+      "profile": "desktop-webgl",
+      "scenario": "site-search",
+      "durationMs": 1474.300000000003,
+      "p95FrameMs": 17.19999999999709,
+      "maxFrameGapMs": 18.60000000000582,
+      "maxInputToFrameMs": 34.20000000001164,
+      "maxEventDurationMs": 32,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "android-portrait",
+      "scenario": "panel",
+      "durationMs": 2061.0000000000036,
+      "p95FrameMs": 16.899999999997817,
+      "maxFrameGapMs": 22.69999999999709,
+      "maxInputToFrameMs": 47.900000000001455,
+      "maxEventDurationMs": 40,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "android-portrait",
+      "scenario": "explore-search",
+      "durationMs": 1694.5,
+      "p95FrameMs": 17.5,
+      "maxFrameGapMs": 47.80000000000291,
+      "maxInputToFrameMs": 47.400000000001455,
+      "maxEventDurationMs": 48,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "android-portrait",
+      "scenario": "explore-filters",
+      "durationMs": 2179.699999999997,
+      "p95FrameMs": 16.900000000001455,
+      "maxFrameGapMs": 17.10000000000582,
+      "maxInputToFrameMs": 47.80000000000291,
+      "maxEventDurationMs": 32,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "android-portrait",
+      "scenario": "catalog-scroll",
+      "durationMs": 760.8999999999942,
+      "p95FrameMs": 22.900000000001455,
+      "maxFrameGapMs": 27.099999999998545,
+      "maxInputToFrameMs": 47.10000000000582,
+      "maxEventDurationMs": 56,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "android-portrait",
+      "scenario": "map-pan",
+      "durationMs": 1297.199999999997,
+      "p95FrameMs": 26.900000000001455,
+      "maxFrameGapMs": 31,
+      "maxInputToFrameMs": 45.900000000001455,
+      "maxEventDurationMs": 64,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "android-portrait",
+      "scenario": "map-zoom",
+      "durationMs": 5981.699999999997,
+      "p95FrameMs": 23.69999999999709,
+      "maxFrameGapMs": 140.59999999999854,
+      "maxInputToFrameMs": 48,
+      "maxEventDurationMs": 56,
+      "longTaskCount": 2,
+      "longTaskMaxMs": 132,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "android-portrait",
+      "scenario": "layer-switch",
+      "durationMs": 3096.699999999997,
+      "p95FrameMs": 16.80000000000291,
+      "maxFrameGapMs": 26.19999999999709,
+      "maxInputToFrameMs": 48.099999999998545,
+      "maxEventDurationMs": 48,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "android-portrait",
+      "scenario": "site-search",
+      "durationMs": 1584.699999999997,
+      "p95FrameMs": 16.900000000001455,
+      "maxFrameGapMs": 18.5,
+      "maxInputToFrameMs": 48.30000000000291,
+      "maxEventDurationMs": 32,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "desktop-webgl",
+      "scenario": "panel",
+      "durationMs": 1209.5,
+      "p95FrameMs": 16.80000000000291,
+      "maxFrameGapMs": 17.19999999999709,
+      "maxInputToFrameMs": 32.799999999995634,
+      "maxEventDurationMs": 24,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "desktop-webgl",
+      "scenario": "explore-search",
+      "durationMs": 1548.199999999997,
+      "p95FrameMs": 17.599999999998545,
+      "maxFrameGapMs": 19.900000000001455,
+      "maxInputToFrameMs": 36.69999999999709,
+      "maxEventDurationMs": 32,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "desktop-webgl",
+      "scenario": "explore-filters",
+      "durationMs": 1850.300000000003,
+      "p95FrameMs": 16.80000000000291,
+      "maxFrameGapMs": 17.40000000000873,
+      "maxInputToFrameMs": 33.09999999999127,
+      "maxEventDurationMs": 32,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "desktop-webgl",
+      "scenario": "catalog-scroll",
+      "durationMs": 446,
+      "p95FrameMs": 16.80000000000291,
+      "maxFrameGapMs": 19.79999999998836,
+      "maxInputToFrameMs": 45.80000000000291,
+      "maxEventDurationMs": 16,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "desktop-webgl",
+      "scenario": "map-pan",
+      "durationMs": 3330.7000000000116,
+      "p95FrameMs": 36.5,
+      "maxFrameGapMs": 47.89999999999418,
+      "maxInputToFrameMs": 54.69999999999709,
+      "maxEventDurationMs": 64,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "desktop-webgl",
+      "scenario": "map-zoom",
+      "durationMs": 9580.899999999994,
+      "p95FrameMs": 21.30000000000291,
+      "maxFrameGapMs": 158,
+      "maxInputToFrameMs": 50.59999999999127,
+      "maxEventDurationMs": 64,
+      "longTaskCount": 2,
+      "longTaskMaxMs": 152,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "desktop-webgl",
+      "scenario": "layer-switch",
+      "durationMs": 2813.199999999997,
+      "p95FrameMs": 16.80000000000291,
+      "maxFrameGapMs": 32.20000000001164,
+      "maxInputToFrameMs": 48.10000000000582,
+      "maxEventDurationMs": 48,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    },
+    {
+      "mode": "cover",
+      "profile": "desktop-webgl",
+      "scenario": "site-search",
+      "durationMs": 1492.5,
+      "p95FrameMs": 17.39999999999418,
+      "maxFrameGapMs": 20.69999999999709,
+      "maxInputToFrameMs": 34.69999999999709,
+      "maxEventDurationMs": 32,
+      "longTaskCount": 0,
+      "longTaskMaxMs": 0,
+      "unexpectedCLS": 0
+    }
+  ],
+  "pixelProof": {
+    "path": "dist/browser-terrain-mask-software-diagnostic.json",
+    "sha256": "c4597f0f4fec2a25aabe511f255f2dd58502c355f65832b8deeebfa5c2d6fdaa",
+    "pixelVerified": true,
+    "cases": [
+      {
+        "name": "webgl2-initial",
+        "renderer": "webgl2",
+        "verified": true
+      },
+      {
+        "name": "webgl2-rotated-zoomed",
+        "renderer": "webgl2",
+        "verified": true
+      },
+      {
+        "name": "canvas2d-initial",
+        "renderer": "canvas2d",
+        "verified": true
+      },
+      {
+        "name": "canvas2d-rotated-zoomed",
+        "renderer": "canvas2d",
+        "verified": true
+      }
+    ],
+    "rendererSHA256": "f842b9cbb335e8d9de880cf228d77b148ee3e1c1f5fb82f626e40e1c22dcb22f",
+    "recovery": [
+      {
+        "lost": 1,
+        "restored": 1,
+        "trusted": true,
+        "metrics": {
+          "width": 512,
+          "height": 384,
+          "outsideWitnesses": 62471,
+          "insideWitnesses": 38945,
+          "nearBoundaryOutside": 6079,
+          "terrainLeaks": 0,
+          "routeLeaks": 0,
+          "nearBoundaryRouteLeaks": 0,
+          "maxTerrainLeak": 0,
+          "maxRouteLeak": 0,
+          "insideVisible": 38945,
+          "routeCorePixels": 597,
+          "routeHaloPixels": 618,
+          "insideVisibleRatio": 1
+        }
+      }
+    ],
+    "pngParityCount": 17,
+    "pngParity": [
+      {
+        "name": "canvas2d-initial-empty.png",
+        "sha256": "42ac7031f12b0761bd863f2134e84de1fe6a2e02bcad2a20be7bdbaeaa403251",
+        "bytes": 5384,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "canvas2d-initial-first-masked-frame.png",
+        "sha256": "3b849ce170838b900c0466522d2817148a10141363ef0eeea18088ea03701e73",
+        "bytes": 10643,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "canvas2d-initial-masked-route.png",
+        "sha256": "29e521fc207d50b5094af92765c80026b48a6f5bf62a167412ddc4aff6de519e",
+        "bytes": 13976,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "canvas2d-initial-reference.png",
+        "sha256": "a25376a69879c59ce53e75b42e4dbf53b8fb0fdfd39f770bbae5013f8e5e8937",
+        "bytes": 28568,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "canvas2d-rotated-zoomed-empty.png",
+        "sha256": "42ac7031f12b0761bd863f2134e84de1fe6a2e02bcad2a20be7bdbaeaa403251",
+        "bytes": 5384,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "canvas2d-rotated-zoomed-first-masked-frame.png",
+        "sha256": "b87b12c4b7aa93ceded7b91c8e8d6b8e4995358c64a936b9d51953e3387a63a5",
+        "bytes": 11288,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "canvas2d-rotated-zoomed-masked-route.png",
+        "sha256": "3e8eb36888abe0a51e1d53dd5609e4e6f8d0f83eaa52352a28ae25e1fd4b74b1",
+        "bytes": 15658,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "canvas2d-rotated-zoomed-reference.png",
+        "sha256": "612950b32897c58a2337f1b57ba1f8a01e9b135513e50bb97c44d053d3bdf651",
+        "bytes": 39201,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "webgl2-initial-empty.png",
+        "sha256": "42ac7031f12b0761bd863f2134e84de1fe6a2e02bcad2a20be7bdbaeaa403251",
+        "bytes": 5384,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "webgl2-initial-first-masked-frame.png",
+        "sha256": "ac0d64b3855649582fb2034be5c8fa224a7276a272c633c322bcd5fffe47f84b",
+        "bytes": 13138,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "webgl2-initial-masked-route.png",
+        "sha256": "97c7ed1d14d371571153ee19d75adbb479d5683380f73f4c6c0e2acb67c56499",
+        "bytes": 16570,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "webgl2-initial-reference.png",
+        "sha256": "d39571f674528a7f23aa6a6813c50384be526b46a377db03495189d8a8bb3e5c",
+        "bytes": 23653,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "webgl2-rotated-zoomed-context-restored.png",
+        "sha256": "c59507c15379f01cadf3e9d3a2d8b8fd442b8cf81717abee26176e8f618f24b6",
+        "bytes": 17427,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "webgl2-rotated-zoomed-empty.png",
+        "sha256": "42ac7031f12b0761bd863f2134e84de1fe6a2e02bcad2a20be7bdbaeaa403251",
+        "bytes": 5384,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "webgl2-rotated-zoomed-first-masked-frame.png",
+        "sha256": "d59869932a45cd8f99ed3752f871c57104ee0e02e09d12a9a14d8e6abb4a85bf",
+        "bytes": 13582,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "webgl2-rotated-zoomed-masked-route.png",
+        "sha256": "c59507c15379f01cadf3e9d3a2d8b8fd442b8cf81717abee26176e8f618f24b6",
+        "bytes": 17427,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      },
+      {
+        "name": "webgl2-rotated-zoomed-reference.png",
+        "sha256": "8e9e36441c41c96471e18242d657e405c130c0916f127765917075ba19536d1c",
+        "bytes": 27530,
+        "matchesNativeBfeb774": true,
+        "matchesFullGL16f731": true
+      }
+    ]
+  },
+  "conclusion": "Increasing real output bounds while preserving application, emulated profiles, DPRs, input and budgets removes desktop layer-switch EventTiming inflation (368 to48 ms). Both diagnostics still fail performance: old output fails zoom gap153.8 ms and layer368 ms; full output fails panp95=36.5 ms and zoomgap158 ms. Native output correction is supported, but this result is not a release PASS.",
+  "primarySourceMechanism": {
+    "sourceVersion": "Chromium156.0.8078.79",
+    "mechanism": [
+      {
+        "url": "https://github.com/chromium/chromium/blob/156.0.8078.79/content/browser/devtools/protocol/emulation_handler.cc",
+        "lines": [
+          845,
+          851
+        ],
+        "claim": "Device metrics resize the emulated WebContents view, not the native browser window."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/156.0.8078.79/content/browser/web_contents/web_contents_impl.cc",
+        "lines": [
+          12398,
+          12416
+        ],
+        "claim": "SetDeviceEmulationSize calls RenderWidgetHostView.SetSize."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/156.0.8078.79/components/viz/service/display/surface_aggregator.cc",
+        "lines": [
+          1952,
+          1996
+        ],
+        "claim": "Damage is intersected with visible and clipping rectangles and the render pass output."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/156.0.8078.79/components/viz/service/display/display.cc",
+        "lines": [
+          907,
+          976
+        ],
+        "claim": "A draw requires aggregate damage and matching surface size, or a copy request; absent damage skips drawing."
+      },
+      {
+        "url": "https://github.com/chromium/chromium/blob/156.0.8078.79/components/viz/service/display/display.cc",
+        "lines": [
+          1111,
+          1131
+        ],
+        "claim": "Skipped draw leads to Swap skipped; empty damage terminates latency records."
+      },
+      {
+        "url": "https://w3c.github.io/event-timing/",
+        "section": "2.1",
+        "claim": "Event duration includes delay until the next finished rendering update; it is not just JavaScript handler duration."
+      }
+    ],
+    "observations": {
+      "drawSkipped": 76,
+      "swapSkipped": 76,
+      "sizeMismatch": 0,
+      "actualSwaps": 4,
+      "allSkippedRendererDamageStartsAtXAtLeast": 1112,
+      "rendererOutputRect": [
+        0,
+        0,
+        1440,
+        1000
+      ],
+      "traceRunUrl": "https://github.com/orewn/tropnik/actions/runs/43039265048",
+      "traceArtifactId": 13863429366,
+      "traceArtifactSHA256": "b08770f7cc93eb4f677bcf9dfd41867c6ec182d66b35b5a7b275b94c78812b7a",
+      "traceFile": "design-qa/desktop-webgl-ui-smoothness-layer-switch.trace.json"
+    },
+    "confirmation": {
+      "runId": 43041620451,
+      "baselineWindow": [
+        780,
+        580
+      ],
+      "baselineClient": [
+        780,
+        493
+      ],
+      "coverWindow": [
+        1920,
+        1920
+      ],
+      "coverClient": [
+        1920,
+        1833
+      ],
+      "baselineDesktopLayerEventMs": 368,
+      "coverDesktopLayerEventMs": 48,
+      "sameEmulatedDesktopViewport": [
+        1440,
+        1000
+      ],
+      "sameEmulatedDesktopDPR": 1,
+      "maskCasesPassed": 4,
+      "identicalPNGsAcrossFullGLAndNative": 17
+    }
+  },
+  "androidLauncher": {
+    "diagnosticOnly": true,
+    "releaseEligible": false,
+    "sourceCommit": "5bf4c7ad1eb8ac660fcda0cc12954c7a220e9434",
+    "runUrl": "https://github.com/orewn/tropnik/actions/runs/43041565686",
+    "artifactId": 13865955545,
+    "artifactSHA256": "5d4ef92a89db3c4160a8e3cefe86360bb647b84396bd34e63985c034ca8a18a5",
+    "emulatorVersion": "37.2.13",
+    "emulatorBuildId": "16740729",
+    "libpulseLoadable": false,
+    "windowedVersion": {
+      "arguments": [
+        "-version"
+      ],
+      "returncode": 127,
+      "error": "libpulse.so.0 missing"
+    },
+    "headlessVersion": {
+      "arguments": [
+        "-no-window",
+        "-version"
+      ],
+      "returncode": 0,
+      "elapsedMs": 44
+    },
+    "change": "Probe the same headless engine used by the unchanged KVM/swangle device boot; remove the unrelated windowed-engine package installer.",
+    "deviceCasesRequired": 8,
+    "deviceCasesExecutedByThisDiagnostic": 0,
+    "source": "https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/emulator/main-emulator.cpp",
+    "networkDiagnostic": {
+      "runUrl": "https://github.com/orewn/tropnik/actions/runs/43040732202",
+      "artifactId": 13864967377,
+      "artifactSHA256": "509b8ed977e538b25758cc9141bc872ae379758573ca384c721db343d39f7a22",
+      "proxyConfigured": false,
+      "ubuntuDNSFailedInAllThreeContexts": true,
+      "googleSDKAndGitHubHTTPSPassedInAllThreeContexts": true
+    }
+  },
+  "finalCandidateCertification": "Not supplied by these diagnostics. The changed application must still pass the full browser matrix, unchanged performance budgets, and all eight installed universal APK device cases."
+}

@@ -518,3 +518,72 @@ test('a committed coverage revision atomically refreshes real geometry and label
  assert.deepEqual(plain(env.engine.getCamera()),cameraBefore);assert.equal(env.store.requests.length,requestsBefore);
  assert.equal(env.host.dataset.mapDrawnRoute,'coverage-route');
 });
+
+function pathCommands(path){
+ return path.commands.flatMap(command=>command[0]==='addPath'?pathCommands(command[1]):[command]);
+}
+
+test('neighbouring coverage revisions reuse unchanged cell paths without losing source order, holes or antimeridian vertices',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());
+ const feature=(cell,role,geometry)=>({type:'Feature',properties:{cell,role,shapeName:cell},geometry});
+ const west=feature('west','area',plain(area.geometry));
+ const east=feature('east','area',{type:'MultiPolygon',coordinates:[
+  [[[179.8,65],[-179.8,65],[-179.8,66],[179.8,66],[179.8,65]],[[179.9,65.2],[179.9,65.4],[-179.9,65.4],[-179.9,65.2],[179.9,65.2]]],
+  [[[177.2,63],[177.4,63],[177.4,63.2],[177.2,63.2],[177.2,63]]],
+ ]});
+ const westBoundary=feature('west','territory-boundary',{type:'MultiLineString',coordinates:[[[40,42],[40.1234567,42.7654321],[42,45]],[[41,43],[41.5,44]]]});
+ const eastBoundary=feature('east','territory-boundary',{type:'LineString',coordinates:[[179.8,65],[-179.8,65],[-179.8,66]]});
+ const westTerritory=feature('west','territory',plain(west.geometry)),eastTerritory=feature('east','territory',plain(east.geometry));
+ const fc=features=>({type:'FeatureCollection',features});
+ const install=(eastArea=east,eastLine=eastBoundary,eastRegion=eastTerritory)=>{
+  env.coverage.area=fc([{...west},eastArea]);
+  env.coverage.boundaries=fc([{...westBoundary},eastLine]);
+  env.coverage.territories=fc([{...westTerritory},eastRegion]);
+ };
+ const expectations=()=>({
+  area:pathCommands(env.geometryPath(env.coverage.area).path),
+  boundaries:pathCommands(env.geometryPath(env.coverage.boundaries).path),
+  selected:pathCommands(env.geometryPath(env.coverage.territories).path),
+ });
+ const closes=()=>env.paths.reduce((sum,path)=>sum+path.commands.filter(command=>command[0]==='closePath').length,0);
+ const assertGeometry=expected=>{
+  const painted=coveragePaint(env);
+  for(const role of ['area','boundaries','selected'])assert.deepEqual(pathCommands(painted[role]),expected[role],`${role} must preserve every projected source vertex and ring command`);
+  assert.deepEqual(pathCommands(painted.mask),[['rect',-3,-3,8,8],...expected.area]);
+  return painted;
+ };
+ install();const initialExpected=expectations();await env.ready();env.engine.setRegion(['west','east']);
+ const route={type:'LineString',coordinates:[[40.2,43.3],[40.4,43.4],[40.8,43.5]]};
+ env.engine.setRoute(route,'kept-route');env.flush();
+ const first=assertGeometry(initialExpected),cameraBefore=plain(env.engine.getCamera()),requestsBefore=env.store.requests.length;
+ const firstCloses=closes(),firstDraw=env.engine.inspect().drawRevision;
+ install();notifyCoverage(env,{revision:1});
+ assert.equal(closes(),firstCloses,'New role collections with the same immutable cells must not repeat any closePath');
+ assert.equal(env.engine.inspect().drawRevision,firstDraw);assert.equal(env.frames.size,1);env.flush();
+ const same=assertGeometry(initialExpected);
+ for(const role of ['area','boundaries','selected'])assert.deepEqual(same[role].commands,first[role].commands,'New feature wrappers must reuse the geometry identity');
+ assert.equal(same.route,first.route);
+
+ const nextEast=plain(east);nextEast.geometry.coordinates[0][0][1]=[-179.7123456,65.0123456];
+ const nextBoundary=plain(eastBoundary);nextBoundary.geometry.coordinates.splice(1,0,[179.9876543,65.1234567]);
+ const nextTerritory=feature('east','territory',plain(nextEast.geometry));
+ install(nextEast,nextBoundary,nextTerritory);const nextExpected=expectations(),beforeCommitCloses=closes(),beforeCommitDraw=env.engine.inspect().drawRevision;
+ notifyCoverage(env,{revision:2});
+ assert.equal(closes()-beforeCommitCloses,6,'Only the changed area and selected territory compile their three rings again');
+ assert.equal(env.engine.inspect().drawRevision,beforeCommitDraw,'All coverage roles must commit before the next paint');
+ assert.equal(env.frames.size,1);env.flush();const next=assertGeometry(nextExpected);
+ for(const role of ['area','boundaries','selected']){
+  assert.equal(next[role].commands[0][1],first[role].commands[0][1],`${role} must retain the untouched western cell`);
+  assert.notEqual(next[role].commands[1][1],first[role].commands[1][1],`${role} must replace the changed eastern cell`);
+ }
+ assert.equal(next.route,first.route);assert.deepEqual(plain(env.engine.getCamera()),cameraBefore);assert.equal(env.store.requests.length,requestsBefore);
+ install();const beforeReturnCloses=closes();notifyCoverage(env,{revision:3});env.flush();assertGeometry(initialExpected);
+ assert.equal(closes(),beforeReturnCloses,'Returning to an immutable cell still held by coverage cache reuses its compiled path');
+
+ route.coordinates[1]=[40.6,43.45];env.engine.setRoute(route,'kept-route');env.flush();const changedRoute=coveragePaint(env).route;
+ assert.notEqual(changedRoute,first.route,'Caller-owned routes must remain outside the immutable coverage cache');
+ assert.notDeepEqual(pathCommands(changedRoute),pathCommands(first.route));assert.equal(env.host.dataset.mapDrawnRoute,'kept-route');
+ assert.deepEqual(plain(env.engine.getCamera()),cameraBefore);
+ env.engine.destroy();const allocations=env.paths.length;notifyCoverage(env,{revision:4});env.flush();
+ assert.equal(env.paths.length,allocations,'Disposed coverage subscriptions cannot compile or resurrect source paths');
+});

@@ -9,6 +9,9 @@ import {assertRequestMapLayout} from './browser-request-layout.mjs';
 import {assertCatalogueExpectations} from './catalogue-expectations.mjs';
 import {assertSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
 import {assertCustomMapInspection,assertCustomDetailInspection,assertCustomSceneInspection,assertCustomVisibleBounds} from './browser-custom-map.mjs';
+import {assertBrowserEnvironment} from './browser-environment.mjs';
+import {assertNativeSurfaceCoverage} from './browser-native-surface.mjs';
+import {assertTerrainMaskReport} from './terrain-mask-report.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -672,6 +675,10 @@ export function assertStyleCameraRoundtrip(receipt,name){
 /** The same evidence gate runs before upload and against the public artifact. */
 export function assertBrowserReport(browser,expectedCommit,expectedCatalogue){
  assert.equal(browser.verified,true);
+ assert.match(expectedCommit||'',/^[a-f0-9]{40}$/,'Publication requires an exact source commit');
+ assertBrowserEnvironment(browser.environment,expectedCommit);
+ assertNativeSurfaceCoverage(browser.environment.nativeSurface);
+ assertTerrainMaskReport(browser.terrainMask,{sourceCommit:expectedCommit,environment:browser.environment});
  assertOfflineSafetyAudit(browser.offlineSafety);
  assert.equal(browser.offlineSafety.originTransport.active,false,'Offline transport was not restored after the audit');
  assert.ok(Number.isFinite(Date.parse(browser.offlineSafety.originTransport.restoredAt)),'Offline transport cleanup is not recorded');

@@ -8,6 +8,7 @@ import {catalogueFixture,layerMenusFixture,exploreExperienceFixture,styleCameraR
 import {coastFixture} from './coast-fixture.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
 import {smoothnessFixture} from './smoothness-fixture.mjs';
+import {browserEnvironmentFixture,terrainMaskReportFixture} from './browser-environment-fixture.mjs';
 
 const commit='a'.repeat(40);
 const assertBrowserReport=(report,source)=>verifyBrowserReport(report,source,catalogueFixture);
@@ -55,7 +56,7 @@ function zoomDesign(profile,engine,mobile){
   screenshots:[...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
 }
 function evidence(){
- return{verified:true,catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:4,
+ return{verified:true,environment:browserEnvironmentFixture(commit),terrainMask:terrainMaskReportFixture(commit),catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:4,
   offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,inputs:['route-title','region','leader-name','leader-phone'].map(id=>({selector:'#'+id,passed:true,focusedBeforeTyping:true,valueLength:10,events:[{type:'input',trusted:true,id,valueLength:10}]})),networkSuccessfulResponses:0,originTransport:{method:'origin-socket-destroy',active:false,startedAt:'2026-11-10T00:00:00Z',restoredAt:'2026-11-10T00:00:01Z',blockedRequests:1,requests:[{path:'/tropnik/_offline-transport-probe',method:'GET'}],probe:{passed:true,errorCode:'ECONNRESET',path:'/tropnik/_offline-transport-probe'}},screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
   profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'tropnik-canvas',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
   desktopProfiles:[{name:'desktop-webgl',engine:'tropnik-canvas',coarse:false,mapInteractionTested:true}],
@@ -111,6 +112,22 @@ test('both upload and public verification require real mobile and desktop map in
   value=>value.mapInteractions[0].catalogScroll.scrollHeightDelta=132,
   value=>value.mapInteractions[0].gestures.dragged=false,
   value=>delete value.mapInteractions[0].gestures.postResizePolygon,
+ ];
+ for(const change of changes){const bad=evidence();change(bad);assert.throws(()=>assertBrowserReport(bad,commit));}
+});
+test('publication rejects missing, synthetic, mismatched or Canvas-substituted WebGL proof',()=>{
+ const missingSource=evidence();missingSource.sourceCommit=null;missingSource.environment.sourceCommit=null;
+ missingSource.terrainMask.sourceCommit=null;missingSource.terrainMask.environment.sourceCommit=null;
+ assert.throws(()=>verifyBrowserReport(missingSource,null,catalogueFixture),/exact source commit/);
+ const changes=[
+  value=>delete value.environment,value=>delete value.terrainMask,
+  value=>delete value.environment.nativeSurface,
+  value=>{value.environment.nativeSurface.viewport.innerWidth=780;value.environment.nativeSurface.viewport.innerHeight=580;},
+  value=>value.environment.commandLine=value.environment.commandLine.replace('--use-angle=swiftshader-webgl','--use-angle=swiftshader'),
+  value=>value.environment.gpu.featureStatus.gpu_compositing='enabled',
+  value=>value.terrainMask.evidence='synthetic-pixels',value=>value.terrainMask.environment.browser.revision='other-revision',
+  value=>value.terrainMask.sourceCommit='e'.repeat(40),value=>value.terrainMask.cases[0].renderer='canvas2d',
+  value=>value.terrainMask.cases[1].frames.at(-1).renderer='canvas2d',value=>value.terrainMask.cases[1].recovery.trusted=false,
  ];
  for(const change of changes){const bad=evidence();change(bad);assert.throws(()=>assertBrowserReport(bad,commit));}
 });

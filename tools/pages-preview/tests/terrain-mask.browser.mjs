@@ -8,6 +8,9 @@ import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {launchBrowser,BROWSER_STARTUP_LIMITS,browserErrorDetails} from '../browser-startup.mjs';
+import {browserEnvironmentArgs,collectBrowserEnvironment} from '../browser-environment.mjs';
+import {collectNativeBrowserSurface} from '../browser-native-surface.mjs';
+import {assertTerrainMaskReport} from '../terrain-mask-report.mjs';
 
 const binary=['google-chrome','google-chrome-stable','chromium','chromium-browser'].find(name=>spawnSync('which',[name],{stdio:'ignore'}).status===0);
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -22,7 +25,7 @@ test('RF display mask clips actual terrain and thick route pixels in WebGL2 and 
  const root=resolve(import.meta.dirname,'../../..'),output=join(root,'web/pages-preview/dist'),pictures=join(root,'web/pages-preview/design-qa/terrain-mask');
  const renderer=await readFile(join(root,'web/public/terrain/terrain-renderer.js')),fixture=await readFile(new URL('terrain-mask-fixture.mjs',import.meta.url));
  const directory=await mkdtemp(join(tmpdir(),'tropnik-terrain-mask-'));
- const report={schemaVersion:1,verified:false,phase:'browser-startup',sourceCommit:process.env.GITHUB_SHA||null,rendererSHA256:createHash('sha256').update(renderer).digest('hex'),cases:[]};
+ const report={schemaVersion:1,verified:false,phase:'browser-startup',evidence:'production-renderer-browser-pixels',sourceCommit:process.env.GITHUB_SHA||null,rendererSHA256:createHash('sha256').update(renderer).digest('hex'),cases:[]};
  const html='<!doctype html><meta charset="utf-8"><style>html,body{margin:0;width:512px;height:384px;overflow:hidden;background:#dfe6da}</style><script type="module">import {TerrainRenderer} from "/terrain-renderer.js";import {runTerrainMaskCase} from "/fixture.mjs";window.runMaskGate=options=>runTerrainMaskCase(TerrainRenderer,options);</script>';
  const server=createHTTPServer((request,response)=>{
   const path=new URL(request.url,'http://127.0.0.1').pathname,content=path==='/'?html:path==='/terrain-renderer.js'?renderer:path==='/fixture.mjs'?fixture:null;
@@ -31,14 +34,15 @@ test('RF display mask clips actual terrain and thick route pixels in WebGL2 and 
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const origin=`http://127.0.0.1:${server.address().port}`,lease=createNetServer();
  await new Promise(resolve=>lease.listen(0,'127.0.0.1',resolve));const port=lease.address().port;await new Promise(resolve=>lease.close(resolve));
- const browser=launchBrowser(binary,['--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--no-first-run','--disable-extensions','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',`--remote-debugging-port=${port}`,`--user-data-dir=${directory}`,'about:blank']);
+ const browser=launchBrowser(binary,browserEnvironmentArgs({debugPort:port,userDataDir:directory}));
  let socket;
  t.after(async()=>{
   socket?.close();await browser.close();await new Promise(resolve=>server.close(resolve));await rm(directory,{recursive:true,force:true});
   await mkdir(output,{recursive:true});report.browserStartup=browser.diagnostics();await writeFile(join(output,'browser-terrain-mask-verification.json'),JSON.stringify(report,null,2)+'\n');
  });
  try{
-  await browser.waitUntilReady(`http://127.0.0.1:${port}/json/version`);
+  const version=await browser.waitUntilReady(`http://127.0.0.1:${port}/json/version`);
+  report.phase='browser-environment';report.environment=await collectBrowserEnvironment(version.webSocketDebuggerUrl,{sourceCommit:report.sourceCommit});
   const target=await browser.requestJSON(`http://127.0.0.1:${port}/json/new?about:blank`,{method:'PUT'});
   socket=new WebSocket(target.webSocketDebuggerUrl);await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true});});
   let next=0;const pending=new Map();
@@ -48,6 +52,7 @@ test('RF display mask clips actual terrain and thick route pixels in WebGL2 and 
    pending.set(id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject:error=>{clearTimeout(timer);reject(error);}});socket.send(JSON.stringify({id,method,params}));
   })};
   const evaluate=async(expression,timeout)=>{const result=await cdp.call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true},timeout);if(result.exceptionDetails)throw new Error(result.exceptionDetails.exception?.description||result.exceptionDetails.text);return result.result.value;};
+  report.environment.nativeSurface=await collectNativeBrowserSurface(cdp);
   await cdp.call('Emulation.setDeviceMetricsOverride',{width:512,height:384,deviceScaleFactor:1,mobile:false});
   await cdp.call('Page.navigate',{url:origin+'/'});
   let loaded=false;for(let attempt=0;attempt<60;attempt++){if(await evaluate("typeof window.runMaskGate==='function'")){loaded=true;break;}await sleep(50);}assert.ok(loaded,'The real renderer fixture did not load');
@@ -66,5 +71,6 @@ test('RF display mask clips actual terrain and thick route pixels in WebGL2 and 
    assert.equal(result.verified,true,result.error||`${name} failed in ${result.phase}`);assert.equal(result.renderer,forceCanvas?'canvas2d':'webgl2');
   }
   assert.equal(report.cases.length,4);assert.ok(report.cases.some(item=>item.recovery?.restored===1));report.verified=true;report.phase='complete';
- }catch(error){report.error=browserErrorDetails(error);throw error;}
+  assertTerrainMaskReport(report,{sourceCommit:report.sourceCommit,rendererSHA256:createHash('sha256').update(renderer).digest('hex')});
+ }catch(error){report.verified=false;report.error=browserErrorDetails(error);throw error;}
 });

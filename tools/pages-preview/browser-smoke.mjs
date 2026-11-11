@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {mkdir, readFile, rename, writeFile, stat} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
@@ -9,6 +10,9 @@ import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-pr
 import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving,browserAuditRunPolicy} from './browser-zoom-audit.mjs';
 import {browserTraceEnabled,traceDesktopSelection,recordBrowserLongTask,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
+import {browserEnvironmentArgs,collectBrowserEnvironment} from './browser-environment.mjs';
+import {collectNativeBrowserSurface,assertNativeSurfaceCoverage} from './browser-native-surface.mjs';
+import {assertTerrainMaskReport} from './terrain-mask-report.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
 import {inspectTrailTouchTargets} from './browser-trail-hitareas.mjs';
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
@@ -852,7 +856,7 @@ const server=serve(ROOT);
 await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(httpPort,'127.0.0.1',resolve);});
 const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browserLaunchStarted=performance.now();
-let browser,cdp,network,currentProfile,failure,currentExploreExperience=null;
+let browser,cdp,network,environment,terrainMask,currentProfile,failure,currentExploreExperience=null;
 const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],satelliteAudits=[],siteSmoothness=[],profilePerformance=[],performanceIssues=[];
 // GitHub can terminate this process before catch/finally. Preserve completed
 // interactions before the long zoom matrix, without marking them as a release.
@@ -860,20 +864,24 @@ const progressDirectory=new URL('../../web/pages-preview/design-qa/',import.meta
 async function checkpoint(phase){
   await mkdir(progressDirectory,{recursive:true});
   const temporary=new URL('browser-progress.tmp',progressDirectory);
-  await writeFile(temporary,JSON.stringify({verified:false,releaseEligible:false,sourceCommit:process.env.GITHUB_SHA||null,catalogue,updatedAt:new Date().toISOString(),profile:currentProfile,phase,performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedSiteSmoothness:siteSmoothness,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest})),completedZoomProfiles:zoomDesigns.map(({profile,geometryPassed,performance})=>({profile,geometryPassed,performance}))},null,2)+'\n');
+  await writeFile(temporary,JSON.stringify({verified:false,releaseEligible:false,environment,sourceCommit:process.env.GITHUB_SHA||null,catalogue,updatedAt:new Date().toISOString(),profile:currentProfile,phase,performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedSiteSmoothness:siteSmoothness,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest})),completedZoomProfiles:zoomDesigns.map(({profile,geometryPassed,performance})=>({profile,geometryPassed,performance}))},null,2)+'\n');
   await rename(temporary,new URL('browser-progress.json',progressDirectory));
 }
 try{
-  browser=launchBrowser(browserBinary(),[
-    '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
-    '--disable-default-apps','--disable-extensions','--disable-features=Translate,MediaRouter','--mute-audio',
-    '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
-    `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
-  ]);
-  await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
+  browser=launchBrowser(browserBinary(),browserEnvironmentArgs({debugPort,userDataDir:userData}));
+  const version=await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
+  environment=await collectBrowserEnvironment(version.webSocketDebuggerUrl);
   const initialUrl=['offline-safety','satellite-continuity','ui-smoothness','ui-smoothness-cpu'].includes(runPolicy.diagnostic)?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
-  const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(initialUrl)}`,{method:'PUT'});
+  const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent('about:blank')}`,{method:'PUT'});
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
+  environment.nativeSurface=await collectNativeBrowserSurface(cdp);
+  if(!runPolicy.diagnostic){
+    assertNativeSurfaceCoverage(environment.nativeSurface);
+    terrainMask=JSON.parse(await readFile(new URL('browser-terrain-mask-verification.json',ROOT),'utf8'));
+    const rendererSHA256=createHash('sha256').update(await readFile(new URL('../../web/public/terrain/terrain-renderer.js',import.meta.url))).digest('hex');
+    assertTerrainMaskReport(terrainMask,{sourceCommit:process.env.GITHUB_SHA||null,environment,rendererSHA256});
+  }
+  if(initialUrl!=='about:blank')await cdp.call('Page.navigate',{url:initialUrl});
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
   network=await observePublicMapNetwork(cdp,{baseURL:`http://127.0.0.1:${httpPort}/tropnik/`});
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
@@ -910,7 +918,7 @@ try{
     currentProfile=profile.name;
     if(runPolicy.diagnostic==='ui-smoothness'||runPolicy.diagnostic==='ui-smoothness-cpu'){
       const audit=await siteSmoothnessAudit(cdp,profile,runPolicy.diagnostic==='ui-smoothness-cpu'?4:1);siteSmoothness.push(audit);performanceIssues.push(...audit.performanceIssues);
-      const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:siteSmoothness.length===runPolicy.profiles.length?'completed':'running',sourceCommit:process.env.GITHUB_SHA||null,profiles:siteSmoothness,performanceIssues,performancePassed:performanceIssues.length===0,updatedAt:new Date().toISOString()};
+      const report={schemaVersion:1,environment,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:siteSmoothness.length===runPolicy.profiles.length?'completed':'running',sourceCommit:process.env.GITHUB_SHA||null,profiles:siteSmoothness,performanceIssues,performancePassed:performanceIssues.length===0,updatedAt:new Date().toISOString()};
       await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));continue;
     }
     if(runPolicy.diagnostic==='satellite-continuity'){
@@ -918,19 +926,14 @@ try{
       satelliteAudits.push(audit);performanceIssues.push(...satellitePerformanceIssues(audit,profile));
       profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
       assert.notEqual(runPolicy.reportFile,'browser-verification.json');
-      const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:satelliteAudits.length===runPolicy.profiles.length?'completed':'running',sourceCommit:process.env.GITHUB_SHA||null,profiles:satelliteAudits,performanceIssues,performancePassed:performanceIssues.length===0,profilePerformance,updatedAt:new Date().toISOString()};
+      const report={schemaVersion:1,environment,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:satelliteAudits.length===runPolicy.profiles.length?'completed':'running',sourceCommit:process.env.GITHUB_SHA||null,profiles:satelliteAudits,performanceIssues,performancePassed:performanceIssues.length===0,profilePerformance,updatedAt:new Date().toISOString()};
       await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
       await checkpoint('satellite-continuity-profile-complete');continue;
     }
     if(runPolicy.diagnostic==='terrain-close'){
-      const systemInfo=async()=>{
-        const version=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/version`);
-        assert.ok(version.webSocketDebuggerUrl,'The browser target does not advertise SystemInfo access');
-        const gpuCdp=new CDP(version.webSocketDebuggerUrl);
-        try{await gpuCdp.open();return await gpuCdp.call('SystemInfo.getInfo',{},3000);}finally{gpuCdp.close();}
-      };
+      const systemInfo=async()=>({gpu:environment.gpu,commandLine:environment.commandLine});
       const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo,url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic});
-      assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
+      report.environment=environment;assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
       assert.notEqual(runPolicy.reportFile,'browser-verification.json');
       await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
       continue;
@@ -949,7 +952,7 @@ try{
       profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
       if(runPolicy.diagnostic==='map-interactions'){
         assert.notEqual(runPolicy.reportFile,'browser-verification.json');
-        const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:profile.name,engine:profile.engine,interaction,performanceIssues,performancePassed:performanceIssues.length===0,performance:profilePerformance.at(-1),completedAt:new Date().toISOString()};
+        const report={schemaVersion:1,environment,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:profile.name,engine:profile.engine,interaction,performanceIssues,performancePassed:performanceIssues.length===0,performance:profilePerformance.at(-1),completedAt:new Date().toISOString()};
         await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
         await checkpoint('map-interactions-diagnostic-complete');continue;
       }
@@ -1006,19 +1009,19 @@ try{
   const offlineSafety=await runOfflineSafetyAudit(cdp,{evaluate,waitValue,sleep,pointerAt,pointerSelector,originTransport:{start:()=>offlineOriginTransport.start(server),snapshot:offlineOriginTransport.snapshot,restore:offlineOriginTransport.restore},url:`http://127.0.0.1:${httpPort}/tropnik/`});
   if(runPolicy.diagnostic==='offline-safety'){
     assert.notEqual(runPolicy.reportFile,'browser-verification.json');
-    const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:offlineSafety.profile,offlineSafety,completedAt:new Date().toISOString()};
+    const report={schemaVersion:1,environment,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:offlineSafety.profile,offlineSafety,completedAt:new Date().toISOString()};
     await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
   }else{
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');
-  const report={verified:true,catalogue,mapInteractionSchemaVersion:4,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,siteSmoothness,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,environment,terrainMask,catalogue,mapInteractionSchemaVersion:4,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,siteSmoothness,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
   }
   }
 }catch(error){
-  failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
+  failure={environment,profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
   if(network)failure.network=network.snapshot();
   if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
   if(error.smoothnessAudit)failure.smoothnessAudit=error.smoothnessAudit;

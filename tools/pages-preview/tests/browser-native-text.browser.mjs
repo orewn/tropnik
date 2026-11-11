@@ -7,6 +7,8 @@ import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {launchBrowser,BROWSER_STARTUP_LIMITS} from '../browser-startup.mjs';
 import {sendNativeText} from '../browser-native-text.mjs';
+import {browserEnvironmentArgs,collectBrowserEnvironment} from '../browser-environment.mjs';
+import {collectNativeBrowserSurface} from '../browser-native-surface.mjs';
 
 const binary=['google-chrome','google-chrome-stable','chromium','chromium-browser'].find(name=>spawnSync('which',[name],{stdio:'ignore'}).status===0);
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -22,15 +24,17 @@ test('native keyboard typing supplies trusted key pairs, honors cancellation and
  const server=createServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const port=server.address().port;await new Promise(resolve=>server.close(resolve));
  // This waits only for the blank Chromium process. Use the same bounded cold
  // startup allowance as the product harness; no application timing starts here.
- const browser=launchBrowser(binary,['--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--no-first-run','--disable-extensions','--disable-gpu',`--remote-debugging-port=${port}`,`--user-data-dir=${directory}`,'about:blank']);
- let socket,phase='browser-startup',verified=false;
+ const browser=launchBrowser(binary,browserEnvironmentArgs({debugPort:port,userDataDir:directory}));
+ const sourceCommit=process.env.GITHUB_SHA||null;
+ let socket,environment,phase='browser-startup',verified=false;
  t.after(async()=>{
   socket?.close();await browser.close();await rm(directory,{recursive:true,force:true});
   const output=resolve(import.meta.dirname,'../../../web/pages-preview/dist');
   await mkdir(output,{recursive:true});
-  await writeFile(join(output,'browser-native-text-verification.json'),JSON.stringify({schemaVersion:1,verified,phase,browserStartup:browser.diagnostics()},null,2)+'\n');
+  await writeFile(join(output,'browser-native-text-verification.json'),JSON.stringify({schemaVersion:1,verified,phase,sourceCommit,environment,browserStartup:browser.diagnostics()},null,2)+'\n');
  });
- await browser.waitUntilReady(`http://127.0.0.1:${port}/json/version`);
+ const version=await browser.waitUntilReady(`http://127.0.0.1:${port}/json/version`);
+ phase='browser-environment';environment=await collectBrowserEnvironment(version.webSocketDebuggerUrl,{sourceCommit});
  phase='keyboard-fixture';
  const target=await browser.requestJSON(`http://127.0.0.1:${port}/json/new?about:blank`,{method:'PUT'});
  socket=new WebSocket(target.webSocketDebuggerUrl);await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true});});
@@ -41,6 +45,7 @@ test('native keyboard typing supplies trusted key pairs, honors cancellation and
   pending.set(id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject:error=>{clearTimeout(timer);reject(error);}});socket.send(JSON.stringify({id,method,params}));
  })};
  const evaluate=async expression=>{const result=await cdp.call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});assert.equal(result.exceptionDetails,undefined);return result.result.value;};
+ environment.nativeSurface=await collectNativeBrowserSurface(cdp);
  const html=`<!doctype html><style>body{margin:20px}input{width:300px;height:40px}#result{width:200px;height:100px;background:#456;margin-top:20px}</style><input id="query"><div id="result"></div><script>
   window.events=[];window.shifts=[];window.blockKey='';
   for(const type of ['keydown','keyup','beforeinput','input'])document.addEventListener(type,event=>events.push({type,trusted:event.isTrusted,key:event.key??null,value:query.value}));

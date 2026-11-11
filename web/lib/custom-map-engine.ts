@@ -98,6 +98,7 @@ export class CustomMapEngine {
   private pixelRatio=1;
   private coverage?:MapCoverage;
   private coverageRevision=-1;
+  private coveragePaths=new WeakMap<GeoJSON.Geometry,Path2D>();
   private area?:Path2D;
   private mask?:Path2D;
   private boundaries?:Path2D;
@@ -280,19 +281,38 @@ export class CustomMapEngine {
     this.schedule(false);
   }
   setPosition(coordinate:[number,number]|null){const others=[...this.markers.values()].map(r=>r.marker).filter(marker=>marker.id!=='current-position');if(coordinate)others.push({id:'current-position',coordinate,label:'Моё местоположение',kind:'position'});this.setMarkers(others);}
-  private updateSelectedArea(){
-    const features=this.coverage?.territories.features.filter(f=>this.selectedShapes.includes(String(f.properties?.shapeName)))||[];
-    this.selectedArea=features.length?geometryPath({type:'FeatureCollection',features}).path:undefined;
+  private coveragePath(geometry:FeatureGeometry):Path2D{
+    if(!geometry)return new Path2D();
+    if(geometry.type==='Feature')return this.coveragePath(geometry.geometry??undefined);
+    if(geometry.type==='FeatureCollection'||geometry.type==='GeometryCollection'){
+      const children=geometry.type==='FeatureCollection'?geometry.features:geometry.geometries;
+      if(children.length===1)return this.coveragePath(children[0]);
+      const path=new Path2D();for(const child of children)path.addPath(this.coveragePath(child));return path;
+    }
+    // Coverage commits reuse immutable cell geometry. Keep each source path at
+    // its original precision and append it in source order, including every
+    // ring and hole. Rewalking the whole country makes closePath costly on the
+    // final zoom frame even when only a few cells have changed.
+    // Weak keys follow the bounded coverage cache (24 MiB) and current view;
+    // visiting new cells never creates a second, strongly retained history.
+    let path=this.coveragePaths.get(geometry);
+    if(!path){path=geometryPath(geometry).path;this.coveragePaths.set(geometry,path);}
+    return path;
   }
+  private selectedCoveragePath(){
+    const features=this.coverage?.territories.features.filter(f=>this.selectedShapes.includes(String(f.properties?.shapeName)))||[];
+    return features.length?this.coveragePath({type:'FeatureCollection',features}):undefined;
+  }
+  private updateSelectedArea(){this.selectedArea=this.selectedCoveragePath();}
   private applyCoverage(){
     if(!this.coverage)return;
     const s=this.coverage.status,changed=s.revision!==this.coverageRevision;
     // Coverage progress and errors keep the current immutable geometry. Only
     // an atomic source commit advances its revision and needs new paths.
     if(changed){
-      this.area=geometryPath(this.coverage.area).path;this.boundaries=geometryPath(this.coverage.boundaries).path;
-      const mask=new Path2D();mask.rect(-3,-3,8,8);mask.addPath(this.area);this.mask=mask;
-      this.updateSelectedArea();this.coverageRevision=s.revision;
+      const area=this.coveragePath(this.coverage.area),boundaries=this.coveragePath(this.coverage.boundaries),selected=this.selectedCoveragePath();
+      const mask=new Path2D();mask.rect(-3,-3,8,8);mask.addPath(area);
+      this.area=area;this.boundaries=boundaries;this.mask=mask;this.selectedArea=selected;this.coverageRevision=s.revision;
     }
     this.element.dataset.mapCoverage=JSON.stringify(s);this.element.dataset.mapCoverageLod=s.lod;this.element.dataset.mapCoverageState=s.ready?'ready':'loading';
     if(changed)this.schedule();else this.publishInspection();
@@ -491,6 +511,7 @@ export class CustomMapEngine {
     if(this.disposed)return;this.disposed=true;cancelAnimationFrame(this.frame);this.stopAnimation();clearTimeout(this.settleTimer);
     this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
+    this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;
   }
 }
 export {COUNTRY_BOUNDS,geometryPath,tileRequests};
