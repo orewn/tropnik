@@ -49,8 +49,8 @@ jobs:
           cmp baseline/web/pnpm-lock.yaml optimized/web/pnpm-lock.yaml
           npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
           test "$(pnpm --version)" = '11.25.0'
-          pnpm --dir optimized/web install --frozen-lockfile
-          pnpm --dir baseline/web install --frozen-lockfile --offline
+          pnpm --dir optimized/web install --frozen-lockfile --store-dir "$RUNNER_TEMP/tropnik-ab-pnpm-store"
+          pnpm --dir baseline/web install --frozen-lockfile --offline --store-dir "$RUNNER_TEMP/tropnik-ab-pnpm-store"
       - name: Verify immutable source identities
         run: |
           test "$(git -C baseline rev-parse HEAD)" = "$BASELINE_SOURCE"
