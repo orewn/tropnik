@@ -19,10 +19,12 @@ test('smoothness tracing needs the explicit normal-speed focused diagnostic opt-
  assert.equal(smoothnessTraceEnabled(),false);
 });
 
+test('targeted pan trace selects only the existing map-pan window',()=>{assert.deepEqual(SMOOTHNESS_TRACE_SCENARIOS,['map-pan']);});
+
 test('focused traces wrap each measured action once and drain outside its window, including a capture cap',async t=>{
  const directory=await mkdtemp(join(tmpdir(),'tropnik-smoothness-trace-')),output=pathToFileURL(directory+'/');t.after(()=>rm(directory,{recursive:true,force:true}));
  for(const mode of ['complete','cap','action-error','stop-error']){
-  const name=mode==='cap'?'explore-search':'panel',report={profile:mobile.name,scenarios:[],traces:[]},order=[],timers=new Map(),failure=new Error(mode);let active=false,actions=0,completion,now=0,nextTimer=0;
+  const name='map-pan',report={profile:mobile.name,scenarios:[],traces:[]},order=[],timers=new Map(),failure=new Error(mode);let active=false,actions=0,completion,now=0,nextTimer=0;
   const cdp={
    observe(event,listener){assert.equal(event,'Tracing.tracingComplete');completion=listener;return()=>{completion=null;};},
    async call(method){
@@ -60,7 +62,7 @@ test('focused traces wrap each measured action once and drain outside its window
 });
 
 test('other scenarios and disabled tracing keep the native measurement path without trace protocol',async()=>{
- for(const [name,tracing]of [['panel',false],['explore-search',false],['map-pan',true]]){
+ for(const [name,tracing]of [['map-pan',false],['explore-search',false],['panel',true]]){
   const report={profile:mobile.name,scenarios:[],traces:[]};let actions=0;
   await measureSmoothnessWindow({call:()=>assert.fail('No tracing for this window'),observe:()=>assert.fail('No trace observer')},name,async()=>{actions++;},{report,tracing,evaluate:async(cdp,expression)=>expression.includes('.stop(')?smoothnessWindowFixture(name).raw:undefined});
   assert.equal(actions,1);assert.deepEqual(report.traces,[]);assert.deepEqual(report.scenarios,[smoothnessWindowFixture(name)]);
