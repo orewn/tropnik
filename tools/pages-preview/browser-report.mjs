@@ -12,6 +12,7 @@ import {assertCustomMapInspection,assertCustomDetailInspection,assertCustomScene
 import {assertBrowserEnvironment} from './browser-environment.mjs';
 import {assertNativeSurfaceCoverage} from './browser-native-surface.mjs';
 import {assertTerrainMaskReport} from './terrain-mask-report.mjs';
+import {assertTerrainCaptureSet} from './browser-terrain-capture.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -291,6 +292,7 @@ function assertZoomDesign(design,name,engine,mobile){
   assert.equal(scene.nativeInputs?.length,30);const labels=scene.nativeInputs.map(item=>item.label);
   assert.deepEqual(labels,[...Array(14).fill('Приблизить ландшафт'),...Array(14).fill('Отдалить ландшафт'),'Повернуть ландшафт','Вернуть исходный ракурс']);
   for(const press of scene.nativeInputs){assert.equal(press.input,mobile?'touch':'mouse');assert.equal(press.point?.unobscured,true);assertNativeBurstEventOrder(press.events,press.input,1);}
+  assertTerrainCaptureSet(scene,design.screenshots,name);
  }
  assert.ok(Array.isArray(design.screenshots)&&design.screenshots.filter(item=>item.mode==='detail').length>=6,`${name}: key-scale review images are missing`);
  assert.ok(design.screenshots.filter(item=>item.mode==='saved-overview').length>=6,`${name}: saved-overview review images are missing`);

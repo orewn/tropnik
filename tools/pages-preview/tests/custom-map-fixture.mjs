@@ -7,7 +7,7 @@ export function customMapFixture({camera={longitude:40.37,latitude:43.72,zoom:14
  const imagery=imagerySource==='eox-bluemarble'?[bitmap(imagerySource,8,256,62),bitmap(imagerySource,8,255,62)]:imagerySource?[bitmap(imagerySource,4,14,3)]:[];
  const detail=mode!=='overview'&&camera.zoom>=5,relief=mode==='detail'&&detail;
  return{engine:'tropnik-canvas',readOnly:true,canvas:{connected:true,width:1000,height:700,cssWidth:1000,cssHeight:700},
-  camera:{center:[camera.longitude,camera.latitude],zoom:camera.zoom},pitch:0,drawRevision:2,routeId,drawnRoute:routeId,
+  camera:{center:[camera.longitude,camera.latitude],zoom:camera.zoom},pitch:0,drawRevision:2,labelRevision:2,routeId,drawnRoute:routeId,
   state:{ready:true,loading:false,error:'',mode,committedMode:mode==='detail'&&!detail?'overview':mode,reliefReady:relief,imagerySource,imageryTarget:imagerySource,imageryLoading:false},
   coverage:{ready:true},tiles:{overview:[bitmap('overview')],detail:detail?[bitmap('vector')]:[],relief:relief?[bitmap('relief')]:[],imagery},labels:[],resources:{errors:[]}};
 }

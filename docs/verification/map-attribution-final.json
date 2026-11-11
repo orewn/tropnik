@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "scope": "actual attribution JSX/CSS, native keyboard/wheel and viewport geometry",
+  "sourceCommit": "33be0877ae82d507a6ab1d7f83062cb480a5d714",
+  "sourceTree": "d8d0f525b2d66ab23f3f3c54a013e15fc2f553c1",
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43061176332",
+  "jobId": 130663849899,
+  "artifact": {
+    "id": 13874340122,
+    "bytes": 870756,
+    "sha256": "435f9be0aeeec6412970efce718339d6cf8d4e1835031cfc6696a4db8af627bf"
+  },
+  "results": {
+    "passed": true,
+    "cases": 40,
+    "profiles": 5,
+    "loadingCycles": 131,
+    "linkChecks": 110,
+    "trustedTabInputs": 90,
+    "trustedWheelEvents": 6,
+    "pngs": 11,
+    "pngDigestsVerified": true,
+    "independentReportValidatorPassed": true,
+    "landscape": {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "popoverTop": 88,
+      "popoverBottom": 202,
+      "availableTop": 72,
+      "availableBottom": 390,
+      "sourceCardWidth": 244.8125,
+      "sourceButtonMinimumSize": 44
+    },
+    "wheel": {
+      "cssDeltaMagnitude": 142,
+      "nativeTransportDeltaMagnitude": 284,
+      "observedDpr": 2,
+      "scrollEndpoints": [
+        0,
+        30
+      ]
+    }
+  },
+  "limits": [
+    "Six wheel events are two three-event top/down/up sequences, not six independent scroll cycles.",
+    "Landscape evidence covers the recorded 844×390 profile; it does not assert arbitrary smaller landscape geometry.",
+    "The integrated source must pass the full release matrix again."
+  ]
+}

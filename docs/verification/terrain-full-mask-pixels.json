@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "verification": "terrain-full-mask-pixels",
+  "status": "passed",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "scope": "Standalone real Chromium pixel parity for the owned all-white terrain mask shader specialization. This does not establish full application performance or release eligibility.",
+  "source": {
+    "repository": "orewn/tropnik",
+    "branch": "diagnostics/terrain-full-mask-pixels",
+    "commit": "dbcb2c53345b68ba2f44c6e861d38a9766810946",
+    "tree": "17b65e3ee27384a5d18b500ed42ab5a38bfe54d7",
+    "rendererPath": "web/public/terrain/terrain-renderer.js",
+    "rendererSHA256": "f36f3dbebc7b9acc1083fc9d39fc20821ef9d42872b9f5ec06245e695d5e1fed"
+  },
+  "ci": {
+    "runId": 43059617066,
+    "jobId": 130658284005,
+    "conclusion": "success",
+    "url": "https://github.com/orewn/tropnik/actions/runs/43059617066",
+    "artifact": {
+      "id": 13873561404,
+      "name": "tropnik-terrain-full-mask-43059617066-1",
+      "bytes": 3956531,
+      "sha256": "2b1ffa7d18dca3ad4742c6b7e9ccf3daba3a81c9bc6ae48d3650ea654992cc4f",
+      "files": 59,
+      "pngFiles": 57,
+      "jsonFiles": 2,
+      "downloadedBytesAndDigestIndependentlyVerified": true
+    }
+  },
+  "baseline": {
+    "method": "Only the body of terrainFragmentForMask is replaced inside the fixture with return TERRAIN_FRAGMENT. Both variants execute the actual production renderer.",
+    "productionRuntimeBypass": false,
+    "actualCompiledShaderSourcesVerified": true
+  },
+  "pixels": {
+    "cases": 8,
+    "devicePixelRatios": [
+      1,
+      2
+    ],
+    "masks": [
+      "full",
+      "mixed"
+    ],
+    "views": [
+      "initial",
+      "rotated and zoomed with trusted context restoration"
+    ],
+    "comparisonPairs": 20,
+    "pngFiles": 40,
+    "differingRGBABytes": 0,
+    "maximumChannelDelta": 0,
+    "independentPillowAndNumPyDecode": true,
+    "readPixelsSHA256MatchesDecodedPNG": true,
+    "trustedContextRestoreCases": 8,
+    "restorePixelDifference": 0,
+    "independentlyRecomputedWitnessSets": 16,
+    "routeLeakPixels": 0,
+    "sourceGrid": {
+      "width": 17,
+      "height": 17,
+      "vertices": 289,
+      "triangles": 512,
+      "meshStride": 1,
+      "metreScale": 1,
+      "nonflat": true,
+      "sourceElevationsUnchanged": true
+    },
+    "actualSamples": 4,
+    "actualStencilBits": 8
+  },
+  "ownedMask": {
+    "callerPixelsAndMetadataMutatedAfterConstruction": true,
+    "routeAndTerrainStencilSemanticsRetained": true,
+    "restoredPixelsMatchOwnedMask": true
+  },
+  "mandatoryCrossGate": {
+    "receipt": "dist/browser-terrain-mask-verification.json",
+    "cases": 4,
+    "pngFiles": 17,
+    "passed": true,
+    "sameSourceCommitRendererAndObservedEnvironment": true,
+    "totalIndependentlyDecodedPNGFiles": 57
+  },
+  "environment": {
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "webgl": "SwiftShader WebGL2",
+    "compositor": "native software",
+    "bothDevicePixelRatiosObserved": true,
+    "contextAttributes": {
+      "alpha": false,
+      "antialias": true,
+      "depth": true,
+      "stencil": true,
+      "preserveDrawingBuffer": false
+    }
+  },
+  "evidence": {
+    "receipt": "dist/browser-terrain-full-mask-verification.json",
+    "pngDirectory": "design-qa/terrain-full-mask",
+    "independentPixelReport": "independent-pixel-verification.json",
+    "sourceAndEnvironmentBinding": "source-environment-binding.json",
+    "remoteMetadata": "github-evidence.json"
+  },
+  "limitations": [
+    "This diagnostic serves the exact renderer module directly. It does not validate generated application bundles or complete application interactions.",
+    "Shader pixel parity alone does not establish a performance improvement.",
+    "The final candidate must regenerate derived assets and repeat all required matching-source graphics gates and the full browser and Android acceptance workflows."
+  ]
+}

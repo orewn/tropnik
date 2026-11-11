@@ -14,6 +14,7 @@ import type {MapTileLabel} from './custom-map-painter';
 import {priorityCityFontSize} from '../public/maps/map-city-labels.js';
 import {drawMapSymbol} from './custom-map-symbols';
 import {mapCanvasPolicy,type MapCanvasPolicy} from './map-canvas-policy';
+import {copyMapLabelDiagnostic,MAP_LABEL_INSPECTION_EVENT,MAP_LABEL_SAMPLE_LIMIT,MAX_RECORDED_MAP_LABELS,selectRecordedMapLabels} from './custom-map-label-inspection';
 
 export type CustomMapMode='detail'|'overview'|'satellite';
 export type CustomMapState={ready:boolean;loading:boolean;mode:CustomMapMode;committedMode:CustomMapMode;imagerySource?:SatelliteSourceId;imageryTarget?:SatelliteSourceId;imageryLoading:boolean;reliefReady:boolean;localDetail:boolean;error:string;residentTiles:number;pendingTiles:number};
@@ -103,6 +104,7 @@ export class CustomMapEngine {
   private mask?:Path2D;
   private boundaries?:Path2D;
   private selectedArea?:Path2D;
+  private selectedBoundary?:Path2D;
   private route?:PathCollection;
   private routeId?:string;
   private markerLayer:HTMLDivElement;
@@ -126,6 +128,7 @@ export class CustomMapEngine {
   private eco=false;
   private additionalLabels:CustomMapLabel[]=[];
   private labelDiagnostics:CustomMapLabelDiagnostic[]=[];
+  private labelDiagnosticTotal=0;
   private drawRevision=0;
   private labelRevision=0;
   private frame=0;
@@ -188,7 +191,13 @@ export class CustomMapEngine {
   setActive(active:boolean){if(this.active===active)return;this.active=active;this.tiles.setActive(active);if(!active){this.pointer.cancel();this.stopAnimation();cancelAnimationFrame(this.frame);this.frame=0;clearTimeout(this.settleTimer);this.setMoving(false);}else{this.schedule();this.settled();}}
   setEco(enabled:boolean){if(this.eco===enabled)return;this.eco=enabled;this.canvas.width=1;this.resizeCanvas();}
   setLabels(labels:readonly CustomMapLabel[]){this.additionalLabels=labels.slice(0,256).map(label=>({...label,coordinate:[...label.coordinate]}));this.scheduleLabels();}
-  getLabelDiagnostics():CustomMapLabelDiagnostic[]{return this.labelDiagnostics.map(record=>({...record,coordinate:[...record.coordinate],...(record.rect?{rect:{...record.rect}}:{})}));}
+  getLabelDiagnostics():CustomMapLabelDiagnostic[]{return this.labelDiagnostics.slice(0,MAP_LABEL_SAMPLE_LIMIT).map(copyMapLabelDiagnostic);}
+  inspectLabels(request:unknown){
+    const selection=selectRecordedMapLabels(this.labelDiagnostics,this.labelDiagnosticTotal,request);
+    if(!selection)return{error:'Invalid label inspection request'};
+    const {candidates,...labelInspection}=selection;
+    return{...this.inspect(),labels:candidates,labelInspection};
+  }
   project(coordinate:readonly number[]){const point=project(this.camera,this.size,coordinate);return{x:point.x,y:this.size.height/2+(point.y-this.size.height/2)*Math.cos(this.pitch*Math.PI/180)};}
   unproject(point:MapPoint){return unproject(this.camera,this.size,this.flatPoint(point));}
   private flatPoint(point:MapPoint){return{x:point.x,y:this.size.height/2+(point.y-this.size.height/2)/Math.cos(this.pitch*Math.PI/180)};}
@@ -299,26 +308,35 @@ export class CustomMapEngine {
     if(!path){path=geometryPath(geometry).path;this.coveragePaths.set(geometry,path);}
     return path;
   }
-  private selectedCoveragePath(){
-    const features=this.coverage?.territories.features.filter(f=>this.selectedShapes.includes(String(f.properties?.shapeName)))||[];
+  private selectedCoveragePath(source:GeoJSON.FeatureCollection|undefined){
+    const features=source?.features.filter(f=>this.selectedShapes.includes(String(f.properties?.shapeName)))||[];
     return features.length?this.coveragePath({type:'FeatureCollection',features}):undefined;
   }
-  private updateSelectedArea(){this.selectedArea=this.selectedCoveragePath();}
+  private updateSelectedArea(){
+    const area=this.selectedCoveragePath(this.coverage?.territories),boundary=this.selectedCoveragePath(this.coverage?.boundaries);
+    this.selectedArea=area;this.selectedBoundary=boundary;
+  }
   private applyCoverage(){
     if(!this.coverage)return;
     const s=this.coverage.status,changed=s.revision!==this.coverageRevision;
     // Coverage progress and errors keep the current immutable geometry. Only
     // an atomic source commit advances its revision and needs new paths.
     if(changed){
-      const area=this.coveragePath(this.coverage.area),boundaries=this.coveragePath(this.coverage.boundaries),selected=this.selectedCoveragePath();
+      const area=this.coveragePath(this.coverage.area),boundaries=this.coveragePath(this.coverage.boundaries),selected=this.selectedCoveragePath(this.coverage.territories),selectedBoundary=this.selectedCoveragePath(this.coverage.boundaries);
       const mask=new Path2D();mask.rect(-3,-3,8,8);mask.addPath(area);
-      this.area=area;this.boundaries=boundaries;this.mask=mask;this.selectedArea=selected;this.coverageRevision=s.revision;
+      this.area=area;this.boundaries=boundaries;this.mask=mask;this.selectedArea=selected;this.selectedBoundary=selectedBoundary;this.coverageRevision=s.revision;
     }
     this.element.dataset.mapCoverage=JSON.stringify(s);this.element.dataset.mapCoverageLod=s.lod;this.element.dataset.mapCoverageState=s.ready?'ready':'loading';
     if(changed)this.schedule();else this.publishInspection();
   }
   private listen(target:EventTarget,name:string,fn:EventListener,options?:AddEventListenerOptions|boolean){target.addEventListener(name,fn,options);this.listeners.push([target,name,fn,options]);}
   private bindInput(){
+    // Return the decisions of the last label paint without drawing, measuring
+    // text again or changing the ordinary bounded DOM sample.
+    this.listen(this.element,MAP_LABEL_INSPECTION_EVENT,((event:CustomEvent<{request:unknown;response?:string}>)=>{
+      const detail=event.detail;if(!detail||typeof detail!=='object')return;
+      detail.response=JSON.stringify(this.inspectLabels(detail.request));
+    }) as EventListener);
     const local=(event:PointerEvent|WheelEvent)=>{const rect=this.pointerRect??this.canvas.getBoundingClientRect();return{x:event.clientX-rect.left,y:event.clientY-rect.top};};
     this.listen(this.canvas,'pointerdown',((event:PointerEvent)=>{
       if(event.button!==0||!this.state.ready||!this.active)return;event.preventDefault();this.canvas.focus({preventScroll:true});
@@ -441,19 +459,51 @@ export class CustomMapEngine {
     if(!batch)return;const ctx=this.context;ctx.globalAlpha=alpha;
     for(const tile of batch.tiles){const n=2**tile.z;ctx.drawImage(tile.bitmap,tile.x/n,tile.y/n,1/n+1e-10,1/n+1e-10);}ctx.globalAlpha=1;
   }
+  private detailCoversViewport(batch:TileBatch|undefined):boolean{
+    if(this.mode!=='detail'||this.pitch!==0||(this.camera.bearingDegrees??0)!==0||this.camera.zoom<4.7||this.camera.zoom>12||batch?.kind!=='vector'||!batch.tiles.length||batch.tiles.length>MAX_VISIBLE_TILES)return false;
+    const ratio=this.pixelRatio,width=this.canvas.width,height=this.canvas.height,scale=256*2**this.camera.zoom,center=mercatorProject(this.camera.center),z=batch.tiles[0].z;
+    if(![ratio,width,height,this.size.width,this.size.height,scale,center.x,center.y].every(Number.isFinite)||ratio<=0||ratio>2||width<=0||height<=0||width>32768||height>32768||this.size.width<=0||this.size.height<=0||Math.abs(center.x)>2||center.y<0||center.y>1||!Number.isInteger(z)||z<0||z>18)return false;
+    const n=2**z;
+    // Axis-aligned tile images wider than one device pixel have no edge AA.
+    // Keep this proof inside a bounded float32 transform range. Four physical
+    // pixels cover rounding of the source points and native canvas matrix;
+    // higher zoom, rotation, pitch and distant world copies keep the underlays.
+    if(scale*ratio/n<=1)return false;
+    const margin=4,left=(center.x+(-margin/ratio-this.size.width/2)/scale)*n,right=(center.x+((width+margin)/ratio-this.size.width/2)/scale)*n;
+    const top=(center.y+(-margin/ratio-this.size.height/2)/scale)*n,bottom=(center.y+((height+margin)/ratio-this.size.height/2)/scale)*n;
+    const x0=Math.floor(left),x1=Math.floor(right),y0=Math.floor(top),y1=Math.floor(bottom);
+    if(![x0,x1,y0,y1].every(Number.isSafeInteger)||x1<x0||y1<y0||y0<0||y1>=n||(x1-x0+1)*(y1-y0+1)>MAX_VISIBLE_TILES)return false;
+    const cells=new Set<string>();
+    for(const tile of batch.tiles){
+      // Every admitted worker output is a full 512px opaque vector raster.
+      // Closed/missing bitmaps, mixed grids and satellite overlays cannot hide
+      // the base, even when the batch itself has already been committed.
+      if(tile.kind!=='vector'||tile.transparent!==false||tile.z!==z||!Number.isSafeInteger(tile.x)||!Number.isInteger(tile.y)||tile.y<0||tile.y>=n||tile.bitmap.width!==512||tile.bitmap.height!==512)return false;
+      cells.add(`${tile.x}/${tile.y}`);
+    }
+    // Recheck the current backing pixels on every frame: a retained batch can
+    // expose an edge during a pan or resize, and a failed batch may have holes.
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(!cells.has(`${x}/${y}`))return false;
+    return true;
+  }
   private draw(){
     if(this.disposed||!this.active)return;const ctx=this.context;
     ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
     const scale=this.worldTransform();
-    if(this.area){ctx.fillStyle='#dce5cf';ctx.fill(this.area,'evenodd');}
-    this.drawTiles(this.overview,.95);
+    const detail=this.displayDetail();
+    if(!this.detailCoversViewport(detail)){
+      if(this.area){ctx.fillStyle='#dce5cf';ctx.fill(this.area,'evenodd');}
+      this.drawTiles(this.overview,.95);
+    }
     const satellite=this.mode==='satellite'&&!!this.imagery;
     if(satellite)this.drawTiles(this.imagery);
-    const detail=this.displayDetail();
     if(this.mode!=='overview'&&this.camera.zoom>=4.7&&(!satellite||detail?.tiles[0]?.transparent))this.drawTiles(detail);
     if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=4.7)this.drawTiles(this.relief,.82);
     if(this.boundaryVisible&&this.boundaries){ctx.strokeStyle=satellite?'rgba(245,248,232,.45)':'rgba(95,123,87,.45)';ctx.lineWidth=.65/scale;ctx.stroke(this.boundaries);}
-    if(this.selectedArea){ctx.fillStyle='rgba(92,128,70,.10)';ctx.fill(this.selectedArea,'evenodd');ctx.strokeStyle=satellite?'#e7eacc':'#688360';ctx.lineWidth=1.3/scale;ctx.stroke(this.selectedArea);}
+    if(this.selectedArea){ctx.fillStyle='rgba(92,128,70,.10)';ctx.fill(this.selectedArea,'evenodd');}
+    // Clipped territory polygons include artificial coverage-cell edges. Only
+    // the source boundary lines may outline the selected territory.
+    if(this.selectedBoundary){ctx.strokeStyle=satellite?'#e7eacc':'#688360';ctx.lineWidth=1.3/scale;ctx.stroke(this.selectedBoundary);}
     if(this.route){ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#fffef5';ctx.lineWidth=(routeStrokeWidth(this.camera.zoom)+3)/scale;ctx.stroke(this.route.path);ctx.strokeStyle='#244d3c';ctx.lineWidth=routeStrokeWidth(this.camera.zoom)/scale;ctx.stroke(this.route.path);}
     if(this.mask){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fill(this.mask,'evenodd');}
     this.drawLabels();
@@ -473,7 +523,7 @@ export class CustomMapEngine {
     for(const edge of this.routeEdges){const p=edge.project();edge.element.style.position='absolute';edge.element.style.left=`${p.x}px`;edge.element.style.top=`${p.y}px`;}
   }
   private drawLabels(){
-    this.labelDiagnostics=[];
+    this.labelDiagnostics=[];this.labelDiagnosticTotal=0;
     // Control widths and the sheet affect label collisions, not terrain. Keep
     // those pixels on their own surface so input never replays the base paths.
     const ctx=this.labelContext;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,this.labelCanvas.width,this.labelCanvas.height);
@@ -483,10 +533,10 @@ export class CustomMapEngine {
     const candidates:Array<{id:string;coordinate:[number,number];label:MapTileLabel;color?:string}>=this.additionalLabels.map(label=>({id:label.id,coordinate:label.coordinate,label:{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},color:label.color}));
     const detail=this.displayDetail();
     if(detail&&this.mode!=='overview'&&this.camera.zoom>=5)for(const tile of detail.tiles)for(const label of tile.labels){const n=2**tile.z;candidates.push({id:`${tile.key}:${label.text}`,coordinate:mercatorUnproject({x:(tile.x+label.x)/n,y:(tile.y+label.y)/n}),label});}
-    candidates.sort((a,b)=>a.label.rank-b.label.rank);let count=0;
+    candidates.sort((a,b)=>a.label.rank-b.label.rank);this.labelDiagnosticTotal=candidates.length;let count=0;
     for(const {id,coordinate,label,color} of candidates){
       const diagnostic:CustomMapLabelDiagnostic={id,label:label.text,coordinate,visible:false,reason:'budget'};
-      if(this.labelDiagnostics.length<512)this.labelDiagnostics.push(diagnostic);
+      if(this.labelDiagnostics.length<MAX_RECORDED_MAP_LABELS)this.labelDiagnostics.push(diagnostic);
       const sourceAnchor=`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`;
       if(count>=64||seen.has(sourceAnchor))continue;
       if(!inRussiaCoverage(coordinate[0],coordinate[1],this.coverage.area)){diagnostic.reason='outside-coverage';continue;}
@@ -511,7 +561,8 @@ export class CustomMapEngine {
     if(this.disposed)return;this.disposed=true;cancelAnimationFrame(this.frame);this.stopAnimation();clearTimeout(this.settleTimer);
     this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
-    this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;
+    this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;this.selectedBoundary=undefined;
+    this.labelDiagnostics=[];this.labelDiagnosticTotal=0;
   }
 }
 export {COUNTRY_BOUNDS,geometryPath,tileRequests};

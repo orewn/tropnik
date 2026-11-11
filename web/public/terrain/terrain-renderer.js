@@ -628,6 +628,34 @@ void main(){
  outColor=vec4(.20,.27,.21,contact*contact*.18);
 }
 `;
+function terrainFragmentForMask(displayMask){
+ // TerrainRenderer validated every binary texel before making this owned copy.
+ // A fully allowed mask never discards, including clamp-to-edge sampling. Keep
+ // the mask itself: it still suppresses the decorative ground/rim and bounds
+ // the route through the existing stencil and route-fragment checks.
+ return displayMask&&displayMask.source.allowedPixels===displayMask.width*displayMask.height
+  ?TERRAIN_FRAGMENT.replace(' if(texture(uDisplayMask,vUV).r<.5)discard;\n','')
+  :TERRAIN_FRAGMENT;
+}
+const PRESENT_FRAGMENT=`#version 300 es
+precision highp float;
+precision highp int;
+uniform highp sampler2D uCompleted;
+out vec4 outColor;
+void main(){outColor=vec4(texelFetch(uCompleted,ivec2(gl_FragCoord.xy),0).rgb,1.0);}
+`;
+function terrainFrameTargetFormat(gl,displayMask){
+ // Keep the original direct path if the default surface cannot be reproduced
+ // exactly. In particular, do not reduce the default MSAA or depth precision.
+ const samples=gl.getParameter(gl.SAMPLES),depth=gl.getParameter(gl.DEPTH_BITS),stencil=gl.getParameter(gl.STENCIL_BITS);
+ if(!Number.isInteger(samples)||samples<0||gl.getParameter(gl.RED_BITS)!==8||gl.getParameter(gl.GREEN_BITS)!==8||gl.getParameter(gl.BLUE_BITS)!==8||gl.getParameter(gl.ALPHA_BITS)!==0)return null;
+ if(gl.getFramebufferAttachmentParameter(gl.FRAMEBUFFER,gl.BACK,gl.FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING)!==gl.LINEAR)return null;
+ const depthFormat=displayMask?(stencil===8&&(depth===24?gl.DEPTH24_STENCIL8:depth===32?gl.DEPTH32F_STENCIL8:null))
+  :depth===16?gl.DEPTH_COMPONENT16:depth===24?gl.DEPTH_COMPONENT24:depth===32?gl.DEPTH_COMPONENT32F:null;
+ if(!depthFormat)return null;
+ for(const format of[gl.RGB8,depthFormat])if(samples&&!Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER,format,gl.SAMPLES)||[]).includes(samples))return null;
+ return{samples,depth,stencil:displayMask?stencil:0,depthFormat};
+}
 class TerrainGPU{
  constructor(gl,model,displayMask=null){
   this.gl=gl;this.model=model;this.displayMask=displayMask;this.resources=[];this.meshes=new Map();this.shadows=new Map();this.routeCount=0;
@@ -638,9 +666,11 @@ class TerrainGPU{
    // filter applies to real cartography and full-resolution terrain normals.
    this.anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
    this.maxAnisotropy=this.anisotropy?Math.min(4,gl.getParameter(this.anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)):1;
-   this.terrain=this.program(TERRAIN_VERTEX,TERRAIN_FRAGMENT);this.shadow=this.program(SHADOW_VERTEX,SHADOW_FRAGMENT);this.line=this.program(ROUTE_VERTEX,ROUTE_FRAGMENT);
+   this.terrain=this.program(TERRAIN_VERTEX,terrainFragmentForMask(displayMask));this.shadow=this.program(SHADOW_VERTEX,SHADOW_FRAGMENT);this.line=this.program(ROUTE_VERTEX,ROUTE_FRAGMENT);
    this.boundary=this.program(BOUNDARY_VERTEX,BOUNDARY_FRAGMENT);
    this.ground=this.program(GROUND_VERTEX,GROUND_FRAGMENT);
+   this.frameFormat=terrainFrameTargetFormat(gl,displayMask);this.frameTarget=null;
+   this.present=this.frameFormat?this.program(SHADOW_VERTEX,PRESENT_FRAGMENT):null;
    this.heightTexture=this.texture(gl.R32F,model.grid.width,model.grid.height,gl.RED,gl.FLOAT,model.heights,gl.NEAREST);
    this.maskTexture=this.texture(gl.R8,displayMask?.width||1,displayMask?.height||1,gl.RED,gl.UNSIGNED_BYTE,displayMask?.pixels||new Uint8Array([255]),gl.NEAREST);
    this.normalTexture=this.texture(gl.RGBA8,model.grid.width,model.grid.height,gl.RGBA,gl.UNSIGNED_BYTE,model.normalTexture,gl.LINEAR);
@@ -662,6 +692,57 @@ class TerrainGPU{
   }catch(error){this.destroy();throw error;}
  }
  track(object,type){if(!object)throw new Error('Terrain GPU allocation failed');this.resources.push([object,type]);return object;}
+ release(object,type){if(!object)return;this.gl['delete'+type](object);this.resources=this.resources.filter(([resource])=>resource!==object);}
+ targetFor(width,height){
+  if(this.frameTarget?.width===width&&this.frameTarget?.height===height)return this.frameTarget;
+  if(this.frameTarget)for(const[object,type]of this.frameTarget.resources)this.release(object,type);
+  this.frameTarget=null;
+  const gl=this.gl,format=this.frameFormat,resources=[],own=(object,type)=>{resources.push([object,type]);return this.track(object,type);};
+  const target={width,height,resources,framebuffer:own(gl.createFramebuffer(),'Framebuffer'),resolve:own(gl.createFramebuffer(),'Framebuffer')};
+  try{
+   gl.bindFramebuffer(gl.FRAMEBUFFER,target.framebuffer);
+   const color=own(gl.createRenderbuffer(),'Renderbuffer'),depth=own(gl.createRenderbuffer(),'Renderbuffer');
+   for(const[buffer,internal,attachment]of[[color,gl.RGB8,gl.COLOR_ATTACHMENT0],[depth,format.depthFormat,this.displayMask?gl.DEPTH_STENCIL_ATTACHMENT:gl.DEPTH_ATTACHMENT]]){
+    gl.bindRenderbuffer(gl.RENDERBUFFER,buffer);
+    if(format.samples)gl.renderbufferStorageMultisample(gl.RENDERBUFFER,format.samples,internal,width,height);else gl.renderbufferStorage(gl.RENDERBUFFER,internal,width,height);
+    if(gl.getRenderbufferParameter(gl.RENDERBUFFER,gl.RENDERBUFFER_SAMPLES)!==format.samples)throw new Error('Terrain framebuffer sample count changed');
+    const sizes=buffer===color?[[gl.RENDERBUFFER_RED_SIZE,8],[gl.RENDERBUFFER_GREEN_SIZE,8],[gl.RENDERBUFFER_BLUE_SIZE,8],[gl.RENDERBUFFER_ALPHA_SIZE,0]]
+     :[[gl.RENDERBUFFER_DEPTH_SIZE,format.depth],[gl.RENDERBUFFER_STENCIL_SIZE,format.stencil]];
+    for(const[parameter,expected]of sizes)if(gl.getRenderbufferParameter(gl.RENDERBUFFER,parameter)!==expected)throw new Error('Terrain framebuffer precision changed');
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER,attachment,gl.RENDERBUFFER,buffer);
+   }
+   if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('Terrain multisample framebuffer unavailable');
+   target.texture=this.texture(gl.RGB8,width,height,gl.RGB,gl.UNSIGNED_BYTE,null,gl.NEAREST);resources.push([target.texture,'Texture']);
+   gl.bindFramebuffer(gl.FRAMEBUFFER,target.resolve);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,target.texture,0);
+   if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE||gl.getError()!==gl.NO_ERROR)throw new Error('Terrain resolve framebuffer unavailable');
+   this.frameTarget=target;return target;
+  }catch(error){for(const[object,type]of resources)this.release(object,type);throw error;}
+  finally{gl.bindRenderbuffer(gl.RENDERBUFFER,null);gl.bindFramebuffer(gl.FRAMEBUFFER,null);}
+ }
+ beginFrame(mesh,camera,light,width,height,dpr,profile){
+  const gl=this.gl,target=this.targetFor(width,height);
+  this.render(mesh,camera,light,width,height,dpr,profile,target.framebuffer);
+  // WebGL2 permits resolving MSAA into a same-format single-sample FBO,
+  // never blitting into the multisampled default framebuffer.
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER,target.framebuffer);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,target.resolve);
+  gl.blitFramebuffer(0,0,width,height,0,0,width,height,gl.COLOR_BUFFER_BIT,gl.NEAREST);
+  const sync=this.track(gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0),'Sync');gl.flush();
+  return{target,sync};
+ }
+ frameReady(frame){
+  const gl=this.gl,status=gl.clientWaitSync(frame.sync,0,0);
+  if(status===gl.TIMEOUT_EXPIRED)return false;
+  if(status!==gl.ALREADY_SIGNALED&&status!==gl.CONDITION_SATISFIED)throw new Error('Terrain frame completion failed');
+  this.release(frame.sync,'Sync');frame.sync=null;return true;
+ }
+ presentFrame(frame){
+  const gl=this.gl,{target}=frame;
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,target.width,target.height);
+  gl.disable(gl.SCISSOR_TEST);gl.disable(gl.DEPTH_TEST);gl.disable(gl.STENCIL_TEST);gl.disable(gl.CULL_FACE);gl.disable(gl.BLEND);gl.depthMask(false);gl.colorMask(true,true,true,true);
+  gl.useProgram(this.present.program);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,target.texture);gl.uniform1i(this.uniform(this.present,'uCompleted'),0);
+  gl.bindVertexArray(this.emptyVAO);gl.drawArrays(gl.TRIANGLES,0,3);gl.bindVertexArray(null);gl.depthMask(true);gl.flush();
+  if(gl.getError()!==gl.NO_ERROR)throw new Error('Terrain completed frame presentation failed');
+ }
  setCartography(surface){
   const gl=this.gl,width=surface?.width||1,height=surface?.height||1;
   // Premultiplied texels make mipmaps and partial-source borders fade into the
@@ -737,9 +818,9 @@ class TerrainGPU{
   }
   return{texture:target.texture,size};
  }
- render(mesh,camera,light,width,height,dpr,profile){
+ render(mesh,camera,light,width,height,dpr,profile,framebuffer=null){
   const gl=this.gl,m=this.model,shadow=this.shadowMap(light,profile),gpuMesh=this.ensureMesh(mesh);
-  gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,width,height);gl.clearColor(SKY[0]/255,SKY[1]/255,SKY[2]/255,1);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);gl.viewport(0,0,width,height);gl.clearColor(SKY[0]/255,SKY[1]/255,SKY[2]/255,1);
   gl.disable(gl.STENCIL_TEST);gl.clearDepth(1);gl.depthMask(true);
   if(this.displayMask){gl.stencilMask(255);gl.clearStencil(0);}
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT|(this.displayMask?gl.STENCIL_BUFFER_BIT:0));
@@ -781,8 +862,8 @@ class TerrainGPU{
  // delete* after restoration itself raises INVALID_OPERATION, poisoning the
  // new context's first allocation check. The browser already released them.
  abandon(){
-  this.resources=[];this.meshes.clear();this.shadows.clear();this.routeCount=0;
-  for(const key of['terrain','shadow','line','boundary','ground','heightTexture','maskTexture','normalTexture','maxHeightTexture','surfaceTexture','cartographyTexture','emptyVAO','routeVAO','routeBuffer','anisotropy'])this[key]=null;
+  this.resources=[];this.meshes.clear();this.shadows.clear();this.routeCount=0;this.frameTarget=null;
+  for(const key of['terrain','shadow','line','boundary','ground','present','heightTexture','maskTexture','normalTexture','maxHeightTexture','surfaceTexture','cartographyTexture','emptyVAO','routeVAO','routeBuffer','anisotropy'])this[key]=null;
  }
  destroy(){const gl=this.gl;for(const[object,type]of this.resources.reverse())gl['delete'+type](object);this.abandon();}
 }
@@ -887,7 +968,7 @@ export class TerrainRenderer{
   this.yaw=DEFAULT_VIEW.yaw;this.pitch=DEFAULT_VIEW.pitch;this.zoom=DEFAULT_VIEW.zoom;this.offset=[0,0];
   this.viewportInsets=normalizedInsets(options.viewportInsets);
   this.visible=true;this.destroyed=false;this.failed=false;this.contextLost=false;this.frame=0;this.dirty=true;this.warmRequested=false;this.graphicsFallback=null;
-  this.pointers=new Map();this.events=[];this.meshes=new Map();this.meshStride=0;this.renderProfile=null;this.route=[];this.routeMeshes=new Map();this.gpuRoute=null;this.dragging=false;this.wheeling=false;this.cartography=null;
+  this.pointers=new Map();this.events=[];this.meshes=new Map();this.meshStride=0;this.renderProfile=null;this.route=[];this.routeMeshes=new Map();this.gpuRoute=null;this.dragging=false;this.wheeling=false;this.cartography=null;this.pendingGPU=null;this.gpuCartographyDirty=false;
   this.previousTouchAction=canvas.style?.touchAction;if(canvas.style)canvas.style.touchAction='none';
   try{
    let gl;
@@ -948,18 +1029,18 @@ export class TerrainRenderer{
    else if(e.key==='Home')this.reset();else return;e.preventDefault();
   });
   this.bind('webglcontextlost',e=>{
-   e.preventDefault();this.contextLost=true;this.cancelFrame();this.gpu?.abandon();this.gpuRoute=null;this.notify('onError','Графический контекст прерван. Восстанавливаем сцену…');
+   e.preventDefault();this.contextLost=true;this.cancelFrame();this.pendingGPU=null;this.canvas.dataset.terrainPending='false';this.gpu?.abandon();this.gpuRoute=null;this.notify('onError','Графический контекст прерван. Восстанавливаем сцену…');
    clearTimeout(this.restoreTimer);this.restoreTimer=setTimeout(()=>{this.recordGraphicsFallback('context-timeout','Graphics context did not restore');this.fallbackAfterLoss();},2500);
   });
   this.bind('webglcontextrestored',()=>{
    if(this.destroyed||!this.gl)return;clearTimeout(this.restoreTimer);
-   try{this.gpu?.abandon();this.gpu=new TerrainGPU(this.gl,this.model,this.displayMask);this.gpu.setCartography(this.cartography);this.gpuRoute=null;this.contextLost=false;this.request();}
+   try{this.gpu?.abandon();this.gpu=new TerrainGPU(this.gl,this.model,this.displayMask);this.gpu.setCartography(this.cartography);this.gpuCartographyDirty=false;this.gpuRoute=null;this.contextLost=false;this.request();}
    catch(error){this.recordGraphicsFallback('context-restoration',error);this.fallbackAfterLoss();}
   });
  }
  fallbackAfterLoss(){
   if(this.destroyed||!this.contextLost)return;clearTimeout(this.restoreTimer);this.unbindControls();this.resize?.disconnect();
-  this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);this.gpuRoute=null;
+  this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);this.gpuRoute=null;this.pendingGPU=null;this.gpuCartographyDirty=false;this.canvas.dataset.terrainPending='false';
   try{this.gpu?.destroy();this.useCanvas(true);this.contextLost=false;this.bindControls();this.observe();this.request();}
   catch{this.terminalFailure('Не удалось восстановить ландшафт. Подготовьте сцену заново.');}
  }
@@ -986,7 +1067,7 @@ export class TerrainRenderer{
   const next=surface&&surface.source.loadedTiles>0?{width:surface.width,height:surface.height,pixels:new Uint8ClampedArray(surface.pixels),source:{...surface.source,bounds:[...surface.source.bounds]}}:null;
   this.cartography=next;this.software?.setCartography(next);
   this.canvas.dataset.cartography=next&&next.source.loadedTiles>0?'source':'none';this.canvas.dataset.cartographyTiles=String(next?.source.loadedTiles||0);
-  try{if(this.gpu&&!this.contextLost)this.gpu.setCartography(next);}
+  try{if(this.gpu&&!this.contextLost){if(this.pendingGPU)this.gpuCartographyDirty=true;else{this.gpu.setCartography(next);this.gpuCartographyDirty=false;}}}
   catch(error){this.recordGraphicsFallback('cartography',error);this.contextLost=true;this.fallbackAfterLoss();return;}
   this.request();
  }
@@ -1004,17 +1085,53 @@ export class TerrainRenderer{
  }
  setVisible(value){
   this.visible=Boolean(value);
-  if(this.visible)this.request();else{this.cancelFrame();this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);if(this.warmRequested)this.request();}
+  if(this.visible)this.request();else{this.cancelFrame();this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);if(this.warmRequested||this.pendingGPU?.warm)this.schedule();}
  }
  setViewportInsets(insets){if(this.destroyed)return;this.viewportInsets=normalizedInsets(insets);this.request();}
  warmup(){if(this.destroyed)return;this.warmRequested=true;this.request();}
  cancelFrame(){if(this.frame){cancelAnimationFrame(this.frame);this.frame=0;}}
  request(){
-  this.dirty=true;if(this.destroyed||(!this.visible&&!this.warmRequested)||this.contextLost||this.frame||this.document?.visibilityState==='hidden')return;
+  if(this.destroyed)return;this.dirty=true;if(this.gpu?.frameFormat)this.canvas.dataset.terrainPending='true';this.schedule();
+ }
+ schedule(){
+  if(this.destroyed||(!this.visible&&!this.warmRequested&&!this.pendingGPU?.warm)||this.contextLost||this.frame||this.document?.visibilityState==='hidden')return;
+  if(!this.pendingGPU&&!this.dirty&&!this.warmRequested)return;
   this.frame=requestAnimationFrame(()=>{
    this.frame=0;const warm=this.warmRequested;this.warmRequested=false;
-   if(!this.destroyed&&(this.visible||warm)&&!this.contextLost&&this.document?.visibilityState!=='hidden'){this.dirty=false;this.render(warm);}
+   if(!this.destroyed&&(this.visible||warm||this.pendingGPU?.warm)&&!this.contextLost&&this.document?.visibilityState!=='hidden'){
+    if(this.pendingGPU){this.pendingGPU.warm||=warm;this.pollGPUFrame();}
+    else{this.dirty=false;this.render(warm);}
+   }
   });
+ }
+ frameDimensions(rect){
+  const profile=this.profileFor(rect,typeof navigator!=='undefined'?navigator:{}),wantedDpr=Math.min(typeof devicePixelRatio==='number'?devicePixelRatio:1,profile.maxDpr);
+  const dpr=Math.min(wantedDpr,Math.sqrt(profile.pixelLimit/(rect.width*rect.height)),4096/rect.width,4096/rect.height);
+  return{profile,dpr,width:Math.max(1,Math.round(rect.width*dpr)),height:Math.max(1,Math.round(rect.height*dpr))};
+ }
+ frameState(rect,dpr){return[rect.width,rect.height,dpr,this.yaw,this.pitch,this.zoom,this.offset[0],this.offset[1],this.viewportInsets,this.cartography,this.route];}
+ pollGPUFrame(){
+  const pending=this.pendingGPU;if(!pending||pending.gpu!==this.gpu||this.destroyed||this.contextLost)return;
+  try{
+   if(!this.gpu.frameReady(pending)){
+    if(performance.now()-pending.started>10000)throw new Error('Terrain frame completion timed out');
+    this.schedule();return;
+   }
+   this.pendingGPU=null;
+   const rect=this.canvas.getBoundingClientRect(),dimensions=this.frameDimensions(rect),state=this.frameState(rect,dimensions.dpr);
+   if(rect.width<1||rect.height<1||!pending.state.every((value,index)=>value===state[index])){
+    this.dirty=true;this.warmRequested||=pending.warm;this.schedule();return;
+   }
+   // Do not resize/clear the visible canvas while expensive work is pending.
+   // The completed texture is copied immediately after the deferred resize.
+   const started=performance.now();
+   if(this.canvas.width!==pending.width||this.canvas.height!==pending.height){this.canvas.width=pending.width;this.canvas.height=pending.height;}
+   this.gpu.presentFrame(pending);pending.info.ms+=performance.now()-started;
+   this.publishFrame(pending.info,pending.routeLength,'deferred-msaa');
+   this.schedule();
+  }catch(error){
+   this.recordGraphicsFallback('presentation',error);this.warmRequested||=pending.warm;this.contextLost=true;this.fallbackAfterLoss();
+  }
  }
  meshFor(step){if(!this.meshes.has(step))this.meshes.set(step,buildTerrainMesh(this.model,step));return this.meshes.get(step);}
  profileFor(rect,hardware){
@@ -1032,43 +1149,53 @@ export class TerrainRenderer{
   if(this.routeMeshes.size>=2)this.routeMeshes.delete(this.routeMeshes.keys().next().value);this.routeMeshes.set(step,route);return route;
  }
  render(warm=false){
+  if(this.pendingGPU){this.dirty=true;return;}
   const started=performance.now(),rect=this.canvas.getBoundingClientRect();if(rect.width<1||rect.height<1){if(warm)this.warmRequested=true;return;}
-  const motion=this.dragging||this.wheeling,hardware=typeof navigator!=='undefined'?navigator:{},profile=this.profileFor(rect,hardware);
-  const wantedDpr=Math.min(typeof devicePixelRatio==='number'?devicePixelRatio:1,profile.maxDpr);
-  const dpr=Math.min(wantedDpr,Math.sqrt(profile.pixelLimit/(rect.width*rect.height)),4096/rect.width,4096/rect.height);
-  const W=Math.max(1,Math.round(rect.width*dpr)),H=Math.max(1,Math.round(rect.height*dpr));
-  if(this.canvas.width!==W||this.canvas.height!==H){this.canvas.width=W;this.canvas.height=H;}
+  const motion=this.dragging||this.wheeling,{profile,dpr,width:W,height:H}=this.frameDimensions(rect);
   const camera=cameraFor(this.model,this,rect.width,rect.height,this.options.compactViewport);
   const budget=this.gpu?Math.max(4225,camera.usableW*camera.usableH*.55*Math.min(2,this.zoom)):16641;
   const step=selectTerrainMeshStride(this.grid,budget,this.meshStride,profile.vertexLimit);this.meshStride=step;
   const mesh=this.meshFor(step),light=terrainLight(this.yaw,this.pitch),route=this.routeFor(step);
+  const info={ms:0,triangles:mesh.triangles,quality:motion?'motion':'full',renderer:this.gpu?'webgl2':'canvas2d',pixelRatio:dpr,meshStride:step,sourceVertices:this.grid.width*this.grid.height,graphicsFallback:this.graphicsFallback?{...this.graphicsFallback}:null,
+   view:{yaw:this.yaw,pitch:this.pitch,zoom:this.zoom,offset:[...this.offset]},
+   cartography:this.cartography?{loadedTiles:this.cartography.source.loadedTiles,requestedTiles:this.cartography.source.requestedTiles,width:this.cartography.width,height:this.cartography.height}:null,
+   displayMask:this.displayMask?{width:this.displayMask.width,height:this.displayMask.height,allowedPixels:this.displayMask.source.allowedPixels,coverageVersion:this.displayMask.source.coverageVersion}:null};
   try{
-   if(this.gpu){if(this.gpuRoute!==route){this.gpu.setRoute(route);this.gpuRoute=route;}this.gpu.render(mesh,camera,light,W,H,dpr,profile);}
-   else this.software.render(mesh,camera,light,W,H,dpr,profile,route);
+   if(this.gpu){
+    if(this.gpuCartographyDirty){this.gpu.setCartography(this.cartography);this.gpuCartographyDirty=false;}
+    if(this.gpuRoute!==route){this.gpu.setRoute(route);this.gpuRoute=route;}
+    if(this.gpu.frameFormat){
+     const frame=this.gpu.beginFrame(mesh,camera,light,W,H,dpr,profile);info.ms=performance.now()-started;
+     this.pendingGPU={...frame,gpu:this.gpu,info,width:W,height:H,routeLength:route.length,warm,started,state:this.frameState(rect,dpr)};
+     this.canvas.dataset.terrainPending='true';this.pollGPUFrame();return;
+    }
+   }
+   if(this.canvas.width!==W||this.canvas.height!==H){this.canvas.width=W;this.canvas.height=H;}
+   if(this.gpu)this.gpu.render(mesh,camera,light,W,H,dpr,profile);else this.software.render(mesh,camera,light,W,H,dpr,profile,route);
   }catch(error){
    if(this.gpu){this.recordGraphicsFallback('render',error);this.warmRequested=warm;this.contextLost=true;this.fallbackAfterLoss();return;}
    this.terminalFailure('Не удалось нарисовать ландшафт. Подготовьте сцену заново.');return;
   }
-  const ms=performance.now()-started,renderer=this.gpu?'webgl2':'canvas2d',quality=motion?'motion':'full';
-  this.canvas.dataset.renderMs=ms.toFixed(1);this.canvas.dataset.triangles=String(mesh.triangles);
-  this.canvas.dataset.quality=quality;this.canvas.dataset.renderer=renderer;this.canvas.dataset.meshStride=String(step);
-  this.canvas.dataset.routeMeshStride=String(step);this.canvas.dataset.routeRenderSegments=String(route.length);
-  this.canvas.dataset.sourceVertices=String(this.grid.width*this.grid.height);this.canvas.dataset.heightScale='1';this.canvas.dataset.material='cartographic';
-  this.canvas.dataset.displayMask=this.displayMask?'russia-display-area':'none';
-  // ms is CPU submission/drawing time, not a GPU or phone FPS measurement.
-  this.notify('onRender',{ms,triangles:mesh.triangles,quality,renderer,pixelRatio:dpr,meshStride:step,sourceVertices:this.grid.width*this.grid.height,graphicsFallback:this.graphicsFallback?{...this.graphicsFallback}:null,
-   view:{yaw:this.yaw,pitch:this.pitch,zoom:this.zoom,offset:[...this.offset]},
-   cartography:this.cartography?{loadedTiles:this.cartography.source.loadedTiles,requestedTiles:this.cartography.source.requestedTiles,width:this.cartography.width,height:this.cartography.height}:null,
-   displayMask:this.displayMask?{width:this.displayMask.width,height:this.displayMask.height,allowedPixels:this.displayMask.source.allowedPixels,coverageVersion:this.displayMask.source.coverageVersion}:null});
+  info.ms=performance.now()-started;this.publishFrame(info,route.length,this.gpu?'direct':'canvas2d');
+ }
+ publishFrame(info,routeLength,presentation){
+  this.canvas.dataset.renderMs=info.ms.toFixed(1);this.canvas.dataset.triangles=String(info.triangles);
+  this.canvas.dataset.quality=info.quality;this.canvas.dataset.renderer=info.renderer;this.canvas.dataset.meshStride=String(info.meshStride);
+  this.canvas.dataset.routeMeshStride=String(info.meshStride);this.canvas.dataset.routeRenderSegments=String(routeLength);
+  this.canvas.dataset.sourceVertices=String(info.sourceVertices);this.canvas.dataset.heightScale='1';this.canvas.dataset.material='cartographic';
+  this.canvas.dataset.displayMask=info.displayMask?'russia-display-area':'none';this.canvas.dataset.terrainPresentation=presentation;this.canvas.dataset.terrainPending=String(this.dirty||this.warmRequested);
+  // ms is CPU submission/presentation time. GPU completion is asynchronous;
+  // this callback describes only the completed view actually copied to canvas.
+  this.notify('onRender',info);
  }
  rotate(delta){if(this.destroyed||!Number.isFinite(delta))return;this.yaw=((this.yaw+delta+PI)%TAU+TAU)%TAU-PI;this.request();}
- zoomBy(factor){if(this.destroyed||!Number.isFinite(factor)||factor<=0)return;this.zoom=clamp(this.zoom*factor,.65,5);this.request();}
+ zoomBy(factor){if(this.destroyed||!Number.isFinite(factor)||factor<=0)return;const next=clamp(this.zoom*factor,.65,5);if(next===this.zoom)return;this.zoom=next;this.request();}
  reset(){if(this.destroyed)return;this.yaw=DEFAULT_VIEW.yaw;this.pitch=DEFAULT_VIEW.pitch;this.zoom=DEFAULT_VIEW.zoom;this.offset=[0,0];this.request();}
  destroy(){
   if(this.destroyed)return;this.destroyed=true;this.cancelFrame();clearTimeout(this.wheelTimer);clearTimeout(this.restoreTimer);
   this.resize?.disconnect();if(this.onResize&&typeof window!=='undefined')window.removeEventListener('resize',this.onResize);
   this.document?.removeEventListener('visibilitychange',this.onVisibility);this.unbindControls();this.pointers.clear();
-  this.gpu?.destroy();this.software?.destroy();this.meshes.clear();this.routeMeshes.clear();this.route=[];this.gpuRoute=null;this.cartography=null;this.displayMask=null;this.warmRequested=false;
+  this.gpu?.destroy();this.software?.destroy();this.pendingGPU=null;this.meshes.clear();this.routeMeshes.clear();this.route=[];this.gpuRoute=null;this.cartography=null;this.displayMask=null;this.warmRequested=false;this.canvas.dataset.terrainPending='false';
   if(this.canvas!==this.originalCanvas&&this.canvas.parentNode)this.canvas.parentNode.replaceChild(this.originalCanvas,this.canvas);
   if(this.originalCanvas.style)this.originalCanvas.style.touchAction=this.previousTouchAction||'';
  }

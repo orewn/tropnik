@@ -1,0 +1,117 @@
+name: Terrain deferred presentation causal diagnosis
+
+on:
+  push:
+    branches: [diagnostics/terrain-deferred-presentation]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terrain-deferred-presentation-diagnostics
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out the exact diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          pnpm --dir web install --frozen-lockfile
+      - name: Verify the unchanged mode sequence and diagnostic boundaries
+        run: node --test web/tests/terrain-renderer.test.mjs web/tests/terrain-display-mask.test.mjs tools/pages-preview/tests/zoom-performance-diagnostics.test.mjs tools/pages-preview/tests/terrain-diagnostic.test.mjs tools/pages-preview/tests/zoom-burst.test.mjs tools/pages-preview/tests/terrain-capture.test.mjs tools/pages-preview/tests/browser-report.test.mjs
+      - name: Install the pinned read-only landscape verifier dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/tropnik-python"
+          "$RUNNER_TEMP/tropnik-python/bin/python" -m pip install --disable-pip-version-check -r tools/android-build/requirements.txt
+          echo "$RUNNER_TEMP/tropnik-python/bin" >> "$GITHUB_PATH"
+      - name: Verify deterministic terrain and map artifacts
+        run: |
+          node tools/android-build/prepare-custom-map.mjs --check
+          python tools/android-build/prepare-landscape.py --check
+          node web/scripts/verify-custom-map.mjs
+      - name: Prepare the verified Android link and static site
+        run: |
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Preserve the existing four-case WebGL2 mask proof
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: node --test tools/pages-preview/tests/terrain-mask.browser.mjs
+      - name: Run the existing Android detail, satellite, overview and 3D sequence
+        timeout-minutes: 8
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: zoom-modes
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Verify the receipt is diagnostic only and retains mode attribution
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import {execFileSync} from 'node:child_process';
+          import {assertBrowserReport} from './tools/pages-preview/browser-report.mjs';
+          import {assertTerrainCaptureSet} from './tools/pages-preview/browser-terrain-capture.mjs';
+          const report=JSON.parse(readFileSync('web/pages-preview/dist/browser-zoom-modes-diagnostic.json','utf8'));
+          assert.equal(report.sourceCommit,process.env.GITHUB_SHA);
+          assert.equal(report.diagnostic,'zoom-modes');
+          assert.equal(report.diagnosticOnly,true);
+          assert.equal(report.verified,false);
+          assert.equal(report.releaseEligible,false);
+          assert.equal(report.geometryPassed,false);
+          assert.equal(report.status,'completed');
+          assert.equal(report.profile,'android-portrait');
+          assert.equal(report.diagnosticScope,'android-existing-zoom-modes');
+          for(const mode of ['detail','satellite','overview','terrain','scene3d'])assert.ok(report.modes[mode]);
+          assert.equal(report.modes.scene3d.zoomInputs,28);
+          assert.ok(report.modePerformanceDiagnostics?.current);
+          assert.ok(Array.isArray(report.modePerformanceDiagnostics.layoutShifts));
+          assert.ok(Array.isArray(report.modePerformanceDiagnostics.recentLongTasks));
+          assert.deepEqual(report.performanceIntervals,{modes:report.performance});
+          assert.equal(report.closeTrail,undefined);
+          assert.equal(report.coast,undefined);
+          assert.throws(()=>assertBrowserReport(report,process.env.GITHUB_SHA));
+          assert.notEqual(report.instrumented,true);
+          assert.equal(report.terrainZoomTrace,undefined);
+          const protectedInputs=[{"path":"web/lib/custom-map-engine.ts","sha256":"7c81f2aa78b1b7b02fe564be0cb1d52bd361060ac901521314d729979cd375ea"},{"path":"web/lib/custom-map-camera.ts","sha256":"260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd"},{"path":"web/components/MapAttribution.tsx","sha256":"8addce99427ca78ecbc597b5c8a7b66c526fef650786aeb28316416d7984fb7d"},{"path":"web/app/map-ui-release.css","sha256":"1e52c29334fd64647b0fa900982366bd437d5d9244c853cea97a5e7f8da5ab36"},{"path":"tools/pages-preview/browser-zoom-audit.mjs","sha256":"4ad975f714b10328a817cb96df77c82315c092e60aa4571c30949515e38fe359"},{"path":"tools/pages-preview/browser-smoke.mjs","sha256":"0b3e586f2aa6032ebb8639004acc54c4097515f007f2e962c6de9b75d31a8e6f"},{"path":"tools/pages-preview/browser-environment.mjs","sha256":"470ca0d7270b230a649f4cd0c7eaded7bdfce29156fd418d2f71d1064519a885"}];
+          for(const item of protectedInputs)assert.equal(createHash('sha256').update(readFileSync(item.path)).digest('hex'),item.sha256,item.path);
+          for(const state of Object.values(report.modes.scene3d.states)){
+            assert.equal(state.frame.renderer,'webgl2');assert.equal(state.frame.pixelRatio,2);assert.equal(state.frame.sourceVertices,263169);
+            assert.equal(state.frame.graphicsFallback,null);assert.equal(state.frame.displayMask.allowedPixels,state.frame.displayMask.width*state.frame.displayMask.height);
+          }
+          assertTerrainCaptureSet(report.modes.scene3d,report.screenshots,report.profile);
+          const captures=report.screenshots.filter(image=>image.mode==='scene3d').map(image=>({file:image.file,bytes:image.bytes,sha256:image.sha256,...image.terrainCapture}));
+          const sourceFiles=['web/public/terrain/terrain-renderer.js','web/public/custom-map/manifest.json','web/public/terrain/landscape.html','web/public/sw.js'];
+          const sceneTasks=report.modePerformanceDiagnostics.recentLongTasks.filter(task=>task.phase==='zoom-design-scene');
+          const summary={schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,instrumented:false,baselineCommit:'ecfc53eb427729839c1f356f6f5c708135d1c9b6',sourceCommit:report.sourceCommit,sourceTree:execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim(),protectedInputs,sourceFiles:sourceFiles.map(path=>({path,sha256:createHash('sha256').update(readFileSync(path)).digest('hex')})),profile:report.profile,nativeSceneZoomInputs:report.modes.scene3d.zoomInputs,sceneFrames:Object.fromEntries(Object.entries(report.modes.scene3d.states).map(([name,state])=>[name,state.frame])),captureBinding:{strengthened:true,baselineHarnessSha256:'8db8c6ae69e0c56349f3b137b67313ef4cfc30d9a60dca5335a53899bdaba014',captures},completedViewExtremes:{close:report.modes.scene3d.states.close.frame.view.zoom===5,wide:report.modes.scene3d.states.wide.frame.view.zoom===.65,reset:report.modes.scene3d.states.reset.frame.view.zoom===1},sceneTasks,sceneLongestObservedTaskMs:Math.max(0,...sceneTasks.map(task=>task.duration)),performance:report.performance,performanceIssues:report.performanceIssues,performancePassed:report.performancePassed,environment:report.environment};
+          writeFileSync('web/pages-preview/dist/terrain-deferred-presentation-summary.json',JSON.stringify(summary,null,2)+'\n');
+          console.log(JSON.stringify({diagnosticOnly:true,sourceCommit:report.sourceCommit,sceneLongestObservedTaskMs:summary.sceneLongestObservedTaskMs,captures:captures.map(c=>({stage:c.stage,sha256:c.sha256,stable:c.stable,settleWaitMs:c.settleWaitMs,captureDurationMs:c.captureDurationMs,frame:c.before.inspection.frame,frames:c.before.inspection.frames})),performance:report.performance,performanceIssues:report.performanceIssues}));
+          NODE
+      - name: Preserve diagnostic evidence without publication
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-terrain-deferred-presentation-${{ github.run_id }}
+          path: |
+            web/pages-preview/design-qa
+            web/pages-preview/dist/build-info.json
+            web/pages-preview/dist/browser-zoom-modes-diagnostic.json
+            web/pages-preview/dist/browser-network.json
+            web/pages-preview/dist/browser-terrain-mask-verification.json
+            web/pages-preview/dist/terrain-deferred-presentation-summary.json
+            web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7

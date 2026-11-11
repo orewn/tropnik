@@ -24,7 +24,9 @@ export function coastFixture(profile,engine){
  const screenshots=steps.map(({fixture,targetZoom})=>({fixture,targetZoom,file:`${profile}-coast-${fixture}-z${targetZoom}.png`,bytes:10000,sha256:'d'.repeat(64)}));
  const labelDiagnostics=steps.filter(step=>step.fixture==='primorsk').map(frame=>{
   const screenshot=screenshots.find(shot=>shot.fixture===frame.fixture&&shot.targetZoom===frame.targetZoom),camera={longitude:28.6,latitude:60.36,zoom:frame.zoom,bearing:0,pitch:0};
-  return{fixture:frame.fixture,targetZoom:frame.targetZoom,afterScreenshot:true,performanceScope:'after-modes-and-source-end-intervals',screenshot:screenshot.file,screenshotSha256:screenshot.sha256,durationMs:1,snapshot:{schemaVersion:2,engine,readOnly:true,cameraPreserved:true,before:camera,after:{...camera},limit:100,names:[...COAST_LABEL_REQUEST.names],truncated:false,candidates:[],customMap:customMapFixture({camera,routeId:''})}};
+  const map=customMapFixture({camera,routeId:''}),revision={drawRevision:map.drawRevision,labelRevision:map.labelRevision};
+  map.labelInspection={schemaVersion:1,names:[...COAST_LABEL_REQUEST.names],limit:100,totalCandidates:0,retainedCandidates:0,matchingCandidates:0,truncated:false};
+  return{fixture:frame.fixture,targetZoom:frame.targetZoom,afterScreenshot:true,performanceScope:'after-modes-and-source-end-intervals',screenshot:screenshot.file,screenshotSha256:screenshot.sha256,durationMs:1,snapshot:{schemaVersion:2,engine,readOnly:true,cameraPreserved:true,before:camera,after:{...camera},revisions:{before:{...revision},queried:{...revision},after:{...revision}},limit:100,names:[...COAST_LABEL_REQUEST.names],truncated:false,candidates:[],customMap:map}};
  });
  return{schemaVersion:2,profile,engine,passed:true,visualReviewRequired:true,steps,pans:[structuredClone(pan),structuredClone(pan)],screenshots,labelDiagnostics,resources:[{path:'/tropnik/data/map-coverage/manifest.json',status:200,finished:true},{path:'/tropnik/data/map-coverage/cells/coastal-cell-source.json',status:200,finished:true}]};
 }

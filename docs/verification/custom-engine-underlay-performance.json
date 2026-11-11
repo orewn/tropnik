@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "scope": "controlled opaque-detail underlay comparison and separate untraced UI smoothness",
+  "sourceCommit": "72839320957aa9ae269bfa6763b267b6a0202ac8",
+  "sourceTree": "6c262245ae913aa453660e496629af9367de9420",
+  "engineSha256": "bcb43c269a6b74b52956acd40aec48e666a4c40255c78f3e77e107210b60487a",
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43060178548",
+  "jobId": 130660276163,
+  "artifact": {
+    "id": 13873721594,
+    "bytes": 6673232,
+    "sha256": "810db2115b10172b8e5c3cd22a7c8dffc157ea02933b31b27756ef8c03e9edf9"
+  },
+  "pixelComparison": {
+    "cases": 30,
+    "pairs": 46,
+    "pngs": 92,
+    "changedPixels": 0,
+    "negativeControls": 10,
+    "sourceEnvironmentAndPngDigestsVerified": true
+  },
+  "smoothness": {
+    "instrumented": false,
+    "cpuThrottle": 1,
+    "profiles": [
+      "android-portrait",
+      "desktop-webgl"
+    ],
+    "scenariosPerProfile": 8,
+    "windows": 16,
+    "issues": [],
+    "desktopPan": {
+      "callbackP95Ms": 24.30000000000291,
+      "callbackMaximumMs": 31,
+      "budgetP95Ms": 35,
+      "nativeInputP95Ms": 44.3
+    },
+    "androidPan": {
+      "callbackP95Ms": 18.8,
+      "callbackMaximumMs": 19.5
+    },
+    "longTasksInEachWindow": 0,
+    "unexpectedLayoutShiftInEachWindow": 0,
+    "rawMeasurementsValidatedByExistingAssertSmoothnessAudit": true
+  },
+  "limits": [
+    "Controlled diagnostic does not replace a fresh full gate on the integrated commit.",
+    "Callback intervals are not presented-frame FPS, field INP, or physical-phone measurements.",
+    "Production engine was the new opaque-detail/label/boundary implementation; terrain and attribution were the previous versions in this causal test."
+  ]
+}

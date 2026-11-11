@@ -920,7 +920,7 @@ async function Oe(e = {}) {
 //#region web/lib/terrain-preparation.worker.ts?worker&url
 var ke = "" + new URL("../workers/terrain-preparation.worker-B8lieq38.js", import.meta.url).href, Ae = "20261106-3", z = new le(), je = () => typeof location > "u" ? "https://map-preview.local" : location.origin, B, Me = `/terrain/terrain-grid.json?v=${Ae}`;
 new fe({
-	loadModule: () => (B ||= import("./terrain-renderer-DQ47YevM.js").catch((e) => {
+	loadModule: () => (B ||= import("./terrain-renderer-Do_PeK_1.js").catch((e) => {
 		throw B = void 0, e;
 	}), B),
 	loadGrid: () => H(Me),

@@ -1,0 +1,109 @@
+name: Production Canvas underlay pixel diagnosis
+
+on:
+  push:
+    branches: [diagnostics/opaque-detail-underlay]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: map-underlay-diagnostics-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  pixel-parity:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Check out the exact diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Compare real production Canvas pixels
+        run: node --test tools/pages-preview/tests/browser-map-underlay.browser.mjs
+      - name: Bind exact source and retained pixel evidence
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {createHash} from 'node:crypto';
+          import {readFileSync} from 'node:fs';
+          import {assertBrowserEnvironment} from './tools/pages-preview/browser-environment.mjs';
+          const underlay = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-underlay-verification.json', 'utf8'));
+          assert.equal(underlay.schemaVersion, 1);
+          assert.equal(underlay.evidence, 'production-canvas-underlay-pixel-parity');
+          assert.equal(underlay.baseline, 'same-production-draw-with-fixture-only-coverage-false');
+          assert.equal(underlay.verified, true);
+          assert.equal(underlay.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(underlay.rendererSHA256, createHash('sha256').update(readFileSync('web/lib/custom-map-engine.ts')).digest('hex'));
+          assert.equal(underlay.sources['web/lib/custom-map-engine.ts'], underlay.rendererSHA256);
+          for (const [path, hash] of Object.entries(underlay.sources)) {
+            assert.match(path, /^web\/(?:[\w.-]+\/)*[\w.-]+$/);
+            assert.equal(hash, createHash('sha256').update(readFileSync(path)).digest('hex'));
+          }
+          assertBrowserEnvironment(underlay.environment, process.env.GITHUB_SHA);
+          const covers = {opaque:[true], 'fractional-zoom':[true], 'pan-sequence':[true,true,true,false,true], missing:[false], transparent:[false], rotated:[false], pitched:[false], satellite:[false], overview:[false], zoom12:[true,true,true,false,true], zoom13:[false], zoom18:[false], 'tiny-tile':[false], 'unwrapped-world':[true], 'boundaries-hidden':[true]};
+          assert.deepEqual(underlay.cases.map(item => item.dpr + '/' + item.name).sort(), [1,2].flatMap(dpr => Object.keys(covers).map(name => dpr + '/' + name)).sort());
+          let underlayFrames = 0;
+          for (const item of underlay.cases) {
+            assert.equal(item.verified, true);
+            assert.equal(item.contextAttributes.alpha, false);
+            assert.equal(item.contextAttributes.willReadFrequently, item.policy.softwareRaster);
+            assert.deepEqual(item.bitmapDimensions, [512,512]);
+            assert.deepEqual(item.frames.map(frame => frame.actualCoverage), covers[item.name]);
+            assert.deepEqual(item.frames.map(frame => frame.expectedCoverage), covers[item.name]);
+            if (item.name === 'tiny-tile') assert.ok(item.tileDeviceSpan <= 1);
+            const negatives = item.name === 'opaque' ? ['remove-route','remove-selectedBoundary','remove-mask'] : ['missing','transparent'].includes(item.name) ? ['force-unsafe-cover'] : [];
+            assert.deepEqual(item.negativeControls.map(control => control.name), negatives);
+            for (const control of item.negativeControls) assert.ok(control.differentPixels > 0);
+            for (const frame of item.frames) {
+              underlayFrames++;
+              assert.deepEqual([frame.width,frame.height], [512*item.dpr,384*item.dpr]);
+              assert.deepEqual(frame.comparison, {differentPixels:0,maxChannelDelta:0,totalPixels:frame.width*frame.height});
+              assert.match(frame.baselinePixelSHA256, /^[a-f0-9]{64}$/);
+              assert.equal(frame.optimizedPixelSHA256, frame.baselinePixelSHA256);
+              const {baseline,optimized} = frame.operations;
+              assert.equal(baseline.area, 1);
+              assert.ok(baseline.overview > 0);
+              assert.equal(optimized.area, frame.actualCoverage ? 0 : 1);
+              assert.equal(optimized.overview, frame.actualCoverage ? 0 : baseline.overview);
+              for (const key of ['clear','mask','selectedArea','detail','relief','imagery']) assert.equal(optimized[key], baseline[key]);
+              assert.equal(optimized.clear, 1);
+              assert.equal(optimized.mask, 1);
+              assert.equal(optimized.proofCalls, 1);
+              if (frame.actualCoverage) assert.ok(item.tileDeviceSpan > 1);
+              assert.deepEqual(frame.captures.map(capture => capture.phase), ['baseline','optimized']);
+              for (const capture of frame.captures) {
+                assert.match(capture.file, /^[a-zA-Z0-9.-]+\.png$/);
+                const png = readFileSync('web/pages-preview/design-qa/map-underlay/' + capture.file);
+                assert.equal(png.length, capture.bytes);
+                assert.equal(createHash('sha256').update(png).digest('hex'), capture.sha256);
+                assert.equal(png.subarray(0,8).toString('hex'), '89504e470d0a1a0a');
+                assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)], [frame.width,frame.height]);
+              }
+            }
+          }
+          assert.equal(underlayFrames, 46);
+          NODE
+      - name: Preserve the actual pixel proof
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-map-underlay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            web/pages-preview/dist/browser-map-underlay-verification.json
+            web/pages-preview/design-qa/map-underlay
+          if-no-files-found: error
+          retention-days: 7

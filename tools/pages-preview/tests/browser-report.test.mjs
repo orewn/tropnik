@@ -9,6 +9,7 @@ import {coastFixture} from './coast-fixture.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
 import {smoothnessFixture} from './smoothness-fixture.mjs';
 import {browserEnvironmentFixture,terrainMaskReportFixture} from './browser-environment-fixture.mjs';
+import {terrainCaptureExpectedView,TERRAIN_CAPTURE_TIMEOUT_MS} from '../browser-terrain-capture.mjs';
 
 const commit='a'.repeat(40);
 const assertBrowserReport=(report,source)=>verifyBrowserReport(report,source,catalogueFixture);
@@ -42,8 +43,24 @@ function sheetGestures(){
   scroll:{passed:true,input:'touch',before:0,after:100,deltaPx:100,pageScrollDeltaPx:0,sheetDisplacementPx:0,selectionPreserved:true},
   tapAfterCancel:true,tapAfterDrag:true,listPositionRetained:true,selectionPreserved:true,finalState:'closed'};
 }
+function terrainScreenshotsFixture(scene,profile,mobile){
+ return Object.entries(scene.states).map(([stage,inspection],index)=>{
+  const canvas={width:mobile?412:1000,height:700,backingWidth:(mobile?412:1000)*(mobile?2:1),backingHeight:700*(mobile?2:1),renderer:'webgl2',pending:'false',presentation:'deferred-msaa',opacity:1};
+  const before={visible:true,ready:true,error:'',sceneOpacity:1,inspection:structuredClone(inspection),canvas};
+  const firstObservedAtMs=1000+index*100,beforeObservedAtMs=firstObservedAtMs+50,afterObservedAtMs=beforeObservedAtMs+10;
+  const click=stage==='initial'?null:scene.nativeInputs[{close:13,wide:27,rotated:28,reset:29}[stage]].events.findLast(event=>event.type==='click');
+  const image={file:profile+'-scene3d-'+(stage==='initial'?'overview':stage)+'.png',mode:'scene3d',bytes:10000,sha256:'c'.repeat(64)};
+  image.terrainCapture={schemaVersion:1,method:'completed-frame-before-and-after-screenshot',stage,expectedView:terrainCaptureExpectedView(stage),
+   readinessTimeoutMs:TERRAIN_CAPTURE_TIMEOUT_MS,pollIntervalMs:50,observations:2,stable:true,settleWaitMs:50,captureDurationMs:10,
+   firstObservedAtMs,beforeObservedAtMs,afterObservedAtMs,lastNativeInputAtMs:click?.time??null,observationAfterLastInputMs:click?beforeObservedAtMs-click.time:null,
+   before,after:structuredClone(before),image:{file:image.file,bytes:image.bytes,sha256:image.sha256}};
+  return image;
+ });
+}
 function zoomDesign(profile,engine,mobile){
  const step=1,input=mobile?'touch':'mouse',high=10+4*step,edges=closeTrail(profile,engine,mobile);
+ const scene3d=engine==='tropnik-canvas'?customSceneFixture(mobile):{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true};
+ const terrainImages=engine==='tropnik-canvas'?terrainScreenshotsFixture(scene3d,profile,mobile):[];
  const burst=(direction,beforeZoom,afterZoom)=>({passed:true,input,count:4,receivedClicks:4,direction,step,beforeZoom,afterZoom,expectedZoom:afterZoom,eventSpanMs:30,durationMs:50,pageScrollDeltaPx:0,selectionPreserved:true,
   dispatchMode:'ordered-native',eventOrderVerified:true,producerDurationMs:1,firstInputLagMs:100,domTimeOrigin:10000,domSampleStartedAtMs:90,recentLongTasks:[],
   events:Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+tap*10+index*2,timestamp:100+tap*10+(index?2:0),trusted:true,pointerType:input,pointerId:mobile?tap+2:1}))).flat(),
@@ -52,8 +69,8 @@ function zoomDesign(profile,engine,mobile){
  return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:8,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2,...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera:{longitude:40,latitude:43,zoom:index+2}})}:{})})),closeTrail:edges,coast:coastFixture(profile,engine),satelliteContinuity:satelliteFixture(profile,engine),
   performance:{layoutShift:0,longestTaskMs:100},performanceIntervals:{modes:{layoutShift:0,longestTaskMs:100},sourceEnds:edges.performance,satellite:{layoutShift:0,longestTaskMs:100}},
   zoomBurst:{passed:true,input,returnedToStart:true,increase:burst(1,10,high),decrease:burst(-1,high,10)},
-  modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview',...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera:{longitude:40,latitude:43,zoom},mode:'overview'})}:{})})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:engine==='tropnik-canvas'?'scene':mobile?'not-offered':'active'},scene3d:engine==='tropnik-canvas'?customSceneFixture(mobile):{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true}},
-  screenshots:[...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
+  modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview',...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera:{longitude:40,latitude:43,zoom},mode:'overview'})}:{})})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:engine==='tropnik-canvas'?'scene':mobile?'not-offered':'active'},scene3d},
+  screenshots:[...terrainImages,...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
 }
 function evidence(){
  return{verified:true,environment:browserEnvironmentFixture(commit),terrainMask:terrainMaskReportFixture(commit),catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:4,
@@ -354,4 +371,20 @@ test('old tap-only receipts and sticky native sheet gestures cannot pass publica
   value=>value.profiles[0].sheetGestures.finalState='open',
  ];
  for(const change of changes){const bad=evidence();change(bad);assert.throws(()=>assertBrowserReport(bad,commit));}
+});
+
+test('publication binds every terrain image to its own complete frame before and after capture',()=>{
+ const valid=evidence();assert.equal(assertBrowserReport(valid,commit),valid);
+ const terrainImage=value=>value.zoomDesigns[0].screenshots.find(image=>image.terrainCapture?.stage==='close');
+ const mutations=[
+  value=>delete terrainImage(value).terrainCapture,
+  value=>terrainImage(value).terrainCapture.after.inspection.frames++,
+  value=>terrainImage(value).terrainCapture.before.canvas.pending='true',
+  value=>terrainImage(value).terrainCapture.before.canvas.opacity=.99,
+  value=>terrainImage(value).sha256='e'.repeat(64),
+  value=>delete terrainImage(value).terrainCapture.settleWaitMs,
+  value=>{const binding=terrainImage(value).terrainCapture;binding.before.inspection.frame.view.zoom=1;binding.after.inspection.frame.view.zoom=1;},
+  value=>{const images=value.zoomDesigns[0].screenshots;images.splice(images.findIndex(image=>image.terrainCapture?.stage==='reset'),1);},
+ ];
+ for(const mutate of mutations){const changed=evidence();mutate(changed);assert.throws(()=>assertBrowserReport(changed,commit));}
 });

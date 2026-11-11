@@ -10,14 +10,23 @@ export const COAST_LABEL_REQUEST=Object.freeze({schemaVersion:1,
 export function requestLabelInspection(request,doc=globalThis.document){
  const custom=doc.querySelector('.atlas-canvas[data-map-engine="tropnik-canvas"]');
  if(custom){
-  const start=performance.now();let inspection;
-  try{inspection=JSON.parse(custom.dataset.mapInspection||'null');}catch{}
-  if(!inspection)return{snapshot:null,durationMs:performance.now()-start,error:'Custom map inspection is missing'};
+  const start=performance.now();let before,inspection,after;
+  try{
+   before=JSON.parse(custom.dataset.mapInspection||'null');
+   if(!before)throw new Error('Custom map inspection is missing');
+   const detail={request:{...request,names:[...request.names]}},EventClass=doc.defaultView?.CustomEvent||globalThis.CustomEvent;
+   custom.dispatchEvent(new EventClass('tropnik-map-label-inspection',{detail}));
+   if(typeof detail.response!=='string'||detail.response.length>1000000)throw new Error('Named label inspection is missing or oversized');
+   inspection=JSON.parse(detail.response);after=JSON.parse(custom.dataset.mapInspection||'null');
+   if(inspection?.error||!inspection?.labelInspection||!after)throw new Error(inspection?.error||'Named label inspection is incomplete');
+  }catch(error){return{snapshot:null,durationMs:performance.now()-start,error:error.message};}
   const camera=value=>({longitude:value.camera.center[0],latitude:value.camera.center[1],zoom:value.camera.zoom,bearing:value.camera.bearingDegrees||0,pitch:value.pitch||0});
-  const labels=(inspection.labels||[]).filter(label=>request.names.includes(label.label)),canvas=custom.querySelector('canvas.tropnik-map-canvas'),rect=canvas?.getBoundingClientRect();
-  return{durationMs:performance.now()-start,snapshot:{schemaVersion:2,engine:'tropnik-canvas',readOnly:true,cameraPreserved:true,
-   before:camera(inspection),after:camera(JSON.parse(custom.dataset.mapInspection)),names:[...request.names],limit:request.limit,
-   truncated:(inspection.labels?.length||0)>=512||labels.length>request.limit,candidates:labels.slice(0,request.limit),
+  const revision=value=>({drawRevision:value.drawRevision,labelRevision:value.labelRevision});
+  const canvas=custom.querySelector('canvas.tropnik-map-canvas'),rect=canvas?.getBoundingClientRect(),beforeCamera=camera(before),afterCamera=camera(after),queriedCamera=camera(inspection);
+  return{durationMs:performance.now()-start,snapshot:{schemaVersion:2,engine:'tropnik-canvas',readOnly:true,
+   cameraPreserved:JSON.stringify(beforeCamera)===JSON.stringify(afterCamera)&&JSON.stringify(beforeCamera)===JSON.stringify(queriedCamera),
+   before:beforeCamera,after:afterCamera,revisions:{before:revision(before),queried:revision(inspection),after:revision(after)},names:[...request.names],limit:request.limit,
+   truncated:inspection.labelInspection.truncated,candidates:inspection.labels,
    customMap:{...inspection,readOnly:true,canvas:canvas&&rect?{connected:canvas.isConnected,width:canvas.width,height:canvas.height,cssWidth:rect.width,cssHeight:rect.height}:null}}};
  }
  return{snapshot:null,durationMs:0,error:'Custom map DOM container is missing'};
@@ -35,6 +44,16 @@ export function assertCoastLabelInspection(capture,frame,screenshot){
   for(const key of ['longitude','latitude'])assert.ok(Math.abs(snapshot.before[key]-frame.camera[key])<1e-7);
   assert.ok(Math.abs(snapshot.before.zoom-frame.zoom)<.001);
   const map=assertCustomMapInspection(snapshot.customMap,'coast labels',{mode:'detail'});
+  assert.deepEqual(map.camera.center,[snapshot.before.longitude,snapshot.before.latitude]);assert.equal(map.camera.zoom,snapshot.before.zoom);
+  assert.equal(map.camera.bearingDegrees||0,snapshot.before.bearing);assert.equal(map.pitch||0,snapshot.before.pitch);
+  assert.deepEqual(snapshot.revisions?.before,snapshot.revisions?.after);assert.deepEqual(snapshot.revisions?.before,snapshot.revisions?.queried);
+  assert.deepEqual(snapshot.revisions?.queried,{drawRevision:map.drawRevision,labelRevision:map.labelRevision});
+  for(const key of ['drawRevision','labelRevision'])assert.ok(Number.isInteger(map[key])&&map[key]>0,'A label inspection must refer to an actual unchanged frame');
+  const query=map.labelInspection;
+  assert.equal(query?.schemaVersion,1);assert.deepEqual(query.names,COAST_LABEL_REQUEST.names);assert.equal(query.limit,COAST_LABEL_REQUEST.limit);assert.equal(query.truncated,false);
+  assert.ok(Number.isInteger(query.totalCandidates)&&query.totalCandidates>=0&&query.totalCandidates<=6400);
+  assert.equal(query.retainedCandidates,query.totalCandidates,'The last-frame decisions were not completely retained');
+  assert.equal(query.matchingCandidates,snapshot.candidates?.length,'The named query dropped matching decisions');
   assert.ok(Array.isArray(snapshot.candidates)&&snapshot.candidates.length<=snapshot.limit);
   assert.deepEqual(snapshot.candidates,map.labels.filter(label=>COAST_LABEL_REQUEST.names.includes(label.label)).slice(0,snapshot.limit),'Label candidates differ from the actual bitmap diagnostics');
   for(const label of snapshot.candidates){

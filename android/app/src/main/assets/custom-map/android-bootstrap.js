@@ -1,4 +1,4 @@
-import { n as e, r as t } from "./chunks/custom-map-entry-DVWsT04x.js";
+import { n as e, r as t } from "./chunks/custom-map-entry-DLfOPZe9.js";
 //#region tools/android-build/native-map-route.ts
 var n = class {
 	origin;

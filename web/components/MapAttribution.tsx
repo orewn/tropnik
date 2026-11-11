@@ -29,7 +29,8 @@ export function MapAttribution({ready=true,terrain=false,satellite=false,satelli
   return <div ref={ref} className={`map-attribution ${terrain?'terrain-data-credit':''}`} hidden={!ready}>
     {satellite&&<div className="map-satellite-credit" data-imagery-source={satelliteSource}>
       {satelliteSource==='eox-bluemarble'?<><a href="https://science.nasa.gov/earth/earth-observatory/" target="_blank" rel="noreferrer">NASA Blue Marble</a><span> · </span><a href="https://maps.eox.at/#data" target="_blank" rel="noreferrer">EOX</a><span className="map-satellite-detail">Обзорный снимок · детализация ниже</span>{zoom>SATELLITE_OVERVIEW_MAX_ZOOM&&<span className="map-satellite-detail">Увеличен обзорный снимок</span>}</>:<><a href="https://cloudless.eox.at" target="_blank" rel="noreferrer">EOxCloudless</a><span> · </span><a href="https://eox.at" target="_blank" rel="noreferrer">EOX</a>{zoom>SATELLITE_MAX_ZOOM&&<span className="map-satellite-detail">Достигнута детализация снимка</span>}</>}
-      {satelliteLoading&&<span className="map-satellite-detail">Загружаем снимки…</span>}
+      {/* Keep the status text's intrinsic footprint across tile requests. */}
+      <span className="map-satellite-detail map-satellite-status" aria-hidden={!satelliteLoading}>Загружаем снимки…</span>
     </div>}
     {expanded&&<div id={id} className="map-attribution-content">
       <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a>

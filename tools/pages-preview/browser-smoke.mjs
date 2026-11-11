@@ -930,7 +930,7 @@ try{
       await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
       await checkpoint('satellite-continuity-profile-complete');continue;
     }
-    if(runPolicy.diagnostic==='terrain-close'){
+    if(runPolicy.diagnostic==='terrain-close'||runPolicy.diagnostic==='zoom-modes'){
       const systemInfo=async()=>({gpu:environment.gpu,commandLine:environment.commandLine});
       const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo,url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic});
       report.environment=environment;assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
@@ -958,7 +958,7 @@ try{
       }
       const smoothness=await siteSmoothnessAudit(cdp,profile);siteSmoothness.push(smoothness);performanceIssues.push(...smoothness.performanceIssues);await checkpoint('site-smoothness-complete');
       await checkpoint('before-zoom-audit');
-      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
+      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,performanceDiagnostics,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
       await checkpoint('profile-complete');
       continue;
     }
@@ -999,7 +999,7 @@ try{
     await checkpoint(interaction?'before-zoom-audit':'profile-complete');
     if(profile.mapInteraction){
       const smoothness=await siteSmoothnessAudit(cdp,profile);siteSmoothness.push(smoothness);performanceIssues.push(...smoothness.performanceIssues);await checkpoint('site-smoothness-complete');
-      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
+      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,performanceDiagnostics,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
     }
     if(profile.mapInteraction)await checkpoint('profile-complete');
   }
