@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict';
 import {dispatchSourceEndPan,assertSourceEndPanInput} from './browser-source-end-pan.mjs';
+import {traceDesktopSelection,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from './browser-trace.mjs';
 
 // These are controlled-browser interaction budgets, not a claim of physical
 // device FPS. RAF callbacks do not prove that the GPU presented every frame.
 export const SMOOTHNESS_LIMITS=Object.freeze({frameP95Ms:35,maxFrameGapMs:150,inputToFrameMs:200,eventDurationMs:200,layoutShift:.1});
 export const SMOOTHNESS_SCENARIOS=Object.freeze(['panel','explore-search','explore-filters','catalog-scroll','map-pan','map-zoom','layer-switch','site-search']);
+export const SMOOTHNESS_TRACE_SCENARIOS=Object.freeze(['panel','explore-search']);
+
+export function smoothnessTraceEnabled({diagnostic=null,traceValue,cpuSlowdownRate=1}={}){
+ return diagnostic==='ui-smoothness'&&traceValue==='1'&&cpuSlowdownRate===1;
+}
 
 /** Self-contained because CDP installs this function in each fresh document.
  * Record only explicitly bounded interaction windows; late observer delivery
@@ -129,25 +135,62 @@ export function assertSmoothnessAudit(report,profile,{release=true}={}){
  assert.equal(report.passed,true);assert.deepEqual(report.scenarios?.map(value=>value.name),SMOOTHNESS_SCENARIOS);
  assert.ok(report.cpuSlowdownRate===1||report.cpuSlowdownRate===4);if(release)assert.equal(report.cpuSlowdownRate,1);
  assert.equal(report.cpuThrottleRestored,true);
+ assert.equal(typeof report.instrumented,'boolean');assert.ok(Array.isArray(report.traces));
+ if(report.instrumented)assert.equal(report.cpuSlowdownRate,1);
+ assert.deepEqual(report.traces.map(trace=>trace.scenario),report.instrumented?SMOOTHNESS_TRACE_SCENARIOS:[]);
+ for(const trace of report.traces){assert.equal(trace.instrumented,true);assert.equal(trace.scope,`ui-smoothness/${profile.name}/${trace.scenario}`);assert.ok(['complete','partial','error'].includes(trace.status));}
+ if(release)assert.equal(report.instrumented,false,'Instrumented UI diagnostics cannot certify release smoothness');
+ assertSourceEndPanInput(report.pan,report.input,profile.name+'/smoothness-pan');
  const issues=report.scenarios.flatMap(window=>smoothnessIssues(window,profile));assert.deepEqual(report.performanceIssues,issues);assert.equal(report.performancePassed,issues.length===0);
  if(release)assert.deepEqual(issues,[],`${profile.name}: UI smoothness budget failed`);
  return report;
 }
 
+/** CDP acknowledgements prove delivery to the protocol, while the browser's
+ * recorder proves that the native pointer pair actually reached the page. */
+export async function observeSmoothnessPan(cdp,start,delta,profile,{evaluate,sleep}){
+ const began=await evaluate(cdp,'performance.now()');assert.ok(Number.isFinite(began));
+ const receipt=await dispatchSourceEndPan(cdp,start,delta,profile,sleep);
+ try{
+  receipt.events=await evaluate(cdp,`(window.__tropnikInputEvents||[]).filter(event=>event.time>=${began}).map(({type,time,timestamp,pointerType,pointerId,trusted,x,y})=>({type,time,timestamp,pointerType,pointerId,trusted,x,y}))`);
+  assertSourceEndPanInput(receipt,profile.mobile?'touch':'mouse',profile.name+'/smoothness-pan');
+ }catch(error){error.panDiagnostics=receipt;throw error;}
+ return receipt;
+}
+
+/** Start tracing before the recorder window, then stop the window before trace
+ * drainage. Each action still runs once, and its raw metrics survive failures. */
+export async function measureSmoothnessWindow(cdp,name,action,{evaluate,report,tracing=false,sourceCommit=null,traceOptions={}}){
+ const inspect=expression=>evaluate(cdp,expression);
+ let releaseDrain;const windowClosed=new Promise(resolve=>{releaseDrain=resolve;});
+ const measure=async()=>{
+  try{
+   await inspect(`window.__tropnikSmoothness.start(${JSON.stringify(name)})`);let error;
+   try{await action();}catch(problem){error=problem;}
+   await inspect('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+   const raw=await inspect('window.__tropnikSmoothness.stop()');
+   try{report.scenarios.push(summarizeSmoothness(raw));}catch(problem){error??=problem;report.invalidWindow=raw;}
+   if(error)throw error;
+  }finally{releaseDrain();}
+ };
+ if(!tracing||!SMOOTHNESS_TRACE_SCENARIOS.includes(name))return measure();
+ const options={...traceOptions,enabled:true,sourceCommit,prefix:`${report.profile}-ui-smoothness-${name}`,scope:`ui-smoothness/${report.profile}/${name}`,categories:FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,captureCategoryEvidence:true,beforeDrain:()=>windowClosed};
+ try{
+  const {trace}=await traceDesktopSelection(cdp,measure,options);report.traces.push({scenario:name,...trace});
+ }catch(error){if(error.traceReceipt)report.traces.push({scenario:name,...error.traceReceipt});throw error;}
+}
+
 /** A short real-input path, independent of the long all-zoom matrix. */
-export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1}={}){
+export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1,diagnostic=process.env.TROPNIK_BROWSER_DIAGNOSTIC??null,traceValue=process.env.TROPNIK_BROWSER_TRACE,sourceCommit=process.env.GITHUB_SHA||null}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,settledSheet,closeMapSheet,clearMapStories,pointerSelector,revealNative,scrollContainer,freeCanvasPoint,url}=helpers;
- const report={schemaVersion:1,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',physicalDevice:false,cpuSlowdownRate,cpuThrottleRestored:false,passed:false,scenarios:[],performanceIssues:[],performancePassed:false};
+ const tracing=smoothnessTraceEnabled({diagnostic,traceValue,cpuSlowdownRate});
+ const report={schemaVersion:1,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',physicalDevice:false,cpuSlowdownRate,cpuThrottleRestored:false,instrumented:tracing,traces:[],passed:false,scenarios:[],performanceIssues:[],performancePassed:false};
  let originalFailure;
  const inspect=expression=>evaluate(cdp,expression);
  const wait=(label,expression,accept,timeout=10000)=>waitValue(label,()=>inspect(expression),accept,timeout);
  const measure=async(name,action)=>{
-  await inspect(`window.__tropnikSmoothness.start(${JSON.stringify(name)})`);let error;
-  try{await action();}catch(problem){error=problem;}
-  await inspect('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
-  const raw=await inspect('window.__tropnikSmoothness.stop()');
-  try{report.scenarios.push(summarizeSmoothness(raw));}catch(problem){error??=problem;report.invalidWindow=raw;}
-  if(error)throw error;
+  try{return await measureSmoothnessWindow(cdp,name,action,{evaluate,report,tracing,sourceCommit});}
+  finally{report.performanceIssues=report.scenarios.flatMap(window=>smoothnessIssues(window,profile));report.performancePassed=report.scenarios.length===SMOOTHNESS_SCENARIOS.length&&!report.performanceIssues.length;}
  };
  const type=async(selector,text)=>{
   await wait('Search input is not editable',`(()=>{const input=document.querySelector(${JSON.stringify(selector)});return !!input&&!input.disabled&&!input.readOnly})()`,Boolean);
@@ -184,7 +227,7 @@ export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1}
   await closeMapSheet(cdp,profile);const before=await settledMap(cdp,profile.engine),start=await freeCanvasPoint(cdp,before);
   const delta={dx:start.x+80<before.rect.right?64:-64,dy:12};
   await measure('map-pan',async()=>{
-   const receipt=await dispatchSourceEndPan(cdp,start,delta,profile,sleep);assertSourceEndPanInput(receipt,report.input,profile.name+'/smoothness-pan');const after=await settledMap(cdp,profile.engine);
+   report.pan=await observeSmoothnessPan(cdp,start,delta,profile,{evaluate,sleep});const after=await settledMap(cdp,profile.engine);
    assert.ok(Math.abs(after.camera.longitude-before.camera.longitude)>1e-6||Math.abs(after.camera.latitude-before.camera.latitude)>1e-6,'Native pan made no progress');
   });
   await measure('map-zoom',async()=>{for(const [label,direction]of [['Увеличить масштаб',1],['Уменьшить масштаб',-1]]){const before=await settledMap(cdp,profile.engine);await pointerSelector(cdp,`.map-controls button[aria-label="${label}"]`,profile);const after=await settledMap(cdp,profile.engine);assert.ok((after.camera.zoom-before.camera.zoom)*direction>.1,`${label}: native input made no zoom progress`);}});
@@ -205,7 +248,7 @@ export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1}
    await pointerSelector(cdp,'button[aria-label="Очистить поиск"]',profile);await wait('Site search clear did not settle',"({value:document.querySelector('#search-query')?.value,busy:document.querySelector('#site-search-results')?.getAttribute('aria-busy')})",value=>value.value===''&&value.busy==='false');
   });
   report.performanceIssues=report.scenarios.flatMap(window=>smoothnessIssues(window,profile));report.performancePassed=!report.performanceIssues.length;report.passed=true;
- }catch(error){originalFailure=error;error.smoothnessAudit=report;throw error;}
+ }catch(error){originalFailure=error;if(error.panDiagnostics)report.pan=error.panDiagnostics;error.smoothnessAudit=report;throw error;}
  finally{
   try{await cdp.call('Emulation.setCPUThrottlingRate',{rate:1});report.cpuThrottleRestored=true;}
   catch(error){

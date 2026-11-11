@@ -55,6 +55,9 @@
 }
 /* Use one navigation mode on tablets and phones, including touch landscape. */
 @media(max-width:1024px){
+  /* The map already occupies the complete mobile compositor surface. The
+     nearly opaque header does not need a backdrop readback on every frame. */
+  .header{background:var(--surface)!important;backdrop-filter:none;-webkit-backdrop-filter:none}
   .header :global(.top-nav){display:none}
   .actions :global(.menu-toggle){display:inline-flex}
   .header :global(.top-nav.open){

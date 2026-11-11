@@ -176,8 +176,9 @@ function events() {
 }
 function mapLibreFixture() {
   const writes = [], map = Object.assign(events(), {
-    loaded: false, present: true, queries: 0, repaints: 0,
+    loaded: false, present: true, moving: false, queries: 0, repaints: 0,
     getLayer() {return this.present ? {} : undefined;},
+    isMoving() {return this.moving;},
     isSourceLoaded() {this.queries++; return this.loaded;},
     setPaintProperty(id, name, value) {writes.push(['paint', id, name, value]);},
     setLayoutProperty(id, name, value) {writes.push(['layout', id, name, value]);},
@@ -216,6 +217,24 @@ test('MapLibre readiness requires a rendered current tile set, not an unused or 
   assert.ok(writes.some(row => row[2] === 'raster-opacity-transition' && row[3].duration === 0));
   candidate.dispose();
   assert.deepEqual(writes.slice(-2), [['layout', OVERVIEW, 'visibility', 'none'], ['paint', OVERVIEW, 'raster-opacity', 0]]);
+});
+
+test('MapLibre keeps the previous ground during a flight and waits for the destination tile set', async () => {
+  const {map, writes} = mapLibreFixture();
+  map.moving = true; map.loaded = true;
+  const candidate = prepareMapLibreSatellite(map, EOX, () => true);
+  let ready = false; void candidate.ready.then(() => {ready = true;});
+  map.emit('render'); await Promise.resolve();
+  assert.equal(ready, false, 'a complete intermediate zoom is not the requested stationary view');
+  assert.equal(map.queries, 0);
+  map.loaded = false; map.moving = false; map.emit('moveend');
+  assert.equal(map.repaints, 2, 'ending the movement requests a readiness frame');
+  map.emit('render'); await Promise.resolve(); assert.equal(ready, false);
+  map.loaded = true; map.emit('render'); await candidate.ready;
+  assert.equal(ready, true); assert.equal(map.listenerCount(), 0);
+  assert.ok(!writes.some(row => row[2] === 'raster-opacity' && row[3] === 1));
+  candidate.show(); assert.deepEqual(writes.at(-1), ['paint', EOX, 'raster-opacity', 1]);
+  candidate.dispose();
 });
 
 test('MapLibre tile error rejects a candidate even when the SDK now considers the source loaded', async () => {

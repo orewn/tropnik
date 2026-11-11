@@ -5,11 +5,17 @@ import {bindMapLabelReflow} from '../lib/map-direction-layout.ts';
 function environment(t) {
   class Element extends EventTarget {
     children = [];
-    closest(selector) {return selector === '.explore-layout' ? this.root || null : null;}
-    querySelectorAll() {return this.children;}
-    matches() {return false;}
+    parentElement = null;
+    constructor(className=''){super();this.className=className;}
+    closest(selector) {
+      if(selector === '.explore-layout'&&this.root)return this.root;
+      return this.matches(selector)?this:this.parentElement?.closest(selector)??null;
+    }
+    querySelectorAll(selector) {return this.children.flatMap(child=>[...(child.matches(selector)?[child]:[]),...child.querySelectorAll(selector)]);}
+    querySelector(selector) {return this.querySelectorAll(selector)[0]??null;}
+    matches(selector) {return selector.split(',').some(value=>value.startsWith('.')&&this.className.split(' ').includes(value.slice(1)));}
   }
-  const root = new Element(), viewport = new Element(), oldCard = new Element();
+  const root = new Element('explore-layout'), viewport = new Element('atlas-canvas'), oldCard = new Element('fact-card');
   viewport.root = root; root.children = [oldCard];
   let serial = 0, fontsReady;
   const resizes = [], mutations = [];
@@ -37,9 +43,9 @@ function environment(t) {
     Object.defineProperty(globalThis, name, {configurable: true, value});
     t.after(() => {if (old) Object.defineProperty(globalThis, name, old); else delete globalThis[name];});
   }
-  return {root, viewport, oldCard, frames, fonts, fontsReady: () => fontsReady(), element: () => new Element(),
+  return {root, viewport, oldCard, frames, fonts, fontsReady: () => fontsReady(), element: (className='fact-card') => new Element(className),
     resize: () => resizes[0], mutation: () => mutations[0],
-    change: () => mutations[0].callback([{target: root}]),
+    change: (records=[{target: root}]) => mutations[0].callback(records),
     flush: () => {const pending = [...frames.values()]; frames.clear(); for (const frame of pending) frame();},
   };
 }
@@ -73,4 +79,52 @@ test('queued observer callbacks and late font readiness cannot restart work afte
   env.fonts.dispatchEvent(new Event('loadingdone'));
   assert.equal(layouts, 0); assert.equal(env.frames.size, 0);
   assert.equal(env.resize().targets.size, 0); assert.equal(env.mutation().disconnected, true);
+});
+
+test('search-card DOM changes leave label geometry alone while the real drawer and overlays stay observed', t => {
+  const env=environment(t),panel=env.element('explore-panel'),content=env.element('explore-panel-content'),foot=env.element('panel-foot');
+  panel.parentElement=env.root;content.parentElement=panel;foot.parentElement=panel;
+  panel.children=[content,foot];env.root.children=[env.oldCard,panel];
+  let layouts=0;
+  const cleanup=bindMapLabelReflow(env.viewport,()=>{layouts++;});
+  env.flush();assert.equal(layouts,1);
+  for(let index=0;index<60;index++){
+    const row=env.element('region-option'),previous=content.children;
+    row.parentElement=content;content.children=[row];
+    env.change([
+      {type:'childList',target:content,addedNodes:[row],removedNodes:previous},
+      {type:'attributes',attributeName:'class',target:row},
+      {type:'attributes',attributeName:'class',target:content},
+      {type:'childList',target:foot,addedNodes:[],removedNodes:[]},
+    ]);
+    env.flush();
+  }
+  assert.equal(layouts,1,'typing/filtering inside a fixed drawer cannot request repeated map label layouts');
+  assert.deepEqual(env.resize().targets,new Set([env.viewport,env.oldCard,panel]));
+  env.resize().callback([{target:panel}]);env.flush();assert.equal(layouts,2,'a real drawer resize still reflows labels');
+  env.change([{type:'attributes',attributeName:'class',target:panel}]);env.flush();assert.equal(layouts,3,'drawer visibility/transform state is not ignored');
+  const overlay=env.element('map-message');overlay.parentElement=env.root;env.root.children.push(overlay);
+  env.change([{type:'childList',target:env.root,addedNodes:[overlay],removedNodes:[]}]);env.flush();
+  assert.equal(layouts,4);assert.ok(env.resize().targets.has(overlay));
+  env.root.children=env.root.children.filter(node=>node!==overlay);
+  env.change([{type:'childList',target:env.root,addedNodes:[],removedNodes:[overlay]}]);env.flush();
+  assert.equal(layouts,5);assert.ok(!env.resize().targets.has(overlay));
+  cleanup();
+});
+
+test('real obstacles inserted inside the catalogue remain discoverable and responsive', t => {
+  const env=environment(t),panel=env.element('explore-panel'),content=env.element('explore-panel-content');
+  panel.parentElement=env.root;content.parentElement=panel;panel.children=[content];env.root.children=[panel];
+  let layouts=0;const cleanup=bindMapLabelReflow(env.viewport,()=>{layouts++;});env.flush();
+  const wrapper=env.element('route-content'),overlay=env.element('map-controls'),control=env.element('control');
+  wrapper.parentElement=content;overlay.parentElement=wrapper;control.parentElement=overlay;
+  wrapper.children=[overlay];overlay.children=[control];content.children=[wrapper];
+  env.change([{type:'childList',target:content,addedNodes:[wrapper],removedNodes:[]}]);env.flush();
+  assert.equal(layouts,2);assert.ok(env.resize().targets.has(overlay));
+  env.change([{type:'attributes',attributeName:'hidden',target:wrapper}]);env.flush();assert.equal(layouts,3,'ancestor visibility still affects an actual obstacle');
+  env.change([{type:'attributes',attributeName:'class',target:control}]);env.flush();assert.equal(layouts,4,'nested controls retain their existing invalidation behavior');
+  content.children=[];
+  env.change([{type:'childList',target:content,addedNodes:[],removedNodes:[wrapper]}]);env.flush();
+  assert.equal(layouts,5);assert.ok(!env.resize().targets.has(overlay));
+  cleanup();
 });

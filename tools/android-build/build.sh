@@ -10,8 +10,15 @@ if [[ -z "$tropnik_sdk" || ! -x "$tropnik_sdk/build-tools/36.0.0/apksigner" ]]; 
   exit 1
 fi
 mkdir -p "$tropnik_output"
-node "$tropnik_root/tools/android-build/prepare-catalog.mjs"
-python3 "$tropnik_root/tools/android-build/prepare-landscape.py"
+if [[ "${GITHUB_ACTIONS:-false}" == "true" || -n "${GITHUB_SHA:-}" || -n "${GITHUB_RUN_ID:-}" ]]; then
+  # A CI receipt names the checked-out commit. Never repair stale committed
+  # assets here and then attribute those uncommitted bytes to that commit.
+  python3 "$tropnik_root/tools/android-build/preview_artifacts.py" source --root "$tropnik_root"
+else
+  # Local development intentionally regenerates assets before checking them.
+  node "$tropnik_root/tools/android-build/prepare-catalog.mjs"
+  python3 "$tropnik_root/tools/android-build/prepare-landscape.py"
+fi
 node "$tropnik_root/tools/android-build/prepare-catalog.mjs" --check
 python3 "$tropnik_root/tools/android-build/prepare-landscape.py" --check
 python3 -m unittest discover -s "$tropnik_root/tools/android-build" -p 'test_*.py'

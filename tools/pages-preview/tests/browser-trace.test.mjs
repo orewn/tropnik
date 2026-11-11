@@ -187,6 +187,34 @@ test('the capture time cap stops and drains before a still-pending selection com
  assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
 });
 
+test('optional drain boundary keeps the recording cap while stream I/O waits for measurement closure',async t=>{
+ const output=await outputDirectory(t),timers=controlledTimers(),cdp=protocol();let finishAction,closeWindow,now=0;
+ const closed=new Promise(resolve=>{closeWindow=resolve;});
+ const pending=traceDesktopSelection(cdp,()=>new Promise(resolve=>{finishAction=resolve;}),{output,...timers,clock:()=>now,beforeDrain:()=>closed});
+ await new Promise(resolve=>setImmediate(resolve));now=DESKTOP_TRACE_LIMITS.durationMs;timers.fireDuration();await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(cdp.calls.at(-1).method,'Tracing.end');assert.equal(cdp.calls.some(call=>call.method==='IO.read'),false);
+ now+=DESKTOP_TRACE_LIMITS.drainMs+100;closeWindow();await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(cdp.calls.at(-1).method,'IO.close');finishAction('measured-once');
+ const {value,trace}=await pending;assert.equal(value,'measured-once');assert.equal(trace.status,'partial');assert.equal(trace.stopReason,'time-limit');
+ assert.equal(trace.recordedDurationMs,DESKTOP_TRACE_LIMITS.durationMs);assert.equal(trace.drainWaitMs,DESKTOP_TRACE_LIMITS.drainMs+100);assert.deepEqual(trace.errors,[]);
+ assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
+});
+
+test('an unreleased drain hook cannot deadlock cleanup after the original action fails',async t=>{
+ const output=await outputDirectory(t),timers=controlledTimers(),cdp=protocol(),failure=new Error('Native action timed out');let rejectAction;
+ const pending=traceDesktopSelection(cdp,()=>new Promise((resolve,reject)=>{rejectAction=reject;}),{output,...timers,beforeDrain:()=>new Promise(()=>{})}).then(()=>null,error=>error);
+ await new Promise(resolve=>setImmediate(resolve));timers.fireDuration();await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(cdp.calls.at(-1).method,'Tracing.end');rejectAction(failure);
+ assert.equal(await pending,failure);assert.equal(cdp.calls.at(-1).method,'IO.close');assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
+ assert.equal(failure.traceReceipt.stopReason,'time-limit');assert.match(failure.traceReceipt.actionError,/Native action timed out/);
+});
+
+test('a rejected drain boundary still closes the handle and preserves the action failure',async t=>{
+ const output=await outputDirectory(t),cdp=protocol(),failure=new Error('Original action failure');
+ const observed=await traceDesktopSelection(cdp,async()=>{throw failure;},{output,...controlledTimers(),beforeDrain:()=>{throw new Error('Boundary failed');}}).then(()=>null,error=>error);
+ assert.equal(observed,failure);assert.equal(cdp.calls.at(-1).method,'IO.close');assert.equal(cdp.observers.size,0);
+});
+
 test('the stream drain deadline stops further reads but still closes the protocol handle',async t=>{
  const output=await outputDirectory(t),timers=controlledTimers();let now=0;
  const cdp=protocol({onRead:()=>{now=DESKTOP_TRACE_LIMITS.drainMs+1;}});

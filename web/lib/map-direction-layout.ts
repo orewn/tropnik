@@ -268,6 +268,7 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
 export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
   const root=viewport.closest('.explore-layout')??viewport.parentElement??viewport;
   const selector=MAP_LABEL_OBSTACLE_SELECTORS.join(',');
+  const innerObstacleSelector=MAP_LABEL_OBSTACLE_SELECTORS.filter(value=>value!=='.explore-panel').join(',');
   let frame=0,disposed=false;
   const queue=()=>{
     if(disposed||frame)return;
@@ -280,10 +281,23 @@ export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
     for(const element of current)if(!observed.has(element)){observed.add(element);resize.observe(element);}
   };
   observe();
+  const containsObstacle=(node:Node)=>node instanceof Element&&(observed.has(node)||node.matches(selector)||!!node.querySelector(selector));
   const mutation=new MutationObserver(records=>{
     if(disposed)return;
     const relevant=records.some(record=>{
-      const target=record.target;return !(target instanceof Element)||!target.closest('.atlas-canvas');
+      const target=record.target;
+      if(!(target instanceof Element))return true;
+      if(target.closest('.atlas-canvas'))return false;
+      // The fixed-size drawer, rather than each route row, is the obstacle.
+      // Search replaces cards and their classes on every keystroke, but none
+      // of that changes the drawer's outer rectangle. Its ResizeObserver and
+      // own class/visibility/settled-transform signals still request reflow.
+      if(!target.closest('.explore-panel-content,.panel-foot'))return true;
+      // Preserve real overlays even if a future layout nests one in the list.
+      if(target.closest(innerObstacleSelector))return true;
+      if(record.type==='attributes')return !!target.querySelector(selector);
+      if(record.type==='childList')return [...record.addedNodes,...record.removedNodes].some(containsObstacle);
+      return false;
     });
     if(relevant){observe();queue();}
   });

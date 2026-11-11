@@ -82,16 +82,20 @@ export function prepareMapLibreSatellite(map:MapLibreMap,id:string,current:()=>b
   let disposed=false,settled=false,rendered=false;
   let resolveReady:()=>void,rejectReady:(error:unknown)=>void;
   const ready=new Promise<void>((resolve,reject)=>{resolveReady=resolve;rejectReady=reject;});
-  const cleanup=()=>{map.off('render',onRender);map.off('error',onError);clearTimeout(timeout);};
+  const cleanup=()=>{map.off('render',onRender);map.off('moveend',onMoveEnd);map.off('error',onError);clearTimeout(timeout);};
   const fail=(error:unknown)=>{if(settled)return;settled=true;cleanup();rejectReady(error);};
   const check=()=>{
     if(disposed||settled||!rendered)return;
     if(!current()||!map.getLayer(id)){fail(cancelled());return;}
-    if(map.isSourceLoaded(id)){settled=true;cleanup();resolveReady();}
+    // A flight or wheel gesture can momentarily finish the previous zoom's
+    // tile set before requesting the destination. Keep the old ground until
+    // a rendered, stationary viewport is complete, as the Leaflet adapter does.
+    if(!map.isMoving()&&map.isSourceLoaded(id)){settled=true;cleanup();resolveReady();}
   };
   const onRender=()=>{rendered=true;check();};
+  const onMoveEnd=()=>{if(!disposed&&!settled)map.triggerRepaint();};
   const onError=(event:{sourceId?:string;error?:unknown})=>{if(event.sourceId===id)fail(event.error??new Error('Satellite tile failed.'));};
-  map.on('render',onRender);map.on('error',onError);
+  map.on('render',onRender);map.on('moveend',onMoveEnd);map.on('error',onError);
   const timeout=setTimeout(()=>fail(new Error('Satellite imagery timed out.')),LOAD_TIMEOUT_MS);
   try{
     map.setPaintProperty(id,'raster-opacity-transition',{duration:0});

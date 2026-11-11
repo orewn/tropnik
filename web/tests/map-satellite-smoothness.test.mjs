@@ -46,9 +46,11 @@ test('stalled current imagery times out, while removal and disposal cancel pendi
  t.mock.timers.tick(1000);assert.equal(commits.length,1);
 });
 
-test('pending tile memory is bounded and overflow is an explicit error',()=>{
+test('pending tile memory is bounded and overflow is an explicit asynchronous error',async()=>{
  const results=[],batch=new SatelliteTileBatch({current:()=>true,settled:()=>true,maxPending:2});
  batch.add('a',error=>results.push(error));batch.add('b',error=>results.push(error));batch.add('c',error=>results.push(error));
+ assert.equal(results.length,0,'createTile must return before an admission error can remove its SDK layer');
+ await turn();
  assert.equal(results.length,1);assert.match(results[0].message,/limit/);batch.dispose();
 });
 

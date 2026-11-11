@@ -84,7 +84,7 @@ test('mobile touch profiles avoid the heavy WebGL startup path',()=>{
   const browser=read('../tools/pages-preview/browser-smoke.mjs');
   assert.match(preload,/export function preferCanvasMap/);
   assert.match(preload,/window\.innerWidth<=900/);
-  assert.match(preload,/supportsMapWebGL\(\)&&!preferCanvasMap\(\)/);
+  assert.match(preload,/!preferCanvasMap\(\)&&supportsMapWebGL\(\)/);
   assert.match(atlas,/preferCanvasMap\(\)\|\|!supportsMapWebGL\(\)/);
   assert.match(browser,/assert\.equal\(geometry\.engine,profile\.engine/);
   assert.equal((browser.match(/mobile:true,engine:'leaflet'/g)||[]).length,4);

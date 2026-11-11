@@ -62,7 +62,10 @@ export function preferCanvasMap() {
 }
 export function warmMap() {
   if (typeof window === 'undefined') return;
-  const webgl=supportsMapWebGL()&&!preferCanvasMap();
+  // Choose the touch renderer before probing a GPU context. Creating even a
+  // temporary WebGL context can initialize the driver on a phone that will
+  // use Leaflet for this visit and never need the WebGL renderer.
+  const webgl=!preferCanvasMap()&&supportsMapWebGL();
   void loadMapCoverage().then(coverage=>coverage.dispose()).catch(()=>undefined);
   void preloadPublic('/maps/tropa-style.json');
   if(!webgl)return Promise.resolve();

@@ -43,7 +43,7 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
           TROPNIK_BROWSER_DIAGNOSTIC: ${{ matrix.diagnostic }}
-          TROPNIK_BROWSER_TRACE: ${{ matrix.diagnostic == 'map-interactions' && '1' || '' }}
+          TROPNIK_BROWSER_TRACE: ${{ (matrix.diagnostic == 'map-interactions' || matrix.diagnostic == 'ui-smoothness') && '1' || '' }}
         run: node tools/pages-preview/browser-smoke.mjs
       - name: Preserve diagnostics without a release artifact
         if: always()

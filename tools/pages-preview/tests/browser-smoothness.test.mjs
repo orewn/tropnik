@@ -1,10 +1,99 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {installSmoothnessRecorder,sessionLayoutShift,summarizeSmoothness,smoothnessIssues,assertSmoothnessAudit,performanceBudgetIssues,runSmoothnessAudit,SMOOTHNESS_LIMITS} from '../browser-smoothness.mjs';
+import {runInNewContext} from 'node:vm';
+import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {installSmoothnessRecorder,sessionLayoutShift,summarizeSmoothness,smoothnessIssues,assertSmoothnessAudit,performanceBudgetIssues,observeSmoothnessPan,runSmoothnessAudit,measureSmoothnessWindow,smoothnessTraceEnabled,SMOOTHNESS_LIMITS,SMOOTHNESS_TRACE_SCENARIOS} from '../browser-smoothness.mjs';
+import {DESKTOP_TRACE_LIMITS,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from '../browser-trace.mjs';
 import {smoothnessFixture,smoothnessWindowFixture} from './smoothness-fixture.mjs';
 
 const mobile={name:'android-portrait',engine:'leaflet',mobile:true};
 const summarize=mutate=>{const raw=structuredClone(smoothnessWindowFixture().raw);mutate(raw);return summarizeSmoothness(raw);};
+
+test('smoothness tracing needs the explicit normal-speed focused diagnostic opt-in',()=>{
+ for(const diagnostic of [null,'ui-smoothness','ui-smoothness-cpu','map-interactions'])for(const traceValue of [undefined,'','1'])for(const cpuSlowdownRate of [1,4]){
+  assert.equal(smoothnessTraceEnabled({diagnostic,traceValue,cpuSlowdownRate}),diagnostic==='ui-smoothness'&&traceValue==='1'&&cpuSlowdownRate===1);
+ }
+ assert.equal(smoothnessTraceEnabled(),false);
+});
+
+test('focused traces wrap each measured action once and drain outside its window, including a capture cap',async t=>{
+ const directory=await mkdtemp(join(tmpdir(),'tropnik-smoothness-trace-')),output=pathToFileURL(directory+'/');t.after(()=>rm(directory,{recursive:true,force:true}));
+ for(const mode of ['complete','cap','action-error','stop-error']){
+  const name=mode==='cap'?'explore-search':'panel',report={profile:mobile.name,scenarios:[],traces:[]},order=[],timers=new Map(),failure=new Error(mode);let active=false,actions=0,completion,now=0,nextTimer=0;
+  const cdp={
+   observe(event,listener){assert.equal(event,'Tracing.tracingComplete');completion=listener;return()=>{completion=null;};},
+   async call(method){
+    order.push(method);if(method==='Tracing.start'||method.startsWith('IO.'))assert.equal(active,false,`${method} must run outside the measurement window`);
+    if(method==='Tracing.end')completion({stream:'smoothness-trace',dataLossOccurred:false});
+    if(method==='IO.read')return{data:JSON.stringify({traceEvents:[{name:'RunTask',cat:'cc,viz'}]}),eof:true};
+    return{};
+   },
+  };
+  const evaluate=async(cdp,expression)=>{
+   if(expression.includes('.start(')){assert.equal(active,false);active=true;order.push('window-start');return 100;}
+   if(expression.includes('.stop(')){order.push('window-stop');active=false;if(mode==='stop-error')throw failure;return smoothnessWindowFixture(name).raw;}
+   assert.ok(expression.includes('requestAnimationFrame'));order.push('final-frames');
+  };
+  const traceOptions={output,clock:()=>now,schedule:(callback,ms)=>{const id=++nextTimer;timers.set(id,{callback,ms});return id;},cancel:id=>timers.delete(id)};
+  const operation=measureSmoothnessWindow(cdp,name,async()=>{
+   actions++;order.push('native-action');assert.equal(active,true);
+   if(mode==='action-error')throw failure;
+   if(mode==='cap'){
+    now=DESKTOP_TRACE_LIMITS.durationMs;[...timers.values()].find(timer=>timer.ms===DESKTOP_TRACE_LIMITS.durationMs).callback();
+    await new Promise(resolve=>setImmediate(resolve));assert.ok(order.includes('Tracing.end'));assert.equal(order.some(value=>value.startsWith('IO.')),false);
+    now+=DESKTOP_TRACE_LIMITS.drainMs+100;
+   }
+  },{evaluate,report,tracing:true,sourceCommit:'a'.repeat(40),traceOptions});
+  if(mode.endsWith('error'))await assert.rejects(operation,error=>error===failure);else await operation;
+  assert.equal(actions,1);assert.equal(active,false);assert.equal(completion,null);assert.equal(timers.size,0);
+  assert.ok(order.indexOf('Tracing.start')<order.indexOf('window-start'));assert.ok(order.indexOf('IO.read')>order.indexOf('window-stop'));
+  assert.equal(report.scenarios.length,mode==='stop-error'?0:1);
+  if(report.scenarios.length)assert.deepEqual(report.scenarios[0],smoothnessWindowFixture(name));
+  const receipt=report.traces[0];assert.equal(receipt.instrumented,true);assert.equal(receipt.sourceCommit,'a'.repeat(40));assert.equal(receipt.scenario,name);
+  assert.equal(receipt.scope,`ui-smoothness/${mobile.name}/${name}`);assert.equal(receipt.status,mode==='cap'?'partial':'complete');assert.deepEqual(receipt.errors,[]);
+  assert.deepEqual(receipt.categories,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES);assert.deepEqual(receipt.limits,DESKTOP_TRACE_LIMITS);
+  const persisted=JSON.parse(await readFile(new URL(`${mobile.name}-ui-smoothness-${name}.trace-meta.json`,output),'utf8'));assert.deepEqual({...persisted,scenario:name},receipt);
+ }
+});
+
+test('other scenarios and disabled tracing keep the native measurement path without trace protocol',async()=>{
+ for(const [name,tracing]of [['panel',false],['explore-search',false],['map-pan',true]]){
+  const report={profile:mobile.name,scenarios:[],traces:[]};let actions=0;
+  await measureSmoothnessWindow({call:()=>assert.fail('No tracing for this window'),observe:()=>assert.fail('No trace observer')},name,async()=>{actions++;},{report,tracing,evaluate:async(cdp,expression)=>expression.includes('.stop(')?smoothnessWindowFixture(name).raw:undefined});
+  assert.equal(actions,1);assert.deepEqual(report.traces,[]);assert.deepEqual(report.scenarios,[smoothnessWindowFixture(name)]);
+ }
+});
+
+test('persisted instrumented metrics remain diagnostic and cannot certify release smoothness',()=>{
+ const report=smoothnessFixture(mobile.name,mobile.engine);report.instrumented=true;
+ report.traces=SMOOTHNESS_TRACE_SCENARIOS.map(scenario=>({scenario,instrumented:true,scope:`ui-smoothness/${mobile.name}/${scenario}`,status:'complete'}));
+ assert.equal(assertSmoothnessAudit(report,mobile,{release:false}),report);
+ assert.throws(()=>assertSmoothnessAudit(report,mobile),/Instrumented UI diagnostics/);
+ for(const mutate of [r=>r.instrumented=false,r=>delete r.instrumented,r=>r.traces.pop(),r=>r.traces[0].instrumented=false,r=>r.cpuSlowdownRate=4]){
+  const bad=structuredClone(report);mutate(bad);assert.throws(()=>assertSmoothnessAudit(bad,mobile,{release:false}));
+ }
+});
+
+test('smoothness pan requires observed native pointer delivery, not only successful CDP commands',async t=>{
+ let now=1000;t.mock.method(performance,'now',()=>now);
+ const start={x:100,y:150},delta={dx:64,dy:12};
+ for(const mobile of [true,false])for(const fault of [null,'missing','untrusted','wrong-position']){
+  const profile={name:mobile?'android-portrait':'desktop-webgl',mobile},events=[{type:'pointerdown',time:now-1}],pointerType=mobile?'touch':'mouse';let last=start;
+  const cdp={call:async(method,params)=>{
+   if(params.touchPoints?.length)last=params.touchPoints[0];else if(Number.isFinite(params.x))last=params;
+   const type=['touchStart','mousePressed'].includes(params.type)?'pointerdown':['touchEnd','mouseReleased'].includes(params.type)?'pointerup':null;
+   if(type&&fault!=='missing')events.push({type,time:now,timestamp:now,pointerType,pointerId:4,trusted:fault!=='untrusted',x:last.x+(fault==='wrong-position'?30:0),y:last.y});
+  }};
+  const evaluate=async(cdp,expression)=>JSON.parse(JSON.stringify(runInNewContext(expression,{performance:{now:()=>now},window:{__tropnikInputEvents:events}})));
+  const operation=()=>observeSmoothnessPan(cdp,start,delta,profile,{evaluate,sleep:async ms=>{now+=ms;}});
+  if(!fault){
+   const receipt=await operation();assert.deepEqual(receipt.events.map(event=>event.type),['pointerdown','pointerup']);assert.ok(receipt.events.every(event=>event.trusted));assert.equal(receipt.commands.length,mobile?14:15);
+  }else await assert.rejects(operation,error=>{assert.ok(error.panDiagnostics);assert.ok(error.panDiagnostics.commands.every(command=>command.status==='fulfilled'));return error.code==='ERR_ASSERTION';});
+ }
+});
 
 test('a failed CPU restore preserves the original browser failure and partial evidence',async()=>{
  const original=new Error('page crashed before mount');let calls=0;
@@ -63,6 +152,14 @@ test('all declared scenarios are required and CPU simulation cannot certify a no
   const bad=structuredClone(report);change(bad);assert.throws(()=>assertSmoothnessAudit(bad,mobile));
  }
  const throttled=structuredClone(report);throttled.cpuSlowdownRate=4;assert.equal(assertSmoothnessAudit(throttled,mobile,{release:false}),throttled);
+});
+test('persisted smoothness reports reject missing or forged native pan delivery',()=>{
+ for(const profile of [mobile,{name:'desktop-webgl',engine:'maplibre',mobile:false}]){
+  const report=smoothnessFixture(profile.name,profile.engine);assert.equal(assertSmoothnessAudit(report,profile),report);
+  for(const mutate of [r=>delete r.pan,r=>delete r.pan.events,r=>r.pan.events.pop(),r=>r.pan.events[0].trusted=false,r=>r.pan.events[1].pointerId++,r=>r.pan.events[1].x+=20,r=>r.pan.commands[4].status='rejected',r=>r.pan.durationMs=0]){
+   const saved=JSON.parse(JSON.stringify(report));mutate(saved);assert.throws(()=>assertSmoothnessAudit(saved,profile));
+  }
+ }
 });
 test('old modes and interaction budgets reject absent, non-finite and exact-limit measurements',()=>{
  for(const profile of [mobile,{name:'desktop-webgl',mobile:false}]){

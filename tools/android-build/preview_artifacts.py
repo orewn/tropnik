@@ -32,11 +32,48 @@ REPORT_NAMES = tuple(
     for suffix in (".alignment.txt", ".compression.json", ".verification.json")
 ) + ("unit-tests.json",)
 FILES = APK_NAMES + REPORT_NAMES
+# Include native code, Gradle configuration, generators and all shared runtime
+# data. Build/device/release report directories are outputs, not source inputs.
+SOURCE_INPUTS = (
+    "android/app", "android/gradle", "android/gradlew", "android/gradlew.bat",
+    "android/build.gradle.kts", "android/settings.gradle.kts", "android/gradle.properties",
+    "tools/android-build", "tools/map-package", "data/terrain-pilot/runtime",
+    "web/lib", "web/public/data", "web/public/maps", "web/public/offline-map",
+    "web/public/terrain", "web/package.json", "web/pnpm-lock.yaml",
+    ".github/workflows/android.yml",
+)
 
 
 def require(condition, message):
     if not condition:
         raise ValueError(message)
+
+
+def ci_build():
+    return os.environ.get("GITHUB_ACTIONS") == "true" or any(
+        os.environ.get(name) for name in ("GITHUB_SHA", "GITHUB_RUN_ID"))
+
+
+def source_checkout(root: Path, *, require_clean=False):
+    """Bind CI evidence to unchanged committed inputs, before and after build.
+
+    Ignored Gradle/dependency outputs do not enter the source tree. Nonignored
+    untracked code or runtime assets do: Gradle and the generators could consume
+    them even though git archive of HEAD would not contain those bytes.
+    """
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+    expected = os.environ.get("GITHUB_SHA", "")
+    require(not ci_build() or re.fullmatch(r"[a-f0-9]{40}", expected),
+            "CI source verification requires a valid GITHUB_SHA")
+    require(not expected or expected == commit, "Checkout commit differs from the workflow source")
+    if require_clean or ci_build():
+        changed = subprocess.check_output(
+            ["git", "diff", "--no-ext-diff", "--name-only", "-z", "HEAD", "--", *SOURCE_INPUTS], cwd=root)
+        untracked = subprocess.check_output(
+            ["git", "ls-files", "--others", "--exclude-standard", "-z", "--", *SOURCE_INPUTS], cwd=root)
+        require(not changed and not untracked,
+                "Android build inputs differ from the source commit; regenerate and commit them before CI")
+    return commit
 
 
 def read_json(path: Path):
@@ -131,9 +168,7 @@ def inspect_payload(directory: Path, root: Path):
 
 def build_receipt(directory: Path, root: Path):
     payload = inspect_payload(directory, root)
-    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-    require(not os.environ.get("GITHUB_SHA") or os.environ["GITHUB_SHA"] == commit,
-            "Checkout commit differs from the workflow source")
+    commit = source_checkout(root)
     receipt = {"schemaVersion": 1, "sourceCommit": commit,
                "workflowRunId": os.environ.get("GITHUB_RUN_ID"),
                "workflowRunAttempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
@@ -147,6 +182,9 @@ def verify_receipt(directory: Path, root: Path):
     receipt = read_json(directory / RECEIPT)
     require(receipt.get("schemaVersion") == 1, "Unknown build receipt schema")
     require(re.fullmatch(r"[a-f0-9]{40}", receipt.get("sourceCommit", "")), "Missing source commit")
+    if ci_build():
+        require(receipt["sourceCommit"] == source_checkout(root),
+                "Artifact does not belong to the unchanged source checkout")
     for key, value in inspect_payload(directory, root).items():
         require(receipt.get(key) == value, f"Build receipt mismatch: {key}")
     for environment, key in (("GITHUB_SHA", "sourceCommit"), ("GITHUB_RUN_ID", "workflowRunId")):
@@ -189,13 +227,18 @@ def capture_installed(directory: Path, root: Path, adb: Path, serial: str, outpu
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("create", "verify", "installed"))
-    parser.add_argument("--directory", type=Path, required=True)
+    parser.add_argument("command", choices=("source", "create", "verify", "installed"))
+    parser.add_argument("--directory", type=Path)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--sdk", type=Path)
     parser.add_argument("--serial", default="emulator-5554")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    if args.command == "source":
+        print(json.dumps({"sourceCommit": source_checkout(args.root, require_clean=True),
+                          "workflowRunId": os.environ.get("GITHUB_RUN_ID")}))
+        return
+    require(args.directory is not None, "Artifact command requires --directory")
     if args.command == "create":
         result = build_receipt(args.directory, args.root)
     elif args.command == "installed":

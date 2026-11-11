@@ -163,6 +163,16 @@ class ReleaseFixture(unittest.TestCase):
         with self.assertRaises(ValueError):
             artifacts.build_receipt(self.dist, self.root)
 
+    def test_dirty_source_without_a_version_change_cannot_create_or_reuse_a_ci_receipt(self):
+        receipt = (self.dist / artifacts.RECEIPT).read_bytes()
+        source = self.root / "android/app/build.gradle.kts"
+        source.write_text(source.read_text() + "// Uncommitted change after checkout\n")
+        with self.assertRaisesRegex(ValueError, "inputs differ"):
+            artifacts.build_receipt(self.dist, self.root)
+        self.assertEqual((self.dist / artifacts.RECEIPT).read_bytes(), receipt)
+        with self.assertRaisesRegex(ValueError, "inputs differ"):
+            artifacts.verify_receipt(self.dist, self.root)
+
     def test_missing_or_legacy_graphics_driver_cannot_be_device_verified(self):
         path = self.device / "graphics-driver.txt"
         for text in ("", "GLES: Google, Android Emulator OpenGL ES Translator (Google SwiftShader), OpenGL ES 3.0\n",
