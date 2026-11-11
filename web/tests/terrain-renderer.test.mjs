@@ -98,21 +98,43 @@ function environment(t,{gpuFailure=false,gl=null,cloneFails=false,width=80,heigh
   return {canvas,ctx,parent,frames,doc,listeners,flush(){const ready=[...frames.values()];frames.clear();ready.forEach(fn=>fn(0));}};
 }
 
-function recordingGL({anisotropy=0}={}){
-  const counts={framebuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[],shaderSources:[],stencilState:[]},enums=new Map(),generations=new WeakMap(),liveTextures=new Set();let next=1,gl,generation=0,error=0;
-  const create=type=>{const object={};generations.set(object,generation);if(type==='Texture')liveTextures.add(object);return object;};
+function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready'}={}){
+  const counts={framebuffers:0,renderbuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[],shaderSources:[],stencilState:[],draws:[],resolves:[],polls:[],maxPendingSyncs:0,deletedSyncs:0},enums=new Map(),generations=new WeakMap(),liveTextures=new Set(),liveSyncs=new Set();let next=1,gl,generation=0,error=0,drawFramebuffer=null,readFramebuffer=null,renderbuffer=null,program=null;
+  const create=type=>{const object={};generations.set(object,generation);if(type==='Texture')liveTextures.add(object);if(type==='Sync'){liveSyncs.add(object);counts.maxPendingSyncs=Math.max(counts.maxPendingSyncs,liveSyncs.size);}return object;};
   const remove=(type,object)=>{
     if(generations.get(object)!==generation){counts.invalidObjectCalls++;error=gl.INVALID_OPERATION;return;}
-    generations.delete(object);if(type==='Texture'){counts.deletedTextures++;liveTextures.delete(object);}
+    generations.delete(object);if(type==='Texture'){counts.deletedTextures++;liveTextures.delete(object);}if(type==='Sync'){liveSyncs.delete(object);counts.deletedSyncs++;}
   };
   const extension={MAX_TEXTURE_MAX_ANISOTROPY_EXT:0x84ff,TEXTURE_MAX_ANISOTROPY_EXT:0x84fe};
-  const methods={NO_ERROR:0,getParameter:key=>key===extension.MAX_TEXTURE_MAX_ANISOTROPY_EXT?anisotropy:16384,getError:()=>{const result=error;error=0;return result;},getExtension:name=>{if(name!=='EXT_texture_filter_anisotropic')return null;counts.anisotropyQueries++;return anisotropy?extension:null;},getShaderParameter:()=>true,getProgramParameter:()=>true,
+  const methods={NO_ERROR:0,getParameter:key=>{
+      if(key===extension.MAX_TEXTURE_MAX_ANISOTROPY_EXT)return anisotropy;
+      if(key===gl.SAMPLES)return samples;if(key===gl.DEPTH_BITS)return 24;if(key===gl.STENCIL_BITS)return 8;
+      if([gl.RED_BITS,gl.GREEN_BITS,gl.BLUE_BITS].includes(key))return 8;if(key===gl.ALPHA_BITS)return 0;return 16384;
+    },getError:()=>{const result=error;error=0;return result;},getExtension:name=>{if(name!=='EXT_texture_filter_anisotropic')return null;counts.anisotropyQueries++;return anisotropy?extension:null;},getShaderParameter:()=>true,getProgramParameter:()=>true,
+    getFramebufferAttachmentParameter:()=>deferred?gl.LINEAR:gl.SRGB,
+    getInternalformatParameter:()=>new Int32Array([samples]),
+    bindFramebuffer:(target,object)=>{if(target===gl.FRAMEBUFFER||target===gl.DRAW_FRAMEBUFFER)drawFramebuffer=object;if(target===gl.FRAMEBUFFER||target===gl.READ_FRAMEBUFFER)readFramebuffer=object;},
+    bindRenderbuffer:(_target,object)=>{renderbuffer=object;},
+    renderbufferStorageMultisample:(_target,count,format,width,height)=>Object.assign(renderbuffer,{samples:count,format,width,height}),
+    renderbufferStorage:(_target,format,width,height)=>Object.assign(renderbuffer,{samples:0,format,width,height}),
+    getRenderbufferParameter:(_target,parameter)=>{
+      if(parameter===gl.RENDERBUFFER_SAMPLES)return renderbuffer.samples;
+      if([gl.RENDERBUFFER_RED_SIZE,gl.RENDERBUFFER_GREEN_SIZE,gl.RENDERBUFFER_BLUE_SIZE].includes(parameter))return renderbuffer.format===gl.RGB8?8:0;
+      if(parameter===gl.RENDERBUFFER_DEPTH_SIZE)return renderbuffer.format===gl.RGB8?0:24;
+      if(parameter===gl.RENDERBUFFER_STENCIL_SIZE)return renderbuffer.format===gl.DEPTH24_STENCIL8?8:0;return 0;
+    },
+    useProgram:value=>{program=value;},
+    drawArrays:(...args)=>counts.draws.push({kind:'arrays',framebuffer:drawFramebuffer,program,args}),
+    drawElements:(...args)=>counts.draws.push({kind:'elements',framebuffer:drawFramebuffer,program,args}),
+    blitFramebuffer:(...args)=>counts.resolves.push({read:readFramebuffer,draw:drawFramebuffer,args}),
+    fenceSync:(condition,flags)=>{assert.equal(condition,gl.SYNC_GPU_COMMANDS_COMPLETE);assert.equal(flags,0);return create('Sync');},
+    clientWaitSync:(sync,flags,timeout)=>{assert.ok(liveSyncs.has(sync));counts.polls.push({flags,timeout});return frameStatus==='pending'?gl.TIMEOUT_EXPIRED:frameStatus==='failed'?gl.WAIT_FAILED:gl.ALREADY_SIGNALED;},
     texParameterf:(_target,key,value)=>{if(key===extension.TEXTURE_MAX_ANISOTROPY_EXT)counts.anisotropyValues.push(value);},
     shaderSource:(_shader,source)=>counts.shaderSources.push(source),
     stencilMask:value=>counts.stencilState.push(['mask',value]),stencilFunc:(...values)=>counts.stencilState.push(['function',...values]),stencilOp:(...values)=>counts.stencilState.push(['operation',...values]),
     checkFramebufferStatus:()=>gl.FRAMEBUFFER_COMPLETE,getUniformLocation:(_program,name)=>name,
     uniform1i:(name,value)=>{if(name==='uSteps')counts.shadowBudgets.push(value);},
-    createFramebuffer:()=>{counts.framebuffers++;return create('Framebuffer');},createBuffer:()=>{counts.buffers++;return create('Buffer');},
+    createFramebuffer:()=>{counts.framebuffers++;return create('Framebuffer');},createRenderbuffer:()=>{counts.renderbuffers++;return create('Renderbuffer');},createBuffer:()=>{counts.buffers++;return create('Buffer');},
     createTexture:()=>{counts.textures++;return create('Texture');},deleteTexture:object=>remove('Texture',object),
     texImage2D:(_target,_level,_internal,width,height,_border,_format,_type,data)=>counts.uploads.push({width,height,pixels:data?.slice(0,16)}),
   };
@@ -122,7 +144,7 @@ function recordingGL({anisotropy=0}={}){
     if(String(key).startsWith('create'))return()=>create(String(key).slice(6));
     if(String(key).startsWith('delete'))return object=>remove(String(key).slice(6),object);return()=>{};
   }});
-  return{gl,counts,loseContext(){generation++;counts.contextReleasedTextures+=liveTextures.size;liveTextures.clear();}};
+  return{gl,counts,setFrameStatus(value){frameStatus=value;},pendingSyncs:()=>liveSyncs.size,loseContext(){generation++;counts.contextReleasedTextures+=liveTextures.size;liveTextures.clear();liveSyncs.clear();drawFramebuffer=null;readFramebuffer=null;renderbuffer=null;program=null;}};
 }
 
 test('LOD hysteresis avoids toggling near a zoom threshold while retaining hard limits',()=>{
@@ -147,6 +169,103 @@ test('pointerdown/up and wheel state cannot recreate buffers, switch LOD or allo
   assert.deepEqual(record.counts.shadowBudgets,[48]);
   renderer.rotate(.00001);env.flush();assert.equal(record.counts.framebuffers,before.framebuffers);assert.deepEqual(record.counts.shadowBudgets,[48,48],'even a small rotation updates light without angle quantization');
   renderer.destroy();
+});
+
+test('clamped zoom no-ops neither redraw nor erase an already pending frame',t=>{
+  const record=recordingGL(),env=environment(t,{gl:record.gl});let rendered=0;
+  const renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:()=>rendered++});
+  const initial=renderer.frame;renderer.zoomBy(1);
+  assert.equal(renderer.frame,initial);assert.equal(renderer.dirty,true);assert.equal(env.frames.size,1);
+  env.flush();assert.equal(rendered,1);assert.equal(env.frames.size,0);
+  renderer.zoomBy(100);assert.equal(renderer.zoom,5);assert.equal(env.frames.size,1);
+  const firstClamp=renderer.frame;renderer.zoomBy(1.2);
+  assert.equal(renderer.frame,firstClamp);assert.equal(renderer.dirty,true);env.flush();assert.equal(rendered,2);
+  for(let i=0;i<12;i++)renderer.zoomBy(1.2);
+  assert.equal(env.frames.size,0);assert.equal(renderer.dirty,false);env.flush();assert.equal(rendered,2);
+  renderer.request();const pending=renderer.frame;renderer.zoomBy(1.2);
+  assert.equal(renderer.frame,pending);assert.equal(renderer.dirty,true);assert.equal(env.frames.size,1);env.flush();assert.equal(rendered,3);
+  renderer.zoomBy(.8);assert.equal(renderer.zoom,4);assert.equal(env.frames.size,1);env.flush();assert.equal(rendered,4);
+  renderer.zoomBy(.001);assert.equal(renderer.zoom,.65);assert.equal(env.frames.size,1);env.flush();assert.equal(rendered,5);
+  for(let i=0;i<12;i++)renderer.zoomBy(.8);
+  assert.equal(env.frames.size,0);assert.equal(renderer.dirty,false);env.flush();assert.equal(rendered,5);
+  renderer.zoomBy(2);assert.equal(renderer.zoom,1.3);assert.equal(env.frames.size,1);env.flush();assert.equal(rendered,6);
+  renderer.destroy();
+});
+
+test('deferred terrain preserves MSAA and keeps the default canvas untouched until a zero-wait fence signals',t=>{
+  const oldDpr=globalThis.devicePixelRatio;globalThis.devicePixelRatio=2;t.after(()=>{if(oldDpr===undefined)delete globalThis.devicePixelRatio;else globalThis.devicePixelRatio=oldDpr;});
+  const record=recordingGL({frameStatus:'pending'}),env=environment(t,{gl:record.gl}),source=grid(3,3),frames=[];
+  const renderer=new TerrainRenderer(env.canvas,source,{displayMask:displayMask(source,[255,0,0,255]),onRender:info=>frames.push(info)});
+  env.flush();assert.equal(frames.length,0);assert.equal(record.pendingSyncs(),1);assert.equal(env.canvas.width,0);assert.equal(env.canvas.height,0);
+  assert.ok(record.counts.draws.every(draw=>draw.framebuffer!==null),'expensive terrain and shadow work cannot dirty the default canvas');
+  assert.deepEqual(renderer.gpu.frameFormat,{samples:4,depth:24,stencil:8,depthFormat:record.gl.DEPTH24_STENCIL8});
+  const draws=record.counts.draws.length,targets=record.counts.framebuffers;
+  for(let i=0;i<3;i++)env.flush();
+  assert.equal(record.counts.draws.length,draws);assert.equal(record.counts.framebuffers,targets);assert.equal(record.pendingSyncs(),1);assert.equal(frames.length,0);
+  assert.equal(record.counts.resolves.length,1);const resolve=record.counts.resolves[0];assert.ok(resolve.read&&resolve.draw);assert.notEqual(resolve.read,resolve.draw);
+  assert.deepEqual(resolve.args,[0,0,160,120,0,0,160,120,record.gl.COLOR_BUFFER_BIT,record.gl.NEAREST]);
+  assert.ok(record.counts.polls.every(poll=>poll.flags===0&&poll.timeout===0),'the main thread must never wait for GPU completion');
+  record.setFrameStatus('ready');env.flush();
+  assert.equal(frames.length,1);assert.equal(frames[0].renderer,'webgl2');assert.equal(frames[0].pixelRatio,2);assert.equal(frames[0].meshStride,1);
+  assert.deepEqual([env.canvas.width,env.canvas.height],[160,120]);assert.equal(env.canvas.dataset.terrainPresentation,'deferred-msaa');assert.equal(env.canvas.dataset.terrainPending,'false');
+  const visible=record.counts.draws.filter(draw=>draw.framebuffer===null);assert.equal(visible.length,1);assert.equal(visible[0].program,renderer.gpu.present.program);
+  assert.equal(record.pendingSyncs(),0);assert.equal(record.counts.maxPendingSyncs,1);assert.equal(env.frames.size,0);renderer.destroy();
+});
+
+test('pending frames coalesce camera, cartography, route and resize without publishing or clearing an obsolete view',t=>{
+  const record=recordingGL(),env=environment(t,{gl:record.gl}),source=grid(3,3),frames=[];
+  let width=80,height=60;env.canvas.getBoundingClientRect=()=>({width,height,left:0,top:0,right:width,bottom:height});
+  const renderer=new TerrainRenderer(env.canvas,source,{onRender:info=>frames.push(info)});env.flush();assert.equal(frames.length,1);
+  record.setFrameStatus('pending');renderer.zoomBy(2);env.flush();const uploads=record.counts.uploads.length,draws=record.counts.draws.length;
+  renderer.zoomBy(1.5);renderer.setCartography(cartography(source));renderer.setGeometry({type:'LineString',coordinates:[[40.001,43.01],[40.019,43.01]]});
+  width=110;height=75;renderer.setViewportInsets({top:3,bottom:4});
+  for(let i=0;i<3;i++)env.flush();
+  assert.equal(record.counts.uploads.length,uploads,'texture replacement must wait behind the completed frame boundary');assert.equal(record.counts.draws.length,draws);
+  assert.deepEqual([env.canvas.width,env.canvas.height],[80,60]);assert.equal(frames.length,1);assert.equal(record.pendingSyncs(),1);
+  record.setFrameStatus('ready');env.flush();
+  assert.equal(frames.length,1,'a completed but obsolete view is not labelled as the new camera');assert.deepEqual([env.canvas.width,env.canvas.height],[80,60]);assert.equal(record.pendingSyncs(),0);
+  record.setFrameStatus('pending');env.flush();
+  assert.equal(record.pendingSyncs(),1);assert.equal(record.counts.maxPendingSyncs,1);assert.equal(frames.length,1);assert.deepEqual([env.canvas.width,env.canvas.height],[80,60]);
+  assert.deepEqual(renderer.gpu.cartographySize,[2,2]);assert.ok(record.counts.uploads.length>uploads);
+  record.setFrameStatus('ready');env.flush();
+  assert.equal(frames.length,2);assert.deepEqual(frames.map(frame=>frame.view.zoom),[1,3]);assert.equal(frames[1].cartography.loadedTiles,1);
+  assert.deepEqual([env.canvas.width,env.canvas.height],[110,75]);assert.ok(Number(env.canvas.dataset.routeRenderSegments)>0);assert.equal(env.frames.size,0);
+  renderer.destroy();assert.equal(record.counts.deletedTextures,record.counts.textures);
+});
+
+test('pending GPU work pauses while hidden and releases its fence on destruction',t=>{
+  const record=recordingGL({frameStatus:'pending'}),env=environment(t,{gl:record.gl});let rendered=0;
+  const renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:()=>rendered++});env.flush();assert.equal(record.pendingSyncs(),1);
+  renderer.setVisible(false);assert.equal(env.frames.size,0);const polls=record.counts.polls.length;env.flush();assert.equal(record.counts.polls.length,polls);
+  renderer.warmup();env.flush();assert.equal(record.pendingSyncs(),1);assert.equal(rendered,0);
+  renderer.destroy();assert.equal(record.pendingSyncs(),0);assert.equal(env.frames.size,0);env.flush();assert.equal(rendered,0);
+  assert.equal(record.counts.deletedTextures,record.counts.textures);assert.equal(record.counts.invalidObjectCalls,0);
+});
+
+test('a lost pending generation is abandoned and recovery presents only a newly completed frame',t=>{
+  const record=recordingGL({frameStatus:'pending'}),env=environment(t,{gl:record.gl}),frames=[];
+  const renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:info=>frames.push(info)});env.flush();const old=renderer.pendingGPU;
+  record.loseContext();env.canvas.events.get('webglcontextlost')({preventDefault(){}});
+  assert.equal(renderer.pendingGPU,null);assert.equal(env.frames.size,0);assert.equal(frames.length,0);
+  env.canvas.events.get('webglcontextrestored')();env.flush();assert.ok(renderer.pendingGPU);assert.notEqual(renderer.pendingGPU.gpu,old.gpu);assert.equal(frames.length,0);
+  record.setFrameStatus('ready');env.flush();assert.equal(frames.length,1);assert.equal(frames[0].renderer,'webgl2');assert.equal(frames[0].graphicsFallback,null);
+  assert.equal(record.pendingSyncs(),0);assert.equal(record.counts.invalidObjectCalls,0);renderer.destroy();
+  assert.equal(record.counts.deletedTextures+record.counts.contextReleasedTextures,record.counts.textures);
+});
+
+test('unsupported default colour encoding retains the original direct WebGL rendering path',t=>{
+  const record=recordingGL({deferred:false}),env=environment(t,{gl:record.gl});let info;
+  const renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:value=>{info=value;}});env.flush();
+  assert.equal(renderer.gpu.frameFormat,null);assert.equal(env.canvas.dataset.terrainPresentation,'direct');assert.equal(info.renderer,'webgl2');assert.equal(info.graphicsFallback,null);
+  assert.equal(record.counts.polls.length,0);assert.equal(record.counts.resolves.length,0);assert.ok(record.counts.draws.some(draw=>draw.kind==='elements'&&draw.framebuffer===null));renderer.destroy();
+});
+
+test('a failed completion query cannot publish a pending frame as ready WebGL',t=>{
+  const record=recordingGL({frameStatus:'pending'}),env=environment(t,{gl:record.gl}),frames=[];
+  const renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:info=>frames.push(info)});env.flush();record.setFrameStatus('failed');env.flush();
+  assert.equal(frames.length,0);assert.equal(renderer.pendingGPU,null);assert.equal(record.pendingSyncs(),0);
+  env.flush();assert.equal(frames.length,1);assert.equal(frames[0].renderer,'canvas2d');assert.equal(frames[0].graphicsFallback.stage,'presentation');
+  renderer.destroy();assert.equal(record.counts.invalidObjectCalls,0);
 });
 
 test('renderer retains validated prepared buffers instead of recomputing the model',t=>{
@@ -197,7 +316,7 @@ test('only a validated fully allowed mask removes the terrain discard while pres
       mask.pixels.fill(0);mask.source.allowedPixels=0;
       record.loseContext();env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();
       assert.equal(renderer.gpu.displayMask,owned);assert.equal(owned.source.allowedPixels,4);
-      assert.equal(record.counts.shaderSources[11],specialized,'restoration selects from the owned validated mask');
+      assert.equal(record.counts.shaderSources.filter(source=>source.includes('vec3 perturbNormal(')).at(-1),specialized,'restoration selects from the owned validated mask');
     }
     renderer.destroy();
   }

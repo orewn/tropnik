@@ -1,14 +1,14 @@
-name: Terrain fully allowed mask causal diagnosis
+name: Terrain deferred presentation causal diagnosis
 
 on:
   push:
-    branches: [diagnostics/terrain-mask-specialization]
+    branches: [diagnostics/terrain-deferred-presentation]
 
 permissions:
   contents: read
 
 concurrency:
-  group: terrain-mask-specialization-diagnostics
+  group: terrain-deferred-presentation-diagnostics
   cancel-in-progress: false
 
 jobs:
@@ -93,22 +93,22 @@ jobs:
           }
           const sourceFiles=['web/public/terrain/terrain-renderer.js','web/public/custom-map/manifest.json','web/public/terrain/landscape.html','web/public/sw.js'];
           const sceneTasks=report.modePerformanceDiagnostics.recentLongTasks.filter(task=>task.phase==='zoom-design-scene');
-          const summary={schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,instrumented:false,baselineCommit:'fd9f4fbc949b13e10a49ccd208450b5456092413',sourceCommit:report.sourceCommit,sourceTree:execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim(),protectedInputs,sourceFiles:sourceFiles.map(path=>({path,sha256:createHash('sha256').update(readFileSync(path)).digest('hex')})),profile:report.profile,nativeSceneZoomInputs:report.modes.scene3d.zoomInputs,sceneFrames:Object.fromEntries(Object.entries(report.modes.scene3d.states).map(([name,state])=>[name,state.frame])),sceneTasks,sceneLongestObservedTaskMs:Math.max(0,...sceneTasks.map(task=>task.duration)),performance:report.performance,performanceIssues:report.performanceIssues,performancePassed:report.performancePassed,environment:report.environment};
-          writeFileSync('web/pages-preview/dist/terrain-mask-specialization-summary.json',JSON.stringify(summary,null,2)+'\n');
+          const summary={schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,instrumented:false,baselineCommit:'ecfc53eb427729839c1f356f6f5c708135d1c9b6',sourceCommit:report.sourceCommit,sourceTree:execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim(),protectedInputs,sourceFiles:sourceFiles.map(path=>({path,sha256:createHash('sha256').update(readFileSync(path)).digest('hex')})),profile:report.profile,nativeSceneZoomInputs:report.modes.scene3d.zoomInputs,sceneFrames:Object.fromEntries(Object.entries(report.modes.scene3d.states).map(([name,state])=>[name,state.frame])),completedViewExtremes:{close:report.modes.scene3d.states.close.frame.view.zoom===5,wide:report.modes.scene3d.states.wide.frame.view.zoom===.65,reset:report.modes.scene3d.states.reset.frame.view.zoom===1},sceneTasks,sceneLongestObservedTaskMs:Math.max(0,...sceneTasks.map(task=>task.duration)),performance:report.performance,performanceIssues:report.performanceIssues,performancePassed:report.performancePassed,environment:report.environment};
+          writeFileSync('web/pages-preview/dist/terrain-deferred-presentation-summary.json',JSON.stringify(summary,null,2)+'\n');
           console.log(JSON.stringify({diagnosticOnly:true,sourceCommit:report.sourceCommit,sceneLongestObservedTaskMs:summary.sceneLongestObservedTaskMs,performance:report.performance,performanceIssues:report.performanceIssues}));
           NODE
       - name: Preserve diagnostic evidence without publication
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: tropnik-terrain-mask-specialization-${{ github.run_id }}
+          name: tropnik-terrain-deferred-presentation-${{ github.run_id }}
           path: |
             web/pages-preview/design-qa
             web/pages-preview/dist/build-info.json
             web/pages-preview/dist/browser-zoom-modes-diagnostic.json
             web/pages-preview/dist/browser-network.json
             web/pages-preview/dist/browser-terrain-mask-verification.json
-            web/pages-preview/dist/terrain-mask-specialization-summary.json
+            web/pages-preview/dist/terrain-deferred-presentation-summary.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7

@@ -658,8 +658,8 @@ function K(e, t, n, r) {
 		1 / c
 	];
 }
-var q = "\nuniform highp sampler2D uHeight;\nuniform vec2 uGrid;\nuniform vec2 uExtent;\nfloat heightAt(vec2 uv) {\n vec2 p=clamp(uv,0.0,1.0)*(uGrid-1.0);\n ivec2 a=ivec2(floor(p)),b=min(a+ivec2(1),ivec2(uGrid)-1);\n vec2 f=fract(p);\n return mix(mix(texelFetch(uHeight,a,0).r,texelFetch(uHeight,ivec2(b.x,a.y),0).r,f.x),\n  mix(texelFetch(uHeight,ivec2(a.x,b.y),0).r,texelFetch(uHeight,b,0).r,f.x),f.y);\n}\n", J = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec2 aUV;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nout vec2 vUV;\nout vec3 vPosition;\n" + q + "\nvoid main(){\n vUV=aUV;vPosition=vec3((aUV.x-.5)*uExtent.x,(.5-aUV.y)*uExtent.y,heightAt(aUV));\n gl_Position=uMatrix*vec4(vPosition,1.0);gl_Position.xy+=uOffset*gl_Position.w;\n}\n";
-function Y(e, t, n, r = 0) {
+var q = "\nuniform highp sampler2D uHeight;\nuniform vec2 uGrid;\nuniform vec2 uExtent;\nfloat heightAt(vec2 uv) {\n vec2 p=clamp(uv,0.0,1.0)*(uGrid-1.0);\n ivec2 a=ivec2(floor(p)),b=min(a+ivec2(1),ivec2(uGrid)-1);\n vec2 f=fract(p);\n return mix(mix(texelFetch(uHeight,a,0).r,texelFetch(uHeight,ivec2(b.x,a.y),0).r,f.x),\n  mix(texelFetch(uHeight,ivec2(a.x,b.y),0).r,texelFetch(uHeight,b,0).r,f.x),f.y);\n}\n", ee = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec2 aUV;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nout vec2 vUV;\nout vec3 vPosition;\n" + q + "\nvoid main(){\n vUV=aUV;vPosition=vec3((aUV.x-.5)*uExtent.x,(.5-aUV.y)*uExtent.y,heightAt(aUV));\n gl_Position=uMatrix*vec4(vPosition,1.0);gl_Position.xy+=uOffset*gl_Position.w;\n}\n";
+function J(e, t, n, r = 0) {
 	let i = (e, t) => {
 		e = (e % n + n) % n, t = (t % n + n) % n;
 		let i = Math.imul(e + 1, 374761393) ^ Math.imul(t + 1, 668265263) ^ Math.imul(r + 1, 1274126177);
@@ -667,11 +667,11 @@ function Y(e, t, n, r = 0) {
 	}, a = Math.floor(e), o = Math.floor(t), s = e - a, c = t - o, l = s * s * s * (s * (s * 6 - 15) + 10), u = c * c * c * (c * (c * 6 - 15) + 10);
 	return d(d(i(a, o), i(a + 1, o), l), d(i(a, o + 1), i(a + 1, o + 1), l), u);
 }
-function X(e = 128) {
+function Y(e = 128) {
 	if (!Number.isInteger(e) || e < 32 || e > 256 || e & e - 1) throw TypeError("Surface texture must be a bounded power of two");
 	let t = new Uint8Array(e * e * 4);
 	for (let n = 0; n < e; n++) for (let r = 0; r < e; r++) {
-		let i = r / e, a = n / e, o = Y(i * 4, a * 4, 4, 3), s = Y(i * 16, a * 16, 16, 7), c = Y(i * 32, a * 32, 32, 19), l = Y(i * 64, a * 64, 64, 41), d = 1 - Math.abs(2 * s - 1), f = .5 + .5 * Math.sin((a + o * .12) * Math.PI * 16), p = [
+		let i = r / e, a = n / e, o = J(i * 4, a * 4, 4, 3), s = J(i * 16, a * 16, 16, 7), c = J(i * 32, a * 32, 32, 19), l = J(i * 64, a * 64, 64, 41), d = 1 - Math.abs(2 * s - 1), f = .5 + .5 * Math.sin((a + o * .12) * Math.PI * 16), p = [
 			.32 * s + .42 * c + .26 * l,
 			.54 * d + .46 * f,
 			o,
@@ -684,7 +684,7 @@ function X(e = 128) {
 		pixels: t
 	};
 }
-function Z(e) {
+function X(e) {
 	let t = [
 		[500, [
 			.16,
@@ -716,7 +716,7 @@ function Z(e) {
 	let i = f(n[0], r[0], e);
 	return n[1].map((e, t) => d(e, r[1][t], i));
 }
-var Q = "#version 300 es\nprecision highp float;\nin vec2 vUV;\nin vec3 vPosition;\nuniform sampler2D uNormal;\nuniform sampler2D uShadow;\nuniform sampler2D uSurface;\nuniform sampler2D uCartography;\nuniform sampler2D uDisplayMask;\nuniform vec2 uCartographySize;\nuniform vec2 uGrid;\nuniform vec3 uLight;\nuniform vec3 uEye;\nuniform float uBase;\nuniform float uScale;\nuniform float uShadowTexel;\nout vec4 outColor;\nvec3 palette(float h){\n vec3 a=vec3(.16,.29,.24),b=vec3(.30,.43,.31),c=vec3(.51,.55,.36),d=vec3(.64,.62,.52),e=vec3(.76,.75,.68);\n if(h<1400.0)return mix(a,b,smoothstep(500.0,1400.0,h));\n if(h<2100.0)return mix(b,c,smoothstep(1400.0,2100.0,h));\n if(h<2700.0)return mix(c,d,smoothstep(2100.0,2700.0,h));\n return mix(d,e,smoothstep(2700.0,3400.0,h));\n}\nvec4 surfaceAt(vec3 p,vec3 n){\n vec3 w=pow(abs(n),vec3(4.0));w/=max(dot(w,vec3(1)),.001);\n return texture(uSurface,p.yz)*w.x+texture(uSurface,p.xz)*w.y+texture(uSurface,p.xy)*w.z;\n}\nvec3 perturbNormal(vec3 p,vec3 n,float height){\n vec3 dp1=dFdx(p),dp2=dFdy(p),r1=cross(dp2,n),r2=cross(n,dp1);\n float determinant=dot(dp1,r1);\n if(abs(determinant)<1e-14)return n;\n vec3 gradient=dFdx(height)*r1+dFdy(height)*r2;\n return normalize(abs(determinant)*n-sign(determinant)*gradient);\n}\nvoid main(){\n if(texture(uDisplayMask,vUV).r<.5)discard;\n vec2 nUV=(vUV*(uGrid-1.0)+.5)/uGrid;\n vec4 tex=texture(uNormal,nUV);vec3 baseNormal=normalize(tex.rgb*2.0-1.0);\n float elevation=vPosition.z*uScale+uBase;\n vec3 metres=vPosition*uScale;\n vec4 macro=surfaceAt(metres/820.0,baseNormal),detail=surfaceAt(metres/96.0,baseNormal);\n float rock=smoothstep(.17,.52,1.0-baseNormal.z);\n rock=max(rock,smoothstep(2300.0,3050.0,elevation)*(.26+macro.b*.35));\n vec3 limestone=mix(vec3(.49,.51,.47),vec3(.72,.69,.61),macro.b*.64+detail.g*.36);\n vec3 albedo=mix(palette(elevation)*(.91+macro.b*.18),limestone,rock*.83);\n albedo*=.94+detail.r*.12;\n vec2 coverUV=(vUV*(uCartographySize-1.0)+.5)/uCartographySize;\n vec4 cover=texture(uCartography,coverUV);\n albedo=mix(albedo,cover.rgb/max(cover.a,.00001),cover.a);\n // Triplanar detail is filtered with mipmaps and never changes terrain positions.\n float bump=(detail.g*.7+detail.r*.3-.5)*mix(.12,.55,rock)*(1.0-cover.a*.85)/uScale;\n vec3 n=perturbNormal(vPosition,baseNormal,bump);\n float contourDistance=abs(fract(elevation/100.0+.5)-.5)*100.0;\n float contour=1.0-smoothstep(0.0,max(.7,fwidth(elevation)*.85),contourDistance);\n albedo*=1.0-contour*.035;\n float shadow=texture(uShadow,vUV).r*.5;\n shadow+=(texture(uShadow,vUV+vec2(uShadowTexel,0)).r+texture(uShadow,vUV-vec2(uShadowTexel,0)).r+\n  texture(uShadow,vUV+vec2(0,uShadowTexel)).r+texture(uShadow,vUV-vec2(0,uShadowTexel)).r)*.125;\n vec3 view=normalize(uEye-vPosition),halfVector=normalize(view+uLight);\n float NoL=max(dot(n,uLight),0.0),NoV=max(dot(n,view),.001),NoH=max(dot(n,halfVector),0.0),VoH=max(dot(view,halfVector),0.0);\n float roughness=mix(.94,.76,rock),alpha=roughness*roughness,a2=alpha*alpha;\n float denominator=NoH*NoH*(a2-1.0)+1.0;\n float distribution=a2/(3.14159265*denominator*denominator);\n float k=(roughness+1.0)*(roughness+1.0)/8.0;\n float visibility=NoV/(NoV*(1.0-k)+k)*NoL/(NoL*(1.0-k)+k);\n float fresnel=.035+.965*pow(1.0-VoH,5.0);\n float specular=distribution*visibility*fresnel/max(4.0*NoL*NoV,.001);\n vec3 linearAlbedo=pow(albedo,vec3(2.2));\n vec3 ambient=mix(vec3(.25,.29,.24),vec3(.35,.43,.46),clamp(n.z*.5+.5,0.0,1.0))*tex.a;\n vec3 lit=linearAlbedo*ambient+(linearAlbedo*.965+vec3(specular)) *vec3(1.15,1.06,.91)*NoL*shadow;\n vec3 color=pow(max(lit,vec3(0)),vec3(1.0/2.2));\n float haze=clamp((distance(uEye,vPosition)-.9)*.10,0.0,.22);\n float edge=min(min(vUV.x,1.0-vUV.x),min(vUV.y,1.0-vUV.y));\n haze=max(haze,(1.0-smoothstep(0.0,.003,edge))*.15);\n outColor=vec4(mix(color,vec3(.875,.902,.855),haze),1.0);\n}\n", ee = "#version 300 es\nprecision highp float;\nout vec2 vUV;\nvoid main(){\n vec2 p=vec2(gl_VertexID==1?3.0:-1.0,gl_VertexID==2?3.0:-1.0);\n vUV=p*.5+.5;gl_Position=vec4(p,0,1);\n}\n", te = "#version 300 es\nprecision highp float;\nprecision highp int;\nin vec2 vUV;\nuniform vec3 uLight;\nuniform int uSteps;\nuniform highp sampler2D uHeightMax;\nout vec4 outColor;\n" + q + `
+var Z = "#version 300 es\nprecision highp float;\nin vec2 vUV;\nin vec3 vPosition;\nuniform sampler2D uNormal;\nuniform sampler2D uShadow;\nuniform sampler2D uSurface;\nuniform sampler2D uCartography;\nuniform sampler2D uDisplayMask;\nuniform vec2 uCartographySize;\nuniform vec2 uGrid;\nuniform vec3 uLight;\nuniform vec3 uEye;\nuniform float uBase;\nuniform float uScale;\nuniform float uShadowTexel;\nout vec4 outColor;\nvec3 palette(float h){\n vec3 a=vec3(.16,.29,.24),b=vec3(.30,.43,.31),c=vec3(.51,.55,.36),d=vec3(.64,.62,.52),e=vec3(.76,.75,.68);\n if(h<1400.0)return mix(a,b,smoothstep(500.0,1400.0,h));\n if(h<2100.0)return mix(b,c,smoothstep(1400.0,2100.0,h));\n if(h<2700.0)return mix(c,d,smoothstep(2100.0,2700.0,h));\n return mix(d,e,smoothstep(2700.0,3400.0,h));\n}\nvec4 surfaceAt(vec3 p,vec3 n){\n vec3 w=pow(abs(n),vec3(4.0));w/=max(dot(w,vec3(1)),.001);\n return texture(uSurface,p.yz)*w.x+texture(uSurface,p.xz)*w.y+texture(uSurface,p.xy)*w.z;\n}\nvec3 perturbNormal(vec3 p,vec3 n,float height){\n vec3 dp1=dFdx(p),dp2=dFdy(p),r1=cross(dp2,n),r2=cross(n,dp1);\n float determinant=dot(dp1,r1);\n if(abs(determinant)<1e-14)return n;\n vec3 gradient=dFdx(height)*r1+dFdy(height)*r2;\n return normalize(abs(determinant)*n-sign(determinant)*gradient);\n}\nvoid main(){\n if(texture(uDisplayMask,vUV).r<.5)discard;\n vec2 nUV=(vUV*(uGrid-1.0)+.5)/uGrid;\n vec4 tex=texture(uNormal,nUV);vec3 baseNormal=normalize(tex.rgb*2.0-1.0);\n float elevation=vPosition.z*uScale+uBase;\n vec3 metres=vPosition*uScale;\n vec4 macro=surfaceAt(metres/820.0,baseNormal),detail=surfaceAt(metres/96.0,baseNormal);\n float rock=smoothstep(.17,.52,1.0-baseNormal.z);\n rock=max(rock,smoothstep(2300.0,3050.0,elevation)*(.26+macro.b*.35));\n vec3 limestone=mix(vec3(.49,.51,.47),vec3(.72,.69,.61),macro.b*.64+detail.g*.36);\n vec3 albedo=mix(palette(elevation)*(.91+macro.b*.18),limestone,rock*.83);\n albedo*=.94+detail.r*.12;\n vec2 coverUV=(vUV*(uCartographySize-1.0)+.5)/uCartographySize;\n vec4 cover=texture(uCartography,coverUV);\n albedo=mix(albedo,cover.rgb/max(cover.a,.00001),cover.a);\n // Triplanar detail is filtered with mipmaps and never changes terrain positions.\n float bump=(detail.g*.7+detail.r*.3-.5)*mix(.12,.55,rock)*(1.0-cover.a*.85)/uScale;\n vec3 n=perturbNormal(vPosition,baseNormal,bump);\n float contourDistance=abs(fract(elevation/100.0+.5)-.5)*100.0;\n float contour=1.0-smoothstep(0.0,max(.7,fwidth(elevation)*.85),contourDistance);\n albedo*=1.0-contour*.035;\n float shadow=texture(uShadow,vUV).r*.5;\n shadow+=(texture(uShadow,vUV+vec2(uShadowTexel,0)).r+texture(uShadow,vUV-vec2(uShadowTexel,0)).r+\n  texture(uShadow,vUV+vec2(0,uShadowTexel)).r+texture(uShadow,vUV-vec2(0,uShadowTexel)).r)*.125;\n vec3 view=normalize(uEye-vPosition),halfVector=normalize(view+uLight);\n float NoL=max(dot(n,uLight),0.0),NoV=max(dot(n,view),.001),NoH=max(dot(n,halfVector),0.0),VoH=max(dot(view,halfVector),0.0);\n float roughness=mix(.94,.76,rock),alpha=roughness*roughness,a2=alpha*alpha;\n float denominator=NoH*NoH*(a2-1.0)+1.0;\n float distribution=a2/(3.14159265*denominator*denominator);\n float k=(roughness+1.0)*(roughness+1.0)/8.0;\n float visibility=NoV/(NoV*(1.0-k)+k)*NoL/(NoL*(1.0-k)+k);\n float fresnel=.035+.965*pow(1.0-VoH,5.0);\n float specular=distribution*visibility*fresnel/max(4.0*NoL*NoV,.001);\n vec3 linearAlbedo=pow(albedo,vec3(2.2));\n vec3 ambient=mix(vec3(.25,.29,.24),vec3(.35,.43,.46),clamp(n.z*.5+.5,0.0,1.0))*tex.a;\n vec3 lit=linearAlbedo*ambient+(linearAlbedo*.965+vec3(specular)) *vec3(1.15,1.06,.91)*NoL*shadow;\n vec3 color=pow(max(lit,vec3(0)),vec3(1.0/2.2));\n float haze=clamp((distance(uEye,vPosition)-.9)*.10,0.0,.22);\n float edge=min(min(vUV.x,1.0-vUV.x),min(vUV.y,1.0-vUV.y));\n haze=max(haze,(1.0-smoothstep(0.0,.003,edge))*.15);\n outColor=vec4(mix(color,vec3(.875,.902,.855),haze),1.0);\n}\n", Q = "#version 300 es\nprecision highp float;\nout vec2 vUV;\nvoid main(){\n vec2 p=vec2(gl_VertexID==1?3.0:-1.0,gl_VertexID==2?3.0:-1.0);\n vUV=p*.5+.5;gl_Position=vec4(p,0,1);\n}\n", te = "#version 300 es\nprecision highp float;\nprecision highp int;\nin vec2 vUV;\nuniform vec3 uLight;\nuniform int uSteps;\nuniform highp sampler2D uHeightMax;\nout vec4 outColor;\n" + q + `
 float maximumHeight(vec2 a,vec2 b){
  ivec2 lo=clamp(ivec2(floor(min(a,b)*(uGrid-1.0))),ivec2(0),ivec2(uGrid)-2);
  ivec2 hi=clamp(ivec2(floor(max(a,b)*(uGrid-1.0))),ivec2(0),ivec2(uGrid)-2);
@@ -755,7 +755,21 @@ void main(){
 }
 `, ne = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec3 aStart;\nlayout(location=1) in vec3 aEnd;\nlayout(location=2) in vec2 aCorner;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nuniform vec2 uViewport;\nuniform float uHalfWidth;\nout vec2 vDistance;\nout vec2 vWorld;\nflat out float vLength;\nvoid main(){\n vec4 a=uMatrix*vec4(aStart,1),b=uMatrix*vec4(aEnd,1);\n if(a.w<=.012||b.w<=.012){gl_Position=vec4(2,2,2,1);vDistance=vec2(0);vLength=0.0;return;}\n vec2 delta=(b.xy/b.w-a.xy/a.w)*uViewport*.5;\n float len=max(length(delta),.001);vec2 direction=delta/len,normal=vec2(-direction.y,direction.x);\n vec4 point=mix(a,b,aCorner.x);\n point.xy+=(normal*aCorner.y*uHalfWidth+direction*(aCorner.x*2.0-1.0)*uHalfWidth)*2.0/uViewport*point.w;\n point.xy+=uOffset*point.w;gl_Position=point;\n vWorld=mix(aStart.xy,aEnd.xy,aCorner.x);\n vDistance=vec2(aCorner.x*len+(aCorner.x*2.0-1.0)*uHalfWidth,aCorner.y*uHalfWidth);vLength=len;\n}\n", re = "#version 300 es\nprecision highp float;\nin vec2 vDistance;\nin vec2 vWorld;\nflat in float vLength;\nuniform vec4 uColor;\nuniform float uHalfWidth;\nuniform sampler2D uDisplayMask;\nuniform vec2 uExtent;\nout vec4 outColor;\nvoid main(){\n vec2 uv=vec2(vWorld.x/uExtent.x+.5,.5-vWorld.y/uExtent.y);\n if(any(lessThan(uv,vec2(0)))||any(greaterThan(uv,vec2(1)))||texture(uDisplayMask,uv).r<.5)discard;\n float cap=max(max(-vDistance.x,vDistance.x-vLength),0.0),dist=length(vec2(cap,vDistance.y));\n float alpha=1.0-smoothstep(uHalfWidth-.8,uHalfWidth,dist);if(alpha<=0.0)discard;\n outColor=vec4(uColor.rgb,uColor.a*alpha);\n}\n", ie = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nout vec3 vPosition;\nout vec3 vNormal;\nvoid main(){vPosition=aPosition;vNormal=aNormal;gl_Position=uMatrix*vec4(aPosition,1);gl_Position.xy+=uOffset*gl_Position.w;}\n", ae = "#version 300 es\nprecision highp float;\nin vec3 vPosition;\nin vec3 vNormal;\nuniform vec3 uLight;\nuniform float uFloor;\nout vec4 outColor;\nvoid main(){\n float elevation=clamp((vPosition.z-uFloor)/.17,0.0,1.0);\n vec3 color=mix(vec3(.34,.38,.33),vec3(.49,.53,.46),elevation);\n float light=.40+.60*max(dot(normalize(vNormal),uLight),0.0);\n outColor=vec4(color*light,1);\n}\n", oe = "#version 300 es\nprecision highp float;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nuniform vec2 uExtent;\nuniform float uFloor;\nout vec2 vPoint;\nvoid main(){\n int id=gl_VertexID;\n vec2 uv=vec2(id==1||id==4||id==5?1.0:0.0,id==2||id==3||id==5?1.0:0.0);\n vPoint=(uv-.5)*(uExtent+vec2(.08));\n gl_Position=uMatrix*vec4(vPoint,uFloor-.001,1);gl_Position.xy+=uOffset*gl_Position.w;\n}\n", se = "#version 300 es\nprecision highp float;\nuniform vec2 uExtent;\nin vec2 vPoint;\nout vec4 outColor;\nvoid main(){\n float distanceToBase=length(max(abs(vPoint)-uExtent*.5,vec2(0)));\n float contact=1.0-smoothstep(0.0,.04,distanceToBase);\n outColor=vec4(.20,.27,.21,contact*contact*.18);\n}\n";
 function ce(e) {
-	return e && e.source.allowedPixels === e.width * e.height ? Q.replace(" if(texture(uDisplayMask,vUV).r<.5)discard;\n", "") : Q;
+	return e && e.source.allowedPixels === e.width * e.height ? Z.replace(" if(texture(uDisplayMask,vUV).r<.5)discard;\n", "") : Z;
+}
+var le = "#version 300 es\nprecision highp float;\nprecision highp int;\nuniform highp sampler2D uCompleted;\nout vec4 outColor;\nvoid main(){outColor=vec4(texelFetch(uCompleted,ivec2(gl_FragCoord.xy),0).rgb,1.0);}\n";
+function ue(e, t) {
+	let n = e.getParameter(e.SAMPLES), r = e.getParameter(e.DEPTH_BITS), i = e.getParameter(e.STENCIL_BITS);
+	if (!Number.isInteger(n) || n < 0 || e.getParameter(e.RED_BITS) !== 8 || e.getParameter(e.GREEN_BITS) !== 8 || e.getParameter(e.BLUE_BITS) !== 8 || e.getParameter(e.ALPHA_BITS) !== 0 || e.getFramebufferAttachmentParameter(e.FRAMEBUFFER, e.BACK, e.FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING) !== e.LINEAR) return null;
+	let a = t ? i === 8 && (r === 24 ? e.DEPTH24_STENCIL8 : r === 32 ? e.DEPTH32F_STENCIL8 : null) : r === 16 ? e.DEPTH_COMPONENT16 : r === 24 ? e.DEPTH_COMPONENT24 : r === 32 ? e.DEPTH_COMPONENT32F : null;
+	if (!a) return null;
+	for (let t of [e.RGB8, a]) if (n && !Array.from(e.getInternalformatParameter(e.RENDERBUFFER, t, e.SAMPLES) || []).includes(n)) return null;
+	return {
+		samples: n,
+		depth: r,
+		stencil: t ? i : 0,
+		depthFormat: a
+	};
 }
 var $ = class {
 	constructor(e, t, n = null) {
@@ -763,7 +777,7 @@ var $ = class {
 		try {
 			if (e.getParameter(e.MAX_TEXTURE_SIZE) < Math.max(t.grid.width, t.grid.height) || e.getParameter(e.MAX_VERTEX_TEXTURE_IMAGE_UNITS) < 1) throw Error("Terrain GPU limits");
 			if (n && (e.getParameter(e.MAX_TEXTURE_SIZE) < Math.max(n.width, n.height) || e.getParameter(e.STENCIL_BITS) < 1)) throw Error("Terrain display mask GPU limits");
-			this.anisotropy = e.getExtension("EXT_texture_filter_anisotropic"), this.maxAnisotropy = this.anisotropy ? Math.min(4, e.getParameter(this.anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)) : 1, this.terrain = this.program(J, ce(n)), this.shadow = this.program(ee, te), this.line = this.program(ne, re), this.boundary = this.program(ie, ae), this.ground = this.program(oe, se), this.heightTexture = this.texture(e.R32F, t.grid.width, t.grid.height, e.RED, e.FLOAT, t.heights, e.NEAREST), this.maskTexture = this.texture(e.R8, n?.width || 1, n?.height || 1, e.RED, e.UNSIGNED_BYTE, n?.pixels || new Uint8Array([255]), e.NEAREST), this.normalTexture = this.texture(e.RGBA8, t.grid.width, t.grid.height, e.RGBA, e.UNSIGNED_BYTE, t.normalTexture, e.LINEAR), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_MIN_FILTER, e.LINEAR_MIPMAP_LINEAR), e.generateMipmap(e.TEXTURE_2D);
+			this.anisotropy = e.getExtension("EXT_texture_filter_anisotropic"), this.maxAnisotropy = this.anisotropy ? Math.min(4, e.getParameter(this.anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)) : 1, this.terrain = this.program(ee, ce(n)), this.shadow = this.program(Q, te), this.line = this.program(ne, re), this.boundary = this.program(ie, ae), this.ground = this.program(oe, se), this.frameFormat = ue(e, n), this.frameTarget = null, this.present = this.frameFormat ? this.program(Q, le) : null, this.heightTexture = this.texture(e.R32F, t.grid.width, t.grid.height, e.RED, e.FLOAT, t.heights, e.NEAREST), this.maskTexture = this.texture(e.R8, n?.width || 1, n?.height || 1, e.RED, e.UNSIGNED_BYTE, n?.pixels || new Uint8Array([255]), e.NEAREST), this.normalTexture = this.texture(e.RGBA8, t.grid.width, t.grid.height, e.RGBA, e.UNSIGNED_BYTE, t.normalTexture, e.LINEAR), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_MIN_FILTER, e.LINEAR_MIPMAP_LINEAR), e.generateMipmap(e.TEXTURE_2D);
 			let r = D(t), i = r[0];
 			this.maxHeightTexture = this.texture(e.R32F, i.width, i.height, e.RED, e.FLOAT, i.data, e.NEAREST);
 			for (let t = 1; t < r.length; t++) {
@@ -771,7 +785,7 @@ var $ = class {
 				e.texImage2D(e.TEXTURE_2D, t, e.R32F, n.width, n.height, 0, e.RED, e.FLOAT, n.data);
 			}
 			if (e.texParameteri(e.TEXTURE_2D, e.TEXTURE_MAX_LEVEL, r.length - 1), e.getError() !== e.NO_ERROR) throw Error("Terrain texture allocation failed");
-			let a = X(128);
+			let a = Y(128);
 			this.surfaceTexture = this.texture(e.RGBA8, a.size, a.size, e.RGBA, e.UNSIGNED_BYTE, a.pixels, e.LINEAR), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_WRAP_S, e.REPEAT), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_WRAP_T, e.REPEAT), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_MIN_FILTER, e.LINEAR_MIPMAP_LINEAR), e.generateMipmap(e.TEXTURE_2D), this.setCartography(null), this.emptyVAO = this.track(e.createVertexArray(), "VertexArray"), this.routeVAO = this.track(e.createVertexArray(), "VertexArray"), this.routeBuffer = this.track(e.createBuffer(), "Buffer"), e.bindVertexArray(this.routeVAO), e.bindBuffer(e.ARRAY_BUFFER, this.routeBuffer);
 			for (let [t, n, r] of [
 				[
@@ -798,6 +812,71 @@ var $ = class {
 	track(e, t) {
 		if (!e) throw Error("Terrain GPU allocation failed");
 		return this.resources.push([e, t]), e;
+	}
+	release(e, t) {
+		e && (this.gl["delete" + t](e), this.resources = this.resources.filter(([t]) => t !== e));
+	}
+	targetFor(e, t) {
+		if (this.frameTarget?.width === e && this.frameTarget?.height === t) return this.frameTarget;
+		if (this.frameTarget) for (let [e, t] of this.frameTarget.resources) this.release(e, t);
+		this.frameTarget = null;
+		let n = this.gl, r = this.frameFormat, i = [], a = (e, t) => (i.push([e, t]), this.track(e, t)), o = {
+			width: e,
+			height: t,
+			resources: i,
+			framebuffer: a(n.createFramebuffer(), "Framebuffer"),
+			resolve: a(n.createFramebuffer(), "Framebuffer")
+		};
+		try {
+			n.bindFramebuffer(n.FRAMEBUFFER, o.framebuffer);
+			let s = a(n.createRenderbuffer(), "Renderbuffer"), c = a(n.createRenderbuffer(), "Renderbuffer");
+			for (let [i, a, o] of [[
+				s,
+				n.RGB8,
+				n.COLOR_ATTACHMENT0
+			], [
+				c,
+				r.depthFormat,
+				this.displayMask ? n.DEPTH_STENCIL_ATTACHMENT : n.DEPTH_ATTACHMENT
+			]]) {
+				if (n.bindRenderbuffer(n.RENDERBUFFER, i), r.samples ? n.renderbufferStorageMultisample(n.RENDERBUFFER, r.samples, a, e, t) : n.renderbufferStorage(n.RENDERBUFFER, a, e, t), n.getRenderbufferParameter(n.RENDERBUFFER, n.RENDERBUFFER_SAMPLES) !== r.samples) throw Error("Terrain framebuffer sample count changed");
+				let c = i === s ? [
+					[n.RENDERBUFFER_RED_SIZE, 8],
+					[n.RENDERBUFFER_GREEN_SIZE, 8],
+					[n.RENDERBUFFER_BLUE_SIZE, 8],
+					[n.RENDERBUFFER_ALPHA_SIZE, 0]
+				] : [[n.RENDERBUFFER_DEPTH_SIZE, r.depth], [n.RENDERBUFFER_STENCIL_SIZE, r.stencil]];
+				for (let [e, t] of c) if (n.getRenderbufferParameter(n.RENDERBUFFER, e) !== t) throw Error("Terrain framebuffer precision changed");
+				n.framebufferRenderbuffer(n.FRAMEBUFFER, o, n.RENDERBUFFER, i);
+			}
+			if (n.checkFramebufferStatus(n.FRAMEBUFFER) !== n.FRAMEBUFFER_COMPLETE) throw Error("Terrain multisample framebuffer unavailable");
+			if (o.texture = this.texture(n.RGB8, e, t, n.RGB, n.UNSIGNED_BYTE, null, n.NEAREST), i.push([o.texture, "Texture"]), n.bindFramebuffer(n.FRAMEBUFFER, o.resolve), n.framebufferTexture2D(n.FRAMEBUFFER, n.COLOR_ATTACHMENT0, n.TEXTURE_2D, o.texture, 0), n.checkFramebufferStatus(n.FRAMEBUFFER) !== n.FRAMEBUFFER_COMPLETE || n.getError() !== n.NO_ERROR) throw Error("Terrain resolve framebuffer unavailable");
+			return this.frameTarget = o, o;
+		} catch (e) {
+			for (let [e, t] of i) this.release(e, t);
+			throw e;
+		} finally {
+			n.bindRenderbuffer(n.RENDERBUFFER, null), n.bindFramebuffer(n.FRAMEBUFFER, null);
+		}
+	}
+	beginFrame(e, t, n, r, i, a, o) {
+		let s = this.gl, c = this.targetFor(r, i);
+		this.render(e, t, n, r, i, a, o, c.framebuffer), s.bindFramebuffer(s.READ_FRAMEBUFFER, c.framebuffer), s.bindFramebuffer(s.DRAW_FRAMEBUFFER, c.resolve), s.blitFramebuffer(0, 0, r, i, 0, 0, r, i, s.COLOR_BUFFER_BIT, s.NEAREST);
+		let l = this.track(s.fenceSync(s.SYNC_GPU_COMMANDS_COMPLETE, 0), "Sync");
+		return s.flush(), {
+			target: c,
+			sync: l
+		};
+	}
+	frameReady(e) {
+		let t = this.gl, n = t.clientWaitSync(e.sync, 0, 0);
+		if (n === t.TIMEOUT_EXPIRED) return !1;
+		if (n !== t.ALREADY_SIGNALED && n !== t.CONDITION_SATISFIED) throw Error("Terrain frame completion failed");
+		return this.release(e.sync, "Sync"), e.sync = null, !0;
+	}
+	presentFrame(e) {
+		let t = this.gl, { target: n } = e;
+		if (t.bindFramebuffer(t.FRAMEBUFFER, null), t.viewport(0, 0, n.width, n.height), t.disable(t.SCISSOR_TEST), t.disable(t.DEPTH_TEST), t.disable(t.STENCIL_TEST), t.disable(t.CULL_FACE), t.disable(t.BLEND), t.depthMask(!1), t.colorMask(!0, !0, !0, !0), t.useProgram(this.present.program), t.activeTexture(t.TEXTURE0), t.bindTexture(t.TEXTURE_2D, n.texture), t.uniform1i(this.uniform(this.present, "uCompleted"), 0), t.bindVertexArray(this.emptyVAO), t.drawArrays(t.TRIANGLES, 0, 3), t.bindVertexArray(null), t.depthMask(!0), t.flush(), t.getError() !== t.NO_ERROR) throw Error("Terrain completed frame presentation failed");
 	}
 	setCartography(e) {
 		let t = this.gl, n = e?.width || 1, r = e?.height || 1, i = e ? new Uint8Array(e.pixels) : /* @__PURE__ */ new Uint8Array(4);
@@ -893,10 +972,10 @@ var $ = class {
 			size: r
 		};
 	}
-	render(e, t, n, r, a, o, s) {
-		let c = this.gl, l = this.model, u = this.shadowMap(n, s), d = this.ensureMesh(e);
-		if (c.bindFramebuffer(c.FRAMEBUFFER, null), c.viewport(0, 0, r, a), c.clearColor(i[0] / 255, i[1] / 255, i[2] / 255, 1), c.disable(c.STENCIL_TEST), c.clearDepth(1), c.depthMask(!0), this.displayMask && (c.stencilMask(255), c.clearStencil(0)), c.clear(c.COLOR_BUFFER_BIT | c.DEPTH_BUFFER_BIT | (this.displayMask ? c.STENCIL_BUFFER_BIT : 0)), this.displayMask || (c.disable(c.DEPTH_TEST), c.disable(c.CULL_FACE), c.depthMask(!1), c.enable(c.BLEND), c.blendFunc(c.SRC_ALPHA, c.ONE_MINUS_SRC_ALPHA), c.useProgram(this.ground.program), c.uniformMatrix4fv(this.uniform(this.ground, "uMatrix"), !1, t.matrix), c.uniform2fv(this.uniform(this.ground, "uOffset"), t.offset), c.uniform2f(this.uniform(this.ground, "uExtent"), l.width, l.height), c.uniform1f(this.uniform(this.ground, "uFloor"), d.floor), c.bindVertexArray(this.emptyVAO), c.drawArrays(c.TRIANGLES, 0, 6), c.depthMask(!0)), this.displayMask && (c.enable(c.STENCIL_TEST), c.stencilFunc(c.ALWAYS, 1, 255), c.stencilOp(c.KEEP, c.KEEP, c.REPLACE)), c.enable(c.DEPTH_TEST), c.depthFunc(c.LEQUAL), c.disable(c.CULL_FACE), c.disable(c.BLEND), c.useProgram(this.terrain.program), this.heightUniforms(this.terrain), this.maskUniforms(this.terrain), c.activeTexture(c.TEXTURE1), c.bindTexture(c.TEXTURE_2D, this.normalTexture), c.uniform1i(this.uniform(this.terrain, "uNormal"), 1), c.activeTexture(c.TEXTURE2), c.bindTexture(c.TEXTURE_2D, u.texture), c.uniform1i(this.uniform(this.terrain, "uShadow"), 2), c.activeTexture(c.TEXTURE4), c.bindTexture(c.TEXTURE_2D, this.surfaceTexture), c.uniform1i(this.uniform(this.terrain, "uSurface"), 4), c.activeTexture(c.TEXTURE5), c.bindTexture(c.TEXTURE_2D, this.cartographyTexture), c.uniform1i(this.uniform(this.terrain, "uCartography"), 5), c.uniform2fv(this.uniform(this.terrain, "uCartographySize"), this.cartographySize), c.uniformMatrix4fv(this.uniform(this.terrain, "uMatrix"), !1, t.matrix), c.uniform2fv(this.uniform(this.terrain, "uOffset"), t.offset), c.uniform3fv(this.uniform(this.terrain, "uLight"), n), c.uniform3fv(this.uniform(this.terrain, "uEye"), t.eye), c.uniform1f(this.uniform(this.terrain, "uBase"), l.base), c.uniform1f(this.uniform(this.terrain, "uScale"), l.scale), c.uniform1f(this.uniform(this.terrain, "uShadowTexel"), 1 / u.size), c.bindVertexArray(d.vao), c.drawElements(c.TRIANGLES, d.count, d.type, 0), this.displayMask && (c.stencilMask(0), c.stencilFunc(c.EQUAL, 1, 255), c.stencilOp(c.KEEP, c.KEEP, c.KEEP)), this.displayMask || (c.useProgram(this.boundary.program), c.uniformMatrix4fv(this.uniform(this.boundary, "uMatrix"), !1, t.matrix), c.uniform2fv(this.uniform(this.boundary, "uOffset"), t.offset), c.uniform3fv(this.uniform(this.boundary, "uLight"), n), c.uniform1f(this.uniform(this.boundary, "uFloor"), d.floor), c.bindVertexArray(d.boundaryVAO), c.drawArrays(c.TRIANGLES, 0, d.boundaryCount)), this.routeCount) {
-			c.enable(c.BLEND), c.blendFunc(c.SRC_ALPHA, c.ONE_MINUS_SRC_ALPHA), c.depthMask(!1), c.useProgram(this.line.program), c.uniformMatrix4fv(this.uniform(this.line, "uMatrix"), !1, t.matrix), c.uniform2fv(this.uniform(this.line, "uOffset"), t.offset), this.maskUniforms(this.line), c.uniform2f(this.uniform(this.line, "uExtent"), l.width, l.height), c.uniform2f(this.uniform(this.line, "uViewport"), r, a), c.bindVertexArray(this.routeVAO);
+	render(e, t, n, r, a, o, s, c = null) {
+		let l = this.gl, u = this.model, d = this.shadowMap(n, s), f = this.ensureMesh(e);
+		if (l.bindFramebuffer(l.FRAMEBUFFER, c), l.viewport(0, 0, r, a), l.clearColor(i[0] / 255, i[1] / 255, i[2] / 255, 1), l.disable(l.STENCIL_TEST), l.clearDepth(1), l.depthMask(!0), this.displayMask && (l.stencilMask(255), l.clearStencil(0)), l.clear(l.COLOR_BUFFER_BIT | l.DEPTH_BUFFER_BIT | (this.displayMask ? l.STENCIL_BUFFER_BIT : 0)), this.displayMask || (l.disable(l.DEPTH_TEST), l.disable(l.CULL_FACE), l.depthMask(!1), l.enable(l.BLEND), l.blendFunc(l.SRC_ALPHA, l.ONE_MINUS_SRC_ALPHA), l.useProgram(this.ground.program), l.uniformMatrix4fv(this.uniform(this.ground, "uMatrix"), !1, t.matrix), l.uniform2fv(this.uniform(this.ground, "uOffset"), t.offset), l.uniform2f(this.uniform(this.ground, "uExtent"), u.width, u.height), l.uniform1f(this.uniform(this.ground, "uFloor"), f.floor), l.bindVertexArray(this.emptyVAO), l.drawArrays(l.TRIANGLES, 0, 6), l.depthMask(!0)), this.displayMask && (l.enable(l.STENCIL_TEST), l.stencilFunc(l.ALWAYS, 1, 255), l.stencilOp(l.KEEP, l.KEEP, l.REPLACE)), l.enable(l.DEPTH_TEST), l.depthFunc(l.LEQUAL), l.disable(l.CULL_FACE), l.disable(l.BLEND), l.useProgram(this.terrain.program), this.heightUniforms(this.terrain), this.maskUniforms(this.terrain), l.activeTexture(l.TEXTURE1), l.bindTexture(l.TEXTURE_2D, this.normalTexture), l.uniform1i(this.uniform(this.terrain, "uNormal"), 1), l.activeTexture(l.TEXTURE2), l.bindTexture(l.TEXTURE_2D, d.texture), l.uniform1i(this.uniform(this.terrain, "uShadow"), 2), l.activeTexture(l.TEXTURE4), l.bindTexture(l.TEXTURE_2D, this.surfaceTexture), l.uniform1i(this.uniform(this.terrain, "uSurface"), 4), l.activeTexture(l.TEXTURE5), l.bindTexture(l.TEXTURE_2D, this.cartographyTexture), l.uniform1i(this.uniform(this.terrain, "uCartography"), 5), l.uniform2fv(this.uniform(this.terrain, "uCartographySize"), this.cartographySize), l.uniformMatrix4fv(this.uniform(this.terrain, "uMatrix"), !1, t.matrix), l.uniform2fv(this.uniform(this.terrain, "uOffset"), t.offset), l.uniform3fv(this.uniform(this.terrain, "uLight"), n), l.uniform3fv(this.uniform(this.terrain, "uEye"), t.eye), l.uniform1f(this.uniform(this.terrain, "uBase"), u.base), l.uniform1f(this.uniform(this.terrain, "uScale"), u.scale), l.uniform1f(this.uniform(this.terrain, "uShadowTexel"), 1 / d.size), l.bindVertexArray(f.vao), l.drawElements(l.TRIANGLES, f.count, f.type, 0), this.displayMask && (l.stencilMask(0), l.stencilFunc(l.EQUAL, 1, 255), l.stencilOp(l.KEEP, l.KEEP, l.KEEP)), this.displayMask || (l.useProgram(this.boundary.program), l.uniformMatrix4fv(this.uniform(this.boundary, "uMatrix"), !1, t.matrix), l.uniform2fv(this.uniform(this.boundary, "uOffset"), t.offset), l.uniform3fv(this.uniform(this.boundary, "uLight"), n), l.uniform1f(this.uniform(this.boundary, "uFloor"), f.floor), l.bindVertexArray(f.boundaryVAO), l.drawArrays(l.TRIANGLES, 0, f.boundaryCount)), this.routeCount) {
+			l.enable(l.BLEND), l.blendFunc(l.SRC_ALPHA, l.ONE_MINUS_SRC_ALPHA), l.depthMask(!1), l.useProgram(this.line.program), l.uniformMatrix4fv(this.uniform(this.line, "uMatrix"), !1, t.matrix), l.uniform2fv(this.uniform(this.line, "uOffset"), t.offset), this.maskUniforms(this.line), l.uniform2f(this.uniform(this.line, "uExtent"), u.width, u.height), l.uniform2f(this.uniform(this.line, "uViewport"), r, a), l.bindVertexArray(this.routeVAO);
 			for (let [e, t] of [[4.3, [
 				1,
 				.985,
@@ -907,19 +986,20 @@ var $ = class {
 				.3,
 				.12,
 				1
-			]]]) c.uniform1f(this.uniform(this.line, "uHalfWidth"), e * o), c.uniform4fv(this.uniform(this.line, "uColor"), t), c.drawArrays(c.TRIANGLES, 0, this.routeCount);
-			c.depthMask(!0), c.disable(c.BLEND);
+			]]]) l.uniform1f(this.uniform(this.line, "uHalfWidth"), e * o), l.uniform4fv(this.uniform(this.line, "uColor"), t), l.drawArrays(l.TRIANGLES, 0, this.routeCount);
+			l.depthMask(!0), l.disable(l.BLEND);
 		}
-		c.disable(c.STENCIL_TEST), c.bindVertexArray(null), c.flush();
+		l.disable(l.STENCIL_TEST), l.bindVertexArray(null), l.flush();
 	}
 	abandon() {
-		this.resources = [], this.meshes.clear(), this.shadows.clear(), this.routeCount = 0;
+		this.resources = [], this.meshes.clear(), this.shadows.clear(), this.routeCount = 0, this.frameTarget = null;
 		for (let e of [
 			"terrain",
 			"shadow",
 			"line",
 			"boundary",
 			"ground",
+			"present",
 			"heightTexture",
 			"maskTexture",
 			"normalTexture",
@@ -938,10 +1018,10 @@ var $ = class {
 		this.abandon();
 	}
 };
-function le(e) {
-	return Z(e);
+function de(e) {
+	return X(e);
 }
-var ue = class {
+var fe = class {
 	constructor(e, t, n = null) {
 		this.ctx = e, this.model = t, this.displayMask = n, this.shadowCache = /* @__PURE__ */ new Map(), this.boundaries = /* @__PURE__ */ new Map(), this.cartography = null;
 	}
@@ -982,7 +1062,7 @@ var ue = class {
 				l.heights[s]
 			];
 			x[o] = K(g, t, r, a);
-			let _ = le(l.grid.elevations[s]), v = f(.18, .57, 1 - c[2]), y = l.normalTexture[s * 4 + 3] / 255, C = Math.max(0, p(c, n)) * b[o] * .94, E = Math.max(u((Math.hypot(...g.map((e, n) => e - t.eye[n])) - .68) * .13, 0, .32), (1 - f(0, .003, Math.min(m, 1 - m, h, 1 - h))) * .15);
+			let _ = de(l.grid.elevations[s]), v = f(.18, .57, 1 - c[2]), y = l.normalTexture[s * 4 + 3] / 255, C = Math.max(0, p(c, n)) * b[o] * .94, E = Math.max(u((Math.hypot(...g.map((e, n) => e - t.eye[n])) - .68) * .13, 0, .32), (1 - f(0, .003, Math.min(m, 1 - m, h, 1 - h))) * .15);
 			T && (T[o] = E);
 			for (let e = 0; e < 3; e++) {
 				let t = d(_[e], [
@@ -1080,7 +1160,7 @@ var ue = class {
 	destroy() {
 		this.shadowCache.clear(), this.boundaries.clear(), this.image = null, this.depth = null, this.cartography = null, this.displayMask = null;
 	}
-}, de = class {
+}, pe = class {
 	constructor(e, t, n = {}) {
 		this.originalCanvas = e, this.canvas = e, this.grid = t, this.options = {
 			...n,
@@ -1096,7 +1176,7 @@ var ue = class {
 				bounds: [...i.source.bounds],
 				cells: [...i.source.cells]
 			}
-		} : null, this.model = n.preparedModel === void 0 ? w(t) : E(t, n.preparedModel), this.widthM = this.model.widthM, this.heightM = this.model.heightM, this.base = this.model.base, this.yaw = r.yaw, this.pitch = r.pitch, this.zoom = r.zoom, this.offset = [0, 0], this.viewportInsets = H(n.viewportInsets), this.visible = !0, this.destroyed = !1, this.failed = !1, this.contextLost = !1, this.frame = 0, this.dirty = !0, this.warmRequested = !1, this.graphicsFallback = null, this.pointers = /* @__PURE__ */ new Map(), this.events = [], this.meshes = /* @__PURE__ */ new Map(), this.meshStride = 0, this.renderProfile = null, this.route = [], this.routeMeshes = /* @__PURE__ */ new Map(), this.gpuRoute = null, this.dragging = !1, this.wheeling = !1, this.cartography = null, this.previousTouchAction = e.style?.touchAction, e.style && (e.style.touchAction = "none");
+		} : null, this.model = n.preparedModel === void 0 ? w(t) : E(t, n.preparedModel), this.widthM = this.model.widthM, this.heightM = this.model.heightM, this.base = this.model.base, this.yaw = r.yaw, this.pitch = r.pitch, this.zoom = r.zoom, this.offset = [0, 0], this.viewportInsets = H(n.viewportInsets), this.visible = !0, this.destroyed = !1, this.failed = !1, this.contextLost = !1, this.frame = 0, this.dirty = !0, this.warmRequested = !1, this.graphicsFallback = null, this.pointers = /* @__PURE__ */ new Map(), this.events = [], this.meshes = /* @__PURE__ */ new Map(), this.meshStride = 0, this.renderProfile = null, this.route = [], this.routeMeshes = /* @__PURE__ */ new Map(), this.gpuRoute = null, this.dragging = !1, this.wheeling = !1, this.cartography = null, this.pendingGPU = null, this.gpuCartographyDirty = !1, this.previousTouchAction = e.style?.touchAction, e.style && (e.style.touchAction = "none");
 		try {
 			let t;
 			if (!n.forceCanvas) try {
@@ -1130,7 +1210,7 @@ var ue = class {
 		if (e && (t = this.canvas.cloneNode?.(!1), !t || !this.canvas.parentNode)) throw Error("Аппаратная сцена недоступна. Откройте плоскую карту.");
 		let n = t.getContext("2d", { alpha: !1 });
 		if (!n) throw Error("На этом устройстве недоступен рендер карты.");
-		e && (this.canvas.parentNode.replaceChild(t, this.canvas), this.canvas = t), this.software = new ue(n, this.model, this.displayMask), this.software.setCartography(this.cartography), this.gl = null, this.gpu = null;
+		e && (this.canvas.parentNode.replaceChild(t, this.canvas), this.canvas = t), this.software = new fe(n, this.model, this.displayMask), this.software.setCartography(this.cartography), this.gl = null, this.gpu = null;
 	}
 	recordGraphicsFallback(e, t) {
 		this.graphicsFallback = {
@@ -1208,14 +1288,14 @@ var ue = class {
 			else return;
 			e.preventDefault();
 		}), this.bind("webglcontextlost", (e) => {
-			e.preventDefault(), this.contextLost = !0, this.cancelFrame(), this.gpu?.abandon(), this.gpuRoute = null, this.notify("onError", "Графический контекст прерван. Восстанавливаем сцену…"), clearTimeout(this.restoreTimer), this.restoreTimer = setTimeout(() => {
+			e.preventDefault(), this.contextLost = !0, this.cancelFrame(), this.pendingGPU = null, this.canvas.dataset.terrainPending = "false", this.gpu?.abandon(), this.gpuRoute = null, this.notify("onError", "Графический контекст прерван. Восстанавливаем сцену…"), clearTimeout(this.restoreTimer), this.restoreTimer = setTimeout(() => {
 				this.recordGraphicsFallback("context-timeout", "Graphics context did not restore"), this.fallbackAfterLoss();
 			}, 2500);
 		}), this.bind("webglcontextrestored", () => {
 			if (!(this.destroyed || !this.gl)) {
 				clearTimeout(this.restoreTimer);
 				try {
-					this.gpu?.abandon(), this.gpu = new $(this.gl, this.model, this.displayMask), this.gpu.setCartography(this.cartography), this.gpuRoute = null, this.contextLost = !1, this.request();
+					this.gpu?.abandon(), this.gpu = new $(this.gl, this.model, this.displayMask), this.gpu.setCartography(this.cartography), this.gpuCartographyDirty = !1, this.gpuRoute = null, this.contextLost = !1, this.request();
 				} catch (e) {
 					this.recordGraphicsFallback("context-restoration", e), this.fallbackAfterLoss();
 				}
@@ -1224,7 +1304,7 @@ var ue = class {
 	}
 	fallbackAfterLoss() {
 		if (!(this.destroyed || !this.contextLost)) {
-			clearTimeout(this.restoreTimer), this.unbindControls(), this.resize?.disconnect(), this.pointers.clear(), this.dragging = !1, this.wheeling = !1, clearTimeout(this.wheelTimer), this.gpuRoute = null;
+			clearTimeout(this.restoreTimer), this.unbindControls(), this.resize?.disconnect(), this.pointers.clear(), this.dragging = !1, this.wheeling = !1, clearTimeout(this.wheelTimer), this.gpuRoute = null, this.pendingGPU = null, this.gpuCartographyDirty = !1, this.canvas.dataset.terrainPending = "false";
 			try {
 				this.gpu?.destroy(), this.useCanvas(!0), this.contextLost = !1, this.bindControls(), this.observe(), this.request();
 			} catch {
@@ -1262,7 +1342,7 @@ var ue = class {
 		} : null;
 		this.cartography = t, this.software?.setCartography(t), this.canvas.dataset.cartography = t && t.source.loadedTiles > 0 ? "source" : "none", this.canvas.dataset.cartographyTiles = String(t?.source.loadedTiles || 0);
 		try {
-			this.gpu && !this.contextLost && this.gpu.setCartography(t);
+			this.gpu && !this.contextLost && (this.pendingGPU ? this.gpuCartographyDirty = !0 : (this.gpu.setCartography(t), this.gpuCartographyDirty = !1));
 		} catch (e) {
 			this.recordGraphicsFallback("cartography", e), this.contextLost = !0, this.fallbackAfterLoss();
 			return;
@@ -1284,7 +1364,7 @@ var ue = class {
 		}
 	}
 	setVisible(e) {
-		this.visible = !!e, this.visible ? this.request() : (this.cancelFrame(), this.pointers.clear(), this.dragging = !1, this.wheeling = !1, clearTimeout(this.wheelTimer), this.warmRequested && this.request());
+		this.visible = !!e, this.visible ? this.request() : (this.cancelFrame(), this.pointers.clear(), this.dragging = !1, this.wheeling = !1, clearTimeout(this.wheelTimer), (this.warmRequested || this.pendingGPU?.warm) && this.schedule());
 	}
 	setViewportInsets(e) {
 		this.destroyed || (this.viewportInsets = H(e), this.request());
@@ -1296,11 +1376,58 @@ var ue = class {
 		this.frame &&= (cancelAnimationFrame(this.frame), 0);
 	}
 	request() {
-		this.dirty = !0, !(this.destroyed || !this.visible && !this.warmRequested || this.contextLost || this.frame || this.document?.visibilityState === "hidden") && (this.frame = requestAnimationFrame(() => {
+		this.destroyed || (this.dirty = !0, this.gpu?.frameFormat && (this.canvas.dataset.terrainPending = "true"), this.schedule());
+	}
+	schedule() {
+		this.destroyed || !this.visible && !this.warmRequested && !this.pendingGPU?.warm || this.contextLost || this.frame || this.document?.visibilityState === "hidden" || !this.pendingGPU && !this.dirty && !this.warmRequested || (this.frame = requestAnimationFrame(() => {
 			this.frame = 0;
 			let e = this.warmRequested;
-			this.warmRequested = !1, !this.destroyed && (this.visible || e) && !this.contextLost && this.document?.visibilityState !== "hidden" && (this.dirty = !1, this.render(e));
+			this.warmRequested = !1, !this.destroyed && (this.visible || e || this.pendingGPU?.warm) && !this.contextLost && this.document?.visibilityState !== "hidden" && (this.pendingGPU ? (this.pendingGPU.warm ||= e, this.pollGPUFrame()) : (this.dirty = !1, this.render(e)));
 		}));
+	}
+	frameDimensions(e) {
+		let t = this.profileFor(e, typeof navigator < "u" ? navigator : {}), n = Math.min(typeof devicePixelRatio == "number" ? devicePixelRatio : 1, t.maxDpr), r = Math.min(n, Math.sqrt(t.pixelLimit / (e.width * e.height)), 4096 / e.width, 4096 / e.height);
+		return {
+			profile: t,
+			dpr: r,
+			width: Math.max(1, Math.round(e.width * r)),
+			height: Math.max(1, Math.round(e.height * r))
+		};
+	}
+	frameState(e, t) {
+		return [
+			e.width,
+			e.height,
+			t,
+			this.yaw,
+			this.pitch,
+			this.zoom,
+			this.offset[0],
+			this.offset[1],
+			this.viewportInsets,
+			this.cartography,
+			this.route
+		];
+	}
+	pollGPUFrame() {
+		let e = this.pendingGPU;
+		if (!(!e || e.gpu !== this.gpu || this.destroyed || this.contextLost)) try {
+			if (!this.gpu.frameReady(e)) {
+				if (performance.now() - e.started > 1e4) throw Error("Terrain frame completion timed out");
+				this.schedule();
+				return;
+			}
+			this.pendingGPU = null;
+			let t = this.canvas.getBoundingClientRect(), n = this.frameDimensions(t), r = this.frameState(t, n.dpr);
+			if (t.width < 1 || t.height < 1 || !e.state.every((e, t) => e === r[t])) {
+				this.dirty = !0, this.warmRequested ||= e.warm, this.schedule();
+				return;
+			}
+			let i = performance.now();
+			(this.canvas.width !== e.width || this.canvas.height !== e.height) && (this.canvas.width = e.width, this.canvas.height = e.height), this.gpu.presentFrame(e), e.info.ms += performance.now() - i, this.publishFrame(e.info, e.routeLength, "deferred-msaa"), this.schedule();
+		} catch (t) {
+			this.recordGraphicsFallback("presentation", t), this.warmRequested ||= e.warm, this.contextLost = !0, this.fallbackAfterLoss();
+		}
 	}
 	meshFor(e) {
 		return this.meshes.has(e) || this.meshes.set(e, F(this.model, e)), this.meshes.get(e);
@@ -1327,34 +1454,24 @@ var ue = class {
 		return this.routeMeshes.size >= 2 && this.routeMeshes.delete(this.routeMeshes.keys().next().value), this.routeMeshes.set(e, t), t;
 	}
 	render(e = !1) {
+		if (this.pendingGPU) {
+			this.dirty = !0;
+			return;
+		}
 		let t = performance.now(), n = this.canvas.getBoundingClientRect();
 		if (n.width < 1 || n.height < 1) {
 			e && (this.warmRequested = !0);
 			return;
 		}
-		let r = this.dragging || this.wheeling, i = typeof navigator < "u" ? navigator : {}, a = this.profileFor(n, i), o = Math.min(typeof devicePixelRatio == "number" ? devicePixelRatio : 1, a.maxDpr), s = Math.min(o, Math.sqrt(a.pixelLimit / (n.width * n.height)), 4096 / n.width, 4096 / n.height), c = Math.max(1, Math.round(n.width * s)), l = Math.max(1, Math.round(n.height * s));
-		(this.canvas.width !== c || this.canvas.height !== l) && (this.canvas.width = c, this.canvas.height = l);
-		let u = G(this.model, this, n.width, n.height, this.options.compactViewport), d = this.gpu ? Math.max(4225, u.usableW * u.usableH * .55 * Math.min(2, this.zoom)) : 16641, f = I(this.grid, d, this.meshStride, a.vertexLimit);
-		this.meshStride = f;
-		let p = this.meshFor(f), m = L(this.yaw, this.pitch), h = this.routeFor(f);
-		try {
-			this.gpu ? (this.gpuRoute !== h && (this.gpu.setRoute(h), this.gpuRoute = h), this.gpu.render(p, u, m, c, l, s, a)) : this.software.render(p, u, m, c, l, s, a, h);
-		} catch (t) {
-			if (this.gpu) {
-				this.recordGraphicsFallback("render", t), this.warmRequested = e, this.contextLost = !0, this.fallbackAfterLoss();
-				return;
-			}
-			this.terminalFailure("Не удалось нарисовать ландшафт. Подготовьте сцену заново.");
-			return;
-		}
-		let g = performance.now() - t, _ = this.gpu ? "webgl2" : "canvas2d", v = r ? "motion" : "full";
-		this.canvas.dataset.renderMs = g.toFixed(1), this.canvas.dataset.triangles = String(p.triangles), this.canvas.dataset.quality = v, this.canvas.dataset.renderer = _, this.canvas.dataset.meshStride = String(f), this.canvas.dataset.routeMeshStride = String(f), this.canvas.dataset.routeRenderSegments = String(h.length), this.canvas.dataset.sourceVertices = String(this.grid.width * this.grid.height), this.canvas.dataset.heightScale = "1", this.canvas.dataset.material = "cartographic", this.canvas.dataset.displayMask = this.displayMask ? "russia-display-area" : "none", this.notify("onRender", {
-			ms: g,
-			triangles: p.triangles,
-			quality: v,
-			renderer: _,
-			pixelRatio: s,
-			meshStride: f,
+		let r = this.dragging || this.wheeling, { profile: i, dpr: a, width: o, height: s } = this.frameDimensions(n), c = G(this.model, this, n.width, n.height, this.options.compactViewport), l = this.gpu ? Math.max(4225, c.usableW * c.usableH * .55 * Math.min(2, this.zoom)) : 16641, u = I(this.grid, l, this.meshStride, i.vertexLimit);
+		this.meshStride = u;
+		let d = this.meshFor(u), f = L(this.yaw, this.pitch), p = this.routeFor(u), m = {
+			ms: 0,
+			triangles: d.triangles,
+			quality: r ? "motion" : "full",
+			renderer: this.gpu ? "webgl2" : "canvas2d",
+			pixelRatio: a,
+			meshStride: u,
 			sourceVertices: this.grid.width * this.grid.height,
 			graphicsFallback: this.graphicsFallback ? { ...this.graphicsFallback } : null,
 			view: {
@@ -1375,20 +1492,51 @@ var ue = class {
 				allowedPixels: this.displayMask.source.allowedPixels,
 				coverageVersion: this.displayMask.source.coverageVersion
 			} : null
-		});
+		};
+		try {
+			if (this.gpu && (this.gpuCartographyDirty &&= (this.gpu.setCartography(this.cartography), !1), this.gpuRoute !== p && (this.gpu.setRoute(p), this.gpuRoute = p), this.gpu.frameFormat)) {
+				let r = this.gpu.beginFrame(d, c, f, o, s, a, i);
+				m.ms = performance.now() - t, this.pendingGPU = {
+					...r,
+					gpu: this.gpu,
+					info: m,
+					width: o,
+					height: s,
+					routeLength: p.length,
+					warm: e,
+					started: t,
+					state: this.frameState(n, a)
+				}, this.canvas.dataset.terrainPending = "true", this.pollGPUFrame();
+				return;
+			}
+			(this.canvas.width !== o || this.canvas.height !== s) && (this.canvas.width = o, this.canvas.height = s), this.gpu ? this.gpu.render(d, c, f, o, s, a, i) : this.software.render(d, c, f, o, s, a, i, p);
+		} catch (t) {
+			if (this.gpu) {
+				this.recordGraphicsFallback("render", t), this.warmRequested = e, this.contextLost = !0, this.fallbackAfterLoss();
+				return;
+			}
+			this.terminalFailure("Не удалось нарисовать ландшафт. Подготовьте сцену заново.");
+			return;
+		}
+		m.ms = performance.now() - t, this.publishFrame(m, p.length, this.gpu ? "direct" : "canvas2d");
+	}
+	publishFrame(e, t, n) {
+		this.canvas.dataset.renderMs = e.ms.toFixed(1), this.canvas.dataset.triangles = String(e.triangles), this.canvas.dataset.quality = e.quality, this.canvas.dataset.renderer = e.renderer, this.canvas.dataset.meshStride = String(e.meshStride), this.canvas.dataset.routeMeshStride = String(e.meshStride), this.canvas.dataset.routeRenderSegments = String(t), this.canvas.dataset.sourceVertices = String(e.sourceVertices), this.canvas.dataset.heightScale = "1", this.canvas.dataset.material = "cartographic", this.canvas.dataset.displayMask = e.displayMask ? "russia-display-area" : "none", this.canvas.dataset.terrainPresentation = n, this.canvas.dataset.terrainPending = String(this.dirty || this.warmRequested), this.notify("onRender", e);
 	}
 	rotate(n) {
 		this.destroyed || !Number.isFinite(n) || (this.yaw = ((this.yaw + n + e) % t + t) % t - e, this.request());
 	}
 	zoomBy(e) {
-		this.destroyed || !Number.isFinite(e) || e <= 0 || (this.zoom = u(this.zoom * e, .65, 5), this.request());
+		if (this.destroyed || !Number.isFinite(e) || e <= 0) return;
+		let t = u(this.zoom * e, .65, 5);
+		t !== this.zoom && (this.zoom = t, this.request());
 	}
 	reset() {
 		this.destroyed || (this.yaw = r.yaw, this.pitch = r.pitch, this.zoom = r.zoom, this.offset = [0, 0], this.request());
 	}
 	destroy() {
-		this.destroyed || (this.destroyed = !0, this.cancelFrame(), clearTimeout(this.wheelTimer), clearTimeout(this.restoreTimer), this.resize?.disconnect(), this.onResize && typeof window < "u" && window.removeEventListener("resize", this.onResize), this.document?.removeEventListener("visibilitychange", this.onVisibility), this.unbindControls(), this.pointers.clear(), this.gpu?.destroy(), this.software?.destroy(), this.meshes.clear(), this.routeMeshes.clear(), this.route = [], this.gpuRoute = null, this.cartography = null, this.displayMask = null, this.warmRequested = !1, this.canvas !== this.originalCanvas && this.canvas.parentNode && this.canvas.parentNode.replaceChild(this.originalCanvas, this.canvas), this.originalCanvas.style && (this.originalCanvas.style.touchAction = this.previousTouchAction || ""));
+		this.destroyed || (this.destroyed = !0, this.cancelFrame(), clearTimeout(this.wheelTimer), clearTimeout(this.restoreTimer), this.resize?.disconnect(), this.onResize && typeof window < "u" && window.removeEventListener("resize", this.onResize), this.document?.removeEventListener("visibilitychange", this.onVisibility), this.unbindControls(), this.pointers.clear(), this.gpu?.destroy(), this.software?.destroy(), this.pendingGPU = null, this.meshes.clear(), this.routeMeshes.clear(), this.route = [], this.gpuRoute = null, this.cartography = null, this.displayMask = null, this.warmRequested = !1, this.canvas.dataset.terrainPending = "false", this.canvas !== this.originalCanvas && this.canvas.parentNode && this.canvas.parentNode.replaceChild(this.originalCanvas, this.canvas), this.originalCanvas.style && (this.originalCanvas.style.touchAction = this.previousTouchAction || ""));
 	}
 };
 //#endregion
-export { de as TerrainRenderer, R as buildTerrainBoundary, F as buildTerrainMesh, z as clipTerrainSegment, X as createSurfaceTexture, w as createTerrainModel, T as createTerrainModelAsync, P as drapeTerrainRoute, A as sampleElevation, y as sampleTerrainCartography, _ as sampleTerrainDisplayMask, N as sampleTerrainMeshElevation, k as sampleTerrainShadow, I as selectTerrainMeshStride, Y as surfaceNoise, L as terrainLight, Z as terrainMaterialColor, B as terrainRoute, E as validatePreparedTerrainModel, v as validateTerrainCartography, g as validateTerrainDisplayMask, b as validateTerrainGrid };
+export { pe as TerrainRenderer, R as buildTerrainBoundary, F as buildTerrainMesh, z as clipTerrainSegment, Y as createSurfaceTexture, w as createTerrainModel, T as createTerrainModelAsync, P as drapeTerrainRoute, A as sampleElevation, y as sampleTerrainCartography, _ as sampleTerrainDisplayMask, N as sampleTerrainMeshElevation, k as sampleTerrainShadow, I as selectTerrainMeshStride, J as surfaceNoise, L as terrainLight, X as terrainMaterialColor, B as terrainRoute, E as validatePreparedTerrainModel, v as validateTerrainCartography, g as validateTerrainDisplayMask, b as validateTerrainGrid };
