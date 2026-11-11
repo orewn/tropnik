@@ -753,13 +753,17 @@ void main(){
  float visibility=visibilityAt();
  outColor=vec4(visibility,visibility,visibility,1);
 }
-`, ne = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec3 aStart;\nlayout(location=1) in vec3 aEnd;\nlayout(location=2) in vec2 aCorner;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nuniform vec2 uViewport;\nuniform float uHalfWidth;\nout vec2 vDistance;\nout vec2 vWorld;\nflat out float vLength;\nvoid main(){\n vec4 a=uMatrix*vec4(aStart,1),b=uMatrix*vec4(aEnd,1);\n if(a.w<=.012||b.w<=.012){gl_Position=vec4(2,2,2,1);vDistance=vec2(0);vLength=0.0;return;}\n vec2 delta=(b.xy/b.w-a.xy/a.w)*uViewport*.5;\n float len=max(length(delta),.001);vec2 direction=delta/len,normal=vec2(-direction.y,direction.x);\n vec4 point=mix(a,b,aCorner.x);\n point.xy+=(normal*aCorner.y*uHalfWidth+direction*(aCorner.x*2.0-1.0)*uHalfWidth)*2.0/uViewport*point.w;\n point.xy+=uOffset*point.w;gl_Position=point;\n vWorld=mix(aStart.xy,aEnd.xy,aCorner.x);\n vDistance=vec2(aCorner.x*len+(aCorner.x*2.0-1.0)*uHalfWidth,aCorner.y*uHalfWidth);vLength=len;\n}\n", re = "#version 300 es\nprecision highp float;\nin vec2 vDistance;\nin vec2 vWorld;\nflat in float vLength;\nuniform vec4 uColor;\nuniform float uHalfWidth;\nuniform sampler2D uDisplayMask;\nuniform vec2 uExtent;\nout vec4 outColor;\nvoid main(){\n vec2 uv=vec2(vWorld.x/uExtent.x+.5,.5-vWorld.y/uExtent.y);\n if(any(lessThan(uv,vec2(0)))||any(greaterThan(uv,vec2(1)))||texture(uDisplayMask,uv).r<.5)discard;\n float cap=max(max(-vDistance.x,vDistance.x-vLength),0.0),dist=length(vec2(cap,vDistance.y));\n float alpha=1.0-smoothstep(uHalfWidth-.8,uHalfWidth,dist);if(alpha<=0.0)discard;\n outColor=vec4(uColor.rgb,uColor.a*alpha);\n}\n", ie = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nout vec3 vPosition;\nout vec3 vNormal;\nvoid main(){vPosition=aPosition;vNormal=aNormal;gl_Position=uMatrix*vec4(aPosition,1);gl_Position.xy+=uOffset*gl_Position.w;}\n", ae = "#version 300 es\nprecision highp float;\nin vec3 vPosition;\nin vec3 vNormal;\nuniform vec3 uLight;\nuniform float uFloor;\nout vec4 outColor;\nvoid main(){\n float elevation=clamp((vPosition.z-uFloor)/.17,0.0,1.0);\n vec3 color=mix(vec3(.34,.38,.33),vec3(.49,.53,.46),elevation);\n float light=.40+.60*max(dot(normalize(vNormal),uLight),0.0);\n outColor=vec4(color*light,1);\n}\n", oe = "#version 300 es\nprecision highp float;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nuniform vec2 uExtent;\nuniform float uFloor;\nout vec2 vPoint;\nvoid main(){\n int id=gl_VertexID;\n vec2 uv=vec2(id==1||id==4||id==5?1.0:0.0,id==2||id==3||id==5?1.0:0.0);\n vPoint=(uv-.5)*(uExtent+vec2(.08));\n gl_Position=uMatrix*vec4(vPoint,uFloor-.001,1);gl_Position.xy+=uOffset*gl_Position.w;\n}\n", se = "#version 300 es\nprecision highp float;\nuniform vec2 uExtent;\nin vec2 vPoint;\nout vec4 outColor;\nvoid main(){\n float distanceToBase=length(max(abs(vPoint)-uExtent*.5,vec2(0)));\n float contact=1.0-smoothstep(0.0,.04,distanceToBase);\n outColor=vec4(.20,.27,.21,contact*contact*.18);\n}\n", $ = class {
+`, ne = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec3 aStart;\nlayout(location=1) in vec3 aEnd;\nlayout(location=2) in vec2 aCorner;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nuniform vec2 uViewport;\nuniform float uHalfWidth;\nout vec2 vDistance;\nout vec2 vWorld;\nflat out float vLength;\nvoid main(){\n vec4 a=uMatrix*vec4(aStart,1),b=uMatrix*vec4(aEnd,1);\n if(a.w<=.012||b.w<=.012){gl_Position=vec4(2,2,2,1);vDistance=vec2(0);vLength=0.0;return;}\n vec2 delta=(b.xy/b.w-a.xy/a.w)*uViewport*.5;\n float len=max(length(delta),.001);vec2 direction=delta/len,normal=vec2(-direction.y,direction.x);\n vec4 point=mix(a,b,aCorner.x);\n point.xy+=(normal*aCorner.y*uHalfWidth+direction*(aCorner.x*2.0-1.0)*uHalfWidth)*2.0/uViewport*point.w;\n point.xy+=uOffset*point.w;gl_Position=point;\n vWorld=mix(aStart.xy,aEnd.xy,aCorner.x);\n vDistance=vec2(aCorner.x*len+(aCorner.x*2.0-1.0)*uHalfWidth,aCorner.y*uHalfWidth);vLength=len;\n}\n", re = "#version 300 es\nprecision highp float;\nin vec2 vDistance;\nin vec2 vWorld;\nflat in float vLength;\nuniform vec4 uColor;\nuniform float uHalfWidth;\nuniform sampler2D uDisplayMask;\nuniform vec2 uExtent;\nout vec4 outColor;\nvoid main(){\n vec2 uv=vec2(vWorld.x/uExtent.x+.5,.5-vWorld.y/uExtent.y);\n if(any(lessThan(uv,vec2(0)))||any(greaterThan(uv,vec2(1)))||texture(uDisplayMask,uv).r<.5)discard;\n float cap=max(max(-vDistance.x,vDistance.x-vLength),0.0),dist=length(vec2(cap,vDistance.y));\n float alpha=1.0-smoothstep(uHalfWidth-.8,uHalfWidth,dist);if(alpha<=0.0)discard;\n outColor=vec4(uColor.rgb,uColor.a*alpha);\n}\n", ie = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nout vec3 vPosition;\nout vec3 vNormal;\nvoid main(){vPosition=aPosition;vNormal=aNormal;gl_Position=uMatrix*vec4(aPosition,1);gl_Position.xy+=uOffset*gl_Position.w;}\n", ae = "#version 300 es\nprecision highp float;\nin vec3 vPosition;\nin vec3 vNormal;\nuniform vec3 uLight;\nuniform float uFloor;\nout vec4 outColor;\nvoid main(){\n float elevation=clamp((vPosition.z-uFloor)/.17,0.0,1.0);\n vec3 color=mix(vec3(.34,.38,.33),vec3(.49,.53,.46),elevation);\n float light=.40+.60*max(dot(normalize(vNormal),uLight),0.0);\n outColor=vec4(color*light,1);\n}\n", oe = "#version 300 es\nprecision highp float;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nuniform vec2 uExtent;\nuniform float uFloor;\nout vec2 vPoint;\nvoid main(){\n int id=gl_VertexID;\n vec2 uv=vec2(id==1||id==4||id==5?1.0:0.0,id==2||id==3||id==5?1.0:0.0);\n vPoint=(uv-.5)*(uExtent+vec2(.08));\n gl_Position=uMatrix*vec4(vPoint,uFloor-.001,1);gl_Position.xy+=uOffset*gl_Position.w;\n}\n", se = "#version 300 es\nprecision highp float;\nuniform vec2 uExtent;\nin vec2 vPoint;\nout vec4 outColor;\nvoid main(){\n float distanceToBase=length(max(abs(vPoint)-uExtent*.5,vec2(0)));\n float contact=1.0-smoothstep(0.0,.04,distanceToBase);\n outColor=vec4(.20,.27,.21,contact*contact*.18);\n}\n";
+function ce(e) {
+	return e && e.source.allowedPixels === e.width * e.height ? Q.replace(" if(texture(uDisplayMask,vUV).r<.5)discard;\n", "") : Q;
+}
+var $ = class {
 	constructor(e, t, n = null) {
 		this.gl = e, this.model = t, this.displayMask = n, this.resources = [], this.meshes = /* @__PURE__ */ new Map(), this.shadows = /* @__PURE__ */ new Map(), this.routeCount = 0;
 		try {
 			if (e.getParameter(e.MAX_TEXTURE_SIZE) < Math.max(t.grid.width, t.grid.height) || e.getParameter(e.MAX_VERTEX_TEXTURE_IMAGE_UNITS) < 1) throw Error("Terrain GPU limits");
 			if (n && (e.getParameter(e.MAX_TEXTURE_SIZE) < Math.max(n.width, n.height) || e.getParameter(e.STENCIL_BITS) < 1)) throw Error("Terrain display mask GPU limits");
-			this.anisotropy = e.getExtension("EXT_texture_filter_anisotropic"), this.maxAnisotropy = this.anisotropy ? Math.min(4, e.getParameter(this.anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)) : 1, this.terrain = this.program(J, Q), this.shadow = this.program(ee, te), this.line = this.program(ne, re), this.boundary = this.program(ie, ae), this.ground = this.program(oe, se), this.heightTexture = this.texture(e.R32F, t.grid.width, t.grid.height, e.RED, e.FLOAT, t.heights, e.NEAREST), this.maskTexture = this.texture(e.R8, n?.width || 1, n?.height || 1, e.RED, e.UNSIGNED_BYTE, n?.pixels || new Uint8Array([255]), e.NEAREST), this.normalTexture = this.texture(e.RGBA8, t.grid.width, t.grid.height, e.RGBA, e.UNSIGNED_BYTE, t.normalTexture, e.LINEAR), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_MIN_FILTER, e.LINEAR_MIPMAP_LINEAR), e.generateMipmap(e.TEXTURE_2D);
+			this.anisotropy = e.getExtension("EXT_texture_filter_anisotropic"), this.maxAnisotropy = this.anisotropy ? Math.min(4, e.getParameter(this.anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)) : 1, this.terrain = this.program(J, ce(n)), this.shadow = this.program(ee, te), this.line = this.program(ne, re), this.boundary = this.program(ie, ae), this.ground = this.program(oe, se), this.heightTexture = this.texture(e.R32F, t.grid.width, t.grid.height, e.RED, e.FLOAT, t.heights, e.NEAREST), this.maskTexture = this.texture(e.R8, n?.width || 1, n?.height || 1, e.RED, e.UNSIGNED_BYTE, n?.pixels || new Uint8Array([255]), e.NEAREST), this.normalTexture = this.texture(e.RGBA8, t.grid.width, t.grid.height, e.RGBA, e.UNSIGNED_BYTE, t.normalTexture, e.LINEAR), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_MIN_FILTER, e.LINEAR_MIPMAP_LINEAR), e.generateMipmap(e.TEXTURE_2D);
 			let r = D(t), i = r[0];
 			this.maxHeightTexture = this.texture(e.R32F, i.width, i.height, e.RED, e.FLOAT, i.data, e.NEAREST);
 			for (let t = 1; t < r.length; t++) {
@@ -934,10 +938,10 @@ void main(){
 		this.abandon();
 	}
 };
-function ce(e) {
+function le(e) {
 	return Z(e);
 }
-var le = class {
+var ue = class {
 	constructor(e, t, n = null) {
 		this.ctx = e, this.model = t, this.displayMask = n, this.shadowCache = /* @__PURE__ */ new Map(), this.boundaries = /* @__PURE__ */ new Map(), this.cartography = null;
 	}
@@ -978,7 +982,7 @@ var le = class {
 				l.heights[s]
 			];
 			x[o] = K(g, t, r, a);
-			let _ = ce(l.grid.elevations[s]), v = f(.18, .57, 1 - c[2]), y = l.normalTexture[s * 4 + 3] / 255, C = Math.max(0, p(c, n)) * b[o] * .94, E = Math.max(u((Math.hypot(...g.map((e, n) => e - t.eye[n])) - .68) * .13, 0, .32), (1 - f(0, .003, Math.min(m, 1 - m, h, 1 - h))) * .15);
+			let _ = le(l.grid.elevations[s]), v = f(.18, .57, 1 - c[2]), y = l.normalTexture[s * 4 + 3] / 255, C = Math.max(0, p(c, n)) * b[o] * .94, E = Math.max(u((Math.hypot(...g.map((e, n) => e - t.eye[n])) - .68) * .13, 0, .32), (1 - f(0, .003, Math.min(m, 1 - m, h, 1 - h))) * .15);
 			T && (T[o] = E);
 			for (let e = 0; e < 3; e++) {
 				let t = d(_[e], [
@@ -1076,7 +1080,7 @@ var le = class {
 	destroy() {
 		this.shadowCache.clear(), this.boundaries.clear(), this.image = null, this.depth = null, this.cartography = null, this.displayMask = null;
 	}
-}, ue = class {
+}, de = class {
 	constructor(e, t, n = {}) {
 		this.originalCanvas = e, this.canvas = e, this.grid = t, this.options = {
 			...n,
@@ -1126,7 +1130,7 @@ var le = class {
 		if (e && (t = this.canvas.cloneNode?.(!1), !t || !this.canvas.parentNode)) throw Error("Аппаратная сцена недоступна. Откройте плоскую карту.");
 		let n = t.getContext("2d", { alpha: !1 });
 		if (!n) throw Error("На этом устройстве недоступен рендер карты.");
-		e && (this.canvas.parentNode.replaceChild(t, this.canvas), this.canvas = t), this.software = new le(n, this.model, this.displayMask), this.software.setCartography(this.cartography), this.gl = null, this.gpu = null;
+		e && (this.canvas.parentNode.replaceChild(t, this.canvas), this.canvas = t), this.software = new ue(n, this.model, this.displayMask), this.software.setCartography(this.cartography), this.gl = null, this.gpu = null;
 	}
 	recordGraphicsFallback(e, t) {
 		this.graphicsFallback = {
@@ -1387,4 +1391,4 @@ var le = class {
 	}
 };
 //#endregion
-export { ue as TerrainRenderer, R as buildTerrainBoundary, F as buildTerrainMesh, z as clipTerrainSegment, X as createSurfaceTexture, w as createTerrainModel, T as createTerrainModelAsync, P as drapeTerrainRoute, A as sampleElevation, y as sampleTerrainCartography, _ as sampleTerrainDisplayMask, N as sampleTerrainMeshElevation, k as sampleTerrainShadow, I as selectTerrainMeshStride, Y as surfaceNoise, L as terrainLight, Z as terrainMaterialColor, B as terrainRoute, E as validatePreparedTerrainModel, v as validateTerrainCartography, g as validateTerrainDisplayMask, b as validateTerrainGrid };
+export { de as TerrainRenderer, R as buildTerrainBoundary, F as buildTerrainMesh, z as clipTerrainSegment, X as createSurfaceTexture, w as createTerrainModel, T as createTerrainModelAsync, P as drapeTerrainRoute, A as sampleElevation, y as sampleTerrainCartography, _ as sampleTerrainDisplayMask, N as sampleTerrainMeshElevation, k as sampleTerrainShadow, I as selectTerrainMeshStride, Y as surfaceNoise, L as terrainLight, Z as terrainMaterialColor, B as terrainRoute, E as validatePreparedTerrainModel, v as validateTerrainCartography, g as validateTerrainDisplayMask, b as validateTerrainGrid };

@@ -628,6 +628,15 @@ void main(){
  outColor=vec4(.20,.27,.21,contact*contact*.18);
 }
 `;
+function terrainFragmentForMask(displayMask){
+ // TerrainRenderer validated every binary texel before making this owned copy.
+ // A fully allowed mask never discards, including clamp-to-edge sampling. Keep
+ // the mask itself: it still suppresses the decorative ground/rim and bounds
+ // the route through the existing stencil and route-fragment checks.
+ return displayMask&&displayMask.source.allowedPixels===displayMask.width*displayMask.height
+  ?TERRAIN_FRAGMENT.replace(' if(texture(uDisplayMask,vUV).r<.5)discard;\n','')
+  :TERRAIN_FRAGMENT;
+}
 class TerrainGPU{
  constructor(gl,model,displayMask=null){
   this.gl=gl;this.model=model;this.displayMask=displayMask;this.resources=[];this.meshes=new Map();this.shadows=new Map();this.routeCount=0;
@@ -638,7 +647,7 @@ class TerrainGPU{
    // filter applies to real cartography and full-resolution terrain normals.
    this.anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
    this.maxAnisotropy=this.anisotropy?Math.min(4,gl.getParameter(this.anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)):1;
-   this.terrain=this.program(TERRAIN_VERTEX,TERRAIN_FRAGMENT);this.shadow=this.program(SHADOW_VERTEX,SHADOW_FRAGMENT);this.line=this.program(ROUTE_VERTEX,ROUTE_FRAGMENT);
+   this.terrain=this.program(TERRAIN_VERTEX,terrainFragmentForMask(displayMask));this.shadow=this.program(SHADOW_VERTEX,SHADOW_FRAGMENT);this.line=this.program(ROUTE_VERTEX,ROUTE_FRAGMENT);
    this.boundary=this.program(BOUNDARY_VERTEX,BOUNDARY_FRAGMENT);
    this.ground=this.program(GROUND_VERTEX,GROUND_FRAGMENT);
    this.heightTexture=this.texture(gl.R32F,model.grid.width,model.grid.height,gl.RED,gl.FLOAT,model.heights,gl.NEAREST);

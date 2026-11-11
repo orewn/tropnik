@@ -229,8 +229,8 @@
     },
     {
       "path": "web/public/terrain/terrain-renderer.js",
-      "sizeBytes": 78520,
-      "sha256": "f842b9cbb335e8d9de880cf228d77b148ee3e1c1f5fb82f626e40e1c22dcb22f"
+      "sizeBytes": 79089,
+      "sha256": "0c238565a4979d85099bcb0bce99d4be384e193011828d8c0e0ccdc691663e5e"
     },
     {
       "path": "web/tsconfig.json",
@@ -238,22 +238,22 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "cea70c9b2d88dc59675cb796c173819fd790817d5c889bbfceeabeef13d8f891",
+  "sourceInputsSha256": "cd0473adb098dc59e8cf2d4d9ea55de3154e7962d3fb85416d3fbba47517bdbe",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "224ee5bca138d5ec26d7cb296b8329dd9666c6a9f0fe9e50d5fe3e91ab75e7e2"
+      "sha256": "522cd7e1ae088ef0fa3742d6f321f4601375800c5e9bc7cb6beb02300c017e72"
     },
     {
-      "path": "chunks/custom-map-entry-DVWsT04x.js",
+      "path": "chunks/custom-map-entry-DsZOu22G.js",
       "sizeBytes": 96711,
-      "sha256": "f675073da427384145cd428a9dc0024a38c7be03a6bb2ec42fda102dce817ed0"
+      "sha256": "145604f4644a4f5f737b686adadb8e24d6e86abf1ab46f2c3b8d218326c4f378"
     },
     {
-      "path": "chunks/terrain-renderer-DQ47YevM.js",
-      "sizeBytes": 72925,
-      "sha256": "19a7a42cb144ea06877ffb567cabbb46c927addf8c7263fdef2f63cc9fb7cdcc"
+      "path": "chunks/terrain-renderer-COkxi303.js",
+      "sizeBytes": 73081,
+      "sha256": "e15ed54cd2fb10d52e80f92d1e046deaa0f1fad1c8f2a38c58753af11bf252ad"
     },
     {
       "path": "index.html",
@@ -268,7 +268,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "067c6ae4684104f9bbb7d1f7890b7d2b071d0f3603bf7ca16cf989f2327c36bf"
+      "sha256": "cf8fe204f1471b2793e14e64b5c4e36fd87d79f8dd4bf59894a836719d681efe"
     },
     {
       "path": "map.css",

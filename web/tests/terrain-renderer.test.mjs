@@ -99,7 +99,7 @@ function environment(t,{gpuFailure=false,gl=null,cloneFails=false,width=80,heigh
 }
 
 function recordingGL({anisotropy=0}={}){
-  const counts={framebuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[]},enums=new Map(),generations=new WeakMap(),liveTextures=new Set();let next=1,gl,generation=0,error=0;
+  const counts={framebuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[],shaderSources:[],stencilState:[]},enums=new Map(),generations=new WeakMap(),liveTextures=new Set();let next=1,gl,generation=0,error=0;
   const create=type=>{const object={};generations.set(object,generation);if(type==='Texture')liveTextures.add(object);return object;};
   const remove=(type,object)=>{
     if(generations.get(object)!==generation){counts.invalidObjectCalls++;error=gl.INVALID_OPERATION;return;}
@@ -108,6 +108,8 @@ function recordingGL({anisotropy=0}={}){
   const extension={MAX_TEXTURE_MAX_ANISOTROPY_EXT:0x84ff,TEXTURE_MAX_ANISOTROPY_EXT:0x84fe};
   const methods={NO_ERROR:0,getParameter:key=>key===extension.MAX_TEXTURE_MAX_ANISOTROPY_EXT?anisotropy:16384,getError:()=>{const result=error;error=0;return result;},getExtension:name=>{if(name!=='EXT_texture_filter_anisotropic')return null;counts.anisotropyQueries++;return anisotropy?extension:null;},getShaderParameter:()=>true,getProgramParameter:()=>true,
     texParameterf:(_target,key,value)=>{if(key===extension.TEXTURE_MAX_ANISOTROPY_EXT)counts.anisotropyValues.push(value);},
+    shaderSource:(_shader,source)=>counts.shaderSources.push(source),
+    stencilMask:value=>counts.stencilState.push(['mask',value]),stencilFunc:(...values)=>counts.stencilState.push(['function',...values]),stencilOp:(...values)=>counts.stencilState.push(['operation',...values]),
     checkFramebufferStatus:()=>gl.FRAMEBUFFER_COMPLETE,getUniformLocation:(_program,name)=>name,
     uniform1i:(name,value)=>{if(name==='uSteps')counts.shadowBudgets.push(value);},
     createFramebuffer:()=>{counts.framebuffers++;return create('Framebuffer');},createBuffer:()=>{counts.buffers++;return create('Buffer');},
@@ -179,6 +181,36 @@ test('GPU display mask retains one owned texture across frames and restores it a
   record.loseContext();env.canvas.events.get('webglcontextlost')({preventDefault(){}});renderer.fallbackAfterLoss();env.flush();
   assert.equal(renderer.software.displayMask,owned);assert.equal(renderer.canvas.dataset.displayMask,'russia-display-area');
   renderer.destroy();assert.equal(record.counts.deletedTextures+record.counts.contextReleasedTextures,record.counts.textures);assert.equal(record.counts.invalidObjectCalls,0);assert.equal(env.frames.size,0);
+});
+test('only a validated fully allowed mask removes the terrain discard while preserving mask and route state',t=>{
+  const source=grid(3,3),snapshots=[];
+  for(const values of[[255,255,255,0],[0,0,0,0],[255,255,255,255]]){
+    const record=recordingGL(),env=environment(t,{gl:record.gl}),mask=displayMask(source,values);
+    const renderer=new TerrainRenderer(env.canvas,source,{displayMask:mask});env.flush();
+    assert.equal(renderer.gpu.displayMask,renderer.displayMask);assert.notEqual(renderer.displayMask.pixels,mask.pixels);
+    assert.equal(renderer.canvas.dataset.displayMask,'russia-display-area');
+    assert.ok([...renderer.gpu.meshes.values()].every(mesh=>mesh.boundaryCount===0),'full mask still suppresses the decorative rim');
+    assert.ok(record.counts.uploads.some(upload=>upload.width===2&&upload.height===2&&[...upload.pixels].every((value,index)=>value===values[index])));
+    snapshots.push({terrain:record.counts.shaderSources[1],route:record.counts.shaderSources[5],stencil:record.counts.stencilState.slice()});
+    if(values.every(value=>value===255)){
+      const specialized=record.counts.shaderSources[1],owned=renderer.displayMask;
+      mask.pixels.fill(0);mask.source.allowedPixels=0;
+      record.loseContext();env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();
+      assert.equal(renderer.gpu.displayMask,owned);assert.equal(owned.source.allowedPixels,4);
+      assert.equal(record.counts.shaderSources[11],specialized,'restoration selects from the owned validated mask');
+    }
+    renderer.destroy();
+  }
+  const [mixed,empty,full]=snapshots,discard=' if(texture(uDisplayMask,vUV).r<.5)discard;\n';
+  assert.equal(mixed.terrain,empty.terrain);assert.ok(mixed.terrain.includes(discard));
+  assert.equal(full.terrain,mixed.terrain.replace(discard,''),'all material calculations and uniforms are unchanged');
+  assert.equal(full.route,mixed.route);assert.ok(full.route.includes('texture(uDisplayMask,uv).r<.5'));
+  assert.deepEqual(full.stencil,mixed.stencil);assert.ok(full.stencil.length>0);
+  const record=recordingGL(),env=environment(t,{gl:record.gl}),bad=displayMask(source,[255,255,255,0]);bad.source.allowedPixels=4;
+  assert.throws(()=>new TerrainRenderer(env.canvas,source,{displayMask:bad}),/mask/);
+  assert.equal(record.counts.shaderSources.length,0,'unverified metadata cannot choose a shader');
+  const unmasked=new TerrainRenderer(env.canvas,source);env.flush();
+  assert.equal(record.counts.shaderSources[1],mixed.terrain,'the absent-mask path is unchanged');unmasked.destroy();
 });
 test('cartography validates bounded pixels, exact geographic grid alignment and source coverage',()=>{
  const source=grid(),valid=cartography(source);assert.equal(validateTerrainCartography(valid,source),valid);

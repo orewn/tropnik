@@ -1,14 +1,14 @@
-name: Focused Android zoom modes diagnosis
+name: Terrain fully allowed mask causal diagnosis
 
 on:
   push:
-    branches: [diagnostics/android-zoom-modes]
+    branches: [diagnostics/terrain-mask-specialization]
 
 permissions:
   contents: read
 
 concurrency:
-  group: android-zoom-modes-diagnostics
+  group: terrain-mask-specialization-diagnostics
   cancel-in-progress: false
 
 jobs:
@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+          fetch-depth: 2
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
@@ -30,7 +31,16 @@ jobs:
           npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
           pnpm --dir web install --frozen-lockfile
       - name: Verify the unchanged mode sequence and diagnostic boundaries
-        run: node --test tools/pages-preview/tests/zoom-performance-diagnostics.test.mjs tools/pages-preview/tests/terrain-diagnostic.test.mjs tools/pages-preview/tests/zoom-burst.test.mjs
+        run: node --test web/tests/terrain-renderer.test.mjs web/tests/terrain-display-mask.test.mjs tools/pages-preview/tests/zoom-performance-diagnostics.test.mjs tools/pages-preview/tests/terrain-diagnostic.test.mjs tools/pages-preview/tests/zoom-burst.test.mjs
+      - name: Verify deterministic terrain and map artifacts
+        run: |
+          node tools/android-build/prepare-custom-map.mjs --check
+          python tools/android-build/prepare-landscape.py --check
+          node web/scripts/verify-custom-map.mjs
+      - name: Preserve the existing four-case WebGL2 mask proof
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: node --test tools/pages-preview/tests/terrain-mask.browser.mjs
       - name: Prepare the verified Android link and static site
         run: |
           node tools/pages-preview/fetch-apk.mjs
@@ -40,12 +50,15 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
           TROPNIK_BROWSER_DIAGNOSTIC: zoom-modes
+          TROPNIK_BROWSER_TRACE: '0'
         run: node tools/pages-preview/browser-smoke.mjs
       - name: Verify the receipt is diagnostic only and retains mode attribution
         run: |
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
-          import {readFileSync} from 'node:fs';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import {execFileSync} from 'node:child_process';
           import {assertBrowserReport} from './tools/pages-preview/browser-report.mjs';
           const report=JSON.parse(readFileSync('web/pages-preview/dist/browser-zoom-modes-diagnostic.json','utf8'));
           assert.equal(report.sourceCommit,process.env.GITHUB_SHA);
@@ -66,18 +79,32 @@ jobs:
           assert.equal(report.closeTrail,undefined);
           assert.equal(report.coast,undefined);
           assert.throws(()=>assertBrowserReport(report,process.env.GITHUB_SHA));
-          console.log(JSON.stringify({diagnosticOnly:true,sourceCommit:report.sourceCommit,performance:report.performance,performanceIssues:report.performanceIssues}));
+          assert.notEqual(report.instrumented,true);
+          assert.equal(report.terrainZoomTrace,undefined);
+          const protectedInputs=[{"path":"web/lib/custom-map-engine.ts","sha256":"7c81f2aa78b1b7b02fe564be0cb1d52bd361060ac901521314d729979cd375ea"},{"path":"web/lib/custom-map-camera.ts","sha256":"260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd"},{"path":"web/components/MapAttribution.tsx","sha256":"8addce99427ca78ecbc597b5c8a7b66c526fef650786aeb28316416d7984fb7d"},{"path":"web/app/map-ui-release.css","sha256":"1e52c29334fd64647b0fa900982366bd437d5d9244c853cea97a5e7f8da5ab36"},{"path":"tools/pages-preview/browser-zoom-audit.mjs","sha256":"8db8c6ae69e0c56349f3b137b67313ef4cfc30d9a60dca5335a53899bdaba014"},{"path":"tools/pages-preview/browser-smoke.mjs","sha256":"0b3e586f2aa6032ebb8639004acc54c4097515f007f2e962c6de9b75d31a8e6f"},{"path":"tools/pages-preview/browser-environment.mjs","sha256":"470ca0d7270b230a649f4cd0c7eaded7bdfce29156fd418d2f71d1064519a885"}];
+          for(const item of protectedInputs)assert.equal(createHash('sha256').update(readFileSync(item.path)).digest('hex'),item.sha256,item.path);
+          for(const state of Object.values(report.modes.scene3d.states)){
+            assert.equal(state.frame.renderer,'webgl2');assert.equal(state.frame.pixelRatio,2);assert.equal(state.frame.sourceVertices,263169);
+            assert.equal(state.frame.graphicsFallback,null);assert.equal(state.frame.displayMask.allowedPixels,state.frame.displayMask.width*state.frame.displayMask.height);
+          }
+          const sourceFiles=['web/public/terrain/terrain-renderer.js','web/public/custom-map/manifest.json','web/public/terrain/landscape.html','web/public/sw.js'];
+          const sceneTasks=report.modePerformanceDiagnostics.recentLongTasks.filter(task=>task.phase==='zoom-design-scene');
+          const summary={schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,instrumented:false,baselineCommit:'fd9f4fbc949b13e10a49ccd208450b5456092413',sourceCommit:report.sourceCommit,sourceTree:execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim(),protectedInputs,sourceFiles:sourceFiles.map(path=>({path,sha256:createHash('sha256').update(readFileSync(path)).digest('hex')})),profile:report.profile,nativeSceneZoomInputs:report.modes.scene3d.zoomInputs,sceneFrames:Object.fromEntries(Object.entries(report.modes.scene3d.states).map(([name,state])=>[name,state.frame])),sceneTasks,sceneLongestObservedTaskMs:Math.max(0,...sceneTasks.map(task=>task.duration)),performance:report.performance,performanceIssues:report.performanceIssues,performancePassed:report.performancePassed,environment:report.environment};
+          writeFileSync('web/pages-preview/dist/terrain-mask-specialization-summary.json',JSON.stringify(summary,null,2)+'\n');
+          console.log(JSON.stringify({diagnosticOnly:true,sourceCommit:report.sourceCommit,sceneLongestObservedTaskMs:summary.sceneLongestObservedTaskMs,performance:report.performance,performanceIssues:report.performanceIssues}));
           NODE
       - name: Preserve diagnostic evidence without publication
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: tropnik-android-zoom-modes-diagnostic-${{ github.run_id }}
+          name: tropnik-terrain-mask-specialization-${{ github.run_id }}
           path: |
             web/pages-preview/design-qa
             web/pages-preview/dist/build-info.json
             web/pages-preview/dist/browser-zoom-modes-diagnostic.json
             web/pages-preview/dist/browser-network.json
+            web/pages-preview/dist/browser-terrain-mask-verification.json
+            web/pages-preview/dist/terrain-mask-specialization-summary.json
             web/pages-preview/dist/browser-failure.*
           if-no-files-found: error
           retention-days: 7
