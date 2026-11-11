@@ -2,7 +2,7 @@ name: Production Canvas underlay pixel diagnosis
 
 on:
   push:
-    branches: [diagnostics/opaque-detail-underlay, diagnostics/opaque-detail-clear]
+    branches: [diagnostics/opaque-detail-underlay, diagnostics/opaque-detail-clear, diagnostics/canvas-recording-reset]
   workflow_dispatch:
 
 permissions:
@@ -46,7 +46,15 @@ jobs:
           const underlay = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-underlay-verification.json', 'utf8'));
           assert.equal(underlay.schemaVersion, 1);
           assert.equal(underlay.evidence, 'production-canvas-underlay-pixel-parity');
-          assert.equal(underlay.baseline, 'same-production-draw-with-fixture-only-coverage-false');
+          assert.equal(underlay.baseline, 'immutable-1710-production-draw');
+          assert.equal(underlay.underlayControl, 'immutable-1710-draw-with-fixture-only-coverage-false');
+          assert.equal(underlay.baselineSourceCommit, '1710b201bfeed52613659ae3e4ca7f26638cb6cb');
+          assert.equal(underlay.baselineRendererSHA256, 'c25b61c97602070d746706d977d50906217e4b1258ce5a482ae64bb914ee3127');
+          const underlayResetBlock = "    // Discard obsolete recorded operations before rebuilding this complete\n    // frame. The opaque detail proof or the original paper fill covers it.\n    ctx.clearRect(0,0,this.canvas.width,this.canvas.height);\n";
+          const underlayCandidateSource = readFileSync('web/lib/custom-map-engine.ts', 'utf8');
+          assert.equal(underlayCandidateSource.split(underlayResetBlock).length, 2);
+          assert.equal(createHash('sha256').update(underlayCandidateSource.replace(underlayResetBlock, '')).digest('hex'), underlay.baselineRendererSHA256);
+          assert.notEqual(underlay.rendererSHA256, underlay.baselineRendererSHA256);
           assert.equal(underlay.verified, true);
           assert.equal(underlay.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(underlay.rendererSHA256, createHash('sha256').update(readFileSync('web/lib/custom-map-engine.ts')).digest('hex'));
@@ -58,7 +66,7 @@ jobs:
           assertBrowserEnvironment(underlay.environment, process.env.GITHUB_SHA);
           const covers = {opaque:[true], 'fractional-zoom':[true], 'pan-sequence':[true,true,true,false,true], missing:[false], transparent:[false], rotated:[false], pitched:[false], satellite:[false], overview:[false], zoom12:[true,true,true,false,true], zoom13:[false], zoom18:[false], 'tiny-tile':[false], 'unwrapped-world':[true], 'boundaries-hidden':[true]};
           assert.deepEqual(underlay.cases.map(item => item.dpr + '/' + item.name).sort(), [1,2].flatMap(dpr => Object.keys(covers).map(name => dpr + '/' + name)).sort());
-          let underlayFrames = 0;
+          let underlayFrames = 0, underlayCaptures = 0;
           for (const item of underlay.cases) {
             assert.equal(item.verified, true);
             assert.equal(item.contextAttributes.alpha, false);
@@ -83,19 +91,27 @@ jobs:
               assert.deepEqual(frame.comparison, {differentPixels:0,maxChannelDelta:0,totalPixels:frame.width*frame.height});
               assert.match(frame.baselinePixelSHA256, /^[a-f0-9]{64}$/);
               assert.equal(frame.optimizedPixelSHA256, frame.baselinePixelSHA256);
-              const {baseline,optimized} = frame.operations;
-              assert.equal(baseline.area, 1);
-              assert.ok(baseline.overview > 0);
+              assert.deepEqual(frame.underlayComparison, frame.comparison);
+              assert.equal(frame.underlayControlPixelSHA256, frame.baselinePixelSHA256);
+              const {baseline,optimized,underlayControl} = frame.operations;
+              assert.equal(underlayControl.area, 1);
+              assert.ok(underlayControl.overview > 0);
+              assert.equal(underlayControl.clear, 1);
+              assert.equal(underlayControl.discard, 0);
+              assert.equal(underlayControl.proofCalls, 1);
               assert.equal(optimized.area, frame.actualCoverage ? 0 : 1);
-              assert.equal(optimized.overview, frame.actualCoverage ? 0 : baseline.overview);
-              for (const key of ['mask','selectedArea','detail','relief','imagery']) assert.equal(optimized[key], baseline[key]);
-              assert.equal(baseline.clear, 1);
+              assert.equal(optimized.overview, frame.actualCoverage ? 0 : underlayControl.overview);
+              for (const key of ['clear','area','overview','mask','selectedArea','detail','relief','imagery','proofCalls']) assert.equal(optimized[key], baseline[key]);
+              for (const key of ['mask','selectedArea','detail','relief','imagery']) assert.equal(optimized[key], underlayControl[key]);
+              assert.equal(baseline.discard, 0);
+              assert.equal(optimized.discard, 1);
               assert.equal(optimized.clear, frame.actualCoverage ? 0 : 1);
               assert.equal(optimized.mask, 1);
               assert.equal(optimized.proofCalls, 1);
               if (frame.actualCoverage) assert.ok(item.tileDeviceSpan > 1);
-              assert.deepEqual(frame.captures.map(capture => capture.phase), ['baseline','optimized']);
+              assert.deepEqual(frame.captures.map(capture => capture.phase), ['baseline','optimized','underlay-control']);
               for (const capture of frame.captures) {
+                underlayCaptures++;
                 assert.match(capture.file, /^[a-zA-Z0-9.-]+\.png$/);
                 const png = readFileSync('web/pages-preview/design-qa/map-underlay/' + capture.file);
                 assert.equal(png.length, capture.bytes);
@@ -106,6 +122,7 @@ jobs:
             }
           }
           assert.equal(underlayFrames, 46);
+          assert.equal(underlayCaptures, 138);
           NODE
       - name: Preserve the actual pixel proof
         if: always()

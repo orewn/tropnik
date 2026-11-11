@@ -15,6 +15,9 @@ import {collectNativeBrowserSurface,assertNativeSurfaceCoverage} from '../browse
 const root=resolve(import.meta.dirname,'../../..'),web=join(root,'web'),require=createRequire(join(web,'package.json'));
 const buildRequire=createRequire(require.resolve('vite')),{build}=buildRequire('esbuild');
 const enginePath=join(web,'lib/custom-map-engine.ts');
+const BASELINE_COMMIT='1710b201bfeed52613659ae3e4ca7f26638cb6cb';
+const BASELINE_SHA256='c25b61c97602070d746706d977d50906217e4b1258ce5a482ae64bb914ee3127';
+const RESET_BLOCK="    // Discard obsolete recorded operations before rebuilding this complete\n    // frame. The opaque detail proof or the original paper fill covers it.\n    ctx.clearRect(0,0,this.canvas.width,this.canvas.height);\n";
 const binary=['google-chrome','google-chrome-stable','chromium','chromium-browser'].find(name=>spawnSync('which',[name],{stdio:'ignore'}).status===0);
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const matrix=[
@@ -38,18 +41,26 @@ const matrix=[
 // The browser receives the real class and its exported geometryPath. Only the
 // worker URL imports are inert: the fixture seeds actual ImageBitmaps and does
 // not construct a network/camera session. Neither draw nor any paint method is
-// copied, rewritten or replaced. The sole baseline override returns false from
-// the new coverage proof, recreating the previous underlay order in that class.
+// copied or replaced in the candidate. The reference module is reconstructed by
+// removing exactly the new three-line recording reset and checking its immutable
+// 1710 SHA. A third reference surface retains the original helper-false underlay
+// control. All three execute the real prototype.draw from their bound module.
 async function productionBundle(){
  const source=await readFile(enginePath,'utf8');
+ assert.equal(source.split(RESET_BLOCK).length,2,'The candidate must contain exactly the reviewed recording reset');
+ const baselineSource=source.replace(RESET_BLOCK,'');
+ assert.equal(createHash('sha256').update(baselineSource).digest('hex'),BASELINE_SHA256,'The reference must be byte-exact immutable 1710');
+ assert.equal(source,baselineSource.replace('    ctx.setTransform(1,0,0,1,0,0);\n    // Fully opaque detail','    ctx.setTransform(1,0,0,1,0,0);\n'+RESET_BLOCK+'    // Fully opaque detail'),'The reset must occur immediately after the complete-frame identity transform');
  assert.match(source,/private detailCoversViewport\(batch:TileBatch\|undefined\):boolean/);
  assert.match(source,/const detail=this\.displayDetail\(\),covered=this\.detailCoversViewport\(detail\);/);
  assert.match(source,/if\(!covered\)\{ctx\.fillStyle=MAP_OUTSIDE_COLOR;ctx\.fillRect\(0,0,this\.canvas\.width,this\.canvas\.height\);\}/);
  const result=await build({absWorkingDir:web,bundle:true,write:false,format:'iife',platform:'browser',target:'chrome107',minify:false,metafile:true,logLevel:'silent',
   tsconfigRaw:{compilerOptions:{baseUrl:'.',paths:{'@/*':['./*']}}},
-  stdin:{contents:`import {CustomMapEngine,geometryPath} from './lib/custom-map-engine.ts';import {mercatorUnproject} from './lib/custom-map-camera.ts';import {MAP_OUTSIDE_COLOR} from './public/maps/russia-viewport.js';import {mapCanvasPolicy} from './lib/map-canvas-policy.ts';window.runUnderlayGate=options=>(${runProductionPixels.toString()})({CustomMapEngine,geometryPath,mercatorUnproject,MAP_OUTSIDE_COLOR,mapCanvasPolicy},options);`,resolveDir:web,sourcefile:'underlay-fixture-entry.js'},
+  stdin:{contents:`import {CustomMapEngine,geometryPath} from './lib/custom-map-engine.ts';import {CustomMapEngine as BaselineCustomMapEngine} from 'tropnik-underlay-immutable-baseline';import {mercatorUnproject} from './lib/custom-map-camera.ts';import {MAP_OUTSIDE_COLOR} from './public/maps/russia-viewport.js';import {mapCanvasPolicy} from './lib/map-canvas-policy.ts';window.runUnderlayGate=options=>(${runProductionPixels.toString()})({CustomMapEngine,BaselineCustomMapEngine,geometryPath,mercatorUnproject,MAP_OUTSIDE_COLOR,mapCanvasPolicy},options);`,resolveDir:web,sourcefile:'underlay-fixture-entry.js'},
   plugins:[{name:'production-source-and-unused-worker-urls',setup(plugin){
-   plugin.onLoad({filter:/[/\\]custom-map-engine\.ts$/},async args=>{assert.equal(args.path,enginePath);return{contents:source,loader:'ts',resolveDir:join(web,'lib')};});
+   plugin.onResolve({filter:/^tropnik-underlay-immutable-baseline$/},()=>({path:enginePath,namespace:'underlay-baseline'}));
+   plugin.onLoad({filter:/.*/,namespace:'underlay-baseline'},()=>({contents:baselineSource,loader:'ts',resolveDir:join(web,'lib')}));
+   plugin.onLoad({filter:/[/\\]custom-map-engine\.ts$/,namespace:'file'},async args=>{assert.equal(args.path,enginePath);return{contents:source,loader:'ts',resolveDir:join(web,'lib')};});
    plugin.onResolve({filter:/\?worker&url$/},args=>({path:args.path,namespace:'unconstructed-worker'}));
    plugin.onLoad({filter:/.*/,namespace:'unconstructed-worker'},()=>({contents:'export default "data:application/javascript,";',loader:'js'}));
   }}],
@@ -57,18 +68,18 @@ async function productionBundle(){
  assert.equal(result.outputFiles.length,1);
  const sources={};
  for(const name of Object.keys(result.metafile.inputs).sort()){
-  if(name==='underlay-fixture-entry.js'||name.startsWith('unconstructed-worker:'))continue;
+  if(name==='underlay-fixture-entry.js'||name.startsWith('unconstructed-worker:')||name.startsWith('underlay-baseline:'))continue;
   const path=resolve(web,name);assert.ok(path.startsWith(web+'/'));
   sources['web/'+name]=createHash('sha256').update(await readFile(path)).digest('hex');
  }
  assert.equal(sources['web/lib/custom-map-engine.ts'],createHash('sha256').update(source).digest('hex'));
- return{code:result.outputFiles[0].text,rendererSHA256:sources['web/lib/custom-map-engine.ts'],sources};
+ return{code:result.outputFiles[0].text,rendererSHA256:sources['web/lib/custom-map-engine.ts'],baselineRendererSHA256:BASELINE_SHA256,baselineSourceCommit:BASELINE_COMMIT,sources};
 }
 
 // This function executes inside Chromium. Canvas calls and image readback are
 // genuine; callbacks for the separate label/DOM-marker surfaces are outside the
 // ground pixel proof. Their full application audits remain mandatory.
-async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproject,MAP_OUTSIDE_COLOR,mapCanvasPolicy},options){
+async function runProductionPixels({CustomMapEngine,BaselineCustomMapEngine,geometryPath,mercatorUnproject,MAP_OUTSIDE_COLOR,mapCanvasPolicy},options){
  const check=(condition,message)=>{if(!condition)throw new Error(message);};
  const dpr=options.dpr,width=512,height=384,zoom=options.zoom??8,z=options.tileZ??Math.ceil(zoom),n=2**z,scale=256*2**zoom;
  check(devicePixelRatio===dpr,'Actual emulated DPR differs from the requested pixel proof');
@@ -112,7 +123,8 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
   // edges emulate cell clipping and must never be outlined by this draw path.
   const selectedBoundary=geometryPath({type:'LineString',coordinates:selectedRing.slice(0,2)}).path;
   const route=geometryPath({type:'LineString',coordinates:[[-260,-110],[-120,-60],[15,5],[130,75],[270,130]].map(coordinate)});
-  const make=(baseline=false)=>{
+  const make=(variant='optimized')=>{
+   const baseline=variant!=='optimized',underlayControl=variant==='underlay-control',Engine=baseline?BaselineCustomMapEngine:CustomMapEngine;
    const canvas=document.createElement('canvas');canvas.width=width*dpr;canvas.height=height*dpr;canvas.style.cssText=`width:${width}px;height:${height}px;position:absolute;left:0;top:0`;
    document.body.appendChild(canvas);surfaces.push(canvas);
    const context=canvas.getContext('2d',{alpha:false,willReadFrequently:policy.softwareRaster});
@@ -121,37 +133,41 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    context.fillStyle=baseline?'#ff00ff':'#00ffb0';context.fillRect(0,0,canvas.width,canvas.height);
    context.fillStyle=baseline?'#1a2bff':'#fff300';
    for(let y=0;y<canvas.height;y+=29)for(let x=0;x<canvas.width;x+=31)if(((x/31)+(y/29))%2===0)context.fillRect(x,y,19,17);
-   const engine=Object.assign(Object.create(CustomMapEngine.prototype),{canvas,context,element:document.createElement('div'),size:{width,height},pixelRatio:dpr,camera:{center:mercatorUnproject(center),zoom,bearingDegrees:options.bearing??0},pitch:options.pitch??0,mode:options.mode??'detail',state:{committedMode:'detail'},active:true,disposed:false,area,mask,boundaries,selectedArea,selectedBoundary,route,routeId:'pixel-fixture-route',overview:overviewBatch,detail:batch,relief:reliefBatch,imagery:options.mode==='satellite'?{kind:'eox-s2',generation:1,tiles:imagery}:undefined,imageryOverlay:batch,boundaryVisible:options.boundaries!==false,reliefVisible:true,drawRevision:0,pointer:{activePointers:1},animation:0,options:{},drawLabels(){},drawMarkers(){}});
-   const count={clear:0,area:0,mask:0,selectedArea:0,overview:0,detail:0,relief:0,imagery:0,proofCalls:0};
-   const fill=context.fill.bind(context),clear=context.fillRect.bind(context),drawImage=context.drawImage.bind(context);
+   const engine=Object.assign(Object.create(Engine.prototype),{canvas,context,element:document.createElement('div'),size:{width,height},pixelRatio:dpr,camera:{center:mercatorUnproject(center),zoom,bearingDegrees:options.bearing??0},pitch:options.pitch??0,mode:options.mode??'detail',state:{committedMode:'detail'},active:true,disposed:false,area,mask,boundaries,selectedArea,selectedBoundary,route,routeId:'pixel-fixture-route',overview:overviewBatch,detail:batch,relief:reliefBatch,imagery:options.mode==='satellite'?{kind:'eox-s2',generation:1,tiles:imagery}:undefined,imageryOverlay:batch,boundaryVisible:options.boundaries!==false,reliefVisible:true,drawRevision:0,pointer:{activePointers:1},animation:0,options:{},drawLabels(){},drawMarkers(){}});
+   const count={clear:0,discard:0,area:0,mask:0,selectedArea:0,overview:0,detail:0,relief:0,imagery:0,proofCalls:0};
+   const fill=context.fill.bind(context),clear=context.fillRect.bind(context),discard=context.clearRect.bind(context),drawImage=context.drawImage.bind(context);
    context.fill=function(path,...args){if(path===area)count.area++;if(path===mask)count.mask++;if(path===selectedArea)count.selectedArea++;return fill(path,...args);};
    context.fillRect=function(...args){count.clear++;return clear(...args);};
+   context.clearRect=function(...args){check(args.length===4&&args[0]===0&&args[1]===0&&args[2]===canvas.width&&args[3]===canvas.height&&context.getTransform().isIdentity,'The recording reset must cover the actual backing in identity coordinates');check(count.clear+count.area+count.overview+count.detail+count.relief+count.imagery+count.mask===0,'Recording reset must precede every frame paint');count.discard++;return discard(...args);};
    context.drawImage=function(image,...args){count[type.get(image)]++;return drawImage(image,...args);};
-   const proof=CustomMapEngine.prototype.detailCoversViewport;
-   engine.detailCoversViewport=function(value){count.proofCalls++;return baseline?false:proof.call(this,value);};
-   const render=()=>{for(const key of Object.keys(count))count[key]=0;CustomMapEngine.prototype.draw.call(engine);return{pixels:context.getImageData(0,0,canvas.width,canvas.height).data,operations:{...count}};};
+   const proof=Engine.prototype.detailCoversViewport;
+   engine.detailCoversViewport=function(value){count.proofCalls++;return underlayControl?false:proof.call(this,value);};
+   const render=()=>{for(const key of Object.keys(count))count[key]=0;Engine.prototype.draw.call(engine);return{pixels:context.getImageData(0,0,canvas.width,canvas.height).data,operations:{...count}};};
    return{engine,canvas,context,render};
   };
-  const baseline=make(true),optimized=make();
+  const baseline=make('baseline'),optimized=make(),underlayControl=make('underlay-control');
    const baselinePrior=baseline.context.getImageData(0,0,baseline.canvas.width,baseline.canvas.height).data,optimizedPrior=optimized.context.getImageData(0,0,optimized.canvas.width,optimized.canvas.height).data;
    const priorFrame={kind:'distinct-opaque-checkerboards',comparison:diff(baselinePrior,optimizedPrior),baselinePixelSHA256:await hash(baselinePrior),optimizedPixelSHA256:await hash(optimizedPrior)};
    check(priorFrame.comparison.differentPixels===width*height*dpr*dpr&&priorFrame.baselinePixelSHA256!==priorFrame.optimizedPixelSHA256,'Adversarial prior pixels must differ across the whole backing store');
   const movement=options.frames??[{x:0,y:0,cover:options.cover}];
   for(let index=0;index<movement.length;index++){
    const move=movement[index],next=mercatorUnproject({x:center.x+move.x/scale,y:center.y+move.y/scale});
-   baseline.engine.camera.center=next;optimized.engine.camera.center=next;
+   baseline.engine.camera.center=next;optimized.engine.camera.center=next;underlayControl.engine.camera.center=next;
    const actualCoverage=CustomMapEngine.prototype.detailCoversViewport.call(optimized.engine,optimized.engine.displayDetail());
    check(actualCoverage===move.cover,`${options.name}/${index}: coverage guard was ${actualCoverage}, expected ${move.cover}`);
-   const old=baseline.render(),current=optimized.render(),comparison=diff(old.pixels,current.pixels);
-   const frame={index,offset:{x:move.x,y:move.y},expectedCoverage:move.cover,actualCoverage,comparison,operations:{baseline:old.operations,optimized:current.operations},baselinePixelSHA256:await hash(old.pixels),optimizedPixelSHA256:await hash(current.pixels),width:optimized.canvas.width,height:optimized.canvas.height,
-    captures:[{phase:'baseline',png:baseline.canvas.toDataURL('image/png').split(',')[1]},{phase:'optimized',png:optimized.canvas.toDataURL('image/png').split(',')[1]}]};
+   const old=baseline.render(),current=optimized.render(),control=underlayControl.render(),comparison=diff(old.pixels,current.pixels),underlayComparison=diff(control.pixels,current.pixels);
+   const frame={index,offset:{x:move.x,y:move.y},expectedCoverage:move.cover,actualCoverage,comparison,underlayComparison,operations:{baseline:old.operations,optimized:current.operations,underlayControl:control.operations},baselinePixelSHA256:await hash(old.pixels),optimizedPixelSHA256:await hash(current.pixels),underlayControlPixelSHA256:await hash(control.pixels),width:optimized.canvas.width,height:optimized.canvas.height,
+    captures:[{phase:'baseline',png:baseline.canvas.toDataURL('image/png').split(',')[1]},{phase:'optimized',png:optimized.canvas.toDataURL('image/png').split(',')[1]},{phase:'underlay-control',png:underlayControl.canvas.toDataURL('image/png').split(',')[1]}]};
    frames.push(frame);
    check(comparison.differentPixels===0,`${options.name}/${index}: ${comparison.differentPixels} pixels changed (max delta ${comparison.maxChannelDelta})`);
-   check(old.operations.area===1&&old.operations.overview===overview.length,'Baseline did not execute the original underlays');
+   check(underlayComparison.differentPixels===0,'The original underlay-control pixels must remain identical');
+   check(control.operations.area===1&&control.operations.overview===overview.length&&control.operations.clear===1,'Underlay control did not execute all original underlays');
    check(current.operations.area===(move.cover?0:1)&&current.operations.overview===(move.cover?0:overview.length),'The production branch did not skip exactly the hidden underlays');
-   for(const key of ['mask','selectedArea','detail','relief','imagery'])check(old.operations[key]===current.operations[key],`${key} changed between branches`);
-   check(old.operations.clear===1&&current.operations.clear===(move.cover?0:1),'Only proven full opaque coverage may omit the paper clear');
-    check(current.operations.mask===1&&current.operations.proofCalls===1,'Every frame must retain the final outside mask and evaluate coverage once');
+   for(const key of ['clear','area','overview','mask','selectedArea','detail','relief','imagery','proofCalls'])check(old.operations[key]===current.operations[key],`${key} changed between actual old and new production branches`);
+   for(const key of ['mask','selectedArea','detail','relief','imagery'])check(control.operations[key]===current.operations[key],`${key} changed from the original underlay control`);
+   check(current.operations.clear===(move.cover?0:1),'Only proven full opaque coverage may omit the paper clear');
+   check(old.operations.discard===0&&current.operations.discard===1&&control.operations.discard===0,'Only the candidate may reset complete-frame recording once');
+   check(current.operations.mask===1&&current.operations.proofCalls===1&&control.operations.proofCalls===1,'Every frame must retain the final outside mask and evaluate coverage once');
    if(options.name==='opaque'){
     const expected=MAP_OUTSIDE_COLOR.slice(1).match(/../g).map(value=>parseInt(value,16));
     for(const point of [[0,0],[-248,0]])for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
@@ -162,7 +178,7 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
      // A fresh context has exactly the baseline's initial paint state. Reusing
      // a previous frame would also inherit the route's lineCap/lineJoin and
      // could create a difference even if the removed feature painted nothing.
-     const control=make(true);control.engine[property]=undefined;const changed=control.render();
+     const control=make('underlay-control');control.engine[property]=undefined;const changed=control.render();
      const result=diff(old.pixels,changed.pixels);check(result.differentPixels>0,`${property}: the fixture must contain visible production pixels`);negativeControls.push({name:'remove-'+property,...result});
     }
    }
@@ -176,10 +192,11 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
  finally{for(const image of bitmaps)image.close();for(const canvas of surfaces)canvas.remove();}
 }
 
-test('underlay fixture bundles the actual engine, geometry and paint dependencies without replacing draw',async()=>{
+test('underlay fixture bundles actual candidate draw and byte-exact immutable 1710 reference with real dependencies',async()=>{
  const result=await productionBundle();assert.ok(result.code.length>10000);assert.ok(/(?:class CustomMapEngine|CustomMapEngine = class)/.test(result.code));
  assert.ok(result.code.includes('detailCoversViewport'));assert.ok(result.code.includes('function geometryPath'));assert.ok(result.sources['web/lib/custom-map-camera.ts']);
  assert.ok(result.sources['web/lib/map-route-presentation.ts']);assert.ok(result.sources['web/lib/map-canvas-policy.ts']);
+ assert.equal(result.baselineRendererSHA256,BASELINE_SHA256);assert.equal(result.baselineSourceCommit,BASELINE_COMMIT);assert.notEqual(result.rendererSHA256,BASELINE_SHA256);
 });
 
 test('production map underlay omission preserves every real Canvas pixel and all fallbacks',{
@@ -188,7 +205,7 @@ test('production map underlay omission preserves every real Canvas pixel and all
  assert.ok(binary,'A real Chromium binary is required for the underlay pixel parity gate');
  const bundle=await productionBundle(),directory=await mkdtemp(join(tmpdir(),'tropnik-map-underlay-'));
  const output=join(web,'pages-preview/dist'),pictures=join(web,'pages-preview/design-qa/map-underlay');
- const report={schemaVersion:1,verified:false,phase:'browser-startup',evidence:'production-canvas-underlay-pixel-parity',sourceCommit:process.env.GITHUB_SHA||null,rendererSHA256:bundle.rendererSHA256,sources:bundle.sources,baseline:'same-production-draw-with-fixture-only-coverage-false',cases:[]};
+ const report={schemaVersion:1,verified:false,phase:'browser-startup',evidence:'production-canvas-underlay-pixel-parity',sourceCommit:process.env.GITHUB_SHA||null,rendererSHA256:bundle.rendererSHA256,sources:bundle.sources,baseline:'immutable-1710-production-draw',underlayControl:'immutable-1710-draw-with-fixture-only-coverage-false',baselineSourceCommit:bundle.baselineSourceCommit,baselineRendererSHA256:bundle.baselineRendererSHA256,cases:[]};
  const server=createHTTPServer((request,response)=>{
   const path=new URL(request.url,'http://127.0.0.1').pathname,content=path==='/'?'<!doctype html><meta charset="utf-8"><style>html,body{margin:0;width:512px;height:384px;overflow:hidden}</style><script src="/fixture.js"></script>':path==='/fixture.js'?bundle.code:null;
   response.writeHead(content===null?404:200,{'content-type':path==='/'?'text/html; charset=utf-8':'text/javascript; charset=utf-8','cache-control':'no-store'});response.end(content??'Not found');
@@ -214,6 +231,7 @@ test('production map underlay omission preserves every real Canvas pixel and all
     for(const frame of result.frames){
      const captures=[];for(const capture of frame.captures){const file=`dpr${dpr}-${scenario.name}-${frame.index}-${capture.phase}.png`,bytes=Buffer.from(capture.png,'base64');assert.ok(bytes.length>=33&&bytes.length<=8*1024*1024);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),frame.width);assert.equal(bytes.readUInt32BE(20),frame.height);await writeFile(join(pictures,file),bytes);captures.push({phase:capture.phase,file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});}frame.captures=captures;
      assert.equal(frame.comparison.differentPixels,0);assert.equal(frame.comparison.maxChannelDelta,0);assert.equal(frame.baselinePixelSHA256,frame.optimizedPixelSHA256);assert.equal(frame.actualCoverage,frame.expectedCoverage);
+     assert.deepEqual(frame.underlayComparison,frame.comparison);assert.equal(frame.underlayControlPixelSHA256,frame.optimizedPixelSHA256);
     }
     assert.equal(result.verified,true,result.error);assert.equal(result.dpr,dpr);
    }
