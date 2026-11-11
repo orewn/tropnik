@@ -1,0 +1,62 @@
+name: Android runner network diagnostics
+
+on:
+  push:
+    branches: [diagnostics/android-runner-network]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Compare unprivileged and installer network access without installing packages
+        timeout-minutes: 4
+        run: |
+          mkdir -p network-reports
+          cat > "$RUNNER_TEMP/tropnik-network-probe.py" <<'PY'
+          import concurrent.futures, json, os, pathlib, platform, subprocess, sys, time, urllib.request
+          context, destination = sys.argv[1:]
+          proxy_keys = ['http_proxy','https_proxy','HTTP_PROXY','HTTPS_PROXY','ALL_PROXY','all_proxy','NO_PROXY','no_proxy']
+          hosts = ['archive.ubuntu.com','security.ubuntu.com','azure.archive.ubuntu.com','dl.google.com','github.com','registry.npmjs.org']
+          def resolve(item):
+              host, family = item
+              start = time.monotonic()
+              try:
+                  run = subprocess.run(['getent', family, host], capture_output=True, text=True, timeout=10)
+                  addresses = sorted({line.split()[0] for line in run.stdout.splitlines() if line.split()})
+                  return dict(host=host, family=family, returncode=run.returncode, addresses=addresses, elapsedMs=round((time.monotonic()-start)*1000))
+              except subprocess.TimeoutExpired:
+                  return dict(host=host, family=family, timeout=True, elapsedMs=round((time.monotonic()-start)*1000))
+          urls = ['https://archive.ubuntu.com/ubuntu/dists/noble/InRelease','https://security.ubuntu.com/ubuntu/dists/noble-security/InRelease','https://dl.google.com/android/repository/repository2-3.xml','https://github.com/']
+          def request(url):
+              start = time.monotonic()
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url, method='HEAD'), timeout=12) as response:
+                      result = dict(url=url, status=response.status)
+              except Exception as error:
+                  reason = getattr(error, 'reason', None)
+                  # Never serialize a proxy URL, credentials, headers or body.
+                  result = dict(url=url, errorType=type(error).__name__, reasonType=type(reason).__name__ if reason is not None else None, errno=getattr(reason,'errno',None), status=getattr(error,'code',None))
+              result['elapsedMs'] = round((time.monotonic()-start)*1000)
+              return result
+          with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+              dns = list(pool.map(resolve, [(host,family) for host in hosts for family in ['ahostsv4','ahosts']]))
+              http = list(pool.map(request, urls))
+          report = dict(schemaVersion=1, diagnosticOnly=True, releaseEligible=False, context=context, os=platform.platform(), sourceCommit=os.environ.get('GITHUB_SHA'), proxyConfigured={key:bool(os.environ.get(key)) for key in proxy_keys}, dns=dns, https=http)
+          pathlib.Path(destination).write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(dict(context=context,proxyConfigured=report['proxyConfigured'],dnsSucceeded=sum(bool(row.get('addresses')) for row in dns),https=http)))
+          PY
+          python3 "$RUNNER_TEMP/tropnik-network-probe.py" user "$PWD/network-reports/user.json"
+          sudo -n python3 "$RUNNER_TEMP/tropnik-network-probe.py" root "$PWD/network-reports/root.json"
+          sudo -n --preserve-env=http_proxy,https_proxy,HTTP_PROXY,HTTPS_PROXY,ALL_PROXY,all_proxy,NO_PROXY,no_proxy python3 "$RUNNER_TEMP/tropnik-network-probe.py" root-proxy "$PWD/network-reports/root-proxy.json"
+      - name: Preserve network evidence without application certification
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: android-runner-network-${{ github.run_id }}
+          path: network-reports
+          if-no-files-found: error
+          retention-days: 7
