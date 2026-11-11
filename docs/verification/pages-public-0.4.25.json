@@ -1,0 +1,13 @@
+{
+  "verified": true,
+  "url": "https://orewn.github.io/tropnik/",
+  "buildId": "2fb1a476c09a5653",
+  "sourceCommit": "4b17b08c56b7d4ce3d46d33db988d61b44c62c7e",
+  "publicHttpChecks": 24,
+  "apkDelivery": "github-release",
+  "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.25-preview/tropnik-preview.apk",
+  "apkBytes": 67858685,
+  "apkSha256": "016aa309d22b1fc34d89949817d3e8fc61162e2c20f8b50a4a803e0feadb88e4",
+  "browserRenderingTested": true,
+  "browserProfiles": 4
+}
