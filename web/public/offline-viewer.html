@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#244d3c"><meta name="robots" content="noindex,nofollow">
-<title>Тропник · автономная карта</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/maps/maplibre-gl.css"><link rel="stylesheet" href="/offline.css"><link rel="stylesheet" href="/offline-fonts.css"><link rel="stylesheet" href="/maps/leaflet.css">
+<title>Тропник · автономная карта</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/custom-map/map.css"><link rel="stylesheet" href="/offline.css"><link rel="stylesheet" href="/offline-fonts.css">
 </head>
 <body>
 <header>
@@ -22,8 +22,8 @@
 <a href="/safety">Подготовка к походу <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h8v8m0-8L12 16M11 5H5v18h18v-6"/></svg></a>
 <a href="/offline-safety.html">Аварийная карточка</a>
 </aside>
-<section class="map-wrap" aria-label="Автономная карта России">
-<div id="map" class="map-is-loading" role="region" aria-label="Карта России и сохранённых маршрутов" aria-busy="true"></div>
+<section class="map-wrap atlas-wrap tropnik-custom-atlas tropnik-standalone-map" aria-label="Автономная карта России">
+<div id="map" class="map-is-loading tropnik-map-surface atlas-canvas" data-map-engine="tropnik-canvas" role="region" aria-label="Карта России и сохранённых маршрутов" aria-busy="true"></div>
 <div class="map-tools">
 <button id="zoom-in" aria-label="Увеличить масштаб" disabled><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 5v18M5 14h18"/></svg></button>
 <button id="zoom-out" aria-label="Уменьшить масштаб" disabled><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 14h18"/></svg></button>
@@ -43,6 +43,6 @@
 </div>
 </section>
 </main>
-<script src="/maps/leaflet.js"></script><script src="/maps/protomaps-leaflet.js"></script><script type="module" src="/offline.js"></script>
+<script type="module" src="/offline.js"></script>
 </body>
 </html>

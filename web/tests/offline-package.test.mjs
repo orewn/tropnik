@@ -73,7 +73,6 @@ function fixture(initial = packageData()) {
   }
   const respond = async url => {
     if (url === '/offline-map/manifest.json') return Response.json(current.manifest);
-    if (url === '/maps/pilot-style.json') return Response.json({ version: 8, sources: {}, layers: [] });
     if (current.resources.has(url)) return new Response(current.resources.get(url));
     throw new Error('Unexpected fixture request: ' + url);
   };
@@ -244,6 +243,10 @@ test('missing cross-tab locks fail closed for changes but keep an installed pack
 test('the shipped pilot package passes its real file hashes and size checks', async () => {
   const base = new URL('../public/offline-map/', import.meta.url);
   const manifest = JSON.parse(readFileSync(new URL('manifest.json', base), 'utf8'));
+  assert.equal(manifest.runtime, 'tropnik-canvas');
+  assert.equal(manifest.files.filter(file => /^localtiles\/.*\.pbf$/.test(file.path)).length, 193);
+  assert.equal(manifest.files.filter(file => /^terrain\/tiles\/.*\.png$/.test(file.path)).length, 21);
+  assert.equal(manifest.files.some(file => /^fonts\//.test(file.path) || /(?:maplibre|leaflet|protomaps|(?:^|\/)style\.json)/i.test(file.path)), false);
   const resources = new Map(manifest.files.map(file => [
     '/offline-map/' + file.path.split('/').map(encodeURIComponent).join('/'),
     readFileSync(new URL(file.path.split('/').map(encodeURIComponent).join('/'), base)),

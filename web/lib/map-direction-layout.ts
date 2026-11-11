@@ -153,6 +153,44 @@ export function mapLabelAvoidObstacles(label:MapLabelRect,safe:MapLabelSafeRect,
   return{x,y,hidden:true};
 }
 
+/** A count belongs to its geographic flag, so it may use the other side or sit
+ * immediately above/below it, but must never drift across the map to find room.
+ * The first candidate preserves the established right-hand badge. All other
+ * candidates are derived from the same unchanged 44px anchor. */
+export function directionCountShift(count:MapLabelRect,marker:MapLabelRect,safe:MapLabelSafeRect,obstacles:readonly MapLabelRect[],gap=8):MapLabelAvoidance{
+  if(![...Object.values(count),...Object.values(marker),...Object.values(safe)].every(Number.isFinite))return{x:0,y:0,hidden:true};
+  const width=count.right-count.left,height=count.bottom-count.top;
+  if(width<=0||height<=0||marker.right<=marker.left||marker.bottom<=marker.top)return{x:0,y:0,hidden:true};
+  const middle=(marker.left+marker.right)/2-width/2;
+  const usable=obstacles.filter(rect=>Object.values(rect).every(Number.isFinite)&&rect.right>rect.left&&rect.bottom>rect.top);
+  const vertical=(below:boolean)=>{
+    const x=middle-count.left;
+    let y=(below?marker.bottom+4:marker.top-height-4)-count.top;
+    // Nearby controls may extend a little above/below the marker. Move only
+    // along this adjacent side; the distance cap below forbids a detached badge.
+    for(let pass=0;pass<=usable.length;pass++){
+      const rect=translateRect(count,x,y),hit=usable.find(obstacle=>intersects(rect,obstacle,gap));
+      if(!hit)break;
+      y=(below?hit.bottom+gap:hit.top-gap-height)-count.top;
+    }
+    return{x,y};
+  };
+  const candidates=[
+    {x:0,y:0},
+    {x:marker.left+marker.right-count.right-count.left,y:0},
+    vertical(false),vertical(true),
+  ].sort((a,b)=>(a.x*a.x+a.y*a.y)-(b.x*b.x+b.y*b.y));
+  for(const candidate of candidates){
+    const rect=translateRect(count,candidate.x,candidate.y);
+    const distance=Math.hypot((rect.left+rect.right-marker.left-marker.right)/2,(rect.top+rect.bottom-marker.top-marker.bottom)/2);
+    if(distance>DIRECTION_MARKER_SIZE+Math.max(width,height)/2)continue;
+    if(insideSafe(rect,safe)&&!usable.some(obstacle=>intersects(rect,obstacle,gap)))return{...candidate,hidden:false};
+  }
+  // The accessible button name still contains the count. Hide this decorative
+  // duplicate only when every adjacent placement is obscured by real controls.
+  return{x:0,y:0,hidden:true};
+}
+
 /** Prefer the semantic side of a marker, but flip before applying translation. */
 export function mapLabelPlacement(
   preferred: MapLabelPlacement, marker: MapLabelRect, labelHeight: number,
@@ -205,18 +243,26 @@ type MeasuredMapLabel={
   button:HTMLButtonElement;label:HTMLElement;preferred:MapLabelPlacement;placement:MapLabelPlacement;
   rect?:DOMRect;shift?:MapLabelAvoidance;
 };
+type MeasuredDirectionCount={button:HTMLButtonElement;count:HTMLElement;marker?:DOMRect;rect?:DOMRect;shift?:MapLabelAvoidance};
 
 /** Reflow settled markers without one forced layout per label. Prepare all
  * labels, measure all, apply side flips together, then measure only the flipped
  * labels. Collision resolution uses those snapshots, so its final writes never
  * alternate with DOM measurements. Geographic anchors and priority stay intact. */
 export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonElement>,viewport:HTMLElement){
-  const {safe,obstacles}=viewportLabelLayout(viewport),labels:MeasuredMapLabel[]=[];
+  const {safe,obstacles}=viewportLabelLayout(viewport),labels:MeasuredMapLabel[]=[],counts:MeasuredDirectionCount[]=[];
   const ordered=[...buttons.values()].filter(button=>!button.hidden&&button.isConnected).sort((a,b)=>{
     const priority=(button:HTMLButtonElement)=>button.classList.contains('is-selected')?0:button.classList.contains('direction-cluster')?1:2;
     return priority(a)-priority(b)||(a.dataset.regionId??'').localeCompare(b.dataset.regionId??'','en');
   });
   for(const button of ordered){
+    const count=button.querySelector<HTMLElement>('.region-marker-count');
+    if(count){
+      delete button.dataset.mapCountHidden;
+      setInlineProperty(count,'--map-count-shift-x','0px');
+      setInlineProperty(count,'--map-count-shift-y','0px');
+      if(count.textContent)counts.push({button,count});
+    }
     const label=button.querySelector<HTMLElement>('.region-marker-label');
     if(!label)continue;
     labels.push({button,label,preferred:'bottom',placement:'bottom'});
@@ -245,6 +291,19 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
   }
   for(const item of labels)if(item.rect&&item.placement!==item.preferred)item.button.dataset.mapLabelPlacement=item.placement;
   for(const item of labels)if(item.rect&&item.placement!==item.preferred)item.rect=item.label.getBoundingClientRect();
+  for(const item of counts){
+    const marker=item.button.getBoundingClientRect(),rect=item.count.getBoundingClientRect();
+    if(rect.width<2||rect.height<2)continue;
+    item.marker=marker;item.rect=rect;
+  }
+  // Counts have a small finite set of positions next to their own flag. Resolve
+  // them first, then keep the more flexible text labels clear of those badges.
+  for(const item of counts){
+    if(!item.rect||!item.marker)continue;
+    const anchors=counts.filter(other=>other!==item&&other.marker).map(other=>other.marker!);
+    item.shift=directionCountShift(item.rect,item.marker,safe,[...obstacles,...anchors]);
+    if(!item.shift.hidden)obstacles.push(translateRect(item.rect,item.shift.x,item.shift.y));
+  }
   // Reuse one obstacle list; every accepted label becomes an obstacle only for
   // the lower-priority labels that follow it, as in the previous sequential flow.
   for(const item of labels){
@@ -260,6 +319,12 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
     if(shift.hidden)button.dataset.mapLabelHidden='true';
     button.classList.toggle('map-label-shifted',shift.x!==0||shift.y!==0||placement!==preferred);
   }
+  for(const {button,count,shift} of counts){
+    if(!shift)continue;
+    setInlineProperty(count,'--map-count-shift-x',`${shift.x}px`);
+    setInlineProperty(count,'--map-count-shift-y',`${shift.y}px`);
+    if(shift.hidden)button.dataset.mapCountHidden='true';
+  }
 }
 
 /** Reflow labels when fonts, responsive cards, controls or the mobile sheet
@@ -268,6 +333,7 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
 export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
   const root=viewport.closest('.explore-layout')??viewport.parentElement??viewport;
   const selector=MAP_LABEL_OBSTACLE_SELECTORS.join(',');
+  const innerObstacleSelector=MAP_LABEL_OBSTACLE_SELECTORS.filter(value=>value!=='.explore-panel').join(',');
   let frame=0,disposed=false;
   const queue=()=>{
     if(disposed||frame)return;
@@ -280,10 +346,31 @@ export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
     for(const element of current)if(!observed.has(element)){observed.add(element);resize.observe(element);}
   };
   observe();
+  const containsObstacle=(node:Node)=>node instanceof Element&&(observed.has(node)||node.matches(selector)||!!node.querySelector(selector));
+  const containsDirection=(node:Node)=>node instanceof Element&&(node.matches('.region-marker')||!!node.querySelector('.region-marker'));
   const mutation=new MutationObserver(records=>{
     if(disposed)return;
     const relevant=records.some(record=>{
-      const target=record.target;return !(target instanceof Element)||!target.closest('.atlas-canvas');
+      const target=record.target;
+      if(!(target instanceof Element))return true;
+      if(target.closest('.atlas-canvas')){
+        // Catalogue changes can update counts or groups without moving the
+        // camera. Observe only this content/visibility; our own style/class
+        // writes and every animated marker transform must remain silent.
+        if(viewport.dataset.mapCamera)return false;
+        if(record.type==='attributes')return record.attributeName==='hidden'&&target.matches('.region-marker');
+        return record.type==='childList'&&(target.matches('.region-marker-count,.region-marker-label')||[...record.addedNodes,...record.removedNodes].some(containsDirection));
+      }
+      // The fixed-size drawer, rather than each route row, is the obstacle.
+      // Search replaces cards and their classes on every keystroke, but none
+      // of that changes the drawer's outer rectangle. Its ResizeObserver and
+      // own class/visibility/settled-transform signals still request reflow.
+      if(!target.closest('.explore-panel-content,.panel-foot'))return true;
+      // Preserve real overlays even if a future layout nests one in the list.
+      if(target.closest(innerObstacleSelector))return true;
+      if(record.type==='attributes')return !!target.querySelector(selector);
+      if(record.type==='childList')return [...record.addedNodes,...record.removedNodes].some(containsObstacle);
+      return false;
     });
     if(relevant){observe();queue();}
   });

@@ -1,14 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import {useState, useEffect, useCallback, useRef} from 'react';
-import {ArrowDown, UserCircle, List, X, CheckCircle, MagnifyingGlass} from '@/components/TropnikIcons';
+import {memo, useState, useEffect, useCallback, useRef} from 'react';
+import {ArrowDown, UserCircle, CheckCircle, MagnifyingGlass} from '@/components/TropnikIcons';
 import {Brand} from './Brand';
 import {AuthDialog} from './AuthDialog';
 import {api, ApiError, AUTH_EVENT, announceAuth, errorText, isAbort, type AuthChange, type User} from '@/lib/api';
 import styles from './Header.module.css';
 
-export function Header({active = 'map'}: {active?: string}) {
+export const Header = memo(function Header({active = 'map'}: {active?: string}) {
   const [auth, setAuth] = useState(false);
   const [menu, setMenu] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -149,10 +149,10 @@ export function Header({active = 'map'}: {active?: string}) {
         <a href="/offline" className={`offline-link ${styles.offlineLink}`} aria-label="Карты с собой" title="Карты с собой"><ArrowDown size={18}/><span>Офлайн</span></a>
         {user ? <button className={`button secondary small ${styles.sessionButton}`} onClick={() => void logout()} disabled={pending} aria-label={pending ? 'Выходим из аккаунта' : 'Выйти из аккаунта ' + user.displayName}><CheckCircle size={17}/><span className={styles.sessionLabel}>{pending ? 'Выходим…' : user.displayName.split(' ')[0].slice(0, 16) + ' · выйти'}</span></button>
           : <button className={`button primary small login-button ${styles.sessionButton}`} aria-label="Войти" onClick={() => { setMenu(false); setAuth(true); }}><UserCircle size={18}/><span className={styles.sessionLabel}>Войти</span></button>}
-        <button ref={menuButton} type="button" className="icon-button menu-toggle" aria-label={menu ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menu} aria-controls="main-navigation" onClick={() => setMenu(!menu)}>{menu ? <X size={23}/> : <List size={23}/>}</button>
+        <button ref={menuButton} type="button" className="icon-button menu-toggle" aria-label={menu ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menu} aria-controls="main-navigation" onClick={() => setMenu(!menu)}><span className={styles.menuGlyph} aria-hidden="true"><span/><span/><span/></span></button>
       </div>
     </header>
     {notice && <div className="notice-block" role="status">{notice} <button type="button" className="text-link" aria-label="Закрыть уведомление" onClick={() => setNotice('')}>Закрыть</button></div>}
     {auth && <AuthDialog onClose={close} onUser={setUser}/>}
   </>;
-}
+});

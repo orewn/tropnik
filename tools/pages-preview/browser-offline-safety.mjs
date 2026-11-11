@@ -66,7 +66,7 @@ export async function restoreOfflineSafetyEnvironment(cdp,report,originTransport
  * URL with the network disabled. No storage seed or component state injection. */
 export async function runOfflineSafetyAudit(cdp,helpers){
  const {evaluate,waitValue,sleep,pointerAt}=helpers;
- const profile={name:'android-portrait',width:412,height:915,mobile:true,engine:'leaflet'};
+ const profile={name:'android-portrait',width:412,height:915,mobile:true,engine:'tropnik-canvas'};
  const report={schemaVersion:1,profile:profile.name,passed:false,nativeInputs:0,inputs:[]};
  const url=new URL('safety/registration/',helpers.url).href;
  let observingOffline=false,successfulResponses=0;

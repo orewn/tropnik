@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "verification": "terrain-presentation-pixels",
+  "status": "passed",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "scope": "Standalone real Chromium pixel parity between immutable direct terrain presentation and the production deferred MSAA presentation. This is not a full application, performance, physical-device, or release acceptance result.",
+  "source": {
+    "repository": "orewn/tropnik",
+    "branch": "diagnostics/terrain-presentation-pixels",
+    "commit": "350fb0606d1505fe3e8c6712e180957753929e59",
+    "tree": "44bb0e58d57cca80f26f90e959dcb85c1093b140",
+    "rendererPath": "web/public/terrain/terrain-renderer.js",
+    "rendererSHA256": "f62b4d8f6286ec7dd12ff3a9c518c64ae04148c3415f3ae31b16d8876e8cdd6d"
+  },
+  "ci": {
+    "runId": 43062875889,
+    "jobId": 130669862526,
+    "conclusion": "success",
+    "url": "https://github.com/orewn/tropnik/actions/runs/43062875889",
+    "artifact": {
+      "id": 13873544182,
+      "name": "tropnik-terrain-presentation-43062875889-1",
+      "bytes": 7655899,
+      "sha256": "a461bc2f7f06d84b82609ca23e48cb373b0bd9ee2b76344d227456744a6cd595",
+      "files": 100,
+      "pngFiles": 97,
+      "jsonFiles": 3,
+      "downloadedBytesAndDigestIndependentlyVerified": true
+    }
+  },
+  "immutableReference": {
+    "sourceCommit": "dbcb2c53345b68ba2f44c6e861d38a9766810946",
+    "sourcePath": "web/public/terrain/terrain-renderer.js",
+    "fixturePath": "tools/pages-preview/tests/fixtures/terrain-renderer-f36-reference.mjs",
+    "bytes": 79132,
+    "sha256": "f36f3dbebc7b9acc1083fc9d39fc20821ef9d42872b9f5ec06245e695d5e1fed",
+    "gitBlob": "1c2b9d746cd434f62e739f47ef246df70158795a",
+    "byteAndGitBlobIdentityVerified": true,
+    "generatedFromCurrentRenderer": false,
+    "referenceFramesMatchingPriorVerifiedDirectArtifact": 20,
+    "priorArtifact": {
+      "runId": 43059617066,
+      "artifactId": 13873561404,
+      "sha256": "2b1ffa7d18dca3ad4742c6b7e9ccf3daba3a81c9bc6ae48d3650ea654992cc4f"
+    }
+  },
+  "pixels": {
+    "cases": 8,
+    "devicePixelRatios": [
+      1,
+      2
+    ],
+    "masks": [
+      "full",
+      "mixed"
+    ],
+    "views": [
+      "initial",
+      "rotated and zoomed with trusted context restoration"
+    ],
+    "comparisonPairs": 20,
+    "pngFiles": 40,
+    "differingRGBABytes": 0,
+    "maximumChannelDelta": 0,
+    "independentPillowAndNumPyDecode": true,
+    "readPixelsSHA256MatchesDecodedPNG": true,
+    "trustedContextRestoreCases": 8,
+    "restorePixelDifference": 0,
+    "independentlyRecomputedWitnessSets": 16,
+    "routeLeakPixels": 0,
+    "sourceGrid": {
+      "width": 17,
+      "height": 17,
+      "vertices": 289,
+      "triangles": 512,
+      "meshStride": 1,
+      "metreScale": 1,
+      "nonflat": true,
+      "sourceElevationsUnchanged": true
+    }
+  },
+  "actualCompletion": {
+    "fencesCreated": 20,
+    "fencesDeleted": 20,
+    "maximumPendingFences": 1,
+    "completedCallbacks": 20,
+    "clientWaitSyncCalls": 157,
+    "everyWaitFlags": 0,
+    "everyWaitTimeout": 0,
+    "queuedAtCompletion": 0,
+    "defaultSceneDraws": 0,
+    "unreadyPresentationDraws": 0,
+    "pendingDefaultDraws": 0,
+    "pendingDefaultClears": 0,
+    "pendingBackingResizes": 0,
+    "liveFencesAfterDestroy": 0,
+    "renderTarget": "RGB8 MSAA resolve to RGB8 single-sample texture, followed by texelFetch presentation after a real signaled fence",
+    "samples": 4,
+    "depthBits": 24,
+    "stencilBits": 8
+  },
+  "mandatoryCrossGates": {
+    "sameSourceCommitRendererAndObservedEnvironment": true,
+    "allThreeStrictReceiptValidatorsPassed": true,
+    "shaderSpecialization": {
+      "receipt": "dist/browser-terrain-full-mask-verification.json",
+      "cases": 8,
+      "comparisonPairs": 20,
+      "pngFiles": 40,
+      "differingRGBABytes": 0
+    },
+    "originalMask": {
+      "receipt": "dist/browser-terrain-mask-verification.json",
+      "cases": 4,
+      "pngFiles": 17,
+      "passed": true
+    },
+    "totalIndependentlyDecodedPNGFiles": 97
+  },
+  "environment": {
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "chromeVersion": "156.0.8078.79",
+    "chromeRevision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+    "compositor": "native software",
+    "webgl": "SwiftShader WebGL2",
+    "nativeWindow": {
+      "width": 1920,
+      "height": 1920
+    },
+    "nativeClient": {
+      "width": 1920,
+      "height": 1833
+    },
+    "nativeDevicePixelRatio": 1,
+    "fixtureCSSSize": {
+      "width": 512,
+      "height": 384
+    },
+    "fixtureBackingSizes": [
+      {
+        "width": 512,
+        "height": 384
+      },
+      {
+        "width": 1024,
+        "height": 768
+      }
+    ],
+    "contextAttributes": {
+      "alpha": false,
+      "antialias": true,
+      "depth": true,
+      "stencil": true,
+      "preserveDrawingBuffer": false
+    }
+  },
+  "evidence": {
+    "receipt": "dist/browser-terrain-presentation-verification.json",
+    "pngDirectory": "design-qa/terrain-presentation",
+    "independentPixelReport": "independent-pixel-verification.json",
+    "sourceAndEnvironmentBinding": "source-environment-binding.json",
+    "remoteMetadata": "github-evidence.json"
+  },
+  "limitations": [
+    "Context loss and destruction occur after settled captures. This run does not claim a forced mid-flight resize or context-loss browser scenario.",
+    "The renderer and fixture sources are bound to this diagnostic commit. No production generated bundles were used by the standalone fixture.",
+    "The final candidate must regenerate derived assets and repeat all required matching-source graphics gates and the full browser and Android acceptance workflows.",
+    "Zero pixel difference here does not establish full application performance or release eligibility."
+  ]
+}

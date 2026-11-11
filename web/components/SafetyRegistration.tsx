@@ -29,8 +29,8 @@ type SafetyCatalog = {
 };
 let safetyCatalogPromise: Promise<SafetyCatalog> | undefined;
 function loadSafetyCatalog(): Promise<SafetyCatalog> {
-  safetyCatalogPromise ??= import('@/lib/content').then(({regions, trails}) => ({
-    regions: regions.map(({id, name}) => ({id, name})),
+  safetyCatalogPromise ??= Promise.all([import('@/lib/content'), import('@/lib/territories')]).then(([{regions, trails}, {territories}]) => ({
+    regions: [...regions, ...territories].map(({id, name}) => ({id, name})),
     routes: trails.map(({id, title, regionId, description}) => ({id, title, regionId, description})),
   }));
   return safetyCatalogPromise;

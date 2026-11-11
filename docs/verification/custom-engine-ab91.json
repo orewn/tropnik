@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "kind": "intermediate-custom-engine-checkpoint",
+  "verified": false,
+  "releaseEligible": false,
+  "source": {
+    "repository": "orewn/tropnik",
+    "headCommit": "ab91c12ffe80d178b947d570cf6d2cc2f556dedd",
+    "androidPullRequestMergeCommit": "7deb75e39bacff96bb3bbd9026813fb6dbb25bdb",
+    "identicalGitTree": "61e212911832f7503364b229f25a12884ad0fdcb",
+    "sourceTreeIdentityVerified": true,
+    "sharedRuntimeSourceInputsSha256": "5e46e7687359f229a335e909812e7043dd270bbf10d22d584c0024cdfea018b6",
+    "sharedRuntimeManifestSha256": "7259ee37048cbff5a7626b8caa9d78bd82690352d6544907f6f4cd19702b16d3"
+  },
+  "runs": {
+    "browser": "https://github.com/orewn/tropnik/actions/runs/43025759574",
+    "android": "https://github.com/orewn/tropnik/actions/runs/43025771662"
+  },
+  "previousBlockers": {
+    "desktopAltai": {
+      "jobId": 130539937945,
+      "status": "passed",
+      "profile": "desktop-webgl",
+      "interactionPassed": true,
+      "performancePassed": true,
+      "performanceIssues": [],
+      "artifactId": 13857935878,
+      "artifactSha256": "200ce1840b9a9fb13969f6d9bf8e19368ee6e67d934ac7f181cd45f20cd2f15f"
+    },
+    "portraitBaikal": {
+      "jobId": 130539937629,
+      "status": "passed",
+      "profile": "android-portrait",
+      "interactionPassed": true,
+      "directionHitAreasPassed": true,
+      "countText": "13",
+      "hitSamples": {
+        "total": 8,
+        "owned": 8,
+        "outsideAnchorOwned": 3
+      },
+      "trustedTouch": {
+        "x": 303.109375,
+        "y": 408.5226135253906,
+        "target": "SPAN[region-marker-count]",
+        "events": [
+          "pointerdown",
+          "pointerup",
+          "click"
+        ]
+      },
+      "after": {
+        "region": "baikal",
+        "zoom": 6
+      },
+      "evidenceMember": "dist/browser-failure.json#completedMapInteractions"
+    }
+  },
+  "android": {
+    "buildJobId": 130539978651,
+    "buildStatus": "success",
+    "deviceJobId": 130541917880,
+    "deviceStatus": "success",
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "deviceExecutionVerified": true,
+    "installedArtifactBytesVerified": true,
+    "releasePayloadDeviceVerified": true,
+    "sourceCommit": "7deb75e39bacff96bb3bbd9026813fb6dbb25bdb",
+    "buildReceiptSha256": "2867f670975a2de7a25d75abd6b958b25d1902a0b15655f8e4e742a9efdc1cdc",
+    "installedApks": {
+      "tropnik-preview.apk": {
+        "bytes": 67850493,
+        "sha256": "1b49cd6af5223569453680e8f324e0614c579d686d9fe954eb762153f900067a"
+      },
+      "tropnik-instrumentation-tests.apk": {
+        "bytes": 1115837,
+        "sha256": "069834b3f38f76b5765e15b4dd4d42abb8dd7eaa92f245441a95be5748dc30cf"
+      }
+    },
+    "artifactId": 13857666012,
+    "artifactSha256": "5bc16407d0e4cbce91153519eb422e4be20f6835c16a1040313a25def85b80e2",
+    "testedArchitecture": "x86_64",
+    "physicalDeviceVerified": false,
+    "arm64DeviceExecutionVerified": false,
+    "publishStatus": "skipped",
+    "signing": "development / debug; pipeline unchanged at this checkpoint"
+  },
+  "fullBrowser": {
+    "jobId": 130539937629,
+    "status": "failure",
+    "profile": "android-portrait",
+    "assertion": "The known mapped area lost its real land-cover texture",
+    "actual": "loading",
+    "expected": "ready",
+    "location": "tools/pages-preview/browser-zoom-audit.mjs:488",
+    "finding": "The wait loop classified the persistent route warning in .terrain-progress as a rendering error and stopped before cartography finished. Warning/error distinction requires a new verified run.",
+    "artifactId": 13857388155,
+    "artifactSha256": "dad23256fe62da408bd94555a5c1718674592361135ccfb1adc21ac8c14c0bdf",
+    "evidenceMembers": [
+      "dist/browser-failure.json",
+      "dist/browser-failure.png",
+      "design-qa/android-portrait.json"
+    ],
+    "recordedPerformanceIssues": 14
+  },
+  "normalUiPerformance": {
+    "jobId": 130539938307,
+    "jobConclusion": "success",
+    "diagnosticOnly": true,
+    "verified": false,
+    "releaseEligible": false,
+    "cpuSlowdownRate": 1,
+    "performancePassed": false,
+    "issueCount": 55,
+    "artifactId": 13857585932,
+    "artifactSha256": "60225ea224f009e4353c1cf57ee0c513d26e98785a7dfc1795243c6aa0b3b0e7"
+  },
+  "scope": "This records the ab91 checkpoint only. Russia-only 3D display masking and later performance corrections were still in progress. A new final source commit requires the complete browser gate and exact-artifact Android validation."
+}

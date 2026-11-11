@@ -1,8 +1,11 @@
 /* Тропник. Only public static assets are cached. Auth, chat and API responses never enter CacheStorage. */
-const VERSION='tropnik-shell-0.4.23-e7af981f6e8a8747';
-const SHELL=['/maps/map-coverage-lod.js','/maps/map-coverage-renderers.js','/data/map-coverage/manifest.json','/data/map-coverage/base.coverage','/maps/russia-viewport.js','/maps/map-label-coverage.js','/maps/map-label-geometry.js','/data/russia-display-area.geojson','/data/russia-outside-mask.geojson','/data/russia-canonical-mask.geojson','/data/russia-boundaries-provenance.json','/offline-fonts.css','/fonts/MANROPE-LICENSE.txt','/fonts/manrope-latin-400.woff2','/fonts/manrope-cyrillic-400.woff2','/fonts/manrope-latin-600.woff2','/fonts/manrope-cyrillic-600.woff2','/maps/leaflet.js','/maps/leaflet.css','/maps/protomaps-leaflet.js','/maps/canvas-style.js','/maps/canvas-label-coverage.js','/maps/map-city-labels.js','/offline-safety.html','/offline-safety.js','/offline-safety.css','/offline-viewer.html','/offline.js','/offline.css','/favicon.svg','/data/world.geojson','/data/regions.geojson','/data/territories.geojson'];
-const MAP_WARM=['/maps/tropa-style.json','/maps/tropnik-pictograms.js','/maps/tropnik-sprite.png','/maps/tropnik-sprite.json','/maps/tropnik-sprite@2x.png','/maps/tropnik-sprite@2x.json','/maps/tropnik-sprite-provenance.json'];
-const WEBGL_WARM=['/terrain/ATTRIBUTION.txt','/terrain/sources/Copernicus-GLO30-LICENSE.pdf','/terrain/landscape.html','/maps/maplibre-gl.mjs','/maps/maplibre-gl.css','/maps/maplibre-worker.js'];
+const VERSION='tropnik-shell-0.4.24-ab71ee31827a430e';
+const SHELL=["/maps/map-coverage-lod.js","/data/map-coverage/manifest.json","/data/map-coverage/base.coverage","/maps/russia-viewport.js","/data/russia-display-area.geojson","/data/russia-outside-mask.geojson","/data/russia-canonical-mask.geojson","/data/russia-boundaries-provenance.json","/offline-fonts.css","/fonts/MANROPE-LICENSE.txt","/fonts/manrope-latin-400.woff2","/fonts/manrope-cyrillic-400.woff2","/fonts/manrope-latin-600.woff2","/fonts/manrope-cyrillic-600.woff2","/offline-safety.html","/offline-safety.js","/offline-safety.css","/offline-viewer.html","/offline.js","/offline.css","/favicon.svg","/data/world.geojson","/data/regions.geojson","/data/territories.geojson"];
+const MAP_WARM=['/terrain/ATTRIBUTION.txt','/terrain/sources/Copernicus-GLO30-LICENSE.pdf','/terrain/landscape.html'];
+// BEGIN GENERATED CUSTOM MAP
+const CUSTOM_MAP_RESOURCES=[{"path":"/custom-map/chunks/custom-map-entry-XVkmYafs.js","sizeBytes":100219,"sha256":"b3c998e23f8b9aae6129a1d489d62b4778a2f41ac849b33697c29b3099dd10e3"},{"path":"/custom-map/chunks/terrain-renderer-qT471hOA.js","sizeBytes":81381,"sha256":"9f3097b89055aebc9493305ec0153a37cb63baa0e35d38aadb78a989a3ba17b3"},{"path":"/custom-map/Manrope-OFL.txt","sizeBytes":4383,"sha256":"d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"},{"path":"/custom-map/map-runtime.js","sizeBytes":156,"sha256":"fc61be90003bf26c47c838b32a6dac44578b627a2eb788fd87382a533d1a40cb"},{"path":"/custom-map/map.css","sizeBytes":75255,"sha256":"66a2a17f1cb861b4b3f60e74861f2ddf1232f21d3561cf1b16bba9a15d29540c"},{"path":"/custom-map/workers/custom-map-tiles.worker-GtnvHQzs.js","sizeBytes":23922,"sha256":"0be3c1608bf8135ec24615bb5cdac7f721fd1a4f66cb73c3c5522df7975c8a31"},{"path":"/custom-map/workers/terrain-preparation.worker-B8lieq38.js","sizeBytes":2849,"sha256":"fb157dbeb3f394b9d9a3edd115cc30dc64f11e352255ca609a2191fa8be7ae0f"},{"path":"/custom-map/manifest.json","sizeBytes":342021,"sha256":"93d109811dbd84cc60e936d8928a755eaf8867a35c58983e5bf6f3c9f7e47146"}];
+// END GENERATED CUSTOM MAP
+const CUSTOM_MAP_URLS=new Set(CUSTOM_MAP_RESOURCES.map(file=>file.path));
 const warmJobs=new Map();
 const SAFETY_PAGES=['/safety/registration','/safety/registration/','/offline-safety','/offline-safety.html'];
 const COVERAGE_CELLS='/data/map-coverage/cells/';
@@ -69,20 +72,37 @@ async function cacheOverview(cache){
  await cache.put(base+'manifest.json',new Response(manifestText,{headers:{'Content-Type':response.headers.get('Content-Type')||'application/json'}}));
  await cache.addAll([base+'tilejson.json',base+'ATTRIBUTION.txt']);
 }
-function warmMapCache(engine){
- const kind=engine==='webgl'?'webgl':'canvas',marker=`/_offline/map-warm-${VERSION}-${kind}`;
+async function cacheCustomMapRuntime(cache){
+ if(!CUSTOM_MAP_RESOURCES.length||CUSTOM_MAP_RESOURCES.length>64)throw new Error('Missing shared map shell');
+ let index=0,total=0;
+ await Promise.all(Array.from({length:3},async()=>{
+  while(index<CUSTOM_MAP_RESOURCES.length){
+   const file=CUSTOM_MAP_RESOURCES[index++];
+   if(!file.path.startsWith('/custom-map/')||!Number.isSafeInteger(file.sizeBytes)||file.sizeBytes<=0||file.sizeBytes>2*1024*1024||!/^[a-f0-9]{64}$/.test(file.sha256))throw new Error('Invalid shared map shell');
+   total+=file.sizeBytes;if(total>4*1024*1024)throw new Error('Shared map shell exceeds budget');
+   const cached=await cache.match(file.path),response=cached||await fetch(file.path,{cache:'no-store',credentials:'omit'});
+   if(!response.ok||(!cached&&response.type!=='basic'))throw new Error('Shared map runtime unavailable');
+   const bytes=await response.arrayBuffer();
+   const actual=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(value=>value.toString(16).padStart(2,'0')).join('');
+   if(bytes.byteLength!==file.sizeBytes||actual!==file.sha256)throw new Error('Shared map runtime integrity mismatch');
+   await cache.put(file.path,new Response(bytes,{headers:{'Content-Type':response.headers.get('Content-Type')||'application/octet-stream'}}));
+  }
+ }));
+}
+function warmMapCache(){
+ const kind='canvas',marker=`/_offline/map-warm-${VERSION}-${kind}`;
  if(warmJobs.has(kind))return warmJobs.get(kind);
- const job=(async()=>{const cache=await caches.open(VERSION);if(await cache.match(marker))return;await cache.addAll(MAP_WARM);if(kind==='webgl')await cache.addAll(WEBGL_WARM);await cacheOverview(cache);await cache.put(marker,new Response('ready',{headers:{'Content-Type':'text/plain'}}));})().catch(error=>{warmJobs.delete(kind);throw error;});
+ const job=(async()=>{const cache=await caches.open(VERSION);if(await cache.match(marker))return;await cache.addAll(MAP_WARM);await cacheCustomMapRuntime(cache);await cacheOverview(cache);await cache.put(marker,new Response('ready',{headers:{'Content-Type':'text/plain'}}));})().catch(error=>{warmJobs.delete(kind);throw error;});
  warmJobs.set(kind,job);return job;
 }
-self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(VERSION);await cache.addAll(SHELL);})());});
+self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(VERSION);await Promise.all([cache.addAll(SHELL),cacheCustomMapRuntime(cache)]);})());});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{for(const name of await caches.keys())if(name.startsWith('tropnik-shell-')&&name!==VERSION)await caches.delete(name);await self.clients.claim();})());});
 self.addEventListener('message',event=>{if(event.data?.type==='skip-waiting')event.waitUntil(self.skipWaiting());else if(event.data?.type==='warm-map')event.waitUntil(warmMapCache(event.data.engine));});
 async function verifiedResource(request){const names=(await caches.keys()).filter(n=>n.startsWith('tropnik-map-')).sort().reverse();for(const name of names){const cache=await caches.open(name);if(await cache.match('/_offline/verified-map')){const match=await cache.match(request);if(match)return match;}}return null;}
 self.addEventListener('fetch',event=>{const req=event.request,url=new URL(req.url);if(req.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/')||req.headers.get('RSC'))return;
  if(coverageCell(url.pathname)){const result=coverageResponse(req,url);event.respondWith(result.then(value=>value.response));event.waitUntil(result.then(value=>value.write).catch(()=>{}));return;}
- if(url.pathname.startsWith('/offline-map/')||url.pathname==='/maps/pilot-style.json'){event.respondWith((async()=>{if(req.cache==='no-store'||req.cache==='reload')return fetch(req);const found=await verifiedResource(req);if(found)return found;return fetch(req);})());return;}
+ if(url.pathname.startsWith('/offline-map/')){event.respondWith((async()=>{if(req.cache==='no-store'||req.cache==='reload')return fetch(req);const found=await verifiedResource(req);if(found)return found;return fetch(req);})());return;}
  if(req.mode==='navigate'){event.respondWith(fetch(req).catch(async()=>{const cache=await caches.open(VERSION);if(SAFETY_PAGES.includes(url.pathname))return await cache.match('/offline-safety.html')||Response.error();return await cache.match(url.pathname)||await cache.match('/offline-viewer.html')||Response.error();}));return;}
- const permitted=['/terrain/terrain-grid.json','/terrain/terrain-preview.json'].includes(url.pathname)||SHELL.includes(url.pathname)||MAP_WARM.includes(url.pathname)||WEBGL_WARM.includes(url.pathname)||url.pathname.startsWith('/_next/static/')||url.pathname.startsWith('/assets/')||url.pathname.startsWith('/data/routes/')||url.pathname.startsWith('/maps/russia-relief/');if(!permitted)return;
+ const permitted=['/terrain/terrain-grid.json','/terrain/terrain-preview.json'].includes(url.pathname)||SHELL.includes(url.pathname)||MAP_WARM.includes(url.pathname)||CUSTOM_MAP_URLS.has(url.pathname)||url.pathname.startsWith('/_next/static/')||url.pathname.startsWith('/assets/')||url.pathname.startsWith('/data/routes/')||url.pathname.startsWith('/maps/russia-relief/');if(!permitted)return;
  event.respondWith((async()=>{const cache=await caches.open(VERSION);const found=await cache.match(req);if(found)return found;const res=await fetch(req);if(res.ok&&res.type==='basic')await cache.put(req,res.clone());return res;})());
 });

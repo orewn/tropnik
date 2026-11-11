@@ -4,7 +4,7 @@ import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { shellPaths, verifyMapShell } from '../scripts/verify-map-shell.mjs';
+import { shellPaths, customMapShellRecords, verifyMapShell } from '../scripts/verify-map-shell.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const publicRoot = path.join(root, 'public');
@@ -17,6 +17,7 @@ async function copyInputs(t, omit = new Set()) {
   const catalog = JSON.parse(await readFile(catalogPath, 'utf8'));
   const files = new Set(['public/sw.js', 'lib/territories.generated.json',
     ...shellPaths(source).map(url => 'public/' + decodeURIComponent(url.slice(1))),
+    ...customMapShellRecords(source).map(record => 'public/' + record.path.slice(1)),
     ...catalog.metadata.routeGeometrySources.map(record => 'public/' + decodeURIComponent(record.url.slice(1))),
   ]);
   for (const relative of files) {
@@ -32,6 +33,7 @@ test('the actual offline shell includes every committed asset and matching terri
   const receipt = await verifyMapShell(root);
   assert.equal(receipt.status, 'passed');
   assert.equal(receipt.shellAssets, shellPaths(source).length);
+  assert.equal(receipt.sharedMapFiles, customMapShellRecords(source).length);
   assert.ok(receipt.territoryCount > 6);
   assert.ok(receipt.routeGeometrySources >= 277);
   assert.ok(receipt.verifiedPublicFiles > receipt.shellAssets);
@@ -41,6 +43,14 @@ test('the actual offline shell includes every committed asset and matching terri
 test('a checkout missing territory geometry fails before the framework build', async t => {
   const { directory } = await copyInputs(t, new Set(['public/data/territories.geojson']));
   await assert.rejects(verifyMapShell(directory), /Required map shell asset is missing: \/data\/territories\.geojson/);
+});
+
+test('a corrupt shared renderer worker cannot become a verified offline shell', async t => {
+  const { directory } = await copyInputs(t);
+  const worker = customMapShellRecords(source).find(record => record.path.startsWith('/custom-map/workers/custom-map-tiles.worker-'));
+  const filename = path.join(directory, 'public', worker.path.slice(1));
+  await writeFile(filename, 'corrupt worker');
+  await assert.rejects(verifyMapShell(directory), /Map asset integrity mismatch: \/custom-map\/workers\//);
 });
 
 test('an HTML asset cannot shadow the offline package management route', async t => {

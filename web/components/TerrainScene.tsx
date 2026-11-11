@@ -16,7 +16,7 @@ export function TerrainScene({trail,onClose,visible=true}:{trail?:Trail;onClose:
  const [phase,setPhase]=useState('Открываем рельеф…'),[error,setError]=useState(''),[source,setSource]=useState<TerrainGrid['source']|null>(null),[info,setInfo]=useState(false),[ready,setReady]=useState(false),[attempt,setAttempt]=useState(0),[revision,setRevision]=useState(0);
  useLayoutEffect(()=>{visibility.current=visible;},[visible]);
  useEffect(()=>{
-  let stale=false,failed=false,first=true,owned:SceneRenderer|null=null;const consumer=new AbortController();
+  let stale=false,failed=false,first=true,recovering=false,owned:SceneRenderer|null=null;const consumer=new AbortController();
   // Reset the external renderer's lifecycle state before a fresh load/retry.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   setError('');setReady(false);setPhase('Открываем рельеф…');
@@ -26,8 +26,8 @@ export function TerrainScene({trail,onClose,visible=true}:{trail?:Trail;onClose:
    owned=new module.TerrainRenderer(canvas.current,grid,{compactViewport:true,preparedModel,onRender:()=>{
     if(stale||failed)return;
     if(first){first=false;setPhase('');setReady(true);}
-    setError(current=>current==='Восстанавливаем изображение…'?'':current);
-   },onError:message=>{if(!stale&&!failed)setError(readableSceneError(message));},onFatal:message=>{
+    if(recovering){recovering=false;setError(current=>current==='Восстанавливаем изображение…'?'':current);}
+   },onError:message=>{if(!stale&&!failed){const messageText=readableSceneError(message);recovering=messageText==='Восстанавливаем изображение…';setError(messageText);}},onFatal:message=>{
     if(stale||failed)return;failed=true;setReady(false);setPhase('');setError(readableSceneError(message));
    }});
    renderer.current=owned;

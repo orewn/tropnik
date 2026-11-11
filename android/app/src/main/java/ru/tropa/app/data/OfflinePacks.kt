@@ -26,22 +26,24 @@ class OfflinePacks(
 
     suspend fun install(region: Region): InstalledPackEntity = mutex.withLock {
         withContext(Dispatchers.IO) {
-            require(region.id.matches(Regex("[a-z0-9-]{1,64}")))
+            require(region.id.matches(Regex("(?:[a-z0-9-]{1,64}|territory-[A-Za-z0-9]{1,54})"))
+                && catalog.region(region.id) != null)
             val regionRoot = File(root, region.id).apply { mkdirs() }
             val directory = File(regionRoot, UUID.randomUUID().toString()).apply { mkdirs() }
             val publication = OfflinePackPublication(directory)
             try {
+                val includePilot = catalog.hasDetailedOfflineMap(region.id)
                 val assets = mutableListOf("maps/world.geojson", "maps/style.json", "catalog.json", "SOURCES.txt")
                 if (context.assets.list("maps")?.contains("regions.geojson") == true) assets += "maps/regions.geojson"
                 assets += bundledFiles("maps/russia")
-                if (region.id == "krasnodar") {
+                if (includePilot) {
                     assets += bundledFiles("maps/pilot")
                     assets += bundledFiles("maps/terrain-pilot")
                     assets += bundledFiles("landscape")
                     assets += "licenses/Manrope-OFL.txt"
                     assets += "licenses/Manrope-Scene-OFL.txt"
                 }
-                val routeAssets = catalog.routes.filter { region.id in it.regionIds }.mapNotNull { it.geometryAsset }
+                val routeAssets = catalog.referenceRoutes(regionId = region.id).mapNotNull { it.geometryAsset }
                 assets += routeAssets
                 val files = JSONArray()
                 assets.distinct().forEach { asset ->
@@ -57,7 +59,7 @@ class OfflinePacks(
                     .put("regionId", region.id).put("version", catalog.version)
                     .put("kind", "bundled-preview-overview")
                     .put("navigationApproved", false).put("assets", files)
-                if (region.id == "krasnodar") manifest.put("detailedCoverage", JSONObject()
+                if (includePilot) manifest.put("detailedCoverage", JSONObject()
                     .put("title", "Район Бзерпинского карниза")
                     .put("bbox", JSONArray(listOf(40.29, 43.64, 40.49, 43.82)))
                     .put("routeIds", JSONArray(listOf("kavkaz-8a"))))

@@ -1,17 +1,12 @@
-import {canvasStyle} from '/maps/canvas-style.js';
-import {createCanvasLabelLayer} from '/maps/canvas-label-coverage.js';
-import {withMapLabelCoverage,bindMapLabelCoverage} from '/maps/map-label-coverage.js';
-import {loadMapCoverage,bindMapCoverage} from '/maps/map-coverage-lod.js';
-import {applyMapLibreCoverage,createCanvasCoverage} from '/maps/map-coverage-renderers.js';
-import {MAP_OUTSIDE_COLOR,russiaCamera,russiaPadding,constrainRussiaCamera,displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude} from '/maps/russia-viewport.js';
+import {RUSSIA_BOUNDS,russiaCamera,russiaPadding,displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude} from '/maps/russia-viewport.js';
 
 const byId=id=>document.getElementById(id),status=text=>{byId('map-status').textContent=text;};
 const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const MASK='russia-outside-mask';
-let saved=[],hasPilot=false,selected=null,driver,coverage=null,creditsStarted=false,creditsPinned=false;
+let saved=[],hasPilot=false,selected=null,driver,coverage=null,creditsStarted=false,creditsPinned=false,mapVisibility;
 function setCredits(expanded){byId('map-credit-body').hidden=!expanded;byId('map-credit-toggle').setAttribute('aria-expanded',String(expanded));byId('map-credit-toggle').setAttribute('aria-label',expanded?'Свернуть сведения об источниках':'Данные карты и лицензии');}
 byId('map-credit-toggle').onclick=()=>{creditsPinned=true;setCredits(byId('map-credit-body').hidden);};
 function mapVisible(visible){
+ if(mapVisibility===visible)return;mapVisibility=visible;
  byId('map').classList.toggle('map-is-loading',!visible);byId('map').setAttribute('aria-busy',String(!visible));
  for(const button of document.querySelectorAll('.map-tools button'))button.disabled=!visible;
  if(visible&&!creditsStarted){
@@ -19,7 +14,6 @@ function mapVisible(visible){
   setTimeout(()=>{const element=byId('map-credits');if(creditsPinned||element.matches(':hover')||element.contains(document.activeElement))return;setCredits(false);},8000);
  }
 }
-async function json(url){const response=await fetch(url);if(!response.ok)throw new Error('Local map resource unavailable');return response.json();}
 function coordinates(data){
  const result=[];
  const walk=value=>{
@@ -39,139 +33,94 @@ function cameraView(tileSize){
  return {camera:russiaCamera(rect.width,rect.height,padding,tileSize),padding};
 }
 function coveredBounds(data){return coveredRussiaBounds(coordinates(data),coverage);}
-function coverageStyle(style,session){
- const next=structuredClone(style);
- next.sources['russia-land']={type:'geojson',data:session.area,tolerance:0,maxzoom:18};next.sources['russia-mask']={type:'geojson',data:session.mask,tolerance:0,maxzoom:18};
- if(next.sources['overview-land'])next.sources['overview-land']={type:'geojson',data:session.area,tolerance:0,maxzoom:18};
- if(!next.layers.some(layer=>layer.id==='russia-land')){
-  let at=0;next.layers.forEach((layer,index)=>{if(layer.type==='background')at=index+1;});
-  next.layers.splice(at,0,{id:'russia-land',type:'fill',source:'russia-land',paint:{'fill-color':'#dbe4cd','fill-antialias':false}});
- }
- next.layers=next.layers.filter(layer=>layer.id!==MASK);
- next.layers.push({id:MASK,type:'fill',source:'russia-mask',paint:{'fill-color':MAP_OUTSIDE_COLOR,'fill-antialias':false}});
- return withMapLabelCoverage(next);
-}
-function overviewStyle(session){
- return coverageStyle({version:8,sources:{'regions-outline':{type:'geojson',data:session.boundaries,tolerance:0,maxzoom:18},'russia-relief':{type:'raster',tiles:['/maps/russia-relief/{z}/{x}/{y}.png'],tileSize:256,minzoom:0,maxzoom:4}},layers:[
-  {id:'background',type:'background',paint:{'background-color':MAP_OUTSIDE_COLOR}},
-  {id:'overview-relief',type:'raster',source:'russia-relief',maxzoom:6,paint:{'raster-opacity':['interpolate',['linear'],['zoom'],0,1,4,1,6,0]}},
-  {id:'boundaries',type:'line',source:'regions-outline',paint:{'line-color':'#9eaf8c','line-width':.7}},
- ]},session);
-}
-function coverageAvailability(session){const warning='На этом масштабе сохранён только обзор. Подключитесь к сети для подробных контуров.';return session.subscribe(current=>{if(current.status.error)status(warning);else if(!current.status.pending&&byId('map-status').textContent===warning)status('Подробные контуры загружены.');});}
 function observeMap(resize){
- let frame=0;const observer=new ResizeObserver(()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(resize);});observer.observe(byId('map'));observer.observe(document.querySelector('aside'));observer.observe(byId('map-credits'));
+ let frame=0;const observer=new ResizeObserver(()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(resize);});
+ for(const element of [byId('map'),document.querySelector('aside'),byId('map-credits'),byId('map-status'),document.querySelector('.map-tools')])if(element)observer.observe(element);
  return()=>{observer.disconnect();cancelAnimationFrame(frame);};
-}
-async function createGL(ml,session){
- ml.setWorkerUrl('/maps/maplibre-worker.js');let floor=cameraView(512).camera,fullView=true,styleReady=false,routeGeometry=null,fitPending=false,positionMarker=null,disposed=false;
- const map=new ml.Map({container:'map',style:overviewStyle(session),...floor,minZoom:Math.max(-2,floor.zoom),maxZoom:18,attributionControl:false,renderWorldCopies:true,maxPitch:70,pixelRatio:Math.min(devicePixelRatio,2),
-  transformConstrain:(point,zoom)=>{const next=constrainRussiaCamera(point.lng,point.lat,zoom,floor);return {center:new ml.LngLat(...next.center),zoom:next.zoom};},
- });
- const unbindLabels=bindMapLabelCoverage(map,session);
- const unbindCoverage=bindMapCoverage(map,session,byId('map'),current=>{coverage=current.area;return applyMapLibreCoverage(map,current);});
- const stopCoverageMessages=coverageAvailability(session);
- const fitRussia=()=>{floor=cameraView(512).camera;fullView=true;map.setMinZoom(Math.max(-2,floor.zoom));map.setTerrain(null);map.easeTo({...floor,padding:{top:0,right:0,bottom:0,left:0},duration:reduced?0:500});};
- const draw=(geometry,fit=true)=>{
-  routeGeometry=geometry;fitPending=fit;
-  if(!styleReady)return;
-  const data=displayGeoJSON(geometry||{type:'FeatureCollection',features:[]});
-  if(map.getSource('saved-route'))map.getSource('saved-route').setData(data);
-  else{
-   map.addSource('saved-route',{type:'geojson',data});
-   map.addLayer({id:'route-halo',type:'line',source:'saved-route',paint:{'line-color':'#fffefa','line-width':8}},MASK);
-   map.addLayer({id:'route',type:'line',source:'saved-route',paint:{'line-color':'#244d3c','line-width':4,'line-dasharray':[3,1]}},MASK);
-  }
-  fitPending=false;if(!geometry||!fit)return;
-  const covered=coveredBounds(data);
-  if(!covered){status('У этой линии нет точек внутри покрытия России. Карточка остаётся доступной.');return;}
-  const bounds=new ml.LngLatBounds([covered[0],covered[1]],[covered[2],covered[3]]);
-  fullView=false;map.fitBounds(bounds,{padding:cameraView(512).padding,maxZoom:14,duration:reduced?0:600});
- };
- map.on('style.load',()=>{
-  if(disposed)return;styleReady=true;
-  if(map.getSource('openmaptiles')){
-   map.addSource('pilot-coverage',{type:'geojson',data:{type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[[40.29,43.64],[40.49,43.64],[40.49,43.82],[40.29,43.82],[40.29,43.64]]]}}});
-   map.addLayer({id:'pilot-coverage-outline',type:'line',source:'pilot-coverage',paint:{'line-color':'#a56736','line-width':2,'line-dasharray':[3,2]}},MASK);
-  }
-  draw(routeGeometry,fitPending);
- });
- map.on('render',()=>{if(styleReady&&map.getSource('russia-land')&&map.isSourceLoaded('russia-land')&&map.getSource('russia-mask')&&map.isSourceLoaded('russia-mask'))mapVisible(true);});
- map.on('error',()=>status('Часть данных недоступна. Проверьте сохранённое покрытие.'));
- map.on('moveend',()=>{const center=map.getCenter();fullView=Math.abs(map.getZoom()-floor.zoom)<1e-5&&Math.abs(center.lng-floor.center[0])<1e-4&&Math.abs(center.lat-floor.center[1])<1e-4;});
- const stopObserver=observeMap(()=>{if(disposed)return;const wasOverview=fullView;floor=cameraView(512).camera;map.setMinZoom(Math.max(-2,floor.zoom));map.resize();if(wasOverview)fitRussia();});
- return {
-  draw,overview:fitRussia,zoomIn:()=>map.zoomIn(),zoomOut:()=>map.zoomOut(),
-  locate:position=>{const {longitude,latitude}=position.coords;if(!inRussiaCoverage(longitude,latitude,coverage))return false;positionMarker?.remove();positionMarker=new ml.Marker({color:'#367a9d'}).setLngLat([russiaLongitude(longitude),latitude]).addTo(map);fullView=false;map.flyTo({center:[russiaLongitude(longitude),latitude],zoom:13,duration:reduced?0:600});return true;},
-  pilot:async()=>{const style=coverageStyle(await json('/maps/pilot-style.json'),session);styleReady=false;mapVisible(false);fullView=false;map.setStyle(style);map.setPitch(45);map.fitBounds([[40.29,43.64],[40.49,43.82]],{padding:cameraView(512).padding,duration:reduced?0:600});},
-  destroy:()=>{disposed=true;stopCoverageMessages();unbindCoverage();unbindLabels();stopObserver();positionMarker?.remove();map.remove();},
- };
-}
-async function createLeaflet(session){
- const L=window.L,p=window.protomapsL;if(!L||!p)throw new Error('Движок плоской карты не загружен.');
- let floor=cameraView(256).camera,fullView=true,clamping=false,selectedLayer,base,labelLayer,positionMarker,outline;
- const map=L.map('map',{center:[floor.center[1],floor.center[0]],zoom:floor.zoom,zoomControl:false,attributionControl:false,minZoom:floor.zoom,maxZoom:18,zoomSnap:0,zoomDelta:.75,preferCanvas:true,worldCopyJump:false});
- map.createPane('russia-land');map.getPane('russia-land').style.zIndex='150';map.createPane('russia-mask');Object.assign(map.getPane('russia-mask').style,{zIndex:'450',pointerEvents:'none'});
- map.createPane('russia-labels');Object.assign(map.getPane('russia-labels').style,{zIndex:'460',pointerEvents:'none'});
- map.createPane('russia-overview-relief');Object.assign(map.getPane('russia-overview-relief').style,{zIndex:'160',pointerEvents:'none'});
- L.tileLayer('/maps/russia-relief/{z}/{x}/{y}.png',{pane:'russia-overview-relief',minZoom:0,maxNativeZoom:4,maxZoom:6,tileSize:256,keepBuffer:1,updateWhenIdle:true}).addTo(map);
- const canvasCoverage=createCanvasCoverage(L,map,{territoryStyle:()=>({color:'#91a67e',weight:.6,fillOpacity:0})});
- const unbindCoverage=bindMapCoverage(map,session,byId('map'),current=>{coverage=current.area;canvasCoverage.apply(current);labelLayer?.clearLayout();labelLayer?.rerenderTiles();});
- const stopCoverageMessages=coverageAvailability(session);
- const clampCamera=()=>{
-  if(clamping)return;const center=map.getCenter(),next=constrainRussiaCamera(center.lng,center.lat,map.getZoom(),floor);
-  if(Math.abs(center.lng-next.center[0])>1e-7||Math.abs(center.lat-next.center[1])>1e-7||Math.abs(map.getZoom()-next.zoom)>1e-7){clamping=true;map.setView([next.center[1],next.center[0]],next.zoom,{animate:false});clamping=false;}
-  const after=map.getCenter();fullView=Math.abs(map.getZoom()-floor.zoom)<1e-5&&Math.abs(after.lng-floor.center[0])<1e-4&&Math.abs(after.lat-floor.center[1])<1e-4;
- };
- map.on('moveend',clampCamera);
- const fitRussia=()=>{floor=cameraView(256).camera;fullView=true;map.setMinZoom(floor.zoom);map.setView([floor.center[1],floor.center[0]],floor.zoom,{animate:!reduced});};
- const fit=(bounds,maxZoom)=>{const {padding}=cameraView(256);fullView=false;map.fitBounds(bounds,{paddingTopLeft:[padding.left,padding.top],paddingBottomRight:[padding.right,padding.bottom],maxZoom,animate:!reduced});};
- const draw=geometry=>{
-  if(selectedLayer){map.removeLayer(selectedLayer);selectedLayer=null;}if(!geometry)return;
-  const data=displayGeoJSON(geometry);selectedLayer=L.geoJSON(data,{style:{color:'#244d3c',weight:4,dashArray:'8 4'},interactive:false}).addTo(map);
-  const covered=coveredBounds(data);if(!covered){status('У этой линии нет точек внутри покрытия России. Карточка остаётся доступной.');return;}
-  fit(L.latLngBounds([[covered[1],covered[0]],[covered[3],covered[2]]]),14);
- };
- const stopObserver=observeMap(()=>{const wasOverview=fullView;map.invalidateSize({pan:false});floor=cameraView(256).camera;map.setMinZoom(floor.zoom);if(wasOverview)fitRussia();else clampCamera();});
- requestAnimationFrame(()=>mapVisible(true));
- return {
-  draw,overview:fitRussia,zoomIn:()=>map.zoomIn(),zoomOut:()=>map.zoomOut(),
-  locate:position=>{const {longitude,latitude}=position.coords;if(!inRussiaCoverage(longitude,latitude,coverage))return false;if(positionMarker)map.removeLayer(positionMarker);positionMarker=L.circleMarker([latitude,russiaLongitude(longitude)],{radius:7,weight:2,color:'#fff',fillColor:'#367a9d',fillOpacity:1}).addTo(map);fullView=false;map.setView([latitude,russiaLongitude(longitude)],13);return true;},
-  pilot:async()=>{
-   if(base)map.removeLayer(base);
-   const style=canvasStyle(p),options={url:location.origin+'/offline-map/localtiles/{z}/{x}/{y}.pbf',minZoom:7,bounds:[[43.64,40.29],[43.82,40.49]],noWrap:true,devicePixelRatio:Math.min(devicePixelRatio,2)};
-   const ground=p.leafletLayer({...options,...style,labelRules:[]});
-   labelLayer=createCanvasLabelLayer(p,ground,style.labelRules,()=>session.area,{...options,pane:'russia-labels'});
-   base=L.layerGroup([ground,labelLayer]).addTo(map);
-   if(!outline)outline=L.rectangle([[43.64,40.29],[43.82,40.49]],{color:'#a56736',fillOpacity:0,weight:2,dashArray:'7 5',interactive:false}).addTo(map);
-   fit([[43.64,40.29],[43.82,40.49]],14);if(selected?.geometry)draw(selected.geometry);
-  },
-  destroy:()=>{stopCoverageMessages();unbindCoverage();canvasCoverage.destroy();stopObserver();map.remove();},
- };
 }
 async function createMap(){
  mapVisible(false);
- // Match the online engine preference. The guaranteed shell includes Canvas;
- // WebGL is optional and must have its module, stylesheet and worker offline.
- let useWebGL=!window.matchMedia('(pointer: coarse)').matches;
- if(useWebGL&&navigator.onLine===false){
-  try{useWebGL='caches'in window&&(await Promise.all(['/maps/maplibre-gl.mjs','/maps/maplibre-gl.css','/maps/maplibre-worker.js'].map(url=>caches.match(url)))).every(Boolean);}
-  catch{useWebGL=false;}
- }
- if(useWebGL){
-  try{const gl=document.createElement('canvas').getContext('webgl2');useWebGL=!!gl;gl?.getExtension('WEBGL_lose_context')?.loseContext();}
-  catch{useWebGL=false;}
- }
- if(useWebGL){
-  // Import before allocating a canonical coverage session: a missing optional
-  // engine must not strand the cached Canvas map with the wrong world copies.
-  let ml;
-  try{ml=await import('/maps/maplibre-gl.mjs');}catch{}
-  if(ml){const session=await loadMapCoverage({canonicalMask:true});coverage=session.area;return createGL(ml,session);}
- }
- const session=await loadMapCoverage({canonicalMask:false});coverage=session.area;
- return createLeaflet(session);
+ const {CustomMapEngine}=await import('/custom-map/map-runtime.js');
+ const element=byId('map'),wrapper=element.parentElement,countryBounds=[...RUSSIA_BOUNDS[0],...RUSSIA_BOUNDS[1]];
+ let floor=cameraView(256).camera,fullView=true,map,ready=false,disposed=false,pilotOutline;
+ let stopObserver=()=>{},stopCoverage=()=>{};
+ const sameCamera=(a,b)=>Math.abs(a.zoom-b.zoom)<1e-7&&Math.abs(a.center[0]-b.center[0])<1e-7&&Math.abs(a.center[1]-b.center[1])<1e-7&&Math.abs(a.bearingDegrees||0)<1e-7;
+ const syncOutline=()=>{
+  if(!pilotOutline)return;
+  const points=[[40.29,43.64],[40.49,43.64],[40.49,43.82],[40.29,43.82]].map(coordinate=>map.project(coordinate));
+  pilotOutline.firstElementChild.setAttribute('points',points.map(point=>`${point.x},${point.y}`).join(' '));
+ };
+ const syncObstacles=()=>{
+  const viewport=element.getBoundingClientRect(),rectangles=[];
+  for(const node of [document.querySelector('.map-tools'),byId('map-status'),byId('map-credits')]){
+   if(!node||node.hidden)continue;const rect=node.getBoundingClientRect();
+   if(rect.width>0&&rect.height>0)rectangles.push({left:rect.left-viewport.left,top:rect.top-viewport.top,right:rect.right-viewport.left,bottom:rect.bottom-viewport.top});
+  }
+  map.setObstacles(rectangles);
+ };
+ const overview=(animate=!reduced)=>{
+  const view=cameraView(256);floor=view.camera;fullView=true;map.setFloor(floor);map.setPitch(0);map.setMode('detail');
+  map.fit(countryBounds,view.padding,floor.zoom,animate);syncObstacles();
+ };
+ const draw=(geometry,fit=true)=>{
+  const data=geometry?displayGeoJSON(geometry):undefined;
+  map.setRoute(data,geometry?selected?.id:undefined);wrapper.dataset.mapRoute=geometry?'selected':'none';
+  if(!geometry||!fit)return;
+  coverage=map.getCoverage()?.area??coverage;
+  const bounds=coveredBounds(data);
+  if(!bounds){status('У этой линии нет точек внутри покрытия России. Карточка остаётся доступной.');return;}
+  fullView=false;map.fit(bounds,cameraView(256).padding,14,!reduced);
+ };
+ const driver={
+  draw,overview:()=>overview(),zoomIn:()=>map.zoomBy(.75),zoomOut:()=>map.zoomBy(-.75),
+  locate:position=>{
+   const {longitude,latitude}=position.coords;coverage=map.getCoverage()?.area??coverage;
+   if(!inRussiaCoverage(longitude,latitude,coverage))return false;
+   const coordinate=[russiaLongitude(longitude),latitude];
+   map.setMarkers([{id:'offline-position',coordinate,label:'Моё местоположение',kind:'position'}]);
+   fullView=false;map.setCamera({center:coordinate,zoom:13,bearingDegrees:0},!reduced);return true;
+  },
+  pilot:async()=>{
+   map.setMode('detail');map.setLayers({paths:true,boundaries:true,relief:true});
+   if(!pilotOutline){
+    pilotOutline=document.createElementNS('http://www.w3.org/2000/svg','svg');pilotOutline.setAttribute('aria-hidden','true');
+    Object.assign(pilotOutline.style,{position:'absolute',inset:'0',width:'100%',height:'100%',pointerEvents:'none',overflow:'hidden'});
+    const polygon=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    polygon.setAttribute('fill','none');polygon.setAttribute('stroke','#a56736');polygon.setAttribute('stroke-width','2');polygon.setAttribute('stroke-dasharray','7 5');
+    pilotOutline.appendChild(polygon);element.insertBefore(pilotOutline,map.canvas.nextSibling);
+   }
+   fullView=false;map.fit([40.29,43.64,40.49,43.82],cameraView(256).padding,14,!reduced);syncOutline();
+   if(selected?.geometry)draw(selected.geometry);
+  },
+  destroy:()=>{if(disposed)return;disposed=true;stopObserver();stopCoverage();pilotOutline?.remove();map?.destroy();},
+ };
+ return new Promise((resolve,reject)=>{
+  let startupSettled=false;
+  const startupFailure=message=>{if(startupSettled||disposed)return;startupSettled=true;driver.destroy();reject(new Error(message));};
+  try{
+   map=new CustomMapEngine(element,{camera:floor,
+    onReady:engine=>{
+     if(disposed)return;map=engine;ready=true;coverage=engine.getCoverage()?.area;
+     if(!coverage){startupFailure('География России недоступна.');return;}
+     const session=engine.getCoverage(),warning='На этом масштабе сохранён только обзор. Подключитесь к сети для подробных контуров.';
+     stopCoverage=session.subscribe(current=>{coverage=current.area;if(current.status.error)status(warning);else if(!current.status.pending&&byId('map-status').textContent===warning)status('Подробные контуры загружены.');});
+     engine.setPadding(cameraView(256).padding);syncObstacles();
+     stopObserver=observeMap(()=>{
+      if(disposed)return;const view=cameraView(256),changed=!sameCamera(view.camera,floor),wasOverview=fullView;floor=view.camera;
+      map.setFloor(floor);map.setPadding(view.padding);syncObstacles();
+      if(wasOverview&&changed)overview(false);
+     });
+     startupSettled=true;resolve(driver);
+    },
+    onGesture:()=>{fullView=false;},
+    onSettled:camera=>{fullView=sameCamera(camera,floor);wrapper.dataset.mapDetail=camera.zoom>=10?'close':'overview';},
+    onFrame:()=>{if(!disposed&&ready){mapVisible(true);syncOutline();}},
+    onState:state=>{if(disposed||!state.error)return;if(!ready)startupFailure(state.error);else status(state.error);},
+   });
+  }catch(error){startupFailure(error instanceof Error?error.message:'Не удалось создать карту.');}
+ });
 }
+
 function connect(){byId('connection').textContent=navigator.onLine?'Подключение есть':'Без сети · на устройстве';}
 connect();window.addEventListener('online',connect);window.addEventListener('offline',connect);
 async function loadSaved(){return new Promise((resolve,reject)=>{const req=indexedDB.open('tropa-local-v1',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('packs'))req.result.createObjectStore('packs',{keyPath:'id'});};req.onsuccess=()=>{const db=req.result,tx=db.transaction('packs'),get=tx.objectStore('packs').getAll();get.onsuccess=()=>resolve(get.result);get.onerror=()=>reject(get.error);tx.oncomplete=()=>db.close();};req.onerror=()=>reject(req.error);});}

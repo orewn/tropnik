@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 
-import {useDeferredValue, useEffect, useMemo, useRef, useState} from 'react';
+import {memo, useDeferredValue, useEffect, useMemo, useRef, useState} from 'react';
 import {ArrowLeft, ArrowRight, Clock, MagnifyingGlass, MapPin, NotePencil, Path, Stack, X} from '@/components/TropnikIcons';
 import {EventCategoryIcon} from '@/components/EventCategoryIcon';
 import {deriveRouteCategories, eventCategoryById} from '@/lib/event-categories';
@@ -14,7 +14,7 @@ const singularKind = {route: 'Маршрут', region: 'Направление',
 const suggestions = ['Байкал до 15 км', 'На один день', 'Водопад', 'Скачать карту'];
 const number = (value: number) => value.toLocaleString('ru');
 
-function Result({hit}: {hit: SearchHit}) {
+const Result = memo(function Result({hit}: {hit: SearchHit}) {
   const category = hit.kind === 'route' ? deriveRouteCategories(hit)[0] : undefined;
   const definition = category ? eventCategoryById[category] : undefined;
   const OtherIcon = hit.kind === 'region' ? MapPin : hit.kind === 'story' ? NotePencil : Stack;
@@ -25,7 +25,7 @@ function Result({hit}: {hit: SearchHit}) {
       <h3 className="heading-6">{hit.title}</h3>
       <p className={`${styles.description} body-6`}>{hit.description}</p>
       {(hit.kind === 'route' || hit.accessStatus) && <div className={`${styles.metadata} caption-4`}>
-        {hit.distanceKm != null && <span><Path size={17}/>{number(hit.distanceKm)} км</span>}
+        {hit.distanceKm != null && <span><Path size={17}/>{number(hit.distanceKm)} км{hit.distanceNote ? ` · ${hit.distanceNote}` : ''}</span>}
         {hit.duration && <span><Clock size={17}/>{hit.duration}</span>}
         {hit.accessStatus === 'closed' && <span className={`${styles.access} ${styles.closed}`}>Посещение закрыто</span>}
         {hit.accessStatus === 'restricted' && <span className={styles.access}>Есть ограничения</span>}
@@ -35,7 +35,7 @@ function Result({hit}: {hit: SearchHit}) {
     </div>
     <ArrowRight className={styles.arrow} size={21}/>
   </a></li>;
-}
+});
 
 export function SiteSearch({initialState}: {initialState: SearchViewState}) {
   const [query, setQuery] = useState(initialState.query), [kind, setKind] = useState(initialState.kind);

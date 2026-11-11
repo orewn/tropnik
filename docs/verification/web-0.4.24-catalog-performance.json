@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "kind": "catalogue-node-diagnostic",
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "createdAt": "2026-11-10T22:08:22.027Z",
+  "node": "v24.22.1",
+  "platform": "linux",
+  "arch": "x64",
+  "baseline": {
+    "commit": "169b0bee9b2bbdb45adfbe71f4162f35f37344d1",
+    "searchSourceSha256": "80d56f9ef4a0f03c587ac5962cf7145751e6c133719479dfeffd1eef5d156566"
+  },
+  "inputs": {
+    "web/lib/search.ts": {
+      "bytes": 12698,
+      "sha256": "77127f65b112464b518fe46efef3c422bef4e0de4ad7e47ab64b2f3318170749"
+    },
+    "web/lib/site-search.ts": {
+      "bytes": 6408,
+      "sha256": "5ccbd65ce2e58b81086a8e69d680553b015d27e4abe33bff00a32b39e65752fe"
+    },
+    "web/lib/content.ts": {
+      "bytes": 20963,
+      "sha256": "3f542cb6ecdb24ebe1d37d731b66aed53927380008fcb303dc2391dbfa7f675d"
+    },
+    "web/lib/catalog.generated.json": {
+      "bytes": 985269,
+      "sha256": "3b88e91d72faaccd26c7cabe61156191100c2f6f20e7d92c43ad947d6654ae72"
+    },
+    "web/lib/route-points.generated.json": {
+      "bytes": 114524,
+      "sha256": "07ff34896033b41d0debb6aa54600fdc2c5455fe83775967e07636fa87a6ae3f"
+    },
+    "web/lib/telegram-reviewed.generated.json": {
+      "bytes": 148,
+      "sha256": "343da88accf0902cb6f9ee75b2834c09ddb140fe1b2622dff4d3852cdd6eea00"
+    },
+    "web/lib/editorial-regions.generated.json": {
+      "bytes": 8336,
+      "sha256": "5e6fc2258f9ec179d6d5a98fcacf4bd5fb36a3b8dd206c9ab87c74ff5397c40b"
+    },
+    "web/lib/territories.generated.json": {
+      "bytes": 396857,
+      "sha256": "b1207ae22641587ed6634c7b87a9b23c1630aedbb768f83db8d69faa3d52be23"
+    },
+    "web/lib/national-editorial.generated.json": {
+      "bytes": 81704,
+      "sha256": "21873890457f1952bc1dfa1124310e2fcd7b0f0209de46eb2867e4de66b9d45e"
+    },
+    "web/lib/yandex-routes.generated.json": {
+      "bytes": 30611,
+      "sha256": "87f1c70dc822febca3b3f3f7d97e14fe48a3243aa959a3077b7246944417562c"
+    },
+    "web/lib/discovery-routes.generated.json": {
+      "bytes": 40231,
+      "sha256": "5a8cf1baa8381dc1fc8b489b2b4bdf1abd8436922a9d18d045cd8c24077fedbc"
+    },
+    "web/lib/russiadiscovery-east.generated.json": {
+      "bytes": 21499,
+      "sha256": "feff4e057067fa196b15ddd29f5ca2fde85d1829c0b2c3c7971ffd125dee5faa"
+    },
+    "web/public/data/russia-boundaries-provenance.json": {
+      "bytes": 10082,
+      "sha256": "b8bc96450cc3777d454d87da3018a76db4bc10323720d76cf512831d0e66ac93"
+    },
+    "web/lib/facts.ts": {
+      "bytes": 16515,
+      "sha256": "67db2caa1860ed599c552953d45cf1c8de0fa83ab1963ac23b9d1591a3a15101"
+    },
+    "web/lib/route-search.ts": {
+      "bytes": 1212,
+      "sha256": "cab554ae92905e8b4c2e908a1b031015c673e2031274d6d007f116c258301ca3"
+    },
+    "web/lib/territories.ts": {
+      "bytes": 5680,
+      "sha256": "0da6d8e28af3732f3e0ab749ac99c8b092f9bef37ce508bb2e7cd9c06807a333"
+    }
+  },
+  "catalogue": {
+    "routes": 680,
+    "documents": 734,
+    "directions": 15,
+    "territories": 85
+  },
+  "semanticComparison": {
+    "queries": 2131,
+    "options": [
+      {},
+      {
+        "kind": "route"
+      },
+      {
+        "kind": "region"
+      },
+      {
+        "kind": "story"
+      },
+      {
+        "kind": "page"
+      },
+      {
+        "includeUnspecified": false
+      }
+    ],
+    "fullResponseEqual": true,
+    "responseSha256": "ac7ae2256b9b4b846a00f9357b37782877f91c7ba3731328f63c54055e8c084e"
+  },
+  "queries": [
+    "Байкал",
+    "Бзепринский",
+    "Мултинские озера",
+    "краснодарский край до 15 км",
+    "Хибины",
+    "Эльбрус на один день",
+    "байкальская тропа",
+    "сапфировая совершеннонесуществующий",
+    "место отдыха рядом с озером",
+    ",fqrfk",
+    "Bzerpin",
+    "Кавказ до 25 км до 8 ч",
+    "Верхнее Мультинское",
+    "гора",
+    "тр",
+    ""
+  ],
+  "searches": [
+    {
+      "documents": 734,
+      "synthetic": false,
+      "multiplier": 1,
+      "baseline": {
+        "buildMs": 44.15110899999854,
+        "medianMs": 14.094686000000365,
+        "p95Ms": 48.2431170000018,
+        "maxMs": 78.13183099999878,
+        "totalMs": 1416.7040749999978,
+        "samples": 80,
+        "firstPass": [
+          {
+            "query": "Байкал",
+            "ms": 14.831974000000628
+          },
+          {
+            "query": "Бзепринский",
+            "ms": 15.57838499999707
+          },
+          {
+            "query": "Мултинские озера",
+            "ms": 14.634281999999075
+          },
+          {
+            "query": "краснодарский край до 15 км",
+            "ms": 22.983671000001777
+          },
+          {
+            "query": "Хибины",
+            "ms": 8.458991999999853
+          },
+          {
+            "query": "Эльбрус на один день",
+            "ms": 18.613994000003004
+          },
+          {
+            "query": "байкальская тропа",
+            "ms": 24.49326999999903
+          },
+          {
+            "query": "сапфировая совершеннонесуществующий",
+            "ms": 39.7250329999988
+          },
+          {
+            "query": "место отдыха рядом с озером",
+            "ms": 16.289234999996552
+          },
+          {
+            "query": ",fqrfk",
+            "ms": 48.2431170000018
+          },
+          {
+            "query": "Bzerpin",
+            "ms": 44.327934999997524
+          },
+          {
+            "query": "Кавказ до 25 км до 8 ч",
+            "ms": 13.750860000000102
+          },
+          {
+            "query": "Верхнее Мультинское",
+            "ms": 9.46266199999809
+          },
+          {
+            "query": "гора",
+            "ms": 6.610222999999678
+          },
+          {
+            "query": "тр",
+            "ms": 0.3321509999987029
+          },
+          {
+            "query": "",
+            "ms": 1.9830460000011954
+          }
+        ]
+      },
+      "candidate": {
+        "buildMs": 36.32010900000023,
+        "medianMs": 1.78690700000152,
+        "p95Ms": 3.886533999997482,
+        "maxMs": 8.601249999999709,
+        "totalMs": 150.83387299999958,
+        "samples": 80,
+        "firstPass": [
+          {
+            "query": "Байкал",
+            "ms": 1.7276989999991201
+          },
+          {
+            "query": "Бзепринский",
+            "ms": 1.819815999999264
+          },
+          {
+            "query": "Мултинские озера",
+            "ms": 2.1285709999974642
+          },
+          {
+            "query": "краснодарский край до 15 км",
+            "ms": 3.886533999997482
+          },
+          {
+            "query": "Хибины",
+            "ms": 1.1361359999973502
+          },
+          {
+            "query": "Эльбрус на один день",
+            "ms": 1.8332549999977346
+          },
+          {
+            "query": "байкальская тропа",
+            "ms": 0.07351900000139722
+          },
+          {
+            "query": "сапфировая совершеннонесуществующий",
+            "ms": 3.0222389999980805
+          },
+          {
+            "query": "место отдыха рядом с озером",
+            "ms": 3.6712769999976445
+          },
+          {
+            "query": ",fqrfk",
+            "ms": 2.0785869999999704
+          },
+          {
+            "query": "Bzerpin",
+            "ms": 3.324835000003077
+          },
+          {
+            "query": "Кавказ до 25 км до 8 ч",
+            "ms": 1.6951609999996435
+          },
+          {
+            "query": "Верхнее Мультинское",
+            "ms": 2.789785999997548
+          },
+          {
+            "query": "гора",
+            "ms": 1.0136449999990873
+          },
+          {
+            "query": "тр",
+            "ms": 0.16515400000207592
+          },
+          {
+            "query": "",
+            "ms": 3.017041999999492
+          }
+        ]
+      },
+      "repliesEqual": true,
+      "repliesSha256": "a1eb385dca0e236914e3510d202bd0dd9fb728f1d1a50742fef5314e48832b15"
+    },
+    {
+      "documents": 7340,
+      "synthetic": true,
+      "multiplier": 10,
+      "baseline": {
+        "buildMs": 563.0678580000022,
+        "medianMs": 159.2720679999984,
+        "p95Ms": 489.67969099999755,
+        "maxMs": 547.4908969999997,
+        "totalMs": 14745.666926000009,
+        "samples": 80,
+        "firstPass": [
+          {
+            "query": "Байкал",
+            "ms": 217.14182399999845
+          },
+          {
+            "query": "Бзепринский",
+            "ms": 210.31789600000047
+          },
+          {
+            "query": "Мултинские озера",
+            "ms": 164.0902500000011
+          },
+          {
+            "query": "краснодарский край до 15 км",
+            "ms": 375.3723209999989
+          },
+          {
+            "query": "Хибины",
+            "ms": 143.79846799999723
+          },
+          {
+            "query": "Эльбрус на один день",
+            "ms": 248.13323300000047
+          },
+          {
+            "query": "байкальская тропа",
+            "ms": 188.11937899999975
+          },
+          {
+            "query": "сапфировая совершеннонесуществующий",
+            "ms": 330.04811999999947
+          },
+          {
+            "query": "место отдыха рядом с озером",
+            "ms": 149.1129890000011
+          },
+          {
+            "query": ",fqrfk",
+            "ms": 382.1747520000026
+          },
+          {
+            "query": "Bzerpin",
+            "ms": 547.4908969999997
+          },
+          {
+            "query": "Кавказ до 25 км до 8 ч",
+            "ms": 142.85809100000188
+          },
+          {
+            "query": "Верхнее Мультинское",
+            "ms": 93.51058499999999
+          },
+          {
+            "query": "гора",
+            "ms": 66.5265679999975
+          },
+          {
+            "query": "тр",
+            "ms": 4.700706000003265
+          },
+          {
+            "query": "",
+            "ms": 26.09015300000101
+          }
+        ]
+      },
+      "candidate": {
+        "buildMs": 145.75658600000315,
+        "medianMs": 1.7777429999987362,
+        "p95Ms": 23.5357159999985,
+        "maxMs": 39.2686179999946,
+        "totalMs": 299.11270299997705,
+        "samples": 80,
+        "firstPass": [
+          {
+            "query": "Байкал",
+            "ms": 2.981278999999631
+          },
+          {
+            "query": "Бзепринский",
+            "ms": 1.1932610000003478
+          },
+          {
+            "query": "Мултинские озера",
+            "ms": 1.3480790000030538
+          },
+          {
+            "query": "краснодарский край до 15 км",
+            "ms": 7.0323759999955655
+          },
+          {
+            "query": "Хибины",
+            "ms": 0.9051649999964866
+          },
+          {
+            "query": "Эльбрус на один день",
+            "ms": 1.359084999996412
+          },
+          {
+            "query": "байкальская тропа",
+            "ms": 0.4707349999953294
+          },
+          {
+            "query": "сапфировая совершеннонесуществующий",
+            "ms": 2.1582950000010896
+          },
+          {
+            "query": "место отдыха рядом с озером",
+            "ms": 1.7212799999979325
+          },
+          {
+            "query": ",fqrfk",
+            "ms": 2.116773000001558
+          },
+          {
+            "query": "Bzerpin",
+            "ms": 5.890340999998443
+          },
+          {
+            "query": "Кавказ до 25 км до 8 ч",
+            "ms": 1.1272729999982403
+          },
+          {
+            "query": "Верхнее Мультинское",
+            "ms": 1.7993849999984377
+          },
+          {
+            "query": "гора",
+            "ms": 2.3991690000038943
+          },
+          {
+            "query": "тр",
+            "ms": 0.15720199999486795
+          },
+          {
+            "query": "",
+            "ms": 23.5357159999985
+          }
+        ]
+      },
+      "repliesEqual": true,
+      "repliesSha256": "bf223fb3094d850b10a44f76d8c0c58fa0c24e0bb75f85df7f4a9784b8e3df2f"
+    }
+  ],
+  "memberships": [
+    {
+      "routes": 680,
+      "regions": 100,
+      "synthetic": false,
+      "baselineMeanMs": 3.9482364999992567,
+      "candidateMeanMs": 0.32902389999944714,
+      "orderedMembershipEqual": true
+    },
+    {
+      "routes": 6800,
+      "regions": 100,
+      "synthetic": true,
+      "baselineMeanMs": 39.15454140000038,
+      "candidateMeanMs": 1.945622150000054,
+      "orderedMembershipEqual": true
+    }
+  ],
+  "limitations": [
+    "Node microbenchmark, not browser interaction or physical-device performance.",
+    "Synthetic 10x input repeats current documents with unique IDs; it models shared vocabulary, not ten times as many independent places.",
+    "Five query passes include the bounded production token cache; firstPass is also retained.",
+    "No input, geometry, image quality, CLS or browser performance gate is changed."
+  ]
+}

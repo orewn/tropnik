@@ -18,6 +18,10 @@
   --focus:#8E4F2D;
   --shadow-control:0 7px 20px rgba(29,48,38,.09);
   --shadow-card:0 16px 42px rgba(29,48,38,.08);
+  --motion-feedback:200ms;
+  --motion-color:300ms;
+  --motion-position:500ms;
+  --ease-service:cubic-bezier(.22,1,.36,1);
   --radius-control:12px;
   --radius-card:16px 16px 28px 16px;
 }
@@ -27,7 +31,7 @@ body{background:var(--paper);color:var(--ink)}
 
 :is(.button,.filter-button,.save-button,.icon-button,.back-link,.fact-controls button,.fact-dismiss){
   border-color:var(--line);
-  transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .12s ease;
+  transition:transform var(--motion-position) var(--ease-service),opacity var(--motion-color) var(--ease-service),background-color var(--motion-color) var(--ease-service),border-color var(--motion-color) var(--ease-service),color var(--motion-color) var(--ease-service);
 }
 .button.primary{background:var(--forest);border-color:var(--forest);color:var(--surface);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
 .button.primary:hover:not(:disabled){background:var(--forest-dark);border-color:var(--forest-dark);box-shadow:var(--shadow-control)}
@@ -93,9 +97,6 @@ body{background:var(--paper);color:var(--ink)}
 .explore-layout .map-context,.explore-layout .map-style-switch,.explore-layout .map-controls,
 .explore-layout .layer-control,.explore-layout .map-message,.explore-layout .map-legend,
 .explore-layout .map-attribution,.explore-layout .fact-card,.explore-layout .fact-closed{z-index:20}
-.explore-layout .maplibregl-marker{z-index:12}
-.explore-layout .leaflet-marker-pane{z-index:600}
-.explore-layout .tropnik-relief-tiles .leaflet-tile{transition:opacity .12s linear}
 
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
   outline:2px solid var(--focus);
@@ -109,8 +110,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 }
 @media(prefers-reduced-motion:reduce){
-  :is(.button,.filter-button,.save-button,.icon-button,.back-link,.trail-card),
-  .explore-layout .trail-marker::before,.explore-layout .tropnik-relief-tiles .leaflet-tile{transition:none}
+  :is(.button,.filter-button,.save-button,.icon-button,.back-link,.trail-card),.explore-layout .trail-marker::before{transition:none}
 }
 
 .explore-layout .atlas-canvas[data-map-camera='zooming'] .trail-marker-label{

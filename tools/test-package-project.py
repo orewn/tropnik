@@ -19,7 +19,7 @@ class SourceExportTest(unittest.TestCase):
     def test_build_and_credential_paths_are_excluded_but_runtime_tiles_survive(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            wanted = ["web/public/offline-map/localtiles/12/2507/1493.pbf", "android/app/src/main/assets/licenses/notice.txt", "infra/.env.example", "android/gradle/wrapper/gradle-wrapper.jar", "web/patches/maplibre-gl@6.16.0.patch", "web/patches/maplibre-gl@6.16.0.swiftshader-rtt.json"]
+            wanted = ["web/public/offline-map/localtiles/12/2507/1493.pbf", "android/app/src/main/assets/licenses/notice.txt", "infra/.env.example", "android/gradle/wrapper/gradle-wrapper.jar", "web/public/custom-map/map-runtime.js", "web/public/custom-map/manifest.json"]
             blocked = ["web/node_modules/module/a.js", "android/app/build/result.apk", "web/public/downloads/app.apk", "android/local.properties", "infra/.env", "android/app/src/release/signing.keystore", "tools/import-data/_deps/library.py"]
             for rel in wanted + blocked:
                 self.put(root, rel)
@@ -52,6 +52,20 @@ class SourceExportTest(unittest.TestCase):
             for profile in ("source", "github"):
                 selected, _ = package.select_files(root, profile, require_project=False)
                 self.assertEqual({manifest, page}, {p.relative_to(root).as_posix() for p in selected})
+
+    def test_national_source_archive_is_separate_but_accepted_routes_and_provenance_survive(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wanted = ["data/catalog/national/routes.json", "data/catalog/national/source-archive.json",
+                      "data/catalog/national/geometry/osm-relation-1.geojson"]
+            blocked = ["data/catalog/national/raw/lists/a.json", "data/catalog/national/raw/relations/1.json",
+                       "data/catalog/national/raw/relations/1.json.source.json"]
+            for rel in wanted + blocked:
+                self.put(root, rel)
+            for profile in ("source", "github"):
+                selected, skipped = package.select_files(root, profile, require_project=False)
+                self.assertEqual(set(wanted), {p.relative_to(root).as_posix() for p in selected})
+                self.assertGreater(skipped.get("separate_hash_pinned_national_source_archive", 0), 0)
 
     def test_boundary_raw_sources_and_renderer_docs_survive_without_processing_cache(self):
         with tempfile.TemporaryDirectory() as tmp:

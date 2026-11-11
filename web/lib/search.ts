@@ -2,7 +2,7 @@ export type SearchKind = 'route' | 'region' | 'story' | 'page';
 export type SearchDocument = {
   id: string; kind: SearchKind; title: string; description: string; href: string;
   regionName?: string; regionId?: string; keywords?: string; body?: string;
-  distanceKm?: number | null; duration?: string | null;
+  distanceKm?: number | null; distanceNote?: string; duration?: string | null;
   accessStatus?: 'closed' | 'restricted' | 'unknown'; missingGeometry?: boolean;
 };
 export type SearchHit = Omit<SearchDocument, 'keywords' | 'body'> & {
@@ -14,7 +14,7 @@ export type SearchResponse = {
   unspecifiedCount: number; appliedFilters: string[];
 };
 type Query = {text: string; words: string[]; maxKm?: number; minKm?: number; maxHours?: number; filters: string[]};
-type Indexed = {document: SearchDocument; title: string[]; place: string[]; body: string[]; all: Set<string>};
+type Indexed = {document: SearchDocument; normalizedTitle: string; hours: number | null};
 const STOP = new Set(['в','во','на','по','и','или','для','к','у','из','от','до','с','со','без','где','как','найти','ищу','хочу','мне','можно','рядом','около','маршрут','маршруты','тропа','тропы','поход','походы','прогулка','прогулки']);
 const ALIASES: Record<string, string> = {
   байкальский:'байкал',байкальская:'байкал',байкальской:'байкал',байкале:'байкал',байкала:'байкал',baikal:'байкал',
@@ -75,23 +75,27 @@ export function durationHours(value?: string | null): number | null {
 // Bounded optimal-string-alignment distance: also recognises adjacent transpositions.
 function distance(a:string,b:string,limit:number):number {
   if(Math.abs(a.length-b.length)>limit)return limit+1;
-  let before:number[]|undefined,previous=Array.from({length:b.length+1},(_,i)=>i);
+  // An edit sequence inside the budget can only visit this diagonal band.
+  // Keep three rows for adjacent transpositions; no full matrix or recursion.
+  const outside=limit+1;
+  let before=new Uint16Array(b.length+1),previous=new Uint16Array(b.length+1),current=new Uint16Array(b.length+1);
+  before.fill(outside);previous.fill(outside);
+  for(let j=0;j<=Math.min(b.length,limit);j++)previous[j]=j;
   for(let i=1;i<=a.length;i++){
-    const current=[i];
-    for(let j=1;j<=b.length;j++){
+    current.fill(outside);current[0]=Math.min(i,outside);
+    for(let j=Math.max(1,i-limit);j<=Math.min(b.length,i+limit);j++){
       current[j]=Math.min(current[j-1]+1,previous[j]+1,previous[j-1]+Number(a[i-1]!==b[j-1]));
-      if(before&&i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])current[j]=Math.min(current[j],before[j-2]+1);
+      if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])current[j]=Math.min(current[j],before[j-2]+1);
     }
-    before=previous;previous=current;
+    const reusable=before;before=previous;previous=current;current=reusable;
   }
   return previous[b.length];
 }
-function tokenScore(token:string,list:readonly string[]):number {
-  if(list.includes(token))return 1;
-  if(token.length>=3&&list.some(word=>word.startsWith(token)||token.startsWith(word)&&word.length>=4))return .82;
-  if(token.length<4)return 0;
-  const budget=token.length>=8?2:1;
-  return list.some(word=>word.length>=4&&distance(token,word,budget)<=budget)?.57:0;
+function wordScore(token:string,word:string):number {
+  if(token===word)return 1;
+  if(token.length>=3&&(word.startsWith(token)||token.startsWith(word)&&word.length>=4))return .82;
+  if(token.length<4||word.length<4)return 0;
+  return distance(token,word,token.length>=8?2:1)<=(token.length>=8?2:1)?.57:0;
 }
 function visibleHit(document:SearchDocument,score:number,unspecified:boolean):SearchHit {
   // Search-only text is intentionally omitted from the public hit payload.
@@ -101,26 +105,59 @@ function visibleHit(document:SearchDocument,score:number,unspecified:boolean):Se
 }
 export function createSearchIndex(documents:readonly SearchDocument[]) {
   const seen=new Set<string>();
-  const indexed:Indexed[]=documents.map(document=>{
+  // Words shared by source notes and descriptions are indexed once. A posting
+  // keeps the strongest field weight for each document, preserving the same
+  // title/place/body ranking without repeating fuzzy comparisons per route.
+  const vocabulary=new Map<string,Map<number,number>>();
+  const tokenized=new Map<string,string[]>();
+  const addField=(text:string,document:number,weight:number)=>{
+    let tokens=tokenized.get(text);
+    if(!tokens){tokens=words(text,false);tokenized.set(text,tokens);}
+    for(const token of tokens){
+      let postings=vocabulary.get(token);
+      if(!postings){postings=new Map();vocabulary.set(token,postings);}
+      if(weight>(postings.get(document)??0))postings.set(document,weight);
+    }
+  };
+  const indexed:Indexed[]=documents.map((document,index)=>{
     const identity=document.kind+':'+document.id;
     if(seen.has(identity))throw new Error('Duplicate search document '+identity);seen.add(identity);
-    const title=words(document.title,false),place=words(`${document.regionName||''} ${document.keywords||''}`,false),body=words(`${document.description} ${document.body||''}`,false);
-    return {document,title,place,body,all:new Set([...title,...place,...body])};
+    addField(document.title,index,12);
+    addField(`${document.regionName||''} ${document.keywords||''}`,index,8);
+    addField(`${document.description} ${document.body||''}`,index,3);
+    return {document,normalizedTitle:normalizeSearchText(document.title),hours:durationHours(document.duration)};
   });
+  tokenized.clear();
+  // Limit cached score vectors by bytes as well as count so a larger catalogue
+  // cannot turn typing/backspacing into an unbounded retained cache.
+  const scoreCache=new Map<string,Float64Array>();
+  const cacheLimit=Math.min(16,Math.floor(1024*1024/Math.max(1,indexed.length*8)));
+  const scoresFor=(token:string)=>{
+    const cached=scoreCache.get(token);
+    if(cached){scoreCache.delete(token);scoreCache.set(token,cached);return cached;}
+    const scores=new Float64Array(indexed.length);
+    for(const [word,postings] of vocabulary){
+      const similarity=wordScore(token,word);if(!similarity)continue;
+      for(const [index,weight] of postings)scores[index]=Math.max(scores[index],similarity*weight);
+    }
+    if(cacheLimit){scoreCache.set(token,scores);while(scoreCache.size>cacheLimit)scoreCache.delete(scoreCache.keys().next().value!);}
+    return scores;
+  };
   return function search(value:string,options:SearchOptions={}):SearchResponse {
     const query=value.trim().slice(0,160);
     let best:{query:Query;variant:string;hits:SearchHit[];weight:number;unspecifiedCount:number}|undefined;
     for(const variant of variants(query)){
       const parsed=parseQuery(variant),hits:SearchHit[]=[];let unspecifiedCount=0;
+      const tokenScores=parsed.words.map(scoresFor),normalizedQuery=normalizeSearchText(parsed.text);
       const constrained=parsed.maxKm!==undefined||parsed.minKm!==undefined||parsed.maxHours!==undefined;
-      for(const item of indexed){
-        const d=item.document;
+      for(let index=0;index<indexed.length;index++){
+        const item=indexed[index],d=item.document;
         if(options.kind&&options.kind!=='all'&&d.kind!==options.kind)continue;
         if(constrained&&d.kind!=='route')continue;
         let score=0;
         let matches=true;
-        for(const token of parsed.words){
-          const strength=Math.max(tokenScore(token,item.title)*12,tokenScore(token,item.place)*8,tokenScore(token,item.body)*3);
+        for(const scores of tokenScores){
+          const strength=scores[index];
           if(!strength){matches=false;break;}score+=strength;
         }
         if(!matches)continue;
@@ -129,9 +166,9 @@ export function createSearchIndex(documents:readonly SearchDocument[]) {
           if(d.distanceKm==null)unspecified=true;
           else if(parsed.maxKm!==undefined&&d.distanceKm>parsed.maxKm||parsed.minKm!==undefined&&d.distanceKm<parsed.minKm)continue;
         }
-        if(parsed.maxHours!==undefined){const hours=durationHours(d.duration);if(hours===null)unspecified=true;else if(hours>parsed.maxHours)continue;}
+        if(parsed.maxHours!==undefined){const hours=item.hours;if(hours===null)unspecified=true;else if(hours>parsed.maxHours)continue;}
         if(unspecified){unspecifiedCount++;if(options.includeUnspecified===false)continue;score-=2;}
-        if(parsed.words.length&&normalizeSearchText(d.title).includes(normalizeSearchText(parsed.text)))score+=7;
+        if(parsed.words.length&&item.normalizedTitle.includes(normalizedQuery))score+=7;
         score+=d.kind==='route'?1:0;
         hits.push(visibleHit(d,score,unspecified));
       }

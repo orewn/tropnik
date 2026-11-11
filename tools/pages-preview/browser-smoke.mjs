@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {mkdir, readFile, rename, writeFile, stat} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
 import {join, normalize, extname} from 'node:path';
@@ -9,24 +10,32 @@ import {projectMapPoint,unprojectMapPoint,pointInPolygonGeometry} from './map-pr
 import {runZoomDesignAudit,settleMapCamera,mapCameraIsMoving,browserAuditRunPolicy} from './browser-zoom-audit.mjs';
 import {browserTraceEnabled,traceDesktopSelection,recordBrowserLongTask,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from './browser-trace.mjs';
 import {launchBrowser,browserErrorDetails} from './browser-startup.mjs';
+import {browserEnvironmentArgs,collectBrowserEnvironment} from './browser-environment.mjs';
+import {collectNativeBrowserSurface,assertNativeSurfaceCoverage} from './browser-native-surface.mjs';
+import {assertTerrainMaskReport} from './terrain-mask-report.mjs';
 import {directionHitGrid,directionExternalPoint,inspectDirectionHitAreas} from './browser-direction-hitareas.mjs';
+import {inspectTrailTouchTargets} from './browser-trail-hitareas.mjs';
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
 import {runOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {createOfflineOriginTransport} from './browser-origin-transport.mjs';
 import {observeRequestMapLayout,assertRequestMapLayout} from './browser-request-layout.mjs';
+import {observePublicMapNetwork} from './browser-network.mjs';
 import {runSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
+import {installSmoothnessRecorder,runSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
+import {inspectCustomMapDOM} from './browser-custom-map.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
+const catalogue=JSON.parse(await readFile(new URL('build-info.json',ROOT),'utf8')).catalogue;
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
 const traceEnabled=browserTraceEnabled(process.env.TROPNIK_BROWSER_TRACE,runPolicy.diagnostic);
 const REPORT = new URL(runPolicy.reportFile, ROOT);
 const profiles = [
-  {name:'compact-android',width:320,height:640,mobile:true,engine:'leaflet'},
-  {name:'iphone-portrait',width:390,height:844,mobile:true,engine:'leaflet'},
-  {name:'android-portrait',width:412,height:915,mobile:true,engine:'leaflet',mapInteraction:true},
-  {name:'phone-landscape',width:844,height:390,mobile:true,engine:'leaflet'},
-  {name:'desktop-webgl',width:1440,height:1000,mobile:false,engine:'maplibre',mapInteraction:true},
+  {name:'compact-android',width:320,height:640,mobile:true,engine:'tropnik-canvas'},
+  {name:'iphone-portrait',width:390,height:844,mobile:true,engine:'tropnik-canvas'},
+  {name:'android-portrait',width:412,height:915,mobile:true,engine:'tropnik-canvas',mapInteraction:true},
+  {name:'phone-landscape',width:844,height:390,mobile:true,engine:'tropnik-canvas'},
+  {name:'desktop-webgl',width:1440,height:1000,mobile:false,engine:'tropnik-canvas',mapInteraction:true},
 ];
 const catalogSources=await Promise.all(['catalog.generated.json','yandex-routes.generated.json','discovery-routes.generated.json','russiadiscovery-east.generated.json','telegram-reviewed.generated.json'].map(async name=>JSON.parse(await readFile(new URL(`../../web/lib/${name}`,import.meta.url),'utf8'))));
 const mapTrails=catalogSources.flatMap(source=>Array.isArray(source)?source:source.routes||[]).map(trail=>{
@@ -153,7 +162,7 @@ async function loadProfile(cdp,url,profile){
     const targets=[...document.querySelectorAll(targetSelector)].filter(visible).map(element=>{const r=element.getBoundingClientRect();return{label:element.getAttribute('aria-label')||element.textContent?.trim(),width:r.width,height:r.height}});
     const card=document.querySelector('.fact-card')?.getBoundingClientRect();
     return{
-      width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,engine:document.querySelector('.leaflet-container')?'leaflet':document.querySelector('.maplibregl-map')?'maplibre':'unknown',
+      width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,engine:document.querySelector('.atlas-canvas > canvas.tropnik-map-canvas')?document.querySelector('.atlas-canvas')?.dataset.mapEngine:'unknown',
       escaping:atlas?labels.filter(label=>label.left<atlas.left-1||label.right>atlas.right+1||label.top<atlas.top-1||label.bottom>atlas.bottom+1):[],
       undersized:targets.filter(target=>target.width<43.5||target.height<43.5),
       card:card?{left:card.left,right:card.right,top:card.top,bottom:card.bottom}:null,
@@ -400,11 +409,12 @@ async function mapState(cdp){
   return evaluate(cdp,`(()=>{
     const element=document.querySelector('.atlas-canvas[data-map-engine]');if(!element)return null;
     const r=element.getBoundingClientRect(),s=getComputedStyle(element),d=element.dataset;
-    return{camera:{longitude:Number(d.mapLongitude),latitude:Number(d.mapLatitude),zoom:Number(d.mapZoom),tileSize:Number(d.mapTileSize),...(d.mapCenterX!==undefined?{centerX:Number(d.mapCenterX),centerY:Number(d.mapCenterY)}:{})},engine:d.mapEngine,route:d.mapRouteId||'',moving:(${mapCameraIsMoving.toString()})(element),visible:s.visibility!=='hidden'&&s.display!=='none'&&r.width>20&&r.height>20,rect:{left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom},width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth${runPolicy.diagnostic?',terrainCamera:(()=>{try{return JSON.parse(d.mapTerrainCamera||\'null\')}catch{return null}})()':''}};
+    const rendering={painted:d.mapPainted==='true',drawnRoute:d.mapDrawnRoute||'',tilesState:d.mapTilesState||'',coverageReady:d.mapCoverageState==='ready'};
+    return{rendering,camera:{longitude:Number(d.mapLongitude),latitude:Number(d.mapLatitude),zoom:Number(d.mapZoom),tileSize:Number(d.mapTileSize),...(d.mapCenterX!==undefined?{centerX:Number(d.mapCenterX),centerY:Number(d.mapCenterY)}:{})},engine:d.mapEngine,route:d.mapRouteId||'',moving:(${mapCameraIsMoving.toString()})(element),visible:s.visibility!=='hidden'&&s.display!=='none'&&r.width>20&&r.height>20,rect:{left:r.left,top:r.top,width:r.width,height:r.height,right:r.right,bottom:r.bottom},width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth${runPolicy.diagnostic?',terrainCamera:(()=>{try{return JSON.parse(d.mapTerrainCamera||\'null\')}catch{return null}})()':''}};
   })()`);
 }
-async function settledMap(cdp,engine){
-  return settleMapCamera({engine,read:()=>mapState(cdp),frame:()=>compositorFrame(cdp),wait:waitValue});
+async function settledMap(cdp,engine,{allowLoading=false}={}){
+  return settleMapCamera({engine,read:()=>mapState(cdp),frame:()=>compositorFrame(cdp),wait:waitValue,allowLoading});
 }
 async function pointerAt(cdp,point,profile){
   assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y),'Pointer coordinates must be finite');
@@ -652,7 +662,7 @@ async function trailTouch(cdp,profile,regionId){
         candidates.push({x,y,id:trail.id,title:trail.title,geometryUrl:trail.geometryUrl,center:trail.center,offset:Math.hypot(dx,dy)});
       }
     }
-    const target=(await canvasPoints(cdp,candidates))[0];
+    const target=(await evaluate(cdp,`(${inspectTrailTouchTargets.toString()})(${JSON.stringify(candidates)})`))[0];
     if(target){
       await pointerAt(cdp,target,profile);
       await expectSelection(cdp,{region:regionId,route:target.id,title:target.title,...(profile.mobile?{sheet:'open'}:{})});
@@ -769,19 +779,19 @@ async function checkStyleCameraRoundtrip(cdp,profile,trail){
   const pan=await dispatchSourceEndPan(cdp,start,delta,profile,sleep),manual=await settledMap(cdp,profile.engine);
   pan.events=await evaluate(cdp,'window.__tropnikInputEvents');pan.before=zoomed;pan.after=manual;
   const transitions=[];
-  for(const label of ['Сохранённый обзор','Детальные тропы онлайн']){
+  for(const label of ['Сохранённый обзор','Тропы и ландшафт']){
     const opened=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,true);
     const selector=await evaluate(cdp,`(()=>{const buttons=[...document.querySelectorAll('.layer-menu>button')],index=buttons.findIndex(button=>button.textContent?.trim()===${JSON.stringify(label)});return index<0?null:'.layer-menu>button:nth-of-type('+(index+1)+')';})()`);assert.ok(selector,`Missing layer ${label}`);
     const scrolls=await revealNative(cdp,selector,'.layer-menu',profile);
-    await evaluate(cdp,`(()=>{window.__tropnikRouteRestoreObserver?.disconnect();window.__tropnikRouteRestores=[];window.__tropnikRouteEdgesBefore=[...document.querySelectorAll('.atlas-wrap .route-edge-marker')];const element=document.querySelector('.atlas-canvas[data-map-engine]');window.__tropnikRouteRestoreObserver=new MutationObserver(records=>{for(const record of records)window.__tropnikRouteRestores.push({old:record.oldValue,current:element.getAttribute('data-map-route-id')});});window.__tropnikRouteRestoreObserver.observe(element,{attributes:true,attributeFilter:['data-map-route-id'],attributeOldValue:true});})()`);
+    await evaluate(cdp,`(()=>{window.__tropnikRouteRestoreObserver?.disconnect();window.__tropnikRouteRestores=[];window.__tropnikRouteEdgesBefore=[...document.querySelectorAll('.atlas-wrap .route-edge-marker')];const element=document.querySelector('.atlas-canvas[data-map-engine]');window.__tropnikBeforeDraw=JSON.parse(element.dataset.mapInspection||'null')?.drawRevision||0;window.__tropnikRouteRestoreObserver=new MutationObserver(records=>{for(const record of records)window.__tropnikRouteRestores.push({old:record.oldValue,current:element.getAttribute('data-map-route-id')});});window.__tropnikRouteRestoreObserver.observe(element,{attributes:true,attributeFilter:['data-map-route-id'],attributeOldValue:true});})()`);
     const selected=await recordedClick(cdp,selector,profile);
-    const restored=await waitValue(`${label}: route overlays were not reinstalled`,()=>evaluate(cdp,`(()=>{const current=[...document.querySelectorAll('.atlas-wrap .route-edge-marker')],prior=window.__tropnikRouteEdgesBefore;return{route:document.querySelector('.atlas-canvas[data-map-engine]')?.dataset.mapRouteId,selected:!![...document.querySelectorAll('.layer-menu>button')].find(button=>button.textContent?.trim()===${JSON.stringify(label)})?.querySelector('svg'),mutations:window.__tropnikRouteRestores,edges:{before:prior.length,after:current.length,replaced:current.filter(element=>!prior.includes(element)).length}};})()`),value=>value.route===selection.route&&value.selected&&value.mutations.some(item=>item.current===selection.route)&&value.edges.after===value.edges.before&&value.edges.replaced===value.edges.after);
+    const restored=await waitValue(`${label}: route and bitmap ground did not remain visible after the layer change`,()=>evaluate(cdp,`(()=>{const current=[...document.querySelectorAll('.atlas-wrap .route-edge-marker')],prior=window.__tropnikRouteEdgesBefore,element=document.querySelector('.atlas-canvas[data-map-engine]'),inspection=JSON.parse(element?.dataset.mapInspection||'null');return{route:element?.dataset.mapRouteId,drawnRoute:element?.dataset.mapDrawnRoute,drawRevision:inspection?.drawRevision,beforeDrawRevision:window.__tropnikBeforeDraw,mode:inspection?.state?.committedMode,tilesState:element?.dataset.mapTilesState,selected:!![...document.querySelectorAll('.layer-menu>button')].find(button=>button.textContent?.trim()===${JSON.stringify(label)})?.querySelector('svg'),mutations:window.__tropnikRouteRestores,edges:{before:prior.length,after:current.length,replaced:current.filter(element=>!prior.includes(element)).length}};})()`),value=>value.route===selection.route&&value.drawnRoute===selection.route&&value.selected&&value.tilesState==='ready'&&value.drawRevision>value.beforeDrawRevision&&value.mode===(label==='Сохранённый обзор'?'overview':'detail')&&value.edges.after===value.edges.before&&value.edges.replaced===0);
     await evaluate(cdp,'window.__tropnikRouteRestoreObserver.disconnect()');
     const closed=await recordedClick(cdp,'.layer-button',profile);await layerMenuState(cdp,false);
     const frame=await settledMap(cdp,profile.engine),line=await reopenSelectedLine(cdp,profile,trail),lineFrame=await settledMap(cdp,profile.engine),currentSelection=await selectionState(cdp);
     transitions.push({label,opened,scrolls,selected,closed,frame,line,lineFrame,selection:currentSelection,restored});
   }
-  const receipt={schemaVersion:1,passed:true,input:'mouse',routeId:selection.route,selection,before,zoomed,zoom,pan,manual,transitions};assertStyleCameraRoundtrip(receipt,profile.name);return receipt;
+  const receipt={schemaVersion:2,passed:true,input:'mouse',routeId:selection.route,selection,before,zoomed,zoom,pan,manual,transitions};assertStyleCameraRoundtrip(receipt,profile.name);return receipt;
 }
 async function mapInteraction(cdp,profile,performanceIssues){
   const focusedDiagnostic=runPolicy.diagnostic==='map-interactions';
@@ -804,7 +814,7 @@ async function mapInteraction(cdp,profile,performanceIssues){
   await phase('route-selection');const trail=await trailTouch(cdp,profile,'altai'),line=await reopenSelectedLine(cdp,profile,trail);
   currentExploreExperience.step='style-camera';
   await phase('style-camera');
-  const styleCameraRoundtrip=profile.engine==='maplibre'?await checkStyleCameraRoundtrip(cdp,profile,trail):null;
+  const styleCameraRoundtrip=!profile.mobile?await checkStyleCameraRoundtrip(cdp,profile,trail):null;
   currentExploreExperience.styleCameraRoundtrip=styleCameraRoundtrip;
   currentExploreExperience.step='request-ownership';await phase('request-ownership');
   const requestOwnership=await traceDesktopSelection(cdp,()=>checkRequestOwnership(cdp,profile,trail),{
@@ -830,12 +840,15 @@ async function mapInteraction(cdp,profile,performanceIssues){
   },{enabled:focusedDiagnostic&&!profile.mobile,sourceCommit:process.env.GITHUB_SHA||null,prefix:'desktop-webgl-sibling-polygon',scope:'desktop-sibling-polygon-selection'});
   const {polygon,siblingParent}=siblingSelection.value;experience.siblingParent=siblingParent;
   await phase('map-gestures');const gestures=await mapGestures(cdp,profile);
-  currentExploreExperience.step='validation';assertExploreExperience({...experience,passed:true},profile.name,profile.engine,profile.mobile);experience.passed=true;
+  currentExploreExperience.step='validation';assertExploreExperience({...experience,passed:true},profile.name,profile.engine,profile.mobile,catalogue);experience.passed=true;
   const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
-  const longTaskLimit=profile.mobile?350:750;
-  if(!(perf.longest<longTaskLimit))performanceIssues.push({profile:profile.name,phase:'map-interactions',metric:'longestTaskMs',value:perf.longest,limit:longTaskLimit});
+  performanceIssues.push(...performanceBudgetIssues({layoutShift:perf.cls,longestTaskMs:perf.longest},profile,'map-interactions'));
   currentExploreExperience=null;
   return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,requestOwnershipTrace:requestOwnership.trace,siblingSelectionTrace:siblingSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+}
+
+async function siteSmoothnessAudit(cdp,profile,cpuSlowdownRate=1){
+  return runSmoothnessAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,settledSheet,closeMapSheet,clearMapStories,pointerSelector,revealNative,scrollContainer,freeCanvasPoint,url:`http://127.0.0.1:${httpPort}/tropnik/`},{cpuSlowdownRate});
 }
 
 const httpPort=await freePort(),debugPort=await freePort();
@@ -843,30 +856,36 @@ const server=serve(ROOT);
 await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(httpPort,'127.0.0.1',resolve);});
 const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browserLaunchStarted=performance.now();
-let browser,cdp,currentProfile,failure,currentExploreExperience=null;
-const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],satelliteAudits=[],profilePerformance=[],performanceIssues=[];
+let browser,cdp,network,environment,terrainMask,currentProfile,failure,currentExploreExperience=null;
+const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],satelliteAudits=[],siteSmoothness=[],profilePerformance=[],performanceIssues=[];
 // GitHub can terminate this process before catch/finally. Preserve completed
 // interactions before the long zoom matrix, without marking them as a release.
 const progressDirectory=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 async function checkpoint(phase){
   await mkdir(progressDirectory,{recursive:true});
   const temporary=new URL('browser-progress.tmp',progressDirectory);
-  await writeFile(temporary,JSON.stringify({verified:false,sourceCommit:process.env.GITHUB_SHA||null,updatedAt:new Date().toISOString(),profile:currentProfile,phase,performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest})),completedZoomProfiles:zoomDesigns.map(({profile,geometryPassed,performance})=>({profile,geometryPassed,performance}))},null,2)+'\n');
+  await writeFile(temporary,JSON.stringify({verified:false,releaseEligible:false,environment,sourceCommit:process.env.GITHUB_SHA||null,catalogue,updatedAt:new Date().toISOString(),profile:currentProfile,phase,performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedSiteSmoothness:siteSmoothness,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest})),completedZoomProfiles:zoomDesigns.map(({profile,geometryPassed,performance})=>({profile,geometryPassed,performance}))},null,2)+'\n');
   await rename(temporary,new URL('browser-progress.json',progressDirectory));
 }
 try{
-  browser=launchBrowser(browserBinary(),[
-    '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-component-update',
-    '--disable-default-apps','--disable-extensions','--disable-features=Translate,MediaRouter','--mute-audio',
-    '--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader',
-    `--remote-debugging-port=${debugPort}`,`--user-data-dir=${userData}`,'about:blank',
-  ]);
-  await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
-  const initialUrl=['offline-safety','satellite-continuity'].includes(runPolicy.diagnostic)?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
-  const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(initialUrl)}`,{method:'PUT'});
+  browser=launchBrowser(browserBinary(),browserEnvironmentArgs({debugPort,userDataDir:userData}));
+  const version=await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
+  environment=await collectBrowserEnvironment(version.webSocketDebuggerUrl);
+  const initialUrl=['offline-safety','satellite-continuity','ui-smoothness','ui-smoothness-cpu'].includes(runPolicy.diagnostic)?'about:blank':`http://127.0.0.1:${httpPort}/tropnik/`;
+  const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent('about:blank')}`,{method:'PUT'});
   cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
+  environment.nativeSurface=await collectNativeBrowserSurface(cdp);
+  if(!runPolicy.diagnostic){
+    assertNativeSurfaceCoverage(environment.nativeSurface);
+    terrainMask=JSON.parse(await readFile(new URL('browser-terrain-mask-verification.json',ROOT),'utf8'));
+    const rendererSHA256=createHash('sha256').update(await readFile(new URL('../../web/public/terrain/terrain-renderer.js',import.meta.url))).digest('hex');
+    assertTerrainMaskReport(terrainMask,{sourceCommit:process.env.GITHUB_SHA||null,environment,rendererSHA256});
+  }
+  if(initialUrl!=='about:blank')await cdp.call('Page.navigate',{url:initialUrl});
   await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Performance.enable');
+  network=await observePublicMapNetwork(cdp,{baseURL:`http://127.0.0.1:${httpPort}/tropnik/`});
   await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`
+    (${installSmoothnessRecorder.toString()})(window);
     window.__tropnikPerf={cls:0,longest:0};
     window.__tropnikPerfStart=0;window.__tropnikPhase='loading';window.__tropnikPhases=[];window.__tropnikLayoutShifts=[];
     window.__tropnikInputEvents=[];window.__tropnikExpectedPointer=null;window.__tropnikLongTasks=[];
@@ -884,7 +903,7 @@ try{
       window.__tropnikInputEvents.push({type,time:performance.now(),timestamp:event.timeStamp,pointerType:event.pointerType||'',pointerId:Number.isInteger(event.pointerId)?event.pointerId:null,x:event.clientX,y:event.clientY,trusted:event.isTrusted,target:node?node.tagName+'['+(node.getAttribute('class')||'')+']':null,button:button?{tag:button.tagName,classes:button.getAttribute('class'),label:(button.getAttribute('aria-label')||button.textContent||'').trim().slice(0,120),regionId:button.dataset.regionId||null,groupKey:button.dataset.mapGroupKey||null,rect:{x:r.x,y:r.y,width:r.width,height:r.height}}:null});
       if(window.__tropnikInputEvents.length>36)window.__tropnikInputEvents.shift();
     },{capture:true,passive:true});
-    try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput){
+    try{new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput&&entry.startTime>=window.__tropnikPerfStart){
       window.__tropnikPerf.cls+=entry.value;
       const rect=value=>({x:value.x,y:value.y,width:value.width,height:value.height});
       const nodePath=node=>{let element=node?.nodeType===1?node:node?.parentElement;const parts=[];for(let i=0;element&&i<4;i++,element=element.parentElement)parts.push(element.tagName.toLowerCase()+(element.id?'#'+element.id:'')+'['+(element.getAttribute('class')||'').slice(0,180)+']');return parts.join(' < ');};
@@ -897,24 +916,24 @@ try{
   `});
   for(const profile of profiles.filter(profile=>!runPolicy.profiles||runPolicy.profiles.includes(profile.name))){
     currentProfile=profile.name;
+    if(runPolicy.diagnostic==='ui-smoothness'||runPolicy.diagnostic==='ui-smoothness-cpu'){
+      const audit=await siteSmoothnessAudit(cdp,profile,runPolicy.diagnostic==='ui-smoothness-cpu'?4:1);siteSmoothness.push(audit);performanceIssues.push(...audit.performanceIssues);
+      const report={schemaVersion:1,environment,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:siteSmoothness.length===runPolicy.profiles.length?'completed':'running',sourceCommit:process.env.GITHUB_SHA||null,profiles:siteSmoothness,performanceIssues,performancePassed:performanceIssues.length===0,updatedAt:new Date().toISOString()};
+      await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));continue;
+    }
     if(runPolicy.diagnostic==='satellite-continuity'){
       const audit=await runSatelliteContinuityAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,url:`http://127.0.0.1:${httpPort}/tropnik/`});
       satelliteAudits.push(audit);performanceIssues.push(...satellitePerformanceIssues(audit,profile));
       profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
       assert.notEqual(runPolicy.reportFile,'browser-verification.json');
-      const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:satelliteAudits.length===runPolicy.profiles.length?'completed':'running',sourceCommit:process.env.GITHUB_SHA||null,profiles:satelliteAudits,performanceIssues,performancePassed:performanceIssues.length===0,profilePerformance,updatedAt:new Date().toISOString()};
+      const report={schemaVersion:1,environment,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:satelliteAudits.length===runPolicy.profiles.length?'completed':'running',sourceCommit:process.env.GITHUB_SHA||null,profiles:satelliteAudits,performanceIssues,performancePassed:performanceIssues.length===0,profilePerformance,updatedAt:new Date().toISOString()};
       await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
       await checkpoint('satellite-continuity-profile-complete');continue;
     }
-    if(runPolicy.diagnostic==='terrain-close'){
-      const systemInfo=async()=>{
-        const version=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/version`);
-        assert.ok(version.webSocketDebuggerUrl,'The browser target does not advertise SystemInfo access');
-        const gpuCdp=new CDP(version.webSocketDebuggerUrl);
-        try{await gpuCdp.open();return await gpuCdp.call('SystemInfo.getInfo',{},3000);}finally{gpuCdp.close();}
-      };
+    if(runPolicy.diagnostic==='terrain-close'||runPolicy.diagnostic==='zoom-modes'){
+      const systemInfo=async()=>({gpu:environment.gpu,commandLine:environment.commandLine});
       const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo,url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic});
-      assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
+      report.environment=environment;assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
       assert.notEqual(runPolicy.reportFile,'browser-verification.json');
       await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
       continue;
@@ -927,18 +946,19 @@ try{
     if(geometry.card)assert.ok(geometry.card.left>=-1&&geometry.card.right<=geometry.width+1&&geometry.card.top>=-1&&geometry.card.bottom<=geometry.height+1,`${profile.name}: story card escaped the visual viewport`);
     if(!profile.mobile){
       const coarse=await evaluate(cdp,"matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0");
-      assert.equal(coarse,false,'The desktop MapLibre check must use a fine pointer');
+      assert.equal(coarse,false,'The desktop canvas check must use a fine pointer');
       const interaction=await mapInteraction(cdp,profile,performanceIssues);mapInteractions.push(interaction);
       desktopProfiles.push({name:profile.name,width:profile.width,height:profile.height,engine:geometry.engine,coarse:false,mapInteractionTested:true});
       profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
       if(runPolicy.diagnostic==='map-interactions'){
         assert.notEqual(runPolicy.reportFile,'browser-verification.json');
-        const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:profile.name,engine:profile.engine,interaction,performanceIssues,performancePassed:performanceIssues.length===0,performance:profilePerformance.at(-1),completedAt:new Date().toISOString()};
+        const report={schemaVersion:1,environment,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:profile.name,engine:profile.engine,interaction,performanceIssues,performancePassed:performanceIssues.length===0,performance:profilePerformance.at(-1),completedAt:new Date().toISOString()};
         await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
         await checkpoint('map-interactions-diagnostic-complete');continue;
       }
+      const smoothness=await siteSmoothnessAudit(cdp,profile);siteSmoothness.push(smoothness);performanceIssues.push(...smoothness.performanceIssues);await checkpoint('site-smoothness-complete');
       await checkpoint('before-zoom-audit');
-      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
+      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,performanceDiagnostics,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
       await checkpoint('profile-complete');
       continue;
     }
@@ -977,7 +997,10 @@ try{
     results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction});
     profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
     await checkpoint(interaction?'before-zoom-audit':'profile-complete');
-    if(profile.mapInteraction)zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
+    if(profile.mapInteraction){
+      const smoothness=await siteSmoothnessAudit(cdp,profile);siteSmoothness.push(smoothness);performanceIssues.push(...smoothness.performanceIssues);await checkpoint('site-smoothness-complete');
+      zoomDesigns.push(await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceIssues,performanceDiagnostics,url:`http://127.0.0.1:${httpPort}/tropnik/`},{traceEnabled}));
+    }
     if(profile.mapInteraction)await checkpoint('profile-complete');
   }
   if(!runPolicy.diagnostic||runPolicy.diagnostic==='offline-safety'){
@@ -986,27 +1009,32 @@ try{
   const offlineSafety=await runOfflineSafetyAudit(cdp,{evaluate,waitValue,sleep,pointerAt,pointerSelector,originTransport:{start:()=>offlineOriginTransport.start(server),snapshot:offlineOriginTransport.snapshot,restore:offlineOriginTransport.restore},url:`http://127.0.0.1:${httpPort}/tropnik/`});
   if(runPolicy.diagnostic==='offline-safety'){
     assert.notEqual(runPolicy.reportFile,'browser-verification.json');
-    const report={schemaVersion:1,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:offlineSafety.profile,offlineSafety,completedAt:new Date().toISOString()};
+    const report={schemaVersion:1,environment,diagnostic:runPolicy.diagnostic,diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',sourceCommit:process.env.GITHUB_SHA||null,profile:offlineSafety.profile,offlineSafety,completedAt:new Date().toISOString()};
     await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
   }else{
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');
-  const report={verified:true,mapInteractionSchemaVersion:3,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,environment,terrainMask,catalogue,mapInteractionSchemaVersion:4,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,siteSmoothness,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
   }
   }
 }catch(error){
-  failure={profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
+  failure={environment,profile:currentProfile,error:error.stack||String(error),errorDetails:browserErrorDetails(error),browserStartup:browser?.diagnostics()??{status:'not-started',binary:null,exitCode:null,signalCode:null,elapsedMs:performance.now()-browserLaunchStarted,errorDetails:browserErrorDetails(error)},performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedZoomDesigns:zoomDesigns,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,sheetGestures,touch})=>({name,engine,sheetTested:sheet.available,sheetGestures,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest}))};
+  if(network)failure.network=network.snapshot();
   if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
+  if(error.smoothnessAudit)failure.smoothnessAudit=error.smoothnessAudit;
+  if(siteSmoothness.length)failure.completedSiteSmoothness=siteSmoothness;
   if(error.nativeScroll)failure.nativeScroll=error.nativeScroll;
   if(satelliteAudits.length)failure.completedSatelliteAudits=satelliteAudits;
   if(error.pointerTarget)failure.pointerTarget=error.pointerTarget;
   if(currentExploreExperience)failure.exploreExperience=currentExploreExperience;
-  if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed',...(error.settleDiagnostics?{settleDiagnostics:error.settleDiagnostics}:{})});
+  if(error.settleDiagnostics)failure.settleDiagnostics=error.settleDiagnostics;
+  if(runPolicy.diagnostic)Object.assign(failure,{diagnosticOnly:true,diagnostic:runPolicy.diagnostic,verified:false,releaseEligible:false,status:'failed'});
   if(cdp){
     try{failure.map=await mapState(cdp);failure.selection=await selectionState(cdp);failure.sheet=await sheetSnapshot(cdp);}catch{}
+    try{failure.customMap=await evaluate(cdp,`(${inspectCustomMapDOM.toString()})()`);}catch{}
     try{failure.navigationHistory=await cdp.call('Page.getNavigationHistory');}catch{}
     try{failure.performance=await performanceDiagnostics(cdp);}catch{}
     try{const screenshot=await cdp.call('Page.captureScreenshot',{format:'png'});await writeFile(new URL('browser-failure.png',ROOT),Buffer.from(screenshot.data,'base64'));}catch{}
@@ -1015,6 +1043,11 @@ try{
   if(runPolicy.diagnostic)await writeFile(REPORT,JSON.stringify(failure,null,2)+'\n');
   throw error;
 }finally{
+  if(network){
+    network.dispose();
+    try{await writeFile(new URL('browser-network.json',ROOT),JSON.stringify(network.snapshot(),null,2)+'\n');}
+    catch(error){console.error('Could not save the network diagnostic:',error.message);}
+  }
   cdp?.close();
   const cleanup=await browser?.close();server.closeAllConnections();server.close();
   if(failure){

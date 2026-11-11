@@ -20,7 +20,11 @@ python3 "$tropnik_root/tools/android-build/preview_artifacts.py" verify --direct
 # Keep preflight diagnostics in both the job log and the retained artifact.
 # pipefail preserves a launcher/linker failure instead of letting tee mask it.
 "$tropnik_emulator" -accel-check 2>&1 | tee "$tropnik_output/acceleration.txt"
-"$tropnik_emulator" -version 2>&1 | tee "$tropnik_output/emulator-version.txt"
+# Probe the same headless engine that runs the device below. A bare -version
+# loads the windowed QEMU binary and its unrelated PulseAudio/Qt dependencies.
+# Both paths were compared on SDK emulator 37.2.13, build 16740729:
+# https://github.com/orewn/tropnik/actions/runs/43041565686
+timeout 30s "$tropnik_emulator" -no-window -version 2>&1 | tee "$tropnik_output/emulator-version.txt"
 cp "$tropnik_sdk/system-images/android-35/google_apis/x86_64/source.properties" "$tropnik_output/system-image.properties"
 
 tropnik_emulator_pid=''
@@ -36,9 +40,9 @@ cleanup() {
 trap cleanup EXIT
 
 "$tropnik_adb" start-server
-# Linux's legacy SwiftShader GLES misreads MapLibre uniform blocks (#4625),
-# producing blue/transparent symbols. SwANGLE keeps the shipped OpenGL renderer
-# and runs its GLSL through ANGLE over software SwiftShader Vulkan instead.
+# Run the actual shared WebView Canvas/WebGL paths through ANGLE and software
+# SwiftShader Vulkan. These cases prove functional composition and recovery;
+# their timings do not establish physical-device GPU performance.
 # https://developer.android.com/studio/run/emulator-acceleration
 "$tropnik_emulator" -avd tropnik-ci-api35 -port 5554 -accel on -gpu swangle \
   -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -memory 2048 -cores 2 \
@@ -57,7 +61,7 @@ if [[ "$tropnik_booted" != 'true' ]]; then
   exit 1
 fi
 # Retain the observed driver, and reject a silent fallback to the legacy GLES
-# path before installing/running the same seven pixel and interaction cases.
+# path before installing/running the eight pixel and interaction cases.
 timeout 10s "$tropnik_adb" -s "$tropnik_serial" shell dumpsys SurfaceFlinger > "$tropnik_output/graphics-driver.txt"
 python3 - "$tropnik_root" "$tropnik_output/graphics-driver.txt" <<'PY'
 import importlib.util

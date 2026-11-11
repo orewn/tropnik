@@ -1,0 +1,56 @@
+{
+  "output": "docs/verification/web-0.4.24-catalog-performance.json",
+  "documents": 734,
+  "queries": 2131,
+  "fullResponseEqual": true,
+  "searches": [
+    {
+      "documents": 734,
+      "synthetic": false,
+      "multiplier": 1,
+      "repliesEqual": true,
+      "repliesSha256": "a1eb385dca0e236914e3510d202bd0dd9fb728f1d1a50742fef5314e48832b15",
+      "baseline": {
+        "buildMs": 44.15110899999854,
+        "p95Ms": 48.2431170000018
+      },
+      "candidate": {
+        "buildMs": 36.32010900000023,
+        "p95Ms": 3.886533999997482
+      }
+    },
+    {
+      "documents": 7340,
+      "synthetic": true,
+      "multiplier": 10,
+      "repliesEqual": true,
+      "repliesSha256": "bf223fb3094d850b10a44f76d8c0c58fa0c24e0bb75f85df7f4a9784b8e3df2f",
+      "baseline": {
+        "buildMs": 563.0678580000022,
+        "p95Ms": 489.67969099999755
+      },
+      "candidate": {
+        "buildMs": 145.75658600000315,
+        "p95Ms": 23.5357159999985
+      }
+    }
+  ],
+  "memberships": [
+    {
+      "routes": 680,
+      "regions": 100,
+      "synthetic": false,
+      "baselineMeanMs": 3.9482364999992567,
+      "candidateMeanMs": 0.32902389999944714,
+      "orderedMembershipEqual": true
+    },
+    {
+      "routes": 6800,
+      "regions": 100,
+      "synthetic": true,
+      "baselineMeanMs": 39.15454140000038,
+      "candidateMeanMs": 1.945622150000054,
+      "orderedMembershipEqual": true
+    }
+  ]
+}

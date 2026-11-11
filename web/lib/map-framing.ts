@@ -7,6 +7,12 @@ export function canRefitMapOverview(fullView:boolean,region:unknown,trail:unknow
  return fullView&&(overviewRequested||!region&&!trail);
 }
 
+/** A description without a source line is located only by its known parent
+ * bounds. It must not block that frame or acquire an invented route anchor. */
+export function territoryFrameSelection(region:{id:string;bounds?:readonly number[]}|undefined,trail?:{id:string;geometryUrl?:string;geometry?:unknown}):string|undefined{
+ return region?.bounds&&!trail?.geometryUrl&&!trail?.geometry?JSON.stringify([region.id,trail?.id??null]):undefined;
+}
+
 /** A covered viewport can require a camera centre just outside the geographic
  * rectangle even when every fitted feature is inside it. Permit only the
  * calculated frame's extra offset; the normal clamp returns within two zooms. */

@@ -45,7 +45,7 @@ try {
   for (const asset of ['offline-safety.html','offline-safety.js','offline-safety.css']) await request(base+asset,200);
   const index=await readFile(join(out,'index.html'),'utf8');
   const emitted=[...index.matchAll(/(?:src|href)="(\/[^"<>]+)"/g)].map(match=>match[1]);
-  for (const url of new Set([...emitted,base+'data/russia-display-area.geojson',base+'data/russia-canonical-mask.geojson',base+'maps/russia-viewport.js',base+'maps/tropnik-sprite@2x.png',base+'maps/russia-relief/tilejson.json',base+'maps/russia-relief/manifest.json',base+'maps/russia-relief/0/0/0.png',base+'maps/russia-relief/4/0/0.png',base+'terrain/terrain-grid.json',base+'offline-fonts.css',base+'offline-map/manifest.json',base+'offline-map/terrain/landscape.html',base+'offline.js',base+'sw.js'])) {
+  for (const url of new Set([...emitted,...report.customMap.deployedFiles.map(file=>base+'custom-map/'+file.path),base+'data/russia-display-area.geojson',base+'data/russia-canonical-mask.geojson',base+'maps/russia-viewport.js',base+'maps/russia-relief/tilejson.json',base+'maps/russia-relief/manifest.json',base+'maps/russia-relief/0/0/0.png',base+'maps/russia-relief/4/0/0.png',base+'terrain/terrain-grid.json',base+'offline-fonts.css',base+'offline-map/manifest.json',base+'offline-map/terrain/landscape.html',base+'offline.js',base+'sw.js'])) {
     assert.ok(url.startsWith(base),`Public reference lost the project prefix: ${url}`);
     const response=await request(url,200,{method:'HEAD'});
     assert.notEqual(response.headers.get('content-length'),'0');

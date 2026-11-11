@@ -13,7 +13,10 @@ test('route discovery stays responsive and browser history restores map state',a
   // native browser flow; retain this check only for the component wiring.
   assert.match(explore,/writeExploreHistory\(window,\{regionId:nextRegion,trailId:nextTrail\},mode\)/);
   assert.match(explore,/aria-busy=\{searchPending\}/);
-  assert.match(browser,/const routeCounts = useMemo/);
+  // Exact membership, order and revision isolation are exercised against the
+  // full catalogue in map-region-selection.test.mjs; this checks shared wiring.
+  assert.match(explore,/regionCatalog=useMemo\(\(\)=>createTrailRegionIndex\(catalog\),\[catalog\]\)/);
+  assert.match(browser,/catalogByRegion\.get\(item\.id\)\?\.length/);
   assert.doesNotMatch(browser,/catalog\.filter\(trail => trailBelongsToRegion/);
   assert.doesNotMatch(browser,/onTouchStart=\{warm\}/);
   assert.match(card,/pointer:coarse/);

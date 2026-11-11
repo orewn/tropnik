@@ -4,10 +4,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal data class RouteCameraFrame(val north: Double, val east: Double, val south: Double, val west: Double)
-internal data class PreparedMapRoute(val json: String, val frame: RouteCameraFrame?)
+internal data class PreparedMapRoute(val json: String, val frame: RouteCameraFrame?, val utf8: ByteArray)
 
 /** Parse off the UI thread. Retain the source geometry, but reduce camera work to
- * four extrema instead of allocating a LatLng for every vertex (up to 100,000
+ * four extrema instead of allocating a camera object for every vertex (up to 100,000
  * in a full API route). No simplification or invented connecting line is used. */
 internal fun prepareMapRouteGeometry(json: String): PreparedMapRoute {
     var count = 0
@@ -29,12 +29,16 @@ internal fun prepareMapRouteGeometry(json: String): PreparedMapRoute {
                     if (longitude in -180.0..180.0 && latitude in -90.0..90.0) {
                         count++
                         north = maxOf(north, latitude); south = minOf(south, latitude)
-                        east = maxOf(east, longitude); west = minOf(west, longitude)
+                        // The shared camera uses the Russia world copy centred
+                        // on 105E. A Chukotka route crossing 180E must not fit a
+                        // 358-degree box; the source geometry stays untouched.
+                        val cameraLongitude = longitude + 360 * kotlin.math.round((105 - longitude) / 360)
+                        east = maxOf(east, cameraLongitude); west = minOf(west, cameraLongitude)
                     }
                 } else for (index in 0 until value.length()) visit(value.opt(index))
             }
         }
     }
     visit(JSONObject(json))
-    return PreparedMapRoute(json, if (count > 1) RouteCameraFrame(north, east, south, west) else null)
+    return PreparedMapRoute(json, if (count > 1) RouteCameraFrame(north, east, south, west) else null, json.toByteArray(Charsets.UTF_8))
 }

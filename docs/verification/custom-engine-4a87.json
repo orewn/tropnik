@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "4a87bd819b11499bc9f5ecc03e9db489a658a6ad",
+  "sourceTree": "4cee748a6cd12334042326b46f0b40ec1f048f47",
+  "verified": false,
+  "releaseEligible": false,
+  "scope": "Intermediate candidate evidence; this is not a release certificate",
+  "local": {
+    "webTestsPassed": 616,
+    "pagesToolTestsPassed": 210,
+    "androidPythonTestsPassed": 80,
+    "webTypes": "passed",
+    "pagesTypes": "passed",
+    "lint": "passed",
+    "sharedRuntimeReproducible": true,
+    "androidLandscapeReproducible": true
+  },
+  "browser": {
+    "runId": 43035790725,
+    "jobId": 130574121754,
+    "url": "https://github.com/orewn/tropnik/actions/runs/43035790725",
+    "buildId": "958d6ea7dbabeaeb",
+    "fullGate": "failed",
+    "reason": "An Altai route remained in tilesState=loading beyond the existing camera-settle budget. The worker/HTTP cause is not established by the stale frame inspection.",
+    "nativeTextAndLayoutAttribution": "passed",
+    "terrainMask": {
+      "verified": true,
+      "rendererSHA256": "f842b9cbb335e8d9de880cf228d77b148ee3e1c1f5fb82f626e40e1c22dcb22f",
+      "casesPassed": 4,
+      "terrainLeaks": 0,
+      "routeLeaks": 0,
+      "webglContextRecovery": "passed"
+    },
+    "normalSmoothness": {
+      "artifactId": 13863615339,
+      "artifactSHA256": "ae4e7a2fa804bc6f2d028a980a4a42eb079b79b2a2052e0d93812fa97d6feb9a",
+      "instrumented": false,
+      "performancePassed": false,
+      "issues": 32
+    }
+  },
+  "android": {
+    "runId": 43035807867,
+    "url": "https://github.com/orewn/tropnik/actions/runs/43035807867",
+    "buildSourceCommit": "bddf244f0b4d803be54500ea501e53a1785a9ed7",
+    "buildTreeMatchesCandidate": true,
+    "buildGate": "passed",
+    "jvmTestsPassed": 51,
+    "universalBytes": 67854589,
+    "universalSHA256": "cd3174beaec9228b6e4fc05f4b1b8f85bf65d9bdfa2b819dc8731660cb5cf9fd",
+    "deviceGate": "infrastructure-failure-before-install",
+    "deviceTestsExecuted": 0,
+    "reason": "Ubuntu mirror azure.archive.ubuntu.com could not resolve while installing the emulator's required libpulse0 dependency; the five-minute step expired before the APK was installed.",
+    "deviceExecutionVerified": false,
+    "physicalDeviceVerified": false
+  },
+  "publication": {
+    "merged": false,
+    "newAndroidReleasePublished": false,
+    "pagesPromoted": false,
+    "lastPublicRelease": "v0.4.23-preview"
+  }
+}

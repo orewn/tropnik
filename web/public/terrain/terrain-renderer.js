@@ -1,6 +1,7 @@
 /**
  * Georeferenced DEM viewer; no external dependencies, assets or network requests.
- * Heights stay at 1:1 scale. Colours are cartographic, not observed land cover.
+ * Heights stay at 1:1 scale. Optional source cartography is georeferenced colour;
+ * the untextured material makes no land-cover observation claim.
  * WebGL2: full-resolution height/normal textures, LOD mesh, cached terrain shadows.
  * Canvas2D: smooth, depth-buffered compatibility rendering. No idle animation loop.
  */
@@ -15,13 +16,50 @@ const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 const normalize=v=>{const n=Math.hypot(...v)||1;return v.map(x=>x/n);};
 const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
 
+export function validateTerrainDisplayMask(mask,grid){
+ const source=mask?.source,b=source?.bounds;
+ if(!mask||!Number.isInteger(mask.width)||!Number.isInteger(mask.height)||mask.width<2||mask.height<2||mask.width>2048||mask.height>2048||
+ !(mask.pixels instanceof Uint8Array)||mask.pixels.length!==mask.width*mask.height)throw new TypeError('Invalid or oversized terrain display mask');
+ if(!source||source.scope!=='russia-display-area'||!/^[a-f0-9]{16}$/.test(source.coverageVersion)||!['overview','regional','local','source'].includes(source.lod)||
+ !Array.isArray(source.cells)||!source.cells.length||source.cells.length>1024||source.cells.some(id=>typeof id!=='string'||id.length>100)||
+ !Array.isArray(b)||b.length!==4||!b.every(Number.isFinite)||!grid?.bounds||!b.every((value,index)=>Math.abs(value-grid.bounds[index])<1e-9)||
+ source.projection!=='regular-longitude-latitude'||source.sampleLayout!=='pixel-cells'||source.rowOrder!=='north-to-south'||source.columnOrder!=='west-to-east'||
+ source.boundaryRule!=='exclude-intersecting-texels'||!Number.isInteger(source.allowedPixels))throw new TypeError('Terrain display mask does not match the source grid');
+ let allowed=0;for(const pixel of mask.pixels){if(pixel!==0&&pixel!==255)throw new TypeError('Invalid terrain display mask coverage');if(pixel)allowed++;}
+ if(allowed!==source.allowedPixels)throw new TypeError('Invalid terrain display mask count');return mask;
+}
+export function sampleTerrainDisplayMask(mask,u,v){
+ if(!mask)return true;
+ if(!Number.isFinite(u)||!Number.isFinite(v)||u<0||v<0||u>1||v>1)return false;
+ return mask.pixels[Math.min(mask.height-1,Math.floor(v*mask.height))*mask.width+Math.min(mask.width-1,Math.floor(u*mask.width))]===255;
+}
+
+export function validateTerrainCartography(surface,grid){
+ const source=surface?.source,b=source?.bounds;
+ if(!surface||!Number.isInteger(surface.width)||!Number.isInteger(surface.height)||surface.width<2||surface.height<2||surface.width>1024||surface.height>1024||
+ !(surface.pixels instanceof Uint8ClampedArray)||surface.pixels.length!==surface.width*surface.height*4)throw new TypeError('Invalid or oversized terrain cartography');
+ if(!source||typeof source.name!=='string'||!source.name||source.name.length>200||!Array.isArray(b)||b.length!==4||!b.every(Number.isFinite)||
+ !grid?.bounds||!b.every((value,i)=>Math.abs(value-grid.bounds[i])<1e-9)||source.projection!=='regular-longitude-latitude'||source.sampleLayout!=='grid-nodes'||
+ source.rowOrder!=='north-to-south'||source.columnOrder!=='west-to-east'||!Number.isInteger(source.requestedTiles)||source.requestedTiles<1||source.requestedTiles>16||
+ !Number.isInteger(source.loadedTiles)||source.loadedTiles<0||source.loadedTiles>source.requestedTiles)throw new TypeError('Terrain cartography does not match the source grid');
+ return surface;
+}
+export function sampleTerrainCartography(surface,u,v,output=[0,0,0,0]){
+ if(!surface||!Number.isFinite(u)||!Number.isFinite(v)){output.fill(0);return output;}
+ const w=surface.width,h=surface.height,p=surface.pixels,x=clamp(u,0,1)*(w-1),y=clamp(v,0,1)*(h-1),x0=Math.floor(x),y0=Math.floor(y),x1=Math.min(x0+1,w-1),y1=Math.min(y0+1,h-1),fx=x-x0,fy=y-y0;
+ const a=(y0*w+x0)*4,b=(y0*w+x1)*4,c=(y1*w+x0)*4,d=(y1*w+x1)*4;
+ const wa=(1-fx)*(1-fy)*p[a+3],wb=fx*(1-fy)*p[b+3],wc=(1-fx)*fy*p[c+3],wd=fx*fy*p[d+3],alpha=wa+wb+wc+wd;
+ output[3]=alpha;for(let k=0;k<3;k++)output[k]=alpha?(p[a+k]*wa+p[b+k]*wb+p[c+k]*wc+p[d+k]*wd)/alpha:0;
+ return output;
+}
+
 export function validateTerrainGrid(grid){
  if(!grid||!Number.isInteger(grid.width)||!Number.isInteger(grid.height)||grid.width<2||grid.height<2||
  grid.width*grid.height>MAX_VERTICES||!grid.elevations||grid.elevations.length!==grid.width*grid.height)
   throw new TypeError('Invalid or oversized elevation grid');
  const b=grid.bounds;
  if(!Array.isArray(b)||b.length!==4||!b.every(Number.isFinite)||b[0]>=b[2]||b[1]>=b[3]||
- b[0]<-180||b[2]>180||b[1]<-85||b[3]>85)throw new TypeError('Invalid terrain bounds');
+ b[2]-b[0]>360||b[1]<-85||b[3]>85)throw new TypeError('Invalid terrain bounds');
  if(grid.units&&grid.units!=='meters')throw new TypeError('Terrain heights must be in metres');
  if(grid.rowOrder&&grid.rowOrder!=='north-to-south')throw new TypeError('Unsupported terrain row order');
  if(grid.columnOrder&&grid.columnOrder!=='west-to-east')throw new TypeError('Unsupported terrain column order');
@@ -294,14 +332,18 @@ export function terrainRoute(model,data){
   else if(g.type==='LineString'&&Array.isArray(g.coordinates))lines.push(g.coordinates);
   else if(g.type==='MultiLineString'&&Array.isArray(g.coordinates))lines.push(...g.coordinates.filter(Array.isArray));
  };visit(data);
- const valid=p=>Array.isArray(p)&&p.length>=2&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&p[0]>=-180&&p[0]<=180&&p[1]>=-90&&p[1]<=90;
+ const valid=p=>Array.isArray(p)&&p.length>=2&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&p[1]>=-90&&p[1]<=90;
+ const longitudeNear=(longitude,reference)=>longitude+360*Math.round((reference-longitude)/360),centerLongitude=(bounds[0]+bounds[2])/2;
  const local=p=>[((p[0]-bounds[0])/(bounds[2]-bounds[0])-.5)*model.widthM,((p[1]-bounds[1])/(bounds[3]-bounds[1])-.5)*model.heightM];
  const lift=Math.max(1.5,Math.min(model.cellX,model.cellY)*.08),step=Math.max(5,Math.min(model.cellX,model.cellY)*.75);
  let clipped=false,sourceSegments=0;
  for(const line of lines)for(let i=1;i<line.length;i++){
   if(++sourceSegments>250000)throw new RangeError('Route exceeds the terrain preview limit');
-  const a=line[i-1],b=line[i];
-  if(!valid(a)||!valid(b)||Math.abs(b[0]-a[0])>180){clipped=true;continue;}
+  const sourceA=line[i-1],sourceB=line[i];
+  if(!valid(sourceA)||!valid(sourceB)){clipped=true;continue;}
+  // Keep an actual crossing of 180 degrees adjacent in the grid's continuous
+  // world. These display coordinates never mutate or replace the source line.
+  const a=[longitudeNear(sourceA[0],centerLongitude),sourceA[1]],b=[longitudeNear(sourceB[0],a[0]),sourceB[1]];
   const part=clipTerrainSegment(a,b,bounds);if(!part){clipped=true;continue;}
   if(part[0][0]!==a[0]||part[0][1]!==a[1]||part[1][0]!==b[0]||part[1][1]!==b[1])clipped=true;
   const p=local(part[0]),q=local(part[1]),length=Math.hypot(q[0]-p[0],q[1]-p[1]);if(length<.01)continue;
@@ -440,7 +482,7 @@ export function terrainMaterialColor(height){
 }
 
 
-const TERRAIN_FRAGMENT="#version 300 es\nprecision highp float;\nin vec2 vUV;\nin vec3 vPosition;\nuniform sampler2D uNormal;\nuniform sampler2D uShadow;\nuniform sampler2D uSurface;\nuniform vec2 uGrid;\nuniform vec3 uLight;\nuniform vec3 uEye;\nuniform float uBase;\nuniform float uScale;\nuniform float uShadowTexel;\nout vec4 outColor;\nvec3 palette(float h){\n vec3 a=vec3(.16,.29,.24),b=vec3(.30,.43,.31),c=vec3(.51,.55,.36),d=vec3(.64,.62,.52),e=vec3(.76,.75,.68);\n if(h<1400.0)return mix(a,b,smoothstep(500.0,1400.0,h));\n if(h<2100.0)return mix(b,c,smoothstep(1400.0,2100.0,h));\n if(h<2700.0)return mix(c,d,smoothstep(2100.0,2700.0,h));\n return mix(d,e,smoothstep(2700.0,3400.0,h));\n}\nvec4 surfaceAt(vec3 p,vec3 n){\n vec3 w=pow(abs(n),vec3(4.0));w/=max(dot(w,vec3(1)),.001);\n return texture(uSurface,p.yz)*w.x+texture(uSurface,p.xz)*w.y+texture(uSurface,p.xy)*w.z;\n}\nvec3 perturbNormal(vec3 p,vec3 n,float height){\n vec3 dp1=dFdx(p),dp2=dFdy(p),r1=cross(dp2,n),r2=cross(n,dp1);\n float determinant=dot(dp1,r1);\n if(abs(determinant)<1e-14)return n;\n vec3 gradient=dFdx(height)*r1+dFdy(height)*r2;\n return normalize(abs(determinant)*n-sign(determinant)*gradient);\n}\nvoid main(){\n vec2 nUV=(vUV*(uGrid-1.0)+.5)/uGrid;\n vec4 tex=texture(uNormal,nUV);vec3 baseNormal=normalize(tex.rgb*2.0-1.0);\n float elevation=vPosition.z*uScale+uBase;\n vec3 metres=vPosition*uScale;\n vec4 macro=surfaceAt(metres/820.0,baseNormal),detail=surfaceAt(metres/96.0,baseNormal);\n float rock=smoothstep(.17,.52,1.0-baseNormal.z);\n rock=max(rock,smoothstep(2300.0,3050.0,elevation)*(.26+macro.b*.35));\n vec3 limestone=mix(vec3(.49,.51,.47),vec3(.72,.69,.61),macro.b*.64+detail.g*.36);\n vec3 albedo=mix(palette(elevation)*(.91+macro.b*.18),limestone,rock*.83);\n albedo*=.94+detail.r*.12;\n // Triplanar detail is filtered with mipmaps and never changes terrain positions.\n float bump=(detail.g*.7+detail.r*.3-.5)*mix(.12,.55,rock)/uScale;\n vec3 n=perturbNormal(vPosition,baseNormal,bump);\n float contourDistance=abs(fract(elevation/100.0+.5)-.5)*100.0;\n float contour=1.0-smoothstep(0.0,max(.7,fwidth(elevation)*.85),contourDistance);\n albedo*=1.0-contour*.035;\n float shadow=texture(uShadow,vUV).r*.5;\n shadow+=(texture(uShadow,vUV+vec2(uShadowTexel,0)).r+texture(uShadow,vUV-vec2(uShadowTexel,0)).r+\n  texture(uShadow,vUV+vec2(0,uShadowTexel)).r+texture(uShadow,vUV-vec2(0,uShadowTexel)).r)*.125;\n vec3 view=normalize(uEye-vPosition),halfVector=normalize(view+uLight);\n float NoL=max(dot(n,uLight),0.0),NoV=max(dot(n,view),.001),NoH=max(dot(n,halfVector),0.0),VoH=max(dot(view,halfVector),0.0);\n float roughness=mix(.94,.76,rock),alpha=roughness*roughness,a2=alpha*alpha;\n float denominator=NoH*NoH*(a2-1.0)+1.0;\n float distribution=a2/(3.14159265*denominator*denominator);\n float k=(roughness+1.0)*(roughness+1.0)/8.0;\n float visibility=NoV/(NoV*(1.0-k)+k)*NoL/(NoL*(1.0-k)+k);\n float fresnel=.035+.965*pow(1.0-VoH,5.0);\n float specular=distribution*visibility*fresnel/max(4.0*NoL*NoV,.001);\n vec3 linearAlbedo=pow(albedo,vec3(2.2));\n vec3 ambient=mix(vec3(.25,.29,.24),vec3(.35,.43,.46),clamp(n.z*.5+.5,0.0,1.0))*tex.a;\n vec3 lit=linearAlbedo*ambient+(linearAlbedo*.965+vec3(specular)) *vec3(1.15,1.06,.91)*NoL*shadow;\n vec3 color=pow(max(lit,vec3(0)),vec3(1.0/2.2));\n float haze=clamp((distance(uEye,vPosition)-.9)*.10,0.0,.22);\n float edge=min(min(vUV.x,1.0-vUV.x),min(vUV.y,1.0-vUV.y));\n haze=max(haze,(1.0-smoothstep(0.0,.003,edge))*.15);\n outColor=vec4(mix(color,vec3(.875,.902,.855),haze),1.0);\n}\n";
+const TERRAIN_FRAGMENT="#version 300 es\nprecision highp float;\nin vec2 vUV;\nin vec3 vPosition;\nuniform sampler2D uNormal;\nuniform sampler2D uShadow;\nuniform sampler2D uSurface;\nuniform sampler2D uCartography;\nuniform sampler2D uDisplayMask;\nuniform vec2 uCartographySize;\nuniform vec2 uGrid;\nuniform vec3 uLight;\nuniform vec3 uEye;\nuniform float uBase;\nuniform float uScale;\nuniform float uShadowTexel;\nout vec4 outColor;\nvec3 palette(float h){\n vec3 a=vec3(.16,.29,.24),b=vec3(.30,.43,.31),c=vec3(.51,.55,.36),d=vec3(.64,.62,.52),e=vec3(.76,.75,.68);\n if(h<1400.0)return mix(a,b,smoothstep(500.0,1400.0,h));\n if(h<2100.0)return mix(b,c,smoothstep(1400.0,2100.0,h));\n if(h<2700.0)return mix(c,d,smoothstep(2100.0,2700.0,h));\n return mix(d,e,smoothstep(2700.0,3400.0,h));\n}\nvec4 surfaceAt(vec3 p,vec3 n){\n vec3 w=pow(abs(n),vec3(4.0));w/=max(dot(w,vec3(1)),.001);\n return texture(uSurface,p.yz)*w.x+texture(uSurface,p.xz)*w.y+texture(uSurface,p.xy)*w.z;\n}\nvec3 perturbNormal(vec3 p,vec3 n,float height){\n vec3 dp1=dFdx(p),dp2=dFdy(p),r1=cross(dp2,n),r2=cross(n,dp1);\n float determinant=dot(dp1,r1);\n if(abs(determinant)<1e-14)return n;\n vec3 gradient=dFdx(height)*r1+dFdy(height)*r2;\n return normalize(abs(determinant)*n-sign(determinant)*gradient);\n}\nvoid main(){\n if(texture(uDisplayMask,vUV).r<.5)discard;\n vec2 nUV=(vUV*(uGrid-1.0)+.5)/uGrid;\n vec4 tex=texture(uNormal,nUV);vec3 baseNormal=normalize(tex.rgb*2.0-1.0);\n float elevation=vPosition.z*uScale+uBase;\n vec3 metres=vPosition*uScale;\n vec4 macro=surfaceAt(metres/820.0,baseNormal),detail=surfaceAt(metres/96.0,baseNormal);\n float rock=smoothstep(.17,.52,1.0-baseNormal.z);\n rock=max(rock,smoothstep(2300.0,3050.0,elevation)*(.26+macro.b*.35));\n vec3 limestone=mix(vec3(.49,.51,.47),vec3(.72,.69,.61),macro.b*.64+detail.g*.36);\n vec3 albedo=mix(palette(elevation)*(.91+macro.b*.18),limestone,rock*.83);\n albedo*=.94+detail.r*.12;\n vec2 coverUV=(vUV*(uCartographySize-1.0)+.5)/uCartographySize;\n vec4 cover=texture(uCartography,coverUV);\n albedo=mix(albedo,cover.rgb/max(cover.a,.00001),cover.a);\n // Triplanar detail is filtered with mipmaps and never changes terrain positions.\n float bump=(detail.g*.7+detail.r*.3-.5)*mix(.12,.55,rock)*(1.0-cover.a*.85)/uScale;\n vec3 n=perturbNormal(vPosition,baseNormal,bump);\n float contourDistance=abs(fract(elevation/100.0+.5)-.5)*100.0;\n float contour=1.0-smoothstep(0.0,max(.7,fwidth(elevation)*.85),contourDistance);\n albedo*=1.0-contour*.035;\n float shadow=texture(uShadow,vUV).r*.5;\n shadow+=(texture(uShadow,vUV+vec2(uShadowTexel,0)).r+texture(uShadow,vUV-vec2(uShadowTexel,0)).r+\n  texture(uShadow,vUV+vec2(0,uShadowTexel)).r+texture(uShadow,vUV-vec2(0,uShadowTexel)).r)*.125;\n vec3 view=normalize(uEye-vPosition),halfVector=normalize(view+uLight);\n float NoL=max(dot(n,uLight),0.0),NoV=max(dot(n,view),.001),NoH=max(dot(n,halfVector),0.0),VoH=max(dot(view,halfVector),0.0);\n float roughness=mix(.94,.76,rock),alpha=roughness*roughness,a2=alpha*alpha;\n float denominator=NoH*NoH*(a2-1.0)+1.0;\n float distribution=a2/(3.14159265*denominator*denominator);\n float k=(roughness+1.0)*(roughness+1.0)/8.0;\n float visibility=NoV/(NoV*(1.0-k)+k)*NoL/(NoL*(1.0-k)+k);\n float fresnel=.035+.965*pow(1.0-VoH,5.0);\n float specular=distribution*visibility*fresnel/max(4.0*NoL*NoV,.001);\n vec3 linearAlbedo=pow(albedo,vec3(2.2));\n vec3 ambient=mix(vec3(.25,.29,.24),vec3(.35,.43,.46),clamp(n.z*.5+.5,0.0,1.0))*tex.a;\n vec3 lit=linearAlbedo*ambient+(linearAlbedo*.965+vec3(specular)) *vec3(1.15,1.06,.91)*NoL*shadow;\n vec3 color=pow(max(lit,vec3(0)),vec3(1.0/2.2));\n float haze=clamp((distance(uEye,vPosition)-.9)*.10,0.0,.22);\n float edge=min(min(vUV.x,1.0-vUV.x),min(vUV.y,1.0-vUV.y));\n haze=max(haze,(1.0-smoothstep(0.0,.003,edge))*.15);\n outColor=vec4(mix(color,vec3(.875,.902,.855),haze),1.0);\n}\n";
 const SHADOW_VERTEX=`#version 300 es
 precision highp float;
 out vec2 vUV;
@@ -505,6 +547,7 @@ uniform vec2 uOffset;
 uniform vec2 uViewport;
 uniform float uHalfWidth;
 out vec2 vDistance;
+out vec2 vWorld;
 flat out float vLength;
 void main(){
  vec4 a=uMatrix*vec4(aStart,1),b=uMatrix*vec4(aEnd,1);
@@ -514,17 +557,23 @@ void main(){
  vec4 point=mix(a,b,aCorner.x);
  point.xy+=(normal*aCorner.y*uHalfWidth+direction*(aCorner.x*2.0-1.0)*uHalfWidth)*2.0/uViewport*point.w;
  point.xy+=uOffset*point.w;gl_Position=point;
+ vWorld=mix(aStart.xy,aEnd.xy,aCorner.x);
  vDistance=vec2(aCorner.x*len+(aCorner.x*2.0-1.0)*uHalfWidth,aCorner.y*uHalfWidth);vLength=len;
 }
 `;
 const ROUTE_FRAGMENT=`#version 300 es
 precision highp float;
 in vec2 vDistance;
+in vec2 vWorld;
 flat in float vLength;
 uniform vec4 uColor;
 uniform float uHalfWidth;
+uniform sampler2D uDisplayMask;
+uniform vec2 uExtent;
 out vec4 outColor;
 void main(){
+ vec2 uv=vec2(vWorld.x/uExtent.x+.5,.5-vWorld.y/uExtent.y);
+ if(any(lessThan(uv,vec2(0)))||any(greaterThan(uv,vec2(1)))||texture(uDisplayMask,uv).r<.5)discard;
  float cap=max(max(-vDistance.x,vDistance.x-vLength),0.0),dist=length(vec2(cap,vDistance.y));
  float alpha=1.0-smoothstep(uHalfWidth-.8,uHalfWidth,dist);if(alpha<=0.0)discard;
  outColor=vec4(uColor.rgb,uColor.a*alpha);
@@ -579,15 +628,51 @@ void main(){
  outColor=vec4(.20,.27,.21,contact*contact*.18);
 }
 `;
+function terrainFragmentForMask(displayMask){
+ // TerrainRenderer validated every binary texel before making this owned copy.
+ // A fully allowed mask never discards, including clamp-to-edge sampling. Keep
+ // the mask itself: it still suppresses the decorative ground/rim and bounds
+ // the route through the existing stencil and route-fragment checks.
+ return displayMask&&displayMask.source.allowedPixels===displayMask.width*displayMask.height
+  ?TERRAIN_FRAGMENT.replace(' if(texture(uDisplayMask,vUV).r<.5)discard;\n','')
+  :TERRAIN_FRAGMENT;
+}
+const PRESENT_FRAGMENT=`#version 300 es
+precision highp float;
+precision highp int;
+uniform highp sampler2D uCompleted;
+out vec4 outColor;
+void main(){outColor=vec4(texelFetch(uCompleted,ivec2(gl_FragCoord.xy),0).rgb,1.0);}
+`;
+function terrainFrameTargetFormat(gl,displayMask){
+ // Keep the original direct path if the default surface cannot be reproduced
+ // exactly. In particular, do not reduce the default MSAA or depth precision.
+ const samples=gl.getParameter(gl.SAMPLES),depth=gl.getParameter(gl.DEPTH_BITS),stencil=gl.getParameter(gl.STENCIL_BITS);
+ if(!Number.isInteger(samples)||samples<0||gl.getParameter(gl.RED_BITS)!==8||gl.getParameter(gl.GREEN_BITS)!==8||gl.getParameter(gl.BLUE_BITS)!==8||gl.getParameter(gl.ALPHA_BITS)!==0)return null;
+ if(gl.getFramebufferAttachmentParameter(gl.FRAMEBUFFER,gl.BACK,gl.FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING)!==gl.LINEAR)return null;
+ const depthFormat=displayMask?(stencil===8&&(depth===24?gl.DEPTH24_STENCIL8:depth===32?gl.DEPTH32F_STENCIL8:null))
+  :depth===16?gl.DEPTH_COMPONENT16:depth===24?gl.DEPTH_COMPONENT24:depth===32?gl.DEPTH_COMPONENT32F:null;
+ if(!depthFormat)return null;
+ for(const format of[gl.RGB8,depthFormat])if(samples&&!Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER,format,gl.SAMPLES)||[]).includes(samples))return null;
+ return{samples,depth,stencil:displayMask?stencil:0,depthFormat};
+}
 class TerrainGPU{
- constructor(gl,model){
-  this.gl=gl;this.model=model;this.resources=[];this.meshes=new Map();this.shadows=new Map();this.routeCount=0;
+ constructor(gl,model,displayMask=null){
+  this.gl=gl;this.model=model;this.displayMask=displayMask;this.resources=[];this.meshes=new Map();this.shadows=new Map();this.routeCount=0;
   try{
    if(gl.getParameter(gl.MAX_TEXTURE_SIZE)<Math.max(model.grid.width,model.grid.height)||gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS)<1)throw new Error('Terrain GPU limits');
-   this.terrain=this.program(TERRAIN_VERTEX,TERRAIN_FRAGMENT);this.shadow=this.program(SHADOW_VERTEX,SHADOW_FRAGMENT);this.line=this.program(ROUTE_VERTEX,ROUTE_FRAGMENT);
+   if(displayMask&&(gl.getParameter(gl.MAX_TEXTURE_SIZE)<Math.max(displayMask.width,displayMask.height)||gl.getParameter(gl.STENCIL_BITS)<1))throw new Error('Terrain display mask GPU limits');
+   // Query once per context, never per frame. The same bounded oblique-angle
+   // filter applies to real cartography and full-resolution terrain normals.
+   this.anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
+   this.maxAnisotropy=this.anisotropy?Math.min(4,gl.getParameter(this.anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)):1;
+   this.terrain=this.program(TERRAIN_VERTEX,terrainFragmentForMask(displayMask));this.shadow=this.program(SHADOW_VERTEX,SHADOW_FRAGMENT);this.line=this.program(ROUTE_VERTEX,ROUTE_FRAGMENT);
    this.boundary=this.program(BOUNDARY_VERTEX,BOUNDARY_FRAGMENT);
    this.ground=this.program(GROUND_VERTEX,GROUND_FRAGMENT);
+   this.frameFormat=terrainFrameTargetFormat(gl,displayMask);this.frameTarget=null;
+   this.present=this.frameFormat?this.program(SHADOW_VERTEX,PRESENT_FRAGMENT):null;
    this.heightTexture=this.texture(gl.R32F,model.grid.width,model.grid.height,gl.RED,gl.FLOAT,model.heights,gl.NEAREST);
+   this.maskTexture=this.texture(gl.R8,displayMask?.width||1,displayMask?.height||1,gl.RED,gl.UNSIGNED_BYTE,displayMask?.pixels||new Uint8Array([255]),gl.NEAREST);
    this.normalTexture=this.texture(gl.RGBA8,model.grid.width,model.grid.height,gl.RGBA,gl.UNSIGNED_BYTE,model.normalTexture,gl.LINEAR);
    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.generateMipmap(gl.TEXTURE_2D);
    const pyramid=terrainShadowPyramid(model),first=pyramid[0];
@@ -599,8 +684,7 @@ class TerrainGPU{
    this.surfaceTexture=this.texture(gl.RGBA8,surface.size,surface.size,gl.RGBA,gl.UNSIGNED_BYTE,surface.pixels,gl.LINEAR);
    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);
    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.generateMipmap(gl.TEXTURE_2D);
-   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
-   if(anisotropy)gl.texParameterf(gl.TEXTURE_2D,anisotropy.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(4,gl.getParameter(anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+   this.setCartography(null);
    this.emptyVAO=this.track(gl.createVertexArray(),'VertexArray');this.routeVAO=this.track(gl.createVertexArray(),'VertexArray');this.routeBuffer=this.track(gl.createBuffer(),'Buffer');
    gl.bindVertexArray(this.routeVAO);gl.bindBuffer(gl.ARRAY_BUFFER,this.routeBuffer);
    for(const[location,size,offset]of[[0,3,0],[1,3,12],[2,2,24]]){gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,32,offset);}
@@ -608,6 +692,76 @@ class TerrainGPU{
   }catch(error){this.destroy();throw error;}
  }
  track(object,type){if(!object)throw new Error('Terrain GPU allocation failed');this.resources.push([object,type]);return object;}
+ release(object,type){if(!object)return;this.gl['delete'+type](object);this.resources=this.resources.filter(([resource])=>resource!==object);}
+ renderbufferParameter(buffer,parameter){
+  const gl=this.gl;
+  // Re-establish the native binding before each synchronous driver query.
+  // A repeated same-object bind may be elided by the WebGL command cache.
+  gl.bindRenderbuffer(gl.RENDERBUFFER,null);gl.bindRenderbuffer(gl.RENDERBUFFER,buffer);
+  return gl.getRenderbufferParameter(gl.RENDERBUFFER,parameter);
+ }
+ targetFor(width,height){
+  if(this.frameTarget?.width===width&&this.frameTarget?.height===height)return this.frameTarget;
+  if(this.frameTarget)for(const[object,type]of this.frameTarget.resources)this.release(object,type);
+  this.frameTarget=null;
+  const gl=this.gl,format=this.frameFormat,resources=[],own=(object,type)=>{resources.push([object,type]);return this.track(object,type);};
+  const target={width,height,resources,framebuffer:own(gl.createFramebuffer(),'Framebuffer'),resolve:own(gl.createFramebuffer(),'Framebuffer')};
+  try{
+   gl.bindFramebuffer(gl.FRAMEBUFFER,target.framebuffer);
+   const color=own(gl.createRenderbuffer(),'Renderbuffer'),depth=own(gl.createRenderbuffer(),'Renderbuffer');
+   for(const[buffer,internal,attachment]of[[color,gl.RGB8,gl.COLOR_ATTACHMENT0],[depth,format.depthFormat,this.displayMask?gl.DEPTH_STENCIL_ATTACHMENT:gl.DEPTH_ATTACHMENT]]){
+    gl.bindRenderbuffer(gl.RENDERBUFFER,buffer);
+    if(format.samples)gl.renderbufferStorageMultisample(gl.RENDERBUFFER,format.samples,internal,width,height);else gl.renderbufferStorage(gl.RENDERBUFFER,internal,width,height);
+    if(this.renderbufferParameter(buffer,gl.RENDERBUFFER_SAMPLES)!==format.samples)throw new Error('Terrain framebuffer sample count changed');
+    const sizes=buffer===color?[[gl.RENDERBUFFER_RED_SIZE,8],[gl.RENDERBUFFER_GREEN_SIZE,8],[gl.RENDERBUFFER_BLUE_SIZE,8],[gl.RENDERBUFFER_ALPHA_SIZE,0]]
+     :[[gl.RENDERBUFFER_DEPTH_SIZE,format.depth],[gl.RENDERBUFFER_STENCIL_SIZE,format.stencil]];
+    for(const[parameter,expected]of sizes)if(this.renderbufferParameter(buffer,parameter)!==expected)throw new Error('Terrain framebuffer precision changed');
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER,attachment,gl.RENDERBUFFER,buffer);
+   }
+   if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('Terrain multisample framebuffer unavailable');
+   target.texture=this.texture(gl.RGB8,width,height,gl.RGB,gl.UNSIGNED_BYTE,null,gl.NEAREST);resources.push([target.texture,'Texture']);
+   gl.bindFramebuffer(gl.FRAMEBUFFER,target.resolve);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,target.texture,0);
+   if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE||gl.getError()!==gl.NO_ERROR)throw new Error('Terrain resolve framebuffer unavailable');
+   this.frameTarget=target;return target;
+  }catch(error){for(const[object,type]of resources)this.release(object,type);throw error;}
+  finally{gl.bindRenderbuffer(gl.RENDERBUFFER,null);gl.bindFramebuffer(gl.FRAMEBUFFER,null);}
+ }
+ beginFrame(mesh,camera,light,width,height,dpr,profile){
+  const gl=this.gl,target=this.targetFor(width,height);
+  this.render(mesh,camera,light,width,height,dpr,profile,target.framebuffer);
+  // WebGL2 permits resolving MSAA into a same-format single-sample FBO,
+  // never blitting into the multisampled default framebuffer.
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER,target.framebuffer);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,target.resolve);
+  gl.blitFramebuffer(0,0,width,height,0,0,width,height,gl.COLOR_BUFFER_BIT,gl.NEAREST);
+  const sync=this.track(gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0),'Sync');gl.flush();
+  return{target,sync};
+ }
+ frameReady(frame){
+  const gl=this.gl,status=gl.clientWaitSync(frame.sync,0,0);
+  if(status===gl.TIMEOUT_EXPIRED)return false;
+  if(status!==gl.ALREADY_SIGNALED&&status!==gl.CONDITION_SATISFIED)throw new Error('Terrain frame completion failed');
+  this.release(frame.sync,'Sync');frame.sync=null;return true;
+ }
+ presentFrame(frame){
+  const gl=this.gl,{target}=frame;
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,target.width,target.height);
+  gl.disable(gl.SCISSOR_TEST);gl.disable(gl.DEPTH_TEST);gl.disable(gl.STENCIL_TEST);gl.disable(gl.CULL_FACE);gl.disable(gl.BLEND);gl.depthMask(false);gl.colorMask(true,true,true,true);
+  gl.useProgram(this.present.program);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,target.texture);gl.uniform1i(this.uniform(this.present,'uCompleted'),0);
+  gl.bindVertexArray(this.emptyVAO);gl.drawArrays(gl.TRIANGLES,0,3);gl.bindVertexArray(null);gl.depthMask(true);gl.flush();
+  if(gl.getError()!==gl.NO_ERROR)throw new Error('Terrain completed frame presentation failed');
+ }
+ setCartography(surface){
+  const gl=this.gl,width=surface?.width||1,height=surface?.height||1;
+  // Premultiplied texels make mipmaps and partial-source borders fade into the
+  // neutral material without inventing colours in unavailable source tiles.
+  const pixels=surface?new Uint8Array(surface.pixels):new Uint8Array(4);
+  if(surface)for(let i=0;i<pixels.length;i+=4){const alpha=pixels[i+3]/255;for(let k=0;k<3;k++)pixels[i+k]=Math.round(pixels[i+k]*alpha);}
+  const texture=this.texture(gl.RGBA8,width,height,gl.RGBA,gl.UNSIGNED_BYTE,pixels,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.generateMipmap(gl.TEXTURE_2D);
+  if(gl.getError()!==gl.NO_ERROR){gl.deleteTexture(texture);this.resources=this.resources.filter(([item])=>item!==texture);throw new Error('Terrain cartography texture allocation failed');}
+  if(this.cartographyTexture){gl.deleteTexture(this.cartographyTexture);this.resources=this.resources.filter(([item])=>item!==this.cartographyTexture);}
+  this.cartographyTexture=texture;this.cartographySize=[width,height];
+ }
  program(vertex,fragment){
   const gl=this.gl,shaders=[];
   try{
@@ -626,6 +780,7 @@ class TerrainGPU{
   const gl=this.gl,texture=this.track(gl.createTexture(),'Texture');gl.bindTexture(gl.TEXTURE_2D,texture);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,filtering);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,filtering);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  if(filtering===gl.LINEAR&&this.anisotropy)gl.texParameterf(gl.TEXTURE_2D,this.anisotropy.TEXTURE_MAX_ANISOTROPY_EXT,this.maxAnisotropy);
   gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,internal,width,height,0,format,type,data);return texture;
  }
  heightUniforms(program){
@@ -633,13 +788,14 @@ class TerrainGPU{
   gl.uniform1i(this.uniform(program,'uHeight'),0);gl.uniform2f(this.uniform(program,'uGrid'),m.grid.width,m.grid.height);
   gl.uniform2f(this.uniform(program,'uExtent'),m.width,m.height);
  }
+ maskUniforms(program){const gl=this.gl;gl.activeTexture(gl.TEXTURE6);gl.bindTexture(gl.TEXTURE_2D,this.maskTexture);gl.uniform1i(this.uniform(program,'uDisplayMask'),6);}
  ensureMesh(mesh){
   if(this.meshes.has(mesh.step))return this.meshes.get(mesh.step);
   const gl=this.gl,vao=this.track(gl.createVertexArray(),'VertexArray'),buffer=this.track(gl.createBuffer(),'Buffer'),index=this.track(gl.createBuffer(),'Buffer');
   gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.uv,gl.STATIC_DRAW);
   gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,8,0);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,index);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,mesh.indices,gl.STATIC_DRAW);gl.bindVertexArray(null);
-  const cut=buildTerrainBoundary(this.model,mesh.step),boundaryVAO=this.track(gl.createVertexArray(),'VertexArray'),boundaryBuffer=this.track(gl.createBuffer(),'Buffer');
+  const cut=this.displayMask?{vertices:new Float32Array(0),count:0,floor:0}:buildTerrainBoundary(this.model,mesh.step),boundaryVAO=this.track(gl.createVertexArray(),'VertexArray'),boundaryBuffer=this.track(gl.createBuffer(),'Buffer');
   gl.bindVertexArray(boundaryVAO);gl.bindBuffer(gl.ARRAY_BUFFER,boundaryBuffer);gl.bufferData(gl.ARRAY_BUFFER,cut.vertices,gl.STATIC_DRAW);
   for(const[location,offset]of[[0,0],[1,12]]){gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,3,gl.FLOAT,false,24,offset);}
   gl.bindVertexArray(null);
@@ -669,42 +825,60 @@ class TerrainGPU{
   }
   return{texture:target.texture,size};
  }
- render(mesh,camera,light,width,height,dpr,profile){
+ render(mesh,camera,light,width,height,dpr,profile,framebuffer=null){
   const gl=this.gl,m=this.model,shadow=this.shadowMap(light,profile),gpuMesh=this.ensureMesh(mesh);
-  gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,width,height);gl.clearColor(SKY[0]/255,SKY[1]/255,SKY[2]/255,1);
-  gl.clearDepth(1);gl.depthMask(true);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);gl.viewport(0,0,width,height);gl.clearColor(SKY[0]/255,SKY[1]/255,SKY[2]/255,1);
+  gl.disable(gl.STENCIL_TEST);gl.clearDepth(1);gl.depthMask(true);
+  if(this.displayMask){gl.stencilMask(255);gl.clearStencil(0);}
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT|(this.displayMask?gl.STENCIL_BUFFER_BIT:0));
+  if(!this.displayMask){
   gl.disable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);gl.depthMask(false);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   gl.useProgram(this.ground.program);gl.uniformMatrix4fv(this.uniform(this.ground,'uMatrix'),false,camera.matrix);gl.uniform2fv(this.uniform(this.ground,'uOffset'),camera.offset);
   gl.uniform2f(this.uniform(this.ground,'uExtent'),m.width,m.height);gl.uniform1f(this.uniform(this.ground,'uFloor'),gpuMesh.floor);
   gl.bindVertexArray(this.emptyVAO);gl.drawArrays(gl.TRIANGLES,0,6);gl.depthMask(true);
-  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.disable(gl.BLEND);gl.useProgram(this.terrain.program);this.heightUniforms(this.terrain);
+  }
+  if(this.displayMask){gl.enable(gl.STENCIL_TEST);gl.stencilFunc(gl.ALWAYS,1,255);gl.stencilOp(gl.KEEP,gl.KEEP,gl.REPLACE);}
+  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.disable(gl.BLEND);gl.useProgram(this.terrain.program);this.heightUniforms(this.terrain);this.maskUniforms(this.terrain);
   gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,this.normalTexture);gl.uniform1i(this.uniform(this.terrain,'uNormal'),1);
   gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,shadow.texture);gl.uniform1i(this.uniform(this.terrain,'uShadow'),2);
   gl.activeTexture(gl.TEXTURE4);gl.bindTexture(gl.TEXTURE_2D,this.surfaceTexture);gl.uniform1i(this.uniform(this.terrain,'uSurface'),4);
+  gl.activeTexture(gl.TEXTURE5);gl.bindTexture(gl.TEXTURE_2D,this.cartographyTexture);gl.uniform1i(this.uniform(this.terrain,'uCartography'),5);gl.uniform2fv(this.uniform(this.terrain,'uCartographySize'),this.cartographySize);
   gl.uniformMatrix4fv(this.uniform(this.terrain,'uMatrix'),false,camera.matrix);gl.uniform2fv(this.uniform(this.terrain,'uOffset'),camera.offset);
   gl.uniform3fv(this.uniform(this.terrain,'uLight'),light);gl.uniform3fv(this.uniform(this.terrain,'uEye'),camera.eye);
   gl.uniform1f(this.uniform(this.terrain,'uBase'),m.base);gl.uniform1f(this.uniform(this.terrain,'uScale'),m.scale);gl.uniform1f(this.uniform(this.terrain,'uShadowTexel'),1/shadow.size);
   gl.bindVertexArray(gpuMesh.vao);gl.drawElements(gl.TRIANGLES,gpuMesh.count,gpuMesh.type,0);
+  if(this.displayMask){gl.stencilMask(0);gl.stencilFunc(gl.EQUAL,1,255);gl.stencilOp(gl.KEEP,gl.KEEP,gl.KEEP);}
+  if(!this.displayMask){
   gl.useProgram(this.boundary.program);gl.uniformMatrix4fv(this.uniform(this.boundary,'uMatrix'),false,camera.matrix);gl.uniform2fv(this.uniform(this.boundary,'uOffset'),camera.offset);
   gl.uniform3fv(this.uniform(this.boundary,'uLight'),light);gl.uniform1f(this.uniform(this.boundary,'uFloor'),gpuMesh.floor);
   gl.bindVertexArray(gpuMesh.boundaryVAO);gl.drawArrays(gl.TRIANGLES,0,gpuMesh.boundaryCount);
+  }
   if(this.routeCount){
    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.useProgram(this.line.program);
    gl.uniformMatrix4fv(this.uniform(this.line,'uMatrix'),false,camera.matrix);gl.uniform2fv(this.uniform(this.line,'uOffset'),camera.offset);
+   this.maskUniforms(this.line);gl.uniform2f(this.uniform(this.line,'uExtent'),m.width,m.height);
    gl.uniform2f(this.uniform(this.line,'uViewport'),width,height);gl.bindVertexArray(this.routeVAO);
    for(const[size,color]of[[4.3,[1,.985,.91,.94]],[2.25,[.74,.30,.12,1]]]){
     gl.uniform1f(this.uniform(this.line,'uHalfWidth'),size*dpr);gl.uniform4fv(this.uniform(this.line,'uColor'),color);gl.drawArrays(gl.TRIANGLES,0,this.routeCount);
    }
    gl.depthMask(true);gl.disable(gl.BLEND);
   }
-  gl.bindVertexArray(null);gl.flush();
+  gl.disable(gl.STENCIL_TEST);gl.bindVertexArray(null);gl.flush();
  }
- destroy(){const gl=this.gl;for(const[object,type]of this.resources.reverse())gl['delete'+type](object);this.resources=[];this.meshes.clear();this.shadows.clear();}
+ // Context loss invalidates every WebGLObject. Passing those old handles to
+ // delete* after restoration itself raises INVALID_OPERATION, poisoning the
+ // new context's first allocation check. The browser already released them.
+ abandon(){
+  this.resources=[];this.meshes.clear();this.shadows.clear();this.routeCount=0;this.frameTarget=null;
+  for(const key of['terrain','shadow','line','boundary','ground','present','heightTexture','maskTexture','normalTexture','maxHeightTexture','surfaceTexture','cartographyTexture','emptyVAO','routeVAO','routeBuffer','anisotropy'])this[key]=null;
+ }
+ destroy(){const gl=this.gl;for(const[object,type]of this.resources.reverse())gl['delete'+type](object);this.abandon();}
 }
 function palette(height){return terrainMaterialColor(height);}
 
 class TerrainCanvas{
- constructor(context,model){this.ctx=context;this.model=model;this.shadowCache=new Map();this.boundaries=new Map();}
+ constructor(context,model,displayMask=null){this.ctx=context;this.model=model;this.displayMask=displayMask;this.shadowCache=new Map();this.boundaries=new Map();this.cartography=null;}
+ setCartography(surface){this.cartography=surface;}
  shadows(mesh,light,profile){
   const key=mesh.step+':'+profile.shadowQueries+':'+light.join(':');if(this.shadowCache.has(key))return this.shadowCache.get(key);
   const values=new Float32Array(mesh.count),m=this.model;
@@ -719,16 +893,19 @@ class TerrainCanvas{
   if(!this.image||this.image.width!==width||this.image.height!==height){this.image=ctx.createImageData(width,height);this.depth=new Float32Array(width*height);}
   const pixels=this.image.data,depth=this.depth;
   for(let p=0;p<pixels.length;p+=4){pixels[p]=SKY[0];pixels[p+1]=SKY[1];pixels[p+2]=SKY[2];pixels[p+3]=255;}depth.fill(Infinity);
-  if(!this.boundaries.has(mesh.step))this.boundaries.set(mesh.step,buildTerrainBoundary(m,mesh.step));
+  if(!this.boundaries.has(mesh.step))this.boundaries.set(mesh.step,this.displayMask?{count:0,vertices:new Float32Array(0),floor:0}:buildTerrainBoundary(m,mesh.step));
   const boundary=this.boundaries.get(mesh.step),shadows=this.shadows(mesh,light,profile),vertices=new Array(mesh.count+boundary.count),colors=new Float32Array((mesh.count+boundary.count)*3);
+  const cartography=this.cartography,lighting=cartography?new Float32Array(mesh.count*3):null,hazes=cartography?new Float32Array(mesh.count):null,cover=[0,0,0,0];
   for(let i=0;i<mesh.count;i++){
    const sample=mesh.sampleIds[i],n=[m.normals[sample*3],m.normals[sample*3+1],m.normals[sample*3+2]],u=mesh.uv[i*2],v=mesh.uv[i*2+1];
    const point=[(u-.5)*m.width,(.5-v)*m.height,m.heights[sample]];vertices[i]=projectPoint(point,camera,width,height);
    const base=palette(m.grid.elevations[sample]),slope=smoothstep(.18,.57,1-n[2]),ao=m.normalTexture[sample*4+3]/255,diffuse=Math.max(0,dot(n,light))*shadows[i]*.94;
    const haze=Math.max(clamp((Math.hypot(...point.map((x,k)=>x-camera.eye[k]))-.68)*.13,0,.32),(1-smoothstep(0,.003,Math.min(u,1-u,v,1-v)))*.15);
+   if(hazes)hazes[i]=haze;
    for(let k=0;k<3;k++){
     const albedo=mix(base[k],[.57,.55,.48][k],slope*.68),illumination=[.34,.41,.40][k]*(.55+.45*n[2])*ao+[1.05,.99,.85][k]*diffuse;
     colors[i*3+k]=mix(Math.max(0,albedo**2.2*illumination)**(1/2.2)*255,SKY[k],haze);
+    if(lighting)lighting[i*3+k]=Math.max(0,illumination)**(1/2.2);
    }
   }
   for(let i=0;i<boundary.count;i++){
@@ -750,43 +927,60 @@ class TerrainCanvas{
     let wa=rowA,wb=rowB,index=y*width+minX;
     for(let x=minX;x<=maxX;x++,index++,wa+=waX,wb+=wbX){
      const wc=1-wa-wb;if(wa<-.00001||wb<-.00001||wc<-.00001)continue;
-     const z=wa*a[2]+wb*b[2]+wc*c[2];if(z>depth[index]||z<-1||z>1)continue;depth[index]=z;
+     const z=wa*a[2]+wb*b[2]+wc*c[2];if(z>depth[index]||z<-1||z>1)continue;
      const pa=wa*a[3],pb=wb*b[3],pc=wc*c[3],reciprocal=1/(pa+pb+pc),offset=index*4;
-     for(let k=0;k<3;k++)pixels[offset+k]=(pa*colors[ia*3+k]+pb*colors[ib*3+k]+pc*colors[ic*3+k])*reciprocal;
+     const u=i<ids.length&&(cartography||this.displayMask)?(pa*mesh.uv[ia*2]+pb*mesh.uv[ib*2]+pc*mesh.uv[ic*2])*reciprocal:0;
+     const v=i<ids.length&&(cartography||this.displayMask)?(pa*mesh.uv[ia*2+1]+pb*mesh.uv[ib*2+1]+pc*mesh.uv[ic*2+1])*reciprocal:0;
+     if(this.displayMask&&!sampleTerrainDisplayMask(this.displayMask,u,v))continue;depth[index]=z;
+     let alpha=0,haze=0;
+     if(cartography&&i<ids.length){
+      sampleTerrainCartography(cartography,u,v,cover);alpha=cover[3]/255;haze=(pa*hazes[ia]+pb*hazes[ib]+pc*hazes[ic])*reciprocal;
+     }
+     for(let k=0;k<3;k++){
+      const neutral=(pa*colors[ia*3+k]+pb*colors[ib*3+k]+pc*colors[ic*3+k])*reciprocal;
+      const mapped=alpha?mix(cover[k]*(pa*lighting[ia*3+k]+pb*lighting[ib*3+k]+pc*lighting[ic*3+k])*reciprocal,SKY[k],haze):neutral;
+      pixels[offset+k]=mix(neutral,mapped,alpha);
+     }
     }
    }
   }
   // Route capsules use the terrain depth buffer, so a hidden trail stays hidden.
-  const projected=segments.map(([a,b])=>[projectPoint(a,camera,width,height),projectPoint(b,camera,width,height)]);
-  for(const[radius,color]of[[4.3*dpr,[255,251,232]],[2.25*dpr,[189,77,31]]])for(const[a,b]of projected)if(a&&b)this.routeCapsule(a,b,radius,color,width,height,pixels,depth);
+  const projected=segments.map(([a,b])=>[projectPoint(a,camera,width,height),projectPoint(b,camera,width,height),[a[0]/m.width+.5,.5-a[1]/m.height],[b[0]/m.width+.5,.5-b[1]/m.height]]);
+  for(const[radius,color]of[[4.3*dpr,[255,251,232]],[2.25*dpr,[189,77,31]]])for(const[a,b,uvA,uvB]of projected)if(a&&b)this.routeCapsule(a,b,radius,color,width,height,pixels,depth,uvA,uvB);
   ctx.putImageData(this.image,0,0);
  }
- routeCapsule(a,b,radius,color,width,height,pixels,depth){
+ routeCapsule(a,b,radius,color,width,height,pixels,depth,uvA,uvB){
   const dx=b[0]-a[0],dy=b[1]-a[1],length=dx*dx+dy*dy;if(length<.00001)return;
   const minX=Math.max(0,Math.floor(Math.min(a[0],b[0])-radius)),maxX=Math.min(width-1,Math.ceil(Math.max(a[0],b[0])+radius));
   const minY=Math.max(0,Math.floor(Math.min(a[1],b[1])-radius)),maxY=Math.min(height-1,Math.ceil(Math.max(a[1],b[1])+radius));
   for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){
    const t=clamp(((x+.5-a[0])*dx+(y+.5-a[1])*dy)/length,0,1),distance=Math.hypot(x+.5-a[0]-dx*t,y+.5-a[1]-dy*t);if(distance>=radius)continue;
    const index=y*width+x,z=mix(a[2],b[2],t);if(z>depth[index]||z<-1||z>1)continue;
+   if(this.displayMask){
+    const reciprocal=1/mix(a[3],b[3],t),u=mix(uvA[0]*a[3],uvB[0]*b[3],t)*reciprocal,v=mix(uvA[1]*a[3],uvB[1]*b[3],t)*reciprocal;
+    if(!Number.isFinite(depth[index])||!sampleTerrainDisplayMask(this.displayMask,u,v))continue;
+   }
    const alpha=clamp(radius-distance,0,1),offset=index*4;for(let k=0;k<3;k++)pixels[offset+k]=mix(pixels[offset+k],color[k],alpha);
   }
  }
- destroy(){this.shadowCache.clear();this.boundaries.clear();this.image=null;this.depth=null;}
+ destroy(){this.shadowCache.clear();this.boundaries.clear();this.image=null;this.depth=null;this.cartography=null;this.displayMask=null;}
 }
 export class TerrainRenderer{
  constructor(canvas,grid,options={}){
-  this.originalCanvas=canvas;this.canvas=canvas;this.grid=grid;this.options=options;
+  this.originalCanvas=canvas;this.canvas=canvas;this.grid=grid;this.options={...options,displayMask:undefined};
+  const mask=options.displayMask?validateTerrainDisplayMask(options.displayMask,grid):null;
+  this.displayMask=mask?{width:mask.width,height:mask.height,pixels:new Uint8Array(mask.pixels),source:{...mask.source,bounds:[...mask.source.bounds],cells:[...mask.source.cells]}}:null;
   this.model=options.preparedModel===undefined?createTerrainModel(grid):validatePreparedTerrainModel(grid,options.preparedModel);
   this.widthM=this.model.widthM;this.heightM=this.model.heightM;this.base=this.model.base;
   this.yaw=DEFAULT_VIEW.yaw;this.pitch=DEFAULT_VIEW.pitch;this.zoom=DEFAULT_VIEW.zoom;this.offset=[0,0];
   this.viewportInsets=normalizedInsets(options.viewportInsets);
-  this.visible=true;this.destroyed=false;this.failed=false;this.contextLost=false;this.frame=0;this.dirty=true;this.warmRequested=false;
-  this.pointers=new Map();this.events=[];this.meshes=new Map();this.meshStride=0;this.renderProfile=null;this.route=[];this.routeMeshes=new Map();this.gpuRoute=null;this.dragging=false;this.wheeling=false;
+  this.visible=true;this.destroyed=false;this.failed=false;this.contextLost=false;this.frame=0;this.dirty=true;this.warmRequested=false;this.graphicsFallback=null;
+  this.pointers=new Map();this.events=[];this.meshes=new Map();this.meshStride=0;this.renderProfile=null;this.route=[];this.routeMeshes=new Map();this.gpuRoute=null;this.dragging=false;this.wheeling=false;this.cartography=null;this.pendingGPU=null;this.gpuCartographyDirty=false;
   this.previousTouchAction=canvas.style?.touchAction;if(canvas.style)canvas.style.touchAction='none';
   try{
    let gl;
-   if(!options.forceCanvas)try{gl=canvas.getContext('webgl2',{alpha:false,antialias:true,depth:true,stencil:false,preserveDrawingBuffer:false,powerPreference:'default',failIfMajorPerformanceCaveat:true});}catch{}
-   if(gl){try{this.gpu=new TerrainGPU(gl,this.model);this.gl=gl;}catch{gl.getExtension('WEBGL_lose_context')?.loseContext();this.useCanvas(true);}}
+   if(!options.forceCanvas)try{gl=canvas.getContext('webgl2',{alpha:false,antialias:true,depth:true,stencil:!!this.displayMask,preserveDrawingBuffer:false,powerPreference:'default',failIfMajorPerformanceCaveat:true});}catch(error){this.recordGraphicsFallback('context-create',error);}
+   if(gl){try{this.gpu=new TerrainGPU(gl,this.model,this.displayMask);this.gl=gl;}catch(error){this.recordGraphicsFallback('initialization',error);gl.getExtension('WEBGL_lose_context')?.loseContext();this.useCanvas(true);}}
    else this.useCanvas(false);
    this.bindControls();this.observe();this.document=canvas.ownerDocument||(typeof document!=='undefined'?document:null);
    this.onVisibility=()=>{if(this.document?.visibilityState!=='hidden')this.request();else this.cancelFrame();};
@@ -801,8 +995,9 @@ export class TerrainRenderer{
   const ctx=next.getContext('2d',{alpha:false});if(!ctx)throw new Error('На этом устройстве недоступен рендер карты.');
   // Commit the DOM replacement only after its context succeeds; failed retries retain React's canvas.
   if(replace){this.canvas.parentNode.replaceChild(next,this.canvas);this.canvas=next;}
-  this.software=new TerrainCanvas(ctx,this.model);this.gl=null;this.gpu=null;
+  this.software=new TerrainCanvas(ctx,this.model,this.displayMask);this.software.setCartography(this.cartography);this.gl=null;this.gpu=null;
  }
+ recordGraphicsFallback(stage,error){this.graphicsFallback={stage,reason:String(error?.message??error??'Graphics context unavailable').replace(/[\r\n\t ]+/g,' ').slice(0,512)};}
  notify(name,value){try{this.options[name]?.(value);}catch{/* Host callbacks must not interrupt rendering or context recovery. */}}
  bind(name,handler,options){this.canvas.addEventListener(name,handler,options);this.events.push([this.canvas,name,handler,options]);}
  bindControls(){
@@ -841,18 +1036,18 @@ export class TerrainRenderer{
    else if(e.key==='Home')this.reset();else return;e.preventDefault();
   });
   this.bind('webglcontextlost',e=>{
-   e.preventDefault();this.contextLost=true;this.cancelFrame();this.notify('onError','Графический контекст прерван. Восстанавливаем сцену…');
-   clearTimeout(this.restoreTimer);this.restoreTimer=setTimeout(()=>this.fallbackAfterLoss(),2500);
+   e.preventDefault();this.contextLost=true;this.cancelFrame();this.pendingGPU=null;this.canvas.dataset.terrainPending='false';this.gpu?.abandon();this.gpuRoute=null;this.notify('onError','Графический контекст прерван. Восстанавливаем сцену…');
+   clearTimeout(this.restoreTimer);this.restoreTimer=setTimeout(()=>{this.recordGraphicsFallback('context-timeout','Graphics context did not restore');this.fallbackAfterLoss();},2500);
   });
   this.bind('webglcontextrestored',()=>{
    if(this.destroyed||!this.gl)return;clearTimeout(this.restoreTimer);
-   try{this.gpu?.destroy();this.gpu=new TerrainGPU(this.gl,this.model);this.gpuRoute=null;this.contextLost=false;this.request();}
-   catch{this.fallbackAfterLoss();}
+   try{this.gpu?.abandon();this.gpu=new TerrainGPU(this.gl,this.model,this.displayMask);this.gpu.setCartography(this.cartography);this.gpuCartographyDirty=false;this.gpuRoute=null;this.contextLost=false;this.request();}
+   catch(error){this.recordGraphicsFallback('context-restoration',error);this.fallbackAfterLoss();}
   });
  }
  fallbackAfterLoss(){
   if(this.destroyed||!this.contextLost)return;clearTimeout(this.restoreTimer);this.unbindControls();this.resize?.disconnect();
-  this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);this.gpuRoute=null;
+  this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);this.gpuRoute=null;this.pendingGPU=null;this.gpuCartographyDirty=false;this.canvas.dataset.terrainPending='false';
   try{this.gpu?.destroy();this.useCanvas(true);this.contextLost=false;this.bindControls();this.observe();this.request();}
   catch{this.terminalFailure('Не удалось восстановить ландшафт. Подготовьте сцену заново.');}
  }
@@ -873,6 +1068,16 @@ export class TerrainRenderer{
   this.offset[1]=clamp(this.offset[1]-(dx*sr-dy*cr)*factor,-this.model.height*.42,this.model.height*.42);
  }
  heightAt(x,y){return sampleElevation(this.model,x,y);}
+ setCartography(surface){
+  if(this.destroyed)return;
+  if(surface)validateTerrainCartography(surface,this.grid);
+  const next=surface&&surface.source.loadedTiles>0?{width:surface.width,height:surface.height,pixels:new Uint8ClampedArray(surface.pixels),source:{...surface.source,bounds:[...surface.source.bounds]}}:null;
+  this.cartography=next;this.software?.setCartography(next);
+  this.canvas.dataset.cartography=next&&next.source.loadedTiles>0?'source':'none';this.canvas.dataset.cartographyTiles=String(next?.source.loadedTiles||0);
+  try{if(this.gpu&&!this.contextLost){if(this.pendingGPU)this.gpuCartographyDirty=true;else{this.gpu.setCartography(next);this.gpuCartographyDirty=false;}}}
+  catch(error){this.recordGraphicsFallback('cartography',error);this.contextLost=true;this.fallbackAfterLoss();return;}
+  this.request();
+ }
  setGeometry(data){
   if(this.destroyed)return;
   try{
@@ -887,17 +1092,53 @@ export class TerrainRenderer{
  }
  setVisible(value){
   this.visible=Boolean(value);
-  if(this.visible)this.request();else{this.cancelFrame();this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);if(this.warmRequested)this.request();}
+  if(this.visible)this.request();else{this.cancelFrame();this.pointers.clear();this.dragging=false;this.wheeling=false;clearTimeout(this.wheelTimer);if(this.warmRequested||this.pendingGPU?.warm)this.schedule();}
  }
  setViewportInsets(insets){if(this.destroyed)return;this.viewportInsets=normalizedInsets(insets);this.request();}
  warmup(){if(this.destroyed)return;this.warmRequested=true;this.request();}
  cancelFrame(){if(this.frame){cancelAnimationFrame(this.frame);this.frame=0;}}
  request(){
-  this.dirty=true;if(this.destroyed||(!this.visible&&!this.warmRequested)||this.contextLost||this.frame||this.document?.visibilityState==='hidden')return;
+  if(this.destroyed)return;this.dirty=true;if(this.gpu?.frameFormat)this.canvas.dataset.terrainPending='true';this.schedule();
+ }
+ schedule(){
+  if(this.destroyed||(!this.visible&&!this.warmRequested&&!this.pendingGPU?.warm)||this.contextLost||this.frame||this.document?.visibilityState==='hidden')return;
+  if(!this.pendingGPU&&!this.dirty&&!this.warmRequested)return;
   this.frame=requestAnimationFrame(()=>{
    this.frame=0;const warm=this.warmRequested;this.warmRequested=false;
-   if(!this.destroyed&&(this.visible||warm)&&!this.contextLost&&this.document?.visibilityState!=='hidden'){this.dirty=false;this.render(warm);}
+   if(!this.destroyed&&(this.visible||warm||this.pendingGPU?.warm)&&!this.contextLost&&this.document?.visibilityState!=='hidden'){
+    if(this.pendingGPU){this.pendingGPU.warm||=warm;this.pollGPUFrame();}
+    else{this.dirty=false;this.render(warm);}
+   }
   });
+ }
+ frameDimensions(rect){
+  const profile=this.profileFor(rect,typeof navigator!=='undefined'?navigator:{}),wantedDpr=Math.min(typeof devicePixelRatio==='number'?devicePixelRatio:1,profile.maxDpr);
+  const dpr=Math.min(wantedDpr,Math.sqrt(profile.pixelLimit/(rect.width*rect.height)),4096/rect.width,4096/rect.height);
+  return{profile,dpr,width:Math.max(1,Math.round(rect.width*dpr)),height:Math.max(1,Math.round(rect.height*dpr))};
+ }
+ frameState(rect,dpr){return[rect.width,rect.height,dpr,this.yaw,this.pitch,this.zoom,this.offset[0],this.offset[1],this.viewportInsets,this.cartography,this.route];}
+ pollGPUFrame(){
+  const pending=this.pendingGPU;if(!pending||pending.gpu!==this.gpu||this.destroyed||this.contextLost)return;
+  try{
+   if(!this.gpu.frameReady(pending)){
+    if(performance.now()-pending.started>10000)throw new Error('Terrain frame completion timed out');
+    this.schedule();return;
+   }
+   this.pendingGPU=null;
+   const rect=this.canvas.getBoundingClientRect(),dimensions=this.frameDimensions(rect),state=this.frameState(rect,dimensions.dpr);
+   if(rect.width<1||rect.height<1||!pending.state.every((value,index)=>value===state[index])){
+    this.dirty=true;this.warmRequested||=pending.warm;this.schedule();return;
+   }
+   // Do not resize/clear the visible canvas while expensive work is pending.
+   // The completed texture is copied immediately after the deferred resize.
+   const started=performance.now();
+   if(this.canvas.width!==pending.width||this.canvas.height!==pending.height){this.canvas.width=pending.width;this.canvas.height=pending.height;}
+   this.gpu.presentFrame(pending);pending.info.ms+=performance.now()-started;
+   this.publishFrame(pending.info,pending.routeLength,'deferred-msaa');
+   this.schedule();
+  }catch(error){
+   this.recordGraphicsFallback('presentation',error);this.warmRequested||=pending.warm;this.contextLost=true;this.fallbackAfterLoss();
+  }
  }
  meshFor(step){if(!this.meshes.has(step))this.meshes.set(step,buildTerrainMesh(this.model,step));return this.meshes.get(step);}
  profileFor(rect,hardware){
@@ -915,39 +1156,53 @@ export class TerrainRenderer{
   if(this.routeMeshes.size>=2)this.routeMeshes.delete(this.routeMeshes.keys().next().value);this.routeMeshes.set(step,route);return route;
  }
  render(warm=false){
+  if(this.pendingGPU){this.dirty=true;return;}
   const started=performance.now(),rect=this.canvas.getBoundingClientRect();if(rect.width<1||rect.height<1){if(warm)this.warmRequested=true;return;}
-  const motion=this.dragging||this.wheeling,hardware=typeof navigator!=='undefined'?navigator:{},profile=this.profileFor(rect,hardware);
-  const wantedDpr=Math.min(typeof devicePixelRatio==='number'?devicePixelRatio:1,profile.maxDpr);
-  const dpr=Math.min(wantedDpr,Math.sqrt(profile.pixelLimit/(rect.width*rect.height)),4096/rect.width,4096/rect.height);
-  const W=Math.max(1,Math.round(rect.width*dpr)),H=Math.max(1,Math.round(rect.height*dpr));
-  if(this.canvas.width!==W||this.canvas.height!==H){this.canvas.width=W;this.canvas.height=H;}
+  const motion=this.dragging||this.wheeling,{profile,dpr,width:W,height:H}=this.frameDimensions(rect);
   const camera=cameraFor(this.model,this,rect.width,rect.height,this.options.compactViewport);
   const budget=this.gpu?Math.max(4225,camera.usableW*camera.usableH*.55*Math.min(2,this.zoom)):16641;
   const step=selectTerrainMeshStride(this.grid,budget,this.meshStride,profile.vertexLimit);this.meshStride=step;
   const mesh=this.meshFor(step),light=terrainLight(this.yaw,this.pitch),route=this.routeFor(step);
+  const info={ms:0,triangles:mesh.triangles,quality:motion?'motion':'full',renderer:this.gpu?'webgl2':'canvas2d',pixelRatio:dpr,meshStride:step,sourceVertices:this.grid.width*this.grid.height,graphicsFallback:this.graphicsFallback?{...this.graphicsFallback}:null,
+   view:{yaw:this.yaw,pitch:this.pitch,zoom:this.zoom,offset:[...this.offset]},
+   cartography:this.cartography?{loadedTiles:this.cartography.source.loadedTiles,requestedTiles:this.cartography.source.requestedTiles,width:this.cartography.width,height:this.cartography.height}:null,
+   displayMask:this.displayMask?{width:this.displayMask.width,height:this.displayMask.height,allowedPixels:this.displayMask.source.allowedPixels,coverageVersion:this.displayMask.source.coverageVersion}:null};
   try{
-   if(this.gpu){if(this.gpuRoute!==route){this.gpu.setRoute(route);this.gpuRoute=route;}this.gpu.render(mesh,camera,light,W,H,dpr,profile);}
-   else this.software.render(mesh,camera,light,W,H,dpr,profile,route);
-  }catch{
-   if(this.gpu){this.warmRequested=warm;this.contextLost=true;this.fallbackAfterLoss();return;}
+   if(this.gpu){
+    if(this.gpuCartographyDirty){this.gpu.setCartography(this.cartography);this.gpuCartographyDirty=false;}
+    if(this.gpuRoute!==route){this.gpu.setRoute(route);this.gpuRoute=route;}
+    if(this.gpu.frameFormat){
+     const frame=this.gpu.beginFrame(mesh,camera,light,W,H,dpr,profile);info.ms=performance.now()-started;
+     this.pendingGPU={...frame,gpu:this.gpu,info,width:W,height:H,routeLength:route.length,warm,started,state:this.frameState(rect,dpr)};
+     this.canvas.dataset.terrainPending='true';this.pollGPUFrame();return;
+    }
+   }
+   if(this.canvas.width!==W||this.canvas.height!==H){this.canvas.width=W;this.canvas.height=H;}
+   if(this.gpu)this.gpu.render(mesh,camera,light,W,H,dpr,profile);else this.software.render(mesh,camera,light,W,H,dpr,profile,route);
+  }catch(error){
+   if(this.gpu){this.recordGraphicsFallback('render',error);this.warmRequested=warm;this.contextLost=true;this.fallbackAfterLoss();return;}
    this.terminalFailure('Не удалось нарисовать ландшафт. Подготовьте сцену заново.');return;
   }
-  const ms=performance.now()-started,renderer=this.gpu?'webgl2':'canvas2d',quality=motion?'motion':'full';
-  this.canvas.dataset.renderMs=ms.toFixed(1);this.canvas.dataset.triangles=String(mesh.triangles);
-  this.canvas.dataset.quality=quality;this.canvas.dataset.renderer=renderer;this.canvas.dataset.meshStride=String(step);
-  this.canvas.dataset.routeMeshStride=String(step);this.canvas.dataset.routeRenderSegments=String(route.length);
-  this.canvas.dataset.sourceVertices=String(this.grid.width*this.grid.height);this.canvas.dataset.heightScale='1';this.canvas.dataset.material='cartographic';
-  // ms is CPU submission/drawing time, not a GPU or phone FPS measurement.
-  this.notify('onRender',{ms,triangles:mesh.triangles,quality,renderer,pixelRatio:dpr,meshStride:step,sourceVertices:this.grid.width*this.grid.height});
+  info.ms=performance.now()-started;this.publishFrame(info,route.length,this.gpu?'direct':'canvas2d');
+ }
+ publishFrame(info,routeLength,presentation){
+  this.canvas.dataset.renderMs=info.ms.toFixed(1);this.canvas.dataset.triangles=String(info.triangles);
+  this.canvas.dataset.quality=info.quality;this.canvas.dataset.renderer=info.renderer;this.canvas.dataset.meshStride=String(info.meshStride);
+  this.canvas.dataset.routeMeshStride=String(info.meshStride);this.canvas.dataset.routeRenderSegments=String(routeLength);
+  this.canvas.dataset.sourceVertices=String(info.sourceVertices);this.canvas.dataset.heightScale='1';this.canvas.dataset.material='cartographic';
+  this.canvas.dataset.displayMask=info.displayMask?'russia-display-area':'none';this.canvas.dataset.terrainPresentation=presentation;this.canvas.dataset.terrainPending=String(this.dirty||this.warmRequested);
+  // ms is CPU submission/presentation time. GPU completion is asynchronous;
+  // this callback describes only the completed view actually copied to canvas.
+  this.notify('onRender',info);
  }
  rotate(delta){if(this.destroyed||!Number.isFinite(delta))return;this.yaw=((this.yaw+delta+PI)%TAU+TAU)%TAU-PI;this.request();}
- zoomBy(factor){if(this.destroyed||!Number.isFinite(factor)||factor<=0)return;this.zoom=clamp(this.zoom*factor,.65,5);this.request();}
+ zoomBy(factor){if(this.destroyed||!Number.isFinite(factor)||factor<=0)return;const next=clamp(this.zoom*factor,.65,5);if(next===this.zoom)return;this.zoom=next;this.request();}
  reset(){if(this.destroyed)return;this.yaw=DEFAULT_VIEW.yaw;this.pitch=DEFAULT_VIEW.pitch;this.zoom=DEFAULT_VIEW.zoom;this.offset=[0,0];this.request();}
  destroy(){
   if(this.destroyed)return;this.destroyed=true;this.cancelFrame();clearTimeout(this.wheelTimer);clearTimeout(this.restoreTimer);
   this.resize?.disconnect();if(this.onResize&&typeof window!=='undefined')window.removeEventListener('resize',this.onResize);
   this.document?.removeEventListener('visibilitychange',this.onVisibility);this.unbindControls();this.pointers.clear();
-  this.gpu?.destroy();this.software?.destroy();this.meshes.clear();this.routeMeshes.clear();this.route=[];this.gpuRoute=null;this.warmRequested=false;
+  this.gpu?.destroy();this.software?.destroy();this.pendingGPU=null;this.meshes.clear();this.routeMeshes.clear();this.route=[];this.gpuRoute=null;this.cartography=null;this.displayMask=null;this.warmRequested=false;this.canvas.dataset.terrainPending='false';
   if(this.canvas!==this.originalCanvas&&this.canvas.parentNode)this.canvas.parentNode.replaceChild(this.originalCanvas,this.canvas);
   if(this.originalCanvas.style)this.originalCanvas.style.touchAction=this.previousTouchAction||'';
  }

@@ -5,7 +5,7 @@ import json
 import unittest
 
 from asset_integrity import AssetError, digest
-from map_coverage import add_coverage_style, decode, encoded, native_package, verify_coverage
+from map_coverage import decode, encoded, native_package, verify_coverage
 
 
 def fixture():
@@ -44,30 +44,30 @@ def fixture():
 
 
 class NativeCoverageTests(unittest.TestCase):
-    def test_source_cells_are_byte_exact_and_only_eastern_cell_moves_to_canonical_world(self):
+    def test_source_cells_and_manifest_are_byte_exact_including_the_dateline(self):
         source, inputs = fixture()
         files = native_package(source, inputs.__getitem__)
         for path, data in inputs.items():
             self.assertEqual(data, files[path])
-        base = json.loads(files["native-base.geojson"])
+        self.assertEqual(source, files["manifest.json"])
+        self.assertNotIn("native-base.geojson", files)
+        base = decode(files["base.coverage"], json.loads(source), canonical=False)
         west = next(f for f in base["features"] if f["id"] == "west:area")
         east = next(f for f in base["features"] if f["id"] == "east:area")
         self.assertEqual(west["geometry"]["coordinates"][0][0], [170, 50])
-        self.assertEqual(east["geometry"]["coordinates"][0][0], [-180, 50])
-        self.assertEqual(east["geometry"]["coordinates"][0][1], [-170, 50])
+        self.assertEqual(east["geometry"]["coordinates"][0][0], [180, 50])
+        self.assertEqual(east["geometry"]["coordinates"][0][1], [190, 50])
         report = verify_coverage(files["manifest.json"], files.__getitem__, actual_files=files)
         self.assertTrue(report["mapCoverageAllLevelsBundled"])
         self.assertEqual(report["mapCoverageFilesVerified"], len(files))
 
-    def test_rehashed_native_overview_cannot_diverge_from_shared_cells(self):
+    def test_missing_lod_cannot_be_hidden_by_an_incomplete_file_inventory(self):
         source, inputs = fixture(); files = native_package(source, inputs.__getitem__)
-        manifest = json.loads(files["manifest.json"])
-        base = json.loads(files["native-base.geojson"]); base["features"].pop()
-        files["native-base.geojson"] = encoded(base)
-        manifest["nativeBase"].update(bytes=len(files["native-base.geojson"]), sha256=digest(files["native-base.geojson"]))
-        files["manifest.json"] = encoded(manifest)
-        with self.assertRaisesRegex(AssetError, "sourced canonical"):
-            verify_coverage(files["manifest.json"], files.__getitem__)
+        with self.assertRaisesRegex(AssetError, "Unlisted or missing"):
+            verify_coverage(source, files.__getitem__, actual_files=[path for path in files if path != "cells/eastsource.coverage"])
+        manifest = json.loads(source); del manifest["cells"][0]["levels"]["source"]
+        with self.assertRaisesRegex(AssetError, "Incomplete coverage cell"):
+            native_package(encoded(manifest), inputs.__getitem__)
 
     def test_corrupt_missing_unlisted_and_path_traversal_assets_fail_closed(self):
         source, inputs = fixture(); valid = native_package(source, inputs.__getitem__)
@@ -85,14 +85,12 @@ class NativeCoverageTests(unittest.TestCase):
             with self.assertRaises(AssetError):
                 decode(encoded(document), json.loads(source))
 
-    def test_all_native_display_roles_use_one_initially_populated_source(self):
+    def test_every_display_role_reaches_the_shared_decoder_without_conversion(self):
         source, inputs = fixture(); files = native_package(source, inputs.__getitem__)
-        original = {"sources": {}, "layers": [{"id": key, "source": "legacy", "type": "fill"} for key in ["land", "borders", "admin-boundary-lines", "russia-outside-mask"]]}
-        style = add_coverage_style(copy.deepcopy(original), files["manifest.json"])
-        verify_coverage(files["manifest.json"], files.__getitem__, style=style)
-        self.assertEqual(len({layer["source"] for layer in style["layers"]}), 1)
-        self.assertEqual(len(original["layers"]), 4)
-        self.assertNotIn("borders", [layer["id"] for layer in style["layers"]])
+        base = decode(files["base.coverage"], json.loads(source), canonical=False)
+        self.assertEqual({feature["properties"]["role"] for feature in base["features"]},
+                         {"area", "mask", "territory", "territory-boundary"})
+        self.assertEqual(set(files), {"manifest.json", *inputs})
 
 
 if __name__ == "__main__":

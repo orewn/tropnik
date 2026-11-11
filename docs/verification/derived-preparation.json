@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "preparationOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "status": "prepared",
+  "repository": "orewn/tropnik",
+  "branch": "prepare/final-site-0.4.24",
+  "sourceCommit": "27a6d93e2e327434f05039aa61fb09601bca8371",
+  "workflowRunId": "43077215241",
+  "workflowRunAttempt": "1",
+  "requiredNext": "Move the candidate PR branch with an expected-head lease, then run every unchanged release acceptance workflow on preparedCommit.",
+  "sourceTree": "4408df7ca980dd8dd6e10ea247f5f3b0925037b9",
+  "preparedTree": "c68e26dde3784535f63dba8c263276cff86eb83e",
+  "protectedSource": {
+    "entries": 5460,
+    "sha256": "b88ee0abaa0bfb90f69e401abb5e75a7b7bf6ff43627976b6d0a5e0fdbfd32ca",
+    "unchanged": true
+  },
+  "generatorCommands": [
+    [
+      "node",
+      "web/scripts/build-landscape.mjs"
+    ],
+    [
+      "python",
+      "tools/android-build/prepare-landscape.py"
+    ],
+    [
+      "node",
+      "tools/android-build/prepare-custom-map.mjs"
+    ],
+    [
+      "node",
+      "web/scripts/prepare-offline.mjs"
+    ],
+    [
+      "node",
+      "web/scripts/stamp-service-worker.mjs"
+    ]
+  ],
+  "generatorChainIdempotent": true,
+  "checkOnlyVerifiersPassed": true,
+  "changed": [
+    {
+      "path": "android/app/src/main/assets/custom-map/android-bootstrap.js",
+      "status": "modified",
+      "previousBlob": "6fe37b9b80cc26cc487306d38885b0ee3a5923ba",
+      "blob": "c021a326e23e64bf7b01c24a0d15806380210a45",
+      "mode": "100644",
+      "bytes": 15534,
+      "sha256": "617d8a0d979f6d04c4eee290a09f00b9814ccb4f21fa1ce668c45bd5a20e72c7"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-B25YODzL.js",
+      "status": "deleted",
+      "previousBlob": "91267123c06fb3d500ac775f8bbae7b0063a012e",
+      "blob": null,
+      "mode": "100644",
+      "bytes": 0,
+      "sha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-XVkmYafs.js",
+      "status": "added",
+      "previousBlob": null,
+      "blob": "2202837d901f87d422a9affebfb1e2c374917f36",
+      "mode": "100644",
+      "bytes": 100219,
+      "sha256": "b3c998e23f8b9aae6129a1d489d62b4778a2f41ac849b33697c29b3099dd10e3"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/manifest.json",
+      "status": "modified",
+      "previousBlob": "e777733b8a901498f1cb7028e4429a32b159c6a7",
+      "blob": "fa8a3efce490ba0fc9d828c11ef5a7ff1d21dd47",
+      "mode": "100644",
+      "bytes": 342021,
+      "sha256": "93d109811dbd84cc60e936d8928a755eaf8867a35c58983e5bf6f3c9f7e47146"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/map-runtime.js",
+      "status": "modified",
+      "previousBlob": "d2aa637b5e7fbfabe56bfae1b704ef957f3e1659",
+      "blob": "e10c4c2fc74e7ceb940bc4c700ae051a69f71be5",
+      "mode": "100644",
+      "bytes": 156,
+      "sha256": "fc61be90003bf26c47c838b32a6dac44578b627a2eb788fd87382a533d1a40cb"
+    },
+    {
+      "path": "web/public/custom-map/android-bootstrap.js",
+      "status": "modified",
+      "previousBlob": "6fe37b9b80cc26cc487306d38885b0ee3a5923ba",
+      "blob": "c021a326e23e64bf7b01c24a0d15806380210a45",
+      "mode": "100644",
+      "bytes": 15534,
+      "sha256": "617d8a0d979f6d04c4eee290a09f00b9814ccb4f21fa1ce668c45bd5a20e72c7"
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-B25YODzL.js",
+      "status": "deleted",
+      "previousBlob": "91267123c06fb3d500ac775f8bbae7b0063a012e",
+      "blob": null,
+      "mode": "100644",
+      "bytes": 0,
+      "sha256": null
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-XVkmYafs.js",
+      "status": "added",
+      "previousBlob": null,
+      "blob": "2202837d901f87d422a9affebfb1e2c374917f36",
+      "mode": "100644",
+      "bytes": 100219,
+      "sha256": "b3c998e23f8b9aae6129a1d489d62b4778a2f41ac849b33697c29b3099dd10e3"
+    },
+    {
+      "path": "web/public/custom-map/manifest.json",
+      "status": "modified",
+      "previousBlob": "e777733b8a901498f1cb7028e4429a32b159c6a7",
+      "blob": "fa8a3efce490ba0fc9d828c11ef5a7ff1d21dd47",
+      "mode": "100644",
+      "bytes": 342021,
+      "sha256": "93d109811dbd84cc60e936d8928a755eaf8867a35c58983e5bf6f3c9f7e47146"
+    },
+    {
+      "path": "web/public/custom-map/map-runtime.js",
+      "status": "modified",
+      "previousBlob": "d2aa637b5e7fbfabe56bfae1b704ef957f3e1659",
+      "blob": "e10c4c2fc74e7ceb940bc4c700ae051a69f71be5",
+      "mode": "100644",
+      "bytes": 156,
+      "sha256": "fc61be90003bf26c47c838b32a6dac44578b627a2eb788fd87382a533d1a40cb"
+    },
+    {
+      "path": "web/public/sw.js",
+      "status": "modified",
+      "previousBlob": "b2f3836f57193398843676b1a75d8a97b9788f74",
+      "blob": "6989f04bea40c6992d273686169cf4d2153ac147",
+      "mode": "100644",
+      "bytes": 11469,
+      "sha256": "7d818b41cb2df3a974768e0cea58c221a97c992b4178c2725c8736eba6bdc1b7"
+    }
+  ],
+  "preparedCommit": "84bc96e5932ecf2f396bf41205a1773b32da1438",
+  "refUpdate": {
+    "branch": "prepare/final-site-0.4.24",
+    "expectedParent": "27a6d93e2e327434f05039aa61fb09601bca8371",
+    "observedCommit": "84bc96e5932ecf2f396bf41205a1773b32da1438",
+    "force": false
+  }
+}

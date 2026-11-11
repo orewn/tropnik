@@ -8,11 +8,15 @@ import {spawnSync} from 'node:child_process';
 import {normalizeBase, rewriteScript, rewriteJSON, rewriteHTML, rewriteCSS, ts} from './paths.mjs';
 import {apkFileName, ensureApk, readApkManifest, validateApkDelivery} from './apk-artifact.mjs';
 import {androidPageDownload, pinAndroidPageDownload} from './apk-page.mjs';
-import {verifyMapLibreTerrainPatch} from '../../web/scripts/maplibre-terrain-patch.mjs';
+import {catalogueExpectations} from './catalogue-expectations.mjs';
+import {verifyCustomMap} from '../../web/scripts/verify-custom-map.mjs';
+import {customMapWebRecords,customMapShellRecords,rewriteCustomMapShellResources,legacyMapRuntime} from './custom-map-assets.mjs';
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const web = join(project, 'web');
-const maplibreTerrainPatch = await verifyMapLibreTerrainPatch({webRoot: web});
+const customMap = await verifyCustomMap({webRoot:web});
+const customMapFiles = customMapWebRecords(customMap);
+const customMapPaths = new Set(customMapFiles.map(file=>'custom-map/'+file.path));
 const require = createRequire(join(web, 'package.json'));
 const {build: viteBuild} = await import(require.resolve('vite'));
 const {default: react} = await import(require.resolve('@vitejs/plugin-react'));
@@ -31,7 +35,6 @@ const inputs = [];
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const exists = async path => access(path).then(() => true, () => false);
 const textExtensions = new Set(['.json', '.webmanifest', '.html', '.css', '.js', '.mjs']);
-const vendorScripts = /\/maps\/(?:maplibre|leaflet|protomaps-leaflet)/;
 
 const connectionsCheck = spawnSync(process.execPath, ['--experimental-strip-types', 'scripts/build-trail-connections.mjs', '--check'], {cwd: web, stdio: 'inherit'});
 if (connectionsCheck.error) throw connectionsCheck.error;
@@ -94,11 +97,13 @@ for (const path of ['page.tsx', 'not-found.tsx', 'regions/[id]/page.tsx', 'route
 for (const path of await files(join(web, 'pages-preview/src'))) await snapshot(path, join(source, 'pages-preview/src', relative(join(web, 'pages-preview/src'), path)));
 for (const path of await files(join(web, 'public'))) {
   const name = relative(join(web, 'public'), path);
+  if (name.startsWith('custom-map/') && !customMapPaths.has(name)) continue;
+  if (legacyMapRuntime.test(name)) continue;
   if (/(?:\.map|\.d\.ts|\.original\.txt)$/.test(name)) continue;
   if (/\.apk$/i.test(name)) continue;
   await snapshot(path, join(source, 'public', name));
 }
-for (const name of ['web/package.json', 'web/pnpm-lock.yaml', 'web/pnpm-workspace.yaml', 'web/scripts/maplibre-terrain-patch.mjs', ...(await files(join(web, 'patches'))).map(path => relative(project, path)), ...(await files(join(project, 'tools/pages-preview'))).map(path => relative(project, path))]) {
+for (const name of ['web/package.json', 'web/pnpm-lock.yaml', 'web/pnpm-workspace.yaml', 'web/scripts/verify-custom-map.mjs', 'web/scripts/prepare-offline.mjs', 'tools/android-build/prepare-custom-map.mjs', ...(await files(join(project, 'tools/pages-preview'))).map(path => relative(project, path))]) {
   const path = join(project, name);
   if (await exists(path)) {const bytes = await readFile(path); inputs.push({path: name, bytes: bytes.length, sha256: sha(bytes)});}
 }
@@ -157,19 +162,26 @@ for (const path of await files(join(source, 'public'))) {
   let bytes = await readFile(path);
   // The Android manifest pins this original provenance file. Its declared root URLs
   // describe the source dataset; GeoJSON bytes and source hashes stay unchanged.
-  const immutable = name.startsWith('offline-map/') || name === 'data/russia-boundaries-provenance.json';
+  const immutable = name.startsWith('offline-map/') || name === 'data/russia-boundaries-provenance.json' || name === 'custom-map/manifest.json';
   if (!immutable && textExtensions.has(extname(name))) {
     let value = bytes.toString('utf8');
     if (/\.(?:json|webmanifest)$/.test(name)) value = JSON.stringify(rewriteJSON(JSON.parse(value), base), null, 2) + '\n';
     else if (name.endsWith('.html')) value = rewriteHTML(value, base);
     else if (name.endsWith('.css')) value = rewriteCSS(value, base);
-    else if (!vendorScripts.test('/' + name)) value = rewriteScript(value, name, {base});
+    else value = rewriteScript(value, name, {base});
     if (name === 'sw.js') value = value.replace(/const VERSION\s*=\s*['"][^'"]+['"]/, `const VERSION='${base.slice(1, -1)}-tropnik-shell-${buildId}'`);
     bytes = Buffer.from(value);
   }
   await mkdir(dirname(target), {recursive: true});
   await writeFile(target, bytes);
 }
+const deployedCustomMapFiles=[];
+for(const file of customMapFiles){
+ const bytes=await readFile(join(publicDir,'custom-map',file.path));
+ deployedCustomMapFiles.push({path:file.path,sizeBytes:bytes.length,sha256:sha(bytes)});
+}
+const workerPath=join(publicDir,'sw.js');
+await writeFile(workerPath,rewriteCustomMapShellResources(await readFile(workerPath,'utf8'),customMapShellRecords(customMapFiles,base),customMapShellRecords(deployedCustomMapFiles,base)));
 const manifestPath = join(publicDir, 'manifest.webmanifest');
 const pwa = JSON.parse(await readFile(manifestPath, 'utf8'));
 pwa.name = 'Тропник'; pwa.short_name = 'Тропник';
@@ -202,7 +214,7 @@ const integration = {
   },
   transform(code, id) {
     const path = id.split('?')[0];
-    if (!path.startsWith(source + '/') || vendorScripts.test(path)) return null;
+    if (!path.startsWith(source + '/')) return null;
     // These adapters already use build.base. Their internal route keys are not public URLs.
     if (path.startsWith(join(source, 'pages-preview/src') + '/')) return null;
     if (/\.[cm]?[jt]sx?$/.test(path)) return {code: rewriteScript(code, path, {base}), map: null};
@@ -211,8 +223,8 @@ const integration = {
   },
   generateBundle() {
     const modules = [...this.getModuleIds()];
-    bundledModules = modules.filter(id => id.startsWith(source)).map(id => relative(source, id)).sort();
-    dependencyModules = modules.filter(id => id.startsWith('/') && id.includes('/node_modules/'));
+    bundledModules = [...new Set([...bundledModules, ...modules.filter(id => id.startsWith(source)).map(id => relative(source, id))])].sort();
+    dependencyModules = [...new Set([...dependencyModules, ...modules.filter(id => id.startsWith('/') && id.includes('/node_modules/'))])];
     const forbidden = bundledModules.filter(id => /^(?:lib\/(?:api|server)\.ts|app\/api\/)|(?:^|\/)backend\//.test(id));
     if (forbidden.length) throw new Error(`Production API/server modules leaked into Pages graph: ${forbidden.join(', ')}`);
   },
@@ -220,6 +232,9 @@ const integration = {
 await viteBuild({
   configFile: false, root: stage, base, publicDir,
   plugins: [integration, react()],
+  // Vite builds ?worker&url in a separate graph. Apply the same path/API
+  // boundary there and include its real modules in the provenance report.
+  worker: {format:'es',plugins:()=>[{...integration,name:'tropnik-pages-worker-boundary'}]},
   resolve: {alias: {'@': source}},
   define: {'process.env.NEXT_PUBLIC_SITE_URL': JSON.stringify(origin + base.slice(0, -1)), 'process.env.TROPA_PUBLIC_INDEXING': JSON.stringify('false')},
   build: {
@@ -257,10 +272,10 @@ for (const root of [...packageRoots].sort()) {
 }
 await writeFile(join(out, 'THIRD_PARTY_NOTICES.txt'), 'Tropnik static preview: browser dependencies\n\n' + thirdParty.map(item => `${item.name} ${item.version}\nLicense: ${JSON.stringify(item.license)}\n${item.notices.join('\n') || 'License notice is retained in the distributed bundle.'}\n`).join('\n'));
 const report = {
-  schemaVersion: 1, buildId, sourceCommit, base, origin, renderer: 'Existing public terrain module from the input snapshot',
+  schemaVersion: 1, buildId, sourceCommit, base, origin, renderer: 'Tropnik Canvas map and geographic terrain from the input snapshot',
   apiConnected: false, serverCodeIncluded: false, fakeServerResponses: false, pages: pages.length,
-  regions: regions.length, referenceRoutes: trails.length, hasApk: config.hasApk, apk, layoutStyles,
-  storageNamespace: base.slice(1, -1), immutableOfflinePack: true, inputs, bundledModules, thirdParty, dependencyPatches: [maplibreTerrainPatch],
+  regions: regions.length, referenceRoutes: trails.length, catalogue: catalogueExpectations(regions, trails), hasApk: config.hasApk, apk, layoutStyles,
+  storageNamespace: base.slice(1, -1), immutableOfflinePack: true, inputs, bundledModules, thirdParty, customMap:{...customMap,deployedFiles:deployedCustomMapFiles},
 };
 await writeFile(join(out, 'build-info.json'), JSON.stringify(report, null, 2) + '\n');
 await writeFile(join(out, 'page-manifest.json'), JSON.stringify(pages, null, 2) + '\n');

@@ -3,6 +3,7 @@ import {createRequire} from 'node:module';
 import {readFile,writeFile,mkdir,rename,readdir,access} from 'node:fs/promises';
 import {dirname,join,resolve,relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {nativeCatalogueRegions} from './catalog-regions.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const require=createRequire(join(root,'web/package.json'));
@@ -12,13 +13,20 @@ const assets=join(root,'android/app/src/main/assets');
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
 const inputRecords=[];
-async function input(path){const bytes=await readFile(path);inputRecords.push({path:relative(root,path),bytes:bytes.length,sha256:sha(bytes)});return bytes;}
+async function input(path){
+  const bytes=await readFile(path),record={path:relative(root,path),bytes:bytes.length,sha256:sha(bytes)};
+  const prior=inputRecords.find(value=>value.path===record.path);
+  if(prior&&(prior.bytes!==record.bytes||prior.sha256!==record.sha256))throw new Error(`Catalogue input changed while reading: ${record.path}`);
+  if(!prior)inputRecords.push(record);
+  return bytes;
+}
 async function output(path,bytes){
   const old=await readFile(path).catch(()=>null);if(old?.equals(bytes))return;
   if(check)throw new Error(`Generated native catalog asset is stale: ${relative(root,path)}`);
   await mkdir(dirname(path),{recursive:true});await writeFile(path+'.catalog-tmp',bytes);await rename(path+'.catalog-tmp',path);
 }
 await input(fileURLToPath(import.meta.url));
+await input(join(root,'tools/android-build/catalog-regions.mjs'));
 
 // Compile the real exports, including geographic exclusions, rather than keeping
 // a second manually maintained list of cards or region centres.
@@ -37,13 +45,15 @@ for(const node of ast.statements){
 }
 for(const[start,end,value]of edits.sort((a,b)=>b[0]-a[0]))code=code.slice(0,start)+value+code.slice(end);
 const compiled=ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
-const {regions,trails}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
+const {regions:curatedRegions,trails}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
+const territoryRecords=JSON.parse((await input(join(root,'web/lib/territories.generated.json'))).toString('utf8')).territories;
+const {regions,memberships:routeMemberships}=nativeCatalogueRegions(curatedRegions,territoryRecords,trails);
 const coverage=JSON.parse(await readFile(join(root,'web/public/data/russia-boundaries-provenance.json'),'utf8'));
 const excluded=new Set(coverage.excludedCatalogRouteIds);
 if(!regions.length||regions.length>200||!trails.length||trails.length>100000)throw new Error('Web catalog cardinality is outside the reviewed import budget');
 if(new Set(trails.map(t=>t.id)).size!==trails.length||trails.some(t=>excluded.has(t.id)))throw new Error('Duplicate or excluded route in native import');
 const regionIds=new Set(regions.map(r=>r.id));
-if(regionIds.size!==regions.length||regions.some(region=>!/^[a-z0-9-]+$/.test(region.id)||!Array.isArray(region.center)||region.center.length!==2||!region.center.every(Number.isFinite)))throw new Error('Invalid curated region identity or overview centre');
+if(regionIds.size!==regions.length||regions.some(region=>!/^(?:[a-z0-9-]{1,64}|territory-[A-Za-z0-9]{1,54})$/.test(region.id)||!Array.isArray(region.center)||region.center.length!==2||!region.center.every(Number.isFinite)))throw new Error('Invalid catalogue region identity or overview centre');
 const learning=JSON.parse((await input(join(root,'tools/android-build/fixtures/learning-route.json'))).toString('utf8'));
 if(learning.id!=='learning-route'||!learning.illustrative||learning.geometryAsset)throw new Error('Learning card must remain explicitly illustrative and geometry-free');
 
@@ -54,7 +64,7 @@ const routes=[];
 for(const trail of trails){
   if(trail.publicationStatus!=='reference')throw new Error(`Bundled import must not silently change publication semantics: ${trail.id}`);
   if(!/^[a-z0-9-]+$/.test(trail.id)||!regionIds.has(trail.regionId))throw new Error(`Invalid route identity ${trail.id}`);
-  const memberships=trail.regionIds?.length?trail.regionIds:[trail.regionId];
+  const memberships=routeMemberships.get(trail.id);
   if(memberships.some(id=>!regionIds.has(id)))throw new Error('Unknown region membership');
   let geometryAsset=null;
   if(trail.geometryUrl!==undefined&&trail.geometryUrl!==null){
@@ -78,7 +88,7 @@ for(const trail of trails){
     geometryAsset,illustrative:false,fieldVerified:false,navigationReady:false,
     sourceName:trail.sourceName,sourceUrl:trail.sourceUrl,
     sourceTitle:trail.sourceTitle??null,distanceNote:trail.distanceNote??null,accessStatus:trail.accessStatus??null,
-    territoryIds:trail.territoryIds??[],
+    territoryIds:memberships.filter(id=>id.startsWith('territory-')),
     sourceLicense:geometryAsset?'Геометрия: © OpenStreetMap contributors, ODbL 1.0. Независимое описание с указанным источником.':'Описание с указанным источником. Линия маршрута пока не добавлена.',
     sourceDate:trail.checkedAt,sourceKind:trail.sourceKind??null,publicationStatus:trail.publicationStatus,
     additionalSources:trail.additionalSources??[],
@@ -98,7 +108,7 @@ routes.push({...learning,regionIds:[learning.regionId],navigationReady:false});
 const identity=sha(JSON.stringify({inputs:inputRecords,geometry:geometries.map(({data,...record})=>record)}));
 const catalog={schemaVersion:1,version:`web-catalog-${identity.slice(0,16)}`,
   regions:regions.map(region=>({id:region.id,name:region.name,subtitle:region.caption,description:region.description,
-    latitude:region.center[1],longitude:region.center[0],zoom:region.zoom})),routes};
+    latitude:region.center[1],longitude:region.center[0],zoom:region.zoom,territory:region.territory})),routes};
 const catalogBytes=json(catalog);
 const manifest={schemaVersion:1,id:'tropnik-reference-catalog-v1',catalog:{path:'catalog.json',bytes:catalogBytes.length,sha256:sha(catalogBytes)},
   sourceInputs:inputRecords,regionIds:[...regionIds],referenceRouteIds:trails.map(t=>t.id),learningRouteIds:[learning.id],
@@ -113,7 +123,7 @@ if(await access(routeDirectory).then(()=>true,()=>false))for(const entry of awai
 for(const geometry of geometries)await output(join(assets,geometry.path),geometry.data);
 await output(join(assets,'catalog.json'),catalogBytes);
 await output(join(assets,'catalog-manifest.json'),json(manifest));
-const byRegion=Object.fromEntries([...regionIds].map(id=>[id,trails.filter(t=>t.regionId===id||t.regionIds?.includes(id)).length]));
+const byRegion=Object.fromEntries([...regionIds].map(id=>[id,trails.filter(t=>routeMemberships.get(t.id).includes(id)).length]));
 console.log(JSON.stringify({checked:check,regions:regions.length,referenceRoutes:trails.length,learningRoutes:1,
   geometryFiles:geometries.length,geometryBytes:geometries.reduce((sum,g)=>sum+g.bytes,0),
   referenceOnlyRoutes:referenceOnlyRouteIds.length,

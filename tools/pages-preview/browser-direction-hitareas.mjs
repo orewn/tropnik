@@ -68,14 +68,9 @@ export function inspectDirectionHitAreas(regionId, doc = document, win = window)
       samples: visible ? directionHitGrid(rect, anchorRect, kind === 'count' ? 4 : 8).map(sampleHit) : []};
   });
   const hiddenControls = buttons.filter(element => element.hidden).map(element => {
-    const current = win.getComputedStyle(element), wrapper = element.closest('.leaflet-region-marker');
-    const wrapperRect = wrapper ? box(wrapper) : null;
-    const samples = wrapper && wrapperRect.width > 1 && wrapperRect.height > 1 ? directionHitGrid(wrapperRect, wrapperRect).map(point => {
-      const withinViewport = inside(point), hit = withinViewport ? doc.elementFromPoint(point.x, point.y) : null;
-      return {...point, withinViewport, captures: !!hit && (hit === wrapper || wrapper.contains(hit)), hitTag: hit?.tagName || null};
-    }) : [];
+    const current = win.getComputedStyle(element);
     return {regionId: element.dataset.regionId, hidden: element.hidden, display: current.display,
-      rect: box(element), wrapper: wrapper ? {rect: wrapperRect, pointerEvents: win.getComputedStyle(wrapper).pointerEvents, samples} : null};
+      rect: box(element), wrapper: null};
   });
   return {schemaVersion: 1, engine: atlas.dataset.mapEngine, regionId, anchorId: button.dataset.regionId,
     groupKey: button.dataset.mapGroupKey, cluster: button.classList.contains('direction-cluster'),

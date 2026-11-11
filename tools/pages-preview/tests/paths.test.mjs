@@ -10,6 +10,20 @@ import {arm64Manifest, universalManifest} from './fixtures/apk.mjs';
 const androidSource = await readFile(new URL('../../../web/app/android/page.tsx', import.meta.url), 'utf8');
 const androidManifest = JSON.parse(await readFile(new URL('../../../web/public/downloads/android-manifest.json', import.meta.url), 'utf8'));
 
+test('map storage stays isolated while the actual canvas class and bridge contract keep their names',()=>{
+ const source=`export const canvas=document.createElement('canvas');canvas.className='tropnik-map-canvas';canvas.classList.add('tropnik-map-surface');export const protocol='tropnik-map-port';export const cachePrefix='tropnik-map-';caches.open(cachePrefix+'123-pilot');sessionStorage.setItem('tropnik-map-attribution-seen','1');export const isMapCache=name=>name.startsWith('tropnik-map-');`;
+ for(const base of ['/tropnik/','/another-project/']){
+  const transformed=rewriteScript(source,'map.ts',{base});assert.equal(rewriteScript(transformed,'map.ts',{base}),transformed);
+  const compiled=ts.transpileModule(transformed,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
+  const classes=[],opened=[],stored=[],canvas={className:'',classList:{add:name=>classes.push(name)}},exports={};
+  new Function('document','caches','sessionStorage','exports',compiled)(
+   {createElement:tag=>{assert.equal(tag,'canvas');return canvas;}},{open:name=>opened.push(name)},{setItem:(key,value)=>stored.push([key,value])},exports);
+  assert.equal(exports.canvas,canvas);assert.equal(canvas.className,'tropnik-map-canvas');assert.deepEqual(classes,['tropnik-map-surface']);assert.equal(exports.protocol,'tropnik-map-port');
+  const namespace=base.slice(1,-1);assert.deepEqual(opened,[namespace+'-tropnik-map-123-pilot']);assert.deepEqual(stored,[[namespace+'-tropnik-map-attribution-seen','1']]);
+  assert.equal(exports.isMapCache(opened[0]),true);assert.equal(exports.isMapCache('tropnik-map-123-pilot'),false);
+ }
+});
+
 test('the rendered real Footer keeps its map and section links inside each Pages project base', async () => {
   const require = createRequire(new URL('../../../web/package.json', import.meta.url));
   const {createElement} = require('react');

@@ -1,19 +1,16 @@
 import type {Trail} from './content';
 import type {TerrainGrid} from '@/public/terrain/terrain-renderer.js';
 import {MapResourcePool, routeTilePlan} from './map-resource-pool';
-import {createMapTransport, publicMapResourceKey} from './map-transport';
+import {publicMapResourceKey} from './map-transport';
 import {TerrainPreparation} from './terrain-preparation';
 import {MAP_CONFIG} from './map-config';
 import {loadMapCoverage} from '@/public/maps/map-coverage-lod.js';
+import terrainPreparationWorkerURL from './terrain-preparation.worker.ts?worker&url';
 
 export const TERRAIN_BOUNDS = [40.29, 43.64, 40.49, 43.82] as const;
 const TERRAIN_VERSION = '20261106-3';
 const pool = new MapResourcePool();
 const origin = () => typeof location === 'undefined' ? 'https://map-preview.local' : location.origin;
-const transport = createMapTransport(pool, origin);
-export const mapRequest = transport.transformRequest;
-let mapWarm: Promise<unknown> | undefined;
-let webglAvailable: boolean | undefined;
 let rendererModule: Promise<typeof import('@/public/terrain/terrain-renderer.js')> | undefined;
 const terrainKey = `/terrain/terrain-grid.json?v=${TERRAIN_VERSION}`;
 const terrainPreparation = new TerrainPreparation({
@@ -22,7 +19,7 @@ const terrainPreparation = new TerrainPreparation({
     return rendererModule;
   },
   loadGrid: () => loadPublicJSON<TerrainGrid>(terrainKey),
-  createWorker: () => typeof Worker === 'undefined' ? undefined : new Worker(new URL('./terrain-preparation.worker.ts', import.meta.url), {type: 'module', name: 'tropnik-terrain'}),
+  createWorker: () => typeof Worker === 'undefined' ? undefined : new Worker(new URL(terrainPreparationWorkerURL, location.href), {type: 'module', name: 'tropnik-terrain'}),
   onFailure: () => pool.invalidate(terrainKey),
 });
 let tileTemplate: Promise<string> | undefined;
@@ -40,38 +37,15 @@ export function loadPublicJSON<T>(url: string, priority = 0): Promise<T> {
   const key = allowed(url); if (!key) return Promise.reject(new Error('Unknown public map resource'));
   return pool.json<T>(key, priority);
 }
-export function loadPublicBytes(url:string,priority=1):Promise<ArrayBuffer>{
+export function loadPublicBytes(url:string,priority=1,signal?:AbortSignal):Promise<ArrayBuffer>{
   const key=allowed(url);if(!key)return Promise.reject(new Error('Unknown public map resource'));
-  return pool.get(key,priority);
-}
-export function supportsMapWebGL() {
-  if(typeof document==='undefined')return false;
-  if(webglAvailable===undefined){
-    try{const gl=document.createElement('canvas').getContext('webgl2');webglAvailable=!!gl;gl?.getExtension('WEBGL_lose_context')?.loseContext();}
-    catch{webglAvailable=false;}
-  }
-  return webglAvailable;
-}
-
-export function preferCanvasMap() {
-  if(typeof window==='undefined'||typeof navigator==='undefined')return false;
-  const nav=navigator as Navigator&{deviceMemory?:number;connection?:{saveData?:boolean}};
-  const coarse=window.matchMedia('(pointer:coarse)').matches||nav.maxTouchPoints>0;
-  const constrained=(nav.deviceMemory??8)<=4||(nav.hardwareConcurrency||8)<=4||!!nav.connection?.saveData;
-  return coarse&&(window.innerWidth<=900||constrained);
+  return pool.get(key,priority,signal);
 }
 export function warmMap() {
   if (typeof window === 'undefined') return;
-  const webgl=supportsMapWebGL()&&!preferCanvasMap();
-  void loadMapCoverage().then(coverage=>coverage.dispose()).catch(()=>undefined);
-  void preloadPublic('/maps/tropa-style.json');
-  if(!webgl)return Promise.resolve();
-  if (!mapWarm) mapWarm = import('maplibre-gl').then(ml => {
-    ml.addProtocol('tropnik-map', transport.load);
-    ml.setWorkerUrl('/maps/maplibre-worker.js');
-    ml.setWorkerCount(Math.max(1, Math.min(MAP_CONFIG.maxWorkers, (navigator.hardwareConcurrency || 4) - 1))); ml.prewarm();
-  }).catch(() => {mapWarm = undefined;});
-  return mapWarm;
+  // The custom map needs source geometry only. No vendor runtime, GPU context
+  // or hidden worker is initialized by hovering a route card.
+  return loadMapCoverage().then(coverage=>coverage.dispose()).catch(()=>undefined);
 }
 export function loadTerrain(signal?: AbortSignal) {return terrainPreparation.load(signal);}
 export function terrainPreparationInfo() {return terrainPreparation.snapshot();}

@@ -1,3 +1,0 @@
-/* Original project artwork, generated from MapIcon.tsx. */
-export const outdoorPaths = {"camp":["m4 23 10-18 10 18H4Z","m10 23 4-8 4 8M11 2l3 3 3-3","M2 25h24"],"water":["M14 3c-2 4-7 9-7 14a7 7 0 0 0 14 0c0-5-5-10-7-14Z","M10 18c0 2 1 3 3 3","M4 25h20"],"shelter":["m3 13 11-10 11 10M6 11v13h16V11","M11 24v-8h6v8","M3 26h22"],"pass":["m2 22 6-13 6 8 6-8 6 13","M8 5v4m12-4v4","m11 24 3-7 3 7"],"peak":["m3 24 11-20 11 20H3Z","m10 11 4 3 4-3","M14 4V1m7 4 2-2M7 5 5 3"],"viewpoint":["M3 15s4-7 11-7 11 7 11 7-4 7-11 7S3 15 3 15Z","m9 17 5-8 5 8H9Z","M14 3V1m-9 5L3 4m20 2 2-2"],"info":["M24 14A10 10 0 1 1 4 14a10 10 0 0 1 20 0Z","M13 12h2v8m-2 0h4","M14 8v.01"]};
-export const markerStyle = {"size": 32, "fill": "#faf6e9", "stroke": "#244d3c", "lineWidth": 1.5};

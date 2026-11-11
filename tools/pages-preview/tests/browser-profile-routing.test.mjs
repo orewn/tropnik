@@ -15,22 +15,23 @@ assert.ok(start>=0&&end>start,'The production profile loop and final audit dispa
 const dispatch=source.slice(start,end);
 const AsyncFunction=(async()=>{}).constructor;
 const profiles=[
- {name:'desktop-webgl',width:1280,height:800,engine:'maplibre',mobile:false,mapInteraction:true},
- {name:'android-portrait',width:412,height:915,engine:'leaflet',mobile:true,mapInteraction:true},
- {name:'compact-android',width:320,height:640,engine:'leaflet',mobile:true,mapInteraction:false},
- {name:'iphone-portrait',width:390,height:844,engine:'leaflet',mobile:true,mapInteraction:false},
- {name:'phone-landscape',width:844,height:390,engine:'leaflet',mobile:true,mapInteraction:false},
+ {name:'desktop-webgl',width:1280,height:800,engine:'tropnik-canvas',mobile:false,mapInteraction:true},
+ {name:'android-portrait',width:412,height:915,engine:'tropnik-canvas',mobile:true,mapInteraction:true},
+ {name:'compact-android',width:320,height:640,engine:'tropnik-canvas',mobile:true,mapInteraction:false},
+ {name:'iphone-portrait',width:390,height:844,engine:'tropnik-canvas',mobile:true,mapInteraction:false},
+ {name:'phone-landscape',width:844,height:390,engine:'tropnik-canvas',mobile:true,mapInteraction:false},
 ];
 
 async function dispatchProfiles(traceEnabled,audit,policy=browserAuditRunPolicy(undefined),issues=[],offlineAudit,satelliteAudit){
  const unavailable=async()=>({available:false});
  const notInvoked=()=>assert.fail('The routing test must not invoke browser helpers');
- const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[],offlineCalls=[],satelliteCalls=[],cdpCalls=[];
+ const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[],offlineCalls=[],satelliteCalls=[],smoothnessCalls=[],cdpCalls=[];
  const bindings={
-  assert,profiles,runPolicy:policy,traceEnabled,cdp:{call:async(method,parameters)=>cdpCalls.push({method,parameters})},httpPort:4200,
-  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],satelliteAudits:[],profilePerformance:[],performanceIssues:issues,
+  environment:{routingFixture:true},terrainMask:{routingFixture:true},assert,profiles,runPolicy:policy,traceEnabled,cdp:{call:async(method,parameters)=>cdpCalls.push({method,parameters})},httpPort:4200,
+  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],satelliteAudits:[],siteSmoothness:[],profilePerformance:[],performanceIssues:issues,catalogue:{schemaVersion:1,total:21},
   REPORT:policy.reportFile,reports,loadCalls,mapCalls,process:{env:{GITHUB_SHA:'a'.repeat(40)}},console:{log(){}},writeFile:async(path,text)=>reports.push({path,report:JSON.parse(text)}),
   runZoomDesignAudit:audit,
+  smoothnessCalls,siteSmoothnessAudit:async(_cdp,profile,rate=1)=>{smoothnessCalls.push({profile:profile.name,rate});return{profile:profile.name,performanceIssues:[]};},
   satelliteCalls,satellitePerformanceIssues,runSatelliteContinuityAudit:async(cdp,profile,helpers)=>{satelliteCalls.push(profile.name);return satelliteAudit? satelliteAudit(cdp,profile,helpers):{profile:profile.name,performance:{layoutShift:0,longestTaskMs:100}};},
   server:{},offlineOriginTransport:{start:notInvoked,snapshot:notInvoked,restore:notInvoked},
   offlineCalls,cdpCalls,runOfflineSafetyAudit:async(cdp,helpers)=>{offlineCalls.push({cdp,helpers});return offlineAudit?offlineAudit(cdp,helpers):{schemaVersion:1,profile:'android-portrait',passed:true};},
@@ -72,7 +73,7 @@ for(const [label,flag] of [['default',undefined],['explicit opt-in','1']]){
 }
 
 test('a desktop audit failure propagates unchanged without repeating or continuing the matrix',async()=>{
- const failure=new Error('The maplibre map did not settle'),calls=[];
+ const failure=new Error('The tropnik-canvas map did not settle'),calls=[];
  const observed=await dispatchProfiles(true,async(_cdp,profile)=>{calls.push(profile.name);throw failure;}).then(()=>null,error=>error);
  assert.equal(observed,failure);assert.deepEqual(calls,['desktop-webgl']);
 });
@@ -98,6 +99,17 @@ test('satellite failures propagate without retrying a profile or claiming a comp
  assert.equal(observed,failure);assert.deepEqual(calls,['desktop-webgl']);
 });
 
+for(const [mode,names,rate]of [['ui-smoothness',['desktop-webgl','android-portrait'],1],['ui-smoothness-cpu',['android-portrait'],4]]){
+ test(`${mode} runs only its short real-input profiles and cannot publish release evidence`,async()=>{
+  const policy=browserAuditRunPolicy(mode);
+  const run=await dispatchProfiles(false,()=>assert.fail('Short smoothness must not invoke zoom matrix'),policy);
+  assert.deepEqual(run.smoothnessCalls,names.map(profile=>({profile,rate})));
+  assert.deepEqual(run.mapCalls,[]);assert.deepEqual(run.loadCalls,[]);assert.equal(run.offlineCalls.length,0);assert.deepEqual(run.zoomDesigns,[]);
+  const report=run.reports.at(-1).report;assert.equal(report.status,'completed');assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);assert.equal(report.performancePassed,true);assert.equal(report.profiles.length,names.length);
+  assert.throws(()=>assertBrowserReport(report,'a'.repeat(40)));
+ });
+}
+
 test('focused map diagnosis runs the exact fresh desktop interaction once and cannot produce release or zoom evidence',async()=>{
  const policy=browserAuditRunPolicy('map-interactions'),issues=[{profile:'desktop-webgl',phase:'map-interactions',metric:'longestTaskMs',value:851,limit:750}];
  const run=await dispatchProfiles(browserTraceEnabled(undefined,policy.diagnostic),()=>assert.fail('The diagnostic must not run any zoom matrix'),policy,issues);
@@ -115,11 +127,15 @@ test('offline diagnosis starts blank, runs the exact final audit once and cannot
  const policy=browserAuditRunPolicy('offline-safety');
  assert.deepEqual(policy,{diagnostic:'offline-safety',reportFile:'browser-offline-safety-diagnostic.json',profiles:[]});
  const bootstrapStart=source.indexOf('  const initialUrl=');
- const bootstrapEnd=source.indexOf('\n  cdp=new CDP(',bootstrapStart);
+ const bootstrapEnd=source.indexOf("\n  await cdp.call('Page.enable')",bootstrapStart);
  assert.ok(bootstrapStart>=0&&bootstrapEnd>bootstrapStart,'The actual initial tab navigation must be available');
- const opened=[];
- await new AsyncFunction('runPolicy','browser','debugPort','httpPort',source.slice(bootstrapStart,bootstrapEnd))(policy,{requestJSON:async(url,options)=>{opened.push({url,options});return{};}},4300,4200);
+ const opened=[],startupCalls=[],environment={};
+ class BlankCDP{async open(){}async call(method){startupCalls.push(method);}}
+ const bootstrap=source.slice(bootstrapStart,bootstrapEnd).replaceAll('import.meta.url',JSON.stringify(new URL('../browser-smoke.mjs',import.meta.url).href));
+ await new AsyncFunction('runPolicy','browser','debugPort','httpPort','CDP','environment','collectNativeBrowserSurface',`let cdp;${bootstrap}`)(policy,{requestJSON:async(url,options)=>{opened.push({url,options});return{};}},4300,4200,BlankCDP,environment,async()=>{startupCalls.push('native-surface');return{blank:true};});
  assert.deepEqual(opened,[{url:'http://127.0.0.1:4300/json/new?about%3Ablank',options:{method:'PUT'}}],'Do not warm the map or its service worker before the safety audit');
+ assert.deepEqual(startupCalls,['native-surface'],'Environment collection must not navigate to the application before the cold offline audit');
+ assert.deepEqual(environment.nativeSurface,{blank:true});
  const receipt={schemaVersion:1,profile:'android-portrait',passed:true,coldNavigation:true};
  const run=await dispatchProfiles(false,()=>assert.fail('Offline diagnosis must not invoke zoom audits'),policy,[],async(cdp,helpers)=>{
   assert.equal(typeof cdp.call,'function');assert.equal(helpers.url,'http://127.0.0.1:4200/tropnik/');

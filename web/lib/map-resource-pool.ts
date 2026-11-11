@@ -1,7 +1,7 @@
 import {MAP_RESOURCE_LIMITS} from './map-config.ts';
 
 /** One bounded pool shared by every preview. It never marks an offline pack complete. */
-type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown};
+type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown; persistent: boolean; consumers: number; controller?: AbortController};
 type Options = {concurrency?: number; maxBytes?: number; maxResourceBytes?: number; maxQueued?: number; timeoutMs?: number; fetcher?: typeof fetch};
 
 export class MapResourcePool {
@@ -16,9 +16,10 @@ export class MapResourcePool {
       if (!Number.isSafeInteger(this.options[key]) || this.options[key] <= 0) throw new RangeError(`Invalid map resource limit: ${key}`);
     }
   }
-  get(url: string, priority = 1): Promise<ArrayBuffer> {
+  get(url: string, priority = 1, signal?: AbortSignal): Promise<ArrayBuffer> {
+    if (signal?.aborted) return Promise.reject(signal.reason ?? new DOMException('Map request cancelled', 'AbortError'));
     const existing = this.entries.get(url);
-    if (existing) {existing.priority = Math.min(existing.priority, priority); this.entries.delete(url); this.entries.set(url, existing); return existing.promise;}
+    if (existing) {existing.priority = Math.min(existing.priority, priority); this.entries.delete(url); this.entries.set(url, existing); return this.consume(url, existing, signal);}
     if (this.queue.length >= this.options.maxQueued) {
       // An opened map takes precedence over speculative cards still in the queue.
       const victim = this.queue.findLast(key => (this.entries.get(key)?.priority ?? 0) > priority);
@@ -29,8 +30,36 @@ export class MapResourcePool {
     }
     let resolve!: Entry['resolve'], reject!: Entry['reject'];
     const promise = new Promise<ArrayBuffer>((yes, no) => {resolve = yes; reject = no;});
-    this.entries.set(url, {promise, resolve, reject, priority, bytes: 0, settled: false});
-    this.queue.push(url); this.pump(); return promise;
+    const entry: Entry = {promise, resolve, reject, priority, bytes: 0, settled: false, persistent: false, consumers: 0};
+    this.entries.set(url, entry);
+    const consumed = this.consume(url, entry, signal);
+    this.queue.push(url); this.pump(); return consumed;
+  }
+  /** Each map view leases a shared read. Cancelling one view cannot abort the
+   * same source still used by another map or a non-cancellable prefetch. */
+  private consume(url: string, entry: Entry, signal?: AbortSignal): Promise<ArrayBuffer> {
+    if (!signal) {entry.persistent = true; return entry.promise;}
+    entry.consumers++;
+    return new Promise((resolve, reject) => {
+      let finished = false;
+      const release = () => {
+        if (finished) return false;
+        finished = true; signal.removeEventListener('abort', cancel); entry.consumers--; return true;
+      };
+      const cancel = () => {
+        if (!release()) return;
+        const error = signal.reason ?? new DOMException('Map request cancelled', 'AbortError');
+        reject(error);
+        if (!entry.settled && !entry.persistent && !entry.consumers && this.entries.get(url) === entry) {
+          this.queue = this.queue.filter(key => key !== url);
+          this.remove(url); entry.controller?.abort(); entry.reject(error);
+        }
+      };
+      signal.addEventListener('abort', cancel, {once: true});
+      entry.promise.then(value => {if (release()) resolve(value);}, error => {if (release()) reject(error);});
+      // Covers a custom signal aborting while the listener is installed.
+      if (signal.aborted) cancel();
+    });
   }
   has(url: string) {return this.entries.has(url);}
   /** Discard invalid content after validation without interrupting another consumer's active request. */
@@ -46,15 +75,17 @@ export class MapResourcePool {
     this.queue.sort((a, b) => (this.entries.get(a)?.priority ?? 9) - (this.entries.get(b)?.priority ?? 9));
     while (this.active < this.options.concurrency && this.queue.length) {
       const url = this.queue.shift()!, entry = this.entries.get(url); if (!entry) continue; this.active++;
-      this.read(url).then(bytes => {
+      const controller = new AbortController(); entry.controller = controller;
+      this.read(url, controller).then(bytes => {
+        if (this.entries.get(url) !== entry) return;
         entry.bytes = bytes.byteLength; entry.settled = true; this.bytes += entry.bytes;
         for (const [key, candidate] of this.entries) {if (this.bytes <= this.options.maxBytes) break; if (candidate.settled && key !== url) this.remove(key);}
         entry.resolve(bytes);
-      }, error => {this.remove(url); entry.reject(error);}).finally(() => {this.active--; this.pump();});
+      }, error => {if (this.entries.get(url) === entry) this.remove(url); entry.reject(error);}).finally(() => {entry.controller = undefined; this.active--; this.pump();});
     }
   }
-  private async read(url: string) {
-    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), this.options.timeoutMs);
+  private async read(url: string, controller: AbortController) {
+    const timer = setTimeout(() => controller.abort(), this.options.timeoutMs);
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     try {
       const response = await this.options.fetcher(url, {cache: 'force-cache', credentials: url.startsWith('/') ? 'same-origin' : 'omit', signal: controller.signal});

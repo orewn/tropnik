@@ -18,6 +18,17 @@ export function shellPaths(source) {
   return paths;
 }
 
+export function customMapShellRecords(source) {
+  const literal = /\bconst\s+CUSTOM_MAP_RESOURCES\s*=\s*(\[[^;]*?\])\s*;/.exec(source)?.[1];
+  if (!literal) throw new Error('Service worker has no verified shared-map list');
+  const records = JSON.parse(literal);
+  if (!Array.isArray(records) || !records.length || records.length > 64 || new Set(records.map(record => record.path)).size !== records.length
+    || records.some(record => !record.path?.startsWith('/custom-map/') || !Number.isSafeInteger(record.sizeBytes) || record.sizeBytes <= 0 || !/^[a-f0-9]{64}$/.test(record.sha256))) {
+    throw new Error('Service worker shared-map inventory is invalid');
+  }
+  return records;
+}
+
 function localPath(url) {
   if (typeof url !== 'string' || !url.startsWith('/') || url.startsWith('//') || /[?#\\]/.test(url)) {
     throw new Error('Map asset URL is not a local absolute path: ' + String(url));
@@ -50,6 +61,11 @@ export async function verifyMapShell(webRoot = defaultRoot) {
   if (legacyViewer) throw new Error('public/offline.html shadows the /offline management route through HTML asset routing; use offline-viewer.html');
   const source = await readFile(path.join(publicRoot, 'sw.js'), 'utf8');
   const paths = shellPaths(source);
+  const customMap = customMapShellRecords(source);
+  if (paths.some(url => /(?:maplibre|leaflet|protomaps)/i.test(url))) throw new Error('Vendor renderer cannot enter the offline shell');
+  for (const required of ['/custom-map/map-runtime.js', '/custom-map/map.css', '/custom-map/manifest.json']) {
+    if (!customMap.some(record => record.path === required)) throw new Error('Shared map shell is incomplete: ' + required);
+  }
   if (!paths.includes('/offline-viewer.html')) throw new Error('SHELL omits the standalone offline viewer');
   for (const asset of ['/offline-safety.html', '/offline-safety.js', '/offline-safety.css']) {
     if (!paths.includes(asset)) throw new Error('SHELL omits the emergency card asset: ' + asset);
@@ -80,6 +96,7 @@ export async function verifyMapShell(webRoot = defaultRoot) {
     return checked.get(url);
   };
   const shell = await Promise.all(paths.map(asset));
+  await Promise.all(customMap.map(async record => recordMatches({bytes: record.sizeBytes, sha256: record.sha256}, await asset(record.path), record.path)));
   if (!paths.includes('/data/territories.geojson')) throw new Error('SHELL omits the full territory geometry');
   const metadataPath = path.join(root, 'lib', 'territories.generated.json');
   let metadataBytes, catalog;
@@ -132,6 +149,7 @@ export async function verifyMapShell(webRoot = defaultRoot) {
   return {
     schemaVersion: 1, status: 'passed', serviceWorkerVersion: version,
     shellAssets: shell.length, shellBytes: shell.reduce((sum, file) => sum + file.bytes, 0),
+    sharedMapFiles: customMap.length, sharedMapBytes: customMap.reduce((sum, file) => sum + file.sizeBytes, 0),
     territoryCount: features.length, territoryGeometrySha256: geometry.sha256,
     territoryMetadataSha256: digest(metadataBytes), routeGeometrySources: routeSources.length,
     verifiedPublicFiles: checked.size, networkRequests: 0,

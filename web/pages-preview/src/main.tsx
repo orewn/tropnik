@@ -2,6 +2,7 @@ import {StrictMode, type ReactNode} from 'react';
 import {createRoot} from 'react-dom/client';
 import build from 'virtual:pages-build';
 import {resolvePage} from './routing';
+import {ServiceWorker} from '../../components/ServiceWorker';
 import 'virtual:pages-layout-styles';
 import './preview.css';
 
@@ -34,8 +35,9 @@ async function start() {
   try {content = await renderPage({params: Promise.resolve({id: page?.id}), searchParams: Promise.resolve(Object.fromEntries(new URLSearchParams(location.search)))});}
   catch (error) {console.error('Static page unavailable', error); content = (await loaders.missing()).default();}
   document.title = `${page?.title || 'Страница не найдена'} · Тропник`;
-  createRoot(document.getElementById('root')!).render(<StrictMode><a className="skip-link" href="#main">Перейти к содержимому</a>{content}</StrictMode>);
-  if ('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register(`${build.base}sw.js`, {scope: build.base}).catch(error => console.info('Offline shell not installed', error));
+  // Use the same load/idle scheduling and update lifecycle as the main app.
+  // Installing the offline shell must not compete with the first map paint.
+  createRoot(document.getElementById('root')!).render(<StrictMode><a className="skip-link" href="#main">Перейти к содержимому</a>{content}<ServiceWorker/></StrictMode>);
 }
 
 void start().catch(error => {

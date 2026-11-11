@@ -12,4 +12,3 @@ export function constrainRussiaCamera(lng: number, lat: number, zoom: number, ov
 export function displayGeoJSON<T>(value: T): T;
 export function inRussiaCoverage(lng: number, lat: number, area: unknown): boolean;
 export function coveredRussiaBounds(positions: ReadonlyArray<ReadonlyArray<number>>, area: unknown): [number, number, number, number] | null;
-export function leafletRussiaMask(mask: GeoJSON.GeoJsonObject): GeoJSON.FeatureCollection;

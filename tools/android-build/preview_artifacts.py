@@ -32,6 +32,17 @@ REPORT_NAMES = tuple(
     for suffix in (".alignment.txt", ".compression.json", ".verification.json")
 ) + ("unit-tests.json",)
 FILES = APK_NAMES + REPORT_NAMES
+# Include native code, Gradle configuration, generators and all shared runtime
+# data. Build/device/release report directories are outputs, not source inputs.
+SOURCE_INPUTS = (
+    "android/app", "android/gradle", "android/gradlew", "android/gradlew.bat",
+    "android/build.gradle.kts", "android/settings.gradle.kts", "android/gradle.properties",
+    "tools/android-build", "tools/map-package", "data/terrain-pilot/runtime", "data/pilot-map",
+    "web/lib", "web/public/data", "web/public/maps", "web/public/offline-map",
+    "web/public/terrain", "web/public/custom-map", "web/package.json", "web/pnpm-lock.yaml", "web/pnpm-workspace.yaml",
+    "web/app/custom-map.css", "web/app/map-direction-marker.css", "web/app/map-detail.css",
+    ".github/workflows/android.yml",
+)
 
 
 def require(condition, message):
@@ -39,10 +50,71 @@ def require(condition, message):
         raise ValueError(message)
 
 
+def ci_build():
+    return os.environ.get("GITHUB_ACTIONS") == "true" or any(
+        os.environ.get(name) for name in ("GITHUB_SHA", "GITHUB_RUN_ID"))
+
+
+def source_checkout(root: Path, *, require_clean=False):
+    """Bind CI evidence to unchanged committed inputs, before and after build.
+
+    Ignored Gradle/dependency outputs do not enter the source tree. Nonignored
+    untracked code or runtime assets do: Gradle and the generators could consume
+    them even though git archive of HEAD would not contain those bytes.
+    """
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+    expected = os.environ.get("GITHUB_SHA", "")
+    require(not ci_build() or re.fullmatch(r"[a-f0-9]{40}", expected),
+            "CI source verification requires a valid GITHUB_SHA")
+    require(not expected or expected == commit, "Checkout commit differs from the workflow source")
+    if require_clean or ci_build():
+        changed = subprocess.check_output(
+            ["git", "diff", "--no-ext-diff", "--name-only", "-z", "HEAD", "--", *SOURCE_INPUTS], cwd=root)
+        untracked = subprocess.check_output(
+            ["git", "ls-files", "--others", "--exclude-standard", "-z", "--", *SOURCE_INPUTS], cwd=root)
+        require(not changed and not untracked,
+                "Android build inputs differ from the source commit; regenerate and commit them before CI")
+    return commit
+
+
 def read_json(path: Path):
     require(path.is_file() and not path.is_symlink() and path.stat().st_size <= 2_000_000,
             f"Missing, linked or oversized JSON: {path.name}")
     return json.loads(path.read_text())
+
+
+def expected_map_runtime(root: Path):
+    """Bind reports to the same reviewed runtime in both source targets."""
+    native = root / "android/app/src/main/assets/custom-map/manifest.json"
+    web = root / "web/public/custom-map/manifest.json"
+    manifest = read_json(native)
+    require(native.read_bytes() == web.read_bytes(), "Web and native map runtime manifests differ")
+    require(manifest.get("schemaVersion") == 1 and manifest.get("runtime") == "tropnik-canvas"
+            and manifest.get("bridge") == "exact-origin-web-message-port-v1", "Unknown shared map runtime")
+    inputs = manifest.get("sourceInputs")
+    require(isinstance(inputs, list) and 1 <= len(inputs) <= 256, "Shared map source inputs missing")
+    encoded = (json.dumps(inputs, indent=2, ensure_ascii=False, allow_nan=False) + "\n").encode()
+    require(hashlib.sha256(encoded).hexdigest() == manifest.get("sourceInputsSha256"), "Shared map source-input digest differs")
+    seen = set()
+    for record in inputs:
+        path = record.get("path")
+        require(isinstance(path, str) and re.fullmatch(r"[A-Za-z0-9_./-]+", path)
+                and not path.startswith("/") and all(part not in ("", ".", "..") for part in path.split("/"))
+                and path not in seen, "Unsafe or duplicate shared map input")
+        seen.add(path)
+        source = root / path
+        require(source.is_file() and not source.is_symlink() and source.resolve().is_relative_to(root.resolve()), "Shared map source input is missing")
+        data = source.read_bytes()
+        require(len(data) == record.get("sizeBytes") and hashlib.sha256(data).hexdigest() == record.get("sha256"), "Shared map source input changed: " + path)
+    files = manifest.get("files", [])
+    workers = [record for record in files if record.get("path", "").startswith("workers/") and record.get("path", "").endswith(".js")]
+    aliases = manifest.get("resourceAliases", [])
+    require(5 <= len(files) <= 64 and 1 <= len(workers) <= 16 and 500 <= len(aliases) <= 2048, "Incomplete shared map runtime proof")
+    return {"mapRenderer": "tropnik-canvas", "mapRendererManifestSha256": hashlib.sha256(native.read_bytes()).hexdigest(),
+            "mapRendererSourceInputsSha256": manifest["sourceInputsSha256"], "mapRendererFilesVerified": len(files),
+            "mapRendererWorkersVerified": len(workers), "mapRendererResourceAliasesVerified": len(aliases),
+            "mapRendererNativeSdkRequired": False, "mapRendererSharedWithWeb": True,
+            "mapRendererBridge": manifest["bridge"]}
 
 
 def fingerprint(path: Path):
@@ -84,6 +156,7 @@ def certificate(text):
 
 def inspect_payload(directory: Path, root: Path):
     version, code = source_version(root)
+    runtime = expected_map_runtime(root)
     files = {name: fingerprint(directory / name) for name in FILES}
     certificates = set()
     for name in APK_NAMES:
@@ -112,6 +185,9 @@ def inspect_payload(directory: Path, root: Path):
         require(verification.get("sha256") == files[name]["sha256"] and
                 verification.get("sizeBytes") == files[name]["bytes"],
                 "Static verification is not for this APK")
+        for key, value in runtime.items():
+            require(verification.get(key) == value and type(verification.get(key)) is type(value),
+                    "APK shared renderer proof differs from the source checkout: " + key)
         expected_abis = {"arm64-v8a"} if name == ARM64 else {"arm64-v8a", "armeabi-v7a", "x86_64"}
         require(set(verification.get("abis", [])) == expected_abis, "Wrong APK architecture")
         require("Verification successful" in (directory / (stem + ".alignment.txt")).read_text(),
@@ -126,14 +202,12 @@ def inspect_payload(directory: Path, root: Path):
             all(tests.get(key) == 0 for key in ("failures", "errors", "skipped")),
             "Executed JVM tests must pass without skips")
     return {"version": version, "versionCode": code, "applicationId": APP_ID,
-            "signingCertificateSha256": cert, "files": files, "jvmTestsPassed": tests["tests"]}
+            "signingCertificateSha256": cert, "files": files, "jvmTestsPassed": tests["tests"], "mapRuntime": runtime}
 
 
 def build_receipt(directory: Path, root: Path):
     payload = inspect_payload(directory, root)
-    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-    require(not os.environ.get("GITHUB_SHA") or os.environ["GITHUB_SHA"] == commit,
-            "Checkout commit differs from the workflow source")
+    commit = source_checkout(root)
     receipt = {"schemaVersion": 1, "sourceCommit": commit,
                "workflowRunId": os.environ.get("GITHUB_RUN_ID"),
                "workflowRunAttempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
@@ -147,6 +221,9 @@ def verify_receipt(directory: Path, root: Path):
     receipt = read_json(directory / RECEIPT)
     require(receipt.get("schemaVersion") == 1, "Unknown build receipt schema")
     require(re.fullmatch(r"[a-f0-9]{40}", receipt.get("sourceCommit", "")), "Missing source commit")
+    if ci_build():
+        require(receipt["sourceCommit"] == source_checkout(root),
+                "Artifact does not belong to the unchanged source checkout")
     for key, value in inspect_payload(directory, root).items():
         require(receipt.get(key) == value, f"Build receipt mismatch: {key}")
     for environment, key in (("GITHUB_SHA", "sourceCommit"), ("GITHUB_RUN_ID", "workflowRunId")):
@@ -189,13 +266,18 @@ def capture_installed(directory: Path, root: Path, adb: Path, serial: str, outpu
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("create", "verify", "installed"))
-    parser.add_argument("--directory", type=Path, required=True)
+    parser.add_argument("command", choices=("source", "create", "verify", "installed"))
+    parser.add_argument("--directory", type=Path)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--sdk", type=Path)
     parser.add_argument("--serial", default="emulator-5554")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    if args.command == "source":
+        print(json.dumps({"sourceCommit": source_checkout(args.root, require_clean=True),
+                          "workflowRunId": os.environ.get("GITHUB_RUN_ID")}))
+        return
+    require(args.directory is not None, "Artifact command requires --directory")
     if args.command == "create":
         result = build_receipt(args.directory, args.root)
     elif args.command == "installed":

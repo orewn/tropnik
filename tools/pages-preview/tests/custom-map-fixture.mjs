@@ -1,0 +1,34 @@
+import {visibleMapBounds} from '../map-projection.mjs';
+import {nativeClickFixture} from './experience-fixture.mjs';
+
+export function customMapFixture({camera={longitude:40.37,latitude:43.72,zoom:14},mode='detail',routeId='kavkaz-8a',imagerySource}={}){
+ const bitmap=(kind,z=0,x=0,y=0)=>({key:`${kind}:${z}/${x}/${y}`,kind,z,x,y,local:kind==='overview',width:512,height:512,
+  bounds:[x/2**z*360-180,Math.atan(Math.sinh(Math.PI*(1-2*(y+1)/2**z)))*180/Math.PI,(x+1)/2**z*360-180,Math.atan(Math.sinh(Math.PI*(1-2*y/2**z)))*180/Math.PI],transparent:false});
+ const imagery=imagerySource==='eox-bluemarble'?[bitmap(imagerySource,8,256,62),bitmap(imagerySource,8,255,62)]:imagerySource?[bitmap(imagerySource,4,14,3)]:[];
+ const detail=mode!=='overview'&&camera.zoom>=5,relief=mode==='detail'&&detail;
+ return{engine:'tropnik-canvas',readOnly:true,canvas:{connected:true,width:1000,height:700,cssWidth:1000,cssHeight:700},
+  camera:{center:[camera.longitude,camera.latitude],zoom:camera.zoom},pitch:0,drawRevision:2,labelRevision:2,routeId,drawnRoute:routeId,
+  state:{ready:true,loading:false,error:'',mode,committedMode:mode==='detail'&&!detail?'overview':mode,reliefReady:relief,imagerySource,imageryTarget:imagerySource,imageryLoading:false},
+  coverage:{ready:true},tiles:{overview:[bitmap('overview')],detail:detail?[bitmap('vector')]:[],relief:relief?[bitmap('relief')]:[],imagery},labels:[],resources:{errors:[]}};
+}
+
+export function customSceneFixture(mobile,routeId='kavkaz-8a'){
+ const width=mobile?412:1000,rect={left:0,top:72,right:width,bottom:772,width,height:700},camera={longitude:40.37,latitude:43.72,zoom:14,tileSize:256};
+ const padding=mobile?{left:24,right:80,top:88,bottom:196}:{left:40,right:88,top:96,bottom:96},bounds=visibleMapBounds(camera,rect,padding);
+ const bitmapInspection=customMapFixture({camera,routeId});bitmapInspection.canvas={connected:true,width,height:700,cssWidth:width,cssHeight:700};
+ Object.assign(bitmapInspection,{viewport:{width,height:700,padding},visibleBounds:bounds});
+ const beforeMap={engine:'tropnik-canvas',route:routeId,moving:false,visible:true,camera,rect,
+  rendering:{painted:true,drawnRoute:routeId,coverageReady:true,tilesState:'ready'},bitmapInspection,
+  viewportLayout:{width,height:772,panel:mobile?{left:0,right:width,top:600,bottom:772}:null}};
+ const view={yaw:-.48,pitch:.72,zoom:1,offset:[0,0]},source={name:'Observed source fixture',url:'test:source'};
+ const initial={schemaVersion:1,engine:'tropnik-terrain',state:'ready',frames:2,requestedBounds:bounds,
+  grid:{width:3,height:3,bounds,minElevation:100,maxElevation:200,source},provenance:{requestedBounds:bounds},
+  displayMask:{state:'ready',width:2048,height:2048,source:{scope:'russia-display-area',coverageVersion:'a'.repeat(16),bounds,cells:['test-cell'],projection:'regular-longitude-latitude',sampleLayout:'pixel-cells',allowedPixels:4194304}},
+  frame:{sourceVertices:9,triangles:8,renderer:'webgl2',view,displayMask:{width:2048,height:2048,allowedPixels:4194304,coverageVersion:'a'.repeat(16)},cartography:{loadedTiles:1,requestedTiles:1,width:1024,height:1024}},
+  cartography:{state:'ready',width:1024,height:1024,source:{bounds,projection:'regular-longitude-latitude',sampleLayout:'grid-nodes',loadedTiles:1,requestedTiles:1}}};
+ const state=(frames,patch)=>({...structuredClone(initial),frames,frame:{...structuredClone(initial.frame),view:{...structuredClone(view),...patch}}});
+ const labels=[...Array(14).fill('Приблизить ландшафт'),...Array(14).fill('Отдалить ландшафт'),'Повернуть ландшафт','Вернуть исходный ракурс'];
+ return{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,rotateInput:true,resetInput:true,imageChanged:true,visualReviewRequired:true,beforeMap,
+  nativeInputs:labels.map(label=>({label,...nativeClickFixture(mobile?'touch':'mouse','scene-button',undefined,label)})),
+  states:{initial,close:state(16,{zoom:5}),wide:state(30,{zoom:.65}),rotated:state(31,{zoom:.65,yaw:-.23}),reset:state(32,{})}};
+}

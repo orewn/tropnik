@@ -65,6 +65,12 @@ test('the actual maximum long task survives the32-entry recent ring without chan
  state.__tropnikPerf={cls:0,longest:0};const next={startTime:20000,duration:79,phase:'next-audit'};recordBrowserLongTask(state,next);
  assert.equal(state.__tropnikPerf.longest,79);assert.equal(state.__tropnikPerf.peakLongTask,next);
 });
+test('late startup task delivery stays diagnostic and does not contaminate the next interaction window',()=>{
+ const state={__tropnikPerf:{cls:0,longest:0},__tropnikPerfStart:1000,__tropnikLongTasks:[]};
+ const old={startTime:800,duration:900},current={startTime:1000,duration:60};
+ recordBrowserLongTask(state,old);assert.equal(state.__tropnikPerf.longest,0);assert.deepEqual(state.__tropnikLongTasks,[old]);
+ recordBrowserLongTask(state,current);assert.equal(state.__tropnikPerf.longest,60);assert.equal(state.__tropnikPerf.peakLongTask,current);
+});
 
 test('default full-matrix action runs once without tracer calls, timers or evidence files',async t=>{
  const output=await outputDirectory(t),value={selected:'altai'};let actions=0;
@@ -76,7 +82,7 @@ test('default full-matrix action runs once without tracer calls, timers or evide
 });
 
 test('disabled tracing preserves the original action failure and settle evidence without retrying',async t=>{
- const output=await outputDirectory(t),failure=new Error('The maplibre map did not settle');let actions=0;
+ const output=await outputDirectory(t),failure=new Error('The tropnik-canvas map did not settle');let actions=0;
  failure.settleDiagnostics={timeoutMs:15000,requiredIdleObservations:4,samples:[{frameMs:6026}]};
  const forbidden=()=>assert.fail('Disabled tracing must not touch the protocol');
  const observed=await traceDesktopSelection({observe:forbidden,call:forbidden},async()=>{actions++;throw failure;},
@@ -181,6 +187,34 @@ test('the capture time cap stops and drains before a still-pending selection com
  assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
 });
 
+test('optional drain boundary keeps the recording cap while stream I/O waits for measurement closure',async t=>{
+ const output=await outputDirectory(t),timers=controlledTimers(),cdp=protocol();let finishAction,closeWindow,now=0;
+ const closed=new Promise(resolve=>{closeWindow=resolve;});
+ const pending=traceDesktopSelection(cdp,()=>new Promise(resolve=>{finishAction=resolve;}),{output,...timers,clock:()=>now,beforeDrain:()=>closed});
+ await new Promise(resolve=>setImmediate(resolve));now=DESKTOP_TRACE_LIMITS.durationMs;timers.fireDuration();await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(cdp.calls.at(-1).method,'Tracing.end');assert.equal(cdp.calls.some(call=>call.method==='IO.read'),false);
+ now+=DESKTOP_TRACE_LIMITS.drainMs+100;closeWindow();await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(cdp.calls.at(-1).method,'IO.close');finishAction('measured-once');
+ const {value,trace}=await pending;assert.equal(value,'measured-once');assert.equal(trace.status,'partial');assert.equal(trace.stopReason,'time-limit');
+ assert.equal(trace.recordedDurationMs,DESKTOP_TRACE_LIMITS.durationMs);assert.equal(trace.drainWaitMs,DESKTOP_TRACE_LIMITS.drainMs+100);assert.deepEqual(trace.errors,[]);
+ assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
+});
+
+test('an unreleased drain hook cannot deadlock cleanup after the original action fails',async t=>{
+ const output=await outputDirectory(t),timers=controlledTimers(),cdp=protocol(),failure=new Error('Native action timed out');let rejectAction;
+ const pending=traceDesktopSelection(cdp,()=>new Promise((resolve,reject)=>{rejectAction=reject;}),{output,...timers,beforeDrain:()=>new Promise(()=>{})}).then(()=>null,error=>error);
+ await new Promise(resolve=>setImmediate(resolve));timers.fireDuration();await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(cdp.calls.at(-1).method,'Tracing.end');rejectAction(failure);
+ assert.equal(await pending,failure);assert.equal(cdp.calls.at(-1).method,'IO.close');assert.equal(cdp.observers.size,0);assert.equal(timers.pending.size,0);
+ assert.equal(failure.traceReceipt.stopReason,'time-limit');assert.match(failure.traceReceipt.actionError,/Native action timed out/);
+});
+
+test('a rejected drain boundary still closes the handle and preserves the action failure',async t=>{
+ const output=await outputDirectory(t),cdp=protocol(),failure=new Error('Original action failure');
+ const observed=await traceDesktopSelection(cdp,async()=>{throw failure;},{output,...controlledTimers(),beforeDrain:()=>{throw new Error('Boundary failed');}}).then(()=>null,error=>error);
+ assert.equal(observed,failure);assert.equal(cdp.calls.at(-1).method,'IO.close');assert.equal(cdp.observers.size,0);
+});
+
 test('the stream drain deadline stops further reads but still closes the protocol handle',async t=>{
  const output=await outputDirectory(t),timers=controlledTimers();let now=0;
  const cdp=protocol({onRead:()=>{now=DESKTOP_TRACE_LIMITS.drainMs+1;}});
@@ -242,7 +276,7 @@ test('the terrain scope has isolated files and explicit larger caps without chan
 
 test('the terrain time cap drains while settle is pending and preserves its later original failure',async t=>{
  const output=await outputDirectory(t),timers=controlledTimers(),cdp=protocol({limits:TERRAIN_TRACE_LIMITS}),prefix='desktop-webgl-terrain-zoom';
- const failure=new Error('The maplibre map did not settle');failure.settleDiagnostics={sampleLimit:16,samples:[{phase:'observed',frameMs:6026,state:{camera:{zoom:5.905}}}]};
+ const failure=new Error('The tropnik-canvas map did not settle');failure.settleDiagnostics={sampleLimit:16,samples:[{phase:'observed',frameMs:6026,state:{camera:{zoom:5.905}}}]};
  let rejectAction,actions=0,now=0;
  const observed=traceDesktopSelection(cdp,()=>{actions++;return new Promise((_,reject)=>{rejectAction=reject;});},{output,prefix,scope:'first-desktop-terrain-zoom-4-to-6',limits:TERRAIN_TRACE_LIMITS,...timers,clock:()=>now}).then(()=>null,error=>error);
  await new Promise(resolve=>setImmediate(resolve));now=20000;timers.fireDuration(20000);

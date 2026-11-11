@@ -41,3 +41,41 @@ test('the smallest containing territory wins over a surrounding territory',()=>{
 test('unknown renderer properties never select a random territory',()=>{
   assert.equal(territoryForMapPoint(['__missing__'],[40,55]),undefined);
 });
+
+const {regions,trails}=load(resolve(web,'lib/content.ts'));
+const {territories,trailBelongsToRegion,createTrailRegionIndex,mapRegionById}=load(resolve(web,'lib/territories.ts'));
+test('the catalogue membership index preserves every route and order for all directions and territories',()=>{
+ const index=createTrailRegionIndex(trails);
+ for(const region of [...regions,...territories]){
+  const expected=trails.filter(trail=>trailBelongsToRegion(trail,region));
+  assert.deepEqual(index.get(region.id)??[],expected,region.name);
+  for(let i=0;i<expected.length;i++)assert.equal(index.get(region.id)[i],expected[i],'map and cards retain the same objects');
+ }
+});
+
+test('every shipped route has a resolvable primary place and preserves exact territory identities',()=>{
+ const knownTerritories=new Set(territories.map(region=>region.id));
+ for(const trail of trails){
+  assert.ok(mapRegionById(trail.regionId),`unreachable primary region for ${trail.id}: ${trail.regionId}`);
+  for(const id of trail.regionIds??[])assert.ok(mapRegionById(id),`unknown place membership for ${trail.id}: ${id}`);
+  for(const id of trail.territoryIds??[])assert.ok(knownTerritories.has(id),`unknown territory membership for ${trail.id}: ${id}`);
+  if(trail.regionIds?.length)assert.ok(trail.regionIds.includes(trail.regionId),`primary region omitted from declared memberships: ${trail.id}`);
+ }
+});
+
+test('new territory routes resolve without inventing an editorial direction or geography',()=>{
+ const first=territories.find(region=>region.shapeNames.includes('Moscow'));
+ const second=territories.find(region=>region.shapeNames.includes('Moscow Oblast'));
+ assert.ok(first&&second);
+ const record={...trails[0],id:'national-fixture',regionId:first.id,regionIds:[first.id,first.id],territoryIds:[first.id,second.id,second.id],geometryUrl:undefined};
+ const before=createTrailRegionIndex([record]);
+ assert.equal(mapRegionById(first.id),first);
+ assert.deepEqual(before.get(first.id),[record]);
+ assert.deepEqual(before.get(second.id),[record]);
+ const revised={...record,regionId:'baikal',regionIds:[],territoryIds:[]};
+ const after=createTrailRegionIndex([revised]);
+ assert.deepEqual([...after.keys()],['baikal'],'a tourism group alone cannot infer administrative membership');
+ assert.deepEqual(before.get(first.id),[record],'a new catalogue cannot mutate its preceding revision');
+ assert.equal(mapRegionById('baikal'),regions.find(region=>region.id==='baikal'));
+ assert.equal(mapRegionById('__unknown__'),undefined);
+});

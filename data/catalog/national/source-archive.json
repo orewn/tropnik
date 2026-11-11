@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "filename": "tropnik-national-route-sources-2026-11-11.tar.gz",
+  "bytes": 7772416,
+  "license": "ODbL-1.0",
+  "attribution": "© OpenStreetMap contributors; distributed by Waymarked Trails",
+  "sha256": "3510bd4e6c2e889b2e2db31b7e1af9bc64403cb0967cc1e283c330fc2eac4ac1",
+  "manifestSha256": "1905680e303e1cd9eb0e04c8815b4d0893f7bb9b7be5c22e3e70d5ecced9e652",
+  "sourceFiles": 1604,
+  "rawResponses": 802,
+  "uncompressedSourceBytes": 31326645,
+  "acceptedRelationSourceBytes": 7658877,
+  "allRelationSourceBytes": 30779637,
+  "allListSourceBytes": 281296,
+  "retrievalWindowUtc": {
+    "first": "2026-11-10T21:24:02.928857+00:00",
+    "last": "2026-11-10T22:00:40.641702+00:00"
+  },
+  "includesRejectedRelations": true,
+  "includesOriginalSourceSidecars": true,
+  "scope": "Original successful responses for the new national acquisition, including rejected candidates. The six-destination historical raw snapshot is not included or revalidated.",
+  "verificationCommand": "python tools/import-data/audit_national_catalog.py --archive tropnik-national-route-sources-2026-11-11.tar.gz"
+}

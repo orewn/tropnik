@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
-import {decodeCoverage,coverageCells,coverageLevel,createMapCoverage,loadMapCoverage,bindMapCoverage,MAP_COVERAGE_LIMITS} from '../public/maps/map-coverage-lod.js';
+import {decodeCoverage,coverageCells,coverageLevel,createMapCoverage,loadMapCoverage,MAP_COVERAGE_LIMITS} from '../public/maps/map-coverage-lod.js';
 
 const version='0123456789abcdef';
 function pack(features,lod='overview',cell) {
@@ -112,16 +112,6 @@ test('disposal aborts pending source work without publishing after unmount',asyn
   const session=createMapCoverage(manifest,base,{fetch:(url,{signal})=>new Promise(resolve=>request={url,signal,resolve})});
   session.subscribe(()=>events++);const job=session.updateView(view(0),14),before=events;
   session.dispose();assert.equal(request.signal.aborted,true);request.resolve(response(files.get(request.url)));await job;assert.equal(events,before);
-});
-
-test('DOM readiness waits for the current renderer and ignores a stale style completion',async()=>{
-  const {manifest,base,files}=fixtures(),session=createMapCoverage(manifest,base,{fetch:async url=>response(files.get(url))});
-  const events=new Map(),map={getBounds:()=>({getWest:()=>20,getSouth:()=>50,getEast:()=>21,getNorth:()=>51}),getZoom:()=>3,on:(event,cb)=>events.set(event,cb),off:event=>events.delete(event)};
-  const element={dataset:{}},renders=[];
-  const dispose=bindMapCoverage(map,session,element,()=>new Promise(resolve=>renders.push(resolve)));
-  events.get('style.load')();const latest=renders.at(-1);
-  for(const resolve of renders.slice(0,-1))resolve();await Promise.resolve();assert.equal(element.dataset.mapCoverageReady,'false');
-  latest();await Promise.resolve();assert.equal(element.dataset.mapCoverageReady,'true');assert.equal(element.dataset.mapCoverageError,'');dispose();
 });
 
 const read=path=>JSON.parse(readFileSync(new URL(path,import.meta.url),'utf8'));

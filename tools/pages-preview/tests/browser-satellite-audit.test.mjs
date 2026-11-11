@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {satelliteResource,observeSatelliteResources,successfulSatelliteResources,satelliteResourcesAt,satelliteTileContains,assertSatelliteContinuityAudit,assertSatelliteCameraUnchanged,satellitePerformanceIssues} from '../browser-satellite-audit.mjs';
+import {satelliteResource,observeSatelliteResources,successfulSatelliteResources,satelliteResourcesAt,satelliteTileContains,assertSatelliteContinuityAudit,assertSatelliteCameraUnchanged,assertSatellitePreload,satellitePerformanceIssues} from '../browser-satellite-audit.mjs';
 import {projectMapPoint} from '../map-projection.mjs';
 import {coastPanPlan} from '../browser-coast-audit.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
@@ -40,8 +40,8 @@ test('completed image responses are independent of ready state and preserve fail
  observer.dispose();assert.equal(listeners.size,0);
 });
 
-for(const engine of ['leaflet','maplibre'])test(`${engine} continuity requires native gestures, provider transfers, lower-detail credit and camera-preserving toggles`,()=>{
- const profile=engine==='leaflet'?'android-portrait':'desktop-webgl',fixture=satelliteFixture(profile,engine);
+for(const profile of ['android-portrait','desktop-webgl'])test(`${profile} custom-map continuity requires native gestures, provider transfers, lower-detail credit and camera-preserving toggles`,()=>{
+ const engine='tropnik-canvas',fixture=satelliteFixture(profile,engine);
  assert.equal(assertSatelliteContinuityAudit(fixture,profile,engine),fixture);
  const changes=[
   value=>delete value.steps,
@@ -78,7 +78,7 @@ for(const engine of ['leaflet','maplibre'])test(`${engine} continuity requires n
 });
 
 test('capture sequence derives pending/errors from raw events and does not apply future failures to earlier frames',()=>{
- const make=()=>satelliteFixture('desktop-webgl','maplibre');
+ const make=()=>satelliteFixture('desktop-webgl','tropnik-canvas');
  const extra=(report,{finished=true,status=404}={})=>{
   const item={...structuredClone(report.resources.requests[0]),requestId:'late',phase:'dateline-native8',responsePhase:'dateline-native8',firstSequence:10,requestedSequence:10,responseSequence:11,finishedSequence:12,status};
   if(!finished){delete item.responseSequence;delete item.finishedSequence;delete item.status;delete item.mimeType;delete item.bytes;item.finished=false;}
@@ -93,8 +93,67 @@ test('capture sequence derives pending/errors from raw events and does not apply
  assert.equal(successfulSatelliteResources(satelliteResourcesAt(delayed.resources,9),'eox-bluemarble').some(item=>item.requestId==='eox-bluemarble'),false,'A transfer completed later cannot certify earlier imagery');
  assert.throws(()=>assertSatelliteContinuityAudit(delayed,delayed.profile,delayed.engine));
  const eastOnly=make();eastOnly.resources.requests.splice(1,1);eastOnly.resources.observedRequests--;
- for(const frame of [...eastOnly.steps,eastOnly.toggles[0].after])if(frame.successfulRequestIds)frame.successfulRequestIds=frame.successfulRequestIds.filter(id=>id!=='eox-bluemarble-west');
+ for(const frame of [...eastOnly.steps,eastOnly.toggles[0].after,eastOnly.preload.after])if(frame.successfulRequestIds)frame.successfulRequestIds=frame.successfulRequestIds.filter(id=>id!=='eox-bluemarble-west');
+ assert.throws(()=>assertSatelliteContinuityAudit(eastOnly,eastOnly.profile,eastOnly.engine),/committed bitmap has no completed public imagery response/);
+ for(const frame of [...eastOnly.steps,eastOnly.toggles[0].after,eastOnly.preload.after])frame.customMap.tiles.imagery=frame.customMap.tiles.imagery.filter(tile=>((tile.x%2**tile.z)+2**tile.z)%2**tile.z!==255);
  assert.throws(()=>assertSatelliteContinuityAudit(eastOnly,eastOnly.profile,eastOnly.engine),/both dateline columns/);
+});
+
+test('custom imagery requires a committed decoded batch, retained ground during preload and actual separable provider viewports',()=>{
+ const valid=satelliteFixture('desktop-webgl','tropnik-canvas');
+ for(const change of [
+  value=>value.toggles[0].after.customMap.tiles.imagery=[],
+  value=>value.toggles[0].after.customMap.tiles.imagery[0].x=1,
+  value=>value.preload.pending.customMap.tiles.detail=[],
+  value=>value.preload.pending.customMap.state.imageryLoading=false,
+  value=>value.setupZooms[0].click.events[2].trusted=false,
+  value=>value.setupZooms[0].after.camera.zoom=4,
+  value=>value.steps[3].camera.zoom=4,
+ ]){const invalid=structuredClone(valid);change(invalid);assert.throws(()=>assertSatelliteContinuityAudit(invalid,invalid.profile,invalid.engine));}
+});
+
+test('preload acceptance rejects early ground removal, stale/finished requests, unbounded holds and missing intermediate images',()=>{
+ const make=()=>satelliteFixture('desktop-webgl','tropnik-canvas');
+ const valid=make();assert.equal(assertSatellitePreload(valid.preload,valid.resources,'preload'),valid.preload);
+ const changes=[
+  report=>report.preload.pending.base.committed='satellite',
+  report=>report.preload.pending.base.state='ready',
+  report=>report.preload.pending.source='eox-bluemarble',
+  report=>report.preload.pending.camera.zoom+=1,
+  report=>report.preload.pending.resourceSequence=3,
+  report=>report.preload.held.records[0].networkId='invented',
+  report=>report.preload.held.records[0].resumedAt=150,
+  report=>report.preload.held.closed=true,
+  report=>report.preload.held.limit=1000,
+  report=>report.preload.released.reason='timeout',
+  report=>report.preload.released.errors=['resume failed'],
+  report=>report.preload.released.records[0].resumedAt=null,
+  report=>report.preload.screenshots.splice(1,1),
+ ];
+ for(const change of changes){const report=make();change(report);assert.throws(()=>assertSatellitePreload(report.preload,report.resources,'preload'));}
+});
+
+test('preload accepts the actual low-zoom overview batch without claiming detail or hiding missing ground',()=>{
+ const make=()=>{
+  const report=satelliteFixture('android-portrait','tropnik-canvas');
+  for(const frame of [report.preload.before,report.preload.pending]){
+   frame.base.committed='overview';frame.customMap.state.committedMode='overview';
+   frame.customMap.tiles.detail=[];frame.customMap.tiles.relief=[];
+  }
+  return report;
+ };
+ const valid=make();assert.equal(assertSatellitePreload(valid.preload,valid.resources,'overview preload'),valid.preload);
+ for(const change of [
+  report=>report.preload.before.base.target='satellite',
+  report=>report.preload.before.customMap.state.mode='overview',
+  report=>report.preload.before.customMap.state.committedMode='detail',
+  report=>{for(const frame of [report.preload.before,report.preload.pending,report.preload.after]){frame.camera.zoom=5;frame.customMap.camera.zoom=5;}},
+  report=>report.preload.before.customMap.camera.zoom=3,
+  report=>report.preload.before.customMap.tiles.overview=[],
+  report=>report.preload.before.customMap.tiles.detail.push(structuredClone(report.preload.before.customMap.tiles.overview[0])),
+  report=>report.preload.before.customMap.tiles.imagery.push(structuredClone(report.preload.after.customMap.tiles.imagery[0])),
+  report=>report.preload.pending.customMap.tiles.overview=[],
+ ]){const invalid=make();change(invalid);assert.throws(()=>assertSatellitePreload(invalid.preload,invalid.resources,'overview preload'));}
 });
 
 test('the native pan planner uses the nearest dateline world copy without writing map coordinates',()=>{
@@ -112,6 +171,6 @@ test('satellite intervals retain the unchanged strict mobile/desktop budgets',()
   const issues=satellitePerformanceIssues({performance:{layoutShift:.12,longestTaskMs:limit}},profile);assert.equal(issues.length,2);assert.equal(issues[1].limit,limit);assert.equal(issues[1].phase,'satellite-continuity');
  }
  assert.throws(()=>satellitePerformanceIssues({}, {name:'desktop-webgl',mobile:false}),/performance evidence/);
- const frame=satelliteFixture('desktop-webgl','maplibre').steps[0],changed=structuredClone(frame);changed.viewport.width-=15;
+ const frame=satelliteFixture('desktop-webgl','tropnik-canvas').steps[0],changed=structuredClone(frame);changed.viewport.width-=15;
  assert.throws(()=>assertSatelliteCameraUnchanged(frame,changed,'satellite'),/viewport/);
 });

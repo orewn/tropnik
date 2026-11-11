@@ -17,17 +17,14 @@ test('mobile sheet uses compositor transforms instead of resizing the map every 
   assert.match(framing,/property==='transform'/);
 });
 
-test('camera movement does not run full DOM collision layout on every frame',()=>{
-  const atlas=read('components/Atlas.tsx');
-  const canvas=read('components/Atlas2D.tsx');
-  const labels=read('lib/map-direction-layout.ts');
-  assert.doesNotMatch(atlas,/map\.on\('move',scheduleDirectionLayout\)/);
-  assert.doesNotMatch(canvas,/map\.on\('move',scheduleDirectionLayout\)/);
-  assert.doesNotMatch(canvas,/map\.on\('zoom',scheduleDirectionLayout\)/);
-  assert.match(atlas,/map\.on\('movestart'/);
-  assert.match(canvas,/map\.on\('movestart'/);
+test('camera movement keeps DOM label collision work in the settled phase',()=>{
+  const engine=read('lib/custom-map-engine.ts'),labels=read('lib/map-direction-layout.ts');
+  const settled=engine.slice(engine.indexOf('private settled()'),engine.indexOf('private refreshTiles()'));
+  const draw=engine.slice(engine.indexOf('private draw()'));
+  assert.match(settled,/constrainDirectionLabels/);
+  assert.doesNotMatch(draw,/constrainDirectionLabels/);
+  assert.match(engine,/dataset\.mapCamera='moving'/);
   assert.match(labels,/requestAnimationFrame/);
-  assert.match(labels,/if\(!disposed\)schedule\(\)/);
   assert.match(labels,/cancelAnimationFrame/);
   assert.doesNotMatch(labels,/root\.addEventListener\('pointerover'/);
 });
@@ -78,17 +75,18 @@ test('compact landscape keeps every map control at 44px',()=>{
 });
 
 
-test('mobile touch profiles avoid the heavy WebGL startup path',()=>{
+test('all real device profiles start the own canvas engine and hover creates no GPU or vendor runtime',()=>{
   const preload=read('lib/map-preload.ts');
-  const atlas=read('components/Atlas.tsx');
+  const atlas=read('components/CustomAtlas.tsx'),explore=read('components/Explore.tsx'),engine=read('lib/custom-map-engine.ts');
   const browser=read('../tools/pages-preview/browser-smoke.mjs');
-  assert.match(preload,/export function preferCanvasMap/);
-  assert.match(preload,/window\.innerWidth<=900/);
-  assert.match(preload,/supportsMapWebGL\(\)&&!preferCanvasMap\(\)/);
-  assert.match(atlas,/preferCanvasMap\(\)\|\|!supportsMapWebGL\(\)/);
+  const warm=preload.slice(preload.indexOf('export function warmMap()'),preload.indexOf('export function loadTerrain'));
+  assert.doesNotMatch(warm,/supportsMapWebGL|prewarm\(|new Worker|import\(/);
+  assert.match(warm,/loadMapCoverage\(\).*coverage\.dispose\(\)/);
+  assert.match(explore,/CustomAtlas as Atlas/);assert.match(atlas,/new CustomMapEngine/);
+  assert.match(engine,/getContext\('2d'/);assert.doesNotMatch(engine,/from ['"](?:maplibre-gl|leaflet|protomaps-leaflet)/);
   assert.match(browser,/assert\.equal\(geometry\.engine,profile\.engine/);
-  assert.equal((browser.match(/mobile:true,engine:'leaflet'/g)||[]).length,4);
-  assert.match(browser,/mobile:false,engine:'maplibre'/);
+  assert.equal((browser.match(/mobile:true,engine:'tropnik-canvas'/g)||[]).length,4);
+  assert.match(browser,/mobile:false,engine:'tropnik-canvas'/);
 });
 
 

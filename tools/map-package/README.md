@@ -55,7 +55,7 @@ Runtime files:
 
 The PNG and mesh data describe the earth's **surface**, including vegetation and structures where present. Copernicus reports TanDEM-X acquisition in 2011–2015 and some older infill data. Mapterhorn's catalogue lists source access in 2025. A November 2026 download is not a new survey. Encoding precision of 1/256 metre is not measurement accuracy. The model does not establish current snow, passability, obstacles, avalanche risk or field verification of a trail. No missing points are generated or filled by this pipeline.
 
-MapLibre GL JS 6.16 can render a real terrain mesh from raster DEM; it requires WebGL2. MapLibre Native Android 13.7.1 supports raster DEM hillshade but does not implement the terrain mesh specification. A pitched hillshade map must be named accordingly; the separate numeric grid can support another actual 3D renderer.
+The common Tropnik engine owns the map camera, MVT cartography and DEM shading. Actual 3D uses the separate original WebGL2/Canvas terrain renderer; a tilted 2D map is not described as a terrain mesh.
 
 Primary references checked on 2026-11-06:
 
@@ -69,19 +69,6 @@ Primary references checked on 2026-11-06:
 
 ## Original outdoor pictograms
 
-`build-sprites.py` reads the project's original 28×28 vector paths from `web/components/MapIcon.tsx` and renders them with Pillow. It does not download third-party artwork or create geographic features.
+The shared custom renderer uses the project's original 28×28 paths from `web/components/MapIcon.tsx` through `web/lib/custom-map-symbols.ts`. Native Canvas paths are compiled once and drawn at the current output scale; no sprite atlas or third-party map symbolizer is shipped.
 
-```sh
-python tools/map-package/build-sprites.py
-```
-
-Generated files in `web/public/maps/`:
-
-- `tropnik-sprite.png` and `.json`: 224×32 atlas, seven 32px logical markers, `pixelRatio: 1`.
-- `tropnik-sprite@2x.png` and `.json`: 448×64 atlas, `pixelRatio: 2`.
-- `tropnik-pictograms.js`: the same source paths and marker colors for the Canvas 2D renderer.
-- `tropnik-sprite-provenance.json`: source path/hash and original project artwork declaration.
-
-Exact sprite keys: **`camp`, `water`, `shelter`, `pass`, `peak`, `viewpoint`, `info`**. MapLibre's sprite URL is `/maps/tropnik-sprite`; it selects the density variant. These are RGBA, non-SDF icons with a cream rounded square and a 1.5px forest-colored stroke. The source paths and generated artwork follow the project's licence; no external pictogram licence is introduced.
-
-`canvas-style.js` uses the same vectors through the installed Protomaps `LabelSymbolizer.place` contract. Include `tropnik-pictograms.js` whenever copying or precaching this module for offline use. Symbols are placed only at actual point features in `poi` and `mountain_peak`; normal label collision handling applies to icon and name together. OMT `saddle` maps to `pass`, while `peak`/`volcano` map to `peak`. Ridges and cliffs keep text labels. A generic hotel does not become a shelter; the water symbol does not independently verify potability, availability or public access.
+Symbols remain **camp, water, shelter, pass, peak, viewpoint, info**. Only actual `poi` or `mountain_peak` source classifications select a symbol, including unnamed points. A generic hotel cannot become a shelter and a place name cannot create a source feature. An icon does not independently verify water quality, availability or public access. Geographic anchors remain unchanged; the symbol and name share one collision rectangle after the country's mask is drawn.

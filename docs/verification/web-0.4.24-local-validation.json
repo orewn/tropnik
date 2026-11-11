@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "kind": "web-local-validation",
+  "createdAt": "2026-11-10T22:09:53.381Z",
+  "localChecksPassed": true,
+  "verified": false,
+  "releaseEligible": false,
+  "browserVerified": false,
+  "physicalDeviceVerified": false,
+  "baselineCommit": "169b0bee9b2bbdb45adfbe71f4162f35f37344d1",
+  "checks": [
+    {
+      "name": "complete web suite",
+      "command": "node --experimental-strip-types --test tests/*.test.mjs",
+      "cwd": "web",
+      "exitCode": 0,
+      "tests": 646,
+      "passed": 646,
+      "failed": 0,
+      "receipt": {
+        "path": "docs/verification/web-0.4.24-tests.txt",
+        "bytes": 63202,
+        "sha256": "bbbaa16519fd303d4c930e229217924fa4b5fdb55d3750206c17542e12058a89"
+      }
+    },
+    {
+      "name": "complete web eslint",
+      "command": "node node_modules/eslint/bin/eslint.js . --ignore-pattern dist --ignore-pattern .next",
+      "cwd": "web",
+      "exitCode": 0,
+      "receipt": {
+        "path": "docs/verification/web-0.4.24-lint.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "TypeScript",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false",
+      "cwd": "web",
+      "exitCode": 0,
+      "receipt": {
+        "path": "docs/verification/web-0.4.24-types.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "isolated catalogue benchmark and complete-response equivalence",
+      "command": "node web/scripts/benchmark-catalog.mjs --baseline 169b0bee9b2bbdb45adfbe71f4162f35f37344d1 --output docs/verification/web-0.4.24-catalog-performance.json",
+      "exitCode": 0,
+      "receipt": {
+        "path": "docs/verification/web-0.4.24-catalog-performance.json",
+        "bytes": 13547,
+        "sha256": "dc18c64dd9ac0fc1ad8dfa962ac5cc9e5a372273bbeb097649bd27cbbea96250"
+      }
+    }
+  ],
+  "resolvedAttempt": {
+    "receipt": {
+      "path": "docs/verification/web-0.4.24-tests-attempt1.txt",
+      "bytes": 64183,
+      "sha256": "2ead7f7909ca933324c2a7fe0685d33823e1325e0ec9d0e87c97aa1564c8a393"
+    },
+    "passed": 645,
+    "failed": 1,
+    "cause": "A pre-existing fixed expectation of 280 source geometry files was stale after catalogue expansion.",
+    "resolution": "Compare the exact set of shipped files to current compiled geometry URLs plus the retained provenance exclusion. Every per-vertex bounds comparison is preserved; no tolerance or coverage limit was weakened."
+  },
+  "integrationReview": {
+    "routes": 680,
+    "geometryRoutes": 614,
+    "sourceOnlyRoutes": 66,
+    "directions": 15,
+    "territories": 85,
+    "territoriesWithCards": 85,
+    "newNationalGeometries": 337,
+    "newEditorialCards": 37,
+    "newEditorialUnknownDistances": 7,
+    "newEditorialClosed": [
+      "voroninsky-forest-lines",
+      "alkhanai-ehe-goroo"
+    ],
+    "nativeWebIdTitleSourceMembershipAndStatusParity": true,
+    "all614NativeGeometryHashesMatch": true,
+    "all337NewPublishedGeometriesPreserveSourceCoordinates": true,
+    "newSourceOnlyCardsHaveNoInventedCoordinates": true,
+    "nationalRecordsRemainReferenceAndUnverified": true,
+    "editorialReviewTimezone": "Europe/Moscow"
+  },
+  "inputs": [
+    {
+      "path": "web/lib/content.ts",
+      "bytes": 20963,
+      "sha256": "3f542cb6ecdb24ebe1d37d731b66aed53927380008fcb303dc2391dbfa7f675d"
+    },
+    {
+      "path": "web/lib/catalog.generated.json",
+      "bytes": 985269,
+      "sha256": "3b88e91d72faaccd26c7cabe61156191100c2f6f20e7d92c43ad947d6654ae72"
+    },
+    {
+      "path": "web/lib/territories.generated.json",
+      "bytes": 396857,
+      "sha256": "b1207ae22641587ed6634c7b87a9b23c1630aedbb768f83db8d69faa3d52be23"
+    },
+    {
+      "path": "web/lib/national-editorial.generated.json",
+      "bytes": 81704,
+      "sha256": "21873890457f1952bc1dfa1124310e2fcd7b0f0209de46eb2867e4de66b9d45e"
+    },
+    {
+      "path": "web/lib/search.ts",
+      "bytes": 12698,
+      "sha256": "77127f65b112464b518fe46efef3c422bef4e0de4ad7e47ab64b2f3318170749"
+    },
+    {
+      "path": "web/lib/route-search.ts",
+      "bytes": 1212,
+      "sha256": "cab554ae92905e8b4c2e908a1b031015c673e2031274d6d007f116c258301ca3"
+    },
+    {
+      "path": "web/lib/site-search.ts",
+      "bytes": 6408,
+      "sha256": "5ccbd65ce2e58b81086a8e69d680553b015d27e4abe33bff00a32b39e65752fe"
+    },
+    {
+      "path": "web/lib/map-framing.ts",
+      "bytes": 5658,
+      "sha256": "97e5a37f7861e3e27dbe2e11e9daa3fedfb754ef4e187d4fe8fee2bf456aad47"
+    },
+    {
+      "path": "web/lib/map-lifecycle.ts",
+      "bytes": 8163,
+      "sha256": "5659b2c4891137aec620ad652a708010ae9df811056732961bea0d2f9a968536"
+    },
+    {
+      "path": "web/lib/trail-connections.generated.json",
+      "bytes": 2160892,
+      "sha256": "cb532475495d77a21409fd5395c045cebd0748886c6b5b79e3fd29ff774bc46a"
+    },
+    {
+      "path": "web/public/maps/map-label-coverage.js",
+      "bytes": 14451,
+      "sha256": "9805fad0edbaeb64d3131fd3df858349760e4ba09662861f599aebfdf08fb27c"
+    },
+    {
+      "path": "web/public/sw.js",
+      "bytes": 9434,
+      "sha256": "544e99cc4fa81e32ba659b639e5610042950c977089e8117ac0a016e1549e682"
+    },
+    {
+      "path": "web/tests/map-coverage-index.test.mjs",
+      "bytes": 6955,
+      "sha256": "204c4fa8348ecd7e1c3b2a803da5019d004256e358931c1c86f1343760516ea1"
+    }
+  ],
+  "limitations": [
+    "Local Node/unit/lint/type checks do not establish browser rendering, frame rate, release eligibility or physical-device behavior.",
+    "Actual coast label identity capture and rendered PNG review remain in full CI. No label deduplication was introduced.",
+    "Benchmark uses identical current documents for baseline and candidate; the separately marked 10x corpus repeats current vocabulary with unique IDs."
+  ]
+}

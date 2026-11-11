@@ -7,8 +7,7 @@ from pathlib import Path
 import unittest
 
 from asset_integrity import AssetError
-from russia_relief import (OVERVIEW_LAYER, OVERVIEW_SOURCE, add_overview_sources,
-                           add_overview_style, verify_overview)
+from russia_relief import add_overview_sources, verify_overview
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -27,20 +26,13 @@ class RussiaOverviewTests(unittest.TestCase):
     def read(self, relative):
         return (RELIEF / relative).read_bytes()
 
-    def style(self):
-        style = json.loads((ASSETS / "maps/style.json").read_text())
-        return add_overview_style(style, self.manifest_bytes)
-
     def test_real_package_is_complete_local_and_matches_the_native_mask(self):
-        report = verify_overview(self.manifest_bytes, self.read, style=self.style(),
+        report = verify_overview(self.manifest_bytes, self.read,
             actual_files=[str(path.relative_to(RELIEF)) for path in RELIEF.rglob("*") if path.is_file()],
             provenance_bytes=self.provenance_bytes)
         self.assertEqual(report["russiaOverviewTileCount"], 341)
         self.assertEqual(report["russiaOverviewTileBytesVerified"], 1689348)
         self.assertFalse(report["russiaOverviewIsElevationData"])
-        style = self.style()
-        self.assertEqual(add_overview_style(copy.deepcopy(style), self.manifest_bytes), style)
-
     def test_missing_corrupt_and_unlisted_assets_fail_instead_of_leaving_a_blank_edge(self):
         original = self.read(self.tile)
         with self.assertRaises(AssetError):
@@ -64,25 +56,14 @@ class RussiaOverviewTests(unittest.TestCase):
         with self.assertRaisesRegex(AssetError, "cover every XYZ"):
             verify_overview(json.dumps(manifest).encode(), self.read)
 
-    def test_remote_source_wrong_zoom_overlay_order_or_different_mask_is_rejected(self):
-        variants = []
-        style = self.style()
-        style["sources"][OVERVIEW_SOURCE]["tiles"] = ["https://tiles.example.invalid/{z}/{x}/{y}.png"]
-        variants.append(style)
-        style = self.style()
-        style["sources"][OVERVIEW_SOURCE]["maxzoom"] = 5
-        variants.append(style)
-        style = self.style()
-        layer = next(item for item in style["layers"] if item["id"] == OVERVIEW_LAYER)
-        style["layers"].remove(layer)
-        style["layers"].insert(len(style["layers"])-1, layer)
-        variants.append(style)
-        style = self.style()
-        style["layers"].insert(0, style["layers"].pop())
-        variants.append(style)
-        for style in variants:
-            with self.assertRaises(AssetError):
-                verify_overview(self.manifest_bytes, self.read, style=style, provenance_bytes=self.provenance_bytes)
+    def test_remote_tile_template_wrong_zoom_or_different_mask_is_rejected(self):
+        for mutation in [lambda value: value.update(tiles=["https://outside.invalid/{z}/{x}/{y}.png"]),
+                         lambda value: value.update(maxzoom=5)]:
+            tilejson = json.loads(self.read("tilejson.json")); mutation(tilejson)
+            with self.assertRaisesRegex(AssetError, "TileJSON"):
+                verify_overview(self.manifest_bytes,
+                    lambda path: json.dumps(tilejson).encode() if path == "tilejson.json" else self.read(path),
+                    provenance_bytes=self.provenance_bytes)
         with self.assertRaisesRegex(AssetError, "another RF display mask"):
             verify_overview(self.manifest_bytes, self.read, provenance_bytes=self.provenance_bytes + b"\n")
 
@@ -90,7 +71,7 @@ class RussiaOverviewTests(unittest.TestCase):
         previous = (ASSETS / "SOURCES.txt").read_bytes()
         updated = add_overview_sources(previous, self.manifest_bytes, self.read("ATTRIBUTION.txt"))
         self.assertEqual(add_overview_sources(updated, self.manifest_bytes, self.read("ATTRIBUTION.txt")), updated)
-        for required in ["MapLibre Native", "Copernicus", "Manrope", "Natural Earth SR_50M", "ODbL-1.0"]:
+        for required in ["Tropnik Canvas", "Copernicus", "Manrope", "Natural Earth SR_50M", "ODbL-1.0"]:
             self.assertIn(required, updated.decode("utf-8"))
 
 

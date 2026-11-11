@@ -28,8 +28,12 @@ export function browserTraceEnabled(value,diagnostic=null){
  * counter itself is still reset only by the existing audit phase boundaries. */
 export function recordBrowserLongTask(target,task){
  const perf=target.__tropnikPerf;
- perf.longest=Math.max(perf.longest,task.duration);
- if(!perf.peakLongTask||task.duration>perf.peakLongTask.duration)perf.peakLongTask=task;
+ // Delivery is asynchronous. Preserve a startup/previous-window task in the
+ // diagnostic ring without attributing it to a newly reset interaction.
+ if(task.startTime>=(target.__tropnikPerfStart??0)){
+  perf.longest=Math.max(perf.longest,task.duration);
+  if(!perf.peakLongTask||task.duration>perf.peakLongTask.duration)perf.peakLongTask=task;
+ }
  target.__tropnikLongTasks.push(task);
  if(target.__tropnikLongTasks.length>32)target.__tropnikLongTasks.shift();
 }
@@ -53,16 +57,30 @@ export async function traceDesktopSelection(cdp,action,{
  prefix='desktop-webgl-first-altai',scope='first-desktop-altai-selection',
  categories=DESKTOP_TRACE_CATEGORIES,
  captureCategoryEvidence=false,
+ beforeDrain=null,
  clock=()=>performance.now(),schedule=setTimeout,cancel=clearTimeout,
 }={}){
  if(!enabled)return{value:await action(),trace:null};
  const started=clock(),chunks=[];
  const receipt={schemaVersion:1,scope,sourceCommit,instrumented:true,startedAtEpochMs:Date.now(),limits:{...limits},categories:[...categories],status:'recording',stopReason:null,bytes:0,eof:false,dataLossOccurred:false,errors:[]};
- let completion,resolveCompletion,startRequested=false,stopPromise,timer,value,actionError;
+ let completion,resolveCompletion,resolveActionFinished,startRequested=false,stopPromise,timer,value,actionError,drainBoundary;
  const completed=new Promise(resolve=>{resolveCompletion=resolve;});
+ const actionFinished=new Promise(resolve=>{resolveActionFinished=resolve;});
  // The completion event is allowed to arrive before Tracing.end is acknowledged.
  const unobserve=cdp.observe('Tracing.tracingComplete',event=>{completion=event;resolveCompletion(event);});
  const errorText=error=>error?.stack||String(error);
+ const waitForDrain=()=>{
+  if(!beforeDrain)return Promise.resolve();
+  // A cap still stops recording immediately. Only stream I/O waits for an
+  // instrumented interaction window to close; action failure always unblocks
+  // cleanup even if its caller forgot to release the optional boundary.
+  return drainBoundary??=(async()=>{
+   const began=clock();
+   try{await Promise.race([Promise.resolve().then(beforeDrain),actionFinished]);}
+   catch(error){receipt.errors.push(errorText(error));await actionFinished;}
+   receipt.drainWaitMs=clock()-began;
+  })();
+ };
  const remaining=deadline=>{
   const time=Math.ceil(deadline-clock());if(time<=0)throw new Error('Trace drain time limit reached');return time;
  };
@@ -85,8 +103,10 @@ export async function traceDesktopSelection(cdp,action,{
     const event=await awaitCompletion(deadline);
     receipt.dataLossOccurred=!!event.dataLossOccurred;handle=event.stream;
     if(!handle)throw new Error('Tracing completed without its requested stream');
+    await waitForDrain();
+    const drainDeadline=beforeDrain?clock()+limits.drainMs:deadline;
     while(!receipt.eof&&receipt.bytes<limits.maxBytes){
-     const chunk=await cdp.call('IO.read',{handle,size:Math.min(limits.chunkBytes,limits.maxBytes-receipt.bytes)},remaining(deadline));
+     const chunk=await cdp.call('IO.read',{handle,size:Math.min(limits.chunkBytes,limits.maxBytes-receipt.bytes)},remaining(drainDeadline));
      const bytes=Buffer.from(chunk.data,chunk.base64Encoded?'base64':'utf8');
      const kept=bytes.subarray(0,limits.maxBytes-receipt.bytes);chunks.push(kept);receipt.bytes+=kept.length;
      receipt.eof=!!chunk.eof&&kept.length===bytes.length;
@@ -97,7 +117,7 @@ export async function traceDesktopSelection(cdp,action,{
    finally{
     // IO.close also discards unread backing storage after a size/time cap.
     handle??=completion?.stream;
-    if(handle)try{await cdp.call('IO.close',{handle},limits.closeMs);}catch(error){receipt.errors.push(errorText(error));}
+    if(handle)try{await waitForDrain();await cdp.call('IO.close',{handle},limits.closeMs);}catch(error){receipt.errors.push(errorText(error));}
    }
   })();
   return stopPromise;
@@ -111,7 +131,7 @@ export async function traceDesktopSelection(cdp,action,{
     traceConfig:{recordMode:'recordUntilFull',traceBufferSizeInKb:limits.bufferSizeKiB,enableSampling:true,includedCategories:categories,excludedCategories:['*']},
    },limits.drainMs);
   }catch(error){receipt.errors.push(errorText(error));}
-  try{value=await action();}catch(error){actionError=error;receipt.actionError=errorText(error);}
+  try{value=await action();}catch(error){actionError=error;receipt.actionError=errorText(error);}finally{resolveActionFinished();}
  }finally{
   await stop(actionError?'action-error':'action-complete');unobserve();
   if(timer!==undefined)cancel(timer);

@@ -1,5 +1,4 @@
 /* Map UI release pass: one control grid, protected edges and photo-led stories. */
-.atlas-wrap .leaflet-route-tooltip{width:max-content;max-width:230px;overflow-wrap:break-word}
 :root{
  --map-ui-edge:24px;
  --map-ui-top:24px;
@@ -24,8 +23,8 @@
 .explore-layout .map-controls button svg{display:block;margin:auto}
 .explore-layout .map-controls>span{width:30px;height:1px;margin:3px auto;flex:none}
 .explore-layout .atlas-wrap{--map-rail-height:235px}
-.explore-layout .atlas-wrap:has(.leaflet-container){--map-rail-height:191px}
-.explore-layout .atlas-wrap:has(.leaflet-container) .map-controls button[aria-label="Север сверху"]{display:none}
+/* Reserve one rail footprint before either renderer mounts. Layers stays put
+   when the 2D renderer omits the north-reset action. */
 .explore-layout .layer-control{right:var(--map-right)}
 .explore-layout .layer-button{min-height:var(--map-control-size);height:var(--map-control-size);padding:0 14px;justify-content:center;border-radius:12px;line-height:1}
 .explore-layout .layer-button svg{display:block;margin:0}
@@ -35,6 +34,7 @@
 .explore-layout .map-attribution:has(.map-satellite-credit){display:flex;align-items:flex-end;gap:8px;max-width:calc(100% - var(--map-left) - var(--map-right))}
 .map-satellite-credit{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:var(--caption-4);font-size:12px;line-height:16px;display:flex;flex-wrap:wrap;gap:0 4px;min-width:0;box-shadow:var(--shadow)}
 .map-satellite-detail{flex-basis:100%}
+.map-satellite-status[aria-hidden="true"]{visibility:hidden}
 .map-satellite-credit a{text-decoration:underline;text-underline-offset:2px}
 .explore-layout .map-style-switch button:active:not(:disabled),.explore-layout .map-controls button:active:not(:disabled),.explore-layout .layer-button:active:not(:disabled){transform:translateY(1px)}
 
@@ -98,7 +98,6 @@
  .explore-layout .map-context>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .explore-layout .map-message,.explore-layout:has(.explore-panel.collapsed) .map-message{top:calc(var(--map-top) + 60px);bottom:auto;left:var(--map-left);right:calc(var(--map-right) + 58px);width:auto;height:auto;max-width:none;align-items:flex-start}
  .explore-layout .map-message>svg{flex-shrink:0;margin-top:12px}.explore-layout .map-message>span{min-width:0;align-self:center}.explore-layout .map-message button{flex-shrink:0;min-height:44px;min-width:44px;align-self:center}
- .maplibregl-ctrl-bottom-left{left:var(--map-left)!important}
  .explore-layout .fact-card.fact-card--compact,.explore-layout:has(.explore-panel.collapsed) .fact-card.fact-card--compact{top:calc(var(--map-top) + 60px);left:var(--map-left);right:auto;bottom:auto;width:320px;grid-template-columns:80px minmax(0,1fr);border-radius:16px}
  .fact-card--compact .fact-photo{min-height:118px}.fact-card--compact .fact-card-inner{padding:10px 11px 8px}.fact-card--compact .fact-topline{height:27px;margin:-6px -6px -4px 0}
  .fact-card.fact-card--compact h3{font-size:14px;line-height:20px}.fact-card--compact .fact-card-footer{padding:2px 4px 2px 8px;gap:4px;min-height:48px}.fact-card--compact .fact-story-toggle{min-width:0;font-size:12px;line-height:16px;white-space:normal;gap:4px;min-height:44px}
@@ -121,7 +120,7 @@
  .explore-layout .map-context{min-height:48px}
  .explore-layout .map-style-switch{min-height:48px}
  .explore-layout .map-controls{top:calc(var(--map-top) + 60px)}
- .explore-layout .layer-control{top:auto;bottom:calc(var(--map-bottom-inset,0px) + 12px)}
+ .explore-layout .layer-control{top:auto;bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 12px)}
  /* Keep the scrollable story above the sheet or bottom control row. */
  .explore-layout .fact-card.fact-card--compact{
   top:calc(var(--map-top) + 60px);bottom:auto;
@@ -143,18 +142,10 @@
   transition:opacity .1s ease,visibility .1s ease!important;
 }
 .explore-layout [data-map-label-hidden='true'] :is(.region-marker-label,.trail-marker-label){opacity:0!important;visibility:hidden!important}
-.explore-layout .leaflet-route-tooltip{
-  max-width:min(230px,calc(100vw - 32px));
-  white-space:normal!important;
-  overflow-wrap:anywhere;
-  text-align:center;
-}
-.explore-layout .tropnik-relief-tiles .leaflet-tile{opacity:1!important;transition:none!important}
 @media(max-width:700px){
   .explore-layout .region-marker-label{max-width:var(--map-label-max-width,132px)!important;font-size:11px;line-height:1.3}
-  .explore-layout .leaflet-route-tooltip{display:none!important}
 }
-@media(hover:none),(pointer:coarse){.explore-layout .leaflet-route-tooltip{display:none!important}}
+@media(hover:none),(pointer:coarse){}
 
 
 /* Tropnik 0.4.8 interaction and rendering performance pass. */
@@ -251,8 +242,8 @@
   .explore-layout .map-message,
   .map-attribution-content,
   .map-attribution-toggle{
-    backdrop-filter:none!important;
     -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
     background:rgba(255,254,250,.985)!important;
   }
   .explore-layout .map-style-switch,
@@ -284,6 +275,13 @@
 
 /* Tropnik 0.4.8 collapsed sheet preview. */
 .sheet-peek-summary{display:none}
+/* The same copy hierarchy is used by portrait and the wider touch landscape
+   sheet. Keep it independent of the breakpoint that enables the container. */
+.sheet-peek-copy{display:flex;min-width:0;flex-direction:column;gap:2px}
+.sheet-peek-copy small{color:var(--muted);font:var(--caption-3);letter-spacing:.12em;text-transform:uppercase}
+.sheet-peek-copy strong{overflow:hidden;color:var(--forest-dark);font:var(--title-2);text-overflow:ellipsis;white-space:nowrap}
+.sheet-peek-copy>span{overflow:hidden;color:var(--muted);font:var(--caption-4);text-overflow:ellipsis;white-space:nowrap}
+.sheet-peek-summary>svg{justify-self:end;color:var(--forest)}
 @media(max-width:700px){
   .explore-layout .sheet-peek-summary{
     display:grid;
@@ -301,11 +299,6 @@
     contain:layout paint style;
   }
   .explore-layout .sheet-peek-summary[hidden]{display:none!important}
-  .sheet-peek-copy{display:flex;min-width:0;flex-direction:column;gap:2px}
-  .sheet-peek-copy small{color:var(--muted);font-size:9px;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
-  .sheet-peek-copy strong{overflow:hidden;color:var(--forest-dark);font-size:18px;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
-  .sheet-peek-copy>span{overflow:hidden;color:var(--muted);font-size:11px;line-height:1.45;text-overflow:ellipsis;white-space:nowrap}
-  .sheet-peek-summary>svg{justify-self:end;color:var(--forest)}
   .explore-layout.sheet-closed .explore-panel-content,
   .explore-layout.sheet-closed .panel-foot{
     visibility:hidden!important;
@@ -319,7 +312,7 @@
 }
 @media(max-width:360px){
   .explore-layout .sheet-peek-summary{padding-inline:18px 12px}
-  .sheet-peek-copy strong{font-size:16px}
+  .sheet-peek-copy strong{font:var(--title-3)}
 }
 
 /* Touch browsers may retain synthetic :hover after tap. */
@@ -389,7 +382,7 @@
     width:100%;
     height:68px;
     min-height:68px;
-    padding:5px 18px 8px 22px;
+    padding:2px 24px;
     gap:12px;
     background:var(--surface);
     color:var(--ink);
@@ -410,19 +403,31 @@
   .explore-layout .layer-menu,
   .explore-layout .map-message,
   .map-attribution-content,
-  .map-attribution-toggle{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .map-attribution-toggle{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 }
 
 /* Short viewports keep the control rail inside the area above the sheet. */
 @media(max-width:900px) and (max-height:620px) and (orientation:landscape){
- .explore-layout .map-controls{top:auto;bottom:calc(var(--map-bottom-inset,0px) + 12px);width:auto;flex-direction:row;padding:4px;gap:0}
+ /* Five 44px controls, 8px rail padding, 8px divider margins, its 1px
+    stroke and the two rail borders. Layers reserves the complete footprint. */
+ .explore-layout .atlas-wrap{--map-rail-width:calc(5 * var(--map-control-size) + 8px + 8px + 1px + 2px)}
+ .explore-layout .map-controls{top:auto;bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 12px);width:auto;flex-direction:row;padding:4px;gap:0}
  .explore-layout .map-controls>span{width:1px;height:24px;margin:0 4px}
  .explore-layout .map-controls button:disabled{display:none}
- .explore-layout .layer-control{right:calc(var(--map-right) + 208px);bottom:calc(var(--map-bottom-inset,0px) + 12px);top:auto}
+ .explore-layout .layer-control{right:calc(var(--map-right) + var(--map-rail-width) + var(--map-control-gap));bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 12px);top:auto}
  .explore-layout .layer-button{width:48px;padding:0;font-size:0;gap:0}
- .explore-layout .layer-menu{top:auto;right:0;bottom:60px;max-height:calc(100dvh - var(--header) - var(--map-bottom-inset,0px) - 96px);overflow:auto}
+ .explore-layout .layer-menu{top:auto;right:0;bottom:60px;max-height:calc(100dvh - var(--header) - var(--sheet-control-inset,var(--map-bottom-inset,0px)) - 96px);overflow:auto}
  .explore-layout .map-legend{display:none}
- .explore-layout .map-attribution{bottom:calc(var(--map-bottom-inset,0px) + 76px)}
+ .explore-layout .map-attribution{bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 76px)}
+ /* Text rows give the source card its actual longest-line width. The licence
+    panel fits beside it, inside the map area above the measured sheet. */
+ .explore-layout .map-satellite-credit,.explore-layout .map-satellite-detail{display:block}
+ .explore-layout .map-attribution-content{
+  top:auto;right:calc(100% + 8px);bottom:0;
+  max-width:min(370px,calc(100vw - var(--explore-panel-width,0px) - var(--map-right) - 100% - var(--map-left) - 8px));
+  max-height:calc(100dvh - var(--header) - var(--sheet-control-inset,var(--map-bottom-inset,0px)) - 76px - var(--map-top));
+  overflow:auto;overscroll-behavior:contain;
+ }
  .explore-layout .fact-closed{top:calc(var(--map-top) + 60px);bottom:auto;left:calc(var(--explore-panel-width) + var(--map-left))}
  .explore-layout .fact-card{max-height:calc(100% - var(--sheet-peek,0px) - var(--map-top) - 72px);overflow:auto}
 }

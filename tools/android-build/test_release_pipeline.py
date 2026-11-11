@@ -86,6 +86,23 @@ class ReleaseFixture(unittest.TestCase):
         (self.root / self.request["notesFile"]).parent.mkdir(parents=True)
         (self.root / self.request["notesFile"]).write_text("Browser planner; development preview.\n")
         self.json(self.root / release.REQUEST, self.request)
+        # These are receipt-boundary fixtures, not pretend APK/runtime content.
+        # Full generated assets are exercised by test_custom_map.py.
+        engine = self.root / "web/lib/custom-map-engine.ts"
+        engine.parent.mkdir(parents=True)
+        engine.write_text("fixture source for receipt equality\n")
+        inputs = [{"path": "web/lib/custom-map-engine.ts", "sizeBytes": engine.stat().st_size,
+                   "sha256": hashlib.sha256(engine.read_bytes()).hexdigest()}]
+        runtime_manifest = {"schemaVersion": 1, "runtime": "tropnik-canvas", "bridge": "exact-origin-web-message-port-v1",
+                            "sourceInputs": inputs,
+                            "sourceInputsSha256": hashlib.sha256((json.dumps(inputs, indent=2) + "\n").encode()).hexdigest(),
+                            "files": [{"path": name} for name in ("map-runtime.js", "android-bootstrap.js", "map.css", "index.html", "workers/custom-map-tiles.worker-fixture.js")],
+                            "resourceAliases": [{} for _ in range(500)]}
+        for name in ("web/public/custom-map/manifest.json", "android/app/src/main/assets/custom-map/manifest.json"):
+            target = self.root / name
+            target.parent.mkdir(parents=True)
+            self.json(target, runtime_manifest)
+        self.runtime = artifacts.expected_map_runtime(self.root)
         def git(*args):
             return subprocess.check_output(["git", *args], cwd=self.root, stderr=subprocess.DEVNULL, text=True).strip()
         self.git = git
@@ -119,6 +136,7 @@ class ReleaseFixture(unittest.TestCase):
                                         "zipAlignment16KVerified", "apkV2SignatureVerified")}})
             self.json(self.dist / (stem + ".verification.json"), {
                 "sha256": fp["sha256"], "sizeBytes": fp["bytes"],
+                **self.runtime,
                 "abis": ["arm64-v8a"] if name == artifacts.ARM64 else ["arm64-v8a", "armeabi-v7a", "x86_64"],
                 "russiaDisplayProvenanceSha256": "cd" * 32, "landscapeGridDimensions": [513, 513],
                 "russiaOverviewTileCount": 341, "russiaOverviewManifestSha256": "ef" * 32,
@@ -145,6 +163,30 @@ class ReleaseFixture(unittest.TestCase):
     def json(path, obj):
         path.write_text(json.dumps(obj, indent=2) + "\n")
 
+    def test_missing_forged_or_legacy_renderer_proof_fails_before_promotion(self):
+        report = self.dist / "tropnik-preview.verification.json"
+        original = json.loads(report.read_text())
+        for key, value in (("mapRenderer", "maplibre"), ("mapRendererManifestSha256", "00" * 32),
+                           ("mapRendererSourceInputsSha256", None), ("mapRendererNativeSdkRequired", True),
+                           ("mapRendererWorkersVerified", 0)):
+            with self.subTest(key=key):
+                self.json(report, {**original, key: value})
+                with self.assertRaisesRegex(ValueError, "shared renderer proof"):
+                    artifacts.inspect_payload(self.dist, self.root)
+        self.json(report, original)
+
+    def test_shared_runtime_cannot_claim_changed_or_divergent_source_inputs(self):
+        engine = self.root / "web/lib/custom-map-engine.ts"
+        original = engine.read_text()
+        engine.write_text(original + "uncommitted behavior\n")
+        with self.assertRaisesRegex(ValueError, "source input changed"):
+            artifacts.inspect_payload(self.dist, self.root)
+        engine.write_text(original)
+        web = self.root / "web/public/custom-map/manifest.json"
+        web.write_text(web.read_text() + "\n")
+        with self.assertRaisesRegex(ValueError, "manifests differ"):
+            artifacts.inspect_payload(self.dist, self.root)
+
     def test_artifact_change_foreign_run_or_source_version_fail(self):
         original = (self.dist / artifacts.UNIVERSAL).read_bytes()
         (self.dist / artifacts.UNIVERSAL).write_bytes(original + b"tamper")
@@ -162,6 +204,16 @@ class ReleaseFixture(unittest.TestCase):
         path.write_text(path.read_text().replace("ab" * 32, "cd" * 32))
         with self.assertRaises(ValueError):
             artifacts.build_receipt(self.dist, self.root)
+
+    def test_dirty_source_without_a_version_change_cannot_create_or_reuse_a_ci_receipt(self):
+        receipt = (self.dist / artifacts.RECEIPT).read_bytes()
+        source = self.root / "android/app/build.gradle.kts"
+        source.write_text(source.read_text() + "// Uncommitted change after checkout\n")
+        with self.assertRaisesRegex(ValueError, "inputs differ"):
+            artifacts.build_receipt(self.dist, self.root)
+        self.assertEqual((self.dist / artifacts.RECEIPT).read_bytes(), receipt)
+        with self.assertRaisesRegex(ValueError, "inputs differ"):
+            artifacts.verify_receipt(self.dist, self.root)
 
     def test_missing_or_legacy_graphics_driver_cannot_be_device_verified(self):
         path = self.device / "graphics-driver.txt"

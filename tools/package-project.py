@@ -73,7 +73,8 @@ REQUIRED = (
     "contracts/openapi.yaml", "contracts/api.ts",
     "android/gradlew", "android/gradle/wrapper/gradle-wrapper.jar",
     "android/app/src/main/AndroidManifest.xml",
-    "android/app/src/main/assets/licenses/MapLibre-Native-LICENSE.md",
+    "android/app/src/main/assets/custom-map/manifest.json",
+    "android/app/src/main/assets/custom-map/map-runtime.js",
     "data/catalog/DATA_LICENSE.txt", "data/pilot-map/manifest.json",
     "data/boundaries/ATTRIBUTION.txt", "data/boundaries/manifest.json",
     "data/boundaries/raw/geoBoundaries-RUS-ADM1.geojson",
@@ -85,8 +86,7 @@ REQUIRED = (
     "web/public/terrain/terrain-renderer.js",
     "data/terrain-pilot/runtime/ATTRIBUTION.txt",
     "data/terrain-pilot/runtime/sources/Copernicus-GLO30-LICENSE.pdf",
-    "web/public/offline-map/licenses/Noto-Sans-OFL-1.1.txt",
-    "web/public/maps/LEAFLET-LICENSE.txt", "web/public/maps/PROTOMAPS-LEAFLET-LICENSE.txt",
+    "web/public/custom-map/manifest.json", "web/public/custom-map/map-runtime.js",
     "web/public/fonts/MANROPE-LICENSE.txt",
     ".github/workflows/android.yml",
 )
@@ -134,6 +134,8 @@ def excluded(path: str, profile: str) -> str | None:
         return "rebuildable_boundary_processing_cache"
     if under(path, "tools/github-publish/generated") or under(path, "tools/db-compat/.work"):
         return "rebuildable_verification_transport"
+    if under(path, "data/catalog/national/raw"):
+        return "separate_hash_pinned_national_source_archive"
     if p.name in SKIP_NAMES or path == "web/package-lock.json":
         return "local_config_or_stale_lock"
     if (p.name.startswith(".env") and not p.name.endswith(".example")) or p.name.startswith(".dev.vars"):

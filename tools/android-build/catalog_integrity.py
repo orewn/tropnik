@@ -7,12 +7,6 @@ import re
 from urllib.parse import urlsplit
 from asset_integrity import AssetError, digest, require, safe_relative
 
-ONLINE_SOURCES = {
-    "online-openmaptiles": {"type": "vector", "url": "https://tiles.openfreemap.org/planet/latest"},
-    "online-dem": {"type": "raster-dem", "tiles": ["https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"]},
-}
-
-
 def _vertices(geometry):
     require(isinstance(geometry, dict), "Catalogue geometry is missing")
     kind = geometry.get("type")
@@ -75,13 +69,17 @@ def verify_catalog(manifest_bytes: bytes, read, *, actual_geometry=None, source_
     catalog = json.loads(catalog_bytes)
     require(catalog.get("schemaVersion") == 1, "Unsupported catalogue schema")
     regions = catalog.get("regions", [])
-    require(isinstance(regions, list) and 1 <= len(regions) <= 200, "Invalid curated region count")
+    require(isinstance(regions, list) and 1 <= len(regions) <= 200, "Invalid catalogue region count")
     region_ids = [region.get("id") for region in regions]
-    require(all(isinstance(value, str) and re.fullmatch(r"[a-z0-9-]{1,64}", value) for value in region_ids)
+    require(all(isinstance(value, str) and re.fullmatch(r"(?:[a-z0-9-]{1,64}|territory-[A-Za-z0-9]{1,54})", value) for value in region_ids)
             and len(set(region_ids)) == len(region_ids), "Duplicate or invalid curated region")
     region_set = set(region_ids)
     require(manifest.get("regionIds") == region_ids, "Native/web curated region parity differs")
+    territory_ids = {value for value in region_ids if value.startswith("territory-")}
     for region in regions:
+        require(type(region.get("territory", False)) is bool
+                and region.get("territory", False) == (region["id"] in territory_ids),
+                "Catalogue territory classification differs from its identity")
         require(all(isinstance(region.get(key), (int, float)) and not isinstance(region[key], bool) and math.isfinite(region[key])
                     for key in ("latitude", "longitude", "zoom"))
                 and -90 <= region["latitude"] <= 90 and -180 <= region["longitude"] <= 180 and 0 <= region["zoom"] <= 22,
@@ -174,46 +172,14 @@ def verify_catalog(manifest_bytes: bytes, read, *, actual_geometry=None, source_
     require({"tools/android-build/prepare-catalog.mjs", "tools/android-build/fixtures/learning-route.json", "web/lib/content.ts",
              "web/lib/catalog.generated.json", "web/lib/route-points.generated.json", "web/public/data/russia-boundaries-provenance.json"} <= input_paths,
             "Catalogue omits a required source input")
+    if territory_ids:
+        require({"tools/android-build/catalog-regions.mjs", "web/lib/territories.generated.json"} <= input_paths,
+                "Territory catalogue omits its membership source inputs")
     return {"catalogManifestSha256": digest(manifest_bytes), "catalogSha256": digest(catalog_bytes),
             "catalogRegionCount": len(regions), "catalogReferenceRouteCount": len(references),
+            "catalogTourismDirectionCount": len(regions) - len(territory_ids), "catalogTerritoryCount": len(territory_ids),
             "catalogLearningRouteCount": len(learning), "catalogGeometryFilesVerified": len(records),
             "catalogReferenceOnlyRouteCount": len(reference_only),
             "catalogGeometryBytesVerified": size, "catalogGeometryVerticesVerified": vertices,
             "catalogRegionMembership": membership, "catalogFieldVerifiedCount": 0, "catalogNavigationReadyCount": 0,
             "catalogSourceByteParityVerified": source_read is not None}
-
-
-def verify_map_resources(style: dict) -> dict:
-    """Permit exactly two explicit online sources; all offline resources stay local."""
-    for key in ("glyphs", "sprite"):
-        require(not style.get(key) or style[key].startswith("asset://"), "Native fonts/sprites are not local")
-    sources = style.get("sources", {})
-    require({key for key in sources if key.startswith("online-")} == ONLINE_SOURCES.keys(), "Unexpected online source set")
-    remote_urls = []
-    for source_id, source in sources.items():
-        urls = [source[field] for field in ("url", "data") if isinstance(source.get(field), str)] + source.get("tiles", [])
-        if source_id in ONLINE_SOURCES:
-            expected = ONLINE_SOURCES[source_id]
-            require(all(source.get(key) == value for key, value in expected.items()), "Online map endpoint differs from its allowlist")
-            allowed = ([expected["url"]] if "url" in expected else []) + expected.get("tiles", [])
-            require(urls == allowed, "Unexpected online map resource")
-            remote_urls += urls
-        else:
-            require(all(url.startswith("asset://") for url in urls), "Unexpected remote resource in a local map source")
-    dem = sources["online-dem"]
-    require(dem.get("encoding") == "terrarium" and dem.get("tileSize") == 512 and dem.get("maxzoom") == 12,
-            "Online elevation encoding or resolution differs")
-    layers = style.get("layers", [])
-    online = [(i, layer) for i, layer in enumerate(layers) if layer.get("id", "").startswith("online-")]
-    require(bool(online) and layers[-1]["id"] == "russia-outside-mask", "Online map lacks the final RF mask")
-    pilot_start = min(i for i, layer in enumerate(layers) if layer.get("source") in {"openmaptiles", "pilot-dem"})
-    for index, layer in enumerate(layers):
-        if layer.get("source") in ONLINE_SOURCES:
-            require(layer.get("id", "").startswith("online-") and layer.get("minzoom", 0) >= 5
-                    and index < pilot_start, "Online map overlays local pilot data or leaks into overview")
-    hillshade = [layer for _, layer in online if layer.get("id") == "online-hillshade"]
-    require(len(hillshade) == 1 and hillshade[0].get("source") == "online-dem"
-            and hillshade[0].get("paint", {}).get("hillshade-illumination-anchor") == "viewport", "Online hillshade is not camera anchored")
-    return {"localOnlyMapResources": False, "bundledOfflineMapAvailable": True,
-            "onlineMapSourcesExplicitlyAllowlisted": True, "onlineMapSourceUrls": remote_urls,
-            "onlineMapLayerCount": len(online), "onlineMapMinZoom": 5, "russiaMaskAboveOnlineMap": True}

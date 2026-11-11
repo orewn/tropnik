@@ -1,4 +1,3 @@
-import type {StyleSpecification} from 'maplibre-gl';
 
 /** The 2016 vintage is the provider's CC BY 4.0 public, commercial-use layer.
  * Newer annual mosaics require a separate licence and must not be substituted.
@@ -34,25 +33,4 @@ export function satelliteSourceForBounds({west,south,east,north}:SatelliteBounds
   if(east-west>=360)return 'eox-bluemarble';
   const copy=Math.ceil((west-problemEast)/360);
   return problemWest+copy*360<=east?'eox-bluemarble':'eox-s2';
-}
-
-/** Replace only the ground drawing. Keep the Russia mask, geographic anchors,
- * paths, roads, labels and selected route above the real satellite imagery. */
-export function satelliteStyle(base: StyleSpecification): StyleSpecification {
-  const next = structuredClone(base);
-  next.name = 'Тропник · спутниковая карта';
-  for(const provider of Object.values(SATELLITE_PROVIDERS))next.sources[provider.source] = {type:'raster',tiles:[provider.tiles],tileSize:256,
-    minzoom:0,maxzoom:provider.maxzoom,attribution:provider.attribution};
-  const retainedFill = new Set(['land', 'overview-land', 'region-fill', 'region-selected', 'russia-outside-mask']);
-  next.layers = next.layers.filter(layer =>
-    layer.type !== 'raster' && layer.type !== 'hillshade' &&
-    (layer.type !== 'fill' || retainedFill.has(layer.id)));
-  const ground = next.layers.findIndex(layer => layer.id === 'land' || layer.id === 'overview-land');
-  // Hidden sources do not request tiles. The session reveals only the current
-  // source, plus a transparent replacement while it loads behind that source.
-  next.layers.splice(ground + 1, 0, ...Object.values(SATELLITE_PROVIDERS).map(provider=>({
-    id:provider.source,type:'raster' as const,source:provider.source,layout:{visibility:'none' as const},
-    paint:{'raster-fade-duration':0,'raster-resampling':'linear' as const,'raster-opacity':0,'raster-opacity-transition':{duration:0}},
-  })));
-  return next;
 }

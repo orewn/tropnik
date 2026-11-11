@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 /** Serialized into the existing page. Observers only read DOM geometry; they do
  * not resize the map, request a frame, warm a context or delay native actions. */
 export function observeRequestMapLayout(){
- const container=document.querySelector('.atlas-canvas'),canvas=document.querySelector('.maplibregl-canvas');
- if(!container||!canvas)throw new Error('Request layout audit requires the existing WebGL map');
+ const container=document.querySelector('.atlas-canvas'),canvas=document.querySelector('.tropnik-map-canvas');
+ if(!container||!canvas)throw new Error('Request layout audit requires the existing custom map');
  const limit=32,samples=[],errors=[];let overflow=false,active=true,previous=null;
  const rect=element=>{const r=element.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height};};
- const frame=()=>({time:performance.now(),viewport:{width:window.innerWidth,height:window.innerHeight,dpr:window.devicePixelRatio},rootClientWidth:document.documentElement.clientWidth,container:rect(container),canvas:rect(canvas),backing:{width:canvas.width,height:canvas.height},connected:container.isConnected&&canvas.isConnected&&document.querySelector('.atlas-canvas')===container&&document.querySelector('.maplibregl-canvas')===canvas});
+ const frame=()=>({time:performance.now(),viewport:{width:window.innerWidth,height:window.innerHeight,dpr:window.devicePixelRatio},rootClientWidth:document.documentElement.clientWidth,container:rect(container),canvas:rect(canvas),backing:{width:canvas.width,height:canvas.height},connected:container.isConnected&&canvas.isConnected&&document.querySelector('.atlas-canvas')===container&&document.querySelector('.tropnik-map-canvas')===canvas});
  const record=(reason,mutations=[],force=false)=>{
   if(!active)return;
   try{

@@ -8,16 +8,16 @@ const source=await readFile(new URL('sw.js',publicRoot),'utf8');
 const manifest=JSON.parse(await readFile(new URL('maps/russia-relief/manifest.json',publicRoot),'utf8'));
 async function run(corrupt=false){
  const calls=[],saved=new Map(),listeners={};
- const cache={addAll:async paths=>{for(const path of paths)saved.set(path,'shell');},match:async path=>saved.get(path),put:async(path,response)=>saved.set(path,new Uint8Array(await response.arrayBuffer()))};
+ const cache={addAll:async paths=>{for(const path of paths)saved.set(path,'shell');},match:async path=>saved.has(path)?new Response(saved.get(path)):undefined,put:async(path,response)=>saved.set(path,new Uint8Array(await response.arrayBuffer()))};
  const context=vm.createContext({self:{addEventListener:(name,callback)=>listeners[name]=callback},caches:{open:async()=>cache},crypto:webcrypto,Response,Uint8Array,Set,Map,Promise,Array,Number,Error,fetch:async path=>{
-  calls.push(path);assert.ok(path.startsWith('/maps/russia-relief/'));
+  calls.push(path);assert.ok(path.startsWith('/maps/russia-relief/')||path.startsWith('/custom-map/'));
   const bytes=await readFile(new URL(path.slice(1),publicRoot));
-  return new Response(corrupt&&path.endsWith('0/0/0.png')?new Uint8Array([0]):bytes);
+  const response=new Response(corrupt&&path.endsWith('0/0/0.png')?new Uint8Array([0]):bytes);Object.defineProperty(response,'type',{value:'basic'});return response;
  }});
  vm.runInContext(source,context);
  let installation;listeners.install({waitUntil:promise=>installation=promise});
  await installation;
- const installCalls=calls.length;
+ const installCalls=calls.filter(path=>path.startsWith('/maps/russia-relief/')).length;
  let warming;listeners.message({data:{type:'warm-map',engine:'canvas'},waitUntil:promise=>warming=promise});
  await warming;
  return{calls,saved,installCalls};
@@ -31,7 +31,9 @@ test('idle map warm saves all 341 actual RF overview tiles using 57 verified til
  assert.equal(calls.filter(path=>path.endsWith('.png')).length,57);
  for(const file of manifest.files)assert.equal(saved.get('/maps/russia-relief/'+file.path)?.byteLength,file.bytes,file.path);
  assert.ok(!calls.some(path=>path.includes('/api/')));
- for(const dependency of ['canvas-style.js','canvas-label-coverage.js','map-label-coverage.js','map-label-geometry.js','map-city-labels.js','tropnik-pictograms.js'])assert.ok(saved.has('/maps/'+dependency),`offline renderer dependency ${dependency} is cached`);
+ for(const dependency of ['map-runtime.js','map.css','manifest.json'])assert.ok(saved.has('/custom-map/'+dependency),`shared renderer dependency ${dependency} is cached`);
+ assert.ok([...saved.keys()].some(path=>path.startsWith('/custom-map/workers/custom-map-tiles.worker-')));
+ assert.ok(![...saved.keys()].some(path=>/(?:maplibre|leaflet|protomaps)/i.test(path)),'no vendor runtime is precached');
 });
 test('corrupt overview bytes reject warmup instead of claiming a complete offline map',async()=>{
  await assert.rejects(run(true),/integrity mismatch/);

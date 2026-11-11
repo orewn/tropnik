@@ -1,7 +1,9 @@
-import {trails,regions,type Trail} from './content';
+import {trails,regions} from './content';
 import {placeFacts} from './facts';
 import {createSearchIndex,type SearchDocument,type SearchOptions} from './search';
 export type {SearchHit,SearchKind,SearchOptions,SearchResponse} from './search';
+import {trailSearchDocument} from './route-search';
+export {createRouteSearch} from './route-search';
 const places=new Map(regions.map(region=>[region.id,region.name]));
 const pages:SearchDocument[]=[
   {id:'map',kind:'page',title:'Карта маршрутов России',description:'Направления, тропы и места для походов на общей карте.',keywords:'карта россия регионы направления рельеф',href:'/'},
@@ -20,16 +22,6 @@ const pages:SearchDocument[]=[
   {id:'privacy',kind:'page',title:'Конфиденциальность',description:'Как хранятся сведения профиля, сохранённые маршруты и история походов.',keywords:'данные личные конфиденциальность удалить профиль',href:'/privacy'},
   {id:'terms',kind:'page',title:'Как пользоваться Тропником',description:'Правила сервиса, участие в походах и ответственность за подготовку.',keywords:'правила условия пользование ответственность',href:'/terms'},
 ];
-function trailSearchDocument(trail:Trail):SearchDocument {
-  return {id:trail.id,kind:'route',title:trail.title,description:trail.description,href:`/routes/${trail.id}`,regionName:places.get(trail.regionId),regionId:trail.regionId,distanceKm:trail.distanceKm,duration:trail.duration,accessStatus:trail.accessStatus,missingGeometry:!trail.geometryUrl&&!trail.geometry,keywords:[trail.subtitle,trail.sourceTitle||'',trail.id,...(trail.regionIds||[]).map(id=>places.get(id)||''),trail.sourceName].join(' '),body:[trail.season,...trail.notes,trail.operatingNotice?.body||'',trail.officialEvidence?.summary||''].join(' ')};
-}
-
-/** Build once per catalogue revision so live routes and their updated fields
- * are searched by the same index rules as the reference catalogue. */
-export function createRouteSearch(catalog:readonly Trail[]) {
-  return createSearchIndex(catalog.map(trailSearchDocument));
-}
-
 export const searchDocuments:SearchDocument[]=[
   ...trails.map(trailSearchDocument),
   ...regions.map(region=>({id:region.id,kind:'region' as const,title:region.name,description:region.description,keywords:`${region.caption} ${region.terrain}`,href:`/regions/${region.id}`})),

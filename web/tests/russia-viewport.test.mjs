@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {
   RUSSIA_BOUNDS, RUSSIA_AREA_URL, RUSSIA_MASK_URL,
   russiaLongitude, russiaPadding, russiaCamera, constrainRussiaCamera,
-  displayGeoJSON, inRussiaCoverage, leafletRussiaMask,
+  displayGeoJSON, inRussiaCoverage,
 } from '../public/maps/russia-viewport.js';
 
 const read = relative => readFileSync(new URL(relative, import.meta.url));
@@ -18,7 +18,6 @@ const geographicalChecks = json('./fixtures/russia-checks.json');
 const routeCoverage = json('./fixtures/russia-route-coverage.json');
 const fixtures = geographicalChecks.pointCases;
 const areaFromCanonical = displayGeoJSON(canonicalArea);
-const repeatedMask = leafletRussiaMask(mask);
 
 const close = (actual, expected, tolerance = 1e-8, message = '') =>
   assert.ok(Math.abs(actual - expected) <= tolerance,
@@ -63,8 +62,6 @@ for (const fixture of fixtures) {
     assert.equal(inRussiaCoverage(lng, lat, areaFromCanonical), fixture.expectedInside,
       'the canonical area remains equivalent when prepared for display');
     assert.equal(inRussiaCoverage(lng, lat, mask), !fixture.expectedInside, 'inverse mask');
-    assert.equal(inRussiaCoverage(lng, lat, repeatedMask), !fixture.expectedInside,
-      'Leaflet world copies must preserve the same transparent interior');
   });
 }
 
@@ -81,10 +78,12 @@ test('Chukotka uses one continuous longitude interval and survives wrapped camer
     }
   }
   // Nearest 105° is deliberately not a general 0…360 normalizer. It is valid
-  // for this selected 19…191° scope; adjacent Leaflet masks cover western water.
+  // for this selected 19…191° scope; the outside mask covers western water.
   close(russiaLongitude(-20), -20);
   assert.equal(inRussiaCoverage(-20, 50, area), false);
-  assert.equal(inRussiaCoverage(-20, 50, repeatedMask), true, 'Atlantic outside the selected scope is masked');
+  // The source inverse mask is stored in its declared world interval. The own
+  // canvas renderer builds a viewport-wide complement from the covered area;
+  // it does not repeat or consume an SDK mask adapter.
   for (const [lng] of actualPositions) {
     assert.ok(lng >= 0 && lng <= 360, 'the display asset has its declared longitude convention');
     close(russiaLongitude(lng), lng, 1e-8, 'all actual selected longitudes are stable around 105°');

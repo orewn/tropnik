@@ -11,4 +11,3 @@ export function coverageLevel(zoom:number):CoverageLevel;
 export function coverageCells(manifest:CoverageManifest,bounds:number[],zoom:number):CoverageCell[];
 export function createMapCoverage(manifest:CoverageManifest,base:GeoJSON.FeatureCollection,options?:{canonicalMask?:boolean;fetch?:typeof fetch}):MapCoverage;
 export function loadMapCoverage(options?:{canonicalMask?:boolean;manifestURL?:string;fetch?:typeof fetch}):Promise<MapCoverage>;
-export function bindMapCoverage(map:{getBounds():{getWest():number;getSouth():number;getEast():number;getNorth():number};getZoom():number;on(type:string,callback:()=>void):unknown;off(type:string,callback:()=>void):unknown},coverage:MapCoverage,element:HTMLElement,apply:(coverage:MapCoverage)=>void|Promise<void>):()=>void;

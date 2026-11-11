@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {createRequire} from 'node:module';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('home page uses the unified editorial service component',async()=>{
@@ -22,12 +23,28 @@ test('home page uses the unified editorial service component',async()=>{
 test('header has one calm desktop navigation surface and a bounded mobile menu',async()=>{
   const css=await read('components/Header.module.css');
   assert.match(css,/position:sticky!important/);
-  assert.match(css,/backdrop-filter:blur\(18px\)/);
+  assert.match(css,/background:var\(--surface\)!important/);
+  assert.match(css,/-webkit-backdrop-filter:none;backdrop-filter:none/);
+  assert.doesNotMatch(css,/backdrop-filter:blur\(/);
   assert.match(css,/top-nav a\.active\).*background:#fffef9/);
   assert.match(css,/height:calc\(100dvh - 68px\)/);
   assert.match(css,/safe-area-inset-bottom/);
   assert.match(css,/forced-colors:active/);
   assert.doesNotMatch(css,/animation:[^;]*infinite/);
+});
+
+test('production CSS minification retains standard backdrop cancellation for Chromium',async()=>{
+  const require=createRequire(import.meta.url),viteRequire=createRequire(require.resolve('vite'));
+  const {transform}=viteRequire('lightningcss');
+  for(const path of ['app/custom-map.css','app/final-polish.css','app/map-ui-release.css','components/Header.module.css','components/HomeEditorial.module.css']){
+    const source=await read(path);
+    for(const targets of [{chrome:107<<16},{chrome:107<<16,safari:17<<16}]){
+      const compiled=transform({filename:path,code:Buffer.from(source),minify:true,targets}).code.toString();
+      const cancellations=[...compiled.matchAll(/\{([^{}]*\bbackdrop-filter:none[^{}]*)\}/g)];
+      assert.ok(cancellations.length>0,`${path}: minification removed backdrop cancellation`);
+      for(const [,declarations]of cancellations)assert.match(declarations,/(?:^|;)backdrop-filter:none(?:!important)?(?:;|$)/,`${path}: only the legacy prefix survived; Chromium would retain the backdrop filter`);
+    }
+  }
 });
 
 test('footer groups product, preparation and legal routes without external dependencies',async()=>{

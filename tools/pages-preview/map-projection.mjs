@@ -27,6 +27,25 @@ export function unprojectMapPoint({x,y},camera,rect){
  return[longitude,Math.atan(Math.sinh(Math.PI*(1-2*mercator)))*180/Math.PI];
 }
 
+/** Independent inverse of the rendered CSS viewport. Retain continuous
+ * longitude and all four corners for a rotated, pitched, partly covered map. */
+export function visibleMapBounds(camera,rect,padding,pitch=0){
+ validate(camera,rect);
+ const bearing=camera.bearingDegrees??0;
+ if(!Number.isFinite(bearing)||!Number.isFinite(pitch)||pitch<0||pitch>60||Math.abs(camera.latitude)>=90)throw new Error('Visible map angles are invalid');
+ for(const key of ['left','right','top','bottom'])if(!Number.isFinite(padding?.[key])||padding[key]<0)throw new Error('Visible map padding is invalid');
+ if(padding.left+padding.right>=rect.width||padding.top+padding.bottom>=rect.height)throw new Error('Visible map padding leaves no ground');
+ const world=camera.tileSize*2**camera.zoom,angle=bearing*Math.PI/180,cos=Math.cos(angle),sin=Math.sin(angle),pitchScale=Math.cos(pitch*Math.PI/180);
+ const middleY=(1-Math.asinh(Math.tan(camera.latitude*Math.PI/180))/Math.PI)/2;
+ const points=[];
+ for(const x of [padding.left,rect.width-padding.right])for(const y of [padding.top,rect.height-padding.bottom]){
+  const dx=x-rect.width/2,dy=(y-rect.height/2)/pitchScale;
+  const longitude=camera.longitude+(cos*dx-sin*dy)/world*360,mercator=middleY+(sin*dx+cos*dy)/world;
+  points.push([longitude,Math.atan(Math.sinh(Math.PI*(1-2*mercator)))*180/Math.PI]);
+ }
+ return[Math.min(...points.map(point=>point[0])),Math.min(...points.map(point=>point[1])),Math.max(...points.map(point=>point[0])),Math.max(...points.map(point=>point[1]))];
+}
+
 function inRing([x,y],ring){
  let inside=false;
  for(let i=0,j=ring.length-1;i<ring.length;j=i++){

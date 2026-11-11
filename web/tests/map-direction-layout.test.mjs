@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {dirname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,directionAnchorCorrection,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,mapLabelAvoidObstacles,updateDirectionButtons} from '../lib/map-direction-layout.ts';
+import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,directionAnchorCorrection,directionCountShift,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,mapLabelAvoidObstacles,updateDirectionButtons,bindMapLabelReflow} from '../lib/map-direction-layout.ts';
 import {russiaCamera,russiaPadding,russiaLongitude} from '../public/maps/russia-viewport.js';
 
 // Use the actual fifteen directions, not a separately maintained coordinate
@@ -146,4 +146,82 @@ test('DOM anchor correction is idempotent across repeated camera frames',()=>{
   assert.deepEqual(first,{x:18,y:48});
   const moved={left:118,right:162,top:248,bottom:292};
   assert.deepEqual(directionAnchorCorrection(moved,{x:130,y:250},viewport,first),first);
+});
+
+test('the Baikal count clears the narrow-phone controls without moving its flag',()=>{
+  // The actual failed CI horizontal geometry: the badge extends beyond the
+  // 44px anchor and is partly covered by the adjacent fixed map toolbar.
+  const marker={left:310,right:354,top:160,bottom:204};
+  const count={left:340,right:364.890625,top:168,bottom:188};
+  const toolbar={left:350,right:394,top:100,bottom:360};
+  const safe={left:12,right:400,top:12,bottom:500};
+  const anchor={...marker};
+  const shift=directionCountShift(count,marker,safe,[toolbar]);
+  assert.equal(shift.hidden,false);
+  const actual={left:count.left+shift.x,right:count.right+shift.x,top:count.top+shift.y,bottom:count.bottom+shift.y};
+  assert.ok(actual.right<=toolbar.left-8,'every painted part clears the toolbar');
+  assert.ok(actual.left<marker.left,'the external badge remains an independently reachable part of the same button');
+  assert.ok(Math.abs(shift.x)<=44&&Math.abs(shift.y)<=44,'the badge stays beside its own flag');
+  assert.deepEqual(marker,anchor,'a UI collision never changes the geographic anchor');
+  assert.deepEqual(directionCountShift(count,marker,safe,[toolbar]),shift,'repeated settled layout does not accumulate an offset');
+  assert.deepEqual(directionCountShift(count,marker,safe,[]),{x:0,y:0,hidden:false},'removing the obstacle restores the normal side');
+});
+
+test('count placement uses another adjacent side at viewport edges and avoids other controls',()=>{
+  const safe={left:12,right:378,top:12,bottom:500};
+  const marker={left:334,right:378,top:160,bottom:204};
+  const count={left:364,right:388,top:168,bottom:188};
+  const leftButton={left:296,right:340,top:152,bottom:212};
+  const shift=directionCountShift(count,marker,safe,[leftButton]);
+  assert.equal(shift.hidden,false);
+  const actual={left:count.left+shift.x,right:count.right+shift.x,top:count.top+shift.y,bottom:count.bottom+shift.y};
+  assert.ok(actual.left>=safe.left&&actual.right<=safe.right&&actual.top>=safe.top&&actual.bottom<=safe.bottom);
+  assert.ok(actual.bottom<=marker.top||actual.top>=marker.bottom,'occupied horizontal sides use a position directly above or below the same flag');
+  const label={left:300,right:390,top:204,bottom:240};
+  const placement=mapLabelAvoidObstacles(label,safe,[leftButton,actual]);
+  assert.equal(placement.hidden,false,'the flexible label can still find room after reserving the badge');
+});
+
+test('a completely covered count hides its decorative copy instead of drifting onto another region',()=>{
+  const safe={left:12,right:378,top:12,bottom:500};
+  const marker={left:100,right:144,top:160,bottom:204},count={left:130,right:154,top:168,bottom:188};
+  assert.deepEqual(directionCountShift(count,marker,safe,[{left:60,right:190,top:100,bottom:260}]),{x:0,y:0,hidden:true});
+});
+
+test('catalogue count changes reflow once while marker transforms and layout writes stay silent',async t=>{
+  const previous=new Map(['Element','document','window','ResizeObserver','MutationObserver','requestAnimationFrame','cancelAnimationFrame'].map(key=>[key,globalThis[key]]));
+  let mutationCallback,scheduled=0,nextFrame=0;
+  const frames=new Map();
+  class Element {
+    dataset={};
+    children=[];
+    constructor(classes,parent){this.classes=new Set(classes.split(' '));this.parentElement=parent;parent?.children.push(this);}
+    matches(selector){return selector.split(',').some(part=>this.classes.has(part.trim().slice(1)));}
+    closest(selector){return this.matches(selector)?this:this.parentElement?.closest(selector)??null;}
+    querySelectorAll(selector){return this.children.flatMap(child=>[...(child.matches(selector)?[child]:[]),...child.querySelectorAll(selector)]);}
+    querySelector(selector){return this.querySelectorAll(selector)[0]??null;}
+    addEventListener(){}
+    removeEventListener(){}
+  }
+  const root=new Element('explore-layout'),viewport=new Element('atlas-canvas',root),layer=new Element('tropnik-marker-layer',viewport),button=new Element('region-marker',layer),count=new Element('region-marker-count',button);
+  Object.assign(globalThis,{
+    Element,document:{fonts:{ready:Promise.resolve(),addEventListener(){},removeEventListener(){}}},window:{addEventListener(){},removeEventListener(){}},
+    ResizeObserver:class{observe(){}unobserve(){}disconnect(){}},
+    MutationObserver:class{constructor(callback){mutationCallback=callback;}observe(){}disconnect(){}},
+    requestAnimationFrame:callback=>{const id=++nextFrame;frames.set(id,callback);return id;},cancelAnimationFrame:id=>frames.delete(id),
+  });
+  const dispose=bindMapLabelReflow(viewport,()=>scheduled++);
+  t.after(()=>{dispose();for(const[key,value]of previous){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}});
+  const flush=()=>{const pending=[...frames.values()];frames.clear();for(const callback of pending)callback();};
+  await Promise.resolve();flush();scheduled=0;
+  const content={target:count,type:'childList',addedNodes:[],removedNodes:[]};
+  mutationCallback([content]);mutationCallback([content]);flush();
+  assert.equal(scheduled,1,'a batch of text updates requires one settled pass');
+  mutationCallback([{target:count,type:'attributes',attributeName:'style'}]);
+  mutationCallback([{target:button,type:'attributes',attributeName:'class'}]);
+  flush();assert.equal(scheduled,1,'our offset/visibility styling never loops');
+  viewport.dataset.mapCamera='moving';mutationCallback([content]);flush();assert.equal(scheduled,1,'camera animation owns the final settled layout');
+  delete viewport.dataset.mapCamera;
+  mutationCallback([{target:button,type:'attributes',attributeName:'hidden'}]);flush();assert.equal(scheduled,2,'a newly exposed group reflows even if its text did not change');
+  dispose();mutationCallback([content]);flush();assert.equal(scheduled,2,'disposed maps schedule no work');
 });

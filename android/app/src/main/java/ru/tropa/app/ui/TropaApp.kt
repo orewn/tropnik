@@ -188,8 +188,14 @@ private fun BrandBar(state: AppState, onBack: () -> Unit) {
 @Composable
 private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () -> Unit) {
     val selected = model.region(state.regionId)
-    val regions = model.catalog.regions.filter { state.search.isBlank() || (it.name + " " + it.subtitle).contains(state.search.trim(), ignoreCase = true) }
-    val regionRoutes = model.catalog.referenceRoutes(state.search, selected?.id)
+    val showTerritories = state.catalogTerritories
+    val mapRegions = remember(model.catalog, showTerritories) { model.catalog.regions.filter { it.territory == showTerritories } }
+    val regions = remember(model.catalog, showTerritories, state.search) {
+        val choices = if (state.search.isBlank()) mapRegions else model.catalog.regions
+        choices.filter { state.search.isBlank() || (it.name + " " + it.subtitle).contains(state.search.trim(), ignoreCase = true) }
+    }
+    val regionRoutes = remember(model.catalog, state.search, selected?.id) { model.catalog.referenceRoutes(state.search, selected?.id) }
+    val savedRouteIds = remember(state.savedRoutes) { state.savedRoutes.mapTo(mutableSetOf()) { it.routeId } }
     LazyColumn(
         Modifier.fillMaxSize().testTag("explore_list"),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
@@ -214,9 +220,9 @@ private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () 
         }
         item {
             Box(Modifier.fillMaxWidth().height(if (selected == null) 280.dp else 320.dp).clip(RoundedCornerShape(16.dp))) {
-                TropaMap(model.catalog.regions, selected, position = state.position, connection = state.connection, onSelectRegion = model::selectRegion, modifier = Modifier.fillMaxSize())
+                TropaMap(mapRegions, selected, position = state.position, connection = state.connection, onSelectRegion = model::selectRegion, modifier = Modifier.fillMaxSize())
                 Surface(Modifier.align(Alignment.TopStart).padding(12.dp), shape = RoundedCornerShape(8.dp), color = Palette.Surface) {
-                    Text(if (selected == null) "Выберите направление ниже" else "Обзор района", Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.labelSmall)
+                    Text(if (selected == null) if (showTerritories) "Выберите территорию ниже" else "Выберите направление ниже" else "Обзор района", Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.labelSmall)
                 }
                 Surface(Modifier.align(Alignment.TopEnd).padding(12.dp), shape = RoundedCornerShape(12.dp), color = Palette.Surface) {
                     TrailIconButton(onClick = onLocation, enabled = state.position != PositionState.Locating, modifier = Modifier.testTag("locate")) {
@@ -233,13 +239,19 @@ private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () 
         }
         item { BrowserPlannerCard(requireNotNull(model.catalog.browserPlannerTarget()), "open_planner") }
         if (selected == null) {
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TrailChoice(selected = !showTerritories, onClick = { model.showTerritories(false) }, label = { Text("Направления") }, modifier = Modifier.testTag("catalog_directions"))
+                    TrailChoice(selected = showTerritories, onClick = { model.showTerritories(true) }, label = { Text("Территории") }, modifier = Modifier.testTag("catalog_territories"))
+                }
+            }
             item { SectionHeading("Куда отправимся", "Выберите регион на карте или в списке") }
             if (regions.isEmpty()) item { EmptyCard("Регион не найден", "Попробуйте другое название: например, «Алтай», «Карелия» или «Крым».", Glyph.SEARCH) }
             items(regions, key = { it.id }) { region -> RegionCard(region) { model.selectRegion(region.id) } }
             if (state.search.isNotBlank()) {
                 item { SectionHeading("Найденные маршруты", "Выберите карточку, чтобы узнать больше") }
                 if (regionRoutes.isEmpty()) item { EmptyCard("Маршрут не найден", "Попробуйте название места или другой запрос.", Glyph.SEARCH) }
-                items(regionRoutes, key = { "search_${it.id}" }) { route -> RouteCard(route, saved = state.savedRoutes.any { it.routeId == route.id }) { model.selectRoute(route.id) } }
+                items(regionRoutes, key = { "search_${it.id}" }) { route -> RouteCard(route, saved = route.id in savedRouteIds) { model.selectRoute(route.id) } }
             }
             item { InfoCard("Карта помогает выбрать направление. Проверка конкретной тропы, условий и гида выполняется перед походом.") }
         } else {
@@ -251,7 +263,7 @@ private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () 
             }
             item { SectionHeading("Маршруты района", "Выберите тропу для следующего похода") }
             if (regionRoutes.isEmpty()) item { EmptyCard(if (state.search.isBlank()) "Маршруты ещё готовятся" else "Маршрут не найден", "Попробуйте другое название или соседний район.", Glyph.MOUNTAIN) }
-            items(regionRoutes, key = { it.id }) { route -> RouteCard(route, saved = state.savedRoutes.any { it.routeId == route.id }) { model.selectRoute(route.id) } }
+            items(regionRoutes, key = { it.id }) { route -> RouteCard(route, saved = route.id in savedRouteIds) { model.selectRoute(route.id) } }
             item { InfoCard("Поход начинается с группы минимум из 4 человек, включая проверенного гида. Число мест и допустимое соотношение участников определяются для конкретного маршрута.") }
         }
         item {
@@ -431,12 +443,13 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
 private fun OfflineAction(region: Region, model: MainViewModel, state: AppState) {
     val installed = state.packs.firstOrNull { it.regionId == region.id }
     val busy = state.busyId == "pack:${region.id}"
+    val detailed = remember(model.catalog, region.id) { model.catalog.hasDetailedOfflineMap(region.id) }
     CardShell {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TropaIcon(if (installed != null) Glyph.CHECK else Glyph.SAVE)
             Text(if (installed != null) "Сохранено на телефоне" else "Возьмите карту с собой", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
         }
-        Text(if (region.id == "krasnodar") "Сохраните карточки, обзор края и подробную карту района Бзерпинского карниза. Для подробной карты других районов понадобится интернет." else "Сохраните карточки и обзорную карту. Подробная карта доступна при подключении к интернету.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+        Text(if (detailed) "Сохраните карточки, обзор края и подробную карту района Бзерпинского карниза. Для подробной карты других районов понадобится интернет." else "Сохраните карточки и обзорную карту. Подробная карта доступна при подключении к интернету.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         if (installed != null) Text(sizeLabel(installed.sizeBytes), style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
         TrailOutlineButton(onClick = { model.saveRegion(region) }, enabled = state.busyId == null,

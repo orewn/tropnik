@@ -5,7 +5,8 @@ from pathlib import Path
 import unittest
 
 from asset_integrity import AssetError, digest
-from catalog_integrity import verify_catalog, verify_map_resources
+from catalog_integrity import verify_catalog
+from online_sources import verify_online_sources
 
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "android/app/src/main/assets"
@@ -111,6 +112,20 @@ class CatalogIntegrityTests(unittest.TestCase):
         with self.assertRaisesRegex(AssetError, "region parity"):
             verify_catalog(json.dumps(manifest).encode(), self.read)
 
+    def test_territory_membership_requires_its_pinned_source_inputs(self):
+        for omitted in ("tools/android-build/catalog-regions.mjs", "web/lib/territories.generated.json"):
+            manifest = copy.deepcopy(self.manifest)
+            manifest["sourceInputs"] = [record for record in manifest["sourceInputs"] if record["path"] != omitted]
+            with self.subTest(omitted=omitted), self.assertRaisesRegex(AssetError, "membership source inputs"):
+                verify_catalog(json.dumps(manifest).encode(), self.read)
+
+    def test_rehashed_catalogue_cannot_reclassify_a_territory_as_a_tourism_direction(self):
+        catalog = json.loads(self.read("catalog.json"))
+        territory = next(region for region in catalog["regions"] if region["id"].startswith("territory-"))
+        territory["territory"] = False
+        with self.assertRaisesRegex(AssetError, "territory classification"):
+            self.verify_fixture(catalog, copy.deepcopy(self.manifest))
+
     def test_additional_sources_cannot_smuggle_participants_or_wrong_message_identity(self):
         source = {"url": "https://t.me/poiskpohod/101", "name": "Сообщество poiskpohod", "messageId": 101,
                   "publishedAt": "2026-11-01T12:00:00", "reviewedAt": "2026-11-06", "scope": "community_mention"}
@@ -123,20 +138,20 @@ class CatalogIntegrityTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(AssetError):
                 self.verify_fixture(catalog, manifest)
 
-    def test_online_sources_are_bounded_and_cannot_replace_local_resources_or_mask(self):
-        style = json.loads(self.read("maps/style.json"))
-        report = verify_map_resources(style)
+    def test_online_sources_are_bounded_and_cannot_replace_local_resources(self):
+        data = self.read("maps/online-sources.json")
+        config = json.loads(data)
+        report = verify_online_sources(data, self.read)
         self.assertTrue(report["bundledOfflineMapAvailable"])
         for mutation in (
-            lambda s: s["sources"]["online-dem"].update(tiles=["https://example.invalid/{z}/{x}/{y}.png"]),
-            lambda s: s.update(glyphs="https://example.invalid/fonts/{fontstack}/{range}.pbf"),
-            lambda s: s["layers"].insert(0, s["layers"].pop()),
-            lambda s: next(l for l in s["layers"] if l["id"] == "online-hillshade").update(minzoom=0),
+            lambda value: value["sources"]["elevation"].update(tiles="https://example.invalid/{z}/{x}/{y}.png"),
+            lambda value: value.update(glyphs="https://example.invalid/fonts/{fontstack}/{range}.pbf"),
+            lambda value: value.update(fullRussiaDetailedOffline=True),
+            lambda value: value["snapshots"]["vector"].update(assetPath="../private.json"),
         ):
-            changed = copy.deepcopy(style)
-            mutation(changed)
-            with self.assertRaises(AssetError):
-                verify_map_resources(changed)
+            changed = copy.deepcopy(config); mutation(changed)
+            with self.subTest(config=changed), self.assertRaises(AssetError):
+                verify_online_sources((json.dumps(changed, ensure_ascii=False, indent=2) + "\n").encode(), self.read)
 
 
 if __name__ == "__main__":

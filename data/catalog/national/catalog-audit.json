@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-11-10T22:03:09.190547+00:00",
+  "status": "passed",
+  "scope": "Reproducible source, geometry and coverage integrity; not current-access, field or navigation certification.",
+  "routeCount": 337,
+  "newGeometryVertices": 180042,
+  "geometryBytes": 5178503,
+  "metadataBytes": 841257,
+  "rawSourcesChecked": 802,
+  "territoriesQueried": 85,
+  "territoriesWithNewGeometry": 44,
+  "zeroNewGeometryTerritories": [
+    {
+      "id": "territory-14850775B24260608407062",
+      "name": "Крым"
+    },
+    {
+      "id": "territory-14850775B70667807354554",
+      "name": "Севастополь"
+    },
+    {
+      "id": "territory-28173009B11091203162490",
+      "name": "Чукотский автономный округ"
+    },
+    {
+      "id": "territory-28173009B16834140201491",
+      "name": "Республика Мордовия"
+    },
+    {
+      "id": "territory-28173009B21210279674314",
+      "name": "Республика Коми"
+    },
+    {
+      "id": "territory-28173009B2185273376578",
+      "name": "Магаданская область"
+    },
+    {
+      "id": "territory-28173009B24080199016459",
+      "name": "Амурская область"
+    },
+    {
+      "id": "territory-28173009B25497318303482",
+      "name": "Самарская область"
+    },
+    {
+      "id": "territory-28173009B2687808218031",
+      "name": "Воронежская область"
+    },
+    {
+      "id": "territory-28173009B29209288820923",
+      "name": "Забайкальский край"
+    },
+    {
+      "id": "territory-28173009B30008444211385",
+      "name": "Республика Алтай"
+    },
+    {
+      "id": "territory-28173009B3082792446388",
+      "name": "Ненецкий автономный округ"
+    },
+    {
+      "id": "territory-28173009B31225333555943",
+      "name": "Кировская область"
+    },
+    {
+      "id": "territory-28173009B34434912986355",
+      "name": "Удмуртская Республика"
+    },
+    {
+      "id": "territory-28173009B38848907206629",
+      "name": "Ярославская область"
+    },
+    {
+      "id": "territory-28173009B3932420572168",
+      "name": "Орловская область"
+    },
+    {
+      "id": "territory-28173009B40138449315491",
+      "name": "Калининградская область"
+    },
+    {
+      "id": "territory-28173009B41275184158050",
+      "name": "Ивановская область"
+    },
+    {
+      "id": "territory-28173009B42082792489997",
+      "name": "Тульская область"
+    },
+    {
+      "id": "territory-28173009B4400867918714",
+      "name": "Кемеровская область"
+    },
+    {
+      "id": "territory-28173009B46424166303156",
+      "name": "Ростовская область"
+    },
+    {
+      "id": "territory-28173009B46831765844996",
+      "name": "Приморский край"
+    },
+    {
+      "id": "territory-28173009B47279883421777",
+      "name": "Ямало-Ненецкий автономный округ"
+    },
+    {
+      "id": "territory-28173009B50284711669511",
+      "name": "Тамбовская область"
+    },
+    {
+      "id": "territory-28173009B51962491984110",
+      "name": "Еврейская автономная область"
+    },
+    {
+      "id": "territory-28173009B5502896824563",
+      "name": "Липецкая область"
+    },
+    {
+      "id": "territory-28173009B55293521919285",
+      "name": "Республика Тыва"
+    },
+    {
+      "id": "territory-28173009B57295377776076",
+      "name": "Хабаровский край"
+    },
+    {
+      "id": "territory-28173009B57398385788417",
+      "name": "Республика Калмыкия"
+    },
+    {
+      "id": "territory-28173009B59972517059449",
+      "name": "Пензенская область"
+    },
+    {
+      "id": "territory-28173009B61240048498251",
+      "name": "Республика Марий Эл"
+    },
+    {
+      "id": "territory-28173009B70023447378008",
+      "name": "Камчатский край"
+    },
+    {
+      "id": "territory-28173009B70678486994214",
+      "name": "Костромская область"
+    },
+    {
+      "id": "territory-28173009B731487536241",
+      "name": "Ханты-Мансийский автономный округ — Югра"
+    },
+    {
+      "id": "territory-28173009B75413689166101",
+      "name": "Республика Ингушетия"
+    },
+    {
+      "id": "territory-28173009B78872068540735",
+      "name": "Иркутская область"
+    },
+    {
+      "id": "territory-28173009B80457268982215",
+      "name": "Алтайский край"
+    },
+    {
+      "id": "territory-28173009B83675725671802",
+      "name": "Краснодарский край"
+    },
+    {
+      "id": "territory-28173009B94971452660823",
+      "name": "Курская область"
+    },
+    {
+      "id": "territory-28173009B96664025860642",
+      "name": "Вологодская область"
+    },
+    {
+      "id": "territory-28173009B96976580001980",
+      "name": "Республика Карелия"
+    }
+  ],
+  "sourceQueryFailures": 0,
+  "sourceDetailFailures": 1,
+  "unqueriedSubareas": 0,
+  "saturatedLeafExtents": 0,
+  "omittedByDetailLimit": 0,
+  "limitedCandidateDetails": [
+    {
+      "osmId": 1254604,
+      "error": "Response exceeded 12 MB bound"
+    }
+  ],
+  "sourceResponseLimitBytes": 12000000,
+  "completenessClaim": false,
+  "limitations": [
+    "The snapshot enumerates bounded provider-indexed relations, not all physical hiking paths.",
+    "A response exceeding the retained 12 MB limit is not retried and does not justify raising the acquisition bound.",
+    "Foreign or boundary-resolution candidates are not clipped or moved into the catalogue."
+  ],
+  "catalogSha256": "d998d364e66825270c83c731192e7fb8d587a10ae64ca9ce7bfa792419eaf9f2",
+  "geometrySha256": "98e5d4aa9e32bbbdff843d5807d630ad640895ed3c6574eeab63fc0abc7fec5c",
+  "reportSha256": "e65613dbe1d8a538f4b558bbcd22558f420c52cb0d6598a1663399e144185733",
+  "sourceArchiveUsed": true,
+  "failures": []
+}

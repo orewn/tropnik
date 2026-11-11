@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {browserAuditRunPolicy,terrainDiagnosticTraceCategories,queryTerrainTraceCategories,terrainResource,observeTerrainResources,inspectTerrainWebGL,shouldTraceTerrainDiagnostic,runTerrainCloseDiagnostic} from '../browser-zoom-audit.mjs';
+import {browserAuditRunPolicy,terrainDiagnosticTraceCategories,queryTerrainTraceCategories,terrainResource,observeTerrainResources,inspectTerrainWebGL} from '../browser-zoom-audit.mjs';
 import {DESKTOP_TRACE_CATEGORIES} from '../browser-trace.mjs';
 import {assertBrowserReport} from '../browser-report.mjs';
 
@@ -58,33 +58,12 @@ test('WebGL evidence uses public getters on the existing canvas without changing
  const reads=[],contexts=[],keys=['RENDERER','VENDOR','VERSION','SAMPLES','SAMPLE_BUFFERS','FRAMEBUFFER_BINDING'];
  const gl={drawingBufferWidth:1440,drawingBufferHeight:1000,getExtension:name=>{assert.equal(name,'WEBGL_debug_renderer_info');return{UNMASKED_RENDERER_WEBGL:7,UNMASKED_VENDOR_WEBGL:8};},isContextLost:()=>false,getContextAttributes:()=>({antialias:false}),getParameter(key){reads.push(key);return new Map([[1,'WebKit WebGL'],[2,'WebKit'],[3,'WebGL 2.0'],[4,0],[5,0],[6,null],[7,'ANGLE SwiftShader'],[8,'Google']]).get(key);},bindFramebuffer(){assert.fail('Diagnostic reads must not bind a framebuffer');}};
  keys.forEach((key,index)=>{gl[key]=index+1;});
- const doc={querySelector(selector){assert.equal(selector,'.maplibregl-canvas');return{getContext(...args){contexts.push(args);return gl;}};}};
+ const doc={querySelector(selector){assert.equal(selector,'.terrain-scene.is-visible .terrain-canvas');return{getContext(...args){contexts.push(args);return gl;}};}};
  const result=inspectTerrainWebGL(doc);assert.deepEqual(contexts,[['webgl2']]);assert.equal(result.available,true);assert.equal(result.attributes.antialias,false);assert.equal(result.samples,0);assert.equal(result.unmaskedRenderer,'ANGLE SwiftShader');assert.equal(result.defaultFramebufferBound,true);assert.equal(result.sampleScope,'currently-bound-framebuffer');assert.equal(reads.length,8);
  assert.equal(inspectTerrainWebGL({querySelector:()=>null}).available,false);
 });
 
-function nativeDiagnosticFixture(failure){
- let current=12.4,toggles=0,bottoms=0,saves=0;const movements=[],captures=[],profile={name:'desktop-webgl',engine:'maplibre',mobile:false},report={geometryPassed:false,verified:true};
- const actions={report,phase:async()=>{},gpu:async()=>({webgl:{available:true,attributes:{antialias:false}}}),geometry:async()=>({zoom:current,routeId:'kavkaz-8a'}),capture:async(_mode,state,label)=>{captures.push({zoom:state.zoom,label});},reachZoom:async value=>{assert.equal(value,11);current=Math.max(current,value);},reachBottom:async()=>{bottoms++;current=2.9054061044955795;return current;},toggleTerrain:async()=>{toggles++;},zoom:async(direction,{mode})=>{
-  assert.equal(direction,1);assert.equal(mode,'terrain-diagnostic');const before=current,traced=shouldTraceTerrainDiagnostic(profile,mode,direction,before,false);movements.push({before,traced});
-  if(traced&&failure)throw failure;current=Math.min(18,current+1);return{before,after:current,changed:true};
- },save:async()=>{saves++;}};
- return{actions,report,movements,captures,counts:()=>({toggles,bottoms,saves})};
-}
-
-test('the diagnostic uses the lower clamp and existing native increments to reproduce15.905→16.905',async()=>{
- const env=nativeDiagnosticFixture(),report=await runTerrainCloseDiagnostic(env.actions);
- assert.equal(report,env.report);assert.equal(report.status,'completed');assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);assert.equal(report.diagnosticOnly,true);assert.equal(report.geometryPassed,false);
- assert.deepEqual(env.captures.map(item=>item.label),['route-ready','terrain-ready','before-target','upper-bound']);
- assert.equal(env.movements.length,16);assert.equal(env.movements.filter(item=>item.traced).length,1);assert.ok(Math.abs(report.targetBeforeZoom-15.9054061044955795)<1e-9);
- assert.equal(env.counts().toggles,1);assert.equal(env.counts().bottoms,1);assert.equal(report.diagnosticSteps.at(-1).zoom,18);
- assert.throws(()=>assertBrowserReport({...report,sourceCommit:'a'.repeat(40)},'a'.repeat(40)),'A completed diagnostic is never publication evidence');
-});
-
-test('a high-zoom settle failure is not retried or converted into diagnostic/release success',async()=>{
- const failure=new Error('The maplibre map did not settle');failure.settleDiagnostics={samples:[{frameMs:15000}]};const env=nativeDiagnosticFixture(failure);
- const observed=await runTerrainCloseDiagnostic(env.actions).then(()=>null,error=>error);assert.equal(observed,failure);
- assert.equal(env.movements.filter(item=>item.traced).length,1);assert.equal(env.movements.at(-1).traced,true);assert.equal(env.captures.some(item=>item.label==='upper-bound'),false);assert.notEqual(env.report.status,'completed');assert.equal(env.report.verified,false);assert.equal(env.report.releaseEligible,false);
- const profile={name:'desktop-webgl',engine:'maplibre',mobile:false};for(const zoom of [4.905,14.905,16,17.905])assert.equal(shouldTraceTerrainDiagnostic(profile,'terrain-diagnostic',1,zoom,false),false);
- assert.equal(shouldTraceTerrainDiagnostic(profile,'terrain-diagnostic',1,15.905,true),false);assert.equal(shouldTraceTerrainDiagnostic(profile,'terrain',1,15.905,false),false);
+test('completed own-terrain diagnostics cannot certify a release',()=>{
+ const diagnostic={verified:false,releaseEligible:false,diagnosticOnly:true,status:'completed',diagnosticScope:'current-visible-map-terrain',sourceCommit:'a'.repeat(40)};
+ assert.throws(()=>assertBrowserReport(diagnostic,diagnostic.sourceCommit));
 });

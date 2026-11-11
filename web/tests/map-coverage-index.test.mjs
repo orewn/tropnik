@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync, readdirSync} from 'node:fs';
 import {inRussiaCoverage, coveredRussiaBounds, russiaLongitude, displayGeoJSON} from '../public/maps/russia-viewport.js';
+import {readCatalogueInputs} from '../scripts/build-trail-connections.mjs';
 
 const read = path => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'));
 const area = read('../public/data/russia-display-area.geojson');
@@ -87,17 +88,20 @@ test('camera bounds stay exact when outside extrema hide covered interior points
   assert.equal(coveredRussiaBounds([[NaN, 50], [180, Infinity]], area), null);
 });
 
-test('fast frames equal full covered-vertex bounds for every shipped source route', () => {
-  let count = 0;
+test('fast frames equal full covered-vertex bounds for every shipped source route', async () => {
+  const {inputs} = await readCatalogueInputs();
+  const excluded = read('../public/data/russia-boundaries-provenance.json').excludedCatalogRouteIds;
+  const expected = new Set([...inputs.map(input => input.geometryUrl), ...excluded.map(id => `/data/imported/${id}.geojson`)]);
+  const checked = new Set();
   for (const folder of ['routes', 'imported']) {
     for (const name of readdirSync(new URL(`../public/data/${folder}/`, import.meta.url)).filter(name => name.endsWith('.geojson'))) {
       const points = [...positions(displayGeoJSON(read(`../public/data/${folder}/${name}`)))];
       const complete = extentOf(points.filter(([lng, lat]) => inRussiaCoverage(lng, lat, area)));
       assert.deepEqual(coveredRussiaBounds(points, area), complete, `${folder}/${name}`);
-      count++;
+      checked.add(`/data/${folder}/${name}`);
     }
   }
-  assert.equal(count, 280, 'check the complete source geometry set, including the excluded route');
+  assert.deepEqual(checked, expected, 'check the complete current source geometry set, including the retained excluded route');
 });
 
 test('the densest shipped route retains every covered vertex when fitted', t => {

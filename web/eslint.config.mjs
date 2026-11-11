@@ -19,12 +19,8 @@ const eslintConfig = defineConfig([
     ".sites-runtime/**",
     "outputs/**",
     "work/**",
-    // Vendored browser bundles copied by prepare-offline/create-map-style.
-    // Keep our public/sw.js, offline.js and map/terrain helpers in the gate.
-    "public/maps/leaflet.js",
-    "public/maps/protomaps-leaflet.js",
-    "public/maps/maplibre-gl.mjs",
-    "public/maps/maplibre-worker.js",
+    // Deterministic bundle; its shared TypeScript/JS inputs remain linted.
+    "public/custom-map/**",
   ]),
   {
     files: ["components/ui/button.tsx", "hooks/use-mobile.ts"],

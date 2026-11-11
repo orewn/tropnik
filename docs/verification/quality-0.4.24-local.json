@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-10T22:10:10.682793+00:00",
+  "status": "local-checks-passed-ci-pending",
+  "baselineCommit": "169b0bee9b2bbdb45adfbe71f4162f35f37344d1",
+  "sourceCommit": null,
+  "releaseEligible": false,
+  "catalogue": {
+    "referenceCards": 680,
+    "geometryRoutes": 614,
+    "withoutGeometry": 66,
+    "directions": 15,
+    "territories": 85,
+    "territoriesWithCards": 85,
+    "territoriesWithGeometry": 53
+  },
+  "tests": {
+    "web": 646,
+    "webLint": true,
+    "webTypecheck": true,
+    "pagesTooling": 153,
+    "androidPython": 64,
+    "androidRegionNode": 4,
+    "androidBootstrapNode": 7,
+    "nationalImporterPython": 12,
+    "sourcePackagePython": 9
+  },
+  "androidAssets": {
+    "catalogueCheck": true,
+    "landscapeCheck": true,
+    "catalogueSha256": "6b398f38de90718b3b4faae2a8d15515f8bb5c18545564653858c2146efe2311",
+    "geometryBytes": 9741304
+  },
+  "localPages": {
+    "buildId": "8fe8f4db4886064e",
+    "sourceCommit": null,
+    "verification": {
+      "verified": true,
+      "pages": 713,
+      "referenceRoutes": 680,
+      "productionRoutingChecks": 2144,
+      "mapPolicyChecks": 14,
+      "staticApiNetworkCalls": 0,
+      "checkedScripts": 65,
+      "publicAssetChecks": 676,
+      "outputFiles": 2658,
+      "offlineFilesVerified": 252,
+      "overviewReliefTilesVerified": 341,
+      "terrainGrid": [
+        513,
+        513
+      ],
+      "apkVerified": true,
+      "coverageExcludedRoutes": [
+        "osm-relation-14407325"
+      ],
+      "base": "/tropnik/"
+    },
+    "httpVerification": {
+      "verified": true,
+      "base": "/tropnik/",
+      "httpChecks": 57,
+      "browserRenderingTested": false,
+      "backendConnected": false
+    },
+    "apkVersionVerified": "0.4.23-preview",
+    "note": "The download manifest remains the previously released APK until the new universal release passes device tests."
+  },
+  "evidence": {
+    "docs/verification/web-0.4.24-tests.txt": {
+      "bytes": 63202,
+      "sha256": "bbbaa16519fd303d4c930e229217924fa4b5fdb55d3750206c17542e12058a89"
+    },
+    "docs/verification/web-0.4.24-lint.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/verification/web-0.4.24-types.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/verification/web-0.4.24-catalog-performance.json": {
+      "bytes": 13547,
+      "sha256": "dc18c64dd9ac0fc1ad8dfa962ac5cc9e5a372273bbeb097649bd27cbbea96250"
+    },
+    "data/catalog/national/catalog-audit.json": {
+      "bytes": 6142,
+      "sha256": "c4577beafdf3f6b36c56fcb626f16a4983fabcda1081a42a953ca9e01a278a52"
+    },
+    "data/catalog/national/web-integration-audit.json": {
+      "bytes": 85256,
+      "sha256": "f4355a44c10be24d9ae8f345c2c6e89c0331aa1fa2e198031b1aa12167c75170"
+    },
+    "data/catalog/national/generator-reproduction.json": {
+      "bytes": 870,
+      "sha256": "2e4f207d85128ee54f0fe4de71f898ded331c912b489f9a72c0a8eaeff901526"
+    },
+    "docs/verification/national-route-independent-audit-0.4.24.json": {
+      "bytes": 5482,
+      "sha256": "fdb1f7b7ce61f9994c269cc9c6837e72ad963ea82a0ad0a1bbd3a187502daa3f"
+    }
+  },
+  "limitations": [
+    "Final 0.4.24 Kotlin/JVM/device and browser matrix are pending CI.",
+    "Preliminary CUA observations cover an intermediate 338-card catalogue; not final release evidence.",
+    "Node benchmark is diagnostic, not browser FPS or physical-device performance."
+  ]
+}

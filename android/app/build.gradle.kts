@@ -28,8 +28,8 @@ android {
         applicationId = "ru.tropa.app.preview"
         minSdk = 26
         targetSdk = 36
-        versionCode = 11
-        versionName = "0.4.23-preview"
+        versionCode = 12
+        versionName = "0.4.24-preview"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Both physical ARM phones and an x86_64 emulator are covered by this APK.
@@ -89,10 +89,6 @@ dependencies {
     ksp("androidx.room:room-compiler:2.8.5")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("org.maplibre.gl:android-sdk-opengl:13.7.1")
-    // SDK runtime dependency is explicit here because the display-scope filter
-    // calls Turf directly, including MultiPolygon holes and the dateline.
-    implementation("org.maplibre.gl:android-sdk-turf:6.0.1")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20250517")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")

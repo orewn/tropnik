@@ -1,4 +1,4 @@
-import type {CircleLayerSpecification} from 'maplibre-gl';
+import type * as GeoJSON from 'geojson';
 
 type MapCenter=[number,number];
 type TrailPointInput={id:string;title:string;center?:[number,number]};
@@ -64,28 +64,4 @@ export function mapTrailPointFeatureCollection(
       properties:{id:item.id,title:item.title,selected:item.selected},
     })),
   };
-}
-
-/** Literal paint lets every point layer share MapLibre's circle shader program.
- * Keep all halos below all dots; selected points sit above unselected points
- * within each role. The final, unsplit layer keeps the same hit geometry. */
-export function mapTrailPointLayers(source:string,hitRadius:number):CircleLayerSpecification[]{
-  const viewport={'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport'} as const;
-  return [
-    {id:'trail-point-halo',type:'circle',source,filter:['!=',['get','selected'],true],paint:{
-      'circle-radius':9,'circle-color':'#FFFEFA','circle-opacity':.98,...viewport,
-    }},
-    {id:'trail-point-halo-selected',type:'circle',source,filter:['==',['get','selected'],true],paint:{
-      'circle-radius':11,'circle-color':'#FFFEFA','circle-opacity':.98,...viewport,
-    }},
-    {id:'trail-point-dot',type:'circle',source,filter:['!=',['get','selected'],true],paint:{
-      'circle-radius':6,'circle-color':'#A56736','circle-stroke-color':'#876A43','circle-stroke-width':1,...viewport,
-    }},
-    {id:'trail-point-dot-selected',type:'circle',source,filter:['==',['get','selected'],true],paint:{
-      'circle-radius':7.5,'circle-color':'#244D3C','circle-stroke-color':'#A56736','circle-stroke-width':2,...viewport,
-    }},
-    {id:'trail-point-hit',type:'circle',source,paint:{
-      'circle-radius':hitRadius,'circle-color':'#000000','circle-opacity':.001,'circle-stroke-opacity':0,...viewport,
-    }},
-  ];
 }

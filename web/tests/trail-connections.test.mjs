@@ -208,7 +208,9 @@ test('the generated index matches every active geometry and its provenance, with
   const {trails, inputs} = await readCatalogueInputs();
   assert.equal(real.stats.catalogueRoutes, trails.length);
   assert.equal(real.stats.geometryRoutes, inputs.length);
-  assert.equal(inputs.length, 277); assert.equal(trails.length, 306);
+  assert.equal(new Set(trails.map(trail => trail.id)).size, trails.length);
+  assert.equal(new Set(inputs.map(input => input.id)).size, inputs.length);
+  assert.deepEqual(new Set(inputs.map(input => input.id)), new Set(trails.filter(trail => trail.geometryUrl).map(trail => trail.id)));
   assert.deepEqual(new Set(Object.keys(real.routes)), new Set(inputs.map(input => input.id)));
   for (const input of inputs) {
     const indexed = real.routes[input.id];
