@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "kind": "actual-upload-recovery-history",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "recordedAt": "2026-11-11T21:12:01Z",
+  "repository": "orewn/tropnik",
+  "version": "0.4.25-preview",
+  "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+  "workflowRunId": 43093581429,
+  "originalDeviceJob": 130779797114,
+  "originalActualResult": {
+    "status": "passed",
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "deviceExecutionVerified": true
+  },
+  "originalUploadErrorLines": [
+    "2026-11-11T20:20:12.3694809Z Attempt 1 of 5 failed with error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON. Retrying request in 8000 ms...",
+    "2026-11-11T20:22:20.7159994Z Attempt 2 of 5 failed with error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON. Retrying request in 12365 ms...",
+    "2026-11-11T20:24:33.4282556Z Attempt 3 of 5 failed with error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON. Retrying request in 23946 ms...",
+    "2026-11-11T20:26:57.7209932Z Attempt 4 of 5 failed with error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON. Retrying request in 27716 ms...",
+    "2026-11-11T20:29:25.8118108Z ##[error]Failed to CreateArtifact: Failed to make request after 5 attempts: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+  ],
+  "originalBlockerRecord": "release-0.4.25-upload-blocker.json",
+  "recoveryPredeclaredPolicy": {
+    "recordedAt": "2026-11-11 21:03:44 UTC",
+    "declaredBeforeAcceptedRetry": true,
+    "previousRequest": "Rejected by GitHub at20:56:35; no additional attempt was created",
+    "changedPrecondition": "Root independently observed terminal completed/failure state at21:02:57 and fetched actual complete device log",
+    "runId": 43093581429,
+    "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+    "originalJob": 130779797114,
+    "actualTests": {
+      "status": "passed",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deviceExecutionVerified": true
+    },
+    "actualUploadErrors": [
+      "2026-11-11T20:20:12.3694809Z Attempt 1 of 5 failed with error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON. Retrying request in 8000 ms...",
+      "2026-11-11T20:22:20.7159994Z Attempt 2 of 5 failed with error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON. Retrying request in 12365 ms...",
+      "2026-11-11T20:24:33.4282556Z Attempt 3 of 5 failed with error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON. Retrying request in 23946 ms...",
+      "2026-11-11T20:26:57.7209932Z Attempt 4 of 5 failed with error: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON. Retrying request in 27716 ms...",
+      "2026-11-11T20:29:25.8118108Z ##[error]Failed to CreateArtifact: Failed to make request after 5 attempts: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+    ],
+    "originalBuildArtifact": 13890865289,
+    "apkSha256": "016aa309d22b1fc34d89949817d3e8fc61162e2c20f8b50a4a803e0feadb88e4",
+    "maximumAdditionalAcceptedAttempts": 1,
+    "scope": "Repeat only the failed native job and downstream prerequisites under the original workflow. Reuse successful build artifact; retain all8cases, real installed-byte verification and same-run6publicassets gates.",
+    "underlyingServiceRootCauseNotClaimed": true,
+    "ifUploadFailsAgain": "Stop unchanged retries and diagnose the actual new error; no gate bypass or fabricated receipt."
+  },
+  "rerunAcceptedResponse": {
+    "success": true
+  },
+  "recoveredDeviceJob": 130787519259,
+  "recoveredActualResult": {
+    "status": "passed",
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "deviceExecutionVerified": true
+  },
+  "buildArtifactReused": {
+    "id": 13890865289,
+    "name": "tropnik-android-preview-1",
+    "size_in_bytes": 109338777,
+    "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13890865289",
+    "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13890865289/zip",
+    "expired": false,
+    "created_at": "2026-11-11T20:13:39Z",
+    "expires_at": "2026-11-25T20:13:35Z",
+    "updated_at": "2026-11-11T20:13:39Z",
+    "digest": "sha256:e5263de2d628f69b3d5175d16e9ebdff24d3f5341a9c4a84e1277e01a39fca80",
+    "workflow_run": {
+      "id": 43093581429,
+      "repository_id": 1447843944,
+      "head_repository_id": 1447843944,
+      "head_branch": "main",
+      "head_sha": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0"
+    }
+  },
+  "deviceArtifact": {
+    "id": 13890997357,
+    "name": "tropnik-android-api35-instrumentation-2",
+    "size_in_bytes": 6266222,
+    "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13890997357",
+    "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/13890997357/zip",
+    "expired": false,
+    "created_at": "2026-11-11T21:07:42Z",
+    "expires_at": "2026-11-25T21:07:38Z",
+    "updated_at": "2026-11-11T21:07:42Z",
+    "digest": "sha256:ea6c8a80e5d6304c4ed74daaf800bd08fa010818dab93a4c4ae13129c9a0a13c",
+    "workflow_run": {
+      "id": 43093581429,
+      "repository_id": 1447843944,
+      "head_repository_id": 1447843944,
+      "head_branch": "main",
+      "head_sha": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0"
+    }
+  },
+  "jobTimeline": [
+    {
+      "id": 130776598478,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "success",
+      "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+      "runAttempt": 1,
+      "startedAt": "2026-11-11T20:07:51Z",
+      "completedAt": "2026-11-11T20:13:47Z"
+    },
+    {
+      "id": 130779797114,
+      "name": "Android device scenarios",
+      "status": "completed",
+      "conclusion": "failure",
+      "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+      "runAttempt": 1,
+      "startedAt": "2026-11-11T20:13:50Z",
+      "completedAt": "2026-11-11T20:29:28Z"
+    },
+    {
+      "id": 130785957297,
+      "name": "Verify public Android bytes and prepare the universal website manifest",
+      "status": "completed",
+      "conclusion": "skipped",
+      "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+      "runAttempt": 1,
+      "startedAt": "2026-11-11T21:01:15Z",
+      "completedAt": "2026-11-11T20:29:29Z"
+    },
+    {
+      "id": 130785962377,
+      "name": "Publish the requested Android prerelease",
+      "status": "completed",
+      "conclusion": "skipped",
+      "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+      "runAttempt": 1,
+      "startedAt": "2026-11-11T21:01:15Z",
+      "completedAt": "2026-11-11T20:29:28Z"
+    },
+    {
+      "id": 130787519259,
+      "name": "Android device scenarios",
+      "status": "completed",
+      "conclusion": "success",
+      "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+      "runAttempt": 2,
+      "startedAt": "2026-11-11T21:03:51Z",
+      "completedAt": "2026-11-11T21:07:44Z"
+    },
+    {
+      "id": 130789454924,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "success",
+      "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+      "runAttempt": 2,
+      "startedAt": "2026-11-11T20:07:51Z",
+      "completedAt": "2026-11-11T20:13:47Z"
+    },
+    {
+      "id": 130789827245,
+      "name": "Publish the requested Android prerelease",
+      "status": "in_progress",
+      "conclusion": null,
+      "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+      "runAttempt": 2,
+      "startedAt": "2026-11-11T21:07:47Z",
+      "completedAt": null
+    },
+    {
+      "id": 130790401398,
+      "name": "Verify public Android bytes and prepare the universal website manifest",
+      "status": "queued",
+      "conclusion": null,
+      "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+      "runAttempt": 2,
+      "startedAt": "2026-11-11T21:08:44Z",
+      "completedAt": null
+    }
+  ],
+  "publicVerifierJob": 130790401398,
+  "publicVerificationRecord": "android-public-0.4.25.json",
+  "publicVerificationRecordedAt": "2026-11-11T21:09:24.957418+00:00",
+  "actualPublicProofScope": {
+    "verified": true,
+    "sourceCommit": "b705c20378c7d5cab7a0eaccbd6b59158c7291d0",
+    "buildArtifactId": 13890865289,
+    "deviceArtifactId": 13890997357,
+    "anonymousAssetsVerified": 6,
+    "actualDeviceTests": 8,
+    "pagesGateStillRequired": true
+  },
+  "officialServiceStatusObserved": {
+    "observedApproximatelyAt": "2026-11-11T21:05:00Z",
+    "sourceUrl": "https://www.githubstatus.com/api/v2/summary.json",
+    "pageUpdatedAt": "2026-11-11T20:59:33.752Z",
+    "incidentId": "dvy0t3mvh1lg",
+    "incidentStatus": "investigating",
+    "actions": "major_outage",
+    "pages": "major_outage",
+    "notAClaimOfInternalCauseOfEarlierCreateArtifactError": true
+  },
+  "finalWebsite": {
+    "sourceCommit": "4b17b08c56b7d4ce3d46d33db988d61b44c62c7e",
+    "runId": 43101003523,
+    "publicVerificationPending": true
+  },
+  "productBudgetsWeakened": false,
+  "sourceReceiptsReplaced": false,
+  "apkRebuilt": false,
+  "apkResigned": false,
+  "jobTimelineObservedAt": "2026-11-11T21:08:53Z"
+}
