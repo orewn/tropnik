@@ -217,3 +217,16 @@ test('opt-in terrain tracing covers only the first existing desktop upward4–5 
  assert.equal(shouldTraceTerrainZoom(profile,'scene3d',-1,4.905,false,true),false);
  for(const changed of [{mobile:true},{engine:'unsupported'},{name:'android-portrait'}])assert.equal(shouldTraceTerrainZoom({...profile,...changed},'scene3d',1,4.905,false,true),false);
 });
+
+
+test('Android high-zoom trace is limited to one existing input in the explicit zoom-modes diagnostic',()=>{
+ const profile={name:'android-portrait',engine:'tropnik-canvas',mobile:true};
+ assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,4.29981696,false,true,'zoom-modes'),true);
+ for(const diagnostic of [null,'terrain-close','ui-smoothness'])assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,4.29981696,false,true,diagnostic),false);
+ for(const zoom of [3.999,5,18,NaN])assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,zoom,false,true,'zoom-modes'),false);
+ assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,4.29981696,true,true,'zoom-modes'),false);
+ assert.equal(shouldTraceTerrainZoom(profile,'scene3d',-1,4.29981696,false,true,'zoom-modes'),false);
+ assert.equal(shouldTraceTerrainZoom(profile,'scene3d',1,4.29981696,false,false,'zoom-modes'),false);
+ for(const changed of [{mobile:false},{name:'compact-phone'},{engine:'unsupported'}])assert.equal(shouldTraceTerrainZoom({...profile,...changed},'scene3d',1,4.29981696,false,true,'zoom-modes'),false);
+});
+

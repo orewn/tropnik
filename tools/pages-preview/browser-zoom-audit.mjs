@@ -122,8 +122,9 @@ export async function settleMapCamera({engine,read,frame,wait,clock=()=>performa
 }
 
 /** Opt-in recording around one existing +1 input, never a diagnostic retry. */
-export function shouldTraceTerrainZoom(profile,mode,direction,beforeZoom,alreadyTraced,traceEnabled=false){
- return traceEnabled&&!alreadyTraced&&profile.name==='desktop-webgl'&&profile.engine==='tropnik-canvas'&&!profile.mobile&&mode==='scene3d'&&direction>0&&beforeZoom>=4&&beforeZoom<5;
+export function shouldTraceTerrainZoom(profile,mode,direction,beforeZoom,alreadyTraced,traceEnabled=false,diagnostic=null){
+ const selected=profile.name==='desktop-webgl'&&!profile.mobile||diagnostic==='zoom-modes'&&profile.name==='android-portrait'&&profile.mobile;
+ return traceEnabled&&!alreadyTraced&&selected&&profile.engine==='tropnik-canvas'&&mode==='scene3d'&&direction>0&&beforeZoom>=4&&beforeZoom<5;
 }
 
 /** Bounds of independent overlays. Parents and children must not both enter
@@ -189,7 +190,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
  if(modesDiagnostic)assert.ok(profile.name==='android-portrait'&&profile.mobile,'The zoom-modes diagnostic requires the Android portrait profile');
  await mkdir(OUTPUT,{recursive:true});
  const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:8,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
- if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[]});
+ if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,instrumented:traceEnabled,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[]});
  let terrainTraceStarted=false;
  const terrainResources=terrainDiagnostic?observeTerrainResources(cdp,()=>report.diagnosticStage):null;
  const save=()=>{if(terrainResources)report.dem=terrainResources.snapshot();return writeFile(new URL(terrainDiagnostic?'desktop-webgl-terrain-diagnostic.json':modesDiagnostic?'android-portrait-zoom-modes-diagnostic.json':`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');};
@@ -497,7 +498,7 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
    let scene;
    for(let attempt=0;attempt<60;attempt++){scene=await sceneState();if(scene.error||scene.ready&&(scene.inspection?.cartography?.state!=='loading'&&scene.inspection?.frame?.cartography?.loadedTiles===scene.inspection?.cartography?.source?.loadedTiles))break;await sleep(250);}
    assert.equal(scene.ready,true,'Custom terrain never rendered its actual source grid');assertCustomSceneInspection(scene.inspection,profile.name+'/terrain');assert.equal(scene.inspection.cartography?.state,'ready','The known mapped area lost its real land-cover texture');
-   if(terrainDiagnostic){
+   if(terrainDiagnostic||modesDiagnostic&&traceEnabled){
     report.gpu={traceCategories:await queryTerrainTraceCategories(cdp)};
     try{assert.ok(helpers.systemInfo,'No browser-level SystemInfo target');const info=await helpers.systemInfo();report.gpu.systemInfo={available:true,gpu:info.gpu,modelName:info.modelName,modelVersion:info.modelVersion};}catch(error){report.gpu.systemInfo={available:false,error:error.message};}
     try{report.gpu.webgl=await evaluate(cdp,`(${inspectTerrainWebGL.toString()})()`);}catch(error){report.gpu.webgl={available:false,error:error.message};}
@@ -512,9 +513,9 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
      assert.ok(point?.unobscured,`${profile.name}: ${label} is not reachable`);
      const press=async()=>{await pointerAt(cdp,point,profile);await sleep(70);const events=await evaluate(cdp,'window.__tropnikInputEvents');assertNativeBurstEventOrder(events,profile.mobile?'touch':'mouse',1);nativeInputs.push({label,input:profile.mobile?'touch':'mouse',point,events});};
      const beforeZoom=traceEnabled?(await sceneState()).inspection?.frame?.view?.zoom:NaN;
-     if(shouldTraceTerrainZoom(profile,'scene3d',label==='Приблизить ландшафт'?1:-1,beforeZoom,terrainTraceStarted,traceEnabled)){
+     if(shouldTraceTerrainZoom(profile,'scene3d',label==='Приблизить ландшафт'?1:-1,beforeZoom,terrainTraceStarted,traceEnabled,diagnostic)){
       terrainTraceStarted=true;
-      try{const recorded=await traceDesktopSelection(cdp,press,{prefix:'desktop-webgl-landscape-close',scope:'own-landscape-close-view',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{})});report.terrainZoomTrace={...recorded.trace,beforeZoom,afterZoom:(await sceneState()).inspection?.frame?.view?.zoom};}
+      try{const recorded=await traceDesktopSelection(cdp,press,{prefix:`${profile.name}-landscape-close`,scope:'own-landscape-close-view',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{})});report.terrainZoomTrace={...recorded.trace,beforeZoom,afterZoom:(await sceneState()).inspection?.frame?.view?.zoom};}
       catch(error){report.terrainZoomTrace={...error.traceReceipt,beforeZoom};throw error;}
      }else await press();
     };
@@ -564,3 +565,4 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
  }
  finally{forget();forgetFinished();forgetFailed();terrainResources?.dispose();}
 }
+

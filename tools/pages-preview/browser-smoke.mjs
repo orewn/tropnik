@@ -932,7 +932,7 @@ try{
     }
     if(runPolicy.diagnostic==='terrain-close'||runPolicy.diagnostic==='zoom-modes'){
       const systemInfo=async()=>({gpu:environment.gpu,commandLine:environment.commandLine});
-      const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo,url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic});
+      const report=await runZoomDesignAudit(cdp,profile,{loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,elementPoint,pointerAt,pointerSelector,diagnosticPhase,mapState,performanceDiagnostics,systemInfo,url:`http://127.0.0.1:${httpPort}/tropnik/`},{diagnostic:runPolicy.diagnostic,traceEnabled});
       report.environment=environment;assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);
       assert.notEqual(runPolicy.reportFile,'browser-verification.json');
       await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
@@ -1060,3 +1060,4 @@ try{
     if(!failure){await writeFile(new URL('browser-failure.json',ROOT),JSON.stringify({error:error.message,browserStartup:browser.diagnostics()},null,2)+'\n');throw error;}
   }
 }
+
