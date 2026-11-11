@@ -185,7 +185,7 @@ test('late source batches cannot replace a newer camera or resurrect state after
 });
 
 test('pending and failed satellite batches retain the actual previous ground until all images commit',async t=>{
- const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+ const env=fixture({view:{...camera,bearingDegrees:12}});t.after(()=>env.engine.destroy());await env.ready();
  const ground=env.lastDraw().filter(call=>call.op==='drawImage').map(call=>call.key);assert.ok(ground.some(key=>key.startsWith('relief:')));assert.ok(ground.some(key=>key.startsWith('vector:')));
  env.engine.setMode('satellite');env.complete(job=>!job.request.kind.startsWith('eox-'));await env.settle();
  const pending=env.pending('eox-s2');assert.ok(pending.length>1);assert.equal(env.engine.getState().committedMode,'detail');assert.equal(env.engine.getState().imageryLoading,true);

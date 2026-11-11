@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "preparationOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "status": "prepared",
+  "repository": "orewn/tropnik",
+  "branch": "prepare/final-site-0.4.24",
+  "sourceCommit": "31a33bf07c0817a3c6ee7dec7abd07be84c2ec3b",
+  "workflowRunId": "43067448206",
+  "workflowRunAttempt": "1",
+  "requiredNext": "Move the candidate PR branch with an expected-head lease, then run every unchanged release acceptance workflow on preparedCommit.",
+  "sourceTree": "9351f585dfe98ad26be8a6f330652e0499c9b16b",
+  "preparedTree": "b55bdb03fc409c4ce9c5ccd8f29c8ae8daa00557",
+  "protectedSource": {
+    "entries": 5451,
+    "sha256": "5ff675f1d454445f0edeb088f0cf78aadf4febdc8586544ca5606ad10d8125ee",
+    "unchanged": true
+  },
+  "generatorCommands": [
+    [
+      "node",
+      "web/scripts/build-landscape.mjs"
+    ],
+    [
+      "python",
+      "tools/android-build/prepare-landscape.py"
+    ],
+    [
+      "node",
+      "tools/android-build/prepare-custom-map.mjs"
+    ],
+    [
+      "node",
+      "web/scripts/prepare-offline.mjs"
+    ],
+    [
+      "node",
+      "web/scripts/stamp-service-worker.mjs"
+    ]
+  ],
+  "generatorChainIdempotent": true,
+  "checkOnlyVerifiersPassed": true,
+  "changed": [
+    {
+      "path": "android/app/src/main/assets/custom-map/android-bootstrap.js",
+      "status": "modified",
+      "previousBlob": "6855ee21417e781f226f212b6b92dcb80a82d213",
+      "blob": "c112fcc4f33a41f1077374250a857764f7fe6939",
+      "mode": "100644",
+      "bytes": 15534,
+      "sha256": "09c22a8e8f9df4adc7190f60218eed109ebcb41c5361e5f99486165a0926c08f"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-DLfOPZe9.js",
+      "status": "deleted",
+      "previousBlob": "ea28a619ebbb3ede7686f1475058c7e4d3b6e1ed",
+      "blob": null,
+      "mode": "100644",
+      "bytes": 0,
+      "sha256": null
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-MTh5lNV_.js",
+      "status": "added",
+      "previousBlob": null,
+      "blob": "7d801f2714d1f25b966e584bb2327b1fbd220e50",
+      "mode": "100644",
+      "bytes": 100205,
+      "sha256": "71a9cd5b19a4830574c4544432769cfefcca1ac1ca6877821e5cb31ec68074de"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/manifest.json",
+      "status": "modified",
+      "previousBlob": "73e639ad37cee18d68d1ee7bdc29fc77a06267cb",
+      "blob": "fabbb03a1b6e90a640c73c570ee58f075eabe43e",
+      "mode": "100644",
+      "bytes": 342021,
+      "sha256": "59e4c21b6cc993d1e3b5501efd832cd01bf60adeb5bc17b24de4237a28810282"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/map-runtime.js",
+      "status": "modified",
+      "previousBlob": "b9a5259d7039a199626d18ff5f3d44d11e406365",
+      "blob": "ad03b8564f7c16987b45f656e006ce1f007788b1",
+      "mode": "100644",
+      "bytes": 156,
+      "sha256": "c9e56fe0bd383db95110fe8c771c0d2ba2e23a0f44e454ae0870aa27513ebab9"
+    },
+    {
+      "path": "web/public/custom-map/android-bootstrap.js",
+      "status": "modified",
+      "previousBlob": "6855ee21417e781f226f212b6b92dcb80a82d213",
+      "blob": "c112fcc4f33a41f1077374250a857764f7fe6939",
+      "mode": "100644",
+      "bytes": 15534,
+      "sha256": "09c22a8e8f9df4adc7190f60218eed109ebcb41c5361e5f99486165a0926c08f"
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-DLfOPZe9.js",
+      "status": "deleted",
+      "previousBlob": "ea28a619ebbb3ede7686f1475058c7e4d3b6e1ed",
+      "blob": null,
+      "mode": "100644",
+      "bytes": 0,
+      "sha256": null
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-MTh5lNV_.js",
+      "status": "added",
+      "previousBlob": null,
+      "blob": "7d801f2714d1f25b966e584bb2327b1fbd220e50",
+      "mode": "100644",
+      "bytes": 100205,
+      "sha256": "71a9cd5b19a4830574c4544432769cfefcca1ac1ca6877821e5cb31ec68074de"
+    },
+    {
+      "path": "web/public/custom-map/manifest.json",
+      "status": "modified",
+      "previousBlob": "73e639ad37cee18d68d1ee7bdc29fc77a06267cb",
+      "blob": "fabbb03a1b6e90a640c73c570ee58f075eabe43e",
+      "mode": "100644",
+      "bytes": 342021,
+      "sha256": "59e4c21b6cc993d1e3b5501efd832cd01bf60adeb5bc17b24de4237a28810282"
+    },
+    {
+      "path": "web/public/custom-map/map-runtime.js",
+      "status": "modified",
+      "previousBlob": "b9a5259d7039a199626d18ff5f3d44d11e406365",
+      "blob": "ad03b8564f7c16987b45f656e006ce1f007788b1",
+      "mode": "100644",
+      "bytes": 156,
+      "sha256": "c9e56fe0bd383db95110fe8c771c0d2ba2e23a0f44e454ae0870aa27513ebab9"
+    },
+    {
+      "path": "web/public/sw.js",
+      "status": "modified",
+      "previousBlob": "88def3db0c7cb6243bd17ee4ec87090f15f2025a",
+      "blob": "cb182759f6ecd4e251788c3446f170c18ab03694",
+      "mode": "100644",
+      "bytes": 11469,
+      "sha256": "d0f141ac07ed1197541f42d60df38c621a6ba91c09c4bbbb5a5a9b98702a166f"
+    }
+  ],
+  "preparedCommit": "31db43b5b409b3571797a0ac809733a04cbfa12b",
+  "refUpdate": {
+    "branch": "prepare/final-site-0.4.24",
+    "expectedParent": "31a33bf07c0817a3c6ee7dec7abd07be84c2ec3b",
+    "observedCommit": "31db43b5b409b3571797a0ac809733a04cbfa12b",
+    "force": false
+  },
+  "independentReview": {
+    "method": "Read actual CI manifest from job logs, independently fetch immutable Git objects, compare both complete source trees, and recompute UTF-8 byte lengths and SHA256 digests.",
+    "remoteCommitParentAndTreeVerified": true,
+    "remoteGeneratedOnlyDiffMatchesManifest": true,
+    "protectedSourceEntries": 5451,
+    "protectedSourceSHA256": "5ff675f1d454445f0edeb088f0cf78aadf4febdc8586544ca5606ad10d8125ee",
+    "allGeneratedBytesAndSHA256Verified": true,
+    "uniqueGeneratedBlobs": 5,
+    "rendererSHA256": "f62b4d8f6286ec7dd12ff3a9c518c64ae04148c3415f3ae31b16d8876e8cdd6d",
+    "engineSHA256": "bcb43c269a6b74b52956acd40aec48e666a4c40255c78f3e77e107210b60487a",
+    "rendererMatchesPixelProofCommit": "350fb0606d1505fe3e8c6712e180957753929e59",
+    "engineMatchesPixelProofCommit": "5b840f45b31c74ef1f9fd38e7101041affc5bbd9",
+    "uiFilesMatchCommit": "33be0877ae82d507a6ab1d7f83062cb480a5d714",
+    "uiFiles": [
+      "web/components/MapAttribution.tsx",
+      "web/app/map-ui-release.css"
+    ],
+    "handwrittenServiceWorkerUnchanged": true,
+    "artifact": {
+      "id": 13876781411,
+      "name": "tropnik-derived-preparation-43067448206-1",
+      "bytes": 1606,
+      "githubReportedSHA256": "2dd9c7d643e2343ebd02abda749c7448e7c6222cad64f22181fd048271690274",
+      "archiveDownloadedAndIndependentlyHashed": false,
+      "actualManifestReadFromJobLog": true
+    },
+    "scope": "Generated source preparation only. Complete fresh candidate browser and Android acceptance remains mandatory."
+  }
+}

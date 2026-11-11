@@ -188,7 +188,8 @@
       "terrainPixelsIdentical": true
     },
     "harnessSourceUrl": "https://github.com/orewn/tropnik/blob/1b8f7d4c9150def96ec73666ce0e23ed635b1f0f/tools/pages-preview/browser-zoom-audit.mjs",
-    "action": "Hold final acceptance. Require expected completed view, pending=false and full scene/canvas opacity before each screenshot, then bind an unchanged before/after frame identity and image SHA. Measure the wait; do not alter input count/timing or reset performance counters."
+    "action": "Hold final acceptance. Require expected completed view, pending=false and full scene/canvas opacity before each screenshot, then bind an unchanged before/after frame identity and image SHA. Measure the wait; do not alter input count/timing or reset performance counters.",
+    "resolvedByCaptureFollowupCommit": "1e1423fbcd9aca7a4b9594ece487e0ee4957f5a9"
   },
   "screenshots": [
     {
@@ -251,5 +252,261 @@
     "Completed frames are coalesced. Fewer frames and CPU submission times are not presented FPS or per-input presentation latency.",
     "Matching remote source descriptors does not independently hash every decoded elevation pixel.",
     "The old CSS layout-shift failure remains. Separate controlled old-vs-new terrain pixel parity does not make a stale live screenshot correct."
-  ]
+  ],
+  "captureBindingFollowup": {
+    "commit": "1e1423fbcd9aca7a4b9594ece487e0ee4957f5a9",
+    "parent": "1b8f7d4c9150def96ec73666ce0e23ed635b1f0f",
+    "tree": "15af4693449d56d5e62384d30e9be9c3dd873d9a",
+    "runId": 43066628100,
+    "jobId": 130683195167,
+    "runUrl": "https://github.com/orewn/tropnik/actions/runs/43066628100",
+    "conclusion": "success",
+    "diagnosticOnly": true,
+    "releaseEligible": false,
+    "productRendererSha256": "f62b4d8f6286ec7dd12ff3a9c518c64ae04148c3415f3ae31b16d8876e8cdd6d",
+    "harnessSha256": "4ad975f714b10328a817cb96df77c82315c092e60aa4571c30949515e38fe359",
+    "change": "Capture binding only. Existing 28 zoom inputs, rotate/reset, 70ms per-input sleep, 250ms phase delay, continuous counters and350/750ms task limits are unchanged. Each image waits for the expected completed view, pending=false and scene/canvas opacity=1, then requires identical frame snapshots before and immediately after its only screenshot attempt.",
+    "artifact": {
+      "id": 13875228474,
+      "name": "tropnik-terrain-deferred-presentation-43066628100",
+      "bytes": 13310374,
+      "sha256": "67e40ec7dac6f7b3701ae992e2007ae2c35ca46ef4184acc8899fb4bf8bcabe2",
+      "digestEvidence": "GitHub Actions artifact API-reported digest",
+      "archiveIndependentlyDownloadedAndHashed": false,
+      "reason": "Execution environment unavailable; no independent ZIP or new PNG byte decoding claimed."
+    },
+    "evidence": {
+      "source": "Full actual browser report and compact summary reconstructed from decoded GitHub job logs; log timestamp prefixes and chunk BOMs removed without changing JSON data.",
+      "independentRawBindingVerificationPassed": true,
+      "pngBase64PresentInLogs": false
+    },
+    "tests": {
+      "nodeTests": 85,
+      "nodePassed": 85,
+      "nodeFailed": 0,
+      "originalFourCaseMaskBrowserTestPassed": true
+    },
+    "performance": {
+      "layoutShift": 0.2561908518287559,
+      "longestTaskMs": 171,
+      "longestTaskLimitMs": 350,
+      "longestTaskPassed": true,
+      "layoutShiftLimit": 0.12,
+      "layoutShiftPassed": false,
+      "issues": [
+        {
+          "profile": "android-portrait",
+          "phase": "zoom-modes",
+          "metric": "layoutShift",
+          "value": 0.2561908518287559,
+          "limit": 0.12
+        }
+      ],
+      "overallPerformancePassed": false
+    },
+    "sceneRetainedLongTasksMs": [
+      171,
+      62
+    ],
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16764682240,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261101.360.1"
+      },
+      "comparisonCaution": "This run used AMD EPYC7763, whereas ecfc and1b used EPYC9V74. Do not attribute the126→171ms difference to the capture helper. The earlier matched-host845→126ms comparison establishes the causal main-thread improvement; this run verifies the unchanged budget while properly binding finished pixels."
+    },
+    "captures": [
+      {
+        "stage": "initial",
+        "file": "android-portrait-scene3d-overview.png",
+        "bytes": 235928,
+        "sha256": "4be24b6645864b7c0fd66308b7180daecdfa1f84c676ed99edc9835197e1837e",
+        "stable": true,
+        "completedFrameId": 1,
+        "view": {
+          "yaw": -0.48,
+          "pitch": 0.72,
+          "zoom": 1,
+          "offset": [
+            0,
+            0
+          ]
+        },
+        "pendingBefore": "false",
+        "pendingAfter": "false",
+        "sceneOpacity": 1,
+        "canvasOpacity": 1,
+        "backingWidth": 824,
+        "backingHeight": 1694,
+        "renderer": "webgl2",
+        "pixelRatio": 2,
+        "triangles": 32768,
+        "meshStride": 4,
+        "settleWaitMs": 412.6254289999779,
+        "captureDurationMs": 161.8035760000057,
+        "lastNativeInputAtMs": null,
+        "beforeObservedAtMs": 162028.7,
+        "afterObservedAtMs": 162189.2,
+        "observationAfterLastInputMs": null,
+        "sameDigestAsPreviouslyDownloadedBaselinePNG": true
+      },
+      {
+        "stage": "close",
+        "file": "android-portrait-scene3d-close.png",
+        "bytes": 351801,
+        "sha256": "01e7863ef57120f7d5e077218e9728bb130fbf2dfe90618b111be77cc22f14b8",
+        "stable": true,
+        "completedFrameId": 2,
+        "view": {
+          "yaw": -0.48,
+          "pitch": 0.72,
+          "zoom": 5,
+          "offset": [
+            0,
+            0
+          ]
+        },
+        "pendingBefore": "false",
+        "pendingAfter": "false",
+        "sceneOpacity": 1,
+        "canvasOpacity": 1,
+        "backingWidth": 824,
+        "backingHeight": 1694,
+        "renderer": "webgl2",
+        "pixelRatio": 2,
+        "triangles": 131072,
+        "meshStride": 2,
+        "settleWaitMs": 785.483452000015,
+        "captureDurationMs": 175.9926470000064,
+        "lastNativeInputAtMs": 164081.3,
+        "beforeObservedAtMs": 165188,
+        "afterObservedAtMs": 165364.2,
+        "observationAfterLastInputMs": 1106.7000000000116,
+        "sameDigestAsPreviouslyDownloadedBaselinePNG": true
+      },
+      {
+        "stage": "wide",
+        "file": "android-portrait-scene3d-wide.png",
+        "bytes": 218136,
+        "sha256": "cc2deb72e584e1e419bd450c81042f98c783729a5d8339fba0ae2e5e2e591e34",
+        "stable": true,
+        "completedFrameId": 3,
+        "view": {
+          "yaw": -0.48,
+          "pitch": 0.72,
+          "zoom": 0.65,
+          "offset": [
+            0,
+            0
+          ]
+        },
+        "pendingBefore": "false",
+        "pendingAfter": "false",
+        "sceneOpacity": 1,
+        "canvasOpacity": 1,
+        "backingWidth": 824,
+        "backingHeight": 1694,
+        "renderer": "webgl2",
+        "pixelRatio": 2,
+        "triangles": 32768,
+        "meshStride": 4,
+        "settleWaitMs": 1.791136000014376,
+        "captureDurationMs": 153.7145770000061,
+        "lastNativeInputAtMs": 167264.59999999998,
+        "beforeObservedAtMs": 167586.8,
+        "afterObservedAtMs": 167740.7,
+        "observationAfterLastInputMs": 322.20000000001164,
+        "sameDigestAsPreviouslyDownloadedBaselinePNG": false
+      },
+      {
+        "stage": "rotated",
+        "file": "android-portrait-scene3d-rotated.png",
+        "bytes": 214989,
+        "sha256": "9766482fd6a2a8eb9a1f7154961ff9ccc9fb5d475afdfbe2ee47ba8368feafa7",
+        "stable": true,
+        "completedFrameId": 4,
+        "view": {
+          "yaw": -0.23000000000000043,
+          "pitch": 0.72,
+          "zoom": 0.65,
+          "offset": [
+            0,
+            0
+          ]
+        },
+        "pendingBefore": "false",
+        "pendingAfter": "false",
+        "sceneOpacity": 1,
+        "canvasOpacity": 1,
+        "backingWidth": 824,
+        "backingHeight": 1694,
+        "renderer": "webgl2",
+        "pixelRatio": 2,
+        "triangles": 32768,
+        "meshStride": 4,
+        "settleWaitMs": 1.4148890000069514,
+        "captureDurationMs": 152.90114499998163,
+        "lastNativeInputAtMs": 167848.5,
+        "beforeObservedAtMs": 168169.8,
+        "afterObservedAtMs": 168322.7,
+        "observationAfterLastInputMs": 321.29999999998836,
+        "sameDigestAsPreviouslyDownloadedBaselinePNG": false
+      },
+      {
+        "stage": "reset",
+        "file": "android-portrait-scene3d-reset.png",
+        "bytes": 237181,
+        "sha256": "80ebe7e68b149bd9e17c79a4a03e8345679585fe1c8b1b1773e25df48892dc24",
+        "stable": true,
+        "completedFrameId": 5,
+        "view": {
+          "yaw": -0.48,
+          "pitch": 0.72,
+          "zoom": 1,
+          "offset": [
+            0,
+            0
+          ]
+        },
+        "pendingBefore": "false",
+        "pendingAfter": "false",
+        "sceneOpacity": 1,
+        "canvasOpacity": 1,
+        "backingWidth": 824,
+        "backingHeight": 1694,
+        "renderer": "webgl2",
+        "pixelRatio": 2,
+        "triangles": 32768,
+        "meshStride": 4,
+        "settleWaitMs": 1.5250860000087414,
+        "captureDurationMs": 159.7217149999924,
+        "lastNativeInputAtMs": 168431.90000000002,
+        "beforeObservedAtMs": 168753.90000000002,
+        "afterObservedAtMs": 168913.8,
+        "observationAfterLastInputMs": 322,
+        "sameDigestAsPreviouslyDownloadedBaselinePNG": false
+      }
+    ],
+    "finding": "All five captures are bound to complete unchanged frames with pending=false and both opacities1. Initial and close PNG hashes exactly match the previously downloaded and decoded ecfc baseline images, resolving the stale zoom1 close screenshot without altering product pixels.",
+    "timingCaution": "The close completed view was observed1106.7ms after the last native click, including the existing~320ms delay and785.483ms extra settling. This is an observed completion bound, not an instantaneous presentation or FPS claim. Waiting and capture remained inside the unchanged performance interval.",
+    "remainingLimitations": [
+      "The old application CSS layout-shift failure remains .2561908518287559 >.12; full release acceptance is still false.",
+      "New archive digest is GitHub-reported rather than independently recomputed locally.",
+      "The remaining three new PNGs were not decoded from this archive because the execution environment was unavailable; their before/after frame identity and pipeline are verified from the full log report."
+    ]
+  }
 }

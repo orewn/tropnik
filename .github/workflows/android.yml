@@ -250,3 +250,69 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python3 tools/android-build/release-preview.py publish --output android/release
+
+
+  verify-public-release:
+    name: Verify public Android bytes and prepare the universal website manifest
+    needs: [build, instrumentation, publish]
+    if: ${{ github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/main' && needs.publish.result == 'success' && needs.build.outputs.release_requested == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout the exact tested and published source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Set up Node.js for the existing anonymous APK verifier
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: JDK17 for fresh official SDK signature verification
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Require the official APK signature verifier
+        run: |
+          tropnik_sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          if [[ ! -x "$tropnik_sdk/build-tools/36.0.0/apksigner" ]]; then
+            "$tropnik_sdk/cmdline-tools/latest/bin/sdkmanager" 'build-tools;36.0.0'
+          fi
+          test -x "$tropnik_sdk/build-tools/36.0.0/apksigner"
+          printf 'TROPNIK_VERIFY_SDK=%s\n' "$tropnik_sdk" >> "$GITHUB_ENV"
+      - name: Download the exact successful build artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
+          path: ${{ runner.temp }}/tropnik-public-build
+          digest-mismatch: error
+      - name: Download the exact installed-device evidence
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          artifact-ids: ${{ needs.instrumentation.outputs.artifact_id }}
+          path: ${{ runner.temp }}/tropnik-public-device
+          digest-mismatch: error
+      - name: Verify all public release bytes and prepare the universal manifest
+        env:
+          TROPNIK_BUILD_ARTIFACT_ID: ${{ needs.build.outputs.artifact_id }}
+          TROPNIK_DEVICE_ARTIFACT_ID: ${{ needs.instrumentation.outputs.artifact_id }}
+        run: |
+          python3 -B tools/android-build/verify-public-preview.py \
+            --directory "$RUNNER_TEMP/tropnik-public-build" \
+            --device-directory "$RUNNER_TEMP/tropnik-public-device" \
+            --sdk "$TROPNIK_VERIFY_SDK" \
+            --build-artifact-id "$TROPNIK_BUILD_ARTIFACT_ID" \
+            --device-artifact-id "$TROPNIK_DEVICE_ARTIFACT_ID" \
+            --output "$RUNNER_TEMP/tropnik-public-release-proof"
+      - name: Preserve public verification or the explicit post-publication failure
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-public-universal-proof-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tropnik-public-release-proof/
+          if-no-files-found: warn
+          retention-days: 14
