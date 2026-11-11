@@ -43,7 +43,8 @@ const matrix=[
 async function productionBundle(){
  const source=await readFile(enginePath,'utf8');
  assert.match(source,/private detailCoversViewport\(batch:TileBatch\|undefined\):boolean/);
- assert.match(source,/if\(!this\.detailCoversViewport\(detail\)\)/);
+ assert.match(source,/const detail=this\.displayDetail\(\),covered=this\.detailCoversViewport\(detail\);/);
+ assert.match(source,/if\(!covered\)\{ctx\.fillStyle=MAP_OUTSIDE_COLOR;ctx\.fillRect\(0,0,this\.canvas\.width,this\.canvas\.height\);\}/);
  const result=await build({absWorkingDir:web,bundle:true,write:false,format:'iife',platform:'browser',target:'chrome107',minify:false,metafile:true,logLevel:'silent',
   tsconfigRaw:{compilerOptions:{baseUrl:'.',paths:{'@/*':['./*']}}},
   stdin:{contents:`import {CustomMapEngine,geometryPath} from './lib/custom-map-engine.ts';import {mercatorUnproject} from './lib/custom-map-camera.ts';import {MAP_OUTSIDE_COLOR} from './public/maps/russia-viewport.js';import {mapCanvasPolicy} from './lib/map-canvas-policy.ts';window.runUnderlayGate=options=>(${runProductionPixels.toString()})({CustomMapEngine,geometryPath,mercatorUnproject,MAP_OUTSIDE_COLOR,mapCanvasPolicy},options);`,resolveDir:web,sourcefile:'underlay-fixture-entry.js'},
@@ -115,6 +116,11 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    const canvas=document.createElement('canvas');canvas.width=width*dpr;canvas.height=height*dpr;canvas.style.cssText=`width:${width}px;height:${height}px;position:absolute;left:0;top:0`;
    document.body.appendChild(canvas);surfaces.push(canvas);
    const context=canvas.getContext('2d',{alpha:false,willReadFrequently:policy.softwareRaster});
+   // Opposite opaque histories must be completely replaced by the real draw.
+   // Subsequent pan frames retain their actual previous output without reseeding.
+   context.fillStyle=baseline?'#ff00ff':'#00ffb0';context.fillRect(0,0,canvas.width,canvas.height);
+   context.fillStyle=baseline?'#1a2bff':'#fff300';
+   for(let y=0;y<canvas.height;y+=29)for(let x=0;x<canvas.width;x+=31)if(((x/31)+(y/29))%2===0)context.fillRect(x,y,19,17);
    const engine=Object.assign(Object.create(CustomMapEngine.prototype),{canvas,context,element:document.createElement('div'),size:{width,height},pixelRatio:dpr,camera:{center:mercatorUnproject(center),zoom,bearingDegrees:options.bearing??0},pitch:options.pitch??0,mode:options.mode??'detail',state:{committedMode:'detail'},active:true,disposed:false,area,mask,boundaries,selectedArea,selectedBoundary,route,routeId:'pixel-fixture-route',overview:overviewBatch,detail:batch,relief:reliefBatch,imagery:options.mode==='satellite'?{kind:'eox-s2',generation:1,tiles:imagery}:undefined,imageryOverlay:batch,boundaryVisible:options.boundaries!==false,reliefVisible:true,drawRevision:0,pointer:{activePointers:1},animation:0,options:{},drawLabels(){},drawMarkers(){}});
    const count={clear:0,area:0,mask:0,selectedArea:0,overview:0,detail:0,relief:0,imagery:0,proofCalls:0};
    const fill=context.fill.bind(context),clear=context.fillRect.bind(context),drawImage=context.drawImage.bind(context);
@@ -127,6 +133,9 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    return{engine,canvas,context,render};
   };
   const baseline=make(true),optimized=make();
+   const baselinePrior=baseline.context.getImageData(0,0,baseline.canvas.width,baseline.canvas.height).data,optimizedPrior=optimized.context.getImageData(0,0,optimized.canvas.width,optimized.canvas.height).data;
+   const priorFrame={kind:'distinct-opaque-checkerboards',comparison:diff(baselinePrior,optimizedPrior),baselinePixelSHA256:await hash(baselinePrior),optimizedPixelSHA256:await hash(optimizedPrior)};
+   check(priorFrame.comparison.differentPixels===width*height*dpr*dpr&&priorFrame.baselinePixelSHA256!==priorFrame.optimizedPixelSHA256,'Adversarial prior pixels must differ across the whole backing store');
   const movement=options.frames??[{x:0,y:0,cover:options.cover}];
   for(let index=0;index<movement.length;index++){
    const move=movement[index],next=mercatorUnproject({x:center.x+move.x/scale,y:center.y+move.y/scale});
@@ -140,8 +149,9 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    check(comparison.differentPixels===0,`${options.name}/${index}: ${comparison.differentPixels} pixels changed (max delta ${comparison.maxChannelDelta})`);
    check(old.operations.area===1&&old.operations.overview===overview.length,'Baseline did not execute the original underlays');
    check(current.operations.area===(move.cover?0:1)&&current.operations.overview===(move.cover?0:overview.length),'The production branch did not skip exactly the hidden underlays');
-   for(const key of ['clear','mask','selectedArea','detail','relief','imagery'])check(old.operations[key]===current.operations[key],`${key} changed between branches`);
-   check(current.operations.clear===1&&current.operations.mask===1&&current.operations.proofCalls===1,'Every frame must clear and apply the final outside mask once');
+   for(const key of ['mask','selectedArea','detail','relief','imagery'])check(old.operations[key]===current.operations[key],`${key} changed between branches`);
+   check(old.operations.clear===1&&current.operations.clear===(move.cover?0:1),'Only proven full opaque coverage may omit the paper clear');
+    check(current.operations.mask===1&&current.operations.proofCalls===1,'Every frame must retain the final outside mask and evaluate coverage once');
    if(options.name==='opaque'){
     const expected=MAP_OUTSIDE_COLOR.slice(1).match(/../g).map(value=>parseInt(value,16));
     for(const point of [[0,0],[-248,0]])for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
@@ -161,7 +171,7 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
     const result=diff(old.pixels,wrong.pixels);check(result.differentPixels>0,'The pixel comparison must detect an unsafe unconditional underlay skip');negativeControls.push({name:'force-unsafe-cover',...result});
    }
   }
-  return{verified:true,name:options.name,dpr,policy,contextAttributes:optimized.context.getContextAttributes(),tileDeviceSpan:scale*dpr/n,bitmapDimensions:[512,512],separateLabelsAndDOMMarkersExcluded:true,frames,negativeControls};
+  return{verified:true,name:options.name,dpr,policy,contextAttributes:optimized.context.getContextAttributes(),tileDeviceSpan:scale*dpr/n,bitmapDimensions:[512,512],separateLabelsAndDOMMarkersExcluded:true,priorFrame,frames,negativeControls};
  }catch(error){return{verified:false,name:options.name,dpr,error:String(error.stack||error),frames,negativeControls};}
  finally{for(const image of bitmaps)image.close();for(const canvas of surfaces)canvas.remove();}
 }

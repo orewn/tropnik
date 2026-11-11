@@ -110,6 +110,8 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   const run=vm.runInContext(`(function(require,module,exports){${compiled.get(filename)}\n})`,environment,{filename});run(require,testModule,testModule.exports);return testModule.exports;
  }
  const exports=load(resolve(root,'lib/custom-map-engine.ts'));
+ const productionDraw=exports.CustomMapEngine.prototype.draw;
+ exports.CustomMapEngine.prototype.draw=function(...args){calls.push({surface:'tropnik-map-canvas',op:'draw-start'});return productionDraw.apply(this,args);};
  const engine=new exports.CustomMapEngine(host,{camera:plain(view),onState:value=>states.push(plain(value))});
  engine.setFloor({center:[105,60],zoom:1,bearingDegrees:0});
  const tick=(elapsed=16)=>{now+=elapsed;const current=[...frames.values()];frames.clear();for(const frame of current)frame(now);return current.length;};
@@ -118,7 +120,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const complete=(selector=()=>true,options=()=>({}))=>{const jobs=pending().filter(selector);for(const job of jobs)store.resolve(job,options(job));return jobs;};
  const ready=async()=>{coverageResolve(coverage);await turn();complete();await turn();flush();return engine;};
  const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
- const lastDraw=()=>[...lastSurface('tropnik-map-canvas','fillRect'),...lastSurface('tropnik-map-labels','clearRect')];
+ const lastDraw=()=>[...lastSurface('tropnik-map-canvas','draw-start'),...lastSurface('tropnik-map-labels','clearRect')];
  return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
   coordinateAt:point=>engine.unproject(point),labelFor(job,coordinate,text,options={}){const p=load(resolve(root,'lib/custom-map-camera.ts')).mercatorProject(coordinate),n=2**job.request.z;return{x:p.x*n-job.request.x,y:p.y*n-job.request.y,text,kind:'place',rank:4,...options};}};
@@ -649,7 +651,7 @@ test('selected Chukotka keeps the real polygon fill but never outlines the sourc
 });
 
 function underlayPaint(env){
- const draw=env.lastDraw();return{draw,area:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='fill'&&call.color==='#dce5cf'),overview:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='drawImage'&&call.alpha===.95)};
+ const draw=env.lastDraw();return{draw,paper:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='fillRect'),area:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='fill'&&call.color==='#dce5cf'),overview:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='drawImage'&&call.alpha===.95)};
 }
 
 test('fully covered opaque detail skips only the occluded underlays and preserves mask, route, selected border and labels',async t=>{
@@ -660,10 +662,10 @@ test('fully covered opaque detail skips only the occluded underlays and preserve
  env.engine.setLabels([{id:'kept-label',coordinate:[40.3,43.4],label:'Kept label'}]);env.flush();
  const tile=env.store.cache.get(env.engine.inspect().tiles.detail[0].key);assert.equal(tile.transparent,false);
  tile.transparent=true;env.engine.setLayers({});env.flush();const baseline=underlayPaint(env);
- assert.equal(baseline.area.length,1);assert.ok(baseline.overview.length>0);
+ assert.equal(baseline.paper.length,1);assert.equal(baseline.area.length,1);assert.ok(baseline.overview.length>0);
  tile.transparent=false;env.engine.setLayers({});env.flush();const optimized=underlayPaint(env);
- assert.equal(optimized.area.length,0);assert.equal(optimized.overview.length,0);
- const retained=baseline.draw.filter(call=>!baseline.area.includes(call)&&!baseline.overview.includes(call));
+ assert.equal(optimized.paper.length,0);assert.equal(optimized.area.length,0);assert.equal(optimized.overview.length,0);
+ const retained=baseline.draw.filter(call=>!baseline.paper.includes(call)&&!baseline.area.includes(call)&&!baseline.overview.includes(call));
  assert.deepEqual(optimized.draw,retained,'The optimization must not change any remaining paint operation or ordering');
  assert.ok(optimized.draw.some(call=>call.op==='fill'&&call.rule==='evenodd'));
  assert.ok(optimized.draw.some(call=>call.op==='stroke'&&call.color==='#244d3c'));assert.ok(optimized.draw.some(call=>call.op==='stroke'&&call.color==='#688360'));
@@ -687,21 +689,21 @@ test('incomplete, transparent or incompatible detail always retains the old coun
  ];
  for(const [name,change]of cases){
   const env=fixture();t.after(()=>env.engine.destroy());await env.ready();change(env);env.engine.setLayers({});env.flush();
-  const actual=underlayPaint(env);assert.equal(actual.area.length,1,name);assert.ok(actual.overview.length>0,name);
+  const actual=underlayPaint(env);assert.equal(actual.paper.length,1,name);assert.equal(actual.area.length,1,name);assert.ok(actual.overview.length>0,name);
  }
  const env=fixture();t.after(()=>env.engine.destroy());await turn();const missing=env.pending('vector')[0];assert.ok(missing);
  env.store.reject(missing);env.complete();await env.settle();const incomplete=underlayPaint(env);
- assert.equal(incomplete.area.length,1,'A rejected central tile cannot prove opaque coverage');assert.ok(incomplete.overview.length>0);
+ assert.equal(incomplete.paper.length,1);assert.equal(incomplete.area.length,1,'A rejected central tile cannot prove opaque coverage');assert.ok(incomplete.overview.length>0);
 });
 
 test('opaque coverage is re-evaluated against the live camera and backing extent before new tiles arrive',async t=>{
  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
- assert.equal(underlayPaint(env).area.length,0);
+ assert.equal(underlayPaint(env).paper.length,0);assert.equal(underlayPaint(env).area.length,0);
  env.engine.setCamera({...env.engine.getCamera(),center:[45.5,43.5]},false);env.flush();
- assert.ok(env.pending('vector').length>0);assert.equal(underlayPaint(env).area.length,1,'A retained batch must not hide newly exposed ground');assert.ok(underlayPaint(env).overview.length>0);
- env.complete();await env.settle();assert.equal(underlayPaint(env).area.length,0,'A complete new batch may occlude the underlays again');
+ assert.ok(env.pending('vector').length>0);assert.equal(underlayPaint(env).paper.length,1);assert.equal(underlayPaint(env).area.length,1,'A retained batch must not hide newly exposed ground');assert.ok(underlayPaint(env).overview.length>0);
+ env.complete();await env.settle();assert.equal(underlayPaint(env).paper.length,0);assert.equal(underlayPaint(env).area.length,0,'A complete new batch may occlude the underlays again');
  env.host.clientWidth=1600;env.observers[0].callback();env.flush();assert.equal(env.engine.canvas.width,1600);
- assert.ok(env.pending('vector').length>0);assert.equal(underlayPaint(env).area.length,1,'The old batch cannot cover a larger actual canvas');
- env.complete();await env.settle();assert.equal(underlayPaint(env).area.length,0);
+ assert.ok(env.pending('vector').length>0);assert.equal(underlayPaint(env).paper.length,1);assert.equal(underlayPaint(env).area.length,1,'The old batch cannot cover a larger actual canvas');
+ env.complete();await env.settle();assert.equal(underlayPaint(env).paper.length,0);assert.equal(underlayPaint(env).area.length,0);
  assert.ok(env.engine.inspect().tiles.detail.every(tile=>tile.width===512&&tile.height===512));assert.equal(env.engine.getCamera().zoom,camera.zoom);
 });

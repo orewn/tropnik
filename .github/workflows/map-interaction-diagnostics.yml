@@ -137,6 +137,13 @@ jobs:
             assert.equal(item.contextAttributes.alpha, false);
             assert.equal(item.contextAttributes.willReadFrequently, item.policy.softwareRaster);
             assert.deepEqual(item.bitmapDimensions, [512,512]);
+            assert.equal(item.priorFrame.kind, 'distinct-opaque-checkerboards');
+            assert.equal(item.priorFrame.comparison.differentPixels, 512*384*item.dpr*item.dpr);
+            assert.equal(item.priorFrame.comparison.totalPixels, 512*384*item.dpr*item.dpr);
+            assert.ok(item.priorFrame.comparison.maxChannelDelta > 0 && item.priorFrame.comparison.maxChannelDelta <= 255);
+            assert.match(item.priorFrame.baselinePixelSHA256, /^[a-f0-9]{64}$/);
+            assert.match(item.priorFrame.optimizedPixelSHA256, /^[a-f0-9]{64}$/);
+            assert.notEqual(item.priorFrame.baselinePixelSHA256, item.priorFrame.optimizedPixelSHA256);
             assert.deepEqual(item.frames.map(frame => frame.actualCoverage), covers[item.name]);
             assert.deepEqual(item.frames.map(frame => frame.expectedCoverage), covers[item.name]);
             if (item.name === 'tiny-tile') assert.ok(item.tileDeviceSpan <= 1);
@@ -154,8 +161,9 @@ jobs:
               assert.ok(baseline.overview > 0);
               assert.equal(optimized.area, frame.actualCoverage ? 0 : 1);
               assert.equal(optimized.overview, frame.actualCoverage ? 0 : baseline.overview);
-              for (const key of ['clear','mask','selectedArea','detail','relief','imagery']) assert.equal(optimized[key], baseline[key]);
-              assert.equal(optimized.clear, 1);
+              for (const key of ['mask','selectedArea','detail','relief','imagery']) assert.equal(optimized[key], baseline[key]);
+              assert.equal(baseline.clear, 1);
+              assert.equal(optimized.clear, frame.actualCoverage ? 0 : 1);
               assert.equal(optimized.mask, 1);
               assert.equal(optimized.proofCalls, 1);
               if (frame.actualCoverage) assert.ok(item.tileDeviceSpan > 1);

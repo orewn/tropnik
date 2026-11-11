@@ -488,10 +488,13 @@ export class CustomMapEngine {
   }
   private draw(){
     if(this.disposed||!this.active)return;const ctx=this.context;
-    ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+    const detail=this.displayDetail(),covered=this.detailCoversViewport(detail);
+    ctx.setTransform(1,0,0,1,0,0);
+    // Fully opaque detail overwrites every backing pixel, including the guard
+    // margin. A missing cell or exposed pan edge retains the original clear.
+    if(!covered){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fillRect(0,0,this.canvas.width,this.canvas.height);}
     const scale=this.worldTransform();
-    const detail=this.displayDetail();
-    if(!this.detailCoversViewport(detail)){
+    if(!covered){
       if(this.area){ctx.fillStyle='#dce5cf';ctx.fill(this.area,'evenodd');}
       this.drawTiles(this.overview,.95);
     }
