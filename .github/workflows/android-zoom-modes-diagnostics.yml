@@ -32,6 +32,11 @@ jobs:
           pnpm --dir web install --frozen-lockfile
       - name: Verify the unchanged mode sequence and diagnostic boundaries
         run: node --test web/tests/terrain-renderer.test.mjs web/tests/terrain-display-mask.test.mjs tools/pages-preview/tests/zoom-performance-diagnostics.test.mjs tools/pages-preview/tests/terrain-diagnostic.test.mjs tools/pages-preview/tests/zoom-burst.test.mjs
+      - name: Install the pinned read-only landscape verifier dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/tropnik-python"
+          "$RUNNER_TEMP/tropnik-python/bin/python" -m pip install --disable-pip-version-check -r tools/android-build/requirements.txt
+          echo "$RUNNER_TEMP/tropnik-python/bin" >> "$GITHUB_PATH"
       - name: Verify deterministic terrain and map artifacts
         run: |
           node tools/android-build/prepare-custom-map.mjs --check
