@@ -116,7 +116,8 @@ jobs:
               assert actual == commit
               retained = sealed / variant / "web/pages-preview/dist"
               build = json.loads((retained / "build-info.json").read_bytes())
-              assert build["sourceCommit"] == commit and build["buildId"] == build_id and build["hasApk"] is True
+              # This original header records the measurement controller; the required Node proof below binds all application input bytes to the immutable checkout.
+              assert build["sourceCommit"] == "e12454abef64c26f4348c9e2a074d2d2f4a11db9" and build["buildId"] == build_id and build["hasApk"] is True
               raw = json.loads((retained / "browser-ui-smoothness-diagnostic.json").read_bytes())
               assert raw["sourceCommit"] == raw["environment"]["sourceCommit"] == "e12454abef64c26f4348c9e2a074d2d2f4a11db9"
               target = source / "web/pages-preview/dist"
@@ -127,6 +128,8 @@ jobs:
           pathlib.Path("ab-sealed-evidence/original-file-hashes.json").write_text(json.dumps(hashes, indent=2) + "\n")
           print("TROPNIK_SEALED_AB_FILE_HASHES=" + json.dumps(hashes, separators=(",", ":")))
           PY
+      - name: Reject incomplete or mismatched immutable application input evidence
+        run: node --test diagnostic/tools/pages-preview/tests/map-clear-build-source.test.mjs
       - name: Revalidate the same raw observations without rerunning either application
         run: node diagnostic/tools/pages-preview/map-clear-ab-report.mjs baseline-source optimized-source ab-sealed-evidence e12454abef64c26f4348c9e2a074d2d2f4a11db9
       - name: Preserve original bytes and corrected evidence binding
