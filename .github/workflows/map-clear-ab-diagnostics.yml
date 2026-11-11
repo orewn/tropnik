@@ -1,0 +1,112 @@
+name: Same-host opaque clear comparison
+
+on:
+  push:
+    branches: [diagnostics/opaque-detail-clear-ab]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: opaque-clear-ab-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  BASELINE_SOURCE: f836dce11579eae0e4596ee5b73f8bbe7246128f
+  OPTIMIZED_SOURCE: 1710b201bfeed52613659ae3e4ca7f26638cb6cb
+
+jobs:
+  same-host-comparison:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - name: Check out the isolated diagnostic tools
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: diagnostic
+          persist-credentials: false
+      - name: Check out the immutable baseline
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BASELINE_SOURCE }}
+          path: baseline
+          persist-credentials: false
+      - name: Check out the immutable optimized candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.OPTIMIZED_SOURCE }}
+          path: optimized
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install the identical frozen dependencies
+        run: |
+          cmp baseline/web/pnpm-lock.yaml optimized/web/pnpm-lock.yaml
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir optimized/web install --frozen-lockfile
+          pnpm --dir baseline/web install --frozen-lockfile --offline
+      - name: Verify immutable source identities
+        run: |
+          test "$(git -C baseline rev-parse HEAD)" = "$BASELINE_SOURCE"
+          test "$(git -C optimized rev-parse HEAD)" = "$OPTIMIZED_SOURCE"
+          git -C baseline diff --exit-code
+          git -C optimized diff --exit-code
+      - name: Prepare baseline site from its checked generated assets
+        working-directory: baseline
+        env:
+          GITHUB_SHA: ${{ env.BASELINE_SOURCE }}
+        run: |
+          node tools/android-build/prepare-custom-map.mjs --check
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Run the unchanged baseline normal UI audit
+        working-directory: baseline
+        timeout-minutes: 8
+        env:
+          GITHUB_SHA: ${{ env.BASELINE_SOURCE }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: ''
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Prepare optimized site from its checked generated assets
+        working-directory: optimized
+        env:
+          GITHUB_SHA: ${{ env.OPTIMIZED_SOURCE }}
+        run: |
+          node tools/android-build/prepare-custom-map.mjs --check
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Run the unchanged optimized normal UI audit
+        working-directory: optimized
+        timeout-minutes: 8
+        env:
+          GITHUB_SHA: ${{ env.OPTIMIZED_SOURCE }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: ''
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Bind source, hardware, raw windows and native input equality
+        run: node diagnostic/tools/pages-preview/map-clear-ab-report.mjs baseline optimized ab-evidence
+      - name: Preserve both actual runs and their comparison
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-map-clear-ab-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ab-evidence
+            baseline/web/pages-preview/design-qa
+            baseline/web/pages-preview/dist/build-info.json
+            baseline/web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            baseline/web/pages-preview/dist/browser-network.json
+            baseline/web/pages-preview/dist/browser-failure.*
+            optimized/web/pages-preview/design-qa
+            optimized/web/pages-preview/dist/build-info.json
+            optimized/web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            optimized/web/pages-preview/dist/browser-network.json
+            optimized/web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7
