@@ -14,12 +14,11 @@ jobs:
     name: Read exact failed device artifact (diagnostic only)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-    env:
-      TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-android-inspection
     steps:
       - name: Bind the exact original artifact metadata
         env:
           GH_TOKEN: ${{ github.token }}
+          TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-android-inspection
         run: |
           mkdir -p "$TROPNIK_INSPECTION_ROOT"
           gh api repos/orewn/tropnik/actions/artifacts/13877466623 > "$TROPNIK_INSPECTION_ROOT/artifact-metadata.json"
@@ -47,6 +46,8 @@ jobs:
           merge-multiple: true
           path: ${{ runner.temp }}/tropnik-android-inspection/files
       - name: Print bounded original receipts, logcat and QA captures
+        env:
+          TROPNIK_INSPECTION_ROOT: ${{ runner.temp }}/tropnik-android-inspection
         run: |
           python3 - <<'PY'
           import base64, hashlib, json, os, re, tarfile
@@ -70,6 +71,8 @@ jobs:
               return json.loads(path.read_text())
           device=get_json("device-result.json")
           installed=get_json("installed-apks.json")
+          print("TROPNIK_ANDROID_INSTALLED_RECEIPT_RAW="+json.dumps(installed,separators=(",",":")))
+          print("TROPNIK_ANDROID_DEVICE_RECEIPT_RAW="+json.dumps(device,separators=(",",":")))
           for receipt in (device,installed):
               assert receipt["sourceCommit"]=="1b01aebd441541e6636af7ccaa36bd7cdc936014", "Wrong source commit"
               assert receipt["workflowRunId"]=="43068767298", "Wrong workflow run"
