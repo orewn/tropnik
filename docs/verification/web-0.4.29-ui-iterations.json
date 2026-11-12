@@ -1,0 +1,1485 @@
+{
+  "schemaVersion": 1,
+  "kind": "historical-ui-candidate-receipts",
+  "assembledAt": "2026-11-12T10:14:26.812532+00:00",
+  "notes": [
+    "These are exact parsed copies of source-bound derived receipts, not original CI report bytes. Original archive/report digests remain inside each receipt.",
+    "All listed candidates failed and were not deployed. A following correction commit is not itself evidence of acceptance; see the final accepted-source receipt."
+  ],
+  "candidates": [
+    {
+      "sourceCommit": "3d4aea93e54e4ee6d15e5dff7d9283b6a8def9f7",
+      "status": "failed-not-published",
+      "followingCorrectionCommit": "cdac126411dcbe741f1fb6210be6a0335b31704f",
+      "followingCorrection": "Measured footer flow and mobile overlay spacing",
+      "originalReceiptFile": "pages-3d4a-evidence/receipt.json",
+      "originalReceiptBytes": 7121,
+      "originalReceiptSha256": "3f0c2902e7c6ac19a09395cdc602bfe6975f3f2f84f0cee71a5a57c9a55b5ff4",
+      "receipt": {
+        "schemaVersion": 1,
+        "status": "blocked-before-deployment",
+        "sourceCommit": "3d4aea93e54e4ee6d15e5dff7d9283b6a8def9f7",
+        "workflowRun": 43184255345,
+        "buildJob": 131067406098,
+        "deployJob": {
+          "id": 131068436056,
+          "conclusion": "skipped"
+        },
+        "firstFailingStep": "Verify source credit geometry across satellite loading",
+        "artifactReceipts": "artifact-receipts.json",
+        "sourceBinding": {
+          "passed": true,
+          "fixtureSHA256": "4fe1325fedf53e74f5f61aba5c8729ea251a808e6aab3e15f136c4495f5cae14",
+          "files": [
+            {
+              "path": "app/layout.tsx",
+              "sha256": "96b8201f9cdfdafc72f237882b59e8dbc10478873e0338f2ad95a9ebad31104d"
+            },
+            {
+              "path": "components/MapAttribution.tsx",
+              "sha256": "1dc9739518d274348b30d2dcc3fce8961b6d0fa71c32e970146a1289fb8776e4"
+            },
+            {
+              "path": "components/MapIcon.tsx",
+              "sha256": "b8329684685f74f1565af46718cc14a4532b572ca345c2f691f218226a352f23"
+            },
+            {
+              "path": "components/TropnikIcons.tsx",
+              "sha256": "4db7fdbe8f96bce6e71566f733776715993de75aead2d4fdf3c600b89a776850"
+            },
+            {
+              "path": "lib/map-attribution.ts",
+              "sha256": "70a4ee72e85fd94ae113b9444adc5b07fd6908c1dee092800d92c0f4acd3d382"
+            },
+            {
+              "path": "lib/map-satellite.ts",
+              "sha256": "369b5f6d99fb52c0754cd8dceea4de6959b9e9a6209e30796ec01cce560135f8"
+            },
+            {
+              "path": "lib/russia-map.ts",
+              "sha256": "0eac13c0921b2b78aeb83f576ec2e274b21c3c5b9932fa1a560b888186399b06"
+            },
+            {
+              "path": "components/CustomAtlas.tsx",
+              "sha256": "30a1e3e3bb28a0beb5269cd561e1db86ac746988f3ce5bd458e74c6accc9faae"
+            },
+            {
+              "path": "components/PlaceStories.tsx",
+              "sha256": "a8c6e810f8e6a28a20b8f1c85cad86b547e81310ba690d19b141d87ef786e619"
+            },
+            {
+              "path": "app/globals.css",
+              "sha256": "1f240196bc1195bb1bea3287a9a9fd1069a95a016ad1a16bde631e885c26cfae"
+            },
+            {
+              "path": "app/tropnik-system.css",
+              "sha256": "36c73db4cda7be4fdcdb700bafbb72458beeb140a5c7197515faf941a70a58e6"
+            },
+            {
+              "path": "app/gotham.css",
+              "sha256": "739150d3bf718fc98132efe987a0f649e9b3c074d4e5465adc01c1bc1578bdb9"
+            },
+            {
+              "path": "app/terrain.css",
+              "sha256": "a022792e36394e73074da74975125bd7bc711b4e074a45011d9e7874810cd2a2"
+            },
+            {
+              "path": "app/map-design.css",
+              "sha256": "f6dca134192bcd5f02c5b45634b7584320b27a788a57f3920b3f7bbf9b3d9fb5"
+            },
+            {
+              "path": "app/place-stories.css",
+              "sha256": "d061783615c3612fb8ae417284d7f4001b8a7a36573ae5c3ad1a2a911a03496b"
+            },
+            {
+              "path": "app/event-categories.css",
+              "sha256": "300e3dcfc3edf243c5d61847d709021d152c8e37c774e1a7d40426fd9cd3095d"
+            },
+            {
+              "path": "app/map-polish.css",
+              "sha256": "1bb41a523f155300f893321917b9adf077764e06f9ef6a93459443c349227360"
+            },
+            {
+              "path": "app/interface-refresh.css",
+              "sha256": "54851df88e8ee5234eadcae1285f06d7fc8e4a401c9425a1f220c7badc02ae4a"
+            },
+            {
+              "path": "app/map-ui-release.css",
+              "sha256": "2f303b6d094d5a2c1d92c4487baed667eb60c818ffb7c3f6af1d4826bea8f9ec"
+            },
+            {
+              "path": "app/final-polish.css",
+              "sha256": "ed4956c63b3ff7deb51e0c5caa94fa1afd23abfd2fcce5001b2523ae33901e5a"
+            },
+            {
+              "path": "app/map-sheet.css",
+              "sha256": "62a1aba65741f540c93372d8d8a0582c9d456cfc85bf690896c5fb9f1e0d0d78"
+            },
+            {
+              "path": "app/map-detail.css",
+              "sha256": "a1e37306bd58d2a666031bb2892f5d0641f9cd8c3cdfa912442ded2b9561a9a7"
+            },
+            {
+              "path": "app/map-direction-marker.css",
+              "sha256": "39ad2e70d14928a1c021db16070c46f4069994258d1e6661ed5517fa78322251"
+            },
+            {
+              "path": "app/custom-map.css",
+              "sha256": "f018c1cd2c8461d45e527d09eed5c93953d056b513afc482b62ca93893b79a3e"
+            },
+            {
+              "path": "@fontsource/manrope/cyrillic-400.css",
+              "sha256": "6ff7908e3f59c2c96c935e2236d3cb1b3bfa157763d85bf530f8b227dc3d8678"
+            },
+            {
+              "path": "@fontsource/manrope/cyrillic-500.css",
+              "sha256": "3b759c08be74805f5b051295afabaf1a7d5c368770fc38903b718ea09038b17c"
+            },
+            {
+              "path": "@fontsource/manrope/cyrillic-600.css",
+              "sha256": "02444808e22b9b998ce1d6e9040234b6f7ab7d604b740da61cc2c4aa83d25d3f"
+            },
+            {
+              "path": "@fontsource/manrope/cyrillic-700.css",
+              "sha256": "3847509773b8d018ef0b7fe63a444e0a1985cb3ca13fa5176664e289d0cfc9c4"
+            },
+            {
+              "path": "@fontsource/manrope/latin-400.css",
+              "sha256": "d5c53a6366731cbbc34eedb261a942da49256016c16fc5c2b381c25bb3c7b5bf"
+            },
+            {
+              "path": "@fontsource/manrope/latin-500.css",
+              "sha256": "7b4eb16c3857724bb47f5017a21c0ca3e11c36877b20da68297e1e290a7d85d8"
+            },
+            {
+              "path": "@fontsource/manrope/latin-600.css",
+              "sha256": "ccf132ff8e594fb11a350a1ab6eb7f0e4bea8d5ee70ba19fedd0a581d4ead8e8"
+            },
+            {
+              "path": "@fontsource/manrope/latin-700.css",
+              "sha256": "cce08640ef7fb4ba227f3bc303c8e65856c9aa0e47ee809727945fe8f712a751"
+            }
+          ]
+        },
+        "assertion": "Every licence link must be reachable with native Tab navigation\n\nfalse !== true\n",
+        "case": "compact-android-overview-limit-expanded",
+        "casesRecorded": 8,
+        "footerCasesRecorded": 0,
+        "measured": {
+          "atlas": {
+            "left": 0,
+            "top": 68,
+            "right": 320,
+            "bottom": 640,
+            "width": 320,
+            "height": 572
+          },
+          "credit": {
+            "left": 12,
+            "top": 374,
+            "right": 256,
+            "bottom": 472,
+            "width": 244,
+            "height": 98
+          },
+          "legal": {
+            "left": 20,
+            "top": 156,
+            "right": 244,
+            "bottom": 366,
+            "width": 224,
+            "height": 210
+          },
+          "toggle": {
+            "left": 264,
+            "top": 428,
+            "right": 308,
+            "bottom": 472,
+            "width": 44,
+            "height": 44
+          },
+          "loadingReadyEqual": true
+        },
+        "nativeFirstLink": {
+          "href": "https://www.openstreetmap.org/copyright",
+          "text": "© OpenStreetMap contributors",
+          "focused": true,
+          "visibleUnblocked": false,
+          "scrollTop": 0
+        },
+        "visualObservation": "The story launcher covers the first licence row in the source-bound PNG; Layers also meets/overlaps the info button. Exact launcher and layer rectangles were not serialized before this early failure.",
+        "failurePNG": {
+          "path": "/workspace/scratch/69b73e6e1c01/pages-3d4a-evidence/design/map-attribution/failure.png",
+          "bytes": 148669,
+          "sha256": "dcac3a9eb2f67a1a108810a349158981b9f32f7f233d6e3aaa680d9eb83c5b77",
+          "physicalPixels": [
+            640,
+            1280
+          ]
+        },
+        "passedBeforeFailure": [
+          "web regression checks",
+          "web lint",
+          "static client types",
+          "static site build and verification",
+          "production phone-landscape control geometry"
+        ],
+        "notReached": [
+          "remaining attribution/footer scenarios",
+          "remaining graphic gates",
+          "full browser smoke and performance",
+          "Pages deployment",
+          "public readback"
+        ]
+      }
+    },
+    {
+      "sourceCommit": "cdac126411dcbe741f1fb6210be6a0335b31704f",
+      "status": "failed-not-published",
+      "followingCorrectionCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+      "followingCorrection": "Remove legacy status offset and pack landscape and open-sheet overlays",
+      "originalReceiptFile": "pages-cdac-evidence/receipt.json",
+      "originalReceiptBytes": 16042,
+      "originalReceiptSha256": "3100bdca5b579c62bb0dbdba7da07a0c9085d8ced115ce44478ec84fde6d5f01",
+      "receipt": {
+        "schemaVersion": 1,
+        "releaseEligible": false,
+        "ciRun": 43185762183,
+        "sourceCommit": "cdac126411dcbe741f1fb6210be6a0335b31704f",
+        "buildJob": 131072386031,
+        "buildConclusion": "failure",
+        "firstFailedStage": "Verify source credit geometry across satellite loading",
+        "deployJob": 131073550210,
+        "deployConclusion": "skipped",
+        "publicReadback": "not performed: no successful deployment",
+        "artifacts": [
+          {
+            "id": 13928985872,
+            "name": "tropnik-pages-design-1",
+            "bytes": 4707784,
+            "sha256": "7e1ae1f0f8fb530df3ba0aaf4f1b0be8730246a546ceaad2ff60f7a01b46589c",
+            "zipPath": "/workspace/scratch/69b73e6e1c01/pages-cdac-evidence/design.zip",
+            "files": 52
+          },
+          {
+            "id": 13928253270,
+            "name": "tropnik-pages-browser-failure-1",
+            "bytes": 77583,
+            "sha256": "ad0701caa22730d018a7f7aa063a87912b65c038c2660b80bdd274f646494ff3",
+            "zipPath": "/workspace/scratch/69b73e6e1c01/pages-cdac-evidence/failure.zip",
+            "files": 2
+          }
+        ],
+        "sourceBinding": {
+          "method": "git show exact committed revision; installed pinned font CSS checked separately",
+          "inputs": [
+            {
+              "path": "app/layout.tsx",
+              "sha256": "96b8201f9cdfdafc72f237882b59e8dbc10478873e0338f2ad95a9ebad31104d",
+              "provider": "git-show-exact-commit",
+              "bytes": 2210
+            },
+            {
+              "path": "app/globals.css",
+              "sha256": "1f240196bc1195bb1bea3287a9a9fd1069a95a016ad1a16bde631e885c26cfae",
+              "provider": "git-show-exact-commit",
+              "bytes": 69589
+            },
+            {
+              "path": "app/tropnik-system.css",
+              "sha256": "36c73db4cda7be4fdcdb700bafbb72458beeb140a5c7197515faf941a70a58e6",
+              "provider": "git-show-exact-commit",
+              "bytes": 15452
+            },
+            {
+              "path": "app/gotham.css",
+              "sha256": "739150d3bf718fc98132efe987a0f649e9b3c074d4e5465adc01c1bc1578bdb9",
+              "provider": "git-show-exact-commit",
+              "bytes": 2017
+            },
+            {
+              "path": "app/terrain.css",
+              "sha256": "a022792e36394e73074da74975125bd7bc711b4e074a45011d9e7874810cd2a2",
+              "provider": "git-show-exact-commit",
+              "bytes": 7453
+            },
+            {
+              "path": "app/map-design.css",
+              "sha256": "f6dca134192bcd5f02c5b45634b7584320b27a788a57f3920b3f7bbf9b3d9fb5",
+              "provider": "git-show-exact-commit",
+              "bytes": 15746
+            },
+            {
+              "path": "app/place-stories.css",
+              "sha256": "d061783615c3612fb8ae417284d7f4001b8a7a36573ae5c3ad1a2a911a03496b",
+              "provider": "git-show-exact-commit",
+              "bytes": 3053
+            },
+            {
+              "path": "app/event-categories.css",
+              "sha256": "300e3dcfc3edf243c5d61847d709021d152c8e37c774e1a7d40426fd9cd3095d",
+              "provider": "git-show-exact-commit",
+              "bytes": 3131
+            },
+            {
+              "path": "app/map-polish.css",
+              "sha256": "1bb41a523f155300f893321917b9adf077764e06f9ef6a93459443c349227360",
+              "provider": "git-show-exact-commit",
+              "bytes": 6507
+            },
+            {
+              "path": "app/interface-refresh.css",
+              "sha256": "54851df88e8ee5234eadcae1285f06d7fc8e4a401c9425a1f220c7badc02ae4a",
+              "provider": "git-show-exact-commit",
+              "bytes": 5541
+            },
+            {
+              "path": "app/map-ui-release.css",
+              "sha256": "2f303b6d094d5a2c1d92c4487baed667eb60c818ffb7c3f6af1d4826bea8f9ec",
+              "provider": "git-show-exact-commit",
+              "bytes": 26051
+            },
+            {
+              "path": "app/final-polish.css",
+              "sha256": "ed4956c63b3ff7deb51e0c5caa94fa1afd23abfd2fcce5001b2523ae33901e5a",
+              "provider": "git-show-exact-commit",
+              "bytes": 6144
+            },
+            {
+              "path": "app/map-sheet.css",
+              "sha256": "62a1aba65741f540c93372d8d8a0582c9d456cfc85bf690896c5fb9f1e0d0d78",
+              "provider": "git-show-exact-commit",
+              "bytes": 3248
+            },
+            {
+              "path": "app/map-detail.css",
+              "sha256": "f645cf33737f443eced64fe1a790c82306b08bce4ba7492f3aa2c2a1edb8690e",
+              "provider": "git-show-exact-commit",
+              "bytes": 14494
+            },
+            {
+              "path": "app/map-direction-marker.css",
+              "sha256": "39ad2e70d14928a1c021db16070c46f4069994258d1e6661ed5517fa78322251",
+              "provider": "git-show-exact-commit",
+              "bytes": 5294
+            },
+            {
+              "path": "app/custom-map.css",
+              "sha256": "f018c1cd2c8461d45e527d09eed5c93953d056b513afc482b62ca93893b79a3e",
+              "provider": "git-show-exact-commit",
+              "bytes": 5416
+            },
+            {
+              "path": "@fontsource/manrope/cyrillic-400.css",
+              "sha256": "6ff7908e3f59c2c96c935e2236d3cb1b3bfa157763d85bf530f8b227dc3d8678",
+              "provider": "pinned-installed-dependency",
+              "bytes": 271
+            },
+            {
+              "path": "@fontsource/manrope/cyrillic-500.css",
+              "sha256": "3b759c08be74805f5b051295afabaf1a7d5c368770fc38903b718ea09038b17c",
+              "provider": "pinned-installed-dependency",
+              "bytes": 271
+            },
+            {
+              "path": "@fontsource/manrope/cyrillic-600.css",
+              "sha256": "02444808e22b9b998ce1d6e9040234b6f7ab7d604b740da61cc2c4aa83d25d3f",
+              "provider": "pinned-installed-dependency",
+              "bytes": 271
+            },
+            {
+              "path": "@fontsource/manrope/cyrillic-700.css",
+              "sha256": "3847509773b8d018ef0b7fe63a444e0a1985cb3ca13fa5176664e289d0cfc9c4",
+              "provider": "pinned-installed-dependency",
+              "bytes": 271
+            },
+            {
+              "path": "@fontsource/manrope/latin-400.css",
+              "sha256": "d5c53a6366731cbbc34eedb261a942da49256016c16fc5c2b381c25bb3c7b5bf",
+              "provider": "pinned-installed-dependency",
+              "bytes": 262
+            },
+            {
+              "path": "@fontsource/manrope/latin-500.css",
+              "sha256": "7b4eb16c3857724bb47f5017a21c0ca3e11c36877b20da68297e1e290a7d85d8",
+              "provider": "pinned-installed-dependency",
+              "bytes": 262
+            },
+            {
+              "path": "@fontsource/manrope/latin-600.css",
+              "sha256": "ccf132ff8e594fb11a350a1ab6eb7f0e4bea8d5ee70ba19fedd0a581d4ead8e8",
+              "provider": "pinned-installed-dependency",
+              "bytes": 262
+            },
+            {
+              "path": "@fontsource/manrope/latin-700.css",
+              "sha256": "cce08640ef7fb4ba227f3bc303c8e65856c9aa0e47ee809727945fe8f712a751",
+              "provider": "pinned-installed-dependency",
+              "bytes": 262
+            },
+            {
+              "path": "components/CustomAtlas.tsx",
+              "sha256": "30a1e3e3bb28a0beb5269cd561e1db86ac746988f3ce5bd458e74c6accc9faae",
+              "provider": "git-show-exact-commit",
+              "bytes": 19089
+            },
+            {
+              "path": "components/PlaceStories.tsx",
+              "sha256": "a8c6e810f8e6a28a20b8f1c85cad86b547e81310ba690d19b141d87ef786e619",
+              "provider": "git-show-exact-commit",
+              "bytes": 10070
+            },
+            {
+              "path": "components/MapAttribution.tsx",
+              "sha256": "1dc9739518d274348b30d2dcc3fce8961b6d0fa71c32e970146a1289fb8776e4",
+              "provider": "git-show-exact-commit",
+              "bytes": 6410
+            },
+            {
+              "path": "components/MapIcon.tsx",
+              "sha256": "b8329684685f74f1565af46718cc14a4532b572ca345c2f691f218226a352f23",
+              "provider": "git-show-exact-commit",
+              "bytes": 2008
+            },
+            {
+              "path": "components/TropnikIcons.tsx",
+              "sha256": "4db7fdbe8f96bce6e71566f733776715993de75aead2d4fdf3c600b89a776850",
+              "provider": "git-show-exact-commit",
+              "bytes": 7234
+            },
+            {
+              "path": "lib/map-attribution.ts",
+              "sha256": "70a4ee72e85fd94ae113b9444adc5b07fd6908c1dee092800d92c0f4acd3d382",
+              "provider": "git-show-exact-commit",
+              "bytes": 976
+            },
+            {
+              "path": "lib/map-satellite.ts",
+              "sha256": "369b5f6d99fb52c0754cd8dceea4de6959b9e9a6209e30796ec01cce560135f8",
+              "provider": "git-show-exact-commit",
+              "bytes": 2495
+            },
+            {
+              "path": "lib/russia-map.ts",
+              "sha256": "0eac13c0921b2b78aeb83f576ec2e274b21c3c5b9932fa1a560b888186399b06",
+              "provider": "git-show-exact-commit",
+              "bytes": 900
+            }
+          ],
+          "fixture": {
+            "path": "tools/pages-preview/tests/browser-map-attribution.browser.mjs",
+            "bytes": 29457,
+            "sha256": "9b766731a9c43cd020ad03330ba2cf041ec449966c56d6f7aec87df58f900cb9"
+          },
+          "compiledCssSHA256": "b4af35b9ddfd5b544270ef64febf4b5c07ee29e388d99dab79f5f2c3816ddaad",
+          "bundleSHA256": "9bd54ab910f0908ddb95e76a41fc549f508be087b8bcf85b746cc5efc318fdd0"
+        },
+        "checks": {
+          "creditCases": 40,
+          "creditPass": 34,
+          "footerCases": 24,
+          "footerPass": 16,
+          "caseFailures": [
+            {
+              "name": "phone-landscape-detail-limit-collapsed",
+              "message": "phone-landscape-detail-limit-collapsed ready: map-style-switch overlaps map-satellite-credit (54×6px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-phone-landscape-detail-limit-collapsed.png",
+                "bytes": 94012,
+                "sha256": "f2394e9881bea5de978369af3574f1132e1ddbbffea3c07362262df4766fe925"
+              }
+            },
+            {
+              "name": "phone-landscape-detail-limit-expanded",
+              "message": "phone-landscape-detail-limit-expanded ready: map-style-switch overlaps map-satellite-credit (54×6px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-phone-landscape-detail-limit-expanded.png",
+                "bytes": 128708,
+                "sha256": "6b06533f165c128995879307c619e94af1b81228cb726d67866a66e99df55c26"
+              }
+            },
+            {
+              "name": "phone-landscape-overview-collapsed",
+              "message": "phone-landscape-overview-collapsed ready: map-style-switch overlaps map-satellite-credit (54×6px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-phone-landscape-overview-collapsed.png",
+                "bytes": 96563,
+                "sha256": "f1daa9760ae7be21fea855a3c505a11141b1cc6604588877be8e670ab2f530ff"
+              }
+            },
+            {
+              "name": "phone-landscape-overview-expanded",
+              "message": "phone-landscape-overview-expanded ready: map-style-switch overlaps map-satellite-credit (54×6px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-phone-landscape-overview-expanded.png",
+                "bytes": 151637,
+                "sha256": "0678a2635d337b942e142e052b16d6cb35adf57abb0121db391e1dc85317d8fe"
+              }
+            },
+            {
+              "name": "phone-landscape-overview-limit-collapsed",
+              "message": "phone-landscape-overview-limit-collapsed ready: map-style-switch overlaps map-satellite-credit (54×22px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-phone-landscape-overview-limit-collapsed.png",
+                "bytes": 101806,
+                "sha256": "91b55353f61de30167ef56fbfa12baf2343b56d4116502ee5b15c00c27a72183"
+              }
+            },
+            {
+              "name": "phone-landscape-overview-limit-expanded",
+              "message": "phone-landscape-overview-limit-expanded ready: map-style-switch overlaps map-satellite-credit (54×22px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-phone-landscape-overview-limit-expanded.png",
+                "bytes": 156754,
+                "sha256": "36c0cc27294520cb92065793d927b38e2488e19be32542eeb81f1f9e99c91fa9"
+              }
+            },
+            {
+              "name": "footer-compact-android-pending",
+              "message": "compact-android-pending loading: map-preload-status overlaps fact-closed (142.921875×26px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-footer-compact-android-pending.png",
+                "bytes": 72002,
+                "sha256": "bef55fbb0ad73c5d67edd5dd22c4d8a8be2b49cbc33f5f06f2ed63ed2df08add"
+              }
+            },
+            {
+              "name": "footer-compact-android-retained",
+              "message": "compact-android-retained loading: map-context overlaps map-preload-status (82.734375×26px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-footer-compact-android-retained.png",
+                "bytes": 94503,
+                "sha256": "d05708f2aaa56780431ddea1d0a4495ac081b6a2d0b04f1eefdc6ee638a332dd"
+              }
+            },
+            {
+              "name": "footer-phone-landscape-pending",
+              "message": "phone-landscape-pending loading: map-preload-status overlaps fact-closed (142.921875×24px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-footer-phone-landscape-pending.png",
+                "bytes": 80590,
+                "sha256": "efc1504d1369f0b3e1e56d41f67f1251180aa9f03280d2e5f23e2972c8c97428"
+              }
+            },
+            {
+              "name": "footer-phone-landscape-retained",
+              "message": "phone-landscape-retained loading: map-style-switch overlaps map-satellite-credit (54×22px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-footer-phone-landscape-retained.png",
+                "bytes": 101806,
+                "sha256": "91b55353f61de30167ef56fbfa12baf2343b56d4116502ee5b15c00c27a72183"
+              }
+            },
+            {
+              "name": "footer-compact-android-sheet-open-pending",
+              "message": "compact-android-sheet-open-pending loading: map-preload-status overlaps fact-closed (142.921875×28.390625px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-footer-compact-android-sheet-open-pending.png",
+                "bytes": 70448,
+                "sha256": "a7b23bfe66193e6bcbfded6d1b70eea2879db98cd99dc49b9717b0dffedc8bba"
+              }
+            },
+            {
+              "name": "footer-compact-android-sheet-open-retained",
+              "message": "compact-android-sheet-open-retained loading: map-controls overlaps map-satellite-credit (170×4.390625px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-footer-compact-android-sheet-open-retained.png",
+                "bytes": 82633,
+                "sha256": "e24416eb53d08ae3b70644983063deeb9e2eb03749dc7a2e1afcd4d07b4cab65"
+              }
+            },
+            {
+              "name": "footer-iphone-portrait-sheet-open-retained",
+              "message": "iphone-portrait-sheet-open-retained loading: map-satellite-credit overlaps fact-closed (73.734375×44px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-footer-iphone-portrait-sheet-open-retained.png",
+                "bytes": 95040,
+                "sha256": "fb948f154ed903d4b5853883dc6be6856d9b9573f8f47f38a0a9f959e71c1937"
+              }
+            },
+            {
+              "name": "footer-android-portrait-sheet-open-retained",
+              "message": "android-portrait-sheet-open-retained loading: map-satellite-credit overlaps fact-closed (51.734375×44px)",
+              "screenshot": {
+                "path": "design-qa/map-attribution/failed-footer-android-portrait-sheet-open-retained.png",
+                "bytes": 98159,
+                "sha256": "00064f3da3b2452e8c426c4564c331e29dccd14b44ca316688cfd1e06cac6bba"
+              }
+            }
+          ],
+          "pngReferencesVerified": 63,
+          "uniquePngsVerified": 49
+        },
+        "diagnosis": [
+          {
+            "family": "legacy collapsed notice offset",
+            "evidence": "Nested relative footer notices inherit bottom:148px and move upward exactly148 CSSpx."
+          },
+          {
+            "family": "landscape placement",
+            "evidence": "Source card overlaps upper-right mode controls; legal panel and pending notice overlap upper-left story launcher."
+          },
+          {
+            "family": "open portrait map height",
+            "evidence": "Credit in fixed top slot overlaps launcher; compact drawer leaves213.609375 CSSpx of map height, insufficient for complete controls, source card and notice."
+          }
+        ],
+        "closedCompactOriginalDefects": {
+          "casesPass": 8,
+          "launcherLegalAndLayersInfoOverlap": "not reproduced in cdac; native links/wheel/Tab retained"
+        },
+        "scopeLimits": [
+          "No full browser smoke, performance, coast/label/satellite or offline outcome exists for this failed candidate.",
+          "No deploy or APK replacement is claimed.",
+          "New uncommitted source and fixture changes were not used to bind this evidence."
+        ],
+        "fullRectangles": "/workspace/scratch/69b73e6e1c01/pages-cdac-evidence/layout-failures.json",
+        "report": "/workspace/scratch/69b73e6e1c01/pages-cdac-evidence/failure/browser-map-attribution-verification.json"
+      }
+    },
+    {
+      "sourceCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+      "status": "failed-not-published",
+      "followingCorrectionCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+      "followingCorrection": "Preserve physical sheet height across open and closed states",
+      "originalReceiptFile": "pages-7012-evidence/receipt.json",
+      "originalReceiptBytes": 6054,
+      "originalReceiptSha256": "0d329b740855d4d44d1d4384dc9f4381bc00af884eb29f656979c6c8fcc497c4",
+      "receipt": {
+        "schemaVersion": 1,
+        "sourceCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+        "runId": 43189201064,
+        "buildJobId": 131083923073,
+        "buildConclusion": "failure",
+        "deployJobId": 131085789837,
+        "deployConclusion": "skipped",
+        "releaseEligible": false,
+        "firstFailedStage": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+        "error": {
+          "name": "AssertionError",
+          "message": "compact-android: panel height changed during transform animation (158.390625px)",
+          "stack": "AssertionError [ERR_ASSERTION]: compact-android: panel height changed during transform animation (158.390625px)\n    at file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:974:14",
+          "code": "ERR_ASSERTION"
+        },
+        "profile": "compact-android",
+        "artifacts": [
+          {
+            "id": 13930365797,
+            "name": "tropnik-pages-browser-failure-1",
+            "zip": {
+              "path": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/failure.zip",
+              "bytes": 243133,
+              "sha256": "e4143181ab8e0a7f5101e00be084d0880ad7a34bf8a210968edddda2d0df707f"
+            },
+            "files": 9
+          },
+          {
+            "id": 13930365805,
+            "name": "tropnik-pages-design-1",
+            "zip": {
+              "path": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/design.zip",
+              "bytes": 21914893,
+              "sha256": "5495de5fcd6a3d63a262fdbd5ea7bc7b08936ef7447c9e4600d67088b65f9eff"
+            },
+            "files": 265
+          }
+        ],
+        "reports": [
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/failure/browser-map-attribution-verification.json",
+            "bytes": 1655301,
+            "sha256": "d6f100f0ce50e18e6f6111e754b60a7b6b749d5f19be4ec0ed6c7cfe9e70a226",
+            "verified": true,
+            "sourceCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+            "cases": 40
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/failure/browser-map-controls-verification.json",
+            "bytes": 29353,
+            "sha256": "e44349a7b571ac5da4207beb471bfb6a42037d6150904339278bdd7d870c1007",
+            "verified": true,
+            "sourceCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+            "cases": 3
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/failure/browser-map-underlay-verification.json",
+            "bytes": 125322,
+            "sha256": "c03d6dcad7840277d192471ebfc966e770a3e4824b176792c571b56b54594986",
+            "verified": true,
+            "sourceCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+            "cases": 30
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/failure/browser-terrain-full-mask-verification.json",
+            "bytes": 100659,
+            "sha256": "ddfc7e4fb5941eba3708960fa872018f6814ff312cae5da348505a9c47376b91",
+            "verified": true,
+            "sourceCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+            "cases": 8
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/failure/browser-terrain-mask-verification.json",
+            "bytes": 42695,
+            "sha256": "8aa04407aaafc451c9138a4f939ff6e14092323d475009f4f7d806278fa21d3d",
+            "verified": true,
+            "sourceCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+            "cases": 4
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/failure/browser-terrain-presentation-verification.json",
+            "bytes": 126675,
+            "sha256": "05b9a419262ce3ec190547d783543f31a05a739fab60fb77fee1ef3392ab45e7",
+            "verified": true,
+            "sourceCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+            "cases": 8
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/failure/browser-terrain-unmasked-verification.json",
+            "bytes": 73830,
+            "sha256": "96774f334de18c8d52f3897a6f093ab245be57637cb843462b4d9f5f9db11317",
+            "verified": true,
+            "sourceCommit": "7012febcf34682e4c5d5d0ede1181eca42f9f17f",
+            "cases": 2
+          }
+        ],
+        "attribution": {
+          "actualSourceBoundValidator": "PASS",
+          "creditCases": 40,
+          "footerCases": 24,
+          "caseFailures": [],
+          "loadingCycles": 131,
+          "pngs": 36,
+          "nativeScrollableCases": [
+            "compact-android-overview-expanded",
+            "compact-android-overview-limit-expanded",
+            "phone-landscape-overview-expanded",
+            "phone-landscape-overview-limit-expanded"
+          ],
+          "observedCompactFooterHeights": [
+            {
+              "name": "compact-android-pending",
+              "height": 102
+            },
+            {
+              "name": "compact-android-retained",
+              "height": 156
+            },
+            {
+              "name": "compact-android-sheet-open-pending",
+              "height": 110
+            },
+            {
+              "name": "compact-android-sheet-open-retained",
+              "height": 164
+            }
+          ]
+        },
+        "sheetFailure": {
+          "closedSnapshot": {
+            "available": true,
+            "state": "closed",
+            "height": 358.390625,
+            "top": 484,
+            "transform": "matrix(1, 0, 0, 1, 0, 202.391)",
+            "animating": false,
+            "summaryVisible": true,
+            "contentVisible": false,
+            "focused": false,
+            "dragging": false,
+            "scrollY": 0,
+            "contentScrollTop": 0,
+            "contentScrollHeight": 1840,
+            "contentClientHeight": 201
+          },
+          "smokeHeightDeltaCssPx": 158.390625,
+          "sourceCause": "Expanded-height cap and portrait footer grid are conditional on sheet-open; closing changes actual panel height instead of transform alone.",
+          "openHeightInferredFromClosedMinusDelta": 200,
+          "inferenceLabel": "Open height inferred; complete intermediate touchSheet record was not serialized."
+        },
+        "limits": [
+          "All seven early graphic steps passed; full mobile/desktop smoke stopped at the first compact-android sheet check.",
+          "No coast/labels/satellite sweep, final performance/offline or deploy/public-readback success exists for this candidate.",
+          "The transform-only sheet invariant and all thresholds remain unchanged."
+        ],
+        "failureScreenshot": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/failure/browser-failure.png",
+        "sourceSnapshot": "/workspace/scratch/69b73e6e1c01/pages-7012-evidence/source-identity.json"
+      }
+    },
+    {
+      "sourceCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+      "status": "failed-not-published",
+      "followingCorrectionCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+      "followingCorrection": "Reserve usable native list space with compact story launcher",
+      "originalReceiptFile": "pages-5e6c-evidence/receipt.json",
+      "originalReceiptBytes": 7233,
+      "originalReceiptSha256": "b9c6d246c6eab9658e1a4528ce8a0b1aff5751d7f276e7e6475d93bcff29bf97",
+      "receipt": {
+        "schemaVersion": 1,
+        "sourceCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+        "runId": 43191291660,
+        "buildJobId": 131090972144,
+        "buildConclusion": "failure",
+        "deployJobId": 131092899393,
+        "deployConclusion": "skipped",
+        "releaseEligible": false,
+        "firstFailedStage": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+        "error": {
+          "name": "AssertionError",
+          "message": "compact-android: sheet has no usable drag travel (60px)",
+          "stack": "AssertionError [ERR_ASSERTION]: compact-android: sheet has no usable drag travel (60px)\n    at dragSheetHandle (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:226:10)\n    at async touchSheetGestures (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:284:14)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:977:25",
+          "code": "ERR_ASSERTION"
+        },
+        "profile": "compact-android",
+        "artifacts": [
+          {
+            "id": 13930179735,
+            "name": "tropnik-pages-browser-failure-1",
+            "zip": {
+              "path": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/failure.zip",
+              "bytes": 294467,
+              "sha256": "3796dd92a4a34d438fc6d1b0e44fb0793c4f7c625b9859d5cddd45aa11e6d9de"
+            },
+            "files": 9
+          },
+          {
+            "id": 13930179746,
+            "name": "tropnik-pages-design-1",
+            "zip": {
+              "path": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/design.zip",
+              "bytes": 21879034,
+              "sha256": "4ed93006490e98d993a7f190b0af9d72293cb04192987311471e5f876ea1cd64"
+            },
+            "files": 265
+          }
+        ],
+        "reports": [
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/failure/browser-map-attribution-verification.json",
+            "bytes": 2458825,
+            "sha256": "b8e15eda49466cecd5e64486bb432bc709183ceb3baa19a3d5a192b8b303b0d5",
+            "verified": true,
+            "sourceCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+            "cases": 40
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/failure/browser-map-controls-verification.json",
+            "bytes": 29148,
+            "sha256": "0f93265d9e9699865f5de4738d77b17a5bd9f577bb012cf69821fca77a8c1c0a",
+            "verified": true,
+            "sourceCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+            "cases": 3
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/failure/browser-map-underlay-verification.json",
+            "bytes": 125322,
+            "sha256": "6198790c324a35c5fe2f66089151316d176c2c6c0d62bc7dc655d9d31f7d0653",
+            "verified": true,
+            "sourceCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+            "cases": 30
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/failure/browser-terrain-full-mask-verification.json",
+            "bytes": 100677,
+            "sha256": "df9bbd7dd772fc1e1e412c3237c6d1127d8e08750e242556fd3583d9696ae6e2",
+            "verified": true,
+            "sourceCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+            "cases": 8
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/failure/browser-terrain-mask-verification.json",
+            "bytes": 42697,
+            "sha256": "506469491ddbaa104338805ed80988631ee8b93d5c56ff37350c3c96d05fa90e",
+            "verified": true,
+            "sourceCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+            "cases": 4
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/failure/browser-terrain-presentation-verification.json",
+            "bytes": 126671,
+            "sha256": "7d440b944f8d2fee5ab8a9fc52ba4a311a50d2217c549762daf5402198ca2cc9",
+            "verified": true,
+            "sourceCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+            "cases": 8
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/failure/browser-terrain-unmasked-verification.json",
+            "bytes": 73826,
+            "sha256": "58ac26e9b00c4fedaebba861de21dcdd0e3e56f9936cbea5f11e9d6466fd3431",
+            "verified": true,
+            "sourceCommit": "5e6cf4aef3c3c65061a775906defdc28b80aded2",
+            "cases": 2
+          }
+        ],
+        "attribution": {
+          "actualSourceBoundValidator": "PASS",
+          "creditCases": 40,
+          "footerCases": 24,
+          "sheetCycles": 36,
+          "caseFailures": [],
+          "loadingCycles": 131,
+          "pngs": 36,
+          "maximumPanelHeightDelta": 0,
+          "maximumFooterHeightDelta": 0,
+          "observedCompactSourceStates": [
+            {
+              "name": "compact-android-detail-collapsed",
+              "panelHeight": 268,
+              "travel": 112,
+              "footerHeight": 100
+            },
+            {
+              "name": "compact-android-detail-expanded",
+              "panelHeight": 172,
+              "travel": 16,
+              "footerHeight": 196
+            },
+            {
+              "name": "compact-android-detail-limit-collapsed",
+              "panelHeight": 252,
+              "travel": 96,
+              "footerHeight": 116
+            },
+            {
+              "name": "compact-android-detail-limit-expanded",
+              "panelHeight": 156,
+              "travel": 0,
+              "footerHeight": 212
+            },
+            {
+              "name": "compact-android-overview-collapsed",
+              "panelHeight": 236,
+              "travel": 80,
+              "footerHeight": 132
+            },
+            {
+              "name": "compact-android-overview-expanded",
+              "panelHeight": 156,
+              "travel": 0,
+              "footerHeight": 212
+            },
+            {
+              "name": "compact-android-overview-limit-collapsed",
+              "panelHeight": 220,
+              "travel": 64,
+              "footerHeight": 148
+            },
+            {
+              "name": "compact-android-overview-limit-expanded",
+              "panelHeight": 156,
+              "travel": 0,
+              "footerHeight": 212
+            }
+          ]
+        },
+        "nativeSheetFailure": {
+          "snapshot": {
+            "available": true,
+            "state": "closed",
+            "height": 216,
+            "top": 484,
+            "transform": "matrix(1, 0, 0, 1, 0, 60)",
+            "animating": false,
+            "summaryVisible": true,
+            "contentVisible": false,
+            "focused": false,
+            "dragging": false,
+            "scrollY": 0,
+            "contentScrollTop": 0,
+            "contentScrollHeight": 1840,
+            "contentClientHeight": 59
+          },
+          "travelCssPx": 60,
+          "requiredTravelCssPx": ">60",
+          "nextNativeListGate": {
+            "minimumSwipeCssPx": 48,
+            "edgeInsetCssPx": 32,
+            "impliedMinimumClientHeightCssPx": 112
+          },
+          "nativeGateSource": {
+            "path": "tools/pages-preview/browser-smoke.mjs",
+            "sha256": "9f0f8e8789b08298866da1e37fca0acd1d8ec940d8b6b40ff2638dd868db997a"
+          },
+          "diagnosis": "Common endpoint fixed physical-height invariance; compact available catalogue remains too short for the existing native drag/list-scroll usability requirements."
+        },
+        "limits": [
+          "All seven early graphics and all36 portrait state cycles passed; native full smoke stopped at compact-android handle drag readiness.",
+          "The next list-swipe minimum is a source-derived bound, not a subsequent executed failure.",
+          "No coast/labels/satellite sweep, final performance/offline or deploy/public-readback success exists for this candidate.",
+          "No existing native input requirement was changed."
+        ],
+        "failureScreenshot": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/failure/browser-failure.png",
+        "sourceSnapshot": "/workspace/scratch/69b73e6e1c01/pages-5e6c-evidence/source-identity.json"
+      }
+    },
+    {
+      "sourceCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+      "status": "failed-not-published",
+      "followingCorrectionCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+      "followingCorrection": "Anchor compact closed layer menu above its left-side button",
+      "originalReceiptFile": "pages-5996-evidence/receipt.json",
+      "originalReceiptBytes": 9118,
+      "originalReceiptSha256": "f1d0db541187010a5ead48f75dfe13c9840c22bb1088ed14e2ecca1663cd78cf",
+      "receipt": {
+        "schemaVersion": 1,
+        "sourceCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+        "runId": 43193939522,
+        "buildJobId": 131099940053,
+        "buildConclusion": "failure",
+        "deployJobId": 131102029645,
+        "deployConclusion": "skipped",
+        "releaseEligible": false,
+        "firstFailedStage": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+        "error": {
+          "name": "AssertionError",
+          "message": "No remaining content in .layer-menu",
+          "stack": "AssertionError [ERR_ASSERTION]: No remaining content in .layer-menu\n    at scrollContainer (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:472:12)\n    at async checkPortraitLayerMenus (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:533:22)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:981:51",
+          "code": "ERR_ASSERTION"
+        },
+        "profile": "compact-android",
+        "artifacts": [
+          {
+            "id": 13931768388,
+            "name": "tropnik-pages-browser-failure-1",
+            "zip": {
+              "path": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/failure.zip",
+              "bytes": 317074,
+              "sha256": "75af783c9b4cd3eef94a85b681705c5b7e3f7027036ee9b4354eefc1aca27ba8"
+            },
+            "files": 9
+          },
+          {
+            "id": 13931474377,
+            "name": "tropnik-pages-design-1",
+            "zip": {
+              "path": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/design.zip",
+              "bytes": 21899123,
+              "sha256": "4d1a0b62b2621b11b8eb58043dcfd7c2645b04c12b8748f48cc2874f3b472279"
+            },
+            "files": 265
+          }
+        ],
+        "reports": [
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/failure/browser-map-attribution-verification.json",
+            "bytes": 2462867,
+            "sha256": "0ede92a704c3f242731d94034708b5a40a15f1ecafddbad5467f398eb080c111",
+            "verified": true,
+            "sourceCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+            "cases": 40
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/failure/browser-map-controls-verification.json",
+            "bytes": 29162,
+            "sha256": "ad5126fa4bf225b98363aed5dfc3052217a94352c0da5288bda103d63f4b525b",
+            "verified": true,
+            "sourceCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+            "cases": 3
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/failure/browser-map-underlay-verification.json",
+            "bytes": 125343,
+            "sha256": "6d045d7c5c2158f2522c6c4b46ebdf1a5df82289cefa08a7a913ae5999b34c01",
+            "verified": true,
+            "sourceCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+            "cases": 30
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/failure/browser-terrain-full-mask-verification.json",
+            "bytes": 100736,
+            "sha256": "e7e9f468e0bb2ebf17f298b68184676d41b3c130a82d0a73ca5cf51109955dfb",
+            "verified": true,
+            "sourceCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+            "cases": 8
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/failure/browser-terrain-mask-verification.json",
+            "bytes": 42711,
+            "sha256": "87f5754a0da82cd31c6dd57099e8062bebeb9d246deabcd15eb6eb19fe78ec8b",
+            "verified": true,
+            "sourceCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+            "cases": 4
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/failure/browser-terrain-presentation-verification.json",
+            "bytes": 126693,
+            "sha256": "67ea47a17ce3ebc5ef581e30793539798ee282b586dd7600f47534a2a9a8c9b0",
+            "verified": true,
+            "sourceCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+            "cases": 8
+          },
+          {
+            "path": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/failure/browser-terrain-unmasked-verification.json",
+            "bytes": 73843,
+            "sha256": "d5b62814a4db2d8c50567b387885052fe296d90189121992c719d5d2c75a0b27",
+            "verified": true,
+            "sourceCommit": "59961eaa2ed5c957594d44f3625e7df8134768a6",
+            "cases": 2
+          }
+        ],
+        "attribution": {
+          "actualSourcePinnedValidator": "PASS",
+          "binding": "Temporary exact git-show5996 sources and pinned font CSS, unchanged validator, all36 PNG hashes/DPR",
+          "creditCases": 40,
+          "footerCases": 24,
+          "sheetCycles": 36,
+          "compactCatalogueCases": 8,
+          "minimumCompactCatalogueTravel": 120,
+          "caseFailures": [],
+          "loadingCycles": 131,
+          "pngs": 36
+        },
+        "initialNativeSheet": {
+          "passed": true,
+          "evidence": "sheet-gestures-after phase and subsequent checkPortraitLayerMenus failure; all earlier assertions resolved",
+          "phases": [
+            {
+              "name": "profile-ready",
+              "time": 2462.2999999999884,
+              "sheet": "closed",
+              "panel": {
+                "x": 0,
+                "y": 484,
+                "width": 320,
+                "height": 272,
+                "display": "flex",
+                "visibility": "visible",
+                "transform": "matrix(1, 0, 0, 1, 0, 116)"
+              }
+            },
+            {
+              "name": "sheet-before",
+              "time": 2465.399999999994,
+              "sheet": "closed",
+              "panel": {
+                "x": 0,
+                "y": 484,
+                "width": 320,
+                "height": 272,
+                "display": "flex",
+                "visibility": "visible",
+                "transform": "matrix(1, 0, 0, 1, 0, 116)"
+              }
+            },
+            {
+              "name": "sheet-after",
+              "time": 3227.899999999994,
+              "sheet": "closed",
+              "panel": {
+                "x": 0,
+                "y": 484,
+                "width": 320,
+                "height": 272,
+                "display": "flex",
+                "visibility": "visible",
+                "transform": "matrix(1, 0, 0, 1, 0, 116)"
+              }
+            },
+            {
+              "name": "sheet-gestures-before",
+              "time": 3229.100000000006,
+              "sheet": "closed",
+              "panel": {
+                "x": 0,
+                "y": 484,
+                "width": 320,
+                "height": 272,
+                "display": "flex",
+                "visibility": "visible",
+                "transform": "matrix(1, 0, 0, 1, 0, 116)"
+              }
+            },
+            {
+              "name": "sheet-gestures-after",
+              "time": 13523.5,
+              "sheet": "closed",
+              "panel": {
+                "x": 0,
+                "y": 484,
+                "width": 320,
+                "height": 330,
+                "display": "flex",
+                "visibility": "visible",
+                "transform": "matrix(1, 0, 0, 1, 0, 174)"
+              }
+            },
+            {
+              "name": "layers-before",
+              "time": 13524.399999999994,
+              "sheet": "closed",
+              "panel": {
+                "x": 0,
+                "y": 484,
+                "width": 320,
+                "height": 330,
+                "display": "flex",
+                "visibility": "visible",
+                "transform": "matrix(1, 0, 0, 1, 0, 174)"
+              }
+            }
+          ],
+          "lastSnapshot": {
+            "available": true,
+            "state": "closed",
+            "height": 330,
+            "top": 484,
+            "transform": "matrix(1, 0, 0, 1, 0, 174)",
+            "animating": false,
+            "summaryVisible": true,
+            "contentVisible": false,
+            "focused": false,
+            "dragging": false,
+            "scrollY": 0,
+            "contentScrollTop": 107,
+            "contentScrollHeight": 1840,
+            "contentClientHeight": 173
+          },
+          "detailedGestureReceipt": "Not serialized before the subsequent failure"
+        },
+        "layerMenuFailure": {
+          "nativeScroll": {
+            "input": "touch",
+            "selector": ".layer-menu",
+            "direction": 1,
+            "before": {
+              "rect": {
+                "left": -230,
+                "right": 2,
+                "top": 128,
+                "bottom": 472,
+                "width": 232,
+                "height": 344
+              },
+              "scrollTop": 0,
+              "scrollHeight": 342,
+              "clientHeight": 342,
+              "scrollY": 0,
+              "sheet": "closed"
+            },
+            "current": {
+              "rect": {
+                "left": -230,
+                "right": 2,
+                "top": 128,
+                "bottom": 472,
+                "width": 232,
+                "height": 344
+              },
+              "scrollTop": 0,
+              "scrollHeight": 342,
+              "clientHeight": 342,
+              "scrollY": 0,
+              "sheet": "closed"
+            },
+            "commands": [],
+            "events": [],
+            "observations": []
+          },
+          "state": "closed",
+          "button": {
+            "left": 12,
+            "right": 62,
+            "top": 422,
+            "bottom": 472,
+            "width": 50,
+            "height": 50
+          },
+          "usable": {
+            "left": 0,
+            "right": 320,
+            "top": 68,
+            "bottom": 484,
+            "width": 320,
+            "height": 416
+          },
+          "diagnosis": "Closed compact Layers moved to the left horizontal rail but menu still inherited right:60px, placing232px menu almost entirely outside the map."
+        },
+        "limits": [
+          "All seven early graphics and all36 portrait state cycles passed. Native compact handle/list chain completed before the Layers menu failure.",
+          "No full multi-profile smoke, coast/labels/satellite sweep, final performance/offline or deploy/public-readback success exists for this candidate.",
+          "No native input requirement or comparison threshold changed."
+        ],
+        "failureScreenshot": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/failure/browser-failure.png",
+        "sourceSnapshot": "/workspace/scratch/69b73e6e1c01/pages-5996-evidence/source-identity.json"
+      }
+    },
+    {
+      "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+      "status": "failed-not-published",
+      "followingCorrectionCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "followingCorrection": "Cancel attribution idle timer when adjacent panels or credit links receive input",
+      "originalReceiptFile": "pages-aa03-evidence/receipt.json",
+      "originalReceiptBytes": 6659,
+      "originalReceiptSha256": "2480cdcb9c585b51e22c0b7141719b3bb109cab59cd0d0c5343478a08faad29c",
+      "receipt": {
+        "schemaVersion": 1,
+        "recordedAt": "2026-11-12T10:06:23.211308+00:00",
+        "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+        "runId": 43195200729,
+        "buildJobId": 131104251059,
+        "buildConclusion": "failure",
+        "deployJobId": 131106021098,
+        "deployConclusion": "skipped",
+        "releaseEligible": false,
+        "runtimeManifestSHA256": "bf555f10d4c3b6d522bd256caf4cb2d8c9931d78f7286cd7b24c9eb4c3cfc398",
+        "artifacts": [
+          {
+            "id": 13931988371,
+            "name": "tropnik-pages-browser-failure-1",
+            "bytes": 297919,
+            "sha256": "453ee58574f333d05ba7c6230febd81ce203a77d0f6cbce47fbfb6ce37119f41",
+            "apiBytesDigestRunSourceVerified": true,
+            "extractedFileCount": 9
+          },
+          {
+            "id": 13932307648,
+            "name": "tropnik-pages-design-1",
+            "bytes": 21898825,
+            "sha256": "4638d15434c1420c125c68afe019f73d37879f080713025e2f941e202feadad2",
+            "apiBytesDigestRunSourceVerified": true,
+            "extractedFileCount": 265
+          }
+        ],
+        "earlyGraphics": [
+          {
+            "file": "failure/browser-map-attribution-verification.json",
+            "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+            "verified": true,
+            "phase": "complete",
+            "sha256": "668a9987200f99cc16a272be13e3a632c2a3fd4e59518a499428ea91884f4695"
+          },
+          {
+            "file": "failure/browser-map-controls-verification.json",
+            "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+            "verified": true,
+            "phase": "complete",
+            "sha256": "719be4060dbb97ed9175417acb6473423e7d07de9cf3e9e829431c2741fe8eef"
+          },
+          {
+            "file": "failure/browser-map-underlay-verification.json",
+            "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+            "verified": true,
+            "phase": "complete",
+            "sha256": "84082ab22a8c8cef042c45c42a3f60b7ffa7caa31bbacbabb19d1a27b051ec39"
+          },
+          {
+            "file": "failure/browser-terrain-full-mask-verification.json",
+            "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+            "verified": true,
+            "phase": "complete",
+            "sha256": "8e08733c37cc5fbcaeaeea83f82663ada7cc29d5f260a5ce5443bc7e971904d7"
+          },
+          {
+            "file": "failure/browser-terrain-mask-verification.json",
+            "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+            "verified": true,
+            "phase": "complete",
+            "sha256": "c59e00f8f35647d9f954198b840bf99557a476dd987d661c42e7c6813892576c"
+          },
+          {
+            "file": "failure/browser-terrain-presentation-verification.json",
+            "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+            "verified": true,
+            "phase": "complete",
+            "sha256": "ce94ad212e81042bfdacfc7c07df4c10915a89576d7590efb8dfca1bd1d220f9"
+          },
+          {
+            "file": "failure/browser-terrain-unmasked-verification.json",
+            "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+            "verified": true,
+            "phase": "complete",
+            "sha256": "ed49ae9a453cfd376b9ead3ba5eed7668bb591e38f83e260c87d7890230898eb"
+          }
+        ],
+        "attribution": {
+          "verified": true,
+          "productionSourceValidation": {
+            "sourceCommit": "aa03d2a9324fe5e147e5abcb409af5b7936d82f8",
+            "source": "git-show exact immutable source; installed pinned font CSS hashes match report",
+            "validatorSHA256": "a36e7ad01ae3c704f71ea96fa8e734964739be802c630a696f697529f9f9487e",
+            "sourceFileCount": 32,
+            "fixtureSHA256": "2f84d205c094ad15795aa74b9f48eb18903f6dbfe6efb515f4dc93c43f01a0bc",
+            "captures": 36,
+            "passed": true
+          },
+          "creditCases": 40,
+          "footerCases": 24,
+          "totalCases": 64,
+          "caseFailures": [],
+          "loadingCycles": 131,
+          "sheetCycles": 36,
+          "compactOrdinaryCatalogueCycles": 8,
+          "minimumCatalogueTravelPx": 120,
+          "sheetCycleHeightTolerancePx": 1.1,
+          "minimumCatalogueTravelRequiredPx": 60
+        },
+        "failure": {
+          "profile": "compact-android",
+          "error": "AssertionError [ERR_ASSERTION]: compact-android: close sheet does not follow the finger: {\"fraction\":0.75,\"fingerY\":478,\"panelTop\":397,\"expectedTop\":455,\"trackingErrorPx\":58,\"pageScrollDeltaPx\":0}\n    at dragSheetHandle (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:238:12)\n    at async touchSheetGestures (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:286:14)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:977:25",
+          "phaseSnapshots": [
+            {
+              "name": "profile-ready",
+              "timeMs": 2479.2000000000116,
+              "panelHeight": 272,
+              "attributionHeight": 110
+            },
+            {
+              "name": "sheet-before",
+              "timeMs": 2481,
+              "panelHeight": 272,
+              "attributionHeight": 110
+            },
+            {
+              "name": "sheet-after",
+              "timeMs": 3255.7000000000116,
+              "panelHeight": 272,
+              "attributionHeight": 110
+            },
+            {
+              "name": "sheet-gestures-before",
+              "timeMs": 3256.2000000000116,
+              "panelHeight": 272,
+              "attributionHeight": 110
+            }
+          ],
+          "actualFailureSheet": {
+            "available": true,
+            "state": "open",
+            "height": 330,
+            "top": 397,
+            "transform": "matrix(1, 0, 0, 1, 0, 87)",
+            "animating": false,
+            "summaryVisible": false,
+            "contentVisible": true,
+            "focused": false,
+            "dragging": true,
+            "scrollY": 0,
+            "contentScrollTop": 113,
+            "contentScrollHeight": 1846,
+            "contentClientHeight": 250
+          },
+          "confirmedPanelHeightChangePx": 58,
+          "trackingErrorPx": 58,
+          "pageScrollDeltaPx": 0,
+          "diagnosis": "The first-display five-second attribution idle timer collapsed the full legal notice during a native drawer drag. The footer shrank and the physical sheet height changed from 272 px to 330 px while dragging; its 58 px change exactly equals the finger-tracking error. Exact failure PNG shows the legal notice is already collapsed; parent independently inspected it.",
+          "sourceCause": "aa03 bindMapAttributionCollapse listened only to atlas pointerdown/wheel. Sibling drawer gestures never canceled its five-second idle timer.",
+          "proofFiles": [
+            "failure/browser-failure.json",
+            "failure/browser-failure.png"
+          ],
+          "remainingNotProven": [
+            "Completed initial native sheet/list chain for aa03",
+            "Compact closed layer-menu native scroll after aa03 CSS correction",
+            "Full map profile, marker, label, satellite, offline and performance audits",
+            "Deploy and public readback"
+          ]
+        },
+        "publicApk": {
+          "requiredVersion": "0.4.25-preview",
+          "status": "No deploy; this failed run does not supply a new public APK verification"
+        },
+        "noBrowserRerun": true,
+        "thresholdsUnchanged": true
+      }
+    }
+  ]
+}

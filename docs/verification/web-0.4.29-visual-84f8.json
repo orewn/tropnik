@@ -1,0 +1,772 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-12T10:51:03.856256+00:00",
+  "reviewer": "ux_skeptic",
+  "reviewKind": "independent final-source delta visual review, exact bitmap reuse and final report readback",
+  "sourceCommit": "84f8206e8b445c7a968332e46389c4abd47f1b53",
+  "buildId": "2976fbe142f6982b",
+  "runId": 43200679588,
+  "scope": "Original3bd6 marker/text and footer collisions, selected mobile/desktop relief/satellite states, compact top row and native layer-menu report evidence",
+  "visualVerdict": "PASS within the specified final-source captured states and existing collision-culling policy",
+  "releaseEligible": false,
+  "productionOrGateChangesMade": false,
+  "newBrowserOrTestRunsPerformed": false,
+  "sourceBinding": {
+    "designArtifactId": 13935803573,
+    "designZip": {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-84f8-evidence/design.zip",
+      "bytes": 77821690,
+      "sha256": "19ec2cd34cfea6b5d1ba577c90a18c612ee66631be676cbe0e3c8ff4dcae80f6"
+    },
+    "designZipMatchesRecordedApiSizeAndDigest": true,
+    "pagesArtifactId": 13936596486,
+    "pagesZip": {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-84f8-evidence/pages.zip",
+      "bytes": 65465838,
+      "sha256": "6224fe3c7038ab02d91239001609082c85e11cea40d75610fa777b92fcb99a88"
+    },
+    "pagesZipMatchesRecordedApiSizeAndDigest": true,
+    "reportFilesByteEqualToPagesTarMembers": [
+      "browser-map-attribution-verification.json",
+      "browser-verification.json",
+      "build-info.json"
+    ],
+    "reviewedImagesByteEqualToDesignZipMembers": true,
+    "reviewedImagesMatchFinalSourceBoundReportShaAndSize": true,
+    "reportedWholeArtifactUniqueBoundPngs": 341,
+    "reportedWholeArtifactReferenceOccurrences": 381,
+    "reviewedCurrentPngs": 17,
+    "newlyDirectlyViewedFinalPngs": 2,
+    "previouslyViewedByteIdenticalFinalPngs": 15,
+    "previousVisualReview": {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-51e5-evidence/visual-review.json",
+      "bytes": 27144,
+      "sha256": "6dbad5732e724762742b9817cc55a004dfe1032f7014603a8ac6cecf497cd1c3"
+    },
+    "comparison": {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-84f8-evidence/visual-comparison.json",
+      "bytes": 7371,
+      "sha256": "fa25d5f84b45ee858722c8217bd8aa7e917730f7711eadd1b11a6e34dfd3614a"
+    }
+  },
+  "evidenceFiles": [
+    {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-84f8-evidence/pages/browser-map-attribution-verification.json",
+      "bytes": 2462839,
+      "sha256": "448cafa74aa9ac569b7e937f4afbef1488e917c5719132e5f4b0a74fd4289d54"
+    },
+    {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-84f8-evidence/pages/browser-verification.json",
+      "bytes": 18527955,
+      "sha256": "ebc5cffb22081eab489eef7b8dd20ec415389c3521a047c69500369b6df73077"
+    },
+    {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-84f8-evidence/pages/build-info.json",
+      "bytes": 407456,
+      "sha256": "7d81c824a1976a4a5524b28d876a43659e6f04a9e22e33c8a8ef2f24847c5ca7"
+    },
+    {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-84f8-evidence/capture-bindings.json",
+      "bytes": 55992,
+      "sha256": "94a26bac75b090634de0f8ba2cd43cd0aa34b297fc3443e391b87818b100481e"
+    },
+    {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-84f8-evidence/receipt.json",
+      "bytes": 21354,
+      "sha256": "ab4416dfaaa2fa6e6007f1be897e5d7cd0e6a0453807cdbbbc5a4f29bd03864c"
+    }
+  ],
+  "viewedPngs": [
+    {
+      "file": "design/android-portrait-route-fit-z12_27.png",
+      "bytes": 1385868,
+      "sha256": "377d19c0372e72b0d1891dd2cd91c8cfb606731f239196c6e79392644fb2e491",
+      "pixelWidth": 824,
+      "pixelHeight": 1830,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/0/screenshots/0",
+          "bytes": 1385868,
+          "sha256": "377d19c0372e72b0d1891dd2cd91c8cfb606731f239196c6e79392644fb2e491"
+        }
+      ],
+      "observation": "Selected marker no longer paints over Minometnaya; the colliding label is omitted, not moved. Dzitaku, Pseashkha, Timukhina and Bzerpi remain whole.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "377d19c0372e72b0d1891dd2cd91c8cfb606731f239196c6e79392644fb2e491"
+    },
+    {
+      "file": "design/desktop-webgl-detail-z11_91-key11.png",
+      "bytes": 1904129,
+      "sha256": "60f53d7c873a3aefd71d523d61bd48540b2ae42bd01c8b1a5d32b1d90080af6c",
+      "pixelWidth": 1440,
+      "pixelHeight": 1000,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/1/screenshots/5",
+          "bytes": 1904129,
+          "sha256": "60f53d7c873a3aefd71d523d61bd48540b2ae42bd01c8b1a5d32b1d90080af6c"
+        }
+      ],
+      "observation": "The former selected-marker/Minometnaya collision is absent. Nearby named peak labels remain whole; ordinary brown markers do not cover visible label text in this frame.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "direct-final-artifact-view",
+      "directlyViewedInFinalReview": true,
+      "byteIdenticalToPreviousArtifact": false,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "17f4f2fff573565d53b728f7d8f1ec85301b29043af4785eac856c2f5e2f06ad"
+    },
+    {
+      "file": "design/desktop-webgl-coast-primorsk-z7.png",
+      "bytes": 801002,
+      "sha256": "e23063cf86c6bdaa55390e01ebb0bddb8472eca255e5c2187a828ccc73e5b80c",
+      "pixelWidth": 1440,
+      "pixelHeight": 1000,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/1/coast/screenshots/0",
+          "bytes": 801002,
+          "sha256": "e23063cf86c6bdaa55390e01ebb0bddb8472eca255e5c2187a828ccc73e5b80c"
+        }
+      ],
+      "observation": "Saint Petersburg and other conflicting labels are culled by collision policy rather than moved. Nearby settlements including Krasnoye Selo, Gatchina and Kingisepp remain whole; the coverage mask edge has no newly apparent holes.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "e23063cf86c6bdaa55390e01ebb0bddb8472eca255e5c2187a828ccc73e5b80c"
+    },
+    {
+      "file": "design/android-portrait-coast-primorsk-z7.png",
+      "bytes": 704438,
+      "sha256": "61232c7703d415320b1dce20996ae44e259f504be9fd921d2c7f6d673698b46d",
+      "pixelWidth": 824,
+      "pixelHeight": 1830,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/0/coast/screenshots/0",
+          "bytes": 704438,
+          "sha256": "61232c7703d415320b1dce20996ae44e259f504be9fd921d2c7f6d673698b46d"
+        }
+      ],
+      "observation": "Visible labels including Svetogorsk, Kamennogorsk, Vysotsk, Kamenka and Ust-Luga are whole beside ordinary markers and controls. No newly apparent coverage-mask gaps in the pictured coast.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "61232c7703d415320b1dce20996ae44e259f504be9fd921d2c7f6d673698b46d"
+    },
+    {
+      "file": "design/desktop-webgl-satellite-dateline-native8.png",
+      "bytes": 1484129,
+      "sha256": "25fe6ee6825fe03119c52a84739b41d876d212a575a245642f1534b8e07e8785",
+      "pixelWidth": 1440,
+      "pixelHeight": 1000,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/1/satelliteContinuity/screenshots/1",
+          "bytes": 1484129,
+          "sha256": "25fe6ee6825fe03119c52a84739b41d876d212a575a245642f1534b8e07e8785"
+        }
+      ],
+      "observation": "NASA Blue Marble/EOX notice is at the bottom right, separate from the bottom-left legend and the info button. The vertical overview-mosaic seam remains visible; this is not a claim of seamless high-resolution imagery.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "25fe6ee6825fe03119c52a84739b41d876d212a575a245642f1534b8e07e8785"
+    },
+    {
+      "file": "design/android-portrait-satellite-preload-pending.png",
+      "bytes": 313434,
+      "sha256": "6f2c1dc04091bacffb7ac80e1682f71b6674b4ea16a97143ffb768ebdffad2d7",
+      "pixelWidth": 824,
+      "pixelHeight": 1830,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/0/satelliteContinuity/preload/screenshots/1",
+          "bytes": 313434,
+          "sha256": "6f2c1dc04091bacffb7ac80e1682f71b6674b4ea16a97143ffb768ebdffad2d7"
+        }
+      ],
+      "observation": "The loading notice is fully above the collapsed sheet. The previous displayed relief remains while Satellite is selected; this pending frame is not treated as ready satellite imagery.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "6f2c1dc04091bacffb7ac80e1682f71b6674b4ea16a97143ffb768ebdffad2d7"
+    },
+    {
+      "file": "design/android-portrait-satellite-dateline-native8.png",
+      "bytes": 933152,
+      "sha256": "33f947948d42033dd86883a15691a46c45a36ca4306b39a7f7cb1dab8e0b56a9",
+      "pixelWidth": 824,
+      "pixelHeight": 1830,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/0/satelliteContinuity/screenshots/1",
+          "bytes": 933152,
+          "sha256": "33f947948d42033dd86883a15691a46c45a36ca4306b39a7f7cb1dab8e0b56a9"
+        }
+      ],
+      "observation": "The full NASA/EOX overview/overzoom notice fits above the collapsed sheet and beside the info button. A visible vertical mosaic seam remains; the notice identifies enlarged overview imagery.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "33f947948d42033dd86883a15691a46c45a36ca4306b39a7f7cb1dab8e0b56a9"
+    },
+    {
+      "file": "design/map-attribution/compact-android-detail-collapsed.png",
+      "bytes": 77462,
+      "sha256": "35d90fd4e83f9fbe23541baf69db2cbe41330e196703448b90e4f1d1fde4981e",
+      "pixelWidth": 640,
+      "pixelHeight": 1280,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-map-attribution-verification.json/cases/0/screenshot",
+          "bytes": 77462,
+          "sha256": "35d90fd4e83f9fbe23541baf69db2cbe41330e196703448b90e4f1d1fde4981e"
+        }
+      ],
+      "observation": "Layout fixture at 320 CSS px: context, compact Stories launcher and both mode buttons are separately visible. Legal/credit, horizontal controls, Layers and sheet do not overlap.",
+      "scene": "layout-fixture",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "35d90fd4e83f9fbe23541baf69db2cbe41330e196703448b90e4f1d1fde4981e"
+    },
+    {
+      "file": "design/map-attribution/footer-compact-android-sheet-open-retained.png",
+      "bytes": 102810,
+      "sha256": "69affb8ac20da6f00ec584b2dfc622cbbcaafb64a5cbce428e27ea297b4bdb20",
+      "pixelWidth": 640,
+      "pixelHeight": 1280,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-map-attribution-verification.json/footerCases/19/screenshot",
+          "bytes": 102810,
+          "sha256": "69affb8ac20da6f00ec584b2dfc622cbbcaafb64a5cbce428e27ea297b4bdb20"
+        }
+      ],
+      "observation": "Layout fixture with open sheet and retained imagery: loading status, source/overzoom/loading text, info, horizontal control rail and Layers occupy separate vertical areas above the sheet.",
+      "scene": "layout-fixture",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "69affb8ac20da6f00ec584b2dfc622cbbcaafb64a5cbce428e27ea297b4bdb20"
+    },
+    {
+      "file": "design/map-attribution/footer-compact-android-sheet-open-pending.png",
+      "bytes": 76708,
+      "sha256": "df29fa1fc05fe18135a9d9a69f0fc8295e78a7c086321396b7fbdc99d3ee708d",
+      "pixelWidth": 640,
+      "pixelHeight": 1280,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-map-attribution-verification.json/footerCases/18/screenshot",
+          "bytes": 76708,
+          "sha256": "df29fa1fc05fe18135a9d9a69f0fc8295e78a7c086321396b7fbdc99d3ee708d"
+        }
+      ],
+      "observation": "Layout fixture with open sheet and pending initial imagery: loading notice, info, controls and Layers are visibly clear of the sheet.",
+      "scene": "layout-fixture",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "df29fa1fc05fe18135a9d9a69f0fc8295e78a7c086321396b7fbdc99d3ee708d"
+    },
+    {
+      "file": "design/map-attribution/compact-android-overview-limit-expanded.png",
+      "bytes": 135682,
+      "sha256": "afd86b8c79346038670ad7ebc9fdb7fb417ebe53870bae9c8bd5a98962e7aee2",
+      "pixelWidth": 640,
+      "pixelHeight": 1280,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-map-attribution-verification.json/cases/7/screenshot",
+          "bytes": 135682,
+          "sha256": "afd86b8c79346038670ad7ebc9fdb7fb417ebe53870bae9c8bd5a98962e7aee2"
+        }
+      ],
+      "observation": "Expanded legal is a bounded scrollable panel, separate from source notice and controls. Its full long text is not claimed to fit simultaneously.",
+      "scene": "layout-fixture",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "afd86b8c79346038670ad7ebc9fdb7fb417ebe53870bae9c8bd5a98962e7aee2"
+    },
+    {
+      "file": "design/android-portrait-satellite-z14_00-key14.png",
+      "bytes": 827500,
+      "sha256": "728aeb1323d0cb21d1df70b0dac51997937e70ca354ed92154e7499c1fce18d8",
+      "pixelWidth": 824,
+      "pixelHeight": 1830,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/0/screenshots/9",
+          "bytes": 827500,
+          "sha256": "728aeb1323d0cb21d1df70b0dac51997937e70ca354ed92154e7499c1fce18d8"
+        }
+      ],
+      "observation": "Selected Satellite state shows imagery with route/line overlays; EOxCloudless/EOX credit is fully above the collapsed sheet beside info.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "728aeb1323d0cb21d1df70b0dac51997937e70ca354ed92154e7499c1fce18d8"
+    },
+    {
+      "file": "design/desktop-webgl-relief-z14_91-key14.png",
+      "bytes": 1116819,
+      "sha256": "208a32d6a38dd3374cc80d6a82f467893c1857f2a3a7b8751d8cf44116f15861",
+      "pixelWidth": 1440,
+      "pixelHeight": 1000,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/1/screenshots/17",
+          "bytes": 1116819,
+          "sha256": "208a32d6a38dd3374cc80d6a82f467893c1857f2a3a7b8751d8cf44116f15861"
+        }
+      ],
+      "observation": "Selected Relief state shows contour and terrain detail with a continuous visible route. Named labels and elevation labels are whole; legend, Stories and Layers remain separate.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "208a32d6a38dd3374cc80d6a82f467893c1857f2a3a7b8751d8cf44116f15861"
+    },
+    {
+      "file": "design/desktop-webgl-route-fit-z13_40.png",
+      "bytes": 1668085,
+      "sha256": "799ee544d276446df474ada945742f48e8aecb23df6da04a0fcb432f5cc04409",
+      "pixelWidth": 1440,
+      "pixelHeight": 1000,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/1/screenshots/0",
+          "bytes": 1668085,
+          "sha256": "799ee544d276446df474ada945742f48e8aecb23df6da04a0fcb432f5cc04409"
+        }
+      ],
+      "observation": "Selected route is visible with its selected marker and neighbouring labels whole; no recurrence of marker-over-label text in the viewed route-fit frame.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "799ee544d276446df474ada945742f48e8aecb23df6da04a0fcb432f5cc04409"
+    },
+    {
+      "file": "design/android-portrait-relief-z14_34-key14.png",
+      "bytes": 984132,
+      "sha256": "2ae349d5eb75848741df0b3b81e4eb32d1f4988be5251c7ef796a50bde5cd5ca",
+      "pixelWidth": 824,
+      "pixelHeight": 1830,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/0/screenshots/18",
+          "bytes": 984132,
+          "sha256": "2ae349d5eb75848741df0b3b81e4eb32d1f4988be5251c7ef796a50bde5cd5ca"
+        }
+      ],
+      "observation": "Selected Relief state shows complete terrain/contour/elevation rendering in the visible map area. Label blocks do not cross controls or the sheet.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "2ae349d5eb75848741df0b3b81e4eb32d1f4988be5251c7ef796a50bde5cd5ca"
+    },
+    {
+      "file": "design/desktop-webgl-satellite-z14_00-key14.png",
+      "bytes": 1164809,
+      "sha256": "174c90b04cedb2ce99bebf3db30fbf3fde2546ab84df4292438647aa77bbdb4e",
+      "pixelWidth": 1440,
+      "pixelHeight": 1000,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-verification.json/zoomDesigns/1/screenshots/9",
+          "bytes": 1164809,
+          "sha256": "174c90b04cedb2ce99bebf3db30fbf3fde2546ab84df4292438647aa77bbdb4e"
+        }
+      ],
+      "observation": "At this different camera/zoom, Minometnaya 2483 m is fully visible away from the selected marker. This supports camera-specific culling rather than deletion of that feature. EOX credit is separate from the legend.",
+      "scene": "actual-browser-map",
+      "visualReviewMethod": "direct-final-artifact-view",
+      "directlyViewedInFinalReview": true,
+      "byteIdenticalToPreviousArtifact": false,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "5b75c8869c3db8540004baa3c1cb31b9d2d95546017222f95f9fb9ca2c1ab9cb"
+    },
+    {
+      "file": "design/map-attribution/compact-android-overview-limit-expanded-license-bottom.png",
+      "bytes": 135777,
+      "sha256": "cc7b7a3f9df0e9ace8a0c39cb8fd6f329f3f2b3aae42966427c449d46bba2758",
+      "pixelWidth": 640,
+      "pixelHeight": 1280,
+      "visuallyViewed": true,
+      "exactArchiveMember": true,
+      "boundReportReferences": [
+        {
+          "reportPointer": "browser-map-attribution-verification.json/cases/7/licenseInteraction/bottomScreenshot",
+          "bytes": 135777,
+          "sha256": "cc7b7a3f9df0e9ace8a0c39cb8fd6f329f3f2b3aae42966427c449d46bba2758"
+        }
+      ],
+      "observation": "At the legal panel scroll bottom, the source/detail link is fully visible with a focus outline. The earlier clipped continuation is reachable by scrolling.",
+      "scene": "layout-fixture",
+      "visualReviewMethod": "previously-viewed-identical-bitmap",
+      "directlyViewedInFinalReview": false,
+      "byteIdenticalToPreviousArtifact": true,
+      "previousSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "previousSHA256": "cc7b7a3f9df0e9ace8a0c39cb8fd6f329f3f2b3aae42966427c449d46bba2758"
+    }
+  ],
+  "baselineComparison": {
+    "sourceCommit": "3bd6e6bf52175084d0b2c4eaba2861a0a70b1eaa",
+    "runId": 43175668294,
+    "designArtifactId": 13924932701,
+    "designZip": {
+      "path": "/workspace/scratch/69b73e6e1c01/pages-3bd6-evidence/design.zip",
+      "bytes": 75011953,
+      "sha256": "02cca03348e97a995fcb0c60c9695838d828cd87cdcf49a3ebe377df06419ba7"
+    },
+    "images": [
+      {
+        "file": "/workspace/scratch/69b73e6e1c01/pages-3bd6-evidence/design/android-portrait-route-fit-z12_27.png",
+        "bytes": 1383369,
+        "sha256": "59b5e51f686936205ceec389749ec16725b7ebffe7417789061a2468aca6bd44",
+        "visuallyViewed": true,
+        "exactArchiveMember": true
+      },
+      {
+        "file": "/workspace/scratch/69b73e6e1c01/pages-3bd6-evidence/design/desktop-webgl-coast-primorsk-z7.png",
+        "bytes": 789707,
+        "sha256": "916f8d79dbc4965777b9967562772441bff494acf18fe77b63ba53491c14d40c",
+        "visuallyViewed": true,
+        "exactArchiveMember": true
+      }
+    ]
+  },
+  "conclusions": [
+    {
+      "id": "selected-marker-label",
+      "verdict": "PASS",
+      "text": "The original Minometnaya overlap is removed in route-fit/detail by dynamic collision culling. It was not moved and is not fully displayed in those frames. Other peak labels remain whole; at desktop satellite z14 Minometnaya is again fully displayed away from the marker.",
+      "images": [
+        "android-portrait-route-fit-z12_27.png",
+        "desktop-webgl-detail-z11_91-key11.png",
+        "desktop-webgl-route-fit-z13_40.png",
+        "desktop-webgl-satellite-z14_00-key14.png"
+      ]
+    },
+    {
+      "id": "ordinary-marker-label",
+      "verdict": "PASS",
+      "text": "The original Saint Petersburg overlap is removed in Primorsk z7 by collision culling. Saint Petersburg is omitted in this exact desktop frame, not moved or shown fully. Several nearby settlement labels remain readable; the map is not emptied of all labels.",
+      "images": [
+        "desktop-webgl-coast-primorsk-z7.png",
+        "android-portrait-coast-primorsk-z7.png"
+      ]
+    },
+    {
+      "id": "satellite-credit-legend-sheet",
+      "verdict": "PASS",
+      "text": "Desktop NASA/EOX notice is separated from the legend; Android source notice is fully above the collapsed sheet and separated from info. The coarse overview mosaic and its visible seams are still honestly identified by the UI.",
+      "images": [
+        "desktop-webgl-satellite-dateline-native8.png",
+        "android-portrait-satellite-dateline-native8.png",
+        "android-portrait-satellite-z14_00-key14.png",
+        "desktop-webgl-satellite-z14_00-key14.png"
+      ]
+    },
+    {
+      "id": "loading-status-sheet",
+      "verdict": "PASS",
+      "text": "Actual Android preload status is fully visible above the collapsed sheet. Pending/retained open-sheet layout fixtures also show separated status/source/control areas.",
+      "images": [
+        "android-portrait-satellite-preload-pending.png",
+        "map-attribution/footer-compact-android-sheet-open-retained.png",
+        "map-attribution/footer-compact-android-sheet-open-pending.png"
+      ]
+    },
+    {
+      "id": "compact-top-row",
+      "verdict": "PASS",
+      "text": "The 320 CSS px layout fixture displays context, Stories and both modes without overlap; the source-bound report records unobscured44x44 Stories/mode targets.",
+      "images": [
+        "map-attribution/compact-android-detail-collapsed.png"
+      ]
+    },
+    {
+      "id": "compact-layers",
+      "verdict": "PASS_REPORT_EVIDENCE",
+      "text": "The final84 native browser report confirms open/close clicks and all five menu controls reachable in closed and open sheets. Exact menu rectangles and scroll positions are recorded below; open scroll positions are [0, 91, 167]. No separate captured PNG of the open menu exists in this design artifact, so this is final report-backed geometry/input evidence rather than a claimed direct visual observation of an open menu.",
+      "report": "pages/browser-verification.json#/profiles/0/layerMenus"
+    },
+    {
+      "id": "relief-satellite-modes",
+      "verdict": "PASS",
+      "text": "Both selected modes are visibly distinct and show map content in the viewed ready frames. The selected route and remaining labels are readable; no new blank rectangular map gap is apparent in these frames.",
+      "images": [
+        "android-portrait-route-fit-z12_27.png",
+        "android-portrait-satellite-z14_00-key14.png",
+        "desktop-webgl-relief-z14_91-key14.png",
+        "desktop-webgl-route-fit-z13_40.png",
+        "android-portrait-relief-z14_34-key14.png",
+        "desktop-webgl-satellite-z14_00-key14.png"
+      ]
+    },
+    {
+      "id": "expanded-legal",
+      "verdict": "PASS",
+      "text": "Expanded long legal text is intentionally scrollable; the final source/details link is visible and focused at the bottom. It does not overlap the source notice or control rail.",
+      "images": [
+        "map-attribution/compact-android-overview-limit-expanded.png",
+        "map-attribution/compact-android-overview-limit-expanded-license-bottom.png"
+      ]
+    }
+  ],
+  "compactEvidence": {
+    "profile": "compact-android",
+    "cssViewport": {
+      "width": 320,
+      "height": 640
+    },
+    "topRowTargets": [
+      {
+        "label": "Рельеф",
+        "rect": {
+          "left": 214,
+          "top": 84,
+          "right": 258,
+          "bottom": 128,
+          "width": 44,
+          "height": 44
+        },
+        "minimumSize": 44,
+        "unobscured": true
+      },
+      {
+        "label": "Спутник",
+        "rect": {
+          "left": 260,
+          "top": 84,
+          "right": 304,
+          "bottom": 128,
+          "width": 44,
+          "height": 44
+        },
+        "minimumSize": 44,
+        "unobscured": true
+      },
+      {
+        "label": "Истории мест",
+        "rect": {
+          "left": 158,
+          "top": 84,
+          "right": 202,
+          "bottom": 128,
+          "width": 44,
+          "height": 44
+        },
+        "minimumSize": 44,
+        "unobscured": true
+      }
+    ],
+    "layerMenusPassed": true,
+    "layerMenuStates": [
+      {
+        "sheet": "closed",
+        "firstMenuRect": {
+          "left": 16,
+          "right": 248,
+          "top": 84,
+          "bottom": 412,
+          "width": 232,
+          "height": 328
+        },
+        "buttonRect": {
+          "left": 12,
+          "right": 62,
+          "top": 422,
+          "bottom": 472,
+          "width": 50,
+          "height": 50
+        },
+        "scrollTops": [
+          0
+        ],
+        "scrollHeight": 334,
+        "clientHeight": 326,
+        "allFiveControlsReachable": true,
+        "reachableControls": [
+          "Границы территорий",
+          "Источники карты",
+          "Подробная офлайн-карта",
+          "Рельеф и линии высот",
+          "Тропы и грунтовые дороги"
+        ],
+        "openAndCloseTrustedClicks": true,
+        "scrolls": []
+      },
+      {
+        "sheet": "open",
+        "firstMenuRect": {
+          "left": 16,
+          "right": 248,
+          "top": 84,
+          "bottom": 238,
+          "width": 232,
+          "height": 154
+        },
+        "buttonRect": {
+          "left": 12,
+          "right": 62,
+          "top": 248,
+          "bottom": 298,
+          "width": 50,
+          "height": 50
+        },
+        "scrollTops": [
+          0,
+          91,
+          167
+        ],
+        "scrollHeight": 334,
+        "clientHeight": 152,
+        "allFiveControlsReachable": true,
+        "reachableControls": [
+          "Границы территорий",
+          "Источники карты",
+          "Подробная офлайн-карта",
+          "Рельеф и линии высот",
+          "Тропы и грунтовые дороги"
+        ],
+        "openAndCloseTrustedClicks": true,
+        "scrolls": [
+          {
+            "input": "touch",
+            "before": 0,
+            "after": 91,
+            "pageScrollBefore": 0,
+            "pageScrollAfter": 0,
+            "allEventsTrusted": true
+          },
+          {
+            "input": "touch",
+            "before": 91,
+            "after": 167,
+            "pageScrollBefore": 0,
+            "pageScrollAfter": 0,
+            "allEventsTrusted": true
+          }
+        ]
+      }
+    ],
+    "nativeSheet": {
+      "passed": true,
+      "heightDelta": 0,
+      "drags": [
+        {
+          "name": "open",
+          "passed": true,
+          "heightDelta": 0,
+          "maxTrackingErrorPx": 1.2207031261368684e-05
+        },
+        {
+          "name": "close",
+          "passed": true,
+          "heightDelta": 0,
+          "maxTrackingErrorPx": 1.2207031261368684e-05
+        },
+        {
+          "name": "open-again",
+          "passed": true,
+          "heightDelta": 0,
+          "maxTrackingErrorPx": 1.2207031261368684e-05
+        },
+        {
+          "name": "close-again",
+          "passed": true,
+          "heightDelta": 0,
+          "maxTrackingErrorPx": 1.2207031261368684e-05
+        }
+      ],
+      "scroll": {
+        "passed": true,
+        "input": "touch",
+        "before": 0,
+        "after": 113,
+        "deltaPx": 113,
+        "pageScrollDeltaPx": 0,
+        "sheetDisplacementPx": 0,
+        "scrollHeightBefore": 1846,
+        "scrollHeightAfter": 1846,
+        "scrollHeightDelta": 0,
+        "selectionPreserved": true
+      }
+    },
+    "attributionCases": {
+      "regular": 40,
+      "footer": 24,
+      "failures": 0
+    }
+  },
+  "limitations": [
+    "This receipt is bound to exact84f8206e8b445c7a968332e46389c4abd47f1b53 final artifacts; source51e is used only as explicitly hashed previous visual evidence.",
+    "Fifteen final PNGs were not redundantly re-opened: their full bytes are identical to previously directly viewed51e bitmaps. The two changed final PNGs were directly viewed in this review.",
+    "Visible Minometnaya/Saint Petersburg collisions were removed by culling the colliding labels in the stated frames, not by relocation or complete display there.",
+    "Review covers17selected final PNGs, not all341source-bound captures.",
+    "Compact attribution images are controlled layout fixtures; final compact layer-menu behaviour is supported separately by the final native browser report.",
+    "Static images do not prove every transient state or physical-device performance; this is not a substitute for the separate Android instrumentation receipt or root live UI review.",
+    "The visible satellite overview mosaic has source seams; this review does not claim seamless or higher-resolution imagery."
+  ]
+}

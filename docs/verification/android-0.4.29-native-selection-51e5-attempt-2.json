@@ -1,0 +1,1085 @@
+{
+  "target": "krasnodar",
+  "prepared": false,
+  "deadlineMs": 15000,
+  "elapsedMs": 1301,
+  "trustedGroupTaps": [
+    {
+      "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar",
+      "zoom": 6,
+      "x": 265.76121520996094,
+      "y": 152.11492919921875,
+      "elapsedMs": 497,
+      "visualState": {
+        "requestedAt": 201448,
+        "callbackAt": 201452,
+        "drawnAt": 201475,
+        "countAtCallback": 10
+      },
+      "coordinateSnapshot": {
+        "requestId": 3,
+        "frame": 8,
+        "painted": {
+          "frame": 8,
+          "camera": {
+            "center": [
+              40.05,
+              44.05
+            ],
+            "zoom": 6,
+            "bearingDegrees": 0
+          },
+          "pitch": 0,
+          "size": {
+            "width": 380,
+            "height": 280
+          }
+        },
+        "viewportBounds": {
+          "x": 0,
+          "y": 0,
+          "width": 380.19049072265625,
+          "height": 280
+        },
+        "marker": {
+          "id": "karachay-cherkessia",
+          "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar",
+          "hidden": false,
+          "x": 265.76121520996094,
+          "y": 152.11492919921875,
+          "width": 44,
+          "height": 44,
+          "hitAtMarker": {
+            "tag": "button",
+            "markerId": "karachay-cherkessia",
+            "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+          }
+        }
+      },
+      "markerId": "karachay-cherkessia",
+      "snapshotRequest": 3,
+      "snapshotFrame": 8,
+      "hitAtMarker": {
+        "tag": "button",
+        "markerId": "karachay-cherkessia",
+        "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+      },
+      "afterInputSequence": 0,
+      "screenX": 738.2251586914062,
+      "screenY": 684.3016967773438,
+      "scaleX": 2.619739294052124,
+      "scaleY": 2.625,
+      "viewLocation": [
+        42,
+        285
+      ],
+      "nativeSize": [
+        996,
+        735
+      ],
+      "globalVisible": [
+        42,
+        285,
+        1038,
+        1020
+      ],
+      "nativeInput": [
+        {
+          "action": 0,
+          "downTime": 201610,
+          "eventTime": 201610,
+          "returnedAt": 201914,
+          "accepted": true
+        },
+        {
+          "action": 1,
+          "downTime": 201610,
+          "eventTime": 202028,
+          "returnedAt": 202040,
+          "accepted": true
+        }
+      ],
+      "actualPressMs": 418,
+      "longPressThresholdMs": 400
+    }
+  ],
+  "finalTap": {},
+  "snapshot": {
+    "ready": true,
+    "frame": 6,
+    "error": "",
+    "camera": {
+      "center": [
+        40.05,
+        44.05
+      ],
+      "zoom": 6,
+      "bearingDegrees": 0
+    },
+    "pitch": 0,
+    "moving": false,
+    "inputReady": true,
+    "painted": {
+      "frame": 6,
+      "camera": {
+        "center": [
+          40.05,
+          44.05
+        ],
+        "zoom": 6,
+        "bearingDegrees": 0
+      },
+      "pitch": 0,
+      "size": {
+        "width": 380,
+        "height": 280
+      }
+    },
+    "state": {
+      "ready": true,
+      "loading": true,
+      "mode": "detail",
+      "committedMode": "overview",
+      "imageryLoading": false,
+      "reliefReady": false,
+      "localDetail": false,
+      "error": "",
+      "residentTiles": 4,
+      "pendingTiles": 0
+    },
+    "rendered": {
+      "engine": "tropnik-canvas",
+      "rasterPolicy": {
+        "softwareRaster": true,
+        "reason": "software"
+      },
+      "contextAttributes": {
+        "alpha": false,
+        "colorSpace": "srgb",
+        "desynchronized": false,
+        "willReadFrequently": "true"
+      },
+      "camera": {
+        "center": [
+          40.05,
+          44.05
+        ],
+        "zoom": 6,
+        "bearingDegrees": 0
+      },
+      "pitch": 0,
+      "viewport": {
+        "width": 380,
+        "height": 280,
+        "padding": {
+          "top": 24,
+          "right": 24,
+          "bottom": 24,
+          "left": 24
+        }
+      },
+      "visibleBounds": [
+        36.40253906250001,
+        42.18977145627787,
+        43.69746093750001,
+        45.85358645528549
+      ],
+      "state": {
+        "ready": true,
+        "loading": true,
+        "mode": "detail",
+        "committedMode": "overview",
+        "imageryLoading": false,
+        "reliefReady": false,
+        "localDetail": false,
+        "error": "",
+        "residentTiles": 4,
+        "pendingTiles": 0
+      },
+      "coverage": {
+        "version": "e0ce67282bfd3694",
+        "lod": "regional",
+        "cells": [
+          "0208-2",
+          "0208-30",
+          "0208-31",
+          "0208-32",
+          "0208-33",
+          "0308-"
+        ],
+        "pending": 6,
+        "error": "",
+        "ready": false,
+        "revision": 0
+      },
+      "routeId": "",
+      "drawnRoute": "",
+      "drawRevision": 6,
+      "labelRevision": 6,
+      "tiles": {
+        "overview": [
+          {
+            "key": "overview:1\/1\/0:1:0:1:1",
+            "kind": "overview",
+            "z": 1,
+            "x": 1,
+            "y": 0,
+            "local": true,
+            "width": 512,
+            "height": 512,
+            "bounds": [
+              0,
+              0,
+              180,
+              85.0511287798066
+            ],
+            "transparent": false
+          },
+          {
+            "key": "overview:1\/2\/0:1:0:1:1",
+            "kind": "overview",
+            "z": 1,
+            "x": 2,
+            "y": 0,
+            "local": true,
+            "width": 512,
+            "height": 512,
+            "bounds": [
+              180,
+              0,
+              360,
+              85.0511287798066
+            ],
+            "transparent": false
+          }
+        ],
+        "detail": [],
+        "relief": [],
+        "imagery": []
+      },
+      "resources": {
+        "resident": 4,
+        "pending": 9,
+        "fetching": 3,
+        "decoding": false,
+        "enabled": true,
+        "stages": {
+          "fetching": 3,
+          "queued": 6
+        },
+        "errors": []
+      }
+    },
+    "size": {
+      "width": 380,
+      "height": 280
+    },
+    "viewportSize": {
+      "width": 380,
+      "height": 280
+    },
+    "viewportBounds": {
+      "x": 0,
+      "y": 0,
+      "width": 380.19049072265625,
+      "height": 280
+    },
+    "routeId": "",
+    "coverage": {
+      "version": "e0ce67282bfd3694",
+      "lod": "regional",
+      "cells": [
+        "0208-2",
+        "0208-30",
+        "0208-31",
+        "0208-32",
+        "0208-33",
+        "0308-"
+      ],
+      "pending": 6,
+      "error": "",
+      "ready": false,
+      "revision": 0
+    },
+    "trustedInput": [],
+    "markers": [
+      {
+        "id": "altai",
+        "groupKey": "altai",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "krasnodar",
+        "groupKey": "krasnodar",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "karelia",
+        "groupKey": "karelia",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "krym",
+        "groupKey": "krym",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "baikal",
+        "groupKey": "baikal",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "kamchatka",
+        "groupKey": "kamchatka",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "voronezh",
+        "groupKey": "voronezh",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "primorye",
+        "groupKey": "primorye",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "kaliningrad",
+        "groupKey": "kaliningrad",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "krasnoyarsk",
+        "groupKey": "krasnoyarsk",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "sakhalin",
+        "groupKey": "sakhalin",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "murmansk",
+        "groupKey": "murmansk",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "adygea",
+        "groupKey": "adygea",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      },
+      {
+        "id": "karachay-cherkessia",
+        "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar",
+        "hidden": false,
+        "x": 265.76121520996094,
+        "y": 152.11492919921875,
+        "width": 44,
+        "height": 44,
+        "hitAtMarker": {
+          "tag": "button",
+          "markerId": "karachay-cherkessia",
+          "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+        }
+      },
+      {
+        "id": "kabardino-balkaria",
+        "groupKey": "kabardino-balkaria",
+        "hidden": true,
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "hitAtMarker": {
+          "tag": "",
+          "markerId": "",
+          "groupKey": ""
+        }
+      }
+    ],
+    "labels": [],
+    "outsideLabelProbes": [],
+    "requestId": 2,
+    "timing": {
+      "startedAt": 1638,
+      "preparedAt": 1639.3999999999942
+    },
+    "transport": {
+      "chars": 4731,
+      "utf8Bytes": 4731
+    },
+    "nativeRoundTripMs": 328
+  },
+  "diagnostics": {
+    "ready": true,
+    "disposed": false,
+    "pageReady": true,
+    "frameReady": true,
+    "snapshotRequest": 3,
+    "snapshotSentAt": 201599,
+    "drawCount": 12,
+    "lastDrawAt": 202064,
+    "receipts": [
+      {
+        "phase": "snapshot-start",
+        "requestId": 1,
+        "startedAt": 1606.7000000000116,
+        "frame": 5,
+        "nativeReceivedAt": 200804
+      },
+      {
+        "phase": "snapshot-received",
+        "requestId": 1,
+        "chars": 4985,
+        "nativeReceivedAt": 200807
+      },
+      {
+        "phase": "snapshot-sent",
+        "requestId": 1,
+        "finishedAt": 1610.3999999999942,
+        "chars": 4985,
+        "utf8Bytes": 4985,
+        "nativeReceivedAt": 200807
+      },
+      {
+        "phase": "snapshot-start",
+        "requestId": 2,
+        "startedAt": 1638,
+        "frame": 6,
+        "nativeReceivedAt": 201140
+      },
+      {
+        "phase": "snapshot-received",
+        "requestId": 2,
+        "chars": 4731,
+        "nativeReceivedAt": 201141
+      },
+      {
+        "phase": "snapshot-sent",
+        "requestId": 2,
+        "finishedAt": 1639.7000000000116,
+        "chars": 4731,
+        "utf8Bytes": 4731,
+        "nativeReceivedAt": 201141
+      },
+      {
+        "phase": "snapshot-start",
+        "requestId": 3,
+        "startedAt": 2403.5,
+        "frame": 8,
+        "nativeReceivedAt": 201601
+      },
+      {
+        "phase": "snapshot-received",
+        "requestId": 3,
+        "chars": 4571,
+        "nativeReceivedAt": 201602
+      },
+      {
+        "phase": "snapshot-sent",
+        "requestId": 3,
+        "finishedAt": 2405.899999999994,
+        "chars": 4571,
+        "utf8Bytes": 4571,
+        "nativeReceivedAt": 201603
+      },
+      {
+        "phase": "trusted-input",
+        "sequence": 1,
+        "type": "pointerdown",
+        "trusted": true,
+        "timeStamp": 2413,
+        "receivedAt": 2738.399999999994,
+        "x": 265.2287902832031,
+        "y": 152.11495971679688,
+        "pointerId": 2,
+        "pointerType": "",
+        "target": {
+          "tag": "button",
+          "markerId": "karachay-cherkessia",
+          "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+        },
+        "frame": 8,
+        "camera": {
+          "center": [
+            40.05,
+            44.05
+          ],
+          "zoom": 6,
+          "bearingDegrees": 0
+        },
+        "nativeReceivedAt": 201938
+      },
+      {
+        "phase": "trusted-input",
+        "sequence": 2,
+        "type": "pointerup",
+        "trusted": true,
+        "timeStamp": 2831,
+        "receivedAt": 2834.7999999999884,
+        "x": 265.2287902832031,
+        "y": 152.11495971679688,
+        "pointerId": 2,
+        "pointerType": "",
+        "target": {
+          "tag": "button",
+          "markerId": "karachay-cherkessia",
+          "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+        },
+        "frame": 8,
+        "camera": {
+          "center": [
+            40.05,
+            44.05
+          ],
+          "zoom": 6,
+          "bearingDegrees": 0
+        },
+        "nativeReceivedAt": 202058
+      }
+    ],
+    "nativeTouchEvents": [
+      {
+        "action": 0,
+        "x": 696.2255859375,
+        "y": 399.3017578125,
+        "eventTime": 201610,
+        "downTime": 201610,
+        "receivedAt": 201926,
+        "handled": true
+      },
+      {
+        "action": 1,
+        "x": 696.2255859375,
+        "y": 399.3017578125,
+        "eventTime": 202028,
+        "downTime": 201610,
+        "receivedAt": 202029,
+        "handled": true
+      }
+    ],
+    "lastSnapshot": {
+      "ready": true,
+      "frame": 8,
+      "error": "",
+      "camera": {
+        "center": [
+          40.05,
+          44.05
+        ],
+        "zoom": 6,
+        "bearingDegrees": 0
+      },
+      "pitch": 0,
+      "moving": false,
+      "inputReady": true,
+      "painted": {
+        "frame": 8,
+        "camera": {
+          "center": [
+            40.05,
+            44.05
+          ],
+          "zoom": 6,
+          "bearingDegrees": 0
+        },
+        "pitch": 0,
+        "size": {
+          "width": 380,
+          "height": 280
+        }
+      },
+      "state": {
+        "ready": true,
+        "loading": true,
+        "mode": "detail",
+        "committedMode": "overview",
+        "imageryLoading": false,
+        "reliefReady": false,
+        "localDetail": false,
+        "error": "",
+        "residentTiles": 4,
+        "pendingTiles": 0
+      },
+      "rendered": {
+        "engine": "tropnik-canvas",
+        "rasterPolicy": {
+          "softwareRaster": true,
+          "reason": "software"
+        },
+        "contextAttributes": {
+          "alpha": false,
+          "colorSpace": "srgb",
+          "desynchronized": false,
+          "willReadFrequently": "true"
+        },
+        "camera": {
+          "center": [
+            40.05,
+            44.05
+          ],
+          "zoom": 6,
+          "bearingDegrees": 0
+        },
+        "pitch": 0,
+        "viewport": {
+          "width": 380,
+          "height": 280,
+          "padding": {
+            "top": 24,
+            "right": 24,
+            "bottom": 24,
+            "left": 24
+          }
+        },
+        "visibleBounds": [
+          36.40253906250001,
+          42.18977145627787,
+          43.69746093750001,
+          45.85358645528549
+        ],
+        "state": {
+          "ready": true,
+          "loading": true,
+          "mode": "detail",
+          "committedMode": "overview",
+          "imageryLoading": false,
+          "reliefReady": false,
+          "localDetail": false,
+          "error": "",
+          "residentTiles": 4,
+          "pendingTiles": 0
+        },
+        "coverage": {
+          "version": "e0ce67282bfd3694",
+          "lod": "regional",
+          "cells": [
+            "0208-2",
+            "0208-30",
+            "0208-31",
+            "0208-32",
+            "0208-33",
+            "0308-"
+          ],
+          "pending": 0,
+          "error": "",
+          "ready": true,
+          "revision": 1
+        },
+        "routeId": "",
+        "drawnRoute": "",
+        "drawRevision": 8,
+        "labelRevision": 8,
+        "tiles": {
+          "overview": [
+            {
+              "key": "overview:4\/9\/5:1:0:4:1",
+              "kind": "overview",
+              "z": 4,
+              "x": 9,
+              "y": 5,
+              "local": true,
+              "width": 512,
+              "height": 512,
+              "bounds": [
+                22.5,
+                40.97989806962013,
+                45,
+                55.77657301866769
+              ],
+              "transparent": false
+            }
+          ],
+          "detail": [],
+          "relief": [],
+          "imagery": []
+        },
+        "resources": {
+          "resident": 5,
+          "pending": 8,
+          "fetching": 3,
+          "decoding": false,
+          "enabled": true,
+          "stages": {
+            "fetching": 3,
+            "queued": 5
+          },
+          "errors": []
+        }
+      },
+      "size": {
+        "width": 380,
+        "height": 280
+      },
+      "viewportSize": {
+        "width": 380,
+        "height": 280
+      },
+      "viewportBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 380.19049072265625,
+        "height": 280
+      },
+      "routeId": "",
+      "coverage": {
+        "version": "e0ce67282bfd3694",
+        "lod": "regional",
+        "cells": [
+          "0208-2",
+          "0208-30",
+          "0208-31",
+          "0208-32",
+          "0208-33",
+          "0308-"
+        ],
+        "pending": 0,
+        "error": "",
+        "ready": true,
+        "revision": 1
+      },
+      "trustedInput": [],
+      "markers": [
+        {
+          "id": "altai",
+          "groupKey": "altai",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "krasnodar",
+          "groupKey": "krasnodar",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "karelia",
+          "groupKey": "karelia",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "krym",
+          "groupKey": "krym",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "baikal",
+          "groupKey": "baikal",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "kamchatka",
+          "groupKey": "kamchatka",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "voronezh",
+          "groupKey": "voronezh",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "primorye",
+          "groupKey": "primorye",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "kaliningrad",
+          "groupKey": "kaliningrad",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "krasnoyarsk",
+          "groupKey": "krasnoyarsk",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "sakhalin",
+          "groupKey": "sakhalin",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "murmansk",
+          "groupKey": "murmansk",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "adygea",
+          "groupKey": "adygea",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        },
+        {
+          "id": "karachay-cherkessia",
+          "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar",
+          "hidden": false,
+          "x": 265.76121520996094,
+          "y": 152.11492919921875,
+          "width": 44,
+          "height": 44,
+          "hitAtMarker": {
+            "tag": "button",
+            "markerId": "karachay-cherkessia",
+            "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+          }
+        },
+        {
+          "id": "kabardino-balkaria",
+          "groupKey": "kabardino-balkaria",
+          "hidden": true,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "hitAtMarker": {
+            "tag": "",
+            "markerId": "",
+            "groupKey": ""
+          }
+        }
+      ],
+      "labels": [],
+      "outsideLabelProbes": [],
+      "requestId": 3,
+      "timing": {
+        "startedAt": 2403.5,
+        "preparedAt": 2404
+      },
+      "transport": {
+        "chars": 4571,
+        "utf8Bytes": 4571
+      },
+      "nativeRoundTripMs": 3
+    }
+  }
+}

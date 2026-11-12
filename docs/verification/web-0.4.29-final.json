@@ -1,0 +1,349 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-12T10:55:57.335406+00:00",
+  "scope": "Final web release acceptance for exact source 84f8206e, combining CI artifacts, anonymous public HTTP readback, scoped visual review and a live public UI round trip. Android proof is CI-only; private Site UI is not manually verified.",
+  "webReleaseAccepted": true,
+  "newPublicApkPublished": false,
+  "source": {
+    "commit": "84f8206e8b445c7a968332e46389c4abd47f1b53",
+    "tree": "3ccc21984e05c24e2ab6db951e09dc8b906e6914",
+    "webTree": "a4e084aba07dda17b9a03c5dd3553580e2571f00",
+    "buildId": "2976fbe142f6982b",
+    "previousPublishedCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+    "lastChange": "Only Android test gesture scheduling changed from 51e55915 to 84f8206e; web, application runtime and CI gates are unchanged.",
+    "documentationCommitPolicy": "A subsequent documentation-only commit records these results. The deployed application source remains the exact commit stated here."
+  },
+  "pages": {
+    "receipt": {
+      "path": "docs/verification/web-0.4.29-published-84f8.json",
+      "bytes": 21354,
+      "sha256": "ab4416dfaaa2fa6e6007f1be897e5d7cd0e6a0453807cdbbbc5a4f29bd03864c"
+    },
+    "runId": 43200679588,
+    "runUrl": "https://github.com/orewn/tropnik/actions/runs/43200679588",
+    "jobs": {
+      "build": {
+        "id": 131122978541,
+        "conclusion": "success"
+      },
+      "deploy": {
+        "id": 131133001484,
+        "conclusion": "success"
+      }
+    },
+    "publicReadback": {
+      "verified": true,
+      "url": "https://orewn.github.io/tropnik/",
+      "buildId": "2976fbe142f6982b",
+      "sourceCommit": "84f8206e8b445c7a968332e46389c4abd47f1b53",
+      "publicHttpChecks": 24,
+      "apkDelivery": "github-release",
+      "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.25-preview/tropnik-preview.apk",
+      "apkBytes": 67858685,
+      "apkSha256": "016aa309d22b1fc34d89949817d3e8fc61162e2c20f8b50a4a803e0feadb88e4",
+      "browserRenderingTested": true,
+      "browserProfiles": 4
+    },
+    "artifacts": [
+      {
+        "id": 13935803573,
+        "name": "tropnik-pages-design-1",
+        "bytes": 77821690,
+        "sha256": "19ec2cd34cfea6b5d1ba577c90a18c612ee66631be676cbe0e3c8ff4dcae80f6",
+        "apiDigestVerified": true,
+        "extractedFiles": 349
+      },
+      {
+        "id": 13936596486,
+        "name": "github-pages-43200679588-1",
+        "bytes": 65465838,
+        "sha256": "6224fe3c7038ab02d91239001609082c85e11cea40d75610fa777b92fcb99a88",
+        "apiDigestVerified": true,
+        "extractedFiles": 13
+      }
+    ],
+    "profiles": {
+      "mobile": [
+        "compact-android",
+        "iphone-portrait",
+        "android-portrait",
+        "phone-landscape"
+      ],
+      "desktop": [
+        "desktop-webgl"
+      ],
+      "total": 5
+    },
+    "graphics": {
+      "reports": 7,
+      "allPassed": true,
+      "attributionAndFooterCases": 64,
+      "sheetCycles": 36,
+      "strictPixelComparisons": 98,
+      "differentPixels": 0
+    },
+    "captureBindings": {
+      "verifiedUniquePngFiles": 341,
+      "verifiedReferenceOccurrences": 381
+    },
+    "mapPanRafIntervals": [
+      {
+        "profile": "android-portrait",
+        "p95Ms": 21.79999999998836,
+        "maxGapMs": 22.699999999953434,
+        "physicalDevice": false,
+        "isPresentedFps": false
+      },
+      {
+        "profile": "desktop-webgl",
+        "p95Ms": 32.699999999953434,
+        "maxGapMs": 43.90000000002328,
+        "physicalDevice": false,
+        "isPresentedFps": false
+      }
+    ],
+    "offlineSafetyPassed": true,
+    "offlineSuccessfulNetworkResponses": 0,
+    "transportRecoveryUniquePairs": 0,
+    "sharedMap": {
+      "manifestSha256": "bf555f10d4c3b6d522bd256caf4cb2d8c9931d78f7286cd7b24c9eb4c3cfc398",
+      "sourceInputsSha256": "3135e14815c0e1e569037a720b9df639bfd5af5c9d5f7c77ec8f13b3196e1c21",
+      "engineSha256": "3c1897c79962d3ecf7f443ea3a01059e60e204869ce0bda3f78446cb1205d9aa"
+    }
+  },
+  "visual": {
+    "receipt": {
+      "path": "docs/verification/web-0.4.29-visual-84f8.json",
+      "bytes": 33438,
+      "sha256": "6581519262134a359e719cde42bbab32419fa3133b773e71db3f3b3dc1ab2c6c"
+    },
+    "selectedPngs": 17,
+    "byteIdenticalToPreviouslyViewed": 15,
+    "changedPngsViewedDirectly": 2,
+    "verdict": "PASS within the recorded scope",
+    "markerPolicy": "Conflicting labels are culled. Relocation or visibility of the culled label in that frame is not claimed.",
+    "layersEvidence": "Open compact Layers is supported by native input/geometry reports, not by a separate PNG of the open menu."
+  },
+  "manualPublicUI": {
+    "receipt": {
+      "path": "docs/verification/web-0.4.29-live-final.json",
+      "bytes": 11862,
+      "sha256": "a23aae57136654632701e2ffd9ce4aa2096b5b47596b86ff7c957e57aea8df77"
+    },
+    "screenshot": {
+      "path": "docs/verification/web-0.4.29-live-final.jpg",
+      "bytes": 221337,
+      "sha256": "beac1418f2647a96e0b0882fdcb0c19fc0563f27f7684c07bf169829ddd7aef5"
+    },
+    "completedAt": "2026-11-12T10:54:59.475Z",
+    "url": "https://orewn.github.io/tropnik/?route=osm-relation-15577268&region=sakhalin",
+    "routeId": "osm-relation-15577268",
+    "camera": {
+      "bearingDegrees": 0,
+      "center": [
+        142.7878226365234,
+        46.94792542123872
+      ],
+      "zoom": 14
+    },
+    "mapViewport": {
+      "height": 864,
+      "padding": {
+        "bottom": 96,
+        "left": 40,
+        "right": 88,
+        "top": 96
+      },
+      "width": 964
+    },
+    "readySequence": [
+      "detail",
+      "satellite",
+      "detail"
+    ],
+    "routeAndCameraPreserved": true,
+    "readyWithoutErrors": true,
+    "entryScripts": [
+      "https://orewn.github.io/tropnik/assets/index-CrxDi20a.js"
+    ],
+    "stylesheets": [
+      "https://orewn.github.io/tropnik/assets/index--uS4iK7x.css",
+      "https://orewn.github.io/tropnik/assets/Footer-BsvoeVO4.css",
+      "https://orewn.github.io/tropnik/assets/page-By3AUdxa.css"
+    ],
+    "sourceBinding": "Published source is verified separately by the exact-source Pages HTTP readback; live entry assets are matched to that verified artifact.",
+    "scope": "One public desktop browser session, normal reload and visible update activation. The pending satellite state retained the prior committed relief before complete satellite readiness."
+  },
+  "android": {
+    "receipt": {
+      "path": "docs/verification/android-0.4.29-proof-84f8.json",
+      "bytes": 5979,
+      "sha256": "c6b663dac7a1ff91c4316792b0bb98f8704194e21e056b89e53a8e770f223f98"
+    },
+    "originalDeviceResult": {
+      "path": "docs/verification/android-0.4.29-device.json",
+      "bytes": 3688,
+      "sha256": "168f1855790fc71a9fb753b8b91d28d23e19bcd8dfae0284a161f5bd929d0d85"
+    },
+    "nativeTimingReport": {
+      "path": "docs/verification/android-0.4.29-native-tap-verification-84f8.json",
+      "bytes": 16902,
+      "sha256": "d381e42f85f67ac10d3543166c2384fc2f3e03453067840c9b2170631973a6e2"
+    },
+    "workflow": {
+      "id": 43200679252,
+      "html_url": "https://github.com/orewn/tropnik/actions/runs/43200679252",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "updated_at": "2026-11-12T10:35:49Z",
+      "head_branch": "main"
+    },
+    "jobs": [
+      {
+        "id": 131122976622,
+        "name": "build",
+        "conclusion": "success"
+      },
+      {
+        "id": 131124331289,
+        "name": "Android device scenarios",
+        "conclusion": "success"
+      },
+      {
+        "id": 131126690663,
+        "name": "Publish the requested Android prerelease",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 131126692036,
+        "name": "Verify public Android bytes and prepare the universal website manifest",
+        "conclusion": "skipped"
+      }
+    ],
+    "androidProofPassed": true,
+    "jvmTestsPassed": 51,
+    "deviceScenariosPassed": 8,
+    "artifacts": [
+      {
+        "kind": "build",
+        "id": 13935870405,
+        "name": "tropnik-android-preview-1",
+        "bytes": 109306724,
+        "sha256": "070059df3b3fb8a2a14028a2b4b88908e3ec0b639c74541b29768490263d0afd",
+        "apiDigestVerified": true,
+        "extractedFiles": 17
+      },
+      {
+        "kind": "device",
+        "id": 13934349893,
+        "name": "tropnik-android-api35-instrumentation-1",
+        "bytes": 5559303,
+        "sha256": "f9e14a5a300fc8f9f4ccac415678225af0895f3ecb29a2465ed92729aa5bd4ba",
+        "apiDigestVerified": true,
+        "extractedFiles": 17
+      }
+    ],
+    "apks": {
+      "tropnik-preview.apk": {
+        "bytes": 67846298,
+        "sha256": "633f36c14455e4f46d9496a61ceb8a24dd1684117d07c84e52c0bd000b9eadbd"
+      },
+      "tropnik-arm64-preview.apk": {
+        "bytes": 67833835,
+        "sha256": "163a4415ab2617185b76d25a3e9607386665706304bcabfca87c5e0c02c4b40a"
+      },
+      "tropnik-instrumentation-tests.apk": {
+        "bytes": 1118505,
+        "sha256": "76d1be287d56670efd303baa3b93f9158bc610c6159ebf1bfb90fc672cb16a22"
+      }
+    },
+    "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+    "actualNativePressMs": [
+      204,
+      199,
+      122,
+      202
+    ],
+    "strictThresholdMs": 400,
+    "allTrustedClicks": true,
+    "publicApkPublicationPerformed": false,
+    "historicalReceiptScope": "The unmodified Android receipt was created before final Pages/manual completion; its pending companionPages and publicationAccepted=false remain historical. This aggregate independently accepts only the web release."
+  },
+  "privateSite": {
+    "receipt": {
+      "path": "docs/verification/web-0.4.29-site.json",
+      "bytes": 2769,
+      "sha256": "2d7a83fdbecf63b39c1e3bf758c74260057f9692625a2c90de3a329762f8aefb"
+    },
+    "version": 40,
+    "publication": {
+      "id": "appgdep_6af5947deeac8191ac67b48c5ee50dde",
+      "project_id": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+      "version_id": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_f425a77a449c81919bbec55133bcd0f6",
+      "status": "succeeded",
+      "title": "Тропник — маршруты, рельеф и спутник",
+      "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+      "updated_at": "2026-11-12T10:27:33.104073+00:00",
+      "env_set_revision": 1,
+      "failure_message": null,
+      "provider_deployment_id": "site---6aed4db0a81881919cc3840d28cfad27",
+      "sourceCommit": "dcd5dc8f6c170aed345b8b95ad26acad56c91238",
+      "webSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "versionNumber": 40
+    },
+    "sourceComparison": {
+      "sourceCommit": "84f8206e8b445c7a968332e46389c4abd47f1b53",
+      "webTree": "a4e084aba07dda17b9a03c5dd3553580e2571f00",
+      "identicalTrackedWebFiles": 2191,
+      "sameWebTreeAs": "51e55915749540842d7c03681e7b0e372076a6c5",
+      "siteCommit": "dcd5dc8f6c170aed345b8b95ad26acad56c91238"
+    },
+    "ownerPrivatePreserved": true,
+    "authenticatedUiVerified": false,
+    "manualUiLimitation": "The session's normal browser authentication navigation was rejected by automatic approval review. Authenticated UI was not verified, and no bypass or repeated authentication attempt was made."
+  },
+  "publicApk": {
+    "version": "0.4.25-preview",
+    "versionCode": 13,
+    "url": "https://github.com/orewn/tropnik/releases/download/v0.4.25-preview/tropnik-preview.apk",
+    "bytes": 67858685,
+    "sha256": "016aa309d22b1fc34d89949817d3e8fc61162e2c20f8b50a4a803e0feadb88e4",
+    "unchanged": true
+  },
+  "history": {
+    "failedUiCandidates": {
+      "path": "docs/verification/web-0.4.29-ui-iterations.json",
+      "bytes": 64266,
+      "sha256": "31578d1d8a7a01bbdf40b5af609e4a44e522780e10f34362070520d962cc6a4c"
+    },
+    "previousPublishedWeb": {
+      "path": "docs/verification/web-0.4.29-published-51e5.json",
+      "bytes": 21336,
+      "sha256": "8fdb3b912a0247fa01a0c41d31ba6166a50a55db441cbd542e3df1f3c5ecf7ba"
+    },
+    "previousVisualReview": {
+      "path": "docs/verification/web-0.4.29-visual-51e5.json",
+      "bytes": 27144,
+      "sha256": "6dbad5732e724762742b9817cc55a004dfe1032f7014603a8ac6cecf497cd1c3"
+    },
+    "failedAndroid51eAttempts": {
+      "path": "docs/verification/android-0.4.29-native-tap-diagnosis-51e5.json",
+      "bytes": 7681,
+      "sha256": "fcfe25cef459dbe3e33fa8bc8e06c496ba08eedbc2b066748f01a02f5241cf33"
+    },
+    "historicalAndroid3bdDevice": {
+      "path": "docs/verification/android-0.4.29-device-3bd6.json",
+      "bytes": 3688,
+      "sha256": "b1cb2be517c36c66969f5b3ae7964f3e4626aa4bd6a21ba7d1e00c7d6f9af561"
+    }
+  },
+  "limits": [
+    "CI desktop/mobile profiles and Android API35 x86_64 emulator do not establish physical ARM64 performance, GPS accuracy, battery behavior or universal 60 FPS.",
+    "Authenticated private Site UI was not verified because automatic approval review rejected the normal authentication navigation; no bypass or retry was attempted.",
+    "The public static site provides local/offline functionality. Accounts, group enrollment and messaging still require the separately deployed Go API; no successful server action or emergency registration is simulated.",
+    "The packaged detailed offline landscape is Bzerpi, not detailed offline coverage of all Russia.",
+    "Overview satellite imagery retains its source mosaic seams and resolution; no new imagery-quality claim is made.",
+    "The scope is the recorded source and tested states. Long expanded legal content on a very short phone can occupy the catalogue area until closed."
+  ]
+}

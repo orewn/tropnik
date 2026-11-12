@@ -1,0 +1,110 @@
+{
+  "status": "failed",
+  "processExitCode": 0,
+  "instrumentationResultCodes": [
+    -1
+  ],
+  "deviceExecutionVerified": false,
+  "tests": 8,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "missingTests": [],
+  "parseErrors": [],
+  "cases": [
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+      "statusCode": -2,
+      "failed": true,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "noServerMeansExplicitConfigurationNotInventedSocialActivity",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    }
+  ],
+  "schemaVersion": 2,
+  "recordedAt": "2026-11-12T10:20:42.544509+00:00",
+  "sourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+  "workflowRunId": "43197108051",
+  "buildReceiptSha256": "c49ed7e59f86897c8f6b782b0ea8f2a66e8ccd783c70003deca7dae915cb9db1",
+  "testedApks": {
+    "tropnik-preview.apk": {
+      "bytes": 67846298,
+      "sha256": "d7cd4b903285b2c59b2e40d9653940c37ecd23f997c9854df7d58ee62833f15d"
+    },
+    "tropnik-instrumentation-tests.apk": {
+      "bytes": 1118441,
+      "sha256": "2b2434a3e4420f9c199e4b455f13fda7422304b94df87a6a0c0312a4bb7f58fd"
+    }
+  },
+  "installedArtifactBytesVerified": true,
+  "releasePayloadDeviceVerified": false,
+  "testedArchitecture": "x86_64",
+  "testedArtifact": "tropnik-preview.apk",
+  "arm64DeviceExecutionVerified": false,
+  "physicalDeviceVerified": false,
+  "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+  "graphicsDriver": {
+    "mode": "swangle",
+    "appBackend": "OpenGL ES",
+    "renderer": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.17841 git hash: 5fa2e61da947))",
+    "diagnosticSha256": "d91442a437ac83f106ef1442e2aec42a0b9064e8eea248fb93b674fd2916f2a2",
+    "verified": true
+  },
+  "note": "All eight actual cases must pass on the exact installed universal preview. ARM64, physical GPU, GPS, battery and a production API are not device-verified."
+}

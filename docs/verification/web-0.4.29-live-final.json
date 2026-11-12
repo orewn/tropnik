@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 1,
+  "expectedSourceCommit": "84f8206e8b445c7a968332e46389c4abd47f1b53",
+  "sourceBinding": "Published source is verified separately by the exact-source Pages HTTP readback; live entry assets are matched to that verified artifact.",
+  "baselineBeforeReload": {
+    "label": "before_reload",
+    "capturedAt": "2026-11-12T10:50:38.617Z",
+    "atlas": {
+      "mapBaseCommitted": "detail",
+      "mapBaseState": "ready",
+      "mapBaseTarget": "detail",
+      "mapDetail": "close",
+      "mapRenderer": "tropnik",
+      "mapRoute": "selected"
+    },
+    "camera": {
+      "bearingDegrees": 0,
+      "center": [
+        142.7878226365234,
+        46.94792542123872
+      ],
+      "zoom": 14
+    },
+    "coverage": {
+      "cells": [
+        "0908-32"
+      ],
+      "error": "",
+      "lod": "source",
+      "pending": 0,
+      "ready": true,
+      "revision": 1,
+      "version": "e0ce67282bfd3694"
+    },
+    "drawnRoute": "osm-relation-15577268",
+    "entryScripts": [
+      "https://orewn.github.io/tropnik/assets/index-CaDjQ58R.js"
+    ],
+    "routeId": "osm-relation-15577268",
+    "state": {
+      "committedMode": "detail",
+      "error": "",
+      "imageryLoading": false,
+      "loading": false,
+      "localDetail": false,
+      "mode": "detail",
+      "pendingTiles": 0,
+      "ready": true,
+      "reliefReady": true,
+      "residentTiles": 47
+    },
+    "stylesheets": [
+      "https://orewn.github.io/tropnik/assets/index-DVwZqvat.css",
+      "https://orewn.github.io/tropnik/assets/Footer-BsvoeVO4.css",
+      "https://orewn.github.io/tropnik/assets/page-By3AUdxa.css"
+    ],
+    "title": "Экотропа \"Восьмерка\"",
+    "url": "https://orewn.github.io/tropnik/?route=osm-relation-15577268&region=sakhalin",
+    "viewport": {
+      "height": 864,
+      "padding": {
+        "bottom": 96,
+        "left": 40,
+        "right": 88,
+        "top": 96
+      },
+      "width": 964
+    }
+  },
+  "states": [
+    {
+      "label": "relief_after_reload_before_worker_activation",
+      "capturedAt": "2026-11-12T10:51:13.511Z",
+      "atlas": {
+        "mapBaseCommitted": "detail",
+        "mapBaseState": "ready",
+        "mapBaseTarget": "detail",
+        "mapDetail": "close",
+        "mapRenderer": "tropnik",
+        "mapRoute": "selected"
+      },
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          142.7878226365234,
+          46.94792542123872
+        ],
+        "zoom": 14
+      },
+      "coverage": {
+        "cells": [
+          "0908-32"
+        ],
+        "error": "",
+        "lod": "source",
+        "pending": 0,
+        "ready": true,
+        "revision": 1,
+        "version": "e0ce67282bfd3694"
+      },
+      "drawnRoute": "osm-relation-15577268",
+      "entryScripts": [
+        "https://orewn.github.io/tropnik/assets/index-CrxDi20a.js"
+      ],
+      "routeId": "osm-relation-15577268",
+      "state": {
+        "committedMode": "detail",
+        "error": "",
+        "imageryLoading": false,
+        "loading": false,
+        "localDetail": false,
+        "mode": "detail",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": true,
+        "residentTiles": 47
+      },
+      "stylesheets": [
+        "https://orewn.github.io/tropnik/assets/index--uS4iK7x.css",
+        "https://orewn.github.io/tropnik/assets/Footer-BsvoeVO4.css",
+        "https://orewn.github.io/tropnik/assets/page-By3AUdxa.css"
+      ],
+      "title": "Экотропа \"Восьмерка\"",
+      "url": "https://orewn.github.io/tropnik/?route=osm-relation-15577268&region=sakhalin",
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    },
+    {
+      "label": "relief_before_switch",
+      "capturedAt": "2026-11-12T10:52:12.085Z",
+      "atlas": {
+        "mapBaseCommitted": "detail",
+        "mapBaseState": "ready",
+        "mapBaseTarget": "detail",
+        "mapDetail": "close",
+        "mapRenderer": "tropnik",
+        "mapRoute": "selected"
+      },
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          142.7878226365234,
+          46.94792542123872
+        ],
+        "zoom": 14
+      },
+      "coverage": {
+        "cells": [
+          "0908-32"
+        ],
+        "error": "",
+        "lod": "source",
+        "pending": 0,
+        "ready": true,
+        "revision": 1,
+        "version": "e0ce67282bfd3694"
+      },
+      "drawnRoute": "osm-relation-15577268",
+      "entryScripts": [
+        "https://orewn.github.io/tropnik/assets/index-CrxDi20a.js"
+      ],
+      "routeId": "osm-relation-15577268",
+      "state": {
+        "committedMode": "detail",
+        "error": "",
+        "imageryLoading": false,
+        "loading": false,
+        "localDetail": false,
+        "mode": "detail",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": true,
+        "residentTiles": 47
+      },
+      "stylesheets": [
+        "https://orewn.github.io/tropnik/assets/index--uS4iK7x.css",
+        "https://orewn.github.io/tropnik/assets/Footer-BsvoeVO4.css",
+        "https://orewn.github.io/tropnik/assets/page-By3AUdxa.css"
+      ],
+      "title": "Экотропа \"Восьмерка\"",
+      "url": "https://orewn.github.io/tropnik/?route=osm-relation-15577268&region=sakhalin",
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    },
+    {
+      "label": "satellite_after_click",
+      "capturedAt": "2026-11-12T10:52:12.406Z",
+      "atlas": {
+        "mapBaseCommitted": "detail",
+        "mapBaseState": "loading",
+        "mapBaseTarget": "satellite",
+        "mapDetail": "close",
+        "mapImagery": "satellite",
+        "mapImageryState": "loading",
+        "mapImageryTarget": "eox-s2",
+        "mapRenderer": "tropnik",
+        "mapRoute": "selected"
+      },
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          142.7878226365234,
+          46.94792542123872
+        ],
+        "zoom": 14
+      },
+      "coverage": {
+        "cells": [
+          "0908-32"
+        ],
+        "error": "",
+        "lod": "source",
+        "pending": 0,
+        "ready": true,
+        "revision": 1,
+        "version": "e0ce67282bfd3694"
+      },
+      "drawnRoute": "osm-relation-15577268",
+      "entryScripts": [
+        "https://orewn.github.io/tropnik/assets/index-CrxDi20a.js"
+      ],
+      "routeId": "osm-relation-15577268",
+      "state": {
+        "committedMode": "detail",
+        "error": "",
+        "imageryLoading": true,
+        "imageryTarget": "eox-s2",
+        "loading": true,
+        "localDetail": false,
+        "mode": "satellite",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": true,
+        "residentTiles": 47
+      },
+      "stylesheets": [
+        "https://orewn.github.io/tropnik/assets/index--uS4iK7x.css",
+        "https://orewn.github.io/tropnik/assets/Footer-BsvoeVO4.css",
+        "https://orewn.github.io/tropnik/assets/page-By3AUdxa.css"
+      ],
+      "title": "Экотропа \"Восьмерка\"",
+      "url": "https://orewn.github.io/tropnik/?route=osm-relation-15577268&region=sakhalin",
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    },
+    {
+      "label": "satellite_ready",
+      "capturedAt": "2026-11-12T10:54:35.682Z",
+      "atlas": {
+        "mapBaseCommitted": "satellite",
+        "mapBaseState": "ready",
+        "mapBaseTarget": "satellite",
+        "mapDetail": "close",
+        "mapImagery": "satellite",
+        "mapImagerySource": "eox-s2",
+        "mapImageryState": "ready",
+        "mapImageryTarget": "eox-s2",
+        "mapRenderer": "tropnik",
+        "mapRoute": "selected"
+      },
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          142.7878226365234,
+          46.94792542123872
+        ],
+        "zoom": 14
+      },
+      "coverage": {
+        "cells": [
+          "0908-32"
+        ],
+        "error": "",
+        "lod": "source",
+        "pending": 0,
+        "ready": true,
+        "revision": 1,
+        "version": "e0ce67282bfd3694"
+      },
+      "drawnRoute": "osm-relation-15577268",
+      "entryScripts": [
+        "https://orewn.github.io/tropnik/assets/index-CrxDi20a.js"
+      ],
+      "routeId": "osm-relation-15577268",
+      "state": {
+        "committedMode": "satellite",
+        "error": "",
+        "imageryLoading": false,
+        "imagerySource": "eox-s2",
+        "imageryTarget": "eox-s2",
+        "loading": false,
+        "localDetail": false,
+        "mode": "satellite",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": false,
+        "residentTiles": 87
+      },
+      "stylesheets": [
+        "https://orewn.github.io/tropnik/assets/index--uS4iK7x.css",
+        "https://orewn.github.io/tropnik/assets/Footer-BsvoeVO4.css",
+        "https://orewn.github.io/tropnik/assets/page-By3AUdxa.css"
+      ],
+      "title": "Экотропа \"Восьмерка\"",
+      "url": "https://orewn.github.io/tropnik/?route=osm-relation-15577268&region=sakhalin",
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    },
+    {
+      "label": "relief_after_round_trip",
+      "capturedAt": "2026-11-12T10:54:41.623Z",
+      "atlas": {
+        "mapBaseCommitted": "detail",
+        "mapBaseState": "ready",
+        "mapBaseTarget": "detail",
+        "mapDetail": "close",
+        "mapRenderer": "tropnik",
+        "mapRoute": "selected"
+      },
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          142.7878226365234,
+          46.94792542123872
+        ],
+        "zoom": 14
+      },
+      "coverage": {
+        "cells": [
+          "0908-32"
+        ],
+        "error": "",
+        "lod": "source",
+        "pending": 0,
+        "ready": true,
+        "revision": 1,
+        "version": "e0ce67282bfd3694"
+      },
+      "drawnRoute": "osm-relation-15577268",
+      "entryScripts": [
+        "https://orewn.github.io/tropnik/assets/index-CrxDi20a.js"
+      ],
+      "routeId": "osm-relation-15577268",
+      "state": {
+        "committedMode": "detail",
+        "error": "",
+        "imageryLoading": false,
+        "loading": false,
+        "localDetail": false,
+        "mode": "detail",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": true,
+        "residentTiles": 87
+      },
+      "stylesheets": [
+        "https://orewn.github.io/tropnik/assets/index--uS4iK7x.css",
+        "https://orewn.github.io/tropnik/assets/Footer-BsvoeVO4.css",
+        "https://orewn.github.io/tropnik/assets/page-By3AUdxa.css"
+      ],
+      "title": "Экотропа \"Восьмерка\"",
+      "url": "https://orewn.github.io/tropnik/?route=osm-relation-15577268&region=sakhalin",
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    }
+  ],
+  "completedAt": "2026-11-12T10:54:59.475Z",
+  "result": {
+    "passed": true,
+    "action": "normal reload, visible update activation, relief to satellite to relief",
+    "routePreserved": true,
+    "cameraPreserved": true,
+    "readyModes": [
+      "detail",
+      "satellite",
+      "detail"
+    ],
+    "screenshot": "web-0.4.29-live-final.jpg",
+    "limitation": "One desktop live session; viewport and selected route are recorded in states. Full multi-profile and failure-path results are in the source-bound CI evidence."
+  }
+}

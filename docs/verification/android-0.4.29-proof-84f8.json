@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "scope": "Complete exact-source Android build, device, artifact and native-timing verification; overall Pages/manual acceptance remains separate.",
+  "androidProofPassed": true,
+  "releaseEligible": false,
+  "publicationAccepted": false,
+  "sourceCommit": "84f8206e8b445c7a968332e46389c4abd47f1b53",
+  "sourceTree": "3ccc21984e05c24e2ab6db951e09dc8b906e6914",
+  "workflow": {
+    "id": 43200679252,
+    "html_url": "https://github.com/orewn/tropnik/actions/runs/43200679252",
+    "status": "completed",
+    "conclusion": "success",
+    "run_attempt": 1,
+    "updated_at": "2026-11-12T10:35:49Z",
+    "head_branch": "main"
+  },
+  "jobs": [
+    {
+      "id": 131122976622,
+      "name": "build",
+      "conclusion": "success"
+    },
+    {
+      "id": 131124331289,
+      "name": "Android device scenarios",
+      "conclusion": "success"
+    },
+    {
+      "id": 131126690663,
+      "name": "Publish the requested Android prerelease",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 131126692036,
+      "name": "Verify public Android bytes and prepare the universal website manifest",
+      "conclusion": "skipped"
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "build",
+      "id": 13935870405,
+      "name": "tropnik-android-preview-1",
+      "bytes": 109306724,
+      "sha256": "070059df3b3fb8a2a14028a2b4b88908e3ec0b639c74541b29768490263d0afd",
+      "apiDigestVerified": true,
+      "extractedFiles": 17
+    },
+    {
+      "kind": "device",
+      "id": 13934349893,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "bytes": 5559303,
+      "sha256": "f9e14a5a300fc8f9f4ccac415678225af0895f3ecb29a2465ed92729aa5bd4ba",
+      "apiDigestVerified": true,
+      "extractedFiles": 17
+    }
+  ],
+  "verification": {
+    "sourceCommit": "84f8206e8b445c7a968332e46389c4abd47f1b53",
+    "workflowRunId": "43200679252",
+    "jvmTestsPassed": 51,
+    "mapRuntime": {
+      "mapRenderer": "tropnik-canvas",
+      "mapRendererManifestSha256": "bf555f10d4c3b6d522bd256caf4cb2d8c9931d78f7286cd7b24c9eb4c3cfc398",
+      "mapRendererSourceInputsSha256": "3135e14815c0e1e569037a720b9df639bfd5af5c9d5f7c77ec8f13b3196e1c21",
+      "mapRendererFilesVerified": 9,
+      "mapRendererWorkersVerified": 2,
+      "mapRendererResourceAliasesVerified": 1124,
+      "mapRendererNativeSdkRequired": false,
+      "mapRendererSharedWithWeb": true,
+      "mapRendererBridge": "exact-origin-web-message-port-v1"
+    },
+    "apks": {
+      "tropnik-preview.apk": {
+        "bytes": 67846298,
+        "sha256": "633f36c14455e4f46d9496a61ceb8a24dd1684117d07c84e52c0bd000b9eadbd"
+      },
+      "tropnik-arm64-preview.apk": {
+        "bytes": 67833835,
+        "sha256": "163a4415ab2617185b76d25a3e9607386665706304bcabfca87c5e0c02c4b40a"
+      },
+      "tropnik-instrumentation-tests.apk": {
+        "bytes": 1118505,
+        "sha256": "76d1be287d56670efd303baa3b93f9158bc610c6159ebf1bfb90fc672cb16a22"
+      }
+    },
+    "manifestAndRuntimeFilesComparedInsideApks": {
+      "tropnik-preview.apk": 9,
+      "tropnik-arm64-preview.apk": 9
+    },
+    "buildReceiptSha256": "49e433353a0aeeb9db19b6a24edca8719390ca1dfff666c88400c608d0755260",
+    "officialArtifactVerifierExitCode": 0,
+    "ciSignatureAndAlignmentReportsValidated": true,
+    "freshLocalSdkSignatureVerification": false,
+    "device": {
+      "rawInstrumentationReparsed": true,
+      "originalJsonComparedExceptRecordedAt": true,
+      "junitByteIdenticalToReparsedResult": true,
+      "installedAndTestedApkHashesMatched": true,
+      "originalDeviceResult": {
+        "bytes": 3688,
+        "sha256": "168f1855790fc71a9fb753b8b91d28d23e19bcd8dfae0284a161f5bd929d0d85"
+      },
+      "tests": 8,
+      "physicalDeviceVerified": false,
+      "arm64DeviceExecutionVerified": false
+    },
+    "schemaVersion": 1,
+    "diagnosticOnly": true,
+    "releaseEligible": false,
+    "publicationAccepted": false,
+    "scope": "Exact Android CI proof for the native scheduling correction. Final Pages and manual acceptance are pending. Public APK is unchanged."
+  },
+  "originalDeviceResult": {
+    "path": "device-result.json",
+    "bytes": 3688,
+    "sha256": "168f1855790fc71a9fb753b8b91d28d23e19bcd8dfae0284a161f5bd929d0d85"
+  },
+  "deviceRecordedAt": "2026-11-12T10:35:39.199612+00:00",
+  "testedEnvironment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+  "testedArchitecture": "x86_64",
+  "nativeTiming": {
+    "report": {
+      "path": "native-tap-verification.json",
+      "bytes": 16902,
+      "sha256": "d381e42f85f67ac10d3543166c2384fc2f3e03453067840c9b2170631973a6e2"
+    },
+    "verified": true,
+    "recordedMarkerTaps": 4,
+    "actualPressMs": [
+      204,
+      199,
+      122,
+      202
+    ],
+    "upDispatchDelayMs": [
+      124,
+      119,
+      42,
+      122
+    ],
+    "allTrustedClicks": true,
+    "strictThresholdMs": 400,
+    "causalPerformanceImprovementClaimed": false
+  },
+  "previousFailedAttempts": {
+    "sourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+    "runId": 43197108051,
+    "attempts": [
+      1,
+      2
+    ],
+    "actualPressMs": [
+      403,
+      418
+    ],
+    "preserved": true,
+    "comparisonSha256": "fcfe25cef459dbe3e33fa8bc8e06c496ba08eedbc2b066748f01a02f5241cf33"
+  },
+  "companionPages": {
+    "runId": 43200679588,
+    "statusAtReceipt": "in_progress",
+    "acceptance": false
+  },
+  "publicApk": {
+    "version": "0.4.25-preview",
+    "publicationPerformed": false
+  },
+  "limits": [
+    "API35 x86_64 emulator with SwANGLE; physical ARM64/GPU, field GPS and battery are not verified.",
+    "Fresh local SDK signature verification was not run; CI signature/alignment reports and their exact artifact bytes were validated.",
+    "The test scheduling correction preserves actual timestamps and strict duration/deadline/native/DOM checks. It does not establish a performance improvement.",
+    "This Android proof does not assert final Pages publication, manual web acceptance or a newly published APK."
+  ]
+}

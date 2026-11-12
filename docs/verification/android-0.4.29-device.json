@@ -78,18 +78,18 @@
     }
   ],
   "schemaVersion": 2,
-  "recordedAt": "2026-11-12T07:37:09.409658+00:00",
-  "sourceCommit": "3bd6e6bf52175084d0b2c4eaba2861a0a70b1eaa",
-  "workflowRunId": "43175668305",
-  "buildReceiptSha256": "ecf17947b3b9de8dfc5a835f70bc08b51563061e6d531e2911786123ea1dace8",
+  "recordedAt": "2026-11-12T10:35:39.199612+00:00",
+  "sourceCommit": "84f8206e8b445c7a968332e46389c4abd47f1b53",
+  "workflowRunId": "43200679252",
+  "buildReceiptSha256": "49e433353a0aeeb9db19b6a24edca8719390ca1dfff666c88400c608d0755260",
   "testedApks": {
     "tropnik-preview.apk": {
-      "bytes": 67842202,
-      "sha256": "d5af4c7d1275c8fe2e4d8e1362c494f438742748a970587c09b40e8a04cb144c"
+      "bytes": 67846298,
+      "sha256": "633f36c14455e4f46d9496a61ceb8a24dd1684117d07c84e52c0bd000b9eadbd"
     },
     "tropnik-instrumentation-tests.apk": {
-      "bytes": 1118441,
-      "sha256": "f40d2c4400cdec802be533ddbad00b0bf8e643fb575201c8e373a40151589f0b"
+      "bytes": 1118505,
+      "sha256": "76d1be287d56670efd303baa3b93f9158bc610c6159ebf1bfb90fc672cb16a22"
     }
   },
   "installedArtifactBytesVerified": true,
@@ -103,7 +103,7 @@
     "mode": "swangle",
     "appBackend": "OpenGL ES",
     "renderer": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.17841 git hash: 5fa2e61da947))",
-    "diagnosticSha256": "8616e33f75490ffab5c74111992fe466bb69568e6a493f037c9c579e7c43d409",
+    "diagnosticSha256": "796410ce9b5b812385a2d54b302e08616a5dc0deea1c7f616960d864dc63f810",
     "verified": true
   },
   "note": "All eight actual cases must pass on the exact installed universal preview. ARM64, physical GPU, GPS, battery and a production API are not device-verified."

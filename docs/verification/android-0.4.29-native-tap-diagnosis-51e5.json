@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "publicationAccepted": false,
+  "sourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+  "sourceTree": "5ced8a831501ba8f2387d2819b8bac958f9ba48f",
+  "runId": 43197108051,
+  "attempts": [
+    {
+      "runAttempt": 1,
+      "jobId": 131112183554,
+      "conclusion": "failure",
+      "artifact": {
+        "artifactId": 13932804914,
+        "bytes": 5262714,
+        "sha256": "013741c2161049c5dbb2f217aedb1692a7b69631accf917f263412240c9432bc",
+        "apiDigestVerified": true,
+        "extractedFiles": 17
+      },
+      "originalDeviceResult": {
+        "path": "device/artifact/device-result.json",
+        "bytes": 3690,
+        "sha256": "c4a984397b06d584876700dc2b03fc3712435a3b4004e53241e8861f34e44ee3"
+      },
+      "originalSelectionReceipt": {
+        "path": "device/test-evidence/qa/map-region-selection.json",
+        "bytes": 23348,
+        "sha256": "427fa8c1605bd1e84fdd451bb5cb77ab2e61262af1b4ec82b56f62c2c177bb50"
+      },
+      "rawInstrumentation": {
+        "path": "device/artifact/raw-instrumentation.log",
+        "bytes": 8844,
+        "sha256": "b39841ec980358379dde2c26bd01f24dd22c63fe3d0f7d894aac463d5b17ae12"
+      },
+      "failedCase": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+      "tests": 8,
+      "passed": 7,
+      "failures": 1,
+      "nativeInput": [
+        {
+          "action": 0,
+          "downTime": 200935,
+          "eventTime": 200935,
+          "returnedAt": 201254,
+          "accepted": true
+        },
+        {
+          "action": 1,
+          "downTime": 200935,
+          "eventTime": 201338,
+          "returnedAt": 201357,
+          "accepted": true
+        }
+      ],
+      "nativeTouchEvents": [
+        {
+          "action": 0,
+          "x": 696.2255859375,
+          "y": 399.3017578125,
+          "eventTime": 200935,
+          "downTime": 200935,
+          "receivedAt": 201261,
+          "handled": true
+        },
+        {
+          "action": 1,
+          "x": 696.2255859375,
+          "y": 399.3017578125,
+          "eventTime": 201338,
+          "downTime": 200935,
+          "receivedAt": 201343,
+          "handled": true
+        }
+      ],
+      "actualPressMs": 403,
+      "longPressThresholdMs": 400,
+      "downEventCreationToInjectionReturnMs": 319,
+      "downReturnToUpEventCreationMs": 84,
+      "upEventCreationToInjectionReturnMs": 19,
+      "downDeliveryDelayMs": 326,
+      "upDeliveryDelayMs": 5,
+      "nativeReceiptIntervalMs": 82
+    },
+    {
+      "runAttempt": 2,
+      "jobId": 131116702538,
+      "conclusion": "failure",
+      "artifact": {
+        "artifactId": 13934821451,
+        "bytes": 5459537,
+        "sha256": "eecf3e3da6b1bc4cc3377e3b56ad35e3b51e943b8400e0fb8f698c63cf20187e",
+        "apiDigestVerified": true,
+        "extractedFiles": 17
+      },
+      "originalDeviceResult": {
+        "path": "attempt-2/device/artifact/device-result.json",
+        "bytes": 3690,
+        "sha256": "424239580ddfbfe721a2d7a182b9e75f27924b4d5c551dcb61bc63913a98f6e4"
+      },
+      "originalSelectionReceipt": {
+        "path": "attempt-2/device/test-evidence/qa/map-region-selection.json",
+        "bytes": 24119,
+        "sha256": "fa517cf1f6705ea2f2775a0dd672aa93d38e2ba438f30cfe156ca2a7f7aaaca5"
+      },
+      "rawInstrumentation": {
+        "path": "attempt-2/device/artifact/raw-instrumentation.log",
+        "bytes": 8844,
+        "sha256": "0e84e840faa5e95e54e62a6c35e4862c3df13db5bf403075c2d256bf7fdfbdee"
+      },
+      "failedCase": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+      "tests": 8,
+      "passed": 7,
+      "failures": 1,
+      "nativeInput": [
+        {
+          "action": 0,
+          "downTime": 201610,
+          "eventTime": 201610,
+          "returnedAt": 201914,
+          "accepted": true
+        },
+        {
+          "action": 1,
+          "downTime": 201610,
+          "eventTime": 202028,
+          "returnedAt": 202040,
+          "accepted": true
+        }
+      ],
+      "nativeTouchEvents": [
+        {
+          "action": 0,
+          "x": 696.2255859375,
+          "y": 399.3017578125,
+          "eventTime": 201610,
+          "downTime": 201610,
+          "receivedAt": 201926,
+          "handled": true
+        },
+        {
+          "action": 1,
+          "x": 696.2255859375,
+          "y": 399.3017578125,
+          "eventTime": 202028,
+          "downTime": 201610,
+          "receivedAt": 202029,
+          "handled": true
+        }
+      ],
+      "actualPressMs": 418,
+      "longPressThresholdMs": 400,
+      "downEventCreationToInjectionReturnMs": 304,
+      "downReturnToUpEventCreationMs": 114,
+      "upEventCreationToInjectionReturnMs": 12,
+      "downDeliveryDelayMs": 316,
+      "upDeliveryDelayMs": 1,
+      "nativeReceiptIntervalMs": 103
+    }
+  ],
+  "sameTestedApkFingerprintsBothAttempts": true,
+  "nativeReceiptLocation": "CustomMapWebView.onTouchEvent: receivedAt is sampled before super.onTouchEvent and handled after it; this is not a separate Activity dispatch timestamp.",
+  "reportedTestedApks": {
+    "tropnik-preview.apk": {
+      "bytes": 67846298,
+      "sha256": "d7cd4b903285b2c59b2e40d9653940c37ecd23f997c9854df7d58ee62833f15d"
+    },
+    "tropnik-instrumentation-tests.apk": {
+      "bytes": 1118441,
+      "sha256": "2b2434a3e4420f9c199e4b455f13fda7422304b94df87a6a0c0312a4bb7f58fd"
+    }
+  },
+  "reportedBuildReceiptSha256": "c49ed7e59f86897c8f6b782b0ea8f2a66e8ccd783c70003deca7dae915cb9db1",
+  "largeBuildArchiveIndependentlyVerified": false,
+  "finding": "Both attempts reproduced the same strict tap-duration failure. Real MotionEvent timestamps measured 403 ms and 418 ms against the unchanged <400 ms guard. Event creation through DOWN injection return consumed 319 ms and 304 ms before the test unconditionally added its nominal 80 ms sleep.",
+  "causalLimits": [
+    "These are actual monotonic timestamps. Do not replace them with the shorter native-view receipt intervals of 82 ms and 103 ms.",
+    "The measured DOWN interval includes event construction, injection and scheduling. No trace identifies one cause among scheduler, Binder, Surface synchronization, Android system or application work.",
+    "The same source and reported installed/tested APK fingerprints were used in both attempts. The large build ZIP has not yet been independently verified.",
+    "The guard failed before the test waited for a trusted DOM click. Neither a successful click nor an observed DOM longpress is established for the failed group tap."
+  ],
+  "readOnlyReviewedCorrection": {
+    "status": "reviewed proposal; implementation and subsequent CI not claimed here",
+    "reviewers": [
+      "release_review",
+      "ux_skeptic"
+    ],
+    "requestedReleaseAt": "downTime + 80 ms",
+    "sleepAfterAcceptedDown": "max(0, requestedReleaseAt - SystemClock.uptimeMillis())",
+    "upTimestamp": "Actual current SystemClock.uptimeMillis(); never backdated",
+    "injectionOrdering": "Serial DOWN then UP using the existing public native injector",
+    "preservedChecks": [
+      "actualPressMs < 400",
+      "original selection deadline",
+      "accepted native injection",
+      "actual CustomMapWebView.onTouchEvent receipt",
+      "trusted DOM click"
+    ],
+    "overrunCleanup": "Send real UP before evaluating elapsed guards, including when DOWN already consumed the budget",
+    "doesNotClaim": "Reduced 304/319 ms injection latency or improved application performance"
+  },
+  "furtherUnchangedRerunsAllowed": false,
+  "attempt1Diagnosis": {
+    "path": "failure-diagnosis-attempt-1.json",
+    "bytes": 5607,
+    "sha256": "f0aaf13f5d4fa5f5eeca7ec59de63c1acb6136acf35390cce0a80f9baa406f2c"
+  }
+}

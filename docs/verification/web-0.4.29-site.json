@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "scope": "Private Site version 40 publication and exact web source identity",
+  "verified": true,
+  "publication": {
+    "id": "appgdep_6af5947deeac8191ac67b48c5ee50dde",
+    "project_id": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+    "version_id": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_f425a77a449c81919bbec55133bcd0f6",
+    "status": "succeeded",
+    "title": "Тропник — маршруты, рельеф и спутник",
+    "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+    "updated_at": "2026-11-12T10:27:33.104073+00:00",
+    "env_set_revision": 1,
+    "failure_message": null,
+    "provider_deployment_id": "site---6aed4db0a81881919cc3840d28cfad27",
+    "sourceCommit": "dcd5dc8f6c170aed345b8b95ad26acad56c91238",
+    "webSourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+    "versionNumber": 40
+  },
+  "packageCheckBeforePublication": {
+    "schemaVersion": 1,
+    "checkedAt": "2026-11-12T10:08:12.415896+00:00",
+    "sourceCommit": "51e55915749540842d7c03681e7b0e372076a6c5",
+    "siteCommit": "dcd5dc8f6c170aed345b8b95ad26acad56c91238",
+    "archive": "/workspace/scratch/69b73e6e1c01/tropnik-0.4.29-overlay7-site.tar.gz",
+    "archiveBytes": 66698501,
+    "archiveSha256": "5eea41903b8f76088a17d68c8c64b9417aa7791ea6b97c1a3cd8b4042c96b609",
+    "fileCount": 2099,
+    "uncompressedBytes": 163537214,
+    "largestFileBytes": 2938837,
+    "identicalTrackedWebFiles": 2191,
+    "safeEntries": true,
+    "apkIncluded": false,
+    "projectId": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+    "sourceInputsSha256": "3135e14815c0e1e569037a720b9df639bfd5af5c9d5f7c77ec8f13b3196e1c21",
+    "manifestSha256": "bf555f10d4c3b6d522bd256caf4cb2d8c9931d78f7286cd7b24c9eb4c3cfc398",
+    "deploymentStatus": "prepared-not-published"
+  },
+  "storedArchive": {
+    "format": "tar",
+    "sha256": "sha256:64bb8c2a6105763751b3863c1ab76e85c5b0df36b939541b9b282ecfd42f8d91",
+    "sizeBytes": 165130240,
+    "fileCount": 2099,
+    "representation": "Service-normalized tar; its digest is separate from the uploaded gzip archive."
+  },
+  "sourceComparison": {
+    "sourceCommit": "84f8206e8b445c7a968332e46389c4abd47f1b53",
+    "webTree": "a4e084aba07dda17b9a03c5dd3553580e2571f00",
+    "identicalTrackedWebFiles": 2191,
+    "sameWebTreeAs": "51e55915749540842d7c03681e7b0e372076a6c5",
+    "siteCommit": "dcd5dc8f6c170aed345b8b95ad26acad56c91238"
+  },
+  "access": {
+    "ownerPrivatePreserved": true,
+    "audienceChangeRequested": false
+  },
+  "manualPrivateUI": {
+    "verified": false,
+    "reason": "The session's normal browser authentication navigation was rejected by automatic approval review. Authenticated UI was not verified, and no bypass or repeated authentication attempt was made."
+  }
+}
