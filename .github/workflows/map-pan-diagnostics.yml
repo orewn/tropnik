@@ -1,4 +1,4 @@
-name: Bounded map pan diagnosis
+name: Paired opaque vector Canvas diagnosis
 
 on:
   push:
@@ -13,82 +13,148 @@ concurrency:
 
 jobs:
   inspect:
-    name: Trace the unchanged native map pan
+    name: Compare exact baseline and alpha-only candidate
     if: github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/diagnostics/map-pan-0.4.29'
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 38
     steps:
-      - name: Check out the isolated diagnostic source
+      - name: Check out the candidate source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          path: candidate
+          persist-credentials: false
+      - name: Check out the immutable production baseline
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 14d6d6753994af458209b19a09e32bc317b3b2fc
+          path: baseline
           persist-credentials: false
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Install frozen dependencies
+      - name: Install identical frozen dependencies
         run: |
           npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
           test "$(pnpm --version)" = '11.25.0'
-          pnpm --dir web install --frozen-lockfile
-      - name: Check trace and native input boundaries
-        run: node --test tools/pages-preview/tests/browser-smoothness.test.mjs tools/pages-preview/tests/browser-trace.test.mjs tools/pages-preview/tests/browser-source-end-pan.test.mjs
-      - name: Prepare the verified Android link and static diagnostic build
+          cmp baseline/web/pnpm-lock.yaml candidate/web/pnpm-lock.yaml
+          pnpm --dir baseline/web install --frozen-lockfile
+          pnpm --dir candidate/web install --frozen-lockfile
+      - name: Check native input, diagnostic provenance and worker boundaries
+        working-directory: candidate
+        run: |
+          node --test tools/pages-preview/tests/browser-smoothness.test.mjs tools/pages-preview/tests/browser-trace.test.mjs tools/pages-preview/tests/source-end-pan.test.mjs tools/pages-preview/tests/map-pan-paired-diagnostic.test.mjs
+          node --experimental-strip-types --test web/tests/custom-map-tiles-worker.test.mjs web/tests/custom-map-vector.test.mjs
+          node tools/android-build/prepare-custom-map.mjs --check
+      - name: Build the immutable baseline
+        working-directory: baseline
+        env:
+          GITHUB_SHA: 14d6d6753994af458209b19a09e32bc317b3b2fc
         run: |
           node tools/pages-preview/fetch-apk.mjs
           node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
-      - name: Capture bounded map pan traces
+      - name: Build the alpha-only candidate
+        working-directory: candidate
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify exact source and build provenance for both variants
+        id: inputs
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs prepare baseline candidate map-pan-evidence
+      - name: Require exact real-worker pixel parity before timing
+        id: parity
+        working-directory: candidate
         timeout-minutes: 8
         env:
           GITHUB_SHA: ${{ github.sha }}
-          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
-          TROPNIK_BROWSER_TRACE: '1'
-        run: node tools/pages-preview/browser-smoke.mjs
-      - name: Check diagnostic provenance and non-release status
         run: |
-          node --input-type=module <<'NODE'
-          import assert from 'node:assert/strict';
-          import {createHash} from 'node:crypto';
-          import {readFileSync,existsSync} from 'node:fs';
-          import {assertSmoothnessAudit} from './tools/pages-preview/browser-smoothness.mjs';
-          const report=JSON.parse(readFileSync('web/pages-preview/dist/browser-ui-smoothness-diagnostic.json','utf8'));
-          assert.equal(report.sourceCommit,process.env.GITHUB_SHA);
-          assert.equal(report.diagnostic,'ui-smoothness');
-          assert.equal(report.diagnosticOnly,true);
-          assert.equal(report.verified,false);
-          assert.equal(report.releaseEligible,false);
-          assert.equal(report.status,'completed');
-          assert.equal(existsSync('web/pages-preview/dist/browser-verification.json'),false);
-          assert.deepEqual(report.profiles.map(profile=>profile.profile),['android-portrait','desktop-webgl']);
-          for(const profile of report.profiles){
-            assertSmoothnessAudit(profile,{name:profile.profile,engine:profile.engine,mobile:profile.profile==='android-portrait'},{release:false});
-            assert.equal(profile.instrumented,true);
-            assert.equal(profile.physicalDevice,false);
-            assert.equal(profile.cpuSlowdownRate,1);
-            assert.deepEqual(profile.traces.map(trace=>trace.scenario),['map-pan']);
-            const trace=profile.traces[0];
-            assert.equal(trace.sourceCommit,process.env.GITHUB_SHA);
-            assert.equal(trace.status,'complete');
-            assert.equal(trace.dataLossOccurred,false);
-            assert.deepEqual(trace.errors,[]);
-            assert.match(trace.file,/^[a-z-]+-ui-smoothness-map-pan\.trace\.json$/);
-            const bytes=readFileSync('web/pages-preview/design-qa/'+trace.file);
-            assert.equal(bytes.length,trace.bytes);
-            assert.equal(createHash('sha256').update(bytes).digest('hex'),trace.sha256);
-          }
-          console.log(JSON.stringify({sourceCommit:report.sourceCommit,diagnosticOnly:true,verified:false,releaseEligible:false,profiles:report.profiles.length}));
-          NODE
-      - name: Preserve traces and raw metrics without publication
+          node --test tools/pages-preview/tests/browser-map-vector-opaque.browser.mjs
+          node tools/pages-preview/map-pan-paired-diagnostic.mjs parity . ../map-pan-evidence
+
+      - name: A1 baseline with a fresh browser profile
+        id: a1
+        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        continue-on-error: true
+        working-directory: baseline
+        timeout-minutes: 6
+        env:
+          GITHUB_SHA: 14d6d6753994af458209b19a09e32bc317b3b2fc
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: ''
+        run: |
+          node ../candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs reset . ../map-pan-evidence/A1 A1 baseline 14d6d6753994af458209b19a09e32bc317b3b2fc
+          node tools/pages-preview/browser-smoke.mjs > ../map-pan-evidence/A1/browser-stdout.log 2> ../map-pan-evidence/A1/browser-stderr.log
+      - name: Preserve A1 outcome and complete raw evidence
+        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs capture baseline map-pan-evidence/A1 '${{ steps.a1.outcome }}'
+
+      - name: B1 candidate with a fresh browser profile
+        id: b1
+        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        continue-on-error: true
+        working-directory: candidate
+        timeout-minutes: 6
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: ''
+        run: |
+          node tools/pages-preview/map-pan-paired-diagnostic.mjs reset . ../map-pan-evidence/B1 B1 candidate '${{ github.sha }}'
+          node tools/pages-preview/browser-smoke.mjs > ../map-pan-evidence/B1/browser-stdout.log 2> ../map-pan-evidence/B1/browser-stderr.log
+      - name: Preserve B1 outcome and complete raw evidence
+        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs capture candidate map-pan-evidence/B1 '${{ steps.b1.outcome }}'
+
+      - name: A2 baseline with a fresh browser profile
+        id: a2
+        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        continue-on-error: true
+        working-directory: baseline
+        timeout-minutes: 6
+        env:
+          GITHUB_SHA: 14d6d6753994af458209b19a09e32bc317b3b2fc
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: ''
+        run: |
+          node ../candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs reset . ../map-pan-evidence/A2 A2 baseline 14d6d6753994af458209b19a09e32bc317b3b2fc
+          node tools/pages-preview/browser-smoke.mjs > ../map-pan-evidence/A2/browser-stdout.log 2> ../map-pan-evidence/A2/browser-stderr.log
+      - name: Preserve A2 outcome and complete raw evidence
+        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs capture baseline map-pan-evidence/A2 '${{ steps.a2.outcome }}'
+
+      - name: B2 candidate with a fresh browser profile
+        id: b2
+        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        continue-on-error: true
+        working-directory: candidate
+        timeout-minutes: 6
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: ''
+        run: |
+          node tools/pages-preview/map-pan-paired-diagnostic.mjs reset . ../map-pan-evidence/B2 B2 candidate '${{ github.sha }}'
+          node tools/pages-preview/browser-smoke.mjs > ../map-pan-evidence/B2/browser-stdout.log 2> ../map-pan-evidence/B2/browser-stderr.log
+      - name: Preserve B2 outcome and complete raw evidence
+        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs capture candidate map-pan-evidence/B2 '${{ steps.b2.outcome }}'
+
+      - name: Validate all four scheduled outcomes without release eligibility
+        if: always() && steps.inputs.outcome == 'success'
+        run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs summarize map-pan-evidence '${{ steps.a1.outcome }}' '${{ steps.b1.outcome }}' '${{ steps.a2.outcome }}' '${{ steps.b2.outcome }}'
+      - name: Preserve the comparison and any incomplete pixel evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: tropnik-map-pan-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          name: tropnik-map-pan-alpha-paired-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
-            web/pages-preview/design-qa
-            web/pages-preview/dist/build-info.json
-            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
-            web/pages-preview/dist/browser-network.json
-            web/pages-preview/dist/browser-failure.*
+            map-pan-evidence
+            candidate/web/pages-preview/dist/browser-vector-alpha-verification.json
+            candidate/web/pages-preview/design-qa/vector-alpha
           if-no-files-found: error
           retention-days: 7

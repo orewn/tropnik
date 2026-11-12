@@ -139,8 +139,8 @@
     },
     {
       "path": "web/lib/custom-map-tiles.worker.ts",
-      "sizeBytes": 15542,
-      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217"
+      "sizeBytes": 15576,
+      "sha256": "f5d5a7eb41f1d504f66aff3e35e1114d8454c89b678b1ec930779ec18668d804"
     },
     {
       "path": "web/lib/custom-map-vector.ts",
@@ -258,17 +258,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "86d863b519542bce661a0245721e5770e18abeb2fdf807851c5d265d37c0d2d8",
+  "sourceInputsSha256": "b4d636215b84d0006ed11a8b08898647a4cdf35b4d45de473197e9245ae36b78",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "b9b47b65bd6539e81d86dfbc8686c7d7ec5b540ca31173a5758a46ed0bb2cf49"
+      "sha256": "78047ae342f765943383daa17f66be7f1cfdc8a36e4eeb20feb83ed83528bedd"
     },
     {
-      "path": "chunks/custom-map-entry-O8dLE4re.js",
+      "path": "chunks/custom-map-entry-D9bEYNVr.js",
       "sizeBytes": 107198,
-      "sha256": "be74f367650cab7251ade5a33d30b0b960a05ecb380ac418774555d96e0109d5"
+      "sha256": "2659e206e9ed290e5f052a5079a934eeb20cd67ce9f32164aaf2204b7becf935"
     },
     {
       "path": "index.html",
@@ -283,7 +283,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "90da72e9df4db831d4a5246f5f407b812022b6d606ab0e111a07b5437baf093e"
+      "sha256": "6e4fa9d2ce810dfba2e9817dd83b2acd398de5cc462b4e1e874715ed64ab20a4"
     },
     {
       "path": "map.css",
@@ -296,9 +296,9 @@
       "sha256": "54075549afdea2aee6d10c3cf70d53429b0ba457eda890a8ad93c1124c508c10"
     },
     {
-      "path": "workers/custom-map-tiles.worker-DIXTfJlZ.js",
-      "sizeBytes": 28755,
-      "sha256": "f76ea8a31e046b700ab47418f303cffec504490e700b78f2dfc68866c4a71b2e"
+      "path": "workers/custom-map-tiles.worker-BOzbsGer.js",
+      "sizeBytes": 28787,
+      "sha256": "c0995a8f541b049796dccb48bc20b54135e6d218a24fa7aeefb2ba8a2c8f0636"
     },
     {
       "path": "workers/terrain-preparation.worker-Bb-s7l3H.js",

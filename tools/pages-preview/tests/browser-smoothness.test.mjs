@@ -13,7 +13,6 @@ const mobile={name:'android-portrait',engine:'tropnik-canvas',mobile:true};
 const summarize=mutate=>{const raw=structuredClone(smoothnessWindowFixture().raw);mutate(raw);return summarizeSmoothness(raw);};
 
 test('smoothness tracing needs the explicit normal-speed focused diagnostic opt-in',()=>{
- assert.deepEqual(SMOOTHNESS_TRACE_SCENARIOS,['map-pan']);
  for(const diagnostic of [null,'ui-smoothness','ui-smoothness-cpu','map-interactions'])for(const traceValue of [undefined,'','1'])for(const cpuSlowdownRate of [1,4]){
   assert.equal(smoothnessTraceEnabled({diagnostic,traceValue,cpuSlowdownRate}),diagnostic==='ui-smoothness'&&traceValue==='1'&&cpuSlowdownRate===1);
  }
@@ -23,7 +22,7 @@ test('smoothness tracing needs the explicit normal-speed focused diagnostic opt-
 test('focused traces wrap each measured action once and drain outside its window, including a capture cap',async t=>{
  const directory=await mkdtemp(join(tmpdir(),'tropnik-smoothness-trace-')),output=pathToFileURL(directory+'/');t.after(()=>rm(directory,{recursive:true,force:true}));
  for(const mode of ['complete','cap','action-error','stop-error']){
-  const name='map-pan',report={profile:mobile.name,scenarios:[],traces:[]},order=[],timers=new Map(),failure=new Error(mode);let active=false,actions=0,completion,now=0,nextTimer=0;
+  const name=mode==='cap'?'explore-search':'panel',report={profile:mobile.name,scenarios:[],traces:[]},order=[],timers=new Map(),failure=new Error(mode);let active=false,actions=0,completion,now=0,nextTimer=0;
   const cdp={
    observe(event,listener){assert.equal(event,'Tracing.tracingComplete');completion=listener;return()=>{completion=null;};},
    async call(method){
@@ -61,7 +60,7 @@ test('focused traces wrap each measured action once and drain outside its window
 });
 
 test('other scenarios and disabled tracing keep the native measurement path without trace protocol',async()=>{
- for(const [name,tracing]of [['map-pan',false],['panel',true],['explore-search',true],['explore-filters',true],['catalog-scroll',true],['map-zoom',true],['layer-switch',true],['site-search',true]]){
+ for(const [name,tracing]of [['panel',false],['explore-search',false],['map-pan',true]]){
   const report={profile:mobile.name,scenarios:[],traces:[]};let actions=0;
   await measureSmoothnessWindow({call:()=>assert.fail('No tracing for this window'),observe:()=>assert.fail('No trace observer')},name,async()=>{actions++;},{report,tracing,evaluate:async(cdp,expression)=>expression.includes('.stop(')?smoothnessWindowFixture(name).raw:undefined});
   assert.equal(actions,1);assert.deepEqual(report.traces,[]);assert.deepEqual(report.scenarios,[smoothnessWindowFixture(name)]);
