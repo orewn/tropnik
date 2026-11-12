@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {MapResourcePool, routeTilePlan} from '../lib/map-resource-pool.ts';
+import {MapResourcePool, MapResourceHTTPError, routeTilePlan} from '../lib/map-resource-pool.ts';
 
 test('all preview cards share one concurrency limit and duplicate requests', async () => {
   let active=0, maximum=0, requests=0;
@@ -124,4 +124,15 @@ test('antimeridian bounds wrap without out-of-world tiles; invalid coordinates f
   assert.ok(tiles.some(t=>t.x===0));assert.ok(tiles.some(t=>t.x===2**t.z-1));
   assert.ok(tiles.every(t=>t.x>=0&&t.x<2**t.z&&t.y>=0&&t.y<2**t.z));
   for(const invalid of [[0,NaN,1,2],[200,0,201,1],[0,91,1,92],[0,2,1,1],[]])assert.deepEqual(routeTilePlan(invalid),[]);
+});
+
+
+test('HTTP status remains typed for missing-coverage decisions without changing failure cleanup',async()=>{
+ for(const status of[404,403,503]){
+  const pool=new MapResourcePool({fetcher:async()=>new Response('Unavailable',{status})});
+  await assert.rejects(pool.get('/data/source.bin'),error=>error instanceof MapResourceHTTPError&&error.status===status&&error.message===`Preview resource unavailable (${status})`);
+  assert.equal(pool.has('/data/source.bin'),false);
+ }
+ const pool=new MapResourcePool({fetcher:async()=>{throw new TypeError('Network error');}});
+ await assert.rejects(pool.get('/data/source.bin'),error=>!(error instanceof MapResourceHTTPError)&&error.message==='Network error');
 });

@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {registerHooks} from 'node:module';
 import {mercatorUnproject} from '../lib/custom-map-camera.ts';
+import {MapResourcePool,MapResourceHTTPError} from '../lib/map-resource-pool.ts';
 import * as renderer from '../public/terrain/terrain-renderer.js';
 
 // Node has no Vite asset compiler. Resolve only its worker-URL import to a URL;
@@ -270,4 +271,49 @@ test('the browser preparation worker uses the compiled URL on the page origin, n
     if (previousWorker) Object.defineProperty(globalThis, 'Worker', previousWorker); else delete globalThis.Worker;
     if (previousLocation) Object.defineProperty(globalThis, 'location', previousLocation); else delete globalThis.location;
   }
+});
+
+
+const countryBounds=[19.63892820000001,41.1858711,191.00266579999993,81.858721];
+test('whole Russia uses complete real-source zoom 2 when the zoom 3 Arctic corner is genuinely absent',async()=>{
+ const urls=[];let active=0,maximum=0;
+ const pool=new MapResourcePool({fetcher:async url=>{
+  urls.push(url);active++;maximum=Math.max(maximum,active);await tick();active--;
+  return /\/3\/(?:7|0)\/0\.webp$/.test(url)?new Response('Tile not found',{status:404}):new Response(bytes);
+ }});
+ const loader=createCustomLandscapeLoader(dependency({loadJSON:async()=>({schemaVersion:1,regions:[]}),loadBytes:url=>pool.get(url),
+  decodeTile:async(_bytes,resource)=>tile(resource.tileSize,resource.z===2?123.25:9000),
+  prepare:async grid=>[renderer,grid,renderer.createTerrainModel(grid)],
+ }));
+ const result=await loader.load(countryBounds,{preferRegional:true});
+ assert.deepEqual(urls.slice(0,3),['https://tiles.mapterhorn.com/3/4/0.webp','https://tiles.mapterhorn.com/3/0/0.webp','https://tiles.mapterhorn.com/3/0/2.webp']);
+ assert.equal(urls.length,9);assert.ok(maximum<=3);assert.deepEqual(result.grid.bounds,countryBounds);assert.equal(result.grid.width,513);assert.equal(result.grid.height,513);
+ assert.equal(result.provenance.sourceZoom,2);assert.equal(result.provenance.sourceTileSize,512);assert.equal(result.provenance.sourceUrls.length,6);
+ assert.ok(result.provenance.sourceUrls.every(url=>url.includes('/2/')));assert.match(result.provenance.fallbackReason,/zoom 3 \(HTTP 404\).*complete zoom 2/);
+ assert.ok(Math.abs(result.provenance.sourcePixelSpacingApproxM-9330.292421747046)<1e-8);
+ assert.equal(result.provenance.missingDataFilled,false);assert.equal(result.provenance.measurementAccuracyClaimedM,null);
+ assert.ok(result.grid.elevations.every(height=>Number.isFinite(height)&&Math.abs(height-123.25)<1e-9),'discarded finer tiles and missing sea corners cannot become invented or mixed elevations');
+ assert.equal(renderer.validatePreparedTerrainModel(result.grid,result.prepared[2]),result.prepared[2]);loader.dispose();
+});
+
+test('late missing coverage still shares the original total tile budget with its complete coarser retry',async()=>{
+ const urls=[],loader=createCustomLandscapeLoader(dependency({loadBytes:async url=>{
+  urls.push(url);await tick();if(url==='https://tiles.mapterhorn.com/3/7/2.webp')throw new MapResourceHTTPError(404);return bytes;
+ }}));
+ const result=await loader.load(countryBounds);
+ assert.equal(urls.filter(url=>url.includes('/3/')).length,15);assert.equal(urls.length,16,'all failed and successful requests together retain the original 16-tile limit');
+ assert.equal(result.provenance.sourceZoom,0);assert.deepEqual(result.provenance.sourceUrls,['https://tiles.mapterhorn.com/0/0/0.webp']);assert.equal(result.provenance.missingDataFilled,false);loader.dispose();
+});
+
+test('coverage retry is limited to three plans and the caller budget; other errors never lower source zoom',async()=>{
+ for(const maxTiles of[9,16]){
+  const urls=[],loader=createCustomLandscapeLoader(dependency({loadBytes:async url=>{urls.push(url);throw new MapResourceHTTPError(404);}}));
+  await assert.rejects(loader.load(countryBounds,{maxTiles}),/No packaged elevation grid/);
+  assert.ok(urls.length<=maxTiles);assert.equal(new Set(urls.map(url=>url.split('/')[3])).size,3);assert.equal(loader.snapshot().cached,0);loader.dispose();
+ }
+ for(const failure of[new MapResourceHTTPError(403),new MapResourceHTTPError(503),new Error('Network timed out'),new Error('Preview resource unavailable (404)'),new Error('Terrarium tile contains unavailable or invalid elevations')]){
+  const urls=[],loader=createCustomLandscapeLoader(dependency({loadBytes:async url=>{urls.push(url);throw failure;}}));
+  await assert.rejects(loader.load(countryBounds),/No packaged elevation grid/);
+  assert.ok(urls.length>0&&urls.length<=3);assert.ok(urls.every(url=>url.includes('/3/')),'non-404 transport/decoder failures must not become repeated coverage retries');loader.dispose();
+ }
 });

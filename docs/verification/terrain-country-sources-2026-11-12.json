@@ -1,0 +1,655 @@
+{
+  "schemaVersion": 1,
+  "checkedDate": "2026-11-12",
+  "recordedAt": "2026-11-12T01:21:22+00:00",
+  "scope": "Read-only verification of remote elevation availability and production loader preparation for the initial full-Russia geographic request",
+  "boundsOrder": [
+    "west",
+    "south",
+    "east",
+    "north"
+  ],
+  "requestedBounds": [
+    19.63892820000001,
+    41.1858711,
+    191.00266579999993,
+    81.858721
+  ],
+  "sourceDocumentation": [
+    "https://mapterhorn.com/data-access/",
+    "https://mapterhorn.com/attribution/"
+  ],
+  "sourceEncoding": "Terrarium; elevation metres = R*256 + G + B/256 - 32768; decoded before spatial interpolation",
+  "validation": {
+    "dimensions": [
+      512,
+      512
+    ],
+    "requiredAlpha": 255,
+    "allowedElevationRangeM": [
+      -12000,
+      10000
+    ],
+    "successfulTileInvalidSamples": 0,
+    "missingResponseInterpretedAsZero": false,
+    "directNetworkConcurrency": 3,
+    "perResponseReadLimitBytes": 4194305
+  },
+  "levels": [
+    {
+      "zoom": 3,
+      "requestedTiles": 15,
+      "successfulTiles": 13,
+      "missingTiles": [
+        "3/0/0",
+        "3/7/0"
+      ],
+      "encodedImageBytes": 1241104,
+      "complete": false,
+      "tiles": [
+        {
+          "tile": "3/0/0",
+          "url": "https://tiles.mapterhorn.com/3/0/0.webp",
+          "httpStatus": 404,
+          "httpDate": "Thu, 12 Nov 2026 01:16:36 GMT",
+          "contentType": "text/plain;charset=UTF-8",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 14,
+          "responseSha256": "6b160727dea166fae8ea8f6ee404588cabdcd818e3f031ba79d061be0f524993",
+          "responseBody": "Tile not found",
+          "dimensions": null,
+          "elevationRangeM": null
+        },
+        {
+          "tile": "3/0/1",
+          "url": "https://tiles.mapterhorn.com/3/0/1.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:46 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 43904,
+          "responseSha256": "2192ec5722478dc751cdbdd60b33db830e84f897fa52f9816fe9d3ff7157b1a2",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -1,
+            2215
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/0/2",
+          "url": "https://tiles.mapterhorn.com/3/0/2.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:52 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 80498,
+          "responseSha256": "d5a50a3eaf4ac7ee73ab2fef117a121de713d783cb3825f302d442ce8b2b635c",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -2,
+            5268
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/4/0",
+          "url": "https://tiles.mapterhorn.com/3/4/0.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:30 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 10856,
+          "responseSha256": "a9f929c8f7623effd097cb5f95cdd57b6336398e9d89c43369bcfdd2af4cbc66",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            0,
+            1309
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/4/1",
+          "url": "https://tiles.mapterhorn.com/3/4/1.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:36 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 47068,
+          "responseSha256": "062e880b160cd70f2fd42eb699aca49afb9527a9837a9d1aa6e5c08e0ad321cb",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            0,
+            1585
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/4/2",
+          "url": "https://tiles.mapterhorn.com/3/4/2.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:46 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 174234,
+          "responseSha256": "96f3535b2e33c70649706cf53fc4d38ff84c273f03004ec5aec8a18ca4ffea7f",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -8,
+            4133
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/5/0",
+          "url": "https://tiles.mapterhorn.com/3/5/0.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:30 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 9972,
+          "responseSha256": "e1b2d0aa1ecaf4585a8e1ad0a5595bf5706a16a7db80083743b5eab02dcc0e8b",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            0,
+            512
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/5/1",
+          "url": "https://tiles.mapterhorn.com/3/5/1.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:41 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 64916,
+          "responseSha256": "9264a225eef38c4daa50c07d0fabbf5650fe524d5b7be133dcb54a2f8f5dd208",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -2,
+            1018
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/5/2",
+          "url": "https://tiles.mapterhorn.com/3/5/2.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:46 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 193704,
+          "responseSha256": "6c61e8e5297875c89cba8138e16a0e74e1405c23594825fe58ab2f76b9ca4cf9",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -153,
+            5467
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/6/0",
+          "url": "https://tiles.mapterhorn.com/3/6/0.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:30 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 8158,
+          "responseSha256": "d16866d442b9cc947702a76a7c369c76651e21320472c92c78f8dd9c2a280ec2",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -1,
+            934
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/6/1",
+          "url": "https://tiles.mapterhorn.com/3/6/1.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:41 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 142642,
+          "responseSha256": "d9febcafa01d9ed7c2c3ff5669ef7fdf8cdd6cfae2b7e8c4f2772c808c0b022a",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -2,
+            1904
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/6/2",
+          "url": "https://tiles.mapterhorn.com/3/6/2.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:52 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 271894,
+          "responseSha256": "2b70ea9af7c6c1e413c62a2af8781f4d9eb392a482241bf01bfa5411a0e3b381",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            0,
+            4102
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/7/0",
+          "url": "https://tiles.mapterhorn.com/3/7/0.webp",
+          "httpStatus": 404,
+          "httpDate": "Thu, 12 Nov 2026 01:16:36 GMT",
+          "contentType": "text/plain;charset=UTF-8",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 14,
+          "responseSha256": "6b160727dea166fae8ea8f6ee404588cabdcd818e3f031ba79d061be0f524993",
+          "responseBody": "Tile not found",
+          "dimensions": null,
+          "elevationRangeM": null
+        },
+        {
+          "tile": "3/7/1",
+          "url": "https://tiles.mapterhorn.com/3/7/1.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:41 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 66152,
+          "responseSha256": "7206a49695cb7872f7f032342e43135902405ff47ac644334717e88877408bef",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -1,
+            2033
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "3/7/2",
+          "url": "https://tiles.mapterhorn.com/3/7/2.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:16:52 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 127106,
+          "responseSha256": "058669e0d2324b7aa7ee38bb0df37c461e99cc78df9b0819e68a4517be623a8d",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            0,
+            3513
+          ],
+          "invalidSampleCount": 0
+        }
+      ]
+    },
+    {
+      "zoom": 2,
+      "requestedTiles": 6,
+      "successfulTiles": 6,
+      "missingTiles": [],
+      "encodedImageBytes": 597846,
+      "complete": true,
+      "tiles": [
+        {
+          "tile": "2/0/0",
+          "url": "https://tiles.mapterhorn.com/2/0/0.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:17:35 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 45178,
+          "responseSha256": "ac17a79805a2978277d37449dbc4939448efbef4df0db290aae3d4ded5238fbb",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -2,
+            2044
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "2/0/1",
+          "url": "https://tiles.mapterhorn.com/2/0/1.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:17:41 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 104504,
+          "responseSha256": "4b275242feffe3022213a90d7221e8c0b83fcbffd6c03cc8f859785f9b9dc301",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -72,
+            4217
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "2/2/0",
+          "url": "https://tiles.mapterhorn.com/2/2/0.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:17:35 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 38432,
+          "responseSha256": "704d075627fd75299c02e42a2c9db68214dcba1e0b8f52e4a0419a4e4d69d925",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            0,
+            1441
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "2/2/1",
+          "url": "https://tiles.mapterhorn.com/2/2/1.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:17:41 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 200638,
+          "responseSha256": "3bc126c1d884d4f2295ba9e3240eec9692bdf5afe540d259e3d490cfe08043f8",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -345,
+            6288
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "2/3/0",
+          "url": "https://tiles.mapterhorn.com/2/3/0.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:17:35 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 59688,
+          "responseSha256": "9e75dcbf6851ef6164e846523be44be5a31ceb77620a4a0858ed7690a2ddf10c",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            0,
+            1922
+          ],
+          "invalidSampleCount": 0
+        },
+        {
+          "tile": "2/3/1",
+          "url": "https://tiles.mapterhorn.com/2/3/1.webp",
+          "httpStatus": 200,
+          "httpDate": "Thu, 12 Nov 2026 01:17:41 GMT",
+          "contentType": "image/webp",
+          "accessControlAllowOrigin": "*",
+          "responseBytes": 149406,
+          "responseSha256": "e4252b0cd0253cef336647f843c0959e38aae5155f58cf723a9c64a0cf0145ef",
+          "dimensions": [
+            512,
+            512
+          ],
+          "alphaValues": [
+            255
+          ],
+          "elevationRangeM": [
+            -1,
+            6010
+          ],
+          "invalidSampleCount": 0
+        }
+      ]
+    }
+  ],
+  "loaderActualResult": {
+    "width": 513,
+    "height": 513,
+    "min": -127.78416830486327,
+    "max": 5104.362779008975,
+    "finite": true,
+    "provenance": {
+      "provider": "Mapterhorn / Copernicus GLO-30",
+      "kind": "remote-terrarium",
+      "requestedBounds": [
+        19.63892820000001,
+        41.1858711,
+        191.00266579999993,
+        81.858721
+      ],
+      "sourceZoom": 2,
+      "sourceTileSize": 512,
+      "sourceUrls": [
+        "https://tiles.mapterhorn.com/2/2/0.webp",
+        "https://tiles.mapterhorn.com/2/3/0.webp",
+        "https://tiles.mapterhorn.com/2/0/0.webp",
+        "https://tiles.mapterhorn.com/2/2/1.webp",
+        "https://tiles.mapterhorn.com/2/3/1.webp",
+        "https://tiles.mapterhorn.com/2/0/1.webp"
+      ],
+      "sourceNominalResolutionM": 30,
+      "sourcePixelSpacingApproxM": 9330.292421747046,
+      "sourceGridSpacingApproxM": null,
+      "outputSpacingApproxM": {
+        "eastWest": 17765.26424768365,
+        "northSouth": 8843.12683589697
+      },
+      "interpolation": "Bilinear on decoded scalar metres with actual neighbours across Terrarium tile seams; no generated or filled elevations.",
+      "missingDataFilled": false,
+      "measurementAccuracyClaimedM": null,
+      "fallbackReason": null
+    },
+    "requests": [
+      "https://tiles.mapterhorn.com/2/2/0.webp",
+      "https://tiles.mapterhorn.com/2/3/0.webp",
+      "https://tiles.mapterhorn.com/2/0/0.webp",
+      "https://tiles.mapterhorn.com/2/2/1.webp",
+      "https://tiles.mapterhorn.com/2/3/1.webp",
+      "https://tiles.mapterhorn.com/2/0/1.webp"
+    ],
+    "sampleCount": 263169,
+    "explicitOptions": {
+      "gridSize": 513,
+      "maxSourceZoom": 2
+    },
+    "method": {
+      "loader": "web/lib/custom-map-landscape.ts:createCustomLandscapeLoader",
+      "preparation": "Default TerrainPreparation path, awaited to completion",
+      "transport": "Injected filesystem reads of the exact network responses recorded above; no alternative source or synthetic elevation fixture",
+      "imageDecode": "Pillow decoded the recorded WebP bytes to RGBA; production decodeTerrariumPixels converted those scalar channels to metres",
+      "environment": "Node with experimental TypeScript stripping; Vite worker URL import was replaced by a harmless asset URL",
+      "browserRenderingVerified": false,
+      "automaticZoomFallbackExercised": false
+    }
+  },
+  "interpretation": {
+    "failureCause": "The selected z3 plan is incomplete: 3/7/0 and 3/0/0 return genuine HTTP404 Tile not found. All thirteen delivered images pass pixel validation. Dateline wrapping and elevation limits did not prevent the complete z2 loader run.",
+    "completeOverviewZoom": 2,
+    "baseDatasetNominalResolutionM": 30,
+    "actualOverviewSourcePixelSpacingApproxMAtMidlatitude": 9330.292421747046,
+    "missingDataFilled": false,
+    "independentElevationAccuracyValidation": false,
+    "countrywideSelfHostedNativeDemPipeline": false,
+    "availabilityIsPointInTime": true
+  },
+  "artifactPolicy": "Only this compact evidence receipt is stored in the repository; downloaded raster assets remain outside the repository.",
+  "automaticLoaderResult": {
+    "verifiedAt": "2026-11-12T01:22:04.542Z",
+    "explicitOptions": {
+      "gridSize": 513,
+      "preferRegional": true
+    },
+    "defaultMaxSourceZoomUsed": true,
+    "width": 513,
+    "height": 513,
+    "sampleCount": 263169,
+    "min": -127.78416830486327,
+    "max": 5104.362779008975,
+    "finite": true,
+    "provenance": {
+      "provider": "Mapterhorn / Copernicus GLO-30",
+      "kind": "remote-terrarium",
+      "requestedBounds": [
+        19.63892820000001,
+        41.1858711,
+        191.00266579999993,
+        81.858721
+      ],
+      "sourceZoom": 2,
+      "sourceTileSize": 512,
+      "sourceUrls": [
+        "https://tiles.mapterhorn.com/2/2/0.webp",
+        "https://tiles.mapterhorn.com/2/3/0.webp",
+        "https://tiles.mapterhorn.com/2/0/0.webp",
+        "https://tiles.mapterhorn.com/2/2/1.webp",
+        "https://tiles.mapterhorn.com/2/3/1.webp",
+        "https://tiles.mapterhorn.com/2/0/1.webp"
+      ],
+      "sourceNominalResolutionM": 30,
+      "sourcePixelSpacingApproxM": 9330.292421747046,
+      "sourceGridSpacingApproxM": null,
+      "outputSpacingApproxM": {
+        "eastWest": 17765.26424768365,
+        "northSouth": 8843.12683589697
+      },
+      "interpolation": "Bilinear on decoded scalar metres with actual neighbours across Terrarium tile seams; no generated or filled elevations.",
+      "missingDataFilled": false,
+      "measurementAccuracyClaimedM": null,
+      "fallbackReason": "Remote elevation coverage missing at zoom 3 (HTTP 404); using complete zoom 2 coverage from 6 real tiles."
+    },
+    "requests": [
+      "https://tiles.mapterhorn.com/3/4/0.webp",
+      "https://tiles.mapterhorn.com/3/0/0.webp",
+      "https://tiles.mapterhorn.com/3/0/2.webp",
+      "https://tiles.mapterhorn.com/2/2/0.webp",
+      "https://tiles.mapterhorn.com/2/0/0.webp",
+      "https://tiles.mapterhorn.com/2/0/1.webp",
+      "https://tiles.mapterhorn.com/2/3/0.webp",
+      "https://tiles.mapterhorn.com/2/2/1.webp",
+      "https://tiles.mapterhorn.com/2/3/1.webp"
+    ],
+    "jsonRequests": [
+      "/terrain-regions/manifest.json"
+    ],
+    "remoteRequestCount": 9,
+    "maxConcurrentByteReads": 3,
+    "successfulEncodedBytes": 689200,
+    "sampleRangeMatchesExplicitZ2Run": true,
+    "productionCodeSha256": {
+      "web/lib/custom-map-landscape.ts": "45aeed9813dcb83b22f7ddc37e5f506f46f97a88bebfdc7f26ec532e48f62cff",
+      "web/lib/map-resource-pool.ts": "f76e5e7e5c404aa0df195e71f53aadf4be2b2c0adec2ee94052c888612325845"
+    },
+    "method": {
+      "loader": "web/lib/custom-map-landscape.ts:createCustomLandscapeLoader",
+      "preparation": "Default TerrainPreparation path, awaited to completion",
+      "transport": "Injected filesystem reads of the exact network responses recorded above; no alternative source or synthetic elevation fixture",
+      "imageDecode": "Pillow decoded the recorded WebP bytes to RGBA; production decodeTerrariumPixels converted those scalar channels to metres",
+      "environment": "Node with experimental TypeScript stripping; Vite worker URL import was replaced by a harmless asset URL",
+      "browserRenderingVerified": false,
+      "automaticZoomFallbackExercised": true,
+      "missingResponseReplay": "MapResourceHTTPError(404) was returned only for the exact URL whose real HTTP404 is recorded above."
+    }
+  }
+}

@@ -3,6 +3,7 @@ import {TerrainPreparation, type PreparedTerrain} from './terrain-preparation.ts
 import type {TerrainGrid} from '../public/terrain/terrain-renderer.js';
 import terrainPreparationWorkerURL from './terrain-preparation.worker.ts?worker&url';
 import {createTerrainRegionReader} from './terrain-region-sources.ts';
+import {MapResourceHTTPError} from './map-resource-pool.ts';
 
 export const LANDSCAPE_MAX_SOURCE_ZOOM = 12;
 export const LANDSCAPE_MAX_TILES = 16;
@@ -240,18 +241,28 @@ export function createCustomLandscapeLoader(dependencies: LandscapeLoaderDepende
   async function tileSource(job: Job, local: boolean) {
     const archive = local ? await getManifest(job.priority) : undefined;
     checkAbort(job.controller.signal);
-    const plan = planLandscapeTiles(job.bounds, {...job.options, tileSize: local ? 256 : 512, availableTileKeys: archive && new Set(archive.tiles.keys())});
+    let remaining = job.options.maxTiles, maxSourceZoom = job.options.maxSourceZoom;
+    const missingZooms: number[] = [];
+    // Sparse remote pyramids may omit an all-sea tile at one zoom while a
+    // coarser tile really exists. All attempts share the original request
+    // budget; never fill missing elevations or combine different source LODs.
+    for (let attempt = 0; attempt < 3; attempt++) {
+    const plan = planLandscapeTiles(job.bounds, {...job.options, maxSourceZoom, maxTiles: remaining, tileSize: local ? 256 : 512, availableTileKeys: archive && new Set(archive.tiles.keys())});
     const resources: LandscapeTileResource[] = plan.tiles.map(tile => {
       const entry = archive?.tiles.get(tileKey(tile));
       return {...tile, tileSize: plan.tileSize, url: entry ? `/offline-map/${entry.path}` : `https://tiles.mapterhorn.com/${tileKey(tile)}.webp`, sha256: entry?.sha256, bytes: entry?.bytes};
     });
     const tiles = new Map<string, DecodedTerrainTile>();
-    let next = 0, error: unknown;
+    let error: unknown;
+    const missing = (value: unknown) => value instanceof MapResourceHTTPError && value.status === 404;
+    const failed = (value: unknown) => {if (error === undefined || missing(error) && !missing(value)) error = value;};
     // Do not enqueue the entire 16-tile region into the shared request pool.
-    const workers = Array.from({length: Math.min(3, resources.length)}, async () => {
-      while (next < resources.length && !error) {
+    const load = async (batch: LandscapeTileResource[]) => {
+    let next = 0;
+    const workers = Array.from({length: Math.min(3, batch.length)}, async () => {
+      while (next < batch.length && error === undefined) {
         checkAbort(job.controller.signal);
-        const resource = resources[next++];
+        const resource = batch[next++]; remaining--;
         try {
           const bytes = await loadBytes(resource.url, job.priority);
           checkAbort(job.controller.signal); await verifyBytes(bytes, resource); checkAbort(job.controller.signal);
@@ -259,12 +270,24 @@ export function createCustomLandscapeLoader(dependencies: LandscapeLoaderDepende
           checkAbort(job.controller.signal);
           if (tile.width !== resource.tileSize || tile.height !== resource.tileSize || tile.elevations.length !== tile.width * tile.height) throw new Error('Unexpected decoded elevation tile dimensions');
           tiles.set(tileKey(resource), tile);
-        } catch (caught) {error = caught;}
+        } catch (caught) {failed(caught);}
       }
     });
     const results = await Promise.allSettled(workers);
-    for (const result of results) if (result.status === 'rejected') error ??= result.reason;
+    for (const result of results) if (result.status === 'rejected') failed(result.reason);
     if (error) throw error;
+    };
+    try {
+      // Check three outer source tiles before admitting the rest. A missing
+      // Arctic/dateline corner then leaves enough of the same budget for a
+      // complete coarser window instead of downloading most of a doomed LOD.
+      const probes = local ? [] : [...new Set([resources[0], resources.findLast(resource => resource.y === resources[0].y)!, resources.at(-1)!])];
+      await load(probes); await load(resources.filter(resource => !probes.includes(resource)));
+    } catch (caught) {
+      checkAbort(job.controller.signal); tiles.clear();
+      if (local || !missing(caught) || !remaining || plan.zoom === 0 || attempt === 2) throw caught;
+      missingZooms.push(plan.zoom); maxSourceZoom = plan.zoom - 1; continue;
+    }
     checkAbort(job.controller.signal);
     return {sample: (longitude: number, latitude: number) => sampleLandscapeElevation(plan, tiles, longitude, latitude),
       source: {...sourceMetadata, ...archive?.source, sourceTileZoom: plan.zoom, sourceTileSize: plan.tileSize},
@@ -272,7 +295,10 @@ export function createCustomLandscapeLoader(dependencies: LandscapeLoaderDepende
       sourceZoom: plan.zoom, sourceTileSize: plan.tileSize, sourceUrls: resources.map(resource => resource.url),
       sourceGridSpacingApproxM: null,
       sourcePixelSpacingApproxM: EARTH_CIRCUMFERENCE_M * Math.cos((job.bounds[1] + job.bounds[3]) / 2 * Math.PI / 180) / (2 ** plan.zoom * plan.tileSize),
+      coverageFallbackReason: missingZooms.length ? `Remote elevation coverage missing at zoom ${missingZooms.join(', ')} (HTTP 404); using complete zoom ${plan.zoom} coverage from ${resources.length} real tiles.` : null,
       interpolation: 'Bilinear on decoded scalar metres with actual neighbours across Terrarium tile seams; no generated or filled elevations.'};
+    }
+    throw new Error('No complete elevation coverage within the request budget');
   }
 
   async function gridSource(job: Job) {
@@ -320,6 +346,7 @@ export function createCustomLandscapeLoader(dependencies: LandscapeLoaderDepende
       catch (error) {checkAbort(job.controller.signal); fallbackReason = error instanceof Error ? error.message : 'Elevation source unavailable';}
     }
     if (!source) throw new Error(fallbackReason ?? 'Elevation data unavailable for this area');
+    if ('coverageFallbackReason' in source && source.coverageFallbackReason) fallbackReason = source.coverageFallbackReason;
     const size = job.options.gridSize, elevations = new Array<number>(size * size), bounds = job.bounds;
     let minElevation = Infinity, maxElevation = -Infinity;
     for (let row = 0; row < size; row++) {

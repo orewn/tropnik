@@ -4,6 +4,13 @@ import {MAP_RESOURCE_LIMITS} from './map-config.ts';
 type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown; persistent: boolean; consumers: number; controller?: AbortController};
 type Options = {concurrency?: number; maxBytes?: number; maxResourceBytes?: number; maxQueued?: number; timeoutMs?: number; fetcher?: typeof fetch};
 
+/** Preserve the actual HTTP status for source-coverage decisions. A failed
+ * fetch, timeout or decoder error must never be mistaken for a missing tile. */
+export class MapResourceHTTPError extends Error {
+  readonly status: number;
+  constructor(status: number) {super(`Preview resource unavailable (${status})`); this.name = 'MapResourceHTTPError'; this.status = status;}
+}
+
 export class MapResourcePool {
   private entries = new Map<string, Entry>();
   private queue: string[] = [];
@@ -94,7 +101,7 @@ export class MapResourcePool {
       // selecting an old coverage manifest or reject a stale material checksum.
       const regional = /(?:^|\/)terrain-regions\//.test(url);
       const response = await this.options.fetcher(url, {cache: regional ? 'no-cache' : 'force-cache', credentials: url.startsWith('/') ? 'same-origin' : 'omit', signal: controller.signal});
-      if (!response.ok) throw new Error(`Preview resource unavailable (${response.status})`);
+      if (!response.ok) throw new MapResourceHTTPError(response.status);
       if (Number(response.headers.get('content-length') || 0) > this.options.maxResourceBytes) throw new Error('Preview resource exceeds the byte budget');
       reader = response.body?.getReader(); if (!reader) return new ArrayBuffer(0);
       const chunks: Uint8Array[] = []; let length = 0;
