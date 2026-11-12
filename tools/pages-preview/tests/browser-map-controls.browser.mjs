@@ -52,12 +52,12 @@ async function productionFixture(){
  };
  const parts=subtrees(atlas,'CustomAtlas.tsx',['map-controls','layer-control','map-style-switch']),peek=subtrees(explore,'Explore.tsx',['sheet-peek-summary']);
  const iconSource=await readFile(join(web,'components/MapIcon.tsx'),'utf8'),{MapIcon}=compile(iconSource,'MapIcon.tsx');
- const iconSet=await readFile(join(web,'components/TropnikIcons.tsx'),'utf8'),{ArrowRight,Check}=compile(iconSet,'TropnikIcons.tsx');
+ const iconSet=await readFile(join(web,'components/TropnikIcons.tsx'),'utf8'),{ArrowRight}=compile(iconSet,'TropnikIcons.tsx');
  // Render the real TSX subtrees, not a copied button count or a CSS formula.
  // Transport, camera effects and React event execution do not affect this
  // layout fixture; the full browser audit exercises their actual behavior.
- const noOperation=()=>{},scope={MapIcon,Check,scene:null,planning:false,trail:null,offline:false,paths:true,relief:true,boundaries:true,engine:{current:null}};
- for(const name of ['locate','fitAll','setLayers','changeMode','setPaths','setRelief','setBoundaries','setScene','openLandscape','closeLandscape'])scope[name]=noOperation;
+ const noOperation=()=>{},scope={MapIcon,planning:false,trail:null,offline:false,paths:true,relief:true,boundaries:true,engine:{current:null}};
+ for(const name of ['locate','fitAll','setLayers','changeMode','setPaths','setRelief','setBoundaries'])scope[name]=noOperation;
  const {Controls}=compile(`export function Controls({layers=false,ready=true}){const state={ready,mode:'detail'},satellite=state.mode==='satellite';return <>${[...parts.values()].join('\n')}</>;}`,'ControlsFixture.tsx',scope);
  const {Peek}=compile(`export function Peek({kind='Каталог',title='Все направления',meta='680 маршрутов'}){const sheetOpen=false,sheetPreviewKind=kind,sheetPreviewTitle=title,sheetPreviewMeta=meta;return ${peek.get('sheet-peek-summary')};}`,'PeekFixture.tsx',{ArrowRight,sheetPreview:{current:null},setSheetOpen:noOperation});
  const html=({layers=false,...copy}={})=>`<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><body><header style="height:var(--header)"></header><main><div class="explore-layout sheet-closed" data-sheet-state="closed"><aside class="explore-panel"><button class="sheet-handle"><span></span></button>${renderToStaticMarkup(jsx.jsx(Peek,copy))}</aside><div class="atlas-wrap tropnik-custom-atlas"><div class="atlas-canvas"></div>${renderToStaticMarkup(jsx.jsx(Controls,{layers}))}</div></div></main></body></html>`;
@@ -67,7 +67,8 @@ async function productionFixture(){
 test('production control fixture renders both menu states, actual peek icons and bundled Cyrillic fonts',async()=>{
  const fixture=await productionFixture(),closed=fixture.html(),open=fixture.html({layers:true});
  assert.doesNotMatch(closed,/class="layer-menu"/);assert.match(open,/class="layer-menu"/);
- assert.match(open,/data-tropnik-icon="Check"/);assert.match(closed,/data-tropnik-icon="ArrowRight"/);
+ assert.match(closed,/aria-label="Рельеф"[^>]*aria-pressed="true"/);assert.match(closed,/aria-label="Спутник"[^>]*aria-pressed="false"/);
+ assert.doesNotMatch(open,/Рельеф всей карты|Карта сверху|Сохранённый обзор|Тропы и ландшафт/);assert.match(closed,/data-tropnik-icon="ArrowRight"/);
  assert.match(closed,/<small>Каталог<\/small><strong>Все направления<\/strong><span>680 маршрутов<\/span>/);
  assert.equal(fixture.sources.cssFiles.filter(file=>file.startsWith('@fontsource/manrope/')).length,8);
  assert.match(closed,/data:font\/woff2;base64,/);assert.doesNotMatch(closed,/url\(["']?\.\/files\/manrope/);

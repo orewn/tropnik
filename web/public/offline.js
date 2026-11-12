@@ -150,7 +150,7 @@ byId('pilot').onclick=pilot;byId('saved').onchange=event=>show(saved.find(pack=>
 async function findPilot(){
  if(!('caches'in window))return;
  for(const name of(await caches.keys()).filter(value=>value.startsWith('tropnik-map-')).sort().reverse()){
-  const cache=await caches.open(name);if(await cache.match('/_offline/verified-map')){hasPilot=true;if(await cache.match('/offline-map/terrain/landscape.html'))byId('landscape').href='/offline-map/terrain/landscape.html';break;}
+  const cache=await caches.open(name);if(await cache.match('/_offline/verified-map')){hasPilot=true;break;}
  }
 }
 const results=await Promise.allSettled([createMap(),loadSaved(),findPilot()]);

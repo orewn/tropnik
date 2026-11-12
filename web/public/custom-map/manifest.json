@@ -169,8 +169,8 @@
     },
     {
       "path": "web/lib/map-preload.ts",
-      "sizeBytes": 5764,
-      "sha256": "5e382ea60ee5ef0360ae62b545a37a42414fc884ef2f949636d975a7cdd11593"
+      "sizeBytes": 5932,
+      "sha256": "6ea08533c3ba6530e58f9f1777bfd29750e41b14398a546a38e25f2750314666"
     },
     {
       "path": "web/lib/map-resource-pool.ts",
@@ -210,7 +210,7 @@
     {
       "path": "web/package.json",
       "sizeBytes": 1896,
-      "sha256": "1a14def54fcebfaf9a6522aa4f158f9f28ffcc76864d7e719864f25014992a60"
+      "sha256": "6cb31ae6141c82165e845a88a0db870c0198321a9218299d3aaf0583f7855c3c"
     },
     {
       "path": "web/pnpm-lock.yaml",
@@ -248,22 +248,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "3c188db9d7de653f570de7e8f77ebf6ba8344c9d05616842f763108f550e20a4",
+  "sourceInputsSha256": "a448f39fbabcbceb93273f1a94945b4d46101419dcf5b4211308e1ee4da6d6a3",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "cb34669644296a26554f0906f23de30f2897183d0e644b2602db5eab1ea3abe5"
+      "sha256": "aa5d86aa97752da9fbe8d3789b8cb15f4732b7d25d6a062f9477495f5be149a5"
     },
     {
-      "path": "chunks/custom-map-entry-CQTZTlx-.js",
-      "sizeBytes": 104557,
-      "sha256": "cee5251c9e1488f58776def005e697e9a190bd76b00e28052d938e8c84fa62c0"
-    },
-    {
-      "path": "chunks/terrain-renderer-C88xySK5.js",
-      "sizeBytes": 94567,
-      "sha256": "8d6e29a7a4ff4c281f08d7d8d093f4cebf533a67bdd8452dcb73b9b4b96e8568"
+      "path": "chunks/custom-map-entry-CPaoAJrn.js",
+      "sizeBytes": 100926,
+      "sha256": "e3713af71a63a0f032dbda2448451adcea68ef4ac7ba7d60ba0eb4613271ada0"
     },
     {
       "path": "index.html",
@@ -278,7 +273,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "8ae725ed8d6c9f8495b636bd2c0605bcd32edca728051270060a6209cf42d833"
+      "sha256": "aa084557108eea9915a8051592609192fe46aef2987f589a0440c4ced936cda0"
     },
     {
       "path": "map.css",

@@ -2,7 +2,6 @@
 import {memo, useMemo, useState} from 'react';
 import {regions, routeCountLabel, type Trail} from '@/lib/content';
 import {territories, type MapRegion} from '@/lib/territories';
-import {preloadTerrain} from '@/lib/map-preload';
 import {ArrowUpRight, MagnifyingGlass, CheckCircle} from './TropnikIcons';
 import {RegionArtwork} from './RegionArtwork';
 
@@ -31,11 +30,7 @@ export const TerritoryBrowser = memo(function TerritoryBrowser({query, catalogBy
     <div className={`region-list${all ? ' territory-list' : ''}`}>
       {choices.slice(0, limit).map(item => {
         const count = catalogByRegion.get(item.id)?.length ?? 0;
-        const warm = () => {
-          const connection = (navigator as Navigator & {connection?: {saveData?: boolean; effectiveType?: string}}).connection;
-          if (item.id === 'krasnodar' && !connection?.saveData && !/(?:^|-)2g$/.test(connection?.effectiveType || '')) void preloadTerrain();
-        };
-        return <button type="button" className="region-option" key={item.id} onPointerEnter={warm} onFocus={warm} onClick={() => onSelect(item)}>
+        return <button type="button" className="region-option" key={item.id} onClick={() => onSelect(item)}>
           <span className={`region-thumbnail region-thumbnail-${item.id}`} style={{backgroundColor: item.tint}}><RegionArtwork regionId={item.id}/></span>
           <span className="region-option-text"><strong className="title-3">{item.name}</strong><small className="caption-4">{normalized ? 'territory' in item && item.territory ? 'Территория · ' : 'Направление · ' : ''}{count ? `${routeCountLabel(count)} · каталог` : 'Карта доступна · маршрутов пока нет'}</small></span>
           <ArrowUpRight size={20}/>

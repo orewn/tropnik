@@ -1,0 +1,78 @@
+{
+  "checkedAt": "2026-11-12T01:52:59.942Z",
+  "environment": "managed local preview",
+  "relief": {
+    "buttons": [
+      {
+        "label": "Рельеф",
+        "pressed": "true"
+      },
+      {
+        "label": "Спутник",
+        "pressed": "false"
+      }
+    ],
+    "camera": {
+      "bearingDegrees": 0,
+      "center": [
+        142.7878226365234,
+        46.94792542123872
+      ],
+      "zoom": 14
+    },
+    "drawnRoute": "osm-relation-15577268",
+    "pitch": 0,
+    "routeId": "osm-relation-15577268",
+    "sceneCount": 0,
+    "state": {
+      "committedMode": "detail",
+      "error": "",
+      "imageryLoading": false,
+      "loading": false,
+      "localDetail": false,
+      "mode": "detail",
+      "pendingTiles": 0,
+      "ready": true,
+      "reliefReady": true,
+      "residentTiles": 47
+    }
+  },
+  "satellite": {
+    "buttons": [
+      {
+        "label": "Рельеф",
+        "pressed": "false"
+      },
+      {
+        "label": "Спутник",
+        "pressed": "true"
+      }
+    ],
+    "camera": {
+      "bearingDegrees": 0,
+      "center": [
+        142.7878226365234,
+        46.94792542123872
+      ],
+      "zoom": 14
+    },
+    "drawnRoute": "osm-relation-15577268",
+    "pitch": 0,
+    "routeId": "osm-relation-15577268",
+    "sceneCount": 0,
+    "state": {
+      "committedMode": "satellite",
+      "error": "",
+      "imageryLoading": false,
+      "imagerySource": "eox-s2",
+      "imageryTarget": "eox-s2",
+      "loading": false,
+      "localDetail": false,
+      "mode": "satellite",
+      "pendingTiles": 0,
+      "ready": true,
+      "reliefReady": false,
+      "residentTiles": 87
+    }
+  }
+}

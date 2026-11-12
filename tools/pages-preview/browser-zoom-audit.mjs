@@ -7,8 +7,8 @@ import {traceDesktopSelection,TERRAIN_TRACE_LIMITS,DESKTOP_TRACE_CATEGORIES} fro
 import {runCoastAudit} from './browser-coast-audit.mjs';
 import {runSatelliteContinuityAudit} from './browser-satellite-audit.mjs';
 import {performanceBudgetIssues} from './browser-smoothness.mjs';
-import {inspectCustomMapDOM,assertCustomMapInspection,assertCustomSceneInspection} from './browser-custom-map.mjs';
-import {captureCompletedTerrain,terrainOpeningExpectedView} from './browser-terrain-capture.mjs';
+import {inspectCustomMapDOM,assertCustomMapInspection} from './browser-custom-map.mjs';
+import {inspectProductMapModes,assertProductMapMode,assertProductMapModeTransition} from './browser-map-modes.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -189,9 +189,8 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
  if(terrainDiagnostic)assert.ok(profile.name==='desktop-webgl'&&!profile.mobile,'The terrain diagnostic requires the desktop profile');
  if(modesDiagnostic)assert.ok(profile.name==='android-portrait'&&profile.mobile,'The zoom-modes diagnostic requires the Android portrait profile');
  await mkdir(OUTPUT,{recursive:true});
- const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:8,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modes:{},startedAt:new Date().toISOString()};
+ const report={profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',schemaVersion:9,geometryPassed:false,visualReviewRequired:true,maximumZoom:18,keyZooms:KEY_ZOOMS,detailSteps:[],screenshots:[],modeSwitches:[],modes:{},startedAt:new Date().toISOString()};
  if(diagnostic)Object.assign(report,{schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,diagnostic,sourceCommit:process.env.GITHUB_SHA||null,status:'starting',diagnosticStage:'loading-route',nativeZooms:[]});
- let terrainTraceStarted=false;
  const terrainResources=terrainDiagnostic?observeTerrainResources(cdp,()=>report.diagnosticStage):null;
  const save=()=>{if(terrainResources)report.dem=terrainResources.snapshot();return writeFile(new URL(terrainDiagnostic?'desktop-webgl-terrain-diagnostic.json':modesDiagnostic?'android-portrait-zoom-modes-diagnostic.json':`${profile.name}.json`,OUTPUT),JSON.stringify(report,null,2)+'\n');};
  const network=new Map();
@@ -225,30 +224,21 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   })()`);
   const bitmapInspection=profile.engine==='tropnik-canvas'?await evaluate(cdp,`(${inspectCustomMapDOM.toString()})()`):undefined;
   if(bitmapInspection)assertCustomMapInspection(bitmapInspection,`${profile.name}/${mode}`,{routeId:'kavkaz-8a'});
+  const modeState=await evaluate(cdp,`(${inspectProductMapModes.toString()})()`);
+  assertProductMapMode(modeState,modeState.state.mode==='satellite'?'Спутник':'Рельеф',`${profile.name}/${mode}`,{routeId:'kavkaz-8a'});
   report.lastInspection={mode,zoom:map.camera.zoom,...layout,...(bitmapInspection?{bitmapInspection}:{})};
   assert.equal(map.route,'kavkaz-8a',`${profile.name}/${mode}: changing zoom/base map lost the selected route`);
   assertMapUIBounds(layout,`${profile.name}/${mode}/${map.camera.zoom}`);
   assert.ok(layout.routeEdgeCount<=2,`${profile.name}/${mode}: route edge annotations grew with vertex count`);
-  return{mode,zoom:map.camera.zoom,camera:map.camera,routeId:map.route,...layout,...(bitmapInspection?{bitmapInspection}:{}),...(diagnostic?{terrainCamera:map.terrainCamera??null}:{})};
+  return{mode,zoom:map.camera.zoom,camera:map.camera,routeId:map.route,modeState,...layout,...(bitmapInspection?{bitmapInspection}:{}),...(diagnostic?{terrainCamera:map.terrainCamera??null}:{})};
  }
- async function capture(mode,state,label='',terrain=null){
-  const zoom=Number.isFinite(state?.zoom)?`z${state.zoom.toFixed(2).replace('.','_')}`:label||'scene';
+ async function capture(mode,state,label=''){
+  const zoom=Number.isFinite(state?.zoom)?`z${state.zoom.toFixed(2).replace('.','_')}`:label;
   const name=`${profile.name}-${mode}-${zoom}${label&&Number.isFinite(state?.zoom)?`-${label}`:''}.png`;
-  const take=()=>cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
-  let result,failure;
-  try{result=terrain?await captureCompletedTerrain({...terrain,capture:take,sleep}):{image:await take()};}
-  catch(error){failure=error;result={image:error.terrainCaptureImage,receipt:error.terrainCapture};}
-  let evidence;
-  // The helper has already read the post-capture identity. File/report IO is
-  // deliberately later, so it cannot attach a subsequent frame to old pixels.
-  if(result.image){
-   const bytes=Buffer.from(result.image.data,'base64');await writeFile(new URL(name,OUTPUT),bytes);
-   evidence={file:name,mode,...(Number.isFinite(state?.zoom)?{zoom:state.zoom}:{}),bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
-   if(result.receipt){result.receipt.image={file:name,bytes:bytes.length,sha256:evidence.sha256};evidence.terrainCapture=result.receipt;}
-   report.screenshots.push(evidence);
-  }
-  if(failure){report.terrainCaptureFailure=result.receipt||{stage:terrain?.stage,error:failure.message};await save();throw failure;}
-  await save();return{...evidence,...(result.scene?{terrainState:result.scene}:{})};
+  const image=await cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+  const bytes=Buffer.from(image.data,'base64');await writeFile(new URL(name,OUTPUT),bytes);
+  const evidence={file:name,mode,...(Number.isFinite(state?.zoom)?{zoom:state.zoom}:{}),bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
+  report.screenshots.push(evidence);await save();return evidence;
  }
  async function zoom(direction,{mode}={}){
   const before=await settledMap(cdp,profile.engine),target=await elementPoint(cdp,direction>0?PLUS:MINUS);
@@ -334,29 +324,30 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   }
   return steps;
  }
- async function layerButton(label,{confirmSelected=false}={}){
-  await pointerSelector(cdp,'.layer-button',profile);
-  const target=await waitValue(`${profile.name}: ${label} layer is unavailable`,()=>evaluate(cdp,`(()=>{const button=[...document.querySelectorAll('.layer-menu button')].find(item=>item.textContent?.trim()===${JSON.stringify(label)});if(!button||button.disabled)return null;const r=button.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);return{x,y,unobscured:!!hit&&button.contains(hit)};})()`),value=>value?.unobscured);
-  await pointerAt(cdp,target,profile);
-  let selected=false;
-  if(confirmSelected)selected=await waitValue(`${profile.name}: ${label} did not become the selected layer`,()=>evaluate(cdp,`(()=>{const button=[...document.querySelectorAll('.layer-menu button')].find(item=>item.textContent?.trim()===${JSON.stringify(label)});return!!button?.querySelector('svg');})()`),Boolean);
-  if(await elementPoint(cdp,'.layer-menu'))await pointerSelector(cdp,'.layer-button',profile);
-  return{selectedControl:selected};
+ async function switchMode(label){
+  await settledMap(cdp,profile.engine);
+  const before=await evaluate(cdp,`(()=>{window.__tropnikModeCanvas=document.querySelector('.atlas-canvas canvas.tropnik-map-canvas');window.__tropnikInputEvents=[];return (${inspectProductMapModes.toString()})();})()`);
+  const selector=`.map-style-switch button[aria-label="${label}"]`,point=await elementPoint(cdp,selector);assert.ok(point?.unobscured,`${profile.name}: ${label} mode is unavailable`);
+  await pointerSelector(cdp,selector,profile);await settledMap(cdp,profile.engine);
+  const after=await evaluate(cdp,`(${inspectProductMapModes.toString()})()`),canvasRetained=await evaluate(cdp,"window.__tropnikModeCanvas===document.querySelector('.atlas-canvas canvas.tropnik-map-canvas')"),events=await evaluate(cdp,'window.__tropnikInputEvents');
+  const transition={label,selector,input:profile.mobile?'touch':'mouse',point,events,before,after,canvasRetained};
+  assertNativeBurstEventOrder(events,transition.input,1);assertProductMapModeTransition(transition,`${profile.name}/${label}`,{routeId:'kavkaz-8a'});
+  report.modeSwitches.push(transition);return{selectedControl:true};
  }
  async function satelliteEvidence(){
   const ui=await evaluate(cdp,`(()=>({active:document.querySelector('.atlas-wrap')?.dataset.mapImagery==='satellite',status:document.querySelector('.map-message')?.textContent?.trim()||'',loadedTiles:(JSON.parse(document.querySelector('.atlas-canvas')?.dataset.mapInspection||'null')?.tiles?.imagery?.length||0)}))()`);
   const responses=[...network.values()].filter(item=>item.source==='satellite');
   return{...ui,finishedImageResponses:responses.filter(item=>item.finished&&item.status===200&&item.mimeType?.startsWith('image/')).length,failedResponses:responses.filter(item=>item.error||item.status>=400).length};
  }
- async function savedOverview(){
-  await diagnosticPhase(cdp,'zoom-design-saved-overview');
-  const selection=await layerButton('Сохранённый обзор',{confirmSelected:true});
+ async function reliefOverview(){
+  await diagnosticPhase(cdp,'zoom-design-relief');
+  const selection={selectedControl:true};
   await settledMap(cdp,profile.engine);await reachBottom();
   const keySteps=[];
   for(const targetZoom of KEY_ZOOMS){
    await reachZoom(targetZoom);
-   const state={...await geometry('saved-overview'),targetZoom};keySteps.push(state);
-   await capture('saved-overview',state,`key${targetZoom}`);
+   const state={...await geometry('relief'),targetZoom};keySteps.push(state);
+   await capture('relief',state,`key${targetZoom}`);
   }
   const responses=[...network.values()].filter(item=>item.source==='overview');
   const sourceEvidence={
@@ -365,9 +356,9 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
    failedResponses:responses.filter(item=>item.error||item.status>=400).length,
    loadedReliefTiles:await evaluate(cdp,"(JSON.parse(document.querySelector('.atlas-canvas')?.dataset.mapInspection||'null')?.tiles?.overview?.length||0)"),
   };
-  // The checkmark confirms the selected UI mode. Source responses only prove
+  // The actual aria-pressed control confirms the selected mode. Source responses prove
   // data availability; the screenshots still require a visual review.
-  report.modes.overview={state:'active',...selection,keySteps,sourceEvidence,visualReviewRequired:true};
+  report.modes.relief={state:'active',...selection,keySteps,sourceEvidence,visualReviewRequired:true};
   await save();
  }
  async function closeTrailEdges(){
@@ -468,14 +459,13 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
   await diagnosticPhase(cdp,terrainDiagnostic?'terrain-diagnostic-loading':'zoom-design-detail');
   const route=await waitValue(`${profile.name}: the zoom audit route did not render`,()=>helpers.mapState(cdp),state=>state?.route==='kavkaz-8a');
   report.routeId=route.route;
-  if(!terrainDiagnostic){
   await capture('route-fit',await geometry('detail'));
   report.minimumZoom=await reachBottom();
   await capture('overview',await geometry('detail'));
   await sweep('detail',1,{allSteps:true});
   report.modes.detail={state:'checked',stepCount:report.detailSteps.length,firstZoom:report.detailSteps[0].zoom,lastZoom:report.detailSteps.at(-1).zoom};
   await diagnosticPhase(cdp,'zoom-design-satellite');
-  await layerButton('Спутник');
+  await switchMode('Спутник');
   let satellite;
   for(let attempt=0;attempt<30;attempt++){
    satellite=await satelliteEvidence();
@@ -491,63 +481,10 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
    report.modes.satellite={state:satellite.status?'fallback':'unavailable',...satellite,stepCount:0,visualReviewRequired:true};
    await capture('satellite-unavailable',await geometry('fallback'));
   }
-  await savedOverview();
-  await layerButton('Тропы и ландшафт');
-  await waitValue(`${profile.name}: leaving satellite did not restore map controls`,()=>evaluate(cdp,"document.querySelector('.atlas-wrap')?.dataset.mapImagery!=='satellite'"),Boolean);
-  await settledMap(cdp,profile.engine);
-  }
-  const terrainButton='.map-style-switch button[aria-label="Рельеф всей карты"]';
-  report.modes.terrain={state:'scene',kind:'georeferenced-current-viewport'};
-  const sceneButton=terrainButton;
-  const sceneAvailable=await elementPoint(cdp,sceneButton);
-  if(sceneAvailable?.unobscured){
-   await diagnosticPhase(cdp,'zoom-design-scene');await reachZoom(14);const beforeScene=await settledMap(cdp,profile.engine);
-   beforeScene.bitmapInspection=await evaluate(cdp,`(${inspectCustomMapDOM.toString()})()`);
-   beforeScene.viewportLayout=await evaluate(cdp,`(()=>{const element=document.querySelector('.atlas-canvas'),panel=element?.closest('.explore-layout')?.querySelector('.explore-panel'),r=panel?.getBoundingClientRect();return{width:innerWidth,height:innerHeight,panel:r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom}:null};})()`);
-   await pointerSelector(cdp,sceneButton,profile);
-   const sceneState=()=>evaluate(cdp,`(()=>{const scene=document.querySelector('.terrain-scene.is-visible'),canvas=scene?.querySelector('canvas'),r=canvas?.getBoundingClientRect(),data=canvas?.dataset,notice=document.querySelector('.atlas-wrap>.map-message'),noticeRect=notice?.getBoundingClientRect(),noticeStyle=notice&&getComputedStyle(notice);return{at:performance.now(),opacity:scene?Number(getComputedStyle(scene).opacity):null,inspection:JSON.parse(scene?.dataset.terrainInspection||'null'),visible:!!scene,ready:scene?.classList.contains('is-ready')===true,retainedMapNoticeVisible:!!noticeRect&&noticeRect.width>0&&noticeRect.height>0&&noticeStyle.display!=='none'&&noticeStyle.visibility!=='hidden'&&Number(noticeStyle.opacity)!==0,error:scene?.querySelector('[data-terrain-status="renderer-error"]')?.textContent?.trim()||'',routeWarning:scene?.querySelector('[data-terrain-status="route-warning"]')?.textContent?.trim()||'',canvas:r?{width:r.width,height:r.height,backingWidth:canvas.width,backingHeight:canvas.height,pending:data.terrainPending??null,presentation:data.terrainPresentation??null,opacity:Number(getComputedStyle(canvas).opacity),renderer:data.renderer||'',triangles:Number(data.triangles||0),sourceVertices:Number(data.sourceVertices||0),meshStride:Number(data.meshStride||0),renderMs:Number(data.renderMs||0)}:null}})()`);
-   let scene;
-   for(let attempt=0;attempt<60;attempt++){scene=await sceneState();if(scene.error||scene.ready&&scene.inspection?.loadingWindow===false&&(scene.inspection?.cartography?.state!=='loading'&&scene.inspection?.frame?.cartography?.loadedTiles===scene.inspection?.cartography?.source?.loadedTiles))break;await sleep(250);}
-   assert.equal(scene.ready,true,'Custom terrain never rendered its actual source grid');assertCustomSceneInspection(scene.inspection,profile.name+'/terrain');assert.equal(scene.inspection.cartography?.state,'ready','The known mapped area lost its real land-cover texture');
-   if(terrainDiagnostic){
-    report.gpu={traceCategories:await queryTerrainTraceCategories(cdp)};
-    try{assert.ok(helpers.systemInfo,'No browser-level SystemInfo target');const info=await helpers.systemInfo();report.gpu.systemInfo={available:true,gpu:info.gpu,modelName:info.modelName,modelVersion:info.modelVersion};}catch(error){report.gpu.systemInfo={available:false,error:error.message};}
-    try{report.gpu.webgl=await evaluate(cdp,`(${inspectTerrainWebGL.toString()})()`);}catch(error){report.gpu.webgl={available:false,error:error.message};}
-   }
-   const nativeInputs=[],navigation={opening:terrainOpeningExpectedView(beforeScene.bitmapInspection.visibleBounds,scene.inspection.frame.viewport)};
-   const captureScene=stage=>capture('scene3d',null,stage==='initial'?'overview':stage,{stage,navigation,readState:sceneState,lastNativeInputAtMs:stage==='initial'?null:nativeInputs.at(-1)?.events.findLast(event=>event.type==='click')?.time});
-   const initial=await captureScene('initial');scene=initial.terrainState;
-   if(scene.ready){
-    assert.equal(scene.retainedMapNoticeVisible,false,`${profile.name}: a retained 2D map notice covers the ready 3D scene`);
-    assert.ok(scene.canvas?.triangles>0&&['webgl2','canvas2d'].includes(scene.canvas.renderer),`${profile.name}: a ready3D scene has no recorded rendered mesh`);
-    const sceneZoom=async label=>{
-     await evaluate(cdp,'window.__tropnikInputEvents=[]');
-     const point=await elementPoint(cdp,`.terrain-controls button[aria-label="${label}"]`);
-     assert.ok(point?.unobscured,`${profile.name}: ${label} is not reachable`);
-     const press=async()=>{await pointerAt(cdp,point,profile);await sleep(70);const events=await evaluate(cdp,'window.__tropnikInputEvents');assertNativeBurstEventOrder(events,profile.mobile?'touch':'mouse',1);nativeInputs.push({label,input:profile.mobile?'touch':'mouse',point,events});};
-     const beforeZoom=traceEnabled?(await sceneState()).inspection?.frame?.view?.zoom:NaN;
-     if(shouldTraceTerrainZoom(profile,'scene3d',label==='Приблизить ландшафт'?1:-1,beforeZoom,terrainTraceStarted,traceEnabled)){
-      terrainTraceStarted=true;
-      try{const recorded=await traceDesktopSelection(cdp,press,{prefix:'desktop-webgl-landscape-close',scope:'own-landscape-close-view',sourceCommit:process.env.GITHUB_SHA||null,limits:TERRAIN_TRACE_LIMITS,...(diagnostic?{categories:report.gpu?.traceCategories?.selected,captureCategoryEvidence:true}:{})});report.terrainZoomTrace={...recorded.trace,beforeZoom,afterZoom:(await sceneState()).inspection?.frame?.view?.zoom};}
-      catch(error){report.terrainZoomTrace={...error.traceReceipt,beforeZoom};throw error;}
-     }else await press();
-    };
-    // Fourteen real1.4x inputs exercise a substantial physical distance range.
-    // Relative mesh zoom may change as a measured DEM window is replaced.
-    for(let i=0;i<14;i++)await sceneZoom('Приблизить ландшафт');
-    await sleep(250);const close=await captureScene('close'),closeState=close.terrainState;navigation.close=closeState.inspection.view;
-    for(let i=0;i<14;i++)await sceneZoom('Отдалить ландшафт');
-    await sleep(250);const wide=await captureScene('wide'),wideState=wide.terrainState;navigation.wide=wideState.inspection.view;
-    await sceneZoom('Повернуть ландшафт');await sleep(250);const rotated=await captureScene('rotated'),rotatedState=rotated.terrainState;
-    await sceneZoom('Вернуть исходный ракурс');await sleep(250);const reset=await captureScene('reset'),resetState=reset.terrainState;
-    report.modes.scene3d={state:'ready',...scene,beforeMap:beforeScene,nativeInputs,states:{initial:scene.inspection,close:closeState.inspection,wide:wideState.inspection,rotated:rotatedState.inspection,reset:resetState.inspection},zoomInputs:28,rotateInput:true,resetInput:true,imageChanged:initial.sha256!==close.sha256&&close.sha256!==wide.sha256,visualReviewRequired:true};
-    assert.equal(report.modes.scene3d.imageChanged,true,`${profile.name}: 3D zoom produced no rendered change`);
-   }else report.modes.scene3d={state:scene.error?'error':'not-ready',...scene,zoomInputs:0,visualReviewRequired:true};
-   await pointerSelector(cdp,'.terrain-controls button[aria-label="Вернуться к карте"]',profile);
-   await waitValue(`${profile.name}: the 3D scene did not return to the map`,()=>evaluate(cdp,"!document.querySelector('.terrain-scene.is-visible')"),Boolean);
-   await settledMap(cdp,profile.engine);
-  }else assert.fail('The own 3D control was unavailable');
-  if(terrainDiagnostic){report.status='completed';report.diagnosticScope='current-visible-map-terrain';report.completedAt=new Date().toISOString();if(helpers.performanceDiagnostics)report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);await save();return report;}
+  await switchMode('Рельеф');
+  await reliefOverview();
+  assert.equal(report.modeSwitches.length,2);
+  if(terrainDiagnostic){report.status='completed';report.diagnosticScope='relief-and-satellite-map-modes';report.completedAt=new Date().toISOString();if(helpers.performanceDiagnostics)report.performanceDiagnostics=await helpers.performanceDiagnostics(cdp);await save();return report;}
   // loadProfile starts a new document/performance interval. Preserve the
   // existing all-mode measurements when adding the separate source fixture.
   const {performance:modePerformance,diagnostics:modePerformanceDiagnostics}=await captureZoomModePerformance(cdp,helpers);

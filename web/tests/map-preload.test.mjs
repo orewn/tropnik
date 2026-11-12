@@ -1,6 +1,73 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
 import {MapResourcePool, MapResourceHTTPError, routeTilePlan} from '../lib/map-resource-pool.ts';
+import {publicMapResourceKey} from '../lib/map-transport.ts';
+import {TerrainPreparation} from '../lib/terrain-preparation.ts';
+import {MAP_CONFIG} from '../lib/map-config.ts';
+import * as renderer from '../public/terrain/terrain-renderer.js';
+
+const preloadSource=ts.transpileModule(readFileSync(new URL('../lib/map-preload.ts',import.meta.url),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
+function preloadModule(dependencies,environment={}){
+  const context=vm.createContext({URL,window:{},location:{origin:'https://map-preview.local',href:'https://map-preview.local/'},navigator:{onLine:true},...environment});
+  const testModule={exports:{}},require=id=>{assert.ok(Object.hasOwn(dependencies,id),`Unexpected preload dependency ${id}`);return dependencies[id];};
+  vm.runInContext(`(function(require,module,exports){${preloadSource}\n})`,context)(require,testModule,testModule.exports);
+  return testModule.exports;
+}
+
+test('route previews warm actual 2D geometry and relief tiles without preparing a separate 3D scene', async () => {
+  const reads=[],geometry={type:'LineString',coordinates:[[40.35,43.7],[40.4,43.75]]};let coverageReads=0,coverageDisposals=0,workers=0,coordinators=0;
+  class PreviewPreparation extends TerrainPreparation {constructor(options){super(options);coordinators++;}}
+  class PreviewPool extends MapResourcePool {
+    constructor(){super({fetcher:async url=>{
+      reads.push(url);
+      if(url==='/data/preview.geojson')return Response.json(geometry);
+      if(url==='https://tiles.openfreemap.org/planet/latest')return Response.json({tiles:['https://tiles.openfreemap.org/planet/test/{z}/{x}/{y}.pbf']});
+      assert.match(url,/^https:\/\/tiles\.(openfreemap\.org\/planet\/test|mapterhorn\.com)\/\d+\/\d+\/\d+\.(pbf|webp)$/);
+      return new Response(new Uint8Array([1,2,3]));
+    }});}
+  }
+  const dependencies={
+    './map-resource-pool':{MapResourcePool:PreviewPool,routeTilePlan},'./map-transport':{publicMapResourceKey},
+    './terrain-preparation':{TerrainPreparation:PreviewPreparation},'./map-config':{MAP_CONFIG},
+    '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>{coverageReads++;return{dispose(){coverageDisposals++;}};}},
+    './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js',
+  };
+  const api=preloadModule(dependencies,{Worker:class{constructor(){workers++;}}}),trail={id:'caucasus',revisionId:'1',geometryUrl:'/data/preview.geojson',bbox:[40.29,43.64,40.49,43.82]};
+  assert.equal(api.hasTerrainPreview(trail),true,'The regression exercises the former implicit 3D coverage branch');
+  const preview=api.preloadTrail(trail);assert.equal(api.preloadTrail(trail),preview,'Two cards still share the same bounded preview');
+  assert.deepEqual({...await preview},{state:'ready',completed:2,total:2});
+  assert.deepEqual(await api.loadPublicJSON('/data/preview.geojson'),geometry);
+  assert.equal(reads.filter(url=>url==='/data/preview.geojson').length,1);
+  assert.ok(reads.some(url=>url.endsWith('.pbf')));assert.ok(reads.some(url=>url.endsWith('.webp')));
+  assert.ok(reads.length<=2+MAP_CONFIG.prefetchTiles*2);
+  assert.equal(coverageReads,1);assert.equal(coverageDisposals,1);
+  assert.equal(api.terrainPreparationInfo().state,'idle');assert.equal(api.terrainPreparationInfo().attempts,0);assert.equal(workers,0);assert.equal(coordinators,0);
+  assert.equal(reads.some(url=>url.startsWith('/terrain/')),false);
+});
+
+test('explicit legacy terrain requests lazily share one coordinator and preserve the idle snapshot and cancellation API',async()=>{
+  const grid={schemaVersion:1,bounds:[40,43,40.1,43.1],width:2,height:2,elevations:[100,110,120,130]};let coordinators=0,reads=0;
+  class LegacyPreparation extends TerrainPreparation {constructor(options){super(options);coordinators++;}}
+  class LegacyPool extends MapResourcePool {constructor(){super({fetcher:async url=>{reads++;assert.match(url,/^\/terrain\/terrain-grid\.json\?v=/);return Response.json(grid);}});}}
+  const api=preloadModule({
+    './map-resource-pool':{MapResourcePool:LegacyPool,routeTilePlan},'./map-transport':{publicMapResourceKey},
+    './terrain-preparation':{TerrainPreparation:LegacyPreparation},'./map-config':{MAP_CONFIG},
+    '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>({dispose(){}})},
+    './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js','@/public/terrain/terrain-renderer.js':renderer,
+  });
+  const idle={state:'idle',method:null,attempts:0,workerStarts:0,fallbackReason:null};
+  assert.deepEqual({...api.terrainPreparationInfo()},idle);assert.equal(coordinators,0);assert.equal(reads,0);
+  const snapshot=api.terrainPreparationInfo();snapshot.state='failed';assert.deepEqual({...api.terrainPreparationInfo()},idle,'Inspection returns an independent snapshot');
+  const cancelled=new AbortController();cancelled.abort();await assert.rejects(api.loadTerrain(cancelled.signal),{name:'AbortError'});
+  assert.equal(coordinators,1);assert.equal(reads,0);assert.deepEqual({...api.terrainPreparationInfo()},idle);
+  const first=api.loadTerrain();assert.equal(api.loadTerrain(),first);const prepared=await first;
+  assert.equal(coordinators,1);assert.equal(reads,1);assert.deepEqual(prepared[1],grid);assert.equal(prepared[2].grid,prepared[1]);
+  assert.equal(api.terrainPreparationInfo().state,'ready');assert.equal(api.terrainPreparationInfo().attempts,1);
+  assert.equal(await api.preloadTerrain(),prepared);assert.equal(coordinators,1);assert.equal(reads,1);
+});
 
 test('all preview cards share one concurrency limit and duplicate requests', async () => {
   let active=0, maximum=0, requests=0;

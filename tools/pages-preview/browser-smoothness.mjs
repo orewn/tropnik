@@ -233,12 +233,12 @@ export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1,
   });
   await measure('map-zoom',async()=>{for(const [label,direction]of [['Увеличить масштаб',1],['Уменьшить масштаб',-1]]){const before=await settledMap(cdp,profile.engine);await pointerSelector(cdp,`.map-controls button[aria-label="${label}"]`,profile);const after=await settledMap(cdp,profile.engine);assert.ok((after.camera.zoom-before.camera.zoom)*direction>.1,`${label}: native input made no zoom progress`);}});
   await measure('layer-switch',async()=>{
-   for(const [label,mode]of [['Сохранённый обзор','overview'],['Тропы и ландшафт','detail']]){
-    await pointerSelector(cdp,'.layer-button',profile);
-    const selector=await inspect(`(()=>{const buttons=[...document.querySelectorAll('.layer-menu>button')],index=buttons.findIndex(node=>node.textContent?.trim()===${JSON.stringify(label)});return index<0?null:'.layer-menu>button:nth-of-type('+(index+1)+')'})()`);assert.ok(selector);
-    await revealNative(cdp,selector,'.layer-menu',profile);await pointerSelector(cdp,selector,profile);
-    await wait(`${label} did not commit`,"(()=>{const d=document.querySelector('.atlas-wrap')?.dataset;return{committed:d?.mapBaseCommitted,target:d?.mapBaseTarget,state:d?.mapBaseState}})()",value=>value.committed===mode&&value.target===mode&&value.state==='ready',20000);
-    if(await inspect("!!document.querySelector('.layer-menu')"))await pointerSelector(cdp,'.layer-button',profile);await settledMap(cdp,profile.engine);
+   for(const [label,mode]of [['Спутник','satellite'],['Рельеф','detail']]){
+    const before=await settledMap(cdp,profile.engine),selector=`.map-style-switch button[aria-label="${label}"]`;
+    await pointerSelector(cdp,selector,profile);
+    await wait(`${label} did not commit`,"(()=>{const d=document.querySelector('.atlas-wrap')?.dataset;return{committed:d?.mapBaseCommitted,target:d?.mapBaseTarget,state:d?.mapBaseState}})()",value=>value.target===mode&&value.state==='ready'&&value.committed===(mode==='detail'&&before.camera.zoom<5?'overview':mode),20000);
+    const after=await settledMap(cdp,profile.engine);assert.deepEqual(after.camera,before.camera,'Mode switch changed the map camera');assert.equal(after.route,before.route);
+    assert.equal(await inspect("document.querySelectorAll('.terrain-scene').length"),0,'Mode switch mounted the removed 3D scene');
    }
   });
   const searchURL=new URL('search/',url).href,loaded=cdp.event('Page.loadEventFired');await cdp.call('Page.navigate',{url:searchURL});await loaded;

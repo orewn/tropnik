@@ -13,15 +13,18 @@ const pool = new MapResourcePool();
 const origin = () => typeof location === 'undefined' ? 'https://map-preview.local' : location.origin;
 let rendererModule: Promise<typeof import('@/public/terrain/terrain-renderer.js')> | undefined;
 const terrainKey = `/terrain/terrain-grid.json?v=${TERRAIN_VERSION}`;
-const terrainPreparation = new TerrainPreparation({
-  loadModule: () => {
-    if (!rendererModule) rendererModule = import('@/public/terrain/terrain-renderer.js').catch(error => {rendererModule = undefined; throw error;});
-    return rendererModule;
-  },
-  loadGrid: () => loadPublicJSON<TerrainGrid>(terrainKey),
-  createWorker: () => typeof Worker === 'undefined' ? undefined : new Worker(new URL(terrainPreparationWorkerURL, location.href), {type: 'module', name: 'tropnik-terrain'}),
-  onFailure: () => pool.invalidate(terrainKey),
-});
+let terrainPreparation: TerrainPreparation | undefined;
+function preparation() {
+  return terrainPreparation ??= new TerrainPreparation({
+    loadModule: () => {
+      if (!rendererModule) rendererModule = import('@/public/terrain/terrain-renderer.js').catch(error => {rendererModule = undefined; throw error;});
+      return rendererModule;
+    },
+    loadGrid: () => loadPublicJSON<TerrainGrid>(terrainKey),
+    createWorker: () => typeof Worker === 'undefined' ? undefined : new Worker(new URL(terrainPreparationWorkerURL, location.href), {type: 'module', name: 'tropnik-terrain'}),
+    onFailure: () => pool.invalidate(terrainKey),
+  });
+}
 let tileTemplate: Promise<string> | undefined;
 const trailJobs = new Map<string, Promise<PreviewResult>>();
 export type PreviewResult = {state: 'ready' | 'partial'; completed: number; total: number};
@@ -47,8 +50,10 @@ export function warmMap() {
   // or hidden worker is initialized by hovering a route card.
   return loadMapCoverage().then(coverage=>coverage.dispose()).catch(()=>undefined);
 }
-export function loadTerrain(signal?: AbortSignal) {return terrainPreparation.load(signal);}
-export function terrainPreparationInfo() {return terrainPreparation.snapshot();}
+export function loadTerrain(signal?: AbortSignal) {return preparation().load(signal);}
+export function terrainPreparationInfo(): ReturnType<TerrainPreparation['snapshot']> {
+  return terrainPreparation?.snapshot() ?? {state: 'idle', method: null, attempts: 0, workerStarts: 0, fallbackReason: null};
+}
 export function preloadTerrain() {return loadTerrain().catch(() => undefined);}
 export function hasTerrainPreview(trail?: Trail, regionId?: string) {
   if (!trail) return regionId === 'krasnodar';
@@ -72,7 +77,6 @@ export function preloadTrail(trail: Trail): Promise<PreviewResult> {
     warmMap();
     const resources: Promise<unknown>[] = [];
     if (trail.geometryUrl?.startsWith('/data/')) resources.push(loadPublicJSON(trail.geometryUrl, 1));
-    if (hasTerrainPreview(trail)) resources.push(loadTerrain());
     // A centre warms surroundings only; it never becomes invented route geometry.
     const b = trail.bbox || (trail.center ? [trail.center[0] - .01, trail.center[1] - .01, trail.center[0] + .01, trail.center[1] + .01] : null);
     if (b && typeof navigator !== 'undefined' && navigator.onLine) {

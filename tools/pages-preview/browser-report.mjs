@@ -8,11 +8,11 @@ import {assertOfflineSafetyAudit} from './browser-offline-safety.mjs';
 import {assertRequestMapLayout} from './browser-request-layout.mjs';
 import {assertCatalogueExpectations} from './catalogue-expectations.mjs';
 import {assertSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
-import {assertCustomMapInspection,assertCustomDetailInspection,assertCustomSceneInspection,assertCustomVisibleBounds} from './browser-custom-map.mjs';
+import {assertCustomMapInspection,assertCustomDetailInspection} from './browser-custom-map.mjs';
+import {assertProductMapMode,assertProductMapModeTransition} from './browser-map-modes.mjs';
 import {assertBrowserEnvironment} from './browser-environment.mjs';
 import {assertNativeSurfaceCoverage} from './browser-native-surface.mjs';
 import {assertTerrainMaskReport} from './terrain-mask-report.mjs';
-import {assertTerrainCaptureSet} from './browser-terrain-capture.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -211,7 +211,7 @@ export function assertCloseTrailAudit(audit,name,engine,mobile,screenshots){
 
 function assertZoomDesign(design,name,engine,mobile){
  assert.equal(design?.geometryPassed,true,`${name}: missing zoom-level design geometry evidence`);
- assert.equal(design.schemaVersion,8,'The design report predates the current renderer evidence');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
+ assert.equal(design.schemaVersion,9,'The design report predates the two map modes');assert.equal(design.engine,engine);assert.equal(design.input,mobile?'touch':'mouse');
  assertCoastAudit(design.coast,name,engine);
  assertSatelliteContinuityAudit(design.satelliteContinuity,name,engine);
  assert.deepEqual(satellitePerformanceIssues(design.satelliteContinuity,{name,mobile}),[],`${name}: satellite rendering exceeded the unchanged performance budget`);
@@ -224,6 +224,7 @@ function assertZoomDesign(design,name,engine,mobile){
  assert.ok(Math.abs(steps.at(-1).zoom-18)<.01,`${name}: close zoom18 was not inspected`);
  for(let index=0;index<steps.length;index++){
   assert.ok(Number.isFinite(steps[index].zoom));
+  assertProductMapMode(steps[index].modeState,'Рельеф',`${name}/detail/${steps[index].zoom}`,{routeId:design.routeId});
   if(engine==='tropnik-canvas'){
    const bitmap=assertCustomDetailInspection(steps[index].bitmapInspection,`${name}/detail/${steps[index].zoom}`,{routeId:design.routeId});
    assert.ok(Math.abs(bitmap.camera.zoom-steps[index].zoom)<.01,`${name}: bitmap inspection has a stale zoom`);
@@ -260,45 +261,29 @@ function assertZoomDesign(design,name,engine,mobile){
  assert.ok(bursts.increase.beforeZoom>=9.5&&bursts.increase.beforeZoom<=11,`${name}: clamping hid a lost zoom input`);
  assert.ok(Math.abs(bursts.decrease.beforeZoom-bursts.increase.afterZoom)<.01&&Math.abs(bursts.decrease.afterZoom-bursts.increase.beforeZoom)<.01);
  assert.equal(design.modes?.detail?.state,'checked');
- const overview=design.modes?.overview,keys=[2,5,8,11,14,18];
- assert.equal(overview?.state,'active',`${name}: the saved overview was not exercised`);
- assert.equal(overview.selectedControl,true);assert.equal(overview.visualReviewRequired,true);
- assert.equal(overview.keySteps?.length,keys.length,`${name}: saved-overview key scales are incomplete`);
+ assert.deepEqual(Object.keys(design.modes).sort(),['detail','relief','satellite'],`${name}: the report includes a removed product mode`);
+ const relief=design.modes.relief,keys=[2,5,8,11,14,18];
+ assert.equal(relief?.state,'active',`${name}: Relief was not exercised`);
+ assert.equal(relief.selectedControl,true);assert.equal(relief.visualReviewRequired,true);
+ assert.equal(relief.keySteps?.length,keys.length,`${name}: Relief key scales are incomplete`);
  for(const [index,key] of keys.entries()){
-  const sample=overview.keySteps[index],minimum=Math.max(key,design.minimumZoom);
-  assert.equal(sample.targetZoom,key);assert.equal(sample.mode,'saved-overview');
-  assert.ok(Number.isFinite(sample.zoom)&&sample.zoom>=minimum-.01&&sample.zoom<minimum+step+.01,`${name}: saved-overview scale ${key} was skipped`);
-  if(engine==='tropnik-canvas'){const state=assertCustomMapInspection(sample.bitmapInspection,`${name}/overview/${key}`,{mode:'overview',routeId:design.routeId});assert.ok(state.tiles.overview.length>0);}
+  const sample=relief.keySteps[index],minimum=Math.max(key,design.minimumZoom);
+  assert.equal(sample.targetZoom,key);assert.equal(sample.mode,'relief');
+  assert.ok(Number.isFinite(sample.zoom)&&sample.zoom>=minimum-.01&&sample.zoom<minimum+step+.01,`${name}: Relief scale ${key} was skipped`);
+  assertProductMapMode(sample.modeState,'Рельеф',`${name}/relief/${key}`,{routeId:design.routeId});
+  if(engine==='tropnik-canvas')assertCustomDetailInspection(sample.bitmapInspection,`${name}/relief/${key}`,{routeId:design.routeId});
  }
- assert.ok(Array.isArray(overview.sourceEvidence?.geoJSON),`${name}: saved-overview source availability was not recorded`);
- for(const source of overview.sourceEvidence.geoJSON){assert.match(source.path,/\/data\/[^/]+\.geojson$/);assert.ok(Number.isFinite(source.status));assert.equal(typeof source.finished,'boolean');}
- for(const field of ['finishedReliefImageResponses','failedResponses','loadedReliefTiles'])assert.ok(Number.isInteger(overview.sourceEvidence[field])&&overview.sourceEvidence[field]>=0);
- assert.ok(['active','fallback','unavailable'].includes(design.modes?.satellite?.state),`${name}: satellite availability was not recorded`);
- assert.ok(['active','not-offered','scene'].includes(design.modes?.terrain?.state),`${name}: terrain availability was not recorded`);
- const scene=design.modes?.scene3d;
- assert.ok(['ready','error','not-ready','not-offered'].includes(scene?.state),`${name}: prepared3D availability was not recorded`);
- if(scene.state==='ready'){assert.equal(scene.retainedMapNoticeVisible,false,`${name}: a retained 2D notice covers the ready 3D scene`);assert.equal(scene.zoomInputs,28);assert.equal(scene.resetInput,true);assert.equal(scene.imageChanged,true);}
- if(engine==='tropnik-canvas'){
-  assert.equal(design.modes.terrain.state,'scene');assert.equal(scene.state,'ready');assert.equal(scene.rotateInput,true);
-  assert.deepEqual(Object.keys(scene.states).sort(),['close','initial','reset','rotated','wide']);
-  for(const [stage,state]of Object.entries(scene.states))assertCustomSceneInspection(state,`${name}/3d/${stage}`);
-  const {initial,close,wide,rotated,reset}=scene.states;
-  assert.equal(initial.cartography?.state,'ready',`${name}: mapped terrain lost its source surface`);
-  let previousFrames=initial.frames,previousWindow=initial.windowRevision;for(const state of [close,wide,rotated]){assert.deepEqual(state.contextBounds,initial.contextBounds);assert.ok(state.frames>previousFrames);assert.ok(state.windowRevision>=previousWindow);previousFrames=state.frames;previousWindow=state.windowRevision;}
-  assert.deepEqual(reset.contextBounds,initial.contextBounds);assert.ok(reset.frames>0,'Reset must render a new actual frame');
-  assert.ok(close.view.distanceM<=initial.view.distanceM/4+.02);assert.ok(wide.view.distanceM>=close.view.distanceM*4-.02);
-  assert.ok(Math.abs(rotated.view.yaw-wide.view.yaw-.25)<1e-7);
-  for(const key of['longitude','latitude','pitch','distanceM'])assert.ok(Math.abs(rotated.view[key]-wide.view[key])<Math.max(1e-7,Math.abs(wide.view[key])*1e-6));
-  for(const key of['longitude','latitude','yaw','pitch','distanceM'])assert.ok(Math.abs(reset.view[key]-initial.view[key])<Math.max(1e-7,Math.abs(initial.view[key])*1e-6));
-  const before=scene.beforeMap;assertStyleCameraFrame(before,design.routeId,`${name}/3d-before-map`,engine);
-  assertCustomVisibleBounds(before,initial,`${name}/3d-before-map`);
-  assert.equal(scene.nativeInputs?.length,30);const labels=scene.nativeInputs.map(item=>item.label);
-  assert.deepEqual(labels,[...Array(14).fill('Приблизить ландшафт'),...Array(14).fill('Отдалить ландшафт'),'Повернуть ландшафт','Вернуть исходный ракурс']);
-  for(const press of scene.nativeInputs){assert.equal(press.input,mobile?'touch':'mouse');assert.equal(press.point?.unobscured,true);assertNativeBurstEventOrder(press.events,press.input,1);}
-  assertTerrainCaptureSet(scene,design.screenshots,name);
+ assert.ok(Array.isArray(relief.sourceEvidence?.geoJSON),`${name}: Relief source availability was not recorded`);
+ for(const source of relief.sourceEvidence.geoJSON){assert.match(source.path,/\/data\/[^/]+\.geojson$/);assert.ok(Number.isFinite(source.status));assert.equal(typeof source.finished,'boolean');}
+ for(const field of ['finishedReliefImageResponses','failedResponses','loadedReliefTiles'])assert.ok(Number.isInteger(relief.sourceEvidence[field])&&relief.sourceEvidence[field]>=0);
+ assert.equal(design.modes.satellite.state,'active',`${name}: Satellite did not load actual imagery`);
+ assert.deepEqual(design.modeSwitches?.map(value=>value.label),['Спутник','Рельеф'],`${name}: both real mode transitions are required`);
+ for(const transition of design.modeSwitches){
+  assert.equal(transition.input,mobile?'touch':'mouse');assert.equal(transition.selector,`.map-style-switch button[aria-label="${transition.label}"]`);assert.equal(transition.point?.unobscured,true);
+  assertNativeBurstEventOrder(transition.events,transition.input,1);assertProductMapModeTransition(transition,`${name}/${transition.label}`,{routeId:design.routeId});
  }
  assert.ok(Array.isArray(design.screenshots)&&design.screenshots.filter(item=>item.mode==='detail').length>=6,`${name}: key-scale review images are missing`);
- assert.ok(design.screenshots.filter(item=>item.mode==='saved-overview').length>=6,`${name}: saved-overview review images are missing`);
+ assert.ok(design.screenshots.filter(item=>item.mode==='relief').length>=6,`${name}: Relief review images are missing`);
  for(const screenshot of design.screenshots){assert.match(screenshot.file,/^[a-z0-9_.-]+\.png$/);assert.match(screenshot.sha256,/^[a-f0-9]{64}$/);assert.ok(screenshot.bytes>1000);}
  assertCloseTrailAudit(design.closeTrail,name,engine,mobile,design.screenshots);
  const intervals=design.performanceIntervals;
@@ -479,9 +464,9 @@ function assertExperienceBack(back,expected,context,from){
 /** Recompute the menu geometry and reachability from every measured scroll
  * frame. An overall pass flag cannot substitute for native input evidence. */
 export function assertLayerMenuAudit(receipt,name){
- assert.equal(receipt?.schemaVersion,1);assert.equal(receipt.passed,true);assert.equal(receipt.input,'touch');
+ assert.equal(receipt?.schemaVersion,2);assert.equal(receipt.passed,true);assert.equal(receipt.input,'touch');
  assert.deepEqual(receipt.states?.map(state=>state.sheet),['closed','open'],`${name}: both portrait sheet states need Layers coverage`);
- const controls=[['BUTTON','Тропы и ландшафт'],['BUTTON','Спутник'],['BUTTON','Сохранённый обзор'],['INPUT','Тропы и грунтовые дороги'],['INPUT','Рельеф и линии высот'],['INPUT','Границы территорий'],['A','Подробная офлайн-карта'],['A','Источники карты']];
+ const controls=[['INPUT','Тропы и грунтовые дороги'],['INPUT','Рельеф и линии высот'],['INPUT','Границы территорий'],['A','Подробная офлайн-карта'],['A','Источники карты']];
  for(const state of receipt.states){
   const context=`${name}/layers/${state.sheet}`;
   assertExperienceClick(state.opened,'touch',`${context}/open`,'.layer-button');assertExperienceClick(state.closed,'touch',`${context}/close`,'.layer-button');
@@ -643,7 +628,7 @@ function assertSameStyleCamera(actual,expected,context){
 }
 export function assertStyleCameraRoundtrip(receipt,name){
  const context=`${name}/style-camera`,engine=receipt?.before?.engine;
- assert.equal(engine,'tropnik-canvas');assert.equal(receipt?.schemaVersion,2);assert.equal(receipt.passed,true);assert.equal(receipt.input,'mouse');assert.ok(typeof receipt.routeId==='string'&&receipt.routeId);
+ assert.equal(engine,'tropnik-canvas');assert.equal(receipt?.schemaVersion,3);assert.equal(receipt.passed,true);assert.equal(receipt.input,'mouse');assert.ok(typeof receipt.routeId==='string'&&receipt.routeId);
  assertExperienceSelection(receipt.selection,context);assert.equal(receipt.selection.route,receipt.routeId);
  for(const frame of [receipt.before,receipt.zoomed,receipt.pan?.before,receipt.pan?.after,receipt.manual])assertStyleCameraFrame(frame,receipt.routeId,context,engine);
  assertExperienceClick(receipt.zoom,'mouse',`${context}/zoom`,'.map-controls button[aria-label="Увеличить масштаб"]');
@@ -652,20 +637,19 @@ export function assertStyleCameraRoundtrip(receipt,name){
  assert.deepEqual(receipt.pan.before.camera,receipt.zoomed.camera);assert.deepEqual(receipt.pan.after.camera,receipt.manual.camera);
  assert.ok(Math.abs(receipt.manual.camera.longitude-receipt.zoomed.camera.longitude)>1e-5||Math.abs(receipt.manual.camera.latitude-receipt.zoomed.camera.latitude)>1e-5,`${context}: no genuine manual pan was measured`);
  assert.ok(Math.abs(receipt.manual.camera.zoom-receipt.zoomed.camera.zoom)<.01,`${context}: panning changed scale`);
- assert.deepEqual(receipt.transitions?.map(transition=>transition.label),['Сохранённый обзор','Тропы и ландшафт']);
+ assert.deepEqual(receipt.transitions?.map(transition=>transition.label),['Спутник','Рельеф']);
  for(const transition of receipt.transitions){
-  assertExperienceClick(transition.opened,'mouse',`${context}/layers-open`,'.layer-button');assertExperienceClick(transition.closed,'mouse',`${context}/layers-close`,'.layer-button');
-  assertExperienceClick(transition.selected,'mouse',`${context}/base-select`);assert.match(transition.selected.selector,/^\.layer-menu>button:nth-of-type\([1-9]\d*\)$/);assert.equal(transition.selected.point.label,transition.label);
-  assertExperienceScrolls(transition.scrolls,'mouse',`${context}/layers-scroll`,'.layer-menu');
+  assertExperienceClick(transition.selected,'mouse',`${context}/mode-select`,`.map-style-switch button[aria-label="${transition.label}"]`);assert.equal(transition.selected.point.label,transition.label);
   assertStyleCameraFrame(transition.frame,receipt.routeId,context,engine);assertSameStyleCamera(transition.frame.camera,receipt.manual.camera,context);
   const line=transition.line;assert.equal(line?.route,receipt.routeId);assert.equal(line.clicked,true);assert.equal(line.selectionRetained,true);assert.equal(line.reopened,false);
   assertExperienceClick({input:'mouse',point:line.point,events:line.events},'mouse',`${context}/restored-line`,false);
   assertStyleCameraFrame(transition.lineFrame,receipt.routeId,context,engine);assertSameStyleCamera(transition.lineFrame.camera,receipt.manual.camera,context);
   assertExperienceSelection(transition.selection,context);for(const key of ['region','route','title'])assert.equal(transition.selection[key],receipt.selection[key]);
   const restored=transition.restored;assert.equal(restored?.route,receipt.routeId);assert.equal(restored.selected,true);
+  assert.equal(restored.canvasRetained,true);assert.equal(restored.terrainScenes,0);assert.equal(restored.pitch,0);
   assert.ok(Array.isArray(restored.mutations));
   if(engine==='tropnik-canvas'){
-   assert.equal(restored.drawnRoute,receipt.routeId);assert.equal(restored.tilesState,'ready');assert.equal(restored.mode,transition.label==='Сохранённый обзор'?'overview':'detail');
+   assert.equal(restored.drawnRoute,receipt.routeId);assert.equal(restored.tilesState,'ready');assert.equal(restored.mode,transition.label==='Спутник'?'satellite':'detail');
    assert.ok(Number.isInteger(restored.drawRevision)&&restored.drawRevision>restored.beforeDrawRevision,`${context}: no actual post-switch draw`);
    assert.ok(restored.mutations.every(mutation=>mutation.current===receipt.routeId&&mutation.old===receipt.routeId),`${context}: an unrelated layer switch cleared the route`);
   }
@@ -690,7 +674,7 @@ export function assertBrowserReport(browser,expectedCommit,expectedCatalogue){
  assert.equal(browser.sourceCommit,expectedCommit);
  assertCatalogueExpectations(expectedCatalogue);
  assert.deepEqual(browser.catalogue,expectedCatalogue,'The browser report belongs to another catalogue snapshot');
- assert.equal(browser.mapInteractionSchemaVersion,4,'The browser report predates the custom-renderer bitmap and continuity gates');
+ assert.equal(browser.mapInteractionSchemaVersion,5,'The browser report predates the Relief/Satellite continuity gates');
  assert.ok(Array.isArray(browser.profiles));
  for(const name of MOBILE_PROFILES){
   const profile=browser.profiles.find(item=>item.name===name);

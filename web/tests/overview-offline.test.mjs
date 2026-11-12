@@ -34,6 +34,9 @@ test('idle map warm saves all 341 actual RF overview tiles using 57 verified til
  for(const dependency of ['map-runtime.js','map.css','manifest.json'])assert.ok(saved.has('/custom-map/'+dependency),`shared renderer dependency ${dependency} is cached`);
  assert.ok([...saved.keys()].some(path=>path.startsWith('/custom-map/workers/custom-map-tiles.worker-')));
  assert.ok(![...saved.keys()].some(path=>/(?:maplibre|leaflet|protomaps)/i.test(path)),'no vendor runtime is precached');
+ assert.ok(saved.has('/terrain/ATTRIBUTION.txt'));assert.ok(saved.has('/terrain/sources/Copernicus-GLO30-LICENSE.pdf'));
+ assert.equal(saved.has('/terrain/landscape.html'),false,'The ordinary map warmup does not download the separate 3D document');
+ assert.ok(!calls.includes('/terrain/landscape.html'));
 });
 test('corrupt overview bytes reject warmup instead of claiming a complete offline map',async()=>{
  await assert.rejects(run(true),/integrity mismatch/);

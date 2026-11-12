@@ -6,6 +6,7 @@ import {coastPanPlan,assertCoastPanInput,inspectCoastPanSelection} from './brows
 import {dispatchSourceEndPan} from './browser-source-end-pan.mjs';
 import {holdSatelliteImagery} from './browser-satellite-preload.mjs';
 import {inspectCustomMapDOM,assertCustomMapInspection} from './browser-custom-map.mjs';
+import {inspectProductMapModes,assertProductMapMode} from './browser-map-modes.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 export const SATELLITE_REGION='territory-28173009B11091203162490';
@@ -184,7 +185,7 @@ export function satellitePerformanceIssues(report,profile){
 
 export function assertSatelliteContinuityAudit(report,profile,engine){
  const input=profile!=='desktop-webgl'?'touch':'mouse',context=profile+'/satellite';
- assert.equal(report?.schemaVersion,3,`${context}: satellite preload/continuity evidence is missing`);assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);assert.equal(report.input,input);
+ assert.equal(report?.schemaVersion,4,`${context}: satellite preload/continuity evidence is missing`);assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);assert.equal(report.input,input);
  assert.equal(report.region,SATELLITE_REGION);assert.equal(report.visualReviewRequired,true);assert.deepEqual(report.steps?.map(frame=>frame.stage),STAGES);
  assert.ok(report.resources?.requests.length<=512);assert.equal(report.resources.discardedRequests,0,'Satellite resource proof overflowed its bounded recorder');
  assert.ok(Number.isInteger(report.resources.sequence)&&report.resources.sequence>0);
@@ -210,8 +211,10 @@ export function assertSatelliteContinuityAudit(report,profile,engine){
   assert.equal(viewIntersectsOverview({...frame,camera:{...frame.camera,longitude:SATELLITE_WEST[0],latitude:SATELLITE_WEST[1]}}),false,`${context}: prepared viewport cannot separate the two imagery providers`);
  }
  for(const [index,toggle] of report.toggles.entries()){
-  assert.equal(toggle.label,index?'Тропы и ландшафт':'Спутник');assertSatelliteCameraUnchanged(toggle.before,toggle.after,context);
-  assertClick(toggle.open,input,context+'/layers');assertClick(toggle.select,input,context+'/'+toggle.label);if(toggle.close)assertClick(toggle.close,input,context+'/close-layers');
+  assert.equal(toggle.label,index?'Рельеф':'Спутник');assertSatelliteCameraUnchanged(toggle.before,toggle.after,context);
+  assertClick(toggle.select,input,context+'/'+toggle.label);assert.equal(toggle.select.selector,`.map-style-switch button[aria-label="${toggle.label}"]`);
+  assert.equal(toggle.canvasRetained,true);assertProductMapMode(toggle.modeState,toggle.label,context+'/'+toggle.label);
+  assert.deepEqual(toggle.modeState.camera.center,[toggle.after.camera.longitude,toggle.after.camera.latitude]);assert.equal(toggle.modeState.camera.zoom,toggle.after.camera.zoom);
  }
  assertReady(report.toggles[0].after,'eox-bluemarble',report.resources,context+'/initial');
  assertSatellitePreload(report.preload,report.resources,context+'/preload');
@@ -262,7 +265,7 @@ export function assertSatelliteContinuityAudit(report,profile,engine){
  * Its performance interval is never reset between providers or image captures. */
 export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OUTPUT}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,pointerSelector,elementPoint,diagnosticPhase}=helpers;
- const report={schemaVersion:3,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',region:SATELLITE_REGION,passed:false,visualReviewRequired:true,steps:[],pans:[],zooms:[],setupZooms:[],toggles:[],screenshots:[],startedAt:new Date().toISOString()};
+ const report={schemaVersion:4,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',region:SATELLITE_REGION,passed:false,visualReviewRequired:true,steps:[],pans:[],zooms:[],setupZooms:[],toggles:[],screenshots:[],startedAt:new Date().toISOString()};
  let currentStage='loading-region';const observer=observeSatelliteResources(cdp,()=>currentStage);
  const save=async()=>{report.resources=observer.snapshot();await mkdir(output,{recursive:true});await writeFile(new URL(`${profile.name}-satellite-continuity.json`,output),JSON.stringify(report,null,2)+'\n');};
  const phase=async name=>{currentStage=name;report.stage=name;await diagnosticPhase(cdp,'satellite-continuity/'+name);};
@@ -289,13 +292,12 @@ export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OU
    report.preload={kind:'held-real-imagery-requests',before,screenshots:[await screenshot('preload-before')]};
   }
   try{
-  const open=await click('.layer-button');
-  const point=await waitValue(`${profile.name}: ${label} layer is unavailable`,()=>evaluate(cdp,`(()=>{const buttons=[...document.querySelectorAll('.layer-menu button')],index=buttons.findIndex(item=>item.textContent?.trim()===${JSON.stringify(label)}),element=buttons[index];if(!element||element.disabled)return null;const r=element.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);return{selector:'.layer-menu button:nth-of-type('+(index+1)+')',unobscured:!!hit&&element.contains(hit)};})()`),value=>value?.unobscured);
+  await evaluate(cdp,"window.__tropnikSatelliteModeCanvas=document.querySelector('.atlas-canvas canvas.tropnik-map-canvas')");
+  const point=await waitValue(`${profile.name}: ${label} layer is unavailable`,()=>evaluate(cdp,`(()=>{const selector='.map-style-switch button[aria-label="${label}"]',element=document.querySelector(selector);if(!element||element.disabled)return null;const r=element.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);return{selector,unobscured:!!hit&&element.contains(hit)};})()`),value=>value?.unobscured);
   // The unchanged eight-second network hold starts immediately before the
-  // action that requests imagery. Opening/closing UI is measured normally,
-  // without consuming the bounded pending-frame capture interval.
+  // action that requests imagery, preserving the bounded pending-frame capture interval.
   if(label==='Спутник')gate=await holdSatelliteImagery(cdp,{match:satelliteResource});
-  const select=await click(point.selector);
+  const select={...await click(point.selector),selector:point.selector};
   if(gate){
    await waitValue(`${profile.name}: preload did not issue bounded real imagery requests`,()=>gate.snapshot(),value=>value.pending>0&&!value.closed,4000);
    const pending=await snapshot({allowLoading:true});report.preload.held=gate.snapshot();pending.resourceSequence=observer.snapshot().sequence;report.preload.pending=pending;
@@ -304,10 +306,10 @@ export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OU
    assert.equal(report.preload.released.reason,'capture',`${profile.name}: imagery preload gate exceeded its bounds`);
    assert.deepEqual(report.preload.released.errors,[]);
   }
-  let close=null;if(await elementPoint(cdp,'.layer-menu'))close=await click('.layer-button');
   const after=label==='Спутник'?await ready('eox-bluemarble'):await waitValue(`${profile.name}: satellite mode did not exit`,snapshot,state=>state.imagery===''&&state.source===''&&state.target===''&&state.state==='');
   if(gate){report.preload.after=after;report.preload.screenshots.push(await screenshot('preload-committed'));}
-  assertSatelliteCameraUnchanged(before,after,profile.name+'/satellite/'+label);report.toggles.push({label,open,select,close,before,after});return after;
+  const modeState=await evaluate(cdp,`(${inspectProductMapModes.toString()})()`),canvasRetained=await evaluate(cdp,"window.__tropnikSatelliteModeCanvas===document.querySelector('.atlas-canvas canvas.tropnik-map-canvas')");
+  assertSatelliteCameraUnchanged(before,after,profile.name+'/satellite/'+label);assertProductMapMode(modeState,label,profile.name+'/satellite/'+label);assert.equal(canvasRetained,true);report.toggles.push({label,select,before,after,modeState,canvasRetained});return after;
   }finally{if(gate){const released=await gate.release('error');report.preload.released??=released;}}
  }
  async function panTo(coordinate,stage){
@@ -365,7 +367,7 @@ export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OU
   assert.ok(Math.abs((await settledMap(cdp,profile.engine)).camera.zoom-initialZoom)<.01,'The native zoom sweep did not restore the original scale');
   await panTo(SATELLITE_WEST,currentStage);await capture(currentStage,SATELLITE_WEST,'eox-s2');
   await phase('dateline-return');await panTo(SATELLITE_DATELINE,currentStage);await capture(currentStage,SATELLITE_DATELINE,'eox-bluemarble');
-  await phase('detail-restored');await toggle('Тропы и ландшафт');await capture(currentStage,null,null);
+  await phase('detail-restored');await toggle('Рельеф');await capture(currentStage,null,null);
   report.performance=await evaluate(cdp,'({layoutShift:window.__tropnikPerf?.cls||0,longestTaskMs:window.__tropnikPerf?.longest||0})');
   report.resources=observer.snapshot();report.passed=true;assertSatelliteContinuityAudit(report,profile.name,profile.engine);report.completedAt=new Date().toISOString();report.durationMs=Date.parse(report.completedAt)-Date.parse(report.startedAt);await save();return report;
  }catch(error){report.passed=false;report.error=error.stack||String(error);await save();throw error;}

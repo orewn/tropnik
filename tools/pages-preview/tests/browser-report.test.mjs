@@ -1,4 +1,5 @@
-import {customMapFixture,customSceneFixture} from './custom-map-fixture.mjs';
+import {customMapFixture} from './custom-map-fixture.mjs';
+import {mapModeFixture,mapModeSwitchesFixture} from './map-modes-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CLOSE_TRAIL_FIXTURE,assertBrowserReport as verifyBrowserReport,assertRouteEdgeFrame,assertReliefPalette} from '../browser-report.mjs';
@@ -9,7 +10,6 @@ import {coastFixture} from './coast-fixture.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
 import {smoothnessFixture} from './smoothness-fixture.mjs';
 import {browserEnvironmentFixture,terrainMaskReportFixture} from './browser-environment-fixture.mjs';
-import {terrainCaptureExpectedView,terrainOpeningExpectedView,TERRAIN_CAPTURE_TIMEOUT_MS} from '../browser-terrain-capture.mjs';
 
 const commit='a'.repeat(40);
 const assertBrowserReport=(report,source)=>verifyBrowserReport(report,source,catalogueFixture);
@@ -43,37 +43,22 @@ function sheetGestures(){
   scroll:{passed:true,input:'touch',before:0,after:100,deltaPx:100,pageScrollDeltaPx:0,sheetDisplacementPx:0,selectionPreserved:true},
   tapAfterCancel:true,tapAfterDrag:true,listPositionRetained:true,selectionPreserved:true,finalState:'closed'};
 }
-function terrainScreenshotsFixture(scene,profile,mobile){
- return Object.entries(scene.states).map(([stage,inspection],index)=>{
-  const canvas={width:mobile?412:1000,height:700,backingWidth:(mobile?412:1000)*(mobile?2:1),backingHeight:700*(mobile?2:1),renderer:'webgl2',pending:'false',presentation:'deferred-msaa',opacity:1};
-  const before={visible:true,ready:true,error:'',sceneOpacity:1,inspection:structuredClone(inspection),canvas};
-  const firstObservedAtMs=1000+index*100,beforeObservedAtMs=firstObservedAtMs+50,afterObservedAtMs=beforeObservedAtMs+10;
-  const click=stage==='initial'?null:scene.nativeInputs[{close:13,wide:27,rotated:28,reset:29}[stage]].events.findLast(event=>event.type==='click');
-  const image={file:profile+'-scene3d-'+(stage==='initial'?'overview':stage)+'.png',mode:'scene3d',bytes:10000,sha256:'c'.repeat(64)};
-  image.terrainCapture={schemaVersion:2,method:'completed-frame-before-and-after-screenshot',stage,expectedView:terrainCaptureExpectedView(stage,{opening:terrainOpeningExpectedView(scene.states.initial.contextBounds,scene.states.initial.frame.viewport),close:scene.states.close.view,wide:scene.states.wide.view}),
-   readinessTimeoutMs:TERRAIN_CAPTURE_TIMEOUT_MS,pollIntervalMs:50,observations:2,stable:true,settleWaitMs:50,captureDurationMs:10,
-   firstObservedAtMs,beforeObservedAtMs,afterObservedAtMs,lastNativeInputAtMs:click?.time??null,observationAfterLastInputMs:click?beforeObservedAtMs-click.time:null,
-   before,after:structuredClone(before),image:{file:image.file,bytes:image.bytes,sha256:image.sha256}};
-  return image;
- });
-}
 function zoomDesign(profile,engine,mobile){
  const step=1,input=mobile?'touch':'mouse',high=10+4*step,edges=closeTrail(profile,engine,mobile);
- const scene3d=engine==='tropnik-canvas'?customSceneFixture(mobile):{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,resetInput:true,imageChanged:true,visualReviewRequired:true};
- const terrainImages=engine==='tropnik-canvas'?terrainScreenshotsFixture(scene3d,profile,mobile):[];
  const burst=(direction,beforeZoom,afterZoom)=>({passed:true,input,count:4,receivedClicks:4,direction,step,beforeZoom,afterZoom,expectedZoom:afterZoom,eventSpanMs:30,durationMs:50,pageScrollDeltaPx:0,selectionPreserved:true,
   dispatchMode:'ordered-native',eventOrderVerified:true,producerDurationMs:1,firstInputLagMs:100,domTimeOrigin:10000,domSampleStartedAtMs:90,recentLongTasks:[],
   events:Array.from({length:4},(_,tap)=>['pointerdown','pointerup','click'].map((type,index)=>({type,time:100+tap*10+index*2,timestamp:100+tap*10+(index?2:0),trusted:true,pointerType:input,pointerId:mobile?tap+2:1}))).flat(),
   commands:[...(mobile?[]:['mouseMoved']),...Array.from({length:4},()=>mobile?['touchStart','touchEnd']:['mousePressed','mouseReleased']).flat()].map((type,index)=>({index,type,method:mobile?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent',status:'fulfilled',sentAtEpochMs:10000+index*.1,ackAtEpochMs:10040+index,sentOffsetMs:index*.1,ackOffsetMs:40+index,ackDurationMs:40+index*.9})),
  });
- return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:8,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2,...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera:{longitude:40,latitude:43,zoom:index+2}})}:{})})),closeTrail:edges,coast:coastFixture(profile,engine),satelliteContinuity:satelliteFixture(profile,engine),
+ return{profile,engine,input:mobile?'touch':'mouse',schemaVersion:9,geometryPassed:true,visualReviewRequired:true,maximumZoom:18,minimumZoom:2,routeId:'kavkaz-8a',detailSteps:Array.from({length:17},(_,index)=>({zoom:index+2,modeState:mapModeFixture({camera:{longitude:40,latitude:43,zoom:index+2}}),...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera:{longitude:40,latitude:43,zoom:index+2}})}:{})})),closeTrail:edges,coast:coastFixture(profile,engine),satelliteContinuity:satelliteFixture(profile,engine),
   performance:{layoutShift:0,longestTaskMs:100},performanceIntervals:{modes:{layoutShift:0,longestTaskMs:100},sourceEnds:edges.performance,satellite:{layoutShift:0,longestTaskMs:100}},
   zoomBurst:{passed:true,input,returnedToStart:true,increase:burst(1,10,high),decrease:burst(-1,high,10)},
-  modes:{detail:{state:'checked'},overview:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'saved-overview',...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera:{longitude:40,latitude:43,zoom},mode:'overview'})}:{})})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true},terrain:{state:engine==='tropnik-canvas'?'scene':mobile?'not-offered':'active'},scene3d},
-  screenshots:[...terrainImages,...['detail','saved-overview'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
+  modeSwitches:mapModeSwitchesFixture(input),
+  modes:{detail:{state:'checked'},relief:{state:'active',selectedControl:true,visualReviewRequired:true,keySteps:[2,5,8,11,14,18].map(zoom=>({targetZoom:zoom,zoom,mode:'relief',modeState:mapModeFixture({camera:{longitude:40,latitude:43,zoom}}),...(engine==='tropnik-canvas'?{bitmapInspection:customMapFixture({camera:{longitude:40,latitude:43,zoom}})}:{})})),sourceEvidence:{geoJSON:[],finishedReliefImageResponses:0,failedResponses:0,loadedReliefTiles:0}},satellite:{state:'active',visualReviewRequired:true}},
+  screenshots:[...['detail','relief'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
 }
 function evidence(){
- return{verified:true,environment:browserEnvironmentFixture(commit),terrainMask:terrainMaskReportFixture(commit),catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:4,
+ return{verified:true,environment:browserEnvironmentFixture(commit),terrainMask:terrainMaskReportFixture(commit),catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:5,
   offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,inputs:['route-title','region','leader-name','leader-phone'].map(id=>({selector:'#'+id,passed:true,focusedBeforeTyping:true,valueLength:10,events:[{type:'input',trusted:true,id,valueLength:10}]})),networkSuccessfulResponses:0,originTransport:{method:'origin-socket-destroy',active:false,startedAt:'2026-11-10T00:00:00Z',restoredAt:'2026-11-10T00:00:01Z',blockedRequests:1,requests:[{path:'/tropnik/_offline-transport-probe',method:'GET'}],probe:{passed:true,errorCode:'ECONNRESET',path:'/tropnik/_offline-transport-probe'}},screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
   profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'tropnik-canvas',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
   desktopProfiles:[{name:'desktop-webgl',engine:'tropnik-canvas',coarse:false,mapInteractionTested:true}],
@@ -212,14 +197,14 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
   value=>value.zoomDesigns[0].detailSteps.pop(),
   value=>value.zoomDesigns[0].screenshots.pop(),
   value=>delete value.zoomDesigns[0].modes.satellite,
-  value=>delete value.zoomDesigns[0].modes.overview,
-  value=>value.zoomDesigns[0].modes.overview.selectedControl=false,
-  value=>value.zoomDesigns[0].modes.overview.keySteps.pop(),
-  value=>value.zoomDesigns[0].modes.overview.keySteps[2].zoom=11,
-  value=>delete value.zoomDesigns[0].modes.overview.sourceEvidence,
-  value=>value.zoomDesigns[0].modes.scene3d.imageChanged=false,
-  value=>value.zoomDesigns[0].modes.scene3d.retainedMapNoticeVisible=true,
-  value=>delete value.zoomDesigns[0].modes.scene3d.retainedMapNoticeVisible,
+  value=>delete value.zoomDesigns[0].modes.relief,
+  value=>value.zoomDesigns[0].modes.relief.selectedControl=false,
+  value=>value.zoomDesigns[0].modes.relief.keySteps.pop(),
+  value=>value.zoomDesigns[0].modes.relief.keySteps[2].zoom=11,
+  value=>delete value.zoomDesigns[0].modes.relief.sourceEvidence,
+  value=>delete value.zoomDesigns[0].modeSwitches,
+  value=>value.zoomDesigns[0].modeSwitches[0].canvasRetained=false,
+  value=>value.zoomDesigns[0].modeSwitches[0].after.terrainScenes=1,
   value=>delete value.zoomDesigns[0].zoomBurst,
   value=>value.zoomDesigns[0].zoomBurst.increase.receivedClicks=3,
   value=>value.zoomDesigns[0].zoomBurst.increase.afterZoom-=.75,
@@ -237,8 +222,7 @@ test('zoom evidence requires all increments and keeps unavailable imagery explic
  for(const change of changes){const bad=evidence();change(bad);assert.throws(()=>assertBrowserReport(bad,commit));}
  const fallback=evidence();
  fallback.zoomDesigns[0].modes.satellite={state:'fallback',status:'External imagery did not load',visualReviewRequired:true};
- fallback.zoomDesigns[0].modes.scene3d={state:'error',error:'Terrain could not prepare',visualReviewRequired:true};
- assert.throws(()=>assertBrowserReport(fallback,commit),'A failed custom3D scene must stay explicit and cannot become a rendering PASS');
+ assert.throws(()=>assertBrowserReport(fallback,commit),'Unloaded satellite imagery cannot become a rendering PASS');
 });
 test('publication requires native single-line source-end coverage and all three review images',()=>{
  const changes=[
@@ -286,25 +270,24 @@ test('publication rejects missing or stale committed relief from the own rendere
   value=>delete value.bitmapInspection,
  ]){const changed=structuredClone(valid);mutate(changed);assert.throws(()=>assertReliefPalette(changed,'invalid relief','tropnik-canvas'));}
 });
-test('publication requires the original visible context, committed measured windows and real progress after every native3D phase',()=>{
+test('publication requires native mode switches, one mounted map and preserved camera and route',()=>{
  for(const change of [
-  scene=>scene.beforeMap.camera.longitude+=.01,
-  scene=>delete scene.beforeMap.bitmapInspection,
-  scene=>scene.beforeMap.bitmapInspection.viewport.padding.bottom=0,
-  scene=>scene.beforeMap.bitmapInspection.viewport.width+=16,
-  scene=>scene.beforeMap.bitmapInspection.visibleBounds=null,
-  scene=>scene.beforeMap.bitmapInspection.pitch=40,
-  scene=>scene.beforeMap.viewportLayout.panel.top=160,
-  scene=>scene.states.initial.provenance.requestedBounds=[0,0,1,1],
-  scene=>scene.states.close.grid.source.url='another-source',
-  scene=>scene.states.wide.frames=scene.states.close.frames,
-  scene=>scene.states.rotated.frame.view.yaw=scene.states.wide.frame.view.yaw,
-  scene=>scene.states.reset.frame.view.zoom=2,
-  scene=>scene.states.reset.cartography.state='unavailable',
-  scene=>scene.states.close.frame.cartography=null,
-  scene=>scene.nativeInputs[0].events[2].trusted=false,
-  scene=>scene.nativeInputs.pop(),
- ]){const invalid=evidence();change(invalid.zoomDesigns[0].modes.scene3d);assert.throws(()=>assertBrowserReport(invalid,commit));}
+  value=>value.modeSwitches.pop(),
+  value=>value.modeSwitches[0].events[2].trusted=false,
+  value=>value.modeSwitches[0].selector='.layer-menu button',
+  value=>value.modeSwitches[0].after.camera.center[0]+=.01,
+  value=>value.modeSwitches[0].after.camera.zoom+=.02,
+  value=>value.modeSwitches[0].after.camera.bearingDegrees=20,
+  value=>value.modeSwitches[0].after.routeId='another-route',
+  value=>value.modeSwitches[0].after.drawnRoute='',
+  value=>value.modeSwitches[0].after.state.loading=true,
+  value=>value.modeSwitches[0].after.drawRevision=value.modeSwitches[0].before.drawRevision,
+  value=>value.modeSwitches[0].after.tiles.imagery=0,
+  value=>value.modeSwitches[1].after.controls[1].pressed='true',
+  value=>value.modeSwitches[1].after.controls.push({label:'3D',pressed:'false',disabled:false}),
+  value=>value.detailSteps[4].modeState.terrainScenes=1,
+  value=>value.modes.relief.keySteps[2].modeState.state.reliefReady=false,
+ ]){const invalid=evidence();change(invalid.zoomDesigns[0]);assert.throws(()=>assertBrowserReport(invalid,commit));}
 });
 test('publication requires both full close-up annotations inside the map and clear of interface panels',()=>{
  const changes=[
@@ -373,18 +356,12 @@ test('old tap-only receipts and sticky native sheet gestures cannot pass publica
  for(const change of changes){const bad=evidence();change(bad);assert.throws(()=>assertBrowserReport(bad,commit));}
 });
 
-test('publication binds every terrain image to its own complete frame before and after capture',()=>{
+test('publication requires all Relief review scales and rejects the removed product scene',()=>{
  const valid=evidence();assert.equal(assertBrowserReport(valid,commit),valid);
- const terrainImage=value=>value.zoomDesigns[0].screenshots.find(image=>image.terrainCapture?.stage==='close');
- const mutations=[
-  value=>delete terrainImage(value).terrainCapture,
-  value=>terrainImage(value).terrainCapture.after.inspection.frames++,
-  value=>terrainImage(value).terrainCapture.before.canvas.pending='true',
-  value=>terrainImage(value).terrainCapture.before.canvas.opacity=.99,
-  value=>terrainImage(value).sha256='e'.repeat(64),
-  value=>delete terrainImage(value).terrainCapture.settleWaitMs,
-  value=>{const binding=terrainImage(value).terrainCapture;binding.before.inspection.frame.view.zoom=1;binding.after.inspection.frame.view.zoom=1;},
-  value=>{const images=value.zoomDesigns[0].screenshots;images.splice(images.findIndex(image=>image.terrainCapture?.stage==='reset'),1);},
- ];
- for(const mutate of mutations){const changed=evidence();mutate(changed);assert.throws(()=>assertBrowserReport(changed,commit));}
+ for(const change of [
+  value=>{const images=value.zoomDesigns[0].screenshots;images.splice(images.findIndex(image=>image.mode==='relief'),1);},
+  value=>value.zoomDesigns[0].modes.scene3d={state:'ready'},
+  value=>value.zoomDesigns[0].modes.relief.keySteps[0].modeState.canvasCount=2,
+  value=>value.zoomDesigns[0].modes.relief.keySteps[0].modeState.pitch=30,
+ ]){const invalid=evidence();change(invalid);assert.throws(()=>assertBrowserReport(invalid,commit));}
 });

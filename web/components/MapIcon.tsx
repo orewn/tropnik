@@ -1,7 +1,8 @@
 /** Original Tropnik symbols: 28×28 construction grid, 24px optical size. */
-export type MapIconName='terrain'|'map'|'compass'|'location'|'layers'|'fit'|'plus'|'minus'|'camp'|'water'|'shelter'|'pass'|'peak'|'viewpoint'|'back'|'rotate'|'info';
+export type MapIconName='terrain'|'satellite'|'map'|'compass'|'location'|'layers'|'fit'|'plus'|'minus'|'camp'|'water'|'shelter'|'pass'|'peak'|'viewpoint'|'back'|'rotate'|'info';
 const paths:Record<MapIconName,string[]>={
  terrain:['M3 23 10 10l4 6 5-12 6 19H3Z','m7 17 3-3 4 4','m17 10 2 3 2-3'],
+ satellite:['m10 13 5-5 5 5-5 5-5-5Z','m4 7 4-4 5 5-4 4-5-5Zm13 13 4-4 4 4-4 4-4-4Z','m12 16-3 3','M4 17a7 7 0 0 1 7 7M4 21a3 3 0 0 1 3 3'],
  map:['m3 7 7-3 8 3 7-3v18l-7 3-8-3-7 3V7Z','M10 4v18m8-15v18','m5 16 3-3 4 2 4-4 6 3'],
  compass:['M14 2v3m0 18v3M2 14h3m18 0h3','M23 14a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z','m17.5 7-1 9-6 5 1-9 6-5Z','m11.5 12 5 4'],
  location:['m14 3 9 21-9-5-9 5 9-21Z','M14 8v11'],

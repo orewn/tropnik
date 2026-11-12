@@ -1,4 +1,5 @@
 import {customMapFixture} from './custom-map-fixture.mjs';
+import {mapModeFixture} from './map-modes-fixture.mjs';
 import {coastFixture} from './coast-fixture.mjs';
 import {unprojectMapPoint} from '../map-projection.mjs';
 import {SATELLITE_REGION} from '../browser-satellite-audit.mjs';
@@ -31,10 +32,10 @@ export function satelliteFixture(profile,engine){
   {requestId:'eox-s2',source:'eox-s2',url:'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/4/3/14.jpg',tile:{z:4,x:14,y:3},status:200,mimeType:'image/jpeg',finished:true,bytes:10000},
  ]};
  resources.requests.forEach((item,index)=>Object.assign(item,{firstSequence:index*3+1,requestedSequence:index*3+1,responseSequence:index*3+2,finishedSequence:index*3+3,phase:index===2?'west-eox':'enable-satellite',responsePhase:index===2?'west-eox':'enable-satellite'}));
- const result={schemaVersion:3,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
+ const result={schemaVersion:4,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
   setupZooms:initialZoom>4?[{direction:1,click:click(),before:frame(180,4,''),after:frame(180,initialZoom,'')}]:[],
   pans:[pan('dateline-overview',[180,67.5]),pan('west-eox',[140,67.5]),pan('dateline-return',[180,67.5])],zooms,
-  toggles:[{label:'Спутник',open:click(),select:click(),close:null,before:frame(180,initialZoom,''),after:frame()},{label:'Тропы и ландшафт',open:click(),select:click(),close:null,before:frame(),after:frame(180,initialZoom,'')}],
+  toggles:[{label:'Спутник',select:{...click(),selector:'.map-style-switch button[aria-label="Спутник"]'},before:frame(180,initialZoom,''),after:frame(),canvasRetained:true,modeState:mapModeFixture({camera:{longitude:180,latitude:67.5,zoom:initialZoom},mode:'satellite',routeId:''})},{label:'Рельеф',select:{...click(),selector:'.map-style-switch button[aria-label="Рельеф"]'},before:frame(),after:frame(180,initialZoom,''),canvasRetained:true,modeState:mapModeFixture({camera:{longitude:180,latitude:67.5,zoom:initialZoom},routeId:''})}],
   screenshots:steps.map(({stage})=>({stage,file:`${profile}-satellite-${stage}.png`,bytes:10000,sha256:'b'.repeat(64)})),resources,performance:{layoutShift:0,longestTaskMs:100}};
  const pending={...frame(180,initialZoom,''),imagery:'satellite',target:'eox-bluemarble',state:'loading',base:{committed:initialZoom<5?'overview':'detail',target:'satellite',state:'loading'},resourceSequence:1};
  if(engine==='tropnik-canvas'){pending.customMap.state.imageryLoading=true;pending.customMap.state.loading=true;pending.customMap.state.mode='satellite';}
