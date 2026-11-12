@@ -333,11 +333,15 @@ class LocalExperienceTest {
         if (nativeMapViewport(map) != viewport) {receipt.put("retryReason", "Native viewport moved before touch");return false}
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
         val downTime = SystemClock.uptimeMillis()
+        val requestedReleaseAt = downTime + 80
         val dispatched = JSONArray()
-        receipt.put("nativeInput", dispatched)
+        receipt.put("nativeInput", dispatched).put("requestedReleaseAt", requestedReleaseAt)
         var upTime = 0L
         for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
-            if (action == MotionEvent.ACTION_UP) SystemClock.sleep(80)
+            if (action == MotionEvent.ACTION_UP) {
+                val remainingHoldMs = requestedReleaseAt - SystemClock.uptimeMillis()
+                if (remainingHoldMs > 0) SystemClock.sleep(remainingHoldMs)
+            }
             val eventTime = SystemClock.uptimeMillis()
             if (action == MotionEvent.ACTION_DOWN) assertTrue("No time remains for the real touch", eventTime <= deadline)
             else upTime = eventTime
@@ -356,6 +360,7 @@ class LocalExperienceTest {
         }
         val longPressMs = ViewConfiguration.getLongPressTimeout().toLong()
         receipt.put("actualPressMs", upTime - downTime).put("longPressThresholdMs", longPressMs)
+            .put("upDispatchDelayMs", (upTime - requestedReleaseAt).coerceAtLeast(0L))
         assertTrue("The actual native gesture became a long press instead of a tap", upTime - downTime < longPressMs)
         assertTrue("The real touch exceeded the original selection deadline", upTime <= deadline)
         val remaining = deadline - SystemClock.uptimeMillis()
