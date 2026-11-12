@@ -15,6 +15,7 @@ import {drawMapSymbol} from './custom-map-symbols';
 import {drawMapLabel,mapLabelBudget,mapLabelLayout,mapLabelPriority,mapLabelRepeatDistance,mapLabelRepeatKey,mapLabelStyle} from './custom-map-labels';
 import {mapCanvasPolicy,type MapCanvasPolicy} from './map-canvas-policy';
 import {copyMapLabelDiagnostic,MAP_LABEL_INSPECTION_EVENT,MAP_LABEL_SAMPLE_LIMIT,MAX_RECORDED_MAP_LABELS,selectRecordedMapLabels} from './custom-map-label-inspection';
+import {mapTileIntersectsCoverage} from './custom-map-coverage';
 
 export type CustomMapMode='detail'|'overview'|'satellite';
 export type CustomMapState={ready:boolean;loading:boolean;mode:CustomMapMode;committedMode:CustomMapMode;imagerySource?:SatelliteSourceId;imageryTarget?:SatelliteSourceId;imageryLoading:boolean;reliefReady:boolean;localDetail:boolean;error:string;residentTiles:number;pendingTiles:number};
@@ -22,7 +23,7 @@ export type CustomMapMarker={id:string;coordinate:[number,number];label:string;k
 export type CustomMapLabel={id:string;coordinate:[number,number];label:string;kind?:MapTileLabel['kind'];rank?:number;color?:string};
 export type CustomMapLabelDiagnostic={id:string;label:string;coordinate:[number,number];visible:boolean;reason:string;x?:number;y?:number;width?:number;rect?:{left:number;top:number;right:number;bottom:number}};
 export type CustomMapOptions={camera:CustomMapCamera;onReady?:(engine:CustomMapEngine)=>void;onFrame?:(camera:CustomMapCamera)=>void;onSettled?:(camera:CustomMapCamera)=>void;onGesture?:()=>void;onClick?:(point:MapPoint,coordinate:[number,number])=>void;onMarker?:(id:string)=>void;onState?:(state:CustomMapState)=>void;maxZoom?:number};
-type TileBatch={tiles:CustomMapTile[];kind:CustomTileKind;generation:number};
+type TileBatch={tiles:CustomMapTile[];kind:CustomTileKind;generation:number;missing?:CustomTileRequest[]};
 type FeatureGeometry=GeoJSON.GeoJSON|undefined;
 type PathCollection={path:Path2D;bounds:[number,number,number,number]};
 const COUNTRY_BOUNDS=[19.6389282,41.1858711,191.0026658,81.858721] as const;
@@ -350,7 +351,13 @@ export class CustomMapEngine {
       this.area=area;this.boundaries=boundaries;this.mask=mask;this.selectedArea=selected;this.selectedBoundary=selectedBoundary;this.coverageRevision=s.revision;
     }
     this.element.dataset.mapCoverage=JSON.stringify(s);this.element.dataset.mapCoverageLod=s.lod;this.element.dataset.mapCoverageState=s.ready?'ready':'loading';
-    if(changed)this.schedule();else this.publishInspection();
+    if(changed){
+      // A more precise immutable mask can reveal an island in a tile which was
+      // previously wholly hidden. Revalidate saved omissions without a pan;
+      // an in-flight replacement checks the current mask at its own commit.
+      if(this.state.ready&&!this.state.loading&&[this.detail,this.relief,this.imagery,this.imageryOverlay].some(batch=>!this.batchCoversMask(batch))){this.currentKeys='';this.refreshTiles();}
+      this.schedule();
+    }else this.publishInspection();
   }
   private listen(target:EventTarget,name:string,fn:EventListener,options?:AddEventListenerOptions|boolean){target.addEventListener(name,fn,options);this.listeners.push([target,name,fn,options]);}
   private bindInput(){
@@ -454,10 +461,12 @@ export class CustomMapEngine {
     this.tiles.pin([...requests.map(customTileKey),...retainedKeys()]);
     this.updateState({loading:requests.length>0,imageryLoading:imageryRequests.length>0,imageryTarget:imageryRequests.length?source:undefined});
     const current=()=>!this.disposed&&generation===this.generation;
+    let checkedCoverageRevision=this.coverageRevision;
     const batch=async(list:CustomTileRequest[],kind:CustomTileKind)=>{
       const result=await Promise.allSettled(list.map(request=>this.tiles.load(request)));
       const ready=result.flatMap(value=>value.status==='fulfilled'?[value.value]:[]),failed=result.length-ready.length;
-      return{value:{tiles:ready,kind,generation} satisfies TileBatch,failed};
+      const missing=list.filter((_,index)=>result[index].status==='rejected');
+      return{value:{tiles:ready,kind,generation,missing} satisfies TileBatch,failed};
     };
     const overview=batch(overviewRequests,'overview').then(result=>{
       if(!current())return;
@@ -472,24 +481,34 @@ export class CustomMapEngine {
     });
     const ground=Promise.all([batch(detailRequests,'vector'),batch(reliefRequests,'relief'),batch(imageryRequests,source)]).then(([detail,relief,imagery])=>{
       if(!current()||!detailRequests.length&&!imageryRequests.length)return;
-      if(imagery.failed||!imageryRequests.length&&(detail.failed||relief.failed)){
+      checkedCoverageRevision=this.coverageRevision;
+      const detailFailed=!this.batchCoversMask(detail.value),reliefFailed=!this.batchCoversMask(relief.value),imageryFailed=!this.batchCoversMask(imagery.value);
+      if(imageryFailed||!imageryRequests.length&&(detailFailed||reliefFailed)){
         this.updateState({imageryLoading:false,error:imageryRequests.length?'Спутниковая карта загрузилась не полностью. Повторите загрузку.':'Подробная карта загрузилась не полностью. Повторите загрузку.'});return;
       }
       if(imageryRequests.length){
         // A complete photograph is useful even if the independent map-object
         // service failed. Keep a prior complete overlay, never a partial one,
         // and report missing objects instead of discarding available imagery.
-        this.imagery=imagery.value;if(!detail.failed)this.imageryOverlay=detail.value;this.detail=undefined;this.relief=undefined;
+        this.imagery=imagery.value;if(!detailFailed)this.imageryOverlay=detail.value;this.detail=undefined;this.relief=undefined;
         const overlay=this.imageryOverlay;
-        this.updateState({committedMode:'satellite',imageryLoading:false,imagerySource:source,reliefReady:false,localDetail:!!overlay?.tiles.length&&overlay.tiles.every(t=>t.local),...(detail.failed?{error:'Подписи и тропы на спутниковой карте загрузились не полностью. Повторите загрузку.'}:navigator.onLine?{error:''}:{})});
+        this.updateState({committedMode:'satellite',imageryLoading:false,imagerySource:source,reliefReady:false,localDetail:!!overlay?.tiles.length&&overlay.tiles.every(t=>t.local),...(detailFailed?{error:'Подписи и тропы на спутниковой карте загрузились не полностью. Повторите загрузку.'}:navigator.onLine?{error:''}:{})});
       }else{
         this.detail=detail.value;this.relief=reliefRequests.length?relief.value:undefined;this.imagery=undefined;this.imageryOverlay=undefined;
-        this.updateState({committedMode:'detail',imagerySource:undefined,imageryTarget:undefined,reliefReady:reliefRequests.length>0,localDetail:detail.value.tiles.every(t=>t.local),...(navigator.onLine?{error:''}:{})});
+        this.updateState({committedMode:'detail',imagerySource:undefined,imageryTarget:undefined,reliefReady:relief.value.tiles.length>0,localDetail:detail.value.tiles.length>0&&detail.value.tiles.every(t=>t.local),...(navigator.onLine?{error:''}:{})});
       }
       this.schedule();
     });
-    void Promise.all([overview,ground]).finally(()=>{if(current()){this.tiles.pin([...requests.map(customTileKey),...retainedKeys()]);this.updateState({loading:false});this.retryAfterOnline();}});
+    void Promise.all([overview,ground]).finally(()=>{if(current()){
+      this.tiles.pin([...requests.map(customTileKey),...retainedKeys()]);this.updateState({loading:false});
+      // Ground may commit before the independent overview finishes. Recheck
+      // omissions if the mask advanced in that interval; a failed retry at the
+      // same revision remains an error, never an automatic request loop.
+      if(checkedCoverageRevision!==this.coverageRevision&&[this.detail,this.relief,this.imagery,this.imageryOverlay].some(batch=>!this.batchCoversMask(batch)))this.retry();
+      this.retryAfterOnline();
+    }});
   }
+  private batchCoversMask(batch:TileBatch|undefined){return !batch?.missing?.some(tile=>mapTileIntersectsCoverage(this.coverage?.area,tile,this.camera.zoom,this.pitch));}
   private displayingSatellite(){return this.state.committedMode==='satellite'&&!!this.imagery;}
   private displayDetail(){return this.displayingSatellite()?this.imageryOverlay:this.detail;}
   private worldTransform(){

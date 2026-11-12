@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {decodeCoverage} from '../public/maps/map-coverage-lod.js';
+import {createMapCoverage,decodeCoverage} from '../public/maps/map-coverage-lod.js';
+import {mercatorUnproject} from '../lib/custom-map-camera.ts';
 import {existsSync,readFileSync} from 'node:fs';
 import {dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -222,6 +223,85 @@ test('opaque cartography and relief commit as one complete ground, with partial 
   assert.ok(env.engine.inspect().tiles.detail.every(tile=>tile.z===9));assert.ok(env.engine.inspect().tiles.relief.every(tile=>tile.z===9));
   assert.ok(env.store.pins.at(-1).length<=3*64,'Only current requests and committed ground remain pinned');
  }
+});
+
+test('the actual Chukotka camera commits sparse ocean DEM failures but still rejects missing visible land',async t=>{
+ const read=url=>readFileSync(resolve(root,'public'+url)),manifest=JSON.parse(read('/data/map-coverage/manifest.json'));
+ const coverage=createMapCoverage(manifest,decodeCoverage(JSON.parse(read(manifest.base.url))),{fetch:async url=>new Response(read(url))});t.after(()=>coverage.dispose());
+ const view={center:[175.2139700208105,67.19878382541751],zoom:5.272349250356769,bearingDegrees:0};
+ await coverage.updateView([156.27536453198246,59.701315217699936,194.15257550963855,72.91795683482115],view.zoom);
+ for(const failLand of [false,true]){
+  const env=fixture({view,width:1041,height:928,coverageArea:coverage.area});t.after(()=>env.engine.destroy());await turn();
+  env.engine.setPadding({top:96,right:88,bottom:96,left:40});
+  const relief=env.pending('relief'),missing=relief.filter(({request:r})=>r.y===12&&r.x>=60&&r.x<=66||r.x===65&&r.y===14||r.x===64&&r.y===18||failLand&&r.x===63&&r.y===13);
+  assert.equal(relief.length,56);assert.equal(missing.length,failLand?10:9);
+  for(const job of missing)env.store.reject(job,'Preview resource unavailable (404)');env.complete();await env.settle();
+  assert.equal(env.engine.getState().loading,false);assert.equal(env.pending().length,0);
+  if(failLand){assert.ok(env.engine.getState().error);assert.equal(env.engine.getState().committedMode,'overview');assert.equal(env.engine.inspect().tiles.relief.length,0);}
+  else{
+   assert.equal(env.engine.getState().error,'');assert.equal(env.engine.getState().committedMode,'detail');assert.equal(env.engine.getState().reliefReady,true);
+   assert.equal(env.engine.inspect().tiles.relief.length,relief.length-missing.length);assert.equal(env.engine.inspect().tiles.detail.length,56,'Every successfully loaded vector remains available');
+   assert.ok(env.engine.inspect().tiles.relief.some(tile=>tile.x===64&&tile.y===13),'The real dateline island remains loaded');
+  }
+ }
+});
+
+function hiddenRelief(env){
+ const job=env.pending('relief').find(({request:r})=>(r.x+1)/2**r.z*360-180<39.9);assert.ok(job,'Fixture has a tile wholly west of its actual coverage');return job;
+}
+function islandInTile(request){
+ const n=2**request.z,coordinates=[[.49,.49],[.51,.49],[.51,.51],[.49,.51],[.49,.49]].map(([x,y])=>mercatorUnproject({x:(request.x+x)/n,y:(request.y+y)/n}));
+ return{type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[coordinates]}};
+}
+function revealMissingTile(env,job){env.coverage.area={type:'FeatureCollection',features:[area,islandInTile(job.request)]};notifyCoverage(env,{revision:1});}
+
+test('a new immutable mask revision loads an island in a previously hidden failed tile without camera movement',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await turn();const missing=hiddenRelief(env);env.store.reject(missing);env.complete();await env.settle();
+ assert.equal(env.engine.getState().error,'');assert.equal(env.engine.getState().committedMode,'detail');const before=env.store.requests.length,view=plain(env.engine.getCamera());
+ revealMissingTile(env,missing);assert.equal(env.engine.getState().loading,true);assert.equal(env.store.requests.length,before+1);assert.equal(env.pending()[0].key,missing.key);
+ env.complete();await env.settle();assert.equal(env.engine.getState().error,'');assert.deepEqual(plain(env.engine.getCamera()),view);assert.ok(env.engine.inspect().tiles.relief.some(tile=>tile.key===missing.key));
+ notifyCoverage(env,{pending:3,ready:false});notifyCoverage(env,{pending:0,ready:true});await env.settle();assert.equal(env.store.requests.length,before+1,'Status-only coverage events never start another tile batch');
+});
+
+test('a mask revision after ground commit but before deferred overview completion queues only one bounded recovery',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await turn();const missing=hiddenRelief(env);env.store.reject(missing);env.complete(job=>job.request.kind!=='overview');await env.settle();
+ assert.equal(env.engine.getState().committedMode,'detail');assert.equal(env.engine.getState().loading,true);assert.ok(env.pending('overview').length>0);
+ const before=env.store.requests.length;revealMissingTile(env,missing);assert.equal(env.store.requests.length,before,'The active overview is allowed to finish');
+ env.complete(job=>job.request.kind==='overview');await env.settle();assert.equal(env.store.requests.length,before+1);assert.equal(env.pending().length,1);assert.equal(env.pending()[0].key,missing.key);
+ env.store.reject(env.pending()[0]);await env.settle();assert.ok(env.engine.getState().error);assert.equal(env.engine.getState().loading,false);
+ for(let i=0;i<4;i++)await env.settle();notifyCoverage(env,{pending:0,ready:true});await env.settle();
+ assert.equal(env.store.requests.length,before+1,'A real failure at the same mask revision must not make an automatic request loop');assert.equal(env.pending().length,0);
+ env.engine.retry();env.complete();await env.settle();assert.equal(env.engine.getState().error,'');assert.ok(env.engine.inspect().tiles.relief.some(tile=>tile.key===missing.key));
+});
+
+test('ground finishing after a mask revision checks the new land before committing, and complete batches need no reload',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await turn();const missing=hiddenRelief(env);env.store.reject(missing);revealMissingTile(env,missing);env.complete();await env.settle();
+ assert.ok(env.engine.getState().error);assert.equal(env.engine.getState().committedMode,'overview');assert.equal(env.pending().length,0);
+ env.engine.retry();env.complete();await env.settle();assert.equal(env.engine.getState().error,'');const count=env.store.requests.length;
+ env.coverage.area={type:'FeatureCollection',features:[area,islandInTile(missing.request)]};notifyCoverage(env,{revision:2});await env.settle();
+ assert.equal(env.store.requests.length,count,'A fully delivered ground batch survives a mask revision without any extra tile request');
+});
+
+test('required failures stay atomic in rotated native and fallback footprints, including a land strip above UI padding',async t=>{
+ for(const [width,height,bearingDegrees] of [[1920,1080,0],[1920,1080,45],[1920,1080,90],[3840,2160,45]]){
+  const env=fixture({view:{...camera,zoom:18,bearingDegrees},width,height});t.after(()=>env.engine.destroy());await turn();
+  const jobs=env.pending('relief');assert.ok(jobs.length>0&&jobs.length<=64);assertViewportRequests(env,jobs.map(job=>job.request),width,height);
+  assert.equal(jobs.every(job=>job.request.z===18),width===1920);env.store.reject(jobs[0]);env.complete();await env.settle();
+  assert.ok(env.engine.getState().error);assert.equal(env.engine.getState().committedMode,'overview');assert.equal(env.engine.inspect().tiles.relief.length,0);
+ }
+ const view={center:[175.2139700208105,67.19878382541751],zoom:5.272349250356769,bearingDegrees:0},top={type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[[180.1,72.6],[180.2,72.6],[180.2,72.7],[180.1,72.7],[180.1,72.6]]]}};
+ const env=fixture({view,width:1041,height:928,coverageArea:top});t.after(()=>env.engine.destroy());await turn();env.engine.setPadding({top:96,right:88,bottom:96,left:40});
+ const point=env.engine.project([180.15,72.65]);assert.ok(point.y>0&&point.y<96,'The land lies on the real canvas but above the framing inset');
+ const failed=env.pending('relief').find(job=>job.request.x===64&&job.request.y===12);assert.ok(failed);env.store.reject(failed);env.complete();await env.settle();assert.ok(env.engine.getState().error);assert.equal(env.engine.getState().committedMode,'overview');
+});
+
+test('a wholly masked missing detail batch clears old satellite mode without inventing relief readiness',async t=>{
+ const env=fixture({coverageArea:collection});t.after(()=>env.engine.destroy());await env.ready();env.engine.setMode('satellite');env.complete();await env.settle();assert.equal(env.engine.getState().committedMode,'satellite');
+ for(const [key,tile] of env.store.cache)if(tile.kind==='relief'||tile.kind==='vector'&&!tile.transparent)env.store.cache.delete(key);
+ env.engine.setMode('detail');const missing=env.pending();assert.ok(missing.some(job=>job.request.kind==='relief')&&missing.some(job=>job.request.kind==='vector'));
+ for(const job of missing)env.store.reject(job,'Source has no data under the outside mask');await env.settle();
+ assert.equal(env.engine.getState().error,'');assert.equal(env.engine.getState().committedMode,'detail');assert.equal(env.engine.getState().reliefReady,false);assert.equal(env.engine.getState().localDetail,false);assert.equal(env.engine.getState().imagerySource,undefined);assert.equal(env.engine.getState().imageryTarget,undefined);
+ assert.equal(env.engine.inspect().tiles.imagery.length,0);assert.equal(env.engine.inspect().tiles.relief.length,0);assert.equal(env.engine.inspect().tiles.detail.length,0);assert.equal(env.pending().length,0);
 });
 
 test('a cold satellite to relief transition retains imagery, labels and source attribution until both ground layers succeed',async t=>{
