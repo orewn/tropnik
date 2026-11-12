@@ -1,0 +1,94 @@
+name: Bounded map pan diagnosis
+
+on:
+  push:
+    branches: [diagnostics/map-pan-0.4.29]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: map-pan-diagnostics-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    name: Trace the unchanged native map pan
+    if: github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/diagnostics/map-pan-0.4.29'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out the isolated diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Check trace and native input boundaries
+        run: node --test tools/pages-preview/tests/browser-smoothness.test.mjs tools/pages-preview/tests/browser-trace.test.mjs tools/pages-preview/tests/browser-source-end-pan.test.mjs
+      - name: Prepare the verified Android link and static diagnostic build
+        run: |
+          node tools/pages-preview/fetch-apk.mjs
+          node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Capture bounded map pan traces
+        timeout-minutes: 8
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: '1'
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Check diagnostic provenance and non-release status
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {createHash} from 'node:crypto';
+          import {readFileSync,existsSync} from 'node:fs';
+          import {assertSmoothnessAudit} from './tools/pages-preview/browser-smoothness.mjs';
+          const report=JSON.parse(readFileSync('web/pages-preview/dist/browser-ui-smoothness-diagnostic.json','utf8'));
+          assert.equal(report.sourceCommit,process.env.GITHUB_SHA);
+          assert.equal(report.diagnostic,'ui-smoothness');
+          assert.equal(report.diagnosticOnly,true);
+          assert.equal(report.verified,false);
+          assert.equal(report.releaseEligible,false);
+          assert.equal(report.status,'completed');
+          assert.equal(existsSync('web/pages-preview/dist/browser-verification.json'),false);
+          assert.deepEqual(report.profiles.map(profile=>profile.profile),['android-portrait','desktop-webgl']);
+          for(const profile of report.profiles){
+            assertSmoothnessAudit(profile,{name:profile.profile,engine:profile.engine,mobile:profile.profile==='android-portrait'},{release:false});
+            assert.equal(profile.instrumented,true);
+            assert.equal(profile.physicalDevice,false);
+            assert.equal(profile.cpuSlowdownRate,1);
+            assert.deepEqual(profile.traces.map(trace=>trace.scenario),['map-pan']);
+            const trace=profile.traces[0];
+            assert.equal(trace.sourceCommit,process.env.GITHUB_SHA);
+            assert.equal(trace.status,'complete');
+            assert.equal(trace.dataLossOccurred,false);
+            assert.deepEqual(trace.errors,[]);
+            assert.match(trace.file,/^[a-z-]+-ui-smoothness-map-pan\.trace\.json$/);
+            const bytes=readFileSync('web/pages-preview/design-qa/'+trace.file);
+            assert.equal(bytes.length,trace.bytes);
+            assert.equal(createHash('sha256').update(bytes).digest('hex'),trace.sha256);
+          }
+          console.log(JSON.stringify({sourceCommit:report.sourceCommit,diagnosticOnly:true,verified:false,releaseEligible:false,profiles:report.profiles.length}));
+          NODE
+      - name: Preserve traces and raw metrics without publication
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-map-pan-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            web/pages-preview/design-qa
+            web/pages-preview/dist/build-info.json
+            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            web/pages-preview/dist/browser-network.json
+            web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7
