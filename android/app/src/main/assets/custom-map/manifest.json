@@ -104,8 +104,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 52940,
-      "sha256": "71b88b16415ea864c216d61ba16b8be8e9983d6b9c93c23834c40b6d44a9ced6"
+      "sizeBytes": 54361,
+      "sha256": "47627d06401dbbc6d638fea4e05e7ea0da56108925e49ee44d3ca40ffd7bf839"
     },
     {
       "path": "web/lib/custom-map-label-inspection.ts",
@@ -184,8 +184,8 @@
     },
     {
       "path": "web/lib/map-resource-pool.ts",
-      "sizeBytes": 9067,
-      "sha256": "f76e5e7e5c404aa0df195e71f53aadf4be2b2c0adec2ee94052c888612325845"
+      "sizeBytes": 10754,
+      "sha256": "cc978e23d16562aa1ea08b2c104edec6a262a29bb958fd2129aacf28bbca580e"
     },
     {
       "path": "web/lib/map-route-presentation.ts",
@@ -258,17 +258,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "86d863b519542bce661a0245721e5770e18abeb2fdf807851c5d265d37c0d2d8",
+  "sourceInputsSha256": "874d7cc4bde6fd5452ef6115ab5ab92b9b07e185514f8b4393abeab250070007",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "b9b47b65bd6539e81d86dfbc8686c7d7ec5b540ca31173a5758a46ed0bb2cf49"
+      "sha256": "9c62ae86da793cb2b06bee19e8431ab149c1a9ad3543d91c812bd37aed09e988"
     },
     {
-      "path": "chunks/custom-map-entry-O8dLE4re.js",
-      "sizeBytes": 107198,
-      "sha256": "be74f367650cab7251ade5a33d30b0b960a05ecb380ac418774555d96e0109d5"
+      "path": "chunks/custom-map-entry-BWNRuns0.js",
+      "sizeBytes": 108645,
+      "sha256": "8431ef9c16cd9869dc0a495f7cd2aa4b1d08618d05d286b1b18cb44b2f84f4de"
     },
     {
       "path": "index.html",
@@ -283,7 +283,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "90da72e9df4db831d4a5246f5f407b812022b6d606ab0e111a07b5437baf093e"
+      "sha256": "2b8c80b406e632a636b17bcab10d77d1af6304bd95fe5b00a6426f10784392ae"
     },
     {
       "path": "map.css",

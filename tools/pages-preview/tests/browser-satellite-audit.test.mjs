@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {satelliteResource,observeSatelliteResources,successfulSatelliteResources,satelliteResourcesAt,satelliteTileContains,assertSatelliteContinuityAudit,assertSatelliteCameraUnchanged,assertSatellitePreload,satellitePerformanceIssues} from '../browser-satellite-audit.mjs';
+import {satelliteResource,observeSatelliteResources,successfulSatelliteResources,satelliteResourcesAt,satelliteRequestStateAt,satelliteTileContains,assertSatelliteContinuityAudit,assertSatelliteCameraUnchanged,assertSatellitePreload,satellitePerformanceIssues} from '../browser-satellite-audit.mjs';
 import {projectMapPoint} from '../map-projection.mjs';
 import {coastPanPlan} from '../browser-coast-audit.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
@@ -97,6 +97,82 @@ test('capture sequence derives pending/errors from raw events and does not apply
  assert.throws(()=>assertSatelliteContinuityAudit(eastOnly,eastOnly.profile,eastOnly.engine),/committed bitmap has no completed public imagery response/);
  for(const frame of [...eastOnly.steps,eastOnly.toggles[0].after,eastOnly.preload.after])frame.customMap.tiles.imagery=frame.customMap.tiles.imagery.filter(tile=>((tile.x%2**tile.z)+2**tile.z)%2**tile.z!==255);
  assert.throws(()=>assertSatelliteContinuityAudit(eastOnly,eastOnly.profile,eastOnly.engine),/both dateline columns/);
+});
+
+function recoveredResetFixture(){
+ const report=satelliteFixture('desktop-webgl','tropnik-canvas'),original=report.resources.requests[0],phase='dateline-native8';
+ const failed={...structuredClone(original),requestId:'reset',phase,responsePhase:phase,failedPhase:phase,firstSequence:10,requestedSequence:10,responseSequence:11,failedSequence:12,error:'net::ERR_CONNECTION_RESET',canceled:false,finished:false};
+ delete failed.finishedSequence;delete failed.bytes;
+ const retry={...structuredClone(original),requestId:'retry',phase,responsePhase:phase,firstSequence:13,requestedSequence:13,responseSequence:14,finishedSequence:15};
+ report.resources.requests.push(failed,retry);report.resources.observedRequests+=2;report.resources.sequence=15;
+ const frame=report.steps[1];frame.resourceSequence=15;frame.successfulRequestIds.push('retry');frame.failedRequestIds=['reset'];
+ frame.recoveredRequests=[{failedRequestId:'reset',retryRequestId:'retry',url:failed.url}];
+ return{report,failed,retry,frame};
+}
+
+test('a reset remains raw failure evidence after a later complete response proves exact-URL recovery',()=>{
+ for(const headersReceived of [false,true]){
+  const {report,failed}=recoveredResetFixture();if(!headersReceived){delete failed.status;delete failed.responseSequence;delete failed.mimeType;delete failed.responsePhase;}
+  const read=sequence=>satelliteRequestStateAt(report.resources,'eox-bluemarble',sequence,'dateline-native8');
+  const broken=read(12);assert.deepEqual(broken.failed,['reset']);assert.deepEqual(broken.unrecovered,['reset']);assert.deepEqual(broken.recoveries,[]);
+  const loading=read(14);assert.deepEqual(loading.pending,['retry']);assert.deepEqual(loading.unrecovered,['reset']);assert.deepEqual(loading.recoveries,[]);
+  const completed=read(15);assert.deepEqual(completed.failed,['reset']);assert.deepEqual(completed.pending,[]);assert.deepEqual(completed.unrecovered,[]);
+  assert.deepEqual(completed.recoveries,[{failedRequestId:'reset',retryRequestId:'retry',url:failed.url}]);
+  assert.equal(completed.current.requests.find(item=>item.requestId==='reset').error,'net::ERR_CONNECTION_RESET','Recovery never deletes the original failure');
+  assert.equal(assertSatelliteContinuityAudit(report,report.profile,report.engine),report);
+ }
+});
+
+test('recovery proof rejects older, parallel, future, canceled, HTTP-error and mismatched image transfers',()=>{
+ const mutations=[
+  ({retry})=>{retry.firstSequence=1;retry.requestedSequence=1;retry.responseSequence=2;retry.finishedSequence=3;},
+  ({retry})=>{retry.firstSequence=11;retry.requestedSequence=11;},
+  ({retry,report})=>{retry.finishedSequence=16;report.resources.sequence=16;},
+  ({retry})=>{retry.canceled=true;retry.error='net::ERR_ABORTED';retry.failedSequence=15;retry.finished=false;delete retry.finishedSequence;},
+  ({retry})=>retry.status=404,
+  ({retry})=>retry.mimeType='text/html',
+  ({retry})=>retry.bytes=-1,
+  ({retry})=>{retry.finished=false;delete retry.finishedSequence;},
+  ({retry})=>{retry.error='net::ERR_CONNECTION_RESET';retry.failedSequence=15;retry.finished=false;delete retry.finishedSequence;},
+  ({retry})=>retry.url=retry.url.replace('/0.jpg','/1.jpg'),
+  ({retry})=>retry.tile.x=1,
+  ({retry})=>retry.source='eox-s2',
+  ({retry})=>retry.phase='dateline-overzoom',
+  ({retry})=>delete retry.requestedSequence,
+  ({retry})=>retry.responseSequence=retry.requestedSequence,
+  ({failed})=>failed.status=404,
+  ({failed})=>failed.status=503,
+  ({failed})=>failed.error='net::ERR_FAILED',
+  ({failed})=>failed.tile.x=1,
+ ];
+ for(const mutate of mutations){
+  const fixture=recoveredResetFixture();mutate(fixture);
+  const state=satelliteRequestStateAt(fixture.report.resources,'eox-bluemarble',15,'dateline-native8');
+  assert.deepEqual(state.recoveries,[],String(mutate));assert.ok(state.unrecovered.includes('reset'),String(mutate));
+ }
+ const canceled=recoveredResetFixture();canceled.failed.canceled=true;
+ assert.deepEqual(satelliteRequestStateAt(canceled.report.resources,'eox-bluemarble',15,'dateline-native8').recoveries,[],'A canceled transfer is never classified as an automatic network recovery');
+});
+
+test('a third successful request cannot hide an exhausted two-attempt network failure',()=>{
+ const {report,retry}=recoveredResetFixture(),third={...structuredClone(retry),requestId:'third',firstSequence:16,requestedSequence:16,responseSequence:17,finishedSequence:18};
+ retry.finished=false;delete retry.finishedSequence;delete retry.bytes;retry.error='net::ERR_CONNECTION_RESET';retry.failedSequence=15;retry.failedPhase='dateline-native8';retry.canceled=false;
+ report.resources.requests.push(third);report.resources.observedRequests++;report.resources.sequence=18;
+ const state=satelliteRequestStateAt(report.resources,'eox-bluemarble',18,'dateline-native8');
+ assert.deepEqual(state.failed,['reset','retry']);assert.deepEqual(state.unrecovered,['reset']);assert.deepEqual(state.recoveries,[{failedRequestId:'retry',retryRequestId:'third',url:retry.url}]);
+});
+
+test('the continuity gate reconstructs recovery pairs and still rejects incomplete ground and forged summaries',()=>{
+ for(const change of [
+  ({frame})=>frame.failedRequestIds=[],
+  ({frame})=>frame.recoveredRequests=[],
+  ({frame})=>frame.recoveredRequests[0].retryRequestId='eox-bluemarble',
+  ({frame})=>frame.unrecoveredRequestIds=['reset'],
+  ({frame})=>frame.customMap.tiles.imagery=[],
+  ({frame})=>frame.state='loading',
+  ({frame})=>frame.credit.visible=false,
+  ({report})=>report.schemaVersion=4,
+ ]){const fixture=recoveredResetFixture();change(fixture);assert.throws(()=>assertSatelliteContinuityAudit(fixture.report,fixture.report.profile,fixture.report.engine));}
 });
 
 test('custom imagery requires a committed decoded batch, retained ground during preload and actual separable provider viewports',()=>{

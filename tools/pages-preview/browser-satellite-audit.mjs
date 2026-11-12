@@ -59,9 +59,22 @@ export function satelliteResourcesAt(network,sequence){
  })};
 }
 
-function sourceRequestsAt(network,source,sequence,phase){
+export function satelliteRequestStateAt(network,source,sequence,phase){
  const current=satelliteResourcesAt(network,sequence),requests=current.requests.filter(item=>item.source===source);
- return{current,pending:requests.filter(item=>!item.finished&&!item.error).map(item=>item.requestId),failed:requests.filter(item=>[item.phase,item.responsePhase,item.failedPhase].includes(phase)&&!item.canceled&&(item.error||item.status>=400)).map(item=>item.requestId)};
+ const failures=requests.filter(item=>[item.phase,item.responsePhase,item.failedPhase].includes(phase)&&!item.canceled&&(item.error||item.status>=400));
+ const successful=new Set(successfulSatelliteResources(current,source).map(item=>item.requestId)),recoveries=[],usedRetries=new Set();
+ for(const failed of failures){
+  // Keep the failed transfer in the raw record. Only a later, independently
+  // completed request for these exact bytes can prove recovery from the
+  // observed connection reset; retained imagery or an older cache hit cannot.
+  if(failed.error!=='net::ERR_CONNECTION_RESET'||failed.finished||(failed.status!==undefined&&failed.status!==200)||!Number.isInteger(failed.requestedSequence)||!Number.isInteger(failed.failedSequence)||failed.requestedSequence>=failed.failedSequence)continue;
+  const retry=requests.filter(item=>item.url===failed.url&&Number.isInteger(item.requestedSequence)&&item.requestedSequence>failed.failedSequence).sort((a,b)=>a.requestedSequence-b.requestedSequence)[0];
+  if(!retry||retry.requestId===failed.requestId||retry.phase!==phase||retry.canceled||usedRetries.has(retry.requestId)||!successful.has(retry.requestId)||!['z','x','y'].every(key=>retry.tile[key]===failed.tile?.[key]))continue;
+  if(!(failed.failedSequence<retry.requestedSequence&&retry.requestedSequence<retry.responseSequence&&retry.responseSequence<retry.finishedSequence&&retry.finishedSequence<=sequence))continue;
+  recoveries.push({failedRequestId:failed.requestId,retryRequestId:retry.requestId,url:failed.url});usedRetries.add(retry.requestId);
+ }
+ const recovered=new Set(recoveries.map(item=>item.failedRequestId));
+ return{current,pending:requests.filter(item=>!item.finished&&!item.error).map(item=>item.requestId),failed:failures.map(item=>item.requestId),recoveries,unrecovered:failures.filter(item=>!recovered.has(item.requestId)).map(item=>item.requestId)};
 }
 
 function bothSeamColumnsLoaded(resources,latitude){
@@ -161,12 +174,13 @@ function assertReady(frame,source,network,context){
  assert.equal(frame.resolution,source==='eox-bluemarble'?'overview':'detail',`${context}: overview imagery cannot count as full detail`);
  if(source==='eox-bluemarble'){assert.match(frame.credit.text,/NASA.*Blue Marble/i);assert.match(frame.credit.text,/обзорный снимок\s*·\s*детализация ниже/i);}
  assert.equal(viewIntersectsOverview(frame),source==='eox-bluemarble',`${context}: the actual viewport does not match its expected imagery region`);
- const captured=sourceRequestsAt(network,source,frame.resourceSequence,frame.resourcePhase),loaded=new Map(successfulSatelliteResources(captured.current,source).map(item=>[item.requestId,item]));
+ const captured=satelliteRequestStateAt(network,source,frame.resourceSequence,frame.resourcePhase),loaded=new Map(successfulSatelliteResources(captured.current,source).map(item=>[item.requestId,item]));
  assert.ok(frame.successfulRequestIds?.length>0,`${context}: no finished imagery responses`);
  assert.ok(frame.successfulRequestIds.every(id=>loaded.has(id)),`${context}: unfinished/failed/wrong-provider responses cannot certify imagery`);
  assert.ok(frame.successfulRequestIds.some(id=>satelliteTileContains(loaded.get(id).tile,frame.coordinate||[frame.camera.longitude,frame.camera.latitude])),`${context}: loaded imagery does not cover the inspected geography`);
  assert.deepEqual(frame.pendingRequestIds,captured.pending,`${context}: pending summary differs from raw capture events`);assert.deepEqual(frame.failedRequestIds,captured.failed,`${context}: error summary differs from raw capture events`);
- assert.deepEqual(captured.pending,[],`${context}: imagery requests are still loading`);assert.deepEqual(captured.failed,[],`${context}: imagery requests failed in this phase`);
+ assert.deepEqual(frame.recoveredRequests,captured.recoveries,`${context}: recovery summary differs from raw capture events`);assert.deepEqual(frame.unrecoveredRequestIds,captured.unrecovered,`${context}: unrecovered summary differs from raw capture events`);
+ assert.deepEqual(captured.pending,[],`${context}: imagery requests are still loading`);assert.deepEqual(captured.unrecovered,[],`${context}: imagery requests failed without a completed recovery in this phase`);
  if(frame.engine==='tropnik-canvas'){
   const map=assertCustomMapInspection(frame.customMap,context,{mode:'satellite'}),tiles=map.tiles.imagery;
   assert.equal(map.state.imagerySource,source);assert.ok(tiles.length>0,`${context}: no committed imagery bitmaps`);
@@ -185,7 +199,7 @@ export function satellitePerformanceIssues(report,profile){
 
 export function assertSatelliteContinuityAudit(report,profile,engine){
  const input=profile!=='desktop-webgl'?'touch':'mouse',context=profile+'/satellite';
- assert.equal(report?.schemaVersion,4,`${context}: satellite preload/continuity evidence is missing`);assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);assert.equal(report.input,input);
+ assert.equal(report?.schemaVersion,5,`${context}: satellite preload/continuity/recovery evidence is missing`);assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);assert.equal(report.input,input);
  assert.equal(report.region,SATELLITE_REGION);assert.equal(report.visualReviewRequired,true);assert.deepEqual(report.steps?.map(frame=>frame.stage),STAGES);
  assert.ok(report.resources?.requests.length<=512);assert.equal(report.resources.discardedRequests,0,'Satellite resource proof overflowed its bounded recorder');
  assert.ok(Number.isInteger(report.resources.sequence)&&report.resources.sequence>0);
@@ -265,7 +279,7 @@ export function assertSatelliteContinuityAudit(report,profile,engine){
  * Its performance interval is never reset between providers or image captures. */
 export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OUTPUT}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,pointerSelector,elementPoint,diagnosticPhase}=helpers;
- const report={schemaVersion:4,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',region:SATELLITE_REGION,passed:false,visualReviewRequired:true,steps:[],pans:[],zooms:[],setupZooms:[],toggles:[],screenshots:[],startedAt:new Date().toISOString()};
+ const report={schemaVersion:5,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',region:SATELLITE_REGION,passed:false,visualReviewRequired:true,steps:[],pans:[],zooms:[],setupZooms:[],toggles:[],screenshots:[],startedAt:new Date().toISOString()};
  let currentStage='loading-region';const observer=observeSatelliteResources(cdp,()=>currentStage);
  const save=async()=>{report.resources=observer.snapshot();await mkdir(output,{recursive:true});await writeFile(new URL(`${profile.name}-satellite-continuity.json`,output),JSON.stringify(report,null,2)+'\n');};
  const phase=async name=>{currentStage=name;report.stage=name;await diagnosticPhase(cdp,'satellite-continuity/'+name);};
@@ -278,13 +292,13 @@ export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OU
  }
  async function ready(source){
   return waitValue(`${profile.name}: ${source} did not load finished imagery`,async()=>{
-   const frame=await snapshot(),network=observer.snapshot(),requests=sourceRequestsAt(network,source,network.sequence,currentStage);
+   const frame=await snapshot(),network=observer.snapshot(),requests=satelliteRequestStateAt(network,source,network.sequence,currentStage);
    const loaded=successfulSatelliteResources(network,source),needNative8=['dateline-native8','dateline-overzoom'].includes(currentStage);
    const result={...frame,resolution:source==='eox-bluemarble'?'overview':'detail',successfulRequestIds:loaded.map(item=>item.requestId),resourceSequence:network.sequence,resourcePhase:currentStage,
     centerTileLoaded:loaded.some(item=>(!needNative8||item.tile.z===8)&&satelliteTileContains(item.tile,[frame.camera.longitude,frame.camera.latitude]))&&(!needNative8||bothSeamColumnsLoaded(loaded,SATELLITE_DATELINE[1])),
-    pendingRequestIds:requests.pending,failedRequestIds:requests.failed};
+    pendingRequestIds:requests.pending,failedRequestIds:requests.failed,recoveredRequests:requests.recoveries,unrecoveredRequestIds:requests.unrecovered};
    report.lastState=result;return result;
-  },frame=>frame.imagery==='satellite'&&frame.source===source&&frame.target===source&&frame.state==='ready'&&frame.centerTileLoaded&&frame.successfulRequestIds.length>0&&frame.pendingRequestIds.length===0&&frame.failedRequestIds.length===0,20000);
+  },frame=>frame.imagery==='satellite'&&frame.source===source&&frame.target===source&&frame.state==='ready'&&frame.centerTileLoaded&&frame.successfulRequestIds.length>0&&frame.pendingRequestIds.length===0&&frame.unrecoveredRequestIds.length===0,20000);
  }
  async function toggle(label){
   const before=await waitValue(`${profile.name}: current base did not settle before a layer transition`,snapshot,value=>value.base.state==='ready');let gate;

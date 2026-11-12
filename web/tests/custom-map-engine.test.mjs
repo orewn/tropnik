@@ -18,9 +18,15 @@ const plain=value=>JSON.parse(JSON.stringify(value));
 const camera={center:[40.5,43.5],zoom:8,bearingDegrees:0};
 const area={type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[[40,42],[42,42],[42,45],[40,45],[40,42]],[[40.65,43.65],[40.65,43.75],[40.75,43.75],[40.75,43.65],[40.65,43.65]]]}};
 const collection={type:'FeatureCollection',features:[]};
+// Exact method bytes from 9110c5b23b4a6dfcb176c8e07f074d3f93239f91. Only
+// this original method is substituted in reference runs; its imported helpers,
+// camera and the rest of the production engine remain the same real modules.
+const originalLabels=readFileSync(resolve(root,'tests/fixtures/custom-map-labels-9110c5b.txt'),'utf8');
+assert.equal(createHash('sha256').update(originalLabels).digest('hex'),'39a5b7a5ca753f6ca893764b8ee7f7a3fd3acd87686d944f5ca7da5cab7ed8c9');
 
-function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader}={}){
+function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false}={}){
  let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[];
+ let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0};
  class Target{
   listeners=new Map();
   addEventListener(type,listener){const listeners=this.listeners.get(type)||new Set();listeners.add(listener);this.listeners.set(type,listeners);}
@@ -100,19 +106,31 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  function load(filename){
   if(modules.has(filename))return modules.get(filename).exports;
   const testModule={exports:{}};modules.set(filename,testModule);
-  if(!compiled.has(filename))compiled.set(filename,ts.transpileModule(readFileSync(filename,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true},fileName:filename}).outputText);
+  const engineModule=filename===resolve(root,'lib/custom-map-engine.ts'),compiledKey=engineModule&&baselineLabels?filename+':original-labels-9110c5b':filename;
+  if(!compiled.has(compiledKey)){
+   let source=readFileSync(filename,'utf8');
+   if(engineModule&&baselineLabels){const start=source.indexOf('  private drawLabels(){\n'),end=source.indexOf('  destroy(){\n',start);assert.ok(start>0&&end>start);source=source.slice(0,start)+originalLabels+source.slice(end);}
+   compiled.set(compiledKey,ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true},fileName:filename}).outputText);
+  }
   const require=specifier=>{
    if(specifier==='./russia-map')return{loadRussiaGeometry:()=>{const attempt=++coverageAttempts;return coverageLoader?coverageLoader(attempt,coverage):attempt<=coverageFailures?Promise.reject(new Error('Coverage fetch failed')):coveragePromise;}};
    if(specifier==='./map-preload')return{loadPublicBytes(){assert.fail('No real download in an engine unit test');},loadPublicJSON(){assert.fail('No real download in an engine unit test');}};
    if(specifier.endsWith('?worker&url'))return{__esModule:true,default:'/workers/fixture.js'};
    let path=resolve(dirname(filename),specifier);if(!existsSync(path))path+='.ts';assert.ok(path.startsWith(root+'/'),'Only real local map modules may load');
-   const result=load(path);if(specifier==='./custom-map-tiles'){tileKey=result.customTileKey;return{...result,CustomMapTiles:Tiles};}return result;
+   const result=load(path);if(specifier==='./custom-map-tiles'){tileKey=result.customTileKey;return{...result,CustomMapTiles:Tiles};}
+   if(engineModule){
+    const watched=specifier==='./custom-map-camera'?{mercatorUnproject:'sourceCoordinates',project:'screenCoordinates'}:specifier==='../public/maps/russia-viewport.js'?{inRussiaCoverage:'coverageTests'}:specifier==='./custom-map-labels'?{mapLabelPriority:'priorityCalls',mapLabelRepeatKey:'repeatKeys'}:{};
+    if(Object.keys(watched).length)return{...result,...Object.fromEntries(Object.entries(watched).map(([name,count])=>[name,(...args)=>{if(paintingLabels)labelWork[count]++;return result[name](...args); }]))};
+   }
+   return result;
   };
-  const run=vm.runInContext(`(function(require,module,exports){${compiled.get(filename)}\n})`,environment,{filename});run(require,testModule,testModule.exports);return testModule.exports;
+  const run=vm.runInContext(`(function(require,module,exports){${compiled.get(compiledKey)}\n})`,environment,{filename});run(require,testModule,testModule.exports);return testModule.exports;
  }
  const exports=load(resolve(root,'lib/custom-map-engine.ts'));
  const productionDraw=exports.CustomMapEngine.prototype.draw;
  exports.CustomMapEngine.prototype.draw=function(...args){calls.push({surface:'tropnik-map-canvas',op:'draw-start'});return productionDraw.apply(this,args);};
+ const productionLabels=exports.CustomMapEngine.prototype.drawLabels;
+ exports.CustomMapEngine.prototype.drawLabels=function(...args){const previous=paintingLabels;paintingLabels=true;try{return productionLabels.apply(this,args);}finally{paintingLabels=previous;}};
  const engine=new exports.CustomMapEngine(host,{camera:plain(view),onState:value=>states.push(plain(value)),onReady:()=>{readyCalls++;},onGesture:()=>{gestures++;}});
  engine.setFloor({center:[105,60],zoom:1,bearingDegrees:0});
  const tick=(elapsed=16)=>{now+=elapsed;const current=[...frames.values()];frames.clear();for(const frame of current)frame(now);return current.length;};
@@ -122,7 +140,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const ready=async()=>{coverageResolve(coverage);await turn();complete();await turn();flush();return engine;};
  const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
  const lastDraw=()=>[...lastSurface('tropnik-map-canvas','draw-start'),...lastSurface('tropnik-map-labels','clearRect')];
- return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,
+ return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
   get coverageAttempts(){return coverageAttempts;},get readyCalls(){return readyCalls;},get gestures(){return gestures;},
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
   coordinateAt:point=>engine.unproject(point),labelFor(job,coordinate,text,options={}){const p=load(resolve(root,'lib/custom-map-camera.ts')).mercatorProject(coordinate),n=2**job.request.z;return{x:p.x*n-job.request.x,y:p.y*n-job.request.y,text,kind:'place',rank:4,...options};}};
@@ -409,6 +427,128 @@ test('source admission and whole-glyph drawing follow the mask without truncatin
  assert.equal(draw.filter(call=>call.op==='fillText'&&call.text==='Same name').length,2,'Equal names at different source anchors must not disappear');assert.equal(byId('duplicate').visible,false);
  const firstText=draw.findIndex(call=>call.op==='fillText'),lastMask=draw.findLastIndex(call=>call.op==='fill'&&call.rule==='evenodd');assert.ok(firstText>lastMask&&lastMask>=0,'The mask must finish before complete admitted glyphs are painted');assert.equal(draw.some(call=>call.op==='clip'),false);
  for(const label of diagnostics.filter(item=>item.visible)){assert.ok(label.rect.left>=12&&label.rect.right<=800-12);assert.ok(label.rect.right-label.rect.left>=label.width);}
+});
+
+function labelSnapshot(env){
+ return{records:plain(env.engine.getLabelDiagnostics()),total:env.engine.inspectLabels({schemaVersion:1,names:['__fixture_missing_name__'],limit:1}).labelInspection.totalCandidates,
+  hidden:env.host.querySelector('.tropnik-map-labels').hidden,paint:plain(env.lastDraw().filter(call=>call.surface==='tropnik-map-labels'))};
+}
+
+test('static label preparation preserves the pinned original decisions and paint through camera, input, coverage and layer changes',async t=>{
+ const current=fixture({view:{...camera,zoom:12}}),original=fixture({view:{...camera,zoom:12},baselineLabels:true}),pair=[current,original],inputs=new Map();
+ t.after(()=>pair.forEach(env=>env.engine.destroy()));
+ const equivalent=phase=>assert.deepEqual(labelSnapshot(current),labelSnapshot(original),phase);
+ const labels=(env,job,prefix='')=>{
+  const specs=job.request.kind==='vector'?[
+   {point:{x:250,y:180},text:prefix+'Москва',rank:9,priorityCity:true,placeClass:'city'},
+   {point:{x:470,y:300},text:'Вершина',kind:'peak',rank:3,elevation:3210.4},
+   {point:{x:470,y:300},text:'Вершина',kind:'peak',rank:3,elevation:3211.4},
+   {point:{x:680,y:170},text:'Тропа «Тест»',kind:'path',rank:4},
+   {point:{x:720,y:170},text:'Тропа Тест',kind:'path',rank:4},
+  ]:job.request.kind==='relief'?[{point:{x:300,y:500},text:'1000 м',kind:'contour',rank:9,elevation:1000}]:[];
+  return{labels:specs.map(({point,text,...properties})=>env.labelFor(job,env.coordinateAt(point),text,properties)).filter(label=>label.x>=0&&label.x<1&&label.y>=0&&label.y<1)};
+ };
+ for(const env of pair){
+  await turn();const additional=[{id:'external',coordinate:env.coordinateAt({x:430,y:460}),label:'External',kind:'path',rank:0},{id:'hole',coordinate:[40.7,43.7],label:'Hole',rank:0},{id:'foreign',coordinate:[39.99,43.5],label:'Foreign',rank:1}];
+  inputs.set(env,additional);env.engine.setLabels(additional);env.complete(()=>true,job=>labels(env,job));await env.settle();
+ }
+ equivalent('Cold construction must keep the exact original order, reasons, coordinates and draw commands');
+ const cold=plain(current.labelWork),coldOriginal=plain(original.labelWork),coldPaint=current.calls.filter(call=>call.op==='measureText').length;
+ assert.equal(cold.sourceCoordinates,6);assert.equal(current.engine.getLabelDiagnostics().find(label=>label.id==='hole').reason,'outside-coverage');
+ assert.ok(current.engine.getLabelDiagnostics().some(label=>label.reason==='duplicate'));assert.ok(current.engine.getLabelDiagnostics().some(label=>label.reason==='repeated-name'));
+ for(const env of pair){env.engine.setRegion([]);env.flush();}
+ equivalent('An unchanged warm paint must remain byte-for-byte equivalent at the command/diagnostic boundary');
+ for(const env of pair)env.engine.canvas.dispatch('pointerdown',{pointerId:81,clientX:400,clientY:300});
+ for(const [x,y]of [[408,304],[416,308],[400,300]]){
+  for(const env of pair){env.engine.canvas.dispatch('pointermove',{pointerId:81,clientX:x,clientY:y});env.flush();}
+  equivalent('A native pan keeps current screen positions and dynamic collision decisions');
+ }
+ for(const key of ['sourceCoordinates','coverageTests','priorityCalls','repeatKeys'])assert.equal(current.labelWork[key],cold[key],`Warm movement must not repeat static ${key}`);
+ assert.ok(original.labelWork.sourceCoordinates>coldOriginal.sourceCoordinates);assert.ok(original.labelWork.coverageTests>coldOriginal.coverageTests);
+ assert.ok(current.labelWork.screenCoordinates>cold.screenCoordinates,'Point-to-screen projection still runs on camera frames');
+ assert.ok(current.calls.filter(call=>call.op==='measureText').length>coldPaint,'Current font measurements must not be frozen with the source metadata');
+ for(const env of pair){env.engine.canvas.dispatch('pointerup',{pointerId:81,clientX:400,clientY:300});env.flush();}
+ equivalent('Pointer release retains the same labels');
+
+ const beforeCallerMutation=plain(current.engine.getLabelDiagnostics());
+ for(const env of pair){const additional=inputs.get(env);additional[0].label='Changed caller';additional[0].coordinate[0]+=.004;env.engine.setRegion([]);env.flush();}
+ equivalent('Mutating caller-owned labels must not corrupt either retained frame');
+ assert.deepEqual(plain(current.engine.getLabelDiagnostics()),beforeCallerMutation,'setLabels owns the original supplied coordinates and text');
+ const beforeReplace=current.labelWork.sourceCoordinates;
+ for(const env of pair){env.engine.setLabels(inputs.get(env));env.flush();}
+ equivalent('A later setLabels call must install the mutated input as a new snapshot');
+ assert.equal(current.engine.getLabelDiagnostics().find(label=>label.id==='external').label,'Changed caller');assert.ok(current.labelWork.sourceCoordinates>beforeReplace);
+
+ for(const env of pair){env.engine.setObstacles([{left:200,right:520,top:140,bottom:340}]);env.flush();}
+ equivalent('Obstacle changes recompute collisions without reusing admitted rectangles');
+ for(const env of pair){env.engine.setObstacles([]);env.flush();}
+ equivalent('Removing an obstacle restores original diagnostics rather than stale collision reasons');
+ const beforeTransform=current.labelWork.sourceCoordinates;
+ for(const env of pair){env.engine.setCamera({...env.engine.getCamera(),bearingDegrees:17.3},false);env.flush();}
+ equivalent('A fractional bearing recalculates positions and collision footprints');
+ for(const env of pair){env.engine.setPitch(30);env.flush();}
+ equivalent('Pitch keeps current projected coordinates rather than the previous flat frame');
+ for(const env of pair){env.host.clientWidth=620;env.host.clientHeight=460;env.observers[0].callback();env.flush();}
+ equivalent('Resize updates the actual label surface, viewport budget and collision decisions');
+ for(const env of pair){env.host.clientWidth=800;env.host.clientHeight=600;env.observers[0].callback();env.engine.setPitch(0);env.engine.setCamera({...env.engine.getCamera(),bearingDegrees:0},false);env.flush();}
+ equivalent('Restoring the original canvas geometry preserves the original commands');
+ assert.equal(current.labelWork.sourceCoordinates,beforeTransform,'Dynamic transforms must not rebuild unchanged source coordinates');
+ for(const env of pair){env.engine.setLayers({relief:false});env.flush();}
+ equivalent('Hiding measured relief removes its height annotations from the candidate set');
+ assert.equal(current.engine.getLabelDiagnostics().some(label=>label.label==='1000 м'),false);
+ for(const env of pair){env.engine.setLayers({relief:true});env.flush();}
+ equivalent('Restoring measured relief restores its annotations');
+ assert.ok(current.engine.getLabelDiagnostics().some(label=>label.label==='1000 м'));
+ const previousCoverage=current.labelWork.coverageTests;
+ for(const env of pair){const next=plain(area);next.geometry.coordinates.pop();env.coverage.area=next;notifyCoverage(env,{revision:1});env.flush();}
+ equivalent('A newly committed immutable area invalidates a previously rejected geographic anchor');
+ assert.equal(current.engine.getLabelDiagnostics().find(label=>label.id==='hole').reason,'outside-viewport');assert.ok(current.labelWork.coverageTests>previousCoverage);
+ const afterCoverage=plain(current.labelWork);
+ for(const env of pair){notifyCoverage(env,{pending:1,error:'Refinement pending'});env.engine.setRegion([]);env.flush();}
+ equivalent('Progress on the same geometry does not alter candidate admission');
+ assert.equal(current.labelWork.sourceCoordinates,afterCoverage.sourceCoordinates);assert.equal(current.labelWork.coverageTests,afterCoverage.coverageTests);
+
+ for(const zoom of [4.99,5.01,8,9,9.99,10.01,12]){
+  for(const env of pair){env.engine.setCamera({...camera,zoom},false);env.flush();}
+  equivalent('Zoom '+zoom+' preserves source/height gates, typography and current positions');
+  const records=current.engine.getLabelDiagnostics();assert.equal(records.some(label=>label.label==='1000 м'),zoom>=10);
+  assert.equal(records.some(label=>label.label==='Москва'),zoom>=5);assert.ok(records.some(label=>label.id==='external'),'Additional labels remain available below the source-label threshold');
+ }
+ for(const env of pair){env.engine.setMode('overview');env.flush();}
+ equivalent('Overview keeps only the additional label inputs');
+ assert.ok(current.engine.getLabelDiagnostics().every(label=>['external','hole','foreign'].includes(label.id)));
+ for(const env of pair){env.engine.setMode('satellite');env.complete(()=>true,job=>labels(env,job));await env.settle();}
+ equivalent('Newly committed satellite overlays replace their source batch');assert.equal(current.engine.getState().committedMode,'satellite');
+ assert.equal(current.engine.getLabelDiagnostics().some(label=>label.label==='1000 м'),false);
+ for(const env of pair){env.engine.setMode('detail');env.flush();}
+ equivalent('Requested detail must retain satellite-label semantics until the replacement commits');assert.equal(current.engine.getState().committedMode,'satellite');
+ for(const env of pair){env.complete(()=>true,job=>labels(env,job));await env.settle();}
+ equivalent('Committed measured relief restores its own source annotations');assert.equal(current.engine.getState().committedMode,'detail');
+ for(const env of pair){env.engine.setLayers({paths:false});env.complete(()=>true,job=>labels(env,job,'Новая '));await env.settle();}
+ equivalent('A newly committed source batch invalidates the previous label metadata even at the same camera');
+ assert.ok(current.engine.getLabelDiagnostics().some(label=>label.label==='Новая Москва'));
+});
+
+test('label coverage work remains lazy behind the original budget while every warm diagnostic is recomputed',async t=>{
+ const current=fixture({view:{...camera,zoom:14}}),original=fixture({view:{...camera,zoom:14},baselineLabels:true}),pair=[current,original];
+ t.after(()=>pair.forEach(env=>env.engine.destroy()));
+ for(const env of pair){await env.ready();env.engine.setLabels(Array.from({length:80},(_,index)=>({id:'label-'+index,coordinate:env.coordinateAt({x:40+(index%10)*80,y:50+Math.floor(index/10)*70}),label:String(index),rank:4})));env.flush();}
+ assert.deepEqual(labelSnapshot(current),labelSnapshot(original));
+ const records=current.engine.getLabelDiagnostics(),visible=records.filter(label=>label.visible).length,covered=current.labelWork.coverageTests,priority=current.labelWork.priorityCalls;
+ assert.equal(visible,26);assert.equal(covered,visible,'Cold preparation must not query source admission for candidates beyond the drawn-label budget');assert.ok(records.some(label=>label.reason==='budget'));
+ for(const env of pair){env.engine.setRegion([]);env.flush();}
+ assert.deepEqual(labelSnapshot(current),labelSnapshot(original));assert.equal(current.labelWork.coverageTests,covered);assert.equal(current.labelWork.priorityCalls,priority);
+ const untouched=current.engine.getLabelDiagnostics(),inspected=current.engine.inspectLabels({schemaVersion:1,names:['0'],limit:1}).labels;
+ untouched[0].coordinate[0]=0;untouched[0].rect.left=0;inspected[0].coordinate[1]=0;inspected[0].rect.top=0;
+ assert.deepEqual(labelSnapshot(current),labelSnapshot(original),'Both public diagnostic APIs must protect retained coordinates and rectangles from caller mutation');
+ for(const env of pair){env.engine.setObstacles([{left:0,right:800,top:0,bottom:195}]);env.flush();}
+ assert.deepEqual(labelSnapshot(current),labelSnapshot(original));
+ const blocked=current.engine.getLabelDiagnostics();assert.equal(blocked.filter(label=>label.visible).length,26);assert.ok(blocked.some(label=>label.reason==='collision'));
+ assert.ok(current.labelWork.coverageTests>covered&&current.labelWork.coverageTests<80,'Only newly reached candidates are admitted when obstacles free the later budget');
+ const expanded=current.labelWork.coverageTests;
+ for(const env of pair){env.engine.setObstacles([]);env.flush();}
+ assert.deepEqual(labelSnapshot(current),labelSnapshot(original));assert.equal(current.labelWork.coverageTests,expanded,'A warm frame reuses true/false source admission but recomputes current reasons');
+ assert.equal(current.engine.getLabelDiagnostics()[0].visible,true);assert.notEqual(current.engine.getLabelDiagnostics()[0].coordinate[0],0);
 });
 
 test('the engine keeps source priority-city typography and bounds diagnostic candidates',async t=>{

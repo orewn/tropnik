@@ -1,0 +1,42 @@
+  private drawLabels(){
+    this.labelDiagnostics=[];this.labelDiagnosticTotal=0;
+    // Control widths and the sheet affect label collisions, not terrain. Keep
+    // those pixels on their own surface so input never replays the base paths.
+    const ctx=this.labelContext;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,this.labelCanvas.width,this.labelCanvas.height);
+    ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);this.labelRevision++;
+    if(!this.coverage){this.labelCanvas.hidden=true;return;}
+    const occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>(),repeated=new Map<string,MapPoint[]>();
+    const candidates:Array<{id:string;coordinate:[number,number];label:MapTileLabel;color?:string}>=this.additionalLabels.map(label=>({id:label.id,coordinate:label.coordinate,label:{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},color:label.color}));
+    const detail=this.displayDetail(),satellite=this.displayingSatellite();
+    const labelBatches=[detail];
+    // Height annotations belong to the committed measured relief. They follow
+    // its visibility, including the retained ground during an imagery load.
+    if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=10)labelBatches.push(this.relief);
+    if(this.mode!=='overview'&&this.camera.zoom>=5)for(const batch of labelBatches)if(batch)for(const tile of batch.tiles)for(const label of tile.labels){const n=2**tile.z;candidates.push({id:`${tile.key}:${label.text}`,coordinate:mercatorUnproject({x:(tile.x+label.x)/n,y:(tile.y+label.y)/n}),label});}
+    candidates.sort((a,b)=>mapLabelPriority(a.label)-mapLabelPriority(b.label)||a.label.rank-b.label.rank);
+    this.labelDiagnosticTotal=candidates.length;let count=0;const budget=mapLabelBudget(this.size.width,this.size.height);
+    for(const {id,coordinate,label,color} of candidates){
+      const diagnostic:CustomMapLabelDiagnostic={id,label:label.text,coordinate,visible:false,reason:'budget'};
+      if(this.labelDiagnostics.length<MAX_RECORDED_MAP_LABELS)this.labelDiagnostics.push(diagnostic);
+      const sourceAnchor=`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`;
+      if(count>=budget)continue;
+      if(seen.has(sourceAnchor)){diagnostic.reason='duplicate';continue;}
+      if(!inRussiaCoverage(coordinate[0],coordinate[1],this.coverage.area)){diagnostic.reason='outside-coverage';continue;}
+      const p=this.project(coordinate),style=mapLabelStyle(label,this.camera.zoom,color);
+      if(p.x<24||p.x>this.size.width-24||p.y<32||p.y>this.size.height-20){diagnostic.reason='outside-viewport';continue;}
+      const value=label.kind==='peak'&&label.elevation!==undefined?`${label.text?label.text+' · ':''}${Math.round(label.elevation)} м`:label.text;
+      ctx.font=`${style.weight} ${style.fontSize}px Manrope, sans-serif`;
+      const width=ctx.measureText(value).width,layout=mapLabelLayout(label,p,width,!!value,style),{rect}=layout;
+      diagnostic.x=p.x;diagnostic.y=p.y;diagnostic.width=width;diagnostic.rect=rect;
+      if(rect.left<12||rect.right>this.size.width-12||rect.top<12||rect.bottom>this.size.height-12){diagnostic.reason='outside-viewport';continue;}
+      const repeatDistance=mapLabelRepeatDistance(label),repeatKey=mapLabelRepeatKey(label);
+      if(value&&repeatDistance&&(repeated.get(repeatKey)||[]).some(previous=>Math.hypot(p.x-previous.x,p.y-previous.y)<repeatDistance)){diagnostic.reason='repeated-name';continue;}
+      if(occupied.some(r=>rect.left<r.right&&rect.right>r.left&&rect.top<r.bottom&&rect.bottom>r.top)){diagnostic.reason='collision';continue;}
+      occupied.push(rect);seen.add(sourceAnchor);
+      if(value&&repeatDistance){const points=repeated.get(repeatKey)||[];points.push(p);repeated.set(repeatKey,points);}
+      if(label.symbol)drawMapSymbol(ctx,label.symbol,p.x,p.y);
+      drawMapLabel(ctx,value,p,layout,style);
+      count++;diagnostic.visible=true;diagnostic.reason='drawn';
+    }
+    this.labelCanvas.hidden=count===0;
+  }

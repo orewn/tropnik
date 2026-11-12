@@ -24,6 +24,7 @@ export type CustomMapLabel={id:string;coordinate:[number,number];label:string;ki
 export type CustomMapLabelDiagnostic={id:string;label:string;coordinate:[number,number];visible:boolean;reason:string;x?:number;y?:number;width?:number;rect?:{left:number;top:number;right:number;bottom:number}};
 export type CustomMapOptions={camera:CustomMapCamera;onReady?:(engine:CustomMapEngine)=>void;onFrame?:(camera:CustomMapCamera)=>void;onSettled?:(camera:CustomMapCamera)=>void;onGesture?:()=>void;onClick?:(point:MapPoint,coordinate:[number,number])=>void;onMarker?:(id:string)=>void;onState?:(state:CustomMapState)=>void;maxZoom?:number};
 type TileBatch={tiles:CustomMapTile[];kind:CustomTileKind;generation:number;missing?:CustomTileRequest[]};
+type LabelCandidate={id:string;coordinate:[number,number];label:MapTileLabel;color?:string;priority:number;sourceAnchor:string;insideCoverage?:boolean;value?:string;repeatDistance?:number;repeatKey?:string};
 type FeatureGeometry=GeoJSON.GeoJSON|undefined;
 type PathCollection={path:Path2D;bounds:[number,number,number,number]};
 const COUNTRY_BOUNDS=[19.6389282,41.1858711,191.0026658,81.858721] as const;
@@ -130,6 +131,7 @@ export class CustomMapEngine {
   private active=true;
   private eco=false;
   private additionalLabels:CustomMapLabel[]=[];
+  private labelCandidateCache?:{detail?:TileBatch;relief?:TileBatch;additional:CustomMapLabel[];area:MapCoverage['area'];candidates:LabelCandidate[]};
   private labelDiagnostics:CustomMapLabelDiagnostic[]=[];
   private labelDiagnosticTotal=0;
   private drawRevision=0;
@@ -585,6 +587,22 @@ export class CustomMapEngine {
     }
     for(const edge of this.routeEdges){const p=edge.project();edge.element.style.position='absolute';edge.element.style.left=`${p.x}px`;edge.element.style.top=`${p.y}px`;}
   }
+  private prepareLabelCandidates(area:MapCoverage['area']):LabelCandidate[]{
+    const includeDetail=this.mode!=='overview'&&this.camera.zoom>=5,detail=includeDetail?this.displayDetail():undefined;
+    // Height annotations belong to the committed measured relief. They follow
+    // its visibility, including the retained ground during an imagery load.
+    const relief=includeDetail&&!this.displayingSatellite()&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=10?this.relief:undefined;
+    const previous=this.labelCandidateCache;
+    if(previous&&previous.detail===detail&&previous.relief===relief&&previous.additional===this.additionalLabels&&previous.area===area)return previous.candidates;
+    // Source batches and committed coverage are immutable; setLabels owns a
+    // defensive copy. Keep only this view's candidates, never a visited-tile
+    // history. Screen projection, typography and collisions still run per frame.
+    const candidate=(id:string,coordinate:[number,number],label:MapTileLabel,color?:string):LabelCandidate=>({id,coordinate,label,color,priority:mapLabelPriority(label),sourceAnchor:`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`});
+    const candidates=this.additionalLabels.map(label=>candidate(label.id,label.coordinate,{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},label.color));
+    for(const batch of [detail,relief])if(batch)for(const tile of batch.tiles)for(const label of tile.labels){const n=2**tile.z;candidates.push(candidate(`${tile.key}:${label.text}`,mercatorUnproject({x:(tile.x+label.x)/n,y:(tile.y+label.y)/n}),label));}
+    candidates.sort((a,b)=>a.priority-b.priority||a.label.rank-b.label.rank);
+    this.labelCandidateCache={detail,relief,additional:this.additionalLabels,area,candidates};return candidates;
+  }
   private drawLabels(){
     this.labelDiagnostics=[];this.labelDiagnosticTotal=0;
     // Control widths and the sheet affect label collisions, not terrain. Keep
@@ -592,31 +610,25 @@ export class CustomMapEngine {
     const ctx=this.labelContext;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,this.labelCanvas.width,this.labelCanvas.height);
     ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);this.labelRevision++;
     if(!this.coverage){this.labelCanvas.hidden=true;return;}
-    const occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>(),repeated=new Map<string,MapPoint[]>();
-    const candidates:Array<{id:string;coordinate:[number,number];label:MapTileLabel;color?:string}>=this.additionalLabels.map(label=>({id:label.id,coordinate:label.coordinate,label:{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},color:label.color}));
-    const detail=this.displayDetail(),satellite=this.displayingSatellite();
-    const labelBatches=[detail];
-    // Height annotations belong to the committed measured relief. They follow
-    // its visibility, including the retained ground during an imagery load.
-    if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=10)labelBatches.push(this.relief);
-    if(this.mode!=='overview'&&this.camera.zoom>=5)for(const batch of labelBatches)if(batch)for(const tile of batch.tiles)for(const label of tile.labels){const n=2**tile.z;candidates.push({id:`${tile.key}:${label.text}`,coordinate:mercatorUnproject({x:(tile.x+label.x)/n,y:(tile.y+label.y)/n}),label});}
-    candidates.sort((a,b)=>mapLabelPriority(a.label)-mapLabelPriority(b.label)||a.label.rank-b.label.rank);
+    const occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>(),repeated=new Map<string,MapPoint[]>(),candidates=this.prepareLabelCandidates(this.coverage.area);
     this.labelDiagnosticTotal=candidates.length;let count=0;const budget=mapLabelBudget(this.size.width,this.size.height);
-    for(const {id,coordinate,label,color} of candidates){
+    for(const candidate of candidates){
+      const {id,coordinate,label,color,sourceAnchor}=candidate;
       const diagnostic:CustomMapLabelDiagnostic={id,label:label.text,coordinate,visible:false,reason:'budget'};
       if(this.labelDiagnostics.length<MAX_RECORDED_MAP_LABELS)this.labelDiagnostics.push(diagnostic);
-      const sourceAnchor=`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`;
       if(count>=budget)continue;
       if(seen.has(sourceAnchor)){diagnostic.reason='duplicate';continue;}
-      if(!inRussiaCoverage(coordinate[0],coordinate[1],this.coverage.area)){diagnostic.reason='outside-coverage';continue;}
+      // A cache miss must not eagerly query coverage for candidates which the
+      // existing budget/duplicate gates never reach. False is cached as well.
+      if(!(candidate.insideCoverage??=inRussiaCoverage(coordinate[0],coordinate[1],this.coverage.area))){diagnostic.reason='outside-coverage';continue;}
       const p=this.project(coordinate),style=mapLabelStyle(label,this.camera.zoom,color);
       if(p.x<24||p.x>this.size.width-24||p.y<32||p.y>this.size.height-20){diagnostic.reason='outside-viewport';continue;}
-      const value=label.kind==='peak'&&label.elevation!==undefined?`${label.text?label.text+' · ':''}${Math.round(label.elevation)} м`:label.text;
+      const value=candidate.value??=(label.kind==='peak'&&label.elevation!==undefined?`${label.text?label.text+' · ':''}${Math.round(label.elevation)} м`:label.text);
       ctx.font=`${style.weight} ${style.fontSize}px Manrope, sans-serif`;
       const width=ctx.measureText(value).width,layout=mapLabelLayout(label,p,width,!!value,style),{rect}=layout;
       diagnostic.x=p.x;diagnostic.y=p.y;diagnostic.width=width;diagnostic.rect=rect;
       if(rect.left<12||rect.right>this.size.width-12||rect.top<12||rect.bottom>this.size.height-12){diagnostic.reason='outside-viewport';continue;}
-      const repeatDistance=mapLabelRepeatDistance(label),repeatKey=mapLabelRepeatKey(label);
+      const repeatDistance=candidate.repeatDistance??=mapLabelRepeatDistance(label),repeatKey=candidate.repeatKey??=mapLabelRepeatKey(label);
       if(value&&repeatDistance&&(repeated.get(repeatKey)||[]).some(previous=>Math.hypot(p.x-previous.x,p.y-previous.y)<repeatDistance)){diagnostic.reason='repeated-name';continue;}
       if(occupied.some(r=>rect.left<r.right&&rect.right>r.left&&rect.top<r.bottom&&rect.bottom>r.top)){diagnostic.reason='collision';continue;}
       occupied.push(rect);seen.add(sourceAnchor);
@@ -632,7 +644,7 @@ export class CustomMapEngine {
     this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
     this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;this.selectedBoundary=undefined;
-    this.labelDiagnostics=[];this.labelDiagnosticTotal=0;
+    this.labelDiagnostics=[];this.labelDiagnosticTotal=0;this.labelCandidateCache=undefined;
   }
 }
 export {COUNTRY_BOUNDS,geometryPath,tileRequests};

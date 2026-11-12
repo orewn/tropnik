@@ -14,7 +14,7 @@ export function satelliteFixture(profile,engine){
   base:{committed:source?'satellite':zoom<5?'overview':'detail',target:source?'satellite':'detail',state:'ready'},
   credit:{visible:!!source,text:source==='eox-bluemarble'?'NASA Blue Marble · EOX · Обзорный снимок · детализация ниже'+(zoom>8?' · Увеличен обзорный снимок':''):source?'EOxCloudless by EOX':''},
   viewport:{...viewport},rect:{...rect},camera:{longitude,latitude:67.5,zoom,tileSize:256},scrollY:0,
-  ...(source?{resolution:source==='eox-bluemarble'?'overview':'detail',successfulRequestIds:source==='eox-bluemarble'?[source,'eox-bluemarble-west']:[source],pendingRequestIds:[],failedRequestIds:[],resourceSequence:9,resourcePhase:'enable-satellite'}:{}),
+  ...(source?{resolution:source==='eox-bluemarble'?'overview':'detail',successfulRequestIds:source==='eox-bluemarble'?[source,'eox-bluemarble-west']:[source],pendingRequestIds:[],failedRequestIds:[],recoveredRequests:[],unrecoveredRequestIds:[],resourceSequence:9,resourcePhase:'enable-satellite'}:{}),
  });
  const native8=initialZoom+Math.ceil((8-initialZoom)/zoomStep)*zoomStep,upwardCount=Math.ceil((8-initialZoom)/zoomStep)+2;
  const steps=[['dateline-overview',180,initialZoom,'eox-bluemarble'],['dateline-native8',180,native8,'eox-bluemarble'],['dateline-overzoom',180,native8+2*zoomStep,'eox-bluemarble'],['west-eox',140,initialZoom,'eox-s2'],['dateline-return',180,initialZoom,'eox-bluemarble'],['detail-restored',180,initialZoom,'']].map(([stage,longitude,zoom,source])=>({stage,...frame(longitude,zoom,source),...(source?{coordinate:[longitude,67.5],centerErrorPx:0,resourcePhase:stage}:{})}));
@@ -32,7 +32,7 @@ export function satelliteFixture(profile,engine){
   {requestId:'eox-s2',source:'eox-s2',url:'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/4/3/14.jpg',tile:{z:4,x:14,y:3},status:200,mimeType:'image/jpeg',finished:true,bytes:10000},
  ]};
  resources.requests.forEach((item,index)=>Object.assign(item,{firstSequence:index*3+1,requestedSequence:index*3+1,responseSequence:index*3+2,finishedSequence:index*3+3,phase:index===2?'west-eox':'enable-satellite',responsePhase:index===2?'west-eox':'enable-satellite'}));
- const result={schemaVersion:4,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
+ const result={schemaVersion:5,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
   setupZooms:initialZoom>4?[{direction:1,click:click(),before:frame(180,4,''),after:frame(180,initialZoom,'')}]:[],
   pans:[pan('dateline-overview',[180,67.5]),pan('west-eox',[140,67.5]),pan('dateline-return',[180,67.5])],zooms,
   toggles:[{label:'Спутник',select:{...click(),selector:'.map-style-switch button[aria-label="Спутник"]'},before:frame(180,initialZoom,''),after:frame(),canvasRetained:true,modeState:mapModeFixture({camera:{longitude:180,latitude:67.5,zoom:initialZoom},mode:'satellite',routeId:''})},{label:'Рельеф',select:{...click(),selector:'.map-style-switch button[aria-label="Рельеф"]'},before:frame(),after:frame(180,initialZoom,''),canvasRetained:true,modeState:mapModeFixture({camera:{longitude:180,latitude:67.5,zoom:initialZoom},routeId:''})}],

@@ -4,6 +4,17 @@ import {MAP_RESOURCE_LIMITS} from './map-config.ts';
 type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown; persistent: boolean; consumers: number; controller?: AbortController};
 type Options = {concurrency?: number; maxBytes?: number; maxResourceBytes?: number; maxQueued?: number; timeoutMs?: number; fetcher?: typeof fetch};
 
+const REMOTE_TILE_GET = /^https:\/\/(?:tiles\.openfreemap\.org\/(?:[^/?#]+\/)+\d+\/\d+\/\d+\.pbf|tiles\.mapterhorn\.com\/\d+\/\d+\/\d+\.webp|tiles\.maps\.eox\.at\/wmts\/1\.0\.0\/(?:s2cloudless_3857|bluemarble_3857)\/default\/g\/\d+\/\d+\/\d+\.jpg)$/;
+function waitForTileRetry(signal: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    signal.throwIfAborted();
+    const cancel = () => {clearTimeout(timer); signal.removeEventListener('abort', cancel); reject(signal.reason);};
+    const timer = setTimeout(() => {signal.removeEventListener('abort', cancel); resolve();}, 150);
+    signal.addEventListener('abort', cancel, {once: true});
+    if (signal.aborted) cancel();
+  });
+}
+
 /** Preserve the actual HTTP status for source-coverage decisions. A failed
  * fetch, timeout or decoder error must never be mistaken for a missing tile. */
 export class MapResourceHTTPError extends Error {
@@ -93,21 +104,36 @@ export class MapResourcePool {
   }
   private async read(url: string, controller: AbortController) {
     const timer = setTimeout(() => controller.abort(), this.options.timeoutMs);
-    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     try {
       // Regional manifests and checked extracts can be updated at the same URL.
       // Revalidate the browser cache on a new pool read; the bounded in-memory
       // pool still shares bytes across views. Otherwise a new release can keep
       // selecting an old coverage manifest or reject a stale material checksum.
       const regional = /(?:^|\/)terrain-regions\//.test(url);
-      const response = await this.options.fetcher(url, {cache: regional ? 'no-cache' : 'force-cache', credentials: url.startsWith('/') ? 'same-origin' : 'omit', signal: controller.signal});
-      if (!response.ok) throw new MapResourceHTTPError(response.status);
-      if (Number(response.headers.get('content-length') || 0) > this.options.maxResourceBytes) throw new Error('Preview resource exceeds the byte budget');
-      reader = response.body?.getReader(); if (!reader) return new ArrayBuffer(0);
-      const chunks: Uint8Array[] = []; let length = 0;
-      while (true) {const {value, done} = await reader.read(); if (done) break; length += value.byteLength; if (length > this.options.maxResourceBytes) throw new Error('Preview resource exceeds the byte budget'); chunks.push(value);}
-      const output = new Uint8Array(length); let offset = 0; for (const chunk of chunks) {output.set(chunk, offset); offset += chunk.length;} return output.buffer;
-    } finally {clearTimeout(timer); controller.abort(); await reader?.cancel().catch(() => {});}
+      for (let attempt = 0; ; attempt++) {
+        controller.signal.throwIfAborted();
+        let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+        let networkFailure = false;
+        const networkRead = <T>(promise: Promise<T>) => promise.catch(error => {networkFailure = error instanceof TypeError; throw error;});
+        try {
+          const response = await networkRead(this.options.fetcher(url, {cache: regional ? 'no-cache' : 'force-cache', credentials: url.startsWith('/') ? 'same-origin' : 'omit', signal: controller.signal}));
+          if (!response.ok) throw new MapResourceHTTPError(response.status);
+          if (Number(response.headers.get('content-length') || 0) > this.options.maxResourceBytes) throw new Error('Preview resource exceeds the byte budget');
+          reader = response.body?.getReader(); if (!reader) return new ArrayBuffer(0);
+          const chunks: Uint8Array[] = []; let length = 0;
+          while (true) {const {value, done} = await networkRead(reader.read()); if (done) break; length += value.byteLength; if (length > this.options.maxResourceBytes) throw new Error('Preview resource exceeds the byte budget'); chunks.push(value);}
+          const output = new Uint8Array(length); let offset = 0; for (const chunk of chunks) {output.set(chunk, offset); offset += chunk.length;} return output.buffer;
+        } catch (error) {
+          // Fetch and its byte stream reject network failures with TypeError.
+          // Retry one public tile GET after releasing any partial response;
+          // HTTP/size errors, cancellation and invalid decoded content keep
+          // their existing failure path. The same slot, leases and deadline
+          // cover both attempts, including the short connection-reset delay.
+          if (attempt || controller.signal.aborted || !networkFailure || !REMOTE_TILE_GET.test(url)) {controller.abort(); throw error;}
+        } finally {await reader?.cancel().catch(() => {}); reader?.releaseLock();}
+        await waitForTileRetry(controller.signal);
+      }
+    } finally {clearTimeout(timer); controller.abort();}
   }
   stats() {return {active: this.active, queued: this.queue.length, cached: this.entries.size, bytes: this.bytes};}
 }
