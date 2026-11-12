@@ -145,22 +145,28 @@ test('tile retry preserves a selected route and camera and remains reachable in 
   assert.ok(env.host.find(node=>node.props['aria-label']==='Повторить загрузку карты'),'Planner failures offer the same recovery action');
 });
 
-test('attribution and imagery diagnostics follow the retained displayed map until the replacement commits',async t=>{
+test('satellite mode styling spans pending and retained imagery while source attribution follows committed ground',async t=>{
   const env=atlasFixture();t.after(()=>env.host.unmount());env.select();await env.host.settle();const map=env.maps[0];
   const apply=value=>{map.state={...map.state,...value};map.options.onState(map.getState());env.host.render();};
   const credit=()=>env.host.find(node=>node.type==='credit').props;
   const atlas=()=>env.host.find(node=>node.props['data-map-renderer']==='tropnik').props;
   apply({mode:'satellite',committedMode:'detail',loading:true,imageryLoading:true,imageryTarget:'eox-bluemarble'});
   assert.equal(credit().satellite,false,'An imagery request does not replace the visible relief attribution');
-  assert.equal(atlas()['data-map-base-state'],'loading');assert.equal(atlas()['data-map-imagery'],undefined);
+  assert.equal(atlas()['data-map-base-state'],'loading');assert.equal(atlas()['data-map-base-committed'],'detail');
+  assert.equal(atlas()['data-map-base-target'],'satellite');assert.equal(atlas()['data-map-imagery'],'satellite','The selected mode marker must already exist while real imagery is pending');
+  assert.equal(atlas()['data-map-imagery-target'],'eox-bluemarble');assert.equal(atlas()['data-map-imagery-state'],'loading');
+  assert.equal(atlas()['data-map-imagery-source'],undefined,'A pending target must not claim a committed imagery source');
   apply({committedMode:'satellite',loading:false,imageryLoading:false,imagerySource:'eox-bluemarble',reliefReady:false});
   assert.equal(credit().satellite,true);assert.equal(credit().satelliteSource,'eox-bluemarble');
   apply({mode:'detail',loading:true,imageryTarget:undefined});
   assert.equal(atlas()['data-map-base-target'],'detail');assert.equal(atlas()['data-map-base-committed'],'satellite');
   assert.equal(atlas()['data-map-base-state'],'loading');assert.equal(atlas()['data-map-imagery-source'],'eox-bluemarble');
+  assert.equal(atlas()['data-map-imagery'],'satellite','Satellite styling stays until retained imagery is replaced');
+  assert.equal(atlas()['data-map-imagery-target'],undefined);assert.equal(atlas()['data-map-imagery-state'],'ready');
   assert.equal(credit().satellite,true);assert.equal(credit().satelliteLoading,false,'Returning to relief is not a new imagery request');
   apply({loading:false,error:'Подробности этого участка не загрузились.'});
   assert.equal(credit().satellite,true,'A failed return keeps the notice for the image still on screen');
+  assert.equal(atlas()['data-map-imagery'],'satellite');assert.equal(atlas()['data-map-imagery-source'],'eox-bluemarble');
   apply({committedMode:'detail',imagerySource:undefined,reliefReady:true,error:''});
   assert.equal(credit().satellite,false);assert.equal(credit().terrain,true);assert.equal(atlas()['data-map-imagery'],undefined);
 });
