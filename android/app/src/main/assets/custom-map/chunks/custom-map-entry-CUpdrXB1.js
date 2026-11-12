@@ -879,7 +879,7 @@ function Le({ west: e, south: t, east: n, north: r }) {
 }
 //#endregion
 //#region web/lib/custom-map-tiles.worker.ts?worker&url
-var Re = "" + new URL("../workers/custom-map-tiles.worker-BOzbsGer.js", import.meta.url).href, ze = 96, Be = 288, Ve = 160, He = 3, Ue = 6, V = 8 * 1024 * 1024, H = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
+var Re = "" + new URL("../workers/custom-map-tiles.worker-DIXTfJlZ.js", import.meta.url).href, ze = 96, Be = 288, Ve = 160, He = 3, Ue = 6, V = 8 * 1024 * 1024, H = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
 function U(e) {
 	let t = e.paintZoom === void 0 ? e.z : e.paintZoom;
 	if (!Number.isInteger(e.z) || e.z < 0 || !Number.isInteger(t) || t < e.z || t > 18) throw Error("Invalid map paint zoom");
@@ -1902,7 +1902,7 @@ function Bt(e) {
 		bounds: n
 	};
 }
-function Z(e) {
+function Vt(e) {
 	let t = Rt.get(e);
 	if (t) return t;
 	let n = {
@@ -1916,7 +1916,7 @@ function Z(e) {
 		};
 		let t = e.type === "Feature" ? e.geometry ? [e.geometry] : [] : e.type === "FeatureCollection" ? e.features : e.geometries;
 		for (let e of t) {
-			let t = Z(e);
+			let t = Vt(e);
 			n.valid &&= t.valid, n.polygons.push(...t.polygons);
 		}
 	} else if (e.type === "Polygon" || e.type === "MultiPolygon") for (let t of e.type === "Polygon" ? [e.coordinates] : e.coordinates) {
@@ -1937,7 +1937,7 @@ function Z(e) {
 	};
 	return Rt.set(e, n), n;
 }
-function Vt(e, t, n, r, i) {
+function Ht(e, t, n, r, i) {
 	let a = 0, o = 1, s = n - e, c = r - t, l = [
 		-s,
 		s,
@@ -1959,13 +1959,13 @@ function Vt(e, t, n, r, i) {
 	}
 	return !0;
 }
-function Ht(e, t) {
+function Ut(e, t) {
 	if (!zt(e.bounds, t)) return !1;
 	let n = e.points;
-	for (let e = 0, r = n.length - 2; e < n.length; r = e, e += 2) if (Vt(n[r], n[r + 1], n[e], n[e + 1], t)) return !0;
+	for (let e = 0, r = n.length - 2; e < n.length; r = e, e += 2) if (Ht(n[r], n[r + 1], n[e], n[e + 1], t)) return !0;
 	return !1;
 }
-function Ut(e, t, n) {
+function Wt(e, t, n) {
 	let r = n.points, i = !1;
 	for (let n = 0, a = r.length - 2; n < r.length; a = n, n += 2) {
 		let o = r[a], s = r[a + 1], c = r[n], l = r[n + 1];
@@ -1973,7 +1973,7 @@ function Ut(e, t, n) {
 	}
 	return i;
 }
-function Wt(e, t, n, r = 0) {
+function Gt(e, t, n, r = 0) {
 	if (!e || typeof e != "object" || !Number.isInteger(t.z) || t.z < 0 || t.z > 18 || !Number.isSafeInteger(t.x) || !Number.isInteger(t.y) || t.y < 0 || t.y >= 2 ** t.z || !Number.isFinite(n) || !Number.isFinite(r) || r < 0 || r > 60) return !0;
 	let i = 2 ** t.z, a = 2 / (256 * 2 ** n * Math.cos(r * Math.PI / 180)), o = {
 		left: t.x / i - a,
@@ -1984,18 +1984,18 @@ function Wt(e, t, n, r = 0) {
 	if (!Number.isFinite(a) || a <= 0) return !0;
 	let s;
 	try {
-		s = Z(e);
+		s = Vt(e);
 	} catch {
 		return !0;
 	}
 	if (!s.valid) return !0;
-	for (let e of s.polygons) if (zt(e.bounds, o) && (e.rings.some((e) => Ht(e, o)) || Ut(o.left, o.top, e.rings[0]) && !e.rings.slice(1).some((e) => Ut(o.left, o.top, e)))) return !0;
+	for (let e of s.polygons) if (zt(e.bounds, o) && (e.rings.some((e) => Ut(e, o)) || Wt(o.left, o.top, e.rings[0]) && !e.rings.slice(1).some((e) => Wt(o.left, o.top, e)))) return !0;
 	return !1;
 }
 //#endregion
 //#region web/lib/custom-map-engine.ts
-var Q = 64;
-function Gt(e) {
+var Z = 64;
+function Q(e) {
 	let t = new Path2D(), n = [
 		Infinity,
 		Infinity,
@@ -2042,7 +2042,7 @@ function $(e, t, n, r, i = !0, a = !1, o = !0) {
 	};
 	for (; s >= 0; s--) {
 		let e = 2 ** s, t = Math.floor(l.x * e), c = Math.floor(u.x * e), d = Math.max(0, Math.floor(u.y * e)), f = Math.min(e - 1, Math.floor(l.y * e));
-		if (y = [], !((c - t + 1) * (f - d + 1) > Q * 4 && s > 0)) {
+		if (y = [], !((c - t + 1) * (f - d + 1) > Z * 4 && s > 0)) {
 			outer: for (let l = d; l <= f; l++) for (let u = t; u <= c; u++) if (b(u, l, e) && (y.push({
 				kind: r,
 				z: s,
@@ -2052,8 +2052,8 @@ function $(e, t, n, r, i = !0, a = !1, o = !0) {
 				transparent: a,
 				...r === "vector" ? { boundaries: o } : {},
 				...r === "vector" || r === "relief" ? { paintZoom: Math.max(s, Math.min(18, Math.floor(n))) } : {}
-			}), y.length > Q && s > 0)) break outer;
-			if (y.length <= Q || s === 0) break;
+			}), y.length > Z && s > 0)) break outer;
+			if (y.length <= Z || s === 0) break;
 		}
 	}
 	let x = 2 ** s;
@@ -2370,7 +2370,7 @@ var Kt = class {
 		this.selectedShapes = [...e], this.updateSelectedArea(), this.schedule();
 	}
 	setRoute(e, t) {
-		let n = e ? Gt(e) : void 0;
+		let n = e ? Q(e) : void 0;
 		if (this.route = n?.bounds.every(Number.isFinite) ? n : void 0, this.routeId = this.route ? t : void 0, this.element.dataset.mapRouteId = this.routeId || "", this.routeEdges.forEach((e) => e.element.remove()), this.routeEdges = [], e) for (let t of Ye(e)) {
 			let e = Xe(t);
 			this.markerLayer.appendChild(e), this.routeEdges.push({
@@ -2433,7 +2433,7 @@ var Kt = class {
 			return n;
 		}
 		let t = this.coveragePaths.get(e);
-		return t || (t = Gt(e).path, this.coveragePaths.set(e, t)), t;
+		return t || (t = Q(e).path, this.coveragePaths.set(e, t)), t;
 	}
 	selectedCoveragePath(e) {
 		let t = e?.features.filter((e) => this.selectedShapes.includes(String(e.properties?.shapeName))) || [];
@@ -2720,7 +2720,7 @@ var Kt = class {
 		});
 	}
 	batchCoversMask(e) {
-		return !e?.missing?.some((e) => Wt(this.coverage?.area, e, this.camera.zoom, this.pitch));
+		return !e?.missing?.some((e) => Gt(this.coverage?.area, e, this.camera.zoom, this.pitch));
 	}
 	displayingSatellite() {
 		return this.state.committedMode === "satellite" && !!this.imagery;
@@ -2743,7 +2743,7 @@ var Kt = class {
 		n.globalAlpha = 1;
 	}
 	detailCoversViewport(e) {
-		if (this.mode !== "detail" || this.pitch !== 0 || (this.camera.bearingDegrees ?? 0) !== 0 || this.camera.zoom < 4.7 || this.camera.zoom > 12 || e?.kind !== "vector" || !e.tiles.length || e.tiles.length > Q) return !1;
+		if (this.mode !== "detail" || this.pitch !== 0 || (this.camera.bearingDegrees ?? 0) !== 0 || this.camera.zoom < 4.7 || this.camera.zoom > 12 || e?.kind !== "vector" || !e.tiles.length || e.tiles.length > Z) return !1;
 		let t = this.pixelRatio, n = this.canvas.width, r = this.canvas.height, i = 256 * 2 ** this.camera.zoom, a = d(this.camera.center), o = e.tiles[0].z;
 		if (![
 			t,
@@ -2763,7 +2763,7 @@ var Kt = class {
 			m,
 			h,
 			g
-		].every(Number.isSafeInteger) || m < p || g < h || h < 0 || g >= s || (m - p + 1) * (g - h + 1) > Q) return !1;
+		].every(Number.isSafeInteger) || m < p || g < h || h < 0 || g >= s || (m - p + 1) * (g - h + 1) > Z) return !1;
 		let _ = /* @__PURE__ */ new Set();
 		for (let t of e.tiles) {
 			if (t.kind !== "vector" || t.transparent !== !1 || t.z !== o || !Number.isSafeInteger(t.x) || !Number.isInteger(t.y) || t.y < 0 || t.y >= s || t.bitmap.width !== 512 || t.bitmap.height !== 512) return !1;
@@ -2797,6 +2797,38 @@ var Kt = class {
 			e.element.style.position = "absolute", e.element.style.left = `${t.x}px`, e.element.style.top = `${t.y}px`;
 		}
 	}
+	prepareLabelCandidates(e) {
+		let t = this.mode !== "overview" && this.camera.zoom >= 5, n = t ? this.displayDetail() : void 0, r = t && !this.displayingSatellite() && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 10 ? this.relief : void 0, i = this.labelCandidateCache;
+		if (i && i.detail === n && i.relief === r && i.additional === this.additionalLabels && i.area === e) return i.candidates;
+		let a = (e, t, n, r) => ({
+			id: e,
+			coordinate: t,
+			label: n,
+			color: r,
+			priority: Tt(n),
+			sourceAnchor: `${n.kind}:${n.symbol || ""}:${n.text}:${t[0].toFixed(6)},${t[1].toFixed(6)}`
+		}), o = this.additionalLabels.map((e) => a(e.id, e.coordinate, {
+			x: 0,
+			y: 0,
+			text: e.label,
+			kind: e.kind ?? "place",
+			rank: e.rank ?? 0
+		}, e.color));
+		for (let e of [n, r]) if (e) for (let t of e.tiles) for (let e of t.labels) {
+			let n = 2 ** t.z;
+			o.push(a(`${t.key}:${e.text}`, f({
+				x: (t.x + e.x) / n,
+				y: (t.y + e.y) / n
+			}), e));
+		}
+		return o.sort((e, t) => e.priority - t.priority || e.label.rank - t.label.rank), this.labelCandidateCache = {
+			detail: n,
+			relief: r,
+			additional: this.additionalLabels,
+			area: e,
+			candidates: o
+		}, o;
+	}
 	drawLabels() {
 		this.labelDiagnostics = [], this.labelDiagnosticTotal = 0;
 		let e = this.labelContext;
@@ -2804,83 +2836,57 @@ var Kt = class {
 			this.labelCanvas.hidden = !0;
 			return;
 		}
-		let t = this.obstacles.map((e) => ({ ...e })), n = /* @__PURE__ */ new Set(), r = /* @__PURE__ */ new Map(), i = this.additionalLabels.map((e) => ({
-			id: e.id,
-			coordinate: e.coordinate,
-			label: {
-				x: 0,
-				y: 0,
-				text: e.label,
-				kind: e.kind ?? "place",
-				rank: e.rank ?? 0
-			},
-			color: e.color
-		})), a = this.displayDetail(), o = this.displayingSatellite(), s = [a];
-		if (!o && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 10 && s.push(this.relief), this.mode !== "overview" && this.camera.zoom >= 5) {
-			for (let e of s) if (e) for (let t of e.tiles) for (let e of t.labels) {
-				let n = 2 ** t.z;
-				i.push({
-					id: `${t.key}:${e.text}`,
-					coordinate: f({
-						x: (t.x + e.x) / n,
-						y: (t.y + e.y) / n
-					}),
-					label: e
-				});
-			}
-		}
-		i.sort((e, t) => Tt(e.label) - Tt(t.label) || e.label.rank - t.label.rank), this.labelDiagnosticTotal = i.length;
-		let c = 0, l = Et(this.size.width, this.size.height);
-		for (let { id: a, coordinate: o, label: s, color: u } of i) {
-			let i = {
-				id: a,
-				label: s.text,
-				coordinate: o,
+		let t = this.obstacles.map((e) => ({ ...e })), n = /* @__PURE__ */ new Set(), r = /* @__PURE__ */ new Map(), i = this.prepareLabelCandidates(this.coverage.area);
+		this.labelDiagnosticTotal = i.length;
+		let a = 0, o = Et(this.size.width, this.size.height);
+		for (let s of i) {
+			let { id: i, coordinate: c, label: l, color: u, sourceAnchor: d } = s, f = {
+				id: i,
+				label: l.text,
+				coordinate: c,
 				visible: !1,
 				reason: "budget"
 			};
-			this.labelDiagnostics.length < 6400 && this.labelDiagnostics.push(i);
-			let d = `${s.kind}:${s.symbol || ""}:${s.text}:${o[0].toFixed(6)},${o[1].toFixed(6)}`;
-			if (c >= l) continue;
+			if (this.labelDiagnostics.length < 6400 && this.labelDiagnostics.push(f), a >= o) continue;
 			if (n.has(d)) {
-				i.reason = "duplicate";
+				f.reason = "duplicate";
 				continue;
 			}
-			if (!N(o[0], o[1], this.coverage.area)) {
-				i.reason = "outside-coverage";
+			if (!(s.insideCoverage ??= N(c[0], c[1], this.coverage.area))) {
+				f.reason = "outside-coverage";
 				continue;
 			}
-			let f = this.project(o), p = wt(s, this.camera.zoom, u);
-			if (f.x < 24 || f.x > this.size.width - 24 || f.y < 32 || f.y > this.size.height - 20) {
-				i.reason = "outside-viewport";
+			let p = this.project(c), m = wt(l, this.camera.zoom, u);
+			if (p.x < 24 || p.x > this.size.width - 24 || p.y < 32 || p.y > this.size.height - 20) {
+				f.reason = "outside-viewport";
 				continue;
 			}
-			let m = s.kind === "peak" && s.elevation !== void 0 ? `${s.text ? s.text + " · " : ""}${Math.round(s.elevation)} м` : s.text;
-			e.font = `${p.weight} ${p.fontSize}px Manrope, sans-serif`;
-			let h = e.measureText(m).width, g = kt(s, f, h, !!m, p), { rect: _ } = g;
-			if (i.x = f.x, i.y = f.y, i.width = h, i.rect = _, _.left < 12 || _.right > this.size.width - 12 || _.top < 12 || _.bottom > this.size.height - 12) {
-				i.reason = "outside-viewport";
+			let h = s.value ??= l.kind === "peak" && l.elevation !== void 0 ? `${l.text ? l.text + " · " : ""}${Math.round(l.elevation)} м` : l.text;
+			e.font = `${m.weight} ${m.fontSize}px Manrope, sans-serif`;
+			let g = e.measureText(h).width, _ = kt(l, p, g, !!h, m), { rect: v } = _;
+			if (f.x = p.x, f.y = p.y, f.width = g, f.rect = v, v.left < 12 || v.right > this.size.width - 12 || v.top < 12 || v.bottom > this.size.height - 12) {
+				f.reason = "outside-viewport";
 				continue;
 			}
-			let v = Dt(s), y = Ot(s);
-			if (m && v && (r.get(y) || []).some((e) => Math.hypot(f.x - e.x, f.y - e.y) < v)) {
-				i.reason = "repeated-name";
+			let y = s.repeatDistance ??= Dt(l), b = s.repeatKey ??= Ot(l);
+			if (h && y && (r.get(b) || []).some((e) => Math.hypot(p.x - e.x, p.y - e.y) < y)) {
+				f.reason = "repeated-name";
 				continue;
 			}
-			if (t.some((e) => _.left < e.right && _.right > e.left && _.top < e.bottom && _.bottom > e.top)) {
-				i.reason = "collision";
+			if (t.some((e) => v.left < e.right && v.right > e.left && v.top < e.bottom && v.bottom > e.top)) {
+				f.reason = "collision";
 				continue;
 			}
-			if (t.push(_), n.add(d), m && v) {
-				let e = r.get(y) || [];
-				e.push(f), r.set(y, e);
+			if (t.push(v), n.add(d), h && y) {
+				let e = r.get(b) || [];
+				e.push(p), r.set(b, e);
 			}
-			s.symbol && St(e, s.symbol, f.x, f.y), At(e, m, f, g, p), c++, i.visible = !0, i.reason = "drawn";
+			l.symbol && St(e, l.symbol, p.x, p.y), At(e, h, p, _, m), a++, f.visible = !0, f.reason = "drawn";
 		}
-		this.labelCanvas.hidden = c === 0;
+		this.labelCanvas.hidden = a === 0;
 	}
 	destroy() {
-		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0);
+		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.labelCandidateCache = void 0);
 	}
 }, qt = Object.freeze({
 	version: 1,

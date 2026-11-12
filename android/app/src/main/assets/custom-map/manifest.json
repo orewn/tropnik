@@ -104,8 +104,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 52940,
-      "sha256": "71b88b16415ea864c216d61ba16b8be8e9983d6b9c93c23834c40b6d44a9ced6"
+      "sizeBytes": 54361,
+      "sha256": "47627d06401dbbc6d638fea4e05e7ea0da56108925e49ee44d3ca40ffd7bf839"
     },
     {
       "path": "web/lib/custom-map-label-inspection.ts",
@@ -139,8 +139,8 @@
     },
     {
       "path": "web/lib/custom-map-tiles.worker.ts",
-      "sizeBytes": 15576,
-      "sha256": "f5d5a7eb41f1d504f66aff3e35e1114d8454c89b678b1ec930779ec18668d804"
+      "sizeBytes": 15542,
+      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217"
     },
     {
       "path": "web/lib/custom-map-vector.ts",
@@ -258,17 +258,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "b4d636215b84d0006ed11a8b08898647a4cdf35b4d45de473197e9245ae36b78",
+  "sourceInputsSha256": "a57cf0a0f166c05000b16699a35ab4443b8460681a0e139293e7032b6a6f223e",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "78047ae342f765943383daa17f66be7f1cfdc8a36e4eeb20feb83ed83528bedd"
+      "sha256": "5624a6c869a3249f5cc7ef34b85ce7c18d55ac8308bc4dc8ed3ba17e31328ce8"
     },
     {
-      "path": "chunks/custom-map-entry-D9bEYNVr.js",
-      "sizeBytes": 107198,
-      "sha256": "2659e206e9ed290e5f052a5079a934eeb20cd67ce9f32164aaf2204b7becf935"
+      "path": "chunks/custom-map-entry-CUpdrXB1.js",
+      "sizeBytes": 107721,
+      "sha256": "fe1e00653f59239e40388decfa63c01c9b52c20d14659e09495c98ba9d0caa64"
     },
     {
       "path": "index.html",
@@ -283,7 +283,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "6e4fa9d2ce810dfba2e9817dd83b2acd398de5cc462b4e1e874715ed64ab20a4"
+      "sha256": "b20137b3db186abab1b44e81a0869051f95c4869d2f52144ff913bff6d7a311d"
     },
     {
       "path": "map.css",
@@ -296,9 +296,9 @@
       "sha256": "54075549afdea2aee6d10c3cf70d53429b0ba457eda890a8ad93c1124c508c10"
     },
     {
-      "path": "workers/custom-map-tiles.worker-BOzbsGer.js",
-      "sizeBytes": 28787,
-      "sha256": "c0995a8f541b049796dccb48bc20b54135e6d218a24fa7aeefb2ba8a2c8f0636"
+      "path": "workers/custom-map-tiles.worker-DIXTfJlZ.js",
+      "sizeBytes": 28755,
+      "sha256": "f76ea8a31e046b700ab47418f303cffec504490e700b78f2dfc68866c4a71b2e"
     },
     {
       "path": "workers/terrain-preparation.worker-Bb-s7l3H.js",

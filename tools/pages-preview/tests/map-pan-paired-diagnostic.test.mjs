@@ -4,36 +4,36 @@ import {readFile,writeFile,mkdir,mkdtemp,rm} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {BASELINE_COMMIT,PAIRED_ORDER,WORKER_PATH,assertAlphaOnlySource,assertChangedPaths,assertUntracedReport,assertPairedReports,assertPixelParity,capture,summarize} from '../map-pan-paired-diagnostic.mjs';
+import {BASELINE_COMMIT,PAIRED_ORDER,ENGINE_PATH,ORACLE_PATH,ORACLE_SHA256,assertLabelMemoOnlySource,assertChangedPaths,assertUntracedReport,assertPairedReports,assertUnderlayReceipt,UNDERLAY_COVERS,capture,summarize} from '../map-pan-paired-diagnostic.mjs';
 import {smoothnessFixture} from './smoothness-fixture.mjs';
 import {browserEnvironmentFixture} from './browser-environment-fixture.mjs';
-import {OPAQUE_VECTOR_CASES} from './fixtures/map-vector-opaque.mjs';
 
-const candidateCommit='c'.repeat(40),options={candidateCommit,baselineWorkerSHA256:'a'.repeat(64),candidateWorkerSHA256:'b'.repeat(64),builds:{baseline:{buildInfoSHA256:'a'.repeat(64)},candidate:{buildInfoSHA256:'b'.repeat(64)}}};
+const candidateCommit='c'.repeat(40),options={candidateCommit,candidateEngineSHA256:'b'.repeat(64),builds:{baseline:{buildInfoSHA256:'a'.repeat(64)},candidate:{buildInfoSHA256:'b'.repeat(64)}}};
 function report(commit,pid){
  const environment=browserEnvironmentFixture(commit);environment.commandLine=environment.commandLine.replace('/tmp/fixture','/tmp/tropnik-chrome-'+pid);
  return{schemaVersion:1,sourceCommit:commit,environment,diagnostic:'ui-smoothness',diagnosticOnly:true,verified:false,releaseEligible:false,status:'completed',performanceIssues:[],performancePassed:true,
   profiles:['android-portrait','desktop-webgl'].map(name=>smoothnessFixture(name,'tropnik-canvas'))};
 }
 function pair(){return PAIRED_ORDER.map((label,index)=>({label,variant:index%2?'candidate':'baseline',outcome:'success',validationErrors:[],buildInfoSHA256:(index%2?'b':'a').repeat(64),report:report(index%2?candidateCommit:BASELINE_COMMIT,100+index)}));}
-function parity(){
- const equal=totalPixels=>({differentPixels:0,maxChannelDelta:0,totalPixels,baselinePixelSHA256:'d'.repeat(64),candidatePixelSHA256:'d'.repeat(64)});
- return{schemaVersion:1,evidence:'production-worker-transfer-and-engine-pixel-parity',sourceCommit:candidateCommit,verified:true,parityPassed:true,diagnosticOnly:true,releaseEligible:false,phase:'complete',workerSHA256:options.candidateWorkerSHA256,
-  baseline:{sourceSHA256:options.baselineWorkerSHA256,kind:'same-production-worker-only-output-alpha-true',replacements:1,candidateExpression:"alpha:job.kind!=='vector'||!!job.transparent",referenceExpression:'alpha:true'},expectedCases:32,expectedCompositeFrames:128,
-  runs:[1,2].flatMap(dpr=>[false,true].map(softwareRaster=>({dpr,softwareRaster,verified:true,
-   negativeControls:[...['relief','raster','satellite-overlay'].map(name=>({name,outputContext:{actual:{alpha:true}},comparison:equal(512*512),forceOpaque:{differentPixels:12}})),{name:'composite-witnesses',reliefDifference:{differentPixels:10},maskDifference:{differentPixels:20}}],
-   cases:OPAQUE_VECTOR_CASES.map(({name})=>({name,verified:true,outputDimensions:[512,512],contexts:{baseline:{actual:{alpha:true}},candidate:{actual:{alpha:false}}},raw:equal(512*512),frames:['altai','fractional-pan','rotated-pan','enlarged'].map(name=>({name,comparison:equal(512*384*dpr*dpr)}))}))})))
+function underlay(){
+ return{schemaVersion:1,evidence:'production-canvas-underlay-pixel-parity',baseline:'same-production-draw-with-fixture-only-coverage-false',sourceCommit:candidateCommit,verified:true,phase:'complete',rendererSHA256:options.candidateEngineSHA256,sources:{[ENGINE_PATH]:options.candidateEngineSHA256},environment:browserEnvironmentFixture(candidateCommit),
+  cases:[1,2].flatMap(dpr=>Object.entries(UNDERLAY_COVERS).map(([name,covers])=>({name,dpr,verified:true,contextAttributes:{alpha:false,willReadFrequently:false},policy:{softwareRaster:false},bitmapDimensions:[512,512],tileDeviceSpan:name==='tiny-tile'?.5:128,
+   priorFrame:{kind:'distinct-opaque-checkerboards',comparison:{differentPixels:512*384*dpr*dpr,totalPixels:512*384*dpr*dpr,maxChannelDelta:255},baselinePixelSHA256:'a'.repeat(64),optimizedPixelSHA256:'b'.repeat(64)},
+   negativeControls:(name==='opaque'?['remove-route','remove-selectedBoundary','remove-mask']:['missing','transparent'].includes(name)?['force-unsafe-cover']:[]).map(name=>({name,differentPixels:100})),
+   frames:covers.map((cover,index)=>{const baseline={area:1,overview:4,clear:1,mask:1,selectedArea:1,detail:9,relief:9,imagery:0,proofCalls:1};return{width:512*dpr,height:384*dpr,actualCoverage:cover,expectedCoverage:cover,comparison:{differentPixels:0,maxChannelDelta:0,totalPixels:512*384*dpr*dpr},baselinePixelSHA256:'d'.repeat(64),optimizedPixelSHA256:'d'.repeat(64),operations:{baseline,optimized:{...baseline,area:cover?0:1,overview:cover?0:4,clear:cover?0:1}},captures:['baseline','optimized'].map(phase=>({phase,file:`dpr${dpr}-${name}-${index}-${phase}.png`}))};})
+  })))
  };
 }
 
-test('the alpha experiment rejects any additional production edit or a second replacement',async()=>{
- const candidate=await readFile(new URL('../../../web/lib/custom-map-tiles.worker.ts',import.meta.url),'utf8');
- const baseline=candidate.replace("alpha:job.kind!=='vector'||!!job.transparent,willReadFrequently:!!job.softwareRaster",'alpha:true,willReadFrequently:!!job.softwareRaster');
- assertAlphaOnlySource(baseline,candidate);
- assert.throws(()=>assertAlphaOnlySource(baseline,candidate+'\n'));
- assert.throws(()=>assertAlphaOnlySource(baseline,candidate.replace("job.kind!=='vector'||!!job.transparent",'false')));
- assertChangedPaths([WORKER_PATH,'web/public/custom-map/workers/custom-map-tiles.worker-new.js']);
- for(const path of ['web/lib/map-resource-pool.ts','tools/pages-preview/browser-satellite-audit.mjs','tools/pages-preview/browser-smoothness.mjs','web/app/globals.css'])assert.throws(()=>assertChangedPaths([WORKER_PATH,path]),/Unexpected experiment change/);
+test('the memo experiment pins the old method and rejects changes to raster, camera, input or other production files',async()=>{
+ const oracle=await readFile(new URL('../../../'+ORACLE_PATH,import.meta.url),'utf8');
+ const baseline="type TileBatch={};\nclass CustomMapEngine {\n  private additionalLabels=[];\n  private draw(){this.paint();}\n"+oracle+"  destroy(){this.labelDiagnostics=[];this.labelDiagnosticTotal=0;}\n}\n";
+ const candidate=baseline.replace('type TileBatch={};','type TileBatch={};\ntype LabelCandidate={};').replace('  private additionalLabels=[];','  private additionalLabels=[];\n  private labelCandidateCache?:unknown;\n  private prepareLabelCandidates(){return [];}').replace(oracle,oracle.replace('this.labelDiagnostics=[];','this.labelDiagnostics=[];this.prepareLabelCandidates();')).replace('this.labelDiagnosticTotal=0;}','this.labelDiagnosticTotal=0;this.labelCandidateCache=undefined;}');
+ assertLabelMemoOnlySource(baseline,candidate,oracle);
+ for(const changed of [candidate.replace('this.paint();',''),candidate.replace('private draw(){','private draw(changed:boolean){'),candidate+'\nconst sideEffect=mutate();',candidate.replace('labelCandidateCache?:unknown','labelCandidateCache=mutate()'),candidate.replace('this.labelCandidateCache=undefined;','')])assert.throws(()=>assertLabelMemoOnlySource(baseline,changed,oracle));
+ assert.throws(()=>assertLabelMemoOnlySource(baseline,candidate,oracle+'\n'));
+ assertChangedPaths([ENGINE_PATH,ORACLE_PATH,'web/public/custom-map/chunks/custom-map-entry-new.js']);
+ for(const path of ['web/lib/custom-map-tiles.worker.ts','web/lib/custom-map-tiles.ts','web/lib/map-resource-pool.ts','tools/pages-preview/browser-satellite-audit.mjs','tools/pages-preview/browser-smoothness.mjs','web/app/globals.css'])assert.throws(()=>assertChangedPaths([ENGINE_PATH,path]),/Unexpected experiment change/);
 });
 
 test('all four normal-speed untraced audits must retain their source, order, build and fresh browser profiles',()=>{
@@ -54,13 +54,13 @@ test('diagnostic receipts cannot masquerade as releases or rewrite native input,
  }
 });
 
-test('the pixel gate binds the real old worker and requires all 32 raw transfers, 128 composites and transparency negative controls',()=>{
- assertPixelParity(parity(),options);
- for(const mutate of [r=>r.baseline.sourceSHA256='e'.repeat(64),r=>r.workerSHA256='e'.repeat(64),r=>r.runs.pop(),r=>r.runs[0].cases[0]=r.runs[0].cases[1],
-  r=>r.runs[0].cases[0].raw.differentPixels=1,r=>r.runs[3].cases[7].frames[3].comparison.maxChannelDelta=1,r=>r.runs[0].cases[0].frames[1].name='altai',
-  r=>r.runs[1].cases[0].contexts.candidate.actual.alpha=true,r=>r.runs[0].negativeControls[1].forceOpaque.differentPixels=0,r=>r.runs[0].negativeControls[3].maskDifference.differentPixels=0,
-  r=>r.releaseEligible=true,r=>r.parityPassed=false]){
-  const bad=parity();mutate(bad);assert.throws(()=>assertPixelParity(bad,options));
+test('the unchanged underlay proof requires its exact engine, all 30 cases and 46 frames, real witnesses and zero pixel differences',()=>{
+ assertUnderlayReceipt(underlay(),options);
+ for(const mutate of [r=>r.rendererSHA256='e'.repeat(64),r=>r.sourceCommit=BASELINE_COMMIT,r=>r.cases.pop(),r=>r.cases[0]=r.cases[1],
+  r=>r.cases[0].frames[0].comparison.differentPixels=1,r=>r.cases[2].frames.pop(),r=>r.cases[0].priorFrame.comparison.differentPixels=0,
+  r=>r.cases[0].frames[0].operations.optimized.relief=0,r=>r.cases[0].negativeControls[2].differentPixels=0,r=>r.cases[0].frames[0].captures.pop(),
+  r=>r.environment.commandLine+=' --disable-gpu',r=>r.verified=false]){
+  const bad=underlay();mutate(bad);assert.throws(()=>assertUnderlayReceipt(bad,options));
  }
 });
 
@@ -83,10 +83,12 @@ test('capture and summary retain all scheduled outcomes when reset, report or po
 test('summary binds saved report bytes and each variant build to the preflight receipt',async t=>{
  const root=await mkdtemp(join(tmpdir(),'tropnik-paired-digests-'));t.after(()=>rm(root,{recursive:true,force:true}));
  const builds={baseline:JSON.stringify({sourceCommit:BASELINE_COMMIT}),candidate:JSON.stringify({sourceCommit:candidateCommit})};
- const provenance={...options,builds:Object.fromEntries(Object.entries(builds).map(([variant,bytes])=>[variant,{buildInfoSHA256:digest(bytes)}]))};
+ const oracle=await readFile(new URL('../../../'+ORACLE_PATH,import.meta.url),'utf8'),semanticTest='// Exact test source captured by preflight.\n';
+ const provenance={...options,semanticProof:{outcome:'success',oraclePath:ORACLE_PATH,oracleSHA256:ORACLE_SHA256,baselineMethodSHA256:ORACLE_SHA256,testPath:'web/tests/custom-map-engine.test.mjs',testSHA256:digest(semanticTest)},builds:Object.fromEntries(Object.entries(builds).map(([variant,bytes])=>[variant,{buildInfoSHA256:digest(bytes)}]))};
  await save(join(root,'provenance.json'),provenance);
- const pixel=JSON.stringify(parity());await mkdir(join(root,'parity'));await writeFile(join(root,'parity/browser-vector-alpha-verification.json'),pixel);
- await save(join(root,'parity-gate.json'),{parityPassed:true,receiptSHA256:digest(pixel)});
+ await mkdir(join(root,'semantics'));await writeFile(join(root,'semantics/drawLabels-baseline.txt'),oracle);await writeFile(join(root,'semantics/custom-map-engine.test.mjs'),semanticTest);
+ const pixel=JSON.stringify(underlay());await mkdir(join(root,'underlay'));await writeFile(join(root,'underlay/browser-map-underlay-verification.json'),pixel);
+ await save(join(root,'underlay-gate.json'),{underlayPassed:true,receiptSHA256:digest(pixel)});
  for(const run of pair()){
   const bytes=JSON.stringify(run.report);await mkdir(join(root,run.label,'dist'),{recursive:true});
   await writeFile(join(root,run.label,'dist/browser-ui-smoothness-diagnostic.json'),bytes);await writeFile(join(root,run.label,'dist/build-info.json'),builds[run.variant]);
@@ -94,6 +96,9 @@ test('summary binds saved report bytes and each variant build to the preflight r
   await save(join(root,run.label,'run-receipt.json'),{...receipt,reportSHA256:digest(bytes),buildInfoSHA256:provenance.builds[run.variant].buildInfoSHA256});
  }
  assert.equal((await summarize(root,'success','success','success','success')).status,'completed');
+ await writeFile(join(root,'semantics/custom-map-engine.test.mjs'),semanticTest+'\n');
+ await assert.rejects(summarize(root,'success','success','success','success'),/saved semantic tests/);
+ await writeFile(join(root,'semantics/custom-map-engine.test.mjs'),semanticTest);
  const path=join(root,'A2/dist/browser-ui-smoothness-diagnostic.json');await writeFile(path,(await readFile(path,'utf8'))+'\n');
  await assert.rejects(summarize(root,'success','success','success','success'));
  const result=JSON.parse(await readFile(join(root,'paired-report.json'),'utf8'));assert.equal(result.status,'incomplete');

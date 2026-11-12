@@ -169,7 +169,7 @@ self.onmessage=async({data:job}:MessageEvent<TileJob>)=>{
     // intended on-screen ink width. Keep the fixed 512px output allocation.
     const paintScale=2**(job.z-paintZoom);
     validateHalo(job);
-    const canvas=new OffscreenCanvas(TILE_SIZE,TILE_SIZE),context=canvas.getContext('2d',{alpha:job.kind!=='vector'||!!job.transparent,willReadFrequently:!!job.softwareRaster});
+    const canvas=new OffscreenCanvas(TILE_SIZE,TILE_SIZE),context=canvas.getContext('2d',{alpha:true,willReadFrequently:!!job.softwareRaster});
     if(!context)throw new Error('Tile painter unavailable');
     let labels:ReturnType<typeof paintVectorTile>=[],contours=0,reliefCoverage:ReliefCoverage|undefined;
     if(job.kind==='raster'){

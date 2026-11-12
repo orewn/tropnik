@@ -1,4 +1,4 @@
-name: Paired opaque vector Canvas diagnosis
+name: Paired static label memo diagnosis
 
 on:
   push:
@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   inspect:
-    name: Compare exact baseline and alpha-only candidate
+    name: Compare exact baseline and engine-only label memo
     if: github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/diagnostics/map-pan-0.4.29'
     runs-on: ubuntu-24.04
     timeout-minutes: 38
@@ -41,18 +41,20 @@ jobs:
           cmp baseline/web/pnpm-lock.yaml candidate/web/pnpm-lock.yaml
           pnpm --dir baseline/web install --frozen-lockfile
           pnpm --dir candidate/web install --frozen-lockfile
-      - name: Check native input, diagnostic provenance and worker boundaries
+      - name: Check immutable label oracle, dynamic decisions and native input
+        id: semantics
         working-directory: candidate
         run: |
-          node --test tools/pages-preview/tests/browser-smoothness.test.mjs tools/pages-preview/tests/browser-trace.test.mjs tools/pages-preview/tests/source-end-pan.test.mjs tools/pages-preview/tests/map-pan-paired-diagnostic.test.mjs
-          node --experimental-strip-types --test web/tests/custom-map-tiles-worker.test.mjs web/tests/custom-map-vector.test.mjs
+          mkdir -p ../map-pan-evidence/semantics
+          node --test tools/pages-preview/tests/browser-smoothness.test.mjs tools/pages-preview/tests/browser-trace.test.mjs tools/pages-preview/tests/source-end-pan.test.mjs tools/pages-preview/tests/map-pan-paired-diagnostic.test.mjs tools/pages-preview/tests/label-audit.test.mjs
+          node --experimental-strip-types --test web/tests/custom-map-engine.test.mjs web/tests/custom-map-label-inspection.test.mjs > ../map-pan-evidence/semantics/engine-tests.log 2>&1 || { cat ../map-pan-evidence/semantics/engine-tests.log; exit 1; }
           node tools/android-build/prepare-custom-map.mjs --check
       - name: Build the immutable baseline
         working-directory: baseline
         run: |
           node tools/pages-preview/fetch-apk.mjs
           GITHUB_SHA=14d6d6753994af458209b19a09e32bc317b3b2fc node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
-      - name: Build the alpha-only candidate
+      - name: Build the engine-only memo candidate
         working-directory: candidate
         env:
           GITHUB_SHA: ${{ github.sha }}
@@ -63,20 +65,21 @@ jobs:
         id: inputs
         env:
           GITHUB_SHA: ${{ github.sha }}
+          MAP_PAN_SEMANTICS_OUTCOME: ${{ steps.semantics.outcome }}
         run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs prepare baseline candidate map-pan-evidence
-      - name: Require exact real-worker pixel parity before timing
-        id: parity
+      - name: Require the complete existing underlay pixel proof before timing
+        id: underlay
         working-directory: candidate
         timeout-minutes: 8
         env:
           GITHUB_SHA: ${{ github.sha }}
         run: |
-          node --test tools/pages-preview/tests/browser-map-vector-opaque.browser.mjs
-          node tools/pages-preview/map-pan-paired-diagnostic.mjs parity . ../map-pan-evidence
+          node --test tools/pages-preview/tests/browser-map-underlay.browser.mjs
+          node tools/pages-preview/map-pan-paired-diagnostic.mjs underlay . ../map-pan-evidence
 
       - name: A1 baseline with a fresh browser profile
         id: a1
-        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.underlay.outcome == 'success'
         continue-on-error: true
         working-directory: baseline
         timeout-minutes: 6
@@ -87,12 +90,12 @@ jobs:
           node ../candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs reset . ../map-pan-evidence/A1 A1 baseline 14d6d6753994af458209b19a09e32bc317b3b2fc
           GITHUB_SHA=14d6d6753994af458209b19a09e32bc317b3b2fc node tools/pages-preview/browser-smoke.mjs > ../map-pan-evidence/A1/browser-stdout.log 2> ../map-pan-evidence/A1/browser-stderr.log
       - name: Preserve A1 outcome and complete raw evidence
-        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.underlay.outcome == 'success'
         run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs capture baseline map-pan-evidence/A1 '${{ steps.a1.outcome }}'
 
       - name: B1 candidate with a fresh browser profile
         id: b1
-        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.underlay.outcome == 'success'
         continue-on-error: true
         working-directory: candidate
         timeout-minutes: 6
@@ -104,12 +107,12 @@ jobs:
           node tools/pages-preview/map-pan-paired-diagnostic.mjs reset . ../map-pan-evidence/B1 B1 candidate '${{ github.sha }}'
           node tools/pages-preview/browser-smoke.mjs > ../map-pan-evidence/B1/browser-stdout.log 2> ../map-pan-evidence/B1/browser-stderr.log
       - name: Preserve B1 outcome and complete raw evidence
-        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.underlay.outcome == 'success'
         run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs capture candidate map-pan-evidence/B1 '${{ steps.b1.outcome }}'
 
       - name: A2 baseline with a fresh browser profile
         id: a2
-        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.underlay.outcome == 'success'
         continue-on-error: true
         working-directory: baseline
         timeout-minutes: 6
@@ -120,12 +123,12 @@ jobs:
           node ../candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs reset . ../map-pan-evidence/A2 A2 baseline 14d6d6753994af458209b19a09e32bc317b3b2fc
           GITHUB_SHA=14d6d6753994af458209b19a09e32bc317b3b2fc node tools/pages-preview/browser-smoke.mjs > ../map-pan-evidence/A2/browser-stdout.log 2> ../map-pan-evidence/A2/browser-stderr.log
       - name: Preserve A2 outcome and complete raw evidence
-        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.underlay.outcome == 'success'
         run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs capture baseline map-pan-evidence/A2 '${{ steps.a2.outcome }}'
 
       - name: B2 candidate with a fresh browser profile
         id: b2
-        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.underlay.outcome == 'success'
         continue-on-error: true
         working-directory: candidate
         timeout-minutes: 6
@@ -137,7 +140,7 @@ jobs:
           node tools/pages-preview/map-pan-paired-diagnostic.mjs reset . ../map-pan-evidence/B2 B2 candidate '${{ github.sha }}'
           node tools/pages-preview/browser-smoke.mjs > ../map-pan-evidence/B2/browser-stdout.log 2> ../map-pan-evidence/B2/browser-stderr.log
       - name: Preserve B2 outcome and complete raw evidence
-        if: always() && steps.inputs.outcome == 'success' && steps.parity.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.underlay.outcome == 'success'
         run: node candidate/tools/pages-preview/map-pan-paired-diagnostic.mjs capture candidate map-pan-evidence/B2 '${{ steps.b2.outcome }}'
 
       - name: Validate all four scheduled outcomes without release eligibility
@@ -146,8 +149,9 @@ jobs:
       - name: Retain scheduled outcomes even when preparation fails
         if: always()
         env:
+          MAP_PAN_SEMANTICS_OUTCOME: ${{ steps.semantics.outcome }}
           MAP_PAN_INPUTS_OUTCOME: ${{ steps.inputs.outcome }}
-          MAP_PAN_PARITY_OUTCOME: ${{ steps.parity.outcome }}
+          MAP_PAN_UNDERLAY_OUTCOME: ${{ steps.underlay.outcome }}
           MAP_PAN_A1_OUTCOME: ${{ steps.a1.outcome }}
           MAP_PAN_B1_OUTCOME: ${{ steps.b1.outcome }}
           MAP_PAN_A2_OUTCOME: ${{ steps.a2.outcome }}
@@ -158,7 +162,7 @@ jobs:
           const env=process.env,order=['A1','B1','A2','B2'];
           const receipt={schemaVersion:1,diagnosticOnly:true,verified:false,releaseEligible:false,
             sourceCommit:env.GITHUB_SHA,baselineCommit:'14d6d6753994af458209b19a09e32bc317b3b2fc',
-            inputsOutcome:env.MAP_PAN_INPUTS_OUTCOME,parityOutcome:env.MAP_PAN_PARITY_OUTCOME,
+            semanticsOutcome:env.MAP_PAN_SEMANTICS_OUTCOME,inputsOutcome:env.MAP_PAN_INPUTS_OUTCOME,underlayOutcome:env.MAP_PAN_UNDERLAY_OUTCOME,
             runs:order.map(label=>({label,variant:label[0]==='A'?'baseline':'candidate',outcome:env['MAP_PAN_'+label+'_OUTCOME']}))};
           await mkdir('map-pan-evidence',{recursive:true});
           await writeFile('map-pan-evidence/workflow-outcomes.json',JSON.stringify(receipt,null,2)+'\n');
@@ -167,12 +171,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: tropnik-map-pan-alpha-paired-${{ github.run_id }}-${{ github.run_attempt }}
+          name: tropnik-map-pan-label-memo-paired-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             map-pan-evidence
             baseline/web/pages-preview/dist/build-info.json
             candidate/web/pages-preview/dist/build-info.json
-            candidate/web/pages-preview/dist/browser-vector-alpha-verification.json
-            candidate/web/pages-preview/design-qa/vector-alpha
+            candidate/web/pages-preview/dist/browser-map-underlay-verification.json
+            candidate/web/pages-preview/design-qa/map-underlay
           if-no-files-found: error
           retention-days: 7

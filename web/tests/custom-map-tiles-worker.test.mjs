@@ -6,7 +6,6 @@ import {gzipSync} from 'node:zlib';
 import ts from 'typescript';
 import * as painter from '../lib/custom-map-painter.ts';
 import {decodeVectorTile} from '../lib/custom-map-vector.ts';
-import {OPAQUE_VECTOR_CASES,opaqueVectorFixtureBytes,opaqueReliefFixturePixels} from '../../tools/pages-preview/tests/fixtures/map-vector-opaque.mjs';
 
 // Execute the actual worker protocol with controlled image/Canvas APIs. Numeric
 // painting is real; recorded commands do not claim to measure GPU output.
@@ -92,8 +91,6 @@ test('zero-layer MVT uses the real decoder and paints an empty satellite overlay
     }
     assert.equal(overlay.bitmap.context.rects.length,0,'The empty satellite overlay paints no opaque pixels');
     assert.deepEqual(detail.bitmap.context.rects,[{args:[0,0,512,512],color:painter.CARTOGRAPHY.land}],'Ordinary detail retains its established paper colour');
-    assert.equal(overlay.bitmap.context.canvas.contextRequests[0].attributes.alpha,true,'Empty satellite overlays retain transparency');
-    assert.equal(detail.bitmap.context.canvas.contextRequests[0].attributes.alpha,false,'The ordinary paper tile is opaque before it crosses the worker boundary');
     assert.deepEqual(env.counts(),{vectorDecodes:1,imageDecodes:0},'A valid empty parent is reused without fabricated objects or image decoding');
   }
 });
@@ -122,7 +119,7 @@ test('software raster targets preserve fixed child pixels, source shading and pa
     const raster=await env.send(job(5,{softwareRaster,kind:'raster',mime:'image/jpeg'}));
     for(const result of [first,second,relief,adjacent,raster]){
       assert.equal(result.error,undefined);assert.equal(result.bitmap.width,512);assert.equal(result.bitmap.height,512);
-      assert.deepEqual(result.bitmap.context.canvas.contextRequests[0].attributes,{alpha:result!==first&&result!==second,willReadFrequently:softwareRaster===true});
+      assert.deepEqual(result.bitmap.context.canvas.contextRequests[0].attributes,{alpha:true,willReadFrequently:softwareRaster===true});
     }
     assert.deepEqual(env.counts(),{vectorDecodes:1,imageDecodes:2},'Adjacent vector and DEM children must keep their shared decoded parents');
     assert.equal(env.shadeSources.length,1,'The same measured parent is shaded once');
@@ -136,46 +133,6 @@ test('software raster targets preserve fixed child pixels, source shading and pa
     assert.ok(env.canvases.every(canvas=>canvas.width<=512&&canvas.height<=512));
     assert.ok(env.decoded.every(bitmap=>bitmap.closed===1));
   }
-});
-
-test('opaque vector children cover their complete output before transfer while satellite overlays keep alpha',async()=>{
-  for(const sourceZ of [18,14,12])for(const transparent of [undefined,false,true]){
-    const env=fixture(),result=await env.send(job(1,{sourceZ,transparent}));
-    assert.equal(result.error,undefined);assert.equal(result.bitmap.width,512);assert.equal(result.bitmap.height,512);
-    const context=result.bitmap.context,view=env.window(18,1605,3207,sourceZ);
-    assert.equal(context.canvas.contextRequests[0].attributes.alpha,transparent===true);
-    if(transparent)assert.equal(context.rects.length,0,'A satellite overlay must not acquire an opaque paper background');
-    else{
-      assert.deepEqual(context.rects,[{args:[0,0,view.paintSize,view.paintSize],color:painter.CARTOGRAPHY.land}]);
-      assert.ok(view.childX*512+512<=view.paintSize&&view.childY*512+512<=view.paintSize,'The translated parent paper must cover every pixel of its child');
-    }
-    assert.equal(env.counts().vectorDecodes,1);assert.equal(result.contours,0);
-    assert.ok(result.labels.every(label=>label.x>=0&&label.x<=1&&label.y>=0&&label.y<=1));
-  }
-});
-
-test('browser alpha fixtures traverse the production decoder and worker for detailed ink and cropped children',async()=>{
-  const env=fixture({vectorDecoder:decodeVectorTile}),bytes=Uint8Array.from(opaqueVectorFixtureBytes());let id=0;
-  const decoded=decodeVectorTile(bytes);assert.equal(Object.keys(decoded.layers).length,11);
-  assert.equal(decoded.layers.landcover.features[0].geometry.length,2,'The pixel fixture includes a real polygon hole');
-  const results=new Map();
-  for(const entry of OPAQUE_VECTOR_CASES){
-    const result=await env.send(job(++id,{...entry,bytes:entry.empty?new ArrayBuffer(0):bytes.slice().buffer,sourceKey:`fixture://${entry.name}`,paths:entry.paths!==false}));
-    assert.equal(result.error,undefined,entry.name);assert.ok(result.bitmap);assert.equal(result.bitmap.context.canvas.contextRequests[0].attributes.alpha,false);results.set(entry.name,result);
-  }
-  assert.ok(results.get('altai-scale').bitmap.context.fills.length>=5,'The scale proof contains real thematic polygons, including the translucent park');
-  const detail=results.get('detailed-ink');assert.ok(detail.bitmap.context.strokes.length>30);assert.ok(detail.labels.some(label=>label.kind==='peak'));
-  assert.ok(results.get('paths-hidden').bitmap.context.strokes.length<detail.bitmap.context.strokes.length,'The path control removes visible detailed ink');
-  assert.ok(results.get('boundaries-hidden').bitmap.context.strokes.length<detail.bitmap.context.strokes.length,'The boundary control removes source boundary ink');
-});
-
-test('browser composite fixture contains bounded measured relief that survives its z7 physical sample spacing',()=>{
-  const height=painter.decodeTerrarium(opaqueReliefFixturePixels(),64,64);
-  assert.ok(Math.min(...height)>500&&Math.max(...height)<4800);
-  const pixels=painter.reliefPixels(height,64,43,7),alpha=pixels.filter((_,index)=>index%4===3);
-  assert.ok(Math.max(...alpha)>=32);assert.ok(alpha.filter(value=>value>=8).length>3000,'Most source samples must supply visible shade before downsampling and .82 compositing');
-  const old=painter.reliefPixels(painter.decodeTerrarium(opaqueReliefFixturePixels(true),64,64),64,43,7),oldAlpha=old.filter((_,index)=>index%4===3);
-  assert.equal(Math.max(...oldAlpha),2,'Retain the old weak terrain as a diagnostic counterexample, not the composite witness');
 });
 
 test('neighbouring display children share one decoded parent, retain crisp widths, and receive their own labels',async()=>{
