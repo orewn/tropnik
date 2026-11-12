@@ -57,14 +57,16 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
       camera:russiaView(element,256).camera,
       onReady:()=>{if(alive)setState(map.getState());},
       onState:value=>{if(alive)setState(value);},
-      onFrame:camera=>{
+      onGesture:()=>{manual.current=true;fullView.current=false;navigation.current++;locationEpoch.current++;frame.current?.cancel();},
+      onSettled:camera=>{
+        if(!alive)return;
+        setZoom(camera.zoom);latest.current.onViewportRegion?.(viewportRegionId(camera.center[0],camera.center[1],camera.zoom));
+        // The ruler describes the settled view. Keep its DOM layout/paint out
+        // of the map's drag and zoom frames, including hidden mobile legends.
         const scale=mapDistanceScale(camera.center[1],camera.zoom),value=scaleValue.current,line=scaleLine.current;if(!scale||!value||!line)return;
-        // Update the fixed ruler without a React render or layout read on pan.
         if(value.textContent!==scale.label)value.textContent=scale.label;
         const width=`${scale.pixels.toFixed(2)}px`;if(line.style.width!==width)line.style.width=width;
       },
-      onGesture:()=>{manual.current=true;fullView.current=false;navigation.current++;locationEpoch.current++;frame.current?.cancel();},
-      onSettled:camera=>{if(alive){setZoom(camera.zoom);latest.current.onViewportRegion?.(viewportRegionId(camera.center[0],camera.center[1],camera.zoom));}},
       onMarker:id=>{
         const current=latest.current,plan=current.planPoints?.find(point=>point.id===id);
         if(plan){plan.onSelect?.();return;}

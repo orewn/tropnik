@@ -1,5 +1,6 @@
 import test from 'node:test';
 import {reliefContourIntervals} from '../lib/custom-map-relief.ts';
+import {mapDistanceScale} from '../lib/custom-map-scale.ts';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {dirname,resolve} from 'node:path';
@@ -80,7 +81,7 @@ function atlasFixture({committedMode='detail'}={}){
     '@/lib/map-direction-layout':{bindMapLabelReflow:()=>()=>{},constrainDirectionLabels(){},MAP_LABEL_OBSTACLE_SELECTORS:[]},
     '@/lib/map-config':{MAP_CONFIG:{trailHitRadiusPx:12,routeMaxZoom:14,territoryMaxZoom:14},viewportRegionId:()=>region.id},
     '@/lib/map-route-presentation':{overviewContextCaption:()=>'',ROUTE_PRESENTATION:{closeZoom:12}},'@/lib/map-types':{EMPTY_MAP_TRAILS:[]},
-    '@/lib/custom-map-scale':{mapDistanceScale:()=>null},
+    '@/lib/custom-map-scale':{mapDistanceScale},
     '@/lib/custom-map-relief':{reliefContourIntervals},
   });
   const select=(trail,visibleTrails=[])=>host.render({region,trail,visibleTrails,onRegion(){},onTrail:value=>chosen.push(value),onMapNote:value=>notes.push(value)});
@@ -113,6 +114,23 @@ test('late responses, including a changed source for the same id, cannot take ow
 test('an unmounted selection cannot apply a late geometry or notification',async()=>{
   const env=atlasFixture();env.select({id:'late',title:'Поздний',geometryUrl:'/late.geojson'});await env.host.settle();
   env.host.unmount();env.requests.get('/late.geojson').resolve(line());await turn();assert.equal(env.maps[0].route,undefined);assert.deepEqual(env.notes,[]);
+});
+
+test('the distance ruler updates from the settled camera without adding DOM work to movement frames',async t=>{
+ const env=atlasFixture();t.after(()=>env.host.unmount());env.select();await env.host.settle();
+ const map=env.maps[0],line=env.host.find(node=>node.props.className==='map-scale-line').props.ref.current;
+ const value=env.host.find(node=>node.props.className==='map-scale').props.children[0].props.ref.current;
+ const changes=[];let width;
+ Object.defineProperty(line.style,'width',{get:()=>width,set:next=>{width=next;changes.push(next);}});
+ const settled={center:[142.7878226365234,46.94792542123872],zoom:14};
+ map.options.onSettled(settled);assert.equal(value.textContent,'500 м');
+ assert.equal(width,`${mapDistanceScale(settled.center[1],settled.zoom).pixels.toFixed(2)}px`);
+ for(let frame=0;frame<60;frame++)map.options.onFrame?.({...settled,center:[settled.center[0],settled.center[1]+frame/100]});
+ assert.equal(changes.length,1,'Movement frames keep the settled ruler without layout writes');
+ const next={...settled,zoom:13};map.options.onSettled(next);assert.equal(value.textContent,'1 км');
+ assert.equal(width,`${mapDistanceScale(next.center[1],next.zoom).pixels.toFixed(2)}px`);
+ const before=changes.length;env.host.unmount();map.options.onSettled({...next,zoom:12});
+ assert.equal(changes.length,before,'An unmounted map cannot write into a detached ruler');
 });
 
 test('the contour legend follows the committed ceil zoom and disappears while replacement tiles are loading',async t=>{
