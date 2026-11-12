@@ -18,6 +18,14 @@ export const MAP_ATTRIBUTION_LAYOUT_CASES=[
 ];
 export const attributionGeometry=value=>({rect:value.rect,atlas:value.atlas,credit:value.credit,content:value.content,toggle:value.toggle,anchors:value.anchors,details:value.details,statusRect:value.status.rect,contentText:value.contentText});
 export const footerLoadingGeometry=value=>({footer:value.footer,publishedFooterHeight:value.publishedFooterHeight,statusRect:value.status.rect,ui:value.ui.filter(item=>item.kind!=='map-preload-status'),targets:value.targets});
+/** Keep independent geometry cases observable after an assertion, but never
+ * swallow browser transport, fixture execution, mount or capture failures. */
+export async function collectAttributionGeometryCase(run,recordFailure){
+ try{await run();return true;}catch(error){
+  if(error?.name!=='AssertionError'||error?.code!=='ERR_ASSERTION')throw error;
+  await recordFailure(error);return false;
+ }
+}
 
 export function expectedMapAttributionSources(root=repoRoot){
  const web=join(root,'web'),require=createRequire(join(web,'package.json')),layout=readFileSync(join(web,'app/layout.tsx'),'utf8');
@@ -62,6 +70,7 @@ function snapshot(value,profile,scenario,expanded,loading){
 export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,previewRoot=join(root,'web/pages-preview'),environment}={}){
  assert.match(sourceCommit||'',/^[a-f0-9]{40}$/,'An exact source commit is required');
  assert.equal(report?.schemaVersion,1);assert.equal(report.verified,true);assert.equal(report.phase,'complete');assert.equal(report.sourceCommit,sourceCommit);assert.equal(report.evidence,'production-react-and-compiled-css-browser-geometry');
+ assert.deepEqual(report.caseFailures,[],'A collected geometry failure cannot become a successful receipt');
  for(const [key,value]of Object.entries(expectedMapAttributionSources(root)))assert.deepEqual(report.sources?.[key],value,'Attribution source binding differs: '+key);
  for(const key of ['compiledCssSHA256','bundleSHA256'])assert.match(report.sources[key],/^[a-f0-9]{64}$/);
  assertBrowserEnvironment(report.environment,sourceCommit);assertNativeSurfaceCoverage(report.environment.nativeSurface);
@@ -83,6 +92,7 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
   const item=report.cases[index],count=profile.name==='android-portrait'&&scenario.name==='detail'&&!expanded?14:3;
   assert.equal(item.profile,profile.name);assert.equal(item.source,scenario.source);assert.equal(item.zoom,scenario.zoom);assert.equal(item.expanded,expanded);assert.equal(item.cycles,count);assert.equal(item.comparisons.length,count);
   snapshot(item.loading,profile,scenario,expanded,true);snapshot(item.ready,profile,scenario,expanded,false);
+  assertAttributionFooterLayout(item.layout,{name,profile,satellite:true,expanded,sheetOpen:false},false);
   const baseline=attributionGeometry(item.loading);assert.deepEqual(attributionGeometry(item.ready),baseline,'Loading changed the measured source footprint');
   for(const [cycle,comparison]of item.comparisons.entries()){assert.equal(comparison.cycle,cycle+1);assert.deepEqual(comparison.loading,baseline);assert.deepEqual(comparison.ready,baseline);cycles++;}
   if(expanded){
@@ -91,7 +101,7 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
    assert.equal(interaction.observedInputs.tabs.length,hrefs.length-1);assert.ok(interaction.observedInputs.tabs.every(event=>event.key==='Tab'&&event.trusted));
    const {scrollHeight,clientHeight,overflowY,center,devicePixelRatio}=interaction.before,maxScroll=scrollHeight-clientHeight;assert.ok(Number.isFinite(scrollHeight)&&clientHeight>0&&clientHeight<=item.ready.content.height&&maxScroll>=0);assert.equal(interaction.before.scrollTop,0);assert.equal(devicePixelRatio,profile.dpr);
    assert.ok(center.x>item.ready.content.left&&center.x<item.ready.content.right&&center.y>item.ready.content.top&&center.y<item.ready.content.bottom);
-   const scrollable=['auto','scroll'].includes(overflowY)&&maxScroll>1;assert.equal(interaction.scrollable,scrollable);assert.equal(scrollable,profile.name==='phone-landscape'&&scenario.source==='eox-bluemarble');
+   const scrollable=['auto','scroll'].includes(overflowY)&&maxScroll>1;assert.equal(interaction.scrollable,scrollable);assert.equal(scrollable,['compact-android','phone-landscape'].includes(profile.name)&&scenario.source==='eox-bluemarble');
    assert.equal(interaction.wheelTransitions.length,scrollable?3:0);assert.equal(interaction.observedInputs.wheels.length,scrollable?3:0);
    if(scrollable){
     assert.deepEqual(interaction.wheelTransitions.map(step=>step.deltaY),[-scrollHeight,scrollHeight,-scrollHeight]);assert.deepEqual(interaction.wheelTransitions.map(step=>step.expected),[0,maxScroll,0]);
@@ -107,7 +117,7 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
    picture(item.screenshot,'design-qa/map-attribution/'+name+'.png',profile);
   }else assert.equal(item.screenshot,undefined);
  }
- assert.equal(cycles,131);assert.equal(pictures,11);
+ assert.equal(cycles,131);assert.equal(pictures,12);
  assert.deepEqual(report.footerCases?.map(item=>item.name),MAP_ATTRIBUTION_LAYOUT_CASES.map(item=>item.name));
  for(const [index,scenario]of MAP_ATTRIBUTION_LAYOUT_CASES.entries()){
   const entry=report.footerCases[index];for(const key of ['name','profile','satellite','expanded','sheetOpen'])assert.deepEqual(entry[key],scenario[key]);
@@ -121,11 +131,11 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
   }else assert.equal(entry.licenseInteraction,undefined);
   picture(entry.screenshot,'design-qa/map-attribution/footer-'+scenario.name+'.png',scenario.profile);
  }
- assert.equal(pictures,35);return report;
+ assert.equal(pictures,36);return report;
 }
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const report=JSON.parse(readFileSync(join(repoRoot,'web/pages-preview/dist/browser-map-attribution-verification.json'),'utf8'));
  assertMapAttributionReceipt(report,{sourceCommit:process.env.GITHUB_SHA});
- console.log(JSON.stringify({verified:true,sourceCommit:report.sourceCommit,profiles:report.profiles.length,cases:report.cases.length,loadingCycles:131,footerCases:report.footerCases.length,pngs:35}));
+ console.log(JSON.stringify({verified:true,sourceCommit:report.sourceCommit,profiles:report.profiles.length,cases:report.cases.length,loadingCycles:131,footerCases:report.footerCases.length,pngs:36}));
 }

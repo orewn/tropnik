@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
-import {MAP_ATTRIBUTION_PROFILES,MAP_ATTRIBUTION_SCENARIOS,MAP_ATTRIBUTION_LAYOUT_CASES,attributionGeometry,expectedMapAttributionSources,assertMapAttributionReceipt} from '../map-attribution-verification.mjs';
+import {MAP_ATTRIBUTION_PROFILES,MAP_ATTRIBUTION_SCENARIOS,MAP_ATTRIBUTION_LAYOUT_CASES,attributionGeometry,expectedMapAttributionSources,assertMapAttributionReceipt,collectAttributionGeometryCase} from '../map-attribution-verification.mjs';
 import {browserEnvironmentFixture} from './browser-environment-fixture.mjs';
 
 const commit='a'.repeat(40),box=(left,top,width,height)=>({left,top,right:left+width,bottom:top+height,width,height});
@@ -18,7 +18,7 @@ function fixture(t){
   const png=Buffer.alloc(24);Buffer.from('89504e470d0a1a0a','hex').copy(png);png.writeUInt32BE(profile.width*profile.dpr,16);png.writeUInt32BE(profile.height*profile.dpr,20);
   const path='design-qa/map-attribution/'+name+'.png';writeFileSync(join(previewRoot,path),png);return{path,bytes:png.length,sha256:createHash('sha256').update(png).digest('hex')};
  };
- const report={schemaVersion:1,verified:true,phase:'complete',sourceCommit:commit,evidence:'production-react-and-compiled-css-browser-geometry',sources:{...expectedMapAttributionSources(),compiledCssSHA256:'b'.repeat(64),bundleSHA256:'c'.repeat(64)},environment:browserEnvironmentFixture(commit),profiles:MAP_ATTRIBUTION_PROFILES,negativeControls:[],cases:[],footerCases:[]};
+ const report={schemaVersion:1,verified:true,phase:'complete',sourceCommit:commit,evidence:'production-react-and-compiled-css-browser-geometry',sources:{...expectedMapAttributionSources(),compiledCssSHA256:'b'.repeat(64),bundleSHA256:'c'.repeat(64)},environment:browserEnvironmentFixture(commit),profiles:MAP_ATTRIBUTION_PROFILES,negativeControls:[],cases:[],footerCases:[],caseFailures:[]};
  for(const profile of MAP_ATTRIBUTION_PROFILES){
   report.negativeControls.push({profile:profile.name,fonts,loading:{credit:box(16,40,180,66)},ready:{credit:box(32,56,164,50)}});
   for(const scenario of MAP_ATTRIBUTION_SCENARIOS)for(const expanded of [false,true]){
@@ -29,7 +29,7 @@ function fixture(t){
    const ready=structuredClone(loading);ready.status.visible=false;ready.status.ariaHidden='true';const cycles=profile.name==='android-portrait'&&scenario.name==='detail'&&!expanded?14:3;
    const item={name,profile:profile.name,source:scenario.source,zoom:scenario.zoom,expanded,cycles,loading,ready,comparisons:Array.from({length:cycles},(_,index)=>({cycle:index+1,loading:attributionGeometry(loading),ready:attributionGeometry(ready)}))};
    if(expanded){
-    const scrollable=profile.name==='phone-landscape'&&scenario.source==='eox-bluemarble',hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources',...(scenario.source==='eox-s2'?['https://cloudless.eox.at','https://eox.at','https://creativecommons.org/licenses/by/4.0/']:[]),'/sources#satellite-attribution'];
+    const scrollable=['compact-android','phone-landscape'].includes(profile.name)&&scenario.source==='eox-bluemarble',hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources',...(scenario.source==='eox-s2'?['https://cloudless.eox.at','https://eox.at','https://creativecommons.org/licenses/by/4.0/']:[]),'/sources#satellite-attribution'];
     const scrollHeight=scrollable?36:18,clientHeight=18,maxScroll=scrollHeight-clientHeight;
     item.licenseInteraction={input:'native-cdp-wheel-and-tab',scrollable,before:{devicePixelRatio:profile.dpr,scrollTop:0,scrollHeight,clientHeight,overflowY:scrollable?'auto':'visible',center:{x:116,y:20},hrefs},links:hrefs.map(href=>({href,text:'Synthetic link',focused:true,visibleUnblocked:true,scrollTop:0})),wheelTransitions:scrollable?[{deltaY:-scrollHeight,nativeDeltaY:-scrollHeight*profile.dpr,before:maxScroll,after:0,expected:0},{deltaY:scrollHeight,nativeDeltaY:scrollHeight*profile.dpr,before:0,after:maxScroll,expected:maxScroll},{deltaY:-scrollHeight,nativeDeltaY:-scrollHeight*profile.dpr,before:maxScroll,after:0,expected:0}]:[],observedInputs:{tabs:hrefs.slice(1).map(()=>({key:'Tab',trusted:true})),wheels:scrollable?[-scrollHeight,scrollHeight,-scrollHeight].map(deltaY=>({deltaY,trusted:true})):[]}};
     if(scrollable&&scenario.name==='overview-limit')item.licenseInteraction.bottomScreenshot=picture(name+'-license-bottom',profile);
@@ -49,16 +49,21 @@ function fixture(t){
   if(expanded){const hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources','/sources#satellite-attribution'];item.licenseInteraction={input:'native-cdp-wheel-and-tab',before:{hrefs,devicePixelRatio:profile.dpr},links:hrefs.map(href=>({href,text:'Synthetic link',focused:true,visibleUnblocked:true})),scrollable:false,wheelTransitions:[],observedInputs:{wheels:[],tabs:hrefs.slice(1).map(()=>({key:'Tab',trusted:true}))}};}
   report.footerCases.push(item);
  }
+ for(const item of report.cases){
+  item.layout=structuredClone(report.footerCases.find(entry=>entry.name===item.profile+'-retained').ready);
+  if(item.expanded)item.layout.ui.push({kind:'map-attribution-content',rect:box(0,120,item.layout.width-120,72)});
+ }
  return{report,options:{sourceCommit:commit,previewRoot}};
 }
 
-test('receipt binds 40 attribution cases, 24 footer layouts, 131 comparisons, real UI sources and 35 PNG identities',t=>{
+test('receipt binds 40 attribution cases, 24 footer layouts, 131 comparisons, real UI sources and 36 PNG identities',t=>{
  const {report,options}=fixture(t);assert.equal(assertMapAttributionReceipt(report,options),report);
  assert.equal(assertMapAttributionReceipt(report,{...options,environment:browserEnvironmentFixture(commit)}),report);
 });
 test('footer proof rejects missing widths, hidden credits, sheet overlap, blocked actions and loading-dependent movement',t=>{
  const {report,options}=fixture(t);
  const changes=[
+  value=>value.caseFailures.push({name:'recorded bad geometry'}),value=>delete value.cases[1].layout,
   value=>value.footerCases.pop(),value=>value.footerCases[0].profile.width=700,value=>value.sources.uiFiles[0].sha256='f'.repeat(64),
   value=>value.footerCases[0].loading.ui=value.footerCases[0].loading.ui.filter(item=>item.kind!=='map-satellite-credit'),
   value=>{const v=value.footerCases[0].loading;v.ui.find(item=>item.kind==='map-satellite-credit').rect=structuredClone(v.ui.find(item=>item.kind==='map-legend').rect);},
@@ -69,6 +74,13 @@ test('footer proof rejects missing widths, hidden credits, sheet overlap, blocke
   value=>value.footerCases[0].screenshot.sha256='e'.repeat(64),
  ];
  for(const change of changes){const bad=structuredClone(report);change(bad);assert.throws(()=>assertMapAttributionReceipt(bad,options));}
+});
+test('independent geometry assertions are retained while browser and capture failures remain fatal',async()=>{
+ const recorded=[],executed=[];
+ for(const name of ['first','second'])await collectAttributionGeometryCase(async()=>{executed.push(name);if(name==='first')assert.fail('Licence link is covered');},async error=>recorded.push(error.message));
+ assert.deepEqual(executed,['first','second']);assert.deepEqual(recorded,['Licence link is covered']);
+ await assert.rejects(()=>collectAttributionGeometryCase(async()=>{throw new Error('CDP disconnected');},async()=>assert.fail('Transport cannot be collected as geometry')),/CDP disconnected/);
+ await assert.rejects(()=>collectAttributionGeometryCase(async()=>assert.fail('Bad rectangle'),async()=>{throw new Error('PNG capture failed');}),/PNG capture failed/);
 });
 test('success bits cannot conceal stale source, missing loading cycles, removed labels or reduced controls',t=>{
  const {report,options}=fixture(t);

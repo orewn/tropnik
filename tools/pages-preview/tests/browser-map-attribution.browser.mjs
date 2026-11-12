@@ -10,7 +10,7 @@ import {dirname,join,resolve} from 'node:path';
 import {launchBrowser,BROWSER_STARTUP_LIMITS,browserErrorDetails} from '../browser-startup.mjs';
 import {browserEnvironmentArgs,collectBrowserEnvironment} from '../browser-environment.mjs';
 import {collectNativeBrowserSurface} from '../browser-native-surface.mjs';
-import {MAP_ATTRIBUTION_PROFILES,MAP_ATTRIBUTION_SCENARIOS,MAP_ATTRIBUTION_LAYOUT_CASES,assertAttributionFooterLayout,footerLoadingGeometry} from '../map-attribution-verification.mjs';
+import {MAP_ATTRIBUTION_PROFILES,MAP_ATTRIBUTION_SCENARIOS,MAP_ATTRIBUTION_LAYOUT_CASES,assertAttributionFooterLayout,footerLoadingGeometry,collectAttributionGeometryCase} from '../map-attribution-verification.mjs';
 
 const root=resolve(import.meta.dirname,'../../..'),web=join(root,'web'),require=createRequire(join(web,'package.json'));
 const viteRequire=createRequire(require.resolve('vite')),{build}=viteRequire('esbuild'),{transform}=viteRequire('lightningcss');
@@ -111,7 +111,7 @@ test('satellite attribution retains exact geometry over loading cycles with all 
  const fixture=await productionFixture(),directory=await mkdtemp(join(tmpdir(),'tropnik-map-attribution-'));
  const lease=createServer();await new Promise(resolve=>lease.listen(0,'127.0.0.1',resolve));const port=lease.address().port;await new Promise(resolve=>lease.close(resolve));
  const browser=launchBrowser(binary,browserEnvironmentArgs({debugPort:port,userDataDir:directory})),output=join(web,'pages-preview/dist'),pictures=join(web,'pages-preview/design-qa/map-attribution');
- const report={schemaVersion:1,verified:false,phase:'browser-startup',sourceCommit:process.env.GITHUB_SHA||null,evidence:'production-react-and-compiled-css-browser-geometry',sources:fixture.sources,profiles,negativeControls:[],cases:[],footerCases:[]};let socket,cdp;
+ const report={schemaVersion:1,verified:false,phase:'browser-startup',sourceCommit:process.env.GITHUB_SHA||null,evidence:'production-react-and-compiled-css-browser-geometry',sources:fixture.sources,profiles,negativeControls:[],cases:[],footerCases:[],caseFailures:[]};let socket,cdp;
  t.after(async()=>{socket?.close();await browser.close();await rm(directory,{recursive:true,force:true});await mkdir(output,{recursive:true});report.browserStartup=browser.diagnostics();await writeFile(join(output,'browser-map-attribution-verification.json'),JSON.stringify(report,null,2)+'\n');});
  try{
   const version=await browser.waitUntilReady(`http://127.0.0.1:${port}/json/version`);report.environment=await collectBrowserEnvironment(version.webSocketDebuggerUrl,{sourceCommit:report.sourceCommit});
@@ -119,7 +119,7 @@ test('satellite attribution retains exact geometry over loading cycles with all 
   await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true});});
   let next=0;const pending=new Map();socket.addEventListener('message',event=>{const message=JSON.parse(event.data),waiter=pending.get(message.id);if(!waiter)return;pending.delete(message.id);message.error?waiter.reject(new Error(message.error.message)):waiter.resolve(message.result);});
   cdp={call:(method,params={})=>new Promise((resolve,reject)=>{const id=++next,timer=setTimeout(()=>{pending.delete(id);reject(new Error('Attribution CDP timeout: '+method));},5000);pending.set(id,{resolve:value=>{clearTimeout(timer);resolve(value);},reject:error=>{clearTimeout(timer);reject(error);}});socket.send(JSON.stringify({id,method,params}));})};
-  const evaluate=async expression=>{const result=await cdp.call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});assert.equal(result.exceptionDetails,undefined);return result.result.value;};
+  const evaluate=async expression=>{const result=await cdp.call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(result.exceptionDetails)throw new Error('Attribution fixture execution failed: '+JSON.stringify(result.exceptionDetails));return result.result.value;};
   const settle=()=>evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
   const render=async(scenario,loading)=>{await evaluate(`window.renderAttribution(${JSON.stringify({satellite:true,satelliteSource:scenario.source,satelliteLoading:loading,zoom:scenario.zoom})})`);await settle();return evaluate(geometryExpression);};
   const setExpanded=async expanded=>{
@@ -132,6 +132,10 @@ test('satellite attribution retains exact geometry over loading cycles with all 
    await settle();assert.equal((await evaluate(toggleExpression)).expanded,expanded);
   };
   const capture=async filename=>{const {data}=await cdp.call('Page.captureScreenshot',{format:'png'}),bytes=Buffer.from(data,'base64');await writeFile(join(pictures,filename),bytes);return{path:'design-qa/map-attribution/'+filename,bytes:bytes.length,sha256:sha(bytes)};};
+  const collectCase=(entry,run)=>collectAttributionGeometryCase(run,async error=>{
+   entry.failure=browserErrorDetails(error);entry.failureLayout=await evaluate(footerGeometryExpression);entry.failureScreenshot=await capture('failed-'+report.phase+'.png');
+   report.caseFailures.push({name:report.phase,failure:entry.failure,screenshot:entry.failureScreenshot});
+  });
   const licenceInteraction=async(entry,profile)=>{
    const before=await evaluate(`(()=>{const panel=document.querySelector('.map-attribution-content'),r=panel.getBoundingClientRect();window.__licenceInputs={tabs:[],wheels:[]};const tab=event=>{if(event.key==='Tab'&&window.__licenceInputs.tabs.length<16)window.__licenceInputs.tabs.push({key:event.key,trusted:event.isTrusted})},wheel=event=>{if(panel.contains(event.target)&&window.__licenceInputs.wheels.length<8)window.__licenceInputs.wheels.push({deltaY:event.deltaY,trusted:event.isTrusted})};document.addEventListener('keydown',tab);panel.addEventListener('wheel',wheel,{passive:true});window.__removeLicenceInputs=()=>{document.removeEventListener('keydown',tab);panel.removeEventListener('wheel',wheel)};return{devicePixelRatio,scrollTop:panel.scrollTop,scrollHeight:panel.scrollHeight,clientHeight:panel.clientHeight,overflowY:getComputedStyle(panel).overflowY,center:{x:(r.left+r.right)/2,y:(r.top+r.bottom)/2},hrefs:[...panel.querySelectorAll('a')].map(a=>a.getAttribute('href'))}})()`);
    assert.equal(before.devicePixelRatio,profile.dpr,'Observe the actual DPR before converting wheel transport units');
@@ -175,16 +179,20 @@ test('satellite attribution retains exact geometry over loading cycles with all 
    assert.notDeepEqual(previousLoading.credit,previousReady.credit,'The negative control must reproduce loading-dependent source reflow');
    report.negativeControls.push({profile:profile.name,loading:stableGeometry(previousLoading),ready:stableGeometry(previousReady),fonts});await evaluate("document.getElementById('previous-attribution-status').remove()");
    for(const scenario of scenarios)for(const expanded of [false,true]){
-    const name=`${profile.name}-${scenario.name}-${expanded?'expanded':'collapsed'}`;report.phase=name;await render(scenario,true);await setExpanded(expanded);
+    const name=`${profile.name}-${scenario.name}-${expanded?'expanded':'collapsed'}`;report.phase=name;
     const cycles=profile.name==='android-portrait'&&scenario.name==='detail'&&!expanded?14:3,entry={name,profile:profile.name,source:scenario.source,zoom:scenario.zoom,expanded,cycles,comparisons:[]};report.cases.push(entry);
+    await collectCase(entry,async()=>{
+    await render(scenario,true);await setExpanded(expanded);
     for(let cycle=0;cycle<cycles;cycle++){
      const loading=await render(scenario,true),ready=await render(scenario,false);
      if(cycle===0){entry.loading=loading;entry.ready=ready;}
      const loadingGeometry=stableGeometry(loading),readyGeometry=stableGeometry(ready);entry.comparisons.push({cycle:cycle+1,loading:loadingGeometry,ready:readyGeometry});
      assertReadable(loading,profile,scenario,expanded,true);assertReadable(ready,profile,scenario,expanded,false);assert.deepEqual(readyGeometry,loadingGeometry,`${name}: a tile request must not move the source, licence popup, or control`);
     }
+    entry.layout=await evaluate(footerGeometryExpression);assertAttributionFooterLayout(entry.layout,{name,profile,satellite:true,expanded,sheetOpen:false},false);
     if(expanded)await licenceInteraction(entry,profile);
     if(scenario.name===(expanded?'overview-limit':'detail'))entry.screenshot=await capture(name+'.png');
+    });
    }
   }
   let footerProfile='';
@@ -196,14 +204,17 @@ test('satellite attribution retains exact geometry over loading cycles with all 
     await evaluate("Promise.race([Promise.all(document.querySelector('.explore-panel').getAnimations().map(animation=>animation.finished.catch(()=>{}))),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Sheet transition did not finish')),1000))])");
     await settle();return evaluate(footerGeometryExpression);
    };
-   await renderFooter(true);await setExpanded(expanded);
    const entry={name,profile,satellite,expanded,sheetOpen};report.footerCases.push(entry);
-   entry.loading=await renderFooter(true);entry.screenshot=await capture('footer-'+name+'.png');assertAttributionFooterLayout(entry.loading,scenario,true);
-   entry.ready=await renderFooter(false);assertAttributionFooterLayout(entry.ready,scenario,false);
+   await collectCase(entry,async()=>{
+   await renderFooter(true);await setExpanded(expanded);
+   entry.loading=await renderFooter(true);entry.screenshot=await capture('footer-'+name+'.png');
+   entry.ready=await renderFooter(false);assertAttributionFooterLayout(entry.loading,scenario,true);assertAttributionFooterLayout(entry.ready,scenario,false);
    assert.deepEqual(footerLoadingGeometry(entry.ready),footerLoadingGeometry(entry.loading),name+': loading must not move the footer, Layers, launcher or licence control');
    if(expanded)await licenceInteraction(entry,profile);
+   });
   }
-  assert.equal(report.cases.length,40);assert.equal(report.negativeControls.length,5);assert.equal(report.footerCases.length,24);report.phase='complete';report.verified=true;
+  assert.equal(report.cases.length,40);assert.equal(report.negativeControls.length,5);assert.equal(report.footerCases.length,24);
+  report.phase='geometry-complete';assert.equal(report.caseFailures.length,0,'Geometry failed: '+report.caseFailures.map(item=>item.name).join(', '));report.phase='complete';report.verified=true;
  }catch(error){
   report.failure=browserErrorDetails(error);
   if(cdp)try{const {data}=await cdp.call('Page.captureScreenshot',{format:'png'}),bytes=Buffer.from(data,'base64');await mkdir(pictures,{recursive:true});await writeFile(join(pictures,'failure.png'),bytes);report.failureScreenshot={path:'design-qa/map-attribution/failure.png',bytes:bytes.length,sha256:sha(bytes)};}catch(captureError){report.failureScreenshotError=browserErrorDetails(captureError);}
