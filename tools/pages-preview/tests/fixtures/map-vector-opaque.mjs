@@ -60,6 +60,20 @@ export const OPAQUE_VECTOR_CASES=Object.freeze([
  {name:'world-copy-budget',z:6,x:111,y:21,sourceZ:6,paintZoom:7},
 ]);
 
+// At z7 a 64px DEM sample spans kilometres. The original gentle fixture
+// produced only alpha 0..2 and can disappear after the actual .82 composite.
+// This bounded analytic terrain supplies visible ridges without changing the
+// measured-height decoder or any production shading/compositing algorithm.
+export function opaqueReliefFixturePixels(weak=false){
+ const size=64,pixels=new Uint8ClampedArray(size*size*4);
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+  const height=weak?1200+x*3+y*2+160*Math.sin(x/7)*Math.cos(y/9):2600+1800*Math.sin(x/3.5)*Math.cos(y/4.5)+350*Math.sin((x+y)/7);
+  const value=32768+height,at=(y*size+x)*4;
+  pixels[at]=Math.floor(value/256);pixels[at+1]=Math.floor(value)%256;pixels[at+2]=Math.round((value%1)*256);pixels[at+3]=255;
+ }
+ return pixels;
+}
+
 // Browser-only: real workers, real transferred ImageBitmaps and the unchanged
 // production map draw. Labels/DOM are independent surfaces outside this proof.
 export async function runOpaqueVectorPixels(api,options){
@@ -90,13 +104,12 @@ export async function runOpaqueVectorPixels(api,options){
  const compare=async(a,b)=>({...diff(a,b),baselinePixelSHA256:await hash(a),candidatePixelSHA256:await hash(b)});
  const metadata=result=>({labels:result.labels,contours:result.contours,reliefCoverage:result.reliefCoverage});
  const outputContext=result=>result.__contexts.find(item=>item.width===512&&item.height===512&&item.type==='2d');
- const imageBytes=async(kind)=>{
+ const imageBytes=async(kind,weak=false)=>{
   const size=kind==='relief'?64:96,canvas=new OffscreenCanvas(size,size),ctx=canvas.getContext('2d'),data=ctx.createImageData(size,size);
-  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+  if(kind==='relief')data.data.set(opaqueReliefFixturePixels(weak));
+  else for(let y=0;y<size;y++)for(let x=0;x<size;x++){
    const at=(y*size+x)*4;
-   if(kind==='relief'){
-    const value=32768+1200+x*3+y*2+160*Math.sin(x/7)*Math.cos(y/9);data.data[at]=Math.floor(value/256);data.data[at+1]=Math.floor(value)%256;data.data[at+2]=Math.round((value%1)*256);data.data[at+3]=255;
-   }else{data.data[at]=25+(x*7)%180;data.data[at+1]=45+(y*9)%150;data.data[at+2]=90+(x+y)%120;data.data[at+3]=x<size/4?0:((x+y)%17===0?128:255);}
+   data.data[at]=25+(x*7)%180;data.data[at+1]=45+(y*9)%150;data.data[at+2]=90+(x+y)%120;data.data[at+3]=x<size/4?0:((x+y)%17===0?128:255);
   }
   ctx.putImageData(data,0,0);return new Uint8Array(await(await canvas.convertToBlob({type:'image/png'})).arrayBuffer());
  };
@@ -121,6 +134,7 @@ export async function runOpaqueVectorPixels(api,options){
  try{
   const dem=await imageBytes('relief'),image=await imageBytes('raster'),reliefJob={kind:'relief',z:7,x:95,y:43,sourceZ:7,sourceKey:'fixture://dem/7/95/43',mime:'image/png',paths:true},rasterJob={kind:'raster',z:7,x:95,y:43,sourceZ:7,mime:'image/png',paths:true};
   const [oldRelief,newRelief]=await pair(reliefJob,dem),[oldRaster,newRaster]=await pair(rasterJob,image);
+  const weakRelief=await send(candidate,{...reliefJob,sourceKey:'fixture://weak-dem/7/95/43'},await imageBytes('relief',true));
   for(const [name,job,data,a,b]of [['relief',reliefJob,dem,oldRelief,newRelief],['raster',rasterJob,image,oldRaster,newRaster]]){
    const raw=await compare(read(a.bitmap),read(b.bitmap)),bad=await send(wrong,job,data),negative=diff(read(a.bitmap),read(bad.bitmap));
    check(outputContext(b).actual.alpha===true&&raw.differentPixels===0,`${name} alpha/pixels changed`);check(negative.differentPixels>0,`The ${name} negative control has no transparent pixels`);
@@ -142,7 +156,13 @@ export async function runOpaqueVectorPixels(api,options){
     if(comparison.differentPixels||entry.name==='altai-scale'&&move.name==='fractional-pan')item.captures.push({name:move.name,baseline:old.canvas.toDataURL('image/png').split(',')[1],candidate:current.canvas.toDataURL('image/png').split(',')[1]});
     if(entry.name==='altai-scale'&&move.name==='fractional-pan'){
      const noRelief=render(b.bitmap,newRelief.bitmap,newRaster.bitmap,move,{omitRelief:true}),noMask=render(b.bitmap,newRelief.bitmap,newRaster.bitmap,move,{omitMask:true});
-     const reliefDifference=diff(current.pixels,noRelief.pixels),maskDifference=diff(current.pixels,noMask.pixels);check(reliefDifference.differentPixels>0&&maskDifference.differentPixels>0,'The composite must contain visible measured relief and mask pixels');controls.push({name:'composite-witnesses',reliefDifference,maskDifference,outsideColor:MAP_OUTSIDE_COLOR});
+     const weakScene=render(b.bitmap,weakRelief.bitmap,newRaster.bitmap,move),weakWithoutMask=render(b.bitmap,weakRelief.bitmap,newRaster.bitmap,move,{omitMask:true});
+     const reliefDifference=diff(current.pixels,noRelief.pixels),maskDifference=diff(current.pixels,noMask.pixels);
+     controls.push({name:'composite-witnesses',reliefDifference,maskDifference,outsideColor:MAP_OUTSIDE_COLOR,previousFixtureWitnesses:{reliefDifference:diff(weakScene.pixels,noRelief.pixels),maskDifference:diff(weakScene.pixels,weakWithoutMask.pixels)}});
+     if(!reliefDifference.differentPixels||!maskDifference.differentPixels){
+      item.verified=false;item.error=`The composite must contain visible measured relief and mask pixels: relief=${reliefDifference.differentPixels}, mask=${maskDifference.differentPixels}`;results.push(item);
+      return{verified:false,error:item.error,dpr,softwareRaster,cases:results,negativeControls:controls};
+     }
     }
    }
    item.verified=raw.differentPixels===0&&item.frames.every(frame=>frame.comparison.differentPixels===0);results.push(item);

@@ -95,7 +95,7 @@ test('opaque vector worker ImageBitmaps preserve every raw and composited browse
     const captures=[];for(const capture of item.captures){for(const phase of ['baseline','candidate']){const file=`dpr${dpr}-${softwareRaster?'software':'default'}-${item.name}-${capture.name}-${phase}.png`,bytes=Buffer.from(capture[phase],'base64');assert.ok(bytes.length>=33&&bytes.length<=8*1024*1024);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),512*dpr);assert.equal(bytes.readUInt32BE(20),384*dpr);await writeFile(join(pictures,file),bytes);captures.push({phase,file,bytes:bytes.length,sha256:sha(bytes)});}}item.captures=captures;
     assert.equal(item.raw.differentPixels,0,`${item.name}: worker output pixels differ`);assert.equal(item.raw.maxChannelDelta,0);assert.equal(item.raw.baselinePixelSHA256,item.raw.candidatePixelSHA256);
     for(const frame of item.frames){assert.equal(frame.comparison.differentPixels,0,`${item.name}/${frame.name}: composited pixels differ`);assert.equal(frame.comparison.maxChannelDelta,0);assert.equal(frame.comparison.baselinePixelSHA256,frame.comparison.candidatePixelSHA256);}
-    assert.equal(item.verified,true);
+    assert.equal(item.verified,true,item.error);
    }
    assert.equal(result.verified,true);assert.equal(result.cases.length,8);assert.equal(result.negativeControls.length,4);
   }

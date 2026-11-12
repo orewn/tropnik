@@ -6,7 +6,7 @@ import {gzipSync} from 'node:zlib';
 import ts from 'typescript';
 import * as painter from '../lib/custom-map-painter.ts';
 import {decodeVectorTile} from '../lib/custom-map-vector.ts';
-import {OPAQUE_VECTOR_CASES,opaqueVectorFixtureBytes} from '../../tools/pages-preview/tests/fixtures/map-vector-opaque.mjs';
+import {OPAQUE_VECTOR_CASES,opaqueVectorFixtureBytes,opaqueReliefFixturePixels} from '../../tools/pages-preview/tests/fixtures/map-vector-opaque.mjs';
 
 // Execute the actual worker protocol with controlled image/Canvas APIs. Numeric
 // painting is real; recorded commands do not claim to measure GPU output.
@@ -167,6 +167,15 @@ test('browser alpha fixtures traverse the production decoder and worker for deta
   const detail=results.get('detailed-ink');assert.ok(detail.bitmap.context.strokes.length>30);assert.ok(detail.labels.some(label=>label.kind==='peak'));
   assert.ok(results.get('paths-hidden').bitmap.context.strokes.length<detail.bitmap.context.strokes.length,'The path control removes visible detailed ink');
   assert.ok(results.get('boundaries-hidden').bitmap.context.strokes.length<detail.bitmap.context.strokes.length,'The boundary control removes source boundary ink');
+});
+
+test('browser composite fixture contains bounded measured relief that survives its z7 physical sample spacing',()=>{
+  const height=painter.decodeTerrarium(opaqueReliefFixturePixels(),64,64);
+  assert.ok(Math.min(...height)>500&&Math.max(...height)<4800);
+  const pixels=painter.reliefPixels(height,64,43,7),alpha=pixels.filter((_,index)=>index%4===3);
+  assert.ok(Math.max(...alpha)>=32);assert.ok(alpha.filter(value=>value>=8).length>3000,'Most source samples must supply visible shade before downsampling and .82 compositing');
+  const old=painter.reliefPixels(painter.decodeTerrarium(opaqueReliefFixturePixels(true),64,64),64,43,7),oldAlpha=old.filter((_,index)=>index%4===3);
+  assert.equal(Math.max(...oldAlpha),2,'Retain the old weak terrain as a diagnostic counterexample, not the composite witness');
 });
 
 test('neighbouring display children share one decoded parent, retain crisp widths, and receive their own labels',async()=>{
