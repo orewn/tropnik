@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "physicalDevice": false,
+  "recovery": {
+    "reconstructedAfterScratchLoss": true,
+    "exactPreviousAuthoredBytesRecovered": false,
+    "previouslyPreparedSha256": null,
+    "source": "Original GitHub Actions artifact, downloaded again and verified against API digest.",
+    "note": "This is a newly generated receipt, not the byte-identical lost authored JSON. Claims are limited to recovered source records and checks explicitly named below."
+  },
+  "sourceCommit": "4b17646f3bdb714969ddef8a9ff8413d05c1eb31",
+  "runId": 43159154539,
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43159154539",
+  "artifact": {
+    "id": 13917937492,
+    "name": "tropnik-pages-browser-failure-1",
+    "bytes": 1491112,
+    "sha256": "c17e6a535ffefd52e3d1cafc135ec4d91b6dd2a3c4c760366de83595e8556c75",
+    "apiDigestVerified": true,
+    "extractedMembersVerified": 9
+  },
+  "rawFailure": {
+    "bytes": 7662875,
+    "sha256": "6f0da83db956971be74512eaaa99aa9453859b0f7aa9770ac19a8cf6c3177260"
+  },
+  "profile": "desktop-webgl",
+  "error": {
+    "name": "Error",
+    "message": "The tropnik-canvas map did not settle: {\"rendering\":{\"painted\":true,\"drawnRoute\":\"\",\"tilesState\":\"error\",\"coverageReady\":true},\"camera\":{\"longitude\":179.99999934967354,\"latitude\":67.50000007453566,\"zoom\":10.272349250356768,\"tileSize\":256,\"centerX\":520.5,\"centerY\":464},\"engine\":\"tropnik-canvas\",\"route\":\"\",\"moving\":false,\"visible\":true,\"rect\":{\"left\":384,\"top\":72,\"width\":1041,\"height\":928,\"right\":1425,\"bottom\":1000},\"width\":1440,\"height\":1000,\"scrollWidth\":1425}",
+    "stack": "Error: The tropnik-canvas map did not settle: {\"rendering\":{\"painted\":true,\"drawnRoute\":\"\",\"tilesState\":\"error\",\"coverageReady\":true},\"camera\":{\"longitude\":179.99999934967354,\"latitude\":67.50000007453566,\"zoom\":10.272349250356768,\"tileSize\":256,\"centerX\":520.5,\"centerY\":464},\"engine\":\"tropnik-canvas\",\"route\":\"\",\"moving\":false,\"visible\":true,\"rect\":{\"left\":384,\"top\":72,\"width\":1041,\"height\":928,\"right\":1425,\"bottom\":1000},\"width\":1440,\"height\":1000,\"scrollWidth\":1425}\n    at waitValue (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:400:9)\n    at async settleMapCamera (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-zoom-audit.mjs:96:13)\n    at async snapshot (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-satellite-audit.mjs:272:60)\n    at async zoom (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-satellite-audit.mjs:333:162)\n    at async runSatelliteContinuityAudit (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-satellite-audit.mjs:364:50)\n    at async runZoomDesignAudit (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-zoom-audit.mjs:501:30)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:958:24"
+  },
+  "camera": {
+    "center": [
+      179.99999934967354,
+      67.50000007453566
+    ],
+    "zoom": 10.272349250356768,
+    "bearingDegrees": 0
+  },
+  "viewport": {
+    "width": 1041,
+    "height": 928,
+    "padding": {
+      "top": 96,
+      "right": 88,
+      "bottom": 96,
+      "left": 40
+    }
+  },
+  "paddedVisibleBounds": [
+    179.45364968964822,
+    67.33933179802837,
+    180.49177089589818,
+    67.65958795542313
+  ],
+  "state": {
+    "ready": true,
+    "loading": false,
+    "mode": "satellite",
+    "committedMode": "satellite",
+    "imageryLoading": false,
+    "reliefReady": false,
+    "localDetail": false,
+    "error": "Подписи и тропы на спутниковой карте загрузились не полностью. Повторите загрузку.",
+    "residentTiles": 117,
+    "pendingTiles": 0,
+    "imageryTarget": "eox-bluemarble",
+    "imagerySource": "eox-bluemarble"
+  },
+  "coverage": {
+    "version": "e0ce67282bfd3694",
+    "lod": "local",
+    "cells": [
+      "0b0a-",
+      "0c0a-0"
+    ],
+    "pending": 0,
+    "error": "",
+    "ready": true,
+    "revision": 5
+  },
+  "sourceErrors": [
+    {
+      "key": "relief:6/64/12:1:0:6:1",
+      "message": "Preview resource unavailable (404)"
+    },
+    {
+      "key": "relief:6/61/12:1:0:6:1",
+      "message": "Preview resource unavailable (404)"
+    },
+    {
+      "key": "relief:6/65/12:1:0:6:1",
+      "message": "Preview resource unavailable (404)"
+    },
+    {
+      "key": "relief:6/60/12:1:0:6:1",
+      "message": "Preview resource unavailable (404)"
+    },
+    {
+      "key": "relief:6/66/12:1:0:6:1",
+      "message": "Preview resource unavailable (404)"
+    },
+    {
+      "key": "vector:11/2046/495:1:1:11:1",
+      "message": "Map source exceeds tile budget"
+    }
+  ],
+  "resourceCounts": {
+    "resident": 117,
+    "pending": 0,
+    "fetching": 0,
+    "decoding": false
+  },
+  "performanceIssues": [],
+  "failedVector": {
+    "key": "vector:11/2046/495:1:1:11:1",
+    "message": "Map source exceeds tile budget"
+  },
+  "priorObservedResponse": {
+    "url": "https://tiles.openfreemap.org/planet/20261101_080013_pt/11/2046/495.pbf",
+    "status": 200,
+    "bodyBytes": 0,
+    "contentType": "application/vnd.mapbox-vector-tile",
+    "xOfmDebug": "empty tile",
+    "provenance": "Earlier exact-source response independently checked by map agent and root in this same session.",
+    "originalRawHeaderFileRecovered": false,
+    "freshNetworkRequestDuringRecovery": false
+  },
+  "diagnosis": {
+    "fix": "Successful empty vector payload is accepted as an empty layer. Empty raster/DEM, HTTP errors, malformed PBF and the 8 MiB limit remain strict.",
+    "recoveredRawFailureAloneDistinguishesZeroFromOversize": false
+  },
+  "primarySources": [
+    "https://github.com/mapbox/mvt-fixtures/blob/54e216ce6bb52c8ceee97b2b9f65438d8eb67b34/FIXTURES.md"
+  ]
+}

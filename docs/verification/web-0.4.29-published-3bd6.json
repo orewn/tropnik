@@ -1,0 +1,682 @@
+{
+  "schemaVersion": 1,
+  "scope": "exact-source Pages CI, artifact integrity and unauthenticated public readback",
+  "verified": true,
+  "sourceCommit": "3bd6e6bf52175084d0b2c4eaba2861a0a70b1eaa",
+  "buildId": "7547f1842ce3235d",
+  "runId": 43175668294,
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43175668294",
+  "jobs": {
+    "build": {
+      "id": 131039226066,
+      "conclusion": "success"
+    },
+    "deploy": {
+      "id": 131047442566,
+      "conclusion": "success"
+    }
+  },
+  "publicReadback": {
+    "verified": true,
+    "url": "https://orewn.github.io/tropnik/",
+    "buildId": "7547f1842ce3235d",
+    "sourceCommit": "3bd6e6bf52175084d0b2c4eaba2861a0a70b1eaa",
+    "publicHttpChecks": 24,
+    "apkDelivery": "github-release",
+    "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.25-preview/tropnik-preview.apk",
+    "apkBytes": 67858685,
+    "apkSha256": "016aa309d22b1fc34d89949817d3e8fc61162e2c20f8b50a4a803e0feadb88e4",
+    "browserRenderingTested": true,
+    "browserProfiles": 4
+  },
+  "staticPages": 713,
+  "catalogueRoutes": 680,
+  "profiles": {
+    "mobile": [
+      "compact-android",
+      "iphone-portrait",
+      "android-portrait",
+      "phone-landscape"
+    ],
+    "desktop": [
+      "desktop-webgl"
+    ],
+    "total": 5
+  },
+  "browser": {
+    "product": "Chrome/156.0.8078.79",
+    "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+    "protocolVersion": "1.3",
+    "jsVersion": "15.6.75.27",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+  },
+  "smoothness": [
+    {
+      "profile": "android-portrait",
+      "passed": true,
+      "scenarios": 8,
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "mapPan": {
+        "durationMs": 1280.9000000000233,
+        "frames": {
+          "samples": 77,
+          "callbackHz": 60.113982356154736,
+          "isPresentedFps": false,
+          "p95Ms": 22.70000000001164,
+          "maxGapMs": 23.600000000034925,
+          "over50ms": 0
+        },
+        "inputToNextFrame": {
+          "count": 1,
+          "p95Ms": 45.79999999998836,
+          "maxMs": 45.79999999998836,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "layout": {
+          "supported": true,
+          "sessionCLS": 0,
+          "unexpectedSum": 0,
+          "allShiftSum": 0,
+          "recentInputCount": 0
+        }
+      }
+    },
+    {
+      "profile": "desktop-webgl",
+      "passed": true,
+      "scenarios": 8,
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "mapPan": {
+        "durationMs": 3380.70000000007,
+        "frames": {
+          "samples": 190,
+          "callbackHz": 56.20137841275359,
+          "isPresentedFps": false,
+          "p95Ms": 33.59999999997672,
+          "maxGapMs": 37.20000000006985,
+          "over50ms": 0
+        },
+        "inputToNextFrame": {
+          "count": 2,
+          "p95Ms": 47.79999999993015,
+          "maxMs": 47.79999999993015,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "layout": {
+          "supported": true,
+          "sessionCLS": 0,
+          "unexpectedSum": 0,
+          "allShiftSum": 0,
+          "recentInputCount": 0
+        }
+      }
+    }
+  ],
+  "graphics": [
+    {
+      "name": "map-controls",
+      "verified": true,
+      "cases": 3
+    },
+    {
+      "name": "map-attribution",
+      "verified": true,
+      "cases": 40,
+      "profiles": 5
+    },
+    {
+      "name": "map-underlay",
+      "verified": true,
+      "cases": 30,
+      "pixelComparisons": 46,
+      "differentPixels": 0,
+      "comparedPixels": 22609920
+    },
+    {
+      "name": "terrain-mask",
+      "verified": true,
+      "cases": 4
+    },
+    {
+      "name": "terrain-full-mask",
+      "verified": true,
+      "cases": 8,
+      "pixelComparisons": 20,
+      "differentPixels": 0,
+      "comparedPixels": 9830400
+    },
+    {
+      "name": "terrain-presentation",
+      "verified": true,
+      "cases": 8,
+      "pixelComparisons": 20,
+      "differentPixels": 0,
+      "comparedPixels": 9830400
+    },
+    {
+      "name": "terrain-unmasked",
+      "verified": true,
+      "cases": 2,
+      "pixelComparisons": 12,
+      "differentPixels": 0,
+      "comparedPixels": 5898240
+    }
+  ],
+  "mapMatrices": [
+    {
+      "profile": "android-portrait",
+      "zoomSchema": 9,
+      "maximumZoom": 18,
+      "keyZooms": [
+        2,
+        5,
+        8,
+        11,
+        14,
+        18
+      ],
+      "detailSteps": 18,
+      "satelliteSteps": 18,
+      "reliefKeySteps": 6,
+      "modeSwitches": 2,
+      "coast": {
+        "passed": true,
+        "steps": [
+          {
+            "fixture": "primorsk",
+            "targetZoom": 7,
+            "actualZoom": 7.621307459879889
+          },
+          {
+            "fixture": "primorsk",
+            "targetZoom": 9,
+            "actualZoom": 9.621307459879889
+          },
+          {
+            "fixture": "primorsk",
+            "targetZoom": 12,
+            "actualZoom": 12.621307459879889
+          },
+          {
+            "fixture": "primorsk",
+            "targetZoom": 15,
+            "actualZoom": 15.621307459879889
+          },
+          {
+            "fixture": "primorsk",
+            "targetZoom": 18,
+            "actualZoom": 18
+          },
+          {
+            "fixture": "gogland",
+            "targetZoom": 11,
+            "actualZoom": 11.621307459879889
+          }
+        ],
+        "pans": 4
+      },
+      "labels": [
+        {
+          "fixture": "primorsk",
+          "zoom": 7,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 2,
+          "visibleNames": [
+            "Выборг"
+          ],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        },
+        {
+          "fixture": "primorsk",
+          "zoom": 9,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 2,
+          "visibleNames": [
+            "Приморск"
+          ],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        },
+        {
+          "fixture": "primorsk",
+          "zoom": 12,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 2,
+          "visibleNames": [
+            "Приморск"
+          ],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        },
+        {
+          "fixture": "primorsk",
+          "zoom": 15,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 0,
+          "visibleNames": [],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        },
+        {
+          "fixture": "primorsk",
+          "zoom": 18,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 0,
+          "visibleNames": [],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        }
+      ],
+      "satelliteContinuity": {
+        "schemaVersion": 5,
+        "passed": true,
+        "stages": [
+          {
+            "stage": "dateline-overview",
+            "source": "eox-bluemarble",
+            "target": "eox-bluemarble",
+            "state": "ready",
+            "zoom": 3.7046647410674485
+          },
+          {
+            "stage": "dateline-native8",
+            "source": "eox-bluemarble",
+            "target": "eox-bluemarble",
+            "state": "ready",
+            "zoom": 8.704664741067448
+          },
+          {
+            "stage": "dateline-overzoom",
+            "source": "eox-bluemarble",
+            "target": "eox-bluemarble",
+            "state": "ready",
+            "zoom": 10.704664741067448
+          },
+          {
+            "stage": "west-eox",
+            "source": "eox-s2",
+            "target": "eox-s2",
+            "state": "ready",
+            "zoom": 3.7046647410674485
+          },
+          {
+            "stage": "dateline-return",
+            "source": "eox-bluemarble",
+            "target": "eox-bluemarble",
+            "state": "ready",
+            "zoom": 3.7046647410674485
+          },
+          {
+            "stage": "detail-restored",
+            "source": "",
+            "target": "",
+            "state": "",
+            "zoom": 3.7046647410674485
+          }
+        ],
+        "pans": 7,
+        "zooms": 14,
+        "toggles": 2,
+        "durationMs": 70185
+      },
+      "performance": {
+        "layoutShift": 0.0934677058138493,
+        "longestTaskMs": 75
+      }
+    },
+    {
+      "profile": "desktop-webgl",
+      "zoomSchema": 9,
+      "maximumZoom": 18,
+      "keyZooms": [
+        2,
+        5,
+        8,
+        11,
+        14,
+        18
+      ],
+      "detailSteps": 17,
+      "satelliteSteps": 17,
+      "reliefKeySteps": 6,
+      "modeSwitches": 2,
+      "coast": {
+        "passed": true,
+        "steps": [
+          {
+            "fixture": "primorsk",
+            "targetZoom": 7,
+            "actualZoom": 7.188991969169209
+          },
+          {
+            "fixture": "primorsk",
+            "targetZoom": 9,
+            "actualZoom": 9.188991969169209
+          },
+          {
+            "fixture": "primorsk",
+            "targetZoom": 12,
+            "actualZoom": 12.188991969169209
+          },
+          {
+            "fixture": "primorsk",
+            "targetZoom": 15,
+            "actualZoom": 15.188991969169209
+          },
+          {
+            "fixture": "primorsk",
+            "targetZoom": 18,
+            "actualZoom": 18
+          },
+          {
+            "fixture": "gogland",
+            "targetZoom": 11,
+            "actualZoom": 11.188991969169209
+          }
+        ],
+        "pans": 3
+      },
+      "labels": [
+        {
+          "fixture": "primorsk",
+          "zoom": 7,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 2,
+          "visibleNames": [
+            "Выборг"
+          ],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        },
+        {
+          "fixture": "primorsk",
+          "zoom": 9,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 2,
+          "visibleNames": [
+            "Выборг",
+            "Приморск"
+          ],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        },
+        {
+          "fixture": "primorsk",
+          "zoom": 12,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 2,
+          "visibleNames": [
+            "Приморск",
+            "Карасевка"
+          ],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        },
+        {
+          "fixture": "primorsk",
+          "zoom": 15,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 1,
+          "visibleNames": [
+            "Приморск"
+          ],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        },
+        {
+          "fixture": "primorsk",
+          "zoom": 18,
+          "names": [
+            "Приморск",
+            "Малые Сопки",
+            "Карасёвка",
+            "Карасевка",
+            "Выборг"
+          ],
+          "candidateCount": 0,
+          "visibleNames": [],
+          "readOnly": true,
+          "cameraPreserved": true,
+          "truncated": false
+        }
+      ],
+      "satelliteContinuity": {
+        "schemaVersion": 5,
+        "passed": true,
+        "stages": [
+          {
+            "stage": "dateline-overview",
+            "source": "eox-bluemarble",
+            "target": "eox-bluemarble",
+            "state": "ready",
+            "zoom": 5.272349250356769
+          },
+          {
+            "stage": "dateline-native8",
+            "source": "eox-bluemarble",
+            "target": "eox-bluemarble",
+            "state": "ready",
+            "zoom": 8.272349250356768
+          },
+          {
+            "stage": "dateline-overzoom",
+            "source": "eox-bluemarble",
+            "target": "eox-bluemarble",
+            "state": "ready",
+            "zoom": 10.272349250356768
+          },
+          {
+            "stage": "west-eox",
+            "source": "eox-s2",
+            "target": "eox-s2",
+            "state": "ready",
+            "zoom": 5.272349250356768
+          },
+          {
+            "stage": "dateline-return",
+            "source": "eox-bluemarble",
+            "target": "eox-bluemarble",
+            "state": "ready",
+            "zoom": 5.272349250356768
+          },
+          {
+            "stage": "detail-restored",
+            "source": "",
+            "target": "",
+            "state": "",
+            "zoom": 5.272349250356768
+          }
+        ],
+        "pans": 9,
+        "zooms": 10,
+        "toggles": 2,
+        "durationMs": 90558
+      },
+      "performance": {
+        "layoutShift": 0.04537290879501386,
+        "longestTaskMs": 92
+      }
+    }
+  ],
+  "transportRecovery": {
+    "session": {
+      "environmentCapturedAt": "2026-11-12T07:33:09.833Z",
+      "sourceCommit": "3bd6e6bf52175084d0b2c4eaba2861a0a70b1eaa",
+      "scope": "one full browser-smoke browser session; repeated profile snapshots deduplicated"
+    },
+    "uniquePairs": 0,
+    "pairOccurrences": 0,
+    "pairs": []
+  },
+  "offlineSafety": {
+    "passed": true,
+    "nativeInputs": 4,
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "offline": true,
+    "titleRestored": true,
+    "contactRestored": true,
+    "draftExplicit": true,
+    "privateApiNotCached": true,
+    "networkSuccessfulResponses": 0,
+    "originTransport": {
+      "method": "origin-socket-destroy",
+      "startedAt": "2026-11-12T07:49:45.285Z",
+      "restoredAt": "2026-11-12T07:49:45.577Z",
+      "blockedRequests": 4,
+      "requests": [
+        {
+          "path": "/tropnik/_offline-transport-probe",
+          "method": "GET",
+          "at": "2026-11-12T07:49:45.289Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-12T07:49:45.295Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-12T07:49:45.295Z"
+        },
+        {
+          "path": "/tropnik/safety/registration/",
+          "method": "GET",
+          "at": "2026-11-12T07:49:45.295Z"
+        }
+      ],
+      "probe": {
+        "passed": true,
+        "errorCode": "ECONNRESET",
+        "path": "/tropnik/_offline-transport-probe"
+      },
+      "active": false
+    }
+  },
+  "artifacts": [
+    {
+      "id": 13924932701,
+      "name": "tropnik-pages-design-1",
+      "bytes": 75011953,
+      "sha256": "02cca03348e97a995fcb0c60c9695838d828cd87cdcf49a3ebe377df06419ba7",
+      "apiDigestVerified": true,
+      "extractedFiles": 324
+    },
+    {
+      "id": 13924787994,
+      "name": "github-pages-43175668294-1",
+      "bytes": 65387612,
+      "sha256": "0dd998fbf2f56ddabb050f2c53b72756347413193d88cd8dbe94d7d52ca24bba",
+      "apiDigestVerified": true,
+      "extractedFiles": 15
+    }
+  ],
+  "captureBindings": {
+    "verifiedUniquePngFiles": 305,
+    "verifiedReferenceOccurrences": 345
+  },
+  "sharedMap": {
+    "manifestSha256": "a7d69aa2d079ff42934789b68a6c3bc280d85ef2dd0757b00db26c8d22aadb5f",
+    "sourceInputsSha256": "874d7cc4bde6fd5452ef6115ab5ab92b9b07e185514f8b4393abeab250070007",
+    "engineSha256": "47627d06401dbbc6d638fea4e05e7ea0da56108925e49ee44d3ca40ffd7bf839"
+  },
+  "publicAssetsExpectedFromVerifiedArtifact": {
+    "entryScripts": [
+      "https://orewn.github.io/tropnik/assets/index-CaDjQ58R.js"
+    ],
+    "stylesheets": [
+      "https://orewn.github.io/tropnik/assets/index-DVwZqvat.css"
+    ]
+  },
+  "snapshotBindings": {
+    "designZoomReportsEqualFullReport": true,
+    "designSmoothnessEqualsFullReport": true,
+    "designMapInteractionsEqualFullReport": true,
+    "offlineEqualsFullReport": true
+  },
+  "limits": [
+    "Browser emulation is not a physical Android-device performance measurement.",
+    "This receipt records the successful CI run; it does not claim a causal A/B performance improvement.",
+    "Independent visual review of these PNGs and live DOM review are separate checks owned by the coordinating agents."
+  ]
+}

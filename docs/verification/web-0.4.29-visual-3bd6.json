@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-read-only-visual-review-of-recorded-CI-frames",
+  "reviewedAt": "2026-11-12T07:58:48.931562+00:00",
+  "sourceCommit": "3bd6e6bf52175084d0b2c4eaba2861a0a70b1eaa",
+  "runId": 43175668294,
+  "artifactId": 13924932701,
+  "artifactZipSHA256": "02cca03348e97a995fcb0c60c9695838d828cd87cdcf49a3ebe377df06419ba7",
+  "buildId": "7547f1842ce3235d",
+  "status": "issues-found",
+  "codeChanged": false,
+  "newBrowserTests": false,
+  "computerUsePerformed": false,
+  "reviewedFrameCount": 33,
+  "reviewedFrames": [
+    {
+      "file": "android-portrait-coast-primorsk-z7.png",
+      "bytes": 693202,
+      "sha256": "799fb3a15c4594cd2fc5cdfcc2e8441c639d724351e522aec1c9406722657732",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-coast-primorsk-z9.png",
+      "bytes": 726742,
+      "sha256": "e1c92c4fd0e9ccf1a0439229e4d325dd5aa3d3d9bb10c95570fcf03dbfe1743b",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-coast-primorsk-z12.png",
+      "bytes": 650515,
+      "sha256": "80741df5d439ea42e5d5571adf42adba2a8cd23cf6ae42574f347f7ffd2a747e",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-coast-primorsk-z15.png",
+      "bytes": 391437,
+      "sha256": "171a35744545d4ca162196897dfd98c5300f3d33bc1735d06ca40d21e832343f",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-coast-primorsk-z18.png",
+      "bytes": 127354,
+      "sha256": "2971e313408082d81efd5fbdc681e338951ceb5051c6203e68d6edad9f677a0f",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-coast-gogland-z11.png",
+      "bytes": 287640,
+      "sha256": "2872f8d7e4329da898057cb038646c7b0ad000577678dcb6eb961f4aec5266f3",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-satellite-preload-before.png",
+      "bytes": 308589,
+      "sha256": "3d6840528aca5d44cdf881684e49bdba58b978f019bbb2ab565121e397d535ac",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-satellite-preload-pending.png",
+      "bytes": 316867,
+      "sha256": "024cb76d97ac5d762c26940bda014e5c74cbec6e299d957cdb7341a2a39ef2e4",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-satellite-preload-committed.png",
+      "bytes": 445558,
+      "sha256": "003778875e4cb8fd4671f807ceeeb18d2305ca825e5203a894efc3769b51b68c",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-satellite-detail-restored.png",
+      "bytes": 288087,
+      "sha256": "1319214cf7cd53d865f6f2a6c26ce3bca9eb3d79474e8378728e94deb6f063ba",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-satellite-dateline-native8.png",
+      "bytes": 903648,
+      "sha256": "5827301a9c9f2ee9e952c6aa1136e9d8a8c808eda21037e04546dd3a99936141",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-satellite-dateline-return.png",
+      "bytes": 395819,
+      "sha256": "78c4a72e6454d745c7226f3ade0d1d288683fb3e30ec3062b4bcb4aaaea0267b",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "desktop-webgl-coast-primorsk-z7.png",
+      "bytes": 789707,
+      "sha256": "916f8d79dbc4965777b9967562772441bff494acf18fe77b63ba53491c14d40c",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-coast-primorsk-z9.png",
+      "bytes": 895748,
+      "sha256": "6ed02d9e08dc00c101601584fdbe64eed142f2b61d87bc25040c45bc03281da5",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-coast-primorsk-z12.png",
+      "bytes": 888405,
+      "sha256": "1b434bf244ca18f77b59298e19c350e7f33c6d0f0cdd5699c7ddfd5e6d989fd1",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-coast-primorsk-z15.png",
+      "bytes": 495637,
+      "sha256": "02a4ad7fd53113ed6641297f1b43227e1996090916c8b456b56b7dc44a9b8010",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-coast-primorsk-z18.png",
+      "bytes": 150561,
+      "sha256": "1e2d6c7eafbd30d112de6a38ee7c6719fcabd07d6bdd8892cd54fc00e7a75501",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-coast-gogland-z11.png",
+      "bytes": 157624,
+      "sha256": "cedb8dfe2c773e2e78c692c77b98e6e41f7d248780a8cf4a43847b2ab4cff178",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-satellite-preload-before.png",
+      "bytes": 762712,
+      "sha256": "a824f0389415918ce860e995b241319fcb68bdb773e35a13d34d2bebfb7380cc",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-satellite-preload-pending.png",
+      "bytes": 757492,
+      "sha256": "1c83fbabb202c770ad1f9f5d3685ffc07d808f452294f5bf5ee26627a436bb54",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-satellite-preload-committed.png",
+      "bytes": 994457,
+      "sha256": "3a154a02b1e7f62d7aa6635c3238c5759defdfbb31d8194c72c76654ec65af53",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-satellite-detail-restored.png",
+      "bytes": 643758,
+      "sha256": "ae894dd5015ef98f060cde78e31f028325a7276ba524217ffa7c8f2278bea326",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-satellite-dateline-native8.png",
+      "bytes": 1441397,
+      "sha256": "0cb60e850a9ce2df4baff6273d1ab2fb6d30524567b981140670f3c8e6e3640b",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-satellite-dateline-return.png",
+      "bytes": 816400,
+      "sha256": "ebb77336f5078a4708dba0e29a0c134f4d7cec84f3feceb75253aad352464173",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "android-portrait-satellite-dateline-overzoom.png",
+      "bytes": 448453,
+      "sha256": "cebff8f47d8e06383c2bcc77df58d264567cfc339d234647c04ce6e361665a00",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-detail-z11_34-key11.png",
+      "bytes": 1551841,
+      "sha256": "1ef469aebfcb98de39f35c20865ffffd76c909f245a8e0efb01e5648eafb0481",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-relief-z14_34-key14.png",
+      "bytes": 984046,
+      "sha256": "92e418451bea2246297fa3275199575bda270ff94e16bf42782a64c45cfa586c",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "android-portrait-satellite-z14_00-key14.png",
+      "bytes": 807320,
+      "sha256": "a27d1f6ca1f8b84a53236799c77ac3a9011b8aadc1f4399b49c63e1ee4aa5b12",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "desktop-webgl-detail-z11_91-key11.png",
+      "bytes": 1902006,
+      "sha256": "0a485ecc65950960fd4e8309b1d6499eb1e7e517ab2731e39906e71260fd28b8",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-relief-z14_91-key14.png",
+      "bytes": 1118414,
+      "sha256": "731db0f71849354acd3b7f2facc3f564332d350e1f5ce673fa5eb192d0751ede",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "desktop-webgl-satellite-z14_00-key14.png",
+      "bytes": 1159754,
+      "sha256": "d595f28aa1ada8c3aa1377aa2a8f2c5b3f54f0df813dfd15a78fc50f5139d944",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "android-portrait-route-fit-z12_27.png",
+      "bytes": 1383369,
+      "sha256": "59b5e51f686936205ceec389749ec16725b7ebffe7417789061a2468aca6bd44",
+      "width": 824,
+      "height": 1830
+    },
+    {
+      "file": "desktop-webgl-route-fit-z13_40.png",
+      "bytes": 1665682,
+      "sha256": "f2224eace141d14533a46e9e42d1def3faef18e6b9f6aab243decb72e788d146",
+      "width": 1440,
+      "height": 1000
+    }
+  ],
+  "findings": [
+    {
+      "id": "route-marker-canvas-label-overlap",
+      "priority": "P2",
+      "observed": "Route marker circles obscure portions of already painted map labels, including a selected green marker covering the elevation in Минометная and brown markers covering Санкт-Петербург.",
+      "examples": [
+        "android-portrait-route-fit-z12_27.png",
+        "desktop-webgl-detail-z11_91-key11.png",
+        "desktop-webgl-coast-primorsk-z7.png",
+        "desktop-webgl-coast-primorsk-z9.png"
+      ],
+      "diagnostics": [
+        {
+          "json": "desktop-webgl-coast.json",
+          "pointer": "/steps/0/bitmapInspection/labels/0",
+          "value": {
+            "id": "vector:8/149/74:1:0:8:1:Санкт-Петербург",
+            "label": "Санкт-Петербург",
+            "coordinate": [
+              30.316085815429688,
+              59.93867623314848
+            ],
+            "visible": true,
+            "reason": "drawn",
+            "x": 697.8437131427963,
+            "y": 552.3336321556573,
+            "width": 137.72621154785156,
+            "rect": {
+              "left": 616.9806073688706,
+              "right": 778.7068189167221,
+              "top": 532.3336321556573,
+              "bottom": 572.3336321556573
+            }
+          }
+        },
+        {
+          "json": "desktop-webgl.json",
+          "pointer": "/detailSteps/9/bitmapInspection/labels/197",
+          "value": {
+            "id": "vector:12/2507/1493:1:0:12:1:Минометная",
+            "label": "Минометная",
+            "coordinate": [
+              40.38645029067993,
+              43.746018000773795
+            ],
+            "visible": true,
+            "reason": "drawn",
+            "x": 490.9282342434818,
+            "y": 398.66253462687206,
+            "width": 121.82487487792969,
+            "rect": {
+              "left": 418.015796804517,
+              "right": 563.8406716824467,
+              "top": 382.66253462687206,
+              "bottom": 438.66253462687206
+            }
+          }
+        },
+        {
+          "json": "android-portrait.json",
+          "pointer": "/screenshots/0",
+          "value": {
+            "file": "android-portrait-route-fit-z12_27.png",
+            "mode": "route-fit",
+            "zoom": 12.270198667061152,
+            "bytes": 1383369,
+            "sha256": "59b5e51f686936205ceec389749ec16725b7ebffe7417789061a2468aca6bd44"
+          }
+        }
+      ],
+      "coordinateNotes": "Canvas label rects are map-local. Desktop PNG map origin is visually x384/y72. No matching DOM route-marker rectangles were retained for these precise frames; later lastInspection marker rects refer to another state and were not substituted.",
+      "recommendedBoundary": "Coordinate DOM route marker footprints with the current-frame canvas label collision decision; include selected/ordinary markers and camera updates without per-frame DOM measurements."
+    },
+    {
+      "id": "satellite-attribution-legend-overlap",
+      "priority": "P2",
+      "observed": "The three-line NASA Blue Marble/EOX attribution panel covers the right side of the bottom desktop map legend, including part of Направление.",
+      "examples": [
+        "desktop-webgl-satellite-dateline-native8.png"
+      ],
+      "approximateScreenshotPixels": {
+        "attributionLeft": 683,
+        "attributionTop": 902,
+        "legendLeft": 409,
+        "legendRight": 757,
+        "legendTop": 927,
+        "legendBottom": 972
+      },
+      "coordinateNotes": "Approximate visual PNG coordinates, not saved DOM rect measurements.",
+      "recommendedBoundary": "Keep the complete attribution and the complete legend visible in separate available rectangles at this actual viewport and long attribution state."
+    },
+    {
+      "id": "mobile-loading-status-under-sheet",
+      "priority": "P3",
+      "observed": "The bottom of the mobile Подгружаем детали текущего ракурса status card is covered by the collapsed bottom sheet. The text itself remains readable in the inspected frame.",
+      "examples": [
+        "android-portrait-satellite-preload-pending.png"
+      ],
+      "recommendedBoundary": "Place the complete status card inside the available map viewport above the collapsed sheet."
+    }
+  ],
+  "positiveObservations": [
+    "The inspected Primorsk and Gogland frames retain whole named coastal labels apart from the separately identified marker overlap. Island and coastline masks show no obvious rectangular tile holes.",
+    "Before/pending/committed pairs retain a visible relief map while satellite loads, then show satellite imagery and corresponding source attribution.",
+    "The inspected satellite return and detail-restored frames show continuous visible land and an active control matching the displayed mode.",
+    "The selected route line remains clear and continuous in both inspected route-fit frames."
+  ],
+  "limitations": [
+    "This is a visual review of 33 preserved screenshots, not all 316 PNGs in the artifact.",
+    "No new browser execution, physical device inspection, interaction replay or performance measurement was performed.",
+    "A screenshot proves visible overlap, but does not on its own establish the implementation cause or exact DOM rectangle.",
+    "The original input and audit assertions were not altered. A successful CI result is not interpreted as absence of these visual findings."
+  ]
+}

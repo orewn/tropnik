@@ -1,0 +1,372 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "physicalDevice": false,
+  "recovery": {
+    "reconstructedAfterScratchLoss": true,
+    "exactPreviousAuthoredBytesRecovered": false,
+    "previouslyPreparedSha256": "df9b9951ce4dd37e841a72edabf267a6f718d402eae196c9b7b84babf215a673",
+    "source": "Original GitHub Actions artifact, downloaded again and verified against API digest.",
+    "note": "This is a newly generated receipt, not the byte-identical lost authored JSON. Claims are limited to recovered source records and checks explicitly named below."
+  },
+  "sourceCommit": "14d6d6753994af458209b19a09e32bc317b3b2fc",
+  "runId": 43162456877,
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43162456877",
+  "artifact": {
+    "id": 13919790384,
+    "name": "tropnik-pages-browser-failure-1",
+    "bytes": 1737436,
+    "sha256": "c92baa6fdb1247b45873fb3058bfe021f73bbac5f5f2ab09bb5163bc50c35fae",
+    "apiDigestVerified": true,
+    "extractedMembersVerified": 9
+  },
+  "rawFailure": {
+    "bytes": 7666918,
+    "sha256": "0d33bc54892a4317dd03e27bdeb8bedfcaf1948814608f0a65bb9d9cd28f0354"
+  },
+  "profile": "desktop-webgl",
+  "error": {
+    "name": "Error",
+    "message": "The tropnik-canvas map did not settle: {\"rendering\":{\"painted\":true,\"drawnRoute\":\"\",\"tilesState\":\"error\",\"coverageReady\":true},\"camera\":{\"longitude\":179.99999934967354,\"latitude\":67.50000007453566,\"zoom\":6.272349250356769,\"tileSize\":256,\"centerX\":520.5,\"centerY\":464},\"engine\":\"tropnik-canvas\",\"route\":\"\",\"moving\":false,\"visible\":true,\"rect\":{\"left\":384,\"top\":72,\"width\":1041,\"height\":928,\"right\":1425,\"bottom\":1000},\"width\":1440,\"height\":1000,\"scrollWidth\":1425}",
+    "stack": "Error: The tropnik-canvas map did not settle: {\"rendering\":{\"painted\":true,\"drawnRoute\":\"\",\"tilesState\":\"error\",\"coverageReady\":true},\"camera\":{\"longitude\":179.99999934967354,\"latitude\":67.50000007453566,\"zoom\":6.272349250356769,\"tileSize\":256,\"centerX\":520.5,\"centerY\":464},\"engine\":\"tropnik-canvas\",\"route\":\"\",\"moving\":false,\"visible\":true,\"rect\":{\"left\":384,\"top\":72,\"width\":1041,\"height\":928,\"right\":1425,\"bottom\":1000},\"width\":1440,\"height\":1000,\"scrollWidth\":1425}\n    at waitValue (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:400:9)\n    at async settleMapCamera (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-zoom-audit.mjs:96:13)\n    at async snapshot (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-satellite-audit.mjs:272:60)\n    at async zoom (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-satellite-audit.mjs:333:162)\n    at async runSatelliteContinuityAudit (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-satellite-audit.mjs:362:148)\n    at async runZoomDesignAudit (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-zoom-audit.mjs:501:30)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:958:24"
+  },
+  "camera": {
+    "center": [
+      179.99999934967354,
+      67.50000007453566
+    ],
+    "zoom": 6.272349250356769,
+    "bearingDegrees": 0
+  },
+  "viewport": {
+    "width": 1041,
+    "height": 928,
+    "padding": {
+      "top": 96,
+      "right": 88,
+      "bottom": 96,
+      "left": 40
+    }
+  },
+  "paddedVisibleBounds": [
+    171.25840478926824,
+    64.79554075369865,
+    187.86834408926825,
+    69.92784083403751
+  ],
+  "state": {
+    "ready": true,
+    "loading": false,
+    "mode": "satellite",
+    "committedMode": "satellite",
+    "imageryLoading": false,
+    "reliefReady": false,
+    "localDetail": false,
+    "error": "Спутниковая карта загрузилась не полностью. Повторите загрузку.",
+    "residentTiles": 145,
+    "pendingTiles": 0,
+    "imageryTarget": "eox-bluemarble",
+    "imagerySource": "eox-bluemarble"
+  },
+  "coverage": {
+    "version": "e0ce67282bfd3694",
+    "lod": "regional",
+    "cells": [
+      "0b09-2",
+      "0b09-3",
+      "0b0a-",
+      "0c09-",
+      "0c0a-0",
+      "0c0a-1"
+    ],
+    "pending": 0,
+    "error": "",
+    "ready": true,
+    "revision": 3
+  },
+  "sourceErrors": [
+    {
+      "key": "relief:6/65/12:1:0:6:1",
+      "message": "Preview resource unavailable (404)"
+    },
+    {
+      "key": "relief:6/60/12:1:0:6:1",
+      "message": "Preview resource unavailable (404)"
+    },
+    {
+      "key": "relief:6/66/12:1:0:6:1",
+      "message": "Preview resource unavailable (404)"
+    },
+    {
+      "key": "eox-bluemarble:6/62/15:1:0:6:1",
+      "message": "Failed to fetch"
+    },
+    {
+      "key": "eox-bluemarble:6/62/16:1:0:6:1",
+      "message": "network error"
+    },
+    {
+      "key": "eox-bluemarble:6/65/15:1:0:6:1",
+      "message": "network error"
+    }
+  ],
+  "resourceCounts": {
+    "resident": 145,
+    "pending": 0,
+    "fetching": 0,
+    "decoding": false
+  },
+  "performanceIssues": [
+    {
+      "profile": "desktop-webgl",
+      "phase": "ui-smoothness/map-pan",
+      "metric": "frameP95Ms",
+      "value": 38.70000000006985,
+      "limit": 35
+    }
+  ],
+  "networkResets": [
+    {
+      "requestId": "5440.11805",
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/6/15/62.jpg",
+      "queryOmitted": false,
+      "method": "GET",
+      "resourceType": "Fetch",
+      "priority": "High",
+      "stage": "failed",
+      "startedAtEpochMs": 1794462842801.323,
+      "startedAtMonotonicSeconds": 1170.10668,
+      "lastEventAtMonotonicSeconds": 1170.799625,
+      "decodedBytes": 0,
+      "encodedBytes": 0,
+      "finishedAtEpochMs": 1794462843495,
+      "durationMs": 692.9450000000088,
+      "errorText": "net::ERR_CONNECTION_RESET",
+      "canceled": false,
+      "ageMs": 692.9072839999571,
+      "idleMs": 0.13992599991615862
+    },
+    {
+      "requestId": "5440.11809",
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/6/16/62.jpg",
+      "queryOmitted": false,
+      "method": "GET",
+      "resourceType": "Fetch",
+      "priority": "High",
+      "stage": "failed",
+      "startedAtEpochMs": 1794462842923.045,
+      "startedAtMonotonicSeconds": 1170.228404,
+      "lastEventAtMonotonicSeconds": 1170.800519,
+      "decodedBytes": 14872,
+      "encodedBytes": 0,
+      "status": 200,
+      "protocol": "h2",
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "timing": {
+        "requestTime": 1170.228932,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 197.269,
+        "sendEnd": 197.45,
+        "receiveHeadersStart": 411.423,
+        "receiveHeadersEnd": 411.553,
+        "workerStart": -0.331,
+        "workerReady": -0.252,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1
+      },
+      "finishedAtEpochMs": 1794462843496,
+      "durationMs": 572.1149999999398,
+      "errorText": "net::ERR_CONNECTION_RESET",
+      "canceled": false,
+      "ageMs": 572.1370030000107,
+      "idleMs": 0.006209000013768673
+    },
+    {
+      "requestId": "5440.11807",
+      "url": "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/6/15/1.jpg",
+      "queryOmitted": false,
+      "method": "GET",
+      "resourceType": "Fetch",
+      "priority": "High",
+      "stage": "failed",
+      "startedAtEpochMs": 1794462842818.2239,
+      "startedAtMonotonicSeconds": 1170.123582,
+      "lastEventAtMonotonicSeconds": 1170.800909,
+      "decodedBytes": 14873,
+      "encodedBytes": 0,
+      "status": 200,
+      "protocol": "h2",
+      "mimeType": "image/png",
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "timing": {
+        "requestTime": 1170.124235,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 302.023,
+        "sendEnd": 302.149,
+        "receiveHeadersStart": 530.279,
+        "receiveHeadersEnd": 530.432,
+        "workerStart": -0.32,
+        "workerReady": -0.186,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1
+      },
+      "finishedAtEpochMs": 1794462843496,
+      "durationMs": 677.3270000001048,
+      "errorText": "net::ERR_CONNECTION_RESET",
+      "canceled": false,
+      "ageMs": 677.4140459999908,
+      "idleMs": 0.0034150000428780913
+    }
+  ],
+  "desktopPan": {
+    "profile": "desktop-webgl",
+    "officialFrames": {
+      "samples": 174,
+      "callbackHz": 54.420917649265775,
+      "isPresentedFps": false,
+      "p95Ms": 38.70000000006985,
+      "maxGapMs": 46.20000000006985,
+      "over50ms": 0
+    },
+    "fullWindowRecomputed": {
+      "count": 173,
+      "medianMs": 16.699999999953434,
+      "p95Ms": 38.70000000006985,
+      "maxMs": 46.20000000006985,
+      "over50ms": 0
+    },
+    "windowStartedAtMs": 14555.900000000023,
+    "windowEndedAtMs": 17753.20000000007,
+    "windowDurationMs": 3197.3000000000466,
+    "pointerDownAtMs": 14573,
+    "pointerUpAtMs": 15257.900000000023,
+    "postReleaseTailMs": 2495.3000000000466,
+    "pressToRelease": {
+      "count": 23,
+      "medianMs": 36.699999999953434,
+      "p95Ms": 45.199999999953434,
+      "maxMs": 46.20000000006985,
+      "over50ms": 0
+    },
+    "pressToReleaseMedianRanks": {
+      "oneBasedRanks": [
+        12
+      ],
+      "valuesMs": [
+        36.699999999953434
+      ]
+    },
+    "leadingTwelve": {
+      "count": 12,
+      "medianMs": 40.0,
+      "p95Ms": 46.20000000006985,
+      "maxMs": 46.20000000006985,
+      "over50ms": 0
+    },
+    "rawLeadingTwelve": [
+      {
+        "fromMs": 14586.300000000047,
+        "toMs": 14623,
+        "gapMs": 36.699999999953434
+      },
+      {
+        "fromMs": 14623,
+        "toMs": 14664,
+        "gapMs": 41
+      },
+      {
+        "fromMs": 14664,
+        "toMs": 14702.70000000007,
+        "gapMs": 38.70000000006985
+      },
+      {
+        "fromMs": 14702.70000000007,
+        "toMs": 14741.100000000093,
+        "gapMs": 38.40000000002328
+      },
+      {
+        "fromMs": 14741.100000000093,
+        "toMs": 14778.5,
+        "gapMs": 37.39999999990687
+      },
+      {
+        "fromMs": 14778.5,
+        "toMs": 14819.900000000023,
+        "gapMs": 41.40000000002328
+      },
+      {
+        "fromMs": 14819.900000000023,
+        "toMs": 14866.100000000093,
+        "gapMs": 46.20000000006985
+      },
+      {
+        "fromMs": 14866.100000000093,
+        "toMs": 14911.300000000047,
+        "gapMs": 45.199999999953434
+      },
+      {
+        "fromMs": 14911.300000000047,
+        "toMs": 14949.900000000023,
+        "gapMs": 38.59999999997672
+      },
+      {
+        "fromMs": 14949.900000000023,
+        "toMs": 14989.100000000093,
+        "gapMs": 39.20000000006985
+      },
+      {
+        "fromMs": 14989.100000000093,
+        "toMs": 15030.20000000007,
+        "gapMs": 41.09999999997672
+      },
+      {
+        "fromMs": 15030.20000000007,
+        "toMs": 15071,
+        "gapMs": 40.79999999993015
+      }
+    ],
+    "nativeInput": {
+      "moves": 12,
+      "requestedHoldMs": 200,
+      "lastMoveAckToReleaseSentMs": 225.4431770000374,
+      "delta": {
+        "dx": 64,
+        "dy": 12
+      },
+      "deliveredMoveEventsCaptured": 0,
+      "deliveredHoldMs": null
+    },
+    "instrumented": false,
+    "cpuSlowdownRate": 1,
+    "performanceIssues": [
+      {
+        "profile": "desktop-webgl",
+        "phase": "ui-smoothness/map-pan",
+        "metric": "frameP95Ms",
+        "value": 38.70000000006985,
+        "limit": 35
+      }
+    ]
+  },
+  "diagnosis": {
+    "separateFailures": true,
+    "panExplainedByLaterNetworkReset": false,
+    "networkFix": "One bounded abort-aware 150 ms retry for remote tile fetch/body network TypeError, preserving the original shared deadline and slot.",
+    "performanceFixClaimedByThisFailureReceipt": false
+  }
+}

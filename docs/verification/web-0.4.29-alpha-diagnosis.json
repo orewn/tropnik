@@ -1,0 +1,2003 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "physicalDevice": false,
+  "recovery": {
+    "reconstructedAfterScratchLoss": true,
+    "exactPreviousAuthoredBytesRecovered": false,
+    "previouslyPreparedSha256": "b0fdcb510ceaa1d288582fc41b5075a6441334b9def15e198325764ce20e5a66",
+    "source": "Original GitHub Actions artifact, downloaded again and verified against API digest.",
+    "note": "This is a newly generated receipt, not the byte-identical lost authored JSON. Claims are limited to recovered source records and checks explicitly named below."
+  },
+  "sourceCommit": "0bb25e26f93562af55642157a11527f166fdfcc1",
+  "runId": 43172310438,
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43172310438",
+  "artifact": {
+    "id": 13922688545,
+    "name": "tropnik-map-pan-alpha-paired-43172310438-1",
+    "bytes": 5865611,
+    "sha256": "201d878e28e0da56a0f805fd05103d1e2a5f40c6f569427186415e4b4d9580ea",
+    "apiDigestVerified": true,
+    "extractedMembersVerified": 50
+  },
+  "baselineCommit": "14d6d6753994af458209b19a09e32bc317b3b2fc",
+  "provenance": {
+    "schemaVersion": 1,
+    "diagnosticOnly": true,
+    "verified": false,
+    "releaseEligible": false,
+    "baselineCommit": "14d6d6753994af458209b19a09e32bc317b3b2fc",
+    "candidateCommit": "0bb25e26f93562af55642157a11527f166fdfcc1",
+    "order": [
+      "A1",
+      "B1",
+      "A2",
+      "B2"
+    ],
+    "changedPaths": [
+      ".github/workflows/map-pan-diagnostics.yml",
+      "android/app/src/main/assets/custom-map/android-bootstrap.js",
+      "android/app/src/main/assets/custom-map/chunks/custom-map-entry-D9bEYNVr.js",
+      "android/app/src/main/assets/custom-map/chunks/custom-map-entry-O8dLE4re.js",
+      "android/app/src/main/assets/custom-map/manifest.json",
+      "android/app/src/main/assets/custom-map/map-runtime.js",
+      "android/app/src/main/assets/custom-map/workers/custom-map-tiles.worker-BOzbsGer.js",
+      "android/app/src/main/assets/custom-map/workers/custom-map-tiles.worker-DIXTfJlZ.js",
+      "tools/pages-preview/map-pan-paired-diagnostic.mjs",
+      "tools/pages-preview/tests/browser-map-vector-opaque.browser.mjs",
+      "tools/pages-preview/tests/fixtures/map-vector-opaque.mjs",
+      "tools/pages-preview/tests/map-pan-paired-diagnostic.test.mjs",
+      "web/lib/custom-map-tiles.worker.ts",
+      "web/public/custom-map/android-bootstrap.js",
+      "web/public/custom-map/chunks/custom-map-entry-D9bEYNVr.js",
+      "web/public/custom-map/chunks/custom-map-entry-O8dLE4re.js",
+      "web/public/custom-map/manifest.json",
+      "web/public/custom-map/map-runtime.js",
+      "web/public/custom-map/workers/custom-map-tiles.worker-BOzbsGer.js",
+      "web/public/custom-map/workers/custom-map-tiles.worker-DIXTfJlZ.js",
+      "web/public/sw.js",
+      "web/tests/custom-map-tiles-worker.test.mjs"
+    ],
+    "baselineWorkerSHA256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+    "candidateWorkerSHA256": "f5d5a7eb41f1d504f66aff3e35e1114d8454c89b678b1ec930779ec18668d804",
+    "builds": {
+      "baseline": {
+        "buildId": "8f9a6a8415283e54",
+        "inputCount": 2133,
+        "sourceInputsSha256": "86d863b519542bce661a0245721e5770e18abeb2fdf807851c5d265d37c0d2d8",
+        "buildInfoSHA256": "6f6fe09b38bd2355f88356715528ae7be38c9aafc01943c966dd6dd3c053c7f1"
+      },
+      "candidate": {
+        "buildId": "241c80cfe357d5fb",
+        "inputCount": 2137,
+        "sourceInputsSha256": "b4d636215b84d0006ed11a8b08898647a4cdf35b4d45de473197e9245ae36b78",
+        "buildInfoSHA256": "22d386b6cf308984e6789e427612672e499b58f2542d8d550a9eebed27cb28bb"
+      }
+    }
+  },
+  "provenanceFile": {
+    "bytes": 2440,
+    "sha256": "d69056ee7f3ca7c87e9cc2903af38838945ffee6af3d38fe87d161bd6732d166"
+  },
+  "pairedReportFile": {
+    "bytes": 169420,
+    "sha256": "ac638be662b5888c81576f7836a67308fac4e6121d1cd2e41759afde096ed42c"
+  },
+  "scheduledOutcomes": {
+    "schemaVersion": 1,
+    "diagnosticOnly": true,
+    "verified": false,
+    "releaseEligible": false,
+    "sourceCommit": "0bb25e26f93562af55642157a11527f166fdfcc1",
+    "baselineCommit": "14d6d6753994af458209b19a09e32bc317b3b2fc",
+    "inputsOutcome": "success",
+    "parityOutcome": "success",
+    "runs": [
+      {
+        "label": "A1",
+        "variant": "baseline",
+        "outcome": "success"
+      },
+      {
+        "label": "B1",
+        "variant": "candidate",
+        "outcome": "success"
+      },
+      {
+        "label": "A2",
+        "variant": "baseline",
+        "outcome": "success"
+      },
+      {
+        "label": "B2",
+        "variant": "candidate",
+        "outcome": "success"
+      }
+    ]
+  },
+  "runs": [
+    {
+      "label": "A1",
+      "variant": "baseline",
+      "outcome": "success",
+      "sourceCommit": "14d6d6753994af458209b19a09e32bc317b3b2fc",
+      "reportSHA256": "47ea4a5f218498660576a90bb4f6e8eb2ff9af16208b0ee85e2c076e2d279003",
+      "buildInfoSHA256": "6f6fe09b38bd2355f88356715528ae7be38c9aafc01943c966dd6dd3c053c7f1",
+      "userDataDir": "/tmp/tropnik-chrome-3920",
+      "environment": {
+        "profile": "chromium-headless-software-swiftshader-webgl-v1",
+        "browser": {
+          "product": "Chrome/156.0.8078.79",
+          "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+          "protocolVersion": "1.3",
+          "jsVersion": "15.6.75.27",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+        },
+        "gpu": {
+          "devices": [
+            {
+              "vendorId": 65535,
+              "deviceId": 65535,
+              "vendorString": "Google Inc. (Google)",
+              "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+              "driverVendor": "SwANGLE",
+              "driverVersion": "5.0.0"
+            }
+          ],
+          "auxAttributes": {
+            "displayType": "ANGLE_SWIFTSHADER",
+            "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+            "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "glVendor": "Google Inc. (Google)",
+            "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+            "skiaBackendType": "None",
+            "targetCpuBits": 64
+          },
+          "featureStatus": {
+            "2d_canvas": "unavailable_software",
+            "direct_rendering_display_compositor": "disabled_off_ok",
+            "gpu_compositing": "disabled_software",
+            "multiple_raster_threads": "enabled_on",
+            "opengl": "disabled_off",
+            "rasterization": "disabled_software",
+            "raw_draw": "disabled_off_ok",
+            "skia_graphite": "disabled_off",
+            "trees_in_viz": "disabled_off",
+            "video_decode": "disabled_software",
+            "video_encode": "disabled_software",
+            "vulkan": "disabled_off",
+            "webgl": "unavailable_software",
+            "webgpu": "unavailable_software",
+            "webgpu_on_vk_via_gl_interop": "disabled_off",
+            "webnn": "unavailable_software"
+          }
+        },
+        "runner": {
+          "os": {
+            "platform": "linux",
+            "release": "7.0.0-1017-azure",
+            "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+            "arch": "x64"
+          },
+          "cpu": {
+            "models": [
+              "AMD EPYC 7763 64-Core Processor"
+            ],
+            "logicalCount": 4,
+            "availableParallelism": 4
+          },
+          "totalMemoryBytes": 16760344576,
+          "image": {
+            "os": "ubuntu24",
+            "version": "20261101.360.1"
+          }
+        }
+      },
+      "profiles": [
+        {
+          "profile": "android-portrait",
+          "officialFrames": {
+            "samples": 77,
+            "callbackHz": 60.132760640374855,
+            "isPresentedFps": false,
+            "p95Ms": 23.400000000023283,
+            "maxGapMs": 23.699999999982538,
+            "over50ms": 0
+          },
+          "fullWindowRecomputed": {
+            "count": 76,
+            "medianMs": 16.70000000001164,
+            "p95Ms": 23.400000000023283,
+            "maxMs": 23.699999999982538,
+            "over50ms": 0
+          },
+          "windowStartedAtMs": 16796.79999999999,
+          "windowEndedAtMs": 18077.29999999999,
+          "windowDurationMs": 1280.5,
+          "pointerDownAtMs": 16810.899999999994,
+          "pointerUpAtMs": 17611.600000000006,
+          "postReleaseTailMs": 465.69999999998254,
+          "pressToRelease": {
+            "count": 47,
+            "medianMs": 16.800000000017462,
+            "p95Ms": 23.400000000023283,
+            "maxMs": 23.699999999982538,
+            "over50ms": 0
+          },
+          "pressToReleaseMedianRanks": {
+            "oneBasedRanks": [
+              24
+            ],
+            "valuesMs": [
+              16.800000000017462
+            ]
+          },
+          "leadingTwelve": {
+            "count": 12,
+            "medianMs": 17.0,
+            "p95Ms": 23.400000000023283,
+            "maxMs": 23.400000000023283,
+            "over50ms": 0
+          },
+          "rawLeadingTwelve": [
+            {
+              "fromMs": 16826.70000000001,
+              "toMs": 16843.79999999999,
+              "gapMs": 17.099999999976717
+            },
+            {
+              "fromMs": 16843.79999999999,
+              "toMs": 16867.20000000001,
+              "gapMs": 23.400000000023283
+            },
+            {
+              "fromMs": 16867.20000000001,
+              "toMs": 16876.70000000001,
+              "gapMs": 9.5
+            },
+            {
+              "fromMs": 16876.70000000001,
+              "toMs": 16893.70000000001,
+              "gapMs": 17.0
+            },
+            {
+              "fromMs": 16893.70000000001,
+              "toMs": 16917,
+              "gapMs": 23.29999999998836
+            },
+            {
+              "fromMs": 16917,
+              "toMs": 16926.70000000001,
+              "gapMs": 9.700000000011642
+            },
+            {
+              "fromMs": 16926.70000000001,
+              "toMs": 16943.70000000001,
+              "gapMs": 17.0
+            },
+            {
+              "fromMs": 16943.70000000001,
+              "toMs": 16967,
+              "gapMs": 23.29999999998836
+            },
+            {
+              "fromMs": 16967,
+              "toMs": 16976.70000000001,
+              "gapMs": 9.700000000011642
+            },
+            {
+              "fromMs": 16976.70000000001,
+              "toMs": 16993.600000000006,
+              "gapMs": 16.89999999999418
+            },
+            {
+              "fromMs": 16993.600000000006,
+              "toMs": 17016.100000000006,
+              "gapMs": 22.5
+            },
+            {
+              "fromMs": 17016.100000000006,
+              "toMs": 17026.70000000001,
+              "gapMs": 10.60000000000582
+            }
+          ],
+          "nativeInput": {
+            "moves": 12,
+            "requestedHoldMs": 200,
+            "lastMoveAckToReleaseSentMs": 225.54462400000193,
+            "delta": {
+              "dx": 64,
+              "dy": 12
+            },
+            "deliveredMoveEventsCaptured": 0,
+            "deliveredHoldMs": null
+          },
+          "instrumented": false,
+          "cpuSlowdownRate": 1,
+          "performanceIssues": []
+        },
+        {
+          "profile": "desktop-webgl",
+          "officialFrames": {
+            "samples": 215,
+            "callbackHz": 56.37717642122963,
+            "isPresentedFps": false,
+            "p95Ms": 32.30000000001746,
+            "maxGapMs": 39.80000000001746,
+            "over50ms": 0
+          },
+          "fullWindowRecomputed": {
+            "count": 214,
+            "medianMs": 16.699999999982538,
+            "p95Ms": 32.30000000001746,
+            "maxMs": 39.80000000001746,
+            "over50ms": 0
+          },
+          "windowStartedAtMs": 14985.700000000012,
+          "windowEndedAtMs": 18799.29999999999,
+          "windowDurationMs": 3813.5999999999767,
+          "pointerDownAtMs": 15002.200000000012,
+          "pointerUpAtMs": 15630.299999999988,
+          "postReleaseTailMs": 3169.0,
+          "pressToRelease": {
+            "count": 23,
+            "medianMs": 31.699999999982538,
+            "p95Ms": 37.29999999998836,
+            "maxMs": 39.40000000002328,
+            "over50ms": 0
+          },
+          "pressToReleaseMedianRanks": {
+            "oneBasedRanks": [
+              12
+            ],
+            "valuesMs": [
+              31.699999999982538
+            ]
+          },
+          "leadingTwelve": {
+            "count": 12,
+            "medianMs": 35.54999999998836,
+            "p95Ms": 39.40000000002328,
+            "maxMs": 39.40000000002328,
+            "over50ms": 0
+          },
+          "rawLeadingTwelve": [
+            {
+              "fromMs": 15016.100000000006,
+              "toMs": 15051.799999999988,
+              "gapMs": 35.69999999998254
+            },
+            {
+              "fromMs": 15051.799999999988,
+              "toMs": 15091.200000000012,
+              "gapMs": 39.40000000002328
+            },
+            {
+              "fromMs": 15091.200000000012,
+              "toMs": 15123.100000000006,
+              "gapMs": 31.89999999999418
+            },
+            {
+              "fromMs": 15123.100000000006,
+              "toMs": 15154.799999999988,
+              "gapMs": 31.699999999982538
+            },
+            {
+              "fromMs": 15154.799999999988,
+              "toMs": 15187.100000000006,
+              "gapMs": 32.30000000001746
+            },
+            {
+              "fromMs": 15187.100000000006,
+              "toMs": 15222.5,
+              "gapMs": 35.39999999999418
+            },
+            {
+              "fromMs": 15222.5,
+              "toMs": 15257.700000000012,
+              "gapMs": 35.20000000001164
+            },
+            {
+              "fromMs": 15257.700000000012,
+              "toMs": 15294.200000000012,
+              "gapMs": 36.5
+            },
+            {
+              "fromMs": 15294.200000000012,
+              "toMs": 15328.399999999994,
+              "gapMs": 34.19999999998254
+            },
+            {
+              "fromMs": 15328.399999999994,
+              "toMs": 15365.100000000006,
+              "gapMs": 36.70000000001164
+            },
+            {
+              "fromMs": 15365.100000000006,
+              "toMs": 15402.399999999994,
+              "gapMs": 37.29999999998836
+            },
+            {
+              "fromMs": 15402.399999999994,
+              "toMs": 15438.100000000006,
+              "gapMs": 35.70000000001164
+            }
+          ],
+          "nativeInput": {
+            "moves": 12,
+            "requestedHoldMs": 200,
+            "lastMoveAckToReleaseSentMs": 225.48643599999923,
+            "delta": {
+              "dx": 64,
+              "dy": 12
+            },
+            "deliveredMoveEventsCaptured": 0,
+            "deliveredHoldMs": null
+          },
+          "instrumented": false,
+          "cpuSlowdownRate": 1,
+          "performanceIssues": []
+        }
+      ]
+    },
+    {
+      "label": "B1",
+      "variant": "candidate",
+      "outcome": "success",
+      "sourceCommit": "0bb25e26f93562af55642157a11527f166fdfcc1",
+      "reportSHA256": "26f33ab8696b6e25524d33b62b5e3885660fef7295035df81df178a2bc20553f",
+      "buildInfoSHA256": "22d386b6cf308984e6789e427612672e499b58f2542d8d550a9eebed27cb28bb",
+      "userDataDir": "/tmp/tropnik-chrome-4260",
+      "environment": {
+        "profile": "chromium-headless-software-swiftshader-webgl-v1",
+        "browser": {
+          "product": "Chrome/156.0.8078.79",
+          "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+          "protocolVersion": "1.3",
+          "jsVersion": "15.6.75.27",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+        },
+        "gpu": {
+          "devices": [
+            {
+              "vendorId": 65535,
+              "deviceId": 65535,
+              "vendorString": "Google Inc. (Google)",
+              "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+              "driverVendor": "SwANGLE",
+              "driverVersion": "5.0.0"
+            }
+          ],
+          "auxAttributes": {
+            "displayType": "ANGLE_SWIFTSHADER",
+            "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+            "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "glVendor": "Google Inc. (Google)",
+            "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+            "skiaBackendType": "None",
+            "targetCpuBits": 64
+          },
+          "featureStatus": {
+            "2d_canvas": "unavailable_software",
+            "direct_rendering_display_compositor": "disabled_off_ok",
+            "gpu_compositing": "disabled_software",
+            "multiple_raster_threads": "enabled_on",
+            "opengl": "disabled_off",
+            "rasterization": "disabled_software",
+            "raw_draw": "disabled_off_ok",
+            "skia_graphite": "disabled_off",
+            "trees_in_viz": "disabled_off",
+            "video_decode": "disabled_software",
+            "video_encode": "disabled_software",
+            "vulkan": "disabled_off",
+            "webgl": "unavailable_software",
+            "webgpu": "unavailable_software",
+            "webgpu_on_vk_via_gl_interop": "disabled_off",
+            "webnn": "unavailable_software"
+          }
+        },
+        "runner": {
+          "os": {
+            "platform": "linux",
+            "release": "7.0.0-1017-azure",
+            "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+            "arch": "x64"
+          },
+          "cpu": {
+            "models": [
+              "AMD EPYC 7763 64-Core Processor"
+            ],
+            "logicalCount": 4,
+            "availableParallelism": 4
+          },
+          "totalMemoryBytes": 16760344576,
+          "image": {
+            "os": "ubuntu24",
+            "version": "20261101.360.1"
+          }
+        }
+      },
+      "profiles": [
+        {
+          "profile": "android-portrait",
+          "officialFrames": {
+            "samples": 77,
+            "callbackHz": 60.1139823561561,
+            "isPresentedFps": false,
+            "p95Ms": 23.900000000023283,
+            "maxGapMs": 25.70000000001164,
+            "over50ms": 0
+          },
+          "fullWindowRecomputed": {
+            "count": 76,
+            "medianMs": 16.70000000001164,
+            "p95Ms": 23.900000000023283,
+            "maxMs": 25.70000000001164,
+            "over50ms": 0
+          },
+          "windowStartedAtMs": 16106.799999999988,
+          "windowEndedAtMs": 17387.699999999983,
+          "windowDurationMs": 1280.8999999999942,
+          "pointerDownAtMs": 16121.100000000006,
+          "pointerUpAtMs": 16920.79999999999,
+          "postReleaseTailMs": 466.8999999999942,
+          "pressToRelease": {
+            "count": 47,
+            "medianMs": 16.79999999998836,
+            "p95Ms": 24.20000000001164,
+            "maxMs": 25.70000000001164,
+            "over50ms": 0
+          },
+          "pressToReleaseMedianRanks": {
+            "oneBasedRanks": [
+              24
+            ],
+            "valuesMs": [
+              16.79999999998836
+            ]
+          },
+          "leadingTwelve": {
+            "count": 12,
+            "medianMs": 17.05000000000291,
+            "p95Ms": 25.70000000001164,
+            "maxMs": 25.70000000001164,
+            "over50ms": 0
+          },
+          "rawLeadingTwelve": [
+            {
+              "fromMs": 16136.799999999988,
+              "toMs": 16153.899999999994,
+              "gapMs": 17.10000000000582
+            },
+            {
+              "fromMs": 16153.899999999994,
+              "toMs": 16178.299999999988,
+              "gapMs": 24.39999999999418
+            },
+            {
+              "fromMs": 16178.299999999988,
+              "toMs": 16186.699999999983,
+              "gapMs": 8.39999999999418
+            },
+            {
+              "fromMs": 16186.699999999983,
+              "toMs": 16203.699999999983,
+              "gapMs": 17.0
+            },
+            {
+              "fromMs": 16203.699999999983,
+              "toMs": 16225.699999999983,
+              "gapMs": 22.0
+            },
+            {
+              "fromMs": 16225.699999999983,
+              "toMs": 16236.799999999988,
+              "gapMs": 11.10000000000582
+            },
+            {
+              "fromMs": 16236.799999999988,
+              "toMs": 16253.699999999983,
+              "gapMs": 16.89999999999418
+            },
+            {
+              "fromMs": 16253.699999999983,
+              "toMs": 16277.600000000006,
+              "gapMs": 23.900000000023283
+            },
+            {
+              "fromMs": 16277.600000000006,
+              "toMs": 16286.699999999983,
+              "gapMs": 9.099999999976717
+            },
+            {
+              "fromMs": 16286.699999999983,
+              "toMs": 16303.799999999988,
+              "gapMs": 17.10000000000582
+            },
+            {
+              "fromMs": 16303.799999999988,
+              "toMs": 16329.5,
+              "gapMs": 25.70000000001164
+            },
+            {
+              "fromMs": 16329.5,
+              "toMs": 16336.799999999988,
+              "gapMs": 7.2999999999883585
+            }
+          ],
+          "nativeInput": {
+            "moves": 12,
+            "requestedHoldMs": 200,
+            "lastMoveAckToReleaseSentMs": 225.4772370000028,
+            "delta": {
+              "dx": 64,
+              "dy": 12
+            },
+            "deliveredMoveEventsCaptured": 0,
+            "deliveredHoldMs": null
+          },
+          "instrumented": false,
+          "cpuSlowdownRate": 1,
+          "performanceIssues": []
+        },
+        {
+          "profile": "desktop-webgl",
+          "officialFrames": {
+            "samples": 223,
+            "callbackHz": 56.259145264644786,
+            "isPresentedFps": false,
+            "p95Ms": 32.30000000001746,
+            "maxGapMs": 43,
+            "over50ms": 0
+          },
+          "fullWindowRecomputed": {
+            "count": 222,
+            "medianMs": 16.699999999982538,
+            "p95Ms": 32.30000000001746,
+            "maxMs": 43.0,
+            "over50ms": 0
+          },
+          "windowStartedAtMs": 14990.299999999988,
+          "windowEndedAtMs": 18954.100000000006,
+          "windowDurationMs": 3963.8000000000175,
+          "pointerDownAtMs": 15007.100000000006,
+          "pointerUpAtMs": 15661.600000000006,
+          "postReleaseTailMs": 3292.5,
+          "pressToRelease": {
+            "count": 24,
+            "medianMs": 24.5,
+            "p95Ms": 42.30000000001746,
+            "maxMs": 43.0,
+            "over50ms": 0
+          },
+          "pressToReleaseMedianRanks": {
+            "oneBasedRanks": [
+              12,
+              13
+            ],
+            "valuesMs": [
+              16.800000000017462,
+              32.19999999998254
+            ]
+          },
+          "leadingTwelve": {
+            "count": 12,
+            "medianMs": 38.14999999999418,
+            "p95Ms": 43.0,
+            "maxMs": 43.0,
+            "over50ms": 0
+          },
+          "rawLeadingTwelve": [
+            {
+              "fromMs": 15020.399999999994,
+              "toMs": 15055.600000000006,
+              "gapMs": 35.20000000001164
+            },
+            {
+              "fromMs": 15055.600000000006,
+              "toMs": 15095.600000000006,
+              "gapMs": 40.0
+            },
+            {
+              "fromMs": 15095.600000000006,
+              "toMs": 15127.799999999988,
+              "gapMs": 32.19999999998254
+            },
+            {
+              "fromMs": 15127.799999999988,
+              "toMs": 15160.199999999983,
+              "gapMs": 32.39999999999418
+            },
+            {
+              "fromMs": 15160.199999999983,
+              "toMs": 15192.5,
+              "gapMs": 32.30000000001746
+            },
+            {
+              "fromMs": 15192.5,
+              "toMs": 15231.199999999983,
+              "gapMs": 38.69999999998254
+            },
+            {
+              "fromMs": 15231.199999999983,
+              "toMs": 15273.5,
+              "gapMs": 42.30000000001746
+            },
+            {
+              "fromMs": 15273.5,
+              "toMs": 15314.899999999994,
+              "gapMs": 41.39999999999418
+            },
+            {
+              "fromMs": 15314.899999999994,
+              "toMs": 15352.699999999983,
+              "gapMs": 37.79999999998836
+            },
+            {
+              "fromMs": 15352.699999999983,
+              "toMs": 15395.699999999983,
+              "gapMs": 43.0
+            },
+            {
+              "fromMs": 15395.699999999983,
+              "toMs": 15434.199999999983,
+              "gapMs": 38.5
+            },
+            {
+              "fromMs": 15434.199999999983,
+              "toMs": 15468.299999999988,
+              "gapMs": 34.10000000000582
+            }
+          ],
+          "nativeInput": {
+            "moves": 12,
+            "requestedHoldMs": 200,
+            "lastMoveAckToReleaseSentMs": 225.4873129999978,
+            "delta": {
+              "dx": 64,
+              "dy": 12
+            },
+            "deliveredMoveEventsCaptured": 0,
+            "deliveredHoldMs": null
+          },
+          "instrumented": false,
+          "cpuSlowdownRate": 1,
+          "performanceIssues": []
+        }
+      ]
+    },
+    {
+      "label": "A2",
+      "variant": "baseline",
+      "outcome": "success",
+      "sourceCommit": "14d6d6753994af458209b19a09e32bc317b3b2fc",
+      "reportSHA256": "473da7c8b0e519cadabe6a91a8a8b20d9061f6e258085fbddcf215f0e05cbf6f",
+      "buildInfoSHA256": "6f6fe09b38bd2355f88356715528ae7be38c9aafc01943c966dd6dd3c053c7f1",
+      "userDataDir": "/tmp/tropnik-chrome-4597",
+      "environment": {
+        "profile": "chromium-headless-software-swiftshader-webgl-v1",
+        "browser": {
+          "product": "Chrome/156.0.8078.79",
+          "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+          "protocolVersion": "1.3",
+          "jsVersion": "15.6.75.27",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+        },
+        "gpu": {
+          "devices": [
+            {
+              "vendorId": 65535,
+              "deviceId": 65535,
+              "vendorString": "Google Inc. (Google)",
+              "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+              "driverVendor": "SwANGLE",
+              "driverVersion": "5.0.0"
+            }
+          ],
+          "auxAttributes": {
+            "displayType": "ANGLE_SWIFTSHADER",
+            "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+            "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "glVendor": "Google Inc. (Google)",
+            "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+            "skiaBackendType": "None",
+            "targetCpuBits": 64
+          },
+          "featureStatus": {
+            "2d_canvas": "unavailable_software",
+            "direct_rendering_display_compositor": "disabled_off_ok",
+            "gpu_compositing": "disabled_software",
+            "multiple_raster_threads": "enabled_on",
+            "opengl": "disabled_off",
+            "rasterization": "disabled_software",
+            "raw_draw": "disabled_off_ok",
+            "skia_graphite": "disabled_off",
+            "trees_in_viz": "disabled_off",
+            "video_decode": "disabled_software",
+            "video_encode": "disabled_software",
+            "vulkan": "disabled_off",
+            "webgl": "unavailable_software",
+            "webgpu": "unavailable_software",
+            "webgpu_on_vk_via_gl_interop": "disabled_off",
+            "webnn": "unavailable_software"
+          }
+        },
+        "runner": {
+          "os": {
+            "platform": "linux",
+            "release": "7.0.0-1017-azure",
+            "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+            "arch": "x64"
+          },
+          "cpu": {
+            "models": [
+              "AMD EPYC 7763 64-Core Processor"
+            ],
+            "logicalCount": 4,
+            "availableParallelism": 4
+          },
+          "totalMemoryBytes": 16760344576,
+          "image": {
+            "os": "ubuntu24",
+            "version": "20261101.360.1"
+          }
+        }
+      },
+      "profiles": [
+        {
+          "profile": "android-portrait",
+          "officialFrames": {
+            "samples": 77,
+            "callbackHz": 60.12337003201593,
+            "isPresentedFps": false,
+            "p95Ms": 23.5,
+            "maxGapMs": 29,
+            "over50ms": 0
+          },
+          "fullWindowRecomputed": {
+            "count": 76,
+            "medianMs": 16.70000000001164,
+            "p95Ms": 23.5,
+            "maxMs": 29.0,
+            "over50ms": 0
+          },
+          "windowStartedAtMs": 16525.400000000023,
+          "windowEndedAtMs": 17806.099999999977,
+          "windowDurationMs": 1280.6999999999534,
+          "pointerDownAtMs": 16539.29999999999,
+          "pointerUpAtMs": 17339.29999999999,
+          "postReleaseTailMs": 466.79999999998836,
+          "pressToRelease": {
+            "count": 47,
+            "medianMs": 16.800000000046566,
+            "p95Ms": 23.800000000046566,
+            "maxMs": 29.0,
+            "over50ms": 0
+          },
+          "pressToReleaseMedianRanks": {
+            "oneBasedRanks": [
+              24
+            ],
+            "valuesMs": [
+              16.800000000046566
+            ]
+          },
+          "leadingTwelve": {
+            "count": 12,
+            "medianMs": 17.0,
+            "p95Ms": 29.0,
+            "maxMs": 29.0,
+            "over50ms": 0
+          },
+          "rawLeadingTwelve": [
+            {
+              "fromMs": 16555.099999999977,
+              "toMs": 16572.29999999999,
+              "gapMs": 17.20000000001164
+            },
+            {
+              "fromMs": 16572.29999999999,
+              "toMs": 16595.79999999999,
+              "gapMs": 23.5
+            },
+            {
+              "fromMs": 16595.79999999999,
+              "toMs": 16605.20000000001,
+              "gapMs": 9.400000000023283
+            },
+            {
+              "fromMs": 16605.20000000001,
+              "toMs": 16622.099999999977,
+              "gapMs": 16.899999999965075
+            },
+            {
+              "fromMs": 16622.099999999977,
+              "toMs": 16644.70000000001,
+              "gapMs": 22.600000000034925
+            },
+            {
+              "fromMs": 16644.70000000001,
+              "toMs": 16655.20000000001,
+              "gapMs": 10.5
+            },
+            {
+              "fromMs": 16655.20000000001,
+              "toMs": 16672.099999999977,
+              "gapMs": 16.899999999965075
+            },
+            {
+              "fromMs": 16672.099999999977,
+              "toMs": 16696.29999999999,
+              "gapMs": 24.20000000001164
+            },
+            {
+              "fromMs": 16696.29999999999,
+              "toMs": 16705.099999999977,
+              "gapMs": 8.799999999988358
+            },
+            {
+              "fromMs": 16705.099999999977,
+              "toMs": 16722.20000000001,
+              "gapMs": 17.100000000034925
+            },
+            {
+              "fromMs": 16722.20000000001,
+              "toMs": 16751.20000000001,
+              "gapMs": 29.0
+            },
+            {
+              "fromMs": 16751.20000000001,
+              "toMs": 16755.70000000001,
+              "gapMs": 4.5
+            }
+          ],
+          "nativeInput": {
+            "moves": 12,
+            "requestedHoldMs": 200,
+            "lastMoveAckToReleaseSentMs": 225.50192100000277,
+            "delta": {
+              "dx": 64,
+              "dy": 12
+            },
+            "deliveredMoveEventsCaptured": 0,
+            "deliveredHoldMs": null
+          },
+          "instrumented": false,
+          "cpuSlowdownRate": 1,
+          "performanceIssues": []
+        },
+        {
+          "profile": "desktop-webgl",
+          "officialFrames": {
+            "samples": 231,
+            "callbackHz": 56.14700306256364,
+            "isPresentedFps": false,
+            "p95Ms": 33.70000000001164,
+            "maxGapMs": 43.600000000034925,
+            "over50ms": 0
+          },
+          "fullWindowRecomputed": {
+            "count": 230,
+            "medianMs": 16.699999999953434,
+            "p95Ms": 33.70000000001164,
+            "maxMs": 43.600000000034925,
+            "over50ms": 0
+          },
+          "windowStartedAtMs": 15103.700000000012,
+          "windowEndedAtMs": 19217.900000000023,
+          "windowDurationMs": 4114.200000000012,
+          "pointerDownAtMs": 15120.599999999977,
+          "pointerUpAtMs": 15779.200000000012,
+          "postReleaseTailMs": 3438.7000000000116,
+          "pressToRelease": {
+            "count": 23,
+            "medianMs": 33.29999999998836,
+            "p95Ms": 40.59999999997672,
+            "maxMs": 43.600000000034925,
+            "over50ms": 0
+          },
+          "pressToReleaseMedianRanks": {
+            "oneBasedRanks": [
+              12
+            ],
+            "valuesMs": [
+              33.29999999998836
+            ]
+          },
+          "leadingTwelve": {
+            "count": 12,
+            "medianMs": 38.05000000001746,
+            "p95Ms": 43.600000000034925,
+            "maxMs": 43.600000000034925,
+            "over50ms": 0
+          },
+          "rawLeadingTwelve": [
+            {
+              "fromMs": 15134.200000000012,
+              "toMs": 15174.799999999988,
+              "gapMs": 40.59999999997672
+            },
+            {
+              "fromMs": 15174.799999999988,
+              "toMs": 15210.099999999977,
+              "gapMs": 35.29999999998836
+            },
+            {
+              "fromMs": 15210.099999999977,
+              "toMs": 15243.799999999988,
+              "gapMs": 33.70000000001164
+            },
+            {
+              "fromMs": 15243.799999999988,
+              "toMs": 15277.900000000023,
+              "gapMs": 34.100000000034925
+            },
+            {
+              "fromMs": 15277.900000000023,
+              "toMs": 15311.200000000012,
+              "gapMs": 33.29999999998836
+            },
+            {
+              "fromMs": 15311.200000000012,
+              "toMs": 15351.099999999977,
+              "gapMs": 39.899999999965075
+            },
+            {
+              "fromMs": 15351.099999999977,
+              "toMs": 15390.400000000023,
+              "gapMs": 39.300000000046566
+            },
+            {
+              "fromMs": 15390.400000000023,
+              "toMs": 15430.799999999988,
+              "gapMs": 40.399999999965075
+            },
+            {
+              "fromMs": 15430.799999999988,
+              "toMs": 15470.599999999977,
+              "gapMs": 39.79999999998836
+            },
+            {
+              "fromMs": 15470.599999999977,
+              "toMs": 15514.200000000012,
+              "gapMs": 43.600000000034925
+            },
+            {
+              "fromMs": 15514.200000000012,
+              "toMs": 15551,
+              "gapMs": 36.79999999998836
+            },
+            {
+              "fromMs": 15551,
+              "toMs": 15586.599999999977,
+              "gapMs": 35.59999999997672
+            }
+          ],
+          "nativeInput": {
+            "moves": 12,
+            "requestedHoldMs": 200,
+            "lastMoveAckToReleaseSentMs": 225.49307399999816,
+            "delta": {
+              "dx": 64,
+              "dy": 12
+            },
+            "deliveredMoveEventsCaptured": 0,
+            "deliveredHoldMs": null
+          },
+          "instrumented": false,
+          "cpuSlowdownRate": 1,
+          "performanceIssues": []
+        }
+      ]
+    },
+    {
+      "label": "B2",
+      "variant": "candidate",
+      "outcome": "success",
+      "sourceCommit": "0bb25e26f93562af55642157a11527f166fdfcc1",
+      "reportSHA256": "b60fe43a5179891b74bdb23872d4d29f195a859f8be21f75ef7d027ae3d0a810",
+      "buildInfoSHA256": "22d386b6cf308984e6789e427612672e499b58f2542d8d550a9eebed27cb28bb",
+      "userDataDir": "/tmp/tropnik-chrome-4981",
+      "environment": {
+        "profile": "chromium-headless-software-swiftshader-webgl-v1",
+        "browser": {
+          "product": "Chrome/156.0.8078.79",
+          "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+          "protocolVersion": "1.3",
+          "jsVersion": "15.6.75.27",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+        },
+        "gpu": {
+          "devices": [
+            {
+              "vendorId": 65535,
+              "deviceId": 65535,
+              "vendorString": "Google Inc. (Google)",
+              "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+              "driverVendor": "SwANGLE",
+              "driverVersion": "5.0.0"
+            }
+          ],
+          "auxAttributes": {
+            "displayType": "ANGLE_SWIFTSHADER",
+            "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+            "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "glVendor": "Google Inc. (Google)",
+            "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+            "skiaBackendType": "None",
+            "targetCpuBits": 64
+          },
+          "featureStatus": {
+            "2d_canvas": "unavailable_software",
+            "direct_rendering_display_compositor": "disabled_off_ok",
+            "gpu_compositing": "disabled_software",
+            "multiple_raster_threads": "enabled_on",
+            "opengl": "disabled_off",
+            "rasterization": "disabled_software",
+            "raw_draw": "disabled_off_ok",
+            "skia_graphite": "disabled_off",
+            "trees_in_viz": "disabled_off",
+            "video_decode": "disabled_software",
+            "video_encode": "disabled_software",
+            "vulkan": "disabled_off",
+            "webgl": "unavailable_software",
+            "webgpu": "unavailable_software",
+            "webgpu_on_vk_via_gl_interop": "disabled_off",
+            "webnn": "unavailable_software"
+          }
+        },
+        "runner": {
+          "os": {
+            "platform": "linux",
+            "release": "7.0.0-1017-azure",
+            "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+            "arch": "x64"
+          },
+          "cpu": {
+            "models": [
+              "AMD EPYC 7763 64-Core Processor"
+            ],
+            "logicalCount": 4,
+            "availableParallelism": 4
+          },
+          "totalMemoryBytes": 16760344576,
+          "image": {
+            "os": "ubuntu24",
+            "version": "20261101.360.1"
+          }
+        }
+      },
+      "profiles": [
+        {
+          "profile": "android-portrait",
+          "officialFrames": {
+            "samples": 77,
+            "callbackHz": 60.14685205436596,
+            "isPresentedFps": false,
+            "p95Ms": 24.100000000034925,
+            "maxGapMs": 25.599999999976717,
+            "over50ms": 0
+          },
+          "fullWindowRecomputed": {
+            "count": 76,
+            "medianMs": 16.70000000001164,
+            "p95Ms": 24.100000000034925,
+            "maxMs": 25.599999999976717,
+            "over50ms": 0
+          },
+          "windowStartedAtMs": 16070.5,
+          "windowEndedAtMs": 17350.70000000001,
+          "windowDurationMs": 1280.2000000000116,
+          "pointerDownAtMs": 16084.100000000035,
+          "pointerUpAtMs": 16884.5,
+          "postReleaseTailMs": 466.20000000001164,
+          "pressToRelease": {
+            "count": 47,
+            "medianMs": 16.79999999998836,
+            "p95Ms": 24.5,
+            "maxMs": 25.599999999976717,
+            "over50ms": 0
+          },
+          "pressToReleaseMedianRanks": {
+            "oneBasedRanks": [
+              24
+            ],
+            "valuesMs": [
+              16.79999999998836
+            ]
+          },
+          "leadingTwelve": {
+            "count": 12,
+            "medianMs": 16.949999999982538,
+            "p95Ms": 25.599999999976717,
+            "maxMs": 25.599999999976717,
+            "over50ms": 0
+          },
+          "rawLeadingTwelve": [
+            {
+              "fromMs": 16100.100000000035,
+              "toMs": 16117.100000000035,
+              "gapMs": 17.0
+            },
+            {
+              "fromMs": 16117.100000000035,
+              "toMs": 16140.5,
+              "gapMs": 23.399999999965075
+            },
+            {
+              "fromMs": 16140.5,
+              "toMs": 16150.100000000035,
+              "gapMs": 9.600000000034925
+            },
+            {
+              "fromMs": 16150.100000000035,
+              "toMs": 16166.900000000023,
+              "gapMs": 16.79999999998836
+            },
+            {
+              "fromMs": 16166.900000000023,
+              "toMs": 16190.100000000035,
+              "gapMs": 23.20000000001164
+            },
+            {
+              "fromMs": 16190.100000000035,
+              "toMs": 16200.100000000035,
+              "gapMs": 10.0
+            },
+            {
+              "fromMs": 16200.100000000035,
+              "toMs": 16217,
+              "gapMs": 16.899999999965075
+            },
+            {
+              "fromMs": 16217,
+              "toMs": 16241.5,
+              "gapMs": 24.5
+            },
+            {
+              "fromMs": 16241.5,
+              "toMs": 16250.100000000035,
+              "gapMs": 8.600000000034925
+            },
+            {
+              "fromMs": 16250.100000000035,
+              "toMs": 16267.100000000035,
+              "gapMs": 17.0
+            },
+            {
+              "fromMs": 16267.100000000035,
+              "toMs": 16292.700000000012,
+              "gapMs": 25.599999999976717
+            },
+            {
+              "fromMs": 16292.700000000012,
+              "toMs": 16300,
+              "gapMs": 7.2999999999883585
+            }
+          ],
+          "nativeInput": {
+            "moves": 12,
+            "requestedHoldMs": 200,
+            "lastMoveAckToReleaseSentMs": 224.52629300000262,
+            "delta": {
+              "dx": 64,
+              "dy": 12
+            },
+            "deliveredMoveEventsCaptured": 0,
+            "deliveredHoldMs": null
+          },
+          "instrumented": false,
+          "cpuSlowdownRate": 1,
+          "performanceIssues": []
+        },
+        {
+          "profile": "desktop-webgl",
+          "officialFrames": {
+            "samples": 214,
+            "callbackHz": 56.116428477776324,
+            "isPresentedFps": false,
+            "p95Ms": 33.899999999965075,
+            "maxGapMs": 46.70000000001164,
+            "over50ms": 0
+          },
+          "fullWindowRecomputed": {
+            "count": 213,
+            "medianMs": 16.70000000001164,
+            "p95Ms": 33.899999999965075,
+            "maxMs": 46.70000000001164,
+            "over50ms": 0
+          },
+          "windowStartedAtMs": 14802.900000000023,
+          "windowEndedAtMs": 18616.400000000023,
+          "windowDurationMs": 3813.5,
+          "pointerDownAtMs": 14819.700000000012,
+          "pointerUpAtMs": 15470.200000000012,
+          "postReleaseTailMs": 3146.2000000000116,
+          "pressToRelease": {
+            "count": 24,
+            "medianMs": 24.699999999982538,
+            "p95Ms": 40.399999999965075,
+            "maxMs": 46.70000000001164,
+            "over50ms": 0
+          },
+          "pressToReleaseMedianRanks": {
+            "oneBasedRanks": [
+              12,
+              13
+            ],
+            "valuesMs": [
+              16.70000000001164,
+              32.699999999953434
+            ]
+          },
+          "leadingTwelve": {
+            "count": 12,
+            "medianMs": 36.55000000001746,
+            "p95Ms": 46.70000000001164,
+            "maxMs": 46.70000000001164,
+            "over50ms": 0
+          },
+          "rawLeadingTwelve": [
+            {
+              "fromMs": 14833.099999999977,
+              "toMs": 14869.099999999977,
+              "gapMs": 36.0
+            },
+            {
+              "fromMs": 14869.099999999977,
+              "toMs": 14905.400000000023,
+              "gapMs": 36.300000000046566
+            },
+            {
+              "fromMs": 14905.400000000023,
+              "toMs": 14938.400000000023,
+              "gapMs": 33.0
+            },
+            {
+              "fromMs": 14938.400000000023,
+              "toMs": 14971.099999999977,
+              "gapMs": 32.699999999953434
+            },
+            {
+              "fromMs": 14971.099999999977,
+              "toMs": 15005.700000000012,
+              "gapMs": 34.600000000034925
+            },
+            {
+              "fromMs": 15005.700000000012,
+              "toMs": 15046.099999999977,
+              "gapMs": 40.399999999965075
+            },
+            {
+              "fromMs": 15046.099999999977,
+              "toMs": 15085.400000000023,
+              "gapMs": 39.300000000046566
+            },
+            {
+              "fromMs": 15085.400000000023,
+              "toMs": 15122.200000000012,
+              "gapMs": 36.79999999998836
+            },
+            {
+              "fromMs": 15122.200000000012,
+              "toMs": 15156.099999999977,
+              "gapMs": 33.899999999965075
+            },
+            {
+              "fromMs": 15156.099999999977,
+              "toMs": 15202.799999999988,
+              "gapMs": 46.70000000001164
+            },
+            {
+              "fromMs": 15202.799999999988,
+              "toMs": 15242.5,
+              "gapMs": 39.70000000001164
+            },
+            {
+              "fromMs": 15242.5,
+              "toMs": 15280,
+              "gapMs": 37.5
+            }
+          ],
+          "nativeInput": {
+            "moves": 12,
+            "requestedHoldMs": 200,
+            "lastMoveAckToReleaseSentMs": 225.47508399999788,
+            "delta": {
+              "dx": 64,
+              "dy": 12
+            },
+            "deliveredMoveEventsCaptured": 0,
+            "deliveredHoldMs": null
+          },
+          "instrumented": false,
+          "cpuSlowdownRate": 1,
+          "performanceIssues": []
+        }
+      ]
+    }
+  ],
+  "sourceScope": {
+    "fullGitInputReplayAfterLoss": false,
+    "note": "The original CI source/build preflight is preserved. Recovery rechecks archived bytes and report/build bindings; it does not relabel the lost independent Git replay as newly executed."
+  },
+  "pixelProof": {
+    "scope": "Actual alpha worker/raster composite experiment. Separate label Canvas and DOM were excluded.",
+    "rawCases": 32,
+    "compositeFrames": 128,
+    "zeroDifferences": true,
+    "negativeControls": [
+      [
+        {
+          "name": "relief",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": false
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": false
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "6e95a4d7ced5a76b2339ecdd4c478e0af5f62620df17224fbd90e9d29dbf2d0c",
+            "candidatePixelSHA256": "6e95a4d7ced5a76b2339ecdd4c478e0af5f62620df17224fbd90e9d29dbf2d0c"
+          },
+          "forceOpaque": {
+            "differentPixels": 262144,
+            "maxChannelDelta": 255,
+            "totalPixels": 262144
+          }
+        },
+        {
+          "name": "raster",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": false
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": false
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "9cc0ed437a13babf88097e7a77687de8be39c485b0070eed1584aa22f233dc8e",
+            "candidatePixelSHA256": "9cc0ed437a13babf88097e7a77687de8be39c485b0070eed1584aa22f233dc8e"
+          },
+          "forceOpaque": {
+            "differentPixels": 102476,
+            "maxChannelDelta": 255,
+            "totalPixels": 262144
+          }
+        },
+        {
+          "name": "satellite-overlay",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": false
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": false
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "135b6a456827973fdc61e946ab5a767dec50e24a72724847e8d162348d739b7d",
+            "candidatePixelSHA256": "135b6a456827973fdc61e946ab5a767dec50e24a72724847e8d162348d739b7d"
+          },
+          "forceOpaque": {
+            "differentPixels": 184538,
+            "maxChannelDelta": 205,
+            "totalPixels": 196608
+          }
+        },
+        {
+          "name": "composite-witnesses",
+          "reliefDifference": {
+            "differentPixels": 169647,
+            "maxChannelDelta": 21,
+            "totalPixels": 196608
+          },
+          "maskDifference": {
+            "differentPixels": 9036,
+            "maxChannelDelta": 195,
+            "totalPixels": 196608
+          },
+          "outsideColor": "#e7ebe2",
+          "previousFixtureWitnesses": {
+            "reliefDifference": {
+              "differentPixels": 0,
+              "maxChannelDelta": 0,
+              "totalPixels": 196608
+            },
+            "maskDifference": {
+              "differentPixels": 9036,
+              "maxChannelDelta": 195,
+              "totalPixels": 196608
+            }
+          }
+        }
+      ],
+      [
+        {
+          "name": "relief",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": true
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": true
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "6e95a4d7ced5a76b2339ecdd4c478e0af5f62620df17224fbd90e9d29dbf2d0c",
+            "candidatePixelSHA256": "6e95a4d7ced5a76b2339ecdd4c478e0af5f62620df17224fbd90e9d29dbf2d0c"
+          },
+          "forceOpaque": {
+            "differentPixels": 262144,
+            "maxChannelDelta": 255,
+            "totalPixels": 262144
+          }
+        },
+        {
+          "name": "raster",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": true
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": true
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "9cc0ed437a13babf88097e7a77687de8be39c485b0070eed1584aa22f233dc8e",
+            "candidatePixelSHA256": "9cc0ed437a13babf88097e7a77687de8be39c485b0070eed1584aa22f233dc8e"
+          },
+          "forceOpaque": {
+            "differentPixels": 102476,
+            "maxChannelDelta": 255,
+            "totalPixels": 262144
+          }
+        },
+        {
+          "name": "satellite-overlay",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": true
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": true
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "135b6a456827973fdc61e946ab5a767dec50e24a72724847e8d162348d739b7d",
+            "candidatePixelSHA256": "135b6a456827973fdc61e946ab5a767dec50e24a72724847e8d162348d739b7d"
+          },
+          "forceOpaque": {
+            "differentPixels": 184538,
+            "maxChannelDelta": 205,
+            "totalPixels": 196608
+          }
+        },
+        {
+          "name": "composite-witnesses",
+          "reliefDifference": {
+            "differentPixels": 169647,
+            "maxChannelDelta": 21,
+            "totalPixels": 196608
+          },
+          "maskDifference": {
+            "differentPixels": 9036,
+            "maxChannelDelta": 195,
+            "totalPixels": 196608
+          },
+          "outsideColor": "#e7ebe2",
+          "previousFixtureWitnesses": {
+            "reliefDifference": {
+              "differentPixels": 0,
+              "maxChannelDelta": 0,
+              "totalPixels": 196608
+            },
+            "maskDifference": {
+              "differentPixels": 9036,
+              "maxChannelDelta": 195,
+              "totalPixels": 196608
+            }
+          }
+        }
+      ],
+      [
+        {
+          "name": "relief",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": false
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": false
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "6e95a4d7ced5a76b2339ecdd4c478e0af5f62620df17224fbd90e9d29dbf2d0c",
+            "candidatePixelSHA256": "6e95a4d7ced5a76b2339ecdd4c478e0af5f62620df17224fbd90e9d29dbf2d0c"
+          },
+          "forceOpaque": {
+            "differentPixels": 262144,
+            "maxChannelDelta": 255,
+            "totalPixels": 262144
+          }
+        },
+        {
+          "name": "raster",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": false
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": false
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "9cc0ed437a13babf88097e7a77687de8be39c485b0070eed1584aa22f233dc8e",
+            "candidatePixelSHA256": "9cc0ed437a13babf88097e7a77687de8be39c485b0070eed1584aa22f233dc8e"
+          },
+          "forceOpaque": {
+            "differentPixels": 102476,
+            "maxChannelDelta": 255,
+            "totalPixels": 262144
+          }
+        },
+        {
+          "name": "satellite-overlay",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": false
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": false
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "135b6a456827973fdc61e946ab5a767dec50e24a72724847e8d162348d739b7d",
+            "candidatePixelSHA256": "135b6a456827973fdc61e946ab5a767dec50e24a72724847e8d162348d739b7d"
+          },
+          "forceOpaque": {
+            "differentPixels": 736550,
+            "maxChannelDelta": 206,
+            "totalPixels": 786432
+          }
+        },
+        {
+          "name": "composite-witnesses",
+          "reliefDifference": {
+            "differentPixels": 677449,
+            "maxChannelDelta": 21,
+            "totalPixels": 786432
+          },
+          "maskDifference": {
+            "differentPixels": 35624,
+            "maxChannelDelta": 195,
+            "totalPixels": 786432
+          },
+          "outsideColor": "#e7ebe2",
+          "previousFixtureWitnesses": {
+            "reliefDifference": {
+              "differentPixels": 0,
+              "maxChannelDelta": 0,
+              "totalPixels": 786432
+            },
+            "maskDifference": {
+              "differentPixels": 35623,
+              "maxChannelDelta": 195,
+              "totalPixels": 786432
+            }
+          }
+        }
+      ],
+      [
+        {
+          "name": "relief",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": true
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": true
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "6e95a4d7ced5a76b2339ecdd4c478e0af5f62620df17224fbd90e9d29dbf2d0c",
+            "candidatePixelSHA256": "6e95a4d7ced5a76b2339ecdd4c478e0af5f62620df17224fbd90e9d29dbf2d0c"
+          },
+          "forceOpaque": {
+            "differentPixels": 262144,
+            "maxChannelDelta": 255,
+            "totalPixels": 262144
+          }
+        },
+        {
+          "name": "raster",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": true
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": true
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "9cc0ed437a13babf88097e7a77687de8be39c485b0070eed1584aa22f233dc8e",
+            "candidatePixelSHA256": "9cc0ed437a13babf88097e7a77687de8be39c485b0070eed1584aa22f233dc8e"
+          },
+          "forceOpaque": {
+            "differentPixels": 102476,
+            "maxChannelDelta": 255,
+            "totalPixels": 262144
+          }
+        },
+        {
+          "name": "satellite-overlay",
+          "outputContext": {
+            "width": 512,
+            "height": 512,
+            "type": "2d",
+            "requested": {
+              "alpha": true,
+              "willReadFrequently": true
+            },
+            "actual": {
+              "alpha": true,
+              "colorSpace": "srgb",
+              "colorType": "unorm8",
+              "desynchronized": false,
+              "toneMapping": {
+                "mode": "standard"
+              },
+              "willReadFrequently": true
+            }
+          },
+          "comparison": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0,
+            "totalPixels": 262144,
+            "baselinePixelSHA256": "135b6a456827973fdc61e946ab5a767dec50e24a72724847e8d162348d739b7d",
+            "candidatePixelSHA256": "135b6a456827973fdc61e946ab5a767dec50e24a72724847e8d162348d739b7d"
+          },
+          "forceOpaque": {
+            "differentPixels": 736550,
+            "maxChannelDelta": 206,
+            "totalPixels": 786432
+          }
+        },
+        {
+          "name": "composite-witnesses",
+          "reliefDifference": {
+            "differentPixels": 677449,
+            "maxChannelDelta": 21,
+            "totalPixels": 786432
+          },
+          "maskDifference": {
+            "differentPixels": 35624,
+            "maxChannelDelta": 195,
+            "totalPixels": 786432
+          },
+          "outsideColor": "#e7ebe2",
+          "previousFixtureWitnesses": {
+            "reliefDifference": {
+              "differentPixels": 0,
+              "maxChannelDelta": 0,
+              "totalPixels": 786432
+            },
+            "maskDifference": {
+              "differentPixels": 35623,
+              "maxChannelDelta": 195,
+              "totalPixels": 786432
+            }
+          }
+        }
+      ]
+    ],
+    "receipt": {
+      "bytes": 206581,
+      "sha256": "cb50938dc23ae27469b704824036c9678c389eff8a9c6b405fe49600b0720555"
+    },
+    "sourceHashes": {
+      "web/lib/custom-map-labels.ts": "b0e38679b23272f18119501b2503211801d5e1719cc2804713496f041f4342fd",
+      "web/lib/custom-map-painter.ts": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "web/lib/custom-map-relief.ts": "14ee495df7b02fe2f689c51e585e4e0fd64ec165a9beb1a85522716861e5f71a",
+      "web/lib/custom-map-symbols.ts": "062eb4cdaf29d6f4946713a790c3d90feca49d0bf9cfcd2d7477465d3a289601",
+      "web/lib/custom-map-tiles.worker.ts": "f5d5a7eb41f1d504f66aff3e35e1114d8454c89b678b1ec930779ec18668d804",
+      "web/lib/custom-map-vector.ts": "87e145aa0d4c8a6b5007c0e1b53faba1b57a6c0d41b7782d7091575c1f5ebe48",
+      "web/public/maps/map-city-labels.js": "62d4b661ef3edf6ffe22b079dde39da0c1602f5f33f28f265bf44c388e3cfd53",
+      "web/lib/custom-map-camera.ts": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "web/lib/map-config.ts": "e5f11697c7ae4f7907ad484490657cbf87655e063bab04d4a4996dd1bd07b73f",
+      "web/lib/map-resource-pool.ts": "f76e5e7e5c404aa0df195e71f53aadf4be2b2c0adec2ee94052c888612325845",
+      "web/lib/map-transport.ts": "c2779dd3e60af7eef6a9aacec96f1d614bb548784954a84fd4d386cab3ee8094",
+      "web/lib/terrain-preparation.ts": "c919ee059fff8c3805c9ee4f83208cdf5c942945972796a1fb0da246a40b4309",
+      "web/public/maps/russia-viewport.js": "56018f7d0224714235857d56d773c41f747fd87b5b9afbd69e481ab6f1771b30",
+      "web/public/maps/map-coverage-lod.js": "a9c98d30f9da32f8266b84270fdb2f0d5dfa51edd6ff02b0a16b7aa83cd4a0d0",
+      "web/public/terrain/terrain-renderer.js": "9aeb714ca4f889587d92506ef7c937c23b09e6fe2c5cf397bfa4121a84de2c86",
+      "web/lib/map-preload.ts": "6ea08533c3ba6530e58f9f1777bfd29750e41b14398a546a38e25f2750314666",
+      "web/lib/map-satellite.ts": "369b5f6d99fb52c0754cd8dceea4de6959b9e9a6209e30796ec01cce560135f8",
+      "web/lib/custom-map-tiles.ts": "c84c763cabacc7b7c4c7e620b3b5e2fdbcb401eb7fa8f4efcf776f854426a5e6",
+      "web/lib/russia-map.ts": "0eac13c0921b2b78aeb83f576ec2e274b21c3c5b9932fa1a560b888186399b06",
+      "web/lib/map-framing.ts": "97e5a37f7861e3e27dbe2e11e9daa3fedfb754ef4e187d4fe8fee2bf456aad47",
+      "web/lib/map-route-presentation.ts": "ef8f9d2c77751ce0ed6f997e5db17eef7f4cc83b57899e98e96c01af6260d963",
+      "web/lib/map-interaction.ts": "19cd3f505e741784b0d669a88bf011474fd22f37b91757c2a42066ad98a6061b",
+      "web/lib/map-direction-marker.ts": "80cc52b98209215c20d2f562f2f9e866f9586881881b258d15db41dcd688bc9f",
+      "web/lib/map-direction-layout.ts": "a7635b852e84532d9841c4164f783ad2f57626807de6139e6f6d90df49ebb92e",
+      "web/lib/map-canvas-policy.ts": "eb8ee4bca63a563b8d755493dca4c10f4d66e089681306f1a8fce6795318cfda",
+      "web/lib/custom-map-label-inspection.ts": "394d86a1c79adb1b27db59d237487703b52d6e12ec7461cdd696f94d10c1bf8c",
+      "web/lib/custom-map-coverage.ts": "a7f653dc44541aa707abfc8433e5567e51e84193cb1e12a067e09b295de4c2c1",
+      "web/lib/custom-map-engine.ts": "71b88b16415ea864c216d61ba16b8be8e9983d6b9c93c23834c40b6d44a9ced6",
+      "tools/pages-preview/tests/fixtures/map-vector-opaque.mjs": "f319fd9051fa696f8c34c4c90f46ef02ed36dc70a0f4da29780ddff9d1892f14"
+    },
+    "capturesVerified": 8
+  },
+  "interpretation": {
+    "alphaAcceptedForRelease": false,
+    "speedupDemonstrated": false,
+    "mainReleaseAcceptance": false
+  },
+  "limitations": [
+    "All four scheduled A/B/A/B outcomes are retained; no best-run selection.",
+    "Callback intervals are rendering opportunities, not presented FPS or physical-device measurements.",
+    "Desktop full windows include a long settle tail. Compare leading twelve intervals as descriptive data, without changing the acceptance gate.",
+    "Press-to-release has 23 versus 24 desktop intervals under the same 200 ms hold; median rank changes must not be sold as a rendering speedup.",
+    "The observer records down/up but not delivered pointermoves. Exact delivered hold and one-to-one move/frame causality are not reconstructed.",
+    "A diagnostic report does not certify final main UI acceptance."
+  ]
+}
