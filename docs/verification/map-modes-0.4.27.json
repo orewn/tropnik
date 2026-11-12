@@ -1,6 +1,9 @@
 {
-  "checkedAt": "2026-11-12T01:52:59.942Z",
-  "environment": "managed local preview",
+  "checkedAt": "2026-11-12T02:19:05.602Z",
+  "environment": "published GitHub Pages",
+  "url": "https://orewn.github.io/tropnik/?route=osm-relation-15577268&region=sakhalin",
+  "buildId": "031a03383829f6be",
+  "sourceCommit": "6cc1719522ac0fc3a1866a9ba29dafd7afea10fb",
   "relief": {
     "buttons": [
       {
@@ -20,6 +23,7 @@
       ],
       "zoom": 14
     },
+    "drawRevision": 9,
     "drawnRoute": "osm-relation-15577268",
     "pitch": 0,
     "routeId": "osm-relation-15577268",
@@ -34,7 +38,7 @@
       "pendingTiles": 0,
       "ready": true,
       "reliefReady": true,
-      "residentTiles": 47
+      "residentTiles": 96
     }
   },
   "satellite": {
@@ -56,6 +60,7 @@
       ],
       "zoom": 14
     },
+    "drawRevision": 8,
     "drawnRoute": "osm-relation-15577268",
     "pitch": 0,
     "routeId": "osm-relation-15577268",
@@ -72,7 +77,9 @@
       "pendingTiles": 0,
       "ready": true,
       "reliefReady": false,
-      "residentTiles": 87
+      "residentTiles": 96
     }
-  }
+  },
+  "cameraPreserved": true,
+  "routePreserved": true
 }
