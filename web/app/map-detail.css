@@ -167,7 +167,7 @@
 /* Footer groups wrap by their real content widths. The notice owns a separate
    row, and the measured footer height keeps the two desktop actions clear of
    both short and multi-line source cards without camera-frame measurements. */
-.explore-layout{--map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 16px)}
+.explore-layout{--map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 16px);--map-footer-top-reserve:116px}
 .tropnik-custom-atlas .map-footer{
   position:absolute;z-index:20;left:var(--map-left);right:var(--map-right);bottom:var(--map-footer-inset);
   display:flex;flex-direction:column;align-items:flex-start;gap:8px;pointer-events:none;
@@ -221,7 +221,7 @@
      flow. Opening/closing changes only the panel transform and UI positions;
      it cannot resize the panel or rewrap the legal text mid-animation. */
   .explore-layout:is(.sheet-open,.sheet-closed):has(.tropnik-custom-atlas .map-footer){
-    --sheet-expanded-height:max(var(--sheet-peek),min(56svh,545px,calc(100svh - var(--header) - var(--map-top) - 60px - 44px - 12px - var(--map-footer-height,0px) - 76px)));
+    --sheet-expanded-height:max(var(--sheet-peek),min(56svh,545px,calc(100svh - var(--header) - var(--map-top) - var(--map-footer-top-reserve) - var(--map-footer-height,0px) - 76px)));
   }
   .explore-layout.sheet-open{--map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 76px)}
   .explore-layout:is(.sheet-open,.sheet-closed) .map-footer-meta>.map-attribution{
@@ -233,13 +233,24 @@
     position:relative;inset:auto;grid-column:1/-1;grid-row:1;width:370px;max-width:100%;justify-self:end;
     /* Legal height uses the notice/source rows and minimum drawer endpoint,
        never footer height or the resulting sheet height: no feedback loop. */
-    max-height:calc(100svh - var(--header) - var(--sheet-peek) - var(--map-top) - 60px - 44px - 12px - 76px - var(--map-footer-notice-height,34px) - var(--map-footer-credit-height,44px) - 16px);
+    max-height:calc(100svh - var(--header) - var(--sheet-peek) - var(--map-top) - var(--map-footer-top-reserve) - 76px - var(--map-footer-notice-height,34px) - var(--map-footer-credit-height,44px) - 16px);
     overflow:auto;overscroll-behavior:contain;
   }
 }
 /* A short portrait cannot fit five vertical actions, Layers and the licence
    control in the same column. Reuse the expanded drawer's horizontal rail. */
 @media(max-width:700px) and (max-height:720px) and (orientation:portrait){
+  /* Context, story and modes share a single header row. Its 60px slot leaves
+     8px below the 52px modes and 4px below a 56px selected-route context. */
+  .explore-layout:is(.sheet-open,.sheet-closed){--map-footer-top-reserve:60px}
+  .explore-layout:is(.sheet-open,.sheet-closed) .tropnik-custom-atlas .map-context{
+    max-width:calc(100% - var(--map-left) - var(--map-right) - var(--map-mode-switch-width,98px) - 44px - 16px);
+  }
+  .explore-layout:is(.sheet-open,.sheet-closed)>.fact-closed{
+    top:calc(var(--map-top) + 4px);left:auto;right:calc(var(--map-right) + var(--map-mode-switch-width,98px) + 8px);
+    width:44px;max-width:44px;height:44px;min-width:44px;min-height:44px;padding:0;gap:0;font-size:0;
+    display:flex;align-items:center;justify-content:center;
+  }
   .explore-layout.sheet-closed{--map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 76px)}
   .explore-layout.sheet-closed .map-controls{
     top:auto;right:var(--map-right);bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 12px);

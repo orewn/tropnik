@@ -43,7 +43,7 @@ function fixture(t){
   const ui=[{kind:'map-context',rect:box(0,0,100,44)},{kind:'map-style-switch',rect:box(w-100,0,100,44)},{kind:'map-controls',rect:short?box(w-220,52,220,44):box(w-44,52,44,220)},{kind:'layer-button',rect:box(w-(short?276:100),52,44,44)},{kind:'fact-closed',rect:box(0,52,100,44)},
    {kind:'map-attribution-toggle',rect:box(w-44,short?186:378,44,44)},...(!profile.mobile?[{kind:'map-legend',rect:box(0,350,100,44)}]:[]),...(satellite?[{kind:'map-satellite-credit',rect:box(w-120,short?150:342,64,80)}]:[]),...(expanded?[{kind:'map-attribution-content',rect:box(0,120,w-120,72)}]:[]),{kind:'map-preload-status',rect:status}];
   const target=(label,rect)=>({label,rect,minimumSize:44,unobscured:true}),targets=[target('mode1',box(w-100,0,44,44)),target('mode2',box(w-44,0,44,44)),...Array.from({length:5},(_,index)=>target('map'+index,short?box(w-220+index*44,52,44,44):box(w-44,52+index*44,44,44))),...ui.filter(item=>['layer-button','fact-closed','map-attribution-toggle'].includes(item.kind)).map(item=>target(item.kind,item.rect))];
-  const loading={width:w,height:profile.height,scrollWidth:w,scrollY:0,sheetOpen,panelHeight:360,panelTransition:'transform',available:box(0,0,w,profile.height-(profile.mobile?(short?112:156):0)),footer:box(0,short?108:112,w,short?128:320),publishedFooterHeight:short?128:320,status:{rect:status,visible:true,ariaHidden:'false',text:'Подгружаем детали текущего ракурса'},ui,targets};
+  const loading={width:w,height:profile.height,scrollWidth:w,scrollY:0,sheetOpen,panelHeight:360,sheetPeek:156,panelTransition:'transform',available:box(0,0,w,profile.height-(profile.mobile?(short?112:156):0)),footer:box(0,short?108:112,w,short?128:320),publishedFooterHeight:short?128:320,status:{rect:status,visible:true,ariaHidden:'false',text:'Подгружаем детали текущего ракурса'},ui,targets};
   const ready=structuredClone(loading);ready.ui=ready.ui.filter(item=>item.kind!=='map-preload-status');ready.status.visible=false;ready.status.ariaHidden='true';
   const item={...scenario,loading,ready,screenshot:picture('footer-'+scenario.name,profile)};
   if(expanded){const hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources','/sources#satellite-attribution'];item.licenseInteraction={input:'native-cdp-wheel-and-tab',before:{hrefs,devicePixelRatio:profile.dpr},links:hrefs.map(href=>({href,text:'Synthetic link',focused:true,visibleUnblocked:true})),scrollable:false,wheelTransitions:[],observedInputs:{wheels:[],tabs:hrefs.slice(1).map(()=>({key:'Tab',trusted:true}))}};}
@@ -96,6 +96,9 @@ test('portrait cycles reject the observed panel-height jump and footer reflow wi
   value=>value.sheetCycle.states[2].sheetOpen=true,
  ]){const bad=structuredClone(report);change(bad.cases.find(value=>value.name==='compact-android-overview-limit-expanded'));assert.throws(()=>assertMapAttributionReceipt(bad,options));}
  const bad=structuredClone(report);delete bad.footerCases.find(value=>value.sheetOpen).sheetCycle;assert.throws(()=>assertMapAttributionReceipt(bad,options));
+ for(const change of [value=>value.panelHeight=value.sheetPeek+60,value=>delete value.sheetPeek]){
+  const bad=structuredClone(report),item=bad.footerCases.find(value=>value.name==='compact-android-pending');item.sheetCycle.states.forEach(change);assert.throws(()=>assertMapAttributionReceipt(bad,options),'A stable but unusably short compact drawer must fail');
+ }
 });
 test('narrow mobile EOX wrapping requires measured native scrolling rather than an assumed unwrapped width',t=>{
  const {report,options}=fixture(t);

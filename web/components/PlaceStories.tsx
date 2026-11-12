@@ -67,7 +67,7 @@ export const PlaceStories=memo(function PlaceStories({regionId,routeId,onPlace}:
   if(event.key==='ArrowRight'){event.preventDefault();manual(1);}
  }
  function togglePlayback(){if(!reduced)setPaused(value=>!value);}
- if(dismissed)return <button type="button" className="fact-closed" onClick={()=>setDismissed(false)}><Compass size={17}/>Истории мест</button>;
+ if(dismissed)return <button type="button" className="fact-closed" aria-label="Истории мест" title="Истории мест" onClick={()=>setDismissed(false)}><Compass size={17}/>Истории мест</button>;
  const photoFailed=failedPhoto===fact.id;
  return <aside
   ref={card}

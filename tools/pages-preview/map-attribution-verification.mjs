@@ -62,6 +62,12 @@ export function assertAttributionSheetCycle(cycle,scenario,baseline){
  }
  const heights=cycle.states.map(value=>value.panelHeight);
  assert.ok(Math.max(...heights)-Math.min(...heights)<1.1,'Portrait sheet state must not change the physical panel height');
+ // A long expanded legal notice is a temporary source panel. The ordinary
+ // compact catalogue must retain the unchanged native drag travel contract.
+ if(profile.name==='compact-android'&&!scenario.expanded)for(const value of cycle.states){
+  assert.ok(Number.isFinite(value.sheetPeek)&&value.sheetPeek>0);
+  assert.ok(value.panelHeight-value.sheetPeek>60,'Compact catalogue must retain usable native drag travel');
+ }
  assert.deepEqual(cycle.states.map(value=>value.footer.height),Array(3).fill(cycle.states[0].footer.height),'Opening the sheet must not reflow the footer');
  assert.deepEqual(footerLoadingGeometry(cycle.states[2]),footerLoadingGeometry(cycle.states[0]),'Closing the sheet must restore the same footer and controls');
  assert.deepEqual(footerLoadingGeometry(cycle.states[scenario.sheetOpen?1:0]),footerLoadingGeometry(baseline),'The sheet cycle must use the same case and legal state');
