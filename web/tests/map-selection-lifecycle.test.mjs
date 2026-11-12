@@ -34,6 +34,7 @@ function componentHost(file,name,dependencies={}){
   const effect=(queue,callback,deps)=>{const index=cursor++,previous=hooks[index],changed=!previous||deps===undefined||deps.some((value,i)=>!Object.is(value,previous.deps?.[i]));
     if(changed){hooks[index]={deps,cleanup:previous?.cleanup};queue.push(()=>{hooks[index].cleanup?.();hooks[index].cleanup=callback();});}};
   const react={memo:value=>value,
+    useCallback:(callback,deps)=>{const index=cursor++,previous=hooks[index];if(!previous||deps.some((value,i)=>!Object.is(value,previous.deps?.[i])))hooks[index]={value:callback,deps};return hooks[index].value;},
     useRef:initial=>{const index=cursor++;return hooks[index]??= {current:initial};},
     useState:initial=>{const index=cursor++;if(!hooks[index])hooks[index]={value:typeof initial==='function'?initial():initial};return[hooks[index].value,value=>{if(disposed)return;const next=typeof value==='function'?value(hooks[index].value):value;if(!Object.is(next,hooks[index].value)){hooks[index].value=next;dirty=true;}}];},
     useEffect:(callback,deps)=>effect(effects,callback,deps),useLayoutEffect:(callback,deps)=>effect(layout,callback,deps)};
@@ -45,7 +46,7 @@ function componentHost(file,name,dependencies={}){
   if(!compiled.has(file))compiled.set(file,ts.transpileModule(readFileSync(resolve(root,file),'utf8'),{fileName:file,compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText);
   const testModule={exports:{}},require=id=>{if(id==='react')return react;if(id==='react/jsx-runtime')return{jsx,jsxs:jsx};assert.ok(Object.hasOwn(dependencies,id),`Uncontrolled dependency ${id}`);return dependencies[id];};
   vm.runInContext(`(function(require,module,exports){${compiled.get(file)}\n})`,environment)(require,testModule,testModule.exports);
-  const host={canvas:null,visibleCanvas:null,
+  const host={canvas:null,visibleCanvas:null,environment,
     render(next=props){if(disposed)return tree;props=next;let count=0;do{assert.ok(count++<30,'Component left a synchronous render loop');dirty=false;cursor=0;tree=testModule.exports[name](props);
       for(const node of nodes())if(typeof node.type==='string'&&node.props.ref){const ref=node.props.ref,old=refs.get(ref);let record=old;if(!old||old.key!==node.key){record={key:node.key,element:element()};refs.set(ref,record);}if(typeof ref==='function')ref(record.element);else ref.current=record.element;if(node.type==='canvas')host.canvas=record.element;}
       while(layout.length)layout.shift()();while(effects.length)effects.shift()();
@@ -57,15 +58,17 @@ function componentHost(file,name,dependencies={}){
   return host;
 }
 
-function atlasFixture({committedMode='detail'}={}){
+function atlasFixture({committedMode='detail',ready=true}={}){
   const requests=new Map(),maps=[],notes=[],chosen=[];
   class AtlasEngine{
-    constructor(_element,options){this.options=options;this.route=undefined;this.routeId=undefined;this.fits=[];this.cameras=[];this.camera=options.camera;this.visibleBounds=grid.bounds;this.active=true;this.activations=[];this.modes=[];this.pitchChanges=[];this.layers={paths:true,boundaries:true,relief:true};this.layerChanges=[];this.routeChanges=[];this.state={ready:true,mode:'detail',committedMode,error:'',loading:false,reliefReady:true,imageryLoading:false};maps.push(this);queueMicrotask(()=>options.onReady());}
+    constructor(_element,options){this.options=options;this.route=undefined;this.routeId=undefined;this.fits=[];this.cameras=[];this.camera=options.camera;this.visibleBounds=grid.bounds;this.active=true;this.activations=[];this.modes=[];this.pitchChanges=[];this.layers={paths:true,boundaries:true,relief:true};this.layerChanges=[];this.routeChanges=[];this.state={ready,mode:'detail',committedMode,error:ready?'':'Границы карты не загрузились.',loading:false,reliefReady:ready,imageryLoading:false};maps.push(this);queueMicrotask(()=>ready?options.onReady():options.onState(this.getState()));}
     getState(){return{...this.state};}
     getCoverage(){return{area:{},territories:{features:[]}};}
     setRoute(geometry,id){this.route=geometry;this.routeId=id;this.routeChanges.push({geometry,id});}
     setMode(mode){this.modes.push(mode);this.state={...this.state,mode,committedMode:mode,imagerySource:mode==='satellite'?'eox-s2':undefined};this.options.onState(this.getState());}
     setLayers(value){this.layerChanges.push(value);Object.assign(this.layers,value);}
+    retry(){this.retries=(this.retries||0)+1;this.state.loading=true;this.options.onState(this.getState());}
+    setPosition(value){this.position=value;}
     setFloor(){}setPadding(){}setRegion(){}setActive(value){this.active=value;this.activations.push(value);}setMarkers(){}setPitch(value){this.pitchChanges.push(value);}setObstacles(){}setCamera(camera){this.camera=camera;this.cameras.push(camera);}destroy(){this.destroyed=true;}
     fit(bounds){this.fits.push(bounds);}getVisibleBounds(){return this.visibleBounds;}getCamera(){return this.camera;}getSize(){return{width:800,height:600};}
   }
@@ -78,7 +81,7 @@ function atlasFixture({committedMode='detail'}={}){
     '@/lib/map-trail-points':{mapTrailPointEntries:()=>[]},'@/lib/route-geometry':{readRouteGeometry,routeGeometryPositions},
     '@/public/maps/russia-viewport.js':{coveredRussiaBounds:positions=>positions.length?grid.bounds:null,inRussiaCoverage:()=>true},
     '@/lib/map-framing':{MapFrameRefit:class{select(){}cancel(){}dispose(){}resized(){}},bindMapFrameRefit:()=>()=>{}},
-    '@/lib/map-direction-layout':{bindMapLabelReflow:()=>()=>{},constrainDirectionLabels(){},MAP_LABEL_OBSTACLE_SELECTORS:[]},
+    '@/lib/map-direction-layout':{bindMapLabelReflow:()=>()=>{},constrainDirectionLabels(){},mapLabelObstacleRects:()=>[]},
     '@/lib/map-config':{MAP_CONFIG:{trailHitRadiusPx:12,routeMaxZoom:14,territoryMaxZoom:14},viewportRegionId:()=>region.id},
     '@/lib/map-route-presentation':{overviewContextCaption:()=>'',ROUTE_PRESENTATION:{closeZoom:12}},'@/lib/map-types':{EMPTY_MAP_TRAILS:[]},
     '@/lib/custom-map-scale':{mapDistanceScale},
@@ -114,6 +117,70 @@ test('late responses, including a changed source for the same id, cannot take ow
 test('an unmounted selection cannot apply a late geometry or notification',async()=>{
   const env=atlasFixture();env.select({id:'late',title:'Поздний',geometryUrl:'/late.geojson'});await env.host.settle();
   env.host.unmount();env.requests.get('/late.geojson').resolve(line());await turn();assert.equal(env.maps[0].route,undefined);assert.deepEqual(env.notes,[]);
+});
+
+test('a failed map startup exposes retry without a dismiss path back to an endless skeleton',async t=>{
+  const env=atlasFixture({ready:false});t.after(()=>env.host.unmount());env.select();await env.host.settle();
+  const map=env.maps[0];assert.match(env.host.text(),/Границы карты не загрузились/);
+  assert.equal(env.host.find(node=>node.props.className==='map-skeleton'),undefined);
+  assert.equal(env.host.nodes().some(node=>node.type==='button'&&['Закрыть','Понятно'].includes(node.props.children)),false);
+  env.host.click('Повторить загрузку карты');assert.equal(map.retries,1);
+  assert.equal(env.host.find(node=>node.props['aria-label']==='Повторить загрузку карты').props.disabled,true);
+  assert.match(env.host.text(),/Загружаем…/);
+  map.state={...map.state,ready:true,loading:false,error:''};map.options.onState(map.getState());env.host.render();
+  assert.equal(env.host.find(node=>node.props['aria-label']==='Повторить загрузку карты'),undefined);
+  assert.equal(env.host.find(node=>node.props['aria-label']==='Рельеф').props.disabled,false);
+  assert.equal(env.maps.length,1,'Recovery reuses the map and its controls');
+});
+
+test('tile retry preserves a selected route and camera and remains reachable in the planner',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());
+  const trail={id:'retry-route',title:'Тропа',geometry:line()};env.select(trail);await env.host.settle();await env.host.settle();
+  const map=env.maps[0],camera=map.camera,geometry=map.route,moves=map.cameras.length,fits=map.fits.length;
+  map.state={...map.state,error:'Не все спутниковые снимки загрузились.'};map.options.onState(map.getState());env.host.render();
+  env.host.click('Повторить загрузку карты');assert.equal(map.retries,1);assert.equal(map.camera,camera);assert.equal(map.route,geometry);
+  assert.equal(map.cameras.length,moves);assert.equal(map.fits.length,fits);
+  map.state={...map.state,loading:false};map.options.onState(map.getState());
+  env.host.render({planning:true,region,trail,onRegion(){}});
+  assert.ok(env.host.find(node=>node.props['aria-label']==='Повторить загрузку карты'),'Planner failures offer the same recovery action');
+});
+
+test('attribution and imagery diagnostics follow the retained displayed map until the replacement commits',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());env.select();await env.host.settle();const map=env.maps[0];
+  const apply=value=>{map.state={...map.state,...value};map.options.onState(map.getState());env.host.render();};
+  const credit=()=>env.host.find(node=>node.type==='credit').props;
+  const atlas=()=>env.host.find(node=>node.props['data-map-renderer']==='tropnik').props;
+  apply({mode:'satellite',committedMode:'detail',loading:true,imageryLoading:true,imageryTarget:'eox-bluemarble'});
+  assert.equal(credit().satellite,false,'An imagery request does not replace the visible relief attribution');
+  assert.equal(atlas()['data-map-base-state'],'loading');assert.equal(atlas()['data-map-imagery'],undefined);
+  apply({committedMode:'satellite',loading:false,imageryLoading:false,imagerySource:'eox-bluemarble',reliefReady:false});
+  assert.equal(credit().satellite,true);assert.equal(credit().satelliteSource,'eox-bluemarble');
+  apply({mode:'detail',loading:true,imageryTarget:undefined});
+  assert.equal(atlas()['data-map-base-target'],'detail');assert.equal(atlas()['data-map-base-committed'],'satellite');
+  assert.equal(atlas()['data-map-base-state'],'loading');assert.equal(atlas()['data-map-imagery-source'],'eox-bluemarble');
+  assert.equal(credit().satellite,true);assert.equal(credit().satelliteLoading,false,'Returning to relief is not a new imagery request');
+  apply({loading:false,error:'Подробности этого участка не загрузились.'});
+  assert.equal(credit().satellite,true,'A failed return keeps the notice for the image still on screen');
+  apply({committedMode:'detail',imagerySource:undefined,reliefReady:true,error:''});
+  assert.equal(credit().satellite,false);assert.equal(credit().terrain,true);assert.equal(atlas()['data-map-imagery'],undefined);
+});
+
+test('manual navigation cancels the locating status and ignores both late geolocation callbacks',async t=>{
+  for(const action of ['gesture','fit','selection']){
+    const env=atlasFixture();t.after(()=>env.host.unmount());env.select();await env.host.settle();
+    const requests=[];env.host.environment.navigator.geolocation={getCurrentPosition:(success,failure)=>requests.push({success,failure})};
+    env.host.click('Моё местоположение');assert.match(env.host.text(),/Определяем местоположение/);
+    const map=env.maps[0];
+    if(action==='gesture'){map.options.onGesture();env.host.render();}
+    else if(action==='fit')env.host.click('Показать Россию целиком');
+    else env.select({id:'new',title:'Другая тропа'});
+    assert.doesNotMatch(env.host.text(),/Определяем местоположение/);assert.equal(env.notes.at(-1),'');
+    const moves=map.cameras.length,notes=env.notes.length;
+    requests[0].success({coords:{longitude:40.05,latitude:43.05,accuracy:12}});requests[0].failure();env.host.render();
+    assert.equal(map.cameras.length,moves);assert.equal(map.position,undefined);assert.equal(env.notes.length,notes);
+    env.host.click('Моё местоположение');requests[1].success({coords:{longitude:40.05,latitude:43.05,accuracy:12}});env.host.render();
+    assert.deepEqual(Array.from(map.position),[40.05,43.05]);assert.match(env.host.text(),/Точность около 12 м/);
+  }
 });
 
 test('the distance ruler updates from the settled camera without adding DOM work to movement frames',async t=>{

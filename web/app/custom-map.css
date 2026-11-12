@@ -21,6 +21,11 @@
 .tropnik-custom-atlas .layer-menu label{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}
 .tropnik-custom-atlas .layer-menu input{width:18px;height:18px;accent-color:var(--forest)}
 .tropnik-custom-atlas .layer-menu>button,.tropnik-custom-atlas .layer-menu>a{min-height:44px;display:flex;align-items:center}
+.tropnik-custom-atlas .map-message-copy{min-width:0;flex:1}
+.tropnik-custom-atlas .map-message-copy>p{margin:0;overflow-wrap:anywhere}
+.tropnik-custom-atlas .map-message-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.tropnik-custom-atlas .map-message-actions button{padding:8px 12px;max-width:100%;white-space:normal;font:var(--button-sm)}
+.tropnik-custom-atlas .map-message--error>svg{align-self:flex-start}
 .tropnik-custom-atlas .map-legend{gap:16px;align-items:center}
 .tropnik-custom-atlas .map-legend-key{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
 .tropnik-custom-atlas .map-scale{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;width:96px;min-height:28px;flex-shrink:0;font-size:12px;line-height:16px;font-variant-numeric:tabular-nums;color:var(--forest)}

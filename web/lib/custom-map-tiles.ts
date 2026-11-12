@@ -74,7 +74,11 @@ export class CustomMapTiles {
     this.jobs.set(key,{work,promise});this.pump();return promise;
   }
   private files(){
-    return this.localFiles??=loadPublicJSON<{files:Array<{path:string}>}>('/offline-map/manifest.json').then(m=>new Set(m.files.map(f=>f.path))).catch(()=>new Set<string>());
+    return this.localFiles??=loadPublicJSON<{files:Array<{path:string}>}>('/offline-map/manifest.json').then(m=>new Set(m.files.map(f=>f.path))).catch(()=>{
+      // Share one in-flight index read, but do not turn a transient failure into
+      // a permanent empty package for the lifetime of this map.
+      this.localFiles=undefined;return new Set<string>();
+    });
   }
   private async source(work:Work):Promise<TileSource>{
     const {kind}=work.request,z=Math.min(work.request.z,kind==='vector'?14:kind==='relief'?12:work.request.z),factor=2**(work.request.z-z),x=Math.floor(work.request.x/factor),y=Math.floor(work.request.y/factor),tx=canonicalX(x,z);

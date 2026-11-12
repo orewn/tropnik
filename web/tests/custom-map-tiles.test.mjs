@@ -11,8 +11,8 @@ const source=readFileSync(new URL('../lib/custom-map-tiles.ts',import.meta.url),
 const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
 const poolSource=readFileSync(new URL('../lib/map-resource-pool.ts',import.meta.url),'utf8');
 const poolCompiled=ts.transpileModule(poolSource,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
-function fixture({files=[],online=true,softwareRaster,sourcePool=false}={}){
-  const downloads=[],workers=[],bitmaps=[];
+function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManifest}={}){
+  const downloads=[],workers=[],bitmaps=[],manifestReads=[];
   let pool;
   if(sourcePool){
     const poolModule={exports:{}};
@@ -33,16 +33,43 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false}={}){
   const navigator={onLine:online};
   vm.runInNewContext(compiled,{module:testModule,exports:testModule.exports,URL,Worker,AbortController,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,console,
     require(name){
-      if(name==='./map-preload')return {loadPublicBytes:(url,priority,signal)=>pool?pool.get(url,priority,signal):new Promise((resolve,reject)=>{const request={url,resolve,reject,signal,priority};downloads.push(request);signal?.addEventListener('abort',()=>{request.done=true;request.aborted=true;reject(signal.reason);},{once:true});}),loadPublicJSON:async url=>url.includes('manifest')?{files:files.map(path=>({path}))}:{tiles:['https://tiles.openfreemap.org/snapshot/{z}/{x}/{y}.pbf']}};
+      if(name==='./map-preload')return {loadPublicBytes:(url,priority,signal)=>pool?pool.get(url,priority,signal):new Promise((resolve,reject)=>{const request={url,resolve,reject,signal,priority};downloads.push(request);signal?.addEventListener('abort',()=>{request.done=true;request.aborted=true;reject(signal.reason);},{once:true});}),loadPublicJSON:async url=>{
+        if(url.includes('manifest')){manifestReads.push(url);return readManifest?readManifest():{files:files.map(path=>({path}))};}
+        return{tiles:['https://tiles.openfreemap.org/snapshot/{z}/{x}/{y}.pbf']};
+      }};
       if(name==='./map-satellite')return {SATELLITE_PROVIDERS:{'eox-s2':{tiles:'https://tiles.maps.eox.at/s2/{z}/{x}/{y}.jpg'},'eox-bluemarble':{tiles:'https://tiles.maps.eox.at/bm/{z}/{x}/{y}.jpg'}}};
       if(name.endsWith('?worker&url'))return {__esModule:true,default:'/custom-map/workers/tiles.js'};
       throw new Error(`Unmocked runtime dependency ${name}`);
     }});
   const store=new testModule.exports.CustomMapTiles(softwareRaster);
   const resolveDownloads=()=>{for(const request of downloads.filter(item=>!item.done)){request.done=true;request.resolve(new Uint8Array([1,2,3,4]).buffer);}};
-  return{store,downloads,workers,bitmaps,navigator,resolveDownloads,pool,createStore:()=>new testModule.exports.CustomMapTiles(softwareRaster),key:testModule.exports.customTileKey};
+  return{store,downloads,workers,bitmaps,manifestReads,navigator,resolveDownloads,pool,createStore:()=>new testModule.exports.CustomMapTiles(softwareRaster),key:testModule.exports.customTileKey};
 }
 const request=(x=0)=>({kind:'overview',z:4,x,y:5});
+
+test('a transient package manifest failure is retried while concurrent reads still share one index request',async t=>{
+  const manifests=[],env=fixture({online:false,readManifest:()=>new Promise((resolve,reject)=>manifests.push({resolve,reject}))});
+  t.after(()=>env.store.destroy());
+  const requests=[100,101,102].map(x=>({kind:'vector',z:12,x,y:200}));
+  env.store.pin(requests.map(env.key));const failed=requests.map(value=>env.store.load(value).catch(error=>error));await turn();
+  assert.equal(manifests.length,1,'concurrent source lookups must share the pending package index');
+  manifests[0].reject(new Error('Temporary manifest transport failure'));
+  assert.ok((await Promise.all(failed)).every(error=>/not in the saved package/.test(error.message)));
+  assert.equal(env.store.pending,0);assert.equal(env.downloads.length,0);
+  const retry=requests.map(value=>env.store.load(value));await turn();
+  assert.equal(manifests.length,2,'the failed index is not cached as a permanent empty package');
+  const files=[100,101,102,103].map(x=>({path:`localtiles/12/${x}/200.pbf`}));
+  manifests[1].resolve({files});await turn();
+  assert.deepEqual(env.downloads.map(value=>value.url).sort(),files.slice(0,3).map(value=>`/offline-map/${value.path}`));
+  env.resolveDownloads();await turn();
+  for(let index=0;index<requests.length;index++){env.workers[0].complete();await turn();}
+  assert.ok((await Promise.all(retry)).every(tile=>tile.local));
+  const next={kind:'vector',z:12,x:103,y:200};env.store.pin([...requests,next].map(env.key));const additional=env.store.load(next);await turn();
+  assert.equal(manifests.length,2,'a successful index remains cached for later source lookups');
+  assert.equal(env.downloads.at(-1).url,'/offline-map/localtiles/12/103/200.pbf');
+  env.resolveDownloads();await turn();env.workers[0].complete();assert.equal((await additional).local,true);
+  assert.equal(env.store.pending,0);assert.equal(env.manifestReads.length,2);
+});
 
 test('a map raster policy reaches every worker job without changing source identity or bitmap caching',async t=>{
   let expectedSources;

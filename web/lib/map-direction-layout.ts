@@ -88,8 +88,8 @@ export const MAP_LABEL_SAFE_AREA = {
   compact: {edge: 12, top: 12, right: 12, bottom: 12},
 } as const;
 export const MAP_LABEL_OBSTACLE_SELECTORS = [
-  '.map-context','.map-style-switch','.map-controls','.layer-control','.map-message','.map-preload-status',
-  '.map-legend','.map-attribution','.fact-card','.fact-closed','.explore-panel',
+  '.map-context','.map-style-switch','.map-controls','.layer-control','.layer-menu','.map-message','.map-preload-status',
+  '.map-legend','.map-attribution','.map-attribution-content','.fact-card','.fact-closed','.explore-panel',
 ] as const;
 
 export function mapLabelSafeRect(viewport: MapLabelRect, compact: boolean, coveredBottom?: number): MapLabelSafeRect {
@@ -209,6 +209,24 @@ function visibleObstacleRect(element:Element,viewport:MapLabelRect){
   if(rect.width<2||rect.height<2||!intersects(rect,viewport))return undefined;
   return{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom};
 }
+function collectMapLabelObstacles(viewport:HTMLElement,bounds:MapLabelRect):MapLabelRect[]{
+  const root=viewport.closest('.explore-layout')??viewport.parentElement??viewport;
+  return [...root.querySelectorAll(MAP_LABEL_OBSTACLE_SELECTORS.join(','))]
+    .filter(element=>element!==viewport&&!element.contains(viewport))
+    .map(element=>visibleObstacleRect(element,bounds)).filter((rect):rect is MapLabelRect=>!!rect);
+}
+
+/** Canvas and DOM labels reserve the same visible overlays. Stories and the
+ * mobile drawer are siblings of the atlas; absolute popups also need their own
+ * rectangle because their parent control does not grow with them. Called only
+ * at settled layout boundaries, never from a map animation frame. */
+export function mapLabelObstacleRects(viewport:HTMLElement):MapLabelRect[]{
+  const bounds=viewport.getBoundingClientRect();
+  return collectMapLabelObstacles(viewport,bounds).map(rect=>({
+    left:rect.left-bounds.left,right:rect.right-bounds.left,
+    top:rect.top-bounds.top,bottom:rect.bottom-bounds.top,
+  }));
+}
 function effectiveVisualRect(bounds:MapLabelRect):MapLabelRect{
   if(typeof window==='undefined'||!window.visualViewport)return bounds;
   const visual=window.visualViewport;
@@ -232,10 +250,7 @@ function viewportLabelLayout(viewport:HTMLElement){
   }
   const compact=Math.min(viewport.clientWidth,visible.right-visible.left)<=700;
   const safe=mapLabelSafeRect(visible,compact,coveredBottom);
-  const selector=MAP_LABEL_OBSTACLE_SELECTORS.join(',');
-  const obstacles=[...root.querySelectorAll(selector)]
-    .filter(element=>element!==viewport&&!element.contains(viewport))
-    .map(element=>visibleObstacleRect(element,visible)).filter((rect):rect is MapLabelRect=>!!rect);
+  const obstacles=collectMapLabelObstacles(viewport,visible);
   return{safe,obstacles,compact};
 }
 

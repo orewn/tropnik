@@ -46,8 +46,10 @@ export const PlaceStories=memo(function PlaceStories({regionId,routeId,onPlace}:
  }
  if(!fact)return null;
  function manual(delta:number){setPaused(true);setIndex(i=>(i+delta+facts.length)%facts.length);}
- function releaseTouchFocus(button:HTMLButtonElement){
-  if(window.matchMedia('(hover:none), (pointer:coarse)').matches)requestAnimationFrame(()=>button.blur());
+ function releaseTouchFocus(button:HTMLButtonElement,clickCount:number){
+  // Keyboard and assistive activations have no pointer click count. Keep
+  // their focus even on a phone with an external keyboard.
+  if(clickCount>0&&window.matchMedia('(hover:none), (pointer:coarse)').matches)requestAnimationFrame(()=>button.blur());
  }
  function beginSwipe(event:ReactPointerEvent<HTMLElement>){
   if(event.pointerType==='mouse'||(event.target as HTMLElement).closest('button,a'))return;
@@ -94,12 +96,12 @@ export const PlaceStories=memo(function PlaceStories({regionId,routeId,onPlace}:
    </div>
   </div>
   <div className="fact-card-footer">
-   {collapsible?<button type="button" className="fact-story-toggle button-sm" aria-expanded={expanded} aria-controls={storyId} onClick={event=>{setExpanded(value=>!value);releaseTouchFocus(event.currentTarget);}}>{expanded?'Свернуть':'Читать историю'}<CaretRight size={14}/></button>:<button className="fact-place" onClick={()=>{setPaused(true);onPlace(fact);}} title="Открыть направление на карте">{fact.place.length>24?fact.place.split(' · ')[0]:fact.place}<ArrowRight size={12}/></button>}
+   {collapsible?<button type="button" className="fact-story-toggle button-sm" aria-expanded={expanded} aria-controls={storyId} onClick={event=>{setExpanded(value=>!value);releaseTouchFocus(event.currentTarget,event.detail);}}>{expanded?'Свернуть':'Читать историю'}<CaretRight size={14}/></button>:<button className="fact-place" onClick={()=>{setPaused(true);onPlace(fact);}} title="Открыть направление на карте">{fact.place.length>24?fact.place.split(' · ')[0]:fact.place}<ArrowRight size={12}/></button>}
    <div className="fact-controls">
-    <button type="button" aria-label="Предыдущая история" onClick={event=>{manual(-1);releaseTouchFocus(event.currentTarget);}}><CaretLeft size={15}/></button>
+    <button type="button" aria-label="Предыдущая история" onClick={event=>{manual(-1);releaseTouchFocus(event.currentTarget,event.detail);}}><CaretLeft size={15}/></button>
     {compact&&<span className="fact-count caption-5">{String(index%facts.length+1).padStart(2,'0')} / {String(facts.length).padStart(2,'0')}</span>}
-    <button type="button" disabled={reduced} title={reduced?'Автосмена отключена системной настройкой уменьшения движения':undefined} aria-label={reduced?'Автосмена отключена системной настройкой':paused?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={event=>{togglePlayback();releaseTouchFocus(event.currentTarget);}}>{paused||reduced?<Play size={13}/>:<Pause size={13}/>}</button>
-    <button type="button" aria-label="Следующая история" onClick={event=>{manual(1);releaseTouchFocus(event.currentTarget);}}><CaretRight size={15}/></button>
+    <button type="button" disabled={reduced} title={reduced?'Автосмена отключена системной настройкой уменьшения движения':undefined} aria-label={reduced?'Автосмена отключена системной настройкой':paused?'Включить смену историй':'Остановить смену историй'} aria-pressed={paused||reduced} onClick={event=>{togglePlayback();releaseTouchFocus(event.currentTarget,event.detail);}}>{paused||reduced?<Play size={13}/>:<Pause size={13}/>}</button>
+    <button type="button" aria-label="Следующая история" onClick={event=>{manual(1);releaseTouchFocus(event.currentTarget,event.detail);}}><CaretRight size={15}/></button>
    </div>
   </div>
   <div className={`fact-progress ${stopped?'paused':''}`} aria-hidden="true"><span key={`${fact.id}-${paused}`}/></div>

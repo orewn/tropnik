@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {dirname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,directionAnchorCorrection,directionCountShift,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,mapLabelAvoidObstacles,updateDirectionButtons,bindMapLabelReflow} from '../lib/map-direction-layout.ts';
+import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,directionAnchorCorrection,directionCountShift,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,mapLabelAvoidObstacles,mapLabelObstacleRects,updateDirectionButtons,bindMapLabelReflow} from '../lib/map-direction-layout.ts';
 import {russiaCamera,russiaPadding,russiaLongitude} from '../public/maps/russia-viewport.js';
 
 // Use the actual fifteen directions, not a separately maintained coordinate
@@ -129,6 +129,37 @@ test('labels hide rather than overlap when no legal rectangle exists',()=>{
   assert.equal(result.hidden,true);
 });
 
+test('canvas labels reserve sibling stories and absolute popups using only visible intersecting rectangles',t=>{
+  const previous=globalThis.getComputedStyle;t.after(()=>{if(previous===undefined)delete globalThis.getComputedStyle;else globalThis.getComputedStyle=previous;});
+  class Element{
+    children=[];style={display:'block',visibility:'visible',opacity:'1'};
+    constructor(className,rect,parent){this.className=className;this.rect=rect;this.parentElement=parent;parent?.children.push(this);}
+    matches(selector){return selector.split(',').some(part=>part.trim()==='.'+this.className);}
+    closest(selector){return this.matches(selector)?this:this.parentElement?.closest(selector)??null;}
+    contains(node){return node===this||this.children.some(child=>child.contains(node));}
+    querySelectorAll(selector){return this.children.flatMap(child=>[...(child.matches(selector)?[child]:[]),...child.querySelectorAll(selector)]);}
+    getBoundingClientRect(){return{...this.rect,width:this.rect.right-this.rect.left,height:this.rect.bottom-this.rect.top};}
+  }
+  globalThis.getComputedStyle=element=>element.style;
+  const rect=(left,top,right,bottom)=>({left,top,right,bottom}),root=new Element('explore-layout',rect(0,80,1100,680));
+  const atlas=new Element('atlas-wrap',rect(300,80,1100,680),root),viewport=new Element('atlas-canvas',rect(300,80,1100,680),atlas);
+  const story=new Element('fact-card',rect(780,120,1080,350),root);
+  const control=new Element('layer-control',rect(1040,530,1084,574),atlas);
+  const menu=new Element('layer-menu',rect(740,290,1028,530),control);
+  const credit=new Element('map-attribution',rect(1040,620,1084,664),atlas);
+  const creditPanel=new Element('map-attribution-content',rect(700,440,1028,620),credit);
+  new Element('explore-panel',rect(0,80,300,680),root);
+  new Element('map-controls',rect(1200,100,1244,300),atlas);
+  const hidden=new Element('fact-closed',rect(400,130,560,174),root);hidden.style.display='none';
+  const transparent=new Element('map-legend',rect(420,600,600,640),atlas);transparent.style.opacity='0';
+  const local=element=>({left:element.rect.left-300,right:element.rect.right-300,top:element.rect.top-80,bottom:element.rect.bottom-80});
+  assert.deepEqual(mapLabelObstacleRects(viewport),[control,menu,credit,creditPanel,story].map(local));
+  story.style.visibility='hidden';menu.style.display='none';creditPanel.style.display='none';
+  assert.deepEqual(mapLabelObstacleRects(viewport),[control,credit].map(local),'closing overlays releases their occupied map space');
+  const mobileSheet=new Element('explore-panel',rect(300,480,1100,680),root);
+  assert.deepEqual(mapLabelObstacleRects(viewport),[control,credit,mobileSheet].map(local),'an overlapping drawer is an obstacle while the desktop side panel is not');
+});
+
 test('cluster anchors remain stable while the projection changes',()=>{
   const south=regions.filter(item=>southIds.includes(item.id));
   const first=groupMapDirections(south,([lng,lat])=>({x:lng*.1,y:lat*.1}));
@@ -190,8 +221,8 @@ test('a completely covered count hides its decorative copy instead of drifting o
 
 test('catalogue count changes reflow once while marker transforms and layout writes stay silent',async t=>{
   const previous=new Map(['Element','document','window','ResizeObserver','MutationObserver','requestAnimationFrame','cancelAnimationFrame'].map(key=>[key,globalThis[key]]));
-  let mutationCallback,scheduled=0,nextFrame=0;
-  const frames=new Map();
+  let mutationCallback,resizeCallback,scheduled=0,nextFrame=0;
+  const frames=new Map(),observed=new Set();
   class Element {
     dataset={};
     children=[];
@@ -206,7 +237,7 @@ test('catalogue count changes reflow once while marker transforms and layout wri
   const root=new Element('explore-layout'),viewport=new Element('atlas-canvas',root),layer=new Element('tropnik-marker-layer',viewport),button=new Element('region-marker',layer),count=new Element('region-marker-count',button);
   Object.assign(globalThis,{
     Element,document:{fonts:{ready:Promise.resolve(),addEventListener(){},removeEventListener(){}}},window:{addEventListener(){},removeEventListener(){}},
-    ResizeObserver:class{observe(){}unobserve(){}disconnect(){}},
+    ResizeObserver:class{constructor(callback){resizeCallback=callback;}observe(element){observed.add(element);}unobserve(element){observed.delete(element);}disconnect(){observed.clear();}},
     MutationObserver:class{constructor(callback){mutationCallback=callback;}observe(){}disconnect(){}},
     requestAnimationFrame:callback=>{const id=++nextFrame;frames.set(id,callback);return id;},cancelAnimationFrame:id=>frames.delete(id),
   });
@@ -223,5 +254,12 @@ test('catalogue count changes reflow once while marker transforms and layout wri
   viewport.dataset.mapCamera='moving';mutationCallback([content]);flush();assert.equal(scheduled,1,'camera animation owns the final settled layout');
   delete viewport.dataset.mapCamera;
   mutationCallback([{target:button,type:'attributes',attributeName:'hidden'}]);flush();assert.equal(scheduled,2,'a newly exposed group reflows even if its text did not change');
-  dispose();mutationCallback([content]);flush();assert.equal(scheduled,2,'disposed maps schedule no work');
+  const control=new Element('layer-control',root),popup=new Element('layer-menu',control),story=new Element('fact-card',root);
+  mutationCallback([{target:root,type:'childList',addedNodes:[control,story],removedNodes:[]}]);flush();
+  assert.ok(observed.has(popup)&&observed.has(story),'absolute popups and sibling story cards are observed independently');
+  assert.equal(scheduled,3);resizeCallback();resizeCallback();flush();assert.equal(scheduled,4,'a popup resize coalesces to one layout boundary');
+  control.children=[];root.children=root.children.filter(child=>child!==story);
+  mutationCallback([{target:root,type:'childList',addedNodes:[],removedNodes:[popup,story]}]);flush();
+  assert.equal(observed.has(popup),false);assert.equal(observed.has(story),false);assert.equal(scheduled,5,'closing overlays releases their observed geometry');
+  dispose();mutationCallback([content]);flush();assert.equal(scheduled,5,'disposed maps schedule no work');
 });

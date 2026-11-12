@@ -1,6 +1,6 @@
 'use client';
 import type * as GeoJSON from 'geojson';
-import {memo,useEffect,useLayoutEffect,useRef,useState} from 'react';
+import {memo,useCallback,useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {MapIcon} from './MapIcon';
 import {MapAttribution} from './MapAttribution';
 import {MapRouteContext} from './MapRouteContext';
@@ -15,7 +15,7 @@ import {mapTrailPointEntries} from '@/lib/map-trail-points';
 import {readRouteGeometry,routeGeometryPositions} from '@/lib/route-geometry';
 import {coveredRussiaBounds,inRussiaCoverage} from '@/public/maps/russia-viewport.js';
 import {MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
-import {bindMapLabelReflow,constrainDirectionLabels,MAP_LABEL_OBSTACLE_SELECTORS} from '@/lib/map-direction-layout';
+import {bindMapLabelReflow,constrainDirectionLabels,mapLabelObstacleRects} from '@/lib/map-direction-layout';
 import {MAP_CONFIG,viewportRegionId} from '@/lib/map-config';
 import {overviewContextCaption,ROUTE_PRESENTATION} from '@/lib/map-route-presentation';
 import {EMPTY_MAP_TRAILS,type AtlasProps} from '@/lib/map-types';
@@ -30,13 +30,14 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
   const scaleValue=useRef<HTMLSpanElement>(null),scaleLine=useRef<HTMLSpanElement>(null);
   const frame=useRef<MapFrameRefit|null>(null),navigation=useRef(0),manual=useRef(false),fullView=useRef(!region),fitCurrent=useRef<(animate?:boolean)=>void>(()=>{});
   const shown=useRef<{trail?:Trail;geometry?:GeoJSON.GeoJSON;bounds?:GeographicBounds}>({});
-  const locationEpoch=useRef(0),position=useRef<[number,number]|null>(null);
+  const locationEpoch=useRef(0),locating=useRef(false),position=useRef<[number,number]|null>(null);
   const [state,setState]=useState(INITIAL),[zoom,setZoom]=useState(2),[status,setStatus]=useState(''),[layers,setLayers]=useState(false);
   const [paths,setPaths]=useState(true),[boundaries,setBoundaries]=useState(true),[relief,setRelief]=useState(true);
   const [offline,setOffline]=useState(false);
   const [dismissedError,setDismissedError]=useState('');
   useLayoutEffect(()=>{latest.current=props;},[props]);
-  const note=(text:string)=>{setStatus(text);latest.current.onMapNote?.(text);};
+  const note=useCallback((text:string)=>{setStatus(text);latest.current.onMapNote?.(text);},[]);
+  const cancelLocation=useCallback(()=>{locationEpoch.current++;if(locating.current){locating.current=false;note('');}},[note]);
   useLayoutEffect(()=>{
     fitCurrent.current=(animate=false)=>{
       const map=engine.current,element=container.current;if(!map||!element)return;
@@ -57,7 +58,7 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
       camera:russiaView(element,256).camera,
       onReady:()=>{if(alive)setState(map.getState());},
       onState:value=>{if(alive)setState(value);},
-      onGesture:()=>{manual.current=true;fullView.current=false;navigation.current++;locationEpoch.current++;frame.current?.cancel();},
+      onGesture:()=>{manual.current=true;fullView.current=false;navigation.current++;cancelLocation();frame.current?.cancel();},
       onSettled:camera=>{
         if(!alive)return;
         setZoom(camera.zoom);latest.current.onViewportRegion?.(viewportRegionId(camera.center[0],camera.center[1],camera.zoom));
@@ -90,10 +91,8 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     const refreshGeometry=()=>{
       if(!alive||layoutFrame)return;
       layoutFrame=requestAnimationFrame(()=>{
-        layoutFrame=0;const rect=element.getBoundingClientRect();
-        const obstacles=[...element.closest('.atlas-wrap')!.querySelectorAll(MAP_LABEL_OBSTACLE_SELECTORS.join(','))].map(node=>node.getBoundingClientRect()).filter(r=>r.width>0&&r.height>0).map(r=>({left:r.left-rect.left,top:r.top-rect.top,right:r.right-rect.left,bottom:r.bottom-rect.top}));
-        if(panel){const p=panel.getBoundingClientRect();if(p.top<rect.bottom&&p.right>rect.left)obstacles.push({left:p.left-rect.left,top:p.top-rect.top,right:p.right-rect.left,bottom:p.bottom-rect.top});}
-        map.setObstacles(obstacles);map.setPadding(russiaView(element,256).padding);
+        layoutFrame=0;
+        map.setObstacles(mapLabelObstacleRects(element));map.setPadding(russiaView(element,256).padding);
         constrainDirectionLabels(new Map([...element.querySelectorAll<HTMLButtonElement>('.region-marker')].map(button=>[button.dataset.regionId!,button])),element);
       });
     };
@@ -101,10 +100,10 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     const resize=new ResizeObserver(()=>{refreshGeometry();refit.resized();});resize.observe(element);
     const connection=()=>setOffline(!navigator.onLine);connection();window.addEventListener('online',connection);window.addEventListener('offline',connection);
     return()=>{alive=false;cancelAnimationFrame(layoutFrame);navigationEpoch.current++;locationRevision.current++;resize.disconnect();unbindFrame();unbindLabels();refit.dispose();frame.current=null;map.destroy();if(engine.current===map)engine.current=null;window.removeEventListener('online',connection);window.removeEventListener('offline',connection);};
-  },[]);
+  },[cancelLocation]);
   useLayoutEffect(()=>{
     if(!state.ready||!engine.current)return;
-    const map=engine.current,revision=++navigation.current;locationEpoch.current++;manual.current=false;fullView.current=!region;
+    const map=engine.current,revision=++navigation.current;cancelLocation();manual.current=false;fullView.current=!region;
     frame.current?.select(JSON.stringify([region?.id,trail?.id,trail?.geometryUrl]));map.setRegion(region?.shapeNames||[]);
     // Clear before paint and before I/O: a newly selected card cannot inherit
     // another route's line, click target or frame.
@@ -124,7 +123,7 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
       note('Линия маршрута не загрузилась. Проверьте подключение и повторите выбор.');
     }});
     return()=>{active=false;};
-  },[region,trail,state.ready]);
+  },[region,trail,state.ready,cancelLocation,note]);
   useEffect(()=>{
     const map=engine.current,coverage=map?.getCoverage();if(!map||!coverage||!state.ready)return;
     const counts=mapDirectionCounts(visibleTrails),markers:CustomMapMarker[]=planning?[]:regions.filter(item=>inRussiaCoverage(...item.center,coverage.area)).map(item=>({id:item.id,coordinate:item.center,label:item.name,kind:'direction',count:counts.get(item.id)||0,active:item.id===region?.id}));
@@ -139,21 +138,23 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     if(mode==='detail'){setRelief(true);map.setLayers({relief:true});}
     map.setMode(mode);
   };
-  const fitAll=()=>{navigation.current++;locationEpoch.current++;manual.current=false;if(!planning||!shown.current.bounds)fullView.current=true;frame.current?.select(`fit-${navigation.current}`);fitCurrent.current(true);};
+  const fitAll=()=>{navigation.current++;cancelLocation();manual.current=false;if(!planning||!shown.current.bounds)fullView.current=true;frame.current?.select(`fit-${navigation.current}`);fitCurrent.current(true);};
   const locate=()=>{
     const map=engine.current,coverage=map?.getCoverage();if(!map||!coverage)return;
     if(!navigator.geolocation){note('Геолокация не поддерживается.');return;}
-    const epoch=++locationEpoch.current;note('Определяем местоположение…');
+    const epoch=++locationEpoch.current;locating.current=true;note('Определяем местоположение…');
     navigator.geolocation.getCurrentPosition(result=>{
       if(epoch!==locationEpoch.current||map!==engine.current)return;
+      locating.current=false;
       const {longitude,latitude,accuracy}=result.coords;
       if(!inRussiaCoverage(longitude,latitude,coverage.area)){note('Местоположение находится за пределами доступной карты России.');return;}
       position.current=[longitude,latitude];map.setPosition(position.current);manual.current=true;fullView.current=false;frame.current?.cancel();map.setCamera({center:position.current,zoom:13},true);note(`Точность около ${Math.round(accuracy)} м. Позиция никому не передаётся.`);
-    },()=>{if(epoch===locationEpoch.current)note('Позиция недоступна. Проверьте разрешение и сигнал.');},{enableHighAccuracy:true,timeout:MAP_CONFIG.geolocationTimeoutMs,maximumAge:MAP_CONFIG.geolocationMaximumAgeMs});
+    },()=>{if(epoch===locationEpoch.current&&map===engine.current){locating.current=false;note('Позиция недоступна. Проверьте разрешение и сигнал.');}},{enableHighAccuracy:true,timeout:MAP_CONFIG.geolocationTimeoutMs,maximumAge:MAP_CONFIG.geolocationMaximumAgeMs});
   };
-  const satellite=state.mode==='satellite',message=status||(state.error!==dismissedError?state.error:'');
+  const retry=()=>{setDismissedError('');setStatus('');engine.current?.retry();};
+  const satellite=state.mode==='satellite',satelliteVisible=state.committedMode==='satellite',mapError=state.error!==dismissedError?state.error:'',message=mapError||status;
   const contours=!satellite&&relief&&state.reliefReady&&!state.loading?reliefContourIntervals(Math.min(18,Math.ceil(zoom))):null;
-  return <div className="atlas-wrap tropnik-custom-atlas" data-map-renderer="tropnik" data-map-base-committed={state.committedMode} data-map-base-target={state.mode} data-map-base-state={state.imageryLoading?'loading':'ready'} data-map-imagery={satellite?'satellite':undefined} data-map-imagery-source={satellite?state.imagerySource:undefined} data-map-imagery-target={satellite?state.imageryTarget:undefined} data-map-imagery-state={satellite?(state.imageryLoading?'loading':state.imagerySource?'ready':'loading'):undefined} data-map-detail={zoom>=ROUTE_PRESENTATION.closeZoom?'close':undefined} data-map-route={trail&&!planning?'selected':undefined}>
+  return <div className="atlas-wrap tropnik-custom-atlas" data-map-renderer="tropnik" data-map-base-committed={state.committedMode} data-map-base-target={state.mode} data-map-base-state={state.loading||state.imageryLoading?'loading':'ready'} data-map-imagery={satelliteVisible?'satellite':undefined} data-map-imagery-source={satelliteVisible?state.imagerySource:undefined} data-map-imagery-target={satellite?state.imageryTarget:undefined} data-map-imagery-state={satellite||satelliteVisible?(state.imageryLoading?'loading':satelliteVisible?'ready':'loading'):undefined} data-map-detail={zoom>=ROUTE_PRESENTATION.closeZoom?'close':undefined} data-map-route={trail&&!planning?'selected':undefined}>
     <div ref={container} className="atlas-canvas tropnik-map-surface" role="region" aria-label="Интерактивная карта России"/>
     {!state.ready&&!message&&<div className="map-skeleton"><MapIcon name="compass" size={38}/><span>Открываем карту России</span></div>}
     {trail&&!planning?<MapRouteContext title={trail.title} caption={overviewContextCaption(state.mode,zoom,false)}/>:<div className="map-context"><span className="live-dot"/><span>{planning?'План похода':region?.name||'Россия'}</span><span className="context-divider"/><span>{satellite?'Спутник':planning?'Выбранные участки':region?'Рельеф':routeCountLabel(visibleTrails.length)}</span></div>}
@@ -161,8 +162,8 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     <div className="map-style-switch"><button aria-label="Рельеф" aria-pressed={!satellite} disabled={!state.ready} className={!satellite?'active':''} onClick={()=>changeMode('detail')} title="Рельеф, тропы и линии высот"><MapIcon name="terrain" size={19}/>Рельеф</button><button aria-label="Спутник" aria-pressed={satellite} disabled={offline||!state.ready} className={satellite?'active':''} onClick={()=>changeMode('satellite')} title={offline?'Спутниковые снимки доступны при подключении к интернету':'Спутниковые снимки с маршрутами'}><MapIcon name="satellite" size={18}/>Спутник</button></div>
     <div className="map-controls"><button aria-label="Увеличить масштаб" disabled={!state.ready} onClick={()=>engine.current?.zoomBy(1)}><MapIcon name="plus" size={20}/></button><button aria-label="Уменьшить масштаб" disabled={!state.ready} onClick={()=>engine.current?.zoomBy(-1)}><MapIcon name="minus" size={20}/></button><span/><button aria-label="Север сверху" onClick={()=>engine.current?.north()}><MapIcon name="compass" size={22}/></button><button aria-label="Моё местоположение" disabled={!state.ready} onClick={locate}><MapIcon name="location" size={21}/></button><button aria-label={planning&&trail?'Показать поход целиком':'Показать Россию целиком'} disabled={!state.ready} onClick={fitAll}><MapIcon name="fit" size={19}/></button></div>
     <div className="layer-control"><button className={layers?'layer-button active':'layer-button'} aria-expanded={layers} onClick={()=>setLayers(!layers)}><MapIcon name="layers" size={20}/>Слои</button>{layers&&<div className="layer-menu"><strong>Ваша карта</strong><label><input type="checkbox" checked={paths} onChange={event=>{setPaths(event.target.checked);engine.current?.setLayers({paths:event.target.checked});}}/>Тропы и грунтовые дороги</label><label><input type="checkbox" checked={relief} onChange={event=>{setRelief(event.target.checked);engine.current?.setLayers({relief:event.target.checked});}}/>Рельеф и линии высот</label><label><input type="checkbox" checked={boundaries} onChange={event=>{setBoundaries(event.target.checked);engine.current?.setLayers({boundaries:event.target.checked});}}/>Границы территорий</label><a href="/offline">Подробная офлайн-карта</a><a href="/sources">Источники карты</a></div>}</div>
-    {message&&!planning&&<div className="map-message" role="status"><MapIcon name="info" size={18}/><span>{message}</span><button onClick={()=>{setStatus('');setDismissedError(state.error);}}>Понятно</button></div>}
+    {message&&(!planning||mapError)&&<div className={`map-message${mapError?' map-message--error':''}`} role="status"><MapIcon name="info" size={18}/>{mapError?<div className="map-message-copy"><p>{message}</p><div className="map-message-actions"><button type="button" onClick={retry} disabled={state.loading} aria-label="Повторить загрузку карты">{state.loading?'Загружаем…':'Повторить загрузку'}</button>{state.ready&&<button type="button" onClick={()=>setDismissedError(state.error)}>Закрыть</button>}</div></div>:<><span>{message}</span><button type="button" onClick={()=>setStatus('')}>Понятно</button></>}</div>}
     {!planning&&<div className="map-legend"><span className="map-scale" title="Расстояние у центра карты"><span ref={scaleValue}/><span ref={scaleLine} className="map-scale-line"/></span><span className="map-legend-key"><span className="legend-line"/>Маршрут</span>{contours?<span className="map-legend-key" title={`Основные линии высот — через ${contours.indexM} м`}><span className="map-contour-key"/>Горизонтали · {contours.minorM} м</span>:<span className="map-legend-key"><span className="legend-region"/>Направление</span>}</div>}
-    <MapAttribution ready={state.ready} terrain={state.reliefReady} satellite={satellite} satelliteSource={state.imagerySource??state.imageryTarget??'eox-s2'} satelliteLoading={state.imageryLoading} zoom={zoom}/>
+    <MapAttribution ready={state.ready} terrain={state.reliefReady} satellite={satelliteVisible} satelliteSource={state.imagerySource??'eox-s2'} satelliteLoading={satellite&&state.imageryLoading} zoom={zoom}/>
   </div>;
 });

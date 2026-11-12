@@ -167,8 +167,8 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
   ?[trail.distanceKm!=null?`${trail.distanceKm.toLocaleString('ru')} км${trail.distanceNote ? ' · '+trail.distanceNote : ''}`:undefined,trail.duration].filter(Boolean).join(' · ')||'Открыть карточку маршрута'
   :routeCountPreview(region?shownTrails.length:catalog.length);
  return <><MapResourceHints/><section ref={sheetLayout} className={`explore-layout ${sheetOpen?'sheet-open':'sheet-closed'}`} data-sheet-state={sheetOpen?'open':'closed'} aria-label="Поиск маршрутов"><aside ref={sheetPanel} id={sheetPanelId} className={`explore-panel ${sheetOpen?'expanded':'collapsed'}`}>
- <button ref={sheetHandle} className="sheet-handle" type="button" onClick={event=>{setSheetOpen(open=>!open);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-controls={sheetPanelId} aria-expanded={sheetOpen} aria-label={sheetOpen?'Свернуть список':'Открыть список'}><span/></button>
- <button ref={sheetPreview} className="sheet-peek-summary" type="button" hidden={sheetOpen} onClick={event=>{setSheetOpen(true);if(window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-label={`Открыть: ${sheetPreviewTitle}`}>
+ <button ref={sheetHandle} className="sheet-handle" type="button" onClick={event=>{setSheetOpen(open=>!open);if(event.detail>0&&window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-controls={sheetPanelId} aria-expanded={sheetOpen} aria-label={sheetOpen?'Свернуть список':'Открыть список'}><span/></button>
+ <button ref={sheetPreview} className="sheet-peek-summary" type="button" hidden={sheetOpen} onClick={event=>{setSheetOpen(true);if(event.detail>0&&window.matchMedia('(pointer:coarse)').matches)event.currentTarget.blur();}} aria-label={`Открыть: ${sheetPreviewTitle}`}>
   <span className="sheet-peek-copy"><small>{sheetPreviewKind}</small><strong>{sheetPreviewTitle}</strong><span>{sheetPreviewMeta}</span></span><ArrowRight size={20}/>
  </button>
  <div className="explore-panel-content" ref={panelContent} aria-busy={searchPending}>

@@ -98,6 +98,8 @@ export class CustomMapEngine {
   private size:MapViewport={width:1,height:1};
   private pixelRatio=1;
   private coverage?:MapCoverage;
+  private coverageTask?:Promise<void>;
+  private retryAfterCurrent=false;
   private coverageRevision=-1;
   private coveragePaths=new WeakMap<GeoJSON.Geometry,Path2D>();
   private area?:Path2D;
@@ -160,11 +162,30 @@ export class CustomMapEngine {
     const context=this.canvas.getContext('2d',{alpha:false,willReadFrequently:this.rasterPolicy.softwareRaster});if(!context)throw new Error('Canvas map is unavailable');this.context=context;
     const labelContext=this.labelCanvas.getContext('2d',{alpha:true,willReadFrequently:this.rasterPolicy.softwareRaster});if(!labelContext)throw new Error('Canvas map labels are unavailable');this.labelContext=labelContext;
     this.resize=new ResizeObserver(()=>this.resizeCanvas());this.resize.observe(element);this.resizeCanvas();this.bindInput();
-    void loadRussiaGeometry().then(coverage=>{
+    this.loadCoverage();
+  }
+  private loadCoverage(){
+    if(this.disposed||this.coverage||this.coverageTask)return;
+    this.updateState({loading:true});
+    this.coverageTask=loadRussiaGeometry().then(coverage=>{
       if(this.disposed){coverage.dispose();return;}
       this.coverage=coverage;this.applyCoverage();this.unbindCoverage=coverage.subscribe(()=>this.applyCoverage());
-      this.updateState({ready:true});this.options.onReady?.(this);this.schedule();this.settled();
-    }).catch(()=>this.updateState({error:'Границы карты не загрузились. Проверьте подключение и обновите страницу.'}));
+      this.updateState({ready:true,loading:false,error:''});this.options.onReady?.(this);this.schedule();this.settled();
+    }).catch(()=>this.updateState({loading:false,error:'Границы карты не загрузились. Проверьте подключение и повторите загрузку.'}))
+      .finally(()=>{this.coverageTask=undefined;this.retryAfterOnline();});
+  }
+  /** Retry the current view without changing its camera or displayed ground.
+   * Repeated input shares an existing attempt instead of adding generations. */
+  retry(){
+    if(this.disposed)return;
+    if(!this.coverage){this.loadCoverage();return;}
+    if(this.state.loading)return;
+    this.currentKeys='';this.refreshTiles();
+  }
+  private retryAfterOnline(){
+    if(!this.retryAfterCurrent)return;
+    this.retryAfterCurrent=false;
+    if(this.state.error)this.retry();
   }
   getCamera():CustomMapCamera{return{...this.camera,center:[...this.camera.center]};}
   getSize():MapViewport{return{...this.size};}
@@ -239,14 +260,16 @@ export class CustomMapEngine {
     this.padding=padding;this.framed=fitBounds(bounds,this.size,{padding,maxZoom,minZoom:this.floor.zoom,referenceLongitude:105});this.setCamera(this.framed,animate);
   }
   zoomBy(delta:number){if(this.disposed||!Number.isFinite(delta))return;const zoom=(this.zoomTarget??this.camera.zoom)+delta;this.options.onGesture?.();this.moveCamera(zoomAt(this.camera,this.size,zoom,undefined,{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18}),true,true);}
-  north(){this.setCamera({...this.camera,bearingDegrees:0},true);}
+  north(){this.options.onGesture?.();this.setCamera({...this.camera,bearingDegrees:0},true);}
   setMode(mode:CustomMapMode){
-    if(this.mode===mode&&!this.state.error)return;this.mode=mode;this.currentKeys='';
-    if(mode!=='satellite'){this.imagery=undefined;this.imageryOverlay=undefined;}
-    if(mode==='overview'){this.detail=undefined;this.relief=undefined;}
-    // Satellite staging owns a separate transparent overlay. The displayed
-    // opaque detail and relief survive until every replacement image is ready.
-    this.updateState({mode,error:'',...(mode==='overview'?{reliefReady:false}:{}),...(mode!=='satellite'?{committedMode:mode,imageryLoading:false,imagerySource:undefined,imageryTarget:undefined}:{})});this.refreshTiles();this.schedule();
+    if(this.mode===mode){if(this.state.error)this.retry();return;}this.mode=mode;this.currentKeys='';
+    if(mode==='overview'){
+      this.detail=undefined;this.relief=undefined;this.imagery=undefined;this.imageryOverlay=undefined;
+      this.updateState({committedMode:'overview',reliefReady:false,localDetail:false,imagerySource:undefined});
+    }
+    // Both directions keep the last complete ground. A transparent overlay
+    // never replaces opaque relief, and a cold relief load never drops imagery.
+    this.updateState({mode,imageryLoading:false,imageryTarget:undefined});this.refreshTiles();this.schedule();
   }
   setLayers(layers:{paths?:boolean;boundaries?:boolean;relief?:boolean}){
     if(layers.paths!==undefined&&layers.paths!==this.paths){this.paths=layers.paths;this.currentKeys='';}
@@ -375,10 +398,13 @@ export class CustomMapEngine {
       if(event.altKey||event.ctrlKey||event.metaKey||!this.state.ready||!this.active)return;
       if(['+','=','Add','PageUp','-','−','Subtract','PageDown'].includes(event.key)){event.preventDefault();this.zoomBy(['+','=','Add','PageUp'].includes(event.key)?1:-1);return;}
       const next=keyboardCameraAction(this.camera,this.size,event.key,{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18});
-      if(next){event.preventDefault();this.options.onGesture?.();this.setCamera(next,true);}else if(event.key==='Home'){event.preventDefault();this.setCamera(this.floor,true);}
+      if(next){event.preventDefault();this.options.onGesture?.();this.setCamera(next,true);}else if(event.key==='Home'){event.preventDefault();this.options.onGesture?.();this.setCamera(this.floor,true);}
     }) as EventListener);
     this.listen(window,'blur',()=>{this.pointer.cancel();this.canvas.classList.remove('is-moving');this.settled();});
-    this.listen(window,'online',()=>{this.currentKeys='';this.updateState({error:''});this.refreshTiles();});
+    this.listen(window,'online',()=>{
+      if(this.coverageTask||this.state.loading)this.retryAfterCurrent=true;
+      else this.retry();
+    });
     this.listen(window,'offline',()=>{this.currentKeys='';this.updateState({error:'Нет сети. Доступны сохранённые границы, маршруты и загруженные участки карты.'});this.refreshTiles();});
   }
   private resizeCanvas(){
@@ -422,35 +448,50 @@ export class CustomMapEngine {
     const reliefRequests=this.mode==='detail'&&this.reliefVisible&&z>=5?tileRequests(this.camera,view,detailLevel,'relief'):[];
     const b=this.getBounds(),source=satelliteSourceForBounds({west:b[0],south:b[1],east:b[2],north:b[3]});
     const imageryRequests=this.mode==='satellite'?tileRequests(this.camera,view,Math.min(source==='eox-s2'?14:8,z),source):[];
-    const stagingSatellite=this.mode==='satellite'&&!this.imagery;
-    if(!detailRequests.length&&!stagingSatellite){this.detail=undefined;this.imageryOverlay=undefined;}
-    if(!reliefRequests.length&&!stagingSatellite)this.relief=undefined;
     const requests=[...overviewRequests,...detailRequests,...reliefRequests,...imageryRequests],keys=requests.map(customTileKey).join('|');
     if(keys===this.currentKeys)return;this.currentKeys=keys;const generation=++this.generation;
     const retainedKeys=()=>[this.overview,this.detail,this.relief,this.imagery,this.imageryOverlay].flatMap(batch=>batch?.tiles.map(t=>t.key)||[]);
     this.tiles.pin([...requests.map(customTileKey),...retainedKeys()]);
-    this.updateState({loading:requests.length>0,imageryLoading:imageryRequests.length>0,imageryTarget:imageryRequests.length?source:undefined,...(!reliefRequests.length&&!stagingSatellite?{reliefReady:false}:{}),...(!detailRequests.length&&!stagingSatellite?{localDetail:false}:{})});
-    let detailFailed=false;
-    const batch=async(list:CustomTileRequest[],kind:CustomTileKind,commit:(batch:TileBatch)=>void,atomic=false)=>{
-      if(!list.length)return;
+    this.updateState({loading:requests.length>0,imageryLoading:imageryRequests.length>0,imageryTarget:imageryRequests.length?source:undefined});
+    const current=()=>!this.disposed&&generation===this.generation;
+    const batch=async(list:CustomTileRequest[],kind:CustomTileKind)=>{
       const result=await Promise.allSettled(list.map(request=>this.tiles.load(request)));
-      if(this.disposed||generation!==this.generation)return;
       const ready=result.flatMap(value=>value.status==='fulfilled'?[value.value]:[]),failed=result.length-ready.length;
-      if(ready.length&&(!atomic||!failed)){commit({tiles:ready,kind,generation});this.schedule();}
-      if(!atomic&&failed===list.length&&kind==='vector'&&navigator.onLine){detailFailed=true;this.updateState({error:'Подробности этого участка не загрузились. Обзор и маршрут сохранены; повторите выбор слоя.'});}
-      if(atomic){
-        if(failed)this.updateState({imageryLoading:false,error:'Не все спутниковые снимки загрузились. Предыдущая карта сохранена; повторите выбор слоя при устойчивой связи.'});
-        else this.updateState({imageryLoading:false,imagerySource:source,committedMode:'satellite',...(!detailFailed?{error:''}:{})});
-      }
+      return{value:{tiles:ready,kind,generation} satisfies TileBatch,failed};
     };
-    void Promise.all([
-      batch(overviewRequests,'overview',value=>{this.overview=value;if(!detailRequests.length&&!imageryRequests.length&&navigator.onLine)this.updateState({error:'',committedMode:'overview'});}),
-      batch(detailRequests,'vector',value=>{if(this.mode==='satellite')this.imageryOverlay=value;else this.detail=value;this.updateState({localDetail:value.tiles.every(t=>t.local),...(this.mode!=='satellite'?{committedMode:'detail',...(navigator.onLine?{error:''}:{})}:{})});}),
-      batch(reliefRequests,'relief',value=>{this.relief=value;this.updateState({reliefReady:true});}),
-      batch(imageryRequests,source,value=>{this.imagery=value;this.detail=undefined;this.relief=undefined;this.updateState({reliefReady:false});},true),
-    ]).finally(()=>{if(!this.disposed&&generation===this.generation){this.tiles.pin([...requests.map(customTileKey),...retainedKeys()]);this.updateState({loading:false});}});
+    const overview=batch(overviewRequests,'overview').then(result=>{
+      if(!current())return;
+      // The overview remains a usable fallback while the selected detailed
+      // ground is staged. An incomplete replacement cannot erase a saved view.
+      if(result.value.tiles.length&&(!result.failed||!this.overview)){this.overview=result.value;this.schedule();}
+      if(!detailRequests.length&&!imageryRequests.length){
+        if(result.failed){this.updateState({error:'Обзор карты загрузился не полностью. Повторите загрузку.'});return;}
+        this.detail=undefined;this.relief=undefined;this.imagery=undefined;this.imageryOverlay=undefined;
+        this.updateState({committedMode:'overview',reliefReady:false,localDetail:false,imagerySource:undefined,...(navigator.onLine?{error:''}:{})});this.schedule();
+      }
+    });
+    const ground=Promise.all([batch(detailRequests,'vector'),batch(reliefRequests,'relief'),batch(imageryRequests,source)]).then(([detail,relief,imagery])=>{
+      if(!current()||!detailRequests.length&&!imageryRequests.length)return;
+      if(imagery.failed||!imageryRequests.length&&(detail.failed||relief.failed)){
+        this.updateState({imageryLoading:false,error:imageryRequests.length?'Спутниковая карта загрузилась не полностью. Повторите загрузку.':'Подробная карта загрузилась не полностью. Повторите загрузку.'});return;
+      }
+      if(imageryRequests.length){
+        // A complete photograph is useful even if the independent map-object
+        // service failed. Keep a prior complete overlay, never a partial one,
+        // and report missing objects instead of discarding available imagery.
+        this.imagery=imagery.value;if(!detail.failed)this.imageryOverlay=detail.value;this.detail=undefined;this.relief=undefined;
+        const overlay=this.imageryOverlay;
+        this.updateState({committedMode:'satellite',imageryLoading:false,imagerySource:source,reliefReady:false,localDetail:!!overlay?.tiles.length&&overlay.tiles.every(t=>t.local),...(detail.failed?{error:'Подписи и тропы на спутниковой карте загрузились не полностью. Повторите загрузку.'}:navigator.onLine?{error:''}:{})});
+      }else{
+        this.detail=detail.value;this.relief=reliefRequests.length?relief.value:undefined;this.imagery=undefined;this.imageryOverlay=undefined;
+        this.updateState({committedMode:'detail',imagerySource:undefined,imageryTarget:undefined,reliefReady:reliefRequests.length>0,localDetail:detail.value.tiles.every(t=>t.local),...(navigator.onLine?{error:''}:{})});
+      }
+      this.schedule();
+    });
+    void Promise.all([overview,ground]).finally(()=>{if(current()){this.tiles.pin([...requests.map(customTileKey),...retainedKeys()]);this.updateState({loading:false});this.retryAfterOnline();}});
   }
-  private displayDetail(){return this.mode==='satellite'&&this.imagery?this.imageryOverlay:this.detail;}
+  private displayingSatellite(){return this.state.committedMode==='satellite'&&!!this.imagery;}
+  private displayDetail(){return this.displayingSatellite()?this.imageryOverlay:this.detail;}
   private worldTransform(){
     const ctx=this.context,s=256*2**this.camera.zoom,c=mercatorProject(this.camera.center),angle=(this.camera.bearingDegrees??0)*Math.PI/180;
     ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);ctx.translate(this.size.width/2,this.size.height/2);ctx.scale(1,Math.cos(this.pitch*Math.PI/180));ctx.rotate(-angle);ctx.scale(s,s);ctx.translate(-c.x,-c.y);return s;
@@ -498,7 +539,7 @@ export class CustomMapEngine {
       if(this.area){ctx.fillStyle='#dce5cf';ctx.fill(this.area,'evenodd');}
       this.drawTiles(this.overview,.95);
     }
-    const satellite=this.mode==='satellite'&&!!this.imagery;
+    const satellite=this.displayingSatellite();
     if(satellite)this.drawTiles(this.imagery);
     if(this.mode!=='overview'&&this.camera.zoom>=4.7&&(!satellite||detail?.tiles[0]?.transparent))this.drawTiles(detail);
     if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=4.7)this.drawTiles(this.relief,.82);
@@ -534,7 +575,7 @@ export class CustomMapEngine {
     if(!this.coverage){this.labelCanvas.hidden=true;return;}
     const occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>(),repeated=new Map<string,MapPoint[]>();
     const candidates:Array<{id:string;coordinate:[number,number];label:MapTileLabel;color?:string}>=this.additionalLabels.map(label=>({id:label.id,coordinate:label.coordinate,label:{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},color:label.color}));
-    const detail=this.displayDetail(),satellite=this.mode==='satellite'&&!!this.imagery;
+    const detail=this.displayDetail(),satellite=this.displayingSatellite();
     const labelBatches=[detail];
     // Height annotations belong to the committed measured relief. They follow
     // its visibility, including the retained ground during an imagery load.

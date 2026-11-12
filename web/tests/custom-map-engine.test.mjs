@@ -18,8 +18,8 @@ const camera={center:[40.5,43.5],zoom:8,bearingDegrees:0};
 const area={type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[[40,42],[42,42],[42,45],[40,45],[40,42]],[[40.65,43.65],[40.65,43.75],[40.75,43.75],[40.75,43.65],[40.65,43.65]]]}};
 const collection={type:'FeatureCollection',features:[]};
 
-function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false}={}){
- let now=0,serial=0,coverageResolve;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[];
+function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader}={}){
+ let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[];
  class Target{
   listeners=new Map();
   addEventListener(type,listener){const listeners=this.listeners.get(type)||new Set();listeners.add(listener);this.listeners.set(type,listeners);}
@@ -101,7 +101,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   const testModule={exports:{}};modules.set(filename,testModule);
   if(!compiled.has(filename))compiled.set(filename,ts.transpileModule(readFileSync(filename,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true},fileName:filename}).outputText);
   const require=specifier=>{
-   if(specifier==='./russia-map')return{loadRussiaGeometry:()=>coveragePromise};
+   if(specifier==='./russia-map')return{loadRussiaGeometry:()=>{const attempt=++coverageAttempts;return coverageLoader?coverageLoader(attempt,coverage):attempt<=coverageFailures?Promise.reject(new Error('Coverage fetch failed')):coveragePromise;}};
    if(specifier==='./map-preload')return{loadPublicBytes(){assert.fail('No real download in an engine unit test');},loadPublicJSON(){assert.fail('No real download in an engine unit test');}};
    if(specifier.endsWith('?worker&url'))return{__esModule:true,default:'/workers/fixture.js'};
    let path=resolve(dirname(filename),specifier);if(!existsSync(path))path+='.ts';assert.ok(path.startsWith(root+'/'),'Only real local map modules may load');
@@ -112,7 +112,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const exports=load(resolve(root,'lib/custom-map-engine.ts'));
  const productionDraw=exports.CustomMapEngine.prototype.draw;
  exports.CustomMapEngine.prototype.draw=function(...args){calls.push({surface:'tropnik-map-canvas',op:'draw-start'});return productionDraw.apply(this,args);};
- const engine=new exports.CustomMapEngine(host,{camera:plain(view),onState:value=>states.push(plain(value))});
+ const engine=new exports.CustomMapEngine(host,{camera:plain(view),onState:value=>states.push(plain(value)),onReady:()=>{readyCalls++;},onGesture:()=>{gestures++;}});
  engine.setFloor({center:[105,60],zoom:1,bearingDegrees:0});
  const tick=(elapsed=16)=>{now+=elapsed;const current=[...frames.values()];frames.clear();for(const frame of current)frame(now);return current.length;};
  const flush=()=>{let count=0;while(frames.size){assert.ok(count++<40,'Own renderer left a recurring idle RAF');tick();}return count;};
@@ -122,6 +122,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
  const lastDraw=()=>[...lastSurface('tropnik-map-canvas','draw-start'),...lastSurface('tropnik-map-labels','clearRect')];
  return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,
+  get coverageAttempts(){return coverageAttempts;},get readyCalls(){return readyCalls;},get gestures(){return gestures;},
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
   coordinateAt:point=>engine.unproject(point),labelFor(job,coordinate,text,options={}){const p=load(resolve(root,'lib/custom-map-camera.ts')).mercatorProject(coordinate),n=2**job.request.z;return{x:p.x*n-job.request.x,y:p.y*n-job.request.y,text,kind:'place',rank:4,...options};}};
 }
@@ -197,6 +198,108 @@ test('pending and failed satellite batches retain the actual previous ground unt
  assert.deepEqual(env.lastDraw().filter(call=>call.op==='drawImage').map(call=>call.key),ground);
  env.engine.setMode('satellite');env.complete();await env.settle();assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().imagerySource,'eox-s2');assert.equal(env.engine.getState().imageryLoading,false);
  assert.equal(env.engine.inspect().tiles.imagery.length,pending.length);assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.key.startsWith('eox-s2:')));
+});
+
+test('opaque cartography and relief commit as one complete ground, with partial and total failures retried in place',async t=>{
+ for(const kind of ['vector','relief'])for(const all of [false,true]){
+  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+  const before=plain(env.engine.inspect().tiles);env.engine.setCamera({center:[41,44],zoom:9});
+  const jobs=env.pending(kind),failed=all?jobs:jobs.slice(0,1);assert.ok(jobs.length>1);
+  for(const job of failed)env.store.reject(job);
+  env.complete(job=>job.request.kind!==(kind==='vector'?'relief':'vector'));await env.settle();
+  assert.deepEqual(plain(env.engine.inspect().tiles.detail),before.detail,'A lone layer may not replace one half of the displayed ground');
+  assert.deepEqual(plain(env.engine.inspect().tiles.relief),before.relief);
+  env.complete();await env.settle();
+  assert.equal(env.engine.getState().loading,false);assert.ok(env.engine.getState().error);
+  assert.deepEqual(plain(env.engine.inspect().tiles.detail),before.detail);assert.deepEqual(plain(env.engine.inspect().tiles.relief),before.relief);
+  const view=plain(env.engine.getCamera()),message=env.engine.getState().error,requests=env.store.requests.length;
+  env.engine.retry();assert.equal(env.engine.getState().loading,true);assert.equal(env.engine.getState().error,message);
+  assert.equal(env.store.requests.length-requests,failed.length,'Completed cached tiles are reused; only failed cells need a retry');
+  const retryRequests=env.store.requests.length;for(let i=0;i<20;i++)env.engine.retry();assert.equal(env.store.requests.length,retryRequests,'Repeated retry input shares the active attempt');
+  env.complete();await env.settle();assert.deepEqual(plain(env.engine.getCamera()),view);
+  assert.equal(env.engine.getState().loading,false);assert.equal(env.engine.getState().error,'');assert.equal(env.engine.getState().reliefReady,true);
+  assert.equal(env.engine.inspect().tiles.detail.length,jobs.length);assert.equal(env.engine.inspect().tiles.relief.length,jobs.length);
+  assert.ok(env.engine.inspect().tiles.detail.every(tile=>tile.z===9));assert.ok(env.engine.inspect().tiles.relief.every(tile=>tile.z===9));
+  assert.ok(env.store.pins.at(-1).length<=3*64,'Only current requests and committed ground remain pinned');
+ }
+});
+
+test('a cold satellite to relief transition retains imagery, labels and source attribution until both ground layers succeed',async t=>{
+ const env=fixture({view:{...camera,bearingDegrees:12}});t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setMode('satellite');env.complete();await env.settle();
+ const before=plain(env.engine.inspect()),drawn=env.lastDraw().filter(call=>call.op==='drawImage').map(call=>call.key);
+ for(const [key,tile] of env.store.cache)if(tile.kind==='relief'||tile.kind==='vector'&&!tile.transparent)env.store.cache.delete(key);
+ env.engine.setMode('detail');await env.settle();
+ assert.equal(env.engine.getState().mode,'detail');assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().imagerySource,'eox-s2');
+ assert.deepEqual(plain(env.engine.inspect().tiles.imagery),before.tiles.imagery);assert.deepEqual(env.lastDraw().filter(call=>call.op==='drawImage').map(call=>call.key),drawn);
+ const relief=env.pending('relief');assert.ok(relief.length>1);env.complete(job=>job.request.kind!=='relief');await env.settle();
+ assert.equal(env.engine.getState().committedMode,'satellite');assert.deepEqual(env.lastDraw().filter(call=>call.op==='drawImage').map(call=>call.key),drawn);
+ env.store.reject(relief[0]);env.complete();await env.settle();assert.ok(env.engine.getState().error);assert.equal(env.engine.getState().committedMode,'satellite');
+ assert.deepEqual(plain(env.engine.getCamera()),before.camera);assert.deepEqual(plain(env.engine.inspect().tiles.imagery),before.tiles.imagery);
+ const held=env.store.pins.at(-1);for(const tile of before.tiles.imagery)assert.ok(held.includes(tile.key),'The previous image must stay alive throughout failure and retry');
+ env.engine.retry();env.complete();await env.settle();
+ assert.equal(env.engine.getState().committedMode,'detail');assert.equal(env.engine.getState().imagerySource,undefined);assert.equal(env.engine.getState().error,'');
+ assert.equal(env.engine.inspect().tiles.imagery.length,0);assert.equal(env.engine.inspect().tiles.relief.length,relief.length);
+ assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.key.startsWith('relief:')));assert.equal(env.lastDraw().some(call=>call.op==='drawImage'&&call.key.startsWith('eox-')),false);
+ const released=env.store.pins.at(-1);for(const tile of before.tiles.imagery)assert.equal(released.includes(tile.key),false,'Replaced imagery becomes evictable after successful commit');
+});
+
+test('a failed satellite cartographic overlay retains complete imagery without committing partial objects',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();const before=plain(env.engine.inspect().tiles);
+ env.engine.setMode('satellite');const overlay=env.pending('vector');assert.ok(overlay.length>1);env.store.reject(overlay[0]);env.complete();await env.settle();
+ assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().imageryLoading,false);assert.match(env.engine.getState().error,/Подписи и тропы/);
+ assert.equal(env.engine.inspect().tiles.detail.length,0);assert.equal(env.engine.inspect().tiles.relief.length,0);assert.ok(env.engine.inspect().tiles.imagery.length>0);assert.ok(before.detail.length>0);
+ env.engine.setMode('satellite');env.complete();await env.settle();assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().error,'');
+});
+
+test('startup coverage recovers through retry or online without duplicate loads or losing the selected camera',async t=>{
+ for(const trigger of ['retry','online']){
+  const env=fixture({delayedCoverage:true,coverageFailures:1});t.after(()=>env.engine.destroy());await env.settle();
+  const before=plain(env.engine.getCamera()),message=env.engine.getState().error;assert.ok(message);assert.equal(env.engine.getState().ready,false);assert.equal(env.engine.getState().loading,false);assert.equal(env.coverageAttempts,1);
+  if(trigger==='retry')env.engine.retry();else env.window.dispatch('online');
+  for(let i=0;i<10;i++){env.engine.retry();env.window.dispatch('online');}
+  assert.equal(env.coverageAttempts,2);assert.equal(env.engine.getState().loading,true);assert.equal(env.engine.getState().error,message);
+  env.coverageResolve(env.coverage);await env.settle();env.complete();await env.settle();
+  assert.equal(env.engine.getState().ready,true);assert.equal(env.engine.getState().loading,false);assert.equal(env.engine.getState().error,'');assert.equal(env.readyCalls,1);assert.equal(env.coverage.subscribers.size,1);
+  assert.deepEqual(plain(env.engine.getCamera()),before);assert.ok(env.engine.inspect().tiles.detail.length>0);
+ }
+});
+
+test('destroy during a retried coverage load releases its late result without callbacks, resources or state resurrection',async()=>{
+ const env=fixture({delayedCoverage:true,coverageFailures:1});await env.settle();env.engine.retry();assert.equal(env.coverageAttempts,2);
+ env.engine.destroy();const states=env.states.length;env.coverageResolve(env.coverage);await env.settle();
+ assert.equal(env.coverage.disposed,1);assert.equal(env.readyCalls,0);assert.equal(env.coverage.subscribers.size,0);assert.equal(env.states.length,states);assert.equal(env.store.requests.length,0);assert.equal(env.frames.size,0);assert.equal(env.host.children.length,0);
+ env.engine.retry();env.window.dispatch('online');assert.equal(env.coverageAttempts,2);
+});
+
+test('online during a pending coverage failure schedules one recovery attempt after it settles',async t=>{
+ let reject;const first=new Promise((_resolve,no)=>{reject=no;});
+ const env=fixture({coverageLoader:(attempt,coverage)=>attempt===1?first:Promise.resolve(coverage)});t.after(()=>env.engine.destroy());
+ assert.equal(env.engine.getState().loading,true);for(let i=0;i<8;i++)env.window.dispatch('online');assert.equal(env.coverageAttempts,1);
+ reject(new Error('Connection returned before the old request failed'));await env.settle();assert.equal(env.coverageAttempts,2);env.complete();await env.settle();
+ assert.equal(env.engine.getState().ready,true);assert.equal(env.engine.getState().error,'');assert.equal(env.readyCalls,1);
+});
+
+test('online during a pending tile failure retries the failed cell once, without an automatic retry loop',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();env.engine.setCamera({center:[41,44],zoom:9});
+ const missing=env.pending('relief')[0];for(let i=0;i<8;i++)env.window.dispatch('online');env.store.reject(missing);env.complete();await env.settle();
+ const retry=env.pending('relief');assert.equal(retry.length,1);assert.equal(retry[0].key,missing.key);assert.equal(env.engine.getState().loading,true);
+ env.store.reject(retry[0]);await env.settle();assert.equal(env.engine.getState().loading,false);assert.ok(env.engine.getState().error);assert.equal(env.pending().length,0);
+ const requests=env.store.requests.length;await env.settle();env.tick(10_000);await env.settle();assert.equal(env.store.requests.length,requests,'One online event cannot create repeated retries against a failed server');
+});
+
+test('a superseded retry cannot replace the latest mode or pin the retired satellite batch again',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();env.engine.setMode('satellite');env.complete();await env.settle();
+ const imagery=plain(env.engine.inspect().tiles.imagery);for(const [key,tile] of env.store.cache)if(tile.kind==='relief'||tile.kind==='vector'&&!tile.transparent)env.store.cache.delete(key);
+ env.engine.setMode('detail');const pending=env.pending();env.engine.setMode('satellite');await env.settle();assert.equal(env.engine.getState().committedMode,'satellite');
+ for(const job of pending)env.store.reject(job,'Superseded relief request');await env.settle();assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().error,'');assert.deepEqual(plain(env.engine.inspect().tiles.imagery),imagery);
+ env.engine.setMode('detail');env.complete();await env.settle();const pins=env.store.pins.at(-1);assert.equal(env.engine.getState().committedMode,'detail');for(const tile of imagery)assert.equal(pins.includes(tile.key),false);
+});
+
+test('Home and north controls publish manual navigation intent so pending route selection cannot take the camera back',async t=>{
+ const env=fixture({view:{...camera,bearingDegrees:30}});t.after(()=>env.engine.destroy());await env.ready();
+ const initial=env.gestures;env.engine.canvas.dispatch('keydown',{key:'Home'});assert.equal(env.gestures,initial+1);env.tick(250);env.flush();assert.equal(env.engine.getCamera().zoom,1);
+ env.engine.north();assert.equal(env.gestures,initial+2);env.tick(250);env.flush();assert.equal(env.engine.getCamera().bearingDegrees,0);
 });
 
 test('base changes keep real route paths and markers; clearing geometry never claims another painted line',async t=>{
@@ -385,7 +488,7 @@ test('4K fallback stays bounded and preserves the display paint zoom without cla
 });
 
 test('a released view disposes a late coverage source without loading or invoking ready callbacks',async()=>{
- const env=fixture({delayedCoverage:true});env.engine.destroy();env.coverageResolve(env.coverage);await env.settle();assert.equal(env.coverage.disposed,1);assert.equal(env.store.requests.length,0);assert.equal(env.states.length,0);assert.equal(env.frames.size,0);
+ const env=fixture({delayedCoverage:true});assert.equal(env.engine.getState().loading,true);env.engine.destroy();const states=env.states.length;env.coverageResolve(env.coverage);await env.settle();assert.equal(env.coverage.disposed,1);assert.equal(env.store.requests.length,0);assert.equal(env.states.length,states);assert.equal(env.readyCalls,0);assert.equal(env.frames.size,0);
 });
 
 test('landscape reads the current visible ground through framing, bearing and pitch without changing the map',async t=>{

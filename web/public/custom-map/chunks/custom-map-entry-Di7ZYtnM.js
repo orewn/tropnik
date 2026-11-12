@@ -959,7 +959,7 @@ var We = class {
 		}), this.pump(), o;
 	}
 	files() {
-		return this.localFiles ??= V("/offline-map/manifest.json").then((e) => new Set(e.files.map((e) => e.path))).catch(() => /* @__PURE__ */ new Set());
+		return this.localFiles ??= V("/offline-map/manifest.json").then((e) => new Set(e.files.map((e) => e.path))).catch(() => (this.localFiles = void 0, /* @__PURE__ */ new Set()));
 	}
 	async source(e) {
 		let { kind: t } = e.request, n = Math.min(e.request.z, t === "vector" ? 14 : t === "relief" ? 12 : e.request.z), r = 2 ** (e.request.z - n), i = Math.floor(e.request.x / r), a = Math.floor(e.request.y / r), o = U(i, n);
@@ -1370,10 +1370,12 @@ var et = {
 	".map-style-switch",
 	".map-controls",
 	".layer-control",
+	".layer-menu",
 	".map-message",
 	".map-preload-status",
 	".map-legend",
 	".map-attribution",
+	".map-attribution-content",
 	".fact-card",
 	".fact-closed",
 	".explore-panel"
@@ -1514,7 +1516,10 @@ function ct(e, t) {
 		bottom: r.bottom
 	};
 }
-function lt(e) {
+function lt(e, t) {
+	return [...(e.closest(".explore-layout") ?? e.parentElement ?? e).querySelectorAll(tt.join(","))].filter((t) => t !== e && !t.contains(e)).map((e) => ct(e, t)).filter((e) => !!e);
+}
+function ut(e) {
 	if (typeof window > "u" || !window.visualViewport) return e;
 	let t = window.visualViewport, n = {
 		left: Math.max(e.left, t.offsetLeft),
@@ -1524,21 +1529,21 @@ function lt(e) {
 	};
 	return n.right - n.left >= 80 && n.bottom - n.top >= 80 ? n : e;
 }
-function ut(e) {
-	let t = lt(e.getBoundingClientRect()), n = e.closest(".explore-layout") ?? e.parentElement ?? e, r = n.querySelector(".explore-panel"), i;
-	if (r) {
-		let e = r.getBoundingClientRect();
-		e.left < t.right && e.right > t.left && e.top > t.top && e.top < t.bottom && (i = Math.max(t.top + 72, e.top - 12));
+function dt(e) {
+	let t = ut(e.getBoundingClientRect()), n = (e.closest(".explore-layout") ?? e.parentElement ?? e).querySelector(".explore-panel"), r;
+	if (n) {
+		let e = n.getBoundingClientRect();
+		e.left < t.right && e.right > t.left && e.top > t.top && e.top < t.bottom && (r = Math.max(t.top + 72, e.top - 12));
 	}
-	let a = Math.min(e.clientWidth, t.right - t.left) <= 700, o = nt(t, a, i), s = tt.join(",");
+	let i = Math.min(e.clientWidth, t.right - t.left) <= 700;
 	return {
-		safe: o,
-		obstacles: [...n.querySelectorAll(s)].filter((t) => t !== e && !t.contains(e)).map((e) => ct(e, t)).filter((e) => !!e),
-		compact: a
+		safe: nt(t, i, r),
+		obstacles: lt(e, t),
+		compact: i
 	};
 }
-function dt(e, t) {
-	let { safe: n, obstacles: r } = ut(t), i = [], a = [], o = [...e.values()].filter((e) => !e.hidden && e.isConnected).sort((e, t) => {
+function ft(e, t) {
+	let { safe: n, obstacles: r } = dt(t), i = [], a = [], o = [...e.values()].filter((e) => !e.hidden && e.isConnected).sort((e, t) => {
 		let n = (e) => e.classList.contains("is-selected") ? 0 : e.classList.contains("direction-cluster") ? 1 : 2;
 		return n(e) - n(t) || (e.dataset.regionId ?? "").localeCompare(t.dataset.regionId ?? "", "en");
 	});
@@ -1601,26 +1606,26 @@ function dt(e, t) {
 	for (let { button: e, label: t, preferred: n, placement: r, shift: a } of i) a && (Y(t, "--map-label-shift-x", `${a.x}px`), Y(t, "--map-label-shift-y", `${a.y}px`), a.hidden && (e.dataset.mapLabelHidden = "true"), e.classList.toggle("map-label-shifted", a.x !== 0 || a.y !== 0 || r !== n));
 	for (let { button: e, count: t, shift: n } of a) n && (Y(t, "--map-count-shift-x", `${n.x}px`), Y(t, "--map-count-shift-y", `${n.y}px`), n.hidden && (e.dataset.mapCountHidden = "true"));
 }
-function ft(e) {
+function pt(e) {
 	let t = e % 100, n = e % 10;
 	return `${e} ${t >= 11 && t <= 14 ? "направлений" : n === 1 ? "направление" : n >= 2 && n <= 4 ? "направления" : "направлений"}`;
 }
-function pt(e, t) {
+function mt(e, t) {
 	return Math.abs(e.point.x - t.point.x) < (e.width + t.width) / 2 + 12 && Math.abs(e.point.y - t.point.y) < (e.height + t.height) / 2 + 12;
 }
-function mt(e, t) {
+function ht(e, t) {
 	let n = e.filter((e) => t.has(e.id)), r = n.length ? n : e, i = e.reduce((e, t) => e + t.center[1], 0) / e.length, a = Math.max(.15, Math.cos(i * Math.PI / 180)), o = (e) => e < 0 ? e + 360 : e, s = (t) => e.reduce((e, n) => {
 		let r = (o(t.center[0]) - o(n.center[0])) * a, i = t.center[1] - n.center[1];
 		return e + r * r + i * i;
 	}, 0);
 	return [...r].sort((e, t) => s(e) - s(t) || e.id.localeCompare(t.id))[0];
 }
-function ht(e, t, n = /* @__PURE__ */ new Set()) {
+function gt(e, t, n = /* @__PURE__ */ new Set()) {
 	let r = /* @__PURE__ */ new Map(), i = [...new Map(e.map((e) => [e.id, e])).values()].sort((e, t) => e.id.localeCompare(t.id));
 	for (let e of i) r.set(e.id, t(e.center));
 	let a = (e) => {
 		e.sort((e, t) => e.id.localeCompare(t.id));
-		let t = mt(e, n), i = e.map((e) => e.center[0] < 0 ? e.center[0] + 360 : e.center[0]), a = e.map((e) => e.center[1]);
+		let t = ht(e, n), i = e.map((e) => e.center[0] < 0 ? e.center[0] + 360 : e.center[0]), a = e.map((e) => e.center[1]);
 		return {
 			key: e.map((e) => e.id).join("|"),
 			members: e,
@@ -1639,22 +1644,22 @@ function ht(e, t, n = /* @__PURE__ */ new Set()) {
 		let t = r.get(e.id);
 		return Number.isFinite(t.x) && Number.isFinite(t.y);
 	}).map((e) => a([e]));
-	for (let e = 0; e < o.length; e++) for (let t = e + 1; t < o.length; t++) if (pt(o[e], o[t])) {
+	for (let e = 0; e < o.length; e++) for (let t = e + 1; t < o.length; t++) if (mt(o[e], o[t])) {
 		o[e] = a([...o[e].members, ...o[t].members]), o.splice(t, 1), e = -1;
 		break;
 	}
 	return o.sort((e, t) => e.key.localeCompare(t.key));
 }
-function gt(e, t, n) {
+function _t(e, t, n) {
 	let r = e.members.length > 1;
 	return {
 		cluster: r,
-		label: r ? ft(e.members.length) : e.anchor.name,
+		label: r ? pt(e.members.length) : e.anchor.name,
 		count: r ? String(e.members.length) : n ? String(t) : "",
-		ariaLabel: r ? `Приблизить ${ft(e.members.length)}: ${e.members.map((e) => e.name).join(", ")}` : `Открыть ${e.anchor.name}${n ? `, маршрутов в каталоге: ${t}` : ""}`
+		ariaLabel: r ? `Приблизить ${pt(e.members.length)}: ${e.members.map((e) => e.name).join(", ")}` : `Открыть ${e.anchor.name}${n ? `, маршрутов в каталоге: ${t}` : ""}`
 	};
 }
-function _t(e, t, n, r, i) {
+function vt(e, t, n, r, i) {
 	let a = new Map(t.map((e) => [e.anchor.id, e])), o = [...e].find(([, e]) => e.ownerDocument.activeElement === e)?.[0];
 	for (let [t, o] of e) {
 		let e = a.get(t);
@@ -1663,7 +1668,7 @@ function _t(e, t, n, r, i) {
 			continue;
 		}
 		o.getAttribute("data-map-anchor-region-id") !== e.anchor.id && o.setAttribute("data-map-anchor-region-id", e.anchor.id), o.getAttribute("data-map-group-key") !== e.key && o.setAttribute("data-map-group-key", e.key);
-		let s = gt(e, n.get(t) || 0, r);
+		let s = _t(e, n.get(t) || 0, r);
 		o.classList.toggle("direction-cluster", s.cluster), o.classList.toggle("is-overview", r), o.classList.toggle("is-selected", e.members.some((e) => e.id === i));
 		let c = o.querySelector(".region-marker-count"), l = o.querySelector(".region-marker-label");
 		c && c.textContent !== s.count && (c.textContent = s.count), l && l.textContent !== s.label && (l.textContent = s.label), o.getAttribute("aria-label") !== s.ariaLabel && o.setAttribute("aria-label", s.ariaLabel), o.removeAttribute("title");
@@ -1676,7 +1681,7 @@ function _t(e, t, n, r, i) {
 }
 //#endregion
 //#region web/lib/custom-map-symbols.ts
-var vt = Object.freeze({
+var yt = Object.freeze({
 	camp: [
 		"m4 23 10-18 10 18H4Z",
 		"m10 23 4-8 4 8M11 2l3 3 3-3",
@@ -1718,26 +1723,26 @@ var vt = Object.freeze({
 		"M5 10V5h4v3h3V3h4v5h3V5h4v5",
 		"M11 12v2m6-2v2"
 	]
-}), yt = /* @__PURE__ */ new Map();
-function bt(e, t, n, r) {
-	let i = yt.get(t);
-	i || (i = vt[t].map((e) => new Path2D(e)), yt.set(t, i));
+}), bt = /* @__PURE__ */ new Map();
+function xt(e, t, n, r) {
+	let i = bt.get(t);
+	i || (i = yt[t].map((e) => new Path2D(e)), bt.set(t, i));
 	let a = t === "water" || t === "waterfall";
 	e.save(), e.translate(n, r), e.beginPath(), e.roundRect(-12, -12, 24, 24, 8), e.fillStyle = a ? "rgba(243,250,250,.97)" : "rgba(255,254,247,.97)", e.fill(), e.lineWidth = 1, e.strokeStyle = a ? "rgba(66,124,136,.32)" : "rgba(49,83,66,.28)", e.stroke(), e.scale(18 / 28, 18 / 28), e.translate(-14, -14), e.lineWidth = 1.8, e.strokeStyle = a ? "#376e7a" : t === "landmark" ? "#886942" : "#315342", e.lineCap = "round", e.lineJoin = "round";
 	for (let t of i) e.stroke(t);
 	e.restore();
 }
-function xt(e) {
+function St(e) {
 	return e <= 3 ? 13 : e < 6 ? 13 + (e - 3) * 4 / 3 : e < 10 ? 17 + (e - 6) * 3 / 4 : 20;
 }
 //#endregion
 //#region web/lib/custom-map-labels.ts
-function St(e, t, n) {
+function Ct(e, t, n) {
 	let r = e.kind === "place" && (!e.placeClass || [
 		"city",
 		"town",
 		"village"
-	].includes(e.placeClass)), i = e.priorityCity ? xt(t) : r && e.rank < 3 ? 14 : 12, a = [
+	].includes(e.placeClass)), i = e.priorityCity ? St(t) : r && e.rank < 3 ? 14 : 12, a = [
 		12,
 		14,
 		16,
@@ -1755,7 +1760,7 @@ function St(e, t, n) {
 		paddingY: s ? 0 : 4
 	};
 }
-function Ct(e) {
+function wt(e) {
 	return e.rank <= 0 ? 0 : e.priorityCity ? 1 : e.kind === "place" && ([
 		"country",
 		"state",
@@ -1767,16 +1772,16 @@ function Ct(e) {
 		"isolated_dwelling"
 	].includes(e.placeClass ?? "") ? 8 : e.kind === "contour" ? 9 : 10;
 }
-function wt(e, t) {
+function Tt(e, t) {
 	return Math.max(8, Math.min(56, Math.floor(Math.max(0, e) * Math.max(0, t) / 18e3)));
 }
-function Tt(e) {
+function Et(e) {
 	return e.kind === "path" ? 320 : e.kind === "water" || e.kind === "contour" ? 240 : 0;
 }
-function Et(e) {
+function Dt(e) {
 	return `${e.kind}:${e.text.trim().replace(/[«»„“”"]/g, "").replace(/\s+/g, " ").toLocaleLowerCase("ru")}`;
 }
-function Dt(e, t, n, r, i) {
+function Ot(e, t, n, r, i) {
 	let a = t.y + (e.symbol ? 24 : 0), o = i.lineHeight / 2 + i.paddingY, s = r ? {
 		left: t.x - n / 2 - i.paddingX,
 		right: t.x + n / 2 + i.paddingX,
@@ -1795,16 +1800,16 @@ function Dt(e, t, n, r, i) {
 		textWidth: n
 	};
 }
-function Ot(e, t, n, r, i) {
+function kt(e, t, n, r, i) {
 	if (!t || !r.plate) return;
 	let a = r.plate;
 	e.beginPath(), e.roundRect(a.left, a.top, a.right - a.left, a.bottom - a.top, 4), e.fillStyle = i.surface, e.fill(), i.border !== "transparent" && (e.strokeStyle = i.border, e.lineWidth = 1, e.stroke()), e.textAlign = "center", e.textBaseline = "middle", e.fillStyle = i.ink, e.fillText(t, n.x, r.textY);
 }
 //#endregion
 //#region web/lib/map-canvas-policy.ts
-var kt = /* @__PURE__ */ new WeakMap(), At = /swiftshader|llvmpipe|softpipe|lavapipe|software|microsoft basic render|\bwarp\b/i;
-function jt(e = document) {
-	let t = kt.get(e);
+var At = /* @__PURE__ */ new WeakMap(), jt = /swiftshader|llvmpipe|softpipe|lavapipe|software|microsoft basic render|\bwarp\b/i;
+function Mt(e = document) {
+	let t = At.get(e);
 	if (t) return t;
 	let n = null, r = "unavailable";
 	try {
@@ -1821,7 +1826,7 @@ function jt(e = document) {
 			r = "available";
 			try {
 				let e = n.getExtension("WEBGL_debug_renderer_info");
-				e && At.test(String(n.getParameter(e.UNMASKED_RENDERER_WEBGL))) && (r = "software");
+				e && jt.test(String(n.getParameter(e.UNMASKED_RENDERER_WEBGL))) && (r = "software");
 			} catch {}
 		}
 	} catch {} finally {
@@ -1833,10 +1838,10 @@ function jt(e = document) {
 		softwareRaster: r !== "available",
 		reason: r
 	});
-	return kt.set(e, i), i;
+	return At.set(e, i), i;
 }
-var Mt = "tropnik-map-label-inspection";
-function Nt(e) {
+var Nt = "tropnik-map-label-inspection";
+function Pt(e) {
 	if (!e || typeof e != "object") return null;
 	let t = e, n = t.limit;
 	return t.schemaVersion !== 1 || !Array.isArray(t.names) || t.names.length < 1 || t.names.length > 100 || !t.names.every((e) => typeof e == "string" && e.length > 0 && e.length <= 160) || new Set(t.names).size !== t.names.length || typeof n != "number" || !Number.isInteger(n) || n < 1 || n > 100 ? null : {
@@ -1845,15 +1850,15 @@ function Nt(e) {
 		limit: n
 	};
 }
-function Pt(e) {
+function Ft(e) {
 	return {
 		...e,
 		coordinate: [...e.coordinate],
 		...e.rect ? { rect: { ...e.rect } } : {}
 	};
 }
-function Ft(e, t, n) {
-	let r = Nt(n);
+function It(e, t, n) {
+	let r = Pt(n);
 	if (!r || !Number.isSafeInteger(t) || t < e.length || e.length > 6400) return null;
 	let i = new Set(r.names), a = e.filter((e) => i.has(e.label));
 	return {
@@ -1864,13 +1869,13 @@ function Ft(e, t, n) {
 		retainedCandidates: e.length,
 		matchingCandidates: a.length,
 		truncated: t > e.length || a.length > r.limit,
-		candidates: a.slice(0, r.limit).map(Pt)
+		candidates: a.slice(0, r.limit).map(Ft)
 	};
 }
 //#endregion
 //#region web/lib/custom-map-engine.ts
 var Q = 64;
-function It(e) {
+function Lt(e) {
 	let t = new Path2D(), n = [
 		Infinity,
 		Infinity,
@@ -1934,12 +1939,12 @@ function $(e, t, n, r, i = !0, a = !1, o = !0) {
 	let x = 2 ** s;
 	return y.sort((e, t) => Math.hypot(e.x + .5 - f.x * x, e.y + .5 - f.y * x) - Math.hypot(t.x + .5 - f.x * x, t.y + .5 - f.y * x));
 }
-var Lt = class {
+var Rt = class {
 	constructor(e, t) {
 		this.framed = null, this.pitch = 0, this.padding = {}, this.size = {
 			width: 1,
 			height: 1
-		}, this.pixelRatio = 1, this.coverageRevision = -1, this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.drawRevision = 0, this.labelRevision = 0, this.frame = 0, this.paintRequested = !1, this.labelsRequested = !1, this.animation = 0, this.zoomTarget = null, this.pointer = new ie({
+		}, this.pixelRatio = 1, this.retryAfterCurrent = !1, this.coverageRevision = -1, this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.drawRevision = 0, this.labelRevision = 0, this.frame = 0, this.paintRequested = !1, this.labelsRequested = !1, this.animation = 0, this.zoomTarget = null, this.pointer = new ie({
 			minZoom: -2,
 			maxZoom: 18,
 			rotate: !0
@@ -1954,7 +1959,7 @@ var Lt = class {
 			error: "",
 			residentTiles: 0,
 			pendingTiles: 0
-		}, this.element = e, this.options = t, this.camera = { ...t.camera }, this.floor = { ...t.camera }, this.rasterPolicy = jt(e.ownerDocument ?? document), this.tiles = new We(this.rasterPolicy.softwareRaster), this.canvas = document.createElement("canvas"), this.canvas.className = "tropnik-map-canvas", this.canvas.tabIndex = 0, this.canvas.setAttribute("aria-label", "Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб."), this.canvas.setAttribute("role", "img"), e.appendChild(this.canvas), this.labelCanvas = document.createElement("canvas"), this.labelCanvas.className = "tropnik-map-labels", this.labelCanvas.hidden = !0, this.labelCanvas.setAttribute("aria-hidden", "true"), e.appendChild(this.labelCanvas), this.markerLayer = document.createElement("div"), this.markerLayer.className = "tropnik-marker-layer", e.appendChild(this.markerLayer);
+		}, this.element = e, this.options = t, this.camera = { ...t.camera }, this.floor = { ...t.camera }, this.rasterPolicy = Mt(e.ownerDocument ?? document), this.tiles = new We(this.rasterPolicy.softwareRaster), this.canvas = document.createElement("canvas"), this.canvas.className = "tropnik-map-canvas", this.canvas.tabIndex = 0, this.canvas.setAttribute("aria-label", "Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб."), this.canvas.setAttribute("role", "img"), e.appendChild(this.canvas), this.labelCanvas = document.createElement("canvas"), this.labelCanvas.className = "tropnik-map-labels", this.labelCanvas.hidden = !0, this.labelCanvas.setAttribute("aria-hidden", "true"), e.appendChild(this.labelCanvas), this.markerLayer = document.createElement("div"), this.markerLayer.className = "tropnik-marker-layer", e.appendChild(this.markerLayer);
 		let n = this.canvas.getContext("2d", {
 			alpha: !1,
 			willReadFrequently: this.rasterPolicy.softwareRaster
@@ -1966,13 +1971,37 @@ var Lt = class {
 			willReadFrequently: this.rasterPolicy.softwareRaster
 		});
 		if (!r) throw Error("Canvas map labels are unavailable");
-		this.labelContext = r, this.resize = new ResizeObserver(() => this.resizeCanvas()), this.resize.observe(e), this.resizeCanvas(), this.bindInput(), Ge().then((e) => {
+		this.labelContext = r, this.resize = new ResizeObserver(() => this.resizeCanvas()), this.resize.observe(e), this.resizeCanvas(), this.bindInput(), this.loadCoverage();
+	}
+	loadCoverage() {
+		this.disposed || this.coverage || this.coverageTask || (this.updateState({ loading: !0 }), this.coverageTask = Ge().then((e) => {
 			if (this.disposed) {
 				e.dispose();
 				return;
 			}
-			this.coverage = e, this.applyCoverage(), this.unbindCoverage = e.subscribe(() => this.applyCoverage()), this.updateState({ ready: !0 }), this.options.onReady?.(this), this.schedule(), this.settled();
-		}).catch(() => this.updateState({ error: "Границы карты не загрузились. Проверьте подключение и обновите страницу." }));
+			this.coverage = e, this.applyCoverage(), this.unbindCoverage = e.subscribe(() => this.applyCoverage()), this.updateState({
+				ready: !0,
+				loading: !1,
+				error: ""
+			}), this.options.onReady?.(this), this.schedule(), this.settled();
+		}).catch(() => this.updateState({
+			loading: !1,
+			error: "Границы карты не загрузились. Проверьте подключение и повторите загрузку."
+		})).finally(() => {
+			this.coverageTask = void 0, this.retryAfterOnline();
+		}));
+	}
+	retry() {
+		if (!this.disposed) {
+			if (!this.coverage) {
+				this.loadCoverage();
+				return;
+			}
+			this.state.loading || (this.currentKeys = "", this.refreshTiles());
+		}
+	}
+	retryAfterOnline() {
+		this.retryAfterCurrent && (this.retryAfterCurrent = !1, this.state.error && this.retry());
 	}
 	getCamera() {
 		return {
@@ -2082,10 +2111,10 @@ var Lt = class {
 		})), this.scheduleLabels();
 	}
 	getLabelDiagnostics() {
-		return this.labelDiagnostics.slice(0, 512).map(Pt);
+		return this.labelDiagnostics.slice(0, 512).map(Ft);
 	}
 	inspectLabels(e) {
-		let t = Ft(this.labelDiagnostics, this.labelDiagnosticTotal, e);
+		let t = It(this.labelDiagnostics, this.labelDiagnosticTotal, e);
 		if (!t) return { error: "Invalid label inspection request" };
 		let { candidates: n, ...r } = t;
 		return {
@@ -2193,23 +2222,26 @@ var Lt = class {
 		}), !0, !0);
 	}
 	north() {
-		this.setCamera({
+		this.options.onGesture?.(), this.setCamera({
 			...this.camera,
 			bearingDegrees: 0
 		}, !0);
 	}
 	setMode(e) {
-		this.mode === e && !this.state.error || (this.mode = e, this.currentKeys = "", e !== "satellite" && (this.imagery = void 0, this.imageryOverlay = void 0), e === "overview" && (this.detail = void 0, this.relief = void 0), this.updateState({
+		if (this.mode === e) {
+			this.state.error && this.retry();
+			return;
+		}
+		this.mode = e, this.currentKeys = "", e === "overview" && (this.detail = void 0, this.relief = void 0, this.imagery = void 0, this.imageryOverlay = void 0, this.updateState({
+			committedMode: "overview",
+			reliefReady: !1,
+			localDetail: !1,
+			imagerySource: void 0
+		})), this.updateState({
 			mode: e,
-			error: "",
-			...e === "overview" ? { reliefReady: !1 } : {},
-			...e === "satellite" ? {} : {
-				committedMode: e,
-				imageryLoading: !1,
-				imagerySource: void 0,
-				imageryTarget: void 0
-			}
-		}), this.refreshTiles(), this.schedule());
+			imageryLoading: !1,
+			imageryTarget: void 0
+		}), this.refreshTiles(), this.schedule();
 	}
 	setLayers(e) {
 		e.paths !== void 0 && e.paths !== this.paths && (this.paths = e.paths, this.currentKeys = ""), e.boundaries !== void 0 && e.boundaries !== this.boundaryVisible && (this.boundaryVisible = e.boundaries, this.currentKeys = ""), e.relief !== void 0 && (this.reliefVisible = e.relief), this.refreshTiles(), this.schedule();
@@ -2218,7 +2250,7 @@ var Lt = class {
 		this.selectedShapes = [...e], this.updateSelectedArea(), this.schedule();
 	}
 	setRoute(e, t) {
-		let n = e ? It(e) : void 0;
+		let n = e ? Lt(e) : void 0;
 		if (this.route = n?.bounds.every(Number.isFinite) ? n : void 0, this.routeId = this.route ? t : void 0, this.element.dataset.mapRouteId = this.routeId || "", this.routeEdges.forEach((e) => e.element.remove()), this.routeEdges = [], e) for (let t of Je(e)) {
 			let e = Ye(t);
 			this.markerLayer.appendChild(e), this.routeEdges.push({
@@ -2281,7 +2313,7 @@ var Lt = class {
 			return n;
 		}
 		let t = this.coveragePaths.get(e);
-		return t || (t = It(e).path, this.coveragePaths.set(e, t)), t;
+		return t || (t = Lt(e).path, this.coveragePaths.set(e, t)), t;
 	}
 	selectedCoveragePath(e) {
 		let t = e?.features.filter((e) => this.selectedShapes.includes(String(e.properties?.shapeName))) || [];
@@ -2312,7 +2344,7 @@ var Lt = class {
 		]);
 	}
 	bindInput() {
-		this.listen(this.element, Mt, ((e) => {
+		this.listen(this.element, Nt, ((e) => {
 			let t = e.detail;
 			!t || typeof t != "object" || (t.response = JSON.stringify(this.inspectLabels(t.request)));
 		}));
@@ -2410,11 +2442,11 @@ var Lt = class {
 				minZoom: this.floor.zoom,
 				maxZoom: this.options.maxZoom ?? 18
 			});
-			t ? (e.preventDefault(), this.options.onGesture?.(), this.setCamera(t, !0)) : e.key === "Home" && (e.preventDefault(), this.setCamera(this.floor, !0));
+			t ? (e.preventDefault(), this.options.onGesture?.(), this.setCamera(t, !0)) : e.key === "Home" && (e.preventDefault(), this.options.onGesture?.(), this.setCamera(this.floor, !0));
 		})), this.listen(window, "blur", () => {
 			this.pointer.cancel(), this.canvas.classList.remove("is-moving"), this.settled();
 		}), this.listen(window, "online", () => {
-			this.currentKeys = "", this.updateState({ error: "" }), this.refreshTiles();
+			this.coverageTask || this.state.loading ? this.retryAfterCurrent = !0 : this.retry();
 		}), this.listen(window, "offline", () => {
 			this.currentKeys = "", this.updateState({ error: "Нет сети. Доступны сохранённые границы, маршруты и загруженные участки карты." }), this.refreshTiles();
 		});
@@ -2462,7 +2494,7 @@ var Lt = class {
 		}), this.element.dataset.mapBearing = String(this.camera.bearingDegrees ?? 0), this.options.onSettled?.(this.getCamera());
 		let e = this.getBounds();
 		requestAnimationFrame(() => {
-			this.disposed || (dt(new Map([...this.markers].filter(([, e]) => e.marker.kind === "direction").map(([e, t]) => [e, t.button])), this.element), qe(this.routeEdges));
+			this.disposed || (ft(new Map([...this.markers].filter(([, e]) => e.marker.kind === "direction").map(([e, t]) => [e, t.button])), this.element), qe(this.routeEdges));
 		}), this.coverage?.updateView([...e], this.camera.zoom).catch(() => void 0), this.refreshTiles(), this.schedule();
 	}
 	refreshTiles() {
@@ -2472,77 +2504,94 @@ var Lt = class {
 			south: o[1],
 			east: o[2],
 			north: o[3]
-		}), c = this.mode === "satellite" ? $(this.camera, e, Math.min(s === "eox-s2" ? 14 : 8, t), s) : [], l = this.mode === "satellite" && !this.imagery;
-		!i.length && !l && (this.detail = void 0, this.imageryOverlay = void 0), !a.length && !l && (this.relief = void 0);
-		let u = [
+		}), c = this.mode === "satellite" ? $(this.camera, e, Math.min(s === "eox-s2" ? 14 : 8, t), s) : [], l = [
 			...n,
 			...i,
 			...a,
 			...c
-		], d = u.map(G).join("|");
-		if (d === this.currentKeys) return;
-		this.currentKeys = d;
-		let f = ++this.generation, p = () => [
+		], u = l.map(G).join("|");
+		if (u === this.currentKeys) return;
+		this.currentKeys = u;
+		let d = ++this.generation, f = () => [
 			this.overview,
 			this.detail,
 			this.relief,
 			this.imagery,
 			this.imageryOverlay
 		].flatMap((e) => e?.tiles.map((e) => e.key) || []);
-		this.tiles.pin([...u.map(G), ...p()]), this.updateState({
-			loading: u.length > 0,
+		this.tiles.pin([...l.map(G), ...f()]), this.updateState({
+			loading: l.length > 0,
 			imageryLoading: c.length > 0,
-			imageryTarget: c.length ? s : void 0,
-			...!a.length && !l ? { reliefReady: !1 } : {},
-			...!i.length && !l ? { localDetail: !1 } : {}
+			imageryTarget: c.length ? s : void 0
 		});
-		let m = !1, h = async (e, t, n, r = !1) => {
-			if (!e.length) return;
-			let i = await Promise.allSettled(e.map((e) => this.tiles.load(e)));
-			if (this.disposed || f !== this.generation) return;
-			let a = i.flatMap((e) => e.status === "fulfilled" ? [e.value] : []), o = i.length - a.length;
-			a.length && (!r || !o) && (n({
-				tiles: a,
-				kind: t,
-				generation: f
-			}), this.schedule()), !r && o === e.length && t === "vector" && navigator.onLine && (m = !0, this.updateState({ error: "Подробности этого участка не загрузились. Обзор и маршрут сохранены; повторите выбор слоя." })), r && (o ? this.updateState({
-				imageryLoading: !1,
-				error: "Не все спутниковые снимки загрузились. Предыдущая карта сохранена; повторите выбор слоя при устойчивой связи."
-			}) : this.updateState({
-				imageryLoading: !1,
-				imagerySource: s,
-				committedMode: "satellite",
-				...m ? {} : { error: "" }
-			}));
-		};
-		Promise.all([
-			h(n, "overview", (e) => {
-				this.overview = e, !i.length && !c.length && navigator.onLine && this.updateState({
-					error: "",
-					committedMode: "overview"
+		let p = () => !this.disposed && d === this.generation, m = async (e, t) => {
+			let n = await Promise.allSettled(e.map((e) => this.tiles.load(e))), r = n.flatMap((e) => e.status === "fulfilled" ? [e.value] : []), i = n.length - r.length;
+			return {
+				value: {
+					tiles: r,
+					kind: t,
+					generation: d
+				},
+				failed: i
+			};
+		}, h = m(n, "overview").then((e) => {
+			if (p() && (e.value.tiles.length && (!e.failed || !this.overview) && (this.overview = e.value, this.schedule()), !i.length && !c.length)) {
+				if (e.failed) {
+					this.updateState({ error: "Обзор карты загрузился не полностью. Повторите загрузку." });
+					return;
+				}
+				this.detail = void 0, this.relief = void 0, this.imagery = void 0, this.imageryOverlay = void 0, this.updateState({
+					committedMode: "overview",
+					reliefReady: !1,
+					localDetail: !1,
+					imagerySource: void 0,
+					...navigator.onLine ? { error: "" } : {}
+				}), this.schedule();
+			}
+		}), g = Promise.all([
+			m(i, "vector"),
+			m(a, "relief"),
+			m(c, s)
+		]).then(([e, t, n]) => {
+			if (!(!p() || !i.length && !c.length)) {
+				if (n.failed || !c.length && (e.failed || t.failed)) {
+					this.updateState({
+						imageryLoading: !1,
+						error: c.length ? "Спутниковая карта загрузилась не полностью. Повторите загрузку." : "Подробная карта загрузилась не полностью. Повторите загрузку."
+					});
+					return;
+				}
+				if (c.length) {
+					this.imagery = n.value, e.failed || (this.imageryOverlay = e.value), this.detail = void 0, this.relief = void 0;
+					let t = this.imageryOverlay;
+					this.updateState({
+						committedMode: "satellite",
+						imageryLoading: !1,
+						imagerySource: s,
+						reliefReady: !1,
+						localDetail: !!t?.tiles.length && t.tiles.every((e) => e.local),
+						...e.failed ? { error: "Подписи и тропы на спутниковой карте загрузились не полностью. Повторите загрузку." } : navigator.onLine ? { error: "" } : {}
+					});
+				} else this.detail = e.value, this.relief = a.length ? t.value : void 0, this.imagery = void 0, this.imageryOverlay = void 0, this.updateState({
+					committedMode: "detail",
+					imagerySource: void 0,
+					imageryTarget: void 0,
+					reliefReady: a.length > 0,
+					localDetail: e.value.tiles.every((e) => e.local),
+					...navigator.onLine ? { error: "" } : {}
 				});
-			}),
-			h(i, "vector", (e) => {
-				this.mode === "satellite" ? this.imageryOverlay = e : this.detail = e, this.updateState({
-					localDetail: e.tiles.every((e) => e.local),
-					...this.mode === "satellite" ? {} : {
-						committedMode: "detail",
-						...navigator.onLine ? { error: "" } : {}
-					}
-				});
-			}),
-			h(a, "relief", (e) => {
-				this.relief = e, this.updateState({ reliefReady: !0 });
-			}),
-			h(c, s, (e) => {
-				this.imagery = e, this.detail = void 0, this.relief = void 0, this.updateState({ reliefReady: !1 });
-			}, !0)
-		]).finally(() => {
-			!this.disposed && f === this.generation && (this.tiles.pin([...u.map(G), ...p()]), this.updateState({ loading: !1 }));
+				this.schedule();
+			}
+		});
+		Promise.all([h, g]).finally(() => {
+			p() && (this.tiles.pin([...l.map(G), ...f()]), this.updateState({ loading: !1 }), this.retryAfterOnline());
 		});
 	}
+	displayingSatellite() {
+		return this.state.committedMode === "satellite" && !!this.imagery;
+	}
 	displayDetail() {
-		return this.mode === "satellite" && this.imagery ? this.imageryOverlay : this.detail;
+		return this.displayingSatellite() ? this.imageryOverlay : this.detail;
 	}
 	worldTransform() {
 		let e = this.context, t = 256 * 2 ** this.camera.zoom, n = d(this.camera.center), r = (this.camera.bearingDegrees ?? 0) * Math.PI / 180;
@@ -2594,16 +2643,16 @@ var Lt = class {
 		e.setTransform(1, 0, 0, 1, 0, 0), n || (e.fillStyle = E, e.fillRect(0, 0, this.canvas.width, this.canvas.height));
 		let r = this.worldTransform();
 		n || (this.area && (e.fillStyle = "#dce5cf", e.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95));
-		let i = this.mode === "satellite" && !!this.imagery;
+		let i = this.displayingSatellite();
 		i && this.drawTiles(this.imagery), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!i || t?.tiles[0]?.transparent) && this.drawTiles(t), !i && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), this.boundaryVisible && this.boundaries && (e.strokeStyle = i ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / r, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (e.strokeStyle = i ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / r, e.stroke(this.selectedBoundary)), this.route && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (q(this.camera.zoom) + 3) / r, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = q(this.camera.zoom) / r, e.stroke(this.route.path)), this.mask && (e.fillStyle = E, e.fill(this.mask, "evenodd")), this.drawLabels(), this.element.dataset.mapPainted = "true", this.element.dataset.mapCanvas = "custom", this.element.dataset.mapDrawnRoute = this.routeId || "", this.drawRevision++, this.drawMarkers(), !this.pointer.activePointers && !this.animation && this.publishInspection(), this.options.onFrame?.(this.getCamera());
 	}
 	drawMarkers() {
-		let e = [...this.markers.values()].filter((e) => e.marker.kind === "direction"), t = ht(e.map(({ marker: e }) => ({
+		let e = [...this.markers.values()].filter((e) => e.marker.kind === "direction"), t = gt(e.map(({ marker: e }) => ({
 			id: e.id,
 			name: e.label,
 			center: e.coordinate
 		})), (e) => this.project(e), new Set([...this.markerGroups.values()].map((e) => e.key)));
-		this.markerGroups = _t(new Map(e.map((e) => [e.marker.id, e.button])), t, new Map(e.map((e) => [e.marker.id, e.marker.count || 0])), this.camera.zoom < 5, e.find((e) => e.marker.active)?.marker.id);
+		this.markerGroups = vt(new Map(e.map((e) => [e.marker.id, e.button])), t, new Map(e.map((e) => [e.marker.id, e.marker.count || 0])), this.camera.zoom < 5, e.find((e) => e.marker.active)?.marker.id);
 		for (let { marker: e, button: t } of this.markers.values()) {
 			let n = this.project(e.coordinate), r = n.x < -22 || n.x > this.size.width + 22 || n.y < -22 || n.y > this.size.height + 22;
 			e.kind === "direction" ? r && (t.hidden = !0) : t.hidden = r, t.style.transform = `translate(${n.x - 22}px,${n.y - 22}px)`;
@@ -2631,7 +2680,7 @@ var Lt = class {
 				rank: e.rank ?? 0
 			},
 			color: e.color
-		})), a = this.displayDetail(), o = this.mode === "satellite" && !!this.imagery, s = [a];
+		})), a = this.displayDetail(), o = this.displayingSatellite(), s = [a];
 		if (!o && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 10 && s.push(this.relief), this.mode !== "overview" && this.camera.zoom >= 5) {
 			for (let e of s) if (e) for (let t of e.tiles) for (let e of t.labels) {
 				let n = 2 ** t.z;
@@ -2645,8 +2694,8 @@ var Lt = class {
 				});
 			}
 		}
-		i.sort((e, t) => Ct(e.label) - Ct(t.label) || e.label.rank - t.label.rank), this.labelDiagnosticTotal = i.length;
-		let c = 0, l = wt(this.size.width, this.size.height);
+		i.sort((e, t) => wt(e.label) - wt(t.label) || e.label.rank - t.label.rank), this.labelDiagnosticTotal = i.length;
+		let c = 0, l = Tt(this.size.width, this.size.height);
 		for (let { id: a, coordinate: o, label: s, color: u } of i) {
 			let i = {
 				id: a,
@@ -2666,19 +2715,19 @@ var Lt = class {
 				i.reason = "outside-coverage";
 				continue;
 			}
-			let f = this.project(o), p = St(s, this.camera.zoom, u);
+			let f = this.project(o), p = Ct(s, this.camera.zoom, u);
 			if (f.x < 24 || f.x > this.size.width - 24 || f.y < 32 || f.y > this.size.height - 20) {
 				i.reason = "outside-viewport";
 				continue;
 			}
 			let m = s.kind === "peak" && s.elevation !== void 0 ? `${s.text ? s.text + " · " : ""}${Math.round(s.elevation)} м` : s.text;
 			e.font = `${p.weight} ${p.fontSize}px Manrope, sans-serif`;
-			let h = e.measureText(m).width, g = Dt(s, f, h, !!m, p), { rect: _ } = g;
+			let h = e.measureText(m).width, g = Ot(s, f, h, !!m, p), { rect: _ } = g;
 			if (i.x = f.x, i.y = f.y, i.width = h, i.rect = _, _.left < 12 || _.right > this.size.width - 12 || _.top < 12 || _.bottom > this.size.height - 12) {
 				i.reason = "outside-viewport";
 				continue;
 			}
-			let v = Tt(s), y = Et(s);
+			let v = Et(s), y = Dt(s);
 			if (m && v && (r.get(y) || []).some((e) => Math.hypot(f.x - e.x, f.y - e.y) < v)) {
 				i.reason = "repeated-name";
 				continue;
@@ -2691,21 +2740,21 @@ var Lt = class {
 				let e = r.get(y) || [];
 				e.push(f), r.set(y, e);
 			}
-			s.symbol && bt(e, s.symbol, f.x, f.y), Ot(e, m, f, g, p), c++, i.visible = !0, i.reason = "drawn";
+			s.symbol && xt(e, s.symbol, f.x, f.y), kt(e, m, f, g, p), c++, i.visible = !0, i.reason = "drawn";
 		}
 		this.labelCanvas.hidden = c === 0;
 	}
 	destroy() {
 		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0);
 	}
-}, Rt = Object.freeze({
+}, zt = Object.freeze({
 	version: 1,
-	CustomMapEngine: Lt,
+	CustomMapEngine: Rt,
 	inRussiaCoverage: N
 });
 typeof window < "u" && Object.defineProperty(window, "TropnikMapAPI", {
-	value: Rt,
+	value: zt,
 	configurable: !1
 });
 //#endregion
-export { Lt as n, N as r, Rt as t };
+export { Rt as n, N as r, zt as t };
