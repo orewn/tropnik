@@ -23,12 +23,12 @@ test('RF display mask clips actual terrain and thick route pixels in WebGL2 and 
 },async t=>{
  assert.ok(binary,'A Chromium binary is required for the terrain mask pixel gate');
  const root=resolve(import.meta.dirname,'../../..'),output=join(root,'web/pages-preview/dist'),pictures=join(root,'web/pages-preview/design-qa/terrain-mask');
- const renderer=await readFile(join(root,'web/public/terrain/terrain-renderer.js')),fixture=await readFile(new URL('terrain-mask-fixture.mjs',import.meta.url));
+ const renderer=await readFile(join(root,'web/public/terrain/terrain-renderer.js')),fixture=await readFile(new URL('terrain-mask-fixture.mjs',import.meta.url)),windowFixture=await readFile(new URL('terrain-window-fixture.mjs',import.meta.url));
  const directory=await mkdtemp(join(tmpdir(),'tropnik-terrain-mask-'));
- const report={schemaVersion:1,verified:false,phase:'browser-startup',evidence:'production-renderer-browser-pixels',sourceCommit:process.env.GITHUB_SHA||null,rendererSHA256:createHash('sha256').update(renderer).digest('hex'),cases:[]};
- const html='<!doctype html><meta charset="utf-8"><style>html,body{margin:0;width:512px;height:384px;overflow:hidden;background:#dfe6da}</style><script type="module">import {TerrainRenderer} from "/terrain-renderer.js";import {runTerrainMaskCase} from "/fixture.mjs";window.runMaskGate=options=>runTerrainMaskCase(TerrainRenderer,options);</script>';
+ const report={schemaVersion:1,verified:false,phase:'browser-startup',evidence:'production-renderer-browser-pixels',sourceCommit:process.env.GITHUB_SHA||null,rendererSHA256:createHash('sha256').update(renderer).digest('hex'),cases:[],mapWindows:[]};
+ const html='<!doctype html><meta charset="utf-8"><style>html,body{margin:0;width:512px;height:384px;overflow:hidden;background:#dfe6da}</style><script type="module">import {TerrainRenderer} from "/terrain-renderer.js";import {runTerrainMaskCase} from "/fixture.mjs";window.runMaskGate=options=>runTerrainMaskCase(TerrainRenderer,options);import {runTerrainWindowCase} from "/window-fixture.mjs";window.runMeshWindowGate=options=>runTerrainWindowCase(TerrainRenderer,options);</script>';
  const server=createHTTPServer((request,response)=>{
-  const path=new URL(request.url,'http://127.0.0.1').pathname,content=path==='/'?html:path==='/terrain-renderer.js'?renderer:path==='/fixture.mjs'?fixture:null;
+  const path=new URL(request.url,'http://127.0.0.1').pathname,content=path==='/'?html:path==='/terrain-renderer.js'?renderer:path==='/fixture.mjs'?fixture:path==='/window-fixture.mjs'?windowFixture:null;
   response.writeHead(content===null?404:200,{'content-type':path==='/'?'text/html; charset=utf-8':'text/javascript; charset=utf-8','cache-control':'no-store'});response.end(content??'Not found');
  });
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -69,6 +69,19 @@ test('RF display mask clips actual terrain and thick route pixels in WebGL2 and 
    }
    const {captures,...summary}=result;report.cases.push({...summary,name,frames});
    assert.equal(result.verified,true,result.error||`${name} failed in ${result.phase}`);assert.equal(result.renderer,forceCanvas?'canvas2d':'webgl2');
+  }
+  // Keep all four legacy cases above intact. These additional cases compare
+  // actual map pixels with complete-grid references at the same source stride.
+  for(const forceCanvas of[false,true]){
+   const name=`map-window-${forceCanvas?'canvas2d':'webgl2'}`;report.phase=name;
+   const result=await evaluate(`window.runMeshWindowGate(${JSON.stringify({forceCanvas})})`,45000),frames=[];
+   for(const capture of result.captures){
+    const file=`${name}-${capture.phase}.png`,bytes=Buffer.from(capture.png,'base64');assert.ok(bytes.length>=33&&bytes.length<=8*1024*1024,'Invalid map-window PNG');
+    assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.subarray(12,16).toString(),'IHDR');assert.equal(bytes.readUInt32BE(16),capture.width);assert.equal(bytes.readUInt32BE(20),capture.height);
+    await writeFile(join(pictures,file),bytes);const {png,...metadata}=capture;frames.push({...metadata,file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
+   }
+   const {captures,...summary}=result;report.mapWindows.push({...summary,name,frames});
+   assert.equal(result.verified,true,result.error||`${name} failed in ${result.phase}`);
   }
   assert.equal(report.cases.length,4);assert.ok(report.cases.some(item=>item.recovery?.restored===1));report.verified=true;report.phase='complete';
   assertTerrainMaskReport(report,{sourceCommit:report.sourceCommit,rendererSHA256:createHash('sha256').update(renderer).digest('hex')});

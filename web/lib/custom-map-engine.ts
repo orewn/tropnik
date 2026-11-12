@@ -11,8 +11,8 @@ import {createDirectionMarker} from './map-direction-marker';
 import {constrainDirectionLabels,groupMapDirections,updateDirectionButtons,type MapDirectionGroup} from './map-direction-layout';
 import type {MapCoverage} from '../public/maps/map-coverage-lod.js';
 import type {MapTileLabel} from './custom-map-painter';
-import {priorityCityFontSize} from '../public/maps/map-city-labels.js';
 import {drawMapSymbol} from './custom-map-symbols';
+import {drawMapLabel,mapLabelBudget,mapLabelLayout,mapLabelPriority,mapLabelRepeatDistance,mapLabelRepeatKey,mapLabelStyle} from './custom-map-labels';
 import {mapCanvasPolicy,type MapCanvasPolicy} from './map-canvas-policy';
 import {copyMapLabelDiagnostic,MAP_LABEL_INSPECTION_EVENT,MAP_LABEL_SAMPLE_LIMIT,MAX_RECORDED_MAP_LABELS,selectRecordedMapLabels} from './custom-map-label-inspection';
 
@@ -532,30 +532,33 @@ export class CustomMapEngine {
     const ctx=this.labelContext;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,this.labelCanvas.width,this.labelCanvas.height);
     ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);this.labelRevision++;
     if(!this.coverage){this.labelCanvas.hidden=true;return;}
-    const occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>();
+    const occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>(),repeated=new Map<string,MapPoint[]>();
     const candidates:Array<{id:string;coordinate:[number,number];label:MapTileLabel;color?:string}>=this.additionalLabels.map(label=>({id:label.id,coordinate:label.coordinate,label:{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},color:label.color}));
     const detail=this.displayDetail();
     if(detail&&this.mode!=='overview'&&this.camera.zoom>=5)for(const tile of detail.tiles)for(const label of tile.labels){const n=2**tile.z;candidates.push({id:`${tile.key}:${label.text}`,coordinate:mercatorUnproject({x:(tile.x+label.x)/n,y:(tile.y+label.y)/n}),label});}
-    candidates.sort((a,b)=>a.label.rank-b.label.rank);this.labelDiagnosticTotal=candidates.length;let count=0;
+    candidates.sort((a,b)=>mapLabelPriority(a.label)-mapLabelPriority(b.label)||a.label.rank-b.label.rank);
+    this.labelDiagnosticTotal=candidates.length;let count=0;const budget=mapLabelBudget(this.size.width,this.size.height);
     for(const {id,coordinate,label,color} of candidates){
       const diagnostic:CustomMapLabelDiagnostic={id,label:label.text,coordinate,visible:false,reason:'budget'};
       if(this.labelDiagnostics.length<MAX_RECORDED_MAP_LABELS)this.labelDiagnostics.push(diagnostic);
       const sourceAnchor=`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`;
-      if(count>=64||seen.has(sourceAnchor))continue;
+      if(count>=budget)continue;
+      if(seen.has(sourceAnchor)){diagnostic.reason='duplicate';continue;}
       if(!inRussiaCoverage(coordinate[0],coordinate[1],this.coverage.area)){diagnostic.reason='outside-coverage';continue;}
-      const p=this.project(coordinate),fontSize=label.priorityCity?priorityCityFontSize(this.camera.zoom):label.kind==='place'&&label.rank<3?14:12;
+      const p=this.project(coordinate),style=mapLabelStyle(label,this.camera.zoom,color);
       if(p.x<24||p.x>this.size.width-24||p.y<32||p.y>this.size.height-20){diagnostic.reason='outside-viewport';continue;}
       const value=label.kind==='peak'&&label.elevation!==undefined?`${label.text?label.text+' · ':''}${Math.round(label.elevation)} м`:label.text;
-      ctx.font=`${label.kind==='place'?'600':'500'} ${fontSize}px Manrope, sans-serif`;
-      const textY=p.y+(label.symbol?21:0),width=Math.max(ctx.measureText(value).width,label.symbol?24:0),halfHeight=fontSize/2+4;
-      const rect={left:p.x-width/2-5,right:p.x+width/2+5,top:label.symbol?p.y-14:p.y-halfHeight,bottom:label.symbol&&!value?p.y+14:textY+halfHeight};
+      ctx.font=`${style.weight} ${style.fontSize}px Manrope, sans-serif`;
+      const width=ctx.measureText(value).width,layout=mapLabelLayout(label,p,width,!!value,style),{rect}=layout;
       diagnostic.x=p.x;diagnostic.y=p.y;diagnostic.width=width;diagnostic.rect=rect;
       if(rect.left<12||rect.right>this.size.width-12||rect.top<12||rect.bottom>this.size.height-12){diagnostic.reason='outside-viewport';continue;}
+      const repeatDistance=mapLabelRepeatDistance(label),repeatKey=mapLabelRepeatKey(label);
+      if(value&&repeatDistance&&(repeated.get(repeatKey)||[]).some(previous=>Math.hypot(p.x-previous.x,p.y-previous.y)<repeatDistance)){diagnostic.reason='repeated-name';continue;}
       if(occupied.some(r=>rect.left<r.right&&rect.right>r.left&&rect.top<r.bottom&&rect.bottom>r.top)){diagnostic.reason='collision';continue;}
       occupied.push(rect);seen.add(sourceAnchor);
+      if(value&&repeatDistance){const points=repeated.get(repeatKey)||[];points.push(p);repeated.set(repeatKey,points);}
       if(label.symbol)drawMapSymbol(ctx,label.symbol,p.x,p.y);
-      if(value){ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;
-        ctx.strokeStyle='rgba(255,254,245,.95)';ctx.strokeText(value,p.x,textY);ctx.fillStyle=color&&/^#[\da-f]{6}$/i.test(color)?color:label.kind==='water'?'#427c88':'#344e3a';ctx.fillText(value,p.x,textY);}
+      drawMapLabel(ctx,value,p,layout,style);
       count++;diagnostic.visible=true;diagnostic.reason='drawn';
     }
     this.labelCanvas.hidden=count===0;

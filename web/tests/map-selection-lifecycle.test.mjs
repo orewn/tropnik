@@ -5,9 +5,10 @@ import {dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import vm from 'node:vm';
 import ts from 'typescript';
-import {createTerrainModel,terrainRoute,drapeTerrainRoute} from '../public/terrain/terrain-renderer.js';
+import {createTerrainModel,terrainRoute,drapeTerrainRoute,TerrainRenderer} from '../public/terrain/terrain-renderer.js';
 import {readRouteGeometry,routeGeometryPositions} from '../lib/route-geometry.ts';
-import {cameraBounds} from '../lib/custom-map-camera.ts';
+import {cameraBounds,project} from '../lib/custom-map-camera.ts';
+import {openingTerrainView,planTerrainNavigation} from '../lib/terrain-navigation.ts';
 import {RUSSIA_BOUNDS,russiaCamera,russiaPadding} from '../public/maps/russia-viewport.js';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),compiled=new Map();
@@ -24,7 +25,7 @@ function componentHost(file,name,dependencies={}){
   const hooks=[],refs=new WeakMap(),frames=new Map();let cursor=0,dirty=false,serial=0,tree,props,disposed=false;
   const layout=[],effects=[];
   const nodes=()=>{const out=[];const visit=node=>{if(!node||typeof node!=='object')return;if(Array.isArray(node)){node.forEach(visit);return;}out.push(node);visit(node.props?.children);};visit(tree);return out;};
-  const element=()=>({dataset:{},clientWidth:800,clientHeight:600,
+  const element=()=>({dataset:{},style:{},clientWidth:800,clientHeight:600,
     getBoundingClientRect:()=>({left:0,top:0,right:800,bottom:600,width:800,height:600}),
     closest:()=>({querySelector:()=>null,querySelectorAll:()=>[]}),querySelectorAll:()=>[],
     querySelector:()=>host.visibleCanvas||host.canvas});
@@ -44,7 +45,7 @@ function componentHost(file,name,dependencies={}){
   vm.runInContext(`(function(require,module,exports){${compiled.get(file)}\n})`,environment)(require,testModule,testModule.exports);
   const host={canvas:null,visibleCanvas:null,
     render(next=props){if(disposed)return tree;props=next;let count=0;do{assert.ok(count++<30,'Component left a synchronous render loop');dirty=false;cursor=0;tree=testModule.exports[name](props);
-      for(const node of nodes())if(typeof node.type==='string'&&node.props.ref){const ref=node.props.ref,old=refs.get(ref);let record=old;if(!old||old.key!==node.key){record={key:node.key,element:element()};refs.set(ref,record);}ref.current=record.element;if(node.type==='canvas')host.canvas=record.element;}
+      for(const node of nodes())if(typeof node.type==='string'&&node.props.ref){const ref=node.props.ref,old=refs.get(ref);let record=old;if(!old||old.key!==node.key){record={key:node.key,element:element()};refs.set(ref,record);}if(typeof ref==='function')ref(record.element);else ref.current=record.element;if(node.type==='canvas')host.canvas=record.element;}
       while(layout.length)layout.shift()();while(effects.length)effects.shift()();
     }while(dirty);return tree;},
     async settle(){await turn();this.render();},
@@ -61,7 +62,7 @@ function atlasFixture(){
     getState(){return{ready:true,mode:'detail',committedMode:'detail',error:'',loading:false};}
     getCoverage(){return{area:{},territories:{features:[]}};}
     setRoute(geometry,id){this.route=geometry;this.routeId=id;}
-    setFloor(){}setPadding(){}setRegion(){}setActive(){}setMarkers(){}setPitch(){}setObstacles(){}setCamera(camera){this.cameras.push(camera);}destroy(){this.destroyed=true;}
+    setFloor(){}setPadding(){}setRegion(){}setActive(value){this.active=value;}setMarkers(){}setPitch(){}setObstacles(){}setCamera(camera){this.cameras.push(camera);}destroy(){this.destroyed=true;}
     fit(bounds){this.fits.push(bounds);}getVisibleBounds(){return this.visibleBounds;}getCamera(){return{center:region.center,zoom:10};}getSize(){return{width:800,height:600};}
   }
   const host=componentHost('components/CustomAtlas.tsx','CustomAtlas',{
@@ -77,7 +78,7 @@ function atlasFixture(){
     '@/lib/map-config':{MAP_CONFIG:{trailHitRadiusPx:12,routeMaxZoom:14,territoryMaxZoom:14},viewportRegionId:()=>region.id},
     '@/lib/map-route-presentation':{OVERVIEW_MESSAGE:'',overviewContextCaption:()=>'',ROUTE_PRESENTATION:{closeZoom:12}},'@/lib/map-types':{EMPTY_MAP_TRAILS:[]},
   });
-  const select=trail=>host.render({region,trail,onRegion(){},onTrail:value=>chosen.push(value),onMapNote:value=>notes.push(value)});
+  const select=(trail,visibleTrails=[])=>host.render({region,trail,visibleTrails,onRegion(){},onTrail:value=>chosen.push(value),onMapNote:value=>notes.push(value)});
   return{host,requests,maps,notes,chosen,select,scene:()=>host.find(node=>node.type===scene)?.props};
 }
 
@@ -127,29 +128,79 @@ test('portrait and wide country views open only their real visible display exten
   assert.equal(map.cameras.length,moves);assert.equal(map.fits.length,fits);
 });
 
-function sceneFixture(initial,{holdMask=false}={}){
-  const renderers=[],loads=[],model=createTerrainModel(grid),source=deferred();let host;
-  const mask=deferred(),maskLoads=[],displayMask={width:2,height:2,pixels:new Uint8Array(4).fill(255),source:{allowedPixels:4,bounds:[...grid.bounds]}};
-  if(!holdMask)mask.resolve(displayMask);
+test('selecting another route marker inside 3D retains its window and camera while replacing only the selected line',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());
+  const a={id:'a',title:'Первая тропа',center:[40.04,43.05],geometry:line()},b={id:'b',title:'Соседняя тропа',center:[40.06,43.05],geometryUrl:'/neighbour.geojson'},trails=[a,b];
+  env.select(a,trails);await env.host.settle();await env.host.settle();env.host.click('Рельеф всей карты');
+  const bounds=env.scene().bounds,fitCount=env.maps[0].fits.length,view={longitude:40.065,latitude:43.06,yaw:.9,pitch:.85,distanceM:2000,zoom:2,bounds:[...grid.bounds]};
+  env.scene().onViewChange(view);env.scene().onMarker(b.id);assert.equal(env.chosen.at(-1),b);env.select(b,trails);
+  assert.equal(env.scene().bounds,bounds,'Stable bounds keep the same terrain component and camera');assert.equal(env.scene().title,b.title);assert.equal(env.scene().geometry,undefined);assert.equal(env.scene().routeStatus,'loading');assert.equal(env.maps[0].active,false);
+  const geometry=line(40.04,40.09);env.requests.get('/neighbour.geojson').resolve(geometry);await env.host.settle();
+  assert.equal(env.scene().geometry,geometry);assert.equal(env.scene().routeStatus,'ready');assert.equal(env.scene().bounds,bounds);assert.equal(env.maps[0].fits.length,fitCount);
+  env.scene().onClose();env.host.render();const restored=env.maps[0].cameras.at(-1);assert.deepEqual(Array.from(restored.center),[view.longitude,view.latitude]);assert.equal(env.maps[0].routeId,b.id);
+});
+
+test('closing the browsed 3D map restores its geographic focus to the same mounted 2D map and preserves the selected line',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());const selected={id:'kept',title:'Маршрут',geometry:line()};env.select(selected);await env.host.settle();await env.host.settle();
+  const map=env.maps[0],fitCount=map.fits.length;env.host.click('Рельеф всей карты');assert.equal(map.active,false);
+  const view={longitude:40.25,latitude:43.05,yaw:.6,pitch:.85,distanceM:5000,zoom:1,bounds:[...grid.bounds]};env.scene().onViewChange(view);env.scene().onClose();env.host.render();
+  assert.equal(env.scene(),undefined);assert.equal(env.maps.length,1);assert.equal(map.active,true);assert.equal(map.route,selected.geometry);assert.equal(map.routeId,selected.id);
+  const restored=map.cameras.at(-1);assert.deepEqual(Array.from(restored.center),[view.longitude,view.latitude]);assert.ok(Math.abs(restored.bearingDegrees+view.yaw*180/Math.PI)<1e-9);assert.ok(restored.zoom>=2&&restored.zoom<=18);
+  assert.equal(map.fits.length,fitCount,'Closing must not snap back to a route fit after the user browsed elsewhere');
+  // Check actual projections, rather than teaching a renderer mock the same
+  // sign convention as the component. A northern landmark must stay on the
+  // same side of the viewed target when leaving the rotated landscape.
+  const oldRAF=globalThis.requestAnimationFrame,oldCancel=globalThis.cancelAnimationFrame;
+  globalThis.requestAnimationFrame=()=>1;globalThis.cancelAnimationFrame=()=>{};
+  const viewport={width:1000,height:700},canvas={style:{},dataset:{},getBoundingClientRect:()=>viewport,getContext:()=>({}),addEventListener(){},removeEventListener(){}};
+  let terrain;
+  try{
+    const data={...grid,bounds:[40,43,40.5,43.1],elevations:grid.elevations.map(()=>100)};
+    terrain=new TerrainRenderer(canvas,data,{navigation:'map',forceCanvas:true,initialView:view,viewportInsets:{top:0,right:0,bottom:0,left:0}});
+    const focus=[view.longitude,view.latitude],north=[view.longitude,view.latitude+.01];
+    const focus3D=terrain.project(...focus),north3D=terrain.project(...north),focus2D=project(restored,viewport,focus),north2D=project(restored,viewport,north);
+    assert.ok(focus3D&&north3D);assert.ok((north3D.x-focus3D.x)*(north2D.x-focus2D.x)>0,'Returning to 2D must not reflect the actual rotated compass direction');
+  }finally{
+    terrain?.destroy();if(oldRAF===undefined)delete globalThis.requestAnimationFrame;else globalThis.requestAnimationFrame=oldRAF;
+    if(oldCancel===undefined)delete globalThis.cancelAnimationFrame;else globalThis.cancelAnimationFrame=oldCancel;
+  }
+});
+
+function sceneFixture(initial,{holdMask=false,holdSurface=false,viewport={width:800,height:600,insets:{top:0,right:0,bottom:0,left:0}}}={}){
+  const renderers=[],loads=[],maskLoads=[],surfaceLoads=[],source=deferred(),mask=deferred();let host;
+  let currentViewport=viewport,viewportObserver;
+  const displayMask={width:2,height:2,pixels:new Uint8Array(4).fill(255),source:{allowedPixels:4,bounds:[...grid.bounds]}};
   class Renderer{
-    constructor(canvas,data,options){this.canvas=canvas;this.options=options;this.model=model;this.segments=[];this.yaw=.25;renderers.push(this);}
+    constructor(canvas,data,options){this.canvas=canvas;this.options=options;this.grid=data;this.model=options.preparedModel;this.segments=[];this.yaw=options.initialView?.yaw??.25;this.view={...openingTerrainView(data.bounds,{width:800,height:600}),...options.initialView};this.terrainChanges=[];this.cartographyChanges=[];renderers.push(this);}
     setGeometry(geometry){const result=terrainRoute(this.model,geometry);this.segments=result.segments;this.canvas.dataset.routeSegments=String(result.segments.length);this.canvas.dataset.routeClipped=String(result.clipped);return{segments:result.segments.length,clipped:result.clipped};}
-    setCartography(){}warmup(){}zoomBy(){}rotate(){}reset(){}destroy(){this.destroyed=true;}
+    getView(){return{...this.view,yaw:this.yaw,zoom:1,bounds:[...this.grid.bounds]};}
+    setView(view){this.view={...this.view,...view};this.yaw=view.yaw;}
+    setViewportInsets(insets){this.viewportInsets=insets;}
+    setTerrain(data,options){this.terrainChanges.push({data,options});this.grid=data;this.model=options.preparedModel;this.segments=[];this.cartography=null;}
+    setCartography(value){this.cartography=value;this.cartographyChanges.push(value);}
+    navigate(change){this.setView({...this.getView(),...change});this.options.onViewChange(this.getView());host.render();}
+    project(){return null;}warmup(){this.warmups=(this.warmups||0)+1;}zoomBy(){}rotate(){}reset(){}destroy(){this.destroyed=true;}
     frame({routeFails=false,replacedCanvas=false}={}){if(replacedCanvas){this.canvas={dataset:{}};host.visibleCanvas=this.canvas;}
       const route=routeFails?[]:drapeTerrainRoute(this.model,this.segments,1);this.canvas.dataset.routeRenderSegments=String(route.length);
       if(routeFails)this.options.onError('Геометрия не помещается в предпросмотр. Откройте маршрут на основной карте.');
-      this.options.onRender({renderer:'canvas2d',ms:1,triangles:128,meshStride:1,quality:'full',view:{yaw:this.yaw}});host.render();}
+      this.options.onRender({renderer:'canvas2d',ms:1,triangles:128,meshStride:1,quality:'full',view:{yaw:this.yaw},geographicView:this.getView(),viewport:currentViewport});host.render();}
   }
-  const loader={load:(bounds,options)=>{loads.push({bounds,options});return source.promise;},dispose(){this.disposed=true;}};
+  const loader={load:(bounds,options)=>{const job=loads.length?deferred():source;loads.push({bounds:[...bounds],options,...job});return job.promise;},dispose(){this.disposed=true;}};
   host=componentHost('components/MapLandscapeScene.tsx','MapLandscapeScene',{
     './MapIcon':{MapIcon:'icon'},'./MapAttribution':{MapAttribution:'credit'},'@/lib/custom-map-landscape':{createCustomLandscapeLoader:()=>loader},
-    '@/lib/custom-map-surface':{createLandscapeSurface:async()=>({width:1,height:1,source:{loadedTiles:0}})},'@/lib/terrain-viewport':{observeTerrainViewport:()=>()=>{}},
-    '@/lib/custom-map-mask':{prepareLandscapeDisplayMask:(bounds,options)=>{maskLoads.push({bounds,options});return mask.promise;}},
+    '@/lib/custom-map-surface':{createLandscapeSurface:(data,options)=>{const job=deferred();surfaceLoads.push({data,options,...job});if(!holdSurface)job.resolve({width:2,height:2,source:{complete:false,loadedTiles:0}});return job.promise;}},
+    '@/lib/terrain-viewport':{readTerrainViewport:()=>currentViewport,observeTerrainViewport:(_element,target,onChange)=>{
+      const observer={target,onChange};viewportObserver=observer;target.setViewportInsets(currentViewport.insets);onChange?.(currentViewport);
+      return()=>{if(viewportObserver===observer)viewportObserver=null;};
+    }},'@/lib/terrain-navigation':{openingTerrainView,planTerrainNavigation},
+    '@/lib/custom-map-mask':{prepareLandscapeDisplayMask:(bounds,options)=>{const job=maskLoads.length?deferred():mask;maskLoads.push({bounds:[...bounds],options,...job});if(!holdMask)job.resolve(JSON.stringify(bounds)===JSON.stringify(grid.bounds)?displayMask:{...displayMask,source:{...displayMask.source,bounds:[...bounds]}});return job.promise;}},
   });
   let props={bounds:grid.bounds,title:'Ландшафт',onClose(){},...initial};host.render(props);
-  return{host,loads,renderers,loader,source,mask,maskLoads,displayMask,
+  const resolveWindow=async(index,data={...grid,bounds:loads[index].bounds})=>{const model=createTerrainModel(data);loads[index].resolve({prepared:[{TerrainRenderer:Renderer},data,model],provenance:{}});await host.settle();return renderers.at(-1);};
+  return{host,loads,renderers,loader,source,mask,maskLoads,surfaceLoads,displayMask,resolveWindow,
+    resize(next){currentViewport=next;viewportObserver?.target.setViewportInsets(next.insets);viewportObserver?.onChange?.(next);viewportObserver?.target.warmup();host.render();},
     update(change){props={...props,...change};host.render(props);},
-    async ready(){source.resolve({prepared:[{TerrainRenderer:Renderer},grid,model],provenance:{}});await host.settle();return renderers.at(-1);},
+    async ready(data=grid){return resolveWindow(0,data);},
     inspection:()=>JSON.parse(host.find(node=>node.type==='section').props.ref.current.dataset.terrainInspection),
   };
 }
@@ -164,12 +215,12 @@ test('a late route updates the existing 3D scene and clearing it removes its pai
 
 test('partial and failed route rendering stay disclosed after successful terrain frames and canvas recovery',async t=>{
   const env=sceneFixture({geometry:line(39.98,40.12),routeStatus:'ready'});t.after(()=>env.host.unmount());const renderer=await env.ready();renderer.frame();
-  assert.equal(env.inspection().route.state,'partial');assert.match(env.host.text(),/Показана только часть маршрута/);
+  assert.equal(env.inspection().route.state,'partial');assert.match(env.host.text(),/Часть маршрута за пределами текущего участка/);
   renderer.options.onError('Восстанавливаем графический контекст');env.host.render();assert.match(env.host.text(),/Восстанавливаем графический контекст/);
-  renderer.frame({replacedCanvas:true});assert.match(env.host.text(),/Показана только часть маршрута/);assert.doesNotMatch(env.host.text(),/Восстанавливаем графический контекст/);
+  renderer.frame({replacedCanvas:true});assert.match(env.host.text(),/Часть маршрута за пределами текущего участка/);assert.doesNotMatch(env.host.text(),/Восстанавливаем графический контекст/);
   env.update({geometry:line()});renderer.frame({routeFails:true});assert.equal(env.inspection().state,'ready');assert.equal(env.inspection().route.state,'render-failed');assert.match(env.host.text(),/Не удалось отрисовать линию маршрута/);
   renderer.frame({routeFails:true});assert.match(env.host.text(),/Не удалось отрисовать линию маршрута/);
-  env.update({geometry:line(41,41.1)});renderer.frame();assert.equal(env.inspection().route.state,'unavailable');assert.match(env.host.text(),/не отображается в пределах этого участка/);
+  env.update({geometry:line(41,41.1)});renderer.frame();assert.equal(env.inspection().route.state,'unavailable');assert.match(env.host.text(),/Маршрут за пределами текущего ракурса/);
 });
 
 test('a nonfatal route notice cannot be mistaken for a renderer error during cartography loading',async t=>{
@@ -197,4 +248,107 @@ test('the real scene never creates an unmasked renderer while country coverage i
 test('closing a scene cancels mask preparation and a late mask cannot resurrect its renderer',async()=>{
   const env=sceneFixture({geometry:line()},{holdMask:true});await env.ready();env.host.unmount();assert.equal(env.maskLoads[0].options.signal.aborted,true);
   env.mask.resolve(env.displayMask);await env.host.settle();assert.equal(env.renderers.length,0);
+});
+
+const materialFor=(bounds,name='Measured material')=>({width:2,height:2,pixels:new Uint8ClampedArray([81,112,75,255,81,112,75,255,83,133,145,255,81,112,75,255]),
+  source:{name,kind:'landcover',bounds:[...bounds],loadedTiles:1,requestedTiles:1,complete:true}});
+const nearbyView={longitude:40.25,latitude:43.05,yaw:.6,pitch:.85,distanceM:1000};
+
+test('the first source window covers the oblique frustum while retaining the chosen 2D context as camera target',async t=>{
+  const env=sceneFixture({});t.after(()=>env.host.unmount());const opening=openingTerrainView(grid.bounds,{width:800,height:600});
+  const planned=planTerrainNavigation(opening,grid.bounds,{width:800,height:600});assert.ok(planned,'This oblique initial camera needs real terrain beyond the original flat rectangle');
+  assert.deepEqual(env.loads[0].bounds,planned.bounds);
+  const renderer=await env.ready();assert.equal(renderer.options.initialView.longitude,opening.longitude);assert.equal(renderer.options.initialView.latitude,opening.latitude);
+  assert.equal(renderer.options.initialView.distanceM,opening.distanceM);
+});
+
+test('an initial viewport change cancels obsolete coverage before any renderer can publish the first frame',async t=>{
+  const viewport={width:390,height:844,insets:{top:192,right:64,bottom:64,left:16}};
+  const env=sceneFixture({}, {viewport});t.after(()=>env.host.unmount());const initial=openingTerrainView(grid.bounds,viewport);
+  const next={...viewport,insets:{top:192,right:16,bottom:400,left:16}};
+  env.resize(next);assert.equal(env.loads.length,2);assert.equal(env.loads[0].options.signal.aborted,true);
+  assert.deepEqual(env.loads[1].bounds,planTerrainNavigation(initial,grid.bounds,next).bounds);
+  await env.resolveWindow(0);assert.equal(env.renderers.length,0,'an old source cannot appear while its replacement is loading');
+  const renderer=await env.resolveWindow(1);renderer.frame();
+  assert.equal(renderer.options.initialView.distanceM,initial.distanceM,'resizing during the initial load preserves the chosen physical camera');
+  assert.deepEqual(renderer.options.viewportInsets,next.insets);
+  assert.deepEqual(env.inspection().frame.viewport,next);
+  assert.deepEqual(env.inspection().view,env.inspection().frame.geographicView);
+});
+
+test('sheet settling replans complete canvas coverage and preserves the rendered scene until the replacement is ready',async t=>{
+  const viewport={width:390,height:844,insets:{top:192,right:64,bottom:64,left:16}},env=sceneFixture({}, {viewport});t.after(()=>env.host.unmount());
+  const renderer=await env.resolveWindow(0);renderer.frame();const view=renderer.getView(),oldGrid=renderer.grid;
+  const next={...viewport,insets:{top:192,right:16,bottom:400,left:16}};env.resize(next);
+  assert.equal(env.loads.length,2);assert.equal(renderer.grid,oldGrid);assert.equal(renderer.terrainChanges.length,0);
+  assert.deepEqual(env.loads[1].bounds,planTerrainNavigation(view,oldGrid.bounds,next,30).bounds);
+  assert.equal(renderer.getView().distanceM,view.distanceM);assert.equal(env.inspection().loadingWindow,true);
+  await env.resolveWindow(1);renderer.frame();
+  assert.equal(env.renderers.length,1);assert.equal(renderer.terrainChanges.length,1);assert.equal(renderer.getView().distanceM,view.distanceM);
+  assert.deepEqual(env.inspection().frame.viewport,next);assert.deepEqual(env.inspection().requestedViewport,next);assert.equal(env.inspection().loadingWindow,false);
+});
+
+test('a native regional DEM prepares its mask and material from its actual wider bounds',async t=>{
+  const env=sceneFixture({geometry:line()});t.after(()=>env.host.unmount());
+  const actual={...grid,bounds:[39.9,42.9,40.2,43.2]},renderer=await env.ready(actual);
+  assert.deepEqual(env.maskLoads[0].bounds,actual.bounds);assert.deepEqual(env.surfaceLoads[0].data.bounds,actual.bounds);
+  assert.deepEqual(Array.from(renderer.options.displayMask.source.bounds),actual.bounds);
+  assert.deepEqual(Array.from(env.inspection().grid.bounds),actual.bounds);
+  assert.equal(renderer.options.navigation,'map');assert.equal(env.loads[0].options.preferRegional,true);
+  assert.ok(renderer.segments.length>0,'The selected real line is projected on the returned native grid');
+});
+
+test('continuous navigation retains the renderer and its completed material until the whole replacement window is prepared',async t=>{
+  const env=sceneFixture({geometry:line(),routeStatus:'ready'},{holdSurface:true});t.after(()=>env.host.unmount());
+  const renderer=await env.ready(),oldMaterial=materialFor(grid.bounds,'old');env.surfaceLoads[0].resolve(oldMaterial);await env.host.settle();renderer.frame();
+  const oldGrid=renderer.grid;renderer.navigate(nearbyView);assert.equal(env.loads.length,2);assert.equal(env.renderers.length,1);assert.equal(renderer.destroyed,undefined);
+  assert.match(env.host.text(),/Подгружаем соседний участок/);assert.equal(renderer.cartography,oldMaterial);
+  await env.resolveWindow(1);assert.equal(env.surfaceLoads.length,2);assert.equal(renderer.terrainChanges.length,0);assert.equal(renderer.grid,oldGrid);
+  const next=materialFor(env.loads[1].bounds,'new');env.surfaceLoads[1].resolve(next);await env.host.settle();
+  assert.equal(env.renderers.length,1);assert.equal(renderer.terrainChanges.length,1);assert.equal(renderer.cartography,next);
+  assert.equal(renderer.getView().longitude,nearbyView.longitude);assert.equal(renderer.getView().latitude,nearbyView.latitude);assert.ok(Math.abs(renderer.getView().yaw-nearbyView.yaw)<1e-9);assert.equal(renderer.getView().distanceM,nearbyView.distanceM);
+  assert.deepEqual(Array.from(renderer.grid.bounds),env.loads[1].bounds);assert.doesNotMatch(env.host.text(),/Подгружаем соседний участок/);
+});
+
+test('a superseded neighbouring source cannot replace a newer requested camera or its route',async t=>{
+  const env=sceneFixture({geometry:line(),routeStatus:'ready'});t.after(()=>env.host.unmount());const renderer=await env.ready();renderer.frame();
+  renderer.navigate(nearbyView);renderer.navigate({...nearbyView,longitude:40.5,yaw:1.1});assert.equal(env.loads.length,3);assert.equal(env.loads[1].options.signal.aborted,true);
+  await env.resolveWindow(1);assert.equal(renderer.terrainChanges.length,0);assert.equal(env.maskLoads.length,1,'Aborted source results do not start a new mask');
+  await env.resolveWindow(2);assert.equal(renderer.terrainChanges.length,1);assert.equal(renderer.getView().longitude,40.5);assert.ok(Math.abs(renderer.getView().yaw-1.1)<1e-9);
+  assert.deepEqual(Array.from(renderer.grid.bounds),env.loads[2].bounds);assert.equal(env.renderers.length,1);
+});
+
+test('returning to the already loaded window cancels an obsolete neighbouring load instead of snapping back on arrival',async t=>{
+  const env=sceneFixture({geometry:line()});t.after(()=>env.host.unmount());const renderer=await env.ready();renderer.frame();
+  const returned={...nearbyView,longitude:40.05,yaw:.2};assert.equal(planTerrainNavigation(returned,grid.bounds,{width:800,height:600},30),null);
+  renderer.navigate(nearbyView);assert.equal(env.loads.length,2);renderer.navigate(returned);
+  assert.equal(env.loads[1].options.signal.aborted,true,'A new gesture supersedes a pending window even when no replacement request is required');
+  await env.resolveWindow(1);assert.equal(renderer.terrainChanges.length,0);assert.equal(renderer.getView().longitude,returned.longitude);assert.equal(renderer.getView().yaw,returned.yaw);
+  const inspection=env.inspection();assert.equal(inspection.loadingWindow,false);assert.equal(inspection.requestedWindowRevision,inspection.windowRevision);
+  assert.deepEqual(inspection.requestedBounds,inspection.loadedRequestBounds);assert.deepEqual(inspection.requestedViewport,inspection.loadedViewport);
+  assert.doesNotMatch(env.host.text(),/Подгружаем соседний участок/);
+});
+
+test('a late material from an obsolete geographic window never paints the current DEM',async t=>{
+  const env=sceneFixture({geometry:line()},{holdSurface:true});t.after(()=>env.host.unmount());const renderer=await env.ready();renderer.frame();
+  renderer.navigate(nearbyView);await env.resolveWindow(1);
+  const current=materialFor(env.loads[1].bounds,'current');env.surfaceLoads[1].resolve(current);await env.host.settle();
+  env.surfaceLoads[0].resolve(materialFor(grid.bounds,'obsolete'));await env.host.settle();
+  assert.deepEqual(renderer.cartographyChanges,[current]);assert.equal(renderer.cartography,current);assert.equal(env.inspection().cartography.source.name,'current');
+});
+
+test('a failed neighbouring load keeps the real current model and its source warning through later frames',async t=>{
+  const env=sceneFixture({geometry:line()},{holdSurface:true});t.after(()=>env.host.unmount());const renderer=await env.ready();
+  const current=materialFor(grid.bounds);env.surfaceLoads[0].resolve(current);await env.host.settle();renderer.frame();
+  renderer.navigate(nearbyView);env.loads[1].reject(new Error('Upstream unavailable'));await env.host.settle();
+  assert.equal(renderer.terrainChanges.length,0);assert.equal(renderer.cartography,current);assert.match(env.host.text(),/Предыдущий ландшафт сохранён/);
+  renderer.frame();assert.match(env.host.text(),/Предыдущий ландшафт сохранён/,'A successful old frame is not proof that the failed neighbouring source recovered');
+  assert.equal(env.inspection().state,'ready');assert.equal(env.renderers.length,1);
+  assert.equal(env.inspection().requestedWindowRevision,env.inspection().windowRevision);assert.deepEqual(env.inspection().requestedViewport,env.inspection().loadedViewport);
+});
+
+test('closing during a replacement window cancels its terrain and cannot revive the disposed renderer',async()=>{
+  const env=sceneFixture({});const renderer=await env.ready();renderer.frame();renderer.navigate(nearbyView);env.host.unmount();
+  assert.equal(env.loads[1].options.signal.aborted,true);assert.equal(renderer.destroyed,true);await env.resolveWindow(1);
+  assert.equal(renderer.terrainChanges.length,0);assert.equal(env.renderers.length,1);assert.equal(env.maskLoads.length,1);
 });

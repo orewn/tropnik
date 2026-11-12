@@ -83,5 +83,9 @@ test('four pixel cases require genuine WebGL capture and restored WebGL pixels i
   value=>value.cases[1].recovery.trusted=false,value=>value.cases[1].recovery.restored=0,value=>value.cases[1].frames.pop(),
   value=>value.cases[0].callerMaskMutationChecked=false,value=>value.cases[0].metrics.terrainLeaks=1,
   value=>delete value.cases[0].metrics.insideVisibleRatio,value=>value.cases[0].metrics.routeCorePixels=0,
+  value=>delete value.mapWindows,value=>value.mapWindows[0].renderer='canvas2d',value=>value.mapWindows[0].sourceHeightsUnchanged=false,
+  value=>value.mapWindows[0].frames[1].pixelSHA256='2'.repeat(64),value=>value.mapWindows[0].frames[1].meshWindow[0]++,
+  value=>value.mapWindows[0].comparisons[0].metrics.differentPixels=1,value=>value.mapWindows[0].comparisons[0].reference='steep-full',
+  value=>value.mapWindows[0].recovery.trusted=false,value=>value.mapWindows[1].frames.pop(),
  ]){const bad=terrainMaskReportFixture();change(bad);assert.throws(()=>assertTerrainMaskReport(bad,options));}
 });

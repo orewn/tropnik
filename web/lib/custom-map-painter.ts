@@ -150,7 +150,10 @@ export function paintVectorTile(context:PaintContext,tile:VectorTile,z:number,si
       if(bounds&&(x<bounds.left||x>bounds.right||y<bounds.top||y>bounds.bottom))return;
       if(kind==='place'&&z<5&&!/country|state|city/.test(classes(f)))return;
       const rank=Number(f.properties.rank)||(/city/.test(classes(f))?1:symbol?3:4);
-      if(kind==='poi'&&!symbol&&rank>3)return;
+      // Hiking labels are admitted by their recorded outdoor classification.
+      // A low source rank alone must not turn schools, clinics or shops into
+      // map landmarks and crowd out the trail and measured terrain.
+      if(kind==='poi'&&!symbol)return;
       const rawElevation=f.properties.ele,elevation=typeof rawElevation==='number'?rawElevation:typeof rawElevation==='string'&&rawElevation.trim()?Number(rawElevation):NaN;
       labels.push({x,y,text:name,kind,rank:Number.isFinite(rank)?rank:4,...(kind==='peak'&&Number.isFinite(elevation)?{elevation}:{}),...(symbol?{symbol}:{}),...(kind==='place'&&isPriorityCity(f.properties)?{priorityCity:true}:{})});
     });

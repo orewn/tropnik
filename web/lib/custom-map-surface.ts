@@ -1,6 +1,6 @@
 import type {TerrainGrid, TerrainCartography} from '../public/terrain/terrain-renderer.js';
-import {decodeVectorTile, VECTOR_TILE_LIMITS} from './custom-map-vector.ts';
-import {paintVectorTile} from './custom-map-painter.ts';
+import {SATELLITE_PROVIDERS, satelliteSourceForBounds, type SatelliteSourceId} from './map-satellite.ts';
+import {createTerrainRegionReader} from './terrain-region-sources.ts';
 
 export const LANDSCAPE_SURFACE_SIZE = 1024;
 export const LANDSCAPE_TILE_LIMIT = 16;
@@ -15,6 +15,7 @@ export type LandscapeSurface = TerrainCartography & {source: {
   rowOrder: 'north-to-south'; columnOrder: 'west-to-east';
   tileZoom: number; requestedTiles: number; loadedTiles: number; localTiles: number; complete: boolean;
   tiles: Array<LandscapeTile & {url: string; local: boolean}>;
+  kind: 'imagery' | 'landcover'; provider?: SatelliteSourceId; nativeResolutionM?: number; acquisitionPeriod?: string;
 }};
 type SurfaceOptions = {signal?: AbortSignal};
 export type LandscapeSurfaceDependencies = {
@@ -23,6 +24,8 @@ export type LandscapeSurfaceDependencies = {
   paint: (bytes: ArrayBuffer, tile: LandscapeTile, signal?: AbortSignal) => Promise<Omit<LandscapeRaster, 'tile'>>;
   online?: () => boolean;
   yield?: () => Promise<void>;
+  regional?: ReturnType<typeof createTerrainRegionReader>;
+  decodeMaterial?: (bytes: ArrayBuffer, width: number, height: number, signal?: AbortSignal) => Promise<Omit<LandscapeRaster, 'tile'>>;
 };
 const nextTurn = () => new Promise<void>(resolve => setTimeout(resolve, 0));
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -39,9 +42,10 @@ function boundedBounds(bounds: readonly number[]): Bounds {
 
 /** Highest source zoom whose entire continuous grid fits the request budget.
  * Only URL x is wrapped: worldX remains continuous across ±180 degrees. */
-export function landscapeTilePlan(bounds: readonly number[]): LandscapeTilePlan {
+export function landscapeTilePlan(bounds: readonly number[], maxZoom = 14): LandscapeTilePlan {
   const b = boundedBounds(bounds);
-  for (let zoom = 14; zoom >= 0; zoom--) {
+  if (!Number.isInteger(maxZoom) || maxZoom < 0 || maxZoom > 14) throw new RangeError('Invalid imagery source zoom');
+  for (let zoom = maxZoom; zoom >= 0; zoom--) {
     const n = 2 ** zoom;
     const x0 = Math.floor((b[0] + 180) / 360 * n), x1 = Math.ceil((b[2] + 180) / 360 * n) - 1;
     const y0 = clamp(Math.floor(mercatorY(b[3]) * n), 0, n - 1), y1 = clamp(Math.ceil(mercatorY(b[1]) * n) - 1, 0, n - 1);
@@ -126,89 +130,86 @@ function cancellable<T>(task: Promise<T>, signal?: AbortSignal): Promise<T> {
   });
 }
 
-/** Injectable source/painter boundary keeps the numeric projection independent of DOM
- * and permits a restricted native host to supply its packaged resource transport. */
+/** Public imagery and measured land-cover colours contain no cartographic labels.
+ * The geometry always remains the separately measured DEM. Complete tile groups
+ * are prepared offscreen; a caller keeps its previous surface until this resolves. */
 export function createLandscapeSurfaceLoader(deps: LandscapeSurfaceDependencies) {
   return async (grid: TerrainGrid, {signal}: SurfaceOptions = {}): Promise<LandscapeSurface> => {
     checkAbort(signal);
-    const plan = landscapeTilePlan(grid.bounds), rasters: LandscapeRaster[] = [];
+    const bounds = boundedBounds(grid.bounds);
+    if (deps.regional && deps.decodeMaterial) {
+      const region = await cancellable(deps.regional.find(bounds), signal); checkAbort(signal);
+      if (region && JSON.stringify(region.bounds) === JSON.stringify(bounds)) {
+        try {
+          const bytes = await cancellable(deps.regional.material(region), signal); checkAbort(signal);
+          const raster = await cancellable(deps.decodeMaterial(bytes, region.material.width, region.material.height, signal), signal); checkAbort(signal);
+          if (raster.width !== region.material.width || raster.height !== region.material.height || !(raster.pixels instanceof Uint8ClampedArray) || raster.pixels.length !== raster.width * raster.height * 4) throw new Error('Invalid measured land-cover raster');
+          return {...raster, source: {name: region.material.source, attribution: String(region.material.attribution || 'ESA WorldCover 2021 / Contains modified Copernicus Sentinel data 2021, CC BY 4.0'),
+            bounds, projection: 'regular-longitude-latitude', sampleLayout: 'grid-nodes', rowOrder: 'north-to-south', columnOrder: 'west-to-east',
+            tileZoom: 0, requestedTiles: 1, loadedTiles: 1, localTiles: 1, complete: true, tiles: [], kind: 'landcover',
+            nativeResolutionM: region.material.nominalResolutionM, acquisitionPeriod: '2021'}};
+        } catch {checkAbort(signal); /* An invalid local material never replaces the existing surface. */}
+      }
+    }
+    const provider = satelliteSourceForBounds({west:bounds[0], south:bounds[1], east:bounds[2], north:bounds[3]});
+    const source = SATELLITE_PROVIDERS[provider], plan = landscapeTilePlan(bounds, source.maxzoom), rasters: LandscapeRaster[] = [];
     const sources: LandscapeSurface['source']['tiles'] = [];
-    let files = new Set<string>();
-    try {
-      const manifest = await cancellable(deps.loadJSON('/offline-map/manifest.json'), signal) as {files?: Array<{path?: string}>};
-      if (Array.isArray(manifest?.files) && manifest.files.length <= 100_000) files = new Set(manifest.files.map(f => f.path).filter((p): p is string => typeof p === 'string'));
-    } catch {checkAbort(signal);}
-    let next = 0, template: Promise<string> | undefined;
-    const remoteTemplate = () => template ??= deps.loadJSON('https://tiles.openfreemap.org/planet/latest').then(value => {
-      const url = (value as {tiles?: string[]})?.tiles?.[0];
-      if (typeof url !== 'string' || !url.startsWith('https://tiles.openfreemap.org/') || !['{z}', '{x}', '{y}'].every(key => url.includes(key))) throw new Error('Unrecognized landscape vector source');
-      return url;
-    });
+    let next = 0;
     const worker = async () => {
       while (next < plan.tiles.length) {
-        checkAbort(signal); const tile = plan.tiles[next++], path = `localtiles/${tile.z}/${tile.x}/${tile.y}.pbf`, local = files.has(path);
+        checkAbort(signal); const tile = plan.tiles[next++];
         try {
-          if (!local && deps.online?.() === false) continue;
-          const url = local ? `/offline-map/${path}` : (await cancellable(remoteTemplate(), signal)).replace('{z}', String(tile.z)).replace('{x}', String(tile.x)).replace('{y}', String(tile.y));
+          if (deps.online?.() === false) continue;
+          const url = source.tiles.replace('{z}', String(tile.z)).replace('{x}', String(tile.x)).replace('{y}', String(tile.y));
           const bytes = await cancellable(deps.loadBytes(url), signal); checkAbort(signal);
-          if (!bytes.byteLength || bytes.byteLength > VECTOR_TILE_LIMITS.bytes) throw new RangeError('Landscape tile exceeds byte budget');
+          if (!bytes.byteLength || bytes.byteLength > 4 * 1024 * 1024) throw new RangeError('Landscape imagery exceeds byte budget');
           const raster = await cancellable(deps.paint(bytes, tile, signal), signal); checkAbort(signal);
-          // Validate immediately so a broken painter cannot retain an oversized buffer.
-          if (raster.width !== TILE_SIZE || raster.height !== TILE_SIZE || !(raster.pixels instanceof Uint8ClampedArray) || raster.pixels.length !== TILE_SIZE * TILE_SIZE * 4) throw new RangeError('Invalid landscape painted tile');
-          rasters.push({tile, ...raster}); sources.push({...tile, url, local});
+          if (![256,512].includes(raster.width) || raster.height !== raster.width || !(raster.pixels instanceof Uint8ClampedArray) || raster.pixels.length !== raster.width * raster.height * 4) throw new RangeError('Invalid landscape imagery tile');
+          rasters.push({tile, ...raster}); sources.push({...tile, url, local: false});
           await (deps.yield || nextTurn)();
-        } catch {checkAbort(signal); /* A missing tile stays transparent; it is never invented. */}
+        } catch {checkAbort(signal);}
       }
     };
-    await Promise.all(Array.from({length: Math.min(CONCURRENCY, plan.tiles.length)}, worker));
-    checkAbort(signal);
-    const result = rasterizer(plan, rasters, LANDSCAPE_SURFACE_SIZE, LANDSCAPE_SURFACE_SIZE);
+    await Promise.all(Array.from({length: Math.min(CONCURRENCY, plan.tiles.length)}, worker)); checkAbort(signal);
+    // Publish imagery only as one complete window. A half-loaded checkerboard
+    // must never replace real neutral relief or a previous complete surface.
+    const complete = sources.length === plan.tiles.length;
+    const result = rasterizer(plan, complete ? rasters : [], LANDSCAPE_SURFACE_SIZE, LANDSCAPE_SURFACE_SIZE);
     rasters.length = 0;
     for (let row = 0; row < LANDSCAPE_SURFACE_SIZE; row += 32) {
-      checkAbort(signal); result.rows(row, Math.min(row + 32, LANDSCAPE_SURFACE_SIZE));
-      await (deps.yield || nextTurn)();
+      checkAbort(signal); result.rows(row, Math.min(row + 32, LANDSCAPE_SURFACE_SIZE)); await (deps.yield || nextTurn)();
     }
     checkAbort(signal); sources.sort((a, b) => a.y - b.y || a.worldX - b.worldX);
     return {width: LANDSCAPE_SURFACE_SIZE, height: LANDSCAPE_SURFACE_SIZE, pixels: result.pixels, source: {
-      name: 'OpenStreetMap / OpenFreeMap', attribution: 'OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors',
-      bounds: plan.bounds, projection: 'regular-longitude-latitude', sampleLayout: 'grid-nodes', rowOrder: 'north-to-south', columnOrder: 'west-to-east',
-      tileZoom: plan.zoom, requestedTiles: plan.tiles.length, loadedTiles: sources.length, localTiles: sources.filter(t => t.local).length,
-      complete: sources.length === plan.tiles.length, tiles: sources,
+      name: provider === 'eox-s2' ? 'Copernicus Sentinel-2 / EOxCloudless' : 'NASA Blue Marble / EOX', attribution: source.attribution,
+      bounds, projection: 'regular-longitude-latitude', sampleLayout: 'grid-nodes', rowOrder: 'north-to-south', columnOrder: 'west-to-east',
+      tileZoom: plan.zoom, requestedTiles: plan.tiles.length, loadedTiles: complete ? sources.length : 0, localTiles: 0,
+      complete, tiles: sources, kind: 'imagery', provider, acquisitionPeriod: provider === 'eox-s2' ? '2016–2017' : 'NASA Blue Marble overview',
+      nativeResolutionM: provider === 'eox-s2' ? 10 : undefined,
     }};
   };
 }
 
-async function uncompressed(bytes: ArrayBuffer, signal?: AbortSignal): Promise<ArrayBuffer> {
-  const signature = new Uint8Array(bytes, 0, Math.min(2, bytes.byteLength));
-  if (signature[0] !== 31 || signature[1] !== 139) return bytes;
-  const reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip')).getReader();
-  const chunks: Uint8Array[] = []; let size = 0;
+async function decodeImage(bytes: ArrayBuffer, expectedWidth?: number, expectedHeight?: number, signal?: AbortSignal) {
+  checkAbort(signal);
+  const bitmap = await createImageBitmap(new Blob([bytes]), {premultiplyAlpha: 'none'});
+  const canvas = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(bitmap.width, bitmap.height) : document.createElement('canvas');
   try {
-    while (true) {
-      checkAbort(signal); const part = await cancellable(reader.read(), signal); if (part.done) break;
-      size += part.value.byteLength; if (size > VECTOR_TILE_LIMITS.bytes) throw new RangeError('Decoded landscape tile exceeds byte budget'); chunks.push(part.value);
-    }
-  } finally {await reader.cancel().catch(() => undefined); reader.releaseLock();}
-  const out = new Uint8Array(size); let at = 0; for (const chunk of chunks) {out.set(chunk, at); at += chunk.length;} return out.buffer;
-}
-
-async function paint(bytes: ArrayBuffer, tile: LandscapeTile, signal?: AbortSignal) {
-  const decoded = decodeVectorTile(await uncompressed(bytes, signal)); checkAbort(signal);
-  const canvas = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(TILE_SIZE, TILE_SIZE) : document.createElement('canvas');
-  canvas.width = canvas.height = TILE_SIZE;
-  try {
+    if (expectedWidth !== undefined ? bitmap.width !== expectedWidth || bitmap.height !== expectedHeight : ![256,512].includes(bitmap.width) || bitmap.width !== bitmap.height) throw new Error('Unexpected landscape image dimensions');
+    if (bitmap.width > 2048 || bitmap.height > 2048) throw new Error('Landscape material exceeds pixel budget');
+    checkAbort(signal); canvas.width = bitmap.width; canvas.height = bitmap.height;
     const context = canvas.getContext('2d', {willReadFrequently: true}) as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
-    if (!context) throw new Error('Landscape cartography painter unavailable');
-    paintVectorTile(context, decoded, tile.z, TILE_SIZE, true, false);
-    return {width: TILE_SIZE, height: TILE_SIZE, pixels: context.getImageData(0, 0, TILE_SIZE, TILE_SIZE).data};
-  } finally {canvas.width = canvas.height = 0;}
+    if (!context) throw new Error('Landscape image decoder unavailable');
+    context.drawImage(bitmap, 0, 0);
+    return {width: bitmap.width, height: bitmap.height, pixels: context.getImageData(0, 0, bitmap.width, bitmap.height).data};
+  } finally {bitmap.close(); canvas.width = canvas.height = 0;}
 }
-
-const sharedLoader = createLandscapeSurfaceLoader({
-  loadBytes: async url => (await import('./map-preload')).loadPublicBytes(url, 0),
-  loadJSON: async url => (await import('./map-preload')).loadPublicJSON(url, 0),
-  paint, online: () => typeof navigator === 'undefined' || navigator.onLine !== false,
+const loadBytes = async (url: string) => (await import('./map-preload')).loadPublicBytes(url, 0);
+const loadJSON = async (url: string) => (await import('./map-preload')).loadPublicJSON(url, 0);
+const sharedLoader = createLandscapeSurfaceLoader({loadBytes, loadJSON,
+  paint: (bytes, _tile, signal) => decodeImage(bytes, undefined, undefined, signal),
+  regional: createTerrainRegionReader({loadBytes, loadJSON}),
+  decodeMaterial: (bytes, width, height, signal) => decodeImage(bytes, width, height, signal),
+  online: () => typeof navigator === 'undefined' || navigator.onLine !== false,
 });
-export function createLandscapeSurface(grid: TerrainGrid, options: SurfaceOptions = {}): Promise<LandscapeSurface> {
-  return sharedLoader(grid, options);
-}
+export function createLandscapeSurface(grid: TerrainGrid, options: SurfaceOptions = {}): Promise<LandscapeSurface> {return sharedLoader(grid, options);}

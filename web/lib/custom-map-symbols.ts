@@ -7,6 +7,8 @@ export const MAP_SYMBOL_PATHS = Object.freeze({
   peak:['m3 24 11-20 11 20H3Z','m10 11 4 3 4-3','M14 4V1m7 4 2-2M7 5 5 3'],
   viewpoint:['M3 15s4-7 11-7 11 7 11 7-4 7-11 7S3 15 3 15Z','m9 17 5-8 5 8H9Z','M14 3V1m-9 5L3 4m20 2 2-2'],
   info:['M24 14A10 10 0 1 1 4 14a10 10 0 0 1 20 0Z','M13 12h2v8m-2 0h4','M14 8v.01'],
+  waterfall:['M3 6h8v13m5-13v16m5-16v10','M8 4h15M3 24c3-3 5 3 8 0s5 3 8 0 4 0 6 0'],
+  landmark:['M5 24h18M7 24V10h14v14M10 24v-6h8v6','M5 10V5h4v3h3V3h4v5h3V5h4v5','M11 12v2m6-2v2'],
 });
 export type MapSymbol = keyof typeof MAP_SYMBOL_PATHS;
 
@@ -23,6 +25,8 @@ export function sourceMapSymbol(properties:Record<string,unknown>,layerKind:stri
   if(has(['drinking_water','spring','water_point']))return 'water';
   if(has(['shelter','alpine_hut','wilderness_hut']))return 'shelter';
   if(has(['viewpoint']))return 'viewpoint';
+  if(has(['waterfall']))return 'waterfall';
+  if(has(['castle','ruins','monument','memorial','archaeological_site']))return 'landmark';
   if(has(['information','guidepost','information_board']))return 'info';
   return undefined;
 }
@@ -32,9 +36,14 @@ const paths=new Map<MapSymbol,Path2D[]>();
 export function drawMapSymbol(context:CanvasRenderingContext2D,symbol:MapSymbol,x:number,y:number){
   let compiled=paths.get(symbol);
   if(!compiled){compiled=MAP_SYMBOL_PATHS[symbol].map(value=>new Path2D(value));paths.set(symbol,compiled);}
-  context.save();context.translate(x,y);context.beginPath();context.arc(0,0,12,0,Math.PI*2);
-  context.fillStyle='rgba(255,254,245,.96)';context.fill();context.scale(20/28,20/28);context.translate(-14,-14);
-  context.lineWidth=1.8;context.strokeStyle=symbol==='water'?'#427c88':'#315342';context.lineCap='round';context.lineJoin='round';
+  const water=symbol==='water'||symbol==='waterfall';
+  // Rounded square badges distinguish source landmarks from round route pins.
+  // The real anchor stays at the badge centre; no decorative location offset.
+  context.save();context.translate(x,y);context.beginPath();context.roundRect(-12,-12,24,24,8);
+  context.fillStyle=water?'rgba(243,250,250,.97)':'rgba(255,254,247,.97)';context.fill();
+  context.lineWidth=1;context.strokeStyle=water?'rgba(66,124,136,.32)':'rgba(49,83,66,.28)';context.stroke();
+  context.scale(18/28,18/28);context.translate(-14,-14);
+  context.lineWidth=1.8;context.strokeStyle=water?'#376e7a':symbol==='landmark'?'#886942':'#315342';context.lineCap='round';context.lineJoin='round';
   for(const path of compiled)context.stroke(path);
   context.restore();
 }

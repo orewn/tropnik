@@ -157,10 +157,23 @@ test('sourced outdoor classes retain unnamed points and high source ranks withou
     point(240,340,{class:'shop',name:'Родник и стоянка',rank:2}),point(260,360,{class:'shop',name:'Unimportant shop',rank:8}),point(280,380,{class:'shop'})
   ])}},original=structuredClone(tile);
   const labels=paintVectorTile(new Context(),tile,13);
-  assert.equal(labels.length,8);assert.deepEqual(labels.filter(label=>label.symbol).map(label=>label.symbol).sort(),['camp','camp','info','pass','shelter','viewpoint','water']);
+  assert.equal(labels.length,7);assert.deepEqual(labels.filter(label=>label.symbol).map(label=>label.symbol).sort(),['camp','camp','info','pass','shelter','viewpoint','water']);
   const camp=labels.find(label=>label.x===100/4096);assert.equal(camp.text,'');assert.equal(camp.rank,8);assert.equal(camp.y,200/4096);
-  assert.equal(labels.find(label=>label.text==='Родник и стоянка').symbol,undefined);
+  assert.equal(labels.find(label=>label.text==='Родник и стоянка'),undefined,'An outdoor-looking shop name does not admit a retail point');
   assert.deepEqual(paintVectorTile(new Context(),tile,12),[]);assert.deepEqual(tile,original);
+});
+
+test('hiking cartography excludes low-ranked school, medical and retail clutter but retains sourced landmarks',()=>{
+  const irrelevant=['school','college','hospital','clinic','doctors','pharmacy','shop','supermarket','mall','restaurant','bank'];
+  const features=irrelevant.map((category,i)=>point(500+i*100,500,{class:category,name:`Городской объект ${i}`,rank:1}));
+  features.push(point(1000,1000,{class:'natural',subclass:'waterfall','name:ru':'Водопад',rank:8}));
+  features.push(point(2000,2000,{class:'historic',subclass:'castle','name:ru':'Крепость',rank:8}));
+  const tile={layers:{poi:layer('poi',features)}},original=structuredClone(tile);
+  for(const zoom of [13,14,18]){
+    const labels=paintVectorTile(new Context(),tile,zoom);
+    assert.deepEqual(labels.map(label=>[label.text,label.symbol]),[['Водопад','waterfall'],['Крепость','landmark']]);
+  }
+  assert.deepEqual(tile,original,'Filtering presentation must not mutate source records');
 });
 
 test('unnamed measured peaks retain their original height and anchor while unknown elevation stays absent',()=>{

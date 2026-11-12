@@ -4,7 +4,7 @@ export function publicMapResourceKey(url: string, origin = 'https://map-preview.
     if (url.startsWith('//')) return null;
     const base = new URL(origin), parsed = new URL(url, base);
     if (parsed.username || parsed.password || parsed.hash || /%2f|%5c|%00/i.test(parsed.pathname)) return null;
-    if (parsed.origin === base.origin && ['/data/', '/maps/', '/terrain/', '/offline-map/'].some(prefix => parsed.pathname.startsWith(prefix))) return parsed.pathname + parsed.search;
+    if (parsed.origin === base.origin && ['/data/', '/maps/', '/terrain/', '/terrain-regions/', '/offline-map/'].some(prefix => parsed.pathname.startsWith(prefix))) return parsed.pathname + parsed.search;
     if (parsed.protocol === 'https:' && !parsed.port && ['tiles.openfreemap.org', 'tiles.mapterhorn.com'].includes(parsed.hostname)) return parsed.href;
     if (parsed.protocol === 'https:' && !parsed.port && parsed.hostname === 'tiles.maps.eox.at' && !parsed.search && /^\/wmts\/1\.0\.0\/(s2cloudless_3857|bluemarble_3857)\/default\/g\/\d+\/\d+\/\d+\.jpg$/.test(parsed.pathname)) return parsed.href;
     return null;

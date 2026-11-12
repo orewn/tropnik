@@ -224,7 +224,7 @@ test('source admission and whole-glyph drawing follow the mask without truncatin
  ]);env.flush();const diagnostics=plain(env.engine.getLabelDiagnostics()),byId=id=>diagnostics.find(item=>item.id===id),draw=env.lastDraw();
  assert.equal(byId('foreign').reason,'outside-coverage');assert.equal(byId('hole').reason,'outside-coverage');assert.equal(byId('border').visible,true);assert.equal(byId('long').visible,false);assert.equal(byId('collision').reason,'collision');
  assert.equal(draw.filter(call=>call.op==='fillText'&&call.text==='Same name').length,2,'Equal names at different source anchors must not disappear');assert.equal(byId('duplicate').visible,false);
- const firstText=draw.findIndex(call=>call.op==='strokeText'),lastMask=draw.findLastIndex(call=>call.op==='fill'&&call.rule==='evenodd');assert.ok(firstText>lastMask&&lastMask>=0,'The mask must finish before complete admitted glyphs are painted');assert.equal(draw.some(call=>call.op==='clip'),false);
+ const firstText=draw.findIndex(call=>call.op==='fillText'),lastMask=draw.findLastIndex(call=>call.op==='fill'&&call.rule==='evenodd');assert.ok(firstText>lastMask&&lastMask>=0,'The mask must finish before complete admitted glyphs are painted');assert.equal(draw.some(call=>call.op==='clip'),false);
  for(const label of diagnostics.filter(item=>item.visible)){assert.ok(label.rect.left>=12&&label.rect.right<=800-12);assert.ok(label.rect.right-label.rect.left>=label.width);}
 });
 
@@ -251,6 +251,49 @@ test('source outdoor glyphs and names share one whole collision footprint at the
  assert.equal(bottom.visible,false,'A glyph must not admit a name that extends below the canvas');
  const draw=env.lastDraw(),text=draw.find(call=>call.op==='fillText'&&call.text==='Camp');assert.ok(text.y>camp.y);assert.ok(camp.rect.top<=camp.y-12&&camp.rect.bottom>=text.y+6);assert.equal(draw.some(call=>call.op==='fillText'&&call.text===''),false);
  assert.ok(draw.filter(call=>call.op==='stroke'&&typeof call.path?.source==='string').length>=6,'Source glyphs use the actual own vector paths');
+});
+
+test('trail and lake names repeat only at readable distances while distinct same-named points remain',async t=>{
+ const env=fixture({view:{...camera,zoom:14},width:1200,height:600});t.after(()=>env.engine.destroy());await turn();
+ const candidates=[
+  {point:{x:250,y:160},text:'Экотропа «Восьмёрка»',kind:'path',rank:1},
+  {point:{x:500,y:160},text:'Экотропа "Восьмёрка"',kind:'path',rank:2},
+  {point:{x:960,y:160},text:'Экотропа «Восьмёрка»',kind:'path',rank:3},
+  {point:{x:250,y:300},text:'Большое озеро',kind:'water',rank:1},
+  {point:{x:450,y:300},text:'Большое озеро',kind:'water',rank:2},
+  {point:{x:700,y:420},text:'Беседка',kind:'poi',symbol:'shelter',rank:1},
+  {point:{x:900,y:420},text:'Беседка',kind:'poi',symbol:'shelter',rank:2},
+ ];
+ env.complete(()=>true,job=>({labels:job.request.kind==='vector'?candidates.map(({point,text,...options})=>env.labelFor(job,env.coordinateAt(point),text,options)).filter(label=>label.x>=0&&label.x<1&&label.y>=0&&label.y<1):[]}));await env.settle();
+ const labels=plain(env.engine.getLabelDiagnostics());
+ assert.equal(labels.filter(label=>label.visible&&label.label.startsWith('Экотропа')).length,2,'A nearby tile seam duplicate disappears but a distant line segment remains identifiable');
+ assert.equal(labels.find(label=>label.label==='Экотропа "Восьмёрка"').reason,'repeated-name');
+ assert.equal(labels.filter(label=>label.visible&&label.label==='Большое озеро').length,1);
+ assert.equal(labels.filter(label=>label.visible&&label.label==='Беседка').length,2,'Distinct source landmarks are never silently merged by their name');
+});
+
+test('readable label plates are measured before admission and do not use a heavy glyph outline',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setLabels([{id:'plate',coordinate:[...camera.center],label:'Название маршрута',kind:'path'}]);env.flush();
+ const label=env.engine.getLabelDiagnostics().find(label=>label.id==='plate'),draw=env.lastDraw();assert.equal(label.visible,true);
+ const text=draw.find(call=>call.op==='fillText'&&call.text==='Название маршрута'),plate=draw.find(call=>call.op==='roundRect');assert.ok(text);assert.ok(plate);
+ const [x,y,width,height,radius]=plate.args;assert.equal(radius,4);assert.ok(width>=label.width+16);assert.ok(height>=24);
+ assert.ok(x>=label.rect.left&&x+width<=label.rect.right&&y>=label.rect.top&&y+height<=label.rect.bottom,'The visible surface must fit inside its collision footprint');
+ assert.equal(draw.some(call=>call.op==='strokeText'),false,'Opaque text plates replace per-glyph white fringes');
+ assert.ok(draw.findIndex(call=>call.op==='fillText')>draw.findIndex(call=>call.op==='roundRect'));
+ env.engine.setObstacles([{left:x+width-1,right:x+width+10,top:y,bottom:y+height}]);env.flush();
+ assert.equal(env.engine.getLabelDiagnostics()[0].reason,'collision','Controls touching the plate edge exclude the entire name');
+});
+
+test('the mobile viewport admits priority geography before crowded local labels and enforces a smaller density budget',async t=>{
+ const env=fixture({view:{...camera,zoom:14},width:390,height:800});t.after(()=>env.engine.destroy());await turn();
+ const positions=Array.from({length:64},(_,i)=>({x:30+(i%8)*47,y:42+Math.floor(i/8)*94}));
+ const candidates=positions.map((point,index)=>({point,text:String(index),rank:4}));
+ candidates.push({point:{x:195,y:400},text:'Южно-Сахалинск',rank:9,priorityCity:true});
+ env.complete(()=>true,job=>({labels:job.request.kind==='vector'?candidates.map(({point,text,...options})=>env.labelFor(job,env.coordinateAt(point),text,options)).filter(label=>label.x>=0&&label.x<1&&label.y>=0&&label.y<1):[]}));await env.settle();
+ const labels=plain(env.engine.getLabelDiagnostics());assert.equal(labels.find(label=>label.label==='Южно-Сахалинск').visible,true);
+ assert.ok(labels.filter(label=>label.visible).length<=17,'390px mobile map retains enough terrain between names');
+ assert.ok(labels.some(label=>label.reason==='budget'),'Sparse non-overlapping labels still have a viewport-area density limit');
 });
 
 test('a successful current detail or overview viewport clears an error belonging to the previous area',async t=>{

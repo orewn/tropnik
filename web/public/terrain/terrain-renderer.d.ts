@@ -44,7 +44,7 @@ export type TerrainDisplayMask={width:number;height:number;pixels:Uint8Array;sou
 export function validateTerrainDisplayMask(mask:TerrainDisplayMask,grid:Pick<TerrainGrid,'bounds'>):TerrainDisplayMask;
 export function sampleTerrainDisplayMask(mask:TerrainDisplayMask|null,u:number,v:number):boolean;
 /** Cartographic colour only. Pixels are georeferenced samples at the grid bounds,
- * with transparent coverage where the source has no available vector tile. */
+ * with transparent coverage where the source has no available sample. */
 export type TerrainCartography = {
   width: number; height: number; pixels: Uint8ClampedArray;
   source: {name: string; bounds: [number, number, number, number];
@@ -55,14 +55,16 @@ export type TerrainCartography = {
 export function validateTerrainCartography(surface: TerrainCartography, grid: Pick<TerrainGrid, 'bounds'>): TerrainCartography;
 export function sampleTerrainCartography(surface: TerrainCartography | null, u: number, v: number, output?: number[]): number[];
 export type TerrainSegment = [TerrainPoint, TerrainPoint];
-export type TerrainMesh = {uv: Float32Array; sampleIds: Uint32Array; indices: Uint16Array | Uint32Array; count: number; step: number; triangles: number};
+export type TerrainMesh = {uv: Float32Array; sampleIds: Uint32Array; indices: Uint16Array | Uint32Array; count: number; step: number; triangles: number; window?:[number,number,number,number]};
 export function validateTerrainGrid(grid: TerrainGrid): {min: number; max: number};
 export function createTerrainModel(grid: TerrainGrid): TerrainModel;
 export function createTerrainModelAsync(grid: TerrainGrid, options?: {signal?: AbortSignal}): Promise<TerrainModel>;
 export function validatePreparedTerrainModel(grid: TerrainGrid, model: unknown): TerrainModel;
 export function sampleElevation(model: TerrainModel, eastMetres: number, northMetres: number): number | null;
 export function sampleTerrainMeshElevation(model: TerrainModel, eastMetres: number, northMetres: number, step: number): number | null;
-export function buildTerrainMesh(model: TerrainModel, step: number): TerrainMesh;
+export function buildTerrainMesh(model: TerrainModel, step: number, window?:[number,number,number,number]|null): TerrainMesh;
+export function visibleTerrainSampleWindow(model: TerrainModel, camera:{matrix:ArrayLike<number>;offset:number[]}):[number,number,number,number]|null;
+export function selectVisibleTerrainMesh(model: TerrainModel, camera:{matrix:ArrayLike<number>;offset:number[]}, budget:number, previous?:number):{step:number;range:[number,number,number,number];count:number};
 export function selectTerrainMeshStride(grid: Pick<TerrainGrid, 'width' | 'height'>, budget: number, previous?: number, hardLimit?: number): number;
 export function drapeTerrainRoute(model: TerrainModel, segments: TerrainSegment[], step: number): TerrainSegment[];
 export function terrainRoute(model: TerrainModel, data: unknown): {segments: TerrainSegment[]; clipped: boolean; sourceSegments: number};
@@ -81,11 +83,29 @@ export type TerrainRenderInfo = {
   meshStride: number;
   sourceVertices: number;
   view: {yaw: number; pitch: number; zoom: number; offset: [number, number]};
+  /** Geographic state of this completed frame, including its actual camera distance. */
+  geographicView: TerrainGeographicView;
+  viewport:{width:number;height:number;insets:{top:number;right:number;bottom:number;left:number}};
+  /** Source-grid sample bounds for a visible map window; null is legacy full-grid rendering. */
+  meshWindow:[number,number,number,number]|null;
+  renderedVertices:number;
   cartography: {loadedTiles: number; requestedTiles: number; width: number; height: number} | null;
   displayMask:{width:number;height:number;allowedPixels:number;coverageVersion:string}|null;
 };
 export type TerrainViewportInsets = Partial<{top: number; right: number; bottom: number; left: number}>;
+export type TerrainGeographicView = {
+  /** Longitude stays continuous near the current grid, including across the dateline. */
+  longitude: number; latitude: number; yaw: number; pitch: number; distanceM: number;
+  zoom: number; bounds: [number,number,number,number];
+};
+export type TerrainViewInput = Pick<TerrainGeographicView,'longitude'|'latitude'|'yaw'|'pitch'|'distanceM'>;
+export type TerrainViewReason = 'gesture'|'wheel'|'keyboard'|'rotate'|'zoom'|'reset';
 export type TerrainRendererOptions = {
+  /** Map: primary drag pans; Shift/right drag orbits. Existing orbit mode is unchanged. */
+  navigation?: 'orbit'|'map';
+  initialView?: TerrainViewInput;
+  /** One event after navigation settles. setView/setTerrain do not emit it. */
+  onViewChange?: (view: TerrainGeographicView, reason: TerrainViewReason) => void;
   compactViewport?: boolean;
   preparedModel?: TerrainModel;
   /** Validated and copied before the first frame; preserved across context recovery. */
@@ -102,10 +122,22 @@ export type TerrainRendererOptions = {
 export class TerrainRenderer {
   constructor(canvas: HTMLCanvasElement, grid: TerrainGrid, options?: TerrainRendererOptions);
   readonly failed: boolean;
+  getView(): TerrainGeographicView;
+  setView(view: TerrainViewInput): void;
+  /** Validates/allocates before replacement; retains geographic camera distance and last completed canvas.
+   * Cartography and routes are reset; the host supplies those for the new bounds.
+   * An omitted displayMask clears the old mask; do not omit it for a restricted display area. */
+  setTerrain(grid: TerrainGrid, options?: {preparedModel?: TerrainModel; displayMask?: TerrainDisplayMask|null}): void;
+  /** CSS pixels relative to canvas; depth is clip-space. Does not test intervening ridge occlusion. */
+  project(longitude:number, latitude:number, elevationM?:number): {x:number;y:number;depth:number}|null;
+  /** Exact active LOD triangle hit; null for sky, uncovered area, or outside the canvas. */
+  unproject(x:number,y:number): {longitude:number;latitude:number;elevationM:number}|null;
+  panBy(dx:number,dy:number): void;
   setGeometry(data: unknown): { segments: number; clipped: boolean } | undefined;
   /** Retains an owned pixel copy; null clears cover colours. Heights never change. */
   setCartography(surface: TerrainCartography | null): void;
   setVisible(visible: boolean): void;
+  /** Map mode preserves physical distance across overlay and canvas-size changes. */
   setViewportInsets(insets: TerrainViewportInsets | null): void;
   /** Schedules one actual frame even while setVisible(false); repeated calls coalesce and do not start an idle loop. */
   warmup(): void;

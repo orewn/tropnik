@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {observeTerrainViewport} from '../lib/terrain-viewport.ts';
+import {observeTerrainViewport,readTerrainViewport} from '../lib/terrain-viewport.ts';
 
 function environment(t,{desktop=false,panel=true,hud={}}={}){
  const eventTarget=()=>{
@@ -29,13 +29,29 @@ function environment(t,{desktop=false,panel=true,hud={}}={}){
   disconnect(){this.disconnected=true;}
  };
  t.after(()=>{if(oldWindow===undefined)delete globalThis.window;else globalThis.window=oldWindow;if(oldObserver===undefined)delete globalThis.ResizeObserver;else globalThis.ResizeObserver=oldObserver;});
- const insets=[];
- const target={setViewportInsets:value=>{measurements++;insets.push(value);},warmup:()=>warmups++};
- const unbind=observeTerrainViewport(surface,target);
- return{viewport,drawer,area,sheet,surface,target,hud,insets,observed,observer:observers[0],unbind,flush,pending:()=>frames.size,reads:()=>layoutReads,count:()=>measurements,warmups:()=>warmups};
+ const insets=[],changes=[],order=[];
+ const target={setViewportInsets:value=>{measurements++;insets.push(value);order.push('insets');},warmup:()=>{warmups++;order.push('warmup');}};
+ const unbind=observeTerrainViewport(surface,target,value=>{changes.push(value);order.push('change');});
+ return{viewport,drawer,area,sheet,surface,target,hud,insets,changes,order,observed,observer:observers[0],unbind,flush,pending:()=>frames.size,reads:()=>layoutReads,count:()=>measurements,warmups:()=>warmups};
 }
 
 const rect=(left,top,width,height)=>({left,top,right:left+width,bottom:top+height,width,height});
+
+test('initial source planning reads the exact same viewport as the first renderer measurement',t=>{
+ const env=environment(t);
+ assert.deepEqual(readTerrainViewport(env.surface),env.changes[0]);
+ assert.deepEqual(env.changes[0],{width:390,height:776,insets:env.insets[0]});
+ assert.deepEqual(env.order,['insets','change','warmup'],'replanning sees the renderer after its physical viewport update');
+ assert.equal(env.count(),1,'reading for source planning does not mutate the renderer');env.unbind();
+});
+
+test('dimension changes with identical HUD insets still replan the full canvas frustum',t=>{
+ const env=environment(t,{desktop:true});
+ env.area.width=1100;env.area.right=1480;env.observer.callback();env.flush();
+ assert.equal(env.count(),2);assert.deepEqual(env.insets[0],env.insets[1]);
+ assert.equal(env.changes[1].width,1100);assert.equal(env.changes[1].height,868);
+ assert.deepEqual(env.order,['insets','change','warmup','insets','change','warmup']);env.unbind();
+});
 
 test('transform-only sheet movement updates terrain insets once at its final visible position',t=>{
  const env=environment(t);

@@ -2,6 +2,7 @@ import {continuousBounds, longitudeNear, mercatorProject, type GeographicBounds}
 import {TerrainPreparation, type PreparedTerrain} from './terrain-preparation.ts';
 import type {TerrainGrid} from '../public/terrain/terrain-renderer.js';
 import terrainPreparationWorkerURL from './terrain-preparation.worker.ts?worker&url';
+import {createTerrainRegionReader} from './terrain-region-sources.ts';
 
 export const LANDSCAPE_MAX_SOURCE_ZOOM = 12;
 export const LANDSCAPE_MAX_TILES = 16;
@@ -32,9 +33,11 @@ export type LandscapeLoadOptions = {
   maxSourceZoom?: number;
   /** Prefer the packaged, finite offline coverage. Online is otherwise WEBP512. */
   preferLocal?: boolean;
+  /** Prefer checked, native public DEM extracts when the entire view is covered. */
+  preferRegional?: boolean;
 };
 export type LandscapeProvenance = {
-  provider: 'Mapterhorn / Copernicus GLO-30';
+  provider: string;
   kind: 'remote-terrarium' | 'local-terrarium' | 'local-grid';
   requestedBounds: [number, number, number, number];
   sourceZoom: number | null;
@@ -159,13 +162,13 @@ export function sampleLandscapeElevation(plan: LandscapeTilePlan, tiles: Readonl
   return north * (1 - fractionY) + south * fractionY;
 }
 
-type NormalizedOptions = {gridSize: 257 | 513; maxTiles: 9 | 16; maxSourceZoom: number; preferLocal: boolean};
+type NormalizedOptions = {gridSize: 257 | 513; maxTiles: 9 | 16; maxSourceZoom: number; preferLocal: boolean; preferRegional: boolean};
 type ManifestEntry = {path: string; bytes: number; sha256: string};
 type TileManifest = {tiles: Map<string, ManifestEntry>; source: Record<string, unknown>};
 function normalizeOptions(options: LandscapeLoadOptions): NormalizedOptions {
   const gridSize = options.gridSize ?? 513, maxTiles = options.maxTiles ?? 16, maxSourceZoom = Math.min(12, options.maxSourceZoom ?? 12);
   if (![257, 513].includes(gridSize) || ![9, 16].includes(maxTiles) || !Number.isInteger(maxSourceZoom) || maxSourceZoom < 0) throw new RangeError('Invalid landscape resolution or budget');
-  return {gridSize, maxTiles, maxSourceZoom, preferLocal: !!options.preferLocal};
+  return {gridSize, maxTiles, maxSourceZoom, preferLocal: !!options.preferLocal, preferRegional: !!options.preferRegional};
 }
 function parseManifest(input: unknown): TileManifest {
   if (!input || typeof input !== 'object' || !Array.isArray((input as {files?: unknown}).files)) throw new Error('Offline elevation manifest is unavailable');
@@ -191,8 +194,8 @@ async function verifyBytes(bytes: ArrayBuffer, resource: LandscapeTileResource) 
   }
 }
 function containsBounds(outer: GeographicBounds, inner: GeographicBounds) {
-  const west = longitudeNear(inner[0], (outer[0] + outer[2]) / 2), east = west + inner[2] - inner[0];
-  return west >= outer[0] && east <= outer[2] && inner[1] >= outer[1] && inner[3] <= outer[3];
+  const west = longitudeNear(inner[0], (outer[0] + outer[2]) / 2), east = inner[2] + (west - inner[0]), epsilon = 1e-9;
+  return west >= outer[0] - epsilon && east <= outer[2] + epsilon && inner[1] >= outer[1] - epsilon && inner[3] <= outer[3] + epsilon;
 }
 function localGridSampler(grid: TerrainGrid) {
   return (longitude: number, latitude: number) => {
@@ -225,6 +228,7 @@ export function createCustomLandscapeLoader(dependencies: LandscapeLoaderDepende
     createWorker: () => typeof Worker === 'undefined' ? undefined : new Worker(new URL(terrainPreparationWorkerURL, location.href), {type: 'module', name: 'tropnik-landscape'}),
   }).load());
   const online = dependencies.online ?? (() => typeof navigator === 'undefined' || navigator.onLine);
+  const regional = createTerrainRegionReader({loadJSON: url => loadJSON(url, 0), loadBytes: url => loadBytes(url, 0)});
   const jobs = new Map<string, Job>(), queue: Job[] = [], cache = new Map<string, CustomLandscape>();
   let active: Job | undefined, disposed = false, manifest: Promise<TileManifest> | undefined;
   let completed = 0, failed = 0;
@@ -295,6 +299,20 @@ export function createCustomLandscapeLoader(dependencies: LandscapeLoaderDepende
     checkAbort(job.controller.signal);
     const useLocal = job.options.preferLocal || !online();
     let source: Awaited<ReturnType<typeof tileSource>> | Awaited<ReturnType<typeof gridSource>> | undefined, fallbackReason: string | null = null;
+    if (job.options.preferRegional) {
+      const region = await regional.find(job.bounds); checkAbort(job.controller.signal);
+      if (region) try {
+        const native = await regional.grid(region); checkAbort(job.controller.signal);
+        const outputSpacingApproxM = spacing(native.bounds, native.width, native.height);
+        const provenance: LandscapeProvenance = {provider: native.source.name, kind: 'local-grid', requestedBounds: [...job.bounds],
+          sourceZoom: null, sourceTileSize: null, sourceUrls: [region.gridUrl], sourceNominalResolutionM: Number(native.source.sourceNominalResolutionM) || 30,
+          sourcePixelSpacingApproxM: null, sourceGridSpacingApproxM: outputSpacingApproxM, outputSpacingApproxM,
+          interpolation: 'Runtime preserves the public DEM extract grid. Extractor locates source pixel centres, bilinearly samples geographic output nodes, and rounds to 0.01 m for encoding; rounding is not an accuracy claim.',
+          missingDataFilled: false, measurementAccuracyClaimedM: null, fallbackReason: null};
+        const grid: TerrainGrid = {...native, source: {...native.source, regionId: region.id, landscape: provenance}};
+        const prepared = await prepare(grid); checkAbort(job.controller.signal); return {grid, prepared, provenance};
+      } catch (error) {checkAbort(job.controller.signal); fallbackReason = error instanceof Error ? error.message : 'Regional elevation source unavailable';}
+    }
     const attempts = useLocal ? [() => tileSource(job, true), () => gridSource(job), ...online() ? [() => tileSource(job, false)] : []]
       : [() => tileSource(job, false), () => tileSource(job, true), () => gridSource(job)];
     for (const attempt of attempts) {

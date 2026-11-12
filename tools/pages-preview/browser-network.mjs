@@ -1,5 +1,5 @@
 export const NETWORK_DIAGNOSTIC_LIMITS=Object.freeze({active:128,completed:32,failed:32,urlLength:2048});
-const LOCAL_ASSETS=['assets/','custom-map/','data/','maps/','offline-map/','terrain/','fonts/'];
+const LOCAL_ASSETS=['assets/','custom-map/','data/','maps/','offline-map/','terrain/','terrain-regions/','fonts/'];
 const TIMING_FIELDS=['requestTime','dnsStart','dnsEnd','connectStart','connectEnd','sslStart','sslEnd','sendStart','sendEnd','receiveHeadersStart','receiveHeadersEnd','workerStart','workerReady','workerFetchStart','workerRespondWithSettled'];
 const finite=value=>typeof value==='number'&&Number.isFinite(value);
 const text=(value,limit=160)=>typeof value==='string'?value.slice(0,limit):'';

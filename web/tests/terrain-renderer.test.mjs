@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createTerrainModel, createTerrainModelAsync, validatePreparedTerrainModel, buildTerrainMesh, selectTerrainMeshStride, drapeTerrainRoute, sampleTerrainMeshElevation, sampleTerrainShadow, TerrainRenderer, validateTerrainCartography, sampleTerrainCartography} from '../public/terrain/terrain-renderer.js';
+import {readFileSync} from 'node:fs';
+import {createTerrainModel, createTerrainModelAsync, validatePreparedTerrainModel, buildTerrainMesh, selectTerrainMeshStride, visibleTerrainSampleWindow, selectVisibleTerrainMesh, drapeTerrainRoute, sampleTerrainMeshElevation, sampleTerrainShadow, TerrainRenderer, validateTerrainCartography, sampleTerrainCartography} from '../public/terrain/terrain-renderer.js';
 
 const grid = (width=6,height=5) => ({width,height,bounds:[40,43,40.02,43.02],elevations:Array.from({length:width*height},(_,i)=>100+(i%width)*12+Math.floor(i/width)*5+(i%3===0?90:0))});
 
@@ -95,15 +96,15 @@ function environment(t,{gpuFailure=false,gl=null,cloneFails=false,width=80,heigh
     cloneNode(){const copy=makeCanvas(true);copy.style={...this.style};return copy;},
   });
   const canvas=makeCanvas();parent.child=canvas;canvas.parentNode=parent;
-  return {canvas,ctx,parent,frames,doc,listeners,flush(){const ready=[...frames.values()];frames.clear();ready.forEach(fn=>fn(0));}};
+  return {canvas,ctx,parent,frames,doc,listeners,resize(w,h){width=w;height=h;},flush(){const ready=[...frames.values()];frames.clear();ready.forEach(fn=>fn(0));}};
 }
 
 function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready',loseRenderbufferBinding=false}={}){
-  const counts={framebuffers:0,renderbuffers:0,buffers:0,shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[],shaderSources:[],stencilState:[],draws:[],resolves:[],polls:[],maxPendingSyncs:0,deletedSyncs:0,renderbufferQueries:[],missingRenderbufferBindings:0},enums=new Map(),generations=new WeakMap(),liveTextures=new Set(),liveSyncs=new Set();let next=1,gl,generation=0,error=0,drawFramebuffer=null,readFramebuffer=null,renderbuffer=null,nativeRenderbuffer=null,program=null;
-  const create=type=>{const object={};generations.set(object,generation);if(type==='Texture')liveTextures.add(object);if(type==='Sync'){liveSyncs.add(object);counts.maxPendingSyncs=Math.max(counts.maxPendingSyncs,liveSyncs.size);}return object;};
+  const counts={framebuffers:0,renderbuffers:0,buffers:0,deletedBuffers:0,contextReleasedBuffers:0,vertexArrays:0,deletedVertexArrays:0,contextReleasedVertexArrays:0,bufferUploads:[],shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[],shaderSources:[],stencilState:[],draws:[],resolves:[],polls:[],maxPendingSyncs:0,deletedSyncs:0,renderbufferQueries:[],missingRenderbufferBindings:0},enums=new Map(),generations=new WeakMap(),liveTextures=new Set(),liveSyncs=new Set(),liveBuffers=new Set(),liveVertexArrays=new Set();let next=1,gl,generation=0,error=0,drawFramebuffer=null,readFramebuffer=null,renderbuffer=null,nativeRenderbuffer=null,program=null;
+  const create=type=>{const object={};generations.set(object,generation);if(type==='Texture')liveTextures.add(object);if(type==='Buffer')liveBuffers.add(object);if(type==='VertexArray'){liveVertexArrays.add(object);counts.vertexArrays++;}if(type==='Sync'){liveSyncs.add(object);counts.maxPendingSyncs=Math.max(counts.maxPendingSyncs,liveSyncs.size);}return object;};
   const remove=(type,object)=>{
     if(generations.get(object)!==generation){counts.invalidObjectCalls++;error=gl.INVALID_OPERATION;return;}
-    generations.delete(object);if(type==='Texture'){counts.deletedTextures++;liveTextures.delete(object);}if(type==='Sync'){liveSyncs.delete(object);counts.deletedSyncs++;}
+    generations.delete(object);if(type==='Buffer'){liveBuffers.delete(object);counts.deletedBuffers++;}if(type==='VertexArray'){liveVertexArrays.delete(object);counts.deletedVertexArrays++;}if(type==='Texture'){counts.deletedTextures++;liveTextures.delete(object);}if(type==='Sync'){liveSyncs.delete(object);counts.deletedSyncs++;}
   };
   const extension={MAX_TEXTURE_MAX_ANISOTROPY_EXT:0x84ff,TEXTURE_MAX_ANISOTROPY_EXT:0x84fe};
   const methods={NO_ERROR:0,getParameter:key=>{
@@ -130,6 +131,7 @@ function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready',l
       if(loseRenderbufferBinding)nativeRenderbuffer=null;return value;
     },
     useProgram:value=>{program=value;},
+    bufferData:(target,data)=>counts.bufferUploads.push({target,length:data.length,bytes:data.byteLength,values:data.slice(0,16)}),
     drawArrays:(...args)=>counts.draws.push({kind:'arrays',framebuffer:drawFramebuffer,program,args}),
     drawElements:(...args)=>counts.draws.push({kind:'elements',framebuffer:drawFramebuffer,program,args}),
     blitFramebuffer:(...args)=>counts.resolves.push({read:readFramebuffer,draw:drawFramebuffer,args}),
@@ -150,7 +152,7 @@ function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready',l
     if(String(key).startsWith('create'))return()=>create(String(key).slice(6));
     if(String(key).startsWith('delete'))return object=>remove(String(key).slice(6),object);return()=>{};
   }});
-  return{gl,counts,setFrameStatus(value){frameStatus=value;},pendingSyncs:()=>liveSyncs.size,loseContext(){generation++;counts.contextReleasedTextures+=liveTextures.size;liveTextures.clear();liveSyncs.clear();drawFramebuffer=null;readFramebuffer=null;renderbuffer=null;nativeRenderbuffer=null;program=null;}};
+  return{gl,counts,setFrameStatus(value){frameStatus=value;},pendingSyncs:()=>liveSyncs.size,liveTextures:()=>liveTextures.size,liveBuffers:()=>liveBuffers.size,liveVertexArrays:()=>liveVertexArrays.size,loseContext(){generation++;counts.contextReleasedTextures+=liveTextures.size;counts.contextReleasedBuffers+=liveBuffers.size;counts.contextReleasedVertexArrays+=liveVertexArrays.size;liveTextures.clear();liveBuffers.clear();liveVertexArrays.clear();liveSyncs.clear();drawFramebuffer=null;readFramebuffer=null;renderbuffer=null;nativeRenderbuffer=null;program=null;}};
 }
 
 test('LOD hysteresis avoids toggling near a zoom threshold while retaining hard limits',()=>{
@@ -369,7 +371,8 @@ test('only a validated fully allowed mask removes the terrain discard while pres
 });
 test('cartography validates bounded pixels, exact geographic grid alignment and source coverage',()=>{
  const source=grid(),valid=cartography(source);assert.equal(validateTerrainCartography(valid,source),valid);
- for(const change of[s=>s.width=2048,s=>s.height=1,s=>s.pixels=new Uint8ClampedArray(15),s=>s.source.bounds[0]+=.0001,s=>s.source.projection='EPSG:3857',s=>s.source.sampleLayout='pixel-centres',s=>s.source.rowOrder='south-to-north',s=>s.source.loadedTiles=2,s=>s.source.requestedTiles=17]){
+ const detailed={...valid,width:2048,height:2048,pixels:new Uint8ClampedArray(2048*2048*4)};assert.equal(validateTerrainCartography(detailed,source),detailed);
+ for(const change of[s=>s.width=2049,s=>s.height=1,s=>s.pixels=new Uint8ClampedArray(15),s=>s.source.bounds[0]+=.0001,s=>s.source.projection='EPSG:3857',s=>s.source.sampleLayout='pixel-centres',s=>s.source.rowOrder='south-to-north',s=>s.source.loadedTiles=2,s=>s.source.requestedTiles=17]){
   const value=structuredClone(valid);change(value);assert.throws(()=>validateTerrainCartography(value,source),/cartography/);
  }
 });
@@ -519,4 +522,176 @@ test('default fit and measured insets keep the complete DEM inside the unobscure
   renderer.zoomBy(1.7);renderer.setViewportInsets({bottom:600});env.flush();assert.equal(renderer.zoom,1.7);
   renderer.setViewportInsets({top:Infinity,right:1e9,bottom:1e9,left:-100});env.flush();assert.ok([...camera.matrix,...camera.offset].every(Number.isFinite));
   renderer.reset();env.flush();assert.equal(renderer.zoom,1);renderer.destroy();
+});
+
+test('map mode pans with primary drag, orbits with alternate drag and settles once without programmatic recursion',async t=>{
+  const env=environment(t,{width:800,height:600}),changes=[];
+  const renderer=new TerrainRenderer(env.canvas,grid(9,9),{navigation:'map',forceCanvas:true,onViewChange:(view,reason)=>changes.push({view,reason})});
+  const initial=renderer.getView(),down=env.canvas.events.get('pointerdown'),move=env.canvas.events.get('pointermove'),up=env.canvas.events.get('pointerup');
+  down({button:0,pointerId:1,clientX:400,clientY:300});move({pointerId:1,clientX:460,clientY:330});
+  assert.equal(renderer.yaw,initial.yaw);assert.notEqual(renderer.getView().longitude,initial.longitude);assert.equal(changes.length,0);
+  up({pointerId:1});await new Promise(resolve=>setTimeout(resolve,5));assert.equal(changes.length,1);assert.equal(changes[0].reason,'gesture');
+  const translated=renderer.getView();down({button:2,pointerId:2,clientX:400,clientY:300});move({pointerId:2,clientX:470,clientY:320});up({pointerId:2});
+  await new Promise(resolve=>setTimeout(resolve,5));assert.equal(changes.length,2);assert.notEqual(renderer.yaw,translated.yaw);assert.equal(renderer.getView().longitude,translated.longitude);
+  renderer.setView(initial);await new Promise(resolve=>setTimeout(resolve,5));assert.equal(changes.length,2);assert.ok(Math.abs(renderer.getView().distanceM-initial.distanceM)<1e-8);
+  renderer.panBy(0,1e8);assert.ok(renderer.getView().latitude<=85);renderer.destroy();assert.equal(env.frames.size,0);
+});
+
+test('geographic projection and picking agree on actual LOD triangles, including the dateline',t=>{
+  const env=environment(t,{width:800,height:600}),source={...grid(9,7),bounds:[179.9,65,180.1,65.2]};
+  const renderer=new TerrainRenderer(env.canvas,source,{navigation:'map',forceCanvas:true});
+  // Keep the check at one true source node on each side of the longitude wrap.
+  renderer.meshStride=2;
+  for(const longitude of[179.975,-179.975]){
+    const latitude=65.1,p=renderer.project(longitude,latitude);assert.ok(p);const hit=renderer.unproject(p.x,p.y);assert.ok(hit);
+    const expected=longitude<0?longitude+360:longitude;
+    assert.ok(Math.abs(hit.longitude-expected)<1e-6);assert.ok(Math.abs(hit.latitude-latitude)<1e-6);
+    const height=sampleTerrainMeshElevation(renderer.model,(expected-180)/.2*renderer.model.widthM,0,2);
+    assert.ok(Math.abs(hit.elevationM-height)<.02);
+  }
+  assert.equal(renderer.unproject(-1,100),null);assert.equal(renderer.project(0,0),null);
+  assert.throws(()=>renderer.setView({...renderer.getView(),distanceM:NaN}),/view/);renderer.destroy();
+});
+
+test('terrain replacement preserves geographic camera and canvas until a new completed frame, discarding obsolete GPU work',t=>{
+  const record=recordingGL(),env=environment(t,{gl:record.gl,width:160,height:120}),frames=[];
+  const source=grid(9,9),renderer=new TerrainRenderer(env.canvas,source,{navigation:'map',onRender:value=>frames.push(value)});env.flush();
+  renderer.setCartography(cartography(source));renderer.setGeometry({type:'LineString',coordinates:[[40.001,43.01],[40.019,43.01]]});env.flush();
+  const view=renderer.getView();renderer.setView({...view,longitude:40.012,latitude:43.012});env.flush();
+  record.setFrameStatus('pending');renderer.zoomBy(1.1);env.flush();assert.equal(record.pendingSyncs(),1);
+  const expected=renderer.getView(),count=frames.length,canvas=env.parent.child,dimensions=[canvas.width,canvas.height];
+  const replacement={...grid(11,7),bounds:[40.002,43.002,40.032,43.032]};replacement.elevations=replacement.elevations.map(value=>value+300);
+  const prepared=createTerrainModel(replacement);renderer.setTerrain(replacement,{preparedModel:prepared});
+  assert.equal(renderer.model,prepared);assert.equal(env.parent.child,canvas);assert.deepEqual([canvas.width,canvas.height],dimensions);assert.equal(frames.length,count);assert.equal(record.pendingSyncs(),0);
+  const current=renderer.getView();for(const key of['longitude','latitude','yaw','pitch','distanceM'])assert.ok(Math.abs(current[key]-expected[key])<1e-7,key);
+  assert.equal(renderer.cartography,null);assert.deepEqual(renderer.route,[]);assert.equal(canvas.dataset.routeSegments,'0');
+  env.flush();assert.equal(record.pendingSyncs(),1);assert.equal(frames.length,count);record.setFrameStatus('ready');env.flush();assert.equal(frames.length,count+1);
+  assert.equal(frames.at(-1).sourceVertices,77);assert.equal(record.counts.invalidObjectCalls,0);renderer.destroy();assert.equal(record.liveTextures(),0);assert.equal(record.pendingSyncs(),0);
+});
+
+test('invalid replacement cannot remove the working scene; map surfaces have no cut slab and sun stays geographic',t=>{
+  const record=recordingGL(),env=environment(t,{gl:record.gl}),source=grid(7,7),renderer=new TerrainRenderer(env.canvas,source,{navigation:'map'});env.flush();
+  const model=renderer.model,gpu=renderer.gpu,heights=model.heights.slice(),shadowCount=record.counts.shadowBudgets.length;
+  assert.equal([...gpu.meshes.values()][0].boundaryCount,0);
+  renderer.rotate(.6);env.flush();assert.equal(record.counts.shadowBudgets.length,shadowCount,'rotating the camera does not rotate the sun');
+  assert.throws(()=>renderer.setTerrain({...source,elevations:[NaN]}),/elevation/);assert.equal(renderer.gpu,gpu);assert.equal(renderer.model,model);assert.deepEqual(model.heights,heights);
+  record.loseContext();env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();assert.equal(renderer.gpu.mapMode,true);
+  renderer.destroy();assert.equal(record.liveTextures(),0);
+});
+
+test('native regional coverage can zoom to a close physical view without manufacturing a denser grid',t=>{
+ const env=environment(t,{width:1000,height:700}),source={...grid(9,9),bounds:[142.68,46.87,142.94,47.04]};
+ const renderer=new TerrainRenderer(env.canvas,source,{navigation:'map',forceCanvas:true,initialView:{longitude:142.81,latitude:46.955,yaw:0,pitch:.85,distanceM:1500}});
+ const model=renderer.model,opening=renderer.getView();for(let i=0;i<14;i++)renderer.zoomBy(1.4);
+ assert.equal(renderer.model,model);assert.ok(renderer.getView().distanceM<opening.distanceM/4);assert.ok(renderer.getView().zoom<=1024);
+ renderer.destroy();
+});
+
+
+test('Canvas map spends its fixed vertex budget on the visible native DEM while preserving the source',t=>{
+ const source=JSON.parse(readFileSync(new URL('../public/terrain-regions/south-sakhalin-v1/terrain-grid.json',import.meta.url),'utf8'));
+ const env=environment(t,{width:1262,height:580}),frames=[];
+ const renderer=new TerrainRenderer(env.canvas,source,{navigation:'map',forceCanvas:true,onRender:frame=>frames.push(frame),initialView:{longitude:142.81,latitude:46.955,yaw:0,pitch:.85,distanceM:26590}});
+ // Keep this native-data check about selection/allocation. Pixel equivalence is
+ // exercised independently below with the real compatibility rasterizer.
+ let mesh;renderer.software.render=value=>{mesh=value;};
+ const elevations=[...source.elevations],heights=renderer.model.heights.slice();env.flush();
+ const wide=frames.at(-1);assert.equal(wide.meshStride,8);assert.equal(wide.sourceVertices,417120);
+ renderer.setView({...renderer.getView(),distanceM:2659});env.flush();
+ const close=frames.at(-1);assert.equal(close.meshStride,2);assert.ok(close.renderedVertices<=16641);assert.ok(close.meshWindow[2]-close.meshWindow[0]<source.width-1);
+ assert.equal(close.renderedVertices,mesh.count);assert.equal(close.triangles,mesh.indices.length/3);
+ for(let i=0;i<mesh.count;i++){
+  const id=mesh.sampleIds[i],x=id%source.width,y=Math.floor(id/source.width);
+  assert.equal(x%close.meshStride,0);assert.equal(y%close.meshStride,0);
+  assert.ok(Math.abs(mesh.uv[i*2]-x/(source.width-1))<1e-7);assert.ok(Math.abs(mesh.uv[i*2+1]-y/(source.height-1))<1e-7);
+ }
+ renderer.setView({...renderer.getView(),distanceM:600});env.flush();assert.equal(frames.at(-1).meshStride,1);
+ for(const longitude of[142.795,142.8,142.81,142.82]){renderer.setView({...renderer.getView(),longitude});env.flush();assert.ok(frames.at(-1).renderedVertices<=16641);assert.ok(renderer.windowMeshes.size<=2);}
+ assert.deepEqual(source.elevations,elevations);assert.deepEqual(renderer.model.heights,heights);assert.equal(renderer.meshes.size,0);
+ renderer.destroy();assert.equal(renderer.windowMeshes.size,0);
+});
+
+test('visible mesh windows conservatively include every real projected sample across tilt, rotation and insets',t=>{
+ const source={...grid(129,129),bounds:[142.7,46.9,142.8,47]},env=environment(t,{width:390,height:844});
+ source.elevations=source.elevations.map((_,i)=>80+620*Math.exp(-((i%129-80)**2+(Math.floor(i/129)-47)**2)/330)+50*Math.sin(i%129/9));
+ const renderer=new TerrainRenderer(env.canvas,source,{navigation:'map',forceCanvas:true});let camera;
+ renderer.software.render=(_mesh,value)=>{camera=value;};
+ for(const [yaw,pitch,insets] of[[0,.85,{top:192,right:64,bottom:64,left:16}],[1.3,.48,{bottom:400,left:16,right:16}],[-2.6,1.22,{top:70,left:84}],[.4,.28,{top:900,right:500,bottom:900,left:500}]]){
+  renderer.setViewportInsets(insets);renderer.setView({longitude:142.75,latitude:46.95,yaw,pitch,distanceM:1800});env.flush();
+  const selected=selectVisibleTerrainMesh(renderer.model,camera,16641,3),window=visibleTerrainSampleWindow(renderer.model,camera),m=camera.matrix,model=renderer.model;
+  assert.ok(window);assert.ok(selected.count<=16641);assert.ok(Number.isInteger(Math.log2(selected.step)));
+  let visible=0;
+  for(let row=0;row<source.height;row++)for(let col=0;col<source.width;col++){
+   const x=(col/(source.width-1)-.5)*model.width,y=(.5-row/(source.height-1))*model.height,z=model.heights[row*source.width+col];
+   const w=m[3]*x+m[7]*y+m[11]*z+m[15],px=(m[0]*x+m[4]*y+m[8]*z+m[12])/w+camera.offset[0],py=(m[1]*x+m[5]*y+m[9]*z+m[13])/w+camera.offset[1],pz=(m[2]*x+m[6]*y+m[10]*z+m[14])/w;
+   if(w<=camera.near||Math.abs(px)>1||Math.abs(py)>1||Math.abs(pz)>1)continue;
+   visible++;assert.ok(col>=window[0]-1e-6&&col<=window[2]+1e-6&&row>=window[1]-1e-6&&row<=window[3]+1e-6,'visible source peak was clipped');
+   assert.ok(col>=selected.range[0]&&col<=selected.range[2]&&row>=selected.range[1]&&row<=selected.range[3]);
+  }
+  assert.ok(visible>100);assert.equal(buildTerrainMesh(model,selected.step,selected.range).count,selected.count);
+ }
+ assert.throws(()=>buildTerrainMesh(renderer.model,2,[1,0,64,64]),/window/);
+ renderer.destroy();
+});
+
+test('cropping the software mesh preserves actual terrain, cartography, mask and draped-route pixels',t=>{
+ const source={...grid(129,129),bounds:[40,43,40.08,43.08]};source.elevations=source.elevations.map((_,i)=>100+50*Math.sin(i%129/8)+30*Math.cos(Math.floor(i/129)/11));
+ const env=environment(t,{width:128,height:96}),renderer=new TerrainRenderer(env.canvas,source,{navigation:'map',forceCanvas:true,displayMask:displayMask(source,[255,0,255,255])});
+ renderer.setCartography(cartography(source));renderer.setGeometry({type:'LineString',coordinates:[[40.025,43.045],[40.055,43.035]]});
+ const draw=renderer.software.render.bind(renderer.software);let args;
+ renderer.software.render=(...value)=>{args=value;draw(...value);};
+ for(const [yaw,pitch] of[[0,.85],[1.1,.65],[-1.4,1.15]]){
+  renderer.setView({longitude:40.04,latitude:43.04,yaw,pitch,distanceM:900});env.flush();
+  const [cropped,...rest]=args,pixels=env.ctx.lastImage.data.slice(),depth=renderer.software.depth.slice();
+  const full=buildTerrainMesh(renderer.model,cropped.step);assert.ok(cropped.count<full.count);
+  draw(full,...rest);assert.deepEqual(env.ctx.lastImage.data,pixels,'same measured triangles must produce identical visible pixels');assert.deepEqual(renderer.software.depth,depth);
+ }
+ assert.ok(renderer.software.shadowCache.size<=4);renderer.destroy();
+});
+
+test('map inset and canvas resize preserve physical camera distance and report the actual completed viewport',t=>{
+ const env=environment(t,{width:390,height:844}),frames=[];
+ const renderer=new TerrainRenderer(env.canvas,grid(17,17),{navigation:'map',forceCanvas:true,viewportInsets:{top:192,right:64,bottom:64,left:16},initialView:{longitude:40.01,latitude:43.01,yaw:.3,pitch:.85,distanceM:5000},onRender:frame=>frames.push(frame)});
+ renderer.software.render=()=>{};env.flush();const opening=renderer.getView();
+ const check=()=>{const view=renderer.getView();for(const key of['longitude','latitude','yaw','pitch','distanceM'])assert.ok(Math.abs(view[key]-opening[key])<1e-8,key);assert.ok(Math.abs(frames.at(-1).geographicView.distanceM-opening.distanceM)<1e-8);};
+ assert.deepEqual(frames.at(-1).viewport,{width:390,height:844,insets:{top:192,right:64,bottom:64,left:16}});check();
+ renderer.setViewportInsets({bottom:400,left:16,right:16});env.flush();check();
+ env.resize(1262,580);assert.ok(Math.abs(renderer.getView().distanceM-opening.distanceM)<1e-8,'a layout resize cannot silently change the desired physical view');
+ renderer.setViewportInsets({top:180,right:88,bottom:36,left:20});env.flush();check();
+ assert.deepEqual(frames.at(-1).viewport,{width:1262,height:580,insets:{top:180,right:88,bottom:36,left:20}});
+ // Also cover a RAF that arrives before the host ResizeObserver callback.
+ env.resize(640,480);renderer.request();env.flush();check();assert.equal(frames.at(-1).viewport.width,640);
+ renderer.setViewportInsets({top:10000,right:10000,bottom:10000,left:10000});env.flush();check();
+ const measured=frames.at(-1).viewport.insets;assert.ok(Math.abs(measured.top+measured.bottom-480*.88)<1e-8);assert.ok(Math.abs(measured.left+measured.right-640*.88)<1e-8);
+ renderer.destroy();
+});
+
+
+test('GPU map refines native visible samples and bounds mesh resources across pending frames and context recovery',t=>{
+ const source=JSON.parse(readFileSync(new URL('../public/terrain-regions/south-sakhalin-v1/terrain-grid.json',import.meta.url),'utf8'));
+ const record=recordingGL(),env=environment(t,{gl:record.gl,width:1262,height:580}),frames=[];
+ const renderer=new TerrainRenderer(env.canvas,source,{navigation:'map',initialView:{longitude:142.81,latitude:46.955,yaw:0,pitch:.85,distanceM:26590},onRender:frame=>frames.push(frame)});env.flush();
+ const heightTexture=renderer.gpu.heightTexture,normalTexture=renderer.gpu.normalTexture,uploads=record.counts.uploads.length;
+ assert.equal(frames.at(-1).meshStride,2);assert.ok(frames.at(-1).renderedVertices<=263169);
+ renderer.setView({...renderer.getView(),distanceM:2659});env.flush();assert.equal(frames.at(-1).meshStride,1);
+ renderer.setView({...renderer.getView(),distanceM:600});env.flush();
+ const close=frames.at(-1),mesh=[...renderer.windowMeshes.values()].at(-1),draw=record.counts.draws.filter(value=>value.kind==='elements').at(-1),meshUploads=record.counts.bufferUploads.slice(-3);
+ assert.equal(close.meshStride,1);assert.ok(close.renderedVertices<16641);assert.equal(draw.args[1],close.triangles*3);
+ assert.equal(meshUploads[0].length,mesh.uv.length);assert.deepEqual(meshUploads[0].values,mesh.uv.slice(0,16));assert.equal(meshUploads[1].length,mesh.indices.length);
+ for(const longitude of[142.795,142.8,142.81,142.82]){
+  renderer.setView({...renderer.getView(),longitude});env.flush();
+  assert.equal(frames.at(-1).meshStride,1);assert.ok(renderer.windowMeshes.size<=2);assert.ok(renderer.gpu.meshes.size<=2);
+  assert.ok(record.liveBuffers()<=7);assert.ok(record.liveVertexArrays()<=6);
+ }
+ assert.equal(renderer.gpu.heightTexture,heightTexture);assert.equal(renderer.gpu.normalTexture,normalTexture);assert.equal(record.counts.uploads.length,uploads,'panning cannot upload or invent elevation/material texels');
+ assert.ok(record.counts.deletedBuffers>=12);assert.equal(record.counts.invalidObjectCalls,0);
+ record.setFrameStatus('pending');renderer.setView({...renderer.getView(),longitude:142.815});env.flush();assert.equal(record.pendingSyncs(),1);
+ const before={buffers:record.counts.buffers,vaos:record.counts.vertexArrays,deleted:record.counts.deletedBuffers,frames:frames.length};
+ renderer.setView({...renderer.getView(),longitude:142.805});env.flush();
+ assert.deepEqual({buffers:record.counts.buffers,vaos:record.counts.vertexArrays,deleted:record.counts.deletedBuffers,frames:frames.length},before,'pending GPU work must retain its mesh until the fence completes');
+ record.setFrameStatus('ready');env.flush();env.flush();assert.equal(frames.at(-1).geographicView.longitude,142.805);assert.ok(renderer.gpu.meshes.size<=2);
+ record.loseContext();env.canvas.events.get('webglcontextlost')({preventDefault(){}});env.canvas.events.get('webglcontextrestored')();env.flush();
+ assert.equal(frames.at(-1).renderer,'webgl2');assert.equal(frames.at(-1).meshStride,1);assert.equal(renderer.gpu.meshes.size,1);assert.equal(record.counts.invalidObjectCalls,0);
+ renderer.destroy();assert.equal(record.liveBuffers(),0);assert.equal(record.liveVertexArrays(),0);assert.equal(record.liveTextures(),0);assert.equal(record.pendingSyncs(),0);
+ assert.equal(record.counts.deletedBuffers+record.counts.contextReleasedBuffers,record.counts.buffers);assert.equal(record.counts.deletedVertexArrays+record.counts.contextReleasedVertexArrays,record.counts.vertexArrays);assert.equal(record.counts.invalidObjectCalls,0);
 });

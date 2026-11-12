@@ -8,6 +8,7 @@ import {apkFileName, validateApkDelivery, validateApkManifest, verifyApk} from '
 import {assertCatalogueExpectations} from './catalogue-expectations.mjs';
 import {verifyCustomMap} from '../../web/scripts/verify-custom-map.mjs';
 import {customMapWebRecords,customMapShellRecords,readCustomMapShellResources,legacyMapRuntime} from './custom-map-assets.mjs';
+import {withNodeModulePreloads} from './node-module-preloads.mjs';
 
 const out = resolve(process.argv[2]);
 const report = JSON.parse(await readFile(join(out, 'build-info.json')));
@@ -98,11 +99,11 @@ const policyEntry = Object.values(viteManifest).find(value => value.isEntry && v
 assert.ok(policyEntry, 'Production map policy entry is required');
 const {publicMapResourceKey} = await import(pathToFileURL(join(out, policyEntry.file)).href);
 let mapPolicyChecks = 0;
-for (const path of ['data/russia-display-area.geojson', 'data/russia-canonical-mask.geojson', 'maps/russia-relief/manifest.json', 'terrain/terrain-grid.json?v=current']) {
+for (const path of ['data/russia-display-area.geojson', 'data/russia-canonical-mask.geojson', 'maps/russia-relief/manifest.json', 'terrain/terrain-grid.json?v=current', 'terrain-regions/manifest.json', 'terrain-regions/south-sakhalin-v1/terrain-grid.json', 'terrain-regions/south-sakhalin-v1/surface.png']) {
   assert.equal(publicMapResourceKey(base + path, report.origin), base + path); mapPolicyChecks++;
   assert.equal(publicMapResourceKey(report.origin + base + path, report.origin), base + path); mapPolicyChecks++;
 }
-for (const path of ['/data/russia-display-area.geojson', '/api/me', base + 'api/me', base + 'terrain/private%2fdata', '//example.org/terrain/x', 'https://untrusted.example/terrain/x']) {
+for (const path of ['/data/russia-display-area.geojson', '/terrain-regions/manifest.json', '/api/me', base + 'api/me', base + 'terrain/private%2fdata', base + 'terrain-regions/private%2fdata', base + 'terrain-regions/../api/me', base + 'terrain-regions-private/secret.json', '//example.org/terrain/x', 'https://untrusted.example/terrain/x', 'https://untrusted.example/terrain-regions/manifest.json']) {
   assert.equal(publicMapResourceKey(path, report.origin), null); mapPolicyChecks++;
 }
 const apiEntry = Object.values(viteManifest).find(value => value.isEntry && value.src === 'source/pages-preview/src/api.ts');
@@ -162,6 +163,36 @@ const world = JSON.parse(await readFile(join(out, 'data/world.geojson')));
 assert.ok(world.features.length > 100);
 const terrain = JSON.parse(await readFile(join(out, 'terrain/terrain-grid.json')));
 assert.equal(terrain.elevations.length, terrain.width * terrain.height);
+// Regional manifests contain hashes of original source bytes, including JSON.
+// Neither formatting nor logical resource URLs may change during publication.
+const regionalRoot=join(web,'public/terrain-regions'),regionalFiles=await walk(regionalRoot);
+assert.ok(regionalFiles.length>0,'The measured regional terrain package is missing');
+for(const originalPath of regionalFiles){
+ const name=originalPath.slice(regionalRoot.length+1),original=await readFile(originalPath),deployed=await readFile(join(out,'terrain-regions',name));
+ assert.deepEqual(deployed,original,`Regional source bytes changed during Pages publication: ${name}`);
+ const input=report.inputs.find(input=>input.path==='web/public/terrain-regions/'+name);
+ assert.equal(input?.bytes,original.length,`Regional build input size differs: ${name}`);
+ assert.equal(input?.sha256,createHash('sha256').update(original).digest('hex'),`Regional build input checksum differs: ${name}`);
+}
+const regionalEntry=Object.values(viteManifest).find(value=>value.isEntry&&value.src==='source/lib/terrain-region-sources.ts');
+assert.ok(regionalEntry,'The actual production regional reader must be importable for verification');
+const {createTerrainRegionReader,parseTerrainRegions}=await import(pathToFileURL(join(out,regionalEntry.file)).href);
+const regionalManifest=JSON.parse(await readFile(join(out,'terrain-regions/manifest.json'),'utf8')),regions=parseTerrainRegions(regionalManifest),regionalFetches=[];
+assert.ok(regions.length>0,'The public regional manifest must contain measured terrain');
+const readRegionalURL=async url=>{
+ assert.ok(url.startsWith(base+'terrain-regions/'),`Regional runtime fetch escaped the Pages base: ${url}`);
+ assert.equal(publicMapResourceKey(url,report.origin),url,'Regional runtime fetch must cross the real public map policy');regionalFetches.push(url);
+ return readFile(join(out,url.slice(base.length)));
+};
+const regionalReader=createTerrainRegionReader({loadJSON:async url=>JSON.parse(await readRegionalURL(url)),loadBytes:async url=>{const bytes=await readRegionalURL(url);return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}});
+await withNodeModulePreloads(base,async()=>{
+ for(const region of regions){
+  assert.ok(await regionalReader.find(region.bounds),`Production reader cannot discover ${region.id}`);
+  const grid=await regionalReader.grid(region),material=await regionalReader.material(region);
+  assert.deepEqual(grid.bounds,region.bounds);assert.equal(material.byteLength,region.materialBytes);
+ }
+});
+assert.deepEqual(regionalFetches,[base+'terrain-regions/manifest.json',...regions.flatMap(region=>[base+region.gridUrl.slice(1),base+region.materialUrl.slice(1)])],'The real deployed reader must resolve immutable logical URLs exactly once');
 const manifest = JSON.parse(await readFile(join(out, 'manifest.webmanifest')));
 assert.equal(manifest.scope, base); assert.equal(manifest.start_url, base); assert.equal(manifest.id, base);
 const sw = await readFile(join(out, 'sw.js'), 'utf8');
@@ -212,6 +243,7 @@ async function walk(path) {
   return result;
 }
 const outputFiles = await walk(out);
+assert.deepEqual(outputFiles.filter(path=>path.startsWith(join(out,'terrain-regions')+'/')).map(path=>path.slice(join(out,'terrain-regions').length+1)).sort(),regionalFiles.map(path=>path.slice(regionalRoot.length+1)).sort(),'Regional publication must preserve the exact source package inventory');
 assert.deepEqual(outputFiles.filter(path=>path.startsWith(join(out,'custom-map')+'/')).map(path=>path.slice(join(out,'custom-map').length+1)).sort(),customMapFiles.map(file=>file.path).sort(),'The public map output must contain exactly the verified common runtime');
 assert.ok(outputFiles.every(path=>!legacyMapRuntime.test(path.slice(out.length+1))),'A retired vendor map runtime remains in the deployable files');
 assert.ok(outputFiles.every(path => !/\.apk$/i.test(path)), 'Pages must link the verified release without publishing any APK binary');
@@ -221,7 +253,7 @@ assert.ok(outputFiles.every(path => !/\/(?:backend|api)\//.test(path)), 'No back
 // Inspect the deployed code's URL literals, not a second implementation of the app.
 // Internal router keys are intentionally unprefixed; source provenance and the
 // cryptographically pinned offline pack describe their own original resource root.
-const rootAsset = /^\/(?:data|maps|custom-map|terrain|offline-map|fonts|downloads|assets)(?:\/|$)|^\/offline(?:-fonts|-viewer)?\.(?:html|js|css)$/;
+const rootAsset = /^\/(?:data|maps|custom-map|terrain|terrain-regions|offline-map|fonts|downloads|assets)(?:\/|$)|^\/offline(?:-fonts|-viewer)?\.(?:html|js|css)$/;
 const deployedUrls = new Set();
 let checkedScripts = 0;
 // Rolldown can compact a literal URL array into `a,b`.split(`,`). Inspect
@@ -258,7 +290,7 @@ for (const path of outputFiles) {
 let publicAssetChecks = 0;
 for (const value of deployedUrls) {
   const relativePath = value.slice(base.length).split(/[?#]/)[0];
-  if (!/^(?:data|maps|custom-map|terrain|offline-map|fonts|downloads|assets)\//.test(relativePath) || /[{}]/.test(relativePath)) continue;
+  if (!/^(?:data|maps|custom-map|terrain|terrain-regions|offline-map|fonts|downloads|assets)\//.test(relativePath) || /[{}]/.test(relativePath)) continue;
   // A template head can end within a filename, such as icon-${size}.png.
   if (!relativePath.endsWith('/') && !/\.[a-z0-9]+$/i.test(relativePath)) continue;
   const present = await exists(join(out, relativePath));
@@ -267,6 +299,6 @@ for (const value of deployedUrls) {
 for (const path of outputFiles.filter(path => path.endsWith('.html'))) {
   assert.match(await readFile(path, 'utf8'), /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i, `HTML must be noindex: ${path}`);
 }
-const verification = {verified:true, pages:pages.length, referenceRoutes:report.referenceRoutes, productionRoutingChecks:routingChecks + 5, mapPolicyChecks, staticApiNetworkCalls:attemptedNetwork, checkedScripts, publicAssetChecks, outputFiles:outputFiles.length, offlineFilesVerified:verified, customMap:{runtime:customMap.runtime,sourceInputsSha256:customMap.sourceInputsSha256,manifestSha256:customMap.manifestSha256,deployedFilesVerified:deployedCustomMapFiles.length,workerCount:customMap.workerCount}, overviewReliefTilesVerified:relief.files.length, terrainGrid:[terrain.width, terrain.height], apkVerified:report.hasApk, coverageExcludedRoutes:coverage.excludedCatalogRouteIds, base};
+const verification = {verified:true, pages:pages.length, referenceRoutes:report.referenceRoutes, productionRoutingChecks:routingChecks + 5, mapPolicyChecks, staticApiNetworkCalls:attemptedNetwork, checkedScripts, publicAssetChecks, outputFiles:outputFiles.length, offlineFilesVerified:verified, customMap:{runtime:customMap.runtime,sourceInputsSha256:customMap.sourceInputsSha256,manifestSha256:customMap.manifestSha256,deployedFilesVerified:deployedCustomMapFiles.length,workerCount:customMap.workerCount}, overviewReliefTilesVerified:relief.files.length, terrainGrid:[terrain.width, terrain.height], regionalTerrain:{regions:regions.length,filesVerified:regionalFiles.length,runtimeFetches:regionalFetches}, apkVerified:report.hasApk, coverageExcludedRoutes:coverage.excludedCatalogRouteIds, base};
 await writeFile(join(out, 'verification.json'), JSON.stringify(verification, null, 2) + '\n');
 console.log(JSON.stringify(verification, null, 2));

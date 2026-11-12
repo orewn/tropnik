@@ -88,7 +88,12 @@ export class MapResourcePool {
     const timer = setTimeout(() => controller.abort(), this.options.timeoutMs);
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     try {
-      const response = await this.options.fetcher(url, {cache: 'force-cache', credentials: url.startsWith('/') ? 'same-origin' : 'omit', signal: controller.signal});
+      // Regional manifests and checked extracts can be updated at the same URL.
+      // Revalidate the browser cache on a new pool read; the bounded in-memory
+      // pool still shares bytes across views. Otherwise a new release can keep
+      // selecting an old coverage manifest or reject a stale material checksum.
+      const regional = /(?:^|\/)terrain-regions\//.test(url);
+      const response = await this.options.fetcher(url, {cache: regional ? 'no-cache' : 'force-cache', credentials: url.startsWith('/') ? 'same-origin' : 'omit', signal: controller.signal});
       if (!response.ok) throw new Error(`Preview resource unavailable (${response.status})`);
       if (Number(response.headers.get('content-length') || 0) > this.options.maxResourceBytes) throw new Error('Preview resource exceeds the byte budget');
       reader = response.body?.getReader(); if (!reader) return new ArrayBuffer(0);

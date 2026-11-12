@@ -1,5 +1,6 @@
 import {visibleMapBounds} from '../map-projection.mjs';
 import {nativeClickFixture} from './experience-fixture.mjs';
+import {terrainOpeningExpectedView} from '../browser-terrain-capture.mjs';
 
 export function customMapFixture({camera={longitude:40.37,latitude:43.72,zoom:14},mode='detail',routeId='kavkaz-8a',imagerySource}={}){
  const bitmap=(kind,z=0,x=0,y=0)=>({key:`${kind}:${z}/${x}/${y}`,kind,z,x,y,local:kind==='overview',width:512,height:512,
@@ -20,15 +21,29 @@ export function customSceneFixture(mobile,routeId='kavkaz-8a'){
  const beforeMap={engine:'tropnik-canvas',route:routeId,moving:false,visible:true,camera,rect,
   rendering:{painted:true,drawnRoute:routeId,coverageReady:true,tilesState:'ready'},bitmapInspection,
   viewportLayout:{width,height:772,panel:mobile?{left:0,right:width,top:600,bottom:772}:null}};
- const view={yaw:-.48,pitch:.72,zoom:1,offset:[0,0]},source={name:'Observed source fixture',url:'test:source'};
- const initial={schemaVersion:1,engine:'tropnik-terrain',state:'ready',frames:2,requestedBounds:bounds,
-  grid:{width:3,height:3,bounds,minElevation:100,maxElevation:200,source},provenance:{requestedBounds:bounds},
-  displayMask:{state:'ready',width:2048,height:2048,source:{scope:'russia-display-area',coverageVersion:'a'.repeat(16),bounds,cells:['test-cell'],projection:'regular-longitude-latitude',sampleLayout:'pixel-cells',allowedPixels:4194304}},
-  frame:{sourceVertices:9,triangles:8,renderer:'webgl2',view,displayMask:{width:2048,height:2048,allowedPixels:4194304,coverageVersion:'a'.repeat(16)},cartography:{loadedTiles:1,requestedTiles:1,width:1024,height:1024}},
-  cartography:{state:'ready',width:1024,height:1024,source:{bounds,projection:'regular-longitude-latitude',sampleLayout:'grid-nodes',loadedTiles:1,requestedTiles:1}}};
- const state=(frames,patch)=>({...structuredClone(initial),frames,frame:{...structuredClone(initial.frame),view:{...structuredClone(view),...patch}}});
+ const viewport={width,height:700,insets:mobile?{top:84,right:16,bottom:196,left:16}:{top:96,right:80,bottom:64,left:32}};
+ const opening=terrainOpeningExpectedView(bounds,viewport);
+ const expand=(extent,factor)=>{const x=(extent[0]+extent[2])/2,y=(extent[1]+extent[3])/2,w=(extent[2]-extent[0])*factor/2,h=(extent[3]-extent[1])*factor/2;return[x-w,y-h,x+w,y+h];};
+ const requested=expand(bounds,2),native=expand(bounds,3);
+ function state(frames,{distanceM=opening.distanceM,yaw=0,zoom=1.2,wide=false,revision=1}={}){
+  const gridBounds=wide?expand(bounds,8):native,request=wide?gridBounds:requested,W=wide?513:660,H=wide?513:632;
+  const middle=[(gridBounds[0]+gridBounds[2])/2,(gridBounds[1]+gridBounds[3])/2],metres=6371008.8*Math.PI/180;
+  const w=(gridBounds[2]-gridBounds[0])*metres*Math.cos(middle[1]*Math.PI/180),h=(gridBounds[3]-gridBounds[1])*metres,scale=Math.max(w,h);
+  const offset=[(opening.longitude-middle[0])/(gridBounds[2]-gridBounds[0])*w/scale,(opening.latitude-middle[1])/(gridBounds[3]-gridBounds[1])*h/scale];
+  const view={yaw,pitch:.85,zoom,offset},geographicView={...opening,yaw,distanceM,zoom,bounds:gridBounds},spacing={eastWest:w/(W-1),northSouth:h/(H-1)};
+  const provenance={provider:'Copernicus GLO-30',kind:wide?'remote-terrarium':'local-grid',requestedBounds:request,sourceNominalResolutionM:30,sourceUrls:[wide?'https://tiles.mapterhorn.com/12/2507/1493.webp':'/terrain-regions/south-sakhalin-v1/terrain-grid.json'],missingDataFilled:false,measurementAccuracyClaimedM:null,outputSpacingApproxM:spacing};
+  const source={name:'Copernicus GLO-30',url:wide?'https://mapterhorn.com/data-access/':'https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM',landscape:provenance};
+  const surface={name:wide?'Copernicus Sentinel-2 / EOxCloudless':'ESA WorldCover 2021',kind:wide?'imagery':'landcover',bounds:gridBounds,projection:'regular-longitude-latitude',sampleLayout:'grid-nodes',rowOrder:'north-to-south',columnOrder:'west-to-east',loadedTiles:1,requestedTiles:1,localTiles:wide?0:1,complete:true,nativeResolutionM:10,acquisitionPeriod:wide?'2016–2017':'2021',attribution:wide?'EOX / Copernicus Sentinel-2':'ESA WorldCover 2021 / CC BY 4.0',...(wide?{provider:'eox-s2',tiles:[{url:'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2017_3857/default/g/12/1493/2507.jpg'}]}:{tiles:[]})};
+  const width=wide?1024:1977,height=wide?1024:1894;
+  return{schemaVersion:2,engine:'tropnik-terrain',navigation:'continuous-map',state:'ready',loadingWindow:false,windowRevision:revision,requestedWindowRevision:revision,frames,contextBounds:bounds,requestedBounds:request,loadedRequestBounds:request,view:geographicView,viewport,
+   grid:{width:W,height:H,bounds:gridBounds,minElevation:100,maxElevation:200,sampleSpacingApproxM:spacing,source},provenance,
+   displayMask:{state:'ready',width:2048,height:2048,source:{scope:'russia-display-area',coverageVersion:'a'.repeat(16),bounds:gridBounds,cells:['test-cell'],projection:'regular-longitude-latitude',sampleLayout:'pixel-cells',allowedPixels:4194304}},
+   frame:{sourceVertices:W*H,meshStride:2,meshWindow:[0,0,W-1,H-1],renderedVertices:(Math.ceil((W-1)/2)+1)*(Math.ceil((H-1)/2)+1),triangles:Math.ceil((W-1)/2)*Math.ceil((H-1)/2)*2,renderer:'webgl2',view,geographicView,viewport,displayMask:{width:2048,height:2048,allowedPixels:4194304,coverageVersion:'a'.repeat(16)},cartography:{loadedTiles:1,requestedTiles:1,width,height}},
+   cartography:{state:'ready',width,height,source:surface}};
+ }
+ const initial=state(2);
  const labels=[...Array(14).fill('Приблизить ландшафт'),...Array(14).fill('Отдалить ландшафт'),'Повернуть ландшафт','Вернуть исходный ракурс'];
  return{state:'ready',retainedMapNoticeVisible:false,zoomInputs:28,rotateInput:true,resetInput:true,imageChanged:true,visualReviewRequired:true,beforeMap,
   nativeInputs:labels.map(label=>({label,...nativeClickFixture(mobile?'touch':'mouse','scene-button',undefined,label)})),
-  states:{initial,close:state(16,{zoom:5}),wide:state(30,{zoom:.65}),rotated:state(31,{zoom:.65,yaw:-.23}),reset:state(32,{})}};
+  states:{initial,close:state(16,{zoom:32,distanceM:opening.distanceM/16}),wide:state(30,{zoom:.3,distanceM:opening.distanceM*2,wide:true,revision:2}),rotated:state(31,{zoom:.3,yaw:.25,distanceM:opening.distanceM*2,wide:true,revision:2}),reset:state(2)}};
 }

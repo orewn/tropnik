@@ -24,6 +24,28 @@ test('network and malformed JSON failures do not poison retries', async () => {
   assert.deepEqual(await pool.json('/terrain/grid.json'),{ok:true});assert.equal(calls,3);
 });
 
+test('a new release revalidates regional coverage and material while sharing reads within a view', async () => {
+  const browserCache=new Map(),requests=[];let revision=1;
+  const fetcher=async(url,options)=>{
+    requests.push({url,cache:options.cache});
+    if(options.cache!=='force-cache'||!browserCache.has(url))browserCache.set(url,JSON.stringify({revision}));
+    return new Response(browserCache.get(url));
+  };
+  for(const prefix of ['', '/tropnik']){
+    const paths=[`${prefix}/terrain-regions/manifest.json`,`${prefix}/terrain-regions/south-sakhalin-v1/surface.png`];
+    const before=new MapResourcePool({fetcher});
+    for(const path of paths)assert.equal((await before.json(path)).revision,revision);
+    revision++;
+    const after=new MapResourcePool({fetcher});
+    for(const path of paths){
+      assert.equal((await after.json(path)).revision,revision,'new pools must not reuse a stale browser response');
+      const count=requests.length;await after.json(path);assert.equal(requests.length,count,'the live pool retains checked bytes');
+    }
+  }
+  const remote=new MapResourcePool({fetcher});await remote.get('https://tiles.mapterhorn.com/12/1/1.webp');
+  assert.equal(requests.at(-1).cache,'force-cache','unchanged tile sources keep their cache policy');
+});
+
 test('semantic invalidation retries settled data and preserves a shared in-flight request', async () => {
   let release,calls=0;const gate=new Promise(resolve=>{release=resolve;});
   const pool=new MapResourcePool({fetcher:async()=>{calls++;await gate;return Response.json({valid:calls>1});}});

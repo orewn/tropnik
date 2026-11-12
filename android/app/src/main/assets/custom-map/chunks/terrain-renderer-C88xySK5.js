@@ -1,0 +1,1820 @@
+//#region web/public/terrain/terrain-renderer.js
+var e = Math.PI, t = e * 2, n = 6371008.8, r = Object.freeze({
+	yaw: -.48,
+	pitch: .72,
+	zoom: 1
+}), i = Object.freeze({
+	yaw: 0,
+	pitch: .85,
+	zoom: 2.2
+}), a = (e, t) => e + 360 * Math.round((t - e) / 360), o = [
+	223,
+	230,
+	218
+], s = 1050625, c = 5e4, l = 32, u = 48, d = 20, f = (e, t, n) => Math.max(t, Math.min(n, e)), p = (e, t, n) => e + (t - e) * n, m = (e, t, n) => {
+	let r = f((n - e) / (t - e), 0, 1);
+	return r * r * (3 - 2 * r);
+}, h = (e, t) => e[0] * t[0] + e[1] * t[1] + e[2] * t[2], g = (e) => {
+	let t = Math.hypot(...e) || 1;
+	return e.map((e) => e / t);
+}, _ = (e, t) => [
+	e[1] * t[2] - e[2] * t[1],
+	e[2] * t[0] - e[0] * t[2],
+	e[0] * t[1] - e[1] * t[0]
+];
+function v(e, t) {
+	let n = e?.source, r = n?.bounds;
+	if (!e || !Number.isInteger(e.width) || !Number.isInteger(e.height) || e.width < 2 || e.height < 2 || e.width > 2048 || e.height > 2048 || !(e.pixels instanceof Uint8Array) || e.pixels.length !== e.width * e.height) throw TypeError("Invalid or oversized terrain display mask");
+	if (!n || n.scope !== "russia-display-area" || !/^[a-f0-9]{16}$/.test(n.coverageVersion) || ![
+		"overview",
+		"regional",
+		"local",
+		"source"
+	].includes(n.lod) || !Array.isArray(n.cells) || !n.cells.length || n.cells.length > 1024 || n.cells.some((e) => typeof e != "string" || e.length > 100) || !Array.isArray(r) || r.length !== 4 || !r.every(Number.isFinite) || !t?.bounds || !r.every((e, n) => Math.abs(e - t.bounds[n]) < 1e-9) || n.projection !== "regular-longitude-latitude" || n.sampleLayout !== "pixel-cells" || n.rowOrder !== "north-to-south" || n.columnOrder !== "west-to-east" || n.boundaryRule !== "exclude-intersecting-texels" || !Number.isInteger(n.allowedPixels)) throw TypeError("Terrain display mask does not match the source grid");
+	let i = 0;
+	for (let t of e.pixels) {
+		if (t !== 0 && t !== 255) throw TypeError("Invalid terrain display mask coverage");
+		t && i++;
+	}
+	if (i !== n.allowedPixels) throw TypeError("Invalid terrain display mask count");
+	return e;
+}
+function y(e, t, n) {
+	return e ? !Number.isFinite(t) || !Number.isFinite(n) || t < 0 || n < 0 || t > 1 || n > 1 ? !1 : e.pixels[Math.min(e.height - 1, Math.floor(n * e.height)) * e.width + Math.min(e.width - 1, Math.floor(t * e.width))] === 255 : !0;
+}
+function b(e, t) {
+	let n = e?.source, r = n?.bounds;
+	if (!e || !Number.isInteger(e.width) || !Number.isInteger(e.height) || e.width < 2 || e.height < 2 || e.width > 2048 || e.height > 2048 || !(e.pixels instanceof Uint8ClampedArray) || e.pixels.length !== e.width * e.height * 4) throw TypeError("Invalid or oversized terrain cartography");
+	if (!n || typeof n.name != "string" || !n.name || n.name.length > 200 || !Array.isArray(r) || r.length !== 4 || !r.every(Number.isFinite) || !t?.bounds || !r.every((e, n) => Math.abs(e - t.bounds[n]) < 1e-9) || n.projection !== "regular-longitude-latitude" || n.sampleLayout !== "grid-nodes" || n.rowOrder !== "north-to-south" || n.columnOrder !== "west-to-east" || !Number.isInteger(n.requestedTiles) || n.requestedTiles < 1 || n.requestedTiles > 16 || !Number.isInteger(n.loadedTiles) || n.loadedTiles < 0 || n.loadedTiles > n.requestedTiles) throw TypeError("Terrain cartography does not match the source grid");
+	return e;
+}
+function x(e, t, n, r = [
+	0,
+	0,
+	0,
+	0
+]) {
+	if (!e || !Number.isFinite(t) || !Number.isFinite(n)) return r.fill(0), r;
+	let i = e.width, a = e.height, o = e.pixels, s = f(t, 0, 1) * (i - 1), c = f(n, 0, 1) * (a - 1), l = Math.floor(s), u = Math.floor(c), d = Math.min(l + 1, i - 1), p = Math.min(u + 1, a - 1), m = s - l, h = c - u, g = (u * i + l) * 4, _ = (u * i + d) * 4, v = (p * i + l) * 4, y = (p * i + d) * 4, b = (1 - m) * (1 - h) * o[g + 3], x = m * (1 - h) * o[_ + 3], S = (1 - m) * h * o[v + 3], C = m * h * o[y + 3], w = b + x + S + C;
+	r[3] = w;
+	for (let e = 0; e < 3; e++) r[e] = w ? (o[g + e] * b + o[_ + e] * x + o[v + e] * S + o[y + e] * C) / w : 0;
+	return r;
+}
+function S(e) {
+	if (!e || !Number.isInteger(e.width) || !Number.isInteger(e.height) || e.width < 2 || e.height < 2 || e.width * e.height > s || !e.elevations || e.elevations.length !== e.width * e.height) throw TypeError("Invalid or oversized elevation grid");
+	let t = e.bounds;
+	if (!Array.isArray(t) || t.length !== 4 || !t.every(Number.isFinite) || t[0] >= t[2] || t[1] >= t[3] || t[2] - t[0] > 360 || t[1] < -85 || t[3] > 85) throw TypeError("Invalid terrain bounds");
+	if (e.units && e.units !== "meters") throw TypeError("Terrain heights must be in metres");
+	if (e.rowOrder && e.rowOrder !== "north-to-south") throw TypeError("Unsupported terrain row order");
+	if (e.columnOrder && e.columnOrder !== "west-to-east") throw TypeError("Unsupported terrain column order");
+	let n = Infinity, r = -Infinity;
+	for (let t = 0; t < e.elevations.length; t++) {
+		let i = e.elevations[t];
+		if (!Number.isFinite(i) || i < -12e3 || i > 1e4) throw TypeError("Invalid terrain elevation");
+		n = Math.min(n, i), r = Math.max(r, i);
+	}
+	return {
+		min: n,
+		max: r
+	};
+}
+function C(t) {
+	let r = S(t), i = t.bounds, a = t.width, o = t.height, s = n * e / 180, c = (i[2] - i[0]) * s * Math.cos((i[1] + i[3]) * e / 360), l = (i[3] - i[1]) * s, u = Math.max(c, l), d = (r.min + r.max) / 2, f = c / (a - 1), p = l / (o - 1);
+	if (![
+		c,
+		l,
+		u,
+		f,
+		p
+	].every((e) => Number.isFinite(e) && e > 0) || !Number.isFinite(Math.fround((r.max - d) / u))) throw TypeError("Invalid terrain scale");
+	return {
+		grid: t,
+		widthM: c,
+		heightM: l,
+		width: c / u,
+		height: l / u,
+		scale: u,
+		base: d,
+		min: r.min,
+		max: r.max,
+		cellX: f,
+		cellY: p
+	};
+}
+function w(e) {
+	let t = C(e), n = e.width * e.height;
+	return {
+		...t,
+		heights: new Float32Array(n),
+		normals: new Float32Array(n * 3),
+		normalTexture: new Uint8Array(n * 4)
+	};
+}
+function T(e, t, n) {
+	let { grid: r, scale: i, base: a, cellX: o, cellY: s, heights: c, normals: l, normalTexture: u } = e, d = r.width, p = r.height, m = r.elevations, h = [
+		[1, 0],
+		[-1, 0],
+		[0, 1],
+		[0, -1],
+		[1, 1],
+		[-1, 1],
+		[1, -1],
+		[-1, -1]
+	];
+	for (let e = t; e < n; e++) {
+		let t = e % d, n = Math.floor(e / d), r = m[e];
+		c[e] = (r - a) / i;
+		let g = Math.max(0, t - 1), _ = Math.min(d - 1, t + 1), v = Math.max(0, n - 1), y = Math.min(p - 1, n + 1), b = (m[n * d + _] - m[n * d + g]) / ((_ - g) * o), x = (m[v * d + t] - m[y * d + t]) / ((y - v) * s), S = Math.hypot(b, x, 1), C = [
+			-b / S,
+			-x / S,
+			1 / S
+		], w = 0, T = 0;
+		for (let e of [2, 8]) for (let [i, a] of h) {
+			let c = f(t + i * e, 0, d - 1), l = f(n + a * e, 0, p - 1), u = Math.hypot((c - t) * o, (l - n) * s);
+			u && (w += Math.atan(Math.max(0, m[l * d + c] - r) / u), T++);
+		}
+		let E = f(1 - .56 * w / Math.max(1, T), .58, 1);
+		for (let t = 0; t < 3; t++) l[e * 3 + t] = C[t], u[e * 4 + t] = Math.round((C[t] * .5 + .5) * 255);
+		u[e * 4 + 3] = Math.round(E * 255);
+	}
+}
+function E(e) {
+	let t = w(e);
+	return T(t, 0, e.width * e.height), t;
+}
+async function D(e, { signal: t } = {}) {
+	let n = () => {
+		if (t?.aborted) {
+			let e = /* @__PURE__ */ Error("Terrain preparation aborted");
+			throw e.name = "AbortError", e;
+		}
+	};
+	n(), await new Promise((e) => setTimeout(e, 0)), n();
+	let r = w(e), i = e.width * e.height;
+	for (let e = 0; e < i; e += 1024) n(), T(r, e, Math.min(i, e + 1024)), e + 1024 < i && await new Promise((e) => setTimeout(e, 0));
+	return n(), r;
+}
+function O(e, t) {
+	let n = C(e), r = e.width * e.height, i = t?.grid, a = () => {
+		throw TypeError("Prepared terrain model does not match its source grid");
+	};
+	(!t || !i || i.width !== e.width || i.height !== e.height || !Array.isArray(i.bounds) || i.bounds.length !== 4 || i.bounds.some((t, n) => t !== e.bounds[n]) || i.elevations?.length !== r) && a();
+	for (let t of [
+		"schemaVersion",
+		"units",
+		"rowOrder",
+		"columnOrder",
+		"source",
+		"attribution"
+	]) JSON.stringify(i[t]) !== JSON.stringify(e[t]) && a();
+	for (let e of [
+		"widthM",
+		"heightM",
+		"width",
+		"height",
+		"scale",
+		"base",
+		"min",
+		"max",
+		"cellX",
+		"cellY"
+	]) (!Number.isFinite(t[e]) || Math.abs(t[e] - n[e]) > Math.max(1, Math.abs(n[e])) * 1e-12) && a();
+	(!(t.heights instanceof Float32Array) || t.heights.length !== r || !(t.normals instanceof Float32Array) || t.normals.length !== r * 3 || !(t.normalTexture instanceof Uint8Array) || t.normalTexture.length !== r * 4) && a(), [
+		t.heights,
+		t.normals,
+		t.normalTexture
+	].every((e) => e.buffer instanceof ArrayBuffer) || a();
+	for (let o = 0; o < r; o++) {
+		(i !== e && i.elevations[o] !== e.elevations[o] || !Number.isFinite(t.heights[o]) || t.heights[o] !== Math.fround((e.elevations[o] - n.base) / n.scale)) && a();
+		let r = t.normals[o * 3], s = t.normals[o * 3 + 1], c = t.normals[o * 3 + 2], l = r * r + s * s + c * c;
+		(!Number.isFinite(l) || l < .999 || l > 1.001 || c <= 0) && a();
+	}
+	if (t.shadowPyramid !== void 0) {
+		let n = 2 ** Math.ceil(Math.log2(e.width - 1)), r = 2 ** Math.ceil(Math.log2(e.height - 1)), i = 0;
+		for (Array.isArray(t.shadowPyramid) || a();;) {
+			let e = t.shadowPyramid[i++];
+			if ((!e || e.width !== n || e.height !== r || !(e.data instanceof Float32Array) || e.data.length !== n * r || !(e.data.buffer instanceof ArrayBuffer) || !e.data.every(Number.isFinite)) && a(), n === 1 && r === 1) break;
+			n = Math.max(1, n / 2), r = Math.max(1, r / 2);
+		}
+		i !== t.shadowPyramid.length && a();
+	}
+	return t;
+}
+function k(e) {
+	if (e.shadowPyramid) return e.shadowPyramid;
+	let t = e.grid.width, n = e.grid.height, r = 2 ** Math.ceil(Math.log2(t - 1)), i = 2 ** Math.ceil(Math.log2(n - 1)), a = new Float32Array(r * i);
+	a.fill(-34e37);
+	for (let i = 0; i < n - 1; i++) for (let n = 0; n < t - 1; n++) {
+		let o = i * t + n;
+		a[i * r + n] = Math.max(e.heights[o], e.heights[o + 1], e.heights[o + t], e.heights[o + t + 1]);
+	}
+	let o = [{
+		width: r,
+		height: i,
+		data: a
+	}], s = o[0];
+	for (; s.width > 1 || s.height > 1;) {
+		let e = {
+			width: Math.max(1, s.width / 2),
+			height: Math.max(1, s.height / 2)
+		};
+		e.data = new Float32Array(e.width * e.height);
+		for (let t = 0; t < e.height; t++) for (let n = 0; n < e.width; n++) {
+			let r = n * 2, i = Math.min(r + 1, s.width - 1), a = t * 2, o = Math.min(a + 1, s.height - 1), c = s.data;
+			e.data[t * e.width + n] = Math.max(c[a * s.width + r], c[a * s.width + i], c[o * s.width + r], c[o * s.width + i]);
+		}
+		o.push(e), s = e;
+	}
+	return e.shadowPyramid = o, o;
+}
+function A(e, t, n, r, i, a) {
+	let o = e.grid.width, s = e.grid.height, c = f(Math.floor(Math.min(n, i) * (o - 1)), 0, o - 2), l = f(Math.floor(Math.max(n, i) * (o - 1)), 0, o - 2), u = f(Math.floor(Math.min(r, a) * (s - 1)), 0, s - 2), d = f(Math.floor(Math.max(r, a) * (s - 1)), 0, s - 2), p = Math.ceil(Math.log2(Math.max(l - c + 1, d - u + 1))), m = 2 ** p, h = t[p], g = Math.floor(c / m), _ = Math.floor(l / m), v = Math.floor(u / m), y = Math.floor(d / m), b = h.data;
+	return Math.max(b[v * h.width + g], b[v * h.width + _], b[y * h.width + g], b[y * h.width + _]);
+}
+function j(e, t, n, r, i, a = u, o) {
+	let s = Number.isFinite(a) ? f(Math.floor(a), 1, u) : u;
+	o && (o.queries = 0, o.limitReached = !1);
+	let c = Math.hypot(i[0], i[1]);
+	if (c < 1e-8 || i[2] <= 0) return 1;
+	let l = t / e.widthM + .5, p = .5 - n / e.heightM;
+	if (l < 0 || l > 1 || p < 0 || p > 1) return 1;
+	let h = i[0] / c / e.width, g = -i[1] / c / e.height, _ = i[2] / c, v = Math.min(e.cellX, e.cellY) / e.scale, y = v * 1.1, b = (r - e.base) / e.scale, x = .8;
+	if (h > 1e-12 ? x = Math.min(x, (1 - l) / h) : h < -1e-12 && (x = Math.min(x, -l / h)), g > 1e-12 ? x = Math.min(x, (1 - p) / g) : g < -1e-12 && (x = Math.min(x, -p / g)), x <= y) return 1;
+	let S = k(e), C = x - y, w = 0, T = 0, E = 1;
+	for (let r = 0; r < s; r++) {
+		o && (o.queries = r + 1);
+		let a = C * 2 ** -w, s = y + T * a, u = s + a, f = v * .25 + s * .014;
+		if (A(e, S, l + h * s, p + g * s, l + h * u, p + g * u) > b + s * _ + v * .18 - f) {
+			if (a > v * .65 && w < d) {
+				w++, T *= 2;
+				continue;
+			}
+			let r = (s + u) / 2, o = M(e, t + i[0] / c * r * e.scale, n + i[1] / c * r * e.scale);
+			if (o !== null) {
+				let t = v * .25 + r * .014;
+				E = Math.min(E, m(-t, t, b + r * _ + v * .18 - (o - e.base) / e.scale));
+			}
+			if (E < .005) return E;
+		}
+		for (let e = 0; e < d; e++) {
+			if (w === 0) return E;
+			if (!(T & 1)) {
+				T++;
+				break;
+			}
+			T = Math.floor(T / 2), w--;
+		}
+	}
+	return o && (o.limitReached = !0), E;
+}
+function M(e, t, n) {
+	if (!Number.isFinite(t) || !Number.isFinite(n)) return null;
+	let { grid: r, widthM: i, heightM: a } = e, o = r.width, s = r.height, c = (t / i + .5) * (o - 1), l = (.5 - n / a) * (s - 1);
+	if (c < -1e-7 || l < -1e-7 || c > o - 1 + 1e-7 || l > s - 1 + 1e-7) return null;
+	c = f(c, 0, o - 1), l = f(l, 0, s - 1);
+	let u = Math.min(o - 2, Math.floor(c)), d = Math.min(s - 2, Math.floor(l)), m = c - u, h = l - d, g = r.elevations;
+	return p(p(g[d * o + u], g[d * o + u + 1], m), p(g[(d + 1) * o + u], g[(d + 1) * o + u + 1], m), h);
+}
+function N(e, t, n, r) {
+	let i = Math.min(Math.floor(t / r), Math.ceil((e.width - 1) / r) - 1) * r, a = Math.min(Math.floor(n / r), Math.ceil((e.height - 1) / r) - 1) * r;
+	return [
+		i,
+		a,
+		Math.min(e.width - 1, i + r),
+		Math.min(e.height - 1, a + r)
+	];
+}
+function P(e, t, n, r) {
+	let i = e.grid.width, [a, o, s, c] = N(e.grid, t, n, r), l = (t - a) / (s - a), u = (n - o) / (c - o), d = e.heights, f = d[o * i + a], p = d[o * i + s], m = d[c * i + a], h = d[c * i + s];
+	return l + u <= 1 ? f + (p - f) * l + (m - f) * u : h + (m - h) * (1 - l) + (p - h) * (1 - u);
+}
+function F(e, t, n, r) {
+	if (!Number.isInteger(r) || r < 1) throw TypeError("Invalid mesh stride");
+	if (!Number.isFinite(t) || !Number.isFinite(n)) return null;
+	let i = e.grid.width, a = e.grid.height, o = (t / e.widthM + .5) * (i - 1), s = (.5 - n / e.heightM) * (a - 1);
+	return o < -1e-7 || s < -1e-7 || o > i - 1 + 1e-7 || s > a - 1 + 1e-7 ? null : P(e, f(o, 0, i - 1), f(s, 0, a - 1), r) * e.scale + e.base;
+}
+function I(e, t, n) {
+	if (!Number.isInteger(n) || n < 1) throw TypeError("Invalid mesh stride");
+	if (!Array.isArray(t) || t.length > c) throw RangeError("Route exceeds the terrain preview limit");
+	let r = e.grid.width, i = e.grid.height, a = [], o = Math.max(1.5, Math.min(e.cellX, e.cellY) * .08) / e.scale;
+	for (let [s, l] of t) {
+		let t = (s[0] / e.width + .5) * (r - 1), u = (.5 - s[1] / e.height) * (i - 1), d = (l[0] - s[0]) / e.width * (r - 1), m = -(l[1] - s[1]) / e.height * (i - 1), h = [0, 1];
+		if (![
+			t,
+			u,
+			d,
+			m
+		].every(Number.isFinite)) throw TypeError("Invalid terrain route point");
+		if (Math.min(t, t + d) < -1e-7 || Math.max(t, t + d) > r - 1 + 1e-7 || Math.min(u, u + m) < -1e-7 || Math.max(u, u + m) > i - 1 + 1e-7) throw RangeError("Terrain route point is outside the grid");
+		let g = (e, t, r) => {
+			if (Math.abs(t) < 1e-12) return;
+			let i = Math.min(e, e + t), a = Math.max(e, e + t);
+			for (let o = Math.max(1, Math.floor(i / n) + 1); o * n < Math.min(a, r); o++) {
+				let r = (o * n - e) / t;
+				r > 1e-10 && r < .9999999999 && h.push(r);
+			}
+		};
+		g(t, d, r - 1), g(u, m, i - 1), h.sort((e, t) => e - t);
+		let _ = h.filter((e, t) => !t || e - h[t - 1] > 1e-10), v = [0];
+		for (let a = 1; a < _.length; a++) {
+			let o = _[a - 1], s = _[a], c = (o + s) / 2, [l, p, h, g] = N(e.grid, f(t + d * c, 0, r - 1), f(u + m * c, 0, i - 1), n), y = (t + d * o - l) / (h - l) + (u + m * o - p) / (g - p) - 1, b = (t + d * s - l) / (h - l) + (u + m * s - p) / (g - p) - 1;
+			if (y * b < 0) {
+				let e = o - y * (s - o) / (b - y);
+				e - o > 1e-10 && s - e > 1e-10 && v.push(e);
+			}
+			v.push(s);
+		}
+		let y;
+		for (let h of v) {
+			let g = [
+				p(s[0], l[0], h),
+				p(s[1], l[1], h),
+				P(e, f(t + d * h, 0, r - 1), f(u + m * h, 0, i - 1), n) + o
+			];
+			if (y) {
+				if (a.length >= c) throw RangeError("Draped route exceeds the terrain preview limit");
+				a.push([y, g]);
+			}
+			y = g;
+		}
+	}
+	return a;
+}
+function L(e, t, n = null) {
+	if (!Number.isInteger(t) || t < 1) throw TypeError("Invalid mesh stride");
+	let r = e.grid.width, i = e.grid.height, a = [], o = [], s = n || [
+		0,
+		0,
+		r - 1,
+		i - 1
+	];
+	if (!Array.isArray(s) || s.length !== 4 || !s.every(Number.isInteger) || s[0] < 0 || s[1] < 0 || s[2] >= r || s[3] >= i || s[0] >= s[2] || s[1] >= s[3] || s[0] % t || s[1] % t || s[2] !== r - 1 && s[2] % t || s[3] !== i - 1 && s[3] % t) throw TypeError("Invalid terrain mesh window");
+	for (let e = s[0]; e < s[2]; e += t) a.push(e);
+	a.push(s[2]);
+	for (let e = s[1]; e < s[3]; e += t) o.push(e);
+	o.push(s[3]);
+	let c = a.length * o.length, l = new Float32Array(c * 2), u = new Uint32Array(c);
+	for (let e = 0; e < o.length; e++) for (let t = 0; t < a.length; t++) {
+		let n = e * a.length + t;
+		l[n * 2] = a[t] / (r - 1), l[n * 2 + 1] = o[e] / (i - 1), u[n] = o[e] * r + a[t];
+	}
+	let d = new (c > 65535 ? Uint32Array : Uint16Array)((a.length - 1) * (o.length - 1) * 6), f = 0;
+	for (let e = 0; e < o.length - 1; e++) for (let t = 0; t < a.length - 1; t++) {
+		let n = e * a.length + t, r = n + 1, i = n + a.length, o = i + 1;
+		for (let e of [
+			n,
+			i,
+			r,
+			r,
+			i,
+			o
+		]) d[f++] = e;
+	}
+	return {
+		uv: l,
+		sampleIds: u,
+		indices: d,
+		count: c,
+		step: t,
+		triangles: d.length / 3,
+		...n ? { window: [...n] } : {}
+	};
+}
+function R(e, t) {
+	let n = t?.matrix, r = t?.offset;
+	if (!n || n.length !== 16 || !Array.from(n).every(Number.isFinite) || !r || r.length !== 2 || !r.every(Number.isFinite)) throw TypeError("Invalid terrain clipping camera");
+	let i = [
+		[-e.width / 2, -e.height / 2],
+		[e.width / 2, -e.height / 2],
+		[e.width / 2, e.height / 2],
+		[-e.width / 2, e.height / 2]
+	], a = (e.min - e.base) / e.scale, o = (e.max - e.base) / e.scale;
+	for (let e of [
+		0,
+		1,
+		2
+	]) for (let t of [-1, 1]) {
+		let s = (e === 2 ? 1 : 1.06) + t * (e === 2 ? 0 : r[e]), c = s * n[3] + t * n[e], l = s * n[7] + t * n[4 + e], u = s * n[11] + t * n[8 + e], d = s * n[15] + t * n[12 + e] + u * (u >= 0 ? o : a), m = (e) => c * e[0] + l * e[1] + d, h = [];
+		for (let e = 0; e < i.length; e++) {
+			let t = i[e], n = i[(e + 1) % i.length], r = m(t), a = m(n), o = r >= -1e-9, s = a >= -1e-9;
+			if (o && h.push(t), o !== s) {
+				let e = f(r / (r - a), 0, 1);
+				h.push([p(t[0], n[0], e), p(t[1], n[1], e)]);
+			}
+		}
+		if (i = h, !i.length) return null;
+	}
+	let s = e.grid.width - 1, c = e.grid.height - 1, l = i.map((t) => f((t[0] / e.width + .5) * s, 0, s)), u = i.map((t) => f((.5 - t[1] / e.height) * c, 0, c));
+	return [
+		Math.min(...l),
+		Math.min(...u),
+		Math.max(...l),
+		Math.max(...u)
+	];
+}
+function ee(e, t, n) {
+	let r = n * 8;
+	return [
+		Math.max(0, Math.floor((t[0] - n * 2) / r) * r),
+		Math.max(0, Math.floor((t[1] - n * 2) / r) * r),
+		Math.min(e.width - 1, Math.ceil((t[2] + n * 2) / r) * r),
+		Math.min(e.height - 1, Math.ceil((t[3] + n * 2) / r) * r)
+	];
+}
+function z(e, t, n, r = 0) {
+	if (!Number.isFinite(n) || n < 4) throw TypeError("Invalid visible terrain budget");
+	let i = Math.min(s, Math.floor(n)), a = e.grid, o = R(e, t) || [
+		0,
+		0,
+		a.width - 1,
+		a.height - 1
+	], c = (e) => {
+		let t = ee(a, o, e);
+		return {
+			step: e,
+			range: t,
+			count: (Math.ceil((t[2] - t[0]) / e) + 1) * (Math.ceil((t[3] - t[1]) / e) + 1)
+		};
+	}, l = c(Number.isInteger(r) && r >= 1 && Number.isInteger(Math.log2(r)) ? r : 1);
+	for (; l.count > i;) l = c(l.step * 2);
+	let u = r ? i * .96 : i;
+	for (; l.step > 1;) {
+		let e = c(l.step / 2);
+		if (e.count > u) break;
+		l = e;
+	}
+	return l;
+}
+function B(e, t, n = 0, r = s) {
+	if (!Number.isFinite(t) || t < 4 || !Number.isFinite(r) || r < 4) throw TypeError("Invalid terrain vertex budget");
+	let i = (t) => (Math.ceil((e.width - 1) / t) + 1) * (Math.ceil((e.height - 1) / t) + 1), a = Math.min(s, r), o = Number.isInteger(n) && n >= 1 ? n : 1, c = Math.min(a, t * (n ? 1.25 : 1));
+	for (; i(o) > c;) o *= 2;
+	let l = t >= a ? a : t * .75;
+	for (; o > 1 && i(o / 2) <= l;) o /= 2;
+	return o;
+}
+function V(e, t) {
+	let n = .58 + f(t, .28, 1.32) * .12, r = e - 2.246;
+	return [
+		Math.cos(r) * Math.cos(n),
+		Math.sin(r) * Math.cos(n),
+		Math.sin(n)
+	];
+}
+function H(e, t) {
+	if (!Number.isInteger(t) || t < 1) throw TypeError("Invalid mesh stride");
+	let n = e.grid.width, r = e.grid.height, i = [], a = [], o = [], s = (e.min - e.base) / e.scale - .012;
+	for (let e = 0; e < n - 1; e += t) i.push(e);
+	i.push(n - 1);
+	for (let e = 0; e < r - 1; e += t) a.push(e);
+	a.push(r - 1);
+	let c = (t, i) => [
+		(t / (n - 1) - .5) * e.width,
+		(.5 - i / (r - 1)) * e.height,
+		e.heights[i * n + t]
+	], l = (e, t, n) => {
+		let r = [
+			e[0],
+			e[1],
+			s
+		], i = [
+			t[0],
+			t[1],
+			s
+		];
+		for (let a of [
+			e,
+			r,
+			t,
+			t,
+			r,
+			i
+		]) o.push(...a, ...n);
+	};
+	for (let e = 1; e < i.length; e++) l(c(i[e - 1], 0), c(i[e], 0), [
+		0,
+		1,
+		0
+	]), l(c(i[e], r - 1), c(i[e - 1], r - 1), [
+		0,
+		-1,
+		0
+	]);
+	for (let e = 1; e < a.length; e++) l(c(0, a[e]), c(0, a[e - 1]), [
+		-1,
+		0,
+		0
+	]), l(c(n - 1, a[e - 1]), c(n - 1, a[e]), [
+		1,
+		0,
+		0
+	]);
+	return {
+		vertices: new Float32Array(o),
+		floor: s,
+		count: o.length / 6,
+		triangles: o.length / 18
+	};
+}
+function U(e, t, n) {
+	let r = 0, i = 1, a = t[0] - e[0], o = t[1] - e[1], s = [
+		-a,
+		a,
+		-o,
+		o
+	], c = [
+		e[0] - n[0],
+		n[2] - e[0],
+		e[1] - n[1],
+		n[3] - e[1]
+	];
+	for (let e = 0; e < 4; e++) {
+		if (Math.abs(s[e]) < 1e-15) {
+			if (c[e] < 0) return null;
+			continue;
+		}
+		let t = c[e] / s[e];
+		if (s[e] < 0 ? r = Math.max(r, t) : i = Math.min(i, t), r > i) return null;
+	}
+	return [[p(e[0], t[0], r), p(e[1], t[1], r)], [p(e[0], t[0], i), p(e[1], t[1], i)]];
+}
+function W(e, t) {
+	let n = [], r = [], i = e.grid.bounds, a = (e, t = 0) => {
+		!e || t > 16 || (e.type === "FeatureCollection" && Array.isArray(e.features) ? e.features.forEach((e) => a(e, t + 1)) : e.type === "Feature" ? a(e.geometry, t + 1) : e.type === "GeometryCollection" && Array.isArray(e.geometries) ? e.geometries.forEach((e) => a(e, t + 1)) : e.type === "LineString" && Array.isArray(e.coordinates) ? n.push(e.coordinates) : e.type === "MultiLineString" && Array.isArray(e.coordinates) && n.push(...e.coordinates.filter(Array.isArray)));
+	};
+	a(t);
+	let o = (e) => Array.isArray(e) && e.length >= 2 && Number.isFinite(e[0]) && Number.isFinite(e[1]) && e[1] >= -90 && e[1] <= 90, s = (e, t) => e + 360 * Math.round((t - e) / 360), l = (i[0] + i[2]) / 2, u = (t) => [((t[0] - i[0]) / (i[2] - i[0]) - .5) * e.widthM, ((t[1] - i[1]) / (i[3] - i[1]) - .5) * e.heightM], d = Math.max(1.5, Math.min(e.cellX, e.cellY) * .08), f = Math.max(5, Math.min(e.cellX, e.cellY) * .75), m = !1, h = 0;
+	for (let t of n) for (let n = 1; n < t.length; n++) {
+		if (++h > 25e4) throw RangeError("Route exceeds the terrain preview limit");
+		let a = t[n - 1], g = t[n];
+		if (!o(a) || !o(g)) {
+			m = !0;
+			continue;
+		}
+		let _ = [s(a[0], l), a[1]], v = [s(g[0], _[0]), g[1]], y = U(_, v, i);
+		if (!y) {
+			m = !0;
+			continue;
+		}
+		(y[0][0] !== _[0] || y[0][1] !== _[1] || y[1][0] !== v[0] || y[1][1] !== v[1]) && (m = !0);
+		let b = u(y[0]), x = u(y[1]), S = Math.hypot(x[0] - b[0], x[1] - b[1]);
+		if (S < .01) continue;
+		let C = Math.ceil(S / f);
+		if (r.length + C > c) throw RangeError("Route exceeds the terrain preview limit");
+		let w;
+		for (let t = 0; t <= C; t++) {
+			let n = p(b[0], x[0], t / C), i = p(b[1], x[1], t / C), a = M(e, n, i);
+			if (a === null) {
+				w = void 0;
+				continue;
+			}
+			let o = [
+				n / e.scale,
+				i / e.scale,
+				(a - e.base + d) / e.scale
+			];
+			w && r.push([w, o]), w = o;
+		}
+	}
+	return {
+		segments: r,
+		clipped: m,
+		sourceSegments: h
+	};
+}
+function te(e, t) {
+	let n = /* @__PURE__ */ new Float32Array(16);
+	for (let r = 0; r < 4; r++) for (let i = 0; i < 4; i++) for (let a = 0; a < 4; a++) n[r * 4 + i] += e[a * 4 + i] * t[r * 4 + a];
+	return n;
+}
+function G(e) {
+	if (e == null) return null;
+	let t = {};
+	for (let n of [
+		"top",
+		"right",
+		"bottom",
+		"left"
+	]) t[n] = Number.isFinite(e[n]) ? Math.max(0, e[n]) : 0;
+	return t;
+}
+var K = /* @__PURE__ */ new WeakMap();
+function ne(t, n) {
+	let i = K.get(t);
+	if (!i) {
+		let e = r.yaw, n = r.pitch, a = [
+			Math.sin(e) * Math.cos(n),
+			-Math.cos(e) * Math.cos(n),
+			Math.sin(n)
+		], o = [
+			Math.cos(e),
+			Math.sin(e),
+			0
+		], s = _(a, o), c = (t.min - t.base) / t.scale - .012, l = Infinity, u = -Infinity;
+		for (let e of [-t.width / 2, t.width / 2]) for (let n of [-t.height / 2, t.height / 2]) for (let r of [c, (t.max - t.base) / t.scale]) {
+			let t = e * a[0] + n * a[1] + (r - .005) * a[2];
+			l = Math.min(l, t), u = Math.max(u, t);
+		}
+		let d = Array.from({ length: 64 }, () => [
+			Infinity,
+			-Infinity,
+			Infinity,
+			-Infinity,
+			Infinity,
+			-Infinity
+		]), p = (e, t, n) => {
+			let r = n - .005, i = e * o[0] + t * o[1], c = e * s[0] + t * s[1] + r * s[2], p = e * a[0] + t * a[1] + r * a[2], m = d[f(Math.floor((p - l) / Math.max(1e-9, u - l) * 64), 0, 63)];
+			m[0] = Math.min(m[0], i), m[1] = Math.max(m[1], i), m[2] = Math.min(m[2], c), m[3] = Math.max(m[3], c), m[4] = Math.min(m[4], p), m[5] = Math.max(m[5], p);
+		}, m = t.grid.width, h = t.grid.height;
+		for (let e = 0; e < h; e++) for (let n = 0; n < m; n++) p((n / (m - 1) - .5) * t.width, (.5 - e / (h - 1)) * t.height, t.heights[e * m + n]);
+		for (let e of [-t.width / 2, t.width / 2]) for (let n of [-t.height / 2, t.height / 2]) p(e, n, c);
+		i = {
+			bins: d.filter((e) => Number.isFinite(e[0])),
+			fits: /* @__PURE__ */ new Map()
+		}, K.set(t, i);
+	}
+	let a = String(n);
+	if (i.fits.has(a)) return i.fits.get(a);
+	let o = (e) => {
+		let t = Infinity, n = -Infinity, r = Infinity, a = -Infinity;
+		for (let o of i.bins) {
+			let i = e - o[5], s = e - o[4];
+			t = Math.min(t, o[0] / (o[0] <= 0 ? i : s)), n = Math.max(n, o[1] / (o[1] >= 0 ? i : s)), r = Math.min(r, o[2] / (o[2] <= 0 ? i : s)), a = Math.max(a, o[3] / (o[3] >= 0 ? i : s));
+		}
+		return {
+			left: t,
+			right: n,
+			bottom: r,
+			top: a
+		};
+	}, s = Math.tan(42 * e / 360), c = .78, l = 2 * s * n * c, u = 2 * s * c, d = (e) => e.right - e.left <= l && e.top - e.bottom <= u, p = Math.max(...i.bins.map((e) => e[5])) + .02, m = Math.max(2, p * 2);
+	for (let e = 0; e < 24 && !d(o(m)); e++) m *= 2;
+	for (let e = 0; e < 20; e++) {
+		let e = (p + m) / 2;
+		d(o(e)) ? m = e : p = e;
+	}
+	let h = o(m), g = {
+		distance: m,
+		centerX: (h.left + h.right) / 2,
+		centerY: (h.bottom + h.top) / 2
+	};
+	return i.fits.size >= 8 && i.fits.delete(i.fits.keys().next().value), i.fits.set(a, g), g;
+}
+function q(t, n, r, i, a) {
+	let o = n.viewportInsets || {
+		top: 0,
+		right: 0,
+		bottom: a && r < 700 ? i * .47 : 0,
+		left: 0
+	}, s = o.left + o.right, c = o.top + o.bottom, l = s ? Math.min(1, r * .88 / s) : 1, u = c ? Math.min(1, i * .88 / c) : 1, d = o.left * l, f = o.right * l, p = o.top * u, m = o.bottom * u, v = Math.max(1, r - d - f), y = Math.max(1, i - p - m), b = v / y, x = 42 * e / 180, S = [
+		Math.sin(n.yaw) * Math.cos(n.pitch),
+		-Math.cos(n.yaw) * Math.cos(n.pitch),
+		Math.sin(n.pitch)
+	], C = g(_([
+		0,
+		0,
+		1
+	], S)), w = _(S, C), T = Math.tan(x / 2), E = ne(t, b), D = n.options?.navigation === "map", O = E.distance / n.zoom, k = D ? M(t, n.offset[0] * t.scale, n.offset[1] * t.scale) : null, A = [
+		n.offset[0],
+		n.offset[1],
+		k === null ? .005 : (k - t.base) / t.scale
+	], j = A.map((e, t) => e + S[t] * O), N = new Float32Array([
+		C[0],
+		w[0],
+		S[0],
+		0,
+		C[1],
+		w[1],
+		S[1],
+		0,
+		C[2],
+		w[2],
+		S[2],
+		0,
+		-h(C, j),
+		-h(w, j),
+		-h(S, j),
+		1
+	]), P = 1 / T * y / i, F = D ? Math.max(2e-5, Math.min(.012, O * .01)) : .012, I = Math.max(12, O + 2 * Math.hypot(t.width, t.height, (t.max - t.min) / t.scale));
+	return {
+		matrix: te(new Float32Array([
+			P / (r / i),
+			0,
+			0,
+			0,
+			0,
+			P,
+			0,
+			0,
+			0,
+			0,
+			(I + F) / (F - I),
+			-1,
+			0,
+			0,
+			2 * I * F / (F - I),
+			0
+		]), N),
+		offset: [(d - f) / r - (D ? 0 : E.centerX / T * y / r), (m - p) / i - (D ? 0 : E.centerY / T * y / i)],
+		eye: j,
+		target: A,
+		distance: O,
+		near: F,
+		usableW: v,
+		usableH: y,
+		right: C,
+		up: w,
+		forward: S,
+		insets: {
+			left: d,
+			right: f,
+			top: p,
+			bottom: m
+		}
+	};
+}
+function J(e, t, n, r) {
+	let i = t.matrix, [a, o, s] = e, c = i[3] * a + i[7] * o + i[11] * s + i[15];
+	return c <= (t.near ?? .012) ? null : [
+		((i[0] * a + i[4] * o + i[8] * s + i[12]) / c + t.offset[0]) * n * .5 + n * .5,
+		(1 - (i[1] * a + i[5] * o + i[9] * s + i[13]) / c - t.offset[1]) * r * .5,
+		(i[2] * a + i[6] * o + i[10] * s + i[14]) / c,
+		1 / c
+	];
+}
+var Y = "\nuniform highp sampler2D uHeight;\nuniform vec2 uGrid;\nuniform vec2 uExtent;\nfloat heightAt(vec2 uv) {\n vec2 p=clamp(uv,0.0,1.0)*(uGrid-1.0);\n ivec2 a=ivec2(floor(p)),b=min(a+ivec2(1),ivec2(uGrid)-1);\n vec2 f=fract(p);\n return mix(mix(texelFetch(uHeight,a,0).r,texelFetch(uHeight,ivec2(b.x,a.y),0).r,f.x),\n  mix(texelFetch(uHeight,ivec2(a.x,b.y),0).r,texelFetch(uHeight,b,0).r,f.x),f.y);\n}\n", re = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec2 aUV;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nout vec2 vUV;\nout vec3 vPosition;\n" + Y + "\nvoid main(){\n vUV=aUV;vPosition=vec3((aUV.x-.5)*uExtent.x,(.5-aUV.y)*uExtent.y,heightAt(aUV));\n gl_Position=uMatrix*vec4(vPosition,1.0);gl_Position.xy+=uOffset*gl_Position.w;\n}\n";
+function X(e, t, n, r = 0) {
+	let i = (e, t) => {
+		e = (e % n + n) % n, t = (t % n + n) % n;
+		let i = Math.imul(e + 1, 374761393) ^ Math.imul(t + 1, 668265263) ^ Math.imul(r + 1, 1274126177);
+		return i = Math.imul(i ^ i >>> 13, 1274126177), ((i ^ i >>> 16) >>> 0) / 4294967295;
+	}, a = Math.floor(e), o = Math.floor(t), s = e - a, c = t - o, l = s * s * s * (s * (s * 6 - 15) + 10), u = c * c * c * (c * (c * 6 - 15) + 10);
+	return p(p(i(a, o), i(a + 1, o), l), p(i(a, o + 1), i(a + 1, o + 1), l), u);
+}
+function Z(e = 128) {
+	if (!Number.isInteger(e) || e < 32 || e > 256 || e & e - 1) throw TypeError("Surface texture must be a bounded power of two");
+	let t = new Uint8Array(e * e * 4);
+	for (let n = 0; n < e; n++) for (let r = 0; r < e; r++) {
+		let i = r / e, a = n / e, o = X(i * 4, a * 4, 4, 3), s = X(i * 16, a * 16, 16, 7), c = X(i * 32, a * 32, 32, 19), l = X(i * 64, a * 64, 64, 41), u = 1 - Math.abs(2 * s - 1), d = .5 + .5 * Math.sin((a + o * .12) * Math.PI * 16), p = [
+			.32 * s + .42 * c + .26 * l,
+			.54 * u + .46 * d,
+			o,
+			.56 * c + .44 * l
+		];
+		for (let i = 0; i < 4; i++) t[(n * e + r) * 4 + i] = Math.round(f(p[i], 0, 1) * 255);
+	}
+	return {
+		size: e,
+		pixels: t
+	};
+}
+function Q(e) {
+	let t = [
+		[500, [
+			.16,
+			.29,
+			.24
+		]],
+		[1400, [
+			.3,
+			.43,
+			.31
+		]],
+		[2100, [
+			.51,
+			.55,
+			.36
+		]],
+		[2700, [
+			.64,
+			.62,
+			.52
+		]],
+		[3400, [
+			.76,
+			.75,
+			.68
+		]]
+	], n = t[0], r = t[1];
+	for (let i = 1; i < t.length - 1 && e >= t[i][0]; i++) n = t[i], r = t[i + 1];
+	let i = m(n[0], r[0], e);
+	return n[1].map((e, t) => p(e, r[1][t], i));
+}
+var ie = "#version 300 es\nprecision highp float;\nin vec2 vUV;\nin vec3 vPosition;\nuniform sampler2D uNormal;\nuniform sampler2D uShadow;\nuniform sampler2D uSurface;\nuniform sampler2D uCartography;\nuniform sampler2D uDisplayMask;\nuniform vec2 uCartographySize;\nuniform vec2 uGrid;\nuniform vec3 uLight;\nuniform vec3 uEye;\nuniform float uBase;\nuniform float uScale;\nuniform float uShadowTexel;\nout vec4 outColor;\nvec3 palette(float h){\n vec3 a=vec3(.16,.29,.24),b=vec3(.30,.43,.31),c=vec3(.51,.55,.36),d=vec3(.64,.62,.52),e=vec3(.76,.75,.68);\n if(h<1400.0)return mix(a,b,smoothstep(500.0,1400.0,h));\n if(h<2100.0)return mix(b,c,smoothstep(1400.0,2100.0,h));\n if(h<2700.0)return mix(c,d,smoothstep(2100.0,2700.0,h));\n return mix(d,e,smoothstep(2700.0,3400.0,h));\n}\nvec4 surfaceAt(vec3 p,vec3 n){\n vec3 w=pow(abs(n),vec3(4.0));w/=max(dot(w,vec3(1)),.001);\n return texture(uSurface,p.yz)*w.x+texture(uSurface,p.xz)*w.y+texture(uSurface,p.xy)*w.z;\n}\nvec3 perturbNormal(vec3 p,vec3 n,float height){\n vec3 dp1=dFdx(p),dp2=dFdy(p),r1=cross(dp2,n),r2=cross(n,dp1);\n float determinant=dot(dp1,r1);\n if(abs(determinant)<1e-14)return n;\n vec3 gradient=dFdx(height)*r1+dFdy(height)*r2;\n return normalize(abs(determinant)*n-sign(determinant)*gradient);\n}\nvoid main(){\n if(texture(uDisplayMask,vUV).r<.5)discard;\n vec2 nUV=(vUV*(uGrid-1.0)+.5)/uGrid;\n vec4 tex=texture(uNormal,nUV);vec3 baseNormal=normalize(tex.rgb*2.0-1.0);\n float elevation=vPosition.z*uScale+uBase;\n vec3 metres=vPosition*uScale;\n vec4 macro=surfaceAt(metres/820.0,baseNormal),detail=surfaceAt(metres/96.0,baseNormal);\n float rock=smoothstep(.17,.52,1.0-baseNormal.z);\n rock=max(rock,smoothstep(2300.0,3050.0,elevation)*(.26+macro.b*.35));\n vec3 limestone=mix(vec3(.49,.51,.47),vec3(.72,.69,.61),macro.b*.64+detail.g*.36);\n vec3 albedo=mix(palette(elevation)*(.91+macro.b*.18),limestone,rock*.83);\n albedo*=.94+detail.r*.12;\n vec2 coverUV=(vUV*(uCartographySize-1.0)+.5)/uCartographySize;\n vec4 cover=texture(uCartography,coverUV);\n albedo=mix(albedo,cover.rgb/max(cover.a,.00001),cover.a);\n // Triplanar detail is filtered with mipmaps and never changes terrain positions.\n float bump=(detail.g*.7+detail.r*.3-.5)*mix(.12,.55,rock)*(1.0-cover.a*.85)/uScale;\n vec3 n=perturbNormal(vPosition,baseNormal,bump);\n float contourDistance=abs(fract(elevation/100.0+.5)-.5)*100.0;\n float contour=1.0-smoothstep(0.0,max(.7,fwidth(elevation)*.85),contourDistance);\n albedo*=1.0-contour*.035;\n float shadow=texture(uShadow,vUV).r*.5;\n shadow+=(texture(uShadow,vUV+vec2(uShadowTexel,0)).r+texture(uShadow,vUV-vec2(uShadowTexel,0)).r+\n  texture(uShadow,vUV+vec2(0,uShadowTexel)).r+texture(uShadow,vUV-vec2(0,uShadowTexel)).r)*.125;\n vec3 view=normalize(uEye-vPosition),halfVector=normalize(view+uLight);\n float NoL=max(dot(n,uLight),0.0),NoV=max(dot(n,view),.001),NoH=max(dot(n,halfVector),0.0),VoH=max(dot(view,halfVector),0.0);\n float roughness=mix(.94,.76,rock),alpha=roughness*roughness,a2=alpha*alpha;\n float denominator=NoH*NoH*(a2-1.0)+1.0;\n float distribution=a2/(3.14159265*denominator*denominator);\n float k=(roughness+1.0)*(roughness+1.0)/8.0;\n float visibility=NoV/(NoV*(1.0-k)+k)*NoL/(NoL*(1.0-k)+k);\n float fresnel=.035+.965*pow(1.0-VoH,5.0);\n float specular=distribution*visibility*fresnel/max(4.0*NoL*NoV,.001);\n vec3 linearAlbedo=pow(albedo,vec3(2.2));\n vec3 ambient=mix(vec3(.25,.29,.24),vec3(.35,.43,.46),clamp(n.z*.5+.5,0.0,1.0))*tex.a;\n vec3 lit=linearAlbedo*ambient+(linearAlbedo*.965+vec3(specular)) *vec3(1.15,1.06,.91)*NoL*shadow;\n vec3 color=pow(max(lit,vec3(0)),vec3(1.0/2.2));\n float haze=clamp((distance(uEye,vPosition)-.9)*.10,0.0,.22);\n float edge=min(min(vUV.x,1.0-vUV.x),min(vUV.y,1.0-vUV.y));\n haze=max(haze,(1.0-smoothstep(0.0,.003,edge))*.15);\n outColor=vec4(mix(color,vec3(.875,.902,.855),haze),1.0);\n}\n", ae = "#version 300 es\nprecision highp float;\nout vec2 vUV;\nvoid main(){\n vec2 p=vec2(gl_VertexID==1?3.0:-1.0,gl_VertexID==2?3.0:-1.0);\n vUV=p*.5+.5;gl_Position=vec4(p,0,1);\n}\n", oe = "#version 300 es\nprecision highp float;\nprecision highp int;\nin vec2 vUV;\nuniform vec3 uLight;\nuniform int uSteps;\nuniform highp sampler2D uHeightMax;\nout vec4 outColor;\n" + Y + `
+float maximumHeight(vec2 a,vec2 b){
+ ivec2 lo=clamp(ivec2(floor(min(a,b)*(uGrid-1.0))),ivec2(0),ivec2(uGrid)-2);
+ ivec2 hi=clamp(ivec2(floor(max(a,b)*(uGrid-1.0))),ivec2(0),ivec2(uGrid)-2);
+ int level=int(ceil(log2(float(max(hi.x-lo.x+1,hi.y-lo.y+1))))),block=1<<level;lo/=block;hi/=block;
+ return max(max(texelFetch(uHeightMax,lo,level).r,texelFetch(uHeightMax,ivec2(hi.x,lo.y),level).r),
+  max(texelFetch(uHeightMax,ivec2(lo.x,hi.y),level).r,texelFetch(uHeightMax,hi,level).r));
+}
+float visibilityAt(){
+ float h=heightAt(vUV),cell=min(uExtent.x/(uGrid.x-1.0),uExtent.y/(uGrid.y-1.0));
+ float horizontal=length(uLight.xy),slope=uLight.z/max(horizontal,.01);
+ vec2 dir=vec2(uLight.x/uExtent.x,-uLight.y/uExtent.y)/max(horizontal,.01);
+ float start=cell*1.1,end=.8;
+ if(dir.x>1e-12)end=min(end,(1.0-vUV.x)/dir.x);else if(dir.x< -1e-12)end=min(end,-vUV.x/dir.x);
+ if(dir.y>1e-12)end=min(end,(1.0-vUV.y)/dir.y);else if(dir.y< -1e-12)end=min(end,-vUV.y/dir.y);
+ if(end<=start)return 1.0;
+ float span=end-start,visibility=1.0;int level=0,index=0;
+ for(int work=0;work<${u};work++){
+  if(work>=uSteps)break;
+  float segment=span*exp2(-float(level)),lo=start+float(index)*segment,hi=lo+segment;
+  float maximum=maximumHeight(vUV+dir*lo,vUV+dir*hi),softness=cell*.25+lo*.014;
+  if(maximum>h+lo*slope+cell*.18-softness){
+   if(segment>cell*.65&&level<${d}){level++;index*=2;continue;}
+   float d=(lo+hi)*.5,s=cell*.25+d*.014,clearance=h+d*slope+cell*.18-heightAt(vUV+dir*d);
+   visibility=min(visibility,smoothstep(-s,s,clearance));if(visibility<.005)return visibility;
+  }
+  for(int up=0;up<${d};up++){
+   if(level==0)return visibility;
+   if((index&1)==0){index++;break;}index/=2;level--;
+  }
+ }
+ return visibility;
+}
+void main(){
+ float visibility=visibilityAt();
+ outColor=vec4(visibility,visibility,visibility,1);
+}
+`, se = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec3 aStart;\nlayout(location=1) in vec3 aEnd;\nlayout(location=2) in vec2 aCorner;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nuniform vec2 uViewport;\nuniform float uHalfWidth;\nout vec2 vDistance;\nout vec2 vWorld;\nflat out float vLength;\nvoid main(){\n vec4 a=uMatrix*vec4(aStart,1),b=uMatrix*vec4(aEnd,1);\n if(a.w<=.012||b.w<=.012){gl_Position=vec4(2,2,2,1);vDistance=vec2(0);vLength=0.0;return;}\n vec2 delta=(b.xy/b.w-a.xy/a.w)*uViewport*.5;\n float len=max(length(delta),.001);vec2 direction=delta/len,normal=vec2(-direction.y,direction.x);\n vec4 point=mix(a,b,aCorner.x);\n point.xy+=(normal*aCorner.y*uHalfWidth+direction*(aCorner.x*2.0-1.0)*uHalfWidth)*2.0/uViewport*point.w;\n point.xy+=uOffset*point.w;gl_Position=point;\n vWorld=mix(aStart.xy,aEnd.xy,aCorner.x);\n vDistance=vec2(aCorner.x*len+(aCorner.x*2.0-1.0)*uHalfWidth,aCorner.y*uHalfWidth);vLength=len;\n}\n", ce = "#version 300 es\nprecision highp float;\nin vec2 vDistance;\nin vec2 vWorld;\nflat in float vLength;\nuniform vec4 uColor;\nuniform float uHalfWidth;\nuniform sampler2D uDisplayMask;\nuniform vec2 uExtent;\nout vec4 outColor;\nvoid main(){\n vec2 uv=vec2(vWorld.x/uExtent.x+.5,.5-vWorld.y/uExtent.y);\n if(any(lessThan(uv,vec2(0)))||any(greaterThan(uv,vec2(1)))||texture(uDisplayMask,uv).r<.5)discard;\n float cap=max(max(-vDistance.x,vDistance.x-vLength),0.0),dist=length(vec2(cap,vDistance.y));\n float alpha=1.0-smoothstep(uHalfWidth-.8,uHalfWidth,dist);if(alpha<=0.0)discard;\n outColor=vec4(uColor.rgb,uColor.a*alpha);\n}\n", le = "#version 300 es\nprecision highp float;\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aNormal;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nout vec3 vPosition;\nout vec3 vNormal;\nvoid main(){vPosition=aPosition;vNormal=aNormal;gl_Position=uMatrix*vec4(aPosition,1);gl_Position.xy+=uOffset*gl_Position.w;}\n", ue = "#version 300 es\nprecision highp float;\nin vec3 vPosition;\nin vec3 vNormal;\nuniform vec3 uLight;\nuniform float uFloor;\nout vec4 outColor;\nvoid main(){\n float elevation=clamp((vPosition.z-uFloor)/.17,0.0,1.0);\n vec3 color=mix(vec3(.34,.38,.33),vec3(.49,.53,.46),elevation);\n float light=.40+.60*max(dot(normalize(vNormal),uLight),0.0);\n outColor=vec4(color*light,1);\n}\n", de = "#version 300 es\nprecision highp float;\nuniform mat4 uMatrix;\nuniform vec2 uOffset;\nuniform vec2 uExtent;\nuniform float uFloor;\nout vec2 vPoint;\nvoid main(){\n int id=gl_VertexID;\n vec2 uv=vec2(id==1||id==4||id==5?1.0:0.0,id==2||id==3||id==5?1.0:0.0);\n vPoint=(uv-.5)*(uExtent+vec2(.08));\n gl_Position=uMatrix*vec4(vPoint,uFloor-.001,1);gl_Position.xy+=uOffset*gl_Position.w;\n}\n", fe = "#version 300 es\nprecision highp float;\nuniform vec2 uExtent;\nin vec2 vPoint;\nout vec4 outColor;\nvoid main(){\n float distanceToBase=length(max(abs(vPoint)-uExtent*.5,vec2(0)));\n float contact=1.0-smoothstep(0.0,.04,distanceToBase);\n outColor=vec4(.20,.27,.21,contact*contact*.18);\n}\n";
+function pe(e) {
+	return e && e.source.allowedPixels === e.width * e.height ? ie.replace(" if(texture(uDisplayMask,vUV).r<.5)discard;\n", "") : ie;
+}
+var me = "#version 300 es\nprecision highp float;\nprecision highp int;\nuniform highp sampler2D uCompleted;\nout vec4 outColor;\nvoid main(){outColor=vec4(texelFetch(uCompleted,ivec2(gl_FragCoord.xy),0).rgb,1.0);}\n";
+function he(e, t) {
+	let n = e.getParameter(e.SAMPLES), r = e.getParameter(e.DEPTH_BITS), i = e.getParameter(e.STENCIL_BITS);
+	if (!Number.isInteger(n) || n < 0 || e.getParameter(e.RED_BITS) !== 8 || e.getParameter(e.GREEN_BITS) !== 8 || e.getParameter(e.BLUE_BITS) !== 8 || e.getParameter(e.ALPHA_BITS) !== 0 || e.getFramebufferAttachmentParameter(e.FRAMEBUFFER, e.BACK, e.FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING) !== e.LINEAR) return null;
+	let a = t ? i === 8 && (r === 24 ? e.DEPTH24_STENCIL8 : r === 32 ? e.DEPTH32F_STENCIL8 : null) : r === 16 ? e.DEPTH_COMPONENT16 : r === 24 ? e.DEPTH_COMPONENT24 : r === 32 ? e.DEPTH_COMPONENT32F : null;
+	if (!a) return null;
+	for (let t of [e.RGB8, a]) if (n && !Array.from(e.getInternalformatParameter(e.RENDERBUFFER, t, e.SAMPLES) || []).includes(n)) return null;
+	return {
+		samples: n,
+		depth: r,
+		stencil: t ? i : 0,
+		depthFormat: a
+	};
+}
+var $ = class {
+	constructor(e, t, n = null, r = !1) {
+		this.mapMode = r, this.gl = e, this.model = t, this.displayMask = n, this.resources = [], this.meshes = /* @__PURE__ */ new Map(), this.shadows = /* @__PURE__ */ new Map(), this.routeCount = 0;
+		try {
+			if (e.getParameter(e.MAX_TEXTURE_SIZE) < Math.max(t.grid.width, t.grid.height) || e.getParameter(e.MAX_VERTEX_TEXTURE_IMAGE_UNITS) < 1) throw Error("Terrain GPU limits");
+			if (n && (e.getParameter(e.MAX_TEXTURE_SIZE) < Math.max(n.width, n.height) || e.getParameter(e.STENCIL_BITS) < 1)) throw Error("Terrain display mask GPU limits");
+			this.anisotropy = e.getExtension("EXT_texture_filter_anisotropic"), this.maxAnisotropy = this.anisotropy ? Math.min(4, e.getParameter(this.anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)) : 1, this.terrain = this.program(re, pe(n)), this.shadow = this.program(ae, oe), this.line = this.program(se, ce), this.boundary = this.program(le, ue), this.ground = this.program(de, fe), this.frameFormat = he(e, n), this.frameTarget = null, this.present = this.frameFormat ? this.program(ae, me) : null, this.heightTexture = this.texture(e.R32F, t.grid.width, t.grid.height, e.RED, e.FLOAT, t.heights, e.NEAREST), this.maskTexture = this.texture(e.R8, n?.width || 1, n?.height || 1, e.RED, e.UNSIGNED_BYTE, n?.pixels || new Uint8Array([255]), e.NEAREST), this.normalTexture = this.texture(e.RGBA8, t.grid.width, t.grid.height, e.RGBA, e.UNSIGNED_BYTE, t.normalTexture, e.LINEAR), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_MIN_FILTER, e.LINEAR_MIPMAP_LINEAR), e.generateMipmap(e.TEXTURE_2D);
+			let r = k(t), i = r[0];
+			this.maxHeightTexture = this.texture(e.R32F, i.width, i.height, e.RED, e.FLOAT, i.data, e.NEAREST);
+			for (let t = 1; t < r.length; t++) {
+				let n = r[t];
+				e.texImage2D(e.TEXTURE_2D, t, e.R32F, n.width, n.height, 0, e.RED, e.FLOAT, n.data);
+			}
+			if (e.texParameteri(e.TEXTURE_2D, e.TEXTURE_MAX_LEVEL, r.length - 1), e.getError() !== e.NO_ERROR) throw Error("Terrain texture allocation failed");
+			let a = Z(128);
+			this.surfaceTexture = this.texture(e.RGBA8, a.size, a.size, e.RGBA, e.UNSIGNED_BYTE, a.pixels, e.LINEAR), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_WRAP_S, e.REPEAT), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_WRAP_T, e.REPEAT), e.texParameteri(e.TEXTURE_2D, e.TEXTURE_MIN_FILTER, e.LINEAR_MIPMAP_LINEAR), e.generateMipmap(e.TEXTURE_2D), this.setCartography(null), this.emptyVAO = this.track(e.createVertexArray(), "VertexArray"), this.routeVAO = this.track(e.createVertexArray(), "VertexArray"), this.routeBuffer = this.track(e.createBuffer(), "Buffer"), e.bindVertexArray(this.routeVAO), e.bindBuffer(e.ARRAY_BUFFER, this.routeBuffer);
+			for (let [t, n, r] of [
+				[
+					0,
+					3,
+					0
+				],
+				[
+					1,
+					3,
+					12
+				],
+				[
+					2,
+					2,
+					24
+				]
+			]) e.enableVertexAttribArray(t), e.vertexAttribPointer(t, n, e.FLOAT, !1, 32, r);
+			e.bindVertexArray(null);
+		} catch (e) {
+			throw this.destroy(), e;
+		}
+	}
+	track(e, t) {
+		if (!e) throw Error("Terrain GPU allocation failed");
+		return this.resources.push([e, t]), e;
+	}
+	release(e, t) {
+		e && (this.gl["delete" + t](e), this.resources = this.resources.filter(([t]) => t !== e));
+	}
+	renderbufferParameter(e, t) {
+		let n = this.gl;
+		return n.bindRenderbuffer(n.RENDERBUFFER, null), n.bindRenderbuffer(n.RENDERBUFFER, e), n.getRenderbufferParameter(n.RENDERBUFFER, t);
+	}
+	targetFor(e, t) {
+		if (this.frameTarget?.width === e && this.frameTarget?.height === t) return this.frameTarget;
+		if (this.frameTarget) for (let [e, t] of this.frameTarget.resources) this.release(e, t);
+		this.frameTarget = null;
+		let n = this.gl, r = this.frameFormat, i = [], a = (e, t) => (i.push([e, t]), this.track(e, t)), o = {
+			width: e,
+			height: t,
+			resources: i,
+			framebuffer: a(n.createFramebuffer(), "Framebuffer"),
+			resolve: a(n.createFramebuffer(), "Framebuffer")
+		};
+		try {
+			n.bindFramebuffer(n.FRAMEBUFFER, o.framebuffer);
+			let s = a(n.createRenderbuffer(), "Renderbuffer"), c = a(n.createRenderbuffer(), "Renderbuffer");
+			for (let [i, a, o] of [[
+				s,
+				n.RGB8,
+				n.COLOR_ATTACHMENT0
+			], [
+				c,
+				r.depthFormat,
+				this.displayMask ? n.DEPTH_STENCIL_ATTACHMENT : n.DEPTH_ATTACHMENT
+			]]) {
+				if (n.bindRenderbuffer(n.RENDERBUFFER, i), r.samples ? n.renderbufferStorageMultisample(n.RENDERBUFFER, r.samples, a, e, t) : n.renderbufferStorage(n.RENDERBUFFER, a, e, t), this.renderbufferParameter(i, n.RENDERBUFFER_SAMPLES) !== r.samples) throw Error("Terrain framebuffer sample count changed");
+				let c = i === s ? [
+					[n.RENDERBUFFER_RED_SIZE, 8],
+					[n.RENDERBUFFER_GREEN_SIZE, 8],
+					[n.RENDERBUFFER_BLUE_SIZE, 8],
+					[n.RENDERBUFFER_ALPHA_SIZE, 0]
+				] : [[n.RENDERBUFFER_DEPTH_SIZE, r.depth], [n.RENDERBUFFER_STENCIL_SIZE, r.stencil]];
+				for (let [e, t] of c) if (this.renderbufferParameter(i, e) !== t) throw Error("Terrain framebuffer precision changed");
+				n.framebufferRenderbuffer(n.FRAMEBUFFER, o, n.RENDERBUFFER, i);
+			}
+			if (n.checkFramebufferStatus(n.FRAMEBUFFER) !== n.FRAMEBUFFER_COMPLETE) throw Error("Terrain multisample framebuffer unavailable");
+			if (o.texture = this.texture(n.RGB8, e, t, n.RGB, n.UNSIGNED_BYTE, null, n.NEAREST), i.push([o.texture, "Texture"]), n.bindFramebuffer(n.FRAMEBUFFER, o.resolve), n.framebufferTexture2D(n.FRAMEBUFFER, n.COLOR_ATTACHMENT0, n.TEXTURE_2D, o.texture, 0), n.checkFramebufferStatus(n.FRAMEBUFFER) !== n.FRAMEBUFFER_COMPLETE || n.getError() !== n.NO_ERROR) throw Error("Terrain resolve framebuffer unavailable");
+			return this.frameTarget = o, o;
+		} catch (e) {
+			for (let [e, t] of i) this.release(e, t);
+			throw e;
+		} finally {
+			n.bindRenderbuffer(n.RENDERBUFFER, null), n.bindFramebuffer(n.FRAMEBUFFER, null);
+		}
+	}
+	beginFrame(e, t, n, r, i, a, o) {
+		let s = this.gl, c = this.targetFor(r, i);
+		this.render(e, t, n, r, i, a, o, c.framebuffer), s.bindFramebuffer(s.READ_FRAMEBUFFER, c.framebuffer), s.bindFramebuffer(s.DRAW_FRAMEBUFFER, c.resolve), s.blitFramebuffer(0, 0, r, i, 0, 0, r, i, s.COLOR_BUFFER_BIT, s.NEAREST);
+		let l = this.track(s.fenceSync(s.SYNC_GPU_COMMANDS_COMPLETE, 0), "Sync");
+		return s.flush(), {
+			target: c,
+			sync: l
+		};
+	}
+	frameReady(e) {
+		let t = this.gl, n = t.clientWaitSync(e.sync, 0, 0);
+		if (n === t.TIMEOUT_EXPIRED) return !1;
+		if (n !== t.ALREADY_SIGNALED && n !== t.CONDITION_SATISFIED) throw Error("Terrain frame completion failed");
+		return this.release(e.sync, "Sync"), e.sync = null, !0;
+	}
+	presentFrame(e) {
+		let t = this.gl, { target: n } = e;
+		if (t.bindFramebuffer(t.FRAMEBUFFER, null), t.viewport(0, 0, n.width, n.height), t.disable(t.SCISSOR_TEST), t.disable(t.DEPTH_TEST), t.disable(t.STENCIL_TEST), t.disable(t.CULL_FACE), t.disable(t.BLEND), t.depthMask(!1), t.colorMask(!0, !0, !0, !0), t.useProgram(this.present.program), t.activeTexture(t.TEXTURE0), t.bindTexture(t.TEXTURE_2D, n.texture), t.uniform1i(this.uniform(this.present, "uCompleted"), 0), t.bindVertexArray(this.emptyVAO), t.drawArrays(t.TRIANGLES, 0, 3), t.bindVertexArray(null), t.depthMask(!0), t.flush(), t.getError() !== t.NO_ERROR) throw Error("Terrain completed frame presentation failed");
+	}
+	setCartography(e) {
+		let t = this.gl, n = e?.width || 1, r = e?.height || 1, i = e ? new Uint8Array(e.pixels) : /* @__PURE__ */ new Uint8Array(4);
+		if (e) for (let e = 0; e < i.length; e += 4) {
+			let t = i[e + 3] / 255;
+			for (let n = 0; n < 3; n++) i[e + n] = Math.round(i[e + n] * t);
+		}
+		let a = this.texture(t.RGBA8, n, r, t.RGBA, t.UNSIGNED_BYTE, i, t.LINEAR);
+		if (t.texParameteri(t.TEXTURE_2D, t.TEXTURE_MIN_FILTER, t.LINEAR_MIPMAP_LINEAR), t.generateMipmap(t.TEXTURE_2D), t.getError() !== t.NO_ERROR) throw t.deleteTexture(a), this.resources = this.resources.filter(([e]) => e !== a), Error("Terrain cartography texture allocation failed");
+		this.cartographyTexture && (t.deleteTexture(this.cartographyTexture), this.resources = this.resources.filter(([e]) => e !== this.cartographyTexture)), this.cartographyTexture = a, this.cartographySize = [n, r];
+	}
+	program(e, t) {
+		let n = this.gl, r = [];
+		try {
+			for (let [i, a] of [[n.VERTEX_SHADER, e], [n.FRAGMENT_SHADER, t]]) {
+				let e = n.createShader(i);
+				if (!e) throw Error("Terrain shader unavailable");
+				if (r.push(e), n.shaderSource(e, a), n.compileShader(e), !n.getShaderParameter(e, n.COMPILE_STATUS)) throw Error("Terrain shader: " + n.getShaderInfoLog(e));
+			}
+			let i = this.track(n.createProgram(), "Program");
+			if (r.forEach((e) => n.attachShader(i, e)), n.linkProgram(i), !n.getProgramParameter(i, n.LINK_STATUS)) throw Error("Terrain shader link: " + n.getProgramInfoLog(i));
+			return {
+				program: i,
+				uniforms: /* @__PURE__ */ new Map()
+			};
+		} finally {
+			r.forEach((e) => n.deleteShader(e));
+		}
+	}
+	uniform(e, t) {
+		return e.uniforms.has(t) || e.uniforms.set(t, this.gl.getUniformLocation(e.program, t)), e.uniforms.get(t);
+	}
+	texture(e, t, n, r, i, a, o) {
+		let s = this.gl, c = this.track(s.createTexture(), "Texture");
+		return s.bindTexture(s.TEXTURE_2D, c), s.texParameteri(s.TEXTURE_2D, s.TEXTURE_MIN_FILTER, o), s.texParameteri(s.TEXTURE_2D, s.TEXTURE_MAG_FILTER, o), s.texParameteri(s.TEXTURE_2D, s.TEXTURE_WRAP_S, s.CLAMP_TO_EDGE), s.texParameteri(s.TEXTURE_2D, s.TEXTURE_WRAP_T, s.CLAMP_TO_EDGE), o === s.LINEAR && this.anisotropy && s.texParameterf(s.TEXTURE_2D, this.anisotropy.TEXTURE_MAX_ANISOTROPY_EXT, this.maxAnisotropy), s.pixelStorei(s.UNPACK_ALIGNMENT, 1), s.texImage2D(s.TEXTURE_2D, 0, e, t, n, 0, r, i, a), c;
+	}
+	heightUniforms(e) {
+		let t = this.gl, n = this.model;
+		t.activeTexture(t.TEXTURE0), t.bindTexture(t.TEXTURE_2D, this.heightTexture), t.uniform1i(this.uniform(e, "uHeight"), 0), t.uniform2f(this.uniform(e, "uGrid"), n.grid.width, n.grid.height), t.uniform2f(this.uniform(e, "uExtent"), n.width, n.height);
+	}
+	maskUniforms(e) {
+		let t = this.gl;
+		t.activeTexture(t.TEXTURE6), t.bindTexture(t.TEXTURE_2D, this.maskTexture), t.uniform1i(this.uniform(e, "uDisplayMask"), 6);
+	}
+	ensureMesh(e) {
+		let t = e.window ? e.step + ":" + e.window.join(":") : e.step;
+		if (this.meshes.has(t)) return this.meshes.get(t);
+		let n = this.gl, r = [], i = (e, t) => (this.track(e, t), r.push([e, t]), e), a = i(n.createVertexArray(), "VertexArray"), o = i(n.createBuffer(), "Buffer"), s = i(n.createBuffer(), "Buffer");
+		n.bindVertexArray(a), n.bindBuffer(n.ARRAY_BUFFER, o), n.bufferData(n.ARRAY_BUFFER, e.uv, n.STATIC_DRAW), n.enableVertexAttribArray(0), n.vertexAttribPointer(0, 2, n.FLOAT, !1, 8, 0), n.bindBuffer(n.ELEMENT_ARRAY_BUFFER, s), n.bufferData(n.ELEMENT_ARRAY_BUFFER, e.indices, n.STATIC_DRAW), n.bindVertexArray(null);
+		let c = this.displayMask || this.mapMode ? {
+			vertices: /* @__PURE__ */ new Float32Array(),
+			count: 0,
+			floor: 0
+		} : H(this.model, e.step), l = i(n.createVertexArray(), "VertexArray"), u = i(n.createBuffer(), "Buffer");
+		n.bindVertexArray(l), n.bindBuffer(n.ARRAY_BUFFER, u), n.bufferData(n.ARRAY_BUFFER, c.vertices, n.STATIC_DRAW);
+		for (let [e, t] of [[0, 0], [1, 12]]) n.enableVertexAttribArray(e), n.vertexAttribPointer(e, 3, n.FLOAT, !1, 24, t);
+		n.bindVertexArray(null);
+		let d = {
+			vao: a,
+			count: e.indices.length,
+			type: e.indices instanceof Uint32Array ? n.UNSIGNED_INT : n.UNSIGNED_SHORT,
+			boundaryVAO: l,
+			boundaryCount: c.count,
+			floor: c.floor,
+			resources: r
+		};
+		if (this.mapMode && this.meshes.size >= 2) {
+			let e = this.meshes.keys().next().value;
+			for (let [t, n] of this.meshes.get(e).resources) this.release(t, n);
+			this.meshes.delete(e);
+		}
+		return this.meshes.set(t, d), d;
+	}
+	setRoute(e) {
+		let t = this.gl, n = new Float32Array(e.length * 6 * 8), r = [
+			[0, -1],
+			[1, -1],
+			[0, 1],
+			[0, 1],
+			[1, -1],
+			[1, 1]
+		], i = 0;
+		for (let [t, a] of e) for (let e of r) n.set(t, i), n.set(a, i + 3), n.set(e, i + 6), i += 8;
+		t.bindBuffer(t.ARRAY_BUFFER, this.routeBuffer), t.bufferData(t.ARRAY_BUFFER, n, t.STATIC_DRAW), this.routeCount = e.length * 6;
+	}
+	shadowMap(e, t) {
+		let n = this.gl, r = t.shadowSize, i = t.shadowQueries, a = this.shadows.get(r);
+		if (!a) {
+			let e = this.texture(n.RGBA8, r, r, n.RGBA, n.UNSIGNED_BYTE, null, n.LINEAR), t = this.track(n.createFramebuffer(), "Framebuffer");
+			if (n.bindFramebuffer(n.FRAMEBUFFER, t), n.framebufferTexture2D(n.FRAMEBUFFER, n.COLOR_ATTACHMENT0, n.TEXTURE_2D, e, 0), n.checkFramebufferStatus(n.FRAMEBUFFER) !== n.FRAMEBUFFER_COMPLETE) throw Error("Terrain shadow target unavailable");
+			a = {
+				texture: e,
+				framebuffer: t,
+				key: ""
+			}, this.shadows.set(r, a);
+		}
+		let o = i + ":" + e.join(":");
+		return a.key !== o && (n.bindFramebuffer(n.FRAMEBUFFER, a.framebuffer), n.viewport(0, 0, r, r), n.disable(n.DEPTH_TEST), n.disable(n.BLEND), n.disable(n.CULL_FACE), n.useProgram(this.shadow.program), this.heightUniforms(this.shadow), n.activeTexture(n.TEXTURE3), n.bindTexture(n.TEXTURE_2D, this.maxHeightTexture), n.uniform1i(this.uniform(this.shadow, "uHeightMax"), 3), n.uniform3fv(this.uniform(this.shadow, "uLight"), e), n.uniform1i(this.uniform(this.shadow, "uSteps"), i), n.bindVertexArray(this.emptyVAO), n.drawArrays(n.TRIANGLES, 0, 3), a.key = o), {
+			texture: a.texture,
+			size: r
+		};
+	}
+	render(e, t, n, r, i, a, s, c = null) {
+		let l = this.gl, u = this.model, d = this.shadowMap(n, s), f = this.ensureMesh(e);
+		if (l.bindFramebuffer(l.FRAMEBUFFER, c), l.viewport(0, 0, r, i), l.clearColor(o[0] / 255, o[1] / 255, o[2] / 255, 1), l.disable(l.STENCIL_TEST), l.clearDepth(1), l.depthMask(!0), this.displayMask && (l.stencilMask(255), l.clearStencil(0)), l.clear(l.COLOR_BUFFER_BIT | l.DEPTH_BUFFER_BIT | (this.displayMask ? l.STENCIL_BUFFER_BIT : 0)), !this.displayMask && !this.mapMode && (l.disable(l.DEPTH_TEST), l.disable(l.CULL_FACE), l.depthMask(!1), l.enable(l.BLEND), l.blendFunc(l.SRC_ALPHA, l.ONE_MINUS_SRC_ALPHA), l.useProgram(this.ground.program), l.uniformMatrix4fv(this.uniform(this.ground, "uMatrix"), !1, t.matrix), l.uniform2fv(this.uniform(this.ground, "uOffset"), t.offset), l.uniform2f(this.uniform(this.ground, "uExtent"), u.width, u.height), l.uniform1f(this.uniform(this.ground, "uFloor"), f.floor), l.bindVertexArray(this.emptyVAO), l.drawArrays(l.TRIANGLES, 0, 6), l.depthMask(!0)), this.displayMask && (l.enable(l.STENCIL_TEST), l.stencilFunc(l.ALWAYS, 1, 255), l.stencilOp(l.KEEP, l.KEEP, l.REPLACE)), l.enable(l.DEPTH_TEST), l.depthFunc(l.LEQUAL), l.disable(l.CULL_FACE), l.disable(l.BLEND), l.useProgram(this.terrain.program), this.heightUniforms(this.terrain), this.maskUniforms(this.terrain), l.activeTexture(l.TEXTURE1), l.bindTexture(l.TEXTURE_2D, this.normalTexture), l.uniform1i(this.uniform(this.terrain, "uNormal"), 1), l.activeTexture(l.TEXTURE2), l.bindTexture(l.TEXTURE_2D, d.texture), l.uniform1i(this.uniform(this.terrain, "uShadow"), 2), l.activeTexture(l.TEXTURE4), l.bindTexture(l.TEXTURE_2D, this.surfaceTexture), l.uniform1i(this.uniform(this.terrain, "uSurface"), 4), l.activeTexture(l.TEXTURE5), l.bindTexture(l.TEXTURE_2D, this.cartographyTexture), l.uniform1i(this.uniform(this.terrain, "uCartography"), 5), l.uniform2fv(this.uniform(this.terrain, "uCartographySize"), this.cartographySize), l.uniformMatrix4fv(this.uniform(this.terrain, "uMatrix"), !1, t.matrix), l.uniform2fv(this.uniform(this.terrain, "uOffset"), t.offset), l.uniform3fv(this.uniform(this.terrain, "uLight"), n), l.uniform3fv(this.uniform(this.terrain, "uEye"), t.eye), l.uniform1f(this.uniform(this.terrain, "uBase"), u.base), l.uniform1f(this.uniform(this.terrain, "uScale"), u.scale), l.uniform1f(this.uniform(this.terrain, "uShadowTexel"), 1 / d.size), l.bindVertexArray(f.vao), l.drawElements(l.TRIANGLES, f.count, f.type, 0), this.displayMask && (l.stencilMask(0), l.stencilFunc(l.EQUAL, 1, 255), l.stencilOp(l.KEEP, l.KEEP, l.KEEP)), !this.displayMask && !this.mapMode && (l.useProgram(this.boundary.program), l.uniformMatrix4fv(this.uniform(this.boundary, "uMatrix"), !1, t.matrix), l.uniform2fv(this.uniform(this.boundary, "uOffset"), t.offset), l.uniform3fv(this.uniform(this.boundary, "uLight"), n), l.uniform1f(this.uniform(this.boundary, "uFloor"), f.floor), l.bindVertexArray(f.boundaryVAO), l.drawArrays(l.TRIANGLES, 0, f.boundaryCount)), this.routeCount) {
+			l.enable(l.BLEND), l.blendFunc(l.SRC_ALPHA, l.ONE_MINUS_SRC_ALPHA), l.depthMask(!1), l.useProgram(this.line.program), l.uniformMatrix4fv(this.uniform(this.line, "uMatrix"), !1, t.matrix), l.uniform2fv(this.uniform(this.line, "uOffset"), t.offset), this.maskUniforms(this.line), l.uniform2f(this.uniform(this.line, "uExtent"), u.width, u.height), l.uniform2f(this.uniform(this.line, "uViewport"), r, i), l.bindVertexArray(this.routeVAO);
+			for (let [e, t] of [[4.3, [
+				1,
+				.985,
+				.91,
+				.94
+			]], [2.25, [
+				.74,
+				.3,
+				.12,
+				1
+			]]]) l.uniform1f(this.uniform(this.line, "uHalfWidth"), e * a), l.uniform4fv(this.uniform(this.line, "uColor"), t), l.drawArrays(l.TRIANGLES, 0, this.routeCount);
+			l.depthMask(!0), l.disable(l.BLEND);
+		}
+		l.disable(l.STENCIL_TEST), l.bindVertexArray(null), l.flush();
+	}
+	abandon() {
+		this.resources = [], this.meshes.clear(), this.shadows.clear(), this.routeCount = 0, this.frameTarget = null;
+		for (let e of [
+			"terrain",
+			"shadow",
+			"line",
+			"boundary",
+			"ground",
+			"present",
+			"heightTexture",
+			"maskTexture",
+			"normalTexture",
+			"maxHeightTexture",
+			"surfaceTexture",
+			"cartographyTexture",
+			"emptyVAO",
+			"routeVAO",
+			"routeBuffer",
+			"anisotropy"
+		]) this[e] = null;
+	}
+	destroy() {
+		let e = this.gl;
+		for (let [t, n] of this.resources.reverse()) e["delete" + n](t);
+		this.abandon();
+	}
+};
+function ge(e) {
+	return Q(e);
+}
+var _e = class {
+	constructor(e, t, n = null, r = !1) {
+		this.mapMode = r, this.ctx = e, this.model = t, this.displayMask = n, this.shadowCache = /* @__PURE__ */ new Map(), this.boundaries = /* @__PURE__ */ new Map(), this.cartography = null;
+	}
+	setCartography(e) {
+		this.cartography = e;
+	}
+	shadows(e, t, n) {
+		let r = e.step + ":" + (e.window?.join(":") || "full") + ":" + n.shadowQueries + ":" + t.join(":");
+		if (this.shadowCache.has(r)) return this.shadowCache.get(r);
+		let i = new Float32Array(e.count), a = this.model;
+		for (let r = 0; r < e.count; r++) i[r] = j(a, (e.uv[r * 2] - .5) * a.widthM, (.5 - e.uv[r * 2 + 1]) * a.heightM, a.grid.elevations[e.sampleIds[r]], t, n.shadowQueries);
+		return this.shadowCache.size >= 4 && this.shadowCache.delete(this.shadowCache.keys().next().value), this.shadowCache.set(r, i), i;
+	}
+	render(e, t, n, r, i, a, s, c) {
+		let l = this.model, u = this.ctx;
+		(!this.image || this.image.width !== r || this.image.height !== i) && (this.image = u.createImageData(r, i), this.depth = new Float32Array(r * i));
+		let d = this.image.data, g = this.depth;
+		for (let e = 0; e < d.length; e += 4) d[e] = o[0], d[e + 1] = o[1], d[e + 2] = o[2], d[e + 3] = 255;
+		g.fill(Infinity), this.boundaries.has(e.step) || this.boundaries.set(e.step, this.displayMask || this.mapMode ? {
+			count: 0,
+			vertices: /* @__PURE__ */ new Float32Array(),
+			floor: 0
+		} : H(l, e.step));
+		let _ = this.boundaries.get(e.step), v = this.shadows(e, n, s), b = Array(e.count + _.count), S = new Float32Array((e.count + _.count) * 3), C = this.cartography, w = C ? new Float32Array(e.count * 3) : null, T = C ? new Float32Array(e.count) : null, E = [
+			0,
+			0,
+			0,
+			0
+		];
+		for (let a = 0; a < e.count; a++) {
+			let s = e.sampleIds[a], c = [
+				l.normals[s * 3],
+				l.normals[s * 3 + 1],
+				l.normals[s * 3 + 2]
+			], u = e.uv[a * 2], d = e.uv[a * 2 + 1], g = [
+				(u - .5) * l.width,
+				(.5 - d) * l.height,
+				l.heights[s]
+			];
+			b[a] = J(g, t, r, i);
+			let _ = ge(l.grid.elevations[s]), y = m(.18, .57, 1 - c[2]), x = l.normalTexture[s * 4 + 3] / 255, C = Math.max(0, h(c, n)) * v[a] * .94, E = Math.max(f((Math.hypot(...g.map((e, n) => e - t.eye[n])) - .68) * .13, 0, .32), (1 - m(0, .003, Math.min(u, 1 - u, d, 1 - d))) * .15);
+			T && (T[a] = E);
+			for (let e = 0; e < 3; e++) {
+				let t = p(_[e], [
+					.57,
+					.55,
+					.48
+				][e], y * .68), n = [
+					.34,
+					.41,
+					.4
+				][e] * (.55 + .45 * c[2]) * x + [
+					1.05,
+					.99,
+					.85
+				][e] * C;
+				S[a * 3 + e] = p(Math.max(0, t ** 2.2 * n) ** (1 / 2.2) * 255, o[e], E), w && (w[a * 3 + e] = Math.max(0, n) ** (1 / 2.2));
+			}
+		}
+		for (let a = 0; a < _.count; a++) {
+			let o = a * 6, s = Array.from(_.vertices.subarray(o, o + 3)), c = Array.from(_.vertices.subarray(o + 3, o + 6)), l = e.count + a;
+			b[l] = J(s, t, r, i);
+			let u = f((s[2] - _.floor) / .17, 0, 1), d = .4 + .6 * Math.max(h(c, n), 0);
+			for (let e = 0; e < 3; e++) S[l * 3 + e] = p([
+				.34,
+				.38,
+				.33
+			][e], [
+				.49,
+				.53,
+				.46
+			][e], u) * d * 255;
+		}
+		let D = e.indices;
+		for (let t = 0; t < D.length + _.count; t += 3) {
+			let n = t < D.length ? D[t] : e.count + t - D.length, a = t < D.length ? D[t + 1] : n + 1, s = t < D.length ? D[t + 2] : n + 2, c = b[n], l = b[a], u = b[s];
+			if (!c || !l || !u) continue;
+			let f = Math.max(0, Math.floor(Math.min(c[0], l[0], u[0]))), m = Math.min(r - 1, Math.ceil(Math.max(c[0], l[0], u[0]))), h = Math.max(0, Math.floor(Math.min(c[1], l[1], u[1]))), _ = Math.min(i - 1, Math.ceil(Math.max(c[1], l[1], u[1])));
+			if (f > m || h > _) continue;
+			let v = (l[1] - u[1]) * (c[0] - u[0]) + (u[0] - l[0]) * (c[1] - u[1]);
+			if (Math.abs(v) < 1e-5) continue;
+			let O = 1 / v, k = (l[1] - u[1]) * O, A = (u[0] - l[0]) * O, j = (u[1] - c[1]) * O, M = (c[0] - u[0]) * O, N = ((l[1] - u[1]) * (f + .5 - u[0]) + (u[0] - l[0]) * (h + .5 - u[1])) * O, P = ((u[1] - c[1]) * (f + .5 - u[0]) + (c[0] - u[0]) * (h + .5 - u[1])) * O;
+			for (let i = h; i <= _; i++, N += A, P += M) {
+				let h = N, _ = P, v = i * r + f;
+				for (let r = f; r <= m; r++, v++, h += k, _ += j) {
+					let r = 1 - h - _;
+					if (h < -1e-5 || _ < -1e-5 || r < -1e-5) continue;
+					let i = h * c[2] + _ * l[2] + r * u[2];
+					if (i > g[v] || i < -1 || i > 1) continue;
+					let f = h * c[3], m = _ * l[3], b = r * u[3], O = 1 / (f + m + b), k = v * 4, A = t < D.length && (C || this.displayMask) ? (f * e.uv[n * 2] + m * e.uv[a * 2] + b * e.uv[s * 2]) * O : 0, j = t < D.length && (C || this.displayMask) ? (f * e.uv[n * 2 + 1] + m * e.uv[a * 2 + 1] + b * e.uv[s * 2 + 1]) * O : 0;
+					if (this.displayMask && !y(this.displayMask, A, j)) continue;
+					g[v] = i;
+					let M = 0, N = 0;
+					C && t < D.length && (x(C, A, j, E), M = E[3] / 255, N = (f * T[n] + m * T[a] + b * T[s]) * O);
+					for (let e = 0; e < 3; e++) {
+						let t = (f * S[n * 3 + e] + m * S[a * 3 + e] + b * S[s * 3 + e]) * O, r = M ? p(E[e] * (f * w[n * 3 + e] + m * w[a * 3 + e] + b * w[s * 3 + e]) * O, o[e], N) : t;
+						d[k + e] = p(t, r, M);
+					}
+				}
+			}
+		}
+		let O = c.map(([e, n]) => [
+			J(e, t, r, i),
+			J(n, t, r, i),
+			[e[0] / l.width + .5, .5 - e[1] / l.height],
+			[n[0] / l.width + .5, .5 - n[1] / l.height]
+		]);
+		for (let [e, t] of [[4.3 * a, [
+			255,
+			251,
+			232
+		]], [2.25 * a, [
+			189,
+			77,
+			31
+		]]]) for (let [n, a, o, s] of O) n && a && this.routeCapsule(n, a, e, t, r, i, d, g, o, s);
+		u.putImageData(this.image, 0, 0);
+	}
+	routeCapsule(e, t, n, r, i, a, o, s, c, l) {
+		let u = t[0] - e[0], d = t[1] - e[1], m = u * u + d * d;
+		if (m < 1e-5) return;
+		let h = Math.max(0, Math.floor(Math.min(e[0], t[0]) - n)), g = Math.min(i - 1, Math.ceil(Math.max(e[0], t[0]) + n)), _ = Math.max(0, Math.floor(Math.min(e[1], t[1]) - n)), v = Math.min(a - 1, Math.ceil(Math.max(e[1], t[1]) + n));
+		for (let a = _; a <= v; a++) for (let _ = h; _ <= g; _++) {
+			let h = f(((_ + .5 - e[0]) * u + (a + .5 - e[1]) * d) / m, 0, 1), g = Math.hypot(_ + .5 - e[0] - u * h, a + .5 - e[1] - d * h);
+			if (g >= n) continue;
+			let v = a * i + _, b = p(e[2], t[2], h);
+			if (b > s[v] || b < -1 || b > 1) continue;
+			if (this.displayMask) {
+				let n = 1 / p(e[3], t[3], h), r = p(c[0] * e[3], l[0] * t[3], h) * n, i = p(c[1] * e[3], l[1] * t[3], h) * n;
+				if (!Number.isFinite(s[v]) || !y(this.displayMask, r, i)) continue;
+			}
+			let x = f(n - g, 0, 1), S = v * 4;
+			for (let e = 0; e < 3; e++) o[S + e] = p(o[S + e], r[e], x);
+		}
+	}
+	destroy() {
+		this.shadowCache.clear(), this.boundaries.clear(), this.image = null, this.depth = null, this.cartography = null, this.displayMask = null;
+	}
+}, ve = class {
+	constructor(e, t, n = {}) {
+		this.originalCanvas = e, this.canvas = e, this.grid = t, this.options = {
+			...n,
+			displayMask: void 0
+		};
+		let a = n.displayMask ? v(n.displayMask, t) : null;
+		this.displayMask = a ? {
+			width: a.width,
+			height: a.height,
+			pixels: new Uint8Array(a.pixels),
+			source: {
+				...a.source,
+				bounds: [...a.source.bounds],
+				cells: [...a.source.cells]
+			}
+		} : null, this.model = n.preparedModel === void 0 ? E(t) : O(t, n.preparedModel), this.widthM = this.model.widthM, this.heightM = this.model.heightM, this.base = this.model.base;
+		let o = n.navigation === "map" ? i : r;
+		this.yaw = o.yaw, this.pitch = o.pitch, this.zoom = o.zoom, this.offset = [0, 0], this.viewportInsets = G(n.viewportInsets), this.viewViewport = this.viewportSize(), this.visible = !0, this.destroyed = !1, this.failed = !1, this.contextLost = !1, this.frame = 0, this.dirty = !0, this.warmRequested = !1, this.graphicsFallback = null, this.pointers = /* @__PURE__ */ new Map(), this.events = [], this.meshes = /* @__PURE__ */ new Map(), this.windowMeshes = /* @__PURE__ */ new Map(), this.meshStride = 0, this.renderProfile = null, this.route = [], this.routeMeshes = /* @__PURE__ */ new Map(), this.gpuRoute = null, this.dragging = !1, this.wheeling = !1, this.cartography = null, this.pendingGPU = null, this.gpuCartographyDirty = !1, n.initialView && this.applyView(n.initialView), this.previousTouchAction = e.style?.touchAction, e.style && (e.style.touchAction = "none");
+		try {
+			let t;
+			if (!n.forceCanvas) try {
+				t = e.getContext("webgl2", {
+					alpha: !1,
+					antialias: !0,
+					depth: !0,
+					stencil: !!this.displayMask,
+					preserveDrawingBuffer: !1,
+					powerPreference: "default",
+					failIfMajorPerformanceCaveat: !0
+				});
+			} catch (e) {
+				this.recordGraphicsFallback("context-create", e);
+			}
+			if (t) try {
+				this.gpu = new $(t, this.model, this.displayMask, this.options.navigation === "map"), this.gl = t;
+			} catch (e) {
+				this.recordGraphicsFallback("initialization", e), t.getExtension("WEBGL_lose_context")?.loseContext(), this.useCanvas(!0);
+			}
+			else this.useCanvas(!1);
+			this.bindControls(), this.observe(), this.document = e.ownerDocument || (typeof document < "u" ? document : null), this.onVisibility = () => {
+				this.document?.visibilityState === "hidden" ? this.cancelFrame() : this.request();
+			}, this.document?.addEventListener("visibilitychange", this.onVisibility), this.request();
+		} catch (e) {
+			throw this.destroy(), e;
+		}
+	}
+	useCanvas(e) {
+		let t = this.canvas;
+		if (e && (t = this.canvas.cloneNode?.(!1), !t || !this.canvas.parentNode)) throw Error("Аппаратная сцена недоступна. Откройте плоскую карту.");
+		let n = t.getContext("2d", { alpha: !1 });
+		if (!n) throw Error("На этом устройстве недоступен рендер карты.");
+		e && (this.canvas.parentNode.replaceChild(t, this.canvas), this.canvas = t), this.software = new _e(n, this.model, this.displayMask, this.options.navigation === "map"), this.software.setCartography(this.cartography), this.gl = null, this.gpu = null;
+	}
+	recordGraphicsFallback(e, t) {
+		this.graphicsFallback = {
+			stage: e,
+			reason: String(t?.message ?? t ?? "Graphics context unavailable").replace(/[\r\n\t ]+/g, " ").slice(0, 512)
+		};
+	}
+	notify(e, t) {
+		try {
+			this.options[e]?.(t);
+		} catch {}
+	}
+	bind(e, t, n) {
+		this.canvas.addEventListener(e, t, n), this.events.push([
+			this.canvas,
+			e,
+			t,
+			n
+		]);
+	}
+	bindControls() {
+		this.bind("pointerdown", (e) => {
+			if (e.button !== void 0 && ![
+				0,
+				1,
+				2
+			].includes(e.button)) return;
+			try {
+				this.canvas.setPointerCapture(e.pointerId);
+			} catch {}
+			let t = e.button === 1 || e.button === 2 || e.shiftKey;
+			this.pointers.set(e.pointerId, {
+				x: e.clientX,
+				y: e.clientY,
+				pan: this.options.navigation === "map" ? !t : t
+			}), this.dragging = !0, this.request();
+		}), this.bind("pointermove", (n) => {
+			let r = this.pointers.get(n.pointerId);
+			if (!r) return;
+			let i = [...this.pointers.values()];
+			this.pointers.set(n.pointerId, {
+				...r,
+				x: n.clientX,
+				y: n.clientY
+			});
+			let a = [...this.pointers.values()];
+			if (a.length === 1) r.pan ? this.panBy(n.clientX - r.x, n.clientY - r.y) : (this.yaw += (n.clientX - r.x) * .0045, this.pitch = f(this.pitch + (n.clientY - r.y) * .003, .28, 1.32));
+			else if (a.length === 2) {
+				let e = Math.hypot(i[0].x - i[1].x, i[0].y - i[1].y), t = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y);
+				e > 2 && (this.zoom = f(this.zoom * t / e, ...this.zoomLimits())), this.panBy((a[0].x + a[1].x - i[0].x - i[1].x) / 2, (a[0].y + a[1].y - i[0].y - i[1].y) / 2);
+			}
+			this.yaw = ((this.yaw + e) % t + t) % t - e, this.request();
+		});
+		let n = (e) => {
+			this.pointers.delete(e.pointerId);
+			try {
+				this.canvas.hasPointerCapture?.(e.pointerId) && this.canvas.releasePointerCapture(e.pointerId);
+			} catch {}
+			this.dragging = this.pointers.size > 0, this.request(), this.dragging || this.scheduleViewChange("gesture", 0);
+		};
+		this.bind("pointerup", n), this.bind("pointercancel", n), this.bind("lostpointercapture", n), this.bind("contextmenu", (e) => e.preventDefault()), this.bind("wheel", (e) => {
+			e.preventDefault();
+			let t = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 300 : 1;
+			this.zoom = f(this.zoom * Math.exp(-f(e.deltaY * t, -800, 800) * .001), ...this.zoomLimits()), this.wheeling = !0, clearTimeout(this.wheelTimer), this.wheelTimer = setTimeout(() => {
+				this.wheeling = !1, this.request(), this.scheduleViewChange("wheel", 0);
+			}, 140), this.request();
+		}, { passive: !1 }), this.bind("keydown", (e) => {
+			if (this.options.navigation === "map" && !e.shiftKey && [
+				"ArrowLeft",
+				"ArrowRight",
+				"ArrowUp",
+				"ArrowDown"
+			].includes(e.key)) this.panBy(e.key === "ArrowLeft" ? 64 : e.key === "ArrowRight" ? -64 : 0, e.key === "ArrowUp" ? 64 : e.key === "ArrowDown" ? -64 : 0), this.request(), this.scheduleViewChange("keyboard");
+			else if (e.key === "ArrowLeft") this.rotate(-.1);
+			else if (e.key === "ArrowRight") this.rotate(.1);
+			else if (e.key === "ArrowUp") this.pitch = f(this.pitch + .06, .28, 1.32), this.request();
+			else if (e.key === "ArrowDown") this.pitch = f(this.pitch - .06, .28, 1.32), this.request();
+			else if (e.key === "+" || e.key === "=") this.zoomBy(1.15);
+			else if (e.key === "-" || e.key === "−") this.zoomBy(1 / 1.15);
+			else if (e.key === "Home") this.reset();
+			else return;
+			this.scheduleViewChange("keyboard"), e.preventDefault();
+		}), this.bind("webglcontextlost", (e) => {
+			e.preventDefault(), this.contextLost = !0, this.cancelFrame(), this.pendingGPU = null, this.canvas.dataset.terrainPending = "false", this.gpu?.abandon(), this.gpuRoute = null, this.notify("onError", "Графический контекст прерван. Восстанавливаем сцену…"), clearTimeout(this.restoreTimer), this.restoreTimer = setTimeout(() => {
+				this.recordGraphicsFallback("context-timeout", "Graphics context did not restore"), this.fallbackAfterLoss();
+			}, 2500);
+		}), this.bind("webglcontextrestored", () => {
+			if (!(this.destroyed || !this.gl)) {
+				clearTimeout(this.restoreTimer);
+				try {
+					this.gpu?.abandon(), this.gpu = new $(this.gl, this.model, this.displayMask, this.options.navigation === "map"), this.gpu.setCartography(this.cartography), this.gpuCartographyDirty = !1, this.gpuRoute = null, this.contextLost = !1, this.request();
+				} catch (e) {
+					this.recordGraphicsFallback("context-restoration", e), this.fallbackAfterLoss();
+				}
+			}
+		});
+	}
+	fallbackAfterLoss() {
+		if (!(this.destroyed || !this.contextLost)) {
+			clearTimeout(this.restoreTimer), this.unbindControls(), this.resize?.disconnect(), this.pointers.clear(), this.dragging = !1, this.wheeling = !1, clearTimeout(this.wheelTimer), this.gpuRoute = null, this.pendingGPU = null, this.gpuCartographyDirty = !1, this.canvas.dataset.terrainPending = "false";
+			try {
+				this.gpu?.destroy(), this.useCanvas(!0), this.contextLost = !1, this.bindControls(), this.observe(), this.request();
+			} catch {
+				this.terminalFailure("Не удалось восстановить ландшафт. Подготовьте сцену заново.");
+			}
+		}
+	}
+	terminalFailure(e) {
+		this.destroyed || (this.failed = !0, this.destroy(), this.notify("onError", e), this.notify("onFatal", e));
+	}
+	unbindControls() {
+		this.events.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.events = [];
+	}
+	observe() {
+		typeof ResizeObserver < "u" ? (this.resize = new ResizeObserver(() => this.options.navigation === "map" ? this.setViewportInsets(this.viewportInsets) : this.request()), this.resize.observe(this.canvas)) : typeof window < "u" && !this.onResize && (this.onResize = () => this.options.navigation === "map" ? this.setViewportInsets(this.viewportInsets) : this.request(), window.addEventListener("resize", this.onResize));
+	}
+	zoomLimits() {
+		return this.options.navigation === "map" ? [.2, 1024] : [.65, 5];
+	}
+	scheduleViewChange(e, t = 160) {
+		this.destroyed || !this.options.onViewChange || (clearTimeout(this.viewTimer), this.viewTimer = setTimeout(() => {
+			this.viewTimer = 0, !this.destroyed && !this.dragging && !this.wheeling && this.notifyViewChange(e);
+		}, t));
+	}
+	notifyViewChange(e) {
+		try {
+			this.options.onViewChange?.(this.getView(), e);
+		} catch {}
+	}
+	viewportSize() {
+		let e = this.canvas.getBoundingClientRect();
+		return {
+			width: Math.max(1, e.width),
+			height: Math.max(1, e.height)
+		};
+	}
+	syncViewport() {
+		if (this.options.navigation !== "map") return;
+		let e = this.viewportSize();
+		(!this.viewViewport || e.width !== this.viewViewport.width || e.height !== this.viewViewport.height) && this.applyView(this.getView());
+	}
+	getView() {
+		let e = this.grid.bounds, t = this.options.navigation === "map" && this.viewViewport ? this.viewViewport : this.viewportSize(), n = q(this.model, this, t.width, t.height, this.options.compactViewport);
+		return {
+			longitude: (e[0] + e[2]) / 2 + this.offset[0] / this.model.width * (e[2] - e[0]),
+			latitude: (e[1] + e[3]) / 2 + this.offset[1] / this.model.height * (e[3] - e[1]),
+			yaw: this.yaw,
+			pitch: this.pitch,
+			distanceM: n.distance * this.model.scale,
+			zoom: this.zoom,
+			bounds: [...e]
+		};
+	}
+	applyView(n) {
+		if (!n || ![
+			"longitude",
+			"latitude",
+			"yaw",
+			"pitch",
+			"distanceM"
+		].every((e) => Number.isFinite(n[e])) || n.latitude < -85 || n.latitude > 85 || n.distanceM <= 0) throw TypeError("Invalid geographic terrain view");
+		let r = this.grid.bounds, i = a(n.longitude, (r[0] + r[2]) / 2), o = this.canvas.getBoundingClientRect();
+		this.yaw = ((n.yaw + e) % t + t) % t - e, this.pitch = f(n.pitch, .28, 1.32), this.offset = [(i - (r[0] + r[2]) / 2) / (r[2] - r[0]) * this.model.width, (n.latitude - (r[1] + r[3]) / 2) / (r[3] - r[1]) * this.model.height];
+		let s = this.zoom, c = q(this.model, this, Math.max(1, o.width), Math.max(1, o.height), this.options.compactViewport);
+		this.zoom = f(c.distance * s * this.model.scale / n.distanceM, ...this.zoomLimits()), this.options.navigation === "map" && (this.viewViewport = {
+			width: Math.max(1, o.width),
+			height: Math.max(1, o.height)
+		});
+	}
+	setView(e) {
+		this.destroyed || (this.applyView(e), this.request());
+	}
+	panBy(t, n) {
+		if (this.destroyed || !Number.isFinite(t) || !Number.isFinite(n)) return;
+		this.syncViewport();
+		let r = this.canvas.getBoundingClientRect(), i = Math.cos(this.yaw), a = Math.sin(this.yaw);
+		if (this.options.navigation === "map") {
+			let o = q(this.model, this, Math.max(1, r.width), Math.max(1, r.height), this.options.compactViewport), s = 2 * o.distance * Math.tan(42 * e / 360) / o.usableH, c = n / Math.max(.25, Math.sin(this.pitch));
+			this.offset[0] -= (t * i + c * a) * s, this.offset[1] -= (t * a - c * i) * s;
+			let l = this.grid.bounds, u = (l[1] + l[3]) / 2 + this.offset[1] / this.model.height * (l[3] - l[1]);
+			this.offset[1] += (f(u, -85, 85) - u) / (l[3] - l[1]) * this.model.height;
+		} else {
+			let e = 1 / Math.max(200, Math.min(r.width, r.height)) / this.zoom;
+			this.offset[0] = f(this.offset[0] - (t * i + n * a) * e, -this.model.width * .42, this.model.width * .42), this.offset[1] = f(this.offset[1] - (t * a - n * i) * e, -this.model.height * .42, this.model.height * .42);
+		}
+		this.request(), !this.dragging && !this.wheeling && this.scheduleViewChange("gesture");
+	}
+	setTerrain(e, { preparedModel: t, displayMask: n = null } = {}) {
+		if (this.destroyed) return;
+		let r = t === void 0 ? E(e) : O(e, t), i = n ? v(n, e) : null, a = i ? {
+			width: i.width,
+			height: i.height,
+			pixels: new Uint8Array(i.pixels),
+			source: {
+				...i.source,
+				bounds: [...i.source.bounds],
+				cells: [...i.source.cells]
+			}
+		} : null, o = this.getView(), s = this.options.navigation === "map", c = null, l = null;
+		this.gpu && !this.contextLost ? (this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null), c = new $(this.gl, r, a, s)) : this.software && (l = new _e(this.software.ctx, r, a, s)), this.cancelFrame(), this.pendingGPU = null, this.gpu?.destroy(), this.software?.destroy(), this.gpu = c, this.software = l, this.grid = e, this.model = r, this.displayMask = a, this.widthM = r.widthM, this.heightM = r.heightM, this.base = r.base, this.meshes.clear(), this.windowMeshes.clear(), this.routeMeshes.clear(), this.meshStride = 0, this.renderProfile = null, this.route = [], this.gpuRoute = null, this.cartography = null, this.gpuCartographyDirty = !1, this.canvas.dataset.cartography = "none", this.canvas.dataset.cartographyTiles = "0", this.canvas.dataset.routeSegments = "0", this.canvas.dataset.routeClipped = "false", this.applyView(o), this.request();
+	}
+	project(e, t, n) {
+		if (this.destroyed || ![e, t].every(Number.isFinite)) return null;
+		this.syncViewport();
+		let r = this.grid.bounds, i = (a(e, (r[0] + r[2]) / 2) - r[0]) / (r[2] - r[0]), o = (r[3] - t) / (r[3] - r[1]);
+		if (i < 0 || i > 1 || o < 0 || o > 1 || !y(this.displayMask, i, o)) return null;
+		let s = (i - .5) * this.model.widthM, c = (.5 - o) * this.model.heightM, l = n === void 0 ? F(this.model, s, c, this.meshStride || 1) : n;
+		if (!Number.isFinite(l)) return null;
+		let u = this.canvas.getBoundingClientRect();
+		if (u.width < 1 || u.height < 1) return null;
+		let d = q(this.model, this, u.width, u.height, this.options.compactViewport), f = J([
+			s / this.model.scale,
+			c / this.model.scale,
+			(l - this.model.base) / this.model.scale
+		], d, u.width, u.height);
+		return f && f[2] >= -1 && f[2] <= 1 ? {
+			x: f[0],
+			y: f[1],
+			depth: f[2]
+		} : null;
+	}
+	unproject(t, n) {
+		if (this.destroyed || ![t, n].every(Number.isFinite)) return null;
+		this.syncViewport();
+		let r = this.canvas.getBoundingClientRect();
+		if (r.width < 1 || r.height < 1 || t < 0 || n < 0 || t > r.width || n > r.height) return null;
+		let i = this.model, a = q(i, this, r.width, r.height, this.options.compactViewport), o = 1 / Math.tan(42 * e / 360) * a.usableH / r.height, s = (t / r.width * 2 - 1 - a.offset[0]) * (r.width / r.height) / o, c = (1 - n / r.height * 2 - a.offset[1]) / o, l = g(a.right.map((e, t) => e * s + a.up[t] * c - a.forward[t])), u = a.eye, d = [
+			-i.width / 2,
+			-i.height / 2,
+			(i.min - i.base) / i.scale - 1e-7
+		], p = [
+			i.width / 2,
+			i.height / 2,
+			(i.max - i.base) / i.scale + 1e-7
+		], m = 0, h = Infinity;
+		for (let e = 0; e < 3; e++) {
+			if (Math.abs(l[e]) < 1e-12) {
+				if (u[e] < d[e] || u[e] > p[e]) return null;
+				continue;
+			}
+			let t = (d[e] - u[e]) / l[e], n = (p[e] - u[e]) / l[e];
+			m = Math.max(m, Math.min(t, n)), h = Math.min(h, Math.max(t, n));
+		}
+		if (!(h >= m) || !Number.isFinite(h)) return null;
+		let _ = (e) => u.map((t, n) => t + l[n] * e), v = _(m), b = _(h), x = this.meshStride || 1;
+		for (let e of [v, b]) e[0] = f(e[0], -i.width / 2, i.width / 2), e[1] = f(e[1], -i.height / 2, i.height / 2);
+		let S = null;
+		if (Math.hypot(l[0], l[1]) < 1e-10) {
+			let e = F(i, v[0] * i.scale, v[1] * i.scale, x);
+			if (e === null) return null;
+			let t = ((e - i.base) / i.scale - u[2]) / l[2];
+			t >= m - 1e-8 && t <= h + 1e-8 && (S = _(t));
+		} else {
+			let e = Math.abs(l[0]) >= Math.abs(l[1]) ? 0 : 1, t = Math.max(1.5, Math.min(i.cellX, i.cellY) * .08) / i.scale;
+			for (let [n, r] of I(i, [[v, b]], x)) {
+				let i = (n[e] - u[e]) / l[e], a = (r[e] - u[e]) / l[e], o = u[2] + l[2] * i - n[2] + t, s = u[2] + l[2] * a - r[2] + t;
+				if (Math.abs(o) < 1e-8) {
+					S = _(i);
+					break;
+				}
+				if (o * s <= 0 && Math.abs(o - s) > 1e-14) {
+					S = _(i + (a - i) * o / (o - s));
+					break;
+				}
+			}
+		}
+		if (!S) return null;
+		let C = S[0] / i.width + .5, w = .5 - S[1] / i.height;
+		return y(this.displayMask, C, w) ? {
+			longitude: i.grid.bounds[0] + C * (i.grid.bounds[2] - i.grid.bounds[0]),
+			latitude: i.grid.bounds[3] - w * (i.grid.bounds[3] - i.grid.bounds[1]),
+			elevationM: S[2] * i.scale + i.base
+		} : null;
+	}
+	heightAt(e, t) {
+		return M(this.model, e, t);
+	}
+	setCartography(e) {
+		if (this.destroyed) return;
+		e && b(e, this.grid);
+		let t = e && e.source.loadedTiles > 0 ? {
+			width: e.width,
+			height: e.height,
+			pixels: new Uint8ClampedArray(e.pixels),
+			source: {
+				...e.source,
+				bounds: [...e.source.bounds]
+			}
+		} : null;
+		this.cartography = t, this.software?.setCartography(t), this.canvas.dataset.cartography = t && t.source.loadedTiles > 0 ? "source" : "none", this.canvas.dataset.cartographyTiles = String(t?.source.loadedTiles || 0);
+		try {
+			this.gpu && !this.contextLost && (this.pendingGPU ? this.gpuCartographyDirty = !0 : (this.gpu.setCartography(t), this.gpuCartographyDirty = !1));
+		} catch (e) {
+			this.recordGraphicsFallback("cartography", e), this.contextLost = !0, this.fallbackAfterLoss();
+			return;
+		}
+		this.request();
+	}
+	setGeometry(e) {
+		if (!this.destroyed) try {
+			let t = W(this.model, e);
+			return this.route = t.segments, this.routeMeshes.clear(), this.gpuRoute = null, this.canvas.dataset.routeClipped = String(t.clipped), this.canvas.dataset.routeSegments = String(t.segments.length), this.request(), {
+				segments: t.segments.length,
+				clipped: t.clipped
+			};
+		} catch {
+			return this.route = [], this.routeMeshes.clear(), this.gpuRoute = null, this.request(), this.notify("onError", "Геометрия не помещается в предпросмотр. Откройте маршрут на основной карте."), this.canvas.dataset.routeClipped = "true", this.canvas.dataset.routeSegments = "0", {
+				segments: 0,
+				clipped: !0
+			};
+		}
+	}
+	setVisible(e) {
+		this.visible = !!e, this.visible ? this.request() : (this.cancelFrame(), this.pointers.clear(), this.dragging = !1, this.wheeling = !1, clearTimeout(this.wheelTimer), (this.warmRequested || this.pendingGPU?.warm) && this.schedule());
+	}
+	setViewportInsets(e) {
+		if (this.destroyed) return;
+		let t = this.options.navigation === "map" ? this.getView() : null;
+		this.viewportInsets = G(e), t && this.applyView(t), this.request();
+	}
+	warmup() {
+		this.destroyed || (this.warmRequested = !0, this.request());
+	}
+	cancelFrame() {
+		this.frame &&= (cancelAnimationFrame(this.frame), 0);
+	}
+	request() {
+		this.destroyed || (this.dirty = !0, this.gpu?.frameFormat && (this.canvas.dataset.terrainPending = "true"), this.schedule());
+	}
+	schedule() {
+		this.destroyed || !this.visible && !this.warmRequested && !this.pendingGPU?.warm || this.contextLost || this.frame || this.document?.visibilityState === "hidden" || !this.pendingGPU && !this.dirty && !this.warmRequested || (this.frame = requestAnimationFrame(() => {
+			this.frame = 0;
+			let e = this.warmRequested;
+			this.warmRequested = !1, !this.destroyed && (this.visible || e || this.pendingGPU?.warm) && !this.contextLost && this.document?.visibilityState !== "hidden" && (this.pendingGPU ? (this.pendingGPU.warm ||= e, this.pollGPUFrame()) : (this.dirty = !1, this.render(e)));
+		}));
+	}
+	frameDimensions(e) {
+		let t = this.profileFor(e, typeof navigator < "u" ? navigator : {}), n = Math.min(typeof devicePixelRatio == "number" ? devicePixelRatio : 1, t.maxDpr), r = Math.min(n, Math.sqrt(t.pixelLimit / (e.width * e.height)), 4096 / e.width, 4096 / e.height);
+		return {
+			profile: t,
+			dpr: r,
+			width: Math.max(1, Math.round(e.width * r)),
+			height: Math.max(1, Math.round(e.height * r))
+		};
+	}
+	frameState(e, t) {
+		return [
+			e.width,
+			e.height,
+			t,
+			this.yaw,
+			this.pitch,
+			this.zoom,
+			this.offset[0],
+			this.offset[1],
+			this.viewportInsets,
+			this.cartography,
+			this.route
+		];
+	}
+	pollGPUFrame() {
+		let e = this.pendingGPU;
+		if (!(!e || e.gpu !== this.gpu || this.destroyed || this.contextLost)) try {
+			if (!this.gpu.frameReady(e)) {
+				if (performance.now() - e.started > 1e4) throw Error("Terrain frame completion timed out");
+				this.schedule();
+				return;
+			}
+			this.pendingGPU = null;
+			let t = this.canvas.getBoundingClientRect(), n = this.frameDimensions(t), r = this.frameState(t, n.dpr);
+			if (t.width < 1 || t.height < 1 || !e.state.every((e, t) => e === r[t])) {
+				this.dirty = !0, this.warmRequested ||= e.warm, this.schedule();
+				return;
+			}
+			let i = performance.now();
+			(this.canvas.width !== e.width || this.canvas.height !== e.height) && (this.canvas.width = e.width, this.canvas.height = e.height), this.gpu.presentFrame(e), e.info.ms += performance.now() - i, this.publishFrame(e.info, e.routeLength, "deferred-msaa"), this.schedule();
+		} catch (t) {
+			this.recordGraphicsFallback("presentation", t), this.warmRequested ||= e.warm, this.contextLost = !0, this.fallbackAfterLoss();
+		}
+	}
+	meshFor(e, t) {
+		if (t) {
+			let n = e + ":" + t.join(":");
+			return this.windowMeshes.has(n) || (this.windowMeshes.size >= 2 && this.windowMeshes.delete(this.windowMeshes.keys().next().value), this.windowMeshes.set(n, L(this.model, e, t))), this.windowMeshes.get(n);
+		}
+		return this.meshes.has(e) || this.meshes.set(e, L(this.model, e)), this.meshes.get(e);
+	}
+	profileFor(e, t) {
+		let n = t.deviceMemory !== void 0 && t.deviceMemory < 4, r = n || e.width < 700, i = !!this.gpu + ":" + n + ":" + r;
+		return this.renderProfile?.key !== i && (this.renderProfile = {
+			key: i,
+			pixelLimit: this.gpu ? n ? 16e5 : 28e5 : 9e5,
+			maxDpr: this.gpu ? 2 : 1.5,
+			vertexLimit: this.gpu ? n ? 66049 : 263169 : 16641,
+			shadowSize: r ? 128 : 256,
+			shadowQueries: r ? l : u
+		}), this.renderProfile;
+	}
+	routeFor(e) {
+		if (this.routeMeshes.has(e)) return this.routeMeshes.get(e);
+		let t;
+		try {
+			t = I(this.model, this.route, e);
+		} catch {
+			t = [], this.notify("onError", "Геометрия не помещается в предпросмотр. Откройте маршрут на основной карте.");
+		}
+		return this.routeMeshes.size >= 2 && this.routeMeshes.delete(this.routeMeshes.keys().next().value), this.routeMeshes.set(e, t), t;
+	}
+	render(e = !1) {
+		if (this.pendingGPU) {
+			this.dirty = !0;
+			return;
+		}
+		let t = performance.now(), n = this.canvas.getBoundingClientRect();
+		if (n.width < 1 || n.height < 1) {
+			e && (this.warmRequested = !0);
+			return;
+		}
+		this.syncViewport();
+		let r = this.dragging || this.wheeling, { profile: i, dpr: a, width: o, height: s } = this.frameDimensions(n), c = q(this.model, this, n.width, n.height, this.options.compactViewport), l = this.gpu ? Math.max(4225, c.usableW * c.usableH * .55 * Math.min(2, this.zoom)) : 16641, u = this.options.navigation === "map" ? z(this.model, c, Math.min(l, i.vertexLimit), this.meshStride) : null, d = u?.step ?? B(this.grid, l, this.meshStride, i.vertexLimit);
+		this.meshStride = d;
+		let f = this.meshFor(d, u?.range), p = this.options.navigation === "map" ? V(0, .85) : V(this.yaw, this.pitch), m = this.routeFor(d), h = {
+			ms: 0,
+			triangles: f.triangles,
+			quality: r ? "motion" : "full",
+			renderer: this.gpu ? "webgl2" : "canvas2d",
+			pixelRatio: a,
+			meshStride: d,
+			sourceVertices: this.grid.width * this.grid.height,
+			graphicsFallback: this.graphicsFallback ? { ...this.graphicsFallback } : null,
+			view: {
+				yaw: this.yaw,
+				pitch: this.pitch,
+				zoom: this.zoom,
+				offset: [...this.offset]
+			},
+			geographicView: {
+				...this.getView(),
+				distanceM: c.distance * this.model.scale
+			},
+			viewport: {
+				width: n.width,
+				height: n.height,
+				insets: { ...c.insets }
+			},
+			meshWindow: f.window ? [...f.window] : null,
+			renderedVertices: f.count,
+			cartography: this.cartography ? {
+				loadedTiles: this.cartography.source.loadedTiles,
+				requestedTiles: this.cartography.source.requestedTiles,
+				width: this.cartography.width,
+				height: this.cartography.height
+			} : null,
+			displayMask: this.displayMask ? {
+				width: this.displayMask.width,
+				height: this.displayMask.height,
+				allowedPixels: this.displayMask.source.allowedPixels,
+				coverageVersion: this.displayMask.source.coverageVersion
+			} : null
+		};
+		try {
+			if (this.gpu && (this.gpuCartographyDirty &&= (this.gpu.setCartography(this.cartography), !1), this.gpuRoute !== m && (this.gpu.setRoute(m), this.gpuRoute = m), this.gpu.frameFormat)) {
+				let r = this.gpu.beginFrame(f, c, p, o, s, a, i);
+				h.ms = performance.now() - t, this.pendingGPU = {
+					...r,
+					gpu: this.gpu,
+					info: h,
+					width: o,
+					height: s,
+					routeLength: m.length,
+					warm: e,
+					started: t,
+					state: this.frameState(n, a)
+				}, this.canvas.dataset.terrainPending = "true", this.pollGPUFrame();
+				return;
+			}
+			(this.canvas.width !== o || this.canvas.height !== s) && (this.canvas.width = o, this.canvas.height = s), this.gpu ? this.gpu.render(f, c, p, o, s, a, i) : this.software.render(f, c, p, o, s, a, i, m);
+		} catch (t) {
+			if (this.gpu) {
+				this.recordGraphicsFallback("render", t), this.warmRequested = e, this.contextLost = !0, this.fallbackAfterLoss();
+				return;
+			}
+			this.terminalFailure("Не удалось нарисовать ландшафт. Подготовьте сцену заново.");
+			return;
+		}
+		h.ms = performance.now() - t, this.publishFrame(h, m.length, this.gpu ? "direct" : "canvas2d");
+	}
+	publishFrame(e, t, n) {
+		this.canvas.dataset.renderMs = e.ms.toFixed(1), this.canvas.dataset.triangles = String(e.triangles), this.canvas.dataset.quality = e.quality, this.canvas.dataset.renderer = e.renderer, this.canvas.dataset.meshStride = String(e.meshStride), this.canvas.dataset.routeMeshStride = String(e.meshStride), this.canvas.dataset.routeRenderSegments = String(t), this.canvas.dataset.sourceVertices = String(e.sourceVertices), this.canvas.dataset.heightScale = "1", this.canvas.dataset.material = "cartographic", this.canvas.dataset.displayMask = e.displayMask ? "russia-display-area" : "none", this.canvas.dataset.terrainPresentation = n, this.canvas.dataset.terrainPending = String(this.dirty || this.warmRequested), this.notify("onRender", e);
+	}
+	rotate(n) {
+		this.destroyed || !Number.isFinite(n) || (this.yaw = ((this.yaw + n + e) % t + t) % t - e, this.request(), this.scheduleViewChange("rotate"));
+	}
+	zoomBy(e) {
+		if (this.destroyed || !Number.isFinite(e) || e <= 0) return;
+		let t = f(this.zoom * e, ...this.zoomLimits());
+		t !== this.zoom && (this.zoom = t, this.request(), this.scheduleViewChange("zoom"));
+	}
+	reset() {
+		if (this.destroyed) return;
+		let e = this.options.navigation === "map" ? i : r;
+		this.yaw = e.yaw, this.pitch = e.pitch, this.zoom = e.zoom, this.offset = [0, 0], this.request(), this.scheduleViewChange("reset");
+	}
+	destroy() {
+		this.destroyed || (this.destroyed = !0, this.cancelFrame(), clearTimeout(this.wheelTimer), clearTimeout(this.restoreTimer), clearTimeout(this.viewTimer), this.resize?.disconnect(), this.onResize && typeof window < "u" && window.removeEventListener("resize", this.onResize), this.document?.removeEventListener("visibilitychange", this.onVisibility), this.unbindControls(), this.pointers.clear(), this.gpu?.destroy(), this.software?.destroy(), this.pendingGPU = null, this.meshes.clear(), this.windowMeshes.clear(), this.routeMeshes.clear(), this.route = [], this.gpuRoute = null, this.cartography = null, this.displayMask = null, this.warmRequested = !1, this.canvas.dataset.terrainPending = "false", this.canvas !== this.originalCanvas && this.canvas.parentNode && this.canvas.parentNode.replaceChild(this.originalCanvas, this.canvas), this.originalCanvas.style && (this.originalCanvas.style.touchAction = this.previousTouchAction || ""));
+	}
+};
+//#endregion
+export { ve as TerrainRenderer, H as buildTerrainBoundary, L as buildTerrainMesh, U as clipTerrainSegment, Z as createSurfaceTexture, E as createTerrainModel, D as createTerrainModelAsync, I as drapeTerrainRoute, M as sampleElevation, x as sampleTerrainCartography, y as sampleTerrainDisplayMask, F as sampleTerrainMeshElevation, j as sampleTerrainShadow, B as selectTerrainMeshStride, z as selectVisibleTerrainMesh, X as surfaceNoise, V as terrainLight, Q as terrainMaterialColor, W as terrainRoute, O as validatePreparedTerrainModel, b as validateTerrainCartography, v as validateTerrainDisplayMask, S as validateTerrainGrid, R as visibleTerrainSampleWindow };

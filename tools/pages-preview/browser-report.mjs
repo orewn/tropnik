@@ -284,11 +284,14 @@ function assertZoomDesign(design,name,engine,mobile){
   for(const [stage,state]of Object.entries(scene.states))assertCustomSceneInspection(state,`${name}/3d/${stage}`);
   const {initial,close,wide,rotated,reset}=scene.states;
   assert.equal(initial.cartography?.state,'ready',`${name}: mapped terrain lost its source surface`);
-  let previousFrames=initial.frames;for(const state of [close,wide,rotated,reset]){assert.deepEqual(state.grid,initial.grid);assert.deepEqual(state.provenance,initial.provenance);assert.deepEqual(state.cartography,initial.cartography);assert.ok(state.frames>previousFrames);previousFrames=state.frames;}
-  assert.equal(close.frame.view.zoom,5);assert.equal(wide.frame.view.zoom,.65);assert.notEqual(rotated.frame.view.yaw,wide.frame.view.yaw);
-  assert.deepEqual(reset.frame.view,initial.frame.view);assert.equal(reset.frame.view.zoom,1);
+  let previousFrames=initial.frames,previousWindow=initial.windowRevision;for(const state of [close,wide,rotated]){assert.deepEqual(state.contextBounds,initial.contextBounds);assert.ok(state.frames>previousFrames);assert.ok(state.windowRevision>=previousWindow);previousFrames=state.frames;previousWindow=state.windowRevision;}
+  assert.deepEqual(reset.contextBounds,initial.contextBounds);assert.ok(reset.frames>0,'Reset must render a new actual frame');
+  assert.ok(close.view.distanceM<=initial.view.distanceM/4+.02);assert.ok(wide.view.distanceM>=close.view.distanceM*4-.02);
+  assert.ok(Math.abs(rotated.view.yaw-wide.view.yaw-.25)<1e-7);
+  for(const key of['longitude','latitude','pitch','distanceM'])assert.ok(Math.abs(rotated.view[key]-wide.view[key])<Math.max(1e-7,Math.abs(wide.view[key])*1e-6));
+  for(const key of['longitude','latitude','yaw','pitch','distanceM'])assert.ok(Math.abs(reset.view[key]-initial.view[key])<Math.max(1e-7,Math.abs(initial.view[key])*1e-6));
   const before=scene.beforeMap;assertStyleCameraFrame(before,design.routeId,`${name}/3d-before-map`,engine);
-  assertCustomVisibleBounds(before,initial.requestedBounds,`${name}/3d-before-map`);
+  assertCustomVisibleBounds(before,initial,`${name}/3d-before-map`);
   assert.equal(scene.nativeInputs?.length,30);const labels=scene.nativeInputs.map(item=>item.label);
   assert.deepEqual(labels,[...Array(14).fill('Приблизить ландшафт'),...Array(14).fill('Отдалить ландшафт'),'Повернуть ландшафт','Вернуть исходный ракурс']);
   for(const press of scene.nativeInputs){assert.equal(press.input,mobile?'touch':'mouse');assert.equal(press.point?.unobscured,true);assertNativeBurstEventOrder(press.events,press.input,1);}

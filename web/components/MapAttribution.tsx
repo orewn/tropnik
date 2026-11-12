@@ -11,7 +11,7 @@ const SESSION_KEY='tropnik-map-attribution-seen';
  * five seconds or the first map interaction. A labelled one-click control
  * always remains in the map corner and opens the full licence information.
  */
-export function MapAttribution({ready=true,terrain=false,satellite=false,satelliteSource='eox-s2',satelliteLoading=false,zoom=0}:{ready?:boolean;terrain?:boolean;satellite?:boolean;satelliteSource?:SatelliteSourceId;satelliteLoading?:boolean;zoom?:number}) {
+export function MapAttribution({ready=true,terrain=false,satellite=false,satelliteSource='eox-s2',satelliteLoading=false,zoom=0,vector=true,routeData=false,landcover=false}:{ready?:boolean;terrain?:boolean;satellite?:boolean;satelliteSource?:SatelliteSourceId;satelliteLoading?:boolean;zoom?:number;vector?:boolean;routeData?:boolean;landcover?:boolean}) {
   const [expanded,setExpanded]=useState(true),[pinned,setPinned]=useState(false);
   const ref=useRef<HTMLDivElement>(null),id=useId();
   useEffect(()=>{
@@ -33,10 +33,11 @@ export function MapAttribution({ready=true,terrain=false,satellite=false,satelli
       <span className="map-satellite-detail map-satellite-status" aria-hidden={!satelliteLoading}>Загружаем снимки…</span>
     </div>}
     {expanded&&<div id={id} className="map-attribution-content">
-      <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a>
-      <span> · </span><a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a>
-      <span> · </span><a href="/sources">Данные и лицензии</a>
+      {(vector||routeData)&&<><span>{!vector?'Маршруты: ':''}</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a><span> · </span></>}
+      {vector&&<><a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a><span> · </span></>}
+      <a href="/sources">Данные и лицензии</a>
       {terrain&&<p>Рельеф и высоты: <a href="/terrain/ATTRIBUTION.txt" target="_blank" rel="noreferrer">полное уведомление</a></p>}
+      {landcover&&<p>Покрытие земли: ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021), processed by ESA WorldCover consortium. <a href="https://esa-worldcover.org/en/data-access" target="_blank" rel="noreferrer">CC BY 4.0</a></p>}
       {satellite&&(satelliteSource==='eox-bluemarble'?<p>NASA Earth Observatory · Blue Marble · EOX::Maps. В районе Чукотки и Врангеля подробная мозаика имеет пробелы; показан обзорный спутниковый снимок. При сильном увеличении заметны стыки исходной мозаики. <a href="/sources#satellite-attribution">Источники и детализация</a></p>:<p><a href="https://cloudless.eox.at" target="_blank" rel="noreferrer">EOxCloudless</a> by <a href="https://eox.at" target="_blank" rel="noreferrer">EOX IT Services GmbH</a>. <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · <a href="/sources#satellite-attribution">Полное уведомление об авторстве</a></p>)}
     </div>}
     <button className="map-attribution-toggle" title="Данные карты и лицензии" aria-label={expanded?'Свернуть сведения об источниках':'Данные карты и лицензии'} aria-expanded={expanded} aria-controls={id}

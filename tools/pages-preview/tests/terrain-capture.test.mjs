@@ -125,3 +125,42 @@ test('the publication binding accepts five stable images and rejects late metada
   assert.throws(()=>assertTerrainCaptureSet(changed.scene,changed.screenshots,'android-portrait'));
  }
 });
+
+test('continuous capture waits for the committed source window and actual physical camera, then binds exactly one image',async()=>{
+ const {customSceneFixture}=await import('./custom-map-fixture.mjs');
+ const {terrainOpeningExpectedView}=await import('../browser-terrain-capture.mjs');
+ const fixture=customSceneFixture(false),canvas={width:1000,height:700,backingWidth:1000,backingHeight:700,renderer:'webgl2',pending:'false',presentation:'deferred-msaa',opacity:1};
+ const navigation={opening:terrainOpeningExpectedView(fixture.states.initial.contextBounds,fixture.states.initial.frame.viewport)};
+ const complete={at:1000,visible:true,ready:true,opacity:1,error:'',inspection:fixture.states.close,canvas};
+ const loading=structuredClone(complete);loading.inspection.loadingWindow=true;loading.inspection.requestedWindowRevision++;
+ const stale=structuredClone(complete);stale.inspection.frame.geographicView=structuredClone(fixture.states.initial.view);
+ const partial=structuredClone(complete);partial.inspection.cartography.source.complete=false;
+ const states=[loading,stale,partial,complete];let clock=0,reads=0,captures=0;
+ const result=await captureCompletedTerrain({stage:'close',navigation,lastNativeInputAtMs:900,now:()=>clock,
+  readState:async()=>({...structuredClone(states[Math.min(reads++,states.length-1)]),at:1000+clock}),sleep:async ms=>{clock+=ms;},
+  capture:async()=>{captures++;assert.equal(reads,4);return{data:'one-actual-frame'};}});
+ assert.equal(captures,1);assert.equal(result.receipt.schemaVersion,2);assert.equal(result.receipt.expectedView.kind,'geographic');
+ assert.equal(result.receipt.before.inspection.loadingWindow,false);assert.equal(result.receipt.before.inspection.frame.geographicView.distanceM,fixture.states.close.view.distanceM);
+ assert.equal(result.receipt.settleWaitMs,150);
+});
+
+test('continuous screenshots cannot be certified by old zoom extremes, changing window revisions or partial materials',async()=>{
+ const {customSceneFixture}=await import('./custom-map-fixture.mjs');
+ const {terrainOpeningExpectedView}=await import('../browser-terrain-capture.mjs');
+ const fixture=customSceneFixture(false),canvas={width:1000,height:700,backingWidth:1000,backingHeight:700,renderer:'webgl2',pending:'false',presentation:'deferred-msaa',opacity:1};
+ const navigation={opening:terrainOpeningExpectedView(fixture.states.initial.contextBounds,fixture.states.initial.frame.viewport)};
+ for(const mutate of[
+  value=>{value.inspection.frame.geographicView.distanceM=navigation.opening.distanceM;value.inspection.view.distanceM=navigation.opening.distanceM;value.inspection.frame.view.zoom=5;},
+  value=>value.inspection.requestedWindowRevision++,value=>value.inspection.loadingWindow=true,
+  value=>value.inspection.cartography.source.complete=false,value=>value.inspection.schemaVersion=1,
+  value=>delete value.inspection.frame.viewport,value=>value.inspection.frame.viewport={...value.inspection.frame.viewport,width:value.canvas.width+1},
+  value=>value.inspection.viewport={...value.inspection.frame.viewport,insets:{...value.inspection.frame.viewport.insets,top:1}},
+ ]){
+  const scene={at:1000,visible:true,ready:true,opacity:1,error:'',inspection:structuredClone(fixture.states.close),canvas};mutate(scene);let clock=0,captures=0;
+  await assert.rejects(captureCompletedTerrain({stage:'close',navigation,now:()=>clock,readState:async()=>({...structuredClone(scene),at:1000+clock}),sleep:async ms=>{clock+=ms;},capture:async()=>{captures++;}}),/readiness deadline/);
+  assert.equal(captures,0);
+ }
+ const scene={at:1000,visible:true,ready:true,opacity:1,error:'',inspection:structuredClone(fixture.states.close),canvas};let captures=0;
+ await assert.rejects(captureCompletedTerrain({stage:'close',navigation,now:()=>0,readState:async()=>structuredClone(scene),sleep:async()=>assert.fail('No retry'),capture:async()=>{captures++;scene.inspection.loadingWindow=true;return{data:'preserve-failure'};}}),/no longer complete/);
+ assert.equal(captures,1);
+});

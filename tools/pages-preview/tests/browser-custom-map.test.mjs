@@ -50,9 +50,14 @@ test('terrain receipt requires its actual geographic grid, mesh, camera and uplo
  const good=customSceneFixture(false).states.initial;assert.equal(assertCustomSceneInspection(good,'terrain'),good);
  for(const change of [
   value=>value.state='loading',value=>value.frames=0,value=>value.grid.width=1026,
+  value=>value.schemaVersion=1,value=>value.loadingWindow=true,value=>value.requestedWindowRevision++,value=>value.loadedRequestBounds=[20,42,21,43],value=>value.contextBounds=null,
+  value=>value.cartography.source.complete=false,value=>value.cartography.source.kind='vector',value=>value.cartography.width=2049,
+  value=>value.provenance.missingDataFilled=true,value=>value.view.distanceM=0,value=>value.frame.geographicView={...value.view,distanceM:1},
+  value=>delete value.frame.viewport,value=>value.frame.viewport={...value.viewport,width:value.viewport.width+1},value=>value.frame.viewport.insets.top=NaN,
   value=>value.frame.sourceVertices++,value=>value.frame.triangles=0,value=>value.frame.renderer='unknown',
+  value=>delete value.frame.meshWindow,value=>value.frame.meshStride=3,value=>value.frame.renderedVertices++,value=>value.frame.triangles+=2,value=>value.frame.meshWindow=[1,0,200,200],
   value=>value.provenance.requestedBounds=[0,0,1,1],value=>value.grid.source.url='',
-  value=>value.frame.view.zoom=6,value=>value.frame.view.yaw=NaN,
+  value=>value.frame.view.zoom=1025,value=>value.frame.view.yaw=NaN,
   value=>value.cartography.source.bounds=[0,0,1,1],value=>value.cartography.source.loadedTiles=17,
   value=>value.frame.cartography=null,value=>value.frame.cartography.width=512,
   value=>delete value.displayMask,value=>value.displayMask.state='loading',
@@ -60,4 +65,17 @@ test('terrain receipt requires its actual geographic grid, mesh, camera and uplo
   value=>value.displayMask.source.allowedPixels=0,value=>value.frame.displayMask=null,
   value=>value.frame.displayMask.coverageVersion='b'.repeat(16),value=>value.frame.displayMask.allowedPixels--,
  ]){const invalid=structuredClone(good);change(invalid);assert.throws(()=>assertCustomSceneInspection(invalid,'invalid'));}
+});
+
+
+test('compatible map mesh receipts prove bounded native sample windows and exact triangle counts',()=>{
+ const value=customSceneFixture(false).states.close;
+ Object.assign(value.frame,{renderer:'canvas2d',meshStride:2,meshWindow:[160,192,496,368],renderedVertices:15041,triangles:29568});
+ assert.equal(assertCustomSceneInspection(value,'close canvas'),value);
+ for(const change of[
+  scene=>scene.frame.meshWindow=null,
+  scene=>scene.frame.meshWindow=[160,192,496,scene.grid.height],
+  scene=>scene.frame.meshWindow=[161,192,497,368],
+  scene=>{const f=scene.frame;f.meshWindow=[0,0,scene.grid.width-1,scene.grid.height-1];const columns=Math.ceil((scene.grid.width-1)/f.meshStride)+1,rows=Math.ceil((scene.grid.height-1)/f.meshStride)+1;f.renderedVertices=columns*rows;f.triangles=(columns-1)*(rows-1)*2;},
+ ]){const bad=structuredClone(value);change(bad);assert.throws(()=>assertCustomSceneInspection(bad,'bad window'));}
 });

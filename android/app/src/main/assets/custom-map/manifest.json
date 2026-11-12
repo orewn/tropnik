@@ -99,8 +99,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 48990,
-      "sha256": "c25b61c97602070d746706d977d50906217e4b1258ce5a482ae64bb914ee3127"
+      "sizeBytes": 49193,
+      "sha256": "2afde0df3bf1fba9f2bdd3f15c7ec81810ecc1b5c0bf7efe9825d03ed40aa3b8"
     },
     {
       "path": "web/lib/custom-map-label-inspection.ts",
@@ -108,14 +108,19 @@
       "sha256": "394d86a1c79adb1b27db59d237487703b52d6e12ec7461cdd696f94d10c1bf8c"
     },
     {
+      "path": "web/lib/custom-map-labels.ts",
+      "sizeBytes": 3919,
+      "sha256": "e814b89fe27643ef34c95ccc9d63754910828f9588f7610ecba796f8e2d7dab3"
+    },
+    {
       "path": "web/lib/custom-map-painter.ts",
-      "sizeBytes": 18930,
-      "sha256": "193245102be985907b7a5050741e79be34f00b4b81fb0d6c511cd05cae1cb555"
+      "sizeBytes": 19147,
+      "sha256": "3c11b99ba4d1ea484e8bb0a60127ab792f531e32b256018f31725510acb9692a"
     },
     {
       "path": "web/lib/custom-map-symbols.ts",
-      "sizeBytes": 2541,
-      "sha256": "54d4034fa45d8e217b72ff0082e022b9400deafacbd88a29cde0624eeff41f45"
+      "sizeBytes": 3239,
+      "sha256": "062eb4cdaf29d6f4946713a790c3d90feca49d0bf9cfcd2d7477465d3a289601"
     },
     {
       "path": "web/lib/custom-map-tiles.ts",
@@ -169,8 +174,8 @@
     },
     {
       "path": "web/lib/map-resource-pool.ts",
-      "sizeBytes": 8302,
-      "sha256": "f84691bba7a8baa5bd0677c360ecc716c9a292304c2741688a08d73b687a8b91"
+      "sizeBytes": 8710,
+      "sha256": "76979c6bf474f87aa661c2da0b9b7114ea50b264ecaa54e520a7f68d9e83ce4d"
     },
     {
       "path": "web/lib/map-route-presentation.ts",
@@ -184,8 +189,8 @@
     },
     {
       "path": "web/lib/map-transport.ts",
-      "sizeBytes": 1760,
-      "sha256": "233330df11f39f7da58a2009d5481ce57ddb3fd249fea65ce0025fc4fcc6f5f9"
+      "sizeBytes": 1781,
+      "sha256": "c2779dd3e60af7eef6a9aacec96f1d614bb548784954a84fd4d386cab3ee8094"
     },
     {
       "path": "web/lib/russia-map.ts",
@@ -205,7 +210,7 @@
     {
       "path": "web/package.json",
       "sizeBytes": 1896,
-      "sha256": "21a785bec4b0f11325a454221697057ae7b2d81bff6d8aa8bc72f0ab4932a4bc"
+      "sha256": "1a14def54fcebfaf9a6522aa4f158f9f28ffcc76864d7e719864f25014992a60"
     },
     {
       "path": "web/pnpm-lock.yaml",
@@ -234,8 +239,8 @@
     },
     {
       "path": "web/public/terrain/terrain-renderer.js",
-      "sizeBytes": 88681,
-      "sha256": "d26c3ae3b33689103fdba30da25f33f25e247d5394de66d19f6f3e910edf5f3b"
+      "sizeBytes": 103757,
+      "sha256": "9aeb714ca4f889587d92506ef7c937c23b09e6fe2c5cf397bfa4121a84de2c86"
     },
     {
       "path": "web/tsconfig.json",
@@ -243,22 +248,22 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "7826b203d11de22542fca57f1b548cff72dcb8a00664f1fb30779165719ace6a",
+  "sourceInputsSha256": "2009c8f535391f623652137e359203cc12dbc7968456a905c92f6307517128de",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "9614e52d2414d1808e40573f151909826edc03dd5cd869e1e26aac3929a818a0"
+      "sha256": "272a7350482746943fc086d04a7a8e437f143ab882bfd4b78ecf3dc361ce3d91"
     },
     {
-      "path": "chunks/custom-map-entry-tByfwzE_.js",
-      "sizeBytes": 101897,
-      "sha256": "3c400e779496523ac31b22bc2c555af21b619de1feb4834be0735f6c0e802f60"
+      "path": "chunks/custom-map-entry-CGuY65pI.js",
+      "sizeBytes": 104440,
+      "sha256": "d0c215e801167f5a88757907b0046f75a543855a3326c2986cd270b83b916f07"
     },
     {
-      "path": "chunks/terrain-renderer-qT471hOA.js",
-      "sizeBytes": 81381,
-      "sha256": "9f3097b89055aebc9493305ec0153a37cb63baa0e35d38aadb78a989a3ba17b3"
+      "path": "chunks/terrain-renderer-C88xySK5.js",
+      "sizeBytes": 94567,
+      "sha256": "8d6e29a7a4ff4c281f08d7d8d093f4cebf533a67bdd8452dcb73b9b4b96e8568"
     },
     {
       "path": "index.html",
@@ -273,7 +278,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "301e07ff92f98c9cb4e399c8a9eacfb35db28cf196d15df39fedff4f62b252b1"
+      "sha256": "4bd69fa3f0256cd49a20356ff51994ac5e0901d998b691774fcb01642566f2e7"
     },
     {
       "path": "map.css",
@@ -286,14 +291,14 @@
       "sha256": "54075549afdea2aee6d10c3cf70d53429b0ba457eda890a8ad93c1124c508c10"
     },
     {
-      "path": "workers/custom-map-tiles.worker-GtnvHQzs.js",
-      "sizeBytes": 23922,
-      "sha256": "0be3c1608bf8135ec24615bb5cdac7f721fd1a4f66cb73c3c5522df7975c8a31"
+      "path": "workers/custom-map-tiles.worker-Bx-onidN.js",
+      "sizeBytes": 24220,
+      "sha256": "a40700ea1a0991e33779e89c6741b18a721a5d439b89e63d6d7f7dc3744a231d"
     },
     {
-      "path": "workers/terrain-preparation.worker-B8lieq38.js",
-      "sizeBytes": 2849,
-      "sha256": "fb157dbeb3f394b9d9a3edd115cc30dc64f11e352255ca609a2191fa8be7ae0f"
+      "path": "workers/terrain-preparation.worker-Bb-s7l3H.js",
+      "sizeBytes": 2891,
+      "sha256": "625ce56a5be80c34fe32704e0fe93aa1a5c83e56d719c1fcfea511ba56583931"
     }
   ],
   "resourceAliases": [

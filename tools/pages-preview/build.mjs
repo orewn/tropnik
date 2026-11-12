@@ -162,7 +162,7 @@ for (const path of await files(join(source, 'public'))) {
   let bytes = await readFile(path);
   // The Android manifest pins this original provenance file. Its declared root URLs
   // describe the source dataset; GeoJSON bytes and source hashes stay unchanged.
-  const immutable = name.startsWith('offline-map/') || name === 'data/russia-boundaries-provenance.json' || name === 'custom-map/manifest.json';
+  const immutable = name.startsWith('offline-map/') || name.startsWith('terrain-regions/') || name === 'data/russia-boundaries-provenance.json' || name === 'custom-map/manifest.json';
   if (!immutable && textExtensions.has(extname(name))) {
     let value = bytes.toString('utf8');
     if (/\.(?:json|webmanifest)$/.test(name)) value = JSON.stringify(rewriteJSON(JSON.parse(value), base), null, 2) + '\n';
@@ -240,7 +240,7 @@ await viteBuild({
   build: {
     outDir: out, emptyOutDir: true, sourcemap: false, manifest: true, chunkSizeWarningLimit: 1200,
     // Keep the actual browser router as an importable production entry, not a second test implementation.
-    rolldownOptions: {input: {index: join(stage, 'index.html'), routing: join(source, 'pages-preview/src/routing.ts'), 'map-policy': join(source, 'lib/map-transport.ts'), 'api-policy': join(source, 'pages-preview/src/api.ts')}, preserveEntrySignatures: 'strict'},
+    rolldownOptions: {input: {index: join(stage, 'index.html'), routing: join(source, 'pages-preview/src/routing.ts'), 'map-policy': join(source, 'lib/map-transport.ts'), 'terrain-regions': join(source, 'lib/terrain-region-sources.ts'), 'api-policy': join(source, 'pages-preview/src/api.ts')}, preserveEntrySignatures: 'strict'},
   },
 });
 

@@ -18,7 +18,20 @@ export function browserEnvironmentFixture(sourceCommit='a'.repeat(40)){
 }
 export function terrainMaskReportFixture(sourceCommit='a'.repeat(40)){
  const metrics={width:512,height:384,outsideWitnesses:30414,insideWitnesses:22002,nearBoundaryOutside:5575,terrainLeaks:0,routeLeaks:0,nearBoundaryRouteLeaks:0,insideVisible:22002,insideVisibleRatio:1,routeCorePixels:279,routeHaloPixels:384};
- return{schemaVersion:1,verified:true,phase:'complete',evidence:'production-renderer-browser-pixels',sourceCommit,environment:browserEnvironmentFixture(sourceCommit),rendererSHA256:'c'.repeat(64),
+ const mapWindows=['webgl2','canvas2d'].map(renderer=>{
+  const name=`map-window-${renderer}`,metrics={width:512,height:384,differentPixels:0,maxChannelDelta:0,terrainPixels:100000,skyPixels:90000,routeCorePixels:800},frames=[],comparisons=[];
+  for(const[view,yaw,pitch,hash]of[['initial',0,.85,'e'],['rotated',1.1,.65,'f'],['steep',-1.4,1.15,'1']]){
+   for(const full of[true,false]){
+    const phase=view+(full?'-full':'-window');frames.push({phase,renderer,width:512,height:384,sourceVertices:16641,meshStride:1,meshWindow:full?null:[40,40,88,88],renderedVertices:full?16641:2401,triangles:full?32768:4608,
+     view:{longitude:40.02,latitude:43.02,yaw,pitch,distanceM:650,bounds:[40,43,40.04,43.04]},viewport:{width:512,height:384,insets:{top:40,right:36,bottom:24,left:12}},
+     file:`${name}-${phase}.png`,bytes:10000,sha256:hash.repeat(64),pixelSHA256:hash.repeat(64)});
+   }
+   comparisons.push({name:view,reference:view+'-full',window:view+'-window',pixelSHA256:hash.repeat(64),metrics:{...metrics}});
+  }
+  if(renderer==='webgl2')frames.push({...frames.at(-1),phase:'steep-restored',file:`${name}-steep-restored.png`});
+  return{name,renderer,verified:true,phase:'complete',navigation:'map',sourceHeightsUnchanged:true,frames,comparisons,recovery:renderer==='webgl2'?{lost:1,restored:1,trusted:true,reference:'steep-window',frame:'steep-restored',metrics:{...metrics}}:null};
+ });
+ return{schemaVersion:1,verified:true,phase:'complete',evidence:'production-renderer-browser-pixels',sourceCommit,environment:browserEnvironmentFixture(sourceCommit),rendererSHA256:'c'.repeat(64),mapWindows,
   cases:['webgl2','canvas2d'].flatMap(renderer=>[false,true].map(changedView=>{
    const name=`${renderer}-${changedView?'rotated-zoomed':'initial'}`,restores=renderer==='webgl2'&&changedView;
    return{name,verified:true,phase:'complete',renderer,callerMaskMutationChecked:true,view:{rotate:changedView?.61:0,zoom:changedView?1.3:1},metrics:{...metrics},

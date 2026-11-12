@@ -9,7 +9,7 @@ import {coastFixture} from './coast-fixture.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
 import {smoothnessFixture} from './smoothness-fixture.mjs';
 import {browserEnvironmentFixture,terrainMaskReportFixture} from './browser-environment-fixture.mjs';
-import {terrainCaptureExpectedView,TERRAIN_CAPTURE_TIMEOUT_MS} from '../browser-terrain-capture.mjs';
+import {terrainCaptureExpectedView,terrainOpeningExpectedView,TERRAIN_CAPTURE_TIMEOUT_MS} from '../browser-terrain-capture.mjs';
 
 const commit='a'.repeat(40);
 const assertBrowserReport=(report,source)=>verifyBrowserReport(report,source,catalogueFixture);
@@ -50,7 +50,7 @@ function terrainScreenshotsFixture(scene,profile,mobile){
   const firstObservedAtMs=1000+index*100,beforeObservedAtMs=firstObservedAtMs+50,afterObservedAtMs=beforeObservedAtMs+10;
   const click=stage==='initial'?null:scene.nativeInputs[{close:13,wide:27,rotated:28,reset:29}[stage]].events.findLast(event=>event.type==='click');
   const image={file:profile+'-scene3d-'+(stage==='initial'?'overview':stage)+'.png',mode:'scene3d',bytes:10000,sha256:'c'.repeat(64)};
-  image.terrainCapture={schemaVersion:1,method:'completed-frame-before-and-after-screenshot',stage,expectedView:terrainCaptureExpectedView(stage),
+  image.terrainCapture={schemaVersion:2,method:'completed-frame-before-and-after-screenshot',stage,expectedView:terrainCaptureExpectedView(stage,{opening:terrainOpeningExpectedView(scene.states.initial.contextBounds,scene.states.initial.frame.viewport),close:scene.states.close.view,wide:scene.states.wide.view}),
    readinessTimeoutMs:TERRAIN_CAPTURE_TIMEOUT_MS,pollIntervalMs:50,observations:2,stable:true,settleWaitMs:50,captureDurationMs:10,
    firstObservedAtMs,beforeObservedAtMs,afterObservedAtMs,lastNativeInputAtMs:click?.time??null,observationAfterLastInputMs:click?beforeObservedAtMs-click.time:null,
    before,after:structuredClone(before),image:{file:image.file,bytes:image.bytes,sha256:image.sha256}};
@@ -286,7 +286,7 @@ test('publication rejects missing or stale committed relief from the own rendere
   value=>delete value.bitmapInspection,
  ]){const changed=structuredClone(valid);mutate(changed);assert.throws(()=>assertReliefPalette(changed,'invalid relief','tropnik-canvas'));}
 });
-test('publication requires the current visible terrain bounds, unchanged source and real progress after every native3D phase',()=>{
+test('publication requires the original visible context, committed measured windows and real progress after every native3D phase',()=>{
  for(const change of [
   scene=>scene.beforeMap.camera.longitude+=.01,
   scene=>delete scene.beforeMap.bitmapInspection,

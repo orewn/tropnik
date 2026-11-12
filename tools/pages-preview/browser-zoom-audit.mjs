@@ -8,7 +8,7 @@ import {runCoastAudit} from './browser-coast-audit.mjs';
 import {runSatelliteContinuityAudit} from './browser-satellite-audit.mjs';
 import {performanceBudgetIssues} from './browser-smoothness.mjs';
 import {inspectCustomMapDOM,assertCustomMapInspection,assertCustomSceneInspection} from './browser-custom-map.mjs';
-import {captureCompletedTerrain} from './browser-terrain-capture.mjs';
+import {captureCompletedTerrain,terrainOpeningExpectedView} from './browser-terrain-capture.mjs';
 
 const OUTPUT=new URL('../../web/pages-preview/design-qa/',import.meta.url);
 const KEY_ZOOMS=[2,5,8,11,14,18];
@@ -507,15 +507,15 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
    await pointerSelector(cdp,sceneButton,profile);
    const sceneState=()=>evaluate(cdp,`(()=>{const scene=document.querySelector('.terrain-scene.is-visible'),canvas=scene?.querySelector('canvas'),r=canvas?.getBoundingClientRect(),data=canvas?.dataset,notice=document.querySelector('.atlas-wrap>.map-message'),noticeRect=notice?.getBoundingClientRect(),noticeStyle=notice&&getComputedStyle(notice);return{at:performance.now(),opacity:scene?Number(getComputedStyle(scene).opacity):null,inspection:JSON.parse(scene?.dataset.terrainInspection||'null'),visible:!!scene,ready:scene?.classList.contains('is-ready')===true,retainedMapNoticeVisible:!!noticeRect&&noticeRect.width>0&&noticeRect.height>0&&noticeStyle.display!=='none'&&noticeStyle.visibility!=='hidden'&&Number(noticeStyle.opacity)!==0,error:scene?.querySelector('[data-terrain-status="renderer-error"]')?.textContent?.trim()||'',routeWarning:scene?.querySelector('[data-terrain-status="route-warning"]')?.textContent?.trim()||'',canvas:r?{width:r.width,height:r.height,backingWidth:canvas.width,backingHeight:canvas.height,pending:data.terrainPending??null,presentation:data.terrainPresentation??null,opacity:Number(getComputedStyle(canvas).opacity),renderer:data.renderer||'',triangles:Number(data.triangles||0),sourceVertices:Number(data.sourceVertices||0),meshStride:Number(data.meshStride||0),renderMs:Number(data.renderMs||0)}:null}})()`);
    let scene;
-   for(let attempt=0;attempt<60;attempt++){scene=await sceneState();if(scene.error||scene.ready&&(scene.inspection?.cartography?.state!=='loading'&&scene.inspection?.frame?.cartography?.loadedTiles===scene.inspection?.cartography?.source?.loadedTiles))break;await sleep(250);}
+   for(let attempt=0;attempt<60;attempt++){scene=await sceneState();if(scene.error||scene.ready&&scene.inspection?.loadingWindow===false&&(scene.inspection?.cartography?.state!=='loading'&&scene.inspection?.frame?.cartography?.loadedTiles===scene.inspection?.cartography?.source?.loadedTiles))break;await sleep(250);}
    assert.equal(scene.ready,true,'Custom terrain never rendered its actual source grid');assertCustomSceneInspection(scene.inspection,profile.name+'/terrain');assert.equal(scene.inspection.cartography?.state,'ready','The known mapped area lost its real land-cover texture');
    if(terrainDiagnostic){
     report.gpu={traceCategories:await queryTerrainTraceCategories(cdp)};
     try{assert.ok(helpers.systemInfo,'No browser-level SystemInfo target');const info=await helpers.systemInfo();report.gpu.systemInfo={available:true,gpu:info.gpu,modelName:info.modelName,modelVersion:info.modelVersion};}catch(error){report.gpu.systemInfo={available:false,error:error.message};}
     try{report.gpu.webgl=await evaluate(cdp,`(${inspectTerrainWebGL.toString()})()`);}catch(error){report.gpu.webgl={available:false,error:error.message};}
    }
-   const nativeInputs=[];
-   const captureScene=stage=>capture('scene3d',null,stage==='initial'?'overview':stage,{stage,readState:sceneState,lastNativeInputAtMs:stage==='initial'?null:nativeInputs.at(-1)?.events.findLast(event=>event.type==='click')?.time});
+   const nativeInputs=[],navigation={opening:terrainOpeningExpectedView(beforeScene.bitmapInspection.visibleBounds,scene.inspection.frame.viewport)};
+   const captureScene=stage=>capture('scene3d',null,stage==='initial'?'overview':stage,{stage,navigation,readState:sceneState,lastNativeInputAtMs:stage==='initial'?null:nativeInputs.at(-1)?.events.findLast(event=>event.type==='click')?.time});
    const initial=await captureScene('initial');scene=initial.terrainState;
    if(scene.ready){
     assert.equal(scene.retainedMapNoticeVisible,false,`${profile.name}: a retained 2D map notice covers the ready 3D scene`);
@@ -532,12 +532,12 @@ export async function runZoomDesignAudit(cdp,profile,helpers,{diagnostic=null,tr
       catch(error){report.terrainZoomTrace={...error.traceReceipt,beforeZoom};throw error;}
      }else await press();
     };
-    // Fourteen actual 1.2x steps reach each renderer's bounded zoom extreme
-    // from its default view. Inspect both extremes, not just one small nudge.
+    // Fourteen real1.4x inputs exercise a substantial physical distance range.
+    // Relative mesh zoom may change as a measured DEM window is replaced.
     for(let i=0;i<14;i++)await sceneZoom('Приблизить ландшафт');
-    await sleep(250);const close=await captureScene('close'),closeState=close.terrainState;
+    await sleep(250);const close=await captureScene('close'),closeState=close.terrainState;navigation.close=closeState.inspection.view;
     for(let i=0;i<14;i++)await sceneZoom('Отдалить ландшафт');
-    await sleep(250);const wide=await captureScene('wide'),wideState=wide.terrainState;
+    await sleep(250);const wide=await captureScene('wide'),wideState=wide.terrainState;navigation.wide=wideState.inspection.view;
     await sceneZoom('Повернуть ландшафт');await sleep(250);const rotated=await captureScene('rotated'),rotatedState=rotated.terrainState;
     await sceneZoom('Вернуть исходный ракурс');await sleep(250);const reset=await captureScene('reset'),resetState=reset.terrainState;
     report.modes.scene3d={state:'ready',...scene,beforeMap:beforeScene,nativeInputs,states:{initial:scene.inspection,close:closeState.inspection,wide:wideState.inspection,rotated:rotatedState.inspection,reset:resetState.inspection},zoomInputs:28,rotateInput:true,resetInput:true,imageChanged:initial.sha256!==close.sha256&&close.sha256!==wide.sha256,visualReviewRequired:true};
