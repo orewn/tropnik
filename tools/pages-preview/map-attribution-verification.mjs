@@ -51,6 +51,21 @@ export function assertAttributionFooterLayout(value,scenario,loading){
  assertMapUIBounds(value,scenario.name+(loading?' loading':' ready'));
  return value;
 }
+export function assertAttributionSheetCycle(cycle,scenario,baseline){
+ const {profile}=scenario,portrait=profile.mobile&&profile.height>profile.width;
+ if(!portrait){assert.equal(cycle,undefined);return;}
+ assert.equal(cycle?.input,'production-react-sheet-state');assert.equal(cycle.states.length,3);
+ assert.deepEqual(cycle.states.map(value=>value.sheetOpen),[false,true,false]);
+ for(const value of cycle.states){
+  assertAttributionFooterLayout(value,{...scenario,sheetOpen:value.sheetOpen},false);
+  assert.ok(Number.isFinite(value.panelHeight)&&value.panelHeight>0);assert.equal(value.panelTransition,'transform');
+ }
+ const heights=cycle.states.map(value=>value.panelHeight);
+ assert.ok(Math.max(...heights)-Math.min(...heights)<1.1,'Portrait sheet state must not change the physical panel height');
+ assert.deepEqual(cycle.states.map(value=>value.footer.height),Array(3).fill(cycle.states[0].footer.height),'Opening the sheet must not reflow the footer');
+ assert.deepEqual(footerLoadingGeometry(cycle.states[2]),footerLoadingGeometry(cycle.states[0]),'Closing the sheet must restore the same footer and controls');
+ assert.deepEqual(footerLoadingGeometry(cycle.states[scenario.sheetOpen?1:0]),footerLoadingGeometry(baseline),'The sheet cycle must use the same case and legal state');
+}
 function snapshot(value,profile,scenario,expanded,loading){
  for(const key of ['rect','atlas','credit','toggle'])validRect(value[key]);validRect(value.status.rect);
  if(expanded){validRect(value.content);assert.ok(value.content.left>=value.atlas.left&&value.content.right<=value.atlas.right&&value.content.top>=value.atlas.top&&value.content.bottom<=value.atlas.bottom,'The licence panel is clipped by its map viewport');}else assert.equal(value.content,null);
@@ -93,6 +108,7 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
   assert.equal(item.profile,profile.name);assert.equal(item.source,scenario.source);assert.equal(item.zoom,scenario.zoom);assert.equal(item.expanded,expanded);assert.equal(item.cycles,count);assert.equal(item.comparisons.length,count);
   snapshot(item.loading,profile,scenario,expanded,true);snapshot(item.ready,profile,scenario,expanded,false);
   assertAttributionFooterLayout(item.layout,{name,profile,satellite:true,expanded,sheetOpen:false},false);
+  assertAttributionSheetCycle(item.sheetCycle,{name,profile,satellite:true,expanded,sheetOpen:false},item.layout);
   const baseline=attributionGeometry(item.loading);assert.deepEqual(attributionGeometry(item.ready),baseline,'Loading changed the measured source footprint');
   for(const [cycle,comparison]of item.comparisons.entries()){assert.equal(comparison.cycle,cycle+1);assert.deepEqual(comparison.loading,baseline);assert.deepEqual(comparison.ready,baseline);cycles++;}
   if(expanded){
@@ -103,11 +119,11 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
    assert.ok(center.x>item.ready.content.left&&center.x<item.ready.content.right&&center.y>item.ready.content.top&&center.y<item.ready.content.bottom);
    const scrollable=maxScroll>1;assert.equal(interaction.scrollable,scrollable);
    if(scrollable)assert.ok(['auto','scroll'].includes(overflowY),'Overflowing licence text must retain native scrolling');
-   // The central landscape column can wrap either EOX notice. Validate its
-   // measured overflow and native input instead of assuming the old width.
+   // Compact portrait and the central landscape column can wrap either EOX
+   // notice. Validate measured overflow and native input, not the old width.
    // The existing long Blue Marble scroll witnesses remain mandatory.
    if(['compact-android','phone-landscape'].includes(profile.name)&&scenario.source==='eox-bluemarble')assert.equal(scrollable,true);
-   else if(profile.name!=='phone-landscape')assert.equal(scrollable,false);
+   else if(!['compact-android','phone-landscape'].includes(profile.name))assert.equal(scrollable,false);
    assert.equal(interaction.wheelTransitions.length,scrollable?3:0);assert.equal(interaction.observedInputs.wheels.length,scrollable?3:0);
    if(scrollable){
     assert.deepEqual(interaction.wheelTransitions.map(step=>step.deltaY),[-scrollHeight,scrollHeight,-scrollHeight]);assert.deepEqual(interaction.wheelTransitions.map(step=>step.expected),[0,maxScroll,0]);
@@ -128,6 +144,7 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
  for(const [index,scenario]of MAP_ATTRIBUTION_LAYOUT_CASES.entries()){
   const entry=report.footerCases[index];for(const key of ['name','profile','satellite','expanded','sheetOpen'])assert.deepEqual(entry[key],scenario[key]);
   assertAttributionFooterLayout(entry.loading,scenario,true);assertAttributionFooterLayout(entry.ready,scenario,false);
+  assertAttributionSheetCycle(entry.sheetCycle,scenario,entry.ready);
   assert.deepEqual(footerLoadingGeometry(entry.ready),footerLoadingGeometry(entry.loading),'A loading cycle moved the footer or an adjacent action');
   if(scenario.expanded){
    const interaction=entry.licenseInteraction,hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources','/sources#satellite-attribution'];

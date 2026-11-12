@@ -84,8 +84,8 @@
     },
     {
       "path": "web/app/map-detail.css",
-      "sizeBytes": 16207,
-      "sha256": "4614fafff49fe5d3ece2b4557d70b9f0ff178009e4d0645bb64488db36f174de"
+      "sizeBytes": 15906,
+      "sha256": "fc503efe037d5ea213f6a12b19f5d06af784e6a1ed0a0303a4c6f1deaa5ba2fd"
     },
     {
       "path": "web/app/map-direction-marker.css",
@@ -263,7 +263,7 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "aad91e78e65b331a23a0848e78edf21a332eacac0d3706a29376e0efcd3ea140",
+  "sourceInputsSha256": "b6b86308da39e230211db7cf0170125679ae7f7b2f0ac68dc24d70e31caf8e9c",
   "files": [
     {
       "path": "android-bootstrap.js",
@@ -292,8 +292,8 @@
     },
     {
       "path": "map.css",
-      "sizeBytes": 81463,
-      "sha256": "0ac931bf0ddc99e7253ed47700066e89469c31141bad8cae4ca08cc5ebc68ec4"
+      "sizeBytes": 81342,
+      "sha256": "ac8ef54e55a3e8629a7e91e7d48201c0afc1e4c4141a2ddb95200c059a510603"
     },
     {
       "path": "offline-manifest.json",

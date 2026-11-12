@@ -10,7 +10,7 @@ import {dirname,join,resolve} from 'node:path';
 import {launchBrowser,BROWSER_STARTUP_LIMITS,browserErrorDetails} from '../browser-startup.mjs';
 import {browserEnvironmentArgs,collectBrowserEnvironment} from '../browser-environment.mjs';
 import {collectNativeBrowserSurface} from '../browser-native-surface.mjs';
-import {MAP_ATTRIBUTION_PROFILES,MAP_ATTRIBUTION_SCENARIOS,MAP_ATTRIBUTION_LAYOUT_CASES,assertAttributionFooterLayout,footerLoadingGeometry,collectAttributionGeometryCase} from '../map-attribution-verification.mjs';
+import {MAP_ATTRIBUTION_PROFILES,MAP_ATTRIBUTION_SCENARIOS,MAP_ATTRIBUTION_LAYOUT_CASES,assertAttributionFooterLayout,assertAttributionSheetCycle,footerLoadingGeometry,collectAttributionGeometryCase} from '../map-attribution-verification.mjs';
 
 const root=resolve(import.meta.dirname,'../../..'),web=join(root,'web'),require=createRequire(join(web,'package.json'));
 const viteRequire=createRequire(require.resolve('vite')),{build}=viteRequire('esbuild'),{transform}=viteRequire('lightningcss');
@@ -86,7 +86,7 @@ const footerGeometryExpression=`(()=>{
  const available={left:atlas.left,top:atlas.top,right:atlas.right,bottom:Math.min(atlas.bottom,touch?sheet.top:Infinity)};available.width=available.right-available.left;available.height=available.bottom-available.top;
  const ui=[...document.querySelectorAll('.map-context,.map-style-switch,.map-controls,.layer-button,.map-preload-status,.fact-closed,.map-attribution-toggle,.map-attribution-content,.map-satellite-credit,.map-legend')].filter(visible).map(element=>({kind:element.className,rect:box(element)}));
  const targets=[...document.querySelectorAll('.map-style-switch button,.map-controls button,.layer-button,.fact-closed,.map-attribution-toggle')].filter(visible).map(element=>{const r=box(element),hit=document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2);return{label:element.getAttribute('aria-label')||element.textContent.trim(),rect:r,minimumSize:44,unobscured:!!hit&&element.contains(hit)}});
- return{width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollY,sheetOpen,available,footer:box(document.querySelector('.map-footer')),publishedFooterHeight:parseFloat(getComputedStyle(host).getPropertyValue('--map-footer-height')),status:{rect:box(status),visible:visible(status),ariaHidden:status.getAttribute('aria-hidden'),text:status.textContent},ui,targets};
+ return{width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollY,sheetOpen,panelHeight:sheet.height,panelTransition:getComputedStyle(document.querySelector('.explore-panel')).transitionProperty,available,footer:box(document.querySelector('.map-footer')),publishedFooterHeight:parseFloat(getComputedStyle(host).getPropertyValue('--map-footer-height')),status:{rect:box(status),visible:visible(status),ariaHidden:status.getAttribute('aria-hidden'),text:status.textContent},ui,targets};
 })()`;
 function assertReadable(value,profile,scenario,expanded,loading){
  assert.equal(value.expanded,expanded);assert.equal(value.source,scenario.source);assert.equal(value.blocked,false,'The actual 44px licence control must remain reachable');
@@ -165,6 +165,18 @@ test('satellite attribution retains exact geometry over loading cycles with all 
    interaction.observedInputs=await evaluate("(()=>{const result=window.__licenceInputs;window.__removeLicenceInputs();document.activeElement.blur();return result})()");
    assert.equal(interaction.observedInputs.tabs.length,before.hrefs.length-1);assert.ok(interaction.observedInputs.tabs.every(event=>event.trusted));assert.equal(interaction.observedInputs.wheels.length,interaction.wheelTransitions.length);assert.ok(interaction.observedInputs.wheels.every(event=>event.trusted));await settle();
   };
+  const sheetCycle=async(entry,scenario,props,baseline)=>{
+   if(!scenario.profile.mobile||scenario.profile.width>=scenario.profile.height)return;
+   const renderState=async sheetOpen=>{
+    await evaluate(`window.renderAttribution(${JSON.stringify(props)},${JSON.stringify({loading:false,sheetOpen})})`);
+    await evaluate("Promise.race([Promise.all(document.querySelector('.explore-panel').getAnimations().map(animation=>animation.finished.catch(()=>{}))),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Sheet transition did not finish')),1000))])");
+    await settle();return evaluate(footerGeometryExpression);
+   };
+   entry.sheetCycle={input:'production-react-sheet-state',states:[]};
+   for(const sheetOpen of [false,true,false])entry.sheetCycle.states.push(await renderState(sheetOpen));
+   assertAttributionSheetCycle(entry.sheetCycle,scenario,baseline);
+   if(scenario.sheetOpen)await renderState(true);
+  };
   report.environment.nativeSurface=await collectNativeBrowserSurface(cdp);await mkdir(pictures,{recursive:true});
   const loadFixture=async profile=>{
    await cdp.call('Emulation.setDeviceMetricsOverride',{width:profile.width,height:profile.height,deviceScaleFactor:profile.dpr,mobile:profile.mobile,screenWidth:profile.width,screenHeight:profile.height});await cdp.call('Emulation.setTouchEmulationEnabled',{enabled:profile.mobile,maxTouchPoints:profile.mobile?5:1});
@@ -195,6 +207,7 @@ test('satellite attribution retains exact geometry over loading cycles with all 
     }
     entry.layout=await evaluate(footerGeometryExpression);assertAttributionFooterLayout(entry.layout,{name,profile,satellite:true,expanded,sheetOpen:false},false);
     if(expanded)await licenceInteraction(entry,profile);
+    await sheetCycle(entry,{name,profile,satellite:true,expanded,sheetOpen:false},{satellite:true,satelliteSource:scenario.source,satelliteLoading:false,zoom:scenario.zoom},entry.layout);
     if(scenario.name===(expanded?'overview-limit':'detail'))entry.screenshot=await capture(name+'.png');
     });
    }
@@ -215,6 +228,7 @@ test('satellite attribution retains exact geometry over loading cycles with all 
    entry.ready=await renderFooter(false);assertAttributionFooterLayout(entry.loading,scenario,true);assertAttributionFooterLayout(entry.ready,scenario,false);
    assert.deepEqual(footerLoadingGeometry(entry.ready),footerLoadingGeometry(entry.loading),name+': loading must not move the footer, Layers, launcher or licence control');
    if(expanded)await licenceInteraction(entry,profile);
+   await sheetCycle(entry,scenario,{satellite,satelliteSource:'eox-bluemarble',satelliteLoading:false,zoom:12},entry.ready);
    });
   }
   assert.equal(report.cases.length,40);assert.equal(report.negativeControls.length,5);assert.equal(report.footerCases.length,24);

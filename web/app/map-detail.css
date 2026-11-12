@@ -215,27 +215,21 @@
   }
 }
 @media(max-width:700px) and (orientation:portrait){
-  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer>.map-preload-status{max-width:calc(100% - 64px)}
-  /* The upper story launcher owns a 44px row below the context. A long legal
-     notice scrolls in the remaining space above its own source card; 100%
-     here is the attribution's actual height, including wrapped credit rows. */
-  .explore-layout.sheet-closed .map-footer-meta .map-attribution-content{
-    max-height:calc(100dvh - var(--header) - var(--map-footer-inset) - 100% - 8px - var(--map-top) - 60px - 44px - 12px);
-    overflow:auto;overscroll-behavior:contain;
-  }
-  /* The open drawer yields enough map height for the actual footer, the top
-     context/story rows and the 52px horizontal rail. Its contents still scroll
-     natively. Only the Explore drawer consumes this value; Planner has no sheet. */
-  .explore-layout.sheet-open:has(.tropnik-custom-atlas .map-footer){
-    --map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 76px);
+  /* The notice owns a whole row above the controls, including on a 320px phone. */
+  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer>.map-preload-status{max-width:100%}
+  /* Both drawer states share one physical panel height and identical footer
+     flow. Opening/closing changes only the panel transform and UI positions;
+     it cannot resize the panel or rewrap the legal text mid-animation. */
+  .explore-layout:is(.sheet-open,.sheet-closed):has(.tropnik-custom-atlas .map-footer){
     --sheet-expanded-height:max(var(--sheet-peek),min(56svh,545px,calc(100svh - var(--header) - var(--map-top) - 60px - 44px - 12px - var(--map-footer-height,0px) - 76px)));
   }
-  .explore-layout.sheet-open .map-footer-meta>.map-attribution{
+  .explore-layout.sheet-open{--map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 76px)}
+  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer-meta>.map-attribution{
     position:relative;inset:auto;display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;align-items:end;
   }
-  .explore-layout.sheet-open .map-footer-meta .map-satellite-credit{grid-column:1;grid-row:2}
-  .explore-layout.sheet-open .map-footer-meta .map-attribution-toggle{grid-column:2;grid-row:2}
-  .explore-layout.sheet-open .map-footer-meta .map-attribution-content{
+  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer-meta .map-satellite-credit{grid-column:1;grid-row:2}
+  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer-meta .map-attribution-toggle{grid-column:2;grid-row:2}
+  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer-meta .map-attribution-content{
     position:relative;inset:auto;grid-column:1/-1;grid-row:1;width:370px;max-width:100%;justify-self:end;
     /* Legal height uses the notice/source rows and minimum drawer endpoint,
        never footer height or the resulting sheet height: no feedback loop. */
