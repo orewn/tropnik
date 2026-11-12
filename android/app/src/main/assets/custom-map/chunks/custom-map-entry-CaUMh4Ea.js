@@ -879,7 +879,7 @@ function Ie({ west: e, south: t, east: n, north: r }) {
 }
 //#endregion
 //#region web/lib/custom-map-tiles.worker.ts?worker&url
-var Le = "" + new URL("../workers/custom-map-tiles.worker-Bx-onidN.js", import.meta.url).href, Re = 96, ze = 288, Be = 160, Ve = 3, He = 6, H = 8 * 1024 * 1024, U = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
+var Le = "" + new URL("../workers/custom-map-tiles.worker-DZxnjlmv.js", import.meta.url).href, Re = 96, ze = 288, Be = 160, Ve = 3, He = 6, H = 8 * 1024 * 1024, U = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
 function W(e) {
 	let t = e.paintZoom === void 0 ? e.z : e.paintZoom;
 	if (!Number.isInteger(e.z) || e.z < 0 || !Number.isInteger(t) || t < e.z || t > 18) throw Error("Invalid map paint zoom");
@@ -1733,38 +1733,53 @@ function xt(e) {
 //#endregion
 //#region web/lib/custom-map-labels.ts
 function St(e, t, n) {
-	let r = e.priorityCity ? xt(t) : e.kind === "place" && e.rank < 3 ? 14 : 12, i = [
+	let r = e.kind === "place" && (!e.placeClass || [
+		"city",
+		"town",
+		"village"
+	].includes(e.placeClass)), i = e.priorityCity ? xt(t) : r && e.rank < 3 ? 14 : 12, a = [
 		12,
 		14,
 		16,
 		18,
 		20
-	].filter((e) => e <= r).at(-1) ?? 12, a = e.kind === "water" || e.symbol === "water" || e.symbol === "waterfall";
+	].filter((e) => e <= i).at(-1) ?? 12, o = e.kind === "water" || e.symbol === "water" || e.symbol === "waterfall", s = e.kind === "contour";
 	return {
-		fontSize: i,
-		lineHeight: i <= 12 ? 16 : i <= 14 ? 20 : i <= 16 ? 24 : 28,
-		weight: e.kind === "place" || e.kind === "peak" ? 600 : 500,
-		ink: n && /^#[\da-f]{6}$/i.test(n) ? n : a ? "#315f69" : e.kind === "path" ? "#745733" : "#294535",
-		surface: a ? "rgba(244,250,249,.95)" : "rgba(255,254,247,.95)",
-		border: a ? "rgba(66,124,136,.22)" : "rgba(69,94,72,.20)"
+		fontSize: a,
+		lineHeight: a <= 12 ? 16 : a <= 14 ? 20 : a <= 16 ? 24 : 28,
+		weight: r || e.kind === "peak" ? 600 : 500,
+		ink: n && /^#[\da-f]{6}$/i.test(n) ? n : o ? "#315f69" : s ? "#77684e" : e.kind === "path" ? "#805536" : "#294535",
+		surface: s ? "rgba(249,247,231,.91)" : o ? "rgba(244,250,249,.95)" : "rgba(255,254,247,.95)",
+		border: s ? "transparent" : o ? "rgba(66,124,136,.22)" : "rgba(69,94,72,.20)",
+		paddingX: s ? 4 : 8,
+		paddingY: s ? 0 : 4
 	};
 }
 function Ct(e) {
-	return e.rank <= 0 ? 0 : e.priorityCity ? 1 : e.kind === "place" && e.rank < 3 ? 2 : e.symbol === "water" || e.symbol === "shelter" || e.symbol === "pass" ? 3 : e.kind === "peak" ? 4 : e.kind === "water" ? 5 : e.symbol ? 6 : e.kind === "path" ? 7 : 8;
+	return e.rank <= 0 ? 0 : e.priorityCity ? 1 : e.kind === "place" && ([
+		"country",
+		"state",
+		"city",
+		"town"
+	].includes(e.placeClass ?? "") || !e.placeClass && e.rank < 3) ? 2 : e.symbol === "water" || e.symbol === "pass" ? 3 : e.kind === "peak" ? 4 : e.kind === "path" ? 5 : e.kind === "water" ? 6 : e.symbol === "shelter" || e.symbol === "camp" || e.symbol === "waterfall" ? 7 : e.symbol || e.kind === "place" && [
+		"village",
+		"hamlet",
+		"isolated_dwelling"
+	].includes(e.placeClass ?? "") ? 8 : e.kind === "contour" ? 9 : 10;
 }
 function wt(e, t) {
 	return Math.max(8, Math.min(56, Math.floor(Math.max(0, e) * Math.max(0, t) / 18e3)));
 }
 function Tt(e) {
-	return e.kind === "path" ? 320 : e.kind === "water" ? 240 : 0;
+	return e.kind === "path" ? 320 : e.kind === "water" || e.kind === "contour" ? 240 : 0;
 }
 function Et(e) {
 	return `${e.kind}:${e.text.trim().replace(/[«»„“”"]/g, "").replace(/\s+/g, " ").toLocaleLowerCase("ru")}`;
 }
 function Dt(e, t, n, r, i) {
-	let a = t.y + (e.symbol ? 24 : 0), o = i.lineHeight / 2 + 4, s = r ? {
-		left: t.x - n / 2 - 8,
-		right: t.x + n / 2 + 8,
+	let a = t.y + (e.symbol ? 24 : 0), o = i.lineHeight / 2 + i.paddingY, s = r ? {
+		left: t.x - n / 2 - i.paddingX,
+		right: t.x + n / 2 + i.paddingX,
 		top: a - o,
 		bottom: a + o
 	} : null;
@@ -1783,7 +1798,7 @@ function Dt(e, t, n, r, i) {
 function Ot(e, t, n, r, i) {
 	if (!t || !r.plate) return;
 	let a = r.plate;
-	e.beginPath(), e.roundRect(a.left, a.top, a.right - a.left, a.bottom - a.top, 4), e.fillStyle = i.surface, e.fill(), e.strokeStyle = i.border, e.lineWidth = 1, e.stroke(), e.textAlign = "center", e.textBaseline = "middle", e.fillStyle = i.ink, e.fillText(t, n.x, r.textY);
+	e.beginPath(), e.roundRect(a.left, a.top, a.right - a.left, a.bottom - a.top, 4), e.fillStyle = i.surface, e.fill(), i.border !== "transparent" && (e.strokeStyle = i.border, e.lineWidth = 1, e.stroke()), e.textAlign = "center", e.textBaseline = "middle", e.fillStyle = i.ink, e.fillText(t, n.x, r.textY);
 }
 //#endregion
 //#region web/lib/map-canvas-policy.ts
@@ -2616,52 +2631,54 @@ var Lt = class {
 				rank: e.rank ?? 0
 			},
 			color: e.color
-		})), a = this.displayDetail();
-		if (a && this.mode !== "overview" && this.camera.zoom >= 5) for (let e of a.tiles) for (let t of e.labels) {
-			let n = 2 ** e.z;
-			i.push({
-				id: `${e.key}:${t.text}`,
-				coordinate: f({
-					x: (e.x + t.x) / n,
-					y: (e.y + t.y) / n
-				}),
-				label: t
-			});
+		})), a = this.displayDetail(), o = this.mode === "satellite" && !!this.imagery, s = [a];
+		if (!o && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 10 && s.push(this.relief), this.mode !== "overview" && this.camera.zoom >= 5) {
+			for (let e of s) if (e) for (let t of e.tiles) for (let e of t.labels) {
+				let n = 2 ** t.z;
+				i.push({
+					id: `${t.key}:${e.text}`,
+					coordinate: f({
+						x: (t.x + e.x) / n,
+						y: (t.y + e.y) / n
+					}),
+					label: e
+				});
+			}
 		}
 		i.sort((e, t) => Ct(e.label) - Ct(t.label) || e.label.rank - t.label.rank), this.labelDiagnosticTotal = i.length;
-		let o = 0, s = wt(this.size.width, this.size.height);
-		for (let { id: a, coordinate: c, label: l, color: u } of i) {
+		let c = 0, l = wt(this.size.width, this.size.height);
+		for (let { id: a, coordinate: o, label: s, color: u } of i) {
 			let i = {
 				id: a,
-				label: l.text,
-				coordinate: c,
+				label: s.text,
+				coordinate: o,
 				visible: !1,
 				reason: "budget"
 			};
 			this.labelDiagnostics.length < 6400 && this.labelDiagnostics.push(i);
-			let d = `${l.kind}:${l.symbol || ""}:${l.text}:${c[0].toFixed(6)},${c[1].toFixed(6)}`;
-			if (o >= s) continue;
+			let d = `${s.kind}:${s.symbol || ""}:${s.text}:${o[0].toFixed(6)},${o[1].toFixed(6)}`;
+			if (c >= l) continue;
 			if (n.has(d)) {
 				i.reason = "duplicate";
 				continue;
 			}
-			if (!N(c[0], c[1], this.coverage.area)) {
+			if (!N(o[0], o[1], this.coverage.area)) {
 				i.reason = "outside-coverage";
 				continue;
 			}
-			let f = this.project(c), p = St(l, this.camera.zoom, u);
+			let f = this.project(o), p = St(s, this.camera.zoom, u);
 			if (f.x < 24 || f.x > this.size.width - 24 || f.y < 32 || f.y > this.size.height - 20) {
 				i.reason = "outside-viewport";
 				continue;
 			}
-			let m = l.kind === "peak" && l.elevation !== void 0 ? `${l.text ? l.text + " · " : ""}${Math.round(l.elevation)} м` : l.text;
+			let m = s.kind === "peak" && s.elevation !== void 0 ? `${s.text ? s.text + " · " : ""}${Math.round(s.elevation)} м` : s.text;
 			e.font = `${p.weight} ${p.fontSize}px Manrope, sans-serif`;
-			let h = e.measureText(m).width, g = Dt(l, f, h, !!m, p), { rect: _ } = g;
+			let h = e.measureText(m).width, g = Dt(s, f, h, !!m, p), { rect: _ } = g;
 			if (i.x = f.x, i.y = f.y, i.width = h, i.rect = _, _.left < 12 || _.right > this.size.width - 12 || _.top < 12 || _.bottom > this.size.height - 12) {
 				i.reason = "outside-viewport";
 				continue;
 			}
-			let v = Tt(l), y = Et(l);
+			let v = Tt(s), y = Et(s);
 			if (m && v && (r.get(y) || []).some((e) => Math.hypot(f.x - e.x, f.y - e.y) < v)) {
 				i.reason = "repeated-name";
 				continue;
@@ -2674,9 +2691,9 @@ var Lt = class {
 				let e = r.get(y) || [];
 				e.push(f), r.set(y, e);
 			}
-			l.symbol && bt(e, l.symbol, f.x, f.y), Ot(e, m, f, g, p), o++, i.visible = !0, i.reason = "drawn";
+			s.symbol && bt(e, s.symbol, f.x, f.y), Ot(e, m, f, g, p), c++, i.visible = !0, i.reason = "drawn";
 		}
-		this.labelCanvas.hidden = o === 0;
+		this.labelCanvas.hidden = c === 0;
 	}
 	destroy() {
 		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0);

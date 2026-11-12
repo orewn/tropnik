@@ -272,6 +272,21 @@ test('trail and lake names repeat only at readable distances while distinct same
  assert.equal(labels.filter(label=>label.visible&&label.label==='Беседка').length,2,'Distinct source landmarks are never silently merged by their name');
 });
 
+test('measured contour numbers follow the visible relief and never leak onto committed satellite imagery',async t=>{
+ const env=fixture({view:{...camera,zoom:14}});t.after(()=>env.engine.destroy());await turn();
+ const measuredLabels=job=>({labels:job.request.kind==='relief'?[env.labelFor(job,camera.center,'400 м',{kind:'contour',rank:6,elevation:400})].filter(label=>label.x>=0&&label.x<1&&label.y>=0&&label.y<1):[]});
+ env.complete(()=>true,measuredLabels);await env.settle();
+ const visible=()=>env.engine.getLabelDiagnostics().some(label=>label.visible&&label.label==='400 м');
+ assert.equal(visible(),true,'A measured index elevation must appear on the relief layer');
+ env.engine.setLayers({relief:false});await env.settle();assert.equal(visible(),false,'Hiding relief also removes its height annotations');
+ env.engine.setLayers({relief:true});env.complete(()=>true,measuredLabels);await env.settle();assert.equal(visible(),true);
+ const before=plain(env.engine.getCamera());env.engine.setMode('satellite');await env.settle();
+ assert.equal(visible(),true,'The retained relief remains annotated until replacement imagery commits');
+ env.complete();await env.settle();assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(visible(),false);
+ env.engine.setMode('detail');env.complete(()=>true,measuredLabels);await env.settle();assert.equal(visible(),true);
+ assert.deepEqual(plain(env.engine.getCamera()),before,'Layer annotations cannot move the camera');
+});
+
 test('readable label plates are measured before admission and do not use a heavy glyph outline',async t=>{
  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
  env.engine.setLabels([{id:'plate',coordinate:[...camera.center],label:'Название маршрута',kind:'path'}]);env.flush();

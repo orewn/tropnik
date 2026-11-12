@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {reliefContourIntervals} from '../lib/custom-map-relief.ts';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {dirname,resolve} from 'node:path';
@@ -79,6 +80,8 @@ function atlasFixture({committedMode='detail'}={}){
     '@/lib/map-direction-layout':{bindMapLabelReflow:()=>()=>{},constrainDirectionLabels(){},MAP_LABEL_OBSTACLE_SELECTORS:[]},
     '@/lib/map-config':{MAP_CONFIG:{trailHitRadiusPx:12,routeMaxZoom:14,territoryMaxZoom:14},viewportRegionId:()=>region.id},
     '@/lib/map-route-presentation':{overviewContextCaption:()=>'',ROUTE_PRESENTATION:{closeZoom:12}},'@/lib/map-types':{EMPTY_MAP_TRAILS:[]},
+    '@/lib/custom-map-scale':{mapDistanceScale:()=>null},
+    '@/lib/custom-map-relief':{reliefContourIntervals},
   });
   const select=(trail,visibleTrails=[])=>host.render({region,trail,visibleTrails,onRegion(){},onTrail:value=>chosen.push(value),onMapNote:value=>notes.push(value)});
   return{host,requests,maps,notes,chosen,select};
@@ -110,6 +113,17 @@ test('late responses, including a changed source for the same id, cannot take ow
 test('an unmounted selection cannot apply a late geometry or notification',async()=>{
   const env=atlasFixture();env.select({id:'late',title:'Поздний',geometryUrl:'/late.geojson'});await env.host.settle();
   env.host.unmount();env.requests.get('/late.geojson').resolve(line());await turn();assert.equal(env.maps[0].route,undefined);assert.deepEqual(env.notes,[]);
+});
+
+test('the contour legend follows the committed ceil zoom and disappears while replacement tiles are loading',async t=>{
+ const env=atlasFixture();t.after(()=>env.host.unmount());env.select();await env.host.settle();
+ const map=env.maps[0];
+ for(const [zoom,interval] of [[9.2,100],[11.2,50],[13.2,25]]){
+  map.options.onSettled({...map.camera,zoom});env.host.render();assert.match(env.host.text(),new RegExp(`Горизонтали ·\\s*${interval}\\s*м`));
+ }
+ map.options.onState({...map.state,loading:true});env.host.render();assert.doesNotMatch(env.host.text(),/Горизонтали/);
+ map.options.onState({...map.state,loading:false});env.host.render();assert.match(env.host.text(),/Горизонтали/);
+ env.host.click('Спутник');assert.doesNotMatch(env.host.text(),/Горизонтали/);
 });
 
 test('the main map offers only Relief and Satellite and keeps one active canvas throughout switching',async t=>{

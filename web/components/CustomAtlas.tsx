@@ -19,12 +19,15 @@ import {bindMapLabelReflow,constrainDirectionLabels,MAP_LABEL_OBSTACLE_SELECTORS
 import {MAP_CONFIG,viewportRegionId} from '@/lib/map-config';
 import {overviewContextCaption,ROUTE_PRESENTATION} from '@/lib/map-route-presentation';
 import {EMPTY_MAP_TRAILS,type AtlasProps} from '@/lib/map-types';
+import {mapDistanceScale} from '@/lib/custom-map-scale';
+import {reliefContourIntervals} from '@/lib/custom-map-relief';
 
 const INITIAL:CustomMapState={ready:false,loading:false,mode:'detail',committedMode:'overview',imageryLoading:false,reliefReady:false,localDetail:false,error:'',residentTiles:0,pendingTiles:0};
 
 export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
   const {region,trail,visibleTrails=EMPTY_MAP_TRAILS,planning=false,planPoints}=props;
   const container=useRef<HTMLDivElement>(null),engine=useRef<CustomMapEngine|null>(null),latest=useRef(props);
+  const scaleValue=useRef<HTMLSpanElement>(null),scaleLine=useRef<HTMLSpanElement>(null);
   const frame=useRef<MapFrameRefit|null>(null),navigation=useRef(0),manual=useRef(false),fullView=useRef(!region),fitCurrent=useRef<(animate?:boolean)=>void>(()=>{});
   const shown=useRef<{trail?:Trail;geometry?:GeoJSON.GeoJSON;bounds?:GeographicBounds}>({});
   const locationEpoch=useRef(0),position=useRef<[number,number]|null>(null);
@@ -54,6 +57,12 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
       camera:russiaView(element,256).camera,
       onReady:()=>{if(alive)setState(map.getState());},
       onState:value=>{if(alive)setState(value);},
+      onFrame:camera=>{
+        const scale=mapDistanceScale(camera.center[1],camera.zoom),value=scaleValue.current,line=scaleLine.current;if(!scale||!value||!line)return;
+        // Update the fixed ruler without a React render or layout read on pan.
+        if(value.textContent!==scale.label)value.textContent=scale.label;
+        const width=`${scale.pixels.toFixed(2)}px`;if(line.style.width!==width)line.style.width=width;
+      },
       onGesture:()=>{manual.current=true;fullView.current=false;navigation.current++;locationEpoch.current++;frame.current?.cancel();},
       onSettled:camera=>{if(alive){setZoom(camera.zoom);latest.current.onViewportRegion?.(viewportRegionId(camera.center[0],camera.center[1],camera.zoom));}},
       onMarker:id=>{
@@ -141,6 +150,7 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     },()=>{if(epoch===locationEpoch.current)note('Позиция недоступна. Проверьте разрешение и сигнал.');},{enableHighAccuracy:true,timeout:MAP_CONFIG.geolocationTimeoutMs,maximumAge:MAP_CONFIG.geolocationMaximumAgeMs});
   };
   const satellite=state.mode==='satellite',message=status||(state.error!==dismissedError?state.error:'');
+  const contours=!satellite&&relief&&state.reliefReady&&!state.loading?reliefContourIntervals(Math.min(18,Math.ceil(zoom))):null;
   return <div className="atlas-wrap tropnik-custom-atlas" data-map-renderer="tropnik" data-map-base-committed={state.committedMode} data-map-base-target={state.mode} data-map-base-state={state.imageryLoading?'loading':'ready'} data-map-imagery={satellite?'satellite':undefined} data-map-imagery-source={satellite?state.imagerySource:undefined} data-map-imagery-target={satellite?state.imageryTarget:undefined} data-map-imagery-state={satellite?(state.imageryLoading?'loading':state.imagerySource?'ready':'loading'):undefined} data-map-detail={zoom>=ROUTE_PRESENTATION.closeZoom?'close':undefined} data-map-route={trail&&!planning?'selected':undefined}>
     <div ref={container} className="atlas-canvas tropnik-map-surface" role="region" aria-label="Интерактивная карта России"/>
     {!state.ready&&!message&&<div className="map-skeleton"><MapIcon name="compass" size={38}/><span>Открываем карту России</span></div>}
@@ -150,7 +160,7 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     <div className="map-controls"><button aria-label="Увеличить масштаб" disabled={!state.ready} onClick={()=>engine.current?.zoomBy(1)}><MapIcon name="plus" size={20}/></button><button aria-label="Уменьшить масштаб" disabled={!state.ready} onClick={()=>engine.current?.zoomBy(-1)}><MapIcon name="minus" size={20}/></button><span/><button aria-label="Север сверху" onClick={()=>engine.current?.north()}><MapIcon name="compass" size={22}/></button><button aria-label="Моё местоположение" disabled={!state.ready} onClick={locate}><MapIcon name="location" size={21}/></button><button aria-label={planning&&trail?'Показать поход целиком':'Показать Россию целиком'} disabled={!state.ready} onClick={fitAll}><MapIcon name="fit" size={19}/></button></div>
     <div className="layer-control"><button className={layers?'layer-button active':'layer-button'} aria-expanded={layers} onClick={()=>setLayers(!layers)}><MapIcon name="layers" size={20}/>Слои</button>{layers&&<div className="layer-menu"><strong>Ваша карта</strong><label><input type="checkbox" checked={paths} onChange={event=>{setPaths(event.target.checked);engine.current?.setLayers({paths:event.target.checked});}}/>Тропы и грунтовые дороги</label><label><input type="checkbox" checked={relief} onChange={event=>{setRelief(event.target.checked);engine.current?.setLayers({relief:event.target.checked});}}/>Рельеф и линии высот</label><label><input type="checkbox" checked={boundaries} onChange={event=>{setBoundaries(event.target.checked);engine.current?.setLayers({boundaries:event.target.checked});}}/>Границы территорий</label><a href="/offline">Подробная офлайн-карта</a><a href="/sources">Источники карты</a></div>}</div>
     {message&&!planning&&<div className="map-message" role="status"><MapIcon name="info" size={18}/><span>{message}</span><button onClick={()=>{setStatus('');setDismissedError(state.error);}}>Понятно</button></div>}
-    {!planning&&<div className="map-legend"><span className="legend-line"/>Тропа<span className="legend-region"/>Направление<span className="legend-hint">{region?'Нажмите на маршрут':'Выберите регион, чтобы приблизить'}</span></div>}
+    {!planning&&<div className="map-legend"><span className="map-scale" title="Расстояние у центра карты"><span ref={scaleValue}/><span ref={scaleLine} className="map-scale-line"/></span><span className="map-legend-key"><span className="legend-line"/>Маршрут</span>{contours?<span className="map-legend-key" title={`Основные линии высот — через ${contours.indexM} м`}><span className="map-contour-key"/>Горизонтали · {contours.minorM} м</span>:<span className="map-legend-key"><span className="legend-region"/>Направление</span>}</div>}
     <MapAttribution ready={state.ready} terrain={state.reliefReady} satellite={satellite} satelliteSource={state.imagerySource??state.imageryTarget??'eox-s2'} satelliteLoading={state.imageryLoading} zoom={zoom}/>
   </div>;
 });

@@ -534,8 +534,12 @@ export class CustomMapEngine {
     if(!this.coverage){this.labelCanvas.hidden=true;return;}
     const occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>(),repeated=new Map<string,MapPoint[]>();
     const candidates:Array<{id:string;coordinate:[number,number];label:MapTileLabel;color?:string}>=this.additionalLabels.map(label=>({id:label.id,coordinate:label.coordinate,label:{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},color:label.color}));
-    const detail=this.displayDetail();
-    if(detail&&this.mode!=='overview'&&this.camera.zoom>=5)for(const tile of detail.tiles)for(const label of tile.labels){const n=2**tile.z;candidates.push({id:`${tile.key}:${label.text}`,coordinate:mercatorUnproject({x:(tile.x+label.x)/n,y:(tile.y+label.y)/n}),label});}
+    const detail=this.displayDetail(),satellite=this.mode==='satellite'&&!!this.imagery;
+    const labelBatches=[detail];
+    // Height annotations belong to the committed measured relief. They follow
+    // its visibility, including the retained ground during an imagery load.
+    if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=10)labelBatches.push(this.relief);
+    if(this.mode!=='overview'&&this.camera.zoom>=5)for(const batch of labelBatches)if(batch)for(const tile of batch.tiles)for(const label of tile.labels){const n=2**tile.z;candidates.push({id:`${tile.key}:${label.text}`,coordinate:mercatorUnproject({x:(tile.x+label.x)/n,y:(tile.y+label.y)/n}),label});}
     candidates.sort((a,b)=>mapLabelPriority(a.label)-mapLabelPriority(b.label)||a.label.rank-b.label.rank);
     this.labelDiagnosticTotal=candidates.length;let count=0;const budget=mapLabelBudget(this.size.width,this.size.height);
     for(const {id,coordinate,label,color} of candidates){

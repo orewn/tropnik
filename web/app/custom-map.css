@@ -21,6 +21,11 @@
 .tropnik-custom-atlas .layer-menu label{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px}
 .tropnik-custom-atlas .layer-menu input{width:18px;height:18px;accent-color:var(--forest)}
 .tropnik-custom-atlas .layer-menu>button,.tropnik-custom-atlas .layer-menu>a{min-height:44px;display:flex;align-items:center}
+.tropnik-custom-atlas .map-legend{gap:16px;align-items:center}
+.tropnik-custom-atlas .map-legend-key{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.tropnik-custom-atlas .map-scale{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;width:96px;min-height:28px;flex-shrink:0;font-size:12px;line-height:16px;font-variant-numeric:tabular-nums;color:var(--forest)}
+.tropnik-custom-atlas .map-scale-line{display:block;height:4px;border:solid currentColor;border-width:0 1px 2px;width:0}
+.tropnik-custom-atlas .map-contour-key{display:block;width:20px;height:8px;border:solid #8a765a;border-width:2px 0 1px;flex-shrink:0}
 .tropnik-custom-atlas .terrain-heading{max-width:min(360px,calc(100% - 112px));box-sizing:border-box}
 .tropnik-custom-atlas .terrain-heading h2{max-width:100%;font-size:24px;line-height:1.25;overflow-wrap:anywhere}
 /* Keep the standard backdrop-filter after its legacy prefix: the production
@@ -31,10 +36,15 @@
 .tropnik-custom-atlas :is(.terrain-controls,.terrain-live){-webkit-backdrop-filter:none;backdrop-filter:none}
 @media(hover:hover) and (pointer:fine){.tropnik-custom-atlas .layer-button:hover:not(.active),.tropnik-custom-atlas .map-attribution-toggle:hover{background:var(--surface-soft)!important}}
 @media(max-width:700px){
+ .explore-layout .tropnik-custom-atlas .map-legend{display:flex;top:calc(var(--map-top,12px) + 64px);bottom:auto;left:var(--map-left,12px);padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+ .tropnik-custom-atlas .map-legend-key{display:none}
  .tropnik-custom-atlas .terrain-heading{max-width:calc(100% - 144px)}
  .tropnik-custom-atlas .terrain-heading h2{font-size:20px}
  /* The shared mobile layout reserves one horizontal row above the drawer.
     Keep all six actions in that row so the status never covers a button. */
  .tropnik-custom-atlas .terrain-controls>button{display:grid;min-width:44px;min-height:44px;width:44px;height:44px}
  .tropnik-custom-atlas .terrain-controls>span{display:none}
+}
+@media(max-width:900px) and (max-height:620px) and (orientation:landscape){
+ .explore-layout .tropnik-custom-atlas .map-legend{display:none}
 }

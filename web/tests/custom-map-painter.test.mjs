@@ -66,8 +66,8 @@ test('contours follow measured pixel centres, have fixed child widths, and retai
   const heights=new Float32Array([0,100,0,100]),context=new Context();
   assert.equal(paintContours(context,heights,2,14,512,{lineScale:1}),3);
   assert.deepEqual(context.strokes[0].path,[['M',192,128],['L',192,384],['M',256,128],['L',256,384],['M',320,128],['L',320,384]]);
-  assert.equal(context.strokes[0].width,.65);
-  const enlarged=new Context();paintContours(enlarged,heights,2,18,32768,{lineScale:1});assert.equal(enlarged.strokes[0].width,.65);
+  assert.equal(context.strokes[0].width,1);
+  const enlarged=new Context();paintContours(enlarged,heights,2,18,32768,{lineScale:1});assert.equal(enlarged.strokes[0].width,1);
   assert.equal(paintContours(new Context(),new Float32Array([0,1000,0,1000]),2,18,512,{lineScale:1}),39,'steep source cells no longer lose all of their contours');
   assert.deepEqual([...heights],[0,100,0,100]);
 });
@@ -84,7 +84,7 @@ test('close zoom uses every source cell in the child, including the final source
 test('saddle contours choose the topology of the measured bilinear surface',()=>{
   // At level0 the positive diagonal is weaker, so its two corners stay separate.
   const context=new Context();paintContours(context,new Float32Array([10,-40,-40,10]),2,14,512,{lineScale:1});
-  const atZero=context.strokes[0].path.slice(-4);
+  const atZero=context.strokes.at(-1).path.slice(-4);
   assert.deepEqual(atZero,[['M',179.2,128],['L',128,179.2],['M',384,332.8],['L',332.8,384]]);
 });
 
@@ -100,7 +100,7 @@ test('invalid Terrarium values fail before they create relief; hillshade uses ac
 
 const measured=(tx,ty,size=4,fn=(x,y)=>25*(x+.5)+40*(y+.5))=>Float32Array.from({length:size*size},(_,i)=>fn(tx*size+i%size,ty*size+Math.floor(i/size)));
 const neighbours=(tx,ty,size=4,fn)=>Object.fromEntries([-1,0,1].flatMap(dy=>[-1,0,1].filter(dx=>dx||dy).map(dx=>[`${dx},${dy}`,elevationBorder(measured(tx+dx,ty+dy,size,fn),size,size,dx,dy)])));
-const segments=context=>{const path=context.strokes.at(-1).path;return Array.from({length:path.length/2},(_,i)=>[path[2*i].slice(1),path[2*i+1].slice(1)]);};
+const segments=context=>context.strokes.flatMap(stroke=>Array.from({length:stroke.path.length/2},(_,i)=>[stroke.path[2*i].slice(1),stroke.path[2*i+1].slice(1)]));
 const seamCrossings=(lines,axis,seam)=>[...new Set(lines.filter(([a,b])=>(a[axis]-seam)*(b[axis]-seam)<0).map(([a,b])=>{const t=(seam-a[axis])/(b[axis]-a[axis]);return +(a[1-axis]+t*(b[1-axis]-a[1-axis])).toFixed(8);})).values()].sort((a,b)=>a-b);
 
 test('real neighbouring samples join contours across horizontal and vertical parent boundaries',()=>{
@@ -181,8 +181,9 @@ test('unnamed measured peaks retain their original height and anchor while unkno
     point(100,200,{ele:'5642'}),point(300,400,{class:'saddle',ele:2750}),point(500,600,{ele:0}),point(700,800,{ele:''})
   ])}};
   const labels=paintVectorTile(new Context(),tile,10);assert.equal(labels.length,4);
-  assert.deepEqual(labels[0],{x:100/4096,y:200/4096,text:'',kind:'peak',rank:3,elevation:5642,symbol:'peak'});
-  assert.equal(labels[1].symbol,'pass');assert.equal(labels[1].elevation,2750);assert.equal(labels[2].elevation,0);assert.equal(labels[3].elevation,undefined);
+  assert.deepEqual(labels.find(label=>label.x===100/4096),{x:100/4096,y:200/4096,text:'',kind:'peak',rank:3,elevation:5642,symbol:'peak'});
+  const pass=labels.find(label=>label.x===300/4096);assert.equal(pass.symbol,'pass');assert.equal(pass.elevation,2750);
+  assert.equal(labels.find(label=>label.x===500/4096).elevation,0);assert.equal(labels.find(label=>label.x===700/4096).elevation,undefined);
   assert.deepEqual(paintVectorTile(new Context(),tile,9),[]);
 });
 

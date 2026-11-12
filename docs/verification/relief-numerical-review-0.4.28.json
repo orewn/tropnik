@@ -1,0 +1,129 @@
+{
+  "verifiedAt": "2026-11-12T02:52:27.587Z",
+  "sourceSha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+  "scope": "Read-only numerical comparison on original source elevations; not ground truth validation",
+  "runtime": "v24.22.1",
+  "benchmarkMethod": "Median of five calls after two warm-up calls in local Node. Not a browser/device performance guarantee; source decode and Canvas composition excluded.",
+  "regions": [
+    {
+      "region": "sakhalin",
+      "sourceSize": 512,
+      "sourceZ": 12,
+      "sourceTile": [
+        12,
+        3672,
+        1441
+      ],
+      "encodedSourceSha256": "7871edec3d6897b233cb8c4ee5a5d8923a569a8f3674f29df347b8f94516198e",
+      "heightSha256": "50fada2831db21d852ebab5afbaf4b70595730544c22a3e8d207e3e37cb5e27b",
+      "heightsUnchanged": true,
+      "shaderMatchesFirstVersionRGBA": true,
+      "shaderSha256": "db22016154e633577e7f10b64a319630b079c05073a871392f33ad2164544ca2",
+      "seamPixelsCompared": 4084,
+      "seamDifferences": 0,
+      "contours": [
+        {
+          "displayZ": 12,
+          "oldSegments": 4797,
+          "newSegments": 4797,
+          "exactGeographicSegmentsUnchanged": true,
+          "labelCount": 4,
+          "labelsAreMeasuredIndexSegmentMidpoints": true,
+          "labelsUseIndexElevations": true
+        },
+        {
+          "displayZ": 14,
+          "oldSegments": 34412,
+          "newSegments": 34412,
+          "exactGeographicSegmentsUnchanged": true,
+          "labelCount": 4,
+          "labelsAreMeasuredIndexSegmentMidpoints": true,
+          "labelsUseIndexElevations": true
+        },
+        {
+          "displayZ": 18,
+          "oldSegments": 9,
+          "newSegments": 9,
+          "exactGeographicSegmentsUnchanged": true,
+          "labelCount": 0,
+          "labelsAreMeasuredIndexSegmentMidpoints": true,
+          "labelsUseIndexElevations": true
+        }
+      ],
+      "alphaBefore": {
+        "mean": 12.77,
+        "visible": 249889,
+        "max": 78
+      },
+      "alphaAfter": {
+        "mean": 30.07,
+        "visible": 258191,
+        "max": 145
+      },
+      "medianShadeMs": {
+        "before": 18.82,
+        "after": 31.46
+      }
+    },
+    {
+      "region": "caucasus",
+      "sourceSize": 256,
+      "sourceZ": 12,
+      "sourceTile": [
+        12,
+        2507,
+        1493
+      ],
+      "encodedSourceSha256": "556b1ad4b2a710353d3f969dc8b3774e44500206854c47eb0f4f346967002042",
+      "heightSha256": "fece5121430502d8cde1329ffcd84091a84a0eb5456d1ba6ad19038b9254171f",
+      "heightsUnchanged": true,
+      "shaderMatchesFirstVersionRGBA": true,
+      "shaderSha256": "7727d94828d708fec502297b10e7ef7277e2e230ef990822b1c50af079995294",
+      "seamPixelsCompared": 2036,
+      "seamDifferences": 0,
+      "contours": [
+        {
+          "displayZ": 12,
+          "oldSegments": 15184,
+          "newSegments": 15184,
+          "exactGeographicSegmentsUnchanged": true,
+          "labelCount": 4,
+          "labelsAreMeasuredIndexSegmentMidpoints": true,
+          "labelsUseIndexElevations": true
+        },
+        {
+          "displayZ": 14,
+          "oldSegments": 60291,
+          "newSegments": 60291,
+          "exactGeographicSegmentsUnchanged": true,
+          "labelCount": 4,
+          "labelsAreMeasuredIndexSegmentMidpoints": true,
+          "labelsUseIndexElevations": true
+        },
+        {
+          "displayZ": 18,
+          "oldSegments": 24,
+          "newSegments": 24,
+          "exactGeographicSegmentsUnchanged": true,
+          "labelCount": 3,
+          "labelsAreMeasuredIndexSegmentMidpoints": true,
+          "labelsUseIndexElevations": true
+        }
+      ],
+      "alphaBefore": {
+        "mean": 34.23,
+        "visible": 65004,
+        "max": 120
+      },
+      "alphaAfter": {
+        "mean": 71.98,
+        "visible": 65386,
+        "max": 148
+      },
+      "medianShadeMs": {
+        "before": 3.54,
+        "after": 4.73
+      }
+    }
+  ]
+}

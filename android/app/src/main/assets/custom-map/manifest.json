@@ -79,8 +79,8 @@
     },
     {
       "path": "web/app/custom-map.css",
-      "sizeBytes": 3958,
-      "sha256": "0475037722b8b532d6aaf6acddc6c34f789e12a90db5b23e35a98fd676393e58"
+      "sizeBytes": 5057,
+      "sha256": "3b9eacbcc3b5db807a64085fe124efc36c7c35cce0789d3f000d58c9119e3012"
     },
     {
       "path": "web/app/map-detail.css",
@@ -99,8 +99,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 49193,
-      "sha256": "2afde0df3bf1fba9f2bdd3f15c7ec81810ecc1b5c0bf7efe9825d03ed40aa3b8"
+      "sizeBytes": 49617,
+      "sha256": "dba89c44c51d4dec405831c8f9df0d7e8d643b1986d544e46fbed696d7ad0097"
     },
     {
       "path": "web/lib/custom-map-label-inspection.ts",
@@ -109,13 +109,18 @@
     },
     {
       "path": "web/lib/custom-map-labels.ts",
-      "sizeBytes": 3919,
-      "sha256": "e814b89fe27643ef34c95ccc9d63754910828f9588f7610ecba796f8e2d7dab3"
+      "sizeBytes": 4586,
+      "sha256": "b0e38679b23272f18119501b2503211801d5e1719cc2804713496f041f4342fd"
     },
     {
       "path": "web/lib/custom-map-painter.ts",
-      "sizeBytes": 19147,
-      "sha256": "3c11b99ba4d1ea484e8bb0a60127ab792f531e32b256018f31725510acb9692a"
+      "sizeBytes": 26868,
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1"
+    },
+    {
+      "path": "web/lib/custom-map-relief.ts",
+      "sizeBytes": 421,
+      "sha256": "14ee495df7b02fe2f689c51e585e4e0fd64ec165a9beb1a85522716861e5f71a"
     },
     {
       "path": "web/lib/custom-map-symbols.ts",
@@ -129,8 +134,8 @@
     },
     {
       "path": "web/lib/custom-map-tiles.worker.ts",
-      "sizeBytes": 15008,
-      "sha256": "5f0754baa9aee259a19388b7559a0fbaa0eca5b02ecb34069c5fcbd056d7a944"
+      "sizeBytes": 15133,
+      "sha256": "1ad3e6abc4dc0d45b67c1fed2638d5bac04bc53a684e36913d1db431a55c218f"
     },
     {
       "path": "web/lib/custom-map-vector.ts",
@@ -210,7 +215,7 @@
     {
       "path": "web/package.json",
       "sizeBytes": 1896,
-      "sha256": "6cb31ae6141c82165e845a88a0db870c0198321a9218299d3aaf0583f7855c3c"
+      "sha256": "c791687514be903a754df2f82ef80e70747d353ed9d98a810a57f8868e792cd2"
     },
     {
       "path": "web/pnpm-lock.yaml",
@@ -248,17 +253,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "a448f39fbabcbceb93273f1a94945b4d46101419dcf5b4211308e1ee4da6d6a3",
+  "sourceInputsSha256": "63b8bc4965ce562d9f9201498cfb29addaa46c9838cc6ee400cff33a3910e5a2",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "aa5d86aa97752da9fbe8d3789b8cb15f4732b7d25d6a062f9477495f5be149a5"
+      "sha256": "d4e5eacd5fe3bb069f361b91aac055673a6537d80e0e497cead0914fd4abda5a"
     },
     {
-      "path": "chunks/custom-map-entry-CPaoAJrn.js",
-      "sizeBytes": 100926,
-      "sha256": "e3713af71a63a0f032dbda2448451adcea68ef4ac7ba7d60ba0eb4613271ada0"
+      "path": "chunks/custom-map-entry-CaUMh4Ea.js",
+      "sizeBytes": 101746,
+      "sha256": "320300cd4e8e8e9f04473a5d0df221269cf1bfd656eeb0dedc33ed650a12eec0"
     },
     {
       "path": "index.html",
@@ -273,12 +278,12 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "aa084557108eea9915a8051592609192fe46aef2987f589a0440c4ced936cda0"
+      "sha256": "67fa120bbe0d20be5e451a91e6226828fc6664833a0ee245e5c7e9348e2da323"
     },
     {
       "path": "map.css",
-      "sizeBytes": 75255,
-      "sha256": "66a2a17f1cb861b4b3f60e74861f2ddf1232f21d3561cf1b16bba9a15d29540c"
+      "sizeBytes": 76335,
+      "sha256": "8db203c428a33ab3f6dc1abecf5d5e7de56288c3d921a1b820ce9d5c9bcc7688"
     },
     {
       "path": "offline-manifest.json",
@@ -286,9 +291,9 @@
       "sha256": "54075549afdea2aee6d10c3cf70d53429b0ba457eda890a8ad93c1124c508c10"
     },
     {
-      "path": "workers/custom-map-tiles.worker-Bx-onidN.js",
-      "sizeBytes": 24220,
-      "sha256": "a40700ea1a0991e33779e89c6741b18a721a5d439b89e63d6d7f7dc3744a231d"
+      "path": "workers/custom-map-tiles.worker-DZxnjlmv.js",
+      "sizeBytes": 28448,
+      "sha256": "7fe1ba17212c38b51d9a44552e0eed45c0877a4b3f397849892193b59462001d"
     },
     {
       "path": "workers/terrain-preparation.worker-Bb-s7l3H.js",

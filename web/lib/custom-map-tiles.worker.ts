@@ -196,7 +196,8 @@ self.onmessage=async({data:job}:MessageEvent<TileJob>)=>{
           reliefCoverage=await prepareRelief(parent,job,view);
           context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';
           context.drawImage(parent.shade,0,0,view.paintSize,view.paintSize);
-          contours=paintContours(context,parent.heights,parent.size,paintZoom,view.paintSize,{lineScale:paintScale,bounds:view.bounds,halo:parent.halo});
+          contours=paintContours(context,parent.heights,parent.size,paintZoom,view.paintSize,{lineScale:paintScale,bounds:view.bounds,halo:parent.halo,labels});
+          labels=labels.map(label=>({...label,x:label.x*view.factor-view.childX,y:label.y*view.factor-view.childY}));
         }
       }finally{context.restore();}
     }

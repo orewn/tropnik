@@ -108,8 +108,8 @@ test('software raster targets preserve fixed child pixels, source shading and pa
 test('neighbouring display children share one decoded parent, retain crisp widths, and receive their own labels',async()=>{
   const env=fixture(),first=await env.send(job(1)),second=await env.send(job(2,{x:1606}));
   assert.equal(env.counts().vectorDecodes,1);assert.equal(env.counts().imageDecodes,0);
-  assert.deepEqual(copy(first.labels),[{x:.5,y:.25,text:'Москва',kind:'place',rank:1,priorityCity:true}]);
-  assert.deepEqual(copy(second.labels),[{x:.5,y:.25,text:'Сочи',kind:'place',rank:1,priorityCity:true}]);
+  assert.deepEqual(copy(first.labels),[{x:.5,y:.25,text:'Москва',kind:'place',rank:1,placeClass:'city',priorityCity:true}]);
+  assert.deepEqual(copy(second.labels),[{x:.5,y:.25,text:'Сочи',kind:'place',rank:1,placeClass:'city',priorityCity:true}]);
   assert.equal(first.bitmap.width,512);assert.equal(first.bitmap.height,512);assert.equal(second.bitmap.width,512);
   assert.equal(first.bitmap.context.strokes[1].width,2.2);assert.deepEqual(first.bitmap.context.strokes[1].dash,[6,5]);
   assert.ok(env.canvases.every(canvas=>canvas.width<=512&&canvas.height<=512),'no parent-sized render target is allocated');
@@ -301,4 +301,22 @@ test('invalid style zooms are rejected before any decoded source or render targe
   }
   assert.equal(env.counts().vectorDecodes,0);assert.equal(env.counts().imageDecodes,0);assert.equal(env.canvases.length,0);assert.equal(env.outputs.length,0);
   const recovered=await env.send(job(++id,{z:17,x:802,y:1603,paintZoom:17}));assert.ok(recovered.bitmap);
+});
+
+test('real contour heights are returned in child coordinates with a fixed candidate budget and shared parent shade',async()=>{
+  const size=32,height=(x,y)=>100+x*40+y*20,env=fixture({images:new Map([[1,sourceImage(size,height)]])});
+  const common={kind:'relief',z:14,sourceZ:12,sourceKey:'https://tiles.example/12/25/50.webp',x:102,y:201};
+  const first=await env.send(job(1,common)),second=await env.send(job(2,{...common,x:103})),fallback=await env.send(job(3,{...common,paintZoom:15}));
+  for(const [result,childX] of [[first,2],[second,3],[fallback,2]]){
+    assert.equal(result.error,undefined);assert.ok(result.labels.length>0&&result.labels.length<=4);
+    for(const label of result.labels){
+      assert.equal(label.kind,'contour');assert.equal(label.text,`${label.elevation} м`);assert.equal(label.elevation%100,0);
+      assert.ok(label.x>=0&&label.x<1&&label.y>=0&&label.y<1);
+      const x=(childX+label.x)/4*size-.5,y=(1+label.y)/4*size-.5;
+      assert.ok(Math.abs(height(x,y)-label.elevation)<1e-9,'Display child normalization must retain the measured height at the geographic anchor');
+    }
+  }
+  assert.deepEqual(copy(fallback.labels),copy(first.labels));
+  assert.equal(env.counts().imageDecodes,1);assert.equal(env.shadeSources.length,1,'No extra decoded DEM or shade is retained for contour text');
+  assert.ok(env.canvases.every(canvas=>canvas.width<=512&&canvas.height<=512));
 });
