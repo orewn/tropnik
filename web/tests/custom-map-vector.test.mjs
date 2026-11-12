@@ -96,6 +96,13 @@ test('unknown fields of every wire type are skipped, including bounded protobuf2
   assert.deepEqual(decodeVectorTile(withUnknown), decodeVectorTile(ordinary));
 });
 
+test('an empty protobuf is the valid zero-layer MVT represented by the official empty-tile fixture', () => {
+  // https://github.com/mapbox/mvt-fixtures/blob/main/FIXTURES.md — fixture 001.
+  for (const bytes of [new ArrayBuffer(0), new Uint8Array(0)]) {
+    const decoded=decodeVectorTile(bytes);assert.deepEqual(Object.keys(decoded.layers),[]);assert.equal(Object.getPrototypeOf(decoded.layers),null);
+  }
+});
+
 test('unusual layer/property names are preserved without prototype mutation and empty layers remain', () => {
   const decoded = decodeVectorTile(tile(layer({name: '__proto__', keys: ['__proto__', 'constructor', 'toString'],
     values: [valueString('safe')], features: [feature({tags: [0, 0, 1, 0, 2, 0]})]}), layer({name: 'empty'})));

@@ -879,7 +879,7 @@ function Le({ west: e, south: t, east: n, north: r }) {
 }
 //#endregion
 //#region web/lib/custom-map-tiles.worker.ts?worker&url
-var Re = "" + new URL("../workers/custom-map-tiles.worker-DZxnjlmv.js", import.meta.url).href, ze = 96, Be = 288, Ve = 160, He = 3, Ue = 6, V = 8 * 1024 * 1024, H = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
+var Re = "" + new URL("../workers/custom-map-tiles.worker-DIXTfJlZ.js", import.meta.url).href, ze = 96, Be = 288, Ve = 160, He = 3, Ue = 6, V = 8 * 1024 * 1024, H = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
 function U(e) {
 	let t = e.paintZoom === void 0 ? e.z : e.paintZoom;
 	if (!Number.isInteger(e.z) || e.z < 0 || !Number.isInteger(t) || t < e.z || t > 18) throw Error("Invalid map paint zoom");
@@ -1017,7 +1017,8 @@ var Ge = class {
 		e.local = t.local, e.mime = t.mime, e.sourceKey = t.url;
 		let n = await this.readSource(e, t.url, 0);
 		if (this.current(e)) {
-			if (!n.byteLength || n.byteLength > V) throw Error("Map source exceeds tile budget");
+			if (n.byteLength > V) throw Error("Map source exceeds tile budget");
+			if (!n.byteLength && e.request.kind !== "vector") throw Error("Empty raster map source");
 			if (e.bytes = n.slice(0), e.request.kind === "relief") {
 				let { z: r, x: i, y: a } = e.request, o = e.sourceZ, s = 2 ** (r - o), c = Math.floor(i / s), l = Math.floor(a / s), u = e.local ? await this.files() : void 0;
 				if (!this.current(e)) return;

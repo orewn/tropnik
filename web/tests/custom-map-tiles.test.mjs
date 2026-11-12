@@ -16,10 +16,10 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
   let pool;
   if(sourcePool){
     const poolModule={exports:{}};
-    vm.runInNewContext(poolCompiled,{module:poolModule,exports:poolModule.exports,AbortController,DOMException,TextDecoder,Uint8Array,setTimeout,clearTimeout,
+    vm.runInNewContext(poolCompiled,{module:poolModule,exports:poolModule.exports,Error,AbortController,DOMException,TextDecoder,Uint8Array,setTimeout,clearTimeout,
       require(name){if(name==='./map-config.ts')return{MAP_RESOURCE_LIMITS};throw new Error(`Unexpected pool dependency ${name}`);}});
     pool=new poolModule.exports.MapResourcePool({fetcher:(url,{signal})=>new Promise((resolve,reject)=>{
-      const request={url,signal,resolve:bytes=>{request.done=true;resolve(new Response(bytes));},reject:error=>{request.done=true;reject(error);}};
+      const request={url,signal,resolve:(bytes,options)=>{request.done=true;resolve(new Response(bytes,options));},reject:error=>{request.done=true;reject(error);}};
       downloads.push(request);signal.addEventListener('abort',()=>{if(request.done)return;request.done=true;request.aborted=true;reject(signal.reason);},{once:true});
     })});
   }
@@ -31,7 +31,7 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
   }
   const testModule={exports:{}};
   const navigator={onLine:online};
-  vm.runInNewContext(compiled,{module:testModule,exports:testModule.exports,URL,Worker,AbortController,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,console,
+  vm.runInNewContext(compiled,{module:testModule,exports:testModule.exports,Error,URL,Worker,AbortController,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,console,
     require(name){
       if(name==='./map-preload')return {loadPublicBytes:(url,priority,signal)=>pool?pool.get(url,priority,signal):new Promise((resolve,reject)=>{const request={url,resolve,reject,signal,priority};downloads.push(request);signal?.addEventListener('abort',()=>{request.done=true;request.aborted=true;reject(signal.reason);},{once:true});}),loadPublicJSON:async url=>{
         if(url.includes('manifest')){manifestReads.push(url);return readManifest?readManifest():{files:files.map(path=>({path}))};}
@@ -46,6 +46,31 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
   return{store,downloads,workers,bitmaps,manifestReads,navigator,resolveDownloads,pool,createStore:()=>new testModule.exports.CustomMapTiles(softwareRaster),key:testModule.exports.customTileKey};
 }
 const request=(x=0)=>({kind:'overview',z:4,x,y:5});
+
+test('successful empty OpenFreeMap MVT is decoded and cached for both satellite and opaque detail',async t=>{
+  const env=fixture({sourcePool:true});t.after(()=>env.store.destroy());
+  const tile={kind:'vector',z:11,x:2046,y:495,transparent:true},opaque={...tile,transparent:false};env.store.pin([tile,opaque].map(env.key));
+  const result=env.store.load(tile);await turn();assert.equal(env.downloads[0].url,'https://tiles.openfreemap.org/snapshot/11/2046/495.pbf');
+  env.downloads[0].resolve(new ArrayBuffer(0),{status:200,headers:{'content-type':'application/vnd.mapbox-vector-tile','content-length':'0','x-ofm-debug':'empty tile'}});await turn();
+  const submitted=env.workers[0].complete();assert.equal(submitted.bytes.byteLength,0);assert.equal(submitted.kind,'vector');assert.equal(submitted.sourceZ,11);assert.equal(submitted.transparent,true);
+  const ready=await result;assert.equal(ready.key,env.key(tile));assert.deepEqual(ready.labels,[]);assert.equal(env.store.snapshot().errors.length,0);
+  assert.equal(await env.store.load(tile),ready,'An empty source still produces one ordinary cacheable bitmap');
+  const other=env.store.load(opaque);await turn();const detail=env.workers[0].complete();assert.equal(detail.bytes.byteLength,0);assert.equal(detail.transparent,false);await other;
+  assert.equal(env.downloads.length,1,'The successful zero-byte source remains shared between style variants');assert.equal(env.store.pending,0);assert.equal(env.store.resident,2);
+});
+
+test('empty raster sources, oversized vectors and failed HTTP responses never become ready empty map tiles',async t=>{
+  for(const kind of ['overview','relief','eox-s2','eox-bluemarble','vector']){
+    const env=fixture();t.after(()=>env.store.destroy());const pending=env.store.load({kind,z:11,x:2046,y:495}).catch(error=>error);await turn();
+    env.downloads[0].resolve(new ArrayBuffer(kind==='vector'?8*1024*1024+1:0));
+    assert.match((await pending).message,kind==='vector'?/tile budget/:/Empty raster/);assert.equal(env.workers.length,0);assert.equal(env.store.resident,0);assert.equal(env.store.pending,0);
+  }
+  for(const status of [404,503]){
+    const env=fixture({sourcePool:true});t.after(()=>env.store.destroy());const pending=env.store.load({kind:'vector',z:11,x:2046,y:495}).catch(error=>error);await turn();
+    env.downloads[0].resolve(new ArrayBuffer(0),{status});assert.match((await pending).message,new RegExp(String(status)));
+    assert.equal(env.workers.length,0);assert.equal(env.store.resident,0);assert.equal(env.store.pending,0);
+  }
+});
 
 test('a transient package manifest failure is retried while concurrent reads still share one index request',async t=>{
   const manifests=[],env=fixture({online:false,readManifest:()=>new Promise((resolve,reject)=>manifests.push({resolve,reject}))});

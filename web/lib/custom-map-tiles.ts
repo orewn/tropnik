@@ -109,7 +109,10 @@ export class CustomMapTiles {
     if(this.reading.has(source.url)){work.stage='queued';return;}
     work.local=source.local;work.mime=source.mime;work.sourceKey=source.url;
     const bytes=await this.readSource(work,source.url,0);if(!this.current(work))return;
-    if(!bytes.byteLength||bytes.byteLength>MAX_TILE_BYTES)throw new Error('Map source exceeds tile budget');
+    if(bytes.byteLength>MAX_TILE_BYTES)throw new Error('Map source exceeds tile budget');
+    // MVT's repeated layers may be empty: OpenFreeMap deliberately responds
+    // HTTP 200 with zero bytes for an empty tile. Images still need real data.
+    if(!bytes.byteLength&&work.request.kind!=='vector')throw new Error('Empty raster map source');
     work.bytes=bytes.slice(0);
     if(work.request.kind==='relief'){
       const {z,x,y}=work.request,sourceZ=work.sourceZ!,factor=2**(z-sourceZ),parentX=Math.floor(x/factor),parentY=Math.floor(y/factor);

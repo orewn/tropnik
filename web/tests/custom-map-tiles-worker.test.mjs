@@ -2,8 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {gzipSync} from 'node:zlib';
 import ts from 'typescript';
 import * as painter from '../lib/custom-map-painter.ts';
+import {decodeVectorTile} from '../lib/custom-map-vector.ts';
 
 // Execute the actual worker protocol with controlled image/Canvas APIs. Numeric
 // painting is real; recorded commands do not claim to measure GPU output.
@@ -17,7 +19,7 @@ const bytes=()=>new Uint8Array([1,2,3]).buffer;
 const job=(id,overrides={})=>({id,kind:'vector',bytes:bytes(),z:18,x:1605,y:3207,sourceZ:14,sourceKey:'https://tiles.example/14/100/200.pbf',paths:true,...overrides});
 const scalarPixel=height=>{const value=height+32768;return[Math.floor(value/256),Math.floor(value)%256,Math.round(value%1*256),255];};
 
-function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vectorTile=vector}={}){
+function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vectorTile=vector,vectorDecoder}={}){
   const messages=[],canvases=[],outputs=[],decoded=[],shadeSources=[],contourViews=[],vectorViews=[];let vectorDecodes=0,imageDecodes=0,failedTransfer=false;
   const rgba=new Uint8ClampedArray(Array.from({length:16},(_,i)=>scalarPixel((i%4)*25+Math.floor(i/4))).flat());
   if(unavailablePixel)rgba[3]=0;
@@ -26,10 +28,10 @@ function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vec
     close(){this.closed++;}
   }
   class Context{
-    constructor(canvas){this.canvas=canvas;this.draws=[];this.strokes=[];this.path=[];this.fills=[];this.offset=[0,0];this.stack=[];this.dash=[];}
+    constructor(canvas){this.canvas=canvas;this.draws=[];this.strokes=[];this.path=[];this.fills=[];this.rects=[];this.offset=[0,0];this.stack=[];this.dash=[];}
     save(){this.stack.push([...this.offset]);}restore(){this.offset=this.stack.pop();}
     translate(x,y){this.offset=[this.offset[0]+x,this.offset[1]+y];}
-    clearRect(){}fillRect(){}beginPath(){this.path=[];}
+    clearRect(){}fillRect(...args){this.rects.push({args,color:this.fillStyle});}beginPath(){this.path=[];}
     moveTo(x,y){this.path.push(['M',x+this.offset[0],y+this.offset[1]]);}
     lineTo(x,y){this.path.push(['L',x+this.offset[0],y+this.offset[1]]);}
     closePath(){this.path.push(['Z']);}
@@ -50,7 +52,7 @@ function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vec
   const scope={exports:{},Error,Blob,DecompressionStream,Uint8Array,Uint8ClampedArray,Float32Array,ArrayBuffer,OffscreenCanvas,ImageData,
     createImageBitmap:async blob=>{imageDecodes++;const input=new Uint8Array(await blob.arrayBuffer()),image=images.get(input[0]);const bitmap=blob.type==='image/jpeg'?new Bitmap(512,512):new Bitmap(image?.size??4,image?.size??4,image?.rgba??rgba);decoded.push(bitmap);return bitmap;},
     require:name=>{
-      if(name==='./custom-map-vector')return{decodeVectorTile:()=>{vectorDecodes++;return vectorTile;}};
+      if(name==='./custom-map-vector')return{decodeVectorTile:input=>{vectorDecodes++;return vectorDecoder?vectorDecoder(input):vectorTile;}};
       assert.equal(name,'./custom-map-painter');return{...painter,
         paintVectorTile:(...args)=>{vectorViews.push({z:args[2],size:args[3],options:args[6]});return painter.paintVectorTile(...args);},
         reliefPixels:(heights,size,y,z,halo)=>{shadeSources.push({y,z,heights:[...heights],halo:copy(halo)});return painter.reliefPixels(heights,size,y,z,halo);},
@@ -76,6 +78,34 @@ test('display/source windows wrap dateline parents and crop the exact positive c
   const east=env.window(18,2**18+5,3207,14);assert.equal(east.sourceX,0);assert.equal(east.childX,5);
   assert.equal(env.window(18,1605,3207,12).factor,64);
   for(const values of [[19,0,0,14],[18,0,-1,14],[12,0,0,14],[18,NaN,0,14]])assert.throws(()=>env.window(...values),/coordinates/);
+});
+
+test('zero-layer MVT uses the real decoder and paints an empty satellite overlay or ordinary opaque ground',async()=>{
+  const gzip=gzipSync(new Uint8Array()),compressed=gzip.buffer.slice(gzip.byteOffset,gzip.byteOffset+gzip.byteLength);
+  for(const source of [new ArrayBuffer(0),compressed]){
+    const env=fixture({vectorDecoder:decodeVectorTile}),target={z:11,x:2046,y:495,sourceZ:11,sourceKey:'https://tiles.openfreemap.org/planet/20261101_080013_pt/11/2046/495.pbf',bytes:source};
+    const overlay=await env.send(job(1,{...target,transparent:true})),detail=await env.send(job(2,{...target,transparent:false}));
+    for(const result of [overlay,detail]){
+      assert.equal(result.error,undefined);assert.equal(result.bitmap.width,512);assert.equal(result.bitmap.height,512);assert.deepEqual(copy(result.labels),[]);
+      assert.equal(result.contours,0);assert.equal(result.bitmap.context.draws.length,0);assert.equal(result.bitmap.context.strokes.length,0);assert.equal(result.bitmap.context.fills.length,0);
+    }
+    assert.equal(overlay.bitmap.context.rects.length,0,'The empty satellite overlay paints no opaque pixels');
+    assert.deepEqual(detail.bitmap.context.rects,[{args:[0,0,512,512],color:painter.CARTOGRAPHY.land}],'Ordinary detail retains its established paper colour');
+    assert.deepEqual(env.counts(),{vectorDecodes:1,imageDecodes:0},'A valid empty parent is reused without fabricated objects or image decoding');
+  }
+});
+
+test('empty images and malformed nonempty protobuf are rejected without producing a ready bitmap',async()=>{
+  const env=fixture({vectorDecoder:decodeVectorTile});let id=0;
+  const gzip=gzipSync(new Uint8Array()),compressed=gzip.buffer.slice(gzip.byteOffset,gzip.byteOffset+gzip.byteLength);
+  for(const kind of ['raster','relief'])for(const bytes of [new ArrayBuffer(0),compressed]){
+    const result=await env.send(job(++id,{kind,bytes}));assert.match(result.error,/Empty raster/);assert.equal(result.bitmap,undefined);
+  }
+  for(const bytes of [undefined,null,{},[],{byteLength:0},new Uint8Array(0)])assert.match((await env.send(job(++id,{bytes}))).error,/Invalid tile byte payload/);
+  assert.ok((await env.send(job(++id,{kind:'unknown',bytes:new ArrayBuffer(0)}))).error);
+  const malformed=await env.send(job(++id,{bytes:new Uint8Array([0x1a,0x01,0xff]).buffer}));assert.match(malformed.error,/Invalid vector tile/);
+  assert.equal(env.outputs.length,0);assert.equal(env.counts().imageDecodes,0);
+  const recovered=await env.send(job(++id,{bytes:new ArrayBuffer(0),transparent:true}));assert.ok(recovered.bitmap,'Rejecting malformed data must not poison the next valid empty tile');
 });
 
 test('software raster targets preserve fixed child pixels, source shading and parent reuse',async()=>{

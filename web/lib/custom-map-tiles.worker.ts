@@ -39,14 +39,17 @@ function vectorBytes(tile:VectorTile){
   }
   return bytes;
 }
-async function unpack(input:ArrayBuffer){
-  if(!input?.byteLength||input.byteLength>MAX_BYTES)throw new Error('Tile exceeds the byte budget');
+async function unpack(input:ArrayBuffer,allowEmptyVector=false){
+  if(!(input instanceof ArrayBuffer))throw new Error('Invalid tile byte payload');
+  if(input.byteLength>MAX_BYTES)throw new Error('Tile exceeds the byte budget');
+  if(!input.byteLength&&!allowEmptyVector)throw new Error('Empty raster tile');
   const signature=new Uint8Array(input,0,Math.min(input.byteLength,2));
   if(signature[0]!==31||signature[1]!==139)return input;
   const reader=new Blob([input]).stream().pipeThrough(new DecompressionStream('gzip')).getReader();
   const chunks:Uint8Array[]=[];let length=0;
   try{for(;;){const {done,value}=await reader.read();if(done)break;length+=value.byteLength;if(length>MAX_BYTES)throw new Error('Decoded tile exceeds budget');chunks.push(value);}}
   finally{await reader.cancel().catch(()=>undefined);reader.releaseLock();}
+  if(!length&&!allowEmptyVector)throw new Error('Empty raster tile');
   const decompressed=new Uint8Array(length);let offset=0;for(const chunk of chunks){decompressed.set(chunk,offset);offset+=chunk.length;}
   return decompressed.buffer;
 }
@@ -156,7 +159,9 @@ self.onmessage=async({data:job}:MessageEvent<TileJob>)=>{
   if(busy){self.postMessage({id:job.id,error:'Tile painter is busy'});return;}
   busy=true;let decoded:ImageBitmap|undefined,painted:ImageBitmap|undefined,parent:Parent|undefined,retained=false;
   try{
-    if(!job.bytes?.byteLength||job.bytes.byteLength>MAX_BYTES)throw new Error('Tile exceeds the byte budget');
+    if(!(job.bytes instanceof ArrayBuffer))throw new Error('Invalid tile byte payload');
+    if(job.bytes.byteLength>MAX_BYTES)throw new Error('Tile exceeds the byte budget');
+    if(!job.bytes.byteLength&&job.kind!=='vector')throw new Error('Empty raster tile');
     const view=tileRenderWindow(job.z,job.x??0,job.y,job.sourceZ??job.z);
     const paintZoom=job.paintZoom===undefined?job.z:job.paintZoom;
     if(!Number.isInteger(paintZoom)||paintZoom<job.z||paintZoom>18)throw new Error('Invalid map paint zoom');
@@ -178,7 +183,7 @@ self.onmessage=async({data:job}:MessageEvent<TileJob>)=>{
       parent=key?parents.get(key):undefined;
       if(parent&&key){parents.delete(key);parents.set(key,parent);retained=true;}
       else{
-        const bytes=await unpack(job.bytes);
+        const bytes=await unpack(job.bytes,job.kind==='vector');
         if(job.kind==='vector'){const tile=decodeVectorTile(bytes);parent={kind:'vector',tile,bytes:vectorBytes(tile)};}
         else{
           parent=await elevationParent(bytes,job.mime);
