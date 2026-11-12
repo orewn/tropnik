@@ -134,6 +134,10 @@ test('satellite attribution retains exact geometry over loading cycles with all 
   const capture=async filename=>{const {data}=await cdp.call('Page.captureScreenshot',{format:'png'}),bytes=Buffer.from(data,'base64');await writeFile(join(pictures,filename),bytes);return{path:'design-qa/map-attribution/'+filename,bytes:bytes.length,sha256:sha(bytes)};};
   const collectCase=(entry,run)=>collectAttributionGeometryCase(run,async error=>{
    entry.failure=browserErrorDetails(error);entry.failureLayout=await evaluate(footerGeometryExpression);entry.failureScreenshot=await capture('failed-'+report.phase+'.png');
+   // A failed native-link assertion returns before the normal listener cleanup.
+   // Retire those listeners before the next independent case can reuse its log.
+   const inputs=await evaluate("(()=>{const inputs=window.__licenceInputs;window.__removeLicenceInputs?.();return inputs})()");
+   if(entry.licenseInteraction&&!entry.licenseInteraction.observedInputs)entry.licenseInteraction.observedInputs=inputs;
    report.caseFailures.push({name:report.phase,failure:entry.failure,screenshot:entry.failureScreenshot});
   });
   const licenceInteraction=async(entry,profile)=>{

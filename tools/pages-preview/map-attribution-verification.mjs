@@ -40,7 +40,7 @@ function validRect(rect){
 export function assertAttributionFooterLayout(value,scenario,loading){
  const {profile,satellite,expanded,sheetOpen}=scenario;
  assert.equal(value.width,profile.width);assert.equal(value.height,profile.height);assert.equal(value.sheetOpen,sheetOpen);
- validRect(value.available);validRect(value.status.rect);assert.equal(value.status.visible,loading);assert.equal(value.status.ariaHidden,String(!loading));assert.equal(value.status.text,'Подгружаем детали текущего ракурса');
+ validRect(value.available);validRect(value.footer);validRect(value.status.rect);assert.equal(value.status.visible,loading);assert.equal(value.status.ariaHidden,String(!loading));assert.equal(value.status.text,'Подгружаем детали текущего ракурса');
  assert.equal(value.publishedFooterHeight,Math.ceil(value.footer.height),'The actions must consume the actual observed footer height');
  const count=kind=>value.ui.filter(item=>item.kind===kind).length;
  for(const kind of ['map-context','map-style-switch','map-controls','layer-button','fact-closed','map-attribution-toggle'])assert.equal(count(kind),1,'Missing real fixture control: '+kind);
@@ -101,7 +101,13 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
    assert.equal(interaction.observedInputs.tabs.length,hrefs.length-1);assert.ok(interaction.observedInputs.tabs.every(event=>event.key==='Tab'&&event.trusted));
    const {scrollHeight,clientHeight,overflowY,center,devicePixelRatio}=interaction.before,maxScroll=scrollHeight-clientHeight;assert.ok(Number.isFinite(scrollHeight)&&clientHeight>0&&clientHeight<=item.ready.content.height&&maxScroll>=0);assert.equal(interaction.before.scrollTop,0);assert.equal(devicePixelRatio,profile.dpr);
    assert.ok(center.x>item.ready.content.left&&center.x<item.ready.content.right&&center.y>item.ready.content.top&&center.y<item.ready.content.bottom);
-   const scrollable=['auto','scroll'].includes(overflowY)&&maxScroll>1;assert.equal(interaction.scrollable,scrollable);assert.equal(scrollable,['compact-android','phone-landscape'].includes(profile.name)&&scenario.source==='eox-bluemarble');
+   const scrollable=maxScroll>1;assert.equal(interaction.scrollable,scrollable);
+   if(scrollable)assert.ok(['auto','scroll'].includes(overflowY),'Overflowing licence text must retain native scrolling');
+   // The central landscape column can wrap either EOX notice. Validate its
+   // measured overflow and native input instead of assuming the old width.
+   // The existing long Blue Marble scroll witnesses remain mandatory.
+   if(['compact-android','phone-landscape'].includes(profile.name)&&scenario.source==='eox-bluemarble')assert.equal(scrollable,true);
+   else if(profile.name!=='phone-landscape')assert.equal(scrollable,false);
    assert.equal(interaction.wheelTransitions.length,scrollable?3:0);assert.equal(interaction.observedInputs.wheels.length,scrollable?3:0);
    if(scrollable){
     assert.deepEqual(interaction.wheelTransitions.map(step=>step.deltaY),[-scrollHeight,scrollHeight,-scrollHeight]);assert.deepEqual(interaction.wheelTransitions.map(step=>step.expected),[0,maxScroll,0]);

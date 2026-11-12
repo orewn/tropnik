@@ -236,7 +236,7 @@
 }
 @media (max-width: 700px) {
   .explore-layout .map-preload-status {left: 16px; bottom: calc(50% + 32px); max-width: calc(100% - 32px)}
-  .explore-layout:has(.explore-panel.collapsed) .map-preload-status {bottom: 148px}
+  .explore-layout:has(.explore-panel.collapsed) .atlas-wrap>.map-preload-status {bottom: 148px}
   .explore-layout .explore-panel-content {padding: 4px 24px 24px}
   .explore-layout .explore-panel.collapsed h1 {font: var(--heading-4); letter-spacing: -.025em}
   .explore-layout .explore-panel.collapsed .panel-intro {font: var(--body-6)}

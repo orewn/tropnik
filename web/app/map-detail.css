@@ -192,22 +192,30 @@
   .explore-layout .map-footer-meta .map-satellite-credit{grid-column:1;grid-row:2}
   .explore-layout .map-footer-meta .map-attribution-toggle{grid-column:2;grid-row:2}
   .explore-layout .map-footer-meta .map-attribution-content{position:relative;inset:auto;grid-column:1/-1;grid-row:1;width:370px;max-width:100%;justify-self:end}
-  .explore-layout:has(.map-footer)>.fact-closed{bottom:max(90px,calc(var(--map-footer-inset) + var(--map-footer-height,0px) + 12px))}
-  .explore-layout .tropnik-custom-atlas .layer-control{bottom:max(84px,calc(var(--map-footer-inset) + var(--map-footer-height,0px) + 12px))}
+  .explore-layout:is(.sheet-open,.sheet-closed):has(.map-footer)>.fact-closed{bottom:max(90px,calc(var(--map-footer-inset) + var(--map-footer-height,0px) + 12px))}
+  .explore-layout:is(.sheet-open,.sheet-closed) .tropnik-custom-atlas .layer-control{bottom:max(84px,calc(var(--map-footer-inset) + var(--map-footer-height,0px) + 12px))}
 }
 @media(max-width:700px){
   .explore-layout{--map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 12px)}
 }
 @media(max-width:900px) and (max-height:620px) and (orientation:landscape){
-  .explore-layout{--map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 76px)}
-  .tropnik-custom-atlas .map-footer{flex-direction:row;align-items:flex-end;gap:16px}
-  .tropnik-custom-atlas .map-footer-meta{width:auto;flex:0 1 auto;margin-left:auto}
-  .tropnik-custom-atlas .map-footer>.map-preload-status{flex:0 1 auto;min-width:0}
+  /* The notice shares the lower row with the horizontal control rail. Source
+     and legal text use the central space above it; neither header column is
+     available to the footer. The measured column widths include a route title. */
+  .explore-layout:is(.sheet-open,.sheet-closed){--map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 12px)}
+  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer>.map-preload-status{
+    max-width:calc(100% - var(--map-rail-width) - var(--map-control-gap) - 48px - 12px);min-width:0;
+  }
+  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer-meta{
+    position:absolute;right:calc(var(--map-mode-switch-width,106px) + 12px);bottom:64px;
+    width:auto;max-width:calc(100% - var(--map-mode-switch-width,106px) - 12px - var(--map-leading-ui-width,0px) - 12px);
+  }
+  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer-meta .map-attribution-content{
+    max-width:min(370px,calc(100vw - var(--explore-panel-width,0px) - var(--map-right) - var(--map-left) - var(--map-mode-switch-width,106px) - 12px - 100% - 8px - var(--map-leading-ui-width,0px) - 12px));
+  }
 }
-/* Preserve the expanded portrait drawer's existing upper attribution slot;
-   display:contents leaves the atlas as its absolute-position containing box. */
 @media(max-width:700px) and (orientation:portrait){
-  .explore-layout.sheet-closed .map-footer>.map-preload-status{max-width:calc(100% - 64px)}
+  .explore-layout:is(.sheet-open,.sheet-closed) .map-footer>.map-preload-status{max-width:calc(100% - 64px)}
   /* The upper story launcher owns a 44px row below the context. A long legal
      notice scrolls in the remaining space above its own source card; 100%
      here is the attribution's actual height, including wrapped credit rows. */
@@ -215,13 +223,24 @@
     max-height:calc(100dvh - var(--header) - var(--map-footer-inset) - 100% - 8px - var(--map-top) - 60px - 44px - 12px);
     overflow:auto;overscroll-behavior:contain;
   }
-  .explore-layout.sheet-open .map-footer,.explore-layout.sheet-open .map-footer-meta{display:contents}
-  .explore-layout.sheet-open .map-footer-meta>.map-attribution{
-    position:absolute;top:calc(var(--map-top) + 60px);right:var(--map-right);bottom:auto;left:auto;
+  /* The open drawer yields enough map height for the actual footer, the top
+     context/story rows and the 52px horizontal rail. Its contents still scroll
+     natively. Only the Explore drawer consumes this value; Planner has no sheet. */
+  .explore-layout.sheet-open:has(.tropnik-custom-atlas .map-footer){
+    --map-footer-inset:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 76px);
+    --sheet-expanded-height:max(var(--sheet-peek),min(56svh,545px,calc(100svh - var(--header) - var(--map-top) - 60px - 44px - 12px - var(--map-footer-height,0px) - 76px)));
   }
-  .explore-layout.sheet-open .map-footer>.map-preload-status{
-    position:absolute;left:var(--map-left);right:calc(var(--map-right) + 64px);top:auto;
-    bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 76px);max-width:none;
+  .explore-layout.sheet-open .map-footer-meta>.map-attribution{
+    position:relative;inset:auto;display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;align-items:end;
+  }
+  .explore-layout.sheet-open .map-footer-meta .map-satellite-credit{grid-column:1;grid-row:2}
+  .explore-layout.sheet-open .map-footer-meta .map-attribution-toggle{grid-column:2;grid-row:2}
+  .explore-layout.sheet-open .map-footer-meta .map-attribution-content{
+    position:relative;inset:auto;grid-column:1/-1;grid-row:1;width:370px;max-width:100%;justify-self:end;
+    /* Legal height uses the notice/source rows and minimum drawer endpoint,
+       never footer height or the resulting sheet height: no feedback loop. */
+    max-height:calc(100svh - var(--header) - var(--sheet-peek) - var(--map-top) - 60px - 44px - 12px - 76px - var(--map-footer-notice-height,34px) - var(--map-footer-credit-height,44px) - 16px);
+    overflow:auto;overscroll-behavior:contain;
   }
 }
 /* A short portrait cannot fit five vertical actions, Layers and the licence

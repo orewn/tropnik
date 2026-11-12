@@ -12,13 +12,39 @@ const SESSION_KEY='tropnik-map-attribution-seen';
 export function MapFooter({loading=false,children}:{loading?:boolean;children:ReactNode}) {
   const ref=useRef<HTMLDivElement>(null);
   useLayoutEffect(()=>{
-    const footer=ref.current,layout=footer?.closest<HTMLElement>('.explore-layout');if(!footer||!layout)return;
-    let written='';
-    const update=(height:number)=>{const value=`${Math.ceil(height)}px`;if(value!==written){written=value;layout.style.setProperty('--map-footer-height',value);}};
-    update(footer.getBoundingClientRect().height);
-    const observer=new ResizeObserver(entries=>{const entry=entries.find(item=>item.target===footer);if(entry)update(entry.borderBoxSize?.[0]?.blockSize??entry.contentRect.height);});
-    observer.observe(footer);
-    return()=>{observer.disconnect();if(layout.style.getPropertyValue('--map-footer-height')===written)layout.style.removeProperty('--map-footer-height');};
+    const footer=ref.current,layout=footer?.closest<HTMLElement>('.explore-layout'),atlas=footer?.closest<HTMLElement>('.atlas-wrap');if(!footer||!layout||!atlas)return;
+    let alive=true,elements:Record<string,HTMLElement|null>={footer};
+    const sizes=new Map<HTMLElement,{width:number;height:number}>(),written=new Map<string,string>();
+    const dimension=(key:string,axis:'width'|'height')=>{const element=elements[key];return element?sizes.get(element)?.[axis]??0:0;};
+    const publish=()=>{
+      if(!alive)return;
+      const values:Record<string,number>={
+        '--map-footer-height':dimension('footer','height'),
+        '--map-footer-notice-height':dimension('notice','height'),
+        '--map-footer-credit-height':Math.max(44,dimension('credit','height'),dimension('toggle','height')),
+        '--map-mode-switch-width':dimension('modes','width'),
+        '--map-leading-ui-width':Math.max(dimension('context','width'),dimension('stories','width')),
+      };
+      for(const [name,size]of Object.entries(values)){const value=`${Math.ceil(size)}px`;if(written.get(name)!==value){written.set(name,value);layout.style.setProperty(name,value);}}
+    };
+    const observer=new ResizeObserver(entries=>{
+      if(!alive)return;
+      for(const entry of entries){const element=entry.target as HTMLElement;if(!sizes.has(element))continue;const border=entry.borderBoxSize?.[0],rect=border?{width:border.inlineSize,height:border.blockSize}:element.getBoundingClientRect();sizes.set(element,{width:rect.width,height:rect.height});}
+      publish();
+    });
+    const sync=()=>{
+      if(!alive)return;
+      elements={footer,notice:footer.querySelector('.map-preload-status'),credit:footer.querySelector('.map-satellite-credit'),toggle:footer.querySelector('.map-attribution-toggle'),modes:atlas.querySelector('.map-style-switch'),context:atlas.querySelector('.map-context,.map-route-context'),stories:layout.querySelector(':scope>.fact-closed')};
+      const current=new Set(Object.values(elements).filter((element):element is HTMLElement=>!!element));
+      for(const element of sizes.keys())if(!current.has(element)){observer.unobserve(element);sizes.delete(element);}
+      for(const element of current)if(!sizes.has(element)){const rect=element.getBoundingClientRect();sizes.set(element,{width:rect.width,height:rect.height});observer.observe(element);}
+      publish();
+    };
+    // Only these seven UI boxes are retained. Direct sibling mutations detect
+    // a story launcher appearing; footer mutations detect source-card changes.
+    // Map canvas markers and camera transforms are outside these observers.
+    const mutation=new MutationObserver(sync);mutation.observe(layout,{childList:true});mutation.observe(atlas,{childList:true});mutation.observe(footer,{childList:true,subtree:true});sync();
+    return()=>{alive=false;mutation.disconnect();observer.disconnect();sizes.clear();for(const [name,value]of written)if(layout.style.getPropertyValue(name)===value)layout.style.removeProperty(name);};
   },[]);
   return <div ref={ref} className="map-footer">
     <div className="map-preload-status" role="status" aria-hidden={!loading}>Подгружаем детали текущего ракурса</div>
