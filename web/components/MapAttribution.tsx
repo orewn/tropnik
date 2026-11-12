@@ -54,8 +54,9 @@ export function MapFooter({loading=false,children}:{loading?:boolean;children:Re
 
 /**
  * Required map credit is visible on the first display, then collapses after
- * five seconds or the first map interaction. A labelled one-click control
- * always remains in the map corner and opens the full licence information.
+ * five idle seconds or the first map interaction. Using adjacent panels keeps
+ * their geometry stable until that map interaction. A labelled one-click
+ * control always remains in the map corner and opens the full licence information.
  */
 export function MapAttribution({ready=true,terrain=false,satellite=false,satelliteSource='eox-s2',satelliteLoading=false,zoom=0,vector=true,routeData=false,landcover=false}:{ready?:boolean;terrain?:boolean;satellite?:boolean;satelliteSource?:SatelliteSourceId;satelliteLoading?:boolean;zoom?:number;vector?:boolean;routeData?:boolean;landcover?:boolean}) {
   const [expanded,setExpanded]=useState(true),[pinned,setPinned]=useState(false);
@@ -70,7 +71,7 @@ export function MapAttribution({ready=true,terrain=false,satellite=false,satelli
       try{sessionStorage.setItem(SESSION_KEY,'1');}catch{}
     };
     const host=ref.current?.closest('.atlas-wrap');
-    return bindMapAttributionCollapse(host??null,ref.current,collapse);
+    return bindMapAttributionCollapse(host??null,ref.current,collapse,host?.closest('.explore-layout')??null);
   },[ready,pinned]);
   return <div ref={ref} className={`map-attribution ${terrain?'terrain-data-credit':''}`} hidden={!ready}>
     {satellite&&<div className="map-satellite-credit" data-imagery-source={satelliteSource}>
