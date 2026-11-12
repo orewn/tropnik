@@ -1,0 +1,104 @@
+{
+  "checkedAt": "2026-11-12T04:00:10.934Z",
+  "environment": "published GitHub Pages",
+  "url": "https://orewn.github.io/tropnik/?route=osm-relation-15577268&region=sakhalin",
+  "buildId": "b1770e3f22349be2",
+  "sourceCommit": "1107367a752f822ff0090788da59080482198a19",
+  "updateAccepted": true,
+  "relief": {
+    "camera": {
+      "bearingDegrees": 0,
+      "center": [
+        142.7878226365234,
+        46.94792542123872
+      ],
+      "zoom": 14
+    },
+    "drawRevision": 27,
+    "drawnRoute": "osm-relation-15577268",
+    "pitch": 0,
+    "routeId": "osm-relation-15577268",
+    "state": {
+      "committedMode": "detail",
+      "error": "",
+      "imageryLoading": false,
+      "loading": false,
+      "localDetail": false,
+      "mode": "detail",
+      "pendingTiles": 0,
+      "ready": true,
+      "reliefReady": true,
+      "residentTiles": 87
+    },
+    "visibleHeightLabels": [
+      "400 м",
+      "200 м",
+      "300 м",
+      "500 м",
+      "100 м",
+      "300 м",
+      "400 м",
+      "100 м",
+      "200 м",
+      "300 м",
+      "100 м",
+      "400 м",
+      "500 м",
+      "300 м"
+    ],
+    "legend": "500 м\nМаршрут\nГоризонтали · 25 м",
+    "buttons": [
+      {
+        "label": "Рельеф",
+        "pressed": "true"
+      },
+      {
+        "label": "Спутник",
+        "pressed": "false"
+      }
+    ],
+    "sceneCount": 0
+  },
+  "satellite": {
+    "camera": {
+      "bearingDegrees": 0,
+      "center": [
+        142.7878226365234,
+        46.94792542123872
+      ],
+      "zoom": 14
+    },
+    "drawRevision": 26,
+    "drawnRoute": "osm-relation-15577268",
+    "pitch": 0,
+    "routeId": "osm-relation-15577268",
+    "state": {
+      "committedMode": "satellite",
+      "error": "",
+      "imageryLoading": false,
+      "imagerySource": "eox-s2",
+      "imageryTarget": "eox-s2",
+      "loading": false,
+      "localDetail": false,
+      "mode": "satellite",
+      "pendingTiles": 0,
+      "ready": true,
+      "reliefReady": false,
+      "residentTiles": 87
+    },
+    "visibleHeightLabels": [],
+    "buttons": [
+      {
+        "label": "Рельеф",
+        "pressed": "false"
+      },
+      {
+        "label": "Спутник",
+        "pressed": "true"
+      }
+    ],
+    "sceneCount": 0
+  },
+  "cameraPreserved": true,
+  "routePreserved": true
+}

@@ -1,0 +1,408 @@
+{
+  "sourceCommit": "1107367a752f822ff0090788da59080482198a19",
+  "verified": true,
+  "sha256": "08756d4041c16dd317b1d86eaf6bb5d1606217102b6633d0afa675b9c1f4b71d",
+  "profiles": [
+    {
+      "name": "compact-android",
+      "width": 320,
+      "height": 640,
+      "engine": "tropnik-canvas",
+      "interactionTested": true,
+      "sheetTested": true,
+      "layoutShift": 0,
+      "longestTaskMs": 0
+    },
+    {
+      "name": "iphone-portrait",
+      "width": 390,
+      "height": 844,
+      "engine": "tropnik-canvas",
+      "interactionTested": true,
+      "sheetTested": true,
+      "layoutShift": 0,
+      "longestTaskMs": 0
+    },
+    {
+      "name": "android-portrait",
+      "width": 412,
+      "height": 915,
+      "engine": "tropnik-canvas",
+      "interactionTested": true,
+      "sheetTested": true,
+      "layoutShift": 0,
+      "longestTaskMs": 62
+    },
+    {
+      "name": "phone-landscape",
+      "width": 844,
+      "height": 390,
+      "engine": "tropnik-canvas",
+      "interactionTested": true,
+      "sheetTested": true,
+      "layoutShift": 0,
+      "longestTaskMs": 0
+    }
+  ],
+  "smoothness": [
+    {
+      "profile": "android-portrait",
+      "passed": true,
+      "performancePassed": true,
+      "performanceIssues": [],
+      "instrumented": false,
+      "physicalDevice": false,
+      "pan": {
+        "durationMs": 1281.7000000000116,
+        "frames": {
+          "samples": 76,
+          "callbackHz": 59.29624717172452,
+          "isPresentedFps": false,
+          "p95Ms": 17.600000000034925,
+          "maxGapMs": 33.20000000001164,
+          "over50ms": 0
+        },
+        "inputToNextFrame": {
+          "count": 1,
+          "p95Ms": 47.29999999998836,
+          "maxMs": 47.29999999998836,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "layout": {
+          "supported": true,
+          "sessionCLS": 0,
+          "unexpectedSum": 0,
+          "allShiftSum": 0,
+          "recentInputCount": 0
+        }
+      },
+      "panInputDurationMs": 814.6788270000106
+    },
+    {
+      "profile": "desktop-webgl",
+      "passed": true,
+      "performancePassed": true,
+      "performanceIssues": [],
+      "instrumented": false,
+      "physicalDevice": false,
+      "pan": {
+        "durationMs": 2981.6999999999534,
+        "frames": {
+          "samples": 173,
+          "callbackHz": 58.02059227957296,
+          "isPresentedFps": false,
+          "p95Ms": 25.29999999993015,
+          "maxGapMs": 36.800000000046566,
+          "over50ms": 0
+        },
+        "inputToNextFrame": {
+          "count": 2,
+          "p95Ms": 40.59999999997672,
+          "maxMs": 40.59999999997672,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "layout": {
+          "supported": true,
+          "sessionCLS": 0,
+          "unexpectedSum": 0,
+          "allShiftSum": 0,
+          "recentInputCount": 0
+        }
+      },
+      "panInputDurationMs": 619.1934739999706
+    }
+  ],
+  "mapInteractions": [
+    {
+      "profile": "android-portrait",
+      "passed": true,
+      "layoutShift": 0,
+      "longestTaskMs": 62
+    },
+    {
+      "profile": "desktop-webgl",
+      "passed": true,
+      "layoutShift": 3.40387811634349e-06,
+      "longestTaskMs": 51
+    }
+  ],
+  "zoomDesigns": [
+    {
+      "profile": "android-portrait",
+      "geometryPassed": true,
+      "performance": {
+        "layoutShift": 0.014685120487324196,
+        "longestTaskMs": 0
+      }
+    },
+    {
+      "profile": "desktop-webgl",
+      "geometryPassed": true,
+      "performance": {
+        "layoutShift": 0.008778216689750692,
+        "longestTaskMs": 63
+      }
+    }
+  ],
+  "version": "0.4.28",
+  "reportUrl": "https://orewn.github.io/tropnik/browser-verification.json",
+  "buildId": "b1770e3f22349be2",
+  "workflow": {
+    "id": 43149485608,
+    "url": "https://github.com/orewn/tropnik/actions/runs/43149485608",
+    "status": "success",
+    "finishedAt": "2026-11-12T03:56:55Z",
+    "deploymentVerifiedAt": "2026-11-12T03:56:51Z",
+    "publicHttpChecks": 24,
+    "webRegressionGate": "success",
+    "webRegressionTestCount": null
+  },
+  "site": {
+    "projectId": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+    "sourceCommit": "9620f3c8c070a7d4506f51bdbf734179b14339f7",
+    "deploymentId": "appgdep_6af534648e58819182a1a491d9bc27e3",
+    "versionId": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_52b7783b935c81919ad415a1205794fe",
+    "url": "https://tropa-rf-atlas-2026.wintrybluebell1.chatgpt.site",
+    "status": "succeeded",
+    "updatedAt": "2026-11-12T03:37:30.292190+00:00",
+    "visibilityPreserved": "owner-private"
+  },
+  "assets": {
+    "serviceWorker": "tropnik-shell-0.4.28-a8d49197fa636d8a",
+    "sharedManifestSha256": "e0fe9e18edbaa4ee937bdf2097a16ede60876b0cb7a9593bef9ace987f471888"
+  },
+  "uiReceipt": "map-relief-public-0.4.28.json",
+  "numericalAudit": "relief-numerical-review-0.4.28.json",
+  "priorPanComparison": {
+    "baselineSource": "6cc1719522ac0fc3a1866a9ba29dafd7afea10fb",
+    "candidateSource": "22a4e34bc9390117792d77455a3d829400f2eaaa",
+    "rows": [
+      {
+        "version": "0.4.27",
+        "profile": "android-portrait",
+        "durationMs": 1281.2999999999884,
+        "frames": {
+          "samples": 77,
+          "callbackHz": 60.09521579645727,
+          "isPresentedFps": false,
+          "p95Ms": 20.900000000023283,
+          "maxGapMs": 22.79999999998836,
+          "over50ms": 0
+        },
+        "frameIntervalsOver35": 0,
+        "inputToNextFrame": {
+          "count": 1,
+          "p95Ms": 46.29999999998836,
+          "maxMs": 46.29999999998836,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "eventTiming": {
+          "supported": true,
+          "observed": 26,
+          "durationThresholdMs": 16,
+          "maxDurationMs": 64,
+          "p95DurationMs": 48,
+          "isFieldINP": false
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "layout": {
+          "supported": true,
+          "sessionCLS": 0,
+          "unexpectedSum": 0,
+          "allShiftSum": 0,
+          "recentInputCount": 0
+        },
+        "instrumented": false,
+        "traceCount": 0,
+        "panDurationMs": 814.0405270000047,
+        "inputStart": {
+          "x": 206,
+          "y": 449.15000000000003
+        },
+        "inputEnd": {
+          "x": 270,
+          "y": 461.15000000000003
+        }
+      },
+      {
+        "version": "0.4.28",
+        "profile": "android-portrait",
+        "durationMs": 1281.1999999999534,
+        "frames": {
+          "samples": 77,
+          "callbackHz": 60.09990633781049,
+          "isPresentedFps": false,
+          "p95Ms": 24.20000000001164,
+          "maxGapMs": 25.70000000001164,
+          "over50ms": 0
+        },
+        "frameIntervalsOver35": 0,
+        "inputToNextFrame": {
+          "count": 1,
+          "p95Ms": 46.20000000001164,
+          "maxMs": 46.20000000001164,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "eventTiming": {
+          "supported": true,
+          "observed": 26,
+          "durationThresholdMs": 16,
+          "maxDurationMs": 64,
+          "p95DurationMs": 56,
+          "isFieldINP": false
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "layout": {
+          "supported": true,
+          "sessionCLS": 0,
+          "unexpectedSum": 0,
+          "allShiftSum": 0,
+          "recentInputCount": 0
+        },
+        "instrumented": false,
+        "traceCount": 0,
+        "panDurationMs": 814.2992340000055,
+        "inputStart": {
+          "x": 206,
+          "y": 449.15000000000003
+        },
+        "inputEnd": {
+          "x": 270,
+          "y": 461.15000000000003
+        }
+      },
+      {
+        "version": "0.4.27",
+        "profile": "desktop-webgl",
+        "durationMs": 3114.600000000093,
+        "frames": {
+          "samples": 179,
+          "callbackHz": 57.47126436781437,
+          "isPresentedFps": false,
+          "p95Ms": 27,
+          "maxGapMs": 40.800000000046566,
+          "over50ms": 0
+        },
+        "frameIntervalsOver35": 1,
+        "inputToNextFrame": {
+          "count": 2,
+          "p95Ms": 45.5,
+          "maxMs": 45.5,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "eventTiming": {
+          "supported": true,
+          "observed": 34,
+          "durationThresholdMs": 16,
+          "maxDurationMs": 56,
+          "p95DurationMs": 56,
+          "isFieldINP": false
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "layout": {
+          "supported": true,
+          "sessionCLS": 0,
+          "unexpectedSum": 0,
+          "allShiftSum": 0,
+          "recentInputCount": 0
+        },
+        "instrumented": false,
+        "traceCount": 0,
+        "panDurationMs": 615.8031470000278,
+        "inputStart": {
+          "x": 748.3499999999999,
+          "y": 489.6
+        },
+        "inputEnd": {
+          "x": 812.3499999999999,
+          "y": 501.6
+        }
+      },
+      {
+        "version": "0.4.28",
+        "profile": "desktop-webgl",
+        "durationMs": 3330.70000000007,
+        "frames": {
+          "samples": 182,
+          "callbackHz": 54.64316810280007,
+          "isPresentedFps": false,
+          "p95Ms": 39.5,
+          "maxGapMs": 47.70000000006985,
+          "over50ms": 0
+        },
+        "frameIntervalsOver35": 13,
+        "inputToNextFrame": {
+          "count": 2,
+          "p95Ms": 52.800000000046566,
+          "maxMs": 52.800000000046566,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "eventTiming": {
+          "supported": true,
+          "observed": 34,
+          "durationThresholdMs": 16,
+          "maxDurationMs": 64,
+          "p95DurationMs": 64,
+          "isFieldINP": false
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "layout": {
+          "supported": true,
+          "sessionCLS": 0,
+          "unexpectedSum": 0,
+          "allShiftSum": 0,
+          "recentInputCount": 0
+        },
+        "instrumented": false,
+        "traceCount": 0,
+        "panDurationMs": 707.7090270000044,
+        "inputStart": {
+          "x": 748.3499999999999,
+          "y": 489.6
+        },
+        "inputEnd": {
+          "x": 812.3499999999999,
+          "y": 501.6
+        }
+      }
+    ]
+  },
+  "measurementNotes": [
+    "Browser CI profiles are not physical phones.",
+    "RAF callback intervals are not presented FPS.",
+    "No trace was captured for map-pan; the cause of the previous timing regression is not isolated by a trace.",
+    "The exact final web TAP count was not retrieved; the existing CI regression step completed successfully."
+  ]
+}
