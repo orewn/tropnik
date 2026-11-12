@@ -25,7 +25,7 @@ const originalLabels=readFileSync(resolve(root,'tests/fixtures/custom-map-labels
 assert.equal(createHash('sha256').update(originalLabels).digest('hex'),'39a5b7a5ca753f6ca893764b8ee7f7a3fd3acd87686d944f5ca7da5cab7ed8c9');
 
 function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false}={}){
- let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[];
+ let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[];
  let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0};
  class Target{
   listeners=new Map();
@@ -56,6 +56,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  return context;
  }
  function matches(element,selector){
+  if(selector===':focus-visible')return element.focusVisible===true;
   if(selector.startsWith(':'))return false;
   const classes=[...selector.matchAll(/\.([\w-]+)/g)].map(match=>match[1]);
   if(classes.length)return classes.every(name=>element.classList.contains(name));
@@ -73,7 +74,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   querySelector(selector){return this.querySelectorAll(selector)[0]||null;}
   closest(selector){return matches(this,selector)?this:this.parentElement?.closest(selector)||null;}
   matches(selector){return matches(this,selector);}
-  getBoundingClientRect(){const w=Number.parseFloat(this.style.width)||this.clientWidth,h=Number.parseFloat(this.style.height)||this.clientHeight;return{x:0,y:0,left:0,top:0,right:w,bottom:h,width:w,height:h};}
+  getBoundingClientRect(){layoutReads++;const w=Number.parseFloat(this.style.width)||this.clientWidth,h=Number.parseFloat(this.style.height)||this.clientHeight;return{x:0,y:0,left:0,top:0,right:w,bottom:h,width:w,height:h};}
   getContext(type,attributes){assert.equal(type,'2d');if(!this.context){this.context=createContext(this.className);this.context.getContextAttributes=()=>attributes;}return this.context;}
   focus(){}setPointerCapture(id){this.pointerCapture.add(id);}hasPointerCapture(id){return this.pointerCapture.has(id);}releasePointerCapture(id){this.pointerCapture.delete(id);}
  }
@@ -141,7 +142,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
  const lastDraw=()=>[...lastSurface('tropnik-map-canvas','draw-start'),...lastSurface('tropnik-map-labels','clearRect')];
  return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
-  get coverageAttempts(){return coverageAttempts;},get readyCalls(){return readyCalls;},get gestures(){return gestures;},
+  get coverageAttempts(){return coverageAttempts;},get readyCalls(){return readyCalls;},get gestures(){return gestures;},get layoutReads(){return layoutReads;},
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
   coordinateAt:point=>engine.unproject(point),labelFor(job,coordinate,text,options={}){const p=load(resolve(root,'lib/custom-map-camera.ts')).mercatorProject(coordinate),n=2**job.request.z;return{x:p.x*n-job.request.x,y:p.y*n-job.request.y,text,kind:'place',rank:4,...options};}};
 }
@@ -158,10 +159,10 @@ test('production engine coalesces changes, has no idle draw loop and pauses anim
 
 test('search markers and changing label obstacles preserve every retained base pixel',async t=>{
  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
- const before=env.engine.inspect().drawRevision,paintCalls=env.calls.length;
+ const before=env.engine.inspect().drawRevision,paintCalls=env.calls.filter(call=>call.surface==='tropnik-map-canvas');
  const marker={id:'search-result',coordinate:[40.3,43.3],label:'Найденный маршрут',kind:'trail'};
  env.engine.setMarkers([marker]);env.flush();
- assert.equal(env.engine.inspect().drawRevision,before);assert.equal(env.calls.length,paintCalls);
+ assert.equal(env.engine.inspect().drawRevision,before);assert.deepEqual(env.calls.filter(call=>call.surface==='tropnik-map-canvas'),paintCalls);
  const button=env.host.querySelector('.tropnik-point-marker');assert.ok(button);assert.equal(button.getAttribute('aria-label'),'Открыть маршрут Найденный маршрут');
  env.engine.setMarkers([{...marker,active:true}]);env.engine.setObstacles([]);env.flush();
  assert.equal(button.classList.contains('is-selected'),true);assert.equal(env.engine.inspect().drawRevision,before);
@@ -175,6 +176,73 @@ test('search markers and changing label obstacles preserve every retained base p
  assert.equal(env.engine.inspect().drawRevision,before);assert.deepEqual(env.calls.filter(call=>call.surface==='tropnik-map-canvas'),baseCalls,'No terrain, tile, mask or route command may replay for an obstacle or text update');
  env.engine.setRegion([]);env.engine.setLabels([]);env.engine.setMarkers([]);env.flush();
  assert.equal(env.engine.inspect().drawRevision,before+1,'A queued full geographic paint must survive later marker and label updates');
+});
+
+test('point markers update actual label collisions without replaying terrain or discarding nearby names',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+ const coordinate=env.coordinateAt({x:370,y:270}),marker={id:'route',coordinate,label:'Маршрут',kind:'trail'};
+ env.engine.setLabels([{id:'peak',coordinate,label:'Минометная · 2483 м',kind:'peak',rank:3},{id:'town',coordinate:env.coordinateAt({x:620,y:170}),label:'Приморск',rank:1}]);env.flush();
+ const label=()=>env.engine.getLabelDiagnostics().find(item=>item.id==='peak'),town=()=>env.engine.getLabelDiagnostics().find(item=>item.id==='town');
+ assert.equal(label().reason,'drawn');assert.equal(town().reason,'drawn');
+ const baseline=plain(env.calls.filter(call=>call.surface==='tropnik-map-canvas')),draws=env.engine.inspect().drawRevision,work=plain(env.labelWork),initialRect=plain(label().rect);
+ env.engine.setMarkers([marker]);env.flush();
+ const button=env.host.querySelector('.tropnik-point-marker');button.getBoundingClientRect=()=>assert.fail('Point marker collision layout must not measure the DOM');
+ assert.equal(button.style.transition,'none','Generic button motion must not make a marker trail the current Canvas camera');
+ assert.equal(label().reason,'collision');assert.equal(town().reason,'drawn');
+ assert.equal(env.lastDraw().some(call=>call.op==='fillText'&&call.text==='Минометная · 2483 м'),false,'The label surface must actually erase the covered text');
+ const unchanged=env.engine.inspect().labelRevision;
+ env.engine.setMarkers([{...marker,label:'Новое название маршрута'}]);env.flush();
+ assert.equal(env.engine.inspect().labelRevision,unchanged,'Unchanged footprints need no label repaint');assert.equal(button.getAttribute('aria-label'),'Открыть маршрут Новое название маршрута');
+ env.engine.setMarkers([]);env.flush();assert.equal(label().reason,'drawn');
+
+ // The ordinary painted circle ends one pixel before this label. Its larger
+ // transparent hit target overlaps it; the selected circle's shadow reaches it.
+ const beside={...marker,coordinate:env.coordinateAt({x:initialRect.left-18,y:270})};
+ env.engine.setMarkers([beside]);env.flush();assert.equal(label().reason,'drawn','Compact circle bounds must preserve a neighbouring named label');
+ env.engine.setMarkers([{...beside,active:true}]);env.flush();assert.equal(label().reason,'collision','The larger selected circle must invalidate the label-only frame');assert.equal(env.host.querySelector('.tropnik-point-marker').style.transition,'none');
+ env.engine.setMarkers([beside]);env.flush();assert.equal(label().reason,'drawn');
+ const focused=env.host.querySelector('.tropnik-point-marker');focused.focusVisible=true;focused.dispatch('focus');env.flush();assert.equal(label().reason,'collision');
+ focused.focusVisible=false;focused.dispatch('blur');env.flush();assert.equal(label().reason,'drawn');
+ env.engine.setMarkers([{...marker,active:true}]);env.flush();assert.equal(label().reason,'collision');
+ env.engine.setMarkers([{...marker,coordinate:env.coordinateAt({x:-100,y:270})}]);env.flush();assert.equal(env.host.querySelector('.tropnik-point-marker').hidden,true);assert.equal(label().reason,'drawn','An offscreen marker must not retain its old obstacle');
+ env.engine.setMarkers([]);env.engine.setPosition(coordinate);env.flush();assert.equal(label().reason,'collision');
+ env.engine.setPosition(null);env.flush();assert.equal(label().reason,'drawn');
+ env.engine.setMarkers([{...marker,kind:'plan'}]);env.flush();assert.equal(label().reason,'collision');
+ const planner=env.host.querySelector('.tropnik-point-marker');assert.equal(planner.style.transition,'none');
+ env.engine.setMarkers([{...marker,kind:'position',active:true}]);env.flush();assert.equal(label().reason,'collision');
+ const position=env.host.querySelector('.tropnik-point-marker');assert.notEqual(position,planner,'Changing kind must replace the painted marker');assert.equal(position.style.transition,'none');
+ env.engine.setMarkers([]);env.flush();assert.equal(label().reason,'drawn');
+ assert.equal(town().reason,'drawn');assert.equal(env.engine.inspect().drawRevision,draws);
+ assert.deepEqual(plain(env.calls.filter(call=>call.surface==='tropnik-map-canvas')),baseline,'Only the label surface may repaint for point-marker changes');
+ for(const key of ['sourceCoordinates','coverageTests','priorityCalls','repeatKeys'])assert.equal(env.labelWork[key],work[key],'Marker changes must not rebuild static '+key);
+ assert.equal(env.frames.size,0);const revision=env.engine.inspect().labelRevision;env.tick(1000);assert.equal(env.engine.inspect().labelRevision,revision,'No marker/label feedback loop remains');
+});
+
+test('point-marker collision and DOM placement use the same live camera through pan, zoom, resize and visibility changes',async t=>{
+ const env=fixture({view:{...camera,zoom:7}});t.after(()=>env.engine.destroy());await env.ready();
+ const coordinate=env.coordinateAt({x:400,y:300}),marker={id:'live-route',coordinate,label:'Выбранный маршрут',kind:'trail',active:true};
+ env.engine.setLabels([{id:'covered',coordinate,label:'Санкт-Петербург',rank:0},{id:'free',coordinate:env.coordinateAt({x:515,y:180}),label:'Выборг',rank:1}]);env.engine.setMarkers([marker]);env.flush();
+ const button=env.host.querySelector('.tropnik-point-marker');button.getBoundingClientRect=()=>assert.fail('No per-frame marker geometry read');
+ const assertCurrent=()=>{
+  const p=env.engine.project(coordinate),record=env.engine.getLabelDiagnostics().find(item=>item.id==='covered');
+  assert.equal(button.hidden,false);assert.equal(button.style.transform,`translate(${p.x-22}px,${p.y-22}px)`);assert.equal(button.style.transition,'none');
+  assert.equal(record.x,p.x);assert.equal(record.y,p.y);assert.equal(record.reason,'collision','A previous-frame footprint must not expose the covered label');
+ };
+ assertCurrent();assert.equal(env.engine.getLabelDiagnostics().find(item=>item.id==='free').reason,'drawn');
+ const warm=plain(env.labelWork);
+ env.engine.canvas.dispatch('pointerdown',{pointerId:97,clientX:400,clientY:300});const reads=env.layoutReads;
+ for(const [x,y]of [[540,370],[430,270],[400,300]]){env.engine.canvas.dispatch('pointermove',{pointerId:97,clientX:x,clientY:y});env.flush();assertCurrent();assert.equal(env.layoutReads,reads,'Dragging must not measure DOM geometry after placing markers');}
+ for(const key of ['sourceCoordinates','coverageTests','priorityCalls','repeatKeys'])assert.equal(env.labelWork[key],warm[key],'Moving markers must retain static label '+key);
+ env.engine.canvas.dispatch('pointerup',{pointerId:97,clientX:400,clientY:300});env.flush();assertCurrent();
+ env.engine.setCamera({center:coordinate,zoom:9,bearingDegrees:17.3});env.flush();assertCurrent();
+ env.engine.setPitch(30);env.flush();assertCurrent();
+ env.host.clientWidth=620;env.host.clientHeight=460;env.observers[0].callback();env.flush();assertCurrent();
+ env.engine.setCamera({center:[50,50],zoom:9});env.flush();assert.equal(button.hidden,true);assert.equal(env.engine.getLabelDiagnostics().find(item=>item.id==='covered').reason,'outside-viewport');
+ env.engine.setCamera({center:coordinate,zoom:9});env.flush();assertCurrent();
+ env.engine.setMode('satellite');env.flush();assertCurrent();env.complete();await env.settle();assertCurrent();
+ env.engine.setActive(false);const revision=env.engine.inspect().labelRevision;env.engine.setMarkers([]);env.tick();assert.equal(env.engine.inspect().labelRevision,revision);
+ env.engine.setActive(true);env.flush();assert.equal(env.engine.getLabelDiagnostics().find(item=>item.id==='covered').reason,'drawn');
+ assert.equal(env.frames.size,0);
 });
 
 test('independent labels retain collision, density and lifecycle without an extra empty compositor surface',async t=>{

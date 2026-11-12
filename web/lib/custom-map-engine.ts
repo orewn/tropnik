@@ -16,10 +16,11 @@ import {drawMapLabel,mapLabelBudget,mapLabelLayout,mapLabelPriority,mapLabelRepe
 import {mapCanvasPolicy,type MapCanvasPolicy} from './map-canvas-policy';
 import {copyMapLabelDiagnostic,MAP_LABEL_INSPECTION_EVENT,MAP_LABEL_SAMPLE_LIMIT,MAX_RECORDED_MAP_LABELS,selectRecordedMapLabels} from './custom-map-label-inspection';
 import {mapTileIntersectsCoverage} from './custom-map-coverage';
+import {MAP_POINT_MARKER_SIZE,mapPointMarkerObstacle,type MapPointMarkerKind} from './map-point-marker-layout';
 
 export type CustomMapMode='detail'|'overview'|'satellite';
 export type CustomMapState={ready:boolean;loading:boolean;mode:CustomMapMode;committedMode:CustomMapMode;imagerySource?:SatelliteSourceId;imageryTarget?:SatelliteSourceId;imageryLoading:boolean;reliefReady:boolean;localDetail:boolean;error:string;residentTiles:number;pendingTiles:number};
-export type CustomMapMarker={id:string;coordinate:[number,number];label:string;kind:'direction'|'trail'|'position'|'plan';count?:number;active?:boolean};
+export type CustomMapMarker={id:string;coordinate:[number,number];label:string;kind:'direction'|MapPointMarkerKind;count?:number;active?:boolean};
 export type CustomMapLabel={id:string;coordinate:[number,number];label:string;kind?:MapTileLabel['kind'];rank?:number;color?:string};
 export type CustomMapLabelDiagnostic={id:string;label:string;coordinate:[number,number];visible:boolean;reason:string;x?:number;y?:number;width?:number;rect?:{left:number;top:number;right:number;bottom:number}};
 export type CustomMapOptions={camera:CustomMapCamera;onReady?:(engine:CustomMapEngine)=>void;onFrame?:(camera:CustomMapCamera)=>void;onSettled?:(camera:CustomMapCamera)=>void;onGesture?:()=>void;onClick?:(point:MapPoint,coordinate:[number,number])=>void;onMarker?:(id:string)=>void;onState?:(state:CustomMapState)=>void;maxZoom?:number};
@@ -150,6 +151,7 @@ export class CustomMapEngine {
   private pointerMoved=false;
   private listeners:Array<[EventTarget,string,EventListener,AddEventListenerOptions|boolean|undefined]>=[];
   private obstacles:Array<{left:number;top:number;right:number;bottom:number}>=[];
+  private markerObstacles:typeof this.obstacles=[];
   private state:CustomMapState={ready:false,loading:false,mode:'detail',committedMode:'overview',imageryLoading:false,reliefReady:false,localDetail:false,error:'',residentTiles:0,pendingTiles:0};
   constructor(element:HTMLElement,options:CustomMapOptions){
     this.element=element;this.options=options;this.camera={...options.camera};this.floor={...options.camera};
@@ -297,12 +299,17 @@ export class CustomMapEngine {
       if(!record){
         const button=marker.kind==='direction'?createDirectionMarker({id:marker.id,name:marker.label}):document.createElement('button');
         button.type='button';button.dataset.mapMarkerId=marker.id;
-        if(marker.kind!=='direction')button.className=`tropnik-point-marker tropnik-point-marker--${marker.kind}`;
+        if(marker.kind!=='direction'){
+          button.className=`tropnik-point-marker tropnik-point-marker--${marker.kind}`;
+          // Camera frames own this position; generic button transitions would lag behind labels.
+          button.style.transition='none';
+        }
         button.addEventListener('click',()=>{
           const group=this.markerGroups.get(marker.id);
           if(group&&group.members.length>1){this.options.onGesture?.();const camera=fitBounds(group.bounds,this.size,{padding:this.padding,maxZoom:11,referenceLongitude:105});this.setCamera({...camera,zoom:Math.max(this.camera.zoom+1,camera.zoom)},true);}
           else this.options.onMarker?.(marker.id);
         });
+        if(marker.kind!=='direction')for(const event of ['focus','blur'])button.addEventListener(event,()=>this.schedule(false));
         this.markerLayer.appendChild(button);record={marker,button};this.markers.set(marker.id,record);
       }
       record.marker=marker;
@@ -433,8 +440,10 @@ export class CustomMapEngine {
     if(!this.frame&&!this.disposed&&this.active)this.frame=requestAnimationFrame(()=>{
       this.frame=0;const repaint=this.paintRequested,relabel=this.labelsRequested;this.paintRequested=false;this.labelsRequested=false;
       if(repaint)this.draw();else{
-        if(relabel){this.drawLabels();this.publishInspection();}
-        this.drawMarkers();
+        // Marker placement and collision bounds share this camera snapshot.
+        // Only a changed painted footprint invalidates the label surface.
+        const markerChange=this.drawMarkers();
+        if(relabel||markerChange){this.drawLabels();this.publishInspection();}
       }
     });
   }
@@ -571,21 +580,27 @@ export class CustomMapEngine {
     if(this.selectedBoundary){ctx.strokeStyle=satellite?'#e7eacc':'#688360';ctx.lineWidth=1.3/scale;ctx.stroke(this.selectedBoundary);}
     if(this.route){ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#fffef5';ctx.lineWidth=(routeStrokeWidth(this.camera.zoom)+3)/scale;ctx.stroke(this.route.path);ctx.strokeStyle='#244d3c';ctx.lineWidth=routeStrokeWidth(this.camera.zoom)/scale;ctx.stroke(this.route.path);}
     if(this.mask){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fill(this.mask,'evenodd');}
-    this.drawLabels();
+    this.drawMarkers();this.drawLabels();
     this.element.dataset.mapPainted='true';this.element.dataset.mapCanvas='custom';this.element.dataset.mapDrawnRoute=this.routeId||'';
-    this.drawRevision++;this.drawMarkers();if(!this.pointer.activePointers&&!this.animation)this.publishInspection();this.options.onFrame?.(this.getCamera());
+    this.drawRevision++;if(!this.pointer.activePointers&&!this.animation)this.publishInspection();this.options.onFrame?.(this.getCamera());
   }
   private drawMarkers(){
+    const obstacles:typeof this.markerObstacles=[],half=MAP_POINT_MARKER_SIZE/2;
     const directions=[...this.markers.values()].filter(record=>record.marker.kind==='direction');
     const groups=groupMapDirections(directions.map(({marker:m})=>({id:m.id,name:m.label,center:m.coordinate})),coordinate=>this.project(coordinate),new Set([...this.markerGroups.values()].map(group=>group.key)));
     this.markerGroups=updateDirectionButtons(new Map(directions.map(r=>[r.marker.id,r.button])),groups,new Map(directions.map(r=>[r.marker.id,r.marker.count||0])),this.camera.zoom<5,directions.find(r=>r.marker.active)?.marker.id);
     for(const {marker,button} of this.markers.values()){
-      const p=this.project(marker.coordinate),outside=p.x< -22||p.x>this.size.width+22||p.y< -22||p.y>this.size.height+22;
+      const p=this.project(marker.coordinate),outside=!Number.isFinite(p.x)||!Number.isFinite(p.y)||p.x< -half||p.x>this.size.width+half||p.y< -half||p.y>this.size.height+half;
       if(marker.kind!=='direction')button.hidden=outside;
       else if(outside)button.hidden=true;
-      button.style.transform=`translate(${p.x-22}px,${p.y-22}px)`;
+      button.style.transform=`translate(${p.x-half}px,${p.y-half}px)`;
+      if(marker.kind!=='direction'&&!button.hidden)obstacles.push(mapPointMarkerObstacle(p,marker.kind,!!marker.active,button.matches(':focus-visible')));
     }
     for(const edge of this.routeEdges){const p=edge.project();edge.element.style.position='absolute';edge.element.style.left=`${p.x}px`;edge.element.style.top=`${p.y}px`;}
+    const changed=obstacles.length!==this.markerObstacles.length||obstacles.some((rect,index)=>{
+      const previous=this.markerObstacles[index];return !previous||rect.left!==previous.left||rect.top!==previous.top||rect.right!==previous.right||rect.bottom!==previous.bottom;
+    });
+    this.markerObstacles=obstacles;return changed;
   }
   private prepareLabelCandidates(area:MapCoverage['area']):LabelCandidate[]{
     const includeDetail=this.mode!=='overview'&&this.camera.zoom>=5,detail=includeDetail?this.displayDetail():undefined;
@@ -610,7 +625,7 @@ export class CustomMapEngine {
     const ctx=this.labelContext;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,this.labelCanvas.width,this.labelCanvas.height);
     ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);this.labelRevision++;
     if(!this.coverage){this.labelCanvas.hidden=true;return;}
-    const occupied=this.obstacles.map(r=>({...r})),seen=new Set<string>(),repeated=new Map<string,MapPoint[]>(),candidates=this.prepareLabelCandidates(this.coverage.area);
+    const occupied=[...this.obstacles,...this.markerObstacles],seen=new Set<string>(),repeated=new Map<string,MapPoint[]>(),candidates=this.prepareLabelCandidates(this.coverage.area);
     this.labelDiagnosticTotal=candidates.length;let count=0;const budget=mapLabelBudget(this.size.width,this.size.height);
     for(const candidate of candidates){
       const {id,coordinate,label,color,sourceAnchor}=candidate;
@@ -644,7 +659,7 @@ export class CustomMapEngine {
     this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
     this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;this.selectedBoundary=undefined;
-    this.labelDiagnostics=[];this.labelDiagnosticTotal=0;this.labelCandidateCache=undefined;
+    this.labelDiagnostics=[];this.labelDiagnosticTotal=0;this.labelCandidateCache=undefined;this.markerObstacles=[];
   }
 }
 export {COUNTRY_BOUNDS,geometryPath,tileRequests};

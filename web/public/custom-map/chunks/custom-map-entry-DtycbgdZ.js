@@ -2019,6 +2019,29 @@ function qt(e, t, n, r = 0) {
 	return !1;
 }
 //#endregion
+//#region web/lib/map-point-marker-layout.ts
+function Jt(e, t, n = !1, r = !1) {
+	if (r) return {
+		left: e.x - 24,
+		top: e.y - 24,
+		right: e.x + 24,
+		bottom: e.y + 24
+	};
+	if (t === "plan") return {
+		left: e.x - 20,
+		top: e.y - 20,
+		right: e.x + 20,
+		bottom: e.y + 20
+	};
+	let i = t === "position" ? n ? 20 : 18 : n ? 17 : 14, a = e.x + 3, o = e.y + 3;
+	return {
+		left: a - i,
+		top: o - i,
+		right: a + i,
+		bottom: o + i
+	};
+}
+//#endregion
 //#region web/lib/custom-map-engine.ts
 var Z = 64;
 function Q(e) {
@@ -2085,7 +2108,7 @@ function $(e, t, n, r, i = !0, a = !1, o = !0) {
 	let x = 2 ** s;
 	return y.sort((e, t) => Math.hypot(e.x + .5 - f.x * x, e.y + .5 - f.y * x) - Math.hypot(t.x + .5 - f.x * x, t.y + .5 - f.y * x));
 }
-var Jt = class {
+var Yt = class {
 	constructor(e, t) {
 		this.framed = null, this.pitch = 0, this.padding = {}, this.size = {
 			width: 1,
@@ -2094,7 +2117,7 @@ var Jt = class {
 			minZoom: -2,
 			maxZoom: 18,
 			rotate: !0
-		}), this.pointerMoved = !1, this.listeners = [], this.obstacles = [], this.state = {
+		}), this.pointerMoved = !1, this.listeners = [], this.obstacles = [], this.markerObstacles = [], this.state = {
 			ready: !1,
 			loading: !1,
 			mode: "detail",
@@ -2416,7 +2439,7 @@ var Jt = class {
 					id: t.id,
 					name: t.label
 				}) : document.createElement("button");
-				n.type = "button", n.dataset.mapMarkerId = t.id, t.kind !== "direction" && (n.className = `tropnik-point-marker tropnik-point-marker--${t.kind}`), n.addEventListener("click", () => {
+				if (n.type = "button", n.dataset.mapMarkerId = t.id, t.kind !== "direction" && (n.className = `tropnik-point-marker tropnik-point-marker--${t.kind}`, n.style.transition = "none"), n.addEventListener("click", () => {
 					let e = this.markerGroups.get(t.id);
 					if (e && e.members.length > 1) {
 						this.options.onGesture?.();
@@ -2430,7 +2453,8 @@ var Jt = class {
 							zoom: Math.max(this.camera.zoom + 1, t.zoom)
 						}, !0);
 					} else this.options.onMarker?.(t.id);
-				}), this.markerLayer.appendChild(n), e = {
+				}), t.kind !== "direction") for (let e of ["focus", "blur"]) n.addEventListener(e, () => this.schedule(!1));
+				this.markerLayer.appendChild(n), e = {
 					marker: t,
 					button: n
 				}, this.markers.set(t.id, e);
@@ -2626,7 +2650,11 @@ var Jt = class {
 		this.paintRequested ||= e, !this.frame && !this.disposed && this.active && (this.frame = requestAnimationFrame(() => {
 			this.frame = 0;
 			let e = this.paintRequested, t = this.labelsRequested;
-			this.paintRequested = !1, this.labelsRequested = !1, e ? this.draw() : (t && (this.drawLabels(), this.publishInspection()), this.drawMarkers());
+			if (this.paintRequested = !1, this.labelsRequested = !1, e) this.draw();
+			else {
+				let e = this.drawMarkers();
+				(t || e) && (this.drawLabels(), this.publishInspection());
+			}
 		}));
 	}
 	scheduleLabels() {
@@ -2805,23 +2833,28 @@ var Jt = class {
 		let r = this.worldTransform();
 		n || (this.area && (e.fillStyle = "#dce5cf", e.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95));
 		let i = this.displayingSatellite();
-		i && this.drawTiles(this.imagery), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!i || t?.tiles[0]?.transparent) && this.drawTiles(t), !i && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), this.boundaryVisible && this.boundaries && (e.strokeStyle = i ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / r, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (e.strokeStyle = i ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / r, e.stroke(this.selectedBoundary)), this.route && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (K(this.camera.zoom) + 3) / r, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = K(this.camera.zoom) / r, e.stroke(this.route.path)), this.mask && (e.fillStyle = me, e.fill(this.mask, "evenodd")), this.drawLabels(), this.element.dataset.mapPainted = "true", this.element.dataset.mapCanvas = "custom", this.element.dataset.mapDrawnRoute = this.routeId || "", this.drawRevision++, this.drawMarkers(), !this.pointer.activePointers && !this.animation && this.publishInspection(), this.options.onFrame?.(this.getCamera());
+		i && this.drawTiles(this.imagery), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!i || t?.tiles[0]?.transparent) && this.drawTiles(t), !i && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), this.boundaryVisible && this.boundaries && (e.strokeStyle = i ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / r, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (e.strokeStyle = i ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / r, e.stroke(this.selectedBoundary)), this.route && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (K(this.camera.zoom) + 3) / r, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = K(this.camera.zoom) / r, e.stroke(this.route.path)), this.mask && (e.fillStyle = me, e.fill(this.mask, "evenodd")), this.drawMarkers(), this.drawLabels(), this.element.dataset.mapPainted = "true", this.element.dataset.mapCanvas = "custom", this.element.dataset.mapDrawnRoute = this.routeId || "", this.drawRevision++, !this.pointer.activePointers && !this.animation && this.publishInspection(), this.options.onFrame?.(this.getCamera());
 	}
 	drawMarkers() {
-		let e = [...this.markers.values()].filter((e) => e.marker.kind === "direction"), t = yt(e.map(({ marker: e }) => ({
+		let e = [], t = [...this.markers.values()].filter((e) => e.marker.kind === "direction"), n = yt(t.map(({ marker: e }) => ({
 			id: e.id,
 			name: e.label,
 			center: e.coordinate
 		})), (e) => this.project(e), new Set([...this.markerGroups.values()].map((e) => e.key)));
-		this.markerGroups = xt(new Map(e.map((e) => [e.marker.id, e.button])), t, new Map(e.map((e) => [e.marker.id, e.marker.count || 0])), this.camera.zoom < 5, e.find((e) => e.marker.active)?.marker.id);
-		for (let { marker: e, button: t } of this.markers.values()) {
-			let n = this.project(e.coordinate), r = n.x < -22 || n.x > this.size.width + 22 || n.y < -22 || n.y > this.size.height + 22;
-			e.kind === "direction" ? r && (t.hidden = !0) : t.hidden = r, t.style.transform = `translate(${n.x - 22}px,${n.y - 22}px)`;
+		this.markerGroups = xt(new Map(t.map((e) => [e.marker.id, e.button])), n, new Map(t.map((e) => [e.marker.id, e.marker.count || 0])), this.camera.zoom < 5, t.find((e) => e.marker.active)?.marker.id);
+		for (let { marker: t, button: n } of this.markers.values()) {
+			let r = this.project(t.coordinate), i = !Number.isFinite(r.x) || !Number.isFinite(r.y) || r.x < -22 || r.x > this.size.width + 22 || r.y < -22 || r.y > this.size.height + 22;
+			t.kind === "direction" ? i && (n.hidden = !0) : n.hidden = i, n.style.transform = `translate(${r.x - 22}px,${r.y - 22}px)`, t.kind !== "direction" && !n.hidden && e.push(Jt(r, t.kind, !!t.active, n.matches(":focus-visible")));
 		}
 		for (let e of this.routeEdges) {
 			let t = e.project();
 			e.element.style.position = "absolute", e.element.style.left = `${t.x}px`, e.element.style.top = `${t.y}px`;
 		}
+		let r = e.length !== this.markerObstacles.length || e.some((e, t) => {
+			let n = this.markerObstacles[t];
+			return !n || e.left !== n.left || e.top !== n.top || e.right !== n.right || e.bottom !== n.bottom;
+		});
+		return this.markerObstacles = e, r;
 	}
 	prepareLabelCandidates(e) {
 		let t = this.mode !== "overview" && this.camera.zoom >= 5, n = t ? this.displayDetail() : void 0, r = t && !this.displayingSatellite() && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 10 ? this.relief : void 0, i = this.labelCandidateCache;
@@ -2862,7 +2895,7 @@ var Jt = class {
 			this.labelCanvas.hidden = !0;
 			return;
 		}
-		let t = this.obstacles.map((e) => ({ ...e })), n = /* @__PURE__ */ new Set(), r = /* @__PURE__ */ new Map(), i = this.prepareLabelCandidates(this.coverage.area);
+		let t = [...this.obstacles, ...this.markerObstacles], n = /* @__PURE__ */ new Set(), r = /* @__PURE__ */ new Map(), i = this.prepareLabelCandidates(this.coverage.area);
 		this.labelDiagnosticTotal = i.length;
 		let a = 0, o = Ot(this.size.width, this.size.height);
 		for (let s of i) {
@@ -2912,16 +2945,16 @@ var Jt = class {
 		this.labelCanvas.hidden = a === 0;
 	}
 	destroy() {
-		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.labelCandidateCache = void 0);
+		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.labelCandidateCache = void 0, this.markerObstacles = []);
 	}
-}, Yt = Object.freeze({
+}, Xt = Object.freeze({
 	version: 1,
-	CustomMapEngine: Jt,
+	CustomMapEngine: Yt,
 	inRussiaCoverage: N
 });
 typeof window < "u" && Object.defineProperty(window, "TropnikMapAPI", {
-	value: Yt,
+	value: Xt,
 	configurable: !1
 });
 //#endregion
-export { Jt as n, N as r, Yt as t };
+export { Yt as n, N as r, Xt as t };

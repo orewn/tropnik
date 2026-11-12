@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
-import {MAP_ATTRIBUTION_PROFILES,MAP_ATTRIBUTION_SCENARIOS,attributionGeometry,expectedMapAttributionSources,assertMapAttributionReceipt} from '../map-attribution-verification.mjs';
+import {MAP_ATTRIBUTION_PROFILES,MAP_ATTRIBUTION_SCENARIOS,MAP_ATTRIBUTION_LAYOUT_CASES,attributionGeometry,expectedMapAttributionSources,assertMapAttributionReceipt} from '../map-attribution-verification.mjs';
 import {browserEnvironmentFixture} from './browser-environment-fixture.mjs';
 
 const commit='a'.repeat(40),box=(left,top,width,height)=>({left,top,right:left+width,bottom:top+height,width,height});
@@ -18,7 +18,7 @@ function fixture(t){
   const png=Buffer.alloc(24);Buffer.from('89504e470d0a1a0a','hex').copy(png);png.writeUInt32BE(profile.width*profile.dpr,16);png.writeUInt32BE(profile.height*profile.dpr,20);
   const path='design-qa/map-attribution/'+name+'.png';writeFileSync(join(previewRoot,path),png);return{path,bytes:png.length,sha256:createHash('sha256').update(png).digest('hex')};
  };
- const report={schemaVersion:1,verified:true,phase:'complete',sourceCommit:commit,evidence:'production-react-and-compiled-css-browser-geometry',sources:{...expectedMapAttributionSources(),compiledCssSHA256:'b'.repeat(64),bundleSHA256:'c'.repeat(64)},environment:browserEnvironmentFixture(commit),profiles:MAP_ATTRIBUTION_PROFILES,negativeControls:[],cases:[]};
+ const report={schemaVersion:1,verified:true,phase:'complete',sourceCommit:commit,evidence:'production-react-and-compiled-css-browser-geometry',sources:{...expectedMapAttributionSources(),compiledCssSHA256:'b'.repeat(64),bundleSHA256:'c'.repeat(64)},environment:browserEnvironmentFixture(commit),profiles:MAP_ATTRIBUTION_PROFILES,negativeControls:[],cases:[],footerCases:[]};
  for(const profile of MAP_ATTRIBUTION_PROFILES){
   report.negativeControls.push({profile:profile.name,fonts,loading:{credit:box(16,40,180,66)},ready:{credit:box(32,56,164,50)}});
   for(const scenario of MAP_ATTRIBUTION_SCENARIOS)for(const expanded of [false,true]){
@@ -38,12 +38,37 @@ function fixture(t){
    report.cases.push(item);
   }
  }
+ for(const scenario of MAP_ATTRIBUTION_LAYOUT_CASES){
+  const {profile,satellite,expanded,sheetOpen}=scenario,w=profile.width,short=profile.height<500,status=box(0,short?108:300,w-64,34);
+  const ui=[{kind:'map-context',rect:box(0,0,100,44)},{kind:'map-style-switch',rect:box(w-100,0,100,44)},{kind:'map-controls',rect:short?box(w-220,52,220,44):box(w-44,52,44,220)},{kind:'layer-button',rect:box(w-(short?276:100),52,44,44)},{kind:'fact-closed',rect:box(0,52,100,44)},
+   {kind:'map-attribution-toggle',rect:box(w-44,short?186:378,44,44)},...(!profile.mobile?[{kind:'map-legend',rect:box(0,350,100,44)}]:[]),...(satellite?[{kind:'map-satellite-credit',rect:box(w-120,short?150:342,64,80)}]:[]),...(expanded?[{kind:'map-attribution-content',rect:box(0,120,w-120,72)}]:[]),{kind:'map-preload-status',rect:status}];
+  const target=(label,rect)=>({label,rect,minimumSize:44,unobscured:true}),targets=[target('mode1',box(w-100,0,44,44)),target('mode2',box(w-44,0,44,44)),...Array.from({length:5},(_,index)=>target('map'+index,short?box(w-220+index*44,52,44,44):box(w-44,52+index*44,44,44))),...ui.filter(item=>['layer-button','fact-closed','map-attribution-toggle'].includes(item.kind)).map(item=>target(item.kind,item.rect))];
+  const loading={width:w,height:profile.height,scrollWidth:w,scrollY:0,sheetOpen,available:box(0,0,w,profile.height-(profile.mobile?(short?112:156):0)),footer:sheetOpen?box(0,0,0,0):box(0,short?108:112,w,short?128:320),publishedFooterHeight:sheetOpen?0:short?128:320,status:{rect:status,visible:true,ariaHidden:'false',text:'Подгружаем детали текущего ракурса'},ui,targets};
+  const ready=structuredClone(loading);ready.ui=ready.ui.filter(item=>item.kind!=='map-preload-status');ready.status.visible=false;ready.status.ariaHidden='true';
+  const item={...scenario,loading,ready,screenshot:picture('footer-'+scenario.name,profile)};
+  if(expanded){const hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources','/sources#satellite-attribution'];item.licenseInteraction={input:'native-cdp-wheel-and-tab',before:{hrefs,devicePixelRatio:profile.dpr},links:hrefs.map(href=>({href,text:'Synthetic link',focused:true,visibleUnblocked:true})),scrollable:false,wheelTransitions:[],observedInputs:{wheels:[],tabs:hrefs.slice(1).map(()=>({key:'Tab',trusted:true}))}};}
+  report.footerCases.push(item);
+ }
  return{report,options:{sourceCommit:commit,previewRoot}};
 }
 
-test('receipt binds all 40 cases, 131 comparison slots, source inputs, loaded fonts and 11 PNG identities',t=>{
+test('receipt binds 40 attribution cases, 24 footer layouts, 131 comparisons, real UI sources and 35 PNG identities',t=>{
  const {report,options}=fixture(t);assert.equal(assertMapAttributionReceipt(report,options),report);
  assert.equal(assertMapAttributionReceipt(report,{...options,environment:browserEnvironmentFixture(commit)}),report);
+});
+test('footer proof rejects missing widths, hidden credits, sheet overlap, blocked actions and loading-dependent movement',t=>{
+ const {report,options}=fixture(t);
+ const changes=[
+  value=>value.footerCases.pop(),value=>value.footerCases[0].profile.width=700,value=>value.sources.uiFiles[0].sha256='f'.repeat(64),
+  value=>value.footerCases[0].loading.ui=value.footerCases[0].loading.ui.filter(item=>item.kind!=='map-satellite-credit'),
+  value=>{const v=value.footerCases[0].loading;v.ui.find(item=>item.kind==='map-satellite-credit').rect=structuredClone(v.ui.find(item=>item.kind==='map-legend').rect);},
+  value=>{const v=value.footerCases.find(item=>item.name==='android-portrait-pending').loading;v.ui.find(item=>item.kind==='map-preload-status').rect.top=v.available.bottom-8;v.ui.find(item=>item.kind==='map-preload-status').rect.bottom=v.available.bottom+26;},
+  value=>{const v=value.footerCases[0].ready.ui.find(item=>item.kind==='layer-button').rect;v.left++;v.right++;},
+  value=>value.footerCases[0].loading.publishedFooterHeight++,value=>value.footerCases[0].ready.targets.pop(),value=>value.footerCases[0].loading.targets[0].unobscured=false,
+  value=>value.footerCases[0].ready.status.visible=true,value=>value.footerCases[1].licenseInteraction.links[0].visibleUnblocked=false,
+  value=>value.footerCases[0].screenshot.sha256='e'.repeat(64),
+ ];
+ for(const change of changes){const bad=structuredClone(report);change(bad);assert.throws(()=>assertMapAttributionReceipt(bad,options));}
 });
 test('success bits cannot conceal stale source, missing loading cycles, removed labels or reduced controls',t=>{
  const {report,options}=fixture(t);

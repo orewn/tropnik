@@ -1,10 +1,30 @@
 'use client';
-import {useEffect,useId,useRef,useState} from 'react';
+import {useEffect,useId,useLayoutEffect,useRef,useState,type ReactNode} from 'react';
 import {MapIcon} from './MapIcon';
 import {SATELLITE_MAX_ZOOM,SATELLITE_OVERVIEW_MAX_ZOOM,type SatelliteSourceId} from '@/lib/map-satellite';
 import {bindMapAttributionCollapse} from '@/lib/map-attribution';
 
 const SESSION_KEY='tropnik-map-attribution-seen';
+
+/** Share the measured footer height with the adjacent desktop actions. The
+ * footer itself never consumes this value, so a size notification cannot
+ * create a layout loop. Camera frames do not read or update this geometry. */
+export function MapFooter({loading=false,children}:{loading?:boolean;children:ReactNode}) {
+  const ref=useRef<HTMLDivElement>(null);
+  useLayoutEffect(()=>{
+    const footer=ref.current,layout=footer?.closest<HTMLElement>('.explore-layout');if(!footer||!layout)return;
+    let written='';
+    const update=(height:number)=>{const value=`${Math.ceil(height)}px`;if(value!==written){written=value;layout.style.setProperty('--map-footer-height',value);}};
+    update(footer.getBoundingClientRect().height);
+    const observer=new ResizeObserver(entries=>{const entry=entries.find(item=>item.target===footer);if(entry)update(entry.borderBoxSize?.[0]?.blockSize??entry.contentRect.height);});
+    observer.observe(footer);
+    return()=>{observer.disconnect();if(layout.style.getPropertyValue('--map-footer-height')===written)layout.style.removeProperty('--map-footer-height');};
+  },[]);
+  return <div ref={ref} className="map-footer">
+    <div className="map-preload-status" role="status" aria-hidden={!loading}>Подгружаем детали текущего ракурса</div>
+    <div className="map-footer-meta">{children}</div>
+  </div>;
+}
 
 /**
  * Required map credit is visible on the first display, then collapses after

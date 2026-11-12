@@ -84,8 +84,8 @@
     },
     {
       "path": "web/app/map-detail.css",
-      "sizeBytes": 9576,
-      "sha256": "c2712d4743fbcd33b1ae73f47bb22716d9722d3c76f91b86abb81596e521ce27"
+      "sizeBytes": 13197,
+      "sha256": "a1e37306bd58d2a666031bb2892f5d0641f9cd8c3cdfa912442ded2b9561a9a7"
     },
     {
       "path": "web/app/map-direction-marker.css",
@@ -104,8 +104,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 54361,
-      "sha256": "47627d06401dbbc6d638fea4e05e7ea0da56108925e49ee44d3ca40ffd7bf839"
+      "sizeBytes": 55660,
+      "sha256": "3c1897c79962d3ecf7f443ea3a01059e60e204869ce0bda3f78446cb1205d9aa"
     },
     {
       "path": "web/lib/custom-map-label-inspection.ts",
@@ -176,6 +176,11 @@
       "path": "web/lib/map-interaction.ts",
       "sizeBytes": 2270,
       "sha256": "19cd3f505e741784b0d669a88bf011474fd22f37b91757c2a42066ad98a6061b"
+    },
+    {
+      "path": "web/lib/map-point-marker-layout.ts",
+      "sizeBytes": 1277,
+      "sha256": "e884311bc2b4def5c8802a9da5375c50f784ef879405b1de12dd9705cc7efb39"
     },
     {
       "path": "web/lib/map-preload.ts",
@@ -258,17 +263,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "874d7cc4bde6fd5452ef6115ab5ab92b9b07e185514f8b4393abeab250070007",
+  "sourceInputsSha256": "70ff9bf95b669b2d269d8a8ecb4ce7c972b90fa6dc26b98a99543327be5af349",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "9c62ae86da793cb2b06bee19e8431ab149c1a9ad3543d91c812bd37aed09e988"
+      "sha256": "76b0f192787d5f30b99f778a4937430cc8a73536701642175e49deedcbafc886"
     },
     {
-      "path": "chunks/custom-map-entry-BWNRuns0.js",
-      "sizeBytes": 108645,
-      "sha256": "8431ef9c16cd9869dc0a495f7cd2aa4b1d08618d05d286b1b18cb44b2f84f4de"
+      "path": "chunks/custom-map-entry-DtycbgdZ.js",
+      "sizeBytes": 109753,
+      "sha256": "e17e2b92d30bb9970a19600af95f122b83b782153706b187b5f6fd58f3cfd25d"
     },
     {
       "path": "index.html",
@@ -283,12 +288,12 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "2b8c80b406e632a636b17bcab10d77d1af6304bd95fe5b00a6426f10784392ae"
+      "sha256": "0921f16fff42180ae8dd4096cb66cae17aa071c21b5813e881df251001ba97b9"
     },
     {
       "path": "map.css",
-      "sizeBytes": 76537,
-      "sha256": "b447323a16863ea19404c4a4bba6e3669c873d2a3e61a19b4025ce7b88ffbbbc"
+      "sizeBytes": 79455,
+      "sha256": "69b5c58b5bd2a950880ee22a0070169a115b4cf091c0cc83b44a9f778a530e70"
     },
     {
       "path": "offline-manifest.json",
