@@ -36,8 +36,9 @@
 .tropnik-custom-atlas :is(.terrain-controls,.terrain-live){-webkit-backdrop-filter:none;backdrop-filter:none}
 @media(hover:hover) and (pointer:fine){.tropnik-custom-atlas .layer-button:hover:not(.active),.tropnik-custom-atlas .map-attribution-toggle:hover{background:var(--surface-soft)!important}}
 @media(max-width:700px){
- .explore-layout .tropnik-custom-atlas .map-legend{display:flex;top:calc(var(--map-top,12px) + 64px);bottom:auto;left:var(--map-left,12px);padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
- .tropnik-custom-atlas .map-legend-key{display:none}
+ /* The phone's second row belongs to place stories and the control rail.
+    Keep the existing compact layout's hidden legend instead of covering it. */
+ .explore-layout .tropnik-custom-atlas .map-legend{display:none}
  .tropnik-custom-atlas .terrain-heading{max-width:calc(100% - 144px)}
  .tropnik-custom-atlas .terrain-heading h2{font-size:20px}
  /* The shared mobile layout reserves one horizontal row above the drawer.

@@ -79,8 +79,8 @@
     },
     {
       "path": "web/app/custom-map.css",
-      "sizeBytes": 5057,
-      "sha256": "3b9eacbcc3b5db807a64085fe124efc36c7c35cce0789d3f000d58c9119e3012"
+      "sizeBytes": 4993,
+      "sha256": "a00fc684c3c81d472f6d9e9ca47307ed5b2594a6d5ab9ae1ef33a528c84cb4bf"
     },
     {
       "path": "web/app/map-detail.css",
@@ -253,7 +253,7 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "63b8bc4965ce562d9f9201498cfb29addaa46c9838cc6ee400cff33a3910e5a2",
+  "sourceInputsSha256": "9f406407b72e304e38e7913b0973a00779857ffa5d9440451c7cdc9cea7474bd",
   "files": [
     {
       "path": "android-bootstrap.js",
@@ -282,8 +282,8 @@
     },
     {
       "path": "map.css",
-      "sizeBytes": 76335,
-      "sha256": "8db203c428a33ab3f6dc1abecf5d5e7de56288c3d921a1b820ce9d5c9bcc7688"
+      "sizeBytes": 76119,
+      "sha256": "0db0fb4f6f30e664249cdb62e7daba216c8b5bd7cac03954ff92496c71d64131"
     },
     {
       "path": "offline-manifest.json",
