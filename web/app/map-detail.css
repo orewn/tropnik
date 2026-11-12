@@ -260,4 +260,10 @@
   .explore-layout.sheet-closed .layer-control{
     top:auto;right:auto;left:var(--map-left);bottom:calc(var(--sheet-control-inset,var(--map-bottom-inset,0px)) + 12px);
   }
+  /* This Layers button is on the left just like the open drawer's rail.
+     Anchor its menu above that button, inside the actual free map height. */
+  .explore-layout.sheet-closed .layer-menu{
+    left:max(0px,calc(16px - var(--map-left)));right:auto;bottom:60px;top:auto;
+    max-height:min(360px,65dvh,max(0px,calc(100dvh - var(--header) - var(--sheet-control-inset,var(--map-bottom-inset,0px)) - 12px - 60px - max(16px,var(--map-top)))));
+  }
 }
