@@ -1,13 +1,15 @@
 import assert from 'node:assert/strict';
 import {dispatchSourceEndPan,assertSourceEndPanInput} from './browser-source-end-pan.mjs';
-import {traceDesktopSelection,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from './browser-trace.mjs';
+import {traceDesktopSelection,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,TERRAIN_TRACE_LIMITS} from './browser-trace.mjs';
 import {sendNativeText} from './browser-native-text.mjs';
 
 // These are controlled-browser interaction budgets, not a claim of physical
 // device FPS. RAF callbacks do not prove that the GPU presented every frame.
 export const SMOOTHNESS_LIMITS=Object.freeze({frameP95Ms:35,maxFrameGapMs:150,inputToFrameMs:200,eventDurationMs:200,layoutShift:.1});
 export const SMOOTHNESS_SCENARIOS=Object.freeze(['panel','explore-search','explore-filters','catalog-scroll','map-pan','map-zoom','layer-switch','site-search']);
-export const SMOOTHNESS_TRACE_SCENARIOS=Object.freeze(['panel','explore-search']);
+// Isolated map-pan diagnosis only; the release source keeps its original gate.
+export const SMOOTHNESS_TRACE_SCENARIOS=Object.freeze(['map-pan']);
+const PAN_TRACE_LIMITS=Object.freeze({...TERRAIN_TRACE_LIMITS,durationMs:8000});
 
 export function smoothnessTraceEnabled({diagnostic=null,traceValue,cpuSlowdownRate=1}={}){
  return diagnostic==='ui-smoothness'&&traceValue==='1'&&cpuSlowdownRate===1;
@@ -159,23 +161,56 @@ export async function observeSmoothnessPan(cdp,start,delta,profile,{evaluate,sle
  return receipt;
 }
 
+/** Read only existing registration/cache metadata, never register, update,
+ * open/create a cache, fetch, or wait for warming. Pages prefixes both the cache
+ * VERSION and marker URL, so derive the latter from the registration scope. */
+async function snapshotPanWorkerState(cdp,evaluate,phase){
+ try{return await evaluate(cdp,`(async()=>{
+  const began=performance.now(),worker=value=>value?{scriptURL:value.scriptURL,state:value.state}:null;
+  const registration=await navigator.serviceWorker?.getRegistration(location.href),scope=registration?.scope||new URL('.',location.href).href;
+  const names=(await caches.keys()).filter(name=>name.includes('tropnik-shell-'));
+  const shellCaches=await Promise.all(names.slice(0,16).map(async name=>{
+   const markerURL=new URL('_offline/map-warm-'+name+'-canvas',scope).href,response=await caches.match(markerURL,{cacheName:name});
+   return{name,markerURL,present:!!response,status:response?.status??null,ready:!!response&&response.ok&&await response.text()==='ready'};
+  }));
+  return{phase:${JSON.stringify(phase)},readOnly:true,startedAtMs:began,capturedAtMs:performance.now(),timeOriginMs:performance.timeOrigin,
+   controller:worker(navigator.serviceWorker?.controller),registration:registration?{scope:registration.scope,active:worker(registration.active),waiting:worker(registration.waiting),installing:worker(registration.installing)}:null,
+   shellCaches,truncated:names.length>16};
+ })()`);}catch(error){return{phase,readOnly:true,error:String(error?.message||error)};}
+}
+
+/** User Timing supplies a trace/browser-clock pair outside the measured window.
+ * Match the named mark in blink.user_timing before attributing RAF intervals. */
+async function capturePanTraceClock(cdp,evaluate,phase){
+ const name='tropnik:desktop-map-pan:'+phase;
+ try{return await evaluate(cdp,`(()=>{const mark=performance.mark(${JSON.stringify(name)});return{name:mark.name,startTimeMs:mark.startTime,timeOriginMs:performance.timeOrigin};})()`);}
+ catch(error){return{name,error:String(error?.message||error)};}
+}
+
 /** Start tracing before the recorder window, then stop the window before trace
  * drainage. Each action still runs once, and its raw metrics survive failures. */
 export async function measureSmoothnessWindow(cdp,name,action,{evaluate,report,tracing=false,sourceCommit=null,traceOptions={}}){
  const inspect=expression=>evaluate(cdp,expression);
+ const focusedTrace=tracing&&report.profile==='desktop-webgl'&&SMOOTHNESS_TRACE_SCENARIOS.includes(name);
+ if(focusedTrace)report.panTraceContext={schemaVersion:1,diagnosticOnly:true,workerBefore:await snapshotPanWorkerState(cdp,evaluate,'before')};
  let releaseDrain;const windowClosed=new Promise(resolve=>{releaseDrain=resolve;});
  const measure=async()=>{
   try{
+   if(focusedTrace)report.panTraceContext.clockBefore=await capturePanTraceClock(cdp,evaluate,'before');
    await inspect(`window.__tropnikSmoothness.start(${JSON.stringify(name)})`);let error;
    try{await action();}catch(problem){error=problem;}
    await inspect('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
    const raw=await inspect('window.__tropnikSmoothness.stop()');
+   if(focusedTrace){
+    report.panTraceContext.clockAfter=await capturePanTraceClock(cdp,evaluate,'after');
+    report.panTraceContext.workerAfter=await snapshotPanWorkerState(cdp,evaluate,'after');
+   }
    try{report.scenarios.push(summarizeSmoothness(raw));}catch(problem){error??=problem;report.invalidWindow=raw;}
    if(error)throw error;
   }finally{releaseDrain();}
  };
- if(!tracing||!SMOOTHNESS_TRACE_SCENARIOS.includes(name))return measure();
- const options={...traceOptions,enabled:true,sourceCommit,prefix:`${report.profile}-ui-smoothness-${name}`,scope:`ui-smoothness/${report.profile}/${name}`,categories:FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,captureCategoryEvidence:true,beforeDrain:()=>windowClosed};
+ if(!focusedTrace)return measure();
+ const options={...traceOptions,limits:PAN_TRACE_LIMITS,enabled:true,sourceCommit,prefix:`${report.profile}-ui-smoothness-${name}`,scope:`ui-smoothness/${report.profile}/${name}`,categories:FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,captureCategoryEvidence:true,beforeDrain:()=>windowClosed};
  try{
   const {trace}=await traceDesktopSelection(cdp,measure,options);report.traces.push({scenario:name,...trace});
  }catch(error){if(error.traceReceipt)report.traces.push({scenario:name,...error.traceReceipt});throw error;}
@@ -184,7 +219,7 @@ export async function measureSmoothnessWindow(cdp,name,action,{evaluate,report,t
 /** A short real-input path, independent of the long all-zoom matrix. */
 export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1,diagnostic=process.env.TROPNIK_BROWSER_DIAGNOSTIC??null,traceValue=process.env.TROPNIK_BROWSER_TRACE,sourceCommit=process.env.GITHUB_SHA||null}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,settledSheet,closeMapSheet,clearMapStories,pointerSelector,revealNative,scrollContainer,freeCanvasPoint,url}=helpers;
- const tracing=smoothnessTraceEnabled({diagnostic,traceValue,cpuSlowdownRate});
+ const tracing=profile.name==='desktop-webgl'&&smoothnessTraceEnabled({diagnostic,traceValue,cpuSlowdownRate});
  const report={schemaVersion:1,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',physicalDevice:false,cpuSlowdownRate,cpuThrottleRestored:false,instrumented:tracing,traces:[],passed:false,scenarios:[],performanceIssues:[],performancePassed:false};
  let originalFailure;
  const inspect=expression=>evaluate(cdp,expression);
