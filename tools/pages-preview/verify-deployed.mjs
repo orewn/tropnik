@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {validateApkDelivery, validateApkManifest, verifyPublicApk} from './apk-artifact.mjs';
 import {assertBrowserReport} from './browser-report.mjs';
+import {assertServiceWorkerUpdateReceipt} from './browser-service-worker-update.mjs';
 
 const [address, expectedBuild, expectedCommit] = process.argv.slice(2);
 assert.match(expectedBuild || '', /^[a-f0-9]{16}$/, 'Pass the build ID produced by the build job');
@@ -63,6 +64,11 @@ const pages = JSON.parse((await request('page-manifest.json')).text);
 assert.equal(pages.length, build.pages);
 const browser = JSON.parse((await request('browser-verification.json', 32 * 1024 * 1024)).text);
 assertBrowserReport(browser,expectedCommit,build.catalogue);
+const workerUpdate = JSON.parse((await request('browser-service-worker-update-verification.json')).text);
+assertServiceWorkerUpdateReceipt(workerUpdate, {sourceCommit:expectedCommit, buildId:expectedBuild, environment:browser.environment});
+for (const path of ['web/components/ServiceWorker.tsx','web/lib/service-worker-registration.ts','web/public/sw.js','tools/pages-preview/browser-service-worker-update.mjs']) {
+  assert.equal(workerUpdate.sources[path], build.inputs.find(input => input.path === path)?.sha256, 'The public update proof belongs to another source input');
+}
 
 const home = (await request('')).text;
 assert.match(home, /Тропник/);
@@ -77,7 +83,8 @@ for (const kind of ['region', 'route', 'android', 'offline', 'sources']) {
 }
 await request('offline-viewer.html');
 for (const asset of ['offline-safety.html','offline-safety.js','offline-safety.css']) await request(asset);
-await request('sw.js');
+const worker = await request('sw.js');
+assert.equal(worker.sha256, workerUpdate.worker.sha256, 'The published worker differs from the browser update proof');
 await request('data/territories.geojson');
 const android = validateApkManifest(JSON.parse((await request('downloads/android-manifest.json')).text));
 validateApkDelivery(build.apk, android);
@@ -86,4 +93,4 @@ validateApkDelivery(build.apk, android);
 const apk = await verifyPublicApk(android);
 assert.equal(apk.bytes, android.bytes);
 assert.equal(apk.sha256, android.sha256, 'The public APK is not the pinned Android build');
-console.log(JSON.stringify({verified: true, url: site.href, buildId: build.buildId, sourceCommit: build.sourceCommit, publicHttpChecks: checks, apkDelivery: build.apk.delivery, apkUrl: apk.url, apkBytes: apk.bytes, apkSha256: apk.sha256, browserRenderingTested: true, browserProfiles: browser.profiles.length}, null, 2));
+console.log(JSON.stringify({verified: true, url: site.href, buildId: build.buildId, sourceCommit: build.sourceCommit, publicHttpChecks: checks, apkDelivery: build.apk.delivery, apkUrl: apk.url, apkBytes: apk.bytes, apkSha256: apk.sha256, browserRenderingTested: true, browserProfiles: browser.profiles.length, serviceWorkerUpdateTested: true, serviceWorkerTimeoutMs: workerUpdate.timeout.elapsedMs}, null, 2));

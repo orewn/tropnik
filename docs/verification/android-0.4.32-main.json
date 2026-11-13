@@ -1,0 +1,532 @@
+{
+  "schemaVersion": 1,
+  "scope": "published Android 0.4.32 preview on exact main source",
+  "status": "passed-and-publicly-verified",
+  "recordedAt": "2026-11-13T11:33:28.972349+00:00",
+  "source": {
+    "schemaVersion": 1,
+    "workflowRunId": "43415329783",
+    "event": "push",
+    "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "sourceTree": "3656d2cd30071df101094f0a8fa467ffbd44dd6b",
+    "parents": [
+      "7d517c96dcc8ca387ff308a238f42cbaf39fe259"
+    ],
+    "branch": "main",
+    "publicationRequestedVersion": "0.4.32-preview"
+  },
+  "workflow": {
+    "runId": 43415329783,
+    "url": "https://github.com/orewn/tropnik/actions/runs/43415329783",
+    "conclusion": "success",
+    "completedAt": "2026-11-13T11:30:42Z",
+    "jobs": [
+      {
+        "id": 131851654289,
+        "name": "build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 131856076034,
+        "name": "Android device scenarios",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 131858604730,
+        "name": "Publish the requested Android prerelease",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 131859034115,
+        "name": "Verify public Android bytes and prepare the universal website manifest",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "jvm": {
+    "tests": 70,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "instrumentationApkCompiled": true
+  },
+  "device": {
+    "status": "passed",
+    "processExitCode": 0,
+    "instrumentationResultCodes": [
+      -1
+    ],
+    "deviceExecutionVerified": true,
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "missingTests": [],
+    "parseErrors": [],
+    "cases": [
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "noServerMeansExplicitConfigurationNotInventedSocialActivity",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      }
+    ],
+    "schemaVersion": 2,
+    "recordedAt": "2026-11-13T11:28:38.803763+00:00",
+    "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "workflowRunId": "43415329783",
+    "buildReceiptSha256": "4fafa9338525fdc27dd2aa059a667e248009bf3187258aab5a4aeef557107fe8",
+    "testedApks": {
+      "tropnik-preview.apk": {
+        "bytes": 69227850,
+        "sha256": "ece07bea79c73bffba5583048fef7922a2a67e9aa37082731ac6c1921b18cd38"
+      },
+      "tropnik-instrumentation-tests.apk": {
+        "bytes": 1181521,
+        "sha256": "98c4da1f3b1fd9bd14b793423f0d47207012193680c74fcd34e49b42bb805d08"
+      }
+    },
+    "installedArtifactBytesVerified": true,
+    "releasePayloadDeviceVerified": true,
+    "testedArchitecture": "x86_64",
+    "testedArtifact": "tropnik-preview.apk",
+    "arm64DeviceExecutionVerified": false,
+    "physicalDeviceVerified": false,
+    "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+    "graphicsDriver": {
+      "mode": "swangle",
+      "appBackend": "OpenGL ES",
+      "renderer": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.17841 git hash: 5fa2e61da947))",
+      "diagnosticSha256": "af447a67267934c4305f6b3ba7dade95f456831158a31de1256bd26184b6ba5f",
+      "verified": true
+    },
+    "note": "All 11 actual cases must pass on the exact installed universal preview. ARM64, physical GPU, GPS, battery, online satellite providers and a production API are not device-verified."
+  },
+  "independentChecks": {
+    "rawInstrumentationProtocolVerified": true,
+    "installedReceiptMatchesDownloadedBuildAndApk": true,
+    "previewReceiptFileFingerprintsVerified": 16,
+    "downloadedArtifactApiDigestsVerified": 4,
+    "publicAssetApiDigestsMatchAnonymousProof": true,
+    "tagPointsToExactSourceCommit": true,
+    "manifestMatchesFinalJobLogExport": true,
+    "pixelsRecheckedFromActualPng": true,
+    "pixelSourceDigestsMatchGeometryInsideActualApk": true,
+    "visuallyInspectedDeviceScreenshot": "map-native-catalogue-coastal.png",
+    "localSdkSignatureReverification": false,
+    "signatureVerificationScope": "Official SDK apksigner ran in build, device and final public-verification jobs; this independent local review checked those exact reports and their file hashes, without rerunning the SDK."
+  },
+  "unsignedProductionCompilation": {
+    "schemaVersion": 1,
+    "kind": "unsigned-production-build-check",
+    "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "workflowRunId": "43415329783",
+    "applicationId": "ru.tropa.app",
+    "versionCode": 15,
+    "version": "0.4.32",
+    "bytes": 60968961,
+    "sha256": "cb67ba04e00b42c242184abaf806284c156168fea17cbe3b0fc47f62a8e9e096",
+    "debuggable": false,
+    "signatureVerified": false,
+    "signingCertificateSha256": null,
+    "productionPublished": false,
+    "deviceExecutionVerified": false,
+    "liveApiVerified": false,
+    "upgradeVerified": false,
+    "sourceAssetParityVerified": true,
+    "sourceAssetsCompared": 1815,
+    "sourceAssetBytesCompared": 142682308,
+    "nativeFont": {
+      "path": "res/-z.ttf",
+      "bytes": 164700,
+      "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6",
+      "resourceTableBindingVerified": true,
+      "resourceId": "0x7f050000",
+      "resourceName": "ru.tropa.app:font/manrope"
+    },
+    "compilerGeneratedArtProfiles": [
+      {
+        "path": "assets/dexopt/baseline.prof",
+        "bytes": 4524,
+        "sha256": "5e7d839353ed7a9726b9d106be3293f6bac0465c1087732e76d06d418d106152",
+        "compilerOutput": "android/app/build/intermediates/binary_art_profile/release/compileReleaseArtProfile/baseline.prof"
+      },
+      {
+        "path": "assets/dexopt/baseline.profm",
+        "bytes": 551,
+        "sha256": "4904dd84c80f07c4a247a552f8b9aa9fba8b24a444c80e3974d6b22db31e6a5b",
+        "compilerOutput": "android/app/build/intermediates/binary_art_profile_metadata/release/compileReleaseArtProfile/baseline.profm"
+      }
+    ]
+  },
+  "runtime": {
+    "mapRenderer": "tropnik-canvas",
+    "mapRendererManifestSha256": "7d406b298be1b2afe7219c4e4310c9c2822d9ef18cb35102cb8bf1db23792fef",
+    "mapRendererSourceInputsSha256": "8132930733aaadc3ccaa665b24ced16064ba23d248f187d9c19aec6722425a8d",
+    "mapRendererFilesVerified": 11,
+    "mapRendererWorkersVerified": 3,
+    "mapRendererResourceAliasesVerified": 1746,
+    "mapRendererNativeSdkRequired": false,
+    "mapRendererSharedWithWeb": true,
+    "mapRendererBridge": "exact-origin-web-message-port-v1"
+  },
+  "universalApk": {
+    "path": "tropnik-preview.apk",
+    "version": "0.4.32-preview",
+    "versionCode": 15,
+    "applicationId": "ru.tropa.app.preview",
+    "bytes": 69227850,
+    "sha256": "ece07bea79c73bffba5583048fef7922a2a67e9aa37082731ac6c1921b18cd38",
+    "signature": "development / debug",
+    "signingCertificateSha256": "f06477747e342ef5a2cef201bd0fc43fdc9104e80189b08faf78c511dded2f62",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "downloadUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.32-preview/tropnik-preview.apk"
+  },
+  "arm64Apk": {
+    "bytes": 69219483,
+    "sha256": "f0e53e8eb98a9bb0ec91d427dbcbd62b206158370fe0b12829b1107f371cdc53"
+  },
+  "publicRelease": {
+    "id": 444148673,
+    "url": "https://github.com/orewn/tropnik/releases/tag/v0.4.32-preview",
+    "tag": "v0.4.32-preview",
+    "publishedAt": "2026-11-13T11:29:44Z",
+    "draft": false,
+    "prerelease": true,
+    "githubImmutable": false,
+    "immutabilityScope": "Versioned release and no-overwrite policy in our publishing script; GitHub-enforced immutability is not enabled.",
+    "verification": {
+      "schemaVersion": 1,
+      "scope": "published-universal-android-promotion",
+      "verified": true,
+      "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+      "workflowRunId": 43415329783,
+      "buildArtifactId": 14031394704,
+      "deviceArtifactId": 14032611394,
+      "tag": "v0.4.32-preview",
+      "releaseUrl": "https://github.com/orewn/tropnik/releases/tag/v0.4.32-preview",
+      "anonymousAssetsVerified": 6,
+      "assets": [
+        {
+          "name": "tropnik-arm64-preview.apk",
+          "bytes": 69219483,
+          "sha256": "f0e53e8eb98a9bb0ec91d427dbcbd62b206158370fe0b12829b1107f371cdc53",
+          "anonymous": true
+        },
+        {
+          "name": "tropnik-preview.apk",
+          "bytes": 69227850,
+          "sha256": "ece07bea79c73bffba5583048fef7922a2a67e9aa37082731ac6c1921b18cd38",
+          "anonymous": true
+        },
+        {
+          "name": "android-manifest.json",
+          "bytes": 2398,
+          "sha256": "21053c11abe253b7e9638d4b6f76f18c45e10dd4c8c93a2fb6717a3d7540aabd",
+          "anonymous": true
+        },
+        {
+          "name": "verification-reports.zip",
+          "bytes": 64166,
+          "sha256": "e57af8066dc022b23a3b01c2bff582d2420c2ca8900202bc308b9c989292ad04",
+          "anonymous": true
+        },
+        {
+          "name": "tropnik-0.4.32-preview-source.tar.gz",
+          "bytes": 149524547,
+          "sha256": "947a5e25d6d72294a5ed05631b7992892a99c164da2837fac64e44aea0e683e7",
+          "anonymous": true
+        },
+        {
+          "name": "checksums.sha256",
+          "bytes": 460,
+          "sha256": "d4e143ffe8e6fa82484c1ac3d04faa990ddc54cd961766235c3388767f1cb595",
+          "anonymous": true
+        }
+      ],
+      "sourceArchiveRecreatedFromExactCommit": true,
+      "releaseReportsRecreatedFromExactReceipts": true,
+      "buildReceipt": {
+        "bytes": 3440,
+        "sha256": "4fafa9338525fdc27dd2aa059a667e248009bf3187258aab5a4aeef557107fe8"
+      },
+      "deviceEvidence": {
+        "device-result.json": {
+          "bytes": 4419,
+          "sha256": "d043f43efa98816461b68686394845bb6381100528cc9ba5bd23f78b89e0bf04"
+        },
+        "installed-apks.json": {
+          "bytes": 581,
+          "sha256": "38f4d1e52e74c3b17195bb4021133f0291582d1eaddd1f9a67d447c490f9978d"
+        },
+        "raw-instrumentation.log": {
+          "bytes": 7402,
+          "sha256": "6be91b1fdb7dc551cd3b085da29da03f7c37800052a90543ed9f3bea6dd5fe67"
+        },
+        "graphics-driver.txt": {
+          "bytes": 22369,
+          "sha256": "af447a67267934c4305f6b3ba7dade95f456831158a31de1256bd26184b6ba5f"
+        }
+      },
+      "actualDeviceTests": 11,
+      "physicalDeviceVerified": false,
+      "arm64DeviceExecutionVerified": false,
+      "sdkSignaturesReverified": true,
+      "productionSigned": false,
+      "previousPreview": {
+        "manifestPath": "web/public/downloads/android-manifest.json",
+        "manifestSha256": "f2e2f07454a827dd49b7177dbe3848956e094367a88dcdca5f420038c89d3ab7",
+        "version": "0.4.31-preview",
+        "versionCode": 14,
+        "applicationId": "ru.tropa.app.preview",
+        "sourceCommit": "baf0b9ef8b8132711a317e861cf1d8aed68800fb",
+        "apkSha256": "01e36115e3c19214543f75b128f806c8195c6b7808b40ae08a256b6bd7150055"
+      },
+      "previousSigningCertificateSha256": "2ab22affedf2dc732b8c57530a016afcd030e820ec3477f91ca019322f9f750c",
+      "signingCertificateSha256": "f06477747e342ef5a2cef201bd0fc43fdc9104e80189b08faf78c511dded2f62",
+      "sameApplicationIdAsPreviousPreview": true,
+      "sameCertificateAsPreviousPreview": false,
+      "versionCodeIncreases": true,
+      "updateIdentityRequirementsMet": false,
+      "updateCompatibilityAssessment": "signing-certificate-mismatch",
+      "updateInstallCompatibilityVerified": false,
+      "pagesGateStillRequired": true,
+      "recordedAt": "2026-11-13T11:30:38.828123+00:00"
+    }
+  },
+  "universalWebsiteManifest": {
+    "origin": "verify-public-release job 131859034115 / tropnik-public-universal-proof-1 artifact 14032696621 / android-universal-manifest.json",
+    "bytes": 3177,
+    "sha256": "405165b18cf746c44abf54b7fd12c0971ea09a06cb2cd9454b340263ad8f2f5f",
+    "architecture": "universal",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "workflowRunId": 43415329783,
+    "testedArtifact": "tropnik-preview.apk",
+    "testedArchitecture": "x86_64",
+    "apkBytes": 69227850,
+    "apkSha256": "ece07bea79c73bffba5583048fef7922a2a67e9aa37082731ac6c1921b18cd38",
+    "signingCertificateSha256": "f06477747e342ef5a2cef201bd0fc43fdc9104e80189b08faf78c511dded2f62",
+    "compatibleWithPreviousPreview": false,
+    "pagesGateStillRequired": true
+  },
+  "artifacts": [
+    {
+      "id": 14032696621,
+      "name": "tropnik-public-universal-proof-1",
+      "size_in_bytes": 3430,
+      "digest": "sha256:6535ac1e7b1afc2d8cb7634ff11e415e7bc948e7f87070621c02d914f0ac78d0"
+    },
+    {
+      "id": 14032611394,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "size_in_bytes": 7676913,
+      "digest": "sha256:fcf0df48b8197036d93bbbed5c2145afa5038d461e4739c97b29b23b570ce544"
+    },
+    {
+      "id": 14032257487,
+      "name": "tropnik-release-candidate-1",
+      "size_in_bytes": 237073197,
+      "digest": "sha256:a37cafdf6e3c8f1ae83982f22ac4c4c19e15dc7971da556aeb733271a285cfb7"
+    },
+    {
+      "id": 14031738031,
+      "name": "tropnik-production-build-check-1",
+      "size_in_bytes": 5165,
+      "digest": "sha256:9f88de6161811b496e69c87618b7b11c9a1a74aaa5be2c08f55bfc7914adb59b"
+    },
+    {
+      "id": 14031394704,
+      "name": "tropnik-android-preview-1",
+      "size_in_bytes": 111850508,
+      "digest": "sha256:39fb3bf265cbf221072bcebab04ef014df342fb9170ac2e95621f0f144139950"
+    }
+  ],
+  "downloadedEvidence": {
+    "production-check.zip": {
+      "bytes": 5165,
+      "sha256": "9f88de6161811b496e69c87618b7b11c9a1a74aaa5be2c08f55bfc7914adb59b"
+    },
+    "preview-artifact.zip": {
+      "bytes": 111850508,
+      "sha256": "39fb3bf265cbf221072bcebab04ef014df342fb9170ac2e95621f0f144139950"
+    },
+    "device-proof.zip": {
+      "bytes": 7676913,
+      "sha256": "fcf0df48b8197036d93bbbed5c2145afa5038d461e4739c97b29b23b570ce544"
+    },
+    "public-proof.zip": {
+      "bytes": 3430,
+      "sha256": "6535ac1e7b1afc2d8cb7634ff11e415e7bc948e7f87070621c02d914f0ac78d0"
+    },
+    "build/preview-build.json": {
+      "bytes": 3440,
+      "sha256": "4fafa9338525fdc27dd2aa059a667e248009bf3187258aab5a4aeef557107fe8"
+    },
+    "device/device-result.json": {
+      "bytes": 4419,
+      "sha256": "d043f43efa98816461b68686394845bb6381100528cc9ba5bd23f78b89e0bf04"
+    },
+    "device/installed-apks.json": {
+      "bytes": 581,
+      "sha256": "38f4d1e52e74c3b17195bb4021133f0291582d1eaddd1f9a67d447c490f9978d"
+    },
+    "device/raw-instrumentation.log": {
+      "bytes": 7402,
+      "sha256": "6be91b1fdb7dc551cd3b085da29da03f7c37800052a90543ed9f3bea6dd5fe67"
+    },
+    "device/graphics-driver.txt": {
+      "bytes": 22369,
+      "sha256": "af447a67267934c4305f6b3ba7dade95f456831158a31de1256bd26184b6ba5f"
+    },
+    "production-verification.json": {
+      "bytes": 11462,
+      "sha256": "6715c6d4cac368d5211a58fa0fd59dd0244eb0f9e4abab704d7687378f0dbc03"
+    },
+    "android-universal-manifest.json": {
+      "bytes": 3177,
+      "sha256": "405165b18cf746c44abf54b7fd12c0971ea09a06cb2cd9454b340263ad8f2f5f"
+    },
+    "public-release-verification.json": {
+      "bytes": 3517,
+      "sha256": "84373f48722424c94e42ae107ce8364caeea5914fd14fc122ea87f1b9ce600ef"
+    },
+    "device/qa/map-native-catalogue-coastal.png": {
+      "bytes": 320236,
+      "sha256": "7a26b7ac6d7c74e89f3e8a3cda7f21f77bd2848abedb2937bcdee31af2e1f31b"
+    },
+    "device/qa/offline-pack-opened-snapshot.png": {
+      "bytes": 357356,
+      "sha256": "beec12e98ea42960673e8b9640631f3850a8cb24b97f7dafbb61fe5bd3efc922"
+    },
+    "independent-device-pixels.json": {
+      "bytes": 882,
+      "sha256": "eee8f3a5cad8f5d76ed823d8d32a2d37d45621053959df62a9d6eb6d4107b798"
+    }
+  },
+  "pixelVerification": {
+    "scope": "Independent resampling of actual screenshots at recorded source-line witnesses; no physical device result",
+    "results": [
+      {
+        "routeId": "kolyma-black-creek",
+        "image": "map-native-catalogue-coastal.png",
+        "sampleCount": 47,
+        "matchedSamples": 47,
+        "sourceInActualApk": "assets/maps/routes/kolyma-black-creek.geojson",
+        "sourceSha256": "de9dcb7a128b037e8000558efc83c926ac3e581473b62e41fdb725c73dddc46b",
+        "observedOfflineOverviewFallback": true
+      },
+      {
+        "routeId": "osm-relation-6040458",
+        "image": "offline-pack-opened-snapshot.png",
+        "sampleCount": 47,
+        "matchedSamples": 47,
+        "sourceInActualApk": "assets/maps/routes/osm-relation-6040458.geojson",
+        "sourceSha256": "b67bd147317b95779ddbab33f04f68403c2d71760bf172185133339f9f94e6e9",
+        "observedOfflineOverviewFallback": true
+      }
+    ]
+  },
+  "limitations": [
+    "This is a development/debug-signed preview; no production signing key or store release is claimed.",
+    "The signing certificate differs from 0.4.31-preview; update identity requirements are not met and installed upgrade compatibility was not tested.",
+    "API35 x86_64 emulator evidence does not qualify physical ARM64, GPS, battery use, online satellite access or a live production API.",
+    "Offline route lines and an overview fallback passed; detailed offline base coverage across the country is not claimed.",
+    "Only the final universal website manifest is eligible for promotion; the release asset android-manifest.json describes the ARM64 producer artifact.",
+    "A new Pages build/browser/deployment gate is still needed after promoting the manifest."
+  ]
+}

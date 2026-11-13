@@ -14,16 +14,21 @@
 увести выбранную область за доступную часть карты. Исправление реализовано,
 124 профильных теста повторены независимо; три новые регрессии действительно
 отказывают на прежнем engine. Shared runtime заново сгенерирован и сверён
-web/Android. Принят следующий immutable **0.4.32-preview / code 15**;
-новый APK и его device gate ещё не получены.
+web/Android. Принят отдельный версионированный **0.4.32-preview / code 15**;
+новый APK опубликован из `9289c1ca`, все четыре jobs run `43415329783`
+прошли, включая 70 JVM, unsigned R8, 11 device scenarios и анонимную проверку
+всех шести release assets. Universal manifest после public proof продвинут
+в веб-исходники. Сертификат отличается от 0.4.31; совместимое обновление
+поверх прежней установки не заявлять.
 
 Продолжение 13 ноября обнаружило неверный JSON envelope в bootstrap gate и
 недоступные published ports из internal-only сети Docker. Подготовлен отдельный
 Caddy ingress без расширения исходящего доступа API/БД; `backend` сохраняет имя,
 новая `application` внутренняя, `frontend` только у ingress. Proxy forwarding
-проверен на синтетическом loopback, Compose rendering — отдельно. Это не
-Docker bootstrap и не действующий сервер. PostgreSQL 18.7 с пересобранным
-официальным PostGIS остаётся частью кандидата.
+проверен сначала на синтетическом loopback, затем настоящий Docker bootstrap
+успешно выполнен в main CI `43415329960`. PostgreSQL 18.7 с пересобранным
+официальным PostGIS, native 54/85 и recovery 11 подтверждены этим прогоном.
+Действующий сервер, optional Next и SMTP не квалифицированы.
 
 На живом Pages также зафиксировано отсутствие реакции на два нажатия кнопки
 обновления. Скрытое состояние worker не прочитано; конкретную причину не
@@ -35,7 +40,7 @@ Docker bootstrap и не действующий сервер. PostgreSQL 18.7 с
 Детали и точные границы — в [журнале 0.4.32](release-0.4.32.md).
 Публикацию 0.4.31 сохранять; её tag, APK и исторические receipts не заменять.
 
-### Последний локальный checkpoint
+### Исторический локальный checkpoint до разрешения публикации
 
 На ветке `fix/trail-completeness-20261113` подготовлен кандидат
 поверх `7d517c96`. После camera/SW/ingress правок прошли **955/955** веб-тестов,
@@ -56,6 +61,30 @@ push, в том числе после сверки прежней просьбы
 назначения. Изменения оставлены локально; не повторять remote write другим
 каналом в обход отказа. Следующий шаг — согласование подготовленного коммита,
 запуск обязательных GitHub gates и публикация только после их успеха.
+
+### Продолжение после явного `go` на публикацию
+
+Пользователь подтвердил отправку `5f79db7` в `orewn/tropnik`, CI и публикацию
+Pages/APK. Ограничение предыдущего checkpoint снято этим ответом; заново
+запрашивать то же разрешение не нужно. Local git/gh не имеют credentials,
+поэтому используется подключённый GitHub Git data API. Remote `main`
+**`9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a`**, tree
+**`3656d2cd30071df101094f0a8fa467ffbd44dd6b`** полностью совпадает с локальным
+кандидатом. [Source receipt](verification/source-0.4.32-main.json).
+
+Backend run **43415329960** — SUCCESS: Go 1.27.4, PG18.7/PostGIS3.7.0,
+native54/85, recovery11, настоящий API/ingress bootstrap и cleanup;
+[receipt](verification/backend-0.4.32-main.json). Optional Next/SMTP не
+квалифицированы. Pages **43415329928** прошёл прежний failing camera witness
+и 24 raster cases, затем отказал на desktop map-pan p95 **36.3 ms / limit35**,
+deploy skipped. Сохранять этот отказ; пока нет доказанного нового hotspot.
+
+Изолированный SW browser run **43415727745**, source **1fe98a07**,
+build **1d4fab4f181657e9** — SUCCESS: настоящие update/timeout/retry, late
+controllerchange без autoreload, cache/localStorage сохранены, cleanup stopped.
+Этот диагностический результат не заменяет финальный Pages source/build.
+В финальный gate добавляются source/worker/PNG bindings и проверка cleanup;
+публикация должна пройти исходные performance budgets.
 
 ### Точные подтверждения промежуточного 0.4.31 на 13 ноября 2026 года
 

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/orewn/tropnik",
+  "branch": "main",
+  "status": "source-published",
+  "recordedAt": "2026-11-13T11:21:59.396Z",
+  "reviewedLocalCommit": "5f79db7bdf064b622103667cea91a3a90f3505e6",
+  "remoteCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+  "remoteCommitDate": "2026-11-13T11:13:17Z",
+  "parentCommit": "7d517c96dcc8ca387ff308a238f42cbaf39fe259",
+  "tree": "3656d2cd30071df101094f0a8fa467ffbd44dd6b",
+  "exactTreeIdentityVerified": true,
+  "uniqueBlobsVerified": 68,
+  "treeEdits": 74,
+  "method": "Git data API through the connected GitHub account; normal fast-forward ref update with expected parent.",
+  "identityNote": "The API assigns commit metadata, so the remote commit SHA differs from the local reviewed commit. The full Git tree is exactly identical.",
+  "releaseStatusNote": "This publishes source only. CI, public Pages and Android releases require their separate actual results."
+}

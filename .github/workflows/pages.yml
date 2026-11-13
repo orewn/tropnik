@@ -92,6 +92,11 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           TROPNIK_BROWSER_DIAGNOSTIC: offline-safety
         run: node tools/pages-preview/browser-smoke.mjs
+      - name: Verify manual service worker updates and the real activation deadline
+        timeout-minutes: 4
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: node tools/pages-preview/browser-service-worker-update.mjs
       - name: Verify complete trail overlay and native line selection
         timeout-minutes: 5
         env:
@@ -165,12 +170,40 @@ jobs:
           import {assertTerrainPresentationReport} from './tools/pages-preview/terrain-presentation-report.mjs';
           import {assertTerrainUnmaskedReport} from './tools/pages-preview/terrain-unmasked-report.mjs';
           import {assertTrailOverlayReceipt} from './tools/pages-preview/browser-trail-overlay.mjs';
+          import {assertServiceWorkerUpdateReceipt} from './tools/pages-preview/browser-service-worker-update.mjs';
           const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
           const browser = JSON.parse(readFileSync('web/pages-preview/dist/browser-verification.json', 'utf8'));
           assert.match(build.buildId, /^[a-f0-9]{16}$/);
           assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(build.hasApk, true);
           assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue);
+          const workerUpdate = JSON.parse(readFileSync('web/pages-preview/dist/browser-service-worker-update-verification.json', 'utf8'));
+          assertServiceWorkerUpdateReceipt(workerUpdate, {sourceCommit:process.env.GITHUB_SHA, buildId:build.buildId, environment:browser.environment});
+          assert.deepEqual(Object.keys(workerUpdate.sources).sort(), ['web/components/ServiceWorker.tsx','web/lib/service-worker-registration.ts','web/public/sw.js','tools/pages-preview/browser-service-worker-update.mjs'].sort());
+          for (const [path, hash] of Object.entries(workerUpdate.sources)) {
+            assert.equal(createHash('sha256').update(readFileSync(path)).digest('hex'), hash);
+            assert.equal(build.inputs.find(input => input.path === path)?.sha256, hash);
+          }
+          const deployedWorker = readFileSync('web/pages-preview/dist/sw.js', 'utf8');
+          const workerVersionPattern = /const VERSION='([^']+)'/g;
+          const workerVersions = [...deployedWorker.matchAll(workerVersionPattern)];
+          assert.equal(workerVersions.length, 1);
+          assert.equal(workerUpdate.worker.version, workerVersions[0][1]);
+          assert.equal(workerUpdate.worker.sha256, createHash('sha256').update(deployedWorker).digest('hex'));
+          const normalizedWorker = deployedWorker.replace(workerVersionPattern, "const VERSION='SW_AUDIT_VERSION'");
+          assert.equal(workerUpdate.worker.normalizedSha256, createHash('sha256').update(normalizedWorker).digest('hex'));
+          for (const [key, variant] of Object.entries(workerUpdate.worker.variants)) {
+            assert.equal(variant.version, workerUpdate.worker.version + '-sw-audit-' + key);
+            const source = deployedWorker.replace(workerVersionPattern, `const VERSION='${variant.version}'`);
+            assert.equal(variant.sha256, createHash('sha256').update(source).digest('hex'));
+          }
+          for (const capture of workerUpdate.screenshots) {
+            const png = readFileSync('web/pages-preview/design-qa/service-worker-update/' + capture.file);
+            assert.equal(png.length, capture.bytes);
+            assert.equal(createHash('sha256').update(png).digest('hex'), capture.sha256);
+            assert.equal(png.subarray(0,8).toString('hex'), '89504e470d0a1a0a');
+            assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)], [workerUpdate.profile.width*workerUpdate.profile.deviceScaleFactor,workerUpdate.profile.height*workerUpdate.profile.deviceScaleFactor]);
+          }
           const trailOverlay = JSON.parse(readFileSync('web/pages-preview/dist/browser-trail-overlay-verification.json', 'utf8'));
           const trailMetadata = JSON.parse(readFileSync('web/lib/trail-overlay.generated.json', 'utf8'));
           assertTrailOverlayReceipt(trailOverlay, {sourceCommit:process.env.GITHUB_SHA, buildId:build.buildId, metadata:trailMetadata, environment:browser.environment});
@@ -385,6 +418,7 @@ jobs:
             web/pages-preview/dist/browser-trail-overlay-verification.json
             web/pages-preview/dist/browser-trail-raster-verification.json
             web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            web/pages-preview/dist/browser-service-worker-update-verification.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Preserve map design checks across zoom levels

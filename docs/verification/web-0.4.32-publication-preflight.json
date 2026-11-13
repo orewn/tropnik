@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "scope": "Local final web publication inputs; not browser CI or deployed proof",
+  "recordedAt": "2026-11-13T11:35:18.877Z",
+  "baseSource": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+  "sourceCommit": null,
+  "buildId": "9f389d3e9f7d2cac",
+  "pages": 718,
+  "allInputHashesRechecked": true,
+  "inputCount": 2161,
+  "apk": {
+    "delivery": "github-release",
+    "sourcePath": "/downloads/tropnik-preview.apk",
+    "downloadHref": "https://github.com/orewn/tropnik/releases/download/v0.4.32-preview/tropnik-preview.apk",
+    "bytes": 69227850,
+    "sha256": "ece07bea79c73bffba5583048fef7922a2a67e9aa37082731ac6c1921b18cd38",
+    "version": "0.4.32-preview",
+    "architecture": "universal",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "signature": "development / debug",
+    "signingCertificateSha256": "f06477747e342ef5a2cef201bd0fc43fdc9104e80189b08faf78c511dded2f62",
+    "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "workflowRunId": 43415329783,
+    "testedArchitecture": "x86_64",
+    "deviceExecutionVerified": true,
+    "physicalDeviceVerified": false
+  },
+  "tooling": {
+    "command": "node --test tools/pages-preview/tests/*.test.mjs",
+    "tests": 365,
+    "passed": 365,
+    "failed": 0,
+    "logSha256": "cb2d98bbec6badfea94f5e59662b3bf8f86aa8740dcdab4a0796edb565299140"
+  },
+  "buildLogSha256": "a3c926ef32bacb5fdfa8b1b98b6e369c56c06bc666362448b5d801ea9039841f",
+  "sourceBinding": {
+    "web/components/ServiceWorker.tsx": {
+      "path": "web/components/ServiceWorker.tsx",
+      "bytes": 7408,
+      "sha256": "c065bd757266394676c43f9b688580ca507e28ff786720b8ef00edc5f080f4c5"
+    },
+    "web/lib/service-worker-registration.ts": {
+      "path": "web/lib/service-worker-registration.ts",
+      "bytes": 5389,
+      "sha256": "408f359d579f350867eb9a2dd5caead8b427f3ebbd4818c709dbbb89700cefbc"
+    },
+    "web/public/sw.js": {
+      "path": "web/public/sw.js",
+      "bytes": 17420,
+      "sha256": "cefd35ed89505bed44ba2eec28d74df8dd8a6ffd1eb53ffc5c73ecf97a376781"
+    },
+    "tools/pages-preview/browser-service-worker-update.mjs": {
+      "path": "tools/pages-preview/browser-service-worker-update.mjs",
+      "bytes": 26376,
+      "sha256": "9500420751f4162ff38cfdbf025cc4f584aafe28ef081ee3979dc0ca7b9aaea4"
+    },
+    "tools/pages-preview/verify-deployed.mjs": {
+      "path": "tools/pages-preview/verify-deployed.mjs",
+      "bytes": 5711,
+      "sha256": "cf6e90e6fe763b037d0f818af6eb58cb01d777c73a34aeff082d40f39161772b"
+    },
+    "web/public/downloads/android-manifest.json": {
+      "path": "web/public/downloads/android-manifest.json",
+      "bytes": 3177,
+      "sha256": "405165b18cf746c44abf54b7fd12c0971ea09a06cb2cd9454b340263ad8f2f5f"
+    }
+  },
+  "browserRenderingTested": false,
+  "deployed": false
+}

@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-diagnostic-artifact-validation",
+  "verified": true,
+  "sourceCommit": "1fe98a074db36fc38a24d3e1f8089dd2786655b3",
+  "productionSourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+  "buildId": "1d4fab4f181657e9",
+  "run": {
+    "id": 43415727745,
+    "jobId": 131853009095,
+    "name": "Verify service worker update",
+    "conclusion": "success",
+    "branch": "verify/service-worker-update-20261113"
+  },
+  "artifact": {
+    "id": 14030938786,
+    "name": "tropnik-service-worker-update-1fe98a074db36fc38a24d3e1f8089dd2786655b3-1",
+    "path": "/workspace/scratch/686c5dc59f67/sw43415727745-proof.zip",
+    "bytes": 1970298,
+    "sha256": "6bf770111af90ff017787a2bd8e91fb9a466a9a609fae1028613b4b3d5693427"
+  },
+  "receipt": {
+    "path": "/workspace/scratch/686c5dc59f67/sw43415727745-proof/dist/browser-service-worker-update-verification.json",
+    "bytes": 21300,
+    "sha256": "65389fe1a7dee82d53eadf5a1b752566630d73bd8bb724a64f98279cd578d0a1",
+    "assertionPassed": true
+  },
+  "build": {
+    "path": "/workspace/scratch/686c5dc59f67/sw43415727745-proof/dist/build-info.json",
+    "bytes": 413478,
+    "sha256": "1075d33db8dafa116bdd30c50455ab3a22c4049dbc6fb9a2dca363304e2ce65d"
+  },
+  "sources": [
+    {
+      "path": "web/components/ServiceWorker.tsx",
+      "bytes": 7408,
+      "sha256": "c065bd757266394676c43f9b688580ca507e28ff786720b8ef00edc5f080f4c5",
+      "buildInputMatches": true,
+      "currentFileMatches": true,
+      "productionSourceMatches": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a"
+    },
+    {
+      "path": "web/lib/service-worker-registration.ts",
+      "bytes": 5389,
+      "sha256": "408f359d579f350867eb9a2dd5caead8b427f3ebbd4818c709dbbb89700cefbc",
+      "buildInputMatches": true,
+      "currentFileMatches": true,
+      "productionSourceMatches": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a"
+    },
+    {
+      "path": "web/public/sw.js",
+      "bytes": 17420,
+      "sha256": "cefd35ed89505bed44ba2eec28d74df8dd8a6ffd1eb53ffc5c73ecf97a376781",
+      "buildInputMatches": true,
+      "currentFileMatches": true,
+      "productionSourceMatches": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a"
+    },
+    {
+      "path": "tools/pages-preview/browser-service-worker-update.mjs",
+      "bytes": 26115,
+      "sha256": "9f10ca3d8af57c406d9ca16564af450fcdb7b17b90fb4f9a6301a6225d745427",
+      "buildInputMatches": true,
+      "currentFileMatches": true
+    }
+  ],
+  "screenshots": [
+    {
+      "phase": "waiting",
+      "file": "sw-update-waiting.png",
+      "bytes": 375397,
+      "sha256": "da4dc002b1d2d4dc016812b672c7dfbb8efd539d0792079d2043c8c89a933ad9",
+      "width": 824,
+      "height": 1830,
+      "path": "/workspace/scratch/686c5dc59f67/sw43415727745-proof/design-qa/service-worker-update/sw-update-waiting.png",
+      "verified": true
+    },
+    {
+      "phase": "updating-held",
+      "file": "sw-update-updating-held.png",
+      "bytes": 379038,
+      "sha256": "b7096e6db148bff13c01e5624c89e4404ce3246b8a9297272277ef3e70a71ac9",
+      "width": 824,
+      "height": 1830,
+      "path": "/workspace/scratch/686c5dc59f67/sw43415727745-proof/design-qa/service-worker-update/sw-update-updating-held.png",
+      "verified": true
+    },
+    {
+      "phase": "retry",
+      "file": "sw-update-retry.png",
+      "bytes": 377177,
+      "sha256": "1c843463e8ba8e2412c1a58e7f9ae7c2777eac71339fee0ccd03663fd44a6417",
+      "width": 824,
+      "height": 1830,
+      "path": "/workspace/scratch/686c5dc59f67/sw43415727745-proof/design-qa/service-worker-update/sw-update-retry.png",
+      "verified": true
+    },
+    {
+      "phase": "late-controller",
+      "file": "sw-update-late-controller.png",
+      "bytes": 377520,
+      "sha256": "0a121424b4fd5935b62cf3f9c246d31173681c737e42ad8f98f13e0ebe5e7049",
+      "width": 824,
+      "height": 1830,
+      "path": "/workspace/scratch/686c5dc59f67/sw43415727745-proof/design-qa/service-worker-update/sw-update-late-controller.png",
+      "verified": true
+    },
+    {
+      "phase": "updated",
+      "file": "sw-update-updated.png",
+      "bytes": 390257,
+      "sha256": "f7c4ee43d8415346c1f7103dedb696b6f98e2d104f53bee8ab1e07b4c87aca4e",
+      "width": 824,
+      "height": 1830,
+      "path": "/workspace/scratch/686c5dc59f67/sw43415727745-proof/design-qa/service-worker-update/sw-update-updated.png",
+      "verified": true
+    }
+  ],
+  "worker": {
+    "sha256": "0f6f69c81ec11586c4d3220ff67eb3c198ce5cf590290a3340b840ca75ff2108",
+    "version": "tropnik-tropnik-shell-1d4fab4f181657e9",
+    "normalizedSha256": "35a1ad2b64946d509e02958de70d16e215a5f6011f774d240b9ba24f8da543f5",
+    "variants": {
+      "a": {
+        "version": "tropnik-tropnik-shell-1d4fab4f181657e9-sw-audit-a",
+        "sha256": "09bb8d3b4c04975c85626029b065f89e3582cc7292fde6a218e27586edeec0a4",
+        "normalizedSha256": "35a1ad2b64946d509e02958de70d16e215a5f6011f774d240b9ba24f8da543f5"
+      },
+      "b": {
+        "version": "tropnik-tropnik-shell-1d4fab4f181657e9-sw-audit-b",
+        "sha256": "59a4dbed6f54de285c4105e3e28b7b6c8a7d00d9f27e906c38d0763372756409",
+        "normalizedSha256": "35a1ad2b64946d509e02958de70d16e215a5f6011f774d240b9ba24f8da543f5"
+      },
+      "c": {
+        "version": "tropnik-tropnik-shell-1d4fab4f181657e9-sw-audit-c",
+        "sha256": "2ca61e5384ba4d73ef21bd263c679dce4381ae82210a020f2bd0751a7083d494",
+        "normalizedSha256": "35a1ad2b64946d509e02958de70d16e215a5f6011f774d240b9ba24f8da543f5"
+      }
+    }
+  },
+  "reconstruction": {
+    "method": "Replace only the VERSION constant in separately built local candidate artifact; not downloaded diagnostic worker bytes",
+    "localWorkerPath": "/workspace/scratch/686c5dc59f67/pages-preview-0.4.32/tropnik/sw.js",
+    "localWorkerSha256": "43bfbc6254b0737301a8a8d511939064fd624f829573d269343ea8d4d2f88bb1",
+    "sha256": "0f6f69c81ec11586c4d3220ff67eb3c198ce5cf590290a3340b840ca75ff2108",
+    "matchesReported": true,
+    "normalizedSha256": "35a1ad2b64946d509e02958de70d16e215a5f6011f774d240b9ba24f8da543f5"
+  },
+  "normal": {
+    "verified": true,
+    "waitingObservationMs": 1502.8816650000008,
+    "waitingDocumentPreserved": true,
+    "waitingControllerPreserved": true,
+    "nativeClick": {
+      "kind": "click",
+      "documentId": 1,
+      "at": 1794568655882.3,
+      "trusted": true,
+      "label": "Обновить",
+      "disabled": false
+    },
+    "reloads": 1,
+    "controllerChanged": true,
+    "activeVersion": "b"
+  },
+  "timeout": {
+    "verified": true,
+    "updatingLabel": "Обновляем…",
+    "updatingDisabled": true,
+    "nativeClick": {
+      "kind": "click",
+      "documentId": 2,
+      "at": 1794568657333.0999,
+      "trusted": true,
+      "label": "Обновить",
+      "disabled": false
+    },
+    "elapsedMs": 15000.800048828125,
+    "heldMessages": 1,
+    "errorLabel": "Повторить",
+    "errorDisabled": false,
+    "timeoutDocumentPreserved": true,
+    "lateControllerChanged": true,
+    "lateObservationMs": 1502.4844569999987,
+    "lateDocumentPreserved": true,
+    "retryClick": {
+      "kind": "click",
+      "documentId": 2,
+      "at": 1794568675430.7,
+      "trusted": true,
+      "label": "Повторить",
+      "disabled": false
+    },
+    "retryReloads": 1,
+    "activeVersion": "c"
+  },
+  "cleanup": {
+    "status": "stopped",
+    "signals": [
+      "SIGTERM"
+    ],
+    "errors": [],
+    "elapsedMs": 53.16335799999797
+  },
+  "browser": {
+    "product": "Chrome/157.0.8103.50",
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 9V45 96-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    }
+  },
+  "preservation": {
+    "syntheticDataPreserved": true,
+    "documents": 3,
+    "pageErrors": [],
+    "localHttpErrors": []
+  },
+  "limitations": [
+    "Synthetic VERSION variants of the current real production worker, not an upgrade from historical published 0.4.31.",
+    "Only one genuine skip-waiting postMessage is held and later delivered; clocks, worker lifecycle and application UI are not spoofed.",
+    "The about route does not qualify map warmup transport or map smoothness.",
+    "Diagnostic build is isolated and was not deployed. Final publication needs its own source-bound complete Pages gate.",
+    "Screenshot hashes, sizes and PNG dimensions independently checked; no visual inspection is claimed in this summary."
+  ]
+}

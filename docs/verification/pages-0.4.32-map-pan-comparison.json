@@ -1,0 +1,1765 @@
+{
+  "schemaVersion": 1,
+  "evidence": "read-only-raw-callback-comparison",
+  "verified": true,
+  "comparison": "Early uninstrumented UI smoothness diagnostic against the same named early diagnostic, not full-audit versus early phase",
+  "thresholdUnchanged": {
+    "metric": "frameP95Ms",
+    "predicate": "strictly less than35ms"
+  },
+  "runs": [
+    {
+      "name": "published-0.4.31",
+      "runId": 43391174806,
+      "sourceCommit": "baf0b9ef8b8132711a317e861cf1d8aed68800fb",
+      "buildId": "fc476ec7a21065bc",
+      "path": "/workspace/scratch/686c5dc59f67/published-baf-browser-ui-smoothness-diagnostic.json",
+      "retrievedFrom": "https://orewn.github.io/tropnik/browser-ui-smoothness-diagnostic.json",
+      "provenance": "Public bytes downloaded on 2026-11-13; sourceCommit agrees with simultaneously downloaded build-info.json",
+      "bytes": 528441,
+      "sha256": "17799b60b050192a8e285f5261b256991a4785034d1b3eabb3c3d0fda6512399",
+      "performancePassed": true,
+      "performanceIssues": [],
+      "environment": {
+        "schemaVersion": 1,
+        "profile": "chromium-headless-software-swiftshader-webgl-v1",
+        "collection": "browser-target-cdp-before-measurement",
+        "sourceCommit": "baf0b9ef8b8132711a317e861cf1d8aed68800fb",
+        "capturedAt": "2026-11-13T08:13:38.223Z",
+        "requestedFlags": [
+          "--headless=new",
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-background-networking",
+          "--disable-component-update",
+          "--disable-default-apps",
+          "--disable-extensions",
+          "--disable-features=Translate,MediaRouter",
+          "--mute-audio",
+          "--no-first-run",
+          "--use-gl=angle",
+          "--use-angle=swiftshader-webgl",
+          "--enable-unsafe-swiftshader",
+          "--window-size=1920,1920",
+          "--ozone-override-screen-size=1920,1920"
+        ],
+        "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=40297 --user-data-dir=/tmp/tropnik-chrome-4548 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+        "browser": {
+          "product": "Chrome/156.0.8078.79",
+          "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+          "protocolVersion": "1.3",
+          "jsVersion": "15.6.75.27",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+        },
+        "gpu": {
+          "devices": [
+            {
+              "vendorId": 65535,
+              "deviceId": 65535,
+              "vendorString": "Google Inc. (Google)",
+              "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+              "driverVendor": "SwANGLE",
+              "driverVersion": "5.0.0"
+            }
+          ],
+          "auxAttributes": {
+            "displayType": "ANGLE_SWIFTSHADER",
+            "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+            "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "glVendor": "Google Inc. (Google)",
+            "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+            "skiaBackendType": "None",
+            "targetCpuBits": 64
+          },
+          "featureStatus": {
+            "2d_canvas": "unavailable_software",
+            "direct_rendering_display_compositor": "disabled_off_ok",
+            "gpu_compositing": "disabled_software",
+            "multiple_raster_threads": "enabled_on",
+            "opengl": "disabled_off",
+            "rasterization": "disabled_software",
+            "raw_draw": "disabled_off_ok",
+            "skia_graphite": "disabled_off",
+            "trees_in_viz": "disabled_off",
+            "video_decode": "disabled_software",
+            "video_encode": "disabled_software",
+            "vulkan": "disabled_off",
+            "webgl": "unavailable_software",
+            "webgpu": "unavailable_software",
+            "webgpu_on_vk_via_gl_interop": "disabled_off",
+            "webnn": "unavailable_software"
+          }
+        },
+        "runner": {
+          "os": {
+            "platform": "linux",
+            "release": "7.0.0-1017-azure",
+            "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+            "arch": "x64"
+          },
+          "cpu": {
+            "models": [
+              "AMD EPYC 9V74 80-Core Processor"
+            ],
+            "logicalCount": 4,
+            "availableParallelism": 4
+          },
+          "totalMemoryBytes": 16760344576,
+          "image": {
+            "os": "ubuntu24",
+            "version": "20261101.360.1"
+          }
+        },
+        "nativeSurface": {
+          "schemaVersion": 1,
+          "collection": "blank-target-before-emulation",
+          "window": {
+            "left": 10,
+            "top": 10,
+            "width": 1920,
+            "height": 1920,
+            "windowState": "normal"
+          },
+          "viewport": {
+            "url": "about:blank",
+            "visibilityState": "visible",
+            "innerWidth": 1920,
+            "innerHeight": 1833,
+            "outerWidth": 1920,
+            "outerHeight": 1920,
+            "devicePixelRatio": 1,
+            "screen": {
+              "width": 1920,
+              "height": 1920,
+              "availWidth": 1920,
+              "availHeight": 1920
+            }
+          }
+        }
+      },
+      "profiles": [
+        {
+          "profile": "android-portrait",
+          "engine": "tropnik-canvas",
+          "input": "touch",
+          "physicalDevice": false,
+          "cpuSlowdownRate": 1,
+          "cpuThrottleRestored": true,
+          "instrumented": false,
+          "traceCount": 0,
+          "performanceIssues": [],
+          "mapPan": {
+            "window": {
+              "startedAt": 15784.899999999994,
+              "endedAt": 16949.600000000006,
+              "durationMs": 1164.7000000000116
+            },
+            "frames": {
+              "samples": 70,
+              "callbackHz": 60.101313642997596,
+              "isPresentedFps": false,
+              "p95Ms": 24.800000000017462,
+              "maxGapMs": 28.29999999998836,
+              "over50ms": 0
+            },
+            "intervalCount": 71,
+            "intervalsAtOrAbove35Ms": [],
+            "inputToNextFrame": {
+              "count": 1,
+              "p95Ms": 46.39999999999418,
+              "maxMs": 46.39999999999418,
+              "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+            },
+            "eventTiming": {
+              "supported": true,
+              "observed": 26,
+              "durationThresholdMs": 16,
+              "maxDurationMs": 64,
+              "p95DurationMs": 64,
+              "isFieldINP": false
+            },
+            "longTasks": {
+              "supported": true,
+              "count": 0,
+              "totalMs": 0,
+              "maxMs": 0
+            },
+            "layout": {
+              "supported": true,
+              "sessionCLS": 0,
+              "unexpectedSum": 0,
+              "allShiftSum": 0.07813910204394024,
+              "recentInputCount": 1
+            },
+            "errors": [],
+            "overflow": false,
+            "hidden": false,
+            "pendingInputFrames": 0,
+            "previousBoundaryTasks": 0,
+            "nativeInput": {
+              "input": "touch",
+              "start": {
+                "x": 206,
+                "y": 449.15000000000003
+              },
+              "end": {
+                "x": 270,
+                "y": 461.15000000000003
+              },
+              "delta": {
+                "dx": 64,
+                "dy": 12
+              },
+              "holdBeforeReleaseMs": 200,
+              "commands": [
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchStart",
+                  "x": 206,
+                  "y": 449.15000000000003,
+                  "sentOffsetMs": 0.07082400000035705,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 15.637324999999691
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 211.33333333333334,
+                  "y": 450.15000000000003,
+                  "sentOffsetMs": 15.673297999999704,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 47.01240599999983
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 216.66666666666666,
+                  "y": 451.15000000000003,
+                  "sentOffsetMs": 72.22693900000013,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 97.08028999999988
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 222,
+                  "y": 452.15000000000003,
+                  "sentOffsetMs": 122.29585599999882,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 147.06308399999944
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 227.33333333333334,
+                  "y": 453.15000000000003,
+                  "sentOffsetMs": 172.28989600000023,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 180.22497499999918
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 232.66666666666666,
+                  "y": 454.15000000000003,
+                  "sentOffsetMs": 205.4610010000015,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 226.78103699999883
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 238,
+                  "y": 455.15000000000003,
+                  "sentOffsetMs": 252.0769909999999,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 256.12464400000135
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 243.33333333333334,
+                  "y": 456.15000000000003,
+                  "sentOffsetMs": 281.4254490000003,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 288.4813520000007
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 248.66666666666666,
+                  "y": 457.15000000000003,
+                  "sentOffsetMs": 313.68206100000134,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 320.8439989999988
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 254,
+                  "y": 458.15000000000003,
+                  "sentOffsetMs": 346.1133439999994,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 355.21139700000094
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 259.3333333333333,
+                  "y": 459.15000000000003,
+                  "sentOffsetMs": 380.47691600000144,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 387.46802299999945
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 264.6666666666667,
+                  "y": 460.15000000000003,
+                  "sentOffsetMs": 412.67727900000136,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 420.7176230000023
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 270,
+                  "y": 461.15000000000003,
+                  "sentOffsetMs": 445.8956220000018,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 453.8116030000001
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchEnd",
+                  "x": 270,
+                  "y": 461.15000000000003,
+                  "sentOffsetMs": 679.5923610000009,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 697.1185700000005
+                }
+              ],
+              "durationMs": 697.1702459999997,
+              "events": [
+                {
+                  "type": "pointerdown",
+                  "time": 15799.399999999994,
+                  "timestamp": 15785.899999999994,
+                  "pointerType": "touch",
+                  "pointerId": 17,
+                  "trusted": true,
+                  "x": 206,
+                  "y": 449.1499938964844
+                },
+                {
+                  "type": "pointerup",
+                  "time": 16482.399999999994,
+                  "timestamp": 16465.70000000001,
+                  "pointerType": "touch",
+                  "pointerId": 17,
+                  "trusted": true,
+                  "x": 270,
+                  "y": 461.1499938964844
+                }
+              ]
+            }
+          },
+          "scenarios": [
+            {
+              "name": "panel",
+              "durationMs": 2042.3000000000175,
+              "frameP95Ms": 16.900000000023283,
+              "maxGapMs": 36.20000000001164,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "explore-search",
+              "durationMs": 1713.7000000000116,
+              "frameP95Ms": 17.39999999999418,
+              "maxGapMs": 21.699999999982538,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "explore-filters",
+              "durationMs": 2180.2999999999884,
+              "frameP95Ms": 17,
+              "maxGapMs": 19.10000000000582,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "catalog-scroll",
+              "durationMs": 778.3000000000175,
+              "frameP95Ms": 22.900000000023283,
+              "maxGapMs": 27,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "map-pan",
+              "durationMs": 1164.7000000000116,
+              "frameP95Ms": 24.800000000017462,
+              "maxGapMs": 28.29999999998836,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "map-zoom",
+              "durationMs": 6064.599999999977,
+              "frameP95Ms": 22,
+              "maxGapMs": 52.10000000000582,
+              "longTasks": {
+                "supported": true,
+                "count": 1,
+                "totalMs": 51,
+                "maxMs": 51
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "layer-switch",
+              "durationMs": 4214.1999999999825,
+              "frameP95Ms": 16.800000000017462,
+              "maxGapMs": 39.09999999997672,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0.022143804754611498
+            },
+            {
+              "name": "site-search",
+              "durationMs": 1583.7000000000116,
+              "frameP95Ms": 17.5,
+              "maxGapMs": 25.79999999998836,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            }
+          ]
+        },
+        {
+          "profile": "desktop-webgl",
+          "engine": "tropnik-canvas",
+          "input": "mouse",
+          "physicalDevice": false,
+          "cpuSlowdownRate": 1,
+          "cpuThrottleRestored": true,
+          "instrumented": false,
+          "traceCount": 0,
+          "performanceIssues": [],
+          "mapPan": {
+            "window": {
+              "startedAt": 13993.800000000017,
+              "endedAt": 17408.20000000001,
+              "durationMs": 3414.399999999994
+            },
+            "frames": {
+              "samples": 191,
+              "callbackHz": 55.93955014058116,
+              "isPresentedFps": false,
+              "p95Ms": 32,
+              "maxGapMs": 40.29999999998836,
+              "over50ms": 0
+            },
+            "intervalCount": 192,
+            "intervalsAtOrAbove35Ms": [
+              {
+                "offsetMs": 62.69999999998254,
+                "durationMs": 35.30000000001746
+              },
+              {
+                "offsetMs": 190.19999999998254,
+                "durationMs": 37.80000000001746
+              },
+              {
+                "offsetMs": 228,
+                "durationMs": 40.29999999998836
+              },
+              {
+                "offsetMs": 268.29999999998836,
+                "durationMs": 35.29999999998836
+              },
+              {
+                "offsetMs": 303.5999999999767,
+                "durationMs": 35.10000000000582
+              },
+              {
+                "offsetMs": 338.69999999998254,
+                "durationMs": 38
+              },
+              {
+                "offsetMs": 376.69999999998254,
+                "durationMs": 39.5
+              },
+              {
+                "offsetMs": 416.19999999998254,
+                "durationMs": 36.5
+              },
+              {
+                "offsetMs": 648.5999999999767,
+                "durationMs": 37.80000000001746
+              }
+            ],
+            "inputToNextFrame": {
+              "count": 2,
+              "p95Ms": 48,
+              "maxMs": 48,
+              "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+            },
+            "eventTiming": {
+              "supported": true,
+              "observed": 20,
+              "durationThresholdMs": 16,
+              "maxDurationMs": 56,
+              "p95DurationMs": 48,
+              "isFieldINP": false
+            },
+            "longTasks": {
+              "supported": true,
+              "count": 0,
+              "totalMs": 0,
+              "maxMs": 0
+            },
+            "layout": {
+              "supported": true,
+              "sessionCLS": 0,
+              "unexpectedSum": 0,
+              "allShiftSum": 0,
+              "recentInputCount": 0
+            },
+            "errors": [],
+            "overflow": false,
+            "hidden": false,
+            "pendingInputFrames": 0,
+            "previousBoundaryTasks": 0,
+            "nativeInput": {
+              "input": "mouse",
+              "start": {
+                "x": 748.3499999999999,
+                "y": 489.6
+              },
+              "end": {
+                "x": 812.3499999999999,
+                "y": 501.6
+              },
+              "delta": {
+                "dx": 64,
+                "dy": 12
+              },
+              "holdBeforeReleaseMs": 200,
+              "commands": [
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 748.3499999999999,
+                  "y": 489.6,
+                  "sentOffsetMs": 0.0027839999966090545,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 13.915648999995028
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mousePressed",
+                  "x": 748.3499999999999,
+                  "y": 489.6,
+                  "sentOffsetMs": 13.92511299999751,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 17.9301489999998
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 753.6833333333333,
+                  "y": 490.6,
+                  "sentOffsetMs": 17.9487869999939,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 30.3737789999941
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 759.0166666666665,
+                  "y": 491.6,
+                  "sentOffsetMs": 55.64778799999476,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 63.013169999998354
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 764.3499999999999,
+                  "y": 492.6,
+                  "sentOffsetMs": 88.20439699999406,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 97.74336299999413
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 769.6833333333333,
+                  "y": 493.6,
+                  "sentOffsetMs": 122.96898099999817,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 128.24094999999943
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 775.0166666666665,
+                  "y": 494.6,
+                  "sentOffsetMs": 153.43215699999564,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 158.69752699999663
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 780.3499999999999,
+                  "y": 495.6,
+                  "sentOffsetMs": 183.91336999999476,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 190.00245899999572
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 785.6833333333333,
+                  "y": 496.6,
+                  "sentOffsetMs": 215.20737699999881,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 227.92421900000045
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 791.0166666666665,
+                  "y": 497.6,
+                  "sentOffsetMs": 253.1263869999966,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 268.5320439999996
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 796.3499999999999,
+                  "y": 498.6,
+                  "sentOffsetMs": 293.739284999996,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 303.645242999999
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 801.6833333333333,
+                  "y": 499.6,
+                  "sentOffsetMs": 328.8139569999985,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 338.53336399999534
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 807.0166666666665,
+                  "y": 500.6,
+                  "sentOffsetMs": 363.74381499999436,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 377.1201049999945
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 812.3499999999999,
+                  "y": 501.6,
+                  "sentOffsetMs": 402.3092689999976,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 416.6227859999999
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseReleased",
+                  "x": 812.3499999999999,
+                  "y": 501.6,
+                  "sentOffsetMs": 642.1038819999958,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 648.3540189999985
+                }
+              ],
+              "durationMs": 648.3827209999945,
+              "events": [
+                {
+                  "type": "pointerdown",
+                  "time": 14010.899999999994,
+                  "timestamp": 14008.600000000006,
+                  "pointerType": "mouse",
+                  "pointerId": 1,
+                  "trusted": true,
+                  "x": 748.3499755859375,
+                  "y": 489.6000061035156
+                },
+                {
+                  "type": "pointerup",
+                  "time": 14637.100000000006,
+                  "timestamp": 14636.899999999994,
+                  "pointerType": "mouse",
+                  "pointerId": 1,
+                  "trusted": true,
+                  "x": 812.3499755859375,
+                  "y": 501.6000061035156
+                },
+                {
+                  "type": "click",
+                  "time": 14641.800000000017,
+                  "timestamp": 14636.899999999994,
+                  "pointerType": "mouse",
+                  "pointerId": 1,
+                  "trusted": true,
+                  "x": 812,
+                  "y": 501
+                }
+              ]
+            }
+          },
+          "scenarios": [
+            {
+              "name": "panel",
+              "durationMs": 1211,
+              "frameP95Ms": 16.89999999999418,
+              "maxGapMs": 17.39999999999418,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "explore-search",
+              "durationMs": 1565.5,
+              "frameP95Ms": 18,
+              "maxGapMs": 26.39999999999418,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "explore-filters",
+              "durationMs": 1850.1000000000058,
+              "frameP95Ms": 16.800000000017462,
+              "maxGapMs": 18.5,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "catalog-scroll",
+              "durationMs": 446.80000000001746,
+              "frameP95Ms": 16.900000000023283,
+              "maxGapMs": 19.5,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "map-pan",
+              "durationMs": 3414.399999999994,
+              "frameP95Ms": 32,
+              "maxGapMs": 40.29999999998836,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "map-zoom",
+              "durationMs": 9148.300000000017,
+              "frameP95Ms": 21.79999999998836,
+              "maxGapMs": 44.89999999999418,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "layer-switch",
+              "durationMs": 3680.9000000000233,
+              "frameP95Ms": 17.39999999999418,
+              "maxGapMs": 45.70000000001164,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0.007472533456448137
+            },
+            {
+              "name": "site-search",
+              "durationMs": 1468.9000000000233,
+              "frameP95Ms": 17.300000000046566,
+              "maxGapMs": 18.79999999998836,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "candidate-0.4.32-failed",
+      "runId": 43415329928,
+      "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+      "buildId": "14768f52ece0811c",
+      "path": "/workspace/scratch/686c5dc59f67/pages43415329928-failure/browser-ui-smoothness-diagnostic.json",
+      "provenance": "Checksum-verified Actions failure artifact14030848958; buildId from both overlay/raster receipts in that same archive",
+      "bytes": 529237,
+      "sha256": "69d2333af105e7d776d1f68688c9737ce616d162276af3b214c6337f1ec5ace3",
+      "performancePassed": false,
+      "performanceIssues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-pan",
+          "metric": "frameP95Ms",
+          "value": 36.29999999998836,
+          "limit": 35
+        }
+      ],
+      "environment": {
+        "schemaVersion": 1,
+        "profile": "chromium-headless-software-swiftshader-webgl-v1",
+        "collection": "browser-target-cdp-before-measurement",
+        "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+        "capturedAt": "2026-11-13T11:16:56.735Z",
+        "requestedFlags": [
+          "--headless=new",
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-background-networking",
+          "--disable-component-update",
+          "--disable-default-apps",
+          "--disable-extensions",
+          "--disable-features=Translate,MediaRouter",
+          "--mute-audio",
+          "--no-first-run",
+          "--use-gl=angle",
+          "--use-angle=swiftshader-webgl",
+          "--enable-unsafe-swiftshader",
+          "--window-size=1920,1920",
+          "--ozone-override-screen-size=1920,1920"
+        ],
+        "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=37681 --user-data-dir=/tmp/tropnik-chrome-4781 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+        "browser": {
+          "product": "Chrome/156.0.8078.79",
+          "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+          "protocolVersion": "1.3",
+          "jsVersion": "15.6.75.27",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+        },
+        "gpu": {
+          "devices": [
+            {
+              "vendorId": 65535,
+              "deviceId": 65535,
+              "vendorString": "Google Inc. (Google)",
+              "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+              "driverVendor": "SwANGLE",
+              "driverVersion": "5.0.0"
+            }
+          ],
+          "auxAttributes": {
+            "displayType": "ANGLE_SWIFTSHADER",
+            "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+            "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "glVendor": "Google Inc. (Google)",
+            "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+            "skiaBackendType": "None",
+            "targetCpuBits": 64
+          },
+          "featureStatus": {
+            "2d_canvas": "unavailable_software",
+            "direct_rendering_display_compositor": "disabled_off_ok",
+            "gpu_compositing": "disabled_software",
+            "multiple_raster_threads": "enabled_on",
+            "opengl": "disabled_off",
+            "rasterization": "disabled_software",
+            "raw_draw": "disabled_off_ok",
+            "skia_graphite": "disabled_off",
+            "trees_in_viz": "disabled_off",
+            "video_decode": "disabled_software",
+            "video_encode": "disabled_software",
+            "vulkan": "disabled_off",
+            "webgl": "unavailable_software",
+            "webgpu": "unavailable_software",
+            "webgpu_on_vk_via_gl_interop": "disabled_off",
+            "webnn": "unavailable_software"
+          }
+        },
+        "runner": {
+          "os": {
+            "platform": "linux",
+            "release": "7.0.0-1017-azure",
+            "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+            "arch": "x64"
+          },
+          "cpu": {
+            "models": [
+              "AMD EPYC 9V74 80-Core Processor"
+            ],
+            "logicalCount": 4,
+            "availableParallelism": 4
+          },
+          "totalMemoryBytes": 16760344576,
+          "image": {
+            "os": "ubuntu24",
+            "version": "20261101.360.1"
+          }
+        },
+        "nativeSurface": {
+          "schemaVersion": 1,
+          "collection": "blank-target-before-emulation",
+          "window": {
+            "left": 10,
+            "top": 10,
+            "width": 1920,
+            "height": 1920,
+            "windowState": "normal"
+          },
+          "viewport": {
+            "url": "about:blank",
+            "visibilityState": "visible",
+            "innerWidth": 1920,
+            "innerHeight": 1833,
+            "outerWidth": 1920,
+            "outerHeight": 1920,
+            "devicePixelRatio": 1,
+            "screen": {
+              "width": 1920,
+              "height": 1920,
+              "availWidth": 1920,
+              "availHeight": 1920
+            }
+          }
+        }
+      },
+      "profiles": [
+        {
+          "profile": "android-portrait",
+          "engine": "tropnik-canvas",
+          "input": "touch",
+          "physicalDevice": false,
+          "cpuSlowdownRate": 1,
+          "cpuThrottleRestored": true,
+          "instrumented": false,
+          "traceCount": 0,
+          "performanceIssues": [],
+          "mapPan": {
+            "window": {
+              "startedAt": 16807.20000000001,
+              "endedAt": 17921.29999999999,
+              "durationMs": 1114.0999999999767
+            },
+            "frames": {
+              "samples": 67,
+              "callbackHz": 60.13822816623409,
+              "isPresentedFps": false,
+              "p95Ms": 27.60000000000582,
+              "maxGapMs": 29.79999999998836,
+              "over50ms": 0
+            },
+            "intervalCount": 68,
+            "intervalsAtOrAbove35Ms": [],
+            "inputToNextFrame": {
+              "count": 1,
+              "p95Ms": 45.89999999999418,
+              "maxMs": 45.89999999999418,
+              "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+            },
+            "eventTiming": {
+              "supported": true,
+              "observed": 26,
+              "durationThresholdMs": 16,
+              "maxDurationMs": 64,
+              "p95DurationMs": 64,
+              "isFieldINP": false
+            },
+            "longTasks": {
+              "supported": true,
+              "count": 0,
+              "totalMs": 0,
+              "maxMs": 0
+            },
+            "layout": {
+              "supported": true,
+              "sessionCLS": 0,
+              "unexpectedSum": 0,
+              "allShiftSum": 0.07813910204394024,
+              "recentInputCount": 1
+            },
+            "errors": [],
+            "overflow": false,
+            "hidden": false,
+            "pendingInputFrames": 0,
+            "previousBoundaryTasks": 0,
+            "nativeInput": {
+              "input": "touch",
+              "start": {
+                "x": 206,
+                "y": 449.15000000000003
+              },
+              "end": {
+                "x": 270,
+                "y": 461.15000000000003
+              },
+              "delta": {
+                "dx": 64,
+                "dy": 12
+              },
+              "holdBeforeReleaseMs": 200,
+              "commands": [
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchStart",
+                  "x": 206,
+                  "y": 449.15000000000003,
+                  "sentOffsetMs": 0.0780170000034559,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 15.072918000001664
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 211.33333333333334,
+                  "y": 450.15000000000003,
+                  "sentOffsetMs": 15.086038000001281,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 46.62598100000105
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 216.66666666666666,
+                  "y": 451.15000000000003,
+                  "sentOffsetMs": 71.82366300000285,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 80.318091000001
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 222,
+                  "y": 452.15000000000003,
+                  "sentOffsetMs": 105.50821200000064,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 114.15805800000089
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 227.33333333333334,
+                  "y": 453.15000000000003,
+                  "sentOffsetMs": 139.3421699999999,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 142.39125400000194
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 232.66666666666666,
+                  "y": 454.15000000000003,
+                  "sentOffsetMs": 167.56310700000176,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 175.89777400000094
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 238,
+                  "y": 455.15000000000003,
+                  "sentOffsetMs": 201.06318800000008,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 208.43290100000013
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 243.33333333333334,
+                  "y": 456.15000000000003,
+                  "sentOffsetMs": 233.58099800000127,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 240.83829200000037
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 248.66666666666666,
+                  "y": 457.15000000000003,
+                  "sentOffsetMs": 266.0018130000026,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 272.68569800000114
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 254,
+                  "y": 458.15000000000003,
+                  "sentOffsetMs": 298.1004970000031,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 306.8493480000034
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 259.3333333333333,
+                  "y": 459.15000000000003,
+                  "sentOffsetMs": 332.0000749999999,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 340.64146299999993
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 264.6666666666667,
+                  "y": 460.15000000000003,
+                  "sentOffsetMs": 365.7790750000022,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 372.48303000000305
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchMove",
+                  "x": 270,
+                  "y": 461.15000000000003,
+                  "sentOffsetMs": 397.63872400000037,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 406.21364800000083
+                },
+                {
+                  "method": "Input.dispatchTouchEvent",
+                  "type": "touchEnd",
+                  "x": 270,
+                  "y": 461.15000000000003,
+                  "sentOffsetMs": 631.6713180000006,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 646.5214910000032
+                }
+              ],
+              "durationMs": 646.5543010000001,
+              "events": [
+                {
+                  "type": "pointerdown",
+                  "time": 16821.399999999994,
+                  "timestamp": 16808.5,
+                  "pointerType": "touch",
+                  "pointerId": 17,
+                  "trusted": true,
+                  "x": 206,
+                  "y": 449.1499938964844
+                },
+                {
+                  "type": "pointerup",
+                  "time": 17454.399999999994,
+                  "timestamp": 17440.100000000006,
+                  "pointerType": "touch",
+                  "pointerId": 17,
+                  "trusted": true,
+                  "x": 270,
+                  "y": 461.1499938964844
+                }
+              ]
+            }
+          },
+          "scenarios": [
+            {
+              "name": "panel",
+              "durationMs": 2091.2000000000116,
+              "frameP95Ms": 16.800000000017462,
+              "maxGapMs": 50.10000000000582,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "explore-search",
+              "durationMs": 1729.3999999999942,
+              "frameP95Ms": 19.29999999998836,
+              "maxGapMs": 26.89999999999418,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "explore-filters",
+              "durationMs": 2178.600000000006,
+              "frameP95Ms": 16.89999999999418,
+              "maxGapMs": 17.5,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "catalog-scroll",
+              "durationMs": 761.6000000000058,
+              "frameP95Ms": 22.79999999998836,
+              "maxGapMs": 27.199999999982538,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "map-pan",
+              "durationMs": 1114.0999999999767,
+              "frameP95Ms": 27.60000000000582,
+              "maxGapMs": 29.79999999998836,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "map-zoom",
+              "durationMs": 6697.899999999994,
+              "frameP95Ms": 24,
+              "maxGapMs": 38.5,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "layer-switch",
+              "durationMs": 4313.899999999994,
+              "frameP95Ms": 16.800000000017462,
+              "maxGapMs": 47.80000000001746,
+              "longTasks": {
+                "supported": true,
+                "count": 1,
+                "totalMs": 51,
+                "maxMs": 51
+              },
+              "sessionCLS": 0.022143804754611498
+            },
+            {
+              "name": "site-search",
+              "durationMs": 1575.1999999999825,
+              "frameP95Ms": 17.10000000000582,
+              "maxGapMs": 18.199999999982538,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            }
+          ]
+        },
+        {
+          "profile": "desktop-webgl",
+          "engine": "tropnik-canvas",
+          "input": "mouse",
+          "physicalDevice": false,
+          "cpuSlowdownRate": 1,
+          "cpuThrottleRestored": true,
+          "instrumented": false,
+          "traceCount": 0,
+          "performanceIssues": [
+            {
+              "profile": "desktop-webgl",
+              "phase": "ui-smoothness/map-pan",
+              "metric": "frameP95Ms",
+              "value": 36.29999999998836,
+              "limit": 35
+            }
+          ],
+          "mapPan": {
+            "window": {
+              "startedAt": 15809.200000000012,
+              "endedAt": 19240,
+              "durationMs": 3430.7999999999884
+            },
+            "frames": {
+              "samples": 191,
+              "callbackHz": 55.67214643814872,
+              "isPresentedFps": false,
+              "p95Ms": 36.29999999998836,
+              "maxGapMs": 42,
+              "over50ms": 0
+            },
+            "intervalCount": 192,
+            "intervalsAtOrAbove35Ms": [
+              {
+                "offsetMs": 30.70000000001164,
+                "durationMs": 36.5
+              },
+              {
+                "offsetMs": 67.20000000001164,
+                "durationMs": 36.29999999998836
+              },
+              {
+                "offsetMs": 205.59999999997672,
+                "durationMs": 38.29999999998836
+              },
+              {
+                "offsetMs": 243.89999999996508,
+                "durationMs": 40.90000000002328
+              },
+              {
+                "offsetMs": 284.79999999998836,
+                "durationMs": 38.79999999998836
+              },
+              {
+                "offsetMs": 323.5999999999767,
+                "durationMs": 38.70000000001164
+              },
+              {
+                "offsetMs": 362.29999999998836,
+                "durationMs": 37.29999999998836
+              },
+              {
+                "offsetMs": 399.5999999999767,
+                "durationMs": 37.29999999998836
+              },
+              {
+                "offsetMs": 436.8999999999651,
+                "durationMs": 38.800000000046566
+              },
+              {
+                "offsetMs": 669.0999999999767,
+                "durationMs": 42
+              }
+            ],
+            "inputToNextFrame": {
+              "count": 2,
+              "p95Ms": 52.70000000001164,
+              "maxMs": 52.70000000001164,
+              "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+            },
+            "eventTiming": {
+              "supported": true,
+              "observed": 20,
+              "durationThresholdMs": 16,
+              "maxDurationMs": 56,
+              "p95DurationMs": 56,
+              "isFieldINP": false
+            },
+            "longTasks": {
+              "supported": true,
+              "count": 0,
+              "totalMs": 0,
+              "maxMs": 0
+            },
+            "layout": {
+              "supported": true,
+              "sessionCLS": 0,
+              "unexpectedSum": 0,
+              "allShiftSum": 0,
+              "recentInputCount": 0
+            },
+            "errors": [],
+            "overflow": false,
+            "hidden": false,
+            "pendingInputFrames": 0,
+            "previousBoundaryTasks": 0,
+            "nativeInput": {
+              "input": "mouse",
+              "start": {
+                "x": 748.3499999999999,
+                "y": 489.6
+              },
+              "end": {
+                "x": 812.3499999999999,
+                "y": 501.6
+              },
+              "delta": {
+                "dx": 64,
+                "dy": 12
+              },
+              "holdBeforeReleaseMs": 200,
+              "commands": [
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 748.3499999999999,
+                  "y": 489.6,
+                  "sentOffsetMs": 0.0035260000004200265,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 13.564695000000938
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mousePressed",
+                  "x": 748.3499999999999,
+                  "y": 489.6,
+                  "sentOffsetMs": 13.569311999999627,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 17.26346999999805
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 753.6833333333333,
+                  "y": 490.6,
+                  "sentOffsetMs": 17.275097999998252,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 30.03665199999523
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 759.0166666666665,
+                  "y": 491.6,
+                  "sentOffsetMs": 55.198646999997436,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 67.74185800000123
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 764.3499999999999,
+                  "y": 492.6,
+                  "sentOffsetMs": 92.96239100000093,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 103.46190899999783
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 769.6833333333333,
+                  "y": 493.6,
+                  "sentOffsetMs": 128.66407400000026,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 137.0983520000009
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 775.0166666666665,
+                  "y": 494.6,
+                  "sentOffsetMs": 162.2929260000019,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 171.47750899999664
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 780.3499999999999,
+                  "y": 495.6,
+                  "sentOffsetMs": 196.68701499999588,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 205.27669099999912
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 785.6833333333333,
+                  "y": 496.6,
+                  "sentOffsetMs": 230.47712399999727,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 244.3137329999954
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 791.0166666666665,
+                  "y": 497.6,
+                  "sentOffsetMs": 269.6727150000006,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 285.5331359999982
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 796.3499999999999,
+                  "y": 498.6,
+                  "sentOffsetMs": 310.72405499999877,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 323.7756309999968
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 801.6833333333333,
+                  "y": 499.6,
+                  "sentOffsetMs": 348.96408599999995,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 362.2088489999951
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 807.0166666666665,
+                  "y": 500.6,
+                  "sentOffsetMs": 387.4222909999953,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 399.42455199999677
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseMoved",
+                  "x": 812.3499999999999,
+                  "y": 501.6,
+                  "sentOffsetMs": 424.63322699999844,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 436.7326099999991
+                },
+                {
+                  "method": "Input.dispatchMouseEvent",
+                  "type": "mouseReleased",
+                  "x": 812.3499999999999,
+                  "y": 501.6,
+                  "sentOffsetMs": 662.2615870000009,
+                  "status": "fulfilled",
+                  "ackOffsetMs": 669.9302959999986
+                }
+              ],
+              "durationMs": 669.9586789999958,
+              "events": [
+                {
+                  "type": "pointerdown",
+                  "time": 15826,
+                  "timestamp": 15823.700000000012,
+                  "pointerType": "mouse",
+                  "pointerId": 1,
+                  "trusted": true,
+                  "x": 748.3499755859375,
+                  "y": 489.6000061035156
+                },
+                {
+                  "type": "pointerup",
+                  "time": 16472.70000000001,
+                  "timestamp": 16472.5,
+                  "pointerType": "mouse",
+                  "pointerId": 1,
+                  "trusted": true,
+                  "x": 812.3499755859375,
+                  "y": 501.6000061035156
+                },
+                {
+                  "type": "click",
+                  "time": 16477.70000000001,
+                  "timestamp": 16472.5,
+                  "pointerType": "mouse",
+                  "pointerId": 1,
+                  "trusted": true,
+                  "x": 812,
+                  "y": 501
+                }
+              ]
+            }
+          },
+          "scenarios": [
+            {
+              "name": "panel",
+              "durationMs": 1211.1000000000058,
+              "frameP95Ms": 16.800000000017462,
+              "maxGapMs": 17.29999999998836,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "explore-search",
+              "durationMs": 1581.7999999999884,
+              "frameP95Ms": 19.60000000000582,
+              "maxGapMs": 34.20000000001164,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "explore-filters",
+              "durationMs": 1849.3000000000175,
+              "frameP95Ms": 16.800000000046566,
+              "maxGapMs": 17.29999999998836,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "catalog-scroll",
+              "durationMs": 447.4000000000233,
+              "frameP95Ms": 16.900000000023283,
+              "maxGapMs": 19.5,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "map-pan",
+              "durationMs": 3430.7999999999884,
+              "frameP95Ms": 36.29999999998836,
+              "maxGapMs": 42,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "map-zoom",
+              "durationMs": 10114.5,
+              "frameP95Ms": 17.29999999998836,
+              "maxGapMs": 53.199999999953434,
+              "longTasks": {
+                "supported": true,
+                "count": 1,
+                "totalMs": 51,
+                "maxMs": 51
+              },
+              "sessionCLS": 0
+            },
+            {
+              "name": "layer-switch",
+              "durationMs": 3730.8000000000466,
+              "frameP95Ms": 17,
+              "maxGapMs": 62.20000000001164,
+              "longTasks": {
+                "supported": true,
+                "count": 1,
+                "totalMs": 62,
+                "maxMs": 62
+              },
+              "sessionCLS": 0.007472533456448137
+            },
+            {
+              "name": "site-search",
+              "durationMs": 1481.5999999999767,
+              "frameP95Ms": 17.199999999953434,
+              "maxGapMs": 18.599999999976717,
+              "longTasks": {
+                "supported": true,
+                "count": 0,
+                "totalMs": 0,
+                "maxMs": 0
+              },
+              "sessionCLS": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "environmentComparison": {
+    "equalKeys": [
+      "profile",
+      "collection",
+      "requestedFlags",
+      "browser",
+      "gpu",
+      "runner",
+      "nativeSurface"
+    ],
+    "claim": "Recorded browser revision, GPU/software flags, runner CPU/kernel/image/memory and native surface match. This records machine class; it does not observe transient co-tenant load or prove runner stability."
+  },
+  "findings": [
+    "Candidate fails exactly one reported budget: desktop map-pan callback p95=36.3ms against strict<35ms.",
+    "Desktop baseline/candidate each have191 RAF callbacks and192 intervals including boundaries; intervals>=35ms rise9 to10. This crosses the95th-percentile order statistic.",
+    "Desktop max callback gap40.3→42.0ms; neither has gaps>50ms, longtasks, unexpected CLS or invalid observation.",
+    "Desktop native drag648.38→669.96ms; slow intervals cluster during native mouse moves and at release. This is temporal correlation, not a function-level profile.",
+    "Both traces arrays are empty and instrumented=false. There is no current trace, compositor presentation sample, scene draw timing, worker warmup start/end or network timing witness in these receipts.",
+    "A map-warmup overlap cannot be confirmed or ruled out from these receipts. The candidate production worker bounds warmup to12s and cancels it for update, but this fact alone does not locate warmup during the failed pan.",
+    "The evidence supports a borderline performance failure and no identified specific new hotspot. It does not justify changing a threshold, hiding the failure or claiming an already fixed regression."
+  ],
+  "limitations": [
+    "requestAnimationFrame callbackHz is not compositor/presented FPS. Native input-to-next-frame is not field INP.",
+    "The historical baseline source differs from the candidate; one passed and one failed sample do not establish causal regression or statistical runner noise.",
+    "No CI rerun, production change, test weakening or additional browser runtime was performed for this analysis."
+  ]
+}

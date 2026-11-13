@@ -1,0 +1,443 @@
+{
+  "receiptVersion": 2,
+  "verifiedAt": "2026-11-13T11:19:20.814143+00:00",
+  "repository": "orewn/tropnik",
+  "status": "passed",
+  "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+  "sourceTree": "3656d2cd30071df101094f0a8fa467ffbd44dd6b",
+  "sourceBinding": {
+    "event": "push",
+    "branch": "main",
+    "workflow": ".github/workflows/backend.yml",
+    "githubCommitTreeMatchesRun": true,
+    "localPreflightCommit": "5f79db7bdf064b622103667cea91a3a90f3505e6",
+    "localPreflightTreeByteIdentical": true,
+    "localPreflightIsSeparateEvidence": true,
+    "checkoutSHAConfirmedInJobLog": true,
+    "imageSourceMatchesRun": true,
+    "restoreSourceMatchesRun": true,
+    "bootstrapSourceMatchesRun": true,
+    "allRecordedTreesClean": true,
+    "workflowBlob": "792336826ae56c9b0312e583b08617b9ea10f12d",
+    "workflowSha256": "01fe852f45e4cce35fba38f453ee89e273a2cf8ac4814d42afbf2f9462a8237b"
+  },
+  "runId": 43415329960,
+  "runAttempt": 1,
+  "runStatus": "completed",
+  "runConclusion": "success",
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43415329960",
+  "runCreatedAt": "2026-11-13T11:13:29Z",
+  "jobId": 131851654762,
+  "jobConclusion": "success",
+  "jobCompletedAt": "2026-11-13T11:18:04Z",
+  "requiredStepsPassed": [
+    "Unit tests and race detector",
+    "Static checks",
+    "Check production bootstrap response contract",
+    "Verify the shared PostgreSQL and rebuilt PostGIS image",
+    "Native PostGIS integration gate",
+    "Install verified age release for recovery drill",
+    "Encrypted backup and isolated restore gate",
+    "Production API image and disposable Compose bootstrap",
+    "Preserve integration evidence"
+  ],
+  "goVersion": "1.27.4",
+  "hostGoVersionConfirmedInJobLog": true,
+  "unitRaceCommand": "go test -race -count=1 ./...",
+  "unitRacePassedPackages": 8,
+  "unitPackagesWithoutTests": 4,
+  "unitCaseCount": "not reported by non-verbose command",
+  "staticCheckCommand": "go vet ./...",
+  "staticCheckPassed": true,
+  "bootstrapContractAndTopologyTests": 13,
+  "nativeIntegration": {
+    "topLevelPassed": 54,
+    "allPassedIncludingSubtests": 85,
+    "failed": 0,
+    "skipped": 0
+  },
+  "postgresqlSecurityUpdateVerified": true,
+  "postgresqlVersion": "18.7",
+  "postgresqlExtensionRebuildProvenanceVerified": true,
+  "postgisVersion": "3.7.0",
+  "strictCompositeTypeMismatch": "error",
+  "artifact": {
+    "id": 14032111404,
+    "name": "tropnik-native-postgis-9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "sizeInBytes": 9211,
+    "sha256": "a7edd15f8b81bf4e2fb2ab483e66e0e37f753d14f219da49926b89730f7d9d44",
+    "apiDigest": "sha256:a7edd15f8b81bf4e2fb2ab483e66e0e37f753d14f219da49926b89730f7d9d44",
+    "apiDigestMatched": true,
+    "uploadLogDigestMatched": true,
+    "zipCRCVerified": true,
+    "exactEvidenceFileSetVerified": true,
+    "createdAt": "2026-11-13T11:18:02Z",
+    "expiresAt": "2026-11-27T11:18:01Z",
+    "url": "https://github.com/orewn/tropnik/actions/runs/43415329960/artifacts/14032111404"
+  },
+  "evidence": {
+    "artifacts-api.json": {
+      "bytes": 923,
+      "sha256": "2262b1e29328d85d3c90c2653db81bf4ee9a0171edad989a50a068fd05f06f07"
+    },
+    "backend-bootstrap.json": {
+      "bytes": 3914,
+      "sha256": "6070a4788efeda485b5674e55eb7aa45decc8b544d3afe55608ee298bceb2cbf"
+    },
+    "backend-bootstrap.log": {
+      "bytes": 91,
+      "sha256": "7970e644c38102a0c156ea1547b95cb77d9da298f1dbf3b9c953642fe2d7b0ae"
+    },
+    "backup-restore.json": {
+      "bytes": 2342,
+      "sha256": "3682fe1de2d3bf5b3a221ebc28eb5aba08e3a8ac83702d4a6ff2cc25906301ef"
+    },
+    "backup-restore.log": {
+      "bytes": 489,
+      "sha256": "4db9d3fab323218bca866c34fe5cb4fb41a07701d07aa6f2e240318de797c5ce"
+    },
+    "job.log": {
+      "bytes": 52351,
+      "sha256": "aac0797a630da24b12fe1e7627cf8427984d76a7f9016509f6676ea6d50f6751"
+    },
+    "jobs-final.json": {
+      "bytes": 5217,
+      "sha256": "f80510b049ed234694954a9f826672000a7a25ea6a84700e3317365a9f765427"
+    },
+    "native-postgis.log": {
+      "bytes": 15618,
+      "sha256": "92ae8234e46cff7de7c22569635a83324bf15cb8c987999fc7a9aa74430ac00f"
+    },
+    "postgis-image.json": {
+      "bytes": 4272,
+      "sha256": "92b2b067d25a9d9949dd6a97f5e4a927eac7fdac4d58c22f98b48891391f6864"
+    },
+    "postgis-image.log": {
+      "bytes": 96,
+      "sha256": "baeb3c752953f27d429e98a509be56efcfe27dc3943cdc95d8a0086fa5e1cc95"
+    },
+    "run-final.json": {
+      "bytes": 13027,
+      "sha256": "171dfb3daad91eeb0b5ef36d5b34fd97eccedf95ed49538ad8ce67258f77b65a"
+    },
+    "source-api.json": {
+      "bytes": 1313,
+      "sha256": "a1117de934f0089b2969e83a560d232f38da6e77339da5cabbe3b81e8a651581"
+    },
+    "workflow.yml": {
+      "bytes": 3643,
+      "sha256": "01fe852f45e4cce35fba38f453ee89e273a2cf8ac4814d42afbf2f9462a8237b"
+    }
+  },
+  "databaseImageQualification": {
+    "schemaVersion": 1,
+    "status": "passed",
+    "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "sourceTree": "3656d2cd30071df101094f0a8fa467ffbd44dd6b",
+    "sourceTreeClean": true,
+    "image": "tropnik-postgis:18.7-3.7.0-pgdg2",
+    "imageId": "sha256:579349246c8006ae3e6be2d8ccece5e83356e2972d44430189a7e4e00abb5a06",
+    "platform": "linux/amd64",
+    "provenanceSHA256": "234bda194a48b74229fe01099377d2bf79f9b58227a62225a3361de282c4a015",
+    "provenance": {
+      "schemaVersion": 1,
+      "baseImage": "postgres:18.7-trixie@sha256:9f4fd4aa918f52ae3d6f3b687f1de90d8f867cd4d520021545a9a50c120eae3b",
+      "baseAMD64Manifest": "sha256:c7fedce47eff6a78cb35dad6b627f0d684107f75ab15c0870e40c093766ba452",
+      "postgresPackageVersion": "18.7-1.pgdg13+2",
+      "postgisVersion": "3.7.0",
+      "postgisPackageVersion": "3.7.0+dfsg-1.pgdg13+2",
+      "upstreamPostgisCommit": "1fdbb1cbb0e076816be06c401c5a5a2cf2c487f9",
+      "upstreamInitCommit": "0ff5ed710b024d26c004eef32533cb586edfd560",
+      "buildinfo": {
+        "url": "https://apt.postgresql.org/pub/repos/apt/pool/main/p/postgis/postgis_3.7.0+dfsg-1.pgdg13+2_amd64.buildinfo",
+        "sha256": "189e29d6f9b43489f888957428679261041e619a1adc225fd8285267f16162bd",
+        "builtAt": "2026-11-10T16:45:39Z",
+        "postgresServerDevVersion": "18.7-1.pgdg13+1"
+      },
+      "packageVerification": {
+        "runURL": "https://github.com/orewn/tropnik/actions/runs/43394938622",
+        "sourceCommit": "7f87ec4d0bc91056df9127fe17c40d272c954224",
+        "artifactSHA256": "38a57ae00701a9def34be758265c890cf4ba07d9388fc03d9e4932e481f75f6f",
+        "authenticatedAPTDownload": true,
+        "packageHashesMatchedBuildinfo": true,
+        "coreUndefinedSymbols": [
+          "DatumGetHeapTupleHeader",
+          "heap_datum_check"
+        ]
+      },
+      "librarySHA256": {
+        "postgis-3.so": "cbc9b95e33d2f9a2b4377a441405415435048953e9f4b66eabf1e8a5ff06cfe1",
+        "postgis_raster-3.so": "2144eefe32978badfb1c9757ffe82b659ac2d20a41e66240623271de737e530b",
+        "postgis_sfcgal-3.so": "78a51cec0d01bfd329f12fb06fe88a6865b719d66564ea31716df406879a69ce",
+        "postgis_topology-3.so": "a80693524009e7933e1929ea4f06bf55b9eb005488bb4b5cc468601e1c7f59de"
+      }
+    },
+    "composeStacksVerified": [
+      "compose.yaml",
+      "compose.test.yaml",
+      "compose.restore.yaml"
+    ],
+    "containerIsolationVerified": true,
+    "librarySHA256": {
+      "postgis-3.so": "cbc9b95e33d2f9a2b4377a441405415435048953e9f4b66eabf1e8a5ff06cfe1",
+      "postgis_raster-3.so": "2144eefe32978badfb1c9757ffe82b659ac2d20a41e66240623271de737e530b",
+      "postgis_sfcgal-3.so": "78a51cec0d01bfd329f12fb06fe88a6865b719d66564ea31716df406879a69ce",
+      "postgis_topology-3.so": "a80693524009e7933e1929ea4f06bf55b9eb005488bb4b5cc468601e1c7f59de"
+    },
+    "runtime": {
+      "serverVersion": "18.7 (Debian 18.7-1.pgdg13+2)",
+      "serverVersionNum": 180007,
+      "compositeTypeMismatch": "error",
+      "dataDirectory": "/var/lib/postgresql/18/docker",
+      "postgisFullVersion": "POSTGIS=\"3.7.0 1fdbb1c\" [EXTENSION] PGSQL=\"180\" GEOS=\"3.15.0-CAPI-1.21.0\" SFCGAL=\"SFCGAL 2.3.0, CGAL 6.2, BOOST 1.83.0\" PROJ=\"9.9.0 NETWORK_ENABLED=OFF URL_ENDPOINT=https://cdn.proj.org USER_WRITABLE_DIRECTORY=/tmp/proj DATABASE_PATH=/usr/share/proj/proj.db\" (compiled against PROJ 9.9.0) GDAL=\"GDAL 3.13.3 \"Iowa City\", released 2026/08/13\" LIBXML=\"2.9.14\" LIBJSON=\"0.18\" LIBPROTOBUF=\"1.5.1\" WAGYU=\"0.5.0 (Internal)\" TOPOLOGY RASTER",
+      "extensionVersions": {
+        "postgis": "3.7.0",
+        "postgis_topology": "3.7.0",
+        "postgis_raster": "3.7.0",
+        "postgis_sfcgal": "3.7.0"
+      }
+    },
+    "unsafeSettingsRejected": [
+      "warn",
+      "disabled"
+    ],
+    "unsafeSettingGuardEvidence": {
+      "warn": {
+        "observedBeforeGuard": "warn",
+        "guardDiagnostic": "composite type mismatch protection must remain strict"
+      },
+      "disabled": {
+        "observedBeforeGuard": "disabled",
+        "guardDiagnostic": "composite type mismatch protection must remain strict"
+      }
+    },
+    "checks": {
+      "sharedComposeDefinition": true,
+      "officialRebuiltLibraries": true,
+      "strictCompositeTypeChecks": true,
+      "upstreamTemplateInitialization": true,
+      "geometryRecord": true,
+      "topology": true,
+      "raster": true,
+      "sfcgal": true
+    },
+    "temporaryDatabaseRemovedBeforePublication": true
+  },
+  "backupRestore": {
+    "scope": "isolated logical restore",
+    "checks": {
+      "geometry": true,
+      "mailOutbox": true,
+      "safetyLinkage": true,
+      "databaseSecurity": true,
+      "safetyEventChain": true,
+      "applicationGuards": true,
+      "activeMembershipIndex": true,
+      "constraintsAndIndexes": true
+    },
+    "status": "passed",
+    "checkedAt": "2026-11-13T11:15:45.860713+00:00",
+    "rowCounts": {
+      "users": 3,
+      "routes": 1,
+      "appeals": 0,
+      "regions": 6,
+      "reports": 0,
+      "reviews": 0,
+      "messages": 1,
+      "sessions": 0,
+      "departures": 1,
+      "memberships": 2,
+      "audit_events": 1,
+      "notifications": 0,
+      "outbox_events": 1,
+      "route_regions": 1,
+      "safety_events": 1,
+      "posting_guards": 0,
+      "route_revisions": 1,
+      "auth_rate_limits": 0,
+      "departure_safety": 1,
+      "idempotency_keys": 0,
+      "safety_check_ins": 0,
+      "schema_migrations": 8,
+      "submission_events": 1,
+      "moderation_actions": 0,
+      "account_mail_outbox": 1,
+      "recruitment_members": 1,
+      "guide_qualifications": 1,
+      "offline_observations": 0,
+      "recruitment_messages": 0,
+      "recruitment_requests": 1,
+      "account_action_tokens": 1,
+      "safety_passport_versions": 1
+    },
+    "ageVersion": "v1.3.2",
+    "migrations": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "archiveSha256": "24918ceb82d9a8411539953b9778d1d9078f5e479d542b77d42d59f447d1d975",
+    "schemaVersion": 8,
+    "postgisImageId": "sha256:579349246c8006ae3e6be2d8ccece5e83356e2972d44430189a7e4e00abb5a06",
+    "postgisVersion": "3.7.0",
+    "postgresVersion": "18.7 (Debian 18.7-1.pgdg13+2)",
+    "sourceTreeClean": true,
+    "applicationGuardCount": 16,
+    "applicationTableCount": 32,
+    "compositeTypeMismatch": "error",
+    "syntheticFixtureVerified": true,
+    "containerIsolationVerified": true,
+    "temporaryDatabaseRemovedBeforePublication": true,
+    "gate": "synthetic backup and isolated restore",
+    "negativeCasesPassed": [
+      "wrong_identity",
+      "truncated_ciphertext",
+      "existing_output",
+      "failed_pg_dump",
+      "missing_safety_guard",
+      "wrong_guard_event",
+      "wrong_guard_column",
+      "missing_mail_outbox",
+      "missing_active_index",
+      "wrong_active_index_predicate",
+      "unsupported_schema"
+    ],
+    "syntheticSourceRemoved": true,
+    "disposableAgeIdentitiesRemoved": true
+  },
+  "productionBootstrap": {
+    "schemaVersion": 2,
+    "status": "passed",
+    "scope": "disposable production Compose bootstrap; no live service deployment",
+    "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "sourceTree": "3656d2cd30071df101094f0a8fa467ffbd44dd6b",
+    "sourceTreeClean": true,
+    "binaries": {
+      "tropa-api": {
+        "sha256": "7f4b03105a7cdf07bb13d108d2e9cc4dd547b947824a99a864955554fda85a80",
+        "bytes": 12284064,
+        "goVersion": "go1.27.4",
+        "package": "tropa/backend/cmd/tropa-api",
+        "cgoEnabled": false,
+        "goos": "linux",
+        "goarch": "amd64"
+      },
+      "tropa-migrate": {
+        "sha256": "cd6c09f91ccb7744bb42348884e32844363f9b54a17d9bf6a2b8402bb2ee04b5",
+        "bytes": 10031264,
+        "goVersion": "go1.27.4",
+        "package": "tropa/backend/cmd/tropa-migrate",
+        "cgoEnabled": false,
+        "goos": "linux",
+        "goarch": "amd64"
+      },
+      "tropa-admin": {
+        "sha256": "2981a7acd001c3c7d92b2d7cb081a8d88823cce31aa8fe0882d762c7cb2e34f3",
+        "bytes": 10039456,
+        "goVersion": "go1.27.4",
+        "package": "tropa/backend/cmd/tropa-admin",
+        "cgoEnabled": false,
+        "goos": "linux",
+        "goarch": "amd64"
+      },
+      "tropa-health": {
+        "sha256": "4dc8562cdfdb7a4f28c31a993b6706b608386526e232c4a8de87b215931bf51b",
+        "bytes": 5894304,
+        "goVersion": "go1.27.4",
+        "package": "tropa/backend/cmd/tropa-health",
+        "cgoEnabled": false,
+        "goos": "linux",
+        "goarch": "amd64"
+      }
+    },
+    "productionConfigurationPreserved": true,
+    "optionalWeb": {
+      "composeTopologyVerified": true,
+      "runtimeVerified": false,
+      "scope": "configuration only; no Next image, HTTP path or browser scenario is qualified by this gate"
+    },
+    "optionalMailTopologyVerified": true,
+    "ingress": {
+      "image": "caddy:2.11.9-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0",
+      "imageId": "sha256:5813f7eb9b94fac4970f9f576695fe1ed1d53d41586fd3eaa350caf7c4627d9c",
+      "provenanceSHA256": "26340cbffae29847b4fc6df6697776fc6a10362186d454385436bc3bd3578f59",
+      "version": "v2.11.9 h1:bhZtcRKQOq0fuLvEgCdPYvUxXyGn9kzjG4lh2332DTE=",
+      "configurationSHA256": {
+        "Caddyfile": "6bc705055fdd329b3c019d098d9e978c61b9cd7741dae5c5d068d015a43396f1",
+        "api.caddy": "a38aa916db26ba8e87e38d74915ac14d50990865fd359094f4caedda35a2f4f2"
+      },
+      "configurationValidated": true,
+      "fixedHTTPRoutesVerified": true,
+      "kernelPolicyVerified": true
+    },
+    "apiImageId": "sha256:79a03dd2717c4996dfd7242a9e829049a15c9e975a4ed4820b92a2e727aa1dc3",
+    "platform": "linux/amd64",
+    "kernelProcReadMethods": {
+      "api/status": "direct",
+      "api/mountinfo": "direct",
+      "ingress/status": "direct",
+      "ingress/mountinfo": "direct"
+    },
+    "database": {
+      "migrations": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "runtimeRole": {
+        "superuser": false,
+        "createDB": false,
+        "createRole": false,
+        "replication": false
+      },
+      "runtimeConnections": 2,
+      "postgresVersion": "18.7 (Debian 18.7-1.pgdg13+2)",
+      "compositeTypeMismatch": "error",
+      "postgisVersion": "3.7.0"
+    },
+    "databaseImageId": "sha256:579349246c8006ae3e6be2d8ccece5e83356e2972d44430189a7e4e00abb5a06",
+    "runtime": {
+      "uid": 65532,
+      "gid": 65532,
+      "effectiveCapabilities": 0,
+      "noNewPrivileges": true,
+      "readOnlyRootFilesystem": true,
+      "internalDatabaseNetwork": true,
+      "internalApplicationNetwork": true,
+      "ingressLoopbackOnly": true,
+      "apiPortUnpublished": true,
+      "databasePortUnpublished": true,
+      "ingressExcludedFromDatabaseNetwork": true,
+      "apiExternalNetworkAbsent": true,
+      "migrationExitCode": 0,
+      "httpLive": "ok",
+      "httpReady": "ready",
+      "healthBinarySucceeded": true
+    },
+    "cleanup": {
+      "containersRemoved": true,
+      "networkRemoved": true,
+      "databaseVolumeRemoved": true,
+      "fixtureSecretsAndBinariesRemoved": true
+    }
+  },
+  "limits": [
+    "This is an exact-source push-main CI qualification using disposable synthetic data, not a live service deployment.",
+    "Optional Next web and SMTP receive configuration checks only; no actual Next container, user browser flow or email delivery was qualified.",
+    "The database and API image IDs are local image configuration identities, not registry manifest digests; the pinned Caddy digest has a separate explicit registry provenance.",
+    "Recovery did not access live user data. Disposable containers, networks, database volumes, age identities, credentials and extracted binaries were removed before success receipts were published.",
+    "This receipt does not transfer success to later executable source changes."
+  ]
+}
