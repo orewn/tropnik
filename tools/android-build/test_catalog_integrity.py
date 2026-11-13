@@ -43,6 +43,20 @@ class CatalogIntegrityTests(unittest.TestCase):
         with self.assertRaisesRegex(AssetError, "stale"):
             verify_catalog(self.manifest_bytes, self.read, actual_geometry=[r["path"] for r in self.manifest["files"]] + ["maps/routes/stale.geojson"])
 
+    def test_shared_overview_cannot_be_missing_corrupted_or_reassigned_to_other_cards(self):
+        path = self.manifest["trailOverlay"]["path"]
+        with self.assertRaisesRegex(AssetError, "overview bytes changed"):
+            verify_catalog(self.manifest_bytes, lambda name: self.read(name)[:-1] if name == path else self.read(name))
+        changed = json.loads(self.read(path))
+        changed["sources"][0]["ids"] = ["learning-route"]
+        data = json.dumps(changed).encode()
+        manifest = copy.deepcopy(self.manifest)
+        manifest["trailOverlay"].update(bytes=len(data), sha256=digest(data))
+        manifest["trailOverlay"]["url"] = "/data/trail-overlay-" + digest(data)[:16] + ".json"
+        manifest["trailOverlay"]["sourcePath"] = "web/public" + manifest["trailOverlay"]["url"]
+        with self.assertRaisesRegex(AssetError, "overview identity or geometry differs"):
+            verify_catalog(json.dumps(manifest).encode(), lambda name: data if name == path else self.read(name))
+
     def test_empty_geometry_and_removed_source_inventory_cannot_be_rehashed_away(self):
         manifest = copy.deepcopy(self.manifest)
         record = manifest["files"][0]

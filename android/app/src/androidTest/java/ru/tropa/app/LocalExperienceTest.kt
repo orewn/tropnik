@@ -4,6 +4,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.InputDevice
 import android.view.MotionEvent
+import android.view.KeyEvent
 import android.view.ViewConfiguration
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
@@ -11,10 +12,12 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.SystemClock
+import android.os.ParcelFileDescriptor
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebView
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
@@ -30,8 +33,13 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
 import ru.tropa.app.data.Catalog
+import ru.tropa.app.data.ConnectionState
+import ru.tropa.app.data.InstalledPackEntity
 import ru.tropa.app.ui.CustomMapWebView
 import java.io.File
+import java.security.MessageDigest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -39,6 +47,154 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 class LocalExperienceTest {
     @get:Rule val app = createAndroidComposeRule<MainActivity>()
+
+    @Test fun savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline() {
+        val application = app.activity.application as TropaApplication
+        val dao = application.database.dao()
+        lateinit var model: MainViewModel
+        app.runOnUiThread { model = ViewModelProvider(app.activity)[MainViewModel::class.java] }
+        // This case exercises the native buttons with Android connectivity
+        // disabled, as well as the renderer's own observed offline state.
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        for (command in listOf("svc wifi disable", "svc data disable")) {
+            ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command)).use { it.readBytes() }
+        }
+        app.waitUntil(timeoutMillis = 15_000) { model.state.value.connection != ConnectionState.ONLINE }
+        val regionId = "altai"
+        val sourceRoute = application.catalog.referenceRoutes(regionId = regionId).first { it.geometryAsset != null }
+        fun readPack() = runBlocking(Dispatchers.IO) { dao.pack(regionId) }
+        fun awaitPublished(previousDirectory: String? = null): InstalledPackEntity {
+            var current: InstalledPackEntity? = null
+            app.waitUntil(timeoutMillis = 45_000) {
+                current = readPack()
+                current != null && current?.directory != previousDirectory && model.state.value.busyId == null &&
+                    model.state.value.packs.any { it.directory == current?.directory }
+            }
+            return requireNotNull(current)
+        }
+        fun savedAction(tag: String) {
+            app.onNodeWithTag("saved_list").performScrollToNode(hasTestTag(tag))
+            app.onNodeWithTag(tag).assertIsEnabled().performClick()
+        }
+        fun verifyThroughButton() {
+            savedAction("verify_pack_$regionId")
+            app.waitUntil(timeoutMillis = 15_000) {
+                app.onAllNodesWithText("Сохранённые карточки и линии доступны. Обзорная карта встроена в приложение.").fetchSemanticsNodes().isNotEmpty()
+            }
+            app.waitUntil(timeoutMillis = 10_000) { model.state.value.busyId == null }
+        }
+        fun refreshThroughButtons(previousDirectory: String): InstalledPackEntity {
+            savedAction("update_pack_$regionId")
+            app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("save_pack"))
+            app.onNodeWithTag("save_pack").assertIsEnabled().performClick()
+            return awaitPublished(previousDirectory)
+        }
+        assertNull("A clean device must not already have this region", readPack())
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_$regionId"))
+        app.onNodeWithTag("region_$regionId").performClick()
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("save_pack"))
+        app.onNodeWithTag("save_pack").assertIsEnabled().performClick()
+        val installed = awaitPublished()
+        val directory = File(installed.directory)
+        val manifest = JSONObject(File(directory, "manifest.json").readText())
+        assertEquals(2, manifest.getInt("schemaVersion"))
+        val paths = manifest.getJSONArray("assets").let { entries ->
+            (0 until entries.length()).map { entries.getJSONObject(it).getString("path") }.toSet()
+        }
+        assertEquals(setOf("catalog.json", "SOURCES.txt") + application.catalog.referenceRoutes(regionId = regionId).mapNotNull { it.geometryAsset }, paths)
+        assertTrue("Shared renderer/tiles must not be copied into every region", paths.all { it == "catalog.json" || it == "SOURCES.txt" || it.startsWith("maps/routes/") })
+        val runtimeBytes = app.activity.assets.open("custom-map/manifest.json").use { it.readBytes() }
+        val runtimeDigest = MessageDigest.getInstance("SHA-256").digest(runtimeBytes).joinToString("") { "%02x".format(it) }
+        assertEquals(runtimeDigest, manifest.getJSONObject("bundledRuntime").getString("sha256"))
+        val geometryFile = File(directory, requireNotNull(sourceRoute.geometryAsset))
+        val originalGeometry = geometryFile.readText(Charsets.UTF_8)
+        app.onNodeWithTag("nav_saved").performClick()
+        verifyThroughButton()
+        savedAction("open_pack_$regionId")
+        app.waitUntil(timeoutMillis = 15_000) { model.state.value.offlineSnapshot != null && model.state.value.busyId == null }
+        app.onNodeWithTag("explore_list").performScrollToIndex(0)
+        app.onNodeWithTag("saved_region_snapshot").assertIsDisplayed()
+        val snapshot = requireNotNull(model.state.value.offlineSnapshot)
+        assertEquals(installed.directory, snapshot.pack.directory)
+        assertNotSame(application.catalog, snapshot.catalog)
+        assertEquals(application.catalog.referenceRoutes(regionId = regionId).map { it.id }, snapshot.catalog.routes.map { it.id })
+        assertEquals(originalGeometry, snapshot.catalog.route(sourceRoute.id)?.inlineGeometry)
+        // A verified snapshot must own its bytes. Removing the on-disk source
+        // now cannot make card→map fall back to an unverified mutable path.
+        assertTrue(geometryFile.delete())
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_${sourceRoute.id}"))
+        app.onNodeWithTag("route_${sourceRoute.id}").performClick()
+        app.onNodeWithTag("saved_route_snapshot").assertExists()
+        assertEquals(originalGeometry, model.route(sourceRoute.id)?.inlineGeometry)
+        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("route_map"))
+        val map = awaitReadyMap()
+        var opened = JSONObject()
+        app.waitUntil(timeoutMillis = 15_000) {
+            opened = mapSnapshot(map)
+            !opened.optBoolean("online", true) && opened.optString("routeId") == sourceRoute.id && mapInputReady(opened)
+        }
+        screenshot("offline-pack-opened-snapshot")
+        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("save_route"))
+        app.onNodeWithTag("save_route").assertIsEnabled().performClick()
+        app.waitUntil(timeoutMillis = 10_000) {
+            runBlocking(Dispatchers.IO) { dao.savedRoute(sourceRoute.id) } != null && model.state.value.busyId == null
+        }
+        val bookmark = runBlocking(Dispatchers.IO) { dao.savedRoute(sourceRoute.id) }
+        app.onNodeWithTag("go_back").performClick()
+        assertEquals(installed.directory, model.state.value.offlineSnapshot?.pack?.directory)
+        app.onNodeWithTag("go_back").performClick()
+        app.onNodeWithTag("nav_saved").assertIsSelected()
+        assertNull(model.state.value.offlineSnapshot)
+        savedAction("open_pack_$regionId")
+        app.waitUntil(timeoutMillis = 15_000) {
+            app.onAllNodesWithText("Сохранённые данные повреждены или удалены. Нажмите «Обновить» и сохраните область заново.").fetchSemanticsNodes().isNotEmpty()
+        }
+        app.onNodeWithTag("saved_list").assertExists()
+        assertNull(model.state.value.offlineSnapshot)
+        val repaired = refreshThroughButtons(installed.directory)
+        assertTrue("Successful replacement should release the old region copy", !directory.exists())
+        app.onNodeWithTag("nav_saved").performClick()
+        verifyThroughButton()
+        // Model an APK runtime revision without damaging the saved cards.
+        val revisedManifest = File(repaired.directory, "manifest.json")
+        val outdated = JSONObject(revisedManifest.readText())
+        outdated.getJSONObject("bundledRuntime").put("sha256", "0".repeat(64))
+        revisedManifest.writeText(outdated.toString(2))
+        savedAction("open_pack_$regionId")
+        app.waitUntil(timeoutMillis = 15_000) {
+            app.onAllNodesWithText("Приложение обновилось. Нажмите «Обновить» и сохраните данные области заново.").fetchSemanticsNodes().isNotEmpty()
+        }
+        assertNull(model.state.value.offlineSnapshot)
+        val refreshed = refreshThroughButtons(repaired.directory)
+        app.onNodeWithTag("nav_saved").performClick()
+        verifyThroughButton()
+        savedAction("remove_pack_$regionId")
+        app.onNodeWithTag("remove_pack_confirm").assertIsEnabled().performClick()
+        app.waitUntil(timeoutMillis = 10_000) { readPack() == null && model.state.value.busyId == null }
+        assertTrue(!File(refreshed.directory).exists())
+        assertEquals("Removing region data must keep separately saved cards", bookmark,
+            runBlocking(Dispatchers.IO) { dao.savedRoute(sourceRoute.id) })
+        app.onNodeWithTag("nav_explore").performClick()
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_$regionId"))
+        app.onNodeWithTag("region_$regionId").performClick()
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("save_pack"))
+        app.onNodeWithTag("save_pack").assertIsEnabled().performClick()
+        val repeated = awaitPublished(refreshed.directory)
+        app.onNodeWithTag("nav_saved").performClick()
+        verifyThroughButton()
+        savedAction("open_pack_$regionId")
+        app.waitUntil(timeoutMillis = 15_000) { model.state.value.offlineSnapshot?.pack?.directory == repeated.directory }
+        screenshot("offline-pack-reinstalled")
+        File(app.activity.filesDir, "qa/offline-pack-lifecycle.json").apply {
+            parentFile!!.mkdirs()
+            writeText(JSONObject().put("regionId", regionId).put("routeId", sourceRoute.id).put("schemaVersion", 2)
+                .put("runtimeSha256", runtimeDigest).put("savedAssets", JSONArray(paths.sorted()))
+                .put("openedMap", opened).put("snapshotSourceBytesVerified", true)
+                .put("missingGeometryRejectedOnNextOpen", true).put("oldRuntimeRequiresUpdate", true)
+                .put("bookmarkSurvivedRemoval", true).put("reinstalledAndVerified", true)
+                .put("networkState", model.state.value.connection.name).toString(2))
+        }
+    }
 
     @Test fun nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute() {
         val catalogue = Catalog.load(app.activity)
@@ -108,6 +264,10 @@ class LocalExperienceTest {
 
     private fun readyMap(): CustomMapWebView {
         app.onNodeWithTag("explore_list").performScrollToIndex(2)
+        return awaitReadyMap()
+    }
+
+    private fun awaitReadyMap(): CustomMapWebView {
         fun findMap(view: View): CustomMapWebView? {
             if (view is CustomMapWebView) return view
             if (view is ViewGroup) for (index in 0 until view.childCount) findMap(view.getChildAt(index))?.let { return it }
@@ -128,6 +288,176 @@ class LocalExperienceTest {
         assertEquals("tropnik-canvas", snapshot.getJSONObject("rendered").getString("engine"))
         assertTrue("The cartographic worker did not decode any tile", snapshot.getJSONObject("state").getInt("residentTiles") > 0)
         return map
+    }
+
+    @Test fun nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline() {
+        val catalogue = Catalog.load(app.activity)
+        val manifest = JSONObject(app.activity.assets.open("catalog-manifest.json").bufferedReader().use { it.readText() })
+        val expectedSources = manifest.getJSONObject("trailOverlay").getInt("sourceCount")
+        val map = readyMap()
+        app.runOnUiThread { map.setOnline(false) }
+        var full = JSONObject()
+        app.waitUntil(timeoutMillis = 15_000) {
+            full = mapSnapshot(map)
+            val overlay = full.getJSONObject("rendered").getJSONObject("catalogueOverlay")
+            val loader = full.getJSONObject("catalogue").optJSONObject("loader")
+            !full.optBoolean("online") && overlay.optInt("sources") == expectedSources &&
+                overlay.optBoolean("currentViewportReady") && loader?.optInt("pending") == 0 && mapInputReady(full)
+        }
+        assertEquals(catalogue.referenceRoutes().map { it.id }.toSet(), full.getJSONObject("catalogue").getJSONArray("visibleIds").let { ids -> (0 until ids.length()).map { ids.getString(it) }.toSet() })
+        assertTrue(full.getJSONObject("rendered").getJSONObject("catalogueOverlay").getInt("preparedParts") > 0)
+
+        // Real Compose controls must reach the shared raster, preserve the
+        // camera and restore the same catalogue after paths are hidden.
+        app.onNodeWithTag("map_paths").assertIsSelected().performClick()
+        var hidden = JSONObject()
+        app.waitUntil(timeoutMillis = 10_000) {
+            hidden = mapSnapshot(map)
+            !hidden.getJSONObject("catalogue").getBoolean("paths") &&
+                hidden.getJSONObject("rendered").getJSONObject("catalogueOverlay").getInt("preparedSources") == 0
+        }
+        assertTrue("Hiding trails changed the map camera", sameMapView(full, hidden))
+        app.onNodeWithTag("map_paths").performClick()
+        app.waitUntil(timeoutMillis = 10_000) {
+            val state = mapSnapshot(map)
+            state.getJSONObject("catalogue").getBoolean("paths") &&
+                state.getJSONObject("rendered").getJSONObject("catalogueOverlay").getInt("sources") == expectedSources
+        }
+
+        // No external request or fake image can count as satellite success.
+        // The production bridge retains a truthful local relief frame offline.
+        app.runOnUiThread { map.command("mode", JSONObject().put("mode", "satellite")) }
+        var offlineMode = JSONObject()
+        app.waitUntil(timeoutMillis = 10_000) {
+            offlineMode = mapSnapshot(map)
+            offlineMode.optString("requestedMode") == "satellite" && offlineMode.getJSONObject("state").optString("mode") == "detail"
+        }
+        assertTrue("An offline mode selection changed the camera", sameMapView(full, offlineMode))
+        assertTrue("Offline relief was falsely reported as satellite imagery", offlineMode.getJSONObject("state").optString("committedMode") != "satellite")
+        app.runOnUiThread { map.command("mode", JSONObject().put("mode", "detail")) }
+
+        val query = "Чёрный ключ"
+        val expectedIds = catalogue.referenceRoutes(query).map { it.id }.toSet()
+        assertTrue("The real reviewed route must be discoverable", "kolyma-black-creek" in expectedIds)
+        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_search"))
+        app.onNodeWithTag("region_search").performClick().performTextReplacement(query)
+        app.waitForIdle()
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+        app.onNodeWithTag("explore_list").performScrollToIndex(2)
+        var filtered = JSONObject()
+        app.waitUntil(timeoutMillis = 10_000) {
+            filtered = mapSnapshot(map)
+            filtered.getJSONObject("catalogue").getJSONArray("visibleIds").let { ids ->
+                (0 until ids.length()).map { ids.getString(it) }.toSet() == expectedIds
+            }
+        }
+        assertEquals("Searching must not refit the country camera", full.getJSONObject("camera").toString(), filtered.getJSONObject("camera").toString())
+        val sourceRoute = requireNotNull(catalogue.route("kolyma-black-creek"))
+        val source = JSONObject(app.activity.assets.open(requireNotNull(sourceRoute.geometryAsset)).bufferedReader().use { it.readText() })
+        val originalLine = source.getJSONArray("features").getJSONObject(0).getJSONObject("geometry").getJSONArray("coordinates").getJSONArray(0)
+        val point = originalLine.getJSONArray(originalLine.length() / 2)
+        // Only the camera is set up by the test. Selection must come from a
+        // trusted native touch on the same actually painted source geometry.
+        app.runOnUiThread { map.command("camera", JSONObject().put("camera", JSONObject().put("center", point).put("zoom", 13)).put("animate", false)) }
+        var hit = JSONObject()
+        app.waitUntil(timeoutMillis = 15_000) {
+            hit = mapSnapshot(map)
+            hit.optString("centerTrailHit") == sourceRoute.id && mapInputReady(hit) &&
+                hit.getJSONObject("rendered").getJSONObject("reviewedCoastal").optInt("overlaySources") > 0
+        }
+        val touch = tapMapTrail(map, hit, sourceRoute.id)
+        app.onNodeWithTag("route_detail").assertExists()
+        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("route_map"))
+        val selectedMap = awaitReadyMap()
+        app.runOnUiThread { selectedMap.setOnline(false) }
+        var selected = JSONObject()
+        app.waitUntil(timeoutMillis = 15_000) {
+            selected = mapSnapshot(selectedMap)
+            selected.optString("routeId") == "kolyma-black-creek" &&
+                selected.getJSONObject("rendered").getJSONObject("reviewedCoastal").optBoolean("selected") && mapInputReady(selected)
+        }
+        // Terminate the actual WebView renderer after moving away from the
+        // automatic route fit. Native recovery must retain that chosen view,
+        // then reload the exact selected source into the replacement renderer.
+        val movedCamera = JSONObject(selected.getJSONObject("camera").toString()).put("zoom", 13.25).put("bearingDegrees", 12.0)
+        app.runOnUiThread { selectedMap.command("camera", JSONObject().put("camera", movedCamera).put("animate", false)) }
+        var beforeRecovery = JSONObject()
+        app.waitUntil(timeoutMillis = 10_000) {
+            beforeRecovery = mapSnapshot(selectedMap)
+            mapInputReady(beforeRecovery) && beforeRecovery.getJSONObject("camera").optDouble("zoom") == 13.25 &&
+                beforeRecovery.getJSONObject("camera").optDouble("bearingDegrees") == 12.0
+        }
+        app.runOnUiThread {
+            check(android.os.Build.VERSION.SDK_INT >= 29) { "Renderer recovery requires the API 35 device gate" }
+            assertTrue("The actual WebView renderer could not be terminated", selectedMap.webViewRenderProcess?.terminate() == true)
+        }
+        app.waitUntil(timeoutMillis = 10_000) { app.onAllNodesWithText("Открыть карту снова").fetchSemanticsNodes().isNotEmpty() }
+        app.onNodeWithText("Открыть карту снова").performClick()
+        val recoveredMap = awaitReadyMap()
+        assertTrue("Recovery reused the terminated WebView", recoveredMap !== selectedMap)
+        app.runOnUiThread { recoveredMap.setOnline(false) }
+        var recovered = JSONObject()
+        app.waitUntil(timeoutMillis = 15_000) {
+            recovered = mapSnapshot(recoveredMap)
+            mapInputReady(recovered) && sameMapView(beforeRecovery, recovered) &&
+                recovered.optString("routeId") == "kolyma-black-creek" &&
+                recovered.getJSONObject("rendered").getJSONObject("reviewedCoastal").optBoolean("selected")
+        }
+        screenshot("map-native-catalogue-coastal")
+        val report = File(app.activity.filesDir, "qa/map-native-catalogue-coastal.json")
+        report.parentFile!!.mkdirs()
+        report.writeText(JSONObject().put("expectedSources", expectedSources).put("full", full).put("hidden", hidden)
+            .put("offlineMode", offlineMode).put("filtered", filtered).put("hit", hit).put("touch", touch).put("selected", selected)
+            .put("beforeRendererRecovery", beforeRecovery).put("afterRendererRecovery", recovered).put("rendererRecoveryVerified", true)
+            .put("onlineSatelliteDeviceVerified", false).toString(2))
+    }
+
+    private fun tapMapTrail(map: CustomMapWebView, snapshot: JSONObject, routeId: String): JSONObject {
+        val deadline = SystemClock.uptimeMillis() + 10_000
+        val receipt = JSONObject().put("routeId", routeId)
+        awaitMapDraw(map, deadline, receipt)
+        val snapshotBudget = deadline - SystemClock.uptimeMillis()
+        assertTrue("No time remains for the completed trail frame", snapshotBudget > 0)
+        val current = mapSnapshot(map, minOf(5_000L, snapshotBudget))
+        assertTrue("Trail hit coordinates must belong to the completed frame", mapInputReady(current) && sameMapView(snapshot, current))
+        assertEquals(routeId, current.getString("centerTrailHit"))
+        val viewport = nativeMapViewport(map)
+        val x = viewport.x + viewport.width / 2f
+        val y = viewport.y + viewport.height / 2f
+        assertTrue("Trail target is outside the visible native map", viewport.visible.contains(x.toInt(), y.toInt()))
+        receipt.put("coordinateSnapshot", current).put("screenX", x.toDouble()).put("screenY", y.toDouble())
+        val lastInput = current.getJSONArray("trustedInput").let { values -> (0 until values.length()).maxOfOrNull { values.getJSONObject(it).optLong("sequence") } ?: 0L }
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        val downTime = SystemClock.uptimeMillis()
+        var upTime = downTime
+        for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
+            if (action == MotionEvent.ACTION_UP) {
+                val remaining = downTime + 80 - SystemClock.uptimeMillis()
+                if (remaining > 0) SystemClock.sleep(remaining)
+            }
+            val eventTime = SystemClock.uptimeMillis()
+            if (action == MotionEvent.ACTION_UP) upTime = eventTime
+            val event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0)
+            event.source = InputDevice.SOURCE_TOUCHSCREEN
+            try { assertTrue("Native trail touch was rejected", automation.injectInputEvent(event, false)) }
+            finally { event.recycle() }
+        }
+        assertTrue("Trail tap became a long press", upTime - downTime < ViewConfiguration.getLongPressTimeout())
+        assertTrue("Trail touch exceeded its original deadline", upTime < deadline)
+        val clickBudget = deadline - SystemClock.uptimeMillis()
+        assertTrue("No time remains for the trusted trail click", clickBudget > 0)
+        app.waitUntil(timeoutMillis = clickBudget) {
+            var diagnostics = JSONObject()
+            app.runOnUiThread { diagnostics = map.debugDiagnostics() }
+            val events = diagnostics.getJSONArray("receipts")
+            val clicks = (0 until events.length()).map { events.getJSONObject(it) }.filter {
+                it.optString("phase") == "trusted-input" && it.optString("type") == "click" &&
+                    it.optBoolean("trusted") && it.optLong("sequence") > lastInput && it.optLong("nativeReceivedAt") >= downTime
+            }
+            receipt.put("trustedClicks", JSONArray(clicks)).put("nativeTouchEvents", diagnostics.getJSONArray("nativeTouchEvents"))
+            clicks.isNotEmpty()
+        }
+        return receipt.put("actualPressMs", upTime - downTime)
     }
 
     private fun mapSnapshot(view: CustomMapWebView, timeoutMillis: Long = 5_000): JSONObject {

@@ -5,13 +5,13 @@ import vm from 'node:vm';
 import ts from '../../web/node_modules/typescript/lib/typescript.js';
 const source=readFileSync(new URL('./native-map-route.ts',import.meta.url),'utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
-const context={exports:{},URL,AbortController,fetch};vm.runInNewContext(compiled,context);
+const context={exports:{},URL,AbortController,fetch,TextDecoder};vm.runInNewContext(compiled,context);
 const {NativeMapRouteLoader}=context.exports;
 const origin='https://map.tropnik.invalid';
 const url=version=>`${origin}/native-route/7-${version}.geojson`;
 const geometry=id=>({type:'LineString',coordinates:[[40,43],[40.1,43.1]],id});
 function deferred(){let resolve;const promise=new Promise(done=>resolve=done);return{promise,resolve};}
-function fixture(request){const drawn=[];return{drawn,loader:new NativeMapRouteLoader(origin,(value,id)=>drawn.push({value,id}),request)};}
+function fixture(request,verify){const drawn=[];return{drawn,loader:new NativeMapRouteLoader(origin,(value,id,coastal)=>drawn.push({value,id,coastal}),request,verify)};}
 
 test('a failed replacement immediately removes the previous card route',async()=>{
  const pending=deferred();let requests=0;
@@ -53,4 +53,27 @@ test('foreign or credential-bearing resources fail closed before any request',as
  const invalid=['https://foreign.invalid/native-route/7-1.geojson',origin+'/private.json',origin+'/native-route/7-1.geojson?secret=x','https://name:pass@map.tropnik.invalid/native-route/7-1.geojson'];
  for(const [i,address]of invalid.entries())await assert.rejects(loader.update({version:i+1,url:address}),/Invalid route/);
  assert.equal(requests,0);assert.equal(drawn.length,invalid.length);assert.equal(drawn.every(value=>value.value===undefined),true);
+});
+
+test('late verified allowances cannot revive a replaced or disposed route',async()=>{
+ const verified=deferred();let entered;
+ const started=new Promise(done=>entered=done),token={key:'reviewed-source'};
+ const {drawn,loader}=fixture(async()=>Response.json(geometry('old')),async()=>{entered();return verified.promise;});
+ const old=loader.update({version:1,id:'old',url:url(1)});await started;
+ await loader.update({version:2});verified.resolve(token);await old;
+ assert.equal(drawn.every(value=>value.value===undefined),true);
+ loader.dispose();
+});
+
+test('selected geometry is committed only after its original bytes are verified',async()=>{
+ const expected=geometry('reviewed'),token={key:'reviewed-source'};
+ const {drawn,loader}=fixture(async()=>Response.json(expected),async(bytes,value,id)=>{
+   assert.deepEqual(JSON.parse(new TextDecoder().decode(bytes)),expected);
+   assert.equal(value.id,id);assert.equal(drawn.at(-1).value,undefined);return token;
+ });
+ await loader.update({version:1,id:'reviewed',url:url(1)});
+ assert.equal(drawn.at(-1).coastal,token);
+ const failed=fixture(async()=>Response.json(expected),async()=>{throw new Error('integrity mismatch');});
+ await assert.rejects(failed.loader.update({version:1,id:'reviewed',url:url(1)}),/integrity mismatch/);
+ assert.equal(failed.drawn.at(-1).value,undefined);
 });

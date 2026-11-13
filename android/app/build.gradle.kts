@@ -12,12 +12,25 @@ val apiBaseUrl = providers.gradleProperty("apiBaseUrl")
     .orElse(providers.environmentVariable("TROPA_API_BASE_URL"))
     .orElse("")
     .get().trimEnd('/')
-if (apiBaseUrl.isNotEmpty()) {
-    val uri = URI(apiBaseUrl)
+// The release path uses only the environment validated by its preflight. A
+// user's global Gradle property must not silently replace that production API.
+val productionApiBaseUrl = providers.environmentVariable("TROPA_API_BASE_URL").orElse("").get().trimEnd('/')
+for (origin in listOf(apiBaseUrl, productionApiBaseUrl)) if (origin.isNotEmpty()) {
+    val uri = URI(origin)
     require(uri.scheme == "https" && !uri.host.isNullOrBlank() &&
         uri.userInfo == null && uri.query == null && uri.fragment == null) {
         "apiBaseUrl must be an HTTPS URL without credentials, query, or fragment."
     }
+}
+
+// Preview keeps its existing identity and debug signing. Production credentials
+// are supplied externally; an empty configuration produces only an unsigned APK.
+val releaseSigningNames = listOf("TROPNIK_RELEASE_KEYSTORE", "TROPNIK_RELEASE_STORE_PASSWORD",
+    "TROPNIK_RELEASE_KEY_ALIAS", "TROPNIK_RELEASE_KEY_PASSWORD")
+val releaseSigning = releaseSigningNames.associateWith { providers.environmentVariable(it).orNull }
+val hasReleaseSigning = releaseSigning.values.any { !it.isNullOrEmpty() }
+require(!hasReleaseSigning || releaseSigning.values.all { !it.isNullOrEmpty() }) {
+    "Production signing requires all four external signing variables."
 }
 
 android {
@@ -28,8 +41,8 @@ android {
         applicationId = "ru.tropa.app.preview"
         minSdk = 26
         targetSdk = 36
-        versionCode = 13
-        versionName = "0.4.25-preview"
+        versionCode = 14
+        versionName = "0.4.31-preview"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Both physical ARM phones and an x86_64 emulator are covered by this APK.
@@ -38,14 +51,23 @@ android {
         ndk { abiFilters += requestedAbi?.let(::listOf) ?: listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) create("production") {
+            storeFile = file(releaseSigning.getValue("TROPNIK_RELEASE_KEYSTORE")!!)
+            storePassword = releaseSigning.getValue("TROPNIK_RELEASE_STORE_PASSWORD")
+            keyAlias = releaseSigning.getValue("TROPNIK_RELEASE_KEY_ALIAS")
+            keyPassword = releaseSigning.getValue("TROPNIK_RELEASE_KEY_PASSWORD")
+        }
+    }
     buildTypes {
         debug { isDebuggable = true }
         release {
+            isDebuggable = false
+            buildConfigField("String", "API_BASE_URL", "\"$productionApiBaseUrl\"")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // The owner supplies a release signing key outside the repository.
-            // No generated debug key is silently reused as a production key.
+            if (hasReleaseSigning) signingConfig = signingConfigs.getByName("production")
         }
     }
 
@@ -70,6 +92,14 @@ android {
             it.systemProperty("tropnik.planner.index", plannerIndex.absolutePath)
             it.inputs.file(plannerIndex)
         }
+    }
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        variant.applicationId.set("ru.tropa.app")
+        val productionVersion = android.defaultConfig.versionName!!.removeSuffix("-preview")
+        variant.outputs.forEach { it.versionName.set(productionVersion) }
     }
 }
 

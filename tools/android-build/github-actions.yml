@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       run_instrumentation:
-        description: 'Run eight device scenarios on the exact universal APK'
+        description: 'Run all required device scenarios on the exact universal APK'
         type: boolean
         required: false
         default: false
@@ -132,6 +132,16 @@ jobs:
         run: |
           chmod +x android/gradlew
           bash tools/android-build/build.sh
+      - name: Compile and verify the minified production variant without signing
+        run: bash tools/android-build/build-release.sh --unsigned-check
+      - name: Preserve the unsigned production compilation receipt
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-production-build-check-${{ github.run_attempt }}
+          path: android/release-check/production-verification.json
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Save preview APKs and reports
         id: apks
         if: always()

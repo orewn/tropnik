@@ -13,14 +13,19 @@
   "bridge": "exact-origin-web-message-port-v1",
   "sourceInputs": [
     {
+      "path": "android/app/src/main/assets/catalog-manifest.json",
+      "sizeBytes": 231084,
+      "sha256": "90772f4843208d0d8e66436f27c6e409ff3cfbb2dce6328efb1069f439acc764"
+    },
+    {
       "path": "tools/android-build/custom-map-android.ts",
-      "sizeBytes": 17542,
-      "sha256": "b1cf374ee3c846f9dd692d80b4fc2c479f2cb152776a79a0ee7e3cd347e7119d"
+      "sizeBytes": 20948,
+      "sha256": "3328b61c830297b2798d7edc51e27b6b09bd25ee6945d1585d5278a52c9e110d"
     },
     {
       "path": "tools/android-build/custom-map-entry.ts",
-      "sizeBytes": 726,
-      "sha256": "3a24e602dd36da37a563640d18ce379ca2470be767a52b26543f7934e45923e3"
+      "sizeBytes": 919,
+      "sha256": "2653fe9b88711798b34d62e0b8f4caddd1417b9f011baed97d6882bb25288f1e"
     },
     {
       "path": "tools/android-build/custom-map-host.css",
@@ -58,19 +63,29 @@
       "sha256": "f7ac6258da20ab7541939b59851155753d1d24f1b30cbcb949077a3faa3d1593"
     },
     {
+      "path": "tools/android-build/native-map-catalogue.ts",
+      "sizeBytes": 5563,
+      "sha256": "61cbf902c87b3497c8b32bba85007bb9a0a84034d85fce7982bfc45b69853861"
+    },
+    {
       "path": "tools/android-build/native-map-diagnostics.ts",
       "sizeBytes": 2429,
       "sha256": "8044d87a036a99d62d331d884212cad3e0ec9e11e2ebaff17caa4b591f85eef4"
     },
     {
+      "path": "tools/android-build/native-map-mode.ts",
+      "sizeBytes": 1170,
+      "sha256": "aa70ad3a38c33911b0ec7393a709a5f40516d67228051fc118b6f7a9ff070e2f"
+    },
+    {
       "path": "tools/android-build/native-map-route.ts",
-      "sizeBytes": 2101,
-      "sha256": "22b22502d976390ca1b1892a3c63554c4c7c56a599cfed8c8e6c484e8c8a924e"
+      "sizeBytes": 2829,
+      "sha256": "07b12b155de8e65d231828206b63628a95b41e83060225b0f7009a257c7b3c41"
     },
     {
       "path": "tools/android-build/prepare-custom-map.mjs",
-      "sizeBytes": 10876,
-      "sha256": "bbd22daec64283e937e3745c59307d3e3825c330fe32dcea1b429e0dbf7a57f5"
+      "sizeBytes": 14445,
+      "sha256": "f03edbc8debbb30649af0f43ca2ed6ec33fa480a0c7303fbfebb32bf33285ee1"
     },
     {
       "path": "tools/android-build/tsconfig.json",
@@ -260,7 +275,7 @@
     {
       "path": "web/package.json",
       "sizeBytes": 1896,
-      "sha256": "80f5d50f0989b89bb854e98d477f3f0f80f1ec0aaad0bb4cd3ed86a6fb20f6be"
+      "sha256": "4a3188e8ee342b097f2076a909b5aa220a21035be6902443ad216cc78b23b2aa"
     },
     {
       "path": "web/pnpm-lock.yaml",
@@ -271,6 +286,11 @@
       "path": "web/pnpm-workspace.yaml",
       "sizeBytes": 1343,
       "sha256": "0db8de5e7a664a3246e8169331d2c0f6d8e5b5cf4c8c861cf386a9476abae4d9"
+    },
+    {
+      "path": "web/public/data/trail-overlay-b9607512eafb423f.json",
+      "sizeBytes": 2634057,
+      "sha256": "b9607512eafb423fd6f3f72096d273c4cfa711539f4f5ac6c24d82e80c616048"
     },
     {
       "path": "web/public/maps/map-city-labels.js",
@@ -298,17 +318,22 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "f20b4a62f81d5e7fd19f57da6ede78597c3ad1e9dc551e9121dfc5bbf36c9919",
+  "sourceInputsSha256": "43b33f42968322c085252078f3c6ad173ce1ca72a0935f01ae00502c130b5404",
   "files": [
     {
       "path": "android-bootstrap.js",
-      "sizeBytes": 15534,
-      "sha256": "bc04f14b85b724542c44f6249a06ab6260031d3909e022f0ff63a0b1bf916412"
+      "sizeBytes": 22054,
+      "sha256": "f61952e35666edde62156295c2f9cbd60261a3d30609cd7df0e75df5f704cf39"
     },
     {
-      "path": "chunks/custom-map-entry-E-fBYdy1.js",
-      "sizeBytes": 135803,
-      "sha256": "4f0aca59d94a5f04d25e2568282f4c89716af8b640a4756d4d9a359d8c911ea7"
+      "path": "catalogue.json",
+      "sizeBytes": 167378,
+      "sha256": "bad517373c27101ea8fe93423083f3636c11cf65824c2202f69cc2c2bf414aa3"
+    },
+    {
+      "path": "chunks/custom-map-entry-BAb4MFUh.js",
+      "sizeBytes": 146183,
+      "sha256": "f9057f4386e0ecf8da83ec9107517354225f80f265e09444e4e7169ecaf220dd"
     },
     {
       "path": "index.html",
@@ -322,8 +347,8 @@
     },
     {
       "path": "map-runtime.js",
-      "sizeBytes": 156,
-      "sha256": "19adeb7ba5f8509ab703d8ee51e2a7a58d90c8636df0d65a05494af69c43dc5a"
+      "sizeBytes": 224,
+      "sha256": "bf3d9a1801f8a462cbf8119a68fecc8a0b33ece9c2c61c5e84fa09eb1246a9f7"
     },
     {
       "path": "map.css",
@@ -352,6 +377,4318 @@
     }
   ],
   "resourceAliases": [
+    {
+      "url": "/data/imported/osm-relation-10015819.geojson",
+      "assetPath": "maps/routes/osm-relation-10015819.geojson",
+      "path": "maps/routes/osm-relation-10015819.geojson",
+      "sizeBytes": 36756,
+      "sha256": "009445dc4ae409b255f0df15ec3901333ff3c4a7350c67c00ffe817fb954984e"
+    },
+    {
+      "url": "/data/imported/osm-relation-10254230.geojson",
+      "assetPath": "maps/routes/osm-relation-10254230.geojson",
+      "path": "maps/routes/osm-relation-10254230.geojson",
+      "sizeBytes": 2797,
+      "sha256": "893e46ff3b3bbdde26fec91f72a46cca21ddc49f365c5d14d182ebdbb2edcfc9"
+    },
+    {
+      "url": "/data/imported/osm-relation-10259506.geojson",
+      "assetPath": "maps/routes/osm-relation-10259506.geojson",
+      "path": "maps/routes/osm-relation-10259506.geojson",
+      "sizeBytes": 3446,
+      "sha256": "672b9ae13d97a13cc670dce2777b1d6ccbf873f6f42c26f094ef99de30f4c1e5"
+    },
+    {
+      "url": "/data/imported/osm-relation-10328567.geojson",
+      "assetPath": "maps/routes/osm-relation-10328567.geojson",
+      "path": "maps/routes/osm-relation-10328567.geojson",
+      "sizeBytes": 3932,
+      "sha256": "2946d114997b3df955f47230ab4fc762d65c29e7c953513c9d0a69cc3f8ae4f1"
+    },
+    {
+      "url": "/data/imported/osm-relation-10347434.geojson",
+      "assetPath": "maps/routes/osm-relation-10347434.geojson",
+      "path": "maps/routes/osm-relation-10347434.geojson",
+      "sizeBytes": 1808,
+      "sha256": "a80598764e68eab889ae2c3767b53a7c888015eaa5a211f65f09cf214d82e76a"
+    },
+    {
+      "url": "/data/imported/osm-relation-10347476.geojson",
+      "assetPath": "maps/routes/osm-relation-10347476.geojson",
+      "path": "maps/routes/osm-relation-10347476.geojson",
+      "sizeBytes": 2413,
+      "sha256": "bbd8e0484589407c402745ee97f4a57286c7052c93f9f9184186988f4f64e99e"
+    },
+    {
+      "url": "/data/imported/osm-relation-10347517.geojson",
+      "assetPath": "maps/routes/osm-relation-10347517.geojson",
+      "path": "maps/routes/osm-relation-10347517.geojson",
+      "sizeBytes": 1239,
+      "sha256": "2ca4a049182c439401e4cb3569126d35dc34d2c0b0b160fecde389f8b3f5bec5"
+    },
+    {
+      "url": "/data/imported/osm-relation-10348060.geojson",
+      "assetPath": "maps/routes/osm-relation-10348060.geojson",
+      "path": "maps/routes/osm-relation-10348060.geojson",
+      "sizeBytes": 7216,
+      "sha256": "dd0dbc714b9128201b7fec641e417c3470369c7800a0b288f03788309a45b5d0"
+    },
+    {
+      "url": "/data/imported/osm-relation-10348073.geojson",
+      "assetPath": "maps/routes/osm-relation-10348073.geojson",
+      "path": "maps/routes/osm-relation-10348073.geojson",
+      "sizeBytes": 4497,
+      "sha256": "345ddebc17c260609ca76eb90bf9f7dd772898ff2a397a00952eebbb22b25648"
+    },
+    {
+      "url": "/data/imported/osm-relation-10411709.geojson",
+      "assetPath": "maps/routes/osm-relation-10411709.geojson",
+      "path": "maps/routes/osm-relation-10411709.geojson",
+      "sizeBytes": 2114,
+      "sha256": "0f8039fbf956858a44fc5674268322a9757e1346503b221ad8a830f6c766ffb2"
+    },
+    {
+      "url": "/data/imported/osm-relation-10513530.geojson",
+      "assetPath": "maps/routes/osm-relation-10513530.geojson",
+      "path": "maps/routes/osm-relation-10513530.geojson",
+      "sizeBytes": 30712,
+      "sha256": "bc885c5dbbfdaaa2e8c1a5fe76b3d325bd09e5ef4142831dd6cb8bd8ca1900cc"
+    },
+    {
+      "url": "/data/imported/osm-relation-10523129.geojson",
+      "assetPath": "maps/routes/osm-relation-10523129.geojson",
+      "path": "maps/routes/osm-relation-10523129.geojson",
+      "sizeBytes": 21299,
+      "sha256": "e5449f125694edd90aa4fb68abb8898d926e18cdf695aec541444941d6d63444"
+    },
+    {
+      "url": "/data/imported/osm-relation-10523413.geojson",
+      "assetPath": "maps/routes/osm-relation-10523413.geojson",
+      "path": "maps/routes/osm-relation-10523413.geojson",
+      "sizeBytes": 9121,
+      "sha256": "0b4e3ee2238185d55973e56d80b0a2c024d09399082e34bbb3b1c77610529aad"
+    },
+    {
+      "url": "/data/imported/osm-relation-10523425.geojson",
+      "assetPath": "maps/routes/osm-relation-10523425.geojson",
+      "path": "maps/routes/osm-relation-10523425.geojson",
+      "sizeBytes": 4064,
+      "sha256": "b6bcf1e7578a596567b306aeada78522b7cc02fa0e84f4c15e2fc967ff142dec"
+    },
+    {
+      "url": "/data/imported/osm-relation-10523488.geojson",
+      "assetPath": "maps/routes/osm-relation-10523488.geojson",
+      "path": "maps/routes/osm-relation-10523488.geojson",
+      "sizeBytes": 5959,
+      "sha256": "5bfecb7336d2b3d243d46a7d8d3d0e97fc90cd3354afb97a443b70c4832ca10d"
+    },
+    {
+      "url": "/data/imported/osm-relation-10523516.geojson",
+      "assetPath": "maps/routes/osm-relation-10523516.geojson",
+      "path": "maps/routes/osm-relation-10523516.geojson",
+      "sizeBytes": 12678,
+      "sha256": "5047b2ea95a71e69388ec549ccf514b4e71868d5ecc6f17289a70b12f45539bd"
+    },
+    {
+      "url": "/data/imported/osm-relation-10523536.geojson",
+      "assetPath": "maps/routes/osm-relation-10523536.geojson",
+      "path": "maps/routes/osm-relation-10523536.geojson",
+      "sizeBytes": 2565,
+      "sha256": "763f327e9da4b1df1c4bffc1ece5646ff0752571aeb906e1f7d1a22484537260"
+    },
+    {
+      "url": "/data/imported/osm-relation-10523570.geojson",
+      "assetPath": "maps/routes/osm-relation-10523570.geojson",
+      "path": "maps/routes/osm-relation-10523570.geojson",
+      "sizeBytes": 6808,
+      "sha256": "86e7d3320cfbd0286dd376c280be8714035907c5135aae334dc5c52b214b4c31"
+    },
+    {
+      "url": "/data/imported/osm-relation-10523600.geojson",
+      "assetPath": "maps/routes/osm-relation-10523600.geojson",
+      "path": "maps/routes/osm-relation-10523600.geojson",
+      "sizeBytes": 30306,
+      "sha256": "26b41103b0ae7533900b44257e36a4fa582408d8e81fb1b73e439773316618d4"
+    },
+    {
+      "url": "/data/imported/osm-relation-10626407.geojson",
+      "assetPath": "maps/routes/osm-relation-10626407.geojson",
+      "path": "maps/routes/osm-relation-10626407.geojson",
+      "sizeBytes": 3907,
+      "sha256": "d427b7bbdd2f93479c23975a8a2084a5ab7bdf47db600b107af985641cde94a0"
+    },
+    {
+      "url": "/data/imported/osm-relation-10716769.geojson",
+      "assetPath": "maps/routes/osm-relation-10716769.geojson",
+      "path": "maps/routes/osm-relation-10716769.geojson",
+      "sizeBytes": 17595,
+      "sha256": "4e1702e9b2fe62ffe18be9f3e4512327f19637bc43f099791a93347fea70a69c"
+    },
+    {
+      "url": "/data/imported/osm-relation-10716849.geojson",
+      "assetPath": "maps/routes/osm-relation-10716849.geojson",
+      "path": "maps/routes/osm-relation-10716849.geojson",
+      "sizeBytes": 6070,
+      "sha256": "72ca45b7510a8a3c05dac34ec34fd91157006897e292d7de26f8632cfdae5882"
+    },
+    {
+      "url": "/data/imported/osm-relation-10752040.geojson",
+      "assetPath": "maps/routes/osm-relation-10752040.geojson",
+      "path": "maps/routes/osm-relation-10752040.geojson",
+      "sizeBytes": 4870,
+      "sha256": "d55eb49d50ea27dfc0d70e15d299b15d24b2de2129d1523b3bf8e3696133f628"
+    },
+    {
+      "url": "/data/imported/osm-relation-10792857.geojson",
+      "assetPath": "maps/routes/osm-relation-10792857.geojson",
+      "path": "maps/routes/osm-relation-10792857.geojson",
+      "sizeBytes": 1122,
+      "sha256": "759d4820226856468a635e45dcfe30122917d6b3aaf288ec28fd5c9ea8cc9531"
+    },
+    {
+      "url": "/data/imported/osm-relation-10925155.geojson",
+      "assetPath": "maps/routes/osm-relation-10925155.geojson",
+      "path": "maps/routes/osm-relation-10925155.geojson",
+      "sizeBytes": 1188,
+      "sha256": "6bab7e4758c93873f53718befb3aebd571ac04eb050a2d7418ba6b53abbda312"
+    },
+    {
+      "url": "/data/imported/osm-relation-10925156.geojson",
+      "assetPath": "maps/routes/osm-relation-10925156.geojson",
+      "path": "maps/routes/osm-relation-10925156.geojson",
+      "sizeBytes": 682,
+      "sha256": "6a3d2a54831553c62a5a87cf1f31fea44848b1664331774c53eade39be83fc3e"
+    },
+    {
+      "url": "/data/imported/osm-relation-10928641.geojson",
+      "assetPath": "maps/routes/osm-relation-10928641.geojson",
+      "path": "maps/routes/osm-relation-10928641.geojson",
+      "sizeBytes": 5987,
+      "sha256": "1724fc1c0c5ca98af54e5cb03fe8a584d82488796995b4e0fabf8246170f9917"
+    },
+    {
+      "url": "/data/imported/osm-relation-11012588.geojson",
+      "assetPath": "maps/routes/osm-relation-11012588.geojson",
+      "path": "maps/routes/osm-relation-11012588.geojson",
+      "sizeBytes": 25869,
+      "sha256": "d5a17dafd9facb7b0e0d35ee3d57a27c0cb7eba49ab0e8f6c1eeb007b4ff7174"
+    },
+    {
+      "url": "/data/imported/osm-relation-11016044.geojson",
+      "assetPath": "maps/routes/osm-relation-11016044.geojson",
+      "path": "maps/routes/osm-relation-11016044.geojson",
+      "sizeBytes": 4068,
+      "sha256": "3b77cade4fb2cfd9d4b6fab1344895c40cfa2c8fe3ae20e8511e2773e059601e"
+    },
+    {
+      "url": "/data/imported/osm-relation-11016072.geojson",
+      "assetPath": "maps/routes/osm-relation-11016072.geojson",
+      "path": "maps/routes/osm-relation-11016072.geojson",
+      "sizeBytes": 8550,
+      "sha256": "35532bdd9e03f2969f0d7b2a8d295d6c11b372ea3df636a743491598f96a223f"
+    },
+    {
+      "url": "/data/imported/osm-relation-11033549.geojson",
+      "assetPath": "maps/routes/osm-relation-11033549.geojson",
+      "path": "maps/routes/osm-relation-11033549.geojson",
+      "sizeBytes": 7907,
+      "sha256": "e2d2bc5ed5a54c3a0eaec1698e64ef6060559b17e7912952ba937447aa8b05d5"
+    },
+    {
+      "url": "/data/imported/osm-relation-11033602.geojson",
+      "assetPath": "maps/routes/osm-relation-11033602.geojson",
+      "path": "maps/routes/osm-relation-11033602.geojson",
+      "sizeBytes": 15636,
+      "sha256": "7ade6d04cbc63b4ec0dac801a3166d920f919a67e16d13b0b8e8be1330c42dc4"
+    },
+    {
+      "url": "/data/imported/osm-relation-11043531.geojson",
+      "assetPath": "maps/routes/osm-relation-11043531.geojson",
+      "path": "maps/routes/osm-relation-11043531.geojson",
+      "sizeBytes": 15573,
+      "sha256": "e68882df67cc5ba763f52526a09e9d211b8e770aa7f034b78b55f10da7ab0fd6"
+    },
+    {
+      "url": "/data/imported/osm-relation-11069404.geojson",
+      "assetPath": "maps/routes/osm-relation-11069404.geojson",
+      "path": "maps/routes/osm-relation-11069404.geojson",
+      "sizeBytes": 11193,
+      "sha256": "6e9af8d8d95b719b7959c20eea7882dabf5ff6183753d6363936dbb8bf1c7d2a"
+    },
+    {
+      "url": "/data/imported/osm-relation-11069780.geojson",
+      "assetPath": "maps/routes/osm-relation-11069780.geojson",
+      "path": "maps/routes/osm-relation-11069780.geojson",
+      "sizeBytes": 9552,
+      "sha256": "d438866fec7744a268834afee2268571db6eec876a0c0001c1bed8cd6f7edfb6"
+    },
+    {
+      "url": "/data/imported/osm-relation-11085262.geojson",
+      "assetPath": "maps/routes/osm-relation-11085262.geojson",
+      "path": "maps/routes/osm-relation-11085262.geojson",
+      "sizeBytes": 1588,
+      "sha256": "a1c667eaf55045196c60fb8de2f4b967fe0dec8b5a7f40caccd9d4144ac875ad"
+    },
+    {
+      "url": "/data/imported/osm-relation-11093903.geojson",
+      "assetPath": "maps/routes/osm-relation-11093903.geojson",
+      "path": "maps/routes/osm-relation-11093903.geojson",
+      "sizeBytes": 963,
+      "sha256": "1011c2fc32c566fd829f6d54d11ce724e8d9e26e1f3b2987108611d581acb389"
+    },
+    {
+      "url": "/data/imported/osm-relation-11271650.geojson",
+      "assetPath": "maps/routes/osm-relation-11271650.geojson",
+      "path": "maps/routes/osm-relation-11271650.geojson",
+      "sizeBytes": 21257,
+      "sha256": "16b5add3e587789b12884daa57c72c115419a5f61f2f21395d23878937d1bee8"
+    },
+    {
+      "url": "/data/imported/osm-relation-11290804.geojson",
+      "assetPath": "maps/routes/osm-relation-11290804.geojson",
+      "path": "maps/routes/osm-relation-11290804.geojson",
+      "sizeBytes": 31384,
+      "sha256": "d8655fb78d2909ea2ee10ba6b9747d67df3ef643dbc9f350f3f2dd1574aed8c7"
+    },
+    {
+      "url": "/data/imported/osm-relation-11296094.geojson",
+      "assetPath": "maps/routes/osm-relation-11296094.geojson",
+      "path": "maps/routes/osm-relation-11296094.geojson",
+      "sizeBytes": 12030,
+      "sha256": "6a538273a330d391438a21ae8f2df78f720bcc954b4abdf1f1a00451328ca737"
+    },
+    {
+      "url": "/data/imported/osm-relation-11502124.geojson",
+      "assetPath": "maps/routes/osm-relation-11502124.geojson",
+      "path": "maps/routes/osm-relation-11502124.geojson",
+      "sizeBytes": 4801,
+      "sha256": "2dcfb63c72b00fedf5da5b7e497af7cc1125de28b7cbf511f396586c68ff59f6"
+    },
+    {
+      "url": "/data/imported/osm-relation-11502125.geojson",
+      "assetPath": "maps/routes/osm-relation-11502125.geojson",
+      "path": "maps/routes/osm-relation-11502125.geojson",
+      "sizeBytes": 2705,
+      "sha256": "52181fa5c96eec93097127c91111df68f4bf4a7cd58682bdeeb6e613ebc0d32f"
+    },
+    {
+      "url": "/data/imported/osm-relation-11502126.geojson",
+      "assetPath": "maps/routes/osm-relation-11502126.geojson",
+      "path": "maps/routes/osm-relation-11502126.geojson",
+      "sizeBytes": 3861,
+      "sha256": "cd7de7bf879a2ad7677a291bab86597baee91ab960b38c0a0705b6062faaa591"
+    },
+    {
+      "url": "/data/imported/osm-relation-11502127.geojson",
+      "assetPath": "maps/routes/osm-relation-11502127.geojson",
+      "path": "maps/routes/osm-relation-11502127.geojson",
+      "sizeBytes": 1325,
+      "sha256": "282295132ec6ca0d486e540e1978defc1fde6d1cfbfd9c9b0967dc9c85f0a308"
+    },
+    {
+      "url": "/data/imported/osm-relation-11521489.geojson",
+      "assetPath": "maps/routes/osm-relation-11521489.geojson",
+      "path": "maps/routes/osm-relation-11521489.geojson",
+      "sizeBytes": 2410,
+      "sha256": "21d14f6a561022ce5307d9ea11d9e839f172a87ce9db2701f4bec49b9c268568"
+    },
+    {
+      "url": "/data/imported/osm-relation-11620035.geojson",
+      "assetPath": "maps/routes/osm-relation-11620035.geojson",
+      "path": "maps/routes/osm-relation-11620035.geojson",
+      "sizeBytes": 3567,
+      "sha256": "12f5f1ad391e65cfb0eb7f45280ef527b7049ec7b0ae36030057d6fb47d055ea"
+    },
+    {
+      "url": "/data/imported/osm-relation-11622414.geojson",
+      "assetPath": "maps/routes/osm-relation-11622414.geojson",
+      "path": "maps/routes/osm-relation-11622414.geojson",
+      "sizeBytes": 3000,
+      "sha256": "9100bf1389868da5ca88a7582be97994e8a90ce387fc0de33e5d6bfa04274871"
+    },
+    {
+      "url": "/data/imported/osm-relation-11632929.geojson",
+      "assetPath": "maps/routes/osm-relation-11632929.geojson",
+      "path": "maps/routes/osm-relation-11632929.geojson",
+      "sizeBytes": 1280,
+      "sha256": "69e5a7dafd57355b440fe4c57135c34c0c980fb07c1f25fcb5d6a8999baa5727"
+    },
+    {
+      "url": "/data/imported/osm-relation-11681960.geojson",
+      "assetPath": "maps/routes/osm-relation-11681960.geojson",
+      "path": "maps/routes/osm-relation-11681960.geojson",
+      "sizeBytes": 1513,
+      "sha256": "3a2087da5f98f32d1eb453ce968f7735c1c3a2968229e58f57e44f6c585700ff"
+    },
+    {
+      "url": "/data/imported/osm-relation-11723986.geojson",
+      "assetPath": "maps/routes/osm-relation-11723986.geojson",
+      "path": "maps/routes/osm-relation-11723986.geojson",
+      "sizeBytes": 1725,
+      "sha256": "ff1cc95ed58a57a56139ce316de2fabefd9ae0a8f1766305f48cc48db57838d3"
+    },
+    {
+      "url": "/data/imported/osm-relation-11820460.geojson",
+      "assetPath": "maps/routes/osm-relation-11820460.geojson",
+      "path": "maps/routes/osm-relation-11820460.geojson",
+      "sizeBytes": 5581,
+      "sha256": "1183b0a9de045624765179af807dae9dfef32fa47bb0638429dfe6227e1b0c3e"
+    },
+    {
+      "url": "/data/imported/osm-relation-11876665.geojson",
+      "assetPath": "maps/routes/osm-relation-11876665.geojson",
+      "path": "maps/routes/osm-relation-11876665.geojson",
+      "sizeBytes": 7883,
+      "sha256": "a9f0b17ae37c888b4853ac7e19574b3ee7c83591938d14b717074a8b4167529c"
+    },
+    {
+      "url": "/data/imported/osm-relation-11876666.geojson",
+      "assetPath": "maps/routes/osm-relation-11876666.geojson",
+      "path": "maps/routes/osm-relation-11876666.geojson",
+      "sizeBytes": 6778,
+      "sha256": "1e3656980d555df9518ceb4a4ec611c8c0dc046daa68f1237c00e3a1acefa9b7"
+    },
+    {
+      "url": "/data/imported/osm-relation-11878243.geojson",
+      "assetPath": "maps/routes/osm-relation-11878243.geojson",
+      "path": "maps/routes/osm-relation-11878243.geojson",
+      "sizeBytes": 1145,
+      "sha256": "1dbed261de113f4928a042bb8b0dd9c3533c352b92afdf3b08ccb76cd44ab8d1"
+    },
+    {
+      "url": "/data/imported/osm-relation-11884899.geojson",
+      "assetPath": "maps/routes/osm-relation-11884899.geojson",
+      "path": "maps/routes/osm-relation-11884899.geojson",
+      "sizeBytes": 14248,
+      "sha256": "82234e711275d224b05de30a04c85f9bc1e419dc77171f5a1b4d52b896131f49"
+    },
+    {
+      "url": "/data/imported/osm-relation-11887675.geojson",
+      "assetPath": "maps/routes/osm-relation-11887675.geojson",
+      "path": "maps/routes/osm-relation-11887675.geojson",
+      "sizeBytes": 13805,
+      "sha256": "23c0e56a357fe3781b3f4030852c5b8dff11529182741db1b5f5d7b9841b4927"
+    },
+    {
+      "url": "/data/imported/osm-relation-11895623.geojson",
+      "assetPath": "maps/routes/osm-relation-11895623.geojson",
+      "path": "maps/routes/osm-relation-11895623.geojson",
+      "sizeBytes": 3012,
+      "sha256": "651fa12ac5695516a3aef50892ad0d7eb4105898d2647d194f9dce0578ce32b7"
+    },
+    {
+      "url": "/data/imported/osm-relation-11895669.geojson",
+      "assetPath": "maps/routes/osm-relation-11895669.geojson",
+      "path": "maps/routes/osm-relation-11895669.geojson",
+      "sizeBytes": 1203,
+      "sha256": "c2f48c01d5b3d58e4456dd209504f5d891438536c61f9c15ed79feeef675bbcf"
+    },
+    {
+      "url": "/data/imported/osm-relation-11964094.geojson",
+      "assetPath": "maps/routes/osm-relation-11964094.geojson",
+      "path": "maps/routes/osm-relation-11964094.geojson",
+      "sizeBytes": 34395,
+      "sha256": "3a0de94fcc1df5361d2a1b616a8a1443f493210c7255a108892705e71799c979"
+    },
+    {
+      "url": "/data/imported/osm-relation-12010784.geojson",
+      "assetPath": "maps/routes/osm-relation-12010784.geojson",
+      "path": "maps/routes/osm-relation-12010784.geojson",
+      "sizeBytes": 1067,
+      "sha256": "9f711ec88a556c84b6829f6f5b5b11118a38eaae24fe4b9d882a8adca9dea59b"
+    },
+    {
+      "url": "/data/imported/osm-relation-12036391.geojson",
+      "assetPath": "maps/routes/osm-relation-12036391.geojson",
+      "path": "maps/routes/osm-relation-12036391.geojson",
+      "sizeBytes": 22666,
+      "sha256": "3460957e900c6c3c2e8261e6739604751e28ddb6a4d465f44c50b91abcc16d22"
+    },
+    {
+      "url": "/data/imported/osm-relation-12220791.geojson",
+      "assetPath": "maps/routes/osm-relation-12220791.geojson",
+      "path": "maps/routes/osm-relation-12220791.geojson",
+      "sizeBytes": 1515,
+      "sha256": "1c7a829752c17bb77efb7fd80aebf91cc53698daa6328370bdf2fb24157bbe4f"
+    },
+    {
+      "url": "/data/imported/osm-relation-12318799.geojson",
+      "assetPath": "maps/routes/osm-relation-12318799.geojson",
+      "path": "maps/routes/osm-relation-12318799.geojson",
+      "sizeBytes": 21085,
+      "sha256": "cf71dec68a42d344c83beffacbe923d1d71ab0a141bc64c08f413e214dad8432"
+    },
+    {
+      "url": "/data/imported/osm-relation-12324287.geojson",
+      "assetPath": "maps/routes/osm-relation-12324287.geojson",
+      "path": "maps/routes/osm-relation-12324287.geojson",
+      "sizeBytes": 14161,
+      "sha256": "b157af5decb1b16ff022473d960ed02f372673dc9286c42b068ed014a8cd1f93"
+    },
+    {
+      "url": "/data/imported/osm-relation-12326195.geojson",
+      "assetPath": "maps/routes/osm-relation-12326195.geojson",
+      "path": "maps/routes/osm-relation-12326195.geojson",
+      "sizeBytes": 656,
+      "sha256": "2f0f427339e799d0ca92ef49a3ea2e4c85a87b109ed9c38593841304ec309517"
+    },
+    {
+      "url": "/data/imported/osm-relation-12328003.geojson",
+      "assetPath": "maps/routes/osm-relation-12328003.geojson",
+      "path": "maps/routes/osm-relation-12328003.geojson",
+      "sizeBytes": 8693,
+      "sha256": "468230b361e0d7b9543b6a1277756730d481fb62a1ea12d7908e4c67aad3b4df"
+    },
+    {
+      "url": "/data/imported/osm-relation-12328131.geojson",
+      "assetPath": "maps/routes/osm-relation-12328131.geojson",
+      "path": "maps/routes/osm-relation-12328131.geojson",
+      "sizeBytes": 9244,
+      "sha256": "c29a138f198c2f7f1b625d1d304fe552ba5897c081d39eb404c0ea78ae8384f1"
+    },
+    {
+      "url": "/data/imported/osm-relation-12335340.geojson",
+      "assetPath": "maps/routes/osm-relation-12335340.geojson",
+      "path": "maps/routes/osm-relation-12335340.geojson",
+      "sizeBytes": 6788,
+      "sha256": "1b9333e9ba811346e87fc8374b0c30dc47961e41affe0016d618008f12bb725c"
+    },
+    {
+      "url": "/data/imported/osm-relation-12347143.geojson",
+      "assetPath": "maps/routes/osm-relation-12347143.geojson",
+      "path": "maps/routes/osm-relation-12347143.geojson",
+      "sizeBytes": 3933,
+      "sha256": "ad264b4fc57c040a39e938558e057827c89f2cdcf8d1fd91c99421e9a3fc77e9"
+    },
+    {
+      "url": "/data/imported/osm-relation-12350723.geojson",
+      "assetPath": "maps/routes/osm-relation-12350723.geojson",
+      "path": "maps/routes/osm-relation-12350723.geojson",
+      "sizeBytes": 5893,
+      "sha256": "3c9c50f5c0d6a3596171fcd234db9c0d5b819705b4cc1d1eed46b51c63b6bac9"
+    },
+    {
+      "url": "/data/imported/osm-relation-12351763.geojson",
+      "assetPath": "maps/routes/osm-relation-12351763.geojson",
+      "path": "maps/routes/osm-relation-12351763.geojson",
+      "sizeBytes": 5041,
+      "sha256": "e187701029dcaf5018481f283f300c1eae997b9fe0083f856689c70d262edcb4"
+    },
+    {
+      "url": "/data/imported/osm-relation-12358186.geojson",
+      "assetPath": "maps/routes/osm-relation-12358186.geojson",
+      "path": "maps/routes/osm-relation-12358186.geojson",
+      "sizeBytes": 1434,
+      "sha256": "98195f6bf2f15586fc6929d5411ee18e227cb7e06ff435b9cafd224db5ef4686"
+    },
+    {
+      "url": "/data/imported/osm-relation-12404970.geojson",
+      "assetPath": "maps/routes/osm-relation-12404970.geojson",
+      "path": "maps/routes/osm-relation-12404970.geojson",
+      "sizeBytes": 3599,
+      "sha256": "2f1dd149876108b4b7e0eef7369224763460c4cb45ca6356e34caf5feb3cb1aa"
+    },
+    {
+      "url": "/data/imported/osm-relation-12404988.geojson",
+      "assetPath": "maps/routes/osm-relation-12404988.geojson",
+      "path": "maps/routes/osm-relation-12404988.geojson",
+      "sizeBytes": 8128,
+      "sha256": "c279e38f05e6f39c4824d29e764c6a757e66ed015d3300b8aa12b25e43d4323d"
+    },
+    {
+      "url": "/data/imported/osm-relation-12406143.geojson",
+      "assetPath": "maps/routes/osm-relation-12406143.geojson",
+      "path": "maps/routes/osm-relation-12406143.geojson",
+      "sizeBytes": 2118,
+      "sha256": "1c0e4baf2caee3177a636c8c62c74ed8de4a248abd7b2e872c3ccfe0a8bdfd9a"
+    },
+    {
+      "url": "/data/imported/osm-relation-12431459.geojson",
+      "assetPath": "maps/routes/osm-relation-12431459.geojson",
+      "path": "maps/routes/osm-relation-12431459.geojson",
+      "sizeBytes": 21730,
+      "sha256": "69d18bfbfc12724d34128e6e388ca4b2418b22f6cb6f13f717745cb0c3a1b2d6"
+    },
+    {
+      "url": "/data/imported/osm-relation-12431460.geojson",
+      "assetPath": "maps/routes/osm-relation-12431460.geojson",
+      "path": "maps/routes/osm-relation-12431460.geojson",
+      "sizeBytes": 21504,
+      "sha256": "bc4a6d846edf896092d473309e5fa049505f751345b739ae5af4082acc6483ae"
+    },
+    {
+      "url": "/data/imported/osm-relation-12431461.geojson",
+      "assetPath": "maps/routes/osm-relation-12431461.geojson",
+      "path": "maps/routes/osm-relation-12431461.geojson",
+      "sizeBytes": 4821,
+      "sha256": "b7f694aecf7e9335ff4c232c7c383411b9f860994f0fb457436c92700d8b2203"
+    },
+    {
+      "url": "/data/imported/osm-relation-12431462.geojson",
+      "assetPath": "maps/routes/osm-relation-12431462.geojson",
+      "path": "maps/routes/osm-relation-12431462.geojson",
+      "sizeBytes": 3295,
+      "sha256": "a599531e20ef6281e92bf9a525596c9a3c77c15b70cb643ca409165697091562"
+    },
+    {
+      "url": "/data/imported/osm-relation-12431463.geojson",
+      "assetPath": "maps/routes/osm-relation-12431463.geojson",
+      "path": "maps/routes/osm-relation-12431463.geojson",
+      "sizeBytes": 5418,
+      "sha256": "f2683755837288bd1877e68f3d1ecbb3e558dec136cca4b8000a4d2ddc3d9a60"
+    },
+    {
+      "url": "/data/imported/osm-relation-12438965.geojson",
+      "assetPath": "maps/routes/osm-relation-12438965.geojson",
+      "path": "maps/routes/osm-relation-12438965.geojson",
+      "sizeBytes": 2412,
+      "sha256": "853fa6412c7d32003f7fe57d9876ded8653a0a955eab418336a312eb66000c35"
+    },
+    {
+      "url": "/data/imported/osm-relation-12438966.geojson",
+      "assetPath": "maps/routes/osm-relation-12438966.geojson",
+      "path": "maps/routes/osm-relation-12438966.geojson",
+      "sizeBytes": 2524,
+      "sha256": "b206d516a543bc200562d8d290837dfaa1072efd401826c733dc33a736631c34"
+    },
+    {
+      "url": "/data/imported/osm-relation-12438967.geojson",
+      "assetPath": "maps/routes/osm-relation-12438967.geojson",
+      "path": "maps/routes/osm-relation-12438967.geojson",
+      "sizeBytes": 6411,
+      "sha256": "6a2d6fc6f567dd7abfcf096e7b4524731636a55849e09d8e47ede37e1df79401"
+    },
+    {
+      "url": "/data/imported/osm-relation-12438968.geojson",
+      "assetPath": "maps/routes/osm-relation-12438968.geojson",
+      "path": "maps/routes/osm-relation-12438968.geojson",
+      "sizeBytes": 5114,
+      "sha256": "5f71a990cf483dd39e66b3bad23b972f59eda498aa866b6b34bf72130969da98"
+    },
+    {
+      "url": "/data/imported/osm-relation-12472017.geojson",
+      "assetPath": "maps/routes/osm-relation-12472017.geojson",
+      "path": "maps/routes/osm-relation-12472017.geojson",
+      "sizeBytes": 6913,
+      "sha256": "aae369c194c594280050c3adf84644f690d6e5b1537ae54756d3e964d351a4c9"
+    },
+    {
+      "url": "/data/imported/osm-relation-12494595.geojson",
+      "assetPath": "maps/routes/osm-relation-12494595.geojson",
+      "path": "maps/routes/osm-relation-12494595.geojson",
+      "sizeBytes": 6869,
+      "sha256": "dc1055431fd15c6a484eca26be2dd95818b86e23384a8f0d033380edcf083f74"
+    },
+    {
+      "url": "/data/imported/osm-relation-12494851.geojson",
+      "assetPath": "maps/routes/osm-relation-12494851.geojson",
+      "path": "maps/routes/osm-relation-12494851.geojson",
+      "sizeBytes": 3187,
+      "sha256": "4657908e6077b7e2393053321fd34a53f4381588881997fa73255707bca05bec"
+    },
+    {
+      "url": "/data/imported/osm-relation-12494971.geojson",
+      "assetPath": "maps/routes/osm-relation-12494971.geojson",
+      "path": "maps/routes/osm-relation-12494971.geojson",
+      "sizeBytes": 7516,
+      "sha256": "ce3b90b4dbae5b1c9d6c719fdc6c609207c18fcce620807a77cc9134a69a018e"
+    },
+    {
+      "url": "/data/imported/osm-relation-12660054.geojson",
+      "assetPath": "maps/routes/osm-relation-12660054.geojson",
+      "path": "maps/routes/osm-relation-12660054.geojson",
+      "sizeBytes": 1336,
+      "sha256": "495e77c43f7f0a67dc52666f8286cdd85b8d6325d4a44c2719c2da6a621496c6"
+    },
+    {
+      "url": "/data/imported/osm-relation-12663711.geojson",
+      "assetPath": "maps/routes/osm-relation-12663711.geojson",
+      "path": "maps/routes/osm-relation-12663711.geojson",
+      "sizeBytes": 7545,
+      "sha256": "07167ba98b0fc48244cb8d06fe0664f219e6f439a94b1b974246261831047658"
+    },
+    {
+      "url": "/data/imported/osm-relation-12867443.geojson",
+      "assetPath": "maps/routes/osm-relation-12867443.geojson",
+      "path": "maps/routes/osm-relation-12867443.geojson",
+      "sizeBytes": 4299,
+      "sha256": "9ad012da99efab6cfe869a0db024be909ff60fd7bf0dff570c75267e0872ca39"
+    },
+    {
+      "url": "/data/imported/osm-relation-12867773.geojson",
+      "assetPath": "maps/routes/osm-relation-12867773.geojson",
+      "path": "maps/routes/osm-relation-12867773.geojson",
+      "sizeBytes": 4926,
+      "sha256": "76b9d72b0879370ff9613dc831841bbf57ba59add27ed9a1888381f4a0f05ffd"
+    },
+    {
+      "url": "/data/imported/osm-relation-12868334.geojson",
+      "assetPath": "maps/routes/osm-relation-12868334.geojson",
+      "path": "maps/routes/osm-relation-12868334.geojson",
+      "sizeBytes": 4459,
+      "sha256": "5d3d3df33691f1c3b28b8f7c5a5e301476c571e1c6627785a00604a7e7308102"
+    },
+    {
+      "url": "/data/imported/osm-relation-12871643.geojson",
+      "assetPath": "maps/routes/osm-relation-12871643.geojson",
+      "path": "maps/routes/osm-relation-12871643.geojson",
+      "sizeBytes": 6474,
+      "sha256": "678c6f4b594ca3e57a43530a83a22074d51a8eb61bf8e4520c9d7ff3610b4984"
+    },
+    {
+      "url": "/data/imported/osm-relation-12882122.geojson",
+      "assetPath": "maps/routes/osm-relation-12882122.geojson",
+      "path": "maps/routes/osm-relation-12882122.geojson",
+      "sizeBytes": 12774,
+      "sha256": "d7bc446bffe9e63d107cf60f63fe01e228f37064055f05806686df5ee47be670"
+    },
+    {
+      "url": "/data/imported/osm-relation-12883213.geojson",
+      "assetPath": "maps/routes/osm-relation-12883213.geojson",
+      "path": "maps/routes/osm-relation-12883213.geojson",
+      "sizeBytes": 4511,
+      "sha256": "eb90d0bdd623f186ae31fe944d8fdfcec0450372b9a050c3779523a1178cdf7f"
+    },
+    {
+      "url": "/data/imported/osm-relation-12883928.geojson",
+      "assetPath": "maps/routes/osm-relation-12883928.geojson",
+      "path": "maps/routes/osm-relation-12883928.geojson",
+      "sizeBytes": 3062,
+      "sha256": "f49cf23cd1acd30868695dfb8f79e90e0578777c131fd5b16f6a3ab4371e03a1"
+    },
+    {
+      "url": "/data/imported/osm-relation-12884046.geojson",
+      "assetPath": "maps/routes/osm-relation-12884046.geojson",
+      "path": "maps/routes/osm-relation-12884046.geojson",
+      "sizeBytes": 1258,
+      "sha256": "2661823051e6b5c4927627e74d02f6429b589b0507d4bc016788ef0168ab743e"
+    },
+    {
+      "url": "/data/imported/osm-relation-12884171.geojson",
+      "assetPath": "maps/routes/osm-relation-12884171.geojson",
+      "path": "maps/routes/osm-relation-12884171.geojson",
+      "sizeBytes": 3196,
+      "sha256": "e1033aaade1b1bcfb7a326cd04cc45fa4b7872455bb9778071caee46385843c3"
+    },
+    {
+      "url": "/data/imported/osm-relation-12892550.geojson",
+      "assetPath": "maps/routes/osm-relation-12892550.geojson",
+      "path": "maps/routes/osm-relation-12892550.geojson",
+      "sizeBytes": 3554,
+      "sha256": "8431cc5fead957241f1623858217f66606086f545df40cc56e8cfce4ccd8c5db"
+    },
+    {
+      "url": "/data/imported/osm-relation-12896853.geojson",
+      "assetPath": "maps/routes/osm-relation-12896853.geojson",
+      "path": "maps/routes/osm-relation-12896853.geojson",
+      "sizeBytes": 19649,
+      "sha256": "af4242eeccbe8c06086087b99d73c7a9b8d1235dca370f278b29527ca635a37f"
+    },
+    {
+      "url": "/data/imported/osm-relation-12900882.geojson",
+      "assetPath": "maps/routes/osm-relation-12900882.geojson",
+      "path": "maps/routes/osm-relation-12900882.geojson",
+      "sizeBytes": 10436,
+      "sha256": "734d7d697087be1b6f5b1c5a11ab8fa32b67a9acd820ee0c0d40a8d76d106fd8"
+    },
+    {
+      "url": "/data/imported/osm-relation-12906364.geojson",
+      "assetPath": "maps/routes/osm-relation-12906364.geojson",
+      "path": "maps/routes/osm-relation-12906364.geojson",
+      "sizeBytes": 924,
+      "sha256": "22080185a1932d62964b859c8cfec40e99fcee405cc24c37d758c09e47b45eeb"
+    },
+    {
+      "url": "/data/imported/osm-relation-12906451.geojson",
+      "assetPath": "maps/routes/osm-relation-12906451.geojson",
+      "path": "maps/routes/osm-relation-12906451.geojson",
+      "sizeBytes": 1135,
+      "sha256": "0b8f4b8f802376777075187657e57641fbed16892ceaa8deb5278304ebc3191b"
+    },
+    {
+      "url": "/data/imported/osm-relation-12906452.geojson",
+      "assetPath": "maps/routes/osm-relation-12906452.geojson",
+      "path": "maps/routes/osm-relation-12906452.geojson",
+      "sizeBytes": 1562,
+      "sha256": "9643da15e68591de87c43753a4f887d4f87c9908cf88ba0b4d408d450d84d537"
+    },
+    {
+      "url": "/data/imported/osm-relation-12906835.geojson",
+      "assetPath": "maps/routes/osm-relation-12906835.geojson",
+      "path": "maps/routes/osm-relation-12906835.geojson",
+      "sizeBytes": 1356,
+      "sha256": "67713ef1132797a417450d3d3c01270fa496505e59411a8944016fcf1de19fae"
+    },
+    {
+      "url": "/data/imported/osm-relation-12906836.geojson",
+      "assetPath": "maps/routes/osm-relation-12906836.geojson",
+      "path": "maps/routes/osm-relation-12906836.geojson",
+      "sizeBytes": 1664,
+      "sha256": "2f64aee41d4d0009f9196de16cca79328ce06bec433468f198675374ec4b349f"
+    },
+    {
+      "url": "/data/imported/osm-relation-12906837.geojson",
+      "assetPath": "maps/routes/osm-relation-12906837.geojson",
+      "path": "maps/routes/osm-relation-12906837.geojson",
+      "sizeBytes": 1399,
+      "sha256": "eb8ea67435ae7dba1b055144c79203e40bb922da0df18caaf819be83a3675869"
+    },
+    {
+      "url": "/data/imported/osm-relation-12906838.geojson",
+      "assetPath": "maps/routes/osm-relation-12906838.geojson",
+      "path": "maps/routes/osm-relation-12906838.geojson",
+      "sizeBytes": 926,
+      "sha256": "09526e1059cd22474d624400b6f0257abf5ef02437628b400a5e1d661dcbdd44"
+    },
+    {
+      "url": "/data/imported/osm-relation-12906839.geojson",
+      "assetPath": "maps/routes/osm-relation-12906839.geojson",
+      "path": "maps/routes/osm-relation-12906839.geojson",
+      "sizeBytes": 874,
+      "sha256": "308b1789060cb5ee5853ac3e12d51d8f6b3ce50d0e1452dbe8460f4d7353790e"
+    },
+    {
+      "url": "/data/imported/osm-relation-12915836.geojson",
+      "assetPath": "maps/routes/osm-relation-12915836.geojson",
+      "path": "maps/routes/osm-relation-12915836.geojson",
+      "sizeBytes": 10592,
+      "sha256": "f2458e977410fcf44db8e49bcc2c8b152cd757785120a4e076df1f2e924ee160"
+    },
+    {
+      "url": "/data/imported/osm-relation-12921500.geojson",
+      "assetPath": "maps/routes/osm-relation-12921500.geojson",
+      "path": "maps/routes/osm-relation-12921500.geojson",
+      "sizeBytes": 12707,
+      "sha256": "73086f11e0f804ef3bc9ca1fe60cd46d254e580b0812acaec816582ff40a47e0"
+    },
+    {
+      "url": "/data/imported/osm-relation-12925406.geojson",
+      "assetPath": "maps/routes/osm-relation-12925406.geojson",
+      "path": "maps/routes/osm-relation-12925406.geojson",
+      "sizeBytes": 8505,
+      "sha256": "44f113392873914f7494c828bdabc97a08b4356472736be98092bd0e88514359"
+    },
+    {
+      "url": "/data/imported/osm-relation-13004581.geojson",
+      "assetPath": "maps/routes/osm-relation-13004581.geojson",
+      "path": "maps/routes/osm-relation-13004581.geojson",
+      "sizeBytes": 3521,
+      "sha256": "041713c6774fbab465bc154eb04f75f4d46379e77b630f3e131d8443c4e44249"
+    },
+    {
+      "url": "/data/imported/osm-relation-13014211.geojson",
+      "assetPath": "maps/routes/osm-relation-13014211.geojson",
+      "path": "maps/routes/osm-relation-13014211.geojson",
+      "sizeBytes": 446,
+      "sha256": "a026f2be97d67df3cb85f1c8ae00f9e54911ce5bf0c99ba952f7f09155d8922c"
+    },
+    {
+      "url": "/data/imported/osm-relation-13021062.geojson",
+      "assetPath": "maps/routes/osm-relation-13021062.geojson",
+      "path": "maps/routes/osm-relation-13021062.geojson",
+      "sizeBytes": 5614,
+      "sha256": "877f00dd9cd21d46fe313969cf0e0920fd58bb53583436dcf0c0de5fdc8122be"
+    },
+    {
+      "url": "/data/imported/osm-relation-13025082.geojson",
+      "assetPath": "maps/routes/osm-relation-13025082.geojson",
+      "path": "maps/routes/osm-relation-13025082.geojson",
+      "sizeBytes": 1353,
+      "sha256": "3492b7991017e00bb0409b9ec35ee2a7fc1c9c953e9a23c5feef63836b9e186b"
+    },
+    {
+      "url": "/data/imported/osm-relation-13030392.geojson",
+      "assetPath": "maps/routes/osm-relation-13030392.geojson",
+      "path": "maps/routes/osm-relation-13030392.geojson",
+      "sizeBytes": 2476,
+      "sha256": "0654a13f6cc758a51e3e6e4f2f86560b01b42f7bf01899ff2ad54b5bc00cc23e"
+    },
+    {
+      "url": "/data/imported/osm-relation-13070643.geojson",
+      "assetPath": "maps/routes/osm-relation-13070643.geojson",
+      "path": "maps/routes/osm-relation-13070643.geojson",
+      "sizeBytes": 3511,
+      "sha256": "d08d40bbffbcf9221d159ccebdbf010c03217175b054381999eebb8ff3a123e4"
+    },
+    {
+      "url": "/data/imported/osm-relation-13083400.geojson",
+      "assetPath": "maps/routes/osm-relation-13083400.geojson",
+      "path": "maps/routes/osm-relation-13083400.geojson",
+      "sizeBytes": 103116,
+      "sha256": "4b952e433b4d77d60ff75f75dff2eed3b134531130ee989778167c0f00aa16ad"
+    },
+    {
+      "url": "/data/imported/osm-relation-13139205.geojson",
+      "assetPath": "maps/routes/osm-relation-13139205.geojson",
+      "path": "maps/routes/osm-relation-13139205.geojson",
+      "sizeBytes": 1244,
+      "sha256": "7fb59d831c6874a25f0f6c3820e54fcf8c4438560b09b383d4a3ad9254c32d8f"
+    },
+    {
+      "url": "/data/imported/osm-relation-13232467.geojson",
+      "assetPath": "maps/routes/osm-relation-13232467.geojson",
+      "path": "maps/routes/osm-relation-13232467.geojson",
+      "sizeBytes": 5124,
+      "sha256": "8f132ba4208be741cf6f3e03d1e8e75242b03f3a83abfb94a5b57632745490da"
+    },
+    {
+      "url": "/data/imported/osm-relation-13232468.geojson",
+      "assetPath": "maps/routes/osm-relation-13232468.geojson",
+      "path": "maps/routes/osm-relation-13232468.geojson",
+      "sizeBytes": 1953,
+      "sha256": "f2046a6766d695e2d665d40d147fc31f2f9bf1806ed1089afef41b9d4d0a7776"
+    },
+    {
+      "url": "/data/imported/osm-relation-13232469.geojson",
+      "assetPath": "maps/routes/osm-relation-13232469.geojson",
+      "path": "maps/routes/osm-relation-13232469.geojson",
+      "sizeBytes": 995,
+      "sha256": "b32c5db79032dc933ae403a81e3bdc0eaaa66b640e340225f1c0c7960f0d9b14"
+    },
+    {
+      "url": "/data/imported/osm-relation-13232470.geojson",
+      "assetPath": "maps/routes/osm-relation-13232470.geojson",
+      "path": "maps/routes/osm-relation-13232470.geojson",
+      "sizeBytes": 8762,
+      "sha256": "26a8e0a525873e7d5f0e35d0cd11780e8d95e371d6648a7f877da689a9ed9723"
+    },
+    {
+      "url": "/data/imported/osm-relation-13263699.geojson",
+      "assetPath": "maps/routes/osm-relation-13263699.geojson",
+      "path": "maps/routes/osm-relation-13263699.geojson",
+      "sizeBytes": 446,
+      "sha256": "e7a50f0c3f7c8f8b55c78fc180453a3e14b59d13230fcc0fa4f1731bd89dff66"
+    },
+    {
+      "url": "/data/imported/osm-relation-13263733.geojson",
+      "assetPath": "maps/routes/osm-relation-13263733.geojson",
+      "path": "maps/routes/osm-relation-13263733.geojson",
+      "sizeBytes": 796,
+      "sha256": "5d90115ba929d18c09c86278c43dc1af82a3c561320fad6012517ece51f03f78"
+    },
+    {
+      "url": "/data/imported/osm-relation-13263734.geojson",
+      "assetPath": "maps/routes/osm-relation-13263734.geojson",
+      "path": "maps/routes/osm-relation-13263734.geojson",
+      "sizeBytes": 2746,
+      "sha256": "9e09a36754a5be3b3c1c8b52c2c22b82e88eb2101769e92602e97cfd3b688df5"
+    },
+    {
+      "url": "/data/imported/osm-relation-13381910.geojson",
+      "assetPath": "maps/routes/osm-relation-13381910.geojson",
+      "path": "maps/routes/osm-relation-13381910.geojson",
+      "sizeBytes": 1326,
+      "sha256": "aa99c8e2d8eeed9607f91f6dc35843e6ed79d61e3460af3acba264c31e904df2"
+    },
+    {
+      "url": "/data/imported/osm-relation-13407963.geojson",
+      "assetPath": "maps/routes/osm-relation-13407963.geojson",
+      "path": "maps/routes/osm-relation-13407963.geojson",
+      "sizeBytes": 7356,
+      "sha256": "7b4205d4e5754935aaac31a454b2e96e96d31a965c2daa75a46ec202f10c73aa"
+    },
+    {
+      "url": "/data/imported/osm-relation-13418278.geojson",
+      "assetPath": "maps/routes/osm-relation-13418278.geojson",
+      "path": "maps/routes/osm-relation-13418278.geojson",
+      "sizeBytes": 1307,
+      "sha256": "4f4a6acf58148bbfd4da0d43e451c8d1d38552d352ddacf875c9c3dadf245784"
+    },
+    {
+      "url": "/data/imported/osm-relation-13486374.geojson",
+      "assetPath": "maps/routes/osm-relation-13486374.geojson",
+      "path": "maps/routes/osm-relation-13486374.geojson",
+      "sizeBytes": 7967,
+      "sha256": "557cafa3e653200e7902eee2873a0fdd0b40a0fa57f2770f3b07ee2f86515793"
+    },
+    {
+      "url": "/data/imported/osm-relation-13499262.geojson",
+      "assetPath": "maps/routes/osm-relation-13499262.geojson",
+      "path": "maps/routes/osm-relation-13499262.geojson",
+      "sizeBytes": 8587,
+      "sha256": "18b53929b5896719b6396d36e733724aff3556f8259cc738e367b7a91e891fa3"
+    },
+    {
+      "url": "/data/imported/osm-relation-13499477.geojson",
+      "assetPath": "maps/routes/osm-relation-13499477.geojson",
+      "path": "maps/routes/osm-relation-13499477.geojson",
+      "sizeBytes": 4770,
+      "sha256": "4aabb97b6e07ad97cc3f2cce9413313f01e70a1a95083e21152298f3d5f63298"
+    },
+    {
+      "url": "/data/imported/osm-relation-13523771.geojson",
+      "assetPath": "maps/routes/osm-relation-13523771.geojson",
+      "path": "maps/routes/osm-relation-13523771.geojson",
+      "sizeBytes": 2437,
+      "sha256": "b968102191001eac881aa65e3c6c3cd58cbabda8f506584f420c09e27e30c7ac"
+    },
+    {
+      "url": "/data/imported/osm-relation-13523772.geojson",
+      "assetPath": "maps/routes/osm-relation-13523772.geojson",
+      "path": "maps/routes/osm-relation-13523772.geojson",
+      "sizeBytes": 2437,
+      "sha256": "7b75711823daa3598d8542bd976d2d90a3eeb9266905f94c007fab964a661e1e"
+    },
+    {
+      "url": "/data/imported/osm-relation-13627521.geojson",
+      "assetPath": "maps/routes/osm-relation-13627521.geojson",
+      "path": "maps/routes/osm-relation-13627521.geojson",
+      "sizeBytes": 2018,
+      "sha256": "e84dfaefd964e29d7de022cfa47d0efb856e7bd0dffee559003f9d32c2711cc3"
+    },
+    {
+      "url": "/data/imported/osm-relation-13756508.geojson",
+      "assetPath": "maps/routes/osm-relation-13756508.geojson",
+      "path": "maps/routes/osm-relation-13756508.geojson",
+      "sizeBytes": 4910,
+      "sha256": "89beb6d9bb547503015cde568fc2ca6704d28c86e61dab64aedb38cd0f3d1034"
+    },
+    {
+      "url": "/data/imported/osm-relation-13984223.geojson",
+      "assetPath": "maps/routes/osm-relation-13984223.geojson",
+      "path": "maps/routes/osm-relation-13984223.geojson",
+      "sizeBytes": 3902,
+      "sha256": "17df398eacd68c30867ca05fa0dffd008b56f911f52431ed60a93b04522201f8"
+    },
+    {
+      "url": "/data/imported/osm-relation-14075152.geojson",
+      "assetPath": "maps/routes/osm-relation-14075152.geojson",
+      "path": "maps/routes/osm-relation-14075152.geojson",
+      "sizeBytes": 3722,
+      "sha256": "13f0a7efcd40887798541d78f86bf8a60c2cbced8d46dc447ac5f1d58c44375d"
+    },
+    {
+      "url": "/data/imported/osm-relation-14093797.geojson",
+      "assetPath": "maps/routes/osm-relation-14093797.geojson",
+      "path": "maps/routes/osm-relation-14093797.geojson",
+      "sizeBytes": 2052,
+      "sha256": "d3b9cd3231e8200c2b40ab6021216b4f0fbabf88a81498fe2563a1f672709d18"
+    },
+    {
+      "url": "/data/imported/osm-relation-14097876.geojson",
+      "assetPath": "maps/routes/osm-relation-14097876.geojson",
+      "path": "maps/routes/osm-relation-14097876.geojson",
+      "sizeBytes": 4038,
+      "sha256": "4fa7659ac9c31035287536927ade6c22dca206252a45fa095563e9ea8194287c"
+    },
+    {
+      "url": "/data/imported/osm-relation-14102449.geojson",
+      "assetPath": "maps/routes/osm-relation-14102449.geojson",
+      "path": "maps/routes/osm-relation-14102449.geojson",
+      "sizeBytes": 919,
+      "sha256": "424f97a62a9425a8041d54131b72986d97b84d01c8a7fa84cc26e7d1e38c856e"
+    },
+    {
+      "url": "/data/imported/osm-relation-14102450.geojson",
+      "assetPath": "maps/routes/osm-relation-14102450.geojson",
+      "path": "maps/routes/osm-relation-14102450.geojson",
+      "sizeBytes": 4902,
+      "sha256": "02c9ab4454afaad35bcb9ae21de703f20b4a4f0b8f837904b7a5948bda0a7124"
+    },
+    {
+      "url": "/data/imported/osm-relation-14102451.geojson",
+      "assetPath": "maps/routes/osm-relation-14102451.geojson",
+      "path": "maps/routes/osm-relation-14102451.geojson",
+      "sizeBytes": 3836,
+      "sha256": "763b89daa2cabb308cbd8606baedf2af75a2008942fe208e821513ca02b519b6"
+    },
+    {
+      "url": "/data/imported/osm-relation-14243573.geojson",
+      "assetPath": "maps/routes/osm-relation-14243573.geojson",
+      "path": "maps/routes/osm-relation-14243573.geojson",
+      "sizeBytes": 10354,
+      "sha256": "620f838a3c68dca08e9cedcf57219446f60bd239857ee0af2b5ad9106af28fc3"
+    },
+    {
+      "url": "/data/imported/osm-relation-14243702.geojson",
+      "assetPath": "maps/routes/osm-relation-14243702.geojson",
+      "path": "maps/routes/osm-relation-14243702.geojson",
+      "sizeBytes": 5583,
+      "sha256": "a75a9a7066eac73cbd3d97e30099f64978f781de8d34e40ac64f5820bb6302ee"
+    },
+    {
+      "url": "/data/imported/osm-relation-14270035.geojson",
+      "assetPath": "maps/routes/osm-relation-14270035.geojson",
+      "path": "maps/routes/osm-relation-14270035.geojson",
+      "sizeBytes": 12837,
+      "sha256": "797a32128b59cfbcc0a7e7a1efd3af01f31484ea457a6df8c7363c0d66ba8f23"
+    },
+    {
+      "url": "/data/imported/osm-relation-14273499.geojson",
+      "assetPath": "maps/routes/osm-relation-14273499.geojson",
+      "path": "maps/routes/osm-relation-14273499.geojson",
+      "sizeBytes": 1707,
+      "sha256": "b4dbd238e55907f13dcbddf7f41c367dab14c8b50db5db9dadde3f9e5455317a"
+    },
+    {
+      "url": "/data/imported/osm-relation-14273500.geojson",
+      "assetPath": "maps/routes/osm-relation-14273500.geojson",
+      "path": "maps/routes/osm-relation-14273500.geojson",
+      "sizeBytes": 1308,
+      "sha256": "1fe93ab6fed4610439b16dc014a4aec9e58e1b5997da2bfb4cb4b1bac869e185"
+    },
+    {
+      "url": "/data/imported/osm-relation-14273717.geojson",
+      "assetPath": "maps/routes/osm-relation-14273717.geojson",
+      "path": "maps/routes/osm-relation-14273717.geojson",
+      "sizeBytes": 14786,
+      "sha256": "ba5bb2ffbb7544ee885aa3b26ff69d31b02f033503c2221fafdfcb686a0a1ed7"
+    },
+    {
+      "url": "/data/imported/osm-relation-14346674.geojson",
+      "assetPath": "maps/routes/osm-relation-14346674.geojson",
+      "path": "maps/routes/osm-relation-14346674.geojson",
+      "sizeBytes": 5508,
+      "sha256": "c61857fd64a3c7055217bd61786a3902e49b145f5f3dda9c0ebe37b4af5c3295"
+    },
+    {
+      "url": "/data/imported/osm-relation-14357545.geojson",
+      "assetPath": "maps/routes/osm-relation-14357545.geojson",
+      "path": "maps/routes/osm-relation-14357545.geojson",
+      "sizeBytes": 20494,
+      "sha256": "a6f86f47094012135943e6d92fdb4ff7c280670d2dd6804e0f58208ce491ea07"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376203.geojson",
+      "assetPath": "maps/routes/osm-relation-14376203.geojson",
+      "path": "maps/routes/osm-relation-14376203.geojson",
+      "sizeBytes": 2395,
+      "sha256": "1f73fbe8cd9c71cf1fd0be821c8985f5e8dee3e2c2748f2680bc5b4b26ad3ffe"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376257.geojson",
+      "assetPath": "maps/routes/osm-relation-14376257.geojson",
+      "path": "maps/routes/osm-relation-14376257.geojson",
+      "sizeBytes": 16080,
+      "sha256": "ea42827a40a94420e071fbc92c45cc2ef969a7671c4a725bde08aed07bc143da"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376382.geojson",
+      "assetPath": "maps/routes/osm-relation-14376382.geojson",
+      "path": "maps/routes/osm-relation-14376382.geojson",
+      "sizeBytes": 6624,
+      "sha256": "d7dbd3c31b19140944507d48442b7f26bb3b89e05901b7b663f874b2f22cac0a"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376417.geojson",
+      "assetPath": "maps/routes/osm-relation-14376417.geojson",
+      "path": "maps/routes/osm-relation-14376417.geojson",
+      "sizeBytes": 5351,
+      "sha256": "8d03c5ba6c6baa9c5db72e687f2275ef9e2b82d07e2573da952a0bc8977a9ecf"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376574.geojson",
+      "assetPath": "maps/routes/osm-relation-14376574.geojson",
+      "path": "maps/routes/osm-relation-14376574.geojson",
+      "sizeBytes": 3513,
+      "sha256": "66555a8ea7e756dd94761c53775566a796c8efded614bcc707d6f415cbdd2424"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376588.geojson",
+      "assetPath": "maps/routes/osm-relation-14376588.geojson",
+      "path": "maps/routes/osm-relation-14376588.geojson",
+      "sizeBytes": 1761,
+      "sha256": "b511325e77ced522129be75b26176f7785fac673a5b4fa7729502e28d1d41be3"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376599.geojson",
+      "assetPath": "maps/routes/osm-relation-14376599.geojson",
+      "path": "maps/routes/osm-relation-14376599.geojson",
+      "sizeBytes": 998,
+      "sha256": "96e872fec2c7ed9a873e1b9444d53c5f28c9eac95c8c9df0515809619e9c0989"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376615.geojson",
+      "assetPath": "maps/routes/osm-relation-14376615.geojson",
+      "path": "maps/routes/osm-relation-14376615.geojson",
+      "sizeBytes": 921,
+      "sha256": "a46bd918f38871a1ad9cd013d9050acc75b05d685ddbe1721576901304d06225"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376633.geojson",
+      "assetPath": "maps/routes/osm-relation-14376633.geojson",
+      "path": "maps/routes/osm-relation-14376633.geojson",
+      "sizeBytes": 822,
+      "sha256": "adb545ee072d679dd0c7d91f4103c18dd1dfc89d7e8ce98bcca5660013005f8b"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376657.geojson",
+      "assetPath": "maps/routes/osm-relation-14376657.geojson",
+      "path": "maps/routes/osm-relation-14376657.geojson",
+      "sizeBytes": 4086,
+      "sha256": "979e0f2b757ff5e7cc554bb247870aafa2c6478a07e2b86e04840b56115c6358"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376701.geojson",
+      "assetPath": "maps/routes/osm-relation-14376701.geojson",
+      "path": "maps/routes/osm-relation-14376701.geojson",
+      "sizeBytes": 7330,
+      "sha256": "c698f6deebab45c45277e0b62e28cabcb2b89f09672998aa55d992ac8aa5a2e1"
+    },
+    {
+      "url": "/data/imported/osm-relation-14376817.geojson",
+      "assetPath": "maps/routes/osm-relation-14376817.geojson",
+      "path": "maps/routes/osm-relation-14376817.geojson",
+      "sizeBytes": 29192,
+      "sha256": "b837d16a27af916d80ae15cc86fa21f6978412234e16c3815a467f9c7046d9c5"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378644.geojson",
+      "assetPath": "maps/routes/osm-relation-14378644.geojson",
+      "path": "maps/routes/osm-relation-14378644.geojson",
+      "sizeBytes": 5477,
+      "sha256": "e2200d0d12d00810e819a825795603916d4a3ffd3d48f8f07181983cb1acfdcb"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378669.geojson",
+      "assetPath": "maps/routes/osm-relation-14378669.geojson",
+      "path": "maps/routes/osm-relation-14378669.geojson",
+      "sizeBytes": 9086,
+      "sha256": "d633333f01f66e65b554db8da766230dd1d62bbe808a4b226e7022308f88ffe1"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378729.geojson",
+      "assetPath": "maps/routes/osm-relation-14378729.geojson",
+      "path": "maps/routes/osm-relation-14378729.geojson",
+      "sizeBytes": 2547,
+      "sha256": "43a17dec16ff48952ba3a1432827faf235b6d07d784155e352604ae17d5425fa"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378738.geojson",
+      "assetPath": "maps/routes/osm-relation-14378738.geojson",
+      "path": "maps/routes/osm-relation-14378738.geojson",
+      "sizeBytes": 8413,
+      "sha256": "2ffdb781101c7f5e24a3be623a0e4c0bed949239c1cb8d5ab5bce4f047dd5755"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378740.geojson",
+      "assetPath": "maps/routes/osm-relation-14378740.geojson",
+      "path": "maps/routes/osm-relation-14378740.geojson",
+      "sizeBytes": 2908,
+      "sha256": "7e6e54f436a295f352520a9c2a83a5ef5ecc82c7d500aefccc052b3c0a41c7a5"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378772.geojson",
+      "assetPath": "maps/routes/osm-relation-14378772.geojson",
+      "path": "maps/routes/osm-relation-14378772.geojson",
+      "sizeBytes": 918,
+      "sha256": "2d6f12123027b7a755a51ecdeaa7969535200023b538efc6e39dcc6d6e785541"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378779.geojson",
+      "assetPath": "maps/routes/osm-relation-14378779.geojson",
+      "path": "maps/routes/osm-relation-14378779.geojson",
+      "sizeBytes": 1321,
+      "sha256": "d4aeaa6a96f1fa9837ecf90820b047212c9c8b9134d484123ae36af8cd815852"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378808.geojson",
+      "assetPath": "maps/routes/osm-relation-14378808.geojson",
+      "path": "maps/routes/osm-relation-14378808.geojson",
+      "sizeBytes": 5823,
+      "sha256": "7943ba30d220c1328c94fd97f0e2e9e8a634970e54374e6e1c9e44cb4b67aa0e"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378813.geojson",
+      "assetPath": "maps/routes/osm-relation-14378813.geojson",
+      "path": "maps/routes/osm-relation-14378813.geojson",
+      "sizeBytes": 4782,
+      "sha256": "5433b74ee98e0c4d14512ad35267c9e84e7117df8639ead53c3e58d55710389f"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378821.geojson",
+      "assetPath": "maps/routes/osm-relation-14378821.geojson",
+      "path": "maps/routes/osm-relation-14378821.geojson",
+      "sizeBytes": 4424,
+      "sha256": "f847406a2a4a50bfc37e0e998509e7c41a72cf771dc84250aab57795f4dd8086"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378861.geojson",
+      "assetPath": "maps/routes/osm-relation-14378861.geojson",
+      "path": "maps/routes/osm-relation-14378861.geojson",
+      "sizeBytes": 13870,
+      "sha256": "7dff366888803713b351cf58118bcaff5d679a5b1d12e798ba2c4d09edd32928"
+    },
+    {
+      "url": "/data/imported/osm-relation-14378873.geojson",
+      "assetPath": "maps/routes/osm-relation-14378873.geojson",
+      "path": "maps/routes/osm-relation-14378873.geojson",
+      "sizeBytes": 5484,
+      "sha256": "d31224c4f5e297048ac22e7c71e6dd19812b93fa6e0743881f9960e121c15bf7"
+    },
+    {
+      "url": "/data/imported/osm-relation-14390321.geojson",
+      "assetPath": "maps/routes/osm-relation-14390321.geojson",
+      "path": "maps/routes/osm-relation-14390321.geojson",
+      "sizeBytes": 2551,
+      "sha256": "fd5ba435224454f6d2d76d3fe8f0c5ba40d7cf3dc1168f06f24f575b64d49a78"
+    },
+    {
+      "url": "/data/imported/osm-relation-14390325.geojson",
+      "assetPath": "maps/routes/osm-relation-14390325.geojson",
+      "path": "maps/routes/osm-relation-14390325.geojson",
+      "sizeBytes": 1954,
+      "sha256": "99caf465588a5f6c037ca6ac91b84e283b6838c9681add9271a05c817aeb7ecc"
+    },
+    {
+      "url": "/data/imported/osm-relation-14390331.geojson",
+      "assetPath": "maps/routes/osm-relation-14390331.geojson",
+      "path": "maps/routes/osm-relation-14390331.geojson",
+      "sizeBytes": 1315,
+      "sha256": "77496114f83f792f03b4b4bff393b886867891dd64a20ea1b805a5da1beb95d0"
+    },
+    {
+      "url": "/data/imported/osm-relation-14390337.geojson",
+      "assetPath": "maps/routes/osm-relation-14390337.geojson",
+      "path": "maps/routes/osm-relation-14390337.geojson",
+      "sizeBytes": 7786,
+      "sha256": "3e72a7b06fa86adc4ca0b3de3ef8dfefdf56837c9ba705a928c37f1eb2415117"
+    },
+    {
+      "url": "/data/imported/osm-relation-14390341.geojson",
+      "assetPath": "maps/routes/osm-relation-14390341.geojson",
+      "path": "maps/routes/osm-relation-14390341.geojson",
+      "sizeBytes": 8144,
+      "sha256": "5d6c029c0f8631e9eb1f47f5ed9d95de06d153cf4ca7d76267cfd09955f7ef80"
+    },
+    {
+      "url": "/data/imported/osm-relation-14390354.geojson",
+      "assetPath": "maps/routes/osm-relation-14390354.geojson",
+      "path": "maps/routes/osm-relation-14390354.geojson",
+      "sizeBytes": 11934,
+      "sha256": "e9ad25c08dcd72594b7d28d22bcc4b4177e44a7fcfd0335753525f42a5faa6d2"
+    },
+    {
+      "url": "/data/imported/osm-relation-14397434.geojson",
+      "assetPath": "maps/routes/osm-relation-14397434.geojson",
+      "path": "maps/routes/osm-relation-14397434.geojson",
+      "sizeBytes": 6426,
+      "sha256": "726199704bc1e34f90441e193b3a33f70f50a3c15b4fdf9b2a5c49114d0e3777"
+    },
+    {
+      "url": "/data/imported/osm-relation-14397458.geojson",
+      "assetPath": "maps/routes/osm-relation-14397458.geojson",
+      "path": "maps/routes/osm-relation-14397458.geojson",
+      "sizeBytes": 6616,
+      "sha256": "0db4936b0a419d59361cf1b9f7637232704f5738a8560792f7c1269da4421a7a"
+    },
+    {
+      "url": "/data/imported/osm-relation-14397487.geojson",
+      "assetPath": "maps/routes/osm-relation-14397487.geojson",
+      "path": "maps/routes/osm-relation-14397487.geojson",
+      "sizeBytes": 9788,
+      "sha256": "5c18cb15439fd65862dd4b42992d47977d43dcde006a9b420ab44e17489da510"
+    },
+    {
+      "url": "/data/imported/osm-relation-14397488.geojson",
+      "assetPath": "maps/routes/osm-relation-14397488.geojson",
+      "path": "maps/routes/osm-relation-14397488.geojson",
+      "sizeBytes": 7510,
+      "sha256": "debf9d1431314860246a41838b76c2b7d725669b4ef1ad14aa1aa6eb0b4b093a"
+    },
+    {
+      "url": "/data/imported/osm-relation-14397491.geojson",
+      "assetPath": "maps/routes/osm-relation-14397491.geojson",
+      "path": "maps/routes/osm-relation-14397491.geojson",
+      "sizeBytes": 4313,
+      "sha256": "2d059579318614087650ed4209c36b8a4e2bad624fe6675b2e8943b51ca19bcf"
+    },
+    {
+      "url": "/data/imported/osm-relation-14397506.geojson",
+      "assetPath": "maps/routes/osm-relation-14397506.geojson",
+      "path": "maps/routes/osm-relation-14397506.geojson",
+      "sizeBytes": 6731,
+      "sha256": "ab35b1d8f0ac68b3552d05fff1ab2b6e8a9c7b99858c2be0fb7c208882c769db"
+    },
+    {
+      "url": "/data/imported/osm-relation-14407510.geojson",
+      "assetPath": "maps/routes/osm-relation-14407510.geojson",
+      "path": "maps/routes/osm-relation-14407510.geojson",
+      "sizeBytes": 2182,
+      "sha256": "28b5d530ff09fa7c7e775cb0ebcc806aba9c8b3a7d9deb564f19bf11a04f5e57"
+    },
+    {
+      "url": "/data/imported/osm-relation-14414049.geojson",
+      "assetPath": "maps/routes/osm-relation-14414049.geojson",
+      "path": "maps/routes/osm-relation-14414049.geojson",
+      "sizeBytes": 5269,
+      "sha256": "7537164b27b10846cd858672c3ab23fb4e017c35f25adb69ea90326ca6afc9fb"
+    },
+    {
+      "url": "/data/imported/osm-relation-14445736.geojson",
+      "assetPath": "maps/routes/osm-relation-14445736.geojson",
+      "path": "maps/routes/osm-relation-14445736.geojson",
+      "sizeBytes": 7756,
+      "sha256": "4a2c09908a6940f55fbf9f19ab96c18a6c523ba450c57482627af4ab322a2268"
+    },
+    {
+      "url": "/data/imported/osm-relation-14445880.geojson",
+      "assetPath": "maps/routes/osm-relation-14445880.geojson",
+      "path": "maps/routes/osm-relation-14445880.geojson",
+      "sizeBytes": 1145,
+      "sha256": "4049e96a7a0cd8d37e00752bfc9b2672473f18255ea92e99b12387e5512f260c"
+    },
+    {
+      "url": "/data/imported/osm-relation-14445881.geojson",
+      "assetPath": "maps/routes/osm-relation-14445881.geojson",
+      "path": "maps/routes/osm-relation-14445881.geojson",
+      "sizeBytes": 3857,
+      "sha256": "f3aba0702e1ca5ae34c4195ef70a2a26def273f422d960dce163e7f6c37f09e1"
+    },
+    {
+      "url": "/data/imported/osm-relation-14448257.geojson",
+      "assetPath": "maps/routes/osm-relation-14448257.geojson",
+      "path": "maps/routes/osm-relation-14448257.geojson",
+      "sizeBytes": 8938,
+      "sha256": "d05085b26315422736e10475b6275ff1c6465668da3b19aa0440f597d7dc529c"
+    },
+    {
+      "url": "/data/imported/osm-relation-14477403.geojson",
+      "assetPath": "maps/routes/osm-relation-14477403.geojson",
+      "path": "maps/routes/osm-relation-14477403.geojson",
+      "sizeBytes": 2892,
+      "sha256": "b4604a838b1e8b6b7f080bf0a17538174c64917bf09000f71107f1d20c736272"
+    },
+    {
+      "url": "/data/imported/osm-relation-14594896.geojson",
+      "assetPath": "maps/routes/osm-relation-14594896.geojson",
+      "path": "maps/routes/osm-relation-14594896.geojson",
+      "sizeBytes": 1216022,
+      "sha256": "dc77be31d5ebb72c09df5b2e2a56e42b624ae3b79322b7fe93d2edf09364b827"
+    },
+    {
+      "url": "/data/imported/osm-relation-14610506.geojson",
+      "assetPath": "maps/routes/osm-relation-14610506.geojson",
+      "path": "maps/routes/osm-relation-14610506.geojson",
+      "sizeBytes": 972,
+      "sha256": "6638b5b2e564084b77cd3ce7bae7118c1d3f3a2e6fcbcd30f33bf36e310b5942"
+    },
+    {
+      "url": "/data/imported/osm-relation-14730392.geojson",
+      "assetPath": "maps/routes/osm-relation-14730392.geojson",
+      "path": "maps/routes/osm-relation-14730392.geojson",
+      "sizeBytes": 4149,
+      "sha256": "d7b738de83f277b3ace845d2ee7ef90130180975a037fed79641bce15548e24b"
+    },
+    {
+      "url": "/data/imported/osm-relation-1474673.geojson",
+      "assetPath": "maps/routes/osm-relation-1474673.geojson",
+      "path": "maps/routes/osm-relation-1474673.geojson",
+      "sizeBytes": 129327,
+      "sha256": "accd47c13c8cfb615385a03a11a23e53286d6d8ea92ab5ec618522aad2a9e0e5"
+    },
+    {
+      "url": "/data/imported/osm-relation-14768810.geojson",
+      "assetPath": "maps/routes/osm-relation-14768810.geojson",
+      "path": "maps/routes/osm-relation-14768810.geojson",
+      "sizeBytes": 6035,
+      "sha256": "b91a6da462cb8da2dcb2b334e68b70cbe4a73c182e446bc5f2d267ee0cd87fb6"
+    },
+    {
+      "url": "/data/imported/osm-relation-14886277.geojson",
+      "assetPath": "maps/routes/osm-relation-14886277.geojson",
+      "path": "maps/routes/osm-relation-14886277.geojson",
+      "sizeBytes": 7756,
+      "sha256": "bb0b005a1ef0a6389893d5a5523aa65f401f218ecf3d1227f41c0e088b34a703"
+    },
+    {
+      "url": "/data/imported/osm-relation-14891581.geojson",
+      "assetPath": "maps/routes/osm-relation-14891581.geojson",
+      "path": "maps/routes/osm-relation-14891581.geojson",
+      "sizeBytes": 3067,
+      "sha256": "8c1370a82aee93e42cb53c6577d89b63c598a6d53dd8145ecc786ad4a05c5a26"
+    },
+    {
+      "url": "/data/imported/osm-relation-14901517.geojson",
+      "assetPath": "maps/routes/osm-relation-14901517.geojson",
+      "path": "maps/routes/osm-relation-14901517.geojson",
+      "sizeBytes": 1543,
+      "sha256": "da68d99378d8ef50b883182e71ae14789a65605fbd21f0db1ebf41ef37403233"
+    },
+    {
+      "url": "/data/imported/osm-relation-14935739.geojson",
+      "assetPath": "maps/routes/osm-relation-14935739.geojson",
+      "path": "maps/routes/osm-relation-14935739.geojson",
+      "sizeBytes": 19071,
+      "sha256": "d9ab0d93dd69b95c900e2b67ae59a59f03cf6de36869994e08af4b814647c231"
+    },
+    {
+      "url": "/data/imported/osm-relation-14935740.geojson",
+      "assetPath": "maps/routes/osm-relation-14935740.geojson",
+      "path": "maps/routes/osm-relation-14935740.geojson",
+      "sizeBytes": 23807,
+      "sha256": "ea79f975dcd0133567f2f954ea6b228111fd62f2244043002dd3868bd826f9de"
+    },
+    {
+      "url": "/data/imported/osm-relation-15004011.geojson",
+      "assetPath": "maps/routes/osm-relation-15004011.geojson",
+      "path": "maps/routes/osm-relation-15004011.geojson",
+      "sizeBytes": 435914,
+      "sha256": "9425cd4607a49c66f55b4c92390da3ce72bd74680cd8b81c5d90a4d94cf19bea"
+    },
+    {
+      "url": "/data/imported/osm-relation-15063489.geojson",
+      "assetPath": "maps/routes/osm-relation-15063489.geojson",
+      "path": "maps/routes/osm-relation-15063489.geojson",
+      "sizeBytes": 519,
+      "sha256": "8f8ccc3ce6efa08b2767c7bea353366cdb3d8d192d1e3b4ab2102844434cce04"
+    },
+    {
+      "url": "/data/imported/osm-relation-15096139.geojson",
+      "assetPath": "maps/routes/osm-relation-15096139.geojson",
+      "path": "maps/routes/osm-relation-15096139.geojson",
+      "sizeBytes": 26178,
+      "sha256": "db891758ab394ab529d46c24600d162db7945bcf0001ac4dad61ece9cb292130"
+    },
+    {
+      "url": "/data/imported/osm-relation-15258276.geojson",
+      "assetPath": "maps/routes/osm-relation-15258276.geojson",
+      "path": "maps/routes/osm-relation-15258276.geojson",
+      "sizeBytes": 8971,
+      "sha256": "44bb72da09c0c48ee515dc48e98a53a455df8108addf01753eecc796c367269f"
+    },
+    {
+      "url": "/data/imported/osm-relation-15352276.geojson",
+      "assetPath": "maps/routes/osm-relation-15352276.geojson",
+      "path": "maps/routes/osm-relation-15352276.geojson",
+      "sizeBytes": 4024,
+      "sha256": "65db86499f6686221ebd6e28a6afd21bf8c133131b07f7b1d2da52619f7d4504"
+    },
+    {
+      "url": "/data/imported/osm-relation-15352408.geojson",
+      "assetPath": "maps/routes/osm-relation-15352408.geojson",
+      "path": "maps/routes/osm-relation-15352408.geojson",
+      "sizeBytes": 961,
+      "sha256": "3b15c5a9c9b35a80962219eb82f0ec5acf5cb0b0fd5265a3353e8bd6a4686a92"
+    },
+    {
+      "url": "/data/imported/osm-relation-15352668.geojson",
+      "assetPath": "maps/routes/osm-relation-15352668.geojson",
+      "path": "maps/routes/osm-relation-15352668.geojson",
+      "sizeBytes": 3558,
+      "sha256": "022113e172fe9cb7e9b1fa9d1de8380bb5e568c43b6374d8b9db95a9c81ce4de"
+    },
+    {
+      "url": "/data/imported/osm-relation-15352823.geojson",
+      "assetPath": "maps/routes/osm-relation-15352823.geojson",
+      "path": "maps/routes/osm-relation-15352823.geojson",
+      "sizeBytes": 1848,
+      "sha256": "836e838148f5b31f91bcb637859f8df7cc1f98596c016169b1561979b97f8ab1"
+    },
+    {
+      "url": "/data/imported/osm-relation-15354460.geojson",
+      "assetPath": "maps/routes/osm-relation-15354460.geojson",
+      "path": "maps/routes/osm-relation-15354460.geojson",
+      "sizeBytes": 5954,
+      "sha256": "0bb756f380b99f030686395391136035b00a2abf97d4d1a183a213327bb5a7c4"
+    },
+    {
+      "url": "/data/imported/osm-relation-15355329.geojson",
+      "assetPath": "maps/routes/osm-relation-15355329.geojson",
+      "path": "maps/routes/osm-relation-15355329.geojson",
+      "sizeBytes": 3721,
+      "sha256": "f616dfbd10e3d4ab79ee1e9b3e308cb8c9edcec7d6f37c23cc72630e7e87d4c4"
+    },
+    {
+      "url": "/data/imported/osm-relation-15355460.geojson",
+      "assetPath": "maps/routes/osm-relation-15355460.geojson",
+      "path": "maps/routes/osm-relation-15355460.geojson",
+      "sizeBytes": 3566,
+      "sha256": "5ab9f52f634162c25aad272e95dbcef8f3dba137d2f77215382260f1b37b7cf0"
+    },
+    {
+      "url": "/data/imported/osm-relation-15355589.geojson",
+      "assetPath": "maps/routes/osm-relation-15355589.geojson",
+      "path": "maps/routes/osm-relation-15355589.geojson",
+      "sizeBytes": 8769,
+      "sha256": "b7f21dc977ff70f35b2f8cfa41bf70229a0b74b86d5a3057293c7cdbc958c4fb"
+    },
+    {
+      "url": "/data/imported/osm-relation-15389861.geojson",
+      "assetPath": "maps/routes/osm-relation-15389861.geojson",
+      "path": "maps/routes/osm-relation-15389861.geojson",
+      "sizeBytes": 1709,
+      "sha256": "9c7c1755eef43052557d7cc61d0279938414ea82938fe601e2c9100284695e79"
+    },
+    {
+      "url": "/data/imported/osm-relation-15389921.geojson",
+      "assetPath": "maps/routes/osm-relation-15389921.geojson",
+      "path": "maps/routes/osm-relation-15389921.geojson",
+      "sizeBytes": 5857,
+      "sha256": "118fb7a76fee4c271303b636a74d3aacb01db5944a6539b450dcadf25d54b946"
+    },
+    {
+      "url": "/data/imported/osm-relation-15398162.geojson",
+      "assetPath": "maps/routes/osm-relation-15398162.geojson",
+      "path": "maps/routes/osm-relation-15398162.geojson",
+      "sizeBytes": 6806,
+      "sha256": "79e430917dd6c8ae851e9fd2fa5cfea6e66ce6d6ca42bac3725736156cc560dd"
+    },
+    {
+      "url": "/data/imported/osm-relation-15402534.geojson",
+      "assetPath": "maps/routes/osm-relation-15402534.geojson",
+      "path": "maps/routes/osm-relation-15402534.geojson",
+      "sizeBytes": 13091,
+      "sha256": "fb0c88920cf09e40c143a27b72252e01687edfa03dbc5548522e269955233890"
+    },
+    {
+      "url": "/data/imported/osm-relation-15402560.geojson",
+      "assetPath": "maps/routes/osm-relation-15402560.geojson",
+      "path": "maps/routes/osm-relation-15402560.geojson",
+      "sizeBytes": 14980,
+      "sha256": "8114108f9d2f5e830e11afc35886d90e9a3678d51c096adc473f7c9f50752be5"
+    },
+    {
+      "url": "/data/imported/osm-relation-15407443.geojson",
+      "assetPath": "maps/routes/osm-relation-15407443.geojson",
+      "path": "maps/routes/osm-relation-15407443.geojson",
+      "sizeBytes": 4473,
+      "sha256": "105b8825ba2a7dae321870dcb220b479af414e74eb37ae89cb775cbb340f7d6d"
+    },
+    {
+      "url": "/data/imported/osm-relation-15407594.geojson",
+      "assetPath": "maps/routes/osm-relation-15407594.geojson",
+      "path": "maps/routes/osm-relation-15407594.geojson",
+      "sizeBytes": 2396,
+      "sha256": "30048ca01c8c4b2f7e99f7969818bcba1af85389e1f33ed1a7f711f3682351cf"
+    },
+    {
+      "url": "/data/imported/osm-relation-15418787.geojson",
+      "assetPath": "maps/routes/osm-relation-15418787.geojson",
+      "path": "maps/routes/osm-relation-15418787.geojson",
+      "sizeBytes": 6067,
+      "sha256": "2d96860283f682d6a59d38f3e88fabb1be4e24d1b4680091956102bbfe430bcb"
+    },
+    {
+      "url": "/data/imported/osm-relation-15421359.geojson",
+      "assetPath": "maps/routes/osm-relation-15421359.geojson",
+      "path": "maps/routes/osm-relation-15421359.geojson",
+      "sizeBytes": 4417,
+      "sha256": "4e6beae71e978c1e21cbc6fa2006b21fca0a496a5d381044cf726517afc679eb"
+    },
+    {
+      "url": "/data/imported/osm-relation-15421510.geojson",
+      "assetPath": "maps/routes/osm-relation-15421510.geojson",
+      "path": "maps/routes/osm-relation-15421510.geojson",
+      "sizeBytes": 2160,
+      "sha256": "28367583a3298be4cdddb79fe4e56865f2757a0c8df2faf25d5a7a6eb8b97157"
+    },
+    {
+      "url": "/data/imported/osm-relation-15444795.geojson",
+      "assetPath": "maps/routes/osm-relation-15444795.geojson",
+      "path": "maps/routes/osm-relation-15444795.geojson",
+      "sizeBytes": 4802,
+      "sha256": "599b63eed89e6168a5b5952a689ada6e35e6b4c7f40c88b3f4de1f02743cfce5"
+    },
+    {
+      "url": "/data/imported/osm-relation-15477153.geojson",
+      "assetPath": "maps/routes/osm-relation-15477153.geojson",
+      "path": "maps/routes/osm-relation-15477153.geojson",
+      "sizeBytes": 4393,
+      "sha256": "ab14d0df7b396dbcca707e31c734c84cf8921a42dea693e02c976d988f031e50"
+    },
+    {
+      "url": "/data/imported/osm-relation-15477200.geojson",
+      "assetPath": "maps/routes/osm-relation-15477200.geojson",
+      "path": "maps/routes/osm-relation-15477200.geojson",
+      "sizeBytes": 3969,
+      "sha256": "6d645cc09f2ab93f1bc691bb85d30dae0858ee4ce3b41688165396b01e5e1d68"
+    },
+    {
+      "url": "/data/imported/osm-relation-15530792.geojson",
+      "assetPath": "maps/routes/osm-relation-15530792.geojson",
+      "path": "maps/routes/osm-relation-15530792.geojson",
+      "sizeBytes": 1142,
+      "sha256": "7936cdd202f4d3e62db36a1309082ef37514ff2a340a6c6cc33889286e5c3366"
+    },
+    {
+      "url": "/data/imported/osm-relation-15530809.geojson",
+      "assetPath": "maps/routes/osm-relation-15530809.geojson",
+      "path": "maps/routes/osm-relation-15530809.geojson",
+      "sizeBytes": 5884,
+      "sha256": "9efbda73f2c19bd0227d71984665df1dab497819ecf9a844c72a87f8ae531fcb"
+    },
+    {
+      "url": "/data/imported/osm-relation-15530951.geojson",
+      "assetPath": "maps/routes/osm-relation-15530951.geojson",
+      "path": "maps/routes/osm-relation-15530951.geojson",
+      "sizeBytes": 3270,
+      "sha256": "379c0cf009e7b19d209ea845bd1d7c9137dbf8da343c7900f0f0bea957731c2e"
+    },
+    {
+      "url": "/data/imported/osm-relation-15530998.geojson",
+      "assetPath": "maps/routes/osm-relation-15530998.geojson",
+      "path": "maps/routes/osm-relation-15530998.geojson",
+      "sizeBytes": 5874,
+      "sha256": "d6663c71550b8f18ec4688bcfda82fd416eac6dc60c6ffb98829cca0a4a4c7c6"
+    },
+    {
+      "url": "/data/imported/osm-relation-15530999.geojson",
+      "assetPath": "maps/routes/osm-relation-15530999.geojson",
+      "path": "maps/routes/osm-relation-15530999.geojson",
+      "sizeBytes": 5092,
+      "sha256": "703efaf2068b2a3e48ce9f1545b8a67703c3fb7bc31bcb06f89c1da4f9d5ea49"
+    },
+    {
+      "url": "/data/imported/osm-relation-15531031.geojson",
+      "assetPath": "maps/routes/osm-relation-15531031.geojson",
+      "path": "maps/routes/osm-relation-15531031.geojson",
+      "sizeBytes": 5812,
+      "sha256": "ae83fe061db88856eab462f5887a6003e9602ef86c9f7ab26fd6c2b35d6cf3c8"
+    },
+    {
+      "url": "/data/imported/osm-relation-15539460.geojson",
+      "assetPath": "maps/routes/osm-relation-15539460.geojson",
+      "path": "maps/routes/osm-relation-15539460.geojson",
+      "sizeBytes": 6728,
+      "sha256": "eb45374beb31723fbb818a48bfe6cd9ad2a51b0a81bb0a5c2fe6a240347ae18c"
+    },
+    {
+      "url": "/data/imported/osm-relation-15539475.geojson",
+      "assetPath": "maps/routes/osm-relation-15539475.geojson",
+      "path": "maps/routes/osm-relation-15539475.geojson",
+      "sizeBytes": 10528,
+      "sha256": "274f01e26043ae85f3a10b6702cc79a51c8a24dfcae63d69a7aa5977429a90c3"
+    },
+    {
+      "url": "/data/imported/osm-relation-15550474.geojson",
+      "assetPath": "maps/routes/osm-relation-15550474.geojson",
+      "path": "maps/routes/osm-relation-15550474.geojson",
+      "sizeBytes": 5425,
+      "sha256": "5039cd654228ff3c1e4903970fd45a85ee58c46d66d11f9891489114d29f8758"
+    },
+    {
+      "url": "/data/imported/osm-relation-15550585.geojson",
+      "assetPath": "maps/routes/osm-relation-15550585.geojson",
+      "path": "maps/routes/osm-relation-15550585.geojson",
+      "sizeBytes": 3868,
+      "sha256": "248c7006cb3541b16387d88d5dc833913544c84592a2da97c433f7d7a0828989"
+    },
+    {
+      "url": "/data/imported/osm-relation-15577268.geojson",
+      "assetPath": "maps/routes/osm-relation-15577268.geojson",
+      "path": "maps/routes/osm-relation-15577268.geojson",
+      "sizeBytes": 8912,
+      "sha256": "be45285c6cf0bfba5f7de6a3ae14b6291a4a94a0c3e0d41472cdd8734ecb568d"
+    },
+    {
+      "url": "/data/imported/osm-relation-15577314.geojson",
+      "assetPath": "maps/routes/osm-relation-15577314.geojson",
+      "path": "maps/routes/osm-relation-15577314.geojson",
+      "sizeBytes": 6745,
+      "sha256": "d4ecdad8485cb93bef09b07746f13694e20e753677b13175a8cf484b4cfd9e36"
+    },
+    {
+      "url": "/data/imported/osm-relation-15678293.geojson",
+      "assetPath": "maps/routes/osm-relation-15678293.geojson",
+      "path": "maps/routes/osm-relation-15678293.geojson",
+      "sizeBytes": 216816,
+      "sha256": "d9a4bd66c6901e147dc5d4b5a9434061f1c5d18b661e43d5862e6edcc2d3b268"
+    },
+    {
+      "url": "/data/imported/osm-relation-15754517.geojson",
+      "assetPath": "maps/routes/osm-relation-15754517.geojson",
+      "path": "maps/routes/osm-relation-15754517.geojson",
+      "sizeBytes": 2890,
+      "sha256": "aafcf34e7639be43321397a2974c7b85bbb9425d1d00e6093e2ad9ebf222c4d6"
+    },
+    {
+      "url": "/data/imported/osm-relation-15754597.geojson",
+      "assetPath": "maps/routes/osm-relation-15754597.geojson",
+      "path": "maps/routes/osm-relation-15754597.geojson",
+      "sizeBytes": 11373,
+      "sha256": "69c10df94f00d629bac82eed410ff0b774cb583fe1122271b310b91c0b558db3"
+    },
+    {
+      "url": "/data/imported/osm-relation-15754604.geojson",
+      "assetPath": "maps/routes/osm-relation-15754604.geojson",
+      "path": "maps/routes/osm-relation-15754604.geojson",
+      "sizeBytes": 5654,
+      "sha256": "395b6dda01357d9282406e9923af813ceba270410afe9c58767344e1c4ad9d7e"
+    },
+    {
+      "url": "/data/imported/osm-relation-15922325.geojson",
+      "assetPath": "maps/routes/osm-relation-15922325.geojson",
+      "path": "maps/routes/osm-relation-15922325.geojson",
+      "sizeBytes": 60031,
+      "sha256": "b1c2c901c12930becd56e79a5ac17cf861dc978ee244e977635680c8f6419c2d"
+    },
+    {
+      "url": "/data/imported/osm-relation-15989384.geojson",
+      "assetPath": "maps/routes/osm-relation-15989384.geojson",
+      "path": "maps/routes/osm-relation-15989384.geojson",
+      "sizeBytes": 3973,
+      "sha256": "434c23a85bdfac110f8a58c8804a9de1ec7f7922f7928011217439d13d117cc0"
+    },
+    {
+      "url": "/data/imported/osm-relation-16054488.geojson",
+      "assetPath": "maps/routes/osm-relation-16054488.geojson",
+      "path": "maps/routes/osm-relation-16054488.geojson",
+      "sizeBytes": 8165,
+      "sha256": "907a2de4f070fe3992adbf105bb05a6dfb8f272b5e0940746309d89f0a13bb1f"
+    },
+    {
+      "url": "/data/imported/osm-relation-16101696.geojson",
+      "assetPath": "maps/routes/osm-relation-16101696.geojson",
+      "path": "maps/routes/osm-relation-16101696.geojson",
+      "sizeBytes": 3508,
+      "sha256": "216dd5394d741289a6a0b0cbbc18f515008aaa4cf48fa9f170031386648d0057"
+    },
+    {
+      "url": "/data/imported/osm-relation-16114689.geojson",
+      "assetPath": "maps/routes/osm-relation-16114689.geojson",
+      "path": "maps/routes/osm-relation-16114689.geojson",
+      "sizeBytes": 3884,
+      "sha256": "aa27ee390ff53438c90a940c4024ba270df342674370a21ed07781b61f6c7bca"
+    },
+    {
+      "url": "/data/imported/osm-relation-16121230.geojson",
+      "assetPath": "maps/routes/osm-relation-16121230.geojson",
+      "path": "maps/routes/osm-relation-16121230.geojson",
+      "sizeBytes": 2683,
+      "sha256": "e8ce891cdec17d348383e2d0ff8213eb2857c254532bdefe116a6fe7fd62ab67"
+    },
+    {
+      "url": "/data/imported/osm-relation-16126776.geojson",
+      "assetPath": "maps/routes/osm-relation-16126776.geojson",
+      "path": "maps/routes/osm-relation-16126776.geojson",
+      "sizeBytes": 9587,
+      "sha256": "0aa26f16ea125f47f56c60ae91a6330340bef1c2a880004cc295d548404f00a0"
+    },
+    {
+      "url": "/data/imported/osm-relation-16127081.geojson",
+      "assetPath": "maps/routes/osm-relation-16127081.geojson",
+      "path": "maps/routes/osm-relation-16127081.geojson",
+      "sizeBytes": 5979,
+      "sha256": "93312932d2270e065909ae3e0e3eb5cc5f1587c0e8e04ccb56da4adc495197fc"
+    },
+    {
+      "url": "/data/imported/osm-relation-16131709.geojson",
+      "assetPath": "maps/routes/osm-relation-16131709.geojson",
+      "path": "maps/routes/osm-relation-16131709.geojson",
+      "sizeBytes": 10183,
+      "sha256": "16e14069305f31d0f3d73afbb22388e620acfc14929811feb405f6fab71ffb47"
+    },
+    {
+      "url": "/data/imported/osm-relation-16138449.geojson",
+      "assetPath": "maps/routes/osm-relation-16138449.geojson",
+      "path": "maps/routes/osm-relation-16138449.geojson",
+      "sizeBytes": 7569,
+      "sha256": "79b111b7ee43fa20167d89dfa1ee5fd8d269eb27fa2322712e4e0399ac35e657"
+    },
+    {
+      "url": "/data/imported/osm-relation-16139387.geojson",
+      "assetPath": "maps/routes/osm-relation-16139387.geojson",
+      "path": "maps/routes/osm-relation-16139387.geojson",
+      "sizeBytes": 3728,
+      "sha256": "2ccfcdf5305562d28e5c4757977528ccdcfa665e57dc92c6f4f288ae9d5c6b02"
+    },
+    {
+      "url": "/data/imported/osm-relation-16149624.geojson",
+      "assetPath": "maps/routes/osm-relation-16149624.geojson",
+      "path": "maps/routes/osm-relation-16149624.geojson",
+      "sizeBytes": 4843,
+      "sha256": "9b81460c115ad621560bbd6d3de5626ba263d54fc12534b64a8934ce01f151fb"
+    },
+    {
+      "url": "/data/imported/osm-relation-16215957.geojson",
+      "assetPath": "maps/routes/osm-relation-16215957.geojson",
+      "path": "maps/routes/osm-relation-16215957.geojson",
+      "sizeBytes": 4554,
+      "sha256": "5c657a043297e407f1db729935a7e7c6473afabb7f08f8bb0bb19a056a09f823"
+    },
+    {
+      "url": "/data/imported/osm-relation-16216006.geojson",
+      "assetPath": "maps/routes/osm-relation-16216006.geojson",
+      "path": "maps/routes/osm-relation-16216006.geojson",
+      "sizeBytes": 16714,
+      "sha256": "73afee2643ddcf344e684152a3d5c33bbe74afd9750a13170637064e646b79fd"
+    },
+    {
+      "url": "/data/imported/osm-relation-16248933.geojson",
+      "assetPath": "maps/routes/osm-relation-16248933.geojson",
+      "path": "maps/routes/osm-relation-16248933.geojson",
+      "sizeBytes": 7549,
+      "sha256": "cb10bb143addc3931ccdbd8107b7defd62c050133ec4eaa67a80534e80b506aa"
+    },
+    {
+      "url": "/data/imported/osm-relation-16276881.geojson",
+      "assetPath": "maps/routes/osm-relation-16276881.geojson",
+      "path": "maps/routes/osm-relation-16276881.geojson",
+      "sizeBytes": 5951,
+      "sha256": "245658add180355848eddd9a94393f45f9b44b26e043d32e5b0a959495f132f5"
+    },
+    {
+      "url": "/data/imported/osm-relation-16277119.geojson",
+      "assetPath": "maps/routes/osm-relation-16277119.geojson",
+      "path": "maps/routes/osm-relation-16277119.geojson",
+      "sizeBytes": 2961,
+      "sha256": "51e748f7c54d6b87d4729609f35b32b8674feeaed06b762e7cf5b0bbe7265230"
+    },
+    {
+      "url": "/data/imported/osm-relation-16277120.geojson",
+      "assetPath": "maps/routes/osm-relation-16277120.geojson",
+      "path": "maps/routes/osm-relation-16277120.geojson",
+      "sizeBytes": 2124,
+      "sha256": "0ecd97a2d0f536d3747c221cb4d97f065e37b5233cdd88a0b28031a8e621b9d5"
+    },
+    {
+      "url": "/data/imported/osm-relation-16331308.geojson",
+      "assetPath": "maps/routes/osm-relation-16331308.geojson",
+      "path": "maps/routes/osm-relation-16331308.geojson",
+      "sizeBytes": 13978,
+      "sha256": "640a2325a18913ff515391485aad37737744c7831ce2a5d8e7def6de2cb33aea"
+    },
+    {
+      "url": "/data/imported/osm-relation-16350390.geojson",
+      "assetPath": "maps/routes/osm-relation-16350390.geojson",
+      "path": "maps/routes/osm-relation-16350390.geojson",
+      "sizeBytes": 2026,
+      "sha256": "54f0da6b8fb1118291e39212d058088b238c6cccff70a8d5dd43f7069d641fbb"
+    },
+    {
+      "url": "/data/imported/osm-relation-16397356.geojson",
+      "assetPath": "maps/routes/osm-relation-16397356.geojson",
+      "path": "maps/routes/osm-relation-16397356.geojson",
+      "sizeBytes": 5219,
+      "sha256": "ea642e7e75d560257e79840a2ba57b2dc05056a181ee85129212451562f746b8"
+    },
+    {
+      "url": "/data/imported/osm-relation-16397367.geojson",
+      "assetPath": "maps/routes/osm-relation-16397367.geojson",
+      "path": "maps/routes/osm-relation-16397367.geojson",
+      "sizeBytes": 1184,
+      "sha256": "819b15cf419f779bbf2f22ef637dd9d48df3f97171c80cee9c91a2adce532e1c"
+    },
+    {
+      "url": "/data/imported/osm-relation-16502403.geojson",
+      "assetPath": "maps/routes/osm-relation-16502403.geojson",
+      "path": "maps/routes/osm-relation-16502403.geojson",
+      "sizeBytes": 885822,
+      "sha256": "73d7c8c8ee8af57c546e4bbe1930abf14a7d89488ad9bf8e28edd064740d1510"
+    },
+    {
+      "url": "/data/imported/osm-relation-16538744.geojson",
+      "assetPath": "maps/routes/osm-relation-16538744.geojson",
+      "path": "maps/routes/osm-relation-16538744.geojson",
+      "sizeBytes": 5531,
+      "sha256": "6c17ae5055d964874eb760b02aa59a2177670834972977f904e4644569f2126f"
+    },
+    {
+      "url": "/data/imported/osm-relation-16538787.geojson",
+      "assetPath": "maps/routes/osm-relation-16538787.geojson",
+      "path": "maps/routes/osm-relation-16538787.geojson",
+      "sizeBytes": 2319,
+      "sha256": "5e74c3c30ea2a6aecdfb51f87c014a0d1f11b81356c789f39668393a630c0f1f"
+    },
+    {
+      "url": "/data/imported/osm-relation-16559770.geojson",
+      "assetPath": "maps/routes/osm-relation-16559770.geojson",
+      "path": "maps/routes/osm-relation-16559770.geojson",
+      "sizeBytes": 1595,
+      "sha256": "0f397cf2d8f05280b41e83bff244cded799c64170d35bd9a9e5c52e82f351b37"
+    },
+    {
+      "url": "/data/imported/osm-relation-16693856.geojson",
+      "assetPath": "maps/routes/osm-relation-16693856.geojson",
+      "path": "maps/routes/osm-relation-16693856.geojson",
+      "sizeBytes": 1323,
+      "sha256": "87cfce67b257edf10ee23476296b99e443533cbb6dcc580c60fe6acdc13ae6dd"
+    },
+    {
+      "url": "/data/imported/osm-relation-16695104.geojson",
+      "assetPath": "maps/routes/osm-relation-16695104.geojson",
+      "path": "maps/routes/osm-relation-16695104.geojson",
+      "sizeBytes": 13402,
+      "sha256": "5399e5518d68d0056a73ed6c8246a76172201120371be9cf0de2090b7a6ec5f0"
+    },
+    {
+      "url": "/data/imported/osm-relation-16695133.geojson",
+      "assetPath": "maps/routes/osm-relation-16695133.geojson",
+      "path": "maps/routes/osm-relation-16695133.geojson",
+      "sizeBytes": 4537,
+      "sha256": "318d6a421b744a5834def11d08093b7010108d2544534523f7641661e229a036"
+    },
+    {
+      "url": "/data/imported/osm-relation-16713285.geojson",
+      "assetPath": "maps/routes/osm-relation-16713285.geojson",
+      "path": "maps/routes/osm-relation-16713285.geojson",
+      "sizeBytes": 3354,
+      "sha256": "e952e0e5137bc183129cd68b11dec66c3c90ffdd2b03d05aee0e08d4bffa8d3d"
+    },
+    {
+      "url": "/data/imported/osm-relation-16717054.geojson",
+      "assetPath": "maps/routes/osm-relation-16717054.geojson",
+      "path": "maps/routes/osm-relation-16717054.geojson",
+      "sizeBytes": 5366,
+      "sha256": "08e769abc54bda13b360defb10576c45361036523165d7a00d5144f9585fb125"
+    },
+    {
+      "url": "/data/imported/osm-relation-16741087.geojson",
+      "assetPath": "maps/routes/osm-relation-16741087.geojson",
+      "path": "maps/routes/osm-relation-16741087.geojson",
+      "sizeBytes": 20357,
+      "sha256": "1dcfec1106b98711fa8911ed205de31de0f83a83a9013a9fe944e611bc4ed5f9"
+    },
+    {
+      "url": "/data/imported/osm-relation-17013428.geojson",
+      "assetPath": "maps/routes/osm-relation-17013428.geojson",
+      "path": "maps/routes/osm-relation-17013428.geojson",
+      "sizeBytes": 2704,
+      "sha256": "b0f8bb91214ed1ceb21bd2e8000959a3b0b95c0cdfcb3d0e8800f5c392465a20"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300502.geojson",
+      "assetPath": "maps/routes/osm-relation-17300502.geojson",
+      "path": "maps/routes/osm-relation-17300502.geojson",
+      "sizeBytes": 5095,
+      "sha256": "44bce48dc47af482eadb9e861ceb0a055cea1b244696caf83bea63c2440e6987"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300511.geojson",
+      "assetPath": "maps/routes/osm-relation-17300511.geojson",
+      "path": "maps/routes/osm-relation-17300511.geojson",
+      "sizeBytes": 3135,
+      "sha256": "5d461718aec07344f253246aa51f53cbaca715bae9629bc586ece5a28dc96943"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300520.geojson",
+      "assetPath": "maps/routes/osm-relation-17300520.geojson",
+      "path": "maps/routes/osm-relation-17300520.geojson",
+      "sizeBytes": 1973,
+      "sha256": "20cd22c454669a1e3e338c0babd760a374e710bc4b8b28f847877a121b842abd"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300544.geojson",
+      "assetPath": "maps/routes/osm-relation-17300544.geojson",
+      "path": "maps/routes/osm-relation-17300544.geojson",
+      "sizeBytes": 10390,
+      "sha256": "b1f39f85795d8a35bd7eeb744f1e75fd648f08b1a626a1f091f6f2ffce28c531"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300545.geojson",
+      "assetPath": "maps/routes/osm-relation-17300545.geojson",
+      "path": "maps/routes/osm-relation-17300545.geojson",
+      "sizeBytes": 594,
+      "sha256": "ab01508c098bfba49248dd40e6d537d8fe8d822e24f6eb4986c2417a542dbbec"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300570.geojson",
+      "assetPath": "maps/routes/osm-relation-17300570.geojson",
+      "path": "maps/routes/osm-relation-17300570.geojson",
+      "sizeBytes": 19964,
+      "sha256": "e58b32b5b2ccba9c362c1c27ecb7aadfaf2fc3ee4ed6255503ce19763af2eee5"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300574.geojson",
+      "assetPath": "maps/routes/osm-relation-17300574.geojson",
+      "path": "maps/routes/osm-relation-17300574.geojson",
+      "sizeBytes": 951,
+      "sha256": "d49dd3c136e33526d78d5e548e9503066118009a22c9bb35dadf9817840815f2"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300583.geojson",
+      "assetPath": "maps/routes/osm-relation-17300583.geojson",
+      "path": "maps/routes/osm-relation-17300583.geojson",
+      "sizeBytes": 1901,
+      "sha256": "9c5eb76436a7a719db5ae4ea60321a466f52a760a887016881fe0da52da31ab9"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300598.geojson",
+      "assetPath": "maps/routes/osm-relation-17300598.geojson",
+      "path": "maps/routes/osm-relation-17300598.geojson",
+      "sizeBytes": 2255,
+      "sha256": "c13145faac354111a259e870cb26cc1155efecd859932e828f16651d4c11b719"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300616.geojson",
+      "assetPath": "maps/routes/osm-relation-17300616.geojson",
+      "path": "maps/routes/osm-relation-17300616.geojson",
+      "sizeBytes": 15504,
+      "sha256": "f2636c90fba9c060ddd2cdaf87742eece08d5fc9813dc4adee23d1c0c51aa4e4"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300646.geojson",
+      "assetPath": "maps/routes/osm-relation-17300646.geojson",
+      "path": "maps/routes/osm-relation-17300646.geojson",
+      "sizeBytes": 3928,
+      "sha256": "7ee429cee2881a5bd72db21f9a586b0d5bb89829f482503e358e42e1ab9ef8ee"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300712.geojson",
+      "assetPath": "maps/routes/osm-relation-17300712.geojson",
+      "path": "maps/routes/osm-relation-17300712.geojson",
+      "sizeBytes": 5370,
+      "sha256": "4a3737b83d02c0150bd464885281e8dc8d6aae8a71572d87dc9b1beecbb78a1e"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300763.geojson",
+      "assetPath": "maps/routes/osm-relation-17300763.geojson",
+      "path": "maps/routes/osm-relation-17300763.geojson",
+      "sizeBytes": 5678,
+      "sha256": "c6b459c02a8c79d095b28b0c356973139b1afa3a77ae70185da243b754821a63"
+    },
+    {
+      "url": "/data/imported/osm-relation-17300798.geojson",
+      "assetPath": "maps/routes/osm-relation-17300798.geojson",
+      "path": "maps/routes/osm-relation-17300798.geojson",
+      "sizeBytes": 5500,
+      "sha256": "73bab5b32760f8865f5a641ca6ed3b5087f816169b7e9e9831cb09c674cce4fa"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305833.geojson",
+      "assetPath": "maps/routes/osm-relation-17305833.geojson",
+      "path": "maps/routes/osm-relation-17305833.geojson",
+      "sizeBytes": 3573,
+      "sha256": "4ab38f506d403f6e645e90125c80eec63dae2964f8497008cb71f1edb37d242a"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305877.geojson",
+      "assetPath": "maps/routes/osm-relation-17305877.geojson",
+      "path": "maps/routes/osm-relation-17305877.geojson",
+      "sizeBytes": 4357,
+      "sha256": "e85ba76a0798dd71cfcaefdb6b255fda8df3e3ee3e139f40a3414993b9ebb1bc"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305893.geojson",
+      "assetPath": "maps/routes/osm-relation-17305893.geojson",
+      "path": "maps/routes/osm-relation-17305893.geojson",
+      "sizeBytes": 2796,
+      "sha256": "8bb8c67a9fe5f09d03a82e1f0552e8b7aa1ae5a8907f2fc380f407f17fc9cc3f"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305918.geojson",
+      "assetPath": "maps/routes/osm-relation-17305918.geojson",
+      "path": "maps/routes/osm-relation-17305918.geojson",
+      "sizeBytes": 7101,
+      "sha256": "bd6f21b48f836ac7e4cb99aacb8d1f36aa3e24691bda7a4ab25d8aad79dfbba9"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305921.geojson",
+      "assetPath": "maps/routes/osm-relation-17305921.geojson",
+      "path": "maps/routes/osm-relation-17305921.geojson",
+      "sizeBytes": 2662,
+      "sha256": "cd9bdfb8093111f60c827bbba25a81561b523c7817e7f52cd7635f6fe67f5fc6"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305933.geojson",
+      "assetPath": "maps/routes/osm-relation-17305933.geojson",
+      "path": "maps/routes/osm-relation-17305933.geojson",
+      "sizeBytes": 4903,
+      "sha256": "05bda27190ee23887b1fb624ccb9652fb29d43c88a012de42d70c3d85c017a83"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305945.geojson",
+      "assetPath": "maps/routes/osm-relation-17305945.geojson",
+      "path": "maps/routes/osm-relation-17305945.geojson",
+      "sizeBytes": 685,
+      "sha256": "1b03e268f88030b497684c86ba85ddb72a83e612ddc6ddccdcbccd2c1d522202"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305962.geojson",
+      "assetPath": "maps/routes/osm-relation-17305962.geojson",
+      "path": "maps/routes/osm-relation-17305962.geojson",
+      "sizeBytes": 2451,
+      "sha256": "da090538020bad259fe913a27f7fc6209f5ba9547ea413b3c786ed4ed95349ec"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305977.geojson",
+      "assetPath": "maps/routes/osm-relation-17305977.geojson",
+      "path": "maps/routes/osm-relation-17305977.geojson",
+      "sizeBytes": 3642,
+      "sha256": "4e582dd8dd7c107c1ff6f68ff597f16bb6f190cd83d7fc30e25305e19dbe01eb"
+    },
+    {
+      "url": "/data/imported/osm-relation-17305991.geojson",
+      "assetPath": "maps/routes/osm-relation-17305991.geojson",
+      "path": "maps/routes/osm-relation-17305991.geojson",
+      "sizeBytes": 5163,
+      "sha256": "978a6b48cd6f9ddf35581d001bbea3423c7a2bd77a107568be6fa2eefbb956f8"
+    },
+    {
+      "url": "/data/imported/osm-relation-17306045.geojson",
+      "assetPath": "maps/routes/osm-relation-17306045.geojson",
+      "path": "maps/routes/osm-relation-17306045.geojson",
+      "sizeBytes": 4479,
+      "sha256": "b1d906455967634d3b4e8bd210455d01df691e378ba2e86c269a21a8a81c4739"
+    },
+    {
+      "url": "/data/imported/osm-relation-17362949.geojson",
+      "assetPath": "maps/routes/osm-relation-17362949.geojson",
+      "path": "maps/routes/osm-relation-17362949.geojson",
+      "sizeBytes": 362183,
+      "sha256": "6f8344daf528d807911eda437f651295290b8674b2b5e7c5d473f6f3ee6ad802"
+    },
+    {
+      "url": "/data/imported/osm-relation-17404527.geojson",
+      "assetPath": "maps/routes/osm-relation-17404527.geojson",
+      "path": "maps/routes/osm-relation-17404527.geojson",
+      "sizeBytes": 3068,
+      "sha256": "b6d593bc7b5783b9681782607850e0601aedc44c81329c9fdf6437307e979d77"
+    },
+    {
+      "url": "/data/imported/osm-relation-17484597.geojson",
+      "assetPath": "maps/routes/osm-relation-17484597.geojson",
+      "path": "maps/routes/osm-relation-17484597.geojson",
+      "sizeBytes": 3374,
+      "sha256": "a1ae8580304cca1de2d07cbeefe24240e979647e58ef5a1a711e17dfc4a315c9"
+    },
+    {
+      "url": "/data/imported/osm-relation-17632320.geojson",
+      "assetPath": "maps/routes/osm-relation-17632320.geojson",
+      "path": "maps/routes/osm-relation-17632320.geojson",
+      "sizeBytes": 2087,
+      "sha256": "7cc9488f12ad7c33a118f1d917c04491f71da50310815e66140404268f8a00b6"
+    },
+    {
+      "url": "/data/imported/osm-relation-17665052.geojson",
+      "assetPath": "maps/routes/osm-relation-17665052.geojson",
+      "path": "maps/routes/osm-relation-17665052.geojson",
+      "sizeBytes": 1890,
+      "sha256": "84998b5e7aee1473d4bb8d0cd84fa01544d83d8f11491a159c96179a04673ec9"
+    },
+    {
+      "url": "/data/imported/osm-relation-17753995.geojson",
+      "assetPath": "maps/routes/osm-relation-17753995.geojson",
+      "path": "maps/routes/osm-relation-17753995.geojson",
+      "sizeBytes": 35361,
+      "sha256": "419f8aeda0f53cbf4265f09483ca03ddc726c9d9b954f42975c762db34b15251"
+    },
+    {
+      "url": "/data/imported/osm-relation-17803720.geojson",
+      "assetPath": "maps/routes/osm-relation-17803720.geojson",
+      "path": "maps/routes/osm-relation-17803720.geojson",
+      "sizeBytes": 4582,
+      "sha256": "f16ac004d5bb9b184d0b746926890a94ca2bcff84f092beac286950b5485139e"
+    },
+    {
+      "url": "/data/imported/osm-relation-17826118.geojson",
+      "assetPath": "maps/routes/osm-relation-17826118.geojson",
+      "path": "maps/routes/osm-relation-17826118.geojson",
+      "sizeBytes": 77430,
+      "sha256": "6fae36083a687e685ad4abc08a14f60bd9d23ec6c5639d45bbf2391cacae1236"
+    },
+    {
+      "url": "/data/imported/osm-relation-17833124.geojson",
+      "assetPath": "maps/routes/osm-relation-17833124.geojson",
+      "path": "maps/routes/osm-relation-17833124.geojson",
+      "sizeBytes": 2890,
+      "sha256": "7cc70c30705653a61e58595b8ffaa86ddec221d5967627e497bbb7d33086d0d8"
+    },
+    {
+      "url": "/data/imported/osm-relation-17840964.geojson",
+      "assetPath": "maps/routes/osm-relation-17840964.geojson",
+      "path": "maps/routes/osm-relation-17840964.geojson",
+      "sizeBytes": 441,
+      "sha256": "71a35833613fb86b0c26e6415529142caccc2245cb5e0654302a047e0efea345"
+    },
+    {
+      "url": "/data/imported/osm-relation-17946460.geojson",
+      "assetPath": "maps/routes/osm-relation-17946460.geojson",
+      "path": "maps/routes/osm-relation-17946460.geojson",
+      "sizeBytes": 8497,
+      "sha256": "6023596ca796aa54d1d426fdc4697090b37ddc49d62b5200a869a1c92f2d1c2f"
+    },
+    {
+      "url": "/data/imported/osm-relation-18057567.geojson",
+      "assetPath": "maps/routes/osm-relation-18057567.geojson",
+      "path": "maps/routes/osm-relation-18057567.geojson",
+      "sizeBytes": 7288,
+      "sha256": "7d5871031b08e3a7bfa5cfe4fd9d8933e006fd9a81410340b0b7e43b42c573c9"
+    },
+    {
+      "url": "/data/imported/osm-relation-18083047.geojson",
+      "assetPath": "maps/routes/osm-relation-18083047.geojson",
+      "path": "maps/routes/osm-relation-18083047.geojson",
+      "sizeBytes": 8153,
+      "sha256": "c278a70619aef293d9aa6011222b3ddd6176c35152bc8e1532267c9fd2d39640"
+    },
+    {
+      "url": "/data/imported/osm-relation-18086558.geojson",
+      "assetPath": "maps/routes/osm-relation-18086558.geojson",
+      "path": "maps/routes/osm-relation-18086558.geojson",
+      "sizeBytes": 4761,
+      "sha256": "961d3168903a8b3e18ae84b4d65fd112f27c41c107d2353d4c045a0c6e8dfb4f"
+    },
+    {
+      "url": "/data/imported/osm-relation-18108422.geojson",
+      "assetPath": "maps/routes/osm-relation-18108422.geojson",
+      "path": "maps/routes/osm-relation-18108422.geojson",
+      "sizeBytes": 60542,
+      "sha256": "ab3b656bb63291076a430fe6e1d2c7530c7895139eced995128957295043b451"
+    },
+    {
+      "url": "/data/imported/osm-relation-18129967.geojson",
+      "assetPath": "maps/routes/osm-relation-18129967.geojson",
+      "path": "maps/routes/osm-relation-18129967.geojson",
+      "sizeBytes": 8173,
+      "sha256": "43bd69187a5e575119d19816ff94c5ce74004abee85f6f07793f51d52419ea54"
+    },
+    {
+      "url": "/data/imported/osm-relation-18143811.geojson",
+      "assetPath": "maps/routes/osm-relation-18143811.geojson",
+      "path": "maps/routes/osm-relation-18143811.geojson",
+      "sizeBytes": 21103,
+      "sha256": "2443e5df3d5c90410b5e2484516333c84ea9b349ceae7a1ae2a6cd3afff15600"
+    },
+    {
+      "url": "/data/imported/osm-relation-18143844.geojson",
+      "assetPath": "maps/routes/osm-relation-18143844.geojson",
+      "path": "maps/routes/osm-relation-18143844.geojson",
+      "sizeBytes": 2643,
+      "sha256": "e8652a3527381b688e18f8ebc2abf914458d06a1a87e4d3739aeaea7d52085c6"
+    },
+    {
+      "url": "/data/imported/osm-relation-18143889.geojson",
+      "assetPath": "maps/routes/osm-relation-18143889.geojson",
+      "path": "maps/routes/osm-relation-18143889.geojson",
+      "sizeBytes": 5220,
+      "sha256": "b4237f1225bc312f69ad66e586d58750cf29a60783d0bae9f79f3585a0ab8fd9"
+    },
+    {
+      "url": "/data/imported/osm-relation-18143909.geojson",
+      "assetPath": "maps/routes/osm-relation-18143909.geojson",
+      "path": "maps/routes/osm-relation-18143909.geojson",
+      "sizeBytes": 4969,
+      "sha256": "3ff593b4d01b250a17e27bdedf922c7e25d90edbdcd118be9c001bf954dda2f2"
+    },
+    {
+      "url": "/data/imported/osm-relation-18143930.geojson",
+      "assetPath": "maps/routes/osm-relation-18143930.geojson",
+      "path": "maps/routes/osm-relation-18143930.geojson",
+      "sizeBytes": 2135,
+      "sha256": "ed6a5df47caade25ce1db30713e134b5d95ee330aa44b85883c59891b8a58711"
+    },
+    {
+      "url": "/data/imported/osm-relation-18144106.geojson",
+      "assetPath": "maps/routes/osm-relation-18144106.geojson",
+      "path": "maps/routes/osm-relation-18144106.geojson",
+      "sizeBytes": 11682,
+      "sha256": "a0279562f5a8a5e455b6524588d49948ce94422e7fc6cb73bd87f958de8bfa79"
+    },
+    {
+      "url": "/data/imported/osm-relation-18144131.geojson",
+      "assetPath": "maps/routes/osm-relation-18144131.geojson",
+      "path": "maps/routes/osm-relation-18144131.geojson",
+      "sizeBytes": 7093,
+      "sha256": "b5766adc80ad139e4799d64537e2ca8fc6bebb4fcf37383d31127dfad5948f39"
+    },
+    {
+      "url": "/data/imported/osm-relation-18144178.geojson",
+      "assetPath": "maps/routes/osm-relation-18144178.geojson",
+      "path": "maps/routes/osm-relation-18144178.geojson",
+      "sizeBytes": 10638,
+      "sha256": "da6e5c26b66debe91d7390ab2f1af80d84a0a661becaa17e549c84a0f141e4ee"
+    },
+    {
+      "url": "/data/imported/osm-relation-18144198.geojson",
+      "assetPath": "maps/routes/osm-relation-18144198.geojson",
+      "path": "maps/routes/osm-relation-18144198.geojson",
+      "sizeBytes": 3805,
+      "sha256": "ea01eb7f7b642983c977834805870671323bc2f44c170d3e839a046b8bc925f3"
+    },
+    {
+      "url": "/data/imported/osm-relation-18162201.geojson",
+      "assetPath": "maps/routes/osm-relation-18162201.geojson",
+      "path": "maps/routes/osm-relation-18162201.geojson",
+      "sizeBytes": 1454712,
+      "sha256": "8bc1192971692197165d95bda9da81465d845a004a83cab7a99ab6e326a555a3"
+    },
+    {
+      "url": "/data/imported/osm-relation-18163496.geojson",
+      "assetPath": "maps/routes/osm-relation-18163496.geojson",
+      "path": "maps/routes/osm-relation-18163496.geojson",
+      "sizeBytes": 3679,
+      "sha256": "b98823da9e75b5a9ffbae940e7a2ae194f9d5402f23224bfd7680bc4d56de667"
+    },
+    {
+      "url": "/data/imported/osm-relation-18196992.geojson",
+      "assetPath": "maps/routes/osm-relation-18196992.geojson",
+      "path": "maps/routes/osm-relation-18196992.geojson",
+      "sizeBytes": 4843,
+      "sha256": "72c9c8da8339a7368ea56e14b45d9edea5dbd9621c5683982e6e996e5889beb1"
+    },
+    {
+      "url": "/data/imported/osm-relation-18197119.geojson",
+      "assetPath": "maps/routes/osm-relation-18197119.geojson",
+      "path": "maps/routes/osm-relation-18197119.geojson",
+      "sizeBytes": 5309,
+      "sha256": "f4b944e443b3fe5cde4628efc25742547efeab799f5874b6b8aaabd27f8d06d2"
+    },
+    {
+      "url": "/data/imported/osm-relation-18197120.geojson",
+      "assetPath": "maps/routes/osm-relation-18197120.geojson",
+      "path": "maps/routes/osm-relation-18197120.geojson",
+      "sizeBytes": 4577,
+      "sha256": "2b32af85621c960b6813400876fdffdda5f6f5c1ce0f593d3174b090bb56cb81"
+    },
+    {
+      "url": "/data/imported/osm-relation-18197294.geojson",
+      "assetPath": "maps/routes/osm-relation-18197294.geojson",
+      "path": "maps/routes/osm-relation-18197294.geojson",
+      "sizeBytes": 1666,
+      "sha256": "60a750380279379e1f299a2c88151e13221e780ad60f469a5c3a22af2259b841"
+    },
+    {
+      "url": "/data/imported/osm-relation-18197367.geojson",
+      "assetPath": "maps/routes/osm-relation-18197367.geojson",
+      "path": "maps/routes/osm-relation-18197367.geojson",
+      "sizeBytes": 1588,
+      "sha256": "15663e88d0518877eaef42e0ad4f8cfec6db2026744e67eaf7bb5ecaf87f9d24"
+    },
+    {
+      "url": "/data/imported/osm-relation-18197451.geojson",
+      "assetPath": "maps/routes/osm-relation-18197451.geojson",
+      "path": "maps/routes/osm-relation-18197451.geojson",
+      "sizeBytes": 5433,
+      "sha256": "563507e9ca11b590c0a56b82c924518274d42049fc65c75dea0adf36d0599970"
+    },
+    {
+      "url": "/data/imported/osm-relation-18215935.geojson",
+      "assetPath": "maps/routes/osm-relation-18215935.geojson",
+      "path": "maps/routes/osm-relation-18215935.geojson",
+      "sizeBytes": 5252,
+      "sha256": "af13281a9303c9d5751b5ae044564926cd2751bb7e6b91f8f8ac48d8f8144992"
+    },
+    {
+      "url": "/data/imported/osm-relation-18230319.geojson",
+      "assetPath": "maps/routes/osm-relation-18230319.geojson",
+      "path": "maps/routes/osm-relation-18230319.geojson",
+      "sizeBytes": 7650,
+      "sha256": "577e290a0b6a3babe38308ffaa555789924ecc35d7d39a29471ec25cdacc992b"
+    },
+    {
+      "url": "/data/imported/osm-relation-18251715.geojson",
+      "assetPath": "maps/routes/osm-relation-18251715.geojson",
+      "path": "maps/routes/osm-relation-18251715.geojson",
+      "sizeBytes": 42584,
+      "sha256": "583eb425ed8bc58ebc4e1a48eb49e7f79c3789e54ddcf7b245be02e7b68a5894"
+    },
+    {
+      "url": "/data/imported/osm-relation-18251716.geojson",
+      "assetPath": "maps/routes/osm-relation-18251716.geojson",
+      "path": "maps/routes/osm-relation-18251716.geojson",
+      "sizeBytes": 14454,
+      "sha256": "73771ca9ac014c0ad6e32fca49d552f63695bde4505788e676a7ed52298b024c"
+    },
+    {
+      "url": "/data/imported/osm-relation-18251717.geojson",
+      "assetPath": "maps/routes/osm-relation-18251717.geojson",
+      "path": "maps/routes/osm-relation-18251717.geojson",
+      "sizeBytes": 33264,
+      "sha256": "3d355bdec36862aa3d615033aca1f8d017f14532ebd3942e44b6aed5d2229497"
+    },
+    {
+      "url": "/data/imported/osm-relation-18251718.geojson",
+      "assetPath": "maps/routes/osm-relation-18251718.geojson",
+      "path": "maps/routes/osm-relation-18251718.geojson",
+      "sizeBytes": 6483,
+      "sha256": "e1a83b4069c508beee2a625049bd3aeb7da81037734a935141efcfc4d0fed2f9"
+    },
+    {
+      "url": "/data/imported/osm-relation-18257803.geojson",
+      "assetPath": "maps/routes/osm-relation-18257803.geojson",
+      "path": "maps/routes/osm-relation-18257803.geojson",
+      "sizeBytes": 74074,
+      "sha256": "fc1eb63233519fc9641cc8d86add27849b58ce8201ab5019b8a4cf13ea028686"
+    },
+    {
+      "url": "/data/imported/osm-relation-18286602.geojson",
+      "assetPath": "maps/routes/osm-relation-18286602.geojson",
+      "path": "maps/routes/osm-relation-18286602.geojson",
+      "sizeBytes": 1324,
+      "sha256": "cfb9ac12ddb5f468754be2c6ba27712ae3347098439268affa267e6949d9f99e"
+    },
+    {
+      "url": "/data/imported/osm-relation-18328942.geojson",
+      "assetPath": "maps/routes/osm-relation-18328942.geojson",
+      "path": "maps/routes/osm-relation-18328942.geojson",
+      "sizeBytes": 552,
+      "sha256": "44e0bcc546a0530e3cf933e1eccf0ce54d82ed85e0cabe81547ace3eba5833fa"
+    },
+    {
+      "url": "/data/imported/osm-relation-18328943.geojson",
+      "assetPath": "maps/routes/osm-relation-18328943.geojson",
+      "path": "maps/routes/osm-relation-18328943.geojson",
+      "sizeBytes": 254,
+      "sha256": "0201b2a8849f1cdfbb3b3a12ce07381fce2a646fdbeb9da6ce6ded7c0852caa8"
+    },
+    {
+      "url": "/data/imported/osm-relation-18351264.geojson",
+      "assetPath": "maps/routes/osm-relation-18351264.geojson",
+      "path": "maps/routes/osm-relation-18351264.geojson",
+      "sizeBytes": 8123,
+      "sha256": "52938df83f4216ce48e23402256c317d5696aa0c6f1714f9430f7f91b0ffc073"
+    },
+    {
+      "url": "/data/imported/osm-relation-18356757.geojson",
+      "assetPath": "maps/routes/osm-relation-18356757.geojson",
+      "path": "maps/routes/osm-relation-18356757.geojson",
+      "sizeBytes": 11154,
+      "sha256": "7fd4af8de3009199e69c89976d3453169e60ac219c4a6b344501a53d7f8bce94"
+    },
+    {
+      "url": "/data/imported/osm-relation-18356758.geojson",
+      "assetPath": "maps/routes/osm-relation-18356758.geojson",
+      "path": "maps/routes/osm-relation-18356758.geojson",
+      "sizeBytes": 4893,
+      "sha256": "d69a32f1231abfb061168130ab1a5a2de892241be56890b62b9ddf86b7bb0f8d"
+    },
+    {
+      "url": "/data/imported/osm-relation-18356759.geojson",
+      "assetPath": "maps/routes/osm-relation-18356759.geojson",
+      "path": "maps/routes/osm-relation-18356759.geojson",
+      "sizeBytes": 4429,
+      "sha256": "804b99a4f03df3c781868cf358e2a80d11469c96d95aef52822282fe96b18304"
+    },
+    {
+      "url": "/data/imported/osm-relation-18356858.geojson",
+      "assetPath": "maps/routes/osm-relation-18356858.geojson",
+      "path": "maps/routes/osm-relation-18356858.geojson",
+      "sizeBytes": 9089,
+      "sha256": "b9e9f41cd2abe2259b5492a5ce0cf06331c9d5838b9eb4ed12d9a6da123c2400"
+    },
+    {
+      "url": "/data/imported/osm-relation-18356924.geojson",
+      "assetPath": "maps/routes/osm-relation-18356924.geojson",
+      "path": "maps/routes/osm-relation-18356924.geojson",
+      "sizeBytes": 4629,
+      "sha256": "2f2a766bec92ff9aee1def28d5a3ebac126af7211ebc0e84b23e7d0f0a3b0234"
+    },
+    {
+      "url": "/data/imported/osm-relation-18384131.geojson",
+      "assetPath": "maps/routes/osm-relation-18384131.geojson",
+      "path": "maps/routes/osm-relation-18384131.geojson",
+      "sizeBytes": 4386,
+      "sha256": "fc8300c99fab926333387029f648ad0e0ea0852abf4f6e304cf137d9be23254e"
+    },
+    {
+      "url": "/data/imported/osm-relation-1842873.geojson",
+      "assetPath": "maps/routes/osm-relation-1842873.geojson",
+      "path": "maps/routes/osm-relation-1842873.geojson",
+      "sizeBytes": 1181,
+      "sha256": "a9db965dd4bee0d8e8e0e7f795c5883478b98695a8b20c6d15acbc2966a11f5e"
+    },
+    {
+      "url": "/data/imported/osm-relation-18434194.geojson",
+      "assetPath": "maps/routes/osm-relation-18434194.geojson",
+      "path": "maps/routes/osm-relation-18434194.geojson",
+      "sizeBytes": 25424,
+      "sha256": "6d09d2b1299b1fc8942ec473485dfab5b1d52ae07d688fbde06ecda4593801f5"
+    },
+    {
+      "url": "/data/imported/osm-relation-18523775.geojson",
+      "assetPath": "maps/routes/osm-relation-18523775.geojson",
+      "path": "maps/routes/osm-relation-18523775.geojson",
+      "sizeBytes": 22716,
+      "sha256": "1721ad8d878e2bf9d4e87798223236105483d0879d3687300f4dbaa3bc9af3de"
+    },
+    {
+      "url": "/data/imported/osm-relation-18526268.geojson",
+      "assetPath": "maps/routes/osm-relation-18526268.geojson",
+      "path": "maps/routes/osm-relation-18526268.geojson",
+      "sizeBytes": 4386,
+      "sha256": "d24b2e39c52feb9449f7ad4919e8f2538c16ce5ff54f9bb80d220992c274a524"
+    },
+    {
+      "url": "/data/imported/osm-relation-18526295.geojson",
+      "assetPath": "maps/routes/osm-relation-18526295.geojson",
+      "path": "maps/routes/osm-relation-18526295.geojson",
+      "sizeBytes": 12059,
+      "sha256": "ffcf87c3978741f6036f48a39185665f64d6f0545f0128476f5dfe97677fe19e"
+    },
+    {
+      "url": "/data/imported/osm-relation-18526981.geojson",
+      "assetPath": "maps/routes/osm-relation-18526981.geojson",
+      "path": "maps/routes/osm-relation-18526981.geojson",
+      "sizeBytes": 40425,
+      "sha256": "2cb278813f0a6e92460c56c1f3102078af05cc220716c87154d5c921f51a3fce"
+    },
+    {
+      "url": "/data/imported/osm-relation-18527692.geojson",
+      "assetPath": "maps/routes/osm-relation-18527692.geojson",
+      "path": "maps/routes/osm-relation-18527692.geojson",
+      "sizeBytes": 3848,
+      "sha256": "2b5ad46bf1cff042d92cf4f7d8a51af4699f80461c1aeee9f28740ff089662c8"
+    },
+    {
+      "url": "/data/imported/osm-relation-18530982.geojson",
+      "assetPath": "maps/routes/osm-relation-18530982.geojson",
+      "path": "maps/routes/osm-relation-18530982.geojson",
+      "sizeBytes": 325,
+      "sha256": "760f87a4af6721c19f11b19eda0006d5adb7fd9e93fff8932d0774482d9559bd"
+    },
+    {
+      "url": "/data/imported/osm-relation-18581018.geojson",
+      "assetPath": "maps/routes/osm-relation-18581018.geojson",
+      "path": "maps/routes/osm-relation-18581018.geojson",
+      "sizeBytes": 1651,
+      "sha256": "6e8d7c7975364415d3d43027d6f932b4fb63c0deeec7065d96034897ec24db86"
+    },
+    {
+      "url": "/data/imported/osm-relation-18581019.geojson",
+      "assetPath": "maps/routes/osm-relation-18581019.geojson",
+      "path": "maps/routes/osm-relation-18581019.geojson",
+      "sizeBytes": 2029,
+      "sha256": "44646a96ff06ef6e1b24fc179ed2748c26a67e4f5f1caf251bcc059a6ec2e9fb"
+    },
+    {
+      "url": "/data/imported/osm-relation-18581020.geojson",
+      "assetPath": "maps/routes/osm-relation-18581020.geojson",
+      "path": "maps/routes/osm-relation-18581020.geojson",
+      "sizeBytes": 2590,
+      "sha256": "fa4f9570a2372f16639489d41f727ce344876165fcf0db3b3a04a470ac52e46d"
+    },
+    {
+      "url": "/data/imported/osm-relation-18581021.geojson",
+      "assetPath": "maps/routes/osm-relation-18581021.geojson",
+      "path": "maps/routes/osm-relation-18581021.geojson",
+      "sizeBytes": 1568,
+      "sha256": "22cd42bb51b1cd3e225f1271bb1e3b19bfeee07cdc556ecc117b7e434446b077"
+    },
+    {
+      "url": "/data/imported/osm-relation-18581022.geojson",
+      "assetPath": "maps/routes/osm-relation-18581022.geojson",
+      "path": "maps/routes/osm-relation-18581022.geojson",
+      "sizeBytes": 6283,
+      "sha256": "7fcb3c67b89039f890b2bf67a95b213b9d02540406ac6b10aba70d85bf3c0456"
+    },
+    {
+      "url": "/data/imported/osm-relation-18624144.geojson",
+      "assetPath": "maps/routes/osm-relation-18624144.geojson",
+      "path": "maps/routes/osm-relation-18624144.geojson",
+      "sizeBytes": 324,
+      "sha256": "43bae2fced652f7e69e55cc384fc4e6aefa4c31b9f995210ff6b3252ab27d7af"
+    },
+    {
+      "url": "/data/imported/osm-relation-18673170.geojson",
+      "assetPath": "maps/routes/osm-relation-18673170.geojson",
+      "path": "maps/routes/osm-relation-18673170.geojson",
+      "sizeBytes": 16911,
+      "sha256": "ac465e17a8d04712c7fa204f3075e36a68439ec42e4ab6255648a5e35d18946c"
+    },
+    {
+      "url": "/data/imported/osm-relation-18677666.geojson",
+      "assetPath": "maps/routes/osm-relation-18677666.geojson",
+      "path": "maps/routes/osm-relation-18677666.geojson",
+      "sizeBytes": 3069,
+      "sha256": "6bdede5085b45562e584b330920ec6befcd1ca5c55fb4e44bdaaea817e90c713"
+    },
+    {
+      "url": "/data/imported/osm-relation-18694953.geojson",
+      "assetPath": "maps/routes/osm-relation-18694953.geojson",
+      "path": "maps/routes/osm-relation-18694953.geojson",
+      "sizeBytes": 1693,
+      "sha256": "9f4cf1d2ab2c9019fc429678291c20fce0152bc749072cc1d6fe65ee08332a38"
+    },
+    {
+      "url": "/data/imported/osm-relation-18869603.geojson",
+      "assetPath": "maps/routes/osm-relation-18869603.geojson",
+      "path": "maps/routes/osm-relation-18869603.geojson",
+      "sizeBytes": 5546,
+      "sha256": "d638822a10be59d827f46924147086697af6d20180caa5dedeeea5fc595d1f8e"
+    },
+    {
+      "url": "/data/imported/osm-relation-18889565.geojson",
+      "assetPath": "maps/routes/osm-relation-18889565.geojson",
+      "path": "maps/routes/osm-relation-18889565.geojson",
+      "sizeBytes": 1977,
+      "sha256": "6007466d8d74212657ad945407dac8dc335f602e1f405877f3f3f6fa6183a72d"
+    },
+    {
+      "url": "/data/imported/osm-relation-19211294.geojson",
+      "assetPath": "maps/routes/osm-relation-19211294.geojson",
+      "path": "maps/routes/osm-relation-19211294.geojson",
+      "sizeBytes": 8230,
+      "sha256": "e4c34394482a69882f16c525ee0e6e37d391bfeb0ef3ddc32c69644ea486ed64"
+    },
+    {
+      "url": "/data/imported/osm-relation-19429001.geojson",
+      "assetPath": "maps/routes/osm-relation-19429001.geojson",
+      "path": "maps/routes/osm-relation-19429001.geojson",
+      "sizeBytes": 1479,
+      "sha256": "c1b20a2ddef2cfb3c146b1404d1bae9a03bdb67623bf94c39868b80dcab0e695"
+    },
+    {
+      "url": "/data/imported/osm-relation-19451230.geojson",
+      "assetPath": "maps/routes/osm-relation-19451230.geojson",
+      "path": "maps/routes/osm-relation-19451230.geojson",
+      "sizeBytes": 731,
+      "sha256": "be1277070a1dd3f1ea05c3cef07bc51b6ec602187394ad4c956dd04d1dc72af0"
+    },
+    {
+      "url": "/data/imported/osm-relation-19451231.geojson",
+      "assetPath": "maps/routes/osm-relation-19451231.geojson",
+      "path": "maps/routes/osm-relation-19451231.geojson",
+      "sizeBytes": 1285,
+      "sha256": "1d3f931a9b8a6e66e9d3dab79355ca72ea8764e5eaa8937e1c3b04544705ef78"
+    },
+    {
+      "url": "/data/imported/osm-relation-19451232.geojson",
+      "assetPath": "maps/routes/osm-relation-19451232.geojson",
+      "path": "maps/routes/osm-relation-19451232.geojson",
+      "sizeBytes": 1899,
+      "sha256": "74bb824857bb24e290f7d5b25a2e911b156896a679235a9912b8db2a1209f833"
+    },
+    {
+      "url": "/data/imported/osm-relation-1949391.geojson",
+      "assetPath": "maps/routes/osm-relation-1949391.geojson",
+      "path": "maps/routes/osm-relation-1949391.geojson",
+      "sizeBytes": 4925,
+      "sha256": "543546859eac42f07ec2f64b3adedb85d8e1226c0c74848b09ad5fb7c69a078e"
+    },
+    {
+      "url": "/data/imported/osm-relation-19730817.geojson",
+      "assetPath": "maps/routes/osm-relation-19730817.geojson",
+      "path": "maps/routes/osm-relation-19730817.geojson",
+      "sizeBytes": 9235,
+      "sha256": "9b8d60bde5704beeffe8ac96966d7496be58365c3b93b725f178c9feabee6d42"
+    },
+    {
+      "url": "/data/imported/osm-relation-19750731.geojson",
+      "assetPath": "maps/routes/osm-relation-19750731.geojson",
+      "path": "maps/routes/osm-relation-19750731.geojson",
+      "sizeBytes": 902,
+      "sha256": "0c5cf83e77df98d7a8cda021dead07bdff4dc6d133263b8798dfcbd63093c787"
+    },
+    {
+      "url": "/data/imported/osm-relation-19774190.geojson",
+      "assetPath": "maps/routes/osm-relation-19774190.geojson",
+      "path": "maps/routes/osm-relation-19774190.geojson",
+      "sizeBytes": 48208,
+      "sha256": "297f673cba9d1161f8fca6df555857026db576e6d448a2f63a1b414989a4b7ec"
+    },
+    {
+      "url": "/data/imported/osm-relation-19862630.geojson",
+      "assetPath": "maps/routes/osm-relation-19862630.geojson",
+      "path": "maps/routes/osm-relation-19862630.geojson",
+      "sizeBytes": 8831,
+      "sha256": "821ba50e840167f7d867316023601979ddb05bb6b9175988040f1a8fe77396b9"
+    },
+    {
+      "url": "/data/imported/osm-relation-19867971.geojson",
+      "assetPath": "maps/routes/osm-relation-19867971.geojson",
+      "path": "maps/routes/osm-relation-19867971.geojson",
+      "sizeBytes": 6886,
+      "sha256": "63c61e17f2c7b4155d13b397030abd2c23a228109620582a5568cfc55376da41"
+    },
+    {
+      "url": "/data/imported/osm-relation-19868083.geojson",
+      "assetPath": "maps/routes/osm-relation-19868083.geojson",
+      "path": "maps/routes/osm-relation-19868083.geojson",
+      "sizeBytes": 23416,
+      "sha256": "022f4f044a4decc01f26b5e43b8304854f25b5c2ef6eeddb15919778be061b4d"
+    },
+    {
+      "url": "/data/imported/osm-relation-19907192.geojson",
+      "assetPath": "maps/routes/osm-relation-19907192.geojson",
+      "path": "maps/routes/osm-relation-19907192.geojson",
+      "sizeBytes": 13467,
+      "sha256": "cc88581170d96164470c43864f8d9cd0a373d7c2f9ae32ed6b7de9c8eae85f34"
+    },
+    {
+      "url": "/data/imported/osm-relation-19907194.geojson",
+      "assetPath": "maps/routes/osm-relation-19907194.geojson",
+      "path": "maps/routes/osm-relation-19907194.geojson",
+      "sizeBytes": 21116,
+      "sha256": "b0bba50c79febb48e3537844badd6b33cc058d7b9d83a5353abc1be9c1a8397b"
+    },
+    {
+      "url": "/data/imported/osm-relation-20044322.geojson",
+      "assetPath": "maps/routes/osm-relation-20044322.geojson",
+      "path": "maps/routes/osm-relation-20044322.geojson",
+      "sizeBytes": 2245,
+      "sha256": "3933096707d3b8d3aad2dfa0298428db3b3e5e9caf9bba99f2ba1d52a973ab70"
+    },
+    {
+      "url": "/data/imported/osm-relation-20355266.geojson",
+      "assetPath": "maps/routes/osm-relation-20355266.geojson",
+      "path": "maps/routes/osm-relation-20355266.geojson",
+      "sizeBytes": 1695,
+      "sha256": "99609a03ea466271190d23176b8bf9a99fe0bef9565d0088782c6cc94af941c3"
+    },
+    {
+      "url": "/data/imported/osm-relation-20587770.geojson",
+      "assetPath": "maps/routes/osm-relation-20587770.geojson",
+      "path": "maps/routes/osm-relation-20587770.geojson",
+      "sizeBytes": 1286,
+      "sha256": "acecd1bddc42af12e72694dc64092bd4d7b471ccad19d21a538867d98d0b5b07"
+    },
+    {
+      "url": "/data/imported/osm-relation-21088901.geojson",
+      "assetPath": "maps/routes/osm-relation-21088901.geojson",
+      "path": "maps/routes/osm-relation-21088901.geojson",
+      "sizeBytes": 1570,
+      "sha256": "58cc8014f0d6ff51e7d90313f4939ca2b9c9aa6df2739c147c9ce093fe47ab3e"
+    },
+    {
+      "url": "/data/imported/osm-relation-21088902.geojson",
+      "assetPath": "maps/routes/osm-relation-21088902.geojson",
+      "path": "maps/routes/osm-relation-21088902.geojson",
+      "sizeBytes": 1394,
+      "sha256": "98580472b175535f72e9485d3bd38591129996d9b95e03c856dd482e40173da2"
+    },
+    {
+      "url": "/data/imported/osm-relation-21088903.geojson",
+      "assetPath": "maps/routes/osm-relation-21088903.geojson",
+      "path": "maps/routes/osm-relation-21088903.geojson",
+      "sizeBytes": 893,
+      "sha256": "7cea420fee1adffaae066eeba6bc9843176ea1619f2487f533a399b0b67c51a8"
+    },
+    {
+      "url": "/data/imported/osm-relation-21088904.geojson",
+      "assetPath": "maps/routes/osm-relation-21088904.geojson",
+      "path": "maps/routes/osm-relation-21088904.geojson",
+      "sizeBytes": 635,
+      "sha256": "9c4f0b530ce289c42693b3c8d89d8078d3c35d153fa114f39cb28b171e237ef7"
+    },
+    {
+      "url": "/data/imported/osm-relation-21088905.geojson",
+      "assetPath": "maps/routes/osm-relation-21088905.geojson",
+      "path": "maps/routes/osm-relation-21088905.geojson",
+      "sizeBytes": 1633,
+      "sha256": "587ee52e92798aa9a88a35ae61f9dea6e8774810c63ed772c9efe267eae7460f"
+    },
+    {
+      "url": "/data/imported/osm-relation-21117907.geojson",
+      "assetPath": "maps/routes/osm-relation-21117907.geojson",
+      "path": "maps/routes/osm-relation-21117907.geojson",
+      "sizeBytes": 119931,
+      "sha256": "7086f8d89f2a7df722b3a02adfbd8623952bef11bb3975c200bb2ffb0a6309db"
+    },
+    {
+      "url": "/data/imported/osm-relation-21150700.geojson",
+      "assetPath": "maps/routes/osm-relation-21150700.geojson",
+      "path": "maps/routes/osm-relation-21150700.geojson",
+      "sizeBytes": 806,
+      "sha256": "5c4612e4b866a20ac10cb79c582b3307227ca37ebba4931f405e1b786398baab"
+    },
+    {
+      "url": "/data/imported/osm-relation-21216847.geojson",
+      "assetPath": "maps/routes/osm-relation-21216847.geojson",
+      "path": "maps/routes/osm-relation-21216847.geojson",
+      "sizeBytes": 2067,
+      "sha256": "73880e466443cef89db20f8c6a82f2244fd507124dc7e7504d3cfc41e04f2011"
+    },
+    {
+      "url": "/data/imported/osm-relation-21241600.geojson",
+      "assetPath": "maps/routes/osm-relation-21241600.geojson",
+      "path": "maps/routes/osm-relation-21241600.geojson",
+      "sizeBytes": 894,
+      "sha256": "622aac9afe093395af190305f61dedaeab30433f1533ef61f9a3acc5849edab9"
+    },
+    {
+      "url": "/data/imported/osm-relation-21280914.geojson",
+      "assetPath": "maps/routes/osm-relation-21280914.geojson",
+      "path": "maps/routes/osm-relation-21280914.geojson",
+      "sizeBytes": 4669,
+      "sha256": "44cf1d4cf2433687f69de2d3024c5ba45c1e6738c3c2a64cad414dcb66c01a11"
+    },
+    {
+      "url": "/data/imported/osm-relation-21410563.geojson",
+      "assetPath": "maps/routes/osm-relation-21410563.geojson",
+      "path": "maps/routes/osm-relation-21410563.geojson",
+      "sizeBytes": 9266,
+      "sha256": "c13c7de6b94ebeb470160bf263e554b63299b8651f3af0db2814ae422efbd6a9"
+    },
+    {
+      "url": "/data/imported/osm-relation-21418972.geojson",
+      "assetPath": "maps/routes/osm-relation-21418972.geojson",
+      "path": "maps/routes/osm-relation-21418972.geojson",
+      "sizeBytes": 1275,
+      "sha256": "66cd7c7a4efd83b40b4f7226f3f76c149f1c85ac834362099b73426deb79e608"
+    },
+    {
+      "url": "/data/imported/osm-relation-21465406.geojson",
+      "assetPath": "maps/routes/osm-relation-21465406.geojson",
+      "path": "maps/routes/osm-relation-21465406.geojson",
+      "sizeBytes": 5007,
+      "sha256": "cd95d86e15a8897d4f385f73bc6d515928741b5f353f95d90ad9fe98f76767a4"
+    },
+    {
+      "url": "/data/imported/osm-relation-21520611.geojson",
+      "assetPath": "maps/routes/osm-relation-21520611.geojson",
+      "path": "maps/routes/osm-relation-21520611.geojson",
+      "sizeBytes": 278,
+      "sha256": "46a41e847077f5f7724d8029a9137d4f12c018c5a9aa59ca8bdc2a3bb69156cd"
+    },
+    {
+      "url": "/data/imported/osm-relation-21650583.geojson",
+      "assetPath": "maps/routes/osm-relation-21650583.geojson",
+      "path": "maps/routes/osm-relation-21650583.geojson",
+      "sizeBytes": 4354,
+      "sha256": "2ec669dd39ef2d9fc55e19e323c70563cd72a46751a384214191fbdaa4a8c4ea"
+    },
+    {
+      "url": "/data/imported/osm-relation-21650587.geojson",
+      "assetPath": "maps/routes/osm-relation-21650587.geojson",
+      "path": "maps/routes/osm-relation-21650587.geojson",
+      "sizeBytes": 1527,
+      "sha256": "9e07765df3a0d2722f9c87d869b75869ceb6d82a952814d6def427c89bc5d35f"
+    },
+    {
+      "url": "/data/imported/osm-relation-21650637.geojson",
+      "assetPath": "maps/routes/osm-relation-21650637.geojson",
+      "path": "maps/routes/osm-relation-21650637.geojson",
+      "sizeBytes": 8874,
+      "sha256": "a2ebd2da23e8e953ecde5c2cceb993789730c4b9cf3887d353f200c70ed6dfe9"
+    },
+    {
+      "url": "/data/imported/osm-relation-21650664.geojson",
+      "assetPath": "maps/routes/osm-relation-21650664.geojson",
+      "path": "maps/routes/osm-relation-21650664.geojson",
+      "sizeBytes": 2236,
+      "sha256": "7d5fc2abd0d656ff4465f166581f562e4c2d165646c74ba89d516fb18d4a87b5"
+    },
+    {
+      "url": "/data/imported/osm-relation-21650665.geojson",
+      "assetPath": "maps/routes/osm-relation-21650665.geojson",
+      "path": "maps/routes/osm-relation-21650665.geojson",
+      "sizeBytes": 11005,
+      "sha256": "351f3fb35f273882b555f490c6353d0d5f4a8c3b608f991b013abad1a41d94cc"
+    },
+    {
+      "url": "/data/imported/osm-relation-21650666.geojson",
+      "assetPath": "maps/routes/osm-relation-21650666.geojson",
+      "path": "maps/routes/osm-relation-21650666.geojson",
+      "sizeBytes": 11300,
+      "sha256": "e9b1a0ab93e166b52fb3b3f1a9519469bf83144d821fee4e73e3e47125a6920d"
+    },
+    {
+      "url": "/data/imported/osm-relation-21799750.geojson",
+      "assetPath": "maps/routes/osm-relation-21799750.geojson",
+      "path": "maps/routes/osm-relation-21799750.geojson",
+      "sizeBytes": 13940,
+      "sha256": "fbb708e2b7cfea5cf5991051c0c9a822a89a55dfef0496b29269930984903410"
+    },
+    {
+      "url": "/data/imported/osm-relation-21841204.geojson",
+      "assetPath": "maps/routes/osm-relation-21841204.geojson",
+      "path": "maps/routes/osm-relation-21841204.geojson",
+      "sizeBytes": 1254,
+      "sha256": "ef1783bbf351dadcd695d61ce5a2bae37a757b8e810a46328bd909e199f705b1"
+    },
+    {
+      "url": "/data/imported/osm-relation-2227014.geojson",
+      "assetPath": "maps/routes/osm-relation-2227014.geojson",
+      "path": "maps/routes/osm-relation-2227014.geojson",
+      "sizeBytes": 9413,
+      "sha256": "366294d400a3cb1c72dc00edae1765446dcad6547385a94c3f7b011a610ac5fc"
+    },
+    {
+      "url": "/data/imported/osm-relation-2244794.geojson",
+      "assetPath": "maps/routes/osm-relation-2244794.geojson",
+      "path": "maps/routes/osm-relation-2244794.geojson",
+      "sizeBytes": 488,
+      "sha256": "b0108f4c547cd0aa032043602809f5aabd23c59b4df113b2f1a51566cdc3d241"
+    },
+    {
+      "url": "/data/imported/osm-relation-2516104.geojson",
+      "assetPath": "maps/routes/osm-relation-2516104.geojson",
+      "path": "maps/routes/osm-relation-2516104.geojson",
+      "sizeBytes": 3130,
+      "sha256": "e5ec06d5086c9f592d1ce4a66386d9c89363dca22250a68d49bcd54d3eeebb82"
+    },
+    {
+      "url": "/data/imported/osm-relation-2727455.geojson",
+      "assetPath": "maps/routes/osm-relation-2727455.geojson",
+      "path": "maps/routes/osm-relation-2727455.geojson",
+      "sizeBytes": 417,
+      "sha256": "4d936c9b6bc5b68d1bb576c682acbf335eeb5afb647844dd948a2e44611a43ed"
+    },
+    {
+      "url": "/data/imported/osm-relation-2824582.geojson",
+      "assetPath": "maps/routes/osm-relation-2824582.geojson",
+      "path": "maps/routes/osm-relation-2824582.geojson",
+      "sizeBytes": 5332,
+      "sha256": "da9adc9c54a1ccb873b11c513cb3aa61ad097e26dfdb467a8fc975db9eda5f2d"
+    },
+    {
+      "url": "/data/imported/osm-relation-2886435.geojson",
+      "assetPath": "maps/routes/osm-relation-2886435.geojson",
+      "path": "maps/routes/osm-relation-2886435.geojson",
+      "sizeBytes": 6542,
+      "sha256": "227bdf5ab136172a2a57bc8b01c839e5236906e8d7cf4169c23835e1c3887372"
+    },
+    {
+      "url": "/data/imported/osm-relation-2978218.geojson",
+      "assetPath": "maps/routes/osm-relation-2978218.geojson",
+      "path": "maps/routes/osm-relation-2978218.geojson",
+      "sizeBytes": 2827,
+      "sha256": "f650f9b9b6831827b2a456273a5d85d9cef459b928c36725be64cdc8eb04a11f"
+    },
+    {
+      "url": "/data/imported/osm-relation-2978229.geojson",
+      "assetPath": "maps/routes/osm-relation-2978229.geojson",
+      "path": "maps/routes/osm-relation-2978229.geojson",
+      "sizeBytes": 3558,
+      "sha256": "5c12042536830f59bb0b943c9603c5798a9910628291e579359ed696828d847f"
+    },
+    {
+      "url": "/data/imported/osm-relation-2978230.geojson",
+      "assetPath": "maps/routes/osm-relation-2978230.geojson",
+      "path": "maps/routes/osm-relation-2978230.geojson",
+      "sizeBytes": 4349,
+      "sha256": "011e5af76b5753755475da9dd222d271c52bf79643b6640d3717527c1e6b2d23"
+    },
+    {
+      "url": "/data/imported/osm-relation-2978256.geojson",
+      "assetPath": "maps/routes/osm-relation-2978256.geojson",
+      "path": "maps/routes/osm-relation-2978256.geojson",
+      "sizeBytes": 9145,
+      "sha256": "070462b34438479835ad954967c0104f107f31e472d49e21c6698b299be6fce6"
+    },
+    {
+      "url": "/data/imported/osm-relation-2978257.geojson",
+      "assetPath": "maps/routes/osm-relation-2978257.geojson",
+      "path": "maps/routes/osm-relation-2978257.geojson",
+      "sizeBytes": 3007,
+      "sha256": "18b21ede3f5bcdb95a4a469f89bc511523892c8b63a0e3ad3e651d1298f7c9c9"
+    },
+    {
+      "url": "/data/imported/osm-relation-2978261.geojson",
+      "assetPath": "maps/routes/osm-relation-2978261.geojson",
+      "path": "maps/routes/osm-relation-2978261.geojson",
+      "sizeBytes": 2730,
+      "sha256": "47211e9fca1c6612e645227b16d8e3f188e53272a82d276207526e17a6b74fc7"
+    },
+    {
+      "url": "/data/imported/osm-relation-2978284.geojson",
+      "assetPath": "maps/routes/osm-relation-2978284.geojson",
+      "path": "maps/routes/osm-relation-2978284.geojson",
+      "sizeBytes": 4758,
+      "sha256": "d8c882e2b17b1f4ae57f2279bbaa6b7e378f7dbc594d9add8608987322c101c0"
+    },
+    {
+      "url": "/data/imported/osm-relation-2978292.geojson",
+      "assetPath": "maps/routes/osm-relation-2978292.geojson",
+      "path": "maps/routes/osm-relation-2978292.geojson",
+      "sizeBytes": 2611,
+      "sha256": "d1d01814728428a6a3eacbaffe6d15491a2215d07f2a59feddd3335d7e168f56"
+    },
+    {
+      "url": "/data/imported/osm-relation-2981679.geojson",
+      "assetPath": "maps/routes/osm-relation-2981679.geojson",
+      "path": "maps/routes/osm-relation-2981679.geojson",
+      "sizeBytes": 2844,
+      "sha256": "5b331086a2f5b3b9f8030d137acf948767f6ae171052972da64dc55fe7138b95"
+    },
+    {
+      "url": "/data/imported/osm-relation-2981682.geojson",
+      "assetPath": "maps/routes/osm-relation-2981682.geojson",
+      "path": "maps/routes/osm-relation-2981682.geojson",
+      "sizeBytes": 1461,
+      "sha256": "e85801c0376d04f12e6f476c4ce28bba4332442c7680e91ecea5082d648d1977"
+    },
+    {
+      "url": "/data/imported/osm-relation-2981716.geojson",
+      "assetPath": "maps/routes/osm-relation-2981716.geojson",
+      "path": "maps/routes/osm-relation-2981716.geojson",
+      "sizeBytes": 1958,
+      "sha256": "6e359aec1b241ce053a7a8952e1b6c61da9aef28a455cd6cf96bb7f5dc1ca6c9"
+    },
+    {
+      "url": "/data/imported/osm-relation-2981758.geojson",
+      "assetPath": "maps/routes/osm-relation-2981758.geojson",
+      "path": "maps/routes/osm-relation-2981758.geojson",
+      "sizeBytes": 3651,
+      "sha256": "6f468f43c6f551a2fcc27fd444e799b388d77f6821081afeb3a5a404ca002944"
+    },
+    {
+      "url": "/data/imported/osm-relation-2981764.geojson",
+      "assetPath": "maps/routes/osm-relation-2981764.geojson",
+      "path": "maps/routes/osm-relation-2981764.geojson",
+      "sizeBytes": 1261,
+      "sha256": "4daaecfa5f00f66bdee5a0f3fcb2cf2e0d8f0b180e1b7091b402f9815c46dc21"
+    },
+    {
+      "url": "/data/imported/osm-relation-2981768.geojson",
+      "assetPath": "maps/routes/osm-relation-2981768.geojson",
+      "path": "maps/routes/osm-relation-2981768.geojson",
+      "sizeBytes": 1700,
+      "sha256": "3b15c725ec196b716eef990efc57f4878ef4042b18357d4e369d6043ece4f5b6"
+    },
+    {
+      "url": "/data/imported/osm-relation-2983111.geojson",
+      "assetPath": "maps/routes/osm-relation-2983111.geojson",
+      "path": "maps/routes/osm-relation-2983111.geojson",
+      "sizeBytes": 1924,
+      "sha256": "655da98edcdd7ef13ec97ebc555998658b85f6413b0667f2034ad4183f18467a"
+    },
+    {
+      "url": "/data/imported/osm-relation-2983138.geojson",
+      "assetPath": "maps/routes/osm-relation-2983138.geojson",
+      "path": "maps/routes/osm-relation-2983138.geojson",
+      "sizeBytes": 1939,
+      "sha256": "5ccc0873c4500d4fdddd31bc81b474bb556ed33d2e20809e7bc1e8f3d2e4bd0e"
+    },
+    {
+      "url": "/data/imported/osm-relation-2983159.geojson",
+      "assetPath": "maps/routes/osm-relation-2983159.geojson",
+      "path": "maps/routes/osm-relation-2983159.geojson",
+      "sizeBytes": 4003,
+      "sha256": "90a6ad63ed48c7a44b2af50180dca01b2a615fece1129748608ae0464638fe8d"
+    },
+    {
+      "url": "/data/imported/osm-relation-2983163.geojson",
+      "assetPath": "maps/routes/osm-relation-2983163.geojson",
+      "path": "maps/routes/osm-relation-2983163.geojson",
+      "sizeBytes": 4080,
+      "sha256": "502ac7217315c5c2b56917e145202cbde28b3b016aa5fd580432aed99772e28c"
+    },
+    {
+      "url": "/data/imported/osm-relation-2983180.geojson",
+      "assetPath": "maps/routes/osm-relation-2983180.geojson",
+      "path": "maps/routes/osm-relation-2983180.geojson",
+      "sizeBytes": 1839,
+      "sha256": "7bc5d2a0b5eca04612a7e56a8209f5bebb11b5d978e8a3fe3d8149da8e667ad3"
+    },
+    {
+      "url": "/data/imported/osm-relation-2983182.geojson",
+      "assetPath": "maps/routes/osm-relation-2983182.geojson",
+      "path": "maps/routes/osm-relation-2983182.geojson",
+      "sizeBytes": 2510,
+      "sha256": "36511907c7a1b464901f15daa5c19077f38972bec9fa47da518cf87319390399"
+    },
+    {
+      "url": "/data/imported/osm-relation-2983194.geojson",
+      "assetPath": "maps/routes/osm-relation-2983194.geojson",
+      "path": "maps/routes/osm-relation-2983194.geojson",
+      "sizeBytes": 2414,
+      "sha256": "21920e5f46483375381a95ea81f06914af1805edb4c3106aa58649b3d8169529"
+    },
+    {
+      "url": "/data/imported/osm-relation-2983290.geojson",
+      "assetPath": "maps/routes/osm-relation-2983290.geojson",
+      "path": "maps/routes/osm-relation-2983290.geojson",
+      "sizeBytes": 847,
+      "sha256": "6f74a171fd1561d72e2c32286a65e3209337fd980e99689c3b814b13160ae1d2"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984722.geojson",
+      "assetPath": "maps/routes/osm-relation-2984722.geojson",
+      "path": "maps/routes/osm-relation-2984722.geojson",
+      "sizeBytes": 4631,
+      "sha256": "cdb9e66b00b30eef08943c5413f6fa57b3cc06fd58b0805913d054d12de41400"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984740.geojson",
+      "assetPath": "maps/routes/osm-relation-2984740.geojson",
+      "path": "maps/routes/osm-relation-2984740.geojson",
+      "sizeBytes": 7932,
+      "sha256": "564e1816b646ac4d50e02689a33ca38d684675bbd77ea33b4d3ae5e7d8d74262"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984790.geojson",
+      "assetPath": "maps/routes/osm-relation-2984790.geojson",
+      "path": "maps/routes/osm-relation-2984790.geojson",
+      "sizeBytes": 3616,
+      "sha256": "7ae669ff8a08466e5f108803bf6d0e2a7266c958788c0a0a865650735bbbe4cf"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984791.geojson",
+      "assetPath": "maps/routes/osm-relation-2984791.geojson",
+      "path": "maps/routes/osm-relation-2984791.geojson",
+      "sizeBytes": 965,
+      "sha256": "005ea9972e024c66d21c317e17a8cddbfc14c35f715e6c6625439511771f7b2c"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984809.geojson",
+      "assetPath": "maps/routes/osm-relation-2984809.geojson",
+      "path": "maps/routes/osm-relation-2984809.geojson",
+      "sizeBytes": 3421,
+      "sha256": "82d742fa694e4c6511809f607f181437019f9634c6bb6d1ae3807edcedde4883"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984813.geojson",
+      "assetPath": "maps/routes/osm-relation-2984813.geojson",
+      "path": "maps/routes/osm-relation-2984813.geojson",
+      "sizeBytes": 2077,
+      "sha256": "2496a5542d38799ffc86ef81619773cd8254b5ce283ceca6fe2a0ddd88f84751"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984816.geojson",
+      "assetPath": "maps/routes/osm-relation-2984816.geojson",
+      "path": "maps/routes/osm-relation-2984816.geojson",
+      "sizeBytes": 698,
+      "sha256": "cf6a4e3ea940417419c45d60baad8ae06ee56c353b055f781e0c8f288bc5c621"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984826.geojson",
+      "assetPath": "maps/routes/osm-relation-2984826.geojson",
+      "path": "maps/routes/osm-relation-2984826.geojson",
+      "sizeBytes": 1802,
+      "sha256": "1f6d3bd23fb87b8e61050ed7055c730bd1384f2ad4ab25e7216991175444775b"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984832.geojson",
+      "assetPath": "maps/routes/osm-relation-2984832.geojson",
+      "path": "maps/routes/osm-relation-2984832.geojson",
+      "sizeBytes": 4399,
+      "sha256": "37237d779df3b94cee7d9bf14026685493b34f3725e883d8e204a90d4678716b"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984834.geojson",
+      "assetPath": "maps/routes/osm-relation-2984834.geojson",
+      "path": "maps/routes/osm-relation-2984834.geojson",
+      "sizeBytes": 2987,
+      "sha256": "a0ba322830656f080338f6dab3e544d767351f17be3196816c44130ef820f8af"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984835.geojson",
+      "assetPath": "maps/routes/osm-relation-2984835.geojson",
+      "path": "maps/routes/osm-relation-2984835.geojson",
+      "sizeBytes": 1804,
+      "sha256": "c7df2e9900b5ed1bb13c8829af0ee5f95b2004e332f82c712f2c23a73c2befa4"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984855.geojson",
+      "assetPath": "maps/routes/osm-relation-2984855.geojson",
+      "path": "maps/routes/osm-relation-2984855.geojson",
+      "sizeBytes": 2747,
+      "sha256": "ac739296c87b73c15c29998cd1d5852fdc70087520cd49b428fd1579a6fcf863"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984859.geojson",
+      "assetPath": "maps/routes/osm-relation-2984859.geojson",
+      "path": "maps/routes/osm-relation-2984859.geojson",
+      "sizeBytes": 2148,
+      "sha256": "655b98840566cf04885471a8cfe105be920bc734783cf012d7d1d212293c7894"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984860.geojson",
+      "assetPath": "maps/routes/osm-relation-2984860.geojson",
+      "path": "maps/routes/osm-relation-2984860.geojson",
+      "sizeBytes": 2877,
+      "sha256": "56dd788084f9258fb12e9ceaa3359393de4d78dd68485c0ca75ed24d254463e1"
+    },
+    {
+      "url": "/data/imported/osm-relation-2984871.geojson",
+      "assetPath": "maps/routes/osm-relation-2984871.geojson",
+      "path": "maps/routes/osm-relation-2984871.geojson",
+      "sizeBytes": 2322,
+      "sha256": "9972c189db719ed2b733e469f4b7c63fc35de402934937bdab24d4b1c6816db1"
+    },
+    {
+      "url": "/data/imported/osm-relation-2985047.geojson",
+      "assetPath": "maps/routes/osm-relation-2985047.geojson",
+      "path": "maps/routes/osm-relation-2985047.geojson",
+      "sizeBytes": 3751,
+      "sha256": "ad604f55856ed5ad66bb277729bbe205399864cb789cf6562c6b6621852682ff"
+    },
+    {
+      "url": "/data/imported/osm-relation-2985053.geojson",
+      "assetPath": "maps/routes/osm-relation-2985053.geojson",
+      "path": "maps/routes/osm-relation-2985053.geojson",
+      "sizeBytes": 2621,
+      "sha256": "f4f601551e203914a8adfc6467471d4452e4adeffcbcfab54029ba1cf0694202"
+    },
+    {
+      "url": "/data/imported/osm-relation-2985074.geojson",
+      "assetPath": "maps/routes/osm-relation-2985074.geojson",
+      "path": "maps/routes/osm-relation-2985074.geojson",
+      "sizeBytes": 4388,
+      "sha256": "2c9458077efeae1eb18d2c1d5d2786610136ad8d7c4925c2fe3d15f18674b327"
+    },
+    {
+      "url": "/data/imported/osm-relation-2985090.geojson",
+      "assetPath": "maps/routes/osm-relation-2985090.geojson",
+      "path": "maps/routes/osm-relation-2985090.geojson",
+      "sizeBytes": 7862,
+      "sha256": "b82ef9e33ea1ad0600fb632e06c3dd5b43f01911f981bff208a0ec597b35df18"
+    },
+    {
+      "url": "/data/imported/osm-relation-2985091.geojson",
+      "assetPath": "maps/routes/osm-relation-2985091.geojson",
+      "path": "maps/routes/osm-relation-2985091.geojson",
+      "sizeBytes": 3906,
+      "sha256": "b54b9d8e1111fc61235097791a4494c3e4f38fbdc730ecd9cf79e12c36cf4b34"
+    },
+    {
+      "url": "/data/imported/osm-relation-2985112.geojson",
+      "assetPath": "maps/routes/osm-relation-2985112.geojson",
+      "path": "maps/routes/osm-relation-2985112.geojson",
+      "sizeBytes": 3752,
+      "sha256": "ca94e268f1788be6fecc116025edd6d8b50a228fe0f03d52f78631b6bc7a5c51"
+    },
+    {
+      "url": "/data/imported/osm-relation-2985115.geojson",
+      "assetPath": "maps/routes/osm-relation-2985115.geojson",
+      "path": "maps/routes/osm-relation-2985115.geojson",
+      "sizeBytes": 4976,
+      "sha256": "e255712df89062a940f357446cf4d9368954f3b33b7a433325e790922c8b85a5"
+    },
+    {
+      "url": "/data/imported/osm-relation-2985116.geojson",
+      "assetPath": "maps/routes/osm-relation-2985116.geojson",
+      "path": "maps/routes/osm-relation-2985116.geojson",
+      "sizeBytes": 1802,
+      "sha256": "d0977c3eea188ca19fef6244a02dfe6f6f9558c367b52f0a06b1fca0fffe142c"
+    },
+    {
+      "url": "/data/imported/osm-relation-2986430.geojson",
+      "assetPath": "maps/routes/osm-relation-2986430.geojson",
+      "path": "maps/routes/osm-relation-2986430.geojson",
+      "sizeBytes": 2636,
+      "sha256": "439cc865256c25c2816eccd4850fb64a25531c8f440cd4d68e8584fab359478c"
+    },
+    {
+      "url": "/data/imported/osm-relation-2986482.geojson",
+      "assetPath": "maps/routes/osm-relation-2986482.geojson",
+      "path": "maps/routes/osm-relation-2986482.geojson",
+      "sizeBytes": 2053,
+      "sha256": "1e7cd392cba3655ed4d9966ff575f7de2397f7828ad4d0bfecb62581d0115545"
+    },
+    {
+      "url": "/data/imported/osm-relation-2986483.geojson",
+      "assetPath": "maps/routes/osm-relation-2986483.geojson",
+      "path": "maps/routes/osm-relation-2986483.geojson",
+      "sizeBytes": 2931,
+      "sha256": "8fcf57e2d12dee422232f0dc73e82aeee7ec3085ff6f03b51397ab8476c6a9ec"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992788.geojson",
+      "assetPath": "maps/routes/osm-relation-2992788.geojson",
+      "path": "maps/routes/osm-relation-2992788.geojson",
+      "sizeBytes": 2160,
+      "sha256": "b0979c0ebf081f1fc43d0c9be0d54408e5644b1a0fdea3169804c0a3583b3e77"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992795.geojson",
+      "assetPath": "maps/routes/osm-relation-2992795.geojson",
+      "path": "maps/routes/osm-relation-2992795.geojson",
+      "sizeBytes": 1989,
+      "sha256": "f0158af2852974c8743e709a32a2e8fcf54a2fc3b55fb61ddb86c50cb42ed3f6"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992798.geojson",
+      "assetPath": "maps/routes/osm-relation-2992798.geojson",
+      "path": "maps/routes/osm-relation-2992798.geojson",
+      "sizeBytes": 4824,
+      "sha256": "632755ac3ddecbf8c9b773485ccf60cd766dfec342ab61cca1a5ee1f22a08066"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992836.geojson",
+      "assetPath": "maps/routes/osm-relation-2992836.geojson",
+      "path": "maps/routes/osm-relation-2992836.geojson",
+      "sizeBytes": 899,
+      "sha256": "4ff0483ffe3e65dcf53b43c88e06171b108d8b21b39877cac234145417c385c3"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992837.geojson",
+      "assetPath": "maps/routes/osm-relation-2992837.geojson",
+      "path": "maps/routes/osm-relation-2992837.geojson",
+      "sizeBytes": 6405,
+      "sha256": "e6731e191d8a803254e50e919f3bafaf49dc8d9368a61e8280ac4a98a1b514aa"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992875.geojson",
+      "assetPath": "maps/routes/osm-relation-2992875.geojson",
+      "path": "maps/routes/osm-relation-2992875.geojson",
+      "sizeBytes": 3144,
+      "sha256": "8b21ca06ff7e64c7ec7c024c851ad8985aca4fedad81285e21f5f884f8f75273"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992904.geojson",
+      "assetPath": "maps/routes/osm-relation-2992904.geojson",
+      "path": "maps/routes/osm-relation-2992904.geojson",
+      "sizeBytes": 2372,
+      "sha256": "65ef26bd73d1bc64b0b98fea830700dd91d7d0a1700c86d4102fe2db59abda68"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992976.geojson",
+      "assetPath": "maps/routes/osm-relation-2992976.geojson",
+      "path": "maps/routes/osm-relation-2992976.geojson",
+      "sizeBytes": 4653,
+      "sha256": "8e801d6d5ea8c89896f26a416e4e8313be6eefeb66fc4b30fc1d4f94eba23166"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992977.geojson",
+      "assetPath": "maps/routes/osm-relation-2992977.geojson",
+      "path": "maps/routes/osm-relation-2992977.geojson",
+      "sizeBytes": 1172,
+      "sha256": "18bf542054af6e1735e83230c3fbaa2820165d5fc4ac37ceb50c2865a4d26e0d"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992978.geojson",
+      "assetPath": "maps/routes/osm-relation-2992978.geojson",
+      "path": "maps/routes/osm-relation-2992978.geojson",
+      "sizeBytes": 849,
+      "sha256": "db31515d6d58297e386f6741ef833a7f2e11ab4d6d919d09af41223188c43026"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992992.geojson",
+      "assetPath": "maps/routes/osm-relation-2992992.geojson",
+      "path": "maps/routes/osm-relation-2992992.geojson",
+      "sizeBytes": 3095,
+      "sha256": "14c6300e9e13d65579c7e808e15f7abb768ebb26997397c865a54f96f3df101b"
+    },
+    {
+      "url": "/data/imported/osm-relation-2992996.geojson",
+      "assetPath": "maps/routes/osm-relation-2992996.geojson",
+      "path": "maps/routes/osm-relation-2992996.geojson",
+      "sizeBytes": 2522,
+      "sha256": "be24de2a59ce25586b709a36e8671dcbf2727407d8fbc7d9d27a0f9952cfe464"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993002.geojson",
+      "assetPath": "maps/routes/osm-relation-2993002.geojson",
+      "path": "maps/routes/osm-relation-2993002.geojson",
+      "sizeBytes": 3321,
+      "sha256": "071a41825fd057419bcdd15a4d4c96aa7b07cfa2ab08e1afd15bc4e76d26ec4a"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993007.geojson",
+      "assetPath": "maps/routes/osm-relation-2993007.geojson",
+      "path": "maps/routes/osm-relation-2993007.geojson",
+      "sizeBytes": 2904,
+      "sha256": "142074fa6805ce8acb807e7c5339400e1a0abe47b699f77dd1b43ba50194ef0a"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993028.geojson",
+      "assetPath": "maps/routes/osm-relation-2993028.geojson",
+      "path": "maps/routes/osm-relation-2993028.geojson",
+      "sizeBytes": 1843,
+      "sha256": "54f4d23313b4db246e33bfb2ad4efb67bcb4a0013ae1ff358600421c9d7c6971"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993029.geojson",
+      "assetPath": "maps/routes/osm-relation-2993029.geojson",
+      "path": "maps/routes/osm-relation-2993029.geojson",
+      "sizeBytes": 5845,
+      "sha256": "08b4df05ae29fe2978cedccc8f2d449a9238298bb429991ff279ae5905691b93"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993031.geojson",
+      "assetPath": "maps/routes/osm-relation-2993031.geojson",
+      "path": "maps/routes/osm-relation-2993031.geojson",
+      "sizeBytes": 8188,
+      "sha256": "06e5c1b4c8e88986d3df7fed6f0aee6c7f11e9e8bc381b2d0dab77be89da5f52"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993032.geojson",
+      "assetPath": "maps/routes/osm-relation-2993032.geojson",
+      "path": "maps/routes/osm-relation-2993032.geojson",
+      "sizeBytes": 1636,
+      "sha256": "25886475625caad6cedc5396c64ab4c1c65e7187e8f3f36479324c32f3aaa0f6"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993033.geojson",
+      "assetPath": "maps/routes/osm-relation-2993033.geojson",
+      "path": "maps/routes/osm-relation-2993033.geojson",
+      "sizeBytes": 6049,
+      "sha256": "fd1a41f7d566e23b491b7a16ed2152cf8021b5e899fa4ac4db2a95dfd3c6e78a"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993043.geojson",
+      "assetPath": "maps/routes/osm-relation-2993043.geojson",
+      "path": "maps/routes/osm-relation-2993043.geojson",
+      "sizeBytes": 12090,
+      "sha256": "75ec7a006524f8339db290ee2f8d7243cb8e36ed4fa302bd6ed542ace1f7a5cb"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993089.geojson",
+      "assetPath": "maps/routes/osm-relation-2993089.geojson",
+      "path": "maps/routes/osm-relation-2993089.geojson",
+      "sizeBytes": 4399,
+      "sha256": "63028dc42f7aa27f539a7916e1c2ae23085078c0a526aac8e8d14f403bc77534"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993092.geojson",
+      "assetPath": "maps/routes/osm-relation-2993092.geojson",
+      "path": "maps/routes/osm-relation-2993092.geojson",
+      "sizeBytes": 6425,
+      "sha256": "1797ce8aa99a935f14a4387fa302aab336d63f0e0aa3536ef9753bde008c1cd3"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993152.geojson",
+      "assetPath": "maps/routes/osm-relation-2993152.geojson",
+      "path": "maps/routes/osm-relation-2993152.geojson",
+      "sizeBytes": 3417,
+      "sha256": "ef85f43cfe20021727cad552dcce1b5f8251d06de4aae7963506e94597f629df"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993154.geojson",
+      "assetPath": "maps/routes/osm-relation-2993154.geojson",
+      "path": "maps/routes/osm-relation-2993154.geojson",
+      "sizeBytes": 3915,
+      "sha256": "9bb5c957fc00d9331468ac143a63696cbbded96d2789cc4a84519710214177ab"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993161.geojson",
+      "assetPath": "maps/routes/osm-relation-2993161.geojson",
+      "path": "maps/routes/osm-relation-2993161.geojson",
+      "sizeBytes": 6230,
+      "sha256": "5ec65579799959893d43faa91a8ef6e50dd9005733bee3462cec0cc21b035ee9"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993164.geojson",
+      "assetPath": "maps/routes/osm-relation-2993164.geojson",
+      "path": "maps/routes/osm-relation-2993164.geojson",
+      "sizeBytes": 798,
+      "sha256": "0ccb366bbf08410934ebb1604a605afc1a3cf4fc3e257d67a8657501962c6805"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993165.geojson",
+      "assetPath": "maps/routes/osm-relation-2993165.geojson",
+      "path": "maps/routes/osm-relation-2993165.geojson",
+      "sizeBytes": 1419,
+      "sha256": "cc526ba746f7aac509fbef904fb5785302d94af50dd2378b77e626e2b9994a2f"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993169.geojson",
+      "assetPath": "maps/routes/osm-relation-2993169.geojson",
+      "path": "maps/routes/osm-relation-2993169.geojson",
+      "sizeBytes": 3732,
+      "sha256": "5a6d9d60dac2dfe13f6c2bc7afb82f781089f18beefcfece60034d2725e14de8"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993180.geojson",
+      "assetPath": "maps/routes/osm-relation-2993180.geojson",
+      "path": "maps/routes/osm-relation-2993180.geojson",
+      "sizeBytes": 939,
+      "sha256": "386b07dcb50bac40eac107c9560ae317a30a0a2729edb79e5fa588a27a01fa8e"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993200.geojson",
+      "assetPath": "maps/routes/osm-relation-2993200.geojson",
+      "path": "maps/routes/osm-relation-2993200.geojson",
+      "sizeBytes": 1686,
+      "sha256": "dba9ca5bb5f35ed4fc0e08c81f950fef2d45db4018cda5576fc27e8675f8db34"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993201.geojson",
+      "assetPath": "maps/routes/osm-relation-2993201.geojson",
+      "path": "maps/routes/osm-relation-2993201.geojson",
+      "sizeBytes": 4505,
+      "sha256": "2f0517df4334e536cfe22980c8f25e7c937ec7ddb552fa659d651fd12db66fe0"
+    },
+    {
+      "url": "/data/imported/osm-relation-2993215.geojson",
+      "assetPath": "maps/routes/osm-relation-2993215.geojson",
+      "path": "maps/routes/osm-relation-2993215.geojson",
+      "sizeBytes": 9679,
+      "sha256": "85381248d7c9ff44432a75d8376bbbb8015baf36ba916fb6de146e928762471d"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994714.geojson",
+      "assetPath": "maps/routes/osm-relation-2994714.geojson",
+      "path": "maps/routes/osm-relation-2994714.geojson",
+      "sizeBytes": 7737,
+      "sha256": "321d3532d59ddf1120cf8a464fbbc63d69b2c826343058269e5b01fb3fce3e28"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994715.geojson",
+      "assetPath": "maps/routes/osm-relation-2994715.geojson",
+      "path": "maps/routes/osm-relation-2994715.geojson",
+      "sizeBytes": 4381,
+      "sha256": "5a0f1d466e510ac18170c4c2b57f3d37d27d8167eae8594f1d199acebbf2ed9a"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994733.geojson",
+      "assetPath": "maps/routes/osm-relation-2994733.geojson",
+      "path": "maps/routes/osm-relation-2994733.geojson",
+      "sizeBytes": 2506,
+      "sha256": "f961a523b8307a7dbf1c188086dd24a3df928b374bb490626fdad1984be4a145"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994734.geojson",
+      "assetPath": "maps/routes/osm-relation-2994734.geojson",
+      "path": "maps/routes/osm-relation-2994734.geojson",
+      "sizeBytes": 869,
+      "sha256": "d23208231d7925b60e988e662f9bee8d26669819d541e6949529fb9425f96960"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994762.geojson",
+      "assetPath": "maps/routes/osm-relation-2994762.geojson",
+      "path": "maps/routes/osm-relation-2994762.geojson",
+      "sizeBytes": 3785,
+      "sha256": "f6f2084d580db47197e016e9e831a1c23af9c8df3f141117ff62ef92e315567a"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994763.geojson",
+      "assetPath": "maps/routes/osm-relation-2994763.geojson",
+      "path": "maps/routes/osm-relation-2994763.geojson",
+      "sizeBytes": 1588,
+      "sha256": "43ee8bc508d5da47b81b16b142ece0947d0ca6dd85ffb490f9fe44656aa2dee7"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994789.geojson",
+      "assetPath": "maps/routes/osm-relation-2994789.geojson",
+      "path": "maps/routes/osm-relation-2994789.geojson",
+      "sizeBytes": 3702,
+      "sha256": "21246d8e9aa21428996b61e9fbc1db260380330ac4f5820f78be040a4107f7dd"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994790.geojson",
+      "assetPath": "maps/routes/osm-relation-2994790.geojson",
+      "path": "maps/routes/osm-relation-2994790.geojson",
+      "sizeBytes": 5250,
+      "sha256": "bb7a1e14ae79080d799194d1042b6379deb66f8d48ae7ed89b5047864dd24606"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994796.geojson",
+      "assetPath": "maps/routes/osm-relation-2994796.geojson",
+      "path": "maps/routes/osm-relation-2994796.geojson",
+      "sizeBytes": 4994,
+      "sha256": "e53266ea041a08266ea81d04351f94c66c53eaa2e58fc64a92b7397b5e1a99c5"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994839.geojson",
+      "assetPath": "maps/routes/osm-relation-2994839.geojson",
+      "path": "maps/routes/osm-relation-2994839.geojson",
+      "sizeBytes": 3763,
+      "sha256": "e1f68ebb11ad846275d632ad8781c16c628a9dac51223842b620ee0fda152a79"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994840.geojson",
+      "assetPath": "maps/routes/osm-relation-2994840.geojson",
+      "path": "maps/routes/osm-relation-2994840.geojson",
+      "sizeBytes": 1967,
+      "sha256": "16bf157a268e7d600bb77e764470f25c66d2bd9c130a7c997e56578314e10c46"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994841.geojson",
+      "assetPath": "maps/routes/osm-relation-2994841.geojson",
+      "path": "maps/routes/osm-relation-2994841.geojson",
+      "sizeBytes": 2851,
+      "sha256": "b064fea064bd34a26d561735d965dd1ea52a72307175fa99524177e4232181e0"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994874.geojson",
+      "assetPath": "maps/routes/osm-relation-2994874.geojson",
+      "path": "maps/routes/osm-relation-2994874.geojson",
+      "sizeBytes": 5403,
+      "sha256": "c745a0c49806eed1d41385fb9ee35d96d06c34f6f8efad67108f550e7a9c9685"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994875.geojson",
+      "assetPath": "maps/routes/osm-relation-2994875.geojson",
+      "path": "maps/routes/osm-relation-2994875.geojson",
+      "sizeBytes": 2973,
+      "sha256": "e0d79ec03d11e0be9252734c575569a1a3d8ce5c968c4e5fe94f6cecf4d7324e"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994910.geojson",
+      "assetPath": "maps/routes/osm-relation-2994910.geojson",
+      "path": "maps/routes/osm-relation-2994910.geojson",
+      "sizeBytes": 2365,
+      "sha256": "8f29aa63f7bcfa8ceddf1310d5e734794baa7bef183339bfbf803e6728aa3be4"
+    },
+    {
+      "url": "/data/imported/osm-relation-2994911.geojson",
+      "assetPath": "maps/routes/osm-relation-2994911.geojson",
+      "path": "maps/routes/osm-relation-2994911.geojson",
+      "sizeBytes": 2692,
+      "sha256": "bb81edc77f7b5024fe95754ea34a2fa10d5d3d5d8ed83ced472d62e621abee92"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008239.geojson",
+      "assetPath": "maps/routes/osm-relation-3008239.geojson",
+      "path": "maps/routes/osm-relation-3008239.geojson",
+      "sizeBytes": 777,
+      "sha256": "372fd4b71d4c17ef6b99935e636de61e115cca97fa6f6803631e8b5d59105760"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008293.geojson",
+      "assetPath": "maps/routes/osm-relation-3008293.geojson",
+      "path": "maps/routes/osm-relation-3008293.geojson",
+      "sizeBytes": 2952,
+      "sha256": "e0997af6498747bee3555e39dc3a2c86d733b7adb19abe0a1411602784daedf1"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008294.geojson",
+      "assetPath": "maps/routes/osm-relation-3008294.geojson",
+      "path": "maps/routes/osm-relation-3008294.geojson",
+      "sizeBytes": 1721,
+      "sha256": "e2ef272d0fbee8f1134483dc38bd634482bc777cc77c8f09172c2c07467111ae"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008326.geojson",
+      "assetPath": "maps/routes/osm-relation-3008326.geojson",
+      "path": "maps/routes/osm-relation-3008326.geojson",
+      "sizeBytes": 1547,
+      "sha256": "fc76f05b0790fb471a5d954c48d1481109532797e90497ee5f3ce0cc4acd87c8"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008327.geojson",
+      "assetPath": "maps/routes/osm-relation-3008327.geojson",
+      "path": "maps/routes/osm-relation-3008327.geojson",
+      "sizeBytes": 7062,
+      "sha256": "f155f79f1764691d617e5f1865a81b94e70ba78cda4494654584158eddf246ce"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008328.geojson",
+      "assetPath": "maps/routes/osm-relation-3008328.geojson",
+      "path": "maps/routes/osm-relation-3008328.geojson",
+      "sizeBytes": 1211,
+      "sha256": "68147955351aff36043449e29f8831d340d4b2b640a1018cc160dab7e46fa18b"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008341.geojson",
+      "assetPath": "maps/routes/osm-relation-3008341.geojson",
+      "path": "maps/routes/osm-relation-3008341.geojson",
+      "sizeBytes": 2844,
+      "sha256": "64babdeb90c74086b29286b8c5a55235742c737174865e27723c2a0dfd16d0ed"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008348.geojson",
+      "assetPath": "maps/routes/osm-relation-3008348.geojson",
+      "path": "maps/routes/osm-relation-3008348.geojson",
+      "sizeBytes": 3904,
+      "sha256": "584f0c961835f8842c9e8ab9b8954877bd950eaf20fc7ada9fa8dd7d3d0cc50b"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008373.geojson",
+      "assetPath": "maps/routes/osm-relation-3008373.geojson",
+      "path": "maps/routes/osm-relation-3008373.geojson",
+      "sizeBytes": 3833,
+      "sha256": "7b8b9a2df1c5fd072b78ca61a74bece5cd7c926d69f4a8191ca571c7e7aa75e2"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008384.geojson",
+      "assetPath": "maps/routes/osm-relation-3008384.geojson",
+      "path": "maps/routes/osm-relation-3008384.geojson",
+      "sizeBytes": 1463,
+      "sha256": "00b572dc41f4ad4b6d119b7a01e725f75b31c14825ccb4bf7ca3d0410e9409e5"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008385.geojson",
+      "assetPath": "maps/routes/osm-relation-3008385.geojson",
+      "path": "maps/routes/osm-relation-3008385.geojson",
+      "sizeBytes": 1892,
+      "sha256": "38816330e47634f62ee9d13ac07452d183fc06c93188b0450db6d2e664f3ba39"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008392.geojson",
+      "assetPath": "maps/routes/osm-relation-3008392.geojson",
+      "path": "maps/routes/osm-relation-3008392.geojson",
+      "sizeBytes": 8994,
+      "sha256": "78531808534ee165f42bd41cb56e2175aa51f3abcca90d4a2b7d46b9bce77a53"
+    },
+    {
+      "url": "/data/imported/osm-relation-3008393.geojson",
+      "assetPath": "maps/routes/osm-relation-3008393.geojson",
+      "path": "maps/routes/osm-relation-3008393.geojson",
+      "sizeBytes": 5646,
+      "sha256": "42ddb25f4efa343ee57034bbb2fd62c168accacf2e0b667fc09623da660ec2a8"
+    },
+    {
+      "url": "/data/imported/osm-relation-3037580.geojson",
+      "assetPath": "maps/routes/osm-relation-3037580.geojson",
+      "path": "maps/routes/osm-relation-3037580.geojson",
+      "sizeBytes": 30732,
+      "sha256": "2aac834a81cfb4be9c4bd17e6e08a7533425c6ce36f6a7d02ca64bca11b3f51c"
+    },
+    {
+      "url": "/data/imported/osm-relation-3038378.geojson",
+      "assetPath": "maps/routes/osm-relation-3038378.geojson",
+      "path": "maps/routes/osm-relation-3038378.geojson",
+      "sizeBytes": 70638,
+      "sha256": "1c64e88363d297280febf29a324acc0c3238a5c6d0131bb00bfd270aa4f54e7c"
+    },
+    {
+      "url": "/data/imported/osm-relation-3038445.geojson",
+      "assetPath": "maps/routes/osm-relation-3038445.geojson",
+      "path": "maps/routes/osm-relation-3038445.geojson",
+      "sizeBytes": 23381,
+      "sha256": "df1b287e237920271bb1805df45ed8653d1b9498399eadb754d06d24a09226e3"
+    },
+    {
+      "url": "/data/imported/osm-relation-3038529.geojson",
+      "assetPath": "maps/routes/osm-relation-3038529.geojson",
+      "path": "maps/routes/osm-relation-3038529.geojson",
+      "sizeBytes": 4434,
+      "sha256": "ed760f97f97a24bfe8440f74537561019eb3a2e45be3c6e2c60df262c82d8431"
+    },
+    {
+      "url": "/data/imported/osm-relation-3038620.geojson",
+      "assetPath": "maps/routes/osm-relation-3038620.geojson",
+      "path": "maps/routes/osm-relation-3038620.geojson",
+      "sizeBytes": 19316,
+      "sha256": "0872451d20fcb417db5e788b4ab4f895433039ed831bfd4f7589197f379b867d"
+    },
+    {
+      "url": "/data/imported/osm-relation-3039148.geojson",
+      "assetPath": "maps/routes/osm-relation-3039148.geojson",
+      "path": "maps/routes/osm-relation-3039148.geojson",
+      "sizeBytes": 22316,
+      "sha256": "4190c7b03c20d2a91bfe775185787da2136b3871cc8f3f3787ba8607d3d89639"
+    },
+    {
+      "url": "/data/imported/osm-relation-3044723.geojson",
+      "assetPath": "maps/routes/osm-relation-3044723.geojson",
+      "path": "maps/routes/osm-relation-3044723.geojson",
+      "sizeBytes": 32094,
+      "sha256": "29cd133920aa0d8e6e75157b759cb110b34448df73f75b4eaf77e39dfa5b3f3a"
+    },
+    {
+      "url": "/data/imported/osm-relation-3044786.geojson",
+      "assetPath": "maps/routes/osm-relation-3044786.geojson",
+      "path": "maps/routes/osm-relation-3044786.geojson",
+      "sizeBytes": 5281,
+      "sha256": "5de8ddd6a8ba8a7918d4bd66209d73e3f41d93c5569ce06ea9b5758bc5773a0b"
+    },
+    {
+      "url": "/data/imported/osm-relation-3044797.geojson",
+      "assetPath": "maps/routes/osm-relation-3044797.geojson",
+      "path": "maps/routes/osm-relation-3044797.geojson",
+      "sizeBytes": 4899,
+      "sha256": "e933c748d531d9983064dee62e07126ff0c7577af83c503f61ad7945f285c67d"
+    },
+    {
+      "url": "/data/imported/osm-relation-3044940.geojson",
+      "assetPath": "maps/routes/osm-relation-3044940.geojson",
+      "path": "maps/routes/osm-relation-3044940.geojson",
+      "sizeBytes": 11880,
+      "sha256": "ca66cae1ea14ffaccc16723d27b0b718cd3043b2bef3707a804a3eced0ed22c7"
+    },
+    {
+      "url": "/data/imported/osm-relation-3044952.geojson",
+      "assetPath": "maps/routes/osm-relation-3044952.geojson",
+      "path": "maps/routes/osm-relation-3044952.geojson",
+      "sizeBytes": 7680,
+      "sha256": "962fde9c4757ea3b3fc2d1420ffb9bee1d3399013cf81c553f81a9e3b47bf1f3"
+    },
+    {
+      "url": "/data/imported/osm-relation-3044986.geojson",
+      "assetPath": "maps/routes/osm-relation-3044986.geojson",
+      "path": "maps/routes/osm-relation-3044986.geojson",
+      "sizeBytes": 2087,
+      "sha256": "70a095beb27a96694d384bfd1ec5314c4ccff5ba4b590618769258b7052c26ce"
+    },
+    {
+      "url": "/data/imported/osm-relation-3059143.geojson",
+      "assetPath": "maps/routes/osm-relation-3059143.geojson",
+      "path": "maps/routes/osm-relation-3059143.geojson",
+      "sizeBytes": 4197,
+      "sha256": "f730b33b9e347c142d9c3f1b713fbb0abcdf2be5d17a6a22b5381a22d55f2388"
+    },
+    {
+      "url": "/data/imported/osm-relation-3059167.geojson",
+      "assetPath": "maps/routes/osm-relation-3059167.geojson",
+      "path": "maps/routes/osm-relation-3059167.geojson",
+      "sizeBytes": 918,
+      "sha256": "893eb00cfb4d34e871ebbf2d17b126ed4f73ac897bb028c4a4d61b321af757a6"
+    },
+    {
+      "url": "/data/imported/osm-relation-3059173.geojson",
+      "assetPath": "maps/routes/osm-relation-3059173.geojson",
+      "path": "maps/routes/osm-relation-3059173.geojson",
+      "sizeBytes": 3033,
+      "sha256": "b35dbb3247407ce218d8ece6d4c779c10306b153cc85581ca25604f1b34291ed"
+    },
+    {
+      "url": "/data/imported/osm-relation-3059316.geojson",
+      "assetPath": "maps/routes/osm-relation-3059316.geojson",
+      "path": "maps/routes/osm-relation-3059316.geojson",
+      "sizeBytes": 4199,
+      "sha256": "d9349a842aa13494afc873bfd9fd349135624f9d47624594f0f96f659de4f44f"
+    },
+    {
+      "url": "/data/imported/osm-relation-3095794.geojson",
+      "assetPath": "maps/routes/osm-relation-3095794.geojson",
+      "path": "maps/routes/osm-relation-3095794.geojson",
+      "sizeBytes": 750,
+      "sha256": "fa304a8bc29434dd92eb6eca9c5a95785cc9afc294d120df51a695d70048d68a"
+    },
+    {
+      "url": "/data/imported/osm-relation-3371876.geojson",
+      "assetPath": "maps/routes/osm-relation-3371876.geojson",
+      "path": "maps/routes/osm-relation-3371876.geojson",
+      "sizeBytes": 5442,
+      "sha256": "3d6e92b277d40a5bb412e918ffe40754d27bb4970eb8f00f91ee512bea757e12"
+    },
+    {
+      "url": "/data/imported/osm-relation-3622919.geojson",
+      "assetPath": "maps/routes/osm-relation-3622919.geojson",
+      "path": "maps/routes/osm-relation-3622919.geojson",
+      "sizeBytes": 8475,
+      "sha256": "c04c9e1c18c4b31e6fe6b525bdf34c7c04e76aaa1bca39b1192b6ecc475e9065"
+    },
+    {
+      "url": "/data/imported/osm-relation-3864582.geojson",
+      "assetPath": "maps/routes/osm-relation-3864582.geojson",
+      "path": "maps/routes/osm-relation-3864582.geojson",
+      "sizeBytes": 2929,
+      "sha256": "7d2d58048b01832c6a82f42a5ec6ab14f5f84be15aeb74d58fde76b64d9dc31a"
+    },
+    {
+      "url": "/data/imported/osm-relation-4001092.geojson",
+      "assetPath": "maps/routes/osm-relation-4001092.geojson",
+      "path": "maps/routes/osm-relation-4001092.geojson",
+      "sizeBytes": 323,
+      "sha256": "b36d269ef33c711818940b591bbe1532bdd39435fece5cc0f9ec70c724ab49b3"
+    },
+    {
+      "url": "/data/imported/osm-relation-4103328.geojson",
+      "assetPath": "maps/routes/osm-relation-4103328.geojson",
+      "path": "maps/routes/osm-relation-4103328.geojson",
+      "sizeBytes": 3202,
+      "sha256": "25162795c71774ce561a3549a70a3eb029bfea71d71622307d7d38eb8de195e6"
+    },
+    {
+      "url": "/data/imported/osm-relation-4232367.geojson",
+      "assetPath": "maps/routes/osm-relation-4232367.geojson",
+      "path": "maps/routes/osm-relation-4232367.geojson",
+      "sizeBytes": 576,
+      "sha256": "b9d89d32a7c72d42b3ff5a1dfdd5dec0189016440170107464160f133def10ed"
+    },
+    {
+      "url": "/data/imported/osm-relation-4509282.geojson",
+      "assetPath": "maps/routes/osm-relation-4509282.geojson",
+      "path": "maps/routes/osm-relation-4509282.geojson",
+      "sizeBytes": 55384,
+      "sha256": "25fca63aa8e6fd5e332707082687ec2926d2d1960cd43a17bcc1155e23e29579"
+    },
+    {
+      "url": "/data/imported/osm-relation-4509283.geojson",
+      "assetPath": "maps/routes/osm-relation-4509283.geojson",
+      "path": "maps/routes/osm-relation-4509283.geojson",
+      "sizeBytes": 10603,
+      "sha256": "362cd9395fc47feaeee3b85006bf126240898fd58eecc596ab2254ebb8ef34d1"
+    },
+    {
+      "url": "/data/imported/osm-relation-4509284.geojson",
+      "assetPath": "maps/routes/osm-relation-4509284.geojson",
+      "path": "maps/routes/osm-relation-4509284.geojson",
+      "sizeBytes": 10499,
+      "sha256": "94b8209a87289681dee590d8922b2ef613b5c134658f9888fa67f877977133f9"
+    },
+    {
+      "url": "/data/imported/osm-relation-4509285.geojson",
+      "assetPath": "maps/routes/osm-relation-4509285.geojson",
+      "path": "maps/routes/osm-relation-4509285.geojson",
+      "sizeBytes": 26049,
+      "sha256": "e02d6a3419629e6098badedc90edf62a8c71355d41f6aadd4c1d06d4072081e3"
+    },
+    {
+      "url": "/data/imported/osm-relation-4509475.geojson",
+      "assetPath": "maps/routes/osm-relation-4509475.geojson",
+      "path": "maps/routes/osm-relation-4509475.geojson",
+      "sizeBytes": 8755,
+      "sha256": "dd0de228fea4c5d0ef5018911d87e11ededa5e4536e9bdfcecc76ef334e90998"
+    },
+    {
+      "url": "/data/imported/osm-relation-4509476.geojson",
+      "assetPath": "maps/routes/osm-relation-4509476.geojson",
+      "path": "maps/routes/osm-relation-4509476.geojson",
+      "sizeBytes": 5188,
+      "sha256": "e56a3f55ef9c0efed22e2254e3dd362de72f2c29f663e6bcc89d6a7ceef5a8b1"
+    },
+    {
+      "url": "/data/imported/osm-relation-4509477.geojson",
+      "assetPath": "maps/routes/osm-relation-4509477.geojson",
+      "path": "maps/routes/osm-relation-4509477.geojson",
+      "sizeBytes": 2163,
+      "sha256": "4bc09c2af53cc7a188b077817428073ca449179c065ef544a13ae12a2057c8ec"
+    },
+    {
+      "url": "/data/imported/osm-relation-4509478.geojson",
+      "assetPath": "maps/routes/osm-relation-4509478.geojson",
+      "path": "maps/routes/osm-relation-4509478.geojson",
+      "sizeBytes": 10999,
+      "sha256": "ba9ab013283aff7007b8c8f05be90b1f8079aa5686cf11e3027264bfa71c0398"
+    },
+    {
+      "url": "/data/imported/osm-relation-4510939.geojson",
+      "assetPath": "maps/routes/osm-relation-4510939.geojson",
+      "path": "maps/routes/osm-relation-4510939.geojson",
+      "sizeBytes": 16945,
+      "sha256": "5cf078b507ea3ab2c7034bd40a526772bf10c4251fee132268e9cfe93821fda0"
+    },
+    {
+      "url": "/data/imported/osm-relation-4510993.geojson",
+      "assetPath": "maps/routes/osm-relation-4510993.geojson",
+      "path": "maps/routes/osm-relation-4510993.geojson",
+      "sizeBytes": 5925,
+      "sha256": "d1187c45637728d2cad791e2a8753e68420b9a742d24a8fee762bbc170e864e6"
+    },
+    {
+      "url": "/data/imported/osm-relation-4511191.geojson",
+      "assetPath": "maps/routes/osm-relation-4511191.geojson",
+      "path": "maps/routes/osm-relation-4511191.geojson",
+      "sizeBytes": 1616,
+      "sha256": "bafc309ccb884eec212e1b1b8e5fb137f85a1e99af03f8fc998732453e99962f"
+    },
+    {
+      "url": "/data/imported/osm-relation-4511229.geojson",
+      "assetPath": "maps/routes/osm-relation-4511229.geojson",
+      "path": "maps/routes/osm-relation-4511229.geojson",
+      "sizeBytes": 13665,
+      "sha256": "1ca369b4aee8fd20d1cf095b87ab7d699edcfa0d11da49773283e19ea57bd30f"
+    },
+    {
+      "url": "/data/imported/osm-relation-4511566.geojson",
+      "assetPath": "maps/routes/osm-relation-4511566.geojson",
+      "path": "maps/routes/osm-relation-4511566.geojson",
+      "sizeBytes": 4821,
+      "sha256": "76deb18d1db8233eee7cd98b862edec4a6c4f3c7b10553e18152ad064fe436f0"
+    },
+    {
+      "url": "/data/imported/osm-relation-5258056.geojson",
+      "assetPath": "maps/routes/osm-relation-5258056.geojson",
+      "path": "maps/routes/osm-relation-5258056.geojson",
+      "sizeBytes": 7378,
+      "sha256": "6b2a18f0a917d6ca8f1fbfab3664ab4ddd4cebe37df24d1b8e634555be5b54d3"
+    },
+    {
+      "url": "/data/imported/osm-relation-5458405.geojson",
+      "assetPath": "maps/routes/osm-relation-5458405.geojson",
+      "path": "maps/routes/osm-relation-5458405.geojson",
+      "sizeBytes": 12357,
+      "sha256": "61d27c7d4f11d973b2094dd4f03aa5d5d31095dbe44deaaf871fc0da5cbc2c45"
+    },
+    {
+      "url": "/data/imported/osm-relation-5461727.geojson",
+      "assetPath": "maps/routes/osm-relation-5461727.geojson",
+      "path": "maps/routes/osm-relation-5461727.geojson",
+      "sizeBytes": 95936,
+      "sha256": "b9b5b024e1454ac90a044182e651c96c1db9197254b175f04c2faf05f8c88a56"
+    },
+    {
+      "url": "/data/imported/osm-relation-5964509.geojson",
+      "assetPath": "maps/routes/osm-relation-5964509.geojson",
+      "path": "maps/routes/osm-relation-5964509.geojson",
+      "sizeBytes": 3531,
+      "sha256": "62c17a27d99b8fe2f042ffd25803d248e99c10eb143a94d3786119ba52e84916"
+    },
+    {
+      "url": "/data/imported/osm-relation-5993429.geojson",
+      "assetPath": "maps/routes/osm-relation-5993429.geojson",
+      "path": "maps/routes/osm-relation-5993429.geojson",
+      "sizeBytes": 9226,
+      "sha256": "9d918173f96ee7f45fab008ed3a6cc8284479b18b68788de8fff629049f2ada4"
+    },
+    {
+      "url": "/data/imported/osm-relation-6015515.geojson",
+      "assetPath": "maps/routes/osm-relation-6015515.geojson",
+      "path": "maps/routes/osm-relation-6015515.geojson",
+      "sizeBytes": 466,
+      "sha256": "2b9de4b318f2fe3c3b59c952d7f83f4873e998a17cad60095a3b38b365419ca6"
+    },
+    {
+      "url": "/data/imported/osm-relation-6040458.geojson",
+      "assetPath": "maps/routes/osm-relation-6040458.geojson",
+      "path": "maps/routes/osm-relation-6040458.geojson",
+      "sizeBytes": 68037,
+      "sha256": "b67bd147317b95779ddbab33f04f68403c2d71760bf172185133339f9f94e6e9"
+    },
+    {
+      "url": "/data/imported/osm-relation-6423462.geojson",
+      "assetPath": "maps/routes/osm-relation-6423462.geojson",
+      "path": "maps/routes/osm-relation-6423462.geojson",
+      "sizeBytes": 2186,
+      "sha256": "1a00a090ceeb254a68705ad18b74d1c9b08e91af9784a5ec86c486c115e8668e"
+    },
+    {
+      "url": "/data/imported/osm-relation-6802600.geojson",
+      "assetPath": "maps/routes/osm-relation-6802600.geojson",
+      "path": "maps/routes/osm-relation-6802600.geojson",
+      "sizeBytes": 4371,
+      "sha256": "0c4156516ccda82955e769e7f3eb7c90247751c753ee144cea1455425e2cf76a"
+    },
+    {
+      "url": "/data/imported/osm-relation-6904653.geojson",
+      "assetPath": "maps/routes/osm-relation-6904653.geojson",
+      "path": "maps/routes/osm-relation-6904653.geojson",
+      "sizeBytes": 4434,
+      "sha256": "f72ff1bdefe5788a7be59f0a9670849726a56f73b183f81036e17a8d6ecbc066"
+    },
+    {
+      "url": "/data/imported/osm-relation-6904654.geojson",
+      "assetPath": "maps/routes/osm-relation-6904654.geojson",
+      "path": "maps/routes/osm-relation-6904654.geojson",
+      "sizeBytes": 1542,
+      "sha256": "259c4d2be6f83ee4ea54b60f02982b6ca3f18622697ca5c9af0e6b23696bef4e"
+    },
+    {
+      "url": "/data/imported/osm-relation-6904655.geojson",
+      "assetPath": "maps/routes/osm-relation-6904655.geojson",
+      "path": "maps/routes/osm-relation-6904655.geojson",
+      "sizeBytes": 968,
+      "sha256": "ef4c00643e0fe3b121cd252c236c5b42bec42a9605113a45328aefea9cdf89c9"
+    },
+    {
+      "url": "/data/imported/osm-relation-6992926.geojson",
+      "assetPath": "maps/routes/osm-relation-6992926.geojson",
+      "path": "maps/routes/osm-relation-6992926.geojson",
+      "sizeBytes": 24746,
+      "sha256": "64ba44af1452e86722b7798561bbc16e8f1d768f1e4e06e754a4c23983e4c0c3"
+    },
+    {
+      "url": "/data/imported/osm-relation-7051502.geojson",
+      "assetPath": "maps/routes/osm-relation-7051502.geojson",
+      "path": "maps/routes/osm-relation-7051502.geojson",
+      "sizeBytes": 92086,
+      "sha256": "de1756b0ca51e4f4f9d8917f91fc2591af7abed7f6c7ca78e5f74f00d319db14"
+    },
+    {
+      "url": "/data/imported/osm-relation-7185229.geojson",
+      "assetPath": "maps/routes/osm-relation-7185229.geojson",
+      "path": "maps/routes/osm-relation-7185229.geojson",
+      "sizeBytes": 1309,
+      "sha256": "99c20a91d3b178c951a1d31b24fbe9ac2264a914333e1fc0a9e75301c1a58d73"
+    },
+    {
+      "url": "/data/imported/osm-relation-7185230.geojson",
+      "assetPath": "maps/routes/osm-relation-7185230.geojson",
+      "path": "maps/routes/osm-relation-7185230.geojson",
+      "sizeBytes": 7033,
+      "sha256": "ec6dd816f8e0c5d2fda0883bcfb9ea419647bc73e2b722928361978620d96fca"
+    },
+    {
+      "url": "/data/imported/osm-relation-7185231.geojson",
+      "assetPath": "maps/routes/osm-relation-7185231.geojson",
+      "path": "maps/routes/osm-relation-7185231.geojson",
+      "sizeBytes": 12602,
+      "sha256": "c795f76df3b0b06fad52cec17f12b2f535e27dffbcc8cdef4fa0745b977b19c2"
+    },
+    {
+      "url": "/data/imported/osm-relation-7185232.geojson",
+      "assetPath": "maps/routes/osm-relation-7185232.geojson",
+      "path": "maps/routes/osm-relation-7185232.geojson",
+      "sizeBytes": 2411,
+      "sha256": "af8210b95f1562e7a2f400e88ebf5ad0fc44d11d65fae463b2dfd31cb0ff7349"
+    },
+    {
+      "url": "/data/imported/osm-relation-7439698.geojson",
+      "assetPath": "maps/routes/osm-relation-7439698.geojson",
+      "path": "maps/routes/osm-relation-7439698.geojson",
+      "sizeBytes": 10676,
+      "sha256": "e9b5b98dec53e9bc2bc3aaa5dc77da36b3712515bd6d8ec2c9949ad37036a4ec"
+    },
+    {
+      "url": "/data/imported/osm-relation-7439719.geojson",
+      "assetPath": "maps/routes/osm-relation-7439719.geojson",
+      "path": "maps/routes/osm-relation-7439719.geojson",
+      "sizeBytes": 9608,
+      "sha256": "e5b2f466f107c140a9ab507036738432eaa2642e340b4d827bfe788a89726f50"
+    },
+    {
+      "url": "/data/imported/osm-relation-7455857.geojson",
+      "assetPath": "maps/routes/osm-relation-7455857.geojson",
+      "path": "maps/routes/osm-relation-7455857.geojson",
+      "sizeBytes": 10350,
+      "sha256": "a7e7e5a769522cf44df3fe3f8a4af88133af06dffe009cc2695b69bd8e41c53e"
+    },
+    {
+      "url": "/data/imported/osm-relation-7547535.geojson",
+      "assetPath": "maps/routes/osm-relation-7547535.geojson",
+      "path": "maps/routes/osm-relation-7547535.geojson",
+      "sizeBytes": 3917,
+      "sha256": "37937a5d9f47fdd79ca02a35719bf6c01b67bc66667cbec07edf5ae508a40807"
+    },
+    {
+      "url": "/data/imported/osm-relation-7770898.geojson",
+      "assetPath": "maps/routes/osm-relation-7770898.geojson",
+      "path": "maps/routes/osm-relation-7770898.geojson",
+      "sizeBytes": 4743,
+      "sha256": "7ac70c5485e28656c2e79b1cc6c54ce43add9c8ea8306bdc4ff4c979fa6cb425"
+    },
+    {
+      "url": "/data/imported/osm-relation-7770899.geojson",
+      "assetPath": "maps/routes/osm-relation-7770899.geojson",
+      "path": "maps/routes/osm-relation-7770899.geojson",
+      "sizeBytes": 4344,
+      "sha256": "9113aec5173b039d67e33524c3e7e41c06c3ed1410bfdd802746f5c956019048"
+    },
+    {
+      "url": "/data/imported/osm-relation-7770900.geojson",
+      "assetPath": "maps/routes/osm-relation-7770900.geojson",
+      "path": "maps/routes/osm-relation-7770900.geojson",
+      "sizeBytes": 5065,
+      "sha256": "c2b432d0b2f317b4506bd802c88a6a806b4c054522fc5915f02252c8f7f0b939"
+    },
+    {
+      "url": "/data/imported/osm-relation-7770901.geojson",
+      "assetPath": "maps/routes/osm-relation-7770901.geojson",
+      "path": "maps/routes/osm-relation-7770901.geojson",
+      "sizeBytes": 585,
+      "sha256": "57ec6251a68bfe9538aaaa89982be57fcd088c27603b09cec10737718a35162f"
+    },
+    {
+      "url": "/data/imported/osm-relation-7778511.geojson",
+      "assetPath": "maps/routes/osm-relation-7778511.geojson",
+      "path": "maps/routes/osm-relation-7778511.geojson",
+      "sizeBytes": 5875,
+      "sha256": "297252e8e3a9bdb0acc1351423d44ccbe60352226f97775a3dca37a416eda0c3"
+    },
+    {
+      "url": "/data/imported/osm-relation-7778512.geojson",
+      "assetPath": "maps/routes/osm-relation-7778512.geojson",
+      "path": "maps/routes/osm-relation-7778512.geojson",
+      "sizeBytes": 4883,
+      "sha256": "9b9269c8d9f3d3d732f39b58284e02657ddbc012420fa3d60245ac60c2d23bea"
+    },
+    {
+      "url": "/data/imported/osm-relation-7778513.geojson",
+      "assetPath": "maps/routes/osm-relation-7778513.geojson",
+      "path": "maps/routes/osm-relation-7778513.geojson",
+      "sizeBytes": 4697,
+      "sha256": "eb60c13f72c3a05277d75b8459c6303886cba823dbd1cf9195bf5ffab2b64778"
+    },
+    {
+      "url": "/data/imported/osm-relation-7971235.geojson",
+      "assetPath": "maps/routes/osm-relation-7971235.geojson",
+      "path": "maps/routes/osm-relation-7971235.geojson",
+      "sizeBytes": 6817,
+      "sha256": "b9da21ed137455eabcbf2a316307b3c54bb0e214ef39016dc7fff26fd8dd17cd"
+    },
+    {
+      "url": "/data/imported/osm-relation-8087924.geojson",
+      "assetPath": "maps/routes/osm-relation-8087924.geojson",
+      "path": "maps/routes/osm-relation-8087924.geojson",
+      "sizeBytes": 1509,
+      "sha256": "1a4283340b0d695cb0d8bffaf32518e33732f849b00bb21a2e4aff2d29bed2df"
+    },
+    {
+      "url": "/data/imported/osm-relation-8192676.geojson",
+      "assetPath": "maps/routes/osm-relation-8192676.geojson",
+      "path": "maps/routes/osm-relation-8192676.geojson",
+      "sizeBytes": 3950,
+      "sha256": "5577491bbee25033b0254b86471786167a1f52706aa0441ec25d9f15c594f1b9"
+    },
+    {
+      "url": "/data/imported/osm-relation-8292782.geojson",
+      "assetPath": "maps/routes/osm-relation-8292782.geojson",
+      "path": "maps/routes/osm-relation-8292782.geojson",
+      "sizeBytes": 1017,
+      "sha256": "994e555ddf4e960b985f09677ddcb6ecb882566e89687d665175d1f6fea0be2e"
+    },
+    {
+      "url": "/data/imported/osm-relation-8311120.geojson",
+      "assetPath": "maps/routes/osm-relation-8311120.geojson",
+      "path": "maps/routes/osm-relation-8311120.geojson",
+      "sizeBytes": 10392,
+      "sha256": "aa6c729f9148f0142a8004a636c2ed6c9c565dc5414cd16f206073fed76a3352"
+    },
+    {
+      "url": "/data/imported/osm-relation-8323426.geojson",
+      "assetPath": "maps/routes/osm-relation-8323426.geojson",
+      "path": "maps/routes/osm-relation-8323426.geojson",
+      "sizeBytes": 41568,
+      "sha256": "a5d93018b0abedffd1f59cc7006e5f5b5ba91fa6f15cce5f1cbad4e16c3211f6"
+    },
+    {
+      "url": "/data/imported/osm-relation-8762068.geojson",
+      "assetPath": "maps/routes/osm-relation-8762068.geojson",
+      "path": "maps/routes/osm-relation-8762068.geojson",
+      "sizeBytes": 10948,
+      "sha256": "41e76ca65f6667b8cbf3bb8c1161c162e8878f487cba6e843545bea763172aed"
+    },
+    {
+      "url": "/data/imported/osm-relation-8780702.geojson",
+      "assetPath": "maps/routes/osm-relation-8780702.geojson",
+      "path": "maps/routes/osm-relation-8780702.geojson",
+      "sizeBytes": 2323,
+      "sha256": "51c779480b2705f1206b5f5b98f59bac12ee2655c55cb007cd8aec87f0a94138"
+    },
+    {
+      "url": "/data/imported/osm-relation-8780703.geojson",
+      "assetPath": "maps/routes/osm-relation-8780703.geojson",
+      "path": "maps/routes/osm-relation-8780703.geojson",
+      "sizeBytes": 10024,
+      "sha256": "fa782ed6c3816197ace9940b88ce4c4207381f4f4ddc6e41493fa71605291d82"
+    },
+    {
+      "url": "/data/imported/osm-relation-8780704.geojson",
+      "assetPath": "maps/routes/osm-relation-8780704.geojson",
+      "path": "maps/routes/osm-relation-8780704.geojson",
+      "sizeBytes": 12330,
+      "sha256": "45b5beb5df88c4d5ed0a8051a534d373deb5f9d2ab3a642dd7eb96902e994639"
+    },
+    {
+      "url": "/data/imported/osm-relation-8780705.geojson",
+      "assetPath": "maps/routes/osm-relation-8780705.geojson",
+      "path": "maps/routes/osm-relation-8780705.geojson",
+      "sizeBytes": 6017,
+      "sha256": "17506b565ae0c7415f418aaa2e9503106a437a77b2c3d1975278411a19a50c21"
+    },
+    {
+      "url": "/data/imported/osm-relation-8780706.geojson",
+      "assetPath": "maps/routes/osm-relation-8780706.geojson",
+      "path": "maps/routes/osm-relation-8780706.geojson",
+      "sizeBytes": 9938,
+      "sha256": "118e97466159b10cee2564a8ba38b9dab7eb04c083185623e9bfca144c6c6941"
+    },
+    {
+      "url": "/data/imported/osm-relation-8894033.geojson",
+      "assetPath": "maps/routes/osm-relation-8894033.geojson",
+      "path": "maps/routes/osm-relation-8894033.geojson",
+      "sizeBytes": 3307,
+      "sha256": "01b137fc823651fbbdffa5ee0491a0a633ceb7b573a5c3d775124dc270339285"
+    },
+    {
+      "url": "/data/imported/osm-relation-9403045.geojson",
+      "assetPath": "maps/routes/osm-relation-9403045.geojson",
+      "path": "maps/routes/osm-relation-9403045.geojson",
+      "sizeBytes": 144218,
+      "sha256": "4927dddcadc7869f8cf129440b0be798fdb29290d256705c84c62d04ae934be8"
+    },
+    {
+      "url": "/data/imported/osm-relation-9403239.geojson",
+      "assetPath": "maps/routes/osm-relation-9403239.geojson",
+      "path": "maps/routes/osm-relation-9403239.geojson",
+      "sizeBytes": 996,
+      "sha256": "059417a275ea3f1779a249ea826c59a91edcc84c0dec70fa06a8bb3347e280a7"
+    },
+    {
+      "url": "/data/imported/osm-relation-9403246.geojson",
+      "assetPath": "maps/routes/osm-relation-9403246.geojson",
+      "path": "maps/routes/osm-relation-9403246.geojson",
+      "sizeBytes": 5078,
+      "sha256": "0daad6449c7c4f3941af9a02e929e8196eb890bcc2fd596187212e724c434758"
+    },
+    {
+      "url": "/data/imported/osm-relation-9438111.geojson",
+      "assetPath": "maps/routes/osm-relation-9438111.geojson",
+      "path": "maps/routes/osm-relation-9438111.geojson",
+      "sizeBytes": 200766,
+      "sha256": "b0ebf63da9b8658830331fc656eafd4430219126824259bcad2093a092fa6956"
+    },
+    {
+      "url": "/data/imported/osm-relation-9524255.geojson",
+      "assetPath": "maps/routes/osm-relation-9524255.geojson",
+      "path": "maps/routes/osm-relation-9524255.geojson",
+      "sizeBytes": 12245,
+      "sha256": "de785aa9e4a98d66e100ca4b46756dabc3bb4ca2d58a1397981844d477a14916"
+    },
+    {
+      "url": "/data/imported/osm-relation-9591689.geojson",
+      "assetPath": "maps/routes/osm-relation-9591689.geojson",
+      "path": "maps/routes/osm-relation-9591689.geojson",
+      "sizeBytes": 88181,
+      "sha256": "ab739c7804048a88ab72085a61fcfe5bb748c4d9f91971d0da4f721b6defdd52"
+    },
+    {
+      "url": "/data/imported/osm-relation-9693179.geojson",
+      "assetPath": "maps/routes/osm-relation-9693179.geojson",
+      "path": "maps/routes/osm-relation-9693179.geojson",
+      "sizeBytes": 18892,
+      "sha256": "957a54dfffeeb8e1e229a5a43e4d95fab20c8d887d2b73e265aa12e1c5eeb231"
+    },
+    {
+      "url": "/data/imported/osm-relation-9693298.geojson",
+      "assetPath": "maps/routes/osm-relation-9693298.geojson",
+      "path": "maps/routes/osm-relation-9693298.geojson",
+      "sizeBytes": 4153,
+      "sha256": "91ce72ef999810d8b8c4bdbd51a5386c7e01f4cda376d9483de08bb0178f5f5a"
+    },
+    {
+      "url": "/data/imported/osm-relation-9903642.geojson",
+      "assetPath": "maps/routes/osm-relation-9903642.geojson",
+      "path": "maps/routes/osm-relation-9903642.geojson",
+      "sizeBytes": 26659,
+      "sha256": "b3486f46a2aea377544db9f1923e012c7f396407b12204c0855a11ba9440a0c7"
+    },
+    {
+      "url": "/data/imported/osm-relation-9935300.geojson",
+      "assetPath": "maps/routes/osm-relation-9935300.geojson",
+      "path": "maps/routes/osm-relation-9935300.geojson",
+      "sizeBytes": 11293,
+      "sha256": "ade4dee057ffcd778ec9118d069173367215f5f0fac474e47346e88c908527fe"
+    },
     {
       "url": "/data/map-coverage/base.coverage",
       "assetPath": "maps/coverage/base.coverage",
@@ -4334,6 +8671,48 @@
       "path": "maps/coverage/manifest.json",
       "sizeBytes": 142756,
       "sha256": "5810b86b93421e8587492381e08a13ddcce780579cc3116e44e7f9bf186fec35"
+    },
+    {
+      "url": "/data/routes/11566519.geojson",
+      "assetPath": "maps/routes/route-11566519.geojson",
+      "path": "maps/routes/route-11566519.geojson",
+      "sizeBytes": 27785,
+      "sha256": "4ada4a8f1354d8f8302be208c4ce9e5043cd08f1097ad020c2e67f36d93febc9"
+    },
+    {
+      "url": "/data/routes/3748147.geojson",
+      "assetPath": "maps/routes/kavkaz-16a.geojson",
+      "path": "maps/routes/kavkaz-16a.geojson",
+      "sizeBytes": 3076,
+      "sha256": "cf0ac12a7da6cdae5b9544bd73683b71c3aad4b339c701cc0030fb8df7f91039"
+    },
+    {
+      "url": "/data/routes/3748250.geojson",
+      "assetPath": "maps/routes/kavkaz-16b.geojson",
+      "path": "maps/routes/kavkaz-16b.geojson",
+      "sizeBytes": 7469,
+      "sha256": "33b8b8ff0af54b0b9c486271eb70bb2fe42560396110f69ea34a5c86e5e9f09c"
+    },
+    {
+      "url": "/data/routes/kolyma-black-creek.geojson",
+      "assetPath": "maps/routes/kolyma-black-creek.geojson",
+      "path": "maps/routes/kolyma-black-creek.geojson",
+      "sizeBytes": 18596,
+      "sha256": "de9dcb7a128b037e8000558efc83c926ac3e581473b62e41fdb725c73dddc46b"
+    },
+    {
+      "url": "/data/routes/kolyma-kongali.geojson",
+      "assetPath": "maps/routes/kolyma-kongali.geojson",
+      "path": "maps/routes/kolyma-kongali.geojson",
+      "sizeBytes": 9520,
+      "sha256": "ec9f94a55d07c64989c6dd5d916a371661f7dfab73136096ef2cc950d24a7abf"
+    },
+    {
+      "url": "/data/trail-overlay-b9607512eafb423f.json",
+      "assetPath": "maps/catalogue/trail-overlay.json",
+      "path": "maps/catalogue/trail-overlay.json",
+      "sizeBytes": 2634057,
+      "sha256": "b9607512eafb423fd6f3f72096d273c4cfa711539f4f5ac6c24d82e80c616048"
     },
     {
       "url": "/maps/russia-relief/0/0/0.png",

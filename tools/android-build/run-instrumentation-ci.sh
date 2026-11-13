@@ -61,7 +61,7 @@ if [[ "$tropnik_booted" != 'true' ]]; then
   exit 1
 fi
 # Retain the observed driver, and reject a silent fallback to the legacy GLES
-# path before installing/running the eight pixel and interaction cases.
+# path before installing/running the required pixel and interaction cases.
 timeout 10s "$tropnik_adb" -s "$tropnik_serial" shell dumpsys SurfaceFlinger > "$tropnik_output/graphics-driver.txt"
 python3 - "$tropnik_root" "$tropnik_output/graphics-driver.txt" <<'PY'
 import importlib.util

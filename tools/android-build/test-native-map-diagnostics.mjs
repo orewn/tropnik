@@ -52,16 +52,34 @@ function bootstrap(labelCount, labelText, markers = [], {debug = true, hit = nul
     getPitch() {return this.pitch;}
     getSize() {return {...this.size};}
     getCoverage() {return {status: {ready: true, revision: 1}, area: {}};}
+    // This harness supplies no route geometry. The new diagnostic must still
+    // query the actual completed viewport centre with the production radius.
+    // Real source admission and hit selection have separate data/device gates.
+    pickTrail(point, radius) {assert.equal(point.x, this.size.width / 2);assert.equal(point.y, this.size.height / 2);assert.equal(radius, 8);return undefined;}
     getLabelDiagnostics() {return labels;}
     inspect() {return {engine: 'tropnik-canvas', state: this.getState(), labels, tiles: {overview: []}};}
   }
   const port = {postMessage: value => messages.push(JSON.parse(value)), start() {}};
   const window = {addEventListener: (event, handler) => handlers.set(event, handler)};
-  const sandbox = {exports: {}, window, document: {getElementById: () => element, elementFromPoint: () => hit, documentElement: {dataset: {}}}, location: {origin: 'https://map.tropnik.invalid'}, performance, TextEncoder, setTimeout, getComputedStyle: () => ({display: 'block'}),
-    require: name => name === './custom-map-entry' ? {CustomMapEngine: Engine, inRussiaCoverage: () => false}
-      : name === './native-map-route' ? {NativeMapRouteLoader: class {}}
-        : name === './native-map-diagnostics' ? context.exports : assert.fail(name)};
-  vm.runInNewContext(compile('./custom-map-android.ts'), sandbox);
+  const sandbox = vm.createContext({exports: {}, window, document: {getElementById: () => element, elementFromPoint: () => hit, documentElement: {dataset: {}}}, location: {origin: 'https://map.tropnik.invalid'},
+    performance, TextEncoder, TextDecoder, URL, AbortController, DOMException, Uint8Array, crypto, setTimeout, clearTimeout,
+    fetch: () => assert.fail('A diagnostics-only bootstrap must not request catalogue or network bytes'), getComputedStyle: () => ({display: 'block'})});
+  const modules = new Map();
+  function load(url) {
+    if (modules.has(url.href)) return modules.get(url.href).exports;
+    assert.ok(url.href.startsWith(new URL('../../', import.meta.url).href), 'A runtime import escaped the checkout');
+    const module = {exports: {}};modules.set(url.href, module);
+    const evaluate = vm.runInContext(`(function(require,module,exports){${compile(url)}\n})`, sandbox, {filename: url.pathname});
+    evaluate(name => {
+      assert.ok(name.startsWith('.'), 'Unexpected external runtime dependency: ' + name);
+      if (url.href === new URL('./custom-map-android.ts', import.meta.url).href && name === './custom-map-entry') return {CustomMapEngine: Engine, inRussiaCoverage: () => false};
+      return load(new URL(name.endsWith('.ts') ? name : name + '.ts', url));
+    }, module, module.exports);
+    return module.exports;
+  }
+  // Catalogue, route cancellation, mode selection, overlay and diagnostics all
+  // use their real imports. Only the visible renderer/DOM are controlled here.
+  load(new URL('./custom-map-android.ts', import.meta.url));
   handlers.get('message')({data: JSON.stringify({type: 'tropnik-map-port', version: 1, generation: 7, debug}), ports: [port]});
   let sequence = 0;
   const snapshot = () => port.onmessage({data: JSON.stringify({type: 'snapshot', version: 1, generation: 7, sequence: ++sequence, payload: {requestId: 36 + sequence}})});

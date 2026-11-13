@@ -12,6 +12,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
+import java.nio.file.Files
 import java.security.MessageDigest
 import java.util.UUID
 
@@ -23,6 +24,20 @@ class OfflinePacks(
 ) {
     private val mutex = Mutex()
     private val root = File(context.filesDir, "offline").apply { mkdirs() }
+    private var verifiedRuntimeSha256: String? = null
+
+    private fun bundledRuntime(): BundledMapRuntime = try {
+        val runtime = parseBundledMapRuntime(context.assets.open(BUNDLED_MAP_MANIFEST).use {
+            readBoundedBytes(it, MAX_BUNDLED_MANIFEST_BYTES)
+        })
+        if (verifiedRuntimeSha256 != runtime.manifestSha256) {
+            verifyBundledMapRuntime(runtime, context.assets::open)
+            verifiedRuntimeSha256 = runtime.manifestSha256
+        }
+        runtime
+    } catch (error: Exception) {
+        throw OfflinePackAssetsUnavailable(error)
+    }
 
     suspend fun install(region: Region): InstalledPackEntity = mutex.withLock {
         withContext(Dispatchers.IO) {
@@ -32,33 +47,43 @@ class OfflinePacks(
             val directory = File(regionRoot, UUID.randomUUID().toString()).apply { mkdirs() }
             val publication = OfflinePackPublication(directory)
             try {
+                // Bind to the same manifest used by CustomMapResources. Shared
+                // coverage, renderer and overview stay in the immutable APK;
+                // copying them into every region would waste over 100 MB each.
+                val runtime = bundledRuntime()
                 val includePilot = catalog.hasDetailedOfflineMap(region.id)
-                val assets = mutableListOf("maps/world.geojson", "maps/style.json", "catalog.json", "SOURCES.txt")
-                if (context.assets.list("maps")?.contains("regions.geojson") == true) assets += "maps/regions.geojson"
-                assets += bundledFiles("maps/russia")
-                if (includePilot) {
-                    assets += bundledFiles("maps/pilot")
-                    assets += bundledFiles("maps/terrain-pilot")
-                    assets += bundledFiles("landscape")
-                    assets += "licenses/Manrope-OFL.txt"
-                    assets += "licenses/Manrope-Scene-OFL.txt"
-                }
+                val assets = mutableListOf("catalog.json", "SOURCES.txt")
                 val routeAssets = catalog.referenceRoutes(regionId = region.id).mapNotNull { it.geometryAsset }
                 assets += routeAssets
                 val files = JSONArray()
+                var copiedBytes = 0L
                 assets.distinct().forEach { asset ->
                     currentCoroutineContext().ensureActive()
-                    require(!asset.contains("..") && !asset.startsWith('/'))
+                    require(safePackRelativePath(asset))
                     val target = File(directory, asset)
                     target.parentFile?.mkdirs()
-                    context.assets.open(asset).use { input -> target.outputStream().use(input::copyTo) }
+                    val input = try { context.assets.open(asset) } catch (error: Exception) { throw OfflinePackAssetsUnavailable(error) }
+                    input.use { source ->
+                        target.outputStream().use { output ->
+                            val buffer = ByteArray(64 * 1024)
+                            var assetBytes = 0L
+                            while (true) {
+                                currentCoroutineContext().ensureActive()
+                                val count = source.read(buffer)
+                                if (count < 0) break
+                                assetBytes += count; copiedBytes += count
+                                require(assetBytes <= MAX_PACK_FILE_BYTES && copiedBytes <= MAX_PACK_BYTES) { "Offline pack exceeds its byte budget" }
+                                output.write(buffer, 0, count)
+                            }
+                        }
+                    }
                     files.put(JSONObject().put("path", asset).put("size", target.length())
                         .put("sha256", target.inputStream().use(::sha256)))
                 }
-                val manifest = JSONObject().put("schemaVersion", 1)
+                val manifest = JSONObject().put("schemaVersion", 2)
                     .put("regionId", region.id).put("version", catalog.version)
-                    .put("kind", "bundled-preview-overview")
-                    .put("navigationApproved", false).put("assets", files)
+                    .put("kind", "bundled-custom-map-region")
+                    .put("navigationApproved", false).put("assets", files).put("bundledRuntime", runtime.descriptor())
                 if (includePilot) manifest.put("detailedCoverage", JSONObject()
                     .put("title", "Район Бзерпинского карниза")
                     .put("bbox", JSONArray(listOf(40.29, 43.64, 40.49, 43.82)))
@@ -95,38 +120,132 @@ class OfflinePacks(
         }
     }
 
-    suspend fun verify(pack: InstalledPackEntity): Boolean = withContext(Dispatchers.IO) {
-        runCatching {
+    private fun inspectPack(pack: InstalledPackEntity): OfflinePackAvailability = try {
             val directory = File(pack.directory)
             require(directory.canonicalPath.startsWith(root.canonicalPath + File.separator))
-            validateFiles(directory, JSONObject(File(directory, "manifest.json").readText()))
-            true
-        }.getOrDefault(false)
+            val file = File(directory, "manifest.json")
+            require(file.isFile && !Files.isSymbolicLink(file.toPath()) && file.length() in 1..MAX_BUNDLED_MANIFEST_BYTES.toLong())
+            val manifest = JSONObject(file.inputStream().use { readBoundedBytes(it, MAX_BUNDLED_MANIFEST_BYTES) }.toString(Charsets.UTF_8))
+            validateFiles(directory, manifest)
+            require(manifest.getString("regionId") == pack.regionId && manifest.getString("version") == pack.version)
+            if (manifest.getInt("schemaVersion") == 1 || pack.version != catalog.version) OfflinePackAvailability.UPDATE_REQUIRED
+            else {
+                // A syntactically valid manifest is not enough: every regional
+                // card with a source line must have its exact saved geometry.
+                val savedCatalog = packCatalog(directory, manifest, pack)
+                val expectedPaths = setOf("catalog.json", "SOURCES.txt") + savedCatalog.referenceRoutes(regionId = pack.regionId).mapNotNull { it.geometryAsset }
+                val actualPaths = manifest.getJSONArray("assets").let { entries ->
+                    (0 until entries.length()).map { entries.getJSONObject(it).getString("path") }.toSet()
+                }
+                require(actualPaths == expectedPaths) { "Saved region asset set does not match its catalogue" }
+                val runtime = bundledRuntime()
+                val expected = manifest.getJSONObject("bundledRuntime")
+                if (expected.getString("sha256") != runtime.manifestSha256 || expected.getLong("size") != runtime.manifestSizeBytes)
+                    OfflinePackAvailability.UPDATE_REQUIRED
+                else OfflinePackAvailability.READY
+            }
+        } catch (cancelled: CancellationException) { throw cancelled
+        } catch (_: OfflinePackAssetsUnavailable) { OfflinePackAvailability.APP_DATA_UNAVAILABLE
+        } catch (_: Exception) { OfflinePackAvailability.DAMAGED }
+
+    suspend fun verify(pack: InstalledPackEntity): OfflinePackAvailability = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            dao.pack(pack.regionId)?.let(::inspectPack) ?: OfflinePackAvailability.DAMAGED
+        }
+    }
+
+    suspend fun open(pack: InstalledPackEntity): OfflinePackOpenResult = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            // The Saved screen may still hold a row that was replaced or
+            // removed. Only the currently published database entry can open.
+            val current = dao.pack(pack.regionId) ?: return@withContext OfflinePackOpenResult(OfflinePackAvailability.DAMAGED)
+            val availability = inspectPack(current)
+            if (availability != OfflinePackAvailability.READY) return@withContext OfflinePackOpenResult(availability)
+            try {
+                val directory = File(current.directory)
+                val manifest = JSONObject(File(directory, "manifest.json").inputStream().use {
+                    readBoundedBytes(it, MAX_BUNDLED_MANIFEST_BYTES)
+                }.toString(Charsets.UTF_8))
+                val savedCatalog = packCatalog(directory, manifest, current)
+                val routes = savedCatalog.referenceRoutes(regionId = current.regionId).map { route ->
+                    currentCoroutineContext().ensureActive()
+                    route.geometryAsset?.let { path ->
+                        val bytes = readPackAsset(directory, manifest, path)
+                        // Retain verified bytes in memory. No unverified file
+                        // path escapes the lock into the asynchronous WebView.
+                        route.copy(inlineGeometry = bytes.toString(Charsets.UTF_8))
+                    } ?: route
+                }
+                OfflinePackOpenResult(OfflinePackAvailability.READY,
+                    OfflineRegionSnapshot(current, savedCatalog.copy(routes = routes)))
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) { OfflinePackOpenResult(OfflinePackAvailability.DAMAGED) }
+        }
+    }
+
+    private fun packCatalog(directory: File, manifest: JSONObject, pack: InstalledPackEntity): Catalog {
+        val result = Catalog.parse(JSONObject(readPackAsset(directory, manifest, "catalog.json").toString(Charsets.UTF_8)))
+        require(result.version == pack.version && result.region(pack.regionId) != null)
+        return result
     }
 
     private fun safeDelete(directory: File) {
         if (directory.canonicalPath.startsWith(root.canonicalPath + File.separator)) directory.deleteRecursively()
     }
 
-    private fun bundledFiles(path: String): List<String> {
-        val children = context.assets.list(path).orEmpty()
-        return if (children.isEmpty()) listOf(path) else children.flatMap { bundledFiles("$path/$it") }
-    }
+}
+
+enum class OfflinePackAvailability { READY, UPDATE_REQUIRED, DAMAGED, APP_DATA_UNAVAILABLE }
+class OfflinePackAssetsUnavailable(cause: Throwable) : IllegalStateException("Bundled offline assets are unavailable", cause)
+data class OfflineRegionSnapshot(val pack: InstalledPackEntity, val catalog: Catalog)
+data class OfflinePackOpenResult(val availability: OfflinePackAvailability, val snapshot: OfflineRegionSnapshot? = null)
+
+internal fun readPackAsset(directory: File, manifest: JSONObject, path: String): ByteArray {
+    require(safePackRelativePath(path))
+    val entries = manifest.getJSONArray("assets")
+    val matching = (0 until entries.length()).map { entries.getJSONObject(it) }.filter { it.getString("path") == path }
+    require(matching.size == 1) { "Required saved region asset is missing or ambiguous" }
+    val expected = matching.single()
+    require(expected.getLong("size") in 1..MAX_PACK_FILE_BYTES.toLong())
+    val target = File(directory, path)
+    require(target.canonicalPath.startsWith(directory.canonicalPath + File.separator) && !Files.isSymbolicLink(target.toPath()))
+    var component = directory
+    for (name in path.split('/')) { component = File(component, name); require(!Files.isSymbolicLink(component.toPath())) }
+    val bytes = target.inputStream().use { readBoundedBytes(it, MAX_PACK_FILE_BYTES) }
+    require(bytes.size.toLong() == expected.getLong("size") && bytes.inputStream().use(::sha256) == expected.getString("sha256"))
+    return bytes
 }
 
 internal fun validateFiles(directory: File, manifest: JSONObject) {
-    require(manifest.getInt("schemaVersion") == 1)
+    val version = manifest.getInt("schemaVersion")
+    require(version in 1..2)
+    if (version == 2) {
+        require(manifest.getString("kind") == "bundled-custom-map-region" && !manifest.getBoolean("navigationApproved"))
+        val runtime = manifest.getJSONObject("bundledRuntime")
+        require(runtime.getString("path") == BUNDLED_MAP_MANIFEST &&
+            runtime.getLong("size") in 1..MAX_BUNDLED_MANIFEST_BYTES.toLong() &&
+            runtime.getString("sha256").matches(Regex("[a-f0-9]{64}")))
+    }
     val assets = manifest.getJSONArray("assets")
-    require(assets.length() in 1..512)
+    require(assets.length() in 1..2048)
     val paths = mutableSetOf<String>()
+    var bytes = 0L
     for (i in 0 until assets.length()) {
         val item = assets.getJSONObject(i)
-        require(paths.add(item.getString("path"))) { "Duplicate asset path" }
-        val target = File(directory, item.getString("path"))
+        val path = item.getString("path")
+        require(safePackRelativePath(path) && paths.add(path)) { "Invalid or duplicate asset path" }
+        val size = item.getLong("size")
+        require(size in 1..MAX_PACK_FILE_BYTES.toLong() && item.getString("sha256").matches(Regex("[a-f0-9]{64}")))
+        bytes += size
+        require(bytes <= MAX_PACK_BYTES) { "Offline pack exceeds its total size limit" }
+        val target = File(directory, path)
         require(target.canonicalPath.startsWith(directory.canonicalPath + File.separator))
-        require(target.isFile && target.length() == item.getLong("size"))
+        var component = directory
+        for (name in path.split('/')) { component = File(component, name); require(!Files.isSymbolicLink(component.toPath())) }
+        require(target.isFile && target.length() == size)
         require(target.inputStream().use(::sha256) == item.getString("sha256"))
     }
+    if (version == 2) require(paths.containsAll(listOf("catalog.json", "SOURCES.txt"))) { "Saved catalogue or attribution is missing" }
 }
 
 internal fun sha256(input: InputStream): String {
