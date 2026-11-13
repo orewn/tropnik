@@ -4,7 +4,7 @@
   "catalog": {
     "path": "catalog.json",
     "bytes": 2176050,
-    "sha256": "bf3c8e6b51d9ee4fd50d68565c593266e4d7cc5cd8b27a755f768663a816d315"
+    "sha256": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0"
   },
   "sourceInputs": [
     {
@@ -24,8 +24,8 @@
     },
     {
       "path": "web/lib/content.ts",
-      "bytes": 23138,
-      "sha256": "3f8f2a789d3788a7598a170186cd37751a24791e79b8e300eeaff16172efdf79"
+      "bytes": 23218,
+      "sha256": "08d73e3ddba8f93c3f5fc516bad5cc31fd4ce27d8e522fc9d1e793734a7cd9bb"
     },
     {
       "path": "web/lib/catalog.generated.json",

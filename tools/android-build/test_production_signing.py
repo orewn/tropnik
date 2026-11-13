@@ -13,6 +13,50 @@ DIGEST = "ab" * 32
 
 
 class ProductionSigningTests(unittest.TestCase):
+    def test_release_font_is_resolved_from_its_resource_and_matches_source_bytes(self):
+        spec = importlib.util.spec_from_file_location("production_font_fixture", Path(__file__).with_name("verify-apk.py"))
+        payload = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(payload)
+        # aapt2 Debug::PrintTable + FileReference::Print format, including the
+        # default configuration. The shortened filename is not an acceptance rule.
+        dump = "Package name=ru.tropa.app id=7f\n  type font id=05 entryCount=1\n    resource 0x7f050000 font/manrope\n      () (file) res/Zf.ttf\n      Flag disabled values:\n  type string id=06 entryCount=1\n    resource 0x7f060000 string/app_name\n      () \"Тропник\"\n"
+        resource = MODULE.font_resource_binding(dump)
+        self.assertEqual(resource["path"], "res/Zf.ttf")
+        self.assertEqual(MODULE.font_resource_diagnostics(dump)["fontTableLines"], [
+            "Package name=ru.tropa.app id=7f", "type font id=05 entryCount=1",
+            "resource 0x7f050000 font/manrope", "() (file) res/Zf.ttf", "Flag disabled values:"])
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "android/app/src/main/res/font/manrope.ttf"
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b"reviewed font fixture")
+            apk = root / "fixture.apk"
+            with zipfile.ZipFile(apk, "w") as archive:
+                archive.writestr("res/Zf.ttf", source.read_bytes())
+                archive.writestr("res/font/manrope.ttf", b"unrelated name cannot override the table")
+            with zipfile.ZipFile(apk) as archive:
+                result = payload.verify_native_font(archive, root, resource)
+                self.assertTrue(result["nativeFont"]["resourceTableBindingVerified"])
+                source.write_bytes(b"X" * source.stat().st_size)
+                with self.assertRaisesRegex(ValueError, "font bytes differ from source"):
+                    payload.verify_native_font(archive, root, resource)
+            with zipfile.ZipFile(apk, "w") as archive:
+                archive.writestr("res/font/manrope.ttf", source.read_bytes())
+            with zipfile.ZipFile(apk) as archive, self.assertRaisesRegex(ValueError, "resource is missing"):
+                payload.verify_native_font(archive, root, resource)
+
+    def test_font_table_rejects_wrong_package_alias_qualifier_duplicate_and_traversal(self):
+        valid = "Package name=ru.tropa.app id=7f\n  type font id=05 entryCount=1\n    resource 0x7f050000 font/manrope\n      () (file) res/Zf.ttf\n"
+        invalid = [valid.replace("ru.tropa.app", "another.app"), valid.replace("font/manrope", "font/other"),
+                   valid.replace("() (file) res/Zf.ttf", "() @font/other"), valid.replace("()", "(en)"),
+                   valid + "    resource 0x7f050001 font/manrope\n      () (file) res/Q.ttf\n",
+                   valid + "      (ru) (file) res/Q.ttf\n", valid.replace("res/Zf.ttf", "res/../Zf.ttf"),
+                   valid.replace("0x7f050000", "0x80050000"), valid.replace("() (file) res/Zf.ttf", ""),
+                   "x" * 8_000_001]
+        for index, value in enumerate(invalid):
+            with self.subTest(case=index), self.assertRaises(ValueError):
+                MODULE.font_resource_binding(value)
+
     def test_unsigned_requires_expected_sdk_result_and_no_signing_material(self):
         with tempfile.TemporaryDirectory() as directory:
             apk = Path(directory) / "fixture.apk"

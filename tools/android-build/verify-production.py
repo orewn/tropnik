@@ -19,6 +19,7 @@ import subprocess
 import zipfile
 from urllib.parse import urlsplit
 
+from asset_integrity import safe_relative
 from preview_artifacts import expected_map_runtime, fingerprint, parse_badging, require, source_checkout, source_version
 
 SIGNING_NAMES = ("TROPNIK_RELEASE_KEYSTORE", "TROPNIK_RELEASE_STORE_PASSWORD",
@@ -85,6 +86,56 @@ def production_certificate(text: str, expected: str):
     return hashes[0]
 
 
+def font_resource_binding(text: str) -> dict:
+    """Resolve the default font/manrope through aapt2's actual resource table."""
+    require(len(text.encode("utf-8")) <= 8_000_000, "Resource table dump exceeds the verification budget")
+    package, current = None, None
+    entries = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("Package name="):
+            package = re.fullmatch(r"Package name=(\S+) id=([a-fA-F0-9]{2})", stripped)
+            current = None
+        elif stripped.startswith("type "):
+            current = None
+        elif stripped.startswith("resource "):
+            current = None
+            header = re.fullmatch(r"resource (0x[a-fA-F0-9]{8}) font/manrope(?: PUBLIC| _PRIVATE_)?", stripped)
+            if header:
+                require(package is not None and package.group(1) == "ru.tropa.app" and package.group(2).lower() == "7f",
+                        "Native Manrope resource belongs to another package")
+                current = {"resourceId": header.group(1).lower(), "resourceName": "ru.tropa.app:font/manrope", "values": []}
+                entries.append(current)
+        elif current is not None and stripped and stripped != "Flag disabled values:":
+            current["values"].append(stripped)
+    require(len(entries) == 1, "Expected exactly one native font/manrope resource")
+    resource = entries[0]
+    require(len(resource["values"]) == 1, "Native Manrope must have one unambiguous default resource value")
+    value = re.fullmatch(r"\(\) \(file\) (res/[^\s]+\.ttf)", resource.pop("values")[0])
+    require(value is not None, "Native Manrope resource must refer directly to its packaged font")
+    resource["path"] = safe_relative(value.group(1))
+    require(resource["resourceId"].startswith("0x7f"), "Native Manrope resource ID belongs to another package")
+    return resource
+
+
+def font_resource_diagnostics(text: str):
+    # Retain only public font-table lines, including a shortened resource name
+    # if a future optimizer changes that contract. These never approve a font.
+    require(len(text.encode("utf-8")) <= 8_000_000, "Resource table diagnostic budget exceeded")
+    lines, in_font = [], False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("Package name="):
+            lines.append(stripped)
+            in_font = False
+        elif stripped.startswith("type "):
+            in_font = stripped.startswith("type font ")
+        if in_font and stripped:
+            lines.append(stripped)
+    require(len(lines) <= 128 and sum(len(line) for line in lines) <= 16_000, "Font table diagnostic budget exceeded")
+    return {"resourceDumpSha256": hashlib.sha256(text.encode("utf-8")).hexdigest(), "fontTableLines": lines}
+
+
 def unsigned_signature(apk: Path, result):
     # A crashed/missing SDK verifier is not evidence that an APK is unsigned.
     diagnostics = (result.stdout + "\n" + result.stderr).splitlines()
@@ -146,7 +197,7 @@ def compiler_profile_diagnostics(apk: Path, root: Path):
             "apkDexoptAssets": apk_profiles, "compileReleaseArtProfileOutputs": outputs}
 
 
-def verify(apk: Path, sdk: Path, root: Path, unsigned: bool, expected_source: str):
+def verify(apk: Path, sdk: Path, root: Path, unsigned: bool, expected_source: str, resource_dump: str | None = None):
     commit = source_checkout(root, require_clean=True)
     require(re.fullmatch(r"[a-f0-9]{40}", expected_source or "") is not None and commit == expected_source,
             "Checkout differs from the source held before the Gradle build")
@@ -171,7 +222,9 @@ def verify(apk: Path, sdk: Path, root: Path, unsigned: bool, expected_source: st
     spec = importlib.util.spec_from_file_location("production_apk_payload", Path(__file__).with_name("verify-apk.py"))
     verifier = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(verifier)
-    payload = verifier.verify_apk(apk, source_root=root)
+    if resource_dump is None:
+        resource_dump = subprocess.check_output([str(binaries / "aapt2"), "dump", "resources", str(apk)], text=True)
+    payload = verifier.verify_apk(apk, source_root=root, font_resource=font_resource_binding(resource_dump))
     require(payload["sha256"] == initial["sha256"] and payload["sizeBytes"] == initial["bytes"]
             and fingerprint(apk) == initial, "Candidate APK changed while it was being verified")
     runtime = expected_map_runtime(root)
@@ -206,8 +259,10 @@ def main():
             "Verification requires --apk, --sdk, --output and --expected-source")
     diagnostics = compiler_profile_diagnostics(args.apk, args.root)
     diagnostics["expectedSourceCommit"] = args.expected_source
+    resource_dump = subprocess.check_output([str(args.sdk / "build-tools/36.0.0/aapt2"), "dump", "resources", str(args.apk)], text=True)
+    diagnostics["nativeFontResource"] = font_resource_diagnostics(resource_dump)
     args.output.with_name("production-diagnostics.json").write_text(json.dumps(diagnostics, ensure_ascii=False, indent=2) + "\n")
-    result = verify(args.apk, args.sdk, args.root, args.unsigned_check, args.expected_source)
+    result = verify(args.apk, args.sdk, args.root, args.unsigned_check, args.expected_source, resource_dump)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps({key: result[key] for key in ("kind", "sourceCommit", "applicationId", "version", "sha256", "signatureVerified")}))
 

@@ -81,6 +81,21 @@ export type ResolveAppealInput = { decision: 'upheld' | 'overturned'; reason: st
 // Cursor is an opaque position, never an account selector or authorization. No participant list is returned.
 // GET /routes pages are capped at 1 MiB of decoded JSON and may return fewer than limit.
 // Always follow meta.nextCursor. GET /routes/ID retains complete geometry with an 8 MiB decoded JSON budget.
+// Browser, BFF, SSR and Android decoded JSON budgets (MiB = 1,048,576 bytes):
+// requests: 1 MiB; errors and unlisted successful methods/paths: 1 MiB.
+// Successful GET /departures/ID/messages and /recruitment-requests/ID/messages: 4 MiB.
+// Successful GET /departures/ID/reviews, /guides/ID/reviews, /recruitment-requests,
+// /me/reports, /me/moderation-actions, /me/appeals, /me/notifications,
+// /moderation/reports and /moderation/appeals: 8 MiB (SQL limit 100 rows).
+// Successful GET /departures/ID/emergency-card: 2 MiB.
+// Successful GET /departures/ID/safety-passport and POST /departures/ID/
+// {safety-passport/prepare,mchs/submission,mchs/confirmation,mchs/start-contact,mchs/return-report}: 16 MiB.
+// These POSTs return a full passport. Route metadata already fits 8 MiB, but
+// preserved RFC3339 fractional strings plus private passport details may exceed
+// that envelope. Go JSON HTML escaping is included in all response budgets.
+// Limits count decoded stream bytes regardless of gzip or Content-Length;
+// query parameters do not expand the exact method/path whitelist. Oversize is
+// an explicit failure, never a shortened message, safety record or geometry.
 
 /** Safety states are platform records of external evidence, never an MChS API response. */
 export type MCHSNotificationPolicy = 'not_required' | 'recommended' | 'required';

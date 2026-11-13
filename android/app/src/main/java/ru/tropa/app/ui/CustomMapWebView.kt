@@ -42,6 +42,7 @@ internal const val CUSTOM_MAP_ORIGIN = "https://map.tropnik.invalid"
 private const val CUSTOM_MAP_DOCUMENT = "$CUSTOM_MAP_ORIGIN/custom-map/index.html"
 private const val MAX_MAP_RESOURCE_BYTES = 8 * 1024 * 1024
 private const val MAX_ROUTE_BYTES = 16 * 1024 * 1024
+private val CATALOGUE_TRAIL_ID = Regex("[a-z0-9-]{1,128}")
 
 /** Closed URL policy shared by the resource broker and focused JVM tests.
  * Remote requests never inherit a session, cookies, account or caller headers. */
@@ -388,8 +389,10 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
     }
 
     fun setCatalogue(ids: List<String>) {
-        require(ids.size <= 100000 && ids.all { Regex("[a-z0-9-]{1,128}").matches(it) } && ids.toSet().size == ids.size)
-        allowedTrailIds = ids.toSet()
+        require(ids.size <= 100000 && ids.all { CATALOGUE_TRAIL_ID.matches(it) })
+        val allowed = ids.toSet()
+        require(allowed.size == ids.size)
+        allowedTrailIds = allowed
         command("catalogue", JSONObject().put("ids", JSONArray(ids)))
     }
 

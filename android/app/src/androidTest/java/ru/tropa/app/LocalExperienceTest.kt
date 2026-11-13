@@ -16,6 +16,9 @@ import android.os.ParcelFileDescriptor
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebView
 import androidx.compose.ui.test.*
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -36,10 +39,14 @@ import ru.tropa.app.data.Catalog
 import ru.tropa.app.data.ConnectionState
 import ru.tropa.app.data.InstalledPackEntity
 import ru.tropa.app.ui.CustomMapWebView
+import ru.tropa.app.ui.OnlineProfileScreen
+import ru.tropa.app.ui.TropaTheme
 import java.io.File
 import java.security.MessageDigest
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -47,6 +54,156 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 class LocalExperienceTest {
     @get:Rule val app = createAndroidComposeRule<MainActivity>()
+
+    @Test fun sessionTransitionsFailClosedAndDiscardLatePrivateWork() {
+        fun mount(fixture: SessionFaultHarness, seed: Boolean = true) {
+            if (seed) fixture.seed()
+            app.runOnUiThread {
+                val model = fixture.createModel()
+                app.activity.setContent { TropaTheme {
+                    val state by model.state.collectAsState()
+                    OnlineProfileScreen(model, state) { }
+                } }
+            }
+            app.waitUntil(10_000) {
+                if (seed) fixture.model.state.value.cachedConversations.size == 1 else fixture.model.state.value.sessionTransitionPending
+            }
+        }
+        fun awaitFailure(fixture: SessionFaultHarness) {
+            app.waitUntil(10_000) { fixture.model.state.value.let { !it.busy && it.sessionTransitionPending && it.error != null } }
+            val state = fixture.model.state.value
+            assertNull(state.session)
+            assertNull(state.conversation)
+            assertTrue(state.messages.isEmpty() && state.pending.isEmpty() && state.cachedConversations.isEmpty())
+            assertTrue(!state.canUseNetwork)
+            assertNull(fixture.vault.bearer(fixture.origin))
+            assertNull(fixture.vault.bearer(fixture.nextOrigin))
+        }
+        fun retry() {
+            app.onNodeWithTag("profile_list").performScrollToNode(hasTestTag("retry_session_transition"))
+            app.onNodeWithTag("retry_session_transition").assertIsEnabled().performClick()
+        }
+        fun awaitComplete(fixture: SessionFaultHarness) {
+            app.waitUntil(10_000) { fixture.model.state.value.let { !it.busy && !it.sessionTransitionPending } }
+            assertNull(fixture.model.state.value.error)
+            assertNull(fixture.model.state.value.session)
+            assertEquals(0, fixture.pendingCount())
+            assertEquals(0, fixture.conversationCount())
+        }
+        fun close(fixture: SessionFaultHarness) {
+            app.runOnUiThread { fixture.stopModel() }
+            fixture.close()
+        }
+
+        val room = SessionFaultHarness(app.activity.application)
+        try {
+            mount(room)
+            val delayedRead = SessionFaultHarness.Pause()
+            room.dao.readPause = delayedRead
+            var reading: Job? = null
+            app.runOnUiThread { reading = room.model.openChat(room.conversation) }
+            delayedRead.awaitEntered()
+            room.dao.failConversations = true
+            room.dao.failOutbox = true
+            app.runOnUiThread { room.model.logout() }
+            awaitFailure(room)
+            assertEquals(1, room.conversationCount())
+            assertEquals(1, room.pendingCount())
+            delayedRead.resume.complete(Unit)
+            runBlocking { withTimeout(10_000) { reading!!.join() } }
+            assertNull("An old chat result must not restore the closed identity", room.model.state.value.conversation)
+            assertTrue(room.model.state.value.messages.isEmpty())
+            val marker = room.persisted.getString("pending-private-cleanup", null)!!
+            assertTrue(!marker.contains(room.session.token) && !marker.contains("token"))
+            app.runOnUiThread { room.stopModel() }
+            room.recreateStorageFromDisk()
+            mount(room, seed = false)
+            assertNull(room.model.state.value.session)
+            assertTrue("Restart must not enable login while the old queue remains", !room.model.state.value.canUseNetwork)
+            assertTrue(runCatching { room.vault.saveSession(room.session) }.isFailure)
+            assertEquals(1, room.pendingCount())
+            retry()
+            awaitFailure(room)
+            assertEquals(0, room.conversationCount())
+            assertEquals(1, room.pendingCount())
+            retry()
+            awaitComplete(room)
+            assertNull(room.persisted.getString("pending-private-cleanup", null))
+        } finally { close(room) }
+
+        for (changeServer in listOf(true, false)) {
+            val persistence = SessionFaultHarness(app.activity.application)
+            try {
+                mount(persistence)
+                persistence.preferences.failNextCommit = true
+                app.runOnUiThread {
+                    if (changeServer) persistence.model.configureServer(persistence.nextOrigin) else persistence.model.logout()
+                }
+                awaitFailure(persistence)
+                assertEquals("An uncertain in-memory preference must not become an API destination", "", persistence.vault.serverUrl())
+                assertEquals(persistence.origin, persistence.persisted.getString("server", null))
+                assertNotNull("The failed commit must not masquerade as persisted logout", persistence.persisted.getString("session", null))
+                assertTrue(persistence.model.state.value.error!!.contains("Не удалось сохранить"))
+                retry()
+                awaitComplete(persistence)
+                assertEquals(if (changeServer) persistence.nextOrigin else persistence.origin, persistence.vault.serverUrl())
+                assertNull(persistence.persisted.getString("session", null))
+            } finally { close(persistence) }
+        }
+
+        val writing = SessionFaultHarness(app.activity.application)
+        try {
+            mount(writing)
+            var opening: Job? = null
+            app.runOnUiThread { opening = writing.model.openChat(writing.conversation) }
+            runBlocking { withTimeout(10_000) { opening!!.join() } }
+            assertEquals(1, writing.model.state.value.messages.size)
+            val delayedWrite = SessionFaultHarness.Pause()
+            writing.dao.enqueuePause = delayedWrite
+            var queued = false
+            var sending: Job? = null
+            app.runOnUiThread { sending = writing.model.sendMessage("Late local fixture") { queued = true } }
+            delayedWrite.awaitEntered()
+            app.runOnUiThread { writing.model.logout() }
+            app.waitUntil(10_000) { writing.vault.session() == null }
+            assertTrue("Cleanup waits for the already started private write", writing.model.state.value.busy)
+            delayedWrite.resume.complete(Unit)
+            runBlocking { withTimeout(10_000) { sending!!.join() } }
+            awaitComplete(writing)
+            assertTrue("A stale enqueue must not report a successful new-session action", !queued)
+            val staleWrite = runBlocking(Dispatchers.IO) {
+                runCatching { writing.privateStore.enqueue(writing.session, writing.conversation, "Must not return") }
+            }
+            assertTrue("A late write cannot repopulate erased private data", staleWrite.isFailure)
+            assertEquals(0, writing.pendingCount())
+            assertEquals(0, writing.conversationCount())
+        } finally { close(writing) }
+
+        val queueFailure = SessionFaultHarness(app.activity.application)
+        try {
+            mount(queueFailure)
+            queueFailure.dao.failPendingRead = true
+            app.runOnUiThread { queueFailure.connections.value = ConnectionState.ONLINE }
+            app.waitUntil(10_000) { queueFailure.model.state.value.chatError != null && !queueFailure.model.state.value.busy }
+            assertEquals(1, queueFailure.pendingCount())
+            assertNotNull(queueFailure.model.state.value.session)
+            app.runOnUiThread { queueFailure.connections.value = ConnectionState.OFFLINE; queueFailure.model.closeChat() }
+            app.waitUntil(10_000) { queueFailure.model.state.value.connection == ConnectionState.OFFLINE }
+            queueFailure.dao.failPendingUpdate = true
+            app.runOnUiThread { queueFailure.connections.value = ConnectionState.ONLINE }
+            app.waitUntil(10_000) { queueFailure.dao.pendingUpdateFailures == 1 && queueFailure.model.state.value.chatError != null }
+            assertEquals(1, queueFailure.pendingCount())
+            assertNotNull(queueFailure.model.state.value.session)
+        } finally { close(queueFailure) }
+
+        File(app.activity.filesDir, "qa/session-transitions.json").apply { parentFile!!.mkdirs() }.writeText(JSONObject()
+            .put("roomConversationDeleteFailureHandled", true).put("roomOutboxDeleteFailureHandled", true)
+            .put("serverCommitFalseHandled", true).put("logoutCommitFalseHandled", true)
+            .put("lateChatReadDiscarded", true).put("lateQueueWriteErased", true)
+            .put("durableCleanupSurvivesRecreation", true).put("outboxReadFailureHandled", true).put("outboxStatusFailureHandled", true)
+            .put("stalePrivateWriteRejected", true).put("nativeRetryButtonVerified", true)
+            .put("externalNetworkUsed", false).toString(2))
+    }
 
     @Test fun savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline() {
         val application = app.activity.application as TropaApplication

@@ -309,7 +309,6 @@ Object.freeze({
 	planMaxZoom: 16,
 	viewportRegionMinZoom: 4,
 	maxPixelRatio: 2,
-	maxWorkers: 3,
 	prefetchTiles: 12,
 	constrainedPrefetchTiles: 4,
 	geolocationTimeoutMs: 15e3,

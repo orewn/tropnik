@@ -2,6 +2,8 @@ package ru.tropa.app.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -9,7 +11,12 @@ import java.util.UUID
 data class CachedMessages(val messages: List<ChatMessage>, val cursor: String?, val updatedAt: Long)
 
 class PrivateConversations(private val dao: LocalDao, private val vault: SessionVault) {
+    private val mutations = Mutex()
     private fun scope(session: AccountSession, conversation: Conversation) = "chat:${session.origin}:${session.account.id}:${conversation.kind.name}:${conversation.id}"
+
+    private fun requireCurrent(session: AccountSession) {
+        check(vault.matches(session)) { "Вход изменился. Откройте переписку после повторного входа." }
+    }
 
     suspend fun load(session: AccountSession, conversation: Conversation): CachedMessages? = withContext(Dispatchers.IO) {
         val row = dao.conversation(session.origin, session.account.id, conversation.kind.name, conversation.id) ?: return@withContext null
@@ -20,6 +27,13 @@ class PrivateConversations(private val dao: LocalDao, private val vault: Session
     }
 
     suspend fun store(session: AccountSession, conversation: Conversation, messages: List<ChatMessage>, cursor: String?) = withContext(Dispatchers.IO) {
+        mutations.withLock {
+            requireCurrent(session)
+            storeLocked(session, conversation, messages, cursor)
+        }
+    }
+
+    private suspend fun storeLocked(session: AccountSession, conversation: Conversation, messages: List<ChatMessage>, cursor: String?) {
         val json = JSONObject().put("messages", JSONArray(messages.takeLast(500).map(ChatMessage::json)))
             .put("cursor", cursor ?: JSONObject.NULL).put("title", conversation.title)
         dao.putConversation(ConversationCacheEntity(session.origin, session.account.id, conversation.kind.name,
@@ -37,16 +51,19 @@ class PrivateConversations(private val dao: LocalDao, private val vault: Session
     }
 
     suspend fun enqueue(session: AccountSession, conversation: Conversation, message: String): String = withContext(Dispatchers.IO) {
-        val text = message.trim()
-        require(text.isNotEmpty() && text.codePointCount(0, text.length) <= 4000) { "Сообщение должно содержать от 1 до 4000 символов" }
-        require(dao.pending(session.origin, session.account.id).size < 100) { "В очереди уже 100 сообщений. Дождитесь отправки или удалите лишние." }
-        val id = UUID.randomUUID().toString()
-        dao.enqueue(PendingMessageEntity(id, session.origin, session.account.id, conversation.kind.name,
-            conversation.id, vault.seal(text, "outbox:$id:${session.origin}:${session.account.id}"), System.currentTimeMillis()))
-        if (dao.conversation(session.origin, session.account.id, conversation.kind.name, conversation.id) == null) {
-            store(session, conversation, emptyList(), null)
+        mutations.withLock {
+            requireCurrent(session)
+            val text = message.trim()
+            require(text.isNotEmpty() && text.codePointCount(0, text.length) <= 4000) { "Сообщение должно содержать от 1 до 4000 символов" }
+            require(dao.pending(session.origin, session.account.id).size < 100) { "В очереди уже 100 сообщений. Дождитесь отправки или удалите лишние." }
+            val id = UUID.randomUUID().toString()
+            dao.enqueue(PendingMessageEntity(id, session.origin, session.account.id, conversation.kind.name,
+                conversation.id, vault.seal(text, "outbox:$id:${session.origin}:${session.account.id}"), System.currentTimeMillis()))
+            if (dao.conversation(session.origin, session.account.id, conversation.kind.name, conversation.id) == null) {
+                storeLocked(session, conversation, emptyList(), null)
+            }
+            id
         }
-        id
     }
 
     suspend fun pending(session: AccountSession, conversation: Conversation? = null): List<PendingMessageEntity> =
@@ -59,8 +76,10 @@ class PrivateConversations(private val dao: LocalDao, private val vault: Session
     }
     suspend fun remove(id: String) = dao.removePending(id)
     suspend fun failed(id: String, failed: Boolean, error: String?) = dao.pendingFailure(id, failed, error)
-    suspend fun clear(session: AccountSession) {
-        dao.clearConversations(session.origin, session.account.id)
-        dao.clearOutbox(session.origin, session.account.id)
+    suspend fun clear(scope: PrivateAccountScope) = mutations.withLock {
+        // The vault is invalidated before entering this barrier. A write that
+        // already started completes before deletion; later stale writes fail.
+        dao.clearConversations(scope.origin, scope.ownerId)
+        dao.clearOutbox(scope.origin, scope.ownerId)
     }
 }

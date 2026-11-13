@@ -63,7 +63,26 @@ def verify_source_assets(archive: zipfile.ZipFile, source_root: Path) -> dict:
             "sourceAssetParityVerified": True, "compilerGeneratedArtProfiles": compiler_assets}
 
 
-def verify_apk(apk: Path, *, source_root: Path | None = None) -> dict:
+def verify_native_font(archive: zipfile.ZipFile, source_root: Path, resource: dict | None = None) -> dict:
+    # Release aapt2 can shorten resource paths. Its resource table, rather than
+    # a filename search, must select the font; both variants retain exact bytes.
+    path = safe_relative(resource["path"] if resource is not None else "res/font/manrope.ttf")
+    require(path.startswith("res/") and path.endswith(".ttf"), "Invalid native font resource path")
+    require(path in archive.namelist(), "Native Manrope font resource is missing from the APK")
+    source = source_root.resolve() / "android/app/src/main/res/font/manrope.ttf"
+    require(source.is_file() and not source.is_symlink() and 0 < source.stat().st_size <= 4_000_000,
+            "Native Manrope source font is missing, linked or oversized")
+    require(archive.getinfo(path).file_size == source.stat().st_size, "Native Manrope font size differs from source")
+    data = archive.read(path)
+    require(data == source.read_bytes(), "Native Manrope font bytes differ from source")
+    return {"manropeFontBundled": True, "nativeFont": {
+        "path": path, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+        "resourceTableBindingVerified": resource is not None,
+        **({"resourceId": resource["resourceId"], "resourceName": resource["resourceName"]} if resource is not None else {}),
+    }}
+
+
+def verify_apk(apk: Path, *, source_root: Path | None = None, font_resource: dict | None = None) -> dict:
     with zipfile.ZipFile(apk) as archive:
         names = archive.namelist()
         require(len(names) == len(set(names)), "Duplicate APK entry")
@@ -111,7 +130,7 @@ def verify_apk(apk: Path, *, source_root: Path | None = None) -> dict:
             lambda path: archive.read(landscape_prefix + path), terrain_manifest)
         require("assets/licenses/Manrope-OFL.txt" in names and "assets/licenses/Manrope-Scene-OFL.txt" in names,
                 "Native or scene font licence missing")
-        require("res/font/manrope.ttf" in names, "Native Manrope font missing")
+        font_report = verify_native_font(archive, source_root or Path(__file__).resolve().parents[2], font_resource)
         catalog = json.loads(archive.read("assets/catalog.json"))
         catalog_report = verify_catalog(archive.read("assets/catalog-manifest.json"),
             lambda path: archive.read("assets/" + path),
@@ -146,7 +165,7 @@ def verify_apk(apk: Path, *, source_root: Path | None = None) -> dict:
             "mapReliefLighting": "geographic",
             "mapProjectedTiltDegrees": [0, 40],
             "separateLocalMeshViewer": True,
-            "manropeFontBundled": True,
+            **font_report,
             "terrainTilesVerified": terrain_report["terrainTileCount"],
             "terrainAttributionAndLicensePresent": True,
             "sceneBytes": landscape_report["landscapeBytesVerified"],

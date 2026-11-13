@@ -28,6 +28,7 @@ EXPECTED = {
     "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
     "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
     "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+    "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
 }
 CLASS_NAME = "ru.tropa.app.LocalExperienceTest"
 

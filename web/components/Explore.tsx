@@ -3,9 +3,10 @@ import {useRouter} from 'next/navigation';
 import {useState,useEffect,useLayoutEffect,useCallback,useMemo,useRef,useSyncExternalStore,useId,useDeferredValue,type FormEvent} from 'react';
 import {MagnifyingGlass,ArrowRight,ArrowLeft,Mountains,Tree,WaveSine,MapPin,SlidersHorizontal,BookmarkSimple,CheckCircle,Info,X,Path,Clock,UsersThree,ArrowDown,ArrowSquareOut,ShieldCheck} from '@/components/TropnikIcons';
 import {trails,type Trail} from '@/lib/content';
-import {packs,saveReference,type SavedPack} from '@/lib/local';
-import {api,ApiError,errorText,type Route} from '@/lib/api';
+import {savedPackIds,saveReference} from '@/lib/local';
+import {api,ApiError,errorText} from '@/lib/api';
 import {publishedTrail} from '@/lib/route-adapter';
+import {loadPublishedRoutes} from '@/lib/published-route';
 import {AuthDialog} from './AuthDialog';
 import {CustomAtlas as Atlas} from './CustomAtlas';
 import {PlaceStories} from './PlaceStories';
@@ -53,7 +54,7 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  const searchRoutes=useMemo(()=>createRouteSearch(catalog),[catalog]);
  useEffect(()=>{warmMap();},[]);
  const closeAuth=useCallback(()=>setAuth(false),[]);
- useEffect(()=>{api<Route[]>('routes').then(r=>setLiveTrails(r.map(publishedTrail))).catch(()=>{});},[]);
+ useEffect(()=>{const controller=new AbortController();let active=true;loadPublishedRoutes(controller.signal).then(r=>{if(active)setLiveTrails(r.map(publishedTrail));}).catch(()=>{});return()=>{active=false;controller.abort();};},[]);
  useLayoutEffect(()=>{
   if(window.location.pathname!=='/')return;
   return bindExploreScrollRestoration();
@@ -71,7 +72,7 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  const [query,setQuery]=useState(''),[filters,setFilters]=useState(DEFAULT_EXPLORE_FILTERS);
  const {expanded:filter,duration,onlySaved,difficulty}=exploreFiltersForRegion(region?.id,filters);
  const deferredQuery=useDeferredValue(query),searchPending=query!==deferredQuery;
- const [saved,setSaved]=useState<SavedPack[]>([]),[notice,setNotice]=useState(''),[saving,setSaving]=useState(''),[offline,setOffline]=useState(false),[sheetOpen,setSheetOpen]=useState(false);
+ const [saved,setSaved]=useState<string[]>([]),[notice,setNotice]=useState(''),[saving,setSaving]=useState(''),[offline,setOffline]=useState(false),[sheetOpen,setSheetOpen]=useState(false);
  const [requestSession]=useState(()=>new ExploreRequestSession(trail?.id));
  const requestState=useSyncExternalStore(requestSession.subscribe,requestSession.getSnapshot,requestSession.getSnapshot);
  const {date,note,error:requestError,busy:requestBusy,saved:draftSaved}=requestState;
@@ -92,7 +93,7 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
  const listKey=`${region?.id||'all'}:${deferredQuery}:${difficulty}:${duration}:${onlySaved}`;
  const [page,setPage]=useState({key:'',limit:12});
  const limit=page.key===listKey?page.limit:12;
- useEffect(()=>{packs().then(setSaved).catch(()=>{});const sync=()=>setOffline(navigator.onLine===false);sync();window.addEventListener('online',sync);window.addEventListener('offline',sync);return()=>{window.removeEventListener('online',sync);window.removeEventListener('offline',sync);};},[]);
+ useEffect(()=>{let active=true;savedPackIds().then(ids=>{if(active)setSaved(ids);}).catch(()=>{});const sync=()=>setOffline(navigator.onLine===false);sync();window.addEventListener('online',sync);window.addEventListener('offline',sync);return()=>{active=false;window.removeEventListener('online',sync);window.removeEventListener('offline',sync);};},[]);
  useEffect(()=>{if(!notice)return;const id=setTimeout(()=>setNotice(''),7000);return()=>clearTimeout(id);},[notice]);
  const closeRequest=requestSession.close;
  const writeExploreState=useCallback((nextRegion?:string,nextTrail?:string,mode:'push'|'replace'='push')=>{
@@ -129,7 +130,7 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
   if(!parent.regionId){setRegion(undefined);setViewportRegion(undefined);setQuery('');setFilters(DEFAULT_EXPLORE_FILTERS);}
   writeExploreState(parent.regionId,parent.trailId);
  },[region?.id,trail?.id,writeExploreState,requestSession,rememberPanelFocus]);
- const save=useCallback(async(t:Trail)=>{setSaving(t.id);try{await saveReference(t);setSaved(await packs());setNotice('Карточка сохранена на этом устройстве. Дата проверки и источник сохранены вместе с ней.');}catch(e){setNotice(errorText(e));}finally{setSaving('');}},[]);
+ const save=useCallback(async(t:Trail)=>{setSaving(t.id);try{await saveReference(t);setSaved(await savedPackIds());setNotice('Карточка сохранена на этом устройстве. Дата проверки и источник сохранены вместе с ней.');}catch(e){setNotice(errorText(e));}finally{setSaving('');}},[]);
  const clearQuery=useCallback(()=>setQuery(''),[]);
  const selectRegionFromPanel=useCallback((value:MapRegion)=>{rememberPanelFocus();selectRegion(value);},[rememberPanelFocus,selectRegion]);
  const selectTrailFromPanel=useCallback((value:Trail)=>{rememberPanelFocus();selectTrail(value);},[rememberPanelFocus,selectTrail]);
@@ -152,7 +153,7 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
    requestSession.accept(attempt,()=>{if(error instanceof ApiError&&error.status===401)setAuth(true);});
   }finally{requestSession.finish(attempt);}
  }
- const savedIds=useMemo(()=>new Set(saved.map(item=>item.id)),[saved]);
+ const savedIds=useMemo(()=>new Set(saved),[saved]);
  const regionalTrails=useMemo(()=>region?regionCatalog.get(region.id)??[]:catalog,[catalog,region,regionCatalog]);
  const routeSearch=useMemo(()=>deferredQuery.trim()?searchRoutes(deferredQuery):null,[deferredQuery,searchRoutes]);
  const shownTrails=useMemo(()=>{

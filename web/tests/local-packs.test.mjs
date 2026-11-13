@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
 import {once} from 'node:events';
-import {packs, saveReference, deletePack} from '../lib/local.ts';
+import {packs, savedPackIds, saveReference, deletePack} from '../lib/local.ts';
 import {MAP_RESOURCE_LIMITS} from '../lib/map-config.ts';
 import {rewriteScript,ts} from '../../tools/pages-preview/paths.mjs';
 
@@ -30,7 +30,7 @@ function storage(t, options = {}) {
         objectStore(storeName) {
           assert.equal(storeName, 'packs');
           const operation = kind => value => {tx.operation = kind; tx.value = value; if (options.requestError) throw options.requestError; return request;};
-          return {getAll: operation('getAll'), put: operation('put'), delete: operation('delete')};
+          return {getAll: operation('getAll'), getAllKeys: operation('getAllKeys'), put: operation('put'), delete: operation('delete')};
         },
         abort(error = new DOMException('Transaction aborted', 'AbortError')) {tx.error = error; queueMicrotask(() => tx.onabort?.({target: tx}));},
         succeed(value) {request.result = value; request.onsuccess?.({target: request});},
@@ -50,6 +50,7 @@ function storage(t, options = {}) {
 
 for (const operation of [
   {name: 'read', run: () => packs(), result: [], kind: 'getAll'},
+  {name: 'read IDs', run: () => savedPackIds(), result: [], kind: 'getAllKeys'},
   {name: 'save', run: () => saveReference({...trail, geometry}), result: trail.id, kind: 'put'},
   {name: 'delete', run: () => deletePack(trail.id), result: undefined, kind: 'delete'},
 ]) test(`${operation.name} waits for transaction commit and rejects a later abort instead of hanging or reporting success`, async t => {
@@ -83,12 +84,38 @@ test('downloaded API geometry is unwrapped without any casting or format migrati
   const env = storage(t);
   t.mock.method(globalThis, 'fetch', async (url,options) => {
     assert.equal(url,'/api/backend/routes/test-route');assert.equal(options.cache,'no-store');assert.equal(options.credentials,'same-origin');
-    return new Response(JSON.stringify({data:{geometry}}));
+    return new Response(JSON.stringify({data:{id:trail.id,revisionId:'revision-1',geometryDetail:'full',geometry}}));
   });
-  const pending = saveReference({...trail,publicationStatus:'published', geometryUrl: '/api/backend/routes/test-route'}), tx = await env.started;
+  const pending = saveReference({...trail,publicationStatus:'published',revisionId:'revision-1', geometryUrl: '/api/backend/routes/test-route'}), tx = await env.started;
   assert.deepEqual(tx.value.geometry, geometry);
   tx.succeed(trail.id); tx.complete();
   await pending; assert.equal(env.counts().closed, 1);
+});
+
+test('saved membership reads only keys and does not open or clone any stored geometry offline', async t => {
+  const env=storage(t);
+  t.mock.method(globalThis,'fetch',()=>{throw new Error('An offline key read must not fetch');});
+  const pending=savedPackIds(),tx=await env.started;
+  assert.equal(tx.operation,'getAllKeys');assert.equal(tx.mode,'readonly');
+  tx.succeed(['a','b',17]);tx.complete();
+  assert.deepEqual(await pending,['a','b']);assert.deepEqual(env.counts(),{opened:1,closed:1});
+});
+
+test('saving a published overview obtains every full vertex and rejects stale identity before storage',async t=>{
+  const overview={...trail,publicationStatus:'published',revisionId:'revision-1',geometryUrl:'/api/backend/routes/test-route',geometry:{type:'LineString',coordinates:[geometry.coordinates[0],geometry.coordinates[1]]}};
+  const full={type:'LineString',coordinates:[[30,61],[30.003,61.002],[30.006,61.008],[30.01,61.01]]};
+  for(const mismatch of [{id:'wrong-route'},{revisionId:'wrong-revision'},{geometryDetail:'overview'}]){
+    await t.test(Object.keys(mismatch)[0],async t=>{
+      const env=storage(t);t.mock.method(globalThis,'fetch',async()=>Response.json({data:{id:trail.id,revisionId:'revision-1',geometryDetail:'full',geometry:full,...mismatch}}));
+      await assert.rejects(saveReference(overview),/Пакет не изменён/);assert.deepEqual(env.counts(),{opened:0,closed:0});
+    });
+  }
+  await t.test('full',async t=>{
+    const env=storage(t);t.mock.method(globalThis,'fetch',async()=>Response.json({data:{id:trail.id,revisionId:'revision-1',geometryDetail:'full',geometry:full}}));
+    const pending=saveReference(overview),tx=await env.started;
+    assert.deepEqual(tx.value.geometry,full);assert.equal(tx.value.trail.revisionId,'revision-1');
+    tx.succeed(trail.id);tx.complete();assert.deepEqual((await pending).geometry.coordinates,full.coordinates);
+  });
 });
 
 test('transaction creation, request creation and request failure always reject and close once', async t => {
@@ -141,7 +168,7 @@ test('unknown source identities and invalid inline or API geometry never mutate 
     {geometry:{type:'LineString',coordinates:[['wrong',43],[40,44]]}},
     {geometryUrl:'/data/routes/not-in-the-catalogue.geojson'},
     {geometryUrl:'https://untrusted.invalid/route.geojson'},
-    {publicationStatus:'published',geometryUrl:'/api/backend/routes/test-route'},
+    {publicationStatus:'published',revisionId:'revision-1',geometryUrl:'/api/backend/routes/test-route'},
   ])await t.test(JSON.stringify(sample),async t=>{
     const env=storage(t);let requests=0;
     t.mock.method(globalThis,'fetch',async()=>{requests++;return new Response(JSON.stringify({unexpected:'not GeoJSON'}));});
@@ -156,7 +183,7 @@ test('oversized announced and streamed route responses are cancelled before JSON
     const env=storage(t);let cancelled=false;
     const body=new ReadableStream({pull(controller){controller.enqueue(new Uint8Array(announced?1:MAP_RESOURCE_LIMITS.maxResourceBytes+1));},cancel(){cancelled=true;}});
     t.mock.method(globalThis,'fetch',async()=>new Response(body,{headers:announced?{'Content-Length':String(MAP_RESOURCE_LIMITS.maxResourceBytes+1)}:{}}));
-    await assert.rejects(saveReference({...trail,publicationStatus:'published',geometryUrl:'/api/backend/routes/test-route'}),error=>/Пакет не изменён/.test(error.message)&&/byte budget/.test(error.cause?.message));
+    await assert.rejects(saveReference({...trail,publicationStatus:'published',revisionId:'revision-1',geometryUrl:'/api/backend/routes/test-route'}),error=>/Пакет не изменён/.test(error.message)&&error.cause?.code==='response_too_large');
     assert.equal(cancelled,true);assert.deepEqual(env.counts(),{opened:0,closed:0});
   });
 });
@@ -175,6 +202,8 @@ test('Pages saves verify project-prefixed source URLs with catalogue-relative ha
   for(const [relative,url] of [
     ['./route-geometry.ts',geometryURL],['./route-source-integrity.ts',moduleURL(integrity,'route-source-integrity.ts')],
     ['./map-config.ts',new URL('../lib/map-config.ts',import.meta.url).href],['./trail-overlay.generated.json',new URL('../lib/trail-overlay.generated.json',import.meta.url).href],
+    ['./published-route.ts',new URL('../lib/published-route.ts',import.meta.url).href],
+    ['./api-transport.ts',new URL('../lib/api-transport.ts',import.meta.url).href],
   ])source=source.replace(JSON.stringify(relative),JSON.stringify(url)).replace("'"+relative+"'",JSON.stringify(url));
   const runtime=await import(moduleURL(source,'local.ts')),env=storage(t,{databaseName:'tropnik-tropa-local-v1'}),requests=[];
   t.mock.method(globalThis,'fetch',async(url,options)=>{requests.push({url,cache:options.cache});return new Response(checkedBytes);});

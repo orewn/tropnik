@@ -2,10 +2,11 @@ import type { Trail } from './content';
 import {readRouteGeometry} from './route-geometry.ts';
 import {loadVerifiedRouteGeometry,ROUTE_SOURCE_DATA_ROOT} from './route-source-integrity.ts';
 import {MAP_RESOURCE_LIMITS} from './map-config.ts';
+import {loadPublishedRouteGeometry} from './published-route.ts';
+import {readBoundedBody} from './api-transport.ts';
 import trailOverlayMetadata from './trail-overlay.generated.json' with {type:'json'};
 
 const DB_NAME = 'tropa-local-v1';
-const API_ROUTE_ROOT='/api/backend/routes/';
 export type SavedPack = {id:string; title:string; regionId:string; savedAt:string; sourceCheckedAt:string; kind:'reference'; trail:Trail; geometry:unknown|null; bytes:number};
 function database():Promise<IDBDatabase> {
   return new Promise((resolve,reject)=>{
@@ -17,6 +18,13 @@ function database():Promise<IDBDatabase> {
 export async function packs():Promise<SavedPack[]> {
   const db=await database();
   try{return await transaction<SavedPack[]>(db,'readonly',store=>store.getAll());}
+  finally{db.close();}
+}
+/** The map needs saved membership only. Read index keys without cloning every
+ * saved route and its full geometry into the interactive catalogue. */
+export async function savedPackIds():Promise<string[]> {
+  const db=await database();
+  try{return (await transaction<IDBValidKey[]>(db,'readonly',store=>store.getAllKeys())).filter((key):key is string=>typeof key==='string');}
   finally{db.close();}
 }
 function transaction<T>(db:IDBDatabase,mode:IDBTransactionMode,request:(store:IDBObjectStore)=>IDBRequest<T>):Promise<T>{
@@ -36,27 +44,14 @@ function transaction<T>(db:IDBDatabase,mode:IDBTransactionMode,request:(store:ID
 }
 async function readSavedSource(url:string,signal:AbortSignal,cache:RequestCache):Promise<ArrayBuffer>{
   const response=await fetch(url,{signal,cache,credentials:'same-origin'});
-  if(!response.ok){await response.body?.cancel().catch(()=>{});throw new Error('Route source unavailable');}
-  const reader=response.body?.getReader();
-  if(!reader)throw new Error('Route source has no bytes');
-  const chunks:Uint8Array[]=[];let size=0;
-  try{
-    if(Number(response.headers.get('content-length'))>MAP_RESOURCE_LIMITS.maxResourceBytes)throw new Error('Route source exceeds the byte budget');
-    for(;;){
-      signal.throwIfAborted();
-      const {done,value}=await reader.read();if(done)break;
-      size+=value.byteLength;if(size>MAP_RESOURCE_LIMITS.maxResourceBytes)throw new Error('Route source exceeds the byte budget');
-      chunks.push(value);
-    }
-    const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
-    return bytes.buffer;
-  }finally{await reader.cancel().catch(()=>{});reader.releaseLock();}
+  if(!response.ok){void response.body?.cancel().catch(()=>{});throw new Error('Route source unavailable');}
+  if(!response.body)throw new Error('Route source has no bytes');
+  return (await readBoundedBody(response,MAP_RESOURCE_LIMITS.maxResourceBytes,signal)).buffer;
 }
 async function savedGeometry(trail:Trail){
   const source=trail.geometryUrl;
+  if(trail.publicationStatus==='published')return loadPublishedRouteGeometry(trail);
   // Static references use the same versioned byte identity as the opened map.
-  // Inline API geometry retains its reviewed revision and is never replaced by
-  // a second, possibly newer response while the card is being saved.
   if(!source?.startsWith(ROUTE_SOURCE_DATA_ROOT)&&trail.geometry!=null)return readRouteGeometry(trail.geometry);
   if(!source)return null;
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),MAP_RESOURCE_LIMITS.timeoutMs);
@@ -74,13 +69,7 @@ async function savedGeometry(trail:Trail){
         return await loadVerifiedRouteGeometry(source,trailOverlayMetadata.sourceHashes,options);
       }
     }
-    // Published routes normally carry inline geometry. Keep the existing API
-    // envelope fallback private and uncached, rather than treating it as a
-    // catalogue resource with an invented source hash.
-    if(trail.publicationStatus!=='published'||!source.startsWith(API_ROUTE_ROOT)||!(/^[\w-]+$/).test(source.slice(API_ROUTE_ROOT.length)))throw new Error('Unknown route source');
-    const bytes=await readSavedSource(source,controller.signal,'no-store');
-    controller.signal.throwIfAborted();
-    return readRouteGeometry(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes)));
+    throw new Error('Unknown route source');
   }finally{clearTimeout(timer);controller.abort();}
 }
 export async function saveReference(trail:Trail):Promise<SavedPack> {

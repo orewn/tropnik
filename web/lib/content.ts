@@ -1,3 +1,4 @@
+import type {Route} from './contract';
 import importedCatalog from './catalog.generated.json';
 import importedPoints from './route-points.generated.json';
 import telegramReviewed from './telegram-reviewed.generated.json';
@@ -47,7 +48,7 @@ export type Trail = {
   territoryIds?: string[];
   accessStatus?: 'closed' | 'restricted' | 'unknown';
   distanceNote?: string;
-  sourceTechnicalDifficulty?:string|null; geometryLengthKm?:number; osmId?:number; regionIds?:string[]; revisionId?:string; geometry?:unknown;
+  sourceTechnicalDifficulty?:string|null; geometryLengthKm?:number; osmId?:number; regionIds?:string[]; revisionId?:string; geometry?:unknown; geometryDetail?:Route['geometryDetail'];
 };
 
 // Published source records are added only with a source, timestamp and explicit status.
