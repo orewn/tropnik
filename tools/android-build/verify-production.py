@@ -106,6 +106,46 @@ def unsigned_signature(apk: Path, result):
     require(data[max(0, central - 16):central] != b"APK Sig Block 42", "Unsigned check contains an APK signing block")
 
 
+def compiler_profile_diagnostics(apk: Path, root: Path):
+    """Bounded public metadata for the actual APK and Gradle task outputs.
+
+    This report never substitutes for byte-for-byte verification and contains
+    neither file contents nor signing inputs. Preserve it when a gate fails.
+    """
+    root = root.resolve()
+    maximum_file_bytes, maximum_total_bytes = 8_000_000, 32_000_000
+    total_bytes = 0
+    apk_profiles = []
+    with zipfile.ZipFile(apk) as archive:
+        entries = [entry for entry in archive.infolist()
+                   if entry.filename.startswith("assets/dexopt/") and not entry.is_dir()]
+        require(len(entries) <= 32, "Too many APK profile diagnostic entries")
+        for entry in sorted(entries, key=lambda item: item.filename):
+            total_bytes += entry.file_size
+            require(0 <= entry.file_size <= maximum_file_bytes and total_bytes <= maximum_total_bytes,
+                    "APK profile diagnostic budget exceeded")
+            data = archive.read(entry)
+            apk_profiles.append({"path": entry.filename, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                                 "magicHex": data[:8].hex()})
+    intermediates = root / "android/app/build/intermediates"
+    paths = sorted(path for directory in intermediates.glob("*/release/compileReleaseArtProfile")
+                   for path in directory.rglob("*") if path.is_file())
+    require(len(paths) <= 32, "Too many compiler profile diagnostic entries")
+    outputs = []
+    for path in paths:
+        require(path.resolve().is_relative_to(intermediates) and not path.is_symlink()
+                and not any(parent.is_symlink() for parent in path.parents if parent.is_relative_to(intermediates)),
+                "Linked compiler profile diagnostic output")
+        total_bytes += path.stat().st_size
+        require(path.stat().st_size <= maximum_file_bytes and total_bytes <= maximum_total_bytes,
+                "Compiler profile diagnostic budget exceeded")
+        with path.open("rb") as source:
+            magic = source.read(8).hex()
+        outputs.append({"path": path.relative_to(root).as_posix(), **fingerprint(path), "magicHex": magic})
+    return {"schemaVersion": 1, "diagnosticOnly": True, "apk": fingerprint(apk),
+            "apkDexoptAssets": apk_profiles, "compileReleaseArtProfileOutputs": outputs}
+
+
 def verify(apk: Path, sdk: Path, root: Path, unsigned: bool, expected_source: str):
     commit = source_checkout(root, require_clean=True)
     require(re.fullmatch(r"[a-f0-9]{40}", expected_source or "") is not None and commit == expected_source,
@@ -164,6 +204,9 @@ def main():
         return
     require(args.apk is not None and args.sdk is not None and args.output is not None and args.expected_source is not None,
             "Verification requires --apk, --sdk, --output and --expected-source")
+    diagnostics = compiler_profile_diagnostics(args.apk, args.root)
+    diagnostics["expectedSourceCommit"] = args.expected_source
+    args.output.with_name("production-diagnostics.json").write_text(json.dumps(diagnostics, ensure_ascii=False, indent=2) + "\n")
     result = verify(args.apk, args.sdk, args.root, args.unsigned_check, args.expected_source)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps({key: result[key] for key in ("kind", "sourceCommit", "applicationId", "version", "sha256", "signatureVerified")}))

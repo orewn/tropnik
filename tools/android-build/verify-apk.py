@@ -44,10 +44,14 @@ def verify_source_assets(archive: zipfile.ZipFile, source_root: Path) -> dict:
         data = archive.read(name)
         require(8 <= len(data) <= 1_500_000 and data[:4] == profiles[name]
                 and re.fullmatch(rb"[0-9]{3}\x00", data[4:8]) is not None, "Invalid compiler ART profile")
-        profile_kind = "art_profile_metadata" if name.endswith(".profm") else "art_profile"
+        # CompileArtProfileTask registers BINARY_ART_PROFILE(_METADATA).
+        # These binary artifacts are distinct from merged/human-readable ART.
+        profile_kind = "binary_art_profile_metadata" if name.endswith(".profm") else "binary_art_profile"
         compiled = source_root.resolve() / "android/app/build/intermediates" / profile_kind / "release/compileReleaseArtProfile" / name.rsplit("/", 1)[1]
-        require(compiled.is_file() and not compiled.is_symlink() and compiled.read_bytes() == data,
-                "APK ART profile differs from this Gradle compiler output")
+        require(compiled.is_file() and not compiled.is_symlink(),
+                "Missing or linked Gradle compiler ART output: " + compiled.relative_to(source_root.resolve()).as_posix())
+        require(compiled.read_bytes() == data,
+                "APK ART profile differs from this Gradle compiler output: " + compiled.relative_to(source_root.resolve()).as_posix())
         compiler_assets.append({"path": name, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
                                 "compilerOutput": compiled.relative_to(source_root.resolve()).as_posix()})
     total = 0

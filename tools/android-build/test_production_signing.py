@@ -63,23 +63,61 @@ class ProductionSigningTests(unittest.TestCase):
             assets = root / "android/app/src/main/assets"
             assets.mkdir(parents=True)
             (assets / "source.txt").write_bytes(b"source")
-            compiled = root / "android/app/build/intermediates/art_profile/release/compileReleaseArtProfile/baseline.prof"
+            compiled = root / "android/app/build/intermediates/binary_art_profile/release/compileReleaseArtProfile/baseline.prof"
             compiled.parent.mkdir(parents=True)
             compiled.write_bytes(b"pro\x00015\x00fixture binary payload")
+            metadata = root / "android/app/build/intermediates/binary_art_profile_metadata/release/compileReleaseArtProfile/baseline.profm"
+            metadata.parent.mkdir(parents=True)
+            metadata.write_bytes(b"prm\x00002\x00fixture binary metadata")
             apk = root / "fixture.apk"
             with zipfile.ZipFile(apk, "w") as archive:
                 archive.writestr("assets/source.txt", b"source")
                 archive.writestr("assets/dexopt/baseline.prof", compiled.read_bytes())
+                archive.writestr("assets/dexopt/baseline.profm", metadata.read_bytes())
             with zipfile.ZipFile(apk) as archive:
                 report = payload.verify_source_assets(archive, root)
-                self.assertEqual(len(report["compilerGeneratedArtProfiles"]), 1)
+                self.assertEqual(len(report["compilerGeneratedArtProfiles"]), 2)
                 compiled.write_bytes(b"pro\x00015\x00different compilation")
                 with self.assertRaisesRegex(ValueError, "this Gradle compiler output"):
                     payload.verify_source_assets(archive, root)
+                compiled.write_bytes(archive.read("assets/dexopt/baseline.prof"))
+                metadata.write_bytes(b"prm\x00002\x00different metadata")
+                with self.assertRaisesRegex(ValueError, "this Gradle compiler output"):
+                    payload.verify_source_assets(archive, root)
+                metadata.write_bytes(archive.read("assets/dexopt/baseline.profm"))
+                historical = root / "android/app/build/intermediates/art_profile/release/compileReleaseArtProfile/baseline.prof"
+                historical.parent.mkdir(parents=True)
+                compiled.rename(historical)
+                with self.assertRaisesRegex(ValueError, "Missing or linked Gradle compiler ART output"):
+                    payload.verify_source_assets(archive, root)
+                historical.rename(compiled)
             with zipfile.ZipFile(apk, "a") as archive:
                 archive.writestr("assets/dexopt/extra.bin", b"unlisted")
             with zipfile.ZipFile(apk) as archive, self.assertRaisesRegex(ValueError, "inventory differs"):
                 payload.verify_source_assets(archive, root)
+
+    def test_profile_diagnostics_are_bounded_metadata_not_release_approval(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            compiled = root / "android/app/build/intermediates/binary_art_profile/release/compileReleaseArtProfile/baseline.prof"
+            compiled.parent.mkdir(parents=True)
+            value = b"pro\x00010\x00fixture profile"
+            compiled.write_bytes(value)
+            apk = root / "fixture.apk"
+            with zipfile.ZipFile(apk, "w") as archive:
+                archive.writestr("assets/dexopt/baseline.prof", value)
+                archive.writestr("assets/unrelated.txt", b"never include file contents")
+            report = MODULE.compiler_profile_diagnostics(apk, root)
+            self.assertTrue(report["diagnosticOnly"])
+            self.assertEqual(len(report["apkDexoptAssets"]), 1)
+            self.assertEqual(len(report["compileReleaseArtProfileOutputs"]), 1)
+            self.assertEqual(report["apkDexoptAssets"][0]["sha256"], report["compileReleaseArtProfileOutputs"][0]["sha256"])
+            self.assertEqual(set(report["apkDexoptAssets"][0]), {"path", "bytes", "sha256", "magicHex"})
+            self.assertEqual(report["apkDexoptAssets"][0]["magicHex"], value[:8].hex())
+            with zipfile.ZipFile(apk, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("assets/dexopt/oversized.prof", b"x" * 8_000_001)
+            with self.assertRaisesRegex(ValueError, "budget exceeded"):
+                MODULE.compiler_profile_diagnostics(apk, root)
 
     def test_production_identity_rejects_preview_debuggable_and_wrong_sdk(self):
         # SDK spelling recorded from build-tools 36 in PR 20, run 43370889007.
