@@ -1,11 +1,11 @@
--- Aggregate-only recovery report for the current six-migration application.
+-- Aggregate-only recovery report for the current seven-migration application.
 SET search_path=pg_catalog,public;
 CREATE TEMP TABLE expected_application_tables(name text PRIMARY KEY);
 INSERT INTO expected_application_tables(name) VALUES
  ('users'),('sessions'),('guide_qualifications'),('regions'),('routes'),('route_regions'),('route_revisions'),
  ('departures'),('memberships'),('idempotency_keys'),('messages'),('reviews'),('offline_observations'),
  ('recruitment_requests'),('recruitment_members'),('recruitment_messages'),('departure_safety'),
- ('safety_passport_versions'),('safety_events'),('safety_check_ins'),('schema_migrations'),('account_action_tokens'),
+ ('safety_passport_versions'),('safety_events'),('safety_check_ins'),('schema_migrations'),('account_action_tokens'),('account_mail_outbox'),
  ('auth_rate_limits'),('audit_events'),('outbox_events'),('posting_guards'),('submission_events'),
  ('reports'),('moderation_actions'),('appeals'),('notifications');
 CREATE TEMP TABLE expected_application_guards(table_name text,trigger_name text,function_name text,
@@ -38,7 +38,7 @@ DO $$ BEGIN
  IF current_setting('data_directory') NOT LIKE '/var/lib/postgresql/%' THEN
   RAISE EXCEPTION 'restored database is outside its temporary data mount';
  END IF;
- IF (SELECT array_agg(version ORDER BY version) FROM schema_migrations) IS DISTINCT FROM ARRAY[1,2,3,4,5,6] THEN
+ IF (SELECT array_agg(version ORDER BY version) FROM schema_migrations) IS DISTINCT FROM ARRAY[1,2,3,4,5,6,7] THEN
   RAISE EXCEPTION 'unexpected application schema version';
  END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_extension WHERE extname='postgis') THEN
@@ -73,6 +73,17 @@ DO $$ BEGIN
    OR ST_IsEmpty(geometry) OR NOT ST_IsValid(geometry) OR ST_NPoints(geometry)<2)
  OR EXISTS(SELECT 1 FROM regions WHERE ST_SRID(center)<>4326 OR ST_IsEmpty(center) OR NOT ST_IsValid(center)) THEN
   RAISE EXCEPTION 'invalid restored geometry';
+ END IF;
+ IF EXISTS(SELECT 1 FROM account_mail_outbox j WHERE
+   (state IN ('pending','leased') AND (payload_cipher IS NULL OR octet_length(payload_cipher)<17
+    OR payload_nonce IS NULL OR octet_length(payload_nonce)<>12 OR recipient_key IS NULL
+    OR octet_length(recipient_key)<>32 OR key_id!~'^[0-9a-f]{64}$' OR finished_at IS NOT NULL))
+   OR (state IN ('accepted','cancelled','failed','expired') AND
+    (payload_cipher IS NOT NULL OR payload_nonce IS NOT NULL OR recipient_key IS NOT NULL OR finished_at IS NULL)))
+ OR EXISTS(SELECT 1 FROM account_mail_outbox j LEFT JOIN account_action_tokens t ON t.token_hash=j.token_hash
+   WHERE j.token_hash IS NOT NULL AND (t.token_hash IS NULL OR t.user_id IS DISTINCT FROM j.user_id
+   OR t.purpose IS DISTINCT FROM j.purpose OR t.expires_at IS DISTINCT FROM j.expires_at)) THEN
+  RAISE EXCEPTION 'restored encrypted mail state or token linkage is inconsistent';
  END IF;
  IF EXISTS(SELECT 1 FROM departures d LEFT JOIN departure_safety s ON s.departure_id=d.id WHERE s.departure_id IS NULL)
  OR EXISTS(SELECT 1 FROM departure_safety s LEFT JOIN safety_passport_versions p
@@ -114,12 +125,12 @@ SELECT jsonb_build_object(
  'postgisImageId',:'postgis_image_id',
  'postgresVersion',current_setting('server_version'),
  'postgisVersion',postgis_lib_version(),
- 'schemaVersion',6,
+ 'schemaVersion',7,
  'applicationTableCount',(SELECT count(*) FROM expected_application_tables),
  'applicationGuardCount',(SELECT count(*) FROM expected_application_guards),
  'migrations',(SELECT jsonb_agg(version ORDER BY version) FROM schema_migrations),
  'rowCounts',(SELECT jsonb_object_agg(name,total ORDER BY name) FROM restored_row_counts),
- 'checks',jsonb_build_object('constraintsAndIndexes',true,'applicationGuards',true,'geometry',true,'safetyLinkage',true,'safetyEventChain',true),
+ 'checks',jsonb_build_object('constraintsAndIndexes',true,'applicationGuards',true,'geometry',true,'safetyLinkage',true,'safetyEventChain',true,'mailOutbox',true),
  'syntheticFixtureVerified',:'fixture_verified'::boolean,
  'containerIsolationVerified',true,
  'temporaryDatabaseRemovedBeforePublication',true,

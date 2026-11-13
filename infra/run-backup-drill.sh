@@ -127,16 +127,24 @@ done
 "${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test --set=ON_ERROR_STOP=1 \
   --command='DROP TRIGGER departure_safety_start_guard ON departures; CREATE TRIGGER departure_safety_start_guard BEFORE UPDATE OF status ON departures FOR EACH ROW EXECUTE FUNCTION enforce_required_safety_before_start()' >/dev/null 2>&1
 
+# A readable schema without the durable mail queue must not qualify recovery.
+"${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test --set=ON_ERROR_STOP=1 \
+  --command='ALTER TABLE account_mail_outbox RENAME TO missing_mail_outbox_fixture' >/dev/null 2>&1
+backup_fixture "$TROPA_WORK/missing-mail-outbox.age" >/dev/null
+reject_restore missing-mail-outbox "$TROPA_WORK/missing-mail-outbox.age" "$TROPA_WORK/identity.agekey"
+"${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test --set=ON_ERROR_STOP=1 \
+  --command='ALTER TABLE missing_mail_outbox_fixture RENAME TO account_mail_outbox' >/dev/null 2>&1
+
 # This is valid age ciphertext and a valid pg_dump archive, but not the required
 # schema. It must fail verification after restore and still remove the stack.
 "${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test --set=ON_ERROR_STOP=1 \
-  --command='DELETE FROM schema_migrations WHERE version=6' >/dev/null 2>&1
+  --command='DELETE FROM schema_migrations WHERE version=7' >/dev/null 2>&1
 backup_fixture "$TROPA_WORK/unsupported-schema.age" >/dev/null
 reject_restore unsupported-schema "$TROPA_WORK/unsupported-schema.age" "$TROPA_WORK/identity.agekey"
 if compgen -G "$TROPA_WORK/.tropa-backup.*" >/dev/null || compgen -G "$TROPA_WORK/.tropa-restore.*" >/dev/null; then
   fail 'A backup or restore temporary directory survived an error path.'
 fi
-printf '%s\n' 'PASS: wrong identity, truncated ciphertext, existing output, failed export, missing or incorrectly attached safety guards and unsupported schema refused.'
+printf '%s\n' 'PASS: wrong identity, truncated ciphertext, existing output, failed export, missing or incorrectly attached safety guards, missing mail outbox and unsupported schema refused.'
 
 "${TROPA_SOURCE[@]}" down --volumes >/dev/null 2>&1 || fail 'Could not remove the synthetic source stack.'
 TROPA_SOURCE_STARTED=false
@@ -151,11 +159,12 @@ import json, sys
 with open(sys.argv[1], encoding='utf-8') as source:
     receipt = json.load(source)
 assert receipt['status'] == 'passed' and receipt['syntheticFixtureVerified'] is True
-assert receipt['schemaVersion'] == 6 and receipt['applicationTableCount'] == 31
+assert receipt['schemaVersion'] == 7 and receipt['applicationTableCount'] == 32
+assert receipt['checks']['mailOutbox'] is True
 assert receipt['applicationGuardCount'] == 16 and receipt['checks']['applicationGuards'] is True
 assert receipt['postgisImageId'] == sys.argv[3], 'source and restore image changed during the gate'
 receipt['gate'] = 'synthetic backup and isolated restore'
-receipt['negativeCasesPassed'] = ['wrong_identity', 'truncated_ciphertext', 'existing_output', 'failed_pg_dump', 'missing_safety_guard', 'wrong_guard_event', 'wrong_guard_column', 'unsupported_schema']
+receipt['negativeCasesPassed'] = ['wrong_identity', 'truncated_ciphertext', 'existing_output', 'failed_pg_dump', 'missing_safety_guard', 'wrong_guard_event', 'wrong_guard_column', 'missing_mail_outbox', 'unsupported_schema']
 receipt['syntheticSourceRemoved'] = True
 receipt['disposableAgeIdentitiesRemoved'] = True
 with open(sys.argv[2], 'x', encoding='utf-8') as target:

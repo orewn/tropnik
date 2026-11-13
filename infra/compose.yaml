@@ -45,6 +45,7 @@ services:
       TROPA_PROXY_TOKEN: ${TROPA_PROXY_TOKEN:-}
       TROPA_AUTH_RATE_KEY: ${TROPA_AUTH_RATE_KEY:?Generate a stable independent auth HMAC key}
       TROPA_SAFETY_DATA_KEY: ${TROPA_SAFETY_DATA_KEY:?Generate and back up an independent safety encryption key}
+      TROPA_ACCOUNT_MAIL_KEY: ${TROPA_ACCOUNT_MAIL_KEY:-}
     depends_on:
       migrate: { condition: service_completed_successfully }
     ports: ["127.0.0.1:8080:8080"]

@@ -160,7 +160,7 @@ history entry to its hike and reviews; the history is not a public profile.
 ### Production database role
 
 Production startup verifies the actual database privileges against the same
-31-table policy used by the grant writer. The configured login must be the
+32-table policy used by the grant writer. The configured login must be the
 effective role: an owner connection hidden behind an initial `SET ROLE` is
 rejected. The check includes schema/database/object ownership, inherited and
 `SET ROLE` capabilities, role-administration options, predefined PostgreSQL
@@ -321,18 +321,20 @@ The exact account/report/appeal request shapes are in `contracts/api.ts` and
 OpenAPI. Queues return up to 100 eligible cases, oldest first; personal histories
 return up to 100 recent records. Older-page navigation is not implemented.
 
-The framework applies migrations 001–006 in order and refuses API
-readiness without schema version 6. Migration 004 adds account-history indexes;
+The framework applies migrations 001–007 in order and refuses API
+readiness without schema version 7. Migration 004 adds account-history indexes;
 005 adds digest-only action tokens, permanent account tombstones and guards
 against deleting active participants, guides or departure owners. Migration 006
 adds versioned encrypted passports, immutable safety evidence and the required
-predeparture contact gate. Re-run migrations with the owner credential,
+predeparture contact gate. Migration 007 adds the encrypted durable account-mail
+outbox and its bounded lease/retry state. Re-run migrations with the owner credential,
 then reapply restricted runtime grants as documented in `../infra`.
 
 ## Account lifecycle and mail transport
 
 Configure `TROPA_SMTP_HOST`, `TROPA_SMTP_PORT`, `TROPA_SMTP_TLS_MODE` (`tls` or
-`starttls`), `TROPA_MAIL_FROM` and `TROPA_ACCOUNT_ACTION_URL`. Optional SMTP
+`starttls`), `TROPA_MAIL_FROM`, `TROPA_ACCOUNT_ACTION_URL` and the independent
+`TROPA_ACCOUNT_MAIL_KEY` (32 bytes encoded as 64 hexadecimal characters). Optional SMTP
 username/password must be supplied together. TLS 1.2 or newer, certificate
 validation and matching server name are mandatory; STARTTLS cannot fall back
 to plaintext. The action URL is a fixed operator-configured HTTPS page, normally
@@ -343,7 +345,7 @@ The Docker base network has no external egress; use the explicit mail overlay in
 
 An entirely absent configuration disables signup and new-link requests with
 `503 registration_unavailable`, while existing accounts can log in. A partial
-configuration fails startup. There is no log mailer, development token response
+configuration fails startup, including SMTP without its outbox encryption key. There is no log mailer, development token response
 or fake success transport. Tests explicitly inject an in-memory mailer or use
 a loopback TLS SMTP fixture with `example.invalid` recipients. No real mail was
 sent while implementing or testing this change.
@@ -354,22 +356,54 @@ consuming the verification link. A verification flag does not grant a guide
 qualification, a staff role or an operator entitlement; existing participation
 permissions are unchanged.
 
-Action secrets contain 256 cryptographically random bits. Only SHA-256 digests
-are stored. Verification lasts at most 24 hours; reset links last 30 minutes.
+Action secrets contain 256 cryptographically random bits. The action-token
+table stores only SHA-256 digests. Pending outbox envelopes hold the recipient,
+secret and prepared message under AES-256-GCM with a separately managed key;
+no plaintext action token is persisted. Verification expires at most 24 hours
+after the request; reset links expire at most 30 minutes after the request.
 Links put the secret in a URL fragment. The action page reads it once, immediately
 removes it from the address bar and sends it only in the subsequent explicit
-POST. Merely opening an email link does not consume it. New requests replace the
-previous link of the same purpose. Token consumption and the corresponding
-account mutation are one transaction, using a consistent user-row lock order.
+POST. Merely opening an email link does not consume it. Repeated requests while
+the same recipient/purpose is pending coalesce into that job. After it finishes,
+a new request replaces the previous link when prepared. Token consumption and
+the corresponding account mutation are one transaction, using a consistent
+user-row lock order.
 
-Mail requests use a bounded in-memory queue (36 accepted jobs including four
-active workers). Workers have a 20-second operation timeout; SMTP itself has a
-15-second bound. A restart can lose queued requests; delivery is not a durable
-promise, and the user can request another link. SMTP acceptance is audited as
-acceptance, not mailbox delivery. Failed transport attempts revoke their own
-token. Tokens, SMTP diagnostics and email addresses are not written to logs.
-This transport sends account security mail; stored moderation notifications and
-the departure outbox are not connected to it.
+Mail requests commit to a PostgreSQL outbox before an allowed request returns
+`202`. Registration and its verification intent commit together. The queue has
+a global transactional bound of 36 pending/leased jobs, including four active
+workers per API process. Workers claim with `FOR UPDATE SKIP LOCKED`, a 60-second
+lease and a unique fencing token; stale workers cannot acknowledge, reschedule
+or revoke work after another worker takes the lease. SMTP runs outside database
+transactions, with a 20-second operation timeout and a 15-second transport bound.
+A restart reclaims expired leases and sends the original encrypted message with
+the same token and Message-ID. Ambiguous SMTP outcomes can produce duplicate
+messages; the guarantee is durable, bounded, at-least-once attempts. Acceptance
+by an SMTP server does not establish delivery to the recipient's mailbox.
+
+A transport error schedules up to eight attempts, with delays of 30, 60, 120,
+240 and then 300 seconds, bounded by the original job deadline. A lost final
+acknowledgement may consume an attempt even if SMTP accepted the message. Only
+confirmed acceptance, cancellation, expiry or exhausted attempts finalizes the
+row and removes its ciphertext, nonce and keyed recipient index. Terminal
+failure/expiry also revokes that job's action token. Consuming or revoking a
+link, resetting a password or closing an account cancels the affected work
+transactionally. Terminal metadata is retained for one day and pruned in
+batches; immutable audit entries contain only opaque IDs, purpose and status.
+Tokens, SMTP diagnostics and recipient addresses are not written to logs.
+Stored moderation notifications and the departure outbox are separate.
+
+The outbox key must be identical across replicas and survive restarts/restores.
+Its fingerprint binds pending rows; missing/replaced keys with a backlog refuse
+API startup and never silently discard mail. Keep the key in an independently
+encrypted recovery bundle outside PostgreSQL, separate from safety/auth/proxy
+keys. Key-only configuration leaves SMTP/signup disabled but permits account
+closure and completion of an already issued reset link. Its notification stays
+in the durable queue until transport returns or the job expires. To rotate this single-key deployment,
+stop mail intake, let the backlog finish or expire with the old key, stop every
+API process, verify there are no pending/leased rows, then change the key across
+all replicas. Historical backups with pending ciphertext still require their
+original key. This version does not provide a multi-key rotation service.
 
 Recovery and verification-request responses are identical for existing, absent,
 verified, disabled and staff accounts. Database account lookups and SMTP run
@@ -382,7 +416,10 @@ A reset atomically changes the hash, consumes the token and revokes every
 session and outstanding action link. Login session creation rechecks the
 previously verified password hash under a row lock, closing the concurrent
 login/reset race. The user signs in again; no automatic session is issued by
-reset. A password-change notification is attempted through the same mail queue.
+reset. Its security notification commits in the same transaction as the new
+password and session revocations. If the durable queue cannot accept it, the
+reset rolls back and the link remains usable. Completing an already issued reset requires the correct durable-mail key and
+queue capacity; it can proceed with SMTP disabled and never waits for delivery.
 
 Account closure requires a valid session, the current password and explicit
 confirmation. Active memberships, owned or guided departures, and owned open

@@ -85,7 +85,9 @@ func New(db *store.Store, cfg Config) (*Server, error) {
 	if e != nil {
 		return nil, e
 	}
-	lifecycle, e := newAccountLifecycle(db, cfg.AccountLifecycle)
+	var lifecycleDB accountLifecycleStore
+	if db != nil { lifecycleDB = db }
+	lifecycle, e := newAccountLifecycle(lifecycleDB, cfg.AccountLifecycle)
 	if e != nil {
 		return nil, e
 	}

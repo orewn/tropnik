@@ -4,6 +4,7 @@ package store_test
 
 import (
 	"context"
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -14,6 +15,7 @@ import (
 
 	"tropa/backend/internal/auth"
 	"tropa/backend/internal/httpapi"
+	"tropa/backend/internal/store"
 )
 
 type capturedAccountMailer struct{ messages chan auth.AccountMail }
@@ -110,7 +112,7 @@ func TestPublicLifecycleHTTPRoundTripWithExplicitTestMailer(t *testing.T) {
 		t.Fatal("closed signup created an account", err)
 	}
 	mailer := capturedAccountMailer{messages: make(chan auth.AccountMail, 8)}
-	config.AccountLifecycle = &httpapi.AccountLifecycleConfig{Mailer: mailer, ActionURL: "https://tropnik.example/account/action"}
+	config.AccountLifecycle = &httpapi.AccountLifecycleConfig{Mailer: mailer, ActionURL: "https://tropnik.example/account/action", MailKey: bytes.Repeat([]byte{11},32)}
 	app, err := httpapi.New(s, config)
 	if err != nil {
 		t.Fatal(err)
@@ -171,4 +173,20 @@ func TestPublicLifecycleHTTPRoundTripWithExplicitTestMailer(t *testing.T) {
 	if loggedIn := lifecycleJSON(t, handler, "auth/login", map[string]string{"email": input["email"], "password": newPassword}, ""); loggedIn.Code != 401 {
 		t.Fatal("deleted account logged in", loggedIn.Code)
 	}
+}
+
+func TestPublicExistingResetWorksWithKeyOnlyAndPersistsItsNotification(t *testing.T) {
+	s:=mailDB(t)
+	ctx:=context.Background()
+	u:=account(t,s,"key-only-reset","tourist")
+	raw,_:=actionToken(t,s,u.Email,store.ResetPasswordAction)
+	app,err:=httpapi.New(s,httpapi.Config{AuthRateKey:make([]byte,32)})
+	if err!=nil { t.Fatal(err) }
+	password:="new mail-disabled fixture password"
+	response:=lifecycleJSON(t,app.Handler(),"auth/password/reset",map[string]string{"token":raw,"password":password,"passwordConfirmation":password},"")
+	if response.Code!=200 || strings.Contains(response.Body.String(),raw) { t.Fatal("existing reset failed in key-only mode",response.Code) }
+	var queued int
+	if err=s.Pool.QueryRow(ctx,"SELECT count(*) FROM account_mail_outbox WHERE user_id=$1 AND purpose='password_changed' AND state='pending' AND payload_cipher IS NOT NULL",u.ID).Scan(&queued);err!=nil || queued!=1 { t.Fatal("key-only reset lost notification",err) }
+	request:=lifecycleJSON(t,app.Handler(),"auth/password/request",map[string]string{"email":u.Email},"")
+	if request.Code!=503 { t.Fatal("key-only mode opened new links",request.Code) }
 }

@@ -59,6 +59,19 @@ INSERT INTO outbox_events(aggregate_id,event_type,payload)
  VALUES('00000000-0000-4000-8000-000000000030','recovery.fixture','{"fixture":true}');
 INSERT INTO submission_events(user_id,kind,channel,fingerprint)
  VALUES('00000000-0000-4000-8000-000000000003','message','recovery-fixture',sha256('recovery-fixture-message'::bytea));
+-- Public synthetic AES-GCM mail vector: independent fixture master 0x33 x32,
+-- nonce 0x44 x12, purpose reset_password, deadline 2026-01-01T00:30Z.
+-- The fixture token is already expired. No transport runs during recovery.
+INSERT INTO account_action_tokens(token_hash,user_id,purpose,created_at,expires_at)
+ VALUES(decode('0f007385b6f9d4b7eeb2748605afe1a984a0a3bfa3f014d09e2a784ce9e5cd1a','hex'),'00000000-0000-4000-8000-000000000003',
+ 'reset_password','2026-01-01T00:00Z','2026-01-01T00:30Z');
+INSERT INTO account_mail_outbox(id,purpose,user_id,recipient_key,key_id,payload_cipher,payload_nonce,token_hash,
+ state,attempts,created_at,expires_at,next_attempt_at,lease_id,lease_until)
+ VALUES('00000000-0000-4000-8000-000000000050','reset_password','00000000-0000-4000-8000-000000000003',
+ decode('a0fdab14047e6825b6db8bd1c0414513f78eed4ae77b5346629b83a75e8041c1','hex'),'644c3b61a0e38691c386ea8e92837b1c13fc0582955ee75f774a12bbc22873ae',
+ decode('d792b279329daec1b9336cb7cd598aeafc8c2ffa8cb3a785f46df012990a8d8964b6aa6b91dc6b2cfce6f6e2f204adaea3ffdb0dd01d67febbaa8b6a403fa7966a48def3e5b61d16ef64c9386461083e70788e8b0ad6e59731dbc5d3783f71eed4caa60e246af5d6cb976adfcefbc97083aa5862f633ac41b0ccb586a032c0236618775a5ff76abac53ba379320155112d1643242f934b88a3b27b095516861c5ce71f6c86a9396a9e583e0a8c575853b2e8fe81971a46cacfba5178d3a62d6cbd12e4580a617f2a071fe363ab31bfe28da6afe8da9fe74dfbbd8248c74115da43e3757af55ddc4cf9cc8d2d0b487920030d8d3d1ac0fe39b69442922f4b4789c02e8f522fceaf794ee9d7da461e7398dc32b4f103bbb0e2ec66de3d7874f4e11674841a3bb652f9b309a79def700c65fa4c80778a9f046ba547f2fe2bf38c915c75598364a6529da7cb99f5305b60e29ae37ff8febff45b010ba086a696d9dd26ec04dee28999cfc0fdae89a6697a512d0e8e149d7405d7524daa654f8dbd3d66eda1f0d0e5ba1b0573b5ec1db746','hex'),decode(repeat('44',12),'hex'),decode('0f007385b6f9d4b7eeb2748605afe1a984a0a3bfa3f014d09e2a784ce9e5cd1a','hex'),
+ 'leased',1,'2026-01-01T00:00Z','2026-01-01T00:30Z','2026-01-01T00:00Z',
+ '00000000-0000-4000-8000-000000000051','2026-01-01T00:01Z');
 -- Gaps prove restore retained sequence state, not merely MAX(id) from table rows.
 SELECT setval('audit_events_id_seq',101,true);
 SELECT setval('outbox_events_id_seq',201,true);

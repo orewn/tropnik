@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"tropa/backend/internal/auth"
 	"tropa/backend/internal/domain"
 	"tropa/backend/migrations"
 )
@@ -19,6 +20,7 @@ import (
 type Store struct {
 	Pool      *pgxpool.Pool
 	SafetyKey []byte
+	mailCipher *auth.AccountMailCipher
 }
 type querier interface {
 	QueryRow(context.Context, string, ...any) pgx.Row
@@ -49,7 +51,12 @@ func New(ctx context.Context, uri string) (*Store, error) {
 		p.Close()
 		return nil, e
 	}
-	return &Store{Pool: p, SafetyKey: key}, nil
+	mailCipher, e := loadAccountMailCipher()
+	if e != nil {
+		p.Close()
+		return nil, e
+	}
+	return &Store{Pool: p, SafetyKey: key, mailCipher: mailCipher}, nil
 }
 func (s *Store) Close() { s.Pool.Close() }
 func (s *Store) Ready(ctx context.Context) error {

@@ -109,6 +109,13 @@ func run() error {
 	if len(safetyKey) == 32 && (subtle.ConstantTimeCompare(safetyKey, rateKey) == 1 || subtle.ConstantTimeCompare(safetyKey, proxyToken) == 1) {
 		return errors.New("safety encryption, authentication rate and proxy keys must be independent")
 	}
+	if rawMailKey:=os.Getenv("TROPA_ACCOUNT_MAIL_KEY");rawMailKey!="" {
+		mailKey,err:=auth.ParseServerKey(rawMailKey)
+		if err!=nil { return errors.New("TROPA_ACCOUNT_MAIL_KEY must contain an independent 256-bit encryption key") }
+		if subtle.ConstantTimeCompare(mailKey,rateKey)==1 || subtle.ConstantTimeCompare(mailKey,proxyToken)==1 || subtle.ConstantTimeCompare(mailKey,safetyKey)==1 {
+			return errors.New("account mail, safety encryption, authentication rate and proxy keys must be independent")
+		}
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	db, e := store.New(ctx, dsn)
@@ -126,6 +133,9 @@ func run() error {
 	}
 	app, e := httpapi.New(db, cfg)
 	if e != nil {
+		if errors.Is(e,store.ErrAccountMailUnavailable) {
+			return errors.New("durable account mail key does not match pending work; restore the independently backed-up key before startup")
+		}
 		return errors.New("authentication initialization failed")
 	}
 	defer func() {
