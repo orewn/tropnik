@@ -1,0 +1,49 @@
+{
+  "name": "Measure the exact source archive without release publication",
+  "on": {
+    "push": {
+      "branches": [
+        "verify/source-archive-033-20261113"
+      ]
+    }
+  },
+  "permissions": {
+    "contents": "read"
+  },
+  "concurrency": {
+    "group": "tropnik-source-archive-033-20261113",
+    "cancel-in-progress": false
+  },
+  "jobs": {
+    "inspect": {
+      "if": "github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/verify/source-archive-033-20261113'",
+      "runs-on": "ubuntu-24.04",
+      "timeout-minutes": 6,
+      "steps": [
+        {
+          "name": "Check out the exact failed producer source",
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "with": {
+            "ref": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+            "persist-credentials": false
+          }
+        },
+        {
+          "name": "Reproduce the complete archive and original size rejection",
+          "run": "python3 - <<'PY'\nimport hashlib,json,os,pathlib,stat,subprocess,sys,tempfile,traceback\nroot=pathlib.Path.cwd()\nsource='f0c489e956c7cbf9164a49d80521e2486b9ad18c'\nversion='0.4.33-preview'\nreceipt={'schemaVersion':1,'evidence':'exact-source-archive-size-reproduction','diagnosticOnly':True,'releaseEligible':False,'sourceCommit':source,'extractorCommit':os.environ['GITHUB_SHA'],'workflowRunId':int(os.environ['GITHUB_RUN_ID']),'status':'running'}\nreceipt_path=pathlib.Path(os.environ['RUNNER_TEMP'])/'tropnik-source-archive-diagnostic.json'\ntry:\n    assert os.environ['GITHUB_REPOSITORY']=='orewn/tropnik'\n    assert os.environ['GITHUB_REF']=='refs/heads/verify/source-archive-033-20261113'\n    assert subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()==source\n    assert subprocess.check_output(['git','rev-parse','HEAD^{tree}'],text=True).strip()=='099764f48b51283dace1c81a2b403fe05d6f48ea'\n    request=json.loads((root/'tools/android-build/release-request.json').read_text())\n    assert request['version']==version and request['versionCode']==16\n    output=pathlib.Path(tempfile.mkdtemp(prefix='tropnik-source-archive-',dir=os.environ['RUNNER_TEMP']))\n    assert not any(output.iterdir())\n    name='tropnik-'+version+'-source.tar.gz'\n    path=output/name\n    argv=['git','archive','--format=tar.gz','--prefix=tropnik-'+version+'/',source]\n    with path.open('xb') as stream:\n        subprocess.run(argv,cwd=root,stdout=stream,check=True,timeout=180)\n    meta=path.lstat()\n    assert stat.S_ISREG(meta.st_mode) and not path.is_symlink() and meta.st_size>0\n    digest=hashlib.sha256()\n    with path.open('rb') as stream:\n        for block in iter(lambda:stream.read(1024*1024),b''):\n            digest.update(block)\n    receipt.update({'archive':{'name':name,'bytes':meta.st_size,'sha256':digest.hexdigest(),'regular':True,'symlink':False},'argv':argv,'sourceTree':'099764f48b51283dace1c81a2b403fe05d6f48ea','gitVersion':subprocess.check_output(['git','--version'],text=True).strip(),'imageOS':os.environ.get('ImageOS'),'imageVersion':os.environ.get('ImageVersion'),'defaultCapBytes':150000000,'proposedSourceCapBytes':200000000})\n    sys.path.insert(0,str(root/'tools/android-build'))\n    import preview_artifacts\n    receipt['fingerprintSourceSHA256']=hashlib.sha256((root/'tools/android-build/preview_artifacts.py').read_bytes()).hexdigest()\n    try:\n        preview_artifacts.fingerprint(path)\n    except ValueError as error:\n        receipt['originalFingerprint']={'accepted':False,'errorType':type(error).__name__,'error':str(error)}\n    else:\n        receipt['originalFingerprint']={'accepted':True}\n    assert meta.st_size>150000000, 'Original archive does not exceed the claimed default cap'\n    assert receipt['originalFingerprint']['accepted'] is False, 'Original rejection did not reproduce'\n    assert meta.st_size<=200000000, 'Proposed bounded source archive cap is insufficient'\n    receipt['status']='reproduced'\nexcept BaseException as error:\n    receipt['status']='failed'\n    receipt['error']=str(error)\n    raise\nfinally:\n    receipt_path.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\\n',encoding='utf-8')\n    print('TROPNIK_SOURCE_ARCHIVE_DIAGNOSTIC='+json.dumps(receipt,ensure_ascii=False))\nPY"
+        },
+        {
+          "name": "Preserve the diagnostic receipt only",
+          "if": "always()",
+          "uses": "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+          "with": {
+            "name": "tropnik-source-archive-diagnostic-${{ github.run_id }}",
+            "path": "${{ runner.temp }}/tropnik-source-archive-diagnostic.json",
+            "if-no-files-found": "error",
+            "retention-days": 7
+          }
+        }
+      ]
+    }
+  }
+}
