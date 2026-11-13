@@ -1,0 +1,581 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "186d0323eb429859161f7285dcde938416b750f3",
+  "buildId": "0c8e7de478c5a62a",
+  "workflowCommit": "e4036c161644484acfd3194b7bd7a45a9db08794",
+  "runId": 43358222230,
+  "jobId": 131665252176,
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "instrumented": true,
+  "artifactId": 14006808610,
+  "artifactBytes": 5294712,
+  "artifactSHA256": "e6a3cf57ad59617aa8028420b95f5b90ee1eb84abeb28cc2956e9a96c79a3ea8",
+  "traces": [
+    {
+      "file": "desktop-webgl-ui-smoothness-panel.trace.json",
+      "bytes": 7702324,
+      "sha256": "bec729a320ec7559284752244d6700f9e2b563c2dafb7006f15e210e6f2981f4",
+      "complete": true,
+      "dataLossOccurred": false
+    },
+    {
+      "file": "desktop-webgl-ui-smoothness-explore-search.trace.json",
+      "bytes": 20373153,
+      "sha256": "e1fca1b762ea3b4fde2c52663225c4de410bd948840486b068a8a48a51a1bacc",
+      "complete": true,
+      "dataLossOccurred": false
+    },
+    {
+      "file": "android-portrait-ui-smoothness-panel.trace.json",
+      "bytes": 9384933,
+      "sha256": "8bf173372d70bc7e3dceeaf3584f5386c18fabe1a75b1607350cd1ce1225551f",
+      "complete": true,
+      "dataLossOccurred": false
+    },
+    {
+      "file": "android-portrait-ui-smoothness-explore-search.trace.json",
+      "bytes": 13254275,
+      "sha256": "c980cbf23419257ec6ff1de811f705f36d78fe14faf69bba4e9208fd011c6dad",
+      "complete": true,
+      "dataLossOccurred": false
+    }
+  ],
+  "clockAlignment": {
+    "method": "first EventDispatch input trace timestamp minus recorder input receivedAt",
+    "originMs": 189872.688
+  },
+  "actions": [
+    {
+      "query": "Б",
+      "inputAtMs": 6010.5,
+      "frames": [
+        {
+          "timeMs": 6022.119,
+          "totalMs": 7.799,
+          "rafMs": 0.352,
+          "commitMs": 1.162,
+          "styleMs": 0.0,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6036.332,
+          "totalMs": 1.126,
+          "rafMs": 0.105,
+          "commitMs": 0.775,
+          "styleMs": 0.049,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6053.231,
+          "totalMs": 41.52,
+          "rafMs": 0.755,
+          "commitMs": 30.182,
+          "styleMs": 3.608,
+          "layoutMs": 1.305
+        }
+      ]
+    },
+    {
+      "query": "Ба",
+      "inputAtMs": 6097.396,
+      "frames": [
+        {
+          "timeMs": 6099.262,
+          "totalMs": 4.039,
+          "rafMs": 0.13,
+          "commitMs": 0.783,
+          "styleMs": 0.045,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6107.909,
+          "totalMs": 4.639,
+          "rafMs": 1.793,
+          "commitMs": 0.793,
+          "styleMs": 0.662,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6119.707,
+          "totalMs": 4.371,
+          "rafMs": 0.551,
+          "commitMs": 0.666,
+          "styleMs": 0.128,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6136.494,
+          "totalMs": 2.375,
+          "rafMs": 0.071,
+          "commitMs": 0.815,
+          "styleMs": 0.124,
+          "layoutMs": 0.0
+        }
+      ]
+    },
+    {
+      "query": "Бай",
+      "inputAtMs": 6153.563,
+      "frames": [
+        {
+          "timeMs": 6155.412,
+          "totalMs": 3.381,
+          "rafMs": 0.11,
+          "commitMs": 0.893,
+          "styleMs": 0.141,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6169.732,
+          "totalMs": 2.313,
+          "rafMs": 0.093,
+          "commitMs": 0.898,
+          "styleMs": 0.115,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6190.796,
+          "totalMs": 42.858,
+          "rafMs": 1.403,
+          "commitMs": 31.039,
+          "styleMs": 4.174,
+          "layoutMs": 0.171
+        }
+      ]
+    },
+    {
+      "query": "Байк",
+      "inputAtMs": 6237.275,
+      "frames": [
+        {
+          "timeMs": 6241.742,
+          "totalMs": 7.39,
+          "rafMs": 0.174,
+          "commitMs": 1.145,
+          "styleMs": 0.138,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6253.029,
+          "totalMs": 4.387,
+          "rafMs": 2.059,
+          "commitMs": 0.911,
+          "styleMs": 0.645,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6276.746,
+          "totalMs": 47.237,
+          "rafMs": 0.763,
+          "commitMs": 31.744,
+          "styleMs": 6.103,
+          "layoutMs": 2.098
+        }
+      ]
+    },
+    {
+      "query": "Байка",
+      "inputAtMs": 6326.897,
+      "frames": [
+        {
+          "timeMs": 6330.075,
+          "totalMs": 6.112,
+          "rafMs": 0.107,
+          "commitMs": 1.036,
+          "styleMs": 0.088,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6337.235,
+          "totalMs": 3.948,
+          "rafMs": 1.566,
+          "commitMs": 0.836,
+          "styleMs": 0.543,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6353.04,
+          "totalMs": 9.322,
+          "rafMs": 0.543,
+          "commitMs": 0.883,
+          "styleMs": 0.126,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6369.771,
+          "totalMs": 5.116,
+          "rafMs": 0.23,
+          "commitMs": 0.853,
+          "styleMs": 0.111,
+          "layoutMs": 0.0
+        }
+      ]
+    },
+    {
+      "query": "Байкал",
+      "inputAtMs": 6389.223,
+      "frames": [
+        {
+          "timeMs": 6391.823,
+          "totalMs": 6.576,
+          "rafMs": 0.109,
+          "commitMs": 1.222,
+          "styleMs": 0.09,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6403.048,
+          "totalMs": 3.601,
+          "rafMs": 0.071,
+          "commitMs": 1.005,
+          "styleMs": 0.063,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6419.686,
+          "totalMs": 42.988,
+          "rafMs": 0.871,
+          "commitMs": 33.233,
+          "styleMs": 3.243,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6464.114,
+          "totalMs": 1.245,
+          "rafMs": 0.153,
+          "commitMs": 0.721,
+          "styleMs": 0.078,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6473.078,
+          "totalMs": 2.608,
+          "rafMs": 1.946,
+          "commitMs": 0.091,
+          "styleMs": 0.6,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6486.377,
+          "totalMs": 1.181,
+          "rafMs": 0.55,
+          "commitMs": 0.088,
+          "styleMs": 0.073,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6502.989,
+          "totalMs": 0.442,
+          "rafMs": 0.088,
+          "commitMs": 0.08,
+          "styleMs": 0.046,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6519.765,
+          "totalMs": 1.562,
+          "rafMs": 0.138,
+          "commitMs": 1.065,
+          "styleMs": 0.066,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6536.397,
+          "totalMs": 0.486,
+          "rafMs": 0.081,
+          "commitMs": 0.088,
+          "styleMs": 0.058,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6553.007,
+          "totalMs": 0.509,
+          "rafMs": 0.085,
+          "commitMs": 0.094,
+          "styleMs": 0.073,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6569.672,
+          "totalMs": 0.49,
+          "rafMs": 0.095,
+          "commitMs": 0.093,
+          "styleMs": 0.059,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6586.427,
+          "totalMs": 0.525,
+          "rafMs": 0.113,
+          "commitMs": 0.097,
+          "styleMs": 0.055,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6603.05,
+          "totalMs": 0.564,
+          "rafMs": 0.121,
+          "commitMs": 0.091,
+          "styleMs": 0.055,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6619.703,
+          "totalMs": 0.648,
+          "rafMs": 0.17,
+          "commitMs": 0.11,
+          "styleMs": 0.08,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6636.496,
+          "totalMs": 0.566,
+          "rafMs": 0.105,
+          "commitMs": 0.106,
+          "styleMs": 0.062,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6653.038,
+          "totalMs": 0.647,
+          "rafMs": 0.12,
+          "commitMs": 0.118,
+          "styleMs": 0.079,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6669.737,
+          "totalMs": 0.64,
+          "rafMs": 0.121,
+          "commitMs": 0.107,
+          "styleMs": 0.074,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6686.422,
+          "totalMs": 7.335,
+          "rafMs": 0.048,
+          "commitMs": 0.844,
+          "styleMs": 0.082,
+          "layoutMs": 1.446
+        },
+        {
+          "timeMs": 6702.969,
+          "totalMs": 0.756,
+          "rafMs": 0.14,
+          "commitMs": 0.221,
+          "styleMs": 0.0,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6719.801,
+          "totalMs": 0.384,
+          "rafMs": 0.108,
+          "commitMs": 0.073,
+          "styleMs": 0.0,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6736.453,
+          "totalMs": 0.424,
+          "rafMs": 0.15,
+          "commitMs": 0.074,
+          "styleMs": 0.0,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6753.115,
+          "totalMs": 0.491,
+          "rafMs": 0.194,
+          "commitMs": 0.087,
+          "styleMs": 0.0,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 6769.823,
+          "totalMs": 1.176,
+          "rafMs": 0.104,
+          "commitMs": 0.105,
+          "styleMs": 0.138,
+          "layoutMs": 0.0
+        }
+      ]
+    },
+    {
+      "query": "А",
+      "inputAtMs": 7161.546,
+      "frames": [
+        {
+          "timeMs": 7170.845,
+          "totalMs": 10.297,
+          "rafMs": 0.148,
+          "commitMs": 1.178,
+          "styleMs": 0.067,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7186.343,
+          "totalMs": 1.551,
+          "rafMs": 0.125,
+          "commitMs": 1.266,
+          "styleMs": 0.0,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7204.775,
+          "totalMs": 49.924,
+          "rafMs": 1.213,
+          "commitMs": 31.594,
+          "styleMs": 6.409,
+          "layoutMs": 2.022
+        }
+      ]
+    },
+    {
+      "query": "Ал",
+      "inputAtMs": 7260.136,
+      "frames": [
+        {
+          "timeMs": 7263.755,
+          "totalMs": 7.514,
+          "rafMs": 0.155,
+          "commitMs": 1.079,
+          "styleMs": 0.0,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7271.562,
+          "totalMs": 6.037,
+          "rafMs": 1.963,
+          "commitMs": 0.941,
+          "styleMs": 0.705,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7286.336,
+          "totalMs": 39.926,
+          "rafMs": 0.826,
+          "commitMs": 31.201,
+          "styleMs": 2.909,
+          "layoutMs": 0.281
+        }
+      ]
+    },
+    {
+      "query": "Алт",
+      "inputAtMs": 7329.236,
+      "frames": [
+        {
+          "timeMs": 7332.019,
+          "totalMs": 4.701,
+          "rafMs": 0.169,
+          "commitMs": 0.901,
+          "styleMs": 0.114,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7336.972,
+          "totalMs": 4.108,
+          "rafMs": 1.709,
+          "commitMs": 0.827,
+          "styleMs": 0.622,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7353.023,
+          "totalMs": 47.125,
+          "rafMs": 1.188,
+          "commitMs": 33.801,
+          "styleMs": 5.224,
+          "layoutMs": 0.224
+        }
+      ]
+    },
+    {
+      "query": "Алта",
+      "inputAtMs": 7403.82,
+      "frames": [
+        {
+          "timeMs": 7406.734,
+          "totalMs": 7.365,
+          "rafMs": 0.145,
+          "commitMs": 1.288,
+          "styleMs": 0.122,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7419.654,
+          "totalMs": 4.731,
+          "rafMs": 1.726,
+          "commitMs": 0.965,
+          "styleMs": 0.616,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7436.365,
+          "totalMs": 7.249,
+          "rafMs": 0.559,
+          "commitMs": 0.829,
+          "styleMs": 0.117,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7453.102,
+          "totalMs": 3.977,
+          "rafMs": 0.135,
+          "commitMs": 0.772,
+          "styleMs": 0.167,
+          "layoutMs": 0.0
+        }
+      ]
+    },
+    {
+      "query": "Алтай",
+      "inputAtMs": 7462.952,
+      "frames": [
+        {
+          "timeMs": 7469.644,
+          "totalMs": 6.657,
+          "rafMs": 0.106,
+          "commitMs": 1.164,
+          "styleMs": 0.14,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7486.384,
+          "totalMs": 6.845,
+          "rafMs": 0.416,
+          "commitMs": 0.821,
+          "styleMs": 0.119,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7502.963,
+          "totalMs": 3.852,
+          "rafMs": 0.088,
+          "commitMs": 0.818,
+          "styleMs": 0.132,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7519.655,
+          "totalMs": 3.909,
+          "rafMs": 0.116,
+          "commitMs": 0.828,
+          "styleMs": 0.133,
+          "layoutMs": 0.0
+        },
+        {
+          "timeMs": 7536.393,
+          "totalMs": 4.168,
+          "rafMs": 0.189,
+          "commitMs": 0.793,
+          "styleMs": 0.149,
+          "layoutMs": 0.0
+        }
+      ]
+    }
+  ],
+  "finding": "The empty Al query still triggers a 31.201 ms native main-thread Commit. Later prefixes with unchanged overlay membership have much cheaper Commit. Remaining work follows full map replay, not the number of trail segments. Instrumented timing is diagnostic, not release evidence."
+}

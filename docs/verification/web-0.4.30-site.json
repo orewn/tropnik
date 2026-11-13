@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "scope": "existing-private-site-deployment",
+  "projectId": "appgprj_6aed4db0a81881919cc3840d28cfad27",
+  "version": 45,
+  "savedVersionId": "appgprj_6aed4db0a81881919cc3840d28cfad27~appgver_f93304a175f88191aead6a03849c3ede",
+  "deploymentId": "appgdep_6af687b3d87881919b1377e460b0d2a7",
+  "deploymentStatus": "succeeded",
+  "deployedAt": "2026-11-13T03:45:14.024515+00:00",
+  "environmentRevision": 1,
+  "mainSourceCommit": "303afe5b325c6ac5e4d89a6d8b3c856f5a3437d8",
+  "siteSourceCommit": "223213319fc71f4f7ff1c7b53c0e38ddf503db66",
+  "siteSourceCheckoutClean": true,
+  "sourceInventory": {
+    "encoding": "sha256-compact-json-ordered-file-records-v1",
+    "files": 2218,
+    "sha256": "c5c9dd4931671cf91456431082180a54dac3d7cd46bd4f77bdd9773fc30284f5"
+  },
+  "runtime": {
+    "sourceInputsSha256": "f20b4a62f81d5e7fd19f57da6ede78597c3ad1e9dc551e9121dfc5bbf36c9919",
+    "manifestSha256": "8e0ff27fcd81c2bf48102df02228fe6ed1afd32ce89dfec5997978c34cca221e",
+    "workerCount": 3
+  },
+  "archive": {
+    "format": "tar.gz",
+    "bytes": 68053919,
+    "sha256": "5a5194a73d3745bd06a003f80f0756773ee385c30a0ecd13c40d51b9bab29b58",
+    "files": 2111,
+    "directories": 132,
+    "verification": "independent-local-size-sha256-and-every-payload-file-comparison",
+    "everyPayloadFileMatchesPreparedBuild": true,
+    "safePathsVerified": true,
+    "apkIncluded": false,
+    "temporaryQaIncluded": false
+  },
+  "serverNormalizedArchive": {
+    "format": "tar",
+    "bytes": 168304640,
+    "sha256": "dc2c6763281f800f6cf0dd6e67f035135a06f38f4c8e97e0074f3a8709a0f88b",
+    "files": 2111,
+    "provenance": "sites_get_site_version.archive_storage",
+    "independentlyDownloadedAndHashed": false,
+    "distinctFromUploadedGzip": true
+  },
+  "hosting": {
+    "manifest": "dist/.openai/hosting.json",
+    "workerEntrypoint": "dist/server/index.js",
+    "workerConfig": "dist/server/wrangler.json",
+    "staticDirectory": "dist/client",
+    "existingProjectIdentityPreserved": true
+  },
+  "access": {
+    "ownerOnlyVerified": true,
+    "audienceChanged": false,
+    "policyRevision": 1
+  },
+  "apiReadback": {
+    "versionSourceAndArchiveVerified": true,
+    "deploymentStatusVerified": true,
+    "activeVersionAndAudienceVerified": true,
+    "tools": [
+      "sites_get_site_version",
+      "sites_get_deployment_status",
+      "sites_get_site"
+    ]
+  },
+  "browserLoginVerificationClaimed": false,
+  "publicPagesDeploymentClaimed": false
+}

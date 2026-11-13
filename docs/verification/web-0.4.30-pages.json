@@ -1,0 +1,832 @@
+{
+  "schemaVersion": 1,
+  "scope": "release-0.4.30-static-web-ci-artifact-and-publication-verification",
+  "verified": true,
+  "verifiedAt": "2026-11-13T04:07:29.535582+00:00",
+  "sourceCommit": "303afe5b325c6ac5e4d89a6d8b3c856f5a3437d8",
+  "sourceTree": "bd66eb7597316c6b8bba21b056e0cb817bcb27c7",
+  "webTree": "7ef5b5e3665ab13236268a3909368bc1800253a4",
+  "workflow": {
+    "id": 43360007491,
+    "name": "Public GitHub Pages",
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "sourceCommit": "303afe5b325c6ac5e4d89a6d8b3c856f5a3437d8",
+    "branch": "main",
+    "url": "https://github.com/orewn/tropnik/actions/runs/43360007491",
+    "createdAt": "2026-11-13T03:35:40Z",
+    "startedAt": "2026-11-13T03:35:40Z",
+    "updatedAt": "2026-11-13T04:00:57Z"
+  },
+  "jobs": [
+    {
+      "id": 131670983897,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43360007491/job/131670983897",
+      "startedAt": "2026-11-13T03:35:43Z",
+      "completedAt": "2026-11-13T04:00:13Z"
+    },
+    {
+      "id": 131679439508,
+      "name": "deploy",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43360007491/job/131679439508",
+      "startedAt": "2026-11-13T04:00:17Z",
+      "completedAt": "2026-11-13T04:00:57Z"
+    }
+  ],
+  "ciSteps": {
+    "allRequiredStepsCompletedSuccessfully": true,
+    "failedSteps": [],
+    "buildSuccessfulSteps": 33,
+    "deploySuccessfulSteps": 8,
+    "webRegressionStep": "success",
+    "webLintStep": "success",
+    "staticTypesStep": "success",
+    "fullBrowserStep": "success",
+    "finalBuildIdentityStep": "success",
+    "publicReadbackStep": "success",
+    "numericUnitTestCountsIncluded": false,
+    "buildLogRetrieval": "Two decoded-job-log connector requests returned Transport closed. Results below are from independently downloaded workflow artifacts and GitHub job metadata, not an invented build stdout summary."
+  },
+  "build": {
+    "id": "8d86a691851d3dcd",
+    "base": "/tropnik/",
+    "origin": "https://orewn.github.io",
+    "pages": 718,
+    "referenceRoutes": 685,
+    "entrypoints": [
+      {
+        "path": "/tropnik/assets/index-CLx64tyF.css",
+        "bytes": 178659,
+        "sha256": "ef0575e91595168ac8887ef2e455832832bc541f765132dcf83a10774e625e6d"
+      },
+      {
+        "path": "/tropnik/assets/index-DjsjatiT.js",
+        "bytes": 187280,
+        "sha256": "f900032c84df17b8e7495b03afa63ea2311beed387200d35adbbc3c63d9e48a9"
+      },
+      {
+        "path": "/tropnik/index.html",
+        "bytes": 1702,
+        "sha256": "17a0e1f9bf05ffc0b43e546a6baf1c478335ea44a72dae8862dbbf4e667556a8"
+      }
+    ],
+    "apiConnected": false,
+    "serverCodeIncluded": false,
+    "fakeServerResponses": false
+  },
+  "staticVerification": {
+    "verified": true,
+    "pages": 718,
+    "referenceRoutes": 685,
+    "productionRoutingChecks": 2159,
+    "mapPolicyChecks": 25,
+    "staticApiNetworkCalls": 0,
+    "checkedScripts": 64,
+    "publicAssetChecks": 665,
+    "outputFiles": 2653,
+    "offlineFilesVerified": 249,
+    "customMap": {
+      "runtime": "tropnik-canvas",
+      "sourceInputsSha256": "f20b4a62f81d5e7fd19f57da6ede78597c3ad1e9dc551e9121dfc5bbf36c9919",
+      "manifestSha256": "8e0ff27fcd81c2bf48102df02228fe6ed1afd32ce89dfec5997978c34cca221e",
+      "deployedFilesVerified": 8,
+      "workerCount": 3
+    },
+    "overviewReliefTilesVerified": 341,
+    "terrainGrid": [
+      513,
+      513
+    ],
+    "regionalTerrain": {
+      "regions": 2,
+      "filesVerified": 11,
+      "runtimeFetches": [
+        "/tropnik/terrain-regions/manifest.json",
+        "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+        "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+        "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+        "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+      ]
+    },
+    "apkVerified": true,
+    "coverageExcludedRoutes": [
+      "osm-relation-14407325"
+    ],
+    "base": "/tropnik/"
+  },
+  "localHttpVerification": {
+    "verified": true,
+    "base": "/tropnik/",
+    "httpChecks": 70,
+    "regionalTerrain": {
+      "regions": 2,
+      "runtimeFetches": [
+        "/tropnik/terrain-regions/manifest.json",
+        "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+        "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+        "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+        "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+      ],
+      "checksumsVerified": true
+    },
+    "browserRenderingTested": false,
+    "backendConnected": false
+  },
+  "catalogueGeometry": {
+    "catalogueRoutes": 685,
+    "geometryRoutes": 624,
+    "uniqueGeometries": 621,
+    "sourceParts": 22456,
+    "sourcePoints": 404749,
+    "bytes": 2634057,
+    "sourceDigest": "7b51fc777cafae384ce658c88d7c8155fb627a108177c16914ade416566028a1"
+  },
+  "runtime": {
+    "sourceInputsSha256": "f20b4a62f81d5e7fd19f57da6ede78597c3ad1e9dc551e9121dfc5bbf36c9919",
+    "manifestSha256": "8e0ff27fcd81c2bf48102df02228fe6ed1afd32ce89dfec5997978c34cca221e",
+    "workerCount": 3,
+    "deployedFilesVerified": 8
+  },
+  "browser": {
+    "verified": true,
+    "environmentProfile": "chromium-headless-software-swiftshader-webgl-v1",
+    "browser": {
+      "product": "Chrome/156.0.8078.79",
+      "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.6.75.27",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    "softwareRendering": true,
+    "physicalDeviceVerified": false,
+    "profiles": [
+      {
+        "name": "compact-android",
+        "width": 320,
+        "height": 640,
+        "engine": "tropnik-canvas"
+      },
+      {
+        "name": "iphone-portrait",
+        "width": 390,
+        "height": 844,
+        "engine": "tropnik-canvas"
+      },
+      {
+        "name": "android-portrait",
+        "width": 412,
+        "height": 915,
+        "engine": "tropnik-canvas"
+      },
+      {
+        "name": "phone-landscape",
+        "width": 844,
+        "height": 390,
+        "engine": "tropnik-canvas"
+      },
+      {
+        "name": "desktop-webgl",
+        "width": 1440,
+        "height": 1000,
+        "engine": "tropnik-canvas"
+      }
+    ],
+    "profileCount": 5,
+    "fullBrowserAssertionsReexecuted": true,
+    "stableEnvironmentReportsMatched": 8
+  },
+  "graphics": {
+    "legacyUnderlay": {
+      "cases": 30,
+      "frames": 46,
+      "comparedPixels": 22609920,
+      "differentPixels": 0,
+      "maxChannelDelta": 0
+    },
+    "stationaryGround": {
+      "cases": 18,
+      "frames": 126,
+      "nativeDpr": [
+        1,
+        1.5,
+        2
+      ],
+      "actualCacheHits": 75,
+      "transformedFallbackFrames": 21,
+      "comparedPixels": 59867136,
+      "differentPixels": 0,
+      "maxChannelDelta": 0
+    },
+    "trailRaster": {
+      "cases": 24,
+      "primaryRasterDifferentPixels": 0,
+      "primaryRasterMaxChannelDelta": 0,
+      "opaqueCompositeComparedPixels": 22806528,
+      "opaqueCompositeMaxChannelDelta": 2,
+      "primaryTransparentComparisonEvidence": "source-bound native worker report; primary transparent pixels are not reconstructed from opaque screenshots",
+      "opaqueCompositePngComparisonIndependentlyRecomputed": true
+    },
+    "mapAttribution": {
+      "verified": true,
+      "cases": 40,
+      "footerCases": 24,
+      "caseFailures": []
+    },
+    "mapControls": {
+      "verified": true,
+      "cases": 3
+    },
+    "terrainMask": {
+      "verified": true,
+      "cases": 4
+    },
+    "terrainFullMask": {
+      "verified": true,
+      "cases": 8
+    },
+    "terrainPresentation": {
+      "verified": true,
+      "cases": 8
+    },
+    "terrainUnmasked": {
+      "verified": true,
+      "cases": 2,
+      "releaseEligible": false
+    },
+    "captures": {
+      "verifiedUniquePngFiles": 396,
+      "verifiedReferenceOccurrences": 396,
+      "pngSizeSha256AndDimensionsVerified": true,
+      "decodedUnderlayRGBAHashesVerified": true,
+      "decodedOpaqueTrailRGBAHashesVerified": true
+    }
+  },
+  "smoothness": {
+    "units": "milliseconds",
+    "millisecondsRoundedTo": 3,
+    "meaning": "Browser callback intervals in CI; not presented FPS or field INP.",
+    "budgets": {
+      "frameP95StrictlyLessThanMs": 35,
+      "frameMaxGapStrictlyLessThanMs": 150,
+      "unchanged": true
+    },
+    "early": {
+      "diagnosticOnly": true,
+      "releaseEligible": false,
+      "profiles": [
+        {
+          "profile": "android-portrait",
+          "passed": true,
+          "performancePassed": true,
+          "instrumented": false,
+          "physicalDevice": false,
+          "scenarios": [
+            {
+              "name": "panel",
+              "samples": 122,
+              "frameP95Ms": 16.9,
+              "frameMaxGapMs": 39.6,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 48
+            },
+            {
+              "name": "explore-search",
+              "samples": 104,
+              "frameP95Ms": 18.5,
+              "frameMaxGapMs": 25.5,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 47.5
+            },
+            {
+              "name": "explore-filters",
+              "samples": 132,
+              "frameP95Ms": 16.9,
+              "frameMaxGapMs": 18.9,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 48
+            },
+            {
+              "name": "catalog-scroll",
+              "samples": 46,
+              "frameP95Ms": 23,
+              "frameMaxGapMs": 27.1,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 47.1
+            },
+            {
+              "name": "map-pan",
+              "samples": 68,
+              "frameP95Ms": 26.4,
+              "frameMaxGapMs": 29.2,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 45.6
+            },
+            {
+              "name": "map-zoom",
+              "samples": 464,
+              "frameP95Ms": 20.5,
+              "frameMaxGapMs": 38.7,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 48.7
+            },
+            {
+              "name": "layer-switch",
+              "samples": 284,
+              "frameP95Ms": 16.8,
+              "frameMaxGapMs": 47,
+              "framesOver50ms": 0,
+              "longTasks": 1,
+              "maxLongTaskMs": 51,
+              "inputToNextRenderingOpportunityP95Ms": 52.6
+            },
+            {
+              "name": "site-search",
+              "samples": 95,
+              "frameP95Ms": 17,
+              "frameMaxGapMs": 22.5,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 48
+            }
+          ]
+        },
+        {
+          "profile": "desktop-webgl",
+          "passed": true,
+          "performancePassed": true,
+          "instrumented": false,
+          "physicalDevice": false,
+          "scenarios": [
+            {
+              "name": "panel",
+              "samples": 73,
+              "frameP95Ms": 16.8,
+              "frameMaxGapMs": 17.3,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 32.6
+            },
+            {
+              "name": "explore-search",
+              "samples": 95,
+              "frameP95Ms": 28.5,
+              "frameMaxGapMs": 35.3,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 47.6
+            },
+            {
+              "name": "explore-filters",
+              "samples": 111,
+              "frameP95Ms": 16.9,
+              "frameMaxGapMs": 19,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 35.5
+            },
+            {
+              "name": "catalog-scroll",
+              "samples": 27,
+              "frameP95Ms": 16.9,
+              "frameMaxGapMs": 19.6,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 44.4
+            },
+            {
+              "name": "map-pan",
+              "samples": 239,
+              "frameP95Ms": 31.8,
+              "frameMaxGapMs": 43.8,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 51.8
+            },
+            {
+              "name": "map-zoom",
+              "samples": 640,
+              "frameP95Ms": 17.6,
+              "frameMaxGapMs": 54.2,
+              "framesOver50ms": 1,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 51.5
+            },
+            {
+              "name": "layer-switch",
+              "samples": 237,
+              "frameP95Ms": 17.4,
+              "frameMaxGapMs": 55.1,
+              "framesOver50ms": 1,
+              "longTasks": 1,
+              "maxLongTaskMs": 55,
+              "inputToNextRenderingOpportunityP95Ms": 70.8
+            },
+            {
+              "name": "site-search",
+              "samples": 90,
+              "frameP95Ms": 17.5,
+              "frameMaxGapMs": 19.3,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 33.9
+            }
+          ]
+        }
+      ]
+    },
+    "fullReleaseAudit": {
+      "verified": true,
+      "profiles": [
+        {
+          "profile": "android-portrait",
+          "passed": true,
+          "performancePassed": true,
+          "instrumented": false,
+          "physicalDevice": false,
+          "scenarios": [
+            {
+              "name": "panel",
+              "samples": 121,
+              "frameP95Ms": 16.9,
+              "frameMaxGapMs": 39.1,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 48.3
+            },
+            {
+              "name": "explore-search",
+              "samples": 104,
+              "frameP95Ms": 21.9,
+              "frameMaxGapMs": 28.7,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 48.2
+            },
+            {
+              "name": "explore-filters",
+              "samples": 132,
+              "frameP95Ms": 16.9,
+              "frameMaxGapMs": 19.8,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 48.2
+            },
+            {
+              "name": "catalog-scroll",
+              "samples": 46,
+              "frameP95Ms": 22.8,
+              "frameMaxGapMs": 27.2,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 47.6
+            },
+            {
+              "name": "map-pan",
+              "samples": 69,
+              "frameP95Ms": 25.8,
+              "frameMaxGapMs": 43.1,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 46
+            },
+            {
+              "name": "map-zoom",
+              "samples": 382,
+              "frameP95Ms": 23,
+              "frameMaxGapMs": 54.7,
+              "framesOver50ms": 1,
+              "longTasks": 1,
+              "maxLongTaskMs": 53,
+              "inputToNextRenderingOpportunityP95Ms": 49.1
+            },
+            {
+              "name": "layer-switch",
+              "samples": 257,
+              "frameP95Ms": 16.8,
+              "frameMaxGapMs": 47.4,
+              "framesOver50ms": 0,
+              "longTasks": 1,
+              "maxLongTaskMs": 51,
+              "inputToNextRenderingOpportunityP95Ms": 53.2
+            },
+            {
+              "name": "site-search",
+              "samples": 97,
+              "frameP95Ms": 18,
+              "frameMaxGapMs": 30.2,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 49.7
+            }
+          ]
+        },
+        {
+          "profile": "desktop-webgl",
+          "passed": true,
+          "performancePassed": true,
+          "instrumented": false,
+          "physicalDevice": false,
+          "scenarios": [
+            {
+              "name": "panel",
+              "samples": 73,
+              "frameP95Ms": 16.8,
+              "frameMaxGapMs": 17.2,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 32.5
+            },
+            {
+              "name": "explore-search",
+              "samples": 95,
+              "frameP95Ms": 21.6,
+              "frameMaxGapMs": 41.1,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 35.6
+            },
+            {
+              "name": "explore-filters",
+              "samples": 111,
+              "frameP95Ms": 17,
+              "frameMaxGapMs": 17.7,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 34.3
+            },
+            {
+              "name": "catalog-scroll",
+              "samples": 26,
+              "frameP95Ms": 20.9,
+              "frameMaxGapMs": 33.1,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 63.5
+            },
+            {
+              "name": "map-pan",
+              "samples": 199,
+              "frameP95Ms": 34.1,
+              "frameMaxGapMs": 38.6,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 51.4
+            },
+            {
+              "name": "map-zoom",
+              "samples": 621,
+              "frameP95Ms": 18.2,
+              "frameMaxGapMs": 55.4,
+              "framesOver50ms": 1,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 52.5
+            },
+            {
+              "name": "layer-switch",
+              "samples": 236,
+              "frameP95Ms": 17,
+              "frameMaxGapMs": 53,
+              "framesOver50ms": 1,
+              "longTasks": 1,
+              "maxLongTaskMs": 53,
+              "inputToNextRenderingOpportunityP95Ms": 69
+            },
+            {
+              "name": "site-search",
+              "samples": 90,
+              "frameP95Ms": 17.4,
+              "frameMaxGapMs": 18.9,
+              "framesOver50ms": 0,
+              "longTasks": 0,
+              "maxLongTaskMs": 0,
+              "inputToNextRenderingOpportunityP95Ms": 32.8
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "offlineSafety": {
+    "passed": true,
+    "savedThroughUI": true,
+    "workerControlled": true,
+    "coldNavigation": true,
+    "offline": true,
+    "titleRestored": true,
+    "contactRestored": true,
+    "draftExplicit": true,
+    "privateApiNotCached": true,
+    "networkSuccessfulResponses": 0
+  },
+  "publicReadback": {
+    "verified": true,
+    "url": "https://orewn.github.io/tropnik/",
+    "buildId": "8d86a691851d3dcd",
+    "sourceCommit": "303afe5b325c6ac5e4d89a6d8b3c856f5a3437d8",
+    "publicHttpChecks": 24,
+    "apkDelivery": "github-release",
+    "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.25-preview/tropnik-preview.apk",
+    "apkBytes": 67858685,
+    "apkSha256": "016aa309d22b1fc34d89949817d3e8fc61162e2c20f8b50a4a803e0feadb88e4",
+    "browserRenderingTested": true,
+    "browserProfiles": 4,
+    "evidence": "Successful deploy-job verification output, extracted from decoded GitHub job log; manual live-browser verification is recorded separately.",
+    "completedAt": "2026-11-13T04:00:57Z",
+    "reportBytes": 491,
+    "reportSha256": "2a746dcd66a1e0d8bec3569c9876a6b4fd7b1560a55f52b80400f7dc7a7895cc"
+  },
+  "artifacts": [
+    {
+      "id": 14008823216,
+      "name": "tropnik-pages-design-1",
+      "bytes": 101695549,
+      "sha256": "3b5b116dd7eb7fb8bba1248adf3ad166b3ba5343d0f88dab9403c2533387533d",
+      "apiDigestVerified": true,
+      "independentlyDownloadedAndHashed": true,
+      "workflowRunId": 43360007491,
+      "sourceCommit": "303afe5b325c6ac5e4d89a6d8b3c856f5a3437d8"
+    },
+    {
+      "id": 14008713250,
+      "name": "github-pages-43360007491-1",
+      "bytes": 66859078,
+      "sha256": "d97efdc36736a509181887c7ca50c130f27a1a6d8d9287ee86543e39ceaed6c3",
+      "apiDigestVerified": true,
+      "independentlyDownloadedAndHashed": true,
+      "workflowRunId": 43360007491,
+      "sourceCommit": "303afe5b325c6ac5e4d89a6d8b3c856f5a3437d8"
+    }
+  ],
+  "reports": [
+    {
+      "file": "browser-map-attribution-verification.json",
+      "bytes": 2462840,
+      "sha256": "4ba87710a155ba86f50317980b0d04b5da0e03e9781cae16fd3e99f93ae5c3c8"
+    },
+    {
+      "file": "browser-map-controls-verification.json",
+      "bytes": 29147,
+      "sha256": "8e26e5a3085589ba606da675cd18662528e606b00aebc241e141a98d9b814dfb"
+    },
+    {
+      "file": "browser-map-underlay-verification.json",
+      "bytes": 404011,
+      "sha256": "de1f6d576db654a88f7c5f59f81b0bd917b79a05ff853bde25ba54fdcc81923f"
+    },
+    {
+      "file": "browser-network.json",
+      "bytes": 101474,
+      "sha256": "07b6f900d04f358c2497123de8e3f97c18d37b88d79b4e1bf8094870e7382f2f"
+    },
+    {
+      "file": "browser-offline-safety-diagnostic.json",
+      "bytes": 13815,
+      "sha256": "0585bfc86ef9505d8fcc25a1121d674b449fb5793941159296e39a64a998a2e9"
+    },
+    {
+      "file": "browser-terrain-full-mask-verification.json",
+      "bytes": 100672,
+      "sha256": "373938fc2dd4725781339e07aae2117d5ec87ab387d138505931178dc3e72e70"
+    },
+    {
+      "file": "browser-terrain-mask-verification.json",
+      "bytes": 42687,
+      "sha256": "3587af6a18409a7b435fc33c439f1347b5c8ad9b8f92a65041d63cd3ede06090"
+    },
+    {
+      "file": "browser-terrain-presentation-verification.json",
+      "bytes": 126672,
+      "sha256": "abe56fc9acd047ab2ae1cd7a2d5eac33a2850e3dd93ee9142fb4ef3b1958e78a"
+    },
+    {
+      "file": "browser-terrain-unmasked-verification.json",
+      "bytes": 73829,
+      "sha256": "972f562950fdeb436227ed96705def0fbed3965fb9ee1eca8f847efe714e2c70"
+    },
+    {
+      "file": "browser-trail-overlay-verification.json",
+      "bytes": 35540,
+      "sha256": "d47dc08c8f6d23f94cd3f750479ff88a1fb521103e50c18b2a6e01778ba9b827"
+    },
+    {
+      "file": "browser-trail-raster-verification.json",
+      "bytes": 144932,
+      "sha256": "aa8cffcb92701e2df16b3a6a047f3aaf52845de6f7a4b751e423748ad537071b"
+    },
+    {
+      "file": "browser-ui-smoothness-diagnostic.json",
+      "bytes": 538217,
+      "sha256": "ddd42d09a9ba7b894fef05eec3e1a961a4a813967b2a71aea569229864fb85e6"
+    },
+    {
+      "file": "browser-verification.json",
+      "bytes": 18621089,
+      "sha256": "5b23c89e39f321cfc23a804f21562d396fd5368a2778797cfb3a3ded0ee3d51a"
+    },
+    {
+      "file": "build-info.json",
+      "bytes": 411463,
+      "sha256": "6dce46e5a8322bccc3f5498bbbf2e911ab0bcc76daba8c66c162a524efeba825"
+    },
+    {
+      "file": "http-verification.json",
+      "bytes": 568,
+      "sha256": "35edd728b4d685d59089ac9b7c1848dc9b502665b0ec64f4acc62f66356267d9"
+    },
+    {
+      "file": "page-manifest.json",
+      "bytes": 116761,
+      "sha256": "df99201294086b5f450d855d6f0889a0133b8d0084029610d1fa812fa8c354bf"
+    },
+    {
+      "file": "verification.json",
+      "bytes": 1173,
+      "sha256": "07a0b4719e1634f14255b5ac5d6f3fc85ffa467e7c06e1109d0e592f2b778206"
+    }
+  ],
+  "sourceBindings": {
+    "files": 32,
+    "hashes": {
+      "web/lib/custom-map-camera.ts": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "web/lib/custom-map-coverage.ts": "a7f653dc44541aa707abfc8433e5567e51e84193cb1e12a067e09b295de4c2c1",
+      "web/lib/custom-map-engine.ts": "c5f240ef6bf5f45f0dc1fc2b83efa554d03fe0930e164e3791f44b4e24a0485b",
+      "web/lib/custom-map-label-inspection.ts": "394d86a1c79adb1b27db59d237487703b52d6e12ec7461cdd696f94d10c1bf8c",
+      "web/lib/custom-map-labels.ts": "b0e38679b23272f18119501b2503211801d5e1719cc2804713496f041f4342fd",
+      "web/lib/custom-map-symbols.ts": "062eb4cdaf29d6f4946713a790c3d90feca49d0bf9cfcd2d7477465d3a289601",
+      "web/lib/custom-map-tiles.ts": "c84c763cabacc7b7c4c7e620b3b5e2fdbcb401eb7fa8f4efcf776f854426a5e6",
+      "web/lib/custom-map-trail-raster.ts": "9a17d5022610354e1865846925d7725304f927247b83fe3fda6718574f572d9b",
+      "web/lib/map-canvas-policy.ts": "eb8ee4bca63a563b8d755493dca4c10f4d66e089681306f1a8fce6795318cfda",
+      "web/lib/map-config.ts": "e5f11697c7ae4f7907ad484490657cbf87655e063bab04d4a4996dd1bd07b73f",
+      "web/lib/map-direction-layout.ts": "a7635b852e84532d9841c4164f783ad2f57626807de6139e6f6d90df49ebb92e",
+      "web/lib/map-direction-marker.ts": "80cc52b98209215c20d2f562f2f9e866f9586881881b258d15db41dcd688bc9f",
+      "web/lib/map-framing.ts": "97e5a37f7861e3e27dbe2e11e9daa3fedfb754ef4e187d4fe8fee2bf456aad47",
+      "web/lib/map-interaction.ts": "19cd3f505e741784b0d669a88bf011474fd22f37b91757c2a42066ad98a6061b",
+      "web/lib/map-point-marker-layout.ts": "e884311bc2b4def5c8802a9da5375c50f784ef879405b1de12dd9705cc7efb39",
+      "web/lib/map-preload.ts": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "web/lib/map-resource-pool.ts": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "web/lib/map-route-presentation.ts": "ef8f9d2c77751ce0ed6f997e5db17eef7f4cc83b57899e98e96c01af6260d963",
+      "web/lib/map-satellite.ts": "369b5f6d99fb52c0754cd8dceea4de6959b9e9a6209e30796ec01cce560135f8",
+      "web/lib/map-trail-overlay.ts": "bddd5c337b46aa25568de64d93f75a1db81d6b89c3e7670f55a6b5f6deeed971",
+      "web/lib/map-transport.ts": "c2779dd3e60af7eef6a9aacec96f1d614bb548784954a84fd4d386cab3ee8094",
+      "web/lib/reviewed-coastal-routes.ts": "5d33678fbad7519075a749088f56d235a498e49caecd8cb3bfbdc6af6dc0c68d",
+      "web/lib/route-geometry.ts": "eb5330c835c50ad023d7ecbf68b180c413d2c8a73a3630e95e4883f9817096d0",
+      "web/lib/route-source-integrity.ts": "21b918b4b726cdf71c3cbcf5d8b57eda1e00ae8ea4d81e8af3c4ef3e87a71eef",
+      "web/lib/russia-map.ts": "0eac13c0921b2b78aeb83f576ec2e274b21c3c5b9932fa1a560b888186399b06",
+      "web/lib/terrain-preparation.ts": "c919ee059fff8c3805c9ee4f83208cdf5c942945972796a1fb0da246a40b4309",
+      "web/lib/trail-overlay.generated.json": "6fa24fcd6ebd290b3730f682b02dffed4a94805f0f34bd2c8c88b660689ef788",
+      "web/public/maps/map-city-labels.js": "62d4b661ef3edf6ffe22b079dde39da0c1602f5f33f28f265bf44c388e3cfd53",
+      "web/public/maps/map-coverage-lod.js": "a9c98d30f9da32f8266b84270fdb2f0d5dfa51edd6ff02b0a16b7aa83cd4a0d0",
+      "web/public/maps/russia-viewport.js": "56018f7d0224714235857d56d773c41f747fd87b5b9afbd69e481ab6f1771b30",
+      "web/public/terrain/terrain-renderer.js": "9aeb714ca4f889587d92506ef7c937c23b09e6fe2c5cf397bfa4121a84de2c86",
+      "web/lib/custom-map-trail-raster.worker.ts": "1518ab7faae90588a0234a945bafcb4baa3f4a087bf30261c442a985fdaed2df"
+    },
+    "committedAndWorkingBytesEqual": true,
+    "workingBytesStatementAppliesAtVerificationTimeOnly": true
+  },
+  "limits": [
+    "This receipt certifies the exact static-web source and build above, not every later repository commit.",
+    "The public website has no connected production API, PostgreSQL/PostGIS or SMTP.",
+    "Public APK remains 0.4.25-preview; this Pages run does not publish a new APK.",
+    "CI uses headless Chromium with software SwiftShader; physical Android devices and hardware GPU performance are not established.",
+    "Rendered source geometry and test results do not establish field condition, route access or coverage of every physical trail.",
+    "Detailed offline basemap coverage remains the prepared region, not all Russia."
+  ]
+}

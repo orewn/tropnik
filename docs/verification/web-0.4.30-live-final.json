@@ -1,0 +1,432 @@
+{
+  "schemaVersion": 1,
+  "scope": "published-pages-desktop-ui-verification",
+  "checkedAt": "2026-11-13T04:07:30.676Z",
+  "url": "https://orewn.github.io/tropnik/",
+  "selectedUrl": "https://orewn.github.io/tropnik/?region=altai&route=osm-relation-6040458",
+  "sourceCommitExpected": "303afe5b325c6ac5e4d89a6d8b3c856f5a3437d8",
+  "buildIdExpected": "8d86a691851d3dcd",
+  "sourceBinding": "Observed HTML entry assets match the independently verified Pages artifact in web-0.4.30-pages.json.",
+  "ordinaryUpdateButtonUsed": true,
+  "storageCleared": false,
+  "observedAssets": {
+    "scripts": [
+      "/tropnik/assets/index-DjsjatiT.js"
+    ],
+    "styles": [
+      "/tropnik/assets/index-CLx64tyF.css",
+      "https://orewn.github.io/tropnik/assets/Footer-BsvoeVO4.css",
+      "https://orewn.github.io/tropnik/assets/page-By3AUdxa.css"
+    ]
+  },
+  "checks": {
+    "initialCatalogueSources621": true,
+    "initialPreparedParts22456": true,
+    "initialViewportReady": true,
+    "layersOpenedOnFirstClick": true,
+    "trailsOffSources0": true,
+    "trailsRestoredSources621": true,
+    "selectedRouteDrawn": true,
+    "satelliteReady": true,
+    "reliefRestoredReady": true,
+    "cameraPreserved": true,
+    "selectedRoutePreserved": true
+  },
+  "states": {
+    "initial": {
+      "engine": "tropnik-canvas",
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          110.2403301368421,
+          69.6251220425601
+        ],
+        "zoom": 2.7782941865922406
+      },
+      "pitch": 0,
+      "routeId": "",
+      "drawnRoute": "",
+      "state": {
+        "committedMode": "overview",
+        "error": "",
+        "imageryLoading": false,
+        "loading": false,
+        "localDetail": false,
+        "mode": "detail",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": false,
+        "residentTiles": 6
+      },
+      "catalogueOverlay": {
+        "currentViewportReady": true,
+        "error": "",
+        "exactSources": 1,
+        "pending": false,
+        "preparedParts": 22456,
+        "preparedSources": 621,
+        "sources": 621
+      },
+      "resources": {
+        "decoding": false,
+        "enabled": true,
+        "errors": [],
+        "fetching": 0,
+        "pending": 0,
+        "resident": 6,
+        "stages": {}
+      },
+      "coverage": {
+        "cells": [],
+        "error": "",
+        "lod": "overview",
+        "pending": 0,
+        "ready": true,
+        "revision": 0,
+        "version": "7035c10e633effb2"
+      },
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    },
+    "trailsOff": {
+      "engine": "tropnik-canvas",
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          110.2403301368421,
+          69.6251220425601
+        ],
+        "zoom": 2.7782941865922406
+      },
+      "pitch": 0,
+      "routeId": "",
+      "drawnRoute": "",
+      "state": {
+        "committedMode": "overview",
+        "error": "",
+        "imageryLoading": false,
+        "loading": false,
+        "localDetail": false,
+        "mode": "detail",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": false,
+        "residentTiles": 6
+      },
+      "catalogueOverlay": {
+        "currentViewportReady": true,
+        "error": "",
+        "exactSources": 0,
+        "pending": false,
+        "preparedParts": 0,
+        "preparedSources": 0,
+        "sources": 0
+      },
+      "resources": {
+        "decoding": false,
+        "enabled": true,
+        "errors": [],
+        "fetching": 0,
+        "pending": 0,
+        "resident": 6,
+        "stages": {}
+      },
+      "coverage": {
+        "cells": [],
+        "error": "",
+        "lod": "overview",
+        "pending": 0,
+        "ready": true,
+        "revision": 0,
+        "version": "7035c10e633effb2"
+      },
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    },
+    "trailsOn": {
+      "engine": "tropnik-canvas",
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          110.2403301368421,
+          69.6251220425601
+        ],
+        "zoom": 2.7782941865922406
+      },
+      "pitch": 0,
+      "routeId": "",
+      "drawnRoute": "",
+      "state": {
+        "committedMode": "overview",
+        "error": "",
+        "imageryLoading": false,
+        "loading": false,
+        "localDetail": false,
+        "mode": "detail",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": false,
+        "residentTiles": 6
+      },
+      "catalogueOverlay": {
+        "currentViewportReady": true,
+        "error": "",
+        "exactSources": 1,
+        "pending": false,
+        "preparedParts": 22456,
+        "preparedSources": 621,
+        "sources": 621
+      },
+      "resources": {
+        "decoding": false,
+        "enabled": true,
+        "errors": [],
+        "fetching": 0,
+        "pending": 0,
+        "resident": 6,
+        "stages": {}
+      },
+      "coverage": {
+        "cells": [],
+        "error": "",
+        "lod": "overview",
+        "pending": 0,
+        "ready": true,
+        "revision": 0,
+        "version": "7035c10e633effb2"
+      },
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    },
+    "selected": {
+      "engine": "tropnik-canvas",
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          87.0331444858852,
+          51.201708722548624
+        ],
+        "zoom": 9.677021559413738
+      },
+      "pitch": 0,
+      "routeId": "osm-relation-6040458",
+      "drawnRoute": "osm-relation-6040458",
+      "state": {
+        "committedMode": "detail",
+        "error": "",
+        "imageryLoading": false,
+        "loading": false,
+        "localDetail": false,
+        "mode": "detail",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": true,
+        "residentTiles": 96
+      },
+      "catalogueOverlay": {
+        "currentViewportReady": true,
+        "error": "",
+        "exactSources": 0,
+        "pending": false,
+        "preparedParts": 0,
+        "preparedSources": 0,
+        "sources": 9
+      },
+      "resources": {
+        "decoding": false,
+        "enabled": true,
+        "errors": [],
+        "fetching": 0,
+        "pending": 0,
+        "resident": 96,
+        "stages": {}
+      },
+      "coverage": {
+        "cells": [
+          "0509-1"
+        ],
+        "error": "",
+        "lod": "local",
+        "pending": 0,
+        "ready": true,
+        "revision": 2,
+        "version": "7035c10e633effb2"
+      },
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    },
+    "satellite": {
+      "engine": "tropnik-canvas",
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          87.0331444858852,
+          51.201708722548624
+        ],
+        "zoom": 9.677021559413738
+      },
+      "pitch": 0,
+      "routeId": "osm-relation-6040458",
+      "drawnRoute": "osm-relation-6040458",
+      "state": {
+        "committedMode": "satellite",
+        "error": "",
+        "imageryLoading": false,
+        "imagerySource": "eox-s2",
+        "imageryTarget": "eox-s2",
+        "loading": false,
+        "localDetail": false,
+        "mode": "satellite",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": false,
+        "residentTiles": 96
+      },
+      "catalogueOverlay": {
+        "currentViewportReady": true,
+        "error": "",
+        "exactSources": 0,
+        "pending": false,
+        "preparedParts": 0,
+        "preparedSources": 0,
+        "sources": 9
+      },
+      "resources": {
+        "decoding": false,
+        "enabled": true,
+        "errors": [],
+        "fetching": 0,
+        "pending": 0,
+        "resident": 96,
+        "stages": {}
+      },
+      "coverage": {
+        "cells": [
+          "0509-1"
+        ],
+        "error": "",
+        "lod": "local",
+        "pending": 0,
+        "ready": true,
+        "revision": 2,
+        "version": "7035c10e633effb2"
+      },
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    },
+    "reliefReturn": {
+      "engine": "tropnik-canvas",
+      "camera": {
+        "bearingDegrees": 0,
+        "center": [
+          87.0331444858852,
+          51.201708722548624
+        ],
+        "zoom": 9.677021559413738
+      },
+      "pitch": 0,
+      "routeId": "osm-relation-6040458",
+      "drawnRoute": "osm-relation-6040458",
+      "state": {
+        "committedMode": "detail",
+        "error": "",
+        "imageryLoading": false,
+        "loading": false,
+        "localDetail": false,
+        "mode": "detail",
+        "pendingTiles": 0,
+        "ready": true,
+        "reliefReady": true,
+        "residentTiles": 96
+      },
+      "catalogueOverlay": {
+        "currentViewportReady": true,
+        "error": "",
+        "exactSources": 0,
+        "pending": false,
+        "preparedParts": 0,
+        "preparedSources": 0,
+        "sources": 9
+      },
+      "resources": {
+        "decoding": false,
+        "enabled": true,
+        "errors": [],
+        "fetching": 0,
+        "pending": 0,
+        "resident": 96,
+        "stages": {}
+      },
+      "coverage": {
+        "cells": [
+          "0509-1"
+        ],
+        "error": "",
+        "lod": "local",
+        "pending": 0,
+        "ready": true,
+        "revision": 2,
+        "version": "7035c10e633effb2"
+      },
+      "viewport": {
+        "height": 864,
+        "padding": {
+          "bottom": 96,
+          "left": 40,
+          "right": 88,
+          "top": 96
+        },
+        "width": 964
+      }
+    }
+  },
+  "limits": [
+    "One managed desktop-browser session; no physical FPS or mobile-device measurement.",
+    "Closed Site browser authentication was not tested."
+  ],
+  "screenshot": {
+    "path": "docs/verification/web-0.4.30-live-final.jpg",
+    "bytes": 278657,
+    "sha256": "c43b29ffa440288bb301761a2048200cf764e583247c6d2305660ff96b842e1d"
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "scope": "release-0.4.30-android-ci-verification",
+  "releaseVersion": "0.4.30",
+  "verifiedAt": "2026-11-13T03:45:01.009267+00:00",
+  "sourceCommit": "303afe5b325c6ac5e4d89a6d8b3c856f5a3437d8",
+  "workflow": {
+    "repository": "orewn/tropnik",
+    "name": "Android preview",
+    "id": 43360008301,
+    "url": "https://github.com/orewn/tropnik/actions/runs/43360008301",
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "jobs": [
+    {
+      "id": 131670986656,
+      "name": "build",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43360008301/job/131670986656",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 131672293336,
+      "name": "Android device scenarios",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43360008301/job/131672293336",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 131673882225,
+      "name": "Publish the requested Android prerelease",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43360008301/job/131673882225",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 131673883104,
+      "name": "Verify public Android bytes and prepare the universal website manifest",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43360008301/job/131673883104",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "tests": {
+    "jvm": {
+      "tests": 51,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "evidence": "Build job JUnit summary"
+    },
+    "device": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deviceExecutionVerified": true,
+      "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+      "androidApi": 35,
+      "architecture": "x86_64",
+      "physicalDeviceVerified": false,
+      "arm64DeviceExecutionVerified": false,
+      "evidence": "Downloaded device artifact: raw device-result.json and instrumentation result"
+    }
+  },
+  "artifacts": {
+    "build": {
+      "id": 14007349647,
+      "name": "tropnik-android-preview-1",
+      "bytes": 109230969,
+      "sha256": "562d060b8be400f79c24bf8702a6a1c702bfe924b72a458e256e059e7bb8aa27",
+      "verification": {
+        "sizeSource": "GitHub artifact API metadata",
+        "digestSource": "GitHub artifact API metadata, build upload log and device download log",
+        "apiDigestMatchesBuildUploadAndDeviceDownloadLog": true,
+        "independentlyDownloaded": false,
+        "independentlyHashed": false
+      }
+    },
+    "device": {
+      "id": 14008700678,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "bytes": 5688665,
+      "sha256": "9977b5d96aaa9e1c8c3736c241046cb18e07af5a6147052c00da80d7ccf26fc8",
+      "verification": {
+        "independentlyDownloaded": true,
+        "independentlyHashed": true,
+        "downloadedSizeMatchesApi": true,
+        "downloadedSha256MatchesApi": true
+      },
+      "rawDeviceResult": {
+        "name": "device-result.json",
+        "bytes": 3688,
+        "sha256": "0661d701f2762543cff24acd824e2a54484bc0f041e32ba4e59ddaa8347c6509",
+        "extractedWithoutModification": true,
+        "path": "docs/verification/release-0.4.30-android-device-result.json"
+      }
+    }
+  },
+  "publicApk": {
+    "version": "0.4.25-preview",
+    "tag": "v0.4.25-preview",
+    "releaseUrl": "https://github.com/orewn/tropnik/releases/tag/v0.4.25-preview",
+    "name": "tropnik-preview.apk",
+    "url": "https://github.com/orewn/tropnik/releases/download/v0.4.25-preview/tropnik-preview.apk",
+    "bytes": 67858685,
+    "sha256": "016aa309d22b1fc34d89949817d3e8fc61162e2c20f8b50a4a803e0feadb88e4",
+    "publishedByThisRun": false,
+    "evidence": [
+      "web/public/downloads/android-manifest.json",
+      "docs/verification/android-public-0.4.25.json",
+      "https://api.github.com/repos/orewn/tropnik/releases/tags/v0.4.25-preview"
+    ],
+    "independentlyDownloadedInThisVerification": false
+  },
+  "limits": [
+    "This receipt applies only to the exact source commit above.",
+    "Device execution covers the API 35 x86_64 emulator; ARM64 and physical-device execution were not verified.",
+    "The build artifact digest is supported by GitHub metadata and CI logs; its complete ZIP and APK bytes were not independently downloaded or hashed in this verification.",
+    "Both publication jobs were skipped. The public universal APK remains 0.4.25-preview."
+  ],
+  "runtime": {
+    "sourceInputsSha256": "f20b4a62f81d5e7fd19f57da6ede78597c3ad1e9dc551e9121dfc5bbf36c9919",
+    "manifestSha256": "8e0ff27fcd81c2bf48102df02228fe6ed1afd32ce89dfec5997978c34cca221e",
+    "workerCount": 3
+  }
+}
