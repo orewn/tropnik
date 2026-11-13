@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_NATIVE_PIXEL_AND_TRANSFER_PROOF",
+  "scope": "Independent review of existing corrected-source native artifact; no new browser invocation, download, runtime edit or performance gate",
+  "runId": 43440468172,
+  "sourceCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "sourceTree": "235a701a33a72948f9fb361ae89f06610ff2729f",
+  "parent": "7056633bddfd2325c4718f385fc55f38ad966459",
+  "sourceFiles": {
+    "web/lib/custom-map-engine.ts": {
+      "bytes": 86221,
+      "sha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4"
+    },
+    "tools/pages-preview/tests/browser-map-underlay.browser.mjs": {
+      "bytes": 63141,
+      "sha256": "ffeda1b9da84943000cb038a31fcd1d11cfa146b286b7b214f6da9593b833fbc"
+    },
+    ".github/workflows/streamed-ground-diagnostic.yml": {
+      "bytes": 12338,
+      "sha256": "4e82eab8dfc77b004c808abf3db11c0e4e211aea9132ad8756e5815af30fcb21"
+    }
+  },
+  "artifact": {
+    "id": 14045463022,
+    "bytes": 134293411,
+    "sha256": "56643b0bb63e5463855866c669e6f6db14e540e7a693d9cc4bb7ee8957337006",
+    "sharedApiDigestAndRunSourceMatch": true
+  },
+  "report": {
+    "path": "/workspace/scratch/686c5dc59f67/streamed-ground-43440468172/zip-members/web/pages-preview/dist/browser-map-underlay-verification.json",
+    "bytes": 1814399,
+    "sha256": "3aa938ebb285af20e6d42ea115f752841623a3193a5b6f987310764da2338bb5"
+  },
+  "rawPixelResults": {
+    "underlayFrames": 46,
+    "groundCacheFrames": 126,
+    "streamingFrames": 198,
+    "totalFrames": 370,
+    "differentPixels": 0,
+    "maximumChannelDelta": 0,
+    "allBaselineAndOptimizedRgbaHashesEqual": true,
+    "allExpectedPhasesPresent": true,
+    "nativeDprs": [
+      1,
+      1.5,
+      2
+    ],
+    "sameZeroOracleAndNativeTimeout": true,
+    "full740PngDecodeOwner": "web_release_skeptic; this review independently decoded the formerly failing pair-01 baseline and optimized PNGs and verified their raw hashes"
+  },
+  "previousFailureRepair": {
+    "runId": 43438213019,
+    "sourceCommit": "7056633bddfd2325c4718f385fc55f38ad966459",
+    "phase": "trace-grid/DPR1/pair-01",
+    "previousDifferentPixels": 257,
+    "previousMaximumChannelDelta": 1,
+    "previousDiffCoordinatesNowExactHistoricalBaseline": 257,
+    "wholeFrameBaselineAndOptimizedRgbaSha256": "c04bd518dc3c0ca247401fccfd6e575c330505988c4454b53077196396096f90",
+    "baselinePng": {
+      "phase": "baseline",
+      "file": "streaming-dpr1-trace-grid-pair-01-baseline.png",
+      "bytes": 332542,
+      "sha256": "eecb4e0c252218b43d587830aac9b07ee82e2d86a9820eaca9d8775b6be8f2ff"
+    },
+    "optimizedPng": {
+      "phase": "optimized",
+      "file": "streaming-dpr1-trace-grid-pair-01-optimized.png",
+      "bytes": 332542,
+      "sha256": "eecb4e0c252218b43d587830aac9b07ee82e2d86a9820eaca9d8775b6be8f2ff"
+    },
+    "all175HistoricalReferenceFrameHashesRemainIdentical": true,
+    "all174PreviouslyPassingOptimizedFrameHashesRemainIdentical": true,
+    "comparisonDoesNotChangeReferenceToHideError": true
+  },
+  "actualTraceGridIncrementWitness": {
+    "phases": "pair-02 through pair-25,24frames perDPR",
+    "perDpr": [
+      {
+        "dpr": 1,
+        "frames": 24,
+        "baselineTileCalls": 3936,
+        "optimizedTileCalls": 719,
+        "captureCount": 24,
+        "restoreCount": 24,
+        "tileCallReductionFraction": 0.8173272357723578,
+        "minimumPatchAreaFraction": 0.002903582430686674,
+        "maximumPatchAreaFraction": 0.08349067541157375,
+        "all24HaveFewerTileCalls": true
+      },
+      {
+        "dpr": 1.5,
+        "frames": 24,
+        "baselineTileCalls": 3936,
+        "optimizedTileCalls": 719,
+        "captureCount": 24,
+        "restoreCount": 24,
+        "tileCallReductionFraction": 0.8173272357723578,
+        "minimumPatchAreaFraction": 0.002722710347771057,
+        "maximumPatchAreaFraction": 0.08151620012656924,
+        "all24HaveFewerTileCalls": true
+      },
+      {
+        "dpr": 2,
+        "frames": 24,
+        "baselineTileCalls": 3936,
+        "optimizedTileCalls": 719,
+        "captureCount": 24,
+        "restoreCount": 24,
+        "tileCallReductionFraction": 0.8173272357723578,
+        "minimumPatchAreaFraction": 0.0026357385968399085,
+        "maximumPatchAreaFraction": 0.08057674152837126,
+        "all24HaveFewerTileCalls": true
+      }
+    ],
+    "totalMandatoryIncrementFrames": 72,
+    "eachIncrement": {
+      "exactlyOneMainGroundPaintWithNoClip": true,
+      "exactlyOneIntegerOneToOnePartialCapture": true,
+      "partialCaptureDestinationClipMatchesDirtyRectExactly": true,
+      "captureIdentityTransformAlphaOneCopyComposite": true,
+      "exactlyOneFullUnclippedIdentityRestore": true,
+      "strictlySmallerThanWholeCanvasPatch": true,
+      "currentLoadingSnapshotIdentity": true,
+      "fewerActualNativeTileDrawsThanDirectReference": true
+    },
+    "perFrameEvidence": {
+      "path": "/workspace/scratch/686c5dc59f67/streamed-ground-43440468172/independent-transfer-counts.json",
+      "bytes": 21606,
+      "sha256": "80cacf6e70a5c777aa06de5d79487e75964feee504973b75130c516c58ae9aab"
+    },
+    "additionalWorkNotInTileCounts": "One partial bitmap capture and one full bitmap restore per mandatory incremental frame; full clear/path paint and later foreground are not included in tile draw counts.",
+    "noWallTimeOrCpuSpeedupClaim": true
+  },
+  "resourceAndContext": {
+    "allObservedContextScopesBalanced": true,
+    "restoreUnderflows": 0,
+    "observedContextStateRecords": 594,
+    "maxLiveRetainedSurfaces": 1,
+    "maxRetainedBytes": 15456768,
+    "memoryLimitBytes": 33554432,
+    "browserCleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 51.86345599999913
+    }
+  },
+  "negativeControls": [
+    {
+      "dpr": 1,
+      "name": "omit-second-loading-pair",
+      "differentPixels": 59980,
+      "maxChannelDelta": 154,
+      "totalPixels": 966048
+    },
+    {
+      "dpr": 1.5,
+      "name": "omit-second-loading-pair",
+      "differentPixels": 134952,
+      "maxChannelDelta": 154,
+      "totalPixels": 2174304
+    },
+    {
+      "dpr": 2,
+      "name": "omit-second-loading-pair",
+      "differentPixels": 239824,
+      "maxChannelDelta": 154,
+      "totalPixels": 3864192
+    }
+  ],
+  "environment": {
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    },
+    "renderPolicy": {
+      "softwareRaster": true,
+      "reason": "software"
+    },
+    "nativeContextAttributes": {
+      "alpha": false,
+      "colorSpace": "srgb",
+      "colorType": "unorm8",
+      "desynchronized": false,
+      "toneMapping": {
+        "mode": "standard"
+      },
+      "willReadFrequently": true
+    },
+    "cpuModelDiffersFromPriorFailure": true
+  },
+  "limitations": [
+    "Seeded native bitmap pixel fixture, not a live network loading test.",
+    "Modeled request order used in trace-grid fixture is not proof of actual completion order in earlier performance trace.",
+    "The81.73% reduction applies to native tile draw call counts in24mandatory fixture updates perDPR; it is not a walltime, CPU or released-app performance result.",
+    "Original full Pages and Android qualification and uninstrumented performance budgets remain separate."
+  ]
+}

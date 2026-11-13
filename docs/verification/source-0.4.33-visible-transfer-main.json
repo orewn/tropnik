@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T14:17:26.234340+00:00",
+  "sourceCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "sourceTree": "235a701a33a72948f9fb361ae89f06610ff2729f",
+  "previousMain": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+  "force": false,
+  "leasedFastForward": true,
+  "sameSourceAsNativePixelGate": true,
+  "nativeRunId": 43440468172,
+  "nativeJobId": 131936452868,
+  "nativeCIConclusion": "success",
+  "qualificationAtPromotion": "CI source/runtime/native/post-bind/upload all passed. Independently downloaded artifact digest, full source/runtime binding and all370 report comparisons/transfers passed. Independent decoding of all740PNG was completed afterward on the same immutable artifact.",
+  "downloadedPreliminaryReceiptSHA256": "2db0ab27d6f475cad9ec96bdd08d71f552ca96567f85b0902145a4ec93180b6e",
+  "pagesRunId": 43440933324,
+  "androidRunId": 43440933260,
+  "initialFullRunStatus": "queued",
+  "releaseRequestVersion": "0.4.32-preview",
+  "releasePublicationRequested": false,
+  "mainAPIReadbackVerified": true,
+  "localFetchedMainVerified": true,
+  "limits": [
+    "Native diagnostic alone does not qualify full browser smoothness or Android publication.",
+    "The separate0.4.33release request waits for full application validation."
+  ]
+}

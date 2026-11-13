@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "repository": "orewn/tropnik",
+  "branch": "verify/direct-drag-20261113",
+  "sourceCommit": "fe90c09138da3d1df2f766d8aff9b11adcf24037",
+  "sourceTree": "e55bc261f90f6f4bba38854b3f07cdf7dd20e54c",
+  "parent": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "localEquivalent": "2d35f42e01eae1fd861fa8448235d4dedb2a23e7",
+  "reviewedFiles": [
+    {
+      "path": ".github/workflows/direct-drag-diagnostic.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "173638610dbe9bef155427ce03c6b956c080e22e",
+      "bytes": 6442,
+      "sha256": "1be633e1d2a8bd5c053d64da5c38019e2139428329bd7488ec2e33a696cd608d",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "tools/pages-preview/browser-smoothness.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e165d704a760d0759db230882b9734dacdd3639e",
+      "bytes": 33726,
+      "sha256": "48609856d45914e45cbd78bc619195d1b30d4ebdeed6dc03b1913771daaa5fdd",
+      "encoding": "utf-8"
+    },
+    {
+      "path": "tools/pages-preview/tests/direct-drag-trace.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "caae01bbc39e7b1c19e4b087c2a173a55c03510a",
+      "bytes": 10760,
+      "sha256": "419437d7a4157ef7f3e705edd80ef6f82a277aa2bdf165c90dfb7c41683ecd72",
+      "encoding": "utf-8"
+    }
+  ],
+  "sourceAndInputProductionPathsUnchanged": true,
+  "runId": 43447381697,
+  "runURL": "https://github.com/orewn/tropnik/actions/runs/43447381697",
+  "refReadback": "fe90c09138da3d1df2f766d8aff9b11adcf24037",
+  "createdAtUTC": "2026-11-13 14:55 UTC"
+}

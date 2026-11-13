@@ -28,10 +28,12 @@ function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vec
     close(){this.closed++;}
   }
   class Context{
-    constructor(canvas){this.canvas=canvas;this.draws=[];this.strokes=[];this.path=[];this.fills=[];this.rects=[];this.offset=[0,0];this.stack=[];this.dash=[];}
+    constructor(canvas){this.canvas=canvas;this.draws=[];this.strokes=[];this.path=[];this.fills=[];this.rects=[];this.commands=[];this.offset=[0,0];this.stack=[];this.dash=[];}
     save(){this.stack.push([...this.offset]);}restore(){this.offset=this.stack.pop();}
     translate(x,y){this.offset=[this.offset[0]+x,this.offset[1]+y];}
-    clearRect(){}fillRect(...args){this.rects.push({args,color:this.fillStyle});}beginPath(){this.path=[];}
+    clearRect(...args){this.commands.push({op:'clearRect',args,offset:[...this.offset]});}
+    fillRect(...args){this.rects.push({args,color:this.fillStyle});this.commands.push({op:'fillRect',args,color:this.fillStyle,offset:[...this.offset]});}
+    beginPath(){this.path=[];this.commands.push({op:'beginPath'});}
     moveTo(x,y){this.path.push(['M',x+this.offset[0],y+this.offset[1]]);}
     lineTo(x,y){this.path.push(['L',x+this.offset[0],y+this.offset[1]]);}
     closePath(){this.path.push(['Z']);}
@@ -82,16 +84,54 @@ test('display/source windows wrap dateline parents and crop the exact positive c
 
 test('zero-layer MVT uses the real decoder and paints an empty satellite overlay or ordinary opaque ground',async()=>{
   const gzip=gzipSync(new Uint8Array()),compressed=gzip.buffer.slice(gzip.byteOffset,gzip.byteOffset+gzip.byteLength);
-  for(const source of [new ArrayBuffer(0),compressed]){
-    const env=fixture({vectorDecoder:decodeVectorTile}),target={z:11,x:2046,y:495,sourceZ:11,sourceKey:'https://tiles.openfreemap.org/planet/20261101_080013_pt/11/2046/495.pbf',bytes:source};
-    const overlay=await env.send(job(1,{...target,transparent:true})),detail=await env.send(job(2,{...target,transparent:false}));
-    for(const result of [overlay,detail]){
+  const windows=[{z:11,x:2046,y:495,sourceZ:11,size:512,offset:[0,0]},
+    {z:18,x:-1,y:3207,sourceZ:14,size:8192,offset:[-7680,-3584]}];
+  for(const source of [new ArrayBuffer(0),compressed])for(const {size,offset,...window} of windows){
+    const env=fixture({vectorDecoder:decodeVectorTile}),target={...window,sourceKey:'https://tiles.example/empty.pbf',bytes:source};
+    const overlay=await env.send(job(1,{...target,transparent:true})),detail=await env.send(job(2,{...target,transparent:false})),ordinary=await env.send(job(3,target));
+    for(const [result,alpha] of [[overlay,true],[detail,false],[ordinary,false]]){
       assert.equal(result.error,undefined);assert.equal(result.bitmap.width,512);assert.equal(result.bitmap.height,512);assert.deepEqual(copy(result.labels),[]);
       assert.equal(result.contours,0);assert.equal(result.bitmap.context.draws.length,0);assert.equal(result.bitmap.context.strokes.length,0);assert.equal(result.bitmap.context.fills.length,0);
+      assert.deepEqual(result.bitmap.context.canvas.contextRequests,[{type:'2d',attributes:{alpha,willReadFrequently:false}}]);
     }
     assert.equal(overlay.bitmap.context.rects.length,0,'The empty satellite overlay paints no opaque pixels');
-    assert.deepEqual(detail.bitmap.context.rects,[{args:[0,0,512,512],color:painter.CARTOGRAPHY.land}],'Ordinary detail retains its established paper colour');
+    assert.deepEqual(overlay.bitmap.context.commands,[{op:'clearRect',args:[0,0,size,size],offset}]);
+    for(const result of [detail,ordinary]){
+      assert.deepEqual(result.bitmap.context.rects,[{args:[0,0,size,size],color:painter.CARTOGRAPHY.land}],'Ordinary detail retains its established paper colour');
+      assert.deepEqual(result.bitmap.context.commands,[{op:'clearRect',args:[0,0,size,size],offset},
+        {op:'fillRect',args:[0,0,size,size],color:painter.CARTOGRAPHY.land,offset}]);
+      assert.ok(offset[0]<=0&&offset[1]<=0&&offset[0]+size>=512&&offset[1]+size>=512,'The translated parent fill covers every output pixel, including wrapped overzoom children');
+    }
     assert.deepEqual(env.counts(),{vectorDecodes:1,imageDecodes:0},'A valid empty parent is reused without fabricated objects or image decoding');
+  }
+});
+
+test('only ordinary vector outputs declare opaque paper before painting native and overzoom geometry',async()=>{
+  const windows=[{z:14,x:100,y:200,sourceZ:14,size:512,offset:[0,0]},
+    {z:18,x:1605,y:3207,sourceZ:14,size:8192,offset:[-2560,-3584]}];
+  for(const softwareRaster of [undefined,false,true])for(const {size,offset,...window} of windows){
+    const env=fixture(),target={...window,softwareRaster};
+    const ordinary=await env.send(job(1,target)),explicit=await env.send(job(2,{...target,transparent:false})),overlay=await env.send(job(3,{...target,transparent:true}));
+    for(const [result,alpha] of [[ordinary,false],[explicit,false],[overlay,true]]){
+      assert.equal(result.error,undefined);assert.equal(result.bitmap.width,512);assert.equal(result.bitmap.height,512);
+      assert.deepEqual(result.bitmap.context.canvas.contextRequests,[{type:'2d',attributes:{alpha,willReadFrequently:softwareRaster===true}}]);
+      assert.ok(result.bitmap.context.strokes.length>0,'Opacity policy must retain the actual source path geometry');
+      assert.ok(result.labels.length>0,'Opacity policy must retain the actual source place anchors');
+      assert.equal(result.bitmap.context.stack.length,0);assert.deepEqual(result.bitmap.context.offset,[0,0]);
+    }
+    for(const result of [ordinary,explicit])assert.deepEqual(result.bitmap.context.commands.slice(0,2),[
+      {op:'clearRect',args:[0,0,size,size],offset},
+      {op:'fillRect',args:[0,0,size,size],color:painter.CARTOGRAPHY.land,offset},
+    ],'Opaque output must establish full paper coverage before any vector path');
+    assert.ok(offset[0]<=0&&offset[1]<=0&&offset[0]+size>=512&&offset[1]+size>=512);
+    assert.deepEqual(ordinary.bitmap.context.commands,explicit.bitmap.context.commands);
+    assert.deepEqual(ordinary.bitmap.context.strokes,explicit.bitmap.context.strokes);
+    assert.deepEqual(copy(ordinary.labels),copy(explicit.labels));assert.deepEqual(copy(ordinary.labels),copy(overlay.labels));
+    assert.equal(overlay.bitmap.context.rects.length,0,'Satellite overlay remains unbacked by opaque paper');
+    assert.deepEqual(overlay.bitmap.context.commands[0],{op:'clearRect',args:[0,0,size,size],offset});
+    assert.deepEqual(env.counts(),{vectorDecodes:1,imageDecodes:0},'Opacity variants share decoded geometry, never an output canvas');
+    assert.equal(new Set(env.outputs.map(bitmap=>bitmap.context.canvas)).size,3);
+    assert.ok(env.outputs.every(bitmap=>bitmap.closed===0));assert.ok(env.canvases.every(canvas=>canvas.width===512&&canvas.height===512));
   }
 });
 
@@ -114,12 +154,12 @@ test('software raster targets preserve fixed child pixels, source shading and pa
     const env=fixture(),sourceKey='https://tiles.example/12/25/50.webp';
     const first=await env.send(job(1,{softwareRaster}));
     const second=await env.send(job(2,{softwareRaster,x:1606}));
-    const relief=await env.send(job(3,{softwareRaster,kind:'relief',sourceZ:12,sourceKey}));
-    const adjacent=await env.send(job(4,{softwareRaster,kind:'relief',sourceZ:12,sourceKey,x:1606}));
-    const raster=await env.send(job(5,{softwareRaster,kind:'raster',mime:'image/jpeg'}));
-    for(const result of [first,second,relief,adjacent,raster]){
+    const relief=await env.send(job(3,{softwareRaster,kind:'relief',sourceZ:12,sourceKey,transparent:false}));
+    const adjacent=await env.send(job(4,{softwareRaster,kind:'relief',sourceZ:12,sourceKey,x:1606,transparent:true}));
+    const raster=await env.send(job(5,{softwareRaster,kind:'raster',mime:'image/jpeg',transparent:false}));
+    for(const [result,alpha] of [[first,false],[second,false],[relief,true],[adjacent,true],[raster,true]]){
       assert.equal(result.error,undefined);assert.equal(result.bitmap.width,512);assert.equal(result.bitmap.height,512);
-      assert.deepEqual(result.bitmap.context.canvas.contextRequests[0].attributes,{alpha:true,willReadFrequently:softwareRaster===true});
+      assert.deepEqual(result.bitmap.context.canvas.contextRequests[0].attributes,{alpha,willReadFrequently:softwareRaster===true});
     }
     assert.deepEqual(env.counts(),{vectorDecodes:1,imageDecodes:2},'Adjacent vector and DEM children must keep their shared decoded parents');
     assert.equal(env.shadeSources.length,1,'The same measured parent is shaded once');

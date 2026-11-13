@@ -1,0 +1,718 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_CONTEXT_AND_TRACE_COMPLETENESS_ONLY",
+  "sourceCommit": "fe90c09138da3d1df2f766d8aff9b11adcf24037",
+  "productionParent": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "runId": 43447381697,
+  "buildId": "3f09559902347936",
+  "artifact": {
+    "id": 14049330938,
+    "node_id": "MDg6QXJ0aWZhY3QxNDA0OTMzMDkzOA==",
+    "name": "tropnik-direct-drag-diagnostic-43447381697-1",
+    "size_in_bytes": 3237122,
+    "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14049330938",
+    "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14049330938/zip",
+    "expired": false,
+    "digest": "sha256:97c1110b8e16e963d340005c1d345645649290da99f78be15e1e37e2fa254bd5",
+    "created_at": "2026-11-13T14:57:51Z",
+    "updated_at": "2026-11-13T14:57:51Z",
+    "expires_at": "2026-11-20T14:57:49Z",
+    "workflow_run": {
+      "id": 43447381697,
+      "repository_id": 1447843944,
+      "head_repository_id": 1447843944,
+      "head_branch": "verify/direct-drag-20261113",
+      "head_sha": "fe90c09138da3d1df2f766d8aff9b11adcf24037"
+    }
+  },
+  "files": [
+    {
+      "path": "/workspace/scratch/686c5dc59f67/direct-drag-43447381697/zip-members/dist/browser-ui-smoothness-diagnostic.json",
+      "bytes": 1124976,
+      "sha256": "4a113feceb64f850c4a09fd0f2d8223a40c36ad241638da8a6dc70466751885a"
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/direct-drag-43447381697/zip-members/design-qa/desktop-webgl-ui-smoothness-map-pan.trace.json",
+      "bytes": 29946722,
+      "sha256": "4c694527ec039c1cbce64a027a5fca5fc6d168cb140e6dd47b52636831918b9f"
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/direct-drag-43447381697/zip-members/dist/build-info.json",
+      "bytes": 414414,
+      "sha256": "d776f3fffe4fc46c83c25c7785d6c968a06d4114968e0d57868e805a6d29c057"
+    }
+  ],
+  "trace": {
+    "complete": true,
+    "eof": true,
+    "dataLossOccurred": false,
+    "events": 90401,
+    "cpuSamples": 68312,
+    "durationMs": 5126.3397509999995,
+    "capMs": 8000,
+    "all35MarksMatched": true
+  },
+  "clock": {
+    "rawWindowMs": {
+      "start": 16587.899999999994,
+      "end": 21513.599999999977,
+      "duration": 4925.6999999999825
+    },
+    "bracketingOffsetMeanUs": 157880709.0,
+    "bracketingOffsetSpreadUs": 108.0,
+    "all35OffsetMinUs": 157880606,
+    "all35OffsetMaxUs": 157880772.00000003,
+    "all35OffsetMeanUs": 157880694.34285715,
+    "profiles": [
+      {
+        "profileId": "0x1",
+        "pid": 2819,
+        "threadId": 2819,
+        "threadName": "CrRendererMain",
+        "startRelativeToRawMs": -146.891
+      },
+      {
+        "profileId": "0x2",
+        "pid": 2819,
+        "threadId": 2905,
+        "threadName": "ServiceWorker thread",
+        "startRelativeToRawMs": 711.482
+      },
+      {
+        "profileId": "0x3",
+        "pid": 2819,
+        "threadId": 3003,
+        "threadName": "DedicatedWorker thread",
+        "startRelativeToRawMs": 878.62
+      }
+    ]
+  },
+  "observer": {
+    "schemaVersion": 1,
+    "scenario": "map-pan",
+    "readOnly": true,
+    "source": "MutationObserver of existing data-map-inspection",
+    "limits": {
+      "transitions": 1024,
+      "keySets": 32,
+      "tilesPerBatch": 64,
+      "keyLength": 256,
+      "inspectionChars": 524288,
+      "errors": 8
+    },
+    "timeOriginMs": 1794581824339.4,
+    "semantics": "Published snapshots, not live worker state. Marks follow publication. drawDelta=0 is not a new paint. Pointer/animation suppress publication, so revision gaps can be expected. Key overlap does not itself prove object identity.",
+    "callbacks": 31,
+    "mutationRecords": 31,
+    "coalescedMutationRecords": 0,
+    "identicalValuesSkipped": 0,
+    "drawRevisionGaps": 11,
+    "maxDrawRevisionDelta": 12,
+    "readDurationTotalMs": 16.19999999992433,
+    "readDurationMaxMs": 1.1000000000058208,
+    "overflow": false,
+    "errors": [],
+    "disconnected": true
+  },
+  "boundaries": [
+    {
+      "phase": "before",
+      "timeRelativeToRawMs": -2.2000000000116415,
+      "canvas": {
+        "width": 1041,
+        "height": 928
+      },
+      "camera": {
+        "center": [
+          87.29202911663077,
+          50.49999999999999
+        ],
+        "zoom": 6.1,
+        "bearingDegrees": 0
+      },
+      "pitch": 0,
+      "rasterPolicy": {
+        "softwareRaster": true,
+        "reason": "software"
+      },
+      "contextAttributes": {
+        "alpha": false,
+        "colorSpace": "srgb",
+        "colorType": "unorm8",
+        "desynchronized": false,
+        "toneMapping": {
+          "mode": "standard"
+        },
+        "willReadFrequently": true
+      },
+      "drawRevision": 95,
+      "state": {
+        "ready": true,
+        "loading": false,
+        "mode": "detail",
+        "committedMode": "detail",
+        "imageryLoading": false,
+        "reliefReady": true,
+        "localDetail": false,
+        "error": "",
+        "residentTiles": 132,
+        "pendingTiles": 0
+      },
+      "resources": {
+        "resident": 132,
+        "pending": 0,
+        "fetching": 0,
+        "decoding": false,
+        "enabled": true,
+        "failedSources": 0,
+        "stages": {},
+        "errors": []
+      },
+      "tileCounts": {
+        "overview": 4,
+        "detail": 64,
+        "relief": 64,
+        "imagery": 0
+      },
+      "tileLevels": {
+        "overview": [
+          4
+        ],
+        "detail": [
+          7
+        ],
+        "relief": [
+          7
+        ],
+        "imagery": []
+      },
+      "loadingGround": null
+    },
+    {
+      "phase": "after",
+      "timeRelativeToRawMs": 4928.1999999999825,
+      "canvas": {
+        "width": 1041,
+        "height": 928
+      },
+      "camera": {
+        "center": [
+          85.97995147228215,
+          50.65622536454623
+        ],
+        "zoom": 6.1,
+        "bearingDegrees": 0
+      },
+      "pitch": 0,
+      "rasterPolicy": {
+        "softwareRaster": true,
+        "reason": "software"
+      },
+      "contextAttributes": {
+        "alpha": false,
+        "colorSpace": "srgb",
+        "colorType": "unorm8",
+        "desynchronized": false,
+        "toneMapping": {
+          "mode": "standard"
+        },
+        "willReadFrequently": true
+      },
+      "drawRevision": 133,
+      "state": {
+        "ready": true,
+        "loading": false,
+        "mode": "detail",
+        "committedMode": "detail",
+        "imageryLoading": false,
+        "reliefReady": true,
+        "localDetail": false,
+        "error": "",
+        "residentTiles": 96,
+        "pendingTiles": 0
+      },
+      "resources": {
+        "resident": 96,
+        "pending": 0,
+        "fetching": 0,
+        "decoding": false,
+        "enabled": true,
+        "failedSources": 0,
+        "stages": {},
+        "errors": []
+      },
+      "tileCounts": {
+        "overview": 4,
+        "detail": 25,
+        "relief": 25,
+        "imagery": 0
+      },
+      "tileLevels": {
+        "overview": [
+          4
+        ],
+        "detail": [
+          6
+        ],
+        "relief": [
+          6
+        ],
+        "imagery": []
+      },
+      "loadingGround": null
+    }
+  ],
+  "loadingTransitions": [
+    {
+      "timeRelativeToRawMs": 1808.7999999999884,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 1,
+      "requestedCells": 25,
+      "detailCount": 1,
+      "reliefCount": 1,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 1940.7999999999884,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 2,
+      "requestedCells": 25,
+      "detailCount": 2,
+      "reliefCount": 2,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 2073.600000000006,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 3,
+      "requestedCells": 25,
+      "detailCount": 3,
+      "reliefCount": 3,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 2209.1999999999825,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 4,
+      "requestedCells": 25,
+      "detailCount": 4,
+      "reliefCount": 4,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 2339.899999999994,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 5,
+      "requestedCells": 25,
+      "detailCount": 5,
+      "reliefCount": 5,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 2439.399999999994,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 6,
+      "requestedCells": 25,
+      "detailCount": 6,
+      "reliefCount": 6,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 2555.600000000006,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 7,
+      "requestedCells": 25,
+      "detailCount": 7,
+      "reliefCount": 7,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 2660.100000000006,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 8,
+      "requestedCells": 25,
+      "detailCount": 8,
+      "reliefCount": 8,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 2800.2999999999884,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 9,
+      "requestedCells": 25,
+      "detailCount": 9,
+      "reliefCount": 9,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3086.100000000006,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 10,
+      "requestedCells": 25,
+      "detailCount": 10,
+      "reliefCount": 10,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3189.5,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 11,
+      "requestedCells": 25,
+      "detailCount": 11,
+      "reliefCount": 11,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3303.7999999999884,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 12,
+      "requestedCells": 25,
+      "detailCount": 12,
+      "reliefCount": 12,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3419.100000000006,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 13,
+      "requestedCells": 25,
+      "detailCount": 13,
+      "reliefCount": 13,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3503.600000000006,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 14,
+      "requestedCells": 25,
+      "detailCount": 14,
+      "reliefCount": 14,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3603.6999999999825,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 15,
+      "requestedCells": 25,
+      "detailCount": 15,
+      "reliefCount": 15,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3687.1999999999825,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 16,
+      "requestedCells": 25,
+      "detailCount": 16,
+      "reliefCount": 16,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3768.1999999999825,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 17,
+      "requestedCells": 25,
+      "detailCount": 17,
+      "reliefCount": 17,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3852.6999999999825,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 18,
+      "requestedCells": 25,
+      "detailCount": 18,
+      "reliefCount": 18,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 3965.100000000006,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 19,
+      "requestedCells": 25,
+      "detailCount": 19,
+      "reliefCount": 19,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 4048.7999999999884,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 20,
+      "requestedCells": 25,
+      "detailCount": 20,
+      "reliefCount": 20,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 4132.799999999988,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 21,
+      "requestedCells": 25,
+      "detailCount": 21,
+      "reliefCount": 21,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 4213.600000000006,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 22,
+      "requestedCells": 25,
+      "detailCount": 22,
+      "reliefCount": 22,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 4314.799999999988,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 23,
+      "requestedCells": 25,
+      "detailCount": 23,
+      "reliefCount": 23,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    },
+    {
+      "timeRelativeToRawMs": 4399.899999999994,
+      "drawDelta": 1,
+      "generation": 4,
+      "readyCells": 24,
+      "requestedCells": 25,
+      "detailCount": 24,
+      "reliefCount": 24,
+      "detailKeysAlsoCanonical": 0,
+      "reliefKeysAlsoCanonical": 0
+    }
+  ],
+  "workerBefore": {
+    "phase": "before",
+    "readOnly": true,
+    "startedAtMs": 16416.599999999977,
+    "capturedAtMs": 16418.5,
+    "timeOriginMs": 1794581824339.4,
+    "controller": {
+      "scriptURL": "http://127.0.0.1:34501/tropnik/sw.js",
+      "state": "activated"
+    },
+    "registration": {
+      "scope": "http://127.0.0.1:34501/tropnik/",
+      "active": {
+        "scriptURL": "http://127.0.0.1:34501/tropnik/sw.js",
+        "state": "activated"
+      },
+      "waiting": null,
+      "installing": null
+    },
+    "shellCaches": [
+      {
+        "name": "tropnik-tropnik-shell-3f09559902347936",
+        "markerURL": "http://127.0.0.1:34501/tropnik/_offline/map-warm-tropnik-tropnik-shell-3f09559902347936-canvas",
+        "present": true,
+        "status": 200,
+        "ready": true
+      }
+    ],
+    "truncated": false
+  },
+  "workerAfter": {
+    "phase": "after",
+    "readOnly": true,
+    "startedAtMs": 21542.79999999999,
+    "capturedAtMs": 21544.699999999983,
+    "timeOriginMs": 1794581824339.4,
+    "controller": {
+      "scriptURL": "http://127.0.0.1:34501/tropnik/sw.js",
+      "state": "activated"
+    },
+    "registration": {
+      "scope": "http://127.0.0.1:34501/tropnik/",
+      "active": {
+        "scriptURL": "http://127.0.0.1:34501/tropnik/sw.js",
+        "state": "activated"
+      },
+      "waiting": null,
+      "installing": null
+    },
+    "shellCaches": [
+      {
+        "name": "tropnik-tropnik-shell-3f09559902347936",
+        "markerURL": "http://127.0.0.1:34501/tropnik/_offline/map-warm-tropnik-tropnik-shell-3f09559902347936-canvas",
+        "present": true,
+        "status": 200,
+        "ready": true
+      }
+    ],
+    "truncated": false
+  },
+  "environmentMatchesFailedFull3cb": true,
+  "environment": {
+    "schemaVersion": 1,
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "collection": "browser-target-cdp-before-measurement",
+    "sourceCommit": "fe90c09138da3d1df2f766d8aff9b11adcf24037",
+    "capturedAt": "2026-11-13T14:56:30.795Z",
+    "requestedFlags": [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-background-networking",
+      "--disable-component-update",
+      "--disable-default-apps",
+      "--disable-extensions",
+      "--disable-features=Translate,MediaRouter",
+      "--mute-audio",
+      "--no-first-run",
+      "--use-gl=angle",
+      "--use-angle=swiftshader-webgl",
+      "--enable-unsafe-swiftshader",
+      "--window-size=1920,1920",
+      "--ozone-override-screen-size=1920,1920"
+    ],
+    "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=45815 --user-data-dir=/tmp/tropnik-chrome-2713 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+        "skiaBackendType": "None",
+        "targetCpuBits": 64
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      }
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    },
+    "nativeSurface": {
+      "schemaVersion": 1,
+      "collection": "blank-target-before-emulation",
+      "window": {
+        "left": 10,
+        "top": 10,
+        "width": 1920,
+        "height": 1920,
+        "windowState": "normal"
+      },
+      "viewport": {
+        "url": "about:blank",
+        "visibilityState": "visible",
+        "innerWidth": 1920,
+        "innerHeight": 1833,
+        "outerWidth": 1920,
+        "outerHeight": 1920,
+        "devicePixelRatio": 1,
+        "screen": {
+          "width": 1920,
+          "height": 1920,
+          "availWidth": 1920,
+          "availHeight": 1920
+        }
+      }
+    }
+  },
+  "limitations": [
+    "This is an instrumented diagnostic, not a release-eligible performance pass.",
+    "Raw UI envelope has no buildId field; the source-matched build-info artifact and SW cache name join the recorded build.",
+    "The ready map-warm marker records completed warm phases, not idle ServiceWorker CPU or a live network queue.",
+    "ServiceWorker CPU sampling starts +711.482 ms after raw start; activity before that is not ruled out by its sampled profile.",
+    "Published inspection is suppressed during pointer input. The first post-input publication jumps 12 draw revisions, leaving 11 draws without individual observer snapshots.",
+    "The observer adds measured overhead total16.2 ms/max1.1 ms and marks after publication. It cannot assign exact draw start/end or prove compositor presentation.",
+    "No served sw.js bytes or browser process cleanup receipt are included in this diagnostic artifact.",
+    "CPU hotspot attribution belongs to the independent perf review; no candidate speedup is inferred here."
+  ]
+}

@@ -1,0 +1,120 @@
+name: Exact source opaque tile diagnosis
+
+on:
+  push:
+    branches: [verify/tile-opacity-20261113]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tile-opacity-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native-pixels-and-smoothness:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out the exact candidate source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Require the reviewed parent and unchanged map geometry and release request
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          import {createHash} from 'node:crypto';
+          import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+          const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
+          const source=git('rev-parse','HEAD'),parent='3cb219fdd8380fcf2580bfe37aa7d1f47523ba08';
+          assert.equal(source,process.env.GITHUB_SHA);
+          assert.equal(process.env.GITHUB_REF,'refs/heads/verify/tile-opacity-20261113');
+          assert.deepEqual(git('rev-list','--parents','-n','1','HEAD').split(/\s+/),[source,parent]);
+          const unchanged=['web/lib/custom-map-engine.ts','web/lib/custom-map-painter.ts','web/lib/custom-map-vector.ts','web/lib/custom-map-tiles.ts','tools/pages-preview/browser-smoothness.mjs','tools/pages-preview/browser-smoke.mjs','tools/pages-preview/browser-environment.mjs','tools/pages-preview/browser-zoom-audit.mjs','tools/pages-preview/browser-source-end-pan.mjs','tools/pages-preview/browser-native-text.mjs','tools/pages-preview/browser-startup.mjs','.github/workflows/android.yml','tools/pages-preview/browser-map-loading.mjs','tools/pages-preview/tests/browser-map-underlay.browser.mjs','tools/android-build/release-request.json','data','contracts'];
+          execFileSync('git',['diff','--exit-code',parent,'HEAD','--',...unchanged],{stdio:'inherit'});
+          const hash=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
+          mkdirSync('web/pages-preview/design-qa/map-tile-opacity-checks',{recursive:true});
+          writeFileSync('web/pages-preview/design-qa/map-tile-opacity-checks/tile-opacity-source.json',JSON.stringify({
+            schemaVersion:1,diagnosticOnly:true,releaseEligible:false,
+            sourceCommit:source,sourceTree:git('rev-parse','HEAD^{tree}'),parent,
+            releaseRequestUnchanged:true,releaseRequestSHA256:hash('tools/android-build/release-request.json'),
+            workerSHA256:hash('web/lib/custom-map-tiles.worker.ts'),unchanged
+          },null,2)+'\n');
+          NODE
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Check the committed shared runtime without repairing it
+        run: node tools/android-build/prepare-custom-map.mjs --check > web/pages-preview/design-qa/map-tile-opacity-checks/tile-opacity-runtime-check.json
+      - name: Verify tile worker protocol and unchanged smoothness contracts
+        run: |
+          node --experimental-strip-types --test web/tests/custom-map-tiles-worker.test.mjs
+          node --test tools/pages-preview/tests/browser-smoothness.test.mjs
+      - name: Restore the existing public Android preview
+        run: node tools/pages-preview/fetch-apk.mjs
+      - name: Build the exact candidate application
+        run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Verify real worker tile opacity and exact native pixels once
+        timeout-minutes: 3
+        run: node --test tools/pages-preview/tests/browser-map-tile-opacity.browser.mjs
+      - name: Bind all native comparisons and image bytes to the exact build
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          import {assertTileOpacityReceipt,assertTileOpacityFiles} from './tools/pages-preview/browser-map-tile-opacity-receipt.mjs';
+          const build=JSON.parse(readFileSync('web/pages-preview/dist/build-info.json','utf8'));
+          const report=JSON.parse(readFileSync('web/pages-preview/dist/browser-map-tile-opacity-verification.json','utf8'));
+          assertTileOpacityReceipt(report,{sourceCommit:process.env.GITHUB_SHA,buildId:build.buildId});
+          assertTileOpacityFiles(report,{root:'.',build});
+          NODE
+      - name: Check all original uninstrumented smoothness scenarios once
+        timeout-minutes: 6
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+        run: |
+          node tools/pages-preview/browser-smoke.mjs
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFileSync} from 'node:fs';
+          import {assertSmoothnessAudit} from './tools/pages-preview/browser-smoothness.mjs';
+          const report=JSON.parse(readFileSync('web/pages-preview/dist/browser-ui-smoothness-diagnostic.json','utf8'));
+          assert.equal(report.sourceCommit,process.env.GITHUB_SHA);
+          assert.equal(report.status,'completed');
+          assert.equal(report.diagnosticOnly,true);assert.equal(report.releaseEligible,false);
+          const profiles=[{name:'android-portrait',mobile:true,engine:'tropnik-canvas'},{name:'desktop-webgl',mobile:false,engine:'tropnik-canvas'}];
+          assert.deepEqual(report.profiles.map(item=>item.profile),profiles.map(item=>item.name));
+          report.profiles.forEach((audit,index)=>assertSmoothnessAudit(audit,profiles[index]));
+          assert.deepEqual(report.performanceIssues,[]);
+          NODE
+      - name: Preserve source and native evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-tile-opacity-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            web/pages-preview/design-qa/map-tile-opacity-checks/tile-opacity-source.json
+            web/pages-preview/design-qa/map-tile-opacity-checks/tile-opacity-runtime-check.json
+            web/pages-preview/dist/build-info.json
+            web/pages-preview/dist/verification.json
+            web/pages-preview/dist/http-verification.json
+            web/pages-preview/dist/browser-map-tile-opacity-verification.json
+            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            web/pages-preview/dist/browser-failure.json
+            web/pages-preview/design-qa/map-tile-opacity
+            web/public/custom-map/manifest.json
+            android/app/src/main/assets/custom-map/manifest.json
+          if-no-files-found: error
+          retention-days: 7

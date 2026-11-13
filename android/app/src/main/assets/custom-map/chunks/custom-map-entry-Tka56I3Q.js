@@ -943,7 +943,7 @@ function Ye({ west: e, south: t, east: n, north: r }) {
 }
 //#endregion
 //#region web/lib/custom-map-tiles.worker.ts?worker&url
-var Xe = "" + new URL("../workers/custom-map-tiles.worker-DIXTfJlZ.js", import.meta.url).href, Ze = 96, Qe = 288, $e = 160, et = 3, tt = 6, R = 8 * 1024 * 1024, nt = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
+var Xe = "" + new URL("../workers/custom-map-tiles.worker-BOzbsGer.js", import.meta.url).href, Ze = 96, Qe = 288, $e = 160, et = 3, tt = 6, R = 8 * 1024 * 1024, nt = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
 function rt(e) {
 	let t = e.paintZoom === void 0 ? e.z : e.paintZoom;
 	if (!Number.isInteger(e.z) || e.z < 0 || !Number.isInteger(t) || t < e.z || t > 18) throw Error("Invalid map paint zoom");

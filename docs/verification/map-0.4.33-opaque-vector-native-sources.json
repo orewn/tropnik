@@ -1,0 +1,106 @@
+{
+  "baseCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "fileHashes": {
+    "tools/pages-preview/tests/browser-map-tile-opacity.browser.mjs": "5e47d3f3d34e9cd285d9a9f08d1872e37f37922ab84835a1f40b3c54173f3c6e",
+    "tools/pages-preview/browser-map-tile-opacity-receipt.mjs": "201ca59a4d2cc97524fc9e165d53f53795c56689fca27dbfac4639bfb2e35252",
+    ".github/workflows/pages.yml": "c5c29b5a1f7dc4417307d79d69c155893633e415ce71538cd1791a8250ce576f",
+    ".github/workflows/tile-opacity-diagnostic.yml": "ec0da665a8299129039ef1613a0fb2029262ecbc328ff4b4b1710c04f3f8dd32"
+  },
+  "candidateWorkerSHA256": "1817903d49d61ff46bdc7c7bd4b84f724a9af3093d1439e5bf19a1c84ec789e1",
+  "baselineWorkerSHA256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+  "baselineReconstructionByteIdenticalToGit": true,
+  "workerDependencies": [
+    {
+      "path": "web/lib/custom-map-vector.ts",
+      "sha256": "87e145aa0d4c8a6b5007c0e1b53faba1b57a6c0d41b7782d7091575c1f5ebe48",
+      "bytes": 12737,
+      "matchesExact3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-relief.ts",
+      "sha256": "14ee495df7b02fe2f689c51e585e4e0fd64ec165a9beb1a85522716861e5f71a",
+      "bytes": 421,
+      "matchesExact3cb": true
+    },
+    {
+      "path": "web/public/maps/map-city-labels.js",
+      "sha256": "62d4b661ef3edf6ffe22b079dde39da0c1602f5f33f28f265bf44c388e3cfd53",
+      "bytes": 941,
+      "matchesExact3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-symbols.ts",
+      "sha256": "062eb4cdaf29d6f4946713a790c3d90feca49d0bf9cfcd2d7477465d3a289601",
+      "bytes": 3239,
+      "matchesExact3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-labels.ts",
+      "sha256": "b0e38679b23272f18119501b2503211801d5e1719cc2804713496f041f4342fd",
+      "bytes": 4586,
+      "matchesExact3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-painter.ts",
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "bytes": 26868,
+      "matchesExact3cb": true
+    }
+  ],
+  "compositionSources": [
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "sha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4",
+      "bytes": 86221,
+      "matchesExact3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-camera.ts",
+      "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "bytes": 21528,
+      "matchesExact3cb": true
+    }
+  ],
+  "assets": [
+    {
+      "id": "z7",
+      "path": "web/public/offline-map/localtiles/7/78/46.pbf",
+      "sha256": "377653b949af33792b377c16f3f77e7dd92711a082fa625ac437d4ee71f32091",
+      "bytes": 242149,
+      "matchesExact3cb": true
+    },
+    {
+      "id": "z12",
+      "path": "web/public/offline-map/localtiles/12/2506/1494.pbf",
+      "sha256": "ef12aeb5e7091f725d8ccdfc7ecf158d48a1a2eb6570d3a7f29d0f32e7556a2b",
+      "bytes": 28130,
+      "matchesExact3cb": true
+    },
+    {
+      "id": "z14",
+      "path": "web/public/offline-map/localtiles/14/10025/5977.pbf",
+      "sha256": "e6ddbb9d45623808994039f3ddc4290b6d789b73f1018ae0a06cd572312ea25d",
+      "bytes": 40300,
+      "matchesExact3cb": true
+    },
+    {
+      "id": "relief",
+      "path": "web/public/offline-map/terrain/tiles/12/2506/1494.png",
+      "sha256": "0f22d003fd23f306ce0815cee54fe45cc9c76ea72ff0cb55dac4b2005ebe79a6",
+      "bytes": 84429,
+      "matchesExact3cb": true
+    }
+  ],
+  "pagesDiffAdditiveOnly": true,
+  "pagesRemovedLines": [],
+  "runtime": {
+    "web/public/custom-map/manifest.json": {
+      "sha256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded",
+      "bytes": 533835
+    },
+    "android/app/src/main/assets/custom-map/manifest.json": {
+      "sha256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded",
+      "bytes": 533835
+    }
+  }
+}

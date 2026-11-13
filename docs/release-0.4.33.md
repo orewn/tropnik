@@ -7,9 +7,12 @@
 ошибку общего картографического движка и задержку появления окружения карты.
 Кандидаты `5fefc0da`, `67d418dd` и `90dae23c` не прошли полные Pages CI
 и не опубликованы. Отдельный pixel candidate `7056633b` выявил изменение
-сглаживания границы под clip. Текущий кандидат ограничивает только перенос
-готовых пикселей в кэш, сохраняя прежние условия рисования всех Path2D;
-native pixel proof исправленного варианта ожидается.
+сглаживания границы под clip. Исправленный `3cb219fd` ограничивает только
+перенос готовых пикселей в кэш, сохраняя прежние условия рисования всех Path2D.
+Его отдельный native gate прошёл все 370 frames с нулевой разницей;
+полный application gate завершил функциональные сценарии, но performance
+assertion отклонил desktop pan p95 35,1 ms при пределе 35 ms. Android validation
+того же source прошёл 70 JVM, R8 и все 11 device scenarios.
 Опубликованный Android 0.4.32 и
 его результаты сохраняются; нового APK или Pages 0.4.33 пока нет.
 
@@ -461,6 +464,122 @@ source inputs:
 Локальный build `c627dcc832e505c5` прошёл 718 страниц и 71 HTTP case;
 все 2165 input hashes повторно сверены. Его `sourceCommit: null` не
 подменяет будущий accepted CI payload.
+
+### Native результат исправленного source 3cb219fd
+
+[Diagnostic run 43440468172](https://github.com/orewn/tropnik/actions/runs/43440468172)
+на `3cb219fdd8380fcf2580bfe37aa7d1f47523ba08` завершился SUCCESS.
+Это новый исправленный source с parent `7056633b`, а не повтор неудачного
+кандидата. [Source receipt](verification/source-0.4.33-visible-transfer-diagnostic.json)
+проверяет exact tree и leased fast-forward диагностической ветки.
+
+[Краткий итог](verification/map-0.4.33-visible-transfer-native-summary.json),
+[полная проверка изображений](verification/map-0.4.33-visible-transfer-native-success.json)
+и [независимый transfer review](verification/map-0.4.33-visible-transfer-native-independent-review.json)
+подтверждают **740 декодированных PNG, 370/370 RGBA comparisons с нулевой
+разницей**. Все 175 исторических baseline hashes сохранились, включая
+первый partial frame; все 174 прежде успешных optimized hashes также
+сохранились. Ровно ошибавшийся `pair-01` теперь совпадает с тем же эталоном,
+включая все 257 ранее изменённых координат.
+
+Все 72 обязательных incremental frames — 24 при DPR 1, 1,5 и 2 — имеют
+полный witness main painter без clip, bounded integer partial capture,
+один full restore и сбалансированные context scopes. На каждом DPR эти
+24 кадра выполняют 719 source tile calls вместо 3936, плюс 24 partial
+captures и 24 full restores. Это native operation counts в controlled
+delivery fixture, **не измерение FPS или времени реальной сетевой загрузки**.
+Максимальная dirty area — 8,35% backing canvas; используется одна retained
+surface. Отрицательный контроль обнаруживает пропущенную вторую пару
+при каждом DPR. Все 31 renderer source, 61 runtime input, два manifest
+и artifact digest проверены; browser cleanup завершился без ошибок.
+
+[Продвижение на main](verification/source-0.4.33-visible-transfer-main.json)
+использует тот же commit, без пересборки или изменения production bytes.
+Полный [Pages 43440933324](https://github.com/orewn/tropnik/actions/runs/43440933324)
+завершился FAILURE на итоговой performance assertion.
+[Независимый пересчёт всех 32 окон](verification/web-0.4.33-visible-transfer-smoothness.json)
+подтверждает единственное превышение: полный desktop pan p95 **35,1 ms**
+при пределе 35 ms. Ранние 16 и остальные 15 полных окон прошли. Все четыре
+audits выполнены при CPU rate 1, с восстановленным throttling и без trace
+instrumentation. У полного pan нет long task или интервала выше 50 ms;
+девять из двенадцати интервалов от 35 ms пришлись на удерживаемый указатель,
+один — на отпускание, два — позже. Эти raw intervals не определяют
+конкретную функцию CPU. Принятый browser-verification не создан, deploy
+пропущен; source не переименован в успешную поставку. Release request пока
+0.4.32. Native pixel PASS не подменяет smoothness или публикацию нового APK.
+
+[Функциональные результаты этого полного run](verification/web-0.4.33-visible-transfer-functional.json)
+проверены отдельно: оба native interaction scenarios прошли, после поворота
+в обоих профилях выбрана исходная ожидаемая Иркутская область. Все шесть
+coast frames каждого профиля готовы, без pending/error, center error не
+более 0,000057 px при прежнем пределе 6 px. Close-trail сохраняет исходный
+маршрут на z11/14/17; оба satellite continuity scenarios прошли. Hashes
+и размеры 69 функциональных PNG подтверждены, 740 native PNG побайтно
+совпадают с уже независимо декодированным proof exact source 3cb219fd.
+
+Свежий loading gate показал 17/42 готовых пар при удержанном DEM. Все
+24 raw RGBA пары совпали между pending/final; все 21 допустимых PNG crops
+из восьми клеток также совпали. Progress — 195,916 ms после настоящего
+pause, которому предшествовали 2323,151 ms подготовки; это не обещание
+полной загрузки за 196 ms. После освобождения источника покрытие завершилось.
+SW update validators и browser cleanup прошли. Эти успешные проверки
+не отменяют общий performance failure.
+
+[Android run 43440933260](https://github.com/orewn/tropnik/actions/runs/43440933260)
+завершился SUCCESS. [Validation receipt](verification/android-0.4.33-visible-transfer-validation.json)
+подтверждает 70 JVM, unsigned R8 и все 11 фактически исполненных device
+cases. Установлен свежий universal APK 69 231 946 B с SHA-256
+`640be462043ce4f248757ecc1e7e8507902c64aaafc82d5d9ec897083403fed9`;
+его runtime, inputs и 1746 aliases совпадают с exact source.
+[Native marker evidence](verification/android-0.4.33-visible-transfer-marker-input.json)
+сохраняет реальные empty-pointerType WebView gestures и два pixel reports
+47/47. Device timings 1100/1243 ms относятся к своим сценариям и не
+подменяют browser smoothness. Publish/public jobs фактически SKIPPED
+при `release_requested=false`; этот APK не объявляется публичным выпуском.
+
+## Непрозрачные vector tiles
+
+Следующий кандидат меняет только атрибут выходной Canvas в tile worker:
+обычный vector tile создаётся с `alpha: false`. Настоящий painter сначала
+полностью заполняет его непрозрачным CARTOGRAPHY.land, затем рисует исходную
+геометрию. Это справедливо и для пустого MVT, и для целочисленно вырезанного
+overzoom child. Canvas может явно учитывать непрозрачность источника при
+повторных drawImage. Прозрачные vector overlays, измеренный relief и
+декодированные растровые источники сохраняют `alpha: true`.
+
+Количество, zoom, URLs, геометрия, размер 512×512 и порядок рисования тайлов
+не меняются. В production изменён только `web/lib/custom-map-tiles.worker.ts`;
+engine и renderer paths остаются точными bytes 3cb219fd. Фактическое ускорение
+не выводится из одного атрибута и должно пройти собственный native/performance
+CI. Уменьшение source zoom не применяется: оно меняло бы набор исходных объектов.
+
+[Регрессионный receipt](verification/map-0.4.33-opaque-vector-regression.json)
+подтверждает 26/26 worker tests и lint. На точных bytes worker 3cb219fd новые
+ожидания дают три alpha failures при 23 PASS. Контролируемые API проверяют
+scope default/false/true, software raster policy, пустой и gzip MVT, native
+и overzoom окна, background перед paths, совпадение labels/geometry/crop,
+parent reuse и ownership. Эти mock команды не являются native pixel proof.
+
+[Native fixture preflight](verification/map-0.4.33-opaque-vector-native-preflight.json)
+и [независимый source review](verification/map-0.4.33-opaque-vector-native-review.json)
+закрепляют 48 случаев: реальные source tiles z7/z12/z14, пустой MVT,
+overzoom child z18, прозрачные overlays и измеренный relief; DPR 1/1,5/2
+и оба raster policies. 96 настоящих Workers должны дать 144 нулевых RGBA
+сравнения для tile, плоской и повёрнутой/наклонной проекций, с 288 PNG.
+[Source witness](verification/map-0.4.33-opaque-vector-native-sources.json)
+сверяет baseline с точным `git show 3cb`, включая все шесть painter dependencies,
+engine/camera и четыре исходных файла. Это подготовка строгого gate, пока
+не результат настоящего браузера. Прежние Pages gates сохранены; новый
+обязательный proof также проверяется по публичному адресу после deployment.
+
+[Локальный preflight opaque candidate](verification/local-0.4.33-opaque-vector-preflight.json)
+проверяет build `39a9a382cb37a4fb`: 718 страниц и все 2167 source input hashes,
+статический и HTTP gates, 26 worker tests, 13 publication tests, worker lint
+и полный TypeScript. Runtime manifest
+`e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded`,
+source inputs `0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642`;
+все 12 web/Android outputs совпадают побайтно. SourceCommit локальной
+сборки равен null. Принятый CI artifact и native результаты ещё требуются.
 
 ## Порядок выпуска
 

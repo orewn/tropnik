@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T14:12:55.073930+00:00",
+  "scope": "Corrected source advanced the isolated diagnostic branch by a leased fast-forward; no main or release-request write.",
+  "branch": "verify/streamed-ground-20261113",
+  "remoteSource": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "sourceTree": "235a701a33a72948f9fb361ae89f06610ff2729f",
+  "parent": "7056633bddfd2325c4718f385fc55f38ad966459",
+  "localReviewedEquivalent": "2099965ea746acae5d6b622a51cde6850abb8cbb",
+  "localAndRemoteTreesEqual": true,
+  "gitApiCommitReadbackVerified": true,
+  "branchReadbackVerified": true,
+  "fetchedRemoteCommitVerified": true,
+  "expectedPreviousBranchHead": "7056633bddfd2325c4718f385fc55f38ad966459",
+  "force": false,
+  "mainAtPublication": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+  "releaseRequest": "0.4.32-preview",
+  "releaseEligible": false,
+  "diagnosticRunId": 43440468172,
+  "diagnosticRunInitialStatus": "in_progress",
+  "transport": {
+    "localCommit": "2099965ea746acae5d6b622a51cde6850abb8cbb",
+    "parent": "7056633bddfd2325c4718f385fc55f38ad966459",
+    "baseTree": "94bdf2017c9af9678d81ab0f695e3025a37248cb",
+    "targetTree": "235a701a33a72948f9fb361ae89f06610ff2729f",
+    "planPath": "/workspace/scratch/686c5dc59f67/github-033-visible-transfer-plan.json",
+    "planBytes": 2561888,
+    "planSha256": "86d1c153c0b38f61f1719d520763be9e036f8b2f839c185e9f416d8022510d4b"
+  },
+  "changedFiles": [
+    {
+      "path": ".github/workflows/pages.yml",
+      "status": "M",
+      "bytes": 43549,
+      "gitBlobSha": "7d228d925c87fe35df1130981d1323129d989e83",
+      "sha256": "3537b48e219e8681ce45144584a03fdf4968a4cd1c549001a59aa476f86e838d"
+    },
+    {
+      "path": ".github/workflows/streamed-ground-diagnostic.yml",
+      "status": "M",
+      "bytes": 12338,
+      "gitBlobSha": "8d6c6c47d53045c3090afa2e2e684d9840c5e46b",
+      "sha256": "4e82eab8dfc77b004c808abf3db11c0e4e211aea9132ad8756e5815af30fcb21"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/android-bootstrap.js",
+      "status": "M",
+      "bytes": 22086,
+      "gitBlobSha": "62142145ee28bb74626e1be58e277749b5bb37d9",
+      "sha256": "05dcfa6dfa63c5af58a0be400fef9b4a8ddf90a915edde9b03e90222591474b8"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-BBfF3zG_.js",
+      "status": "A",
+      "bytes": 155542,
+      "gitBlobSha": "20740b5600e63ba102fa3ac3066b02dcbf673a7e",
+      "sha256": "65109fdbf2ef3b72ba7f9437149f01069ced21e2dbfffb8ade4f878e36437c20"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-CWE0vlEv.js",
+      "status": "D"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/manifest.json",
+      "status": "M",
+      "bytes": 533835,
+      "gitBlobSha": "292430302b66e7ef8931628456151e8881046e70",
+      "sha256": "5fea6c7b878bc50e2efc57e9a01032805f176116bf743e7dc0dff5014ef6b20b"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/map-runtime.js",
+      "status": "M",
+      "bytes": 224,
+      "gitBlobSha": "41d45bdd22f604196487367f27fc5bf9135df6c4",
+      "sha256": "3ddf8494e7279d5ea311465d9bbcdffb85e6028ce77c66459a2e6d7a3ac0a4d2"
+    },
+    {
+      "path": "docs/release-0.4.33.md",
+      "status": "M",
+      "bytes": 43752,
+      "gitBlobSha": "8bcb4a8a4437a0afa129bc16c2b6803c3c5a3234",
+      "sha256": "855445b7b0855f5b16d004dd70c25c9e124719a16b49324069e48ffb44021bb2"
+    },
+    {
+      "path": "docs/verification/local-0.4.33-visible-transfer-preflight.json",
+      "status": "A",
+      "bytes": 9920,
+      "gitBlobSha": "4de2a5f91325a6eab67727d0d876f6a339b2700e",
+      "sha256": "8d3b2162bcaeb4c2d5e21f8f2a47be3d3098a2be86678ec9d9fda8b9d9477cd5"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-streamed-ground-native-failure.json",
+      "status": "A",
+      "bytes": 382969,
+      "gitBlobSha": "547cc2f87fecc963787bd487e2b1b7adfdf0a5e1",
+      "sha256": "8346ff5aebeee1680cf010c69263f25dbed5cd97db417603032361d59098ed2b"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-streamed-ground-path-failure.json",
+      "status": "A",
+      "bytes": 6051,
+      "gitBlobSha": "a60469cb6b9031ad4b9e7ed67073bdb821d9f189",
+      "sha256": "366bfa5da88920f2b76ab6009ae7e4c2ec84d81fe1611a10b1986484a459c564"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-visible-transfer-fixture-review.json",
+      "status": "A",
+      "bytes": 3900,
+      "gitBlobSha": "63ac0489354b179832cb6c8db23096ba492da9de",
+      "sha256": "cbe79dedd7cb0c56ce6fb24da482600aa09b4888c7957f277e7f947da8726158"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-visible-transfer-regression.json",
+      "status": "A",
+      "bytes": 8180,
+      "gitBlobSha": "43b33d8913028d5f522c77ea3af88c2ba8935a4a",
+      "sha256": "34924fa2d11326110ef0f521ee41e28cd4bbd00dde20df32642e3db42ce61172"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-visible-transfer-source-review.json",
+      "status": "A",
+      "bytes": 6154,
+      "gitBlobSha": "3598cba1ce4de130ed445922fcbceb4b5f000bde",
+      "sha256": "75c65cc9073f5020bd1049c00e2517d9d0f45401aed8332e08d3afc7cf96dbf3"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-visible-transfer-workflow-review.json",
+      "status": "A",
+      "bytes": 3605,
+      "gitBlobSha": "9b248a2d43a8b2e02baf3c4f3d3f629c9a5977e6",
+      "sha256": "3c2b8b6e128d47d0a5d7097adb03a8325f7d23e82485edaec5f2159bebf3b64e"
+    },
+    {
+      "path": "docs/verification/source-0.4.33-streamed-ground-diagnostic.json",
+      "status": "A",
+      "bytes": 10537,
+      "gitBlobSha": "39328f36f0831812e80d4836bec185d824bc190d",
+      "sha256": "861ad11771e843e15cd6df89ff05f8db038fcb71ca88b9603394c045d36eb969"
+    },
+    {
+      "path": "tools/pages-preview/tests/browser-map-underlay.browser.mjs",
+      "status": "M",
+      "bytes": 63141,
+      "gitBlobSha": "c7ddf1c86f840a202be0a9fc4863d195d19765b6",
+      "sha256": "ffeda1b9da84943000cb038a31fcd1d11cfa146b286b7b214f6da9593b833fbc"
+    },
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "status": "M",
+      "bytes": 86221,
+      "gitBlobSha": "143666be793628bfd41fdba2b2fc34b886331be1",
+      "sha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4"
+    },
+    {
+      "path": "web/public/custom-map/android-bootstrap.js",
+      "status": "M",
+      "bytes": 22086,
+      "gitBlobSha": "62142145ee28bb74626e1be58e277749b5bb37d9",
+      "sha256": "05dcfa6dfa63c5af58a0be400fef9b4a8ddf90a915edde9b03e90222591474b8"
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-BBfF3zG_.js",
+      "status": "A",
+      "bytes": 155542,
+      "gitBlobSha": "20740b5600e63ba102fa3ac3066b02dcbf673a7e",
+      "sha256": "65109fdbf2ef3b72ba7f9437149f01069ced21e2dbfffb8ade4f878e36437c20"
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-CWE0vlEv.js",
+      "status": "D"
+    },
+    {
+      "path": "web/public/custom-map/manifest.json",
+      "status": "M",
+      "bytes": 533835,
+      "gitBlobSha": "292430302b66e7ef8931628456151e8881046e70",
+      "sha256": "5fea6c7b878bc50e2efc57e9a01032805f176116bf743e7dc0dff5014ef6b20b"
+    },
+    {
+      "path": "web/public/custom-map/map-runtime.js",
+      "status": "M",
+      "bytes": 224,
+      "gitBlobSha": "41d45bdd22f604196487367f27fc5bf9135df6c4",
+      "sha256": "3ddf8494e7279d5ea311465d9bbcdffb85e6028ce77c66459a2e6d7a3ac0a4d2"
+    },
+    {
+      "path": "web/public/sw.js",
+      "status": "M",
+      "bytes": 17420,
+      "gitBlobSha": "d85b07d4a070441af73a3f44b4fd07d060762c4f",
+      "sha256": "d7452acaf421c430cc245f7612fc21c3e59a2cc672d7807d9da2777f9a8b88db"
+    },
+    {
+      "path": "web/tests/custom-map-engine.test.mjs",
+      "status": "M",
+      "bytes": 200019,
+      "gitBlobSha": "3c0051b3a263944a0a604865cce77460daeed92f",
+      "sha256": "b24b465f1d1f5574464362c1a74619e11315a9fd400f3a535c2773247957528e"
+    }
+  ],
+  "limitations": [
+    "This is a new corrected source, not a rerun of the failed source.",
+    "Native CI outcome and full application acceptance remain pending."
+  ]
+}

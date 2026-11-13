@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_AT_SOURCE",
+  "productionSourceCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "localCommit": "2d35f42e01eae1fd861fa8448235d4dedb2a23e7",
+  "files": [
+    {
+      "path": ".github/workflows/direct-drag-diagnostic.yml",
+      "bytes": 6442,
+      "sha256": "1be633e1d2a8bd5c053d64da5c38019e2139428329bd7488ec2e33a696cd608d"
+    },
+    {
+      "path": "tools/pages-preview/browser-smoothness.mjs",
+      "bytes": 33726,
+      "sha256": "48609856d45914e45cbd78bc619195d1b30d4ebdeed6dc03b1913771daaa5fdd"
+    },
+    {
+      "path": "tools/pages-preview/tests/direct-drag-trace.test.mjs",
+      "bytes": 10760,
+      "sha256": "419437d7a4157ef7f3e705edd80ef6f82a277aa2bdf165c90dfb7c41683ecd72"
+    }
+  ],
+  "checks": {
+    "originalRunSmoothnessBodyByteIdenticalFromReportInitialization": true,
+    "productionTreesUnchanged": true,
+    "traceOnlyDesktopMapPan": true,
+    "captureCapMs": 8000,
+    "originalBudgetsUnchanged": true,
+    "allOriginal16WindowsRetained": true,
+    "observerReadOnlyBounded": true,
+    "workerSnapshotsOutsideRawWindow": true,
+    "captureBeforeRawDrainAfterRaw": true,
+    "postCaptureRequiresCompleteEOFNoLossAndOriginalBudgets": true,
+    "releaseQualificationForbidden": true
+  },
+  "limits": [
+    "Source review only; CI actual evidence pending.",
+    "Observer publication marks are upper bounds, with coalescing and pointer suppression explicit.",
+    "No browser run was performed locally."
+  ]
+}

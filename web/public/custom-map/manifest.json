@@ -154,8 +154,8 @@
     },
     {
       "path": "web/lib/custom-map-tiles.worker.ts",
-      "sizeBytes": 15542,
-      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217"
+      "sizeBytes": 15880,
+      "sha256": "1817903d49d61ff46bdc7c7bd4b84f724a9af3093d1439e5bf19a1c84ec789e1"
     },
     {
       "path": "web/lib/custom-map-trail-raster.ts",
@@ -318,12 +318,12 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "0d89efd6598ff9f70f2f92559d65a2936c2e2e6b1ad0f956e0663c5c534f8cb5",
+  "sourceInputsSha256": "0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 22086,
-      "sha256": "05dcfa6dfa63c5af58a0be400fef9b4a8ddf90a915edde9b03e90222591474b8"
+      "sha256": "5965499ab77befc730eae063256ce470d9d64768d3d729683f850b6d558f74af"
     },
     {
       "path": "catalogue.json",
@@ -331,9 +331,9 @@
       "sha256": "bad517373c27101ea8fe93423083f3636c11cf65824c2202f69cc2c2bf414aa3"
     },
     {
-      "path": "chunks/custom-map-entry-BBfF3zG_.js",
+      "path": "chunks/custom-map-entry-Tka56I3Q.js",
       "sizeBytes": 155542,
-      "sha256": "65109fdbf2ef3b72ba7f9437149f01069ced21e2dbfffb8ade4f878e36437c20"
+      "sha256": "d78b2146a7b92f3d3bb1d788c9273c28f2e1967c72ee8f563c61756092f02bf4"
     },
     {
       "path": "index.html",
@@ -348,7 +348,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 224,
-      "sha256": "3ddf8494e7279d5ea311465d9bbcdffb85e6028ce77c66459a2e6d7a3ac0a4d2"
+      "sha256": "0b8d7783042950e73b6dd41b6a77b124bc5071c1acafb4e883c7c28f82de1b17"
     },
     {
       "path": "map.css",
@@ -361,9 +361,9 @@
       "sha256": "54075549afdea2aee6d10c3cf70d53429b0ba457eda890a8ad93c1124c508c10"
     },
     {
-      "path": "workers/custom-map-tiles.worker-DIXTfJlZ.js",
-      "sizeBytes": 28755,
-      "sha256": "f76ea8a31e046b700ab47418f303cffec504490e700b78f2dfc68866c4a71b2e"
+      "path": "workers/custom-map-tiles.worker-BOzbsGer.js",
+      "sizeBytes": 28787,
+      "sha256": "c0995a8f541b049796dccb48bc20b54135e6d218a24fa7aeefb2ba8a2c8f0636"
     },
     {
       "path": "workers/custom-map-trail-raster.worker-CZZMbu81.js",

@@ -5,6 +5,7 @@ import {validateApkDelivery, validateApkManifest, verifyPublicApk} from './apk-a
 import {assertBrowserReport} from './browser-report.mjs';
 import {assertServiceWorkerUpdateReceipt} from './browser-service-worker-update.mjs';
 import {assertMapLoadingReceipt} from './browser-map-loading.mjs';
+import {assertTileOpacityReceipt} from './browser-map-tile-opacity-receipt.mjs';
 
 const [address, expectedBuild, expectedCommit] = process.argv.slice(2);
 assert.match(expectedBuild || '', /^[a-f0-9]{16}$/, 'Pass the build ID produced by the build job');
@@ -70,6 +71,11 @@ assertServiceWorkerUpdateReceipt(workerUpdate, {sourceCommit:expectedCommit, bui
 for (const path of ['web/components/ServiceWorker.tsx','web/lib/service-worker-registration.ts','web/public/sw.js','tools/pages-preview/browser-service-worker-update.mjs']) {
   assert.equal(workerUpdate.sources[path], build.inputs.find(input => input.path === path)?.sha256, 'The public update proof belongs to another source input');
 }
+const tileOpacity = JSON.parse((await request('browser-map-tile-opacity-verification.json')).text);
+assertTileOpacityReceipt(tileOpacity, {sourceCommit:expectedCommit, buildId:expectedBuild, environment:browser.environment});
+for (const source of tileOpacity.sources) {
+  assert.deepEqual(source, build.inputs.find(input => input.path === source.path), 'The public tile opacity proof belongs to another source input');
+}
 const mapLoading = JSON.parse((await request('browser-map-loading-verification.json')).text);
 assertMapLoadingReceipt(mapLoading, {sourceCommit:expectedCommit, buildId:expectedBuild, environment:browser.environment});
 for (const [path, hash] of Object.entries(mapLoading.sources)) {
@@ -99,4 +105,4 @@ validateApkDelivery(build.apk, android);
 const apk = await verifyPublicApk(android);
 assert.equal(apk.bytes, android.bytes);
 assert.equal(apk.sha256, android.sha256, 'The public APK is not the pinned Android build');
-console.log(JSON.stringify({verified: true, url: site.href, buildId: build.buildId, sourceCommit: build.sourceCommit, publicHttpChecks: checks, apkDelivery: build.apk.delivery, apkUrl: apk.url, apkBytes: apk.bytes, apkSha256: apk.sha256, browserRenderingTested: true, browserProfiles: browser.profiles.length, serviceWorkerUpdateTested: true, serviceWorkerTimeoutMs: workerUpdate.timeout.elapsedMs, mapLoadingTested: true}, null, 2));
+console.log(JSON.stringify({verified: true, url: site.href, buildId: build.buildId, sourceCommit: build.sourceCommit, publicHttpChecks: checks, apkDelivery: build.apk.delivery, apkUrl: apk.url, apkBytes: apk.bytes, apkSha256: apk.sha256, browserRenderingTested: true, browserProfiles: browser.profiles.length, serviceWorkerUpdateTested: true, serviceWorkerTimeoutMs: workerUpdate.timeout.elapsedMs, mapLoadingTested: true, tileOpacityTested: true, tileOpacityComparisons: tileOpacity.totals.comparisons}, null, 2));

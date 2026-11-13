@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-13T14:54:12.106863+00:00",
+  "status": "passed-local-protocol-regression",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "baseCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "candidateWorkerSHA256": "1817903d49d61ff46bdc7c7bd4b84f724a9af3093d1439e5bf19a1c84ec789e1",
+  "candidateTestSHA256": "3cfa197418de00cea27cca10a019d5b63258e9d6a37c83f4680a20caf4662ef5",
+  "ownedChanges": [
+    "web/tests/custom-map-tiles-worker.test.mjs"
+  ],
+  "productionWorkerOwner": "root",
+  "sourceGeometryAndPainterBytesUnchangedFromBase": true,
+  "review": {
+    "ordinaryVector": "Each job creates a fresh 512x512 output. paintVectorTile first clears and fills the entire translated parent rectangle with opaque #ecebdc before vector paths. Integer child offsets and parent extent cover all output pixels, including wrapped overzoom children.",
+    "scope": "alpha:false only for kind=vector with transparent absent/false. Boolean coercion agrees with the existing painter argument. Satellite vector overlays, raster outputs, elevation readback, parent shade and relief outputs keep their previous alpha behavior.",
+    "laterPaint": "The painter has no later clearRect, globalCompositeOperation or globalAlpha override that would erase the opaque vector background. Semi-transparent feature colours composite over the existing paper.",
+    "lifetime": "Each opacity variant owns a separate output canvas; decoded vector geometry is shared unchanged. No new surface budget, bitmap close, source request, zoom, path filter or release-request change is introduced."
+  },
+  "red": {
+    "sourceCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+    "workerSha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+    "testSha256": "3cfa197418de00cea27cca10a019d5b63258e9d6a37c83f4680a20caf4662ef5",
+    "adaptedTestSha256": "ed01456384a7bf2c1c78e109e280877d6962d67b2329af2a8d8000f7f42c65db",
+    "adaptation": "Only import/readFile paths changed to exact clean 3cb sources; TypeScript loaded from existing main dependency. All test assertions unchanged.",
+    "command": [
+      "node",
+      "--experimental-strip-types",
+      "--test",
+      "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-vector-worker-3cb-red.test.mjs"
+    ],
+    "exitCode": 1,
+    "log": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-vector-worker-3cb-red.log",
+    "tests": 26,
+    "passed": 23,
+    "failed": 3,
+    "expectedFailure": "All three failures are alpha:true actual versus alpha:false expected for an ordinary vector output. Existing unrelated 23 tests pass."
+  },
+  "green": {
+    "baseCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+    "candidate": "uncommitted worker bytes; exact hashes below",
+    "hashes": {
+      "web/lib/custom-map-tiles.worker.ts": "1817903d49d61ff46bdc7c7bd4b84f724a9af3093d1439e5bf19a1c84ec789e1",
+      "web/tests/custom-map-tiles-worker.test.mjs": "3cfa197418de00cea27cca10a019d5b63258e9d6a37c83f4680a20caf4662ef5"
+    },
+    "sourceUnchangedDuringRun": true,
+    "command": [
+      "node",
+      "--experimental-strip-types",
+      "--test",
+      "tests/custom-map-tiles-worker.test.mjs"
+    ],
+    "exitCode": 0,
+    "log": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-vector-worker-green.log",
+    "tests": 26,
+    "passed": 26,
+    "failed": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "command": [
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "tests/custom-map-tiles-worker.test.mjs"
+    ],
+    "exitCode": 0,
+    "log": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-vector-worker-test-lint.log"
+  },
+  "diffCheck": {
+    "exitCode": 0
+  },
+  "coverage": [
+    "ordinary transparency absent and explicit false; transparent true overlay",
+    "softwareRaster absent, false and true",
+    "native display/source and z18/source14 cropped children",
+    "raw and gzip zero-layer MVT through real decoder; wrapped x=-1 overzoom child",
+    "full opaque background before any source path; existing parent translation, path strokes and place anchors",
+    "relief/raster output alpha and original shade/readback policy",
+    "parent LRU reuse, separate 512px outputs and transferred bitmap ownership",
+    "existing malformed input, failure/retry, DEM halo, source crop and paintZoom semantics"
+  ],
+  "limits": [
+    "Canvas calls are recorded by a mock. This receipt is not a native pixel comparison, opacity metadata measurement, performance result or physical-device result.",
+    "Canvas backend rounding and ImageBitmap compositing must pass the strict real-browser native fixture; no tolerance relaxation is authorized.",
+    "All original uninstrumented smoothness windows and full Pages/Android release gates remain required on a new exact source. No APK publication is authorized by this result."
+  ],
+  "hashes": {
+    "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-tiles.worker.ts": "1817903d49d61ff46bdc7c7bd4b84f724a9af3093d1439e5bf19a1c84ec789e1",
+    "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-painter.ts": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+    "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-vector.ts": "87e145aa0d4c8a6b5007c0e1b53faba1b57a6c0d41b7782d7091575c1f5ebe48",
+    "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-tiles-worker.test.mjs": "3cfa197418de00cea27cca10a019d5b63258e9d6a37c83f4680a20caf4662ef5",
+    "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-vector-worker-3cb-red.log": "56410f8bf2ad6a50cf5c82b86a332dd04f406dca76f538d9cfb5c33562798d98",
+    "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-vector-worker-green.log": "952ea70e5c0fc934a6c466092429d14dbd8751f24c68f0d05da52c27bdc8c3c1",
+    "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-vector-worker-test-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

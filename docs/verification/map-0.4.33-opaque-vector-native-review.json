@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-13T15:04:50.783923+00:00",
+  "status": "passed-independent-source-review",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "baseCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "reviewedFiles": {
+    "tools/pages-preview/tests/browser-map-tile-opacity.browser.mjs": "5e47d3f3d34e9cd285d9a9f08d1872e37f37922ab84835a1f40b3c54173f3c6e",
+    "tools/pages-preview/browser-map-tile-opacity-receipt.mjs": "201ca59a4d2cc97524fc9e165d53f53795c56689fca27dbfac4639bfb2e35252",
+    ".github/workflows/pages.yml": "c5c29b5a1f7dc4417307d79d69c155893633e415ce71538cd1791a8250ce576f",
+    ".github/workflows/tile-opacity-diagnostic.yml": "ec0da665a8299129039ef1613a0fb2029262ecbc328ff4b4b1710c04f3f8dd32"
+  },
+  "candidateWorkerSHA256": "1817903d49d61ff46bdc7c7bd4b84f724a9af3093d1439e5bf19a1c84ec789e1",
+  "baselineWorkerSHA256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+  "sourceWitness": {
+    "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-opacity-native-source-witness.json",
+    "bytes": 3818,
+    "sha256": "3380e28c77ea23e89b0a1aa1c1a2c09cf415e08c0e310d42e516028a8b55ef98"
+  },
+  "blockingFindings": [],
+  "checks": {
+    "frozenBaseline": "Independently reconstructed baseline from candidate by removing the one reviewed comment and replacing the one alpha expression. Result is byte-identical to git show 3cb:worker, not merely to a helper-provided hash.",
+    "unchangedProduction": "All six worker dependency hashes, the main engine/camera bytes and four pinned MVT/PNG assets independently match exact 3cb. Esbuild worker metafile input-set equality rejects extra/unbound decode or painter imports.",
+    "realWorker": "Each case creates separate baseline/candidate native Worker instances using compiled actual production handlers. Pinned input ArrayBuffer is posted with transfer; the real posted ImageBitmap and its detachment are observed. No worker painting or output pixels are replaced.",
+    "nativeObservation": "getContext and postMessage wrappers use Reflect.apply on the captured native methods with the original receiver/arguments. Actual context attributes, ImageBitmap dimensions before/after native transfer and receiver type are checked, rather than inferring alpha from requested options alone.",
+    "realComposition": "Bitmap readback uses actual native Canvas/getImageData. Both flat and affine compositions call the unchanged CustomMapEngine.prototype.worldTransform/drawTiles on a real context, with a fractional zoom/offset and fixed adversarial opaque backdrop. The drawImage counter forwards the original call. Unconstructed engine worker URL stubs are not used by either actual tile worker.",
+    "strictPixels": "Every case compares all RGBA bytes for transferred 512x512 tile, fractional flat composition and bearing17.3/pitch25 composition. Required deltas are exactly zero; pixel hashes, alpha counts, source metadata and visible effects are checked. There is no tolerance relaxation or substitute bitmap.",
+    "completeMatrix": "The helper requires the exact ordered 8 scenarios x 2 softwareRaster policies x 3 DPR values. It independently recounts 48 cases, 144 comparisons, 288 PNGs and 96 workers; six captures per case have fixed phase names and dimensions.",
+    "cleanup": "Per-case finally cancels pending jobs, terminates both workers, closes both received bitmaps and releases canvas surfaces before the returned case is serialized. Success requires exact cleanup counters and detached zero dimensions. Outer browser shutdown completes before report validation; success requires stopped cleanup without errors.",
+    "sourceBuildRuntime": "Fixture checks build sourceCommit against GITHUB_SHA. Shared helper validates source/build identity, every recorded source against local bytes and build.inputs, exact baseline/candidate/dependency hashes, web/native manifest byte parity and manifest worker source hash/sourceInputsSha256.",
+    "browserEnvironment": "Native browser environment and surface are measured, validated against the existing fixed rendering profile and bound to source. Pages additionally compares the native witness environment to the full browser report environment.",
+    "captureArtifacts": "Native canvases emit PNGs through toDataURL. The fixture writes all six captures, records PNG hashes/lengths plus native RGBA hashes, and the helper verifies PNG file bytes/signature/dimensions. Actual archive PNG decode/recomputation remains a subsequent independent artifact review.",
+    "pagesIntegration": "git diff against 3cb contains only additions: native fixture execution, strict shared receipt/file assertions and failure-report upload. Existing underlay, performance, native-input and all other release gates remain unchanged.",
+    "diagnosticWorkflow": "Current diagnostic workflow invokes both strict helpers against the exact build after native execution. Source/runtime evidence stays outside dist before the build; output upload includes all native captures. It has read-only permissions and no publish/deploy step."
+  },
+  "requiredNativeRun": {
+    "executedByThisReview": false,
+    "cases": 48,
+    "comparisons": 144,
+    "pngs": 288,
+    "workers": 96,
+    "expectedDifferentPixels": 0,
+    "expectedMaxChannelDelta": 0
+  },
+  "limits": [
+    "This is a source-review witness, not a successful native browser run or a performance measurement.",
+    "Fixture bundles exact production source with esbuild and exercises native Chromium Workers/Canvas. It does not itself execute the published APK/WebView or certify physical ARM64/signing.",
+    "The source inputs and helper PNG-byte checks do not replace independent decoding of downloaded PNGs and checking their pixels/hashes after CI.",
+    "No test or gate threshold was changed, no browser was launched, and no repository or remote write was performed for this review.",
+    "The 0.4.33 APK remains unpublished; a diagnostic PASS does not replace fresh complete Pages/Android gates."
+  ]
+}

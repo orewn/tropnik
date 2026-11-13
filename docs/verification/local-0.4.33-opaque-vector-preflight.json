@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "verified": true,
+  "releaseEligible": false,
+  "browserRenderingTested": false,
+  "createdAt": "2026-11-13T15:06:08.510117+00:00",
+  "parent": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "productionChange": "Only ordinary vector worker output context alpha is false; source cells, painter, engine, tile store and data unchanged.",
+  "build": {
+    "sourceCommit": null,
+    "buildId": "39a9a382cb37a4fb",
+    "pages": 718,
+    "inputsVerified": 2167,
+    "verification": {
+      "verified": true,
+      "pages": 718,
+      "referenceRoutes": 685,
+      "productionRoutingChecks": 2159,
+      "mapPolicyChecks": 25,
+      "staticApiNetworkCalls": 0,
+      "checkedScripts": 67,
+      "publicAssetChecks": 666,
+      "outputFiles": 2657,
+      "offlineFilesVerified": 249,
+      "customMap": {
+        "runtime": "tropnik-canvas",
+        "sourceInputsSha256": "0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642",
+        "manifestSha256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded",
+        "deployedFilesVerified": 9,
+        "workerCount": 3
+      },
+      "overviewReliefTilesVerified": 341,
+      "terrainGrid": [
+        513,
+        513
+      ],
+      "regionalTerrain": {
+        "regions": 2,
+        "filesVerified": 11,
+        "runtimeFetches": [
+          "/tropnik/terrain-regions/manifest.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+          "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+        ]
+      },
+      "apkVerified": true,
+      "coverageExcludedRoutes": [
+        "osm-relation-14407325"
+      ],
+      "base": "/tropnik/"
+    },
+    "httpVerification": {
+      "verified": true,
+      "base": "/tropnik/",
+      "httpChecks": 71,
+      "regionalTerrain": {
+        "regions": 2,
+        "runtimeFetches": [
+          "/tropnik/terrain-regions/manifest.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+          "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+        ],
+        "checksumsVerified": true
+      },
+      "browserRenderingTested": false,
+      "backendConnected": false
+    }
+  },
+  "runtime": {
+    "checkOnly": true,
+    "runtime": "tropnik-canvas",
+    "sourceInputsSha256": "0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642",
+    "sourceFiles": 61,
+    "outputFiles": 12,
+    "resourceAliases": 1746,
+    "manifestSha256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded",
+    "destinations": [
+      "web/public/custom-map",
+      "android/app/src/main/assets/custom-map"
+    ]
+  },
+  "webAndroidOutputs": [
+    {
+      "path": "Manrope-OFL.txt",
+      "bytes": 4383,
+      "sha256": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"
+    },
+    {
+      "path": "android-bootstrap.js",
+      "bytes": 22086,
+      "sha256": "5965499ab77befc730eae063256ce470d9d64768d3d729683f850b6d558f74af"
+    },
+    {
+      "path": "catalogue.json",
+      "bytes": 167378,
+      "sha256": "bad517373c27101ea8fe93423083f3636c11cf65824c2202f69cc2c2bf414aa3"
+    },
+    {
+      "path": "chunks/custom-map-entry-Tka56I3Q.js",
+      "bytes": 155542,
+      "sha256": "d78b2146a7b92f3d3bb1d788c9273c28f2e1967c72ee8f563c61756092f02bf4"
+    },
+    {
+      "path": "index.html",
+      "bytes": 952,
+      "sha256": "a1bae92f19506b4deecafef29b945ba2f5fca19baa9ff1daa3fca77eba12a78a"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 533835,
+      "sha256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded"
+    },
+    {
+      "path": "map-runtime.js",
+      "bytes": 224,
+      "sha256": "0b8d7783042950e73b6dd41b6a77b124bc5071c1acafb4e883c7c28f82de1b17"
+    },
+    {
+      "path": "map.css",
+      "bytes": 82304,
+      "sha256": "8e56ccd8993e60f3ba822b939543c19be14d3db4562130c6460422bdb6e74e88"
+    },
+    {
+      "path": "offline-manifest.json",
+      "bytes": 34784,
+      "sha256": "54075549afdea2aee6d10c3cf70d53429b0ba457eda890a8ad93c1124c508c10"
+    },
+    {
+      "path": "workers/custom-map-tiles.worker-BOzbsGer.js",
+      "bytes": 28787,
+      "sha256": "c0995a8f541b049796dccb48bc20b54135e6d218a24fa7aeefb2ba8a2c8f0636"
+    },
+    {
+      "path": "workers/custom-map-trail-raster.worker-CZZMbu81.js",
+      "bytes": 2387,
+      "sha256": "bfec0605c231da3c03fca6403800e8b0ff7678ed83e66218dfa973d7e26c7345"
+    },
+    {
+      "path": "workers/terrain-preparation.worker-Bb-s7l3H.js",
+      "bytes": 2891,
+      "sha256": "625ce56a5be80c34fe32704e0fe93aa1a5c83e56d719c1fcfea511ba56583931"
+    }
+  ],
+  "checks": {
+    "workerProtocol": {
+      "passed": 26,
+      "redBaselinePassed": 23,
+      "redBaselineExpectedFailures": 3,
+      "receipt": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-vector-worker-regression-review.json",
+        "bytes": 5941,
+        "sha256": "9f984d0d29666ea458fff7c757bbaad098ae97b3a156125b2a2de89b784e5ef4"
+      }
+    },
+    "sourceAndWitness": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-opacity-native-independent-review.json",
+      "bytes": 6026,
+      "sha256": "3a0acfd4e711154c65811bfae75e991513c29226a6bbc8be0d45e8285a384642"
+    },
+    "nativeFixturePreflight": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-opacity-fixture-preflight.json",
+      "bytes": 4625,
+      "sha256": "8fd8584382bff1fc4908128c971e7be772d834ea08ecc441b6cd93ce31d67bad"
+    },
+    "publicationTests": {
+      "passed": 13,
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-worker-publication-tests-fixed.log",
+        "bytes": 1497,
+        "sha256": "cc37d09d1c0e765bfffb1a2b56ea5529e65f26634425804622d588a9ece6ae2e"
+      },
+      "initialFailureLog": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-worker-publication-tests.log",
+        "bytes": 2586,
+        "sha256": "b0b4b11df87000f31dff1c10c1b2d94616be903fbc3ed5d42d980e033ef202a5"
+      },
+      "initialFailure": "New independent verifier block initially entered the old loading-only extraction. Moved the new block before loading; preserved the original test and all its assertions."
+    },
+    "workerLint": {
+      "exitCode": 0,
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-worker-lint.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "preparationNote": "The first invocation from repo root lacked the web ESLint config; the corrected invocation ran from web/."
+    },
+    "typescript": {
+      "exitCode": 0,
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-worker-types.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "localBuildLogs": {
+    "initial": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-worker-static-build.log",
+      "bytes": 11921,
+      "sha256": "44a69cf8533d31e7242ea810a488cb461c84ad4c5786b82f93f045766117b2fd"
+    },
+    "final": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/opaque-worker-final-static-build.log",
+      "bytes": 11920,
+      "sha256": "7fa73b1125b30800a81cd51d850426a17aee7cdf83325c7db30b0fd7743a1ea0"
+    }
+  },
+  "limitations": [
+    "Native opacity pixels and uninstrumented browser speed remain pending.",
+    "This local build has sourceCommit null and is never substituted for the accepted Pages artifact.",
+    "No new APK or release request is published."
+  ]
+}

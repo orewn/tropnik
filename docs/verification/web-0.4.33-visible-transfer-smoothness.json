@@ -1,0 +1,990 @@
+{
+  "schemaVersion": 1,
+  "status": "EARLY_16_PASS_FULL_15_OF_16_PASS_RELEASE_GATE_FAILED",
+  "runId": 43440933324,
+  "sourceCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "buildId": "c627dcc832e505c5",
+  "artifact": {
+    "id": 14047403144,
+    "bytes": 2428615,
+    "sha256": "73bc357c491a6c6d4b108649cd5deae5d45cf033a56045f90bc3186d562ac251",
+    "singleSharedDownload": true
+  },
+  "reports": {
+    "early": {
+      "path": "/workspace/scratch/686c5dc59f67/pages43440933324/failure/zip-members/browser-ui-smoothness-diagnostic.json",
+      "bytes": 536035,
+      "sha256": "3661ee650dded516e392a1685a3f592ba0de2e50900734c56cf4e125e0c3e9db"
+    },
+    "fullFailure": {
+      "path": "/workspace/scratch/686c5dc59f67/pages43440933324/failure/zip-members/browser-failure.json",
+      "bytes": 17375603,
+      "sha256": "346e53f1a7b395957f0eddb65fee1e2431981530d626cc4b5faf30c24879beef"
+    },
+    "originalValidatorRecomputation": {
+      "path": "/workspace/scratch/686c5dc59f67/pages43440933324/original-smoothness-recomputed.json",
+      "bytes": 65609,
+      "sha256": "29fded253cd6c8f8e72144eeddf8a2365f10da536e348658457f9413e2b28072"
+    }
+  },
+  "sourceBinding": {
+    "earlySourceAndBothEnvironmentSourcesMatch": true,
+    "fullFailureHasNoTopLevelSourceField": true,
+    "commonBuildWitnesses": [
+      {
+        "path": "/workspace/scratch/686c5dc59f67/pages43440933324/failure/zip-members/browser-map-loading-verification.json",
+        "bytes": 1706488,
+        "sha256": "62d198ea58085251d4459855ddf84d3d103867c2d0376fcd913ffd5b86c5383c",
+        "sourceCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+        "buildId": "c627dcc832e505c5"
+      },
+      {
+        "path": "/workspace/scratch/686c5dc59f67/pages43440933324/failure/zip-members/browser-service-worker-update-verification.json",
+        "bytes": 21094,
+        "sha256": "126023ace67fd71ef0b3e6609ca78cb86efcf766ccb95ad6ed1d91369efc3579",
+        "sourceCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+        "buildId": "c627dcc832e505c5"
+      }
+    ],
+    "uiReportsDoNotEmbedBuildId": "Build binding is through this same source/run artifact and companion build-bound loading/SW reports; no fabricated UI buildId field.",
+    "stableEnvironmentFieldsEqual": [
+      "sourceCommit",
+      "browser",
+      "gpu",
+      "runner",
+      "requestedFlags",
+      "nativeSurface"
+    ],
+    "helpers": [
+      {
+        "path": "tools/pages-preview/browser-smoothness.mjs",
+        "bytes": 24027,
+        "sha256": "f2b6eef88fcc7d5d262e08b4aec81e13651065850865a0a3785d3e79042f2650",
+        "byteIdenticalTo90": true
+      },
+      {
+        "path": "tools/pages-preview/browser-source-end-pan.mjs",
+        "bytes": 7754,
+        "sha256": "5a4d396f6d811f843c7e7e5a0529fe964903b753bce34284125f4dc6727b8cc0",
+        "byteIdenticalTo90": true
+      },
+      {
+        "path": "tools/pages-preview/browser-zoom-audit.mjs",
+        "bytes": 46078,
+        "sha256": "6f1ee1a872cc3227e9f9b562f86af16901554a902bcd60d78f6b03d3c3179229",
+        "byteIdenticalTo90": true
+      }
+    ]
+  },
+  "validation": {
+    "recordedEvidenceOnlyNoNewBrowserRun": true,
+    "completeEarlyWindows": 16,
+    "completeFullWindows": 16,
+    "missingScenarios": [],
+    "partialSmoothnessAuditPresent": false,
+    "all32DerivedMetricObjectsMatchOriginalSummarizeSmoothness": true,
+    "independentNearestRankP95Recomputed": true,
+    "allNativePanReceiptsPassOriginalAssertions": true,
+    "allFourAuditsCpuRate": 1,
+    "allFourAuditsCpuThrottleRestored": true,
+    "cpuThrottleRestoreErrors": [],
+    "allFourAuditsInstrumented": false,
+    "allTraceArraysEmpty": true,
+    "allWindowsVisibleNoOverflowNoPendingInputAndNoObserverErrors": true,
+    "limits": {
+      "frameP95MsStrictLessThan": 35,
+      "maxFrameGapMsStrictLessThan": 150,
+      "inputToNextFrameMsStrictLessThan": 200,
+      "eventDurationMsStrictLessThan": 200,
+      "sessionClsStrictLessThan": 0.1,
+      "longestTaskMsStrictLessThan": {
+        "android-portrait": 350,
+        "desktop-webgl": 750
+      }
+    }
+  },
+  "actualFailure": {
+    "performanceIssues": [
+      {
+        "profile": "desktop-webgl",
+        "phase": "ui-smoothness/map-pan",
+        "metric": "frameP95Ms",
+        "value": 35.10000000009313,
+        "limit": 35
+      }
+    ],
+    "assertionLocation": "browser-smoke.mjs:1014 final performance issue assertion",
+    "envelopeLastProfile": "android-offline-safety",
+    "actualFailingProfile": "desktop-webgl",
+    "earlyBudgetIssues": [],
+    "fullBudgetIssueCount": 1,
+    "fullAcceptedBrowserVerificationExists": false,
+    "noRoundingToleranceOrRetry": true
+  },
+  "windows": [
+    {
+      "stage": "early",
+      "profile": "android-portrait",
+      "scenario": "panel",
+      "durationMs": 2108,
+      "rafSamples": 126,
+      "frameIntervals": 127,
+      "nearestRank95": 121,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 39.90000000002328,
+      "gapsAtLeast35Ms": 1,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 64.79999999998836,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "android-portrait",
+      "scenario": "explore-search",
+      "durationMs": 1812,
+      "rafSamples": 109,
+      "frameIntervals": 110,
+      "nearestRank95": 105,
+      "frameP95Ms": 17.400000000023283,
+      "maxFrameGapMs": 26.70000000001164,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 64.70000000001164,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "android-portrait",
+      "scenario": "explore-filters",
+      "durationMs": 2180.600000000035,
+      "rafSamples": 132,
+      "frameIntervals": 133,
+      "nearestRank95": 127,
+      "frameP95Ms": 16.899999999965075,
+      "maxFrameGapMs": 17,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 47.899999999965075,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "android-portrait",
+      "scenario": "catalog-scroll",
+      "durationMs": 861.5999999999767,
+      "rafSamples": 52,
+      "frameIntervals": 53,
+      "nearestRank95": 51,
+      "frameP95Ms": 22.600000000034925,
+      "maxFrameGapMs": 22.800000000046566,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 47.800000000046566,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "android-portrait",
+      "scenario": "map-pan",
+      "durationMs": 1314.1999999999534,
+      "rafSamples": 79,
+      "frameIntervals": 80,
+      "nearestRank95": 76,
+      "frameP95Ms": 25.300000000046566,
+      "maxFrameGapMs": 29.400000000023283,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 45.5,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "android-portrait",
+      "scenario": "map-zoom",
+      "durationMs": 6714.299999999988,
+      "rafSamples": 387,
+      "frameIntervals": 388,
+      "nearestRank95": 369,
+      "frameP95Ms": 25.600000000034925,
+      "maxFrameGapMs": 40,
+      "gapsAtLeast35Ms": 2,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 65.29999999998836,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "android-portrait",
+      "scenario": "layer-switch",
+      "durationMs": 4280.200000000012,
+      "rafSamples": 256,
+      "frameIntervals": 257,
+      "nearestRank95": 245,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 35.20000000001164,
+      "gapsAtLeast35Ms": 1,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 68.70000000001164,
+      "sessionCLS": 0.022143804754611498
+    },
+    {
+      "stage": "early",
+      "profile": "android-portrait",
+      "scenario": "site-search",
+      "durationMs": 1583.7999999999884,
+      "rafSamples": 96,
+      "frameIntervals": 97,
+      "nearestRank95": 93,
+      "frameP95Ms": 17.899999999965075,
+      "maxFrameGapMs": 34.90000000002328,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 66.40000000002328,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "desktop-webgl",
+      "scenario": "panel",
+      "durationMs": 1210.3000000000466,
+      "rafSamples": 73,
+      "frameIntervals": 74,
+      "nearestRank95": 71,
+      "frameP95Ms": 16.79999999998836,
+      "maxFrameGapMs": 17.29999999998836,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 32.79999999998836,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "desktop-webgl",
+      "scenario": "explore-search",
+      "durationMs": 1615.4000000000233,
+      "rafSamples": 96,
+      "frameIntervals": 97,
+      "nearestRank95": 93,
+      "frameP95Ms": 21,
+      "maxFrameGapMs": 31.400000000023283,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 37.600000000034925,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "desktop-webgl",
+      "scenario": "explore-filters",
+      "durationMs": 1849.8000000000466,
+      "rafSamples": 111,
+      "frameIntervals": 112,
+      "nearestRank95": 107,
+      "frameP95Ms": 16.79999999998836,
+      "maxFrameGapMs": 17.5,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 33.09999999997672,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "desktop-webgl",
+      "scenario": "catalog-scroll",
+      "durationMs": 447.20000000001164,
+      "rafSamples": 27,
+      "frameIntervals": 28,
+      "nearestRank95": 27,
+      "frameP95Ms": 20.20000000001164,
+      "maxFrameGapMs": 31.70000000001164,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 43.899999999965075,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "desktop-webgl",
+      "scenario": "map-pan",
+      "durationMs": 4247.299999999988,
+      "rafSamples": 237,
+      "frameIntervals": 238,
+      "nearestRank95": 227,
+      "frameP95Ms": 34.800000000046566,
+      "maxFrameGapMs": 49,
+      "gapsAtLeast35Ms": 11,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 51.70000000001164,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "desktop-webgl",
+      "scenario": "map-zoom",
+      "durationMs": 11647.600000000035,
+      "rafSamples": 677,
+      "frameIntervals": 678,
+      "nearestRank95": 645,
+      "frameP95Ms": 27.5,
+      "maxFrameGapMs": 53.79999999998836,
+      "gapsAtLeast35Ms": 7,
+      "gapsOver50Ms": 1,
+      "longTaskCount": 1,
+      "longestTaskMs": 52,
+      "inputMaxMs": 51.20000000001164,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "early",
+      "profile": "desktop-webgl",
+      "scenario": "layer-switch",
+      "durationMs": 3713.4000000000233,
+      "rafSamples": 219,
+      "frameIntervals": 220,
+      "nearestRank95": 209,
+      "frameP95Ms": 16.900000000023283,
+      "maxFrameGapMs": 37,
+      "gapsAtLeast35Ms": 3,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 52.70000000001164,
+      "sessionCLS": 0.007472533456448137
+    },
+    {
+      "stage": "early",
+      "profile": "desktop-webgl",
+      "scenario": "site-search",
+      "durationMs": 1496.399999999965,
+      "rafSamples": 91,
+      "frameIntervals": 92,
+      "nearestRank95": 88,
+      "frameP95Ms": 17.600000000034925,
+      "maxFrameGapMs": 19,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 34.79999999998836,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "android-portrait",
+      "scenario": "panel",
+      "durationMs": 2091.3000000000466,
+      "rafSamples": 125,
+      "frameIntervals": 126,
+      "nearestRank95": 120,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 39.70000000006985,
+      "gapsAtLeast35Ms": 1,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 64.90000000002328,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "android-portrait",
+      "scenario": "explore-search",
+      "durationMs": 1813.0999999999767,
+      "rafSamples": 109,
+      "frameIntervals": 110,
+      "nearestRank95": 105,
+      "frameP95Ms": 19.400000000023283,
+      "maxFrameGapMs": 25.20000000006985,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 64.90000000002328,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "android-portrait",
+      "scenario": "explore-filters",
+      "durationMs": 2198.0999999999767,
+      "rafSamples": 133,
+      "frameIntervals": 134,
+      "nearestRank95": 128,
+      "frameP95Ms": 17,
+      "maxFrameGapMs": 39.90000000002328,
+      "gapsAtLeast35Ms": 1,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 47.90000000002328,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "android-portrait",
+      "scenario": "catalog-scroll",
+      "durationMs": 894.4000000000233,
+      "rafSamples": 54,
+      "frameIntervals": 55,
+      "nearestRank95": 53,
+      "frameP95Ms": 22.599999999976717,
+      "maxFrameGapMs": 22.900000000023283,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 58.20000000006985,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "android-portrait",
+      "scenario": "map-pan",
+      "durationMs": 1330.9000000000233,
+      "rafSamples": 80,
+      "frameIntervals": 81,
+      "nearestRank95": 77,
+      "frameP95Ms": 25.199999999953434,
+      "maxFrameGapMs": 28.70000000006985,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 45.800000000046566,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "android-portrait",
+      "scenario": "map-zoom",
+      "durationMs": 7148,
+      "rafSamples": 408,
+      "frameIntervals": 409,
+      "nearestRank95": 389,
+      "frameP95Ms": 25.79999999993015,
+      "maxFrameGapMs": 50.90000000002328,
+      "gapsAtLeast35Ms": 5,
+      "gapsOver50Ms": 1,
+      "longTaskCount": 1,
+      "longestTaskMs": 50,
+      "inputMaxMs": 65,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "android-portrait",
+      "scenario": "layer-switch",
+      "durationMs": 4079.79999999993,
+      "rafSamples": 243,
+      "frameIntervals": 244,
+      "nearestRank95": 232,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 34.300000000046566,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 69.5,
+      "sessionCLS": 0.022143804754611498
+    },
+    {
+      "stage": "full",
+      "profile": "android-portrait",
+      "scenario": "site-search",
+      "durationMs": 1592.1000000000931,
+      "rafSamples": 97,
+      "frameIntervals": 98,
+      "nearestRank95": 94,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 20.400000000023283,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 48.39999999990687,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "desktop-webgl",
+      "scenario": "panel",
+      "durationMs": 1209.8999999999069,
+      "rafSamples": 73,
+      "frameIntervals": 74,
+      "nearestRank95": 71,
+      "frameP95Ms": 16.899999999906868,
+      "maxFrameGapMs": 17.300000000046566,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 32.800000000046566,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "desktop-webgl",
+      "scenario": "explore-search",
+      "durationMs": 1632,
+      "rafSamples": 96,
+      "frameIntervals": 97,
+      "nearestRank95": 93,
+      "frameP95Ms": 22.5,
+      "maxFrameGapMs": 41,
+      "gapsAtLeast35Ms": 2,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 37.5,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "desktop-webgl",
+      "scenario": "explore-filters",
+      "durationMs": 1866.3000000000466,
+      "rafSamples": 110,
+      "frameIntervals": 111,
+      "nearestRank95": 106,
+      "frameP95Ms": 17.199999999953434,
+      "maxFrameGapMs": 49,
+      "gapsAtLeast35Ms": 2,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 34.9000000001397,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "desktop-webgl",
+      "scenario": "catalog-scroll",
+      "durationMs": 463.5,
+      "rafSamples": 28,
+      "frameIntervals": 29,
+      "nearestRank95": 28,
+      "frameP95Ms": 17.100000000093132,
+      "maxFrameGapMs": 19.699999999953434,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 60.89999999990687,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "desktop-webgl",
+      "scenario": "map-pan",
+      "durationMs": 4030.7999999998137,
+      "rafSamples": 224,
+      "frameIntervals": 225,
+      "nearestRank95": 214,
+      "frameP95Ms": 35.10000000009313,
+      "maxFrameGapMs": 46.89999999990687,
+      "gapsAtLeast35Ms": 12,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 52.800000000046566,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "desktop-webgl",
+      "scenario": "map-zoom",
+      "durationMs": 11680.899999999907,
+      "rafSamples": 680,
+      "frameIntervals": 681,
+      "nearestRank95": 647,
+      "frameP95Ms": 26.600000000093132,
+      "maxFrameGapMs": 54.199999999953434,
+      "gapsAtLeast35Ms": 9,
+      "gapsOver50Ms": 1,
+      "longTaskCount": 1,
+      "longestTaskMs": 52,
+      "inputMaxMs": 50.699999999953434,
+      "sessionCLS": 0
+    },
+    {
+      "stage": "full",
+      "profile": "desktop-webgl",
+      "scenario": "layer-switch",
+      "durationMs": 3913.5,
+      "rafSamples": 231,
+      "frameIntervals": 232,
+      "nearestRank95": 221,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 37,
+      "gapsAtLeast35Ms": 3,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 53,
+      "sessionCLS": 0.007472533456448137
+    },
+    {
+      "stage": "full",
+      "profile": "desktop-webgl",
+      "scenario": "site-search",
+      "durationMs": 1475.1000000000931,
+      "rafSamples": 90,
+      "frameIntervals": 91,
+      "nearestRank95": 87,
+      "frameP95Ms": 17.4000000001397,
+      "maxFrameGapMs": 19,
+      "gapsAtLeast35Ms": 0,
+      "gapsOver50Ms": 0,
+      "longTaskCount": 0,
+      "longestTaskMs": 0,
+      "inputMaxMs": 34.699999999953434,
+      "sessionCLS": 0
+    }
+  ],
+  "desktopPanTiming": [
+    {
+      "stage": "early",
+      "durationMs": 4247.299999999988,
+      "rafSamples": 237,
+      "intervalsIncludingStartAndEnd": 238,
+      "nearestRank95": 227,
+      "p95Ms": 34.800000000046566,
+      "maxGapMs": 49.0,
+      "over50ms": 0,
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "sessionCls": 0,
+      "nativeInputMaxMs": 51.70000000001164,
+      "pointerDownOffsetMs": 16.699999999953434,
+      "pointerUpOffsetMs": 655.2999999999884,
+      "nativeDispatchDurationMs": 660.5957439999984,
+      "nativeDelta": {
+        "dx": 64,
+        "dy": 12
+      },
+      "sameRequestedInputCoordinates": true,
+      "slowIntervalTimingCounts": {
+        "before-pointerup": 8,
+        "within-100ms-after-pointerup": 1,
+        "later-than-100ms-after-pointerup": 2
+      },
+      "intervalsAtLeast35Ms": [
+        {
+          "intervalIndex": 2,
+          "startOffsetMs": 30.599999999976717,
+          "endOffsetMs": 65.89999999996508,
+          "gapMs": 35.29999999998836,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 3,
+          "startOffsetMs": 65.89999999996508,
+          "endOffsetMs": 101.19999999995343,
+          "gapMs": 35.29999999998836,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 7,
+          "startOffsetMs": 198.69999999995343,
+          "endOffsetMs": 235.29999999998836,
+          "gapMs": 36.600000000034925,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 8,
+          "startOffsetMs": 235.29999999998836,
+          "endOffsetMs": 284.29999999998836,
+          "gapMs": 49.0,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 9,
+          "startOffsetMs": 284.29999999998836,
+          "endOffsetMs": 323.0999999999767,
+          "gapMs": 38.79999999998836,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 10,
+          "startOffsetMs": 323.0999999999767,
+          "endOffsetMs": 359.19999999995343,
+          "gapMs": 36.09999999997672,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 12,
+          "startOffsetMs": 394.0,
+          "endOffsetMs": 429.0,
+          "gapMs": 35.0,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 13,
+          "startOffsetMs": 429.0,
+          "endOffsetMs": 465.8999999999651,
+          "gapMs": 36.899999999965075,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 26,
+          "startOffsetMs": 663.3999999999651,
+          "endOffsetMs": 702.0999999999767,
+          "gapMs": 38.70000000001164,
+          "timingCategory": "within-100ms-after-pointerup"
+        },
+        {
+          "intervalIndex": 77,
+          "startOffsetMs": 1530.0,
+          "endOffsetMs": 1569.0999999999767,
+          "gapMs": 39.09999999997672,
+          "timingCategory": "later-than-100ms-after-pointerup"
+        },
+        {
+          "intervalIndex": 96,
+          "startOffsetMs": 1863.399999999965,
+          "endOffsetMs": 1898.6999999999534,
+          "gapMs": 35.29999999998836,
+          "timingCategory": "later-than-100ms-after-pointerup"
+        }
+      ],
+      "p95IntervalIndexes": [
+        11
+      ],
+      "highest16GapsAscending": [
+        32.40000000002328,
+        32.59999999997672,
+        32.90000000002328,
+        33.79999999998836,
+        34.800000000046566,
+        35.0,
+        35.29999999998836,
+        35.29999999998836,
+        35.29999999998836,
+        36.09999999997672,
+        36.600000000034925,
+        36.899999999965075,
+        38.70000000001164,
+        38.79999999998836,
+        39.09999999997672,
+        49.0
+      ]
+    },
+    {
+      "stage": "full",
+      "durationMs": 4030.7999999998137,
+      "rafSamples": 224,
+      "intervalsIncludingStartAndEnd": 225,
+      "nearestRank95": 214,
+      "p95Ms": 35.10000000009313,
+      "maxGapMs": 46.89999999990687,
+      "over50ms": 0,
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "sessionCls": 0,
+      "nativeInputMaxMs": 52.800000000046566,
+      "pointerDownOffsetMs": 16.699999999953434,
+      "pointerUpOffsetMs": 670.6999999999534,
+      "nativeDispatchDurationMs": 676.489132000017,
+      "nativeDelta": {
+        "dx": 64,
+        "dy": 12
+      },
+      "sameRequestedInputCoordinates": true,
+      "slowIntervalTimingCounts": {
+        "before-pointerup": 9,
+        "within-100ms-after-pointerup": 1,
+        "later-than-100ms-after-pointerup": 2
+      },
+      "intervalsAtLeast35Ms": [
+        {
+          "intervalIndex": 2,
+          "startOffsetMs": 30.5999999998603,
+          "endOffsetMs": 67.0,
+          "gapMs": 36.4000000001397,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 3,
+          "startOffsetMs": 67.0,
+          "endOffsetMs": 103.19999999995343,
+          "gapMs": 36.199999999953434,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 7,
+          "startOffsetMs": 207.0,
+          "endOffsetMs": 248.0999999998603,
+          "gapMs": 41.0999999998603,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 8,
+          "startOffsetMs": 248.0999999998603,
+          "endOffsetMs": 286.29999999981374,
+          "gapMs": 38.199999999953434,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 9,
+          "startOffsetMs": 286.29999999981374,
+          "endOffsetMs": 325.79999999981374,
+          "gapMs": 39.5,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 10,
+          "startOffsetMs": 325.79999999981374,
+          "endOffsetMs": 366.5999999998603,
+          "gapMs": 40.800000000046566,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 11,
+          "startOffsetMs": 366.5999999998603,
+          "endOffsetMs": 406.19999999995343,
+          "gapMs": 39.60000000009313,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 12,
+          "startOffsetMs": 406.19999999995343,
+          "endOffsetMs": 444.29999999981374,
+          "gapMs": 38.0999999998603,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 13,
+          "startOffsetMs": 444.29999999981374,
+          "endOffsetMs": 481.5999999998603,
+          "gapMs": 37.300000000046566,
+          "timingCategory": "before-pointerup"
+        },
+        {
+          "intervalIndex": 26,
+          "startOffsetMs": 680.0999999998603,
+          "endOffsetMs": 718.2999999998137,
+          "gapMs": 38.199999999953434,
+          "timingCategory": "within-100ms-after-pointerup"
+        },
+        {
+          "intervalIndex": 59,
+          "startOffsetMs": 1249.3999999999069,
+          "endOffsetMs": 1296.2999999998137,
+          "gapMs": 46.89999999990687,
+          "timingCategory": "later-than-100ms-after-pointerup"
+        },
+        {
+          "intervalIndex": 128,
+          "startOffsetMs": 2414.7999999998137,
+          "endOffsetMs": 2449.899999999907,
+          "gapMs": 35.10000000009313,
+          "timingCategory": "later-than-100ms-after-pointerup"
+        }
+      ],
+      "p95IntervalIndexes": [
+        128
+      ],
+      "highest16GapsAscending": [
+        33.800000000046566,
+        34.0999999998603,
+        34.800000000046566,
+        34.9000000001397,
+        35.10000000009313,
+        36.199999999953434,
+        36.4000000001397,
+        37.300000000046566,
+        38.0999999998603,
+        38.199999999953434,
+        38.199999999953434,
+        39.5,
+        39.60000000009313,
+        40.800000000046566,
+        41.0999999998603,
+        46.89999999990687
+      ]
+    }
+  ],
+  "interpretation": {
+    "proven": "Current full desktop pan has225intervals and rank214 p95=35.10000000009313ms, with12 intervals at least35ms. Early desktop pan has238intervals and rank227 p95=34.800000000046566ms, with11 intervals at least35ms. All other31 measured windows meet original budgets.",
+    "timingAttribution": "Nine of12 full slow intervals end while the pointer remains held; one follows release by under100ms; two occur later in the same settlement window. Raw timestamp grouping is not CPU/source attribution.",
+    "lateP95Interval": "Full p95 comes from interval128, +2414.8 to+2449.9ms. The other late slow interval is46.9ms at+1249.4 to+1296.3ms.",
+    "noDeterministicHotspotProven": "No current CPU trace, loading-cohort transitions or pan camera/tile snapshots were captured. The two late intervals cannot be assigned to progressive updates, final commit, idle scheduling or other work from these reports. Pointer-held intervals likewise do not isolate drawTiles from native dispatch, labels or other main-thread work.",
+    "priorViewportCullingModel": {
+      "path": "/workspace/scratch/686c5dc59f67/pages43440933324/prior-grid-viewport-cull-model.json",
+      "bytes": 6623,
+      "sha256": "7471135ef4215a9616017abefdbd5a9cc4d27105de56632c5851528ab2fb1a6e"
+    },
+    "viewportCullConclusion": "Previously recorded67 geometry predicts zero canonical/overview calls removed throughout the same64/12 modeled pan. Current3cb has no recorded camera/cohorts, so this does not justify a current runtime culling fix.",
+    "releaseConclusion": "The exact3cb original full performance gate failed and must remain failed. Passing early audit and native pixel proof do not substitute for a future exact-source full gate."
+  },
+  "environment": {
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    },
+    "separateEarlyAndFullBrowserProcesses": true,
+    "sameMetadataDoesNotMakeRandomizedPerformanceExperiment": true
+  },
+  "limitsAndHistory": [
+    "Earlier67/90 performance failures and instrumented trace remain separate source/env evidence.",
+    "Native corrected-source370-frame pixel proof remains valid for its fixture; it does not imply release performance.",
+    "No runtime or workflow edits, browser retries, new diagnostics, budget changes or timing-window changes were performed by this review."
+  ]
+}

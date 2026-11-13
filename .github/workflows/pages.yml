@@ -137,6 +137,8 @@ jobs:
         run: |
           node --test tools/pages-preview/tests/browser-map-attribution.browser.mjs
           node tools/pages-preview/map-attribution-verification.mjs
+      - name: Verify native worker tile opacity with exact pixels
+        run: node --test tools/pages-preview/tests/browser-map-tile-opacity.browser.mjs
       - name: Verify production Canvas underlay pixel parity
         run: node --test tools/pages-preview/tests/browser-map-underlay.browser.mjs
       - name: Verify Russia mask pixels and GPU context recovery
@@ -177,12 +179,16 @@ jobs:
           import {assertTrailOverlayReceipt} from './tools/pages-preview/browser-trail-overlay.mjs';
           import {assertServiceWorkerUpdateReceipt} from './tools/pages-preview/browser-service-worker-update.mjs';
           import {assertMapLoadingReceipt} from './tools/pages-preview/browser-map-loading.mjs';
+          import {assertTileOpacityReceipt,assertTileOpacityFiles} from './tools/pages-preview/browser-map-tile-opacity-receipt.mjs';
           const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
           const browser = JSON.parse(readFileSync('web/pages-preview/dist/browser-verification.json', 'utf8'));
           assert.match(build.buildId, /^[a-f0-9]{16}$/);
           assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(build.hasApk, true);
           assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue);
+          const tileOpacity = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-tile-opacity-verification.json', 'utf8'));
+          assertTileOpacityReceipt(tileOpacity, {sourceCommit:process.env.GITHUB_SHA, buildId:build.buildId, environment:browser.environment});
+          assertTileOpacityFiles(tileOpacity, {build});
           const workerUpdate = JSON.parse(readFileSync('web/pages-preview/dist/browser-service-worker-update-verification.json', 'utf8'));
           assertServiceWorkerUpdateReceipt(workerUpdate, {sourceCommit:process.env.GITHUB_SHA, buildId:build.buildId, environment:browser.environment});
           assert.deepEqual(Object.keys(workerUpdate.sources).sort(), ['web/components/ServiceWorker.tsx','web/lib/service-worker-registration.ts','web/public/sw.js','tools/pages-preview/browser-service-worker-update.mjs'].sort());
@@ -570,6 +576,7 @@ jobs:
             web/pages-preview/dist/browser-terrain-unmasked-verification.json
             web/pages-preview/dist/browser-map-attribution-verification.json
             web/pages-preview/dist/browser-map-underlay-verification.json
+            web/pages-preview/dist/browser-map-tile-opacity-verification.json
             web/pages-preview/dist/browser-map-controls-verification.json
             web/pages-preview/dist/browser-trail-overlay-verification.json
             web/pages-preview/dist/browser-trail-raster-verification.json

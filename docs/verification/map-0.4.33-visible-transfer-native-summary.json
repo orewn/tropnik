@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_ACTUAL_NATIVE_PIXEL_REGRESSION",
+  "runId": 43440468172,
+  "sourceCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "sourceTree": "235a701a33a72948f9fb361ae89f06610ff2729f",
+  "parent": "7056633bddfd2325c4718f385fc55f38ad966459",
+  "artifactId": 14045463022,
+  "artifactZipBytes": 134293411,
+  "artifactZipSHA256": "56643b0bb63e5463855866c669e6f6db14e540e7a693d9cc4bb7ee8957337006",
+  "report": {
+    "path": "zip-members/web/pages-preview/dist/browser-map-underlay-verification.json",
+    "bytes": 1814399,
+    "sha256": "3aa938ebb285af20e6d42ea115f752841623a3193a5b6f987310764da2338bb5"
+  },
+  "fixture": {
+    "path": "tools/pages-preview/tests/browser-map-underlay.browser.mjs",
+    "bytes": 63141,
+    "sha256": "ffeda1b9da84943000cb038a31fcd1d11cfa146b286b7b214f6da9593b833fbc"
+  },
+  "engineSHA256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4",
+  "runtimeManifestSHA256": "5fea6c7b878bc50e2efc57e9a01032805f176116bf743e7dc0dff5014ef6b20b",
+  "runtimeInputsSHA256": "0d89efd6598ff9f70f2f92559d65a2936c2e2e6b1ad0f956e0663c5c534f8cb5",
+  "actualFrames": {
+    "underlay": 46,
+    "groundCache": 126,
+    "streamingGround": 198
+  },
+  "actualDecodedPNGs": 740,
+  "differentPixels": 0,
+  "maxChannelDelta": 0,
+  "immutableSourceFilesVerified": 31,
+  "runtimeSourceFilesVerified": 61,
+  "previousFailureRegression": {
+    "oldRunId": 43438213019,
+    "oldSource": "7056633bddfd2325c4718f385fc55f38ad966459",
+    "phase": "trace-grid/dpr1/pair-01",
+    "oldDifferentPixels": 257,
+    "oldMaxChannelDelta": 1,
+    "oldBBoxInclusive": [
+      711,
+      317,
+      720,
+      556
+    ],
+    "old257LocationsNowMatch": true,
+    "newWholeFrameDifferentPixels": 0,
+    "baselineCrossRunDifferentPixels": 0,
+    "scope": "Native deterministic fixture pixels only; no browser timing gain is inferred."
+  },
+  "nativeTileWork": [
+    {
+      "dpr": 1,
+      "requiredIncrementalFrames": 24,
+      "baselineTileCalls": 3936,
+      "optimizedTileCalls": 719
+    },
+    {
+      "dpr": 1.5,
+      "requiredIncrementalFrames": 24,
+      "baselineTileCalls": 3936,
+      "optimizedTileCalls": 719
+    },
+    {
+      "dpr": 2,
+      "requiredIncrementalFrames": 24,
+      "baselineTileCalls": 3936,
+      "optimizedTileCalls": 719
+    }
+  ],
+  "cleanup": {
+    "status": "stopped",
+    "signals": [
+      "SIGTERM"
+    ],
+    "errors": [],
+    "elapsedMs": 51.86345599999913
+  },
+  "evidence": [
+    {
+      "file": "independent-native-success-review.json",
+      "bytes": 1355418,
+      "sha256": "4cb03c1f9273c2107bb0fb8c1503177ac86fd65b43e62fc8f32a49605a8ef112"
+    },
+    {
+      "file": "independent-corrected-native-transfer-review.json",
+      "bytes": 8008,
+      "sha256": "1b3d3632f2debd81a8cd017b568eee2a1a3f6c44314941b1d8a67effecb7cc51"
+    }
+  ],
+  "releaseQualified": false,
+  "remainingQualification": "Full exact-source Pages workflow, uninstrumented smoothness, real loading/SW/full/mobile/coast gates, deployment and public source verification. Native call-count reduction is not a measured UI speed claim."
+}

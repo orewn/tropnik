@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_LOCAL_PREPARATION_ONLY",
+  "baselineSourceCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+  "files": [
+    {
+      "path": "web/lib/custom-map-vector.ts",
+      "bytes": 12737,
+      "sha256": "87e145aa0d4c8a6b5007c0e1b53faba1b57a6c0d41b7782d7091575c1f5ebe48",
+      "byteIdenticalTo3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-relief.ts",
+      "bytes": 421,
+      "sha256": "14ee495df7b02fe2f689c51e585e4e0fd64ec165a9beb1a85522716861e5f71a",
+      "byteIdenticalTo3cb": true
+    },
+    {
+      "path": "web/public/maps/map-city-labels.js",
+      "bytes": 941,
+      "sha256": "62d4b661ef3edf6ffe22b079dde39da0c1602f5f33f28f265bf44c388e3cfd53",
+      "byteIdenticalTo3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-symbols.ts",
+      "bytes": 3239,
+      "sha256": "062eb4cdaf29d6f4946713a790c3d90feca49d0bf9cfcd2d7477465d3a289601",
+      "byteIdenticalTo3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-labels.ts",
+      "bytes": 4586,
+      "sha256": "b0e38679b23272f18119501b2503211801d5e1719cc2804713496f041f4342fd",
+      "byteIdenticalTo3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-painter.ts",
+      "bytes": 26868,
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "byteIdenticalTo3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "bytes": 86221,
+      "sha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4",
+      "byteIdenticalTo3cb": true
+    },
+    {
+      "path": "web/lib/custom-map-camera.ts",
+      "bytes": 21528,
+      "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "byteIdenticalTo3cb": true
+    },
+    {
+      "path": "tools/pages-preview/tests/browser-map-tile-opacity.browser.mjs",
+      "bytes": 23854,
+      "sha256": "5e47d3f3d34e9cd285d9a9f08d1872e37f37922ab84835a1f40b3c54173f3c6e"
+    },
+    {
+      "path": "tools/pages-preview/browser-map-tile-opacity-receipt.mjs",
+      "bytes": 13189,
+      "sha256": "201ca59a4d2cc97524fc9e165d53f53795c56689fca27dbfac4639bfb2e35252"
+    },
+    {
+      "path": ".github/workflows/pages.yml",
+      "bytes": 44248,
+      "sha256": "c5c29b5a1f7dc4417307d79d69c155893633e415ce71538cd1791a8250ce576f"
+    }
+  ],
+  "checks": [
+    {
+      "command": "node --test --test-name-pattern='tile opacity fixture bundles|tile opacity baseline rejects' tools/pages-preview/tests/browser-map-tile-opacity.browser.mjs",
+      "actualSelection": "tile opacity fixture bundles|tile opacity baseline rejects",
+      "passed": 2,
+      "failed": 0,
+      "nativeBrowserExecuted": false
+    },
+    {
+      "command": "node --test tools/pages-preview/tests/workflow-inputs.test.mjs tools/pages-preview/tests/map-loading-publication.test.mjs tools/pages-preview/tests/verify-deployed.test.mjs",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "check": "Pages YAML plus every run block bash syntax and embedded Node syntax",
+      "bashBlocks": 28,
+      "nodeBlocks": 2,
+      "passed": true
+    },
+    {
+      "check": "Both new modules node --check and git diff --check",
+      "passed": true
+    }
+  ],
+  "scope": {
+    "cases": 48,
+    "nativeWorkersExpected": 96,
+    "comparisonsExpected": 144,
+    "pngsExpected": 288,
+    "baseline": "Exact old worker full source SHA after narrowly reversing only the alpha expression and four comments",
+    "assets": [
+      "real pinned z7 PBF",
+      "real pinned z12 PBF",
+      "real pinned z14 PBF",
+      "zero-byte empty MVT",
+      "real archived z12 DEM PNG"
+    ],
+    "overzoom": "sourcez14 to displayz18 child5/7",
+    "nativeDpr": [
+      1,
+      1.5,
+      2
+    ],
+    "softwareRaster": [
+      false,
+      true
+    ],
+    "compositions": [
+      {
+        "bearing": 0,
+        "pitch": 0
+      },
+      {
+        "bearing": 17.3,
+        "pitch": 25
+      }
+    ],
+    "pixels": "Every tile/flat/affine RGBA channel must match; no tolerance",
+    "workerObservation": "Original getContext and postMessage forwarded unchanged; records actual context attributes and bitmap detachment",
+    "cleanup": "Both workers terminated and both bitmaps closed per case; own browser stopped before full receipt assertion",
+    "buildInputs": "Recursive existing builder includes fixture and helper automatically; build.mjs unchanged"
+  },
+  "limits": [
+    "No local native browser was run. Actual native proof is pending CI.",
+    "No speed improvement is asserted from source or mocked tests.",
+    "This scoped fixture does not replace full application, native370, loading or smoothness gates."
+  ]
+}
