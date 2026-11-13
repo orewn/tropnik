@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "verified": true,
+  "evidence": "uploaded-user-web-zip-actual-readback",
+  "sourceCommit": "0770a7448fed05853bc724b4edb4feb235e5cda3",
+  "buildId": "56bf66e1870513ce",
+  "artifact": {
+    "schemaVersion": 1,
+    "id": 14062258668,
+    "name": "tropnik-web-0.4.33-56bf66e1870513ce.zip",
+    "bytes": 69220610,
+    "sha256": "f7506b533abcccc9d81c7a0f20f8ccd0fae1a1eb64d33f6bdb4dd1f2b2c82e3c",
+    "packagingSourceCommit": "3bcb3d6288d674aa2e99a9a5ab380c73b47a3aca",
+    "packagingRunId": 43476216944,
+    "expiresAt": "2026-12-13T17:47:38Z",
+    "artifactURL": "https://github.com/orewn/tropnik/actions/runs/43476216944/artifacts/14062258668",
+    "archiveFalse": true,
+    "apiDigestMatchesPreparedZIP": true
+  },
+  "actualArchive": {
+    "bytes": 69220610,
+    "sha256": "f7506b533abcccc9d81c7a0f20f8ccd0fae1a1eb64d33f6bdb4dd1f2b2c82e3c"
+  },
+  "memberCount": 3517,
+  "allPayloadMembersByteIdentical": true,
+  "noDoubleWrapper": true,
+  "filesSHA256ManifestVerified": true,
+  "newMeasurements": false,
+  "libraryUploadPerformed": false,
+  "fullReadbackReceipt": {
+    "bytes": 712843,
+    "sha256": "33f862e4c61de3e36dc5315fb7224bd54b3be75747338e56f5043e9c4f4a6a3b"
+  }
+}

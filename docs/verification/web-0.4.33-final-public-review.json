@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "evidence": "final-pages-api-and-small-public-deploy-log-independent-review",
+  "status": "PASS",
+  "sourceCommit": "0770a7448fed05853bc724b4edb4feb235e5cda3",
+  "buildId": "56bf66e1870513ce",
+  "run": {
+    "id": 43471278331,
+    "attempt": 1,
+    "conclusion": "success",
+    "buildJobId": 132043522818,
+    "deployJobId": 132058614490,
+    "fullBrowserCompletedAt": "2026-11-13T17:43:20Z",
+    "publicCompletedAt": "2026-11-13T17:44:45Z"
+  },
+  "artifact": {
+    "id": 14062357483,
+    "name": "github-pages-43471278331-1",
+    "bytes": 67258462,
+    "digest": "sha256:1dfe69f062dc5b3a236af0ead7a58b05cd34cf7a8e9c2ad9712e7616de91b139",
+    "expired": false
+  },
+  "public": {
+    "verified": true,
+    "url": "https://orewn.github.io/tropnik/",
+    "buildId": "56bf66e1870513ce",
+    "sourceCommit": "0770a7448fed05853bc724b4edb4feb235e5cda3",
+    "publicHttpChecks": 27,
+    "apkDelivery": "github-release",
+    "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/tropnik-preview.apk",
+    "apkBytes": 69231946,
+    "apkSha256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408",
+    "browserRenderingTested": true,
+    "browserProfiles": 4,
+    "serviceWorkerUpdateTested": true,
+    "serviceWorkerTimeoutMs": 15000.800048828125,
+    "mapLoadingTested": true,
+    "tileOpacityTested": true,
+    "tileOpacityComparisons": 144
+  },
+  "sourceFiles": {
+    "web/public/downloads/android-manifest.json": {
+      "sha256": "aa01366bcd1917b5353c81a5bbad2a585d745dc757aeecdf57067feb570634c4",
+      "bytes": 3177
+    },
+    "web/public/sw.js": {
+      "sha256": "8ab590677f074665ad7f04b3327bdf5f83ab7463018d910adbc9cf32f12f3c28",
+      "bytes": 17420
+    }
+  },
+  "swVersion": "tropnik-shell-0.4.33-d7251b01afd47ebd",
+  "apkProducer": {
+    "version": "0.4.33-preview",
+    "architecture": "universal",
+    "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+    "workflowRunId": 43466306940,
+    "url": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/tropnik-preview.apk",
+    "bytes": 69231946,
+    "sha256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408"
+  },
+  "methods": {
+    "apiRunJobsArtifactsRead": true,
+    "oneCompletedSmallDeployLogRead": true,
+    "smallDeployLogChars": 19330,
+    "exactSourceGitCompareAndBlobHashesRead": true,
+    "manifestPublicBytesShaUrlEqual": true,
+    "hugeSuccessBuildLogRead": false,
+    "manualBinaryArtifactDownload": false,
+    "newBrowserMeasurements": false
+  },
+  "scope": {
+    "originalCiAllRequiredStepsPassed": true,
+    "originalPublicVerifierPassed": true,
+    "independentFinalRaw32": "delegated to perf_skeptic; pending at receipt time",
+    "freshPngIndependentDecode": "not performed; local execution environment unavailable",
+    "finalZip": "root-owned packaging from this exact immutable artifact; pending"
+  },
+  "priorFailurePreserved": {
+    "sourceCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+    "runId": 43458536389,
+    "phase": "ui-smoothness/map-pan",
+    "profile": "desktop-webgl",
+    "metric": "frameP95Ms",
+    "value": 35,
+    "strictLimit": 35,
+    "conclusion": "failure"
+  }
+}

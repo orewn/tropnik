@@ -3,14 +3,32 @@
   "scope": "release-0.4.33-evidence",
   "releaseSource": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
   "finalWebsiteSource": "0770a7448fed05853bc724b4edb4feb235e5cda3",
-  "status": "waiting-for-final-website-acceptance",
+  "status": "verified-final",
   "mainModifiedByEvidenceCommit": false,
   "newMeasurements": false,
   "android": {
     "version": "0.4.33-preview",
     "workflowRunId": 43466306940,
     "publicVerified": true,
-    "universalSHA256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408"
+    "universalSHA256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408",
+    "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+    "versionCode": 16,
+    "universalURL": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/tropnik-preview.apk",
+    "universalBytes": 69231946,
+    "releaseURL": "https://github.com/orewn/tropnik/releases/tag/v0.4.33-preview",
+    "anonymousAssetsVerified": 6,
+    "jvmTestsPassed": 70,
+    "pythonTestsPassed": 114,
+    "deviceTests": 11,
+    "deviceEnvironment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+    "signature": "development / debug",
+    "signingCertificateSha256": "7be125719a8a4fb70d9d0b901f95326a03a7c9f3f8b93b96761eb175d02f6d26",
+    "compatibleWithPreviousPreview": false,
+    "updateIdentityRequirementsMet": false,
+    "updateCompatibilityAssessment": "signing-certificate-mismatch",
+    "physicalDeviceVerified": false,
+    "arm64DeviceExecutionVerified": false,
+    "productionSigned": false
   },
   "acceptedReleaseSourceWebsite": {
     "workflowRunId": 43466306226,
@@ -42,12 +60,94 @@
   },
   "finalPages": {
     "workflowRunId": 43471278331,
-    "status": "in-progress",
-    "fullAuditStartedAt": "2026-11-13T17:24:50Z"
+    "runAttempt": 1,
+    "sourceCommit": "0770a7448fed05853bc724b4edb4feb235e5cda3",
+    "buildId": "56bf66e1870513ce",
+    "status": "completed",
+    "conclusion": "success",
+    "fullBrowserAudit": "success",
+    "publicVerification": "success",
+    "url": "https://orewn.github.io/tropnik/",
+    "workflowURL": "https://github.com/orewn/tropnik/actions/runs/43471278331",
+    "jobs": [
+      {
+        "id": 132043522818,
+        "name": "build",
+        "conclusion": "success",
+        "completedAt": "2026-11-13T17:43:44Z"
+      },
+      {
+        "id": 132058614490,
+        "name": "deploy",
+        "conclusion": "success",
+        "completedAt": "2026-11-13T17:44:48Z"
+      }
+    ],
+    "artifact": {
+      "id": 14062357483,
+      "name": "github-pages-43471278331-1",
+      "bytes": 67258462,
+      "sha256": "1dfe69f062dc5b3a236af0ead7a58b05cd34cf7a8e9c2ad9712e7616de91b139",
+      "expiresAt": "2026-11-20T17:43:31Z"
+    },
+    "rawWindows": 32,
+    "passingWindows": 32,
+    "failingWindows": 0,
+    "independentRawReviewVerified": true,
+    "evidenceFiles": [
+      {
+        "path": "docs/verification/web-0.4.33-final-accepted-raw.json",
+        "blob": "9f27df98db1316c1d4420dfcd0be726aa7c18aa4",
+        "bytes": 531485,
+        "sha256": "7b01715f059ff6d8f584889a4430a8588f9fa942c4c8c1d29a7a62160ac3d81c"
+      },
+      {
+        "path": "docs/verification/web-0.4.33-final-accepted-smoothness-review.json",
+        "blob": "e4c7031b84a6a3cf633df96fc3206e0f829409f3",
+        "bytes": 109441,
+        "sha256": "5e0c83913b4e07dc0ff57d3a8d9339123a6a97aab62d40f71efb568c7b919439"
+      },
+      {
+        "path": "docs/verification/web-0.4.33-final-public-review.json",
+        "blob": "7addcf0d42ae39c1e523c74c6ff6c0d128a7d16b",
+        "bytes": 3179,
+        "sha256": "0e7af53bb9e4c754a0ca5b978ce73273440c8c2b9a86a8950349bcb06266ea2c"
+      }
+    ]
   },
   "notes": [
-    "All referenced receipts preserve their original bytes and fields at recording time.",
-    "f0c4 strict35 failure remains a failed historical result in the release source.",
-    "Accepted79 measurements do not replace final0770 acceptance."
-  ]
+    "All referenced producer receipts preserve their original bytes and fields at recording time.",
+    "The f0c4 strict35 failure remains a failed historical result in the release source.",
+    "Accepted79 measurements are retained separately; final0770 independently passed all 32 original windows.",
+    "Preparation-only receipt flags describe the historical preparation step; the final source subsequently passed its own unchanged Pages and public verification.",
+    "These results do not establish an A/B speedup or a universal frame-rate guarantee.",
+    "Evidence commits do not alter main, application code, release assets, or acceptance thresholds."
+  ],
+  "webZip": {
+    "schemaVersion": 1,
+    "id": 14062258668,
+    "name": "tropnik-web-0.4.33-56bf66e1870513ce.zip",
+    "bytes": 69220610,
+    "sha256": "f7506b533abcccc9d81c7a0f20f8ccd0fae1a1eb64d33f6bdb4dd1f2b2c82e3c",
+    "packagingSourceCommit": "3bcb3d6288d674aa2e99a9a5ab380c73b47a3aca",
+    "packagingRunId": 43476216944,
+    "expiresAt": "2026-12-13T17:47:38Z",
+    "artifactURL": "https://github.com/orewn/tropnik/actions/runs/43476216944/artifacts/14062258668",
+    "archiveFalse": true,
+    "apiDigestMatchesPreparedZIP": true,
+    "verified": true,
+    "allPayloadMembersByteIdentical": true,
+    "memberCount": 3517,
+    "payloadFiles": 2675,
+    "payloadBytes": 187642787,
+    "filesSHA256ManifestVerified": true,
+    "receiptPath": "docs/verification/web-0.4.33-final-web-zip-readback.json",
+    "receiptBytes": 1198,
+    "receiptSHA256": "0e4ac1045b7ffcee61379bced4a5d604ff2dd99a12c1ec94d8c9f3e2b16b3fc9",
+    "evidenceArtifact": {
+      "id": 14062388216,
+      "bytes": 357237,
+      "sha256": "d99a1fd6a1bc362db864dea4a1f134d5f3e0da49d270cee5269fc82109d0303b"
+    }
+  }
 }
