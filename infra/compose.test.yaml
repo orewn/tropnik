@@ -9,7 +9,8 @@ services:
     ports: ["127.0.0.1::5432"]
     tmpfs: [/var/lib/postgresql]
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -U tropa_test -d tropa_test"]
+      # A socket-only init server is not ready for the host-side Go connection.
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -U tropa_test -d tropa_test"]
       interval: 2s
       timeout: 3s
       retries: 30

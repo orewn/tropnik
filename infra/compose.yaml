@@ -13,7 +13,9 @@ services:
       - postgres-data:/var/lib/postgresql
       - ./db/01-runtime-role.sh:/docker-entrypoint-initdb.d/01-runtime-role.sh:ro
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -U tropa_owner -d tropa"]
+      # The image starts a socket-only server while initialization scripts run.
+      # Wait for the final TCP listener before migrations use the runtime role.
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -U tropa_owner -d tropa"]
       interval: 5s
       timeout: 3s
       retries: 20
