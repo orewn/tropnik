@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "requestId": "android-0-4-32-preview-camera-handoff-20261113",
-  "version": "0.4.32-preview",
-  "versionCode": 15,
-  "notesFile": "tools/android-build/release-notes/0.4.32-preview.md"
+  "requestId": "android-0-4-33-preview-single-activation-20261113",
+  "version": "0.4.33-preview",
+  "versionCode": 16,
+  "notesFile": "tools/android-build/release-notes/0.4.33-preview.md"
 }

@@ -2,19 +2,25 @@
 
 ## Текущий статус
 
-Готовится отдельный выпуск **0.4.33-preview / versionCode 16** поверх
-`b80e274524c3834c470b9a3ade9dfabc1fdb4ca5`. Он исправляет подтверждённую
-ошибку общего картографического движка и задержку появления окружения карты.
-Кандидаты `5fefc0da`, `67d418dd` и `90dae23c` не прошли полные Pages CI
-и не опубликованы. Отдельный pixel candidate `7056633b` выявил изменение
-сглаживания границы под clip. Исправленный `3cb219fd` ограничивает только
-перенос готовых пикселей в кэш, сохраняя прежние условия рисования всех Path2D.
-Его отдельный native gate прошёл все 370 frames с нулевой разницей;
-полный application gate завершил функциональные сценарии, но performance
-assertion отклонил desktop pan p95 35,1 ms при пределе 35 ms. Android validation
-того же source прошёл 70 JVM, R8 и все 11 device scenarios.
-Опубликованный Android 0.4.32 и
-его результаты сохраняются; нового APK или Pages 0.4.33 пока нет.
+Исправленный source `8020e5c3243cd99e6f727e787c3109bece3d28f7` прошёл полный
+[Pages CI 43450247714](https://github.com/orewn/tropnik/actions/runs/43450247714)
+с публичной проверкой build `39a9a382cb37a4fb`. Все 32 исходных окна плавности
+(early и full, два профиля) независимо пересчитаны из полного raw содержимого принятого Pages артефакта;
+лимиты и сценарии сохранены. Android validation того же source прошёл
+70 JVM, unsigned production R8 и все 11 сценариев точного APK на эмуляторе.
+
+Отдельный release request запрашивает **0.4.33-preview / versionCode 16**.
+Он запускает собственные Android build/device/publish/public проверки и новый
+полный Pages run. Validation APK не используется вместо публикуемого выпуска.
+Веб-ссылка на APK остаётся 0.4.32 до получения финального universal manifest
+из нового успешного public producer job.
+
+Файловая среда стала недоступна после изолированного native proof. Поэтому
+32 raw окна получены через отдельное read-only извлечение из принятого
+Pages артефакта. SHA оригинального ZIP и трёх JSON members проверены на runner;
+полный compact payload восстановлен и проверен независимо. Локальное чтение
+всего Pages payload, новое независимое декодирование PNG этого run и проверка
+старой открытой вкладки остаются незавершёнными.
 
 ## Один жест и два выбора
 
@@ -580,6 +586,31 @@ engine/camera и четыре исходных файла. Это подгото
 source inputs `0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642`;
 все 12 web/Android outputs совпадают побайтно. SourceCommit локальной
 сборки равен null. Принятый CI artifact и native результаты ещё требуются.
+
+## Проверка source 8020e5c3 перед запросом выпуска
+
+Изолированный [run 43449346670](https://github.com/orewn/tropnik/actions/runs/43449346670)
+на точном source 8020e5c3 прошёл 48 случаев, 96 настоящих Workers и 144 сравнения
+RGBA с нулевой разницей. Все 288 PNG дополнительно декодированы независимо.
+Тот же diagnostic run прошёл все 16 исходных uninstrumented smoothness windows.
+Desktop pan p95 составил 30,2 ms при строгом лимите меньше 35 ms. Runner был
+EPYC 9V74, а предыдущая проверка 3cb — EPYC 7763: это не количественное A/B
+измерение ускорения.
+
+После продвижения того же commit в main полный Pages run 43450247714
+прошёл существующие функциональные сценарии, проверки SW update, загрузки
+при задержанном DEM halo, 370 underlay frames и 144 worker opacity comparisons.
+Early/full raw32 пересчитаны отдельно без изменения исходных валидаторов.
+Полные исходные audit objects сохранены в
+[raw receipt](verification/web-0.4.33-accepted-main-raw.json), а независимый
+расчёт — в [smoothness review](verification/web-0.4.33-accepted-main-smoothness-review.json).
+[Запись prerequisites](verification/source-0.4.33-release-request.json)
+разделяет результаты CI, независимый разбор журналов и недоступную пока
+повторную проверку bytes скачанных артефактов.
+
+Runtime manifest остаётся `e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded`,
+source inputs — `0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642`.
+Запрос публикации и release notes не меняют эти 61 вход и общий runtime.
 
 ## Порядок выпуска
 

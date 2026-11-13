@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "evidence": "release-request-prerequisites",
+  "state": "qualified-for-explicit-release-request",
+  "qualifiedSource": {
+    "commit": "8020e5c3243cd99e6f727e787c3109bece3d28f7",
+    "tree": "8a1f30c4e7444200c11c37278deaad0a039c2b67",
+    "buildId": "39a9a382cb37a4fb"
+  },
+  "nativeDiagnostic": {
+    "runId": 43449346670,
+    "artifactId": 14050040819,
+    "cases": 48,
+    "workers": 96,
+    "pixelComparisons": 144,
+    "pngs": 288,
+    "differentPixels": 0,
+    "independentlyDecodedPNGs": true,
+    "receiptSHA256": "f6ba96dc5e3ca3b143978cf26d1fdad967aab08dbfc4845fc55112054124fa3b",
+    "independentSmoothnessWindows": 16,
+    "independentSmoothnessReceiptSHA256": "bd5f5ea1f22016e83617ea620c35d79fae64d5f4142f23bd2284b9922a80659f",
+    "notAnABSpeedClaim": true
+  },
+  "mainPages": {
+    "runId": 43450247714,
+    "attempt": 1,
+    "sourceCommit": "8020e5c3243cd99e6f727e787c3109bece3d28f7",
+    "buildId": "39a9a382cb37a4fb",
+    "status": "completed",
+    "conclusion": "success",
+    "buildJobId": 131970206560,
+    "deployJobId": 131987829637,
+    "publicVerification": {
+      "status": "passed",
+      "completedAt": "2026-11-13T15:43:11Z",
+      "scope": "unauthenticated public build/browser receipts/APK"
+    },
+    "artifact": {
+      "id": 14054195271,
+      "bytes": 67265503,
+      "sha256": "4851c6762442da19f3325b7a1c70c850e1a3cc3a965318e74f291463a8114857"
+    },
+    "fullAudit": {
+      "startedAt": "2026-11-13T15:19:46Z",
+      "completedAt": "2026-11-13T15:42:22Z"
+    },
+    "independentSmoothness": {
+      "status": "passed",
+      "windows": 32,
+      "performanceIssues": [],
+      "originalValidatorsUnchanged": true,
+      "rawRecomputed": true,
+      "cpuRate": 1,
+      "cpuRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "scope": "original accepted artifact, source-bound read-only extraction, complete raw audit objects",
+      "reviewReceipt": "docs/verification/web-0.4.33-accepted-main-smoothness-review.json",
+      "rawReceipt": "docs/verification/web-0.4.33-accepted-main-raw.json"
+    },
+    "nativeGateResults": {
+      "underlayFrames": 370,
+      "workerOpacityComparisons": 144,
+      "status": "passed-from-original-ci",
+      "newIndependentPNGDecoding": false
+    }
+  },
+  "androidValidation": {
+    "schemaVersion": 1,
+    "evidence": "github-ci-status-and-independent-agent-log-review",
+    "sourceCommit": "8020e5c3243cd99e6f727e787c3109bece3d28f7",
+    "runId": 43450247461,
+    "runAttempt": 1,
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 131970205183,
+        "name": "build",
+        "conclusion": "success"
+      },
+      {
+        "id": 131972249974,
+        "name": "Android device scenarios",
+        "conclusion": "success"
+      },
+      {
+        "id": 131974846387,
+        "name": "Publish the requested Android prerelease",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 131974848140,
+        "name": "Verify public Android bytes and prepare the universal website manifest",
+        "conclusion": "skipped"
+      }
+    ],
+    "jvm": {
+      "tests": 70,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "r8": {
+      "status": "pass-from-fresh-ci-log",
+      "scope": "unsigned-production-build-check"
+    },
+    "device": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "rawProtocolRecords": 22,
+      "scope": "API35-x86_64-emulator",
+      "pointerLedgersIndependentlyRead": false
+    },
+    "universalFromCiLog": {
+      "bytes": 69231946,
+      "sha256": "3d2c63362e5774b9464ab446852f5732a26cc3b57d32325efe2a04214b67b402",
+      "certificateSHA256": "baf2395b2b9115e80f24fa64543228cfd4d094d8c4ebd958f6aafc1c9dc454af"
+    },
+    "independentDownloadedArtifactReview": {
+      "status": "pending",
+      "reason": "workspace execution environment unavailable",
+      "notSubstitutedFromPreviousSource": true
+    },
+    "publication": "not-requested-request-remains032"
+  },
+  "runtime": {
+    "manifestSHA256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded",
+    "sourceInputsSHA256": "0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642",
+    "sourceInputCount": 61,
+    "webAndAndroidOutputsIdentical": true,
+    "resourceAliases": 1746
+  },
+  "requestedRelease": {
+    "schemaVersion": 1,
+    "requestId": "android-0-4-33-preview-single-activation-20261113",
+    "version": "0.4.33-preview",
+    "versionCode": 16,
+    "notesFile": "tools/android-build/release-notes/0.4.33-preview.md"
+  },
+  "requiredOwnProducerGates": [
+    "build and70JVM",
+    "unsigned-productionR8",
+    "exact-universal11device",
+    "immutablepublication",
+    "sixanonymouspublicassets and SDK/device/source binding"
+  ],
+  "environmentLimitation": {
+    "filesystemUnavailable": true,
+    "originalZipAndThreeJsonMembers": "verified-on-read-only-extractor-runner",
+    "compactRawBytes": "independently-reconstructed-and-sha256-verified",
+    "fullLocalPayloadAndPNGs": "pending",
+    "liveCUAVerification": "pending",
+    "archivePackaging": "pending"
+  },
+  "safetyOfTransition": {
+    "noProductionCodeChangesInReleaseRequest": true,
+    "noAcceptanceGateChanges": true,
+    "doNotUseValidationApkAsPublishedRelease": true
+  },
+  "transport": {
+    "extractorRun": 43457469106,
+    "extractorCommit": "320f62a6583e79c0cc16d172cb5f895b44269a52",
+    "extractorJob": 131995280562,
+    "artifactSourceCommit": "8020e5c3243cd99e6f727e787c3109bece3d28f7",
+    "buildId": "39a9a382cb37a4fb",
+    "chunks": 45,
+    "payloadBytes": 539959,
+    "payloadSHA256": "2b703d80dd1aa841bb5a5bce9caf37af407e0ef1bb08ad00015573b5b8841a4a",
+    "archive": {
+      "id": 14054195271,
+      "bytes": 67265503,
+      "sha256": "4851c6762442da19f3325b7a1c70c850e1a3cc3a965318e74f291463a8114857"
+    },
+    "tar": {
+      "bytes": 190167040,
+      "sha256": "711fb4b786ebefe37d3fe439d81fab35cf314eadde36799334f0cd67a09a6830",
+      "members": 3514
+    },
+    "files": {
+      "browser-verification.json": {
+        "bytes": 17247921,
+        "sha256": "74d579974a5336280e768e2b94b372d9431777f67de09530263409e13ad17ff4"
+      },
+      "browser-ui-smoothness-diagnostic.json": {
+        "bytes": 540102,
+        "sha256": "efaf0890471494c074b2940c6791569a3f5229c522afe6cfb57df365a4792a07"
+      },
+      "build-info.json": {
+        "bytes": 414616,
+        "sha256": "2d88a267a136ae9cdf7e1671f82113ab48069be8b9348bf8bfb1254816912d9f"
+      }
+    },
+    "originalValidatorsRevalidated": "pass",
+    "independentRawRecompute": "passed",
+    "independentPNGReview": false,
+    "newMeasurements": false
+  },
+  "rawBlob": {
+    "path": "docs/verification/web-0.4.33-accepted-main-raw.json",
+    "blob": "a3320fdf190fdeaae7568c1e5e92bf6dc214b91e",
+    "bytes": 539960,
+    "sha256": "4535a1470b2ed2f7e2a16b40d461da9d8375ccf085cca5c3482848b6f92c94a7",
+    "format": "exact compact extraction JSON plus LF",
+    "verifiedByOwnerReadback": true
+  },
+  "independentReviewBlob": {
+    "path": "docs/verification/web-0.4.33-accepted-main-smoothness-review.json",
+    "blob": "99ed4aaea87258ccd21007358edac27bd5bc7497",
+    "bytes": 103310,
+    "sha256": "542858a209e40b91ce1bcac77a11c5ab5ec7ef0380748021ebe0ecd30379744e"
+  }
+}
