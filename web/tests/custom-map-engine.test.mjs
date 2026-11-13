@@ -1512,6 +1512,40 @@ const restoredGround=env=>env.lastDraw().filter(call=>call.surface==='tropnik-ma
 const groundCopies=env=>env.calls.filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage').length;
 function warmGround(env){for(let i=0;i<3;i++){env.engine.setLayers({});env.flush();}assert.equal(restoredGround(env).length,1,'A stationary map must actually restore its retained ground');}
 
+test('progressive loading paints each ready pair without copying every transient full canvas',async t=>{
+ for(const outcome of ['complete','failed neighbour','late failed neighbour']){
+  const env=fixture({groundCache:true});t.after(()=>env.engine.destroy());await env.ready();warmGround(env);
+  const original=plain(env.engine.inspect().tiles);
+  env.engine.setCamera({...camera,zoom:9});await env.settle();const copies=groundCopies(env),requests=env.store.requests.length;
+  const vectors=env.pending('vector'),reliefs=env.pending('relief');assert.ok(vectors.length>3&&vectors.length===reliefs.length);
+  for(const vector of vectors.slice(0,3)){
+   const relief=reliefs.find(job=>job.request.x===vector.request.x&&job.request.y===vector.request.y);
+   env.store.resolve(vector);env.store.resolve(relief);await env.settle();
+   assert.equal(env.engine.getState().loading,true);assert.deepEqual(plain(env.engine.inspect().tiles),original);
+   assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.key===vector.key),'Ready imagery must still paint immediately');
+   assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.key===relief.key),'Measured relief must remain paired with the new imagery');
+   assert.equal(groundCopies(env),copies,'A pending streaming frame must not force another full backing-store copy');
+  }
+  if(outcome==='late failed neighbour'){
+   const held=env.pending('relief')[0];env.complete(job=>job!==held);await env.settle();
+   assert.equal(groundCopies(env),copies);assert.equal(env.engine.getState().loading,true);
+   env.store.reject(held);await env.settle();
+   assert.equal(groundCopies(env),copies,'A late failure with no new paint must not add a synthetic refresh');
+   env.engine.setLayers({});env.flush();
+  }else{
+   if(outcome==='failed neighbour')env.store.reject(env.pending('relief')[0]);
+   env.complete();await env.settle();
+  }
+  assert.equal(env.engine.getState().loading,false);
+  assert.equal(!!env.engine.getState().error,outcome!=='complete');
+  assert.equal(env.store.requests.length,requests,'Reducing paint work cannot change the tile request plan');
+  assert.equal(groundCopies(env),copies+1,'The settled complete or useful failed ground is captured once');
+  const settledCopies=groundCopies(env);warmGround(env);
+  assert.equal(groundCopies(env),settledCopies,'Later stationary redraws reuse that exact settled ground');
+  assert.equal(env.frames.size,0,'The cache must not add an idle animation loop');
+ }
+});
+
 test('stationary overlay and selected-route changes reuse ground while their lines and final mask stay current',async t=>{
  const env=fixture({groundCache:true});t.after(()=>env.engine.destroy());await env.ready();warmGround(env);
  const entry=(id,y)=>({key:id,ids:[id],parts:[{bounds:[40.2,y,40.8,y],lines:[[[40.2,y],[40.8,y]]]}]});

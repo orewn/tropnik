@@ -1,0 +1,1459 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-13T13:08:11.714828+00:00",
+  "reviewer": "perf_skeptic",
+  "status": "CANDIDATE_EARLY_SMOOTHNESS_FAILED_CAUSE_NOT_YET_TRACE_ATTRIBUTED",
+  "runId": 43429612556,
+  "sourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+  "buildId": "ed67ad6cbd56a305",
+  "archives": [
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43429612556/failure/artifact-14039182198.zip",
+      "bytes": 446367,
+      "sha256": "2ac66e8c8a5f09d447279b719ec47d0badcc0e2f39b2fec919bd6d61a2e00279"
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43429612556/design/artifact-14039541700.zip",
+      "bytes": 10266069,
+      "sha256": "09daf22a3fd658c402aa23a15c9f37dc0aba8ad840ea44a1319ac2284a3443a6"
+    }
+  ],
+  "rawReceipt": {
+    "path": "/workspace/scratch/686c5dc59f67/pages43429612556/failure/zip-members/browser-ui-smoothness-diagnostic.json",
+    "bytes": 529400,
+    "sha256": "7e9a472978c665647afb9d97c543c02922c0d9f0e7ba422b3f66d34bd375907d"
+  },
+  "limits": {
+    "frameP95Ms": 35,
+    "maxFrameGapMs": 150,
+    "inputToNextFrameMs": 200,
+    "eventDurationMs": 200,
+    "sessionCLS": 0.1,
+    "longestTaskMobileMs": 350,
+    "longestTaskDesktopMs": 750,
+    "comparison": "strictly less than each limit; unchanged"
+  },
+  "recomputedWindows": [
+    {
+      "profile": "android-portrait",
+      "name": "panel",
+      "rawStartedAt": 2848.100000000035,
+      "rawEndedAt": 4940.700000000012,
+      "durationMs": 2092.5999999999767,
+      "samples": 126,
+      "intervalsIncludingBoundaries": 127,
+      "p95OrderStatisticRankOneBased": 121,
+      "recomputed": {
+        "frameP95Ms": 17.0,
+        "maxFrameGapMs": 32.20000000001164,
+        "inputToNextFrameMs": 64.90000000002328,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 94,
+      "eventTimingMaxDurationMs": 64,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "android-portrait",
+      "name": "explore-search",
+      "rawStartedAt": 4944.200000000012,
+      "rawEndedAt": 6724.200000000012,
+      "durationMs": 1780.0,
+      "samples": 107,
+      "intervalsIncludingBoundaries": 108,
+      "p95OrderStatisticRankOneBased": 103,
+      "recomputed": {
+        "frameP95Ms": 17.0,
+        "maxFrameGapMs": 19.0,
+        "inputToNextFrameMs": 64.79999999998836,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 169,
+      "eventTimingMaxDurationMs": 64,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "android-portrait",
+      "name": "explore-filters",
+      "rawStartedAt": 12065.100000000035,
+      "rawEndedAt": 14307.5,
+      "durationMs": 2242.399999999965,
+      "samples": 136,
+      "intervalsIncludingBoundaries": 137,
+      "p95OrderStatisticRankOneBased": 131,
+      "recomputed": {
+        "frameP95Ms": 16.900000000023283,
+        "maxFrameGapMs": 17.099999999976717,
+        "inputToNextFrameMs": 65.0,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 129,
+      "eventTimingMaxDurationMs": 64,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "android-portrait",
+      "name": "catalog-scroll",
+      "rawStartedAt": 14310.200000000012,
+      "rawEndedAt": 15207.100000000035,
+      "durationMs": 896.9000000000233,
+      "samples": 54,
+      "intervalsIncludingBoundaries": 55,
+      "p95OrderStatisticRankOneBased": 53,
+      "recomputed": {
+        "frameP95Ms": 22.70000000001164,
+        "maxFrameGapMs": 23,
+        "inputToNextFrameMs": 61,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 30,
+      "eventTimingMaxDurationMs": 72,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "android-portrait",
+      "name": "map-pan",
+      "rawStartedAt": 16692.900000000023,
+      "rawEndedAt": 18040.800000000047,
+      "durationMs": 1347.9000000000233,
+      "samples": 81,
+      "intervalsIncludingBoundaries": 82,
+      "p95OrderStatisticRankOneBased": 78,
+      "recomputed": {
+        "frameP95Ms": 21.20000000001164,
+        "maxFrameGapMs": 24.300000000046566,
+        "inputToNextFrameMs": 45.40000000002328,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 26,
+      "eventTimingMaxDurationMs": 72,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": [],
+      "trustedInputs": [
+        {
+          "type": "pointerdown",
+          "trusted": true,
+          "startTime": 1.2999999999883585,
+          "receivedAt": 14.900000000023283,
+          "nextFrameAt": 46.70000000001164
+        }
+      ],
+      "longTasksRelativeMs": [],
+      "slowIntervals": []
+    },
+    {
+      "profile": "android-portrait",
+      "name": "map-zoom",
+      "rawStartedAt": 18042.300000000047,
+      "rawEndedAt": 24856.5,
+      "durationMs": 6814.199999999953,
+      "samples": 399,
+      "intervalsIncludingBoundaries": 400,
+      "p95OrderStatisticRankOneBased": 380,
+      "recomputed": {
+        "frameP95Ms": 27.29999999998836,
+        "maxFrameGapMs": 41.70000000001164,
+        "inputToNextFrameMs": 65.10000000003492,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 3,
+      "eventTimingObserved": 70,
+      "eventTimingMaxDurationMs": 64,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": [],
+      "trustedInputs": [
+        {
+          "type": "pointerdown",
+          "trusted": true,
+          "startTime": 732.1999999999534,
+          "receivedAt": 764.5,
+          "nextFrameAt": 797.2999999999884
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "startTime": 809.3999999999651,
+          "receivedAt": 832.2999999999884,
+          "nextFrameAt": 868.2999999999884
+        },
+        {
+          "type": "pointerdown",
+          "trusted": true,
+          "startTime": 5398.699999999953,
+          "receivedAt": 5431.199999999953,
+          "nextFrameAt": 5463.399999999965
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "startTime": 5476.599999999977,
+          "receivedAt": 5499.199999999953,
+          "nextFrameAt": 5537.299999999988
+        }
+      ],
+      "longTasksRelativeMs": [],
+      "slowIntervals": [
+        {
+          "start": 3413.399999999965,
+          "end": 3451.7999999999884,
+          "duration": 38.40000000002328
+        },
+        {
+          "start": 4096.699999999953,
+          "end": 4138.399999999965,
+          "duration": 41.70000000001164
+        },
+        {
+          "start": 6180.099999999977,
+          "end": 6221.299999999988,
+          "duration": 41.20000000001164
+        }
+      ]
+    },
+    {
+      "profile": "android-portrait",
+      "name": "layer-switch",
+      "rawStartedAt": 24858.70000000001,
+      "rawEndedAt": 29956.20000000001,
+      "durationMs": 5097.5,
+      "samples": 306,
+      "intervalsIncludingBoundaries": 307,
+      "p95OrderStatisticRankOneBased": 292,
+      "recomputed": {
+        "frameP95Ms": 16.900000000023283,
+        "maxFrameGapMs": 29.599999999976717,
+        "inputToNextFrameMs": 64.90000000002328,
+        "sessionCLS": 0.022143804754611498,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 70,
+      "eventTimingMaxDurationMs": 72,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "android-portrait",
+      "name": "site-search",
+      "rawStartedAt": 337.9000000000233,
+      "rawEndedAt": 1912.0999999999767,
+      "durationMs": 1574.1999999999534,
+      "samples": 96,
+      "intervalsIncludingBoundaries": 97,
+      "p95OrderStatisticRankOneBased": 93,
+      "recomputed": {
+        "frameP95Ms": 17.0,
+        "maxFrameGapMs": 23.5,
+        "inputToNextFrameMs": 48.399999999965075,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 98,
+      "eventTimingMaxDurationMs": 32,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "desktop-webgl",
+      "name": "panel",
+      "rawStartedAt": 2759.2000000000116,
+      "rawEndedAt": 3969,
+      "durationMs": 1209.7999999999884,
+      "samples": 73,
+      "intervalsIncludingBoundaries": 74,
+      "p95OrderStatisticRankOneBased": 71,
+      "recomputed": {
+        "frameP95Ms": 16.900000000023283,
+        "maxFrameGapMs": 17.0,
+        "inputToNextFrameMs": 32.70000000001164,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 25,
+      "eventTimingMaxDurationMs": 24,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "desktop-webgl",
+      "name": "explore-search",
+      "rawStartedAt": 3971,
+      "rawEndedAt": 5519.300000000047,
+      "durationMs": 1548.3000000000466,
+      "samples": 93,
+      "intervalsIncludingBoundaries": 94,
+      "p95OrderStatisticRankOneBased": 90,
+      "recomputed": {
+        "frameP95Ms": 17.5,
+        "maxFrameGapMs": 24.599999999976717,
+        "inputToNextFrameMs": 35.40000000002328,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 104,
+      "eventTimingMaxDurationMs": 32,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "desktop-webgl",
+      "name": "explore-filters",
+      "rawStartedAt": 12387,
+      "rawEndedAt": 14235.900000000023,
+      "durationMs": 1848.9000000000233,
+      "samples": 111,
+      "intervalsIncludingBoundaries": 112,
+      "p95OrderStatisticRankOneBased": 107,
+      "recomputed": {
+        "frameP95Ms": 17.0,
+        "maxFrameGapMs": 18.29999999998836,
+        "inputToNextFrameMs": 34.5,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 42,
+      "eventTimingMaxDurationMs": 32,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "desktop-webgl",
+      "name": "catalog-scroll",
+      "rawStartedAt": 14237.5,
+      "rawEndedAt": 14685.200000000012,
+      "durationMs": 447.70000000001164,
+      "samples": 27,
+      "intervalsIncludingBoundaries": 28,
+      "p95OrderStatisticRankOneBased": 27,
+      "recomputed": {
+        "frameP95Ms": 16.900000000023283,
+        "maxFrameGapMs": 18.899999999965075,
+        "inputToNextFrameMs": 45.09999999997672,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 0,
+      "eventTimingMaxDurationMs": null,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "desktop-webgl",
+      "name": "map-pan",
+      "rawStartedAt": 15088,
+      "rawEndedAt": 19285,
+      "durationMs": 4197,
+      "samples": 216,
+      "intervalsIncludingBoundaries": 217,
+      "p95OrderStatisticRankOneBased": 207,
+      "recomputed": {
+        "frameP95Ms": 40.90000000002328,
+        "maxFrameGapMs": 54.5,
+        "inputToNextFrameMs": 47.399999999965075,
+        "sessionCLS": 0,
+        "longestTaskMs": 54
+      },
+      "intervalsAtLeast35ms": 24,
+      "eventTimingObserved": 20,
+      "eventTimingMaxDurationMs": 56,
+      "longTasksCount": 2,
+      "longTasksTotalMs": 105,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-pan",
+          "metric": "frameP95Ms",
+          "value": 40.90000000002328,
+          "limit": 35
+        }
+      ],
+      "trustedInputs": [
+        {
+          "type": "pointerdown",
+          "trusted": true,
+          "startTime": 14.100000000034925,
+          "receivedAt": 16.800000000046566,
+          "nextFrameAt": 61.5
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "startTime": 589,
+          "receivedAt": 593.9000000000233,
+          "nextFrameAt": 630.3000000000466
+        }
+      ],
+      "longTasksRelativeMs": [
+        {
+          "start": 2129.5,
+          "duration": 51
+        },
+        {
+          "start": 3112.8000000000466,
+          "duration": 54
+        }
+      ],
+      "slowIntervals": [
+        {
+          "start": 1413.2000000000116,
+          "end": 1450.9000000000233,
+          "duration": 37.70000000001164
+        },
+        {
+          "start": 1512.8000000000466,
+          "end": 1549.3000000000466,
+          "duration": 36.5
+        },
+        {
+          "start": 1596.4000000000233,
+          "end": 1633.4000000000233,
+          "duration": 37.0
+        },
+        {
+          "start": 1696.2000000000116,
+          "end": 1734,
+          "duration": 37.79999999998836
+        },
+        {
+          "start": 1796.2000000000116,
+          "end": 1833.2000000000116,
+          "duration": 37.0
+        },
+        {
+          "start": 1879.600000000035,
+          "end": 1917.8000000000466,
+          "duration": 38.20000000001164
+        },
+        {
+          "start": 1962.8000000000466,
+          "end": 2001.3000000000466,
+          "duration": 38.5
+        },
+        {
+          "start": 2046.2000000000116,
+          "end": 2084.8000000000466,
+          "duration": 38.600000000034925
+        },
+        {
+          "start": 2129.5,
+          "end": 2181.8000000000466,
+          "duration": 52.300000000046566
+        },
+        {
+          "start": 2246.100000000035,
+          "end": 2285.4000000000233,
+          "duration": 39.29999999998836
+        },
+        {
+          "start": 2497,
+          "end": 2536.9000000000233,
+          "duration": 39.90000000002328
+        },
+        {
+          "start": 2612.9000000000233,
+          "end": 2653.8000000000466,
+          "duration": 40.90000000002328
+        },
+        {
+          "start": 2696.100000000035,
+          "end": 2738.2000000000116,
+          "duration": 42.09999999997672
+        },
+        {
+          "start": 2779.8000000000466,
+          "end": 2820.4000000000233,
+          "duration": 40.59999999997672
+        },
+        {
+          "start": 2862.9000000000233,
+          "end": 2907,
+          "duration": 44.09999999997672
+        },
+        {
+          "start": 2946.100000000035,
+          "end": 2989.8000000000466,
+          "duration": 43.70000000001164
+        },
+        {
+          "start": 3046.100000000035,
+          "end": 3089,
+          "duration": 42.899999999965075
+        },
+        {
+          "start": 3112.8000000000466,
+          "end": 3167.3000000000466,
+          "duration": 54.5
+        },
+        {
+          "start": 3212.8000000000466,
+          "end": 3253.600000000035,
+          "duration": 40.79999999998836
+        },
+        {
+          "start": 3279.5,
+          "end": 3319.9000000000233,
+          "duration": 40.40000000002328
+        },
+        {
+          "start": 3362.8000000000466,
+          "end": 3403.8000000000466,
+          "duration": 41.0
+        },
+        {
+          "start": 3429.4000000000233,
+          "end": 3470.7000000000116,
+          "duration": 41.29999999998836
+        },
+        {
+          "start": 3512.8000000000466,
+          "end": 3554.7000000000116,
+          "duration": 41.899999999965075
+        },
+        {
+          "start": 3596.2000000000116,
+          "end": 3637.7000000000116,
+          "duration": 41.5
+        }
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "name": "map-zoom",
+      "rawStartedAt": 19286.600000000035,
+      "rawEndedAt": 30351.5,
+      "durationMs": 11064.899999999965,
+      "samples": 606,
+      "intervalsIncludingBoundaries": 607,
+      "p95OrderStatisticRankOneBased": 577,
+      "recomputed": {
+        "frameP95Ms": 36.0,
+        "maxFrameGapMs": 50.09999999997672,
+        "inputToNextFrameMs": 47.0,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 37,
+      "eventTimingObserved": 30,
+      "eventTimingMaxDurationMs": 56,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-zoom",
+          "metric": "frameP95Ms",
+          "value": 36.0,
+          "limit": 35
+        }
+      ],
+      "trustedInputs": [
+        {
+          "type": "pointerdown",
+          "trusted": true,
+          "startTime": 748.7999999999884,
+          "receivedAt": 749.7000000000116,
+          "nextFrameAt": 786.8999999999651
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "startTime": 750.5999999999767,
+          "receivedAt": 750.7999999999884,
+          "nextFrameAt": 787.2999999999884
+        },
+        {
+          "type": "pointerdown",
+          "trusted": true,
+          "startTime": 8015.0,
+          "receivedAt": 8016.700000000012,
+          "nextFrameAt": 8062.0
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "startTime": 8017.5,
+          "receivedAt": 8017.899999999965,
+          "nextFrameAt": 8062.5
+        }
+      ],
+      "longTasksRelativeMs": [],
+      "slowIntervals": [
+        {
+          "start": 1197.399999999965,
+          "end": 1236.7000000000116,
+          "duration": 39.300000000046566
+        },
+        {
+          "start": 1947.399999999965,
+          "end": 1986.7999999999884,
+          "duration": 39.40000000002328
+        },
+        {
+          "start": 2797.399999999965,
+          "end": 2837.0999999999767,
+          "duration": 39.70000000001164
+        },
+        {
+          "start": 3364.0,
+          "end": 3399.0,
+          "duration": 35.0
+        },
+        {
+          "start": 3497.399999999965,
+          "end": 3541.5,
+          "duration": 44.100000000034925
+        },
+        {
+          "start": 4180.700000000012,
+          "end": 4226.5,
+          "duration": 45.79999999998836
+        },
+        {
+          "start": 4530.599999999977,
+          "end": 4568.0,
+          "duration": 37.40000000002328
+        },
+        {
+          "start": 4897.399999999965,
+          "end": 4932.399999999965,
+          "duration": 35
+        },
+        {
+          "start": 4963.899999999965,
+          "end": 4999.899999999965,
+          "duration": 36.0
+        },
+        {
+          "start": 5164.399999999965,
+          "end": 5210.700000000012,
+          "duration": 46.300000000046566
+        },
+        {
+          "start": 5280.599999999977,
+          "end": 5317.700000000012,
+          "duration": 37.100000000034925
+        },
+        {
+          "start": 5563.899999999965,
+          "end": 5599.599999999977,
+          "duration": 35.70000000001164
+        },
+        {
+          "start": 5663.899999999965,
+          "end": 5700.099999999977,
+          "duration": 36.20000000001164
+        },
+        {
+          "start": 5780.599999999977,
+          "end": 5817.5,
+          "duration": 36.90000000002328
+        },
+        {
+          "start": 5897.299999999988,
+          "end": 5935.299999999988,
+          "duration": 38.0
+        },
+        {
+          "start": 5980.599999999977,
+          "end": 6019.0,
+          "duration": 38.40000000002328
+        },
+        {
+          "start": 6080.5,
+          "end": 6130.599999999977,
+          "duration": 50.09999999997672
+        },
+        {
+          "start": 6163.899999999965,
+          "end": 6201.099999999977,
+          "duration": 37.20000000001164
+        },
+        {
+          "start": 6247.299999999988,
+          "end": 6284.700000000012,
+          "duration": 37.40000000002328
+        },
+        {
+          "start": 6314.0,
+          "end": 6350.599999999977,
+          "duration": 36.59999999997672
+        },
+        {
+          "start": 6397.200000000012,
+          "end": 6438.399999999965,
+          "duration": 41.199999999953434
+        },
+        {
+          "start": 6463.899999999965,
+          "end": 6500.099999999977,
+          "duration": 36.20000000001164
+        },
+        {
+          "start": 6530.5,
+          "end": 6567.599999999977,
+          "duration": 37.09999999997672
+        },
+        {
+          "start": 6597.299999999988,
+          "end": 6633.599999999977,
+          "duration": 36.29999999998836
+        },
+        {
+          "start": 6680.599999999977,
+          "end": 6717.099999999977,
+          "duration": 36.5
+        },
+        {
+          "start": 6747.399999999965,
+          "end": 6792.200000000012,
+          "duration": 44.800000000046566
+        },
+        {
+          "start": 8278.799999999988,
+          "end": 8319.599999999977,
+          "duration": 40.79999999998836
+        },
+        {
+          "start": 8319.599999999977,
+          "end": 8357.0,
+          "duration": 37.40000000002328
+        },
+        {
+          "start": 9064.299999999988,
+          "end": 9107.299999999988,
+          "duration": 43.0
+        },
+        {
+          "start": 9813.799999999988,
+          "end": 9860.200000000012,
+          "duration": 46.40000000002328
+        },
+        {
+          "start": 9980.399999999965,
+          "end": 10015.399999999965,
+          "duration": 35
+        },
+        {
+          "start": 10067.899999999965,
+          "end": 10104.700000000012,
+          "duration": 36.800000000046566
+        },
+        {
+          "start": 10230.399999999965,
+          "end": 10267.299999999988,
+          "duration": 36.90000000002328
+        },
+        {
+          "start": 10313.700000000012,
+          "end": 10349.700000000012,
+          "duration": 36.0
+        },
+        {
+          "start": 10380.399999999965,
+          "end": 10415.599999999977,
+          "duration": 35.20000000001164
+        },
+        {
+          "start": 10463.700000000012,
+          "end": 10499.599999999977,
+          "duration": 35.899999999965075
+        },
+        {
+          "start": 10530.700000000012,
+          "end": 10567.5,
+          "duration": 36.79999999998836
+        }
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "name": "layer-switch",
+      "rawStartedAt": 30353.900000000023,
+      "rawEndedAt": 34201.20000000001,
+      "durationMs": 3847.2999999999884,
+      "samples": 229,
+      "intervalsIncludingBoundaries": 230,
+      "p95OrderStatisticRankOneBased": 219,
+      "recomputed": {
+        "frameP95Ms": 17.0,
+        "maxFrameGapMs": 32.100000000034925,
+        "inputToNextFrameMs": 47.600000000034925,
+        "sessionCLS": 0.007472533456448137,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 26,
+      "eventTimingMaxDurationMs": 56,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    },
+    {
+      "profile": "desktop-webgl",
+      "name": "site-search",
+      "rawStartedAt": 304.19999999995343,
+      "rawEndedAt": 1779.0999999999767,
+      "durationMs": 1474.9000000000233,
+      "samples": 90,
+      "intervalsIncludingBoundaries": 91,
+      "p95OrderStatisticRankOneBased": 87,
+      "recomputed": {
+        "frameP95Ms": 17.099999999976717,
+        "maxFrameGapMs": 18.5,
+        "inputToNextFrameMs": 34.300000000046566,
+        "sessionCLS": 0,
+        "longestTaskMs": 0
+      },
+      "intervalsAtLeast35ms": 0,
+      "eventTimingObserved": 73,
+      "eventTimingMaxDurationMs": 24,
+      "longTasksCount": 0,
+      "longTasksTotalMs": 0,
+      "rawBoundsAndDerivedMetricsVerified": true,
+      "issues": []
+    }
+  ],
+  "recomputedIssues": [
+    {
+      "profile": "desktop-webgl",
+      "phase": "ui-smoothness/map-pan",
+      "metric": "frameP95Ms",
+      "value": 40.90000000002328,
+      "limit": 35
+    },
+    {
+      "profile": "desktop-webgl",
+      "phase": "ui-smoothness/map-zoom",
+      "metric": "frameP95Ms",
+      "value": 36.0,
+      "limit": 35
+    }
+  ],
+  "all16RawWindowMetricsAndBoundsMatch": true,
+  "profileFlags": [
+    {
+      "schemaVersion": 1,
+      "profile": "android-portrait",
+      "engine": "tropnik-canvas",
+      "input": "touch",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "passed": true,
+      "performanceIssues": [],
+      "performancePassed": true
+    },
+    {
+      "schemaVersion": 1,
+      "profile": "desktop-webgl",
+      "engine": "tropnik-canvas",
+      "input": "mouse",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "passed": true,
+      "performanceIssues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-pan",
+          "metric": "frameP95Ms",
+          "value": 40.90000000002328,
+          "limit": 35
+        },
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-zoom",
+          "metric": "frameP95Ms",
+          "value": 36,
+          "limit": 35
+        }
+      ],
+      "performancePassed": false
+    }
+  ],
+  "nativePanChecks": [
+    {
+      "profile": "android-portrait",
+      "nativeReceipt": {
+        "input": "touch",
+        "start": {
+          "x": 206,
+          "y": 449.15000000000003
+        },
+        "end": {
+          "x": 270,
+          "y": 461.15000000000003
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchStart",
+            "x": 206,
+            "y": 449.15000000000003,
+            "sentOffsetMs": 0.06307100000049104,
+            "status": "fulfilled",
+            "ackOffsetMs": 15.74903699999777
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 211.33333333333334,
+            "y": 450.15000000000003,
+            "sentOffsetMs": 15.761051999998017,
+            "status": "fulfilled",
+            "ackOffsetMs": 45.938099999999395
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 216.66666666666666,
+            "y": 451.15000000000003,
+            "sentOffsetMs": 71.07315100000051,
+            "status": "fulfilled",
+            "ackOffsetMs": 112.74734999999782
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 222,
+            "y": 452.15000000000003,
+            "sentOffsetMs": 137.8833909999994,
+            "status": "fulfilled",
+            "ackOffsetMs": 179.41674299999795
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 227.33333333333334,
+            "y": 453.15000000000003,
+            "sentOffsetMs": 203.57289599999785,
+            "status": "fulfilled",
+            "ackOffsetMs": 229.20793299999787
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 232.66666666666666,
+            "y": 454.15000000000003,
+            "sentOffsetMs": 254.36139299999923,
+            "status": "fulfilled",
+            "ackOffsetMs": 279.39020999999775
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 238,
+            "y": 455.15000000000003,
+            "sentOffsetMs": 304.53686899999957,
+            "status": "fulfilled",
+            "ackOffsetMs": 329.2839209999984
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 243.33333333333334,
+            "y": 456.15000000000003,
+            "sentOffsetMs": 354.521045999998,
+            "status": "fulfilled",
+            "ackOffsetMs": 379.2267900000006
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 248.66666666666666,
+            "y": 457.15000000000003,
+            "sentOffsetMs": 404.3566780000001,
+            "status": "fulfilled",
+            "ackOffsetMs": 429.78144699999757
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 254,
+            "y": 458.15000000000003,
+            "sentOffsetMs": 454.9563699999999,
+            "status": "fulfilled",
+            "ackOffsetMs": 479.53956800000014
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 259.3333333333333,
+            "y": 459.15000000000003,
+            "sentOffsetMs": 504.6836799999983,
+            "status": "fulfilled",
+            "ackOffsetMs": 529.1338790000009
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 264.6666666666667,
+            "y": 460.15000000000003,
+            "sentOffsetMs": 554.284717999999,
+            "status": "fulfilled",
+            "ackOffsetMs": 579.7530789999983
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 604.8963909999984,
+            "status": "fulfilled",
+            "ackOffsetMs": 629.4177080000009
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchEnd",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 853.8840749999981,
+            "status": "fulfilled",
+            "ackOffsetMs": 879.8627369999995
+          }
+        ],
+        "durationMs": 879.9050079999979,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 16707.800000000047,
+            "timestamp": 16694.20000000001,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 206,
+            "y": 449.1499938964844
+          },
+          {
+            "type": "pointerup",
+            "time": 17573.600000000035,
+            "timestamp": 17548.300000000047,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 270,
+            "y": 461.1499938964844
+          }
+        ]
+      },
+      "downRelativeMs": 14.900000000023283,
+      "upRelativeMs": 880.7000000000116,
+      "checks": "Exactly 12 linear moves, ACK order, trusted matching down/up, original 64/12 displacement and 200 ms hold verified."
+    },
+    {
+      "profile": "desktop-webgl",
+      "nativeReceipt": {
+        "input": "mouse",
+        "start": {
+          "x": 748.3499999999999,
+          "y": 489.6
+        },
+        "end": {
+          "x": 812.3499999999999,
+          "y": 501.6
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 0.0034470000027795322,
+            "status": "fulfilled",
+            "ackOffsetMs": 13.259994000000006
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mousePressed",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 13.26469299999735,
+            "status": "fulfilled",
+            "ackOffsetMs": 17.42485000000306
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 753.6833333333333,
+            "y": 490.6,
+            "sentOffsetMs": 17.436430000001565,
+            "status": "fulfilled",
+            "ackOffsetMs": 29.62533899999835
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 759.0166666666665,
+            "y": 491.6,
+            "sentOffsetMs": 54.78484800000297,
+            "status": "fulfilled",
+            "ackOffsetMs": 61.405596999997215
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 764.3499999999999,
+            "y": 492.6,
+            "sentOffsetMs": 86.5453439999983,
+            "status": "fulfilled",
+            "ackOffsetMs": 91.41570499999943
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 769.6833333333333,
+            "y": 493.6,
+            "sentOffsetMs": 116.53932200000418,
+            "status": "fulfilled",
+            "ackOffsetMs": 119.20760700000392
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 775.0166666666665,
+            "y": 494.6,
+            "sentOffsetMs": 144.36926400000084,
+            "status": "fulfilled",
+            "ackOffsetMs": 148.27680200000032
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 780.3499999999999,
+            "y": 495.6,
+            "sentOffsetMs": 173.4254559999972,
+            "status": "fulfilled",
+            "ackOffsetMs": 176.02134500000102
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 785.6833333333333,
+            "y": 496.6,
+            "sentOffsetMs": 201.15149799999926,
+            "status": "fulfilled",
+            "ackOffsetMs": 207.90689900000143
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 791.0166666666665,
+            "y": 497.6,
+            "sentOffsetMs": 233.05066600000282,
+            "status": "fulfilled",
+            "ackOffsetMs": 238.88370099999884
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 796.3499999999999,
+            "y": 498.6,
+            "sentOffsetMs": 264.0173760000034,
+            "status": "fulfilled",
+            "ackOffsetMs": 270.33117199999833
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 801.6833333333333,
+            "y": 499.6,
+            "sentOffsetMs": 295.4718219999995,
+            "status": "fulfilled",
+            "ackOffsetMs": 301.431319000003
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 807.0166666666665,
+            "y": 500.6,
+            "sentOffsetMs": 326.5838220000005,
+            "status": "fulfilled",
+            "ackOffsetMs": 331.6600069999986
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 356.79434200000105,
+            "status": "fulfilled",
+            "ackOffsetMs": 362.3295020000005
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseReleased",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 587.7982830000037,
+            "status": "fulfilled",
+            "ackOffsetMs": 593.7246149999992
+          }
+        ],
+        "durationMs": 593.7440439999991,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 15104.800000000047,
+            "timestamp": 15102.100000000035,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 748.3499755859375,
+            "y": 489.6000061035156
+          },
+          {
+            "type": "pointerup",
+            "time": 15677.400000000023,
+            "timestamp": 15677,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812.3499755859375,
+            "y": 501.6000061035156
+          },
+          {
+            "type": "click",
+            "time": 15681.900000000023,
+            "timestamp": 15677,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812,
+            "y": 501
+          }
+        ]
+      },
+      "downRelativeMs": 16.800000000046566,
+      "upRelativeMs": 589.4000000000233,
+      "checks": "Exactly 12 linear moves, ACK order, trusted matching down/up, original 64/12 displacement and 200 ms hold verified."
+    }
+  ],
+  "buildEnvironmentBinding": {
+    "method": "Early report and actual loading receipt explicitly name the same sourceCommit. Loading receipt names build ed67ad6cbd56a305. Stable browser/GPU/runner/flags/nativeSurface and source fields exactly match. Early raw profile itself does not independently repeat buildId.",
+    "loadingReceiptPath": "/workspace/scratch/686c5dc59f67/pages43429612556/failure/zip-members/browser-map-loading-verification.json",
+    "loadingReceiptSha256": "9d18c8cc247662dd4425af5d0fd55b900369dc7197a7254358737b912be934e4",
+    "sameStableEnvironment": true,
+    "loadingResultOwnership": "web_release_skeptic independently validates actual source hashes, pixels, PNGs and cleanup; this receipt does not replace that GREEN proof."
+  },
+  "fullAudit": {
+    "available": false,
+    "completedSmoothnessWindows": 0,
+    "reason": "The early UI smoothness step failed. Full audit and deploy were skipped; no full browser-verification or accepted Pages payload exists. Do not transfer earlier full Android results."
+  },
+  "baselineComparison": [
+    {
+      "label": "5fef",
+      "sourceCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+      "receiptPath": "/workspace/scratch/686c5dc59f67/pages43422618701/failure/zip-members/browser-ui-smoothness-diagnostic.json",
+      "receiptSha256": "1b8003002fa937137d2c7faab8487cd667dc1321d58528f27227789418148c90",
+      "browser": {
+        "product": "Chrome/156.0.8078.79",
+        "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+        "protocolVersion": "1.3",
+        "jsVersion": "15.6.75.27",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+      },
+      "runner": {
+        "os": {
+          "platform": "linux",
+          "release": "7.0.0-1017-azure",
+          "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+          "arch": "x64"
+        },
+        "cpu": {
+          "models": [
+            "AMD EPYC 9V74 80-Core Processor"
+          ],
+          "logicalCount": 4,
+          "availableParallelism": 4
+        },
+        "totalMemoryBytes": 16760348672,
+        "image": {
+          "os": "ubuntu24",
+          "version": "20261101.360.1"
+        }
+      },
+      "nativePanStart": {
+        "x": 748.3499999999999,
+        "y": 489.6
+      },
+      "nativePanDelta": {
+        "dx": 64,
+        "dy": 12
+      },
+      "holdBeforeReleaseMs": 200,
+      "actualPanDurationMs": 626.4887769999987,
+      "windows": [
+        {
+          "name": "map-pan",
+          "p95Ms": 30.599999999976717,
+          "maxGapMs": 36.20000000001164,
+          "durationMs": 4031.1999999999534,
+          "samples": 230,
+          "slowAtLeast35ms": 4,
+          "slowAtLeast35msStartingAfter800ms": 0
+        },
+        {
+          "name": "map-zoom",
+          "p95Ms": 17.5,
+          "maxGapMs": 45.70000000001164,
+          "durationMs": 10064.899999999965,
+          "samples": 591,
+          "slowAtLeast35ms": 2,
+          "slowAtLeast35msStartingAfter800ms": 2
+        }
+      ]
+    },
+    {
+      "label": "67d",
+      "sourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+      "receiptPath": "/workspace/scratch/686c5dc59f67/pages43429612556/failure/zip-members/browser-ui-smoothness-diagnostic.json",
+      "receiptSha256": "7e9a472978c665647afb9d97c543c02922c0d9f0e7ba422b3f66d34bd375907d",
+      "browser": {
+        "product": "Chrome/157.0.8103.50",
+        "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+        "protocolVersion": "1.3",
+        "jsVersion": "15.7.112.23",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+      },
+      "runner": {
+        "os": {
+          "platform": "linux",
+          "release": "7.0.0-1014-aws",
+          "version": "#14~24.04.1-Ubuntu SMP PREEMPT Fri Sep 18 21:24:59 UTC 2026",
+          "arch": "x64"
+        },
+        "cpu": {
+          "models": [
+            "Intel(R) Xeon(R) 6975P-C"
+          ],
+          "logicalCount": 4,
+          "availableParallelism": 4
+        },
+        "totalMemoryBytes": 16464302080,
+        "image": {
+          "os": "ubuntu24",
+          "version": "20261111.127.1"
+        }
+      },
+      "nativePanStart": {
+        "x": 748.3499999999999,
+        "y": 489.6
+      },
+      "nativePanDelta": {
+        "dx": 64,
+        "dy": 12
+      },
+      "holdBeforeReleaseMs": 200,
+      "actualPanDurationMs": 593.7440439999991,
+      "windows": [
+        {
+          "name": "map-pan",
+          "p95Ms": 40.90000000002328,
+          "maxGapMs": 54.5,
+          "durationMs": 4197,
+          "samples": 216,
+          "slowAtLeast35ms": 24,
+          "slowAtLeast35msStartingAfter800ms": 24
+        },
+        {
+          "name": "map-zoom",
+          "p95Ms": 36,
+          "maxGapMs": 50.09999999997672,
+          "durationMs": 11064.899999999965,
+          "samples": 606,
+          "slowAtLeast35ms": 37,
+          "slowAtLeast35msStartingAfter800ms": 37
+        }
+      ]
+    }
+  ],
+  "unchangedGestureAndMeasurementHelpers": [
+    {
+      "path": "tools/pages-preview/browser-smoothness.mjs",
+      "sha256": "f2b6eef88fcc7d5d262e08b4aec81e13651065850865a0a3785d3e79042f2650",
+      "localEquals5fefGitBlob": true
+    },
+    {
+      "path": "tools/pages-preview/browser-source-end-pan.mjs",
+      "sha256": "5a4d396f6d811f843c7e7e5a0529fe964903b753bce34284125f4dc6727b8cc0",
+      "localEquals5fefGitBlob": true
+    },
+    {
+      "path": "tools/pages-preview/browser-zoom-audit.mjs",
+      "sha256": "6f1ee1a872cc3227e9f9b562f86af16901554a902bcd60d78f6b03d3c3179229",
+      "localEquals5fefGitBlob": true
+    }
+  ],
+  "attribution": {
+    "directObservation": "All 24 desktop pan RAF gaps >=35 ms begin after +1413.2 ms, through +3596.2 ms (last ends +3637.7). Native pointerup arrived at +589.4 ms; actual pan protocol receipt duration is 593.744 ms. No >=35 ms interval occurs during the native drag. Both long tasks (51 and54 ms) start at +2129.5 and +3112.8 ms. The 5fef pan had four >=35 ms intervals, all before +667 ms; zero after +800 ms.",
+    "measurementWindowMeaning": "The existing map-pan window includes the native drag and settledMap waiting for ready tiles and four stable camera observations, followed by two real RAFs. The unchanged zoom window includes +1 then -1 input with complete settlement between them. The observed late work is legitimately inside the original budgets; no window is trimmed or redefined.",
+    "sourceSuspect": "On each newly paired source completion the new engine replaces loadingGround and schedules a paint. Its identity is part of groundSignature; restoreGround therefore misses. The normal draw paints old canonical detail/relief, all accumulated loading detail/relief, then retains a full canvas ground copy. This produces source-completion work growing with ready cells and is consistent with the late slow-gap pattern.",
+    "notProven": "The uninstrumented smoothness report stores RAF/input/EventTiming/longtask/layout arrays only. It has no loadingGround/drawRevision transition series, request ledger, CPU samples, renderer trace or SW snapshots for these windows. Actual partial-paint overlap, CPU hotspot and SW contribution cannot be directly established from this receipt.",
+    "environmentCaveat": "67d ran Chrome157 on Intel Xeon6975P-C/image20261111.127.1; 5fef ran Chrome156 on AMD EPYC9V74/image20261101.360.1. Comparison is the same gesture/source path but not a controlled same-environment performance A/B.",
+    "nextMinimalEvidence": "One explicitly separate diagnostic of the exact failing runtime around the same map-pan/map-zoom, using browser-trace.mjs and bounded read-only mapInspection transitions (drawRevision, current loading generation/ready cells, canonical keys) aligned with UserTiming. Keep input, measurement windows, CPU rate and budgets unchanged. Instrumented results cannot certify release. Nothing launched by this reviewer."
+  },
+  "history": "Previous 9289 desktop p95 failure mostly coincided with native input; 0cb diagnostic and first e69fd acquisition failure remain separate evidence. The candidate loading GREEN does not imply smoothness GREEN.",
+  "actionsTaken": "Read existing shared artifacts, independently recomputed all raw statistics and native gesture checks, compared unchanged helper source to5fef and reviewed current engine suspect. No app/tooling edits, downloads, browser runs, workflow repeats or changed budgets."
+}

@@ -1,0 +1,720 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T13:08:47.839995+00:00",
+  "status": "passed",
+  "scope": "Second 0.4.33 main validation of the progressive-loading and WebView pointerType changes. No release or public APK was published by this workflow. All artifact, source, byte and device evidence belongs to this exact run.",
+  "source": {
+    "commit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+    "tree": "a7d79e676734c6ab112154548bf212e0d056cb84",
+    "parent": "5fefc0da294400bf36110c9ee8130e68e7425071"
+  },
+  "workflow": {
+    "id": 43429612598,
+    "url": "https://github.com/orewn/tropnik/actions/runs/43429612598",
+    "attempt": 1,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "updatedAt": "2026-11-13T13:08:09Z",
+    "jobs": [
+      {
+        "id": 131899528941,
+        "name": "build",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": null,
+        "completed_at": null,
+        "html_url": null
+      },
+      {
+        "id": 131901868981,
+        "name": "Android device scenarios",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": null,
+        "completed_at": null,
+        "html_url": null
+      },
+      {
+        "id": 131904260239,
+        "name": "Verify public Android bytes and prepare the universal website manifest",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": null,
+        "completed_at": null,
+        "html_url": null
+      },
+      {
+        "id": 131904260695,
+        "name": "Publish the requested Android prerelease",
+        "status": "completed",
+        "conclusion": "skipped",
+        "started_at": null,
+        "completed_at": null,
+        "html_url": null
+      }
+    ]
+  },
+  "deviceSummary": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failingCases": []
+  },
+  "publicationControl": {
+    "releaseRequested": false,
+    "actualGateValues": [
+      "false"
+    ],
+    "requestUnchangedFromParent": true,
+    "heldRequest": {
+      "schemaVersion": 1,
+      "requestId": "android-0-4-32-preview-camera-handoff-20261113",
+      "version": "0.4.32-preview",
+      "versionCode": 15,
+      "notesFile": "tools/android-build/release-notes/0.4.32-preview.md"
+    },
+    "publishJobSkipped": true,
+    "publicVerificationJobSkipped": true,
+    "publicReleaseVerified": false,
+    "releaseHeldPendingFullPagesAndAndroidValidation": true
+  },
+  "universalApk": {
+    "bytes": 69227850,
+    "sha256": "3c88a007e72d14d20436adfeddeb87b0eecb69d7f3865f8fef3ad0d29e613c9a",
+    "applicationId": "ru.tropa.app.preview",
+    "version": "0.4.33-preview",
+    "versionCode": 16,
+    "signing": "development / debug",
+    "signingCertificateSha256": "c94df09a7fc6bbead066de85debf36541c6eb4c04d5c5dafab40e0d3daf1df8b",
+    "file": "/workspace/scratch/686c5dc59f67/android-0.4.33-release/validation-67d418dd/build/tropnik-preview.apk",
+    "published": false
+  },
+  "arm64Apk": {
+    "bytes": 69219483,
+    "sha256": "660df90e4279f831d7819992c8070c2e2ebfe2e6a993d4cee3aaf326d20452ee",
+    "deviceExecutionVerified": false,
+    "published": false
+  },
+  "jvm": {
+    "tests": 70,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "instrumentationApkCompiled": true,
+    "instrumentationExecuted": false
+  },
+  "runtime": {
+    "mapRenderer": "tropnik-canvas",
+    "mapRendererManifestSha256": "3a630081d3470c050b5d2010c568ff5faa51e1ce550732d4b8473ef33056f9fd",
+    "mapRendererSourceInputsSha256": "a863fe0f5d2379a4f5ff225341fe4fce5b163bd7f19413d53e785275c27303cb",
+    "mapRendererFilesVerified": 11,
+    "mapRendererWorkersVerified": 3,
+    "mapRendererResourceAliasesVerified": 1746,
+    "mapRendererNativeSdkRequired": false,
+    "mapRendererSharedWithWeb": true,
+    "mapRendererBridge": "exact-origin-web-message-port-v1"
+  },
+  "independentApkRuntimeByteVerification": {
+    "mapRenderer": "tropnik-canvas",
+    "mapRendererManifestSha256": "3a630081d3470c050b5d2010c568ff5faa51e1ce550732d4b8473ef33056f9fd",
+    "mapRendererSourceInputsSha256": "a863fe0f5d2379a4f5ff225341fe4fce5b163bd7f19413d53e785275c27303cb",
+    "mapRendererFilesVerified": 11,
+    "mapRendererWorkersVerified": 3,
+    "mapRendererResourceAliasesVerified": 1746,
+    "mapRendererSharedWithWeb": true,
+    "mapRendererNativeSdkRequired": false,
+    "mapRendererBridge": "exact-origin-web-message-port-v1",
+    "mapRendererCyrillicFontBundled": true,
+    "mapRendererOfflineVectorTiles": 193,
+    "mapRendererOfflineDemTiles": 21,
+    "mapRendererCatalogueSourcesVerified": 621,
+    "mapRendererCatalogueOverviewVerified": true
+  },
+  "unsignedProductionCompilation": {
+    "schemaVersion": 1,
+    "kind": "unsigned-production-build-check",
+    "sourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+    "workflowRunId": "43429612598",
+    "applicationId": "ru.tropa.app",
+    "versionCode": 16,
+    "version": "0.4.33",
+    "bytes": 60969713,
+    "sha256": "96932d8f493ae635ec778bde77b27bf3308e43b33272a79752177427110ca389",
+    "debuggable": false,
+    "payload": {
+      "apk": "tropnik-release-check.apk",
+      "sizeBytes": 60969713,
+      "sha256": "96932d8f493ae635ec778bde77b27bf3308e43b33272a79752177427110ca389",
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ],
+      "offlineTileCount": 193,
+      "manifestFilesVerified": 199,
+      "manifestBytesVerified": 2426031,
+      "offlineVectorSourceManifestSha256": "82384a5c6111075e3505046e4c6e3287f45f35e83e55dab98c56e8dc4cceead0",
+      "offlineMapVendorGlyphsPackaged": false,
+      "onlineSourcesManifestSha256": "3f3636f4811288691fa65adc5017e08a674bd4fce5ac863e540c2beb21c725c7",
+      "onlineMapSourcesExplicitlyAllowlisted": true,
+      "onlineSourceConfigurationVersion": 2,
+      "onlineMapSourceUrls": [
+        "https://tiles.openfreemap.org/planet/latest",
+        "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp",
+        "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg",
+        "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/{z}/{y}/{x}.jpg"
+      ],
+      "bundledOfflineMapAvailable": true,
+      "closureAdvisoryPresent": true,
+      "native64BitElfLoadAlignment": {
+        "lib/arm64-v8a/libandroidx.graphics.path.so": 16384,
+        "lib/x86_64/libandroidx.graphics.path.so": 16384
+      },
+      "terrainTileCount": 21,
+      "terrainManifestFilesVerified": 48,
+      "terrainManifestBytesVerified": 2288677,
+      "terrainGridSamples": 16641,
+      "terrainBounds": [
+        40.29,
+        43.64,
+        40.49,
+        43.82
+      ],
+      "terrainManifestSha256": "edd843b102531afd6d80c497f60a9562322a2e02bf01bffa01656a4dd5f5dc15",
+      "landscapeManifestFilesVerified": 1,
+      "landscapeBytesVerified": 2028532,
+      "landscapeSha256": "3d5ee24001ce2ad23f30deafc04613524e574ac981cb4dad428687289db0e190",
+      "landscapeOffline": true,
+      "landscapeGridDimensions": [
+        513,
+        513
+      ],
+      "landscapeGridSamples": 263169,
+      "landscapeGridSourceSha256": "ce2d0be1f749dae6b24b2a949b878a66fe84746ed8d979312a1c8afa4ee06a55",
+      "landscapeGridEmbeddedSha256": "b0b8fee5f69c93a260fcfcc8a6fa84dc8c56b9bca5570d6ad2fa333656745199",
+      "landscapeGridSpacingApproxM": {
+        "eastWest": 31.42,
+        "northSouth": 39.14
+      },
+      "russiaDisplayAssetCount": 2,
+      "russiaDisplayAssetBytesVerified": 2343931,
+      "russiaDisplayProvenanceSha256": "b8bc96450cc3777d454d87da3018a76db4bc10323720d76cf512831d0e66ac93",
+      "russiaFitBounds": [
+        [
+          19.6389282,
+          41.1858711
+        ],
+        [
+          191.0026658,
+          81.858721
+        ]
+      ],
+      "russiaExcludedCatalogRouteIds": [
+        "osm-relation-14407325"
+      ],
+      "russiaOverviewTileCount": 341,
+      "russiaOverviewTileBytesVerified": 1689348,
+      "russiaOverviewFilesVerified": 344,
+      "russiaOverviewManifestSha256": "0be4600a67f7696c74846dfdb2873016e1fc31e7d386353a6afa180f9fa3a4f3",
+      "russiaOverviewTilejsonSha256": "3fbfff6454d669a927679a803ddd00b739222646fbeadb1682fbd4a73c0d819d",
+      "russiaOverviewAttributionSha256": "e7b68af12f0242c680e5ba0f8895748daf142d07277bf506e5dd2cc4c7e90135",
+      "russiaOverviewMaxNativeZoom": 4,
+      "russiaOverviewLocalOnly": true,
+      "russiaOverviewCompleteWrappedXYZ": true,
+      "russiaOverviewIsElevationData": false,
+      "catalogManifestSha256": "9cbb8423681c7a2974ad75bd4cda47fe1db8da292324ce09b7e725a62a095825",
+      "catalogSha256": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0",
+      "catalogRegionCount": 100,
+      "catalogReferenceRouteCount": 685,
+      "catalogTourismDirectionCount": 15,
+      "catalogTerritoryCount": 85,
+      "catalogLearningRouteCount": 1,
+      "catalogGeometryFilesVerified": 624,
+      "catalogReferenceOnlyRouteCount": 61,
+      "catalogGeometryBytesVerified": 9810752,
+      "catalogGeometryVerticesVerified": 405833,
+      "catalogTrailOverlaySourcesVerified": 621,
+      "catalogTrailOverlayBytesVerified": 2634057,
+      "catalogRegionMembership": {
+        "altai": 11,
+        "krasnodar": 99,
+        "karelia": 11,
+        "krym": 151,
+        "baikal": 13,
+        "kamchatka": 4,
+        "voronezh": 1,
+        "primorye": 4,
+        "kaliningrad": 2,
+        "krasnoyarsk": 47,
+        "sakhalin": 8,
+        "murmansk": 15,
+        "adygea": 4,
+        "karachay-cherkessia": 20,
+        "kabardino-balkaria": 6,
+        "territory-28173009B80457268982215": 5,
+        "territory-28173009B24080199016459": 1,
+        "territory-28173009B62882423633207": 1,
+        "territory-28173009B68474107072963": 1,
+        "territory-28173009B21416061393121": 5,
+        "territory-28173009B9124867987859": 1,
+        "territory-28173009B91128253561055": 5,
+        "territory-28173009B90356867269748": 1,
+        "territory-28173009B96664025860642": 1,
+        "territory-28173009B2687808218031": 1,
+        "territory-28173009B51962491984110": 3,
+        "territory-28173009B29209288820923": 1,
+        "territory-28173009B41275184158050": 1,
+        "territory-28173009B78872068540735": 8,
+        "territory-28173009B46612801043871": 8,
+        "territory-28173009B40138449315491": 2,
+        "territory-28173009B99237675212372": 3,
+        "territory-28173009B70023447378008": 4,
+        "territory-28173009B95588705134862": 22,
+        "territory-28173009B4400867918714": 1,
+        "territory-28173009B31225333555943": 1,
+        "territory-28173009B70678486994214": 1,
+        "territory-28173009B83675725671802": 99,
+        "territory-28173009B65133456612022": 47,
+        "territory-14850775B24260608407062": 143,
+        "territory-28173009B71296032393878": 1,
+        "territory-28173009B94971452660823": 1,
+        "territory-28173009B90810482533567": 50,
+        "territory-28173009B5502896824563": 1,
+        "territory-28173009B2185273376578": 3,
+        "territory-28173009B19676032168465": 11,
+        "territory-28173009B74836580104791": 32,
+        "territory-28173009B70218250039968": 15,
+        "territory-28173009B3082792446388": 2,
+        "territory-28173009B18259284234443": 12,
+        "territory-28173009B16533507618293": 2,
+        "territory-28173009B27844369294009": 9,
+        "territory-28173009B55503329301013": 1,
+        "territory-28173009B76603557910928": 2,
+        "territory-28173009B3932420572168": 1,
+        "territory-28173009B59972517059449": 1,
+        "territory-28173009B90469334921421": 6,
+        "territory-28173009B46831765844996": 4,
+        "territory-28173009B86476767341172": 1,
+        "territory-28173009B41832925814017": 8,
+        "territory-28173009B30008444211385": 6,
+        "territory-28173009B30250450380208": 10,
+        "territory-28173009B49563687485750": 5,
+        "territory-28173009B24428243574749": 5,
+        "territory-28173009B75413689166101": 2,
+        "territory-28173009B57398385788417": 1,
+        "territory-28173009B96976580001980": 11,
+        "territory-28173009B21210279674314": 1,
+        "territory-28173009B61240048498251": 1,
+        "territory-28173009B16834140201491": 1,
+        "territory-28173009B48058606062294": 3,
+        "territory-28173009B7235812138525": 3,
+        "territory-28173009B46738131000378": 4,
+        "territory-28173009B55293521919285": 1,
+        "territory-28173009B55422170414647": 2,
+        "territory-28173009B46424166303156": 1,
+        "territory-28173009B69714658607289": 7,
+        "territory-28173009B25497318303482": 1,
+        "territory-28173009B8796515134902": 8,
+        "territory-28173009B21415173479872": 7,
+        "territory-28173009B36269087375583": 8,
+        "territory-28173009B92397886288731": 8,
+        "territory-14850775B70667807354554": 19,
+        "territory-28173009B31773571872137": 7,
+        "territory-28173009B89423349656391": 33,
+        "territory-28173009B50284711669511": 1,
+        "territory-28173009B63182593849600": 5,
+        "territory-28173009B26811060113320": 2,
+        "territory-28173009B42082792489997": 1,
+        "territory-28173009B77673499236961": 1,
+        "territory-28173009B34434912986355": 1,
+        "territory-28173009B42697300509311": 3,
+        "territory-28173009B57295377776076": 1,
+        "territory-28173009B731487536241": 1,
+        "territory-28173009B19466568926459": 19,
+        "territory-28173009B98838729156012": 8,
+        "territory-28173009B91429860602147": 4,
+        "territory-28173009B11091203162490": 3,
+        "territory-28173009B47279883421777": 2,
+        "territory-28173009B38848907206629": 1
+      },
+      "catalogFieldVerifiedCount": 0,
+      "catalogNavigationReadyCount": 0,
+      "catalogSourceByteParityVerified": false,
+      "mapCoverageVersion": "7035c10e633effb2",
+      "mapCoverageSourceManifestSha256": "5810b86b93421e8587492381e08a13ddcce780579cc3116e44e7f9bf186fec35",
+      "mapCoverageFilesVerified": 569,
+      "mapCoverageBytesVerified": 114878763,
+      "mapCoverageAllLevelsBundled": true,
+      "mapCoverageSharedEncoding": "indexed-delta-1e7-v1",
+      "mapRenderer": "tropnik-canvas",
+      "mapRendererManifestSha256": "3a630081d3470c050b5d2010c568ff5faa51e1ce550732d4b8473ef33056f9fd",
+      "mapRendererSourceInputsSha256": "a863fe0f5d2379a4f5ff225341fe4fce5b163bd7f19413d53e785275c27303cb",
+      "mapRendererFilesVerified": 11,
+      "mapRendererWorkersVerified": 3,
+      "mapRendererResourceAliasesVerified": 1746,
+      "mapRendererSharedWithWeb": true,
+      "mapRendererNativeSdkRequired": false,
+      "mapRendererBridge": "exact-origin-web-message-port-v1",
+      "mapRendererCyrillicFontBundled": true,
+      "mapRendererOfflineVectorTiles": 193,
+      "mapRendererOfflineDemTiles": 21,
+      "mapRendererCatalogueSourcesVerified": 621,
+      "mapRendererCatalogueOverviewVerified": true,
+      "terrainRendererSha256": "9aeb714ca4f889587d92506ef7c937c23b09e6fe2c5cf397bfa4121a84de2c86",
+      "mapReliefRenderer": "own-terrarium-worker",
+      "mapReliefLighting": "geographic",
+      "mapProjectedTiltDegrees": [
+        0,
+        40
+      ],
+      "separateLocalMeshViewer": true,
+      "manropeFontBundled": true,
+      "nativeFont": {
+        "path": "res/-z.ttf",
+        "bytes": 164700,
+        "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6",
+        "resourceTableBindingVerified": true,
+        "resourceId": "0x7f050000",
+        "resourceName": "ru.tropa.app:font/manrope"
+      },
+      "terrainTilesVerified": 21,
+      "terrainAttributionAndLicensePresent": true,
+      "sceneBytes": 2028532,
+      "sceneSha256": "3d5ee24001ce2ad23f30deafc04613524e574ac981cb4dad428687289db0e190",
+      "deviceUiTestPerformedByThisScript": false,
+      "sourceAssetsCompared": 1815,
+      "sourceAssetBytesCompared": 142685513,
+      "sourceAssetParityVerified": true,
+      "compilerGeneratedArtProfiles": [
+        {
+          "path": "assets/dexopt/baseline.prof",
+          "bytes": 4525,
+          "sha256": "7eecc50ac24306afb4af01eda4ea1601dc010035a20041139e89a19453d5be5b",
+          "compilerOutput": "android/app/build/intermediates/binary_art_profile/release/compileReleaseArtProfile/baseline.prof"
+        },
+        {
+          "path": "assets/dexopt/baseline.profm",
+          "bytes": 551,
+          "sha256": "4904dd84c80f07c4a247a552f8b9aa9fba8b24a444c80e3974d6b22db31e6a5b",
+          "compilerOutput": "android/app/build/intermediates/binary_art_profile_metadata/release/compileReleaseArtProfile/baseline.profm"
+        }
+      ]
+    },
+    "signatureVerified": false,
+    "signingCertificateSha256": null,
+    "productionPublished": false,
+    "deviceExecutionVerified": false,
+    "liveApiVerified": false,
+    "upgradeVerified": false
+  },
+  "device": {
+    "status": "passed",
+    "processExitCode": 0,
+    "instrumentationResultCodes": [
+      -1
+    ],
+    "deviceExecutionVerified": true,
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "missingTests": [],
+    "parseErrors": [],
+    "cases": [
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      },
+      {
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "noServerMeansExplicitConfigurationNotInventedSocialActivity",
+        "statusCode": 0,
+        "failed": false,
+        "error": false,
+        "skipped": false
+      }
+    ],
+    "schemaVersion": 2,
+    "recordedAt": "2026-11-13T13:08:03.768536+00:00",
+    "sourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+    "workflowRunId": "43429612598",
+    "buildReceiptSha256": "8ede98525fd343bde60947f602e327ae2ca96328c268bb3941ed5551ddf631eb",
+    "testedApks": {
+      "tropnik-preview.apk": {
+        "bytes": 69227850,
+        "sha256": "3c88a007e72d14d20436adfeddeb87b0eecb69d7f3865f8fef3ad0d29e613c9a"
+      },
+      "tropnik-instrumentation-tests.apk": {
+        "bytes": 1181521,
+        "sha256": "4de7f44bf015b2b989bc6abba637acc85f75d290308f6dff67a3eb50bb0cb32b"
+      }
+    },
+    "installedArtifactBytesVerified": true,
+    "releasePayloadDeviceVerified": true,
+    "testedArchitecture": "x86_64",
+    "testedArtifact": "tropnik-preview.apk",
+    "arm64DeviceExecutionVerified": false,
+    "physicalDeviceVerified": false,
+    "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+    "graphicsDriver": {
+      "mode": "swangle",
+      "appBackend": "OpenGL ES",
+      "renderer": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.17841 git hash: 5fa2e61da947))",
+      "diagnosticSha256": "da186bb1de16563b84681f7fb4f00e44550ad6c00b5efafed8e0ba42b6f69fce",
+      "verified": true
+    },
+    "note": "All 11 actual cases must pass on the exact installed universal preview. ARM64, physical GPU, GPS, battery, online satellite providers and a production API are not device-verified."
+  },
+  "nativeMarkerInput": {
+    "receipt": "android-0.4.33-native-marker-input.json",
+    "bytes": 24338,
+    "sha256": "e9764af40ed4c2c868c4f49c5ce4f72a0d59bc8d1813cd7b49ef66cb6e2228a7",
+    "status": "passed",
+    "nationalPointerIds": [
+      2,
+      2,
+      3
+    ],
+    "groupPointerIds": [
+      [
+        2,
+        2,
+        3
+      ],
+      [
+        4,
+        4,
+        5
+      ]
+    ],
+    "directionPointerIds": [
+      6,
+      6,
+      7
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 14039351101,
+      "name": "tropnik-android-preview-1",
+      "size_in_bytes": 111852041,
+      "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14039351101",
+      "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14039351101/zip",
+      "expired": false,
+      "created_at": "2026-11-13T13:03:08Z",
+      "expires_at": "2026-11-27T13:03:04Z",
+      "updated_at": "2026-11-13T13:03:08Z",
+      "digest": "sha256:9799deaec8cb7296b4b874482a4cc66e5576dd6e51d694f5300d8eba8755c103",
+      "workflow_run": {
+        "id": 43429612598,
+        "repository_id": 1447843944,
+        "head_repository_id": 1447843944,
+        "head_branch": "main",
+        "head_sha": "67d418dd1e187d065d2ff3bd3703c50b7436268b"
+      }
+    },
+    {
+      "id": 14038852442,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "size_in_bytes": 7479350,
+      "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14038852442",
+      "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14038852442/zip",
+      "expired": false,
+      "created_at": "2026-11-13T13:08:07Z",
+      "expires_at": "2026-11-27T13:08:05Z",
+      "updated_at": "2026-11-13T13:08:07Z",
+      "digest": "sha256:5678ffd6052987b1f4c6638efad30ee70ccb90aab8a23740757cac2bfeeda41a",
+      "workflow_run": {
+        "id": 43429612598,
+        "repository_id": 1447843944,
+        "head_repository_id": 1447843944,
+        "head_branch": "main",
+        "head_sha": "67d418dd1e187d065d2ff3bd3703c50b7436268b"
+      }
+    },
+    {
+      "id": 14038746748,
+      "name": "tropnik-production-build-check-1",
+      "size_in_bytes": 5164,
+      "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14038746748",
+      "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14038746748/zip",
+      "expired": false,
+      "created_at": "2026-11-13T13:03:03Z",
+      "expires_at": "2026-11-27T13:03:02Z",
+      "updated_at": "2026-11-13T13:03:03Z",
+      "digest": "sha256:6286beb58b25a64eba6087ccd76a2cb3af0d6a29808f64b5b1480cd5a337bdc7",
+      "workflow_run": {
+        "id": 43429612598,
+        "repository_id": 1447843944,
+        "head_repository_id": 1447843944,
+        "head_branch": "main",
+        "head_sha": "67d418dd1e187d065d2ff3bd3703c50b7436268b"
+      }
+    }
+  ],
+  "downloadedEvidence": [
+    {
+      "artifactId": 14039351101,
+      "name": "tropnik-android-preview-1",
+      "file": "build.zip",
+      "bytes": 111852041,
+      "sha256": "9799deaec8cb7296b4b874482a4cc66e5576dd6e51d694f5300d8eba8755c103",
+      "apiDigestMatched": true,
+      "extractedDirectory": "build"
+    },
+    {
+      "artifactId": 14038746748,
+      "name": "tropnik-production-build-check-1",
+      "file": "production.zip",
+      "bytes": 5164,
+      "sha256": "6286beb58b25a64eba6087ccd76a2cb3af0d6a29808f64b5b1480cd5a337bdc7",
+      "apiDigestMatched": true,
+      "extractedDirectory": "production"
+    },
+    {
+      "artifactId": 14038852442,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "file": "device.zip",
+      "bytes": 7479350,
+      "sha256": "5678ffd6052987b1f4c6638efad30ee70ccb90aab8a23740757cac2bfeeda41a",
+      "apiDigestMatched": true,
+      "extractedDirectory": "device"
+    }
+  ],
+  "independentChecks": {
+    "buildReceiptRevalidatedAgainstExactCleanSource": true,
+    "previewReceiptFileFingerprintsVerified": 16,
+    "artifactApiDigestsVerified": 3,
+    "rawInstrumentationProtocolVerified": true,
+    "installedApkReceiptsReboundToDownloadedBuild": true,
+    "localSdkSignatureReverification": false,
+    "signatureVerificationScope": "Official SDK apksigner reports are bound by the validated build receipt; the independent local review did not rerun SDK tools."
+  },
+  "evidenceFiles": {
+    "github-final.json": {
+      "bytes": 24323,
+      "sha256": "72e34451f448600a08e98052be019befa557092de24b056aae596a14a11dc690"
+    },
+    "build.log": {
+      "bytes": 148076,
+      "sha256": "9c550c188551880d8dc71651174089b80fdfc0cf859bdd2b5076cf25a64b89da"
+    },
+    "build/preview-build.json": {
+      "bytes": 3440,
+      "sha256": "8ede98525fd343bde60947f602e327ae2ca96328c268bb3941ed5551ddf631eb"
+    },
+    "production/production-verification.json": {
+      "bytes": 11462,
+      "sha256": "ec2b9a79d0d496fad07e7913dff7eb8c509616f8236bb9304a3e8447d4c3bc73"
+    },
+    "production/production-diagnostics.json": {
+      "bytes": 2661,
+      "sha256": "5b0f77d1d6e4b624a4a4dcfe7ae0972fd593d27f22338b87211eff108c2f5c54"
+    },
+    "device/device-result.json": {
+      "bytes": 4419,
+      "sha256": "5b8e6551d2e1681d32febfab4c2fec1a00c93687e87b4a8466c6f036fc014b56"
+    },
+    "device/installed-apks.json": {
+      "bytes": 581,
+      "sha256": "64404f03f60a1a026f324a6ab2020a3eb40da97e27c31c57c2cfd48e82064dc7"
+    },
+    "device/raw-instrumentation.log": {
+      "bytes": 7402,
+      "sha256": "a3691726326a03fe794007fff5423442d8be30b7668ec9e2d61408dcaa37076d"
+    },
+    "device-job.log": {
+      "bytes": 63500,
+      "sha256": "bca0f85d5b67eb0bc564656ab169423dc6ba2b2a0f4d094618a724ddc11112ed"
+    }
+  },
+  "limitations": {
+    "physicalDeviceVerified": false,
+    "arm64DeviceExecutionVerified": false,
+    "productionSigningVerified": false,
+    "liveApiVerified": false,
+    "upgradeInstallCompatibilityVerified": false,
+    "publicReleaseVerified": false,
+    "resultNotTransferableToFutureReleaseSource": true,
+    "futurePublishRequiresNewCompleteAndroidBuildDeviceAndPublicVerification": true,
+    "mapLoadingPerformanceQualified": false
+  }
+}

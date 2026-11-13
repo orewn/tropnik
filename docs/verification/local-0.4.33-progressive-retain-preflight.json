@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T13:17:37.673319+00:00",
+  "scope": "Local candidate preflight; no browser timing, pixel parity or device performance claim.",
+  "baselineSourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+  "productionChange": {
+    "path": "web/lib/custom-map-engine.ts",
+    "baselineSha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704",
+    "candidateSha256": "95ad8a8e654bd15299c1e944f40af98b8a3becbb38896619dfd7d6ff0ced781a",
+    "onlyChange": "    // Each newly ready pair invalidates the preceding streaming signature.\n    // Paint it directly; capture the stable complete or failed ground on its\n    // next real redraw instead of copying the full backing store per pair.\n    if(this.state.loading&&this.loadingGround)return;\n",
+    "onlyThisAdditionVerified": true,
+    "meaning": "Avoid full backing-store retention copies while a ready-pair generation is still loading. The onscreen painter, staging cohort, requests and labels are unchanged.",
+    "tradeoff": "A separate overlay redraw during active loading replays the original ground painter; stable completed or failed ground can be retained on its next actual redraw."
+  },
+  "regression": {
+    "testFile": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-engine.test.mjs",
+      "bytes": 170414,
+      "sha256": "f2cf51e2dd21f8505405a014bd909aba201dce5013835ce02dedf7a4a0bb493d"
+    },
+    "testBodySha256": "50263b41b48a97c3de9c67ad94096ba9e278318761148c0d1f4313e53a1d80dc",
+    "testName": "progressive loading paints each ready pair without copying every transient full canvas",
+    "sameTestBodyForRedAndGreen": true,
+    "baselineExpectedFailure": {
+      "actualCopies": 3,
+      "expectedCopies": 2,
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/progressive-retain-red-final-test.tap",
+        "bytes": 939,
+        "sha256": "c41b7ddc46072ab621791ae75de245f67bc40438348198250154879c16c7a836"
+      }
+    },
+    "cases": [
+      "three successive ready pairs",
+      "complete generation",
+      "failed neighbour with other results",
+      "late sole rejection followed by lazy cache capture",
+      "no idle RAF",
+      "unchanged request count",
+      "actual tile draw calls remain visible"
+    ],
+    "limitations": "Real production engine with controlled DOM/canvas/tile delivery. Counts of drawImage backing-store copies are operational evidence, not browser timing or raster pixel proof."
+  },
+  "engineSuite": {
+    "exitCode": 0,
+    "counts": {
+      "tests": 79,
+      "pass": 79,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/progressive-retain-engine-green.tap",
+      "bytes": 9476,
+      "sha256": "dc7eeb55a79f10b5c0fbef96a9d183c6597ed6ddca877eddc1e65c39922ff17b"
+    }
+  },
+  "lint": {
+    "exitCode": 0,
+    "command": "./node_modules/.bin/eslint lib/custom-map-engine.ts tests/custom-map-engine.test.mjs",
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/progressive-retain-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "command": "./node_modules/.bin/tsc --noEmit",
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/progressive-retain-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "runtimeDeterminism": {
+    "checkOnly": true,
+    "runtime": "tropnik-canvas",
+    "sourceInputsSha256": "bba9268d3fd505c58d66c610645d6141634357bac101c06e6df41d7510b0d5d4",
+    "sourceFiles": 61,
+    "outputFiles": 12,
+    "resourceAliases": 1746,
+    "manifestSha256": "d1f8823596d966213e7c0dd68e156ea8feec9d16bda001b42a63e8d0756cbf2a",
+    "destinations": [
+      "web/public/custom-map",
+      "android/app/src/main/assets/custom-map"
+    ]
+  },
+  "runtimeByteParity": {
+    "verified": true,
+    "files": 12,
+    "manifestSha256": "d1f8823596d966213e7c0dd68e156ea8feec9d16bda001b42a63e8d0756cbf2a"
+  },
+  "generationOrder": [
+    "prepare-custom-map.mjs",
+    "prepare-offline.mjs",
+    "stamp-service-worker.mjs"
+  ],
+  "build": {
+    "buildId": "9422286fa73b1574",
+    "sourceCommit": null,
+    "base": "/tropnik/",
+    "origin": "https://orewn.github.io",
+    "inputsVerified": 2165,
+    "metadata": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/local-build-9422286fa73b1574/build-info.json",
+      "bytes": 414188,
+      "sha256": "d66274433daf56bbcb67a6517944deda4976c1914158b2af8cddd828f8b33fd5"
+    },
+    "verification": {
+      "verified": true,
+      "pages": 718,
+      "referenceRoutes": 685,
+      "productionRoutingChecks": 2159,
+      "mapPolicyChecks": 25,
+      "staticApiNetworkCalls": 0,
+      "checkedScripts": 67,
+      "publicAssetChecks": 666,
+      "outputFiles": 2657,
+      "offlineFilesVerified": 249,
+      "customMap": {
+        "runtime": "tropnik-canvas",
+        "sourceInputsSha256": "bba9268d3fd505c58d66c610645d6141634357bac101c06e6df41d7510b0d5d4",
+        "manifestSha256": "d1f8823596d966213e7c0dd68e156ea8feec9d16bda001b42a63e8d0756cbf2a",
+        "deployedFilesVerified": 9,
+        "workerCount": 3
+      },
+      "overviewReliefTilesVerified": 341,
+      "terrainGrid": [
+        513,
+        513
+      ],
+      "regionalTerrain": {
+        "regions": 2,
+        "filesVerified": 11,
+        "runtimeFetches": [
+          "/tropnik/terrain-regions/manifest.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+          "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+        ]
+      },
+      "apkVerified": true,
+      "coverageExcludedRoutes": [
+        "osm-relation-14407325"
+      ],
+      "base": "/tropnik/"
+    },
+    "httpVerification": {
+      "verified": true,
+      "base": "/tropnik/",
+      "httpChecks": 71,
+      "regionalTerrain": {
+        "regions": 2,
+        "runtimeFetches": [
+          "/tropnik/terrain-regions/manifest.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+          "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+        ],
+        "checksumsVerified": true
+      },
+      "browserRenderingTested": false,
+      "backendConnected": false
+    },
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/progressive-retain-static-build.log",
+      "bytes": 11921,
+      "sha256": "1b641b8836cde077e59cd8ec361401fce0b89b844d2b70d58585df75c08416ce"
+    }
+  },
+  "loadingGateInputs": {
+    "verified": false,
+    "browserLaunched": false,
+    "inputsMatch": true,
+    "buildId": "9422286fa73b1574",
+    "sources": {
+      "web/lib/custom-map-engine.ts": "95ad8a8e654bd15299c1e944f40af98b8a3becbb38896619dfd7d6ff0ced781a",
+      "web/lib/custom-map-tiles.ts": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546",
+      "web/lib/custom-map-camera.ts": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "web/lib/custom-map-painter.ts": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "web/lib/custom-map-tiles.worker.ts": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+      "web/lib/map-resource-pool.ts": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "web/lib/map-preload.ts": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "web/lib/catalog.generated.json": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49",
+      "tools/pages-preview/browser-map-loading.mjs": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64"
+    }
+  },
+  "releaseControl": {
+    "requestVersion": "0.4.32-preview",
+    "publicationRequested": false
+  },
+  "limits": [
+    "Actual CI browser smoothness and all required pixel gates remain mandatory.",
+    "No budget, oracle, request plan, concurrency or deadline was changed.",
+    "The final web archive must come from an accepted exact CI Pages payload."
+  ]
+}

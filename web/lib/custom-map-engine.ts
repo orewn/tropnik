@@ -776,6 +776,10 @@ export class CustomMapEngine {
     // exact opaque ground after a settled paint, before any route or mask is
     // added. Moving frames keep their original painter without extra copies.
     if(this.pointer.activePointers||this.animation||this.groundSnapshotUnavailable)return;
+    // Each newly ready pair invalidates the preceding streaming signature.
+    // Paint it directly; capture the stable complete or failed ground on its
+    // next real redraw instead of copying the full backing store per pair.
+    if(this.state.loading&&this.loadingGround)return;
     // An intermediate native flush changes subpixel edges in rotated/pitched
     // views. Keep their original single-pass ground; search uses north-up.
     if((this.camera.bearingDegrees??0)!==0||this.pitch!==0)return;

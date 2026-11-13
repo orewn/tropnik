@@ -1,0 +1,365 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13 13:02:33 UTC",
+  "scope": "Publication identity for validation-only main source; workflow outcomes remain separate.",
+  "repository": "orewn/tropnik",
+  "branch": "main",
+  "sourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+  "tree": "a7d79e676734c6ab112154548bf212e0d056cb84",
+  "parents": [
+    "5fefc0da294400bf36110c9ee8130e68e7425071"
+  ],
+  "localReviewedCommit": "3ce7b1e1e01bcc78ccfce10f634a2a6642cf8649",
+  "localTree": "a7d79e676734c6ab112154548bf212e0d056cb84",
+  "remoteTreeMatchesReviewedTree": true,
+  "mainLease": {
+    "expectedBefore": "5fefc0da294400bf36110c9ee8130e68e7425071",
+    "force": false,
+    "readbackAfter": "67d418dd1e187d065d2ff3bd3703c50b7436268b"
+  },
+  "transportPlan": {
+    "path": "/workspace/scratch/686c5dc59f67/github-033-loading-validation-plan.json",
+    "bytes": 2683677,
+    "sha256": "86e41d033aa8d5c262b6c9c7df9f4786e8229b78694f8001616ac6389cbb89c4",
+    "entries": 47
+  },
+  "release": {
+    "webVersion": "0.4.33",
+    "androidVersion": "0.4.33-preview",
+    "androidVersionCode": 16,
+    "requestVersion": "0.4.32-preview",
+    "requestUnchanged": true,
+    "publicationRequested": false
+  },
+  "expectedLocalBuild": "ed67ad6cbd56a305",
+  "runs": {
+    "pages": 43429612556,
+    "android": 43429612598
+  },
+  "files": [
+    {
+      "path": ".github/workflows/pages.yml",
+      "status": "M",
+      "bytes": 33229,
+      "gitBlobSha": "b3a19d5ddebd61c3dcaec177f138b0e32cb11cc0",
+      "sha256": "0b714a4bb356602dc72d34d1021c24abdf05d3c6f00b42434d09dbc7b31f99a9"
+    },
+    {
+      "path": "README.md",
+      "status": "M",
+      "bytes": 48117,
+      "gitBlobSha": "587329331b226985437600aa1e356ada2956d5d7",
+      "sha256": "2929229e2099095278b7a2d0da424d9716877abd81f2e099279953b52f4351e0"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/android-bootstrap.js",
+      "status": "M",
+      "bytes": 22086,
+      "gitBlobSha": "a920c2bd3e496c5f4762999bc874dad9045b37d5",
+      "sha256": "b266c0cc6b36c42b53057bb8c61f1ece27816a8e2fe51adb5927effee7044224"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-BomP9hwf.js",
+      "status": "A",
+      "bytes": 150325,
+      "gitBlobSha": "667483e1bc30ed7542757a4618b08254a2eaff67",
+      "sha256": "1aecf81dfb73f52006d5ee141c4d63b5d3b09a38e6f8ad0b7a14f09fa4b45c12"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-CRqFx0YH.js",
+      "status": "D"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/manifest.json",
+      "status": "M",
+      "bytes": 533835,
+      "gitBlobSha": "64f7c071f3510f81b8e8159910061ecc2faa9dc1",
+      "sha256": "3a630081d3470c050b5d2010c568ff5faa51e1ce550732d4b8473ef33056f9fd"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/map-runtime.js",
+      "status": "M",
+      "bytes": 224,
+      "gitBlobSha": "49a83d0e0cf589c3fda3650c9eac7efd524b5f6f",
+      "sha256": "c71d76366b21caf49fb5735dc990b4f7afed1bfa52b23c5c713746df9484693d"
+    },
+    {
+      "path": "docs/release-0.4.33.md",
+      "status": "M",
+      "bytes": 21162,
+      "gitBlobSha": "4499c88d1d44cadd2816bc6f5608d415119b4b14",
+      "sha256": "825655799c71ba1d58424fb8d1db9644d151703d91fbe1316041827b193f94f6"
+    },
+    {
+      "path": "docs/verification/android-0.4.33-first-validation.json",
+      "status": "A",
+      "bytes": 27412,
+      "gitBlobSha": "3744d8e6878f7cacdf9d3b10840ce3121404ee09",
+      "sha256": "62e39342eacd28338951265034f3eaa0ac6ce51d3715c4d20942fe8d7a398b6f"
+    },
+    {
+      "path": "docs/verification/android-0.4.33-webview-pointer-failure.json",
+      "status": "A",
+      "bytes": 14297,
+      "gitBlobSha": "dd2d7309b3340304a7d6e1daaf94e7299551efb1",
+      "sha256": "e5d861be37a66b83cae4ade20268659fd3ddd35e9e616d3ed7c73e3f943bf207"
+    },
+    {
+      "path": "docs/verification/local-0.4.33-loading-acquisition-preflight.json",
+      "status": "A",
+      "bytes": 4826,
+      "gitBlobSha": "97a974e4071bf305c975b9a29b1f60c20f50833f",
+      "sha256": "a5b8c69604e9323cae595092491a9b8173ece7e4905432cf169b8268a20cd072"
+    },
+    {
+      "path": "docs/verification/local-0.4.33-loading-preflight.json",
+      "status": "A",
+      "bytes": 8591,
+      "gitBlobSha": "6b7b80e8c167f3914e1af205547b90987a7da5fb",
+      "sha256": "8cfcec2bfd2d1058dc6e0cb2c54f2f4c3b210787790da09bdc33cdd7c128b1d1"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-engine-independent-review.json",
+      "status": "A",
+      "bytes": 9209,
+      "gitBlobSha": "d2894313fe4a176668a5d81f50b6d5b52cbd2e01",
+      "sha256": "115ad8d0b77e0b49d7230aa1ee5343c66c5f65da3e4925ad03d12e023701e646"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-engine-lifetime-replay.json",
+      "status": "A",
+      "bytes": 3537,
+      "gitBlobSha": "0558eee12f91ad7932d2566379b33e0d40ebea4d",
+      "sha256": "86f9bec4296f2b0744776215e6c529ca23ce561bddc3c195b0d60588c3027a87"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-failed-source-independent-review.json",
+      "status": "A",
+      "bytes": 4907,
+      "gitBlobSha": "2c673d13d90f4ac2cb76cb398abc68ddaa582f52",
+      "sha256": "e98b27ee7c33c0fcb81759ee8a23f7a165ea8522ba6ff53995857c6258a654ba"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-failed-source-sharing.json",
+      "status": "A",
+      "bytes": 8829,
+      "gitBlobSha": "9cc1c00e8d4861a7670763a4ce385836d61f212d",
+      "sha256": "0083eaa1dad8719663ba8bea44626f98221df6f149550d35e5eb05726c1563af"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-loading-acquisition-correction.json",
+      "status": "A",
+      "bytes": 2137,
+      "gitBlobSha": "1ce43f9f29b8865e69c7fe8d500a3b7bbb80f067",
+      "sha256": "ce3de92ede74fb53081c79d94c5d67c4444aa7b345a5e85d5dd7c88c0900d6c5"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-loading-baseline-red-review.json",
+      "status": "A",
+      "bytes": 32525,
+      "gitBlobSha": "246b4563ff502903398fc9c893a6c5f83fd0a172",
+      "sha256": "dcd316f83f37298d768ce4d0c77bf19165b9b80c0b84bae9dd7bfa67ac052793"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-loading-baseline-red.json",
+      "status": "A",
+      "bytes": 15137,
+      "gitBlobSha": "592d814761497a5cd7d4825d0732f431decfa584",
+      "sha256": "605332636ebee63a1a06bc9ea365ee284f99611672dc57db7eff0c825165dd83"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-loading-first-fixture-review.json",
+      "status": "A",
+      "bytes": 20836,
+      "gitBlobSha": "c2cc1ddedf3cbf91a0af2fecf213d7e194ca4d88",
+      "sha256": "623f9a0c68a17ee2e79b4a0ba06c884e8d25de143fa84e2cb3eaee4c20190907"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-loading-first-fixture.json",
+      "status": "A",
+      "bytes": 9205,
+      "gitBlobSha": "80843728c55a8ed356629d0cf947bb584f8c2c41",
+      "sha256": "331a2e7c04daca9b2bde28783850c489d62214dfd46c82691e69e7e7e0ea8dc0"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-loading-gate-first-review.json",
+      "status": "A",
+      "bytes": 9370,
+      "gitBlobSha": "ed9dd608f6da2c770465a97d76c3cf2238fc7041",
+      "sha256": "a10d6a2d7a6e5403e1eb273fe6e9a6d89ee0a3fbfc2bdd3adfc1b49119bb916c"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-loading-pipeline-diagnosis.json",
+      "status": "A",
+      "bytes": 112619,
+      "gitBlobSha": "cc540821078f94890729db04cabbcb1b0dcd5c6d",
+      "sha256": "4970402a27c71db428b97ba4a8cab5977988a6c440bb4ee73642214d8658246a"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-progressive-regression.json",
+      "status": "A",
+      "bytes": 3689,
+      "gitBlobSha": "56ea242b0f31a400d99ad59ba047f2b24a9bf62e",
+      "sha256": "e885642a9c049034abd3543682db00a4e57e28948a69866e49f93b60e663ea55"
+    },
+    {
+      "path": "docs/verification/web-0.4.33-coast-cause.json",
+      "status": "A",
+      "bytes": 75205,
+      "gitBlobSha": "bc66f74e27fadaf68e5abb2fd4674f2e853be716",
+      "sha256": "ab787775e52c2aa912de854070d11c62ec7da95dfe596b2fd8065fa13ff58324"
+    },
+    {
+      "path": "docs/verification/web-0.4.33-coast-navigation.json",
+      "status": "A",
+      "bytes": 5324,
+      "gitBlobSha": "e2c7f4a9c4f1ea2610796b51d17bae8a953888ec",
+      "sha256": "e0a220af14e0ef571c538721232109c0ec9892b4dcdaf8bffc499871b34ef504"
+    },
+    {
+      "path": "docs/verification/web-0.4.33-first-smoothness-review.json",
+      "status": "A",
+      "bytes": 24585,
+      "gitBlobSha": "58a50a66c953a01b260c9259a318486dcb67b193",
+      "sha256": "24db0fd04fd76c7cc3ec5bfbc7195eeba404990c1b088abd1717db934692ffc8"
+    },
+    {
+      "path": "docs/verification/web-0.4.33-first-validation.json",
+      "status": "A",
+      "bytes": 12344,
+      "gitBlobSha": "c605e0c6e3ff4945256c8f8e1fd3719cc888f0fb",
+      "sha256": "539345e27120b43b7d7fce7f2fe7958a11cbdfe1d29ca404001e5cd7cb3302bb"
+    },
+    {
+      "path": "tools/android-build/release-notes/0.4.33-preview.md",
+      "status": "M",
+      "bytes": 5867,
+      "gitBlobSha": "8882ae8b0cb60d0c001c93d68a384284f8b227ea",
+      "sha256": "359e2b6fe6aadfcb086cbd731c67adafa39be636852b3b25c333b9137d368e90"
+    },
+    {
+      "path": "tools/pages-preview/browser-coast-audit.mjs",
+      "status": "M",
+      "bytes": 16223,
+      "gitBlobSha": "e6d9fa56e8390ca7c1e45e7c8ef9ac51372e1321",
+      "sha256": "a8c9599a9e40f1c4fe8990bf2957413c476013c745c9933589d2cb93ed9f363f"
+    },
+    {
+      "path": "tools/pages-preview/browser-map-loading.mjs",
+      "status": "A",
+      "bytes": 54368,
+      "gitBlobSha": "17c1060fa4b13badcaff177cf140af7bbb511347",
+      "sha256": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64"
+    },
+    {
+      "path": "tools/pages-preview/tests/browser-map-loading.test.mjs",
+      "status": "A",
+      "bytes": 18739,
+      "gitBlobSha": "80ae735c5a9370c58096955fd760c86e8a9a2a22",
+      "sha256": "bde5f2d153955075f2893114de3568cfd63a220a9a761e33a2a06885c4851212"
+    },
+    {
+      "path": "tools/pages-preview/tests/coast-navigation.test.mjs",
+      "status": "A",
+      "bytes": 6132,
+      "gitBlobSha": "cecd633507a813a407d6aed4101bde28aea80783",
+      "sha256": "57d28d4e93be93f4a7425c610d03173b61c217e3d0cd848f6303ba5bef777b06"
+    },
+    {
+      "path": "tools/pages-preview/tests/coast-pan.test.mjs",
+      "status": "M",
+      "bytes": 6539,
+      "gitBlobSha": "02cd63d356769c126f44948752e344527ac6d251",
+      "sha256": "92a4dbaf076d5d5318426a2db689db97dfc8d842e4328f0b42517eb05a0d37bd"
+    },
+    {
+      "path": "tools/pages-preview/tests/map-loading-publication.test.mjs",
+      "status": "A",
+      "bytes": 7937,
+      "gitBlobSha": "8eeff5cd1bb79f52dc72838147616081a566744a",
+      "sha256": "193442c66d00916a4d0bcf1c7f3a6c9e725326821cddf5caa89ee6a691d94702"
+    },
+    {
+      "path": "tools/pages-preview/tests/verify-deployed.test.mjs",
+      "status": "M",
+      "bytes": 4644,
+      "gitBlobSha": "9a22463211c262526fba39afe73e53456f192655",
+      "sha256": "3e07777787c707e05a451afb643dc9764ef7e475ea3c0bf0f6bf628634cb424e"
+    },
+    {
+      "path": "tools/pages-preview/verify-deployed.mjs",
+      "status": "M",
+      "bytes": 6230,
+      "gitBlobSha": "8f5e2348656056d58f0df3d5af6ae8b5596edd05",
+      "sha256": "f97afa41f73be505229cbc406f5369af8d1fc26ec59e1405e1821111faba53cf"
+    },
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "status": "M",
+      "bytes": 78080,
+      "gitBlobSha": "bfeb9bea1d6c938fed1b34a5dfdf8451cf28be38",
+      "sha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704"
+    },
+    {
+      "path": "web/lib/custom-map-tiles.ts",
+      "status": "M",
+      "bytes": 18538,
+      "gitBlobSha": "6b7abbf962082d04743170b1fbb68c750e8f2350",
+      "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546"
+    },
+    {
+      "path": "web/public/custom-map/android-bootstrap.js",
+      "status": "M",
+      "bytes": 22086,
+      "gitBlobSha": "a920c2bd3e496c5f4762999bc874dad9045b37d5",
+      "sha256": "b266c0cc6b36c42b53057bb8c61f1ece27816a8e2fe51adb5927effee7044224"
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-BomP9hwf.js",
+      "status": "A",
+      "bytes": 150325,
+      "gitBlobSha": "667483e1bc30ed7542757a4618b08254a2eaff67",
+      "sha256": "1aecf81dfb73f52006d5ee141c4d63b5d3b09a38e6f8ad0b7a14f09fa4b45c12"
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-CRqFx0YH.js",
+      "status": "D"
+    },
+    {
+      "path": "web/public/custom-map/manifest.json",
+      "status": "M",
+      "bytes": 533835,
+      "gitBlobSha": "64f7c071f3510f81b8e8159910061ecc2faa9dc1",
+      "sha256": "3a630081d3470c050b5d2010c568ff5faa51e1ce550732d4b8473ef33056f9fd"
+    },
+    {
+      "path": "web/public/custom-map/map-runtime.js",
+      "status": "M",
+      "bytes": 224,
+      "gitBlobSha": "49a83d0e0cf589c3fda3650c9eac7efd524b5f6f",
+      "sha256": "c71d76366b21caf49fb5735dc990b4f7afed1bfa52b23c5c713746df9484693d"
+    },
+    {
+      "path": "web/public/sw.js",
+      "status": "M",
+      "bytes": 17420,
+      "gitBlobSha": "b559ab5e94932a87a4b9208024d26b6b3dae35c7",
+      "sha256": "3c2674f6f1c53db9a6c0794daa025291f569323ca3ed142566922ac7eb13b6e1"
+    },
+    {
+      "path": "web/tests/custom-map-engine.test.mjs",
+      "status": "M",
+      "bytes": 167930,
+      "gitBlobSha": "a35e2236a2fa1fa6ddbe65a9c7e1c7a38928bab1",
+      "sha256": "b28ba2e27ba2bad98d46ff8e664bf4ef5bdb416de96b4b41d6585646c3a7ebdd"
+    },
+    {
+      "path": "web/tests/custom-map-tiles.test.mjs",
+      "status": "M",
+      "bytes": 43967,
+      "gitBlobSha": "036c857d61894606e09959267f57e62481117842",
+      "sha256": "af16792bab5506b73d589b4aa92c669be0f8536a11896f90f6c4720fdd9eacde"
+    }
+  ]
+}
+

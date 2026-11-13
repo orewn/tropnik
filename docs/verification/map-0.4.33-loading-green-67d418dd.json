@@ -1,0 +1,935 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-bound-map-loading-green-with-unresolved-pages-performance-failure",
+  "sourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+  "tree": "a7d79e676734c6ab112154548bf212e0d056cb84",
+  "buildId": "ed67ad6cbd56a305",
+  "runId": 43429612556,
+  "buildJobId": 131899529817,
+  "classification": {
+    "loadingGatePASS": true,
+    "loadingRawRGBAAndActualScreenshotsPASS": true,
+    "pagesOverallPASS": false,
+    "acceptedPagesPayload": false,
+    "published": false,
+    "releaseEligible": false,
+    "blockingStep": "Check UI smoothness before the full browser audit",
+    "blockingMetrics": [
+      {
+        "profile": "desktop-webgl",
+        "phase": "ui-smoothness/map-pan",
+        "metric": "frameP95Ms",
+        "value": 40.90000000002328,
+        "limit": 35
+      },
+      {
+        "profile": "desktop-webgl",
+        "phase": "ui-smoothness/map-zoom",
+        "metric": "frameP95Ms",
+        "value": 36,
+        "limit": 35
+      }
+    ],
+    "fullBrowserAndOriginalSixCoastFrames": "skipped"
+  },
+  "artifacts": [
+    {
+      "artifact": {
+        "id": 14039182198,
+        "name": "tropnik-pages-browser-failure-1",
+        "size_in_bytes": 446367,
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14039182198",
+        "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14039182198/zip",
+        "expired": false,
+        "created_at": "2026-11-13T13:03:26Z",
+        "expires_at": "2026-11-20T13:03:24Z",
+        "updated_at": "2026-11-13T13:03:26Z",
+        "digest": "sha256:2ac66e8c8a5f09d447279b719ec47d0badcc0e2f39b2fec919bd6d61a2e00279",
+        "workflow_run": {
+          "id": 43429612556,
+          "repository_id": 1447843944,
+          "head_repository_id": 1447843944,
+          "head_branch": "main",
+          "head_sha": "67d418dd1e187d065d2ff3bd3703c50b7436268b"
+        }
+      },
+      "archive": {
+        "path": "/workspace/scratch/686c5dc59f67/pages43429612556/failure/artifact-14039182198.zip",
+        "bytes": 446367,
+        "sha256": "2ac66e8c8a5f09d447279b719ec47d0badcc0e2f39b2fec919bd6d61a2e00279"
+      }
+    },
+    {
+      "artifact": {
+        "id": 14039541700,
+        "name": "tropnik-pages-design-1",
+        "size_in_bytes": 10266069,
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14039541700",
+        "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14039541700/zip",
+        "expired": false,
+        "created_at": "2026-11-13T13:03:29Z",
+        "expires_at": "2026-11-20T13:03:27Z",
+        "updated_at": "2026-11-13T13:03:29Z",
+        "digest": "sha256:09daf22a3fd658c402aa23a15c9f37dc0aba8ad840ea44a1319ac2284a3443a6",
+        "workflow_run": {
+          "id": 43429612556,
+          "repository_id": 1447843944,
+          "head_repository_id": 1447843944,
+          "head_branch": "main",
+          "head_sha": "67d418dd1e187d065d2ff3bd3703c50b7436268b"
+        }
+      },
+      "archive": {
+        "path": "/workspace/scratch/686c5dc59f67/pages43429612556/design/artifact-14039541700.zip",
+        "bytes": 10266069,
+        "sha256": "09daf22a3fd658c402aa23a15c9f37dc0aba8ad840ea44a1319ac2284a3443a6"
+      }
+    }
+  ],
+  "rawLoadingReport": {
+    "path": "/workspace/scratch/686c5dc59f67/pages43429612556/failure/zip-members/browser-map-loading-verification.json",
+    "bytes": 1707099,
+    "sha256": "9d18c8cc247662dd4425af5d0fd55b900369dc7197a7254358737b912be934e4"
+  },
+  "rawSmoothnessReport": {
+    "path": "/workspace/scratch/686c5dc59f67/pages43429612556/failure/zip-members/browser-ui-smoothness-diagnostic.json",
+    "bytes": 529400,
+    "sha256": "7e9a472978c665647afb9d97c543c02922c0d9f0e7ba422b3f66d34bd375907d"
+  },
+  "sourceBindings": [
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "bytes": 78080,
+      "sha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704",
+      "matchesExactCommitBytes": true
+    },
+    {
+      "path": "web/lib/custom-map-tiles.ts",
+      "bytes": 18538,
+      "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546",
+      "matchesExactCommitBytes": true
+    },
+    {
+      "path": "web/lib/custom-map-camera.ts",
+      "bytes": 21528,
+      "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "matchesExactCommitBytes": true
+    },
+    {
+      "path": "web/lib/custom-map-painter.ts",
+      "bytes": 26868,
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "matchesExactCommitBytes": true
+    },
+    {
+      "path": "web/lib/custom-map-tiles.worker.ts",
+      "bytes": 15542,
+      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+      "matchesExactCommitBytes": true
+    },
+    {
+      "path": "web/lib/map-resource-pool.ts",
+      "bytes": 11161,
+      "sha256": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "matchesExactCommitBytes": true
+    },
+    {
+      "path": "web/lib/map-preload.ts",
+      "bytes": 6548,
+      "sha256": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "matchesExactCommitBytes": true
+    },
+    {
+      "path": "web/lib/catalog.generated.json",
+      "bytes": 993152,
+      "sha256": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49",
+      "matchesExactCommitBytes": true
+    },
+    {
+      "path": "tools/pages-preview/browser-map-loading.mjs",
+      "bytes": 54368,
+      "sha256": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64",
+      "matchesExactCommitBytes": true
+    }
+  ],
+  "semanticReceiptValidation": {
+    "assertMapLoadingReceipt": "PASS against exact commit/build and same-run browser environment",
+    "candidateCodeUnchanged": true,
+    "runtimeRerun": false
+  },
+  "actualFault": {
+    "url": "https://tiles.mapterhorn.com/11/1345/620.webp",
+    "cell": {
+      "z": 11,
+      "x": 1345,
+      "y": 620
+    },
+    "networkId": "4510.443",
+    "acquiredAfterEnableMs": 8415.651088999999,
+    "stableAfterPauseMs": 197.66040900000007,
+    "progressAfterPauseMs": 202.46771900000022,
+    "pixelReadbackAfterPauseMs": 271.85974700000224,
+    "releasedAfterPauseMs": 499.14544899999964,
+    "releaseReason": "progress-captured",
+    "heldErrors": [],
+    "releaseErrors": [],
+    "holdLimitMs": 8000,
+    "progressLimitMs": 6000,
+    "acquisitionLimitMs": 15000
+  },
+  "actualProgress": {
+    "pairedReadyCells": 16,
+    "requestedCells": 42,
+    "generation": 5,
+    "coverage": {
+      "visible": {
+        "left": 40,
+        "top": 96,
+        "right": 953,
+        "bottom": 832
+      },
+      "visibleCssPixels": 671968,
+      "canonicalCssPixels": 337521.7663261398,
+      "progressCssPixels": 510583.06628534413,
+      "expandedCssPixels": 173061.29995920445,
+      "coveredCssPixels": 671967.9999999999
+    },
+    "canonicalPreviousBatchPreserved": {
+      "detail": true,
+      "relief": true
+    },
+    "completeCanonicalDetailCells": 42,
+    "completeCanonicalReliefCells": 42,
+    "stagingClearedAtCompletion": true
+  },
+  "actualPixelProof": {
+    "candidateROIs": 24,
+    "finalTextureEligibleROIs": 22,
+    "distinctEligibleCells": [
+      "11/1343/615",
+      "11/1343/616",
+      "11/1343/617",
+      "11/1344/615",
+      "11/1345/615",
+      "11/1345/618",
+      "11/1346/615"
+    ],
+    "eligibleDifferencePixels": 0,
+    "allCandidateRGBABytePairsIdentical": true,
+    "all24PendingReadbacksMatchActualScreenshot": true,
+    "all24CompleteReadbacksMatchActualScreenshot": true,
+    "comparison": [
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 615
+          },
+          "x": 167,
+          "y": 103,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "5de7b49336df9b93ad8a9416306cb0bb83af1f4e9f6063277cff3348f8672c6f",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 387,
+        "finalChannelRanges": [
+          118,
+          82,
+          71
+        ],
+        "finalNonModalPixels": 3732,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1344,
+            "y": 615
+          },
+          "x": 346,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "70bd92b8d424e5444e779a010fbafa1e66cdb943ec695de7402850ade8a3f62a",
+        "eligibleByIndependentFinalOnlyTexture": false,
+        "distinctFinalRGB": 439,
+        "finalChannelRanges": [
+          124,
+          84,
+          91
+        ],
+        "finalNonModalPixels": 1012,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 615
+          },
+          "x": 526,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "9d57e61317986db4c425973795a2ca203231c103e3f95cb0b525ad87f0161536",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 801,
+        "finalChannelRanges": [
+          140,
+          98,
+          112
+        ],
+        "finalNonModalPixels": 2213,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1346,
+            "y": 615
+          },
+          "x": 705,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "ddac2c6cda561663eb55564997903b7a708616caffbd15b33faf1122260bb3ce",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 344,
+        "finalChannelRanges": [
+          109,
+          81,
+          74
+        ],
+        "finalNonModalPixels": 3483,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 616
+          },
+          "x": 122,
+          "y": 364,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "93038ad1818265edbcf193578ae20586380faa6a36ae7b06a4cae1c9659505d9",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 1103,
+        "finalChannelRanges": [
+          146,
+          107,
+          107
+        ],
+        "finalNonModalPixels": 3239,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 617
+          },
+          "x": 122,
+          "y": 552,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "7d29e0a06430673977fcd2d3fd75f76d6776e1703e46c54e37d48a0b806e900c",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 609,
+        "finalChannelRanges": [
+          144,
+          101,
+          77
+        ],
+        "finalNonModalPixels": 3384,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 618
+          },
+          "x": 526,
+          "y": 731,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "e4c3734c02d19684d085c03012107f634e9ff3878e02f9a84cd4075e7ffbaa33",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 993,
+        "finalChannelRanges": [
+          143,
+          101,
+          97
+        ],
+        "finalNonModalPixels": 3946,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 615
+          },
+          "x": 114,
+          "y": 103,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "7babc48546ab15028212c956a14a86b2fb0a615e154670e96f75d8c0f1dc22c4",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 463,
+        "finalChannelRanges": [
+          71,
+          50,
+          67
+        ],
+        "finalNonModalPixels": 3797,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1344,
+            "y": 615
+          },
+          "x": 293,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "35917d808e918b577ff550e717751249c2cf4b1a42d6abfc226acdd7f18ee217",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 1031,
+        "finalChannelRanges": [
+          98,
+          73,
+          91
+        ],
+        "finalNonModalPixels": 3961,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 615
+          },
+          "x": 473,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "8e906e4110899a48da9f03a2bb8a0859bf1d4c04bbebf7f89896b0733171c1c3",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 1226,
+        "finalChannelRanges": [
+          140,
+          104,
+          102
+        ],
+        "finalNonModalPixels": 3078,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1346,
+            "y": 615
+          },
+          "x": 652,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "666bb7ceaddf6a4b8e983a6f1560f8ed22027d8638471daa6ed4e46d208728d1",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 518,
+        "finalChannelRanges": [
+          115,
+          82,
+          77
+        ],
+        "finalNonModalPixels": 2133,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 616
+          },
+          "x": 114,
+          "y": 364,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "118979c97c12b304f2edb4a7638c15022dd105217156a262480c7d22ca83cfb7",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 1074,
+        "finalChannelRanges": [
+          146,
+          100,
+          92
+        ],
+        "finalNonModalPixels": 3219,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 617
+          },
+          "x": 114,
+          "y": 552,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "31405da6854dde89f99ba6af16784d428e2813b6a95a5ce5797cd66a4a3f9979",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 615,
+        "finalChannelRanges": [
+          144,
+          101,
+          77
+        ],
+        "finalNonModalPixels": 3423,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 618
+          },
+          "x": 473,
+          "y": 731,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "c31da69b5a6d41dd80eab31742d8ec4e43084c6b06d4bca8346b0bf38b6edd3b",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 972,
+        "finalChannelRanges": [
+          143,
+          101,
+          97
+        ],
+        "finalNonModalPixels": 3657,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 615
+          },
+          "x": 220,
+          "y": 103,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "b4d3f972c085dc4cb038a7543c863888019b42f258751eddb244c03ffbd157df",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 529,
+        "finalChannelRanges": [
+          132,
+          91,
+          89
+        ],
+        "finalNonModalPixels": 3797,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1344,
+            "y": 615
+          },
+          "x": 400,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "ffee3659827bb93f0e23bd2278758854245198499891530707f432781349a4cc",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 972,
+        "finalChannelRanges": [
+          140,
+          101,
+          100
+        ],
+        "finalNonModalPixels": 2279,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 615
+          },
+          "x": 579,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "2e2e30bb4ee13a0fbd4ac5c572e13ffe9f0bf8cce6bd53e29be5d2a25277a4be",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 633,
+        "finalChannelRanges": [
+          146,
+          100,
+          112
+        ],
+        "finalNonModalPixels": 1691,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1346,
+            "y": 615
+          },
+          "x": 758,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "6b24890f99aab216882b13288353e7cd6b580ae6df3af6e9c7be3e57d48b5ecd",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 253,
+        "finalChannelRanges": [
+          84,
+          67,
+          33
+        ],
+        "finalNonModalPixels": 3463,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 616
+          },
+          "x": 131,
+          "y": 364,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "e38769deb1818fc78372052989859071ac01b7d48725f222ea7a00c4d6d48d68",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 1192,
+        "finalChannelRanges": [
+          146,
+          109,
+          110
+        ],
+        "finalNonModalPixels": 3275,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 617
+          },
+          "x": 131,
+          "y": 552,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "f702c2df679b9ac948a5347c154c6652683b2ba55aa2c358f5f3acc5d41684c8",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 561,
+        "finalChannelRanges": [
+          144,
+          101,
+          77
+        ],
+        "finalNonModalPixels": 3290,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 618
+          },
+          "x": 579,
+          "y": 731,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "d6e96b096764efa9ad2a03c86f0581c84d40cf98a9ab5edd32d56e36ddd5ad91",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 786,
+        "finalChannelRanges": [
+          143,
+          101,
+          93
+        ],
+        "finalNonModalPixels": 3896,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 615
+          },
+          "x": 167,
+          "y": 96,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "8889959a2a48d1600db3d00cb7bafd0277fc12319d5e5017cdfcf413a615166d",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 416,
+        "finalChannelRanges": [
+          125,
+          87,
+          71
+        ],
+        "finalNonModalPixels": 3704,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1344,
+            "y": 615
+          },
+          "x": 346,
+          "y": 96,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "55c65b397db110022f3709d2a47c91d15c0ec32dcd51b4a42418d65b690ed5d0",
+        "eligibleByIndependentFinalOnlyTexture": false,
+        "distinctFinalRGB": 432,
+        "finalChannelRanges": [
+          125,
+          85,
+          81
+        ],
+        "finalNonModalPixels": 959,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 615
+          },
+          "x": 526,
+          "y": 96,
+          "width": 64,
+          "height": 64
+        },
+        "bytes": 16384,
+        "sha256": "d70226e370fe6d491f91257e471dc7241edbc2a2565da240bd9a6d35671ee037",
+        "eligibleByIndependentFinalOnlyTexture": true,
+        "distinctFinalRGB": 712,
+        "finalChannelRanges": [
+          140,
+          96,
+          101
+        ],
+        "finalNonModalPixels": 1803,
+        "differentPendingToCompleteBytes": 0,
+        "pendingReadbackMatchesActualPNG": true,
+        "completeReadbackMatchesActualPNG": true
+      }
+    ]
+  },
+  "network": {
+    "atProgressRecords": 77,
+    "completeRecords": 114,
+    "allCompleteHTTP200": true,
+    "overflowAtProgress": 0,
+    "overflowAtCompletion": 0,
+    "heldURLPhysicalRequests": 1
+  },
+  "screenshots": [
+    {
+      "phase": "route",
+      "file": "map-loading-route.png",
+      "bytes": 1144770,
+      "sha256": "e32d8bcf6be3498428c4e777f3e01f8c09b6f5f6d340d57d92a0670a25eb94b5",
+      "width": 1440,
+      "height": 1000,
+      "verifiedActualPNGBytesSHAAndDimensions": true
+    },
+    {
+      "phase": "before",
+      "file": "map-loading-before.png",
+      "bytes": 1587177,
+      "sha256": "b2d086268d5aafe4787ebb05e9a79f3589e9962f47f14f28285d5c1fecf2f253",
+      "width": 1440,
+      "height": 1000,
+      "verifiedActualPNGBytesSHAAndDimensions": true
+    },
+    {
+      "phase": "pending-progress",
+      "file": "map-loading-pending-progress.png",
+      "bytes": 1071335,
+      "sha256": "5b9e0544d8c7ccc1b7c5ad810e900ba88d39c3face85fa85993b52293666f5b3",
+      "width": 1440,
+      "height": 1000,
+      "verifiedActualPNGBytesSHAAndDimensions": true
+    },
+    {
+      "phase": "complete",
+      "file": "map-loading-complete.png",
+      "bytes": 1635889,
+      "sha256": "4de29d8fef3e58e3efc62c59606b55562375465fcf2d3e5e1ef2c7fd814af143",
+      "width": 1440,
+      "height": 1000,
+      "verifiedActualPNGBytesSHAAndDimensions": true
+    }
+  ],
+  "cleanup": {
+    "loading": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 51.89709900000162
+    },
+    "serviceWorkerUpdate": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 59.679095999999845
+    }
+  },
+  "environment": {
+    "browser": "Chrome/157.0.8103.50",
+    "runnerImage": {
+      "os": "ubuntu24",
+      "version": "20261111.127.1"
+    },
+    "cpu": {
+      "models": [
+        "Intel(R) Xeon(R) 6975P-C"
+      ],
+      "logicalCount": 4,
+      "availableParallelism": 4
+    },
+    "sameRunEnvironmentMatched": true
+  },
+  "pageErrors": [],
+  "localHttpErrors": [],
+  "scopeLimits": [
+    "The ~202 ms progress figure starts at actual halo interception after ~8.4 s acquisition, not at the user zoom or navigation; this is not a network-speed benchmark.",
+    "The failure artifact has no build-info.json or accepted dist payload. Source bytes are independently bound to the immutable exact commit; build identity and input checking are recorded by the actual gate. No local rebuild is substituted for CI bytes.",
+    "Loading success does not clear the desktop pan/zoom smoothness failures or the unexecuted full/coast matrix.",
+    "This report records actual source-bound browser data and PNGs; no pixels, clocks, workers, geometry or application state were synthesized."
+  ]
+}

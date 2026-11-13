@@ -1,0 +1,883 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T13:08:36.617250+00:00",
+  "status": "passed",
+  "sourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+  "workflowRunId": 43429612598,
+  "universalApk": {
+    "bytes": 69227850,
+    "sha256": "3c88a007e72d14d20436adfeddeb87b0eecb69d7f3865f8fef3ad0d29e613c9a"
+  },
+  "webViewDiagnostic": "Current WebView Update Service state\n  Current WebView package (name, version): (com.google.android.webview, 124.0.6367.219)\n  Minimum targetSdkVersion: 33\n  Minimum WebView version code: 636771938\n  Number of relros started: 1\n  Number of relros finished: 1\n  WebView package dirty: false\n  Any WebView package installed: true\n  Preferred WebView package (name, version): (com.google.android.webview, 124.0.6367.219)\n  WebView packages:\n    Valid package com.google.android.webview (versionName: 124.0.6367.219, versionCode: 636771938, targetSdkVersion: 34) is  installed/enabled for all users\n    com.google.android.webview.beta is NOT installed.\n    com.google.android.webview.dev is NOT installed.\n    com.google.android.webview.canary is NOT installed.\n    com.google.android.webview.debug is NOT installed.\n    com.android.webview is NOT installed.\n",
+  "deviceCases": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "requiredMarkerCases": [
+      "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+      "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount"
+    ]
+  },
+  "nationalMarker": {
+    "regionId": "territory-28173009B26811060113320",
+    "elapsedMs": 753,
+    "tap": {
+      "markerId": "territory-28173009B26811060113320",
+      "trustedClickObserved": true,
+      "nativePressMs": 125,
+      "longPressThresholdMs": 400,
+      "visualState": {
+        "requestedAt": 114794,
+        "callbackAt": 114795,
+        "drawnAt": 114812,
+        "countAtCallback": 13
+      },
+      "coordinateSnapshot": {
+        "requestId": 4,
+        "frame": 9,
+        "painted": {
+          "frame": 9,
+          "camera": {
+            "center": [
+              81.5695492,
+              58.2767055
+            ],
+            "zoom": 6,
+            "bearingDegrees": 0
+          },
+          "pitch": 0,
+          "size": {
+            "width": 380,
+            "height": 280
+          }
+        },
+        "viewportBounds": {
+          "x": 0,
+          "y": 0,
+          "width": 380.19049072265625,
+          "height": 280
+        },
+        "marker": {
+          "id": "territory-28173009B26811060113320",
+          "groupKey": "territory-28173009B26811060113320",
+          "hidden": false,
+          "x": 190,
+          "y": 140,
+          "width": 44,
+          "height": 44,
+          "hitAtMarker": {
+            "tag": "button",
+            "markerId": "territory-28173009B26811060113320",
+            "groupKey": "territory-28173009B26811060113320"
+          }
+        }
+      },
+      "nativeInput": [
+        {
+          "action": 0,
+          "downTime": 114864,
+          "eventTime": 114864,
+          "returnedAt": 114989,
+          "accepted": true
+        },
+        {
+          "action": 1,
+          "downTime": 114864,
+          "eventTime": 114989,
+          "returnedAt": 114998,
+          "accepted": true
+        }
+      ],
+      "nativeTouchEvents": [
+        {
+          "action": 0,
+          "x": 497.7509765625,
+          "y": 367.5,
+          "eventTime": 114864,
+          "downTime": 114864,
+          "receivedAt": 114991,
+          "handled": true
+        },
+        {
+          "action": 1,
+          "x": 497.7509765625,
+          "y": 367.5,
+          "eventTime": 114989,
+          "downTime": 114864,
+          "receivedAt": 114992,
+          "handled": true
+        }
+      ],
+      "domInput": [
+        {
+          "phase": "trusted-input",
+          "sequence": 1,
+          "type": "pointerdown",
+          "trusted": true,
+          "timeStamp": 3087.5,
+          "receivedAt": 3228.899999999994,
+          "x": 189.6194305419922,
+          "y": 140,
+          "pointerId": 2,
+          "pointerType": "",
+          "target": {
+            "tag": "button",
+            "markerId": "territory-28173009B26811060113320",
+            "groupKey": "territory-28173009B26811060113320"
+          },
+          "frame": 9,
+          "camera": {
+            "center": [
+              81.5695492,
+              58.2767055
+            ],
+            "zoom": 6,
+            "bearingDegrees": 0
+          },
+          "nativeReceivedAt": 115008
+        },
+        {
+          "phase": "trusted-input",
+          "sequence": 2,
+          "type": "pointerup",
+          "trusted": true,
+          "timeStamp": 3212.5,
+          "receivedAt": 3232.399999999994,
+          "x": 189.6194305419922,
+          "y": 140,
+          "pointerId": 2,
+          "pointerType": "",
+          "target": {
+            "tag": "button",
+            "markerId": "territory-28173009B26811060113320",
+            "groupKey": "territory-28173009B26811060113320"
+          },
+          "frame": 9,
+          "camera": {
+            "center": [
+              81.5695492,
+              58.2767055
+            ],
+            "zoom": 6,
+            "bearingDegrees": 0
+          },
+          "nativeReceivedAt": 115009
+        },
+        {
+          "phase": "trusted-input",
+          "sequence": 3,
+          "type": "click",
+          "trusted": true,
+          "timeStamp": 3212.5,
+          "receivedAt": 3237.800000000003,
+          "x": 189,
+          "y": 140,
+          "pointerId": 3,
+          "pointerType": "",
+          "target": {
+            "tag": "button",
+            "markerId": "territory-28173009B26811060113320",
+            "groupKey": "territory-28173009B26811060113320"
+          },
+          "frame": 9,
+          "camera": {
+            "center": [
+              81.5695492,
+              58.2767055
+            ],
+            "zoom": 6,
+            "bearingDegrees": 0
+          },
+          "nativeReceivedAt": 115017
+        }
+      ],
+      "pointerIds": [
+        2,
+        2,
+        3
+      ],
+      "pointerTypes": [
+        "",
+        "",
+        ""
+      ],
+      "unknownTypeCompatibilityIdObserved": true,
+      "sameCameraAcrossDownUpClick": true,
+      "frames": [
+        9,
+        9,
+        9
+      ],
+      "pointerUpAndClickTimestampEqual": true
+    }
+  },
+  "directionMarker": {
+    "regionId": "krasnodar",
+    "elapsedMs": 3065,
+    "groupTaps": [
+      {
+        "markerId": "karachay-cherkessia",
+        "trustedClickObserved": true,
+        "nativePressMs": 80,
+        "longPressThresholdMs": 400,
+        "visualState": {
+          "requestedAt": 186497,
+          "callbackAt": 186515,
+          "drawnAt": 186529,
+          "countAtCallback": 10
+        },
+        "coordinateSnapshot": {
+          "requestId": 4,
+          "frame": 6,
+          "painted": {
+            "frame": 6,
+            "camera": {
+              "center": [
+                40.05,
+                44.05
+              ],
+              "zoom": 6,
+              "bearingDegrees": 0
+            },
+            "pitch": 0,
+            "size": {
+              "width": 380,
+              "height": 280
+            }
+          },
+          "viewportBounds": {
+            "x": 0,
+            "y": 0,
+            "width": 380.19049072265625,
+            "height": 280
+          },
+          "marker": {
+            "id": "karachay-cherkessia",
+            "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar",
+            "hidden": false,
+            "x": 265.76121520996094,
+            "y": 152.11492919921875,
+            "width": 44,
+            "height": 44,
+            "hitAtMarker": {
+              "tag": "button",
+              "markerId": "karachay-cherkessia",
+              "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+            }
+          }
+        },
+        "nativeInput": [
+          {
+            "action": 0,
+            "downTime": 186748,
+            "eventTime": 186748,
+            "returnedAt": 186768,
+            "accepted": true
+          },
+          {
+            "action": 1,
+            "downTime": 186748,
+            "eventTime": 186828,
+            "returnedAt": 186911,
+            "accepted": true
+          }
+        ],
+        "nativeTouchEvents": [
+          {
+            "action": 0,
+            "x": 696.2255859375,
+            "y": 399.3017578125,
+            "eventTime": 186748,
+            "downTime": 186748,
+            "receivedAt": 186765,
+            "handled": true
+          },
+          {
+            "action": 1,
+            "x": 696.2255859375,
+            "y": 399.3017578125,
+            "eventTime": 186828,
+            "downTime": 186748,
+            "receivedAt": 186841,
+            "handled": true
+          }
+        ],
+        "domInput": [
+          {
+            "phase": "trusted-input",
+            "sequence": 1,
+            "type": "pointerdown",
+            "trusted": true,
+            "timeStamp": 2199.7000000000116,
+            "receivedAt": 2247.7000000000116,
+            "x": 265.2287902832031,
+            "y": 152.11495971679688,
+            "pointerId": 2,
+            "pointerType": "",
+            "target": {
+              "tag": "button",
+              "markerId": "karachay-cherkessia",
+              "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+            },
+            "frame": 8,
+            "camera": {
+              "center": [
+                40.05,
+                44.05
+              ],
+              "zoom": 6,
+              "bearingDegrees": 0
+            },
+            "nativeReceivedAt": 186809
+          },
+          {
+            "phase": "trusted-input",
+            "sequence": 2,
+            "type": "pointerup",
+            "trusted": true,
+            "timeStamp": 2279.7000000000116,
+            "receivedAt": 2294,
+            "x": 265.2287902832031,
+            "y": 152.11495971679688,
+            "pointerId": 2,
+            "pointerType": "",
+            "target": {
+              "tag": "button",
+              "markerId": "karachay-cherkessia",
+              "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+            },
+            "frame": 8,
+            "camera": {
+              "center": [
+                40.05,
+                44.05
+              ],
+              "zoom": 6,
+              "bearingDegrees": 0
+            },
+            "nativeReceivedAt": 187145
+          },
+          {
+            "phase": "trusted-input",
+            "sequence": 3,
+            "type": "click",
+            "trusted": true,
+            "timeStamp": 2279.7000000000116,
+            "receivedAt": 2497,
+            "x": 265,
+            "y": 152,
+            "pointerId": 3,
+            "pointerType": "",
+            "target": {
+              "tag": "button",
+              "markerId": "karachay-cherkessia",
+              "groupKey": "adygea|kabardino-balkaria|karachay-cherkessia|krasnodar"
+            },
+            "frame": 8,
+            "camera": {
+              "center": [
+                40.05,
+                44.05
+              ],
+              "zoom": 6,
+              "bearingDegrees": 0
+            },
+            "nativeReceivedAt": 187146
+          }
+        ],
+        "pointerIds": [
+          2,
+          2,
+          3
+        ],
+        "pointerTypes": [
+          "",
+          "",
+          ""
+        ],
+        "unknownTypeCompatibilityIdObserved": true,
+        "sameCameraAcrossDownUpClick": true,
+        "frames": [
+          8,
+          8,
+          8
+        ],
+        "pointerUpAndClickTimestampEqual": true
+      },
+      {
+        "markerId": "krasnodar",
+        "trustedClickObserved": true,
+        "nativePressMs": 141,
+        "longPressThresholdMs": 400,
+        "visualState": {
+          "requestedAt": 187289,
+          "callbackAt": 187300,
+          "drawnAt": 187313,
+          "countAtCallback": 16
+        },
+        "coordinateSnapshot": {
+          "requestId": 6,
+          "frame": 9,
+          "painted": {
+            "frame": 9,
+            "camera": {
+              "center": [
+                41.74873715000004,
+                44.01381079147641
+              ],
+              "zoom": 7.102429889826774,
+              "bearingDegrees": 0
+            },
+            "pitch": 0,
+            "size": {
+              "width": 380,
+              "height": 280
+            }
+          },
+          "viewportBounds": {
+            "x": 0,
+            "y": 0,
+            "width": 380.19049072265625,
+            "height": 280
+          },
+          "marker": {
+            "id": "krasnodar",
+            "groupKey": "adygea|karachay-cherkessia|krasnodar",
+            "hidden": false,
+            "x": 23.99999988079071,
+            "y": 135.08118438720703,
+            "width": 44,
+            "height": 44,
+            "hitAtMarker": {
+              "tag": "button",
+              "markerId": "krasnodar",
+              "groupKey": "adygea|karachay-cherkessia|krasnodar"
+            }
+          }
+        },
+        "nativeInput": [
+          {
+            "action": 0,
+            "downTime": 187499,
+            "eventTime": 187499,
+            "returnedAt": 187640,
+            "accepted": true
+          },
+          {
+            "action": 1,
+            "downTime": 187499,
+            "eventTime": 187640,
+            "returnedAt": 187662,
+            "accepted": true
+          }
+        ],
+        "nativeTouchEvents": [
+          {
+            "action": 0,
+            "x": 696.2255859375,
+            "y": 399.3017578125,
+            "eventTime": 186748,
+            "downTime": 186748,
+            "receivedAt": 186765,
+            "handled": true
+          },
+          {
+            "action": 1,
+            "x": 696.2255859375,
+            "y": 399.3017578125,
+            "eventTime": 186828,
+            "downTime": 186748,
+            "receivedAt": 186841,
+            "handled": true
+          },
+          {
+            "action": 0,
+            "x": 62.8740234375,
+            "y": 354.587890625,
+            "eventTime": 187499,
+            "downTime": 187499,
+            "receivedAt": 187659,
+            "handled": true
+          },
+          {
+            "action": 1,
+            "x": 62.8740234375,
+            "y": 354.587890625,
+            "eventTime": 187640,
+            "downTime": 187499,
+            "receivedAt": 187660,
+            "handled": true
+          }
+        ],
+        "domInput": [
+          {
+            "phase": "trusted-input",
+            "sequence": 4,
+            "type": "pointerdown",
+            "trusted": true,
+            "timeStamp": 2950.7000000000116,
+            "receivedAt": 3124.3000000000175,
+            "x": 23.952009201049805,
+            "y": 135.0811004638672,
+            "pointerId": 4,
+            "pointerType": "",
+            "target": {
+              "tag": "button",
+              "markerId": "krasnodar",
+              "groupKey": "adygea|karachay-cherkessia|krasnodar"
+            },
+            "frame": 10,
+            "camera": {
+              "center": [
+                41.74873715000004,
+                44.01381079147641
+              ],
+              "zoom": 7.102429889826774,
+              "bearingDegrees": 0
+            },
+            "nativeReceivedAt": 187884
+          },
+          {
+            "phase": "trusted-input",
+            "sequence": 5,
+            "type": "pointerup",
+            "trusted": true,
+            "timeStamp": 3091.7000000000116,
+            "receivedAt": 3124.5,
+            "x": 23.952009201049805,
+            "y": 135.0811004638672,
+            "pointerId": 4,
+            "pointerType": "",
+            "target": {
+              "tag": "button",
+              "markerId": "krasnodar",
+              "groupKey": "adygea|karachay-cherkessia|krasnodar"
+            },
+            "frame": 10,
+            "camera": {
+              "center": [
+                41.74873715000004,
+                44.01381079147641
+              ],
+              "zoom": 7.102429889826774,
+              "bearingDegrees": 0
+            },
+            "nativeReceivedAt": 187884
+          },
+          {
+            "phase": "trusted-input",
+            "sequence": 6,
+            "type": "click",
+            "trusted": true,
+            "timeStamp": 3091.7000000000116,
+            "receivedAt": 3235.9000000000233,
+            "x": 24,
+            "y": 135,
+            "pointerId": 5,
+            "pointerType": "",
+            "target": {
+              "tag": "button",
+              "markerId": "krasnodar",
+              "groupKey": "adygea|karachay-cherkessia|krasnodar"
+            },
+            "frame": 10,
+            "camera": {
+              "center": [
+                41.74873715000004,
+                44.01381079147641
+              ],
+              "zoom": 7.102429889826774,
+              "bearingDegrees": 0
+            },
+            "nativeReceivedAt": 187896
+          }
+        ],
+        "pointerIds": [
+          4,
+          4,
+          5
+        ],
+        "pointerTypes": [
+          "",
+          "",
+          ""
+        ],
+        "unknownTypeCompatibilityIdObserved": true,
+        "sameCameraAcrossDownUpClick": true,
+        "frames": [
+          10,
+          10,
+          10
+        ],
+        "pointerUpAndClickTimestampEqual": true
+      }
+    ],
+    "finalTap": {
+      "markerId": "krasnodar",
+      "trustedClickObserved": true,
+      "nativePressMs": 99,
+      "longPressThresholdMs": 400,
+      "visualState": {
+        "requestedAt": 189215,
+        "callbackAt": 189229,
+        "drawnAt": 189245,
+        "countAtCallback": 24
+      },
+      "coordinateSnapshot": {
+        "requestId": 8,
+        "frame": 13,
+        "painted": {
+          "frame": 13,
+          "camera": {
+            "center": [
+              40.88233740000001,
+              44.18826285927815
+            ],
+            "zoom": 8.131652158338488,
+            "bearingDegrees": 0
+          },
+          "pitch": 0,
+          "size": {
+            "width": 380,
+            "height": 280
+          }
+        },
+        "viewportBounds": {
+          "x": 0,
+          "y": 0,
+          "width": 380.19049072265625,
+          "height": 280
+        },
+        "marker": {
+          "id": "krasnodar",
+          "groupKey": "krasnodar",
+          "hidden": false,
+          "x": 24,
+          "y": 178.41087341308594,
+          "width": 44,
+          "height": 44,
+          "hitAtMarker": {
+            "tag": "button",
+            "markerId": "krasnodar",
+            "groupKey": "krasnodar"
+          }
+        }
+      },
+      "nativeInput": [
+        {
+          "action": 0,
+          "downTime": 189261,
+          "eventTime": 189261,
+          "returnedAt": 189360,
+          "accepted": true
+        },
+        {
+          "action": 1,
+          "downTime": 189261,
+          "eventTime": 189360,
+          "returnedAt": 189401,
+          "accepted": true
+        }
+      ],
+      "nativeTouchEvents": [
+        {
+          "action": 0,
+          "x": 696.2255859375,
+          "y": 399.3017578125,
+          "eventTime": 186748,
+          "downTime": 186748,
+          "receivedAt": 186765,
+          "handled": true
+        },
+        {
+          "action": 1,
+          "x": 696.2255859375,
+          "y": 399.3017578125,
+          "eventTime": 186828,
+          "downTime": 186748,
+          "receivedAt": 186841,
+          "handled": true
+        },
+        {
+          "action": 0,
+          "x": 62.8740234375,
+          "y": 354.587890625,
+          "eventTime": 187499,
+          "downTime": 187499,
+          "receivedAt": 187659,
+          "handled": true
+        },
+        {
+          "action": 1,
+          "x": 62.8740234375,
+          "y": 354.587890625,
+          "eventTime": 187640,
+          "downTime": 187499,
+          "receivedAt": 187660,
+          "handled": true
+        },
+        {
+          "action": 0,
+          "x": 62.8740234375,
+          "y": 468.328125,
+          "eventTime": 189261,
+          "downTime": 189261,
+          "receivedAt": 189368,
+          "handled": true
+        },
+        {
+          "action": 1,
+          "x": 62.8740234375,
+          "y": 468.328125,
+          "eventTime": 189360,
+          "downTime": 189261,
+          "receivedAt": 189368,
+          "handled": true
+        }
+      ],
+      "domInput": [
+        {
+          "phase": "trusted-input",
+          "sequence": 7,
+          "type": "pointerdown",
+          "trusted": true,
+          "timeStamp": 4712.700000000012,
+          "receivedAt": 4822.3000000000175,
+          "x": 23.952009201049805,
+          "y": 178.41073608398438,
+          "pointerId": 6,
+          "pointerType": "",
+          "target": {
+            "tag": "button",
+            "markerId": "krasnodar",
+            "groupKey": "krasnodar"
+          },
+          "frame": 13,
+          "camera": {
+            "center": [
+              40.88233740000001,
+              44.18826285927815
+            ],
+            "zoom": 8.131652158338488,
+            "bearingDegrees": 0
+          },
+          "nativeReceivedAt": 189374
+        },
+        {
+          "phase": "trusted-input",
+          "sequence": 8,
+          "type": "pointerup",
+          "trusted": true,
+          "timeStamp": 4811.700000000012,
+          "receivedAt": 4822.600000000006,
+          "x": 23.952009201049805,
+          "y": 178.41073608398438,
+          "pointerId": 6,
+          "pointerType": "",
+          "target": {
+            "tag": "button",
+            "markerId": "krasnodar",
+            "groupKey": "krasnodar"
+          },
+          "frame": 13,
+          "camera": {
+            "center": [
+              40.88233740000001,
+              44.18826285927815
+            ],
+            "zoom": 8.131652158338488,
+            "bearingDegrees": 0
+          },
+          "nativeReceivedAt": 189374
+        },
+        {
+          "phase": "trusted-input",
+          "sequence": 9,
+          "type": "click",
+          "trusted": true,
+          "timeStamp": 4811.700000000012,
+          "receivedAt": 4827.5,
+          "x": 24,
+          "y": 178,
+          "pointerId": 7,
+          "pointerType": "",
+          "target": {
+            "tag": "button",
+            "markerId": "krasnodar",
+            "groupKey": "krasnodar"
+          },
+          "frame": 13,
+          "camera": {
+            "center": [
+              40.88233740000001,
+              44.18826285927815
+            ],
+            "zoom": 8.131652158338488,
+            "bearingDegrees": 0
+          },
+          "nativeReceivedAt": 189376
+        }
+      ],
+      "pointerIds": [
+        6,
+        6,
+        7
+      ],
+      "pointerTypes": [
+        "",
+        "",
+        ""
+      ],
+      "unknownTypeCompatibilityIdObserved": true,
+      "sameCameraAcrossDownUpClick": true,
+      "frames": [
+        13,
+        13,
+        13
+      ],
+      "pointerUpAndClickTimestampEqual": true
+    }
+  },
+  "evidenceFiles": {
+    "device/qa/qa/catalog-national-map-selection.json": {
+      "bytes": 127030,
+      "sha256": "b0c7024adb56a3666109efd7ec88be7fe551021b7c6617378980193edc914b77"
+    },
+    "device/qa/qa/map-region-selection.json": {
+      "bytes": 103988,
+      "sha256": "dcac27a737473aada7450680757bc404fe6b2142cdcf449e694ec0642f56f2b5"
+    },
+    "device/device-result.json": {
+      "bytes": 4419,
+      "sha256": "5b8e6551d2e1681d32febfab4c2fec1a00c93687e87b4a8466c6f036fc014b56"
+    },
+    "device/raw-instrumentation.log": {
+      "bytes": 7402,
+      "sha256": "a3691726326a03fe794007fff5423442d8be30b7668ec9e2d61408dcaa37076d"
+    },
+    "device/webview-version.txt": {
+      "bytes": 855,
+      "sha256": "9e33c80ae6aacf2ac72052013cf84b65ac066c0d9d0a25704b3cb9e3ca01329d"
+    },
+    "device/qa/qa/catalog-national-map-after-tap.png": {
+      "bytes": 206281,
+      "sha256": "8ab31042c30df37dcc01a309162072e984fc0a231b9182262224758f2e8d103c"
+    },
+    "device/qa/qa/map-region-after-tap.png": {
+      "bytes": 310977,
+      "sha256": "8b706a4625ececda89fa995d5e250c048fb4b19cb125659f1143b6f65eb9d3f2"
+    }
+  },
+  "limits": {
+    "physicalDeviceVerified": false,
+    "sourceResultsTransferred": false,
+    "nativeOracleChanged": false,
+    "inputProgrammaticallyReplaced": false,
+    "eventFieldsNotRecordedByExistingLedger": [
+      "button",
+      "detail"
+    ],
+    "browserLoadingPerformanceQualifiedByThisReport": false
+  }
+}

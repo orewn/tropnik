@@ -3733,7 +3733,7 @@ var Fn = class {
 		return n.save(), n.setTransform(1, 0, 0, 1, 0, 0), n.globalAlpha = 1, n.globalCompositeOperation = "copy", n.drawImage(t.surface, 0, 0), n.restore(), !0;
 	}
 	retainGround(e) {
-		if (!(this.pointer.activePointers || this.animation || this.groundSnapshotUnavailable) && !((this.camera.bearingDegrees ?? 0) !== 0 || this.pitch !== 0)) {
+		if (!(this.pointer.activePointers || this.animation || this.groundSnapshotUnavailable) && !(this.state.loading && this.loadingGround) && !((this.camera.bearingDegrees ?? 0) !== 0 || this.pitch !== 0)) {
 			if (this.canvas.width * this.canvas.height * 4 > Pn) {
 				this.releaseGround();
 				return;
