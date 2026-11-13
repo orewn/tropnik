@@ -141,7 +141,7 @@ function readMap(cdp){return evaluate(cdp,`(()=>{
  if(!host?.dataset.mapInspection||!canvas)return null;const value=JSON.parse(host.dataset.mapInspection),rect=canvas.getBoundingClientRect();
  return{engine:value.engine,camera:value.camera,state:value.state,routeId:value.routeId,drawnRoute:value.drawnRoute,catalogueOverlay:value.catalogueOverlay,drawRevision:value.drawRevision,moving:host.dataset.mapMoving,rect:{left:rect.left,top:rect.top,width:rect.width,height:rect.height},scrollY:window.scrollY,url:location.href};
 })()`);}
-const stable=value=>value?.state.ready&&value.moving!=='true'&&value.drawRevision>0;
+const stable=value=>value?.state.ready&&value.moving!=='true'&&value.drawRevision>0&&value.catalogueOverlay.currentViewportReady===true&&!value.catalogueOverlay.error;
 async function pointer(cdp,profile,point){
   if(profile.mobile){await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id:41,radiusX:2,radiusY:2,force:1}]});await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}
   else{await cdp.call('Input.dispatchMouseEvent',{type:'mouseMoved',x:point.x,y:point.y,pointerType:'mouse'});await cdp.call('Input.dispatchMouseEvent',{type:'mousePressed',x:point.x,y:point.y,button:'left',buttons:1,clickCount:1,pointerType:'mouse'});await cdp.call('Input.dispatchMouseEvent',{type:'mouseReleased',x:point.x,y:point.y,button:'left',buttons:0,clickCount:1,pointerType:'mouse'});}

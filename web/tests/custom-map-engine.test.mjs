@@ -25,7 +25,7 @@ const originalLabels=readFileSync(resolve(root,'tests/fixtures/custom-map-labels
 assert.equal(createHash('sha256').update(originalLabels).digest('hex'),'39a5b7a5ca753f6ca893764b8ee7f7a3fd3acd87686d944f5ca7da5cab7ed8c9');
 
 function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false}={}){
- let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[];
+ let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[],rasters=[];
  let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0};
  class Target{
   listeners=new Map();
@@ -42,9 +42,16 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  }
  function createContext(surface){
  const record=call=>calls.push({...call,surface});
- const context={font:'10px sans-serif',fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,globalAlpha:1,stack:[],
-  save(){this.stack.push(Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','globalAlpha','textAlign','textBaseline'].map(key=>[key,this[key]])));record({op:'save'});},
+ const context={font:'10px sans-serif',fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,globalAlpha:1,stack:[],matrix:[1,0,0,1,0,0],
+  save(){this.stack.push({...Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','globalAlpha','textAlign','textBaseline'].map(key=>[key,this[key]])),matrix:[...this.matrix]});record({op:'save'});},
   restore(){Object.assign(this,this.stack.pop());record({op:'restore'});},
+  setTransform(...matrix){this.matrix=matrix;record({op:'setTransform',args:matrix});},
+  resetTransform(){this.matrix=[1,0,0,1,0,0];record({op:'resetTransform',args:[]});},
+  transform(a,b,c,d,e,f){const [aa,bb,cc,dd,ee,ff]=this.matrix;this.matrix=[aa*a+cc*b,bb*a+dd*b,aa*c+cc*d,bb*c+dd*d,aa*e+cc*f+ee,bb*e+dd*f+ff];},
+  translate(x,y){this.transform(1,0,0,1,x,y);record({op:'translate',args:[x,y]});},
+  scale(x,y){this.transform(x,0,0,y,0,0);record({op:'scale',args:[x,y]});},
+  rotate(angle){const c=Math.cos(angle),s=Math.sin(angle);this.transform(c,s,-s,c,0,0);record({op:'rotate',args:[angle]});},
+  getTransform(){const [a,b,c,d,e,f]=this.matrix;return{a,b,c,d,e,f};},
   measureText(text){const fontSize=Number(this.font.match(/([\d.]+)px/)?.[1]||10),width=text.length*fontSize*.55;record({op:'measureText',text,font:this.font,width});return{width,actualBoundingBoxAscent:fontSize*.8,actualBoundingBoxDescent:fontSize*.2};},
   fill(path,rule){record({op:'fill',path,rule,color:this.fillStyle});},
   stroke(path){record({op:'stroke',path,color:this.strokeStyle,width:this.lineWidth});},
@@ -52,7 +59,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   strokeText(text,x,y){record({op:'strokeText',text,x,y,font:this.font});},
   fillText(text,x,y){record({op:'fillText',text,x,y,font:this.font});},
  };
- for(const name of ['setTransform','resetTransform','translate','scale','rotate','fillRect','clearRect','strokeRect','beginPath','closePath','moveTo','lineTo','arc','ellipse','bezierCurveTo','quadraticCurveTo','roundRect','rect','clip','setLineDash'])context[name]=function(...args){record({op:name,args});};
+ for(const name of ['fillRect','clearRect','strokeRect','beginPath','closePath','moveTo','lineTo','arc','ellipse','bezierCurveTo','quadraticCurveTo','roundRect','rect','clip','setLineDash'])context[name]=function(...args){record({op:name,args});};
  return context;
  }
  function matches(element,selector){
@@ -98,8 +105,28 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   reject(job,message='Source failed'){assert.equal(job.settled,false);job.settled=true;if(this.jobs.get(job.key)===job)this.jobs.delete(job.key);job.reject(new Error(message));}
   destroy(){this.destroyed=true;this.active=false;for(const tile of this.cache.values())tile.bitmap.close();this.cache.clear();}
  }
+ // Only native worker delivery is controlled: the real raster manager still
+ // owns its cache, stale-reply rejection, source registration and bitmap close.
+ class TrailRasterWorker{
+  requests=[];pending=null;registered=new Map();destroyed=false;
+  constructor(){rasters.push(this);}
+  postMessage(payload){
+   assert.equal(this.pending,null,'Only one worker paint may be in flight');
+   for(const id of payload.dropPartIds)this.registered.delete(id);
+   for(const part of payload.addParts)this.registered.set(part.id,part);
+   assert.ok(payload.partIds.every(id=>this.registered.has(id)));
+   this.pending=payload;this.requests.push(payload);
+  }
+  resolve(){
+   assert.ok(this.pending,'A raster request must exist before it can complete');
+   const job=this.pending;this.pending=null;
+   const bitmap={key:'trail-raster:'+job.id,width:job.width,height:job.height,closed:false,parts:job.partIds.map(id=>this.registered.get(id)),close(){this.closed=true;}};
+   this.onmessage({data:{id:job.id,bitmap}});return{bitmap,width:job.width,height:job.height};
+  }
+  terminate(){this.destroyed=true;}
+ }
  const globals={document,window,Path2D:Path,ResizeObserver:class{constructor(callback){this.callback=callback;observers.push(this);}observe(){}disconnect(){this.disconnected=true;}},
-  devicePixelRatio:1,navigator:{onLine:true},matchMedia:()=>({matches:false}),performance:{now:()=>now},console,URL,AbortController,crypto:globalThis.crypto,TextEncoder,
+  devicePixelRatio:1,navigator:{onLine:true},location:{href:'https://fixture.invalid/'},Worker:TrailRasterWorker,queueMicrotask,matchMedia:()=>({matches:false}),performance:{now:()=>now},console,URL,AbortController,crypto:globalThis.crypto,TextEncoder,
   getComputedStyle:element=>({display:element.hidden?'none':'block',visibility:'visible',opacity:'1',pointerEvents:'auto'}),
   requestAnimationFrame:callback=>{const id=++serial;frames.set(id,callback);return id;},cancelAnimationFrame:id=>frames.delete(id),
   setTimeout:(callback,delay)=>{const id=++serial;timers.set(id,{callback,at:now+delay});return id;},clearTimeout:id=>timers.delete(id)};
@@ -141,7 +168,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const ready=async()=>{coverageResolve(coverage);await turn();complete();await turn();flush();return engine;};
  const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
  const lastDraw=()=>[...lastSurface('tropnik-map-canvas','draw-start'),...lastSurface('tropnik-map-labels','clearRect')];
- return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
+ return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,rasters,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
   verifyReviewedCoastalRoute:load(resolve(root,'lib/reviewed-coastal-routes.ts')).verifyReviewedCoastalRoute,
   get coverageAttempts(){return coverageAttempts;},get readyCalls(){return readyCalls;},get gestures(){return gestures;},get layoutReads(){return layoutReads;},
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
@@ -1190,6 +1217,51 @@ test('close catalogue geometry replaces the overview without joining parts and p
  const stroke=()=>env.lastDraw().find(call=>call.op==='stroke'&&call.color==='#618253');assert.equal(pathCommands(stroke().path).filter(command=>command[0]==='lineTo').length,1);
  env.engine.setTrailOverlay([{...entry,detail:[{bounds,lines:[detail]}]}]);env.flush();assert.equal(pathCommands(stroke().path).filter(command=>command[0]==='lineTo').length,2);assert.equal(env.engine.inspect().catalogueOverlay.exactSources,1);
  env.engine.setCamera({...camera,center:[50,55],zoom:13});env.flush();assert.equal(stroke(),undefined);assert.equal(env.engine.inspect().catalogueOverlay.preparedParts,0);
+});
+
+function denseTrailEntry(){
+ const parts=Array.from({length:300},(_,index)=>{const y=43.4+index*.0005,coordinates=[[40.2,y],[40.8,y]];return{bounds:[40.2,y,40.8,y],lines:[coordinates,coordinates]};});
+ return{key:'dense',ids:['dense'],parts};
+}
+
+test('dense catalogue lines become selectable only with their committed raster and disappear immediately with filters or paths',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+ const entry=denseTrailEntry(),coordinate=[40.5,43.4];env.engine.setTrailOverlay([entry]);env.flush();
+ assert.equal(env.rasters.length,1,'Dense source geometry must use the asynchronous raster surface');
+ const raster=env.rasters[0];assert.equal(raster.pending.partIds.length,300);
+ assert.ok(raster.pending.addParts.every(part=>part.points.length===4),'Source parts remain disconnected in the worker payload');
+ assert.equal(env.engine.pickTrail(env.engine.project(coordinate)),undefined,'Pending invisible background lines cannot be selected');
+ assert.equal(env.lastDraw().some(call=>call.op==='stroke'&&call.color==='#618253'),false,'Dense paths must not synchronously replay on the UI canvas');
+ const completed=raster.resolve();await env.settle();
+ const draw=env.lastDraw(),index=draw.findIndex(call=>call.op==='drawImage'&&call.bitmap===completed.bitmap);assert.ok(index>=0);
+ assert.deepEqual(draw[index].args,[0,0],'A physical worker bitmap is composited exactly once without a second world transform');
+ const priorTransform=draw.slice(0,index).findLast(call=>call.op==='setTransform');assert.deepEqual(priorTransform.args,[1,0,0,1,0,0]);
+ const mask=coveragePaint(env).mask;assert.ok(draw.findIndex(call=>call.op==='fill'&&call.path===mask)>index,'Ordinary worker trails retain the existing country mask');
+ assert.equal(env.engine.pickTrail(env.engine.project(coordinate)),'dense');
+ env.engine.setTrailOverlay([]);env.flush();
+ assert.equal(env.engine.pickTrail(env.engine.project(coordinate)),undefined);
+ assert.equal(env.lastDraw().some(call=>call.op==='drawImage'&&String(call.key).startsWith('trail-raster:')),false);
+ env.engine.setTrailOverlay([entry]);env.flush();env.engine.setCamera({...env.engine.getCamera(),center:[40.55,43.5]},false);env.flush();assert.ok(raster.pending);
+ env.engine.setLayers({paths:false});env.complete();await env.settle();
+ assert.equal(env.engine.inspect().catalogueOverlay.pending,false,'Switching paths off invalidates pending catalogue publication');assert.equal(env.engine.pickTrail(env.engine.project(coordinate)),undefined);
+ const hidden=raster.resolve();await env.settle();assert.equal(hidden.bitmap.closed,true,'A late hidden-layer reply must be disposed instead of published');
+ env.engine.setRoute({type:'LineString',coordinates:[[40.2,43.4],[40.8,43.4]]},'selected');env.flush();
+ assert.equal(env.engine.pickTrail(env.engine.project(coordinate)),'selected','The exact selected route remains independent of background paths');
+});
+
+test('dense trail bitmaps are reused only for the same camera and palette and are disposed with the engine',async t=>{
+ const env=fixture();await env.ready();const entry=denseTrailEntry();env.engine.setTrailOverlay([entry]);env.flush();const raster=env.rasters[0];
+ const first=raster.resolve();await env.settle();const requests=raster.requests.length;
+ env.engine.setLayers({});env.flush();assert.equal(raster.requests.length,requests,'An unchanged paint reuses its exact worker frame');
+ assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.bitmap===first.bitmap));
+ env.engine.setCamera({...env.engine.getCamera(),center:[40.55,43.5]},false);env.flush();
+ assert.ok(raster.pending);assert.notDeepEqual(raster.pending.transform,raster.requests[0].transform);
+ assert.deepEqual(raster.pending.partIds,raster.requests[0].partIds);assert.equal(raster.pending.addParts.length,0,'A camera change reuses registered immutable source coordinates');
+ assert.equal(env.lastDraw().some(call=>call.op==='drawImage'&&call.bitmap===first.bitmap),false,'A previous camera bitmap cannot be painted at the new camera');
+ const moved=raster.resolve();await env.settle();assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.bitmap===moved.bitmap));
+ env.engine.setMode('satellite');env.complete();await env.settle();assert.ok(raster.pending);assert.equal(raster.pending.lineColor,'#f2d49b');
+ assert.equal(env.lastDraw().some(call=>call.op==='drawImage'&&call.bitmap===moved.bitmap),false,'A relief bitmap cannot pass for the satellite palette');
+ const satellite=raster.resolve();await env.settle();env.engine.destroy();assert.equal(raster.destroyed,true);assert.equal(satellite.bitmap.closed,true);assert.equal(first.bitmap.closed,true);assert.equal(moved.bitmap.closed,true);
 });
 
 test('only the verified coastal snapshot crosses the unchanged mask; ordinary and shifted tracks remain masked',async t=>{

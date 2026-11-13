@@ -19,19 +19,24 @@ import {hitTrailOverlay,overlayBoundsIntersect,overlayPartLine,trailOverlayParts
 import {isReviewedCoastalAllowance,type ReviewedCoastalAllowance} from './reviewed-coastal-routes';
 import {mapTileIntersectsCoverage} from './custom-map-coverage';
 import {MAP_POINT_MARKER_SIZE,mapPointMarkerObstacle,type MapPointMarkerKind} from './map-point-marker-layout';
+import {CustomMapTrailRaster,type TrailRasterPart} from './custom-map-trail-raster';
 
 export type CustomMapMode='detail'|'overview'|'satellite';
 export type CustomMapState={ready:boolean;loading:boolean;mode:CustomMapMode;committedMode:CustomMapMode;imagerySource?:SatelliteSourceId;imageryTarget?:SatelliteSourceId;imageryLoading:boolean;reliefReady:boolean;localDetail:boolean;error:string;residentTiles:number;pendingTiles:number};
 export type CustomMapMarker={id:string;coordinate:[number,number];label:string;kind:'direction'|MapPointMarkerKind;count?:number;active?:boolean};
 export type CustomMapLabel={id:string;coordinate:[number,number];label:string;kind?:MapTileLabel['kind'];rank?:number;color?:string};
 export type CustomMapLabelDiagnostic={id:string;label:string;coordinate:[number,number];visible:boolean;reason:string;x?:number;y?:number;width?:number;rect?:{left:number;top:number;right:number;bottom:number}};
-export type CustomMapOptions={camera:CustomMapCamera;onReady?:(engine:CustomMapEngine)=>void;onFrame?:(camera:CustomMapCamera)=>void;onSettled?:(camera:CustomMapCamera)=>void;onGesture?:()=>void;onClick?:(point:MapPoint,coordinate:[number,number])=>void;onMarker?:(id:string)=>void;onState?:(state:CustomMapState)=>void;maxZoom?:number};
+export type CustomMapOptions={camera:CustomMapCamera;onReady?:(engine:CustomMapEngine)=>void;onFrame?:(camera:CustomMapCamera)=>void;onSettled?:(camera:CustomMapCamera)=>void;onGesture?:()=>void;onClick?:(point:MapPoint,coordinate:[number,number])=>void;onMarker?:(id:string)=>void;onState?:(state:CustomMapState)=>void;onOverlayError?:(message:string)=>void;maxZoom?:number};
 type TileBatch={tiles:CustomMapTile[];kind:CustomTileKind;generation:number;missing?:CustomTileRequest[]};
 type LabelCandidate={id:string;coordinate:[number,number];label:MapTileLabel;color?:string;priority:number;sourceAnchor:string;insideCoverage?:boolean;value?:string;repeatDistance?:number;repeatKey?:string};
 type FeatureGeometry=GeoJSON.GeoJSON|undefined;
 type PathCollection={path:Path2D;bounds:[number,number,number,number]};
 const COUNTRY_BOUNDS=[19.6389282,41.1858711,191.0026658,81.858721] as const;
 const MAX_VISIBLE_TILES=64;
+// The execution path changes, never the lines or their screen-space accuracy.
+// Dense, disconnected country paths otherwise spend 200ms in native Canvas
+// replay on the UI thread even when their JavaScript paths are already cached.
+const DIRECT_TRAIL_COMPLEXITY=4096;
 
 function geometryPath(geometry:FeatureGeometry):PathCollection{
   const path=new Path2D(),bounds:[number,number,number,number]=[Infinity,Infinity,-Infinity,-Infinity];
@@ -127,6 +132,14 @@ export class CustomMapEngine {
   private trailOverlaySources=0;
   private trailOverlayParts=0;
   private trailOverlayDetails=0;
+  private trailOverlayCandidateCounts={sources:0,parts:0,details:0};
+  private trailRaster?:CustomMapTrailRaster;
+  private trailRasterParts?:readonly TrailRasterPart[];
+  private trailRasterPartCache=new WeakMap<GeoJSON.Position[],TrailRasterPart>();
+  private trailRasterPartSerial=0;
+  private trailOverlayPaintedEntries:readonly TrailOverlayEntry[]=[];
+  private trailOverlayViewportReady=true;
+  private trailRasterError='';
   private markerLayer:HTMLDivElement;
   private markers=new Map<string,{marker:CustomMapMarker;button:HTMLButtonElement}>();
   private markerGroups=new Map<string,MapDirectionGroup<{id:string;name:string;center:[number,number]}>>();
@@ -198,6 +211,7 @@ export class CustomMapEngine {
    * Repeated input shares an existing attempt instead of adding generations. */
   retry(){
     if(this.disposed)return;
+    this.trailRaster?.retry();this.schedule();
     if(!this.coverage){this.loadCoverage();return;}
     if(this.state.loading)return;
     this.currentKeys='';this.refreshTiles();
@@ -225,7 +239,7 @@ export class CustomMapEngine {
     // During resize the previous sheet insets can briefly exceed the new size.
     // Inspection must stay safe until the layout observer supplies fresh values.
     const visible=Object.values(padding).every(value=>Number.isFinite(value)&&value>=0)&&padding.left+padding.right<this.size.width&&padding.top+padding.bottom<this.size.height;
-    return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',catalogueOverlay:{sources:this.trailOverlay.length,preparedSources:this.paths?this.trailOverlaySources:0,preparedParts:this.paths?this.trailOverlayParts:0,exactSources:this.paths?this.trailOverlayDetails:0},reviewedCoastal:{selected:!!this.reviewedCoastalRoute,overlaySources:this.paths?this.reviewedCoastalOverlaySources:0},drawRevision:this.drawRevision,labelRevision:this.labelRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
+    return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',catalogueOverlay:{sources:this.trailOverlay.length,preparedSources:this.paths?this.trailOverlaySources:0,preparedParts:this.paths?this.trailOverlayParts:0,exactSources:this.paths?this.trailOverlayDetails:0,currentViewportReady:!this.paths||this.trailOverlayViewportReady,pending:!!(this.paths&&this.trailRasterParts?.length&&this.trailRaster?.getState().pending),error:this.paths?this.trailRasterError:''},reviewedCoastal:{selected:!!this.reviewedCoastalRoute,overlaySources:this.paths?this.reviewedCoastalOverlaySources:0},drawRevision:this.drawRevision,labelRevision:this.labelRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
   }
   private publishInspection(){if(this.disposed)return;this.element.dataset.mapTilesState=this.state.loading?'loading':this.state.error?'error':'ready';this.element.dataset.mapInspection=JSON.stringify(this.inspect());}
   private setMoving(moving:boolean){this.element.dataset.mapMoving=String(moving);if(moving)this.element.dataset.mapCamera='moving';else delete this.element.dataset.mapCamera;}
@@ -292,7 +306,7 @@ export class CustomMapEngine {
     this.updateState({mode,imageryLoading:false,imageryTarget:undefined});this.refreshTiles();this.schedule();
   }
   setLayers(layers:{paths?:boolean;boundaries?:boolean;relief?:boolean}){
-    if(layers.paths!==undefined&&layers.paths!==this.paths){this.paths=layers.paths;this.currentKeys='';}
+    if(layers.paths!==undefined&&layers.paths!==this.paths){this.paths=layers.paths;this.currentKeys='';if(!this.paths){this.trailRaster?.clear();this.updateTrailRasterError();this.trailOverlayPaintedEntries=[];}}
     if(layers.boundaries!==undefined&&layers.boundaries!==this.boundaryVisible){this.boundaryVisible=layers.boundaries;this.currentKeys='';}
     if(layers.relief!==undefined)this.reliefVisible=layers.relief;
     this.refreshTiles();this.schedule();
@@ -307,6 +321,7 @@ export class CustomMapEngine {
     this.routeEdges.forEach(edge=>edge.element.remove());this.routeEdges=[];
     if(geometry)for(const edge of routeLineEdges(geometry)){const element=createRouteEdgeElement(edge);this.markerLayer.appendChild(element);this.routeEdges.push({element,project:()=>this.project(edge.coordinate)});}
     this.trailOverlayWindow=undefined;
+    this.trailRaster?.clear();this.trailOverlayPaintedEntries=[];
     this.schedule();
   }
   /** Only click handlers call this. Use the same exact/overview geometry and
@@ -323,7 +338,7 @@ export class CustomMapEngine {
       pointerInsideCoverage:inRussiaCoverage(coordinate[0],coordinate[1],coverage)};
     const selected=this.routeHit&&hitTrailOverlay([this.routeHit],options);
     if(selected)return selected.id;
-    return this.paths?hitTrailOverlay(this.trailOverlay,{...options,skipId:this.routeId})?.id:undefined;
+    return this.paths?hitTrailOverlay(this.trailOverlayPaintedEntries,{...options,skipId:this.routeId})?.id:undefined;
   }
   /** Catalogue lines are independent of basemap tiles and the exact selected
    * track. Source parts are compiled once, then reused through pan and modes. */
@@ -331,17 +346,18 @@ export class CustomMapEngine {
     if(entries.length===this.trailOverlay.length&&entries.every((entry,index)=>{
       const previous=this.trailOverlay[index];return entry.key===previous.key&&entry.parts===previous.parts&&entry.detail===previous.detail&&entry.coastal===previous.coastal&&entry.ids.length===previous.ids.length&&entry.ids.every((id,i)=>id===previous.ids[i]);
     }))return;
-    this.trailOverlay=entries;this.trailOverlayWindow=undefined;this.schedule();
+    this.trailOverlay=entries;this.trailOverlayWindow=undefined;this.trailRaster?.clear();this.trailOverlayPaintedEntries=[];
+    this.trailOverlayViewportReady=!entries.length;this.schedule();
   }
   private prepareTrailOverlay(){
-    if(!this.trailOverlay.length){this.trailOverlayBatch=undefined;this.reviewedCoastalOverlayBatch=undefined;this.reviewedCoastalOverlaySources=0;this.trailOverlaySources=0;this.trailOverlayParts=0;this.trailOverlayDetails=0;return;}
+    if(!this.trailOverlay.length){this.trailOverlayBatch=undefined;this.trailRasterParts=undefined;this.trailRaster?.clear();this.reviewedCoastalOverlayBatch=undefined;this.reviewedCoastalOverlaySources=0;this.trailOverlayCandidateCounts={sources:0,parts:0,details:0};return;}
     const view=this.getBounds(),level=this.camera.zoom<=TRAIL_OVERLAY_ZOOMS[0]?0:this.camera.zoom<=TRAIL_OVERLAY_ZOOMS[1]?1:2;
     const previous=this.trailOverlayWindow;
     if(previous&&this.trailOverlayLevel===level&&view[0]>=previous[0]&&view[1]>=previous[1]&&view[2]<=previous[2]&&view[3]<=previous[3])return;
     // One viewport of overscan keeps paths ready during a drag. Crossing that
     // margin recomposes cached Path2D objects, never decodes source JSON again.
     const size=this.virtualSize(),window=cameraBounds(this.camera,{width:size.width+512,height:size.height+512});
-    const batch=new Path2D(),coastalBatch=new Path2D();let sources=0,parts=0,details=0,coastalSources=0,clippedParts=0;
+    const coastalBatch=new Path2D(),linesToPaint:GeoJSON.Position[][]=[];let sources=0,parts=0,details=0,coastalSources=0,complexity=0;
     for(const entry of this.trailOverlay){
       if(this.routeId&&entry.ids.includes(this.routeId))continue;
       if(isReviewedCoastalAllowance(entry.coastal)&&entry.key===entry.coastal.key){
@@ -354,15 +370,61 @@ export class CustomMapEngine {
       for(const part of lines){
         if(!overlayBoundsIntersect(part.bounds,window))continue;
         const coordinates=overlayPartLine(part,level);
-        let path=this.trailOverlayPaths.get(coordinates);
-        if(!path){path=geometryPath({type:'LineString',coordinates}).path;this.trailOverlayPaths.set(coordinates,path);}
-        batch.addPath(path);parts++;clippedParts++;included=true;
+        linesToPaint.push(coordinates);complexity+=16+coordinates.length;parts++;included=true;
       }
       if(included){sources++;if(exact)details++;}
     }
-    this.trailOverlayBatch=clippedParts?batch:undefined;this.trailOverlayWindow=[...window];this.trailOverlayLevel=level;
-    this.trailOverlaySources=sources;this.trailOverlayParts=parts;this.trailOverlayDetails=details;
+    this.trailOverlayBatch=undefined;this.trailRasterParts=undefined;
+    if(complexity>DIRECT_TRAIL_COMPLEXITY){
+      this.trailRasterParts=linesToPaint.map(coordinates=>{
+        let part=this.trailRasterPartCache.get(coordinates);if(part)return part;
+        const points=new Float64Array(coordinates.length*2);let reference=105;
+        for(let index=0;index<coordinates.length;index++){
+          const coordinate=coordinates[index],longitude=coordinate[0]+360*Math.round((reference-coordinate[0])/360);reference=longitude;
+          const point=mercatorProject([longitude,coordinate[1]]);points[index*2]=point.x;points[index*2+1]=point.y;
+        }
+        part={id:++this.trailRasterPartSerial,points};this.trailRasterPartCache.set(coordinates,part);return part;
+      });
+    }else{
+      this.trailRaster?.clear();
+      if(linesToPaint.length){
+        const batch=new Path2D();
+        for(const coordinates of linesToPaint){let path=this.trailOverlayPaths.get(coordinates);if(!path){path=geometryPath({type:'LineString',coordinates}).path;this.trailOverlayPaths.set(coordinates,path);}batch.addPath(path);}
+        this.trailOverlayBatch=batch;
+      }
+    }
+    this.trailOverlayWindow=[...window];this.trailOverlayLevel=level;
+    this.trailOverlayCandidateCounts={sources,parts,details};
     this.reviewedCoastalOverlayBatch=coastalSources?coastalBatch:undefined;this.reviewedCoastalOverlaySources=coastalSources;
+  }
+  private updateTrailRasterError(){
+    const error=this.trailRaster?.getState().error||'';
+    if(error===this.trailRasterError)return;
+    this.trailRasterError=error;
+    this.options.onOverlayError?.(error?'Тропы не появились на карте. Повторите загрузку.':'');
+  }
+  private drawTrailOverlay(scale:number,satellite:boolean){
+    this.prepareTrailOverlay();const ctx=this.context,width=this.camera.zoom<8?1.4:2;
+    const halo=satellite?'rgba(30,48,37,.9)':'rgba(255,254,245,.9)',color=satellite?'#f2d49b':'#618253';
+    let complete=true;
+    if(this.trailRasterParts?.length){
+      this.trailRaster??=new CustomMapTrailRaster({softwareRaster:this.rasterPolicy.softwareRaster,onChange:()=>{if(!this.disposed){this.updateTrailRasterError();this.schedule();}}});
+      const {a,b,c,d,e,f}=ctx.getTransform();
+      const snapshot=this.trailRaster.request({parts:this.trailRasterParts,width:this.canvas.width,height:this.canvas.height,transform:[a,b,c,d,e,f],haloWidth:(width+2)/scale,lineWidth:width/scale,haloColor:halo,lineColor:color});
+      complete=!!snapshot;
+      if(snapshot){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(snapshot.bitmap,0,0);ctx.restore();}
+    }else if(this.trailOverlayBatch){
+      ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=halo;ctx.lineWidth=(width+2)/scale;ctx.stroke(this.trailOverlayBatch);
+      ctx.strokeStyle=color;ctx.lineWidth=width/scale;ctx.stroke(this.trailOverlayBatch);
+    }
+    this.updateTrailRasterError();this.trailOverlayViewportReady=complete;
+    // Never expose a newly requested, invisible source as a hit target. The
+    // independently painted reviewed coastal source remains available.
+    this.trailOverlayPaintedEntries=complete?this.trailOverlay:this.trailOverlay.filter(entry=>isReviewedCoastalAllowance(entry.coastal)&&entry.key===entry.coastal.key);
+    const counts=this.trailOverlayCandidateCounts;
+    this.trailOverlaySources=complete?counts.sources:this.reviewedCoastalOverlaySources;
+    this.trailOverlayParts=complete?counts.parts:this.trailOverlayPaintedEntries.reduce((sum,entry)=>sum+(entry.coastal?.geometry.coordinates.length??0),0);
+    this.trailOverlayDetails=complete?counts.details:this.reviewedCoastalOverlaySources;
   }
   setMarkers(markers:readonly CustomMapMarker[]){
     const ids=new Set(markers.map(marker=>marker.id));
@@ -653,12 +715,7 @@ export class CustomMapEngine {
     // the source boundary lines may outline the selected territory.
     if(this.selectedBoundary){ctx.strokeStyle=satellite?'#e7eacc':'#688360';ctx.lineWidth=1.3/scale;ctx.stroke(this.selectedBoundary);}
     if(this.paths){
-      this.prepareTrailOverlay();
-      if(this.trailOverlayBatch){
-        const width=this.camera.zoom<8?1.4:2;
-        ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=satellite?'rgba(30,48,37,.9)':'rgba(255,254,245,.9)';ctx.lineWidth=(width+2)/scale;ctx.stroke(this.trailOverlayBatch);
-        ctx.strokeStyle=satellite?'#f2d49b':'#618253';ctx.lineWidth=width/scale;ctx.stroke(this.trailOverlayBatch);
-      }
+      this.drawTrailOverlay(scale,satellite);
     }
     if(this.route&&!this.reviewedCoastalRoute){ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#fffef5';ctx.lineWidth=(routeStrokeWidth(this.camera.zoom)+3)/scale;ctx.stroke(this.route.path);ctx.strokeStyle='#244d3c';ctx.lineWidth=routeStrokeWidth(this.camera.zoom)/scale;ctx.stroke(this.route.path);}
     if(this.mask){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fill(this.mask,'evenodd');}
@@ -754,6 +811,7 @@ export class CustomMapEngine {
     this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
     this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;this.selectedBoundary=undefined;
+    this.trailRaster?.destroy();this.trailRaster=undefined;this.trailRasterParts=undefined;this.trailRasterPartCache=new WeakMap();this.trailOverlayPaintedEntries=[];
     this.trailOverlay=[];this.trailOverlayPaths=new WeakMap();this.trailOverlayBatch=undefined;this.trailOverlayWindow=undefined;
     this.routeHit=undefined;
     this.reviewedCoastalRoute=undefined;this.reviewedCoastalPaths=new WeakMap();this.reviewedCoastalOverlayBatch=undefined;this.reviewedCoastalOverlaySources=0;

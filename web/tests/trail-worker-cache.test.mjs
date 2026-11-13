@@ -84,12 +84,16 @@ test('exact legacy route sources also recover from cached invalid bytes on a val
   for (const base of ['/', '/tropnik/']) await t.test(base, async () => {
     const env = worker({base}), path = 'data/routes/kolyma-black-creek.geojson?v=pinned';
     env.response('invalid source bytes'); await env.get(path);
+    env.network(false);
+    for (const cache of ['reload', 'no-store']) await assert.rejects(env.get(path, {cache}), /Offline/);
+    env.network(true);
     env.response('{"type":"FeatureCollection","features":[]}');
     assert.equal(await (await env.get(path, {cache: 'no-store'})).text(), '{"type":"FeatureCollection","features":[]}');
     assert.equal(await (await env.get(path)).text(), 'invalid source bytes');
     await env.get(path, {cache: 'reload'});
     env.network(false);
     assert.equal(await (await env.get(path)).text(), '{"type":"FeatureCollection","features":[]}');
+    for (const cache of ['reload', 'no-store']) await assert.rejects(env.get(path, {cache}), /Offline/);
   });
 });
 

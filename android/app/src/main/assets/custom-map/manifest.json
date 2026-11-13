@@ -104,8 +104,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 64067,
-      "sha256": "197837ec8bfb84939f0be7525c0c6112c59d1c72c1fd65e118f3517fc3310871"
+      "sizeBytes": 68495,
+      "sha256": "75267ccf1d4d7ca0758cd0462a8d4ac828cd28dca31933e2320bfebdbe16de50"
     },
     {
       "path": "web/lib/custom-map-label-inspection.ts",
@@ -141,6 +141,16 @@
       "path": "web/lib/custom-map-tiles.worker.ts",
       "sizeBytes": 15542,
       "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217"
+    },
+    {
+      "path": "web/lib/custom-map-trail-raster.ts",
+      "sizeBytes": 12982,
+      "sha256": "9a17d5022610354e1865846925d7725304f927247b83fe3fda6718574f572d9b"
+    },
+    {
+      "path": "web/lib/custom-map-trail-raster.worker.ts",
+      "sizeBytes": 3671,
+      "sha256": "1518ab7faae90588a0234a945bafcb4baa3f4a087bf30261c442a985fdaed2df"
     },
     {
       "path": "web/lib/custom-map-vector.ts",
@@ -288,17 +298,17 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "625abaaf780083b578c105bef429b415bb3abe038ec073220b7c8d7499a3d9c3",
+  "sourceInputsSha256": "651a564fce0743e9cd7ed5e2cf6fef9ce4a32a8f26118ad624438d7c20b8a0ab",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 15534,
-      "sha256": "5602e22f8a08709dcf939b82c036bcb774f6d4467e88ea256500ff4b3eb709f2"
+      "sha256": "e1d3f80d509ff5618f87dcad4833acffbd4afb6770d77c1a8ce533290d9589ac"
     },
     {
-      "path": "chunks/custom-map-entry-BDIeTicq.js",
-      "sizeBytes": 120607,
-      "sha256": "f10bbf245418fe0994c6934621f30e95ccd3c884af492eecd85651e0b5fc37a7"
+      "path": "chunks/custom-map-entry-Ut5hlSJD.js",
+      "sizeBytes": 133424,
+      "sha256": "bbf178fcfc94e60af5736768f9f3fd487a0c84fbdf068795f00f90e3abe2d0b9"
     },
     {
       "path": "index.html",
@@ -313,7 +323,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 156,
-      "sha256": "aae2b26f874363aa531947c9eb614e0bc11dd2c08ef36df4ca80431859bf5fae"
+      "sha256": "e1db9f6adc1437fec01c5f757b59a51874c5072cbfacc833a1d2b2f81f04a5b6"
     },
     {
       "path": "map.css",
@@ -329,6 +339,11 @@
       "path": "workers/custom-map-tiles.worker-DIXTfJlZ.js",
       "sizeBytes": 28755,
       "sha256": "f76ea8a31e046b700ab47418f303cffec504490e700b78f2dfc68866c4a71b2e"
+    },
+    {
+      "path": "workers/custom-map-trail-raster.worker-CZZMbu81.js",
+      "sizeBytes": 2387,
+      "sha256": "bfec0605c231da3c03fca6403800e8b0ff7678ed83e66218dfa973d7e26c7345"
     },
     {
       "path": "workers/terrain-preparation.worker-Bb-s7l3H.js",

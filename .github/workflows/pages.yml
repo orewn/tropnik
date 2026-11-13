@@ -77,11 +77,41 @@ jobs:
           test "$PAGES_CONFIG_BASE" = '/tropnik'
       - name: Build and verify the static site
         run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Check cold offline emergency access before the full browser audit
+        timeout-minutes: 3
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: offline-safety
+        run: node tools/pages-preview/browser-smoke.mjs
       - name: Verify complete trail overlay and native line selection
         timeout-minutes: 5
         env:
           GITHUB_SHA: ${{ github.sha }}
         run: node tools/pages-preview/browser-trail-overlay.mjs
+      - name: Verify worker trail pixels against the direct renderer
+        timeout-minutes: 4
+        run: node --test tools/pages-preview/tests/browser-trail-raster.browser.mjs
+      - name: Check UI smoothness before the full browser audit
+        timeout-minutes: 6
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+        run: |
+          node tools/pages-preview/browser-smoke.mjs
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFileSync} from 'node:fs';
+          import {assertSmoothnessAudit} from './tools/pages-preview/browser-smoothness.mjs';
+          const report = JSON.parse(readFileSync('web/pages-preview/dist/browser-ui-smoothness-diagnostic.json', 'utf8'));
+          assert.equal(report.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(report.status, 'completed');
+          assert.equal(report.diagnosticOnly, true);
+          assert.equal(report.releaseEligible, false);
+          const profiles = [{name:'android-portrait',mobile:true,engine:'tropnik-canvas'}, {name:'desktop-webgl',mobile:false,engine:'tropnik-canvas'}];
+          assert.deepEqual(report.profiles.map(item => item.profile), profiles.map(item => item.name));
+          report.profiles.forEach((audit, index) => assertSmoothnessAudit(audit, profiles[index]));
+          assert.deepEqual(report.performanceIssues, []);
+          NODE
       - name: Verify production map controls in phone landscape
         run: node --test tools/pages-preview/tests/browser-map-controls.browser.mjs
       - name: Verify source credit geometry across satellite loading
@@ -141,6 +171,48 @@ jobs:
             assert.equal(createHash('sha256').update(png).digest('hex'), capture.sha256);
             assert.equal(png.subarray(0,8).toString('hex'), '89504e470d0a1a0a');
             assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)], [profile.width*profile.deviceScaleFactor,profile.height*profile.deviceScaleFactor]);
+          }
+          const trailRaster = JSON.parse(readFileSync('web/pages-preview/dist/browser-trail-raster-verification.json', 'utf8'));
+          assert.equal(trailRaster.schemaVersion, 1);
+          assert.equal(trailRaster.verified, true);
+          assert.equal(trailRaster.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(trailRaster.buildId, build.buildId);
+          assert.equal(trailRaster.evidence, 'production-trail-worker-pixel-parity');
+          assert.equal(trailRaster.overlay.sha256, trailMetadata.sha256);
+          assert.equal(trailRaster.overlay.sources, trailMetadata.uniqueGeometries);
+          assertMatchingBrowserEnvironments(trailRaster.environment, browser.environment, process.env.GITHUB_SHA);
+          assert.deepEqual(trailRaster.matrix, {dpr:[1,1.5,2], palettes:['relief','satellite'], scenarios:['disconnected','antimeridian','rotated-pitched','country']});
+          for (const [path, hash] of Object.entries(trailRaster.sources)) {
+            assert.match(path, /^web\/(?:[\w.-]+\/)*[\w.-]+$/);
+            assert.equal(createHash('sha256').update(readFileSync(path)).digest('hex'), hash);
+          }
+          assert.equal(trailRaster.cases.length, 24);
+          assert.equal(new Set(trailRaster.cases.map(item => `${item.dpr}/${item.name}/${item.palette}`)).size, 24);
+          for (const item of trailRaster.cases) {
+            assert.equal(item.verified, true);
+            assert.equal(item.rasterComparison.differentPixels, 0);
+            assert.equal(item.rasterComparison.maxChannelDelta, 0);
+            assert.equal(item.referenceRasterPixelSHA256, item.workerRasterPixelSHA256);
+            // Grouping two translucent strokes into an RGBA bitmap changes
+            // 8-bit alpha rounding by at most two levels over an opaque map.
+            // The actual transparent geometry/raster remains bit-identical.
+            assert.ok(item.comparison.maxChannelDelta <= 2);
+            assert.equal(item.nativeWorker.bitmap, true);
+            assert.equal(item.nativeWorker.count, 1);
+            assert.equal(item.nativeWorker.state.ready, true);
+            assert.equal(item.nativeWorker.state.error, '');
+            if (item.name === 'country') {
+              assert.equal(item.sources, trailMetadata.uniqueGeometries);
+              assert.equal(item.frame.parts, trailMetadata.sourceParts);
+            }
+            assert.deepEqual(item.captures.map(capture => capture.phase), ['reference','worker']);
+            for (const capture of item.captures) {
+              const png = readFileSync('web/pages-preview/design-qa/trail-raster/' + capture.file);
+              assert.equal(png.length, capture.bytes);
+              assert.equal(createHash('sha256').update(png).digest('hex'), capture.sha256);
+              assert.equal(png.subarray(0,8).toString('hex'), '89504e470d0a1a0a');
+              assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)], [item.frame.width,item.frame.height]);
+            }
           }
           const mask = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-mask-verification.json', 'utf8'));
           assert.equal(mask.verified, true);
@@ -246,6 +318,8 @@ jobs:
             web/pages-preview/dist/browser-map-underlay-verification.json
             web/pages-preview/dist/browser-map-controls-verification.json
             web/pages-preview/dist/browser-trail-overlay-verification.json
+            web/pages-preview/dist/browser-trail-raster-verification.json
+            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Preserve map design checks across zoom levels
