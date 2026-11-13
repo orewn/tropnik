@@ -104,6 +104,16 @@ func (s *Store) JoinRecruitment(ctx context.Context, user, id string) error {
 		return e
 	}
 	defer tx.Rollback(ctx)
+	// Match DeleteAccount's user-first lock order. A request authenticated before
+	// account closure must not recreate interest after its removal commits.
+	var activeUser string
+	e = tx.QueryRow(ctx, "SELECT id::text FROM users WHERE id=$1 AND NOT disabled AND deleted_at IS NULL FOR SHARE", user).Scan(&activeUser)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return domain.ErrUnauthorized
+	}
+	if e != nil {
+		return e
+	}
 	var real, status string
 	e = tx.QueryRow(ctx, "SELECT id::text,status FROM recruitment_requests WHERE id::text=$1 FOR UPDATE", id).Scan(&real, &status)
 	if e != nil {

@@ -60,6 +60,9 @@ func TestRestrictedRuntimeRoleCanOperateButCannotElevate(t *testing.T) {
 	if e = app.Ready(ctx); e != nil {
 		t.Fatal("runtime readiness denied", e)
 	}
+	if e = app.CheckRuntimeRole(ctx); e != nil {
+		t.Fatal("runtime privilege policy denied", e)
+	}
 	key := auth.RateIdentity(make([]byte, 32), store.AuthIPScope, "198.51.100.20")
 	if result, err := app.ConsumeAuthAttempt(ctx, store.AuthIPScope, key); err != nil || !result.Allowed {
 		t.Fatal("runtime auth budget denied", result, err)

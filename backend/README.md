@@ -1,9 +1,12 @@
 # TROPA backend
 
-The 0.4.23 safety integration passed the complete native race/integration suite
+The recorded 0.4.23 safety integration passed the native race/integration suite
 on 2026-11-10: 52 unit tests and 29 PostGIS integration tests on Go 1.27.3,
 PostgreSQL 18.6 and PostGIS 3.7.0. `go vet ./...` and the CGO-disabled command
-build also passed. See [the safety workflow](SAFETY-PASSPORT.md).
+build also passed. These results qualify that source revision; later changes
+require their own native gate. See [the recorded proof](../docs/verification/backend-0.4.23-final.json),
+[the safety workflow](SAFETY-PASSPORT.md) and the current
+[acceptance boundaries](../docs/acceptance.md).
 Earlier release verification for 0.4.18 is recorded in
 [`docs/runtime-audit-2026-11-09.md`](../docs/runtime-audit-2026-11-09.md).
 The backend gate runs `go test -race -count=1 ./...`, `go vet ./...` and native
@@ -154,6 +157,28 @@ history entry to its hike and reviews; the history is not a public profile.
 
 ## Local development
 
+### Production database role
+
+Production startup verifies the actual database privileges against the same
+31-table policy used by the grant writer. The configured login must be the
+effective role: an owner connection hidden behind an initial `SET ROLE` is
+rejected. The check includes schema/database/object ownership, inherited and
+`SET ROLE` capabilities, role-administration options, predefined PostgreSQL
+roles, column-level and `PUBLIC` grants, sequence mutation, delegation and
+missing required privileges. Checking only `rolsuper` and similar role flags
+does not establish this boundary.
+
+Runtime grants are applied in one transaction. The application does not revoke
+excess permissions automatically or alter a shared operator role. If the startup
+check fails, inspect the selected credential and its memberships, remove the
+unintended grants with the operator credential, then reapply the documented
+runtime policy. The check applies at startup; later operator permission changes
+still require deployment controls and monitoring. Native regression tests use
+disposable roles and inspect privileged predefined memberships without invoking
+server-file, process or backend-control functions.
+
+### Development process
+
 Requires Go 1.27+, PostgreSQL with PostGIS, and a **development database**.
 Generate a separate 64-character hexadecimal auth key once (for example with
 `openssl rand -hex 32`) and retain it in your uncommitted development environment.
@@ -296,11 +321,12 @@ The exact account/report/appeal request shapes are in `contracts/api.ts` and
 OpenAPI. Queues return up to 100 eligible cases, oldest first; personal histories
 return up to 100 recent records. Older-page navigation is not implemented.
 
-The framework now applies migrations 001–005 in order and refuses API
-readiness without schema version 5. Migration 004 adds account-history indexes;
+The framework applies migrations 001–006 in order and refuses API
+readiness without schema version 6. Migration 004 adds account-history indexes;
 005 adds digest-only action tokens, permanent account tombstones and guards
-against deleting active participants, guides or departure owners. Re-run
-migrations with the owner credential,
+against deleting active participants, guides or departure owners. Migration 006
+adds versioned encrypted passports, immutable safety evidence and the required
+predeparture contact gate. Re-run migrations with the owner credential,
 then reapply restricted runtime grants as documented in `../infra`.
 
 ## Account lifecycle and mail transport

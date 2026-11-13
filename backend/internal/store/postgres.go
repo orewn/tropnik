@@ -56,6 +56,9 @@ func (s *Store) Ready(ctx context.Context) error {
 	var v int
 	return s.Pool.QueryRow(ctx, "SELECT version FROM schema_migrations WHERE version=$1", migrations.RequiredVersion).Scan(&v)
 }
+func (s *Store) CheckRuntimeRole(ctx context.Context) error {
+	return migrations.CheckRuntimeRole(ctx, s.Pool)
+}
 func dbErr(err error) error {
 	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.ErrNotFound

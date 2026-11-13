@@ -1,5 +1,38 @@
 # Backend implementation review
 
+## Current context — 2026-11-13
+
+The review below is a historical record from 2026-11-06. Its statements about
+unexecuted database tests and missing account lifecycle functions are not the
+current release status. Email verification, recovery and account closure were
+subsequently implemented; schema 006 added the server-side safety passport.
+The [0.4.23 source-bound proof](../docs/verification/backend-0.4.23-final.json)
+records 52 unit tests and 29 native PostGIS integration tests. These historical
+results do not qualify later changes.
+
+The 2026-11-13 review found a production startup gap: checking only role flags
+accepted an ordinary table/schema owner or a role with extra grants. Production
+startup now compares effective privileges with the same policy that grants the
+31 application tables. It rejects ownership, privileged predefined roles,
+inherited/SET ROLE powers, ADMIN/GRANT options, extra or missing column/table
+privileges, sequence rewriting and an owner connection with a selected limited
+role. Grants are transactional; existing operator permissions are never revoked
+automatically. This is a startup boundary, not continuous enforcement against a
+later operator change or a claim of protection from a compromised database owner.
+
+New native tests cover the previously accepted cases, assert that the former
+four-flag check still appears unprivileged in those cases, and require a normal
+restricted login to remain operational. The privileged-role tests inspect
+metadata only. Their result must come from the exact-source native CI run;
+adding test code is not evidence of execution. Current deployment and external
+launch gates are recorded in [acceptance](../docs/acceptance.md).
+
+Primary references for this boundary are PostgreSQL 18
+[privilege semantics](https://www.postgresql.org/docs/18/ddl-priv.html) and
+[privilege/role inquiry functions](https://www.postgresql.org/docs/18/functions-info.html).
+
+## Historical implementation review
+
 Review date: 2026-11-06. Scope: Go API, SQL migrations, operator CLI, API contract,
 container configuration, social UI/API client and a read-only review of the web BFF. This is an
 implementation review with recorded checks, not an independent penetration test
@@ -77,7 +110,7 @@ output in `verification/go-tests.jsonl`.
   its separate evidence is recorded in `../docs/verification/next-production-build.json`.
   That later build does not broaden the scope of the earlier HTTP smoke check.
 
-## Required release gates still open
+## Release gates recorded on 2026-11-06
 
 Run `../infra/run-integration.sh` on a Docker-capable host. It provisions only a
 uniquely named ephemeral test stack and schema. The suite checks concurrent last

@@ -215,6 +215,11 @@ OR EXISTS(SELECT 1 FROM recruitment_requests WHERE created_by=$1 AND status='ope
 	if err = revokeAccountAccess(ctx, tx, user); err != nil {
 		return err
 	}
+	// Interest does not reserve a place. Withdraw it while holding the user lock;
+	// keep actual participation, requests and messages as anonymised history.
+	if _, err = tx.Exec(ctx, "DELETE FROM recruitment_members WHERE user_id=$1", user); err != nil {
+		return err
+	}
 	// Idempotent join responses contain a guide-name snapshot. Keep their
 	// operation/result identity, but do not return the former public name on a
 	// later replay after this account was anonymised.

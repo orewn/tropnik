@@ -120,10 +120,8 @@ func run() error {
 		return errors.New("database migrations are missing; run tropa-migrate first")
 	}
 	if mode == "production" {
-		var privileged bool
-		e = db.Pool.QueryRow(ctx, "SELECT rolsuper OR rolcreatedb OR rolcreaterole OR rolbypassrls FROM pg_roles WHERE rolname=current_user").Scan(&privileged)
-		if e != nil || privileged {
-			return errors.New("API must use an unprivileged database role; keep the operator credential separate")
+		if e = db.CheckRuntimeRole(ctx); e != nil {
+			return errors.New("API database privileges do not match the restricted runtime policy; keep the operator credential separate and reapply reviewed grants")
 		}
 	}
 	app, e := httpapi.New(db, cfg)

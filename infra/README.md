@@ -22,7 +22,9 @@ PostgreSQL connections use a private isolated Docker network. The explicit
 1. Copy the environment template to `.env` in this directory.
 2. Generate independent 64-character hexadecimal values, for example by running
    `openssl rand -hex 32` separately for each. Set `POSTGRES_PASSWORD`,
-   `TROPA_APP_PASSWORD` and the stable server-only `TROPA_AUTH_RATE_KEY`.
+   `TROPA_APP_PASSWORD`, the stable server-only `TROPA_AUTH_RATE_KEY`, and the
+   separate `TROPA_SAFETY_DATA_KEY`. Retain the safety encryption key with
+   encrypted backups; losing it makes existing private passports unreadable.
 3. Set `PUBLIC_ORIGIN` to the exact HTTPS website origin, without a trailing slash.
 4. Run:
 
@@ -34,8 +36,13 @@ curl --fail http://127.0.0.1:8080/api/v1/health/ready
 ```
 
 The database init script creates the unprivileged API role. The migration job
-applies the schema as the owner and grants only the required runtime rights.
-The API refuses a privileged database user in production. Neither an operator
+applies all six migrations as the owner and grants the runtime rights in one
+transaction. Production startup checks actual column/table/sequence privileges,
+ownership and reachable roles against that same policy. A connection using an
+owner login with a restricted initial `SET ROLE` also fails. Excess privileges
+are reported with a generic configuration error and are not automatically
+revoked. Inspect the credential and memberships with the operator before
+reapplying runtime grants. Neither an operator
 nor a guide is automatically created. The API container is non-root, read-only,
 has no extra Linux capabilities and contains no shell.
 
@@ -163,7 +170,7 @@ actual domain must be configured before enabling public HTTPS.
 The supplied forwarding path is Caddy → Next BFF → Go for website requests,
 and Caddy → Go for the native client. Caddy must be the actual HTTPS ingress and
 overwrite both `X-Real-IP` from its connection and `X-Tropa-Proxy-Token` from its
-server environment. Generate a **fourth, independent** 64-character hexadecimal
+server environment. Generate an **additional independent** 64-character hexadecimal
 value for `TROPA_PROXY_TOKEN`; install it in Caddy's service environment, the
 server-side Next process and Go. A Compose `.env` does not automatically configure
 a separately installed Caddy service.
@@ -217,8 +224,12 @@ temporary test stack, generates a test-only random password, runs the integratio
 suite against `tropa_test` and removes that temporary stack when it exits. It
 does not use or remove the production `postgres-data` volume.
 
-The supplied code was compiled and its ordinary race/unit tests ran in the
-authoring environment. Additional serial SQL scenarios and `SET ROLE` grants
+The recorded [0.4.23 native gate](../docs/verification/backend-0.4.23-final.json)
+ran 52 unit tests and 29 real PostGIS integration tests, including restricted
+runtime roles, on its exact source. Every later backend change requires a new
+native run; historical results do not qualify the new runtime-role guard.
+The repository's `Backend and native PostGIS` workflow runs that gate for
+backend/infra changes. Additional serial SQL scenarios and `SET ROLE` grants
 can be exercised with [`tools/db-compat`](../tools/db-compat/README.md). That
 experimental, single-session PGlite/PostGIS engine does not replace this native
 gate: concurrent transactions, two-pool auth limits, network role authentication
