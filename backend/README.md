@@ -195,8 +195,9 @@ The development example intentionally names placeholders. No default account or
 default password is installed. Generate the safety key separately and retain it
 with encrypted database backups; existing private passports cannot be decrypted
 if it is lost. Readiness remains closed without the safety key. The API binds
-`127.0.0.1:8080` unless `HTTP_ADDR`
-is specified. Use the production container instructions in `../infra/README.md`
+`127.0.0.1:8080` unless `HTTP_ADDR` is specified. The `tropa-health` readiness
+probe reads that same address and port; wildcard binds use local loopback in
+the same address family, without HTTP proxy or redirect handling. Use the production container instructions in `../infra/README.md`
 for real users. Do not point a development process at a production database.
 
 ## Operator review, with explicit evidence
@@ -321,13 +322,21 @@ The exact account/report/appeal request shapes are in `contracts/api.ts` and
 OpenAPI. Queues return up to 100 eligible cases, oldest first; personal histories
 return up to 100 recent records. Older-page navigation is not implemented.
 
-The framework applies migrations 001–007 in order and refuses API
-readiness without schema version 7. Migration 004 adds account-history indexes;
+The framework applies migrations 001–008 in order and refuses API
+readiness without schema version 8. Migration 004 adds account-history indexes;
 005 adds digest-only action tokens, permanent account tombstones and guards
 against deleting active participants, guides or departure owners. Migration 006
 adds versioned encrypted passports, immutable safety evidence and the required
 predeparture contact gate. Migration 007 adds the encrypted durable account-mail
-outbox and its bounded lease/retry state. Re-run migrations with the owner credential,
+outbox and its bounded lease/retry state. Migration 008 adds the active-membership
+partial index used by the public departure list. The list returns at most 100
+rows in one SQL statement and aggregates active membership instead of loading
+cancelled/no-show history into the API. Its fields and derived readiness share
+the existing domain rules; group mutations still read the locked full group.
+Migration 008 uses transactional `CREATE INDEX`, which blocks membership writes
+until commit: plan a maintenance window for an already populated large DB.
+This is a structural/query-count guarantee, not a measured throughput claim.
+Re-run migrations with the owner credential,
 then reapply restricted runtime grants as documented in `../infra`.
 
 ## Account lifecycle and mail transport
@@ -385,11 +394,20 @@ A transport error schedules up to eight attempts, with delays of 30, 60, 120,
 240 and then 300 seconds, bounded by the original job deadline. A lost final
 acknowledgement may consume an attempt even if SMTP accepted the message. Only
 confirmed acceptance, cancellation, expiry or exhausted attempts finalizes the
-row and removes its ciphertext, nonce and keyed recipient index. Terminal
+row and removes its ciphertext, nonce and keyed recipient index. Expiry cleanup
+runs when a worker next claims the job; with SMTP workers disabled, expired
+ciphertext remains until workers resume or account closure cancels it. Terminal
 failure/expiry also revokes that job's action token. Consuming or revoking a
 link, resetting a password or closing an account cancels the affected work
-transactionally. Terminal metadata is retained for one day and pruned in
-batches; immutable audit entries contain only opaque IDs, purpose and status.
+transactionally. Terminal metadata becomes eligible for removal after one day.
+One maintenance goroutine per SMTP-enabled process removes it independently
+of delivery latency: at most ten batches of 100 rows and 500 ms per pass, with
+`SKIP LOCKED` for concurrent replicas. A full pass schedules another after
+100 ms; an empty/partial pass waits one minute. Database failures back off five
+seconds and rate-limit generic warnings. Pauses or DB overload can delay
+physical cleanup; retention does not alter pending-message deadlines. These
+limits and the distinct migration/bootstrap/mail advisory-lock IDs live in
+`internal/policy`. Immutable audit entries contain only opaque IDs, purpose and status.
 Tokens, SMTP diagnostics and recipient addresses are not written to logs.
 Stored moderation notifications and the departure outbox are separate.
 
@@ -399,7 +417,8 @@ API startup and never silently discard mail. Keep the key in an independently
 encrypted recovery bundle outside PostgreSQL, separate from safety/auth/proxy
 keys. Key-only configuration leaves SMTP/signup disabled but permits account
 closure and completion of an already issued reset link. Its notification stays
-in the durable queue until transport returns or the job expires. To rotate this single-key deployment,
+in the durable queue until transport returns. Its deadline still applies, and
+the next worker retires expired work without sending it. To rotate this single-key deployment,
 stop mail intake, let the backlog finish or expire with the old key, stop every
 API process, verify there are no pending/leased rows, then change the key across
 all replicas. Historical backups with pending ciphertext still require their

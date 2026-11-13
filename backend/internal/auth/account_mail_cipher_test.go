@@ -27,6 +27,19 @@ func mailCipherFixture(t *testing.T, marker byte) *AccountMailCipher {
 
 func mailCipherDeadline() time.Time { return time.Date(2030, 2, 3, 4, 5, 6, 123456000, time.UTC) }
 
+func TestAccountMailRecipientIndexRejectsAnUninitializedCipher(t *testing.T) {
+	for _, c := range []*AccountMailCipher{nil, {}} {
+		func() {
+			defer func() {
+				if recover() == nil {
+					t.Error("uninitialized cipher produced a recipient index")
+				}
+			}()
+			_ = c.RecipientKey("fixture@example.invalid")
+		}()
+	}
+}
+
 func TestAccountMailCipherSurvivesRestartWithIndependentSubkeys(t *testing.T) {
 	master := bytes.Repeat([]byte{0x15}, 32) // disposable fixture, never a deployment key
 	first, err := NewAccountMailCipher(master)

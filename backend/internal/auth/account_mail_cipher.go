@@ -57,6 +57,9 @@ func (c *AccountMailCipher) KeyID() string { return c.keyID }
 
 // RecipientKey indexes a caller-normalized email without storing that address
 // in plaintext. The caller must construct the cipher successfully at startup.
+// Nil/zero receivers are programmer errors: fail closed instead of indexing
+// addresses under a known zero key. Store keeps this field private, assigns it
+// only after NewAccountMailCipher succeeds, and checks nil before each call.
 func (c *AccountMailCipher) RecipientKey(normalizedEmail string) [32]byte {
 	if c == nil || c.aead == nil {
 		panic("account mail cipher is not initialized")

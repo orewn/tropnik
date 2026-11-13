@@ -135,16 +135,29 @@ reject_restore missing-mail-outbox "$TROPA_WORK/missing-mail-outbox.age" "$TROPA
 "${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test --set=ON_ERROR_STOP=1 \
   --command='ALTER TABLE missing_mail_outbox_fixture RENAME TO account_mail_outbox' >/dev/null 2>&1
 
+# Schema 8 requires the active-only count index, including its exact predicate.
+# A present but narrower index must not pass merely because it is valid.
+"${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test --set=ON_ERROR_STOP=1 \
+  --command='DROP INDEX memberships_active_departure' >/dev/null 2>&1
+backup_fixture "$TROPA_WORK/missing-active-index.age" >/dev/null
+reject_restore missing-active-index "$TROPA_WORK/missing-active-index.age" "$TROPA_WORK/identity.agekey"
+"${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test --set=ON_ERROR_STOP=1 \
+  --command="CREATE INDEX memberships_active_departure ON memberships(departure_id) WHERE status='confirmed'" >/dev/null 2>&1
+backup_fixture "$TROPA_WORK/wrong-active-index.age" >/dev/null
+reject_restore wrong-active-index "$TROPA_WORK/wrong-active-index.age" "$TROPA_WORK/identity.agekey"
+"${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test --set=ON_ERROR_STOP=1 \
+  --command="DROP INDEX memberships_active_departure; CREATE INDEX memberships_active_departure ON memberships(departure_id) WHERE status IN ('confirmed','checked_in','completed')" >/dev/null 2>&1
+
 # This is valid age ciphertext and a valid pg_dump archive, but not the required
 # schema. It must fail verification after restore and still remove the stack.
 "${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test --set=ON_ERROR_STOP=1 \
-  --command='DELETE FROM schema_migrations WHERE version=7' >/dev/null 2>&1
+  --command='DELETE FROM schema_migrations WHERE version=8' >/dev/null 2>&1
 backup_fixture "$TROPA_WORK/unsupported-schema.age" >/dev/null
 reject_restore unsupported-schema "$TROPA_WORK/unsupported-schema.age" "$TROPA_WORK/identity.agekey"
 if compgen -G "$TROPA_WORK/.tropa-backup.*" >/dev/null || compgen -G "$TROPA_WORK/.tropa-restore.*" >/dev/null; then
   fail 'A backup or restore temporary directory survived an error path.'
 fi
-printf '%s\n' 'PASS: wrong identity, truncated ciphertext, existing output, failed export, missing or incorrectly attached safety guards, missing mail outbox and unsupported schema refused.'
+printf '%s\n' 'PASS: wrong identity, truncated ciphertext, existing output, failed export, missing or incorrectly attached safety guards, missing mail outbox, missing or incorrect active index and unsupported schema refused.'
 
 "${TROPA_SOURCE[@]}" down --volumes >/dev/null 2>&1 || fail 'Could not remove the synthetic source stack.'
 TROPA_SOURCE_STARTED=false
@@ -159,12 +172,13 @@ import json, sys
 with open(sys.argv[1], encoding='utf-8') as source:
     receipt = json.load(source)
 assert receipt['status'] == 'passed' and receipt['syntheticFixtureVerified'] is True
-assert receipt['schemaVersion'] == 7 and receipt['applicationTableCount'] == 32
+assert receipt['schemaVersion'] == 8 and receipt['applicationTableCount'] == 32
 assert receipt['checks']['mailOutbox'] is True
+assert receipt['checks']['activeMembershipIndex'] is True
 assert receipt['applicationGuardCount'] == 16 and receipt['checks']['applicationGuards'] is True
 assert receipt['postgisImageId'] == sys.argv[3], 'source and restore image changed during the gate'
 receipt['gate'] = 'synthetic backup and isolated restore'
-receipt['negativeCasesPassed'] = ['wrong_identity', 'truncated_ciphertext', 'existing_output', 'failed_pg_dump', 'missing_safety_guard', 'wrong_guard_event', 'wrong_guard_column', 'missing_mail_outbox', 'unsupported_schema']
+receipt['negativeCasesPassed'] = ['wrong_identity', 'truncated_ciphertext', 'existing_output', 'failed_pg_dump', 'missing_safety_guard', 'wrong_guard_event', 'wrong_guard_column', 'missing_mail_outbox', 'missing_active_index', 'wrong_active_index_predicate', 'unsupported_schema']
 receipt['syntheticSourceRemoved'] = True
 receipt['disposableAgeIdentitiesRemoved'] = True
 with open(sys.argv[2], 'x', encoding='utf-8') as target:

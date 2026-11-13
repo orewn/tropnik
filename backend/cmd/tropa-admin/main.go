@@ -15,6 +15,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"tropa/backend/internal/domain"
+	"tropa/backend/internal/policy"
 )
 
 func main() {
@@ -62,7 +63,7 @@ func run() error {
 	}
 	defer tx.Rollback(ctx)
 	if command == "bootstrap-admin" {
-		if _, e = tx.Exec(ctx, "SELECT pg_advisory_xact_lock(87071205)"); e != nil {
+		if _, e = tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", int64(policy.BootstrapAdminLock)); e != nil {
 			return e
 		}
 		var id string

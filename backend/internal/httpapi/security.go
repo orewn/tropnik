@@ -16,7 +16,7 @@ func (c Config) Validate() error {
 	if len(c.AuthRateKey) != 32 {
 		return errors.New("TROPA_AUTH_RATE_KEY must be an independent 256-bit server key")
 	}
-	if c.AccountLifecycle != nil && (subtle.ConstantTimeCompare(c.AccountLifecycle.MailKey,c.AuthRateKey)==1 || subtle.ConstantTimeCompare(c.AccountLifecycle.MailKey,c.ProxyToken)==1) {
+	if c.AccountLifecycle != nil && (subtle.ConstantTimeCompare(c.AccountLifecycle.MailKey, c.AuthRateKey) == 1 || subtle.ConstantTimeCompare(c.AccountLifecycle.MailKey, c.ProxyToken) == 1) {
 		return errors.New("account mail encryption, authentication rate and proxy keys must be independent")
 	}
 	if len(c.TrustedProxyCIDRs) == 0 && len(c.ProxyToken) != 0 {

@@ -16,6 +16,7 @@ import (
 	_ "time/tzdata"
 
 	"tropa/backend/internal/auth"
+	"tropa/backend/internal/config"
 	"tropa/backend/internal/httpapi"
 	"tropa/backend/internal/store"
 )
@@ -109,10 +110,12 @@ func run() error {
 	if len(safetyKey) == 32 && (subtle.ConstantTimeCompare(safetyKey, rateKey) == 1 || subtle.ConstantTimeCompare(safetyKey, proxyToken) == 1) {
 		return errors.New("safety encryption, authentication rate and proxy keys must be independent")
 	}
-	if rawMailKey:=os.Getenv("TROPA_ACCOUNT_MAIL_KEY");rawMailKey!="" {
-		mailKey,err:=auth.ParseServerKey(rawMailKey)
-		if err!=nil { return errors.New("TROPA_ACCOUNT_MAIL_KEY must contain an independent 256-bit encryption key") }
-		if subtle.ConstantTimeCompare(mailKey,rateKey)==1 || subtle.ConstantTimeCompare(mailKey,proxyToken)==1 || subtle.ConstantTimeCompare(mailKey,safetyKey)==1 {
+	if rawMailKey := os.Getenv("TROPA_ACCOUNT_MAIL_KEY"); rawMailKey != "" {
+		mailKey, err := auth.ParseServerKey(rawMailKey)
+		if err != nil {
+			return errors.New("TROPA_ACCOUNT_MAIL_KEY must contain an independent 256-bit encryption key")
+		}
+		if subtle.ConstantTimeCompare(mailKey, rateKey) == 1 || subtle.ConstantTimeCompare(mailKey, proxyToken) == 1 || subtle.ConstantTimeCompare(mailKey, safetyKey) == 1 {
 			return errors.New("account mail, safety encryption, authentication rate and proxy keys must be independent")
 		}
 	}
@@ -133,7 +136,7 @@ func run() error {
 	}
 	app, e := httpapi.New(db, cfg)
 	if e != nil {
-		if errors.Is(e,store.ErrAccountMailUnavailable) {
+		if errors.Is(e, store.ErrAccountMailUnavailable) {
 			return errors.New("durable account mail key does not match pending work; restore the independently backed-up key before startup")
 		}
 		return errors.New("authentication initialization failed")
@@ -143,10 +146,7 @@ func run() error {
 		defer done()
 		_ = app.Shutdown(shutdownCtx)
 	}()
-	addr := os.Getenv("HTTP_ADDR")
-	if addr == "" {
-		addr = "127.0.0.1:8080"
-	}
+	addr := config.HTTPAddress(os.Getenv)
 	srv := &http.Server{Addr: addr, Handler: app.Handler(), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 15 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 << 10}
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)

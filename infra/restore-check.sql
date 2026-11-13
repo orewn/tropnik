@@ -1,4 +1,4 @@
--- Aggregate-only recovery report for the current seven-migration application.
+-- Aggregate-only recovery report for the current eight-migration application.
 SET search_path=pg_catalog,public;
 CREATE TEMP TABLE expected_application_tables(name text PRIMARY KEY);
 INSERT INTO expected_application_tables(name) VALUES
@@ -38,7 +38,7 @@ DO $$ BEGIN
  IF current_setting('data_directory') NOT LIKE '/var/lib/postgresql/%' THEN
   RAISE EXCEPTION 'restored database is outside its temporary data mount';
  END IF;
- IF (SELECT array_agg(version ORDER BY version) FROM schema_migrations) IS DISTINCT FROM ARRAY[1,2,3,4,5,6,7] THEN
+ IF (SELECT array_agg(version ORDER BY version) FROM schema_migrations) IS DISTINCT FROM ARRAY[1,2,3,4,5,6,7,8] THEN
   RAISE EXCEPTION 'unexpected application schema version';
  END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_extension WHERE extname='postgis') THEN
@@ -56,6 +56,13 @@ DO $$ BEGIN
    JOIN expected_application_tables expected ON c.relname=expected.name
    WHERE c.relnamespace='public'::regnamespace AND (NOT i.indisvalid OR NOT i.indisready)) THEN
   RAISE EXCEPTION 'unvalidated constraints or invalid indexes';
+ END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_index i JOIN pg_class c ON c.oid=i.indexrelid JOIN pg_am am ON am.oid=c.relam
+   WHERE i.indrelid='public.memberships'::regclass AND c.relname='memberships_active_departure'
+   AND i.indisvalid AND i.indisready AND NOT i.indisunique AND i.indnkeyatts=1 AND i.indnatts=1 AND am.amname='btree'
+   AND pg_get_indexdef(i.indexrelid,1,true)='departure_id'
+   AND pg_get_expr(i.indpred,i.indrelid)=$predicate$(status = ANY (ARRAY['confirmed'::text, 'checked_in'::text, 'completed'::text]))$predicate$) THEN
+  RAISE EXCEPTION 'active membership count index missing or incorrectly defined';
  END IF;
  IF EXISTS(SELECT 1 FROM expected_application_guards expected
    LEFT JOIN pg_class c ON c.relnamespace='public'::regnamespace AND c.relname=expected.table_name
@@ -125,12 +132,12 @@ SELECT jsonb_build_object(
  'postgisImageId',:'postgis_image_id',
  'postgresVersion',current_setting('server_version'),
  'postgisVersion',postgis_lib_version(),
- 'schemaVersion',7,
+ 'schemaVersion',8,
  'applicationTableCount',(SELECT count(*) FROM expected_application_tables),
  'applicationGuardCount',(SELECT count(*) FROM expected_application_guards),
  'migrations',(SELECT jsonb_agg(version ORDER BY version) FROM schema_migrations),
  'rowCounts',(SELECT jsonb_object_agg(name,total ORDER BY name) FROM restored_row_counts),
- 'checks',jsonb_build_object('constraintsAndIndexes',true,'applicationGuards',true,'geometry',true,'safetyLinkage',true,'safetyEventChain',true,'mailOutbox',true),
+ 'checks',jsonb_build_object('constraintsAndIndexes',true,'applicationGuards',true,'geometry',true,'safetyLinkage',true,'safetyEventChain',true,'mailOutbox',true,'activeMembershipIndex',true),
  'syntheticFixtureVerified',:'fixture_verified'::boolean,
  'containerIsolationVerified',true,
  'temporaryDatabaseRemovedBeforePublication',true,

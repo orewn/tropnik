@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -86,6 +87,12 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 func db(t *testing.T) *store.Store {
+	return dbThrough(t, migrations.RequiredVersion)
+}
+
+// dbThrough permits a real predecessor schema for upgrade regression tests.
+// Ordinary integration fixtures always exercise the production migrator.
+func dbThrough(t *testing.T, through int) *store.Store {
 	t.Helper()
 	dsn := os.Getenv("TEST_DATABASE_URL")
 	u, e := url.Parse(dsn)
@@ -124,8 +131,31 @@ func db(t *testing.T) *store.Store {
 			t.Error(e)
 		}
 	})
-	if e = migrations.Apply(ctx, s.Pool); e != nil {
-		t.Fatal(e)
+	if through == migrations.RequiredVersion {
+		if e = migrations.Apply(ctx, s.Pool); e != nil {
+			t.Fatal(e)
+		}
+	} else {
+		files, err := migrations.Files.ReadDir(".")
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, file := range files {
+			version, err := strconv.Atoi(file.Name()[:3])
+			if err != nil {
+				t.Fatal(err)
+			}
+			if version > through {
+				continue
+			}
+			raw, err := migrations.Files.ReadFile(file.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err = s.Pool.Exec(ctx, string(raw)); err != nil {
+				t.Fatal(err)
+			}
+		}
 	}
 	return s
 }
