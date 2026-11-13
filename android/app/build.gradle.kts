@@ -105,6 +105,9 @@ androidComponents {
 
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
+// Keep the runtime and HTTPS fixtures on the same security-patched transport.
+val okhttpVersion = "4.12.1"
+
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.10.01"))
     implementation("androidx.core:core-ktx:1.17.0")
@@ -118,11 +121,11 @@ dependencies {
     implementation("androidx.room:room-ktx:2.8.5")
     ksp("androidx.room:room-compiler:2.8.5")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20250517")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testImplementation("com.squareup.okhttp3:okhttp-tls:4.12.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVersion")
+    testImplementation("com.squareup.okhttp3:okhttp-tls:$okhttpVersion")
     androidTestImplementation(platform("androidx.compose:compose-bom:2025.10.01"))
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test:runner:1.7.0")

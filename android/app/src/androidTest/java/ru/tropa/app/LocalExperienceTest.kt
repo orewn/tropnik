@@ -304,11 +304,15 @@ class LocalExperienceTest {
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("route_map"))
         val map = awaitReadyMap()
         var opened = JSONObject()
+        val openedDeadline = SystemClock.uptimeMillis() + 15_000
         app.waitUntil(timeoutMillis = 15_000) {
-            opened = mapSnapshot(map)
-            !opened.optBoolean("online", true) && opened.optString("routeId") == sourceRoute.id && mapInputReady(opened)
+            val remaining = openedDeadline - SystemClock.uptimeMillis()
+            if (remaining <= 0) return@waitUntil false
+            opened = mapSnapshot(map, minOf(5_000L, remaining))
+            !opened.optBoolean("online", true) && opened.optString("routeId") == sourceRoute.id && mapInputReady(opened) &&
+                SystemClock.uptimeMillis() <= openedDeadline
         }
-        screenshot("offline-pack-opened-snapshot")
+        val openedPixels = waitForRoutePixels("offline-pack-opened-snapshot", map, originalGeometry, opened, openedDeadline)
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("save_route"))
         app.onNodeWithTag("save_route").assertIsEnabled().performClick()
         app.waitUntil(timeoutMillis = 10_000) {
@@ -365,6 +369,7 @@ class LocalExperienceTest {
             writeText(JSONObject().put("regionId", regionId).put("routeId", sourceRoute.id).put("schemaVersion", 2)
                 .put("runtimeSha256", runtimeDigest).put("savedAssets", JSONArray(paths.sorted()))
                 .put("openedMap", opened).put("snapshotSourceBytesVerified", true)
+                .put("visibleRoutePixels", openedPixels)
                 .put("missingGeometryRejectedOnNextOpen", true).put("oldRuntimeRequiresUpdate", true)
                 .put("bookmarkSurvivedRemoval", true).put("reinstalledAndVerified", true)
                 .put("networkState", model.state.value.connection.name).toString(2))
@@ -560,7 +565,8 @@ class LocalExperienceTest {
         }
         assertEquals("Searching must not refit the country camera", full.getJSONObject("camera").toString(), filtered.getJSONObject("camera").toString())
         val sourceRoute = requireNotNull(catalogue.route("kolyma-black-creek"))
-        val source = JSONObject(app.activity.assets.open(requireNotNull(sourceRoute.geometryAsset)).bufferedReader().use { it.readText() })
+        val sourceGeometry = app.activity.assets.open(requireNotNull(sourceRoute.geometryAsset)).bufferedReader(Charsets.UTF_8).use { it.readText() }
+        val source = JSONObject(sourceGeometry)
         val originalLine = source.getJSONArray("features").getJSONObject(0).getJSONObject("geometry").getJSONArray("coordinates").getJSONArray(0)
         val point = originalLine.getJSONArray(originalLine.length() / 2)
         // Only the camera is set up by the test. Selection must come from a
@@ -607,18 +613,23 @@ class LocalExperienceTest {
         assertTrue("Recovery reused the terminated WebView", recoveredMap !== selectedMap)
         app.runOnUiThread { recoveredMap.setOnline(false) }
         var recovered = JSONObject()
+        val recoveryDeadline = SystemClock.uptimeMillis() + 15_000
         app.waitUntil(timeoutMillis = 15_000) {
-            recovered = mapSnapshot(recoveredMap)
+            val remaining = recoveryDeadline - SystemClock.uptimeMillis()
+            if (remaining <= 0) return@waitUntil false
+            recovered = mapSnapshot(recoveredMap, minOf(5_000L, remaining))
             mapInputReady(recovered) && sameMapView(beforeRecovery, recovered) &&
                 recovered.optString("routeId") == "kolyma-black-creek" &&
-                recovered.getJSONObject("rendered").getJSONObject("reviewedCoastal").optBoolean("selected")
+                recovered.getJSONObject("rendered").getJSONObject("reviewedCoastal").optBoolean("selected") &&
+                SystemClock.uptimeMillis() <= recoveryDeadline
         }
-        screenshot("map-native-catalogue-coastal")
+        val recoveredPixels = waitForRoutePixels("map-native-catalogue-coastal", recoveredMap, sourceGeometry, recovered, recoveryDeadline)
         val report = File(app.activity.filesDir, "qa/map-native-catalogue-coastal.json")
         report.parentFile!!.mkdirs()
         report.writeText(JSONObject().put("expectedSources", expectedSources).put("full", full).put("hidden", hidden)
             .put("offlineMode", offlineMode).put("filtered", filtered).put("hit", hit).put("touch", touch).put("selected", selected)
             .put("beforeRendererRecovery", beforeRecovery).put("afterRendererRecovery", recovered).put("rendererRecoveryVerified", true)
+            .put("visibleRoutePixels", recoveredPixels)
             .put("onlineSatelliteDeviceVerified", false).toString(2))
     }
 
@@ -812,7 +823,7 @@ class LocalExperienceTest {
         }
         try {
             val remaining = deadline - SystemClock.uptimeMillis()
-            assertTrue("The current map DOM did not reach the compositor before the original selection deadline", remaining > 0 && visual.await(remaining, TimeUnit.MILLISECONDS))
+            assertTrue("The current map DOM did not reach the compositor before the original map deadline", remaining > 0 && visual.await(remaining, TimeUnit.MILLISECONDS))
             val drawRemaining = deadline - SystemClock.uptimeMillis()
             assertTrue("No time remains for the current map frame", drawRemaining > 0)
             app.waitUntil(timeoutMillis = drawRemaining) {
@@ -829,6 +840,93 @@ class LocalExperienceTest {
                 receipt.put("visualState", JSONObject().put("requestedAt", startedAt).put("callbackAt", visualAt).put("drawnAt", drawnAt).put("countAtCallback", countAtVisual))
             }
         }
+    }
+
+    private fun waitForRoutePixels(name: String, map: CustomMapWebView, source: String, expected: JSONObject, deadline: Long): JSONObject {
+        val receipt = JSONObject().put("routeId", expected.getString("routeId")).put("deadlineMs", 15_000)
+        val probe = RoutePixelProbe(source)
+        var pixels = JSONObject().put("passed", false).put("reason", "No screenshot captured")
+        var current = JSONObject()
+        var bitmap: Bitmap? = null
+        var passed = false
+        var failure: Throwable? = null
+        try {
+            // JS onFrame/ready is only submission. The already existing native
+            // barrier also requires Android to draw that submitted WebView.
+            awaitMapDraw(map, deadline, receipt)
+            val snapshotBudget = deadline - SystemClock.uptimeMillis()
+            assertTrue("No time remains to confirm the route frame", snapshotBudget > 0)
+            current = mapSnapshot(map, minOf(5_000L, snapshotBudget))
+            assertTrue("Route pixels must belong to the same completed camera", mapInputReady(current) && sameMapView(expected, current))
+            assertEquals(expected.getString("routeId"), current.getString("routeId"))
+            val viewport = nativeMapViewport(map)
+            val density = app.activity.resources.displayMetrics.density
+            val screenshotBudget = deadline - SystemClock.uptimeMillis()
+            assertTrue("No time remains for visible route pixels", screenshotBudget > 0)
+            app.waitUntil(timeoutMillis = screenshotBudget) {
+                assertEquals("A scrolled/resized native viewport cannot reuse route sample coordinates", viewport, nativeMapViewport(map))
+                bitmap?.recycle()
+                bitmap = null
+                bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+                pixels = bitmap?.let { image -> probe.inspect(image, current,
+                    Rect(viewport.x, viewport.y, viewport.x + viewport.width, viewport.y + viewport.height), viewport.visible, density) }
+                    ?: JSONObject().put("passed", false).put("reason", "Screenshot unavailable")
+                passed = pixels.optBoolean("passed") && SystemClock.uptimeMillis() <= deadline
+                passed
+            }
+        } catch (error: AssertionError) { failure = error }
+        catch (error: Exception) { failure = error }
+        finally {
+            receipt.put("passed", passed).put("elapsedMs", SystemClock.uptimeMillis() - (deadline - 15_000))
+                .put("snapshot", current).put("pixels", pixels).put("failure", failure?.toString()?.take(1024) ?: JSONObject.NULL)
+            // Diagnostic readback may explain a failed compositor/paint, but
+            // it can never replace the real on-screen pixel acceptance above.
+            if (!passed) receipt.put("canvasDiagnostic", try { routeCanvasDiagnostic(map, pixels) }
+                catch (error: Exception) { error.toString().take(1024) })
+            val report = File(app.activity.filesDir, "qa/$name-route-pixels.json")
+            report.parentFile!!.mkdirs()
+            report.writeText(receipt.toString(2))
+            bitmap?.let { image ->
+                File(app.activity.filesDir, "qa/$name.png").outputStream().use { output ->
+                    assertTrue(image.compress(Bitmap.CompressFormat.PNG, 100, output))
+                }
+                image.recycle()
+            }
+        }
+        if (!passed) throw AssertionError("The exact source route has no verified visible line: $pixels", failure)
+        return receipt
+    }
+
+    private fun routeCanvasDiagnostic(map: CustomMapWebView, pixels: JSONObject): Any {
+        val done = CountDownLatch(1)
+        var result: Any = "Canvas readback unavailable"
+        val samples = pixels.optJSONArray("samples") ?: JSONArray()
+        val coordinates = JSONArray((0 until minOf(128, samples.length())).map { index ->
+            val point = samples.getJSONObject(index)
+            JSONArray(listOf(point.getDouble("cssX"), point.getDouble("cssY")))
+        })
+        app.runOnUiThread {
+            map.evaluateJavascript("""
+                (function(){try{
+                  var c=document.querySelector('.tropnik-map-canvas');if(!c)return JSON.stringify({error:'Canvas missing'});
+                  var ctx=c.getContext('2d'),r=c.getBoundingClientRect(),m=ctx.getTransform(),points=$coordinates;
+                  var sx=c.width/r.width,sy=c.height/r.height,hits=points.map(function(p){
+                    var x=Math.max(0,Math.floor((p[0]-r.x-2)*sx)),y=Math.max(0,Math.floor((p[1]-r.y-2)*sy));
+                    var w=Math.min(c.width-x,Math.ceil(4*sx)+1),h=Math.min(c.height-y,Math.ceil(4*sy)+1),hit=false;
+                    if(w>0&&h>0){var data=ctx.getImageData(x,y,w,h).data;for(var i=0;i<data.length;i+=4)
+                      if(data[i+3]>=240&&Math.abs(data[i]-36)<=18&&Math.abs(data[i+1]-77)<=18&&Math.abs(data[i+2]-60)<=18){hit=true;break;}}
+                    return hit;});
+                  return JSON.stringify({width:c.width,height:c.height,rect:{x:r.x,y:r.y,width:r.width,height:r.height},
+                    alpha:ctx.globalAlpha,composite:ctx.globalCompositeOperation,transform:{a:m.a,b:m.b,c:m.c,d:m.d,e:m.e,f:m.f},
+                    sampleCount:points.length,matchedSamples:hits.filter(Boolean).length,matches:hits});
+                }catch(error){return JSON.stringify({error:String(error).slice(0,512)});}})()
+            """.trimIndent()) { raw ->
+                result = runCatching { JSONObject(JSONTokener(raw).nextValue() as String) }.getOrElse { raw.take(1024) }
+                done.countDown()
+            }
+        }
+        done.await(2, TimeUnit.SECONDS)
+        return result
     }
 
     private fun tapMapMarker(map: CustomMapWebView, marker: JSONObject, snapshot: JSONObject, deadline: Long, receipt: JSONObject): Boolean {
