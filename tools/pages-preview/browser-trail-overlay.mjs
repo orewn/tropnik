@@ -48,6 +48,7 @@ export function assertTrailOverlayReceipt(report,{sourceCommit,buildId,metadata,
     assert.ok(item.selected.camera.zoom>item.country.camera.zoom);
     assert.equal(item.geometry.status,200);assert.equal(item.geometry.sha256,metadata.sourceHashes[item.geometry.key]);
     assert.equal(item.geometry.version,item.geometry.sha256.slice(0,16));assert.ok(item.geometry.ids.includes(item.selected.routeId));
+    assert.ok(item.geometry.bytes>0);assert.ok(['cdp-stream','cdp-body'].includes(item.geometry.capture));assert.ok(item.geometry.requestId);assert.equal(item.geometry.error,undefined);
     assert.equal(item.reliefOption,true);assert.equal(item.satelliteOption,true);
     assert.deepEqual(item.screenshots.map(capture=>capture.phase),['country','selected']);
     for(const capture of item.screenshots){assert.match(capture.file,/^(?:desktop|phone)-(?:country|selected)\.png$/);assert.match(capture.sha256,/^[a-f0-9]{64}$/);assert.ok(capture.bytes>1000);}
@@ -70,6 +71,68 @@ class CDP{
   observe(method,callback){const list=this.observers.get(method)||new Set();list.add(callback);this.observers.set(method,list);return()=>list.delete(callback);}
   close(){for(const job of this.pending.values()){clearTimeout(job.timer);job.reject(new Error('CDP closed'));}this.pending.clear();this.socket?.close();}
 }
+
+/** Observe the bytes of the page's own requests, including preload requests.
+ * A fetch can consume its complete body and then abort its controller: CDP
+ * emits loadingFailed in that case, without decoding getResponseBody content.
+ * streamResourceContent preserves that raw prefix and subsequent data chunks.
+ * https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-streamResourceContent
+ */
+export function observeGeometryBytes(cdp,{origin,sources,responses,maxBytes=4*1024*1024}){
+  const pending=new Map(),jobs=[],byKey=new Map(sources.map(source=>[source.key,source])),remove=[];
+  const append=(state,data,prefix=false)=>{
+    if(state.captureError)return;
+    const bytes=Buffer.from(data||'','base64');state.length+=bytes.length;
+    if(state.length>maxBytes){state.captureError=new Error('Geometry response exceeds the CDP byte budget');state.chunks=[];state.prefix=null;return;}
+    if(prefix)state.prefix=bytes;else state.chunks.push(bytes);
+  };
+  const start=(requestId,url)=>{
+    if(!url.startsWith(origin+'/')||!/\.geojson\?v=/.test(url))return;
+    if(pending.has(requestId))return pending.get(requestId);
+    const parsed=new URL(url),key=parsed.pathname.split('/data/')[1],source=byKey.get(key);
+    const state={record:{requestId,url,key,version:parsed.searchParams.get('v'),ids:source?.ids??[]},chunks:[],prefix:null,length:0};pending.set(requestId,state);
+    state.streamReady=cdp.call('Network.streamResourceContent',{requestId}).then(result=>{
+      // dataReceived may precede the command's acknowledgement. The returned
+      // bufferedData always precedes those events; it must not be appended.
+      append(state,result.bufferedData,true);state.streaming=true;
+    }).catch(error=>{state.streamError=String(error);});
+    jobs.push(state.streamReady);return state;
+  };
+  // Chromium creates ResourceData before requestWillBeSent. Arm at that event
+  // so fast local/preloaded responses are observed before their body arrives.
+  remove.push(cdp.observe('Network.requestWillBeSent',event=>start(event.requestId,event.request.url)));
+  remove.push(cdp.observe('Network.responseReceived',event=>{
+    const state=start(event.requestId,event.response.url);if(state)state.record.status=event.response.status;
+  }));
+  remove.push(cdp.observe('Network.dataReceived',event=>{
+    const state=pending.get(event.requestId);if(state&&event.data!==undefined)append(state,event.data);
+  }));
+  const finish=(event,terminal)=>{
+    const state=pending.get(event.requestId);if(!state||state.terminal)return;state.terminal=terminal;
+    jobs.push((async()=>{
+      await state.streamReady;
+      const record={...state.record,terminal,...(terminal==='failed'?{canceled:!!event.canceled,transportError:event.errorText}:{})};
+      try{
+        if(state.captureError)throw state.captureError;
+        let bytes;
+        if(state.streaming){bytes=Buffer.concat([state.prefix,...state.chunks],state.length);record.capture='cdp-stream';}
+        else{
+          // A small resource may finish before streaming is enabled. Reading
+          // CDP's retained body observes the same request, never a second GET.
+          const body=await cdp.call('Network.getResponseBody',{requestId:event.requestId});
+          bytes=Buffer.from(body.body,body.base64Encoded?'base64':'utf8');record.capture='cdp-body';record.streamError=state.streamError;
+          if(bytes.length>maxBytes)throw new Error('Geometry response exceeds the CDP byte budget');
+        }
+        responses.push({...record,bytes:bytes.length,sha256:digest(bytes)});
+      }catch(error){responses.push({...record,error:String(error),streamError:state.streamError});}
+      finally{state.chunks=[];state.prefix=null;pending.delete(event.requestId);}
+    })());
+  };
+  remove.push(cdp.observe('Network.loadingFinished',event=>finish(event,'finished')));
+  remove.push(cdp.observe('Network.loadingFailed',event=>finish(event,'failed')));
+  return{settle:()=>Promise.allSettled(jobs),dispose:()=>{remove.forEach(unbind=>unbind());pending.clear();}};
+}
+
 async function evaluate(cdp,expression){const result=await cdp.call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(result.exceptionDetails)throw new Error(JSON.stringify(result.exceptionDetails));return result.result.value;}
 async function waitValue(label,read,accept,timeout=25000){const deadline=performance.now()+timeout;let last;while(performance.now()<deadline){last=await read();if(accept(last))return last;await pause(80);}throw new Error(`${label}: condition did not settle: ${JSON.stringify(last)}`);}
 function readMap(cdp){return evaluate(cdp,`(()=>{
@@ -137,19 +200,14 @@ async function run(){
     for(const profile of PROFILES){
       console.log(JSON.stringify({phase:'trail-overlay-profile',profile:profile.name,buildId:build.buildId}));
       const result={...profile,verified:false,pageErrors:[],consoleErrors:[],httpErrors:[],failedRequests:[],geometryResponses:[],screenshots:[]};report.profiles.push(result);await checkpoint();
-      const requests=new Map(),geometries=new Map(),jobs=[],remove=[];
+      const requests=new Map(),remove=[],geometryBytes=observeGeometryBytes(cdp,{origin,sources:overlay.sources,responses:result.geometryResponses});
       remove.push(cdp.observe('Runtime.exceptionThrown',event=>result.pageErrors.push(event.exceptionDetails)));
       remove.push(cdp.observe('Runtime.consoleAPICalled',event=>{if(event.type==='error')result.consoleErrors.push(event.args.map(arg=>arg.value??arg.description).join(' '));}));
       remove.push(cdp.observe('Network.requestWillBeSent',event=>requests.set(event.requestId,event.request.url)));
       remove.push(cdp.observe('Network.loadingFailed',event=>{const url=requests.get(event.requestId)||'';result.failedRequests.push({url,local:url.startsWith(origin+'/'),canceled:!!event.canceled,error:event.errorText});}));
       remove.push(cdp.observe('Network.responseReceived',event=>{
         const {url,status}=event.response;if(status>=400)result.httpErrors.push({url,status,local:url.startsWith(origin+'/')});
-        if(url.startsWith(origin+'/')&&/\.geojson\?v=/.test(url))geometries.set(event.requestId,{url,status});
       }));
-      remove.push(cdp.observe('Network.loadingFinished',event=>{const response=geometries.get(event.requestId);if(!response)return;jobs.push((async()=>{try{
-        const body=await cdp.call('Network.getResponseBody',{requestId:event.requestId}),bytes=Buffer.from(body.body,body.base64Encoded?'base64':'utf8'),url=new URL(response.url),key=url.pathname.split('/data/')[1],source=overlay.sources.find(item=>item.key===key);
-        result.geometryResponses.push({...response,key,version:url.searchParams.get('v'),bytes:bytes.length,sha256:digest(bytes),ids:source?.ids??[]});
-      }catch(error){result.geometryResponses.push({...response,error:String(error)});}})());}));
       try{
         await cdp.call('Emulation.setDeviceMetricsOverride',{width:profile.width,height:profile.height,deviceScaleFactor:profile.deviceScaleFactor,mobile:profile.mobile,screenWidth:profile.width,screenHeight:profile.height});
         await cdp.call('Emulation.setTouchEmulationEnabled',{enabled:profile.mobile,maxTouchPoints:profile.mobile?5:1});
@@ -185,10 +243,13 @@ async function run(){
         result.selected=await waitValue('selected route after panel transition',()=>readMap(cdp),value=>stable(value)&&value.routeId===result.selected.routeId);
         result.screenshots.push(await screenshot(cdp,profile,'selected'));
         const options=await evaluate(cdp,'({relief:!!document.querySelector(".map-style-switch button[aria-label=Рельеф]"),satellite:!!document.querySelector(".map-style-switch button[aria-label=Спутник]")})');result.reliefOption=options.relief;result.satelliteOption=options.satellite;
-        result.geometry=await waitValue('versioned selected source bytes',async()=>{await Promise.allSettled(jobs);return result.geometryResponses.find(item=>item.ids?.includes(result.selected.routeId)&&item.sha256===metadata.sourceHashes[item.key]);},Boolean);
+        const selectedBytes=await waitValue('versioned selected source bytes',async()=>{
+          await geometryBytes.settle();const observed=result.geometryResponses.filter(item=>item.ids?.includes(result.selected.routeId));
+          return{match:observed.find(item=>item.status===200&&item.sha256===metadata.sourceHashes[item.key]&&item.version===item.sha256.slice(0,16)),observed};
+        },value=>!!value.match);result.geometry=selectedBytes.match;
         result.verified=true;
       }catch(error){result.failure=browserErrorDetails(error);result.lastInspection=await readMap(cdp).catch(()=>null);try{result.failureCapture=await screenshot(cdp,profile,'failure');}catch{}throw error;}
-      finally{await Promise.allSettled(jobs);remove.forEach(unbind=>unbind());await checkpoint();}
+      finally{await geometryBytes.settle();geometryBytes.dispose();remove.forEach(unbind=>unbind());await checkpoint();}
     }
     report.verified=true;assertTrailOverlayReceipt(report,{sourceCommit:build.sourceCommit,buildId:build.buildId,metadata});
   }catch(error){failure=error;report.verified=false;report.failure=browserErrorDetails(error);}
