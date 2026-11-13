@@ -19,7 +19,7 @@ func TestRoutePageBudgetPaginatesWithoutLosingTheFirstOmittedRoute(t *testing.T)
 	remaining := routes
 	for len(remaining) > 0 {
 		body, err := routePageJSON(remaining, 100)
-		if err != nil || len(body) > domain.RoutePageResponseBytes {
+		if err != nil || len(body) > domain.RoutePageResponseBytes || cap(body) > domain.RoutePageResponseBytes {
 			t.Fatalf("page exceeded its wire budget: %d %v", len(body), err)
 		}
 		var envelope struct {
@@ -47,6 +47,15 @@ func TestRoutePageBudgetPaginatesWithoutLosingTheFirstOmittedRoute(t *testing.T)
 	for i := range routes {
 		if seen[i] != routes[i].ID {
 			t.Fatal("route order changed")
+		}
+	}
+}
+
+func TestSmallRoutePagesDoNotReserveTheFullResponseBudget(t *testing.T) {
+	for _, routes := range [][]domain.Route{nil, {{ID: "small-route", Title: "Short route"}}} {
+		body, err := routePageJSON(routes, 30)
+		if err != nil || cap(body) >= 16<<10 || !json.Valid(body) {
+			t.Fatal("small response retained an excessive backing buffer", len(body), cap(body), err)
 		}
 	}
 }

@@ -57,6 +57,9 @@ WHERE email=$1 AND NOT disabled AND deleted_at IS NULL AND NOT is_admin AND NOT 
 WHERE user_id=$1 AND purpose=$2 AND consumed_at IS NULL AND revoked_at IS NULL`, out.ID, purpose); err != nil {
 		return out, err
 	}
+	if err = s.cancelAccountMailTx(ctx, tx, out.ID, out.Email, []string{purpose}, ""); err != nil {
+		return out, err
+	}
 	_, err = tx.Exec(ctx, `INSERT INTO account_action_tokens(token_hash,user_id,purpose,created_at,expires_at)
 VALUES($1,$2,$3,statement_timestamp(),statement_timestamp()+$4*interval '1 second')`, digest[:], out.ID, purpose, ttl)
 	if err != nil {
@@ -66,9 +69,31 @@ VALUES($1,$2,$3,statement_timestamp(),statement_timestamp()+$4*interval '1 secon
 }
 
 func (s *Store) RevokeAccountAction(ctx context.Context, digest [32]byte) error {
-	_, err := s.Pool.Exec(ctx, `UPDATE account_action_tokens SET revoked_at=clock_timestamp()
-WHERE token_hash=$1 AND consumed_at IS NULL AND revoked_at IS NULL`, digest[:])
-	return err
+	tx, err := s.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	var user string
+	err = tx.QueryRow(ctx, "SELECT user_id::text FROM account_action_tokens WHERE token_hash=$1", digest[:]).Scan(&user)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if err = tx.QueryRow(ctx, "SELECT id::text FROM users WHERE id=$1 FOR UPDATE", user).Scan(&user); err != nil {
+		return err
+	}
+	if _, err = tx.Exec(ctx, `UPDATE account_action_tokens SET revoked_at=clock_timestamp()
+WHERE token_hash=$1 AND consumed_at IS NULL AND revoked_at IS NULL`, digest[:]); err != nil {
+		return err
+	}
+	if _, err = tx.Exec(ctx, `UPDATE account_mail_outbox SET state='cancelled',recipient_key=NULL,payload_cipher=NULL,payload_nonce=NULL,
+lease_id=NULL,lease_until=NULL,finished_at=clock_timestamp() WHERE token_hash=$1 AND state IN ('pending','leased')`, digest[:]); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 // Always lock the user before mutating tokens, matching issue, reset and delete.
@@ -113,6 +138,9 @@ func (s *Store) VerifyAccountEmail(ctx context.Context, digest [32]byte) error {
 	if _, err = tx.Exec(ctx, "UPDATE users SET email_verified=true WHERE id=$1", user.ID); err != nil {
 		return err
 	}
+	if err = s.cancelAccountMailTx(ctx, tx, user.ID, user.Email, []string{VerifyEmailAction}, ""); err != nil {
+		return err
+	}
 	if _, err = tx.Exec(ctx, "INSERT INTO audit_events(actor_id,action,entity_id) VALUES($1,'account.email_verified',$1)", user.ID); err != nil {
 		return err
 	}
@@ -120,6 +148,17 @@ func (s *Store) VerifyAccountEmail(ctx context.Context, digest [32]byte) error {
 }
 
 func (s *Store) ResetAccountPassword(ctx context.Context, digest [32]byte, passwordHash string) (AccountActionRecipient, error) {
+	return s.resetAccountPassword(ctx, digest, passwordHash, false)
+}
+
+func (s *Store) ResetAccountPasswordWithMail(ctx context.Context, digest [32]byte, passwordHash string) (AccountActionRecipient, error) {
+	if s.mailCipher == nil {
+		return AccountActionRecipient{}, ErrAccountMailUnavailable
+	}
+	return s.resetAccountPassword(ctx, digest, passwordHash, true)
+}
+
+func (s *Store) resetAccountPassword(ctx context.Context, digest [32]byte, passwordHash string, notify bool) (AccountActionRecipient, error) {
 	var out AccountActionRecipient
 	if len(passwordHash) < 32 || len(passwordHash) > 1024 {
 		return out, domain.ErrInvalid
@@ -129,6 +168,11 @@ func (s *Store) ResetAccountPassword(ctx context.Context, digest [32]byte, passw
 		return out, err
 	}
 	defer tx.Rollback(ctx)
+	if notify {
+		if err = lockAccountMailQueue(ctx, tx); err != nil {
+			return out, err
+		}
+	}
 	out, err = consumeAccountAction(ctx, tx, digest, ResetPasswordAction)
 	if err != nil {
 		return out, err
@@ -136,8 +180,13 @@ func (s *Store) ResetAccountPassword(ctx context.Context, digest [32]byte, passw
 	if _, err = tx.Exec(ctx, "UPDATE users SET password_hash=$2 WHERE id=$1", out.ID, passwordHash); err != nil {
 		return out, err
 	}
-	if err = revokeAccountAccess(ctx, tx, out.ID); err != nil {
+	if err = s.revokeAccountAccess(ctx, tx, out.ID); err != nil {
 		return out, err
+	}
+	if notify {
+		if err = s.enqueueAccountMailTx(ctx, tx, out.Email, out.ID, "password_changed", false); err != nil {
+			return out, err
+		}
 	}
 	if _, err = tx.Exec(ctx, "INSERT INTO audit_events(actor_id,action,entity_id) VALUES($1,'account.password_reset',$1)", out.ID); err != nil {
 		return out, err
@@ -145,12 +194,18 @@ func (s *Store) ResetAccountPassword(ctx context.Context, digest [32]byte, passw
 	return out, tx.Commit(ctx)
 }
 
-func revokeAccountAccess(ctx context.Context, tx pgx.Tx, user string) error {
+func (s *Store) revokeAccountAccess(ctx context.Context, tx pgx.Tx, user string) error {
 	if _, err := tx.Exec(ctx, "UPDATE sessions SET revoked_at=clock_timestamp() WHERE user_id=$1 AND revoked_at IS NULL", user); err != nil {
 		return err
 	}
-	_, err := tx.Exec(ctx, "UPDATE account_action_tokens SET revoked_at=clock_timestamp() WHERE user_id=$1 AND consumed_at IS NULL AND revoked_at IS NULL", user)
-	return err
+	if _, err := tx.Exec(ctx, "UPDATE account_action_tokens SET revoked_at=clock_timestamp() WHERE user_id=$1 AND consumed_at IS NULL AND revoked_at IS NULL", user); err != nil {
+		return err
+	}
+	var email string
+	if err := tx.QueryRow(ctx, "SELECT email FROM users WHERE id=$1", user).Scan(&email); err != nil {
+		return err
+	}
+	return s.cancelAccountMailTx(ctx, tx, user, email, []string{VerifyEmailAction, ResetPasswordAction}, "")
 }
 
 // This closes the login-vs-reset race: a password verified before a concurrent
@@ -212,7 +267,14 @@ OR EXISTS(SELECT 1 FROM recruitment_requests WHERE created_by=$1 AND status='ope
 	if active {
 		return ErrActiveAccount
 	}
-	if err = revokeAccountAccess(ctx, tx, user); err != nil {
+	if err = s.revokeAccountAccess(ctx, tx, user); err != nil {
+		return err
+	}
+	var email string
+	if err = tx.QueryRow(ctx, "SELECT email FROM users WHERE id=$1", user).Scan(&email); err != nil {
+		return err
+	}
+	if err = s.cancelAccountMailTx(ctx, tx, user, email, []string{"password_changed"}, ""); err != nil {
 		return err
 	}
 	// Interest does not reserve a place. Withdraw it while holding the user lock;
@@ -238,15 +300,4 @@ WHERE response->>'guideId'=$1::text AND response ? 'guideName'`, user)
 		return err
 	}
 	return tx.Commit(ctx)
-}
-
-func (s *Store) RecordAccountMail(ctx context.Context, user, purpose string, accepted bool) error {
-	// Only an action name and opaque account id reach the audit. SMTP acceptance
-	// is not proof that a message reached the mailbox or was read.
-	action := "account.mail_failed"
-	if accepted {
-		action = "account.mail_accepted"
-	}
-	_, err := s.Pool.Exec(ctx, "INSERT INTO audit_events(actor_id,action,entity_id,details) VALUES($1,$2,$1,jsonb_build_object('purpose',$3::text))", user, action, purpose)
-	return err
 }

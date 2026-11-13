@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['backend/**', 'infra/**', '.github/workflows/backend.yml']
+    paths: &backend_inputs ['backend/**', 'infra/**', '.github/workflows/backend.yml']
   pull_request:
-    paths: ['backend/**', 'infra/**', '.github/workflows/backend.yml']
+    paths: *backend_inputs
 
 permissions:
   contents: read
@@ -18,7 +18,7 @@ defaults:
 
 concurrency:
   group: backend-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
@@ -43,11 +43,30 @@ jobs:
           set -euo pipefail
           mkdir -p verification
           bash infra/run-integration.sh 2>&1 | tee verification/native-postgis.log
+      - name: Install verified age release for recovery drill
+        run: |
+          set -euo pipefail
+          TROPA_AGE_DIR="$RUNNER_TEMP/tropa-age"
+          mkdir -p "$TROPA_AGE_DIR"
+          curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+            --output "$TROPA_AGE_DIR/age.tar.gz" \
+            https://github.com/FiloSottile/age/releases/download/v1.3.2/age-v1.3.2-linux-amd64.tar.gz
+          printf '%s  %s\n' cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10 "$TROPA_AGE_DIR/age.tar.gz" | sha256sum --check --status
+          tar -xzf "$TROPA_AGE_DIR/age.tar.gz" -C "$TROPA_AGE_DIR" age/age age/age-keygen
+          printf '%s\n' "$TROPA_AGE_DIR/age" >> "$GITHUB_PATH"
+          "$TROPA_AGE_DIR/age/age" --version
+      - name: Encrypted backup and isolated restore gate
+        run: |
+          set -euo pipefail
+          bash infra/run-backup-drill.sh --report verification/backup-restore.json 2>&1 | tee verification/backup-restore.log
       - name: Preserve integration evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: tropnik-native-postgis-${{ github.sha }}
-          path: verification/native-postgis.log
+          path: |
+            verification/native-postgis.log
+            verification/backup-restore.log
+            verification/backup-restore.json
           if-no-files-found: warn
           retention-days: 14

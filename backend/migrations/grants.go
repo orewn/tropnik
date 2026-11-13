@@ -48,6 +48,7 @@ var runtimeTables = []runtimeTablePolicy{
 	{Table: "safety_check_ins", Select: true, InsertAll: true},
 	{Table: "schema_migrations", Select: true},
 	{Table: "account_action_tokens", Select: true, InsertAll: true, UpdateAll: true},
+	{Table: "account_mail_outbox", Select: true, InsertAll: true, UpdateAll: true, Delete: true},
 	{Table: "auth_rate_limits", Select: true, InsertAll: true, UpdateAll: true, Delete: true},
 	{Table: "audit_events", InsertAll: true},
 	{Table: "outbox_events", InsertAll: true},

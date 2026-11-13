@@ -137,17 +137,24 @@ func (g *Group) ActiveCount() int {
 
 func (g *Group) Refresh() {
 	g.ParticipantCount = g.ActiveCount()
-	if g.Status != "recruiting" && g.Status != "ready" && g.Status != "awaiting_guide" {
+	g.Departure.RefreshReadiness()
+}
+
+// RefreshReadiness shares the public status calculation with group mutations.
+// A read projection supplies ParticipantCount from its database aggregate;
+// mutations first count the complete locked group in Refresh.
+func (d *Departure) RefreshReadiness() {
+	if d.Status != "recruiting" && d.Status != "ready" && d.Status != "awaiting_guide" {
 		return
 	}
-	if g.GuideID == nil || !g.GuideEligible {
-		g.Status = "awaiting_guide"
+	if d.GuideID == nil || !d.GuideEligible {
+		d.Status = "awaiting_guide"
 		return
 	}
-	if g.RouteOpen && g.ParticipantCount >= g.MinPeople {
-		g.Status = "ready"
+	if d.RouteOpen && d.ParticipantCount >= d.MinPeople {
+		d.Status = "ready"
 	} else {
-		g.Status = "recruiting"
+		d.Status = "recruiting"
 	}
 }
 

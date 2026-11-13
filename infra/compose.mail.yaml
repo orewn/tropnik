@@ -10,6 +10,7 @@ services:
       TROPA_SMTP_PASSWORD: ${TROPA_SMTP_PASSWORD:-}
       TROPA_MAIL_FROM: ${TROPA_MAIL_FROM:?Set the sender address}
       TROPA_ACCOUNT_ACTION_URL: ${TROPA_ACCOUNT_ACTION_URL:?Set the HTTPS account action page}
+      TROPA_ACCOUNT_MAIL_KEY: ${TROPA_ACCOUNT_MAIL_KEY:?Set the independent stable outbox encryption key}
     networks: [backend, mail-egress]
 networks:
   mail-egress: {}
