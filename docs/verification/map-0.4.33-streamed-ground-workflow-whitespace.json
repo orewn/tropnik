@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T13:55:28.797385+00:00",
+  "path": ".github/workflows/streamed-ground-diagnostic.yml",
+  "before": {
+    "bytes": 10119,
+    "sha256": "8d89fc088dc433d47b2613796e14a2f3ff4d18f7e1ca87925992a355c4881fb7"
+  },
+  "after": {
+    "bytes": 10118,
+    "sha256": "de99536b8c20f70957c9b24ada476b5c905e0c36ce09bcc813fcdb5788067a04"
+  },
+  "onlyChange": "Removed exactly one redundant trailing LF after the final newline. All YAML and shell/Node source bytes before that final LF are identical.",
+  "reason": "First staged diff included the previously untracked workflow and reported one extra blank line at EOF. Earlier unstaged diff checks did not inspect that untracked file.",
+  "unchangedRuntimeAndBuildInputs": true,
+  "testsRerun": false
+}

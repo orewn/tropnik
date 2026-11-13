@@ -1,0 +1,160 @@
+name: Exact source streamed ground pixel diagnosis
+
+on:
+  push:
+    branches: [verify/streamed-ground-20261113]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: streamed-ground-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native-pixels:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Check out the exact candidate source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Require the single guard parent and unchanged release request
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          import {createHash} from 'node:crypto';
+          import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+          const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
+          const source=git('rev-parse','HEAD'),parent='90dae23c757c2b630e7f94b6532ef2cda5110562';
+          assert.equal(source,process.env.GITHUB_SHA);
+          assert.equal(process.env.GITHUB_REF,'refs/heads/verify/streamed-ground-20261113');
+          assert.deepEqual(git('rev-list','--parents','-n','1','HEAD').split(/\s+/),[source,parent]);
+          execFileSync('git',['diff','--exit-code',parent,'HEAD','--','tools/android-build/release-request.json'],{stdio:'inherit'});
+          const release=readFileSync('tools/android-build/release-request.json');
+          mkdirSync('web/pages-preview/dist',{recursive:true});
+          writeFileSync('web/pages-preview/dist/streamed-ground-source.json',JSON.stringify({
+            schemaVersion:1,diagnosticOnly:true,releaseEligible:false,
+            sourceCommit:source,sourceTree:git('rev-parse','HEAD^{tree}'),parent,
+            releaseRequestUnchanged:true,releaseRequestSHA256:createHash('sha256').update(release).digest('hex')
+          },null,2)+'\n');
+          NODE
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Check the committed shared runtime without repairing it
+        run: |
+          node tools/android-build/prepare-custom-map.mjs --check > web/pages-preview/dist/streamed-ground-runtime-check.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {createHash} from 'node:crypto';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const file='web/pages-preview/dist/streamed-ground-runtime-check.json';
+          const receipt=JSON.parse(readFileSync(file,'utf8'));
+          const web=readFileSync('web/public/custom-map/manifest.json');
+          const android=readFileSync('android/app/src/main/assets/custom-map/manifest.json');
+          const manifest=JSON.parse(web);
+          assert.equal(receipt.checkOnly,true);
+          assert.equal(receipt.runtime,'tropnik-canvas');
+          assert.deepEqual(web,android);
+          assert.equal(receipt.manifestSha256,createHash('sha256').update(web).digest('hex'));
+          assert.equal(receipt.sourceInputsSha256,manifest.sourceInputsSha256);
+          assert.deepEqual(receipt.destinations,['web/public/custom-map','android/app/src/main/assets/custom-map']);
+          const engine=readFileSync('web/lib/custom-map-engine.ts');
+          const input=manifest.sourceInputs.find(item=>item.path==='web/lib/custom-map-engine.ts');
+          assert.ok(input);
+          assert.equal(input.sha256,createHash('sha256').update(engine).digest('hex'));
+          writeFileSync(file,JSON.stringify({...receipt,sourceCommit:process.env.GITHUB_SHA,manifestsByteIdentical:true},null,2)+'\n');
+          NODE
+      - name: Run the original native underlay and streaming pixel gate once
+        run: node --test tools/pages-preview/tests/browser-map-underlay.browser.mjs
+      - name: Bind the completed pixel proof to this exact source
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {createHash} from 'node:crypto';
+          import {readFileSync} from 'node:fs';
+          import {assertBrowserEnvironment} from './tools/pages-preview/browser-environment.mjs';
+          const hash=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
+          const report=JSON.parse(readFileSync('web/pages-preview/dist/browser-map-underlay-verification.json','utf8'));
+          assert.equal(report.schemaVersion,1);
+          assert.equal(report.evidence,'production-canvas-underlay-pixel-parity');
+          assert.equal(report.phase,'complete');
+          assert.equal(report.verified,true);
+          assert.equal(report.groundCache.verified,true);
+          assert.equal(report.streamingGround.verified,true);
+          assert.equal(report.sourceCommit,process.env.GITHUB_SHA);
+          assert.equal(report.rendererSHA256,hash('web/lib/custom-map-engine.ts'));
+          assert.equal(report.sources['web/lib/custom-map-engine.ts'],report.rendererSHA256);
+          for(const [path,value] of Object.entries(report.sources)){
+            assert.match(path,/^web\/(?:[\w.-]+\/)*[\w.-]+$/);
+            assert.equal(value,hash(path));
+          }
+          const fixture='tools/pages-preview/tests/browser-map-underlay.browser.mjs';
+          assert.deepEqual(report.fixture,{path:fixture,bytes:readFileSync(fixture).length,sha256:hash(fixture)});
+          assertBrowserEnvironment(report.environment,process.env.GITHUB_SHA);
+          const phases={
+            'trace-grid':['cold','stroke-history',...Array.from({length:25},(_,index)=>'pair-'+String(index+1).padStart(2,'0')),'complete','complete-warm'],
+            'small-lifecycle':['cold','stroke-history','pair-01','pair-02','repeat','overlay-changed','route-changed','mask-changed','selected-area-changed','boundary-changed','line-caps-changed','overview-changed','canonical-replaced','new-generation','new-generation-pair','prefix-inserted','prefix-replaced','cohort-shrunk','loading-reset','restart','fractional-camera','resize','pointer-active','pointer-released','animation-active','animation-ended','rotated','pitched','flat-restored','relief-hidden','relief-restored','failure-overlay','failure-warm','satellite-retained','detail-restored','complete','complete-warm']
+          };
+          const streaming=report.streamingGround;
+          assert.equal(streaming.baseline,'same-production-draw-with-update-retain-restore-disabled');
+          assert.deepEqual(streaming.dpr,[1,1.5,2]);
+          assert.deepEqual(streaming.scenarios,Object.keys(phases));
+          assert.deepEqual(streaming.phases,phases);
+          assert.deepEqual(streaming.cases.map(item=>item.dpr+'/'+item.name).sort(),[1,1.5,2].flatMap(dpr=>Object.keys(phases).map(name=>dpr+'/'+name)).sort());
+          for(const item of streaming.cases){
+            assert.equal(item.verified,true);assert.equal(item.nativeDpr,item.dpr);
+            assert.deepEqual(item.frames.map(frame=>frame.phase),phases[item.name]);
+            assert.equal(item.incrementalFrames,item.name==='trace-grid'?24:0);
+            for(const frame of item.frames)if(item.name==='trace-grid'&&/^pair-\d+$/.test(frame.phase)&&Number(frame.phase.slice(5))>=2){
+              assert.equal(frame.mustIncrement,true);assert.equal(frame.operations.optimized.updateHits,1);
+              assert.equal(frame.operations.optimized.main.snapshotCopies,1);assert.equal(frame.loadingSnapshotIdentity,true);
+            }
+          }
+          for(const [cases,expectedFrames] of [[report.cases,46],[report.groundCache.cases,126],[streaming.cases,198]]){
+            assert.equal(cases.reduce((sum,item)=>sum+item.frames.length,0),expectedFrames);
+            for(const item of cases)for(const frame of item.frames){
+              assert.deepEqual(frame.comparison,{differentPixels:0,maxChannelDelta:0,totalPixels:frame.width*frame.height});
+              assert.match(frame.baselinePixelSHA256,/^[a-f0-9]{64}$/);
+              assert.equal(frame.optimizedPixelSHA256,frame.baselinePixelSHA256);
+              assert.deepEqual(frame.captures.map(capture=>capture.phase),['baseline','optimized']);
+              for(const capture of frame.captures){
+                assert.match(capture.file,/^[a-zA-Z0-9.-]+\.png$/);
+                const path='web/pages-preview/design-qa/map-underlay/'+capture.file,png=readFileSync(path);
+                assert.equal(png.length,capture.bytes);assert.equal(hash(path),capture.sha256);
+                assert.equal(png.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+                assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)],[frame.width,frame.height]);
+              }
+            }
+          }
+          assert.equal(report.browserStartup.status,'ready');
+          assert.equal(report.browserStartup.cleanup.status,'stopped');
+          assert.deepEqual(report.browserStartup.cleanup.errors,[]);
+          NODE
+      - name: Preserve exact pixel evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-streamed-ground-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            web/pages-preview/dist/streamed-ground-source.json
+            web/pages-preview/dist/streamed-ground-runtime-check.json
+            web/pages-preview/dist/browser-map-underlay-verification.json
+            web/pages-preview/design-qa/map-underlay
+            web/public/custom-map/manifest.json
+            android/app/src/main/assets/custom-map/manifest.json
+          if-no-files-found: error
+          retention-days: 7

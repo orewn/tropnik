@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_REVIEW_PASS_ACTUAL_NATIVE_GATE_NOT_YET_RUN",
+  "engineSha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6",
+  "files": [
+    {
+      "path": "tools/pages-preview/tests/browser-map-underlay.browser.mjs",
+      "bytes": 59781,
+      "sha256": "95bbb41463a75a223d0d44cc1f4179ed95bc78eb2af4f22ff3fb38fcc50512d1"
+    },
+    {
+      "path": ".github/workflows/pages.yml",
+      "bytes": 42052,
+      "sha256": "92bdf3d809ba3e158536f44c572709006af73946fccf979a6ee86a2fc906e709"
+    },
+    {
+      "path": ".github/workflows/streamed-ground-diagnostic.yml",
+      "bytes": 10119,
+      "sha256": "8d89fc088dc433d47b2613796e14a2f3ff4d18f7e1ca87925992a355c4881fb7"
+    }
+  ],
+  "reviewerScope": "Read-only native fixture/publication proof review. Reviewer authored only new streamed-ground-diagnostic.yml, then syntax-checked it and requested independent review; no browser, CI rerun, runtime edits, or remote writes.",
+  "nativeFixture": {
+    "productionClassBundled": true,
+    "productionPaintMethodsCopiedOrReplaced": false,
+    "baselineOverrides": [
+      "updateLoadingGround false",
+      "retainGround no-op",
+      "restoreGround false"
+    ],
+    "contextWrappers": "Call bound original native fill/fillRect/drawImage and record both visible and retained contexts; engine drawGround wrapper forwards exact args to original.",
+    "initialPixels": "Distinct adversarial opaque checkerboards verified different for every backing pixel before painting.",
+    "matrix": {
+      "priorUnderlayFrames": 46,
+      "priorGroundCacheFrames": 126,
+      "newStreamingFrames": 198,
+      "newDpr": [
+        1,
+        1.5,
+        2
+      ],
+      "streamingCases": 6,
+      "traceGrid": "actual camera6.1,1041x928,canonical64z7,loading25z6; seeded ImageBitmaps and deterministic request-order delivery",
+      "lifecyclePhases": 37
+    },
+    "positivePathAssertions": "Each trace-grid pair02..25 must hit actual updateLoadingGround once, call original drawGround only on retained context with bounded integer dirty clip smaller than full canvas, issue fewer total native tile draws including retained context, present exactly one snapshot copy, and retain current loading object identity.",
+    "pixelOracle": "Every native backing RGBA pixel equals full direct production painter, zero differentPixels/maxDelta; hashes equal; PNG bytes/header/dimensions bound.",
+    "negativeControl": "Omitting second paired cell must produce visible pixel difference; prevents stale first-pair image from qualifying.",
+    "lifecycleCoverage": [
+      "generation",
+      "prefix insertion/replacement/shrink",
+      "loading reset/restart",
+      "canonical/overview change",
+      "fractional camera",
+      "odd-size DPR and resize",
+      "pointer/animation/rotation/pitch fallback",
+      "relief visibility",
+      "failure warm reuse",
+      "satellite handoff",
+      "area/boundary/caps",
+      "route/overlay/mask"
+    ],
+    "cleanup": "Native retained surfaces tracked <=1 and32MiB; all engine surfaces released, ImageBitmaps closed, DOM canvases removed in finally; browser/server/temp directory cleaned and receipt written by test cleanup.",
+    "priorRunProductionPixelsFunctionByteIdenticalTo90": true,
+    "nativeTestTimeoutUnchanged": "BROWSER_STARTUP_LIMITS.readyMs+120000"
+  },
+  "dedicatedWorkflow": {
+    "trigger": "push verify/streamed-ground-20261113 only",
+    "permissions": {
+      "contents": "read"
+    },
+    "deployment": false,
+    "parent": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+    "singleParentRequired": true,
+    "releaseRequestUnchanged": true,
+    "checkoutRef": "github.sha",
+    "fetchDepth": 2,
+    "nodeVersion": 24,
+    "pnpmVersion": "11.25.0",
+    "frozenDependencies": true,
+    "deterministicRuntimeCheck": "prepare-custom-map.mjs --check; never repairs committed outputs",
+    "nativeCommandRuns": 1,
+    "nativeTimeoutChanged": false,
+    "jobTimeoutMinutes": 6,
+    "apkOrStaticBuild": false,
+    "postBind": "Exact source/fixture/engine+shared manifest/environment/cleanup; exact6streaming cases/198frames/phases/24increments; all370frame zero comparisons and allPNG byte hashes+header dimensions",
+    "artifact": "always upload source/runtime-check/browser report, all map-underlay PNGs and web/native manifests; no continue-on-error",
+    "independentReview": {
+      "reviewer": "web_release_skeptic",
+      "workflowSha256": "8d89fc088dc433d47b2613796e14a2f3ff4d18f7e1ca87925992a355c4881fb7",
+      "result": "PASS",
+      "originalAndNarrowPostBindReviewsCompleted": true
+    }
+  },
+  "verificationPerformed": [
+    "YAML parsed with BaseLoader",
+    "all run blocks bash -n",
+    "all3embedded Node module blocks syntax-checked",
+    "native matrix/source-forwarding review against frozen04d90 engine",
+    "no browser or broad test rerun"
+  ],
+  "limitations": [
+    "Pixel equality is not established by source review or mock Canvas matrices. Dedicated exact-source native gate must execute and pass.",
+    "Trace grid delivery is deterministic request-order fixture, not recovered network/decode order or a full application loading session.",
+    "Labels and DOM marker surfaces are intentionally excluded from ground pixel comparison; full application/native/quality release gates remain required.",
+    "Performance improvement cannot be inferred from native draw-call reduction alone; final exact source must pass original uninstrumented35ms gate."
+  ]
+}

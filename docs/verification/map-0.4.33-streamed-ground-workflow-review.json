@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "web_release_skeptic",
+  "status": "source-and-local-preflight-pass; native-runtime-pending",
+  "reviewedAt": "2026-11-13T13:53:00.320581+00:00",
+  "expectedParentCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+  "files": [
+    {
+      "path": ".github/workflows/streamed-ground-diagnostic.yml",
+      "bytes": 10119,
+      "sha256": "8d89fc088dc433d47b2613796e14a2f3ff4d18f7e1ca87925992a355c4881fb7"
+    },
+    {
+      "path": "tools/pages-preview/tests/browser-map-underlay.browser.mjs",
+      "bytes": 59781,
+      "sha256": "95bbb41463a75a223d0d44cc1f4179ed95bc78eb2af4f22ff3fb38fcc50512d1"
+    },
+    {
+      "path": ".github/workflows/pages.yml",
+      "bytes": 42052,
+      "sha256": "92bdf3d809ba3e158536f44c572709006af73946fccf979a6ee86a2fc906e709"
+    },
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "bytes": 85956,
+      "sha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6"
+    }
+  ],
+  "workflowReview": {
+    "singleNativeInvocation": true,
+    "exactHeadAndSingleParentRequired": true,
+    "releaseRequestUnchangedRequired": true,
+    "runtimeCheckOnlyNoRepair": true,
+    "webAndAndroidManifestsByteBound": true,
+    "readOnlyGitHubPermissions": true,
+    "noDeployOrReleaseJob": true,
+    "alwaysUploadsFailureEvidence": true,
+    "postCaptureChecks": "source/environment/fixture/engine binding; exact6 streaming cases/198 new frames/24 incremental frames per trace-grid; all46+126+198 zero-pixel comparisons and PNG byte/SHA/signature/dimensions; browser cleanup stopped/no errors",
+    "nativeJobBudgetMinutes": 6,
+    "unchangedOldNativeTestBudget": "BROWSER_STARTUP_LIMITS.readyMs + 120000 ms",
+    "existingMatricesUnchanged": {
+      "underlayFrames": 46,
+      "groundCacheFrames": 126
+    }
+  },
+  "newNativeContract": {
+    "dpr": [
+      1,
+      1.5,
+      2
+    ],
+    "scenarios": [
+      "trace-grid",
+      "small-lifecycle"
+    ],
+    "streamingFrames": 198,
+    "traceGrid": {
+      "viewport": [
+        1041,
+        928
+      ],
+      "canonicalZ": 7,
+      "canonicalCells": 64,
+      "loadingZ": 6,
+      "loadingCells": 25,
+      "cameraZoom": 6.1
+    },
+    "pixelOracle": {
+      "differentPixels": 0,
+      "maxChannelDelta": 0
+    },
+    "baselineOverrides": [
+      "updateLoadingGround returns false",
+      "retainGround no-op",
+      "restoreGround returns false"
+    ],
+    "workOracle": [
+      "every trace pair02..25 patches integer bounded area smaller than the backing store",
+      "exact current loading object retained",
+      "one retained-surface presentation",
+      "fewer native tile drawImage calls than full reference",
+      "at most one retained backing surface and original32MiB bound"
+    ],
+    "scope": "Seeded genuine native ImageBitmaps and real production painter. Network, labels and application UI are not simulated or qualified by this microfixture; unchanged real loading UI gate remains mandatory."
+  },
+  "localChecks": [
+    {
+      "command": "node --test --test-name-pattern='underlay fixture bundles' tools/pages-preview/tests/browser-map-underlay.browser.mjs",
+      "pass": 1,
+      "fail": 0,
+      "exitCode": 0,
+      "browserLaunched": false
+    },
+    {
+      "command": "node --test tools/pages-preview/tests/workflow-inputs.test.mjs tools/pages-preview/tests/map-loading-publication.test.mjs",
+      "pass": 9,
+      "fail": 0,
+      "exitCode": 0,
+      "browserLaunched": false
+    },
+    {
+      "command": "node --check tools/pages-preview/tests/browser-map-underlay.browser.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "workflow": ".github/workflows/streamed-ground-diagnostic.yml",
+      "step": "Require the single guard parent and unchanged release request",
+      "check": "node --check --input-type=module",
+      "exitCode": 0,
+      "embeddedBytes": 1159
+    },
+    {
+      "workflow": ".github/workflows/streamed-ground-diagnostic.yml",
+      "step": "Check the committed shared runtime without repairing it",
+      "check": "node --check --input-type=module",
+      "exitCode": 0,
+      "embeddedBytes": 1187
+    },
+    {
+      "workflow": ".github/workflows/streamed-ground-diagnostic.yml",
+      "step": "Bind the completed pixel proof to this exact source",
+      "check": "node --check --input-type=module",
+      "exitCode": 0,
+      "embeddedBytes": 4343
+    },
+    {
+      "workflow": ".github/workflows/pages.yml",
+      "step": "Check UI smoothness before the full browser audit",
+      "check": "node --check --input-type=module",
+      "exitCode": 0,
+      "embeddedBytes": 840
+    },
+    {
+      "workflow": ".github/workflows/pages.yml",
+      "step": "Record the verified build identity",
+      "check": "node --check --input-type=module",
+      "exitCode": 0,
+      "embeddedBytes": 26291
+    }
+  ],
+  "limitations": [
+    "Chromium was not launched locally. Native pixel equality, actual patch work and runtime duration require the forthcoming one-shot CI artifact.",
+    "No diagnostic/main branch, rerun, deployment or remote write was performed by this reviewer.",
+    "Source review and prior-source loading receipts do not qualify the forthcoming candidate or publication."
+  ]
+}

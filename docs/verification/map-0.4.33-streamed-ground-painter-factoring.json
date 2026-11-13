@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Exact source factoring proof; no renderer execution, pixel claim, or source mutation",
+  "sourcePath": "web/lib/custom-map-engine.ts",
+  "baseline": {
+    "commit": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+    "gitBlob": "5a6db296ba012a6f912fb17029afb033a1b3d4c3",
+    "bytes": 78364,
+    "sha256": "95ad8a8e654bd15299c1e944f40af98b8a3becbb38896619dfd7d6ff0ced781a"
+  },
+  "candidate": {
+    "gitBlob": "a2350ed62dcb5f84c07d724c3e6eb08296bd2f87",
+    "bytes": 85956,
+    "sha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6"
+  },
+  "groundPainter": {
+    "baselineExtraction": {
+      "method": "private draw()",
+      "startInclusive": "      ctx.setTransform(1,0,0,1,0,0);",
+      "endExclusive": "      this.retainGround(signature);"
+    },
+    "candidateExtraction": {
+      "method": "private drawGround(...)",
+      "startInclusive": "      ctx.setTransform(1,0,0,1,0,0);",
+      "endExclusive": "      return scale;"
+    },
+    "baselineRaw": {
+      "bytes": 1611,
+      "sha256": "b93443e9b145a43062f140313f3ca51188d7c87f6ea951fe3013095ffec12269"
+    },
+    "candidateRaw": {
+      "bytes": 1686,
+      "sha256": "103d4bc3acf448e7c078b1f1015b7d4b7dd8def5c1563ca007f857a6808b2899"
+    },
+    "normalizationDirection": "candidate to baseline",
+    "normalizations": [
+      {
+        "candidateText": "const scale=this.worldTransform(ctx);",
+        "baselineText": "scale=this.worldTransform();",
+        "occurrences": 1
+      },
+      {
+        "candidateText": "this.drawTiles(this.overview,.95,ctx,patch);",
+        "baselineText": "this.drawTiles(this.overview,.95);",
+        "occurrences": 1
+      },
+      {
+        "candidateText": "this.drawTiles(this.imagery,1,ctx,patch);",
+        "baselineText": "this.drawTiles(this.imagery);",
+        "occurrences": 1
+      },
+      {
+        "candidateText": "this.drawTiles(detail,1,ctx,patch);",
+        "baselineText": "this.drawTiles(detail);",
+        "occurrences": 1
+      },
+      {
+        "candidateText": "this.drawTiles(this.relief,.82,ctx,patch);",
+        "baselineText": "this.drawTiles(this.relief,.82);",
+        "occurrences": 1
+      },
+      {
+        "candidateText": "this.drawTiles(this.loadingGround.detail,1,ctx,patch);",
+        "baselineText": "this.drawTiles(this.loadingGround.detail);",
+        "occurrences": 1
+      },
+      {
+        "candidateText": "this.drawTiles(this.loadingGround.relief,.82,ctx,patch);",
+        "baselineText": "this.drawTiles(this.loadingGround.relief,.82);",
+        "occurrences": 1
+      }
+    ],
+    "whitespaceCommentsOrderConditionsConstantsNormalized": false,
+    "baselineNormalized": {
+      "bytes": 1611,
+      "sha256": "b93443e9b145a43062f140313f3ca51188d7c87f6ea951fe3013095ffec12269"
+    },
+    "candidateNormalized": {
+      "bytes": 1611,
+      "sha256": "b93443e9b145a43062f140313f3ca51188d7c87f6ea951fe3013095ffec12269"
+    },
+    "normalizedBytesEqual": true,
+    "integrationChecks": {
+      "defaultContextIsThisContext": true,
+      "directFallbackCallsHelperWithoutPatch": true,
+      "helperReturnsScaleAndCallerRetainsGroundAfterwards": true,
+      "worldTransformAndDrawTilesDefaultToOriginalContext": true
+    }
+  },
+  "foreground": {
+    "bothMethods": "private draw()",
+    "startInclusive": "    if(this.paths){",
+    "endExclusive": "    this.drawMarkers();",
+    "normalizations": [],
+    "baseline": {
+      "bytes": 1578,
+      "sha256": "c7b75c93df721a7112892667f0ca46d2f02bd24b9a87ff190609fe76c8e45cac"
+    },
+    "candidate": {
+      "bytes": 1578,
+      "sha256": "c7b75c93df721a7112892667f0ca46d2f02bd24b9a87ff190609fe76c8e45cac"
+    },
+    "byteIdentical": true
+  },
+  "result": "Full ground paint operations match old90 exactly after only7explicit context/patch/scale rewrites; foreground before drawMarkers is byte-identical. This rules out common painter-body factoring drift but does not replace native clip/compositing pixel proof."
+}

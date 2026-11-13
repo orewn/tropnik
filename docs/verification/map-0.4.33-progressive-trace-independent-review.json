@@ -1,0 +1,791 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "web_release_skeptic",
+  "readOnlyReview": true,
+  "runId": 43432849188,
+  "artifactId": 14042360306,
+  "sourceCommit": "b206b9560e667a74a42977b38ed1b83ac45a27bc",
+  "sourceTree": "4df748c2a31e124b76e573b99c2ac8061c039084",
+  "productionSourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+  "buildId": "b544fe7f68c42f14",
+  "status": "pan-context-complete; zoom-trace-unavailable; diagnostic-performance-failed",
+  "releaseEligible": false,
+  "artifact": {
+    "path": "/workspace/scratch/686c5dc59f67/progressive-paint-43432849188/artifact-14042360306.zip",
+    "bytes": 3318365,
+    "sha256": "2f367891d26742707d33b0ac03ce953f877f8d3108e03ea9de5bc99c01a99609"
+  },
+  "report": {
+    "path": "/workspace/scratch/686c5dc59f67/progressive-paint-43432849188/zip-members/dist/browser-ui-smoothness-diagnostic.json",
+    "bytes": 829153,
+    "sha256": "7ed4e69e32ea2e490a7bb7a4260ab7358b195952650cca2bea74f727eee5b40b"
+  },
+  "buildInfo": {
+    "path": "/workspace/scratch/686c5dc59f67/progressive-paint-43432849188/zip-members/dist/build-info.json",
+    "bytes": 414420,
+    "sha256": "9202b1180276825fef925829f594a0f6905f946a3e55091931dd4e57cc3e023d"
+  },
+  "sourceCompare": {
+    "path": "/workspace/scratch/686c5dc59f67/progressive-paint-43432849188/source-compare.json",
+    "bytes": 44338,
+    "sha256": "87cdd8a943937a74d3156646b667427653920403ed9e41fa6333cec486469f10"
+  },
+  "selectedInputsVerifiedAgainstExactProductionGitBytes": [
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "bytes": 78080,
+      "sha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704"
+    },
+    {
+      "path": "web/lib/custom-map-tiles.ts",
+      "bytes": 18538,
+      "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546"
+    },
+    {
+      "path": "web/lib/custom-map-painter.ts",
+      "bytes": 26868,
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1"
+    },
+    {
+      "path": "web/lib/custom-map-tiles.worker.ts",
+      "bytes": 15542,
+      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217"
+    },
+    {
+      "path": "web/lib/map-resource-pool.ts",
+      "bytes": 11161,
+      "sha256": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880"
+    },
+    {
+      "path": "web/lib/map-preload.ts",
+      "bytes": 6548,
+      "sha256": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81"
+    },
+    {
+      "path": "web/public/sw.js",
+      "bytes": 17420,
+      "sha256": "3c2674f6f1c53db9a6c0794daa025291f569323ca3ed142566922ac7eb13b6e1"
+    },
+    {
+      "path": "tools/pages-preview/browser-trace.mjs",
+      "bytes": 10380,
+      "sha256": "21f369873545568ac33cf6bff828e35ce25041e4dc6b8de8c8e240bdf6930d25"
+    }
+  ],
+  "diagnosticToolInput": {
+    "path": "tools/pages-preview/browser-smoothness.mjs",
+    "bytes": 33380,
+    "sha256": "fbc6729e80df77daf213b85ceda64471267aaad44ac18340c9820c02fc4d4abd"
+  },
+  "panTrace": {
+    "file": {
+      "path": "/workspace/scratch/686c5dc59f67/progressive-paint-43432849188/zip-members/design-qa/desktop-webgl-ui-smoothness-map-pan.trace.json",
+      "bytes": 31242029,
+      "sha256": "f9f7c37a3c2d731bbb510aa632285075dd197db46f86181e88b2da72350621cb"
+    },
+    "metadata": {
+      "schemaVersion": 1,
+      "scope": "ui-smoothness/desktop-webgl/map-pan",
+      "sourceCommit": "b206b9560e667a74a42977b38ed1b83ac45a27bc",
+      "instrumented": true,
+      "startedAtEpochMs": 1794576152675,
+      "limits": {
+        "durationMs": 8000,
+        "drainMs": 5000,
+        "closeMs": 1000,
+        "maxBytes": 100663296,
+        "bufferSizeKiB": 65536,
+        "chunkBytes": 262144
+      },
+      "categories": [
+        "devtools.timeline",
+        "blink.user_timing",
+        "gpu",
+        "disabled-by-default-devtools.timeline",
+        "disabled-by-default-devtools.timeline.stack",
+        "disabled-by-default-v8.cpu_profiler",
+        "cc",
+        "viz",
+        "skia",
+        "disabled-by-default-viz.quads",
+        "disabled-by-default-skia.gpu"
+      ],
+      "status": "complete",
+      "stopReason": "action-complete",
+      "bytes": 31242029,
+      "eof": true,
+      "dataLossOccurred": false,
+      "errors": [],
+      "recordedDurationMs": 5738.792981000006,
+      "drainWaitMs": 0.035816999996313825,
+      "eventCount": 91850,
+      "cpuProfileChunks": 726,
+      "cpuSamples": 71318,
+      "timelineEvents": 15216,
+      "capturedCategories": {
+        "available": true,
+        "source": "traceEvents[].cat",
+        "categoryCount": 24,
+        "limit": 128,
+        "truncated": false,
+        "counts": [
+          {
+            "name": "cc",
+            "events": 42521
+          },
+          {
+            "name": "benchmark",
+            "events": 24349
+          },
+          {
+            "name": "disabled-by-default-devtools.timeline",
+            "events": 16969
+          },
+          {
+            "name": "viz",
+            "events": 12247
+          },
+          {
+            "name": "devtools.timeline",
+            "events": 11790
+          },
+          {
+            "name": "disabled-by-default-devtools.timeline.frame",
+            "events": 6484
+          },
+          {
+            "name": "disabled-by-default-viz.quads",
+            "events": 5594
+          },
+          {
+            "name": "graphics.pipeline",
+            "events": 5574
+          },
+          {
+            "name": "disabled-by-default-v8.gc",
+            "events": 5362
+          },
+          {
+            "name": "gpu",
+            "events": 2133
+          },
+          {
+            "name": "input.scrolling",
+            "events": 985
+          },
+          {
+            "name": "disabled-by-default-v8.cpu_profiler",
+            "events": 729
+          },
+          {
+            "name": "blink",
+            "events": 589
+          },
+          {
+            "name": "input",
+            "events": 518
+          },
+          {
+            "name": "toplevel.flow",
+            "events": 413
+          },
+          {
+            "name": "disabled-by-default-cc.debug",
+            "events": 235
+          },
+          {
+            "name": "disabled-by-default-devtools.timeline.layers",
+            "events": 235
+          },
+          {
+            "name": "disabled-by-default-display.framedisplayed",
+            "events": 79
+          },
+          {
+            "name": "blink.user_timing",
+            "events": 35
+          },
+          {
+            "name": "__metadata",
+            "events": 31
+          },
+          {
+            "name": "blink.animations",
+            "events": 23
+          },
+          {
+            "name": "rail",
+            "events": 23
+          },
+          {
+            "name": "v8",
+            "events": 7
+          },
+          {
+            "name": "skia",
+            "events": 1
+          }
+        ]
+      },
+      "file": "desktop-webgl-ui-smoothness-map-pan.trace.json",
+      "sha256": "f9f7c37a3c2d731bbb510aa632285075dd197db46f86181e88b2da72350621cb"
+    }
+  },
+  "zoomTrace": {
+    "metadataFile": {
+      "path": "/workspace/scratch/686c5dc59f67/progressive-paint-43432849188/zip-members/design-qa/desktop-webgl-ui-smoothness-map-zoom.trace-meta.json",
+      "bytes": 1274,
+      "sha256": "e6940a3964d0a6582d8468fdb4b198c4172869f220793eb0fb18f099c33a3be0"
+    },
+    "metadata": {
+      "schemaVersion": 1,
+      "scope": "ui-smoothness/desktop-webgl/map-zoom",
+      "sourceCommit": "b206b9560e667a74a42977b38ed1b83ac45a27bc",
+      "instrumented": true,
+      "startedAtEpochMs": 1794576164578,
+      "limits": {
+        "durationMs": 20000,
+        "drainMs": 5000,
+        "closeMs": 1000,
+        "maxBytes": 100663296,
+        "bufferSizeKiB": 65536,
+        "chunkBytes": 262144
+      },
+      "categories": [
+        "devtools.timeline",
+        "blink.user_timing",
+        "gpu",
+        "disabled-by-default-devtools.timeline",
+        "disabled-by-default-devtools.timeline.stack",
+        "disabled-by-default-v8.cpu_profiler",
+        "cc",
+        "viz",
+        "skia",
+        "disabled-by-default-viz.quads",
+        "disabled-by-default-skia.gpu"
+      ],
+      "status": "error",
+      "stopReason": "action-complete",
+      "bytes": 0,
+      "eof": false,
+      "dataLossOccurred": false,
+      "errors": [
+        "Error: Tracing.tracingComplete timed out\n    at Timeout.<anonymous> (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-trace.mjs:90:97)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)"
+      ],
+      "recordedDurationMs": 15005.351559000002,
+      "capturedCategories": {
+        "available": false,
+        "source": "traceEvents[].cat",
+        "reason": "incomplete-trace-stream"
+      }
+    },
+    "traceFileExists": false
+  },
+  "clockBinding": {
+    "formula": "trace ts (microseconds) = performance.now (milliseconds) * 1000 + offset",
+    "expectedMarks": 35,
+    "observedUniqueMarks": 35,
+    "allMarksMeanOffsetUs": 113506398.82857142,
+    "minimumOffsetUs": 113506345.0,
+    "maximumOffsetUs": 113506490,
+    "maximumResidualFromMeanUs": 91.1714285761118,
+    "bracketingMarksMeanOffsetUs": 113506414.5,
+    "bracketingOffsetSpreadUs": 117.00000001490116,
+    "precisionLimit": "performance.now marks are rounded; reported offsets are empirical alignment, not exact clock identity"
+  },
+  "cpuCoverage": [
+    {
+      "id": "0x1",
+      "thread": "CrRendererMain",
+      "startFromRawPanMsUsingAllMarksMean": -140.85282857142388,
+      "samples": 28525,
+      "negativeTimeDeltas": 613,
+      "minimumTimeDeltaUs": -2050,
+      "sampleCountsAreNotDurationWeighted": true
+    },
+    {
+      "id": "0x2",
+      "thread": "ServiceWorker thread",
+      "startFromRawPanMsUsingAllMarksMean": 726.2721714285761,
+      "samples": 21700,
+      "negativeTimeDeltas": 58,
+      "minimumTimeDeltaUs": -2088,
+      "sampleCountsAreNotDurationWeighted": true,
+      "leafSampleCounts": {
+        "": 5,
+        "(idle)": 21694,
+        "(program)": 1
+      },
+      "observedScriptLocations": [
+        {
+          "codeType": "JS",
+          "columnNumber": 30,
+          "functionName": "",
+          "lineNumber": 196,
+          "scriptId": 3,
+          "url": "http://127.0.0.1:46383/tropnik/sw.js"
+        }
+      ]
+    },
+    {
+      "id": "0x3",
+      "thread": "DedicatedWorker thread",
+      "startFromRawPanMsUsingAllMarksMean": 920.8341714285762,
+      "samples": 21093,
+      "negativeTimeDeltas": 76,
+      "minimumTimeDeltaUs": -2926,
+      "sampleCountsAreNotDurationWeighted": true
+    }
+  ],
+  "contexts": [
+    {
+      "scenario": "map-pan",
+      "rawStartMs": 16521.5,
+      "rawEndMs": 22056.399999999994,
+      "rawDurationMs": 5534.899999999994,
+      "frameCallbacks": 257,
+      "reportedFrames": {
+        "samples": 257,
+        "callbackHz": 46.432636542665676,
+        "isPresentedFps": false,
+        "p95Ms": 58.69999999998254,
+        "maxGapMs": 74.79999999998836,
+        "over50ms": 24
+      },
+      "workerReads": [
+        {
+          "phase": "before",
+          "readOnly": true,
+          "startedAtMs": 16325.5,
+          "capturedAtMs": 16327.400000000009,
+          "timeOriginMs": 1794576136347,
+          "controller": {
+            "scriptURL": "http://127.0.0.1:46383/tropnik/sw.js",
+            "state": "activated"
+          },
+          "registration": {
+            "scope": "http://127.0.0.1:46383/tropnik/",
+            "active": {
+              "scriptURL": "http://127.0.0.1:46383/tropnik/sw.js",
+              "state": "activated"
+            },
+            "waiting": null,
+            "installing": null
+          },
+          "shellCaches": [
+            {
+              "name": "tropnik-tropnik-shell-b544fe7f68c42f14",
+              "markerURL": "http://127.0.0.1:46383/tropnik/_offline/map-warm-tropnik-tropnik-shell-b544fe7f68c42f14-canvas",
+              "present": true,
+              "status": 200,
+              "ready": true
+            }
+          ],
+          "truncated": false,
+          "outsideRawMeasurement": true
+        },
+        {
+          "phase": "after",
+          "readOnly": true,
+          "startedAtMs": 22063.800000000017,
+          "capturedAtMs": 22065.899999999994,
+          "timeOriginMs": 1794576136347,
+          "controller": {
+            "scriptURL": "http://127.0.0.1:46383/tropnik/sw.js",
+            "state": "activated"
+          },
+          "registration": {
+            "scope": "http://127.0.0.1:46383/tropnik/",
+            "active": {
+              "scriptURL": "http://127.0.0.1:46383/tropnik/sw.js",
+              "state": "activated"
+            },
+            "waiting": null,
+            "installing": null
+          },
+          "shellCaches": [
+            {
+              "name": "tropnik-tropnik-shell-b544fe7f68c42f14",
+              "markerURL": "http://127.0.0.1:46383/tropnik/_offline/map-warm-tropnik-tropnik-shell-b544fe7f68c42f14-canvas",
+              "present": true,
+              "status": 200,
+              "ready": true
+            }
+          ],
+          "truncated": false,
+          "outsideRawMeasurement": true
+        }
+      ],
+      "clockBefore": {
+        "name": "tropnik:progressive-paint:map-pan:before",
+        "startTimeMs": 16520.70000000001,
+        "timeOriginMs": 1794576136347
+      },
+      "clockAfter": {
+        "name": "tropnik:progressive-paint:map-pan:after",
+        "startTimeMs": 22058.600000000006,
+        "timeOriginMs": 1794576136347
+      },
+      "observer": {
+        "schemaVersion": 1,
+        "scenario": "map-pan",
+        "readOnly": true,
+        "source": "MutationObserver of existing data-map-inspection",
+        "limits": {
+          "transitions": 1024,
+          "keySets": 32,
+          "tilesPerBatch": 64,
+          "keyLength": 256,
+          "inspectionChars": 524288,
+          "errors": 8
+        },
+        "timeOriginMs": 1794576136347,
+        "semantics": "Published snapshots, not live worker state. Marks follow publication. drawDelta=0 is not a new paint. Pointer/animation suppress publication, so revision gaps can be expected. Key overlap does not itself prove object identity.",
+        "callbacks": 31,
+        "mutationRecords": 31,
+        "coalescedMutationRecords": 0,
+        "identicalValuesSkipped": 0,
+        "drawRevisionGaps": 11,
+        "maxDrawRevisionDelta": 12,
+        "readDurationTotalMs": 17.10000000000582,
+        "readDurationMaxMs": 0.9000000000087311,
+        "overflow": false,
+        "errors": [],
+        "disconnected": true
+      },
+      "transitions": 33,
+      "canonicalKeySets": 2,
+      "stateOnlyPublications": 5,
+      "partialPaintGenerations": [
+        {
+          "generation": 4,
+          "publishedPaints": 24,
+          "firstPublishedAtMsFromRawStart": 1643.6000000000058,
+          "lastPublishedAtMsFromRawStart": 4946.899999999994,
+          "readyCellCounts": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24
+          ],
+          "requestedCells": [
+            25
+          ],
+          "maxDetailKeyOverlap": 0,
+          "maxReliefKeyOverlap": 0
+        }
+      ]
+    },
+    {
+      "scenario": "map-zoom",
+      "rawStartMs": 28290.899999999994,
+      "rawEndMs": 43221.80000000002,
+      "rawDurationMs": 14930.900000000023,
+      "frameCallbacks": 750,
+      "reportedFrames": {
+        "samples": 750,
+        "callbackHz": 50.23139931283438,
+        "isPresentedFps": false,
+        "p95Ms": 49.10000000000582,
+        "maxGapMs": 69.89999999999418,
+        "over50ms": 33
+      },
+      "workerReads": [
+        {
+          "phase": "before",
+          "readOnly": true,
+          "startedAtMs": 28229,
+          "capturedAtMs": 28230.70000000001,
+          "timeOriginMs": 1794576136347,
+          "controller": {
+            "scriptURL": "http://127.0.0.1:46383/tropnik/sw.js",
+            "state": "activated"
+          },
+          "registration": {
+            "scope": "http://127.0.0.1:46383/tropnik/",
+            "active": {
+              "scriptURL": "http://127.0.0.1:46383/tropnik/sw.js",
+              "state": "activated"
+            },
+            "waiting": null,
+            "installing": null
+          },
+          "shellCaches": [
+            {
+              "name": "tropnik-tropnik-shell-b544fe7f68c42f14",
+              "markerURL": "http://127.0.0.1:46383/tropnik/_offline/map-warm-tropnik-tropnik-shell-b544fe7f68c42f14-canvas",
+              "present": true,
+              "status": 200,
+              "ready": true
+            }
+          ],
+          "truncated": false,
+          "outsideRawMeasurement": true
+        },
+        {
+          "phase": "after",
+          "readOnly": true,
+          "startedAtMs": 43233.600000000006,
+          "capturedAtMs": 43235.399999999994,
+          "timeOriginMs": 1794576136347,
+          "controller": {
+            "scriptURL": "http://127.0.0.1:46383/tropnik/sw.js",
+            "state": "activated"
+          },
+          "registration": {
+            "scope": "http://127.0.0.1:46383/tropnik/",
+            "active": {
+              "scriptURL": "http://127.0.0.1:46383/tropnik/sw.js",
+              "state": "activated"
+            },
+            "waiting": null,
+            "installing": null
+          },
+          "shellCaches": [
+            {
+              "name": "tropnik-tropnik-shell-b544fe7f68c42f14",
+              "markerURL": "http://127.0.0.1:46383/tropnik/_offline/map-warm-tropnik-tropnik-shell-b544fe7f68c42f14-canvas",
+              "present": true,
+              "status": 200,
+              "ready": true
+            }
+          ],
+          "truncated": false,
+          "outsideRawMeasurement": true
+        }
+      ],
+      "clockBefore": {
+        "name": "tropnik:progressive-paint:map-zoom:before",
+        "startTimeMs": 28290.300000000017,
+        "timeOriginMs": 1794576136347
+      },
+      "clockAfter": {
+        "name": "tropnik:progressive-paint:map-zoom:after",
+        "startTimeMs": 43224.100000000006,
+        "timeOriginMs": 1794576136347
+      },
+      "observer": {
+        "schemaVersion": 1,
+        "scenario": "map-zoom",
+        "readOnly": true,
+        "source": "MutationObserver of existing data-map-inspection",
+        "limits": {
+          "transitions": 1024,
+          "keySets": 32,
+          "tilesPerBatch": 64,
+          "keyLength": 256,
+          "inspectionChars": 524288,
+          "errors": 8
+        },
+        "timeOriginMs": 1794576136347,
+        "semantics": "Published snapshots, not live worker state. Marks follow publication. drawDelta=0 is not a new paint. Pointer/animation suppress publication, so revision gaps can be expected. Key overlap does not itself prove object identity.",
+        "callbacks": 102,
+        "mutationRecords": 119,
+        "coalescedMutationRecords": 17,
+        "identicalValuesSkipped": 0,
+        "drawRevisionGaps": 15,
+        "maxDrawRevisionDelta": 9,
+        "readDurationTotalMs": 57.69999999983702,
+        "readDurationMaxMs": 1.6000000000058208,
+        "overflow": false,
+        "errors": [],
+        "disconnected": true
+      },
+      "transitions": 104,
+      "canonicalKeySets": 4,
+      "stateOnlyPublications": 9,
+      "partialPaintGenerations": [
+        {
+          "generation": 5,
+          "publishedPaints": 63,
+          "firstPublishedAtMsFromRawStart": 1363.2000000000116,
+          "lastPublishedAtMsFromRawStart": 9474.5,
+          "readyCellCounts": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63
+          ],
+          "requestedCells": [
+            64
+          ],
+          "maxDetailKeyOverlap": 0,
+          "maxReliefKeyOverlap": 0
+        },
+        {
+          "generation": 6,
+          "publishedPaints": 25,
+          "firstPublishedAtMsFromRawStart": 11381.900000000023,
+          "lastPublishedAtMsFromRawStart": 14322.0,
+          "readyCellCounts": [
+            1,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24
+          ],
+          "requestedCells": [
+            25
+          ],
+          "maxDetailKeyOverlap": 0,
+          "maxReliefKeyOverlap": 0
+        }
+      ]
+    }
+  ],
+  "environment": {
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    },
+    "profile": "chromium-headless-software-swiftshader-webgl-v1"
+  },
+  "performanceIssues": [
+    {
+      "profile": "desktop-webgl",
+      "phase": "ui-smoothness/map-pan",
+      "metric": "frameP95Ms",
+      "value": 58.69999999998254,
+      "limit": 35
+    },
+    {
+      "profile": "desktop-webgl",
+      "phase": "ui-smoothness/map-zoom",
+      "metric": "frameP95Ms",
+      "value": 49.10000000000582,
+      "limit": 35
+    }
+  ],
+  "findings": [
+    "Both boundary snapshots have the same activated worker, no waiting/installing worker, and matching-build ready cache marker. Reads occurred outside the measured raw windows.",
+    "Ready marker supports completion of heavy map warm phases before the windows. It does not prove a service worker is idle or has no remaining promise work.",
+    "Service-worker CPU sampling starts about 726 ms after pan measurement begins; no claim of SW inactivity before that point is supported. In the sampled portion 21694/21700 leaf samples are idle; this is a sample count, not CPU milliseconds.",
+    "All 35 expected pan marks are present once, including every published inspection and both clock boundaries. Pan stream completed with EOF and no reported data loss.",
+    "Zoom tracingComplete timed out, leaving zero bytes and no trace file. Zoom raw frames and observer snapshots exist, but no zoom CPU or raster attribution can be made from a trace.",
+    "Observed pan streaming cohort grows 1 through 24 of 25 cells across 24 distinct draw revisions; key overlap with canonical tiles is zero. This run does not establish cached-pair overdraw as a cause.",
+    "Observer revision gaps during native input/animation are an intentional publication limitation, not evidence of trace loss. State-only publications are not paints; published timestamps follow drawing rather than measuring its duration.",
+    "The observer is bounded, has no overflow/errors, and disconnected in both scenarios. Its measured read overhead and trace overhead remain diagnostic confounders; these runs do not certify release speed."
+  ]
+}

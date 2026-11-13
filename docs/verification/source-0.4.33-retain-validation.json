@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T13:21:42.000262+00:00",
+  "scope": "Publication identity for validation main; actual workflow outcomes are separate.",
+  "repository": "orewn/tropnik",
+  "branch": "main",
+  "sourceCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+  "tree": "c2b49b6a3af6bfedfa4a4a50cbdf776a221e4356",
+  "parents": [
+    "67d418dd1e187d065d2ff3bd3703c50b7436268b"
+  ],
+  "localReviewedCommit": "53d3aaf64b67a33b983ccd18016ec4afbb09eda3",
+  "localTree": "c2b49b6a3af6bfedfa4a4a50cbdf776a221e4356",
+  "remoteTreeMatchesReviewedTree": true,
+  "mainLease": {
+    "expectedBefore": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+    "force": false,
+    "readbackAfter": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+  },
+  "transportPlan": {
+    "path": "/workspace/scratch/686c5dc59f67/github-033-retain-validation-plan.json",
+    "bytes": 2050933,
+    "sha256": "2cb65d4ce23865d0372981a4958485f08982e994a67803a3ad06e08b6c62942e",
+    "entries": 20
+  },
+  "release": {
+    "webVersion": "0.4.33",
+    "androidVersion": "0.4.33-preview",
+    "androidVersionCode": 16,
+    "requestVersion": "0.4.32-preview",
+    "requestUnchanged": true,
+    "publicationRequested": false
+  },
+  "expectedLocalBuild": "9422286fa73b1574",
+  "runs": {
+    "pages": 43432850110,
+    "android": 43432850354
+  },
+  "separateInstrumentedBaseline": {
+    "sourceCommit": "b206b9560e667a74a42977b38ed1b83ac45a27bc",
+    "tree": "4df748c2a31e124b76e573b99c2ac8061c039084",
+    "parent": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+    "productionIdenticalToParent": true,
+    "run": 43432849188,
+    "releaseEligible": false
+  },
+  "files": [
+    {
+      "path": "android/app/src/main/assets/custom-map/android-bootstrap.js",
+      "status": "M",
+      "bytes": 22086,
+      "gitBlobSha": "615c68e86df4cff8d65b5b64f4a54e89b196bf32",
+      "sha256": "5bdaf9659f4bd019b6e71a2f716cb666b7e9cda90c1cc416fb7f9b4cabfc61ad"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-BomP9hwf.js",
+      "status": "D"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/chunks/custom-map-entry-CVL0qZLb.js",
+      "status": "A",
+      "bytes": 150372,
+      "gitBlobSha": "ebf5fd5f8b8c47e4bc7b64be883c129b499ee58b",
+      "sha256": "5a67c57168e0ced08b3367f8589a26d4f5af4f52231755806205505fe61d284d"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/manifest.json",
+      "status": "M",
+      "bytes": 533835,
+      "gitBlobSha": "f229a3c30aab0c12feaceaf53291626bdcec8073",
+      "sha256": "d1f8823596d966213e7c0dd68e156ea8feec9d16bda001b42a63e8d0756cbf2a"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/map-runtime.js",
+      "status": "M",
+      "bytes": 224,
+      "gitBlobSha": "a52dfbc0aa88e23246329b9fa5a5488c18a3809b",
+      "sha256": "acd870f97de0bb49722eff641c819fef38f5d53366d8b73e61e664d53e22b689"
+    },
+    {
+      "path": "docs/release-0.4.33.md",
+      "status": "M",
+      "bytes": 27355,
+      "gitBlobSha": "08f2cb78ce7d6198572f3677911e97271a8e9e21",
+      "sha256": "2430d18c872a1541c56510c8a2a487a33303dab11dcef2bc2351b5b23091ad2f"
+    },
+    {
+      "path": "docs/verification/android-0.4.33-loading-marker-input.json",
+      "status": "A",
+      "bytes": 24338,
+      "gitBlobSha": "adbea6a9efd0ffa9ce2c5972a6a691b6dee50c2a",
+      "sha256": "e9764af40ed4c2c868c4f49c5ce4f72a0d59bc8d1813cd7b49ef66cb6e2228a7"
+    },
+    {
+      "path": "docs/verification/android-0.4.33-loading-validation.json",
+      "status": "A",
+      "bytes": 27479,
+      "gitBlobSha": "8cd797da91ab196be16a89d5cf8387e79395520f",
+      "sha256": "dd54e30a83ba5e98cb756191f56dc16b4f36a9b7edc5aa9b3a4ee1a6f6a978d1"
+    },
+    {
+      "path": "docs/verification/local-0.4.33-progressive-retain-preflight.json",
+      "status": "A",
+      "bytes": 8443,
+      "gitBlobSha": "6d88a465b429e95d0340660944b48dfa6e2a5fd0",
+      "sha256": "125cfa42405616c570b48068e5cffc732f9dd21641d97b22253db0ea91db6058"
+    },
+    {
+      "path": "docs/verification/map-0.4.33-loading-green-67d418dd.json",
+      "status": "A",
+      "bytes": 27052,
+      "gitBlobSha": "621a01f6c902b9bf7c46d534404bb93868758bc7",
+      "sha256": "584d9cfd1bec43292dd0841ddf2649d39f7e91ad9f0c7343e43c3654d9553269"
+    },
+    {
+      "path": "docs/verification/source-0.4.33-loading-validation.json",
+      "status": "A",
+      "bytes": 13683,
+      "gitBlobSha": "532ea21d2f0f25f6a59dc5ed754315d0fef90c55",
+      "sha256": "64693bef1973716161aff914e3cd0ae342362f844acc5f838af80e6bcd5309b6"
+    },
+    {
+      "path": "docs/verification/web-0.4.33-loading-smoothness-failure.json",
+      "status": "A",
+      "bytes": 46123,
+      "gitBlobSha": "3843dcdb288835cee81bc8257e502ca03b644e90",
+      "sha256": "b96e46e665a976ab40b032984c72ece402f96b8d272fb9363ff36426a27ceb3d"
+    },
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "status": "M",
+      "bytes": 78364,
+      "gitBlobSha": "5a6db296ba012a6f912fb17029afb033a1b3d4c3",
+      "sha256": "95ad8a8e654bd15299c1e944f40af98b8a3becbb38896619dfd7d6ff0ced781a"
+    },
+    {
+      "path": "web/public/custom-map/android-bootstrap.js",
+      "status": "M",
+      "bytes": 22086,
+      "gitBlobSha": "615c68e86df4cff8d65b5b64f4a54e89b196bf32",
+      "sha256": "5bdaf9659f4bd019b6e71a2f716cb666b7e9cda90c1cc416fb7f9b4cabfc61ad"
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-BomP9hwf.js",
+      "status": "D"
+    },
+    {
+      "path": "web/public/custom-map/chunks/custom-map-entry-CVL0qZLb.js",
+      "status": "A",
+      "bytes": 150372,
+      "gitBlobSha": "ebf5fd5f8b8c47e4bc7b64be883c129b499ee58b",
+      "sha256": "5a67c57168e0ced08b3367f8589a26d4f5af4f52231755806205505fe61d284d"
+    },
+    {
+      "path": "web/public/custom-map/manifest.json",
+      "status": "M",
+      "bytes": 533835,
+      "gitBlobSha": "f229a3c30aab0c12feaceaf53291626bdcec8073",
+      "sha256": "d1f8823596d966213e7c0dd68e156ea8feec9d16bda001b42a63e8d0756cbf2a"
+    },
+    {
+      "path": "web/public/custom-map/map-runtime.js",
+      "status": "M",
+      "bytes": 224,
+      "gitBlobSha": "a52dfbc0aa88e23246329b9fa5a5488c18a3809b",
+      "sha256": "acd870f97de0bb49722eff641c819fef38f5d53366d8b73e61e664d53e22b689"
+    },
+    {
+      "path": "web/public/sw.js",
+      "status": "M",
+      "bytes": 17420,
+      "gitBlobSha": "b4d4f973d25c47b1d0e16a6546b7cfe2d837c40e",
+      "sha256": "63536bd12dcbc85e6f94db2c0713d3103cef36567728b0742deec51bcbea78c0"
+    },
+    {
+      "path": "web/tests/custom-map-engine.test.mjs",
+      "status": "M",
+      "bytes": 170414,
+      "gitBlobSha": "ef55f8a676f26efae54c9a5b4a3066f35d4ea145",
+      "sha256": "f2cf51e2dd21f8505405a014bd909aba201dce5013835ce02dedf7a4a0bb493d"
+    }
+  ]
+}

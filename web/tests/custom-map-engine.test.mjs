@@ -25,7 +25,7 @@ const collection={type:'FeatureCollection',features:[]};
 const originalLabels=readFileSync(resolve(root,'tests/fixtures/custom-map-labels-9110c5b.txt'),'utf8');
 assert.equal(createHash('sha256').update(originalLabels).digest('hex'),'39a5b7a5ca753f6ca893764b8ee7f7a3fd3acd87686d944f5ca7da5cab7ed8c9');
 
-function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false,groundCache=false,beforeZoom,onGesture,onClick,onMarker}={}){
+function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false,groundCache=false,pixelRatio=1,beforeZoom,onGesture,onClick,onMarker}={}){
  let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[],rasters=[],grounds=[];
  let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0};
  class Target{
@@ -54,7 +54,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   rect(...args){this.commands.push(['rect',...args]);}closePath(){this.commands.push(['closePath']);}addPath(path){this.commands.push(['addPath',path]);}
  }
  function createContext(surface){
- const record=call=>calls.push({...call,surface});
+ const record=call=>calls.push({...call,surface,matrix:[...context.matrix],composite:context.globalCompositeOperation,alpha:context.globalAlpha});
  const context={font:'10px sans-serif',fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,lineCap:'butt',lineJoin:'miter',miterLimit:10,globalAlpha:1,globalCompositeOperation:'source-over',stack:[],matrix:[1,0,0,1,0,0],
   save(){this.stack.push({...Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','lineCap','lineJoin','miterLimit','globalAlpha','globalCompositeOperation','textAlign','textBaseline'].map(key=>[key,this[key]])),matrix:[...this.matrix]});record({op:'save'});},
   restore(){Object.assign(this,this.stack.pop());record({op:'restore'});},
@@ -145,7 +145,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  }
  const globals={document,window,Path2D:Path,ResizeObserver:class{constructor(callback){this.callback=callback;observers.push(this);}observe(){}disconnect(){this.disconnected=true;}},
   ...(groundCache?{OffscreenCanvas:GroundCanvas}:{}),
-  devicePixelRatio:1,navigator:{onLine:true},location:{href:'https://fixture.invalid/'},Worker:TrailRasterWorker,queueMicrotask,matchMedia:()=>({matches:false}),performance:{now:()=>now},console,URL,AbortController,crypto:globalThis.crypto,TextEncoder,
+  devicePixelRatio:pixelRatio,navigator:{onLine:true},location:{href:'https://fixture.invalid/'},Worker:TrailRasterWorker,queueMicrotask,matchMedia:()=>({matches:false}),performance:{now:()=>now},console,URL,AbortController,crypto:globalThis.crypto,TextEncoder,
   getComputedStyle:element=>({display:element.hidden?'none':'block',visibility:'visible',opacity:'1',pointerEvents:'auto'}),
   requestAnimationFrame:callback=>{const id=++serial;frames.set(id,callback);return id;},cancelAnimationFrame:id=>frames.delete(id),
   setTimeout:(callback,delay)=>{const id=++serial;timers.set(id,{callback,at:now+delay});return id;},clearTimeout:id=>timers.delete(id)};
@@ -186,7 +186,9 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const complete=(selector=()=>true,options=()=>({}))=>{const jobs=pending().filter(selector);for(const job of jobs)store.resolve(job,options(job));return jobs;};
  const ready=async()=>{coverageResolve(coverage);await turn();complete();await turn();flush();return engine;};
  const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
- const lastDraw=()=>[...lastSurface('tropnik-map-canvas','draw-start'),...lastSurface('tropnik-map-labels','clearRect')];
+ // A frame may paint its retained ground before presenting it on the visible
+ // canvas. Observe that actual work in order, without expanding cached history.
+ const lastDraw=()=>[...calls.slice(calls.findLastIndex(call=>call.surface==='tropnik-map-canvas'&&call.op==='draw-start')).filter(call=>call.surface!=='tropnik-map-labels'),...lastSurface('tropnik-map-labels','clearRect')];
  return{engine,host,context:engine.canvas.context,document,window,coverage,store,states,calls,paths,rasters,grounds,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
   verifyReviewedCoastalRoute:load(resolve(root,'lib/reviewed-coastal-routes.ts')).verifyReviewedCoastalRoute,
   get coverageAttempts(){return coverageAttempts;},get readyCalls(){return readyCalls;},get gestures(){return gestures;},get layoutReads(){return layoutReads;},
@@ -1509,7 +1511,8 @@ test('opaque coverage is re-evaluated against the live camera and backing extent
 });
 
 const restoredGround=env=>env.lastDraw().filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='drawImage'&&String(call.key).startsWith('retained-ground:'));
-const groundCopies=env=>env.calls.filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage').length;
+const groundCopies=env=>env.calls.filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage'&&call.args.length===2).length;
+const groundPatches=env=>env.lastDraw().filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage'&&call.args.length===4);
 function warmGround(env){for(let i=0;i<3;i++){env.engine.setLayers({});env.flush();}assert.equal(restoredGround(env).length,1,'A stationary map must actually restore its retained ground');}
 
 test('progressive loading paints each ready pair without copying every transient full canvas',async t=>{
@@ -1539,7 +1542,8 @@ test('progressive loading paints each ready pair without copying every transient
   assert.equal(env.engine.getState().loading,false);
   assert.equal(!!env.engine.getState().error,outcome!=='complete');
   assert.equal(env.store.requests.length,requests,'Reducing paint work cannot change the tile request plan');
-  assert.equal(groundCopies(env),copies+1,'The settled complete or useful failed ground is captured once');
+  assert.equal(groundCopies(env),copies+Number(outcome==='complete'),'A canonical commit captures once; useful failed ground is already exact after its incremental patches');
+  if(outcome!=='complete')assert.equal(restoredGround(env).length,1,'A failed neighbour reuses the useful patched ground');
   const settledCopies=groundCopies(env);warmGround(env);
   assert.equal(groundCopies(env),settledCopies,'Later stationary redraws reuse that exact settled ground');
   assert.equal(env.frames.size,0,'The cache must not add an idle animation loop');
@@ -1707,4 +1711,202 @@ test('only the verified coastal snapshot crosses the unchanged mask; ordinary an
  assert.equal(env.engine.inspect().reviewedCoastal.overlaySources,1);assert.ok(draw.findIndex(call=>call.op==='stroke'&&call.color==='#618253')>maskIndex(draw));assert.equal(coveragePaint(env).mask,mask);
  env.engine.setMode('satellite');env.complete();await env.settle();draw=env.lastDraw();assert.ok(draw.findIndex(call=>call.op==='stroke'&&call.color==='#f2d49b')>maskIndex(draw));
  env.engine.setLayers({paths:false});env.complete();await env.settle();assert.equal(env.engine.inspect().reviewedCoastal.overlaySources,0);assert.equal(env.lastDraw().some(call=>call.op==='stroke'&&call.color==='#f2d49b'),false);
+});
+
+// Exact viewport and grids from diagnostic run 43432849188 on source 67d418d.
+// The retained 64 z7 cells and requested 25 z6 cells are observed data. Delivery
+// orders below are deliberately controlled; the CI trace did not record them.
+const streamingView={center:[85.97995147228215,50.65622536454623],zoom:6.1,bearingDegrees:0};
+const streamingArea={type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[[70,40],[100,40],[100,60],[70,60],[70,40]],[[86,50.6],[86,50.7],[86.1,50.7],[86.1,50.6],[86,50.6]]]}};
+const sameTileCell=(a,b)=>a.request.z===b.request.z&&a.request.x===b.request.x&&a.request.y===b.request.y;
+const isSourcePaint=call=>call.op==='drawImage'&&/^(overview|vector|relief):/.test(String(call.key));
+const sourcePaints=env=>env.lastDraw().filter(isSourcePaint);
+const sourcePaintShape=call=>({key:call.key,args:call.args,matrix:call.matrix,alpha:call.alpha,composite:call.composite});
+async function streamingFixture(t,{groundCache=true,pixelRatio=1}={}){
+ // This controlled prior camera reproduces the observed retained grid. It is
+ // not represented as the unrecorded historical camera or completion order.
+ const view={center:mercatorUnproject({x:95.01/128,y:43.01/128}),zoom:6.1,bearingDegrees:0};
+ const env=fixture({view,width:1041,height:928,coverageArea:streamingArea,groundCache,pixelRatio});t.after(()=>env.engine.destroy());
+ env.coverage.territories={type:'FeatureCollection',features:[{...plain(streamingArea),properties:{shapeName:'stream-region'}}]};
+ env.coverage.boundaries={type:'FeatureCollection',features:[{type:'Feature',properties:{shapeName:'stream-region'},geometry:{type:'LineString',coordinates:[[70,40],[100,60]]}}]};
+ await env.ready();
+ const old=env.engine.inspect().tiles.detail;assert.equal(old.length,64);assert.ok(old.every(tile=>tile.z===7));
+ assert.deepEqual([...new Set(old.map(tile=>tile.x))].sort((a,b)=>a-b),[91,92,93,94,95,96,97,98]);
+ assert.deepEqual([...new Set(old.map(tile=>tile.y))].sort((a,b)=>a-b),[39,40,41,42,43,44,45,46]);
+ env.engine.setRegion(['stream-region']);env.engine.setRoute({type:'LineString',coordinates:[[85,50.5],[87,50.8]]},'stream-route');env.flush();
+ if(groundCache)warmGround(env);
+ env.engine.setCamera(plain(streamingView));await env.settle();
+ const vectors=env.pending('vector'),reliefs=env.pending('relief');assert.equal(vectors.length,25);assert.equal(reliefs.length,25);assert.ok(vectors.every(job=>job.request.z===6));
+ assert.deepEqual([...new Set(vectors.map(job=>job.request.x))].sort((a,b)=>a-b),[45,46,47,48,49]);
+ assert.deepEqual([...new Set(vectors.map(job=>job.request.y))].sort((a,b)=>a-b),[19,20,21,22,23]);
+ return{env,vectors,reliefs,pair:vector=>reliefs.find(job=>sameTileCell(job,vector))};
+}
+function dirtyClip(env){
+ const calls=env.lastDraw().filter(call=>String(call.surface).startsWith('retained-ground:')),clip=calls.findIndex(call=>call.op==='clip');
+ assert.ok(clip>=0,'A streaming patch must restrict writes to a dirty rectangle');
+ const path=calls[clip].args[0],pathRect=path?.commands?.find(command=>command[0]==='rect');
+ const callRect=calls.slice(0,clip).findLast(call=>call.op==='rect');
+ const rect=pathRect?.slice(1)??callRect?.args;assert.ok(rect,'The clip must have an explicit rectangle');
+ assert.deepEqual(calls[clip].matrix,[1,0,0,1,0,0],'Clip edges belong to physical backing pixels');
+ assert.equal(rect.length,4);assert.ok(rect.every(Number.isInteger),'Fractional clipping can change antialiased pixels');
+ const [left,top,width,height]=rect;assert.ok(left>=0&&top>=0&&width>0&&height>0);
+ assert.ok(left+width<=env.engine.canvas.width&&top+height<=env.engine.canvas.height);
+ return{left,top,right:left+width,bottom:top+height,calls};
+}
+function paintedRect(call){
+ const [x,y,width,height]=call.args,[a,b,c,d,e,f]=call.matrix;
+ const points=[[x,y],[x+width,y],[x,y+height],[x+width,y+height]].map(([px,py])=>[a*px+c*py+e,b*px+d*py+f]);
+ return{left:Math.min(...points.map(point=>point[0])),top:Math.min(...points.map(point=>point[1])),right:Math.max(...points.map(point=>point[0])),bottom:Math.max(...points.map(point=>point[1]))};
+}
+const rectanglesIntersect=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+function assertStreamingPatch(cached,canonical,newKeys){
+ const patch=groundPatches(cached),full=sourcePaints(canonical),clip=dirtyClip(cached),draw=cached.lastDraw();assert.ok(patch.length>0);
+ assert.equal(draw.filter(call=>call.surface==='tropnik-map-canvas'&&isSourcePaint(call)).length,0,'Patched frames cannot replay the full visible source batches too');
+ const keys=new Set(patch.map(call=>call.key));
+ for(const call of full)if(rectanglesIntersect(paintedRect(call),clip))assert.ok(keys.has(call.key),'A tile touching the dirty pixels cannot be culled: '+call.key);
+ assert.deepEqual(patch.map(sourcePaintShape),full.filter(call=>keys.has(call.key)).map(sourcePaintShape),'Each retained source keeps its original sampling coordinates, transform, alpha and layer order');
+ for(const key of newKeys){
+  const call=full.find(item=>item.key===key);assert.ok(call);const bounds=paintedRect(call);assert.ok(keys.has(key),'Every newly ready pair must reach its ground patch');
+  assert.ok(clip.left<=Math.max(0,Math.floor(bounds.left))&&clip.top<=Math.max(0,Math.floor(bounds.top)));
+  assert.ok(clip.right>=Math.min(cached.engine.canvas.width,Math.ceil(bounds.right))&&clip.bottom>=Math.min(cached.engine.canvas.height,Math.ceil(bounds.bottom)));
+ }
+ const restored=restoredGround(cached);assert.equal(restored.length,1,'Present the completed ground exactly once');
+ assert.deepEqual(restored[0].args,[0,0]);assert.deepEqual(restored[0].matrix,[1,0,0,1,0,0]);assert.equal(restored[0].composite,'copy');assert.equal(restored[0].alpha,1);
+ const present=draw.indexOf(restored[0]),route=draw.findIndex(call=>call.op==='stroke'&&call.color==='#244d3c'),mask=draw.findIndex(call=>call.op==='fill'&&call.path===cached.engine.mask&&call.rule==='evenodd');
+ assert.ok(draw.indexOf(patch.at(-1))<present&&route>present,'Current route follows the completed patch and identity presentation');
+ assert.ok(mask>route,'The country/hole mask stays after the route');
+ assert.equal(clip.calls.some(call=>call.op==='stroke'&&call.color==='#244d3c'),false,'Routes cannot be baked into the retained ground');
+ const groundDecorations=items=>items.filter(call=>call.op==='stroke'&&['rgba(95,123,87,.45)','#688360'].includes(call.color)||call.op==='fill'&&call.color==='rgba(92,128,70,.10)').map(call=>({op:call.op,color:call.color,width:call.width,rule:call.rule,path:pathCommands(call.path),matrix:call.matrix,alpha:call.alpha,composite:call.composite}));
+ assert.deepEqual(groundDecorations(clip.calls),groundDecorations(canonical.lastDraw()),'Boundaries and selected territory are rebuilt once after all clipped tiles');
+ assert.equal(cached.context.globalCompositeOperation,'source-over');assert.equal(cached.grounds.filter(surface=>surface.width&&surface.height).length,1);
+ return patch.length;
+}
+
+test('streaming snapshot patches the observed 64 z7 to 25 z6 grid in bounded work for three delivery orders',async t=>{
+ for(const orderName of ['requested center-first','reverse','alternating edges']){
+  const cached=await streamingFixture(t),canonical=await streamingFixture(t,{groundCache:false});
+  const order=orderName==='requested center-first'?Array.from({length:25},(_,i)=>i):orderName==='reverse'?Array.from({length:25},(_,i)=>24-i):Array.from({length:25},(_,i)=>i%2?24-Math.floor(i/2):Math.floor(i/2));
+  const captures=groundCopies(cached.env),requests=cached.env.store.requests.length;let optimizedCalls=0,canonicalCalls=0,seeds=0;const counts=[];
+  for(const [step,index]of order.slice(0,24).entries()){
+   for(const current of [cached,canonical]){current.env.store.resolve(current.vectors[index]);await current.env.settle();assert.equal(current.env.engine.inspect().loadingGround?.readyCells??0,step);current.env.store.resolve(current.pair(current.vectors[index]));await current.env.settle();}
+   const patch=groundPatches(cached.env),full=sourcePaints(canonical.env),actual=sourcePaints(cached.env);
+   if(patch.length)assertStreamingPatch(cached.env,canonical.env,[cached.vectors[index].key,cached.pair(cached.vectors[index]).key]);
+   else{assert.equal(step,0,'Only the first incompatible streaming frame may seed its full ground');seeds++;assert.equal(groundCopies(cached.env),captures+seeds);}
+   optimizedCalls+=actual.length;canonicalCalls+=full.length;counts.push(actual.length);
+   assert.equal(groundCopies(cached.env),captures+seeds,'A compatible ready pair cannot capture the entire visible canvas');
+   assert.equal(cached.env.engine.inspect().loadingGround.readyCells,step+1);assert.equal(cached.env.engine.inspect().tiles.detail.length,64);assert.equal(cached.env.engine.getState().loading,true);
+   assert.deepEqual(plain(cached.env.engine.inspect().loadingGround),plain(canonical.env.engine.inspect().loadingGround));assert.equal(cached.env.store.requests.length,requests);assert.equal(cached.env.frames.size,0);
+  }
+  assert.ok(optimizedCalls<=canonicalCalls/2,`${orderName}: dirty source draw calls ${optimizedCalls} must stay below half of full replay ${canonicalCalls}`);
+  const finalIndex=order.at(-1);for(const current of [cached,canonical]){current.env.store.resolve(current.vectors[finalIndex]);current.env.store.resolve(current.pair(current.vectors[finalIndex]));await current.env.settle();}
+  assert.equal(cached.env.engine.inspect().loadingGround,null);assert.equal(cached.env.engine.inspect().tiles.detail.length,25);assert.equal(cached.env.engine.getState().loading,false);assert.equal(cached.env.engine.getState().error,'');
+  assert.equal(groundCopies(cached.env),captures+seeds+1,'The atomic canonical commit invalidates the old partial signature once');
+  t.diagnostic(`${orderName}: 24 controlled partial frames ${JSON.stringify(counts)}; source draw calls ${optimizedCalls}/${canonicalCalls}; native pixel equality and frame timing are separate browser gates`);
+ }
+});
+
+test('streaming snapshot coalesces ready cells in device pixels while labels stay tied to complete pairs',async t=>{
+ for(const pixelRatio of [1.5,2]){
+  const cached=await streamingFixture(t,{pixelRatio}),canonical=await streamingFixture(t,{groundCache:false,pixelRatio});
+  for(const current of [cached,canonical]){current.env.store.resolve(current.vectors[0]);current.env.store.resolve(current.pair(current.vectors[0]));await current.env.settle();}
+  const captures=groundCopies(cached.env),labelIndex=1,coordinate=mercatorUnproject({x:(cached.vectors[labelIndex].request.x+.5)/64,y:(cached.vectors[labelIndex].request.y+.5)/64});
+  for(const current of [cached,canonical]){const vector=current.vectors[labelIndex];current.env.store.resolve(vector,{labels:[current.env.labelFor(vector,coordinate,'Готовая пара')]});await current.env.settle();assert.equal(current.env.engine.getLabelDiagnostics().some(label=>label.label==='Готовая пара'),false);}
+  const indices=[1,2,3];
+  for(const current of [cached,canonical]){
+   for(const index of indices){if(index!==labelIndex)current.env.store.resolve(current.vectors[index]);current.env.store.resolve(current.pair(current.vectors[index]));}
+   assert.equal(current.env.frames.size,0,'Promise completion is not a synchronous render');await current.env.settle();
+  }
+  assertStreamingPatch(cached.env,canonical.env,indices.flatMap(index=>[cached.vectors[index].key,cached.pair(cached.vectors[index]).key]));
+  assert.equal(groundCopies(cached.env),captures);assert.equal(cached.env.engine.inspect().loadingGround.readyCells,4);
+  assert.ok(cached.env.engine.getLabelDiagnostics().some(label=>label.label==='Готовая пара'&&label.visible),'A clipped ground update still admits the completed pair’s label');
+  const before=cached.env.calls.length,draw=cached.env.engine.inspect().drawRevision;
+  cached.env.engine.setObstacles([{left:0,top:0,right:10,bottom:10}]);cached.env.flush();
+  assert.equal(cached.env.engine.inspect().drawRevision,draw);assert.equal(cached.env.calls.slice(before).some(call=>String(call.surface).startsWith('retained-ground:')||call.surface==='tropnik-map-canvas'&&call.op==='drawImage'),false,'Label-only work cannot patch or copy terrain');
+ }
+});
+
+async function warmStreaming(current){
+ for(const index of [0,1]){current.env.store.resolve(current.vectors[index]);current.env.store.resolve(current.pair(current.vectors[index]));await current.env.settle();}
+ assert.ok(groundPatches(current.env).length>0,'Exercise a real compatible patch before testing invalidation');
+}
+test('streaming snapshot rejects base changes, reordered old cells and nonmonotonic generations before presenting stale pixels',async t=>{
+ const cases=[
+  ['same-grid pan',env=>env.engine.setCamera({...env.engine.getCamera(),center:[streamingView.center[0]+.000001,streamingView.center[1]]})],
+  ['zoom',env=>env.engine.setCamera({...env.engine.getCamera(),zoom:6.101})],
+  ['bearing',env=>env.engine.setCamera({...env.engine.getCamera(),bearingDegrees:17})],
+  ['pitch',env=>env.engine.setPitch(25)],
+  ['outside proved zoom range',env=>env.engine.setCamera({...env.engine.getCamera(),zoom:13})],
+  ['resize',env=>{env.host.clientWidth=1042;env.observers[0].callback();}],
+  ['overview batch',env=>{env.engine.overview={...env.engine.overview};env.engine.setLayers({});}],
+  ['canonical detail',env=>{env.engine.detail={...env.engine.detail};env.engine.setLayers({});}],
+  ['canonical relief',env=>{env.engine.relief={...env.engine.relief};env.engine.setLayers({});}],
+  ['coverage',env=>{env.coverage.area=plain(streamingArea);notifyCoverage(env,{revision:1});}],
+  ['selected territory',env=>env.engine.setRegion([])],
+  ['boundary style',env=>env.engine.setLayers({boundaries:false})],
+  ['relief style',env=>env.engine.setLayers({relief:false})],
+  ['photograph handoff',env=>env.engine.setMode('satellite')],
+  ['line cap',env=>{env.context.lineCap='square';env.engine.setLayers({});}],
+  ['line join',env=>{env.context.lineJoin='bevel';env.engine.setLayers({});}],
+  ['miter limit',env=>{env.context.miterLimit=4;env.engine.setLayers({});}],
+  ['different generation',env=>{env.engine.loadingGround={...env.engine.loadingGround,generation:env.engine.generation+1};env.engine.setLayers({});}],
+  ['replaced vector object',env=>{const loading=env.engine.loadingGround;env.engine.loadingGround={...loading,detail:{...loading.detail,tiles:loading.detail.tiles.map((tile,index)=>index?tile:{...tile})}};env.engine.setLayers({});}],
+  ['replaced relief object',env=>{const loading=env.engine.loadingGround;env.engine.loadingGround={...loading,relief:{...loading.relief,tiles:loading.relief.tiles.map((tile,index)=>index?tile:{...tile})}};env.engine.setLayers({});}],
+  ['reordered prior vectors',env=>{const loading=env.engine.loadingGround;env.engine.loadingGround={...loading,detail:{...loading.detail,tiles:[...loading.detail.tiles].reverse()}};env.engine.setLayers({});}],
+  ['removed prior pair',env=>{const loading=env.engine.loadingGround,detail=loading.detail.tiles.slice(1),relief=loading.relief.tiles.slice(1);env.engine.loadingGround={...loading,cells:new Set(detail.map(tile=>`${tile.x}/${tile.y}`)),detail:{...loading.detail,tiles:detail},relief:{...loading.relief,tiles:relief}};env.engine.setLayers({});}],
+ ];
+ for(const [name,change]of cases){
+  const current=await streamingFixture(t);await warmStreaming(current);const {env}=current,captures=groundCopies(env);
+  change(env);env.flush();
+  assert.equal(groundPatches(env).length,0,name+': incompatible ground cannot be patched');
+  assert.equal(restoredGround(env).length,0,name+': stale pixels cannot be copied to the new frame');
+  assert.ok(env.lastDraw().some(call=>call.surface==='tropnik-map-canvas'&&isSourcePaint(call)),name+': keep the original direct painter');
+  assert.ok(groundCopies(env)<=captures+1,name+': a direct fallback may seed only one full snapshot');
+  assert.ok(env.grounds.filter(surface=>surface.width&&surface.height).length<=1,name+': no second live ground surface');
+ }
+});
+
+test('streaming snapshot keeps a failed neighbour useful, reseeds an explicit retry and ignores old camera results',async t=>{
+ const current=await streamingFixture(t);await warmStreaming(current);const {env}=current,captures=groundCopies(env),failed=current.pair(current.vectors[2]);
+ env.store.reject(failed);env.complete();await env.settle();
+ assert.equal(env.engine.getState().loading,false);assert.ok(env.engine.getState().error);assert.equal(env.engine.inspect().loadingGround.readyCells,24);
+ assert.equal(env.engine.inspect().tiles.detail.length,64);assert.equal(groundCopies(env),captures,'A failed neighbour cannot require another whole-canvas capture');
+ const generation=env.engine.inspect().loadingGround.generation,count=env.store.requests.length;env.engine.retry();await env.settle();
+ assert.ok(env.engine.inspect().loadingGround.generation>generation);assert.equal(env.engine.inspect().loadingGround.readyCells,24);
+ assert.equal(env.store.requests.length,count+1,'Retry still requests exactly the failed cell');assert.equal(groundPatches(env).length,0,'A new attempt cannot incrementally mutate a previous generation');
+ assert.equal(groundCopies(env),captures+1,'The new attempt seeds its current complete pairs once');
+ const pending=env.pending();env.engine.setCamera({center:[120,55],zoom:8,bearingDegrees:0});const nextGeneration=env.engine.generation;
+ for(const job of pending)env.store.resolve(job);await env.settle();
+ assert.equal(env.engine.generation,nextGeneration);assert.equal(env.engine.inspect().loadingGround,null,'Late old-camera cells cannot reappear in the new ground');
+ assert.equal(groundPatches(env).length,0);assert.equal(restoredGround(env).length,0);assert.deepEqual(plain(env.engine.getCamera().center),[120,55]);
+});
+
+test('streaming snapshot preserves pause, one-surface budget and bitmap ownership through destruction',async t=>{
+ const current=await streamingFixture(t);await warmStreaming(current);const {env}=current,captures=groundCopies(env),revision=env.engine.inspect().drawRevision;
+ const liveBitmaps=[...env.store.cache.values()].map(tile=>tile.bitmap);assert.ok(liveBitmaps.every(bitmap=>!bitmap.closed));
+ env.engine.setActive(false);
+ for(const index of [2,3]){env.store.resolve(current.vectors[index]);env.store.resolve(current.pair(current.vectors[index]));}
+ await env.settle();assert.equal(env.engine.inspect().drawRevision,revision);assert.equal(env.frames.size,0);assert.equal(groundCopies(env),captures);
+ env.engine.setActive(true);await env.settle();assert.equal(env.engine.inspect().loadingGround.readyCells,4);assert.ok(groundPatches(env).length>0);assert.equal(restoredGround(env).length,1);
+ assert.equal(groundCopies(env),captures);assert.ok(liveBitmaps.every(bitmap=>!bitmap.closed),'Snapshot drawing cannot close store-owned bitmaps');
+ const owned=[...env.grounds];env.host.clientWidth=5000;env.host.clientHeight=2000;env.observers[0].callback();env.flush();
+ assert.ok(owned.every(surface=>surface.width===0&&surface.height===0),'An over-budget streaming frame releases its previous backing store');
+ assert.equal(groundPatches(env).length,0);assert.equal(restoredGround(env).length,0);assert.ok(env.lastDraw().some(call=>call.surface==='tropnik-map-canvas'&&isSourcePaint(call)));
+ const pending=env.pending(),bitmaps=[...env.store.cache.values()].map(tile=>tile.bitmap);env.engine.destroy();const calls=env.calls.length;
+ for(const job of pending)env.store.resolve(job);await env.settle();
+ assert.equal(env.calls.length,calls,'Late worker results cannot allocate or patch a destroyed surface');assert.ok(env.grounds.every(surface=>surface.width===0&&surface.height===0));
+ assert.ok(bitmaps.every(bitmap=>bitmap.closed),'The tile store remains the sole bitmap disposal owner');assert.equal(env.host.children.length,0);assert.equal(env.frames.size,0);
+});
+
+test('streaming snapshot seeds a cold first pair once before patching its next completed neighbour',async t=>{
+ const env=fixture({groundCache:true});t.after(()=>env.engine.destroy());await turn();
+ const vectors=env.pending('vector'),reliefs=env.pending('relief'),pair=vector=>reliefs.find(job=>sameTileCell(job,vector));assert.ok(vectors.length>2);
+ assert.equal(env.engine.inspect().drawRevision,0,'No earlier RAF may have created a reusable ground');assert.equal(env.grounds.length,0);
+ const requests=env.store.requests.length;env.store.resolve(vectors[0]);env.store.resolve(pair(vectors[0]));await env.settle();
+ assert.equal(env.engine.inspect().loadingGround.readyCells,1);assert.equal(env.engine.getState().loading,true);assert.equal(groundCopies(env),1,'The first current partial ground needs exactly one direct seed');
+ assert.equal(groundPatches(env).length,0);assert.equal(restoredGround(env).length,0);assert.ok(env.lastDraw().some(call=>call.surface==='tropnik-map-canvas'&&call.key===vectors[0].key));
+ env.store.resolve(vectors[1]);await env.settle();assert.equal(env.engine.inspect().loadingGround.readyCells,1);assert.equal(groundCopies(env),1);
+ env.store.resolve(pair(vectors[1]));await env.settle();
+ const patch=groundPatches(env);assert.ok(patch.some(call=>call.key===vectors[1].key));assert.ok(patch.some(call=>call.key===pair(vectors[1]).key));dirtyClip(env);
+ assert.equal(restoredGround(env).length,1);assert.deepEqual(restoredGround(env)[0].args,[0,0]);assert.equal(groundCopies(env),1,'The next ready pair cannot repeat the first full capture');
+ assert.equal(env.engine.inspect().loadingGround.readyCells,2);assert.equal(env.store.requests.length,requests);assert.equal(env.frames.size,0);assert.equal(env.grounds.filter(surface=>surface.width&&surface.height).length,1);
 });

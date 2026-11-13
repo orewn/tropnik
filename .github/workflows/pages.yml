@@ -415,6 +415,117 @@ jobs:
             }
           }
           assert.equal(groundFrames, 126);
+          const fixturePath = 'tools/pages-preview/tests/browser-map-underlay.browser.mjs';
+          const fixtureBytes = readFileSync(fixturePath);
+          assert.deepEqual(underlay.fixture, {path:fixturePath,bytes:fixtureBytes.length,sha256:createHash('sha256').update(fixtureBytes).digest('hex')});
+          assert.deepEqual(build.inputs.find(input => input.path === fixturePath), underlay.fixture);
+          const streamingGround = underlay.streamingGround;
+          const streamingScenarios = ['trace-grid','small-lifecycle'];
+          const streamingPhases = {
+            'trace-grid':['cold','stroke-history',...Array.from({length:25},(_,index) => 'pair-'+String(index+1).padStart(2,'0')),'complete','complete-warm'],
+            'small-lifecycle':['cold','stroke-history','pair-01','pair-02','repeat','overlay-changed','route-changed','mask-changed','selected-area-changed','boundary-changed','line-caps-changed','overview-changed','canonical-replaced','new-generation','new-generation-pair','prefix-inserted','prefix-replaced','cohort-shrunk','loading-reset','restart','fractional-camera','resize','pointer-active','pointer-released','animation-active','animation-ended','rotated','pitched','flat-restored','relief-hidden','relief-restored','failure-overlay','failure-warm','satellite-retained','detail-restored','complete','complete-warm'],
+          };
+          assert.equal(streamingGround.verified, true);
+          assert.equal(streamingGround.baseline, 'same-production-draw-with-update-retain-restore-disabled');
+          assert.deepEqual(streamingGround.dpr, [1,1.5,2]);
+          assert.deepEqual(streamingGround.scenarios, streamingScenarios);
+          assert.deepEqual(streamingGround.phases, streamingPhases);
+          assert.deepEqual(streamingGround.cases.map(item => item.dpr+'/'+item.name).sort(), [1,1.5,2].flatMap(dpr => streamingScenarios.map(name => dpr+'/'+name)).sort());
+          let streamingFrames = 0;
+          for (const item of streamingGround.cases) {
+            const trace = item.name === 'trace-grid';
+            const initial = trace ? {width:1041,height:928} : {width:512,height:384};
+            assert.equal(item.verified, true);
+            assert.equal(item.streamingProof, true);
+            assert.equal(item.nativeDpr, item.dpr);
+            assert.equal(item.separateLabelsAndDOMMarkersExcluded, true);
+            assert.equal(item.fixture, 'production-painter-with-seeded-native-512px-ImageBitmaps; deterministic delivery; no application or network simulation');
+            assert.equal(item.contextAttributes.alpha, false);
+            assert.equal(item.contextAttributes.willReadFrequently, item.policy.softwareRaster);
+            assert.deepEqual(item.initialViewport, initial);
+            assert.equal(item.initialCamera.zoom, trace ? 6.1 : 8.25);
+            assert.equal(item.initialCamera.bearingDegrees, 0);
+            if (trace) assert.deepEqual(item.initialCamera.center, [85.97995147228215,50.65622536454623]);
+            assert.equal(item.canonicalGrid.z, trace ? 7 : 9);
+            assert.equal(item.canonicalGrid.cells, trace ? 64 : 4);
+            assert.equal(item.loadingGrid.z, trace ? 6 : 8);
+            assert.equal(item.loadingGrid.cells, trace ? 25 : 9);
+            if (trace) {
+              assert.deepEqual(item.canonicalGrid.bounds, [91,39,98,46]);
+              assert.deepEqual(item.loadingGrid.bounds, [45,19,49,23]);
+            }
+            assert.deepEqual(item.phases, streamingPhases[item.name]);
+            assert.deepEqual(item.frames.map(frame => frame.phase), streamingPhases[item.name]);
+            assert.equal(item.incrementalFrames, trace ? 24 : 0);
+            assert.equal(item.priorFrame.kind, 'distinct-opaque-checkerboards');
+            const priorPixels = Math.round(initial.width*item.dpr)*Math.round(initial.height*item.dpr);
+            assert.equal(item.priorFrame.comparison.differentPixels, priorPixels);
+            assert.equal(item.priorFrame.comparison.totalPixels, priorPixels);
+            assert.ok(item.priorFrame.comparison.maxChannelDelta > 0);
+            assert.match(item.priorFrame.baselinePixelSHA256, /^[a-f0-9]{64}$/);
+            assert.match(item.priorFrame.optimizedPixelSHA256, /^[a-f0-9]{64}$/);
+            assert.notEqual(item.priorFrame.baselinePixelSHA256, item.priorFrame.optimizedPixelSHA256);
+            assert.deepEqual(item.negativeControls.map(control => control.name), trace ? ['omit-second-loading-pair'] : []);
+            for (const control of item.negativeControls) assert.ok(control.differentPixels > 0 && control.maxChannelDelta > 0);
+            for (const [index, frame] of item.frames.entries()) {
+              streamingFrames++;
+              assert.equal(frame.index, index);
+              const resized = !trace && index >= streamingPhases[item.name].indexOf('resize');
+              const viewport = resized ? {width:529,height:395} : initial;
+              assert.deepEqual(frame.viewport, viewport);
+              assert.deepEqual([frame.width,frame.height], [Math.round(viewport.width*item.dpr),Math.round(viewport.height*item.dpr)]);
+              assert.deepEqual(frame.comparison, {differentPixels:0,maxChannelDelta:0,totalPixels:frame.width*frame.height});
+              assert.match(frame.baselinePixelSHA256, /^[a-f0-9]{64}$/);
+              assert.equal(frame.optimizedPixelSHA256, frame.baselinePixelSHA256);
+              assert.ok(frame.retained.maxLiveSurfaces <= 1 && frame.retained.maxBytes <= 32*1024*1024);
+              const {baseline,optimized} = frame.operations;
+              assert.equal(baseline.updateHits, 0);
+              assert.equal(baseline.restoreHits, 0);
+              assert.equal(baseline.groundCalls.length, 1);
+              assert.deepEqual(baseline.groundCalls[0], {surface:'main',dirty:null});
+              assert.equal(baseline.main.mask, 1);
+              assert.equal(optimized.main.mask, 1);
+              const mustIncrement = trace && /^pair-\d+$/.test(frame.phase) && Number(frame.phase.slice(5)) >= 2;
+              assert.equal(frame.mustIncrement, mustIncrement);
+              const fallback = ['pointer-active','animation-active','rotated','pitched','satellite-retained'].includes(frame.phase);
+              assert.equal(frame.fallback, fallback);
+              if (mustIncrement) {
+                assert.equal(frame.loadingSnapshotIdentity, true);
+                assert.equal(frame.loadingCells, Number(frame.phase.slice(5)));
+                assert.equal(frame.loadingGeneration, 2);
+                assert.equal(optimized.updateHits, 1);
+                assert.equal(optimized.main.snapshotCopies, 1);
+                assert.ok(optimized.groundCalls.length > 0);
+                for (const call of optimized.groundCalls) {
+                  assert.equal(call.surface, 'retained');
+                  const {rect,geometry} = call.dirty;
+                  assert.ok(Object.values(rect).every(Number.isInteger));
+                  assert.ok(rect.left >= 0 && rect.top >= 0 && rect.right <= frame.width && rect.bottom <= frame.height && rect.right > rect.left && rect.bottom > rect.top);
+                  assert.ok((rect.right-rect.left)*(rect.bottom-rect.top) < frame.width*frame.height);
+                  assert.deepEqual([geometry.width,geometry.height,geometry.ratio], [frame.width,frame.height,item.dpr]);
+                }
+                const tileCalls = counts => ['overview','detail','relief','imagery'].reduce((sum,key) => sum+counts[key],0);
+                assert.ok(tileCalls(optimized.retained)+tileCalls(optimized.main) < tileCalls(baseline.main));
+              }
+              if (fallback) {
+                assert.equal(optimized.updateHits, 0);
+                assert.ok(optimized.groundCalls.every(call => !call.dirty));
+              }
+              assert.deepEqual(frame.captures.map(capture => capture.phase), ['baseline','optimized']);
+              for (const capture of frame.captures) {
+                assert.equal(capture.file, `streaming-dpr${item.dpr}-${item.name}-${frame.phase}-${capture.phase}.png`);
+                const png = readFileSync('web/pages-preview/design-qa/map-underlay/'+capture.file);
+                assert.equal(png.length, capture.bytes);
+                assert.equal(createHash('sha256').update(png).digest('hex'), capture.sha256);
+                assert.equal(png.subarray(0,8).toString('hex'), '89504e470d0a1a0a');
+                assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)], [frame.width,frame.height]);
+              }
+            }
+          }
+          assert.equal(streamingFrames, 198);
+          assert.equal(underlay.browserStartup.status, 'ready');
+          assert.equal(underlay.browserStartup.cleanup.status, 'stopped');
+          assert.deepEqual(underlay.browserStartup.cleanup.errors, []);
           const controls = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-controls-verification.json', 'utf8'));
           assert.equal(controls.verified, true);
           assert.equal(controls.sourceCommit, process.env.GITHUB_SHA);

@@ -5,7 +5,9 @@
 Готовится отдельный выпуск **0.4.33-preview / versionCode 16** поверх
 `b80e274524c3834c470b9a3ade9dfabc1fdb4ca5`. Он исправляет подтверждённую
 ошибку общего картографического движка и задержку появления окружения карты.
-Первый кандидат `5fefc0da` не прошёл полные CI и не опубликован.
+Кандидаты `5fefc0da`, `67d418dd` и `90dae23c` не прошли полные Pages CI
+и не опубликованы. Текущий кандидат добавляет ограниченное обновление
+retained ground при поступлении готовых клеток; native pixel proof ожидается.
 Опубликованный Android 0.4.32 и
 его результаты сохраняются; нового APK или Pages 0.4.33 пока нет.
 
@@ -249,9 +251,9 @@ down/up/click `2/2/3`, `4/4/5` и `6/6/7`. Screenshot после касания 
 Android release request и публичный download manifest остаются на 0.4.32.
 Публикация 0.4.33 удерживается до полного Pages PASS исправленного runtime.
 
-## Кэш отрисовки во время поступления клеток
+## Первая оптимизация кэша: source 90dae23c
 
-Следующий локальный кандидат убирает одну лишнюю операцию: полную копию
+Кандидат `90dae23c757c2b630e7f94b6532ef2cda5110562` убрал одну лишнюю операцию: полную копию
 canvas для retained ground, пока есть готовые промежуточные пары и их
 поколение ещё загружается. Каждая новая пара меняет signature и делает
 предыдущую такую копию непригодной для следующего кадра. Прямой onscreen
@@ -275,7 +277,116 @@ source inputs:
 `bba9268d3fd505c58d66c610645d6141634357bac101c06e6df41d7510b0d5d4`.
 Локальная сборка `9422286fa73b1574` проверила 718 страниц, 71 HTTP case и
 все 2165 input hashes. Её `sourceCommit: null`; браузерные пиксели, реальная
-плавность и точный новый APK ещё должны пройти свои CI gates.
+плавность и точный новый APK проверялись отдельно в следующих CI gates.
+
+### Результаты source 90dae23c
+
+[Pages run 43432850110](https://github.com/orewn/tropnik/actions/runs/43432850110)
+с build `9422286fa73b1574` снова остановился на ранней плавности:
+desktop pan p95 **45,2 ms**, zoom **38,9 ms** при прежнем пределе 35 ms.
+Остальные 14 окон прошли; Android pan — 25,9 ms, zoom — 30,9 ms.
+[Независимый пересчёт](verification/web-0.4.33-retain-smoothness-failure.json)
+сохраняет все 16 завершённых окон без instrumentation. Из 33 длинных pan
+интервалов 24 пришлись на позднюю часть после жеста, восемь — на сам drag,
+один — на первоначальное settled состояние. Полный UI audit, последующие
+pixel gates и deploy не запускались; принятого Pages payload нет.
+
+При этом [loading и SW gates](verification/web-0.4.33-retain-loading-sw.json)
+прошли на exact source: при удержанном внешнем DEM готовы 17 из 42 пар,
+подробное покрытие расширено на 195 171,45 CSS px². Все 24 raw RGBA пары
+совпали между pending и final; все 24 соответствующие PNG crops также
+совпали между фазами. В двух сравнениях raw canvas с PNG один и тот же
+образец имеет 37 отличающихся пикселей с максимальной channel delta 2;
+возможное влияние соседней CSS-тени остаётся объяснением, а не trace proof.
+Ни oracle, ни порог не менялись. Progress зафиксирован через 266,35 ms после
+реального pause, сам pause — через 6667,01 ms от начала подготовки;
+это не полная загрузка за 266 ms. После release приняты 42/42 пары,
+все 114 сетевых ответов успешны. SW deadline/retry и cleanup прошли.
+
+[Android run 43432850354](https://github.com/orewn/tropnik/actions/runs/43432850354)
+прошёл 70 JVM, unsigned R8 и все 11 exact-artifact device scenarios.
+[Validation](verification/android-0.4.33-retain-validation.json) и
+[native marker proof](verification/android-0.4.33-retain-marker-input.json)
+сохраняют source, runtime, точные APK bytes и настоящие WebView gestures.
+Release request остался 0.4.32, publish/public jobs пропущены.
+
+### Trace повторной отрисовки
+
+Один изолированный [diagnostic run 43432849188](https://github.com/orewn/tropnik/actions/runs/43432849188)
+с production bytes `67d418dd` сохранил полный native pan trace.
+[Trace receipt](verification/map-0.4.33-progressive-paint-trace.json) и
+[независимый разбор контекста](verification/map-0.4.33-progressive-trace-independent-review.json)
+связывают все 24 поздних RAF interval свыше 50 ms с 24 реальными partial
+paint callbacks. В каждом CPU stack присутствуют и `drawTiles → drawImage`,
+и `retainGround → drawImage`. Из 5929 CPU samples этих callbacks 3074
+относятся к drawTiles, 2328 — к retainGround. Это sample counts,
+не доли wall time и не прогноз ускорения.
+
+Геометрия pan: canvas 1041×928, DPR 1, camera zoom 6,1; прежние 64 клетки
+z7 и новые 25 клеток z6. Все прежние клетки пересекают viewport. Простого
+отсечения невидимых tiles недостаточно; [occlusion model](verification/map-0.4.33-canonical-occlusion-model.json)
+также оставляет первые partial frames почти без экономии. [Dirty-region model](verification/map-0.4.33-dirty-region-model.json)
+обосновывает обновление ограниченного участка. Модели считают draw calls,
+не измеряют native время; фактический порядок завершения клеток не записан.
+Zoom trace завершился `Tracing.tracingComplete timed out`, сохранил ноль
+байт и не используется для CPU attribution. Run не повторялся и не
+подменяет обычные release gates.
+
+## Ограниченное обновление готовой подложки
+
+Текущий кандидат сохраняет одну совместимую retained surface и при
+появлении новых пар обновляет только их целочисленный bounding rectangle
+в физических пикселях, с запасом 4 px. Внутри clip воспроизводится прежний
+полный ground painter: underlay, canonical и loading пары, рельеф,
+границы и полупрозрачная маска в исходном порядке. Исключаются только
+тайлы, которые доказанно не влияют на этот clip. Весь foreground рисуется
+прежним способом после переноса готовой подложки на видимый canvas.
+
+[Сравнение с историческим painter](verification/map-0.4.33-streamed-ground-painter-factoring.json)
+подтверждает совпадение полного ground body после семи явных замен
+передачи context/patch, default alpha и объявления scale. Условия, порядок,
+константы и whitespace не нормализованы. Foreground совпадает побайтно без
+каких-либо замен. Это source proof факторинга; pixel proof clip остаётся
+отдельной native проверкой.
+
+Кэш применяется только при совместимых camera/style/source inputs,
+stationary north-up view и текущем поколении пар. Смена камеры, размеров,
+масштаба экрана, слоя, геометрии, поколения, замена или перестановка старых
+bitmap возвращает исходный полный painter. Неизвестная геометрия также
+не отсекается. Первое подходящее покрытие сохраняется один раз; полное
+canonical завершение перерисовывается целиком. Используется одна прежняя
+поверхность с лимитом 32 MiB. Новых запросов, bitmap resampling, таймеров
+или idle RAF нет.
+
+[Независимый review движка](verification/map-0.4.33-streamed-ground-independent-review.json)
+и [регрессии](verification/map-0.4.33-streamed-ground-regression.json)
+проверяют clip, порядок слоёв, identity bitmap, generation, invalidation,
+ошибки/retry, foreground и lifetime. Итоговый [локальный preflight](verification/local-0.4.33-streamed-ground-preflight.json)
+подтвердил **85/85** engine tests, lint и полный TypeScript. На сохранённой
+геометрии и трёх управляемых порядках готовности partial frames выполняют
+737, 703 и 726 source-image draw calls вместо 3768. Эти mock counts не
+включают full-surface copies, paths и labels и не означают такое же
+сокращение времени в браузере.
+
+Runtime воспроизводим из 61 source input; все 12 web/Android файлов
+побайтно совпадают. Manifest SHA-256:
+`83b26b0121443b963cb7a032dbf3d66d65ff894202dd8b770b95bcf93b7d5c23`;
+source inputs:
+`d033278ba5e00aea107e617d56d5dcafcf3d4e173e077493a779e7d1458d45cf`.
+Локальная сборка `1ea1ee8c41121dd0` прошла 718 страниц, 71 HTTP case и
+проверку всех 2165 input hashes. `sourceCommit: null` сохраняется явно;
+этот локальный ZIP не используется как поставка.
+
+[Новая native fixture](verification/map-0.4.33-streamed-ground-native-fixture-review.json)
+сохраняет прежние 172 pixel frames и deadline и добавляет 198 frames:
+trace geometry и lifecycle сценарии при DPR 1, 1,5 и 2. Сравниваются
+все RGBA pixels настоящего Canvas с полным painter; допустимая разница —
+ноль. Отдельно требуются actual dirty-path hits, bounded clip, один retained
+surface, PNG bytes/hash/dimensions и отрицательный контроль пропущенной пары.
+Первый запуск выполняется один раз на `verify/streamed-ground-20261113`,
+без Pages/APK publication. Только после его PASS тот же commit продвигается
+на main для полных application, smoothness и Android gates. Native pixel
+результат и улучшение фактической плавности пока не заявляются.
 
 ## Порядок выпуска
 

@@ -3650,19 +3650,23 @@ var Fn = class {
 	displayDetail() {
 		return this.displayingSatellite() ? this.imageryOverlay : this.detail;
 	}
-	worldTransform() {
-		let e = this.context, t = 256 * 2 ** this.camera.zoom, n = d(this.camera.center), r = (this.camera.bearingDegrees ?? 0) * Math.PI / 180;
+	worldTransform(e = this.context) {
+		let t = 256 * 2 ** this.camera.zoom, n = d(this.camera.center), r = (this.camera.bearingDegrees ?? 0) * Math.PI / 180;
 		return e.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0), e.translate(this.size.width / 2, this.size.height / 2), e.scale(1, Math.cos(this.pitch * Math.PI / 180)), e.rotate(-r), e.scale(t, t), e.translate(-n.x, -n.y), t;
 	}
-	drawTiles(e, t = 1) {
-		if (!e) return;
-		let n = this.context;
-		n.globalAlpha = t;
-		for (let t of e.tiles) {
-			let e = 2 ** t.z;
-			n.drawImage(t.bitmap, t.x / e, t.y / e, 1 / e + 1e-10, 1 / e + 1e-10);
+	drawTiles(e, t = 1, n = this.context, r) {
+		if (e) {
+			n.globalAlpha = t;
+			for (let t of e.tiles) {
+				if (r) {
+					let e = this.groundTileRect(t, r.geometry), n = r.rect;
+					if (e && (e.right < n.left - 4 || e.left > n.right + 4 || e.bottom < n.top - 4 || e.top > n.bottom + 4)) continue;
+				}
+				let e = 2 ** t.z;
+				n.drawImage(t.bitmap, t.x / e, t.y / e, 1 / e + 1e-10, 1 / e + 1e-10);
+			}
+			n.globalAlpha = 1;
 		}
-		n.globalAlpha = 1;
 	}
 	detailCoversViewport(e) {
 		if (this.mode !== "detail" || this.pitch !== 0 || (this.camera.bearingDegrees ?? 0) !== 0 || this.camera.zoom < 4.7 || this.camera.zoom > 12 || e?.kind !== "vector" || !e.tiles.length || e.tiles.length > Z) return !1;
@@ -3715,7 +3719,6 @@ var Fn = class {
 			e,
 			this.imagery,
 			this.relief,
-			this.loadingGround,
 			this.boundaries,
 			this.boundaryVisible,
 			this.reliefVisible,
@@ -3726,14 +3729,105 @@ var Fn = class {
 			r.miterLimit
 		];
 	}
+	sameGroundSignature(e) {
+		let t = this.groundSnapshot;
+		return !!t && t.signature.length === e.length && e.every((e, n) => Object.is(e, t.signature[n]));
+	}
+	groundPixelGeometry() {
+		if (this.mode !== "detail" || this.pitch !== 0 || (this.camera.bearingDegrees ?? 0) !== 0 || this.camera.zoom < 5 || this.camera.zoom > 12) return;
+		let e = this.pixelRatio, t = this.canvas.width, n = this.canvas.height, r = 256 * 2 ** this.camera.zoom, i = d(this.camera.center);
+		if (!(![
+			e,
+			t,
+			n,
+			this.size.width,
+			this.size.height,
+			r,
+			i.x,
+			i.y
+		].every(Number.isFinite) || e <= 0 || e > 2 || !Number.isInteger(t) || !Number.isInteger(n) || t <= 0 || n <= 0 || t > 32768 || n > 32768 || t * n * 4 > Pn || this.size.width <= 0 || this.size.height <= 0 || Math.abs(i.x) > 2 || i.y < 0 || i.y > 1)) return {
+			ratio: e,
+			width: t,
+			height: n,
+			scale: r,
+			center: i,
+			centerX: this.size.width / 2,
+			centerY: this.size.height / 2
+		};
+	}
+	groundTileRect(e, t) {
+		let { scale: n, ratio: r, center: i, centerX: a, centerY: o } = t, s = 2 ** e.z;
+		if (!Number.isInteger(e.z) || e.z < 0 || e.z > 18 || !Number.isSafeInteger(e.x) || !Number.isInteger(e.y) || e.y < 0 || e.y >= s || Math.abs(e.x / s) > 2 || Math.abs((e.x + 1) / s) > 2 || n * r / s <= 1) return;
+		let c = ((e.x / s - i.x) * n + a) * r, l = ((e.y / s - i.y) * n + o) * r, u = ((e.x / s + 1 / s + 1e-10 - i.x) * n + a) * r, d = ((e.y / s + 1 / s + 1e-10 - i.y) * n + o) * r;
+		if (!(![
+			c,
+			l,
+			u,
+			d
+		].every(Number.isFinite) || u <= c || d <= l)) return {
+			left: c,
+			top: l,
+			right: u,
+			bottom: d
+		};
+	}
+	validLoadingGround(e) {
+		if (!Number.isSafeInteger(e.generation) || e.generation !== this.generation || !Number.isInteger(e.z) || e.z < 0 || e.z > 18 || !e.detail.tiles.length || e.detail.tiles.length > Z || !Number.isInteger(e.requestedCells) || e.requestedCells < e.detail.tiles.length || e.requestedCells > Z) return !1;
+		let t = (t, n) => t.kind === n && t.tiles.every((t) => t.kind === n && t.z === e.z && Number.isSafeInteger(t.x) && Number.isInteger(t.y) && t.y >= 0 && t.y < 2 ** t.z && t.bitmap.width === 512 && t.bitmap.height === 512 && (n !== "vector" || t.transparent === !1));
+		if (!t(e.detail, "vector") || e.relief && !t(e.relief, "relief")) return !1;
+		let n = new Set(e.detail.tiles.map((e) => `${e.x}/${e.y}`));
+		return n.size === e.detail.tiles.length && e.cells.size === n.size && [...n].every((t) => e.cells.has(t)) && (!e.relief || e.relief.tiles.length === n.size && new Set(e.relief.tiles.map((e) => `${e.x}/${e.y}`)).size === n.size && e.relief.tiles.every((e) => n.has(`${e.x}/${e.y}`)));
+	}
 	restoreGround(e) {
 		let t = this.groundSnapshot;
-		if (!t || t.signature.length !== e.length || e.some((e, n) => !Object.is(e, t.signature[n]))) return !1;
+		if (!t || !this.sameGroundSignature(e) || t.loading !== this.loadingGround || this.loadingGround && !this.validLoadingGround(this.loadingGround)) return !1;
 		let n = this.context;
 		return n.save(), n.setTransform(1, 0, 0, 1, 0, 0), n.globalAlpha = 1, n.globalCompositeOperation = "copy", n.drawImage(t.surface, 0, 0), n.restore(), !0;
 	}
+	updateLoadingGround(e, t, n, r) {
+		let i = this.groundSnapshot, a = this.loadingGround, o = this.groundPixelGeometry();
+		if (!i || !a || n || !o || this.pointer.activePointers || this.animation || this.groundSnapshotUnavailable || !this.sameGroundSignature(e) || !this.validLoadingGround(a) || i.surface.width !== this.canvas.width || i.surface.height !== this.canvas.height) return !1;
+		let s = i.loading;
+		if (s && (s.generation !== a.generation || s.z !== a.z || s.requestedCells !== a.requestedCells || !!s.relief != !!a.relief)) return !1;
+		let c = (e, t) => {
+			if (!e) return !0;
+			if (!t) return !1;
+			let n = new Set(e.tiles), r = t.tiles.filter((e) => n.has(e));
+			return r.length === e.tiles.length && r.every((t, n) => t === e.tiles[n]);
+		};
+		if (!c(s?.detail, a.detail) || !c(s?.relief, a.relief)) return !1;
+		let l = new Set(s?.detail.tiles), u = a.detail.tiles.filter((e) => !l.has(e)), d = o.width, f = o.height, p = 0, m = 0;
+		for (let e of u) {
+			let t = this.groundTileRect(e, o);
+			if (!t) return !1;
+			let n = Math.max(0, Math.floor(t.left - 4)), r = Math.max(0, Math.floor(t.top - 4)), i = Math.min(o.width, Math.ceil(t.right + 4)), a = Math.min(o.height, Math.ceil(t.bottom + 4));
+			i <= n || a <= r || (d = Math.min(d, n), f = Math.min(f, r), p = Math.max(p, i), m = Math.max(m, a));
+		}
+		try {
+			if (p > d && m > f) {
+				let e = i.context;
+				e.save();
+				try {
+					e.setTransform(1, 0, 0, 1, 0, 0), e.globalAlpha = 1, e.globalCompositeOperation = "source-over", e.lineCap = this.context.lineCap, e.lineJoin = this.context.lineJoin, e.miterLimit = this.context.miterLimit, e.beginPath(), e.rect(d, f, p - d, m - f), e.clip(), this.drawGround(t, n, r, e, {
+						rect: {
+							left: d,
+							top: f,
+							right: p,
+							bottom: m
+						},
+						geometry: o
+					});
+				} finally {
+					e.restore();
+				}
+			}
+			return i.signature = e, i.loading = a, this.restoreGround(e);
+		} catch {
+			return this.releaseGround(), this.groundSnapshotUnavailable = !0, !1;
+		}
+	}
 	retainGround(e) {
-		if (!(this.pointer.activePointers || this.animation || this.groundSnapshotUnavailable) && !(this.state.loading && this.loadingGround) && !((this.camera.bearingDegrees ?? 0) !== 0 || this.pitch !== 0)) {
+		if (!(this.pointer.activePointers || this.animation || this.groundSnapshotUnavailable) && !(this.state.loading && this.loadingGround && (!this.groundPixelGeometry() || !this.validLoadingGround(this.loadingGround))) && !((this.camera.bearingDegrees ?? 0) !== 0 || this.pitch !== 0)) {
 			if (this.canvas.width * this.canvas.height * 4 > Pn) {
 				this.releaseGround();
 				return;
@@ -3757,7 +3851,7 @@ var Fn = class {
 				}
 				t.surface.width !== this.canvas.width && (t.surface.width = this.canvas.width), t.surface.height !== this.canvas.height && (t.surface.height = this.canvas.height);
 				let n = t.context;
-				n.setTransform(1, 0, 0, 1, 0, 0), n.globalAlpha = 1, n.globalCompositeOperation = "copy", n.drawImage(this.canvas, 0, 0), t.signature = e;
+				n.setTransform(1, 0, 0, 1, 0, 0), n.globalAlpha = 1, n.globalCompositeOperation = "copy", n.drawImage(this.canvas, 0, 0), t.signature = e, t.loading = this.loadingGround;
 			} catch {
 				this.releaseGround(), this.groundSnapshotUnavailable = !0;
 			}
@@ -3767,10 +3861,15 @@ var Fn = class {
 		let e = this.groundSnapshot;
 		this.groundSnapshot = void 0, e && (e.surface.width = 0, e.surface.height = 0);
 	}
+	drawGround(e, t, n, r = this.context, i) {
+		r.setTransform(1, 0, 0, 1, 0, 0), n || (r.fillStyle = ve, r.fillRect(0, 0, this.canvas.width, this.canvas.height));
+		let a = this.worldTransform(r);
+		return n || (this.area && (r.fillStyle = "#dce5cf", r.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95, r, i)), t && this.drawTiles(this.imagery, 1, r, i), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!t || e?.tiles[0]?.transparent) && this.drawTiles(e, 1, r, i), !t && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82, r, i), !t && this.mode === "detail" && this.camera.zoom >= 4.7 && this.loadingGround && (this.drawTiles(this.loadingGround.detail, 1, r, i), this.reliefVisible && this.drawTiles(this.loadingGround.relief, .82, r, i)), this.boundaryVisible && this.boundaries && (r.strokeStyle = t ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", r.lineWidth = .65 / a, r.stroke(this.boundaries)), this.selectedArea && (r.fillStyle = "rgba(92,128,70,.10)", r.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (r.strokeStyle = t ? "#e7eacc" : "#688360", r.lineWidth = 1.3 / a, r.stroke(this.selectedBoundary)), a;
+	}
 	draw() {
 		if (this.disposed || !this.active) return;
 		let e = this.context, t = this.displayDetail(), n = this.detailCoversViewport(t), r = this.displayingSatellite(), i = this.groundSignature(t, r, n), a;
-		if (this.restoreGround(i) ? a = this.worldTransform() : (e.setTransform(1, 0, 0, 1, 0, 0), n || (e.fillStyle = ve, e.fillRect(0, 0, this.canvas.width, this.canvas.height)), a = this.worldTransform(), n || (this.area && (e.fillStyle = "#dce5cf", e.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95)), r && this.drawTiles(this.imagery), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!r || t?.tiles[0]?.transparent) && this.drawTiles(t), !r && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), !r && this.mode === "detail" && this.camera.zoom >= 4.7 && this.loadingGround && (this.drawTiles(this.loadingGround.detail), this.reliefVisible && this.drawTiles(this.loadingGround.relief, .82)), this.boundaryVisible && this.boundaries && (e.strokeStyle = r ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / a, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (e.strokeStyle = r ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / a, e.stroke(this.selectedBoundary)), this.retainGround(i)), this.paths && this.drawTrailOverlay(a, r), this.route && !this.reviewedCoastalRoute && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (V(this.camera.zoom) + 3) / a, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = V(this.camera.zoom) / a, e.stroke(this.route.path)), this.mask && (e.fillStyle = ve, e.fill(this.mask, "evenodd")), this.paths && this.reviewedCoastalOverlayBatch) {
+		if (this.restoreGround(i) || this.updateLoadingGround(i, t, r, n) ? a = this.worldTransform() : (a = this.drawGround(t, r, n), this.retainGround(i)), this.paths && this.drawTrailOverlay(a, r), this.route && !this.reviewedCoastalRoute && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (V(this.camera.zoom) + 3) / a, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = V(this.camera.zoom) / a, e.stroke(this.route.path)), this.mask && (e.fillStyle = ve, e.fill(this.mask, "evenodd")), this.paths && this.reviewedCoastalOverlayBatch) {
 			let t = this.camera.zoom < 8 ? 1.4 : 2;
 			e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = r ? "rgba(30,48,37,.9)" : "rgba(255,254,245,.9)", e.lineWidth = (t + 2) / a, e.stroke(this.reviewedCoastalOverlayBatch), e.strokeStyle = r ? "#f2d49b" : "#618253", e.lineWidth = t / a, e.stroke(this.reviewedCoastalOverlayBatch);
 		}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-read-only-progressive-retention-candidate-review",
+  "reviewStatus": "PASS",
+  "scope": "Code and targeted regression review only; no browser timing, native raster parity, deployment or release clearance.",
+  "baselineSourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+  "baselineEngineSha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704",
+  "candidateEngine": {
+    "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-engine.ts",
+    "bytes": 78364,
+    "sha256": "95ad8a8e654bd15299c1e944f40af98b8a3becbb38896619dfd7d6ff0ced781a"
+  },
+  "candidateTest": {
+    "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-engine.test.mjs",
+    "bytes": 170414,
+    "sha256": "f2cf51e2dd21f8505405a014bd909aba201dce5013835ce02dedf7a4a0bb493d"
+  },
+  "exactOnlyProductionAddition": "    // Each newly ready pair invalidates the preceding streaming signature.\n    // Paint it directly; capture the stable complete or failed ground on its\n    // next real redraw instead of copying the full backing store per pair.\n    if(this.state.loading&&this.loadingGround)return;\n",
+  "onlyFourLineAdditionVerified": true,
+  "guardReview": {
+    "placement": "Inside retainGround after existing pointer/animation/unavailable checks, before eligible offscreen snapshot allocation/copy.",
+    "onScreenPainter": "Unchanged: all ground detail/relief batches, selected area/boundaries, routes, mask and labels execute as before.",
+    "sourceScheduling": "Unchanged: generation creation, tile request ordering, pool concurrency, pins, deadlines, partial-pair publication and canonical commit are untouched.",
+    "cacheIdentity": "groundSignature still includes loadingGround identity; an old retained snapshot cannot restore a different partial cohort. Existing snapshot stays bounded and is released by existing resize/budget/destroy paths.",
+    "partialFailure": "The guard requires both loading=true and a partial cohort. Once loading ends with a failed neighbor, the useful partial view may be retained on its next actual redraw.",
+    "lateSoleRejection": "No new paint/RAF/timer is added merely to capture a cache after a late rejection; the regression waits for a subsequent real redraw.",
+    "gestureTransformGuards": "Active pointer, animation, unavailable snapshot, bearing/pitch and backing-byte limits are retained unchanged.",
+    "labelCohort": "Unchanged complete loading cohort and loadingRelief cache discriminator; no deduplication or stable-sort/collision-order change."
+  },
+  "meaningfulRegression": {
+    "name": "progressive loading paints each ready pair without copying every transient full canvas",
+    "sameTestRedGreenDeclaredByPreflight": true,
+    "redLog": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/progressive-retain-red-final-test.tap",
+      "bytes": 939,
+      "sha256": "c41b7ddc46072ab621791ae75de245f67bc40438348198250154879c16c7a836"
+    },
+    "redFailure": "Actual backing copies3 versus expected2 while a real prepared pair still paints.",
+    "cases": [
+      "Three successive vector+relief completions paint immediately while canonical batches remain unchanged.",
+      "Active partial frames add no full backing-store copy.",
+      "Complete accepted ground is captured and then reused.",
+      "Failed neighbor with other arrivals preserves useful staged ground and allows capture after loading ends.",
+      "Late sole rejection adds no eager repaint; next actual redraw lazily captures stable partial ground.",
+      "No extra source requests or idle RAF are introduced."
+    ],
+    "reportedEngineSuite": {
+      "tests": 79,
+      "pass": 79,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "greenLog": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/progressive-retain-engine-green.tap",
+      "bytes": 9476,
+      "sha256": "dc7eeb55a79f10b5c0fbef96a9d183c6597ed6ddca877eddc1e65c39922ff17b"
+    },
+    "lintAndTypes": "Root preflight records PASS; their saved log bytes/hashes were independently checked. This review did not rerun them."
+  },
+  "tradeoff": "An overlay/filter redraw during active loading with an unchanged partial cohort replays the ground painter instead of reusing a newly captured partial snapshot. Pixel intent is unchanged, but this moves work from streaming copies to such redraws; final browser gates remain necessary.",
+  "deferredOptimization": "Do not remove cached pairs from loadingGround: that changes retained/staged label insertion order and can change collision winners. Any future paint-only deduplication must preserve metadata/labels and compare both actual tile/bitmap identities, not keys alone, with same-z overlapping-pan and same-key-new-bitmap tests. No such production change is included.",
+  "preflight": {
+    "path": "/workspace/scratch/ee002c1fa3a0/tropnik/docs/verification/local-0.4.33-progressive-retain-preflight.json",
+    "bytes": 8443,
+    "sha256": "125cfa42405616c570b48068e5cffc732f9dd21641d97b22253db0ea91db6058"
+  },
+  "candidateLocalBuild": {
+    "buildId": "9422286fa73b1574",
+    "sourceCommit": null,
+    "runtimeManifestSha256": "d1f8823596d966213e7c0dd68e156ea8feec9d16bda001b42a63e8d0756cbf2a",
+    "inputChecks": 2165,
+    "localOnly": true
+  },
+  "remainingEvidence": [
+    "Baseline trace for actual temporal/CPU attribution; no claim that this code caused the failed p95 window yet.",
+    "Exact candidate real loading pixel gate and all original browser/performance gates.",
+    "Original six coastline frames per required profile, full accepted CI payload and public verification."
+  ],
+  "releaseEligible": false
+}

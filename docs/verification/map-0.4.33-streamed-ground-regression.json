@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T13:45:30.968437+00:00",
+  "status": "passed-local-regression-review",
+  "scope": "Test changes only. No engine/generated/workflow changes, no remote writes or CI reruns by this reviewer.",
+  "base": {
+    "sourceCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+    "tree": "c2b49b6a3af6bfedfa4a4a50cbdf776a221e4356",
+    "engineSha256": "95ad8a8e654bd15299c1e944f40af98b8a3becbb38896619dfd7d6ff0ced781a",
+    "detachedWorktree": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-ground-tests-90dae23c",
+    "onlyChangedPath": "web/tests/custom-map-engine.test.mjs"
+  },
+  "candidate": {
+    "engineSha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6",
+    "testSha256": "20b22a32d7ceac5a241ae5d1e58a7599671d465a00902b82eb444a0d57d19d91",
+    "testPath": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-engine.test.mjs",
+    "initialTestSha256": "ca8a63da1fd6f0ccb1814d294a06362e66a0ab6ce1dfd096483c3bac8160258f",
+    "initialTestSnapshot": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-ground-tests-initial.mjs",
+    "fullSuiteTestCountBeforeLastStandaloneCase": 84,
+    "finalRegisteredTestCount": 85
+  },
+  "runs": [
+    {
+      "kind": "expected-red",
+      "engineSha256": "95ad8a8e654bd15299c1e944f40af98b8a3becbb38896619dfd7d6ff0ced781a",
+      "testSha256": "ca8a63da1fd6f0ccb1814d294a06362e66a0ab6ce1dfd096483c3bac8160258f",
+      "pattern": "streaming snapshot|progressive loading paints each",
+      "tests": 6,
+      "passed": 0,
+      "failed": 6,
+      "exitCode": 1,
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-ground-red.log",
+        "bytes": 6011,
+        "sha256": "6eb6aca02c1096101def6ec1b375003f9c1ac252dfb60a81a16a3d2ce4c24c94"
+      }
+    },
+    {
+      "kind": "focused-green-before-final-hardening",
+      "engineSha256": "013ca2e07de8abcd6e14f3c2fb4f46e69bcef4f653e26560a6c2944903258df0",
+      "testSha256": "ca8a63da1fd6f0ccb1814d294a06362e66a0ab6ce1dfd096483c3bac8160258f",
+      "tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "exitCode": 0,
+      "note": "Engine hash was recorded before command. Root subsequently hardened integer/generation checks and clipped empty rectangles. This focused result is not claimed against the newer hash.",
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-ground-green-first.log",
+        "bytes": 1500,
+        "sha256": "d6a09426812fff195426d03866993d96b192b85d11ff7f6442d842542bea71ea"
+      }
+    },
+    {
+      "kind": "full-engine-suite",
+      "engineSha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6",
+      "testSha256": "ca8a63da1fd6f0ccb1814d294a06362e66a0ab6ce1dfd096483c3bac8160258f",
+      "tests": 84,
+      "passed": 84,
+      "failed": 0,
+      "exitCode": 0,
+      "sourceTiming": {
+        "engineLastModifiedUtc": "2026-11-13T13:42:31.551917221Z",
+        "logCreatedUtc": "2026-11-13T13:42:45.472120934Z"
+      },
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-ground-engine-suite.log",
+        "bytes": 10753,
+        "sha256": "1dda1e2446940eda298d16da732b9fb857d4009d4808c4cd7a251c7fed93e67a"
+      }
+    },
+    {
+      "kind": "cold-first-RAF-expected-red",
+      "engineSha256": "95ad8a8e654bd15299c1e944f40af98b8a3becbb38896619dfd7d6ff0ced781a",
+      "testSha256": "20b22a32d7ceac5a241ae5d1e58a7599671d465a00902b82eb444a0d57d19d91",
+      "tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "exitCode": 1,
+      "assertion": "First completed cold pair produced zero full captures; exactly one seed is required.",
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-ground-cold-red.log",
+        "bytes": 983,
+        "sha256": "6536f19c27b2e92f9d820d6373b0f43254136459195f70fe461ccfc1c010d03e"
+      }
+    },
+    {
+      "kind": "cold-first-RAF-green",
+      "engineSha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6",
+      "testSha256": "20b22a32d7ceac5a241ae5d1e58a7599671d465a00902b82eb444a0d57d19d91",
+      "tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "exitCode": 0,
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-ground-cold-green.log",
+        "bytes": 229,
+        "sha256": "85c9eb2139abfe474e4ba9bb60b23bfa84e2fe2d24488ee679b03c2a7c5abecc"
+      }
+    }
+  ],
+  "actualGrid": {
+    "diagnosticSourceCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+    "diagnosticRunId": 43432849188,
+    "fixtureSha256": "d5d187959ff3432fd4dabdfacdd51552a4ed5171344c67f5cb14208518ffca7b",
+    "camera": {
+      "center": [
+        85.97995147228215,
+        50.65622536454623
+      ],
+      "zoom": 6.1,
+      "bearingDegrees": 0
+    },
+    "viewport": {
+      "width": 1041,
+      "height": 928
+    },
+    "recordedPixelRatio": 1,
+    "additionalControlledPixelRatios": [
+      1.5,
+      2
+    ],
+    "canonical": {
+      "cells": 64,
+      "z": 7,
+      "x": [
+        91,
+        98
+      ],
+      "y": [
+        39,
+        46
+      ]
+    },
+    "requested": {
+      "cells": 25,
+      "z": 6,
+      "x": [
+        45,
+        49
+      ],
+      "y": [
+        19,
+        23
+      ]
+    },
+    "observedActualCompletionOrder": false,
+    "controlledPriorCameraNote": "The test computes a prior camera reproducing the recorded 64-cell grid; it is not represented as the observed historical camera."
+  },
+  "controlledPartialFrames": {
+    "frameCountPerOrder": 24,
+    "baseline": "Same current production engine in a separate fixture with OffscreenCanvas unavailable; canonical direct painter.",
+    "countIncludes": "Source overview/vector/relief drawImage calls only.",
+    "countExcludes": [
+      "initial pre-stream seed",
+      "final atomic commit",
+      "whole-surface captures/restores",
+      "paths and labels",
+      "native raster or presentation time"
+    ],
+    "sourceCalls": {
+      "requestedCenterFirst": {
+        "patched": 737,
+        "canonical": 3768
+      },
+      "reverse": {
+        "patched": 703,
+        "canonical": 3768
+      },
+      "alternatingEdges": {
+        "patched": 726,
+        "canonical": 3768
+      }
+    },
+    "preserved": [
+      "all source rectangles intersecting dirty pixels",
+      "original drawImage destination coordinates including seam epsilon",
+      "source transform, alpha, relative layer order",
+      "integer bounded physical-pixel clip",
+      "boundaries, selected fill and selected border replayed once after tiles",
+      "one identity copy then current route and country/hole mask",
+      "complete vector/relief label admission and label-only separation",
+      "no additional tile requests or idle RAF"
+    ]
+  },
+  "invalidationCases": [
+    "same-grid pan",
+    "zoom",
+    "bearing",
+    "pitch",
+    "zoom outside admitted range",
+    "resize",
+    "overview batch",
+    "canonical detail batch",
+    "canonical relief batch",
+    "coverage",
+    "selected territory",
+    "boundary style",
+    "relief style",
+    "photograph handoff",
+    "line cap",
+    "line join",
+    "miter limit",
+    "different generation",
+    "replaced prior vector object",
+    "replaced prior relief object",
+    "reordered prior vectors",
+    "removed prior pair"
+  ],
+  "lifetimeAndFailures": [
+    "failed neighbour keeps useful patched ground without whole capture",
+    "explicit retry reseeds new generation and requests only failed cell",
+    "late old-camera results cannot repopulate loading ground",
+    "inactive view does not render; resume coalesces ready pairs",
+    "one live surface and 32MiB budget fallback",
+    "tile store retains bitmap close ownership",
+    "destroy and late replies cannot resurrect a surface",
+    "cold first RAF seeds once, later atomic pair patches"
+  ],
+  "existingAssertionChanges": [
+    "Frame observer includes retained-surface work only within current draw-start so existing ready-tile assertions still see actual painter calls.",
+    "Full capture counter narrows to offscreen drawImage with exactly two destination arguments; source patch calls have four.",
+    "Failed partial ground now expects zero additional full captures when its already patched snapshot is reusable; canonical commit still requires one. Existing readiness/error/request/idle assertions remain."
+  ],
+  "limitations": {
+    "nativePixelEqualityVerifiedByThisReport": false,
+    "browserPerformanceGatePassedByThisReport": false,
+    "androidBuildOrDeviceExecutedByThisReport": false,
+    "publicReleaseAuthorizedOrPerformed": false,
+    "note": "Mock Canvas records prove dispatch, clipping geometry, order and lifecycle. They do not implement Canvas rasterization and cannot establish subpixel equality or actual frame latency. Full browser pixel/interaction/performance and fresh source-bound Android gates remain required."
+  },
+  "verification": "git diff --check passed. Final file adds only one standalone test after the 84-test full run; that case has its own exact90 RED and frozen-engine GREEN. No claim of a single 85-test full run is made."
+}

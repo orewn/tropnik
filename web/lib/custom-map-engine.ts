@@ -29,6 +29,10 @@ export type CustomMapLabelDiagnostic={id:string;label:string;coordinate:[number,
 export type CustomMapOptions={camera:CustomMapCamera;onReady?:(engine:CustomMapEngine)=>void;onFrame?:(camera:CustomMapCamera)=>void;onSettled?:(camera:CustomMapCamera)=>void;onBeforeZoom?:()=>void;onGesture?:()=>void;onClick?:(point:MapPoint,coordinate:[number,number])=>void;onMarker?:(id:string)=>void;onState?:(state:CustomMapState)=>void;onOverlayError?:(message:string)=>void;maxZoom?:number};
 type TileBatch={tiles:CustomMapTile[];kind:CustomTileKind;generation:number;missing?:CustomTileRequest[]};
 type LoadingGround={generation:number;requestedCells:number;z:number;cells:ReadonlySet<string>;detail:TileBatch;relief?:TileBatch};
+type GroundContext=CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D;
+type GroundRect={left:number;top:number;right:number;bottom:number};
+type GroundPixelGeometry={scale:number;ratio:number;center:MapPoint;width:number;height:number;centerX:number;centerY:number};
+type GroundPatch={rect:GroundRect;geometry:GroundPixelGeometry};
 type LabelCandidate={id:string;coordinate:[number,number];label:MapTileLabel;color?:string;priority:number;sourceAnchor:string;insideCoverage?:boolean;value?:string;repeatDistance?:number;repeatKey?:string};
 type FeatureGeometry=GeoJSON.GeoJSON|undefined;
 type PathCollection={path:Path2D;bounds:[number,number,number,number]};
@@ -142,7 +146,7 @@ export class CustomMapEngine {
   private trailOverlayPaintedEntries:readonly TrailOverlayEntry[]=[];
   private trailOverlayViewportReady=true;
   private trailRasterError='';
-  private groundSnapshot?:{surface:OffscreenCanvas;context:OffscreenCanvasRenderingContext2D;signature:readonly unknown[]};
+  private groundSnapshot?:{surface:OffscreenCanvas;context:OffscreenCanvasRenderingContext2D;signature:readonly unknown[];loading?:LoadingGround};
   private groundSnapshotUnavailable=false;
   private markerLayer:HTMLDivElement;
   private markers=new Map<string,{marker:CustomMapMarker;button:HTMLButtonElement}>();
@@ -725,13 +729,21 @@ export class CustomMapEngine {
   private batchCoversMask(batch:TileBatch|undefined){return !batch?.missing?.some(tile=>mapTileIntersectsCoverage(this.coverage?.area,tile,this.camera.zoom,this.pitch));}
   private displayingSatellite(){return this.state.committedMode==='satellite'&&!!this.imagery;}
   private displayDetail(){return this.displayingSatellite()?this.imageryOverlay:this.detail;}
-  private worldTransform(){
-    const ctx=this.context,s=256*2**this.camera.zoom,c=mercatorProject(this.camera.center),angle=(this.camera.bearingDegrees??0)*Math.PI/180;
+  private worldTransform(ctx:GroundContext=this.context){
+    const s=256*2**this.camera.zoom,c=mercatorProject(this.camera.center),angle=(this.camera.bearingDegrees??0)*Math.PI/180;
     ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);ctx.translate(this.size.width/2,this.size.height/2);ctx.scale(1,Math.cos(this.pitch*Math.PI/180));ctx.rotate(-angle);ctx.scale(s,s);ctx.translate(-c.x,-c.y);return s;
   }
-  private drawTiles(batch:TileBatch|undefined,alpha=1){
-    if(!batch)return;const ctx=this.context;ctx.globalAlpha=alpha;
-    for(const tile of batch.tiles){const n=2**tile.z;ctx.drawImage(tile.bitmap,tile.x/n,tile.y/n,1/n+1e-10,1/n+1e-10);}ctx.globalAlpha=1;
+  private drawTiles(batch:TileBatch|undefined,alpha=1,ctx:GroundContext=this.context,patch?:GroundPatch){
+    if(!batch)return;ctx.globalAlpha=alpha;
+    for(const tile of batch.tiles){
+      if(patch){
+        const rect=this.groundTileRect(tile,patch.geometry),clip=patch.rect;
+        // Keep a physical-pixel guard on both the dirty region and the source
+        // influence. Unknown/unbounded geometry always keeps its original draw.
+        if(rect&&(rect.right<clip.left-4||rect.left>clip.right+4||rect.bottom<clip.top-4||rect.top>clip.bottom+4))continue;
+      }
+      const n=2**tile.z;ctx.drawImage(tile.bitmap,tile.x/n,tile.y/n,1/n+1e-10,1/n+1e-10);
+    }ctx.globalAlpha=1;
   }
   private detailCoversViewport(batch:TileBatch|undefined):boolean{
     if(this.mode!=='detail'||this.pitch!==0||(this.camera.bearingDegrees??0)!==0||this.camera.zoom<4.7||this.camera.zoom>12||batch?.kind!=='vector'||!batch.tiles.length||batch.tiles.length>MAX_VISIBLE_TILES)return false;
@@ -763,23 +775,90 @@ export class CustomMapEngine {
   private groundSignature(detail:TileBatch|undefined,satellite:boolean,covered:boolean):readonly unknown[]{
     const ctx=this.context;
     return[this.canvas.width,this.canvas.height,this.size.width,this.size.height,this.pixelRatio,...this.camera.center,this.camera.zoom,this.camera.bearingDegrees??0,this.pitch,
-      this.mode,this.state.committedMode,satellite,covered,this.area,this.overview,detail,this.imagery,this.relief,this.loadingGround,this.boundaries,this.boundaryVisible,this.reliefVisible,this.selectedArea,this.selectedBoundary,
+      this.mode,this.state.committedMode,satellite,covered,this.area,this.overview,detail,this.imagery,this.relief,this.boundaries,this.boundaryVisible,this.reliefVisible,this.selectedArea,this.selectedBoundary,
       ctx.lineCap,ctx.lineJoin,ctx.miterLimit];
+  }
+  private sameGroundSignature(signature:readonly unknown[]){
+    const retained=this.groundSnapshot;
+    return !!retained&&retained.signature.length===signature.length&&signature.every((value,index)=>Object.is(value,retained.signature[index]));
+  }
+  private groundPixelGeometry():GroundPixelGeometry|undefined{
+    if(this.mode!=='detail'||this.pitch!==0||(this.camera.bearingDegrees??0)!==0||this.camera.zoom<5||this.camera.zoom>12)return;
+    const ratio=this.pixelRatio,width=this.canvas.width,height=this.canvas.height,scale=256*2**this.camera.zoom,center=mercatorProject(this.camera.center);
+    if(![ratio,width,height,this.size.width,this.size.height,scale,center.x,center.y].every(Number.isFinite)||ratio<=0||ratio>2||!Number.isInteger(width)||!Number.isInteger(height)||width<=0||height<=0||width>32768||height>32768||width*height*4>GROUND_SNAPSHOT_BYTES||this.size.width<=0||this.size.height<=0||Math.abs(center.x)>2||center.y<0||center.y>1)return;
+    return{ratio,width,height,scale,center,centerX:this.size.width/2,centerY:this.size.height/2};
+  }
+  private groundTileRect(tile:CustomMapTile,geometry:GroundPixelGeometry):GroundRect|undefined{
+    const {scale,ratio,center,centerX,centerY}=geometry,n=2**tile.z;
+    if(!Number.isInteger(tile.z)||tile.z<0||tile.z>18||!Number.isSafeInteger(tile.x)||!Number.isInteger(tile.y)||tile.y<0||tile.y>=n||Math.abs(tile.x/n)>2||Math.abs((tile.x+1)/n)>2||scale*ratio/n<=1)return;
+    // Match the exact drawImage destination, including its seam overlap. Four
+    // backing pixels bound float32 transform/edge rounding in the admitted
+    // scale and world range; transformed or tiny images use the direct path.
+    const left=((tile.x/n-center.x)*scale+centerX)*ratio,top=((tile.y/n-center.y)*scale+centerY)*ratio;
+    const right=((tile.x/n+1/n+1e-10-center.x)*scale+centerX)*ratio,bottom=((tile.y/n+1/n+1e-10-center.y)*scale+centerY)*ratio;
+    if(![left,top,right,bottom].every(Number.isFinite)||right<=left||bottom<=top)return;
+    return{left,top,right,bottom};
+  }
+  private validLoadingGround(loading:LoadingGround){
+    if(!Number.isSafeInteger(loading.generation)||loading.generation!==this.generation||!Number.isInteger(loading.z)||loading.z<0||loading.z>18||!loading.detail.tiles.length||loading.detail.tiles.length>MAX_VISIBLE_TILES||!Number.isInteger(loading.requestedCells)||loading.requestedCells<loading.detail.tiles.length||loading.requestedCells>MAX_VISIBLE_TILES)return false;
+    const valid=(batch:TileBatch,kind:CustomTileKind)=>batch.kind===kind&&batch.tiles.every(tile=>tile.kind===kind&&tile.z===loading.z&&Number.isSafeInteger(tile.x)&&Number.isInteger(tile.y)&&tile.y>=0&&tile.y<2**tile.z&&tile.bitmap.width===512&&tile.bitmap.height===512&&(kind!=='vector'||tile.transparent===false));
+    if(!valid(loading.detail,'vector')||loading.relief&&!valid(loading.relief,'relief'))return false;
+    const cells=new Set(loading.detail.tiles.map(tile=>`${tile.x}/${tile.y}`));
+    return cells.size===loading.detail.tiles.length&&loading.cells.size===cells.size&&[...cells].every(cell=>loading.cells.has(cell))&&(!loading.relief||loading.relief.tiles.length===cells.size&&new Set(loading.relief.tiles.map(tile=>`${tile.x}/${tile.y}`)).size===cells.size&&loading.relief.tiles.every(tile=>cells.has(`${tile.x}/${tile.y}`)));
   }
   private restoreGround(signature:readonly unknown[]):boolean{
     const retained=this.groundSnapshot;
-    if(!retained||retained.signature.length!==signature.length||signature.some((value,index)=>!Object.is(value,retained.signature[index])))return false;
+    if(!retained||!this.sameGroundSignature(signature)||retained.loading!==this.loadingGround||this.loadingGround&&!this.validLoadingGround(this.loadingGround))return false;
     const ctx=this.context;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';ctx.drawImage(retained.surface,0,0);ctx.restore();return true;
+  }
+  private updateLoadingGround(signature:readonly unknown[],detail:TileBatch|undefined,satellite:boolean,covered:boolean):boolean{
+    const retained=this.groundSnapshot,loading=this.loadingGround,geometry=this.groundPixelGeometry();
+    if(!retained||!loading||satellite||!geometry||this.pointer.activePointers||this.animation||this.groundSnapshotUnavailable||!this.sameGroundSignature(signature)||!this.validLoadingGround(loading)||retained.surface.width!==this.canvas.width||retained.surface.height!==this.canvas.height)return false;
+    const previous=retained.loading;
+    if(previous&&(previous.generation!==loading.generation||previous.z!==loading.z||previous.requestedCells!==loading.requestedCells||!!previous.relief!==!!loading.relief))return false;
+    // The source cohorts are immutable. Earlier pairs must remain identical
+    // and in their original relative order; retries/replacements get a full
+    // direct paint. A newly ready pair may be inserted anywhere in that order.
+    const preserves=(before:TileBatch|undefined,after:TileBatch|undefined)=>{
+      if(!before)return true;if(!after)return false;
+      const known=new Set(before.tiles),retainedTiles=after.tiles.filter(tile=>known.has(tile));
+      return retainedTiles.length===before.tiles.length&&retainedTiles.every((tile,index)=>tile===before.tiles[index]);
+    };
+    if(!preserves(previous?.detail,loading.detail)||!preserves(previous?.relief,loading.relief))return false;
+    const known=new Set(previous?.detail.tiles),added=loading.detail.tiles.filter(tile=>!known.has(tile));
+    let left=geometry.width,top=geometry.height,right=0,bottom=0;
+    for(const tile of added){
+      const rect=this.groundTileRect(tile,geometry);if(!rect)return false;
+      const x0=Math.max(0,Math.floor(rect.left-4)),y0=Math.max(0,Math.floor(rect.top-4)),x1=Math.min(geometry.width,Math.ceil(rect.right+4)),y1=Math.min(geometry.height,Math.ceil(rect.bottom+4));
+      if(x1<=x0||y1<=y0)continue;
+      left=Math.min(left,x0);top=Math.min(top,y0);right=Math.max(right,x1);bottom=Math.max(bottom,y1);
+    }
+    try{
+      if(right>left&&bottom>top){
+        const ctx=retained.context;ctx.save();
+        try{
+          ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+          ctx.lineCap=this.context.lineCap;ctx.lineJoin=this.context.lineJoin;ctx.miterLimit=this.context.miterLimit;
+          // Integer backing-pixel edges preserve every pixel outside the patch.
+          // Inside it replay the original ground, including its underlay,
+          // relief, boundaries and translucent selection in the same order.
+          ctx.beginPath();ctx.rect(left,top,right-left,bottom-top);ctx.clip();
+          this.drawGround(detail,satellite,covered,ctx,{rect:{left,top,right,bottom},geometry});
+        }finally{ctx.restore();}
+      }
+      retained.signature=signature;retained.loading=loading;
+      return this.restoreGround(signature);
+    }catch{this.releaseGround();this.groundSnapshotUnavailable=true;return false;}
   }
   private retainGround(signature:readonly unknown[]){
     // Source filters do not change the map beneath their lines. Retain one
     // exact opaque ground after a settled paint, before any route or mask is
     // added. Moving frames keep their original painter without extra copies.
     if(this.pointer.activePointers||this.animation||this.groundSnapshotUnavailable)return;
-    // Each newly ready pair invalidates the preceding streaming signature.
-    // Paint it directly; capture the stable complete or failed ground on its
-    // next real redraw instead of copying the full backing store per pair.
-    if(this.state.loading&&this.loadingGround)return;
+    // A compatible streaming surface is patched before reaching this method.
+    // Seed an incompatible view once; unsupported geometry keeps the original
+    // direct renderer without capturing a transient full canvas per pair.
+    if(this.state.loading&&this.loadingGround&&(!this.groundPixelGeometry()||!this.validLoadingGround(this.loadingGround)))return;
     // An intermediate native flush changes subpixel edges in rotated/pitched
     // views. Keep their original single-pass ground; search uses north-up.
     if((this.camera.bearingDegrees??0)!==0||this.pitch!==0)return;
@@ -794,39 +873,40 @@ export class CustomMapEngine {
       }
       if(retained.surface.width!==this.canvas.width)retained.surface.width=this.canvas.width;
       if(retained.surface.height!==this.canvas.height)retained.surface.height=this.canvas.height;
-      const ctx=retained.context;ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';ctx.drawImage(this.canvas,0,0);retained.signature=signature;
+      const ctx=retained.context;ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';ctx.drawImage(this.canvas,0,0);retained.signature=signature;retained.loading=this.loadingGround;
     }catch{this.releaseGround();this.groundSnapshotUnavailable=true;}
   }
   private releaseGround(){const retained=this.groundSnapshot;this.groundSnapshot=undefined;if(retained){retained.surface.width=0;retained.surface.height=0;}}
-  private draw(){
-    if(this.disposed||!this.active)return;const ctx=this.context;
-    const detail=this.displayDetail(),covered=this.detailCoversViewport(detail);
-    const satellite=this.displayingSatellite(),signature=this.groundSignature(detail,satellite,covered);let scale:number;
-    if(this.restoreGround(signature))scale=this.worldTransform();
-    else{
+  private drawGround(detail:TileBatch|undefined,satellite:boolean,covered:boolean,ctx:GroundContext=this.context,patch?:GroundPatch){
       ctx.setTransform(1,0,0,1,0,0);
       // Fully opaque detail overwrites every backing pixel, including the guard
       // margin. A missing cell or exposed pan edge retains the original clear.
       if(!covered){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fillRect(0,0,this.canvas.width,this.canvas.height);}
-      scale=this.worldTransform();
+      const scale=this.worldTransform(ctx);
       if(!covered){
         if(this.area){ctx.fillStyle='#dce5cf';ctx.fill(this.area,'evenodd');}
-        this.drawTiles(this.overview,.95);
+        this.drawTiles(this.overview,.95,ctx,patch);
       }
-      if(satellite)this.drawTiles(this.imagery);
-      if(this.mode!=='overview'&&this.camera.zoom>=4.7&&(!satellite||detail?.tiles[0]?.transparent))this.drawTiles(detail);
-      if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=4.7)this.drawTiles(this.relief,.82);
+      if(satellite)this.drawTiles(this.imagery,1,ctx,patch);
+      if(this.mode!=='overview'&&this.camera.zoom>=4.7&&(!satellite||detail?.tiles[0]?.transparent))this.drawTiles(detail,1,ctx,patch);
+      if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=4.7)this.drawTiles(this.relief,.82,ctx,patch);
       if(!satellite&&this.mode==='detail'&&this.camera.zoom>=4.7&&this.loadingGround){
-        this.drawTiles(this.loadingGround.detail);
-        if(this.reliefVisible)this.drawTiles(this.loadingGround.relief,.82);
+        this.drawTiles(this.loadingGround.detail,1,ctx,patch);
+        if(this.reliefVisible)this.drawTiles(this.loadingGround.relief,.82,ctx,patch);
       }
       if(this.boundaryVisible&&this.boundaries){ctx.strokeStyle=satellite?'rgba(245,248,232,.45)':'rgba(95,123,87,.45)';ctx.lineWidth=.65/scale;ctx.stroke(this.boundaries);}
       if(this.selectedArea){ctx.fillStyle='rgba(92,128,70,.10)';ctx.fill(this.selectedArea,'evenodd');}
       // Clipped territory polygons include artificial coverage-cell edges. Only
       // the source boundary lines may outline the selected territory.
       if(this.selectedBoundary){ctx.strokeStyle=satellite?'#e7eacc':'#688360';ctx.lineWidth=1.3/scale;ctx.stroke(this.selectedBoundary);}
-      this.retainGround(signature);
-    }
+      return scale;
+  }
+  private draw(){
+    if(this.disposed||!this.active)return;const ctx=this.context;
+    const detail=this.displayDetail(),covered=this.detailCoversViewport(detail);
+    const satellite=this.displayingSatellite(),signature=this.groundSignature(detail,satellite,covered);let scale:number;
+    if(this.restoreGround(signature)||this.updateLoadingGround(signature,detail,satellite,covered))scale=this.worldTransform();
+    else{scale=this.drawGround(detail,satellite,covered);this.retainGround(signature);}
     if(this.paths){
       this.drawTrailOverlay(scale,satellite);
     }

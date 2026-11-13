@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_REVIEW_PASS_NATIVE_PIXEL_AND_RELEASE_GATES_PENDING",
+  "scope": "Independent read-only engine code review; no new browser/CI/runtime tests or production edits by reviewer",
+  "engine": {
+    "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-engine.ts",
+    "bytes": 85956,
+    "sha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6"
+  },
+  "baseCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+  "checks": [
+    {
+      "area": "Dirty rectangle geometry",
+      "result": "PASS",
+      "evidence": "groundPixelGeometry admits north-up, zero-pitch detail only, zoom5..12,DPR0..2,finite bounded world/size,integer backing dimensions,32MiB cap. groundTileRect matches drawImage x/n,y/n,1/n+1e-10 extents; CSS center is multiplied by DPR after transform, including rounded odd-size backings. Rect floor/ceil covers4physicalpx and clamps to actual canvas; empty intersection does not widen the union."
+    },
+    {
+      "area": "Tile exclusion",
+      "result": "PASS",
+      "evidence": "Only drawTiles inside a dirty clip receives optional patch. A tile is skipped only when its conservative destination lies more than4physicalpx outside the already padded clip; unknown geometry remains drawn. Canvas layer order and alpha are unchanged."
+    },
+    {
+      "area": "Base signature and monotonic cohort",
+      "result": "PASS",
+      "evidence": "The unchanged base signature retains camera,canvas/DPR,mode/committed mode,covered result,area/overview/detail/imagery/relief,boundaries/visibility/selection and inherited cap/join/miter. Loading identity is tracked separately. Same current generation,z,requested count,relief presence are required for previous cohorts. Prior tile objects must survive in the same relative order; inserted pairs may enter between existing tiles. Removal,replacement,reorder,new generation or base change falls back to direct paint."
+    },
+    {
+      "area": "Pair and bitmap validity",
+      "result": "PASS",
+      "evidence": "Current loading cohort validates nonempty<=64 detail,requested bound,unique same-z integer cell shape,opaque vector,512x512 open bitmap sizes,paired relief cell equality and declared loading.cells. Current closed loading bitmaps invalidate both restore and patch. Tile sources stay immutable under the existing store contract."
+    },
+    {
+      "area": "Alpha and compositing",
+      "result": "PASS_AT_SOURCE",
+      "evidence": "Patch uses save/identity device clip/globalAlpha1/source-over; original drawGround then paints opaque base or proven opaque canonical coverage before relief,boundaries,selectedArea tint and selectedBoundary in original order. Outside integer clip stays untouched. Finally restores context and identity-copies the one opaque surface to visible canvas; route/mask/labels remain outside cached ground and paint once. Browser native clip/raster parity is still required."
+    },
+    {
+      "area": "Partial/error/retry/satellite state",
+      "result": "PASS",
+      "evidence": "refreshTiles still clears staging on new generation,canonical commit remains atomic,failed ground retains current partial cohort and pin set,stable failure may restore identical surface; same-view retry rejects previous-generation partial lineage. Satellite never enters patch path; canonical/mode/base changes seed direct ground. No source request,pin or quality settings changed."
+    },
+    {
+      "area": "Resource lifetime and exception handling",
+      "result": "PASS",
+      "evidence": "Same existing groundSnapshot, no additional surface or transferred bitmap. Old tile cohorts remain pinned by unchanged requests+retainedKeys until replace. Patch updates signature/loading only after drawing succeeds. Exceptions release and zero surface then disable caching and direct fallback; destroy releases surface. Previous loading references are replaced with each snapshot update."
+    },
+    {
+      "area": "Scope of original painter extraction",
+      "result": "PASS",
+      "evidence": "drawGround preserves exact visible ground order and constants, gains explicit context and optional disjoint tile pruning. worldTransform default context unchanged. Overlays,markers,labels,inspection/drawRevision scheduling and final raster quality are not modified."
+    }
+  ],
+  "notes": [
+    "Initial partial may patch a compatible existing pre-stream snapshot whose loading is undefined; a cold/incompatible surface is fully painted and captured once. This is supported by source and will be checked by the separate mock/native owners.",
+    "The source review assumes existing immutable CustomMapTile/TileBatch ownership. It does not claim that identity checks detect arbitrary in-place mutation of private application data.",
+    "Independent pure geometry model uses exact recorded camera/grids, but does not recover actual ready-cell order. 885tile calls/25steps is conservative center-first model with first partial full; compatible pre-stream base model787. These are call counts, not a wall-speedup promise."
+  ],
+  "model": {
+    "path": "/workspace/scratch/686c5dc59f67/progressive-paint-43432849188/dirty-region-call-model.json",
+    "bytes": 55132,
+    "sha256": "d85cee3253006a7c3adcc9490c8a946123a95819654d6ba1aa534255019034a4"
+  },
+  "requiredRemainingEvidence": [
+    "Owner mock regressions and type/lint checks on final bytes",
+    "Existing native underlay pixel gate including all streaming frames and zero difference, without changing timeout/oracles",
+    "Exact final source uninstrumented full Pages and original35ms smoothness gate",
+    "Separate exact runtime Android validation before release"
+  ]
+}

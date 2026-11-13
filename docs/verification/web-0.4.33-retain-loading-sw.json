@@ -1,0 +1,1462 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "web_release_skeptic",
+  "readOnlyReview": true,
+  "sourceCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+  "sourceTree": "c2b49b6a3af6bfedfa4a4a50cbdf776a221e4356",
+  "parentCommit": "67d418dd1e187d065d2ff3bd3703c50b7436268b",
+  "buildId": "9422286fa73b1574",
+  "runId": 43432850110,
+  "status": "focused-loading-and-service-worker-pass; overall-Pages-failed-early-smoothness",
+  "releaseEligible": false,
+  "deployed": false,
+  "transport": {
+    "failure": {
+      "schemaVersion": 1,
+      "verified": true,
+      "scope": "Exact artifact transport and payload bytes; semantic and public gates separate",
+      "sourceCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+      "artifact": {
+        "id": 14040576627,
+        "name": "tropnik-pages-browser-failure-1",
+        "size_in_bytes": 474389,
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14040576627",
+        "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14040576627/zip",
+        "expired": false,
+        "created_at": "2026-11-13T13:26:15Z",
+        "expires_at": "2026-11-20T13:26:15Z",
+        "updated_at": "2026-11-13T13:26:15Z",
+        "digest": "sha256:958b89a9d9b4d10916bea5c7220eb84d7b070949f49c57a89655319ab8a122f7",
+        "workflow_run": {
+          "id": 43432850110,
+          "repository_id": 1447843944,
+          "head_repository_id": 1447843944,
+          "head_branch": "main",
+          "head_sha": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+        }
+      },
+      "archive": {
+        "path": "/workspace/scratch/686c5dc59f67/pages43432850110/failure/artifact-14040576627.zip",
+        "bytes": 474389,
+        "sha256": "958b89a9d9b4d10916bea5c7220eb84d7b070949f49c57a89655319ab8a122f7"
+      },
+      "zipMembers": 5,
+      "payloadRoot": "/workspace/scratch/686c5dc59f67/pages43432850110/failure/zip-members",
+      "payloadFiles": 5,
+      "payloadBytes": 2453169,
+      "payloadManifest": {
+        "path": "/workspace/scratch/686c5dc59f67/pages43432850110/failure/payload-file-hashes.json",
+        "bytes": 835,
+        "sha256": "d01201770f4d6aff09b9d4f6b67232e72537389dc50be05f80eb01ac10b7cb18"
+      }
+    },
+    "design": {
+      "schemaVersion": 1,
+      "verified": true,
+      "scope": "Exact artifact transport and payload bytes; semantic and public gates separate",
+      "sourceCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+      "artifact": {
+        "id": 14040646566,
+        "name": "tropnik-pages-design-1",
+        "size_in_bytes": 10405263,
+        "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14040646566",
+        "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14040646566/zip",
+        "expired": false,
+        "created_at": "2026-11-13T13:26:16Z",
+        "expires_at": "2026-11-20T13:26:16Z",
+        "updated_at": "2026-11-13T13:26:16Z",
+        "digest": "sha256:8d96cb11d20cbdc9740d46f283101c500c599d5a2572c68a71e373c9a71f197f",
+        "workflow_run": {
+          "id": 43432850110,
+          "repository_id": 1447843944,
+          "head_repository_id": 1447843944,
+          "head_branch": "main",
+          "head_sha": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+        }
+      },
+      "archive": {
+        "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/artifact-14040646566.zip",
+        "bytes": 10405263,
+        "sha256": "8d96cb11d20cbdc9740d46f283101c500c599d5a2572c68a71e373c9a71f197f"
+      },
+      "zipMembers": 63,
+      "payloadRoot": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members",
+      "payloadFiles": 63,
+      "payloadBytes": 10952787,
+      "payloadManifest": {
+        "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/payload-file-hashes.json",
+        "bytes": 10971,
+        "sha256": "4f6e217a48dab23267a8dbf36661683ed0dc4cb9760c7a364292e8aadbf97951"
+      }
+    }
+  },
+  "receiptFiles": [
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/failure/zip-members/browser-map-loading-verification.json",
+      "bytes": 1711537,
+      "sha256": "4b2b2ff19702c96e3cbde25ad160c485711fcfc3d344c8be54d51900c8c01e3c"
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/failure/zip-members/browser-service-worker-update-verification.json",
+      "bytes": 21092,
+      "sha256": "d987b1000fa6f97d625115757df1afce20613d71a078d8e342420eacf99a7749"
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/failure/zip-members/browser-ui-smoothness-diagnostic.json",
+      "bytes": 542166,
+      "sha256": "a4fe5c36425ff9c0d10304ba8acacc37601a7f32ddd8ffed3a62bc7188673812"
+    }
+  ],
+  "exportedAssertions": {
+    "schemaVersion": 1,
+    "sourceCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562",
+    "buildId": "9422286fa73b1574",
+    "readOnlyAssertions": true,
+    "loading": "PASS",
+    "serviceWorker": "PASS",
+    "assertionSourceHashes": {
+      "tools/pages-preview/browser-map-loading.mjs": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64",
+      "tools/pages-preview/browser-service-worker-update.mjs": "9500420751f4162ff38cfdbf025cc4f584aafe28ef081ee3979dc0ca7b9aaea4"
+    },
+    "limitations": [
+      "Overall Pages failed early smoothness. Full audit, metadata gate, deploy and public verification did not run."
+    ]
+  },
+  "sources": {
+    "web/lib/custom-map-engine.ts": {
+      "bytes": 78364,
+      "sha256": "95ad8a8e654bd15299c1e944f40af98b8a3becbb38896619dfd7d6ff0ced781a",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/lib/custom-map-tiles.ts": {
+      "bytes": 18538,
+      "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/lib/custom-map-camera.ts": {
+      "bytes": 21528,
+      "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/lib/custom-map-painter.ts": {
+      "bytes": 26868,
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/lib/custom-map-tiles.worker.ts": {
+      "bytes": 15542,
+      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/lib/map-resource-pool.ts": {
+      "bytes": 11161,
+      "sha256": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/lib/map-preload.ts": {
+      "bytes": 6548,
+      "sha256": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/lib/catalog.generated.json": {
+      "bytes": 993152,
+      "sha256": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "tools/pages-preview/browser-map-loading.mjs": {
+      "bytes": 54368,
+      "sha256": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/components/ServiceWorker.tsx": {
+      "bytes": 7408,
+      "sha256": "c065bd757266394676c43f9b688580ca507e28ff786720b8ef00edc5f080f4c5",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/lib/service-worker-registration.ts": {
+      "bytes": 5389,
+      "sha256": "408f359d579f350867eb9a2dd5caead8b427f3ebbd4818c709dbbb89700cefbc",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "web/public/sw.js": {
+      "bytes": 17420,
+      "sha256": "63536bd12dcbc85e6f94db2c0713d3103cef36567728b0742deec51bcbea78c0",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    },
+    "tools/pages-preview/browser-service-worker-update.mjs": {
+      "bytes": 26376,
+      "sha256": "9500420751f4162ff38cfdbf025cc4f584aafe28ef081ee3979dc0ca7b9aaea4",
+      "verifiedAgainstExactGitCommit": "90dae23c757c2b630e7f94b6532ef2cda5110562"
+    }
+  },
+  "loading": {
+    "route": {
+      "id": "osm-relation-17013428",
+      "regionId": "territory-28173009B90469334921421",
+      "title": "Лубяной тракт"
+    },
+    "fixture": {
+      "fault": "Pause one genuine external DEM halo request until paired viewport progress is painted",
+      "responseBytesReplaced": false,
+      "clockOverridden": false,
+      "workerStateOverridden": false,
+      "appStateOverridden": false,
+      "cacheDisabled": false,
+      "serviceWorkerBypassed": false
+    },
+    "limits": {
+      "acquireMs": 15000,
+      "holdMs": 8000,
+      "progressMs": 6000,
+      "settleMs": 15000,
+      "networkRecords": 256,
+      "maxCells": 64,
+      "maxSetupZooms": 4
+    },
+    "planLevel": 11,
+    "plannedCells": 42,
+    "pendingReadyCells": 17,
+    "pendingRequestedCells": 42,
+    "pendingRealDetailTiles": 17,
+    "pendingRealReliefTiles": 17,
+    "canonicalTilesUnchangedDuringHold": true,
+    "finalPairedCanonicalCells": 42,
+    "finalLoadingGroundNull": true,
+    "coverage": {
+      "visible": {
+        "left": 40,
+        "top": 96,
+        "right": 953,
+        "bottom": 832
+      },
+      "visibleCssPixels": 671968,
+      "canonicalCssPixels": 337521.7663261398,
+      "progressCssPixels": 524656.9853121487,
+      "expandedCssPixels": 195171.4515175838,
+      "coveredCssPixels": 671967.9999999999
+    },
+    "heldRequest": {
+      "requestId": "interception-job-80.0",
+      "networkId": "4714.449",
+      "url": "https://tiles.mapterhorn.com/11/1345/620.webp",
+      "cell": {
+        "z": 11,
+        "x": 1345,
+        "y": 620
+      },
+      "pausedAtEpochMs": 1794576276121,
+      "pausedAtMonotonicMs": 27203.286118,
+      "resumedAtEpochMs": null,
+      "resumedAtMonotonicMs": null
+    },
+    "releasedRequest": {
+      "requestId": "interception-job-80.0",
+      "networkId": "4714.449",
+      "url": "https://tiles.mapterhorn.com/11/1345/620.webp",
+      "cell": {
+        "z": 11,
+        "x": 1345,
+        "y": 620
+      },
+      "pausedAtEpochMs": 1794576276121,
+      "pausedAtMonotonicMs": 27203.286118,
+      "resumedAtEpochMs": 1794576276710,
+      "resumedAtMonotonicMs": 27791.666986
+    },
+    "timing": {
+      "acquireAfterEnableMs": 6667.013513999998,
+      "stableAfterPauseMs": 261.28654200000165,
+      "progressAfterPauseMs": 266.3468040000007,
+      "pixelReadbackAfterPauseMs": 332.5305479999988,
+      "releaseAfterPauseMs": 588.3808680000002,
+      "progressFromNativeViewNotClaimed": true
+    },
+    "rawObservation": {
+      "stableTargetObserved": true,
+      "stableAtEpochMs": 1794576276382,
+      "stableAtMonotonicMs": 27464.57266,
+      "progressAtEpochMs": 1794576276387,
+      "progressAtMonotonicMs": 27469.632922,
+      "pixelsCapturedAtMonotonicMs": 27535.816666
+    },
+    "releaseReason": "progress-captured",
+    "networkCompleteRecords": 114,
+    "allNetworkCompleted200": true,
+    "pixelROIs": 24,
+    "eligibleROIs": 23,
+    "eligibleCells": [
+      "11/1343/616",
+      "11/1343/617",
+      "11/1344/615",
+      "11/1345/615",
+      "11/1345/618",
+      "11/1346/615",
+      "11/1347/616",
+      "11/1347/617"
+    ],
+    "all24PendingAndCompleteRawRgbaExactlyEqual": true,
+    "all24ActualPendingScreenshotCropsExactlyEqualCompleteScreenshotCrops": true,
+    "rawCanvasSamplesExactlyEqualActualScreenshotCrops": 46,
+    "rawCanvasSamplesComparedWithActualScreenshotCrops": 48,
+    "pixelComparisons": [
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1344,
+            "y": 615
+          },
+          "x": 346,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          730,
+          176,
+          794,
+          240
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "70bd92b8d424e5444e779a010fbafa1e66cdb943ec695de7402850ade8a3f62a",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "70bd92b8d424e5444e779a010fbafa1e66cdb943ec695de7402850ade8a3f62a",
+        "eligible": false,
+        "finalDistinctColors": 439,
+        "finalNonModalPixels": 1012
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 615
+          },
+          "x": 526,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          910,
+          176,
+          974,
+          240
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "9d57e61317986db4c425973795a2ca203231c103e3f95cb0b525ad87f0161536",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "9d57e61317986db4c425973795a2ca203231c103e3f95cb0b525ad87f0161536",
+        "eligible": true,
+        "finalDistinctColors": 801,
+        "finalNonModalPixels": 2213
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1346,
+            "y": 615
+          },
+          "x": 705,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          1089,
+          176,
+          1153,
+          240
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "ddac2c6cda561663eb55564997903b7a708616caffbd15b33faf1122260bb3ce",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "ddac2c6cda561663eb55564997903b7a708616caffbd15b33faf1122260bb3ce",
+        "eligible": true,
+        "finalDistinctColors": 344,
+        "finalNonModalPixels": 3483
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 616
+          },
+          "x": 122,
+          "y": 364,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          506,
+          436,
+          570,
+          500
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "93038ad1818265edbcf193578ae20586380faa6a36ae7b06a4cae1c9659505d9",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "93038ad1818265edbcf193578ae20586380faa6a36ae7b06a4cae1c9659505d9",
+        "eligible": true,
+        "finalDistinctColors": 1103,
+        "finalNonModalPixels": 3239
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1347,
+            "y": 616
+          },
+          "x": 860,
+          "y": 313,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          1244,
+          385,
+          1308,
+          449
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "a424d5342aa6fc38512dc47da62949ac412089cb00be152880bee17578d3d34e",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "a424d5342aa6fc38512dc47da62949ac412089cb00be152880bee17578d3d34e",
+        "eligible": true,
+        "finalDistinctColors": 918,
+        "finalNonModalPixels": 3649
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 617
+          },
+          "x": 122,
+          "y": 552,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          506,
+          624,
+          570,
+          688
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "7d29e0a06430673977fcd2d3fd75f76d6776e1703e46c54e37d48a0b806e900c",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "7d29e0a06430673977fcd2d3fd75f76d6776e1703e46c54e37d48a0b806e900c",
+        "eligible": true,
+        "finalDistinctColors": 609,
+        "finalNonModalPixels": 3384
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1347,
+            "y": 617
+          },
+          "x": 860,
+          "y": 508,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          1244,
+          580,
+          1308,
+          644
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "dde9c3196f225934d04ae4c2651a5377d191d83a2818c4360e9b20f006f6642f",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "dde9c3196f225934d04ae4c2651a5377d191d83a2818c4360e9b20f006f6642f",
+        "eligible": true,
+        "finalDistinctColors": 1112,
+        "finalNonModalPixels": 3899
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 618
+          },
+          "x": 526,
+          "y": 731,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          910,
+          803,
+          974,
+          867
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "e4c3734c02d19684d085c03012107f634e9ff3878e02f9a84cd4075e7ffbaa33",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "e4c3734c02d19684d085c03012107f634e9ff3878e02f9a84cd4075e7ffbaa33",
+        "eligible": true,
+        "finalDistinctColors": 993,
+        "finalNonModalPixels": 3946
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1344,
+            "y": 615
+          },
+          "x": 293,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          677,
+          176,
+          741,
+          240
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "35917d808e918b577ff550e717751249c2cf4b1a42d6abfc226acdd7f18ee217",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "35917d808e918b577ff550e717751249c2cf4b1a42d6abfc226acdd7f18ee217",
+        "eligible": true,
+        "finalDistinctColors": 1031,
+        "finalNonModalPixels": 3961
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 615
+          },
+          "x": 473,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          857,
+          176,
+          921,
+          240
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "8e906e4110899a48da9f03a2bb8a0859bf1d4c04bbebf7f89896b0733171c1c3",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "8e906e4110899a48da9f03a2bb8a0859bf1d4c04bbebf7f89896b0733171c1c3",
+        "eligible": true,
+        "finalDistinctColors": 1226,
+        "finalNonModalPixels": 3078
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1346,
+            "y": 615
+          },
+          "x": 652,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          1036,
+          176,
+          1100,
+          240
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "666bb7ceaddf6a4b8e983a6f1560f8ed22027d8638471daa6ed4e46d208728d1",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "666bb7ceaddf6a4b8e983a6f1560f8ed22027d8638471daa6ed4e46d208728d1",
+        "eligible": true,
+        "finalDistinctColors": 518,
+        "finalNonModalPixels": 2133
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 616
+          },
+          "x": 114,
+          "y": 364,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          498,
+          436,
+          562,
+          500
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "118979c97c12b304f2edb4a7638c15022dd105217156a262480c7d22ca83cfb7",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "118979c97c12b304f2edb4a7638c15022dd105217156a262480c7d22ca83cfb7",
+        "eligible": true,
+        "finalDistinctColors": 1074,
+        "finalNonModalPixels": 3219
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1347,
+            "y": 616
+          },
+          "x": 831,
+          "y": 313,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          1215,
+          385,
+          1279,
+          449
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "e655c90653b12fa583dc7f317107764ee33c585e45627caa12e89c263ffb45a6",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "e655c90653b12fa583dc7f317107764ee33c585e45627caa12e89c263ffb45a6",
+        "eligible": true,
+        "finalDistinctColors": 996,
+        "finalNonModalPixels": 2696
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 617
+          },
+          "x": 114,
+          "y": 552,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          498,
+          624,
+          562,
+          688
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "31405da6854dde89f99ba6af16784d428e2813b6a95a5ce5797cd66a4a3f9979",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "31405da6854dde89f99ba6af16784d428e2813b6a95a5ce5797cd66a4a3f9979",
+        "eligible": true,
+        "finalDistinctColors": 615,
+        "finalNonModalPixels": 3423
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1347,
+            "y": 617
+          },
+          "x": 831,
+          "y": 508,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          1215,
+          580,
+          1279,
+          644
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "01362485c011b7d08bccf21d0d3f9b48e1024979f9fbfa13c842fea22f779d98",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "01362485c011b7d08bccf21d0d3f9b48e1024979f9fbfa13c842fea22f779d98",
+        "eligible": true,
+        "finalDistinctColors": 919,
+        "finalNonModalPixels": 3728
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 618
+          },
+          "x": 473,
+          "y": 731,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          857,
+          803,
+          921,
+          867
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "c31da69b5a6d41dd80eab31742d8ec4e43084c6b06d4bca8346b0bf38b6edd3b",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "c31da69b5a6d41dd80eab31742d8ec4e43084c6b06d4bca8346b0bf38b6edd3b",
+        "eligible": true,
+        "finalDistinctColors": 972,
+        "finalNonModalPixels": 3657
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1344,
+            "y": 615
+          },
+          "x": 400,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          784,
+          176,
+          848,
+          240
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "ffee3659827bb93f0e23bd2278758854245198499891530707f432781349a4cc",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "ffee3659827bb93f0e23bd2278758854245198499891530707f432781349a4cc",
+        "eligible": true,
+        "finalDistinctColors": 972,
+        "finalNonModalPixels": 2279
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 615
+          },
+          "x": 579,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          963,
+          176,
+          1027,
+          240
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "2e2e30bb4ee13a0fbd4ac5c572e13ffe9f0bf8cce6bd53e29be5d2a25277a4be",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "2e2e30bb4ee13a0fbd4ac5c572e13ffe9f0bf8cce6bd53e29be5d2a25277a4be",
+        "eligible": true,
+        "finalDistinctColors": 633,
+        "finalNonModalPixels": 1691
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1346,
+            "y": 615
+          },
+          "x": 758,
+          "y": 104,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          1142,
+          176,
+          1206,
+          240
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "6b24890f99aab216882b13288353e7cd6b580ae6df3af6e9c7be3e57d48b5ecd",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "6b24890f99aab216882b13288353e7cd6b580ae6df3af6e9c7be3e57d48b5ecd",
+        "eligible": true,
+        "finalDistinctColors": 253,
+        "finalNonModalPixels": 3463
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 616
+          },
+          "x": 131,
+          "y": 364,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          515,
+          436,
+          579,
+          500
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "e38769deb1818fc78372052989859071ac01b7d48725f222ea7a00c4d6d48d68",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "e38769deb1818fc78372052989859071ac01b7d48725f222ea7a00c4d6d48d68",
+        "eligible": true,
+        "finalDistinctColors": 1192,
+        "finalNonModalPixels": 3275
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1347,
+            "y": 616
+          },
+          "x": 889,
+          "y": 313,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          1273,
+          385,
+          1337,
+          449
+        ],
+        "pendingRgbaEqualsActualPngCrop": false,
+        "completeRgbaEqualsActualPngCrop": false,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "54d36755630f01e2e17ae6ea1ea33c0160e8113728c7a64e329e1fc5bd1dddbf",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 37,
+            "maxChannelDelta": 2
+          },
+          "complete": {
+            "differentPixels": 37,
+            "maxChannelDelta": 2
+          }
+        },
+        "rgbaSha256": "e282bf6ed16b2a9f089c0de345587e831b96567233d74c30246dbb4ce793231d",
+        "eligible": true,
+        "finalDistinctColors": 763,
+        "finalNonModalPixels": 3847
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1343,
+            "y": 617
+          },
+          "x": 131,
+          "y": 552,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          515,
+          624,
+          579,
+          688
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "f702c2df679b9ac948a5347c154c6652683b2ba55aa2c358f5f3acc5d41684c8",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "f702c2df679b9ac948a5347c154c6652683b2ba55aa2c358f5f3acc5d41684c8",
+        "eligible": true,
+        "finalDistinctColors": 561,
+        "finalNonModalPixels": 3290
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1347,
+            "y": 617
+          },
+          "x": 889,
+          "y": 508,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          1273,
+          580,
+          1337,
+          644
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "8bedc18727b72244314fc82c0c88ce7405e895ad01957d475a9404c8a72e7dea",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "8bedc18727b72244314fc82c0c88ce7405e895ad01957d475a9404c8a72e7dea",
+        "eligible": true,
+        "finalDistinctColors": 845,
+        "finalNonModalPixels": 3905
+      },
+      {
+        "roi": {
+          "cell": {
+            "z": 11,
+            "x": 1345,
+            "y": 618
+          },
+          "x": 579,
+          "y": 731,
+          "width": 64,
+          "height": 64
+        },
+        "pageCrop": [
+          963,
+          803,
+          1027,
+          867
+        ],
+        "pendingRgbaEqualsActualPngCrop": true,
+        "completeRgbaEqualsActualPngCrop": true,
+        "pendingEqualsComplete": true,
+        "actualPendingPngCropEqualsActualCompletePngCrop": true,
+        "actualPngCropSha256": "d6e96b096764efa9ad2a03c86f0581c84d40cf98a9ab5edd32d56e36ddd5ad91",
+        "canvasVsPageScreenshotDelta": {
+          "pending": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          },
+          "complete": {
+            "differentPixels": 0,
+            "maxChannelDelta": 0
+          }
+        },
+        "rgbaSha256": "d6e96b096764efa9ad2a03c86f0581c84d40cf98a9ab5edd32d56e36ddd5ad91",
+        "eligible": true,
+        "finalDistinctColors": 786,
+        "finalNonModalPixels": 3896
+      }
+    ],
+    "browserCleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 101.25805399999808
+    }
+  },
+  "serviceWorker": {
+    "fixture": {
+      "entrypoint": "/tropnik/about/",
+      "workerTransformation": "VERSION constant only; the remaining deployed worker bytes are unchanged",
+      "fault": "Hold one genuine skip-waiting postMessage, then deliver it after the real application timeout",
+      "clockOverridden": false,
+      "workerStateOverridden": false,
+      "uiStateOverridden": false,
+      "unregistered": false
+    },
+    "normal": {
+      "verified": true,
+      "waitingObservationMs": 1502.56968,
+      "waitingDocumentPreserved": true,
+      "waitingControllerPreserved": true,
+      "nativeClick": {
+        "kind": "click",
+        "documentId": 1,
+        "at": 1794576228846.8,
+        "trusted": true,
+        "label": "Обновить",
+        "disabled": false
+      },
+      "reloads": 1,
+      "controllerChanged": true,
+      "activeVersion": "b"
+    },
+    "timeout": {
+      "verified": true,
+      "updatingLabel": "Обновляем…",
+      "updatingDisabled": true,
+      "nativeClick": {
+        "kind": "click",
+        "documentId": 2,
+        "at": 1794576230298.2,
+        "trusted": true,
+        "label": "Обновить",
+        "disabled": false
+      },
+      "elapsedMs": 15000.89990234375,
+      "heldMessages": 1,
+      "errorLabel": "Повторить",
+      "errorDisabled": false,
+      "timeoutDocumentPreserved": true,
+      "lateControllerChanged": true,
+      "lateObservationMs": 1503.861617999999,
+      "lateDocumentPreserved": true,
+      "retryClick": {
+        "kind": "click",
+        "documentId": 2,
+        "at": 1794576248493.5,
+        "trusted": true,
+        "label": "Повторить",
+        "disabled": false
+      },
+      "retryReloads": 1,
+      "activeVersion": "c"
+    },
+    "worker": {
+      "sha256": "9352b7ba15a120eb887841e6dcc2a0be196e87bee713ab0c394dfcc10bcc9970",
+      "version": "tropnik-tropnik-shell-9422286fa73b1574",
+      "normalizedSha256": "8813030f5762f82465b762127616ef28f43332061570d6b41f9722a9b1c9a84e",
+      "variants": {
+        "a": {
+          "version": "tropnik-tropnik-shell-9422286fa73b1574-sw-audit-a",
+          "sha256": "f41f868d78effe68e6792469f72e02cbcbb73f526fe58b4bd1c1727f8215aa4f",
+          "normalizedSha256": "8813030f5762f82465b762127616ef28f43332061570d6b41f9722a9b1c9a84e"
+        },
+        "b": {
+          "version": "tropnik-tropnik-shell-9422286fa73b1574-sw-audit-b",
+          "sha256": "ba00cc9472fa7bb171bbaf7e97def186b51ada2d27f4d843e079efd8123a4678",
+          "normalizedSha256": "8813030f5762f82465b762127616ef28f43332061570d6b41f9722a9b1c9a84e"
+        },
+        "c": {
+          "version": "tropnik-tropnik-shell-9422286fa73b1574-sw-audit-c",
+          "sha256": "1f336f3ca792cdba0c18be303dd81c33f3f8a5799e95a5355ba6b4493f5b2e5c",
+          "normalizedSha256": "8813030f5762f82465b762127616ef28f43332061570d6b41f9722a9b1c9a84e"
+        }
+      }
+    },
+    "servedVariantRecords": [
+      {
+        "variant": "a",
+        "sha256": "f41f868d78effe68e6792469f72e02cbcbb73f526fe58b4bd1c1727f8215aa4f",
+        "at": "2026-11-13T13:23:45.327Z"
+      },
+      {
+        "variant": "b",
+        "sha256": "ba00cc9472fa7bb171bbaf7e97def186b51ada2d27f4d843e079efd8123a4678",
+        "at": "2026-11-13T13:23:46.881Z"
+      },
+      {
+        "variant": "c",
+        "sha256": "1f336f3ca792cdba0c18be303dd81c33f3f8a5799e95a5355ba6b4493f5b2e5c",
+        "at": "2026-11-13T13:23:50.000Z"
+      },
+      {
+        "variant": "c",
+        "sha256": "1f336f3ca792cdba0c18be303dd81c33f3f8a5799e95a5355ba6b4493f5b2e5c",
+        "at": "2026-11-13T13:23:51.530Z"
+      }
+    ],
+    "documents": 3,
+    "syntheticDataPreserved": true,
+    "browserCleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 57.021286999999575
+    }
+  },
+  "screenshots": [
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members/map-loading/map-loading-route.png",
+      "bytes": 1144770,
+      "sha256": "e32d8bcf6be3498428c4e777f3e01f8c09b6f5f6d340d57d92a0670a25eb94b5",
+      "phase": "route",
+      "kind": "map-loading",
+      "dimensions": [
+        1440,
+        1000
+      ]
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members/map-loading/map-loading-before.png",
+      "bytes": 1587181,
+      "sha256": "ff8db9107169e10abfc8284de1466220b8c85e6ca2167ab900e0dbde6ab0d49a",
+      "phase": "before",
+      "kind": "map-loading",
+      "dimensions": [
+        1440,
+        1000
+      ]
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members/map-loading/map-loading-pending-progress.png",
+      "bytes": 1078656,
+      "sha256": "29fc74f79b15c65f1a6fa917a0116621e14bf8424891c07cd77f3e8b9fc67b79",
+      "phase": "pending-progress",
+      "kind": "map-loading",
+      "dimensions": [
+        1440,
+        1000
+      ]
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members/map-loading/map-loading-complete.png",
+      "bytes": 1635884,
+      "sha256": "e241ed9a4dfe93c4128eba6fdb71f47686f21ed6ec74307ad7eed9f4ebf7cb09",
+      "phase": "complete",
+      "kind": "map-loading",
+      "dimensions": [
+        1440,
+        1000
+      ]
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members/service-worker-update/sw-update-waiting.png",
+      "bytes": 375397,
+      "sha256": "da4dc002b1d2d4dc016812b672c7dfbb8efd539d0792079d2043c8c89a933ad9",
+      "phase": "waiting",
+      "kind": "service-worker-update",
+      "dimensions": [
+        824,
+        1830
+      ]
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members/service-worker-update/sw-update-updating-held.png",
+      "bytes": 379046,
+      "sha256": "2470e46afbc5dbbfb4e8a3b33bb997133599defb483af5ca94129455dc3be6fa",
+      "phase": "updating-held",
+      "kind": "service-worker-update",
+      "dimensions": [
+        824,
+        1830
+      ]
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members/service-worker-update/sw-update-retry.png",
+      "bytes": 377214,
+      "sha256": "1201ed3b9ef005c1a4e68ca86c8e0888e288d91395ae0d9f4e7444251e2e56ed",
+      "phase": "retry",
+      "kind": "service-worker-update",
+      "dimensions": [
+        824,
+        1830
+      ]
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members/service-worker-update/sw-update-late-controller.png",
+      "bytes": 377520,
+      "sha256": "0a121424b4fd5935b62cf3f9c246d31173681c737e42ad8f98f13e0ebe5e7049",
+      "phase": "late-controller",
+      "kind": "service-worker-update",
+      "dimensions": [
+        824,
+        1830
+      ]
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/pages43432850110/design/zip-members/service-worker-update/sw-update-updated.png",
+      "bytes": 390257,
+      "sha256": "f7c4ee43d8415346c1f7103dedb696b6f98e2d104f53bee8ab1e07b4c87aca4e",
+      "phase": "updated",
+      "kind": "service-worker-update",
+      "dimensions": [
+        824,
+        1830
+      ]
+    }
+  ],
+  "performanceIssues": [
+    {
+      "profile": "desktop-webgl",
+      "phase": "ui-smoothness/map-pan",
+      "metric": "frameP95Ms",
+      "value": 45.20000000001164,
+      "limit": 35
+    },
+    {
+      "profile": "desktop-webgl",
+      "phase": "ui-smoothness/map-zoom",
+      "metric": "frameP95Ms",
+      "value": 38.899999999965075,
+      "limit": 35
+    }
+  ],
+  "limitsOfEvidence": [
+    "These independent source-bound focused PASS receipts belong only to source90dae23/build9422286. Earlier sources are not substituted.",
+    "No github-pages artifact was created, and failure artifact contains no build-info or deployed worker bytes. Exact report sources were checked against immutable Git bytes; the full final metadata/deployed-worker gate was skipped.",
+    "Early uninstrumented UI smoothness failed desktop map-pan45.2ms and map-zoom38.9ms against35ms. Full audit, coast, later pixel gates, deployment and public verification did not run.",
+    "Loading progress timing is measured from actual external-halo pause, not from the initial user action or the whole cold load.",
+    "One ROI has the same 37-pixel/max2-channel difference between canvas RGBA and both page screenshots; 46/48 canvas-to-screenshot samples match exactly. All24 actual pending-to-complete screenshot crops still match byte-for-byte. The differing ROI adjoins the map-controls CSS shadow (source globals.css SHA1f240196bc1195bb1bea3287a9a9fd1069a95a016ad1a16bde631e885c26cfae, .map-controls box-shadow var(--shadow), 0 8px32px #1d382c10); shadow compositing is consistent with, but not conclusively proved as, the symmetric difference. No gate or threshold was changed.",
+    "Service-worker test uses the actual candidate app/worker with VERSION-only variants and one delayed genuine skip-waiting message. It does not test upgrade from the old publicly deployed version or map warmup transport."
+  ]
+}
