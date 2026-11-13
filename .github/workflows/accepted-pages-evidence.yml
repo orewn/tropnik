@@ -21,21 +21,21 @@
       "runs-on": "ubuntu-24.04",
       "timeout-minutes": 10,
       "env": {
-        "EVIDENCE_SOURCE": "8020e5c3243cd99e6f727e787c3109bece3d28f7",
+        "EVIDENCE_SOURCE": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
         "EVIDENCE_BUILD": "39a9a382cb37a4fb",
-        "EVIDENCE_RUN": "43450247714",
+        "EVIDENCE_RUN": "43466306226",
         "EVIDENCE_ATTEMPT": "1",
-        "EVIDENCE_ARTIFACT": "14054195271",
-        "EVIDENCE_NAME": "github-pages-43450247714-1",
-        "EVIDENCE_BYTES": "67265503",
-        "EVIDENCE_SHA256": "4851c6762442da19f3325b7a1c70c850e1a3cc3a965318e74f291463a8114857"
+        "EVIDENCE_ARTIFACT": "14061655923",
+        "EVIDENCE_NAME": "github-pages-43466306226-1",
+        "EVIDENCE_BYTES": "67257903",
+        "EVIDENCE_SHA256": "c567b6bb9951c229b94046815f70b52b949fdcef6b88e559bf4925cd61d1dd2f"
       },
       "steps": [
         {
           "name": "Check out the exact accepted source",
           "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
           "with": {
-            "ref": "8020e5c3243cd99e6f727e787c3109bece3d28f7",
+            "ref": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
             "persist-credentials": false
           }
         },
@@ -58,8 +58,8 @@
           "name": "Download the original verified ZIP once",
           "uses": "actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
           "with": {
-            "artifact-ids": "14054195271",
-            "run-id": "43450247714",
+            "artifact-ids": "14061655923",
+            "run-id": "43466306226",
             "repository": "orewn/tropnik",
             "github-token": "${{ github.token }}",
             "path": "${{ runner.temp }}/tropnik-accepted-pages-zip",
