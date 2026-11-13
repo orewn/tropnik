@@ -152,6 +152,11 @@ async function pointerSelector(cdp,profile,selector){
   });
   await pointer(cdp,profile,point);
 }
+function failureUi(cdp){return evaluate(cdp,`(()=>{
+  const box=element=>{if(!element)return null;const rect=element.getBoundingClientRect();return{left:rect.left,top:rect.top,width:rect.width,height:rect.height};};
+  const layers=document.querySelector('.layer-button'),menu=document.querySelector('.layer-menu'),credit=document.querySelector('.map-attribution-toggle');
+  return{inputs:window.__trailAuditInputs||[],layers:{expanded:layers?.getAttribute('aria-expanded'),rect:box(layers)},menu:{rect:box(menu),checkboxes:[...(menu?.querySelectorAll('input')||[])].map(input=>({checked:input.checked,rect:box(input)}))},credit:{expanded:credit?.getAttribute('aria-expanded'),rect:box(document.querySelector('.map-attribution-content'))},footer:box(document.querySelector('.map-footer')),sheet:document.querySelector('.explore-layout')?.dataset.sheetState};
+})()`);}
 async function screenshot(cdp,profile,phase){const {data}=await cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});const bytes=Buffer.from(data,'base64'),file=`${profile.name}-${phase}.png`;await writeFile(join(CAPTURES,file),bytes);return{phase,file,bytes:bytes.length,sha256:digest(bytes)};}
 function distanceToLine(point,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy,t=l?Math.max(0,Math.min(1,((point.x-a.x)*dx+(point.y-a.y)*dy)/l)):0;return Math.hypot(point.x-a.x-t*dx,point.y-a.y-t*dy);}
 async function lineWitness(cdp,map,sources){
@@ -196,7 +201,7 @@ async function run(){
     const target=await browser.requestJSON(`http://127.0.0.1:${debugPort}/json/new?about:blank`,{method:'PUT'});cdp=new CDP(target.webSocketDebuggerUrl);await cdp.open();
     report.environment.nativeSurface=await collectNativeBrowserSurface(cdp);assertNativeSurfaceCoverage(report.environment.nativeSurface,PROFILES);
     await cdp.call('Page.enable');await cdp.call('Runtime.enable');await cdp.call('Network.enable',{maxTotalBufferSize:32*1024*1024,maxResourceBufferSize:4*1024*1024});
-    await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`window.__trailAuditInputs=[];document.addEventListener('pointerup',event=>{window.__trailAuditInputs.push({type:event.type,pointerType:event.pointerType,trusted:event.isTrusted,target:event.target?.matches('canvas.tropnik-map-canvas')?'canvas':event.target?.tagName,x:event.clientX,y:event.clientY});if(window.__trailAuditInputs.length>32)window.__trailAuditInputs.shift();},{capture:true});`});
+    await cdp.call('Page.addScriptToEvaluateOnNewDocument',{source:`window.__trailAuditInputs=[];for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,event=>{const layers=document.querySelector('.layer-button'),rect=layers?.getBoundingClientRect(),control=event.target?.closest('button,input,label,a');window.__trailAuditInputs.push({type:event.type,pointerType:event.pointerType,trusted:event.isTrusted,target:event.target?.matches('canvas.tropnik-map-canvas')?'canvas':event.target?.tagName,x:event.clientX,y:event.clientY,control:control?.className,controlLabel:control?.getAttribute('aria-label')||control?.textContent?.trim(),layersExpanded:layers?.getAttribute('aria-expanded'),layersRect:rect?{left:rect.left,top:rect.top,width:rect.width,height:rect.height}:null,creditExpanded:document.querySelector('.map-attribution-toggle')?.getAttribute('aria-expanded')});if(window.__trailAuditInputs.length>96)window.__trailAuditInputs.shift();},{capture:true});`});
     for(const profile of PROFILES){
       console.log(JSON.stringify({phase:'trail-overlay-profile',profile:profile.name,buildId:build.buildId}));
       const result={...profile,verified:false,pageErrors:[],consoleErrors:[],httpErrors:[],failedRequests:[],geometryResponses:[],screenshots:[]};report.profiles.push(result);await checkpoint();
@@ -236,7 +241,7 @@ async function run(){
         result.regionSourceKeys=regionalSources.map(source=>source.key);assert.equal(regionalSources.length,result.region.catalogueOverlay.sources,'DOM route identities must cover the complete filtered overlay');
         const witness=await lineWitness(cdp,result.region,regionalSources);await pointer(cdp,profile,witness);
         result.selected=await waitValue('native source-line selection',()=>readMap(cdp),value=>stable(value)&&!!value.routeId&&value.routeId===value.drawnRoute);
-        const input=await evaluate(cdp,'window.__trailAuditInputs.filter(input=>input.target==="canvas").at(-1)');
+        const input=await evaluate(cdp,'window.__trailAuditInputs.filter(input=>input.type==="pointerup"&&input.target==="canvas").at(-1)');
         result.lineHit={...witness,pointerType:input?.pointerType,trusted:input?.trusted,target:input?.target,actualX:input?.x,actualY:input?.y};
         assert.ok(witness.acceptableIds.includes(result.selected.routeId),'Native line click opened another source');
         if(profile.mobile&&await evaluate(cdp,'document.querySelector(".explore-layout")?.dataset.sheetState==="open"'))await pointerSelector(cdp,profile,'.sheet-handle');
@@ -248,7 +253,7 @@ async function run(){
           return{match:observed.find(item=>item.status===200&&item.sha256===metadata.sourceHashes[item.key]&&item.version===item.sha256.slice(0,16)),observed};
         },value=>!!value.match);result.geometry=selectedBytes.match;
         result.verified=true;
-      }catch(error){result.failure=browserErrorDetails(error);result.lastInspection=await readMap(cdp).catch(()=>null);try{result.failureCapture=await screenshot(cdp,profile,'failure');}catch{}throw error;}
+      }catch(error){result.failure=browserErrorDetails(error);result.lastInspection=await readMap(cdp).catch(()=>null);result.failureUi=await failureUi(cdp).catch(()=>null);try{result.failureCapture=await screenshot(cdp,profile,'failure');}catch{}throw error;}
       finally{await geometryBytes.settle();geometryBytes.dispose();remove.forEach(unbind=>unbind());await checkpoint();}
     }
     report.verified=true;assertTrailOverlayReceipt(report,{sourceCommit:build.sourceCommit,buildId:build.buildId,metadata});

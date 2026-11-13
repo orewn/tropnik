@@ -127,3 +127,45 @@ test('map focus does not cancel the untouched idle timeout; cleanup after panel 
   t.mock.timers.tick(60000);
   assert.equal(collapsed, 1, 'unmount after preserving geometry must leave no callbacks');
 });
+
+class ControlTarget extends EventTarget {
+  constructor(selector) {super(); this.selector = selector;}
+  matches(selectors) {return selectors.split(',').includes(this.selector);}
+}
+
+test('first Layers press preserves its position until the native click, then a canvas gesture still collapses', t => {
+  t.mock.timers.enable({apis: ['setTimeout']});
+  const host = new EventTarget(), credit = new EventTarget(), layout = new CaptureLayout();
+  const layers = new ControlTarget('button'), icon = new EventTarget(), canvas = new EventTarget();
+  let collapsed = 0, clicked = 0;
+  layers.addEventListener('click', () => {clicked++;});
+  const cleanup = bindMapAttributionCollapse(host, credit, () => {collapsed++;}, layout);
+  t.mock.timers.tick(4999);
+  const path = [icon, layers, host, layout];
+  assert.equal(gesture(layout, 'pointerdown', path).defaultPrevented, false);
+  assert.equal(gesture(host, 'pointerdown', path).defaultPrevented, false);
+  t.mock.timers.tick(10000);
+  assert.equal(collapsed, 0, 'pointerdown must not shrink the footer under the pressed Layers control');
+  gesture(layers, 'pointerup', path);gesture(layers, 'click', path);
+  assert.equal(clicked, 1, 'the binding must leave native release/click handlers available');
+  gesture(host, 'wheel', [canvas, host, layout]);
+  assert.equal(collapsed, 1, 'the next actual map gesture still dismisses the credit');
+  assertNoListeners(host, layout);cleanup();
+});
+
+for (const type of engagementTypes) test(`map control ${type} protects its geometry without disabling subsequent map gestures`, t => {
+  t.mock.timers.enable({apis: ['setTimeout']});
+  const host = new EventTarget(), credit = new EventTarget(), layout = new CaptureLayout();
+  for (const selector of ['button', 'input', 'a', 'summary', '[role="button"]', '.layer-menu', '.map-message']) {
+    let collapsed = 0;
+    const cleanup = bindMapAttributionCollapse(host, credit, () => {collapsed++;}, layout);
+    t.mock.timers.tick(4999);
+    const control = new ControlTarget(selector), child = new EventTarget(), path = [child, control, host, layout];
+    assert.equal(gesture(layout, type, path).defaultPrevented, false);
+    assert.equal(gesture(host, type, path).defaultPrevented, false);
+    t.mock.timers.tick(6000);
+    assert.equal(collapsed, 0, `${selector} ${type} must retain the engaged control across the idle deadline`);
+    gesture(host, 'pointerdown', [host, layout]);assert.equal(collapsed, 1);
+    assertNoListeners(host, layout);cleanup();
+  }
+});
