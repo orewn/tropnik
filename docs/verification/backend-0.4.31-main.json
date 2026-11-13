@@ -1,0 +1,198 @@
+{
+  "receiptVersion": 1,
+  "verifiedAt": "2026-11-13T08:16:45.672051+00:00",
+  "repository": "orewn/tropnik",
+  "sourceCommit": "baf0b9ef8b8132711a317e861cf1d8aed68800fb",
+  "sourceTree": "d8a036565054c9f28a372e21578d3fbb9e0d10f5",
+  "sourceBinding": {
+    "event": "push",
+    "branch": "main",
+    "workflow": ".github/workflows/backend.yml",
+    "githubCommitTreeMatchesRunAndLocalCheckout": true,
+    "checkoutSHAConfirmedInJobLog": true,
+    "restoreSourceMatchesRun": true,
+    "restoreSourceTreeClean": true,
+    "workflowBlob": "c504d4ff3c3fbdfb92784a4db00e21c573b227a0",
+    "workflowSha256": "75d66e6b479af988690722e4cf56e717a3ad17109f7aa6b93833db4faa552555"
+  },
+  "runId": 43391174999,
+  "runAttempt": 1,
+  "runStatus": "completed",
+  "runConclusion": "success",
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43391174999",
+  "runCreatedAt": "2026-11-13T08:10:39Z",
+  "runCompletedAt": "2026-11-13T08:13:22Z",
+  "jobId": 131771165653,
+  "jobConclusion": "success",
+  "requiredStepsPassed": [
+    "Unit tests and race detector",
+    "Static checks",
+    "Native PostGIS integration gate",
+    "Install verified age release for recovery drill",
+    "Encrypted backup and isolated restore gate",
+    "Preserve integration evidence"
+  ],
+  "goVersion": "1.27.3",
+  "unitRaceCommand": "go test -race -count=1 ./...",
+  "unitRacePassedPackages": 8,
+  "unitPackagesWithoutTests": 4,
+  "unitCaseCount": "not reported by non-verbose command",
+  "staticCheckCommand": "go vet ./...",
+  "staticCheckPassed": true,
+  "nativeTopLevelPassed": 54,
+  "nativeAllPassedIncludingSubtests": 85,
+  "nativeFailed": 0,
+  "nativeSkipped": 0,
+  "requiredSchemaVersion": 8,
+  "applicationTableCount": 32,
+  "applicationGuardCount": 16,
+  "negativeRecoveryCasesPassed": 11,
+  "artifact": {
+    "id": 14020194828,
+    "name": "tropnik-native-postgis-baf0b9ef8b8132711a317e861cf1d8aed68800fb",
+    "sizeInBytes": 5535,
+    "sha256": "061aecf83f680e1158d1111a90e863725f38b052418a006f2a4113c72fd235c3",
+    "apiDigest": "sha256:061aecf83f680e1158d1111a90e863725f38b052418a006f2a4113c72fd235c3",
+    "apiDigestMatched": true,
+    "uploadLogDigestMatched": true,
+    "zipCRCVerified": true,
+    "exactEvidenceFileSetVerified": true,
+    "createdAt": "2026-11-13T08:13:18Z",
+    "expiresAt": "2026-11-27T08:13:17Z",
+    "url": "https://github.com/orewn/tropnik/actions/runs/43391174999/artifacts/14020194828"
+  },
+  "evidence": {
+    "native-postgis.log": {
+      "bytes": 25367,
+      "sha256": "35cd2ef36fcd1a3e6f76f6d0b7af4516bc469e63f17118353c08bc7525e2d822"
+    },
+    "backup-restore.log": {
+      "bytes": 489,
+      "sha256": "4db9d3fab323218bca866c34fe5cb4fb41a07701d07aa6f2e240318de797c5ce"
+    },
+    "backup-restore.json": {
+      "bytes": 2276,
+      "sha256": "00fb074d60aecec9d74135b4634e7b46c5611b2364d153cdc2eaefe2d54a8686"
+    },
+    "job.log": {
+      "bytes": 63823,
+      "sha256": "7e7c3951fc5d1c128770c3aff37f06a0bd36f7da1adcb20d327da5e37d3aef58"
+    },
+    "workflow.yml": {
+      "bytes": 2719,
+      "sha256": "75d66e6b479af988690722e4cf56e717a3ad17109f7aa6b93833db4faa552555"
+    },
+    "source-api.json": {
+      "bytes": 2083,
+      "sha256": "1f083dc014c1433f47dd392dbf89d914d978dddbb5a2ba7afd5632335990eeb8"
+    },
+    "run-final.json": {
+      "bytes": 13788,
+      "sha256": "5d7a37f29be361086bada3d2f97a1faf85b2c616aa54f2324ced596917bd213a"
+    },
+    "jobs-final.json": {
+      "bytes": 2284,
+      "sha256": "0d76493a88532a1a362f3cb442f2c9cd083a7412971a5d526cce0058037ba157"
+    },
+    "artifacts-api.json": {
+      "bytes": 850,
+      "sha256": "8f0333c699a82590c56ecd64777115ea3b333b07ff12ab0a871d5b67740d6400"
+    },
+    "local-source.json": {
+      "bytes": 310,
+      "sha256": "48df65e9abe40430dfc26e97d21850229990b6541896d779f15c653ef52d2114"
+    }
+  },
+  "backupRestore": {
+    "scope": "isolated logical restore",
+    "checks": {
+      "geometry": true,
+      "mailOutbox": true,
+      "safetyLinkage": true,
+      "safetyEventChain": true,
+      "applicationGuards": true,
+      "activeMembershipIndex": true,
+      "constraintsAndIndexes": true
+    },
+    "status": "passed",
+    "checkedAt": "2026-11-13T08:12:45.088658+00:00",
+    "rowCounts": {
+      "users": 3,
+      "routes": 1,
+      "appeals": 0,
+      "regions": 6,
+      "reports": 0,
+      "reviews": 0,
+      "messages": 1,
+      "sessions": 0,
+      "departures": 1,
+      "memberships": 2,
+      "audit_events": 1,
+      "notifications": 0,
+      "outbox_events": 1,
+      "route_regions": 1,
+      "safety_events": 1,
+      "posting_guards": 0,
+      "route_revisions": 1,
+      "auth_rate_limits": 0,
+      "departure_safety": 1,
+      "idempotency_keys": 0,
+      "safety_check_ins": 0,
+      "schema_migrations": 8,
+      "submission_events": 1,
+      "moderation_actions": 0,
+      "account_mail_outbox": 1,
+      "recruitment_members": 1,
+      "guide_qualifications": 1,
+      "offline_observations": 0,
+      "recruitment_messages": 0,
+      "recruitment_requests": 1,
+      "account_action_tokens": 1,
+      "safety_passport_versions": 1
+    },
+    "ageVersion": "v1.3.2",
+    "migrations": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "sourceCommit": "baf0b9ef8b8132711a317e861cf1d8aed68800fb",
+    "archiveSha256": "7270c0c991f1845be0646bf9df169ef1775d2bff24f07d806f33c73116d3acfb",
+    "schemaVersion": 8,
+    "postgisImageId": "sha256:26355bcc80a42bc38c96ca2a7d7fda6ce08d5cd5b4546c4800b1695356c74a85",
+    "postgisVersion": "3.7.0",
+    "postgresVersion": "18.6 (Debian 18.6-1.pgdg13+2)",
+    "sourceTreeClean": true,
+    "applicationGuardCount": 16,
+    "applicationTableCount": 32,
+    "syntheticFixtureVerified": true,
+    "containerIsolationVerified": true,
+    "temporaryDatabaseRemovedBeforePublication": true,
+    "gate": "synthetic backup and isolated restore",
+    "negativeCasesPassed": [
+      "wrong_identity",
+      "truncated_ciphertext",
+      "existing_output",
+      "failed_pg_dump",
+      "missing_safety_guard",
+      "wrong_guard_event",
+      "wrong_guard_column",
+      "missing_mail_outbox",
+      "missing_active_index",
+      "wrong_active_index_predicate",
+      "unsupported_schema"
+    ],
+    "syntheticSourceRemoved": true,
+    "disposableAgeIdentitiesRemoved": true
+  },
+  "notes": [
+    "This is a successful exact-source push-main CI gate, not a later commit or PR synthetic merge.",
+    "Native top-level count includes TestAccountMailCrashHelper; the parent restart test asserts the actual child-process exit.",
+    "Recovery uses an isolated synthetic database and disposable age identities. It does not claim a backup of live user data, a deployed API, or SMTP delivery."
+  ]
+}
