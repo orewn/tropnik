@@ -24,8 +24,8 @@ import java.util.UUID
 
 /** Faults surround the actual vault, Room repository and production ViewModel. */
 internal class SessionFaultHarness(private val application: Application) {
-    val origin = "https://old.example.invalid"
-    val nextOrigin = "https://new.example.invalid"
+    val origin = ApiAddress.normalize("https://old.example.invalid")
+    val nextOrigin = ApiAddress.normalize("https://new.example.invalid")
     private val preferenceName = "session-fault-${UUID.randomUUID()}"
     val persisted = application.getSharedPreferences(preferenceName, Context.MODE_PRIVATE)
     val preferences = UncertainPreferences(persisted)

@@ -13,7 +13,12 @@ const validId = (value: unknown): value is string => typeof value === 'string' &
 export class NativeMapCatalogue {
   private pending?: Promise<NativeMapCatalogueManifest>;
   private readonly lifetime = new AbortController();
-  constructor(private readonly origin: string, private readonly request: typeof fetch = fetch) {}
+  private readonly request: typeof fetch;
+  constructor(private readonly origin: string, request: typeof fetch = fetch) {
+    // Browser fetch rejects a class instance as its receiver. Capture both the
+    // default and an explicitly supplied transport, then invoke it as a function.
+    this.request = (...args) => request(...args);
+  }
 
   manifest(): Promise<NativeMapCatalogueManifest> {
     if (this.lifetime.signal.aborted) return Promise.reject(new DOMException('Map disposed', 'AbortError'));

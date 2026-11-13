@@ -6,10 +6,15 @@ export class NativeMapRouteLoader {
   private version = 0;
   private pending?: AbortController;
   private disposed = false;
+  private readonly request: typeof fetch;
   constructor(private readonly origin: string,
     private readonly setRoute: (geometry?: GeoJSON.GeoJSON, id?: string, coastal?: ReviewedCoastalAllowance) => void,
-    private readonly request: typeof fetch = fetch,
-    private readonly verify?: (bytes: ArrayBuffer, geometry: GeoJSON.GeoJSON, id?: string) => Promise<ReviewedCoastalAllowance | undefined>) {}
+    request: typeof fetch = fetch,
+    private readonly verify?: (bytes: ArrayBuffer, geometry: GeoJSON.GeoJSON, id?: string) => Promise<ReviewedCoastalAllowance | undefined>) {
+    // The controller also passes fetch explicitly; neither path may call the
+    // browser function with this loader as its receiver.
+    this.request = (...args) => request(...args);
+  }
 
   async update(payload: NativeMapRoute): Promise<void> {
     if (this.disposed || !Number.isSafeInteger(payload.version) || payload.version <= this.version) return;

@@ -6,12 +6,14 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -217,18 +219,8 @@ fun TropaMap(
         val candidate = error ?: scopeError ?: mapError?.takeIf { effectiveOnline || !mapReady } ?: overlayError ?: rasterError
         val problem = candidate?.takeIf { fatal || it != dismissedError }
         if ((!mapReady || countryBounds == null) && problem == null) Text("Открываем карту России…", Modifier.align(Alignment.Center).background(Palette.Surface).padding(12.dp), style = MaterialTheme.typography.bodyMedium)
-        problem?.let { message ->
-            Column(Modifier.align(Alignment.Center).padding(16.dp).background(Palette.Surface), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(message, Modifier.padding(12.dp), color = Palette.Alert)
-                if (fatal) TrailTextButton(onClick = { retry += 1 }) { Text("Открыть карту снова") }
-                else TrailTextButton(onClick = {
-                    error = null;dismissedError = null;onlineFailed = false;routeAttempt += 1;mapView.command("retry")
-                }, Modifier.testTag("map_retry")) { Text("Повторить загрузку") }
-                if (!fatal && mapReady) TrailTextButton(onClick = { dismissedError = message }) { Text("Закрыть") }
-            }
-        }
-        scopeNotice?.let { Text(it, Modifier.align(Alignment.Center).background(Palette.Surface).padding(12.dp), style = MaterialTheme.typography.bodySmall, color = Palette.Muted) }
-        if (mapReady) {
+        if (problem == null) scopeNotice?.let { Text(it, Modifier.align(Alignment.Center).background(Palette.Surface).padding(12.dp), style = MaterialTheme.typography.bodySmall, color = Palette.Muted) }
+        if (mapReady && problem == null) {
             Surface(Modifier.align(Alignment.CenterEnd).padding(end = 8.dp), color = Palette.Surface, shape = RoundedCornerShape(12.dp)) {
                 Column {
                     TrailIconButton(onClick = { mapView.command("zoom", JSONObject().put("delta", 1)) }) { TropaIcon(Glyph.ZOOM_IN, description = "Приблизить карту") }
@@ -257,12 +249,36 @@ fun TropaMap(
                 TrailChoice(selected = eco, onClick = { eco = !eco }, label = { Text("Беречь заряд") }, modifier = Modifier.heightIn(min = 48.dp))
             }
         }
-        Surface(Modifier.align(Alignment.BottomStart), color = Palette.Surface.copy(alpha = .96f), shape = RoundedCornerShape(topEnd = 12.dp)) {
-            Row(Modifier.padding(start = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(if (committedMode == "satellite") if (imagerySource == "eox-bluemarble") "© OSM · NASA Blue Marble · EOX" else "© OSM · EOX · Sentinel · CC BY 4.0" else "© OpenStreetMap contributors",
-                    Modifier.weight(1f, fill = false), style = MaterialTheme.typography.labelSmall, color = Palette.Muted)
-                Spacer(Modifier.width(4.dp))
-                TrailIconButton(onClick = { showAttribution = true }) { TropaIcon(Glyph.INFO, description = "Источники карты и рельефа") }
+        // The actionable error is the final layer. Keep the parent map heading
+        // clear, reserve the attribution's measured height, and scroll only the
+        // message so retry/close cannot be covered by ordinary map controls.
+        Column(Modifier.align(Alignment.BottomStart).then(
+            if (problem == null) Modifier else Modifier.fillMaxSize().padding(top = 64.dp)
+        )) {
+            problem?.let { message ->
+                Surface(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 8.dp).testTag("map_error_panel"),
+                    color = Palette.Surface, shape = RoundedCornerShape(8.dp)) {
+                    Column(Modifier.fillMaxSize()) {
+                        Text(message, Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(12.dp),
+                            color = Palette.Alert, style = MaterialTheme.typography.bodyMedium)
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (fatal) TrailTextButton(onClick = { retry += 1 }, Modifier.weight(1f).testTag("map_reopen")) { Text("Открыть карту снова") }
+                            else TrailTextButton(onClick = {
+                                error = null;dismissedError = null;onlineFailed = false;routeAttempt += 1;mapView.command("retry")
+                            }, Modifier.weight(1f).testTag("map_retry")) { Text("Повторить загрузку") }
+                            if (!fatal && mapReady) TrailTextButton(onClick = { dismissedError = message },
+                                Modifier.weight(1f).testTag("map_error_close")) { Text("Закрыть") }
+                        }
+                    }
+                }
+            }
+            Surface(color = Palette.Surface.copy(alpha = .96f), shape = RoundedCornerShape(topEnd = 12.dp)) {
+                Row(Modifier.padding(start = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(if (committedMode == "satellite") if (imagerySource == "eox-bluemarble") "© OSM · NASA Blue Marble · EOX" else "© OSM · EOX · Sentinel · CC BY 4.0" else "© OpenStreetMap contributors",
+                        Modifier.weight(1f, fill = false), style = MaterialTheme.typography.labelSmall, color = Palette.Muted)
+                    Spacer(Modifier.width(4.dp))
+                    TrailIconButton(onClick = { showAttribution = true }) { TropaIcon(Glyph.INFO, description = "Источники карты и рельефа") }
+                }
             }
         }
     }

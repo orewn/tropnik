@@ -64,8 +64,8 @@
     },
     {
       "path": "tools/android-build/native-map-catalogue.ts",
-      "sizeBytes": 5563,
-      "sha256": "61cbf902c87b3497c8b32bba85007bb9a0a84034d85fce7982bfc45b69853861"
+      "sizeBytes": 5804,
+      "sha256": "cc2e95b78eb56a4ac692174cf9ee2aefa894e838f93cd44cbaa78399ec2b9694"
     },
     {
       "path": "tools/android-build/native-map-diagnostics.ts",
@@ -79,8 +79,8 @@
     },
     {
       "path": "tools/android-build/native-map-route.ts",
-      "sizeBytes": 2829,
-      "sha256": "07b12b155de8e65d231828206b63628a95b41e83060225b0f7009a257c7b3c41"
+      "sizeBytes": 3043,
+      "sha256": "10165d65791d6de32ffc59df3cd1181e042a6113f10e50bac297e03f89350f46"
     },
     {
       "path": "tools/android-build/prepare-custom-map.mjs",
@@ -280,7 +280,7 @@
     {
       "path": "web/pnpm-lock.yaml",
       "sizeBytes": 312009,
-      "sha256": "c0e650468eedacce65aa8d9cdf02dc05782f260a8a76b5e07b4b0181933102c8"
+      "sha256": "c2706502a2eaee1f3d86310f895ebca1ec924c5eb34131ab76716f03833da0eb"
     },
     {
       "path": "web/pnpm-workspace.yaml",
@@ -318,12 +318,12 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "9817ae7b12ccd679de08b887a1258542de6f5e1807b6c192dbc5712c018df10d",
+  "sourceInputsSha256": "8088b0a2d30faef6ef54ca1f121b0a3d86b89397bacbf36608ccb0fc1cbdc588",
   "files": [
     {
       "path": "android-bootstrap.js",
-      "sizeBytes": 22054,
-      "sha256": "d7bf432c4725e523d813f466d174e8ebaf41595ccafc0df1356c1b5524c1778c"
+      "sizeBytes": 22086,
+      "sha256": "f4cff427ba712720ba37931bfcb6c0eb130daab9a762caad451369feeb98f370"
     },
     {
       "path": "catalogue.json",

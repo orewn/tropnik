@@ -28,7 +28,7 @@ overrides:
 packageExtensionsChecksum: sha256-KW6oyz4ULWfVWl38hBK30iAj42IWIDG0bl1fvGhvNrw=
 
 patchedDependencies:
-  '@vercel/og@1.0.3': 3a75804daecf8a4d61f4544e100d9d0e4ab64b38a429a1d7bee2eea85819fbf6
+  '@vercel/og@1.0.3': 22b21de24b85dbbad8076e84feab7b59b8bd01492dd7e389c909123bab6eafed
 
 importers:
 
@@ -5938,7 +5938,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
-  '@vercel/og@1.0.3(patch_hash=3a75804daecf8a4d61f4544e100d9d0e4ab64b38a429a1d7bee2eea85819fbf6)(@types/node@22.19.19)':
+  '@vercel/og@1.0.3(patch_hash=22b21de24b85dbbad8076e84feab7b59b8bd01492dd7e389c909123bab6eafed)(@types/node@22.19.19)':
     dependencies:
       '@resvg/resvg-wasm': 2.4.1
       harfbuzzjs: 0.10.0
@@ -8075,7 +8075,7 @@ snapshots:
   vinext@1.0.0-beta.5(@types/node@22.19.19)(@vitejs/plugin-react@6.0.2(vite@8.1.6(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)))(@vitejs/plugin-rsc@0.5.26(react-dom@19.2.9(react@19.2.9))(react-server-dom-webpack@19.2.9(react-dom@19.2.9(react@19.2.9))(react@19.2.9)(webpack@5.106.2(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)))(react@19.2.9)(vite@8.1.6(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)))(next@16.4.1(@babel/core@7.29.6(supports-color@10.2.2))(@types/node@22.19.19)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react-server-dom-webpack@19.2.9(react-dom@19.2.9(react@19.2.9))(react@19.2.9)(webpack@5.106.2(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)))(react@19.2.9)(vite@8.1.6(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)):
     dependencies:
       '@unpic/react': 1.0.2(next@16.4.1(@babel/core@7.29.6(supports-color@10.2.2))(@types/node@22.19.19)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
-      '@vercel/og': 1.0.3(patch_hash=3a75804daecf8a4d61f4544e100d9d0e4ab64b38a429a1d7bee2eea85819fbf6)(@types/node@22.19.19)
+      '@vercel/og': 1.0.3(patch_hash=22b21de24b85dbbad8076e84feab7b59b8bd01492dd7e389c909123bab6eafed)(@types/node@22.19.19)
       '@vinext/types': 1.0.0-beta.2
       '@vitejs/plugin-react': 6.0.2(vite@8.1.6(@types/node@22.19.19)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1))
       image-size: 2.0.3

@@ -16,8 +16,8 @@ for(const item of native.files){
 }
 const descriptor={schemaVersion:1,overlay:{url:overview.url,sha256:overview.sha256,sizeBytes:overview.bytes},sources:[...sourceMap.values()],referenceRouteIds:native.referenceRouteIds};
 
-function modules(){
- const context=vm.createContext({URL,AbortController,DOMException,fetch,TextDecoder,TextEncoder,Uint8Array,crypto,performance,setTimeout,clearTimeout});
+function modules(browserFetch=fetch){
+ const context=vm.createContext({URL,AbortController,DOMException,fetch:browserFetch,TextDecoder,TextEncoder,Uint8Array,crypto,performance,setTimeout,clearTimeout});
  const cache=new Map();
  function load(name){
   const filename=path.resolve(root,name.endsWith('.ts')?name:name+'.ts');
@@ -44,6 +44,29 @@ function fixture({manifest=descriptor,request:intercept}={}){
 const arrayBuffer=bytes=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);
 const pause=()=>new Promise(done=>setTimeout(done,5));
 async function until(predicate){const deadline=Date.now()+5000;while(!predicate()){if(Date.now()>deadline)throw new Error('Native overlay did not settle');await pause();}}
+
+for(const injected of [false,true])test(`catalogue ${injected?'explicit':'default'} fetch preserves the browser receiver contract`,async()=>{
+ const requests=[];
+ async function browserFetch(value,options){
+  if(this!==undefined)throw new TypeError('Illegal invocation');
+  const url=String(value);requests.push({url,options});
+  assert.equal(new URL(url).origin,origin);assert.equal(new URL(url).search,'');
+  const filename=url===origin+'/custom-map/catalogue.json'
+   ?path.join(root,'android/app/src/main/assets/custom-map/catalogue.json')
+   :path.join(root,'web/public',new URL(url).pathname);
+  return new Response(readFileSync(filename));
+ }
+ const {catalogue}=modules(browserFetch);
+ const instance=injected?new catalogue.NativeMapCatalogue(origin,browserFetch):new catalogue.NativeMapCatalogue(origin);
+ try{
+  const manifest=await instance.manifest(),source=manifest.sources[0],signal=new AbortController().signal;
+  assert.equal(manifest.sources.length,overview.uniqueGeometries);
+  const bytes=await instance.load(source.url+'?v='+source.sha256.slice(0,16),2,signal);
+  assert.deepEqual(Buffer.from(bytes),readFileSync(path.join(root,'web/public',source.url)));
+  assert.deepEqual(requests.map(item=>item.url),[origin+'/custom-map/catalogue.json',origin+source.url]);
+  assert.equal(requests[1].options.signal,signal);assert.equal(requests[1].options.credentials,'omit');
+ }finally{instance.dispose();}
+});
 
 test('canonical native catalogue URLs retain exact revision and origin admission',async()=>{
  const {instance,requests}=fixture();const source=descriptor.sources[0],signal=new AbortController().signal;

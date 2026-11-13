@@ -13,6 +13,24 @@ const geometry=id=>({type:'LineString',coordinates:[[40,43],[40.1,43.1]],id});
 function deferred(){let resolve;const promise=new Promise(done=>resolve=done);return{promise,resolve};}
 function fixture(request,verify){const drawn=[];return{drawn,loader:new NativeMapRouteLoader(origin,(value,id,coastal)=>drawn.push({value,id,coastal}),request,verify)};}
 
+for(const injected of [false,true])test(`selected route ${injected?'explicit':'default'} fetch preserves the browser receiver contract`,async()=>{
+ const requests=[],drawn=[],expected=geometry('reviewed');
+ async function browserFetch(value,options){
+  if(this!==undefined)throw new TypeError('Illegal invocation');
+  requests.push({url:String(value),options});return Response.json(expected);
+ }
+ const runtime={exports:{},URL,AbortController,fetch:browserFetch,TextDecoder};vm.runInNewContext(compiled,runtime);
+ const draw=(value,id)=>drawn.push({value,id});
+ const Loader=runtime.exports.NativeMapRouteLoader;
+ const loader=injected?new Loader(origin,draw,browserFetch):new Loader(origin,draw);
+ try{
+  await loader.update({version:1,id:'reviewed',url:url(1)});
+  assert.equal(drawn.at(-1).id,'reviewed');assert.equal(JSON.stringify(drawn.at(-1).value),JSON.stringify(expected));
+  assert.deepEqual(requests.map(item=>item.url),[url(1)]);
+  assert.equal(requests[0].options.credentials,'omit');assert.equal(requests[0].options.signal.aborted,false);
+ }finally{loader.dispose();}
+});
+
 test('a failed replacement immediately removes the previous card route',async()=>{
  const pending=deferred();let requests=0;
  const {drawn,loader}=fixture(async()=>++requests===1?Response.json(geometry('old')):pending.promise);

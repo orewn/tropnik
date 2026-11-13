@@ -23,7 +23,8 @@ modified: 381,964 bytes, SHA-256
 `d2ab975172d6103e7624e8f7f03fea2316eca6fe562e1b80fc7f7058b283a6d0`.
 No global `require`, filesystem shim, network font fallback or disabled
 supply-chain policy is introduced. The patch is content-addressed in the
-committed lockfile and must apply during a frozen install.
+committed lockfile and must apply during a frozen install. The modified entries
+do not advertise unchanged upstream source maps with stale line mappings.
 
 Compatibility gates render and inspect real PNG bytes with project Manrope
 fonts. They also verify the installed renderer contains the patched Satori

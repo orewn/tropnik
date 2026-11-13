@@ -11,6 +11,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
+import android.net.ConnectivityManager
 import android.os.SystemClock
 import android.os.ParcelFileDescriptor
 import android.webkit.RenderProcessGoneDetail
@@ -216,7 +217,24 @@ class LocalExperienceTest {
         for (command in listOf("svc wifi disable", "svc data disable")) {
             ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command)).use { it.readBytes() }
         }
-        app.waitUntil(timeoutMillis = 15_000) { model.state.value.connection != ConnectionState.ONLINE }
+        val connectivity = application.getSystemService(ConnectivityManager::class.java)
+        val connectionStates = mutableListOf<String>()
+        var disconnected = false
+        try {
+            app.waitUntil(timeoutMillis = 15_000) {
+                val state = model.state.value.connection
+                if (connectionStates.lastOrNull() != state.name) connectionStates.add(state.name)
+                disconnected = connectivity.activeNetwork == null && state == ConnectionState.OFFLINE
+                disconnected
+            }
+        } finally {
+            File(app.activity.filesDir, "qa/saved-pack-connectivity.json").apply { parentFile!!.mkdirs() }
+                .writeText(JSONObject().put("offlineVerified", disconnected)
+                    .put("androidHasActiveNetwork", connectivity.activeNetwork != null)
+                    .put("nativeStates", JSONArray(connectionStates)).put("nativeState", model.state.value.connection.name)
+                    .toString(2))
+            if (!disconnected) screenshot("saved-pack-connectivity-failed")
+        }
         val regionId = "altai"
         val sourceRoute = application.catalog.referenceRoutes(regionId = regionId).first { it.geometryAsset != null }
         fun readPack() = runBlocking(Dispatchers.IO) { dao.pack(regionId) }
@@ -454,15 +472,47 @@ class LocalExperienceTest {
         val map = readyMap()
         app.runOnUiThread { map.setOnline(false) }
         var full = JSONObject()
-        app.waitUntil(timeoutMillis = 15_000) {
-            full = mapSnapshot(map)
-            val overlay = full.getJSONObject("rendered").getJSONObject("catalogueOverlay")
-            val loader = full.getJSONObject("catalogue").optJSONObject("loader")
-            !full.optBoolean("online") && overlay.optInt("sources") == expectedSources &&
-                overlay.optBoolean("currentViewportReady") && loader?.optInt("pending") == 0 && mapInputReady(full)
+        var catalogueReady = false
+        try {
+            app.waitUntil(timeoutMillis = 15_000) {
+                full = mapSnapshot(map)
+                val overlay = full.getJSONObject("rendered").getJSONObject("catalogueOverlay")
+                val loader = full.getJSONObject("catalogue").optJSONObject("loader")
+                catalogueReady = !full.optBoolean("online") && overlay.optInt("sources") == expectedSources &&
+                    overlay.optBoolean("currentViewportReady") && loader?.optInt("pending") == 0 && mapInputReady(full)
+                catalogueReady
+            }
+        } finally {
+            File(app.activity.filesDir, "qa/native-catalogue-readiness.json").apply { parentFile!!.mkdirs() }
+                .writeText(JSONObject().put("ready", catalogueReady).put("expectedSources", expectedSources)
+                    .put("snapshot", full).toString(2))
+            if (!catalogueReady) screenshot("native-catalogue-readiness-failed")
         }
         assertEquals(catalogue.referenceRoutes().map { it.id }.toSet(), full.getJSONObject("catalogue").getJSONArray("visibleIds").let { ids -> (0 until ids.length()).map { ids.getString(it) }.toSet() })
         assertTrue(full.getJSONObject("rendered").getJSONObject("catalogueOverlay").getInt("preparedParts") > 0)
+
+        // Inject a recoverable native error after the real catalogue is ready.
+        // Touch the displayed controls, rather than invoking their semantics
+        // actions: a later overlay must not intercept either retry or close.
+        app.runOnUiThread { map.onFailure?.invoke("Линии троп не загрузились. Повторите загрузку карты.", false) }
+        app.waitUntil(10_000) { app.onAllNodesWithTag("map_error_panel").fetchSemanticsNodes().isNotEmpty() }
+        app.onNodeWithTag("map_retry").assertIsDisplayed().assertIsEnabled()
+        app.onNodeWithTag("map_error_close").assertIsDisplayed().assertIsEnabled()
+        app.onNodeWithTag("map_paths").assertDoesNotExist()
+        app.onNodeWithContentDescription("Приблизить карту").assertDoesNotExist()
+        app.onNodeWithContentDescription("Источники карты и рельефа").assertIsDisplayed()
+        screenshot("map-recoverable-error-actions")
+        app.onNodeWithTag("map_error_close").performTouchInput { click() }
+        app.waitUntil(10_000) { app.onAllNodesWithTag("map_error_panel").fetchSemanticsNodes().isEmpty() }
+        app.onNodeWithTag("map_paths").assertIsDisplayed()
+        app.runOnUiThread { map.onFailure?.invoke("Линия маршрута не загрузилась. Повторите загрузку карты.", false) }
+        app.waitUntil(10_000) { app.onAllNodesWithTag("map_retry").fetchSemanticsNodes().isNotEmpty() }
+        app.onNodeWithTag("map_retry").assertIsDisplayed().assertIsEnabled().performTouchInput { click() }
+        app.waitUntil(10_000) { app.onAllNodesWithTag("map_error_panel").fetchSemanticsNodes().isEmpty() }
+        assertTrue("Recoverable native actions moved the map", sameMapView(full, mapSnapshot(map)))
+        File(app.activity.filesDir, "qa/map-error-controls.json").apply { parentFile!!.mkdirs() }.writeText(JSONObject()
+            .put("recoverableErrorInjected", true).put("closePhysicalTouchVerified", true).put("retryPhysicalTouchVerified", true)
+            .put("ordinaryControlsSuppressed", true).put("attributionVisible", true).put("cameraRetained", true).toString(2))
 
         // Real Compose controls must reach the shared raster, preserve the
         // camera and restore the same catalogue after paths are hidden.
@@ -549,7 +599,10 @@ class LocalExperienceTest {
             assertTrue("The actual WebView renderer could not be terminated", selectedMap.webViewRenderProcess?.terminate() == true)
         }
         app.waitUntil(timeoutMillis = 10_000) { app.onAllNodesWithText("Открыть карту снова").fetchSemanticsNodes().isNotEmpty() }
-        app.onNodeWithText("Открыть карту снова").performClick()
+        app.onNodeWithTag("map_reopen").assertIsDisplayed().assertIsEnabled()
+        app.onNodeWithTag("map_paths").assertDoesNotExist()
+        screenshot("map-renderer-error-actions")
+        app.onNodeWithTag("map_reopen").performTouchInput { click() }
         val recoveredMap = awaitReadyMap()
         assertTrue("Recovery reused the terminated WebView", recoveredMap !== selectedMap)
         app.runOnUiThread { recoveredMap.setOnline(false) }

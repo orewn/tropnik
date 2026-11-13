@@ -3,13 +3,13 @@ import { a as e, i as t, n, r } from "./chunks/custom-map-entry-WNxyJV6N.js";
 var i = class {
 	origin;
 	setRoute;
-	request;
 	verify;
 	version = 0;
 	pending;
 	disposed = !1;
+	request;
 	constructor(e, t, n = fetch, r) {
-		this.origin = e, this.setRoute = t, this.request = n, this.verify = r;
+		this.origin = e, this.setRoute = t, this.verify = r, this.request = (...e) => n(...e);
 	}
 	async update(e) {
 		if (this.disposed || !Number.isSafeInteger(e.version) || e.version <= this.version || (this.version = e.version, this.pending?.abort(), this.pending = void 0, this.setRoute(void 0), !e.url)) return;
@@ -49,11 +49,11 @@ var i = class {
 	}
 }, a = 8 * 1024 * 1024, o = async (e) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", e))].map((e) => e.toString(16).padStart(2, "0")).join(""), s = (e) => typeof e == "string" && /^[a-z0-9-]{1,128}$/.test(e), c = class {
 	origin;
-	request;
 	pending;
 	lifetime = new AbortController();
+	request;
 	constructor(e, t = fetch) {
-		this.origin = e, this.request = t;
+		this.origin = e, this.request = (...e) => t(...e);
 	}
 	manifest() {
 		return this.lifetime.signal.aborted ? Promise.reject(new DOMException("Map disposed", "AbortError")) : (this.pending ||= this.readManifest().catch((e) => {

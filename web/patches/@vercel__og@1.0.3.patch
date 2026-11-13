@@ -1,5 +1,5 @@
 diff --git a/dist/index.edge.js b/dist/index.edge.js
-index ee0cd4fd75bc5f00135de3170a98fce4134a2fc8..6dbabbffde76ffa7d5dfbb0152a2c5f39fa8af1b 100644
+index ee0cd4fd75bc5f00135de3170a98fce4134a2fc8..c2aeeb9340c9101c88dbf874fd2010b47debae76 100644
 --- a/dist/index.edge.js
 +++ b/dist/index.edge.js
 @@ -1,3 +1,5 @@
@@ -36,8 +36,16 @@ index ee0cd4fd75bc5f00135de3170a98fce4134a2fc8..6dbabbffde76ffa7d5dfbb0152a2c5f3
          resolve(hbjs(instance));
        }, reject);
      });
+@@ -23672,4 +23682,4 @@ parse-css-color/dist/index.esm.js:
+    * @license MIT
+    *)
+ */
+-//# sourceMappingURL=index.edge.js.map
+\ No newline at end of file
++// The loader patch changes line mappings; the unmodified upstream source map is not advertised.
+\ No newline at end of file
 diff --git a/dist/index.node.js b/dist/index.node.js
-index 4f360de7f45abe8b89697a6f3c20b6b8f1a7548a..18b8330f06724f46bda5e4c1542db04e6184519c 100644
+index 4f360de7f45abe8b89697a6f3c20b6b8f1a7548a..8b3e4e1fa7d492bb425d070d2a3a20a46a65e09a 100644
 --- a/dist/index.node.js
 +++ b/dist/index.node.js
 @@ -1,3 +1,7 @@
@@ -57,3 +65,10 @@ index 4f360de7f45abe8b89697a6f3c20b6b8f1a7548a..18b8330f06724f46bda5e4c1542db04e
  var ZI = Object.create;
  var Jr = Object.defineProperty;
  var jI = Object.getOwnPropertyDescriptor;
+@@ -23684,4 +23688,4 @@ parse-css-color/dist/index.esm.js:
+    * @license MIT
+    *)
+ */
+-//# sourceMappingURL=index.node.js.map
+\ No newline at end of file
++// The loader patch changes line mappings; the unmodified upstream source map is not advertised.
