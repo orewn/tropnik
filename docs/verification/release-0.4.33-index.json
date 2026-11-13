@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "scope": "release-0.4.33-evidence",
+  "releaseSource": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+  "finalWebsiteSource": "0770a7448fed05853bc724b4edb4feb235e5cda3",
+  "status": "waiting-for-final-website-acceptance",
+  "mainModifiedByEvidenceCommit": false,
+  "newMeasurements": false,
+  "android": {
+    "version": "0.4.33-preview",
+    "workflowRunId": 43466306940,
+    "publicVerified": true,
+    "universalSHA256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408"
+  },
+  "acceptedReleaseSourceWebsite": {
+    "workflowRunId": 43466306226,
+    "buildId": "39a9a382cb37a4fb",
+    "rawWindows": 32,
+    "passingWindows": 32,
+    "evidenceFiles": [
+      {
+        "path": "docs/verification/web-0.4.33-accepted-79b5-raw.json",
+        "blob": "409c28529dfe891468874a944aef8c8331b31145",
+        "bytes": 529928,
+        "sha256": "40419d98f1bd4050aafc8c2d22bfc16bedc994b7c8db1c62438fb19d538be563"
+      },
+      {
+        "path": "docs/verification/web-0.4.33-accepted-79b5-smoothness-review.json",
+        "blob": "f31f2c1b0956938084bd4c7460c008806ffb8952",
+        "bytes": 105081,
+        "sha256": "fabc39e03c97a0fb4be17531a510de56cef682c860a5e8564aafd02e6ac62a89"
+      }
+    ]
+  },
+  "canonicalPreparation": {
+    "workflowRunId": 43469040535,
+    "sourceCommit": "7545e33a27fe424ab84d8caaaba539c11ac73668",
+    "preparedCommit": "0770a7448fed05853bc724b4edb4feb235e5cda3",
+    "receiptPath": "docs/verification/web-0.4.33-final-derived-preparation.json",
+    "receiptSHA256": "80f34478875b5118c91ac95c7ab341f2a209930af3ee3f0e43f79b0ea9652458",
+    "generatedOnlyVersionChange": true
+  },
+  "finalPages": {
+    "workflowRunId": 43471278331,
+    "status": "in-progress",
+    "fullAuditStartedAt": "2026-11-13T17:24:50Z"
+  },
+  "notes": [
+    "All referenced receipts preserve their original bytes and fields at recording time.",
+    "f0c4 strict35 failure remains a failed historical result in the release source.",
+    "Accepted79 measurements do not replace final0770 acceptance."
+  ]
+}

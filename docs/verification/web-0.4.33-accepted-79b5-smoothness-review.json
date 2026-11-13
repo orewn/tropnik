@@ -1,0 +1,3318 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-accepted-pages-raw-smoothness-review",
+  "reviewer": "perf_skeptic",
+  "conclusion": "EXACT_ACCEPTED_79B5_ARTIFACT_ALL_32_ORIGINAL_UNINSTRUMENTED_WINDOWS_PASS",
+  "verified": true,
+  "scope": "Original accepted source 79b5 Pages early and full smoothness raw evidence only; retrospective recomputation, not a new browser or performance run.",
+  "source": {
+    "repository": "orewn/tropnik",
+    "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+    "buildId": "39a9a382cb37a4fb",
+    "runId": 43466306226,
+    "attempt": 1,
+    "runURL": "https://github.com/orewn/tropnik/actions/runs/43466306226"
+  },
+  "acceptedEvidence": {
+    "originalArtifact": {
+      "id": 14061655923,
+      "name": "github-pages-43466306226-1",
+      "bytes": 67257903,
+      "sha256": "c567b6bb9951c229b94046815f70b52b949fdcef6b88e559bf4925cd61d1dd2f",
+      "expired": false,
+      "workflowRun": {
+        "id": 43466306226,
+        "repository_id": 1447843944,
+        "head_repository_id": 1447843944,
+        "head_branch": "main",
+        "head_sha": "79b5c5edd0c88f7c54e182181c3e8db6791ad706"
+      }
+    },
+    "originalRun": {
+      "id": 43466306226,
+      "attempt": 1,
+      "path": ".github/workflows/pages.yml",
+      "event": "push",
+      "headBranch": "main",
+      "headSha": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43466306226"
+    },
+    "buildInfo": {
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "buildId": "39a9a382cb37a4fb",
+      "catalogue": {
+        "schemaVersion": 1,
+        "total": 685,
+        "directions": [
+          {
+            "id": "altai",
+            "name": "Алтай",
+            "count": 11
+          },
+          {
+            "id": "krasnodar",
+            "name": "Краснодарский край",
+            "count": 99
+          },
+          {
+            "id": "karelia",
+            "name": "Карелия",
+            "count": 11
+          },
+          {
+            "id": "krym",
+            "name": "Крым",
+            "count": 151
+          },
+          {
+            "id": "baikal",
+            "name": "Байкал",
+            "count": 13
+          },
+          {
+            "id": "kamchatka",
+            "name": "Камчатка",
+            "count": 4
+          },
+          {
+            "id": "voronezh",
+            "name": "Воронежская область",
+            "count": 1
+          },
+          {
+            "id": "primorye",
+            "name": "Приморский край",
+            "count": 4
+          },
+          {
+            "id": "kaliningrad",
+            "name": "Калининградская область",
+            "count": 2
+          },
+          {
+            "id": "krasnoyarsk",
+            "name": "Красноярский край",
+            "count": 47
+          },
+          {
+            "id": "sakhalin",
+            "name": "Сахалинская область",
+            "count": 8
+          },
+          {
+            "id": "murmansk",
+            "name": "Мурманская область",
+            "count": 15
+          },
+          {
+            "id": "adygea",
+            "name": "Республика Адыгея",
+            "count": 4
+          },
+          {
+            "id": "karachay-cherkessia",
+            "name": "Карачаево-Черкесская Республика",
+            "count": 20
+          },
+          {
+            "id": "kabardino-balkaria",
+            "name": "Кабардино-Балкарская Республика",
+            "count": 6
+          }
+        ],
+        "sourceDigest": "136769e354d893aa20c52f10abe26ce29bdeca8629afbb1c1135c2d83b70b815"
+      }
+    },
+    "members": {
+      "schemaVersion": 1,
+      "archive": {
+        "bytes": 67257903,
+        "sha256": "c567b6bb9951c229b94046815f70b52b949fdcef6b88e559bf4925cd61d1dd2f"
+      },
+      "tar": {
+        "bytes": 190156800,
+        "sha256": "fb123d2217f93e37dc33f72e0ba8492d31e458ad194e2705f7cb973c2cf6a8ba",
+        "members": 3514
+      },
+      "members": {
+        "browser-verification.json": {
+          "path": "browser-verification.json",
+          "bytes": 17244613,
+          "sha256": "123beef2021a03359c4ad2ed59dbc124f1d711c2aeca780be75ecb3cde7b59be"
+        },
+        "browser-ui-smoothness-diagnostic.json": {
+          "path": "browser-ui-smoothness-diagnostic.json",
+          "bytes": 527834,
+          "sha256": "c766014fb083406ffd66dcae7b2df5be2235485ad7e9d66aea5d8aa1cf2fdbf3"
+        },
+        "build-info.json": {
+          "path": "build-info.json",
+          "bytes": 414616,
+          "sha256": "d94583a8276ab6ff966d842699dd3507103a1d4c208fd685f2a1faf1d3ea5ec7"
+        }
+      },
+      "extractedFiles": [
+        "browser-ui-smoothness-diagnostic.json",
+        "browser-verification.json",
+        "build-info.json"
+      ],
+      "noOtherMembersExtracted": true
+    },
+    "rawCompactJSON": {
+      "repository": "orewn/tropnik",
+      "gitBlob": "409c28529dfe891468874a944aef8c8331b31145",
+      "bytes": 529928,
+      "sha256": "40419d98f1bd4050aafc8c2d22bfc16bedc994b7c8db1c62438fb19d538be563",
+      "format": "exact compact JSON + LF",
+      "suggestedPath": "docs/verification/web-0.4.33-accepted-79b5-raw.json",
+      "exactReadback": true,
+      "independentUTF8Bytes": true,
+      "independentSHA256": true,
+      "unreferenced": true
+    }
+  },
+  "extractor": {
+    "sourceCommit": "e57c66f648995a7ff2566ce91432b36e874ac57a",
+    "branch": "verify/accepted-pages-evidence-20261113",
+    "runId": 43472042161,
+    "jobId": 132046143920,
+    "runURL": "https://github.com/orewn/tropnik/actions/runs/43472042161",
+    "jobStatus": "completed",
+    "jobConclusion": "success",
+    "completedAt": "2026-11-13T17:22:11Z",
+    "allStepsPassed": true,
+    "workflow": {
+      "path": ".github/workflows/accepted-pages-evidence.yml",
+      "gitBlob": "4de847d8a9635257544722f036c6b5f9cb14a8cd",
+      "bytes": 14105,
+      "sha256": "cfa782fe1ce544284c38c3f6002dc9f8fb54e24a33584599d5d9086470206143",
+      "onlyConfigChangedFromParent": true,
+      "parent": "320f62a6583e79c0cc16d172cb5f895b44269a52"
+    },
+    "transportIntegrity": {
+      "schemaVersion": 1,
+      "extractorRunId": 43472042161,
+      "extractorJobId": 132046143920,
+      "extractorSourceCommit": "e57c66f648995a7ff2566ce91432b36e874ac57a",
+      "artifactRunId": 43466306226,
+      "header": {
+        "schemaVersion": 1,
+        "artifactSourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+        "extractorSourceCommit": "e57c66f648995a7ff2566ce91432b36e874ac57a",
+        "utf16CodeUnits": 529701,
+        "utf8Bytes": 529927,
+        "sha256": "a1efb7f5d9f5ce57b3b0eebb77c9b80d448161daf3fa329264e2edf37f448ac0",
+        "parts": 45
+      },
+      "footer": {
+        "parts": 45,
+        "sha256": "a1efb7f5d9f5ce57b3b0eebb77c9b80d448161daf3fa329264e2edf37f448ac0"
+      },
+      "orderedUniqueCompleteChunks": true,
+      "utf8Bytes": 529927,
+      "sha256": "a1efb7f5d9f5ce57b3b0eebb77c9b80d448161daf3fa329264e2edf37f448ac0",
+      "logUTF16CodeUnits": 623656,
+      "logUTF8Bytes": 623884,
+      "logSHA256": "417ca0f9cf3edfbbcafafd076b5d97254430bbea244a793386ed6008be112b15",
+      "rawWithLF": {
+        "bytes": 529928,
+        "sha256": "40419d98f1bd4050aafc8c2d22bfc16bedc994b7c8db1c62438fb19d538be563"
+      },
+      "oneCompletedCompactLogRead": true,
+      "manualArtifactDownloads": 0,
+      "transportOwner": "perf_skeptic"
+    },
+    "newMeasurements": false,
+    "newBrowserRun": false,
+    "manualBinaryArtifactDownloads": 0,
+    "originalReportValidation": {
+      "originalFullBrowserValidator": "passed",
+      "originalEarlyAndFullSmoothnessValidators": "passed",
+      "originalEnvironmentComparator": "passed"
+    }
+  },
+  "method": {
+    "helper": {
+      "path": "tools/pages-preview/browser-smoothness.mjs",
+      "gitBlob": "aeca582e3dc735bc55a4de6d3bba3ba984a0cd94",
+      "sha256": "f2b6eef88fcc7d5d262e08b4aec81e13651065850865a0a3785d3e79042f2650"
+    },
+    "panHelper": {
+      "path": "tools/pages-preview/browser-source-end-pan.mjs",
+      "gitBlob": "277ae927f48426fe05fbeb2ab5b681e2f889e367",
+      "sha256": "5a4d396f6d811f843c7e7e5a0529fe964903b753bce34284125f4dc6727b8cc0"
+    },
+    "method": "Unchanged exact source pure functions evaluated with JSON-compatible strict assert shim; no browser/action code invoked",
+    "selfChecks": {
+      "sha256EmptyAndAbc": true,
+      "originalStrict35BoundaryRejected": true,
+      "forgedDerivedMetricRejected": true
+    },
+    "limits": {
+      "frameP95Ms": 35,
+      "maxFrameGapMs": 150,
+      "inputToFrameMs": 200,
+      "eventDurationMs": 200,
+      "layoutShift": 0.1,
+      "longestTaskMs": {
+        "androidPortrait": 350,
+        "desktopWebgl": 750
+      }
+    },
+    "scenarios": [
+      "panel",
+      "explore-search",
+      "explore-filters",
+      "catalog-scroll",
+      "map-pan",
+      "map-zoom",
+      "layer-switch",
+      "site-search"
+    ],
+    "environmentHelpers": [
+      {
+        "path": "tools/pages-preview/browser-environment.mjs",
+        "gitBlob": "cfeed81990533bb1aa36c4a05b31c4a441745246",
+        "sha256": "470ca0d7270b230a649f4cd0c7eaded7bdfce29156fd418d2f71d1064519a885"
+      },
+      {
+        "path": "tools/pages-preview/browser-native-surface.mjs",
+        "gitBlob": "ed918b27cc31e44e206206525f3d5ba74b447df8",
+        "sha256": "d2a1e66ae9e255594a9f7ed5d169fea2da7441587cba0a3701fad236db2daaa6"
+      }
+    ],
+    "environmentMethod": "Unchanged assertBrowserEnvironment/assertMatchingBrowserEnvironments/nativeSurfaceCoverage source bodies; Buffer.byteLength provided by UTF8 count shim; no OS collection invoked.",
+    "helperRetrievalOrigin": "8020e5c3243cd99e6f727e787c3109bece3d28f7",
+    "targetSourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+    "currentHelperBindings": [
+      {
+        "path": "tools/pages-preview/browser-report.mjs",
+        "bytes": 62220,
+        "sha256": "eaee2c07cdc805f5e11fb1ac3e337ea0a6ff909165e17908e3344b8258d7e970",
+        "knownGitBlob": "7d09e2f4c5bdf81cbbd6ffa2597b93b1e2729b82",
+        "exactKnownGitBytesMatchCurrentAcceptedBuildInputs": true
+      },
+      {
+        "path": "tools/pages-preview/browser-smoothness.mjs",
+        "bytes": 24027,
+        "sha256": "f2b6eef88fcc7d5d262e08b4aec81e13651065850865a0a3785d3e79042f2650",
+        "knownGitBlob": "aeca582e3dc735bc55a4de6d3bba3ba984a0cd94",
+        "exactKnownGitBytesMatchCurrentAcceptedBuildInputs": true
+      },
+      {
+        "path": "tools/pages-preview/browser-source-end-pan.mjs",
+        "bytes": 7754,
+        "sha256": "5a4d396f6d811f843c7e7e5a0529fe964903b753bce34284125f4dc6727b8cc0",
+        "knownGitBlob": "277ae927f48426fe05fbeb2ab5b681e2f889e367",
+        "exactKnownGitBytesMatchCurrentAcceptedBuildInputs": true
+      },
+      {
+        "path": "tools/pages-preview/browser-environment.mjs",
+        "bytes": 9636,
+        "sha256": "470ca0d7270b230a649f4cd0c7eaded7bdfce29156fd418d2f71d1064519a885",
+        "knownGitBlob": "cfeed81990533bb1aa36c4a05b31c4a441745246",
+        "exactKnownGitBytesMatchCurrentAcceptedBuildInputs": true
+      }
+    ],
+    "helperBindingExplanation": "The stored exact helper bodies were originally read at 8020. The four hashes exported by the exact 79b5 checkout independently match those stored bytes and the accepted build-info inputs. The unchanged environment helper imports the native-surface helper listed above.",
+    "rawDataPreservation": "All four original audit objects, including every scenario raw array and native pan record, are retained without filtering in the digest-bound raw JSON blob.",
+    "checks": [
+      "Exactly two early and two full profiles, matched by original profile names, with all original eight scenarios each.",
+      "Original assertSmoothnessAudit release mode on each full original audit, using the unmodified strict numeric thresholds.",
+      "Recomputed all derived scenario values from original raw callbacks and boundaries using unchanged summarizeSmoothness, with exact equality to the recorded fields.",
+      "Validated native pan input witness, original source/environment comparator and native surface coverage.",
+      "Verified CPU rate 1, successful restoration, no tracing, no raw recorder error/overflow/hidden/pending-input contamination.",
+      "Preserved source/build binding through build-info and original full-report catalogue validation without inventing envelope buildId fields."
+    ],
+    "percentile": "Original nearest-rank p95; raw values are not rounded before comparison.",
+    "thresholdComparison": "Strict less-than. A value of exactly 35 ms remains a failure of the original frameP95Ms gate.",
+    "noBrowserOrActionsExecutedForReview": true
+  },
+  "result": {
+    "audits": 4,
+    "windows": 32,
+    "passingWindows": 32,
+    "failingWindows": 0,
+    "issues": [],
+    "allOriginalReleaseValidatorsPassed": true,
+    "profileTotals": [
+      {
+        "phase": "early",
+        "profile": "android-portrait",
+        "windows": 8,
+        "rawRAFCallbacks": 1261,
+        "rawIntervals": 1269,
+        "longTasks": 0,
+        "longTaskTotalMs": 0,
+        "largestFrameP95Ms": 22.79999999998836,
+        "largestFrameGapMs": 35.20000000001164,
+        "passingWindows": 8
+      },
+      {
+        "phase": "early",
+        "profile": "desktop-webgl",
+        "windows": 8,
+        "rawRAFCallbacks": 1423,
+        "rawIntervals": 1431,
+        "longTasks": 0,
+        "longTaskTotalMs": 0,
+        "largestFrameP95Ms": 23.100000000034925,
+        "largestFrameGapMs": 45.09999999997672,
+        "passingWindows": 8
+      },
+      {
+        "phase": "full",
+        "profile": "android-portrait",
+        "windows": 8,
+        "rawRAFCallbacks": 1257,
+        "rawIntervals": 1265,
+        "longTasks": 0,
+        "longTaskTotalMs": 0,
+        "largestFrameP95Ms": 22.70000000006985,
+        "largestFrameGapMs": 44.09999999997672,
+        "passingWindows": 8
+      },
+      {
+        "phase": "full",
+        "profile": "desktop-webgl",
+        "windows": 8,
+        "rawRAFCallbacks": 1358,
+        "rawIntervals": 1366,
+        "longTasks": 1,
+        "longTaskTotalMs": 52,
+        "largestFrameP95Ms": 24,
+        "largestFrameGapMs": 53.699999999953434,
+        "passingWindows": 8
+      }
+    ],
+    "totalRAFCallbacks": 5299,
+    "totalIntervals": 5331,
+    "totalLongTasks": 1,
+    "totalLongTaskMs": 52
+  },
+  "profiles": [
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "engine": "tropnik-canvas",
+      "input": "touch",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "scenarioCount": 8,
+      "performancePassed": true,
+      "issues": [],
+      "pan": {
+        "input": "touch",
+        "start": {
+          "x": 206,
+          "y": 449.15000000000003
+        },
+        "end": {
+          "x": 270,
+          "y": 461.15000000000003
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchStart",
+            "x": 206,
+            "y": 449.15000000000003,
+            "sentOffsetMs": 0.049694999997882405,
+            "status": "fulfilled",
+            "ackOffsetMs": 16.42822299999898
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 211.33333333333334,
+            "y": 450.15000000000003,
+            "sentOffsetMs": 16.450566999999864,
+            "status": "fulfilled",
+            "ackOffsetMs": 47.548139999998966
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 216.66666666666666,
+            "y": 451.15000000000003,
+            "sentOffsetMs": 72.83915799999886,
+            "status": "fulfilled",
+            "ackOffsetMs": 114.1225599999998
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 222,
+            "y": 452.15000000000003,
+            "sentOffsetMs": 139.32592799999838,
+            "status": "fulfilled",
+            "ackOffsetMs": 180.9015729999992
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 227.33333333333334,
+            "y": 453.15000000000003,
+            "sentOffsetMs": 206.11476299999777,
+            "status": "fulfilled",
+            "ackOffsetMs": 230.83330399999977
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 232.66666666666666,
+            "y": 454.15000000000003,
+            "sentOffsetMs": 256.1029400000007,
+            "status": "fulfilled",
+            "ackOffsetMs": 280.82941700000083
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 238,
+            "y": 455.15000000000003,
+            "sentOffsetMs": 306.00438999999824,
+            "status": "fulfilled",
+            "ackOffsetMs": 330.77641399999993
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 243.33333333333334,
+            "y": 456.15000000000003,
+            "sentOffsetMs": 355.9484940000002,
+            "status": "fulfilled",
+            "ackOffsetMs": 380.7309749999986
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 248.66666666666666,
+            "y": 457.15000000000003,
+            "sentOffsetMs": 405.89492099999916,
+            "status": "fulfilled",
+            "ackOffsetMs": 430.84231499999805
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 254,
+            "y": 458.15000000000003,
+            "sentOffsetMs": 456.0930320000007,
+            "status": "fulfilled",
+            "ackOffsetMs": 480.80531699999847
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 259.3333333333333,
+            "y": 459.15000000000003,
+            "sentOffsetMs": 506.0318279999992,
+            "status": "fulfilled",
+            "ackOffsetMs": 530.8327669999999
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 264.6666666666667,
+            "y": 460.15000000000003,
+            "sentOffsetMs": 556.0295129999977,
+            "status": "fulfilled",
+            "ackOffsetMs": 580.7147469999982
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 606.3651680000003,
+            "status": "fulfilled",
+            "ackOffsetMs": 630.7728839999982
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchEnd",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 856.2888439999988,
+            "status": "fulfilled",
+            "ackOffsetMs": 880.7550659999979
+          }
+        ],
+        "durationMs": 880.7958169999984,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 16718.100000000006,
+            "timestamp": 16703.800000000017,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 206,
+            "y": 449.1499938964844
+          },
+          {
+            "type": "pointerup",
+            "time": 17584.100000000006,
+            "timestamp": 17560.100000000006,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 270,
+            "y": 461.1499938964844
+          }
+        ]
+      }
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "engine": "tropnik-canvas",
+      "input": "mouse",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "scenarioCount": 8,
+      "performancePassed": true,
+      "issues": [],
+      "pan": {
+        "input": "mouse",
+        "start": {
+          "x": 748.3499999999999,
+          "y": 489.6
+        },
+        "end": {
+          "x": 812.3499999999999,
+          "y": 501.6
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 0.002644000000145752,
+            "status": "fulfilled",
+            "ackOffsetMs": 14.270119000000705
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mousePressed",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 14.273273999999219,
+            "status": "fulfilled",
+            "ackOffsetMs": 17.664216999997734
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 753.6833333333333,
+            "y": 490.6,
+            "sentOffsetMs": 17.6809030000004,
+            "status": "fulfilled",
+            "ackOffsetMs": 30.998077999996895
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 759.0166666666665,
+            "y": 491.6,
+            "sentOffsetMs": 56.20602599999984,
+            "status": "fulfilled",
+            "ackOffsetMs": 64.3005869999979
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 764.3499999999999,
+            "y": 492.6,
+            "sentOffsetMs": 89.52580499999749,
+            "status": "fulfilled",
+            "ackOffsetMs": 97.64333500000066
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 769.6833333333333,
+            "y": 493.6,
+            "sentOffsetMs": 122.84367100000236,
+            "status": "fulfilled",
+            "ackOffsetMs": 130.96001999999862
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 775.0166666666665,
+            "y": 494.6,
+            "sentOffsetMs": 156.15070600000035,
+            "status": "fulfilled",
+            "ackOffsetMs": 164.30339500000264
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 780.3499999999999,
+            "y": 495.6,
+            "sentOffsetMs": 189.5089949999965,
+            "status": "fulfilled",
+            "ackOffsetMs": 197.58420800000022
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 785.6833333333333,
+            "y": 496.6,
+            "sentOffsetMs": 223.19175299999915,
+            "status": "fulfilled",
+            "ackOffsetMs": 231.07655299999897
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 791.0166666666665,
+            "y": 497.6,
+            "sentOffsetMs": 256.29754200000025,
+            "status": "fulfilled",
+            "ackOffsetMs": 264.3076450000008
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 796.3499999999999,
+            "y": 498.6,
+            "sentOffsetMs": 289.51742099999683,
+            "status": "fulfilled",
+            "ackOffsetMs": 297.82642099999794
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 801.6833333333333,
+            "y": 499.6,
+            "sentOffsetMs": 323.03653699999995,
+            "status": "fulfilled",
+            "ackOffsetMs": 331.04652599999827
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 807.0166666666665,
+            "y": 500.6,
+            "sentOffsetMs": 356.2577749999982,
+            "status": "fulfilled",
+            "ackOffsetMs": 364.3608249999961
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 389.5760599999994,
+            "status": "fulfilled",
+            "ackOffsetMs": 397.71918800000276
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseReleased",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 623.2160549999971,
+            "status": "fulfilled",
+            "ackOffsetMs": 628.9811750000008
+          }
+        ],
+        "durationMs": 629.0073649999977,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 14336.200000000012,
+            "timestamp": 14334.100000000035,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 748.3499755859375,
+            "y": 489.6000061035156
+          },
+          {
+            "type": "pointerup",
+            "time": 14943.5,
+            "timestamp": 14943.200000000012,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812.3499755859375,
+            "y": 501.6000061035156
+          },
+          {
+            "type": "click",
+            "time": 14947.799999999988,
+            "timestamp": 14943.200000000012,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812,
+            "y": 501
+          }
+        ]
+      }
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "engine": "tropnik-canvas",
+      "input": "touch",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "scenarioCount": 8,
+      "performancePassed": true,
+      "issues": [],
+      "pan": {
+        "input": "touch",
+        "start": {
+          "x": 206,
+          "y": 449.15000000000003
+        },
+        "end": {
+          "x": 270,
+          "y": 461.15000000000003
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchStart",
+            "x": 206,
+            "y": 449.15000000000003,
+            "sentOffsetMs": 0.055443000004743226,
+            "status": "fulfilled",
+            "ackOffsetMs": 15.312231999996584
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 211.33333333333334,
+            "y": 450.15000000000003,
+            "sentOffsetMs": 15.32262800000899,
+            "status": "fulfilled",
+            "ackOffsetMs": 47.50878499999817
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 216.66666666666666,
+            "y": 451.15000000000003,
+            "sentOffsetMs": 72.67345499999647,
+            "status": "fulfilled",
+            "ackOffsetMs": 114.38646500000323
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 222,
+            "y": 452.15000000000003,
+            "sentOffsetMs": 139.5684920000058,
+            "status": "fulfilled",
+            "ackOffsetMs": 181.14978300000075
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 227.33333333333334,
+            "y": 453.15000000000003,
+            "sentOffsetMs": 206.30999700000393,
+            "status": "fulfilled",
+            "ackOffsetMs": 231.10112400000799
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 232.66666666666666,
+            "y": 454.15000000000003,
+            "sentOffsetMs": 256.253355000008,
+            "status": "fulfilled",
+            "ackOffsetMs": 280.9224930000055
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 238,
+            "y": 455.15000000000003,
+            "sentOffsetMs": 305.0787830000045,
+            "status": "fulfilled",
+            "ackOffsetMs": 331.035103000002
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 243.33333333333334,
+            "y": 456.15000000000003,
+            "sentOffsetMs": 356.18798600000446,
+            "status": "fulfilled",
+            "ackOffsetMs": 380.91736999999557
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 248.66666666666666,
+            "y": 457.15000000000003,
+            "sentOffsetMs": 406.0327649999963,
+            "status": "fulfilled",
+            "ackOffsetMs": 430.87866600000416
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 254,
+            "y": 458.15000000000003,
+            "sentOffsetMs": 456.06295600000885,
+            "status": "fulfilled",
+            "ackOffsetMs": 480.805508999998
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 259.3333333333333,
+            "y": 459.15000000000003,
+            "sentOffsetMs": 505.96313000000373,
+            "status": "fulfilled",
+            "ackOffsetMs": 531.0506580000074
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 264.6666666666667,
+            "y": 460.15000000000003,
+            "sentOffsetMs": 556.2503160000051,
+            "status": "fulfilled",
+            "ackOffsetMs": 581.1057310000033
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 606.2593349999952,
+            "status": "fulfilled",
+            "ackOffsetMs": 630.9050969999953
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchEnd",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 856.4911060000013,
+            "status": "fulfilled",
+            "ackOffsetMs": 880.8974330000055
+          }
+        ],
+        "durationMs": 880.9524459999957,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 15001.599999999977,
+            "timestamp": 14987.20000000007,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 206,
+            "y": 449.1499938964844
+          },
+          {
+            "type": "pointerup",
+            "time": 15867.599999999977,
+            "timestamp": 15843.70000000007,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 270,
+            "y": 461.1499938964844
+          }
+        ]
+      }
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "engine": "tropnik-canvas",
+      "input": "mouse",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "scenarioCount": 8,
+      "performancePassed": true,
+      "issues": [],
+      "pan": {
+        "input": "mouse",
+        "start": {
+          "x": 748.3499999999999,
+          "y": 489.6
+        },
+        "end": {
+          "x": 812.3499999999999,
+          "y": 501.6
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 0.0026439999928697944,
+            "status": "fulfilled",
+            "ackOffsetMs": 14.49807500001043
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mousePressed",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 14.499917999957688,
+            "status": "fulfilled",
+            "ackOffsetMs": 17.347934999968857
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 753.6833333333333,
+            "y": 490.6,
+            "sentOffsetMs": 17.353113000048324,
+            "status": "fulfilled",
+            "ackOffsetMs": 30.896369999973103
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 759.0166666666665,
+            "y": 491.6,
+            "sentOffsetMs": 56.09072700003162,
+            "status": "fulfilled",
+            "ackOffsetMs": 64.24538400000893
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 764.3499999999999,
+            "y": 492.6,
+            "sentOffsetMs": 89.38494200003333,
+            "status": "fulfilled",
+            "ackOffsetMs": 97.73183099995367
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 769.6833333333333,
+            "y": 493.6,
+            "sentOffsetMs": 122.87787900003605,
+            "status": "fulfilled",
+            "ackOffsetMs": 131.94335900002625
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 775.0166666666665,
+            "y": 494.6,
+            "sentOffsetMs": 157.13330300000962,
+            "status": "fulfilled",
+            "ackOffsetMs": 160.57173700002022
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 780.3499999999999,
+            "y": 495.6,
+            "sentOffsetMs": 185.7228190000169,
+            "status": "fulfilled",
+            "ackOffsetMs": 197.75764600001276
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 785.6833333333333,
+            "y": 496.6,
+            "sentOffsetMs": 222.9033739999868,
+            "status": "fulfilled",
+            "ackOffsetMs": 230.98924200003967
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 791.0166666666665,
+            "y": 497.6,
+            "sentOffsetMs": 256.1709349999437,
+            "status": "fulfilled",
+            "ackOffsetMs": 264.3776249999646
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 796.3499999999999,
+            "y": 498.6,
+            "sentOffsetMs": 289.504224000033,
+            "status": "fulfilled",
+            "ackOffsetMs": 298.4070709999651
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 801.6833333333333,
+            "y": 499.6,
+            "sentOffsetMs": 323.6438060000073,
+            "status": "fulfilled",
+            "ackOffsetMs": 331.23305100004654
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 807.0166666666665,
+            "y": 500.6,
+            "sentOffsetMs": 356.38128199998755,
+            "status": "fulfilled",
+            "ackOffsetMs": 364.443014999968
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 389.60434600000735,
+            "status": "fulfilled",
+            "ackOffsetMs": 397.69705700001214
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseReleased",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 623.124300000025,
+            "status": "fulfilled",
+            "ackOffsetMs": 627.9341299999505
+          }
+        ],
+        "durationMs": 627.9384070000378,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 13576.299999999814,
+            "timestamp": 13574.399999999907,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 748.3499755859375,
+            "y": 489.6000061035156
+          },
+          {
+            "type": "pointerup",
+            "time": 14183.399999999907,
+            "timestamp": 14183.199999999953,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812.3499755859375,
+            "y": 501.6000061035156
+          },
+          {
+            "type": "click",
+            "time": 14187,
+            "timestamp": 14183.199999999953,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812,
+            "y": 501
+          }
+        ]
+      }
+    }
+  ],
+  "windows": [
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "panel",
+      "startedAtMs": 2875.600000000006,
+      "endedAtMs": 4968.200000000012,
+      "durationMs": 2092.600000000006,
+      "rafCallbacks": 126,
+      "rawIntervals": 127,
+      "nearestRank95": 121,
+      "frameP95Ms": 16.800000000017462,
+      "maxFrameGapMs": 27.29999999998836,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 6,
+        "p95Ms": 64.89999999999418,
+        "maxMs": 64.89999999999418,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 94,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.6489971638274501,
+        "recentInputCount": 3
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "explore-search",
+      "startedAtMs": 4971.5,
+      "endedAtMs": 6769.100000000006,
+      "durationMs": 1797.6000000000058,
+      "rafCallbacks": 108,
+      "rawIntervals": 109,
+      "nearestRank95": 104,
+      "frameP95Ms": 16.800000000017462,
+      "maxFrameGapMs": 19.300000000017462,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 28,
+        "p95Ms": 64.89999999999418,
+        "maxMs": 64.89999999999418,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 169,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.08597465980714723,
+        "recentInputCount": 8
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "explore-filters",
+      "startedAtMs": 12191.600000000006,
+      "endedAtMs": 14369.100000000006,
+      "durationMs": 2177.5,
+      "rafCallbacks": 132,
+      "rawIntervals": 133,
+      "nearestRank95": 127,
+      "frameP95Ms": 16.89999999999418,
+      "maxFrameGapMs": 17,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 8,
+        "p95Ms": 48.20000000001164,
+        "maxMs": 48.20000000001164,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 129,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.06736832584065423,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "catalog-scroll",
+      "startedAtMs": 14372.200000000012,
+      "endedAtMs": 15234.700000000012,
+      "durationMs": 862.5,
+      "rafCallbacks": 52,
+      "rawIntervals": 53,
+      "nearestRank95": 51,
+      "frameP95Ms": 22.79999999998836,
+      "maxFrameGapMs": 22.89999999999418,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 49.70000000001164,
+        "maxMs": 49.70000000001164,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 30,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 56,
+        "p95DurationMs": 48,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "map-pan",
+      "startedAtMs": 16702.800000000017,
+      "endedAtMs": 18051.100000000006,
+      "durationMs": 1348.2999999999884,
+      "rafCallbacks": 81,
+      "rawIntervals": 82,
+      "nearestRank95": 78,
+      "frameP95Ms": 18.900000000023283,
+      "maxFrameGapMs": 21,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 46.79999999998836,
+        "maxMs": 46.79999999998836,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 26,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.07813910204394024,
+        "recentInputCount": 1
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "pointerDownOffsetMs": 15.299999999988358,
+      "pointerUpOffsetMs": 881.2999999999884,
+      "gestureCommandDurationMs": 880.7958169999984,
+      "holdBeforeReleaseMs": 200
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "map-zoom",
+      "startedAtMs": 18052.20000000001,
+      "endedAtMs": 24650.800000000017,
+      "durationMs": 6598.600000000006,
+      "rafCallbacks": 394,
+      "rawIntervals": 395,
+      "nearestRank95": 376,
+      "frameP95Ms": 18.699999999982538,
+      "maxFrameGapMs": 26.70000000001164,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 65.10000000000582,
+        "maxMs": 65.10000000000582,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 70,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "layer-switch",
+      "startedAtMs": 24652.600000000006,
+      "endedAtMs": 29150.5,
+      "durationMs": 4497.899999999994,
+      "rafCallbacks": 270,
+      "rawIntervals": 271,
+      "nearestRank95": 258,
+      "frameP95Ms": 16.800000000017462,
+      "maxFrameGapMs": 23.79999999998836,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 65,
+        "maxMs": 65,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 70,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0.022143804754611498,
+        "unexpectedSum": 0.022143804754611498,
+        "allShiftSum": 0.044287609509222996,
+        "recentInputCount": 1
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "site-search",
+      "startedAtMs": 327,
+      "endedAtMs": 1931.8000000000175,
+      "durationMs": 1604.8000000000175,
+      "rafCallbacks": 98,
+      "rawIntervals": 99,
+      "nearestRank95": 95,
+      "frameP95Ms": 17.10000000000582,
+      "maxFrameGapMs": 35.20000000001164,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 34,
+        "p95Ms": 46.5,
+        "maxMs": 48.29999999998836,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 100,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.12862321695545878,
+        "recentInputCount": 3
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 41,
+          "startOffsetMs": 651.6000000000058,
+          "endOffsetMs": 686.8000000000175,
+          "gapMs": 35.20000000001164
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "panel",
+      "startedAtMs": 2772.7000000000116,
+      "endedAtMs": 3984.7000000000116,
+      "durationMs": 1212,
+      "rafCallbacks": 73,
+      "rawIntervals": 74,
+      "nearestRank95": 71,
+      "frameP95Ms": 16.800000000017462,
+      "maxFrameGapMs": 17.20000000001164,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 32.90000000002328,
+        "maxMs": 32.90000000002328,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 25,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 16,
+        "p95DurationMs": 16,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "explore-search",
+      "startedAtMs": 3986.4000000000233,
+      "endedAtMs": 5535.3000000000175,
+      "durationMs": 1548.8999999999942,
+      "rafCallbacks": 93,
+      "rawIntervals": 94,
+      "nearestRank95": 90,
+      "frameP95Ms": 17.400000000023283,
+      "maxFrameGapMs": 21.60000000000582,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 28,
+        "p95Ms": 34.39999999999418,
+        "maxMs": 34.79999999998836,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 104,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.323803973176362,
+        "recentInputCount": 13
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "explore-filters",
+      "startedAtMs": 11635.600000000035,
+      "endedAtMs": 13485.200000000012,
+      "durationMs": 1849.5999999999767,
+      "rafCallbacks": 111,
+      "rawIntervals": 112,
+      "nearestRank95": 107,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 17.400000000023283,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 8,
+        "p95Ms": 32.90000000002328,
+        "maxMs": 32.90000000002328,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 42,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 24,
+        "p95DurationMs": 24,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.053738818344105876,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "catalog-scroll",
+      "startedAtMs": 13486.799999999988,
+      "endedAtMs": 13934.400000000023,
+      "durationMs": 447.6000000000349,
+      "rafCallbacks": 27,
+      "rawIntervals": 28,
+      "nearestRank95": 27,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 19.099999999976717,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 45.70000000001164,
+        "maxMs": 45.70000000001164,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 0,
+        "durationThresholdMs": 16,
+        "maxDurationMs": null,
+        "p95DurationMs": null,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "map-pan",
+      "startedAtMs": 14319.299999999988,
+      "endedAtMs": 18450.79999999999,
+      "durationMs": 4131.5,
+      "rafCallbacks": 248,
+      "rawIntervals": 249,
+      "nearestRank95": 237,
+      "frameP95Ms": 23.100000000034925,
+      "maxFrameGapMs": 29.20000000001164,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 2,
+        "p95Ms": 40.09999999997672,
+        "maxMs": 40.09999999997672,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 20,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 48,
+        "p95DurationMs": 40,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "pointerDownOffsetMs": 16.900000000023283,
+      "pointerUpOffsetMs": 624.2000000000116,
+      "gestureCommandDurationMs": 629.0073649999977,
+      "holdBeforeReleaseMs": 200
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "map-zoom",
+      "startedAtMs": 18452,
+      "endedAtMs": 27950.400000000023,
+      "durationMs": 9498.400000000023,
+      "rafCallbacks": 563,
+      "rawIntervals": 564,
+      "nearestRank95": 536,
+      "frameP95Ms": 19.900000000023283,
+      "maxFrameGapMs": 45.09999999997672,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 42.5,
+        "maxMs": 42.5,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 30,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 48,
+        "p95DurationMs": 48,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 339,
+          "startOffsetMs": 5664.900000000023,
+          "endOffsetMs": 5710,
+          "gapMs": 45.09999999997672
+        },
+        {
+          "index": 434,
+          "startOffsetMs": 7316,
+          "endOffsetMs": 7352.100000000035,
+          "gapMs": 36.100000000034925
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "layer-switch",
+      "startedAtMs": 27952.5,
+      "endedAtMs": 31583.79999999999,
+      "durationMs": 3631.2999999999884,
+      "rafCallbacks": 218,
+      "rawIntervals": 219,
+      "nearestRank95": 209,
+      "frameP95Ms": 16.900000000023283,
+      "maxFrameGapMs": 27.900000000023283,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 43.59999999997672,
+        "maxMs": 43.59999999997672,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 26,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 48,
+        "p95DurationMs": 48,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0.007472533456448137,
+        "unexpectedSum": 0.007472533456448137,
+        "allShiftSum": 0.014945066912896274,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "site-search",
+      "startedAtMs": 307.20000000001164,
+      "endedAtMs": 1779.600000000035,
+      "durationMs": 1472.4000000000233,
+      "rafCallbacks": 90,
+      "rawIntervals": 91,
+      "nearestRank95": 87,
+      "frameP95Ms": 17.399999999965075,
+      "maxFrameGapMs": 20.20000000001164,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 34,
+        "p95Ms": 33.29999999998836,
+        "maxMs": 34.20000000001164,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 74,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 24,
+        "p95DurationMs": 24,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.8686109606648199,
+        "recentInputCount": 5
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "panel",
+      "startedAtMs": 2858,
+      "endedAtMs": 5001.5,
+      "durationMs": 2143.5,
+      "rafCallbacks": 129,
+      "rawIntervals": 130,
+      "nearestRank95": 124,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 23.29999999998836,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 6,
+        "p95Ms": 65.5,
+        "maxMs": 65.5,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 94,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 72,
+        "p95DurationMs": 72,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.490066128301584,
+        "recentInputCount": 4
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "explore-search",
+      "startedAtMs": 5004.300000000047,
+      "endedAtMs": 6768.600000000035,
+      "durationMs": 1764.2999999999884,
+      "rafCallbacks": 106,
+      "rawIntervals": 107,
+      "nearestRank95": 102,
+      "frameP95Ms": 17,
+      "maxFrameGapMs": 22,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 28,
+        "p95Ms": 65.09999999997672,
+        "maxMs": 65.70000000001164,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 169,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.10071628622367525,
+        "recentInputCount": 8
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "explore-filters",
+      "startedAtMs": 10555,
+      "endedAtMs": 12785.100000000035,
+      "durationMs": 2230.100000000035,
+      "rafCallbacks": 135,
+      "rawIntervals": 136,
+      "nearestRank95": 130,
+      "frameP95Ms": 16.899999999965075,
+      "maxFrameGapMs": 44.09999999997672,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 8,
+        "p95Ms": 64.59999999997672,
+        "maxMs": 64.59999999997672,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 129,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.09222663752508793,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 107,
+          "startOffsetMs": 1763.4000000000233,
+          "endOffsetMs": 1807.5,
+          "gapMs": 44.09999999997672
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "catalog-scroll",
+      "startedAtMs": 12787.800000000047,
+      "endedAtMs": 13684.599999999977,
+      "durationMs": 896.7999999999302,
+      "rafCallbacks": 54,
+      "rawIntervals": 55,
+      "nearestRank95": 53,
+      "frameP95Ms": 22.70000000006985,
+      "maxFrameGapMs": 23,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 61.600000000034925,
+        "maxMs": 61.600000000034925,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 32,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 72,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "map-pan",
+      "startedAtMs": 14986.20000000007,
+      "endedAtMs": 16334.5,
+      "durationMs": 1348.2999999999302,
+      "rafCallbacks": 81,
+      "rawIntervals": 82,
+      "nearestRank95": 78,
+      "frameP95Ms": 19.099999999976717,
+      "maxFrameGapMs": 20.699999999953434,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 47,
+        "maxMs": 47,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 26,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "pointerDownOffsetMs": 15.399999999906868,
+      "pointerUpOffsetMs": 881.3999999999069,
+      "gestureCommandDurationMs": 880.9524459999957,
+      "holdBeforeReleaseMs": 200
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "map-zoom",
+      "startedAtMs": 16336,
+      "endedAtMs": 23001.099999999977,
+      "durationMs": 6665.099999999977,
+      "rafCallbacks": 398,
+      "rawIntervals": 399,
+      "nearestRank95": 380,
+      "frameP95Ms": 18.900000000023283,
+      "maxFrameGapMs": 27.5,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 64.90000000002328,
+        "maxMs": 64.90000000002328,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 70,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "layer-switch",
+      "startedAtMs": 23003.300000000047,
+      "endedAtMs": 27283.900000000023,
+      "durationMs": 4280.599999999977,
+      "rafCallbacks": 257,
+      "rawIntervals": 258,
+      "nearestRank95": 246,
+      "frameP95Ms": 16.900000000023283,
+      "maxFrameGapMs": 26.300000000046566,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 64.79999999993015,
+        "maxMs": 64.79999999993015,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 70,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0.022143804754611498,
+        "unexpectedSum": 0.022143804754611498,
+        "allShiftSum": 0.044287609509222996,
+        "recentInputCount": 1
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "site-search",
+      "startedAtMs": 317.60000000009313,
+      "endedAtMs": 1912.9000000000233,
+      "durationMs": 1595.2999999999302,
+      "rafCallbacks": 97,
+      "rawIntervals": 98,
+      "nearestRank95": 94,
+      "frameP95Ms": 17.800000000046566,
+      "maxFrameGapMs": 21.099999999976717,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 34,
+        "p95Ms": 48.70000000006985,
+        "maxMs": 48.79999999993015,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 104,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.12862321695545878,
+        "recentInputCount": 3
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "panel",
+      "startedAtMs": 2796,
+      "endedAtMs": 4008,
+      "durationMs": 1212,
+      "rafCallbacks": 73,
+      "rawIntervals": 74,
+      "nearestRank95": 71,
+      "frameP95Ms": 17,
+      "maxFrameGapMs": 17.200000000186265,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 32.89999999990687,
+        "maxMs": 32.89999999990687,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 25,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 16,
+        "p95DurationMs": 16,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "explore-search",
+      "startedAtMs": 4009.5999999998603,
+      "endedAtMs": 5558.09999999986,
+      "durationMs": 1548.5,
+      "rafCallbacks": 93,
+      "rawIntervals": 94,
+      "nearestRank95": 90,
+      "frameP95Ms": 17.4000000001397,
+      "maxFrameGapMs": 19.300000000046566,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 28,
+        "p95Ms": 33.800000000046566,
+        "maxMs": 34.800000000046566,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 104,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 40,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.323803973176362,
+        "recentInputCount": 13
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "explore-filters",
+      "startedAtMs": 10875.5,
+      "endedAtMs": 12724.699999999953,
+      "durationMs": 1849.1999999999534,
+      "rafCallbacks": 111,
+      "rawIntervals": 112,
+      "nearestRank95": 107,
+      "frameP95Ms": 16.899999999906868,
+      "maxFrameGapMs": 17.799999999813735,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 8,
+        "p95Ms": 33.10000000009313,
+        "maxMs": 33.10000000009313,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 42,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 24,
+        "p95DurationMs": 24,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.053738818344105876,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "catalog-scroll",
+      "startedAtMs": 12726.09999999986,
+      "endedAtMs": 13174.199999999953,
+      "durationMs": 448.10000000009313,
+      "rafCallbacks": 27,
+      "rawIntervals": 28,
+      "nearestRank95": 27,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 18.700000000186265,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 46.5999999998603,
+        "maxMs": 46.5999999998603,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 0,
+        "durationThresholdMs": 16,
+        "maxDurationMs": null,
+        "p95DurationMs": null,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "map-pan",
+      "startedAtMs": 13559.5,
+      "endedAtMs": 16690.699999999953,
+      "durationMs": 3131.1999999999534,
+      "rafCallbacks": 186,
+      "rawIntervals": 187,
+      "nearestRank95": 178,
+      "frameP95Ms": 24,
+      "maxFrameGapMs": 34,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 2,
+        "p95Ms": 40,
+        "maxMs": 40,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 20,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 48,
+        "p95DurationMs": 40,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "pointerDownOffsetMs": 16.799999999813735,
+      "pointerUpOffsetMs": 623.8999999999069,
+      "gestureCommandDurationMs": 627.9384070000378,
+      "holdBeforeReleaseMs": 200
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "map-zoom",
+      "startedAtMs": 16692,
+      "endedAtMs": 26156.899999999907,
+      "durationMs": 9464.899999999907,
+      "rafCallbacks": 561,
+      "rawIntervals": 562,
+      "nearestRank95": 534,
+      "frameP95Ms": 18.5,
+      "maxFrameGapMs": 53.699999999953434,
+      "over50ms": 1,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 42.200000000186265,
+        "maxMs": 42.200000000186265,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 30,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 48,
+        "p95DurationMs": 48,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 1,
+        "totalMs": 52,
+        "maxMs": 52
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 430,
+          "startOffsetMs": 7220.399999999907,
+          "endOffsetMs": 7255.59999999986,
+          "gapMs": 35.199999999953434
+        },
+        {
+          "index": 444,
+          "startOffsetMs": 7481.199999999953,
+          "endOffsetMs": 7534.899999999907,
+          "gapMs": 53.699999999953434
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "layer-switch",
+      "startedAtMs": 26159.199999999953,
+      "endedAtMs": 29806.699999999953,
+      "durationMs": 3647.5,
+      "rafCallbacks": 218,
+      "rawIntervals": 219,
+      "nearestRank95": 209,
+      "frameP95Ms": 17,
+      "maxFrameGapMs": 39.4000000001397,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 41.60000000009313,
+        "maxMs": 41.60000000009313,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 26,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 48,
+        "p95DurationMs": 48,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0.007472533456448137,
+        "unexpectedSum": 0.007472533456448137,
+        "allShiftSum": 0.014945066912896274,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 189,
+          "startOffsetMs": 3150.399999999907,
+          "endOffsetMs": 3189.8000000000466,
+          "gapMs": 39.4000000001397
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "site-search",
+      "startedAtMs": 310.60000000009313,
+      "endedAtMs": 1762.9000000001397,
+      "durationMs": 1452.3000000000466,
+      "rafCallbacks": 89,
+      "rawIntervals": 90,
+      "nearestRank95": 86,
+      "frameP95Ms": 17.4000000001397,
+      "maxFrameGapMs": 25.699999999953434,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 34,
+        "p95Ms": 33.800000000046566,
+        "maxMs": 34,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 78,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 24,
+        "p95DurationMs": 24,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.8686109606648199,
+        "recentInputCount": 5
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": []
+    }
+  ],
+  "environment": {
+    "early": {
+      "schemaVersion": 1,
+      "profile": "chromium-headless-software-swiftshader-webgl-v1",
+      "collection": "browser-target-cdp-before-measurement",
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "capturedAt": "2026-11-13T16:51:16.043Z",
+      "requestedFlags": [
+        "--headless=new",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-background-networking",
+        "--disable-component-update",
+        "--disable-default-apps",
+        "--disable-extensions",
+        "--disable-features=Translate,MediaRouter",
+        "--mute-audio",
+        "--no-first-run",
+        "--use-gl=angle",
+        "--use-angle=swiftshader-webgl",
+        "--enable-unsafe-swiftshader",
+        "--window-size=1920,1920",
+        "--ozone-override-screen-size=1920,1920"
+      ],
+      "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=46085 --user-data-dir=/tmp/tropnik-chrome-5116 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+      "browser": {
+        "product": "Chrome/157.0.8103.50",
+        "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+        "protocolVersion": "1.3",
+        "jsVersion": "15.7.112.23",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+      },
+      "gpu": {
+        "devices": [
+          {
+            "vendorId": 65535,
+            "deviceId": 65535,
+            "vendorString": "Google Inc. (Google)",
+            "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "driverVendor": "SwANGLE",
+            "driverVersion": "5.0.0"
+          }
+        ],
+        "auxAttributes": {
+          "displayType": "ANGLE_SWIFTSHADER",
+          "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+          "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "glVendor": "Google Inc. (Google)",
+          "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+          "skiaBackendType": "None",
+          "targetCpuBits": 64
+        },
+        "featureStatus": {
+          "2d_canvas": "unavailable_software",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "disabled_software",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "disabled_off",
+          "rasterization": "disabled_software",
+          "skia_graphite": "disabled_off",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "disabled_software",
+          "video_encode": "disabled_software",
+          "vulkan": "disabled_off",
+          "webgl": "unavailable_software",
+          "webgpu": "unavailable_software",
+          "webgpu_on_vk_via_gl_interop": "disabled_off",
+          "webnn": "unavailable_software"
+        }
+      },
+      "runner": {
+        "os": {
+          "platform": "linux",
+          "release": "7.0.0-1017-azure",
+          "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+          "arch": "x64"
+        },
+        "cpu": {
+          "models": [
+            "AMD EPYC 9V45 96-Core Processor"
+          ],
+          "logicalCount": 4,
+          "availableParallelism": 4
+        },
+        "totalMemoryBytes": 16760344576,
+        "image": {
+          "os": "ubuntu24",
+          "version": "20261111.370.1"
+        }
+      },
+      "nativeSurface": {
+        "schemaVersion": 1,
+        "collection": "blank-target-before-emulation",
+        "window": {
+          "left": 10,
+          "top": 10,
+          "width": 1920,
+          "height": 1920,
+          "windowState": "normal"
+        },
+        "viewport": {
+          "url": "about:blank",
+          "visibilityState": "visible",
+          "innerWidth": 1920,
+          "innerHeight": 1833,
+          "outerWidth": 1920,
+          "outerHeight": 1920,
+          "devicePixelRatio": 1,
+          "screen": {
+            "width": 1920,
+            "height": 1920,
+            "availWidth": 1920,
+            "availHeight": 1920
+          }
+        }
+      }
+    },
+    "full": {
+      "schemaVersion": 1,
+      "profile": "chromium-headless-software-swiftshader-webgl-v1",
+      "collection": "browser-target-cdp-before-measurement",
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "capturedAt": "2026-11-13T16:54:17.615Z",
+      "requestedFlags": [
+        "--headless=new",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-background-networking",
+        "--disable-component-update",
+        "--disable-default-apps",
+        "--disable-extensions",
+        "--disable-features=Translate,MediaRouter",
+        "--mute-audio",
+        "--no-first-run",
+        "--use-gl=angle",
+        "--use-angle=swiftshader-webgl",
+        "--enable-unsafe-swiftshader",
+        "--window-size=1920,1920",
+        "--ozone-override-screen-size=1920,1920"
+      ],
+      "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=44959 --user-data-dir=/tmp/tropnik-chrome-7528 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+      "browser": {
+        "product": "Chrome/157.0.8103.50",
+        "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+        "protocolVersion": "1.3",
+        "jsVersion": "15.7.112.23",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+      },
+      "gpu": {
+        "devices": [
+          {
+            "vendorId": 65535,
+            "deviceId": 65535,
+            "vendorString": "Google Inc. (Google)",
+            "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "driverVendor": "SwANGLE",
+            "driverVersion": "5.0.0"
+          }
+        ],
+        "auxAttributes": {
+          "displayType": "ANGLE_SWIFTSHADER",
+          "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+          "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "glVendor": "Google Inc. (Google)",
+          "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+          "skiaBackendType": "None",
+          "targetCpuBits": 64
+        },
+        "featureStatus": {
+          "2d_canvas": "unavailable_software",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "disabled_software",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "disabled_off",
+          "rasterization": "disabled_software",
+          "skia_graphite": "disabled_off",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "disabled_software",
+          "video_encode": "disabled_software",
+          "vulkan": "disabled_off",
+          "webgl": "unavailable_software",
+          "webgpu": "unavailable_software",
+          "webgpu_on_vk_via_gl_interop": "disabled_off",
+          "webnn": "unavailable_software"
+        }
+      },
+      "runner": {
+        "os": {
+          "platform": "linux",
+          "release": "7.0.0-1017-azure",
+          "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+          "arch": "x64"
+        },
+        "cpu": {
+          "models": [
+            "AMD EPYC 9V45 96-Core Processor"
+          ],
+          "logicalCount": 4,
+          "availableParallelism": 4
+        },
+        "totalMemoryBytes": 16760344576,
+        "image": {
+          "os": "ubuntu24",
+          "version": "20261111.370.1"
+        }
+      },
+      "nativeSurface": {
+        "schemaVersion": 1,
+        "collection": "blank-target-before-emulation",
+        "window": {
+          "left": 10,
+          "top": 10,
+          "width": 1920,
+          "height": 1920,
+          "windowState": "normal"
+        },
+        "viewport": {
+          "url": "about:blank",
+          "visibilityState": "visible",
+          "innerWidth": 1920,
+          "innerHeight": 1833,
+          "outerWidth": 1920,
+          "outerHeight": 1920,
+          "devicePixelRatio": 1,
+          "screen": {
+            "width": 1920,
+            "height": 1920,
+            "availWidth": 1920,
+            "availHeight": 1920
+          }
+        }
+      }
+    },
+    "originalComparatorPassed": true,
+    "originalNativeSurfaceCoveragePassed": true
+  },
+  "originalEnvelopes": {
+    "early": {
+      "schemaVersion": 1,
+      "status": "completed",
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "verified": false,
+      "diagnosticOnly": true,
+      "releaseEligible": false,
+      "performancePassed": true,
+      "performanceIssues": [],
+      "environment": {
+        "schemaVersion": 1,
+        "profile": "chromium-headless-software-swiftshader-webgl-v1",
+        "collection": "browser-target-cdp-before-measurement",
+        "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+        "capturedAt": "2026-11-13T16:51:16.043Z",
+        "requestedFlags": [
+          "--headless=new",
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-background-networking",
+          "--disable-component-update",
+          "--disable-default-apps",
+          "--disable-extensions",
+          "--disable-features=Translate,MediaRouter",
+          "--mute-audio",
+          "--no-first-run",
+          "--use-gl=angle",
+          "--use-angle=swiftshader-webgl",
+          "--enable-unsafe-swiftshader",
+          "--window-size=1920,1920",
+          "--ozone-override-screen-size=1920,1920"
+        ],
+        "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=46085 --user-data-dir=/tmp/tropnik-chrome-5116 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+        "browser": {
+          "product": "Chrome/157.0.8103.50",
+          "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+          "protocolVersion": "1.3",
+          "jsVersion": "15.7.112.23",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+        },
+        "gpu": {
+          "devices": [
+            {
+              "vendorId": 65535,
+              "deviceId": 65535,
+              "vendorString": "Google Inc. (Google)",
+              "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+              "driverVendor": "SwANGLE",
+              "driverVersion": "5.0.0"
+            }
+          ],
+          "auxAttributes": {
+            "displayType": "ANGLE_SWIFTSHADER",
+            "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+            "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "glVendor": "Google Inc. (Google)",
+            "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+            "skiaBackendType": "None",
+            "targetCpuBits": 64
+          },
+          "featureStatus": {
+            "2d_canvas": "unavailable_software",
+            "direct_rendering_display_compositor": "disabled_off_ok",
+            "gpu_compositing": "disabled_software",
+            "multiple_raster_threads": "enabled_on",
+            "opengl": "disabled_off",
+            "rasterization": "disabled_software",
+            "skia_graphite": "disabled_off",
+            "trees_in_viz": "disabled_off",
+            "video_decode": "disabled_software",
+            "video_encode": "disabled_software",
+            "vulkan": "disabled_off",
+            "webgl": "unavailable_software",
+            "webgpu": "unavailable_software",
+            "webgpu_on_vk_via_gl_interop": "disabled_off",
+            "webnn": "unavailable_software"
+          }
+        },
+        "runner": {
+          "os": {
+            "platform": "linux",
+            "release": "7.0.0-1017-azure",
+            "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+            "arch": "x64"
+          },
+          "cpu": {
+            "models": [
+              "AMD EPYC 9V45 96-Core Processor"
+            ],
+            "logicalCount": 4,
+            "availableParallelism": 4
+          },
+          "totalMemoryBytes": 16760344576,
+          "image": {
+            "os": "ubuntu24",
+            "version": "20261111.370.1"
+          }
+        },
+        "nativeSurface": {
+          "schemaVersion": 1,
+          "collection": "blank-target-before-emulation",
+          "window": {
+            "left": 10,
+            "top": 10,
+            "width": 1920,
+            "height": 1920,
+            "windowState": "normal"
+          },
+          "viewport": {
+            "url": "about:blank",
+            "visibilityState": "visible",
+            "innerWidth": 1920,
+            "innerHeight": 1833,
+            "outerWidth": 1920,
+            "outerHeight": 1920,
+            "devicePixelRatio": 1,
+            "screen": {
+              "width": 1920,
+              "height": 1920,
+              "availWidth": 1920,
+              "availHeight": 1920
+            }
+          }
+        }
+      }
+    },
+    "full": {
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "verified": true,
+      "environment": {
+        "schemaVersion": 1,
+        "profile": "chromium-headless-software-swiftshader-webgl-v1",
+        "collection": "browser-target-cdp-before-measurement",
+        "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+        "capturedAt": "2026-11-13T16:54:17.615Z",
+        "requestedFlags": [
+          "--headless=new",
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-background-networking",
+          "--disable-component-update",
+          "--disable-default-apps",
+          "--disable-extensions",
+          "--disable-features=Translate,MediaRouter",
+          "--mute-audio",
+          "--no-first-run",
+          "--use-gl=angle",
+          "--use-angle=swiftshader-webgl",
+          "--enable-unsafe-swiftshader",
+          "--window-size=1920,1920",
+          "--ozone-override-screen-size=1920,1920"
+        ],
+        "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=44959 --user-data-dir=/tmp/tropnik-chrome-7528 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+        "browser": {
+          "product": "Chrome/157.0.8103.50",
+          "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+          "protocolVersion": "1.3",
+          "jsVersion": "15.7.112.23",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+        },
+        "gpu": {
+          "devices": [
+            {
+              "vendorId": 65535,
+              "deviceId": 65535,
+              "vendorString": "Google Inc. (Google)",
+              "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+              "driverVendor": "SwANGLE",
+              "driverVersion": "5.0.0"
+            }
+          ],
+          "auxAttributes": {
+            "displayType": "ANGLE_SWIFTSHADER",
+            "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+            "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "glVendor": "Google Inc. (Google)",
+            "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+            "skiaBackendType": "None",
+            "targetCpuBits": 64
+          },
+          "featureStatus": {
+            "2d_canvas": "unavailable_software",
+            "direct_rendering_display_compositor": "disabled_off_ok",
+            "gpu_compositing": "disabled_software",
+            "multiple_raster_threads": "enabled_on",
+            "opengl": "disabled_off",
+            "rasterization": "disabled_software",
+            "skia_graphite": "disabled_off",
+            "trees_in_viz": "disabled_off",
+            "video_decode": "disabled_software",
+            "video_encode": "disabled_software",
+            "vulkan": "disabled_off",
+            "webgl": "unavailable_software",
+            "webgpu": "unavailable_software",
+            "webgpu_on_vk_via_gl_interop": "disabled_off",
+            "webnn": "unavailable_software"
+          }
+        },
+        "runner": {
+          "os": {
+            "platform": "linux",
+            "release": "7.0.0-1017-azure",
+            "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+            "arch": "x64"
+          },
+          "cpu": {
+            "models": [
+              "AMD EPYC 9V45 96-Core Processor"
+            ],
+            "logicalCount": 4,
+            "availableParallelism": 4
+          },
+          "totalMemoryBytes": 16760344576,
+          "image": {
+            "os": "ubuntu24",
+            "version": "20261111.370.1"
+          }
+        },
+        "nativeSurface": {
+          "schemaVersion": 1,
+          "collection": "blank-target-before-emulation",
+          "window": {
+            "left": 10,
+            "top": 10,
+            "width": 1920,
+            "height": 1920,
+            "windowState": "normal"
+          },
+          "viewport": {
+            "url": "about:blank",
+            "visibilityState": "visible",
+            "innerWidth": 1920,
+            "innerHeight": 1833,
+            "outerWidth": 1920,
+            "outerHeight": 1920,
+            "devicePixelRatio": 1,
+            "screen": {
+              "width": 1920,
+              "height": 1920,
+              "availWidth": 1920,
+              "availHeight": 1920
+            }
+          }
+        }
+      }
+    }
+  },
+  "preservedPriorFailure": {
+    "sourceCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+    "runId": 43458536389,
+    "conclusion": "failure",
+    "issue": {
+      "profile": "desktop-webgl",
+      "phase": "ui-smoothness/map-pan",
+      "metric": "frameP95Ms",
+      "value": 35,
+      "limit": 35,
+      "comparison": "value < limit"
+    },
+    "rawBlob": "49c960d82f8eb45b9f607a5ac59b3d240fb6b4e8",
+    "reviewBlob": "40133f92a2401da8daeec1ebdd0fea133cd6d720",
+    "unchangedByThisReview": true
+  },
+  "limitations": [
+    "These numbers qualify the measured 79b5 source and environment, not the later final 0770 source. The latter must pass its own unchanged original Pages gates.",
+    "The 79b5 runner uses AMD EPYC 9V45; the earlier failed f0c4 runner used EPYC 7763 and accepted 8020 used EPYC 9V74. This is not a controlled same-machine performance A/B comparison.",
+    "79b5 is an independently required archive-packaging fix with no renderer change. No quantitative rendering improvement or cause of f0c4's failure is attributed to it.",
+    "This compact recovery validates accepted artifact identity and original JSON evidence. Fresh independent decoding of the separate design PNG bytes is not part of this review.",
+    "No new trace, browser run, acceptance measurement, repeated performance gate, main/ref mutation or publication was performed by this review.",
+    "The full desktop zoom window contains one 52 ms long task and a 53.7 ms maximum frame gap; both are within the unchanged original thresholds. No zero-long-task claim is made."
+  ],
+  "independentTransportCrosscheck": {
+    "reviewer": "web_release_skeptic",
+    "method": "One independent read of the exact raw Git blob, compared with previously collected original artifact API metadata and the small completed deploy log; no second extractor log or artifact download.",
+    "result": "PASS",
+    "rawBlob": "409c28529dfe891468874a944aef8c8331b31145",
+    "bytes": 529928,
+    "sha256": "40419d98f1bd4050aafc8c2d22bfc16bedc994b7c8db1c62438fb19d538be563",
+    "verifiedScopes": [
+      "raw blob exact UTF8 byte count and SHA256",
+      "compact payload UTF8 byte count and SHA256",
+      "original artifact ZIP size and digest against independent API metadata",
+      "source79b5/build39a9 against independent completed deploy log",
+      "all three selected original member hashes",
+      "all four complete original eight-scenario audit objects"
+    ],
+    "rawNumericRecomputationByPeer": false,
+    "independentPNGDecoding": false
+  }
+}

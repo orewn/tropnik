@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "preparationOnly": true,
+  "verified": false,
+  "releaseEligible": false,
+  "status": "prepared",
+  "repository": "orewn/tropnik",
+  "branch": "prepare/final-site-0.4.24",
+  "sourceCommit": "7545e33a27fe424ab84d8caaaba539c11ac73668",
+  "workflowRunId": "43469040535",
+  "workflowRunAttempt": "1",
+  "requiredNext": "Move the candidate PR branch with an expected-head lease, then run every unchanged release acceptance workflow on preparedCommit.",
+  "sourceTree": "5e86a297f522cc4ce1d811f7485c7a477840fdf0",
+  "preparedTree": "fffab7ea59c5754a348bba5c9866bd5a565d5fd3",
+  "protectedSource": {
+    "entries": 5830,
+    "sha256": "83b606ecd8e550b43de70acad83d09ceee1f774ba3c8e3c1b84f152207b6100e",
+    "unchanged": true
+  },
+  "generatorCommands": [
+    [
+      "node",
+      "web/scripts/build-landscape.mjs"
+    ],
+    [
+      "python",
+      "tools/android-build/prepare-landscape.py"
+    ],
+    [
+      "node",
+      "tools/android-build/prepare-custom-map.mjs"
+    ],
+    [
+      "node",
+      "web/scripts/prepare-offline.mjs"
+    ],
+    [
+      "node",
+      "web/scripts/stamp-service-worker.mjs"
+    ]
+  ],
+  "generatorChainIdempotent": true,
+  "checkOnlyVerifiersPassed": true,
+  "changed": [
+    {
+      "path": "web/public/sw.js",
+      "status": "modified",
+      "previousBlob": "15b80158a9f69a38dc6c7029cb9a1810098d0749",
+      "blob": "eb43eeec449dcb57581b9186def0b8f3a51a0cdb",
+      "mode": "100644",
+      "bytes": 17420,
+      "sha256": "8ab590677f074665ad7f04b3327bdf5f83ab7463018d910adbc9cf32f12f3c28"
+    }
+  ],
+  "preparedCommit": "0770a7448fed05853bc724b4edb4feb235e5cda3",
+  "refUpdate": {
+    "branch": "prepare/final-site-0.4.24",
+    "expectedParent": "7545e33a27fe424ab84d8caaaba539c11ac73668",
+    "observedCommit": "0770a7448fed05853bc724b4edb4feb235e5cda3",
+    "force": false
+  }
+}
