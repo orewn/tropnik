@@ -1,0 +1,411 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "scope": "fresh-main-android-preview-release-and-public-universal-proof",
+  "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+  "tree": "eeec6a1dd2dca9140ab201c4ed5e1be7ca8d3d45",
+  "parentCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+  "version": "0.4.33-preview",
+  "versionCode": 16,
+  "releaseRequestId": "android-0-4-33-preview-source-archive-20261113",
+  "workflow": {
+    "runId": 43466306940,
+    "attempt": 1,
+    "event": "push",
+    "branch": "main",
+    "path": ".github/workflows/android.yml",
+    "url": "https://github.com/orewn/tropnik/actions/runs/43466306940",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 132026247891,
+        "name": "build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 132028186053,
+        "name": "Android device scenarios",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 132031428663,
+        "name": "Publish the requested Android prerelease",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 132032079353,
+        "name": "Verify public Android bytes and prepare the universal website manifest",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "releaseRequested": true,
+  "build": {
+    "jvm": {
+      "tests": 70,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 17
+    },
+    "pythonToolingTestsPassed": 114,
+    "compressionAndDebugSignature": {
+      "allUncompressedEntrySha256Unchanged": true,
+      "sameDebugCertificateVerified": true,
+      "zipAlignment16KVerified": true,
+      "apkV2SignatureVerified": true
+    },
+    "apks": [
+      {
+        "name": "tropnik-preview.apk",
+        "bytes": 69231946,
+        "sha256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408",
+        "abis": [
+          "arm64-v8a",
+          "armeabi-v7a",
+          "x86_64"
+        ],
+        "signingCertificateSha256": "7be125719a8a4fb70d9d0b901f95326a03a7c9f3f8b93b96761eb175d02f6d26",
+        "runtimeManifestSha256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded",
+        "sourceInputsSha256": "0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642",
+        "sourceAssetParityVerified": false,
+        "catalogSourceByteParityVerified": false
+      },
+      {
+        "name": "tropnik-arm64-preview.apk",
+        "bytes": 69219483,
+        "sha256": "653e1d5c28ea528dfd314ff0e42b768e84e9cff7dd18e6622eb62a0f84ac070f",
+        "abis": [
+          "arm64-v8a"
+        ],
+        "signingCertificateSha256": "7be125719a8a4fb70d9d0b901f95326a03a7c9f3f8b93b96761eb175d02f6d26",
+        "runtimeManifestSha256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded",
+        "sourceInputsSha256": "0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642",
+        "sourceAssetParityVerified": false,
+        "catalogSourceByteParityVerified": false
+      }
+    ],
+    "unsignedProductionCompilation": {
+      "kind": "unsigned-production-build-check",
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "applicationId": "ru.tropa.app",
+      "version": "0.4.33",
+      "sha256": "b68f25c4867bd91d83afa88c73f5cd6a3be44b7a8a0286c0dd5c77676d49ce91",
+      "signatureVerified": false
+    },
+    "optionalSourceAssetComparison": "Static CLI does not supply --source-root; its sourceAssetParityVerified/catalogSourceByteParityVerified=false values preserved, as on earlier runs; shared-runtime hashes separately verified by original build receipt gates."
+  },
+  "sharedRuntime": {
+    "manifestSha256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded",
+    "sourceInputsSha256": "0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642",
+    "filesVerified": 11,
+    "workersVerified": 3,
+    "aliasesVerified": 1746
+  },
+  "device": {
+    "jobId": 132028186053,
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "actualStartCompletionPairsIndependentlyParsed": 11,
+    "rawStatusEvents": 22,
+    "finalInstrumentationCode": -1,
+    "actualCases": [
+      {
+        "index": 1,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+        "statusCode": 0
+      },
+      {
+        "index": 2,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+        "statusCode": 0
+      },
+      {
+        "index": 3,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+        "statusCode": 0
+      },
+      {
+        "index": 4,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+        "statusCode": 0
+      },
+      {
+        "index": 5,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
+        "statusCode": 0
+      },
+      {
+        "index": 6,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+        "statusCode": 0
+      },
+      {
+        "index": 7,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
+        "statusCode": 0
+      },
+      {
+        "index": 8,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+        "statusCode": 0
+      },
+      {
+        "index": 9,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+        "statusCode": 0
+      },
+      {
+        "index": 10,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
+        "statusCode": 0
+      },
+      {
+        "index": 11,
+        "className": "ru.tropa.app.LocalExperienceTest",
+        "name": "noServerMeansExplicitConfigurationNotInventedSocialActivity",
+        "statusCode": 0
+      }
+    ],
+    "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+    "graphicsDriver": {
+      "mode": "swangle",
+      "appBackend": "OpenGL ES",
+      "renderer": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.17841 git hash: 5fa2e61da947))",
+      "diagnosticSha256": "656464e420e4a8200e16a4d1c77e6877e071fce604aa4eaec8d7ac21869441c5",
+      "verified": true
+    },
+    "downloadedBuildArtifact": {
+      "id": 14058612202,
+      "bytes": 111855535,
+      "sha256": "40cc8ff1a9e45c81b45daf918765f4fa935248d8610a04bddf0e441dc97213d1"
+    },
+    "installedArtifactBytesVerified": true,
+    "testedUniversalSha256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408",
+    "rawLogReconstructedFromCompletedJob": {
+      "bytes": 7402,
+      "sha256": "bcfea4589df74784068f0915ae28782694785e981ab7846becce4ea1b58b959d"
+    },
+    "evidence": {
+      "device-result.json": {
+        "bytes": 4419,
+        "sha256": "deb0b332ce5dcbb8431a666bff3e3eac7ccada3e0eea70528eada6bbee75770b"
+      },
+      "installed-apks.json": {
+        "bytes": 581,
+        "sha256": "22479354ea02e6ca2a545b9e9ea37ae372b079fcf04797b8c9c64e777751cf96"
+      },
+      "raw-instrumentation.log": {
+        "bytes": 7402,
+        "sha256": "bcfea4589df74784068f0915ae28782694785e981ab7846becce4ea1b58b959d"
+      },
+      "graphics-driver.txt": {
+        "bytes": 23933,
+        "sha256": "656464e420e4a8200e16a4d1c77e6877e071fce604aa4eaec8d7ac21869441c5"
+      }
+    }
+  },
+  "publication": {
+    "releaseId": 444491248,
+    "url": "https://github.com/orewn/tropnik/releases/tag/v0.4.33-preview",
+    "tag": "v0.4.33-preview",
+    "tagCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+    "draft": false,
+    "prerelease": true,
+    "githubImmutableFlag": false,
+    "immutableMeaning": "Versioned no-overwrite policy enforced by reviewed publisher; GitHub immutable flag is recorded separately",
+    "publishedAt": "2026-11-13T16:57:46Z",
+    "assets": [
+      {
+        "id": 744434182,
+        "name": "android-manifest.json",
+        "bytes": 2398,
+        "sha256": "9ec3024967a9978c51c8eda6ae26bf7079509b008b139a1c18ef36ac96746081",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/android-manifest.json"
+      },
+      {
+        "id": 744434608,
+        "name": "checksums.sha256",
+        "bytes": 460,
+        "sha256": "3cc265d2f6775f772d38ccc8b3d1b6eef87b4a9860861b4a4b8516948325a5eb",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/checksums.sha256"
+      },
+      {
+        "id": 744434264,
+        "name": "tropnik-0.4.33-preview-source.tar.gz",
+        "bytes": 150134059,
+        "sha256": "d5b2aa0ce856c2ca3986d85c9a95691b458b0e60879ac0a713219abc3c15cc26",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/tropnik-0.4.33-preview-source.tar.gz"
+      },
+      {
+        "id": 744433759,
+        "name": "tropnik-arm64-preview.apk",
+        "bytes": 69219483,
+        "sha256": "653e1d5c28ea528dfd314ff0e42b768e84e9cff7dd18e6622eb62a0f84ac070f",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/tropnik-arm64-preview.apk"
+      },
+      {
+        "id": 744433972,
+        "name": "tropnik-preview.apk",
+        "bytes": 69231946,
+        "sha256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/tropnik-preview.apk"
+      },
+      {
+        "id": 744434219,
+        "name": "verification-reports.zip",
+        "bytes": 64343,
+        "sha256": "4d3fe6bbed1c661e40ad7e122882e0cbc522af21853ceffc8867225674523c30",
+        "url": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/verification-reports.zip"
+      }
+    ]
+  },
+  "publicVerification": {
+    "anonymousAssetsVerified": 6,
+    "sdkSignaturesReverified": true,
+    "sourceArchiveRecreatedFromExactCommit": true,
+    "releaseReportsRecreatedFromExactReceipts": true,
+    "buildArtifactId": 14058612202,
+    "deviceArtifactId": 14058878217,
+    "buildReceipt": {
+      "bytes": 3440,
+      "sha256": "f9cb3b4bf36888fa658c8ddab3d0a7f36a6024363ef0e82ed7b86d64fd94be2e"
+    }
+  },
+  "artifacts": [
+    {
+      "id": 14059632513,
+      "name": "tropnik-public-universal-proof-1",
+      "bytes": 3425,
+      "sha256": "1e340ff765612946d8566bbf4ff2b459933b1223c7cc4eb403ad3af65e5037e2",
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "runId": 43466306940
+    },
+    {
+      "id": 14058878217,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "bytes": 7718333,
+      "sha256": "c380e9669a30613d5785d495f40e6915f4e1dd71e9b6a348bbf3423f4cb3eb96",
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "runId": 43466306940
+    },
+    {
+      "id": 14058612202,
+      "name": "tropnik-android-preview-1",
+      "bytes": 111855535,
+      "sha256": "40cc8ff1a9e45c81b45daf918765f4fa935248d8610a04bddf0e441dc97213d1",
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "runId": 43466306940
+    },
+    {
+      "id": 14057929289,
+      "name": "tropnik-release-candidate-1",
+      "bytes": 237676624,
+      "sha256": "5a9ecebfe924a072e903708b7c82b529a0c32ab738205da9e512670942090911",
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "runId": 43466306940
+    },
+    {
+      "id": 14057868439,
+      "name": "tropnik-production-build-check-1",
+      "bytes": 5163,
+      "sha256": "54aeb259bbb1bc7f1bd545bc06f04616150697e6137362c601b97773af5fa043",
+      "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+      "runId": 43466306940
+    }
+  ],
+  "producerExtraction": {
+    "publicJobId": 132032079353,
+    "manifest": {
+      "bytes": 3177,
+      "sha256": "aa01366bcd1917b5353c81a5bbad2a585d745dc757aeecdf57067feb570634c4"
+    },
+    "publicProof": {
+      "bytes": 3517,
+      "sha256": "e352176ac29c29e6625d9fb67d4d7c5c8e7365450f677ebb16acfeaae0e9fa06"
+    },
+    "markerLines": {
+      "manifest": 386,
+      "proof": 387,
+      "summary": 388
+    },
+    "fieldsModified": false,
+    "manifestReconstructedFromARM64Asset": false,
+    "previousManifestSha256": "405165b18cf746c44abf54b7fd12c0971ea09a06cb2cd9454b340263ad8f2f5f"
+  },
+  "completedLogs": {
+    "build": {
+      "bytes": 147453,
+      "sha256": "897c637e16f7f5fd5c2aef7b0903e33cc17771c6f03bb69f1508862a8736527b"
+    },
+    "device": {
+      "bytes": 63721,
+      "sha256": "77adf6ad4338acd309841ae8a62b4381b4c1de982b596baa09ec9e36244e1c96"
+    },
+    "publish": {
+      "bytes": 23605,
+      "sha256": "97b05e0eb7eb47ab4c1c4a18597c9046300f89767b8ea186abc1d2c486d66150"
+    },
+    "public": {
+      "bytes": 46343,
+      "sha256": "bc604523944e39d52346e46df2293b354fd0472a9f1d7c04e088af02203f3b72"
+    }
+  },
+  "constraints": {
+    "signature": "development / debug",
+    "productionSigned": false,
+    "physicalDeviceVerified": false,
+    "arm64DeviceExecutionVerified": false,
+    "updateInstallCompatibilityVerified": false,
+    "updateCompatibilityAssessment": "signing-certificate-mismatch",
+    "pagesGateStillRequired": true,
+    "independentLocalAPKDownloadPerformed": false,
+    "independentMarkerLedgerDownloadPerformed": false,
+    "previousValidationAPKReused": false,
+    "websiteManifestPromotedByReviewer": false
+  },
+  "archiveBudgetPreflight": {
+    "runId": 43464296516,
+    "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+    "testsPassed": 37,
+    "sourceBytes": 150134059,
+    "sourceSha256": "d5b2aa0ce856c2ca3986d85c9a95691b458b0e60879ac0a713219abc3c15cc26",
+    "defaultArtifactBudget": 150000000,
+    "sourceArchiveBudget": 200000000,
+    "reviewedFiles": [
+      {
+        "path": "tools/android-build/preview_artifacts.py",
+        "bytes": 16516,
+        "sha256": "5c2217b9f0db5d1de08c00b96dc61e43a99ba0d2e952d93c1e7fe76d37e0b4e3"
+      },
+      {
+        "path": "tools/android-build/release-preview.py",
+        "bytes": 21877,
+        "sha256": "8e838f45d9253bb415391909868ba8c0e2c2f231cdebcb2e8287f95a82d2a267"
+      },
+      {
+        "path": "tools/android-build/test_release_archive_budget.py",
+        "bytes": 11114,
+        "sha256": "a4c448e725e2c3e98adafcd0bb582d36fdca7bdf1d932d0b3177ceffe20b77d0"
+      }
+    ]
+  },
+  "recordedAt": "2026-11-13 17:01:21 UTC"
+}

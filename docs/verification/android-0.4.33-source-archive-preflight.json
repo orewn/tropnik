@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "evidence": "source-archive-budget-preflight",
+  "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+  "baselineSourceCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+  "workflowRunId": 43464296516,
+  "status": "passed",
+  "newBrowserMeasurements": false,
+  "sdkOrDeviceVerification": false,
+  "reviewedFiles": {
+    "tools/android-build/preview_artifacts.py": {
+      "bytes": 16516,
+      "sha256": "5c2217b9f0db5d1de08c00b96dc61e43a99ba0d2e952d93c1e7fe76d37e0b4e3"
+    },
+    "tools/android-build/release-preview.py": {
+      "bytes": 21877,
+      "sha256": "8e838f45d9253bb415391909868ba8c0e2c2f231cdebcb2e8287f95a82d2a267"
+    },
+    "tools/android-build/test_release_archive_budget.py": {
+      "bytes": 11114,
+      "sha256": "a4c448e725e2c3e98adafcd0bb582d36fdca7bdf1d932d0b3177ceffe20b77d0"
+    }
+  },
+  "sharedRuntime": {
+    "manifestSHA256": "e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded",
+    "sourceInputsSHA256": "0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642",
+    "sourceInputs": 61,
+    "allInputBytesVerified": true,
+    "webAndroidManifestIdentical": true
+  },
+  "baselineRed": {
+    "sourceCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+    "test": "test_release_archive_budget.SourceArchivePipelineTests.test_prepare_public_rebuild_and_publish_recheck_large_source",
+    "returnCode": 1,
+    "tests": 1,
+    "errors": 1,
+    "expectedError": "ValueError: Missing, linked or oversized artifact: tropnik-0.4.16-preview-source.tar.gz",
+    "expectedFailureMatched": true,
+    "logSHA256": "f876348e2a233b79358b25298c7ce9c90a99b167e625dd2a1329f3860e57a64a"
+  },
+  "candidateGreen": {
+    "modules": [
+      "test_release_archive_budget",
+      "test_release_pipeline",
+      "test_public_preview"
+    ],
+    "moduleCounts": {
+      "test_release_archive_budget": 9,
+      "test_release_pipeline": 21,
+      "test_public_preview": 7
+    },
+    "tests": 37,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "unexpectedSuccesses": 0,
+    "logSHA256": "2c01c35ecb84aae10f27556aeca94647c7d64f48011cf31637a73ca085fd4099"
+  },
+  "actualCandidateArchive": {
+    "name": "tropnik-0.4.33-preview-source.tar.gz",
+    "bytes": 150134059,
+    "sha256": "d5b2aa0ce856c2ca3986d85c9a95691b458b0e60879ac0a713219abc3c15cc26",
+    "argv": [
+      "git",
+      "archive",
+      "--format=tar.gz",
+      "--prefix=tropnik-0.4.33-preview/",
+      "79b5c5edd0c88f7c54e182181c3e8db6791ad706"
+    ],
+    "regular": true,
+    "symlink": false,
+    "sourceBudget": 200000000,
+    "sourceBudgetAccepted": true,
+    "defaultBudget": 150000000,
+    "defaultBudgetAccepted": false,
+    "defaultBudgetError": "Empty or oversized artifact: tropnik-0.4.33-preview-source.tar.gz (bytes=150134059, limit=150000000)"
+  },
+  "gitVersion": "git version 2.56.1",
+  "imageOS": "ubuntu24",
+  "imageVersion": "20261111.127.1"
+}

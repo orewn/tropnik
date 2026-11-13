@@ -1,0 +1,4741 @@
+{
+  "schemaVersion": 1,
+  "classification": "EXACT_F0C4_FAILED_GATE_CONFIRMED_31_OF_32_WINDOWS_PASS",
+  "sourceCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+  "buildId": "39a9a382cb37a4fb",
+  "runId": 43458536389,
+  "originalReleaseQualification": "FAIL",
+  "rawObservationValidated": true,
+  "profileCount": 4,
+  "windowCount": 32,
+  "passingWindows": 31,
+  "failingWindows": 1,
+  "expectedIssues": [
+    {
+      "profile": "desktop-webgl",
+      "phase": "ui-smoothness/map-pan",
+      "metric": "frameP95Ms",
+      "value": 35,
+      "limit": 35
+    }
+  ],
+  "profiles": [
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "engine": "tropnik-canvas",
+      "input": "touch",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "performancePassed": true,
+      "issues": [],
+      "originalReleaseAssertion": "passed",
+      "rejection": null,
+      "pan": {
+        "input": "touch",
+        "start": {
+          "x": 206,
+          "y": 449.15000000000003
+        },
+        "end": {
+          "x": 270,
+          "y": 461.15000000000003
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchStart",
+            "x": 206,
+            "y": 449.15000000000003,
+            "sentOffsetMs": 0.08437799999956042,
+            "status": "fulfilled",
+            "ackOffsetMs": 15.65969700000278
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 211.33333333333334,
+            "y": 450.15000000000003,
+            "sentOffsetMs": 15.673283000000083,
+            "status": "fulfilled",
+            "ackOffsetMs": 46.3816939999997
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 216.66666666666666,
+            "y": 451.15000000000003,
+            "sentOffsetMs": 71.58865200000218,
+            "status": "fulfilled",
+            "ackOffsetMs": 96.26900600000226
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 222,
+            "y": 452.15000000000003,
+            "sentOffsetMs": 121.4804600000025,
+            "status": "fulfilled",
+            "ackOffsetMs": 163.21132500000022
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 227.33333333333334,
+            "y": 453.15000000000003,
+            "sentOffsetMs": 188.48127000000022,
+            "status": "fulfilled",
+            "ackOffsetMs": 213.0657769999998
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 232.66666666666666,
+            "y": 454.15000000000003,
+            "sentOffsetMs": 238.3503180000007,
+            "status": "fulfilled",
+            "ackOffsetMs": 263.3011140000017
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 238,
+            "y": 455.15000000000003,
+            "sentOffsetMs": 288.4841750000014,
+            "status": "fulfilled",
+            "ackOffsetMs": 313.0376310000029
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 243.33333333333334,
+            "y": 456.15000000000003,
+            "sentOffsetMs": 338.2315340000023,
+            "status": "fulfilled",
+            "ackOffsetMs": 363.0236870000008
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 248.66666666666666,
+            "y": 457.15000000000003,
+            "sentOffsetMs": 388.20696099999986,
+            "status": "fulfilled",
+            "ackOffsetMs": 413.0193730000028
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 254,
+            "y": 458.15000000000003,
+            "sentOffsetMs": 438.238865000003,
+            "status": "fulfilled",
+            "ackOffsetMs": 463.02877100000114
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 259.3333333333333,
+            "y": 459.15000000000003,
+            "sentOffsetMs": 488.24439500000153,
+            "status": "fulfilled",
+            "ackOffsetMs": 513.0521270000027
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 264.6666666666667,
+            "y": 460.15000000000003,
+            "sentOffsetMs": 538.2282570000025,
+            "status": "fulfilled",
+            "ackOffsetMs": 563.0789790000017
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 588.2529050000012,
+            "status": "fulfilled",
+            "ackOffsetMs": 613.0290080000013
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchEnd",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 838.5138130000014,
+            "status": "fulfilled",
+            "ackOffsetMs": 863.0443970000015
+          }
+        ],
+        "durationMs": 863.0784710000007,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 17177.599999999977,
+            "timestamp": 17164.20000000001,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 206,
+            "y": 449.1499938964844
+          },
+          {
+            "type": "pointerup",
+            "time": 18026.899999999965,
+            "timestamp": 18002.79999999999,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 270,
+            "y": 461.1499938964844
+          }
+        ]
+      }
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "engine": "tropnik-canvas",
+      "input": "mouse",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "performancePassed": true,
+      "issues": [],
+      "originalReleaseAssertion": "passed",
+      "rejection": null,
+      "pan": {
+        "input": "mouse",
+        "start": {
+          "x": 748.3499999999999,
+          "y": 489.6
+        },
+        "end": {
+          "x": 812.3499999999999,
+          "y": 501.6
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 0.0031970000054570846,
+            "status": "fulfilled",
+            "ackOffsetMs": 13.133864000003086
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mousePressed",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 13.13769200000388,
+            "status": "fulfilled",
+            "ackOffsetMs": 17.31211200000689
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 753.6833333333333,
+            "y": 490.6,
+            "sentOffsetMs": 17.327511000003142,
+            "status": "fulfilled",
+            "ackOffsetMs": 29.81860400000005
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 759.0166666666665,
+            "y": 491.6,
+            "sentOffsetMs": 55.02325500000006,
+            "status": "fulfilled",
+            "ackOffsetMs": 65.47892100000172
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 764.3499999999999,
+            "y": 492.6,
+            "sentOffsetMs": 90.69373100000666,
+            "status": "fulfilled",
+            "ackOffsetMs": 111.17805000000226
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 769.6833333333333,
+            "y": 493.6,
+            "sentOffsetMs": 136.39346100000694,
+            "status": "fulfilled",
+            "ackOffsetMs": 142.9630030000044
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 775.0166666666665,
+            "y": 494.6,
+            "sentOffsetMs": 168.18255200000567,
+            "status": "fulfilled",
+            "ackOffsetMs": 174.89092000000528
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 780.3499999999999,
+            "y": 495.6,
+            "sentOffsetMs": 200.0694220000005,
+            "status": "fulfilled",
+            "ackOffsetMs": 209.58841300000495
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 785.6833333333333,
+            "y": 496.6,
+            "sentOffsetMs": 234.77038200000243,
+            "status": "fulfilled",
+            "ackOffsetMs": 245.4578560000009
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 791.0166666666665,
+            "y": 497.6,
+            "sentOffsetMs": 270.6728260000018,
+            "status": "fulfilled",
+            "ackOffsetMs": 283.86042799999996
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 796.3499999999999,
+            "y": 498.6,
+            "sentOffsetMs": 309.0558730000048,
+            "status": "fulfilled",
+            "ackOffsetMs": 320.4110639999999
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 801.6833333333333,
+            "y": 499.6,
+            "sentOffsetMs": 345.63289700000314,
+            "status": "fulfilled",
+            "ackOffsetMs": 356.2002980000034
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 807.0166666666665,
+            "y": 500.6,
+            "sentOffsetMs": 381.38447100000485,
+            "status": "fulfilled",
+            "ackOffsetMs": 390.9405720000068
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 416.115006,
+            "status": "fulfilled",
+            "ackOffsetMs": 426.052134000005
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseReleased",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 651.5591120000026,
+            "status": "fulfilled",
+            "ackOffsetMs": 658.7179270000051
+          }
+        ],
+        "durationMs": 658.7464300000065,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 16285.600000000035,
+            "timestamp": 16282.799999999988,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 748.3499755859375,
+            "y": 489.6000061035156
+          },
+          {
+            "type": "pointerup",
+            "time": 16921.70000000001,
+            "timestamp": 16921.400000000023,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812.3499755859375,
+            "y": 501.6000061035156
+          },
+          {
+            "type": "click",
+            "time": 16927.400000000023,
+            "timestamp": 16921.400000000023,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812,
+            "y": 501
+          }
+        ]
+      }
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "engine": "tropnik-canvas",
+      "input": "touch",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "performancePassed": true,
+      "issues": [],
+      "originalReleaseAssertion": "passed",
+      "rejection": null,
+      "pan": {
+        "input": "touch",
+        "start": {
+          "x": 206,
+          "y": 449.15000000000003
+        },
+        "end": {
+          "x": 270,
+          "y": 461.15000000000003
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchStart",
+            "x": 206,
+            "y": 449.15000000000003,
+            "sentOffsetMs": 0.12098500000138301,
+            "status": "fulfilled",
+            "ackOffsetMs": 15.352136000001337
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 211.33333333333334,
+            "y": 450.15000000000003,
+            "sentOffsetMs": 15.36824599999818,
+            "status": "fulfilled",
+            "ackOffsetMs": 46.39313699999184
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 216.66666666666666,
+            "y": 451.15000000000003,
+            "sentOffsetMs": 71.58905200001027,
+            "status": "fulfilled",
+            "ackOffsetMs": 113.03324100001191
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 222,
+            "y": 452.15000000000003,
+            "sentOffsetMs": 138.26084499999706,
+            "status": "fulfilled",
+            "ackOffsetMs": 179.92716800000926
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 227.33333333333334,
+            "y": 453.15000000000003,
+            "sentOffsetMs": 205.13977200000954,
+            "status": "fulfilled",
+            "ackOffsetMs": 229.82495300001756
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 232.66666666666666,
+            "y": 454.15000000000003,
+            "sentOffsetMs": 254.98979999999574,
+            "status": "fulfilled",
+            "ackOffsetMs": 279.8699550000165
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 238,
+            "y": 455.15000000000003,
+            "sentOffsetMs": 305.03197600001295,
+            "status": "fulfilled",
+            "ackOffsetMs": 329.8091290000157
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 243.33333333333334,
+            "y": 456.15000000000003,
+            "sentOffsetMs": 354.977693000008,
+            "status": "fulfilled",
+            "ackOffsetMs": 379.98186800001713
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 248.66666666666666,
+            "y": 457.15000000000003,
+            "sentOffsetMs": 405.1616420000064,
+            "status": "fulfilled",
+            "ackOffsetMs": 429.8808540000027
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 254,
+            "y": 458.15000000000003,
+            "sentOffsetMs": 455.0786419999931,
+            "status": "fulfilled",
+            "ackOffsetMs": 479.8652929999953
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 259.3333333333333,
+            "y": 459.15000000000003,
+            "sentOffsetMs": 505.02355699999316,
+            "status": "fulfilled",
+            "ackOffsetMs": 529.9485089999944
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 264.6666666666667,
+            "y": 460.15000000000003,
+            "sentOffsetMs": 555.1130649999977,
+            "status": "fulfilled",
+            "ackOffsetMs": 580.2148949999973
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchMove",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 605.3721060000098,
+            "status": "fulfilled",
+            "ackOffsetMs": 629.841425000006
+          },
+          {
+            "method": "Input.dispatchTouchEvent",
+            "type": "touchEnd",
+            "x": 270,
+            "y": 461.15000000000003,
+            "sentOffsetMs": 855.3143080000154,
+            "status": "fulfilled",
+            "ackOffsetMs": 879.9491169999965
+          }
+        ],
+        "durationMs": 879.9864270000107,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 16196.399999999907,
+            "timestamp": 16182.29999999993,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 206,
+            "y": 449.1499938964844
+          },
+          {
+            "type": "pointerup",
+            "time": 17061.899999999907,
+            "timestamp": 17037.599999999977,
+            "pointerType": "touch",
+            "pointerId": 17,
+            "trusted": true,
+            "x": 270,
+            "y": 461.1499938964844
+          }
+        ]
+      }
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "engine": "tropnik-canvas",
+      "input": "mouse",
+      "physicalDevice": false,
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "performancePassed": false,
+      "issues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-pan",
+          "metric": "frameP95Ms",
+          "value": 35,
+          "limit": 35
+        }
+      ],
+      "originalReleaseAssertion": "rejected-as-original",
+      "rejection": "desktop-webgl: UI smoothness budget failed: deepEqual keys mismatch $",
+      "pan": {
+        "input": "mouse",
+        "start": {
+          "x": 748.3499999999999,
+          "y": 489.6
+        },
+        "end": {
+          "x": 812.3499999999999,
+          "y": 501.6
+        },
+        "delta": {
+          "dx": 64,
+          "dy": 12
+        },
+        "holdBeforeReleaseMs": 200,
+        "commands": [
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 0.0027339999796822667,
+            "status": "fulfilled",
+            "ackOffsetMs": 13.24104399990756
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mousePressed",
+            "x": 748.3499999999999,
+            "y": 489.6,
+            "sentOffsetMs": 13.244309999980032,
+            "status": "fulfilled",
+            "ackOffsetMs": 17.68284899997525
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 753.6833333333333,
+            "y": 490.6,
+            "sentOffsetMs": 17.68757799989544,
+            "status": "fulfilled",
+            "ackOffsetMs": 29.744470999925397
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 759.0166666666665,
+            "y": 491.6,
+            "sentOffsetMs": 54.89313999994192,
+            "status": "fulfilled",
+            "ackOffsetMs": 65.29899799998384
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 764.3499999999999,
+            "y": 492.6,
+            "sentOffsetMs": 90.4426070000045,
+            "status": "fulfilled",
+            "ackOffsetMs": 99.5945729999803
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 769.6833333333333,
+            "y": 493.6,
+            "sentOffsetMs": 124.75510399998166,
+            "status": "fulfilled",
+            "ackOffsetMs": 132.13683499989565
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 775.0166666666665,
+            "y": 494.6,
+            "sentOffsetMs": 157.29657599993516,
+            "status": "fulfilled",
+            "ackOffsetMs": 179.51603599998634
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 780.3499999999999,
+            "y": 495.6,
+            "sentOffsetMs": 204.67377100000158,
+            "status": "fulfilled",
+            "ackOffsetMs": 211.18886599992402
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 785.6833333333333,
+            "y": 496.6,
+            "sentOffsetMs": 236.334959999891,
+            "status": "fulfilled",
+            "ackOffsetMs": 250.42680699995253
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 791.0166666666665,
+            "y": 497.6,
+            "sentOffsetMs": 275.6106419999851,
+            "status": "fulfilled",
+            "ackOffsetMs": 290.1091019999003
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 796.3499999999999,
+            "y": 498.6,
+            "sentOffsetMs": 315.2645729999058,
+            "status": "fulfilled",
+            "ackOffsetMs": 326.94037999992725
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 801.6833333333333,
+            "y": 499.6,
+            "sentOffsetMs": 352.0897789999144,
+            "status": "fulfilled",
+            "ackOffsetMs": 367.43793999997433
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 807.0166666666665,
+            "y": 500.6,
+            "sentOffsetMs": 392.6048229999142,
+            "status": "fulfilled",
+            "ackOffsetMs": 405.07219999993686
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseMoved",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 430.21721199993044,
+            "status": "fulfilled",
+            "ackOffsetMs": 443.6014759999234
+          },
+          {
+            "method": "Input.dispatchMouseEvent",
+            "type": "mouseReleased",
+            "x": 812.3499999999999,
+            "y": 501.6,
+            "sentOffsetMs": 669.0268479998922,
+            "status": "fulfilled",
+            "ackOffsetMs": 675.5637869999046
+          }
+        ],
+        "durationMs": 675.567023999989,
+        "events": [
+          {
+            "type": "pointerdown",
+            "time": 16023.59999999986,
+            "timestamp": 16020.899999999907,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 748.3499755859375,
+            "y": 489.6000061035156
+          },
+          {
+            "type": "pointerup",
+            "time": 16677.09999999986,
+            "timestamp": 16676.899999999907,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812.3499755859375,
+            "y": 501.6000061035156
+          },
+          {
+            "type": "click",
+            "time": 16682,
+            "timestamp": 16676.899999999907,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "trusted": true,
+            "x": 812,
+            "y": 501
+          }
+        ]
+      }
+    }
+  ],
+  "rows": [
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "panel",
+      "startedAtMs": 2988.2000000000116,
+      "endedAtMs": 5094.299999999988,
+      "durationMs": 2106.0999999999767,
+      "rafCallbacks": 126,
+      "rawIntervals": 127,
+      "nearestRank95": 121,
+      "frameP95Ms": 16.900000000023283,
+      "maxFrameGapMs": 40.600000000034925,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 6,
+        "p95Ms": 64.40000000002328,
+        "maxMs": 64.40000000002328,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 94,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.6489971638274501,
+        "recentInputCount": 3
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 35,
+          "startOffsetMs": 571.8999999999651,
+          "endOffsetMs": 612.5,
+          "gapMs": 40.600000000034925
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 64,
+          "startOffsetMs": 1071.899999999965,
+          "endOffsetMs": 1088.6999999999534,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 4,
+          "startOffsetMs": 55.199999999953434,
+          "endOffsetMs": 72,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 117,
+          "startOffsetMs": 1955.1999999999534,
+          "endOffsetMs": 1972,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 84,
+          "startOffsetMs": 1405.1999999999534,
+          "endOffsetMs": 1422.0999999999767,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 106,
+          "startOffsetMs": 1771.899999999965,
+          "endOffsetMs": 1788.7999999999884,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 22,
+          "startOffsetMs": 355.29999999998836,
+          "endOffsetMs": 372.29999999998836,
+          "gapMs": 17
+        },
+        {
+          "index": 1,
+          "startOffsetMs": 5.2999999999883585,
+          "endOffsetMs": 22.5,
+          "gapMs": 17.20000000001164
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "explore-search",
+      "startedAtMs": 5099.099999999977,
+      "endedAtMs": 6962.099999999977,
+      "durationMs": 1863,
+      "rafCallbacks": 112,
+      "rawIntervals": 113,
+      "nearestRank95": 108,
+      "frameP95Ms": 18.199999999953434,
+      "maxFrameGapMs": 28.20000000001164,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 28,
+        "p95Ms": 72.29999999998836,
+        "maxMs": 80.5,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 169,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 96,
+        "p95DurationMs": 96,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.08597465980714723,
+        "recentInputCount": 8
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 89,
+          "startOffsetMs": 1477.5,
+          "endOffsetMs": 1494.4000000000233,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 26,
+          "startOffsetMs": 427.6000000000349,
+          "endOffsetMs": 444.79999999998836,
+          "gapMs": 17.199999999953434
+        },
+        {
+          "index": 32,
+          "startOffsetMs": 527.7000000000116,
+          "endOffsetMs": 544.9000000000233,
+          "gapMs": 17.20000000001164
+        },
+        {
+          "index": 36,
+          "startOffsetMs": 594.6000000000349,
+          "endOffsetMs": 612.7999999999884,
+          "gapMs": 18.199999999953434
+        },
+        {
+          "index": 96,
+          "startOffsetMs": 1594.2999999999884,
+          "endOffsetMs": 1613,
+          "gapMs": 18.70000000001164
+        },
+        {
+          "index": 24,
+          "startOffsetMs": 394.29999999998836,
+          "endOffsetMs": 413.4000000000233,
+          "gapMs": 19.100000000034925
+        },
+        {
+          "index": 68,
+          "startOffsetMs": 1127.7000000000116,
+          "endOffsetMs": 1147.4000000000233,
+          "gapMs": 19.70000000001164
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "explore-filters",
+      "startedAtMs": 12549.700000000012,
+      "endedAtMs": 14728.700000000012,
+      "durationMs": 2179,
+      "rafCallbacks": 132,
+      "rawIntervals": 133,
+      "nearestRank95": 127,
+      "frameP95Ms": 16.899999999965075,
+      "maxFrameGapMs": 17.29999999998836,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 8,
+        "p95Ms": 47.90000000002328,
+        "maxMs": 47.90000000002328,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 129,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.06736832584065423,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 45,
+          "startOffsetMs": 726.6999999999534,
+          "endOffsetMs": 743.5,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 102,
+          "startOffsetMs": 1676.6999999999534,
+          "endOffsetMs": 1693.5,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 41,
+          "startOffsetMs": 660,
+          "endOffsetMs": 676.8999999999651,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 116,
+          "startOffsetMs": 1910,
+          "endOffsetMs": 1926.899999999965,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 121,
+          "startOffsetMs": 1993.2999999999884,
+          "endOffsetMs": 2010.1999999999534,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 64,
+          "startOffsetMs": 1043.399999999965,
+          "endOffsetMs": 1060.2999999999884,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 108,
+          "startOffsetMs": 1776.6999999999534,
+          "endOffsetMs": 1793.5999999999767,
+          "gapMs": 16.900000000023283
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "catalog-scroll",
+      "startedAtMs": 14732.5,
+      "endedAtMs": 15593.899999999965,
+      "durationMs": 861.3999999999651,
+      "rafCallbacks": 52,
+      "rawIntervals": 53,
+      "nearestRank95": 51,
+      "frameP95Ms": 22.699999999953434,
+      "maxFrameGapMs": 22.899999999965075,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 47.899999999965075,
+        "maxMs": 47.899999999965075,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 30,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 56,
+        "p95DurationMs": 48,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 15,
+          "startOffsetMs": 244.20000000001164,
+          "endOffsetMs": 266.70000000001164,
+          "gapMs": 22.5
+        },
+        {
+          "index": 12,
+          "startOffsetMs": 194.20000000001164,
+          "endOffsetMs": 216.79999999998836,
+          "gapMs": 22.599999999976717
+        },
+        {
+          "index": 18,
+          "startOffsetMs": 294.0999999999767,
+          "endOffsetMs": 316.70000000001164,
+          "gapMs": 22.600000000034925
+        },
+        {
+          "index": 9,
+          "startOffsetMs": 144.20000000001164,
+          "endOffsetMs": 166.89999999996508,
+          "gapMs": 22.699999999953434
+        },
+        {
+          "index": 24,
+          "startOffsetMs": 394.0999999999767,
+          "endOffsetMs": 416.79999999998836,
+          "gapMs": 22.70000000001164
+        },
+        {
+          "index": 2,
+          "startOffsetMs": 27.20000000001164,
+          "endOffsetMs": 50.09999999997672,
+          "gapMs": 22.899999999965075
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "map-pan",
+      "startedAtMs": 17163,
+      "endedAtMs": 18493.599999999977,
+      "durationMs": 1330.5999999999767,
+      "rafCallbacks": 80,
+      "rawIntervals": 81,
+      "nearestRank95": 77,
+      "frameP95Ms": 25.899999999965075,
+      "maxFrameGapMs": 28.5,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 45.79999999998836,
+        "maxMs": 45.79999999998836,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 26,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 72,
+        "p95DurationMs": 72,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.07813910204394024,
+        "recentInputCount": 1
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 26,
+          "startOffsetMs": 430.0999999999767,
+          "endOffsetMs": 454.79999999998836,
+          "gapMs": 24.70000000001164,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 29,
+          "startOffsetMs": 480.29999999998836,
+          "endOffsetMs": 505.0999999999767,
+          "gapMs": 24.79999999998836,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 20,
+          "startOffsetMs": 330.0999999999767,
+          "endOffsetMs": 355,
+          "gapMs": 24.900000000023283,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 10,
+          "startOffsetMs": 163.5,
+          "endOffsetMs": 189.39999999996508,
+          "gapMs": 25.899999999965075,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 17,
+          "startOffsetMs": 280.0999999999767,
+          "endOffsetMs": 306.5,
+          "gapMs": 26.400000000023283,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 14,
+          "startOffsetMs": 230.29999999998836,
+          "endOffsetMs": 256.79999999998836,
+          "gapMs": 26.5,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 3,
+          "startOffsetMs": 47,
+          "endOffsetMs": 74.29999999998836,
+          "gapMs": 27.29999999998836,
+          "timingBin": "pointer-held"
+        }
+      ],
+      "pointerDownOffsetMs": 14.599999999976717,
+      "pointerUpOffsetMs": 863.8999999999651,
+      "gestureCommandDurationMs": 863.0784710000007,
+      "holdBeforeReleaseMs": 200,
+      "intervalsAtP95": [
+        {
+          "index": 10,
+          "startOffsetMs": 163.5,
+          "endOffsetMs": 189.39999999996508,
+          "gapMs": 25.899999999965075,
+          "timingBin": "pointer-held"
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "map-zoom",
+      "startedAtMs": 18495.70000000001,
+      "endedAtMs": 25543.399999999965,
+      "durationMs": 7047.699999999953,
+      "rafCallbacks": 408,
+      "rawIntervals": 409,
+      "nearestRank95": 389,
+      "frameP95Ms": 25.699999999953434,
+      "maxFrameGapMs": 38.800000000046566,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 67,
+        "maxMs": 67,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 70,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 72,
+        "p95DurationMs": 72,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 347,
+          "startOffsetMs": 5944.599999999977,
+          "endOffsetMs": 5982.199999999953,
+          "gapMs": 37.59999999997672
+        },
+        {
+          "index": 348,
+          "startOffsetMs": 5982.199999999953,
+          "endOffsetMs": 6021,
+          "gapMs": 38.800000000046566
+        },
+        {
+          "index": 376,
+          "startOffsetMs": 6497.599999999977,
+          "endOffsetMs": 6533.599999999977,
+          "gapMs": 36
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 51,
+          "startOffsetMs": 847.1999999999534,
+          "endOffsetMs": 872.5,
+          "gapMs": 25.300000000046566
+        },
+        {
+          "index": 339,
+          "startOffsetMs": 5753.799999999988,
+          "endOffsetMs": 5779.199999999953,
+          "gapMs": 25.399999999965075
+        },
+        {
+          "index": 223,
+          "startOffsetMs": 3797,
+          "endOffsetMs": 3822.5999999999767,
+          "gapMs": 25.599999999976717
+        },
+        {
+          "index": 52,
+          "startOffsetMs": 872.5,
+          "endOffsetMs": 898.1999999999534,
+          "gapMs": 25.699999999953434
+        },
+        {
+          "index": 260,
+          "startOffsetMs": 4413.799999999988,
+          "endOffsetMs": 4439.699999999953,
+          "gapMs": 25.899999999965075
+        },
+        {
+          "index": 210,
+          "startOffsetMs": 3580.399999999965,
+          "endOffsetMs": 3606.2999999999884,
+          "gapMs": 25.900000000023283
+        },
+        {
+          "index": 199,
+          "startOffsetMs": 3397.0999999999767,
+          "endOffsetMs": 3423.0999999999767,
+          "gapMs": 26
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "layer-switch",
+      "startedAtMs": 25546.599999999977,
+      "endedAtMs": 30343.20000000001,
+      "durationMs": 4796.600000000035,
+      "rafCallbacks": 286,
+      "rawIntervals": 287,
+      "nearestRank95": 273,
+      "frameP95Ms": 16.899999999965075,
+      "maxFrameGapMs": 35.600000000034925,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 69.5,
+        "maxMs": 69.5,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 70,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 80,
+        "p95DurationMs": 80,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0.022143804754611498,
+        "unexpectedSum": 0.022143804754611498,
+        "allShiftSum": 0.044287609509222996,
+        "recentInputCount": 1
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 255,
+          "startOffsetMs": 4264.5,
+          "endOffsetMs": 4300.100000000035,
+          "gapMs": 35.600000000034925
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 162,
+          "startOffsetMs": 2695.7999999999884,
+          "endOffsetMs": 2712.600000000035,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 179,
+          "startOffsetMs": 2995.7999999999884,
+          "endOffsetMs": 3012.600000000035,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 188,
+          "startOffsetMs": 3145.7999999999884,
+          "endOffsetMs": 3162.600000000035,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 19,
+          "startOffsetMs": 312.6000000000349,
+          "endOffsetMs": 329.5,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 260,
+          "startOffsetMs": 4362.400000000023,
+          "endOffsetMs": 4379.299999999988,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 47,
+          "startOffsetMs": 779.2000000000116,
+          "endOffsetMs": 796.1000000000349,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 71,
+          "startOffsetMs": 1179.2000000000116,
+          "endOffsetMs": 1196.100000000035,
+          "gapMs": 16.900000000023283
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenario": "site-search",
+      "startedAtMs": 388.0999999999767,
+      "endedAtMs": 1961.0999999999767,
+      "durationMs": 1573,
+      "rafCallbacks": 95,
+      "rawIntervals": 96,
+      "nearestRank95": 92,
+      "frameP95Ms": 16.899999999965075,
+      "maxFrameGapMs": 18.70000000001164,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 34,
+        "p95Ms": 47.90000000002328,
+        "maxMs": 48.20000000001164,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 106,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.12862321695545878,
+        "recentInputCount": 3
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 76,
+          "startOffsetMs": 1255.7000000000116,
+          "endOffsetMs": 1272.5,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 40,
+          "startOffsetMs": 655.7999999999884,
+          "endOffsetMs": 672.6000000000349,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 2,
+          "startOffsetMs": 22.400000000023283,
+          "endOffsetMs": 39.29999999998836,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 74,
+          "startOffsetMs": 1222.4000000000233,
+          "endOffsetMs": 1239.2999999999884,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 11,
+          "startOffsetMs": 172.5,
+          "endOffsetMs": 189.40000000002328,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 49,
+          "startOffsetMs": 805.7000000000116,
+          "endOffsetMs": 822.6000000000349,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 35,
+          "startOffsetMs": 572.4000000000233,
+          "endOffsetMs": 589.4000000000233,
+          "gapMs": 17
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "panel",
+      "startedAtMs": 2824,
+      "endedAtMs": 4033.4000000000233,
+      "durationMs": 1209.4000000000233,
+      "rafCallbacks": 73,
+      "rawIntervals": 74,
+      "nearestRank95": 71,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 17.29999999998836,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 32.90000000002328,
+        "maxMs": 32.90000000002328,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 25,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 24,
+        "p95DurationMs": 24,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 46,
+          "startOffsetMs": 758.5,
+          "endOffsetMs": 775.2999999999884,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 64,
+          "startOffsetMs": 1058.5,
+          "endOffsetMs": 1075.2999999999884,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 21,
+          "startOffsetMs": 341.79999999998836,
+          "endOffsetMs": 358.6000000000349,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 57,
+          "startOffsetMs": 941.7999999999884,
+          "endOffsetMs": 958.6000000000349,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 61,
+          "startOffsetMs": 1008.5,
+          "endOffsetMs": 1025.4000000000233,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 18,
+          "startOffsetMs": 291.79999999998836,
+          "endOffsetMs": 309,
+          "gapMs": 17.20000000001164
+        },
+        {
+          "index": 1,
+          "startOffsetMs": 9.200000000011642,
+          "endOffsetMs": 26.5,
+          "gapMs": 17.29999999998836
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "explore-search",
+      "startedAtMs": 4035.600000000035,
+      "endedAtMs": 5650.799999999988,
+      "durationMs": 1615.1999999999534,
+      "rafCallbacks": 96,
+      "rawIntervals": 97,
+      "nearestRank95": 93,
+      "frameP95Ms": 21.899999999965075,
+      "maxFrameGapMs": 35.20000000001164,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 28,
+        "p95Ms": 35.20000000001164,
+        "maxMs": 36.600000000034925,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 105,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 48,
+        "p95DurationMs": 48,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.323803973176362,
+        "recentInputCount": 13
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 60,
+          "startOffsetMs": 999.8999999999651,
+          "endOffsetMs": 1035.0999999999767,
+          "gapMs": 35.20000000001164
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 31,
+          "startOffsetMs": 514.8999999999651,
+          "endOffsetMs": 535,
+          "gapMs": 20.100000000034925
+        },
+        {
+          "index": 79,
+          "startOffsetMs": 1331.899999999965,
+          "endOffsetMs": 1352,
+          "gapMs": 20.100000000034925
+        },
+        {
+          "index": 27,
+          "startOffsetMs": 447.5,
+          "endOffsetMs": 467.79999999998836,
+          "gapMs": 20.29999999998836
+        },
+        {
+          "index": 22,
+          "startOffsetMs": 364.79999999998836,
+          "endOffsetMs": 386.69999999995343,
+          "gapMs": 21.899999999965075
+        },
+        {
+          "index": 87,
+          "startOffsetMs": 1465.5,
+          "endOffsetMs": 1490,
+          "gapMs": 24.5
+        },
+        {
+          "index": 28,
+          "startOffsetMs": 467.79999999998836,
+          "endOffsetMs": 494.0999999999767,
+          "gapMs": 26.29999999998836
+        },
+        {
+          "index": 80,
+          "startOffsetMs": 1352,
+          "endOffsetMs": 1383.0999999999767,
+          "gapMs": 31.099999999976717
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "explore-filters",
+      "startedAtMs": 13568,
+      "endedAtMs": 15417.100000000035,
+      "durationMs": 1849.100000000035,
+      "rafCallbacks": 111,
+      "rawIntervals": 112,
+      "nearestRank95": 107,
+      "frameP95Ms": 16.899999999965075,
+      "maxFrameGapMs": 17.599999999976717,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 8,
+        "p95Ms": 33.59999999997672,
+        "maxMs": 33.59999999997672,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 42,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.053738818344105876,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 81,
+          "startOffsetMs": 1347.7000000000116,
+          "endOffsetMs": 1364.5,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 89,
+          "startOffsetMs": 1480.7000000000116,
+          "endOffsetMs": 1497.5,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 107,
+          "startOffsetMs": 1780.7000000000116,
+          "endOffsetMs": 1797.5,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 57,
+          "startOffsetMs": 947.4000000000233,
+          "endOffsetMs": 964.2999999999884,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 80,
+          "startOffsetMs": 1330.7000000000116,
+          "endOffsetMs": 1347.7000000000116,
+          "gapMs": 17
+        },
+        {
+          "index": 99,
+          "startOffsetMs": 1647.4000000000233,
+          "endOffsetMs": 1664.600000000035,
+          "gapMs": 17.20000000001164
+        },
+        {
+          "index": 37,
+          "startOffsetMs": 614.2000000000116,
+          "endOffsetMs": 631.6000000000349,
+          "gapMs": 17.400000000023283
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "catalog-scroll",
+      "startedAtMs": 15419.100000000035,
+      "endedAtMs": 15866.600000000035,
+      "durationMs": 447.5,
+      "rafCallbacks": 27,
+      "rawIntervals": 28,
+      "nearestRank95": 27,
+      "frameP95Ms": 16.900000000023283,
+      "maxFrameGapMs": 19.899999999965075,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 44.40000000002328,
+        "maxMs": 44.40000000002328,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 12,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 16,
+        "p95DurationMs": 16,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 15,
+          "startOffsetMs": 246.19999999995343,
+          "endOffsetMs": 263,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 18,
+          "startOffsetMs": 296.19999999995343,
+          "endOffsetMs": 313,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 7,
+          "startOffsetMs": 113,
+          "endOffsetMs": 129.89999999996508,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 23,
+          "startOffsetMs": 379.5999999999767,
+          "endOffsetMs": 396.5,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 1,
+          "startOffsetMs": 13,
+          "endOffsetMs": 32.899999999965075,
+          "gapMs": 19.899999999965075
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "map-pan",
+      "startedAtMs": 16268.900000000023,
+      "endedAtMs": 20516.29999999999,
+      "durationMs": 4247.399999999965,
+      "rafCallbacks": 236,
+      "rawIntervals": 237,
+      "nearestRank95": 226,
+      "frameP95Ms": 34.79999999998836,
+      "maxFrameGapMs": 45.600000000034925,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 2,
+        "p95Ms": 51.70000000001164,
+        "maxMs": 51.70000000001164,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 20,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 56,
+        "p95DurationMs": 56,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 2,
+          "startOffsetMs": 30.399999999965075,
+          "endOffsetMs": 65.59999999997672,
+          "gapMs": 35.20000000001164,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 3,
+          "startOffsetMs": 65.59999999997672,
+          "endOffsetMs": 111.20000000001164,
+          "gapMs": 45.600000000034925,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 7,
+          "startOffsetMs": 209.39999999996508,
+          "endOffsetMs": 245.09999999997672,
+          "gapMs": 35.70000000001164,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 8,
+          "startOffsetMs": 245.09999999997672,
+          "endOffsetMs": 283.5,
+          "gapMs": 38.40000000002328,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 9,
+          "startOffsetMs": 283.5,
+          "endOffsetMs": 320.0999999999767,
+          "gapMs": 36.59999999997672,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 10,
+          "startOffsetMs": 320.0999999999767,
+          "endOffsetMs": 355.79999999998836,
+          "gapMs": 35.70000000001164,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 11,
+          "startOffsetMs": 355.79999999998836,
+          "endOffsetMs": 391,
+          "gapMs": 35.20000000001164,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 12,
+          "startOffsetMs": 391,
+          "endOffsetMs": 426.29999999998836,
+          "gapMs": 35.29999999998836,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 13,
+          "startOffsetMs": 426.29999999998836,
+          "endOffsetMs": 463.8999999999651,
+          "gapMs": 37.59999999997672,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 26,
+          "startOffsetMs": 663.2999999999884,
+          "endOffsetMs": 702.7000000000116,
+          "gapMs": 39.40000000002328,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 124,
+          "startOffsetMs": 2363.0999999999767,
+          "endOffsetMs": 2398.2000000000116,
+          "gapMs": 35.100000000034925,
+          "timingBin": "after-observed-pointerup"
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 107,
+          "startOffsetMs": 2047.399999999965,
+          "endOffsetMs": 2080.7999999999884,
+          "gapMs": 33.40000000002328,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 120,
+          "startOffsetMs": 2279.7000000000116,
+          "endOffsetMs": 2313.2999999999884,
+          "gapMs": 33.59999999997672,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 6,
+          "startOffsetMs": 175.09999999997672,
+          "endOffsetMs": 209.39999999996508,
+          "gapMs": 34.29999999998836,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 77,
+          "startOffsetMs": 1529.7999999999884,
+          "endOffsetMs": 1564.5999999999767,
+          "gapMs": 34.79999999998836,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 124,
+          "startOffsetMs": 2363.0999999999767,
+          "endOffsetMs": 2398.2000000000116,
+          "gapMs": 35.100000000034925,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 2,
+          "startOffsetMs": 30.399999999965075,
+          "endOffsetMs": 65.59999999997672,
+          "gapMs": 35.20000000001164,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 11,
+          "startOffsetMs": 355.79999999998836,
+          "endOffsetMs": 391,
+          "gapMs": 35.20000000001164,
+          "timingBin": "pointer-held"
+        }
+      ],
+      "pointerDownOffsetMs": 16.70000000001164,
+      "pointerUpOffsetMs": 652.7999999999884,
+      "gestureCommandDurationMs": 658.7464300000065,
+      "holdBeforeReleaseMs": 200,
+      "intervalsAtP95": [
+        {
+          "index": 77,
+          "startOffsetMs": 1529.7999999999884,
+          "endOffsetMs": 1564.5999999999767,
+          "gapMs": 34.79999999998836,
+          "timingBin": "after-observed-pointerup"
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "map-zoom",
+      "startedAtMs": 20518.600000000035,
+      "endedAtMs": 32482.400000000023,
+      "durationMs": 11963.799999999988,
+      "rafCallbacks": 698,
+      "rawIntervals": 699,
+      "nearestRank95": 665,
+      "frameP95Ms": 27.29999999998836,
+      "maxFrameGapMs": 51.899999999965075,
+      "over50ms": 1,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 51.20000000001164,
+        "maxMs": 51.20000000001164,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 30,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 56,
+        "p95DurationMs": 56,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 1,
+        "totalMs": 50,
+        "maxMs": 50
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 55,
+          "startOffsetMs": 992,
+          "endOffsetMs": 1032.399999999965,
+          "gapMs": 40.399999999965075
+        },
+        {
+          "index": 56,
+          "startOffsetMs": 1032.399999999965,
+          "endOffsetMs": 1069.6999999999534,
+          "gapMs": 37.29999999998836
+        },
+        {
+          "index": 236,
+          "startOffsetMs": 4046.5,
+          "endOffsetMs": 4085.1999999999534,
+          "gapMs": 38.699999999953434
+        },
+        {
+          "index": 432,
+          "startOffsetMs": 7332.099999999977,
+          "endOffsetMs": 7367.699999999953,
+          "gapMs": 35.59999999997672
+        },
+        {
+          "index": 508,
+          "startOffsetMs": 8613,
+          "endOffsetMs": 8648.599999999977,
+          "gapMs": 35.59999999997672
+        },
+        {
+          "index": 516,
+          "startOffsetMs": 8846.5,
+          "endOffsetMs": 8898.399999999965,
+          "gapMs": 51.899999999965075
+        },
+        {
+          "index": 517,
+          "startOffsetMs": 8898.399999999965,
+          "endOffsetMs": 8941,
+          "gapMs": 42.600000000034925
+        },
+        {
+          "index": 529,
+          "startOffsetMs": 9114.199999999953,
+          "endOffsetMs": 9149.699999999953,
+          "gapMs": 35.5
+        },
+        {
+          "index": 562,
+          "startOffsetMs": 9679.599999999977,
+          "endOffsetMs": 9715,
+          "gapMs": 35.40000000002328
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 226,
+          "startOffsetMs": 3879.7999999999884,
+          "endOffsetMs": 3907.0999999999767,
+          "gapMs": 27.29999999998836
+        },
+        {
+          "index": 299,
+          "startOffsetMs": 5113.099999999977,
+          "endOffsetMs": 5140.399999999965,
+          "gapMs": 27.29999999998836
+        },
+        {
+          "index": 511,
+          "startOffsetMs": 8710,
+          "endOffsetMs": 8737.299999999988,
+          "gapMs": 27.29999999998836
+        },
+        {
+          "index": 512,
+          "startOffsetMs": 8737.299999999988,
+          "endOffsetMs": 8764.599999999977,
+          "gapMs": 27.29999999998836
+        },
+        {
+          "index": 245,
+          "startOffsetMs": 4213.099999999977,
+          "endOffsetMs": 4240.5,
+          "gapMs": 27.400000000023283
+        },
+        {
+          "index": 343,
+          "startOffsetMs": 5846.399999999965,
+          "endOffsetMs": 5873.799999999988,
+          "gapMs": 27.400000000023283
+        },
+        {
+          "index": 571,
+          "startOffsetMs": 9846.599999999977,
+          "endOffsetMs": 9874.199999999953,
+          "gapMs": 27.599999999976717
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "layer-switch",
+      "startedAtMs": 32485.600000000035,
+      "endedAtMs": 36432.20000000001,
+      "durationMs": 3946.5999999999767,
+      "rafCallbacks": 233,
+      "rawIntervals": 234,
+      "nearestRank95": 223,
+      "frameP95Ms": 16.79999999998836,
+      "maxFrameGapMs": 39.70000000001164,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 54.09999999997672,
+        "maxMs": 54.09999999997672,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 26,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 56,
+        "p95DurationMs": 56,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0.007472533456448137,
+        "unexpectedSum": 0.007472533456448137,
+        "allShiftSum": 0.014945066912896274,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 46,
+          "startOffsetMs": 762.7999999999884,
+          "endOffsetMs": 801.0999999999767,
+          "gapMs": 38.29999999998836
+        },
+        {
+          "index": 123,
+          "startOffsetMs": 2063.6999999999534,
+          "endOffsetMs": 2103.399999999965,
+          "gapMs": 39.70000000001164
+        },
+        {
+          "index": 196,
+          "startOffsetMs": 3295.899999999965,
+          "endOffsetMs": 3333.399999999965,
+          "gapMs": 37.5
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 164,
+          "startOffsetMs": 2762.2999999999884,
+          "endOffsetMs": 2779.0999999999767,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 167,
+          "startOffsetMs": 2812.2999999999884,
+          "endOffsetMs": 2829.0999999999767,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 183,
+          "startOffsetMs": 3079,
+          "endOffsetMs": 3095.7999999999884,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 214,
+          "startOffsetMs": 3629,
+          "endOffsetMs": 3645.7999999999884,
+          "gapMs": 16.79999999998836
+        },
+        {
+          "index": 64,
+          "startOffsetMs": 1079.1999999999534,
+          "endOffsetMs": 1096,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 57,
+          "startOffsetMs": 962.5,
+          "endOffsetMs": 979.3999999999651,
+          "gapMs": 16.899999999965075
+        },
+        {
+          "index": 189,
+          "startOffsetMs": 3179,
+          "endOffsetMs": 3195.899999999965,
+          "gapMs": 16.899999999965075
+        }
+      ]
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenario": "site-search",
+      "startedAtMs": 336.5,
+      "endedAtMs": 1814.9000000000233,
+      "durationMs": 1478.4000000000233,
+      "rafCallbacks": 90,
+      "rawIntervals": 91,
+      "nearestRank95": 87,
+      "frameP95Ms": 17.70000000001164,
+      "maxFrameGapMs": 19.79999999998836,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 34,
+        "p95Ms": 33.20000000001164,
+        "maxMs": 34.79999999998836,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 78,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 24,
+        "p95DurationMs": 24,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.8686109606648199,
+        "recentInputCount": 5
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 81,
+          "startOffsetMs": 1324.7000000000116,
+          "endOffsetMs": 1342.0999999999767,
+          "gapMs": 17.399999999965075
+        },
+        {
+          "index": 30,
+          "startOffsetMs": 474.79999999998836,
+          "endOffsetMs": 492.20000000001164,
+          "gapMs": 17.400000000023283
+        },
+        {
+          "index": 61,
+          "startOffsetMs": 991.5,
+          "endOffsetMs": 1008.9000000000233,
+          "gapMs": 17.400000000023283
+        },
+        {
+          "index": 28,
+          "startOffsetMs": 442.29999999998836,
+          "endOffsetMs": 460,
+          "gapMs": 17.70000000001164
+        },
+        {
+          "index": 44,
+          "startOffsetMs": 708.2000000000116,
+          "endOffsetMs": 725.9000000000233,
+          "gapMs": 17.70000000001164
+        },
+        {
+          "index": 83,
+          "startOffsetMs": 1358.2999999999884,
+          "endOffsetMs": 1377.0999999999767,
+          "gapMs": 18.79999999998836
+        },
+        {
+          "index": 23,
+          "startOffsetMs": 358.0999999999767,
+          "endOffsetMs": 376.9000000000233,
+          "gapMs": 18.800000000046566
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "panel",
+      "startedAtMs": 2870.79999999993,
+      "endedAtMs": 4962.199999999953,
+      "durationMs": 2091.4000000000233,
+      "rafCallbacks": 125,
+      "rawIntervals": 126,
+      "nearestRank95": 120,
+      "frameP95Ms": 16.900000000023283,
+      "maxFrameGapMs": 33.90000000002328,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 6,
+        "p95Ms": 64.79999999993015,
+        "maxMs": 64.79999999993015,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 94,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 72,
+        "p95DurationMs": 72,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.490066128301584,
+        "recentInputCount": 4
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 63,
+          "startOffsetMs": 1057.5,
+          "endOffsetMs": 1074.3000000000466,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 84,
+          "startOffsetMs": 1407.4000000000233,
+          "endOffsetMs": 1424.2000000000698,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 22,
+          "startOffsetMs": 357.4000000000233,
+          "endOffsetMs": 374.30000000004657,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 105,
+          "startOffsetMs": 1757.4000000000233,
+          "endOffsetMs": 1774.3000000000466,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 1,
+          "startOffsetMs": 7.700000000069849,
+          "endOffsetMs": 24.800000000046566,
+          "gapMs": 17.099999999976717
+        },
+        {
+          "index": 51,
+          "startOffsetMs": 857.4000000000233,
+          "endOffsetMs": 874.5,
+          "gapMs": 17.099999999976717
+        },
+        {
+          "index": 111,
+          "startOffsetMs": 1857.4000000000233,
+          "endOffsetMs": 1874.5,
+          "gapMs": 17.099999999976717
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "explore-search",
+      "startedAtMs": 4967,
+      "endedAtMs": 6780,
+      "durationMs": 1813,
+      "rafCallbacks": 109,
+      "rawIntervals": 110,
+      "nearestRank95": 105,
+      "frameP95Ms": 17,
+      "maxFrameGapMs": 24.199999999953434,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 28,
+        "p95Ms": 64,
+        "maxMs": 64.5,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 169,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 64,
+        "p95DurationMs": 64,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.10071628622367525,
+        "recentInputCount": 8
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 92,
+          "startOffsetMs": 1527.6999999999534,
+          "endOffsetMs": 1544.5,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 87,
+          "startOffsetMs": 1444.5,
+          "endOffsetMs": 1461.3999999999069,
+          "gapMs": 16.899999999906868
+        },
+        {
+          "index": 26,
+          "startOffsetMs": 427.89999999990687,
+          "endOffsetMs": 444.89999999990687,
+          "gapMs": 17
+        },
+        {
+          "index": 93,
+          "startOffsetMs": 1544.5,
+          "endOffsetMs": 1561.5,
+          "gapMs": 17
+        },
+        {
+          "index": 46,
+          "startOffsetMs": 761.2999999999302,
+          "endOffsetMs": 778.5999999999767,
+          "gapMs": 17.300000000046566
+        },
+        {
+          "index": 32,
+          "startOffsetMs": 527.8999999999069,
+          "endOffsetMs": 545.2999999999302,
+          "gapMs": 17.400000000023283
+        },
+        {
+          "index": 27,
+          "startOffsetMs": 444.89999999990687,
+          "endOffsetMs": 462.5,
+          "gapMs": 17.600000000093132
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "explore-filters",
+      "startedAtMs": 11683,
+      "endedAtMs": 13863.399999999907,
+      "durationMs": 2180.399999999907,
+      "rafCallbacks": 132,
+      "rawIntervals": 133,
+      "nearestRank95": 127,
+      "frameP95Ms": 17,
+      "maxFrameGapMs": 19.400000000023283,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 8,
+        "p95Ms": 47.800000000046566,
+        "maxMs": 47.800000000046566,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 129,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 40,
+        "p95DurationMs": 40,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.09222663752508793,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 118,
+          "startOffsetMs": 1944.7999999999302,
+          "endOffsetMs": 1961.6999999999534,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 121,
+          "startOffsetMs": 1994.7999999999302,
+          "endOffsetMs": 2011.6999999999534,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 32,
+          "startOffsetMs": 511.5999999999767,
+          "endOffsetMs": 528.5999999999767,
+          "gapMs": 17
+        },
+        {
+          "index": 54,
+          "startOffsetMs": 878.1999999999534,
+          "endOffsetMs": 895.1999999999534,
+          "gapMs": 17
+        },
+        {
+          "index": 64,
+          "startOffsetMs": 1044.8999999999069,
+          "endOffsetMs": 1061.8999999999069,
+          "gapMs": 17
+        },
+        {
+          "index": 108,
+          "startOffsetMs": 1778.1999999999534,
+          "endOffsetMs": 1795.1999999999534,
+          "gapMs": 17
+        },
+        {
+          "index": 125,
+          "startOffsetMs": 2061.5,
+          "endOffsetMs": 2078.5,
+          "gapMs": 17
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "catalog-scroll",
+      "startedAtMs": 13867.399999999907,
+      "endedAtMs": 14728.79999999993,
+      "durationMs": 861.4000000000233,
+      "rafCallbacks": 52,
+      "rawIntervals": 53,
+      "nearestRank95": 51,
+      "frameP95Ms": 22.70000000006985,
+      "maxFrameGapMs": 23.29999999993015,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 47.89999999990687,
+        "maxMs": 47.89999999990687,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 32,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 56,
+        "p95DurationMs": 48,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 9,
+          "startOffsetMs": 144.20000000006985,
+          "endOffsetMs": 166.70000000006985,
+          "gapMs": 22.5
+        },
+        {
+          "index": 15,
+          "startOffsetMs": 244.20000000006985,
+          "endOffsetMs": 266.70000000006985,
+          "gapMs": 22.5
+        },
+        {
+          "index": 18,
+          "startOffsetMs": 294.10000000009313,
+          "endOffsetMs": 316.80000000004657,
+          "gapMs": 22.699999999953434
+        },
+        {
+          "index": 24,
+          "startOffsetMs": 394,
+          "endOffsetMs": 416.70000000006985,
+          "gapMs": 22.70000000006985
+        },
+        {
+          "index": 2,
+          "startOffsetMs": 27.20000000006985,
+          "endOffsetMs": 50,
+          "gapMs": 22.79999999993015
+        },
+        {
+          "index": 12,
+          "startOffsetMs": 194.10000000009313,
+          "endOffsetMs": 217.40000000002328,
+          "gapMs": 23.29999999993015
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "map-pan",
+      "startedAtMs": 16180.899999999907,
+      "endedAtMs": 17528.5,
+      "durationMs": 1347.6000000000931,
+      "rafCallbacks": 81,
+      "rawIntervals": 82,
+      "nearestRank95": 78,
+      "frameP95Ms": 25.199999999953434,
+      "maxFrameGapMs": 29,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 45.800000000046566,
+        "maxMs": 45.800000000046566,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 26,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 72,
+        "p95DurationMs": 72,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 21,
+          "startOffsetMs": 347.10000000009313,
+          "endOffsetMs": 371.60000000009313,
+          "gapMs": 24.5,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 27,
+          "startOffsetMs": 447.10000000009313,
+          "endOffsetMs": 471.70000000006985,
+          "gapMs": 24.599999999976717,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 39,
+          "startOffsetMs": 647.1000000000931,
+          "endOffsetMs": 671.8000000000466,
+          "gapMs": 24.699999999953434,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 15,
+          "startOffsetMs": 247.10000000009313,
+          "endOffsetMs": 272.30000000004657,
+          "gapMs": 25.199999999953434,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 36,
+          "startOffsetMs": 597.1000000000931,
+          "endOffsetMs": 622.4000000000233,
+          "gapMs": 25.29999999993015,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 11,
+          "startOffsetMs": 180.40000000002328,
+          "endOffsetMs": 206.10000000009313,
+          "gapMs": 25.70000000006985,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 3,
+          "startOffsetMs": 47.20000000006985,
+          "endOffsetMs": 73.20000000006985,
+          "gapMs": 26,
+          "timingBin": "pointer-held"
+        }
+      ],
+      "pointerDownOffsetMs": 15.5,
+      "pointerUpOffsetMs": 881,
+      "gestureCommandDurationMs": 879.9864270000107,
+      "holdBeforeReleaseMs": 200,
+      "intervalsAtP95": [
+        {
+          "index": 15,
+          "startOffsetMs": 247.10000000009313,
+          "endOffsetMs": 272.30000000004657,
+          "gapMs": 25.199999999953434,
+          "timingBin": "pointer-held"
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "map-zoom",
+      "startedAtMs": 17530.099999999977,
+      "endedAtMs": 24995,
+      "durationMs": 7464.900000000023,
+      "rafCallbacks": 429,
+      "rawIntervals": 430,
+      "nearestRank95": 409,
+      "frameP95Ms": 26,
+      "maxFrameGapMs": 39,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 64.80000000004657,
+        "maxMs": 64.80000000004657,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 70,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 72,
+        "p95DurationMs": 72,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 370,
+          "startOffsetMs": 6325.79999999993,
+          "endOffsetMs": 6364.79999999993,
+          "gapMs": 39
+        },
+        {
+          "index": 371,
+          "startOffsetMs": 6364.79999999993,
+          "endOffsetMs": 6402.29999999993,
+          "gapMs": 37.5
+        },
+        {
+          "index": 375,
+          "startOffsetMs": 6464,
+          "endOffsetMs": 6499.79999999993,
+          "gapMs": 35.79999999993015
+        },
+        {
+          "index": 392,
+          "startOffsetMs": 6798.900000000023,
+          "endOffsetMs": 6837.699999999953,
+          "gapMs": 38.79999999993015
+        },
+        {
+          "index": 399,
+          "startOffsetMs": 6947.400000000023,
+          "endOffsetMs": 6985.099999999977,
+          "gapMs": 37.699999999953434
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 379,
+          "startOffsetMs": 6557.5,
+          "endOffsetMs": 6583.29999999993,
+          "gapMs": 25.79999999993015
+        },
+        {
+          "index": 381,
+          "startOffsetMs": 6597.400000000023,
+          "endOffsetMs": 6623.199999999953,
+          "gapMs": 25.79999999993015
+        },
+        {
+          "index": 384,
+          "startOffsetMs": 6664.099999999977,
+          "endOffsetMs": 6689.900000000023,
+          "gapMs": 25.800000000046566
+        },
+        {
+          "index": 139,
+          "startOffsetMs": 2397.5999999999767,
+          "endOffsetMs": 2423.5999999999767,
+          "gapMs": 26
+        },
+        {
+          "index": 231,
+          "startOffsetMs": 3930.79999999993,
+          "endOffsetMs": 3957.29999999993,
+          "gapMs": 26.5
+        },
+        {
+          "index": 174,
+          "startOffsetMs": 2980.9000000000233,
+          "endOffsetMs": 3007.6999999999534,
+          "gapMs": 26.79999999993015
+        },
+        {
+          "index": 378,
+          "startOffsetMs": 6530.699999999953,
+          "endOffsetMs": 6557.5,
+          "gapMs": 26.800000000046566
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "layer-switch",
+      "startedAtMs": 24998.199999999953,
+      "endedAtMs": 29478.5,
+      "durationMs": 4480.300000000047,
+      "rafCallbacks": 267,
+      "rawIntervals": 268,
+      "nearestRank95": 255,
+      "frameP95Ms": 16.900000000023283,
+      "maxFrameGapMs": 36,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 70.29999999993015,
+        "maxMs": 70.29999999993015,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 70,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 80,
+        "p95DurationMs": 80,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0.022143804754611498,
+        "unexpectedSum": 0.022143804754611498,
+        "allShiftSum": 0.044287609509222996,
+        "recentInputCount": 1
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 150,
+          "startOffsetMs": 2500.8000000000466,
+          "endOffsetMs": 2536.8000000000466,
+          "gapMs": 36
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 67,
+          "startOffsetMs": 1112.5,
+          "endOffsetMs": 1129.4000000000233,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 82,
+          "startOffsetMs": 1362.5,
+          "endOffsetMs": 1379.4000000000233,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 148,
+          "startOffsetMs": 2462.4000000000233,
+          "endOffsetMs": 2479.3000000000466,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 224,
+          "startOffsetMs": 3745.5999999999767,
+          "endOffsetMs": 3762.5,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 266,
+          "startOffsetMs": 4462.400000000023,
+          "endOffsetMs": 4479.300000000047,
+          "gapMs": 16.900000000023283
+        },
+        {
+          "index": 110,
+          "startOffsetMs": 1829,
+          "endOffsetMs": 1846,
+          "gapMs": 17
+        },
+        {
+          "index": 141,
+          "startOffsetMs": 2345.8000000000466,
+          "endOffsetMs": 2362.8000000000466,
+          "gapMs": 17
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenario": "site-search",
+      "startedAtMs": 340.5999999999767,
+      "endedAtMs": 1910.5999999999767,
+      "durationMs": 1570,
+      "rafCallbacks": 96,
+      "rawIntervals": 97,
+      "nearestRank95": 93,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 18.400000000023283,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 34,
+        "p95Ms": 48.09999999997672,
+        "maxMs": 48.199999999953434,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 109,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.12862321695545878,
+        "recentInputCount": 3
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 56,
+          "startOffsetMs": 902.9000000000233,
+          "endOffsetMs": 919.7000000000698,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 67,
+          "startOffsetMs": 1086,
+          "endOffsetMs": 1102.8000000000466,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 76,
+          "startOffsetMs": 1236,
+          "endOffsetMs": 1252.8000000000466,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 88,
+          "startOffsetMs": 1436,
+          "endOffsetMs": 1452.8000000000466,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 4,
+          "startOffsetMs": 36.10000000009313,
+          "endOffsetMs": 53,
+          "gapMs": 16.899999999906868
+        },
+        {
+          "index": 57,
+          "startOffsetMs": 919.7000000000698,
+          "endOffsetMs": 936.9000000000233,
+          "gapMs": 17.199999999953434
+        },
+        {
+          "index": 34,
+          "startOffsetMs": 536.2000000000698,
+          "endOffsetMs": 553.7000000000698,
+          "gapMs": 17.5
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "panel",
+      "startedAtMs": 2861.1999999999534,
+      "endedAtMs": 4071.399999999907,
+      "durationMs": 1210.1999999999534,
+      "rafCallbacks": 73,
+      "rawIntervals": 74,
+      "nearestRank95": 71,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 17.4000000001397,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 32.60000000009313,
+        "maxMs": 32.60000000009313,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 25,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 24,
+        "p95DurationMs": 24,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 42,
+          "startOffsetMs": 692.5999999998603,
+          "endOffsetMs": 709.3999999999069,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 62,
+          "startOffsetMs": 1026,
+          "endOffsetMs": 1042.8000000000466,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 64,
+          "startOffsetMs": 1059.1999999999534,
+          "endOffsetMs": 1076,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 66,
+          "startOffsetMs": 1092.5,
+          "endOffsetMs": 1109.3000000000466,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 50,
+          "startOffsetMs": 825.8999999999069,
+          "endOffsetMs": 842.8000000000466,
+          "gapMs": 16.9000000001397
+        },
+        {
+          "index": 1,
+          "startOffsetMs": 10.099999999860302,
+          "endOffsetMs": 27.199999999953434,
+          "gapMs": 17.100000000093132
+        },
+        {
+          "index": 18,
+          "startOffsetMs": 292.5999999998603,
+          "endOffsetMs": 310,
+          "gapMs": 17.4000000001397
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "explore-search",
+      "startedAtMs": 4073.7999999998137,
+      "endedAtMs": 5672.199999999953,
+      "durationMs": 1598.4000000001397,
+      "rafCallbacks": 95,
+      "rawIntervals": 96,
+      "nearestRank95": 92,
+      "frameP95Ms": 21.600000000093132,
+      "maxFrameGapMs": 33.89999999990687,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 28,
+        "p95Ms": 36.199999999953434,
+        "maxMs": 36.800000000046566,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 105,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.323803973176362,
+        "recentInputCount": 13
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 31,
+          "startOffsetMs": 514.7000000001863,
+          "endOffsetMs": 534.3000000000466,
+          "gapMs": 19.5999999998603
+        },
+        {
+          "index": 78,
+          "startOffsetMs": 1314.4000000001397,
+          "endOffsetMs": 1334.4000000001397,
+          "gapMs": 20
+        },
+        {
+          "index": 58,
+          "startOffsetMs": 963.7000000001863,
+          "endOffsetMs": 983.9000000001397,
+          "gapMs": 20.199999999953434
+        },
+        {
+          "index": 22,
+          "startOffsetMs": 364.5,
+          "endOffsetMs": 386.10000000009313,
+          "gapMs": 21.600000000093132
+        },
+        {
+          "index": 79,
+          "startOffsetMs": 1334.4000000001397,
+          "endOffsetMs": 1357.2000000001863,
+          "gapMs": 22.800000000046566
+        },
+        {
+          "index": 86,
+          "startOffsetMs": 1448.1000000000931,
+          "endOffsetMs": 1472.3000000000466,
+          "gapMs": 24.199999999953434
+        },
+        {
+          "index": 28,
+          "startOffsetMs": 464.60000000009313,
+          "endOffsetMs": 490.30000000004657,
+          "gapMs": 25.699999999953434
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "explore-filters",
+      "startedAtMs": 13306,
+      "endedAtMs": 15155.699999999953,
+      "durationMs": 1849.6999999999534,
+      "rafCallbacks": 111,
+      "rawIntervals": 112,
+      "nearestRank95": 107,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 17.600000000093132,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 8,
+        "p95Ms": 33.800000000046566,
+        "maxMs": 33.800000000046566,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 42,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 32,
+        "p95DurationMs": 32,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.053738818344105876,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 75,
+          "startOffsetMs": 1247.2999999998137,
+          "endOffsetMs": 1264.0999999998603,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 82,
+          "startOffsetMs": 1364.2999999998137,
+          "endOffsetMs": 1381.0999999998603,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 87,
+          "startOffsetMs": 1447.2999999998137,
+          "endOffsetMs": 1464.0999999998603,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 98,
+          "startOffsetMs": 1630.6999999999534,
+          "endOffsetMs": 1647.5,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 80,
+          "startOffsetMs": 1330.6999999999534,
+          "endOffsetMs": 1347.5999999998603,
+          "gapMs": 16.899999999906868
+        },
+        {
+          "index": 99,
+          "startOffsetMs": 1647.5,
+          "endOffsetMs": 1664.3999999999069,
+          "gapMs": 16.899999999906868
+        },
+        {
+          "index": 92,
+          "startOffsetMs": 1530.6999999999534,
+          "endOffsetMs": 1547.7999999998137,
+          "gapMs": 17.0999999998603
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "catalog-scroll",
+      "startedAtMs": 15157.799999999814,
+      "endedAtMs": 15604.699999999953,
+      "durationMs": 446.9000000001397,
+      "rafCallbacks": 27,
+      "rawIntervals": 28,
+      "nearestRank95": 27,
+      "frameP95Ms": 16.800000000046566,
+      "maxFrameGapMs": 19.899999999906868,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 1,
+        "p95Ms": 44,
+        "maxMs": 44,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 12,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 16,
+        "p95DurationMs": 16,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 18,
+          "startOffsetMs": 295.5,
+          "endOffsetMs": 312.20000000018626,
+          "gapMs": 16.700000000186265
+        },
+        {
+          "index": 19,
+          "startOffsetMs": 312.20000000018626,
+          "endOffsetMs": 329,
+          "gapMs": 16.799999999813735
+        },
+        {
+          "index": 7,
+          "startOffsetMs": 112.30000000004657,
+          "endOffsetMs": 129.10000000009313,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 24,
+          "startOffsetMs": 395.5,
+          "endOffsetMs": 412.30000000004657,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 1,
+          "startOffsetMs": 12.200000000186265,
+          "endOffsetMs": 32.10000000009313,
+          "gapMs": 19.899999999906868
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "map-pan",
+      "startedAtMs": 16006.799999999814,
+      "endedAtMs": 20054,
+      "durationMs": 4047.2000000001863,
+      "rafCallbacks": 224,
+      "rawIntervals": 225,
+      "nearestRank95": 214,
+      "frameP95Ms": 35,
+      "maxFrameGapMs": 47,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 2,
+        "p95Ms": 51.5,
+        "maxMs": 51.5,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 20,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 56,
+        "p95DurationMs": 56,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-pan",
+          "metric": "frameP95Ms",
+          "value": 35,
+          "limit": 35
+        }
+      ],
+      "slowIntervals": [
+        {
+          "index": 2,
+          "startOffsetMs": 30.300000000046566,
+          "endOffsetMs": 65.5,
+          "gapMs": 35.199999999953434,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 5,
+          "startOffsetMs": 132.20000000018626,
+          "endOffsetMs": 179.20000000018626,
+          "gapMs": 47,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 7,
+          "startOffsetMs": 211.10000000009313,
+          "endOffsetMs": 248.9000000001397,
+          "gapMs": 37.800000000046566,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 8,
+          "startOffsetMs": 248.9000000001397,
+          "endOffsetMs": 288.5,
+          "gapMs": 39.5999999998603,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 9,
+          "startOffsetMs": 288.5,
+          "endOffsetMs": 327.20000000018626,
+          "gapMs": 38.700000000186265,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 10,
+          "startOffsetMs": 327.20000000018626,
+          "endOffsetMs": 367.10000000009313,
+          "gapMs": 39.89999999990687,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 11,
+          "startOffsetMs": 367.10000000009313,
+          "endOffsetMs": 405.30000000004657,
+          "gapMs": 38.199999999953434,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 12,
+          "startOffsetMs": 405.30000000004657,
+          "endOffsetMs": 443.80000000004657,
+          "gapMs": 38.5,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 13,
+          "startOffsetMs": 443.80000000004657,
+          "endOffsetMs": 480.4000000001397,
+          "gapMs": 36.60000000009313,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 26,
+          "startOffsetMs": 680,
+          "endOffsetMs": 717.2000000001863,
+          "gapMs": 37.200000000186265,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 64,
+          "startOffsetMs": 1329.9000000001397,
+          "endOffsetMs": 1364.9000000001397,
+          "gapMs": 35,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 105,
+          "startOffsetMs": 2048.7000000001863,
+          "endOffsetMs": 2084.8000000000466,
+          "gapMs": 36.0999999998603,
+          "timingBin": "after-observed-pointerup"
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 75,
+          "startOffsetMs": 1546.5,
+          "endOffsetMs": 1580.8000000000466,
+          "gapMs": 34.300000000046566,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 3,
+          "startOffsetMs": 65.5,
+          "endOffsetMs": 99.9000000001397,
+          "gapMs": 34.4000000001397,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 69,
+          "startOffsetMs": 1429.8000000000466,
+          "endOffsetMs": 1464.2000000001863,
+          "gapMs": 34.4000000001397,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 64,
+          "startOffsetMs": 1329.9000000001397,
+          "endOffsetMs": 1364.9000000001397,
+          "gapMs": 35,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 2,
+          "startOffsetMs": 30.300000000046566,
+          "endOffsetMs": 65.5,
+          "gapMs": 35.199999999953434,
+          "timingBin": "pointer-held"
+        },
+        {
+          "index": 105,
+          "startOffsetMs": 2048.7000000001863,
+          "endOffsetMs": 2084.8000000000466,
+          "gapMs": 36.0999999998603,
+          "timingBin": "after-observed-pointerup"
+        },
+        {
+          "index": 13,
+          "startOffsetMs": 443.80000000004657,
+          "endOffsetMs": 480.4000000001397,
+          "gapMs": 36.60000000009313,
+          "timingBin": "pointer-held"
+        }
+      ],
+      "pointerDownOffsetMs": 16.800000000046566,
+      "pointerUpOffsetMs": 670.3000000000466,
+      "gestureCommandDurationMs": 675.567023999989,
+      "holdBeforeReleaseMs": 200,
+      "intervalsAtP95": [
+        {
+          "index": 64,
+          "startOffsetMs": 1329.9000000001397,
+          "endOffsetMs": 1364.9000000001397,
+          "gapMs": 35,
+          "timingBin": "after-observed-pointerup"
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "map-zoom",
+      "startedAtMs": 20056.09999999986,
+      "endedAtMs": 31836.799999999814,
+      "durationMs": 11780.699999999953,
+      "rafCallbacks": 686,
+      "rawIntervals": 687,
+      "nearestRank95": 653,
+      "frameP95Ms": 27.300000000046566,
+      "maxFrameGapMs": 53.39999999990687,
+      "over50ms": 1,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 53.199999999953434,
+        "maxMs": 53.199999999953434,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 30,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 56,
+        "p95DurationMs": 56,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 1,
+        "totalMs": 51,
+        "maxMs": 51
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0,
+        "recentInputCount": 0
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 55,
+          "startOffsetMs": 996.1000000000931,
+          "endOffsetMs": 1035.6999999999534,
+          "gapMs": 39.5999999998603
+        },
+        {
+          "index": 56,
+          "startOffsetMs": 1035.6999999999534,
+          "endOffsetMs": 1073,
+          "gapMs": 37.300000000046566
+        },
+        {
+          "index": 504,
+          "startOffsetMs": 8563.40000000014,
+          "endOffsetMs": 8601.100000000093,
+          "gapMs": 37.699999999953434
+        },
+        {
+          "index": 512,
+          "startOffsetMs": 8798.40000000014,
+          "endOffsetMs": 8851.800000000047,
+          "gapMs": 53.39999999990687
+        },
+        {
+          "index": 513,
+          "startOffsetMs": 8851.800000000047,
+          "endOffsetMs": 8896.699999999953,
+          "gapMs": 44.89999999990687
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 508,
+          "startOffsetMs": 8690.40000000014,
+          "endOffsetMs": 8717.5,
+          "gapMs": 27.0999999998603
+        },
+        {
+          "index": 280,
+          "startOffsetMs": 4796.800000000047,
+          "endOffsetMs": 4824,
+          "gapMs": 27.199999999953434
+        },
+        {
+          "index": 295,
+          "startOffsetMs": 5046.800000000047,
+          "endOffsetMs": 5074.100000000093,
+          "gapMs": 27.300000000046566
+        },
+        {
+          "index": 341,
+          "startOffsetMs": 5813.5,
+          "endOffsetMs": 5840.800000000047,
+          "gapMs": 27.300000000046566
+        },
+        {
+          "index": 507,
+          "startOffsetMs": 8663,
+          "endOffsetMs": 8690.40000000014,
+          "gapMs": 27.4000000001397
+        },
+        {
+          "index": 629,
+          "startOffsetMs": 10830,
+          "endOffsetMs": 10857.40000000014,
+          "gapMs": 27.4000000001397
+        },
+        {
+          "index": 317,
+          "startOffsetMs": 5413.40000000014,
+          "endOffsetMs": 5440.90000000014,
+          "gapMs": 27.5
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "layer-switch",
+      "startedAtMs": 31840.09999999986,
+      "endedAtMs": 36486.69999999995,
+      "durationMs": 4646.600000000093,
+      "rafCallbacks": 275,
+      "rawIntervals": 276,
+      "nearestRank95": 263,
+      "frameP95Ms": 16.9000000001397,
+      "maxFrameGapMs": 38,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 4,
+        "p95Ms": 53.800000000046566,
+        "maxMs": 53.800000000046566,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 26,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 56,
+        "p95DurationMs": 56,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0.007472533456448137,
+        "unexpectedSum": 0.007472533456448137,
+        "allShiftSum": 0.014945066912896274,
+        "recentInputCount": 2
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [
+        {
+          "index": 46,
+          "startOffsetMs": 762.9000000001397,
+          "endOffsetMs": 800.9000000001397,
+          "gapMs": 38
+        },
+        {
+          "index": 165,
+          "startOffsetMs": 2767,
+          "endOffsetMs": 2804.5,
+          "gapMs": 37.5
+        },
+        {
+          "index": 238,
+          "startOffsetMs": 3996,
+          "endOffsetMs": 4033.3000000000466,
+          "gapMs": 37.300000000046566
+        }
+      ],
+      "percentileNeighbourhood": [
+        {
+          "index": 243,
+          "startOffsetMs": 4095.6999999999534,
+          "endOffsetMs": 4112.5,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 265,
+          "startOffsetMs": 4479,
+          "endOffsetMs": 4495.800000000047,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 274,
+          "startOffsetMs": 4629,
+          "endOffsetMs": 4645.800000000047,
+          "gapMs": 16.800000000046566
+        },
+        {
+          "index": 63,
+          "startOffsetMs": 1062.5,
+          "endOffsetMs": 1079.4000000001397,
+          "gapMs": 16.9000000001397
+        },
+        {
+          "index": 49,
+          "startOffsetMs": 829.3000000000466,
+          "endOffsetMs": 846.3000000000466,
+          "gapMs": 17
+        },
+        {
+          "index": 114,
+          "startOffsetMs": 1912.5,
+          "endOffsetMs": 1929.5,
+          "gapMs": 17
+        },
+        {
+          "index": 161,
+          "startOffsetMs": 2695.8000000000466,
+          "endOffsetMs": 2712.8000000000466,
+          "gapMs": 17
+        }
+      ]
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenario": "site-search",
+      "startedAtMs": 329.80000000004657,
+      "endedAtMs": 1830.6999999999534,
+      "durationMs": 1500.8999999999069,
+      "rafCallbacks": 91,
+      "rawIntervals": 92,
+      "nearestRank95": 88,
+      "frameP95Ms": 17.5,
+      "maxFrameGapMs": 19.399999999906868,
+      "over50ms": 0,
+      "inputToNextFrame": {
+        "count": 34,
+        "p95Ms": 33.39999999990687,
+        "maxMs": 34.60000000009313,
+        "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+      },
+      "eventTiming": {
+        "supported": true,
+        "observed": 79,
+        "durationThresholdMs": 16,
+        "maxDurationMs": 24,
+        "p95DurationMs": 24,
+        "isFieldINP": false
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "layout": {
+        "supported": true,
+        "sessionCLS": 0,
+        "unexpectedSum": 0,
+        "allShiftSum": 0.8686109606648199,
+        "recentInputCount": 5
+      },
+      "errors": [],
+      "overflow": false,
+      "hidden": false,
+      "pendingInputFrames": 0,
+      "previousBoundaryTasks": 0,
+      "allDerivedFieldsRecomputedExact": true,
+      "issues": [],
+      "slowIntervals": [],
+      "percentileNeighbourhood": [
+        {
+          "index": 19,
+          "startOffsetMs": 298.0999999998603,
+          "endOffsetMs": 315.39999999990687,
+          "gapMs": 17.300000000046566
+        },
+        {
+          "index": 27,
+          "startOffsetMs": 431.79999999981374,
+          "endOffsetMs": 449.0999999998603,
+          "gapMs": 17.300000000046566
+        },
+        {
+          "index": 57,
+          "startOffsetMs": 931.6999999999534,
+          "endOffsetMs": 949,
+          "gapMs": 17.300000000046566
+        },
+        {
+          "index": 44,
+          "startOffsetMs": 714.8999999999069,
+          "endOffsetMs": 732.3999999999069,
+          "gapMs": 17.5
+        },
+        {
+          "index": 81,
+          "startOffsetMs": 1331.3999999999069,
+          "endOffsetMs": 1348.8999999999069,
+          "gapMs": 17.5
+        },
+        {
+          "index": 61,
+          "startOffsetMs": 998.2999999998137,
+          "endOffsetMs": 1015.8999999999069,
+          "gapMs": 17.600000000093132
+        },
+        {
+          "index": 83,
+          "startOffsetMs": 1364.8999999999069,
+          "endOffsetMs": 1383.8999999999069,
+          "gapMs": 19
+        }
+      ]
+    }
+  ],
+  "helperBindings": [
+    {
+      "path": "tools/pages-preview/browser-smoothness.mjs",
+      "bytes": 24027,
+      "sha256": "f2b6eef88fcc7d5d262e08b4aec81e13651065850865a0a3785d3e79042f2650",
+      "gitBlob": "aeca582e3dc735bc55a4de6d3bba3ba984a0cd94",
+      "independentlyMatchedExactGitSource": true
+    },
+    {
+      "path": "tools/pages-preview/browser-source-end-pan.mjs",
+      "bytes": 7754,
+      "sha256": "5a4d396f6d811f843c7e7e5a0529fe964903b753bce34284125f4dc6727b8cc0",
+      "gitBlob": "277ae927f48426fe05fbeb2ab5b681e2f889e367",
+      "independentlyMatchedExactGitSource": true
+    },
+    {
+      "path": "tools/pages-preview/browser-environment.mjs",
+      "bytes": 9636,
+      "sha256": "470ca0d7270b230a649f4cd0c7eaded7bdfce29156fd418d2f71d1064519a885",
+      "gitBlob": "cfeed81990533bb1aa36c4a05b31c4a441745246",
+      "independentlyMatchedExactGitSource": true
+    },
+    {
+      "path": "tools/pages-preview/browser-smoke.mjs",
+      "bytes": 98337,
+      "sha256": "9f0f8e8789b08298866da1e37fca0acd1d8ec940d8b6b40ff2638dd868db997a",
+      "gitBlob": "05ee0e4b22f4e6348e19caa35f4096402813c86e",
+      "independentlyMatchedExactGitSource": true
+    }
+  ],
+  "engineBinding": {
+    "receipt": "loading",
+    "path": "web/lib/custom-map-engine.ts",
+    "bytes": 86221,
+    "sha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4",
+    "gitBlob": "143666be793628bfd41fdba2b2fc34b886331be1",
+    "independentlyMatchedExactGitSource": true
+  },
+  "environment": {
+    "schemaVersion": 1,
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "collection": "browser-target-cdp-before-measurement",
+    "sourceCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+    "capturedAt": "2026-11-13T16:10:29.712Z",
+    "requestedFlags": [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-background-networking",
+      "--disable-component-update",
+      "--disable-default-apps",
+      "--disable-extensions",
+      "--disable-features=Translate,MediaRouter",
+      "--mute-audio",
+      "--no-first-run",
+      "--use-gl=angle",
+      "--use-angle=swiftshader-webgl",
+      "--enable-unsafe-swiftshader",
+      "--window-size=1920,1920",
+      "--ozone-override-screen-size=1920,1920"
+    ],
+    "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=38831 --user-data-dir=/tmp/tropnik-chrome-7888 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+        "skiaBackendType": "None",
+        "targetCpuBits": 64
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      }
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760340480,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    },
+    "nativeSurface": {
+      "schemaVersion": 1,
+      "collection": "blank-target-before-emulation",
+      "window": {
+        "left": 10,
+        "top": 10,
+        "width": 1920,
+        "height": 1920,
+        "windowState": "normal"
+      },
+      "viewport": {
+        "url": "about:blank",
+        "visibilityState": "visible",
+        "innerWidth": 1920,
+        "innerHeight": 1833,
+        "outerWidth": 1920,
+        "outerHeight": 1920,
+        "devicePixelRatio": 1,
+        "screen": {
+          "width": 1920,
+          "height": 1920,
+          "availWidth": 1920,
+          "availHeight": 1920
+        }
+      }
+    }
+  },
+  "earlyFullEnvironmentMatchedByOriginalComparator": true,
+  "nativeSurfaceCoveragePassedBoth": true,
+  "browserCleanup": {
+    "status": "stopped",
+    "signals": [
+      "SIGTERM"
+    ],
+    "errors": [],
+    "elapsedMs": 101.45348299993202
+  },
+  "transport": {
+    "schemaVersion": 1,
+    "evidence": "failed-pages-artifact-read-only",
+    "releaseEligible": false,
+    "extractor": {
+      "sourceCommit": "ac7bb26e2a97ffd42f729200b94ec42ab450c2f7",
+      "runId": 43465851194,
+      "attempt": 1
+    },
+    "artifactSourceCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+    "expectedBuildId": "39a9a382cb37a4fb",
+    "run": {
+      "id": 43458536389,
+      "attempt": 1,
+      "path": ".github/workflows/pages.yml",
+      "event": "push",
+      "headBranch": "main",
+      "headSha": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43458536389"
+    },
+    "artifact": {
+      "id": 14056958350,
+      "name": "tropnik-pages-browser-failure-1",
+      "bytes": 2477913,
+      "sha256": "6eafe72296e2fb10ddb65852d3579186ca6193fe39bebbd4a847fbda40d3b5bb",
+      "expired": false,
+      "workflowRun": {
+        "id": 43458536389,
+        "repository_id": 1447843944,
+        "head_repository_id": 1447843944,
+        "head_branch": "main",
+        "head_sha": "f0c489e956c7cbf9164a49d80521e2486b9ad18c"
+      }
+    },
+    "noNewMeasurements": true,
+    "noBrowserRun": true,
+    "observedAt": "2026-11-13T16:45:16.246Z"
+  },
+  "memberHashes": {
+    "schemaVersion": 1,
+    "archive": {
+      "bytes": 2477913,
+      "sha256": "6eafe72296e2fb10ddb65852d3579186ca6193fe39bebbd4a847fbda40d3b5bb"
+    },
+    "members": {
+      "browser-failure.json": {
+        "path": "browser-failure.json",
+        "bytes": 17376952,
+        "sha256": "c7248fad883628850272d790b8343753757da402ccbe8660138f391650e8c376"
+      },
+      "browser-map-loading-verification.json": {
+        "path": "browser-map-loading-verification.json",
+        "bytes": 1710309,
+        "sha256": "856555bc5f687be8dba800f2943f22eb136a1b7dadfb1c3e771912348dc88087"
+      },
+      "browser-service-worker-update-verification.json": {
+        "path": "browser-service-worker-update-verification.json",
+        "bytes": 21075,
+        "sha256": "7bf9c8f66ec556f457ae5eab8d9e85e6ded3507bd8687e9c03d8f0e13ffe3ac5"
+      },
+      "browser-ui-smoothness-diagnostic.json": {
+        "path": "browser-ui-smoothness-diagnostic.json",
+        "bytes": 538627,
+        "sha256": "30c90a1ddbeab2ad726534f7485967cbb5fdac1e99d31d2ee87e1f63d4fd01c1"
+      }
+    },
+    "zipMembers": [
+      {
+        "path": "browser-failure.png",
+        "bytes": 172952
+      },
+      {
+        "path": "browser-map-attribution-verification.json",
+        "bytes": 2463398
+      },
+      {
+        "path": "browser-failure.json",
+        "bytes": 17376952
+      },
+      {
+        "path": "browser-map-controls-verification.json",
+        "bytes": 29692
+      },
+      {
+        "path": "browser-map-loading-verification.json",
+        "bytes": 1710309
+      },
+      {
+        "path": "browser-map-tile-opacity-verification.json",
+        "bytes": 596099
+      },
+      {
+        "path": "browser-map-underlay-verification.json",
+        "bytes": 1814444
+      },
+      {
+        "path": "browser-service-worker-update-verification.json",
+        "bytes": 21075
+      },
+      {
+        "path": "browser-terrain-full-mask-verification.json",
+        "bytes": 101218
+      },
+      {
+        "path": "browser-terrain-mask-verification.json",
+        "bytes": 43239
+      },
+      {
+        "path": "browser-terrain-presentation-verification.json",
+        "bytes": 127229
+      },
+      {
+        "path": "browser-terrain-unmasked-verification.json",
+        "bytes": 74379
+      },
+      {
+        "path": "browser-trail-overlay-verification.json",
+        "bytes": 32837
+      },
+      {
+        "path": "browser-trail-raster-verification.json",
+        "bytes": 145473
+      },
+      {
+        "path": "browser-ui-smoothness-diagnostic.json",
+        "bytes": 538627
+      }
+    ],
+    "extractedFiles": [
+      "browser-failure.json",
+      "browser-map-loading-verification.json",
+      "browser-service-worker-update-verification.json",
+      "browser-ui-smoothness-diagnostic.json"
+    ],
+    "noOtherMembersExtracted": true
+  },
+  "buildBinding": {
+    "sourceCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+    "buildId": "39a9a382cb37a4fb",
+    "kind": "two focused receipts in the same exact-source failure artifact",
+    "buildInfoAvailable": false
+  },
+  "rawEvidence": {
+    "gitBlob": "49c960d82f8eb45b9f607a5ac59b3d240fb6b4e8",
+    "bytes": 620784,
+    "sha256": "8720438c556d5b771c15ac05376425c2205d9875a4b45107a54db1c87cc937ba",
+    "payloadBytes": 620783,
+    "payloadSHA256": "5218d4be556eb3a2630145b7903eac853df1622191e1ac267af69cb4e8c40ef2",
+    "originalLogTransportOwner": "web_release_skeptic",
+    "originalLogChunks": 52,
+    "extractorRunId": 43465851194,
+    "extractorJobId": 132024651494,
+    "independentBlobReads": 1,
+    "independentBlobBytesAndHashVerified": true,
+    "originalArtifactDownloadedByThisAgent": false
+  },
+  "limitations": [
+    "Original failure remains FAIL; no rounded tolerance or threshold change",
+    "Raw timings locate intervals relative to observed pointer events, not method-level CPU attribution",
+    "No new measurement or performance rerun; no PNG decoding",
+    "Build ID is bound by two same-source focused receipts; original failure artifact does not contain build-info.json",
+    "The complete four audit objects are preserved in raw Git blob49c960d82f8eb45b9f607a5ac59b3d240fb6b4e8, independently read once and hashed by this reviewer. Log chunk and original ZIP transport validation were performed by the source-reviewed extraction workflow and web_release_skeptic; this reviewer did not repeat the artifact download or compact-log fetch.",
+    "Android-portrait is an emulated Chromium touch profile, physicalDevice:false, not physical Android performance evidence.",
+    "The source hash independently matched here is the actual engine source named by the loading receipt and Git checkout. Broader release/source reviews remain separate.",
+    "No new function-level CPU attribution, random-noise classification, label-cache optimization, new trace or performance rerun is proposed from these observations.",
+    "The previous accepted8020 raw32 PASS, earlier3cb35.1 failure, and instrumented traces remain separate source/run evidence."
+  ],
+  "evidence": "independent-failed-pages-raw-smoothness-review",
+  "reviewedAtUTC": "2026-11-13 16:49:07 UTC",
+  "reviewer": "perf_skeptic",
+  "evidenceReviewPassed": true,
+  "performancePassed": false,
+  "releaseEligible": false,
+  "sourceTree": "099764f48b51283dace1c81a2b403fe05d6f48ea",
+  "sourceParent": "8020e5c3243cd99e6f727e787c3109bece3d28f7",
+  "originalLimits": {
+    "frameP95Ms": 35,
+    "maxFrameGapMs": 150,
+    "inputToFrameMs": 200,
+    "eventDurationMs": 200,
+    "layoutShift": 0.1,
+    "longTaskMs": {
+      "androidPortrait": 350,
+      "desktopWebgl": 750
+    },
+    "comparison": "All maximum limits are strict; frame p95 must be <35 ms. Equality is a failure."
+  },
+  "originalScenarioNames": [
+    "panel",
+    "explore-search",
+    "explore-filters",
+    "catalog-scroll",
+    "map-pan",
+    "map-zoom",
+    "layer-switch",
+    "site-search"
+  ],
+  "originalFunctions": {
+    "names": [
+      "summarizeSmoothness",
+      "smoothnessIssues",
+      "assertSmoothnessAudit",
+      "assertSourceEndPanInput",
+      "assertMatchingBrowserEnvironments",
+      "assertNativeSurfaceCoverage"
+    ],
+    "implementation": "Exact original helper bodies evaluated in an independent JavaScript isolate with a JSON-compatible strict assert shim and UTF8 byteLength shim; no browser/action code invoked",
+    "originalMethodsSHA256UnchangedFromAccepted8020": true,
+    "negativeControls": {
+      "sha256EmptyAndAbc": true,
+      "originalStrict35BoundaryRejected": true,
+      "forgedDerivedMetricRejected": true
+    }
+  },
+  "profileSummaries": [
+    {
+      "phase": "early",
+      "profile": "android-portrait",
+      "scenarioCount": 8,
+      "performancePassed": true,
+      "issues": [],
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "totalRAFCallbacks": 1291,
+      "totalIntervals": 1299,
+      "maxFrameP95Ms": 25.899999999965075,
+      "maxFrameGapMs": 40.600000000034925,
+      "maxInputToNextFrameMs": 80.5,
+      "maxObservedEventDurationMs": 96,
+      "longTaskCount": 0,
+      "maxLongTaskMs": 0,
+      "maxSessionCLS": 0.022143804754611498
+    },
+    {
+      "phase": "early",
+      "profile": "desktop-webgl",
+      "scenarioCount": 8,
+      "performancePassed": true,
+      "issues": [],
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "totalRAFCallbacks": 1564,
+      "totalIntervals": 1572,
+      "maxFrameP95Ms": 34.79999999998836,
+      "maxFrameGapMs": 51.899999999965075,
+      "maxInputToNextFrameMs": 54.09999999997672,
+      "maxObservedEventDurationMs": 56,
+      "longTaskCount": 1,
+      "maxLongTaskMs": 50,
+      "maxSessionCLS": 0.007472533456448137
+    },
+    {
+      "phase": "full",
+      "profile": "android-portrait",
+      "scenarioCount": 8,
+      "performancePassed": true,
+      "issues": [],
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "totalRAFCallbacks": 1291,
+      "totalIntervals": 1299,
+      "maxFrameP95Ms": 26,
+      "maxFrameGapMs": 39,
+      "maxInputToNextFrameMs": 70.29999999993015,
+      "maxObservedEventDurationMs": 80,
+      "longTaskCount": 0,
+      "maxLongTaskMs": 0,
+      "maxSessionCLS": 0.022143804754611498
+    },
+    {
+      "phase": "full",
+      "profile": "desktop-webgl",
+      "scenarioCount": 8,
+      "performancePassed": false,
+      "issues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-pan",
+          "metric": "frameP95Ms",
+          "value": 35,
+          "limit": 35
+        }
+      ],
+      "cpuSlowdownRate": 1,
+      "cpuThrottleRestored": true,
+      "instrumented": false,
+      "traces": [],
+      "totalRAFCallbacks": 1582,
+      "totalIntervals": 1590,
+      "maxFrameP95Ms": 35,
+      "maxFrameGapMs": 53.39999999990687,
+      "maxInputToNextFrameMs": 53.800000000046566,
+      "maxObservedEventDurationMs": 56,
+      "longTaskCount": 1,
+      "maxLongTaskMs": 51,
+      "maxSessionCLS": 0.007472533456448137
+    }
+  ],
+  "originalFailure": {
+    "originalRunConclusion": "failure",
+    "buildJobId": 131998995441,
+    "failedStepNumber": 30,
+    "failedAssertionSource": "tools/pages-preview/browser-smoke.mjs:1014",
+    "gate": "Unchanged strict p95 <35 ms",
+    "observedP95Ms": 35,
+    "originalReleaseAssertionRejectionIndependentlyConfirmed": true,
+    "observationsValid": true,
+    "rafCallbacks": 224,
+    "intervals": 225,
+    "nearestRank95": 214,
+    "durationMs": 4047.2000000001863,
+    "maxFrameGapMs": 47,
+    "inputToNextFrameMaxMs": 51.5,
+    "intervalsAtOrAbove35ms": 12,
+    "slowIntervalTimingBins": {
+      "pointer-held": 9,
+      "pointerup-boundary": 0,
+      "after-observed-pointerup": 3,
+      "before-observed-pointerdown": 0,
+      "pointerdown-boundary": 0
+    },
+    "observedPointerDownOffsetMs": 16.800000000046566,
+    "observedPointerUpOffsetMs": 670.3000000000466,
+    "percentileCutoffIntervals": [
+      {
+        "index": 64,
+        "startOffsetMs": 1329.9000000001397,
+        "endOffsetMs": 1364.9000000001397,
+        "gapMs": 35,
+        "timingBin": "after-observed-pointerup"
+      }
+    ],
+    "causalBoundary": "The interval equal to the p95 cutoff occurred after observed pointerup; nine of twelve intervals >=35 ms occurred while the pointer was held. These raw RAF timestamps do not identify a renderer function, thread, resource or scheduler cause.",
+    "unchangedFailureState": true,
+    "roundedToleranceUsed": false
+  },
+  "environmentComparisonWithPriorAccepted8020": {
+    "priorSource": "8020e5c3243cd99e6f727e787c3109bece3d28f7",
+    "priorRunId": 43450247714,
+    "acceptedCPUModels": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "failedCPUModels": [
+      "AMD EPYC 7763 64-Core Processor"
+    ],
+    "acceptedBrowser": "Chrome/157.0.8103.50",
+    "failedBrowser": "Chrome/157.0.8103.50",
+    "acceptedImage": {
+      "os": "ubuntu24",
+      "version": "20261111.370.1"
+    },
+    "failedImage": {
+      "os": "ubuntu24",
+      "version": "20261111.370.1"
+    },
+    "sameCPUModel": false,
+    "interpretation": "The prior accepted run used a different CPU model. No matched A/B or quantitative performance gain/loss attribution is claimed; the current strict failure is retained."
+  },
+  "reviewedExtractor": {
+    "status": "PASS",
+    "blockers": [],
+    "gitBlob": "648f547263a02f85b11e37bf30e98a0556712eb3",
+    "bytes": 16413,
+    "sha256": "a0c43a79f81609b0fc50039cc1d4a5408df6709ec3d42755f187d806c7f77328",
+    "exactFrozenBodies": true,
+    "nodeSyntaxChecked": 2,
+    "scope": "Original failed run/artifact metadata, bounded four-file ZIP extraction, exact raw32 failure-preserving validation, complete chunk framing; no new browser or performance run"
+  },
+  "extractionRun": {
+    "id": 43465851194,
+    "jobId": 132024651494,
+    "sourceCommit": "ac7bb26e2a97ffd42f729200b94ec42ab450c2f7",
+    "conclusion": "success",
+    "meaning": "Only recovery and validation of original failed-run bytes succeeded; this is not a successful release/performance run"
+  },
+  "nextStepBoundary": "The separately necessary archive budget fix 79b5c5edd0c88f7c54e182181c3e8db6791ad706 may proceed through its own original gates. This evidence does not qualify it or cancel the f0c4 failure."
+}

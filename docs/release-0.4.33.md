@@ -2,30 +2,60 @@
 
 ## Текущий статус
 
-Исправление прогрузки уже опубликовано на сайте: source `8020e5c3243cd99e6f727e787c3109bece3d28f7`,
-build `39a9a382cb37a4fb`, полный Pages run 43450247714 и независимые raw32 PASS.
-Runtime manifest `e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded`
-и все его 61 source inputs сохраняются.
+Оптимизация прогрузки была опубликована на сайте из source
+`8020e5c3243cd99e6f727e787c3109bece3d28f7`, build `39a9a382cb37a4fb`.
+Его полный Pages run 43450247714 и независимые raw32 прошли.
+Готовые пары vector/relief и их подписи появляются по мере готовности,
+а соседние тайлы разделяют ошибку одного внешнего источника рельефа.
+Общий runtime manifest остаётся
+`e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded`;
+все 61 source input и web/native runtime сохранены.
 
-Попытка Android 0.4.33 на source `f0c489e956c7cbf9164a49d80521e2486b9ad18c` прошла 70 JVM, R8 и все 11 device tests,
-но остановилась до публикации: полный source archive имеет **150 096 983 байта**,
-на 96 983 больше общего лимита 150 000 000. Отдельная read-only диагностика
-[43462011812](https://github.com/orewn/tropnik/actions/runs/43462011812) воспроизвела отказ
-на точном git archive исходного commit. Release и tag 0.4.33 ещё отсутствуют.
+**Android 0.4.33-preview / code 16 опубликован** из source
+`79b5c5edd0c88f7c54e182181c3e8db6791ad706`.
+[Собственный run 43466306940](https://github.com/orewn/tropnik/actions/runs/43466306940)
+завершил все четыре jobs успешно: 70 JVM, 114 Python tooling, unsigned R8,
+11 фактически выполненных device cases и анонимная проверка всех шести
+публичных файлов. [Universal APK](https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/tropnik-preview.apk)
+имеет 69231946 байт и SHA-256 `1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408`.
+[Полный review](verification/android-0.4.33-main.json) и
+[неизменённый public producer proof](verification/android-0.4.33-public.json)
+связывают source, run, свежий установленный APK, SDK и опубликованные bytes.
 
-Подготовлено отдельное ограничение 200 000 000 байт только для точного архива
-исходников проверенной версии. Лимит APK, receipts и остальных файлов остаётся
-150 000 000. Полное содержимое git archive, шесть release assets, подписи,
-публичные checksums и прежние release gates сохраняются. Проверяются все три
-места fingerprint и public recreation; девять новых regressions включают
-meaningful RED на прежнем source и GREEN текущего candidate.
+Веб-файл `web/public/downloads/android-manifest.json` перенесён целиком
+из успешного **universal producer**, без изменения полей: 3177 байт,
+SHA-256 `aa01366bcd1917b5353c81a5bbad2a585d745dc757aeecdf57067feb570634c4`.
+Публичный release asset с тем же именем описывает ARM64 и для сайта не используется.
+После смены веб-манифеста штатные генераторы обновляют только cache VERSION
+в `web/public/sw.js`; собственные полные Pages и проверка публичного адреса
+остаются обязательными. Содержимое окончательного веб-архива берётся из
+принятого Pages artifact без пересборки.
 
-[Запись причины и исправления](verification/android-0.4.33-source-archive-limit.json)
-отделяет завершённый source review от ещё требуемого CI preflight. Новый
-request `android-0-4-33-preview-source-archive-20261113` сохраняет версию **0.4.33-preview / code 16**;
-его продвижение на main разрешено только после preflight того же commit.
-Затем выполняются собственные Android build/device/publish/public и полный Pages.
-Файловая среда и ручная проверка старой вкладки остаются недоступными.
+Первый запрос выпуска на `f0c489e9` остановился до публикации: полный source
+archive имел 150 096 983 байта, на 96 983 больше общего предела 150 000 000.
+[Изолированный preflight](verification/android-0.4.33-source-archive-preflight.json)
+воспроизвёл исходный отказ и прошёл 37/37 tests на исправлении. Предел
+200 000 000 применяется только к точному source archive проверенной версии;
+предел APK и прочих файлов остаётся 150 000 000. Полный архив выпуска
+имеет 150 134 059 байт и SHA-256
+`d5b2aa0ce856c2ca3986d85c9a95691b458b0e60879ac0a713219abc3c15cc26`.
+Это те же bytes, что в preflight и в публичной проверке.
+
+Отдельный Pages run 43458536389 на `f0c489e9` остаётся **FAIL**:
+[полные raw objects](verification/web-0.4.33-f0c4-raw-smoothness-failure.json) и
+[независимый пересчёт](verification/web-0.4.33-f0c4-raw-smoothness-failure-review.json)
+подтвердили 31 прошедшее окно и единственный full desktop pan p95 ровно
+35 ms при строгом условии меньше 35 ms. Округление, допуск или повтор
+измерения для этого source не применялись. Эти интервалы не устанавливают
+причину на уровне функций CPU. Исправление упаковки было подготовлено
+независимо; каждый следующий веб-source проходит собственный исходный gate.
+
+Preview подписан development/debug ключом. Сертификат отличается от 0.4.32,
+поэтому требования совместимого update-install не выполнены. Проверка
+эмулятора API 35 x86_64 не подтверждает физический ARM64, полевой GPS,
+батарею или production signing. Подробная автономная карта по-прежнему
+ограничена подготовленным пилотным районом. Ручная проверка старой
+пользовательской вкладки не заявляется.
 
 ## Один жест и два выбора
 
