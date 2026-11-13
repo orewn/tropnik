@@ -294,6 +294,62 @@ jobs:
             }
           }
           assert.equal(underlayFrames, 46);
+          const groundCache = underlay.groundCache;
+          const groundScenarios = ['opaque','missing','satellite','overview','rotated-pitched','unwrapped-world'];
+          const groundPhases = ['cold','stroke-history','warm','overlay-changed','overlay-empty','route-changed','route-empty'];
+          assert.equal(groundCache.verified, true);
+          assert.equal(groundCache.baseline, 'same-production-draw-with-ground-cache-disabled');
+          assert.deepEqual(groundCache.dpr, [1,1.5,2]);
+          assert.deepEqual(groundCache.scenarios, groundScenarios);
+          assert.deepEqual(groundCache.phases, groundPhases);
+          assert.deepEqual(groundCache.cases.map(item => item.dpr + '/' + item.name).sort(), [1,1.5,2].flatMap(dpr => groundScenarios.map(name => dpr + '/' + name)).sort());
+          let groundFrames = 0;
+          for (const item of groundCache.cases) {
+            assert.equal(item.verified, true);
+            assert.equal(item.cacheProof, true);
+            assert.equal(item.previewOnly, false);
+            assert.equal(item.nativeDpr, item.dpr);
+            assert.equal(item.cacheEligible, item.name !== 'rotated-pitched');
+            assert.deepEqual(item.phases, groundPhases);
+            assert.deepEqual(item.frames.map(frame => frame.phase), groundPhases);
+            if (item.cacheEligible) {
+              assert.equal(item.groundContextAttributes.alpha, false);
+              assert.equal(item.groundContextAttributes.willReadFrequently, item.policy.softwareRaster);
+              assert.deepEqual(item.retainedBacking, {width:512*item.dpr,height:384*item.dpr,bytes:512*384*item.dpr*item.dpr*4});
+            } else {
+              assert.equal(item.groundContextAttributes, null);
+              assert.equal(item.retainedBacking, null);
+            }
+            for (const [index, frame] of item.frames.entries()) {
+              groundFrames++;
+              assert.equal(frame.expectedHit, item.cacheEligible && index >= 2);
+              assert.equal(frame.operations.baseline.groundRestore, 0);
+              assert.equal(frame.operations.optimized.groundRestore, Number(frame.expectedHit));
+              for (const side of ['baseline','optimized']) {
+                assert.equal(frame.operations[side].mask, 1);
+                assert.equal(frame.operations[side].proofCalls, 1);
+              }
+              for (const key of ['clear','area','overview','detail','relief','imagery','selectedArea']) {
+                if (frame.expectedHit) assert.equal(frame.operations.optimized[key], 0);
+                if (!item.cacheEligible) assert.equal(frame.operations.optimized[key], frame.operations.baseline[key]);
+              }
+              assert.deepEqual([frame.width,frame.height], [512*item.dpr,384*item.dpr]);
+              assert.deepEqual(frame.comparison, {differentPixels:0,maxChannelDelta:0,totalPixels:frame.width*frame.height});
+              assert.match(frame.baselinePixelSHA256, /^[a-f0-9]{64}$/);
+              assert.equal(frame.optimizedPixelSHA256, frame.baselinePixelSHA256);
+              if (index >= 3) assert.ok(frame.changedFromPrevious.differentPixels > 0);
+              assert.deepEqual(frame.captures.map(capture => capture.phase), ['baseline','optimized']);
+              for (const capture of frame.captures) {
+                assert.match(capture.file, /^[a-zA-Z0-9.-]+\.png$/);
+                const png = readFileSync('web/pages-preview/design-qa/map-underlay/' + capture.file);
+                assert.equal(png.length, capture.bytes);
+                assert.equal(createHash('sha256').update(png).digest('hex'), capture.sha256);
+                assert.equal(png.subarray(0,8).toString('hex'), '89504e470d0a1a0a');
+                assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)], [frame.width,frame.height]);
+              }
+            }
+          }
+          assert.equal(groundFrames, 126);
           const controls = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-controls-verification.json', 'utf8'));
           assert.equal(controls.verified, true);
           assert.equal(controls.sourceCommit, process.env.GITHUB_SHA);

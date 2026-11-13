@@ -2418,7 +2418,7 @@ var X = Object.freeze({
 	failWorker(e) {
 		clearTimeout(this.timer), this.timer = void 0, this.worker?.terminate(), this.worker = void 0, this.active = void 0, this.latest = void 0, this.registered.clear(), this.desired && !this.cache.has(this.desired.key) && (this.error = "Trail overlay raster: " + e, this.failedKey = this.desired.key, this.notify());
 	}
-}, Z = 64, pn = 4096;
+}, Z = 64, pn = 4096, mn = 32 * 1024 * 1024;
 function Q(e) {
 	let t = new Path2D(), n = [
 		Infinity,
@@ -2483,7 +2483,7 @@ function $(e, t, n, r, i = !0, a = !1, o = !0) {
 	let x = 2 ** s;
 	return y.sort((e, t) => Math.hypot(e.x + .5 - f.x * x, e.y + .5 - f.y * x) - Math.hypot(t.x + .5 - f.x * x, t.y + .5 - f.y * x));
 }
-var mn = class {
+var hn = class {
 	constructor(e, t) {
 		this.framed = null, this.pitch = 0, this.padding = {}, this.size = {
 			width: 1,
@@ -2492,7 +2492,7 @@ var mn = class {
 			sources: 0,
 			parts: 0,
 			details: 0
-		}, this.trailRasterPartCache = /* @__PURE__ */ new WeakMap(), this.trailRasterPartSerial = 0, this.trailOverlayPaintedEntries = [], this.trailOverlayViewportReady = !0, this.trailRasterError = "", this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.drawRevision = 0, this.labelRevision = 0, this.frame = 0, this.paintRequested = !1, this.labelsRequested = !1, this.animation = 0, this.zoomTarget = null, this.pointer = new ie({
+		}, this.trailRasterPartCache = /* @__PURE__ */ new WeakMap(), this.trailRasterPartSerial = 0, this.trailOverlayPaintedEntries = [], this.trailOverlayViewportReady = !0, this.trailRasterError = "", this.groundSnapshotUnavailable = !1, this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.drawRevision = 0, this.labelRevision = 0, this.frame = 0, this.paintRequested = !1, this.labelsRequested = !1, this.animation = 0, this.zoomTarget = null, this.pointer = new ie({
 			minZoom: -2,
 			maxZoom: 18,
 			rotate: !0
@@ -3371,20 +3371,88 @@ var mn = class {
 		for (let e = h; e <= g; e++) for (let t = p; t <= m; t++) if (!_.has(`${t}/${e}`)) return !1;
 		return !0;
 	}
+	groundSignature(e, t, n) {
+		let r = this.context;
+		return [
+			this.canvas.width,
+			this.canvas.height,
+			this.size.width,
+			this.size.height,
+			this.pixelRatio,
+			...this.camera.center,
+			this.camera.zoom,
+			this.camera.bearingDegrees ?? 0,
+			this.pitch,
+			this.mode,
+			this.state.committedMode,
+			t,
+			n,
+			this.area,
+			this.overview,
+			e,
+			this.imagery,
+			this.relief,
+			this.boundaries,
+			this.boundaryVisible,
+			this.reliefVisible,
+			this.selectedArea,
+			this.selectedBoundary,
+			r.lineCap,
+			r.lineJoin,
+			r.miterLimit
+		];
+	}
+	restoreGround(e) {
+		let t = this.groundSnapshot;
+		if (!t || t.signature.length !== e.length || e.some((e, n) => !Object.is(e, t.signature[n]))) return !1;
+		let n = this.context;
+		return n.save(), n.setTransform(1, 0, 0, 1, 0, 0), n.globalAlpha = 1, n.globalCompositeOperation = "copy", n.drawImage(t.surface, 0, 0), n.restore(), !0;
+	}
+	retainGround(e) {
+		if (!(this.pointer.activePointers || this.animation || this.groundSnapshotUnavailable) && !((this.camera.bearingDegrees ?? 0) !== 0 || this.pitch !== 0)) {
+			if (this.canvas.width * this.canvas.height * 4 > mn) {
+				this.releaseGround();
+				return;
+			}
+			if (!(typeof OffscreenCanvas > "u")) try {
+				let t = this.groundSnapshot;
+				if (!t) {
+					let e = new OffscreenCanvas(this.canvas.width, this.canvas.height), n = e.getContext("2d", {
+						alpha: !1,
+						willReadFrequently: this.rasterPolicy.softwareRaster
+					});
+					if (!n) {
+						this.groundSnapshotUnavailable = !0;
+						return;
+					}
+					t = {
+						surface: e,
+						context: n,
+						signature: []
+					}, this.groundSnapshot = t;
+				}
+				t.surface.width !== this.canvas.width && (t.surface.width = this.canvas.width), t.surface.height !== this.canvas.height && (t.surface.height = this.canvas.height);
+				let n = t.context;
+				n.setTransform(1, 0, 0, 1, 0, 0), n.globalAlpha = 1, n.globalCompositeOperation = "copy", n.drawImage(this.canvas, 0, 0), t.signature = e;
+			} catch {
+				this.releaseGround(), this.groundSnapshotUnavailable = !0;
+			}
+		}
+	}
+	releaseGround() {
+		let e = this.groundSnapshot;
+		this.groundSnapshot = void 0, e && (e.surface.width = 0, e.surface.height = 0);
+	}
 	draw() {
 		if (this.disposed || !this.active) return;
-		let e = this.context, t = this.displayDetail(), n = this.detailCoversViewport(t);
-		e.setTransform(1, 0, 0, 1, 0, 0), n || (e.fillStyle = ge, e.fillRect(0, 0, this.canvas.width, this.canvas.height));
-		let r = this.worldTransform();
-		n || (this.area && (e.fillStyle = "#dce5cf", e.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95));
-		let i = this.displayingSatellite();
-		if (i && this.drawTiles(this.imagery), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!i || t?.tiles[0]?.transparent) && this.drawTiles(t), !i && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), this.boundaryVisible && this.boundaries && (e.strokeStyle = i ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / r, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (e.strokeStyle = i ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / r, e.stroke(this.selectedBoundary)), this.paths && this.drawTrailOverlay(r, i), this.route && !this.reviewedCoastalRoute && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (H(this.camera.zoom) + 3) / r, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = H(this.camera.zoom) / r, e.stroke(this.route.path)), this.mask && (e.fillStyle = ge, e.fill(this.mask, "evenodd")), this.paths && this.reviewedCoastalOverlayBatch) {
+		let e = this.context, t = this.displayDetail(), n = this.detailCoversViewport(t), r = this.displayingSatellite(), i = this.groundSignature(t, r, n), a;
+		if (this.restoreGround(i) ? a = this.worldTransform() : (e.setTransform(1, 0, 0, 1, 0, 0), n || (e.fillStyle = ge, e.fillRect(0, 0, this.canvas.width, this.canvas.height)), a = this.worldTransform(), n || (this.area && (e.fillStyle = "#dce5cf", e.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95)), r && this.drawTiles(this.imagery), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!r || t?.tiles[0]?.transparent) && this.drawTiles(t), !r && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82), this.boundaryVisible && this.boundaries && (e.strokeStyle = r ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", e.lineWidth = .65 / a, e.stroke(this.boundaries)), this.selectedArea && (e.fillStyle = "rgba(92,128,70,.10)", e.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (e.strokeStyle = r ? "#e7eacc" : "#688360", e.lineWidth = 1.3 / a, e.stroke(this.selectedBoundary)), this.retainGround(i)), this.paths && this.drawTrailOverlay(a, r), this.route && !this.reviewedCoastalRoute && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (H(this.camera.zoom) + 3) / a, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = H(this.camera.zoom) / a, e.stroke(this.route.path)), this.mask && (e.fillStyle = ge, e.fill(this.mask, "evenodd")), this.paths && this.reviewedCoastalOverlayBatch) {
 			let t = this.camera.zoom < 8 ? 1.4 : 2;
-			e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = i ? "rgba(30,48,37,.9)" : "rgba(255,254,245,.9)", e.lineWidth = (t + 2) / r, e.stroke(this.reviewedCoastalOverlayBatch), e.strokeStyle = i ? "#f2d49b" : "#618253", e.lineWidth = t / r, e.stroke(this.reviewedCoastalOverlayBatch);
+			e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = r ? "rgba(30,48,37,.9)" : "rgba(255,254,245,.9)", e.lineWidth = (t + 2) / a, e.stroke(this.reviewedCoastalOverlayBatch), e.strokeStyle = r ? "#f2d49b" : "#618253", e.lineWidth = t / a, e.stroke(this.reviewedCoastalOverlayBatch);
 		}
 		if (this.reviewedCoastalRoute || this.paths && this.reviewedCoastalOverlayBatch && this.route && this.area) {
 			let t = this.reviewedCoastalRoute ?? this.route;
-			e.save(), this.reviewedCoastalRoute || e.clip(this.area, "evenodd"), e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (H(this.camera.zoom) + 3) / r, e.stroke(t.path), e.strokeStyle = "#244d3c", e.lineWidth = H(this.camera.zoom) / r, e.stroke(t.path), e.restore();
+			e.save(), this.reviewedCoastalRoute || e.clip(this.area, "evenodd"), e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (H(this.camera.zoom) + 3) / a, e.stroke(t.path), e.strokeStyle = "#244d3c", e.lineWidth = H(this.camera.zoom) / a, e.stroke(t.path), e.restore();
 		}
 		this.drawMarkers(), this.drawLabels(), this.element.dataset.mapPainted = "true", this.element.dataset.mapCanvas = "custom", this.element.dataset.mapDrawnRoute = this.routeId || "", this.drawRevision++, !this.pointer.activePointers && !this.animation && this.publishInspection(), this.options.onFrame?.(this.getCamera());
 	}
@@ -3498,16 +3566,16 @@ var mn = class {
 		this.labelCanvas.hidden = a === 0;
 	}
 	destroy() {
-		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.trailRaster?.destroy(), this.trailRaster = void 0, this.trailRasterParts = void 0, this.trailRasterPartCache = /* @__PURE__ */ new WeakMap(), this.trailOverlayPaintedEntries = [], this.trailOverlay = [], this.trailOverlayPaths = /* @__PURE__ */ new WeakMap(), this.trailOverlayBatch = void 0, this.trailOverlayWindow = void 0, this.routeHit = void 0, this.reviewedCoastalRoute = void 0, this.reviewedCoastalPaths = /* @__PURE__ */ new WeakMap(), this.reviewedCoastalOverlayBatch = void 0, this.reviewedCoastalOverlaySources = 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.labelCandidateCache = void 0, this.markerObstacles = []);
+		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.releaseGround(), this.trailRaster?.destroy(), this.trailRaster = void 0, this.trailRasterParts = void 0, this.trailRasterPartCache = /* @__PURE__ */ new WeakMap(), this.trailOverlayPaintedEntries = [], this.trailOverlay = [], this.trailOverlayPaths = /* @__PURE__ */ new WeakMap(), this.trailOverlayBatch = void 0, this.trailOverlayWindow = void 0, this.routeHit = void 0, this.reviewedCoastalRoute = void 0, this.reviewedCoastalPaths = /* @__PURE__ */ new WeakMap(), this.reviewedCoastalOverlayBatch = void 0, this.reviewedCoastalOverlaySources = 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.labelCandidateCache = void 0, this.markerObstacles = []);
 	}
-}, hn = Object.freeze({
+}, gn = Object.freeze({
 	version: 1,
-	CustomMapEngine: mn,
+	CustomMapEngine: hn,
 	inRussiaCoverage: A
 });
 typeof window < "u" && Object.defineProperty(window, "TropnikMapAPI", {
-	value: hn,
+	value: gn,
 	configurable: !1
 });
 //#endregion
-export { mn as n, A as r, hn as t };
+export { hn as n, A as r, gn as t };

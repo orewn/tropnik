@@ -24,8 +24,8 @@ const collection={type:'FeatureCollection',features:[]};
 const originalLabels=readFileSync(resolve(root,'tests/fixtures/custom-map-labels-9110c5b.txt'),'utf8');
 assert.equal(createHash('sha256').update(originalLabels).digest('hex'),'39a5b7a5ca753f6ca893764b8ee7f7a3fd3acd87686d944f5ca7da5cab7ed8c9');
 
-function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false}={}){
- let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[],rasters=[];
+function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false,groundCache=false}={}){
+ let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[],rasters=[],grounds=[];
  let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0};
  class Target{
   listeners=new Map();
@@ -42,8 +42,8 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  }
  function createContext(surface){
  const record=call=>calls.push({...call,surface});
- const context={font:'10px sans-serif',fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,globalAlpha:1,stack:[],matrix:[1,0,0,1,0,0],
-  save(){this.stack.push({...Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','globalAlpha','textAlign','textBaseline'].map(key=>[key,this[key]])),matrix:[...this.matrix]});record({op:'save'});},
+ const context={font:'10px sans-serif',fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,lineCap:'butt',lineJoin:'miter',miterLimit:10,globalAlpha:1,globalCompositeOperation:'source-over',stack:[],matrix:[1,0,0,1,0,0],
+  save(){this.stack.push({...Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','lineCap','lineJoin','miterLimit','globalAlpha','globalCompositeOperation','textAlign','textBaseline'].map(key=>[key,this[key]])),matrix:[...this.matrix]});record({op:'save'});},
   restore(){Object.assign(this,this.stack.pop());record({op:'restore'});},
   setTransform(...matrix){this.matrix=matrix;record({op:'setTransform',args:matrix});},
   resetTransform(){this.matrix=[1,0,0,1,0,0];record({op:'resetTransform',args:[]});},
@@ -125,7 +125,12 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   }
   terminate(){this.destroyed=true;}
  }
+ class GroundCanvas{
+  constructor(width,height){this.width=width;this.height=height;this.key='retained-ground:'+grounds.length;grounds.push(this);}
+  getContext(type,attributes){assert.equal(type,'2d');if(!this.context){this.context=createContext(this.key);this.context.getContextAttributes=()=>attributes;}return this.context;}
+ }
  const globals={document,window,Path2D:Path,ResizeObserver:class{constructor(callback){this.callback=callback;observers.push(this);}observe(){}disconnect(){this.disconnected=true;}},
+  ...(groundCache?{OffscreenCanvas:GroundCanvas}:{}),
   devicePixelRatio:1,navigator:{onLine:true},location:{href:'https://fixture.invalid/'},Worker:TrailRasterWorker,queueMicrotask,matchMedia:()=>({matches:false}),performance:{now:()=>now},console,URL,AbortController,crypto:globalThis.crypto,TextEncoder,
   getComputedStyle:element=>({display:element.hidden?'none':'block',visibility:'visible',opacity:'1',pointerEvents:'auto'}),
   requestAnimationFrame:callback=>{const id=++serial;frames.set(id,callback);return id;},cancelAnimationFrame:id=>frames.delete(id),
@@ -168,7 +173,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const ready=async()=>{coverageResolve(coverage);await turn();complete();await turn();flush();return engine;};
  const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
  const lastDraw=()=>[...lastSurface('tropnik-map-canvas','draw-start'),...lastSurface('tropnik-map-labels','clearRect')];
- return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,rasters,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
+ return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,rasters,grounds,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
   verifyReviewedCoastalRoute:load(resolve(root,'lib/reviewed-coastal-routes.ts')).verifyReviewedCoastalRoute,
   get coverageAttempts(){return coverageAttempts;},get readyCalls(){return readyCalls;},get gestures(){return gestures;},get layoutReads(){return layoutReads;},
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
@@ -1189,6 +1194,80 @@ test('opaque coverage is re-evaluated against the live camera and backing extent
  assert.ok(env.engine.inspect().tiles.detail.every(tile=>tile.width===512&&tile.height===512));assert.equal(env.engine.getCamera().zoom,camera.zoom);
 });
 
+const restoredGround=env=>env.lastDraw().filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='drawImage'&&String(call.key).startsWith('retained-ground:'));
+const groundCopies=env=>env.calls.filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage').length;
+function warmGround(env){for(let i=0;i<3;i++){env.engine.setLayers({});env.flush();}assert.equal(restoredGround(env).length,1,'A stationary map must actually restore its retained ground');}
+
+test('stationary overlay and selected-route changes reuse ground while their lines and final mask stay current',async t=>{
+ const env=fixture({groundCache:true});t.after(()=>env.engine.destroy());await env.ready();warmGround(env);
+ const entry=(id,y)=>({key:id,ids:[id],parts:[{bounds:[40.2,y,40.8,y],lines:[[[40.2,y],[40.8,y]]]}]});
+ env.engine.setTrailOverlay([entry('first',43.4)]);env.flush();warmGround(env);
+ const surface=restoredGround(env)[0].bitmap,copies=groundCopies(env),mask=env.lastDraw().find(call=>call.op==='fill'&&call.rule==='evenodd')?.path;
+ assert.ok(mask);
+ for(const [name,change,hasOverlay,hasRoute]of [
+  ['different filter',()=>env.engine.setTrailOverlay([entry('second',43.55)]),true,false],
+  ['empty results',()=>env.engine.setTrailOverlay([]),false,false],
+  ['selected route',()=>env.engine.setRoute({type:'LineString',coordinates:[[40.2,43.35],[40.8,43.6]]},'selected'),false,true],
+  ['clear selected route',()=>env.engine.setRoute(undefined),false,false],
+ ]){
+  change();env.flush();const draw=env.lastDraw(),restored=restoredGround(env);assert.equal(restored.length,1,name);assert.equal(restored[0].bitmap,surface,name);
+  assert.equal(groundCopies(env),copies,'Overlay-only changes must not recapture the base');
+  assert.equal(draw.some(call=>call.op==='drawImage'&&call.bitmap!==surface),false,'A hit does not replay the unchanged tile batches');
+  assert.equal(draw.some(call=>call.op==='stroke'&&call.color==='#618253'),hasOverlay,name);
+  assert.equal(draw.some(call=>call.op==='stroke'&&call.color==='#244d3c'),hasRoute,name);
+  assert.ok(draw.findIndex(call=>call.op==='fill'&&call.path===mask)>draw.indexOf(restored[0]),'The current outside/hole mask remains after the restored ground');
+  assert.equal(env.context.globalCompositeOperation,'source-over','Copying opaque ground must not leak copy composition into routes or masks');
+ }
+ assert.equal(env.grounds.filter(surface=>surface.width&&surface.height).length,1,'Only one bounded ground canvas is retained');
+});
+
+test('retained ground rejects changed camera, source batches, coverage, styles and backing dimensions',async t=>{
+ const cases=[
+  ['pan',env=>env.engine.setCamera({...env.engine.getCamera(),center:[40.55,43.5]},false)],
+  ['zoom',env=>env.engine.setCamera({...env.engine.getCamera(),zoom:8.1},false)],
+  ['bearing',env=>env.engine.setCamera({...env.engine.getCamera(),bearingDegrees:17},false),false],
+  ['pitch',env=>env.engine.setPitch(25),false],
+  ['resize',env=>{env.host.clientWidth=850;env.observers[0].callback();}],
+  ['new detail batch',env=>{env.engine.detail={...env.engine.detail,tiles:[...env.engine.detail.tiles]};env.engine.setLayers({});}],
+  ['new relief batch',env=>{env.engine.relief={...env.engine.relief,tiles:[...env.engine.relief.tiles]};env.engine.setLayers({});}],
+  ['coverage',env=>{env.coverage.area=plain(area);env.coverage.area.geometry.coordinates[0][0][0]+=.01;notifyCoverage(env,{revision:1});}],
+  ['selected boundary',env=>env.engine.setRegion(['alpha'])],
+  ['boundaries hidden',env=>env.engine.setLayers({boundaries:false})],
+  ['relief hidden',env=>env.engine.setLayers({relief:false})],
+  ['mode',env=>env.engine.setMode('overview')],
+  ['line cap history',env=>{env.context.lineCap='square';env.engine.setLayers({});}],
+  ['line join history',env=>{env.context.lineJoin='bevel';env.engine.setLayers({});}],
+  ['miter history',env=>{env.context.miterLimit=4;env.engine.setLayers({});}],
+ ];
+ for(const [name,change,captures=true]of cases){
+  const env=fixture({groundCache:true});t.after(()=>env.engine.destroy());
+  env.coverage.territories={type:'FeatureCollection',features:[{...plain(area),properties:{shapeName:'alpha'}}]};
+  env.coverage.boundaries={type:'FeatureCollection',features:[{type:'Feature',properties:{shapeName:'alpha'},geometry:{type:'LineString',coordinates:[[40,42],[42,45]]}}]};
+  await env.ready();warmGround(env);const copies=groundCopies(env);change(env);env.flush();
+  assert.equal(restoredGround(env).length,0,name+': stale ground must not be reused');
+  assert.equal(groundCopies(env),copies+Number(captures),name+': eligible stationary paint captures once; transformed views retain the original painter');
+  assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&!String(call.key).startsWith('retained-ground:')),name+': real source tiles remain visible');
+ }
+});
+
+test('ground capture pauses during gestures and animation, respects its memory budget and releases on destruction',async t=>{
+ const env=fixture({groundCache:true});t.after(()=>env.engine.destroy());await env.ready();warmGround(env);const canvas=env.engine.canvas;
+ let copies=groundCopies(env);env.engine.setCamera({...env.engine.getCamera(),bearingDegrees:17},false);env.engine.setPitch(25);env.flush();
+ assert.equal(groundCopies(env),copies,'A rotated and pitched frame must not force an intermediate native raster flush');assert.equal(restoredGround(env).length,0);
+ assert.ok(env.lastDraw().some(call=>call.op==='drawImage'),'Transformed views retain their real direct ground painter');
+ env.engine.setCamera({...env.engine.getCamera(),bearingDegrees:0},false);env.engine.setPitch(0);env.flush();warmGround(env);
+ copies=groundCopies(env);canvas.dispatch('pointerdown',{pointerId:7,clientX:300,clientY:250});canvas.dispatch('pointermove',{pointerId:7,clientX:330,clientY:250});env.flush();
+ assert.equal(groundCopies(env),copies,'Moving pointer frames must not copy a full backing store');assert.equal(restoredGround(env).length,0);
+ canvas.dispatch('pointerup',{pointerId:7,clientX:330,clientY:250});env.flush();assert.ok(groundCopies(env)>copies,'The settled gesture may retain its final ground');
+ copies=groundCopies(env);env.engine.setCamera({...env.engine.getCamera(),center:[40.7,43.5]},true);env.tick(16);env.tick(16);
+ assert.equal(groundCopies(env),copies,'Animated camera frames must not recapture');env.flush();assert.ok(groundCopies(env)>copies);
+ const owned=[...env.grounds];env.host.clientWidth=5000;env.host.clientHeight=2000;env.observers[0].callback();env.flush();
+ assert.ok(owned.every(surface=>surface.width===0&&surface.height===0),'An over-budget backing frame releases the earlier allocation');
+ assert.equal(restoredGround(env).length,0);assert.ok(env.lastDraw().some(call=>call.op==='drawImage'),'The original direct renderer remains available above the cache budget');
+ env.host.clientWidth=800;env.host.clientHeight=600;env.observers[0].callback();env.complete();await env.settle();warmGround(env);
+ env.engine.destroy();assert.ok(env.grounds.every(surface=>surface.width===0&&surface.height===0),'Destroy releases every retained backing surface');
+});
+
 test('catalogue overlay preserves every source part, culls distant geometry and retains the selected exact line in both modes',async t=>{
  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
  const part=(coordinates)=>({bounds:[Math.min(...coordinates.map(p=>p[0])),Math.min(...coordinates.map(p=>p[1])),Math.max(...coordinates.map(p=>p[0])),Math.max(...coordinates.map(p=>p[1]))],lines:[coordinates,coordinates]});
@@ -1249,7 +1328,7 @@ test('dense catalogue lines become selectable only with their committed raster a
  assert.equal(env.engine.pickTrail(env.engine.project(coordinate)),'selected','The exact selected route remains independent of background paths');
 });
 
-test('dense trail bitmaps are reused only for the same camera and palette and are disposed with the engine',async t=>{
+test('dense trail bitmaps are reused only for the same camera and palette and are disposed with the engine',async()=>{
  const env=fixture();await env.ready();const entry=denseTrailEntry();env.engine.setTrailOverlay([entry]);env.flush();const raster=env.rasters[0];
  const first=raster.resolve();await env.settle();const requests=raster.requests.length;
  env.engine.setLayers({});env.flush();assert.equal(raster.requests.length,requests,'An unchanged paint reuses its exact worker frame');

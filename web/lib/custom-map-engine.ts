@@ -37,6 +37,7 @@ const MAX_VISIBLE_TILES=64;
 // Dense, disconnected country paths otherwise spend 200ms in native Canvas
 // replay on the UI thread even when their JavaScript paths are already cached.
 const DIRECT_TRAIL_COMPLEXITY=4096;
+const GROUND_SNAPSHOT_BYTES=32*1024*1024;
 
 function geometryPath(geometry:FeatureGeometry):PathCollection{
   const path=new Path2D(),bounds:[number,number,number,number]=[Infinity,Infinity,-Infinity,-Infinity];
@@ -140,6 +141,8 @@ export class CustomMapEngine {
   private trailOverlayPaintedEntries:readonly TrailOverlayEntry[]=[];
   private trailOverlayViewportReady=true;
   private trailRasterError='';
+  private groundSnapshot?:{surface:OffscreenCanvas;context:OffscreenCanvasRenderingContext2D;signature:readonly unknown[]};
+  private groundSnapshotUnavailable=false;
   private markerLayer:HTMLDivElement;
   private markers=new Map<string,{marker:CustomMapMarker;button:HTMLButtonElement}>();
   private markerGroups=new Map<string,MapDirectionGroup<{id:string;name:string;center:[number,number]}>>();
@@ -693,27 +696,65 @@ export class CustomMapEngine {
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(!cells.has(`${x}/${y}`))return false;
     return true;
   }
+  private groundSignature(detail:TileBatch|undefined,satellite:boolean,covered:boolean):readonly unknown[]{
+    const ctx=this.context;
+    return[this.canvas.width,this.canvas.height,this.size.width,this.size.height,this.pixelRatio,...this.camera.center,this.camera.zoom,this.camera.bearingDegrees??0,this.pitch,
+      this.mode,this.state.committedMode,satellite,covered,this.area,this.overview,detail,this.imagery,this.relief,this.boundaries,this.boundaryVisible,this.reliefVisible,this.selectedArea,this.selectedBoundary,
+      ctx.lineCap,ctx.lineJoin,ctx.miterLimit];
+  }
+  private restoreGround(signature:readonly unknown[]):boolean{
+    const retained=this.groundSnapshot;
+    if(!retained||retained.signature.length!==signature.length||signature.some((value,index)=>!Object.is(value,retained.signature[index])))return false;
+    const ctx=this.context;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';ctx.drawImage(retained.surface,0,0);ctx.restore();return true;
+  }
+  private retainGround(signature:readonly unknown[]){
+    // Source filters do not change the map beneath their lines. Retain one
+    // exact opaque ground after a settled paint, before any route or mask is
+    // added. Moving frames keep their original painter without extra copies.
+    if(this.pointer.activePointers||this.animation||this.groundSnapshotUnavailable)return;
+    // An intermediate native flush changes subpixel edges in rotated/pitched
+    // views. Keep their original single-pass ground; search uses north-up.
+    if((this.camera.bearingDegrees??0)!==0||this.pitch!==0)return;
+    if(this.canvas.width*this.canvas.height*4>GROUND_SNAPSHOT_BYTES){this.releaseGround();return;}
+    if(typeof OffscreenCanvas==='undefined')return;
+    try{
+      let retained=this.groundSnapshot;
+      if(!retained){
+        const surface=new OffscreenCanvas(this.canvas.width,this.canvas.height),context=surface.getContext('2d',{alpha:false,willReadFrequently:this.rasterPolicy.softwareRaster});
+        if(!context){this.groundSnapshotUnavailable=true;return;}
+        retained={surface,context,signature:[]};this.groundSnapshot=retained;
+      }
+      if(retained.surface.width!==this.canvas.width)retained.surface.width=this.canvas.width;
+      if(retained.surface.height!==this.canvas.height)retained.surface.height=this.canvas.height;
+      const ctx=retained.context;ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';ctx.drawImage(this.canvas,0,0);retained.signature=signature;
+    }catch{this.releaseGround();this.groundSnapshotUnavailable=true;}
+  }
+  private releaseGround(){const retained=this.groundSnapshot;this.groundSnapshot=undefined;if(retained){retained.surface.width=0;retained.surface.height=0;}}
   private draw(){
     if(this.disposed||!this.active)return;const ctx=this.context;
     const detail=this.displayDetail(),covered=this.detailCoversViewport(detail);
-    ctx.setTransform(1,0,0,1,0,0);
-    // Fully opaque detail overwrites every backing pixel, including the guard
-    // margin. A missing cell or exposed pan edge retains the original clear.
-    if(!covered){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fillRect(0,0,this.canvas.width,this.canvas.height);}
-    const scale=this.worldTransform();
-    if(!covered){
-      if(this.area){ctx.fillStyle='#dce5cf';ctx.fill(this.area,'evenodd');}
-      this.drawTiles(this.overview,.95);
+    const satellite=this.displayingSatellite(),signature=this.groundSignature(detail,satellite,covered);let scale:number;
+    if(this.restoreGround(signature))scale=this.worldTransform();
+    else{
+      ctx.setTransform(1,0,0,1,0,0);
+      // Fully opaque detail overwrites every backing pixel, including the guard
+      // margin. A missing cell or exposed pan edge retains the original clear.
+      if(!covered){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fillRect(0,0,this.canvas.width,this.canvas.height);}
+      scale=this.worldTransform();
+      if(!covered){
+        if(this.area){ctx.fillStyle='#dce5cf';ctx.fill(this.area,'evenodd');}
+        this.drawTiles(this.overview,.95);
+      }
+      if(satellite)this.drawTiles(this.imagery);
+      if(this.mode!=='overview'&&this.camera.zoom>=4.7&&(!satellite||detail?.tiles[0]?.transparent))this.drawTiles(detail);
+      if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=4.7)this.drawTiles(this.relief,.82);
+      if(this.boundaryVisible&&this.boundaries){ctx.strokeStyle=satellite?'rgba(245,248,232,.45)':'rgba(95,123,87,.45)';ctx.lineWidth=.65/scale;ctx.stroke(this.boundaries);}
+      if(this.selectedArea){ctx.fillStyle='rgba(92,128,70,.10)';ctx.fill(this.selectedArea,'evenodd');}
+      // Clipped territory polygons include artificial coverage-cell edges. Only
+      // the source boundary lines may outline the selected territory.
+      if(this.selectedBoundary){ctx.strokeStyle=satellite?'#e7eacc':'#688360';ctx.lineWidth=1.3/scale;ctx.stroke(this.selectedBoundary);}
+      this.retainGround(signature);
     }
-    const satellite=this.displayingSatellite();
-    if(satellite)this.drawTiles(this.imagery);
-    if(this.mode!=='overview'&&this.camera.zoom>=4.7&&(!satellite||detail?.tiles[0]?.transparent))this.drawTiles(detail);
-    if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=4.7)this.drawTiles(this.relief,.82);
-    if(this.boundaryVisible&&this.boundaries){ctx.strokeStyle=satellite?'rgba(245,248,232,.45)':'rgba(95,123,87,.45)';ctx.lineWidth=.65/scale;ctx.stroke(this.boundaries);}
-    if(this.selectedArea){ctx.fillStyle='rgba(92,128,70,.10)';ctx.fill(this.selectedArea,'evenodd');}
-    // Clipped territory polygons include artificial coverage-cell edges. Only
-    // the source boundary lines may outline the selected territory.
-    if(this.selectedBoundary){ctx.strokeStyle=satellite?'#e7eacc':'#688360';ctx.lineWidth=1.3/scale;ctx.stroke(this.selectedBoundary);}
     if(this.paths){
       this.drawTrailOverlay(scale,satellite);
     }
@@ -811,7 +852,7 @@ export class CustomMapEngine {
     this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
     this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;this.selectedBoundary=undefined;
-    this.trailRaster?.destroy();this.trailRaster=undefined;this.trailRasterParts=undefined;this.trailRasterPartCache=new WeakMap();this.trailOverlayPaintedEntries=[];
+    this.releaseGround();this.trailRaster?.destroy();this.trailRaster=undefined;this.trailRasterParts=undefined;this.trailRasterPartCache=new WeakMap();this.trailOverlayPaintedEntries=[];
     this.trailOverlay=[];this.trailOverlayPaths=new WeakMap();this.trailOverlayBatch=undefined;this.trailOverlayWindow=undefined;
     this.routeHit=undefined;
     this.reviewedCoastalRoute=undefined;this.reviewedCoastalPaths=new WeakMap();this.reviewedCoastalOverlayBatch=undefined;this.reviewedCoastalOverlaySources=0;

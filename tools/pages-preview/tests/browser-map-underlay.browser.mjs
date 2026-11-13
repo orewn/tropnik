@@ -34,6 +34,15 @@ const matrix=[
  {name:'unwrapped-world',unwrapped:true,cover:true},
  {name:'boundaries-hidden',boundaries:false,cover:true},
 ];
+const groundMatrix=[
+ {name:'opaque',cover:true},
+ {name:'missing',missing:true,cover:false},
+ {name:'satellite',mode:'satellite',transparent:true,cover:false},
+ {name:'overview',mode:'overview',cover:false},
+ {name:'rotated-pitched',bearing:17.3,pitch:25,cover:false},
+ {name:'unwrapped-world',unwrapped:true,cover:true},
+];
+const groundPhases=['cold','stroke-history','warm','overlay-changed','overlay-empty','route-changed','route-empty'];
 
 // The browser receives the real class and its exported geometryPath. Only the
 // worker URL imports are inert: the fixture seeds actual ImageBitmaps and does
@@ -71,9 +80,9 @@ async function productionBundle(){
 async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproject,MAP_OUTSIDE_COLOR,mapCanvasPolicy},options){
  const check=(condition,message)=>{if(!condition)throw new Error(message);};
  const dpr=options.dpr,width=512,height=384,zoom=options.zoom??8,z=options.tileZ??Math.ceil(zoom),n=2**z,scale=256*2**zoom;
- check(devicePixelRatio===dpr,'Actual emulated DPR differs from the requested pixel proof');
+ check(options.previewOnly===true||devicePixelRatio===dpr,'Actual emulated DPR differs from the requested pixel proof');
  const center={x:(options.unwrapped?n+.5:Math.floor(.626*n)+.5)/n,y:(Math.floor(.373*n)+.5)/n};
- const policy=mapCanvasPolicy(document),bitmaps=[],surfaces=[],frames=[],negativeControls=[];
+ const policy=mapCanvasPolicy(document),bitmaps=[],surfaces=[],engines=[],frames=[],negativeControls=[];
  const bitmap=async(kind,index=0)=>{
   const canvas=document.createElement('canvas');canvas.width=canvas.height=512;
   const ctx=canvas.getContext('2d',{alpha:true,willReadFrequently:policy.softwareRaster});
@@ -121,14 +130,17 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    context.fillStyle=baseline?'#ff00ff':'#00ffb0';context.fillRect(0,0,canvas.width,canvas.height);
    context.fillStyle=baseline?'#1a2bff':'#fff300';
    for(let y=0;y<canvas.height;y+=29)for(let x=0;x<canvas.width;x+=31)if(((x/31)+(y/29))%2===0)context.fillRect(x,y,19,17);
-   const engine=Object.assign(Object.create(CustomMapEngine.prototype),{canvas,context,element:document.createElement('div'),size:{width,height},pixelRatio:dpr,camera:{center:mercatorUnproject(center),zoom,bearingDegrees:options.bearing??0},pitch:options.pitch??0,mode:options.mode??'detail',state:{committedMode:options.mode??'detail'},active:true,disposed:false,area,mask,boundaries,selectedArea,selectedBoundary,route,routeId:'pixel-fixture-route',overview:overviewBatch,detail:batch,relief:reliefBatch,imagery:options.mode==='satellite'?{kind:'eox-s2',generation:1,tiles:imagery}:undefined,imageryOverlay:batch,boundaryVisible:options.boundaries!==false,reliefVisible:true,drawRevision:0,pointer:{activePointers:1},animation:0,options:{},drawLabels(){},drawMarkers(){}});
-   const count={clear:0,area:0,mask:0,selectedArea:0,overview:0,detail:0,relief:0,imagery:0,proofCalls:0};
+   const engine=Object.assign(Object.create(CustomMapEngine.prototype),{canvas,context,element:document.createElement('div'),size:{width,height},pixelRatio:dpr,rasterPolicy:policy,camera:{center:mercatorUnproject(center),zoom,bearingDegrees:options.bearing??0},pitch:options.pitch??0,mode:options.mode??'detail',state:{committedMode:options.mode??'detail'},active:true,disposed:false,area,mask,boundaries,selectedArea,selectedBoundary,route,routeId:'pixel-fixture-route',overview:overviewBatch,detail:batch,relief:reliefBatch,imagery:options.mode==='satellite'?{kind:'eox-s2',generation:1,tiles:imagery}:undefined,imageryOverlay:batch,boundaryVisible:options.boundaries!==false,reliefVisible:true,drawRevision:0,pointer:{activePointers:options.cacheProof?0:1},animation:0,options:{},paths:!!options.cacheProof,trailOverlay:[],trailOverlayPaths:new WeakMap(),reviewedCoastalPaths:new WeakMap(),trailRasterPartCache:new WeakMap(),trailRasterPartSerial:0,trailOverlayCandidateCounts:{sources:0,parts:0,details:0},trailOverlayPaintedEntries:[],trailOverlaySources:0,trailOverlayParts:0,trailOverlayDetails:0,reviewedCoastalOverlaySources:0,trailRasterError:'',trailOverlayViewportReady:true,drawLabels(){},drawMarkers(){},publishInspection(){},schedule(){}});engines.push(engine);
+   const count={clear:0,area:0,mask:0,selectedArea:0,overview:0,detail:0,relief:0,imagery:0,proofCalls:0,groundRestore:0};
    const fill=context.fill.bind(context),clear=context.fillRect.bind(context),drawImage=context.drawImage.bind(context);
    context.fill=function(path,...args){if(path===area)count.area++;if(path===mask)count.mask++;if(path===selectedArea)count.selectedArea++;return fill(path,...args);};
    context.fillRect=function(...args){count.clear++;return clear(...args);};
-   context.drawImage=function(image,...args){count[type.get(image)]++;return drawImage(image,...args);};
+   context.drawImage=function(image,...args){const kind=type.get(image);if(kind)count[kind]++;return drawImage(image,...args);};
    const proof=CustomMapEngine.prototype.detailCoversViewport;
-   engine.detailCoversViewport=function(value){count.proofCalls++;return baseline?false:proof.call(this,value);};
+   engine.detailCoversViewport=function(value){count.proofCalls++;return baseline&&!options.cacheProof?false:proof.call(this,value);};
+   const restore=CustomMapEngine.prototype.restoreGround;
+   engine.restoreGround=function(signature){const restored=baseline&&options.cacheProof?false:restore.call(this,signature);if(restored)count.groundRestore++;return restored;};
+   if(baseline&&options.cacheProof)engine.retainGround=()=>{};
    const render=()=>{for(const key of Object.keys(count))count[key]=0;CustomMapEngine.prototype.draw.call(engine);return{pixels:context.getImageData(0,0,canvas.width,canvas.height).data,operations:{...count}};};
    return{engine,canvas,context,render};
   };
@@ -136,6 +148,39 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    const baselinePrior=baseline.context.getImageData(0,0,baseline.canvas.width,baseline.canvas.height).data,optimizedPrior=optimized.context.getImageData(0,0,optimized.canvas.width,optimized.canvas.height).data;
    const priorFrame={kind:'distinct-opaque-checkerboards',comparison:diff(baselinePrior,optimizedPrior),baselinePixelSHA256:await hash(baselinePrior),optimizedPixelSHA256:await hash(optimizedPrior)};
    check(priorFrame.comparison.differentPixels===width*height*dpr*dpr&&priorFrame.baselinePixelSHA256!==priorFrame.optimizedPixelSHA256,'Adversarial prior pixels must differ across the whole backing store');
+  if(options.cacheProof){
+   const phases=['cold','stroke-history','warm','overlay-changed','overlay-empty','route-changed','route-empty'];
+   const cacheEligible=(options.bearing??0)===0&&(options.pitch??0)===0;
+   const entry=(key,points)=>{const coordinates=points.map(coordinate);return{key,ids:[key],parts:[{bounds:[Math.min(...coordinates.map(point=>point[0])),Math.min(...coordinates.map(point=>point[1])),Math.max(...coordinates.map(point=>point[0])),Math.max(...coordinates.map(point=>point[1]))],lines:[coordinates]}]};};
+   const first=entry('first',[[-170,70],[-110,100],[-70,65]]),second=entry('second',[[70,100],[130,40],[180,80]]);
+   baseline.engine.setTrailOverlay([first]);optimized.engine.setTrailOverlay([first]);let previous;
+   for(let index=0;index<phases.length;index++){
+    const phase=phases[index];
+    if(phase==='overlay-changed')for(const item of [baseline,optimized])item.engine.setTrailOverlay([second]);
+    if(phase==='overlay-empty')for(const item of [baseline,optimized])item.engine.setTrailOverlay([]);
+    if(phase==='route-changed')for(const item of [baseline,optimized])item.engine.route=geometryPath({type:'LineString',coordinates:[[-180,-75],[-100,-20],[-130,80]].map(coordinate)});
+    if(phase==='route-empty')for(const item of [baseline,optimized]){item.engine.route=undefined;item.engine.routeId='';}
+    const old=baseline.render(),current=optimized.render(),comparison=diff(old.pixels,current.pixels),expectedHit=cacheEligible&&index>=2;
+    const frame={index,phase,expectedHit,comparison,operations:{baseline:old.operations,optimized:current.operations},baselinePixelSHA256:await hash(old.pixels),optimizedPixelSHA256:await hash(current.pixels),width:optimized.canvas.width,height:optimized.canvas.height,
+     captures:[{phase:'baseline',png:baseline.canvas.toDataURL('image/png').split(',')[1]},{phase:'optimized',png:optimized.canvas.toDataURL('image/png').split(',')[1]}]};frames.push(frame);
+    check(comparison.differentPixels===0,`${options.name}/${phase}: retained ground changed ${comparison.differentPixels} pixels (max ${comparison.maxChannelDelta})`);
+    check(old.operations.groundRestore===0&&current.operations.groundRestore===Number(expectedHit),`${options.name}/${phase}: the actual native ground cache did not follow its expected cold/warm lifecycle`);
+    check(old.operations.mask===1&&current.operations.mask===1,'Every cached frame must repaint the current outside and hole mask');
+    check(old.operations.proofCalls===1&&current.operations.proofCalls===1,'Every frame rechecks the live opaque coverage guard');
+    if(expectedHit){
+     for(const key of ['clear','area','overview','detail','relief','imagery','selectedArea'])check(current.operations[key]===0,`${phase}: retained ground replayed ${key}`);
+     check(old.operations.selectedArea===1&&old.operations.overview+old.operations.detail+old.operations.imagery>0,'The uncached production baseline must paint actual source ground');
+    }
+    if(!cacheEligible)for(const key of ['clear','area','overview','detail','relief','imagery','selectedArea'])check(current.operations[key]===old.operations[key],`${phase}: transformed fallback changed original ${key} operations`);
+    if(index>=3){frame.changedFromPrevious=diff(previous,current.pixels);check(frame.changedFromPrevious.differentPixels>0,`${phase}: a stale cached route/overlay would be invisible to this fixture`);}
+    previous=current.pixels;
+   }
+   const retained=optimized.engine.groundSnapshot;
+   check(cacheEligible?retained?.surface instanceof OffscreenCanvas:!retained,'Eligible frames require actual native ground; transformed views must retain the original direct painter');
+   const retainedBacking=retained?{width:retained.surface.width,height:retained.surface.height,bytes:retained.surface.width*retained.surface.height*4}:null;
+   check(!retainedBacking||retainedBacking.bytes<=32*1024*1024,'Retained ground exceeded its allocation budget');
+   return{verified:true,cacheProof:true,cacheEligible,name:options.name,dpr,nativeDpr:devicePixelRatio,previewOnly:options.previewOnly===true,policy,contextAttributes:optimized.context.getContextAttributes(),groundContextAttributes:retained?.context.getContextAttributes()??null,retainedBacking,phases,priorFrame,frames,negativeControls};
+  }
   const movement=options.frames??[{x:0,y:0,cover:options.cover}];
   for(let index=0;index<movement.length;index++){
    const move=movement[index],next=mercatorUnproject({x:center.x+move.x/scale,y:center.y+move.y/scale});
@@ -175,9 +220,20 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
   }
   return{verified:true,name:options.name,dpr,policy,contextAttributes:optimized.context.getContextAttributes(),tileDeviceSpan:scale*dpr/n,bitmapDimensions:[512,512],separateLabelsAndDOMMarkersExcluded:true,priorFrame,frames,negativeControls};
  }catch(error){return{verified:false,name:options.name,dpr,error:String(error.stack||error),frames,negativeControls};}
- finally{for(const image of bitmaps)image.close();for(const canvas of surfaces)canvas.remove();}
+ finally{for(const engine of engines)engine.releaseGround();for(const image of bitmaps)image.close();for(const canvas of surfaces)canvas.remove();}
 }
 
+async function writePreviewFixture(directory,basePath){
+ const bundle=await productionBundle();await mkdir(directory,{recursive:true});await writeFile(join(directory,'fixture.js'),bundle.code);
+ const config={basePath,dpr:[1,1.5,2],scenarios:groundMatrix};
+ const html='<!doctype html><meta charset="utf-8"><title>Temporary retained ground pixel diagnosis</title><h1>Retained ground pixel diagnosis</h1><p>Diagnostic only. Backing scales are explicit; native browser DPR is reported separately.</p><p id="progress">Loading production painter…</p><div id="comparison"></div><pre id="report"></pre><script src="'+basePath+'fixture.js"></script><script>'+`(async()=>{const config=${JSON.stringify(config)},report={verified:false,releaseEligible:false,previewOnly:true,nativeDpr:devicePixelRatio,sourceHashes:${JSON.stringify(bundle.sources)},cases:[]};try{for(const dpr of config.dpr)for(const scenario of config.scenarios){document.getElementById('progress').textContent='Running '+scenario.name+' / backing scale '+dpr;const result=await window.runUnderlayGate({...scenario,dpr,cacheProof:true,previewOnly:true});if(!result.verified&&!document.getElementById('comparison').children.length)for(const capture of result.frames.at(-1)?.captures??[]){const image=document.createElement('img');image.src='data:image/png;base64,'+capture.png;image.alt=capture.phase;image.style.width='512px';document.getElementById('comparison').appendChild(image);}for(const frame of result.frames)delete frame.captures;report.cases.push(result);document.getElementById('report').textContent=JSON.stringify(report,null,2);}report.complete=true;report.pixelCasesPassed=report.cases.filter(result=>result.verified).length;document.getElementById('progress').textContent='Complete: '+report.pixelCasesPassed+'/'+report.cases.length+' exact pixel cases';}catch(error){report.error=String(error.stack||error);document.getElementById('progress').textContent='Failed: '+report.error;}document.getElementById('report').textContent=JSON.stringify(report,null,2);})()`+'</script>';
+ await writeFile(join(directory,'index.html'),html);console.log(JSON.stringify({directory,basePath,previewOnly:true,verified:false,releaseEligible:false,rendererSHA256:bundle.rendererSHA256,cases:groundMatrix.length*3}));
+}
+
+if(process.argv.includes('--write-preview-fixture')){
+ const index=process.argv.indexOf('--write-preview-fixture'),directory=process.argv[index+1],basePath=process.argv[index+2];assert.ok(directory&&basePath?.startsWith('/')&&basePath.endsWith('/'));
+ await writePreviewFixture(resolve(directory),basePath);
+}else{
 test('underlay fixture bundles the actual engine, geometry and paint dependencies without replacing draw',async()=>{
  const result=await productionBundle();assert.ok(result.code.length>10000);assert.ok(/(?:class CustomMapEngine|CustomMapEngine = class)/.test(result.code));
  assert.ok(result.code.includes('detailCoversViewport'));assert.ok(result.code.includes('function geometryPath'));assert.ok(result.sources['web/lib/custom-map-camera.ts']);
@@ -190,7 +246,7 @@ test('production map underlay omission preserves every real Canvas pixel and all
  assert.ok(binary,'A real Chromium binary is required for the underlay pixel parity gate');
  const bundle=await productionBundle(),directory=await mkdtemp(join(tmpdir(),'tropnik-map-underlay-'));
  const output=join(web,'pages-preview/dist'),pictures=join(web,'pages-preview/design-qa/map-underlay');
- const report={schemaVersion:1,verified:false,phase:'browser-startup',evidence:'production-canvas-underlay-pixel-parity',sourceCommit:process.env.GITHUB_SHA||null,rendererSHA256:bundle.rendererSHA256,sources:bundle.sources,baseline:'same-production-draw-with-fixture-only-coverage-false',cases:[]};
+ const report={schemaVersion:1,verified:false,phase:'browser-startup',evidence:'production-canvas-underlay-pixel-parity',sourceCommit:process.env.GITHUB_SHA||null,rendererSHA256:bundle.rendererSHA256,sources:bundle.sources,baseline:'same-production-draw-with-fixture-only-coverage-false',cases:[],groundCache:{verified:false,baseline:'same-production-draw-with-ground-cache-disabled',dpr:[1,1.5,2],scenarios:groundMatrix.map(item=>item.name),phases:groundPhases,cases:[]}};
  const server=createHTTPServer((request,response)=>{
   const path=new URL(request.url,'http://127.0.0.1').pathname,content=path==='/'?'<!doctype html><meta charset="utf-8"><style>html,body{margin:0;width:512px;height:384px;overflow:hidden}</style><script src="/fixture.js"></script>':path==='/fixture.js'?bundle.code:null;
   response.writeHead(content===null?404:200,{'content-type':path==='/'?'text/html; charset=utf-8':'text/javascript; charset=utf-8','cache-control':'no-store'});response.end(content??'Not found');
@@ -221,6 +277,20 @@ test('production map underlay omission preserves every real Canvas pixel and all
    }
   }
   assert.equal(report.cases.length,matrix.length*2);assert.equal(report.cases.reduce((sum,item)=>sum+item.frames.length,0),46);
+  for(const dpr of report.groundCache.dpr){
+   await cdp.call('Emulation.setDeviceMetricsOverride',{width:512,height:384,deviceScaleFactor:dpr,mobile:false});await cdp.call('Page.navigate',{url:origin+'/'});
+   let loaded=false;for(let attempt=0;attempt<60;attempt++){if(await evaluate("typeof window.runUnderlayGate==='function'")){loaded=true;break;}await sleep(50);}assert.ok(loaded,'The ground-cache production fixture did not load');
+   for(const scenario of groundMatrix){
+    report.phase=`ground-dpr${dpr}-${scenario.name}`;const result=await evaluate(`window.runUnderlayGate(${JSON.stringify({...scenario,dpr,cacheProof:true})})`,20000);report.groundCache.cases.push(result);
+    for(const frame of result.frames){
+     const captures=[];for(const capture of frame.captures){const file=`ground-dpr${dpr}-${scenario.name}-${frame.phase}-${capture.phase}.png`,bytes=Buffer.from(capture.png,'base64');assert.ok(bytes.length>=33&&bytes.length<=8*1024*1024);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),frame.width);assert.equal(bytes.readUInt32BE(20),frame.height);await writeFile(join(pictures,file),bytes);captures.push({phase:capture.phase,file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});}frame.captures=captures;
+     assert.equal(frame.comparison.differentPixels,0);assert.equal(frame.comparison.maxChannelDelta,0);assert.equal(frame.baselinePixelSHA256,frame.optimizedPixelSHA256);assert.equal(frame.operations.optimized.groundRestore,Number(frame.expectedHit));
+    }
+    assert.equal(result.verified,true,result.error);assert.equal(result.cacheProof,true);assert.equal(result.previewOnly,false);assert.equal(result.nativeDpr,dpr);assert.deepEqual(result.phases,groundPhases);assert.equal(result.frames.length,groundPhases.length);
+   }
+  }
+  assert.equal(report.groundCache.cases.length,18);assert.equal(report.groundCache.cases.reduce((sum,item)=>sum+item.frames.length,0),126);report.groundCache.verified=true;
   report.verified=true;report.phase='complete';
  }catch(error){report.error=browserErrorDetails(error);throw error;}
 });
+}
