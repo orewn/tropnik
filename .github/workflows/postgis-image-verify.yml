@@ -1,4 +1,4 @@
-name: Isolated PostgreSQL 18.7 image probe
+name: Isolated PGDG PostGIS rebuild probe
 
 on:
   push:
@@ -14,9 +14,9 @@ concurrency:
 jobs:
   measure:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 10
     steps:
-      - name: Measure official image digests and isolated database versions
+      - name: Verify official PGDG buildinfo and library symbols
         shell: bash
         run: |
           set -euo pipefail
@@ -25,157 +25,125 @@ jobs:
           import json
           import os
           from pathlib import Path
+          import re
           import subprocess
-          import time
+          import tempfile
+          import urllib.request
           from datetime import datetime, timezone
           
-          OUT = Path("verification")
+          OUT = Path("verification").resolve()
           OUT.mkdir(exist_ok=True)
+          VERSION = "3.7.0+dfsg-1.pgdg13+2"
+          BASE = "postgres:18.7-trixie@sha256:9f4fd4aa918f52ae3d6f3b687f1de90d8f867cd4d520021545a9a50c120eae3b"
+          BUILDINFO = f"postgis_{VERSION}_amd64.buildinfo"
+          POOL = "https://apt.postgresql.org/pub/repos/apt/pool/main/p/postgis/"
           report = {
               "schemaVersion": 1,
-              "purpose": "Read-only measurement of official image contents; not rebuilt-extension qualification",
+              "purpose": "Verify official PGDG rebuilt PostGIS package provenance without executing its library",
               "sourceSHA": os.environ["GITHUB_SHA"],
               "sourceRef": os.environ["GITHUB_REF"],
               "runID": os.environ["GITHUB_RUN_ID"],
               "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
               "createdAt": datetime.now(timezone.utc).isoformat(),
-              "requiredPostgreSQLVersion": "18.7",
-              "requiredPostGISSeries": "3.7",
-              "postgisRebuildProvenanceVerified": False,
-              "images": [],
-              "cleanup": [],
+              "base": BASE,
+              "packageVersion": VERSION,
+              "buildinfoURL": POOL + BUILDINFO,
+              "packages": [],
           }
           
-          def command(argv, timeout=60, check=True):
-              result = subprocess.run(argv, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
-              if check and result.returncode != 0:
-                  raise RuntimeError(f"{argv[0]} {argv[1]} failed ({result.returncode}): {result.stderr[-3000:]}")
-              return result
+          def command(argv, timeout=60):
+              p = subprocess.run(argv, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
+              if p.returncode:
+                  raise RuntimeError(f"{argv[0]} {argv[1]} failed ({p.returncode}): {p.stderr[-3000:]}")
+              return p.stdout
           
           def save():
-              (OUT / "image-probe.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+              (OUT / "package-probe.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
           
-          def sql(name, query):
-              return command(["docker", "exec", name, "psql", "-XAt", "-v", "ON_ERROR_STOP=1",
-                              "-U", "tropa_probe", "-d", "probe", "-c", query]).stdout.strip()
-          
-          def inspect_image(reference, index):
-              item = {"reference": reference, "platform": "linux/amd64"}
-              report["images"].append(item)
-              save()
-              pull = command(["docker", "pull", "--platform", "linux/amd64", reference], timeout=240)
-              (OUT / f"pull-{index}.txt").write_text(pull.stdout + pull.stderr, encoding="utf-8")
-              raw = json.loads(command(["docker", "image", "inspect", reference]).stdout)[0]
-              item["imageID"] = raw["Id"]
-              item["repoDigests"] = raw.get("RepoDigests", [])
-              item["created"] = raw["Created"]
-              item["os"] = raw["Os"]
-              item["architecture"] = raw["Architecture"]
-              public_keys = {"PG_MAJOR", "PG_VERSION", "PGDATA", "POSTGIS_MAJOR", "POSTGIS_VERSION"}
-              item["versionEnvironment"] = dict(v.split("=", 1) for v in raw["Config"].get("Env", [])
-                                                if v.split("=", 1)[0] in public_keys)
-              item["provenanceLabels"] = {k: v for k, v in (raw["Config"].get("Labels") or {}).items()
-                                         if k in {"maintainer", "org.opencontainers.image.source",
-                                                  "org.opencontainers.image.version", "org.opencontainers.image.revision",
-                                                  "org.opencontainers.image.description"}}
-              manifest = command(["docker", "manifest", "inspect", "--verbose", reference], timeout=90)
-              manifest_text = manifest.stdout
-              json.loads(manifest_text)
-              (OUT / f"manifest-{index}.json").write_text(manifest_text, encoding="utf-8")
-              item["manifestEvidenceSHA256"] = hashlib.sha256(manifest_text.encode()).hexdigest()
-              name = f"tropnik-image-probe-{index}"
-              try:
-                  command(["docker", "run", "--detach", "--name", name, "--platform", "linux/amd64",
-                           "--network", "none", "--log-driver", "none",
-                           "--tmpfs", "/var/lib/postgresql:rw,size=1073741824",
-                           "--memory", "2g", "--pids-limit", "256", "--shm-size", "256m",
-                           "--security-opt", "no-new-privileges:true",
-                           "-e", "POSTGRES_USER=tropa_probe", "-e", "POSTGRES_DB=probe",
-                           "-e", "POSTGRES_HOST_AUTH_METHOD=trust", item["imageID"]], timeout=60)
-                  container = json.loads(command(["docker", "inspect", name]).stdout)[0]
-                  item["isolation"] = {
-                      "networkMode": container["HostConfig"]["NetworkMode"],
-                      "logDriver": container["HostConfig"]["LogConfig"]["Type"],
-                      "portBindings": container["HostConfig"]["PortBindings"],
-                      "binds": container["HostConfig"]["Binds"],
-                      "mounts": [{"type": m["Type"], "destination": m["Destination"]} for m in container["Mounts"]],
-                  }
-                  assert item["isolation"]["networkMode"] == "none"
-                  assert item["isolation"]["logDriver"] == "none"
-                  assert not item["isolation"]["portBindings"] and not item["isolation"]["binds"]
-                  assert all(m["type"] == "tmpfs" for m in item["isolation"]["mounts"])
-                  deadline = time.monotonic() + 90
-                  while True:
-                      ready = command(["docker", "exec", name, "pg_isready", "-h", "127.0.0.1",
-                                       "-U", "tropa_probe", "-d", "probe"], check=False)
-                      if ready.returncode == 0:
-                          break
-                      if time.monotonic() >= deadline:
-                          raise RuntimeError(f"Final TCP readiness timed out for {reference}")
-                      time.sleep(1)
-                  item["database"] = json.loads(sql(name, """
-                      SELECT json_build_object(
-                          'serverVersion', current_setting('server_version'),
-                          'serverVersionNum', current_setting('server_version_num')::integer,
-                          'dataDirectory', current_setting('data_directory'),
-                          'compositeTypeMismatch', current_setting('composite_type_mismatch', true),
-                          'extensions', (SELECT json_agg(json_build_object('name', extname, 'version', extversion)
-                                        ORDER BY extname) FROM pg_extension)
-                      )::text
-                  """))
-                  packages = command(["docker", "exec", name, "dpkg-query", "-W",
-                                      "-f=${binary:Package}\t${Version}\t${Architecture}\n"]).stdout.splitlines()
-                  item["postgresPackages"] = [line.split("\t") for line in packages
-                                              if line.startswith(("postgresql", "libpq", "postgis"))]
-                  pgconfig = command(["docker", "exec", name, "pg_config", "--version"], check=False)
-                  item["pgConfigVersion"] = pgconfig.stdout.strip() if pgconfig.returncode == 0 else None
-                  if reference.startswith("postgis/"):
-                      item["postgis"] = json.loads(sql(name, """
-                          SELECT json_build_object(
-                              'fullVersion', postgis_full_version(),
-                              'libraryVersion', postgis_lib_version(),
-                              'scriptsInstalled', postgis_scripts_installed()
-                          )::text
-                      """))
-                      build_date_available = sql(name, "SELECT to_regprocedure('postgis_lib_build_date()') IS NOT NULL") == "t"
-                      if build_date_available:
-                          item["postgis"]["libraryBuildDate"] = sql(name, "SELECT postgis_lib_build_date()")
-                      binary = command(["docker", "exec", name, "sha256sum", "/usr/lib/postgresql/18/lib/postgis-3.so"])
-                      item["postgis"]["librarySHA256"] = binary.stdout.split()[0]
-                      assert item["postgis"]["libraryVersion"].startswith("3.7.")
-                  item["targetCoreVersionSatisfied"] = item["database"]["serverVersionNum"] == 180007
-                  assert item["database"]["dataDirectory"].startswith("/var/lib/postgresql/18/")
-                  if reference.startswith("postgres:"):
-                      assert item["targetCoreVersionSatisfied"], "Official 18.7 image did not report PostgreSQL 18.7"
-              finally:
-                  removed = command(["docker", "rm", "--force", "--volumes", name], check=False)
-                  report["cleanup"].append({"container": name, "removed": removed.returncode == 0})
-                  save()
+          def fields(text):
+              result = {}
+              current = None
+              for line in text.splitlines():
+                  if line.startswith((" ", "\t")) and current:
+                      result[current] += "\n" + line
+                  elif re.match(r"^[A-Za-z][A-Za-z0-9-]*:", line):
+                      current, value = line.split(":", 1)
+                      result[current] = value.strip()
+                  else:
+                      current = None
+              return result
           
           try:
-              inspect_image("postgis/postgis:18-3.7", 0)
-              inspect_image("postgres:18.7-trixie", 1)
-              report["measurementComplete"] = True
+              raw = urllib.request.urlopen(POOL + BUILDINFO, timeout=60).read()
+              assert len(raw) < 262144
+              (OUT / BUILDINFO).write_bytes(raw)
+              info = fields(raw.decode("utf-8"))
+              report["buildinfoSHA256"] = hashlib.sha256(raw).hexdigest()
+              report["buildDate"] = info.get("Build-Date")
+              report["buildArchitecture"] = info.get("Build-Architecture")
+              report["buildSource"] = info.get("Source")
+              report["buildVersion"] = info.get("Version")
+              assert info["Version"] == VERSION and info["Build-Architecture"] == "amd64"
+              deps = info["Installed-Build-Depends"].split(",")
+              report["postgresBuildDependencies"] = [s.strip() for s in deps if s.strip().startswith(("postgresql", "libpq"))]
+              report["headers18_7Verified"] = any(re.fullmatch(r"postgresql-server-dev-18\s+\(=\s*18\.7-[^)]+\)", s.strip()) for s in deps)
+              checksums = {}
+              for line in info["Checksums-Sha256"].splitlines():
+                  parts = line.split()
+                  if len(parts) == 3:
+                      checksums[parts[2]] = {"sha256": parts[0], "bytes": int(parts[1])}
+              command(["docker", "pull", "--platform", "linux/amd64", BASE], timeout=240)
+              with tempfile.TemporaryDirectory(prefix="tropnik-pgdg-package-") as temp:
+                  temp_path = Path(temp)
+                  package_names = ["postgresql-18-postgis-3", "postgresql-18-postgis-3-scripts"]
+                  # apt verifies the repository InRelease signatures and package checksums.
+                  # This disposable container has no credentials, database or production volumes.
+                  script = "set -eu\napt-get update -qq\ncd /evidence\napt-get download " + " ".join(p + "=" + VERSION for p in package_names) + "\n"
+                  output = command(["docker", "run", "--rm", "--platform", "linux/amd64",
+                                    "--entrypoint", "/bin/sh", "--security-opt", "no-new-privileges:true",
+                                    "--mount", f"type=bind,src={temp},dst=/evidence", BASE, "-c", script], timeout=240)
+                  (OUT / "apt-download.log").write_text(output, encoding="utf-8")
+                  for pkg in package_names:
+                      candidates = list(temp_path.glob(pkg + "_*.deb"))
+                      assert len(candidates) == 1, candidates
+                      deb = candidates[0]
+                      expected = checksums[deb.name]
+                      actual = hashlib.sha256(deb.read_bytes()).hexdigest()
+                      assert actual == expected["sha256"] and deb.stat().st_size == expected["bytes"]
+                      control = fields(command(["dpkg-deb", "--field", str(deb)]))
+                      assert control["Package"] == pkg and control["Version"] == VERSION
+                      record = {"name": pkg, "file": deb.name, "sha256": actual, "bytes": deb.stat().st_size,
+                                "version": control["Version"], "architecture": control["Architecture"],
+                                "depends": control.get("Depends"), "matchesOfficialBuildinfo": True,
+                                "libraries": []}
+                      report["packages"].append(record)
+                      extracted = temp_path / pkg
+                      command(["dpkg-deb", "--extract", str(deb), str(extracted)])
+                      for library in sorted(extracted.glob("usr/lib/postgresql/18/lib/*.so")):
+                          symbols = command(["readelf", "--dyn-syms", "--wide", str(library)])
+                          wanted = [line.strip() for line in symbols.splitlines()
+                                    if any(name in line for name in ["DatumGetHeapTupleHeader", "heap_datum_check", "heap_datum_update_type"])]
+                          record["libraries"].append({"name": library.name, "sha256": hashlib.sha256(library.read_bytes()).hexdigest(),
+                                                      "securitySymbols": wanted})
+                          (OUT / (library.name + ".symbols.txt")).write_text(symbols, encoding="utf-8")
+                  core = next(p for p in report["packages"] if p["name"] == "postgresql-18-postgis-3")
+                  core_library = next(p for p in core["libraries"] if p["name"] == "postgis-3.so")
+                  report["newCompositeChecksReferenced"] = all(any(name in symbol for symbol in core_library["securitySymbols"])
+                                                             for name in ["DatumGetHeapTupleHeader", "heap_datum_check"])
+                  report["officialRebuildQualified"] = report["headers18_7Verified"] and report["newCompositeChecksReferenced"]
+                  report["measurementComplete"] = True
           finally:
               report["finishedAt"] = datetime.now(timezone.utc).isoformat()
               save()
           
-          print(json.dumps({
-              "sourceSHA": report["sourceSHA"],
-              "images": [{"reference": i["reference"], "database": i.get("database"),
-                          "postgis": i.get("postgis"), "repoDigests": i.get("repoDigests"),
-                          "targetCoreVersionSatisfied": i.get("targetCoreVersionSatisfied")}
-                         for i in report["images"]],
-              "postgisRebuildProvenanceVerified": False,
-              "cleanup": report["cleanup"]
-          }, indent=2))
+          print(json.dumps(report, indent=2))
           
           PY
-      - name: Preserve public image evidence
+      - name: Preserve public package evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: tropnik-postgis-18.7-probe
+          name: tropnik-postgis-18.7-package-probe
           path: verification/
           if-no-files-found: error
           retention-days: 3
