@@ -1,0 +1,57 @@
+name: Trail redraw diagnostics
+
+on:
+  push:
+    branches: ['diagnostics/trail-search-186d032-20261113']
+
+permissions:
+  contents: read
+
+jobs:
+  ui-smoothness-traces:
+    if: ${{ github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/diagnostics/trail-search-186d032-20261113' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out the exact diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: '186d0323eb429859161f7285dcde938416b750f3'
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Record the source and workflow identities
+        run: |
+          test "$(git rev-parse HEAD)" = '186d0323eb429859161f7285dcde938416b750f3'
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          writeFileSync('trail-redraw-provenance.json', JSON.stringify({schemaVersion:1,diagnosticOnly:true,sourceCommit:'186d0323eb429859161f7285dcde938416b750f3',workflowCommit:process.env.GITHUB_SHA,workflowRunId:process.env.GITHUB_RUN_ID,workflowRunAttempt:process.env.GITHUB_RUN_ATTEMPT,mode:'ui-smoothness',trace:true,cpuSlowdownRate:1},null,2)+'\n');
+          NODE
+      - name: Install the pinned package manager and frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Restore and verify the public Android preview
+        run: node tools/pages-preview/fetch-apk.mjs
+      - name: Build and verify the exact static source
+        run: GITHUB_SHA=186d0323eb429859161f7285dcde938416b750f3 node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Trace the existing UI smoothness scenarios
+        timeout-minutes: 12
+        run: GITHUB_SHA=186d0323eb429859161f7285dcde938416b750f3 TROPNIK_BROWSER_DIAGNOSTIC=ui-smoothness TROPNIK_BROWSER_TRACE=1 node tools/pages-preview/browser-smoke.mjs
+      - name: Preserve traced diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-trail-redraw-186d032-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            trail-redraw-provenance.json
+            web/pages-preview/design-qa/
+            web/pages-preview/dist/build-info.json
+            web/pages-preview/dist/browser-*-diagnostic.json
+            web/pages-preview/dist/browser-failure.*
+          if-no-files-found: error
+          retention-days: 7
