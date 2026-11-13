@@ -40,6 +40,7 @@ export function assertTrailOverlayReceipt(report,{sourceCommit,buildId,metadata,
     assert.equal(item.layers.off.catalogueOverlay.sources,0);assert.equal(item.layers.off.catalogueOverlay.preparedParts,0);
     assert.equal(item.layers.on.catalogueOverlay.sources,metadata.uniqueGeometries);assert.ok(item.layers.on.catalogueOverlay.preparedParts>0);
     assert.equal(new URL(item.region.url).searchParams.get('region'),'altai');assert.equal(item.region.routeId,'');
+    assert.ok(Math.abs(item.region.scrollY-item.country.scrollY)<=.5,'Region selection must preserve the document scroll position');
     assert.ok(item.regionSourceKeys.length>0&&item.regionSourceKeys.length<metadata.uniqueGeometries);assert.equal(item.region.catalogueOverlay.sources,item.regionSourceKeys.length);
     assert.ok(item.regionSourceKeys.includes(item.geometry.key));assert.ok(item.region.camera.zoom>=8);
     assert.equal(item.lineHit.pointerType,item.mobile?'touch':'mouse');assert.equal(item.lineHit.trusted,true);assert.equal(item.lineHit.target,'canvas');
@@ -138,7 +139,7 @@ async function waitValue(label,read,accept,timeout=25000){const deadline=perform
 function readMap(cdp){return evaluate(cdp,`(()=>{
  const host=document.querySelector('.atlas-canvas[data-map-engine="tropnik-canvas"]'),canvas=host?.querySelector('canvas.tropnik-map-canvas');
  if(!host?.dataset.mapInspection||!canvas)return null;const value=JSON.parse(host.dataset.mapInspection),rect=canvas.getBoundingClientRect();
- return{engine:value.engine,camera:value.camera,state:value.state,routeId:value.routeId,drawnRoute:value.drawnRoute,catalogueOverlay:value.catalogueOverlay,drawRevision:value.drawRevision,moving:host.dataset.mapMoving,rect:{left:rect.left,top:rect.top,width:rect.width,height:rect.height},url:location.href};
+ return{engine:value.engine,camera:value.camera,state:value.state,routeId:value.routeId,drawnRoute:value.drawnRoute,catalogueOverlay:value.catalogueOverlay,drawRevision:value.drawRevision,moving:host.dataset.mapMoving,rect:{left:rect.left,top:rect.top,width:rect.width,height:rect.height},scrollY:window.scrollY,url:location.href};
 })()`);}
 const stable=value=>value?.state.ready&&value.moving!=='true'&&value.drawRevision>0;
 async function pointer(cdp,profile,point){
@@ -155,7 +156,7 @@ async function pointerSelector(cdp,profile,selector){
 function failureUi(cdp){return evaluate(cdp,`(()=>{
   const box=element=>{if(!element)return null;const rect=element.getBoundingClientRect();return{left:rect.left,top:rect.top,width:rect.width,height:rect.height};};
   const layers=document.querySelector('.layer-button'),menu=document.querySelector('.layer-menu'),credit=document.querySelector('.map-attribution-toggle');
-  return{inputs:window.__trailAuditInputs||[],layers:{expanded:layers?.getAttribute('aria-expanded'),rect:box(layers)},menu:{rect:box(menu),checkboxes:[...(menu?.querySelectorAll('input')||[])].map(input=>({checked:input.checked,rect:box(input)}))},credit:{expanded:credit?.getAttribute('aria-expanded'),rect:box(document.querySelector('.map-attribution-content'))},footer:box(document.querySelector('.map-footer')),sheet:document.querySelector('.explore-layout')?.dataset.sheetState};
+  return{scrollY:window.scrollY,viewport:{width:innerWidth,height:innerHeight},inputs:window.__trailAuditInputs||[],layers:{expanded:layers?.getAttribute('aria-expanded'),rect:box(layers)},menu:{rect:box(menu),checkboxes:[...(menu?.querySelectorAll('input')||[])].map(input=>({checked:input.checked,rect:box(input)}))},credit:{expanded:credit?.getAttribute('aria-expanded'),rect:box(document.querySelector('.map-attribution-content'))},footer:box(document.querySelector('.map-footer')),sheet:document.querySelector('.explore-layout')?.dataset.sheetState,sheetRect:box(document.querySelector('.explore-panel'))};
 })()`);}
 async function screenshot(cdp,profile,phase){const {data}=await cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});const bytes=Buffer.from(data,'base64'),file=`${profile.name}-${phase}.png`;await writeFile(join(CAPTURES,file),bytes);return{phase,file,bytes:bytes.length,sha256:digest(bytes)};}
 function distanceToLine(point,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy,t=l?Math.max(0,Math.min(1,((point.x-a.x)*dx+(point.y-a.y)*dy)/l)):0;return Math.hypot(point.x-a.x-t*dx,point.y-a.y-t*dy);}
@@ -226,11 +227,17 @@ async function run(){
         await pointerSelector(cdp,profile,checkbox);
         const on=await waitValue('restored paths',()=>readMap(cdp),value=>stable(value)&&value.catalogueOverlay.sources===metadata.uniqueGeometries&&value.catalogueOverlay.preparedParts>0);
         result.layers={off,on};await pointerSelector(cdp,profile,'.layer-button');
+        if(profile.mobile&&await evaluate(cdp,'!!document.querySelector(".fact-card")')){
+          await pointerSelector(cdp,profile,'.fact-card button[aria-label="Свернуть истории"]');
+          result.storyDismissal=await waitValue('phone story collapsed by native control',()=>evaluate(cdp,'({card:!!document.querySelector(".fact-card"),launcher:!!document.querySelector(".fact-closed")})'),value=>!value.card&&value.launcher);
+        }
         if(profile.mobile&&await evaluate(cdp,'document.querySelector(".explore-layout")?.dataset.sheetState==="closed"'))await pointerSelector(cdp,profile,'.sheet-peek-summary');
         const regionButton='.region-option:has(.region-thumbnail-altai)';
-        await evaluate(cdp,`document.querySelector(${JSON.stringify(regionButton)})?.scrollIntoView({block:'nearest',inline:'nearest'})`);
+        // Altai is the first visible option. Wait for the drawer's animation
+        // through pointerSelector; scrollIntoView also scrolls the whole page.
         await pointerSelector(cdp,profile,regionButton);
         result.region=await waitValue('Altai catalogue without a selected card',()=>readMap(cdp),value=>stable(value)&&new URL(value.url).searchParams.get('region')==='altai'&&value.routeId===''&&value.catalogueOverlay.sources>0&&value.catalogueOverlay.sources<metadata.uniqueGeometries);
+        assert.ok(Math.abs(result.region.scrollY-result.country.scrollY)<=.5,`Region selection scrolled the document: ${JSON.stringify({country:result.country,region:result.region})}`);
         if(profile.mobile&&await evaluate(cdp,'document.querySelector(".explore-layout")?.dataset.sheetState==="open"'))await pointerSelector(cdp,profile,'.sheet-handle');
         for(let step=0;step<6&&result.region.camera.zoom<8;step++){
           const previous=result.region.camera.zoom;await pointerSelector(cdp,profile,'.map-controls button[aria-label="Увеличить масштаб"]');
