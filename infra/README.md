@@ -417,7 +417,16 @@ checks including rejected `warn`/`disabled` settings, upstream template
 initialization, and geometry/topology/raster/SFCGAL smoke cases. It then runs the
 native store suite and this recovery drill. Uploaded evidence contains the
 public image receipt/log, `backup-restore.json`, the bounded recovery log and
-the native test log. No identity or encrypted fixture archive is uploaded. A gate
+the native test log. A final disposable bootstrap gate builds the actual API
+Dockerfile, verifies the four shipped binaries' Go toolchain/build metadata,
+and runs the production Compose settings with synthetic keys and passwords.
+Only image names are changed to isolate the fixture. It verifies migration 8,
+the restricted database role, HTTP and Docker readiness, and the running API's
+UID, read-only root, zero effective capabilities and no-new-privileges flag.
+The fixture containers, internal network, database volume, keys and copied
+binaries are removed before its public receipt is written. Its aggregate
+receipt/log are uploaded as well. No identity, fixture key, API binary or
+encrypted backup archive is uploaded. A gate
 run counts as evidence only for its recorded source and tool/image versions.
 It does not replace measured recovery from the selected production storage.
 

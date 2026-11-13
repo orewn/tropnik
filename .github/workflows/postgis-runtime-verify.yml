@@ -60,6 +60,10 @@ jobs:
         run: |
           set -euo pipefail
           bash infra/run-backup-drill.sh --report verification/backup-restore.json 2>&1 | tee verification/backup-restore.log
+      - name: Production API image and disposable Compose bootstrap
+        run: |
+          set -euo pipefail
+          python3 infra/verify-backend-bootstrap.py --database-image-report verification/postgis-image.json --report verification/backend-bootstrap.json 2>&1 | tee verification/backend-bootstrap.log
       - name: Preserve integration evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
@@ -68,6 +72,8 @@ jobs:
           path: |
             verification/postgis-image.json
             verification/postgis-image.log
+            verification/backend-bootstrap.json
+            verification/backend-bootstrap.log
             verification/native-postgis.log
             verification/backup-restore.log
             verification/backup-restore.json
