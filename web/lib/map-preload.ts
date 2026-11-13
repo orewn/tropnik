@@ -4,6 +4,8 @@ import {MapResourcePool, routeTilePlan} from './map-resource-pool';
 import {publicMapResourceKey} from './map-transport';
 import {TerrainPreparation} from './terrain-preparation';
 import {MAP_CONFIG} from './map-config';
+import trailOverlayMetadata from './trail-overlay.generated.json';
+import {versionedRouteSource} from './route-source-integrity';
 import {loadMapCoverage} from '@/public/maps/map-coverage-lod.js';
 import terrainPreparationWorkerURL from './terrain-preparation.worker.ts?worker&url';
 
@@ -44,6 +46,9 @@ export function loadPublicBytes(url:string,priority=1,signal?:AbortSignal):Promi
   const key=allowed(url);if(!key)return Promise.reject(new Error('Unknown public map resource'));
   return pool.get(key,priority,signal);
 }
+export function invalidatePublicMapResource(url:string,options:{reload?:boolean}={reload:true}):void{
+  const key=allowed(url);if(key)pool.invalidate(key,options);
+}
 export function warmMap() {
   if (typeof window === 'undefined') return;
   // The custom map needs source geometry only. No vendor runtime, GPU context
@@ -76,7 +81,11 @@ export function preloadTrail(trail: Trail): Promise<PreviewResult> {
   const job = (async () => {
     warmMap();
     const resources: Promise<unknown>[] = [];
-    if (trail.geometryUrl?.startsWith('/data/')) resources.push(loadPublicJSON(trail.geometryUrl, 1));
+    // Warm exactly the key used by selected-route and overlay reads. The
+    // consumer verifies these bytes; prefetch must not retain a second,
+    // unversioned copy of the same source or parse geometry prematurely.
+    if (trail.geometryUrl?.startsWith('/data/')) resources.push(Promise.resolve().then(() =>
+      loadPublicBytes(versionedRouteSource(trail.geometryUrl!, trailOverlayMetadata.sourceHashes).url, 1)));
     // A centre warms surroundings only; it never becomes invented route geometry.
     const b = trail.bbox || (trail.center ? [trail.center[0] - .01, trail.center[1] - .01, trail.center[0] + .01, trail.center[1] + .01] : null);
     if (b && typeof navigator !== 'undefined' && navigator.onLine) {

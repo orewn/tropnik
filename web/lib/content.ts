@@ -7,6 +7,7 @@ import nationalEditorial from './national-editorial.generated.json';
 import yandexReviewed from './yandex-routes.generated.json';
 import discoveryReviewed from './discovery-routes.generated.json';
 import discoveryEastReviewed from './russiadiscovery-east.generated.json';
+import editorialGeometry from './editorial-geometry.generated.json';
 import displayCoverage from '@/public/data/russia-boundaries-provenance.json';
 export type Region = {
   id: string; name: string; caption: string; description: string; terrain: string;
@@ -35,6 +36,9 @@ export type Trail = {
   distanceKm: number | null; duration: string | null; ascentM: number | null;
   difficulty: 'easy' | 'moderate' | 'hard' | 'unknown'; difficultyLabel: string;
   geometryUrl?: string; sourceUrl: string; sourceName: string; checkedAt: string;
+  geometrySourceKind?: 'database' | 'official'; geometrySourceUrl?: string; geometrySourceName?: string;
+  geometrySourceLicense?: string; geometrySourceTrailId?: string; geometryReviewedAt?: string;
+  geometryScope?: 'source_track' | 'source_scheme';
   publicationStatus: 'reference' | 'published'; season: string; notes: string[];
   operatingNotice?: {title:string;body:string;url:string;effectiveAt:string};
   sourceKind?:'database'|'official'|'published'|'community'; officialEvidence?:{url:string;summary:string;checkedAt:string;scope:string}; center?:[number,number]; bbox?:number[];
@@ -154,6 +158,24 @@ const reviewedOperatingStatus: Record<string, 'closed' | 'restricted'> = {
 const reviewedCatalogues = [yandexReviewed, discoveryReviewed, discoveryEastReviewed] as {
   routes: Trail[]; updatesByRouteId: Record<string, Partial<Trail>>;
 }[];
+type EditorialGeometryUpdate = Partial<Trail> & {addNotes: string[]; removeNotes: string[]};
+const geometryUpdates: Record<string, EditorialGeometryUpdate> = Object.fromEntries(
+  Object.entries(editorialGeometry.updatesByRouteId).map(([id, update]) => {
+    if (!Array.isArray(update.center) || update.center.length !== 2 || !update.center.every(Number.isFinite)
+      || !Array.isArray(update.bbox) || update.bbox.length !== 4 || !update.bbox.every(Number.isFinite)
+      || (update.geometrySourceKind !== 'database' && update.geometrySourceKind !== 'official')
+      || (update.geometryScope !== 'source_track' && update.geometryScope !== 'source_scheme')) {
+      throw new Error(`Invalid reviewed geometry metadata: ${id}`);
+    }
+    const center: [number, number] = [update.center[0], update.center[1]];
+    const additionalSources: SourceReference[] = update.additionalSources.map(source => {
+      if (source.scope !== 'geometry_download') throw new Error(`Invalid geometry source scope: ${id}`);
+      return {...source, scope: 'geometry_download'};
+    });
+    return [id, {...update, center, additionalSources,
+      geometrySourceKind: update.geometrySourceKind, geometryScope: update.geometryScope}];
+  }),
+);
 export const trails: Trail[] = [
   ...initialTrails.map(t => ({...t, ...(importedPoints as Record<string, unknown>)[t.id] as object})),
   ...(importedCatalog as Trail[]), ...reviewedCatalogues.flatMap(source => source.routes),
@@ -166,6 +188,16 @@ export const trails: Trail[] = [
     if (update) merged = {...merged, ...update, id: trail.id, additionalSources: [
       ...(merged.additionalSources || []), ...(update.additionalSources || []),
     ]};
+  }
+  // Explicit reviewed source links feed every consumer of the catalogue:
+  // map, route passport, planner, static export and native catalogue.
+  // Official descriptive distances and their original reading dates stay intact.
+  const geometryUpdate = geometryUpdates[trail.id];
+  if (geometryUpdate) {
+    const {addNotes = [], removeNotes = [], additionalSources = [], ...fields} = geometryUpdate;
+    merged = {...merged, ...fields, id: trail.id,
+      notes: [...merged.notes.filter(note => !removeNotes.includes(note)), ...addNotes],
+      additionalSources: [...(merged.additionalSources || []), ...additionalSources]};
   }
   const sources = [...(merged.additionalSources || []), ...(telegramSources[trail.id] || [])];
   const clean = (text: string) => text

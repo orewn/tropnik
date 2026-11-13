@@ -14,12 +14,16 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import sys
 
 import numpy as np
 import shapely
 from shapely.geometry import MultiPolygon, Point, Polygon, box, mapping, shape
 from shapely.ops import unary_union
 from shapely.strtree import STRtree
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from route_catalog_inputs import load_route_catalogs
 
 ROOT = Path(__file__).resolve().parents[2]
 R = 6378137.0
@@ -172,7 +176,7 @@ def build(args):
 
     # Preserve the already established source detail around route envelopes.
     # A route can be fitted before its destination's cells have arrived.
-    routes = json.loads((ROOT / 'data/catalog/routes.geojson').read_text())['features']
+    routes, catalog_input = load_route_catalogs(ROOT)
     windows = []
     for item in routes:
         west, south, east, north = unwrap(shape(item['geometry'])).bounds
@@ -182,7 +186,10 @@ def build(args):
     configuration = {'schemaVersion': 1, 'sourceCommit': SOURCE_COMMIT, 'sources': sources,
                      'levels': LEVELS, 'maxCellVertices': args.max_cell_vertices,
                      'routeEnvelopePaddingDegrees': .015,
-                     'routeCatalogSha256': sha((ROOT / 'data/catalog/routes.geojson').read_bytes()),
+                     'routeCatalogSha256': catalog_input['catalogSha256'],
+                     'routeCatalogInputs': catalog_input['catalogInputs'],
+                     'routeCatalogFingerprintEncoding': catalog_input['catalogFingerprintEncoding'],
+                     'routeCatalogCount': catalog_input['routeCount'],
                      'sourceFeatureSelection': {'RUS': 'all 83 source features', 'UKR': sorted(CRIMEA)},
                      'inlandWaterInclusions': ['Lake Ladoga', 'Lake Onega'],
                      'coordinateDecimalPlaces': 7, 'encoding': 'indexed-delta-1e7-v1'}

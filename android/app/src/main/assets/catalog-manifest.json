@@ -3,14 +3,14 @@
   "id": "tropnik-reference-catalog-v1",
   "catalog": {
     "path": "catalog.json",
-    "bytes": 2017891,
-    "sha256": "6b398f38de90718b3b4faae2a8d15515f8bb5c18545564653858c2146efe2311"
+    "bytes": 2176050,
+    "sha256": "228950a06cc015eaed24db6398f5fbd692ccf3b6959315661e10ddaabb783f69"
   },
   "sourceInputs": [
     {
       "path": "tools/android-build/prepare-catalog.mjs",
-      "bytes": 10185,
-      "sha256": "5c217ec80b29b49d1199b1ecc5f11b539c5f62d7b40837b857c5c8946db0513b"
+      "bytes": 10080,
+      "sha256": "d460426a5da3ddb23f016af34bd9ded8b7bd155ea45ca9d6803630ad677b0ef0"
     },
     {
       "path": "tools/android-build/catalog-regions.mjs",
@@ -18,19 +18,24 @@
       "sha256": "23cb61a47bbbe80c8704ed768c8ddcc72f2877109ff89b927791c9604d48221e"
     },
     {
+      "path": "tools/android-build/catalog-provenance.mjs",
+      "bytes": 1310,
+      "sha256": "cbec925211b796d7ad9e3e5d83ccd0b66ad4318aae3f601143cc53f1aa8ade3d"
+    },
+    {
       "path": "web/lib/content.ts",
-      "bytes": 20963,
-      "sha256": "3f542cb6ecdb24ebe1d37d731b66aed53927380008fcb303dc2391dbfa7f675d"
+      "bytes": 23138,
+      "sha256": "3f8f2a789d3788a7598a170186cd37751a24791e79b8e300eeaff16172efdf79"
     },
     {
       "path": "web/lib/catalog.generated.json",
-      "bytes": 985269,
-      "sha256": "3b88e91d72faaccd26c7cabe61156191100c2f6f20e7d92c43ad947d6654ae72"
+      "bytes": 993152,
+      "sha256": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49"
     },
     {
       "path": "web/lib/route-points.generated.json",
-      "bytes": 114524,
-      "sha256": "07ff34896033b41d0debb6aa54600fdc2c5455fe83775967e07636fa87a6ae3f"
+      "bytes": 115462,
+      "sha256": "31b35b5843b114bed2e264e9b5064fa37d1946daa0636682bc94fd42bbd5bf61"
     },
     {
       "path": "web/lib/telegram-reviewed.generated.json",
@@ -66,6 +71,11 @@
       "path": "web/lib/russiadiscovery-east.generated.json",
       "bytes": 21499,
       "sha256": "feff4e057067fa196b15ddd29f5ca2fde85d1829c0b2c3c7971ffd125dee5faa"
+    },
+    {
+      "path": "web/lib/editorial-geometry.generated.json",
+      "bytes": 6047,
+      "sha256": "b19d38c7710f1ea007fcb7c5a8a932849c4f304beb1c5dd4bcd345f0c8d43568"
     },
     {
       "path": "web/public/data/russia-boundaries-provenance.json",
@@ -795,6 +805,11 @@
     "osm-relation-21650666",
     "osm-relation-21799750",
     "osm-relation-21841204",
+    "osm-relation-10411709",
+    "osm-relation-12010784",
+    "osm-relation-15407443",
+    "osm-relation-16114689",
+    "osm-relation-17484597",
     "divnogorye-big-divy",
     "primorye-cape-tobizina",
     "katun-upper-multinskoye",
@@ -1479,22 +1494,29 @@
     "osm-relation-21650665",
     "osm-relation-21650666",
     "osm-relation-21799750",
-    "osm-relation-21841204"
+    "osm-relation-21841204",
+    "osm-relation-10411709",
+    "osm-relation-12010784",
+    "osm-relation-15407443",
+    "osm-relation-16114689",
+    "osm-relation-17484597",
+    "stolby-book-of-nature",
+    "ergaki-svetloe",
+    "elbrus-devichyi-kosy",
+    "kolyma-black-creek",
+    "kolyma-kongali"
   ],
   "referenceOnlyRouteIds": [
     "divnogorye-big-divy",
     "primorye-cape-tobizina",
     "katun-upper-multinskoye",
     "curonian-efa",
-    "stolby-book-of-nature",
     "stolby-takmak-legends",
     "stolby-nature-climate",
     "baikal-listvyanka-bolshie-koty",
     "bbt-bolshie-koty-goloustnoe",
     "baikal-khamar-daban-waterfall",
     "teriberka-batareysky-waterfall",
-    "ergaki-svetloe",
-    "elbrus-devichyi-kosy",
     "elbrus-terskol-gorge",
     "cheget-narzan-glade",
     "dombay-chuchkhur-waterfalls",
@@ -1517,8 +1539,6 @@
     "bastak-uchebnaya",
     "bastak-tigrinaya",
     "bastak-bee-world",
-    "kolyma-black-creek",
-    "kolyma-kongali",
     "kolyma-sleeping-knight",
     "pustozersk-big-trail",
     "nenets-barefoot-tundra",
@@ -5852,6 +5872,76 @@
       "sourcePath": "web/public/data/imported/osm-relation-21841204.geojson",
       "bytes": 1254,
       "sha256": "ef1783bbf351dadcd695d61ce5a2bae37a757b8e810a46328bd909e199f705b1"
+    },
+    {
+      "routeId": "osm-relation-10411709",
+      "path": "maps/routes/osm-relation-10411709.geojson",
+      "sourcePath": "web/public/data/imported/osm-relation-10411709.geojson",
+      "bytes": 2114,
+      "sha256": "0f8039fbf956858a44fc5674268322a9757e1346503b221ad8a830f6c766ffb2"
+    },
+    {
+      "routeId": "osm-relation-12010784",
+      "path": "maps/routes/osm-relation-12010784.geojson",
+      "sourcePath": "web/public/data/imported/osm-relation-12010784.geojson",
+      "bytes": 1067,
+      "sha256": "9f711ec88a556c84b6829f6f5b5b11118a38eaae24fe4b9d882a8adca9dea59b"
+    },
+    {
+      "routeId": "osm-relation-15407443",
+      "path": "maps/routes/osm-relation-15407443.geojson",
+      "sourcePath": "web/public/data/imported/osm-relation-15407443.geojson",
+      "bytes": 4473,
+      "sha256": "105b8825ba2a7dae321870dcb220b479af414e74eb37ae89cb775cbb340f7d6d"
+    },
+    {
+      "routeId": "osm-relation-16114689",
+      "path": "maps/routes/osm-relation-16114689.geojson",
+      "sourcePath": "web/public/data/imported/osm-relation-16114689.geojson",
+      "bytes": 3884,
+      "sha256": "aa27ee390ff53438c90a940c4024ba270df342674370a21ed07781b61f6c7bca"
+    },
+    {
+      "routeId": "osm-relation-17484597",
+      "path": "maps/routes/osm-relation-17484597.geojson",
+      "sourcePath": "web/public/data/imported/osm-relation-17484597.geojson",
+      "bytes": 3374,
+      "sha256": "a1ae8580304cca1de2d07cbeefe24240e979647e58ef5a1a711e17dfc4a315c9"
+    },
+    {
+      "routeId": "stolby-book-of-nature",
+      "path": "maps/routes/stolby-book-of-nature.geojson",
+      "sourcePath": "web/public/data/imported/osm-relation-7770901.geojson",
+      "bytes": 585,
+      "sha256": "57ec6251a68bfe9538aaaa89982be57fcd088c27603b09cec10737718a35162f"
+    },
+    {
+      "routeId": "ergaki-svetloe",
+      "path": "maps/routes/ergaki-svetloe.geojson",
+      "sourcePath": "web/public/data/imported/osm-relation-10523413.geojson",
+      "bytes": 9121,
+      "sha256": "0b4e3ee2238185d55973e56d80b0a2c024d09399082e34bbb3b1c77610529aad"
+    },
+    {
+      "routeId": "elbrus-devichyi-kosy",
+      "path": "maps/routes/elbrus-devichyi-kosy.geojson",
+      "sourcePath": "web/public/data/imported/osm-relation-16216006.geojson",
+      "bytes": 16714,
+      "sha256": "73afee2643ddcf344e684152a3d5c33bbe74afd9750a13170637064e646b79fd"
+    },
+    {
+      "routeId": "kolyma-black-creek",
+      "path": "maps/routes/kolyma-black-creek.geojson",
+      "sourcePath": "web/public/data/routes/kolyma-black-creek.geojson",
+      "bytes": 18596,
+      "sha256": "de9dcb7a128b037e8000558efc83c926ac3e581473b62e41fdb725c73dddc46b"
+    },
+    {
+      "routeId": "kolyma-kongali",
+      "path": "maps/routes/kolyma-kongali.geojson",
+      "sourcePath": "web/public/data/routes/kolyma-kongali.geojson",
+      "bytes": 9520,
+      "sha256": "ec9f94a55d07c64989c6dd5d916a371661f7dfab73136096ef2cc950d24a7abf"
     }
   ]
 }

@@ -4,6 +4,7 @@ import {readFile,writeFile,mkdir,rename,readdir,access} from 'node:fs/promises';
 import {dirname,join,resolve,relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {nativeCatalogueRegions} from './catalog-regions.mjs';
+import {nativeGeometryProvenance} from './catalog-provenance.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const require=createRequire(join(root,'web/package.json'));
@@ -27,6 +28,7 @@ async function output(path,bytes){
 }
 await input(fileURLToPath(import.meta.url));
 await input(join(root,'tools/android-build/catalog-regions.mjs'));
+await input(join(root,'tools/android-build/catalog-provenance.mjs'));
 
 // Compile the real exports, including geographic exclusions, rather than keeping
 // a second manually maintained list of cards or region centres.
@@ -89,7 +91,7 @@ for(const trail of trails){
     sourceName:trail.sourceName,sourceUrl:trail.sourceUrl,
     sourceTitle:trail.sourceTitle??null,distanceNote:trail.distanceNote??null,accessStatus:trail.accessStatus??null,
     territoryIds:memberships.filter(id=>id.startsWith('territory-')),
-    sourceLicense:geometryAsset?'Геометрия: © OpenStreetMap contributors, ODbL 1.0. Независимое описание с указанным источником.':'Описание с указанным источником. Линия маршрута пока не добавлена.',
+    ...nativeGeometryProvenance(trail,Boolean(geometryAsset)),
     sourceDate:trail.checkedAt,sourceKind:trail.sourceKind??null,publicationStatus:trail.publicationStatus,
     additionalSources:trail.additionalSources??[],
     currentStatusLabel:notice?.title??null,currentAdvisory:notice?.body??null,

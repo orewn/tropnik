@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
@@ -7,9 +8,11 @@ import {MapResourcePool, MapResourceHTTPError, routeTilePlan} from '../lib/map-r
 import {publicMapResourceKey} from '../lib/map-transport.ts';
 import {TerrainPreparation} from '../lib/terrain-preparation.ts';
 import {MAP_CONFIG} from '../lib/map-config.ts';
+import {loadVerifiedRouteGeometry,versionedRouteSource} from '../lib/route-source-integrity.ts';
 import * as renderer from '../public/terrain/terrain-renderer.js';
 
 const preloadSource=ts.transpileModule(readFileSync(new URL('../lib/map-preload.ts',import.meta.url),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
+const sourceFixture=geometry=>{const body=JSON.stringify(geometry),sha256=createHash('sha256').update(body).digest('hex'),url='/data/preview.geojson',sourceHashes={'preview.geojson':sha256};return{body,url,sourceHashes,versioned:versionedRouteSource(url,sourceHashes).url};};
 function preloadModule(dependencies,environment={}){
   const context=vm.createContext({URL,window:{},location:{origin:'https://map-preview.local',href:'https://map-preview.local/'},navigator:{onLine:true},...environment});
   const testModule={exports:{}},require=id=>{assert.ok(Object.hasOwn(dependencies,id),`Unexpected preload dependency ${id}`);return dependencies[id];};
@@ -18,12 +21,12 @@ function preloadModule(dependencies,environment={}){
 }
 
 test('route previews warm actual 2D geometry and relief tiles without preparing a separate 3D scene', async () => {
-  const reads=[],geometry={type:'LineString',coordinates:[[40.35,43.7],[40.4,43.75]]};let coverageReads=0,coverageDisposals=0,workers=0,coordinators=0;
+  const reads=[],geometry={type:'LineString',coordinates:[[40.35,43.7],[40.4,43.75]]},source=sourceFixture(geometry);let coverageReads=0,coverageDisposals=0,workers=0,coordinators=0;
   class PreviewPreparation extends TerrainPreparation {constructor(options){super(options);coordinators++;}}
   class PreviewPool extends MapResourcePool {
     constructor(){super({fetcher:async url=>{
       reads.push(url);
-      if(url==='/data/preview.geojson')return Response.json(geometry);
+      if(url===source.versioned)return new Response(source.body);
       if(url==='https://tiles.openfreemap.org/planet/latest')return Response.json({tiles:['https://tiles.openfreemap.org/planet/test/{z}/{x}/{y}.pbf']});
       assert.match(url,/^https:\/\/tiles\.(openfreemap\.org\/planet\/test|mapterhorn\.com)\/\d+\/\d+\/\d+\.(pbf|webp)$/);
       return new Response(new Uint8Array([1,2,3]));
@@ -32,6 +35,7 @@ test('route previews warm actual 2D geometry and relief tiles without preparing 
   const dependencies={
     './map-resource-pool':{MapResourcePool:PreviewPool,routeTilePlan},'./map-transport':{publicMapResourceKey},
     './terrain-preparation':{TerrainPreparation:PreviewPreparation},'./map-config':{MAP_CONFIG},
+    './trail-overlay.generated.json':{sourceHashes:source.sourceHashes},'./route-source-integrity':{versionedRouteSource},
     '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>{coverageReads++;return{dispose(){coverageDisposals++;}};}},
     './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js',
   };
@@ -39,13 +43,59 @@ test('route previews warm actual 2D geometry and relief tiles without preparing 
   assert.equal(api.hasTerrainPreview(trail),true,'The regression exercises the former implicit 3D coverage branch');
   const preview=api.preloadTrail(trail);assert.equal(api.preloadTrail(trail),preview,'Two cards still share the same bounded preview');
   assert.deepEqual({...await preview},{state:'ready',completed:2,total:2});
-  assert.deepEqual(await api.loadPublicJSON('/data/preview.geojson'),geometry);
-  assert.equal(reads.filter(url=>url==='/data/preview.geojson').length,1);
+  assert.deepEqual(await api.loadPublicJSON(source.versioned),geometry);
+  assert.equal(reads.filter(url=>url===source.versioned).length,1);assert.equal(reads.includes(source.url),false);
   assert.ok(reads.some(url=>url.endsWith('.pbf')));assert.ok(reads.some(url=>url.endsWith('.webp')));
   assert.ok(reads.length<=2+MAP_CONFIG.prefetchTiles*2);
   assert.equal(coverageReads,1);assert.equal(coverageDisposals,1);
   assert.equal(api.terrainPreparationInfo().state,'idle');assert.equal(api.terrainPreparationInfo().attempts,0);assert.equal(workers,0);assert.equal(coordinators,0);
   assert.equal(reads.some(url=>url.startsWith('/terrain/')),false);
+});
+
+test('prefetch and selected-route verification share one versioned HTTP read in either start order',async t=>{
+  for(const first of ['prefetch','selection'])await t.test(first,async()=>{
+    const geometry={type:'LineString',coordinates:[[40.35,43.7],[40.4,43.75]]},source=sourceFixture(geometry),reads=[];
+    let release,jsonReads=0;const gate=new Promise(resolve=>{release=resolve;});
+    class SharedPool extends MapResourcePool {
+      static instance;
+      constructor(){super({fetcher:async url=>{reads.push(url);await gate;return new Response(source.body);}});SharedPool.instance=this;}
+      json(...args){jsonReads++;return super.json(...args);}
+    }
+    const api=preloadModule({
+      './map-resource-pool':{MapResourcePool:SharedPool,routeTilePlan},'./map-transport':{publicMapResourceKey},
+      './terrain-preparation':{TerrainPreparation},'./map-config':{MAP_CONFIG},
+      './trail-overlay.generated.json':{sourceHashes:source.sourceHashes},'./route-source-integrity':{versionedRouteSource},
+      '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>({dispose(){}})},
+      './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js',
+    });
+    const trail={id:'shared',revisionId:'1',geometryUrl:source.url},controller=new AbortController();
+    const select=()=>loadVerifiedRouteGeometry(trail.geometryUrl,source.sourceHashes,{load:api.loadPublicBytes,invalidate:api.invalidatePublicMapResource,signal:controller.signal});
+    let preview,selection;
+    if(first==='prefetch'){preview=api.preloadTrail(trail);await new Promise(resolve=>setImmediate(resolve));selection=select();}
+    else{selection=select();preview=api.preloadTrail(trail);}
+    await new Promise(resolve=>setImmediate(resolve));
+    assert.deepEqual(reads,[source.versioned]);assert.equal(SharedPool.instance.stats().active,1);assert.equal(SharedPool.instance.stats().queued,0);
+    release();assert.deepEqual({...await preview},{state:'ready',completed:1,total:1});assert.deepEqual(await selection,geometry);
+    assert.equal(jsonReads,0,'Prefetch warms bytes without parsing a separate geometry object');
+    assert.equal(SharedPool.instance.stats().cached,1);assert.equal(SharedPool.instance.stats().bytes,Buffer.byteLength(source.body));
+    assert.deepEqual(await select(),geometry);assert.deepEqual(reads,[source.versioned],'A later selection reuses the same checked resource bytes');
+  });
+});
+
+test('offline preview failures stay partial, skip remote tiles and can retry the same versioned source',async()=>{
+  const geometry={type:'LineString',coordinates:[[40.35,43.7],[40.4,43.75]]},source=sourceFixture(geometry),reads=[];let unavailable=true;
+  class OfflinePool extends MapResourcePool {constructor(){super({fetcher:async url=>{reads.push(url);assert.equal(url,source.versioned);return unavailable?new Response('offline',{status:503}):new Response(source.body);}});}}
+  const api=preloadModule({
+    './map-resource-pool':{MapResourcePool:OfflinePool,routeTilePlan},'./map-transport':{publicMapResourceKey},
+    './terrain-preparation':{TerrainPreparation},'./map-config':{MAP_CONFIG},
+    './trail-overlay.generated.json':{sourceHashes:source.sourceHashes},'./route-source-integrity':{versionedRouteSource},
+    '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>({dispose(){}})},
+    './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js',
+  },{navigator:{onLine:false}});
+  const trail={id:'offline',geometryUrl:source.url,bbox:[40.29,43.64,40.49,43.82]};
+  assert.deepEqual({...await api.preloadTrail(trail)},{state:'partial',completed:0,total:1});assert.deepEqual(reads,[source.versioned]);
+  unavailable=false;assert.deepEqual({...await api.preloadTrail(trail)},{state:'ready',completed:1,total:1});assert.deepEqual(reads,[source.versioned,source.versioned]);
+  assert.deepEqual({...await api.preloadTrail({...trail,id:'absent',geometryUrl:'/data/absent.geojson'})},{state:'partial',completed:0,total:1});assert.equal(reads.length,2,'A missing source hash is a contained partial preview, never an unversioned fetch');
 });
 
 test('explicit legacy terrain requests lazily share one coordinator and preserve the idle snapshot and cancellation API',async()=>{
@@ -55,6 +105,7 @@ test('explicit legacy terrain requests lazily share one coordinator and preserve
   const api=preloadModule({
     './map-resource-pool':{MapResourcePool:LegacyPool,routeTilePlan},'./map-transport':{publicMapResourceKey},
     './terrain-preparation':{TerrainPreparation:LegacyPreparation},'./map-config':{MAP_CONFIG},
+    './trail-overlay.generated.json':{sourceHashes:{}},'./route-source-integrity':{versionedRouteSource},
     '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>({dispose(){}})},
     './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js','@/public/terrain/terrain-renderer.js':renderer,
   });

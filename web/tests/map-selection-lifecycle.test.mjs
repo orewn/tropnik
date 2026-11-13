@@ -2,6 +2,7 @@ import test from 'node:test';
 import {reliefContourIntervals} from '../lib/custom-map-relief.ts';
 import {mapDistanceScale} from '../lib/custom-map-scale.ts';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -12,11 +13,15 @@ import {readRouteGeometry,routeGeometryPositions} from '../lib/route-geometry.ts
 import {cameraBounds} from '../lib/custom-map-camera.ts';
 import {openingTerrainView,planTerrainNavigation} from '../lib/terrain-navigation.ts';
 import {russiaCamera,russiaPadding} from '../public/maps/russia-viewport.js';
+import {TrailOverlayLoader} from '../lib/map-trail-overlay.ts';
+import {buildTrailOverlay} from '../scripts/build-trail-overlay.mjs';
+import {verifyReviewedCoastalRoute} from '../lib/reviewed-coastal-routes.ts';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),compiled=new Map();
 const turn=()=>new Promise(done=>setImmediate(done));
 const deferred=()=>{let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return{promise,resolve,reject};};
 const line=(west=40.02,east=40.08)=>({type:'LineString',coordinates:[[west,43.05],[east,43.05]]});
+const overlaySource=id=>{const geometry=line();return{id,geometryUrl:`/data/${id}.geojson`,sha256:createHash('sha256').update(JSON.stringify(geometry)).digest('hex'),geometry};};
 const region={id:'region',name:'Район',center:[40.05,43.05],zoom:10,bounds:[40,43,40.1,43.1]};
 const grid={schemaVersion:1,bounds:[40,43,40.1,43.1],width:9,height:9,elevations:Array.from({length:81},(_,i)=>100+i%9*3),minElevation:100,maxElevation:124};
 
@@ -39,8 +44,10 @@ function componentHost(file,name,dependencies={}){
     useState:initial=>{const index=cursor++;if(!hooks[index])hooks[index]={value:typeof initial==='function'?initial():initial};return[hooks[index].value,value=>{if(disposed)return;const next=typeof value==='function'?value(hooks[index].value):value;if(!Object.is(next,hooks[index].value)){hooks[index].value=next;dirty=true;}}];},
     useEffect:(callback,deps)=>effect(effects,callback,deps),useLayoutEffect:(callback,deps)=>effect(layout,callback,deps)};
   const jsx=(type,props,key)=>({type,props:props||{},key});
-  const noop=()=>{};
-  const environment=vm.createContext({console,AbortController,URL,navigator:{onLine:true},window:{addEventListener:noop,removeEventListener:noop},
+  const listeners=new Map();
+  const environment=vm.createContext({console,AbortController,URL,navigator:{onLine:true},window:{
+    addEventListener:(name,listener)=>{if(!listeners.has(name))listeners.set(name,new Set());listeners.get(name).add(listener);},
+    removeEventListener:(name,listener)=>listeners.get(name)?.delete(listener),dispatch:name=>{for(const listener of listeners.get(name)||[])listener();}},
     ResizeObserver:class{observe(){}disconnect(){}},
     requestAnimationFrame:callback=>{const id=++serial;frames.set(id,callback);return id;},cancelAnimationFrame:id=>frames.delete(id)});
   if(!compiled.has(file))compiled.set(file,ts.transpileModule(readFileSync(resolve(root,file),'utf8'),{fileName:file,compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText);
@@ -52,6 +59,7 @@ function componentHost(file,name,dependencies={}){
       while(layout.length)layout.shift()();while(effects.length)effects.shift()();
     }while(dirty);return tree;},
     async settle(){await turn();this.render();},
+    async settleUntil(predicate){const deadline=Date.now()+3000;while(!predicate()&&Date.now()<deadline){await new Promise(done=>setTimeout(done,1));this.render();}assert.ok(predicate(),'Expected asynchronous component state did not settle');},
     nodes,find:predicate=>nodes().find(predicate),text:()=>{const visit=node=>typeof node==='string'?node:typeof node==='number'?String(node):Array.isArray(node)?node.map(visit).join(' '):node&&typeof node==='object'?visit(node.props?.children):'';return visit(tree);},
     click(label){const button=this.find(node=>node.type==='button'&&node.props['aria-label']===label);assert.ok(button,`Missing button ${label}`);button.props.onClick();this.render();},
     unmount(){disposed=true;for(const hook of hooks)hook?.cleanup?.();frames.clear();}};
@@ -59,25 +67,30 @@ function componentHost(file,name,dependencies={}){
 }
 
 function atlasFixture({committedMode='detail',ready=true}={}){
-  const requests=new Map(),maps=[],notes=[],chosen=[];
+  const requests=new Map(),maps=[],notes=[],chosen=[],overlayRequests=[],invalidated=[];
   class AtlasEngine{
     constructor(_element,options){this.options=options;this.route=undefined;this.routeId=undefined;this.fits=[];this.cameras=[];this.camera=options.camera;this.visibleBounds=grid.bounds;this.active=true;this.activations=[];this.modes=[];this.pitchChanges=[];this.layers={paths:true,boundaries:true,relief:true};this.layerChanges=[];this.routeChanges=[];this.state={ready,mode:'detail',committedMode,error:ready?'':'Границы карты не загрузились.',loading:false,reliefReady:ready,imageryLoading:false};maps.push(this);queueMicrotask(()=>ready?options.onReady():options.onState(this.getState()));}
     getState(){return{...this.state};}
     getCoverage(){return{area:{},territories:{features:[]}};}
     setRoute(geometry,id){this.route=geometry;this.routeId=id;this.routeChanges.push({geometry,id});}
+    setTrailOverlay(entries){this.overlay=entries;}
+    pickTrail(point,tolerance){this.lastPick={point,tolerance};return this.pickResult??this.routeId;}
     setMode(mode){this.modes.push(mode);this.state={...this.state,mode,committedMode:mode,imagerySource:mode==='satellite'?'eox-s2':undefined};this.options.onState(this.getState());}
     setLayers(value){this.layerChanges.push(value);Object.assign(this.layers,value);}
     retry(){this.retries=(this.retries||0)+1;this.state.loading=true;this.options.onState(this.getState());}
     setPosition(value){this.position=value;}
     setFloor(){}setPadding(){}setRegion(){}setActive(value){this.active=value;this.activations.push(value);}setMarkers(){}setPitch(value){this.pitchChanges.push(value);}setObstacles(){}setCamera(camera){this.camera=camera;this.cameras.push(camera);}destroy(){this.destroyed=true;}
-    fit(bounds){this.fits.push(bounds);}getVisibleBounds(){return this.visibleBounds;}getCamera(){return this.camera;}getSize(){return{width:800,height:600};}
+    fit(bounds){this.fits.push(bounds);}getVisibleBounds(){return this.visibleBounds;}getBounds(){return this.visibleBounds;}getCamera(){return this.camera;}getSize(){return{width:800,height:600};}
   }
   const host=componentHost('components/CustomAtlas.tsx','CustomAtlas',{
     './MapIcon':{MapIcon:'icon'},'./MapAttribution':{MapAttribution:'credit'},'./MapRouteContext':{MapRouteContext:'context'},
     '@/lib/custom-map-engine':{CustomMapEngine:AtlasEngine},'@/lib/custom-map-camera':{hitGeometry:()=>true,mercatorProject:()=>({x:.6,y:.4}),mercatorUnproject:()=>region.center},
     '@/lib/content':{regions:[],routeCountLabel:()=>''},'@/lib/map-catalog':{mapDirectionCounts:()=>new globalThis.Map()},'@/lib/territories':{territoryForMapPoint:()=>undefined},
     '@/lib/russia-map':{russiaView:()=>({camera:{center:region.center,zoom:1},padding:{}})},
-    '@/lib/map-preload':{loadPublicJSON:url=>{const request=deferred();requests.set(url,request);return request.promise;}},
+    '@/lib/map-preload':{loadPublicBytes:(url,priority,signal)=>{const request={...deferred(),url,priority,signal};overlayRequests.push(request);return request.promise;},invalidatePublicMapResource:url=>invalidated.push(url)},
+    '@/lib/route-source-integrity':{loadVerifiedRouteGeometry:(url,_sources,{signal})=>{const request={...deferred(),signal};requests.set(url,request);return request.promise;}},
+    '@/lib/map-trail-overlay':{TrailOverlayLoader},'@/lib/trail-overlay.generated.json':{url:'/data/test-overlay.json',sourceHashes:{}},
+    '@/lib/reviewed-coastal-routes':{verifyReviewedCoastalRoute},
     '@/lib/map-trail-points':{mapTrailPointEntries:()=>[]},'@/lib/route-geometry':{readRouteGeometry,routeGeometryPositions},
     '@/public/maps/russia-viewport.js':{coveredRussiaBounds:positions=>positions.length?grid.bounds:null,inRussiaCoverage:()=>true},
     '@/lib/map-framing':{MapFrameRefit:class{select(){}cancel(){}dispose(){}resized(){}},bindMapFrameRefit:()=>()=>{}},
@@ -88,8 +101,58 @@ function atlasFixture({committedMode='detail',ready=true}={}){
     '@/lib/custom-map-relief':{reliefContourIntervals},
   });
   const select=(trail,visibleTrails=[])=>host.render({region,trail,visibleTrails,onRegion(){},onTrail:value=>chosen.push(value),onMapNote:value=>notes.push(value)});
-  return{host,requests,maps,notes,chosen,select};
+  return{host,requests,maps,notes,chosen,select,overlayRequests,invalidated};
 }
+
+test('the same failed route retries without resetting a manually moved camera; reconnect also restores its geometry',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());const route={id:'retry',title:'Маршрут',geometryUrl:'/retry.geojson'};
+  env.select(route);await env.host.settle();const map=env.maps[0],first=env.requests.get(route.geometryUrl);
+  map.options.onGesture();map.camera={center:[40.09,43.09],zoom:13};const cameraBefore=structuredClone(map.camera),fits=map.fits.length;
+  first.reject(new Error('temporary'));await env.host.settle();env.host.click('Повторить загрузку маршрута');
+  const retry=env.requests.get(route.geometryUrl);assert.notEqual(retry,first);retry.resolve(line());await env.host.settle();
+  assert.ok(map.route);assert.deepEqual(map.camera,cameraBefore);assert.equal(map.fits.length,fits,'Network recovery must not reframe the user');
+  const second={id:'second',title:'Другой маршрут',geometryUrl:'/second.geojson'};env.select(second);await env.host.settle();
+  const failed=env.requests.get(second.geometryUrl);failed.reject(new Error('offline'));await env.host.settle();
+  env.host.environment.window.dispatch('online');env.host.render();const connected=env.requests.get(second.geometryUrl);assert.notEqual(connected,failed);
+  const geometry=line(40.04,40.08);connected.resolve(geometry);await env.host.settle();assert.equal(map.route,geometry);assert.equal(map.routeId,'second');
+});
+
+test('all filtered catalogue lines reach the engine before any individual card is selected and obey layer visibility',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());const a={id:'a',title:'Первый'},b={id:'b',title:'Второй'};
+  env.select(undefined,[a,b]);await env.host.settle();assert.equal(env.overlayRequests.length,1);
+  env.overlayRequests[0].resolve(new TextEncoder().encode(JSON.stringify(buildTrailOverlay([overlaySource('a'),overlaySource('b')]))).buffer);await env.host.settle();
+  const map=env.maps[0];assert.deepEqual(map.overlay.map(entry=>entry.ids),[['a'],['b']]);assert.equal(map.route,undefined);
+  env.select(undefined,[b]);await env.host.settle();assert.deepEqual(map.overlay.map(entry=>entry.ids),[['b']]);assert.equal(env.overlayRequests.length,1);
+  const layers=env.host.find(node=>node.type==='button'&&node.props['aria-expanded']!==undefined);layers.props.onClick();env.host.render();
+  const paths=env.host.nodes().find(node=>node.type==='input'&&node.props.type==='checkbox');paths.props.onChange({target:{checked:false}});env.host.render();
+  assert.deepEqual(map.overlay,[]);assert.equal(map.layers.paths,false);
+});
+
+test('a failed visible detail exposes Retry in the map and clears after recovery or leaving the close view',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());const a={id:'a',title:'Первый'},b={id:'b',title:'Второй'};
+  env.select(undefined,[a]);await env.host.settle();
+  env.overlayRequests[0].resolve(new TextEncoder().encode(JSON.stringify(buildTrailOverlay([overlaySource('a'),overlaySource('b')]))).buffer);await env.host.settle();
+  const map=env.maps[0];map.camera={...map.camera,zoom:14};map.options.onSettled(map.camera);env.host.render();
+  const failed=env.overlayRequests.at(-1);failed.reject(new Error('temporary detail failure'));await env.host.settle();
+  assert.match(env.host.text(),/Часть подробных линий/);assert.equal(map.overlay.length,1);assert.equal(map.overlay[0].detail,undefined);
+  env.host.click('Повторить загрузку троп');const retry=env.overlayRequests.at(-1);assert.notEqual(retry,failed);
+  retry.resolve(new TextEncoder().encode(JSON.stringify(line())).buffer);await env.host.settleUntil(()=>map.overlay[0].detail);
+  assert.ok(map.overlay[0].detail);assert.doesNotMatch(env.host.text(),/Часть подробных линий/);
+  env.select(undefined,[b]);await env.host.settle();env.overlayRequests.at(-1).reject(new Error('other detail failure'));await env.host.settle();
+  assert.ok(env.host.find(node=>node.props['aria-label']==='Повторить загрузку троп'));
+  map.camera={...map.camera,zoom:8};map.options.onSettled(map.camera);env.host.render();
+  assert.doesNotMatch(env.host.text(),/Часть подробных линий/);assert.equal(map.overlay.length,1);assert.equal(map.overlay[0].detail,undefined);
+  assert.equal(env.host.find(node=>node.props['aria-label']==='Повторить загрузку троп'),undefined);
+});
+
+test('clicking a catalogue line opens its current filtered card without first selecting its marker',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());const a={id:'a',title:'Первый'},b={id:'b',title:'Второй'};
+  env.select(undefined,[a,b]);await env.host.settle();const map=env.maps[0],point={x:100,y:100};
+  map.pickResult='b';map.options.onClick(point,[40.05,43.05]);
+  assert.equal(env.chosen.at(-1),b);assert.deepEqual(map.lastPick,{point,tolerance:12});
+  env.select(undefined,[a]);await env.host.settle();const count=env.chosen.length;
+  map.options.onClick(point,[40.05,43.05]);assert.equal(env.chosen.length,count,'A stale hit id from the previous filter cannot reopen a hidden card');
+});
 
 test('selecting a loading or failed route clears the previous line across Relief and Satellite changes',async t=>{
   const env=atlasFixture();t.after(()=>env.host.unmount());
@@ -106,6 +169,7 @@ test('late responses, including a changed source for the same id, cannot take ow
   const env=atlasFixture();t.after(()=>env.host.unmount());
   const old={id:'same',title:'Старая ревизия',geometryUrl:'/old.geojson'},current={id:'same',title:'Новая ревизия',geometryUrl:'/new.geojson'};
   env.select(old);await env.host.settle();env.select(current);env.host.click('Спутник');
+  assert.equal(env.requests.get('/old.geojson').signal.aborted,true);assert.equal(env.requests.get('/new.geojson').signal.aborted,false);
   const actual=line(40.03,40.07);env.requests.get('/new.geojson').resolve(actual);await env.host.settle();
   assert.equal(env.maps[0].route,actual);assert.equal(env.maps[0].routeId,current.id);env.host.click('Рельеф');
   env.requests.get('/old.geojson').resolve(line());await env.host.settle();
@@ -116,7 +180,7 @@ test('late responses, including a changed source for the same id, cannot take ow
 
 test('an unmounted selection cannot apply a late geometry or notification',async()=>{
   const env=atlasFixture();env.select({id:'late',title:'Поздний',geometryUrl:'/late.geojson'});await env.host.settle();
-  env.host.unmount();env.requests.get('/late.geojson').resolve(line());await turn();assert.equal(env.maps[0].route,undefined);assert.deepEqual(env.notes,[]);
+  env.host.unmount();assert.equal(env.requests.get('/late.geojson').signal.aborted,true);env.requests.get('/late.geojson').resolve(line());await turn();assert.equal(env.maps[0].route,undefined);assert.deepEqual(env.notes,[]);
 });
 
 test('a failed map startup exposes retry without a dismiss path back to an endless skeleton',async t=>{

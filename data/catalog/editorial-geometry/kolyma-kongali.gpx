@@ -1,0 +1,1466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="SAS.Planet 19.12.21.10095" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wptx1="http://www.garmin.com/xmlschemas/WaypointExtension/v1" xmlns:gpxtrx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/WaypointExtension/v1 http://www8.garmin.com/xmlschemas/WaypointExtensionv1.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd">
+  <metadata>
+    <time>2023-10-16T01:12:48Z</time>
+    <link href="http://www.sasgis.org/">
+      <text>SAS.Planet</text>
+    </link>
+    <name>Конгали</name>
+    <author>
+      <name>7</name>
+    </author>
+    <bounds maxlat="59.5735888204457" maxlon="151.021178578292" minlat="59.6108237838253" minlon="150.99645429935"/>
+  </metadata>
+  <rte>
+    <name>Конгали</name>
+    <number>1</number>
+    <extensions>
+      <gpxx:RouteExtension>
+        <gpxx:Categories>
+          <gpxx:Category>default</gpxx:Category>
+        </gpxx:Categories>
+      </gpxx:RouteExtension>
+      <gpxtrx:TrackExtension>
+        <gpxtrx:Categories>
+          <gpxtrx:Category>default</gpxtrx:Category>
+        </gpxtrx:Categories>
+      </gpxtrx:TrackExtension>
+    </extensions>
+    <rtept lat="59.6108237838253" lon="151.006129374062">
+      <name>Конгали 1</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6106309638484" lon="151.005994916815">
+      <name>Конгали 2</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.610489606828" lon="151.005833984275">
+      <name>Конгали 3</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6103047544394" lon="151.005608678717">
+      <name>Конгали 4</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6101960172635" lon="151.005458475013">
+      <name>Конгали 5</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6100329108377" lon="151.005190254111">
+      <name>Конгали 6</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6099404835103" lon="151.005007863898">
+      <name>Конгали 7</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6098371820779" lon="151.004825473685">
+      <name>Конгали 8</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6096958217066" lon="151.004664541144">
+      <name>Конгали 9</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6095055279568" lon="151.004514337439">
+      <name>Конгали 10</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.609293485076" lon="151.004396320243">
+      <name>Конгали 11</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6090325073796" lon="151.004203201194">
+      <name>Конгали 12</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6087389050399" lon="151.0039671668">
+      <name>Конгали 13</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6082930595279" lon="151.003623844046">
+      <name>Конгали 14</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6077765237688" lon="151.003130317588">
+      <name>Конгали 15</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6074230999748" lon="151.002765537162">
+      <name>Конгали 16</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6070044238849" lon="151.002379299063">
+      <name>Конгали 17</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6068752857231" lon="151.002204955477">
+      <name>Конгали 18</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6065634671135" lon="151.001843874608">
+      <name>Конгали 19</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6063859155384" lon="151.001453936953">
+      <name>Конгали 20</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6062554156148" lon="151.001086474318">
+      <name>Конгали 21</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6061453059088" lon="151.000850439925">
+      <name>Конгали 22</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6059631483163" lon="151.000678778548">
+      <name>Конгали 23</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6057293326411" lon="151.000547350306">
+      <name>Конгали 24</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6052562587246" lon="151.000327409167">
+      <name>Конгали 25</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6048769791206" lon="151.000147701163">
+      <name>Конгали 26</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6042244450197" lon="150.999839247126">
+      <name>Конгали 27</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6038546700528" lon="150.999635399241">
+      <name>Конгали 28</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6034767340667" lon="150.999396682639">
+      <name>Конгали 29</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6028894293959" lon="150.999104321856">
+      <name>Конгали 30</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6022191825489" lon="150.998578608889">
+      <name>Конгали 31</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6020111721798" lon="150.998471320529">
+      <name>Конгали 32</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.601687597927" lon="150.998361349959">
+      <name>Конгали 33</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6014850225392" lon="150.998313070197">
+      <name>Конгали 34</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.600918" lon="150.997932">
+      <name>Конгали 35</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6002085579706" lon="150.997688115496">
+      <name>Конгали 36</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5998604928588" lon="150.997816861529">
+      <name>Конгали 37</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5995559329194" lon="150.998117268939">
+      <name>Конгали 38</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5990175076809" lon="150.998664439578">
+      <name>Конгали 39</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5986313589995" lon="150.998932660479">
+      <name>Конгали 40</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.598430124824" lon="150.998836100955">
+      <name>Конгали 41</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5983159102947" lon="150.998600066561">
+      <name>Конгали 42</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5981745012905" lon="150.998417676348">
+      <name>Конгали 43</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5979460700997" lon="150.998353303332">
+      <name>Конгали 44</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5976850039745" lon="150.998423040766">
+      <name>Конгали 45</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5973117151159" lon="150.998504524384">
+      <name>Конгали 46</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5969398665528" lon="150.998605430979">
+      <name>Конгали 47</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5966216823856" lon="150.998637617488">
+      <name>Конгали 48</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5964857053242" lon="150.998632253069">
+      <name>Конгали 49</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5963109316394" lon="150.998686914597">
+      <name>Конгали 50</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.596053294601" lon="150.999109686274">
+      <name>Конгали 51</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5958438861445" lon="150.999538839717">
+      <name>Конгали 52</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5956970274852" lon="150.999898255725">
+      <name>Конгали 53</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5956725509793" lon="151.000112832446">
+      <name>Конгали 54</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5955855232583" lon="151.000751198191">
+      <name>Конгали 55</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5954794579177" lon="151.001255453486">
+      <name>Конгали 56</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.595291803031" lon="151.001958192248">
+      <name>Конгали 57</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5951911760646" lon="151.002301515002">
+      <name>Конгали 58</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.594976" lon="151.002742">
+      <name>Конгали 59</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5947913848616" lon="151.002902329821">
+      <name>Конгали 60</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5944759000007" lon="151.002910376448">
+      <name>Конгали 61</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5940570620614" lon="151.002918423075">
+      <name>Конгали 62</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5939183548366" lon="151.002972067256">
+      <name>Конгали 63</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5936572573263" lon="151.003031075854">
+      <name>Конгали 64</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5930670606655" lon="151.003047169108">
+      <name>Конгали 65</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.592623726383" lon="151.003009618182">
+      <name>Конгали 66</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5922456636802" lon="151.002773583789">
+      <name>Конгали 67</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5919655137462" lon="151.002403438945">
+      <name>Конгали 68</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.591715280757" lon="151.001990378756">
+      <name>Конгали 69</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5915684040017" lon="151.00149148788">
+      <name>Конгали 70</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.591405206852" lon="151.001008690257">
+      <name>Конгали 71</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5912528887952" lon="151.000617087741">
+      <name>Конгали 72</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5908176905322" lon="151.000284493823">
+      <name>Конгали 73</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5903960868255" lon="150.999994815249">
+      <name>Конгали 74</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.590103" lon="150.999728">
+      <name>Конгали 75</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5899282365037" lon="150.999683679004">
+      <name>Конгали 76</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5897296701486" lon="150.999603212733">
+      <name>Конгали 77</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5894032571454" lon="150.999533475299">
+      <name>Конгали 78</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.589038758868" lon="150.99939400043">
+      <name>Конгали 79</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5887857838526" lon="150.999302805323">
+      <name>Конгали 80</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5885355271197" lon="150.999174059291">
+      <name>Конгали 81</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.58832063126" lon="150.999136508365">
+      <name>Конгали 82</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5880295675822" lon="150.999227703471">
+      <name>Конгали 83</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5877684241873" lon="150.99936717834">
+      <name>Конгали 84</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5873631038466" lon="150.999624670405">
+      <name>Конгали 85</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5869604989242" lon="150.999689043422">
+      <name>Конгали 86</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.586644940334" lon="150.999538839717">
+      <name>Конгали 87</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5863892268835" lon="150.99901312675">
+      <name>Конгали 88</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5860688598654" lon="150.998399918233">
+      <name>Конгали 89</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5857145692679" lon="150.99800461616">
+      <name>Конгали 90</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5853772353678" lon="150.997521818538">
+      <name>Конгали 91</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5851269531836" lon="150.997275055308">
+      <name>Конгали 92</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5848984330354" lon="150.997232139964">
+      <name>Конгали 93</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5844522701609" lon="150.997221411128">
+      <name>Конгали 94</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5838428673714" lon="150.9972428688">
+      <name>Конгали 95</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5835490442108" lon="150.997146309275">
+      <name>Конгали 96</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.583247056612" lon="150.996996105571">
+      <name>Конгали 97</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5828484832291" lon="150.996811033149">
+      <name>Конгали 98</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5823546809637" lon="150.996558905501">
+      <name>Конгали 99</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.582128862628" lon="150.99645429935">
+      <name>Конгали 100</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5820989347826" lon="150.996588409801">
+      <name>Конгали 101</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5819860249435" lon="150.996687651534">
+      <name>Конгали 102</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5818839976534" lon="150.996719838042">
+      <name>Конгали 103</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5817098703611" lon="150.99672520246">
+      <name>Конгали 104</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5815656705126" lon="150.996719838042">
+      <name>Конгали 105</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5813724961586" lon="150.996794939895">
+      <name>Конгали 106</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5812500611325" lon="150.996864677329">
+      <name>Конгали 107</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5810704889521" lon="150.997020245452">
+      <name>Конгали 108</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5808773117448" lon="150.997320652862">
+      <name>Конгали 109</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5807467124387" lon="150.99740648355">
+      <name>Конгали 110</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5805780209155" lon="150.99746012773">
+      <name>Конгали 111</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5804338161984" lon="150.997540594001">
+      <name>Конгали 112</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.580357632324" lon="150.997663975615">
+      <name>Конгали 113</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5802705648268" lon="150.997798086066">
+      <name>Конгали 114</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.580112754412" lon="150.997883916755">
+      <name>Конгали 115</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.579843386643" lon="150.997948289771">
+      <name>Конгали 116</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5795277610489" lon="150.997996569533">
+      <name>Конгали 117</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5790760847717" lon="150.998039484877">
+      <name>Конгали 118</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5787414050512" lon="150.998130679984">
+      <name>Конгали 119</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5783631857363" lon="150.998254061599">
+      <name>Конгали 120</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5780774776696" lon="150.998355985541">
+      <name>Конгали 121</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.577846188404" lon="150.998404265303">
+      <name>Конгали 122</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5776067343068" lon="150.998404265303">
+      <name>Конгали 123</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5774217004241" lon="150.998339892287">
+      <name>Конгали 124</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5772421077379" lon="150.998254061599">
+      <name>Конгали 125</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5770543507193" lon="150.998184324164">
+      <name>Конгали 126</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5769373421904" lon="150.998296976943">
+      <name>Конгали 127</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5767305354199" lon="150.99857592668">
+      <name>Конгали 128</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5765645448523" lon="150.998881698508">
+      <name>Конгали 129</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5763604569627" lon="150.999187470336">
+      <name>Конгали 130</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5762325612521" lon="150.999364496131">
+      <name>Конгали 131</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5760148653037" lon="150.999541521926">
+      <name>Конгали 132</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575680155026" lon="150.999815107245">
+      <name>Конгали 133</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5754733405015" lon="151.000136972327">
+      <name>Конгали 134</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5752515577191" lon="151.000394464393">
+      <name>Конгали 135</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5750665108395" lon="151.000550032515">
+      <name>Конгали 136</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5748596925303" lon="151.000668049712">
+      <name>Конгали 137</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5747154632177" lon="151.000764609237">
+      <name>Конгали 138</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5746447089884" lon="151.000839711089">
+      <name>Конгали 139</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5743644119208" lon="151.001134754081">
+      <name>Конгали 140</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5740487347483" lon="151.00146198358">
+      <name>Конгали 141</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.573888173667" lon="151.001622916121">
+      <name>Конгали 142</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5736024274683" lon="151.001848221679">
+      <name>Конгали 143</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5735888204457" lon="151.002014518638">
+      <name>Конгали 144</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5736241986929" lon="151.002111078162">
+      <name>Конгали 145</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5736743480083" lon="151.002151311297">
+      <name>Конгали 146</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5737206117445" lon="151.002237141986">
+      <name>Конгали 147</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5737804823673" lon="151.002290786166">
+      <name>Конгали 148</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5738185817988" lon="151.002408803363">
+      <name>Конгали 149</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5738131390255" lon="151.002537549395">
+      <name>Конгали 150</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5738240245712" lon="151.002666295428">
+      <name>Конгали 151</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5738675667186" lon="151.002886236567">
+      <name>Конгали 152</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5739111088095" lon="151.003138364215">
+      <name>Конгали 153</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.573927437079" lon="151.003336847682">
+      <name>Конгали 154</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574002" lon="151.003626">
+      <name>Конгали 155</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574157" lon="151.005033">
+      <name>Конгали 156</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574517" lon="151.006488">
+      <name>Конгали 157</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574464" lon="151.008001">
+      <name>Конгали 158</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.57475" lon="151.008589">
+      <name>Конгали 159</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574972" lon="151.009845">
+      <name>Конгали 160</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575194" lon="151.010267">
+      <name>Конгали 161</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575113" lon="151.010817">
+      <name>Конгали 162</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575497" lon="151.012971">
+      <name>Конгали 163</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575283" lon="151.014634">
+      <name>Конгали 164</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575507" lon="151.015239">
+      <name>Конгали 165</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575511241433" lon="151.016589642424">
+      <name>Конгали 166</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5755409892032" lon="151.01687564448">
+      <name>Конгали 167</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5756309761779" lon="151.017077804465">
+      <name>Конгали 168</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757098920259" lon="151.017356754203">
+      <name>Конгали 169</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5758051350435" lon="151.017598153014">
+      <name>Конгали 170</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5758813292628" lon="151.017818094153">
+      <name>Конгали 171</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5758296260614" lon="151.018166781325">
+      <name>Конгали 172</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757888076883" lon="151.018494010825">
+      <name>Конгали 173</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575756152954" lon="151.019003630538">
+      <name>Конгали 174</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757452680355" lon="151.019593716521">
+      <name>Конгали 175</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757996925926" lon="151.020189166922">
+      <name>Конгали 176</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757833652347" lon="151.02041447248">
+      <name>Конгали 177</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757316618824" lon="151.020682693381">
+      <name>Конгали 178</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5756772372148" lon="151.020945549865">
+      <name>Конгали 179</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5756406547134" lon="151.021178578292">
+      <name>Конгали 180</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5756772372148" lon="151.020945549865">
+      <name>Конгали 181</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757316618824" lon="151.020682693381">
+      <name>Конгали 182</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757833652347" lon="151.02041447248">
+      <name>Конгали 183</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757996925926" lon="151.020189166922">
+      <name>Конгали 184</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757452680355" lon="151.019593716521">
+      <name>Конгали 185</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575756152954" lon="151.019003630538">
+      <name>Конгали 186</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757888076883" lon="151.018494010825">
+      <name>Конгали 187</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5758296260614" lon="151.018166781325">
+      <name>Конгали 188</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5758813292628" lon="151.017818094153">
+      <name>Конгали 189</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5758051350435" lon="151.017598153014">
+      <name>Конгали 190</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5757098920259" lon="151.017356754203">
+      <name>Конгали 191</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5756309761779" lon="151.017077804465">
+      <name>Конгали 192</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5755384539126" lon="151.016879320998">
+      <name>Конгали 193</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575511241433" lon="151.016589642424">
+      <name>Конгали 194</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575507" lon="151.015239">
+      <name>Конгали 195</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575283" lon="151.014634">
+      <name>Конгали 196</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575497" lon="151.012971">
+      <name>Конгали 197</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575113" lon="151.010817">
+      <name>Конгали 198</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575194" lon="151.010267">
+      <name>Конгали 199</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574972" lon="151.009845">
+      <name>Конгали 200</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.57475" lon="151.008589">
+      <name>Конгали 201</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574464" lon="151.008001">
+      <name>Конгали 202</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574517" lon="151.006488">
+      <name>Конгали 203</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574157" lon="151.005033">
+      <name>Конгали 204</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.574002" lon="151.003626">
+      <name>Конгали 205</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.573927437079" lon="151.003336847682">
+      <name>Конгали 206</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5739111088095" lon="151.003138364215">
+      <name>Конгали 207</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5738675667186" lon="151.002886236567">
+      <name>Конгали 208</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5738240245712" lon="151.002666295428">
+      <name>Конгали 209</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5738131390255" lon="151.002537549395">
+      <name>Конгали 210</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5738185817988" lon="151.002408803363">
+      <name>Конгали 211</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5737804823673" lon="151.002290786166">
+      <name>Конгали 212</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5737206117445" lon="151.002237141986">
+      <name>Конгали 213</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5736743480083" lon="151.002151311297">
+      <name>Конгали 214</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5736241986929" lon="151.002111078162">
+      <name>Конгали 215</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5735888204457" lon="151.002014518638">
+      <name>Конгали 216</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5736024274683" lon="151.001848221679">
+      <name>Конгали 217</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.573888173667" lon="151.001622916121">
+      <name>Конгали 218</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5740487347483" lon="151.00146198358">
+      <name>Конгали 219</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5743644119208" lon="151.001134754081">
+      <name>Конгали 220</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5746447089884" lon="151.000839711089">
+      <name>Конгали 221</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5747154632177" lon="151.000764609237">
+      <name>Конгали 222</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5748596925303" lon="151.000668049712">
+      <name>Конгали 223</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5750665108395" lon="151.000550032515">
+      <name>Конгали 224</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5752515577191" lon="151.000394464393">
+      <name>Конгали 225</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5754733405015" lon="151.000136972327">
+      <name>Конгали 226</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.575680155026" lon="150.999815107245">
+      <name>Конгали 227</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5760148653037" lon="150.999541521926">
+      <name>Конгали 228</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5762325612521" lon="150.999364496131">
+      <name>Конгали 229</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5763604569627" lon="150.999187470336">
+      <name>Конгали 230</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5765645448523" lon="150.998881698508">
+      <name>Конгали 231</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5767305354199" lon="150.99857592668">
+      <name>Конгали 232</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5769373421904" lon="150.998296976943">
+      <name>Конгали 233</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5770543507193" lon="150.998184324164">
+      <name>Конгали 234</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5772421077379" lon="150.998254061599">
+      <name>Конгали 235</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5774217004241" lon="150.998339892287">
+      <name>Конгали 236</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5776067343068" lon="150.998404265303">
+      <name>Конгали 237</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.577846188404" lon="150.998404265303">
+      <name>Конгали 238</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5780774776696" lon="150.998355985541">
+      <name>Конгали 239</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5783631857363" lon="150.998254061599">
+      <name>Конгали 240</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5787414050512" lon="150.998130679984">
+      <name>Конгали 241</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5790760847717" lon="150.998039484877">
+      <name>Конгали 242</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5795277610489" lon="150.997996569533">
+      <name>Конгали 243</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.579843386643" lon="150.997948289771">
+      <name>Конгали 244</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.580112754412" lon="150.997883916755">
+      <name>Конгали 245</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5802705648268" lon="150.997798086066">
+      <name>Конгали 246</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.580357632324" lon="150.997663975615">
+      <name>Конгали 247</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5804338161984" lon="150.997540594001">
+      <name>Конгали 248</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5805780209155" lon="150.99746012773">
+      <name>Конгали 249</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5807467124387" lon="150.99740648355">
+      <name>Конгали 250</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5808773117448" lon="150.997320652862">
+      <name>Конгали 251</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5810704889521" lon="150.997020245452">
+      <name>Конгали 252</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5812500611325" lon="150.996864677329">
+      <name>Конгали 253</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5813724961586" lon="150.996794939895">
+      <name>Конгали 254</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5815656705126" lon="150.996719838042">
+      <name>Конгали 255</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5817098703611" lon="150.99672520246">
+      <name>Конгали 256</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5818839976534" lon="150.996719838042">
+      <name>Конгали 257</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5819860249435" lon="150.996687651534">
+      <name>Конгали 258</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5820989347826" lon="150.996588409801">
+      <name>Конгали 259</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.582128862628" lon="150.99645429935">
+      <name>Конгали 260</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5823546809637" lon="150.996558905501">
+      <name>Конгали 261</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5828484832291" lon="150.996811033149">
+      <name>Конгали 262</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.583247056612" lon="150.996996105571">
+      <name>Конгали 263</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5835490442108" lon="150.997146309275">
+      <name>Конгали 264</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5838428673714" lon="150.9972428688">
+      <name>Конгали 265</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5844522701609" lon="150.997221411128">
+      <name>Конгали 266</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5848984330354" lon="150.997232139964">
+      <name>Конгали 267</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5851269531836" lon="150.997275055308">
+      <name>Конгали 268</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5853772353678" lon="150.997521818538">
+      <name>Конгали 269</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5857145692679" lon="150.99800461616">
+      <name>Конгали 270</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5860682221309" lon="150.99841231193">
+      <name>Конгали 271</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5863892268835" lon="150.99901312675">
+      <name>Конгали 272</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.586644940334" lon="150.999538839717">
+      <name>Конгали 273</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5869604989242" lon="150.999689043422">
+      <name>Конгали 274</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5873631038466" lon="150.999624670405">
+      <name>Конгали 275</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5877684241873" lon="150.99936717834">
+      <name>Конгали 276</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5880295675822" lon="150.999227703471">
+      <name>Конгали 277</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.58832063126" lon="150.999136508365">
+      <name>Конгали 278</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5885355271197" lon="150.999174059291">
+      <name>Конгали 279</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5887857838526" lon="150.999302805323">
+      <name>Конгали 280</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.589038758868" lon="150.99939400043">
+      <name>Конгали 281</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5894032571454" lon="150.999533475299">
+      <name>Конгали 282</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5897296701486" lon="150.999603212733">
+      <name>Конгали 283</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5899282365037" lon="150.999683679004">
+      <name>Конгали 284</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.590103" lon="150.999728">
+      <name>Конгали 285</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5903960868255" lon="150.999994815249">
+      <name>Конгали 286</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5908176905322" lon="151.000284493823">
+      <name>Конгали 287</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5912528887952" lon="151.000617087741">
+      <name>Конгали 288</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.591405206852" lon="151.001008690257">
+      <name>Конгали 289</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5915684040017" lon="151.00149148788">
+      <name>Конгали 290</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.591715280757" lon="151.001990378756">
+      <name>Конгали 291</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5919655137462" lon="151.002403438945">
+      <name>Конгали 292</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5922456636802" lon="151.002773583789">
+      <name>Конгали 293</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.592623726383" lon="151.003009618182">
+      <name>Конгали 294</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5930670606655" lon="151.003047169108">
+      <name>Конгали 295</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5936572573263" lon="151.003031075854">
+      <name>Конгали 296</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5939183548366" lon="151.002972067256">
+      <name>Конгали 297</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5940570620614" lon="151.002918423075">
+      <name>Конгали 298</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5944759000007" lon="151.002910376448">
+      <name>Конгали 299</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5947913848616" lon="151.002902329821">
+      <name>Конгали 300</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.594976" lon="151.002742">
+      <name>Конгали 301</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5951911760646" lon="151.002301515002">
+      <name>Конгали 302</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.595291803031" lon="151.001958192248">
+      <name>Конгали 303</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5954794579177" lon="151.001255453486">
+      <name>Конгали 304</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5955855232583" lon="151.000751198191">
+      <name>Конгали 305</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5956725509793" lon="151.000112832446">
+      <name>Конгали 306</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5956970274852" lon="150.999898255725">
+      <name>Конгали 307</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5958438861445" lon="150.999538839717">
+      <name>Конгали 308</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.596053294601" lon="150.999109686274">
+      <name>Конгали 309</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5963116538803" lon="150.99871271934">
+      <name>Конгали 310</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5964857053242" lon="150.998632253069">
+      <name>Конгали 311</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5966216823856" lon="150.998637617488">
+      <name>Конгали 312</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5969398665528" lon="150.998605430979">
+      <name>Конгали 313</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.597317876294" lon="150.998530329127">
+      <name>Конгали 314</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5976850039745" lon="150.998423040766">
+      <name>Конгали 315</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5979460700997" lon="150.998353303332">
+      <name>Конгали 316</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5981745012905" lon="150.998417676348">
+      <name>Конгали 317</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5983159102947" lon="150.998600066561">
+      <name>Конгали 318</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.598430124824" lon="150.998836100955">
+      <name>Конгали 319</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5986313589995" lon="150.998932660479">
+      <name>Конгали 320</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5990175076809" lon="150.998664439578">
+      <name>Конгали 321</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5995559329194" lon="150.998117268939">
+      <name>Конгали 322</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.5998604928588" lon="150.997816861529">
+      <name>Конгали 323</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6002085579706" lon="150.997688115496">
+      <name>Конгали 324</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.600918" lon="150.997932">
+      <name>Конгали 325</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6014850225392" lon="150.998313070197">
+      <name>Конгали 326</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.601687597927" lon="150.998361349959">
+      <name>Конгали 327</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6020111721798" lon="150.998471320529">
+      <name>Конгали 328</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6022191825489" lon="150.998578608889">
+      <name>Конгали 329</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6028894293959" lon="150.999104321856">
+      <name>Конгали 330</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6034767340667" lon="150.999396682639">
+      <name>Конгали 331</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6038546700528" lon="150.999635399241">
+      <name>Конгали 332</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6042244450197" lon="150.999839247126">
+      <name>Конгали 333</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6048769791206" lon="151.000147701163">
+      <name>Конгали 334</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6052562587246" lon="151.000327409167">
+      <name>Конгали 335</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6057293326411" lon="151.000547350306">
+      <name>Конгали 336</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6059631483163" lon="151.000678778548">
+      <name>Конгали 337</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6061453059088" lon="151.000850439925">
+      <name>Конгали 338</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6062554156148" lon="151.001086474318">
+      <name>Конгали 339</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6063859155384" lon="151.001453936953">
+      <name>Конгали 340</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6065680708315" lon="151.001834810633">
+      <name>Конгали 341</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6068752857231" lon="151.002204955477">
+      <name>Конгали 342</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6070044238849" lon="151.002379299063">
+      <name>Конгали 343</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6074230999748" lon="151.002765537162">
+      <name>Конгали 344</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6077765237688" lon="151.003130317588">
+      <name>Конгали 345</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6082930595279" lon="151.003623844046">
+      <name>Конгали 346</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6087389050399" lon="151.0039671668">
+      <name>Конгали 347</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6090325073796" lon="151.004203201194">
+      <name>Конгали 348</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.609293485076" lon="151.004396320243">
+      <name>Конгали 349</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6095055279568" lon="151.004514337439">
+      <name>Конгали 350</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6096958217066" lon="151.004664541144">
+      <name>Конгали 351</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6098371820779" lon="151.004825473685">
+      <name>Конгали 352</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6099404835103" lon="151.005007863898">
+      <name>Конгали 353</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6100329108377" lon="151.005190254111">
+      <name>Конгали 354</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6101960172635" lon="151.005458475013">
+      <name>Конгали 355</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6103047544394" lon="151.005608678717">
+      <name>Конгали 356</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.610489606828" lon="151.005833984275">
+      <name>Конгали 357</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6106309638484" lon="151.005994916815">
+      <name>Конгали 358</name>
+      <sym>waypoint</sym>
+    </rtept>
+    <rtept lat="59.6107898040225" lon="151.006228615795">
+      <name>Конгали 359</name>
+      <sym>waypoint</sym>
+    </rtept>
+  </rte>
+</gpx>

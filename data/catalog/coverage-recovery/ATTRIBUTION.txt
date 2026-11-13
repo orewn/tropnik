@@ -1,0 +1,4 @@
+OSM-derived route data: OpenStreetMap contributors, distributed by Waymarked Trails. ODbL 1.0.
+https://www.openstreetmap.org/copyright
+https://opendatacommons.org/licenses/odbl/1-0/
+Fresh source responses and dates are retained; no field, access, or navigation verification is claimed.

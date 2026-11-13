@@ -99,6 +99,8 @@ jobs:
           npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
           test "$(pnpm --version)" = '11.25.0'
           pnpm --dir web install --frozen-lockfile
+      - name: Verify reviewed route geometry against pinned sources
+        run: python3 web/scripts/prepare-editorial-geometry.py --check
       - name: JDK17
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
@@ -128,6 +130,12 @@ jobs:
           printf '%s\n' "$RUNNER_TEMP/tropnik-python/bin" >> "$GITHUB_PATH"
           node --version
           printf 'NODE_PATH=%s\n' "$GITHUB_WORKSPACE/web/node_modules" >> "$GITHUB_ENV"
+      - name: Reproduce recovered routes against the pinned full boundary
+        run: |
+          python3 -m pip install -r tools/map-package/requirements-territories.txt
+          python3 tools/import-data/recover_route_coverage.py build --archive data/catalog/coverage-recovery/source-responses.tar.gz --download-sources --check
+          python3 -m unittest discover -s tools/import-data -p 'test_route_coverage_recovery.py'
+          python3 -m unittest discover -s tools/map-package -p 'test_route_catalog_inputs.py'
       - name: Build, test and verify
         run: |
           chmod +x android/gradlew

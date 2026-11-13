@@ -36,6 +36,10 @@ const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const exists = async path => access(path).then(() => true, () => false);
 const textExtensions = new Set(['.json', '.webmanifest', '.html', '.css', '.js', '.mjs']);
 
+const overlayCheck = spawnSync(process.execPath, ['--experimental-strip-types', 'scripts/build-trail-overlay.mjs', '--check'], {cwd: web, stdio: 'inherit'});
+if (overlayCheck.error) throw overlayCheck.error;
+if (overlayCheck.status !== 0) throw new Error('The visible trail overlay must match the complete current catalogue and source geometry before publishing.');
+
 const connectionsCheck = spawnSync(process.execPath, ['--experimental-strip-types', 'scripts/build-trail-connections.mjs', '--check'], {cwd: web, stdio: 'inherit'});
 if (connectionsCheck.error) throw connectionsCheck.error;
 if (connectionsCheck.status !== 0) throw new Error('The trail connection index must match the current catalogue and geometry before publishing.');
@@ -162,7 +166,7 @@ for (const path of await files(join(source, 'public'))) {
   let bytes = await readFile(path);
   // The Android manifest pins this original provenance file. Its declared root URLs
   // describe the source dataset; GeoJSON bytes and source hashes stay unchanged.
-  const immutable = name.startsWith('offline-map/') || name.startsWith('terrain-regions/') || name === 'data/russia-boundaries-provenance.json' || name === 'custom-map/manifest.json';
+  const immutable = name.startsWith('offline-map/') || name.startsWith('terrain-regions/') || name === 'data/russia-boundaries-provenance.json' || name === 'custom-map/manifest.json' || /^data\/trail-overlay-[a-f0-9]{16}\.json$/.test(name);
   if (!immutable && textExtensions.has(extname(name))) {
     let value = bytes.toString('utf8');
     if (/\.(?:json|webmanifest)$/.test(name)) value = JSON.stringify(rewriteJSON(JSON.parse(value), base), null, 2) + '\n';

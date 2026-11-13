@@ -38,7 +38,15 @@ The generator dissolves the source, works in the renderer's Mercator plane,
 simplifies globally before clipping, and validates each serialized geometry.
 Source boundary **lines** are clipped independently of administrative fill
 polygons, so an artificial cell perimeter never becomes a green outline.
-Existing route envelopes retain source detail even in the initial overview.
+Every committed `data/catalog/**/routes.geojson` collection participates in
+route-detail protection, including the national supplement, recovered coastal
+routes and reviewed official tracks. Raw acquisition directories are excluded.
+The shared `route_catalog_inputs.py` reader checks identities and linear
+geometry, and the manifest records every input's path, byte count and SHA-256.
+The current 622 route envelopes retain source detail even in the initial
+overview; the original generator protected only the initial 278-route extract.
+Each envelope contains unchanged source land only, so a source track cannot
+create new land around itself.
 
 | View zoom | Level | Mercator tolerance |
 | --- | --- | --- |
@@ -77,9 +85,8 @@ Supported roles are `area`, `mask`, `territory`, and `territory-boundary`.
 The shared web decoder is `/maps/map-coverage-lod.js`.
 
 This encoding shares identical positions between roles without changing any
-geometry. All 568 bundles total 114,710,697 bytes before HTTP compression, or
-46,901,617 bytes with independent gzip level 6. The initial overview is
-2,938,837 bytes raw / 901,717 gzip. The raw source level across the whole display
+geometry. All 568 bundles total 114,878,763 bytes before HTTP compression.
+The initial overview is 3,019,896 bytes. The raw source level across the whole display
 is 52,758,752 bytes; a viewport fetches only its selected cells.
 
 The `.coverage` byte stream must be copied without JSON reformatting or URL

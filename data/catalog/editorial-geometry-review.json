@@ -1,0 +1,1521 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-13",
+  "scope": "Explicit review of all 66 editorial cards lacking geometry at baseline. Only source tracks matching the full described route are linked. Sparse schemes, partial routes, materially unresolved variants, restricted reuse sources and unavailable tracks remain unresolved. Public source retrieval is not field verification or permission to hike.",
+  "accepted": [
+    {
+      "id": "stolby-book-of-nature",
+      "kind": "existing_catalogue",
+      "sourceRouteId": "osm-relation-7770901",
+      "sourceTitle": "Экотропа \"Книга Природы\"",
+      "sourceSha256": "57ec6251a68bfe9538aaaa89982be57fcd088c27603b09cec10737718a35162f",
+      "reviewedAt": "2026-11-13",
+      "segmentCount": 1,
+      "pointCount": 16,
+      "evidence": [
+        {
+          "url": "https://kras-stolby.ru/posetitelyam/marshruty/poznavatelnaya-ekotropa-kniga-prirody-1/",
+          "scope": "Official route identity, 1.2 km one-way, both endpoint coordinates."
+        }
+      ],
+      "notes": [
+        "Длина линии на карте — около 1 км; описание парка указывает 1,2 км. Перед выходом сверяйте вход и выход с действующей схемой парка."
+      ],
+      "geometryScope": "source_track",
+      "identityReview": {
+        "regionMatches": true,
+        "fieldVerified": false,
+        "navigationReady": false,
+        "coordinatesChanged": false
+      },
+      "endpointAnchors": [
+        {
+          "coordinates": [
+            92.7416,
+            55.942233
+          ],
+          "maximumDistanceM": 50
+        },
+        {
+          "coordinates": [
+            92.745283,
+            55.950433
+          ],
+          "maximumDistanceM": 20
+        }
+      ],
+      "removeNotes": [
+        "Проверенная геометрия этого варианта пока не добавлена. Карточка содержит описание, а не готовый навигационный трек."
+      ],
+      "title": "Красноярские Столбы — «Книга природы»"
+    },
+    {
+      "id": "ergaki-svetloe",
+      "kind": "existing_catalogue",
+      "sourceRouteId": "osm-relation-10523413",
+      "sourceTitle": "Кордон Тушканчик-озеро Светлое",
+      "sourceSha256": "0b4e3ee2238185d55973e56d80b0a2c024d09399082e34bbb3b1c77610529aad",
+      "reviewedAt": "2026-11-13",
+      "segmentCount": 12,
+      "pointCount": 373,
+      "evidence": [
+        {
+          "url": "https://ergaki-park.ru/tourism/ekotropy/",
+          "scope": "Official named ecotrail to Lake Svetloe, stated length 7 km."
+        },
+        {
+          "url": "https://www.ergaki-park.ru/map/interactive/",
+          "scope": "Official map explicitly identifies the route from Tushkanchik cordon to Lake Svetloe."
+        }
+      ],
+      "notes": [
+        "Линия ведёт от кордона Тушканчик к озеру Светлому и содержит ответвление у озера. Обратный путь учитывается отдельно."
+      ],
+      "geometryScope": "source_track",
+      "identityReview": {
+        "regionMatches": true,
+        "fieldVerified": false,
+        "navigationReady": false,
+        "coordinatesChanged": false
+      },
+      "title": "Ергаки — озеро Светлое",
+      "removeNotes": []
+    },
+    {
+      "id": "elbrus-devichyi-kosy",
+      "kind": "existing_catalogue",
+      "sourceRouteId": "osm-relation-16216006",
+      "sourceTitle": "Треккинг к водопаду Девичьи Косы",
+      "sourceSha256": "73afee2643ddcf344e684152a3d5c33bbe74afd9750a13170637064e646b79fd",
+      "reviewedAt": "2026-11-13",
+      "segmentCount": 5,
+      "pointCount": 695,
+      "evidence": [
+        {
+          "url": "https://resort-elbrus.ru/whatTodo/jwknudpgc2vb3704cw5gmy90/vodopad-devichi-kosy",
+          "scope": "Official route from Terskol mosque to Devichyi Kosy; 10.2 km return trip compared with 5.057 km one-way source line."
+        }
+      ],
+      "notes": [
+        "Показан путь от Терскола к водопаду. В карточке указана длина выхода туда и обратно."
+      ],
+      "geometryScope": "source_track",
+      "identityReview": {
+        "regionMatches": true,
+        "fieldVerified": false,
+        "navigationReady": false,
+        "coordinatesChanged": false
+      },
+      "sourceUrlUpdate": "https://resort-elbrus.ru/whatTodo/jwknudpgc2vb3704cw5gmy90/vodopad-devichi-kosy",
+      "title": "Терскол — водопад Девичьи Косы",
+      "removeNotes": []
+    },
+    {
+      "id": "kolyma-black-creek",
+      "kind": "official_gpx",
+      "sourcePath": "data/catalog/editorial-geometry/kolyma-black-creek.gpx",
+      "sourceSha256": "5acdd2bd5a08d5f13f680f5d398d24f2822d3c3fe15bbcce10f2acce5f209cda",
+      "sourceUrl": "https://greatkolymatrail.ru/upload/iblock/bc2/7jp03f3v0yqp8z36gjiz4o3ahdhkyxu2/1601848705912.gpx",
+      "sourceName": "Большая Колымская тропа · Агентство по туризму Магаданской области",
+      "retrievedAt": "2026-11-12T23:33:32.901326+00:00",
+      "reviewedAt": "2026-11-13",
+      "license": "not-stated",
+      "licenseReview": {
+        "sourceOffersPublicGpxDownload": true,
+        "openRedistributionLicenseFound": false,
+        "note": "The original public download is attributed; no OSM/ODbL or other open license is claimed."
+      },
+      "segmentCount": 1,
+      "pointCount": 788,
+      "geometryScope": "source_track",
+      "evidence": [
+        {
+          "url": "https://greatkolymatrail.ru/routes/chernyy-klyuch/",
+          "scope": "Named official route page directly provides this GPX. Route name, region, start and itinerary match; all original track segments and vertices are retained."
+        }
+      ],
+      "coordinateChanges": "Preserved vertex order and segments. GPX lat/lon attributes converted to GeoJSON lon/lat and rounded to seven decimal places. No simplification, gap joining or new points. Elevation/timestamps remain in the original GPX.",
+      "identityReview": {
+        "regionMatches": true,
+        "fieldVerified": false,
+        "navigationReady": false,
+        "maximumSourceEdgeM": 23.1,
+        "originalPointCount": 788
+      },
+      "notes": [
+        "В описании маршрута указано 8 км; длина опубликованного трека — около 8,3 км."
+      ],
+      "title": "Большая Колымская тропа — Чёрный ключ",
+      "removeNotes": [
+        "Геометрия маршрута в каталог не добавлена. Перед выходом уточните вариант пути и действующие условия у автора маршрута."
+      ]
+    },
+    {
+      "id": "kolyma-kongali",
+      "kind": "official_gpx",
+      "sourcePath": "data/catalog/editorial-geometry/kolyma-kongali.gpx",
+      "sourceSha256": "26d93a2b4f6f5d416020d8206a20dc8f41dccb68dc54227bbc537ff9f2e58abb",
+      "sourceUrl": "https://greatkolymatrail.ru/upload/iblock/34c/0zlldn1s3q09vt4y8bv76n3lnn4jppb5/%D0%9A%D0%BE%D0%BD%D0%B3%D0%B0%D0%BB%D0%B8.gpx",
+      "sourceName": "Большая Колымская тропа · Агентство по туризму Магаданской области",
+      "retrievedAt": "2026-11-12T23:33:32.619245+00:00",
+      "reviewedAt": "2026-11-13",
+      "license": "not-stated",
+      "licenseReview": {
+        "sourceOffersPublicGpxDownload": true,
+        "openRedistributionLicenseFound": false,
+        "note": "The original public download is attributed; no OSM/ODbL or other open license is claimed."
+      },
+      "segmentCount": 1,
+      "pointCount": 359,
+      "geometryScope": "source_track",
+      "evidence": [
+        {
+          "url": "https://greatkolymatrail.ru/routes/klyuch-kongali/",
+          "scope": "Named official route page directly provides this GPX. Route name, region, start and itinerary match; all original track segments and vertices are retained."
+        }
+      ],
+      "coordinateChanges": "Preserved vertex order and segments. GPX lat/lon attributes converted to GeoJSON lon/lat and rounded to seven decimal places. No simplification, gap joining or new points. Elevation/timestamps remain in the original GPX.",
+      "identityReview": {
+        "regionMatches": true,
+        "fieldVerified": false,
+        "navigationReady": false,
+        "maximumSourceEdgeM": 128.6,
+        "originalPointCount": 359
+      },
+      "notes": [
+        "В описании маршрута указано 10 км; длина опубликованного трека — около 11,6 км. Учитывайте различие при планировании."
+      ],
+      "title": "Большая Колымская тропа — Ключ Конгали",
+      "removeNotes": [
+        "Геометрия маршрута в каталог не добавлена. Перед выходом уточните вариант пути и действующие условия у автора маршрута.",
+        "Длина опубликованного трека отличается от справочных 10 км. Конкретный вариант пути нужно уточнить у автора."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "beringia-avan",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://park-beringia.ru/avan",
+      "title": "Аван — древнее поселение",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://park-beringia.ru/avan",
+          "finalUrl": "https://park-beringia.ru/avan",
+          "retrievedAt": "2026-11-12T23:31:12.359300+00:00",
+          "bytes": 80356,
+          "sha256": "06c2b4619ffb44f34be6c761d6c10fcf7aa01c6a8caf5f595c5a75182779b81a",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "beringia-whale-alley",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://park-beringia.ru/whale",
+      "title": "Китовая аллея и Сиклюк",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://park-beringia.ru/whale",
+          "finalUrl": "https://park-beringia.ru/whale",
+          "retrievedAt": "2026-11-12T23:31:12.528423+00:00",
+          "bytes": 80521,
+          "sha256": "e06839f8210ce7eacd31b23bc5280255c2fcb54a71e3682e65985e45aa95a61c",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "beringia-masik",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://park-beringia.ru/masik",
+      "title": "Масик — поселение на побережье",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://park-beringia.ru/masik",
+          "finalUrl": "https://park-beringia.ru/masik",
+          "retrievedAt": "2026-11-12T23:31:12.428951+00:00",
+          "bytes": 80835,
+          "sha256": "b9ff05286da677aaa662e402cfc6aacf3d6bde1c179414f5454314f38c1b2de6",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "bastak-uchebnaya",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://bastak-eao.ru/ekologicheskaya-tropa-uchebnaya",
+      "title": "Бастак — Учебная тропа",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://bastak-eao.ru/ekologicheskaya-tropa-uchebnaya",
+          "finalUrl": "https://bastak-eao.ru/ekologicheskaya-tropa-uchebnaya",
+          "retrievedAt": "2026-11-12T23:31:10.908583+00:00",
+          "bytes": 154655,
+          "sha256": "122e7945c069562c7a7d2fcf36ec82e5535a36c4abbdb5bf5a18b24f7bdac4d4",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "bastak-tigrinaya",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://bastak-eao.ru/ekologicheskaya-tropa-tigrinaya",
+      "title": "Бастак — Тигриная тропа",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://bastak-eao.ru/ekologicheskaya-tropa-tigrinaya",
+          "finalUrl": "https://bastak-eao.ru/ekologicheskaya-tropa-tigrinaya",
+          "retrievedAt": "2026-11-12T23:31:17.247496+00:00",
+          "bytes": 154787,
+          "sha256": "db122a0d0c4db1aea23e48ba2732e9b3f382d8babbab813ec3fb95e1080d5fe1",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "bastak-bee-world",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://bastak-eao.ru/ekologicheskaya-tropa-v-mire-pchel",
+      "title": "Бастак — В мире пчёл",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://bastak-eao.ru/ekologicheskaya-tropa-v-mire-pchel",
+          "finalUrl": "https://bastak-eao.ru/ekologicheskaya-tropa-v-mire-pchel",
+          "retrievedAt": "2026-11-12T23:31:16.096992+00:00",
+          "bytes": 155119,
+          "sha256": "658a3174dd0e23c705b43a3a2c9284af13aef9e2449d484523fea1a6390245b8",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "kolyma-sleeping-knight",
+      "reason": "The official GPX is explicitly labelled as ending at the lake. The card continues to Sleeping Knight summit. The lake approach cannot establish the missing summit section.",
+      "sourceUrl": "https://greatkolymatrail.ru/routes/spyashchiy-rytsar/",
+      "title": "Спящий рыцарь — Мёртвое озеро и вершина",
+      "reasonCode": "partial_source_track",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://greatkolymatrail.ru/routes/spyashchiy-rytsar/",
+          "finalUrl": "https://greatkolymatrail.ru/routes/spyashchiy-rytsar/",
+          "retrievedAt": "2026-11-12T23:31:19.635718+00:00",
+          "bytes": 71685,
+          "sha256": "e8160a1ee037631540ce89db0730f31a0d2d8cdadaef3a6951175fbf3d74a8d4",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "scope": "partial_track",
+        "vertices": 706,
+        "lengthKm": 6.647,
+        "source": {
+          "sourceUrl": "https://greatkolymatrail.ru/upload/iblock/5bf/yuumtzi31jqq2ivmr5glfwj5dabo29kj/%D0%A1%D0%BF%D1%8F%D1%89%D0%B8%D0%B8%CC%86%20%D1%80%D1%8B%D1%86%D0%B0%D1%80%D1%8C%20%28%D0%B4%D0%BE%20%D0%BE%D0%B7%D0%B5%D1%80%D0%B0%29.gpx",
+          "retrievedAt": "2026-11-12T23:33:37.458494+00:00",
+          "bytes": 167325,
+          "sha256": "d8136790c5371850c5035e6ba92878db3a8c0d8e352393e572293dbaeb18baff"
+        }
+      }
+    },
+    {
+      "id": "pustozersk-big-trail",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://naomuseum.ru/visitors/excursions/ekskursii-v-pustozersk/?ELEMENT_ID=493",
+      "title": "Большая пустозерская тропа",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://naomuseum.ru/visitors/excursions/ekskursii-v-pustozersk/?ELEMENT_ID=493",
+          "finalUrl": "https://naomuseum.ru/visitors/excursions/ekskursii-v-pustozersk/?ELEMENT_ID=493",
+          "retrievedAt": "2026-11-12T23:31:24.358289+00:00",
+          "bytes": 320719,
+          "sha256": "e80e08d56ae67ead121c316af8c6981c32fe6e20725f378042ea0a52066c3987",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "nenets-barefoot-tundra",
+      "reason": "The public official route map supplies a sparse scheme, not a sufficiently detailed track of the whole walk. It remains a source_scheme and is not promoted to a rendered hiking line.",
+      "sourceUrl": "https://zapovedtravel.ru/Route/Details/0cc1edf1-fa05-4f7c-b5a7-9a2e3a5ff55a",
+      "title": "Босиком по тундре",
+      "reasonCode": "source_scheme_only",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://zapovedtravel.ru/Route/Details/0cc1edf1-fa05-4f7c-b5a7-9a2e3a5ff55a",
+          "finalUrl": "https://zapovedtravel.ru/Route/Details/0cc1edf1-fa05-4f7c-b5a7-9a2e3a5ff55a",
+          "retrievedAt": "2026-11-12T23:31:28.015620+00:00",
+          "bytes": 131126,
+          "sha256": "396ffd18c4398fe9a8e25923f79a2698c4ff19f826e0d2725509faebd8a29e01",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "scope": "source_scheme",
+        "vertices": 21,
+        "lengthKm": 4.563,
+        "maximumEdgeM": 497.6,
+        "source": {
+          "sourceUrl": "https://zapovedtravel.ru/Map/GetRoutes?ids=0cc1edf1-fa05-4f7c-b5a7-9a2e3a5ff55a",
+          "retrievedAt": "2026-11-12T23:32:56.448704+00:00",
+          "bytes": 969,
+          "sha256": "c91ccc9542349cb6efbcef259086f2ca012fa7bc477d32e09a66548a01edb1be"
+        }
+      }
+    },
+    {
+      "id": "yamal-nephrite-waterfall",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://polarurals.ru/news/%D0%BB%D0%B5%D1%82%D0%BE%20%D0%BF%D0%BE%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B9%20%D1%83%D1%80%D0%B0%D0%BB%20%D1%82%D0%BE%D0%BF",
+      "title": "Нефритовая долина — к водопаду",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://polarurals.ru/news/%D0%BB%D0%B5%D1%82%D0%BE%20%D0%BF%D0%BE%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B9%20%D1%83%D1%80%D0%B0%D0%BB%20%D1%82%D0%BE%D0%BF",
+          "finalUrl": "https://polarurals.ru/news/%D0%BB%D0%B5%D1%82%D0%BE%20%D0%BF%D0%BE%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B9%20%D1%83%D1%80%D0%B0%D0%BB%20%D1%82%D0%BE%D0%BF",
+          "retrievedAt": "2026-11-12T23:31:24.954706+00:00",
+          "bytes": 52676,
+          "sha256": "a5535c95bd025b65d61e768bdc8a6b85af798cc0a4ae06a664c296a79cb7e3b0",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "yamal-romantics-glacier",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://polarurals.ru/news/%D0%BB%D0%B5%D1%82%D0%BE%20%D0%BF%D0%BE%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B9%20%D1%83%D1%80%D0%B0%D0%BB%20%D1%82%D0%BE%D0%BF",
+      "title": "К леднику Романтиков",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://polarurals.ru/news/%D0%BB%D0%B5%D1%82%D0%BE%20%D0%BF%D0%BE%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B9%20%D1%83%D1%80%D0%B0%D0%BB%20%D1%82%D0%BE%D0%BF",
+          "finalUrl": "https://polarurals.ru/news/%D0%BB%D0%B5%D1%82%D0%BE%20%D0%BF%D0%BE%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B9%20%D1%83%D1%80%D0%B0%D0%BB%20%D1%82%D0%BE%D0%BF",
+          "retrievedAt": "2026-11-12T23:31:25.006048+00:00",
+          "bytes": 52676,
+          "sha256": "2d2fdaa2309a40776fc2673c6c330a7cd832ec6fe6ce952a440985fb166a3b1f",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "azas-reindeer-people",
+      "reason": "The public official route map supplies a sparse scheme, not a sufficiently detailed track of the whole walk. It remains a source_scheme and is not promoted to a rendered hiking line.",
+      "sourceUrl": "https://zapovedtravel.ru/Route/Details/22d2a98c-6064-4335-a428-fccc31f7cbf0",
+      "title": "Азас — Тропою оленных людей",
+      "reasonCode": "source_scheme_only",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://zapovedtravel.ru/Route/Details/22d2a98c-6064-4335-a428-fccc31f7cbf0",
+          "finalUrl": "https://zapovedtravel.ru/Route/Details/22d2a98c-6064-4335-a428-fccc31f7cbf0",
+          "retrievedAt": "2026-11-12T23:31:34.457482+00:00",
+          "bytes": 131394,
+          "sha256": "c084ba0b60a5b1ff8ce3a467fc13a2132566f8203c76118abaa6a4161aff111d",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "scope": "source_scheme",
+        "vertices": 35,
+        "lengthKm": 10.358,
+        "maximumEdgeM": 949,
+        "source": {
+          "sourceUrl": "https://zapovedtravel.ru/Map/GetRoutes?ids=22d2a98c-6064-4335-a428-fccc31f7cbf0",
+          "retrievedAt": "2026-11-12T23:32:56.585024+00:00",
+          "bytes": 1728,
+          "sha256": "606b65205b00536c4c80c50573df0f424f2869c177879eec2fa13ff8b9ead118"
+        }
+      }
+    },
+    {
+      "id": "smolny-animal-trail",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://zapoved-mordovia.ru/ru/ekoprosveschenie/obekty-posescheniya/ekologicheskie-tropy.html",
+      "title": "Смольный — Звериная тропа",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://zapoved-mordovia.ru/ru/ekoprosveschenie/obekty-posescheniya/ekologicheskie-tropy.html",
+          "finalUrl": "https://zapoved-mordovia.ru/ru/ekoprosveschenie/obekty-posescheniya/ekologicheskie-tropy.html",
+          "retrievedAt": "2026-11-12T23:31:29.685737+00:00",
+          "bytes": 27291,
+          "sha256": "affa41d8e49ff29aa97388a93b6ef9d57ef420090bb07b6423c486b793203b30",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "plesheevo-grey-heron",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://www.plesheevo-lake.ru/posetitelyam/ekologicheskie-tropy-i-turistskie-marshruty/v-gostyakh-u-seroy-tsapli-ekologicheskaya-tropa/",
+      "title": "В гостях у серой цапли",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://www.plesheevo-lake.ru/posetitelyam/ekologicheskie-tropy-i-turistskie-marshruty/v-gostyakh-u-seroy-tsapli-ekologicheskaya-tropa/",
+          "finalUrl": "https://www.plesheevo-lake.ru/posetitelyam/ekologicheskie-tropy-i-turistskie-marshruty/v-gostyakh-u-seroy-tsapli-ekologicheskaya-tropa/",
+          "retrievedAt": "2026-11-12T23:31:30.422604+00:00",
+          "bytes": 155141,
+          "sha256": "ab928972c2b8d158675d4503a067b4afb9f196534c30fc106c2ecc974aa05929",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "oryol-kudeyar-path",
+      "reason": "The Google MyMap linked by the official page is titled as the national park boundary. Its exported linework is the park boundary layer, not the 1.4 km Kudeyar route.",
+      "sourceUrl": "https://www.orlpolesie.ru/deyatelnost/15-poseshchenie/26-ekologicheskie-tropy-i-marshruty",
+      "title": "Тропами Кудеяра",
+      "reasonCode": "boundary_map_only",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://www.orlpolesie.ru/deyatelnost/15-poseshchenie/26-ekologicheskie-tropy-i-marshruty",
+          "finalUrl": "https://www.orlpolesie.ru/deyatelnost/15-poseshchenie/26-ekologicheskie-tropy-i-marshruty",
+          "retrievedAt": "2026-11-12T23:31:33.679138+00:00",
+          "bytes": 97208,
+          "sha256": "2da64d7a95cc170fa87fd07f91c8804e4eccac677f7dd0415599d694ca225943",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "sourceTitle": "Границы национального парка \"Орловское полесье\"",
+        "source": {
+          "sourceUrl": "https://www.google.com/maps/d/kml?mid=14KikzHUHzNW3RlgzVucCUxdE5nQlUFDu&resourcekey",
+          "finalUrl": "https://www.google.com/maps/d/kml?mid=14KikzHUHzNW3RlgzVucCUxdE5nQlUFDu&resourcekey",
+          "retrievedAt": "2026-11-12T23:39:27.579482+00:00",
+          "bytes": 60277,
+          "sha256": "d4ecce5c4756890ced08d52dcf8d0e08cf0f2f04f67c6f73daefaf08cf384ca2",
+          "contentType": "application/vnd.google-earth.kmz"
+        }
+      }
+    },
+    {
+      "id": "zeysky-health-trail",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://www.amuroopt.ru/ekoturizm/informatsiya-ob-ekotropakh/",
+      "title": "Зейский — Тропа здоровья",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://www.amuroopt.ru/ekoturizm/informatsiya-ob-ekotropakh/",
+          "finalUrl": "https://www.amuroopt.ru/ekoturizm/informatsiya-ob-ekotropakh/",
+          "retrievedAt": "2026-11-12T23:31:35.115408+00:00",
+          "bytes": 50860,
+          "sha256": "28de1c935f4f06e146555a2e717196c09f583a830fe6575c86ea6e7b2c84bd30",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "ivanovo-three-oaks",
+      "reason": "The official PDF was successfully retrieved after encoding its Unicode URL. It is a route passport; no machine-readable coordinate track was identified. A printed scheme is not digitised into an invented line.",
+      "sourceUrl": "https://dt.ivanovoobl.ru/upload/medialibrary/708/Маршрут%20Три%20дуба%20—%20пешеходный.pdf",
+      "title": "История деревьев: три дуба",
+      "reasonCode": "document_only",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://dt.ivanovoobl.ru/upload/medialibrary/708/%D0%9C%D0%B0%D1%80%D1%88%D1%80%D1%83%D1%82%20%D0%A2%D1%80%D0%B8%20%D0%B4%D1%83%D0%B1%D0%B0%20%E2%80%94%20%D0%BF%D0%B5%D1%88%D0%B5%D1%85%D0%BE%D0%B4%D0%BD%D1%8B%D0%B9.pdf",
+          "finalUrl": "https://dt.ivanovoobl.ru/upload/medialibrary/708/%D0%9C%D0%B0%D1%80%D1%88%D1%80%D1%83%D1%82%20%D0%A2%D1%80%D0%B8%20%D0%B4%D1%83%D0%B1%D0%B0%20%E2%80%94%20%D0%BF%D0%B5%D1%88%D0%B5%D1%85%D0%BE%D0%B4%D0%BD%D1%8B%D0%B9.pdf",
+          "retrievedAt": "2026-11-12T23:38:54.605027+00:00",
+          "bytes": 498739,
+          "sha256": "852fb8460ccdc8ca4b1a29797a4993d5a68cf5c6b0b30a1e0a58d2b0fff1ca26",
+          "contentType": "application/pdf"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "rostov-manych-mysteries",
+      "reason": "The public official route map supplies a sparse scheme, not a sufficiently detailed track of the whole walk. It remains a source_scheme and is not promoted to a rendered hiking line.",
+      "sourceUrl": "https://zapovedtravel.ru/Route/Details/4a09fb17-a65f-4bc3-b736-e569eb96074e",
+      "title": "Загадки Манычской долины",
+      "reasonCode": "source_scheme_only",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://zapovedtravel.ru/Route/Details/4a09fb17-a65f-4bc3-b736-e569eb96074e",
+          "finalUrl": "https://zapovedtravel.ru/Route/Details/4a09fb17-a65f-4bc3-b736-e569eb96074e",
+          "retrievedAt": "2026-11-12T23:31:38.210291+00:00",
+          "bytes": 130360,
+          "sha256": "ee4b20ad92291d2bf5614caf387b8f9ae4e1d9ef9403025c750511ad914c107b",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "scope": "source_scheme",
+        "vertices": 5,
+        "lengthKm": 0.7,
+        "maximumEdgeM": 237.7,
+        "source": {
+          "sourceUrl": "https://zapovedtravel.ru/Map/GetRoutes?ids=4a09fb17-a65f-4bc3-b736-e569eb96074e",
+          "retrievedAt": "2026-11-12T23:33:01.966378+00:00",
+          "bytes": 543,
+          "sha256": "f653e06e13c139ca671ae2b52bc7a2e349b9075d86d5e67ee0e4d2d1ba122a8e"
+        }
+      }
+    },
+    {
+      "id": "voroninsky-forest-lines",
+      "reason": "The official page loads the Leaflet library, but its page and loaded site script do not expose a coordinate line or GPX/KML for this itinerary. The presence of mapping software is not route geometry.",
+      "sourceUrl": "https://voroninsky.ru/travel/liniilesa/",
+      "title": "Линии леса",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://voroninsky.ru/travel/liniilesa/",
+          "finalUrl": "https://voroninsky.ru/travel/liniilesa/",
+          "retrievedAt": "2026-11-12T23:31:37.547318+00:00",
+          "bytes": 173738,
+          "sha256": "297fe51888f08fc128b877e72495302f63e54f9f7b8e0ebd8c0851ddc2a20fb2",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "argamach-mountain-miniature",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://park48.ru/service/",
+      "title": "Горная страна в миниатюре",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://park48.ru/service/",
+          "finalUrl": "https://park48.ru/service/",
+          "retrievedAt": "2026-11-12T23:31:38.917307+00:00",
+          "bytes": 35637,
+          "sha256": "cf8c59b37ae1f520436b01473ebbf99e0a0ba6157f2e709e67384d633c496019",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "penza-reserve-kaleidoscope",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://zpls.ru/deyatelnost/ekologicheskoe-prosveshhenie/ekologicheskie-tropyi/ekotropa-zapovednyij-kalejdoskop.html",
+      "title": "Заповедный калейдоскоп",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://zpls.ru/deyatelnost/ekologicheskoe-prosveshhenie/ekologicheskie-tropyi/ekotropa-zapovednyij-kalejdoskop.html",
+          "finalUrl": "https://zpls.ru/deyatelnost/ekologicheskoe-prosveshhenie/ekologicheskie-tropyi/ekotropa-zapovednyij-kalejdoskop.html",
+          "retrievedAt": "2026-11-12T23:31:40.031380+00:00",
+          "bytes": 20560,
+          "sha256": "7678c1a0a1b8512dd46a2f1c9866d900b53440aec83d0355fea7bbbc1d621e32",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "kologriv-reserve-forest",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://kologrivskiy-les.ru/tur-puteshestvie-v-zapovednyj-les/",
+      "title": "Путешествие в заповедный лес",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://kologrivskiy-les.ru/tur-puteshestvie-v-zapovednyj-les/",
+          "finalUrl": "https://kologrivskiy-les.ru/tur-puteshestvie-v-zapovednyj-les/",
+          "retrievedAt": "2026-11-12T23:31:43.476347+00:00",
+          "bytes": 188822,
+          "sha256": "465ff8308ce1fffecebdf8472cc065d11f373b4adfcfa6d086181ed86085b454",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "kursk-streletskaya-steppe",
+      "reason": "The public official route map supplies a sparse scheme, not a sufficiently detailed track of the whole walk. It remains a source_scheme and is not promoted to a rendered hiking line.",
+      "sourceUrl": "https://zapovedtravel.ru/Route/Details/56eae447-f97d-485d-bb74-8ccf1bf8ba7e",
+      "title": "Стрелецкая степь",
+      "reasonCode": "source_scheme_only",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://zapovedtravel.ru/Route/Details/56eae447-f97d-485d-bb74-8ccf1bf8ba7e",
+          "finalUrl": "https://zapovedtravel.ru/Route/Details/56eae447-f97d-485d-bb74-8ccf1bf8ba7e",
+          "retrievedAt": "2026-11-12T23:31:44.911813+00:00",
+          "bytes": 127036,
+          "sha256": "6f79ea769c4c3f9c41d06f1ce218ed355cc5205c12857e0404fb9668dd7cd70b",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "scope": "source_scheme",
+        "vertices": 6,
+        "lengthKm": 0.699,
+        "maximumEdgeM": 294.1,
+        "source": {
+          "sourceUrl": "https://zapovedtravel.ru/Map/GetRoutes?ids=56eae447-f97d-485d-bb74-8ccf1bf8ba7e",
+          "retrievedAt": "2026-11-12T23:33:02.133493+00:00",
+          "bytes": 416,
+          "sha256": "d4cd77c580b1993a4dc2b1821e0f7fec4aba6e29cc99798a1937bee5b0cbdb0a"
+        }
+      }
+    },
+    {
+      "id": "alkhanai-ehe-goroo",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://alkhana.ru/ehegoro/",
+      "title": "Алханай — Ехэ гороо",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://alkhana.ru/ehegoro/",
+          "finalUrl": "https://alkhana.ru/ehegoro/",
+          "retrievedAt": "2026-11-12T23:31:46.181187+00:00",
+          "bytes": 296662,
+          "sha256": "39e7625e70b48bec2f5b3923752f4d442e1747521f8240920a8a5aff63c3e72f",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "nechkinsky-eagle-cliffs",
+      "reason": "The public official route map supplies a sparse scheme, not a sufficiently detailed track of the whole walk. It remains a source_scheme and is not promoted to a rendered hiking line.",
+      "sourceUrl": "https://zapovedtravel.ru/Route/Details/7e400864-ecf7-452d-9a8b-fe307f9a49f0",
+      "title": "Орланьи кручи",
+      "reasonCode": "source_scheme_only",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://zapovedtravel.ru/Route/Details/7e400864-ecf7-452d-9a8b-fe307f9a49f0",
+          "finalUrl": "https://zapovedtravel.ru/Route/Details/7e400864-ecf7-452d-9a8b-fe307f9a49f0",
+          "retrievedAt": "2026-11-12T23:31:45.194258+00:00",
+          "bytes": 128332,
+          "sha256": "ab779e105cd53605230390edf6c27a2d999ee2478700c296ca15620c9f20cb8d",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "scope": "source_scheme",
+        "vertices": 26,
+        "lengthKm": 2.663,
+        "maximumEdgeM": 322.5,
+        "source": {
+          "sourceUrl": "https://zapovedtravel.ru/Map/GetRoutes?ids=7e400864-ecf7-452d-9a8b-fe307f9a49f0",
+          "retrievedAt": "2026-11-12T23:33:07.392096+00:00",
+          "bytes": 1289,
+          "sha256": "cb4225017cc7ce97e50182d788f06d4c546de0e11152d2c6d40f8ba901a41949"
+        }
+      }
+    },
+    {
+      "id": "kulikovo-rgo-ecotrail",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://nakulikovompole.rgo.ru/",
+      "title": "Экотропа РГО на Куликовом поле",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://nakulikovompole.rgo.ru/",
+          "finalUrl": "https://nakulikovompole.rgo.ru/",
+          "retrievedAt": "2026-11-12T23:31:52.535101+00:00",
+          "bytes": 347725,
+          "sha256": "10518c4821b0684e17f116f4252ac9ccb67518e75fcc8971aa6baf2820125b21",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "pisanitsa-nature-ancestors",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://tomskayapisanitsa.ru/news1/um27102025/",
+      "title": "Наедине с природой и предками",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://tomskayapisanitsa.ru/news1/um27102025/",
+          "finalUrl": "https://tomskayapisanitsa.ru/news1/um27102025/",
+          "retrievedAt": "2026-11-12T23:31:51.810206+00:00",
+          "bytes": 113194,
+          "sha256": "8ca847cf354251c24c0e83e551b02d1cbbc2a8804a91a976a5b66e333b02c785",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "kalmykia-animal-swan-trail",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://zapovednik-chernyezemli.ru/zverinaya_tropa_i_lebedinoye_ozero",
+      "title": "Звериная тропа и лебединое озеро",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://zapovednik-chernyezemli.ru/zverinaya_tropa_i_lebedinoye_ozero",
+          "finalUrl": "https://zapovednik-chernyezemli.ru/zverinaya_tropa_i_lebedinoye_ozero",
+          "retrievedAt": "2026-11-12T23:31:50.554565+00:00",
+          "bytes": 397169,
+          "sha256": "2f77e4bfb9876c9697985b7df965a9620cf0f6c7eab1a524048a734c7c6d7ada",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "samarovsky-cold-log-misne",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://visitugra.ru/locations/307",
+      "title": "Лог Холодный — Миснэ",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://visitugra.ru/locations/307",
+          "finalUrl": "https://visitugra.ru/locations/307",
+          "retrievedAt": "2026-11-12T23:31:51.455682+00:00",
+          "bytes": 259700,
+          "sha256": "08f77b080445c97503d6cc48ed59c9e1d2d02298a298c25df437d0ac1e466f21",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "russian-north-maura",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://russevpark.ru/tourism/tours/maura.html",
+      "title": "Экологическая тропа по горе Мауре",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://russevpark.ru/tourism/tours/maura.html",
+          "finalUrl": "https://russevpark.ru/tourism/tours/maura.html",
+          "retrievedAt": "2026-11-12T23:31:56.773991+00:00",
+          "bytes": 38086,
+          "sha256": "4e8f349315de28f87e069c92307a19c32e6c699871294d642d398160b180df19",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "yugyd-va-smotrovaya",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://yugyd-va.ru/2025/10/28/ekologicheskaya-tropa-smotrovaya/",
+      "title": "Югыд ва — Смотровая тропа",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://yugyd-va.ru/2025/10/28/ekologicheskaya-tropa-smotrovaya/",
+          "finalUrl": "https://yugyd-va.ru/2025/10/28/ekologicheskaya-tropa-smotrovaya/",
+          "retrievedAt": "2026-11-12T23:31:55.792355+00:00",
+          "bytes": 303334,
+          "sha256": "27e28f07638638c9a4d5030943732370bea334405961cf5a1557d62ef86ea31e",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "samara-molodetsky-kurgan",
+      "reason": "The official embedded map contains a detailed 217-vertex loop passing near both named peaks and returning to the checkpoint. Its 4.259 km length differs materially from the card/passport 5.7 km and the source describes two variants. The exact full-card variant remains unresolved rather than silently substituting one loop.",
+      "sourceUrl": "https://npsamluka.ru/turisticheskie-marshruty/molodeckij-kurgan-i-devya-gora/",
+      "title": "К вершине Молодецкого кургана",
+      "reasonCode": "source_variant_length_conflict",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://npsamluka.ru/turisticheskie-marshruty/molodeckij-kurgan-i-devya-gora/",
+          "finalUrl": "https://npsamluka.ru/turisticheskie-marshruty/molodeckij-kurgan-i-devya-gora/",
+          "retrievedAt": "2026-11-12T23:31:56.924166+00:00",
+          "bytes": 106652,
+          "sha256": "8d5edc98178a346ec25aee4dcd670c4320e35194c31233e1b08e1ce92cffad5d",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "scope": "unresolved_variant",
+        "vertices": 217,
+        "lengthKm": 4.259,
+        "maximumEdgeM": 84,
+        "sourcePageSha256": "8d5edc98178a346ec25aee4dcd670c4320e35194c31233e1b08e1ce92cffad5d",
+        "mapField": "a.open__map-touch[data-link=.../molodeckij-kurgan-i-devya-gora/] data-points",
+        "passportUrl": "https://npsamluka.ru/wp-content/uploads/2025/10/Самарская-Лука-К-вершине-Молодецкого-кургана.pdf"
+      }
+    },
+    {
+      "id": "mari-chodra-klenovogorye",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://xn--80aalpfprne1e.xn--p1ai/activity/travel/649/655/",
+      "title": "Путешествие по Кленовогорью",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://xn--80aalpfprne1e.xn--p1ai/activity/travel/649/655/",
+          "finalUrl": "https://xn--80aalpfprne1e.xn--p1ai/activity/travel/649/655/",
+          "retrievedAt": "2026-11-12T23:31:56.906126+00:00",
+          "bytes": 25884,
+          "sha256": "553173e7a9325213c439e6fc3d1f552e75e2ece5b4d647f2a9a841d4ad5b3818",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "khekhtsir-reserve-trail",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://www.zapovedamur.ru/bolshehehcirskiy/ekskursii",
+      "title": "Заповедный Хехцир",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://www.zapovedamur.ru/bolshehehcirskiy/ekskursii",
+          "finalUrl": "https://www.zapovedamur.ru/bolshehehcirskiy/ekskursii",
+          "retrievedAt": "2026-11-12T23:32:04.113192+00:00",
+          "bytes": 212695,
+          "sha256": "71e69c3b78b68e7af1d091534ac59a5d2580a78266f6dd3848bcd848a1f7603c",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "nurgush-hello-beaver",
+      "reason": "The public official route map supplies a sparse scheme, not a sufficiently detailed track of the whole walk. It remains a source_scheme and is not promoted to a rendered hiking line.",
+      "sourceUrl": "https://zapovedtravel.ru/Route/Details/0b73dbd8-d8f7-4792-8c60-64610e8f5959",
+      "title": "Нургуш — Здравствуй, бобр!",
+      "reasonCode": "source_scheme_only",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://zapovedtravel.ru/Route/Details/0b73dbd8-d8f7-4792-8c60-64610e8f5959",
+          "finalUrl": "https://zapovedtravel.ru/Route/Details/0b73dbd8-d8f7-4792-8c60-64610e8f5959",
+          "retrievedAt": "2026-11-12T23:32:04.206753+00:00",
+          "bytes": 126966,
+          "sha256": "fcd1b63b365ba011d33d5bbe7ba1313532af00372d30fa69a182bfa8b80e0dca",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "scope": "source_scheme",
+        "vertices": 23,
+        "lengthKm": 14.934,
+        "maximumEdgeM": 1815.4,
+        "source": {
+          "sourceUrl": "https://zapovedtravel.ru/Map/GetRoutes?ids=0b73dbd8-d8f7-4792-8c60-64610e8f5959",
+          "retrievedAt": "2026-11-12T23:33:07.517937+00:00",
+          "bytes": 1074,
+          "sha256": "c9529e11ccf7e390857307ad326419cb2d0f67ddf3ec067da8fa3960d8f87405"
+        }
+      }
+    },
+    {
+      "id": "divnogorye-big-divy",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://divnogor.ru/jekskursii/",
+      "title": "Дивногорье — Большие Дивы и Маяцкое городище",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://divnogor.ru/jekskursii/",
+          "finalUrl": "https://divnogor.ru/jekskursii/",
+          "retrievedAt": "2026-11-12T23:32:03.512900+00:00",
+          "bytes": 183697,
+          "sha256": "e0b5bd5a651103b628e568a4503aa6cbc911fc2eed5edeb34650a5568a7ede00",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "primorye-cape-tobizina",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://visit-primorye.ru/what-to-do/mys-tobizina",
+      "title": "Мыс Тобизина — от бухты Карпинского",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://visit-primorye.ru/what-to-do/mys-tobizina",
+          "finalUrl": "https://visit-primorye.ru/what-to-do/mys-tobizina",
+          "retrievedAt": "2026-11-12T23:32:02.626316+00:00",
+          "bytes": 763459,
+          "sha256": "5cc59614b0fb50dfd61e8fc0629aebd3f4c6fc81e96e4e2d44aa342125c5264d",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "katun-upper-multinskoye",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://katunskiy.ru/posetitelyam/marshrutyi/v-kray-ozer-i-vodopadov",
+      "title": "Мультинские озёра — к Верхнему озеру",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://katunskiy.ru/posetitelyam/marshrutyi/v-kray-ozer-i-vodopadov",
+          "finalUrl": "https://katunskiy.ru/posetitelyam/marshrutyi/v-kray-ozer-i-vodopadov",
+          "retrievedAt": "2026-11-12T23:32:08.502636+00:00",
+          "bytes": 92947,
+          "sha256": "cab2a60cfc53304ae36608402bda883b3c3fa71c4ed9ca58f48bff14f3ff6bdc",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "curonian-efa",
+      "reason": "The official passport supplies a description and scheme. A same-name relation appears among national candidates rejected by display coverage, but its exact full geometry and correspondence to the passport have not been approved.",
+      "sourceUrl": "https://park-kosa.ru/vyisota-efa.pdf",
+      "title": "Куршская коса — Высота Эфа",
+      "reasonCode": "unreviewed_excluded_candidate",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://park-kosa.ru/vyisota-efa.pdf",
+          "finalUrl": "https://park-kosa.ru/vyisota-efa.pdf",
+          "retrievedAt": "2026-11-12T23:32:09.483217+00:00",
+          "bytes": 1644730,
+          "sha256": "b0b3d5eef6cdd5da35d0b0b1017ddf721a7671795a7a57e1216cca4cff6d5b9f",
+          "contentType": "application/pdf"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "sourceRouteId": "osm-relation-18306020",
+        "candidateStatus": "outside_displayed_territories"
+      }
+    },
+    {
+      "id": "stolby-takmak-legends",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://kras-stolby.ru/posetitelyam/marshruty/marshrut-legendy-takmaka-1/",
+      "title": "Красноярские Столбы — «Легенды Такмака»",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://kras-stolby.ru/posetitelyam/marshruty/marshrut-legendy-takmaka-1/",
+          "finalUrl": "https://kras-stolby.ru/posetitelyam/marshruty/marshrut-legendy-takmaka-1/",
+          "retrievedAt": "2026-11-12T23:32:09.938379+00:00",
+          "bytes": 79902,
+          "sha256": "3ef4c7cfbe0bcaf032a8a1bf8bd04c0f731c66f957cb227cce7c60e51dfea5af",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "stolby-nature-climate",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://kras-stolby.ru/posetitelyam/marshruty/ekotropa-priroda-i-klimat-1/",
+      "title": "Красноярские Столбы — «Природа и климат»",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://kras-stolby.ru/posetitelyam/marshruty/ekotropa-priroda-i-klimat-1/",
+          "finalUrl": "https://kras-stolby.ru/posetitelyam/marshruty/ekotropa-priroda-i-klimat-1/",
+          "retrievedAt": "2026-11-12T23:32:13.749919+00:00",
+          "bytes": 83100,
+          "sha256": "c587dcbbab33212b54be5fe5ec2d79a53aae74b09999b0384679f646031b8957",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "baikal-listvyanka-bolshie-koty",
+      "reason": "The official page links an external GPS archive, but its coordinates, complete itinerary match and reuse terms have not been approved in this review. The existing 163 km OSM Baikal relation covers a much broader itinerary and cannot be linked wholesale to this 24.7 km section.",
+      "sourceUrl": "https://greatbaikaltrail.org/listvyanka-bol-shie-koty",
+      "title": "Большая Байкальская тропа — Листвянка — Большие Коты",
+      "reasonCode": "linked_archive_unverified",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://greatbaikaltrail.org/listvyanka-bol-shie-koty",
+          "finalUrl": "https://greatbaikaltrail.org/listvyanka-bol-shie-koty",
+          "retrievedAt": "2026-11-12T23:32:14.415916+00:00",
+          "bytes": 207492,
+          "sha256": "4ca068c17ed00b9be1879e5a3ef0be67a189879b78f7bdb1383562639a523c72",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "sourceRouteId": "osm-relation-5461727",
+        "candidateLengthKm": 163,
+        "publicArchiveUrl": "https://drive.google.com/file/d/1yVIfkSTPdUQtXRuROt78ua659_fAP9FZ/view",
+        "license": "not-reviewed"
+      }
+    },
+    {
+      "id": "bbt-bolshie-koty-goloustnoe",
+      "reason": "The author-linked map provides a detailed complete four-part track, but the primary page expressly requires the association permission to reuse its maps and tracks. No permission is recorded. Keep the source link and do not copy the track into the distributed catalogue.",
+      "sourceUrl": "https://www.greatbaikaltrail.org/tropa-bol-shie-koty-bol-shoe-goloustno",
+      "title": "Большие Коты — Большое Голоустное",
+      "reasonCode": "source_permission_required",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://www.greatbaikaltrail.org/tropa-bol-shie-koty-bol-shoe-goloustno",
+          "finalUrl": "https://www.greatbaikaltrail.org/tropa-bol-shie-koty-bol-shoe-goloustno",
+          "retrievedAt": "2026-11-12T23:32:15.025357+00:00",
+          "bytes": 206949,
+          "sha256": "b617c3598b6cfa39987a65a395aeefc5c96e3d05194ced9718351745d940c50c",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "segments": 4,
+        "vertices": 2705,
+        "lengthKm": 32.779,
+        "maximumEdgeM": 165,
+        "source": {
+          "sourceUrl": "https://www.google.com/maps/d/kml?mid=1mLn47fMGwcm5guQmVJHpgX3RZAg&resourcekey",
+          "finalUrl": "https://www.google.com/maps/d/kml?mid=1mLn47fMGwcm5guQmVJHpgX3RZAg&resourcekey",
+          "retrievedAt": "2026-11-12T23:39:27.570008+00:00",
+          "bytes": 22758,
+          "sha256": "95104131272cbb154b2823a97dc4af2f2832c560d182676da8b421737a5e2aab",
+          "contentType": "application/vnd.google-earth.kmz"
+        },
+        "license": "permission-required",
+        "officialDescriptionLengthKm": 30
+      }
+    },
+    {
+      "id": "baikal-khamar-daban-waterfall",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://baikalecotourism.ru/hamardabantur",
+      "title": "В дебри Хамар-Дабана — к водопаду",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://baikalecotourism.ru/hamardabantur",
+          "finalUrl": "https://baikalecotourism.ru/hamardabantur",
+          "retrievedAt": "2026-11-12T23:32:14.835877+00:00",
+          "bytes": 99110,
+          "sha256": "a41d6db6c0e88c1f7145341b3fe4e7f32b386754036f0772fcdca7bf99d19b4a",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "teriberka-batareysky-waterfall",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://murmansk.travel/excursions/811",
+      "title": "Териберка — Батарейский водопад",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://murmansk.travel/excursions/811",
+          "finalUrl": "https://murmansk.travel/excursions/811",
+          "retrievedAt": "2026-11-12T23:32:21.857156+00:00",
+          "bytes": 740267,
+          "sha256": "3d38c87c089df3e02dc4720f7aeeb630556de881c80c73790b8025ce600c4292",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "elbrus-terskol-gorge",
+      "reason": "The similar OSM relation is only 1.798 km and has three disconnected components; the official itinerary is about 4 km one way. It cannot represent the complete gorge route.",
+      "sourceUrl": "https://resort-elbrus.ru/excursions/15/treking-terskolskoe-ushhele",
+      "title": "Терскольское ущелье — водопад Терскол",
+      "reasonCode": "incomplete_catalogue_candidate",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://resort-elbrus.ru/excursions/15/treking-terskolskoe-ushhele",
+          "finalUrl": "https://resort-elbrus.ru/excursions/15/treking-terskolskoe-ushhele",
+          "retrievedAt": "2026-11-12T23:32:20.519626+00:00",
+          "bytes": 2555224,
+          "sha256": "f63fb291215b5e1feaa6e742a532667e4bdecb8d8ed3447ea0246050e66e310f",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "sourceRouteId": "osm-relation-16215957",
+        "lengthKm": 1.798,
+        "connectedComponents": 3,
+        "componentVertices": [
+          108,
+          60,
+          5
+        ]
+      }
+    },
+    {
+      "id": "cheget-narzan-glade",
+      "reason": "The old official route URL now returns the resort site shell without the former route description or a coordinate download. No verified replacement track for this specific itinerary was found.",
+      "sourceUrl": "https://resort-elbrus.ru/whatTodo/23/polyana-narzanov",
+      "title": "Чегет — Поляна Нарзанов",
+      "reasonCode": "source_page_moved",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://resort-elbrus.ru/whatTodo/23/polyana-narzanov",
+          "finalUrl": "https://resort-elbrus.ru/whatTodo/23/polyana-narzanov",
+          "retrievedAt": "2026-11-12T23:32:25.647176+00:00",
+          "bytes": 2555131,
+          "sha256": "f01e013c51b777e001ad1f0e3bcd28f14ea2fd32750852f077d6967048e2b829",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "dombay-chuchkhur-waterfalls",
+      "reason": "The OSM candidate starts in Dombay village and is 6.744 km, whereas this card describes 4.6 km from the checkpoint. The official map also combines the Chuchkhur and Ptysh branches. Neither complete geometry is an exact match to this card.",
+      "sourceUrl": "https://tgpbz.ru/novosti/otkrytie-marshruta-na-chuchhurskie-vodopady/",
+      "title": "Домбай — Русская поляна — Чучхурские водопады",
+      "reasonCode": "different_route_variant",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://tgpbz.ru/novosti/otkrytie-marshruta-na-chuchhurskie-vodopady/",
+          "finalUrl": "https://tgpbz.ru/novosti/otkrytie-marshruta-na-chuchhurskie-vodopady/",
+          "retrievedAt": "2026-11-12T23:32:23.802191+00:00",
+          "bytes": 160778,
+          "sha256": "0d3d73eabb3c97833da94c96613c264114a60f2b6f372720bf1585493b0c7ce3",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "sourceRouteId": "osm-relation-17306045",
+        "lengthKm": 6.744,
+        "officialMapUrl": "https://tgpbz.ru/wp-json/kd-routes/v1/routes"
+      }
+    },
+    {
+      "id": "dombay-alibek-waterfall",
+      "reason": "The OSM candidate includes the earlier village approach (6.204 km versus the official 5.7 km to the waterfall). The official map combines the waterfall and Turye Lake branches; the current source restricts the upper itinerary. No complete exact track has been approved.",
+      "sourceUrl": "https://tgpbz.ru/marshruty/ushhele-alibek/",
+      "title": "Ущелье Алибек — Алибекский водопад",
+      "reasonCode": "different_route_variant",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://tgpbz.ru/marshruty/ushhele-alibek/",
+          "finalUrl": "https://tgpbz.ru/marshruty/ushhele-alibek/",
+          "retrievedAt": "2026-11-12T23:32:25.211750+00:00",
+          "bytes": 243830,
+          "sha256": "40ef809b601b5ece1a977c9eb33c74ec180cae655aeb3ef3f15188bcdd36568a",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "sourceRouteId": "osm-relation-17305991",
+        "lengthKm": 6.204,
+        "officialMapUrl": "https://tgpbz.ru/wp-json/kd-routes/v1/routes"
+      }
+    },
+    {
+      "id": "arkhyz-lake-love",
+      "reason": "The official FAQ says visiting this destination is prohibited. A similarly named OSM relation does not establish an approved visitor itinerary; this remains an access notice without an added route line.",
+      "sourceUrl": "https://tgpbz.ru/otvety-na-chasto-zadavaemye-voprosy/",
+      "title": "Озеро Любви — Суук-Джюрек-Кёль",
+      "reasonCode": "no_authorized_itinerary",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://tgpbz.ru/otvety-na-chasto-zadavaemye-voprosy/",
+          "finalUrl": "https://tgpbz.ru/otvety-na-chasto-zadavaemye-voprosy/",
+          "retrievedAt": "2026-11-12T23:32:24.982334+00:00",
+          "bytes": 168005,
+          "sha256": "cc65c17d3d1b72c3bd86c3b7cf0a9d8cd43dde30b8e69d394c0d68dc32faa64f",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      },
+      "candidate": {
+        "sourceRouteId": "osm-relation-15531031"
+      }
+    },
+    {
+      "id": "kamchatka-around-tolbachiks",
+      "reason": "The linked official passport returned HTTP 500. The current route table has no exact Around Tolbachiks download. Other named Kamchatka tracks cannot be substituted.",
+      "sourceUrl": "https://www.vulcanikamchatki.ru/files/pasporta_2024/3_pasport_vokrug_tolbachikov.pdf",
+      "title": "Вокруг Толбачиков",
+      "reasonCode": "source_unavailable",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://www.vulcanikamchatki.ru/files/pasporta_2024/3_pasport_vokrug_tolbachikov.pdf",
+          "error": "HTTP Error 500: Internal Server Error"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "nalychevo-avachinsky-central",
+      "reason": "The exact-named official GPX was retrieved (4 segments, 1279 vertices, 40.938 km), but it continues about 4 km below the Avachinsky cordon into the vehicle approach. The card describes 37 km between cordons. The tail has 6 edges over 500 m. Do not silently display the additional approach or trim to a guessed endpoint.",
+      "sourceUrl": "https://www.vulcanikamchatki.ru/files/pasporta_2024/pasport_2_avachinskij-central_nyj.pdf",
+      "title": "Налычево — Авачинский — Центральный",
+      "reasonCode": "source_extra_approach",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://www.vulcanikamchatki.ru/files/pasporta_2024/pasport_2_avachinskij-central_nyj.pdf",
+          "error": "HTTP Error 500: Internal Server Error"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification.",
+        "passportRead": "Official PDF text was additionally read through indexed primary source; exact start/end coordinates and distance were confirmed."
+      },
+      "candidate": {
+        "scope": "unresolved_variant",
+        "segments": 4,
+        "vertices": 1279,
+        "lengthKm": 40.938,
+        "maximumEdgeM": 1075.8,
+        "officialStartAnchor": [
+          158.7402778,
+          53.26
+        ],
+        "officialEndAnchor": [
+          158.7608333,
+          53.51
+        ],
+        "source": {
+          "sourceUrl": "https://www.vulcanikamchatki.ru/files/2024/gpx/2_avachinskij-central_nyj.zip",
+          "retrievedAt": "2026-11-12T23:35:02.164999+00:00",
+          "bytes": 9625,
+          "sha256": "12b8640d163b86dca48103afc067179a152ace6969d0e620afd53115c617a7ed"
+        },
+        "gpxSha256": "0abc95a9fe2b01f54b4aec2d1cf1865f39a9f54c81059764f9a836d766cd6446",
+        "listingUrl": "https://www.vulcanikamchatki.ru/v_pomow_gostyu/nomera_marshrutov/",
+        "accessStatusAtReview": "closed"
+      }
+    },
+    {
+      "id": "kamchatka-pacific-ring",
+      "reason": "The current official route table does not identify this historical Pacific Ring itinerary or an exact coordinate download. Other current Kamchatka GPX files and older similarly named variants cannot establish the full route represented by this card.",
+      "sourceUrl": "https://www.vulcanikamchatki.ru/v_pomow_gostyu/nomera_marshrutov/",
+      "title": "Тихоокеанское кольцо",
+      "reasonCode": "historic_variant_unresolved",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://www.vulcanikamchatki.ru/v_pomow_gostyu/nomera_marshrutov/",
+          "finalUrl": "https://www.vulcanikamchatki.ru/v_pomow_gostyu/nomera_marshrutov/",
+          "retrievedAt": "2026-11-12T23:32:30.460744+00:00",
+          "bytes": 63798,
+          "sha256": "084ed22f874306f88b271c894c16805aa89281344517409e83dcf1644a5d4e5d",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "akkem-three-birches-refuge",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://altai.travel/tourism/tours/shkola-alpinizma-na-beluhe",
+      "title": "Аккемская тропа — от Трёх берёз к приюту Аккем",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://altai.travel/tourism/tours/shkola-alpinizma-na-beluhe",
+          "finalUrl": "https://altai.travel/tourism/tours/shkola-alpinizma-na-beluhe",
+          "retrievedAt": "2026-11-12T23:32:30.417490+00:00",
+          "bytes": 136382,
+          "sha256": "9eedc0e3464f99b78c618821c7fa30234ada677d1bee2d6003200d10a695cf0f",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "sikhote-alin-arsenyev",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://sikhote-alin.ru/node/19604?language=ru",
+      "title": "Тропа Арсеньева",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://sikhote-alin.ru/node/19604?language=ru",
+          "finalUrl": "https://sikhote-alin.ru/node/19604?language=ru",
+          "retrievedAt": "2026-11-12T23:32:35.998337+00:00",
+          "bytes": 84082,
+          "sha256": "0d2413a4bfc3ae02bb5bba16145ae22f7a38704be047ccd1a104ec0f5bdbd000",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "leopard-land-leopard-trail",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://leopard-land.ru/services/excursions",
+      "title": "Тропой леопарда",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://leopard-land.ru/services/excursions",
+          "finalUrl": "https://leopard-land.ru/services/excursions",
+          "retrievedAt": "2026-11-12T23:32:36.171207+00:00",
+          "bytes": 452558,
+          "sha256": "0dd1d451b4036629f495c84cb94078a96700f53e83c1eb5c20b6b8442e02ec02",
+          "contentType": "text/html; charset=utf-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "lazovsky-petrov-island",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://openlazovsky.ru/lazovskiyzapovednik",
+      "title": "Остров Петрова — «Остров, остановивший время»",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://openlazovsky.ru/lazovskiyzapovednik",
+          "finalUrl": "https://openlazovsky.ru/lazovskiyzapovednik",
+          "retrievedAt": "2026-11-12T23:32:34.584308+00:00",
+          "bytes": 17013,
+          "sha256": "4270ae42e56e75d87c629838a2beb5f28032e4dd5c50005627caa9c299f1482e",
+          "contentType": "text/html"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "sakhalin-chekhov-peak",
+      "reason": "The source could not be fetched during this review: HTTP Error 503: Service Unavailable. The route description cannot be converted into a coordinate track.",
+      "sourceUrl": "https://sakhalin.tours/node/262",
+      "title": "Пик Чехова от кафе «Старый друг»",
+      "reasonCode": "source_unavailable",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://sakhalin.tours/node/262",
+          "error": "HTTP Error 503: Service Unavailable"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "kunashir-mendeleev-fumaroles",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://kurilskiy.ru/other-routes-kunashir",
+      "title": "Вулкан Менделеева — к фумарольному полю",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://kurilskiy.ru/other-routes-kunashir",
+          "finalUrl": "https://kurilskiy.ru/other-routes-kunashir",
+          "retrievedAt": "2026-11-12T23:32:41.822084+00:00",
+          "bytes": 338423,
+          "sha256": "dcf19c7b3b0250d84e665ffe58647d629eb1d1e0907acd3475f3bb26e5a79e06",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "kunashir-golovnin-caldera",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://kurilskiy.ru/routes-nature-reserve",
+      "title": "Кальдера вулкана Головнина — к озеру Кипящему",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://kurilskiy.ru/routes-nature-reserve",
+          "finalUrl": "https://kurilskiy.ru/routes-nature-reserve",
+          "retrievedAt": "2026-11-12T23:32:42.000369+00:00",
+          "bytes": 426591,
+          "sha256": "4bae41a6098a6cc1a5da21d6f371ca4de4f700a950f3e96000ec1e58a8af19e1",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    },
+    {
+      "id": "kunashir-cape-stolbchaty",
+      "reason": "The reviewed source describes this itinerary, but no coordinate track for this exact variant was identified in its direct download links. No exact match to an existing catalogue track has been approved.",
+      "sourceUrl": "https://www.kurilskiy.ru/routes-protective-zone",
+      "title": "Мыс Столбчатый от посёлка «13 км»",
+      "reasonCode": "no_exact_coordinate_source",
+      "sourceReview": {
+        "reviewedAt": "2026-11-13",
+        "page": {
+          "sourceUrl": "https://www.kurilskiy.ru/routes-protective-zone",
+          "finalUrl": "https://www.kurilskiy.ru/routes-protective-zone",
+          "retrievedAt": "2026-11-12T23:32:41.728601+00:00",
+          "bytes": 341053,
+          "sha256": "3906d8be007631471b6942e11e6352b32250b25fc264aa5cf04b72bee70b36d7",
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "scope": "Public source page and directly discovered geometry/map links; no name-based automatic matching and no field verification."
+      }
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 /* Тропник. Only public static assets are cached. Auth, chat and API responses never enter CacheStorage. */
-const VERSION='tropnik-shell-0.4.29-06a195ff5e4f2e7e';
+const VERSION='tropnik-shell-0.4.30-2fc7d0e9a77f7c8b';
 const SHELL=["/maps/map-coverage-lod.js","/data/map-coverage/manifest.json","/data/map-coverage/base.coverage","/maps/russia-viewport.js","/data/russia-display-area.geojson","/data/russia-outside-mask.geojson","/data/russia-canonical-mask.geojson","/data/russia-boundaries-provenance.json","/offline-fonts.css","/fonts/MANROPE-LICENSE.txt","/fonts/manrope-latin-400.woff2","/fonts/manrope-cyrillic-400.woff2","/fonts/manrope-latin-600.woff2","/fonts/manrope-cyrillic-600.woff2","/offline-safety.html","/offline-safety.js","/offline-safety.css","/offline-viewer.html","/offline.js","/offline.css","/favicon.svg","/data/world.geojson","/data/regions.geojson","/data/territories.geojson"];
 const MAP_WARM=['/terrain/ATTRIBUTION.txt','/terrain/sources/Copernicus-GLO30-LICENSE.pdf'];
 // BEGIN GENERATED CUSTOM MAP
-const CUSTOM_MAP_RESOURCES=[{"path":"/custom-map/chunks/custom-map-entry-DtycbgdZ.js","sizeBytes":109753,"sha256":"e17e2b92d30bb9970a19600af95f122b83b782153706b187b5f6fd58f3cfd25d"},{"path":"/custom-map/Manrope-OFL.txt","sizeBytes":4383,"sha256":"d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"},{"path":"/custom-map/map-runtime.js","sizeBytes":156,"sha256":"0921f16fff42180ae8dd4096cb66cae17aa071c21b5813e881df251001ba97b9"},{"path":"/custom-map/map.css","sizeBytes":82263,"sha256":"339a6051f00ccf2be12fdfe7e07eb86c8f08538e77903e5bc36de8b1d863a1bd"},{"path":"/custom-map/workers/custom-map-tiles.worker-DIXTfJlZ.js","sizeBytes":28755,"sha256":"f76ea8a31e046b700ab47418f303cffec504490e700b78f2dfc68866c4a71b2e"},{"path":"/custom-map/workers/terrain-preparation.worker-Bb-s7l3H.js","sizeBytes":2891,"sha256":"625ce56a5be80c34fe32704e0fe93aa1a5c83e56d719c1fcfea511ba56583931"},{"path":"/custom-map/manifest.json","sizeBytes":342524,"sha256":"bf555f10d4c3b6d522bd256caf4cb2d8c9931d78f7286cd7b24c9eb4c3cfc398"}];
+const CUSTOM_MAP_RESOURCES=[{"path":"/custom-map/chunks/custom-map-entry-BDIeTicq.js","sizeBytes":120607,"sha256":"f10bbf245418fe0994c6934621f30e95ccd3c884af492eecd85651e0b5fc37a7"},{"path":"/custom-map/Manrope-OFL.txt","sizeBytes":4383,"sha256":"d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"},{"path":"/custom-map/map-runtime.js","sizeBytes":156,"sha256":"aae2b26f874363aa531947c9eb614e0bc11dd2c08ef36df4ca80431859bf5fae"},{"path":"/custom-map/map.css","sizeBytes":82263,"sha256":"339a6051f00ccf2be12fdfe7e07eb86c8f08538e77903e5bc36de8b1d863a1bd"},{"path":"/custom-map/workers/custom-map-tiles.worker-DIXTfJlZ.js","sizeBytes":28755,"sha256":"f76ea8a31e046b700ab47418f303cffec504490e700b78f2dfc68866c4a71b2e"},{"path":"/custom-map/workers/terrain-preparation.worker-Bb-s7l3H.js","sizeBytes":2891,"sha256":"625ce56a5be80c34fe32704e0fe93aa1a5c83e56d719c1fcfea511ba56583931"},{"path":"/custom-map/manifest.json","sizeBytes":343378,"sha256":"168fcdd8bf81f87f3a80c8550fb7863809d036297b654840a92cadcb404679af"}];
 // END GENERATED CUSTOM MAP
 const CUSTOM_MAP_URLS=new Set(CUSTOM_MAP_RESOURCES.map(file=>file.path));
 const warmJobs=new Map();
@@ -40,6 +40,43 @@ async function coverageResponse(request,url){
  if(found)return{response:found};
  const response=await fetch(request);
  const write=response.ok&&response.type==='basic'?rememberCoverage(cache,url.pathname,response.clone()):undefined;
+ return{response,write};
+}
+// Only visited public trail data is retained. Query strings remain part of the
+// key, so an imported track requested with a new ?v= cannot reuse old bytes.
+const TRAIL_DATA_ROOT='/data/';
+const TRAIL_CACHE_LIMITS={bytes:32*1024*1024,entries:64,fileBytes:4*1024*1024};
+let trailWrites=Promise.resolve();
+function trailData(path){
+ return path.startsWith(TRAIL_DATA_ROOT)&&/^(?:trail-overlay-[a-f0-9]{16}\.json|imported\/[a-z0-9-]+\.geojson)$/.test(path.slice(TRAIL_DATA_ROOT.length));
+}
+function rememberTrailData(cache,key,response){
+ const job=trailWrites.then(async()=>{
+  if(Number(response.headers.get('content-length'))>TRAIL_CACHE_LIMITS.fileBytes){response.body?.cancel().catch(()=>{});return;}
+  const reader=response.body?.getReader();if(!reader)return;
+  const parts=[];let size=0;
+  try{for(;;){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;if(size>TRAIL_CACHE_LIMITS.fileBytes){reader.cancel().catch(()=>{});return;}parts.push(value);}}finally{reader.releaseLock();}
+  if(!size)return;
+  const retained=[];let total=0;
+  for(const request of await cache.keys()){
+   const url=new URL(request.url);if(!trailData(url.pathname))continue;
+   if(url.pathname+url.search===key){await cache.delete(request);continue;}
+   const cached=await cache.match(request),bytes=Number(cached?.headers.get('x-tropnik-trail-bytes'));
+   if(!Number.isSafeInteger(bytes)||bytes<=0||bytes>TRAIL_CACHE_LIMITS.fileBytes){await cache.delete(request);continue;}
+   retained.push({request,bytes});total+=bytes;
+  }
+  while(retained.length&&(retained.length>=TRAIL_CACHE_LIMITS.entries||total+size>TRAIL_CACHE_LIMITS.bytes)){const old=retained.shift();await cache.delete(old.request);total-=old.bytes;}
+  const bytes=new Uint8Array(size);let offset=0;for(const part of parts){bytes.set(part,offset);offset+=part.byteLength;}
+  await cache.put(key,new Response(bytes,{headers:{'Content-Type':response.headers.get('Content-Type')||'application/json','X-Tropnik-Trail-Bytes':String(size)}}));
+ });
+ trailWrites=job.catch(()=>{});return trailWrites;
+}
+async function trailDataResponse(request,url){
+ if(request.cache==='no-store')return{response:await fetch(request)};
+ const cache=await caches.open(VERSION),key=url.pathname+url.search;
+ if(request.cache!=='reload'){const found=await cache.match(key);if(found)return{response:found};}
+ const response=await fetch(request);
+ const write=response.ok&&response.type==='basic'?rememberTrailData(cache,key,response.clone()):undefined;
  return{response,write};
 }
 async function cacheOverview(cache){
@@ -101,8 +138,9 @@ self.addEventListener('message',event=>{if(event.data?.type==='skip-waiting')eve
 async function verifiedResource(request){const names=(await caches.keys()).filter(n=>n.startsWith('tropnik-map-')).sort().reverse();for(const name of names){const cache=await caches.open(name);if(await cache.match('/_offline/verified-map')){const match=await cache.match(request);if(match)return match;}}return null;}
 self.addEventListener('fetch',event=>{const req=event.request,url=new URL(req.url);if(req.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/')||req.headers.get('RSC'))return;
  if(coverageCell(url.pathname)){const result=coverageResponse(req,url);event.respondWith(result.then(value=>value.response));event.waitUntil(result.then(value=>value.write).catch(()=>{}));return;}
+ if(trailData(url.pathname)){const result=trailDataResponse(req,url);event.respondWith(result.then(value=>value.response));event.waitUntil(result.then(value=>value.write).catch(()=>{}));return;}
  if(url.pathname.startsWith('/offline-map/')){event.respondWith((async()=>{if(req.cache==='no-store'||req.cache==='reload')return fetch(req);const found=await verifiedResource(req);if(found)return found;return fetch(req);})());return;}
  if(req.mode==='navigate'){event.respondWith(fetch(req).catch(async()=>{const cache=await caches.open(VERSION);if(SAFETY_PAGES.includes(url.pathname))return await cache.match('/offline-safety.html')||Response.error();return await cache.match(url.pathname)||await cache.match('/offline-viewer.html')||Response.error();}));return;}
  const permitted=['/terrain/terrain-grid.json','/terrain/terrain-preview.json'].includes(url.pathname)||SHELL.includes(url.pathname)||MAP_WARM.includes(url.pathname)||CUSTOM_MAP_URLS.has(url.pathname)||url.pathname.startsWith('/_next/static/')||url.pathname.startsWith('/assets/')||url.pathname.startsWith('/data/routes/')||url.pathname.startsWith('/maps/russia-relief/');if(!permitted)return;
- event.respondWith((async()=>{const cache=await caches.open(VERSION);const found=await cache.match(req);if(found)return found;const res=await fetch(req);if(res.ok&&res.type==='basic')await cache.put(req,res.clone());return res;})());
+ event.respondWith((async()=>{if(req.cache==='no-store')return fetch(req);const cache=await caches.open(VERSION);const found=req.cache==='reload'?null:await cache.match(req);if(found)return found;const res=await fetch(req);if(res.ok&&res.type==='basic')await cache.put(req,res.clone());return res;})());
 });

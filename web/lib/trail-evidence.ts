@@ -3,6 +3,8 @@ type GeometryEvidence = {
   sourceKind?: string;
   geometryUrl?: string;
   geometry?: unknown;
+  geometrySourceKind?: 'database' | 'official';
+  geometryScope?: 'source_track' | 'source_scheme';
 };
 
 /** Explain only geometry actually supplied with the record. */
@@ -12,6 +14,11 @@ export function trailGeometryDescription(trail: GeometryEvidence): string {
   }
   if (trail.publicationStatus === 'published') {
     return 'На карте показан опубликованный путь. Новые изменения и ограничения проверяются перед каждым выходом.';
+  }
+  if (trail.geometrySourceKind === 'official') {
+    return trail.geometryScope === 'source_scheme'
+      ? 'На карте показана схема пути, опубликованная организацией, отвечающей за маршрут. Для навигации нужна подробная карта; условия на местности проверяются перед выходом.'
+      : 'Линия пути опубликована организацией, отвечающей за маршрут. Она не заменяет проверку состояния тропы и действующих ограничений перед выходом.';
   }
   if (trail.sourceKind === 'community') {
     return 'Линия пути получена из указанного источника сообщества. Её полнота и соответствие маршруту на местности требуют отдельной проверки.';

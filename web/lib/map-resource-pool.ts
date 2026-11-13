@@ -1,7 +1,7 @@
 import {MAP_RESOURCE_LIMITS} from './map-config.ts';
 
 /** One bounded pool shared by every preview. It never marks an offline pack complete. */
-type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown; persistent: boolean; consumers: number; controller?: AbortController};
+type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown; persistent: boolean; consumers: number; controller?: AbortController; reload: boolean};
 type Options = {concurrency?: number; maxBytes?: number; maxResourceBytes?: number; maxQueued?: number; timeoutMs?: number; fetcher?: typeof fetch};
 
 const REMOTE_TILE_GET = /^https:\/\/(?:tiles\.openfreemap\.org\/(?:[^/?#]+\/)+\d+\/\d+\/\d+\.pbf|tiles\.mapterhorn\.com\/\d+\/\d+\/\d+\.webp|tiles\.maps\.eox\.at\/wmts\/1\.0\.0\/(?:s2cloudless_3857|bluemarble_3857)\/default\/g\/\d+\/\d+\/\d+\.jpg)$/;
@@ -27,6 +27,7 @@ export class MapResourcePool {
   private queue: string[] = [];
   private active = 0;
   private bytes = 0;
+  private reloads = new Set<string>();
   private options: Required<Options>;
   constructor(options: Options = {}) {
     this.options = {...MAP_RESOURCE_LIMITS, fetcher: (...args) => fetch(...args), ...options};
@@ -48,7 +49,7 @@ export class MapResourcePool {
     }
     let resolve!: Entry['resolve'], reject!: Entry['reject'];
     const promise = new Promise<ArrayBuffer>((yes, no) => {resolve = yes; reject = no;});
-    const entry: Entry = {promise, resolve, reject, priority, bytes: 0, settled: false, persistent: false, consumers: 0};
+    const entry: Entry = {promise, resolve, reject, priority, bytes: 0, settled: false, persistent: false, consumers: 0, reload: this.reloads.has(url)};
     this.entries.set(url, entry);
     const consumed = this.consume(url, entry, signal);
     this.queue.push(url); this.pump(); return consumed;
@@ -81,12 +82,15 @@ export class MapResourcePool {
   }
   has(url: string) {return this.entries.has(url);}
   /** Discard invalid content after validation without interrupting another consumer's active request. */
-  invalidate(url: string) {if (this.entries.get(url)?.settled) this.remove(url);}
+  invalidate(url: string, options: {reload?: boolean} = {}) {
+    if (this.entries.get(url)?.settled) this.remove(url);
+    if (options.reload) {this.reloads.delete(url); this.reloads.add(url); if (this.reloads.size > this.options.maxQueued) this.reloads.delete(this.reloads.values().next().value!);}
+  }
   async json<T>(url: string, priority = 1): Promise<T> {
     const bytes = await this.get(url, priority), entry = this.entries.get(url);
     if (entry?.json !== undefined) return entry.json as T;
     try {const value = JSON.parse(new TextDecoder().decode(bytes)) as T; if (entry) entry.json = value; return value;}
-    catch (error) {this.remove(url); throw error;}
+    catch (error) {this.invalidate(url, {reload: true}); throw error;}
   }
   private remove(url: string) {const entry = this.entries.get(url); if (entry) {this.bytes -= entry.bytes; this.entries.delete(url);}}
   private pump() {
@@ -94,15 +98,15 @@ export class MapResourcePool {
     while (this.active < this.options.concurrency && this.queue.length) {
       const url = this.queue.shift()!, entry = this.entries.get(url); if (!entry) continue; this.active++;
       const controller = new AbortController(); entry.controller = controller;
-      this.read(url, controller).then(bytes => {
+      this.read(url, controller, entry.reload).then(bytes => {
         if (this.entries.get(url) !== entry) return;
-        entry.bytes = bytes.byteLength; entry.settled = true; this.bytes += entry.bytes;
+        entry.bytes = bytes.byteLength; entry.settled = true; this.bytes += entry.bytes; this.reloads.delete(url);
         for (const [key, candidate] of this.entries) {if (this.bytes <= this.options.maxBytes) break; if (candidate.settled && key !== url) this.remove(key);}
         entry.resolve(bytes);
       }, error => {if (this.entries.get(url) === entry) this.remove(url); entry.reject(error);}).finally(() => {entry.controller = undefined; this.active--; this.pump();});
     }
   }
-  private async read(url: string, controller: AbortController) {
+  private async read(url: string, controller: AbortController, reload: boolean) {
     const timer = setTimeout(() => controller.abort(), this.options.timeoutMs);
     try {
       // Regional manifests and checked extracts can be updated at the same URL.
@@ -116,7 +120,7 @@ export class MapResourcePool {
         let networkFailure = false;
         const networkRead = <T>(promise: Promise<T>) => promise.catch(error => {networkFailure = error instanceof TypeError; throw error;});
         try {
-          const response = await networkRead(this.options.fetcher(url, {cache: regional ? 'no-cache' : 'force-cache', credentials: url.startsWith('/') ? 'same-origin' : 'omit', signal: controller.signal}));
+          const response = await networkRead(this.options.fetcher(url, {cache: reload ? 'reload' : regional ? 'no-cache' : 'force-cache', credentials: url.startsWith('/') ? 'same-origin' : 'omit', signal: controller.signal}));
           if (!response.ok) throw new MapResourceHTTPError(response.status);
           if (Number(response.headers.get('content-length') || 0) > this.options.maxResourceBytes) throw new Error('Preview resource exceeds the byte budget');
           reader = response.body?.getReader(); if (!reader) return new ArrayBuffer(0);

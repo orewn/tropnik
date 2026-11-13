@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import sys
 from urllib.request import Request, urlopen
 
 import numpy as np
@@ -20,6 +21,9 @@ from shapely.affinity import translate
 from shapely.geometry import GeometryCollection, MultiPolygon, Point, Polygon, box, mapping, shape
 from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from route_catalog_inputs import load_route_catalogs
 
 ROOT = Path(__file__).resolve().parents[2]
 RAW = ROOT / 'data/boundaries/raw'
@@ -222,8 +226,7 @@ def main():
 
     # Protect full source boundaries near actual imported routes, so an
     # overview simplifier cannot cut coastal trails out of the application.
-    catalog_path = ROOT / 'data/catalog/routes.geojson'
-    catalog = json.loads(catalog_path.read_text())['features']
+    catalog, catalog_input = load_route_catalogs(ROOT)
     detail_padding = 0.015
     windows = []
     for f in catalog:
@@ -279,7 +282,7 @@ def main():
     coverage_report = {
         'schemaVersion': 1, 'checkedAt': datetime.now(timezone.utc).isoformat(),
         'scope': 'All imported line vertices compared against selected historical source plus explicitly included inland water holes and against the runtime display mask. Not field, access or legal verification.',
-        'catalogPath': str(catalog_path.relative_to(ROOT)), 'catalogSha256': digest(catalog_path),
+        **catalog_input,
         'routeCount': len(route_rows), 'totalVertices': sum(r['vertexCount'] for r in route_rows),
         'excludedCatalogRouteIds': excluded_ids,
         'verticesIncorrectlyRemovedBySimplification': removed_vertices,
@@ -391,7 +394,7 @@ def main():
         'simplificationToleranceDegrees': args.simplify_degrees,
         'fullSourceDetailExceptions': sorted(CRIMEA_NAMES),
         'inlandWaterDisplayInclusions': lake_records,
-        'routeDetailPreservation': {'catalogSha256': digest(catalog_path), 'routeCount': len(catalog),
+        'routeDetailPreservation': {**catalog_input,
                                     'policy': 'Full selected source geometry inside union of route envelopes padded by the stated angular amount',
                                     'envelopePaddingDegrees': detail_padding},
         'excludedCatalogRouteIds': excluded_ids,

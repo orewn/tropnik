@@ -5,14 +5,18 @@ from zoneinfo import ZoneInfo
 root=Path(__file__).resolve().parents[1]
 catalog=root.parent/'data/catalog'
 records=json.loads((catalog/'routes.json').read_text())['routes']
-national_path=catalog/'national/routes.json'
-national_records=json.loads(national_path.read_text())['routes'] if national_path.exists() else []
 known_ids={row['id'] for row in records}
-if len(known_ids)!=len(records) or any(row['id'] in known_ids for row in national_records):
- raise ValueError('National supplement duplicates a source route identity')
-if len({row['id'] for row in national_records})!=len(national_records):
- raise ValueError('National supplement has duplicate identities')
-records=[*(dict(row,_sourceRoot=catalog) for row in records),*(dict(row,_sourceRoot=catalog/'national') for row in national_records)]
+if len(known_ids)!=len(records):raise ValueError('Original catalogue has duplicate identities')
+records=[dict(row,_sourceRoot=catalog) for row in records]
+# Keep the historical catalogue first; every committed supplementary card
+# collection participates. Raw acquisition responses are never public cards.
+supplements=sorted((path for path in catalog.rglob('routes.json') if path.parent!=catalog and 'raw' not in path.relative_to(catalog).parts),key=lambda path:(path!=catalog/'national/routes.json',path.as_posix()))
+for source in supplements:
+ document=json.loads(source.read_text())
+ if not isinstance(document.get('routes'),list):raise ValueError('Invalid supplemental route collection: '+str(source))
+ for row in document['routes']:
+  if row['id'] in known_ids:raise ValueError('Supplement duplicates a source route identity: '+row['id'])
+  known_ids.add(row['id']);records.append(dict(row,_sourceRoot=source.parent))
 evidence={r['osmRelationId']:r for r in json.loads((catalog/'verification-evidence.json').read_text())['records']}
 aliases={3748147:'kavkaz-16a',3748250:'kavkaz-16b',11566519:'kavkaz-8a'}
 points={};out=[];active_files=set();target=root/'public/data/imported';target.mkdir(parents=True,exist_ok=True)

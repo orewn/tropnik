@@ -19,6 +19,15 @@ test('existing sourced lines and published geometry keep their distinct provenan
   assert.match(trailGeometryDescription({publicationStatus:'published', geometryUrl:'/data/routes/1.geojson'}), /опубликованный путь/);
 });
 
+test('official GPX and an official schematic line do not claim OSM provenance or field verification', () => {
+  const track = trailGeometryDescription({publicationStatus:'reference', geometryUrl:'/data/routes/official.geojson', geometrySourceKind:'official', geometryScope:'source_track'});
+  assert.match(track, /опубликована организацией/);
+  assert.doesNotMatch(track, /OpenStreetMap|проверена на местности/);
+  const scheme = trailGeometryDescription({publicationStatus:'reference', geometryUrl:'/data/routes/official.geojson', geometrySourceKind:'official', geometryScope:'source_scheme'});
+  assert.match(scheme, /схема пути/);
+  assert.match(scheme, /подробная карта/);
+});
+
 test('source references reject executable schemes, credential URLs and invalid addresses', () => {
   for (const value of ['javascript:alert(1)', 'data:text/html,anything', 'https://user:secret@t.me/poiskpohod/1', '/relative-source', 'not a URL']) {
     assert.equal(safeSourceHref(value), null);

@@ -99,7 +99,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   destroy(){this.destroyed=true;this.active=false;for(const tile of this.cache.values())tile.bitmap.close();this.cache.clear();}
  }
  const globals={document,window,Path2D:Path,ResizeObserver:class{constructor(callback){this.callback=callback;observers.push(this);}observe(){}disconnect(){this.disconnected=true;}},
-  devicePixelRatio:1,navigator:{onLine:true},matchMedia:()=>({matches:false}),performance:{now:()=>now},console,URL,AbortController,
+  devicePixelRatio:1,navigator:{onLine:true},matchMedia:()=>({matches:false}),performance:{now:()=>now},console,URL,AbortController,crypto:globalThis.crypto,TextEncoder,
   getComputedStyle:element=>({display:element.hidden?'none':'block',visibility:'visible',opacity:'1',pointerEvents:'auto'}),
   requestAnimationFrame:callback=>{const id=++serial;frames.set(id,callback);return id;},cancelAnimationFrame:id=>frames.delete(id),
   setTimeout:(callback,delay)=>{const id=++serial;timers.set(id,{callback,at:now+delay});return id;},clearTimeout:id=>timers.delete(id)};
@@ -142,6 +142,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
  const lastDraw=()=>[...lastSurface('tropnik-map-canvas','draw-start'),...lastSurface('tropnik-map-labels','clearRect')];
  return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
+  verifyReviewedCoastalRoute:load(resolve(root,'lib/reviewed-coastal-routes.ts')).verifyReviewedCoastalRoute,
   get coverageAttempts(){return coverageAttempts;},get readyCalls(){return readyCalls;},get gestures(){return gestures;},get layoutReads(){return layoutReads;},
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
   coordinateAt:point=>engine.unproject(point),labelFor(job,coordinate,text,options={}){const p=load(resolve(root,'lib/custom-map-camera.ts')).mercatorProject(coordinate),n=2**job.request.z;return{x:p.x*n-job.request.x,y:p.y*n-job.request.y,text,kind:'place',rank:4,...options};}};
@@ -1072,10 +1073,14 @@ test('named label inspection reads retained decisions beyond 512 without repaint
 
 test('selected Chukotka keeps the real polygon fill but never outlines the source coverage-cell cut',async t=>{
  const bytes=readFileSync(resolve(root,'public/data/map-coverage/base.coverage'));
- assert.equal(createHash('sha256').update(bytes).digest('hex'),'dfefb142c5ea6686a86686e29a8ba8410b5940391b572102dfb41bacd4daa21b');
  const source=decodeCoverage(JSON.parse(bytes.toString('utf8'))),name='Chukotka Autonomous Okrug';
  const pick=role=>source.features.find(feature=>feature.properties.cell==='0b0a-'&&feature.properties.shapeName===name&&feature.properties.role===role);
  const territory=pick('territory'),boundary=pick('territory-boundary');assert.ok(territory&&boundary);
+ // Pin the exact source features exercised here. Unrelated coverage refinements
+ // must not force this regression case to bless a different Chukotka geometry.
+ // Both decoded features are unchanged from release c1d1648.
+ assert.equal(createHash('sha256').update(JSON.stringify(territory)).digest('hex'),'98b83ce39ea9d2dff5bf90911aaa75dac625027c9fb45365235a119aa9eec51e');
+ assert.equal(createHash('sha256').update(JSON.stringify(boundary)).digest('hex'),'3a7a723e36ee75da007b8f7fc710ca34fa5e401d9abe946d040554642fd675b5');
  const lines=geometry=>geometry.type==='MultiPolygon'?geometry.coordinates.flat():geometry.coordinates;
  const crossing=geometry=>lines(geometry).flatMap(line=>line.slice(1).flatMap((point,index)=>{
   const previous=line[index];return previous[0]===180&&point[0]===180&&Math.min(previous[1],point[1])<67.5&&Math.max(previous[1],point[1])>67.5?[[previous,point]]:[];
@@ -1155,4 +1160,52 @@ test('opaque coverage is re-evaluated against the live camera and backing extent
  assert.ok(env.pending('vector').length>0);assert.equal(underlayPaint(env).paper.length,1);assert.equal(underlayPaint(env).area.length,1,'The old batch cannot cover a larger actual canvas');
  env.complete();await env.settle();assert.equal(underlayPaint(env).paper.length,0);assert.equal(underlayPaint(env).area.length,0);
  assert.ok(env.engine.inspect().tiles.detail.every(tile=>tile.width===512&&tile.height===512));assert.equal(env.engine.getCamera().zoom,camera.zoom);
+});
+
+test('catalogue overlay preserves every source part, culls distant geometry and retains the selected exact line in both modes',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+ const part=(coordinates)=>({bounds:[Math.min(...coordinates.map(p=>p[0])),Math.min(...coordinates.map(p=>p[1])),Math.max(...coordinates.map(p=>p[0])),Math.max(...coordinates.map(p=>p[1]))],lines:[coordinates,coordinates]});
+ const first={key:'a',ids:['a','a-alias'],parts:[part([[39,43.5],[42,43.5]]),part([[40.4,43.55],[40.6,43.55]])]},second={key:'b',ids:['b'],parts:[part([[40.3,43.3],[40.7,43.6]])]},far={key:'far',ids:['far'],parts:[part([[110,60],[111,61]])]};
+ env.engine.setTrailOverlay([first,second,far]);env.flush();
+ const overlay=()=>env.lastDraw().find(call=>call.op==='stroke'&&['#618253','#f2d49b'].includes(call.color));
+ const before=overlay();assert.ok(before);assert.equal(before.path.commands.filter(command=>command[0]==='addPath').length,3);
+ assert.equal(pathCommands(before.path).filter(command=>command[0]==='moveTo').length,3,'Disconnected source parts each start with moveTo');
+ assert.equal(env.engine.inspect().catalogueOverlay.preparedSources,2);assert.equal(env.engine.inspect().catalogueOverlay.preparedParts,3);
+ const compiledPaths=env.paths.filter(path=>path.commands.some(command=>command[0]==='lineTo')).length;
+ env.engine.setLayers({});env.flush();assert.equal(overlay().path,before.path,'An unchanged view reuses its aggregated path');
+ env.engine.setMode('satellite');env.complete();await env.settle();assert.equal(overlay().color,'#f2d49b');assert.equal(overlay().path,before.path);
+ env.engine.setRoute({type:'LineString',coordinates:[[40.3,43.3],[40.45,43.49],[40.7,43.6]]},'a-alias');env.flush();
+ assert.equal(env.engine.inspect().catalogueOverlay.preparedSources,1,'All aliases of selected source are removed from the background layer');
+ const draw=env.lastDraw(),selected=draw.findIndex(call=>call.op==='stroke'&&call.color==='#244d3c'),background=draw.findIndex(call=>call===overlay());assert.ok(selected>background);
+ env.engine.setLayers({paths:false});env.complete();await env.settle();assert.equal(overlay(),undefined);assert.equal(env.engine.inspect().drawnRoute,'a-alias');
+ env.engine.setLayers({paths:true});env.complete();await env.settle();assert.ok(overlay());
+ assert.equal(env.paths.filter(path=>path.commands.some(command=>command[0]==='lineTo')).length,compiledPaths+1,'Only the newly selected raw geometry compiles; mode/filter updates reuse catalogue parts');
+ env.engine.setTrailOverlay([]);env.flush();assert.equal(overlay(),undefined);assert.equal(env.engine.inspect().drawnRoute,'a-alias');
+});
+
+test('close catalogue geometry replaces the overview without joining parts and pan/zoom keeps bounded batches',async t=>{
+ const env=fixture({view:{...camera,zoom:13}});t.after(()=>env.engine.destroy());await env.ready();
+ const coarse=[[40.49,43.5],[40.51,43.5]],detail=[[40.49,43.5],[40.5,43.501],[40.51,43.5]],bounds=[40.49,43.5,40.51,43.501];
+ const entry={key:'a',ids:['a'],parts:[{bounds,lines:[coarse,coarse]}]};env.engine.setTrailOverlay([entry]);env.flush();
+ const stroke=()=>env.lastDraw().find(call=>call.op==='stroke'&&call.color==='#618253');assert.equal(pathCommands(stroke().path).filter(command=>command[0]==='lineTo').length,1);
+ env.engine.setTrailOverlay([{...entry,detail:[{bounds,lines:[detail]}]}]);env.flush();assert.equal(pathCommands(stroke().path).filter(command=>command[0]==='lineTo').length,2);assert.equal(env.engine.inspect().catalogueOverlay.exactSources,1);
+ env.engine.setCamera({...camera,center:[50,55],zoom:13});env.flush();assert.equal(stroke(),undefined);assert.equal(env.engine.inspect().catalogueOverlay.preparedParts,0);
+});
+
+test('only the verified coastal snapshot crosses the unchanged mask; ordinary and shifted tracks remain masked',async t=>{
+ const env=fixture({view:{center:[150.94,59.56],zoom:11,bearingDegrees:0}});t.after(()=>env.engine.destroy());await env.ready();
+ const source=JSON.parse(readFileSync(resolve(root,'public/data/routes/kolyma-black-creek.geojson'),'utf8')),url='/data/routes/kolyma-black-creek.geojson';
+ const allowance=await env.verifyReviewedCoastalRoute(url,source);assert.ok(allowance);
+ const before=coveragePaint(env),mask=before.mask,maskIndex=draw=>draw.findIndex(call=>call.op==='fill'&&call.path===mask);
+ env.engine.setRoute(source,'coastal',allowance);env.flush();
+ let draw=env.lastDraw();assert.ok(draw.findIndex(call=>call.op==='stroke'&&call.color==='#244d3c')>maskIndex(draw));assert.equal(env.engine.inspect().reviewedCoastal.selected,true);
+ assert.equal(coveragePaint(env).mask,mask);assert.equal(coveragePaint(env).area,before.area,'Review does not modify land/country coverage');
+ const shifted=plain(source);shifted.features[0].geometry.coordinates[0][100][0]+=.001;
+ assert.equal(await env.verifyReviewedCoastalRoute(url,shifted),undefined);
+ env.engine.setRoute(shifted,'shifted',allowance);env.flush();draw=env.lastDraw();
+ assert.equal(env.engine.inspect().reviewedCoastal.selected,false);assert.ok(draw.findIndex(call=>call.op==='stroke'&&call.color==='#244d3c')<maskIndex(draw));
+ env.engine.setRoute(undefined);env.engine.setTrailOverlay([{key:'routes/kolyma-black-creek.geojson',ids:['coastal'],parts:[],coastal:allowance}]);env.flush();draw=env.lastDraw();
+ assert.equal(env.engine.inspect().reviewedCoastal.overlaySources,1);assert.ok(draw.findIndex(call=>call.op==='stroke'&&call.color==='#618253')>maskIndex(draw));assert.equal(coveragePaint(env).mask,mask);
+ env.engine.setMode('satellite');env.complete();await env.settle();draw=env.lastDraw();assert.ok(draw.findIndex(call=>call.op==='stroke'&&call.color==='#f2d49b')>maskIndex(draw));
+ env.engine.setLayers({paths:false});env.complete();await env.settle();assert.equal(env.engine.inspect().reviewedCoastal.overlaySources,0);assert.equal(env.lastDraw().some(call=>call.op==='stroke'&&call.color==='#f2d49b'),false);
 });
