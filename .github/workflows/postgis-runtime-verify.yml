@@ -1,0 +1,75 @@
+name: Isolated PostgreSQL 18.7 and rebuilt PostGIS qualification
+
+on:
+  push:
+    branches: [verify/postgis-runtime-20261113]
+
+permissions:
+  contents: read
+
+# Explicit bash enables pipefail for every run step, including logs captured by tee.
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.27.4'
+          cache-dependency-path: backend/go.sum
+      - name: Unit tests and race detector
+        working-directory: backend
+        run: go test -race -count=1 ./...
+      - name: Static checks
+        working-directory: backend
+        run: go vet ./...
+      - name: Verify the shared PostgreSQL and rebuilt PostGIS image
+        run: |
+          set -euo pipefail
+          mkdir -p verification
+          python3 infra/verify-postgis-image.py --report verification/postgis-image.json 2>&1 | tee verification/postgis-image.log
+      - name: Native PostGIS integration gate
+        run: |
+          set -euo pipefail
+          mkdir -p verification
+          bash infra/run-integration.sh 2>&1 | tee verification/native-postgis.log
+      - name: Install verified age release for recovery drill
+        run: |
+          set -euo pipefail
+          TROPA_AGE_DIR="$RUNNER_TEMP/tropa-age"
+          mkdir -p "$TROPA_AGE_DIR"
+          curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+            --output "$TROPA_AGE_DIR/age.tar.gz" \
+            https://github.com/FiloSottile/age/releases/download/v1.3.2/age-v1.3.2-linux-amd64.tar.gz
+          printf '%s  %s\n' cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10 "$TROPA_AGE_DIR/age.tar.gz" | sha256sum --check --status
+          tar -xzf "$TROPA_AGE_DIR/age.tar.gz" -C "$TROPA_AGE_DIR" age/age age/age-keygen
+          printf '%s\n' "$TROPA_AGE_DIR/age" >> "$GITHUB_PATH"
+          "$TROPA_AGE_DIR/age/age" --version
+      - name: Encrypted backup and isolated restore gate
+        run: |
+          set -euo pipefail
+          bash infra/run-backup-drill.sh --report verification/backup-restore.json 2>&1 | tee verification/backup-restore.log
+      - name: Preserve integration evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-native-postgis-${{ github.sha }}
+          path: |
+            verification/postgis-image.json
+            verification/postgis-image.log
+            verification/native-postgis.log
+            verification/backup-restore.log
+            verification/backup-restore.json
+          if-no-files-found: warn
+          retention-days: 14

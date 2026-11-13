@@ -7,10 +7,20 @@ runtime; ordinary self-hosting uses the Next application from `../web`.
 ## Host layout
 
 Use an x86-64 Linux host with Docker Compose for the supplied PostGIS image.
-The upstream `postgis/postgis:18-3.7` image documents amd64 support. An ARM host
-requires a separately verified native PostGIS build; do not silently rely on
-emulation for production. The data volume is `/var/lib/postgresql`, the
-PostgreSQL 18+ image layout.
+All three database stacks extend `compose.database.yaml`: a digest-pinned
+official PostgreSQL 18.7 base with the official PGDG PostGIS 3.7.0 packages
+rebuilt against PostgreSQL 18.7 headers. Package versions and SHA-256 hashes
+are fixed; build provenance is in [db/postgis/README.md](db/postgis/README.md).
+An ARM host requires a separately verified native build; do not silently rely
+on emulation for production. The data volume remains `/var/lib/postgresql`,
+with `PGDATA=/var/lib/postgresql/18/docker`.
+
+PostgreSQL 18.7's composite-type security fix requires rebuilt C extensions.
+The native and restore gates require `composite_type_mismatch=error`.
+Image construction needs network access for authenticated package downloads;
+the isolated restore database itself has no network. Compose rebuilds from
+the shared recipe, reusing Docker's build cache, and never pulls a same-named
+database image from a registry.
 
 The database has no published port. API port 8080 binds only to host loopback.
 PostgreSQL connections use a private isolated Docker network. The explicit
@@ -401,9 +411,13 @@ attached to the wrong event or UPDATE column, a missing mail outbox, a missing
 or incorrectly defined active-membership index, and an unsupported schema. Cleanup
 of temporary containers/networks and identity files is part of the gate.
 
-The Backend workflow runs this after the native store integration suite and
-uploads only `backup-restore.json`, the bounded recovery log and the existing
-native test log. No identity or encrypted fixture archive is uploaded. A gate
+The Backend workflow first qualifies the shared database image: actual
+server/client/package versions, four rebuilt library hashes, strict composite
+checks including rejected `warn`/`disabled` settings, upstream template
+initialization, and geometry/topology/raster/SFCGAL smoke cases. It then runs the
+native store suite and this recovery drill. Uploaded evidence contains the
+public image receipt/log, `backup-restore.json`, the bounded recovery log and
+the native test log. No identity or encrypted fixture archive is uploaded. A gate
 run counts as evidence only for its recorded source and tool/image versions.
 It does not replace measured recovery from the selected production storage.
 
@@ -423,6 +437,7 @@ location required by the legal review. A hosting region selection alone is not
 proof of compliance. Check new route restrictions with authoritative sources
 and actual guide review; importing a map is not that review.
 
-Container tags are explicit but still mutable. Before a production release,
-resolve and record the tested image digests, SBOM and vulnerability scan results.
+The database base digest and rebuilt extension package hashes are pinned.
+Record the resulting deployment image digest, SBOM and vulnerability scan
+results for the actual host; other build/runtime tags still need that review.
 The separate website and Android artifacts do not configure any live server.

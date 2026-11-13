@@ -1,4 +1,5 @@
 -- Aggregate-only recovery report for the current eight-migration application.
+\ir /usr/local/share/tropnik/runtime-check.sql
 SET search_path=pg_catalog,public;
 CREATE TEMP TABLE expected_application_tables(name text PRIMARY KEY);
 INSERT INTO expected_application_tables(name) VALUES
@@ -137,7 +138,8 @@ SELECT jsonb_build_object(
  'applicationGuardCount',(SELECT count(*) FROM expected_application_guards),
  'migrations',(SELECT jsonb_agg(version ORDER BY version) FROM schema_migrations),
  'rowCounts',(SELECT jsonb_object_agg(name,total ORDER BY name) FROM restored_row_counts),
- 'checks',jsonb_build_object('constraintsAndIndexes',true,'applicationGuards',true,'geometry',true,'safetyLinkage',true,'safetyEventChain',true,'mailOutbox',true,'activeMembershipIndex',true),
+ 'checks',jsonb_build_object('constraintsAndIndexes',true,'applicationGuards',true,'geometry',true,'safetyLinkage',true,'safetyEventChain',true,'mailOutbox',true,'activeMembershipIndex',true,'databaseSecurity',true),
+ 'compositeTypeMismatch',current_setting('composite_type_mismatch'),
  'syntheticFixtureVerified',:'fixture_verified'::boolean,
  'containerIsolationVerified',true,
  'temporaryDatabaseRemovedBeforePublication',true,

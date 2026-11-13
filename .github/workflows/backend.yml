@@ -38,6 +38,11 @@ jobs:
       - name: Static checks
         working-directory: backend
         run: go vet ./...
+      - name: Verify the shared PostgreSQL and rebuilt PostGIS image
+        run: |
+          set -euo pipefail
+          mkdir -p verification
+          python3 infra/verify-postgis-image.py --report verification/postgis-image.json 2>&1 | tee verification/postgis-image.log
       - name: Native PostGIS integration gate
         run: |
           set -euo pipefail
@@ -65,6 +70,8 @@ jobs:
         with:
           name: tropnik-native-postgis-${{ github.sha }}
           path: |
+            verification/postgis-image.json
+            verification/postgis-image.log
             verification/native-postgis.log
             verification/backup-restore.log
             verification/backup-restore.json

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "baseImage": "postgres:18.7-trixie@sha256:9f4fd4aa918f52ae3d6f3b687f1de90d8f867cd4d520021545a9a50c120eae3b",
+  "baseAMD64Manifest": "sha256:c7fedce47eff6a78cb35dad6b627f0d684107f75ab15c0870e40c093766ba452",
+  "postgresPackageVersion": "18.7-1.pgdg13+2",
+  "postgisVersion": "3.7.0",
+  "postgisPackageVersion": "3.7.0+dfsg-1.pgdg13+2",
+  "upstreamPostgisCommit": "1fdbb1cbb0e076816be06c401c5a5a2cf2c487f9",
+  "upstreamInitCommit": "0ff5ed710b024d26c004eef32533cb586edfd560",
+  "buildinfo": {
+    "url": "https://apt.postgresql.org/pub/repos/apt/pool/main/p/postgis/postgis_3.7.0+dfsg-1.pgdg13+2_amd64.buildinfo",
+    "sha256": "189e29d6f9b43489f888957428679261041e619a1adc225fd8285267f16162bd",
+    "builtAt": "2026-11-10T16:45:39Z",
+    "postgresServerDevVersion": "18.7-1.pgdg13+1"
+  },
+  "packageVerification": {
+    "runURL": "https://github.com/orewn/tropnik/actions/runs/43394938622",
+    "sourceCommit": "7f87ec4d0bc91056df9127fe17c40d272c954224",
+    "artifactSHA256": "38a57ae00701a9def34be758265c890cf4ba07d9388fc03d9e4932e481f75f6f",
+    "authenticatedAPTDownload": true,
+    "packageHashesMatchedBuildinfo": true,
+    "coreUndefinedSymbols": [
+      "DatumGetHeapTupleHeader",
+      "heap_datum_check"
+    ]
+  },
+  "librarySHA256": {
+    "postgis-3.so": "cbc9b95e33d2f9a2b4377a441405415435048953e9f4b66eabf1e8a5ff06cfe1",
+    "postgis_raster-3.so": "2144eefe32978badfb1c9757ffe82b659ac2d20a41e66240623271de737e530b",
+    "postgis_sfcgal-3.so": "78a51cec0d01bfd329f12fb06fe88a6865b719d66564ea31716df406879a69ce",
+    "postgis_topology-3.so": "a80693524009e7933e1929ea4f06bf55b9eb005488bb4b5cc468601e1c7f59de"
+  }
+}

@@ -1,8 +1,9 @@
 name: tropa
 services:
   db:
-    image: postgis/postgis:18-3.7
-    platform: linux/amd64
+    extends:
+      file: compose.database.yaml
+      service: postgis
     environment:
       POSTGRES_DB: tropa
       POSTGRES_USER: tropa_owner
