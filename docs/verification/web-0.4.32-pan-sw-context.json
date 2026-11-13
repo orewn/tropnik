@@ -1,0 +1,381 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-read-only-service-worker-trace-context-review",
+  "verified": true,
+  "runId": 43417560064,
+  "sourceCommit": "0cb437e0840f7dc372c8cdb53c224ee1503d5b75",
+  "parentProductionSourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+  "buildId": "fbc61f6653972eca",
+  "scope": "Instrumented diagnostic source only; not a release certificate or a replacement for failed main43415329928",
+  "artifacts": [
+    {
+      "path": "/workspace/scratch/686c5dc59f67/map-pan-43417560064/dist/browser-ui-smoothness-diagnostic.json",
+      "bytes": 552397,
+      "sha256": "d1ea2a057166a83e90ab7873c8f35f78d19193c51da4f98ba85af7f48be96d4b"
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/map-pan-43417560064/dist/build-info.json",
+      "bytes": 413289,
+      "sha256": "75413d00ccc393a8b32e1cd7886c8b3c9c95901636a4c1b5f8ee19ef50afd610"
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/map-pan-43417560064/dist/browser-network.json",
+      "bytes": 42451,
+      "sha256": "7edd4becbaeaffa48c97b1b303c2ad5c9ea9c867c669f668c82d5757d45521d4"
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/map-pan-43417560064/design-qa/desktop-webgl-ui-smoothness-map-pan.trace-meta.json",
+      "bytes": 3174,
+      "sha256": "f0793d663e8228da9b7cbd728d15cd08fde90af2563c4d0e6034156f60efcc30"
+    },
+    {
+      "path": "/workspace/scratch/686c5dc59f67/map-pan-43417560064/design-qa/desktop-webgl-ui-smoothness-map-pan.trace.json",
+      "bytes": 24636185,
+      "sha256": "0bb6c850f4798e999c364194fdf066affaca57f0a7f2c486e2a42176db61dca2"
+    }
+  ],
+  "sourceBinding": {
+    "productionInputsMatchParent": [
+      {
+        "path": "web/components/ServiceWorker.tsx",
+        "bytes": 7408,
+        "sha256": "c065bd757266394676c43f9b688580ca507e28ff786720b8ef00edc5f080f4c5"
+      },
+      {
+        "path": "web/lib/service-worker-registration.ts",
+        "bytes": 5389,
+        "sha256": "408f359d579f350867eb9a2dd5caead8b427f3ebbd4818c709dbbb89700cefbc"
+      },
+      {
+        "path": "web/public/sw.js",
+        "bytes": 17420,
+        "sha256": "cefd35ed89505bed44ba2eec28d74df8dd8a6ffd1eb53ffc5c73ecf97a376781"
+      }
+    ],
+    "diagnosticSourceMatchesBuild": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/browser-smoothness.mjs",
+      "bytes": 26820,
+      "sha256": "c3d99bd636f7d352ac98c23681b532be0b4a587ee4886cd5093ce08557bc0eac"
+    }
+  },
+  "completeness": {
+    "status": "complete",
+    "eof": true,
+    "dataLossOccurred": false,
+    "errors": [],
+    "eventCount": 80829,
+    "cpuProfileChunks": 727,
+    "cpuSamples": 71391,
+    "traceBytes": 24636185,
+    "bothClockMarksFound": true,
+    "caveat": "Complete drained stream is not complete CPU sampling coverage for every thread from window start."
+  },
+  "clock": {
+    "traceOffsetBeforeUs": 172598406.0,
+    "traceOffsetAfterUs": 172598432,
+    "offsetDisagreementUs": 26.0,
+    "rawPanBrowserMs": [
+      17675.800000000017,
+      22161.70000000001
+    ],
+    "rawPanTraceUsFromBefore": [
+      190274206.00000003,
+      194760106.0
+    ],
+    "marksBracketRawWindow": true,
+    "sameRendererAndNavigation": true,
+    "workerBeforeCompletedBeforePanMs": 260.1000000000058,
+    "workerAfterCompletedAfterPanMs": 3.6000000000058208
+  },
+  "workerContext": {
+    "schemaVersion": 1,
+    "diagnosticOnly": true,
+    "workerBefore": {
+      "phase": "before",
+      "readOnly": true,
+      "startedAtMs": 17414.100000000006,
+      "capturedAtMs": 17415.70000000001,
+      "timeOriginMs": 1794569549340,
+      "controller": {
+        "scriptURL": "http://127.0.0.1:40707/tropnik/sw.js",
+        "state": "activated"
+      },
+      "registration": {
+        "scope": "http://127.0.0.1:40707/tropnik/",
+        "active": {
+          "scriptURL": "http://127.0.0.1:40707/tropnik/sw.js",
+          "state": "activated"
+        },
+        "waiting": null,
+        "installing": null
+      },
+      "shellCaches": [
+        {
+          "name": "tropnik-tropnik-shell-fbc61f6653972eca",
+          "markerURL": "http://127.0.0.1:40707/tropnik/_offline/map-warm-tropnik-tropnik-shell-fbc61f6653972eca-canvas",
+          "present": true,
+          "status": 200,
+          "ready": true
+        }
+      ],
+      "truncated": false
+    },
+    "clockBefore": {
+      "name": "tropnik:desktop-map-pan:before",
+      "startTimeMs": 17674.5,
+      "timeOriginMs": 1794569549340
+    },
+    "clockAfter": {
+      "name": "tropnik:desktop-map-pan:after",
+      "startTimeMs": 22163,
+      "timeOriginMs": 1794569549340
+    },
+    "workerAfter": {
+      "phase": "after",
+      "readOnly": true,
+      "startedAtMs": 22163.70000000001,
+      "capturedAtMs": 22165.300000000017,
+      "timeOriginMs": 1794569549340,
+      "controller": {
+        "scriptURL": "http://127.0.0.1:40707/tropnik/sw.js",
+        "state": "activated"
+      },
+      "registration": {
+        "scope": "http://127.0.0.1:40707/tropnik/",
+        "active": {
+          "scriptURL": "http://127.0.0.1:40707/tropnik/sw.js",
+          "state": "activated"
+        },
+        "waiting": null,
+        "installing": null
+      },
+      "shellCaches": [
+        {
+          "name": "tropnik-tropnik-shell-fbc61f6653972eca",
+          "markerURL": "http://127.0.0.1:40707/tropnik/_offline/map-warm-tropnik-tropnik-shell-fbc61f6653972eca-canvas",
+          "present": true,
+          "status": 200,
+          "ready": true
+        }
+      ],
+      "truncated": false
+    }
+  },
+  "workerTimeline": {
+    "pid": 2564,
+    "tid": 2653,
+    "workerScriptURL": "http://127.0.0.1:40707/tropnik/sw.js",
+    "functionCalls": {
+      "count": 74,
+      "firstOffsetMs": 676.7809999999702,
+      "lastOffsetMs": 3888.9169999999704,
+      "sumWallMs": 8.922,
+      "sumThreadMs": 8.321,
+      "maxWallMs": 5.771
+    },
+    "runTasks": {
+      "count": 148,
+      "firstOffsetMs": 676.6889999999702,
+      "lastOffsetMs": 3889.10099999997,
+      "sumWallMs": 18.938,
+      "sumThreadMs": 17.443,
+      "maxWallMs": 5.903
+    },
+    "functionCallSourceLocations": {
+      "http://127.0.0.1:40707/tropnik/sw.js:197": 74
+    },
+    "cpuProfile": {
+      "id": "0x2",
+      "startsOffsetMs": 677.0869999999702,
+      "samples": 22200,
+      "rawSampleFunctionCounts": {
+        "": 7,
+        "(idle)": 22191,
+        "(program)": 1,
+        "(garbage collector)": 1
+      },
+      "negativeDeltaCount": 58,
+      "negativeDeltaTotalUs": -9273,
+      "minDeltaUs": -2153,
+      "weightedCpuEstimateMade": false
+    }
+  },
+  "panNetwork": {
+    "requests": 74,
+    "firstRequestOffsetMs": 676.2529999999701,
+    "domains": {
+      "tiles.openfreemap.org": 25,
+      "tiles.mapterhorn.com": 49
+    },
+    "initiatorFiles": {
+      "http://127.0.0.1:40707/tropnik/assets/map-preload-Bxtet0Yd.js": 74
+    },
+    "sameOriginRequests": 0,
+    "responses": 74,
+    "responsesFromServiceWorker": 0,
+    "responsesFromCache": 0,
+    "statusCodes": {
+      "200": 74
+    },
+    "finishes": 74,
+    "failedFinishes": 0,
+    "wholeRunNetworkObserverLimits": {
+      "active": 128,
+      "completed": 32,
+      "failed": 32,
+      "urlLength": 2048
+    },
+    "wholeRunNetworkObserverCounts": {
+      "started": 891,
+      "completed": 887,
+      "failed": 0,
+      "canceled": 0,
+      "redirected": 0,
+      "ignored": 21,
+      "activeOverflow": 0,
+      "completedDiscarded": 855,
+      "failedDiscarded": 0
+    }
+  },
+  "environment": {
+    "schemaVersion": 1,
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "collection": "browser-target-cdp-before-measurement",
+    "sourceCommit": "0cb437e0840f7dc372c8cdb53c224ee1503d5b75",
+    "capturedAt": "2026-11-13T11:31:49.448Z",
+    "requestedFlags": [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-background-networking",
+      "--disable-component-update",
+      "--disable-default-apps",
+      "--disable-extensions",
+      "--disable-features=Translate,MediaRouter",
+      "--mute-audio",
+      "--no-first-run",
+      "--use-gl=angle",
+      "--use-angle=swiftshader-webgl",
+      "--enable-unsafe-swiftshader",
+      "--window-size=1920,1920",
+      "--ozone-override-screen-size=1920,1920"
+    ],
+    "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=39575 --user-data-dir=/tmp/tropnik-chrome-2458 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+        "skiaBackendType": "None",
+        "targetCpuBits": 64
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      }
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    },
+    "nativeSurface": {
+      "schemaVersion": 1,
+      "collection": "blank-target-before-emulation",
+      "window": {
+        "left": 10,
+        "top": 10,
+        "width": 1920,
+        "height": 1920,
+        "windowState": "normal"
+      },
+      "viewport": {
+        "url": "about:blank",
+        "visibilityState": "visible",
+        "innerWidth": 1920,
+        "innerHeight": 1833,
+        "outerWidth": 1920,
+        "outerHeight": 1920,
+        "devicePixelRatio": 1,
+        "screen": {
+          "width": 1920,
+          "height": 1920,
+          "availWidth": 1920,
+          "availHeight": 1920
+        }
+      }
+    }
+  },
+  "environmentEqualToFailedMainByField": {
+    "profile": true,
+    "collection": true,
+    "requestedFlags": true,
+    "browser": false,
+    "gpu": false,
+    "runner": false,
+    "nativeSurface": true
+  },
+  "interpretation": [
+    "The genuine build-specific warm marker already contains ready before the measured pan and still does after. In the production worker this marker is written after all three warmup stages; repeated warm requests with that marker return before warming assets. This supports completed map warmup for this diagnostic.",
+    "Observed Service Worker calls are ordinary fetch listener execution for renderer-initiated cross-origin map tiles, starting near native release. No captured heavy warmup is identified.",
+    "The worker CPU profile begins677ms after the raw window start. It cannot establish worker CPU idleness during the earlier drag. Negative CPU sample deltas are preserved; raw sample counts are not reported as weighted CPU percentages.",
+    "Endpoint registration snapshots are not a continuous lifecycle event log; matching script/state is not an assertion of unchanged JS controller object identity throughout.",
+    "Whole-run network.json retains a bounded tail and discards completed history. It cannot be treated as a complete warmup request record.",
+    "Chrome157/ANGLE and runner image differ from failed main Chrome156/image20261101, and tracing changes the measured window. The32.6ms instrumented p95 is not a performance clearance or a causal A/B comparison.",
+    "No SW/cache snapshot exists for the failed main run, so the observed diagnostic warm completion cannot be retroactively assigned to that run."
+  ],
+  "actions": {
+    "runtimeEdits": false,
+    "thresholdChanges": false,
+    "reruns": false,
+    "browserRuns": false,
+    "remoteWrites": false
+  }
+}

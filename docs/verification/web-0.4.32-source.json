@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "scope": "Exact final web source publication; CI and deploy tracked separately",
+  "localReviewedCommit": "b872a67e15b1e22d7f4e7ae3e926a85a0a777211",
+  "sourceCommit": "b80e274524c3834c470b9a3ade9dfabc1fdb4ca5",
+  "parentCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+  "tree": "18708b988ae90e64794ff619d57d51663e9a2ab7",
+  "localAndRemoteTreesIdentical": true,
+  "changedFiles": 15,
+  "expectedHeadFastForwardVerified": true,
+  "publicRefReadbackVerified": true,
+  "metadataDifference": "GitHub create_commit sets its own commit metadata; complete Git tree matched before moving main",
+  "localPayloadBuildId": "9f389d3e9f7d2cac",
+  "pagesRunId": 43418601893,
+  "runtimeChangedSinceAndroidBackendSource": false,
+  "androidSourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+  "backendSourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+  "sourceOnly": true,
+  "recordedAt": "2026-11-13T11:43:09.003268+00:00"
+}

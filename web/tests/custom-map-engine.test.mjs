@@ -25,15 +25,27 @@ const collection={type:'FeatureCollection',features:[]};
 const originalLabels=readFileSync(resolve(root,'tests/fixtures/custom-map-labels-9110c5b.txt'),'utf8');
 assert.equal(createHash('sha256').update(originalLabels).digest('hex'),'39a5b7a5ca753f6ca893764b8ee7f7a3fd3acd87686d944f5ca7da5cab7ed8c9');
 
-function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false,groundCache=false,beforeZoom,onGesture}={}){
+function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false,groundCache=false,beforeZoom,onGesture,onClick,onMarker}={}){
  let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[],rasters=[],grounds=[];
  let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0};
  class Target{
   listeners=new Map();
-  addEventListener(type,listener){const listeners=this.listeners.get(type)||new Set();listeners.add(listener);this.listeners.set(type,listeners);}
-  removeEventListener(type,listener){this.listeners.get(type)?.delete(listener);}
-  dispatch(type,properties={}){const event={type,button:0,preventDefault(){this.defaultPrevented=true;},...properties};for(const listener of [...(this.listeners.get(type)||[])])listener.call(this,event);return event;}
-  listenerCount(){return [...this.listeners.values()].reduce((sum,listeners)=>sum+listeners.size,0);}
+  addEventListener(type,listener,options){const capture=typeof options==='boolean'?options:!!options?.capture,listeners=this.listeners.get(type)||[];if(!listeners.some(item=>item.listener===listener&&item.capture===capture))listeners.push({listener,capture});this.listeners.set(type,listeners);}
+  removeEventListener(type,listener,options){const capture=typeof options==='boolean'?options:!!options?.capture;this.listeners.set(type,(this.listeners.get(type)||[]).filter(item=>item.listener!==listener||item.capture!==capture));}
+  // Replay an explicitly supplied browser event through real DOM phases. This
+  // does not invent click targets or synthesize clicks from pointerup; the
+  // Canvas -> marker boundary below comes from the failed native CI trace.
+  dispatch(type,properties={}){
+   let stopped=false,immediate=false;
+   const event={type,button:0,bubbles:!['focus','blur'].includes(type),target:this,defaultPrevented:false,...properties,preventDefault(){this.defaultPrevented=true;},stopPropagation(){stopped=true;},stopImmediatePropagation(){stopped=true;immediate=true;}};
+   const parents=[];for(let parent=this.parentElement??this.parentTarget;parent;parent=parent.parentElement??parent.parentTarget)parents.push(parent);
+   const invoke=(target,capture,phase)=>{event.currentTarget=target;event.eventPhase=phase;for(const item of [...(target.listeners.get(type)||[])]){if(item.capture===capture)item.listener.call(target,event);if(immediate)break;}};
+   for(const parent of [...parents].reverse()){invoke(parent,true,1);if(stopped)break;}
+   if(!stopped){invoke(this,true,2);if(!immediate)invoke(this,false,2);}
+   if(event.bubbles&&!stopped)for(const parent of parents){invoke(parent,false,3);if(stopped)break;}
+   event.currentTarget=null;event.eventPhase=0;return event;
+  }
+  listenerCount(){return [...this.listeners.values()].reduce((sum,listeners)=>sum+listeners.length,0);}
  }
  class Path{
   commands=[];
@@ -72,7 +84,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  }
  class Element extends Target{
   children=[];dataset={};className='';hidden=false;attributes={};isConnected=true;pointerCapture=new Set();clientWidth=width;clientHeight=height;
-  constructor(tag){super();this.tagName=tag.toUpperCase();this.style={setProperty(name,value){this[name]=value;},getPropertyValue(name){return this[name]||'';},removeProperty(name){delete this[name];}};this.classList={contains:name=>this.className.split(/\s+/).includes(name),add:(...names)=>{this.className=[...new Set([...this.className.split(/\s+/).filter(Boolean),...names])].join(' ');},remove:(...names)=>{this.className=this.className.split(/\s+/).filter(name=>!names.includes(name)).join(' ');},toggle:(name,force)=>{const enabled=force??!this.classList.contains(name);this.classList[enabled?'add':'remove'](name);return enabled;}};}
+  constructor(tag){super();this.ownerDocument=document;this.tagName=tag.toUpperCase();this.style={setProperty(name,value){this[name]=value;},getPropertyValue(name){return this[name]||'';},removeProperty(name){delete this[name];}};this.classList={contains:name=>this.className.split(/\s+/).includes(name),add:(...names)=>{this.className=[...new Set([...this.className.split(/\s+/).filter(Boolean),...names])].join(' ');},remove:(...names)=>{this.className=this.className.split(/\s+/).filter(name=>!names.includes(name)).join(' ');},toggle:(name,force)=>{const enabled=force??!this.classList.contains(name);this.classList[enabled?'add':'remove'](name);return enabled;}};}
   appendChild(element){element.parentElement=this;this.children.push(element);return element;}
   remove(){if(this.parentElement)this.parentElement.children=this.parentElement.children.filter(child=>child!==this);this.parentElement=null;this.isConnected=false;}
   setAttribute(name,value){this.attributes[name]=String(value);}getAttribute(name){return this.attributes[name]??null;}
@@ -84,9 +96,10 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   matches(selector){return matches(this,selector);}
   getBoundingClientRect(){layoutReads++;const w=Number.parseFloat(this.style.width)||this.clientWidth,h=Number.parseFloat(this.style.height)||this.clientHeight;return{x:0,y:0,left:0,top:0,right:w,bottom:h,width:w,height:h};}
   getContext(type,attributes){assert.equal(type,'2d');if(!this.context){this.context=createContext(this.className);this.context.getContextAttributes=()=>attributes;}return this.context;}
-  focus(){}setPointerCapture(id){this.pointerCapture.add(id);}hasPointerCapture(id){return this.pointerCapture.has(id);}releasePointerCapture(id){this.pointerCapture.delete(id);}
+  focus(){this.ownerDocument.activeElement=this;}setPointerCapture(id){this.pointerCapture.add(id);}hasPointerCapture(id){return this.pointerCapture.has(id);}releasePointerCapture(id){this.pointerCapture.delete(id);}
  }
- const document={createElement:tag=>new Element(tag),createElementNS:(_namespace,tag)=>new Element(tag)},window=new Target(),host=new Element('div');
+ const document=Object.assign(new Target(),{activeElement:null,createElement:tag=>new Element(tag),createElementNS:(_namespace,tag)=>new Element(tag)}),window=new Target(),host=new Element('div');
+ document.parentTarget=window;document.body=new Element('body');document.body.parentTarget=document;document.body.appendChild(host);
  const coverage={area:coverageArea,boundaries:collection,territories:collection,status:{ready:true,lod:'source',pending:0,error:'',version:'a'.repeat(16),cells:['test'],revision:0},updates:[],subscribers:new Set(),disposed:0,
   subscribe(listener){this.subscribers.add(listener);return()=>this.subscribers.delete(listener);},
   async updateView(bounds,zoom){this.updates.push({bounds:[...bounds],zoom});},dispose(){this.disposed++;}};
@@ -165,7 +178,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  exports.CustomMapEngine.prototype.draw=function(...args){calls.push({surface:'tropnik-map-canvas',op:'draw-start'});return productionDraw.apply(this,args);};
  const productionLabels=exports.CustomMapEngine.prototype.drawLabels;
  exports.CustomMapEngine.prototype.drawLabels=function(...args){const previous=paintingLabels;paintingLabels=true;try{return productionLabels.apply(this,args);}finally{paintingLabels=previous;}};
- const engine=new exports.CustomMapEngine(host,{camera:plain(view),onState:value=>states.push(plain(value)),onReady:()=>{readyCalls++;},onBeforeZoom:()=>beforeZoom?.(engine),onGesture:()=>{gestures++;onGesture?.(engine);}});
+ const engine=new exports.CustomMapEngine(host,{camera:plain(view),onState:value=>states.push(plain(value)),onReady:()=>{readyCalls++;},onBeforeZoom:()=>beforeZoom?.(engine),onGesture:()=>{gestures++;onGesture?.(engine);},onClick,onMarker});
  engine.setFloor({center:[105,60],zoom:1,bearingDegrees:0});
  const tick=(elapsed=16)=>{now+=elapsed;const current=[...frames.values()];frames.clear();for(const frame of current)frame(now);return current.length;};
  const flush=()=>{let count=0;while(frames.size){assert.ok(count++<40,'Own renderer left a recurring idle RAF');tick();}return count;};
@@ -174,12 +187,116 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  const ready=async()=>{coverageResolve(coverage);await turn();complete();await turn();flush();return engine;};
  const lastSurface=(surface,clear)=>{const own=calls.filter(call=>call.surface===surface);return own.slice(own.findLastIndex(call=>call.op===clear));};
  const lastDraw=()=>[...lastSurface('tropnik-map-canvas','draw-start'),...lastSurface('tropnik-map-labels','clearRect')];
- return{engine,host,context:engine.canvas.context,window,coverage,store,states,calls,paths,rasters,grounds,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
+ return{engine,host,context:engine.canvas.context,document,window,coverage,store,states,calls,paths,rasters,grounds,frames,timers,observers,tick,flush,complete,pending,ready,coverageResolve,lastDraw,labelWork,
   verifyReviewedCoastalRoute:load(resolve(root,'lib/reviewed-coastal-routes.ts')).verifyReviewedCoastalRoute,
   get coverageAttempts(){return coverageAttempts;},get readyCalls(){return readyCalls;},get gestures(){return gestures;},get layoutReads(){return layoutReads;},
   async settle(){await turn();flush();},geometryPath:exports.geometryPath,
   coordinateAt:point=>engine.unproject(point),labelFor(job,coordinate,text,options={}){const p=load(resolve(root,'lib/custom-map-camera.ts')).mercatorProject(coordinate),n=2**job.request.z;return{x:p.x*n-job.request.x,y:p.y*n-job.request.y,text,kind:'place',rank:4,...options};}};
 }
+
+test('marker activation cannot overwrite the observed Canvas territory touch with its retargeted compatibility click',async t=>{
+ const territory='territory-28173009B78872068540735',selected=[],events=[];
+ const env=fixture({width:585.609375,height:340,onClick:point=>{
+  assert.deepEqual(plain(point),{x:292.8046875,y:170});selected.push(territory);
+  env.engine.setMarkers([{id:'baikal',label:'Байкал',coordinate:env.engine.unproject(point),kind:'direction'}]);
+ },onMarker:id=>selected.push(id)});t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.canvas.getBoundingClientRect=()=>({left:329.390625,top:72,width:585.609375,height:340});
+ for(const type of ['pointerdown','pointerup','click'])for(const capture of [true,false])env.document.addEventListener(type,event=>events.push({type:event.type,phase:event.eventPhase,target:event.target.tagName,pointerId:event.pointerId,timeStamp:event.timeStamp}),capture);
+ // Exact native sequence from Pages 43418601893: pointerId 73 starts and
+ // ends on Canvas; selection/layout then puts Baikal under the same pixel.
+ // The compatibility click has the same timestamp as that pointerup.
+ const pointer={pointerId:73,pointerType:'touch',clientX:622.1953125,clientY:242};
+ env.engine.canvas.dispatch('pointerdown',{...pointer,timeStamp:68474.8});env.tick(47);
+ env.engine.canvas.dispatch('pointerup',{...pointer,timeStamp:68526.5});env.flush();
+ const button=env.host.querySelector('.region-marker-baikal');assert.ok(button);
+ const click=button.dispatch('click',{...pointer,clientX:622,detail:1,timeStamp:68526.5});
+ assert.deepEqual(selected,[territory],'One Canvas touch must select the territory exactly once');
+ assert.equal(click.defaultPrevented,false,'Ignoring a marker callback must not cancel the native event');
+ assert.deepEqual(events,[
+  ...[1,3].map(phase=>({type:'pointerdown',phase,target:'CANVAS',pointerId:73,timeStamp:68474.8})),
+  ...[1,3].map(phase=>({type:'pointerup',phase,target:'CANVAS',pointerId:73,timeStamp:68526.5})),
+  ...[1,3].map(phase=>({type:'click',phase,target:'BUTTON',pointerId:73,timeStamp:68526.5})),
+ ],'Document capture and bubbling observers must retain the original input ledger');
+});
+
+test('marker activation preserves native touch, mouse, legacy click and keyboard or assistive input on descendants',async t=>{
+ const selected=[],env=fixture({onMarker:id=>selected.push(id)});t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setMarkers([{id:'baikal',label:'Байкал',coordinate:[...camera.center],kind:'direction'}]);env.flush();
+ const button=env.host.querySelector('.region-marker-baikal'),targets=[button,button.querySelector('.region-marker-label'),button.querySelector('.region-marker-count'),button.querySelector('svg')];
+ let serial=10;
+ for(const pointerType of ['touch','mouse'])for(const target of targets){
+  assert.ok(target);const pointer={pointerType,pointerId:pointerType==='mouse'?1:serial++,clientX:400,clientY:300};
+  target.dispatch('pointerdown',pointer);target.dispatch('pointerup',pointer);target.dispatch('click',{...pointer,detail:1});
+ }
+ assert.deepEqual(selected,Array(8).fill('baikal'),'Labels, counts and SVG children keep their owning button');
+ const pointer={pointerId:1,pointerType:'mouse',clientX:400,clientY:300};
+ button.dispatch('pointerdown',pointer);button.dispatch('pointerup',pointer);button.dispatch('click',{detail:1,clientX:400,clientY:300});
+ assert.equal(selected.length,9,'Browsers with MouseEvent click and no pointerId retain normal marker activation');
+ button.dispatch('click',{detail:0});button.dispatch('click',{detail:0,pointerId:-1,pointerType:''});
+ assert.equal(selected.length,11,'Keyboard and assistive activation need no pointerdown');
+ button.dispatch('pointerdown',pointer);button.dispatch('click',{detail:0});button.dispatch('click',{...pointer,detail:1});
+ assert.equal(selected.length,12,'An accessible click consumes any old pointer ownership');
+ // A pointer drag which the browser resolves to the same button still has
+ // native button semantics; Canvas panning is checked separately below.
+ button.dispatch('pointerdown',pointer);button.dispatch('pointermove',{...pointer,clientX:415});button.dispatch('pointerup',{...pointer,clientX:415});button.dispatch('click',{...pointer,clientX:415,detail:1});
+ assert.equal(selected.length,13);
+ for(const kind of ['trail','plan','position']){
+  env.engine.setMarkers([{id:kind,label:kind,coordinate:[...camera.center],kind}]);env.flush();const point=env.host.querySelector('.tropnik-point-marker');
+  point.dispatch('pointerdown',pointer);point.dispatch('pointerup',pointer);point.dispatch('click',{...pointer,detail:1});assert.equal(selected.at(-1),kind);
+ }
+});
+
+test('marker activation follows the current pointer origin even when mouse pointerId is reused',async t=>{
+ const selected=[],env=fixture({onClick:()=>selected.push('territory'),onMarker:id=>selected.push(id)});t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setMarkers([{id:'baikal',label:'Байкал',coordinate:[...camera.center],kind:'direction'}]);env.flush();const button=env.host.querySelector('.region-marker-baikal');
+ const pointer={pointerId:1,pointerType:'mouse',clientX:400,clientY:300},click={...pointer,detail:1};
+ button.dispatch('pointerdown',pointer);button.dispatch('pointerup',pointer);button.dispatch('click',click);
+ env.engine.canvas.dispatch('pointerdown',pointer);env.engine.canvas.dispatch('pointerup',pointer);button.dispatch('click',click);
+ assert.deepEqual(selected,['baikal','territory'],'A previous marker click cannot authorize a later Canvas compatibility click');
+ button.dispatch('pointerdown',pointer);button.dispatch('pointerup',pointer);button.dispatch('click',click);
+ assert.deepEqual(selected,['baikal','territory','baikal'],'The next real marker gesture works immediately with the same mouse id');
+ const outside=env.document.createElement('button');env.document.body.appendChild(outside);
+ button.dispatch('pointerdown',pointer);outside.dispatch('pointerup',pointer);
+ outside.dispatch('pointerdown',pointer);outside.dispatch('pointerup',pointer);button.dispatch('click',click);
+ assert.equal(selected.length,3,'A new press outside the map invalidates an unfinished marker press');
+ button.dispatch('pointerdown',pointer);button.dispatch('pointerup',pointer);button.dispatch('click',{...click,pointerId:72});button.dispatch('click',click);
+ assert.equal(selected.length,3,'A wrong-pointer click rejects and consumes ownership');
+ button.dispatch('pointerdown',pointer);button.dispatch('pointerup',pointer);button.dispatch('click',click);button.dispatch('click',click);
+ assert.equal(selected.length,4,'A second compatibility click cannot reuse the same ownership');
+});
+
+test('marker activation rejects cancelled, blurred and inactive input without converting Canvas drags into taps',async t=>{
+ const selected=[],env=fixture({onClick:()=>selected.push('territory'),onMarker:id=>selected.push(id)});t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setMarkers([{id:'baikal',label:'Байкал',coordinate:[...camera.center],kind:'direction'}]);env.flush();const button=env.host.querySelector('.region-marker-baikal');
+ const pointer={pointerId:1,pointerType:'touch',clientX:400,clientY:300},click={...pointer,detail:1};
+ for(const action of ['cancel','blur','inactive']){
+  button.dispatch('pointerdown',pointer);
+  if(action==='cancel')button.dispatch('pointercancel',pointer);
+  else if(action==='blur')env.window.dispatch('blur');
+  else{env.engine.setActive(false);button.dispatch('click',{detail:0});env.engine.setActive(true);}
+  button.dispatch('click',click);assert.deepEqual(selected,[],action+' must not leave a marker press armed');
+ }
+ for(const action of ['cancel','drag','lost-capture']){
+  env.engine.canvas.dispatch('pointerdown',pointer);
+  if(action==='cancel')env.engine.canvas.dispatch('pointercancel',pointer);
+  else if(action==='drag'){env.engine.canvas.dispatch('pointermove',{...pointer,clientX:430});env.engine.canvas.dispatch('pointerup',{...pointer,clientX:430});}
+  else{env.engine.canvas.pointerCapture.delete(pointer.pointerId);env.engine.canvas.dispatch('lostpointercapture',pointer);}
+  button.dispatch('click',click);assert.deepEqual(selected,[],action+' must not turn into a marker or territory selection');
+ }
+ button.dispatch('pointerdown',pointer);button.dispatch('pointerup',pointer);button.dispatch('click',click);assert.deepEqual(selected,['baikal']);
+});
+
+test('marker activation cannot transfer to a replacement button or survive removal and engine cleanup',async()=>{
+ const selected=[],env=fixture({onMarker:id=>selected.push(id)});await env.ready();
+ const marker={id:'baikal',label:'Байкал',coordinate:[...camera.center],kind:'direction'},pointer={pointerId:1,pointerType:'mouse',clientX:400,clientY:300},click={...pointer,detail:1};
+ env.engine.setMarkers([marker]);env.flush();const original=env.host.querySelector('.region-marker-baikal');original.dispatch('pointerdown',pointer);
+ env.engine.setMarkers([{...marker,kind:'trail'}]);env.flush();const replacement=env.host.querySelector('.tropnik-point-marker');
+ replacement.dispatch('click',click);original.dispatch('click',{detail:0});assert.deepEqual(selected,[],'A same-id replacement is a different pointer target');
+ replacement.dispatch('pointerdown',pointer);env.engine.setMarkers([]);replacement.dispatch('click',click);replacement.dispatch('click',{detail:0});assert.deepEqual(selected,[]);
+ env.engine.setMarkers([marker]);env.flush();const current=env.host.querySelector('.region-marker-baikal');current.dispatch('pointerdown',pointer);current.dispatch('pointerup',pointer);current.dispatch('click',click);assert.deepEqual(selected,['baikal']);
+ current.dispatch('pointerdown',pointer);env.engine.destroy();assert.equal(env.document.listenerCount(),0);assert.equal(env.window.listenerCount(),0);assert.equal(env.engine.canvas.listenerCount(),0);
+ current.dispatch('click',{detail:0});current.dispatch('pointerdown',pointer);current.dispatch('pointerup',pointer);current.dispatch('click',click);assert.deepEqual(selected,['baikal'],'Detached button references cannot call a destroyed engine');
+});
 
 test('production engine coalesces changes, has no idle draw loop and pauses animation/tiles offscreen',async t=>{
  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();const before=env.engine.inspect().drawRevision;
@@ -978,7 +1095,7 @@ test('every map zoom key accumulates native autorepeat and leaves modified brows
   env.flush();assert.equal(map.getCamera().zoom,8+4*delta,`${key} autorepeat lost a zoom step`);
   for(const modifier of ['altKey','ctrlKey','metaKey']){
    const before=plain(map.getCamera()),event=map.canvas.dispatch('keydown',{key,repeat:true,[modifier]:true});env.flush();
-   assert.equal(event.defaultPrevented,undefined);assert.deepEqual(plain(map.getCamera()),before,`${key} must not steal a modified browser shortcut`);
+   assert.equal(event.defaultPrevented,false);assert.deepEqual(plain(map.getCamera()),before,`${key} must not steal a modified browser shortcut`);
   }
  }
  map.setCamera(camera);env.flush();for(let index=0;index<4;index++)map.zoomBy(1);env.tick(48);

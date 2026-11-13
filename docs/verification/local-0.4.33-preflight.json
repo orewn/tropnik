@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "scope": "Local first 0.4.33 candidate, held Android publication; not browser CI or deployed proof",
+  "recordedAt": "2026-11-13T12:06:59.335806+00:00",
+  "baseSource": "b80e274524c3834c470b9a3ade9dfabc1fdb4ca5",
+  "sourceCommit": null,
+  "buildId": "84de743e18910362",
+  "pages": 718,
+  "allInputHashesRechecked": true,
+  "inputCount": 2161,
+  "apk": {
+    "delivery": "github-release",
+    "sourcePath": "/downloads/tropnik-preview.apk",
+    "downloadHref": "https://github.com/orewn/tropnik/releases/download/v0.4.32-preview/tropnik-preview.apk",
+    "bytes": 69227850,
+    "sha256": "ece07bea79c73bffba5583048fef7922a2a67e9aa37082731ac6c1921b18cd38",
+    "version": "0.4.32-preview",
+    "architecture": "universal",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "signature": "development / debug",
+    "signingCertificateSha256": "f06477747e342ef5a2cef201bd0fc43fdc9104e80189b08faf78c511dded2f62",
+    "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "workflowRunId": 43415329783,
+    "testedArchitecture": "x86_64",
+    "deviceExecutionVerified": true,
+    "physicalDeviceVerified": false
+  },
+  "regression": {
+    "receipt": "web-0.4.33-marker-origin-regression.json",
+    "expectedRed": 5,
+    "engineGreen": 71
+  },
+  "initialIncompleteGeneration": {
+    "tests": 957,
+    "passed": 946,
+    "failed": 11,
+    "reason": "prepare-custom-map was complete but generated CUSTOM_MAP_RESOURCES still referenced the removed previous chunk. The first local build and offline tests correctly rejected this incomplete generated state.",
+    "testLogSha256": "28c42ce995cb0a0beeccb3aacc124638f95832c8632527e2afd20762939f91f7",
+    "buildLogSha256": "3d8f479686048b0f772de4bdd7ea1a1db097e46a878651d9d128e694dfb40bc1",
+    "remedy": "Ran unchanged prepare-offline.mjs and stamp-service-worker.mjs; only generated resource list and VERSION differ in sw.js. All failed suites were rerun successfully. Full final-source web suite remains a CI gate."
+  },
+  "affectedOfflineSuites": {
+    "tests": 32,
+    "passed": 32,
+    "failed": 0,
+    "logSha256": "f881bf5d2d5c8e24311d6f71895f7eebdf1f79c76fcbc589ff0424aaa097ee5e"
+  },
+  "affectedMapShellSuite": {
+    "tests": 9,
+    "passed": 9,
+    "failed": 0,
+    "logSha256": "d3510407c63a9ac198ed0f0abb50711728b259927ecec4475e51f0b8ab48569b"
+  },
+  "pagesTooling": {
+    "tests": 365,
+    "passed": 365,
+    "failed": 0,
+    "logSha256": "b5b27f5b16c9f622c78b7c63ed598da2fda9c52a5278c0199a674d55a47d4be0"
+  },
+  "eslint": {
+    "exitCode": 0,
+    "logSha256": "7a52c6eaae53f1dc110842e74fbd3d95fd1293d174c3192c07e098bb21454ffc"
+  },
+  "typescriptPages": {
+    "exitCode": 0,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "nativePreflightReceipt": "android-0.4.33-local-preflight.json",
+  "sharedRuntime": {
+    "checkOnly": false,
+    "runtime": "tropnik-canvas",
+    "sourceInputsSha256": "4f6ee5671c8cea6f29bbccacc1a4c8328665357dcecee9daf69e43466f07720c",
+    "sourceFiles": 61,
+    "outputFiles": 12,
+    "resourceAliases": 1746,
+    "manifestSha256": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d",
+    "destinations": [
+      "web/public/custom-map",
+      "android/app/src/main/assets/custom-map"
+    ]
+  },
+  "offlineGeneration": {
+    "files": 249,
+    "vectorTiles": 193,
+    "terrainTiles": 21,
+    "packageBytes": 6887513,
+    "landscapeBytes": 2010104,
+    "sharedMapFiles": 9,
+    "sharedMapManifestSha256": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d",
+    "allArchiveHashesVerified": true,
+    "networkRequests": 0
+  },
+  "workerBehaviorOutsideGeneratedResourcesAndVersionUnchanged": true,
+  "buildLogSha256": "4b83104a87c2964069afe525e3208455f842f08bd86ea64f10a37fe4c65c5310",
+  "sourceBinding": {
+    "web/lib/custom-map-engine.ts": {
+      "bytes": 74766,
+      "sha256": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862"
+    },
+    "web/tests/custom-map-engine.test.mjs": {
+      "bytes": 155921,
+      "sha256": "19877f4f1b47d5ddc093bcb397046c41d1f8e7ad9fd15d9a6ff5710f536e3ba4"
+    },
+    "web/package.json": {
+      "bytes": 1896,
+      "sha256": "2140f2b536d8303ba3c2c15f2074a953553a73d6822d1d87435a26f890dae2e3"
+    },
+    "android/app/build.gradle.kts": {
+      "bytes": 6178,
+      "sha256": "25710c514cb3827bec6fc8726695d262cc97b64157975cf59e6ba622c4942107"
+    },
+    "contracts/openapi.yaml": {
+      "bytes": 65433,
+      "sha256": "ae1ed7135120fe71bd1c89ded5fc4bef52f4ea8b9a885c3db677d497bb53688b"
+    },
+    "web/public/custom-map/manifest.json": {
+      "bytes": 533835,
+      "sha256": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d"
+    },
+    "android/app/src/main/assets/custom-map/manifest.json": {
+      "bytes": 533835,
+      "sha256": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d"
+    },
+    "web/public/sw.js": {
+      "bytes": 17420,
+      "sha256": "5b78ec1f625b9da0d29714e152403fa59c9e938683757b457ddad4bac899b5e9"
+    },
+    "web/public/downloads/android-manifest.json": {
+      "bytes": 3177,
+      "sha256": "405165b18cf746c44abf54b7fd12c0971ea09a06cb2cd9454b340263ad8f2f5f"
+    },
+    "tools/android-build/release-request.json": {
+      "bytes": 212,
+      "sha256": "e466c362f796ce7c83ff16ff2b164dfba29f18982303b3614e7294d952532578"
+    },
+    ".github/workflows/pages.yml": {
+      "bytes": 31432,
+      "sha256": "e507ea9d35f04948e2697d82ca23f9a9e4ca476c4c54e3942407c54aef4cf0fb"
+    },
+    ".github/workflows/android.yml": {
+      "bytes": 15312,
+      "sha256": "8fc25861492320250154557b0a92539b1563bcaae121562a4214211100c0e909"
+    },
+    "tools/pages-preview/browser-smoke.mjs": {
+      "bytes": 98337,
+      "sha256": "9f0f8e8789b08298866da1e37fca0acd1d8ec940d8b6b40ff2638dd868db997a"
+    },
+    "tools/pages-preview/browser-smoothness.mjs": {
+      "bytes": 24027,
+      "sha256": "f2b6eef88fcc7d5d262e08b4aec81e13651065850865a0a3785d3e79042f2650"
+    },
+    "tools/pages-preview/browser-service-worker-update.mjs": {
+      "bytes": 26376,
+      "sha256": "9500420751f4162ff38cfdbf025cc4f584aafe28ef081ee3979dc0ca7b9aaea4"
+    },
+    "tools/pages-preview/verify-deployed.mjs": {
+      "bytes": 5711,
+      "sha256": "cf6e90e6fe763b037d0f818af6eb58cb01d777c73a34aeff082d40f39161772b"
+    }
+  },
+  "androidReleaseRequested": false,
+  "browserRenderingTested": false,
+  "deployed": false
+}

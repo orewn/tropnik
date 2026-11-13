@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "release": "0.4.33",
+  "issue": "Canvas pointerup selects an administrative territory, then the same touch compatibility click activates an overlapping direction marker.",
+  "recordedNativeFailure": {
+    "sourceCommit": "b80e274524c3834c470b9a3ade9dfabc1fdb4ca5",
+    "workflowRun": 43418601893,
+    "job": 131862640123,
+    "artifactId": 14032548681,
+    "artifactSha256": "98d3bbae93aed17f14a06135a976369384fbe56cfa7c204ab37adfc43bce5642",
+    "browserFailureJsonSha256": "f694bd9b30a605dc6d0ca6e60953cacdbbbd85141434d5e2d6e2be5edf145d3c",
+    "profileLabel": "android-portrait",
+    "actualViewport": {
+      "width": 915,
+      "height": 412,
+      "orientation": "landscape"
+    },
+    "expectedRegion": "territory-28173009B78872068540735",
+    "actualRegion": "baikal",
+    "events": [
+      {
+        "type": "pointerdown",
+        "target": "CANVAS[tropnik-map-canvas]",
+        "pointerType": "touch",
+        "pointerId": 73,
+        "timestamp": 68474.80000000005,
+        "x": 622.1953125,
+        "y": 242,
+        "trusted": true
+      },
+      {
+        "type": "pointerup",
+        "target": "CANVAS[tropnik-map-canvas is-moving]",
+        "pointerType": "touch",
+        "pointerId": 73,
+        "timestamp": 68526.5,
+        "x": 622.1953125,
+        "y": 242,
+        "trusted": true
+      },
+      {
+        "type": "click",
+        "target": "BUTTON[region-marker region-marker-baikal]",
+        "pointerType": "touch",
+        "pointerId": 73,
+        "timestamp": 68526.5,
+        "x": 622,
+        "y": 242,
+        "trusted": true
+      }
+    ],
+    "historySelectionOrder": [
+      "territory-28173009B78872068540735",
+      "baikal"
+    ]
+  },
+  "candidate": {
+    "productionFile": "web/lib/custom-map-engine.ts",
+    "productionSha256": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862",
+    "testFile": "web/tests/custom-map-engine.test.mjs",
+    "testSha256": "19877f4f1b47d5ddc093bcb397046c41d1f8e7ad9fd15d9a6ff5710f536e3ba4",
+    "fix": "A marker pointer click consumes and validates its originating button and pointer id. New pointerdown anywhere and pointercancel reset ownership; blur, inactive state, removal and destruction clear it. detail 0 keyboard/assistive input and legacy MouseEvent clicks remain supported. No event cancellation or propagation stop is added."
+  },
+  "localVerification": {
+    "red": {
+      "sourceCommit": "b80e274524c3834c470b9a3ade9dfabc1fdb4ca5",
+      "productionSha256": "f93de3ec53df83427358de1a35aa537bf1437a734b541223fb0b117640ed5ec5",
+      "testSha256": "19877f4f1b47d5ddc093bcb397046c41d1f8e7ad9fd15d9a6ff5710f536e3ba4",
+      "command": "node --experimental-strip-types --test --test-name-pattern=marker activation web/tests/custom-map-engine.test.mjs",
+      "exitCode": 1,
+      "tests": 5,
+      "passed": 0,
+      "failed": 5,
+      "expectedFailure": true,
+      "actualSelection": [
+        "territory-28173009B78872068540735",
+        "baikal"
+      ],
+      "expectedSelection": [
+        "territory-28173009B78872068540735"
+      ],
+      "method": "The exact git-show b80e production engine ran in a scratch overlay with the final test file and unmodified real module dependencies. No production-method substitution was used.",
+      "logSha256": "b42dd032811e54b334fcbd99072ded195a6aedce50b415c951d91f47ebcb0888"
+    },
+    "green": {
+      "command": "node --experimental-strip-types --test web/tests/custom-map-engine.test.mjs",
+      "exitCode": 0,
+      "tests": 71,
+      "passed": 71,
+      "failed": 0,
+      "logSha256": "700cf304476afdbf52742a8e53cc29a2547c75206d6aa6710a426004d89462d8"
+    },
+    "typescript": {
+      "command": "cd web && ./node_modules/.bin/tsc --noEmit --incremental false",
+      "exitCode": 0
+    },
+    "diffCheck": {
+      "command": "git diff --check -- web/lib/custom-map-engine.ts web/tests/custom-map-engine.test.mjs",
+      "exitCode": 0
+    },
+    "coveredBehavior": [
+      "The exact observed Canvas pointerdown/up then marker compatibility-click sequence selects only the territory.",
+      "Document capture and bubbling observers retain all three input events.",
+      "Touch, mouse, legacy click, direction label/count/SVG descendants, keyboard and assistive detail 0 input, and trail/plan/position markers activate normally.",
+      "A new real marker gesture works immediately with a reused mouse pointerId; outside presses, wrong-pointer and duplicate clicks cannot reuse ownership.",
+      "Marker cancellation, blur and inactive state clear ownership; Canvas drag, cancellation and capture loss do not activate a marker or territory.",
+      "Native same-button drag/click semantics remain unchanged; replacement, removal and engine destruction do not preserve activation ownership."
+    ]
+  },
+  "browserBoundary": {
+    "candidateNativeBrowserRunPerformedByThisVerification": false,
+    "localScope": "The unit fixture replays explicitly recorded native event targets through the actual production engine. It does not calculate browser hit targets, synthesize clicks from pointerup, or prove browser layout retargeting on the candidate.",
+    "unchangedBrowserSmokeSha256": "9f0f8e8789b08298866da1e37fca0acd1d8ec940d8b6b40ff2638dd868db997a",
+    "requiredGate": "The next final Pages main CI must pass the unchanged full mapInteraction / mapGestures landscape post-resize polygonTouch path with the existing coordinates, oracle and budgets."
+  }
+}

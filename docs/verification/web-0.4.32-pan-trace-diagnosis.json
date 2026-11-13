@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "physicalDevice": false,
+  "evidenceVerified": true,
+  "conclusion": "The diagnostic trace confirms substantial unchanged Canvas tile drawing and renderer Commit work during native desktop pan. It does not establish the cause of the earlier Chrome 156 release failure, an improvement, or a safe minimal runtime fix.",
+  "source": {
+    "commit": "0cb437e0840f7dc372c8cdb53c224ee1503d5b75",
+    "tree": "3fed078270614e4653f3462247cba64e93bcdc9c",
+    "parentRuntimeCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+    "buildId": "fbc61f6653972eca",
+    "apiCompareVerified": true,
+    "onlyChangedFiles": [
+      ".github/workflows/diagnose-map-pan.yml",
+      "tools/pages-preview/browser-smoothness.mjs"
+    ],
+    "instrumentationSha256": "c3d99bd636f7d352ac98c23681b532be0b4a587ee4886cd5093ce08557bc0eac",
+    "instrumentationGitBlob": "869443c1a34adb6c14094a76e64703673052051e",
+    "runtimeChanged": false,
+    "canonicalInputsAndBudgetsChanged": false
+  },
+  "run": {
+    "id": 43417560064,
+    "jobId": 131859211442,
+    "attempt": 1,
+    "url": "https://github.com/orewn/tropnik/actions/runs/43417560064",
+    "jobConclusion": "success",
+    "meaning": "Diagnostic action/assertions completed; instrumented timings do not certify release smoothness."
+  },
+  "artifact": {
+    "id": 14032497687,
+    "name": "tropnik-map-pan-trace-0cb437e0840f7dc372c8cdb53c224ee1503d5b75-1",
+    "bytes": 2617509,
+    "sha256": "2fe0eba987ad07f604ce7f87b50dcbc41afe72695b8aa7320c841a29ce155b2d",
+    "apiDigestVerified": true,
+    "members": [
+      {
+        "path": "design-qa/desktop-webgl-ui-smoothness-map-pan.trace-meta.json",
+        "bytes": 3174,
+        "sha256": "f0793d663e8228da9b7cbd728d15cd08fde90af2563c4d0e6034156f60efcc30"
+      },
+      {
+        "path": "design-qa/desktop-webgl-ui-smoothness-map-pan.trace.json",
+        "bytes": 24636185,
+        "sha256": "0bb6c850f4798e999c364194fdf066affaca57f0a7f2c486e2a42176db61dca2"
+      },
+      {
+        "path": "dist/browser-network.json",
+        "bytes": 42451,
+        "sha256": "7edd4becbaeaffa48c97b1b303c2ad5c9ea9c867c669f668c82d5757d45521d4"
+      },
+      {
+        "path": "dist/browser-ui-smoothness-diagnostic.json",
+        "bytes": 552397,
+        "sha256": "d1ea2a057166a83e90ab7873c8f35f78d19193c51da4f98ba85af7f48be96d4b"
+      },
+      {
+        "path": "dist/build-info.json",
+        "bytes": 413289,
+        "sha256": "75413d00ccc393a8b32e1cd7886c8b3c9c95901636a4c1b5f8ee19ef50afd610"
+      }
+    ]
+  },
+  "trace": {
+    "status": "complete",
+    "stopReason": "action-complete",
+    "eof": true,
+    "dataLossOccurred": false,
+    "errors": [],
+    "recordedDurationMs": 4749.614803000004,
+    "bytes": 24636185,
+    "eventCount": 80829,
+    "cpuProfileChunks": 727,
+    "cpuSamples": 71391,
+    "timelineEvents": 14292,
+    "categories": [
+      "devtools.timeline",
+      "blink.user_timing",
+      "gpu",
+      "disabled-by-default-devtools.timeline",
+      "disabled-by-default-devtools.timeline.stack",
+      "disabled-by-default-v8.cpu_profiler",
+      "cc",
+      "viz",
+      "skia",
+      "disabled-by-default-viz.quads",
+      "disabled-by-default-skia.gpu"
+    ],
+    "limits": {
+      "durationMs": 8000,
+      "drainMs": 5000,
+      "closeMs": 1000,
+      "maxBytes": 100663296,
+      "bufferSizeKiB": 65536,
+      "chunkBytes": 262144
+    },
+    "sha256": "0bb6c850f4798e999c364194fdf066affaca57f0a7f2c486e2a42176db61dca2"
+  },
+  "environment": {
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    },
+    "sameCpuModelAsEarlierReports": true,
+    "sameBrowserAsEarlierReports": false,
+    "sameRunnerImageAsEarlierReports": false
+  },
+  "comparisons": {
+    "publishedEarlyUntraced": {
+      "sourceCommit": "baf0b9ef8b8132711a317e861cf1d8aed68800fb",
+      "reportSha256": "17799b60b050192a8e285f5261b256991a4785034d1b3eabb3c3d0fda6512399",
+      "instrumented": false,
+      "durationMs": 3414.399999999994,
+      "rafSamples": 191,
+      "frameIntervals": 192,
+      "p95AscendingRank": 183,
+      "frameP95Ms": 32,
+      "maxGapMs": 40.29999999998836,
+      "gapsAtLeast35Ms": 9,
+      "gapsOver50Ms": 0,
+      "longTasks": 0,
+      "nativePanDurationMs": 648.3827209999945,
+      "browser": "Chrome/156.0.8078.79",
+      "runnerImage": "20261101.360.1"
+    },
+    "failedEarlyUntraced": {
+      "sourceCommit": "9289c1ca004b714cf0f4538bf7ea0e8a6f19ae3a",
+      "reportSha256": "69d2333af105e7d776d1f68688c9737ce616d162276af3b214c6337f1ec5ace3",
+      "instrumented": false,
+      "durationMs": 3430.7999999999884,
+      "rafSamples": 191,
+      "frameIntervals": 192,
+      "p95AscendingRank": 183,
+      "frameP95Ms": 36.29999999998836,
+      "maxGapMs": 42,
+      "gapsAtLeast35Ms": 10,
+      "gapsOver50Ms": 0,
+      "longTasks": 0,
+      "nativePanDurationMs": 669.9586789999958,
+      "browser": "Chrome/156.0.8078.79",
+      "runnerImage": "20261101.360.1"
+    },
+    "targetedInstrumented": {
+      "sourceCommit": "0cb437e0840f7dc372c8cdb53c224ee1503d5b75",
+      "reportSha256": "d1ea2a057166a83e90ab7873c8f35f78d19193c51da4f98ba85af7f48be96d4b",
+      "instrumented": true,
+      "durationMs": 4485.899999999994,
+      "rafSamples": 256,
+      "frameIntervals": 257,
+      "p95AscendingRank": 245,
+      "frameP95Ms": 32.60000000000582,
+      "maxGapMs": 41.10000000000582,
+      "gapsAtLeast35Ms": 9,
+      "gapsOver50Ms": 0,
+      "longTasks": 0,
+      "nativePanDurationMs": 676.5959799999982,
+      "browser": "Chrome/157.0.8103.50",
+      "runnerImage": "20261111.370.1"
+    }
+  },
+  "clockAlignment": {
+    "method": "Match the two recorded blink.user_timing marks to their PerformanceMark.startTime; trace microseconds minus browser milliseconds times1000. Use mean offset; retain discrepancy.",
+    "marks": [
+      {
+        "name": "tropnik:desktop-map-pan:before",
+        "traceUs": 190272906,
+        "browserStartTimeMs": 17674.5,
+        "offsetUs": 172598406.0
+      },
+      {
+        "name": "tropnik:desktop-map-pan:after",
+        "traceUs": 194761432,
+        "browserStartTimeMs": 22163,
+        "offsetUs": 172598432
+      }
+    ],
+    "meanOffsetUs": 172598419.0,
+    "offsetSpreadUs": 26.0,
+    "rawWindowStartedAtMs": 17675.800000000017,
+    "rawWindowEndedAtMs": 22161.70000000001,
+    "windowTraceUs": [
+      190274219.0,
+      194760119.0
+    ],
+    "deliveredPointerDownOffsetMs": 25.3,
+    "deliveredPointerUpOffsetMs": 672.3
+  },
+  "movingFrames": {
+    "scope": "Twelve map RAF callbacks after delivered pointerdown and before pointerup, identified by CustomAtlas-B76WsYy2.js line1,column91952. Callback and Commit are disjoint sequential children of the same renderer BeginMainFrame; no summation of nested parent/child spans.",
+    "rendererPid": 2564,
+    "rendererThreadId": 2564,
+    "frame": {
+      "count": 12,
+      "minMs": 32.552,
+      "medianMs": 35.72,
+      "maxMs": 40.228,
+      "sumMs": 429.043
+    },
+    "mapCallback": {
+      "count": 12,
+      "minMs": 14.56,
+      "medianMs": 20.242,
+      "maxMs": 23.147,
+      "sumMs": 224.439
+    },
+    "commit": {
+      "count": 12,
+      "minMs": 11.36,
+      "medianMs": 13.7095,
+      "maxMs": 17.15,
+      "sumMs": 167.696
+    },
+    "rows": [
+      {
+        "frameStartOffsetMs": 49.951,
+        "frameWallMs": 36.185,
+        "frameThreadMs": 35.483,
+        "mapCallbackWallMs": 17.029,
+        "commitWallMs": 16.546
+      },
+      {
+        "frameStartOffsetMs": 86.392,
+        "frameWallMs": 36.128,
+        "frameThreadMs": 35.575,
+        "mapCallbackWallMs": 14.912,
+        "commitWallMs": 17.15
+      },
+      {
+        "frameStartOffsetMs": 122.638,
+        "frameWallMs": 33.675,
+        "frameThreadMs": 33.446,
+        "mapCallbackWallMs": 14.647,
+        "commitWallMs": 15.118
+      },
+      {
+        "frameStartOffsetMs": 156.402,
+        "frameWallMs": 34.679,
+        "frameThreadMs": 34.466,
+        "mapCallbackWallMs": 14.56,
+        "commitWallMs": 16.35
+      },
+      {
+        "frameStartOffsetMs": 191.198,
+        "frameWallMs": 32.552,
+        "frameThreadMs": 32.328,
+        "mapCallbackWallMs": 15.415,
+        "commitWallMs": 14.034
+      },
+      {
+        "frameStartOffsetMs": 223.882,
+        "frameWallMs": 36.826,
+        "frameThreadMs": 37.353,
+        "mapCallbackWallMs": 20.758,
+        "commitWallMs": 12.938
+      },
+      {
+        "frameStartOffsetMs": 260.832,
+        "frameWallMs": 36.346,
+        "frameThreadMs": 35.778,
+        "mapCallbackWallMs": 20.689,
+        "commitWallMs": 11.567
+      },
+      {
+        "frameStartOffsetMs": 297.702,
+        "frameWallMs": 40.228,
+        "frameThreadMs": 39.631,
+        "mapCallbackWallMs": 23.147,
+        "commitWallMs": 13.385
+      },
+      {
+        "frameStartOffsetMs": 338.032,
+        "frameWallMs": 37.901,
+        "frameThreadMs": 37.605,
+        "mapCallbackWallMs": 20.149,
+        "commitWallMs": 14.366
+      },
+      {
+        "frameStartOffsetMs": 376.025,
+        "frameWallMs": 34.315,
+        "frameThreadMs": 34.096,
+        "mapCallbackWallMs": 21.308,
+        "commitWallMs": 11.36
+      },
+      {
+        "frameStartOffsetMs": 410.466,
+        "frameWallMs": 34.896,
+        "frameThreadMs": 34.684,
+        "mapCallbackWallMs": 20.335,
+        "commitWallMs": 12.883
+      },
+      {
+        "frameStartOffsetMs": 445.458,
+        "frameWallMs": 35.312,
+        "frameThreadMs": 35.097,
+        "mapCallbackWallMs": 21.49,
+        "commitWallMs": 11.999
+      }
+    ],
+    "nativePointerMoveProcessingMs": {
+      "count": 12,
+      "minMs": 0.222,
+      "medianMs": 0.2595,
+      "maxMs": 0.913,
+      "sumMs": 4.465
+    }
+  },
+  "cpuSampling": {
+    "scope": "Main renderer samples whose reconstructed timestamps fall within first800ms of raw pan window. These are sample counts, not exact CPU durations. Signed deltas are retained; no clamping or duration-weighted estimates.",
+    "profiles": [
+      {
+        "profileId": "0x1",
+        "rendererPid": 2564,
+        "targetThreadId": 2564,
+        "startedOffsetMs": -123.307,
+        "sampleCount": 28254,
+        "negativeTimeDeltaCount": 555,
+        "minimumTimeDeltaUs": -1159,
+        "firstSampleOffsetMs": -1.587,
+        "lastSampleOffsetMs": 4489.147,
+        "allSampleNodeIdsResolved": true
+      },
+      {
+        "profileId": "0x2",
+        "rendererPid": 2564,
+        "targetThreadId": 2653,
+        "startedOffsetMs": 677.074,
+        "sampleCount": 22200,
+        "negativeTimeDeltaCount": 58,
+        "minimumTimeDeltaUs": -2153,
+        "firstSampleOffsetMs": 682.392,
+        "lastSampleOffsetMs": 4488.658,
+        "allSampleNodeIdsResolved": true
+      },
+      {
+        "profileId": "0x3",
+        "rendererPid": 2564,
+        "targetThreadId": 2760,
+        "startedOffsetMs": 924.604,
+        "sampleCount": 20937,
+        "negativeTimeDeltaCount": 73,
+        "minimumTimeDeltaUs": -899,
+        "firstSampleOffsetMs": 932.24,
+        "lastSampleOffsetMs": 4477.062,
+        "allSampleNodeIdsResolved": true
+      }
+    ],
+    "mainFirst800SampleCount": 5206,
+    "mainFirst800SelfCounts": {
+      "(program)": 1952,
+      "(idle)": 1390,
+      "drawImage": 1246,
+      "stroke": 136,
+      "(garbage collector)": 118,
+      "drawLabels": 103,
+      "requestAnimationFrame": 69,
+      "<anonymous>": 22,
+      "draw": 17,
+      "publishInspection": 14,
+      "drawMarkers": 10,
+      "measureText": 10
+    },
+    "mainFirst800InclusiveCounts": {
+      "draw": 1577,
+      "drawTiles": 1194,
+      "drawLabels": 139,
+      "drawMarkers": 29,
+      "retainGround": 59
+    },
+    "mainFirst800DrawTilesDrawImageChainSamples": 1188,
+    "attribution": "Sampled drawTiles -> drawImage dominates sampled map-draw stacks; native renderer Commit work is independently measured by timeline spans. Commit internals are not fully attributed to a specific JS method."
+  },
+  "serviceWorker": {
+    "before": {
+      "phase": "before",
+      "readOnly": true,
+      "startedAtMs": 17414.100000000006,
+      "capturedAtMs": 17415.70000000001,
+      "timeOriginMs": 1794569549340,
+      "controller": {
+        "scriptURL": "http://127.0.0.1:40707/tropnik/sw.js",
+        "state": "activated"
+      },
+      "registration": {
+        "scope": "http://127.0.0.1:40707/tropnik/",
+        "active": {
+          "scriptURL": "http://127.0.0.1:40707/tropnik/sw.js",
+          "state": "activated"
+        },
+        "waiting": null,
+        "installing": null
+      },
+      "shellCaches": [
+        {
+          "name": "tropnik-tropnik-shell-fbc61f6653972eca",
+          "markerURL": "http://127.0.0.1:40707/tropnik/_offline/map-warm-tropnik-tropnik-shell-fbc61f6653972eca-canvas",
+          "present": true,
+          "status": 200,
+          "ready": true
+        }
+      ],
+      "truncated": false
+    },
+    "after": {
+      "phase": "after",
+      "readOnly": true,
+      "startedAtMs": 22163.70000000001,
+      "capturedAtMs": 22165.300000000017,
+      "timeOriginMs": 1794569549340,
+      "controller": {
+        "scriptURL": "http://127.0.0.1:40707/tropnik/sw.js",
+        "state": "activated"
+      },
+      "registration": {
+        "scope": "http://127.0.0.1:40707/tropnik/",
+        "active": {
+          "scriptURL": "http://127.0.0.1:40707/tropnik/sw.js",
+          "state": "activated"
+        },
+        "waiting": null,
+        "installing": null
+      },
+      "shellCaches": [
+        {
+          "name": "tropnik-tropnik-shell-fbc61f6653972eca",
+          "markerURL": "http://127.0.0.1:40707/tropnik/_offline/map-warm-tropnik-tropnik-shell-fbc61f6653972eca-canvas",
+          "present": true,
+          "status": 200,
+          "ready": true
+        }
+      ],
+      "truncated": false
+    },
+    "beforeSnapshotFinishedBeforeWindowMs": 260.1,
+    "afterSnapshotFinishedAfterWindowMs": 3.6,
+    "currentBuildWarmMarkerReadyBeforeAndAfter": true,
+    "traceWideFunctionCallCount": 74,
+    "traceWideFunctionCallWallMs": 8.922,
+    "traceWideFunctionCallThreadMs": 8.321,
+    "traceWideRunTaskCount": 149,
+    "sampledCoverageStartsOffsetMs": 677.074,
+    "meaning": "The current-build ready marker shows that the heavy warmup phases completed before the initial snapshot in this diagnostic. It does not expose the final promise/microtask state. SW profiling begins after most drag movement; earlier absence of samples is not evidence of zero SW CPU. No retrospective warmup conclusion is made for the failed run."
+  },
+  "unchangedCode": {
+    "methods": [
+      "CustomMapEngine.bindInput pan handlers",
+      "CustomMapEngine.schedule",
+      "CustomMapEngine.draw",
+      "CustomMapEngine.drawTiles",
+      "CustomMapEngine.drawLabels",
+      "CustomMapEngine.refreshTiles"
+    ],
+    "comparison": "git diff7d517c96..9289c1ca; pan/draw/tile code unchanged. New anchored zoomBy/onBeforeZoom path is exercised only after map-pan by the canonical scenario."
+  },
+  "limitations": [
+    "The earlier failed and published baseline runs used Chrome156.0.8078.79/image20261101.360.1; this instrumented run used Chrome157.0.8103.50/image20261111.370.1. It is not a controlled cross-version A/B.",
+    "Tracing changes scheduling and cost. The full diagnostic window has256RAF samples over4485.9ms, versus191 over3430.8ms in the failed run; a lower whole-window percentile is not evidence of faster drawing.",
+    "CPU profile timeDeltas include negative values (main555,SW58,tile73); counts are reported without converting them to exact function CPU milliseconds.",
+    "Complete stream/no data loss does not imply every native browser call is annotated. Native Commit internals remain partly opaque.",
+    "The old failure has no CPU/timeline trace. This trace identifies present work, not the exact cause of the old1.3ms threshold exceedance.",
+    "No runtime optimization or immutable Android release rewrite is justified by this receipt alone. Physical-device performance is not measured."
+  ],
+  "decision": {
+    "runtimeFixProposed": false,
+    "gateBudgetUnchangedMs": 35,
+    "nextRequiredEvidence": "The genuinely changed final source (verified APK manifest plus mandatory SW browser gate) must pass the original full untraced Pages gate. Preserve this diagnostic and the failed run; investigate any new exact-source failure on its own evidence.",
+    "finalPayloadCommit": "b80e274524c3834c470b9a3ade9dfabc1fdb4ca5",
+    "finalPayloadGateResult": "pending at receipt preparation"
+  }
+}

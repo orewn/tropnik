@@ -146,6 +146,7 @@ export class CustomMapEngine {
   private markerLayer:HTMLDivElement;
   private markers=new Map<string,{marker:CustomMapMarker;button:HTMLButtonElement}>();
   private markerGroups=new Map<string,MapDirectionGroup<{id:string;name:string;center:[number,number]}>>();
+  private markerPointer?:{button:HTMLButtonElement;id:number};
   private routeEdges:RouteEdgeAnnotation[]=[];
   private selectedShapes:string[]=[];
   private mode:CustomMapMode='detail';
@@ -246,7 +247,7 @@ export class CustomMapEngine {
   }
   private publishInspection(){if(this.disposed)return;this.element.dataset.mapTilesState=this.state.loading?'loading':this.state.error?'error':'ready';this.element.dataset.mapInspection=JSON.stringify(this.inspect());}
   private setMoving(moving:boolean){this.element.dataset.mapMoving=String(moving);if(moving)this.element.dataset.mapCamera='moving';else delete this.element.dataset.mapCamera;}
-  setActive(active:boolean){if(this.active===active)return;this.active=active;this.tiles.setActive(active);if(!active){this.pointer.cancel();this.stopAnimation();cancelAnimationFrame(this.frame);this.frame=0;clearTimeout(this.settleTimer);this.setMoving(false);}else{this.schedule();this.settled();}}
+  setActive(active:boolean){if(this.active===active)return;this.active=active;this.tiles.setActive(active);if(!active){this.markerPointer=undefined;this.pointer.cancel();this.stopAnimation();cancelAnimationFrame(this.frame);this.frame=0;clearTimeout(this.settleTimer);this.setMoving(false);}else{this.schedule();this.settled();}}
   setEco(enabled:boolean){if(this.eco===enabled)return;this.eco=enabled;this.canvas.width=1;this.resizeCanvas();}
   setLabels(labels:readonly CustomMapLabel[]){this.additionalLabels=labels.slice(0,256).map(label=>({...label,coordinate:[...label.coordinate]}));this.scheduleLabels();}
   getLabelDiagnostics():CustomMapLabelDiagnostic[]{return this.labelDiagnostics.slice(0,MAP_LABEL_SAMPLE_LIMIT).map(copyMapLabelDiagnostic);}
@@ -463,7 +464,17 @@ export class CustomMapEngine {
           // Camera frames own this position; generic button transitions would lag behind labels.
           button.style.transition='none';
         }
-        button.addEventListener('click',()=>{
+        button.addEventListener('pointerdown',event=>{
+          if(event.button===0&&this.active&&this.markers.get(marker.id)?.button===button)this.markerPointer={button,id:event.pointerId};
+        });
+        button.addEventListener('click',event=>{
+          const origin=this.markerPointer;this.markerPointer=undefined;
+          if(!this.active||this.markers.get(marker.id)?.button!==button)return;
+          // A Canvas pointerup can open a sheet and move this button under the
+          // ensuing compatibility click. Only its own press may activate it.
+          // detail 0 is keyboard/AT input; older click events have no pointerId.
+          const pointerId=(event as PointerEvent).pointerId;
+          if(event.detail!==0&&(origin?.button!==button||(typeof pointerId==='number'&&pointerId!==origin.id)))return;
           const group=this.markerGroups.get(marker.id);
           if(group&&group.members.length>1){this.options.onGesture?.();const camera=fitBounds(group.bounds,this.size,{padding:this.padding,maxZoom:11,referenceLongitude:105});this.setCamera({...camera,zoom:Math.max(this.camera.zoom+1,camera.zoom)},true);}
           else this.options.onMarker?.(marker.id);
@@ -479,6 +490,7 @@ export class CustomMapEngine {
         record.button.textContent=marker.kind==='plan'?marker.label.slice(0,2):'';
       }
     }
+    if(this.markerPointer&&!this.markerLayer.contains(this.markerPointer.button))this.markerPointer=undefined;
     this.schedule(false);
   }
   setPosition(coordinate:[number,number]|null){const others=[...this.markers.values()].map(r=>r.marker).filter(marker=>marker.id!=='current-position');if(coordinate)others.push({id:'current-position',coordinate,label:'Моё местоположение',kind:'position'});this.setMarkers(others);}
@@ -529,6 +541,12 @@ export class CustomMapEngine {
   }
   private listen(target:EventTarget,name:string,fn:EventListener,options?:AddEventListenerOptions|boolean){target.addEventListener(name,fn,options);this.listeners.push([target,name,fn,options]);}
   private bindInput(){
+    // Reset before a marker's bubbling pointerdown, including presses outside
+    // this map: mouse pointerId is reused even after an unfinished gesture.
+    // Keep all events observable by document capture/bubbling input ledgers.
+    const clearMarkerPointer=()=>{this.markerPointer=undefined;};
+    this.listen(document,'pointerdown',clearMarkerPointer,true);
+    this.listen(document,'pointercancel',clearMarkerPointer,true);
     // Return the decisions of the last label paint without drawing, measuring
     // text again or changing the ordinary bounded DOM sample.
     this.listen(this.element,MAP_LABEL_INSPECTION_EVENT,((event:CustomEvent<{request:unknown;response?:string}>)=>{
@@ -575,7 +593,7 @@ export class CustomMapEngine {
       const next=keyboardCameraAction(this.camera,this.size,event.key,{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18});
       if(next){event.preventDefault();this.options.onGesture?.();this.setCamera(next,true);}else if(event.key==='Home'){event.preventDefault();this.options.onGesture?.();this.setCamera(this.floor,true);}
     }) as EventListener);
-    this.listen(window,'blur',()=>{this.pointer.cancel();this.canvas.classList.remove('is-moving');this.settled();});
+    this.listen(window,'blur',()=>{this.markerPointer=undefined;this.pointer.cancel();this.canvas.classList.remove('is-moving');this.settled();});
     this.listen(window,'online',()=>{
       if(this.coverageTask||this.state.loading)this.retryAfterCurrent=true;
       else this.retry();
@@ -871,7 +889,7 @@ export class CustomMapEngine {
     this.labelCanvas.hidden=count===0;
   }
   destroy(){
-    if(this.disposed)return;this.disposed=true;cancelAnimationFrame(this.frame);this.stopAnimation();clearTimeout(this.settleTimer);
+    if(this.disposed)return;this.disposed=true;this.markerPointer=undefined;cancelAnimationFrame(this.frame);this.stopAnimation();clearTimeout(this.settleTimer);
     this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
     this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;this.selectedBoundary=undefined;

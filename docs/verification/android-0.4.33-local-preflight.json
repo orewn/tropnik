@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T12:03:39.752344+00:00",
+  "status": "passed",
+  "scope": "Local working-tree native catalogue and shared-runtime checks only. Gradle/JVM, R8, exact-APK emulator execution and public release verification remain separate CI gates.",
+  "candidate": {
+    "androidVersion": "0.4.33-preview",
+    "androidVersionCode": 16,
+    "webVersion": "0.4.33",
+    "openApiVersion": "0.4.33",
+    "baselineGitHead": "b80e274524c3834c470b9a3ade9dfabc1fdb4ca5",
+    "uncommittedWorkingTree": true,
+    "ciSourceCommit": null
+  },
+  "sourceInputsSha256": "4f6ee5671c8cea6f29bbccacc1a4c8328665357dcecee9daf69e43466f07720c",
+  "runtimeManifestSha256": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d",
+  "sourceFilesSha256": {
+    "web/package.json": "2140f2b536d8303ba3c2c15f2074a953553a73d6822d1d87435a26f890dae2e3",
+    "android/app/build.gradle.kts": "25710c514cb3827bec6fc8726695d262cc97b64157975cf59e6ba622c4942107",
+    "contracts/openapi.yaml": "ae1ed7135120fe71bd1c89ded5fc4bef52f4ea8b9a885c3db677d497bb53688b",
+    "tools/android-build/release-notes/0.4.33-preview.md": "49a4cb73451ce3ff752e7da1f5e874e80f5885ba0052b756f2932a6fef418451",
+    "web/lib/custom-map-engine.ts": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862",
+    "web/tests/custom-map-engine.test.mjs": "19877f4f1b47d5ddc093bcb397046c41d1f8e7ad9fd15d9a6ff5710f536e3ba4",
+    "android/app/src/main/assets/catalog.json": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0",
+    "android/app/src/main/assets/catalog-manifest.json": "9cbb8423681c7a2974ad75bd4cda47fe1db8da292324ce09b7e725a62a095825",
+    "android/app/src/main/assets/custom-map/manifest.json": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d",
+    "web/public/custom-map/manifest.json": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d",
+    "tools/android-build/release-request.json": "e466c362f796ce7c83ff16ff2b164dfba29f18982303b3614e7294d952532578",
+    "tools/android-build/release-preview.py": "6ef83fdad7710e9968289b2657bc2fbfa4601af7fd89482436390f1b3ab3c55f",
+    ".github/workflows/android.yml": "8fc25861492320250154557b0a92539b1563bcaae121562a4214211100c0e909",
+    "web/public/downloads/android-manifest.json": "405165b18cf746c44abf54b7fd12c0971ea09a06cb2cd9454b340263ad8f2f5f"
+  },
+  "deterministicRuntime": {
+    "checkOnly": true,
+    "runtime": "tropnik-canvas",
+    "sourceInputsSha256": "4f6ee5671c8cea6f29bbccacc1a4c8328665357dcecee9daf69e43466f07720c",
+    "sourceFiles": 61,
+    "outputFiles": 12,
+    "resourceAliases": 1746,
+    "manifestSha256": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d",
+    "destinations": [
+      "web/public/custom-map",
+      "android/app/src/main/assets/custom-map"
+    ]
+  },
+  "runtimeByteVerification": {
+    "mapRenderer": "tropnik-canvas",
+    "mapRendererManifestSha256": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d",
+    "mapRendererSourceInputsSha256": "4f6ee5671c8cea6f29bbccacc1a4c8328665357dcecee9daf69e43466f07720c",
+    "mapRendererFilesVerified": 11,
+    "mapRendererWorkersVerified": 3,
+    "mapRendererResourceAliasesVerified": 1746,
+    "mapRendererSharedWithWeb": true,
+    "mapRendererNativeSdkRequired": false,
+    "mapRendererBridge": "exact-origin-web-message-port-v1",
+    "mapRendererCyrillicFontBundled": true,
+    "mapRendererOfflineVectorTiles": 193,
+    "mapRendererOfflineDemTiles": 21,
+    "mapRendererCatalogueSourcesVerified": 621,
+    "mapRendererCatalogueOverviewVerified": true,
+    "webAndroidRuntimeByteParity": true,
+    "webAndroidFilesCompared": 12
+  },
+  "deterministicCatalogue": {
+    "checked": true,
+    "regions": 100,
+    "referenceRoutes": 685,
+    "learningRoutes": 1,
+    "geometryFiles": 624,
+    "geometryBytes": 9810752,
+    "referenceOnlyRoutes": 61,
+    "trailOverlayBytes": 2634057,
+    "trailOverlaySources": 621,
+    "catalogBytes": 2176050,
+    "catalogSha256": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0",
+    "excludedRouteIds": [
+      "osm-relation-14407325"
+    ],
+    "fieldVerified": 0,
+    "navigationReady": 0
+  },
+  "checks": [
+    {
+      "name": "custom-map-deterministic",
+      "command": [
+        "node",
+        "tools/android-build/prepare-custom-map.mjs",
+        "--check"
+      ],
+      "startedAt": "2026-11-13T12:02:33.842626+00:00",
+      "durationSeconds": 10.869,
+      "exitCode": 0,
+      "log": "custom-map-deterministic.log",
+      "logSha256": "7fb97f6876b1459ec56316d869cb806ba28b16b34adab5fbe1efb7254e7c5a73"
+    },
+    {
+      "name": "catalogue-deterministic",
+      "command": [
+        "node",
+        "tools/android-build/prepare-catalog.mjs",
+        "--check"
+      ],
+      "startedAt": "2026-11-13T12:02:33.843240+00:00",
+      "durationSeconds": 6.326,
+      "exitCode": 0,
+      "log": "catalogue-deterministic.log",
+      "logSha256": "5181d0a87023b233271c28f7969c10041480c533de293a79427833db570aa4e9"
+    },
+    {
+      "name": "native-python-tools",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/android-build",
+        "-p",
+        "test_*.py"
+      ],
+      "startedAt": "2026-11-13T12:02:33.844026+00:00",
+      "durationSeconds": 34.589,
+      "exitCode": 0,
+      "log": "native-python-tools.log",
+      "logSha256": "cb2359dfe6e81f4e1699effc84b57eb7945da2f82bb378fafa496c5722a0e5b1"
+    },
+    {
+      "name": "native-map-node-tools",
+      "command": [
+        "node",
+        "--test",
+        "tools/android-build/test-custom-map.mjs",
+        "tools/android-build/test-native-map-route.mjs",
+        "tools/android-build/test-native-map-catalogue.mjs",
+        "tools/android-build/test-native-map-diagnostics.mjs"
+      ],
+      "startedAt": "2026-11-13T12:02:33.844345+00:00",
+      "durationSeconds": 13.647,
+      "exitCode": 0,
+      "log": "native-map-node-tools.log",
+      "logSha256": "a1de38b81bbc27b117c34b0cdb4a6ba7412bb13a32c1c619fb075c0e31e4fc7b"
+    },
+    {
+      "name": "catalogue-node-tools",
+      "command": [
+        "node",
+        "--test",
+        "tools/android-build/test-catalog-regions.mjs"
+      ],
+      "startedAt": "2026-11-13T12:02:33.845496+00:00",
+      "durationSeconds": 1.637,
+      "exitCode": 0,
+      "log": "catalogue-node-tools.log",
+      "logSha256": "4e43ea0a5468096052523673384963d64a70ec1b66ecab2ef9f385ac6bdff3d8"
+    }
+  ],
+  "pythonTestsPassed": 105,
+  "nativeRuntimeNodeTestsPassed": 28,
+  "catalogueNodeTestsPassed": 4,
+  "rawLogsDirectory": "/workspace/scratch/686c5dc59f67/android-0.4.33-release/preflight",
+  "releaseControl": {
+    "phase": "validation-only; publication held",
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "android-0-4-32-preview-camera-handoff-20261113",
+      "version": "0.4.32-preview",
+      "versionCode": 15,
+      "notesFile": "tools/android-build/release-notes/0.4.32-preview.md"
+    },
+    "requestUnchangedFromBaselineHead": true,
+    "publisherAndWorkflowUnchangedFromBaselineHead": true,
+    "sourceVersionRequestMismatchIntentional": true,
+    "nextMainPushWithUnchangedRequestWillPublish": false,
+    "publicationGateRule": "Main push publishes only when release-request.json changes between the actual before SHA and HEAD, or an explicit main workflow_dispatch requests publication. Version consistency is required only when publication is requested. A subsequent 0.4.33 request must run its own complete Android gates.",
+    "requestGateRegressionTestsIncludedInPythonSuite": true,
+    "publicDownloadManifestVersion": "0.4.32-preview",
+    "publicDownloadManifestVersionCode": 15,
+    "publicDownloadManifestSha256": "405165b18cf746c44abf54b7fd12c0971ea09a06cb2cd9454b340263ad8f2f5f"
+  },
+  "limits": {
+    "gradleBuildExecuted": false,
+    "jvmTestsExecuted": false,
+    "productionR8Executed": false,
+    "apkBuiltOrInspected": false,
+    "emulatorExecuted": false,
+    "physicalArm64Executed": false,
+    "productionSigningVerified": false,
+    "publicReleaseVerified": false,
+    "pythonDevicePreflightOutputUsesUnitTestFixtures": true
+  },
+  "mainReleaseVerified": false
+}

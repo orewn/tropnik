@@ -2905,7 +2905,7 @@ var Fn = class {
 		this.element.dataset.mapMoving = String(e), e ? this.element.dataset.mapCamera = "moving" : delete this.element.dataset.mapCamera;
 	}
 	setActive(e) {
-		this.active !== e && (this.active = e, this.tiles.setActive(e), e ? (this.schedule(), this.settled()) : (this.pointer.cancel(), this.stopAnimation(), cancelAnimationFrame(this.frame), this.frame = 0, clearTimeout(this.settleTimer), this.setMoving(!1)));
+		this.active !== e && (this.active = e, this.tiles.setActive(e), e ? (this.schedule(), this.settled()) : (this.markerPointer = void 0, this.pointer.cancel(), this.stopAnimation(), cancelAnimationFrame(this.frame), this.frame = 0, clearTimeout(this.settleTimer), this.setMoving(!1)));
 	}
 	setEco(e) {
 		this.eco !== e && (this.eco = e, this.canvas.width = 1, this.resizeCanvas());
@@ -3259,18 +3259,27 @@ var Fn = class {
 					id: t.id,
 					name: t.label
 				}) : document.createElement("button");
-				if (n.type = "button", n.dataset.mapMarkerId = t.id, t.kind !== "direction" && (n.className = `tropnik-point-marker tropnik-point-marker--${t.kind}`, n.style.transition = "none"), n.addEventListener("click", () => {
-					let e = this.markerGroups.get(t.id);
-					if (e && e.members.length > 1) {
+				if (n.type = "button", n.dataset.mapMarkerId = t.id, t.kind !== "direction" && (n.className = `tropnik-point-marker tropnik-point-marker--${t.kind}`, n.style.transition = "none"), n.addEventListener("pointerdown", (e) => {
+					e.button === 0 && this.active && this.markers.get(t.id)?.button === n && (this.markerPointer = {
+						button: n,
+						id: e.pointerId
+					});
+				}), n.addEventListener("click", (e) => {
+					let r = this.markerPointer;
+					if (this.markerPointer = void 0, !this.active || this.markers.get(t.id)?.button !== n) return;
+					let i = e.pointerId;
+					if (e.detail !== 0 && (r?.button !== n || typeof i == "number" && i !== r.id)) return;
+					let a = this.markerGroups.get(t.id);
+					if (a && a.members.length > 1) {
 						this.options.onGesture?.();
-						let t = C(e.bounds, this.size, {
+						let e = C(a.bounds, this.size, {
 							padding: this.padding,
 							maxZoom: 11,
 							referenceLongitude: 105
 						});
 						this.setCamera({
-							...t,
-							zoom: Math.max(this.camera.zoom + 1, t.zoom)
+							...e,
+							zoom: Math.max(this.camera.zoom + 1, e.zoom)
 						}, !0);
 					} else this.options.onMarker?.(t.id);
 				}), t.kind !== "direction") for (let e of ["focus", "blur"]) n.addEventListener(e, () => this.schedule(!1));
@@ -3281,7 +3290,7 @@ var Fn = class {
 			}
 			e.marker = t, t.kind !== "direction" && (e.button.setAttribute("aria-label", t.kind === "trail" ? `Открыть маршрут ${t.label}` : t.label), e.button.dataset.trailId = t.kind === "trail" ? t.id : "", e.button.classList.toggle("is-selected", !!t.active), e.button.textContent = t.kind === "plan" ? t.label.slice(0, 2) : "");
 		}
-		this.schedule(!1);
+		this.markerPointer && !this.markerLayer.contains(this.markerPointer.button) && (this.markerPointer = void 0), this.schedule(!1);
 	}
 	setPosition(e) {
 		let t = [...this.markers.values()].map((e) => e.marker).filter((e) => e.id !== "current-position");
@@ -3339,29 +3348,32 @@ var Fn = class {
 		]);
 	}
 	bindInput() {
-		this.listen(this.element, Yt, ((e) => {
+		let e = () => {
+			this.markerPointer = void 0;
+		};
+		this.listen(document, "pointerdown", e, !0), this.listen(document, "pointercancel", e, !0), this.listen(this.element, Yt, ((e) => {
 			let t = e.detail;
 			!t || typeof t != "object" || (t.response = JSON.stringify(this.inspectLabels(t.request)));
 		}));
-		let e = (e) => {
+		let t = (e) => {
 			let t = this.pointerRect ?? this.canvas.getBoundingClientRect();
 			return {
 				x: e.clientX - t.left,
 				y: e.clientY - t.top
 			};
 		};
-		this.listen(this.canvas, "pointerdown", ((t) => {
-			if (t.button !== 0 || !this.state.ready || !this.active) return;
-			t.preventDefault(), this.canvas.focus({ preventScroll: !0 }), this.stopAnimation(), clearTimeout(this.settleTimer), this.options.onGesture?.(), this.pointerRect = this.canvas.getBoundingClientRect();
-			let n = e(t);
-			this.pointer.begin(t.pointerId, this.flatPoint(n), this.camera, this.size), this.setMoving(!0), this.pointer.activePointers === 1 ? (this.pointerStart = {
+		this.listen(this.canvas, "pointerdown", ((e) => {
+			if (e.button !== 0 || !this.state.ready || !this.active) return;
+			e.preventDefault(), this.canvas.focus({ preventScroll: !0 }), this.stopAnimation(), clearTimeout(this.settleTimer), this.options.onGesture?.(), this.pointerRect = this.canvas.getBoundingClientRect();
+			let n = t(e);
+			this.pointer.begin(e.pointerId, this.flatPoint(n), this.camera, this.size), this.setMoving(!0), this.pointer.activePointers === 1 ? (this.pointerStart = {
 				...n,
 				time: performance.now(),
-				id: t.pointerId
-			}, this.pointerMoved = !1) : this.pointerMoved = !0, this.canvas.setPointerCapture(t.pointerId), this.canvas.classList.add("is-moving");
-		})), this.listen(this.canvas, "pointermove", ((t) => {
+				id: e.pointerId
+			}, this.pointerMoved = !1) : this.pointerMoved = !0, this.canvas.setPointerCapture(e.pointerId), this.canvas.classList.add("is-moving");
+		})), this.listen(this.canvas, "pointermove", ((e) => {
 			if (!this.pointer.activePointers) return;
-			let n = e(t), r = this.pointer.move(t.pointerId, this.flatPoint(n));
+			let n = t(e), r = this.pointer.move(e.pointerId, this.flatPoint(n));
 			if (!r) return;
 			this.pointerStart && Math.hypot(n.x - this.pointerStart.x, n.y - this.pointerStart.y) > 5 && (this.pointerMoved = !0);
 			let i = z(r.center[0], r.center[1], r.zoom, {
@@ -3377,17 +3389,17 @@ var Fn = class {
 				zoom: i.zoom
 			}, this.schedule();
 		}));
-		let t = ((t) => {
-			let n = this.pointerStart, r = e(t), i = t.type === "pointerup" && !this.pointerMoved && n?.id === t.pointerId && performance.now() - n.time < 700;
-			this.pointer.end(t.pointerId), this.canvas.hasPointerCapture(t.pointerId) && this.canvas.releasePointerCapture(t.pointerId), this.pointer.activePointers || (this.pointerRect = void 0, this.pointerStart = void 0, this.canvas.classList.remove("is-moving"), this.settled()), i && this.options.onClick?.(r, this.unproject(r));
+		let n = ((e) => {
+			let n = this.pointerStart, r = t(e), i = e.type === "pointerup" && !this.pointerMoved && n?.id === e.pointerId && performance.now() - n.time < 700;
+			this.pointer.end(e.pointerId), this.canvas.hasPointerCapture(e.pointerId) && this.canvas.releasePointerCapture(e.pointerId), this.pointer.activePointers || (this.pointerRect = void 0, this.pointerStart = void 0, this.canvas.classList.remove("is-moving"), this.settled()), i && this.options.onClick?.(r, this.unproject(r));
 		});
-		this.listen(this.canvas, "pointerup", t), this.listen(this.canvas, "pointercancel", t), this.listen(this.canvas, "lostpointercapture", ((e) => {
+		this.listen(this.canvas, "pointerup", n), this.listen(this.canvas, "pointercancel", n), this.listen(this.canvas, "lostpointercapture", ((e) => {
 			let t = this.pointer.activePointers;
 			this.pointer.end(e.pointerId), t && !this.pointer.activePointers && (this.pointerRect = void 0, this.pointerStart = void 0, this.canvas.classList.remove("is-moving"), this.settled());
-		})), this.listen(this.canvas, "wheel", ((t) => {
+		})), this.listen(this.canvas, "wheel", ((e) => {
 			if (!this.state.ready || !this.active) return;
-			t.preventDefault(), this.options.onGesture?.(), this.stopAnimation();
-			let n = S(this.camera, this.size, this.camera.zoom + se(t.deltaY, t.deltaMode, this.size.height), this.flatPoint(e(t)), {
+			e.preventDefault(), this.options.onGesture?.(), this.stopAnimation();
+			let n = S(this.camera, this.size, this.camera.zoom + se(e.deltaY, e.deltaMode, this.size.height), this.flatPoint(t(e)), {
 				minZoom: this.floor.zoom,
 				maxZoom: this.options.maxZoom ?? 18
 			}), r = z(n.center[0], n.center[1], n.zoom, {
@@ -3439,7 +3451,7 @@ var Fn = class {
 			});
 			t ? (e.preventDefault(), this.options.onGesture?.(), this.setCamera(t, !0)) : e.key === "Home" && (e.preventDefault(), this.options.onGesture?.(), this.setCamera(this.floor, !0));
 		})), this.listen(window, "blur", () => {
-			this.pointer.cancel(), this.canvas.classList.remove("is-moving"), this.settled();
+			this.markerPointer = void 0, this.pointer.cancel(), this.canvas.classList.remove("is-moving"), this.settled();
 		}), this.listen(window, "online", () => {
 			this.coverageTask || this.state.loading ? this.retryAfterCurrent = !0 : this.retry();
 		}), this.listen(window, "offline", () => {
@@ -3841,7 +3853,7 @@ var Fn = class {
 		this.labelCanvas.hidden = a === 0;
 	}
 	destroy() {
-		this.disposed || (this.disposed = !0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.releaseGround(), this.trailRaster?.destroy(), this.trailRaster = void 0, this.trailRasterParts = void 0, this.trailRasterPartCache = /* @__PURE__ */ new WeakMap(), this.trailOverlayPaintedEntries = [], this.trailOverlay = [], this.trailOverlayPaths = /* @__PURE__ */ new WeakMap(), this.trailOverlayBatch = void 0, this.trailOverlayWindow = void 0, this.routeHit = void 0, this.reviewedCoastalRoute = void 0, this.reviewedCoastalPaths = /* @__PURE__ */ new WeakMap(), this.reviewedCoastalOverlayBatch = void 0, this.reviewedCoastalOverlaySources = 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.labelCandidateCache = void 0, this.markerObstacles = []);
+		this.disposed || (this.disposed = !0, this.markerPointer = void 0, cancelAnimationFrame(this.frame), this.stopAnimation(), clearTimeout(this.settleTimer), this.resize.disconnect(), this.pointer.cancel(), this.listeners.forEach(([e, t, n, r]) => e.removeEventListener(t, n, r)), this.listeners = [], this.unbindCoverage?.(), this.coverage?.dispose(), this.tiles.destroy(), this.canvas.remove(), this.labelCanvas.remove(), this.markerLayer.remove(), this.markers.clear(), this.routeEdges = [], this.coveragePaths = /* @__PURE__ */ new WeakMap(), this.area = void 0, this.mask = void 0, this.boundaries = void 0, this.selectedArea = void 0, this.selectedBoundary = void 0, this.releaseGround(), this.trailRaster?.destroy(), this.trailRaster = void 0, this.trailRasterParts = void 0, this.trailRasterPartCache = /* @__PURE__ */ new WeakMap(), this.trailOverlayPaintedEntries = [], this.trailOverlay = [], this.trailOverlayPaths = /* @__PURE__ */ new WeakMap(), this.trailOverlayBatch = void 0, this.trailOverlayWindow = void 0, this.routeHit = void 0, this.reviewedCoastalRoute = void 0, this.reviewedCoastalPaths = /* @__PURE__ */ new WeakMap(), this.reviewedCoastalOverlayBatch = void 0, this.reviewedCoastalOverlaySources = 0, this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.labelCandidateCache = void 0, this.markerObstacles = []);
 	}
 }, In = Object.freeze({
 	version: 1,

@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T11:54:49.095214+00:00",
+  "scope": "Failed exact-source full browser audit; not a deployed release",
+  "sourceCommit": "b80e274524c3834c470b9a3ade9dfabc1fdb4ca5",
+  "buildId": "9f389d3e9f7d2cac",
+  "buildBinding": "Three source-bound peer receipts, including SW; build-info.json and Pages artifact were not uploaded after failure",
+  "workflowRunId": 43418601893,
+  "buildJobId": 131862640123,
+  "status": "failed",
+  "deploy": "skipped",
+  "failureStage": "mapGestures / polygonTouch after portrait-to-landscape resize",
+  "topLevelProfile": "android-portrait",
+  "actualViewport": {
+    "width": 915,
+    "height": 412
+  },
+  "expectedSelection": {
+    "region": "territory-28173009B78872068540735",
+    "route": "",
+    "title": "Иркутская область",
+    "sheet": "open"
+  },
+  "observedSelection": {
+    "region": "baikal",
+    "route": "",
+    "title": "Байкал",
+    "sheet": "open",
+    "history": {
+      "length": 12,
+      "level": 1,
+      "pushed": true,
+      "explore": true
+    },
+    "activeElement": {
+      "tag": "CANVAS",
+      "classes": "tropnik-map-canvas",
+      "label": "Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб."
+    }
+  },
+  "expectedPointer": {
+    "time": 68474.40000000002,
+    "x": 622.1953125,
+    "y": 242,
+    "selector": null,
+    "label": "Иркутская область",
+    "sampledAt": null,
+    "animating": null,
+    "animations": []
+  },
+  "nativeEvents": [
+    {
+      "type": "pointerdown",
+      "time": 68480.5,
+      "timestamp": 68474.80000000005,
+      "pointerType": "touch",
+      "pointerId": 73,
+      "x": 622.1953125,
+      "y": 242,
+      "trusted": true,
+      "target": "CANVAS[tropnik-map-canvas]",
+      "button": null
+    },
+    {
+      "type": "pointerup",
+      "time": 68527.09999999998,
+      "timestamp": 68526.5,
+      "pointerType": "touch",
+      "pointerId": 73,
+      "x": 622.1953125,
+      "y": 242,
+      "trusted": true,
+      "target": "CANVAS[tropnik-map-canvas is-moving]",
+      "button": null
+    },
+    {
+      "type": "click",
+      "time": 68598.80000000005,
+      "timestamp": 68526.5,
+      "pointerType": "touch",
+      "pointerId": 73,
+      "x": 622,
+      "y": 242,
+      "trusted": true,
+      "target": "BUTTON[region-marker region-marker-baikal]",
+      "button": {
+        "tag": "BUTTON",
+        "classes": "region-marker region-marker-baikal",
+        "label": "Открыть Байкал",
+        "regionId": "baikal",
+        "groupKey": "baikal",
+        "rect": {
+          "x": 620.0274658203125,
+          "y": 228.58935546875,
+          "width": 44,
+          "height": 44
+        }
+      }
+    }
+  ],
+  "historyTail": [
+    {
+      "id": 32,
+      "url": "http://127.0.0.1:36193/tropnik/?region=territory-28173009B49563687485750",
+      "userTypedURL": "http://127.0.0.1:36193/tropnik/",
+      "title": "Карта маршрутов России · Тропник",
+      "transitionType": "link"
+    },
+    {
+      "id": 34,
+      "url": "http://127.0.0.1:36193/tropnik/?region=territory-28173009B78872068540735",
+      "userTypedURL": "http://127.0.0.1:36193/tropnik/",
+      "title": "Карта маршрутов России · Тропник",
+      "transitionType": "link"
+    },
+    {
+      "id": 35,
+      "url": "http://127.0.0.1:36193/tropnik/?region=baikal",
+      "userTypedURL": "http://127.0.0.1:36193/tropnik/",
+      "title": "Карта маршрутов России · Тропник",
+      "transitionType": "link"
+    }
+  ],
+  "diagnosis": "The Canvas pointerup selected the expected administrative territory; the subsequent native click from that same pointer activated the Baikal marker after it moved under the released point. One gesture caused two selections.",
+  "runtimeCause": {
+    "firstHandler": "CustomMapEngine.bindInput / pointerup calls options.onClick",
+    "secondHandler": "CustomMapEngine.setMarkers / button click calls options.onMarker without checking pointer origin"
+  },
+  "assertionChanged": false,
+  "performanceBudgetFailure": false,
+  "earlySmoothnessPassed": true,
+  "fullSmoothnessReached": false,
+  "serviceWorkerGatePassed": true,
+  "publicPagesUpdated": false,
+  "artifacts": [
+    {
+      "id": 14032548681,
+      "sha256": "98d3bbae93aed17f14a06135a976369384fbe56cfa7c204ab37adfc43bce5642"
+    },
+    {
+      "id": 14033327091,
+      "sha256": "dfb6c022c7e50d00f9e438364a47aee36ab31cd55570920abf6e374ced63fed2"
+    }
+  ],
+  "rawFailureSha256": "f694bd9b30a605dc6d0ca6e60953cacdbbbd85141434d5e2d6e2be5edf145d3c",
+  "screenshot": {
+    "sha256": "46dd9c4baf189732257707adcb36a59576140519a02cd82df77b5f173b732ddd",
+    "bytes": 751971,
+    "width": 1830,
+    "height": 824
+  }
+}

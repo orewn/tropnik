@@ -119,8 +119,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 73294,
-      "sha256": "f93de3ec53df83427358de1a35aa537bf1437a734b541223fb0b117640ed5ec5"
+      "sizeBytes": 74766,
+      "sha256": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862"
     },
     {
       "path": "web/lib/custom-map-label-inspection.ts",
@@ -275,7 +275,7 @@
     {
       "path": "web/package.json",
       "sizeBytes": 1896,
-      "sha256": "6b00e37dceb0f675a70321b4542b31eefcd546a47cd2eece79034b46733f793a"
+      "sha256": "2140f2b536d8303ba3c2c15f2074a953553a73d6822d1d87435a26f890dae2e3"
     },
     {
       "path": "web/pnpm-lock.yaml",
@@ -318,12 +318,12 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "8132930733aaadc3ccaa665b24ced16064ba23d248f187d9c19aec6722425a8d",
+  "sourceInputsSha256": "4f6ee5671c8cea6f29bbccacc1a4c8328665357dcecee9daf69e43466f07720c",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 22086,
-      "sha256": "663d8a9183c285dec15d4ed3839a4d63c8e788c865d8706620832c4ac22d22ff"
+      "sha256": "0b779ccd13ffaab0ad5fe24478bf7bf4cb5424cfee5dbeedeb348e146527d11d"
     },
     {
       "path": "catalogue.json",
@@ -331,9 +331,9 @@
       "sha256": "bad517373c27101ea8fe93423083f3636c11cf65824c2202f69cc2c2bf414aa3"
     },
     {
-      "path": "chunks/custom-map-entry-Di78nDBh.js",
-      "sizeBytes": 147120,
-      "sha256": "9b2349e9907c7affb26423990cd9449e6808f57bfbfe156edfdfbf09d234859e"
+      "path": "chunks/custom-map-entry-CRqFx0YH.js",
+      "sizeBytes": 147917,
+      "sha256": "88ec30c17fcf077285c1e9a6e95e3ed8c8394536d26ba4d85d756744c2c8a880"
     },
     {
       "path": "index.html",
@@ -348,7 +348,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 224,
-      "sha256": "700cf2d9c8f852bceaa3433ccb5ac11bf2a0b51c87a42be2df564e7d24e87969"
+      "sha256": "e22b5d92186e9f25d42496853f7cc8bc05566a957e72ec4de424a24ec4d3cdc7"
     },
     {
       "path": "map.css",

@@ -1,6 +1,39 @@
 # Тропник: рабочая память проекта
 
-## Текущая работа: 0.4.32 после промежуточного 0.4.31
+## Текущая работа: 0.4.33 и один выбор за одно касание
+
+Полный Pages `b80e2745` / run `43418601893` отказал в оригинальном
+post-resize polygon witness. Это настоящий runtime bug: один pointerId 73
+сначала выбирает Иркутскую область через Canvas pointerup, затем native click
+попадает в переместившийся маркер Байкала. История подтверждает оба перехода.
+[Точный отказ](verification/web-0.4.32-pages-failure.json). Ранний untraced
+smoothness и новый exact-source SW gate прошли, полный smoothness не начался.
+Pages deploy пропущен; public web остаётся на 0.4.31 `baf0b9ef`.
+
+Исправление общего engine требует нового **0.4.33-preview / code 16**:
+Android 0.4.32 уже опубликован, его assets/tag не менять. Версии web,
+Android и OpenAPI подготовлены; общий runtime регенерирован после проверки
+input guard. Пять regression tests на exact b80e engine дают ожидаемый RED,
+включая `[Иркутская область, Байкал]`; тот же test file на исправлении GREEN,
+engine suite 71/71 и TypeScript PASS. Независимый review без blockers.
+[Receipt](verification/web-0.4.33-marker-origin-regression.json).
+Runtime manifest SHA256 `3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d`.
+Target/oracle и performance budgets не меняются; full browser CI ещё требуется.
+
+Для 0.4.33 выбран штатный двухфазный выпуск. При первом push исправления
+**release-request.json остаётся побайтно 0.4.32**: это намеренно удерживает
+publish, но main Android build/R8/device выполняются. После успешного полного
+Pages runtime gate отдельный request 0.4.33 запустит собственный полный
+Android release/public proof. Затем продвигается только final universal
+manifest. Старый request не исправлять автоматически как рассогласование.
+[Журнал 0.4.33](release-0.4.33.md).
+
+Пользовательское `go` на отправку кода/workflow, CI и публикацию в
+`orewn/tropnik` продолжает действовать. Новых вопросов о том же разрешении
+не требуется. Git data API доступен; локальные git/gh credentials отсутствуют.
+Последний remote main — `b80e2745`, локальная ветка `release/web-0.4.32`.
+
+## История подготовки 0.4.32 после промежуточного 0.4.31
 
 Пользователь расширил задачу до согласования конфигурации, параметров,
 типов и триггеров, поиска аварийных состояний, лишних выделений памяти,
@@ -85,6 +118,25 @@ controllerchange без autoreload, cache/localStorage сохранены, clean
 Этот диагностический результат не заменяет финальный Pages source/build.
 В финальный gate добавляются source/worker/PNG bindings и проверка cleanup;
 публикация должна пройти исходные performance budgets.
+
+### Финальный веб-исходник
+
+В `main` опубликован **`b80e274524c3834c470b9a3ade9dfabc1fdb4ca5`**,
+tree **`18708b988ae90e64794ff619d57d51663e9a2ab7`**, parent `9289c1ca`.
+Его дерево побайтно совпало с локальным reviewed `b872a67` до fast-forward.
+[Source receipt](verification/web-0.4.32-source.json). Изменены только
+Pages tooling/workflow, проверенный universal APK manifest и документация;
+runtime не менялся относительно принятых Android/backend `9289c1ca`.
+Локальный payload **`9f389d3e9f7d2cac`**, 718 страниц / 71 HTTP check,
+все 2161 входа сверены; новый полный Pages run **43418601893** обязан
+подтвердить собственные source/build и все исходные бюджеты.
+
+Изолированный pan trace `0cb437e0` / run `43417560064` полный. Он показывает
+затраты прежнего drawTiles/drawImage и browser Commit, готовый warm marker
+до pan. Chrome 157 / runner image 20261111 отличаются от failed main
+Chrome 156 / image 20261101; instrumented p95 не переносить в приёмку.
+[Trace diagnosis](verification/web-0.4.32-pan-trace-diagnosis.json),
+[independent SW context](verification/web-0.4.32-pan-sw-context.json).
 
 ### Точные подтверждения промежуточного 0.4.31 на 13 ноября 2026 года
 

@@ -1,0 +1,362 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-final-source-sw-gate-validation-in-failed-pages-run",
+  "verified": true,
+  "releaseEligible": false,
+  "sourceCommit": "b80e274524c3834c470b9a3ade9dfabc1fdb4ca5",
+  "buildId": "9f389d3e9f7d2cac",
+  "runId": 43418601893,
+  "buildJobId": 131862640123,
+  "workflowConclusion": "failure",
+  "deployConclusion": "skipped",
+  "scope": "Real SW gate passed on final source; full browser audit failed later on phone polygon selection; no published Pages payload exists for this run.",
+  "artifacts": [
+    {
+      "key": "failure",
+      "id": 14032548681,
+      "sha256": "98d3bbae93aed17f14a06135a976369384fbe56cfa7c204ab37adfc43bce5642",
+      "bytes": 1029702,
+      "zip": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/failure.zip",
+      "root": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/failure",
+      "members": 13,
+      "verified": true
+    },
+    {
+      "key": "design",
+      "id": 14033327091,
+      "sha256": "dfb6c022c7e50d00f9e438364a47aee36ab31cd55570920abf6e374ced63fed2",
+      "bytes": 47769783,
+      "zip": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/design.zip",
+      "root": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/design",
+      "members": 577,
+      "verified": true
+    }
+  ],
+  "report": {
+    "path": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/failure/browser-service-worker-update-verification.json",
+    "bytes": 20554,
+    "sha256": "ef26f857c24fbd69453b69c513190d940b35658bed44ab33db6d55e55d1c56be"
+  },
+  "sources": [
+    {
+      "path": "web/components/ServiceWorker.tsx",
+      "sha256": "c065bd757266394676c43f9b688580ca507e28ff786720b8ef00edc5f080f4c5",
+      "bytes": 7408,
+      "exactCommitVerified": true
+    },
+    {
+      "path": "web/lib/service-worker-registration.ts",
+      "sha256": "408f359d579f350867eb9a2dd5caead8b427f3ebbd4818c709dbbb89700cefbc",
+      "bytes": 5389,
+      "exactCommitVerified": true
+    },
+    {
+      "path": "web/public/sw.js",
+      "sha256": "cefd35ed89505bed44ba2eec28d74df8dd8a6ffd1eb53ffc5c73ecf97a376781",
+      "bytes": 17420,
+      "exactCommitVerified": true
+    },
+    {
+      "path": "tools/pages-preview/browser-service-worker-update.mjs",
+      "sha256": "9500420751f4162ff38cfdbf025cc4f584aafe28ef081ee3979dc0ca7b9aaea4",
+      "bytes": 26376,
+      "exactCommitVerified": true
+    }
+  ],
+  "screenshots": [
+    {
+      "phase": "waiting",
+      "file": "sw-update-waiting.png",
+      "bytes": 375397,
+      "sha256": "da4dc002b1d2d4dc016812b672c7dfbb8efd539d0792079d2043c8c89a933ad9",
+      "path": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/design/service-worker-update/sw-update-waiting.png",
+      "width": 824,
+      "height": 1830,
+      "verified": true
+    },
+    {
+      "phase": "updating-held",
+      "file": "sw-update-updating-held.png",
+      "bytes": 378076,
+      "sha256": "25867a3bc03f5f6797124d9b1a4a27fe1877d09bdbe8bf1c1c42ac5885b0b933",
+      "path": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/design/service-worker-update/sw-update-updating-held.png",
+      "width": 824,
+      "height": 1830,
+      "verified": true
+    },
+    {
+      "phase": "retry",
+      "file": "sw-update-retry.png",
+      "bytes": 377214,
+      "sha256": "1201ed3b9ef005c1a4e68ca86c8e0888e288d91395ae0d9f4e7444251e2e56ed",
+      "path": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/design/service-worker-update/sw-update-retry.png",
+      "width": 824,
+      "height": 1830,
+      "verified": true
+    },
+    {
+      "phase": "late-controller",
+      "file": "sw-update-late-controller.png",
+      "bytes": 377520,
+      "sha256": "0a121424b4fd5935b62cf3f9c246d31173681c737e42ad8f98f13e0ebe5e7049",
+      "path": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/design/service-worker-update/sw-update-late-controller.png",
+      "width": 824,
+      "height": 1830,
+      "verified": true
+    },
+    {
+      "phase": "updated",
+      "file": "sw-update-updated.png",
+      "bytes": 390257,
+      "sha256": "f7c4ee43d8415346c1f7103dedb696b6f98e2d104f53bee8ab1e07b4c87aca4e",
+      "path": "/workspace/scratch/686c5dc59f67/pages43418601893-failure/design/service-worker-update/sw-update-updated.png",
+      "width": 824,
+      "height": 1830,
+      "verified": true
+    }
+  ],
+  "worker": {
+    "sha256": "d5ead36ffb3bbed3c79a68326cfd23b9f7be735f81533731ba396a0b6393943f",
+    "version": "tropnik-tropnik-shell-9f389d3e9f7d2cac",
+    "normalizedSha256": "35a1ad2b64946d509e02958de70d16e215a5f6011f774d240b9ba24f8da543f5",
+    "variants": {
+      "a": {
+        "version": "tropnik-tropnik-shell-9f389d3e9f7d2cac-sw-audit-a",
+        "sha256": "163530ce28fd1e3d0f531a7f4016c99e35b33defac5f0fb537c581b98f9ab89d",
+        "normalizedSha256": "35a1ad2b64946d509e02958de70d16e215a5f6011f774d240b9ba24f8da543f5"
+      },
+      "b": {
+        "version": "tropnik-tropnik-shell-9f389d3e9f7d2cac-sw-audit-b",
+        "sha256": "bbdf2ace1c8a737379867a88e5302c7cf6e2ad5529a4301b21fad6f5e5e1985c",
+        "normalizedSha256": "35a1ad2b64946d509e02958de70d16e215a5f6011f774d240b9ba24f8da543f5"
+      },
+      "c": {
+        "version": "tropnik-tropnik-shell-9f389d3e9f7d2cac-sw-audit-c",
+        "sha256": "55fd90266ff12e3999cefd3d32a3ab9b6c5547a979078162ad5bf4cb5d387f99",
+        "normalizedSha256": "35a1ad2b64946d509e02958de70d16e215a5f6011f774d240b9ba24f8da543f5"
+      }
+    }
+  },
+  "workerReconstruction": {
+    "sha256": "d5ead36ffb3bbed3c79a68326cfd23b9f7be735f81533731ba396a0b6393943f",
+    "method": "VERSION-only reconstruction from separate local artifact, same production worker source; actual CI sw.js/build-info not present in failure archive"
+  },
+  "normal": {
+    "verified": true,
+    "waitingObservationMs": 1502.6216410000002,
+    "waitingDocumentPreserved": true,
+    "waitingControllerPreserved": true,
+    "nativeClick": {
+      "kind": "click",
+      "documentId": 1,
+      "at": 1794570067563.5,
+      "trusted": true,
+      "label": "Обновить",
+      "disabled": false
+    },
+    "reloads": 1,
+    "controllerChanged": true,
+    "activeVersion": "b"
+  },
+  "timeout": {
+    "verified": true,
+    "updatingLabel": "Обновляем…",
+    "updatingDisabled": true,
+    "nativeClick": {
+      "kind": "click",
+      "documentId": 2,
+      "at": 1794570069099.5999,
+      "trusted": true,
+      "label": "Обновить",
+      "disabled": false
+    },
+    "elapsedMs": 15001.199951171875,
+    "heldMessages": 1,
+    "errorLabel": "Повторить",
+    "errorDisabled": false,
+    "timeoutDocumentPreserved": true,
+    "lateControllerChanged": true,
+    "lateObservationMs": 1503.9701220000024,
+    "lateDocumentPreserved": true,
+    "retryClick": {
+      "kind": "click",
+      "documentId": 2,
+      "at": 1794570087295.2,
+      "trusted": true,
+      "label": "Повторить",
+      "disabled": false
+    },
+    "retryReloads": 1,
+    "activeVersion": "c"
+  },
+  "cleanup": {
+    "status": "stopped",
+    "signals": [
+      "SIGTERM"
+    ],
+    "errors": [],
+    "elapsedMs": 56.689941999997245
+  },
+  "pageErrors": [],
+  "localHttpErrors": [],
+  "environment": {
+    "schemaVersion": 1,
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "collection": "browser-target-cdp-before-measurement",
+    "sourceCommit": "b80e274524c3834c470b9a3ade9dfabc1fdb4ca5",
+    "capturedAt": "2026-11-13T11:41:03.473Z",
+    "requestedFlags": [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-background-networking",
+      "--disable-component-update",
+      "--disable-default-apps",
+      "--disable-extensions",
+      "--disable-features=Translate,MediaRouter",
+      "--mute-audio",
+      "--no-first-run",
+      "--use-gl=angle",
+      "--use-angle=swiftshader-webgl",
+      "--enable-unsafe-swiftshader",
+      "--window-size=1920,1920",
+      "--ozone-override-screen-size=1920,1920"
+    ],
+    "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=36007 --user-data-dir=/tmp/tropnik-sw-update-l5MRJi --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+    "browser": {
+      "product": "Chrome/156.0.8078.79",
+      "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.6.75.27",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+        "skiaBackendType": "None",
+        "targetCpuBits": 64
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      }
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760340480,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261101.360.1"
+      }
+    },
+    "nativeSurface": {
+      "schemaVersion": 1,
+      "collection": "blank-target-before-emulation",
+      "window": {
+        "left": 10,
+        "top": 10,
+        "width": 1920,
+        "height": 1920,
+        "windowState": "normal"
+      },
+      "viewport": {
+        "url": "about:blank",
+        "visibilityState": "visible",
+        "innerWidth": 1920,
+        "innerHeight": 1833,
+        "outerWidth": 1920,
+        "outerHeight": 1920,
+        "devicePixelRatio": 1,
+        "screen": {
+          "width": 1920,
+          "height": 1920,
+          "availWidth": 1920,
+          "availHeight": 1920
+        }
+      }
+    }
+  },
+  "memberHashes": [
+    {
+      "file": "browser-failure.json",
+      "bytes": 358044,
+      "sha256": "f694bd9b30a605dc6d0ca6e60953cacdbbbd85141434d5e2d6e2be5edf145d3c"
+    },
+    {
+      "file": "browser-failure.png",
+      "bytes": 751971,
+      "sha256": "46dd9c4baf189732257707adcb36a59576140519a02cd82df77b5f173b732ddd"
+    },
+    {
+      "file": "browser-ui-smoothness-diagnostic.json",
+      "bytes": 531376,
+      "sha256": "02f82ef03047d7078ade44d77136853e28c02aa095c87aaa418d8887fe390f57"
+    },
+    {
+      "file": "browser-service-worker-update-verification.json",
+      "bytes": 20554,
+      "sha256": "ef26f857c24fbd69453b69c513190d940b35658bed44ab33db6d55e55d1c56be"
+    },
+    {
+      "file": "browser-trail-overlay-verification.json",
+      "bytes": 34367,
+      "sha256": "f048ddcc4f2168164409222987ac0d9ce3ccc32245703f78281a9477f4375e2a"
+    },
+    {
+      "file": "browser-trail-raster-verification.json",
+      "bytes": 144939,
+      "sha256": "792c0390e4331654aec278b2f383405c21773ff271839cc3363e334c5c6fc03f"
+    }
+  ],
+  "fullAuditFailure": {
+    "profile": "android-portrait",
+    "error": "Error: Map selection did not become {\"region\":\"territory-28173009B78872068540735\",\"route\":\"\",\"title\":\"Иркутская область\",\"sheet\":\"open\"}: {\"region\":\"baikal\",\"route\":\"\",\"title\":\"Байкал\",\"sheet\":\"open\",\"history\":{\"length\":12,\"level\":1,\"pushed\":true,\"explore\":true},\"activeElement\":{\"tag\":\"CANVAS\",\"classes\":\"tropnik-map-canvas\",\"label\":\"Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб.\"}}\n    at waitValue (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:400:9)\n    at async polygonTouch (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:721:3)\n    at async mapGestures (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:760:21)\n    at async mapInteraction (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:839:46)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:992:46",
+    "sourceBinding": "failure.environment.sourceCommit plus API artifact.workflow_run.head_sha"
+  },
+  "limitations": [
+    "No full browser-verification.json, build-info.json or github-pages artifact was produced/preserved in this failed run.",
+    "No public deployment, live SW proof or reusable release payload is claimed.",
+    "Worker source/variant hashes were deterministically reconstructed; no raw CI deployed worker file is available here.",
+    "PNG SHA/size/header/dimensions verified; this receipt does not claim visual QA."
+  ]
+}
