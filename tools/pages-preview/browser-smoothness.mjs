@@ -1,13 +1,17 @@
 import assert from 'node:assert/strict';
 import {dispatchSourceEndPan,assertSourceEndPanInput} from './browser-source-end-pan.mjs';
-import {traceDesktopSelection,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES} from './browser-trace.mjs';
+import {traceDesktopSelection,FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,TERRAIN_TRACE_LIMITS} from './browser-trace.mjs';
 import {sendNativeText} from './browser-native-text.mjs';
 
 // These are controlled-browser interaction budgets, not a claim of physical
 // device FPS. RAF callbacks do not prove that the GPU presented every frame.
 export const SMOOTHNESS_LIMITS=Object.freeze({frameP95Ms:35,maxFrameGapMs:150,inputToFrameMs:200,eventDurationMs:200,layoutShift:.1});
 export const SMOOTHNESS_SCENARIOS=Object.freeze(['panel','explore-search','explore-filters','catalog-scroll','map-pan','map-zoom','layer-switch','site-search']);
-export const SMOOTHNESS_TRACE_SCENARIOS=Object.freeze(['panel','explore-search']);
+// Branch-only diagnostic opt-in. Capture caps bound evidence, never the
+// original action, recorder window, native gesture or performance budgets.
+const progressiveTrace=process.env.TROPNIK_PROGRESSIVE_PAINT_TRACE==='1';
+export const SMOOTHNESS_TRACE_SCENARIOS=Object.freeze(progressiveTrace?['map-pan','map-zoom']:['panel','explore-search']);
+const PROGRESSIVE_TRACE_LIMITS=Object.freeze({'map-pan':Object.freeze({...TERRAIN_TRACE_LIMITS,durationMs:8000}),'map-zoom':TERRAIN_TRACE_LIMITS});
 
 export function smoothnessTraceEnabled({diagnostic=null,traceValue,cpuSlowdownRate=1}={}){
  return diagnostic==='ui-smoothness'&&traceValue==='1'&&cpuSlowdownRate===1;
@@ -159,23 +163,110 @@ export async function observeSmoothnessPan(cdp,start,delta,profile,{evaluate,sle
  return receipt;
 }
 
+/** Read published inspection transitions only. No RAF loop, app callback,
+ * prototype replacement, camera write, renderer invocation or network action.
+ * An observer callback is after publication: its mark is an upper bound on
+ * that paint, not a measurement of draw() duration. Coalescing is explicit. */
+export function installProgressivePaintTrace(target,scenario){
+ const perf=target.performance,element=target.document.querySelector('.atlas-canvas[data-map-engine]');
+ if(!element)throw new Error('No published map inspection surface');
+ const canvas=element.querySelector('canvas.tropnik-map-canvas');if(!canvas)throw new Error('No map raster canvas');
+ if(target.__tropnikProgressivePaintTrace)throw new Error('Previous map observer was not removed');
+ const limits={transitions:1024,keySets:32,tilesPerBatch:64,keyLength:256,inspectionChars:512*1024,errors:8};
+ const report={schemaVersion:1,scenario,readOnly:true,source:'MutationObserver of existing data-map-inspection',limits,timeOriginMs:perf.timeOrigin,
+  semantics:'Published snapshots, not live worker state. Marks follow publication. drawDelta=0 is not a new paint. Pointer/animation suppress publication, so revision gaps can be expected. Key overlap does not itself prove object identity.',
+  transitions:[],canonicalKeySets:[],callbacks:0,mutationRecords:0,coalescedMutationRecords:0,identicalValuesSkipped:0,
+  drawRevisionGaps:0,maxDrawRevisionDelta:0,readDurationTotalMs:0,readDurationMaxMs:0,overflow:false,errors:[],disconnected:false};
+ const keySets=new Map();let stopped=false,lastText,lastDraw,observer;
+ const error=problem=>{if(report.errors.length<limits.errors)report.errors.push(String(problem?.message||problem).slice(0,1000));};
+ const keys=tiles=>{
+  if(!Array.isArray(tiles)||tiles.length>limits.tilesPerBatch)throw new Error('Inspection tile list exceeds diagnostic bound');
+  return tiles.map(tile=>{if(typeof tile.key!=='string'||!tile.key.length||tile.key.length>limits.keyLength)throw new Error('Invalid bounded tile key');return tile.key;});
+ };
+ const capture=(phase,force=false)=>{
+  const began=perf.now();
+  try{
+   if(!element.isConnected)throw new Error('Observed map surface was replaced');
+   const text=element.dataset.mapInspection;
+   if(typeof text!=='string'||text.length>limits.inspectionChars)throw new Error('Missing or oversized published inspection');
+   if(!force&&text===lastText){report.identicalValuesSkipped++;return;}lastText=text;
+   if(report.transitions.length>=limits.transitions){report.overflow=true;observer?.disconnect();return;}
+   const map=JSON.parse(text),canonical={overview:keys(map.tiles.overview),detail:keys(map.tiles.detail),relief:keys(map.tiles.relief),imagery:keys(map.tiles.imagery)};
+   const identity=JSON.stringify(canonical);let keySet=keySets.get(identity);
+   if(keySet===undefined){if(keySets.size>=limits.keySets){report.overflow=true;observer?.disconnect();return;}
+    keySet=keySets.size;keySets.set(identity,keySet);report.canonicalKeySets.push({id:keySet,...canonical});}
+   if(!Number.isSafeInteger(map.drawRevision)||map.drawRevision<0)throw new Error('Invalid published draw revision');
+   const drawDelta=lastDraw===undefined?null:map.drawRevision-lastDraw;
+   if(drawDelta!==null&&drawDelta<0)throw new Error('Published draw revision moved backwards');
+   if(drawDelta>1)report.drawRevisionGaps+=drawDelta-1;
+   report.maxDrawRevisionDelta=Math.max(report.maxDrawRevisionDelta,drawDelta??0);lastDraw=map.drawRevision;
+   const loading=map.loadingGround,detail=loading?keys(loading.detail):[],relief=loading?keys(loading.relief):[];
+   const canonicalDetail=new Set(canonical.detail),canonicalRelief=new Set(canonical.relief);
+   const mark=perf.mark('tropnik:progressive-paint:'+scenario+':inspection:'+report.transitions.length);
+   report.transitions.push({index:report.transitions.length,phase,callbackStartedAtMs:began,mark:{name:mark.name,startTimeMs:mark.startTime},observedAtEpochMs:Date.now(),
+    drawRevision:map.drawRevision,drawDelta,labelRevision:map.labelRevision,canonicalKeySet:keySet,canvas:{width:canvas.width,height:canvas.height},
+    camera:map.camera,moving:element.dataset.mapMoving==='true'||element.hasAttribute('data-map-camera'),hidden:target.document.visibilityState!=='visible',
+    state:{ready:map.state.ready,loading:map.state.loading,mode:map.state.mode,committedMode:map.state.committedMode,error:map.state.error},
+    coverage:{revision:map.coverage?.revision,pending:map.coverage?.pending,ready:map.coverage?.ready,error:map.coverage?.error},
+    overlay:{ready:map.catalogueOverlay?.currentViewportReady,pending:map.catalogueOverlay?.pending,error:map.catalogueOverlay?.error},
+    loading:loading?{generation:loading.generation,readyCells:loading.readyCells,requestedCells:loading.requestedCells,detailCount:detail.length,reliefCount:relief.length,
+     detailKeysAlsoCanonical:detail.filter(key=>canonicalDetail.has(key)).length,reliefKeysAlsoCanonical:relief.filter(key=>canonicalRelief.has(key)).length}:null});
+  }catch(problem){error(problem);}
+  finally{const duration=perf.now()-began;report.readDurationTotalMs+=duration;report.readDurationMaxMs=Math.max(report.readDurationMaxMs,duration);}
+ };
+ observer=new target.MutationObserver(records=>{if(stopped)return;report.callbacks++;report.mutationRecords+=records.length;report.coalescedMutationRecords+=Math.max(0,records.length-1);capture('mutation');});
+ observer.observe(element,{attributes:true,attributeFilter:['data-map-inspection']});capture('before',true);
+ target.__tropnikProgressivePaintTrace={stop(){if(!stopped){stopped=true;observer.disconnect();capture('after',true);report.disconnected=true;delete target.__tropnikProgressivePaintTrace;}return report;}};
+ return{installed:true,scenario,limits,timeOriginMs:perf.timeOrigin};
+}
+
+/** Previous isolated pan diagnosis: inspect existing caches outside the raw
+ * window. Do not register/update a worker, open a cache, fetch or warm maps. */
+async function progressiveWorkerSnapshot(cdp,evaluate,phase){
+ try{return await evaluate(cdp,`(async()=>{
+  const began=performance.now(),worker=value=>value?{scriptURL:value.scriptURL,state:value.state}:null;
+  const registration=await navigator.serviceWorker?.getRegistration(location.href),scope=registration?.scope||new URL('.',location.href).href;
+  const names=(await caches.keys()).filter(name=>name.includes('tropnik-shell-'));
+  const shellCaches=await Promise.all(names.slice(0,16).map(async name=>{const markerURL=new URL('_offline/map-warm-'+name+'-canvas',scope).href,response=await caches.match(markerURL,{cacheName:name});return{name,markerURL,present:!!response,status:response?.status??null,ready:!!response&&response.ok&&await response.text()==='ready'};}));
+  return{phase:${JSON.stringify(phase)},readOnly:true,startedAtMs:began,capturedAtMs:performance.now(),timeOriginMs:performance.timeOrigin,controller:worker(navigator.serviceWorker?.controller),registration:registration?{scope:registration.scope,active:worker(registration.active),waiting:worker(registration.waiting),installing:worker(registration.installing)}:null,shellCaches,truncated:names.length>16};
+ })()`);}catch(error){return{phase,readOnly:true,error:String(error?.message||error)};}
+}
+async function progressiveClock(cdp,evaluate,scenario,phase){
+ const name='tropnik:progressive-paint:'+scenario+':'+phase;
+ try{return await evaluate(cdp,`(()=>{const mark=performance.mark(${JSON.stringify(name)});return{name:mark.name,startTimeMs:mark.startTime,timeOriginMs:performance.timeOrigin};})()`);}
+ catch(error){return{name,error:String(error?.message||error)};}
+}
+
 /** Start tracing before the recorder window, then stop the window before trace
  * drainage. Each action still runs once, and its raw metrics survive failures. */
 export async function measureSmoothnessWindow(cdp,name,action,{evaluate,report,tracing=false,sourceCommit=null,traceOptions={}}){
  const inspect=expression=>evaluate(cdp,expression);
+ const focused=progressiveTrace&&tracing&&report.profile==='desktop-webgl'&&SMOOTHNESS_TRACE_SCENARIOS.includes(name);
+ let context,observerStopped=false;
+ if(focused){
+  context={schemaVersion:1,scenario:name,diagnosticOnly:true,productionSourceCommit:'67d418dd1e187d065d2ff3bd3703c50b7436268b',errors:[],workerBefore:await progressiveWorkerSnapshot(cdp,evaluate,'before')};
+  (report.progressivePaintTrace??=[]).push(context);
+ }
+ const stopObserver=async()=>{if(!focused||observerStopped)return;observerStopped=true;
+  try{context.inspection=await inspect('window.__tropnikProgressivePaintTrace?.stop()??null');}catch(error){context.errors.push(String(error?.message||error));}};
  let releaseDrain;const windowClosed=new Promise(resolve=>{releaseDrain=resolve;});
  const measure=async()=>{
   try{
+   if(focused){
+    try{context.installed=await inspect('('+installProgressivePaintTrace.toString()+')(window,'+JSON.stringify(name)+')');}catch(error){context.errors.push(String(error?.message||error));}
+    context.clockBefore=await progressiveClock(cdp,evaluate,name,'before');
+   }
    await inspect(`window.__tropnikSmoothness.start(${JSON.stringify(name)})`);let error;
    try{await action();}catch(problem){error=problem;}
    await inspect('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
    const raw=await inspect('window.__tropnikSmoothness.stop()');
+   if(focused){context.clockAfter=await progressiveClock(cdp,evaluate,name,'after');await stopObserver();context.workerAfter=await progressiveWorkerSnapshot(cdp,evaluate,'after');}
    try{report.scenarios.push(summarizeSmoothness(raw));}catch(problem){error??=problem;report.invalidWindow=raw;}
    if(error)throw error;
-  }finally{releaseDrain();}
+  }finally{await stopObserver();releaseDrain();}
  };
- if(!tracing||!SMOOTHNESS_TRACE_SCENARIOS.includes(name))return measure();
- const options={...traceOptions,enabled:true,sourceCommit,prefix:`${report.profile}-ui-smoothness-${name}`,scope:`ui-smoothness/${report.profile}/${name}`,categories:FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,captureCategoryEvidence:true,beforeDrain:()=>windowClosed};
+ if(!tracing||!SMOOTHNESS_TRACE_SCENARIOS.includes(name)||(progressiveTrace&&!focused))return measure();
+ const options={...traceOptions,...(focused?{limits:PROGRESSIVE_TRACE_LIMITS[name]}:{}),enabled:true,sourceCommit,prefix:`${report.profile}-ui-smoothness-${name}`,scope:`ui-smoothness/${report.profile}/${name}`,categories:FIRST_ALTAI_DIAGNOSTIC_TRACE_CATEGORIES,captureCategoryEvidence:true,beforeDrain:()=>windowClosed};
  try{
   const {trace}=await traceDesktopSelection(cdp,measure,options);report.traces.push({scenario:name,...trace});
  }catch(error){if(error.traceReceipt)report.traces.push({scenario:name,...error.traceReceipt});throw error;}
@@ -184,7 +275,7 @@ export async function measureSmoothnessWindow(cdp,name,action,{evaluate,report,t
 /** A short real-input path, independent of the long all-zoom matrix. */
 export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1,diagnostic=process.env.TROPNIK_BROWSER_DIAGNOSTIC??null,traceValue=process.env.TROPNIK_BROWSER_TRACE,sourceCommit=process.env.GITHUB_SHA||null}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,settledSheet,closeMapSheet,clearMapStories,pointerSelector,revealNative,scrollContainer,freeCanvasPoint,url}=helpers;
- const tracing=smoothnessTraceEnabled({diagnostic,traceValue,cpuSlowdownRate});
+ const tracing=smoothnessTraceEnabled({diagnostic,traceValue,cpuSlowdownRate})&&(!progressiveTrace||profile.name==='desktop-webgl');
  const report={schemaVersion:1,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',physicalDevice:false,cpuSlowdownRate,cpuThrottleRestored:false,instrumented:tracing,traces:[],passed:false,scenarios:[],performanceIssues:[],performancePassed:false};
  let originalFailure;
  const inspect=expression=>evaluate(cdp,expression);
