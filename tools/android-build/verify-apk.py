@@ -24,11 +24,70 @@ from online_sources import verify_online_sources
 from pilot_map import verify_pilot
 
 
-def verify_apk(apk: Path) -> dict:
+def verify_source_assets(archive: zipfile.ZipFile, source_root: Path) -> dict:
+    """Bind source assets to checkout; account for AGP's two binary ART profiles."""
+    root = source_root.resolve() / "android/app/src/main/assets"
+    require(root.is_dir(), "Native source assets are missing")
+    expected = {}
+    for path in root.rglob("*"):
+        require(not path.is_symlink(), "Linked source asset is not permitted")
+        if path.is_file():
+            expected["assets/" + path.relative_to(root).as_posix()] = path
+    actual = {name for name in archive.namelist() if name.startswith("assets/") and not name.endswith("/")}
+    # AGP compiles library profiles into release assets. These are compiler
+    # outputs, not editable map/catalogue data. No other extra asset is admitted.
+    profiles = {"assets/dexopt/baseline.prof": b"pro\x00", "assets/dexopt/baseline.profm": b"prm\x00"}
+    generated = actual - set(expected)
+    require(generated <= set(profiles) and set(expected) <= actual, "APK/source asset inventory differs")
+    compiler_assets = []
+    for name in sorted(generated):
+        data = archive.read(name)
+        require(8 <= len(data) <= 1_500_000 and data[:4] == profiles[name]
+                and re.fullmatch(rb"[0-9]{3}\x00", data[4:8]) is not None, "Invalid compiler ART profile")
+        # CompileArtProfileTask registers BINARY_ART_PROFILE(_METADATA).
+        # These binary artifacts are distinct from merged/human-readable ART.
+        profile_kind = "binary_art_profile_metadata" if name.endswith(".profm") else "binary_art_profile"
+        compiled = source_root.resolve() / "android/app/build/intermediates" / profile_kind / "release/compileReleaseArtProfile" / name.rsplit("/", 1)[1]
+        require(compiled.is_file() and not compiled.is_symlink(),
+                "Missing or linked Gradle compiler ART output: " + compiled.relative_to(source_root.resolve()).as_posix())
+        require(compiled.read_bytes() == data,
+                "APK ART profile differs from this Gradle compiler output: " + compiled.relative_to(source_root.resolve()).as_posix())
+        compiler_assets.append({"path": name, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                                "compilerOutput": compiled.relative_to(source_root.resolve()).as_posix()})
+    total = 0
+    for name, path in expected.items():
+        source = path.read_bytes()
+        require(archive.read(name) == source, "APK asset differs from the reviewed source: " + name)
+        total += len(source)
+    return {"sourceAssetsCompared": len(expected), "sourceAssetBytesCompared": total,
+            "sourceAssetParityVerified": True, "compilerGeneratedArtProfiles": compiler_assets}
+
+
+def verify_native_font(archive: zipfile.ZipFile, source_root: Path, resource: dict | None = None) -> dict:
+    # Release aapt2 can shorten resource paths. Its resource table, rather than
+    # a filename search, must select the font; both variants retain exact bytes.
+    path = safe_relative(resource["path"] if resource is not None else "res/font/manrope.ttf")
+    require(path.startswith("res/") and path.endswith(".ttf"), "Invalid native font resource path")
+    require(path in archive.namelist(), "Native Manrope font resource is missing from the APK")
+    source = source_root.resolve() / "android/app/src/main/res/font/manrope.ttf"
+    require(source.is_file() and not source.is_symlink() and 0 < source.stat().st_size <= 4_000_000,
+            "Native Manrope source font is missing, linked or oversized")
+    require(archive.getinfo(path).file_size == source.stat().st_size, "Native Manrope font size differs from source")
+    data = archive.read(path)
+    require(data == source.read_bytes(), "Native Manrope font bytes differ from source")
+    return {"manropeFontBundled": True, "nativeFont": {
+        "path": path, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+        "resourceTableBindingVerified": resource is not None,
+        **({"resourceId": resource["resourceId"], "resourceName": resource["resourceName"]} if resource is not None else {}),
+    }}
+
+
+def verify_apk(apk: Path, *, source_root: Path | None = None, font_resource: dict | None = None) -> dict:
     with zipfile.ZipFile(apk) as archive:
         names = archive.namelist()
         require(len(names) == len(set(names)), "Duplicate APK entry")
         require(archive.testzip() is None, "APK CRC failure")
+        source_report = verify_source_assets(archive, source_root) if source_root is not None else {"sourceAssetParityVerified": False}
         custom_map_report = verify_custom_map(archive.read("assets/custom-map/manifest.json"),
             lambda path: archive.read("assets/" + path),
             actual_files=[name.removeprefix("assets/") for name in names if name.startswith("assets/custom-map/") and not name.endswith("/")])
@@ -71,7 +130,7 @@ def verify_apk(apk: Path) -> dict:
             lambda path: archive.read(landscape_prefix + path), terrain_manifest)
         require("assets/licenses/Manrope-OFL.txt" in names and "assets/licenses/Manrope-Scene-OFL.txt" in names,
                 "Native or scene font licence missing")
-        require("res/font/manrope.ttf" in names, "Native Manrope font missing")
+        font_report = verify_native_font(archive, source_root or Path(__file__).resolve().parents[2], font_resource)
         catalog = json.loads(archive.read("assets/catalog.json"))
         catalog_report = verify_catalog(archive.read("assets/catalog-manifest.json"),
             lambda path: archive.read("assets/" + path),
@@ -106,12 +165,13 @@ def verify_apk(apk: Path) -> dict:
             "mapReliefLighting": "geographic",
             "mapProjectedTiltDegrees": [0, 40],
             "separateLocalMeshViewer": True,
-            "manropeFontBundled": True,
+            **font_report,
             "terrainTilesVerified": terrain_report["terrainTileCount"],
             "terrainAttributionAndLicensePresent": True,
             "sceneBytes": landscape_report["landscapeBytesVerified"],
             "sceneSha256": landscape_report["landscapeSha256"],
             "deviceUiTestPerformedByThisScript": False,
+            **source_report,
         }
     return result
 
@@ -120,8 +180,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("apk", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--source-root", type=Path)
     args = parser.parse_args()
-    result = verify_apk(args.apk)
+    result = verify_apk(args.apk, source_root=args.source_root)
     text = json.dumps(result, ensure_ascii=False, indent=2)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,74 @@
+diff --git a/dist/index.edge.js b/dist/index.edge.js
+index ee0cd4fd75bc5f00135de3170a98fce4134a2fc8..c2aeeb9340c9101c88dbf874fd2010b47debae76 100644
+--- a/dist/index.edge.js
++++ b/dist/index.edge.js
+@@ -1,3 +1,5 @@
++// HarfBuzz is supplied as a precompiled Worker module, just like Yoga/Resvg.
++import tropnikHarfBuzzWasm from "harfbuzzjs/hb.wasm?module";
+ var __create = Object.create;
+ var __defProp = Object.defineProperty;
+ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+@@ -3743,8 +3745,10 @@ var require_hb = __commonJS({
+         var moduleRtn;
+         var Module = moduleArg;
+         var ENVIRONMENT_IS_WEB = typeof window == "object";
+-        var ENVIRONMENT_IS_WORKER = typeof WorkerGlobalScope != "undefined";
+-        var ENVIRONMENT_IS_NODE = typeof process == "object" && process.versions?.node && process.type != "renderer";
++        // Cloudflare supplies the compiled module and has no self.location URL.
++        var ENVIRONMENT_IS_WORKER = false;
++        // nodejs_compat exposes process, but this edge entry must not use fs.
++        var ENVIRONMENT_IS_NODE = false;
+         var arguments_ = [];
+         var thisProgram = "./this.program";
+         var quit_ = (status, toThrow) => {
+@@ -4346,7 +4350,13 @@ var require_harfbuzzjs = __commonJS({
+     var hbjs = require_hbjs();
+     var hb = require_hb();
+     module.exports = new Promise(function(resolve, reject) {
+-      hb().then((instance) => {
++      hb({
++        instantiateWasm(imports, receive) {
++          const instance = new WebAssembly.Instance(tropnikHarfBuzzWasm, imports);
++          receive(instance, tropnikHarfBuzzWasm);
++          return instance.exports;
++        }
++      }).then((instance) => {
+         resolve(hbjs(instance));
+       }, reject);
+     });
+@@ -23672,4 +23682,4 @@ parse-css-color/dist/index.esm.js:
+    * @license MIT
+    *)
+ */
+-//# sourceMappingURL=index.edge.js.map
+\ No newline at end of file
++// The loader patch changes line mappings; the unmodified upstream source map is not advertised.
+\ No newline at end of file
+diff --git a/dist/index.node.js b/dist/index.node.js
+index 4f360de7f45abe8b89697a6f3c20b6b8f1a7548a..8b3e4e1fa7d492bb425d070d2a3a20a46a65e09a 100644
+--- a/dist/index.node.js
++++ b/dist/index.node.js
+@@ -1,3 +1,7 @@
++// Use Satori's declared HarfBuzz package so its CommonJS loader resolves the
++// matching hb.wasm beside itself. The upstream ESM bundle omits that asset.
++import { createRequire as tropnikCreateRequire } from "node:module";
++const tropnikRequire = tropnikCreateRequire(import.meta.url);
+ var __create = Object.create;
+ var __defProp = Object.defineProperty;
+ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+@@ -15395,7 +15399,7 @@ try {
+ }
+ 
+ // node_modules/.pnpm/satori@0.33.5/node_modules/satori/dist/index.js
+-var import_harfbuzzjs = __toESM(require_harfbuzzjs(), 1);
++var import_harfbuzzjs = __toESM(tropnikCreateRequire(tropnikRequire.resolve("satori/package.json"))("harfbuzzjs"), 1);
+ var ZI = Object.create;
+ var Jr = Object.defineProperty;
+ var jI = Object.getOwnPropertyDescriptor;
+@@ -23684,4 +23688,4 @@ parse-css-color/dist/index.esm.js:
+    * @license MIT
+    *)
+ */
+-//# sourceMappingURL=index.node.js.map
+\ No newline at end of file
++// The loader patch changes line mappings; the unmodified upstream source map is not advertised.

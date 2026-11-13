@@ -37,7 +37,7 @@ async function record(filename, recordPath = relative(filename)) {
   const bytes = await readFile(filename);
   return {path: recordPath, sizeBytes: bytes.length, sha256: hash(bytes)};
 }
-async function aliases() {
+async function aliases(catalogue) {
   const result = [];
   async function alias(url, assetPath) {
     if (!url.startsWith('/') || !safeResourcePath(assetPath)) throw new Error('Unsafe map alias');
@@ -56,7 +56,43 @@ async function aliases() {
   ]) for (const filename of await files(path.join(native, assetPrefix))) {
     if (filename.endsWith(suffix)) await alias(urlPrefix + filename, assetPrefix + filename);
   }
+  await alias(catalogue.trailOverlay.url, catalogue.trailOverlay.path);
+  const sources = new Map();
+  for (const source of catalogue.files) {
+    if (!/^web\/public\/data\/(routes|imported)\/[a-z0-9-]+\.geojson$/.test(source.sourcePath)) throw new Error('Invalid native source alias');
+    const url = source.sourcePath.slice('web/public'.length), prior = sources.get(url);
+    if (prior && (prior.sha256 !== source.sha256 || prior.bytes !== source.bytes)) throw new Error('Conflicting native route source');
+    if (!prior) {sources.set(url, source);await alias(url, source.path);}
+  }
   return result.sort((a, b) => a.url.localeCompare(b.url, 'en'));
+}
+
+async function nativeCatalogue() {
+  const catalogue = JSON.parse(await readFile(path.join(native, 'catalog-manifest.json'), 'utf8'));
+  const metadata = JSON.parse(await readFile(path.join(web, 'lib/trail-overlay.generated.json'), 'utf8'));
+  const overlay = catalogue.trailOverlay;
+  if (catalogue.schemaVersion !== 1 || !overlay || overlay.path !== 'maps/catalogue/trail-overlay.json' ||
+    overlay.url !== metadata.url || overlay.sha256 !== metadata.sha256 || overlay.bytes !== metadata.bytes ||
+    overlay.sourcePath !== 'web/public' + metadata.url) throw new Error('Native trail overview is stale; run prepare-catalog.mjs first');
+  const bytes = await readFile(path.join(native, overlay.path));
+  if (bytes.length !== overlay.bytes || hash(bytes) !== overlay.sha256 || !(await readFile(path.join(root, overlay.sourcePath))).equals(bytes)) throw new Error('Native trail overview differs from its source');
+  const sources = new Map(), ids = new Set();
+  for (const source of catalogue.files) {
+    if (!/^web\/public\/data\/(routes|imported)\/[a-z0-9-]+\.geojson$/.test(source.sourcePath) ||
+      !/^maps\/routes\/[a-z0-9-]+\.geojson$/.test(source.path) || !/^[a-z0-9-]{1,128}$/.test(source.routeId)) throw new Error('Invalid native catalogue source path or identity');
+    const key = source.sourcePath.slice('web/public/data/'.length), url = '/data/' + key;
+    if (metadata.sourceHashes[key] !== source.sha256 || ids.has(source.routeId) || !catalogue.referenceRouteIds.includes(source.routeId)) throw new Error('Native trail identity or source integrity differs');
+    const bytes = await readFile(path.join(native, source.path));
+    if (bytes.length !== source.bytes || hash(bytes) !== source.sha256 || bytes.length > 8 * 1024 * 1024) throw new Error('Native trail geometry differs from the catalogue manifest or resource budget');
+    ids.add(source.routeId);
+    const prior = sources.get(url);
+    if (prior) prior.ids.push(source.routeId);
+    else sources.set(url, {url, sha256: source.sha256, sizeBytes: source.bytes, ids: [source.routeId]});
+  }
+  if (sources.size !== metadata.uniqueGeometries || sources.size !== Object.keys(metadata.sourceHashes).length ||
+    ids.size !== metadata.geometryRoutes || catalogue.referenceRouteIds.length !== metadata.catalogueRoutes) throw new Error('Native trail catalogue is incomplete');
+  return {catalogue, descriptor: {schemaVersion: 1, overlay: {url: overlay.url, sha256: overlay.sha256, sizeBytes: overlay.bytes},
+    sources: [...sources.values()].sort((a, b) => a.url.localeCompare(b.url, 'en')), referenceRouteIds: catalogue.referenceRouteIds}};
 }
 export async function prepareCustomMap({check = false, output} = {}) {
   const packageJson = JSON.parse(await readFile(path.join(web, 'package.json'), 'utf8'));
@@ -89,7 +125,12 @@ export async function prepareCustomMap({check = false, output} = {}) {
       'tools/android-build/custom-map-host.css', 'tools/android-build/tsconfig.json', 'web/tsconfig.json', 'web/package.json', 'web/pnpm-lock.yaml', 'web/pnpm-workspace.yaml',
       ...['latin', 'cyrillic'].flatMap(subset => [400, 600].map(weight => `tools/android-build/fonts/manrope-${subset}-${weight}-normal.woff2`)), 'tools/android-build/fonts/OFL.txt']) sourceFiles.add(path.join(root, source));
     for (const filename of requiredSources) if (!sourceFiles.has(path.join(root, filename))) throw new Error(`Missing shared runtime source provenance: ${filename}`);
-    const resourceAliases = await aliases();
+    const {catalogue, descriptor} = await nativeCatalogue();
+    sourceFiles.add(path.join(native, 'catalog-manifest.json'));
+    sourceFiles.add(path.join(web, 'lib/trail-overlay.generated.json'));
+    sourceFiles.add(path.join(root, catalogue.trailOverlay.sourcePath));
+    const resourceAliases = await aliases(catalogue);
+    await writeFile(path.join(stage, 'catalogue.json'), json(descriptor));
     const offline = resourceAliases.filter(r => r.url.startsWith('/offline-map/')).map(r => ({path: r.url.slice('/offline-map/'.length), size: r.sizeBytes, sha256: r.sha256}));
     await writeFile(path.join(stage, 'offline-manifest.json'), json({schemaVersion: 1, complete: true, fullRussiaDetailedOffline: false, files: offline}));
     await writeFile(path.join(stage, 'index.html'), await readFile(path.join(root, 'tools/android-build/custom-map.html')));

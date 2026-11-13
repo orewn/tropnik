@@ -23,14 +23,17 @@ import time
 import urllib.parse
 import urllib.request
 
-from preview_artifacts import (ARM64, RECEIPT, UNIVERSAL, fingerprint, read_json,
+from preview_artifacts import (APP_ID, ARM64, RECEIPT, UNIVERSAL, fingerprint, read_json,
                                require, source_checkout, verify_sdk)
 
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("public_preview_release", HERE / "release-preview.py")
 release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
-PREVIOUS_CERTIFICATE = "b6269435d1981a12aba09454271e2aa767b95288c3a21cbb92729aa2f5981fa8"
+spec = importlib.util.spec_from_file_location("public_preview_instrumentation", HERE / "check-instrumentation.py")
+instrumentation = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(instrumentation)
+PREVIOUS_MANIFEST = "web/public/downloads/android-manifest.json"
 PUBLIC_HOSTS = {"github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com"}
 SHARED_FIELDS = {
     "russiaCoverageProvenanceSha256": "russiaDisplayProvenanceSha256",
@@ -109,9 +112,59 @@ def validate_public_release(remote, tag, publication, body):
     release.verify_remote_assets(remote, publication)
 
 
+def previous_preview_comparison(root, build):
+    """Compare to the website's published baseline held in this exact commit.
+
+    An old manifest can omit applicationId, so derive it from that manifest's
+    original source commit rather than guessing today's package identity.
+    Matching signatures is necessary; it never proves an installed upgrade.
+    """
+    path = root / PREVIOUS_MANIFEST
+    previous = read_json(path)
+    require(re.fullmatch(r"[a-f0-9]{40}", previous.get("sourceCommit", "")) is not None and
+            re.fullmatch(r"[a-f0-9]{64}", previous.get("signingCertificateSha256", "")) is not None and
+            re.fullmatch(r"[a-f0-9]{64}", previous.get("sha256", "")) is not None and
+            re.fullmatch(r"\d+\.\d+\.\d+-preview", previous.get("version", "")) is not None and
+            type(previous.get("versionCode")) is int and previous["versionCode"] > 0 and
+            previous.get("signature") == "development / debug",
+            "Previous published preview manifest is invalid")
+    try:
+        committed = subprocess.check_output(["git", "show", "HEAD:" + PREVIOUS_MANIFEST], cwd=root)
+        source = subprocess.check_output(["git", "show", previous["sourceCommit"] + ":android/app/build.gradle.kts"], cwd=root, text=True)
+    except subprocess.CalledProcessError as error:
+        raise ValueError("Previous preview source/provenance is unavailable in the checked-out history") from error
+    require(committed == path.read_bytes(), "Previous preview baseline differs from the held source commit")
+    identities = re.findall(r'^\s*applicationId\s*=\s*"([a-zA-Z0-9_.]+)"\s*$', source, re.M)
+    versions = re.findall(r'^\s*versionName\s*=\s*"([^"\r\n]+)"\s*$', source, re.M)
+    codes = re.findall(r'^\s*versionCode\s*=\s*(\d+)\s*$', source, re.M)
+    require(len(identities) == len(versions) == len(codes) == 1 and
+            versions[0] == previous["version"] and int(codes[0]) == previous["versionCode"] and
+            previous.get("applicationId", identities[0]) == identities[0],
+            "Previous preview manifest identity differs from its own source commit")
+    require(build.get("applicationId") == APP_ID and type(build.get("versionCode")) is int and
+            re.fullmatch(r"[a-f0-9]{64}", build.get("signingCertificateSha256", "")) is not None,
+            "Current verified preview identity is missing")
+    same_identity = build["applicationId"] == identities[0]
+    same_signer = build["signingCertificateSha256"] == previous["signingCertificateSha256"]
+    newer_code = build["versionCode"] > previous["versionCode"]
+    status = ("application-id-mismatch" if not same_identity else "signing-certificate-mismatch" if not same_signer else
+              "non-increasing-version-code" if not newer_code else "identity-matches-upgrade-not-tested")
+    return {"previousPreview": {"manifestPath": PREVIOUS_MANIFEST,
+                "manifestSha256": hashlib.sha256(committed).hexdigest(), "version": previous["version"],
+                "versionCode": previous["versionCode"], "applicationId": identities[0],
+                "sourceCommit": previous["sourceCommit"], "apkSha256": previous["sha256"]},
+            "previousSigningCertificateSha256": previous["signingCertificateSha256"],
+            "signingCertificateSha256": build["signingCertificateSha256"],
+            "sameApplicationIdAsPreviousPreview": same_identity,
+            "sameCertificateAsPreviousPreview": same_signer, "versionCodeIncreases": newer_code,
+            "updateIdentityRequirementsMet": same_identity and same_signer and newer_code,
+            "updateCompatibilityAssessment": status, "updateInstallCompatibilityVerified": False}
+
+
 def universal_metadata(metadata, build, device, verification, receipt_sha):
     universal, arm64 = build["files"][UNIVERSAL], build["files"][ARM64]
     require(metadata.get("architecture") == "arm64-v8a" and
+            metadata.get("applicationId") == build.get("applicationId") == APP_ID and
             all(metadata.get(key) == arm64[key] for key in ("bytes", "sha256")) and
             metadata.get("sourceCommit") == build["sourceCommit"] and
             metadata.get("workflowRunId") == int(build["workflowRunId"]) and
@@ -122,12 +175,12 @@ def universal_metadata(metadata, build, device, verification, receipt_sha):
     require(verification.get("sha256") == universal["sha256"] and verification.get("sizeBytes") == universal["bytes"] and
             sorted(verification.get("abis", [])) == ["arm64-v8a", "armeabi-v7a", "x86_64"],
             "Universal verification differs from the exact three-ABI APK")
-    require(device.get("tests") == 8 and device.get("testedArtifact") == UNIVERSAL and
+    require(device.get("tests") == len(instrumentation.EXPECTED) and device.get("testedArtifact") == UNIVERSAL and
             device.get("testedArchitecture") == "x86_64" and
             device.get("testedApks", {}).get(UNIVERSAL) == universal and
             all(device.get(key) is True for key in ("deviceExecutionVerified", "releasePayloadDeviceVerified", "installedArtifactBytesVerified")) and
             device.get("physicalDeviceVerified") is False and device.get("arm64DeviceExecutionVerified") is False,
-            "Universal manifest requires all eight exact-artifact emulator cases")
+            "Universal manifest requires all expected exact-artifact emulator cases")
     result = copy.deepcopy(metadata)
     for destination, source in SHARED_FIELDS.items():
         require(metadata.get(destination) == verification[source], "Universal payload metadata differs: " + destination)
@@ -155,6 +208,7 @@ def verify(args):
     build = verify_sdk(directory, root, args.sdk)
     require(build["sourceCommit"] == commit and build["workflowRunId"] == os.environ["GITHUB_RUN_ID"],
             "Producer workflow/source mismatch")
+    previous = previous_preview_comparison(root, build)
     for value in (args.build_artifact_id, args.device_artifact_id):
         require(re.fullmatch(r"[1-9][0-9]*", value or ""), "Missing exact producer artifact ID")
     with tempfile.TemporaryDirectory(prefix="tropnik-public-proof-") as temporary:
@@ -205,10 +259,7 @@ def verify(args):
                                ("device-result.json", "installed-apks.json", "raw-instrumentation.log", "graphics-driver.txt")},
             "actualDeviceTests": device["tests"], "physicalDeviceVerified": False, "arm64DeviceExecutionVerified": False,
             "sdkSignaturesReverified": True, "productionSigned": False,
-            "previousSigningCertificateSha256": PREVIOUS_CERTIFICATE,
-            "signingCertificateSha256": build["signingCertificateSha256"],
-            "sameCertificateAsPreviousPreview": build["signingCertificateSha256"] == PREVIOUS_CERTIFICATE,
-            "updateInstallCompatibilityVerified": False, "pagesGateStillRequired": True,
+            **previous, "pagesGateStillRequired": True,
             "recordedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         }
 

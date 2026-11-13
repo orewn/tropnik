@@ -4,6 +4,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {PaperPlaneTilt, ChatCircleDots, ArrowClockwise, WifiSlash, Flag} from '@/components/TropnikIcons';
 import {api, ApiError, errorText, isAbort, type User, type ChatMessage, type RecruitmentMessage} from '@/lib/api';
 import {mergeMessages} from '@/lib/trip-policy';
+import {API_TRANSPORT_LIMITS} from '@/lib/api-transport';
 import {ReportDialog} from './ReportDialog';
 
 type ChatItem = (ChatMessage | RecruitmentMessage) & {visibility?: 'visible' | 'hidden'};
@@ -20,33 +21,40 @@ export function ChatPanel({kind, id, user}: {kind: 'departures' | 'recruitment-r
   const [report, setReport] = useState<string | null>(null);
   const generation = useRef(0);
   const sequence = useRef(0);
-  const readController = useRef<AbortController | null>(null);
+  const reading = useRef<{controller: AbortController; promise: Promise<void>} | null>(null);
   const sending = useRef(false);
   const attempt = useRef<{body: string; clientId: string} | null>(null);
   const endpoint = kind + '/' + encodeURIComponent(id) + '/messages';
 
-  const load = useCallback(async () => {
+  const load = useCallback(() => {
+    // Manual refresh, foregrounding and the poll all share the active read.
+    // A normal slow response must not be cancelled by the next refresh tick.
+    if (reading.current && !reading.current.controller.signal.aborted) return reading.current.promise;
     const epoch = generation.current;
     const request = ++sequence.current;
-    readController.current?.abort();
     const controller = new AbortController();
-    readController.current = controller;
+    const job = {controller, promise: Promise.resolve()};
+    reading.current = job;
+    job.promise = (async () => {
     try {
       const list = await api<ChatItem[]>(endpoint, {signal: controller.signal});
-      if (epoch !== generation.current || request !== sequence.current) return;
+      if (controller.signal.aborted || epoch !== generation.current || request !== sequence.current) return;
       setMessages(previous => mergeMessages(previous, list));
       setReadError('');
       setDenied(false);
     } catch (error) {
-      if (isAbort(error) || epoch !== generation.current || request !== sequence.current) return;
+      if (controller.signal.aborted || isAbort(error) || epoch !== generation.current || request !== sequence.current) return;
       setReadError(errorText(error));
       if (error instanceof ApiError && [401, 403, 404].includes(error.status)) {
         setMessages([]);
         setDenied(true);
       }
     } finally {
+      if (reading.current === job) reading.current = null;
       if (epoch === generation.current && request === sequence.current) setLoading(false);
     }
+    })();
+    return job.promise;
   }, [endpoint]);
 
   useEffect(() => {
@@ -64,22 +72,34 @@ export function ChatPanel({kind, id, user}: {kind: 'departures' | 'recruitment-r
     setPending(false);
     sending.current = false;
     attempt.current = null;
-    void load();
+    let active = true, polling = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const schedule = () => {
+      clearTimeout(timer);
+      if (active && navigator.onLine && !document.hidden) timer = setTimeout(poll, API_TRANSPORT_LIMITS.chatRefreshMs);
+    };
+    const poll = (initial = false) => {
+      clearTimeout(timer);
+      if (!active || polling || !initial && (!navigator.onLine || document.hidden)) return;
+      polling = true;
+      const settled = () => { polling = false; schedule(); };
+      void load().then(settled, settled);
+    };
     const state = () => {
       setOnline(navigator.onLine);
-      if (navigator.onLine && !document.hidden) void load();
+      if (navigator.onLine && !document.hidden) poll(); else clearTimeout(timer);
     };
-    const timer = setInterval(() => {
-      if (navigator.onLine && !document.hidden) void load();
-    }, 10000);
     window.addEventListener('online', state);
     window.addEventListener('offline', state);
     document.addEventListener('visibilitychange', state);
     setOnline(navigator.onLine);
+    poll(true);
     return () => {
+      active = false;
       activeGeneration.current++;
-      readController.current?.abort();
-      clearInterval(timer);
+      reading.current?.controller.abort();
+      reading.current = null;
+      clearTimeout(timer);
       window.removeEventListener('online', state);
       window.removeEventListener('offline', state);
       document.removeEventListener('visibilitychange', state);

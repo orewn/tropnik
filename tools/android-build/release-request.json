@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "requestId": "android-0-4-25-preview-fair-map-sources-20261111",
-  "version": "0.4.25-preview",
-  "versionCode": 13,
-  "notesFile": "tools/android-build/release-notes/0.4.25-preview.md"
+  "requestId": "android-0-4-31-preview-native-trails-parity-20261113",
+  "version": "0.4.31-preview",
+  "versionCode": 14,
+  "notesFile": "tools/android-build/release-notes/0.4.31-preview.md"
 }

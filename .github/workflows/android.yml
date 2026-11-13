@@ -1,4 +1,4 @@
-# Copy to .github/workflows/android.yml at the repository root.
+# Canonical Android workflow; build scripts and receipts bind this file.
 # Builds development-signed previews, tests the exact universal artifact, and
 # publishes only an explicit versioned release request after both gates pass.
 # Production signing is intentionally not configured. Actions are commit-pinned.
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       run_instrumentation:
-        description: 'Run eight device scenarios on the exact universal APK'
+        description: 'Run all required device scenarios on the exact universal APK'
         type: boolean
         required: false
         default: false
@@ -19,12 +19,14 @@ on:
         default: false
   push:
     branches: [main]
-    paths:
+    paths: &android_inputs
       - 'android/**'
       - 'tools/android-build/**'
       - 'tools/map-package/**'
-      - 'data/terrain-pilot/runtime/**'
-      - 'data/pilot-map/**'
+      - 'tools/import-data/**'
+      - 'data/**'
+      - 'web/scripts/**'
+      - 'web/patches/**'
       - 'web/public/terrain/**'
       - 'web/public/data/**'
       - 'web/public/maps/**'
@@ -34,33 +36,23 @@ on:
       - 'web/app/custom-map.css'
       - 'web/app/map-direction-marker.css'
       - 'web/app/map-detail.css'
+      - 'web/tsconfig.json'
       - 'web/package.json'
       - 'web/pnpm-lock.yaml'
       - 'web/pnpm-workspace.yaml'
       - '.github/workflows/android.yml'
+      - '.gitignore'
   pull_request:
-    paths:
-      - 'android/**'
-      - 'tools/android-build/**'
-      - 'tools/map-package/**'
-      - 'data/terrain-pilot/runtime/**'
-      - 'data/pilot-map/**'
-      - 'web/public/terrain/**'
-      - 'web/public/data/**'
-      - 'web/public/maps/**'
-      - 'web/public/offline-map/**'
-      - 'web/lib/**'
-      - 'web/public/custom-map/**'
-      - 'web/app/custom-map.css'
-      - 'web/app/map-direction-marker.css'
-      - 'web/app/map-detail.css'
-      - 'web/package.json'
-      - 'web/pnpm-lock.yaml'
-      - 'web/pnpm-workspace.yaml'
-      - '.github/workflows/android.yml'
+    paths: *android_inputs
 
 permissions:
   contents: read
+
+# Only superseded PR validation may be cancelled. Main releases keep their
+# full exact-artifact gates and are never interrupted by a later push.
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Fail the job when any command in a pipeline fails.
 defaults:
@@ -133,13 +125,25 @@ jobs:
       - name: Reproduce recovered routes against the pinned full boundary
         run: |
           python3 -m pip install -r tools/map-package/requirements-territories.txt
-          python3 tools/import-data/recover_route_coverage.py build --archive data/catalog/coverage-recovery/source-responses.tar.gz --download-sources --check
+          python3 tools/import-data/recover_route_coverage.py build --archive data/catalog/coverage-recovery/source-responses.tar.gz --source-dir "$RUNNER_TEMP/tropnik-route-sources" --download-sources --check
           python3 -m unittest discover -s tools/import-data -p 'test_route_coverage_recovery.py'
           python3 -m unittest discover -s tools/map-package -p 'test_route_catalog_inputs.py'
       - name: Build, test and verify
         run: |
           chmod +x android/gradlew
           bash tools/android-build/build.sh
+      - name: Compile and verify the minified production variant without signing
+        run: bash tools/android-build/build-release.sh --unsigned-check
+      - name: Preserve the unsigned production compilation receipt
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-production-build-check-${{ github.run_attempt }}
+          path: |
+            android/release-check/production-verification.json
+            android/release-check/production-diagnostics.json
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Save preview APKs and reports
         id: apks
         if: always()

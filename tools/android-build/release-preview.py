@@ -126,7 +126,7 @@ def prepare(root: Path, directory: Path, device_directory: Path, output: Path):
     for name in (ARM64, UNIVERSAL):
         shutil.copyfile(directory / name, output / name)
     verification = read_json(directory / "tropnik-arm64-preview.verification.json")
-    metadata = {"version": build["version"], "versionCode": build["versionCode"], "architecture": "arm64-v8a",
+    metadata = {"version": build["version"], "versionCode": build["versionCode"], "applicationId": build["applicationId"], "architecture": "arm64-v8a",
                 "releaseRequestId": request["requestId"],
                 "minSdk": 26, "targetSdk": 36, **build["files"][ARM64],
                 "signature": "development / debug", "compatibleWithPreviousPreview": False,

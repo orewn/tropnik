@@ -44,6 +44,91 @@ class ApiRouteHistoryTest {
 
     private fun routeJson(coordinates: String = "[33,63],[33.01,63.01]") = """{"id":"route-fixture","slug":"route-fixture","regionId":"karelia","title":"Fixture only","description":"Transport fixture, not a hiking route","revisionId":"revision-fixture","status":"published","difficulty":"easy","distanceKm":1,"ascentM":10,"durationMin":30,"verifiedAt":null,"geometryDetail":"full","geometry":{"type":"LineString","coordinates":[$coordinates]}}"""
 
+    @Test fun fullChatWindowsRetainEveryMaximalHtmlEscapedMessage() = runBlocking {
+        // Equivalent to Go encoding/json's default EscapeHTML for 4000 '<'
+        // runes. This is valid backend data, not an oversized synthetic string.
+        val escapedBody = "\\u003c".repeat(4000)
+        val messages = List(100) { index -> """{"id":"message-$index","userId":"fixture-user","displayName":"Fixture","body":"$escapedBody","clientId":"client-$index","createdAt":"2026-11-13T00:00:00Z"}""" }.joinToString(",")
+        val body = """{"data":[$messages],"meta":{"mode":"production"}}"""
+        assertTrue(body.toByteArray().size > ApiResponseBudget.DEFAULT_BYTES)
+        assertTrue(body.toByteArray().size < ApiResponseBudget.CHAT_WINDOW_BYTES)
+        for (kind in ConversationKind.entries) {
+            server.enqueue(MockResponse().setChunkedBody(body, 8192))
+            val page = api.messages(Conversation(kind, "chat-fixture", "Fixture"), null)
+            assertEquals(100, page.messages.size)
+            assertTrue(page.messages.all { it.body == "<".repeat(4000) })
+            assertEquals("message-99", page.messages.last().id)
+            val request = server.takeRequest(3, TimeUnit.SECONDS)!!
+            assertEquals("/api/v1/${kind.path}/chat-fixture/messages", request.path)
+            assertEquals("GET", request.method)
+            assertEquals("Bearer $token", request.getHeader("Authorization"))
+        }
+    }
+
+    @Test fun chatAllowanceIsBoundedAfterDecodeAndDoesNotEnlargeErrorsOrSendAcknowledgements() = runBlocking {
+        val conversation = Conversation(ConversationKind.DEPARTURE, "chat-fixture", "Fixture")
+        val compressed = Buffer()
+        GzipSink(compressed).buffer().use { it.writeUtf8("x".repeat(ApiResponseBudget.CHAT_WINDOW_BYTES + 1)) }
+        assertTrue(compressed.size < ApiResponseBudget.DEFAULT_BYTES)
+        server.enqueue(MockResponse().setHeader("Content-Encoding", "gzip").setBody(compressed))
+        val large = try { api.messages(conversation, null); null } catch (failure: ApiFailure) { failure }
+        assertEquals("response_too_large", large?.code)
+
+        val defaultOverflow = "x".repeat(ApiResponseBudget.DEFAULT_BYTES + 1)
+        server.enqueue(MockResponse().setResponseCode(503).setChunkedBody(defaultOverflow, 8192))
+        val error = try { api.messages(conversation, null); null } catch (failure: ApiFailure) { failure }
+        assertEquals("response_too_large", error?.code)
+
+        server.enqueue(MockResponse().setBody(defaultOverflow))
+        val acknowledgement = try { api.sendMessage(conversation, "Fixture", "client-fixture"); null } catch (failure: ApiFailure) { failure }
+        assertEquals("response_too_large", acknowledgement?.code)
+    }
+
+    @Test fun boundedRichCollectionsRetainAllHundredRowsThroughActualApiMethods() = runBlocking {
+        val text = "\\u003c".repeat(2000)
+        val review = "\\u003c".repeat(3000)
+        val base = "\"id\":\"item\",\"createdAt\":\"2026-11-13T00:00:00Z\""
+        data class Fixture(val path: String, val item: String, val expected: String, val read: suspend () -> List<String>)
+        val fixtures = listOf(
+            Fixture("/departures/fixture/reviews", """{$base,"target":"guide","rating":5,"body":"$review"}""", "<".repeat(3000)) { api.reviews("fixture").map { it.body } },
+            Fixture("/recruitment-requests", """{$base,"routeId":"fixture","creatorId":"fixture-user","creatorName":"Fixture","preferredDate":null,"body":"$text","status":"open","departureId":null,"interestedCount":1}""", "<".repeat(2000)) { api.recruitment().map { it.body } },
+            Fixture("/me/reports", """{$base,"targetType":"departure_message","targetId":"fixture","reason":"spam","body":"$text","status":"resolved","decisionReason":"$text"}""", "<".repeat(2000)) { api.reports().map { it.body } },
+            Fixture("/me/moderation-actions", """{$base,"targetType":"departure_message","action":"hide","reason":"$text","expiresAt":null,"revokedAt":null,"appealStatus":null}""", "<".repeat(2000)) { api.moderationActions().map { it.reason } },
+            Fixture("/me/appeals", """{$base,"actionId":"fixture","body":"$text","status":"open","decisionReason":"$text"}""", "<".repeat(2000)) { api.appeals().map { it.body } },
+            Fixture("/me/notifications", """{$base,"kind":"moderation","title":"Fixture","body":"$text","readAt":null}""", "<".repeat(2000)) { api.notifications().map { it.body } },
+        )
+        for (fixture in fixtures) {
+            val items = List(100) { index -> fixture.item.replace("\"id\":\"item\"", "\"id\":\"item-$index\"") }.joinToString(",")
+            val body = """{"data":[$items],"meta":{"mode":"production"}}"""
+            assertTrue(body.toByteArray().size > ApiResponseBudget.DEFAULT_BYTES)
+            assertTrue(body.toByteArray().size < ApiResponseBudget.COLLECTION_BYTES)
+            server.enqueue(MockResponse().setChunkedBody(body, 8192))
+            val rows = fixture.read()
+            assertEquals(100, rows.size)
+            assertTrue(rows.all { it == fixture.expected })
+            assertEquals("/api/v1" + fixture.path, server.takeRequest(3, TimeUnit.SECONDS)!!.path)
+        }
+    }
+
+    @Test fun collectionBudgetRejectsDecodedOverflowAndNeverExtendsAnErrorMutationOrUnlistedPath() = runBlocking {
+        val compressed = Buffer()
+        GzipSink(compressed).buffer().use { it.writeUtf8("x".repeat(ApiResponseBudget.COLLECTION_BYTES + 1)) }
+        server.enqueue(MockResponse().setHeader("Content-Encoding", "gzip").setBody(compressed))
+        val large = try { api.reviews("fixture"); null } catch (failure: ApiFailure) { failure }
+        assertEquals("response_too_large", large?.code)
+        val overflow = "x".repeat(ApiResponseBudget.DEFAULT_BYTES + 1)
+        server.enqueue(MockResponse().setResponseCode(503).setChunkedBody(overflow, 8192))
+        val error = try { api.reviews("fixture"); null } catch (failure: ApiFailure) { failure }
+        assertEquals("response_too_large", error?.code)
+        server.enqueue(MockResponse().setBody(overflow))
+        val mutation = try { api.review("fixture", "guide", 5, "Fixture"); null } catch (failure: ApiFailure) { failure }
+        assertEquals("response_too_large", mutation?.code)
+        for (path in listOf("/routes?limit=100", "/me/summary", "/me/reports/id", "/me/unknown", "/moderation/reports/id",
+            "/departures/fixture/reviews/more", "/guides/fixture", "/departures/../reviews", "/recruitment-requests/fixture")) {
+            assertEquals(path, ApiResponseBudget.DEFAULT_BYTES, ApiResponseBudget.forResponse(path, "GET", true))
+        }
+    }
+
     @Test fun fullRouteAboveOneMebibyteRetainsAllHundredThousandVertices() = runBlocking {
         val vertices = List(100_000) { "[33.123456789,63.123456789]" }.joinToString(",")
         val body = """{"data":${routeJson(vertices)},"meta":{"mode":"production"}}"""

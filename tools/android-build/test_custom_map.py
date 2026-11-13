@@ -53,6 +53,17 @@ class CustomMapIntegrityTests(unittest.TestCase):
         with self.assertRaises((AssetError, ValueError)):
             verify_custom_map(json_bytes(forged), self.read)
 
+    def test_native_trail_alias_cannot_be_removed_or_reassigned(self):
+        forged = copy.deepcopy(self.manifest)
+        index = next(index for index, item in enumerate(forged["resourceAliases"]) if item["url"].startswith("/data/routes/"))
+        forged["resourceAliases"].pop(index)
+        with self.assertRaisesRegex(AssetError, "every native catalogue line"):
+            verify_custom_map(json_bytes(forged), self.read)
+        forged = copy.deepcopy(self.manifest)
+        forged["resourceAliases"][index].update(path="maps/routes/injected.geojson", assetPath="maps/routes/injected.geojson")
+        with self.assertRaisesRegex(AssetError, "Trail source alias differs"):
+            verify_custom_map(json_bytes(forged), self.read)
+
 
 if __name__ == "__main__":
     unittest.main()

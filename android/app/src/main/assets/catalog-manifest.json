@@ -4,13 +4,13 @@
   "catalog": {
     "path": "catalog.json",
     "bytes": 2176050,
-    "sha256": "228950a06cc015eaed24db6398f5fbd692ccf3b6959315661e10ddaabb783f69"
+    "sha256": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0"
   },
   "sourceInputs": [
     {
       "path": "tools/android-build/prepare-catalog.mjs",
-      "bytes": 10080,
-      "sha256": "d460426a5da3ddb23f016af34bd9ded8b7bd155ea45ca9d6803630ad677b0ef0"
+      "bytes": 11835,
+      "sha256": "bce7bcffea834f796a8dd4e1266e33c22945b9dfc5fd1cfe9c00bc83af55b2c6"
     },
     {
       "path": "tools/android-build/catalog-regions.mjs",
@@ -24,8 +24,8 @@
     },
     {
       "path": "web/lib/content.ts",
-      "bytes": 23138,
-      "sha256": "3f8f2a789d3788a7598a170186cd37751a24791e79b8e300eeaff16172efdf79"
+      "bytes": 23218,
+      "sha256": "08d73e3ddba8f93c3f5fc516bad5cc31fd4ce27d8e522fc9d1e793734a7cd9bb"
     },
     {
       "path": "web/lib/catalog.generated.json",
@@ -86,6 +86,16 @@
       "path": "tools/android-build/fixtures/learning-route.json",
       "bytes": 1407,
       "sha256": "93244f5c69071d1a7ea6a295bf7c14fbd8fad86592b32173daf3868d3fcb6e52"
+    },
+    {
+      "path": "web/lib/trail-overlay.generated.json",
+      "bytes": 71155,
+      "sha256": "6fa24fcd6ebd290b3730f682b02dffed4a94805f0f34bd2c8c88b660689ef788"
+    },
+    {
+      "path": "web/public/data/trail-overlay-b9607512eafb423f.json",
+      "bytes": 2634057,
+      "sha256": "b9607512eafb423fd6f3f72096d273c4cfa711539f4f5ac6c24d82e80c616048"
     }
   ],
   "regionIds": [
@@ -1574,6 +1584,14 @@
   ],
   "fieldVerifiedCount": 0,
   "navigationReadyCount": 0,
+  "trailOverlay": {
+    "path": "maps/catalogue/trail-overlay.json",
+    "sourcePath": "web/public/data/trail-overlay-b9607512eafb423f.json",
+    "url": "/data/trail-overlay-b9607512eafb423f.json",
+    "bytes": 2634057,
+    "sha256": "b9607512eafb423fd6f3f72096d273c4cfa711539f4f5ac6c24d82e80c616048",
+    "sourceCount": 621
+  },
   "files": [
     {
       "routeId": "kavkaz-16a",

@@ -107,6 +107,23 @@ for(const trail of trails){
     osmId:trail.osmId??null});
 }
 routes.push({...learning,regionIds:[learning.regionId],navigationReady:false});
+// One lossless overview for the shared loader; detailed source files above are
+// reused through aliases rather than copied into a second catalogue package.
+const overlayMetadata=JSON.parse((await input(join(root,'web/lib/trail-overlay.generated.json'))).toString('utf8'));
+if(overlayMetadata.version!==1||!/^\/data\/trail-overlay-[a-f0-9]{16}\.json$/.test(overlayMetadata.url)||
+  overlayMetadata.url!==`/data/trail-overlay-${overlayMetadata.sha256.slice(0,16)}.json`)throw new Error('Invalid trail overlay source');
+const overlaySourcePath='web/public'+overlayMetadata.url;
+const overlayBytes=await input(join(root,overlaySourcePath));
+if(overlayBytes.length!==overlayMetadata.bytes||sha(overlayBytes)!==overlayMetadata.sha256||overlayBytes.length>8*1024*1024)throw new Error('Trail overlay integrity or resource budget differs');
+const sourceKeys=new Set();
+for(const geometry of geometries){
+  const key=geometry.sourcePath.slice('web/public/data/'.length);sourceKeys.add(key);
+  if(overlayMetadata.sourceHashes[key]!==geometry.sha256)throw new Error('Native trail source differs from the shared overlay: '+key);
+}
+if(sourceKeys.size!==Object.keys(overlayMetadata.sourceHashes).length||overlayMetadata.catalogueRoutes!==trails.length||
+  overlayMetadata.geometryRoutes!==geometries.length||overlayMetadata.uniqueGeometries!==sourceKeys.size)throw new Error('Native/shared trail catalogue parity differs');
+const trailOverlay={path:'maps/catalogue/trail-overlay.json',sourcePath:overlaySourcePath,url:overlayMetadata.url,
+  bytes:overlayBytes.length,sha256:sha(overlayBytes),sourceCount:sourceKeys.size};
 const identity=sha(JSON.stringify({inputs:inputRecords,geometry:geometries.map(({data,...record})=>record)}));
 const catalog={schemaVersion:1,version:`web-catalog-${identity.slice(0,16)}`,
   regions:regions.map(region=>({id:region.id,name:region.name,subtitle:region.caption,description:region.description,
@@ -116,18 +133,19 @@ const manifest={schemaVersion:1,id:'tropnik-reference-catalog-v1',catalog:{path:
   sourceInputs:inputRecords,regionIds:[...regionIds],referenceRouteIds:trails.map(t=>t.id),learningRouteIds:[learning.id],
   geometryRouteIds:geometries.map(record=>record.routeId),referenceOnlyRouteIds,
   excludedRouteIds:[...excluded],fieldVerifiedCount:0,navigationReadyCount:0,
-  files:geometries.map(({data,...record})=>record)};
+  trailOverlay,files:geometries.map(({data,...record})=>record)};
 const expectedNames=new Set(geometries.map(record=>record.path.split('/').at(-1)));
 const routeDirectory=join(assets,'maps/routes');
 if(await access(routeDirectory).then(()=>true,()=>false))for(const entry of await readdir(routeDirectory)){
   if(entry.endsWith('.geojson')&&!expectedNames.has(entry))throw new Error(`Unexpected unmanaged geometry in native assets: ${entry}`);
 }
 for(const geometry of geometries)await output(join(assets,geometry.path),geometry.data);
+await output(join(assets,trailOverlay.path),overlayBytes);
 await output(join(assets,'catalog.json'),catalogBytes);
 await output(join(assets,'catalog-manifest.json'),json(manifest));
 const byRegion=Object.fromEntries([...regionIds].map(id=>[id,trails.filter(t=>routeMemberships.get(t.id).includes(id)).length]));
 console.log(JSON.stringify({checked:check,regions:regions.length,referenceRoutes:trails.length,learningRoutes:1,
   geometryFiles:geometries.length,geometryBytes:geometries.reduce((sum,g)=>sum+g.bytes,0),
-  referenceOnlyRoutes:referenceOnlyRouteIds.length,
+  referenceOnlyRoutes:referenceOnlyRouteIds.length,trailOverlayBytes:overlayBytes.length,trailOverlaySources:sourceKeys.size,
   catalogBytes:catalogBytes.length,catalogSha256:manifest.catalog.sha256,byRegion,
   excludedRouteIds:manifest.excludedRouteIds,fieldVerified:0,navigationReady:0},null,2));

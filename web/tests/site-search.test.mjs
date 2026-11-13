@@ -20,7 +20,7 @@ function load(path) {
     compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, esModuleInterop: true},
   }).outputText;
   new Function('require', 'module', 'exports', code)(id => load(
-    (id.startsWith('@/') ? resolve(web, id.slice(2)) : resolve(dirname(path), id)) + (id.endsWith('.json') ? '' : '.ts'),
+    (id.startsWith('@/') ? resolve(web, id.slice(2)) : resolve(dirname(path), id)) + (id.endsWith('.json') || id.endsWith('.ts') ? '' : '.ts'),
   ), loadedModule, loadedModule.exports);
   cache.set(path, loadedModule.exports);
   return loadedModule.exports;

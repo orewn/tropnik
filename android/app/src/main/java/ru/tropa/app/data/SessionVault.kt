@@ -1,6 +1,7 @@
 package ru.tropa.app.data
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import org.json.JSONObject
@@ -13,33 +14,92 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 /** Only encrypted bearer/session bytes are persisted. Keys never enter the APK. */
-class SessionVault(context: Context) {
-    private val preferences = context.getSharedPreferences("tropnik-session", Context.MODE_PRIVATE)
+class SessionVault internal constructor(private val preferences: SharedPreferences) {
+    constructor(context: Context) : this(context.getSharedPreferences("tropnik-session", Context.MODE_PRIVATE))
     private val alias = "tropnik.local.v1"
-    fun serverUrl(): String = preferences.getString("server", null)
-        ?: runCatching { ApiAddress.normalize(BuildConfig.API_BASE_URL) }.getOrDefault("")
+    private var confirmedServer = runCatching {
+        ApiAddress.normalize(preferences.getString("server", null) ?: BuildConfig.API_BASE_URL)
+    }.getOrDefault("")
+    @Volatile var persistenceError: String? = null
+        private set
 
-    @Synchronized fun setServer(value: String) {
+    // commit(false) can already have changed SharedPreferences' in-memory map.
+    // Until a checked retry succeeds, neither that host nor any bearer is usable.
+    @Synchronized fun serverUrl(): String = if (persistenceError == null) confirmedServer else ""
+
+    private fun persist(editor: SharedPreferences.Editor, message: String) {
+        val saved = try { editor.commit() } catch (_: Exception) { false }
+        if (!saved) {
+            persistenceError = message
+            throw SessionPersistenceException(message)
+        }
+        persistenceError = null
+    }
+
+    private fun cleanupEditor(editor: SharedPreferences.Editor, cleanup: PrivateAccountScope?): SharedPreferences.Editor {
+        if (cleanup != null) editor.putString("pending-private-cleanup", JSONObject()
+            .put("origin", cleanup.origin).put("ownerId", cleanup.ownerId).toString())
+        return editor
+    }
+
+    @Synchronized fun pendingCleanup(): PrivateAccountScope? {
+        val encoded = preferences.getString("pending-private-cleanup", null) ?: return null
+        return try {
+            val json = JSONObject(encoded)
+            val origin = json.getString("origin")
+            val owner = json.getString("ownerId")
+            require(origin.isNotBlank() && ApiAddress.normalize(origin) == origin && owner.isNotBlank() && owner.length <= 128)
+            PrivateAccountScope(origin, owner)
+        } catch (_: Exception) {
+            val message = "Не удалось прочитать состояние очистки личных данных. Доступ к сервису приостановлен."
+            persistenceError = message
+            throw SessionPersistenceException(message)
+        }
+    }
+
+    @Synchronized fun finishCleanup(cleanup: PrivateAccountScope) {
+        check(pendingCleanup() == cleanup) { "Состояние очистки личных данных изменилось" }
+        persist(preferences.edit().remove("pending-private-cleanup"),
+            "Не удалось сохранить завершение очистки. Доступ к сервису приостановлен. Повторите завершение действия.")
+    }
+
+    @Synchronized fun setServer(value: String, cleanup: PrivateAccountScope? = null) {
         val normalized = ApiAddress.normalize(value)
-        preferences.edit().putString("server", normalized).remove("session").commit()
+        persist(cleanupEditor(preferences.edit().putString("server", normalized).remove("session"), cleanup),
+            "Не удалось сохранить подключение. Доступ к сервису приостановлен. Повторите сохранение.")
+        confirmedServer = normalized
     }
     @Synchronized fun session(): AccountSession? {
+        if (persistenceError != null || preferences.getString("pending-private-cleanup", null) != null) return null
         val encoded = preferences.getString("session", null) ?: return null
         return runCatching {
             val j = JSONObject(open(encoded, "account-session"))
             require(j.getString("origin") == serverUrl())
             AccountSession(j.getString("origin"), j.getString("token"), j.getString("expiresAt"), Account.parse(j.getJSONObject("user")))
-        }.getOrElse { clearSession(); null }
+        }.getOrElse {
+            try { clearSession() } catch (_: SessionPersistenceException) { /* Exposed by persistenceError. */ }
+            null
+        }
     }
     @Synchronized fun saveSession(session: AccountSession) {
+        persistenceError?.let { throw SessionPersistenceException(it) }
+        if (pendingCleanup() != null) throw SessionPersistenceException("Сначала завершите очистку личных данных в профиле.")
         require(session.origin == serverUrl())
         require(session.token.matches(Regex("[A-Za-z0-9_-]{32,128}")))
         val j = JSONObject().put("origin", session.origin).put("token", session.token).put("expiresAt", session.expiresAt)
             .put("user", JSONObject(session.account.rawJson))
-        check(preferences.edit().putString("session", seal(j.toString(), "account-session")).commit()) { "Не удалось сохранить защищённый сеанс" }
+        persist(preferences.edit().putString("session", seal(j.toString(), "account-session")),
+            "Не удалось сохранить защищённый вход. Доступ к сервису приостановлен. Повторите завершение входа.")
     }
-    @Synchronized fun clearSession() { preferences.edit().remove("session").commit() }
-    fun bearer() = session()?.takeIf { it.locallyUnexpired }?.token
+    @Synchronized fun clearSession(cleanup: PrivateAccountScope? = null) {
+        persist(cleanupEditor(preferences.edit().putString("server", confirmedServer).remove("session"), cleanup),
+            "Не удалось сохранить выход. Доступ к сервису приостановлен. Повторите завершение выхода.")
+    }
+    @Synchronized fun bearer(origin: String) = session()?.takeIf { it.locallyUnexpired && it.origin == origin }?.token
+
+    @Synchronized fun matches(expected: AccountSession): Boolean = session()?.let {
+        it.origin == expected.origin && it.account.id == expected.account.id && it.token == expected.token
+    } == true
 
     fun seal(plainText: String, context: String): String {
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
@@ -66,3 +126,8 @@ class SessionVault(context: Context) {
         }.generateKey()
     }
 }
+
+class SessionPersistenceException(message: String) : IllegalStateException(message)
+
+/** Durable deletion intent contains an account scope, never a bearer. */
+data class PrivateAccountScope(val origin: String, val ownerId: String)

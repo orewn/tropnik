@@ -21,7 +21,7 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
 
     def test_full_route_io_and_parsing_leave_main_before_native_bridge_update(self) -> None:
         effect = between(self.source,
-            "LaunchedEffect(mapView, mapReady, countryBounds, selected?.id, route?.id, route?.apiRevisionId, route?.geometryAsset, route?.inlineGeometry) {",
+            "LaunchedEffect(mapView, mapReady, countryBounds, selected?.id,",
             "LaunchedEffect(mapView, mapReady, position) {")
         read = effect.index("withContext(Dispatchers.IO)")
         parse = effect.index("withContext(Dispatchers.Default)")
@@ -42,10 +42,10 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
 
     def test_source_changes_refresh_route_without_coupling_to_marker_filter(self) -> None:
         key = self.source.split("LaunchedEffect(mapView, mapReady, countryBounds, selected?.id", 1)[1].split(" {", 1)[0]
-        for field in ("route?.id", "route?.apiRevisionId", "route?.geometryAsset", "route?.inlineGeometry"):
+        for field in ("route?.id", "route?.apiRevisionId", "route?.geometryAsset", "route?.inlineGeometry", "routeAttempt"):
             self.assertIn(field, key)
-        self.assertNotIn("regions", key)
-        self.assertNotIn("hashCode", key)
+        for field in ("regions", "hashCode", "visibleTrailIds", "mode", "paths"):
+            self.assertNotIn(field, key)
         effect = between(self.source, "LaunchedEffect(mapView, regions, selected?.id) {",
                          "LaunchedEffect(mapView, mapReady, countryBounds")
         self.assertIn("mapView.setMarkers", effect)
@@ -57,7 +57,9 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
         self.assertIn("check(Looper.myLooper() == Looper.getMainLooper())", command)
         self.assertIn("Handler(Looper.getMainLooper())", self.host)
         registry_load = between(self.host, "resourceLoader.execute {", "private fun fail(")
-        self.assertIn("CustomMapResources(context)", registry_load)
+        self.assertIn("CustomMapResources(context,", registry_load)
+        for callback in ("networkFailure", "localFailure"):
+            self.assertIn(callback + " = { handler.post { if (!disposed)", registry_load)
         self.assertIn("else handler.post", registry_load)
         self.assertIn("brokerReference.getAndSet(null)?.close()", self.host)
         self.assertIn("resourceLoader.shutdownNow()", self.host)
@@ -67,7 +69,7 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
         self.assertNotIn(".cancel()", broker_close)
         self.assertIn("private val network = MapNetworkLifetime(", self.host)
         self.assertIn("}, handler)", self.host)
-        route = between(self.host, "fun setRoute(id:", "fun setOnline(")
+        route = between(self.host, "fun setRoute(id:", "fun setCatalogue(")
         self.assertIn("assetBroker?.setRoute", route)
         self.assertIn('command("route",', route)
         self.assertNotIn('.put("geometry"', route)
@@ -75,8 +77,12 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
         self.assertNotIn("addJavascriptInterface", self.host)
 
     def test_controls_and_position_use_typed_commands_with_owned_lifecycle(self) -> None:
-        for action in ("zoom", "north", "pitch", "eco", "layers", "position"):
+        for action in ("zoom", "north", "mode", "retry", "eco", "layers", "position"):
             self.assertIn(f'mapView.command("{action}"', self.source)
+        self.assertNotIn('mapView.command("pitch"', self.source)
+        self.assertIn('mode == "detail"', self.source)
+        self.assertIn('mode == "satellite"', self.source)
+        self.assertIn("mapView.setCatalogue(visibleTrailIds)", self.source)
         position = between(self.source, "LaunchedEffect(mapView, mapReady, position) {", "Box(modifier.background")
         self.assertIn("lastPositionTime != point.measuredAt", position)
         self.assertIn("mapView.release()", self.source)
