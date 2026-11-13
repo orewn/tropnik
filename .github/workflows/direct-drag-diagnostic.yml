@@ -1,0 +1,120 @@
+name: Exact source instrumented direct drag diagnosis
+
+on:
+  push:
+    branches: [verify/direct-drag-20261113]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: direct-drag-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.repository == 'orewn/tropnik'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out the exact diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Require the exact failing production parent and unchanged runtime
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
+          const source=git('rev-parse','HEAD'),parent='3cb219fdd8380fcf2580bfe37aa7d1f47523ba08';
+          assert.equal(source,process.env.GITHUB_SHA);
+          assert.equal(process.env.GITHUB_REF,'refs/heads/verify/direct-drag-20261113');
+          assert.deepEqual(git('rev-list','--parents','-n','1','HEAD').split(/\s+/),[source,parent]);
+          assert.deepEqual(git('diff','--name-only',parent,'HEAD').split('\n').sort(),[
+            '.github/workflows/direct-drag-diagnostic.yml',
+            'tools/pages-preview/browser-smoothness.mjs',
+            'tools/pages-preview/tests/direct-drag-trace.test.mjs'
+          ].sort());
+          execFileSync('git',['diff','--exit-code',parent,'HEAD','--','web','android','contracts','data','tools/android-build/release-request.json'],{stdio:'inherit'});
+          NODE
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Restore the existing public Android preview
+        run: node tools/pages-preview/fetch-apk.mjs
+      - name: Verify bounded diagnostic recording and unchanged measurement contracts
+        run: node --test tools/pages-preview/tests/direct-drag-trace.test.mjs tools/pages-preview/tests/browser-smoothness.test.mjs
+      - name: Build the exact production app with diagnostic tooling
+        run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+      - name: Trace the original UI sequence once without changing native actions or budgets
+        timeout-minutes: 5
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_BROWSER_DIAGNOSTIC: ui-smoothness
+          TROPNIK_BROWSER_TRACE: '1'
+          TROPNIK_DIRECT_DRAG_TRACE: '1'
+        run: node tools/pages-preview/browser-smoke.mjs
+      - name: Check pan capture and original budgets on all 16 diagnostic windows
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          TROPNIK_DIRECT_DRAG_TRACE: '1'
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFileSync} from 'node:fs';
+          import {assertSmoothnessAudit} from './tools/pages-preview/browser-smoothness.mjs';
+          const report = JSON.parse(readFileSync('web/pages-preview/dist/browser-ui-smoothness-diagnostic.json', 'utf8'));
+          assert.equal(report.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(report.status, 'completed');
+          assert.equal(report.diagnostic, 'ui-smoothness');
+          assert.equal(report.diagnosticOnly, true);
+          assert.equal(report.verified, false);
+          assert.equal(report.releaseEligible, false);
+          const profiles = [{name:'android-portrait',mobile:true,engine:'tropnik-canvas'}, {name:'desktop-webgl',mobile:false,engine:'tropnik-canvas'}];
+          assert.deepEqual(report.profiles.map(item => item.profile), profiles.map(item => item.name));
+          const desktop=report.profiles[1];
+          assert.equal(desktop.directDragTrace?.length,1);
+          const context=desktop.directDragTrace[0];
+          assert.equal(context.productionSourceCommit,'3cb219fdd8380fcf2580bfe37aa7d1f47523ba08');
+          assert.equal(context.scenario,'map-pan');assert.deepEqual(context.errors,[]);
+          assert.equal(context.inspection.disconnected,true);assert.equal(context.inspection.overflow,false);
+          assert.deepEqual(context.inspection.errors,[]);
+          assert.deepEqual(context.inspection.boundarySnapshots.map(value=>value.phase),['before','after']);
+          assert.equal(desktop.traces.length,1);assert.equal(desktop.traces[0].scenario,'map-pan');
+          assert.equal(desktop.traces[0].status,'complete');assert.equal(desktop.traces[0].eof,true);
+          assert.equal(desktop.traces[0].dataLossOccurred,false);assert.deepEqual(desktop.traces[0].errors,[]);
+          report.profiles.forEach((audit, index) => {
+            assert.equal(audit.cpuSlowdownRate, 1);
+            assert.equal(audit.instrumented, index === 1);
+            // Diagnostic structure accepts tracing. The unchanged budget
+            // results below still fail; this can never qualify a release.
+            assertSmoothnessAudit(audit, profiles[index], {release:false});
+            assert.deepEqual(audit.performanceIssues, []);
+          });
+          assert.deepEqual(report.performanceIssues, []);
+          assert.equal(report.performancePassed, true);
+          NODE
+      - name: Preserve evidence even if the original performance assertion fails
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: tropnik-direct-drag-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            web/pages-preview/dist/build-info.json
+            web/pages-preview/dist/verification.json
+            web/pages-preview/dist/http-verification.json
+            web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
+            web/pages-preview/dist/browser-failure.json
+            web/pages-preview/design-qa/desktop-webgl-ui-smoothness-map-pan.trace*.json
+          if-no-files-found: error
+          retention-days: 7
