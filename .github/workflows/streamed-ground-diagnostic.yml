@@ -23,7 +23,7 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 2
           persist-credentials: false
-      - name: Require the single guard parent and unchanged release request
+      - name: Require the single reviewed diagnostic parent and unchanged release request
         run: |
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
@@ -31,7 +31,7 @@ jobs:
           import {createHash} from 'node:crypto';
           import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
           const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
-          const source=git('rev-parse','HEAD'),parent='90dae23c757c2b630e7f94b6532ef2cda5110562';
+          const source=git('rev-parse','HEAD'),parent='7056633bddfd2325c4718f385fc55f38ad966459';
           assert.equal(source,process.env.GITHUB_SHA);
           assert.equal(process.env.GITHUB_REF,'refs/heads/verify/streamed-ground-20261113');
           assert.deepEqual(git('rev-list','--parents','-n','1','HEAD').split(/\s+/),[source,parent]);
@@ -119,9 +119,36 @@ jobs:
             assert.equal(item.verified,true);assert.equal(item.nativeDpr,item.dpr);
             assert.deepEqual(item.frames.map(frame=>frame.phase),phases[item.name]);
             assert.equal(item.incrementalFrames,item.name==='trace-grid'?24:0);
-            for(const frame of item.frames)if(item.name==='trace-grid'&&/^pair-\d+$/.test(frame.phase)&&Number(frame.phase.slice(5))>=2){
-              assert.equal(frame.mustIncrement,true);assert.equal(frame.operations.optimized.updateHits,1);
-              assert.equal(frame.operations.optimized.main.snapshotCopies,1);assert.equal(frame.loadingSnapshotIdentity,true);
+            for(const frame of item.frames){
+              const {baseline,optimized}=frame.operations;
+              for(const operations of [baseline,optimized]){
+                assert.ok(Array.isArray(operations.contextStates));
+                assert.equal(operations.contextStates.filter(state=>state.surface==='main').length,1);
+                for(const state of operations.contextStates){
+                  assert.ok(['main','retained'].includes(state.surface));
+                  assert.equal(state.saveDepth,0);assert.equal(state.clipDepth,0);assert.equal(state.restoreUnderflows,0);
+                }
+              }
+              if(item.name!=='trace-grid'||!/^pair-\d+$/.test(frame.phase)||Number(frame.phase.slice(5))<2)continue;
+              assert.equal(frame.mustIncrement,true);assert.equal(optimized.updateHits,1);
+              assert.equal(optimized.restoreHits,1);assert.equal(optimized.main.snapshotCopies,1);
+              assert.equal(optimized.retained.visibleCopies,1);assert.equal(frame.loadingSnapshotIdentity,true);
+              assert.equal(optimized.groundCalls.length,1);
+              const call=optimized.groundCalls[0];assert.equal(call.surface,'main');assert.equal(call.clipDepth,0);
+              const {rect,geometry}=call.dirty;
+              assert.ok(Object.values(rect).every(Number.isInteger));
+              assert.ok(rect.left>=0&&rect.top>=0&&rect.right<=frame.width&&rect.bottom<=frame.height&&rect.right>rect.left&&rect.bottom>rect.top);
+              assert.ok((rect.right-rect.left)*(rect.bottom-rect.top)<frame.width*frame.height);
+              assert.equal(geometry.width,frame.width);assert.equal(geometry.height,frame.height);assert.equal(geometry.ratio,item.dpr);
+              const identity=[1,0,0,1,0,0],args=[rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top];
+              const clip={rects:[{args,transform:identity}],argumentsCount:0,transform:identity};
+              assert.deepEqual(optimized.clipCalls,[{surface:'retained',...clip}]);
+              assert.deepEqual(optimized.transfers,[
+                {surface:'retained',source:'main',args:[...args,...args],transform:identity,alpha:1,compositeOperation:'copy',clips:[clip]},
+                {surface:'main',source:'retained',args:[0,0],transform:identity,alpha:1,compositeOperation:'copy',clips:[]}
+              ]);
+              const tileCalls=counts=>['overview','detail','relief','imagery'].reduce((sum,key)=>sum+counts[key],0);
+              assert.ok(tileCalls(optimized.main)+tileCalls(optimized.retained)<tileCalls(baseline.main));
             }
           }
           for(const [cases,expectedFrames] of [[report.cases,46],[report.groundCache.cases,126],[streaming.cases,198]]){

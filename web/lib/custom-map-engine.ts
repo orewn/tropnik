@@ -809,7 +809,10 @@ export class CustomMapEngine {
   private restoreGround(signature:readonly unknown[]):boolean{
     const retained=this.groundSnapshot;
     if(!retained||!this.sameGroundSignature(signature)||retained.loading!==this.loadingGround||this.loadingGround&&!this.validLoadingGround(this.loadingGround))return false;
-    const ctx=this.context;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';ctx.drawImage(retained.surface,0,0);ctx.restore();return true;
+    const ctx=this.context;ctx.save();
+    try{ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';ctx.drawImage(retained.surface,0,0);}
+    finally{ctx.restore();}
+    return true;
   }
   private updateLoadingGround(signature:readonly unknown[],detail:TileBatch|undefined,satellite:boolean,covered:boolean):boolean{
     const retained=this.groundSnapshot,loading=this.loadingGround,geometry=this.groundPixelGeometry();
@@ -835,15 +838,19 @@ export class CustomMapEngine {
     }
     try{
       if(right>left&&bottom>top){
+        // Rasterize paths in their original full visible context. Clipping a
+        // native stroke changes its subpixel edges, even at integer clip bounds.
+        // Only disjoint source tiles are omitted; pixels outside the dirty
+        // rectangle are temporary and restored before this synchronous draw ends.
+        this.drawGround(detail,satellite,covered,this.context,{rect:{left,top,right,bottom},geometry});
         const ctx=retained.context;ctx.save();
         try{
-          ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
-          ctx.lineCap=this.context.lineCap;ctx.lineJoin=this.context.lineJoin;ctx.miterLimit=this.context.miterLimit;
-          // Integer backing-pixel edges preserve every pixel outside the patch.
-          // Inside it replay the original ground, including its underlay,
-          // relief, boundaries and translucent selection in the same order.
+          ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;
+          // Clip only the exact 1:1 pixel transfer, never the ground paths.
+          // The destination clip also contains the destructive extent of copy.
           ctx.beginPath();ctx.rect(left,top,right-left,bottom-top);ctx.clip();
-          this.drawGround(detail,satellite,covered,ctx,{rect:{left,top,right,bottom},geometry});
+          ctx.globalCompositeOperation='copy';
+          ctx.drawImage(this.canvas,left,top,right-left,bottom-top,left,top,right-left,bottom-top);
         }finally{ctx.restore();}
       }
       retained.signature=signature;retained.loading=loading;

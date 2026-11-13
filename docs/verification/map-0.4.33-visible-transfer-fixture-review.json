@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_AT_SOURCE_NATIVE_PENDING",
+  "parent": "7056633bddfd2325c4718f385fc55f38ad966459",
+  "files": {
+    "tools/pages-preview/tests/browser-map-underlay.browser.mjs": {
+      "bytes": 63141,
+      "sha256": "ffeda1b9da84943000cb038a31fcd1d11cfa146b286b7b214f6da9593b833fbc"
+    },
+    ".github/workflows/pages.yml": {
+      "bytes": 43549,
+      "sha256": "3537b48e219e8681ce45144584a03fdf4968a4cd1c549001a59aa476f86e838d"
+    },
+    ".github/workflows/streamed-ground-diagnostic.yml": {
+      "bytes": 12338,
+      "sha256": "4e82eab8dfc77b004c808abf3db11c0e4e211aea9132ad8756e5815af30fcb21"
+    },
+    "web/lib/custom-map-engine.ts": {
+      "bytes": 86221,
+      "sha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4"
+    }
+  },
+  "unchangedFixturePrefix": {
+    "bytes": 24731,
+    "sha256": "ea3bb6999a5732b22189ab90dfcc26c107879a505de9b01aa142ad22573ea5c7",
+    "scope": "All matrices/phase definitions, original172-frame production pixel function, production bundling and imports before streaming function",
+    "byteIdentical": true
+  },
+  "unchangedFixtureSuffix": {
+    "bytes": 13547,
+    "sha256": "998e9fad04c8b2743ff092c3db2302ac5d83f1c4bd45cf63b08a9911d9c55f6d",
+    "scope": "Preview handling, real native test runner, startup/cleanup, source/PNG receipt writing, all370 frame requirements and original native timeout",
+    "byteIdentical": true
+  },
+  "unchangedOracleAndReference": {
+    "zeroDifferentPixels": true,
+    "zeroMaximumChannelDelta": true,
+    "fullRgbaComparison": true,
+    "sameThreeBaselineOverrides": true,
+    "sameAdversarialPriorPixelsAndOmittedSecondPairControl": true
+  },
+  "newObservationContract": {
+    "nativeMethodsForwardedOnceWithOriginalArguments": [
+      "save",
+      "restore",
+      "beginPath",
+      "rect",
+      "clip",
+      "drawImage",
+      "fill",
+      "fillRect"
+    ],
+    "realContextPropertiesObserved": [
+      "transform",
+      "globalAlpha",
+      "globalCompositeOperation"
+    ],
+    "mainAndRetainedSourcesIdentifiedByActualObjectIdentity": true,
+    "allStreamingFramesBalancedSaveClipScopesAndNoRestoreUnderflow": true,
+    "eachRequiredIncrement": {
+      "mainDirtyGroundCall": 1,
+      "mainGroundClipDepth": 0,
+      "partialCapture": {
+        "surface": "retained",
+        "source": "main",
+        "argumentCountIncludingImage": 9,
+        "sourceAndDestinationRect": "Same bounded nonempty integer dirty rect",
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "alpha": 1,
+        "compositeOperation": "copy",
+        "clip": "Exactly one matching integer destination rect"
+      },
+      "fullRestore": {
+        "surface": "main",
+        "source": "retained",
+        "argumentCountIncludingImage": 3,
+        "args": [
+          0,
+          0
+        ],
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "alpha": 1,
+        "compositeOperation": "copy",
+        "clip": "none"
+      },
+      "nativeTileCallsLessThanDirectReference": true
+    }
+  },
+  "diagnosticWorkflow": {
+    "parentChangedToExact705": true,
+    "sameBranchAndReadOnlyPermissions": true,
+    "sameSingleNativeCommandAndDeadline": true,
+    "sameFrozenDependencySetupAndDeterministicRuntimeCheck": true,
+    "sameAlwaysArtifactAndNoPublish": true,
+    "postBindMirrorsStrictTransfersScopesClipGeometryDprAndReduction": true,
+    "preservesSourceAll370ZeroAndPngHashBinding": true,
+    "localStaticChecks": {
+      "yaml": "PASS",
+      "bashBlocks": 5,
+      "nodeSyntaxBlocks": 3,
+      "diffCheck": "PASS",
+      "browserTestsExecuted": 0
+    }
+  },
+  "limitation": "These are source and static-syntax checks. Corrected-source native pixels, counters and subsequent full release performance remain unqualified until actual artifacts."
+}

@@ -54,7 +54,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   rect(...args){this.commands.push(['rect',...args]);}closePath(){this.commands.push(['closePath']);}addPath(path){this.commands.push(['addPath',path]);}
  }
  function createContext(surface){
- const record=call=>calls.push({...call,surface,matrix:[...context.matrix],composite:context.globalCompositeOperation,alpha:context.globalAlpha});
+ const record=call=>calls.push({...call,surface,matrix:[...context.matrix],composite:context.globalCompositeOperation,alpha:context.globalAlpha,lineCap:context.lineCap,lineJoin:context.lineJoin,miterLimit:context.miterLimit});
  const context={font:'10px sans-serif',fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,lineCap:'butt',lineJoin:'miter',miterLimit:10,globalAlpha:1,globalCompositeOperation:'source-over',stack:[],matrix:[1,0,0,1,0,0],
   save(){this.stack.push({...Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','lineCap','lineJoin','miterLimit','globalAlpha','globalCompositeOperation','textAlign','textBaseline'].map(key=>[key,this[key]])),matrix:[...this.matrix]});record({op:'save'});},
   restore(){Object.assign(this,this.stack.pop());record({op:'restore'});},
@@ -1512,7 +1512,11 @@ test('opaque coverage is re-evaluated against the live camera and backing extent
 
 const restoredGround=env=>env.lastDraw().filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='drawImage'&&String(call.key).startsWith('retained-ground:'));
 const groundCopies=env=>env.calls.filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage'&&call.args.length===2).length;
-const groundPatches=env=>env.lastDraw().filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage'&&call.args.length===4);
+const groundPartialCaptures=env=>env.lastDraw().filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage'&&call.args.length===8);
+function groundPatches(env){
+ const draw=env.lastDraw(),capture=groundPartialCaptures(env)[0];
+ return capture?draw.slice(0,draw.indexOf(capture)).filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='drawImage'&&call.args.length===4):[];
+}
 function warmGround(env){for(let i=0;i<3;i++){env.engine.setLayers({});env.flush();}assert.equal(restoredGround(env).length,1,'A stationary map must actually restore its retained ground');}
 
 test('progressive loading paints each ready pair without copying every transient full canvas',async t=>{
@@ -1741,17 +1745,25 @@ async function streamingFixture(t,{groundCache=true,pixelRatio=1}={}){
  assert.deepEqual([...new Set(vectors.map(job=>job.request.y))].sort((a,b)=>a-b),[19,20,21,22,23]);
  return{env,vectors,reliefs,pair:vector=>reliefs.find(job=>sameTileCell(job,vector))};
 }
-function dirtyClip(env){
- const calls=env.lastDraw().filter(call=>String(call.surface).startsWith('retained-ground:')),clip=calls.findIndex(call=>call.op==='clip');
- assert.ok(clip>=0,'A streaming patch must restrict writes to a dirty rectangle');
+function dirtyCapture(env){
+ const draw=env.lastDraw(),captures=groundPartialCaptures(env);assert.equal(captures.length,1,'A streaming patch transfers exactly one bounded pixel rectangle');
+ const capture=captures[0],calls=draw.filter(call=>String(call.surface).startsWith('retained-ground:')),clip=calls.findIndex(call=>call.op==='clip');
+ assert.ok(clip>=0&&clip<calls.indexOf(capture),'The destination clip must contain the destructive extent of copy');
  const path=calls[clip].args[0],pathRect=path?.commands?.find(command=>command[0]==='rect');
  const callRect=calls.slice(0,clip).findLast(call=>call.op==='rect');
- const rect=pathRect?.slice(1)??callRect?.args;assert.ok(rect,'The clip must have an explicit rectangle');
+ const rect=pathRect?.slice(1)??callRect?.args;assert.ok(rect,'The pixel transfer must have an explicit destination rectangle');
  assert.deepEqual(calls[clip].matrix,[1,0,0,1,0,0],'Clip edges belong to physical backing pixels');
  assert.equal(rect.length,4);assert.ok(rect.every(Number.isInteger),'Fractional clipping can change antialiased pixels');
  const [left,top,width,height]=rect;assert.ok(left>=0&&top>=0&&width>0&&height>0);
  assert.ok(left+width<=env.engine.canvas.width&&top+height<=env.engine.canvas.height);
- return{left,top,right:left+width,bottom:top+height,calls};
+ assert.equal(capture.bitmap,env.engine.canvas,'Capture the actual original main-context raster');
+ assert.deepEqual(capture.args,[left,top,width,height,left,top,width,height],'Source and destination are the identical integer rectangle, without resampling');
+ assert.deepEqual(capture.matrix,[1,0,0,1,0,0]);assert.equal(capture.composite,'copy');assert.equal(capture.alpha,1);
+ const main=draw.slice(0,draw.indexOf(capture)).filter(call=>call.surface==='tropnik-map-canvas');
+ assert.equal(main.some(call=>call.op==='clip'),false,'Native paths must retain their original unclipped main viewport');
+ assert.equal(calls.some(call=>call.op==='fill'||call.op==='stroke'||isSourcePaint(call)),false,'The retained surface receives pixels; it cannot rerasterize native ground paths or tiles');
+ assert.equal(capture.bitmap.context.stack.length,0,'Ground rasterization cannot leave a changed main drawing state');
+ return{left,top,right:left+width,bottom:top+height,calls,main,capture};
 }
 function paintedRect(call){
  const [x,y,width,height]=call.args,[a,b,c,d,e,f]=call.matrix;
@@ -1760,8 +1772,9 @@ function paintedRect(call){
 }
 const rectanglesIntersect=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
 function assertStreamingPatch(cached,canonical,newKeys){
- const patch=groundPatches(cached),full=sourcePaints(canonical),clip=dirtyClip(cached),draw=cached.lastDraw();assert.ok(patch.length>0);
- assert.equal(draw.filter(call=>call.surface==='tropnik-map-canvas'&&isSourcePaint(call)).length,0,'Patched frames cannot replay the full visible source batches too');
+ const patch=groundPatches(cached),full=sourcePaints(canonical),clip=dirtyCapture(cached),draw=cached.lastDraw();assert.ok(patch.length>0);
+ assert.deepEqual(draw.filter(call=>call.surface==='tropnik-map-canvas'&&isSourcePaint(call)),patch,'Each culled source cohort paints once on the original main context before capture');
+ assert.equal(draw.filter(call=>String(call.surface).startsWith('retained-ground:')&&isSourcePaint(call)).length,0,'Source imagery must not be rerasterized on the retained context');
  const keys=new Set(patch.map(call=>call.key));
  for(const call of full)if(rectanglesIntersect(paintedRect(call),clip))assert.ok(keys.has(call.key),'A tile touching the dirty pixels cannot be culled: '+call.key);
  assert.deepEqual(patch.map(sourcePaintShape),full.filter(call=>keys.has(call.key)).map(sourcePaintShape),'Each retained source keeps its original sampling coordinates, transform, alpha and layer order');
@@ -1773,11 +1786,11 @@ function assertStreamingPatch(cached,canonical,newKeys){
  const restored=restoredGround(cached);assert.equal(restored.length,1,'Present the completed ground exactly once');
  assert.deepEqual(restored[0].args,[0,0]);assert.deepEqual(restored[0].matrix,[1,0,0,1,0,0]);assert.equal(restored[0].composite,'copy');assert.equal(restored[0].alpha,1);
  const present=draw.indexOf(restored[0]),route=draw.findIndex(call=>call.op==='stroke'&&call.color==='#244d3c'),mask=draw.findIndex(call=>call.op==='fill'&&call.path===cached.engine.mask&&call.rule==='evenodd');
- assert.ok(draw.indexOf(patch.at(-1))<present&&route>present,'Current route follows the completed patch and identity presentation');
+ assert.ok(draw.indexOf(patch.at(-1))<draw.indexOf(clip.capture)&&draw.indexOf(clip.capture)<present&&route>present,'Original ground rasterization precedes bounded capture, identity presentation and the current route');
  assert.ok(mask>route,'The country/hole mask stays after the route');
- assert.equal(clip.calls.some(call=>call.op==='stroke'&&call.color==='#244d3c'),false,'Routes cannot be baked into the retained ground');
- const groundDecorations=items=>items.filter(call=>call.op==='stroke'&&['rgba(95,123,87,.45)','#688360'].includes(call.color)||call.op==='fill'&&call.color==='rgba(92,128,70,.10)').map(call=>({op:call.op,color:call.color,width:call.width,rule:call.rule,path:pathCommands(call.path),matrix:call.matrix,alpha:call.alpha,composite:call.composite}));
- assert.deepEqual(groundDecorations(clip.calls),groundDecorations(canonical.lastDraw()),'Boundaries and selected territory are rebuilt once after all clipped tiles');
+ assert.equal(clip.main.some(call=>call.op==='stroke'&&call.color==='#244d3c'||call.op==='fill'&&call.path===cached.engine.mask),false,'Routes and the final country mask cannot be baked into the retained ground');
+ const groundDecorations=items=>items.filter(call=>call.op==='stroke'&&['rgba(95,123,87,.45)','#688360'].includes(call.color)||call.op==='fill'&&call.color==='rgba(92,128,70,.10)').map(call=>({op:call.op,color:call.color,width:call.width,rule:call.rule,path:pathCommands(call.path),matrix:call.matrix,alpha:call.alpha,composite:call.composite,lineCap:call.lineCap,lineJoin:call.lineJoin,miterLimit:call.miterLimit}));
+ assert.deepEqual(groundDecorations(clip.main),groundDecorations(canonical.lastDraw()),'Original full-viewport boundaries and selected territory rasterize once after the culled source tiles');
  assert.equal(cached.context.globalCompositeOperation,'source-over');assert.equal(cached.grounds.filter(surface=>surface.width&&surface.height).length,1);
  return patch.length;
 }
@@ -1818,7 +1831,7 @@ test('streaming snapshot coalesces ready cells in device pixels while labels sta
   }
   assertStreamingPatch(cached.env,canonical.env,indices.flatMap(index=>[cached.vectors[index].key,cached.pair(cached.vectors[index]).key]));
   assert.equal(groundCopies(cached.env),captures);assert.equal(cached.env.engine.inspect().loadingGround.readyCells,4);
-  assert.ok(cached.env.engine.getLabelDiagnostics().some(label=>label.label==='Готовая пара'&&label.visible),'A clipped ground update still admits the completed pair’s label');
+  assert.ok(cached.env.engine.getLabelDiagnostics().some(label=>label.label==='Готовая пара'&&label.visible),'A bounded ground transfer still admits the completed pair’s label');
   const before=cached.env.calls.length,draw=cached.env.engine.inspect().drawRevision;
   cached.env.engine.setObstacles([{left:0,top:0,right:10,bottom:10}]);cached.env.flush();
   assert.equal(cached.env.engine.inspect().drawRevision,draw);assert.equal(cached.env.calls.slice(before).some(call=>String(call.surface).startsWith('retained-ground:')||call.surface==='tropnik-map-canvas'&&call.op==='drawImage'),false,'Label-only work cannot patch or copy terrain');
@@ -1906,7 +1919,52 @@ test('streaming snapshot seeds a cold first pair once before patching its next c
  assert.equal(groundPatches(env).length,0);assert.equal(restoredGround(env).length,0);assert.ok(env.lastDraw().some(call=>call.surface==='tropnik-map-canvas'&&call.key===vectors[0].key));
  env.store.resolve(vectors[1]);await env.settle();assert.equal(env.engine.inspect().loadingGround.readyCells,1);assert.equal(groundCopies(env),1);
  env.store.resolve(pair(vectors[1]));await env.settle();
- const patch=groundPatches(env);assert.ok(patch.some(call=>call.key===vectors[1].key));assert.ok(patch.some(call=>call.key===pair(vectors[1]).key));dirtyClip(env);
+ const patch=groundPatches(env);assert.ok(patch.some(call=>call.key===vectors[1].key));assert.ok(patch.some(call=>call.key===pair(vectors[1]).key));dirtyCapture(env);
  assert.equal(restoredGround(env).length,1);assert.deepEqual(restoredGround(env)[0].args,[0,0]);assert.equal(groundCopies(env),1,'The next ready pair cannot repeat the first full capture');
  assert.equal(env.engine.inspect().loadingGround.readyCells,2);assert.equal(env.store.requests.length,requests);assert.equal(env.frames.size,0);assert.equal(env.grounds.filter(surface=>surface.width&&surface.height).length,1);
 });
+
+test('streaming snapshot preserves original main-canvas boundary rasterization before a bounded pixel capture',async t=>{
+ const cached=await streamingFixture(t),canonical=await streamingFixture(t,{groundCache:false});
+ for(const current of [cached,canonical]){current.env.store.resolve(current.vectors[0]);current.env.store.resolve(current.pair(current.vectors[0]));await current.env.settle();}
+ const draw=cached.env.lastDraw(),border=draw.filter(call=>call.op==='stroke'&&call.path===cached.env.engine.selectedBoundary&&call.color==='#688360');assert.equal(border.length,1);
+ // The real 7056633 native comparison failed by 257 pixels (max channel delta 1)
+ // when this source boundary was rasterized under an offscreen clip. This
+ // structural regression cannot substitute for that unchanged pixel oracle.
+ assert.equal(border[0].surface,'tropnik-map-canvas','A source boundary must use its original full main-context rasterizer');
+ assertStreamingPatch(cached.env,canonical.env,[cached.vectors[0].key,cached.pair(cached.vectors[0]).key]);
+ const partial=groundPartialCaptures(cached.env)[0],[,,width,height]=partial.args;
+ assert.ok(width*height<cached.env.engine.canvas.width*cached.env.engine.canvas.height/4,'A single center cell cannot be disguised as a whole-backing-store capture');
+ assert.equal(cached.env.grounds.filter(surface=>surface.width&&surface.height).length,1);
+});
+
+async function assertStreamingCopyFailure(t,stage){
+ const current=await streamingFixture(t),canonical=await streamingFixture(t,{groundCache:false});await warmStreaming(current);
+ for(const index of [0,1]){canonical.env.store.resolve(canonical.vectors[index]);canonical.env.store.resolve(canonical.pair(canonical.vectors[index]));await canonical.env.settle();}
+ const {env}=current,snapshot=env.engine.groundSnapshot,surface=snapshot.surface,context=stage==='partial capture'?snapshot.context:env.context,original=context.drawImage;
+ const copies=groundCopies(env),surfaces=env.grounds.length,pins=env.store.pins.length,requests=env.store.requests.length;let failed=false;
+ context.drawImage=function(bitmap,...args){
+  const selected=stage==='partial capture'?bitmap===env.engine.canvas&&args.length===8:bitmap===surface&&args.length===2;
+  if(selected&&!failed){failed=true;env.calls.push({op:'injected-copy-failure',stage,surface:stage==='partial capture'?surface.key:'tropnik-map-canvas'});throw new Error('Controlled native '+stage+' failure');}
+  return original.call(this,bitmap,...args);
+ };
+ for(const item of [current,canonical]){item.env.store.resolve(item.vectors[2]);item.env.store.resolve(item.pair(item.vectors[2]));await item.env.settle();}
+ assert.equal(failed,true,'The exception must happen at the actual requested Canvas operation');
+ const draw=env.lastDraw(),failure=draw.findIndex(call=>call.op==='injected-copy-failure'),fallback=draw.slice(failure+1);assert.ok(failure>=0);
+ assert.equal(env.context.globalCompositeOperation,'source-over','A failed restore must not leave destructive copy composition active for the direct fallback');
+ assert.equal(env.context.stack.length,0,'Every main-context save must be restored on failure');assert.equal(snapshot.context.stack.length,0,'Every retained-context save must be restored on failure');
+ assert.deepEqual(env.context.getTransform(),canonical.env.context.getTransform(),'Fallback restores the canonical world transform');
+ assert.deepEqual(fallback.filter(isSourcePaint).map(sourcePaintShape),sourcePaints(canonical.env).map(sourcePaintShape),'The original complete painter remains available after a failed pixel transfer');
+ const route=fallback.findIndex(call=>call.op==='stroke'&&call.color==='#244d3c'),mask=fallback.findIndex(call=>call.op==='fill'&&call.path===env.engine.mask);
+ assert.ok(route>=0&&mask>route,'Current foreground and final mask follow the direct fallback');
+ assert.equal(draw.filter(call=>call.op==='stroke'&&call.color==='#244d3c').length,1,'A failed scratch frame cannot paint foreground twice');
+ assert.equal(env.engine.groundSnapshot,undefined);assert.equal(env.engine.groundSnapshotUnavailable,true);assert.equal(surface.width,0);assert.equal(surface.height,0);
+ assert.equal(env.grounds.length,surfaces,'An exception cannot allocate a replacement surface in the same frame');assert.equal(groundCopies(env),copies);
+ assert.equal(env.store.pins.length,pins);assert.equal(env.store.requests.length,requests);assert.ok([...env.store.cache.values()].every(tile=>!tile.bitmap.closed),'Source bitmaps remain owned by the tile store');
+ context.drawImage=original;env.engine.setLayers({});env.flush();
+ assert.equal(groundPartialCaptures(env).length,0);assert.equal(restoredGround(env).length,0);assert.equal(env.grounds.length,surfaces);
+ assert.deepEqual(sourcePaints(env).map(sourcePaintShape),sourcePaints(canonical.env).map(sourcePaintShape),'The disabled cache continues to use the same direct painter');
+ assert.equal(env.frames.size,0);
+}
+test('streaming snapshot falls back safely when its partial pixel capture throws',t=>assertStreamingCopyFailure(t,'partial capture'));
+test('streaming snapshot falls back safely when its final main restore throws',t=>assertStreamingCopyFailure(t,'main restore'));

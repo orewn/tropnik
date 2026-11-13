@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T14:10:56.490354+00:00",
+  "status": "passed-local-regression-review",
+  "base": {
+    "sourceCommit": "7056633bddfd2325c4718f385fc55f38ad966459",
+    "tree": "94bdf2017c9af9678d81ab0f695e3025a37248cb",
+    "engineSha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6",
+    "worktree": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-ground-tests-7056633",
+    "onlyChangedPath": "web/tests/custom-map-engine.test.mjs"
+  },
+  "candidate": {
+    "engineSha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4",
+    "testSha256": "b24b465f1d1f5574464362c1a74619e11315a9fd400f3a535c2773247957528e",
+    "testPath": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-engine.test.mjs",
+    "registeredTests": 88,
+    "productionEngineEditedByThisReviewer": false,
+    "generatedOrWorkflowFilesEditedByThisReviewer": false
+  },
+  "meaningfulRed": [
+    {
+      "kind": "exact705-main-rasterization-regression",
+      "sourceCommit": "7056633bddfd2325c4718f385fc55f38ad966459",
+      "engineSha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6",
+      "testSha256": "b24b465f1d1f5574464362c1a74619e11315a9fd400f3a535c2773247957528e",
+      "tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "exitCode": 1,
+      "failure": "Selected source boundary stroke used retained-ground:0; original main canvas is required.",
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-exact705-red-final.log",
+        "bytes": 1106,
+        "sha256": "9886d7a5ba9230e3d216232796ca99815a7793c55c62d72b741146baf8702f15"
+      }
+    },
+    {
+      "kind": "intermediate-restore-exception-regression",
+      "engineSha256": "c49bdf1101f0becc6f69914ccd41ce4be5e8de1d164df669ce22e620c5591752",
+      "notRemoteCommit": true,
+      "construction": "Exact known c49bdf bytes reconstructed from ee692468 by replacing only restoreGround with its original705 method. SHA verified before execution. Scratch test fixture loads this module in memory; production and detached worktree engines are unchanged.",
+      "source": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/custom-map-engine-c49bdf.ts",
+        "bytes": 86192,
+        "sha256": "c49bdf1101f0becc6f69914ccd41ce4be5e8de1d164df669ce22e620c5591752"
+      },
+      "testFixture": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-intermediate-red.test.mjs",
+        "bytes": 200444,
+        "sha256": "4127170f57a53052832fb997db574ac3771feabfdf16db0e96e5fa3b53545277"
+      },
+      "tests": 2,
+      "passed": 1,
+      "failed": 1,
+      "exitCode": 1,
+      "passedCase": "Partial capture throw already falls back safely.",
+      "failedCase": "Final main restore throw leaks globalCompositeOperation=copy into the direct fallback.",
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-c49-restore-red.log",
+        "bytes": 1109,
+        "sha256": "cbb8da3875ec21c7e72902ea285094ef56245fa6790adda992e0a7d6f2743979"
+      }
+    }
+  ],
+  "green": {
+    "kind": "full-engine-suite",
+    "engineSha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4",
+    "testSha256": "b24b465f1d1f5574464362c1a74619e11315a9fd400f3a535c2773247957528e",
+    "tests": 88,
+    "passed": 88,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-engine-suite.log",
+      "bytes": 11167,
+      "sha256": "92619dbe8ded7d249e84cdb064c8c8b176decdce626cf106dbf2487dcae79884"
+    }
+  },
+  "lint": {
+    "scope": "web/tests/custom-map-engine.test.mjs",
+    "command": "./node_modules/.bin/eslint tests/custom-map-engine.test.mjs",
+    "exitCode": 0,
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-test-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "types": {
+    "scope": "complete web tsconfig",
+    "command": "./node_modules/.bin/tsc --noEmit --incremental false",
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "exitCode": 0,
+    "status": "passed"
+  },
+  "contracts": [
+    "Source tiles and every ground Path2D replay on the original visible Canvas context with no main-context clip.",
+    "One retained-context pixel capture uses exactly eight numeric source/destination arguments; both integer rectangles are identical, positive and bounded by the actual backing store.",
+    "The destination clip equals that rectangle and precedes copy composition, so pixels outside it cannot be cleared.",
+    "Retained context receives only main-canvas pixels, never source tiles or fill/stroke Path2D commands.",
+    "Identity full restore occurs exactly once after capture and before current route and final country/hole mask.",
+    "Whole-canvas captures are still counted separately by two numeric destination arguments; compatible streaming frames do not recapture the full canvas.",
+    "Original source coordinates, matrices, alpha, relative order and all tiles intersecting the copied rectangle remain equal to the separate direct-painter fixture.",
+    "Selected fill/border and administrative boundaries preserve path geometry, line styles, transforms and composition on main.",
+    "Existing actual-grid source-call reduction, atomic pair labels, DPR1.5/2, cold seed,22 invalidations, explicit retry, pause, budget and bitmap ownership checks remain active."
+  ],
+  "newExceptionAssertions": [
+    "Injected error must occur at the actual selected partial capture or final main restore operation, not at fixture setup.",
+    "Both main and retained save/restore stacks are balanced after failure; main composition is source-over.",
+    "Complete canonical direct ground, world transform, current route and mask are restored before the frame ends.",
+    "Failed snapshot is released and disabled without a new surface, extra pin, extra tile request or tile bitmap close.",
+    "Subsequent redraw continues through the original direct painter without resurrecting the failed cache."
+  ],
+  "controlledSourceDrawCounts": {
+    "scope": "24 partial frames of recorded64 z7 -> requested25 z6 grid; synthetic completion orders, not recorded timing order",
+    "requestedCenterFirst": {
+      "candidate": 737,
+      "direct": 3768
+    },
+    "reverse": {
+      "candidate": 703,
+      "direct": 3768
+    },
+    "alternatingEdges": {
+      "candidate": 726,
+      "direct": 3768
+    },
+    "excludes": [
+      "initial/final full paints",
+      "pixel capture and restore copies",
+      "paths and labels",
+      "native timing"
+    ]
+  },
+  "iterationHistory": {
+    "firstFocusedAttempt": {
+      "engineSha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4",
+      "testSha256": "13b902a8b9450f55da962459a7314a3ef4a3773637d469c8bbb13fa8aad4903b",
+      "passed": 9,
+      "failed": 1,
+      "reason": "Synthetic fixture reuses one Path2D for both general and selected boundary. Selected stroke observer was corrected to include its exact color #688360; no production change or pixel tolerance change.",
+      "log": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-focused-green.log",
+        "bytes": 2620,
+        "sha256": "908c9f9c3c151af53724e051a07a1381b2c12a13219f94a02664d30a11f7711d"
+      }
+    },
+    "finalFullSuiteIncludesAllCorrectedFocusedCases": true
+  },
+  "limits": {
+    "nativePixelEqualityEstablishedByMockTests": false,
+    "browserPerformanceGatePassedByThisReport": false,
+    "androidBuildOrDeviceRunPerformed": false,
+    "remoteWritesPerformed": false,
+    "note": "Existing native705 failure remains historical evidence. The unchanged native pixel comparison and full Pages/browser performance gates must run on the new exact source; no acceptance thresholds were modified."
+  },
+  "diffCheck": "git diff --check passed"
+}

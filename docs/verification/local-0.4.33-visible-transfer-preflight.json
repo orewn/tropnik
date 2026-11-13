@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T14:11:20.632136+00:00",
+  "scope": "Local corrected-source preflight; no native pixel success, browser timing, APK or publication claim.",
+  "baselineSourceCommit": "7056633bddfd2325c4718f385fc55f38ad966459",
+  "candidateSourceFiles": {
+    "web/lib/custom-map-engine.ts": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-engine.ts",
+      "bytes": 86221,
+      "sha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4"
+    },
+    "web/tests/custom-map-engine.test.mjs": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-engine.test.mjs",
+      "bytes": 200019,
+      "sha256": "b24b465f1d1f5574464362c1a74619e11315a9fd400f3a535c2773247957528e"
+    },
+    "tools/pages-preview/tests/browser-map-underlay.browser.mjs": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/tools/pages-preview/tests/browser-map-underlay.browser.mjs",
+      "bytes": 63141,
+      "sha256": "ffeda1b9da84943000cb038a31fcd1d11cfa146b286b7b214f6da9593b833fbc"
+    },
+    ".github/workflows/pages.yml": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/.github/workflows/pages.yml",
+      "bytes": 43549,
+      "sha256": "3537b48e219e8681ce45144584a03fdf4968a4cd1c549001a59aa476f86e838d"
+    },
+    ".github/workflows/streamed-ground-diagnostic.yml": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/.github/workflows/streamed-ground-diagnostic.yml",
+      "bytes": 12338,
+      "sha256": "4e82eab8dfc77b004c808abf3db11c0e4e211aea9132ad8756e5815af30fcb21"
+    }
+  },
+  "productionChange": {
+    "meaning": "Keep all ground paths on the original unclipped main context. Cull only non-influencing source tile draws, copy precisely the completed dirty pixels into the composed retained surface, restore the complete ground, then paint the unchanged foreground.",
+    "copyContract": "One integer 1:1 nine-argument main-to-retained drawImage inside an identity destination clip with alpha 1 and copy, followed by one full identity retained-to-main restore.",
+    "failureContract": "Restore main state in finally; release/disable the failed snapshot and complete the original direct painter before foreground.",
+    "priorNativeFailure": {
+      "sourceCommit": "7056633bddfd2325c4718f385fc55f38ad966459",
+      "runId": 43438213019,
+      "phase": "trace-grid/dpr1/pair-01",
+      "differentPixels": 257,
+      "maxChannelDelta": 1,
+      "sameZeroPixelOracleRetained": true
+    }
+  },
+  "engineSuite": {
+    "exitCode": 0,
+    "counts": {
+      "tests": 88,
+      "pass": 88,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-engine-suite.log",
+      "bytes": 11167,
+      "sha256": "92619dbe8ded7d249e84cdb064c8c8b176decdce626cf106dbf2487dcae79884"
+    }
+  },
+  "engineLint": {
+    "exitCode": 0,
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/copy-boundary-engine-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "testLint": {
+    "exitCode": 0,
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-test-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/stream-copy-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "sourceReviews": [
+    {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/docs/verification/map-0.4.33-visible-transfer-source-review.json",
+      "bytes": 6154,
+      "sha256": "75c65cc9073f5020bd1049c00e2517d9d0f45401aed8332e08d3afc7cf96dbf3"
+    },
+    {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/docs/verification/map-0.4.33-visible-transfer-fixture-review.json",
+      "bytes": 3900,
+      "sha256": "cbe79dedd7cb0c56ce6fb24da482600aa09b4888c7957f277e7f947da8726158"
+    },
+    {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/docs/verification/map-0.4.33-visible-transfer-workflow-review.json",
+      "bytes": 3605,
+      "sha256": "3c2b8b6e128d47d0a5d7097adb03a8325f7d23e82485edaec5f2159bebf3b64e"
+    },
+    {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/docs/verification/map-0.4.33-visible-transfer-regression.json",
+      "bytes": 8180,
+      "sha256": "34924fa2d11326110ef0f521ee41e28cd4bbd00dde20df32642e3db42ce61172"
+    }
+  ],
+  "runtimeDeterminism": {
+    "checkOnly": true,
+    "runtime": "tropnik-canvas",
+    "sourceInputsSha256": "0d89efd6598ff9f70f2f92559d65a2936c2e2e6b1ad0f956e0663c5c534f8cb5",
+    "sourceFiles": 61,
+    "outputFiles": 12,
+    "resourceAliases": 1746,
+    "manifestSha256": "5fea6c7b878bc50e2efc57e9a01032805f176116bf743e7dc0dff5014ef6b20b",
+    "destinations": [
+      "web/public/custom-map",
+      "android/app/src/main/assets/custom-map"
+    ]
+  },
+  "runtimeByteParity": {
+    "verified": true,
+    "files": 12,
+    "manifestSha256": "5fea6c7b878bc50e2efc57e9a01032805f176116bf743e7dc0dff5014ef6b20b"
+  },
+  "generationOrder": [
+    "prepare-custom-map.mjs",
+    "prepare-offline.mjs",
+    "stamp-service-worker.mjs"
+  ],
+  "build": {
+    "buildId": "c627dcc832e505c5",
+    "sourceCommit": null,
+    "base": "/tropnik/",
+    "origin": "https://orewn.github.io",
+    "inputsVerified": 2165,
+    "metadata": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/local-build-c627dcc832e505c5/build-info.json",
+      "bytes": 414188,
+      "sha256": "b9a89e36142880df0c1adf07b0ef63a4624afc4224f6fee7ae761551946cce21"
+    },
+    "verification": {
+      "verified": true,
+      "pages": 718,
+      "referenceRoutes": 685,
+      "productionRoutingChecks": 2159,
+      "mapPolicyChecks": 25,
+      "staticApiNetworkCalls": 0,
+      "checkedScripts": 67,
+      "publicAssetChecks": 666,
+      "outputFiles": 2657,
+      "offlineFilesVerified": 249,
+      "customMap": {
+        "runtime": "tropnik-canvas",
+        "sourceInputsSha256": "0d89efd6598ff9f70f2f92559d65a2936c2e2e6b1ad0f956e0663c5c534f8cb5",
+        "manifestSha256": "5fea6c7b878bc50e2efc57e9a01032805f176116bf743e7dc0dff5014ef6b20b",
+        "deployedFilesVerified": 9,
+        "workerCount": 3
+      },
+      "overviewReliefTilesVerified": 341,
+      "terrainGrid": [
+        513,
+        513
+      ],
+      "regionalTerrain": {
+        "regions": 2,
+        "filesVerified": 11,
+        "runtimeFetches": [
+          "/tropnik/terrain-regions/manifest.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+          "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+        ]
+      },
+      "apkVerified": true,
+      "coverageExcludedRoutes": [
+        "osm-relation-14407325"
+      ],
+      "base": "/tropnik/"
+    },
+    "httpVerification": {
+      "verified": true,
+      "base": "/tropnik/",
+      "httpChecks": 71,
+      "regionalTerrain": {
+        "regions": 2,
+        "runtimeFetches": [
+          "/tropnik/terrain-regions/manifest.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+          "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+        ],
+        "checksumsVerified": true
+      },
+      "browserRenderingTested": false,
+      "backendConnected": false
+    },
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/copy-boundary-static-build.log",
+      "bytes": 11920,
+      "sha256": "7a5bd30685e350fb8e71bd6c71a6096bdc207ae30c854704cc6ac047fba320f1"
+    }
+  },
+  "loadingGateInputs": {
+    "verified": false,
+    "browserLaunched": false,
+    "inputsMatch": true,
+    "buildId": "c627dcc832e505c5",
+    "sources": {
+      "web/lib/custom-map-engine.ts": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4",
+      "web/lib/custom-map-tiles.ts": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546",
+      "web/lib/custom-map-camera.ts": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "web/lib/custom-map-painter.ts": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "web/lib/custom-map-tiles.worker.ts": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+      "web/lib/map-resource-pool.ts": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "web/lib/map-preload.ts": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "web/lib/catalog.generated.json": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49",
+      "tools/pages-preview/browser-map-loading.mjs": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64"
+    }
+  },
+  "releaseControl": {
+    "requestVersion": "0.4.32-preview",
+    "unchangedFromParent": true,
+    "publicationRequested": false
+  },
+  "nextGate": {
+    "branch": "verify/streamed-ground-20261113",
+    "expectedParent": "7056633bddfd2325c4718f385fc55f38ad966459",
+    "workflow": ".github/workflows/streamed-ground-diagnostic.yml",
+    "nativeFrames": 370,
+    "existingFrames": 172,
+    "newFrames": 198,
+    "requiredDifferingPixels": 0,
+    "runsForCorrectedSource": 1
+  },
+  "limits": [
+    "The native diagnostic is required for the corrected source and does not substitute for full application smoothness and exact APK gates.",
+    "Mock tile-call counts are not elapsed-time measurements.",
+    "Final web delivery must use the exact accepted CI Pages payload."
+  ]
+}

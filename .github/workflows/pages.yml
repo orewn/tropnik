@@ -482,7 +482,17 @@ jobs:
               assert.equal(baseline.updateHits, 0);
               assert.equal(baseline.restoreHits, 0);
               assert.equal(baseline.groundCalls.length, 1);
-              assert.deepEqual(baseline.groundCalls[0], {surface:'main',dirty:null});
+              assert.deepEqual(baseline.groundCalls[0], {surface:'main',dirty:null,clipDepth:0});
+              for (const operations of [baseline,optimized]) {
+                assert.ok(operations.contextStates.length > 0);
+                assert.equal(operations.contextStates.filter(state => state.surface === 'main').length, 1);
+                for (const state of operations.contextStates) {
+                  assert.ok(['main','retained'].includes(state.surface));
+                  assert.equal(state.saveDepth, 0);
+                  assert.equal(state.clipDepth, 0);
+                  assert.equal(state.restoreUnderflows, 0);
+                }
+              }
               assert.equal(baseline.main.mask, 1);
               assert.equal(optimized.main.mask, 1);
               const mustIncrement = trace && /^pair-\d+$/.test(frame.phase) && Number(frame.phase.slice(5)) >= 2;
@@ -495,15 +505,27 @@ jobs:
                 assert.equal(frame.loadingGeneration, 2);
                 assert.equal(optimized.updateHits, 1);
                 assert.equal(optimized.main.snapshotCopies, 1);
-                assert.ok(optimized.groundCalls.length > 0);
+                assert.equal(optimized.retained.visibleCopies, 1);
+                assert.equal(optimized.restoreHits, 1);
+                assert.equal(optimized.groundCalls.length, 1);
                 for (const call of optimized.groundCalls) {
-                  assert.equal(call.surface, 'retained');
+                  assert.equal(call.surface, 'main');
+                  assert.equal(call.clipDepth, 0);
                   const {rect,geometry} = call.dirty;
                   assert.ok(Object.values(rect).every(Number.isInteger));
                   assert.ok(rect.left >= 0 && rect.top >= 0 && rect.right <= frame.width && rect.bottom <= frame.height && rect.right > rect.left && rect.bottom > rect.top);
                   assert.ok((rect.right-rect.left)*(rect.bottom-rect.top) < frame.width*frame.height);
                   assert.deepEqual([geometry.width,geometry.height,geometry.ratio], [frame.width,frame.height,item.dpr]);
                 }
+                const rect = optimized.groundCalls[0].dirty.rect;
+                const identity = [1,0,0,1,0,0];
+                const args = [rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top];
+                const clip = {rects:[{args,transform:identity}],argumentsCount:0,transform:identity};
+                assert.deepEqual(optimized.clipCalls, [{surface:'retained',...clip}]);
+                assert.deepEqual(optimized.transfers, [
+                  {surface:'retained',source:'main',args:[...args,...args],transform:identity,alpha:1,compositeOperation:'copy',clips:[clip]},
+                  {surface:'main',source:'retained',args:[0,0],transform:identity,alpha:1,compositeOperation:'copy',clips:[]},
+                ]);
                 const tileCalls = counts => ['overview','detail','relief','imagery'].reduce((sum,key) => sum+counts[key],0);
                 assert.ok(tileCalls(optimized.retained)+tileCalls(optimized.main) < tileCalls(baseline.main));
               }

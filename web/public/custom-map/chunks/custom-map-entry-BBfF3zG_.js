@@ -3782,7 +3782,13 @@ var Fn = class {
 		let t = this.groundSnapshot;
 		if (!t || !this.sameGroundSignature(e) || t.loading !== this.loadingGround || this.loadingGround && !this.validLoadingGround(this.loadingGround)) return !1;
 		let n = this.context;
-		return n.save(), n.setTransform(1, 0, 0, 1, 0, 0), n.globalAlpha = 1, n.globalCompositeOperation = "copy", n.drawImage(t.surface, 0, 0), n.restore(), !0;
+		n.save();
+		try {
+			n.setTransform(1, 0, 0, 1, 0, 0), n.globalAlpha = 1, n.globalCompositeOperation = "copy", n.drawImage(t.surface, 0, 0);
+		} finally {
+			n.restore();
+		}
+		return !0;
 	}
 	updateLoadingGround(e, t, n, r) {
 		let i = this.groundSnapshot, a = this.loadingGround, o = this.groundPixelGeometry();
@@ -3805,18 +3811,19 @@ var Fn = class {
 		}
 		try {
 			if (p > d && m > f) {
+				this.drawGround(t, n, r, this.context, {
+					rect: {
+						left: d,
+						top: f,
+						right: p,
+						bottom: m
+					},
+					geometry: o
+				});
 				let e = i.context;
 				e.save();
 				try {
-					e.setTransform(1, 0, 0, 1, 0, 0), e.globalAlpha = 1, e.globalCompositeOperation = "source-over", e.lineCap = this.context.lineCap, e.lineJoin = this.context.lineJoin, e.miterLimit = this.context.miterLimit, e.beginPath(), e.rect(d, f, p - d, m - f), e.clip(), this.drawGround(t, n, r, e, {
-						rect: {
-							left: d,
-							top: f,
-							right: p,
-							bottom: m
-						},
-						geometry: o
-					});
+					e.setTransform(1, 0, 0, 1, 0, 0), e.globalAlpha = 1, e.beginPath(), e.rect(d, f, p - d, m - f), e.clip(), e.globalCompositeOperation = "copy", e.drawImage(this.canvas, d, f, p - d, m - f, d, f, p - d, m - f);
 				} finally {
 					e.restore();
 				}

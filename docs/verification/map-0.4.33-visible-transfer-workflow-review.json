@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_AT_SOURCE_AND_LOCAL_TOOLING_ONLY",
+  "parent": "7056633bddfd2325c4718f385fc55f38ad966459",
+  "files": {
+    ".github/workflows/streamed-ground-diagnostic.yml": {
+      "bytes": 12338,
+      "sha256": "4e82eab8dfc77b004c808abf3db11c0e4e211aea9132ad8756e5815af30fcb21"
+    },
+    "tools/pages-preview/tests/browser-map-underlay.browser.mjs": {
+      "bytes": 63141,
+      "sha256": "ffeda1b9da84943000cb038a31fcd1d11cfa146b286b7b214f6da9593b833fbc"
+    },
+    ".github/workflows/pages.yml": {
+      "bytes": 43549,
+      "sha256": "3537b48e219e8681ce45144584a03fdf4968a4cd1c549001a59aa476f86e838d"
+    },
+    "web/lib/custom-map-engine.ts": {
+      "bytes": 86221,
+      "sha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4"
+    }
+  },
+  "checks": {
+    "yamlParsed": true,
+    "bashRunBlocksParsed": 5,
+    "embeddedNodeBlocksParsed": [
+      "Require the single reviewed diagnostic parent and unchanged release request",
+      "Check the committed shared runtime without repairing it",
+      "Bind the completed pixel proof to this exact source"
+    ],
+    "originalSingleNativeCommandUnchanged": [
+      "node --test tools/pages-preview/tests/browser-map-underlay.browser.mjs"
+    ],
+    "jobTimeoutMinutesUnchanged": 6,
+    "permissionsUnchanged": {
+      "contents": "read"
+    },
+    "fixtureBundleTest": {
+      "pass": 1,
+      "fail": 0,
+      "nativeBrowserInvoked": false
+    },
+    "workflowAndLoadingPublicationTests": {
+      "pass": 9,
+      "fail": 0
+    },
+    "pagesEmbeddedNodeBlocksParsed": 2,
+    "nodeCheck": true,
+    "gitDiffCheck": true
+  },
+  "nativeObserverContract": {
+    "ground": "one main drawGround with bounded dirty tile-culling, clipDepth=0",
+    "capture": "one retained<-main identity alpha1 composite-copy native9arg transfer, source and destination exact same integer rect, one exact destination clip",
+    "present": "one main<-retained identity alpha1 copy with args[0,0], no clip",
+    "sequence": "capture precedes full restore; original foreground follows in production draw",
+    "state": "all main and retained scopes end saveDepth0/clipDepth0/restoreUnderflows0",
+    "tileWork": "all24 trace-grid pair additions perDPR issue fewer native tile draws than full baseline"
+  },
+  "unchangedSections": {
+    "old_native_function": {
+      "unchanged": true,
+      "bytes": 17925,
+      "sha256": "3bff8cd177859c3df2bfa49555da95d4e854a70939058241a4ebce7a1f156696"
+    },
+    "old_matrix": {
+      "unchanged": true,
+      "bytes": 1416,
+      "sha256": "f0cb914a718fb78b1f8c0bfe1806e9065ef2b3fec3bbde542eb6d37574f3a220"
+    },
+    "streaming_phases": {
+      "unchanged": true,
+      "bytes": 1091,
+      "sha256": "f0d9f9d1167feca6cba306139702016d0fe6cccb7283fb88b8c1ac243345e705"
+    },
+    "native_runner": {
+      "unchanged": true,
+      "bytes": 10219,
+      "sha256": "397ca0dc37c241706536519564d27de306d6fb44ba85f098e22007a72956a64b"
+    },
+    "pagesEmbeddedNodeSyntax": {
+      "blocks": 2,
+      "steps": [
+        "Check UI smoothness before the full browser audit",
+        "Record the verified build identity"
+      ]
+    }
+  },
+  "limitations": [
+    "No local Chromium or remote execution was performed by this reviewer.",
+    "All370 pixel comparisons and native transfer observations still require actual diagnostic CI on this exact source.",
+    "No threshold, deadline, old172 native pixel oracle, or streaming phase was relaxed.",
+    "Observer forwards actual native context operations and observes their transforms; it does not replace painter, images, or pixel bytes."
+  ]
+}

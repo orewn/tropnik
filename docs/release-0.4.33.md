@@ -6,8 +6,10 @@
 `b80e274524c3834c470b9a3ade9dfabc1fdb4ca5`. Он исправляет подтверждённую
 ошибку общего картографического движка и задержку появления окружения карты.
 Кандидаты `5fefc0da`, `67d418dd` и `90dae23c` не прошли полные Pages CI
-и не опубликованы. Текущий кандидат добавляет ограниченное обновление
-retained ground при поступлении готовых клеток; native pixel proof ожидается.
+и не опубликованы. Отдельный pixel candidate `7056633b` выявил изменение
+сглаживания границы под clip. Текущий кандидат ограничивает только перенос
+готовых пикселей в кэш, сохраняя прежние условия рисования всех Path2D;
+native pixel proof исправленного варианта ожидается.
 Опубликованный Android 0.4.32 и
 его результаты сохраняются; нового APK или Pages 0.4.33 пока нет.
 
@@ -332,9 +334,9 @@ Zoom trace завершился `Tracing.tracingComplete timed out`, сохра�
 байт и не используется для CPU attribution. Run не повторялся и не
 подменяет обычные release gates.
 
-## Ограниченное обновление готовой подложки
+## Первый вариант ограниченного обновления: source 7056633b
 
-Текущий кандидат сохраняет одну совместимую retained surface и при
+Кандидат `7056633bddfd2325c4718f385fc55f38ad966459` сохраняет одну совместимую retained surface и при
 появлении новых пар обновляет только их целочисленный bounding rectangle
 в физических пикселях, с запасом 4 px. Внутри clip воспроизводится прежний
 полный ground painter: underlay, canonical и loading пары, рельеф,
@@ -383,14 +385,87 @@ trace geometry и lifecycle сценарии при DPR 1, 1,5 и 2. Сравн�
 все RGBA pixels настоящего Canvas с полным painter; допустимая разница —
 ноль. Отдельно требуются actual dirty-path hits, bounded clip, один retained
 surface, PNG bytes/hash/dimensions и отрицательный контроль пропущенной пары.
-Первый запуск выполняется один раз на `verify/streamed-ground-20261113`,
-без Pages/APK publication. Только после его PASS тот же commit продвигается
-на main для полных application, smoothness и Android gates. Native pixel
-результат и улучшение фактической плавности пока не заявляются.
+Первый запуск выполнен один раз на `verify/streamed-ground-20261113`,
+без Pages/APK publication. [Source receipt](verification/source-0.4.33-streamed-ground-diagnostic.json)
+связывает exact remote tree с локальным reviewed snapshot; main остался
+`90dae23c`.
+
+### Native отказ на границе выбранной территории
+
+[Run 43438213019](https://github.com/orewn/tropnik/actions/runs/43438213019)
+прошёл source/parent/request guards и runtime `--check`, но остановился
+на `trace-grid / DPR 1 / pair-01`. [Независимый artifact review](verification/map-0.4.33-streamed-ground-native-failure.json)
+проверил все 350 сохранённых PNG и заново декодировал RGBA. Прежние
+46 + 126 кадров и первые два streaming кадра имеют нулевую разницу.
+Первое ограниченное обновление меняет **257 пикселей с max channel delta 1**.
+Остальные 195 streaming кадров не исполнены; допуск не изменялся.
+
+[Spatial review](verification/map-0.4.33-streamed-ground-path-failure.json)
+помещает все различия внутри clip `[438,316,721,600)`, в полосе
+`x711…720 / y317…556` около сглаженного правого `selectedBoundary`.
+154 пикселя находятся уже правее нового тайла и в эталоне не менялись
+от предыдущего кадра. Это подтверждает дефект повторного рисования
+прежней границы под clip. Изоляции stroke/fill отдельным native run не было;
+внутренний механизм rasterizer не объявлен доказанным. Actual tile calls
+первого обновления — 139 → 36, но эта экономия не компенсирует pixel FAIL.
+Cleanup остановил браузер без ошибок; результаты сохранены, run не повторялся.
+
+## Перенос только готовых пикселей в кэш
+
+Исправленный вариант оставляет прежний composed snapshot. `drawGround`
+выполняется на видимом context с исходным полным viewport и без Canvas clip.
+Ограничение используется только для исключения source tiles, которые не
+влияют на dirty rectangle. Все Path2D, включая area под overview, границы
+и полупрозрачное выделение, проходят прежнюю rasterization в прежнем порядке.
+
+После этого только готовый целочисленный rectangle копируется из main
+canvas в retained surface: одинаковые source/destination coordinates,
+identity transform, alpha 1 и операция `copy` внутри destination clip.
+Полный сохранённый ground сразу восстанавливается на main, затем рисуется
+прежний foreground. Временные пиксели за пределами rectangle восстанавливаются
+до завершения того же синхронного draw; отдельного кадра или async gap нет.
+Это сохраняет один кэш и прежнее отсутствие ground repaint на stable warm hit.
+
+При исключении snapshot освобождается и выполняется исходный direct painter.
+Дополнительно `restoreGround` восстанавливает Canvas state через `finally`,
+чтобы ошибка native copy не оставила destructive `copy` перед fallback.
+[Независимый source review](verification/map-0.4.33-visible-transfer-source-review.json)
+подтверждает, что за пределами `updateLoadingGround` и `restoreGround`
+engine побайтно совпадает с проверенным `7056633b`: painter, foreground,
+geometry guards, поколение и запросы не менялись.
+Целевые 24 incremental frames, все 370 native comparisons с допуском ноль
+и прежние budgets остаются обязательными. Исправленный source должен пройти
+свой отдельный диагностический run, затем полные Pages и Android gates.
+[Fixture review](verification/map-0.4.33-visible-transfer-fixture-review.json)
+и [workflow review](verification/map-0.4.33-visible-transfer-workflow-review.json)
+проверяют новые наблюдаемые Canvas transfers, отсутствие clip у main paths
+и закрытие save/restore scopes. Прежние 172 frames, планы фаз, native runner
+и deadline побайтно сохранены; изменены только operation assertions для
+новой последовательности копирования и добавлены проверки её точных аргументов.
+
+[Регрессионный receipt](verification/map-0.4.33-visible-transfer-regression.json)
+сохраняет expected RED на exact `7056633b` для размещения path painter и
+отдельный RED на intermediate `c49bdf…` для утечки `copy` после исключения.
+Итоговый [локальный preflight](verification/local-0.4.33-visible-transfer-preflight.json)
+подтверждает **88/88** engine tests, engine/test lint и полный TypeScript.
+Проверяются частичный перенос, отсутствие clip на main paths, полный restore
+перед foreground, ошибки обеих копий, lifetime и прежние invalidations.
+Контролируемые source draw counts остались 737/703/726 против 3768;
+это количество вызовов, не native ускорение.
+
+Итоговый runtime manifest:
+`5fea6c7b878bc50e2efc57e9a01032805f176116bf743e7dc0dff5014ef6b20b`;
+source inputs:
+`0d89efd6598ff9f70f2f92559d65a2936c2e2e6b1ad0f956e0663c5c534f8cb5`.
+Все 12 web/Android outputs побайтно совпадают, deterministic check прошёл.
+Локальный build `c627dcc832e505c5` прошёл 718 страниц и 71 HTTP case;
+все 2165 input hashes повторно сверены. Его `sourceCommit: null` не
+подменяет будущий accepted CI payload.
 
 ## Порядок выпуска
 
-Сначала общий runtime, версии 0.4.33 и проверки отправляются на main при
+Сначала исправленный source проходит изолированную native pixel проверку.
+После PASS тот же commit с общим runtime и версиями 0.4.33 отправляется на main при
 неизменённом `release-request.json` прежнего 0.4.32. Это штатный режим:
 Android выполняет build, unsigned production R8 и exact-artifact device gate,
 а publish/public jobs пропускаются. Полный Pages использует исходный сценарий,

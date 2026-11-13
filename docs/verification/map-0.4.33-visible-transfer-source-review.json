@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_AT_SOURCE_NATIVE_RESULT_PENDING",
+  "scope": "Narrow review of full-viewport path paint plus bounded pixel transfer correction; no browser/test execution or source changes by reviewer",
+  "parent": {
+    "commit": "7056633bddfd2325c4718f385fc55f38ad966459",
+    "engineSha256": "04d90d6e35ab3386bddd769c64fd53ab2ca86ca5fcd1ae65d6a3b0e6215a74e6",
+    "engineBytes": 85956
+  },
+  "candidate": {
+    "engineSha256": "ee69246841c24a0056dae9d63a789ed92d29156dd55eb1eff777b280c28613d4",
+    "engineBytes": 86221,
+    "preExceptionFixEngineSha256": "c49bdf1101f0becc6f69914ccd41ce4be5e8de1d164df669ce22e620c5591752"
+  },
+  "changedMethodsOnly": [
+    "updateLoadingGround",
+    "restoreGround"
+  ],
+  "wholeSourceEqualAfterRestoringThoseTwoParentMethods": true,
+  "update": {
+    "sha256": "8556b8a92b78f290e5ba9441584186de3e8af94002d1aa9466d02a76c5ff904e",
+    "preTryGeometrySignatureGenerationOrderGuardsByteIdentical": true,
+    "postCaptureMetadataAndCatchByteIdentical": true,
+    "paint": "this.drawGround(detail,satellite,covered,this.context,{rect:{left,top,right,bottom},geometry});",
+    "paintTarget": "this.context, unchanged full viewport and no added clip",
+    "patchUse": "Existing disjoint raster source tile culling only",
+    "capture": "ctx.drawImage(this.canvas,left,top,right-left,bottom-top,left,top,right-left,bottom-top);",
+    "destinationClip": "ctx.beginPath();ctx.rect(left,top,right-left,bottom-top);ctx.clip();",
+    "capturePolicy": {
+      "identityTransform": true,
+      "alpha": 1,
+      "compositeOperation": "copy",
+      "integerSourceAndDestinationSameRect": true,
+      "destinationClipBeforeCopy": true,
+      "saveFinallyRestore": true,
+      "nonemptyRectGuard": true
+    },
+    "metadataUpdatedAfterSuccessfulCapture": true,
+    "existingFullRestoreBeforeForeground": true,
+    "asyncBoundaryAdded": false,
+    "outsideDirtyPixels": "May be temporarily invalid on visible canvas during this synchronous method; full retained restore precedes foreground and inspection."
+  },
+  "exceptionStateFix": {
+    "problem": "A full restore drawImage exception could bypass main context.restore, leaving composite copy and the saved stack active before update catch returned false to direct fallback.",
+    "fix": "restoreGround uses save/try/finally restore; its throw is preserved for existing update catch.",
+    "exactExpectedFinallyTransformationVerified": true,
+    "unchangedUpdateCatch": "this.releaseGround();this.groundSnapshotUnavailable=true;return false;",
+    "partialCaptureAlsoRestoresDestinationInFinally": true
+  },
+  "coveredTrueSafety": "Existing detailCoversViewport admits only fully opaque512 vector rasters covering the canvas. Existing tile influence culling retains every source that can affect the dirty rectangle with4physicalpx guard. Canonical tiles therefore overwrite prior foreground inside the copied region; covered=false instead performs the original opaque full clear.",
+  "unchangedMethods": {
+    "worldTransform": {
+      "bytes": 416,
+      "sha256": "5764f9cca5a4fa35c69c458677011daf4d231b5bfdf809061c00c47a02f5adda",
+      "byteIdentical": true
+    },
+    "drawTiles": {
+      "bytes": 690,
+      "sha256": "82a67844c9345358b08676b9d515fa0fe3d6d3be2c16f3314b05f8f55409301d",
+      "byteIdentical": true
+    },
+    "detailCoversViewport": {
+      "bytes": 2478,
+      "sha256": "ef5f21cc3c842c06c073ca790931dd0365a63a8dc4579574d75c0da9ea9a14be",
+      "byteIdentical": true
+    },
+    "groundSignature": {
+      "bytes": 578,
+      "sha256": "b21bdc32b8598cc06535cb52a74ed65dcaeed7b2cb7538437504ce8c9c165322",
+      "byteIdentical": true
+    },
+    "sameGroundSignature": {
+      "bytes": 250,
+      "sha256": "5b32e639cc2c8ac0cc75e768af2cf2cac218ef8a82ae1b816cd805dfc37a7ddf",
+      "byteIdentical": true
+    },
+    "groundPixelGeometry": {
+      "bytes": 813,
+      "sha256": "224d74f4b4a061eca425908b69d8ef7dbc91c74bb3a9da071236437d0716aa05",
+      "byteIdentical": true
+    },
+    "groundTileRect": {
+      "bytes": 965,
+      "sha256": "19cdac61958daf098439bcade3d34a251378873443127fc7bed5ec1e9b61128f",
+      "byteIdentical": true
+    },
+    "validLoadingGround": {
+      "bytes": 1275,
+      "sha256": "d32ce6f75064353327a2e9b71d88a102f42428a9eb89a3bdbe9f4ac7046e0753",
+      "byteIdentical": true
+    },
+    "retainGround": {
+      "bytes": 1994,
+      "sha256": "71efa2da533ecab1defd7d1bb770f70663e6b41969acd22c884269fcd02e9c2e",
+      "byteIdentical": true
+    },
+    "releaseGround": {
+      "bytes": 158,
+      "sha256": "28ab057e1be884ee146b49be7ab08a35d68ba300ef6e45a9a822c37ef827eecb",
+      "byteIdentical": true
+    },
+    "drawGround": {
+      "bytes": 1844,
+      "sha256": "d565ecf13605aef282d09a31964046e6307b3a01afa7bcfd5ae0e713c9c9d306",
+      "byteIdentical": true
+    }
+  },
+  "foreground": {
+    "normalizations": [],
+    "bytes": 1578,
+    "sha256": "c7b75c93df721a7112892667f0ca46d2f02bd24b9a87ff190609fe76c8e45cac",
+    "byteIdentical": true
+  },
+  "resourceAndSemantics": "Same single bounded composed surface, generation/signature/object-order validation, bitmap references, painter order, labels, pins, requests and canonical commit paths. Only an additional bounded bitmap capture replaces clipped Path2D replay.",
+  "nativeAcceptanceRequired": {
+    "all370FramesZeroDifference": true,
+    "all24TraceGridIncrementsPerDpr": true,
+    "sameOriginalTimeoutAndOracles": true,
+    "newNativeCaptureWitness": "Exactly one main dirty-culling drawGround with no clip; one retained<-main9-arg integer identity/copy transfer with exact clip; one unclipped main<-retained full restore; balanced context scopes.",
+    "noToleranceOrPerformanceClaim": true
+  },
+  "failureEvidence": {
+    "path": "/workspace/scratch/686c5dc59f67/streamed-ground-43438213019/independent-spatial-path-failure-review.json",
+    "sha256": "366bfa5da88920f2b76ab6009ae7e4c2ec84d81fe1611a10b1986484a459c564"
+  },
+  "limits": [
+    "Native corrected-source pixel equality has not run yet.",
+    "Call-count reduction still requires actual complete native sequence; no walltime or release qualification follows from this source review."
+  ]
+}
