@@ -1,0 +1,690 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-13T12:51:31.282974+00:00",
+  "reviewer": "perf_skeptic",
+  "status": "FIXTURE_ACQUISITION_FAILURE_NOT_PRODUCT_RED",
+  "runId": 43427936120,
+  "sourceCommit": "e69fd49460a9657eba6fcde1455e0698101e586d",
+  "buildId": "a26c9e6fa4503417",
+  "artifact": {
+    "id": 14037553626,
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43427936120/artifact-14037553626.zip",
+    "sha256": "c19f1d9467edd3b854d20cf4b61744a8d4d5fe2fa31fbf1f408796900c94ec6c",
+    "bytes": 3629329,
+    "download": "Shared single download by web_release_skeptic; independently rehashed here."
+  },
+  "rawReceipt": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43427936120/zip-members/dist/browser-map-loading-verification.json",
+    "sha256": "da46f08a578f1d0255d7191e8321b3f6c8c12e069d5b15d4bbec6937fa8e0268",
+    "bytes": 397979
+  },
+  "buildManifest": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43427936120/zip-members/dist/build-info.json",
+    "sha256": "e9a8227d16d8f7cbb4b40f7f5cb133a2b24d3c6291a93008625b90925520be2f",
+    "bytes": 413847,
+    "sourceAndBuildMatch": true
+  },
+  "sourceChecks": {
+    "web/lib/custom-map-engine.ts": {
+      "sha256": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862",
+      "matchesActualBaselineBytes": true,
+      "matchesArtifactBuildInput": true
+    },
+    "web/lib/custom-map-tiles.ts": {
+      "sha256": "c84c763cabacc7b7c4c7e620b3b5e2fdbcb401eb7fa8f4efcf776f854426a5e6",
+      "matchesActualBaselineBytes": true,
+      "matchesArtifactBuildInput": true
+    },
+    "web/lib/custom-map-camera.ts": {
+      "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "matchesActualBaselineBytes": true,
+      "matchesArtifactBuildInput": true
+    },
+    "web/lib/custom-map-painter.ts": {
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "matchesActualBaselineBytes": true,
+      "matchesArtifactBuildInput": true
+    },
+    "web/lib/custom-map-tiles.worker.ts": {
+      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+      "matchesActualBaselineBytes": true,
+      "matchesArtifactBuildInput": true
+    },
+    "web/lib/map-resource-pool.ts": {
+      "sha256": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "matchesActualBaselineBytes": true,
+      "matchesArtifactBuildInput": true
+    },
+    "web/lib/map-preload.ts": {
+      "sha256": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "matchesActualBaselineBytes": true,
+      "matchesArtifactBuildInput": true
+    },
+    "web/lib/catalog.generated.json": {
+      "sha256": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49",
+      "matchesActualBaselineBytes": true,
+      "matchesArtifactBuildInput": true
+    },
+    "tools/pages-preview/browser-map-loading.mjs": {
+      "sha256": "32a5d6a7bcffe30f0f140fa37d6c578b1371ea428ad37ef8f626c7582809cf7d",
+      "matchesActualBaselineBytes": true,
+      "matchesArtifactBuildInput": true
+    }
+  },
+  "failure": {
+    "phase": "fixture-acquisition",
+    "name": "Error",
+    "message": "Halo acquisition ended: acquire-timeout",
+    "stack": "Error: Halo acquisition ended: acquire-timeout\n    at loadingError (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-map-loading.mjs:235:49)\n    at report.faultAcquired (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-map-loading.mjs:549:57)\n    at waitValue (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-map-loading.mjs:409:48)\n    at async run (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-map-loading.mjs:548:26)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-map-loading.mjs:629:79",
+    "code": "MAP_LOADING_FIXTURE_ACQUISITION_FAILED"
+  },
+  "released": {
+    "schemaVersion": 1,
+    "kind": "one-real-external-dem-halo",
+    "timeoutMs": 8000,
+    "acquireTimeoutMs": 4000,
+    "enabledAtEpochMs": 1794574068123,
+    "enabledAtMonotonicMs": 51535.132117,
+    "observed": 22,
+    "held": null,
+    "pending": 0,
+    "closed": true,
+    "reason": "acquire-timeout",
+    "errors": [
+      "No real halo was acquired within the bounded setup interval"
+    ]
+  },
+  "cause": {
+    "directlyObserved": "The enabled Fetch interceptor observed 22 actual DEM pauses, but none matched the external halo set before its 4000 ms acquisition timer expired. All 22 corresponding DEM URLs were primary grid cells. No request was deliberately held.",
+    "sourceMechanism": "Production tileRequests sorts visible cells by distance from the viewport center. CustomMapTiles alternates demanded layers, admits at most six prepared items, runs three source reads, and advances each admitted DEM through its adjacent sources. Initial central DEM neighborhoods lie entirely inside this 7 x 6 primary grid; an outside-grid halo becomes relevant only when edge-cell dependencies are reached. The observed inner-to-outer sequence is consistent with that ordering.",
+    "boundedConclusion": "The fixture acquisition deadline ended before the requested outside-grid fault existed in this run. This is a demonstrated fixture-precondition failure, not an application progress verdict.",
+    "notMeasured": "Recording stopped immediately after acquisition timeout and cleanup. The time a first external halo would have been issued, exact worker readiness, and eventual completion time were not observed. No new acquisition budget is inferred from the truncated prefix."
+  },
+  "cameraAndNativeAction": {
+    "route": {
+      "id": "osm-relation-17013428",
+      "regionId": "territory-28173009B90469334921421",
+      "title": "Лубяной тракт"
+    },
+    "actions": [
+      {
+        "selector": ".map-controls button[aria-label=\"Уменьшить масштаб\"]",
+        "point": {
+          "left": 1353,
+          "top": 208,
+          "width": 44,
+          "height": 44,
+          "x": 1375,
+          "y": 230,
+          "unobscured": true,
+          "animating": false
+        },
+        "events": [
+          {
+            "type": "pointerdown",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 10455.800000000003,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "pointerup",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 10506.600000000006,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "click",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 10506.800000000003,
+            "label": "Уменьшить масштаб"
+          }
+        ]
+      },
+      {
+        "selector": ".map-controls button[aria-label=\"Уменьшить масштаб\"]",
+        "point": {
+          "left": 1353,
+          "top": 208,
+          "width": 44,
+          "height": 44,
+          "x": 1375,
+          "y": 230,
+          "unobscured": true,
+          "animating": false
+        },
+        "events": [
+          {
+            "type": "pointerdown",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 15842,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "pointerup",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 15843.200000000012,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "click",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 15843.300000000003,
+            "label": "Уменьшить масштаб"
+          }
+        ]
+      },
+      {
+        "selector": ".map-controls button[aria-label=\"Уменьшить масштаб\"]",
+        "point": {
+          "left": 1353,
+          "top": 208,
+          "width": 44,
+          "height": 44,
+          "x": 1375,
+          "y": 230,
+          "unobscured": true,
+          "animating": false
+        },
+        "events": [
+          {
+            "type": "pointerdown",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 27235.600000000006,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "pointerup",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 27236.20000000001,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "click",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 27236.300000000003,
+            "label": "Уменьшить масштаб"
+          }
+        ]
+      }
+    ],
+    "beforeCamera": {
+      "center": [
+        56.46536080224536,
+        57.97720349667858
+      ],
+      "zoom": 11.486151797145155,
+      "bearingDegrees": 0
+    },
+    "plannedCamera": {
+      "center": [
+        56.47712595449073,
+        57.97720349667858
+      ],
+      "zoom": 10.486151797145155,
+      "bearingDegrees": 0
+    },
+    "lastCamera": {
+      "center": [
+        56.477125954490674,
+        57.97720349667858
+      ],
+      "zoom": 10.486151797145155,
+      "bearingDegrees": 0
+    },
+    "centerDifferenceDegrees": [
+      -5.684341886080802e-14,
+      0.0
+    ],
+    "zoomDifference": 0.0,
+    "viewport": {
+      "width": 1041,
+      "height": 928,
+      "padding": {
+        "top": 96,
+        "right": 88,
+        "bottom": 96,
+        "left": 40
+      }
+    },
+    "sourceLevel": 11,
+    "primaryCount": 42,
+    "primaryXRange": [
+      1342,
+      1348
+    ],
+    "primaryYRange": [
+      614,
+      619
+    ],
+    "externalHaloCandidateCount": 30,
+    "lastMoving": false,
+    "lastTilesState": "loading",
+    "selection": {
+      "route": "osm-relation-17013428",
+      "region": "territory-28173009B90469334921421",
+      "title": "Лубяной тракт"
+    },
+    "judgment": "Three trusted native mouse zoom clicks with unobscured control and matching pointer IDs; the final click reached exactly the planned target zoom and center within floating-point tolerance. No camera, grid, URL level or control-delivery mismatch."
+  },
+  "network": {
+    "source": "page-target CDP Network events",
+    "overflow": 0,
+    "count": 44,
+    "vectorCount": 22,
+    "demCount": 22,
+    "levels": [
+      11
+    ],
+    "primaryCount": 44,
+    "externalHaloCount": 0,
+    "failedCount": 0,
+    "completed200CountAtFinalSnapshot": 41,
+    "pendingAtFinalSnapshot": 3,
+    "cacheOrServiceWorkerCount": 0,
+    "originEpochMs": 1794574068123,
+    "firstStartFromEnableMs": 376,
+    "lastStartFromEnableMs": 4003,
+    "lastFrameFromEnableMs": 4017,
+    "demTimeline": [
+      {
+        "cell": {
+          "z": 11,
+          "x": 1345,
+          "y": 617
+        },
+        "startedAfterEnableMs": 535,
+        "finishedAfterEnableMs": 1076,
+        "status": 200,
+        "requestId": "2783.313"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1345,
+          "y": 616
+        },
+        "startedAfterEnableMs": 548,
+        "finishedAfterEnableMs": 1063,
+        "status": 200,
+        "requestId": "2783.315"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1344,
+          "y": 617
+        },
+        "startedAfterEnableMs": 868,
+        "finishedAfterEnableMs": 1202,
+        "status": 200,
+        "requestId": "2783.317"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1344,
+          "y": 616
+        },
+        "startedAfterEnableMs": 1076,
+        "finishedAfterEnableMs": 1593,
+        "status": 200,
+        "requestId": "2783.319"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1346,
+          "y": 617
+        },
+        "startedAfterEnableMs": 1211,
+        "finishedAfterEnableMs": 1480,
+        "status": 200,
+        "requestId": "2783.321"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1343,
+          "y": 617
+        },
+        "startedAfterEnableMs": 1480,
+        "finishedAfterEnableMs": 1763,
+        "status": 200,
+        "requestId": "2783.323"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1343,
+          "y": 616
+        },
+        "startedAfterEnableMs": 1593,
+        "finishedAfterEnableMs": 1846,
+        "status": 200,
+        "requestId": "2783.325"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1347,
+          "y": 617
+        },
+        "startedAfterEnableMs": 1764,
+        "finishedAfterEnableMs": 2016,
+        "status": 200,
+        "requestId": "2783.327"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1346,
+          "y": 616
+        },
+        "startedAfterEnableMs": 1846,
+        "finishedAfterEnableMs": 2105,
+        "status": 200,
+        "requestId": "2783.329"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1344,
+          "y": 615
+        },
+        "startedAfterEnableMs": 2016,
+        "finishedAfterEnableMs": 2291,
+        "status": 200,
+        "requestId": "2783.331"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1345,
+          "y": 615
+        },
+        "startedAfterEnableMs": 2105,
+        "finishedAfterEnableMs": 2471,
+        "status": 200,
+        "requestId": "2783.332"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1343,
+          "y": 615
+        },
+        "startedAfterEnableMs": 2291,
+        "finishedAfterEnableMs": 3044,
+        "status": 200,
+        "requestId": "2783.334"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1345,
+          "y": 618
+        },
+        "startedAfterEnableMs": 2471,
+        "finishedAfterEnableMs": 2819,
+        "status": 200,
+        "requestId": "2783.336"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1344,
+          "y": 618
+        },
+        "startedAfterEnableMs": 2608,
+        "finishedAfterEnableMs": 2899,
+        "status": 200,
+        "requestId": "2783.338"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1347,
+          "y": 616
+        },
+        "startedAfterEnableMs": 2819,
+        "finishedAfterEnableMs": 3099,
+        "status": 200,
+        "requestId": "2783.339"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1346,
+          "y": 615
+        },
+        "startedAfterEnableMs": 2900,
+        "finishedAfterEnableMs": 3237,
+        "status": 200,
+        "requestId": "2783.340"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1343,
+          "y": 618
+        },
+        "startedAfterEnableMs": 3045,
+        "finishedAfterEnableMs": 3413,
+        "status": 200,
+        "requestId": "2783.341"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1346,
+          "y": 618
+        },
+        "startedAfterEnableMs": 3099,
+        "finishedAfterEnableMs": 3352,
+        "status": 200,
+        "requestId": "2783.342"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1347,
+          "y": 615
+        },
+        "startedAfterEnableMs": 3376,
+        "finishedAfterEnableMs": 3891,
+        "status": 200,
+        "requestId": "2783.345"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1347,
+          "y": 618
+        },
+        "startedAfterEnableMs": 3413,
+        "finishedAfterEnableMs": 3662,
+        "status": 200,
+        "requestId": "2783.346"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1345,
+          "y": 614
+        },
+        "startedAfterEnableMs": 3835,
+        "finishedAfterEnableMs": null,
+        "status": null,
+        "requestId": "2783.351"
+      },
+      {
+        "cell": {
+          "z": 11,
+          "x": 1344,
+          "y": 614
+        },
+        "startedAfterEnableMs": 3892,
+        "finishedAfterEnableMs": null,
+        "status": null,
+        "requestId": "2783.352"
+      }
+    ],
+    "observedCompletedLatencyMs": {
+      "vector": {
+        "minimum": 132,
+        "median": 158,
+        "maximum": 187,
+        "sampleCount": 21
+      },
+      "dem": {
+        "minimum": 249,
+        "median": 312.5,
+        "maximum": 753,
+        "sampleCount": 20
+      }
+    },
+    "completeVectorCountBy4000ms": 20,
+    "completeDEMCountBy4000ms": 20,
+    "vectorAndNineDEMNetworkNeighborhoodsBy4000ms": [
+      [
+        11,
+        1344,
+        616
+      ],
+      [
+        11,
+        1345,
+        616
+      ],
+      [
+        11,
+        1346,
+        616
+      ],
+      [
+        11,
+        1344,
+        617
+      ],
+      [
+        11,
+        1345,
+        617
+      ],
+      [
+        11,
+        1346,
+        617
+      ]
+    ],
+    "dependencyCaveat": "The six complete network neighborhoods are not worker decode or bitmap readiness proof. The prefix contains no acquired delay; these neighborhoods do not convert this failure to product RED."
+  },
+  "serviceWorker": {
+    "controllerBefore": "http://127.0.0.1:45441/tropnik/sw.js",
+    "controllerAfter": "http://127.0.0.1:45441/tropnik/sw.js",
+    "sourceSha256": "5b78ec1f625b9da0d29714e152403fa59c9e938683757b457ddad4bac899b5e9",
+    "sourceMatchesArtifactInput": true,
+    "sourceBehavior": "The baseline sw.js fetch listener immediately returns for cross-origin URLs. Both DEM and vector requests are cross-origin. All recorded responses have fromServiceWorker=false, fromDiskCache=false and servedFromCache=false.",
+    "limitation": "No worker CPU/cache/warmup trace was collected. Do not infer absence of unrelated worker background work from controller identity."
+  },
+  "inspectionCaveat": {
+    "publishedResources": {
+      "resident": 96,
+      "pending": 84,
+      "fetching": 3,
+      "decoding": false,
+      "enabled": true,
+      "stages": {
+        "fetching": 3,
+        "queued": 81
+      },
+      "errors": []
+    },
+    "reason": "This is the published dataset.mapInspection snapshot. The old engine publishes on draws/state changes and has no per-source-completion publication. The 3 fetching / 81 queued values are not a live queue measurement at the 4017 ms read and must not be used as deadline attribution."
+  },
+  "screenshots": [
+    {
+      "phase": "route",
+      "sha256": "e32d8bcf6be3498428c4e777f3e01f8c09b6f5f6d340d57d92a0670a25eb94b5",
+      "bytes": 1144770,
+      "hashAndSizeMatch": true
+    },
+    {
+      "phase": "before",
+      "sha256": "b2d086268d5aafe4787ebb05e9a79f3589e9962f47f14f28285d5c1fecf2f253",
+      "bytes": 1587177,
+      "hashAndSizeMatch": true
+    },
+    {
+      "phase": "failure",
+      "sha256": "3b39827594e02951e6134accdd6d1c10bbd1750b036aaaea840bd5074916e87c",
+      "bytes": 753182,
+      "hashAndSizeMatch": true
+    }
+  ],
+  "visualInspection": "Before shows a completed detailed map. Failure PNG shows the previous detailed footprint reduced to a central rectangle with flat overview outside and the loading notice. It was captured after fixture release, not during a held request or successful progress witness.",
+  "cleanup": {
+    "reason": "acquire-timeout",
+    "pending": 0,
+    "held": null,
+    "failureScreenshotAfterRelease": true,
+    "browser": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 102.9063559999995
+    },
+    "pageErrors": [],
+    "localHttpErrors": []
+  },
+  "environment": {
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760340480,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    }
+  },
+  "actionsTaken": "Read shared artifact and exact baseline sources, recomputed grid/network classifications and hashes, visually inspected existing PNGs. No production/tooling/workflow edits, network downloads, browser launches, CI reruns, or threshold changes."
+}

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-engine-loading-and-webview-review",
+  "baseCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "status": "passed-code-review-and-78-focused-engine-tests-real-browser-device-witness-pending",
+  "reviewedFiles": [
+    {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-engine.ts",
+      "bytes": 78080,
+      "sha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704"
+    },
+    {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-engine.test.mjs",
+      "bytes": 167930,
+      "sha256": "b28ba2e27ba2bad98d46ff8e664bf4ef5bdb416de96b4b41d6585646c3a7ebdd"
+    }
+  ],
+  "initialVariant": {
+    "engineSha256": "581ddaad54bed8d8711340019e51d012b82e5b3bfdfb333195c1ab47b0f75073",
+    "testSha256": "391fc4e2ff7f52b04861b3bd3b95852b0eacf865f8734dcfb815e8f2bc83bc3d",
+    "engineSnapshot": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/custom-map-engine-before-label-cache-fix.ts",
+      "bytes": 77960,
+      "sha256": "581ddaad54bed8d8711340019e51d012b82e5b3bfdfb333195c1ab47b0f75073"
+    }
+  },
+  "reviewerChanges": [
+    "Added one authorized regression only to web/tests/custom-map-engine.test.mjs. No production engine, store, runtime or workflow changes."
+  ],
+  "functionalBlockers": [],
+  "resolvedFinding": {
+    "category": "loading-relief-label-cache-zoom-threshold",
+    "originalSourceSha256": "581ddaad54bed8d8711340019e51d012b82e5b3bfdfb333195c1ab47b0f75073",
+    "cause": "A cold partial ground has no canonical relief batch. During animated zoom10 to9.125 the unchanged loadingGround identity hit the label cache, even though loading relief labels are allowed only at zoom>=10.",
+    "reproducer": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-loading-label-cache-repro.json",
+      "bytes": 3810,
+      "sha256": "39480809b9950fe79db4316c2feaa1ccf57b147f9e1899650ddadabb299e0bbe"
+    },
+    "fix": "Root computes gated loadingRelief, includes its identity in the candidate cache key, and uses that same gated value when adding height labels.",
+    "resolutionDiff": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-loading-label-cache-resolution.patch",
+      "bytes": 2765,
+      "sha256": "da6bf2308b12e38235f94500f507cde266c0910161d0c2cc0fd6862d20d510aa"
+    },
+    "regression": "cold loading relief labels follow the zoom threshold during animation without a source completion",
+    "red": {
+      "engine": "saved immutable581dd snapshot",
+      "testSetup": "Scratch copy uses the same test and fixture, absolute repo dependencies, with only the engine read redirected to the exact saved baseline. Production files were not replaced.",
+      "result": "FAIL true!==false atzoom9.125 before settled callback",
+      "evidence": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-loading-label-cache-red.tap",
+        "bytes": 1038,
+        "sha256": "5b4b5837de25fdb4e2a71a6672c43c798b78c57b5fbfc91c027f5f8dd2e3b549"
+      }
+    },
+    "green": {
+      "result": "PASS below10 then visible again at10 with same loading generation; no source completion, requests or pins intervene before the first assertion",
+      "evidence": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-loading-label-cache-green.tap",
+        "bytes": 9365,
+        "sha256": "166740760d6275dceb1fbc8cbf083f024c1cd631ce3021b45eab3001265a874f"
+      }
+    }
+  },
+  "checks": {
+    "bitmapPinning": "PASS: loading cells are members of initial requested keys; revealed cells do not pin again. New generation clears loadingGround before unpinning old cells. Final failures retain requested cells plus old canonical ground. Success drops staging before releasing replaced canonical keys.",
+    "staleGenerations": "PASS: reveal, full commit and final pin all use the existing generation/disposal guard. Abandoned callbacks cannot repopulate loadingGround; destroy clears it before releasing store bitmaps.",
+    "partialStateAndRetry": "PASS: paired loading pixels remain separate from canonical tiles and committedMode. Required failures retain useful completed pairs plus error/loading=false. Retry reuses ready cached pairs and requests only the failed primary; final success clears staging and error.",
+    "labelsAndOwnership": "PASS after finding fixed: old labels with anchors under new opaque cells are excluded; loading labels enter only with their ready pair. Cache includes canonical detail/relief, immutable loadingGround, gated loadingRelief, additional labels and coverage identity. Final canonical batches use the original label source order.",
+    "satelliteHandoff": "PASS: progressive mode is disabled when entering satellite or replacing committed satellite. Existing image/vector/relief handoffs, masked failures, source attribution and required-cell atomic commit remain intact.",
+    "requestAndPinCounts": "PASS: no extra source requests or per-cell pins. In independent z14→z11 replay,23 ready pairs retain105requests and3pin calls; failed batch adds only the original final pin; retry adds1request; full commit leaves49pinned keys.",
+    "workScheduling": "PASS with bounded extra paint during loading: reveal runs only on tile completion; each new immutable loading object invalidates ground/label caches. Existing RAF coalescing is retained and idleRAF=0. Loading paint adds the actual ready raster layers; it is not free per-frame work.",
+    "webViewInput": "PASS by source and observed-event replay: empty click pointerType permits the compatibility click only when the same marker button owns the press. Nonempty pointer types retain pointerId check. Origin is consumed once and cleared on any document pointerdown/cancel, blur, inactive, replacement/removal and destroy. Keyboard/AT detail0 remains supported."
+  },
+  "ownershipReplay": {
+    "sourceSha256": "581ddaad54bed8d8711340019e51d012b82e5b3bfdfb333195c1ab47b0f75073",
+    "scope": "Its final92bb delta changes only loading-relief label cache gating; the lifetime, drawing and pin paths are identical.",
+    "method": "Production engine plus existing controlled-tile fixture. Independently tightened fixture pin policy immediately closes/removes every unpinned mock bitmap; every engine-held and painted tile must remain pinned/open.",
+    "script": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-loading-ownership-review.mjs",
+      "bytes": 24038,
+      "sha256": "587477add327502b3eb3900d014b9149c06c269457d360662baee93ae6268ea7"
+    },
+    "raw": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-loading-ownership-review.json",
+      "bytes": 3537,
+      "sha256": "86f9bec4296f2b0744776215e6c529ca23ce561bddc3c195b0d60588c3027a87"
+    },
+    "observedDrawImages": {
+      "retainedZ14": 57,
+      "retainedPlus23ReadyPairs": 103,
+      "completedZ11": 48
+    },
+    "phases": [
+      "initial complete",
+      "new viewport",
+      "partial pairs",
+      "required failure",
+      "explicit retry",
+      "canonical completion",
+      "satellite pending",
+      "satellite complete",
+      "opaque pending over satellite",
+      "detail complete",
+      "destroy"
+    ]
+  },
+  "webViewObservedEvidence": {
+    "androidRun": 43422618671,
+    "sourceCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+    "events": {
+      "path": "/workspace/scratch/686c5dc59f67/android-0.4.33-release/validation-5fefc0da/device/qa/qa/catalog-national-map-selection.json",
+      "bytes": 126992,
+      "sha256": "06eab9b3583ff391c21651f5e21271a88a6000b2f5894e2a76e945c8a81589b9"
+    },
+    "webViewVersion": {
+      "path": "/workspace/scratch/686c5dc59f67/android-0.4.33-release/validation-5fefc0da/device/webview-version.txt",
+      "bytes": 855,
+      "sha256": "9e33c80ae6aacf2ac72052013cf84b65ac066c0d9d0a25704b3cb9e3ca01329d"
+    },
+    "actualSequence": "trusted pointerdown/up pointerId2, then click pointerId3, pointerType empty throughout, same actual marker territory-28173009B26811060113320 at x189.6194305419922/y140; WebView124.0.6367.219."
+  },
+  "verification": {
+    "command": "node --experimental-strip-types --test tests/custom-map-engine.test.mjs",
+    "tests": 78,
+    "pass": 78,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "evidence": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-loading-label-cache-green.tap",
+      "bytes": 9365,
+      "sha256": "166740760d6275dceb1fbc8cbf083f024c1cd631ce3021b45eab3001265a874f"
+    },
+    "diffCheck": "passed"
+  },
+  "limits": [
+    "Controlled fixture replay is not a real Chromium/WebView device gate. The built payload must still complete the intended native browser loading witness and final release gates.",
+    "Extra ready raster layers increase transient draw work during loading; no wall-time or35ms release-performance improvement is claimed by this review.",
+    "Final screenshot/raster equivalence remains the original browser raster gate; this review verifies unchanged final composition and the full existing engine tests.",
+    "Prior failed5fef Pages/Android runs remain failures and are not superseded by these local unit results."
+  ]
+}

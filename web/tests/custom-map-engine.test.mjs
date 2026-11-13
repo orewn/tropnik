@@ -414,6 +414,123 @@ test('independent labels retain collision, density and lifecycle without an extr
  env.engine.setLabels([label]);env.engine.destroy();env.flush();assert.equal(labels.isConnected,false);assert.equal(env.host.children.length,0);assert.equal(env.frames.size,0);
 });
 
+
+// Observed on API 35 WebView 124.0.6367.219 in Android run 43422618671.
+// Its trusted native touch has down/up pointerId 2, then click pointerId 3;
+// all three events report pointerType ''. The same actual marker owns the press.
+test('Android WebView 124 unknown pointer type activates an owned marker exactly once',async t=>{
+ const selected=[],view={center:[81.5695492,58.2767055],zoom:6,bearingDegrees:0};
+ const env=fixture({view,width:380,height:280,onMarker:id=>selected.push(id)});t.after(()=>env.engine.destroy());await env.ready();
+ const id='territory-28173009B26811060113320';
+ env.engine.setMarkers([{id,label:'Территория',coordinate:[...view.center],kind:'direction'}]);env.flush();
+ const button=env.host.querySelector('.region-marker-'+id);
+ const down={pointerId:2,pointerType:'',clientX:189.6194305419922,clientY:140,timeStamp:4323.699999999997,isTrusted:true};
+ const up={...down,timeStamp:4424.699999999997};
+ const click={...up,pointerId:3,clientX:189,detail:1};
+ button.dispatch('pointerdown',down);button.dispatch('pointerup',up);button.dispatch('click',click);
+ assert.deepEqual(selected,[id],'A stable owned native marker must activate despite the empty-type compatibility click id');
+ button.dispatch('click',click);assert.deepEqual(selected,[id],'The compatibility click consumes ownership once');
+});
+
+test('Android WebView 124 unknown pointer type cannot turn a Canvas gesture into marker activation',async t=>{
+ const selected=[],env=fixture({onClick:()=>selected.push('territory'),onMarker:id=>selected.push(id)});t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setMarkers([{id:'baikal',label:'Байкал',coordinate:[...camera.center],kind:'direction'}]);env.flush();
+ const button=env.host.querySelector('.region-marker-baikal');
+ const down={pointerId:2,pointerType:'',clientX:400,clientY:300,timeStamp:4323.699999999997,isTrusted:true};
+ const up={...down,timeStamp:4424.699999999997},click={...up,pointerId:3,detail:1};
+ env.engine.canvas.dispatch('pointerdown',down);env.engine.canvas.dispatch('pointerup',up);button.dispatch('click',click);
+ assert.deepEqual(selected,['territory'],'The Canvas pointer origin cannot authorize any marker compatibility click');
+ button.dispatch('pointerdown',down);button.dispatch('pointerup',up);button.dispatch('click',click);
+ assert.deepEqual(selected,['territory','baikal'],'An independent subsequent press on the marker still works immediately');
+});
+
+test('loading ground paints ready measured pairs around the selected route before a slow neighbouring DEM finishes',async t=>{
+ const view={center:[56.4372266,57.9741523],zoom:14,bearingDegrees:0};
+ const coverageArea={type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[[54,56],[58,56],[58,60],[54,60],[54,56]]]}};
+ const env=fixture({view,width:1435,height:824,coverageArea});t.after(()=>env.engine.destroy());await env.ready();
+ const previous=plain(env.engine.inspect().tiles),next={...view,zoom:11};env.engine.setCamera(next);
+ const vectors=env.pending('vector'),reliefs=env.pending('relief');assert.equal(vectors.length,24);assert.equal(reliefs.length,24);
+ const held=reliefs.at(-1),sameCell=(a,b)=>a.request.z===b.request.z&&a.request.x===b.request.x&&a.request.y===b.request.y;
+ env.complete(job=>job!==held);await env.settle();
+ const readyVector=vectors.find(job=>!sameCell(job,held)),readyRelief=reliefs.find(job=>sameCell(job,readyVector));
+ const painted=env.lastDraw().filter(call=>call.op==='drawImage').map(call=>call.key);
+ assert.ok(painted.includes(readyVector.key)&&painted.includes(readyRelief.key),'A completed vector/relief pair must paint while another DEM is still pending');
+ assert.equal(painted.includes(vectors.find(job=>sameCell(job,held)).key),false,'An unpaired vector cannot cover the retained measured ground');
+ assert.deepEqual(plain(env.engine.inspect().tiles),previous,'Progress must not pretend the full ground was committed');
+ const pending=plain(env.engine.inspect().loadingGround);assert.equal(pending.readyCells,23);assert.equal(pending.requestedCells,24);
+ assert.equal(pending.detail.length,23);assert.equal(pending.relief.length,23);assert.equal(env.engine.getState().loading,true);
+ assert.deepEqual(plain(env.engine.getCamera()),next);assert.equal(env.frames.size,0,'Progress has no recurring idle RAF');
+ const requests=env.store.requests.length;env.store.resolve(held);await env.settle();
+ assert.equal(env.engine.getState().loading,false);assert.equal(env.engine.getState().error,'');assert.equal(env.engine.inspect().loadingGround,null);
+ assert.equal(env.engine.inspect().tiles.detail.length,24);assert.equal(env.engine.inspect().tiles.relief.length,24);
+ assert.equal(env.store.requests.length,requests,'Progress must not add a lower-quality or speculative tile request');
+});
+
+test('loading ground keeps pairs atomic and useful completed cells through a failed neighbour and explicit retry',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();const previous=plain(env.engine.inspect().tiles);
+ env.engine.setCamera({...camera,zoom:9});const vectors=env.pending('vector'),reliefs=env.pending('relief');
+ const vector=vectors[0],relief=reliefs.find(job=>job.request.x===vector.request.x&&job.request.y===vector.request.y);
+ env.store.resolve(vector);await env.settle();
+ assert.equal(env.lastDraw().some(call=>call.op==='drawImage'&&call.key===vector.key),false,'Vector alone must not erase measured relief');
+ env.store.resolve(relief);await env.settle();
+ assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.key===vector.key),'A complete pair is independently useful');
+ const failed=reliefs.find(job=>job!==relief);env.store.reject(failed);env.complete();await env.settle();
+ assert.equal(env.engine.getState().loading,false);assert.ok(env.engine.getState().error);assert.deepEqual(plain(env.engine.inspect().tiles),previous);
+ assert.ok(env.engine.inspect().loadingGround.readyCells>0);assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.key===vector.key));
+ const count=env.store.requests.length;env.engine.retry();await env.settle();
+ assert.equal(env.store.requests.length,count+1,'Only the failed primary cell is requested again');
+ assert.equal(env.engine.getState().loading,true);assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.key===vector.key),'Retry keeps cached ready pairs visible');
+ env.complete();await env.settle();assert.equal(env.engine.getState().error,'');assert.equal(env.engine.inspect().loadingGround,null);
+});
+
+test('loading ground labels appear with their painted pairs and reuse unchanged candidates',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await turn();
+ env.complete(()=>true,job=>{if(job.request.kind!=='vector')return{};const label=env.labelFor(job,camera.center,'Прежняя подпись');return{labels:label.x>=0&&label.x<1&&label.y>=0&&label.y<1?[label]:[]};});await env.settle();
+ env.engine.setCamera({...camera,zoom:9});const vector=env.pending('vector')[0],relief=env.pending('relief').find(job=>job.request.x===vector.request.x&&job.request.y===vector.request.y);
+ const coordinate=mercatorUnproject({x:(vector.request.x+.5)/2**vector.request.z,y:(vector.request.y+.5)/2**vector.request.z});
+ env.store.resolve(vector,{labels:[env.labelFor(vector,coordinate,'Новый готовый участок')]});await env.settle();
+ assert.equal(env.engine.getLabelDiagnostics().some(label=>label.label==='Новый готовый участок'),false);
+ env.store.resolve(relief);await env.settle();
+ assert.ok(env.engine.getLabelDiagnostics().some(label=>label.label==='Новый готовый участок'&&label.visible),'Labels must appear with their actual painted pair');
+ const before=env.labelWork.sourceCoordinates;env.engine.setObstacles([{left:0,top:0,right:10,bottom:10}]);env.flush();
+ assert.equal(env.labelWork.sourceCoordinates,before,'Unchanged loading cells reuse their label candidates');
+});
+
+test('cold loading relief labels follow the zoom threshold during animation without a source completion',async t=>{
+ const view={...camera,zoom:10},env=fixture({view});t.after(()=>env.engine.destroy());await turn();
+ const vector=env.pending('vector')[0],relief=env.pending('relief').find(job=>job.request.z===vector.request.z&&job.request.x===vector.request.x&&job.request.y===vector.request.y);
+ const coordinate=mercatorUnproject({x:(vector.request.x+.5)/2**vector.request.z,y:(vector.request.y+.5)/2**vector.request.z});
+ env.store.resolve(vector);env.store.resolve(relief,{labels:[env.labelFor(relief,coordinate,'200 м',{kind:'contour',rank:9})]});await env.settle();
+ const visible=()=>env.engine.getLabelDiagnostics().some(label=>label.label==='200 м'&&label.visible);
+ const before=plain(env.engine.inspect()),requests=env.store.requests.length,pins=env.store.pins.length,pending=env.pending().length;
+ assert.equal(before.tiles.relief.length,0,'This cold view has no canonical relief batch to invalidate the label cache');
+ assert.equal(before.loadingGround.readyCells,1);assert.equal(visible(),true);assert.ok(pending>0);
+ env.engine.setCamera({...view,zoom:9},true);env.tick(120);
+ assert.equal(env.engine.getCamera().zoom,9.125,'Observe the actual animated camera before its settled callback');
+ assert.equal(env.engine.inspect().loadingGround.generation,before.loadingGround.generation);
+ assert.equal(env.store.requests.length,requests);assert.equal(env.store.pins.length,pins);assert.equal(env.pending().length,pending);
+ assert.equal(visible(),false,'The unchanged loading batch cannot retain height labels below their zoom threshold');
+ env.engine.setCamera(view,true);env.tick(240);
+ assert.equal(env.engine.getCamera().zoom,10);assert.equal(visible(),true,'The same still-pending measured pair regains its annotation at the threshold');
+ assert.equal(env.engine.inspect().loadingGround.generation,before.loadingGround.generation);assert.equal(env.pending().length,pending);
+});
+
+test('loading ground cannot cross a camera generation, cover a retained satellite view or survive destruction',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setCamera({...camera,zoom:9});const old=env.pending(),vector=old.find(job=>job.request.kind==='vector'),relief=old.find(job=>job.request.kind==='relief'&&job.request.x===vector.request.x&&job.request.y===vector.request.y);
+ env.store.resolve(vector);env.store.resolve(relief);await env.settle();assert.equal(env.engine.inspect().loadingGround?.readyCells,1);
+ env.engine.setCamera({center:[41.5,44],zoom:10});const nextGeneration=env.engine.inspect().loadingGround?.generation;
+ for(const job of old)if(!job.settled)env.store.resolve(job);await env.settle();
+ assert.equal(env.engine.inspect().loadingGround?.generation,nextGeneration);assert.equal(env.engine.inspect().loadingGround?.readyCells??0,0,'Old results cannot repopulate a newer view');
+ env.complete();await env.settle();env.engine.setMode('satellite');env.complete();await env.settle();assert.equal(env.engine.getState().committedMode,'satellite');
+ const satellite=plain(env.engine.inspect().tiles.imagery);env.engine.setMode('detail');env.engine.setCamera({center:[41.7,44.1],zoom:11});
+ const incoming=env.pending('vector').find(job=>job.request.z===11&&!job.request.transparent);assert.ok(incoming);
+ const dem=env.pending('relief').find(job=>job.request.z===11&&job.request.x===incoming.request.x&&job.request.y===incoming.request.y);assert.ok(dem);
+ env.store.resolve(incoming);env.store.resolve(dem);await env.settle();
+ assert.equal(env.engine.inspect().loadingGround,null,'An incomplete opaque replacement must not cover the retained photograph');assert.deepEqual(plain(env.engine.inspect().tiles.imagery),satellite);
+ const pending=env.pending();env.engine.destroy();for(const job of pending)env.store.resolve(job);await env.settle();assert.equal(env.engine.inspect().loadingGround,null);assert.equal(env.host.children.length,0);
+});
+
 test('late source batches cannot replace a newer camera or resurrect state after destroy',async()=>{
  const env=fixture();await turn();const old=env.pending();assert.ok(old.length>0);
  env.engine.setCamera({center:[100,55],zoom:8});const latest=env.pending().filter(job=>!old.includes(job));assert.ok(latest.length>0);

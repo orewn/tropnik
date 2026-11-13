@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T12:29:45.416741+00:00",
+  "kind": "independent-tile-failure-sharing-code-review",
+  "baseCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "status": "passed",
+  "scope": [
+    "web/lib/custom-map-tiles.ts",
+    "web/tests/custom-map-tiles.test.mjs"
+  ],
+  "reviewedFiles": [
+    {
+      "path": "web/lib/custom-map-tiles.ts",
+      "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546"
+    },
+    {
+      "path": "web/tests/custom-map-tiles.test.mjs",
+      "sha256": "af16792bab5506b73d589b4aa92c669be0f8536a11896f90f6c4720fdd9eacde"
+    }
+  ],
+  "functionalBlockers": [],
+  "openFindings": [],
+  "resolvedFinding": {
+    "category": "retained-failure-memory-bound",
+    "originalStoreSha256": "feeaa2e9c2b57322f39d49d3e6dfde3037f0a76886a5a5b9c15bdcefeea91132",
+    "observation": "Replacing the Map alone left obsolete failure entries reachable through in-flight readSource captures. The current snapshot count was bounded but total old-epoch retention could exceed160.",
+    "resolution": "Root added failedSources.clear() before assigning the new Map in pin(). This releases obsolete entries immediately while preserving Map identity as the epoch guard.",
+    "reviewerEditedProductionFiles": false
+  },
+  "checks": {
+    "perAttemptFailureLifetime": "PASS: rejection is shared only after the pooled logical read rejects; pin resets scope and destroy releases it. Source metadata lookup failures remain outside the cache.",
+    "pinEpochs": "PASS: captured Map identity, current work identity and non-aborted consumer signal are all required before remembering a rejection.",
+    "lateAbortedReads": "PASS: aborted or retained old-attempt failures cannot populate the new epoch; covered by cancellation and HTTP503 cases.",
+    "hardCap160": "PASS: oldest entry is evicted before insertion at160; previous epoch entries are now cleared immediately, and old captures cannot insert after replacement.",
+    "retrySemantics": "PASS: unchanged pool owns one eligible TypeError retry after150ms under the same15000ms deadline, signal and leases; explicit new pin permits a new attempt.",
+    "bitmapOwnership": "PASS: no bitmap ownership or transfer path changed. Displayed partial relief remains alive while pinned; unpin discards incomplete relief for a measured revisit. Same-key pin retains the existing completed partial bitmap.",
+    "resourceBudgets": "PASS: three fetch slots, six prepared payloads,160 pending jobs,96 ordinary resident bitmaps and288 pinned bitmap cap remain unchanged.",
+    "typeErrorFixture": "PASS: injecting host TypeError into the pool VM makes mock rejections use the production instanceof retry branch."
+  },
+  "verification": {
+    "originalFrozenRun": {
+      "startedAt": "2026-11-13T12:27:35.149664+00:00",
+      "command": [
+        "node",
+        "--experimental-strip-types",
+        "--test",
+        "tests/custom-map-tiles.test.mjs",
+        "tests/map-resource-retry.test.mjs"
+      ],
+      "exitCode": 0,
+      "frozenFilesUnchanged": true,
+      "files": [
+        {
+          "path": "web/lib/custom-map-tiles.ts",
+          "sha256": "feeaa2e9c2b57322f39d49d3e6dfde3037f0a76886a5a5b9c15bdcefeea91132"
+        },
+        {
+          "path": "web/tests/custom-map-tiles.test.mjs",
+          "sha256": "af16792bab5506b73d589b4aa92c669be0f8536a11896f90f6c4720fdd9eacde"
+        }
+      ],
+      "log": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-failed-source-independent-tests.log",
+      "logSha256": "20de2f224e8bdcdbd5f2ccc2ee578ac314695922e13ac8ce679fef47d0ab21ef"
+    },
+    "finalAfterClearFixRun": {
+      "startedAt": "2026-11-13T12:29:30.055369+00:00",
+      "command": [
+        "node",
+        "--experimental-strip-types",
+        "--test",
+        "tests/custom-map-tiles.test.mjs",
+        "tests/map-resource-retry.test.mjs"
+      ],
+      "exitCode": 0,
+      "frozenFilesUnchanged": true,
+      "files": [
+        {
+          "path": "web/lib/custom-map-tiles.ts",
+          "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546"
+        },
+        {
+          "path": "web/tests/custom-map-tiles.test.mjs",
+          "sha256": "af16792bab5506b73d589b4aa92c669be0f8536a11896f90f6c4720fdd9eacde"
+        }
+      ],
+      "log": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-failed-source-independent-final-tests.log",
+      "logSha256": "6c4e6b72e43b037b193348c812b9bce0f4a4941a1172a7b6ef990bab3ecda1ff"
+    },
+    "tests": 38,
+    "pass": 38,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "limits": [
+    "No production/test/workflow/generated-runtime edits were made by this review.",
+    "Source-pool tests use virtual HTTP/worker timing and do not establish browser latency or provider availability.",
+    "Engine paired-loading integration and pin-call lifecycle require the separate engine review."
+  ]
+}

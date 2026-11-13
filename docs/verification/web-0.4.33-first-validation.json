@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "buildId": "84de743e18910362",
+  "run": 43422618701,
+  "attempt": 1,
+  "releaseEligible": false,
+  "fullBrowserPassed": false,
+  "deployment": "skipped",
+  "scope": "Source-bound partial baseline evidence from API-digest-verified failure/design artifacts. No accepted Pages payload, no actual built sw.js bytes and no complete browser report exist in this failed run.",
+  "artifacts": [
+    {
+      "id": 14036490018,
+      "name": "tropnik-pages-browser-failure-1",
+      "bytes": 572140,
+      "sha256": "8ac8375b5fae1325de4f52c9a69df0b244e3f611b131cf2249aef97fbc99fbdb",
+      "payloadRoot": "/workspace/scratch/686c5dc59f67/pages43422618701/failure/zip-members"
+    },
+    {
+      "id": 14036385271,
+      "name": "tropnik-pages-design-1",
+      "bytes": 67165295,
+      "sha256": "374e1a30e2d0680573f428476d4fc6a75452990b31b0fd03dadb0bbb5e78bee9",
+      "payloadRoot": "/workspace/scratch/686c5dc59f67/pages43422618701/design/zip-members"
+    }
+  ],
+  "failure": {
+    "file": "/workspace/scratch/686c5dc59f67/pages43422618701/failure/zip-members/browser-failure.json",
+    "bytes": 834253,
+    "sha256": "24e160edb20c5db9797e83bb6b4325f06dd4e790e1479098997fb15dcd9666a3",
+    "profile": "android-portrait",
+    "error": "Error: android-portrait: native panning did not center the source coastline\n    at panTo (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-coast-audit.mjs:170:9)\n    at async runCoastAudit (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-coast-audit.mjs:189:20)\n    at async runZoomDesignAudit (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-zoom-audit.mjs:500:16)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:999:24"
+  },
+  "originalLandscapeSelection": {
+    "verified": true,
+    "profile": "android-portrait",
+    "passed": true,
+    "gestures": {
+      "zoomInput": "touch-control",
+      "beforeZoom": 4.565744490697904,
+      "afterZoom": 5.565744490697904,
+      "dragged": true,
+      "dragCameras": {
+        "before": {
+          "longitude": 108.60860116363642,
+          "latitude": 52.951875916205694,
+          "zoom": 5.565744490697904,
+          "tileSize": 256,
+          "centerX": 206,
+          "centerY": 423.5
+        },
+        "after": {
+          "longitude": 107.18349331168838,
+          "latitude": 53.165995387053385,
+          "zoom": 5.565744490697904,
+          "tileSize": 256,
+          "centerX": 206,
+          "centerY": 423.5
+        }
+      },
+      "selectionPreserved": true,
+      "resizedTo": {
+        "width": 915,
+        "height": 412
+      },
+      "postResizePolygon": "territory-28173009B78872068540735"
+    }
+  },
+  "serviceWorkerUpdate": {
+    "verified": true,
+    "receipt": {
+      "path": "/workspace/scratch/686c5dc59f67/pages43422618701/failure/zip-members/browser-service-worker-update-verification.json",
+      "bytes": 20544,
+      "sha256": "9160c40a488ded78595766546ddd3ce5d362e2a6750a7a6cc26cb40d7cb72911"
+    },
+    "sources": [
+      {
+        "path": "web/components/ServiceWorker.tsx",
+        "sha256": "c065bd757266394676c43f9b688580ca507e28ff786720b8ef00edc5f080f4c5",
+        "bytes": 7408
+      },
+      {
+        "path": "web/lib/service-worker-registration.ts",
+        "sha256": "408f359d579f350867eb9a2dd5caead8b427f3ebbd4818c709dbbb89700cefbc",
+        "bytes": 5389
+      },
+      {
+        "path": "web/public/sw.js",
+        "sha256": "5b78ec1f625b9da0d29714e152403fa59c9e938683757b457ddad4bac899b5e9",
+        "bytes": 17420
+      },
+      {
+        "path": "tools/pages-preview/browser-service-worker-update.mjs",
+        "sha256": "9500420751f4162ff38cfdbf025cc4f584aafe28ef081ee3979dc0ca7b9aaea4",
+        "bytes": 26376
+      }
+    ],
+    "screenshots": [
+      {
+        "phase": "waiting",
+        "file": "sw-update-waiting.png",
+        "bytes": 375397,
+        "sha256": "da4dc002b1d2d4dc016812b672c7dfbb8efd539d0792079d2043c8c89a933ad9",
+        "dimensions": [
+          824,
+          1830
+        ]
+      },
+      {
+        "phase": "updating-held",
+        "file": "sw-update-updating-held.png",
+        "bytes": 378782,
+        "sha256": "c61d8703285304a9a0d8a2a307c6c75163ae75e01e50d7187d5eb46eb340c741",
+        "dimensions": [
+          824,
+          1830
+        ]
+      },
+      {
+        "phase": "retry",
+        "file": "sw-update-retry.png",
+        "bytes": 376962,
+        "sha256": "5be3649ab6ff5bbf915e0c2f9cdc083afba1dea6adc28faccbc35ad09a99b9ea",
+        "dimensions": [
+          824,
+          1830
+        ]
+      },
+      {
+        "phase": "late-controller",
+        "file": "sw-update-late-controller.png",
+        "bytes": 377520,
+        "sha256": "0a121424b4fd5935b62cf3f9c246d31173681c737e42ad8f98f13e0ebe5e7049",
+        "dimensions": [
+          824,
+          1830
+        ]
+      },
+      {
+        "phase": "updated",
+        "file": "sw-update-updated.png",
+        "bytes": 390257,
+        "sha256": "f7c4ee43d8415346c1f7103dedb696b6f98e2d104f53bee8ab1e07b4c87aca4e",
+        "dimensions": [
+          824,
+          1830
+        ]
+      }
+    ],
+    "reportedWorker": {
+      "sha256": "916acb09bdcad1b220b13dc38c6932732deffb617e5981830ea1efde790e6ad0",
+      "version": "tropnik-tropnik-shell-84de743e18910362",
+      "normalizedSha256": "b519d8ee82c6394d9fd4f33fa43185eceee8aee97d31214fa65effb2354531ae",
+      "variants": {
+        "a": {
+          "version": "tropnik-tropnik-shell-84de743e18910362-sw-audit-a",
+          "sha256": "5b707eaf9c6838e4dd82df3ed87336077add9f8e7d1dfaed26a153619e9a8339",
+          "normalizedSha256": "b519d8ee82c6394d9fd4f33fa43185eceee8aee97d31214fa65effb2354531ae"
+        },
+        "b": {
+          "version": "tropnik-tropnik-shell-84de743e18910362-sw-audit-b",
+          "sha256": "40c80231f04653785c91f313b2a5a2716a556ff06011e6a493c136e2243a37af",
+          "normalizedSha256": "b519d8ee82c6394d9fd4f33fa43185eceee8aee97d31214fa65effb2354531ae"
+        },
+        "c": {
+          "version": "tropnik-tropnik-shell-84de743e18910362-sw-audit-c",
+          "sha256": "caaa0a20ffece6191e0ea5031076e8cf830f62c82667375e807399b033fc66ac",
+          "normalizedSha256": "b519d8ee82c6394d9fd4f33fa43185eceee8aee97d31214fa65effb2354531ae"
+        }
+      }
+    },
+    "normal": {
+      "verified": true,
+      "waitingObservationMs": 1502.653621,
+      "waitingDocumentPreserved": true,
+      "waitingControllerPreserved": true,
+      "nativeClick": {
+        "kind": "click",
+        "documentId": 1,
+        "at": 1794571876766.2,
+        "trusted": true,
+        "label": "Обновить",
+        "disabled": false
+      },
+      "reloads": 1,
+      "controllerChanged": true,
+      "activeVersion": "b"
+    },
+    "timeout": {
+      "verified": true,
+      "updatingLabel": "Обновляем…",
+      "updatingDisabled": true,
+      "nativeClick": {
+        "kind": "click",
+        "documentId": 2,
+        "at": 1794571878235.2,
+        "trusted": true,
+        "label": "Обновить",
+        "disabled": false
+      },
+      "elapsedMs": 15000.900146484375,
+      "heldMessages": 1,
+      "errorLabel": "Повторить",
+      "errorDisabled": false,
+      "timeoutDocumentPreserved": true,
+      "lateControllerChanged": true,
+      "lateObservationMs": 1501.5606279999993,
+      "lateDocumentPreserved": true,
+      "retryClick": {
+        "kind": "click",
+        "documentId": 2,
+        "at": 1794571896314.6,
+        "trusted": true,
+        "label": "Повторить",
+        "disabled": false
+      },
+      "retryReloads": 1,
+      "activeVersion": "c"
+    },
+    "cleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 51.144632999999885
+    },
+    "workerBytesIndependentlyAvailable": false
+  },
+  "environment": {
+    "schemaVersion": 1,
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "collection": "browser-target-cdp-before-measurement",
+    "sourceCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+    "capturedAt": "2026-11-13T12:14:44.165Z",
+    "requestedFlags": [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-background-networking",
+      "--disable-component-update",
+      "--disable-default-apps",
+      "--disable-extensions",
+      "--disable-features=Translate,MediaRouter",
+      "--mute-audio",
+      "--no-first-run",
+      "--use-gl=angle",
+      "--use-angle=swiftshader-webgl",
+      "--enable-unsafe-swiftshader",
+      "--window-size=1920,1920",
+      "--ozone-override-screen-size=1920,1920"
+    ],
+    "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=44839 --user-data-dir=/tmp/tropnik-chrome-7204 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+    "browser": {
+      "product": "Chrome/156.0.8078.79",
+      "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.6.75.27",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+    },
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28975 git hash: 127e783de334)",
+        "skiaBackendType": "None",
+        "targetCpuBits": 64
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      }
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760348672,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261101.360.1"
+      }
+    },
+    "nativeSurface": {
+      "schemaVersion": 1,
+      "collection": "blank-target-before-emulation",
+      "window": {
+        "left": 10,
+        "top": 10,
+        "width": 1920,
+        "height": 1920,
+        "windowState": "normal"
+      },
+      "viewport": {
+        "url": "about:blank",
+        "visibilityState": "visible",
+        "innerWidth": 1920,
+        "innerHeight": 1833,
+        "outerWidth": 1920,
+        "outerHeight": 1920,
+        "devicePixelRatio": 1,
+        "screen": {
+          "width": 1920,
+          "height": 1920,
+          "availWidth": 1920,
+          "availHeight": 1920
+        }
+      }
+    }
+  }
+}

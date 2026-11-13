@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T12:55:14.968462+00:00",
+  "status": "passed",
+  "scope": "Local final build after a source-reviewed fixture acquisition correction; no real browser/device or release claim.",
+  "baselineGitHead": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "ciSourceCommit": null,
+  "priorPreflight": {
+    "path": "/workspace/scratch/ee002c1fa3a0/tropnik/docs/verification/local-0.4.33-loading-preflight.json",
+    "bytes": 8591,
+    "sha256": "8cfcec2bfd2d1058dc6e0cb2c54f2f4c3b210787790da09bdc33cdd7c128b1d1"
+  },
+  "priorInputManifest": {
+    "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/local-build-eea0352868678f26/build-info.json",
+    "bytes": 414188,
+    "sha256": "02a0f35a408cf03128edbc291c759d95de76b1b8be24ace3874c3cb8c17fa03a"
+  },
+  "changedBuildInputs": [
+    {
+      "path": "tools/pages-preview/browser-map-loading.mjs",
+      "before": {
+        "path": "tools/pages-preview/browser-map-loading.mjs",
+        "bytes": 54367,
+        "sha256": "32a5d6a7bcffe30f0f140fa37d6c578b1371ea428ad37ef8f626c7582809cf7d"
+      },
+      "after": {
+        "path": "tools/pages-preview/browser-map-loading.mjs",
+        "bytes": 54368,
+        "sha256": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64"
+      }
+    }
+  ],
+  "unchangedBuildInputs": 2164,
+  "reason": "Actual baseline fixture saw only primary requests before its 4s acquisition bound. The next diagnostic gives setup 15s; actual held interval8s and progress6s remain unchanged.",
+  "productionRuntimeAndWebInputsUnchanged": true,
+  "inheritedChecks": "971 web tests, 28 native map tooling, runtime determinism/12-file byte parity, lint and types from the linked preflight; exact associated source bytes remain unchanged. The previous387 tooling run is historical; current affected checks are below.",
+  "focusedTests": {
+    "counts": {
+      "tests": 24,
+      "pass": 24,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "exitCode": 0,
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/loading-acquisition-focused.tap",
+      "bytes": 2763,
+      "sha256": "9981d8cc5d9833465a75003c30151fb52cd7028ba86953278f4517762e1bacc8"
+    }
+  },
+  "inputCheck": {
+    "verified": false,
+    "browserLaunched": false,
+    "inputsMatch": true,
+    "buildId": "ed67ad6cbd56a305",
+    "sources": {
+      "web/lib/custom-map-engine.ts": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704",
+      "web/lib/custom-map-tiles.ts": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546",
+      "web/lib/custom-map-camera.ts": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "web/lib/custom-map-painter.ts": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "web/lib/custom-map-tiles.worker.ts": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+      "web/lib/map-resource-pool.ts": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "web/lib/map-preload.ts": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "web/lib/catalog.generated.json": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49",
+      "tools/pages-preview/browser-map-loading.mjs": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64"
+    }
+  },
+  "build": {
+    "buildId": "ed67ad6cbd56a305",
+    "sourceCommit": null,
+    "base": "/tropnik/",
+    "origin": "https://orewn.github.io",
+    "pages": 718,
+    "inputsVerified": 2165,
+    "metadata": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/pages-preview/dist/build-info.json",
+      "bytes": 414188,
+      "sha256": "fab50067cab54f49f1ecbd794b1a08fddf3d75da09b312344ee9fe33a7ce8495"
+    },
+    "staticVerification": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/pages-preview/dist/verification.json",
+      "bytes": 1173,
+      "sha256": "29b36ef3c2785db816f02ce5aef4f30f5c8697763dda78ab6d5ae20a87d27ecb"
+    },
+    "httpVerification": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/pages-preview/dist/http-verification.json",
+      "bytes": 568,
+      "sha256": "feef21421125f1bb4a651ebd33b5cc94bf8141a838ef15f8c93fa96c4750959d"
+    },
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/loading-acquisition-static-build.log",
+      "bytes": 11920,
+      "sha256": "33113ae8f78ad61aaebd47c060c2fa9ee7a76b5dd096db4fefa36ca62b3fd832"
+    }
+  },
+  "releaseControl": {
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "android-0-4-32-preview-camera-handoff-20261113",
+      "version": "0.4.32-preview",
+      "versionCode": 15,
+      "notesFile": "tools/android-build/release-notes/0.4.32-preview.md"
+    },
+    "requestUnchanged": true,
+    "apk033Published": false
+  }
+}

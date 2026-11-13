@@ -1,0 +1,142 @@
+{
+  "sourceHash": "581ddaad54bed8d8711340019e51d012b82e5b3bfdfb333195c1ab47b0f75073",
+  "method": "Unmodified production engine with existing controlled-tile fixture; aggressively close and remove every unpinned mock raster to check the pin ownership contract",
+  "checks": [
+    {
+      "phase": "settled z14",
+      "pins": 2,
+      "pinKeys": 57,
+      "requests": 57,
+      "heldTiles": 57,
+      "loading": false,
+      "canonicalMode": "detail",
+      "readyCells": 0,
+      "error": "",
+      "drawImages": 57,
+      "idleRAF": 0
+    },
+    {
+      "phase": "new z11 attempt",
+      "pins": 3,
+      "pinKeys": 105,
+      "requests": 105,
+      "heldTiles": 57,
+      "loading": true,
+      "canonicalMode": "detail",
+      "readyCells": 0,
+      "error": "",
+      "drawImages": 57,
+      "idleRAF": 0
+    },
+    {
+      "phase": "23 ready pairs with final DEM pending",
+      "pins": 3,
+      "pinKeys": 105,
+      "requests": 105,
+      "heldTiles": 103,
+      "loading": true,
+      "canonicalMode": "detail",
+      "readyCells": 23,
+      "error": "",
+      "drawImages": 103,
+      "idleRAF": 0
+    },
+    {
+      "phase": "required neighbour failed; useful pairs retained",
+      "pins": 4,
+      "pinKeys": 105,
+      "requests": 105,
+      "heldTiles": 103,
+      "loading": false,
+      "canonicalMode": "detail",
+      "readyCells": 23,
+      "error": "Подробная карта загрузилась не полностью. Повторите загрузку.",
+      "drawImages": 103,
+      "idleRAF": 0
+    },
+    {
+      "phase": "explicit retry with cached pairs",
+      "pins": 5,
+      "pinKeys": 105,
+      "requests": 106,
+      "heldTiles": 103,
+      "loading": true,
+      "canonicalMode": "detail",
+      "readyCells": 23,
+      "error": "Подробная карта загрузилась не полностью. Повторите загрузку.",
+      "drawImages": 103,
+      "idleRAF": 0
+    },
+    {
+      "phase": "full canonical commit after retry",
+      "pins": 6,
+      "pinKeys": 49,
+      "requests": 106,
+      "heldTiles": 49,
+      "loading": false,
+      "canonicalMode": "detail",
+      "readyCells": 0,
+      "error": "",
+      "drawImages": 48,
+      "idleRAF": 0
+    },
+    {
+      "phase": "satellite pending retains full measured ground",
+      "pins": 7,
+      "pinKeys": 97,
+      "requests": 154,
+      "heldTiles": 49,
+      "loading": true,
+      "canonicalMode": "detail",
+      "readyCells": 0,
+      "error": "",
+      "drawImages": 49,
+      "idleRAF": 0
+    },
+    {
+      "phase": "full satellite commit",
+      "pins": 8,
+      "pinKeys": 49,
+      "requests": 154,
+      "heldTiles": 49,
+      "loading": false,
+      "canonicalMode": "satellite",
+      "readyCells": 0,
+      "error": "",
+      "drawImages": 25,
+      "idleRAF": 0
+    },
+    {
+      "phase": "opaque pair cannot cover retained satellite",
+      "pins": 10,
+      "pinKeys": 97,
+      "requests": 250,
+      "heldTiles": 49,
+      "loading": true,
+      "canonicalMode": "satellite",
+      "readyCells": 0,
+      "error": "",
+      "drawImages": 25,
+      "idleRAF": 0
+    },
+    {
+      "phase": "atomic measured handoff completes",
+      "pins": 11,
+      "pinKeys": 49,
+      "requests": 250,
+      "heldTiles": 49,
+      "loading": false,
+      "canonicalMode": "detail",
+      "readyCells": 0,
+      "error": "",
+      "drawImages": 48,
+      "idleRAF": 0
+    },
+    {
+      "phase": "destroy",
+      "loadingGround": null,
+      "children": 0,
+      "cachedBitmaps": 0
+    }
+  ]
+}

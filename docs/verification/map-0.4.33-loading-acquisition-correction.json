@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-13T12:51:52.877845+00:00",
+  "reviewer": "perf_skeptic",
+  "status": "PASS_EXACT_ACQUISITION_CORRECTION_REVIEW",
+  "openBlockers": [],
+  "oldGateSha256": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64",
+  "newGateSha256": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64",
+  "testSha256": "bde5f2d153955075f2893114de3568cfd63a220a9a761e33a2a06885c4851212",
+  "exactByteDifference": "One replacement: acquireMs:4000 -> acquireMs:15000. Every other gate byte unchanged; tests unchanged.",
+  "authorization": "Parent explicitly authorized web_release_skeptic to correct only acquisition after source-bound actual setup failure.",
+  "causeReceipt": {
+    "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/map-loading-43427936120-acquisition-review.json",
+    "sha256": "623f9a0c68a17ee2e79b4a0ba06c884e8d25de143fa84e2cb3eaee4c20190907",
+    "runId": 43427936120,
+    "sourceCommit": "e69fd49460a9657eba6fcde1455e0698101e586d",
+    "status": "FIXTURE_ACQUISITION_FAILURE_NOT_PRODUCT_RED"
+  },
+  "reason": "The actual 42-cell target produced 22 real primary DEM pauses in four seconds and no outside-grid halo. Acquisition is a bounded setup wait for that genuine fault opportunity; the previous four-second bound expired before it existed.",
+  "unchanged": {
+    "actualHoldMs": 8000,
+    "progressFromActualPauseMs": 6000,
+    "settleMs": 15000,
+    "route": "osm-relation-17013428",
+    "viewportProfile": "desktop-webgl 1440x1000 DPR1",
+    "plannerAndNativeZoom": true,
+    "externalHaloClassification": true,
+    "allPixelOracles": true,
+    "sourceAndArtifactValidation": true,
+    "cleanup": true,
+    "productionRuntime": true
+  },
+  "limits": "Fifteen seconds is an explicitly chosen existing setup deadline, not a measured first-halo arrival time. The first run ended too early to measure that arrival. A new exact-source diagnostic remains necessary; no result is transferred and no product RED is claimed.",
+  "actionsTaken": "Compared exact old and new source bytes, rehashed current files. No edits or new browser/CI/broad test run."
+}

@@ -41,6 +41,7 @@ export class CustomMapTiles {
   private timer?:ReturnType<typeof setTimeout>;
   private fetching=0;
   private reading=new Set<string>();
+  private failedSources=new Map<string,unknown>();
   private lastFetchKind?:CustomTileKind;
   private lastHaloWork=0;
   private lastDecodeKind?:CustomTileKind;
@@ -51,11 +52,14 @@ export class CustomMapTiles {
   private localFiles?:Promise<Set<string>>;
   private errors:Array<{key:string;message:string}>=[];
   constructor(private readonly softwareRaster=false){}
-  snapshot(){return{resident:this.cache.size,pending:this.jobs.size,fetching:this.fetching,decoding:!!this.active,enabled:this.enabled,stages:[...this.jobs.values()].reduce<Record<string,number>>((counts,{work})=>{counts[work.stage]=(counts[work.stage]||0)+1;return counts;},{}),errors:this.errors.map(error=>({...error}))};}
+  snapshot(){return{resident:this.cache.size,pending:this.jobs.size,fetching:this.fetching,decoding:!!this.active,enabled:this.enabled,failedSources:this.failedSources.size,stages:[...this.jobs.values()].reduce<Record<string,number>>((counts,{work})=>{counts[work.stage]=(counts[work.stage]||0)+1;return counts;},{}),errors:this.errors.map(error=>({...error}))};}
   get pending(){return this.jobs.size;}
   get resident(){return this.cache.size;}
   setActive(active:boolean){this.enabled=active;if(active)this.pump();}
   pin(keys:Iterable<string>){
+    // A failed neighbour is shared only within this view attempt. Replacing
+    // the map also keeps a late read from poisoning the next view or retry.
+    this.failedSources.clear();this.failedSources=new Map();
     this.pinned=new Set(keys);
     for(const [key,{work}] of this.jobs)if(!this.pinned.has(key)&&work.stage!=='decoding'){this.jobs.delete(key);work.controller.abort();work.bytes=undefined;work.halo=undefined;work.haloPlan=undefined;work.reject(new Error('Map view changed'));}
     this.evict(true);
@@ -99,8 +103,20 @@ export class CustomMapTiles {
     // The shared pool owns cache bytes, consumer leases and the global HTTP
     // cap. A source may occupy only one of this map's read slots: sibling
     // tiles park until its pooled result can be consumed without waiting.
+    const failures=this.failedSources;
+    if(failures.has(url))throw failures.get(url);
     this.reading.add(url);
     try{return await loadPublicBytes(url,priority,work.controller.signal);}
+    catch(error){
+      // The pool already completed its bounded network retry. Its rejected
+      // entry is removed, so adjacent DEMs would otherwise repeat the entire
+      // deadline for one unavailable border. Cancellation is not a failure.
+      if(failures===this.failedSources&&this.current(work)&&!work.controller.signal.aborted){
+        if(failures.size>=MAX_PENDING)failures.delete(failures.keys().next().value!);
+        failures.set(url,error);
+      }
+      throw error;
+    }
     finally{this.reading.delete(url);}
   }
   private async fetchPrimary(work:Work){
@@ -232,6 +248,6 @@ export class CustomMapTiles {
   destroy(){
     if(this.disposed)return;this.disposed=true;clearTimeout(this.timer);this.worker?.terminate();this.worker=undefined;
     for(const {work} of this.jobs.values()){work.controller.abort();work.bytes=undefined;work.halo=undefined;work.haloPlan=undefined;work.reject(new Error('Map resources released'));}
-    this.jobs.clear();for(const tile of this.cache.values())tile.bitmap.close();this.cache.clear();this.pinned.clear();this.active=undefined;
+    this.jobs.clear();for(const tile of this.cache.values())tile.bitmap.close();this.cache.clear();this.pinned.clear();this.failedSources.clear();this.active=undefined;
   }
 }

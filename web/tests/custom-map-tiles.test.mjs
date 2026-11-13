@@ -16,7 +16,7 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
   let pool;
   if(sourcePool){
     const poolModule={exports:{}};
-    vm.runInNewContext(poolCompiled,{module:poolModule,exports:poolModule.exports,Error,AbortController,DOMException,TextDecoder,Uint8Array,setTimeout,clearTimeout,
+    vm.runInNewContext(poolCompiled,{module:poolModule,exports:poolModule.exports,Error,TypeError,AbortController,DOMException,TextDecoder,Uint8Array,setTimeout,clearTimeout,
       require(name){if(name==='./map-config.ts')return{MAP_RESOURCE_LIMITS};throw new Error(`Unexpected pool dependency ${name}`);}});
     pool=new poolModule.exports.MapResourcePool({fetcher:(url,{signal})=>new Promise((resolve,reject)=>{
       const request={url,signal,resolve:(bytes,options)=>{request.done=true;resolve(new Response(bytes,options));},reject:error=>{request.done=true;reject(error);}};
@@ -254,6 +254,108 @@ test('cancelling one map preserves a shared primary-halo source lease and all ei
   assert.ok([...buffers].reduce((sum,bytes)=>sum+bytes.byteLength,0)<=8*1024*1024);
   assert.equal(env.store.resident,0,'late shared responses cannot republish the abandoned tile');
   assert.equal(other.pending,0);
+});
+
+test('three neighbouring DEMs share one timed-out external halo per view and a later visit recovers the real border',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const env=fixture({sourcePool:true}),outcomes=[];
+  t.after(async()=>{env.store.destroy();await Promise.all(outcomes);});
+  const requests=[200,201,202].map(y=>({kind:'relief',z:12,x:100,y}));
+  const target='https://tiles.mapterhorn.com/12/99/201.webp';
+  const begin=()=>{env.store.pin(requests.map(env.key));const results=requests.map(tile=>env.store.load(tile).catch(error=>error));outcomes.push(...results);return results;};
+  const deliver=async failTarget=>{
+    const payloads=[];let timeouts=0;
+    for(let step=0;env.store.pending&&step<100;step++){
+      await turn();let progress=false;
+      for(const read of env.downloads.filter(item=>!item.done)){
+        if(failTarget&&read.url===target)continue;
+        read.resolve(new Uint8Array([1,2,3,4]).buffer);progress=true;
+      }
+      await turn();
+      const worker=env.workers[0];
+      while(worker?.messages.length){
+        const payload=worker.messages[0],halo=payload.halo;
+        payloads.push(worker.complete({reliefCoverage:{sourceSize:512,required:8,available:halo.tiles.length,missing:halo.missing,resampled:[],missingDataFilled:false}}));progress=true;
+      }
+      await turn();
+      assert.ok(env.pool.stats().active<=3);assert.ok(preparedPayloads(env.store.snapshot())<=6);
+      if(!progress&&env.store.pending){
+        const active=env.downloads.filter(item=>!item.done);
+        assert.equal(active.length,1,'Only the deliberately held external source may remain');assert.equal(active[0].url,target);
+        t.mock.timers.tick(MAP_RESOURCE_LIMITS.timeoutMs);timeouts++;await turn();
+      }
+    }
+    assert.equal(env.store.pending,0);return{payloads,timeouts};
+  };
+  const first=begin(),failed=await deliver(true),tiles=await Promise.all(first);
+  assert.equal(env.downloads.filter(read=>read.url===target).length,1,'A failed source is shared after the pool removes its entry, instead of three serial deadlines');
+  assert.equal(failed.timeouts,1);assert.equal(failed.payloads.length,3);
+  assert.ok(tiles.every(tile=>tile.bitmap&&tile.reliefCoverage.required===8&&tile.reliefCoverage.available===7&&tile.reliefCoverage.missing.length===1));
+  assert.ok(tiles.every(tile=>tile.reliefCoverage.missing[0].reason==='unavailable'&&tile.reliefCoverage.missingDataFilled===false));
+  assert.deepEqual(Array.from(failed.payloads,payload=>`${payload.y}:${payload.halo.missing[0].dx},${payload.halo.missing[0].dy}`).sort(),['200:-1,1','201:-1,0','202:-1,-1']);
+  assert.equal(env.store.snapshot().errors.length,0,'Missing border measurements keep their existing explicit coverage semantics');
+  assert.equal(env.store.snapshot().failedSources,1);
+  env.store.pin([]);assert.ok(tiles.every(tile=>tile.bitmap.closed),'Unpinned partial bitmaps are discarded for a later measured retry');
+  const retry=begin(),recovered=await deliver(false),complete=await Promise.all(retry);
+  assert.equal(env.downloads.filter(read=>read.url===target).length,2,'The next view attempt really reads the formerly failed source again');
+  assert.equal(recovered.timeouts,0);assert.equal(recovered.payloads.length,3);
+  assert.ok(complete.every(tile=>tile.reliefCoverage.available===8&&tile.reliefCoverage.missing.length===0));
+  assert.ok(recovered.payloads.every(payload=>payload.halo.tiles.some(item=>item.sourceKey===target)));
+  assert.equal(env.store.snapshot().failedSources,0);
+});
+
+test('failed primary sharing preserves the pool network retry and an explicit new pin can recover the same source',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const env=fixture({sourcePool:true}),outcomes=[];
+  t.after(async()=>{env.store.destroy();await Promise.all(outcomes);});
+  const requests=[1600,1601,1602].map(x=>({kind:'vector',z:18,x,y:3207}));
+  env.store.pin(requests.map(env.key));
+  const first=requests.map(tile=>env.store.load(tile).catch(error=>error));outcomes.push(...first);await turn();
+  assert.equal(env.downloads.length,1);env.downloads[0].reject(new TypeError('Connection reset'));await turn();
+  t.mock.timers.tick(149);await turn();assert.equal(env.downloads.length,1);
+  t.mock.timers.tick(1);await turn();assert.equal(env.downloads.length,2);
+  assert.equal(env.downloads[1].signal,env.downloads[0].signal,'The pool still owns both physical attempts and their original deadline');
+  env.downloads[1].reject(new TypeError('Connection reset'));await turn();
+  assert.equal(env.downloads.length,2,'Other children share the failed physical sequence without recreating it');
+  assert.ok((await Promise.all(first)).every(error=>/Connection reset/.test(error.message)));
+  assert.equal(env.store.snapshot().failedSources,1);
+  env.store.pin(requests.map(env.key));assert.equal(env.store.snapshot().failedSources,0);
+  const retry=requests.map(tile=>env.store.load(tile));outcomes.push(...retry);await turn();
+  assert.equal(env.downloads.length,3);env.resolveDownloads();await turn();
+  for(let index=0;index<requests.length;index++){env.workers[0].complete();await turn();}
+  assert.ok((await Promise.all(retry)).every(tile=>tile.bitmap));assert.equal(env.store.pending,0);
+});
+
+test('a cancelled source and a retained old-attempt failure cannot poison new view demand',async t=>{
+  for(const cancel of [true,false]){
+    const env=fixture({sourcePool:true}),outcomes=[];t.after(async()=>{env.store.destroy();await Promise.all(outcomes);});
+    const first={kind:'vector',z:18,x:1600,y:3207},next={...first,x:1601};
+    env.store.pin([env.key(first)]);const old=env.store.load(first).catch(error=>error);outcomes.push(old);await turn();
+    assert.equal(env.downloads.length,1);
+    env.store.pin([...(cancel?[]:[env.key(first)]),env.key(next)]);
+    const current=env.store.load(next);outcomes.push(current);
+    if(cancel){assert.equal(env.downloads[0].signal.aborted,true);assert.match((await old).message,/view changed/);}
+    else{env.downloads[0].resolve(new ArrayBuffer(0),{status:503});assert.match((await old).message,/503/);}
+    await turn();assert.equal(env.downloads.length,2,'The new attempt can request the source regardless of late rejection from the prior read');
+    assert.equal(env.downloads[1].url,env.downloads[0].url);assert.equal(env.store.snapshot().failedSources,0);
+    env.resolveDownloads();await turn();env.workers[0].complete();assert.ok((await current).bitmap);
+  }
+});
+
+test('failed source retention is bounded and pin or destruction releases it',async t=>{
+  const env=fixture();t.after(()=>env.store.destroy());
+  const requests=Array.from({length:161},(_,x)=>({kind:'overview',z:12,x,y:200}));env.store.pin(requests.map(env.key));
+  for(const tile of requests){
+    const result=env.store.load(tile).catch(error=>error);await turn();const read=env.downloads.at(-1);read.done=true;read.reject(new Error('Source unavailable'));
+    assert.match((await result).message,/Source unavailable/);assert.ok(env.store.snapshot().failedSources<=160);
+  }
+  assert.equal(env.store.snapshot().failedSources,160);const before=env.downloads.length;
+  await assert.rejects(env.store.load(requests.at(-1)),/Source unavailable/);assert.equal(env.downloads.length,before,'A retained failure needs no new download');
+  const oldest=env.store.load(requests[0]).catch(error=>error);await turn();assert.equal(env.downloads.length,before+1,'The oldest failed URL leaves the bounded retention');
+  env.downloads.at(-1).done=true;env.downloads.at(-1).reject(new Error('Source unavailable'));await oldest;
+  assert.equal(env.store.snapshot().failedSources,160);env.store.pin(requests.map(env.key));assert.equal(env.store.snapshot().failedSources,0);
+  const last=env.store.load(requests[0]).catch(error=>error);await turn();env.downloads.at(-1).done=true;env.downloads.at(-1).reject(new Error('Source unavailable'));await last;
+  assert.equal(env.store.snapshot().failedSources,1);env.store.destroy();assert.equal(env.store.snapshot().failedSources,0);
 });
 
 test('duplicate consumers share one decode and source bytes stay owned by the fetch pool',async t=>{

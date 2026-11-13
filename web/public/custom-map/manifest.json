@@ -119,8 +119,8 @@
     },
     {
       "path": "web/lib/custom-map-engine.ts",
-      "sizeBytes": 74766,
-      "sha256": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862"
+      "sizeBytes": 78080,
+      "sha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704"
     },
     {
       "path": "web/lib/custom-map-label-inspection.ts",
@@ -149,8 +149,8 @@
     },
     {
       "path": "web/lib/custom-map-tiles.ts",
-      "sizeBytes": 17623,
-      "sha256": "c84c763cabacc7b7c4c7e620b3b5e2fdbcb401eb7fa8f4efcf776f854426a5e6"
+      "sizeBytes": 18538,
+      "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546"
     },
     {
       "path": "web/lib/custom-map-tiles.worker.ts",
@@ -318,12 +318,12 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "4f6ee5671c8cea6f29bbccacc1a4c8328665357dcecee9daf69e43466f07720c",
+  "sourceInputsSha256": "a863fe0f5d2379a4f5ff225341fe4fce5b163bd7f19413d53e785275c27303cb",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 22086,
-      "sha256": "0b779ccd13ffaab0ad5fe24478bf7bf4cb5424cfee5dbeedeb348e146527d11d"
+      "sha256": "b266c0cc6b36c42b53057bb8c61f1ece27816a8e2fe51adb5927effee7044224"
     },
     {
       "path": "catalogue.json",
@@ -331,9 +331,9 @@
       "sha256": "bad517373c27101ea8fe93423083f3636c11cf65824c2202f69cc2c2bf414aa3"
     },
     {
-      "path": "chunks/custom-map-entry-CRqFx0YH.js",
-      "sizeBytes": 147917,
-      "sha256": "88ec30c17fcf077285c1e9a6e95e3ed8c8394536d26ba4d85d756744c2c8a880"
+      "path": "chunks/custom-map-entry-BomP9hwf.js",
+      "sizeBytes": 150325,
+      "sha256": "1aecf81dfb73f52006d5ee141c4d63b5d3b09a38e6f8ad0b7a14f09fa4b45c12"
     },
     {
       "path": "index.html",
@@ -348,7 +348,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 224,
-      "sha256": "e22b5d92186e9f25d42496853f7cc8bc05566a957e72ec4de424a24ec4d3cdc7"
+      "sha256": "c71d76366b21caf49fb5735dc990b4f7afed1bfa52b23c5c713746df9484693d"
     },
     {
       "path": "map.css",

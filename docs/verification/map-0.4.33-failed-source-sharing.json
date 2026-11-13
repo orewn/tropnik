@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded-map-source-failure-sharing-review",
+  "baseCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "status": "independently-reviewed-pass-awaiting-integrated-browser-witness",
+  "ownedFiles": [
+    {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-tiles.ts",
+      "bytes": 18538,
+      "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546"
+    },
+    {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-tiles.test.mjs",
+      "bytes": 43967,
+      "sha256": "af16792bab5506b73d589b4aa92c669be0f8536a11896f90f6c4720fdd9eacde"
+    }
+  ],
+  "baselineProductionStoreSha256": "c84c763cabacc7b7c4c7e620b3b5e2fdbcb401eb7fa8f4efcf776f854426a5e6",
+  "mechanism": {
+    "failure": "MapResourcePool removes a rejected entry. Three adjacent relief tiles then serially reacquire the same unavailable external DEM source, each receiving a new full timeout.",
+    "fix": "CustomMapTiles shares completed source rejection within the current pin scope, after the shared pool has finished its own bounded physical retry sequence.",
+    "retention": {
+      "maxURLs": 160,
+      "overflow": "evict oldest retained failure",
+      "scopeReset": "each pin() first clears obsolete failures, then replaces the Map to preserve epoch identity; destroy() clears the current map",
+      "lateReadProtection": "only the captured map that is still current may record a rejection",
+      "liveReadProtection": "current work and non-aborted consumer signal are both required"
+    },
+    "diagnosticField": "snapshot().failedSources",
+    "unchanged": [
+      "3 concurrent tile-source reads",
+      "3 concurrent global HTTP reads",
+      "6 prepared payloads",
+      "15000ms resource deadline",
+      "150ms internal network retry delay and one retry for TypeError",
+      "source URL and precision",
+      "real measured halo data",
+      "relief missingDataFilled=false semantics",
+      "shared pool leases and global cache semantics",
+      "existing pinned bitmap lifetime"
+    ]
+  },
+  "verification": {
+    "red": {
+      "test": "three neighbouring DEMs share one timed-out external halo per view and a later visit recovers the real border",
+      "productionSource": "unmodified store bytes from 5fefc0da",
+      "result": "FAIL: actual physical requests 3, expected 1",
+      "evidence": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-failed-source-red.tap",
+        "bytes": 998,
+        "sha256": "2b843843ddf364ac212a63fadd7f4510dc84a0128d00e60de4e53f8d6020e748"
+      }
+    },
+    "green": {
+      "command": "node --experimental-strip-types --test tests/custom-map-tiles.test.mjs tests/map-resource-retry.test.mjs",
+      "cwd": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "tests": 38,
+      "pass": 38,
+      "fail": 0,
+      "cancelled": 0,
+      "evidence": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-failed-source-green.tap",
+        "bytes": 4345,
+        "sha256": "55f7db5252988f396a10323aaa12bdb9426a3dfcbefe6661490bf1d26d76ea35"
+      }
+    },
+    "checks": [
+      "single 15000ms logical timeout shared by three external-halo consumers",
+      "all three expose seven real neighbours and one explicit unavailable measurement",
+      "unpin discards partial bitmaps; next visit genuinely loads the formerly failed URL and restores all eight neighbours",
+      "pool retains its two physical TypeError attempts, same signal and original deadline",
+      "new pin retries and recovers a failed primary at the same URL",
+      "cancelled source does not poison next demand for the same URL",
+      "late failure of a retained previous-attempt read does not poison new attempt",
+      "160 retained failures maximum; oldest eviction, pin reset, and destroy cleanup",
+      "existing source sharing, cancellation, byte bounds, worker limits and pool retry gates pass"
+    ],
+    "diffCheck": "git diff --check -- web/lib/custom-map-tiles.ts web/tests/custom-map-tiles.test.mjs passed",
+    "fixtureCorrection": "The VM pool receives the host TypeError constructor so mocked fetch TypeError rejections share the same realm as its instanceof check; otherwise the test fixture would incorrectly suppress the production network retry."
+  },
+  "scopeLimits": [
+    "Existing completed partial-halo bitmap stays cached while pinned. Same-key engine retry does not rebuild it; this patch intentionally does not close a displayed bitmap. Primary retry and unpin-to-revisit halo repair are separately verified.",
+    "One shared failed sequence applies while the source remains in the bounded failure map. More than 160 distinct failed sources can evict an old failure and permit another attempt.",
+    "The source-based diagnosis uses virtual HTTP and worker clocks. Its 2505ms / 10110ms / 47110ms figures are synthetic mechanism demonstrations, not observed user latency or measured speedups.",
+    "No engine, renderer, worker, source pool, workflow, generated runtime or production deployment was edited by this subtask. Engine progressive rendering and real browser loading witness are owned by other agents."
+  ],
+  "syntheticDiagnosis": {
+    "script": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-loading-pipeline-diagnosis.mjs",
+      "bytes": 8862,
+      "sha256": "de390bc8e4562cc7f235cfc01b10bb5e42d19df9b493dbda4f3448f46b3befb7"
+    },
+    "raw": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-loading-pipeline-diagnosis.json",
+      "bytes": 112619,
+      "sha256": "4970402a27c71db428b97ba4a8cab5977988a6c440bb4ee73642214d8658246a"
+    },
+    "assumptions": "Immutable 5fef planner/store/pool, approximate screenshot viewport1435x824, exact catalogue center, zoom11,100ms successful HTTP,5ms synthetic worker,immediate metadata. No provider network or real raster worker."
+  },
+  "originalImplementedVariant": {
+    "ownedFiles": [
+      {
+        "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-tiles.ts",
+        "bytes": 18511,
+        "sha256": "feeaa2e9c2b57322f39d49d3e6dfde3037f0a76886a5a5b9c15bdcefeea91132"
+      },
+      {
+        "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-tiles.test.mjs",
+        "bytes": 43967,
+        "sha256": "af16792bab5506b73d589b4aa92c669be0f8536a11896f90f6c4720fdd9eacde"
+      }
+    ],
+    "focusedGreen": {
+      "command": "node --experimental-strip-types --test tests/custom-map-tiles.test.mjs tests/map-resource-retry.test.mjs",
+      "cwd": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "tests": 38,
+      "pass": 38,
+      "fail": 0,
+      "cancelled": 0,
+      "evidence": {
+        "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-failed-source-green.tap",
+        "bytes": 4345,
+        "sha256": "55f7db5252988f396a10323aaa12bdb9426a3dfcbefe6661490bf1d26d76ea35"
+      }
+    },
+    "receiptSha256BeforeReviewUpdate": "229429f05043f4211bfb3d1ff06d704db8b24392883a0e9997fce1b1f8b760d2"
+  },
+  "independentReview": {
+    "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-failed-source-independent-review.json",
+    "bytes": 4907,
+    "sha256": "e98b27ee7c33c0fcb81759ee8a23f7a165ea8522ba6ff53995857c6258a654ba",
+    "status": "passed",
+    "resolvedFinding": {
+      "category": "retained-failure-memory-bound",
+      "originalStoreSha256": "feeaa2e9c2b57322f39d49d3e6dfde3037f0a76886a5a5b9c15bdcefeea91132",
+      "observation": "Replacing the Map alone left obsolete failure entries reachable through in-flight readSource captures. The current snapshot count was bounded but total old-epoch retention could exceed160.",
+      "resolution": "Root added failedSources.clear() before assigning the new Map in pin(). This releases obsolete entries immediately while preserving Map identity as the epoch guard.",
+      "reviewerEditedProductionFiles": false
+    },
+    "finalVerification": {
+      "startedAt": "2026-11-13T12:29:30.055369+00:00",
+      "command": [
+        "node",
+        "--experimental-strip-types",
+        "--test",
+        "tests/custom-map-tiles.test.mjs",
+        "tests/map-resource-retry.test.mjs"
+      ],
+      "exitCode": 0,
+      "frozenFilesUnchanged": true,
+      "files": [
+        {
+          "path": "web/lib/custom-map-tiles.ts",
+          "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546"
+        },
+        {
+          "path": "web/tests/custom-map-tiles.test.mjs",
+          "sha256": "af16792bab5506b73d589b4aa92c669be0f8536a11896f90f6c4720fdd9eacde"
+        }
+      ],
+      "log": "/workspace/scratch/686c5dc59f67/perf-diagnostic/tile-failed-source-independent-final-tests.log",
+      "logSha256": "6c4e6b72e43b037b193348c812b9bce0f4a4941a1172a7b6ef990bab3ecda1ff"
+    },
+    "tests": 38,
+    "pass": 38
+  }
+}

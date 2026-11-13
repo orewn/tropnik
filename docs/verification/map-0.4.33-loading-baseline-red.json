@@ -1,0 +1,452 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-bound-baseline-expected-progress-red",
+  "runId": 43428798267,
+  "jobId": 131896774749,
+  "sourceCommit": "57bdfd9630a464d7241040ded27b3cba071552fe",
+  "tree": "7757cbd427a7aa5fa4cd029e29b6b092af25c5bd",
+  "parent": "e69fd49460a9657eba6fcde1455e0698101e586d",
+  "productionBaselineCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "buildId": "5c78c2796ece628a",
+  "artifact": {
+    "id": 14037534354,
+    "name": "tropnik-map-loading-baseline-43428798267-1",
+    "size_in_bytes": 3653628,
+    "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14037534354",
+    "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14037534354/zip",
+    "expired": false,
+    "created_at": "2026-11-13T12:53:39Z",
+    "expires_at": "2026-11-20T12:53:38Z",
+    "updated_at": "2026-11-13T12:53:39Z",
+    "digest": "sha256:fa35c1bcac359298fdf87aa4deb6411b88920f19ce88aa175b5b5fd78fd2ac15",
+    "workflow_run": {
+      "id": 43428798267,
+      "repository_id": 1447843944,
+      "head_repository_id": 1447843944,
+      "head_branch": "verify/map-loading-20261113",
+      "head_sha": "57bdfd9630a464d7241040ded27b3cba071552fe"
+    }
+  },
+  "archive": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43428798267/artifact-14037534354.zip",
+    "bytes": 3653628,
+    "sha256": "fa35c1bcac359298fdf87aa4deb6411b88920f19ce88aa175b5b5fd78fd2ac15"
+  },
+  "report": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43428798267/zip-members/dist/browser-map-loading-verification.json",
+    "bytes": 635729,
+    "sha256": "941bfed82ba6e79fdaade2de7513e80a5e021416c971b1d268e44af809ef4649"
+  },
+  "buildInfo": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43428798267/zip-members/dist/build-info.json",
+    "bytes": 413847,
+    "sha256": "ceadc18cfc7539f715ff7048201946d9d124079794d8a8f7fdad022d0d6ad033"
+  },
+  "sourceCompare": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43428798267/source-compare.json",
+    "bytes": 15398,
+    "sha256": "539924a78d8d7a1866e3b06cd71a71f22859837280852d580b5f3006846f572b"
+  },
+  "sourceBindings": [
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "bytes": 74766,
+      "sha256": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862",
+      "sourceBinding": "exact prior committed bytes, unchanged in independently fetched GitHub comparison",
+      "buildInputMatch": true
+    },
+    {
+      "path": "web/lib/custom-map-tiles.ts",
+      "bytes": 17623,
+      "sha256": "c84c763cabacc7b7c4c7e620b3b5e2fdbcb401eb7fa8f4efcf776f854426a5e6",
+      "sourceBinding": "exact prior committed bytes, unchanged in independently fetched GitHub comparison",
+      "buildInputMatch": true
+    },
+    {
+      "path": "web/lib/custom-map-camera.ts",
+      "bytes": 21528,
+      "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "sourceBinding": "exact prior committed bytes, unchanged in independently fetched GitHub comparison",
+      "buildInputMatch": true
+    },
+    {
+      "path": "web/lib/custom-map-painter.ts",
+      "bytes": 26868,
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "sourceBinding": "exact prior committed bytes, unchanged in independently fetched GitHub comparison",
+      "buildInputMatch": true
+    },
+    {
+      "path": "web/lib/custom-map-tiles.worker.ts",
+      "bytes": 15542,
+      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+      "sourceBinding": "exact prior committed bytes, unchanged in independently fetched GitHub comparison",
+      "buildInputMatch": true
+    },
+    {
+      "path": "web/lib/map-resource-pool.ts",
+      "bytes": 11161,
+      "sha256": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "sourceBinding": "exact prior committed bytes, unchanged in independently fetched GitHub comparison",
+      "buildInputMatch": true
+    },
+    {
+      "path": "web/lib/map-preload.ts",
+      "bytes": 6548,
+      "sha256": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "sourceBinding": "exact prior committed bytes, unchanged in independently fetched GitHub comparison",
+      "buildInputMatch": true
+    },
+    {
+      "path": "web/lib/catalog.generated.json",
+      "bytes": 993152,
+      "sha256": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49",
+      "sourceBinding": "exact prior committed bytes, unchanged in independently fetched GitHub comparison",
+      "buildInputMatch": true
+    },
+    {
+      "path": "tools/pages-preview/browser-map-loading.mjs",
+      "bytes": 54368,
+      "sha256": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64",
+      "sourceBinding": "exact frozen bytes match GitHub comparison blob identity",
+      "buildInputMatch": true
+    }
+  ],
+  "productionDirectoriesUnchanged": [
+    "web",
+    "android",
+    "contracts",
+    "data"
+  ],
+  "classification": {
+    "category": "expected-old-engine-progress-regression",
+    "productRED": true,
+    "gatePASS": false,
+    "candidateGREEN": false,
+    "releaseEligible": false,
+    "code": "MAP_LOADING_NO_PAINTED_PROGRESS",
+    "phase": "paired-progress-before-halo-release",
+    "lastProgressAssertion": "No independently painted loading ground before the held halo completed",
+    "basis": "The real external halo was acquired and stayed held across a stable native target view. Canonical detail/relief stayed exactly at the prior z12 batch; loading ground stayed absent. Independent target cells had all ten physical source requests complete while the held dependency remained unfinished. This is the intended old-engine regression, with no setup/transport/cleanup failure."
+  },
+  "actualFault": {
+    "url": "https://tiles.mapterhorn.com/11/1345/620.webp",
+    "cell": {
+      "z": 11,
+      "x": 1345,
+      "y": 620
+    },
+    "requestId": "interception-job-80.0",
+    "networkId": "2572.449",
+    "matchingPhysicalRequests": 1,
+    "acquiredAfterEnableMs": 8489.051907000001,
+    "stableAfterPauseMs": 219.26262799999677,
+    "lastPendingFrameAfterPauseMs": 5976,
+    "releasedAfterPauseMs": 6033.759976999994,
+    "holdLimitMs": 8000,
+    "progressLimitMs": 6000,
+    "releaseReason": "failure",
+    "lastPreReleaseHeldState": {
+      "schemaVersion": 1,
+      "kind": "one-real-external-dem-halo",
+      "timeoutMs": 8000,
+      "acquireTimeoutMs": 15000,
+      "enabledAtEpochMs": 1794574403102,
+      "enabledAtMonotonicMs": 25744.344421,
+      "observed": 64,
+      "held": {
+        "requestId": "interception-job-80.0",
+        "networkId": "2572.449",
+        "url": "https://tiles.mapterhorn.com/11/1345/620.webp",
+        "cell": {
+          "z": 11,
+          "x": 1345,
+          "y": 620
+        },
+        "pausedAtEpochMs": 1794574411591,
+        "pausedAtMonotonicMs": 34233.396328,
+        "resumedAtEpochMs": null,
+        "resumedAtMonotonicMs": null
+      },
+      "pending": 1,
+      "closed": false,
+      "reason": null,
+      "errors": []
+    },
+    "releaseErrors": []
+  },
+  "nativeView": {
+    "selection": {
+      "route": "osm-relation-17013428",
+      "region": "territory-28173009B90469334921421",
+      "title": "Лубяной тракт"
+    },
+    "camera": {
+      "center": [
+        56.477125954490674,
+        57.97720349667858
+      ],
+      "zoom": 10.486151797145155,
+      "bearingDegrees": 0
+    },
+    "plannedCamera": {
+      "center": [
+        56.47712595449073,
+        57.97720349667858
+      ],
+      "zoom": 10.486151797145155,
+      "bearingDegrees": 0
+    },
+    "viewport": {
+      "width": 1041,
+      "height": 928,
+      "padding": {
+        "top": 96,
+        "right": 88,
+        "bottom": 96,
+        "left": 40
+      }
+    },
+    "rect": {
+      "left": 384,
+      "top": 72,
+      "right": 1425,
+      "bottom": 1000,
+      "width": 1041,
+      "height": 928
+    },
+    "moving": false,
+    "actualTrustedMouseActions": [
+      {
+        "selector": ".map-controls button[aria-label=\"Уменьшить масштаб\"]",
+        "point": {
+          "left": 1353,
+          "top": 208,
+          "width": 44,
+          "height": 44,
+          "x": 1375,
+          "y": 230,
+          "unobscured": true,
+          "animating": false
+        },
+        "events": [
+          {
+            "type": "pointerdown",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 7085.900000000009,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "pointerup",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 7088.5,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "click",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 7088.700000000012,
+            "label": "Уменьшить масштаб"
+          }
+        ]
+      },
+      {
+        "selector": ".map-controls button[aria-label=\"Уменьшить масштаб\"]",
+        "point": {
+          "left": 1353,
+          "top": 208,
+          "width": 44,
+          "height": 44,
+          "x": 1375,
+          "y": 230,
+          "unobscured": true,
+          "animating": false
+        },
+        "events": [
+          {
+            "type": "pointerdown",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 12586.900000000009,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "pointerup",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 12587.600000000006,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "click",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 12587.600000000006,
+            "label": "Уменьшить масштаб"
+          }
+        ]
+      },
+      {
+        "selector": ".map-controls button[aria-label=\"Уменьшить масштаб\"]",
+        "point": {
+          "left": 1353,
+          "top": 208,
+          "width": 44,
+          "height": 44,
+          "x": 1375,
+          "y": 230,
+          "unobscured": true,
+          "animating": false
+        },
+        "events": [
+          {
+            "type": "pointerdown",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 24543,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "pointerup",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 24543.5,
+            "label": "Уменьшить масштаб"
+          },
+          {
+            "type": "click",
+            "trusted": true,
+            "pointerType": "mouse",
+            "pointerId": 1,
+            "time": 24543.600000000006,
+            "label": "Уменьшить масштаб"
+          }
+        ]
+      }
+    ],
+    "coverage": {
+      "version": "7035c10e633effb2",
+      "lod": "local",
+      "cells": [
+        "0309-3"
+      ],
+      "pending": 0,
+      "error": "",
+      "ready": true,
+      "revision": 2
+    },
+    "catalogueOverlay": {
+      "sources": 6,
+      "preparedSources": 1,
+      "preparedParts": 8,
+      "exactSources": 0,
+      "currentViewportReady": true,
+      "pending": false,
+      "error": ""
+    },
+    "serviceWorkerController": "http://127.0.0.1:41449/tropnik/sw.js"
+  },
+  "ground": {
+    "canonicalUnchanged": {
+      "detail": true,
+      "relief": true
+    },
+    "canonicalDetailTiles": 42,
+    "canonicalReliefTiles": 42,
+    "canonicalLevel": 12,
+    "requestedLevel": 11,
+    "requestedCells": 42,
+    "loadingGround": null,
+    "beforeDrawRevision": 57,
+    "heldDrawRevision": 71,
+    "visibleCssPixels": 671968,
+    "retainedCanonicalCssPixels": 337521.7663261398,
+    "stagedProgressCssPixels": 0
+  },
+  "preReleaseNetwork": {
+    "records": 106,
+    "completedHTTP200": 103,
+    "pending": 3,
+    "failed": 0,
+    "completedVectors": 42,
+    "completedDEM": 61,
+    "overflow": 0,
+    "fromDiskCache": 0,
+    "fromServiceWorker": 0,
+    "servedFromCache": 0,
+    "fullyDownloadedIndependentNeighborhoodsAtPause": 17,
+    "fullyDownloadedIndependentNeighborhoodsAtLastPending": 29,
+    "fullyDownloadedOutsideOldFootprintCellsAtLastPending": 19,
+    "rawDependencyReceipt": {
+      "path": "/workspace/scratch/686c5dc59f67/map-loading43428798267/network-independent-cell-dependencies.json",
+      "bytes": 15832,
+      "sha256": "abed266c62ae56a54fe9e9a13e3f9c8a89665ff59a1b3871530655171fb39fac"
+    }
+  },
+  "screenshots": [
+    {
+      "phase": "route",
+      "file": "map-loading-route.png",
+      "bytes": 1144770,
+      "sha256": "e32d8bcf6be3498428c4e777f3e01f8c09b6f5f6d340d57d92a0670a25eb94b5",
+      "width": 1440,
+      "height": 1000,
+      "actualBytesSHAAndDimensionsMatch": true
+    },
+    {
+      "phase": "before",
+      "file": "map-loading-before.png",
+      "bytes": 1587188,
+      "sha256": "fe521757a409fd5649bc8c7d8732c5bacd25b7a10669c7534fc765bf25590d36",
+      "width": 1440,
+      "height": 1000,
+      "actualBytesSHAAndDimensionsMatch": true
+    },
+    {
+      "phase": "failure",
+      "file": "map-loading-failure.png",
+      "bytes": 753173,
+      "sha256": "67cf312754d3cccaf0c8c02b02150765fd31876553a507344739059268d14774",
+      "width": 1440,
+      "height": 1000,
+      "actualBytesSHAAndDimensionsMatch": true
+    }
+  ],
+  "failureScreenshotAfterRelease": true,
+  "visualObservation": "The failure PNG shows the old central detailed rectangle surrounded by flat green fallback, with the real route and loading status. It was captured after release and is only corroborating geometry, not a held-phase pixel witness.",
+  "browser": {
+    "product": "Chrome/157.0.8103.50",
+    "runnerImage": {
+      "os": "ubuntu24",
+      "version": "20261111.370.1"
+    },
+    "cleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 101.88396100000682
+    }
+  },
+  "pageErrors": [],
+  "localHttpErrors": [],
+  "scopeLimits": [
+    "Complete vector+9 DEM network dependencies prove physical source availability, not worker decode completion; no decoder timestamps were observed.",
+    "Actual held snapshots and lastPending Network are pre-release; the failure PNG is explicitly post-release. No pending/final pixel comparison exists for this failed baseline.",
+    "The old inspection resource queue is published at draws and must not be interpreted as a live queue at the verdict.",
+    "This is a genuine Chromium regression under one deliberate bounded source delay; it is not a measurement of the user network or a green result for the candidate.",
+    "Current candidate still requires its exact-source real loading gate and unchanged full Pages gates."
+  ]
+}

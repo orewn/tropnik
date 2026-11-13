@@ -1,0 +1,2524 @@
+{
+  "sourceCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "workflowRun": 43422618701,
+  "jobArtifact": 14036490018,
+  "designArtifact": 14036385271,
+  "sourceSha256": "2ea45b24821d4fd530cf8bf75f3487861ede0f53f228cb492ae2e14b410841e6",
+  "rawCoastFile": "/workspace/scratch/686c5dc59f67/pages43422618701/design/zip-members/android-portrait-coast.json",
+  "rawCoastSha256": "cc1059d6feeaf0f081a54e22c7e218fd708b9e5bfcc284703ac81eb308260b07",
+  "rawFailureFile": "/workspace/scratch/686c5dc59f67/pages43422618701/failure/zip-members/browser-failure.json",
+  "rawFailureSha256": "24e160edb20c5db9797e83bb6b4325f06dd4e790e1479098997fb15dcd9666a3",
+  "finding": "The old witness zoomed six times about the visible-ground anchor before recentering at the unchanged full-Canvas center. The resulting displacement requires 13 bounded correction attempts, while the original total budget allows 12. All observed native pans moved the actual camera correctly.",
+  "initialCenteredCamera": {
+    "longitude": 26.95967506087257,
+    "latitude": 60.06331589470519,
+    "zoom": 5.621307459879889,
+    "tileSize": 256,
+    "centerX": 206,
+    "centerY": 423.5
+  },
+  "postSixZoomsCamera": {
+    "longitude": 26.17226858544643,
+    "latitude": 60.702588094188826,
+    "zoom": 11.621307459879889,
+    "tileSize": 256,
+    "centerX": 206,
+    "centerY": 423.5
+  },
+  "predictedPostSixZoomsCamera": {
+    "longitude": 26.172268585446435,
+    "latitude": 60.702588094188826,
+    "zoom": 11.621307459879889
+  },
+  "viewport": {
+    "width": 412,
+    "height": 847,
+    "padding": {
+      "top": 88,
+      "right": 80,
+      "bottom": 180,
+      "left": 24
+    }
+  },
+  "visibleAnchorOffsetFromCanvasCenterPx": {
+    "x": -28.0,
+    "y": -46.0
+  },
+  "expectedAccumulatedTargetOffsetPx": {
+    "x": 1764.0,
+    "y": 2898.0
+  },
+  "panAttemptBudget": 12,
+  "requiredAttempts": 13,
+  "actualPans": [
+    {
+      "attempt": 0,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.17226858544643,
+        "latitude": 60.702588094188826,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.236635940524224,
+        "latitude": 60.65080018463716,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999289577383
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -1.000710483367584e-06
+      },
+      "targetBeforePx": {
+        "x": 1764.0003116824469,
+        "y": 2898.0004251436512
+      },
+      "targetAfterPx": {
+        "x": 1619.8003109194026,
+        "y": 2661.100431247167
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 41420,
+          "timestamp": 41405.30000000005,
+          "pointerType": "touch",
+          "pointerId": 11,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 42046.30000000005,
+          "timestamp": 42045.59999999998,
+          "pointerType": "touch",
+          "pointerId": 11,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.0021229999838396907,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.471955000015441
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.4083339253522,
+          "sentOffsetMs": 15.475589999987278,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.1589260000037
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.6666678507044,
+          "sentOffsetMs": 73.29073599999538,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.2562560000224
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.92500177605655,
+          "sentOffsetMs": 106.40004400000907,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.61537200002931
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.18333570140874,
+          "sentOffsetMs": 139.73028700001305,
+          "status": "fulfilled",
+          "ackOffsetMs": 147.97977600002196
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.4416696267609,
+          "sentOffsetMs": 173.12060299998848,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.25200700003188
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.7000035521131,
+          "sentOffsetMs": 206.36548099998618,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.63605000003008
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.9583374774653,
+          "sentOffsetMs": 239.7833630000241,
+          "status": "fulfilled",
+          "ackOffsetMs": 247.9835590000148
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166714028175,
+          "sentOffsetMs": 273.748311000003,
+          "status": "fulfilled",
+          "ackOffsetMs": 283.76301300001796
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.4750053281697,
+          "sentOffsetMs": 308.90939500002423,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.5650630000164
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333925352185,
+          "sentOffsetMs": 339.68957099999534,
+          "status": "fulfilled",
+          "ackOffsetMs": 347.9588680000161
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.991673178874,
+          "sentOffsetMs": 373.092845999985,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.383284999989
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.2500071042262,
+          "sentOffsetMs": 406.4995019999915,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.5707779999939
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.2500071042262,
+          "sentOffsetMs": 640.0254989999812,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.3408260000288
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 1,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.236635940524224,
+        "latitude": 60.65080018463716,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.301003295601987,
+        "latitude": 60.59892889506733,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999291828445
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -9.781998642210965e-07
+      },
+      "targetBeforePx": {
+        "x": 1619.8003109194026,
+        "y": 2661.100431247167
+      },
+      "targetAfterPx": {
+        "x": 1475.6003101566125,
+        "y": 2424.2004373506825
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 45319.70000000007,
+          "timestamp": 45305,
+          "pointerType": "touch",
+          "pointerId": 12,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 45946.30000000005,
+          "timestamp": 45945.40000000002,
+          "pointerType": "touch",
+          "pointerId": 12,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.002394000010099262,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.387940999993589
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.40833392347633,
+          "sentOffsetMs": 15.392487999983132,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.18463800003519
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.66666784695263,
+          "sentOffsetMs": 73.31719899998279,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.4247580000083
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.92500177042893,
+          "sentOffsetMs": 106.56037399999332,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.70877399999881
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.18333569390524,
+          "sentOffsetMs": 139.81743900000583,
+          "status": "fulfilled",
+          "ackOffsetMs": 148.0432129999972
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.44166961738154,
+          "sentOffsetMs": 173.14366599998903,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.31990699999733
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.7000035408578,
+          "sentOffsetMs": 206.41778700001305,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.6162600000389
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.95833746433414,
+          "sentOffsetMs": 239.76149800000712,
+          "status": "fulfilled",
+          "ackOffsetMs": 248.17269500001566
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166713878104,
+          "sentOffsetMs": 273.28181100002257,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.45884300000034
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.4750053112867,
+          "sentOffsetMs": 306.6039630000014,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.83127900003456
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.733339234763,
+          "sentOffsetMs": 339.95796100003645,
+          "status": "fulfilled",
+          "ackOffsetMs": 348.15810699999565
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167315823928,
+          "sentOffsetMs": 373.27631699998165,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.5312639999902
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.25000708171555,
+          "sentOffsetMs": 406.647089999984,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.7674180000322
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000708171558,
+          "sentOffsetMs": 640.2436290000333,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.6320929999929
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 2,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.301003295601987,
+        "latitude": 60.59892889506733,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.36537065067978,
+        "latitude": 60.546974133817976,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999294515385
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -9.513304632946529e-07
+      },
+      "targetBeforePx": {
+        "x": 1475.6003101566125,
+        "y": 2424.2004373506825
+      },
+      "targetAfterPx": {
+        "x": 1331.400309393568,
+        "y": 2187.300443454198
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 49436.20000000007,
+          "timestamp": 49421.70000000007,
+          "pointerType": "touch",
+          "pointerId": 13,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 50062.70000000007,
+          "timestamp": 50061.90000000002,
+          "pointerType": "touch",
+          "pointerId": 13,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.0019730000058189034,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.090136999962851
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.4083339212372,
+          "sentOffsetMs": 15.09464399999706,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.11584499996388
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.6666678424744,
+          "sentOffsetMs": 73.25489799998468,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.23952499998268
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.9250017637116,
+          "sentOffsetMs": 106.38469799997984,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.57105099997716
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.18333568494876,
+          "sentOffsetMs": 139.71790799999144,
+          "status": "fulfilled",
+          "ackOffsetMs": 147.86237899999833
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.44166960618594,
+          "sentOffsetMs": 172.99173899996094,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.1931040000054
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.7000035274231,
+          "sentOffsetMs": 206.34157300001243,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.4840710000135
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.95833744866025,
+          "sentOffsetMs": 239.63476300000912,
+          "status": "fulfilled",
+          "ackOffsetMs": 247.83854199998314
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166713698974,
+          "sentOffsetMs": 272.97853799996665,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.19665800000075
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.4750052911346,
+          "sentOffsetMs": 306.3380959999631,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.4944050000049
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333921237182,
+          "sentOffsetMs": 339.6371649999637,
+          "status": "fulfilled",
+          "ackOffsetMs": 347.8410539999604
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.991673133609,
+          "sentOffsetMs": 372.96536599996034,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.18998600001214
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.25000705484618,
+          "sentOffsetMs": 406.32866100000683,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.50112299999455
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000705484618,
+          "sentOffsetMs": 639.9432389999856,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.3096019999939
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 3,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.36537065067978,
+        "latitude": 60.546974133817976,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.429738005757542,
+        "latitude": 60.494935809354565,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999297788887
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -9.185954468193813e-07
+      },
+      "targetBeforePx": {
+        "x": 1331.400309393568,
+        "y": 2187.300443454198
+      },
+      "targetAfterPx": {
+        "x": 1187.2003086307782,
+        "y": 1950.400449557714
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 54852.70000000007,
+          "timestamp": 54837.90000000002,
+          "pointerType": "touch",
+          "pointerId": 14,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 55479.20000000007,
+          "timestamp": 55478.30000000005,
+          "pointerType": "touch",
+          "pointerId": 14,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.0020130000193603337,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.453304000024218
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.4083339185093,
+          "sentOffsetMs": 15.456447999982629,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.1230949999881
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.66666783701857,
+          "sentOffsetMs": 73.23455900000408,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.42002100002719
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.92500175552783,
+          "sentOffsetMs": 106.538796000008,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.68961699999636
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.1833356740371,
+          "sentOffsetMs": 139.79808700003196,
+          "status": "fulfilled",
+          "ackOffsetMs": 147.9616870000027
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.44166959254636,
+          "sentOffsetMs": 173.08175300003495,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.39171799999895
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.70000351105557,
+          "sentOffsetMs": 206.50149900000542,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.76613800000632
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.95833742956484,
+          "sentOffsetMs": 239.86970899999142,
+          "status": "fulfilled",
+          "ackOffsetMs": 248.03007400000934
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166713480741,
+          "sentOffsetMs": 273.1471850000089,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.5210139999981
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.47500526658337,
+          "sentOffsetMs": 306.6384960000287,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.812871000031
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333918509266,
+          "sentOffsetMs": 339.9157209999976,
+          "status": "fulfilled",
+          "ackOffsetMs": 348.1499850000255
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167310360193,
+          "sentOffsetMs": 373.270651000028,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.8356919999933
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.25000702211113,
+          "sentOffsetMs": 406.98499999998603,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.80784800002584
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000702211116,
+          "sentOffsetMs": 640.2418250000337,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.6356820000219
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 4,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.429738005757542,
+        "latitude": 60.494935809354565,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.494105360835334,
+        "latitude": 60.44281383027086,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999301852518
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -8.779591382790386e-07
+      },
+      "targetBeforePx": {
+        "x": 1187.2003086307782,
+        "y": 1950.400449557714
+      },
+      "targetAfterPx": {
+        "x": 1043.0003078677337,
+        "y": 1713.5004556612296
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 57702.40000000002,
+          "timestamp": 57687.80000000005,
+          "pointerType": "touch",
+          "pointerId": 15,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 58330.40000000002,
+          "timestamp": 58328.40000000002,
+          "pointerType": "touch",
+          "pointerId": 15,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.0025840000016614795,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.212803000002168
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.4083339151229,
+          "sentOffsetMs": 15.215687000018079,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.016700999985915
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.66666783024584,
+          "sentOffsetMs": 73.15515399997821,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.35923300002469
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.9250017453687,
+          "sentOffsetMs": 106.47559300001012,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.6294179999968
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.18333566049165,
+          "sentOffsetMs": 139.7443360000034,
+          "status": "fulfilled",
+          "ackOffsetMs": 147.92577099998016
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.4416695756145,
+          "sentOffsetMs": 173.04484500002582,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.2668709999998
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.70000349073746,
+          "sentOffsetMs": 206.38580500002718,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.58355400001165
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.95833740586033,
+          "sentOffsetMs": 239.70532200002344,
+          "status": "fulfilled",
+          "ackOffsetMs": 247.90975200000685
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166713209832,
+          "sentOffsetMs": 273.02699300000677,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.2443019999773
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.47500523610614,
+          "sentOffsetMs": 306.3374569999869,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.57138999999734
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333915122905,
+          "sentOffsetMs": 339.6918660000083,
+          "status": "fulfilled",
+          "ackOffsetMs": 347.8934620000073
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167306635198,
+          "sentOffsetMs": 373.0124760000035,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.2447960000136
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.25000698147485,
+          "sentOffsetMs": 406.36424199998146,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.58313300000736
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000698147485,
+          "sentOffsetMs": 640.0702269999892,
+          "status": "fulfilled",
+          "ackOffsetMs": 642.8843409999972
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 5,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.494105360835334,
+        "latitude": 60.44281383027086,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.558472715913098,
+        "latitude": 60.39060810529034,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.8999930704557
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389643955
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -8.25983846652889e-07
+      },
+      "targetBeforePx": {
+        "x": 1043.0003078677337,
+        "y": 1713.5004556612296
+      },
+      "targetAfterPx": {
+        "x": 898.8003071046891,
+        "y": 1476.60046176479
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 61952.30000000005,
+          "timestamp": 61937.59999999998,
+          "pointerType": "touch",
+          "pointerId": 16,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 62578.70000000007,
+          "timestamp": 62578,
+          "pointerType": "touch",
+          "pointerId": 16,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.002003000001423061,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.2902929999982
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.40833391079536,
+          "sentOffsetMs": 15.293838000041433,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.14394500001799
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.66666782159075,
+          "sentOffsetMs": 73.27620800002478,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.41992800001753
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.92500173238614,
+          "sentOffsetMs": 106.55065099999774,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.76638700003969
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.18333564318147,
+          "sentOffsetMs": 139.9059899999993,
+          "status": "fulfilled",
+          "ackOffsetMs": 148.09731099999044
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.4416695539768,
+          "sentOffsetMs": 173.22782100003678,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.41326300002402
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.7000034647722,
+          "sentOffsetMs": 206.51499100000365,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.71202900004573
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.95833737556757,
+          "sentOffsetMs": 239.80979100003606,
+          "status": "fulfilled",
+          "ackOffsetMs": 247.99254900001688
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166712863629,
+          "sentOffsetMs": 273.11896400002297,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.3107050000108
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.4750051971582,
+          "sentOffsetMs": 306.4552160000312,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.80555099999765
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333910795358,
+          "sentOffsetMs": 339.9026920000324,
+          "status": "fulfilled",
+          "ackOffsetMs": 348.0146160000004
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167301874897,
+          "sentOffsetMs": 373.13922900002217,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.35117999999784
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.25000692954433,
+          "sentOffsetMs": 406.48159999999916,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.7241759999888
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000692954433,
+          "sentOffsetMs": 640.1572210000013,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.4572150000022
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 6,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.558472715913098,
+        "latitude": 60.39060810529034,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.62284007099089,
+        "latitude": 60.33831854326776,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999313905645
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -7.57427869757521e-07
+      },
+      "targetBeforePx": {
+        "x": 898.8003071046891,
+        "y": 1476.60046176479
+      },
+      "targetAfterPx": {
+        "x": 754.6003063418992,
+        "y": 1239.7004678683056
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 65618.90000000002,
+          "timestamp": 65604.20000000007,
+          "pointerType": "touch",
+          "pointerId": 17,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 66245.20000000007,
+          "timestamp": 66244.40000000002,
+          "pointerType": "touch",
+          "pointerId": 17,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.002172999957110733,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.359719000000041
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.4083339050787,
+          "sentOffsetMs": 15.363383999967482,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.06218599999556
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.66666781015726,
+          "sentOffsetMs": 73.18834599998081,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.38673799997196
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.9250017152359,
+          "sentOffsetMs": 106.50894199998584,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.67321399995126
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.18333562031455,
+          "sentOffsetMs": 140.87970499997027,
+          "status": "fulfilled",
+          "ackOffsetMs": 148.02931299997726
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.4416695253932,
+          "sentOffsetMs": 173.15280899999198,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.28491399995983
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.70000343047184,
+          "sentOffsetMs": 206.41117399994982,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.64483800000744
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.9583373355505,
+          "sentOffsetMs": 239.762985999987,
+          "status": "fulfilled",
+          "ackOffsetMs": 247.96681700000772
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.21667124062907,
+          "sentOffsetMs": 273.0842640000046,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.30332700000145
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.4750051457077,
+          "sentOffsetMs": 306.42770399997244,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.64641699998174
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333905078633,
+          "sentOffsetMs": 339.77342799998587,
+          "status": "fulfilled",
+          "ackOffsetMs": 347.9261729999562
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167295586497,
+          "sentOffsetMs": 373.0482769999653,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.26507699996
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.2500068609436,
+          "sentOffsetMs": 406.3784979999764,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.5967599999858
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000686094359,
+          "sentOffsetMs": 640.0318559999578,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.4059939999715
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 7,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.62284007099089,
+        "latitude": 60.33831854326776,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.687207426068653,
+        "latitude": 60.28594505319055,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999323378717
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -6.626971469358978e-07
+      },
+      "targetBeforePx": {
+        "x": 754.6003063418992,
+        "y": 1239.7004678683056
+      },
+      "targetAfterPx": {
+        "x": 610.4003055788546,
+        "y": 1002.8004739718214
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 68368.70000000007,
+          "timestamp": 68354.09999999998,
+          "pointerType": "touch",
+          "pointerId": 18,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 68995.09999999998,
+          "timestamp": 68994.30000000005,
+          "pointerType": "touch",
+          "pointerId": 18,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.0024739999789744616,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.196582000004128
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.40833389718443,
+          "sentOffsetMs": 15.199675999989267,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.13431499997387
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.66666779436883,
+          "sentOffsetMs": 73.27034999994794,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.36382699996466
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.92500169155323,
+          "sentOffsetMs": 106.48530999996001,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.65635299996939
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.18333558873763,
+          "sentOffsetMs": 139.7780259999563,
+          "status": "fulfilled",
+          "ackOffsetMs": 147.97834099998
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.44166948592203,
+          "sentOffsetMs": 173.10954799997853,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.2887729999493
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.70000338310643,
+          "sentOffsetMs": 206.4096149999532,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.58795799996005
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.95833728029083,
+          "sentOffsetMs": 239.71107299998403,
+          "status": "fulfilled",
+          "ackOffsetMs": 247.9471209999756
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166711774753,
+          "sentOffsetMs": 273.03859999997076,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.28483299998334
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.47500507465963,
+          "sentOffsetMs": 306.39922599995043,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.5940829999745
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333897184406,
+          "sentOffsetMs": 339.7198919999646,
+          "status": "fulfilled",
+          "ackOffsetMs": 347.96651599998586
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167286902846,
+          "sentOffsetMs": 373.0575039999676,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.27415399998426
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.25000676621286,
+          "sentOffsetMs": 406.39804000000004,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.57822599995416
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000676621286,
+          "sentOffsetMs": 640.0160259999684,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.3558849999681
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 8,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.687207426068653,
+        "latitude": 60.28594505319055,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.751574781146417,
+        "latitude": 60.23348754418036,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.8999933733748
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -5.231095201452263e-07
+      },
+      "targetBeforePx": {
+        "x": 610.4003055788546,
+        "y": 1002.8004739718214
+      },
+      "targetAfterPx": {
+        "x": 466.20030481606483,
+        "y": 765.9004800753371
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 72035.30000000005,
+          "timestamp": 72020.59999999998,
+          "pointerType": "touch",
+          "pointerId": 19,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 72661.5,
+          "timestamp": 72660.70000000007,
+          "pointerType": "touch",
+          "pointerId": 19,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.0025940000195987523,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.237695000017993
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.4083338855521,
+          "sentOffsetMs": 15.240950000006706,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.08743000001414
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.66666777110424,
+          "sentOffsetMs": 73.19128099997761,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.41035299998475
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.9250016566563,
+          "sentOffsetMs": 106.51946099998895,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.70866800000658
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.18333554220845,
+          "sentOffsetMs": 139.83199799997965,
+          "status": "fulfilled",
+          "ackOffsetMs": 148.0074349999777
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.44166942776053,
+          "sentOffsetMs": 173.12034899997525,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.30310700001428
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.70000331331266,
+          "sentOffsetMs": 207.49144499999238,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.63974899996538
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.95833719886474,
+          "sentOffsetMs": 239.75053099996876,
+          "status": "fulfilled",
+          "ackOffsetMs": 247.96756899997126
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166710844168,
+          "sentOffsetMs": 273.0953340000124,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.2810859999736
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.47500496996895,
+          "sentOffsetMs": 307.4642149999854,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.6961129999836
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333885552103,
+          "sentOffsetMs": 339.78931899997406,
+          "status": "fulfilled",
+          "ackOffsetMs": 348.0253849999863
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167274107313,
+          "sentOffsetMs": 373.1605729999719,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.3807950000046
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.25000662662526,
+          "sentOffsetMs": 406.5016319999704,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.6159280000138
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000662662524,
+          "sentOffsetMs": 640.0127070000162,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.311297999986
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 9,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.751574781146417,
+        "latitude": 60.23348754418036,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.81594213622421,
+        "latitude": 60.18094592549455,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999359918448
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": -2.972998345285305e-07
+      },
+      "targetBeforePx": {
+        "x": 466.20030481606483,
+        "y": 765.9004800753371
+      },
+      "targetAfterPx": {
+        "x": 322.0003040530203,
+        "y": 529.0004861788527
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 75351.70000000007,
+          "timestamp": 75337.09999999998,
+          "pointerType": "touch",
+          "pointerId": 20,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 75978.20000000007,
+          "timestamp": 75977.30000000005,
+          "pointerType": "touch",
+          "pointerId": 20,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.002062999992631376,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.220099000027403
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.40833386673467,
+          "sentOffsetMs": 15.224225000012666,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.13064899999881
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.6666677334693,
+          "sentOffsetMs": 73.26929100003326,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.37756900000386
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.9250016002039,
+          "sentOffsetMs": 106.50148000003537,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.66840900003444
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.18333546693856,
+          "sentOffsetMs": 139.7789900000207,
+          "status": "fulfilled",
+          "ackOffsetMs": 148.0210650000372
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.4416693336732,
+          "sentOffsetMs": 173.1339390000212,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.28976800001692
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.70000320040776,
+          "sentOffsetMs": 206.38542599999346,
+          "status": "fulfilled",
+          "ackOffsetMs": 214.69675300002564
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.95833706714245,
+          "sentOffsetMs": 239.82770399999572,
+          "status": "fulfilled",
+          "ackOffsetMs": 247.9985549999983
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.216670933877,
+          "sentOffsetMs": 273.1048090000404,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.29028100002324
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.47500480061166,
+          "sentOffsetMs": 306.40161300002364,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.66721700003836
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333866734632,
+          "sentOffsetMs": 339.75861000001896,
+          "status": "fulfilled",
+          "ackOffsetMs": 348.0285809999914
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167253408092,
+          "sentOffsetMs": 373.1225080000004,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.397220999992
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.25000640081552,
+          "sentOffsetMs": 406.51323400001274,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.6618470000103
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000640081555,
+          "sentOffsetMs": 640.0768150000367,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.4183710000361
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 10,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.81594213622421,
+        "latitude": 60.18094592549455,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.880309491301972,
+        "latitude": 60.12832010652764,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999402744823
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389648432
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": 1.309639117152983e-07
+      },
+      "targetBeforePx": {
+        "x": 322.0003040530203,
+        "y": 529.0004861788527
+      },
+      "targetAfterPx": {
+        "x": 177.80030328997577,
+        "y": 292.10049228236846
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 78085.20000000007,
+          "timestamp": 78070.30000000005,
+          "pointerType": "touch",
+          "pointerId": 21,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 78711.59999999998,
+          "timestamp": 78710.80000000005,
+          "pointerType": "touch",
+          "pointerId": 21,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.0024129999801516533,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.423879000009038
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.40833383104604,
+          "sentOffsetMs": 15.4272340000025,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.19940499996301
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.666667662092,
+          "sentOffsetMs": 73.31339099997422,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.36941200000001
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.925001493138,
+          "sentOffsetMs": 107.52892700000666,
+          "status": "fulfilled",
+          "ackOffsetMs": 114.71259399998235
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.183335324184,
+          "sentOffsetMs": 139.8358930000104,
+          "status": "fulfilled",
+          "ackOffsetMs": 148.05556599999545
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.44166915522993,
+          "sentOffsetMs": 173.1796360000153,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.32951599999797
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.70000298627593,
+          "sentOffsetMs": 206.45017099997494,
+          "status": "fulfilled",
+          "ackOffsetMs": 215.34420599997975
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.9583368173219,
+          "sentOffsetMs": 240.46743600000627,
+          "status": "fulfilled",
+          "ackOffsetMs": 248.34526500001084
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166706483679,
+          "sentOffsetMs": 273.44685199996457,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.529011000006
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.4750044794139,
+          "sentOffsetMs": 306.6474539999617,
+          "status": "fulfilled",
+          "ackOffsetMs": 315.03694600000745
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333831045983,
+          "sentOffsetMs": 340.1566710000043,
+          "status": "fulfilled",
+          "ackOffsetMs": 348.19888099998934
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167214150583,
+          "sentOffsetMs": 373.31859599996824,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.5354839999927
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.2500059725518,
+          "sentOffsetMs": 406.63566899998114,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.93599999998696
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.2500059725518,
+          "sentOffsetMs": 640.3443940000143,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.6369069999782
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    },
+    {
+      "attempt": 11,
+      "leg": 0,
+      "coordinate": [
+        26.9596752,
+        60.0633158
+      ],
+      "beforeCamera": {
+        "longitude": 26.880309491301972,
+        "latitude": 60.12832010652764,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "afterCamera": {
+        "longitude": 26.944676846379764,
+        "latitude": 60.075609996812894,
+        "zoom": 11.621307459879889,
+        "tileSize": 256,
+        "centerX": 206,
+        "centerY": 423.5
+      },
+      "requestedDelta": {
+        "dx": -144.2,
+        "dy": -236.89999515030226
+      },
+      "actualCameraShiftPx": {
+        "x": -144.20000076304453,
+        "y": -236.89999389652908
+      },
+      "shiftErrorPx": {
+        "x": -7.63044539553448e-07,
+        "y": 1.2537731777229055e-06
+      },
+      "targetBeforePx": {
+        "x": 177.80030328997577,
+        "y": 292.10049228236846
+      },
+      "targetAfterPx": {
+        "x": 33.6003025271859,
+        "y": 55.20049838583935
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 80235,
+          "timestamp": 80220.30000000005,
+          "pointerType": "touch",
+          "pointerId": 22,
+          "x": 206,
+          "y": 449.1499938964844,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas]",
+          "button": null
+        },
+        {
+          "type": "pointerup",
+          "time": 80861.09999999998,
+          "timestamp": 80860.40000000002,
+          "pointerType": "touch",
+          "pointerId": 22,
+          "x": 61.79999923706055,
+          "y": 212.25,
+          "trusted": true,
+          "target": "CANVAS[tropnik-map-canvas is-moving]",
+          "button": null
+        }
+      ],
+      "commands": [
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchStart",
+          "x": 206,
+          "y": 449.15000000000003,
+          "sentOffsetMs": 0.002603999979328364,
+          "status": "fulfilled",
+          "ackOffsetMs": 15.287715999991633
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 193.98333333333335,
+          "y": 429.40833373747483,
+          "sentOffsetMs": 15.291502000007313,
+          "status": "fulfilled",
+          "ackOffsetMs": 48.11406499997247
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 181.96666666666667,
+          "y": 409.66666747494963,
+          "sentOffsetMs": 73.24527999997372,
+          "status": "fulfilled",
+          "ackOffsetMs": 81.36279500002274
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 169.95,
+          "y": 389.9250012124245,
+          "sentOffsetMs": 106.46185199997853,
+          "status": "fulfilled",
+          "ackOffsetMs": 115.8481160000083
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 157.93333333333334,
+          "y": 370.1833349498993,
+          "sentOffsetMs": 140.96996700001182,
+          "status": "fulfilled",
+          "ackOffsetMs": 148.4287020000047
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 145.91666666666666,
+          "y": 350.4416686873741,
+          "sentOffsetMs": 173.55162400001427,
+          "status": "fulfilled",
+          "ackOffsetMs": 181.6061869999976
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 133.9,
+          "y": 330.7000024248489,
+          "sentOffsetMs": 206.74889899999835,
+          "status": "fulfilled",
+          "ackOffsetMs": 215.00454799999716
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 121.88333333333334,
+          "y": 310.9583361623237,
+          "sentOffsetMs": 240.12368499999866,
+          "status": "fulfilled",
+          "ackOffsetMs": 247.84466599998996
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 109.86666666666667,
+          "y": 291.2166698997985,
+          "sentOffsetMs": 272.96254099998623,
+          "status": "fulfilled",
+          "ackOffsetMs": 281.21676799998386
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 97.85000000000001,
+          "y": 271.47500363727335,
+          "sentOffsetMs": 306.33707599999616,
+          "status": "fulfilled",
+          "ackOffsetMs": 314.5509740000125
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 85.83333333333333,
+          "y": 251.73333737474815,
+          "sentOffsetMs": 339.64873000001535,
+          "status": "fulfilled",
+          "ackOffsetMs": 347.9006829999853
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 73.81666666666669,
+          "y": 231.99167111222295,
+          "sentOffsetMs": 373.0173059999943,
+          "status": "fulfilled",
+          "ackOffsetMs": 381.2490899999975
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchMove",
+          "x": 61.80000000000001,
+          "y": 212.25000484969777,
+          "sentOffsetMs": 406.37037000001874,
+          "status": "fulfilled",
+          "ackOffsetMs": 414.56715199997416
+        },
+        {
+          "method": "Input.dispatchTouchEvent",
+          "type": "touchEnd",
+          "x": 61.80000000000001,
+          "y": 212.25000484969777,
+          "sentOffsetMs": 639.9584570000297,
+          "status": "fulfilled",
+          "ackOffsetMs": 641.1786100000027
+        }
+      ],
+      "selectionUnchanged": true,
+      "rectUnchanged": true
+    }
+  ],
+  "maximumRequestedVsActualShiftErrorPx": 1.467713919849412e-06,
+  "remainingTargetOffsetPx": {
+    "x": 33.6003025271859,
+    "y": 55.20049838583935
+  },
+  "remainingCenterErrorPx": 64.62256070416483,
+  "completedSourceFrames": [
+    {
+      "fixture": "primorsk",
+      "targetZoom": 7,
+      "actualZoom": 7.621307459879889,
+      "centerErrorPx": 2.2213064900048686e-06,
+      "lod": "regional"
+    },
+    {
+      "fixture": "primorsk",
+      "targetZoom": 9,
+      "actualZoom": 9.621307459879889,
+      "centerErrorPx": 1.9499538086676657e-05,
+      "lod": "local"
+    },
+    {
+      "fixture": "primorsk",
+      "targetZoom": 12,
+      "actualZoom": 12.621307459879889,
+      "centerErrorPx": 7.826061564925881e-06,
+      "lod": "source"
+    },
+    {
+      "fixture": "primorsk",
+      "targetZoom": 15,
+      "actualZoom": 15.621307459879889,
+      "centerErrorPx": 2.5817943364317744e-06,
+      "lod": "source"
+    },
+    {
+      "fixture": "primorsk",
+      "targetZoom": 18,
+      "actualZoom": 18,
+      "centerErrorPx": 1.2856939530157578e-05,
+      "lod": "source"
+    }
+  ],
+  "finalCoverage": {
+    "version": "7035c10e633effb2",
+    "lod": "local",
+    "cells": [
+      "0109-312"
+    ],
+    "pending": 0,
+    "error": "",
+    "ready": true,
+    "revision": 7
+  },
+  "finalState": {
+    "ready": true,
+    "loading": false,
+    "mode": "detail",
+    "committedMode": "detail",
+    "imageryLoading": false,
+    "reliefReady": true,
+    "localDetail": false,
+    "error": "",
+    "residentTiles": 96,
+    "pendingTiles": 0
+  },
+  "lifecycleEvidence": "No camera jump, zoom change, viewport resize, selection/layer change, native click or cancellation appears in the 12 failing-pan receipts. The published final map is idle, painted and ready with pending=0 and empty errors.",
+  "proposedCorrection": "Keep the same source coordinate, full-Canvas center, 6px oracle, 28-zoom limit and one shared total budget of 12 correction attempts per zoom case. Recenter using actual native pans between intermediate zoom steps.",
+  "verificationBoundary": "This record derives camera movement and reachability from the exact saved native CI events and public cameras. Candidate browser execution is not claimed."
+}

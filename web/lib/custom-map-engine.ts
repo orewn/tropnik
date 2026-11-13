@@ -28,6 +28,7 @@ export type CustomMapLabel={id:string;coordinate:[number,number];label:string;ki
 export type CustomMapLabelDiagnostic={id:string;label:string;coordinate:[number,number];visible:boolean;reason:string;x?:number;y?:number;width?:number;rect?:{left:number;top:number;right:number;bottom:number}};
 export type CustomMapOptions={camera:CustomMapCamera;onReady?:(engine:CustomMapEngine)=>void;onFrame?:(camera:CustomMapCamera)=>void;onSettled?:(camera:CustomMapCamera)=>void;onBeforeZoom?:()=>void;onGesture?:()=>void;onClick?:(point:MapPoint,coordinate:[number,number])=>void;onMarker?:(id:string)=>void;onState?:(state:CustomMapState)=>void;onOverlayError?:(message:string)=>void;maxZoom?:number};
 type TileBatch={tiles:CustomMapTile[];kind:CustomTileKind;generation:number;missing?:CustomTileRequest[]};
+type LoadingGround={generation:number;requestedCells:number;z:number;cells:ReadonlySet<string>;detail:TileBatch;relief?:TileBatch};
 type LabelCandidate={id:string;coordinate:[number,number];label:MapTileLabel;color?:string;priority:number;sourceAnchor:string;insideCoverage?:boolean;value?:string;repeatDistance?:number;repeatKey?:string};
 type FeatureGeometry=GeoJSON.GeoJSON|undefined;
 type PathCollection={path:Path2D;bounds:[number,number,number,number]};
@@ -158,13 +159,14 @@ export class CustomMapEngine {
   private relief?:TileBatch;
   private imagery?:TileBatch;
   private imageryOverlay?:TileBatch;
+  private loadingGround?:LoadingGround;
   private generation=0;
   private currentKeys='';
   private disposed=false;
   private active=true;
   private eco=false;
   private additionalLabels:CustomMapLabel[]=[];
-  private labelCandidateCache?:{detail?:TileBatch;relief?:TileBatch;additional:CustomMapLabel[];area:MapCoverage['area'];candidates:LabelCandidate[]};
+  private labelCandidateCache?:{detail?:TileBatch;relief?:TileBatch;loading?:LoadingGround;loadingRelief?:TileBatch;additional:CustomMapLabel[];area:MapCoverage['area'];candidates:LabelCandidate[]};
   private labelDiagnostics:CustomMapLabelDiagnostic[]=[];
   private labelDiagnosticTotal=0;
   private drawRevision=0;
@@ -243,7 +245,7 @@ export class CustomMapEngine {
     // During resize the previous sheet insets can briefly exceed the new size.
     // Inspection must stay safe until the layout observer supplies fresh values.
     const visible=Object.values(padding).every(value=>Number.isFinite(value)&&value>=0)&&padding.left+padding.right<this.size.width&&padding.top+padding.bottom<this.size.height;
-    return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',catalogueOverlay:{sources:this.trailOverlay.length,preparedSources:this.paths?this.trailOverlaySources:0,preparedParts:this.paths?this.trailOverlayParts:0,exactSources:this.paths?this.trailOverlayDetails:0,currentViewportReady:!this.paths||this.trailOverlayViewportReady,pending:!!(this.paths&&this.trailRasterParts?.length&&this.trailRaster?.getState().pending),error:this.paths?this.trailRasterError:''},reviewedCoastal:{selected:!!this.reviewedCoastalRoute,overlaySources:this.paths?this.reviewedCoastalOverlaySources:0},drawRevision:this.drawRevision,labelRevision:this.labelRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
+    return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',catalogueOverlay:{sources:this.trailOverlay.length,preparedSources:this.paths?this.trailOverlaySources:0,preparedParts:this.paths?this.trailOverlayParts:0,exactSources:this.paths?this.trailOverlayDetails:0,currentViewportReady:!this.paths||this.trailOverlayViewportReady,pending:!!(this.paths&&this.trailRasterParts?.length&&this.trailRaster?.getState().pending),error:this.paths?this.trailRasterError:''},reviewedCoastal:{selected:!!this.reviewedCoastalRoute,overlaySources:this.paths?this.reviewedCoastalOverlaySources:0},drawRevision:this.drawRevision,labelRevision:this.labelRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},loadingGround:this.loadingGround?{generation:this.loadingGround.generation,requestedCells:this.loadingGround.requestedCells,readyCells:this.loadingGround.detail.tiles.length,detail:describe(this.loadingGround.detail),relief:describe(this.loadingGround.relief)}:null,labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
   }
   private publishInspection(){if(this.disposed)return;this.element.dataset.mapTilesState=this.state.loading?'loading':this.state.error?'error':'ready';this.element.dataset.mapInspection=JSON.stringify(this.inspect());}
   private setMoving(moving:boolean){this.element.dataset.mapMoving=String(moving);if(moving)this.element.dataset.mapCamera='moving';else delete this.element.dataset.mapCamera;}
@@ -472,9 +474,11 @@ export class CustomMapEngine {
           if(!this.active||this.markers.get(marker.id)?.button!==button)return;
           // A Canvas pointerup can open a sheet and move this button under the
           // ensuing compatibility click. Only its own press may activate it.
-          // detail 0 is keyboard/AT input; older click events have no pointerId.
-          const pointerId=(event as PointerEvent).pointerId;
-          if(event.detail!==0&&(origin?.button!==button||(typeof pointerId==='number'&&pointerId!==origin.id)))return;
+          // detail 0 is keyboard/AT input. Some Android WebViews expose an
+          // unrelated click pointerId with empty pointerType; only a known
+          // pointer type carries an identity we can compare to this press.
+          const pointer=event as PointerEvent;
+          if(event.detail!==0&&(origin?.button!==button||(pointer.pointerType&&typeof pointer.pointerId==='number'&&pointer.pointerId!==origin.id)))return;
           const group=this.markerGroups.get(marker.id);
           if(group&&group.members.length>1){this.options.onGesture?.();const camera=fitBounds(group.bounds,this.size,{padding:this.padding,maxZoom:11,referenceLongitude:105});this.setCamera({...camera,zoom:Math.max(this.camera.zoom+1,camera.zoom)},true);}
           else this.options.onMarker?.(marker.id);
@@ -647,14 +651,32 @@ export class CustomMapEngine {
     const b=this.getBounds(),source=satelliteSourceForBounds({west:b[0],south:b[1],east:b[2],north:b[3]});
     const imageryRequests=this.mode==='satellite'?tileRequests(this.camera,view,Math.min(source==='eox-s2'?14:8,z),source):[];
     const requests=[...overviewRequests,...detailRequests,...reliefRequests,...imageryRequests],keys=requests.map(customTileKey).join('|');
-    if(keys===this.currentKeys)return;this.currentKeys=keys;const generation=++this.generation;
+    if(keys===this.currentKeys)return;this.currentKeys=keys;const generation=++this.generation;this.loadingGround=undefined;
     const retainedKeys=()=>[this.overview,this.detail,this.relief,this.imagery,this.imageryOverlay].flatMap(batch=>batch?.tiles.map(t=>t.key)||[]);
     this.tiles.pin([...requests.map(customTileKey),...retainedKeys()]);
     this.updateState({loading:requests.length>0,imageryLoading:imageryRequests.length>0,imageryTarget:imageryRequests.length?source:undefined});
     const current=()=>!this.disposed&&generation===this.generation;
+    // Reveal only complete cells at the requested quality. A slow neighbour
+    // must not hide all the other measured vector/relief pairs. The previous
+    // complete ground remains underneath; changing to/from a photograph keeps
+    // its existing atomic handoff. No speculative tile or extra pin is added.
+    const progressive=this.mode==='detail'&&this.state.committedMode!=='satellite'&&detailRequests.length>0;
+    const detailReady=new Map<string,CustomMapTile>(),reliefReady=new Map<string,CustomMapTile>(),paired=new Set<string>();
+    const cell=(tile:CustomTileRequest)=>`${tile.z}/${tile.x}/${tile.y}`;
+    const reveal=(tile:CustomMapTile)=>{
+      if(!progressive||!current()||(tile.kind!=='vector'&&tile.kind!=='relief'))return;
+      const key=cell(tile);(tile.kind==='vector'?detailReady:reliefReady).set(key,tile);
+      if(paired.has(key)||!detailReady.has(key)||(reliefRequests.length&&!reliefReady.has(key)))return;
+      paired.add(key);
+      const detail=detailRequests.flatMap(request=>paired.has(cell(request))?[detailReady.get(cell(request))!]:[]);
+      const relief=reliefRequests.flatMap(request=>paired.has(cell(request))?[reliefReady.get(cell(request))!]:[]);
+      this.loadingGround={generation,requestedCells:detailRequests.length,z:detailRequests[0].z,cells:new Set(detail.map(tile=>`${tile.x}/${tile.y}`)),
+        detail:{tiles:detail,kind:'vector',generation},...(reliefRequests.length?{relief:{tiles:relief,kind:'relief' as const,generation}}:{})};
+      this.schedule();
+    };
     let checkedCoverageRevision=this.coverageRevision;
     const batch=async(list:CustomTileRequest[],kind:CustomTileKind)=>{
-      const result=await Promise.allSettled(list.map(request=>this.tiles.load(request)));
+      const result=await Promise.allSettled(list.map(request=>this.tiles.load(request).then(tile=>{reveal(tile);return tile;})));
       const ready=result.flatMap(value=>value.status==='fulfilled'?[value.value]:[]),failed=result.length-ready.length;
       const missing=list.filter((_,index)=>result[index].status==='rejected');
       return{value:{tiles:ready,kind,generation,missing} satisfies TileBatch,failed};
@@ -666,7 +688,7 @@ export class CustomMapEngine {
       if(result.value.tiles.length&&(!result.failed||!this.overview)){this.overview=result.value;this.schedule();}
       if(!detailRequests.length&&!imageryRequests.length){
         if(result.failed){this.updateState({error:'Обзор карты загрузился не полностью. Повторите загрузку.'});return;}
-        this.detail=undefined;this.relief=undefined;this.imagery=undefined;this.imageryOverlay=undefined;
+        this.detail=undefined;this.relief=undefined;this.imagery=undefined;this.imageryOverlay=undefined;this.loadingGround=undefined;
         this.updateState({committedMode:'overview',reliefReady:false,localDetail:false,imagerySource:undefined,...(navigator.onLine?{error:''}:{})});this.schedule();
       }
     });
@@ -677,6 +699,7 @@ export class CustomMapEngine {
       if(imageryFailed||!imageryRequests.length&&(detailFailed||reliefFailed)){
         this.updateState({imageryLoading:false,error:imageryRequests.length?'Спутниковая карта загрузилась не полностью. Повторите загрузку.':'Подробная карта загрузилась не полностью. Повторите загрузку.'});return;
       }
+      this.loadingGround=undefined;
       if(imageryRequests.length){
         // A complete photograph is useful even if the independent map-object
         // service failed. Keep a prior complete overlay, never a partial one,
@@ -740,7 +763,7 @@ export class CustomMapEngine {
   private groundSignature(detail:TileBatch|undefined,satellite:boolean,covered:boolean):readonly unknown[]{
     const ctx=this.context;
     return[this.canvas.width,this.canvas.height,this.size.width,this.size.height,this.pixelRatio,...this.camera.center,this.camera.zoom,this.camera.bearingDegrees??0,this.pitch,
-      this.mode,this.state.committedMode,satellite,covered,this.area,this.overview,detail,this.imagery,this.relief,this.boundaries,this.boundaryVisible,this.reliefVisible,this.selectedArea,this.selectedBoundary,
+      this.mode,this.state.committedMode,satellite,covered,this.area,this.overview,detail,this.imagery,this.relief,this.loadingGround,this.boundaries,this.boundaryVisible,this.reliefVisible,this.selectedArea,this.selectedBoundary,
       ctx.lineCap,ctx.lineJoin,ctx.miterLimit];
   }
   private restoreGround(signature:readonly unknown[]):boolean{
@@ -789,6 +812,10 @@ export class CustomMapEngine {
       if(satellite)this.drawTiles(this.imagery);
       if(this.mode!=='overview'&&this.camera.zoom>=4.7&&(!satellite||detail?.tiles[0]?.transparent))this.drawTiles(detail);
       if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=4.7)this.drawTiles(this.relief,.82);
+      if(!satellite&&this.mode==='detail'&&this.camera.zoom>=4.7&&this.loadingGround){
+        this.drawTiles(this.loadingGround.detail);
+        if(this.reliefVisible)this.drawTiles(this.loadingGround.relief,.82);
+      }
       if(this.boundaryVisible&&this.boundaries){ctx.strokeStyle=satellite?'rgba(245,248,232,.45)':'rgba(95,123,87,.45)';ctx.lineWidth=.65/scale;ctx.stroke(this.boundaries);}
       if(this.selectedArea){ctx.fillStyle='rgba(92,128,70,.10)';ctx.fill(this.selectedArea,'evenodd');}
       // Clipped territory polygons include artificial coverage-cell edges. Only
@@ -841,16 +868,25 @@ export class CustomMapEngine {
     // Height annotations belong to the committed measured relief. They follow
     // its visibility, including the retained ground during an imagery load.
     const relief=includeDetail&&!this.displayingSatellite()&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=10?this.relief:undefined;
+    const loading=includeDetail&&this.mode==='detail'&&!this.displayingSatellite()?this.loadingGround:undefined;
+    const loadingRelief=this.reliefVisible&&this.camera.zoom>=10?loading?.relief:undefined;
     const previous=this.labelCandidateCache;
-    if(previous&&previous.detail===detail&&previous.relief===relief&&previous.additional===this.additionalLabels&&previous.area===area)return previous.candidates;
+    if(previous&&previous.detail===detail&&previous.relief===relief&&previous.loading===loading&&previous.loadingRelief===loadingRelief&&previous.additional===this.additionalLabels&&previous.area===area)return previous.candidates;
     // Source batches and committed coverage are immutable; setLabels owns a
     // defensive copy. Keep only this view's candidates, never a visited-tile
     // history. Screen projection, typography and collisions still run per frame.
     const candidate=(id:string,coordinate:[number,number],label:MapTileLabel,color?:string):LabelCandidate=>({id,coordinate,label,color,priority:mapLabelPriority(label),sourceAnchor:`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`});
     const candidates=this.additionalLabels.map(label=>candidate(label.id,label.coordinate,{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},label.color));
-    for(const batch of [detail,relief])if(batch)for(const tile of batch.tiles)for(const label of tile.labels){const n=2**tile.z;candidates.push(candidate(`${tile.key}:${label.text}`,mercatorUnproject({x:(tile.x+label.x)/n,y:(tile.y+label.y)/n}),label));}
+    const add=(batch:TileBatch|undefined,retained:boolean)=>{if(batch)for(const tile of batch.tiles)for(const label of tile.labels){
+      const n=2**tile.z,point={x:(tile.x+label.x)/n,y:(tile.y+label.y)/n};
+      // A newly opaque cell owns its labels too. Keep previous labels only
+      // where their actual old ground is still visible beneath the loading view.
+      if(retained&&loading&&loading.cells.has(`${Math.floor(point.x*2**loading.z)}/${Math.floor(point.y*2**loading.z)}`))continue;
+      candidates.push(candidate(`${tile.key}:${label.text}`,mercatorUnproject(point),label));
+    }};
+    add(detail,true);add(relief,true);add(loading?.detail,false);add(loadingRelief,false);
     candidates.sort((a,b)=>a.priority-b.priority||a.label.rank-b.label.rank);
-    this.labelCandidateCache={detail,relief,additional:this.additionalLabels,area,candidates};return candidates;
+    this.labelCandidateCache={detail,relief,loading,loadingRelief,additional:this.additionalLabels,area,candidates};return candidates;
   }
   private drawLabels(){
     this.labelDiagnostics=[];this.labelDiagnosticTotal=0;
@@ -890,7 +926,7 @@ export class CustomMapEngine {
   }
   destroy(){
     if(this.disposed)return;this.disposed=true;this.markerPointer=undefined;cancelAnimationFrame(this.frame);this.stopAnimation();clearTimeout(this.settleTimer);
-    this.resize.disconnect();this.pointer.cancel();this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
+    this.resize.disconnect();this.pointer.cancel();this.loadingGround=undefined;this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
     this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;this.selectedBoundary=undefined;
     this.releaseGround();this.trailRaster?.destroy();this.trailRaster=undefined;this.trailRasterParts=undefined;this.trailRasterPartCache=new WeakMap();this.trailOverlayPaintedEntries=[];

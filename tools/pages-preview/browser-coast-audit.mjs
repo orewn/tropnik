@@ -30,6 +30,48 @@ export function coastPanPlan(dx,dy,rect,mobile){
  return[delta];
 }
 
+/** Navigation reads the published camera and delegates only actual native
+ * inputs. One zoom case shares twelve correction attempts across its steps. */
+export function createCoastNavigation({read,drag,zoom,mobile,context}){
+ async function panTo(coordinate,budget={attempts:0}){
+  assert.ok(Number.isInteger(budget.attempts)&&budget.attempts>=0&&budget.attempts<=12);
+  while(true){
+   const map=await read(),point=projectMapPoint(coordinate,map.camera,map.rect);
+   const center={x:map.rect.left+(map.camera.centerX??map.rect.width/2),y:map.rect.top+(map.camera.centerY??map.rect.height/2)};
+   const dx=center.x-point.x,dy=center.y-point.y,distance=Math.hypot(dx,dy);
+   if(distance<=6)return{map,centerErrorPx:distance};
+   if(budget.attempts===12)throw new Error(`${context}: native panning did not center the source coastline`);
+   const attempt=budget.attempts++;
+   for(const [leg,planned] of coastPanPlan(dx,dy,map.rect,mobile).entries()){
+    const before=await read();let delta=planned;
+    if(leg>0){
+     // Use the settled first drag, not its requested displacement: native
+     // rounding or residual inertia must not become an assumed camera move.
+     const actual=projectMapPoint(coordinate,before.camera,before.rect);
+     const cx=before.rect.left+(before.camera.centerX??before.rect.width/2),cy=before.rect.top+(before.camera.centerY??before.rect.height/2);
+     [delta]=coastPanPlan(cx-actual.x,cy-actual.y,before.rect,false);
+     assert.ok(Math.hypot(delta.dx,delta.dy)>=24,`${context}: the native approach did not create a deliberate return drag`);
+    }
+    await drag(delta,{coordinate,attempt,leg,before});
+   }
+  }
+ }
+ async function reachZoom(target,coordinate){
+  const budget={attempts:0};
+  for(let attempt=0;attempt<28;attempt++){
+   const map=await read(),currentZoom=map.camera.zoom;
+   if(currentZoom>=target-.01&&currentZoom<target+1.01)return panTo(coordinate,budget);
+   await zoom(currentZoom<target?'Увеличить масштаб':'Уменьшить масштаб');
+   // Controls keep the visible-ground anchor fixed, which can differ from
+   // the Canvas center. Correct each step before that offset is magnified;
+   // every correction still spends this case's single twelve-attempt budget.
+   await panTo(coordinate,budget);
+  }
+  throw new Error(`${context}: native coastline zoom did not reach ${target}`);
+ }
+ return{panTo,reachZoom};
+}
+
 /** Read only the selected route/region and public layer state. A native mouse
  * drag may end in a browser click, but it must not perform a map selection. */
 export function inspectCoastPanSelection(doc=document,loc=location){
@@ -133,23 +175,11 @@ export async function runCoastAudit(cdp,profile,helpers){
   cdp.observe('Network.loadingFailed',({requestId,errorText})=>{const item=resources.get(requestId);if(item)item.error=errorText;}),
  ];
  const save=async()=>{report.resources=[...resources.values()];await mkdir(OUTPUT,{recursive:true});await writeFile(new URL(profile.name+'-coast.json',OUTPUT),JSON.stringify(report,null,2)+'\n');};
- async function panTo(coordinate){
-  for(let attempt=0;attempt<12;attempt++){
-   const map=await settledMap(cdp,profile.engine),point=projectMapPoint(coordinate,map.camera,map.rect);
-   const center={x:map.rect.left+(map.camera.centerX??map.rect.width/2),y:map.rect.top+(map.camera.centerY??map.rect.height/2)};
-   const dx=center.x-point.x,dy=center.y-point.y,distance=Math.hypot(dx,dy);
-   if(distance<=6)return{map,centerErrorPx:distance};
-   for(const [leg,planned] of coastPanPlan(dx,dy,map.rect,profile.mobile).entries()){
-   const before=await settledMap(cdp,profile.engine),beforeSelection=await evaluate(cdp,`(${inspectCoastPanSelection.toString()})()`);
-   let delta=planned;
-   if(leg>0){
-    // Use the settled first drag, not its requested displacement: native
-    // rounding or residual inertia must not become an assumed camera move.
-    const actual=projectMapPoint(coordinate,before.camera,before.rect);
-    const cx=before.rect.left+(before.camera.centerX??before.rect.width/2),cy=before.rect.top+(before.camera.centerY??before.rect.height/2);
-    [delta]=coastPanPlan(cx-actual.x,cy-actual.y,before.rect,false);
-    assert.ok(Math.hypot(delta.dx,delta.dy)>=24,`${profile.name}: the native approach did not create a deliberate return drag`);
-   }
+ const {panTo,reachZoom}=createCoastNavigation({
+  mobile:profile.mobile,context:profile.name,read:()=>settledMap(cdp,profile.engine),
+  zoom:label=>pointerSelector(cdp,`.map-controls button[aria-label="${label}"]`,profile),
+  drag:async(delta,{coordinate,attempt,leg,before})=>{
+   const beforeSelection=await evaluate(cdp,`(${inspectCoastPanSelection.toString()})()`);
    const start=await evaluate(cdp,`(()=>{
     const map=document.querySelector('.atlas-canvas[data-map-engine]'),r=map.getBoundingClientRect(),delta=${JSON.stringify(delta)};
     for(const fy of [.45,.6,.3,.75])for(const fx of [.5,.65,.35,.8,.2]){
@@ -165,28 +195,15 @@ export async function runCoastAudit(cdp,profile,helpers){
    Object.assign(pan,{coordinate,attempt,leg,before:{camera:before.camera,rect:before.rect,selection:beforeSelection},after:{camera:after.camera,rect:after.rect,selection:await evaluate(cdp,`(${inspectCoastPanSelection.toString()})()`)}});
    pan.events=await evaluate(cdp,'window.__tropnikInputEvents');
    report.pans.push(pan);assertCoastPanInput(pan,profile.mobile?'touch':'mouse',profile.name+'/coast');
-   }
   }
-  throw new Error(`${profile.name}: native panning did not center the source coastline`);
- }
- async function reachZoom(target){
-  for(let attempt=0;attempt<28;attempt++){
-   const map=await settledMap(cdp,profile.engine),zoom=map.camera.zoom;
-   if(zoom>=target-.01&&zoom<target+1.01)return;
-   const label=zoom<target?'Увеличить масштаб':'Уменьшить масштаб';
-   await pointerSelector(cdp,`.map-controls button[aria-label="${label}"]`,profile);
-   await settledMap(cdp,profile.engine);
-  }
-  throw new Error(`${profile.name}: native coastline zoom did not reach ${target}`);
- }
+ });
  try{
   for(const fixture of COAST_FIXTURES){
    const url=new URL(helpers.url);url.searchParams.set('region',COAST_REGION);
    await loadProfile(cdp,url.href,profile);await closeMapSheet(cdp,profile);await clearMapStories(cdp,profile);
    await panTo(fixture.coordinate);
    for(const targetZoom of fixture.zooms){
-    await reachZoom(targetZoom);
-    const centered=await panTo(fixture.coordinate);
+    const centered=await reachZoom(targetZoom,fixture.coordinate);
     const geometry=await waitValue(`${profile.name}: ${fixture.id} geometry did not settle at ${targetZoom}`,()=>evaluate(cdp,
      `(${inspectCoastCoverage.toString()})((${inspectCustomMapDOM.toString()})())`),state=>state?.ready===true&&state.pending===0&&state.error==='',20000);
     const frame={fixture:fixture.id,coordinate:fixture.coordinate,targetZoom,zoom:centered.map.camera.zoom,camera:centered.map.camera,centerErrorPx:centered.centerErrorPx,...geometry};

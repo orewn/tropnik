@@ -63,6 +63,7 @@ test('a browser mouse click after a delivered drag is valid only with an unchang
  assert.equal(assertCoastPanInput(pan,'mouse','native desktop drag'),true);
  for(const mutate of [
   value=>{value.after=structuredClone(value.before);},
+  value=>{value.after.camera.zoom+=.5;},
   value=>{value.delta={dx:0,dy:0};value.end={...value.start};},
   value=>{value.commands.splice(3,1);},
   value=>{value.events[0].trusted=false;},

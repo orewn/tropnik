@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-13T12:48:53.507296+00:00",
+  "reviewer": "perf_skeptic",
+  "status": "PASS_SOURCE_REVIEW_REAL_BROWSER_EVIDENCE_PENDING",
+  "openBlockers": [],
+  "scope": "Independent read-only review of frozen browser map-loading gate, source binding, pixel oracle, real-delay fixture and cleanup. No production/tooling edits, browser runs, CI retries, budget changes, or new broad tests.",
+  "files": {
+    "tools/pages-preview/browser-map-loading.mjs": {
+      "bytes": 54367,
+      "sha256": "32a5d6a7bcffe30f0f140fa37d6c578b1371ea428ad37ef8f626c7582809cf7d"
+    },
+    "tools/pages-preview/tests/browser-map-loading.test.mjs": {
+      "bytes": 18739,
+      "sha256": "bde5f2d153955075f2893114de3568cfd63a220a9a761e33a2a06885c4851212"
+    },
+    "web/lib/custom-map-engine.ts": {
+      "bytes": 78080,
+      "sha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704"
+    },
+    "web/lib/custom-map-tiles.ts": {
+      "bytes": 18538,
+      "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546"
+    },
+    "web/lib/custom-map-camera.ts": {
+      "bytes": 21528,
+      "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd"
+    },
+    "web/lib/custom-map-painter.ts": {
+      "bytes": 26868,
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1"
+    },
+    "web/lib/custom-map-tiles.worker.ts": {
+      "bytes": 15542,
+      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217"
+    },
+    "web/lib/map-resource-pool.ts": {
+      "bytes": 11161,
+      "sha256": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880"
+    },
+    "web/lib/map-preload.ts": {
+      "bytes": 6548,
+      "sha256": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81"
+    },
+    "web/lib/catalog.generated.json": {
+      "bytes": 993152,
+      "sha256": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49"
+    },
+    ".github/workflows/pages.yml": {
+      "bytes": 33229,
+      "sha256": "0b714a4bb356602dc72d34d1021c24abdf05d3c6f00b42434d09dbc7b31f99a9"
+    },
+    "tools/pages-preview/verify-deployed.mjs": {
+      "bytes": 6230,
+      "sha256": "f97afa41f73be505229cbc406f5369af8d1fc26ec59e1405e1821111faba53cf"
+    }
+  },
+  "localBuildCrossCheck": {
+    "buildId": "eea0352868678f26",
+    "manifestSourceCommit": null,
+    "inputMatches": {
+      "tools/pages-preview/browser-map-loading.mjs": true,
+      "web/lib/custom-map-engine.ts": true,
+      "web/lib/custom-map-tiles.ts": true,
+      "web/lib/custom-map-camera.ts": true,
+      "web/lib/custom-map-painter.ts": true,
+      "web/lib/custom-map-tiles.worker.ts": true,
+      "web/lib/map-resource-pool.ts": true,
+      "web/lib/map-preload.ts": true,
+      "web/lib/catalog.generated.json": true
+    },
+    "allNineMatch": true,
+    "scope": "Local build input consistency only; not publication or CI proof."
+  },
+  "pixelProof": {
+    "surface": "Read-only getImageData from the actual canvas.tropnik-map-canvas DPR1 backing surface.",
+    "coordinateChoice": "64 x 64 ROIs with 4 px cell inset, at most 24, computed only from the pending geometry. Excludes all old canonical detail rectangles and current label/UI rectangles. Round-robin source cells; does not select by pixel agreement.",
+    "referenceEligibility": "Complete-frame texture only: at least 16 distinct RGB colors, maximum channel range at least 8, at least 25 percent nonmodal pixels; clear in both readbacks and no complete label/UI rectangle overlap.",
+    "acceptance": "Every eligible ROI must match all RGBA bytes exactly and at least two distinct current cells must be eligible. Flat/flat is insufficient, flat/textured fails, a single wrong eligible ROI fails.",
+    "causalOrder": "Progress inspected while the acquired network request is unfinished and held; two real animation frames; raw pending readback then pending PNG; fixture still held checked after PNG; only then continue request; complete ground at the identical camera/viewport/mask/overlay becomes the reference.",
+    "sourceOwnership": "Current-generation loadingGround contains at least two same-cell vector/relief pairs from the target grid; old canonical detail and relief stay unchanged until final commit; partial area expands beyond old canonical ground; fallback coverage uses exact rectangle union.",
+    "negativeControlsReviewed": [
+      "metadata-only flat pending paint against textured complete paint",
+      "flat pending and flat complete images",
+      "one byte corrupted in an eligible ROI",
+      "only one unobscured eligible cell",
+      "different final camera",
+      "final eligibility independent of matching pixels"
+    ],
+    "limits": "This proves sampled same-camera ground pixels in at least two new cells. It does not replace full raster quality, smoothness, Android, or provider-speed validation."
+  },
+  "fixtureAndDeadlines": {
+    "acquisitionMs": 4000,
+    "heldRequestMs": 8000,
+    "progressMs": 6000,
+    "settleMs": 15000,
+    "pauseStart": "The hold timer starts only on the genuine first matching external z11 DEM Fetch.requestPaused event, not on fixture enable or native zoom setup.",
+    "fault": "Only the first actual halo URL outside the target primary grid is held; other requests are continued with requestId only. No response replacement, cache disabling, SW bypass, worker mutation, camera assignment, clock override, or application callback.",
+    "errorSeparation": "Acquisition failure, lack of stable camera/mask/overlay readiness, hold expiry, rejected progress geometry, absent textured reference and different pixels fail separately. Failure screenshots are after fixture release and explicitly marked as such.",
+    "cleanup": "Idempotent release drains tracked continue commands, disables Fetch and removes its listener. Finally releases again safely, disposes passive network observers, closes CDP/browser, verifies stopped browser diagnostics, closes local server/connections and removes the temporary profile.",
+    "boundedEvidence": "One held request, network ledger at most 256 entries with overflow forbidden for success, 24 ROIs, up to 64 target cells, at most 4 setup zooms."
+  },
+  "sourceBinding": {
+    "inputs": "Nine actual file hashes and byte counts checked against build-info before launching; build sourceCommit checked against GITHUB_SHA. Actual route title/region checked in the exact catalogue.",
+    "packaging": "Pages repeats receipt validation with exact source/build/full browser environment, hashes all nine input files against the manifest, and rehashes the four PNG files including bytes/header/dimensions.",
+    "public": "verify-deployed fetches the public receipt with a hard 4 MiB streamed body limit, revalidates source/build/browser environment and matches all nine hashes to build inputs.",
+    "sizeCaveat": "The gate preflight bound uses compact JSON.stringify(report), while checkpoint writes indented JSON. The public fetch bound is on actual bytes. Check actual final file size; do not describe the compact assertion alone as an exact on-disk 4 MiB bound."
+  },
+  "baselineInterpretation": {
+    "expectedRun": 43427936120,
+    "expectedSource": "e69fd49460a9657eba6fcde1455e0698101e586d",
+    "requiredForCausalRed": "Actual held halo must be acquired, current camera/mask/overlay stable, held request still unfinished, no failed target request, and enough unaffected source dependencies completed during the hold. Inspect ledger and timestamps in the actual artifact before attributing missing progress to the old batch barrier.",
+    "codeOnlyCaveat": "MAP_LOADING_NO_PAINTED_PROGRESS readiness requires at least one completed vector and at least one completed DEM, not proof that a specific unaffected pair finished decoding. The error code alone cannot distinguish all other-source or decoder stalls.",
+    "notRed": [
+      "unsupported z11 setup or planner fallback",
+      "no acquired external halo",
+      "unstable camera or mask/overlay",
+      "hold ending before observation",
+      "too few clear textured reference cells",
+      "unrelated external-source failure"
+    ],
+    "noTransfer": "The earlier 5fef release failures, 9289 smoothness failure and 0cb trace remain separate evidence. No old performance result transfers to the new paired-progress engine."
+  },
+  "previousPlannerMath": {
+    "receipt": "/workspace/scratch/686c5dc59f67/perf-diagnostic/map-loading-plan-independent-review.json",
+    "gateSha256AtRun": "046a24ce71beed86965dfffb8b92362e836b1c781af891011549571a2d8838c8",
+    "result": "37 supported flat-camera combinations matched production zoomAt/tileRequests; 8 cases explicitly unsupported because production falls back to z10. This was an earlier gate revision; frozen planner source was additionally read during this review. It is not a new browser result."
+  },
+  "tests": {
+    "ownerReportedFocused": {
+      "passed": 11,
+      "failed": 0,
+      "sourceHash": "32a5d6a7bcffe30f0f140fa37d6c578b1371ea428ad37ef8f626c7582809cf7d",
+      "testHash": "bde5f2d153955075f2893114de3568cfd63a220a9a761e33a2a06885c4851212"
+    },
+    "independentAction": "Read the focused tests and negative controls, source/planner/pixel/fixture code, packaging and public validation. Did not rerun the already completed broad suite or start a browser/CI workflow."
+  }
+}

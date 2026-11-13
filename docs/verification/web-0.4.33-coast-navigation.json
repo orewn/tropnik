@@ -1,0 +1,85 @@
+{
+  "failureSourceCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "failureRun": 43422618701,
+  "rootCauseFile": "coast-cause.json",
+  "rootCauseSha256": "ab787775e52c2aa912de854070d11c62ec7da95dfe596b2fd8065fa13ff58324",
+  "changedFiles": [
+    "tools/pages-preview/browser-coast-audit.mjs",
+    "tools/pages-preview/tests/coast-navigation.test.mjs",
+    "tools/pages-preview/tests/coast-pan.test.mjs"
+  ],
+  "navigationChange": "The native witness recenters the same source vertex between intermediate visible-anchor zoom steps. One budget object permits at most twelve correction attempts for the entire reachZoom case, including final centering. No fresh budget is allocated to an intermediate step.",
+  "preservedLimits": {
+    "panCorrectionAttemptsPerZoomCase": 12,
+    "zoomAttempts": 28,
+    "centerErrorPx": 6,
+    "panHorizontalFraction": 0.35,
+    "panVerticalFraction": 0.3,
+    "stationaryHoldBeforeReleaseMs": 200
+  },
+  "preservedAcceptance": {
+    "sourceFixturesRegionAndPanPlanUnchanged": true,
+    "inspectionAndAcceptanceFunctionsUnchanged": true,
+    "inspectionAndAcceptanceSha256": "a453e3bce91b8a2728fe5b2447633b60a688f13b0c6ead2c1eec0b9b4a9fa1e7",
+    "actualNativeDispatchAndHitTesting": "Unchanged native callback: sample the unobscured Canvas path, clear the input ledger, dispatchSourceEndPan, settle the public camera, record and assert original camera/selection/layer/event invariants."
+  },
+  "red": {
+    "failureSourceCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+    "originalAuditSha256": "2ea45b24821d4fd530cf8bf75f3487861ede0f53f228cb492ae2e14b410841e6",
+    "batchedControllerSha256": "078dbddcf4d0fec359f4aa876fb9b54dacf1e88c26b9de40bd94bfab521ba445",
+    "testSha256": "57d28d4e93be93f4a7425c610d03173b61c217e3d0cd848f6303ba5bef777b06",
+    "method": "The old six-zoom batch order is preserved after extracting navigation into a testable controller. The same 12-attempt cap and 6px target remain; no interleaved correction is present. The raw native failure at exact source5fef is recorded separately.",
+    "command": [
+      "node",
+      "--test",
+      "tools/pages-preview/tests/coast-navigation.test.mjs"
+    ],
+    "exitCode": 1,
+    "logSha256": "b392a064ba59dedc81fe0b53d9501600562c6c0681e173762134f3e273213a0d"
+  },
+  "green": {
+    "command": [
+      "node",
+      "--test",
+      "tools/pages-preview/tests/coast-navigation.test.mjs",
+      "tools/pages-preview/tests/coast-pan.test.mjs",
+      "tools/pages-preview/tests/coast-coverage.test.mjs",
+      "tools/pages-preview/tests/source-end-pan.test.mjs",
+      "tools/pages-preview/tests/map-projection.test.mjs",
+      "tools/pages-preview/tests/browser-report.test.mjs"
+    ],
+    "exitCode": 0,
+    "auditSha256": "a8c9599a9e40f1c4fe8990bf2957413c476013c745c9933589d2cb93ed9f363f",
+    "testSha256": "57d28d4e93be93f4a7425c610d03173b61c217e3d0cd848f6303ba5bef777b06",
+    "logSha256": "c41bf759b061eadefb6001a826e4606fb40429e970eabc7f9fc8963f7259dccd",
+    "files": {
+      "tools/pages-preview/tests/coast-navigation.test.mjs": "57d28d4e93be93f4a7425c610d03173b61c217e3d0cd848f6303ba5bef777b06",
+      "tools/pages-preview/tests/coast-pan.test.mjs": "92a4dbaf076d5d5318426a2db689db97dfc8d842e4328f0b42517eb05a0d37bd",
+      "tools/pages-preview/tests/coast-coverage.test.mjs": "30c4c4a2b5d057e33dfaf9ca6f9a30e23ca24d787867260e58f96ef8042e405b",
+      "tools/pages-preview/tests/source-end-pan.test.mjs": "4d71d3358a930fdc369275b08c6fa7ea774a802eee9d63510f91fa7e2e9f0041",
+      "tools/pages-preview/tests/map-projection.test.mjs": "4236d190b7d5ecabe30e1d7b867445baf818636f640724eb8a63ea6d84c5d4e9",
+      "tools/pages-preview/tests/browser-report.test.mjs": "d67e24376dd6343cd83d9652ccd8a18146111407a91413f089b1e57f9096ac7a"
+    }
+  },
+  "results": {
+    "newRegressionTests": 4,
+    "focusedTests": 37,
+    "focusedPassed": 37,
+    "focusedFailed": 0,
+    "oldBatchOrderRequiredAttempts": 13,
+    "oldBatchOrderAllowedAttempts": 12,
+    "oldBatchRemainingCenterErrorPx": 64.62256070416483,
+    "interleavedZoomCommands": 6,
+    "interleavedPanCorrectionAttempts": 6,
+    "interleavedFinalZoom": 11.621307459879889,
+    "interleavedFinalCenterErrorPx": "<0.001",
+    "sharedBudgetNegativeControl": "Slow but measurable gesture delivery across multiple zoom levels fails after the original twelve total correction attempts, before reaching six zoom commands.",
+    "twelfthAttemptPositiveControl": "A successful twelfth correction is accepted by a read of the settled camera; no thirteenth input is emitted.",
+    "otherNegativeControls": "Wrong pan direction, nonfunctional zoom, changed zoom during a native drag, missing/stale/pending/failed coverage, incorrect geometry publication and centerError>6 remain rejected."
+  },
+  "boundary": "Local tests run the actual witness controller with production zoomAt/pan math and controlled input delivery. They do not claim candidate native browser execution. The original saved CI events establish the failure cause; the next full Pages audit must validate all six original coastline frames and unchanged source/mask/camera criteria.",
+  "diffCheck": {
+    "command": "git diff --check -- tools/pages-preview/browser-coast-audit.mjs tools/pages-preview/tests/coast-navigation.test.mjs tools/pages-preview/tests/coast-pan.test.mjs",
+    "exitCode": 0
+  }
+}

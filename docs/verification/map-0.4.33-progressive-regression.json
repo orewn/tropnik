@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T12:43:12.924Z",
+  "status": "passed",
+  "scope": "Local deterministic engine and actual-event replay only; no real-browser, device, source-provider speed or publication claim.",
+  "baseline": {
+    "sourceCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+    "engineSha256": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862",
+    "testFile": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-5fef-loading-red/web/tests/custom-map-engine.test.mjs",
+      "bytes": 165930,
+      "sha256": "391fc4e2ff7f52b04861b3bd3b95852b0eacf865f8734dcfb815e8f2bc83bc3d"
+    },
+    "sourceOverlay": "Only the regression test file replaces its baseline counterpart; lib source and map fixtures are extracted from the exact baseline.",
+    "tests": 6,
+    "pass": 0,
+    "fail": 6,
+    "allFailuresAreAssertions": true,
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-loading-webview-exact-5fef-red.tap",
+      "bytes": 5688,
+      "sha256": "0ab40d79c0951c85f282006d79d9e2b52d835af290b85675671595ee4cf62353"
+    }
+  },
+  "finalCandidate": {
+    "ciSourceCommit": null,
+    "engine": {
+      "path": "web/lib/custom-map-engine.ts",
+      "bytes": 78080,
+      "sha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704"
+    },
+    "testFile": {
+      "path": "web/tests/custom-map-engine.test.mjs",
+      "bytes": 167930,
+      "sha256": "b28ba2e27ba2bad98d46ff8e664bf4ef5bdb416de96b4b41d6585646c3a7ebdd"
+    },
+    "tests": 78,
+    "pass": 78,
+    "fail": 0,
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/engine-loading-label-cache-green.tap",
+      "bytes": 9365,
+      "sha256": "166740760d6275dceb1fbc8cbf083f024c1cd631ce3021b45eab3001265a874f"
+    }
+  },
+  "unchangedReplayedTests": [
+    {
+      "name": "Android WebView 124 unknown pointer type activates an owned marker exactly once",
+      "testStatementSha256": "8a3950ac9672d05b8dce6127eb0e5940248cbc565e93351943d0a81618046018"
+    },
+    {
+      "name": "Android WebView 124 unknown pointer type cannot turn a Canvas gesture into marker activation",
+      "testStatementSha256": "1883f321c813ab1fe9d629260c0432f2d531708c2d4ae9789cd26065fc124d31"
+    },
+    {
+      "name": "loading ground paints ready measured pairs around the selected route before a slow neighbouring DEM finishes",
+      "testStatementSha256": "c507043d4831a19bfefc841c109f000d07ea3e16f92b54b358ca3b70fd0caa17"
+    },
+    {
+      "name": "loading ground keeps pairs atomic and useful completed cells through a failed neighbour and explicit retry",
+      "testStatementSha256": "9604799d120f682f35407074bf5095129f33013ccd00cde67b65eefa10789876"
+    },
+    {
+      "name": "loading ground labels appear with their painted pairs and reuse unchanged candidates",
+      "testStatementSha256": "63877dae7de10f2709a54ad663070cdb19d1d431c4d0fef06b70d1cd2178656b"
+    },
+    {
+      "name": "loading ground cannot cross a camera generation, cover a retained satellite view or survive destruction",
+      "testStatementSha256": "a32e70a4bf2530a65909bd51b9fddba5380d810254718aaf1ac2a097de993fab"
+    }
+  ],
+  "additionalRegression": "The subsequent independent review added and resolved the partial-relief label-cache zoom10 threshold regression. Its separate RED/GREEN is preserved in map-0.4.33-engine-independent-review.json.",
+  "observedAndroidEvidence": "android-0.4.33-webview-pointer-failure.json",
+  "limitations": {
+    "webviewClickDetail": 1,
+    "webviewClickDetailIsFixtureAssumption": true,
+    "syntheticTimersAreProviderBenchmark": false,
+    "chromiumRun": false,
+    "deviceRun": false
+  }
+}

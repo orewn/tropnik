@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T12:46:59.172154+00:00",
+  "status": "passed",
+  "scope": "Local current working-tree validation; no browser, device, release or provider-speed claim.",
+  "baselineGitHead": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "ciSourceCommit": null,
+  "sourceFiles": {
+    "web/lib/custom-map-engine.ts": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-engine.ts",
+      "bytes": 78080,
+      "sha256": "92bb81a9dd45b458db123db7dc0e5672748383a6789b5bb46336760271576704"
+    },
+    "web/lib/custom-map-tiles.ts": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/lib/custom-map-tiles.ts",
+      "bytes": 18538,
+      "sha256": "8cec74b1a9fe37faa18edbfc0ca73b147fd7131097b84ea62ccc426924f57546"
+    },
+    "web/tests/custom-map-engine.test.mjs": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-engine.test.mjs",
+      "bytes": 167930,
+      "sha256": "b28ba2e27ba2bad98d46ff8e664bf4ef5bdb416de96b4b41d6585646c3a7ebdd"
+    },
+    "web/tests/custom-map-tiles.test.mjs": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/tests/custom-map-tiles.test.mjs",
+      "bytes": 43967,
+      "sha256": "af16792bab5506b73d589b4aa92c669be0f8536a11896f90f6c4720fdd9eacde"
+    },
+    "tools/pages-preview/browser-map-loading.mjs": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/tools/pages-preview/browser-map-loading.mjs",
+      "bytes": 54367,
+      "sha256": "32a5d6a7bcffe30f0f140fa37d6c578b1371ea428ad37ef8f626c7582809cf7d"
+    },
+    "tools/pages-preview/tests/browser-map-loading.test.mjs": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/tools/pages-preview/tests/browser-map-loading.test.mjs",
+      "bytes": 18739,
+      "sha256": "bde5f2d153955075f2893114de3568cfd63a220a9a761e33a2a06885c4851212"
+    },
+    "tools/pages-preview/browser-coast-audit.mjs": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/tools/pages-preview/browser-coast-audit.mjs",
+      "bytes": 16223,
+      "sha256": "a8c9599a9e40f1c4fe8990bf2957413c476013c745c9933589d2cb93ed9f363f"
+    },
+    "tools/pages-preview/tests/coast-navigation.test.mjs": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/tools/pages-preview/tests/coast-navigation.test.mjs",
+      "bytes": 6132,
+      "sha256": "57d28d4e93be93f4a7425c610d03173b61c217e3d0cd848f6303ba5bef777b06"
+    },
+    "tools/pages-preview/verify-deployed.mjs": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/tools/pages-preview/verify-deployed.mjs",
+      "bytes": 6230,
+      "sha256": "f97afa41f73be505229cbc406f5369af8d1fc26ec59e1405e1821111faba53cf"
+    },
+    ".github/workflows/pages.yml": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/.github/workflows/pages.yml",
+      "bytes": 33229,
+      "sha256": "0b714a4bb356602dc72d34d1021c24abdf05d3c6f00b42434d09dbc7b31f99a9"
+    },
+    "web/public/custom-map/manifest.json": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/public/custom-map/manifest.json",
+      "bytes": 533835,
+      "sha256": "3a630081d3470c050b5d2010c568ff5faa51e1ce550732d4b8473ef33056f9fd"
+    },
+    "web/public/sw.js": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/public/sw.js",
+      "bytes": 17420,
+      "sha256": "3c2674f6f1c53db9a6c0794daa025291f569323ca3ed142566922ac7eb13b6e1"
+    },
+    "web/package.json": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/package.json",
+      "bytes": 1896,
+      "sha256": "2140f2b536d8303ba3c2c15f2074a953553a73d6822d1d87435a26f890dae2e3"
+    },
+    "android/app/build.gradle.kts": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/android/app/build.gradle.kts",
+      "bytes": 6178,
+      "sha256": "25710c514cb3827bec6fc8726695d262cc97b64157975cf59e6ba622c4942107"
+    },
+    "tools/android-build/release-notes/0.4.33-preview.md": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/tools/android-build/release-notes/0.4.33-preview.md",
+      "bytes": 5867,
+      "sha256": "359e2b6fe6aadfcb086cbd731c67adafa39be636852b3b25c333b9137d368e90"
+    },
+    "tools/android-build/release-request.json": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/tools/android-build/release-request.json",
+      "bytes": 212,
+      "sha256": "e466c362f796ce7c83ff16ff2b164dfba29f18982303b3614e7294d952532578"
+    },
+    ".github/workflows/android.yml": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/.github/workflows/android.yml",
+      "bytes": 15312,
+      "sha256": "8fc25861492320250154557b0a92539b1563bcaae121562a4214211100c0e909"
+    },
+    "web/public/downloads/android-manifest.json": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/public/downloads/android-manifest.json",
+      "bytes": 3177,
+      "sha256": "405165b18cf746c44abf54b7fd12c0971ea09a06cb2cd9454b340263ad8f2f5f"
+    }
+  },
+  "webTests": {
+    "exitCode": 0,
+    "counts": {
+      "tests": 971,
+      "pass": 971,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/loading-final-web-suite.tap",
+      "bytes": 100313,
+      "sha256": "35cd3ac2909ee7ec2c4fb0d8aa73074a5dd283f3b078da1029fd0ed999ee3d6d"
+    }
+  },
+  "nativeMapToolingTests": {
+    "exitCode": 0,
+    "counts": {
+      "tests": 28,
+      "pass": 28,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/loading-final-native-map-tools.tap",
+      "bytes": 2850,
+      "sha256": "d442464d6d5b551e7be99d93305a303880c7c538aa94a7ca60445b3522c1a05b"
+    }
+  },
+  "pagesToolingTests": {
+    "exitCode": 0,
+    "counts": {
+      "tests": 387,
+      "pass": 387,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/loading-final-pages-tooling.tap",
+      "bytes": 50881,
+      "sha256": "c0cb09612c4855f7427c8a0bac1ffaa6369957982bbdb199be4362616b23a6fb"
+    }
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "command": "node web/node_modules/typescript/bin/tsc -p web/tsconfig.json --noEmit --incremental false",
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/loading-final-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "lint": {
+    "exitCode": 0,
+    "command": "pnpm --dir web lint",
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/loading-final-lint.log",
+      "bytes": 56,
+      "sha256": "7a52c6eaae53f1dc110842e74fbd3d95fd1293d174c3192c07e098bb21454ffc"
+    }
+  },
+  "runtimeDeterminism": {
+    "checkOnly": true,
+    "runtime": "tropnik-canvas",
+    "sourceInputsSha256": "a863fe0f5d2379a4f5ff225341fe4fce5b163bd7f19413d53e785275c27303cb",
+    "sourceFiles": 61,
+    "outputFiles": 12,
+    "resourceAliases": 1746,
+    "manifestSha256": "3a630081d3470c050b5d2010c568ff5faa51e1ce550732d4b8473ef33056f9fd",
+    "destinations": [
+      "web/public/custom-map",
+      "android/app/src/main/assets/custom-map"
+    ]
+  },
+  "runtimeByteParity": {
+    "verified": true,
+    "files": 12,
+    "manifestSha256": "3a630081d3470c050b5d2010c568ff5faa51e1ce550732d4b8473ef33056f9fd"
+  },
+  "generationOrder": [
+    "prepare-custom-map.mjs",
+    "prepare-offline.mjs",
+    "stamp-service-worker.mjs"
+  ],
+  "build": {
+    "buildId": "eea0352868678f26",
+    "base": "/tropnik/",
+    "origin": "https://orewn.github.io",
+    "sourceCommit": null,
+    "inputsVerified": 2165,
+    "metadata": {
+      "path": "/workspace/scratch/ee002c1fa3a0/tropnik/web/pages-preview/dist/build-info.json",
+      "bytes": 414188,
+      "sha256": "02a0f35a408cf03128edbc291c759d95de76b1b8be24ace3874c3cb8c17fa03a"
+    },
+    "log": {
+      "path": "/workspace/scratch/686c5dc59f67/perf-diagnostic/loading-final-static-build.log",
+      "bytes": 11920,
+      "sha256": "3ec5c8c8137f944d961e1dc6d5f48f4d2ab8723eac8f7a89a13b97af80fc0144"
+    }
+  },
+  "releaseControl": {
+    "requestUnchanged": true,
+    "request": {
+      "schemaVersion": 1,
+      "requestId": "android-0-4-32-preview-camera-handoff-20261113",
+      "version": "0.4.32-preview",
+      "versionCode": 15,
+      "notesFile": "tools/android-build/release-notes/0.4.32-preview.md"
+    },
+    "nextMainPushRequestsPublication": false,
+    "apk033Published": false
+  },
+  "limits": {
+    "realBrowserExecuted": false,
+    "exactApkDeviceExecuted": false,
+    "publishedWebVerified": false,
+    "syntheticTimingIsProviderBenchmark": false
+  }
+}

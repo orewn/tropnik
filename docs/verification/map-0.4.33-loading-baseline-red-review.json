@@ -1,0 +1,1207 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-13T12:56:51.988599+00:00",
+  "reviewer": "perf_skeptic",
+  "status": "EXPECTED_BASELINE_PROGRESS_RED_CONFIRMED_WITH_DECODE_LIMITATION",
+  "runId": 43428798267,
+  "sourceCommit": "57bdfd9630a464d7241040ded27b3cba071552fe",
+  "buildId": "5c78c2796ece628a",
+  "productionBaselineCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "artifact": {
+    "id": 14037534354,
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43428798267/artifact-14037534354.zip",
+    "bytes": 3653628,
+    "sha256": "fa35c1bcac359298fdf87aa4deb6411b88920f19ce88aa175b5b5fd78fd2ac15",
+    "download": "Existing shared single download independently rehashed; no additional download."
+  },
+  "rawReceipt": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43428798267/zip-members/dist/browser-map-loading-verification.json",
+    "bytes": 635729,
+    "sha256": "941bfed82ba6e79fdaade2de7513e80a5e021416c971b1d268e44af809ef4649"
+  },
+  "buildManifest": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43428798267/zip-members/dist/build-info.json",
+    "bytes": 413847,
+    "sha256": "ceadc18cfc7539f715ff7048201946d9d124079794d8a8f7fdad022d0d6ad033"
+  },
+  "sourceChecks": {
+    "web/lib/custom-map-engine.ts": {
+      "sha256": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862",
+      "bytes": 74766,
+      "baselineFileAndArtifactInputMatch": true,
+      "equals5fefGitBlob": true
+    },
+    "web/lib/custom-map-tiles.ts": {
+      "sha256": "c84c763cabacc7b7c4c7e620b3b5e2fdbcb401eb7fa8f4efcf776f854426a5e6",
+      "bytes": 17623,
+      "baselineFileAndArtifactInputMatch": true,
+      "equals5fefGitBlob": true
+    },
+    "web/lib/custom-map-camera.ts": {
+      "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "bytes": 21528,
+      "baselineFileAndArtifactInputMatch": true,
+      "equals5fefGitBlob": true
+    },
+    "web/lib/custom-map-painter.ts": {
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "bytes": 26868,
+      "baselineFileAndArtifactInputMatch": true,
+      "equals5fefGitBlob": true
+    },
+    "web/lib/custom-map-tiles.worker.ts": {
+      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+      "bytes": 15542,
+      "baselineFileAndArtifactInputMatch": true,
+      "equals5fefGitBlob": true
+    },
+    "web/lib/map-resource-pool.ts": {
+      "sha256": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "bytes": 11161,
+      "baselineFileAndArtifactInputMatch": true,
+      "equals5fefGitBlob": true
+    },
+    "web/lib/map-preload.ts": {
+      "sha256": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "bytes": 6548,
+      "baselineFileAndArtifactInputMatch": true,
+      "equals5fefGitBlob": true
+    },
+    "web/lib/catalog.generated.json": {
+      "sha256": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49",
+      "bytes": 993152,
+      "baselineFileAndArtifactInputMatch": true,
+      "equals5fefGitBlob": true
+    },
+    "tools/pages-preview/browser-map-loading.mjs": {
+      "sha256": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64",
+      "bytes": 54368,
+      "baselineFileAndArtifactInputMatch": true
+    }
+  },
+  "generatedRuntimeAndWorkerChecks": {
+    "web/public/custom-map/catalogue.json": {
+      "sha256": "bad517373c27101ea8fe93423083f3636c11cf65824c2202f69cc2c2bf414aa3",
+      "bytes": 167378,
+      "equals5fefGitBlob": true
+    },
+    "web/public/custom-map/chunks/custom-map-entry-CRqFx0YH.js": {
+      "sha256": "88ec30c17fcf077285c1e9a6e95e3ed8c8394536d26ba4d85d756744c2c8a880",
+      "bytes": 147917,
+      "equals5fefGitBlob": true
+    },
+    "web/public/custom-map/manifest.json": {
+      "sha256": "3831d1cbd52aab9c7805b89586fbea33c49d011014181ef8840a81b2483d061d",
+      "bytes": 533835,
+      "equals5fefGitBlob": true
+    },
+    "web/public/custom-map/Manrope-OFL.txt": {
+      "sha256": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30",
+      "bytes": 4383,
+      "equals5fefGitBlob": true
+    },
+    "web/public/custom-map/map-runtime.js": {
+      "sha256": "e22b5d92186e9f25d42496853f7cc8bc05566a957e72ec4de424a24ec4d3cdc7",
+      "bytes": 224,
+      "equals5fefGitBlob": true
+    },
+    "web/public/custom-map/map.css": {
+      "sha256": "8e56ccd8993e60f3ba822b939543c19be14d3db4562130c6460422bdb6e74e88",
+      "bytes": 82304,
+      "equals5fefGitBlob": true
+    },
+    "web/public/custom-map/workers/custom-map-tiles.worker-DIXTfJlZ.js": {
+      "sha256": "f76ea8a31e046b700ab47418f303cffec504490e700b78f2dfc68866c4a71b2e",
+      "bytes": 28755,
+      "equals5fefGitBlob": true
+    },
+    "web/public/custom-map/workers/custom-map-trail-raster.worker-CZZMbu81.js": {
+      "sha256": "bfec0605c231da3c03fca6403800e8b0ff7678ed83e66218dfa973d7e26c7345",
+      "bytes": 2387,
+      "equals5fefGitBlob": true
+    },
+    "web/public/custom-map/workers/terrain-preparation.worker-Bb-s7l3H.js": {
+      "sha256": "625ce56a5be80c34fe32704e0fe93aa1a5c83e56d719c1fcfea511ba56583931",
+      "bytes": 2891,
+      "equals5fefGitBlob": true
+    },
+    "web/public/sw.js": {
+      "sha256": "5b78ec1f625b9da0d29714e152403fa59c9e938683757b457ddad4bac899b5e9",
+      "bytes": 17420,
+      "equals5fefGitBlob": true
+    }
+  },
+  "sourceCompare": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43428798267/source-compare.json",
+    "sha256": "539924a78d8d7a1866e3b06cd71a71f22859837280852d580b5f3006846f572b",
+    "base": "e69fd49460a9657eba6fcde1455e0698101e586d",
+    "head": "57bdfd9630a464d7241040ded27b3cba071552fe",
+    "changedPaths": [
+      ".github/workflows/map-loading-diagnostic.yml",
+      "tools/pages-preview/browser-map-loading.mjs"
+    ],
+    "changes": "acquireMs 4000 -> 15000; checkout fetch-depth 2 -> 3. No production path change."
+  },
+  "verdict": {
+    "code": "MAP_LOADING_NO_PAINTED_PROGRESS",
+    "phase": "paired-progress-before-halo-release",
+    "message": "The stable target had no independently painted loading ground while its real external halo remained held",
+    "lastProgressAssertion": "No independently painted loading ground before the held halo completed",
+    "interpretation": "The fault was acquired, current camera/mask/overlay were stable, another large set of complete source neighborhoods was available over the network, yet the old engine kept only canonical z12 ground. Exact old source has no per-cell commit path: full vector and relief batches await allSettled and their shared Promise.all before replacing ground. The held halo is sufficient to keep at least one required relief unresolved and therefore prevent that shared commit. This is an expected application progress regression witness, not a fixture acquisition failure.",
+    "limitations": [
+      "No worker completion/profile events or per-cell bitmap readiness were collected. Network completion does not prove decode completion or worker availability. Do not claim 29 decoded pairs.",
+      "The held URL was not the only unfinished source: two other DEMs were still in flight and eight required outer-ring URLs had not been observed. Do not claim it was the sole contributor to total load time.",
+      "The failure PNG is after release; pre-release evidence is the exact frame and live Network/Fetch snapshots. No successful pending/final pixel comparison exists on the baseline.",
+      "This bounded fault witness is not a provider-speed benchmark, smoothness pass, Android pass, or claim about new candidate runtime."
+    ]
+  },
+  "timing": {
+    "acquisitionMs": 8489.051907000001,
+    "stableFromPauseMs": 219.26262799999677,
+    "lastPreReleaseFrameFromPauseMs": 5976,
+    "releaseFromPauseMs": 6033.759976999994,
+    "afterReleaseFrameFromPauseMs": 6037,
+    "limits": {
+      "acquireMs": 15000,
+      "holdMs": 8000,
+      "progressMs": 6000,
+      "settleMs": 15000,
+      "networkRecords": 256,
+      "maxCells": 64,
+      "maxSetupZooms": 4
+    },
+    "actualVerdictTimestamp": "No separate timestamp field; the failing progress deadline is bracketed by the last pre-release observation at +5976 epoch-ms and failure release ACK at +6033.760 monotonic-ms. Do not label ACK time as exact verdict time."
+  },
+  "held": {
+    "acquired": {
+      "schemaVersion": 1,
+      "kind": "one-real-external-dem-halo",
+      "timeoutMs": 8000,
+      "acquireTimeoutMs": 15000,
+      "enabledAtEpochMs": 1794574403102,
+      "enabledAtMonotonicMs": 25744.344421,
+      "observed": 41,
+      "held": {
+        "requestId": "interception-job-80.0",
+        "networkId": "2572.449",
+        "url": "https://tiles.mapterhorn.com/11/1345/620.webp",
+        "cell": {
+          "z": 11,
+          "x": 1345,
+          "y": 620
+        },
+        "pausedAtEpochMs": 1794574411591,
+        "pausedAtMonotonicMs": 34233.396328,
+        "resumedAtEpochMs": null,
+        "resumedAtMonotonicMs": null
+      },
+      "pending": 1,
+      "closed": false,
+      "reason": null,
+      "errors": []
+    },
+    "atLastPreReleaseObservation": {
+      "schemaVersion": 1,
+      "kind": "one-real-external-dem-halo",
+      "timeoutMs": 8000,
+      "acquireTimeoutMs": 15000,
+      "enabledAtEpochMs": 1794574403102,
+      "enabledAtMonotonicMs": 25744.344421,
+      "observed": 64,
+      "held": {
+        "requestId": "interception-job-80.0",
+        "networkId": "2572.449",
+        "url": "https://tiles.mapterhorn.com/11/1345/620.webp",
+        "cell": {
+          "z": 11,
+          "x": 1345,
+          "y": 620
+        },
+        "pausedAtEpochMs": 1794574411591,
+        "pausedAtMonotonicMs": 34233.396328,
+        "resumedAtEpochMs": null,
+        "resumedAtMonotonicMs": null
+      },
+      "pending": 1,
+      "closed": false,
+      "reason": null,
+      "errors": []
+    },
+    "networkAtLastPreReleaseObservation": {
+      "requestId": "2572.449",
+      "url": "https://tiles.mapterhorn.com/11/1345/620.webp",
+      "kind": "dem",
+      "cell": {
+        "z": 11,
+        "x": 1345,
+        "y": 620
+      },
+      "startedAtEpochMs": 1794574411592,
+      "startedAtMonotonicSeconds": 99.578654,
+      "finishedAtEpochMs": null,
+      "failed": null,
+      "status": null,
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "servedFromCache": false,
+      "encodedBytes": 0
+    },
+    "released": {
+      "schemaVersion": 1,
+      "kind": "one-real-external-dem-halo",
+      "timeoutMs": 8000,
+      "acquireTimeoutMs": 15000,
+      "enabledAtEpochMs": 1794574403102,
+      "enabledAtMonotonicMs": 25744.344421,
+      "observed": 64,
+      "held": {
+        "requestId": "interception-job-80.0",
+        "networkId": "2572.449",
+        "url": "https://tiles.mapterhorn.com/11/1345/620.webp",
+        "cell": {
+          "z": 11,
+          "x": 1345,
+          "y": 620
+        },
+        "pausedAtEpochMs": 1794574411591,
+        "pausedAtMonotonicMs": 34233.396328,
+        "resumedAtEpochMs": 1794574417625,
+        "resumedAtMonotonicMs": 40267.156305
+      },
+      "pending": 0,
+      "closed": true,
+      "reason": "failure",
+      "errors": []
+    },
+    "dependentPrimaryCells": [
+      [
+        11,
+        1344,
+        619
+      ],
+      [
+        11,
+        1345,
+        619
+      ],
+      [
+        11,
+        1346,
+        619
+      ]
+    ]
+  },
+  "network": {
+    "source": "page-target CDP Network events",
+    "count": 106,
+    "vectorCount": 42,
+    "demCount": 64,
+    "complete200Count": 103,
+    "failedCount": 0,
+    "overflow": 0,
+    "cacheOrServiceWorkerCount": 0,
+    "all42PrimaryVectorComplete": true,
+    "all42PrimaryDEMComplete": true,
+    "duplicateHeldUrlCount": 1,
+    "otherPending": [
+      {
+        "requestId": "2572.474",
+        "url": "https://tiles.mapterhorn.com/11/1348/620.webp",
+        "kind": "dem",
+        "cell": {
+          "z": 11,
+          "x": 1348,
+          "y": 620
+        },
+        "startedAtEpochMs": 1794574417118,
+        "startedAtMonotonicSeconds": 105.106688,
+        "finishedAtEpochMs": null,
+        "failed": null,
+        "status": null,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "servedFromCache": false,
+        "encodedBytes": 0
+      },
+      {
+        "requestId": "2572.475",
+        "url": "https://tiles.mapterhorn.com/11/1349/618.webp",
+        "kind": "dem",
+        "cell": {
+          "z": 11,
+          "x": 1349,
+          "y": 618
+        },
+        "startedAtEpochMs": 1794574417521,
+        "startedAtMonotonicSeconds": 105.510169,
+        "finishedAtEpochMs": null,
+        "failed": null,
+        "status": null,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "servedFromCache": false,
+        "encodedBytes": 0
+      }
+    ],
+    "notYetObservedOuterHaloCells": [
+      [
+        11,
+        1341,
+        613
+      ],
+      [
+        11,
+        1341,
+        620
+      ],
+      [
+        11,
+        1348,
+        613
+      ],
+      [
+        11,
+        1349,
+        613
+      ],
+      [
+        11,
+        1349,
+        614
+      ],
+      [
+        11,
+        1349,
+        615
+      ],
+      [
+        11,
+        1349,
+        619
+      ],
+      [
+        11,
+        1349,
+        620
+      ]
+    ],
+    "neighborhoodDefinition": "For each actual z11 target cell: its vector source and the DEM primary plus eight same-z adjacent DEM sources (ten HTTP resources). Source classification follows unchanged reliefHaloOffsets for z <= 12. Complete means every required record finished HTTP 200, no failure, before last pre-release frame.",
+    "completeNeighborhoodsAtPause": 17,
+    "completeNeighborhoodsAtStable": 18,
+    "completeNeighborhoodsAt3s": 22,
+    "completeNeighborhoodsAtLastFrame": 29,
+    "cellDependencies": [
+      {
+        "cell": [
+          11,
+          1342,
+          614
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1341,
+              613
+            ],
+            "state": "not-requested"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1343,
+          614
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 4607,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1344,
+          614
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 1881,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1345,
+          614
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 1461,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1346,
+          614
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 3416,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1347,
+          614
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1348,
+              613
+            ],
+            "state": "not-requested"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1348,
+          614
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1348,
+              613
+            ],
+            "state": "not-requested"
+          },
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              613
+            ],
+            "state": "not-requested"
+          },
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              614
+            ],
+            "state": "not-requested"
+          },
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              615
+            ],
+            "state": "not-requested"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1342,
+          615
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 5089,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 12107.36854287581
+      },
+      {
+        "cell": [
+          11,
+          1343,
+          615
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -452,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 23174.743660864195
+      },
+      {
+        "cell": [
+          11,
+          1344,
+          615
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -2286,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 15138.511129289433
+      },
+      {
+        "cell": [
+          11,
+          1345,
+          615
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -1786,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 15138.51112928944
+      },
+      {
+        "cell": [
+          11,
+          1346,
+          615
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -934,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 15138.511129289434
+      },
+      {
+        "cell": [
+          11,
+          1347,
+          615
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 2869,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 21984.58327661066
+      },
+      {
+        "cell": [
+          11,
+          1348,
+          615
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              614
+            ],
+            "state": "not-requested"
+          },
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              615
+            ],
+            "state": "not-requested"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1342,
+          616
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 3919,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 12469.66815214122
+      },
+      {
+        "cell": [
+          11,
+          1343,
+          616
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -1384,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 16072.465063149511
+      },
+      {
+        "cell": [
+          11,
+          1344,
+          616
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -4795,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1345,
+          616
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -4644,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1346,
+          616
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -4278,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1347,
+          616
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -78,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 22642.447609621788
+      },
+      {
+        "cell": [
+          11,
+          1348,
+          616
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              615
+            ],
+            "state": "not-requested"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1342,
+          617
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 3549,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 12469.668152141223
+      },
+      {
+        "cell": [
+          11,
+          1343,
+          617
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -1500,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 16072.465063149517
+      },
+      {
+        "cell": [
+          11,
+          1344,
+          617
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -4393,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1345,
+          617
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -4423,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1346,
+          617
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -4034,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 0.0
+      },
+      {
+        "cell": [
+          11,
+          1347,
+          617
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 179,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 22642.447609621795
+      },
+      {
+        "cell": [
+          11,
+          1348,
+          617
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              618
+            ],
+            "state": "pending"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1342,
+          618
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 4358,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 12469.66815214122
+      },
+      {
+        "cell": [
+          11,
+          1343,
+          618
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -367,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 24108.69759472427
+      },
+      {
+        "cell": [
+          11,
+          1344,
+          618
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -2284,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 16072.465063149506
+      },
+      {
+        "cell": [
+          11,
+          1345,
+          618
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -3026,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 16072.465063149517
+      },
+      {
+        "cell": [
+          11,
+          1346,
+          618
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": -1873,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 16072.465063149511
+      },
+      {
+        "cell": [
+          11,
+          1347,
+          618
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 2097,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 22642.447609621788
+      },
+      {
+        "cell": [
+          11,
+          1348,
+          618
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              618
+            ],
+            "state": "pending"
+          },
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              619
+            ],
+            "state": "not-requested"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1342,
+          619
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1341,
+              620
+            ],
+            "state": "not-requested"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1343,
+          619
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": 3932,
+        "missing": [],
+        "visibleAreaOutsideOldCanonicalCssPixels": 4311.726848687968
+      },
+      {
+        "cell": [
+          11,
+          1344,
+          619
+        ],
+        "dependsOnHeld": true,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1345,
+              620
+            ],
+            "state": "pending"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1345,
+          619
+        ],
+        "dependsOnHeld": true,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1345,
+              620
+            ],
+            "state": "pending"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1346,
+          619
+        ],
+        "dependsOnHeld": true,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1345,
+              620
+            ],
+            "state": "pending"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1347,
+          619
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1348,
+              620
+            ],
+            "state": "pending"
+          }
+        ]
+      },
+      {
+        "cell": [
+          11,
+          1348,
+          619
+        ],
+        "dependsOnHeld": false,
+        "networkCompleteFromPauseMs": null,
+        "missing": [
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              618
+            ],
+            "state": "pending"
+          },
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              619
+            ],
+            "state": "not-requested"
+          },
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1348,
+              620
+            ],
+            "state": "pending"
+          },
+          {
+            "kind": "dem",
+            "cell": [
+              11,
+              1349,
+              620
+            ],
+            "state": "not-requested"
+          }
+        ]
+      }
+    ]
+  },
+  "frames": {
+    "beforeCamera": {
+      "center": [
+        56.46536080224536,
+        57.97720349667858
+      ],
+      "zoom": 11.486151797145155,
+      "bearingDegrees": 0
+    },
+    "plannedCamera": {
+      "center": [
+        56.47712595449073,
+        57.97720349667858
+      ],
+      "zoom": 10.486151797145155,
+      "bearingDegrees": 0
+    },
+    "lastPreReleaseCamera": {
+      "center": [
+        56.477125954490674,
+        57.97720349667858
+      ],
+      "zoom": 10.486151797145155,
+      "bearingDegrees": 0
+    },
+    "centerDifferenceDegrees": [
+      -5.684341886080802e-14,
+      0.0
+    ],
+    "zoomDifference": 0.0,
+    "selection": {
+      "route": "osm-relation-17013428",
+      "region": "territory-28173009B90469334921421",
+      "title": "Лубяной тракт"
+    },
+    "moving": false,
+    "state": {
+      "ready": true,
+      "loading": true,
+      "mode": "detail",
+      "committedMode": "detail",
+      "imageryLoading": false,
+      "reliefReady": true,
+      "localDetail": false,
+      "error": "",
+      "residentTiles": 96,
+      "pendingTiles": 0
+    },
+    "coverage": {
+      "version": "7035c10e633effb2",
+      "lod": "local",
+      "cells": [
+        "0309-3"
+      ],
+      "pending": 0,
+      "error": "",
+      "ready": true,
+      "revision": 2
+    },
+    "catalogueOverlay": {
+      "sources": 6,
+      "preparedSources": 1,
+      "preparedParts": 8,
+      "exactSources": 0,
+      "currentViewportReady": true,
+      "pending": false,
+      "error": ""
+    },
+    "canonicalAllTilesExactlyEqualBefore": true,
+    "canonicalDetailAndReliefCountEach": 42,
+    "canonicalDetailAndReliefLevel": 12,
+    "loadingGround": null,
+    "drawRevisionBefore": 57,
+    "drawRevisionAtLastObservation": 71,
+    "controllerBefore": "http://127.0.0.1:41449/tropnik/sw.js",
+    "controllerLast": "http://127.0.0.1:41449/tropnik/sw.js",
+    "inspectionCaveat": "Resource counters belong to published mapInspection, not a guaranteed live source queue; not used for deadline attribution."
+  },
+  "geometricOpportunity": {
+    "scope": "Potential coverage of cells with complete NETWORK dependencies, not decoded or rendered coverage.",
+    "completeNetworkCellsWithVisibleAreaBeyondOldGround": 19,
+    "theirTotalVisibleAreaBeyondOldGroundCssPixels": 316801.3259126678,
+    "visibleCssPixels": 671968,
+    "oldCanonicalCssPixels": 337521.76632613974
+  },
+  "screenshots": [
+    {
+      "phase": "route",
+      "file": "map-loading-route.png",
+      "bytes": 1144770,
+      "sha256": "e32d8bcf6be3498428c4e777f3e01f8c09b6f5f6d340d57d92a0670a25eb94b5",
+      "width": 1440,
+      "height": 1000,
+      "actualBytesHashAndDimensionsMatch": true
+    },
+    {
+      "phase": "before",
+      "file": "map-loading-before.png",
+      "bytes": 1587188,
+      "sha256": "fe521757a409fd5649bc8c7d8732c5bacd25b7a10669c7534fc765bf25590d36",
+      "width": 1440,
+      "height": 1000,
+      "actualBytesHashAndDimensionsMatch": true
+    },
+    {
+      "phase": "failure",
+      "file": "map-loading-failure.png",
+      "bytes": 753173,
+      "sha256": "67cf312754d3cccaf0c8c02b02150765fd31876553a507344739059268d14774",
+      "width": 1440,
+      "height": 1000,
+      "actualBytesHashAndDimensionsMatch": true
+    }
+  ],
+  "visualReview": "Failure PNG visibly retains the old central detailed rectangle and shows flat overview outside plus the loading notice. It is explicitly after release and is not a held-window pixel proof.",
+  "cleanup": {
+    "failureScreenshotAfterRelease": true,
+    "browser": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 101.88396100000682
+    },
+    "fixtureErrors": [],
+    "pageErrors": [],
+    "localHttpErrors": []
+  },
+  "environment": {
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    }
+  },
+  "history": "First e69fd run43427936120 remains FIXTURE_ACQUISITION_FAILURE_NOT_PRODUCT_RED. Original gate32a source review and correction1107 review retained separately. This result applies to old5fef production with corrected acquisition fixture only.",
+  "actionsTaken": "Read-only artifact/source review, exact byte/hash/grid/dependency calculations and existing image inspection. No production or tooling edits, browser launches, new downloads, CI reruns or budget changes."
+}

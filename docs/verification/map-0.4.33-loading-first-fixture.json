@@ -1,0 +1,276 @@
+{
+  "schemaVersion": 1,
+  "kind": "map-loading-baseline-fixture-failure-classification",
+  "sourceCommit": "e69fd49460a9657eba6fcde1455e0698101e586d",
+  "productionBaselineCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "productionDirectoriesUnchanged": [
+    "web",
+    "android",
+    "contracts",
+    "data"
+  ],
+  "buildId": "a26c9e6fa4503417",
+  "runId": 43427936120,
+  "jobId": 131893890718,
+  "artifact": {
+    "id": 14037553626,
+    "name": "tropnik-map-loading-baseline-43427936120-1",
+    "size_in_bytes": 3629329,
+    "url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14037553626",
+    "archive_download_url": "https://api.github.com/repos/orewn/tropnik/actions/artifacts/14037553626/zip",
+    "expired": false,
+    "created_at": "2026-11-13T12:47:53Z",
+    "expires_at": "2026-11-20T12:47:52Z",
+    "updated_at": "2026-11-13T12:47:53Z",
+    "digest": "sha256:c19f1d9467edd3b854d20cf4b61744a8d4d5fe2fa31fbf1f408796900c94ec6c",
+    "workflow_run": {
+      "id": 43427936120,
+      "repository_id": 1447843944,
+      "head_repository_id": 1447843944,
+      "head_branch": "verify/map-loading-20261113",
+      "head_sha": "e69fd49460a9657eba6fcde1455e0698101e586d"
+    }
+  },
+  "archive": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43427936120/artifact-14037553626.zip",
+    "bytes": 3629329,
+    "sha256": "c19f1d9467edd3b854d20cf4b61744a8d4d5fe2fa31fbf1f408796900c94ec6c"
+  },
+  "report": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43427936120/zip-members/dist/browser-map-loading-verification.json",
+    "bytes": 397979,
+    "sha256": "da46f08a578f1d0255d7191e8321b3f6c8c12e069d5b15d4bbec6937fa8e0268",
+    "actualBytesWithinPublic4MiB": true
+  },
+  "buildInfo": {
+    "path": "/workspace/scratch/686c5dc59f67/map-loading43427936120/zip-members/dist/build-info.json",
+    "bytes": 413847,
+    "sha256": "e9a8227d16d8f7cbb4b40f7f5cb133a2b24d3c6291a93008625b90925520be2f"
+  },
+  "classification": {
+    "category": "fixture-setup-failure",
+    "productRED": false,
+    "gatePASS": false,
+    "releaseEligible": false,
+    "code": "MAP_LOADING_FIXTURE_ACQUISITION_FAILED",
+    "phase": "fixture-acquisition",
+    "cause": "The acquisition interval ended before any real external DEM halo was requested. All observed requests belonged to target primary cells; the matching fault was never injected.",
+    "unproven": "No finding about progressive painted pixels or old-engine prepared pairs follows from this run."
+  },
+  "nativeView": {
+    "route": {
+      "route": "osm-relation-17013428",
+      "region": "territory-28173009B90469334921421",
+      "title": "Лубяной тракт"
+    },
+    "beforeCamera": {
+      "center": [
+        56.46536080224536,
+        57.97720349667858
+      ],
+      "zoom": 11.486151797145155,
+      "bearingDegrees": 0
+    },
+    "actualCamera": {
+      "center": [
+        56.477125954490674,
+        57.97720349667858
+      ],
+      "zoom": 10.486151797145155,
+      "bearingDegrees": 0
+    },
+    "plannedCamera": {
+      "center": [
+        56.47712595449073,
+        57.97720349667858
+      ],
+      "zoom": 10.486151797145155,
+      "bearingDegrees": 0
+    },
+    "maxCenterErrorDegrees": 5.684341886080802e-14,
+    "level": 11,
+    "primaryCells": 42,
+    "haloCandidates": 30,
+    "xRange": [
+      1342,
+      1348
+    ],
+    "yRange": [
+      614,
+      619
+    ]
+  },
+  "fixture": {
+    "schemaVersion": 1,
+    "kind": "one-real-external-dem-halo",
+    "timeoutMs": 8000,
+    "acquireTimeoutMs": 4000,
+    "enabledAtEpochMs": 1794574068123,
+    "enabledAtMonotonicMs": 51535.132117,
+    "observed": 22,
+    "held": null,
+    "pending": 0,
+    "closed": true,
+    "reason": "acquire-timeout",
+    "errors": [
+      "No real halo was acquired within the bounded setup interval"
+    ]
+  },
+  "network": {
+    "source": "page-target CDP Network events",
+    "overflow": 0,
+    "records": 44,
+    "primary": 44,
+    "externalHalo": 0,
+    "completed": 41,
+    "pending": 3,
+    "failed": 0,
+    "completedHTTP200": 41,
+    "fromDiskCache": 0,
+    "fromServiceWorker": 0,
+    "servedFromCache": 0,
+    "kinds": {
+      "vector": {
+        "records": 22,
+        "completed": 21,
+        "firstStartedAfterEnableMs": 376,
+        "lastStartedAfterEnableMs": 4003,
+        "completedCDPDurationMs": {
+          "min": 130.17899999999827,
+          "median": 160.07299999999702,
+          "max": 183.09700000000362
+        }
+      },
+      "dem": {
+        "records": 22,
+        "completed": 20,
+        "firstStartedAfterEnableMs": 535,
+        "lastStartedAfterEnableMs": 3892,
+        "completedCDPDurationMs": {
+          "min": 247.94699999998215,
+          "median": 312.1555000000029,
+          "max": 752.1780000000007
+        }
+      }
+    }
+  },
+  "sourceBindings": [
+    {
+      "path": "web/lib/custom-map-engine.ts",
+      "bytes": 74766,
+      "sha256": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862",
+      "exactCommittedBytesAndBuildInputMatch": true
+    },
+    {
+      "path": "web/lib/custom-map-tiles.ts",
+      "bytes": 17623,
+      "sha256": "c84c763cabacc7b7c4c7e620b3b5e2fdbcb401eb7fa8f4efcf776f854426a5e6",
+      "exactCommittedBytesAndBuildInputMatch": true
+    },
+    {
+      "path": "web/lib/custom-map-camera.ts",
+      "bytes": 21528,
+      "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+      "exactCommittedBytesAndBuildInputMatch": true
+    },
+    {
+      "path": "web/lib/custom-map-painter.ts",
+      "bytes": 26868,
+      "sha256": "7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1",
+      "exactCommittedBytesAndBuildInputMatch": true
+    },
+    {
+      "path": "web/lib/custom-map-tiles.worker.ts",
+      "bytes": 15542,
+      "sha256": "25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217",
+      "exactCommittedBytesAndBuildInputMatch": true
+    },
+    {
+      "path": "web/lib/map-resource-pool.ts",
+      "bytes": 11161,
+      "sha256": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+      "exactCommittedBytesAndBuildInputMatch": true
+    },
+    {
+      "path": "web/lib/map-preload.ts",
+      "bytes": 6548,
+      "sha256": "0af0dd7b8f348a2b60f6d4eceef92e8d0b2b4f949c588ea96ddc02e053ae1e81",
+      "exactCommittedBytesAndBuildInputMatch": true
+    },
+    {
+      "path": "web/lib/catalog.generated.json",
+      "bytes": 993152,
+      "sha256": "6c0a6bebfa048f78fa548c4b3ddb058c97579739512e1477c21182857d2dab49",
+      "exactCommittedBytesAndBuildInputMatch": true
+    },
+    {
+      "path": "tools/pages-preview/browser-map-loading.mjs",
+      "bytes": 54367,
+      "sha256": "32a5d6a7bcffe30f0f140fa37d6c578b1371ea428ad37ef8f626c7582809cf7d",
+      "exactCommittedBytesAndBuildInputMatch": true
+    }
+  ],
+  "screenshots": [
+    {
+      "phase": "route",
+      "file": "map-loading-route.png",
+      "bytes": 1144770,
+      "sha256": "e32d8bcf6be3498428c4e777f3e01f8c09b6f5f6d340d57d92a0670a25eb94b5",
+      "width": 1440,
+      "height": 1000,
+      "sha256AndActualPNGDimensionsMatch": true
+    },
+    {
+      "phase": "before",
+      "file": "map-loading-before.png",
+      "bytes": 1587177,
+      "sha256": "b2d086268d5aafe4787ebb05e9a79f3589e9962f47f14f28285d5c1fecf2f253",
+      "width": 1440,
+      "height": 1000,
+      "sha256AndActualPNGDimensionsMatch": true
+    },
+    {
+      "phase": "failure",
+      "file": "map-loading-failure.png",
+      "bytes": 753182,
+      "sha256": "3b39827594e02951e6134accdd6d1c10bbd1750b036aaaea840bd5074916e87c",
+      "width": 1440,
+      "height": 1000,
+      "sha256AndActualPNGDimensionsMatch": true
+    }
+  ],
+  "failureScreenshotAfterRelease": true,
+  "pageErrors": [],
+  "localHttpErrors": [],
+  "browser": {
+    "product": "Chrome/157.0.8103.50",
+    "runnerImage": {
+      "os": "ubuntu24",
+      "version": "20261111.370.1"
+    },
+    "cleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 102.9063559999995
+    }
+  },
+  "attributionBoundaries": [
+    "Network is a passive real CDP ledger; no completed request was served by ServiceWorker/cache. This does not prove that the page had no controller.",
+    "The old engine publishes map.resources with inspection/draw. The 3 fetching/81 queued lastFrame value is not a live deadline queue measurement.",
+    "The center-first primary and halo-dependency scheduling in exact source is compatible with the observed acquisition delay; this run does not measure eventual first-halo time.",
+    "Failure screenshot was captured after interception cleanup and is not a held-phase paint witness."
+  ],
+  "authorizedFixtureRevision": {
+    "acquireMsBefore": 4000,
+    "acquireMsAfter": 15000,
+    "basis": "Use the existing normal settle/source deadline to observe actual queued external halo arrival; first run had no such request by 4000 ms.",
+    "holdMsUnchanged": 8000,
+    "progressMsUnchanged": 6000,
+    "gateSHA256": "1107f072728a062c62dbbb76dc67a5277d3e3ac00ebf3c021aefd26372ed6a64",
+    "focusedTestsUnchangedSHA256": "bde5f2d153955075f2893114de3568cfd63a220a9a761e33a2a06885c4851212",
+    "focusedTests": "11/11 PASS; existing behavioral separation and cleanup coverage"
+  }
+}

@@ -1,0 +1,4668 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "5fefc0da294400bf36110c9ee8130e68e7425071",
+  "method": "Unmodified immutable CustomMapTiles + MapResourcePool under virtual HTTP/worker scheduler; exact immutable planner function exposed only in-memory",
+  "assumptions": {
+    "center": [
+      56.4372266,
+      57.9741523
+    ],
+    "viewport": {
+      "width": 1435,
+      "height": 824
+    },
+    "zoom": 11,
+    "httpSuccessfulResponseMs": 100,
+    "workerReplyMs": 5,
+    "metadataImmediate": true,
+    "actualWorkerRasterization": false,
+    "actualProviderNetwork": false,
+    "screenshotExactCameraUnknown": true,
+    "summary": "Mechanism proof and synthetic timing; not observed user latency."
+  },
+  "sourceHashes": {
+    "web/lib/custom-map-camera.ts": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd",
+    "web/lib/map-config.ts": "987c3d6051ca40d06c68a497a1c041dfbb5c7f305916ed4efe378f9b77c183a1",
+    "web/lib/custom-map-engine.ts": "92a21d51f999a0cfc3ac525efad9c5fa602ceaa62aa43f1e9b5a487fb87c8862",
+    "web/lib/map-resource-pool.ts": "f4f88a0c3e3fa0f6b3d80e6fe73f746ac8d31d9aeb472c384bf877d21fe4e880",
+    "web/lib/custom-map-tiles.ts": "c84c763cabacc7b7c4c7e620b3b5e2fdbcb401eb7fa8f4efcf776f854426a5e6"
+  },
+  "scenarios": [
+    {
+      "case": "normal_100ms_reads",
+      "zoom": 11,
+      "viewport": {
+        "width": 1435,
+        "height": 824
+      },
+      "overviewTiles": 1,
+      "vectorTiles": 24,
+      "reliefTiles": 24,
+      "firstVectorMs": 110,
+      "allVectorMs": 1915,
+      "firstReliefMs": 1010,
+      "allReliefMs": 2505,
+      "firstCompletePairMs": 1010,
+      "allButLastPairMs": 2420,
+      "allPairMs": 2505,
+      "physicalReads": 73,
+      "uniqueURLs": 73,
+      "demReads": 48,
+      "uniqueDemURLs": 48,
+      "externalHaloURLs": 24,
+      "maxPhysicalConcurrentReads": 3,
+      "targetIsOutsideViewport": true,
+      "targetReads": [
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 2005,
+          "endedAt": 2105,
+          "status": 200
+        }
+      ],
+      "pairs": [
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "at": 1010,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "at": 1015,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "at": 1110,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "at": 1210,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "at": 1220,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "at": 1310,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "at": 1510,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "at": 1810,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "at": 1815,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "at": 1820,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "at": 1825,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "at": 1910,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "at": 2010,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "at": 2105,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "at": 2110,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "at": 2205,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "at": 2210,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "at": 2305,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "at": 2310,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "at": 2405,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "at": 2410,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "at": 2415,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "at": 2420,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "at": 2505,
+          "haloMissing": 0
+        }
+      ],
+      "finalState": {
+        "resident": 49,
+        "pending": 0,
+        "fetching": 0,
+        "decoding": false,
+        "enabled": true,
+        "stages": {},
+        "errors": []
+      },
+      "downloads": [
+        {
+          "url": "/maps/russia-relief/4/10/4.png",
+          "startedAt": 0,
+          "endedAt": 100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/617.pbf",
+          "startedAt": 0,
+          "endedAt": 100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/617.pbf",
+          "startedAt": 0,
+          "endedAt": 100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/617.webp",
+          "startedAt": 100,
+          "endedAt": 200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/616.pbf",
+          "startedAt": 100,
+          "endedAt": 200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/617.webp",
+          "startedAt": 100,
+          "endedAt": 200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/616.pbf",
+          "startedAt": 200,
+          "endedAt": 300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/616.webp",
+          "startedAt": 200,
+          "endedAt": 300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/618.pbf",
+          "startedAt": 200,
+          "endedAt": 300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/616.webp",
+          "startedAt": 300,
+          "endedAt": 400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/617.pbf",
+          "startedAt": 300,
+          "endedAt": 400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/617.webp",
+          "startedAt": 300,
+          "endedAt": 400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/618.pbf",
+          "startedAt": 400,
+          "endedAt": 500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/618.webp",
+          "startedAt": 400,
+          "endedAt": 500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/616.webp",
+          "startedAt": 400,
+          "endedAt": 500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/616.pbf",
+          "startedAt": 500,
+          "endedAt": 600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/618.webp",
+          "startedAt": 500,
+          "endedAt": 600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/617.webp",
+          "startedAt": 500,
+          "endedAt": 600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/617.pbf",
+          "startedAt": 600,
+          "endedAt": 700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/616.webp",
+          "startedAt": 600,
+          "endedAt": 700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/618.webp",
+          "startedAt": 600,
+          "endedAt": 700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/615.pbf",
+          "startedAt": 700,
+          "endedAt": 800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/615.webp",
+          "startedAt": 700,
+          "endedAt": 800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/615.webp",
+          "startedAt": 700,
+          "endedAt": 800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/616.pbf",
+          "startedAt": 800,
+          "endedAt": 900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/619.webp",
+          "startedAt": 800,
+          "endedAt": 900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/618.webp",
+          "startedAt": 800,
+          "endedAt": 900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/615.pbf",
+          "startedAt": 900,
+          "endedAt": 1000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/615.webp",
+          "startedAt": 900,
+          "endedAt": 1000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/619.webp",
+          "startedAt": 900,
+          "endedAt": 1000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/618.pbf",
+          "startedAt": 1000,
+          "endedAt": 1100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/615.webp",
+          "startedAt": 1000,
+          "endedAt": 1100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/619.webp",
+          "startedAt": 1000,
+          "endedAt": 1100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/618.pbf",
+          "startedAt": 1100,
+          "endedAt": 1200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/615.pbf",
+          "startedAt": 1100,
+          "endedAt": 1200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/617.webp",
+          "startedAt": 1100,
+          "endedAt": 1200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/615.pbf",
+          "startedAt": 1200,
+          "endedAt": 1300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/619.webp",
+          "startedAt": 1200,
+          "endedAt": 1300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/616.webp",
+          "startedAt": 1200,
+          "endedAt": 1300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/617.pbf",
+          "startedAt": 1300,
+          "endedAt": 1400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/616.pbf",
+          "startedAt": 1300,
+          "endedAt": 1400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/617.webp",
+          "startedAt": 1300,
+          "endedAt": 1400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/617.pbf",
+          "startedAt": 1400,
+          "endedAt": 1500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/614.webp",
+          "startedAt": 1400,
+          "endedAt": 1500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/618.webp",
+          "startedAt": 1400,
+          "endedAt": 1500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/616.pbf",
+          "startedAt": 1500,
+          "endedAt": 1600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/614.webp",
+          "startedAt": 1500,
+          "endedAt": 1600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/616.webp",
+          "startedAt": 1500,
+          "endedAt": 1600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/618.pbf",
+          "startedAt": 1600,
+          "endedAt": 1700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/615.webp",
+          "startedAt": 1600,
+          "endedAt": 1700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/614.webp",
+          "startedAt": 1600,
+          "endedAt": 1700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/618.pbf",
+          "startedAt": 1700,
+          "endedAt": 1800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/615.webp",
+          "startedAt": 1700,
+          "endedAt": 1800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/614.webp",
+          "startedAt": 1700,
+          "endedAt": 1800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/615.pbf",
+          "startedAt": 1800,
+          "endedAt": 1900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/618.webp",
+          "startedAt": 1800,
+          "endedAt": 1900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/615.pbf",
+          "startedAt": 1805,
+          "endedAt": 1905,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/614.webp",
+          "startedAt": 1900,
+          "endedAt": 2000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/614.webp",
+          "startedAt": 1900,
+          "endedAt": 2000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/619.webp",
+          "startedAt": 1905,
+          "endedAt": 2005,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/617.webp",
+          "startedAt": 2000,
+          "endedAt": 2100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/616.webp",
+          "startedAt": 2000,
+          "endedAt": 2100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 2005,
+          "endedAt": 2105,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/619.webp",
+          "startedAt": 2100,
+          "endedAt": 2200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/616.webp",
+          "startedAt": 2100,
+          "endedAt": 2200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/615.webp",
+          "startedAt": 2105,
+          "endedAt": 2205,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/618.webp",
+          "startedAt": 2200,
+          "endedAt": 2300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/618.webp",
+          "startedAt": 2200,
+          "endedAt": 2300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/615.webp",
+          "startedAt": 2205,
+          "endedAt": 2305,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/614.webp",
+          "startedAt": 2300,
+          "endedAt": 2400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/619.webp",
+          "startedAt": 2300,
+          "endedAt": 2400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/614.webp",
+          "startedAt": 2305,
+          "endedAt": 2405,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/619.webp",
+          "startedAt": 2400,
+          "endedAt": 2500,
+          "status": 200
+        }
+      ],
+      "decodes": [
+        {
+          "kind": "raster",
+          "z": 4,
+          "x": 10,
+          "y": 4,
+          "startedAt": 100,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 105
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "startedAt": 105,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 110
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "startedAt": 110,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 115
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "startedAt": 200,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 205
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "startedAt": 300,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 305
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "startedAt": 305,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 310
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "startedAt": 400,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 405
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "startedAt": 500,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 505
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "startedAt": 600,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 605
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "startedAt": 700,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 705
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "startedAt": 800,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 805
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "startedAt": 900,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 905
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "startedAt": 1000,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1005
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "startedAt": 1005,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "startedAt": 1010,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1015
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "startedAt": 1100,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1105
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "startedAt": 1105,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1110
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "startedAt": 1200,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1205
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "startedAt": 1205,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1210
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "startedAt": 1210,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1215
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "startedAt": 1215,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1220
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "startedAt": 1300,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1305
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "startedAt": 1305,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1310
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "startedAt": 1400,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1405
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "startedAt": 1405,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1410
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "startedAt": 1500,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1505
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "startedAt": 1505,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1510
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "startedAt": 1600,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1605
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "startedAt": 1700,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1705
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "startedAt": 1800,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1805
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "startedAt": 1805,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1810
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "startedAt": 1810,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1815
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "startedAt": 1815,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1820
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "startedAt": 1820,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1825
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "startedAt": 1900,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1905
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "startedAt": 1905,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1910
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "startedAt": 1910,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1915
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "startedAt": 2005,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "startedAt": 2100,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2105
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "startedAt": 2105,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2110
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "startedAt": 2200,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2205
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "startedAt": 2205,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2210
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "startedAt": 2300,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2305
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "startedAt": 2305,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2310
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "startedAt": 2400,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2405
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "startedAt": 2405,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2410
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "startedAt": 2410,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2415
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "startedAt": 2415,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2420
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "startedAt": 2500,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2505
+        }
+      ]
+    },
+    {
+      "case": "one_external_halo_takes_8s",
+      "zoom": 11,
+      "viewport": {
+        "width": 1435,
+        "height": 824
+      },
+      "overviewTiles": 1,
+      "vectorTiles": 24,
+      "reliefTiles": 24,
+      "firstVectorMs": 110,
+      "allVectorMs": 1915,
+      "firstReliefMs": 1010,
+      "allReliefMs": 10110,
+      "firstCompletePairMs": 1010,
+      "allButLastPairMs": 10015,
+      "allPairMs": 10110,
+      "physicalReads": 73,
+      "uniqueURLs": 73,
+      "demReads": 48,
+      "uniqueDemURLs": 48,
+      "externalHaloURLs": 24,
+      "maxPhysicalConcurrentReads": 3,
+      "targetIsOutsideViewport": true,
+      "targetReads": [
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 2005,
+          "endedAt": 10005,
+          "status": 200
+        }
+      ],
+      "pairs": [
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "at": 1010,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "at": 1015,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "at": 1110,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "at": 1210,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "at": 1220,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "at": 1310,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "at": 1510,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "at": 1810,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "at": 1815,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "at": 1820,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "at": 1825,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "at": 1910,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "at": 2010,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "at": 2105,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "at": 2205,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "at": 2210,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "at": 2305,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "at": 2405,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "at": 2505,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "at": 2510,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "at": 2605,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "at": 10010,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "at": 10015,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "at": 10110,
+          "haloMissing": 0
+        }
+      ],
+      "finalState": {
+        "resident": 49,
+        "pending": 0,
+        "fetching": 0,
+        "decoding": false,
+        "enabled": true,
+        "stages": {},
+        "errors": []
+      },
+      "downloads": [
+        {
+          "url": "/maps/russia-relief/4/10/4.png",
+          "startedAt": 0,
+          "endedAt": 100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/617.pbf",
+          "startedAt": 0,
+          "endedAt": 100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/617.pbf",
+          "startedAt": 0,
+          "endedAt": 100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/617.webp",
+          "startedAt": 100,
+          "endedAt": 200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/616.pbf",
+          "startedAt": 100,
+          "endedAt": 200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/617.webp",
+          "startedAt": 100,
+          "endedAt": 200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/616.pbf",
+          "startedAt": 200,
+          "endedAt": 300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/616.webp",
+          "startedAt": 200,
+          "endedAt": 300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/618.pbf",
+          "startedAt": 200,
+          "endedAt": 300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/616.webp",
+          "startedAt": 300,
+          "endedAt": 400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/617.pbf",
+          "startedAt": 300,
+          "endedAt": 400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/617.webp",
+          "startedAt": 300,
+          "endedAt": 400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/618.pbf",
+          "startedAt": 400,
+          "endedAt": 500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/618.webp",
+          "startedAt": 400,
+          "endedAt": 500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/616.webp",
+          "startedAt": 400,
+          "endedAt": 500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/616.pbf",
+          "startedAt": 500,
+          "endedAt": 600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/618.webp",
+          "startedAt": 500,
+          "endedAt": 600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/617.webp",
+          "startedAt": 500,
+          "endedAt": 600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/617.pbf",
+          "startedAt": 600,
+          "endedAt": 700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/616.webp",
+          "startedAt": 600,
+          "endedAt": 700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/618.webp",
+          "startedAt": 600,
+          "endedAt": 700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/615.pbf",
+          "startedAt": 700,
+          "endedAt": 800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/615.webp",
+          "startedAt": 700,
+          "endedAt": 800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/615.webp",
+          "startedAt": 700,
+          "endedAt": 800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/616.pbf",
+          "startedAt": 800,
+          "endedAt": 900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/619.webp",
+          "startedAt": 800,
+          "endedAt": 900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/618.webp",
+          "startedAt": 800,
+          "endedAt": 900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/615.pbf",
+          "startedAt": 900,
+          "endedAt": 1000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/615.webp",
+          "startedAt": 900,
+          "endedAt": 1000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/619.webp",
+          "startedAt": 900,
+          "endedAt": 1000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/618.pbf",
+          "startedAt": 1000,
+          "endedAt": 1100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/615.webp",
+          "startedAt": 1000,
+          "endedAt": 1100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/619.webp",
+          "startedAt": 1000,
+          "endedAt": 1100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/618.pbf",
+          "startedAt": 1100,
+          "endedAt": 1200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/615.pbf",
+          "startedAt": 1100,
+          "endedAt": 1200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/617.webp",
+          "startedAt": 1100,
+          "endedAt": 1200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/615.pbf",
+          "startedAt": 1200,
+          "endedAt": 1300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/619.webp",
+          "startedAt": 1200,
+          "endedAt": 1300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/616.webp",
+          "startedAt": 1200,
+          "endedAt": 1300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/617.pbf",
+          "startedAt": 1300,
+          "endedAt": 1400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/616.pbf",
+          "startedAt": 1300,
+          "endedAt": 1400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/617.webp",
+          "startedAt": 1300,
+          "endedAt": 1400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/617.pbf",
+          "startedAt": 1400,
+          "endedAt": 1500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/614.webp",
+          "startedAt": 1400,
+          "endedAt": 1500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/618.webp",
+          "startedAt": 1400,
+          "endedAt": 1500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/616.pbf",
+          "startedAt": 1500,
+          "endedAt": 1600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/614.webp",
+          "startedAt": 1500,
+          "endedAt": 1600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/616.webp",
+          "startedAt": 1500,
+          "endedAt": 1600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/618.pbf",
+          "startedAt": 1600,
+          "endedAt": 1700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/615.webp",
+          "startedAt": 1600,
+          "endedAt": 1700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/614.webp",
+          "startedAt": 1600,
+          "endedAt": 1700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/618.pbf",
+          "startedAt": 1700,
+          "endedAt": 1800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/615.webp",
+          "startedAt": 1700,
+          "endedAt": 1800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/614.webp",
+          "startedAt": 1700,
+          "endedAt": 1800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/615.pbf",
+          "startedAt": 1800,
+          "endedAt": 1900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/618.webp",
+          "startedAt": 1800,
+          "endedAt": 1900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/615.pbf",
+          "startedAt": 1805,
+          "endedAt": 1905,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/614.webp",
+          "startedAt": 1900,
+          "endedAt": 2000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/614.webp",
+          "startedAt": 1900,
+          "endedAt": 2000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/619.webp",
+          "startedAt": 1905,
+          "endedAt": 2005,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/617.webp",
+          "startedAt": 2000,
+          "endedAt": 2100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/616.webp",
+          "startedAt": 2000,
+          "endedAt": 2100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 2005,
+          "endedAt": 10005,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/619.webp",
+          "startedAt": 2100,
+          "endedAt": 2200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/616.webp",
+          "startedAt": 2100,
+          "endedAt": 2200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/615.webp",
+          "startedAt": 2200,
+          "endedAt": 2300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/618.webp",
+          "startedAt": 2200,
+          "endedAt": 2300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/618.webp",
+          "startedAt": 2300,
+          "endedAt": 2400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/615.webp",
+          "startedAt": 2300,
+          "endedAt": 2400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/619.webp",
+          "startedAt": 2400,
+          "endedAt": 2500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/614.webp",
+          "startedAt": 2400,
+          "endedAt": 2500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/614.webp",
+          "startedAt": 2500,
+          "endedAt": 2600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/619.webp",
+          "startedAt": 10005,
+          "endedAt": 10105,
+          "status": 200
+        }
+      ],
+      "decodes": [
+        {
+          "kind": "raster",
+          "z": 4,
+          "x": 10,
+          "y": 4,
+          "startedAt": 100,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 105
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "startedAt": 105,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 110
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "startedAt": 110,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 115
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "startedAt": 200,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 205
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "startedAt": 300,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 305
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "startedAt": 305,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 310
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "startedAt": 400,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 405
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "startedAt": 500,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 505
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "startedAt": 600,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 605
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "startedAt": 700,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 705
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "startedAt": 800,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 805
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "startedAt": 900,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 905
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "startedAt": 1000,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1005
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "startedAt": 1005,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "startedAt": 1010,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1015
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "startedAt": 1100,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1105
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "startedAt": 1105,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1110
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "startedAt": 1200,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1205
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "startedAt": 1205,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1210
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "startedAt": 1210,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1215
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "startedAt": 1215,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1220
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "startedAt": 1300,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1305
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "startedAt": 1305,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1310
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "startedAt": 1400,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1405
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "startedAt": 1405,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1410
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "startedAt": 1500,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1505
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "startedAt": 1505,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1510
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "startedAt": 1600,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1605
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "startedAt": 1700,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1705
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "startedAt": 1800,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1805
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "startedAt": 1805,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1810
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "startedAt": 1810,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1815
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "startedAt": 1815,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1820
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "startedAt": 1820,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1825
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "startedAt": 1900,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1905
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "startedAt": 1905,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1910
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "startedAt": 1910,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1915
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "startedAt": 2005,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "startedAt": 2100,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2105
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "startedAt": 2200,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2205
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "startedAt": 2205,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2210
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "startedAt": 2300,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2305
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "startedAt": 2400,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2405
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "startedAt": 2500,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2505
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "startedAt": 2505,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2510
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "startedAt": 2600,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2605
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "startedAt": 10005,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 10010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "startedAt": 10010,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 10015
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "startedAt": 10105,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 10110
+        }
+      ]
+    },
+    {
+      "case": "one_external_halo_times_out",
+      "zoom": 11,
+      "viewport": {
+        "width": 1435,
+        "height": 824
+      },
+      "overviewTiles": 1,
+      "vectorTiles": 24,
+      "reliefTiles": 24,
+      "firstVectorMs": 110,
+      "allVectorMs": 1915,
+      "firstReliefMs": 1010,
+      "allReliefMs": 47110,
+      "firstCompletePairMs": 1010,
+      "allButLastPairMs": 32010,
+      "allPairMs": 47110,
+      "physicalReads": 75,
+      "uniqueURLs": 73,
+      "demReads": 50,
+      "uniqueDemURLs": 48,
+      "externalHaloURLs": 24,
+      "maxPhysicalConcurrentReads": 3,
+      "targetIsOutsideViewport": true,
+      "targetReads": [
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 2005,
+          "endedAt": 17005,
+          "status": "aborted"
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 17005,
+          "endedAt": 32005,
+          "status": "aborted"
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 32005,
+          "endedAt": 47005,
+          "status": "aborted"
+        }
+      ],
+      "pairs": [
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "at": 1010,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "at": 1015,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "at": 1110,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "at": 1210,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "at": 1220,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "at": 1310,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "at": 1510,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "at": 1810,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "at": 1815,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "at": 1820,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "at": 1825,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "at": 1910,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "at": 2010,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "at": 2105,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "at": 2205,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "at": 2210,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "at": 2305,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "at": 2405,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "at": 2505,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "at": 2510,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "at": 2605,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "at": 17010,
+          "haloMissing": 1
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "at": 32010,
+          "haloMissing": 1
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "at": 47110,
+          "haloMissing": 1
+        }
+      ],
+      "finalState": {
+        "resident": 49,
+        "pending": 0,
+        "fetching": 0,
+        "decoding": false,
+        "enabled": true,
+        "stages": {},
+        "errors": []
+      },
+      "downloads": [
+        {
+          "url": "/maps/russia-relief/4/10/4.png",
+          "startedAt": 0,
+          "endedAt": 100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/617.pbf",
+          "startedAt": 0,
+          "endedAt": 100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/617.pbf",
+          "startedAt": 0,
+          "endedAt": 100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/617.webp",
+          "startedAt": 100,
+          "endedAt": 200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/616.pbf",
+          "startedAt": 100,
+          "endedAt": 200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/617.webp",
+          "startedAt": 100,
+          "endedAt": 200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/616.pbf",
+          "startedAt": 200,
+          "endedAt": 300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/616.webp",
+          "startedAt": 200,
+          "endedAt": 300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/618.pbf",
+          "startedAt": 200,
+          "endedAt": 300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/616.webp",
+          "startedAt": 300,
+          "endedAt": 400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/617.pbf",
+          "startedAt": 300,
+          "endedAt": 400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/617.webp",
+          "startedAt": 300,
+          "endedAt": 400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/618.pbf",
+          "startedAt": 400,
+          "endedAt": 500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/618.webp",
+          "startedAt": 400,
+          "endedAt": 500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/616.webp",
+          "startedAt": 400,
+          "endedAt": 500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/616.pbf",
+          "startedAt": 500,
+          "endedAt": 600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/618.webp",
+          "startedAt": 500,
+          "endedAt": 600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/617.webp",
+          "startedAt": 500,
+          "endedAt": 600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/617.pbf",
+          "startedAt": 600,
+          "endedAt": 700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/616.webp",
+          "startedAt": 600,
+          "endedAt": 700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/618.webp",
+          "startedAt": 600,
+          "endedAt": 700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/615.pbf",
+          "startedAt": 700,
+          "endedAt": 800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/615.webp",
+          "startedAt": 700,
+          "endedAt": 800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/615.webp",
+          "startedAt": 700,
+          "endedAt": 800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/616.pbf",
+          "startedAt": 800,
+          "endedAt": 900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/619.webp",
+          "startedAt": 800,
+          "endedAt": 900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/618.webp",
+          "startedAt": 800,
+          "endedAt": 900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/615.pbf",
+          "startedAt": 900,
+          "endedAt": 1000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/615.webp",
+          "startedAt": 900,
+          "endedAt": 1000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/619.webp",
+          "startedAt": 900,
+          "endedAt": 1000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/618.pbf",
+          "startedAt": 1000,
+          "endedAt": 1100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/615.webp",
+          "startedAt": 1000,
+          "endedAt": 1100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/619.webp",
+          "startedAt": 1000,
+          "endedAt": 1100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/618.pbf",
+          "startedAt": 1100,
+          "endedAt": 1200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/615.pbf",
+          "startedAt": 1100,
+          "endedAt": 1200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/617.webp",
+          "startedAt": 1100,
+          "endedAt": 1200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/615.pbf",
+          "startedAt": 1200,
+          "endedAt": 1300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/619.webp",
+          "startedAt": 1200,
+          "endedAt": 1300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/616.webp",
+          "startedAt": 1200,
+          "endedAt": 1300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/617.pbf",
+          "startedAt": 1300,
+          "endedAt": 1400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/616.pbf",
+          "startedAt": 1300,
+          "endedAt": 1400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/617.webp",
+          "startedAt": 1300,
+          "endedAt": 1400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/617.pbf",
+          "startedAt": 1400,
+          "endedAt": 1500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/614.webp",
+          "startedAt": 1400,
+          "endedAt": 1500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/618.webp",
+          "startedAt": 1400,
+          "endedAt": 1500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/616.pbf",
+          "startedAt": 1500,
+          "endedAt": 1600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/614.webp",
+          "startedAt": 1500,
+          "endedAt": 1600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/616.webp",
+          "startedAt": 1500,
+          "endedAt": 1600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/618.pbf",
+          "startedAt": 1600,
+          "endedAt": 1700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/615.webp",
+          "startedAt": 1600,
+          "endedAt": 1700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/614.webp",
+          "startedAt": 1600,
+          "endedAt": 1700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/618.pbf",
+          "startedAt": 1700,
+          "endedAt": 1800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/615.webp",
+          "startedAt": 1700,
+          "endedAt": 1800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/614.webp",
+          "startedAt": 1700,
+          "endedAt": 1800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/615.pbf",
+          "startedAt": 1800,
+          "endedAt": 1900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/618.webp",
+          "startedAt": 1800,
+          "endedAt": 1900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/615.pbf",
+          "startedAt": 1805,
+          "endedAt": 1905,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/614.webp",
+          "startedAt": 1900,
+          "endedAt": 2000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/614.webp",
+          "startedAt": 1900,
+          "endedAt": 2000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/619.webp",
+          "startedAt": 1905,
+          "endedAt": 2005,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/617.webp",
+          "startedAt": 2000,
+          "endedAt": 2100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/616.webp",
+          "startedAt": 2000,
+          "endedAt": 2100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 2005,
+          "endedAt": 17005,
+          "status": "aborted"
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/619.webp",
+          "startedAt": 2100,
+          "endedAt": 2200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/616.webp",
+          "startedAt": 2100,
+          "endedAt": 2200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/615.webp",
+          "startedAt": 2200,
+          "endedAt": 2300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/618.webp",
+          "startedAt": 2200,
+          "endedAt": 2300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/618.webp",
+          "startedAt": 2300,
+          "endedAt": 2400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/615.webp",
+          "startedAt": 2300,
+          "endedAt": 2400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/619.webp",
+          "startedAt": 2400,
+          "endedAt": 2500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/614.webp",
+          "startedAt": 2400,
+          "endedAt": 2500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/614.webp",
+          "startedAt": 2500,
+          "endedAt": 2600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 17005,
+          "endedAt": 32005,
+          "status": "aborted"
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 32005,
+          "endedAt": 47005,
+          "status": "aborted"
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/619.webp",
+          "startedAt": 47005,
+          "endedAt": 47105,
+          "status": 200
+        }
+      ],
+      "decodes": [
+        {
+          "kind": "raster",
+          "z": 4,
+          "x": 10,
+          "y": 4,
+          "startedAt": 100,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 105
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "startedAt": 105,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 110
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "startedAt": 110,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 115
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "startedAt": 200,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 205
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "startedAt": 300,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 305
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "startedAt": 305,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 310
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "startedAt": 400,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 405
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "startedAt": 500,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 505
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "startedAt": 600,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 605
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "startedAt": 700,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 705
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "startedAt": 800,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 805
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "startedAt": 900,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 905
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "startedAt": 1000,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1005
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "startedAt": 1005,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "startedAt": 1010,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1015
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "startedAt": 1100,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1105
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "startedAt": 1105,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1110
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "startedAt": 1200,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1205
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "startedAt": 1205,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1210
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "startedAt": 1210,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1215
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "startedAt": 1215,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1220
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "startedAt": 1300,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1305
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "startedAt": 1305,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1310
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "startedAt": 1400,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1405
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "startedAt": 1405,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1410
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "startedAt": 1500,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1505
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "startedAt": 1505,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1510
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "startedAt": 1600,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1605
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "startedAt": 1700,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1705
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "startedAt": 1800,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1805
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "startedAt": 1805,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1810
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "startedAt": 1810,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1815
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "startedAt": 1815,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1820
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "startedAt": 1820,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1825
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "startedAt": 1900,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1905
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "startedAt": 1905,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 1910
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "startedAt": 1910,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 1915
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "startedAt": 2005,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "startedAt": 2100,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2105
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "startedAt": 2200,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2205
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "startedAt": 2205,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2210
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "startedAt": 2300,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2305
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "startedAt": 2400,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2405
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "startedAt": 2500,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2505
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "startedAt": 2505,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2510
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "startedAt": 2600,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 2605
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "startedAt": 17005,
+          "haloMissing": [
+            {
+              "dx": -1,
+              "dy": 0,
+              "reason": "unavailable"
+            }
+          ],
+          "haloRequired": 8,
+          "endedAt": 17010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "startedAt": 32005,
+          "haloMissing": [
+            {
+              "dx": -1,
+              "dy": 1,
+              "reason": "unavailable"
+            }
+          ],
+          "haloRequired": 8,
+          "endedAt": 32010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "startedAt": 47105,
+          "haloMissing": [
+            {
+              "dx": -1,
+              "dy": -1,
+              "reason": "unavailable"
+            }
+          ],
+          "haloRequired": 8,
+          "endedAt": 47110
+        }
+      ]
+    },
+    {
+      "case": "three_active_speculative_reads_take_4s",
+      "zoom": 11,
+      "viewport": {
+        "width": 1435,
+        "height": 824
+      },
+      "overviewTiles": 1,
+      "vectorTiles": 24,
+      "reliefTiles": 24,
+      "firstVectorMs": 4110,
+      "allVectorMs": 5915,
+      "firstReliefMs": 5010,
+      "allReliefMs": 6505,
+      "firstCompletePairMs": 5010,
+      "allButLastPairMs": 6420,
+      "allPairMs": 6505,
+      "physicalReads": 76,
+      "uniqueURLs": 76,
+      "demReads": 48,
+      "uniqueDemURLs": 48,
+      "externalHaloURLs": 24,
+      "maxPhysicalConcurrentReads": 3,
+      "targetIsOutsideViewport": true,
+      "targetReads": [
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 6005,
+          "endedAt": 6105,
+          "status": 200
+        }
+      ],
+      "pairs": [
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "at": 5010,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "at": 5015,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "at": 5110,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "at": 5210,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "at": 5220,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "at": 5310,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "at": 5510,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "at": 5810,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "at": 5815,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "at": 5820,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "at": 5825,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "at": 5910,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "at": 6010,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "at": 6105,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "at": 6110,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "at": 6205,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "at": 6210,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "at": 6305,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "at": 6310,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "at": 6405,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "at": 6410,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "at": 6415,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "at": 6420,
+          "haloMissing": 0
+        },
+        {
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "at": 6505,
+          "haloMissing": 0
+        }
+      ],
+      "finalState": {
+        "resident": 49,
+        "pending": 0,
+        "fetching": 0,
+        "decoding": false,
+        "enabled": true,
+        "stages": {},
+        "errors": []
+      },
+      "downloads": [
+        {
+          "url": "https://tiles.openfreemap.org/speculative/11/0/617.pbf",
+          "startedAt": 0,
+          "endedAt": 4000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/speculative/11/1/617.pbf",
+          "startedAt": 0,
+          "endedAt": 4000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/speculative/11/2/617.pbf",
+          "startedAt": 0,
+          "endedAt": 4000,
+          "status": 200
+        },
+        {
+          "url": "/maps/russia-relief/4/10/4.png",
+          "startedAt": 4000,
+          "endedAt": 4100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/617.pbf",
+          "startedAt": 4000,
+          "endedAt": 4100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/617.pbf",
+          "startedAt": 4000,
+          "endedAt": 4100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/617.webp",
+          "startedAt": 4100,
+          "endedAt": 4200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/616.pbf",
+          "startedAt": 4100,
+          "endedAt": 4200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/617.webp",
+          "startedAt": 4100,
+          "endedAt": 4200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/616.pbf",
+          "startedAt": 4200,
+          "endedAt": 4300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/616.webp",
+          "startedAt": 4200,
+          "endedAt": 4300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/618.pbf",
+          "startedAt": 4200,
+          "endedAt": 4300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/616.webp",
+          "startedAt": 4300,
+          "endedAt": 4400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/617.pbf",
+          "startedAt": 4300,
+          "endedAt": 4400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/617.webp",
+          "startedAt": 4300,
+          "endedAt": 4400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/618.pbf",
+          "startedAt": 4400,
+          "endedAt": 4500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/618.webp",
+          "startedAt": 4400,
+          "endedAt": 4500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/616.webp",
+          "startedAt": 4400,
+          "endedAt": 4500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/616.pbf",
+          "startedAt": 4500,
+          "endedAt": 4600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/618.webp",
+          "startedAt": 4500,
+          "endedAt": 4600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/617.webp",
+          "startedAt": 4500,
+          "endedAt": 4600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/617.pbf",
+          "startedAt": 4600,
+          "endedAt": 4700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/616.webp",
+          "startedAt": 4600,
+          "endedAt": 4700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/618.webp",
+          "startedAt": 4600,
+          "endedAt": 4700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1345/615.pbf",
+          "startedAt": 4700,
+          "endedAt": 4800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/615.webp",
+          "startedAt": 4700,
+          "endedAt": 4800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/615.webp",
+          "startedAt": 4700,
+          "endedAt": 4800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/616.pbf",
+          "startedAt": 4800,
+          "endedAt": 4900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/619.webp",
+          "startedAt": 4800,
+          "endedAt": 4900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/618.webp",
+          "startedAt": 4800,
+          "endedAt": 4900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1344/615.pbf",
+          "startedAt": 4900,
+          "endedAt": 5000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/615.webp",
+          "startedAt": 4900,
+          "endedAt": 5000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/619.webp",
+          "startedAt": 4900,
+          "endedAt": 5000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/618.pbf",
+          "startedAt": 5000,
+          "endedAt": 5100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/615.webp",
+          "startedAt": 5000,
+          "endedAt": 5100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/619.webp",
+          "startedAt": 5000,
+          "endedAt": 5100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/618.pbf",
+          "startedAt": 5100,
+          "endedAt": 5200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1346/615.pbf",
+          "startedAt": 5100,
+          "endedAt": 5200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/617.webp",
+          "startedAt": 5100,
+          "endedAt": 5200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1343/615.pbf",
+          "startedAt": 5200,
+          "endedAt": 5300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/619.webp",
+          "startedAt": 5200,
+          "endedAt": 5300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/616.webp",
+          "startedAt": 5200,
+          "endedAt": 5300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/617.pbf",
+          "startedAt": 5300,
+          "endedAt": 5400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/616.pbf",
+          "startedAt": 5300,
+          "endedAt": 5400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/617.webp",
+          "startedAt": 5300,
+          "endedAt": 5400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/617.pbf",
+          "startedAt": 5400,
+          "endedAt": 5500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1345/614.webp",
+          "startedAt": 5400,
+          "endedAt": 5500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/618.webp",
+          "startedAt": 5400,
+          "endedAt": 5500,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/616.pbf",
+          "startedAt": 5500,
+          "endedAt": 5600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1344/614.webp",
+          "startedAt": 5500,
+          "endedAt": 5600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/616.webp",
+          "startedAt": 5500,
+          "endedAt": 5600,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/618.pbf",
+          "startedAt": 5600,
+          "endedAt": 5700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/615.webp",
+          "startedAt": 5600,
+          "endedAt": 5700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1346/614.webp",
+          "startedAt": 5600,
+          "endedAt": 5700,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/618.pbf",
+          "startedAt": 5700,
+          "endedAt": 5800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/615.webp",
+          "startedAt": 5700,
+          "endedAt": 5800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1343/614.webp",
+          "startedAt": 5700,
+          "endedAt": 5800,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1347/615.pbf",
+          "startedAt": 5800,
+          "endedAt": 5900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/618.webp",
+          "startedAt": 5800,
+          "endedAt": 5900,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.openfreemap.org/snapshot/11/1342/615.pbf",
+          "startedAt": 5805,
+          "endedAt": 5905,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/614.webp",
+          "startedAt": 5900,
+          "endedAt": 6000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/614.webp",
+          "startedAt": 5900,
+          "endedAt": 6000,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1347/619.webp",
+          "startedAt": 5905,
+          "endedAt": 6005,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/617.webp",
+          "startedAt": 6000,
+          "endedAt": 6100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/616.webp",
+          "startedAt": 6000,
+          "endedAt": 6100,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/617.webp",
+          "startedAt": 6005,
+          "endedAt": 6105,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1342/619.webp",
+          "startedAt": 6100,
+          "endedAt": 6200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/616.webp",
+          "startedAt": 6100,
+          "endedAt": 6200,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/615.webp",
+          "startedAt": 6105,
+          "endedAt": 6205,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/618.webp",
+          "startedAt": 6200,
+          "endedAt": 6300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/618.webp",
+          "startedAt": 6200,
+          "endedAt": 6300,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/615.webp",
+          "startedAt": 6205,
+          "endedAt": 6305,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/614.webp",
+          "startedAt": 6300,
+          "endedAt": 6400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1348/619.webp",
+          "startedAt": 6300,
+          "endedAt": 6400,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/614.webp",
+          "startedAt": 6305,
+          "endedAt": 6405,
+          "status": 200
+        },
+        {
+          "url": "https://tiles.mapterhorn.com/11/1341/619.webp",
+          "startedAt": 6400,
+          "endedAt": 6500,
+          "status": 200
+        }
+      ],
+      "decodes": [
+        {
+          "kind": "raster",
+          "z": 4,
+          "x": 10,
+          "y": 4,
+          "startedAt": 4100,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4105
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "startedAt": 4105,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4110
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "startedAt": 4110,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4115
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "startedAt": 4200,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4205
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "startedAt": 4300,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4305
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "startedAt": 4305,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4310
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "startedAt": 4400,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4405
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "startedAt": 4500,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4505
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "startedAt": 4600,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4605
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "startedAt": 4700,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4705
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "startedAt": 4800,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4805
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "startedAt": 4900,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 4905
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "startedAt": 5000,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5005
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 617,
+          "startedAt": 5005,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 617,
+          "startedAt": 5010,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5015
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "startedAt": 5100,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5105
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 618,
+          "startedAt": 5105,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5110
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "startedAt": 5200,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5205
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 616,
+          "startedAt": 5205,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5210
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "startedAt": 5210,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5215
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 616,
+          "startedAt": 5215,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5220
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "startedAt": 5300,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5305
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 618,
+          "startedAt": 5305,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5310
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "startedAt": 5400,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5405
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "startedAt": 5405,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5410
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "startedAt": 5500,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5505
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 617,
+          "startedAt": 5505,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5510
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "startedAt": 5600,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5605
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "startedAt": 5700,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5705
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "startedAt": 5800,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5805
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 616,
+          "startedAt": 5805,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5810
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1345,
+          "y": 615,
+          "startedAt": 5810,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5815
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 616,
+          "startedAt": 5815,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5820
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1344,
+          "y": 615,
+          "startedAt": 5820,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5825
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "startedAt": 5900,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5905
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 617,
+          "startedAt": 5905,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 5910
+        },
+        {
+          "kind": "vector",
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "startedAt": 5910,
+          "haloMissing": [],
+          "haloRequired": 0,
+          "endedAt": 5915
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 618,
+          "startedAt": 6005,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6010
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 615,
+          "startedAt": 6100,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6105
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1346,
+          "y": 615,
+          "startedAt": 6105,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6110
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1343,
+          "y": 618,
+          "startedAt": 6200,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6205
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 616,
+          "startedAt": 6205,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6210
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 617,
+          "startedAt": 6300,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6305
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 617,
+          "startedAt": 6305,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6310
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 616,
+          "startedAt": 6400,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6405
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 618,
+          "startedAt": 6405,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6410
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1347,
+          "y": 615,
+          "startedAt": 6410,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6415
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 615,
+          "startedAt": 6415,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6420
+        },
+        {
+          "kind": "relief",
+          "z": 11,
+          "x": 1342,
+          "y": 618,
+          "startedAt": 6500,
+          "haloMissing": [],
+          "haloRequired": 8,
+          "endedAt": 6505
+        }
+      ]
+    }
+  ]
+}

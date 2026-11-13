@@ -97,6 +97,11 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
         run: node tools/pages-preview/browser-service-worker-update.mjs
+      - name: Verify native map progress while one real DEM halo is delayed
+        timeout-minutes: 4
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: node tools/pages-preview/browser-map-loading.mjs
       - name: Verify complete trail overlay and native line selection
         timeout-minutes: 5
         env:
@@ -171,6 +176,7 @@ jobs:
           import {assertTerrainUnmaskedReport} from './tools/pages-preview/terrain-unmasked-report.mjs';
           import {assertTrailOverlayReceipt} from './tools/pages-preview/browser-trail-overlay.mjs';
           import {assertServiceWorkerUpdateReceipt} from './tools/pages-preview/browser-service-worker-update.mjs';
+          import {assertMapLoadingReceipt} from './tools/pages-preview/browser-map-loading.mjs';
           const build = JSON.parse(readFileSync('web/pages-preview/dist/build-info.json', 'utf8'));
           const browser = JSON.parse(readFileSync('web/pages-preview/dist/browser-verification.json', 'utf8'));
           assert.match(build.buildId, /^[a-f0-9]{16}$/);
@@ -203,6 +209,23 @@ jobs:
             assert.equal(createHash('sha256').update(png).digest('hex'), capture.sha256);
             assert.equal(png.subarray(0,8).toString('hex'), '89504e470d0a1a0a');
             assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)], [workerUpdate.profile.width*workerUpdate.profile.deviceScaleFactor,workerUpdate.profile.height*workerUpdate.profile.deviceScaleFactor]);
+          }
+          const mapLoading = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-loading-verification.json', 'utf8'));
+          assertMapLoadingReceipt(mapLoading, {sourceCommit:process.env.GITHUB_SHA, buildId:build.buildId, environment:browser.environment});
+          for (const [path, hash] of Object.entries(mapLoading.sources)) {
+            const bytes = readFileSync(path), input = build.inputs.find(item => item.path === path);
+            assert.equal(createHash('sha256').update(bytes).digest('hex'), hash);
+            assert.equal(input?.sha256, hash);
+            assert.equal(input?.bytes, bytes.length);
+          }
+          for (const capture of mapLoading.screenshots) {
+            assert.equal(capture.file, 'map-loading-' + capture.phase + '.png');
+            const png = readFileSync('web/pages-preview/design-qa/map-loading/' + capture.file);
+            assert.equal(png.length, capture.bytes);
+            assert.equal(createHash('sha256').update(png).digest('hex'), capture.sha256);
+            assert.equal(png.subarray(0,8).toString('hex'), '89504e470d0a1a0a');
+            assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)], [capture.width,capture.height]);
+            assert.deepEqual([capture.width,capture.height], [mapLoading.profile.width*mapLoading.profile.deviceScaleFactor,mapLoading.profile.height*mapLoading.profile.deviceScaleFactor]);
           }
           const trailOverlay = JSON.parse(readFileSync('web/pages-preview/dist/browser-trail-overlay-verification.json', 'utf8'));
           const trailMetadata = JSON.parse(readFileSync('web/lib/trail-overlay.generated.json', 'utf8'));
@@ -419,6 +442,7 @@ jobs:
             web/pages-preview/dist/browser-trail-raster-verification.json
             web/pages-preview/dist/browser-ui-smoothness-diagnostic.json
             web/pages-preview/dist/browser-service-worker-update-verification.json
+            web/pages-preview/dist/browser-map-loading-verification.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Preserve map design checks across zoom levels
