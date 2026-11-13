@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "image": "caddy:2.11.9-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0",
+  "version": "v2.11.9",
+  "platform": "linux/amd64",
+  "indexDigest": "sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0",
+  "amd64ManifestDigest": "sha256:fc9cbc100585871d18d4e451cca7021785c90a7006087427ae5ceb3e4efe6424",
+  "amd64ConfigDigest": "sha256:5813f7eb9b94fac4970f9f576695fe1ed1d53d41586fd3eaa350caf7c4627d9c",
+  "officialDockerfileCommit": "d322e6686bbce5622d98a04c84fadd43b5eb8c58",
+  "officialDockerfileURL": "https://github.com/caddyserver/caddy-docker/blob/d322e6686bbce5622d98a04c84fadd43b5eb8c58/2.11/alpine/Dockerfile",
+  "releaseURL": "https://github.com/caddyserver/caddy/releases/tag/v2.11.9",
+  "registryTagURL": "https://hub.docker.com/v2/namespaces/library/repositories/caddy/tags/2.11.9-alpine",
+  "registryRepository": "https://registry-1.docker.io/v2/library/caddy/",
+  "metadataVerifiedAt": "2026-11-13",
+  "metadataVerification": "Docker Hub tag matched the registry index; SHA-256 of both raw registry manifests matched Docker-Content-Digest and the pinned references. Runtime image and container checks remain a separate gate.",
+  "officialAMD64ArchiveSHA512": "0e85544340290a16ce4bfb76fe7d65e9de1bf3a6e67f5ccfff30b30d27ea4c73e078077b7bf3e58ae60b6b12e44327705287059c775bca5782e8ee85ea7edd75",
+  "officialAMD64BinarySHA256": "a563843e11cbce39c557bd429ebb787d56f49d51d9bbb3292cd9b36b37a60cdf",
+  "curlVerification": {
+    "layerDigest": "sha256:c4d6974dbf71e422d13654405f502ff60ea306943b999003c012ecc6dd93d317",
+    "path": "/usr/bin/curl",
+    "bytes": 272432,
+    "method": "Verified SHA-256 of the official amd64 dependency layer and inspected its tar member; the actual container healthcheck remains part of runtime qualification."
+  }
+}

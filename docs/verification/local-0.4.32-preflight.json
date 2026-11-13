@@ -1,0 +1,456 @@
+{
+  "schemaVersion": 1,
+  "status": "local-preflight-passed-not-released",
+  "recordedAt": "2026-11-13T10:54:02.999756+00:00",
+  "release": {
+    "web": "0.4.32",
+    "requestedAndroid": "0.4.32-preview",
+    "requestedVersionCode": 15
+  },
+  "sourceBinding": {
+    "baselineCommit": "7d517c96dcc8ca387ff308a238f42cbaf39fe259",
+    "baselineContainsCandidate": false,
+    "branch": "fix/trail-completeness-20261113",
+    "scope": "Executed against the prepared working tree. Final candidate is identified by these file hashes and the exact build input inventory, not by the baseline commit.",
+    "changedExecutableInputs": {
+      ".github/workflows/backend.yml": {
+        "bytes": 3643,
+        "sha256": "01fe852f45e4cce35fba38f453ee89e273a2cf8ac4814d42afbf2f9462a8237b"
+      },
+      "android/app/build.gradle.kts": {
+        "bytes": 6178,
+        "sha256": "c2bc73e154cc0b409f638e4d2cbc3748986d926da47fb6364a9d54d02962d933"
+      },
+      "android/app/src/main/assets/custom-map/android-bootstrap.js": {
+        "bytes": 22086,
+        "sha256": "663d8a9183c285dec15d4ed3839a4d63c8e788c865d8706620832c4ac22d22ff"
+      },
+      "android/app/src/main/assets/custom-map/chunks/custom-map-entry-Di78nDBh.js": {
+        "bytes": 147120,
+        "sha256": "9b2349e9907c7affb26423990cd9449e6808f57bfbfe156edfdfbf09d234859e"
+      },
+      "android/app/src/main/assets/custom-map/manifest.json": {
+        "bytes": 533835,
+        "sha256": "7d406b298be1b2afe7219c4e4310c9c2822d9ef18cb35102cb8bf1db23792fef"
+      },
+      "android/app/src/main/assets/custom-map/map-runtime.js": {
+        "bytes": 224,
+        "sha256": "700cf2d9c8f852bceaa3433ccb5ac11bf2a0b51c87a42be2df564e7d24e87969"
+      },
+      "contracts/openapi.yaml": {
+        "bytes": 65433,
+        "sha256": "b3ed1aea2363bef3ba032b0b02cda972d9276176b42aa009f5a452c2c1298196"
+      },
+      "infra/Caddyfile.example": {
+        "bytes": 1010,
+        "sha256": "0a675d2fd36b030539e0c0388e2ac3a64c6bc4343b804e880430d3324f9a3f9c"
+      },
+      "infra/compose.database.yaml": {
+        "bytes": 394,
+        "sha256": "57549f916ad751a6a5209b2e50c285e0b3202e6f92b9f21bcf03624b4a22fdce"
+      },
+      "infra/compose.mail.yaml": {
+        "bytes": 840,
+        "sha256": "22111d6c16fbfccde806e996e5272e1e968f6f837be83d0fd70f7f241c5c602a"
+      },
+      "infra/compose.restore.yaml": {
+        "bytes": 1234,
+        "sha256": "cae1e72b00bd69e647975bb8c054ef158bce2026664b273281e944b23277a43a"
+      },
+      "infra/compose.test.yaml": {
+        "bytes": 541,
+        "sha256": "2186e7ccb536163c8aff0d7fa2c435aedd81490719d766929988ebd597a81a90"
+      },
+      "infra/compose.web.yaml": {
+        "bytes": 1414,
+        "sha256": "f93ec7c223604df04c3ff838a3803d6cb7d739c53bf8e6713ea3baf57ba49a35"
+      },
+      "infra/compose.yaml": {
+        "bytes": 3433,
+        "sha256": "b03e51e90369f332567cbf4e968cea1ebfcf4d695a584f399d2395c8226e1a48"
+      },
+      "infra/db/postgis/Dockerfile": {
+        "bytes": 1947,
+        "sha256": "b1e94add65c090b694071a17f711348859ddd19daec206dabd349b67651b773a"
+      },
+      "infra/db/postgis/LICENSE": {
+        "bytes": 1081,
+        "sha256": "cbd28f04526994ff2ef1d0377275ec5e0a42cf2833ffd46ecb9c7ed8304fc72b"
+      },
+      "infra/db/postgis/initdb-postgis.sh": {
+        "bytes": 1285,
+        "sha256": "4d49631c59a1b93edcd0b1b068a5fe019e2b473404ddf7be015a28d4da4fe8a2"
+      },
+      "infra/db/postgis/packages.sha256": {
+        "bytes": 250,
+        "sha256": "44d2c49442d73a4cc561e8227a1555f2255704e72dae0f188dbd82cd4e1ad895"
+      },
+      "infra/db/postgis/provenance.json": {
+        "bytes": 1651,
+        "sha256": "234bda194a48b74229fe01099377d2bf79f9b58227a62225a3361de282c4a015"
+      },
+      "infra/db/postgis/runtime-check.sql": {
+        "bytes": 693,
+        "sha256": "1f63e8216f89862ec15064b83bdd1f6c88b280a6fddd1ce020db8bc670955a33"
+      },
+      "infra/db/postgis/update-postgis.sh": {
+        "bytes": 2286,
+        "sha256": "6869638e98a7c829db0e2164c5824fbb106a2a75c71463abdeb8fc586ebb1f36"
+      },
+      "infra/ingress/Caddyfile": {
+        "bytes": 325,
+        "sha256": "6bc705055fdd329b3c019d098d9e978c61b9cd7741dae5c5d068d015a43396f1"
+      },
+      "infra/ingress/api.caddy": {
+        "bytes": 179,
+        "sha256": "a38aa916db26ba8e87e38d74915ac14d50990865fd359094f4caedda35a2f4f2"
+      },
+      "infra/ingress/provenance.json": {
+        "bytes": 1823,
+        "sha256": "26340cbffae29847b4fc6df6697776fc6a10362186d454385436bc3bd3578f59"
+      },
+      "infra/ingress/web.caddy": {
+        "bytes": 109,
+        "sha256": "08e8e81a2591776c2ef02a9b5ecc38dfef794e89c8faa1a111cffb64610f0d9f"
+      },
+      "infra/restore-check.sql": {
+        "bytes": 10213,
+        "sha256": "4e9e2f6cae370764ff9feaa3d35b9b0064e4d8b6d8aad53f99d1156de7b9bc7b"
+      },
+      "infra/run-backup-drill.sh": {
+        "bytes": 13958,
+        "sha256": "bbb0bc2725b2799a2bed854b0b997c27fafd09728042eb845034403064dcf561"
+      },
+      "infra/run-integration.sh": {
+        "bytes": 1108,
+        "sha256": "aab03e5e9d85fd3e02c7444a4772076845c925d1848e8d09b5307f501660fc2a"
+      },
+      "infra/tests/test_backend_bootstrap.py": {
+        "bytes": 2672,
+        "sha256": "870181810ca91d0504fe8a57110b3b4e94e63187222d031f7c738804e570e80a"
+      },
+      "infra/tests/test_ingress_topology.py": {
+        "bytes": 6236,
+        "sha256": "07bf815d3fef73aa256bf77d13e58ab468038bcc0b9a6e64d03102aedf2e58c0"
+      },
+      "infra/verify-backend-bootstrap.py": {
+        "bytes": 29996,
+        "sha256": "8bd0f1323f20531a7d41c5c26f406361f061cce2692ff197c6477ce134062f9e"
+      },
+      "infra/verify-postgis-image.py": {
+        "bytes": 11792,
+        "sha256": "a85f57795cd7e1900a4e99e42f9592c15a80a41470efea172dc3a74d2053cfef"
+      },
+      "tools/android-build/release-notes/0.4.32-preview.md": {
+        "bytes": 4498,
+        "sha256": "0153248ecddccf89178147ba40fed792346809252a05a2d55d92c3ea12abbb08"
+      },
+      "tools/android-build/release-request.json": {
+        "bytes": 212,
+        "sha256": "e466c362f796ce7c83ff16ff2b164dfba29f18982303b3614e7294d952532578"
+      },
+      "web/components/CustomAtlas.tsx": {
+        "bytes": 23113,
+        "sha256": "20266c99aa3ca26c615a88a3ae7a52841a6766100ae5f620ded38199b594ad52"
+      },
+      "web/components/ServiceWorker.tsx": {
+        "bytes": 7408,
+        "sha256": "c065bd757266394676c43f9b688580ca507e28ff786720b8ef00edc5f080f4c5"
+      },
+      "web/lib/custom-map-engine.ts": {
+        "bytes": 73294,
+        "sha256": "f93de3ec53df83427358de1a35aa537bf1437a734b541223fb0b117640ed5ec5"
+      },
+      "web/lib/map-framing.ts": {
+        "bytes": 6340,
+        "sha256": "01713c0eb1ddccf8adaddd1c6ddb4876484b889965dff918e7cadaff067f517c"
+      },
+      "web/lib/service-worker-registration.ts": {
+        "bytes": 5389,
+        "sha256": "408f359d579f350867eb9a2dd5caead8b427f3ebbd4818c709dbbb89700cefbc"
+      },
+      "web/package.json": {
+        "bytes": 1896,
+        "sha256": "6b00e37dceb0f675a70321b4542b31eefcd546a47cd2eece79034b46733f793a"
+      },
+      "web/public/custom-map/android-bootstrap.js": {
+        "bytes": 22086,
+        "sha256": "663d8a9183c285dec15d4ed3839a4d63c8e788c865d8706620832c4ac22d22ff"
+      },
+      "web/public/custom-map/chunks/custom-map-entry-Di78nDBh.js": {
+        "bytes": 147120,
+        "sha256": "9b2349e9907c7affb26423990cd9449e6808f57bfbfe156edfdfbf09d234859e"
+      },
+      "web/public/custom-map/manifest.json": {
+        "bytes": 533835,
+        "sha256": "7d406b298be1b2afe7219c4e4310c9c2822d9ef18cb35102cb8bf1db23792fef"
+      },
+      "web/public/custom-map/map-runtime.js": {
+        "bytes": 224,
+        "sha256": "700cf2d9c8f852bceaa3433ccb5ac11bf2a0b51c87a42be2df564e7d24e87969"
+      },
+      "web/public/sw.js": {
+        "bytes": 17420,
+        "sha256": "cefd35ed89505bed44ba2eec28d74df8dd8a6ffd1eb53ffc5c73ecf97a376781"
+      },
+      "web/tests/custom-map-engine.test.mjs": {
+        "bytes": 144080,
+        "sha256": "e2b65ef2b16268845c022de00719ce9b0d96e96edf625da7472004ee21c6748a"
+      },
+      "web/tests/map-framing.test.mjs": {
+        "bytes": 16089,
+        "sha256": "d534661084fac427ca1b8914cda9a3b5510876aa11fbeb0f1d1b38559cdffa7d"
+      },
+      "web/tests/map-selection-lifecycle.test.mjs": {
+        "bytes": 57669,
+        "sha256": "db446a48e9b442151a92b1d311230760ce2a4a20ee32cdd5aca830068d86c05d"
+      },
+      "web/tests/overview-offline.test.mjs": {
+        "bytes": 3186,
+        "sha256": "ae9d747cba1cc9d4ce187e8d1aada080da2f4fb3c2460e7d96fdb7aaba6eadc0"
+      },
+      "web/tests/service-polish.test.mjs": {
+        "bytes": 3769,
+        "sha256": "ad0c77beb9f6fad1972472f52346021c370dadddb92a83af6b98a6d30a2660cc"
+      },
+      "web/tests/service-worker-update.test.mjs": {
+        "bytes": 10700,
+        "sha256": "39fc2115d65bb78bd954782019cae196a01d1e16b64d0f3d17837cc258f6c0a2"
+      },
+      "web/tests/service-worker-warm-lifecycle.test.mjs": {
+        "bytes": 6086,
+        "sha256": "07da9ddf5657684d8b3750be5b92e511700ca0898713f4124bc573a5f83a0cca"
+      }
+    }
+  },
+  "checks": {
+    "web": {
+      "command": "node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs",
+      "cwd": "web",
+      "exitCode": 0,
+      "tests": 955,
+      "pass": 955,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "pagesTooling": {
+      "command": "node --test tools/pages-preview/tests/*.test.mjs",
+      "cwd": ".",
+      "exitCode": 0,
+      "tests": 365,
+      "pass": 365,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "typescript": {
+      "command": "node web/node_modules/typescript/bin/tsc -p web/pages-preview/tsconfig.json --noEmit",
+      "exitCode": 0
+    },
+    "eslint": {
+      "command": "node node_modules/eslint/bin/eslint.js . --ignore-pattern dist --ignore-pattern .next",
+      "cwd": "web",
+      "exitCode": 0
+    },
+    "infra": {
+      "command": "TROPNIK_COMPOSE=/workspace/scratch/686c5dc59f67/bin/docker-compose PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s infra/tests -p 'test_*.py'",
+      "exitCode": 0,
+      "tests": 13,
+      "pass": 13,
+      "fail": 0,
+      "composeVariants": [
+        "base",
+        "web",
+        "mail",
+        "web+mail"
+      ]
+    },
+    "exitStatusEvidence": "Every process completed with exitCode 0 in the tool result; empty type/lint logs alone are not used as evidence."
+  },
+  "staticBuild": {
+    "command": "node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io --out /workspace/scratch/686c5dc59f67/pages-preview-0.4.32/tropnik",
+    "exitCode": 0,
+    "buildId": "14768f52ece0811c",
+    "sourceCommit": null,
+    "sourceCommitScope": "Local working-tree build; no CI source identity is asserted.",
+    "allInputBytesAndHashesMatchedWorkingTree": true,
+    "inputCount": 2160,
+    "buildInfo": {
+      "bytes": 413251,
+      "sha256": "703d79fedabe0594b0eea3ae1583f6fa80770fc2174cbc8b9b99607fee51aedf"
+    },
+    "verification": {
+      "verified": true,
+      "pages": 718,
+      "referenceRoutes": 685,
+      "productionRoutingChecks": 2159,
+      "mapPolicyChecks": 25,
+      "staticApiNetworkCalls": 0,
+      "checkedScripts": 67,
+      "publicAssetChecks": 666,
+      "outputFiles": 2657,
+      "offlineFilesVerified": 249,
+      "customMap": {
+        "runtime": "tropnik-canvas",
+        "sourceInputsSha256": "8132930733aaadc3ccaa665b24ced16064ba23d248f187d9c19aec6722425a8d",
+        "manifestSha256": "7d406b298be1b2afe7219c4e4310c9c2822d9ef18cb35102cb8bf1db23792fef",
+        "deployedFilesVerified": 9,
+        "workerCount": 3
+      },
+      "overviewReliefTilesVerified": 341,
+      "terrainGrid": [
+        513,
+        513
+      ],
+      "regionalTerrain": {
+        "regions": 2,
+        "filesVerified": 11,
+        "runtimeFetches": [
+          "/tropnik/terrain-regions/manifest.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+          "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+        ]
+      },
+      "apkVerified": true,
+      "coverageExcludedRoutes": [
+        "osm-relation-14407325"
+      ],
+      "base": "/tropnik/"
+    },
+    "httpVerification": {
+      "verified": true,
+      "base": "/tropnik/",
+      "httpChecks": 71,
+      "regionalTerrain": {
+        "regions": 2,
+        "runtimeFetches": [
+          "/tropnik/terrain-regions/manifest.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-central-v1/surface.png",
+          "/tropnik/terrain-regions/south-sakhalin-v1/terrain-grid.json",
+          "/tropnik/terrain-regions/south-sakhalin-v1/surface.png"
+        ],
+        "checksumsVerified": true
+      },
+      "browserRenderingTested": false,
+      "backendConnected": false
+    },
+    "archive": {
+      "bytes": 66584398,
+      "sha256": "aab796ba9998d877d1f2890070b4e3056c034098f84f031e13802787b0f4935b"
+    },
+    "downloadedAndroid": {
+      "delivery": "github-release",
+      "sourcePath": "/downloads/tropnik-preview.apk",
+      "downloadHref": "https://github.com/orewn/tropnik/releases/download/v0.4.31-preview/tropnik-preview.apk",
+      "bytes": 69227850,
+      "sha256": "01e36115e3c19214543f75b128f806c8195c6b7808b40ae08a256b6bd7150055",
+      "version": "0.4.31-preview",
+      "architecture": "universal",
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ],
+      "signature": "development / debug",
+      "signingCertificateSha256": "2ab22affedf2dc732b8c57530a016afcd030e820ec3477f91ca019322f9f750c",
+      "sourceCommit": "baf0b9ef8b8132711a317e861cf1d8aed68800fb",
+      "workflowRunId": 43391174819,
+      "testedArchitecture": "x86_64",
+      "deviceExecutionVerified": true,
+      "physicalDeviceVerified": false
+    },
+    "newAndroidBuilt": false
+  },
+  "serviceWorkerStamp": "tropnik-shell-0.4.32-7d71abc5561fbd8d",
+  "supportingReceipts": {
+    "camera-0.4.32-local.json": {
+      "bytes": 10601,
+      "sha256": "2cee2c4bfe75983989ec6a6a99cf83ff75ad2aa69e05dc58f3c56e85a668ffc4"
+    },
+    "web-0.4.32-local-update.json": {
+      "bytes": 9457,
+      "sha256": "0c191e145dfad670c3d2993ac2954c35f16d2a9dbd9d5fb187f25ab396d29cfc"
+    },
+    "android-0.4.32-local-review.json": {
+      "bytes": 5899,
+      "sha256": "8160b6c052623285230d1d0c710176559d23c9c1dc912468ea604a268f825bef"
+    },
+    "backend-0.4.32-local-ingress.json": {
+      "bytes": 3992,
+      "sha256": "ff3b49073d6fc249318ed817c32cfbaafe26746c33ec745e05f4b0af686c3697"
+    },
+    "ingress-0.4.32-local-transport.json": {
+      "bytes": 2448,
+      "sha256": "151e3afee0bffa2150a641fe22bad0655e12ebe4319ce0a204e5a99779bd5cb2"
+    },
+    "web-0.4.32-live-update-issue.jpg": {
+      "bytes": 175933,
+      "sha256": "7d5a470f55c482969902fdc90a943afb1f1503427aad55d8435078168fd30292"
+    }
+  },
+  "executionLogs": {
+    "web-0.4.32-tests.log": {
+      "bytes": 98596,
+      "sha256": "b8dc6e69657d3d285e08fa219afccc04941a87ece1de618e739d9f4a913cdf70"
+    },
+    "pages-0.4.32-tooling.log": {
+      "bytes": 48424,
+      "sha256": "9c86fa58b51aba02ea51cf2329e28ebf31213a7a661ad91e81c38b089db35535"
+    },
+    "web-0.4.32-lint.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "web-0.4.32-types.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "infra-0.4.32-tests.log": {
+      "bytes": 112,
+      "sha256": "6575afe3c77778c37ce3b2130016f9d99a0a621aec80d11fe051031b025b8175"
+    },
+    "web-0.4.32-build.log": {
+      "bytes": 13955,
+      "sha256": "c973d044a38c7dc98b010affe40476b72b7e88cb85c239861916cd96665dbb94"
+    }
+  },
+  "uncompletedGates": {
+    "browserCandidate": {
+      "passed": false,
+      "reason": "Local Chromium cannot create its process-singleton socket (EPERM); cloud browser cannot reach this local artifact. The public UI observation is of the old published site."
+    },
+    "dockerBootstrap": {
+      "passed": false,
+      "reason": "No Docker daemon; Compose rendering and actual local Caddy transport do not qualify Docker networking or the real API/Next processes."
+    },
+    "androidBuildAndDevice": {
+      "passed": false,
+      "reason": "New code 15 APK, JVM/R8/emulator and public-asset checks require the release CI."
+    },
+    "publicRelease": {
+      "passed": false,
+      "reason": "Automatic approval review rejected both GitHub push attempts. No candidate code or workflow was sent remotely; explicit permission for the concrete repository/payload is required."
+    },
+    "siteDeployment": {
+      "passed": false,
+      "reason": "Existing private Site remains at version 45; no new deployment was attempted."
+    }
+  },
+  "publicationTarget": {
+    "repository": "https://github.com/orewn/tropnik",
+    "pages": "https://orewn.github.io/tropnik/",
+    "androidTag": "v0.4.32-preview"
+  },
+  "limits": [
+    "This is local preflight evidence, not an acceptance receipt for a published release.",
+    "The running old service worker can ignore the new cancellation command; the upgrade path requires a real browser check after deployment.",
+    "A local static build still links the verified 0.4.31-preview universal APK. Promote the new verified universal manifest only after the 0.4.32 Android release passes.",
+    "Live Go/PostGIS/BFF/SMTP, multiple real clients, physical ARM64 and production signing have not been qualified."
+  ]
+}

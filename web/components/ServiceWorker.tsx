@@ -1,7 +1,7 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
-import {watchServiceWorkerRegistration} from '@/lib/service-worker-registration';
+import {ServiceWorkerUpdateRequest, watchServiceWorkerRegistration} from '@/lib/service-worker-registration';
 
 type IdleWindow = Window & {
   requestIdleCallback?: (callback: () => void, options?: {timeout: number}) => number;
@@ -15,8 +15,11 @@ const UPDATE_INTERVAL = 30 * 60 * 1000;
 
 export function ServiceWorker() {
   const [updateReady, setUpdateReady] = useState(false);
+  const [updateState, setUpdateState] = useState<'ready' | 'updating' | 'error'>('ready');
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const refreshRequested = useRef(false);
+  const documentController = useRef<ServiceWorker | null>(null);
+  const updateRequest = useRef<ServiceWorkerUpdateRequest | null>(null);
   const lastUpdateCheck = useRef(0);
 
   useEffect(() => {
@@ -27,12 +30,16 @@ export function ServiceWorker() {
     let disposed = false;
     let unwatchRegistration: (() => void) | undefined;
     let controllerKnown = !!navigator.serviceWorker.controller;
+    documentController.current = navigator.serviceWorker.controller;
     let checkUpdate = () => {};
+    let scheduleWarm = () => {};
     const controllerChanged = () => {
       if (disposed) return;
-      if (refreshRequested.current) { location.reload(); return; }
-      if (controllerKnown && !disposed) setUpdateReady(true);
+      if (refreshRequested.current) return;
+      if (controllerKnown) setUpdateReady(true);
+      else documentController.current = navigator.serviceWorker.controller;
       controllerKnown = true;
+      scheduleWarm();
     };
     const wake = () => { if (!document.hidden) checkUpdate(); };
     navigator.serviceWorker.addEventListener('controllerchange', controllerChanged);
@@ -78,13 +85,21 @@ export function ServiceWorker() {
         if (disposed || !document.querySelector('.explore-layout')) return;
         const connection = (navigator as NetworkNavigator).connection;
         if (connection?.saveData || /(?:^|-)2g$/.test(connection?.effectiveType || '')) return;
-        schedule(() => {
-          const worker = registration.active || registration.waiting || registration.installing;
-          worker?.postMessage({
-            type: 'warm-map',
-            engine: window.matchMedia('(pointer: coarse)').matches ? 'canvas' : 'webgl',
-          });
-        }, 4200);
+        let warmScheduled = false;
+        scheduleWarm = () => {
+          if (disposed || warmScheduled || refreshRequested.current) return;
+          warmScheduled = true;
+          schedule(() => {
+            warmScheduled = false;
+            if (refreshRequested.current || registration.waiting || registration.installing) return;
+            const worker = registration.active;
+            if (worker?.state === 'activated') worker.postMessage({
+              type: 'warm-map',
+              engine: window.matchMedia('(pointer: coarse)').matches ? 'canvas' : 'webgl',
+            });
+          }, 4200);
+        };
+        scheduleWarm();
       }).catch(() => {});
     }, 2800);
 
@@ -94,6 +109,8 @@ export function ServiceWorker() {
     return () => {
       disposed = true;
       unwatchRegistration?.();
+      updateRequest.current?.cancel(); updateRequest.current = null;
+      refreshRequested.current = false;
       registrationRef.current = null;
       window.removeEventListener('load', register);
       navigator.serviceWorker.removeEventListener('controllerchange', controllerChanged);
@@ -106,15 +123,23 @@ export function ServiceWorker() {
   }, []);
 
   function activateUpdate() {
-    const waiting = registrationRef.current?.waiting;
-    if (!waiting) { location.reload(); return; }
+    if (refreshRequested.current) return;
     refreshRequested.current = true;
-    waiting.postMessage({type: 'skip-waiting'});
+    setUpdateState('updating');
+    const finish = () => {if (updateRequest.current !== request) return false; updateRequest.current = null; refreshRequested.current = false; return true;};
+    const request = new ServiceWorkerUpdateRequest({
+      registration: registrationRef.current, container: navigator.serviceWorker, documentController: documentController.current,
+      schedule: (callback, delay) => {const handle = window.setTimeout(callback, delay); return () => window.clearTimeout(handle);},
+      reload: () => {if (finish()) {setUpdateState('ready'); location.reload();}},
+      failed: () => {if (finish()) setUpdateState('error');},
+    });
+    updateRequest.current = request;
+    request.start();
   }
 
   if (!updateReady) return null;
   return <div className="app-update" role="region" aria-label="Обновление Тропника">
-    <span role="status" aria-live="polite"><strong>Доступна свежая версия.</strong> Обновите страницу, когда будете готовы получить последние исправления.</span>
-    <div><button type="button" className="button primary small" onClick={activateUpdate}>Обновить</button><button type="button" className="button secondary small" onClick={()=>setUpdateReady(false)}>Позже</button></div>
+    <span role="status" aria-live="polite"><strong>{updateState === 'error' ? 'Не удалось обновить страницу.' : updateState === 'updating' ? 'Подготавливаем свежую версию.' : 'Доступна свежая версия.'}</strong>{' '}{updateState === 'error' ? 'Обновление пока не завершилось. Проверьте подключение и повторите попытку.' : updateState === 'updating' ? 'Страница откроется заново, когда обновление будет готово.' : 'Обновите страницу, когда будете готовы получить последние исправления.'}</span>
+    <div><button type="button" className="button primary small" disabled={updateState === 'updating'} onClick={activateUpdate}>{updateState === 'updating' ? 'Обновляем…' : updateState === 'error' ? 'Повторить' : 'Обновить'}</button><button type="button" className="button secondary small" disabled={updateState === 'updating'} onClick={()=>{setUpdateReady(false); setUpdateState('ready');}}>Позже</button></div>
   </div>;
 }

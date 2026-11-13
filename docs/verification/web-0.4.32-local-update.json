@@ -1,0 +1,189 @@
+{
+  "receiptVersion": 1,
+  "recordedAt": "2026-11-13T10:51:26.077600+00:00",
+  "reviewer": "map_skeptic",
+  "repository": "orewn/tropnik",
+  "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik",
+  "releaseCandidate": "0.4.32",
+  "status": "targeted-local-working-tree-verification-passed-full-root-verification-pending",
+  "sourceCommit": null,
+  "sourceBinding": {
+    "kind": "final working-tree file byte snapshot taken after root service-worker stamp generation",
+    "parentCommit": "7d517c96dcc8ca387ff308a238f42cbaf39fe259",
+    "parentContainsFix": false,
+    "files": [
+      {
+        "path": "web/components/ServiceWorker.tsx",
+        "bytes": 7408,
+        "sha256": "c065bd757266394676c43f9b688580ca507e28ff786720b8ef00edc5f080f4c5"
+      },
+      {
+        "path": "web/lib/service-worker-registration.ts",
+        "bytes": 5389,
+        "sha256": "408f359d579f350867eb9a2dd5caead8b427f3ebbd4818c709dbbb89700cefbc"
+      },
+      {
+        "path": "web/public/sw.js",
+        "bytes": 17420,
+        "sha256": "cefd35ed89505bed44ba2eec28d74df8dd8a6ffd1eb53ffc5c73ecf97a376781"
+      },
+      {
+        "path": "web/tests/overview-offline.test.mjs",
+        "bytes": 3186,
+        "sha256": "ae9d747cba1cc9d4ce187e8d1aada080da2f4fb3c2460e7d96fdb7aaba6eadc0"
+      },
+      {
+        "path": "web/tests/service-polish.test.mjs",
+        "bytes": 3769,
+        "sha256": "ad0c77beb9f6fad1972472f52346021c370dadddb92a83af6b98a6d30a2660cc"
+      },
+      {
+        "path": "web/tests/service-worker-update.test.mjs",
+        "bytes": 10700,
+        "sha256": "39fc2115d65bb78bd954782019cae196a01d1e16b64d0f3d17837cc258f6c0a2"
+      },
+      {
+        "path": "web/tests/service-worker-warm-lifecycle.test.mjs",
+        "bytes": 6086,
+        "sha256": "07da9ddf5657684d8b3750be5b92e511700ca0898713f4124bc573a5f83a0cca"
+      }
+    ],
+    "testTimeHashLimit": "No per-file byte digest was captured at the instant of the targeted tests. These hashes bind the final local files inspected for this receipt, not an immutable tested commit.",
+    "postTestGeneration": {
+      "path": "web/public/sw.js",
+      "reportedBy": "root",
+      "scope": "Root reports changing only the generated service-worker VERSION stamp after the child targeted verification.",
+      "previousVersion": "tropnik-shell-0.4.32-e1d500bdfe7b3152",
+      "currentVersionLine": "const VERSION='tropnik-shell-0.4.32-7d71abc5561fbd8d';",
+      "reexecutedByChildAfterStamp": false,
+      "finalIntegratedVerification": "Running under root; its result is not asserted here."
+    }
+  },
+  "observedLiveIssue": {
+    "reportedBy": "root",
+    "url": "https://orewn.github.io/tropnik/?region=altai",
+    "observation": "Enabled update button was activated twice; banner remained and no page reload was observed.",
+    "hiddenWorkerStateCaptured": false,
+    "specificLiveRootCauseProven": false
+  },
+  "changes": {
+    "activationDeadlineMilliseconds": 15000,
+    "optionalWarmupTotalDeadlineMilliseconds": 12000,
+    "behavior": [
+      "Explicit updating state and disabled repeated action; visible failure with retry.",
+      "One user decision owns one bounded controller transition; timeout/unmount revokes later reload.",
+      "Reload requires actual controller identity to differ from the controller of the loaded document.",
+      "Waiting-worker replacement retargets the successor once without restarting the original deadline.",
+      "Waiting-to-active/activating delivery before controllerchange remains an owned pending activation.",
+      "Thrown update postMessage is handled and retry is available.",
+      "Optional warmup fetches receive AbortSignal; waitUntil settles at the total deadline even for noncooperative transport.",
+      "Late aborted responses cannot continue writes or write a ready marker.",
+      "Retiring-worker warmup suppression does not disable the successor warmup.",
+      "No service-worker unregister or deletion of user offline packs was added."
+    ]
+  },
+  "executedCommands": [
+    {
+      "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "command": "node --experimental-strip-types --test tests/service-worker-update.test.mjs",
+      "phase": "original-code RED",
+      "tests": 6,
+      "pass": 1,
+      "fail": 5,
+      "skipped": 0,
+      "cancelled": 0,
+      "exitCode": 1,
+      "failures": [
+        "No visible updating state",
+        "No timeout/retry after missing controllerchange",
+        "No activation message to replacement waiting worker",
+        "Reloaded unchanged old controller after waiting removal",
+        "Uncaught postMessage failure"
+      ]
+    },
+    {
+      "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "command": "node --experimental-strip-types --test tests/service-worker-warm-lifecycle.test.mjs",
+      "phase": "original-worker RED",
+      "tests": 5,
+      "pass": 0,
+      "fail": 5,
+      "skipped": 0,
+      "cancelled": 0,
+      "exitCode": 1,
+      "scope": "Three top-level tests including two root/Pages subtests; assertions failed on never-ending optional warmup, missing explicit cancellation and unavailable bounded retry."
+    },
+    {
+      "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "command": "node --experimental-strip-types --test --test-name-pattern='waiting becoming active' tests/service-worker-update.test.mjs",
+      "phase": "intermediate-fix RED before root-discovered activation-delivery race correction",
+      "tests": 1,
+      "pass": 0,
+      "fail": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "exitCode": 1,
+      "assertion": "Activation precedes controller delivery and is not a vanished update"
+    },
+    {
+      "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "command": "node --experimental-strip-types --test --test-name-pattern='successor can warm' tests/service-worker-warm-lifecycle.test.mjs",
+      "phase": "intermediate-fix RED before retiring-only suppression correction",
+      "tests": 1,
+      "pass": 0,
+      "fail": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "exitCode": 1,
+      "assertion": "Only retiring controllers suppress later idle work"
+    },
+    {
+      "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "command": "node --experimental-strip-types --test tests/service-worker-update.test.mjs tests/service-worker-registration.test.mjs tests/service-worker-warm-lifecycle.test.mjs tests/overview-offline.test.mjs tests/offline-shell-cache.test.mjs tests/startup-polish.test.mjs tests/service-polish.test.mjs",
+      "phase": "final child targeted GREEN before root stamp generation",
+      "tests": 41,
+      "pass": 41,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "exitCode": 0,
+      "durationMilliseconds": 3795.490379
+    },
+    {
+      "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "command": "node node_modules/typescript/bin/tsc -p pages-preview/tsconfig.json --noEmit",
+      "phase": "Pages TypeScript verification",
+      "exitCode": 0,
+      "scope": "Relevant TS/TSX files unchanged by the later retiring-only JavaScript correction and generated stamp."
+    },
+    {
+      "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "command": "node node_modules/eslint/bin/eslint.js components/ServiceWorker.tsx lib/service-worker-registration.ts tests/service-worker-update.test.mjs tests/service-worker-warm-lifecycle.test.mjs tests/overview-offline.test.mjs tests/service-polish.test.mjs public/sw.js",
+      "phase": "final changed-file lint before root stamp generation",
+      "exitCode": 0
+    },
+    {
+      "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik/web",
+      "command": "git diff --check",
+      "phase": "working-tree whitespace verification before root stamp generation",
+      "exitCode": 0
+    }
+  ],
+  "preservedChecks": {
+    "rfOverviewTiles": 341,
+    "uniqueOverviewTileDownloads": 57,
+    "customRuntimeIntegrity": "Actual generated resources remain checked by byte size and SHA-256.",
+    "readyMarker": "Written only after full warmup completion; absent after deadline or cancellation.",
+    "offlineSafety": "Root and Pages refresh rejection still falls back to installed emergency JS/CSS; unrelated/private data is not substituted.",
+    "sourceTestAdaptation": "The old text-only skip-waiting assertion moved from TSX into its actual extracted lifecycle helper; runtime behavior assertions were added."
+  },
+  "evidenceLimits": [
+    "Commands and exit/count evidence were observed directly in tool stdout. No separate raw transcript log was retained by this child.",
+    "RED states were executed before the corresponding edits, but were not separately committed or retained as immutable byte snapshots.",
+    "VM/React host tests control browser delivery, time and transport. They do not demonstrate a real browser compositor, browser SW activation or a published upgrade.",
+    "An already-running older worker can ignore cancel-map-warm and keep its old unbounded task. The new waiting version cannot retroactively repair that worker before activation.",
+    "The public UI observation does not identify which internal worker-state mechanism occurred.",
+    "No full browser gate, deployment, live upgrade success or final integrated root suite result is asserted.",
+    "No repository edits or new tests were performed while creating this receipt."
+  ]
+}

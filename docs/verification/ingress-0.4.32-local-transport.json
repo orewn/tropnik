@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "scope": "Official Caddy binary and actual adapted configs, with only listener/upstream addresses replaced by loopback fixtures. Not a Docker network, API, Next or public deployment proof.",
+  "binarySha256": "a563843e11cbce39c557bd429ebb787d56f49d51d9bbb3292cd9b36b37a60cdf",
+  "sources": {
+    "Caddyfile": "6bc705055fdd329b3c019d098d9e978c61b9cd7741dae5c5d068d015a43396f1",
+    "api.caddy": "a38aa916db26ba8e87e38d74915ac14d50990865fd359094f4caedda35a2f4f2",
+    "web.caddy": "08e8e81a2591776c2ef02a9b5ecc38dfef794e89c8faa1a111cffb64610f0d9f"
+  },
+  "cases": [
+    {
+      "mode": "api",
+      "listeners": [
+        "8080"
+      ],
+      "checks": [
+        {
+          "upstream": "api",
+          "postPathAndBodyPreserved": true,
+          "preservedHeaderNames": [
+            "x-real-ip",
+            "x-tropa-proxy-token",
+            "origin",
+            "host",
+            "cookie",
+            "authorization"
+          ],
+          "forwardedProto": "http",
+          "status": 200
+        }
+      ],
+      "readinessEnvelopePassed": true,
+      "adminDisabled": true,
+      "automaticHttpsDisabled": true,
+      "persistDisabled": true
+    },
+    {
+      "mode": "api-and-web",
+      "listeners": [
+        "3000",
+        "8080"
+      ],
+      "checks": [
+        {
+          "upstream": "web",
+          "postPathAndBodyPreserved": true,
+          "preservedHeaderNames": [
+            "x-real-ip",
+            "x-tropa-proxy-token",
+            "origin",
+            "host",
+            "cookie",
+            "authorization"
+          ],
+          "forwardedProto": "http",
+          "status": 200
+        },
+        {
+          "upstream": "api",
+          "postPathAndBodyPreserved": true,
+          "preservedHeaderNames": [
+            "x-real-ip",
+            "x-tropa-proxy-token",
+            "origin",
+            "host",
+            "cookie",
+            "authorization"
+          ],
+          "forwardedProto": "http",
+          "status": 200
+        }
+      ],
+      "readinessEnvelopePassed": true,
+      "adminDisabled": true,
+      "automaticHttpsDisabled": true,
+      "persistDisabled": true
+    }
+  ],
+  "cleanup": {
+    "caddyProcessesExited": true,
+    "upstreamSocketsClosed": true
+  },
+  "identityBoundary": "The application uses PUBLIC_ORIGIN and the authenticated host-ingress X-Real-IP proof; an intermediate HTTP X-Forwarded-Proto is not an authority."
+}

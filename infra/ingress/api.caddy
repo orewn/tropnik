@@ -1,0 +1,5 @@
+:8080 {
+	# Fixed upstream only. Pass X-Real-IP/X-Tropa-Proxy-Token unchanged.
+	# Go verifies the immediate peer and the host ingress's proof separately.
+	reverse_proxy api:8080
+}

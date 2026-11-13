@@ -17,12 +17,22 @@ services:
       PORT: "3000"
     depends_on:
       api: { condition: service_healthy }
-    ports: ["127.0.0.1:3000:3000"]
     read_only: true
     tmpfs:
       - /tmp:size=64m,mode=1777
       - /app/.next/cache:size=64m,uid=1000,gid=1000
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD, node, --eval, "fetch('http://127.0.0.1:3000/api/status',{signal:AbortSignal.timeout(4000)}).then(async r=>{const s=await r.json();process.exit(r.status===200&&s.configured===true&&s.connected===true&&s.mode==='connected'?0:1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
-    networks: [backend]
+    networks: [application]
+  ingress:
+    volumes:
+      - ./ingress/web.caddy:/etc/caddy/listeners/web.caddy:ro
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on:
+      web: { condition: service_healthy }

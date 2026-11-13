@@ -26,7 +26,7 @@ export type CustomMapState={ready:boolean;loading:boolean;mode:CustomMapMode;com
 export type CustomMapMarker={id:string;coordinate:[number,number];label:string;kind:'direction'|MapPointMarkerKind;count?:number;active?:boolean};
 export type CustomMapLabel={id:string;coordinate:[number,number];label:string;kind?:MapTileLabel['kind'];rank?:number;color?:string};
 export type CustomMapLabelDiagnostic={id:string;label:string;coordinate:[number,number];visible:boolean;reason:string;x?:number;y?:number;width?:number;rect?:{left:number;top:number;right:number;bottom:number}};
-export type CustomMapOptions={camera:CustomMapCamera;onReady?:(engine:CustomMapEngine)=>void;onFrame?:(camera:CustomMapCamera)=>void;onSettled?:(camera:CustomMapCamera)=>void;onGesture?:()=>void;onClick?:(point:MapPoint,coordinate:[number,number])=>void;onMarker?:(id:string)=>void;onState?:(state:CustomMapState)=>void;onOverlayError?:(message:string)=>void;maxZoom?:number};
+export type CustomMapOptions={camera:CustomMapCamera;onReady?:(engine:CustomMapEngine)=>void;onFrame?:(camera:CustomMapCamera)=>void;onSettled?:(camera:CustomMapCamera)=>void;onBeforeZoom?:()=>void;onGesture?:()=>void;onClick?:(point:MapPoint,coordinate:[number,number])=>void;onMarker?:(id:string)=>void;onState?:(state:CustomMapState)=>void;onOverlayError?:(message:string)=>void;maxZoom?:number};
 type TileBatch={tiles:CustomMapTile[];kind:CustomTileKind;generation:number;missing?:CustomTileRequest[]};
 type LabelCandidate={id:string;coordinate:[number,number];label:MapTileLabel;color?:string;priority:number;sourceAnchor:string;insideCoverage?:boolean;value?:string;repeatDistance?:number;repeatKey?:string};
 type FeatureGeometry=GeoJSON.GeoJSON|undefined;
@@ -276,7 +276,7 @@ export class CustomMapEngine {
   }
   private stopAnimation(){cancelAnimationFrame(this.animation);this.animation=0;this.zoomTarget=null;}
   setCamera(next:CustomMapCamera,animate=false){this.moveCamera(next,animate);}
-  private moveCamera(next:CustomMapCamera,animate:boolean,zoomControl=false){
+  private moveCamera(next:CustomMapCamera,animate:boolean,zoomAnchor?:MapPoint){
     if(this.disposed)return;
     this.pointer.cancel();this.stopAnimation();
     const constrained=constrainFramedCamera(next.center[0],next.center[1],next.zoom,{...this.floor,center:[...this.floor.center]},this.framed?{...this.framed,center:[...this.framed.center]}:null);
@@ -285,18 +285,38 @@ export class CustomMapEngine {
     const start=this.getCamera(),from=mercatorProject(start.center),to=mercatorProject(target.center),at=performance.now();
     // A burst owns one clamped destination. Interpolated frames must not eat
     // subsequent button/key steps or accumulate debt beyond either limit.
-    this.zoomTarget=zoomControl?target.zoom:null;
+    this.zoomTarget=zoomAnchor?target.zoom:null;
     this.setMoving(true);
     const tick=()=>{
       if(this.disposed)return;const t=Math.min(1,(performance.now()-at)/240),eased=1-(1-t)**3;
-      this.camera={center:mercatorUnproject({x:from.x+(to.x-from.x)*eased,y:from.y+(to.y-from.y)*eased}),zoom:start.zoom+(target.zoom-start.zoom)*eased,bearingDegrees:(start.bearingDegrees??0)+((target.bearingDegrees??0)-(start.bearingDegrees??0))*eased};
+      const zoom=start.zoom+(target.zoom-start.zoom)*eased;
+      if(zoomAnchor){
+        // Interpolating centre and logarithmic zoom independently moves the
+        // anchor between frames; another button press would inherit that drift.
+        const camera=zoomAt(start,this.size,zoom,zoomAnchor,{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18});
+        const bounded=constrainFramedCamera(camera.center[0],camera.center[1],camera.zoom,{...this.floor,center:[...this.floor.center]},this.framed?{...this.framed,center:[...this.framed.center]}:null);
+        this.camera={...camera,center:bounded.center as [number,number],zoom:bounded.zoom};
+      }else this.camera={center:mercatorUnproject({x:from.x+(to.x-from.x)*eased,y:from.y+(to.y-from.y)*eased}),zoom,bearingDegrees:(start.bearingDegrees??0)+((target.bearingDegrees??0)-(start.bearingDegrees??0))*eased};
       this.draw();if(t<1)this.animation=requestAnimationFrame(tick);else{this.animation=0;this.zoomTarget=null;this.settled();}
     };this.animation=requestAnimationFrame(tick);
   }
   fit(bounds:GeographicBounds,padding:Partial<MapInsets>={},maxZoom=14,animate=true){
     this.padding=padding;this.framed=fitBounds(bounds,this.size,{padding,maxZoom,minZoom:this.floor.zoom,referenceLongitude:105});this.setCamera(this.framed,animate);
   }
-  zoomBy(delta:number){if(this.disposed||!Number.isFinite(delta))return;const zoom=(this.zoomTarget??this.camera.zoom)+delta;this.options.onGesture?.();this.moveCamera(zoomAt(this.camera,this.size,zoom,undefined,{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18}),true,true);}
+  zoomBy(delta:number){
+    if(this.disposed||!Number.isFinite(delta))return;
+    // An automatic frame can still belong to a moving drawer. Its owner must
+    // finish that handoff before a manual control takes the displayed camera.
+    this.options.onBeforeZoom?.();
+    if(this.disposed)return;
+    const zoom=(this.zoomTarget??this.camera.zoom)+delta;
+    const left=this.padding.left??0,right=this.padding.right??0,top=this.padding.top??0,bottom=this.padding.bottom??0;
+    const valid=[left,right,top,bottom].every(value=>Number.isFinite(value)&&value>=0)&&left+right<this.size.width&&top+bottom<this.size.height;
+    const anchor=valid?{x:(this.size.width+left-right)/2,y:(this.size.height+top-bottom)/2}:{x:this.size.width/2,y:this.size.height/2};
+    this.options.onGesture?.();
+    const flatAnchor=this.flatPoint(anchor);
+    this.moveCamera(zoomAt(this.camera,this.size,zoom,flatAnchor,{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18}),true,flatAnchor);
+  }
   north(){this.options.onGesture?.();this.setCamera({...this.camera,bearingDegrees:0},true);}
   setMode(mode:CustomMapMode){
     if(this.mode===mode){if(this.state.error)this.retry();return;}this.mode=mode;this.currentKeys='';
@@ -565,6 +585,9 @@ export class CustomMapEngine {
   private resizeCanvas(){
     if(this.disposed)return;const width=Math.max(1,this.element.clientWidth),height=Math.max(1,this.element.clientHeight);
     if(width===this.size.width&&height===this.size.height&&this.canvas.width>1)return;
+    // A zoom anchor belongs to its CSS viewport. Keep the displayed camera on
+    // rotation; no old animation may resume against the new dimensions.
+    if(width!==this.size.width||height!==this.size.height)this.stopAnimation();
     this.pointer.cancel();this.size={width,height};this.pixelRatio=this.eco?1:Math.min(devicePixelRatio||1,matchMedia('(pointer:coarse)').matches?1.5:2);
     this.canvas.width=Math.round(width*this.pixelRatio);this.canvas.height=Math.round(height*this.pixelRatio);
     this.labelCanvas.width=this.canvas.width;this.labelCanvas.height=this.canvas.height;

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {createMapCoverage,decodeCoverage} from '../public/maps/map-coverage-lod.js';
 import {mercatorUnproject} from '../lib/custom-map-camera.ts';
+import {MapFrameRefit,prepareMapFrameControl} from '../lib/map-framing.ts';
 import {existsSync,readFileSync} from 'node:fs';
 import {dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -24,7 +25,7 @@ const collection={type:'FeatureCollection',features:[]};
 const originalLabels=readFileSync(resolve(root,'tests/fixtures/custom-map-labels-9110c5b.txt'),'utf8');
 assert.equal(createHash('sha256').update(originalLabels).digest('hex'),'39a5b7a5ca753f6ca893764b8ee7f7a3fd3acd87686d944f5ca7da5cab7ed8c9');
 
-function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false,groundCache=false}={}){
+function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false,groundCache=false,beforeZoom,onGesture}={}){
  let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[],rasters=[],grounds=[];
  let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0};
  class Target{
@@ -164,7 +165,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  exports.CustomMapEngine.prototype.draw=function(...args){calls.push({surface:'tropnik-map-canvas',op:'draw-start'});return productionDraw.apply(this,args);};
  const productionLabels=exports.CustomMapEngine.prototype.drawLabels;
  exports.CustomMapEngine.prototype.drawLabels=function(...args){const previous=paintingLabels;paintingLabels=true;try{return productionLabels.apply(this,args);}finally{paintingLabels=previous;}};
- const engine=new exports.CustomMapEngine(host,{camera:plain(view),onState:value=>states.push(plain(value)),onReady:()=>{readyCalls++;},onGesture:()=>{gestures++;}});
+ const engine=new exports.CustomMapEngine(host,{camera:plain(view),onState:value=>states.push(plain(value)),onReady:()=>{readyCalls++;},onBeforeZoom:()=>beforeZoom?.(engine),onGesture:()=>{gestures++;onGesture?.(engine);}});
  engine.setFloor({center:[105,60],zoom:1,bearingDegrees:0});
  const tick=(elapsed=16)=>{now+=elapsed;const current=[...frames.values()];frames.clear();for(const frame of current)frame(now);return current.length;};
  const flush=()=>{let count=0;while(frames.size){assert.ok(count++<40,'Own renderer left a recurring idle RAF');tick();}return count;};
@@ -849,6 +850,72 @@ test('public inspection publishes fresh scene insets without refitting and toler
  assert.deepEqual(plain(map.getCamera()),camera,'Publishing geometry must not change the manually selected view');
 });
 
+test('button and keyboard zoom retain the visible ground anchor behind asymmetric UI, bearing and pitch',async t=>{
+ for(const pitch of [0,40,60])for(const bearingDegrees of [0,37]){
+  const width=390,height=776,padding={top:88,bottom:496.625,left:24,right:80};
+  const env=fixture({width,height,view:{center:[87.37403396940255,47.760138089519664],zoom:6.1,bearingDegrees}});t.after(()=>env.engine.destroy());await env.ready();
+  const map=env.engine;map.setPadding(padding);map.setPitch(pitch);env.flush();
+  const anchor={x:167,y:183.6875},coordinate=map.unproject(anchor);
+  for(const key of [null,'+','-','PageUp']){
+   if(key===null)map.zoomBy(1);else map.canvas.dispatch('keydown',{key});
+   env.flush();const actual=map.project(coordinate);
+   assert.ok(Math.hypot(actual.x-anchor.x,actual.y-anchor.y)<1e-7,`The visible source point moved under ${key??'button'} at pitch ${pitch}, bearing ${bearingDegrees}: ${JSON.stringify(actual)}`);
+  }
+ }
+});
+
+test('zoom preparation completes a pending automatic frame before calculating the next requested scale',async t=>{
+ let automatic=true,preparations=0;
+ const env=fixture({width:390,height:776,view:{center:[87.37403396940255,47.760138089519664],zoom:6.1,bearingDegrees:0},
+  beforeZoom:map=>{preparations++;if(automatic){map.setPadding({top:88,bottom:180,left:24,right:80});map.setCamera({center:[87.37403396940255,49.89632845309948],zoom:6.1,bearingDegrees:0});}},
+  onGesture:()=>{automatic=false;}});t.after(()=>env.engine.destroy());await env.ready();
+ const map=env.engine;map.setPadding({top:88,bottom:496.625,left:24,right:80});
+ map.zoomBy(1);env.flush();map.zoomBy(1);env.flush();
+ const altai=map.project([86.8,50.5]);
+ assert.ok(Math.hypot(altai.x-167,altai.y-342)<1e-7,`The selected Altai area left the usable viewport: ${JSON.stringify(altai)}`);
+ assert.equal(map.getCamera().zoom,8.1);assert.equal(preparations,2);
+ automatic=true;map.setCamera({...camera,zoom:4});map.zoomBy(1);env.flush();
+ assert.equal(map.getCamera().zoom,7.1,'Preparation may change fitted zoom; calculate the requested step afterwards');
+ const before=preparations;map.zoomBy(NaN);map.zoomBy(Infinity);assert.equal(preparations,before);
+ map.destroy();map.zoomBy(1);assert.equal(preparations,before,'A disposed map cannot flush a live UI frame');
+});
+
+test('a closing drawer and its queued settled frame hand the real Altai view to zoom without a late reset',async t=>{
+ for(const phase of ['transition-running','settled-frame-queued'])for(const elapsed of [0,16,40]){
+  let automatic=true,finishes=0,refits=0,refit,serial=0;
+  const frames=new Map(),animation={transitionProperty:'transform',playState:phase==='transition-running'?'running':'finished',pending:false,
+   finish(){finishes++;this.playState='finished';refit.settled();}};
+  const panel={getAnimations:()=>[animation,{transitionProperty:'opacity',playState:'running',finish(){assert.fail('Unrelated feedback must keep its animation');}}]};
+  const env=fixture({width:390,height:776,view:{center:[87.37403396940255,47.760138089519664],zoom:6.1,bearingDegrees:0},
+   beforeZoom:()=>prepareMapFrameControl(panel,refit),onGesture:()=>{automatic=false;refit.cancel();}});t.after(()=>env.engine.destroy());await env.ready();
+  const map=env.engine;map.setPadding({top:88,bottom:496.625,left:24,right:80});
+  refit=new MapFrameRefit({allowed:()=>automatic,refit:()=>{
+   refits++;assert.equal(animation.playState,'finished','Measure only the finished drawer endpoint');
+   map.setPadding({top:88,bottom:180,left:24,right:80});map.setCamera({center:[87.37403396940255,49.89632845309948],zoom:6.1,bearingDegrees:0});
+  },requestFrame:callback=>{frames.set(++serial,callback);return serial;},cancelFrame:id=>frames.delete(id)});
+  t.after(()=>refit.dispose());refit.select('altai');if(phase==='settled-frame-queued')refit.settled();
+  const stale=[...frames.values()];
+  map.zoomBy(1);if(elapsed)env.tick(elapsed);map.zoomBy(1);env.flush();
+  const actual=map.project([86.8,50.5]),cameraBefore=plain(map.getCamera());
+  assert.ok(Math.hypot(actual.x-167,actual.y-342)<1e-7,`${phase}, ${elapsed}ms: Altai left the visible viewport`);
+  assert.equal(map.getCamera().zoom,8.1);assert.equal(refits,1);assert.equal(finishes,phase==='transition-running'?1:0);assert.equal(frames.size,0);
+  refit.settled();stale.forEach(callback=>callback());env.flush();
+  assert.deepEqual(plain(map.getCamera()),cameraBefore,'Late CSS completion cannot replace the manual zoom with z6.1');
+  animation.playState='running';map.zoomBy(-1);env.flush();
+  assert.equal(refits,1);assert.equal(animation.playState,'running','A later control on a manual view must not finish the drawer');
+  assert.equal(map.getCamera().zoom,7.1);
+ }
+});
+
+test('zoom falls back to the actual canvas centre while stale or invalid insets leave no usable area',async t=>{
+ const env=fixture({width:390,height:776});t.after(()=>env.engine.destroy());await env.ready();const map=env.engine;
+ for(const padding of [{left:-1},{top:NaN},{bottom:Infinity},{left:200,right:190},{top:400,bottom:376},{bottom:1000}]){
+  map.setCamera(camera);map.setPadding(padding);env.flush();const centre=map.unproject({x:195,y:388});
+  map.zoomBy(1);env.flush();const actual=map.project(centre);
+  assert.ok(Math.hypot(actual.x-195,actual.y-388)<1e-7);assert.ok(map.getCamera().center.every(Number.isFinite));
+ }
+});
+
 test('zoom controls accumulate every rapid input across RAF, reversals and both clamped ends',async t=>{
  for(const elapsed of [0,16,40]){
   const env=fixture();t.after(()=>env.engine.destroy());await env.ready();const map=env.engine;
@@ -876,6 +943,19 @@ test('manual gestures, programmatic camera and fit discard a superseded zoom-con
  map.zoomBy(1);env.flush();assert.ok(Math.abs(map.getCamera().zoom-panned.zoom-1)<1e-9,'Dragging owns the displayed camera and cancels its old button target');
  pending();map.canvas.dispatch('wheel',{clientX:310,clientY:240,deltaY:-80,deltaMode:0});const wheeled=plain(map.getCamera());
  map.zoomBy(1);env.flush();assert.ok(Math.abs(map.getCamera().zoom-wheeled.zoom-1)<1e-9,'A new wheel anchor must not inherit the old button target');
+});
+
+test('resizing during an anchored zoom cancels its old viewport and retains the currently displayed camera',async t=>{
+ const env=fixture({width:390,height:776,view:{center:[87.37403396940255,49.89632845309948],zoom:6.1,bearingDegrees:37}});t.after(()=>env.engine.destroy());await env.ready();
+ const map=env.engine;map.setPadding({top:88,bottom:180,left:24,right:80});map.setPitch(40);map.zoomBy(1);map.zoomBy(1);env.tick(48);
+ const displayed=plain(map.getCamera());assert.ok(displayed.zoom>6.1&&displayed.zoom<8.1);
+ env.host.clientWidth=844;env.host.clientHeight=322;env.observers[0].callback();
+ assert.deepEqual(plain(map.getCamera()),displayed,'Resize first retains the geography the user was already seeing');
+ env.tick(1000);env.flush();assert.deepEqual(plain(map.getCamera()),displayed,'No old viewport anchor may run after the resize');
+ assert.equal(env.host.dataset.mapMoving,'false');
+ map.setPadding({top:48,bottom:88,left:24,right:80});const anchor={x:394,y:141},point=map.unproject(anchor);
+ map.zoomBy(1);env.flush();assert.ok(Math.abs(map.getCamera().zoom-displayed.zoom-1)<1e-9,'The next control discards the old burst target');
+ const actual=map.project(point);assert.ok(Math.hypot(actual.x-anchor.x,actual.y-anchor.y)<1e-7,'The next control belongs to the new viewport');
 });
 
 test('pausing or disposing during a zoom burst cancels future camera work',async()=>{

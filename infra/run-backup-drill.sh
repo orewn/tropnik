@@ -61,6 +61,8 @@ assert_no_restore_resources
 TROPA_SOURCE_STARTED=true
 "${TROPA_SOURCE[@]}" up -d --wait >/dev/null 2>&1 || fail 'Could not start the synthetic backup source.'
 TROPA_SOURCE_CONTAINER="$("${TROPA_SOURCE[@]}" ps -q db)"
+"${TROPA_SOURCE[@]}" exec -T db psql -X --quiet --no-password --username=tropa_drill --dbname=tropa_backup_test \
+  --file=/usr/local/share/tropnik/runtime-check.sql >/dev/null 2>&1 || fail 'The synthetic source does not meet the database security contract.'
 TROPA_SOURCE_IMAGE_ID="$(docker inspect --format '{{.Image}}' "$TROPA_SOURCE_CONTAINER")"
 TROPA_ISOLATION="$(docker inspect --format '{{.HostConfig.NetworkMode}}/{{len .HostConfig.PortBindings}}/{{len .HostConfig.Binds}}/{{.HostConfig.LogConfig.Type}}{{range .Mounts}}{{if ne .Type "tmpfs"}}/persistent-mount{{end}}{{end}}' "$TROPA_SOURCE_CONTAINER")"
 [[ "$TROPA_ISOLATION" == none/0/0/none ]] || fail 'Synthetic source isolation does not match the recovery contract.'
@@ -175,6 +177,8 @@ assert receipt['status'] == 'passed' and receipt['syntheticFixtureVerified'] is 
 assert receipt['schemaVersion'] == 8 and receipt['applicationTableCount'] == 32
 assert receipt['checks']['mailOutbox'] is True
 assert receipt['checks']['activeMembershipIndex'] is True
+assert receipt['checks']['databaseSecurity'] is True
+assert receipt['compositeTypeMismatch'] == 'error'
 assert receipt['applicationGuardCount'] == 16 and receipt['checks']['applicationGuards'] is True
 assert receipt['postgisImageId'] == sys.argv[3], 'source and restore image changed during the gate'
 receipt['gate'] = 'synthetic backup and isolated restore'

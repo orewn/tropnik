@@ -1,12 +1,43 @@
 /* Тропник. Only public static assets are cached. Auth, chat and API responses never enter CacheStorage. */
-const VERSION='tropnik-shell-0.4.31-d2c02392f4caa92c';
+const VERSION='tropnik-shell-0.4.32-7d71abc5561fbd8d';
 const SHELL=["/maps/map-coverage-lod.js","/data/map-coverage/manifest.json","/data/map-coverage/base.coverage","/maps/russia-viewport.js","/data/russia-display-area.geojson","/data/russia-outside-mask.geojson","/data/russia-canonical-mask.geojson","/data/russia-boundaries-provenance.json","/offline-fonts.css","/fonts/MANROPE-LICENSE.txt","/fonts/manrope-latin-400.woff2","/fonts/manrope-cyrillic-400.woff2","/fonts/manrope-latin-600.woff2","/fonts/manrope-cyrillic-600.woff2","/offline-safety.html","/offline-safety.js","/offline-safety.css","/offline-viewer.html","/offline.js","/offline.css","/favicon.svg","/data/world.geojson","/data/regions.geojson","/data/territories.geojson"];
 const MAP_WARM=['/terrain/ATTRIBUTION.txt','/terrain/sources/Copernicus-GLO30-LICENSE.pdf'];
 // BEGIN GENERATED CUSTOM MAP
-const CUSTOM_MAP_RESOURCES=[{"path":"/custom-map/catalogue.json","sizeBytes":167378,"sha256":"bad517373c27101ea8fe93423083f3636c11cf65824c2202f69cc2c2bf414aa3"},{"path":"/custom-map/chunks/custom-map-entry-WNxyJV6N.js","sizeBytes":146167,"sha256":"299b29b82f40fd17fcd95fc0a00de7b598fd9f7f33b0fcc892ca70456e7bfb28"},{"path":"/custom-map/Manrope-OFL.txt","sizeBytes":4383,"sha256":"d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"},{"path":"/custom-map/map-runtime.js","sizeBytes":224,"sha256":"a97b351e9dd253f27446caba67edb70183fa1a26ba7e947354b97f2e3e32792b"},{"path":"/custom-map/map.css","sizeBytes":82304,"sha256":"8e56ccd8993e60f3ba822b939543c19be14d3db4562130c6460422bdb6e74e88"},{"path":"/custom-map/workers/custom-map-tiles.worker-DIXTfJlZ.js","sizeBytes":28755,"sha256":"f76ea8a31e046b700ab47418f303cffec504490e700b78f2dfc68866c4a71b2e"},{"path":"/custom-map/workers/custom-map-trail-raster.worker-CZZMbu81.js","sizeBytes":2387,"sha256":"bfec0605c231da3c03fca6403800e8b0ff7678ed83e66218dfa973d7e26c7345"},{"path":"/custom-map/workers/terrain-preparation.worker-Bb-s7l3H.js","sizeBytes":2891,"sha256":"625ce56a5be80c34fe32704e0fe93aa1a5c83e56d719c1fcfea511ba56583931"},{"path":"/custom-map/manifest.json","sizeBytes":533835,"sha256":"367928b2aa44f903ece4745c85b5149cf040c5546732f5a7f46382eb59b3128f"}];
+const CUSTOM_MAP_RESOURCES=[{"path":"/custom-map/catalogue.json","sizeBytes":167378,"sha256":"bad517373c27101ea8fe93423083f3636c11cf65824c2202f69cc2c2bf414aa3"},{"path":"/custom-map/chunks/custom-map-entry-Di78nDBh.js","sizeBytes":147120,"sha256":"9b2349e9907c7affb26423990cd9449e6808f57bfbfe156edfdfbf09d234859e"},{"path":"/custom-map/Manrope-OFL.txt","sizeBytes":4383,"sha256":"d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"},{"path":"/custom-map/map-runtime.js","sizeBytes":224,"sha256":"700cf2d9c8f852bceaa3433ccb5ac11bf2a0b51c87a42be2df564e7d24e87969"},{"path":"/custom-map/map.css","sizeBytes":82304,"sha256":"8e56ccd8993e60f3ba822b939543c19be14d3db4562130c6460422bdb6e74e88"},{"path":"/custom-map/workers/custom-map-tiles.worker-DIXTfJlZ.js","sizeBytes":28755,"sha256":"f76ea8a31e046b700ab47418f303cffec504490e700b78f2dfc68866c4a71b2e"},{"path":"/custom-map/workers/custom-map-trail-raster.worker-CZZMbu81.js","sizeBytes":2387,"sha256":"bfec0605c231da3c03fca6403800e8b0ff7678ed83e66218dfa973d7e26c7345"},{"path":"/custom-map/workers/terrain-preparation.worker-Bb-s7l3H.js","sizeBytes":2891,"sha256":"625ce56a5be80c34fe32704e0fe93aa1a5c83e56d719c1fcfea511ba56583931"},{"path":"/custom-map/manifest.json","sizeBytes":533835,"sha256":"7d406b298be1b2afe7219c4e4310c9c2822d9ef18cb35102cb8bf1db23792fef"}];
 // END GENERATED CUSTOM MAP
 const CUSTOM_MAP_URLS=new Set(CUSTOM_MAP_RESOURCES.map(file=>file.path));
 const warmJobs=new Map();
+const MAP_WARM_TIMEOUT_MS=12000;
+let warmBlocked=false;
+function warmAbortReason(signal){return signal.reason||new DOMException('Map warmup cancelled','AbortError');}
+function checkWarm(signal){if(signal?.aborted)throw warmAbortReason(signal);}
+function waitWarm(work,signal){
+ if(!signal)return Promise.resolve(work);
+ return new Promise((resolve,reject)=>{
+  const stop=()=>{signal.removeEventListener('abort',stop);reject(warmAbortReason(signal));};
+  signal.addEventListener('abort',stop,{once:true});
+  Promise.resolve(work).then(value=>{signal.removeEventListener('abort',stop);if(signal.aborted)reject(warmAbortReason(signal));else resolve(value);},error=>{signal.removeEventListener('abort',stop);reject(error);});
+  if(signal.aborted)stop();
+ });
+}
+function fetchWarm(path,options={},signal){
+ checkWarm(signal);
+ const work=fetch(path,{...options,...(signal?{signal}:{})}).then(response=>{
+  if(signal?.aborted){response.body?.cancel().catch(()=>{});throw warmAbortReason(signal);}return response;
+ });
+ return waitWarm(work,signal);
+}
+function putWarm(cache,path,response,signal){checkWarm(signal);return waitWarm(cache.put(path,response),signal);}
+async function cacheWarmAssets(cache,paths,signal){
+ let index=0;
+ await Promise.all(Array.from({length:Math.min(3,paths.length)},async()=>{
+  while(index<paths.length){checkWarm(signal);const path=paths[index++],response=await fetchWarm(path,{credentials:'omit'},signal);
+   if(!response.ok||response.type!=='basic')throw new Error('Map warm asset unavailable');
+   await putWarm(cache,path,response,signal);
+  }
+ }));
+}
+function cancelMapWarm(retiring=true){if(retiring)warmBlocked=true;for(const job of warmJobs.values())job.controller.abort();}
 const SAFETY_PAGES=['/safety/registration','/safety/registration/','/offline-safety','/offline-safety.html'];
 const COVERAGE_CELLS='/data/map-coverage/cells/';
 const COVERAGE_CACHE_LIMITS={bytes:32*1024*1024,entries:64,cellBytes:3*1024*1024};
@@ -79,10 +110,10 @@ async function trailDataResponse(request,url){
  const write=response.ok&&response.type==='basic'?rememberTrailData(cache,key,response.clone()):undefined;
  return{response,write};
 }
-async function cacheOverview(cache){
- const base='/maps/russia-relief/',response=await fetch(base+'manifest.json',{cache:'no-store'});
+async function cacheOverview(cache,signal){
+ const base='/maps/russia-relief/',response=await fetchWarm(base+'manifest.json',{cache:'no-store'},signal);
  if(!response.ok)throw new Error('Overview manifest unavailable');
- const manifestText=await response.text();let manifest;
+ const manifestText=await waitWarm(response.text(),signal);let manifest;
  try{manifest=JSON.parse(manifestText);}catch{throw new Error('Invalid overview package');}
  if(!manifest.complete||manifest.tileCount!==341||manifest.files?.length!==341||manifest.totalTileBytes>3*1024*1024)throw new Error('Invalid overview package');
  const seen=new Set(),unique=new Map();let total=0;
@@ -98,43 +129,52 @@ async function cacheOverview(cache){
  const pending=[...unique.values()];let index=0;
  await Promise.all(Array.from({length:3},async()=>{
   while(index<pending.length){
-   const {file,paths}=pending[index++],result=await fetch(base+file.path);
+   checkWarm(signal);const {file,paths}=pending[index++],result=await fetchWarm(base+file.path,{},signal);
    if(!result.ok)throw new Error('Overview tile unavailable');
-   const bytes=await result.arrayBuffer();
-   const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');
+   const bytes=await waitWarm(result.arrayBuffer(),signal);
+   const hash=[...new Uint8Array(await waitWarm(crypto.subtle.digest('SHA-256',bytes),signal))].map(x=>x.toString(16).padStart(2,'0')).join('');
    if(bytes.byteLength!==file.bytes||hash!==file.sha256)throw new Error('Overview tile integrity mismatch');
-   for(const path of paths)await cache.put(base+path,new Response(bytes,{headers:{'Content-Type':'image/png'}}));
+   for(const path of paths)await putWarm(cache,base+path,new Response(bytes,{headers:{'Content-Type':'image/png'}}),signal);
   }
  }));
- await cache.put(base+'manifest.json',new Response(manifestText,{headers:{'Content-Type':response.headers.get('Content-Type')||'application/json'}}));
- await cache.addAll([base+'tilejson.json',base+'ATTRIBUTION.txt']);
+ await putWarm(cache,base+'manifest.json',new Response(manifestText,{headers:{'Content-Type':response.headers.get('Content-Type')||'application/json'}}),signal);
+ await cacheWarmAssets(cache,[base+'tilejson.json',base+'ATTRIBUTION.txt'],signal);
 }
-async function cacheCustomMapRuntime(cache){
+async function cacheCustomMapRuntime(cache,signal){
  if(!CUSTOM_MAP_RESOURCES.length||CUSTOM_MAP_RESOURCES.length>64)throw new Error('Missing shared map shell');
  let index=0,total=0;
  await Promise.all(Array.from({length:3},async()=>{
   while(index<CUSTOM_MAP_RESOURCES.length){
+   checkWarm(signal);
    const file=CUSTOM_MAP_RESOURCES[index++];
    if(!file.path.startsWith('/custom-map/')||!Number.isSafeInteger(file.sizeBytes)||file.sizeBytes<=0||file.sizeBytes>2*1024*1024||!/^[a-f0-9]{64}$/.test(file.sha256))throw new Error('Invalid shared map shell');
    total+=file.sizeBytes;if(total>4*1024*1024)throw new Error('Shared map shell exceeds budget');
-   const cached=await cache.match(file.path),response=cached||await fetch(file.path,{cache:'no-store',credentials:'omit'});
+   const cached=await waitWarm(cache.match(file.path),signal),response=cached||await fetchWarm(file.path,{cache:'no-store',credentials:'omit'},signal);
    if(!response.ok||(!cached&&response.type!=='basic'))throw new Error('Shared map runtime unavailable');
-   const bytes=await response.arrayBuffer();
-   const actual=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(value=>value.toString(16).padStart(2,'0')).join('');
+   const bytes=await waitWarm(response.arrayBuffer(),signal);
+   const actual=[...new Uint8Array(await waitWarm(crypto.subtle.digest('SHA-256',bytes),signal))].map(value=>value.toString(16).padStart(2,'0')).join('');
    if(bytes.byteLength!==file.sizeBytes||actual!==file.sha256)throw new Error('Shared map runtime integrity mismatch');
-   await cache.put(file.path,new Response(bytes,{headers:{'Content-Type':response.headers.get('Content-Type')||'application/octet-stream'}}));
+   await putWarm(cache,file.path,new Response(bytes,{headers:{'Content-Type':response.headers.get('Content-Type')||'application/octet-stream'}}),signal);
   }
  }));
 }
 function warmMapCache(){
+ if(warmBlocked)return Promise.resolve();
  const kind='canvas',marker=`/_offline/map-warm-${VERSION}-${kind}`;
- if(warmJobs.has(kind))return warmJobs.get(kind);
- const job=(async()=>{const cache=await caches.open(VERSION);if(await cache.match(marker))return;await cache.addAll(MAP_WARM);await cacheCustomMapRuntime(cache);await cacheOverview(cache);await cache.put(marker,new Response('ready',{headers:{'Content-Type':'text/plain'}}));})().catch(error=>{warmJobs.delete(kind);throw error;});
- warmJobs.set(kind,job);return job;
+ if(warmJobs.has(kind))return warmJobs.get(kind).promise;
+ const controller=new AbortController(),signal=controller.signal,entry={controller,promise:null};
+ const timer=setTimeout(()=>controller.abort(),MAP_WARM_TIMEOUT_MS);
+ const work=(async()=>{
+  const cache=await waitWarm(caches.open(VERSION),signal);if(await waitWarm(cache.match(marker),signal))return;
+  await cacheWarmAssets(cache,MAP_WARM,signal);await cacheCustomMapRuntime(cache,signal);await cacheOverview(cache,signal);
+  await putWarm(cache,marker,new Response('ready',{headers:{'Content-Type':'text/plain'}}),signal);
+ })();
+ entry.promise=waitWarm(work,signal).catch(error=>{controller.abort();if(warmJobs.get(kind)===entry)warmJobs.delete(kind);throw error;}).finally(()=>clearTimeout(timer));
+ warmJobs.set(kind,entry);return entry.promise;
 }
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(VERSION);await Promise.all([cache.addAll(SHELL),cacheCustomMapRuntime(cache)]);})());});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{for(const name of await caches.keys())if(name.startsWith('tropnik-shell-')&&name!==VERSION)await caches.delete(name);await self.clients.claim();})());});
-self.addEventListener('message',event=>{if(event.data?.type==='skip-waiting')event.waitUntil(self.skipWaiting());else if(event.data?.type==='warm-map')event.waitUntil(warmMapCache(event.data.engine));});
+self.addEventListener('message',event=>{if(event.data?.type==='skip-waiting'){cancelMapWarm(false);event.waitUntil(self.skipWaiting());}else if(event.data?.type==='cancel-map-warm')cancelMapWarm();else if(event.data?.type==='warm-map')event.waitUntil(warmMapCache().catch(error=>{if(error?.name!=='AbortError')throw error;}));});
 async function verifiedResource(request){const names=(await caches.keys()).filter(n=>n.startsWith('tropnik-map-')).sort().reverse();for(const name of names){const cache=await caches.open(name);if(await cache.match('/_offline/verified-map')){const match=await cache.match(request);if(match)return match;}}return null;}
 async function publicAssetResponse(request,url){
  const refresh=request.cache==='no-store'||request.cache==='reload';

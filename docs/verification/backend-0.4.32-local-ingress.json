@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "scope": "Local Compose/parser/regression checks only; no Docker runtime or deployment proof",
+  "recordedAt": "2026-11-13T10:48:04.471825+00:00",
+  "repository": "/workspace/scratch/ee002c1fa3a0/tropnik",
+  "sourceCommit": "7d517c96dcc8ca387ff308a238f42cbaf39fe259",
+  "workingTreeClean": false,
+  "unitTests": {
+    "command": "TROPNIK_COMPOSE=/workspace/scratch/686c5dc59f67/bin/docker-compose PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s infra/tests -p 'test_*.py'",
+    "passed": 13,
+    "failed": 0
+  },
+  "compose": {
+    "version": "v5.7.1",
+    "binarySHA256": "af426722a8af5de812fcee30cc1c39f0639f5f723cbadefb25e5d4db054064cf",
+    "resolvedVariants": [
+      "base",
+      "web",
+      "mail",
+      "web+mail"
+    ],
+    "topologyVerified": true
+  },
+  "caddy": {
+    "version": "v2.11.9",
+    "binarySHA256": "a563843e11cbce39c557bd429ebb787d56f49d51d9bbb3292cd9b36b37a60cdf",
+    "adaptValidateVariants": [
+      "base",
+      "web"
+    ],
+    "fixedRoutePolicyVerified": true,
+    "identityRewriteNegativeRejected": true
+  },
+  "dockerBootstrap": {
+    "verified": false,
+    "reason": "No Docker daemon in this environment; actual container receipt awaits authorized CI."
+  },
+  "optionalWebRuntime": {
+    "verified": false,
+    "reason": "No Next container, browser flow or deployed service was qualified."
+  },
+  "diffWhitespaceCheck": "passed",
+  "files": {
+    "backend/README.md": {
+      "sha256": "0051b46a463ffa3b69fca0c66e48c99e6ee8b29f9c7dbddc2a37178c8fed08c2",
+      "bytes": 37274,
+      "mtimeNs": 1794566799538853785
+    },
+    "infra/README.md": {
+      "sha256": "65f4789e5996f37423d4f7034596618b40b6ff330e5e1428bede006388cfceaa",
+      "bytes": 29039,
+      "mtimeNs": 1794566799382851413
+    },
+    "infra/Caddyfile.example": {
+      "sha256": "0a675d2fd36b030539e0c0388e2ac3a64c6bc4343b804e880430d3324f9a3f9c",
+      "bytes": 1010,
+      "mtimeNs": 1794566799654855550
+    },
+    "infra/compose.yaml": {
+      "sha256": "b03e51e90369f332567cbf4e968cea1ebfcf4d695a584f399d2395c8226e1a48",
+      "bytes": 3433,
+      "mtimeNs": 1794566376404432148
+    },
+    "infra/compose.web.yaml": {
+      "sha256": "f93ec7c223604df04c3ff838a3803d6cb7d739c53bf8e6713ea3baf57ba49a35",
+      "bytes": 1414,
+      "mtimeNs": 1794566376512433709
+    },
+    "infra/compose.mail.yaml": {
+      "sha256": "22111d6c16fbfccde806e996e5272e1e968f6f837be83d0fd70f7f241c5c602a",
+      "bytes": 840,
+      "mtimeNs": 1794566376612435154
+    },
+    "infra/verify-backend-bootstrap.py": {
+      "sha256": "8bd0f1323f20531a7d41c5c26f406361f061cce2692ff197c6477ce134062f9e",
+      "bytes": 29996,
+      "mtimeNs": 1794566722241681229
+    },
+    "infra/ingress/Caddyfile": {
+      "sha256": "6bc705055fdd329b3c019d098d9e978c61b9cd7741dae5c5d068d015a43396f1",
+      "bytes": 325,
+      "mtimeNs": 1794566470189787209
+    },
+    "infra/ingress/api.caddy": {
+      "sha256": "a38aa916db26ba8e87e38d74915ac14d50990865fd359094f4caedda35a2f4f2",
+      "bytes": 179,
+      "mtimeNs": 1794566376860438737
+    },
+    "infra/ingress/web.caddy": {
+      "sha256": "08e8e81a2591776c2ef02a9b5ecc38dfef794e89c8faa1a111cffb64610f0d9f",
+      "bytes": 109,
+      "mtimeNs": 1794566376956440124
+    },
+    "infra/ingress/provenance.json": {
+      "sha256": "26340cbffae29847b4fc6df6697776fc6a10362186d454385436bc3bd3578f59",
+      "bytes": 1823,
+      "mtimeNs": 1794566799878858958
+    },
+    "infra/ingress/README.md": {
+      "sha256": "a6c41a6f3e0ce7f88cad139115853473816b94d57910eb9bf61d30cb95e433e6",
+      "bytes": 5226,
+      "mtimeNs": 1794566799998860783
+    },
+    "infra/tests/test_backend_bootstrap.py": {
+      "sha256": "870181810ca91d0504fe8a57110b3b4e94e63187222d031f7c738804e570e80a",
+      "bytes": 2672,
+      "mtimeNs": 1794566073108055884
+    },
+    "infra/tests/test_ingress_topology.py": {
+      "sha256": "07bf815d3fef73aa256bf77d13e58ab468038bcc0b9a6e64d03102aedf2e58c0",
+      "bytes": 6236,
+      "mtimeNs": 1794566722389683526
+    }
+  }
+}

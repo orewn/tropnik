@@ -1,0 +1,10 @@
+# One reviewed database build for production, native tests and isolated restore.
+# pull_policy: build prevents a same-named registry tag or stale local image from
+# replacing this recipe. Repeated starts reuse Docker's verified build cache.
+services:
+  postgis:
+    image: tropnik-postgis:18.7-3.7.0-pgdg2
+    platform: linux/amd64
+    pull_policy: build
+    build:
+      context: ./db/postgis

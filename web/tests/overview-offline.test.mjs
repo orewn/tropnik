@@ -9,8 +9,8 @@ const manifest=JSON.parse(await readFile(new URL('maps/russia-relief/manifest.js
 async function run(corrupt=false){
  const calls=[],saved=new Map(),listeners={};
  const cache={addAll:async paths=>{for(const path of paths)saved.set(path,'shell');},match:async path=>saved.has(path)?new Response(saved.get(path)):undefined,put:async(path,response)=>saved.set(path,new Uint8Array(await response.arrayBuffer()))};
- const context=vm.createContext({self:{addEventListener:(name,callback)=>listeners[name]=callback},caches:{open:async()=>cache},crypto:webcrypto,Response,Uint8Array,Set,Map,Promise,Array,Number,Error,fetch:async path=>{
-  calls.push(path);assert.ok(path.startsWith('/maps/russia-relief/')||path.startsWith('/custom-map/'));
+ const context=vm.createContext({self:{addEventListener:(name,callback)=>listeners[name]=callback},caches:{open:async()=>cache},crypto:webcrypto,Response,Uint8Array,Set,Map,Promise,Array,Number,Error,AbortController,DOMException,setTimeout,clearTimeout,fetch:async path=>{
+  calls.push(path);assert.ok(path.startsWith('/maps/russia-relief/')||path.startsWith('/custom-map/')||path.startsWith('/terrain/'));
   const bytes=await readFile(new URL(path.slice(1),publicRoot));
   const response=new Response(corrupt&&path.endsWith('0/0/0.png')?new Uint8Array([0]):bytes);Object.defineProperty(response,'type',{value:'basic'});return response;
  }});

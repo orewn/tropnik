@@ -1,8 +1,9 @@
 name: tropa
 services:
   db:
-    image: postgis/postgis:18-3.7
-    platform: linux/amd64
+    extends:
+      file: compose.database.yaml
+      service: postgis
     environment:
       POSTGRES_DB: tropa
       POSTGRES_USER: tropa_owner
@@ -48,7 +49,6 @@ services:
       TROPA_ACCOUNT_MAIL_KEY: ${TROPA_ACCOUNT_MAIL_KEY:-}
     depends_on:
       migrate: { condition: service_completed_successfully }
-    ports: ["127.0.0.1:8080:8080"]
     read_only: true
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
@@ -58,9 +58,39 @@ services:
       timeout: 3s
       retries: 3
     restart: unless-stopped
-    networks: [backend]
+    networks: [backend, application]
+  # Docker cannot publish ports from an internal-only network. This fixed
+  # upstream HTTP hop owns the loopback bindings; API and DB keep no egress.
+  ingress:
+    image: caddy:2.11.9-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0
+    platform: linux/amd64
+    user: "65532:65532"
+    environment:
+      XDG_CONFIG_HOME: /tmp/caddy-config
+      XDG_DATA_HOME: /tmp/caddy-data
+    volumes:
+      - ./ingress/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./ingress/api.caddy:/etc/caddy/listeners/api.caddy:ro
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on:
+      api: { condition: service_healthy }
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,uid=65532,gid=65532,mode=0700
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    healthcheck:
+      test: [CMD, curl, --noproxy, "*", --fail, --silent, --show-error, --max-time, "2", http://127.0.0.1:8080/api/v1/health/ready]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    networks: [application, frontend]
 networks:
   backend:
     internal: true
+  application:
+    internal: true
+  frontend: {}
 volumes:
   postgres-data:

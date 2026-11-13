@@ -1,12 +1,33 @@
-# Тропник 0.4.31
+# Тропник 0.4.31 — промежуточный опубликованный выпуск
 
-## Статус кандидата
+## Статус выпуска
 
-Кандидат продолжает опубликованный веб-выпуск 0.4.30 и обновляет общий
-движок, автономный просмотрщик, Android и проверку восстановления PostGIS.
-До получения результатов нового CI этот документ не подтверждает публикацию
-нового сайта, APK, работающего социального сервиса или production-подписи.
-Точные commit, байты поставки и результаты будут добавлены после проверки.
+Этот исторический срез сохраняет фактические поставки 13 ноября 2026 года.
+Последующее исправление общей камеры и security update базы ведутся в
+[отдельном выпуске 0.4.32](release-0.4.32.md); его результаты не подменяют
+исходники и bytes, перечисленные здесь.
+
+| Компонент | Проверенный исходник | Результат |
+|---|---|---|
+| Android 0.4.31-preview | `baf0b9ef8b8132711a317e861cf1d8aed68800fb`, tree `d8a036565054c9f28a372e21578d3fbb9e0d10f5` | 70 JVM, отдельная unsigned R8-сборка и 11 device-сценариев PASS; APK опубликован, все 6 public assets проверены анонимно. [Main receipt](verification/android-0.4.31-main.json). |
+| Backend / Go 1.27.4 | `7d517c96dcc8ca387ff308a238f42cbaf39fe259`, tree `2a89cc9413e7196fbb89303d5764adbfee75c93e` | Race/vet, native 54/85 и recovery 11 PASS. Это host-Go/synthetic DB gate; фактически PostgreSQL 18.6 / PostGIS 3.7.0. [Receipt](verification/backend-0.4.31-go-1.27.4.json). |
+| Опубликованный Pages 0.4.31 | `baf0b9ef`, build **`fc476ec7a21065bc`**, [run 43391174806](https://github.com/orewn/tropnik/actions/runs/43391174806) | Build job `131771165006` и deploy job `131780234263` SUCCESS, завершение 08:32:28 UTC. В этой веб-сборке ещё прежний APK manifest 0.4.25-preview. |
+| Следующая Pages-попытка | `7d517c96`, [run 43394040418](https://github.com/orewn/tropnik/actions/runs/43394040418) | FAILED: phone line witness не нашёл видимую линию (`visible=0`); deploy пропущен. Требуются исправление и новый полный gate, включая продвижение universal manifest 0.4.31. |
+| Закрытый Site | Действующая версия **45**, main source `303afe5b`, Site source `223213319fc71f4f7ff1c7b53c0e38ddf503db66` | [Прежний подтверждённый deploy](verification/web-0.4.30-site.json) сохранён. Подготовка 0.4.31 отменена до build/input/remote push. |
+
+Публичный веб уже использует 0.4.31 из `baf0b9ef`; прежний
+[выпуск 0.4.30](release-0.4.30.md) остаётся историческим доказательством.
+На этом этапе исправленный Pages source/build, новый Site и PostgreSQL 18.7
+с совместимым пересобранным PostGIS ещё требовали собственных gates;
+их дальнейшая приёмка относится к 0.4.32. Live backend/SMTP, постоянная Android
+production-подпись и физическое ARM64-испытание остаются открытыми условиями.
+
+Проверенный Pages artifact `baf0b9ef` — **14021108713**, **66 940 641 байт**,
+SHA-256 `c07b9b7b1115ce543d1713f9b8d5f660d94a78f3eb121a9150dcb74ed6e29d91`.
+Его `build-info.json` содержит source `baf0b9ef` и build `fc476ec7a21065bc`;
+`verification.json` и `http-verification.json` подтверждают **718 страниц**
+и **71 HTTP-проверку до deploy**. Это отдельные значения от локального
+preflight и от проверок публичного адреса после публикации.
 
 ## Изменения
 
@@ -36,8 +57,12 @@
   для прежнего runtime получают разные сообщения с действием обновления.
 
 Каталог содержит 685 справочных карточек, 624 с исходной геометрией и 61 без
-подтверждённой линии. 621 уникальный источник сохраняет 22 456 отдельных
-частей. Этот выпуск не выдумывает недостающие треки и не соединяет разрывы.
+подтверждённой линии. Общий слой содержит **621 уникальный источник,
+22 456 отдельных частей и 404 749 вершин** — 9 784 332 байта. Android хранит
+файлы по карточкам: **624 файла, 22 474 части и 405 833 вершины** — 9 810 752
+байта. Разница связана с повторным использованием одних исходников разными
+карточками. Учебная карточка учитывается отдельно. Этот выпуск не выдумывает
+недостающие треки и не соединяет разрывы.
 
 ### Истории мест
 
@@ -71,8 +96,23 @@
 race по восьми пакетам, vet, 54 native-теста верхнего уровня / 85 вместе
 с подтестами на PostgreSQL 18.6 и PostGIS 3.7.0. Проверен настоящий переход
 схемы 7 → 8 с сохранением данных и отдельный процесс, аварийно завершённый
-до перезапуска почтового обработчика. Это результат указанного дерева;
-окончательный main и развёрнутый сервис требуют своих проверок.
+до перезапуска почтового обработчика. Этот preflight сохраняет собственные
+исходники и не подменяет последующие main результаты.
+
+Main `baf0b9ef` прошёл тот же native/recovery набор на Go 1.27.3;
+[исторический receipt](verification/backend-0.4.31-main.json) сохранён.
+После минимального обновления toolchain [run 43394040453](https://github.com/orewn/tropnik/actions/runs/43394040453)
+подтвердил точный main `7d517c96` на **Go 1.27.4**: 8 пакетов unit/race,
+`go vet`, **54 основных native-теста / 85 с подтестами**, schema **8**,
+**32** таблицы, **16** guards и **11** отрицательных recovery cases.
+SHA-256 скачанного ZIP совпал с API digest и upload log; checkout, tree и
+restore source совпали. [Новый receipt](verification/backend-0.4.31-go-1.27.4.json).
+Этот workflow не строит production API Docker image и не развёртывает сервис.
+
+В обоих main drills фактическая база — PostgreSQL **18.6** / PostGIS **3.7.0**.
+Обновление до security release **18.7** требует совместимых пересобранных
+C-extensions и самостоятельного native/recovery gate; оно не считается
+выполненным по Go-результату. [Проверка backend/build зависимостей](verification/backend-build-dependencies-0.4.31.md).
 
 Readiness базы использует финальный TCP listener. Временный сервер
 инициализации PostgreSQL больше не должен разрешать преждевременный
@@ -123,12 +163,39 @@ Readiness базы использует финальный TCP listener. Вре�
 
 ### Android и подпись
 
-Подготовлен запрос универсального `0.4.31-preview`, versionCode 14,
-для ARM64, ARMv7 и x86_64. Публикация разрешена штатным pipeline только
-после сборки, JVM-проверок и исполнения точного APK в API 35.
-Отдельный gate собирает и проверяет production-вариант с R8 без подписи.
-Это не заменяет постоянный ключ владельца и не обозначает готовность
-подписанного приложения для магазина.
+Опубликован [0.4.31-preview](https://github.com/orewn/tropnik/releases/tag/v0.4.31-preview),
+versionCode **14**, source `baf0b9ef8b8132711a317e861cf1d8aed68800fb`.
+[Main workflow 43391174819](https://github.com/orewn/tropnik/actions/runs/43391174819)
+прошёл build, 70 JVM, отдельную unsigned production R8-сборку, все 11
+сценариев установленного API 35 / x86_64 APK и public-release verification.
+Gradle 8.14.7 подтверждён build log; в фактическом DEX присутствуют OkHttp
+4.12.1 и class definition `CertificateBlocklist`.
+
+| Публичный файл | Байты | SHA-256 |
+|---|---:|---|
+| [Universal APK](https://github.com/orewn/tropnik/releases/download/v0.4.31-preview/tropnik-preview.apk), ARM64 / ARMv7 / x86_64 | 69 227 850 | `01e36115e3c19214543f75b128f806c8195c6b7808b40ae08a256b6bd7150055` |
+| [ARM64 APK](https://github.com/orewn/tropnik/releases/download/v0.4.31-preview/tropnik-arm64-preview.apk) | 69 219 483 | `72492e90a19ae4ea6e5a398c69d11a6532a6f0dd99a3e72c85c05691b67dd94d` |
+
+[Public gate](verification/android-0.4.31-public.json) анонимно скачал и
+проверил все шесть release assets, включая manifests/checksums, source archive
+и reports; tag связан с точным main. Website manifest произведён этим gate
+для **universal**, совпадающего с установленным и проверенным APK.
+
+Публичная поставка имеет **development/debug-подпись** и application ID
+`ru.tropa.app.preview`. Отдельный unsigned R8 APK `ru.tropa.app` имеет
+60 968 761 байт, SHA-256
+`3ad9c15b5cae7f8cb7d15a02d628af98f989f2d0e1264051780de2d0e5caaae1`;
+его компиляция и содержимое проверены, production-публикация не выполнялась.
+Это разные артефакты, поэтому public preview не выдаётся за подписанный
+production R8 выпуск.
+
+Новый signing certificate SHA-256 —
+`2ab22affedf2dc732b8c57530a016afcd030e820ec3477f91ca019322f9f750c`;
+у 0.4.25-preview был
+`e5a1c532731cb78aebb65bfef1c7c802169eaf0fd0311bc1f2fb5e83635ac090`.
+Application ID совпадает и versionCode вырос с 13 до 14, но сертификаты
+различаются: условия update identity не выполнены,
+`compatibleWithPreviousPreview=false`. Update-install испытание не проводилось.
 
 Предвыпускной device-прогон выявил неверный контекст вызова браузерного
 `fetch` в загрузчиках каталога и выбранного маршрута. Исправление охватывает
@@ -151,7 +218,17 @@ Readiness базы использует финальный TCP listener. Вре�
 пиксели с проекцией исходной геометрии. Оба кадра дали 47/47 совпадений
 в прежнем бюджете 15 секунд; runtime renderer для этого не менялся.
 [Точные исходники и артефакты preflight](verification/android-0.4.31-preflight.json)
-не заменяют последующий CI общей main-поставки.
+сохранены отдельно от последующего CI общей main-поставки.
+
+В опубликованном main оба сценария вновь дали **47/47** проб: сохранённый
+маршрут `osm-relation-6040458` за **1 184 мс**, береговой `kolyma-black-creek`
+за **610 мс**, в исходном бюджете 15 секунд. PNG независимо сопоставлены с
+геометрией внутри фактического APK. Проверены 621/621 готовых источников,
+офлайн-снимок при отсутствии активной Android-сети, отказ повреждённого и
+устаревшего пакета, сохранность bookmark при удалении и ошибки приватного
+хранилища/смены сеанса. [Main proof](verification/android-0.4.31-main.json).
+Реальная загрузка online-спутника, физический ARM64 и live API этим gate
+не подтверждаются.
 
 ### Согласование модулей и нагрузки
 
@@ -196,9 +273,17 @@ SHA-256 дистрибутива и JAR сверены с опубликован
 
 OkHttp, MockWebServer и OkHttp TLS используют одну версию 4.12.1,
 блокирующую скомпрометированные intermediate certificates eMudhra.
-Прохождение старого Android-кандидата не подтверждает эти новые зависимости:
-они требуют полного прогона точных исходников. [Отчёт Android-зависимостей](verification/android-dependencies-0.4.31.md)
+Именно этот набор прошёл полный main CI `baf0b9ef` и проверку фактического DEX.
+[Отчёт Android-зависимостей](verification/android-dependencies-0.4.31.md)
 фиксирует advisories, происхождение wrapper и границы поддержки Kotlin/AGP.
+
+Backend pins обновлены до Go **1.27.4**; exact-main результат приведён выше.
+Terrain requirements теперь используют **Pillow 13.0.0**, закрывая два
+опубликованных advisory прежнего диапазона. Обе существующие проверки
+`south-sakhalin-v1` и `south-sakhalin-central-v1` прошли под этой версией,
+без регенерации assets. [Отдельный audit](verification/backend-build-dependencies-0.4.31.md)
+сохраняет первичные источники, условия применимости и незакрытый PostgreSQL
+image gate; полный Go/Python/container SBOM scan не заявлен.
 
 React, React DOM и RSC согласованы на 19.2.9. Устранены найденные advisory
 в транзитивных esbuild, Satori и minimatch. Проверяется фактически включённый
@@ -243,18 +328,17 @@ CLI проверен. Эти ограничения tooling остаются я�
 старого API; в этом выпуске оно не вводилось. [Расчёт размеров ответов](verification/api-response-budgets-0.4.31.json)
 отдельно перечисляет эту границу и синтетические сценарии больших DTO.
 
-## Обязательные проверки выпуска
+## Статус обязательных проверок
 
-- Веб-регрессия, TypeScript, линтер и проверки статической сборки.
-- Полный браузерный проход мобильных и настольного профилей: маршруты,
-  слои, подписи, жесты, восстановление, офлайн и бюджеты плавности.
-- Совпадение растровых кадров worker с прямым рендерером и сохранение
-  маски, подложки и геометрии карты.
-- Python/Node проверки Android, воспроизводимость общих ресурсов,
-  JVM, unsigned R8 и device gate на окончательных байтах APK.
-- Go race/vet, настоящий PostGIS и шифрованное резервирование с
-  восстановлением и отрицательными сценариями.
-- Проверка опубликованных HTTP-ресурсов, идентичности сборки и SHA-256 APK.
+| Gate | Фактический результат |
+|---|---|
+| Локальный web checkpoint | 934 web / 365 tooling, TypeScript и lint PASS, 718 static pages / 71 HTTP checks; отдельная локальная Site build PASS. [Receipt](verification/local-0.4.31-preflight.json) относится к своему checkpoint, не к будущей публикации. |
+| Android local tooling | 105 Python / 41 Node и три проверки генерации PASS на закреплённом preflight. [Receipt](verification/android-0.4.31-local-preflight.json). |
+| Android main и public bytes | 70 JVM / unsigned R8 / 11 device / 6 public assets PASS на `baf0b9ef`; точный universal SHA и пиксельные доказательства приведены выше. |
+| Backend main / Go 1.27.4 | Race/vet / native 54/85 / schema 8 / 32 tables / 16 guards / recovery 11 PASS на `7d517c96`. |
+| Pages main | `baf0b9ef` опубликован успешным run 43391174806 с прежним APK manifest. `7d517c96` отказал на phone line witness, deploy пропущен. Полный gate и продвижение нового manifest для исправленного source ещё требуются. |
+| Site 0.4.31 | Новый deploy не выполнялся; действует версия 45. Требуются исправленный source, точная сборка, readback версии/deployment и сохранение доступа. |
+| PostgreSQL 18.7 / PostGIS | Новый совместимый образ и его native/recovery gate ещё не подтверждены; прежние main receipts фактически использовали 18.6. |
 
 ## Оставшиеся условия полного production-допуска
 

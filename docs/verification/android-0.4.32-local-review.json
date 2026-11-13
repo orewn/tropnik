@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-13T10:51:25.204606+00:00",
+  "verifiedAt": null,
+  "verifiedAtNote": "Exact wall-clock verification timestamp was not captured. This checkpoint records checks already executed earlier in the same review session; recording it did not rerun tests.",
+  "reviewer": "/root/android_release_review",
+  "repository": "orewn/tropnik",
+  "workingDirectory": "/workspace/scratch/ee002c1fa3a0/tropnik",
+  "releaseCandidate": "0.4.32-preview",
+  "versionCode": 15,
+  "status": "local-working-tree-verification-passed",
+  "scope": "Read-only Android release configuration, source-bound generated assets, and selected local release-pipeline regression tests; no APK build or release qualification.",
+  "baselineCommit": "7d517c96dcc8ca387ff308a238f42cbaf39fe259",
+  "baselineCommitIsTestedSourceCommit": false,
+  "sourceState": "Existing dirty/staged 0.4.32 working tree over baseline 7d517c96. No immutable commit or complete tree digest was captured by this review.",
+  "execution": {
+    "command": "python -B - <<'PY'\nfrom pathlib import Path\nimport json, hashlib, sys, importlib.util, unittest\nr=Path('/workspace/scratch/ee002c1fa3a0/tropnik'); scripts=r/'tools/android-build'\nsys.path.insert(0,str(scripts))\nfrom custom_map import verify_custom_map\nassets=r/'android/app/src/main/assets'\nmanifest=(assets/'custom-map/manifest.json').read_bytes()\nfiles=['custom-map/'+p.relative_to(assets/'custom-map').as_posix() for p in (assets/'custom-map').rglob('*') if p.is_file()]\nproof=verify_custom_map(manifest,lambda name:(assets/name).read_bytes(), actual_files=files, source_root=r)\nweb=r/'web/public/custom-map'\nfor p in (assets/'custom-map').rglob('*'):\n if p.is_file(): assert p.read_bytes()==(web/p.relative_to(assets/'custom-map')).read_bytes(),p\nprint('GENERATED_RUNTIME',json.dumps(proof,ensure_ascii=False))\nprint('SHARED_FILES_EQUAL',len(files))\nfrom preview_artifacts import source_version\nspec=importlib.util.spec_from_file_location('release_preview',scripts/'release-preview.py'); mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)\nrequest=mod.read_request(r);assert source_version(r)==(request['version'],request['versionCode'])\nprint('VERSION_CONSISTENT',source_version(r))\nsuite=unittest.TestSuite()\nfor name in ['test_release_pipeline.py','test_public_preview.py','test_workflow_inputs.py','test_preview_signing.py','test_custom_map.py','test_source_checkout.py']:\n suite.addTests(unittest.defaultTestLoader.discover(str(scripts),pattern=name))\nresult=unittest.TextTestRunner(verbosity=1).run(suite)\nraise SystemExit(not result.wasSuccessful())\nPY",
+    "cwd": "/workspace/scratch/ee002c1fa3a0/tropnik",
+    "exitCode": 0,
+    "testsRun": 49,
+    "passed": 49,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "durationSeconds": 8.798,
+    "suiteFiles": [
+      "tools/android-build/test_release_pipeline.py",
+      "tools/android-build/test_public_preview.py",
+      "tools/android-build/test_workflow_inputs.py",
+      "tools/android-build/test_preview_signing.py",
+      "tools/android-build/test_custom_map.py",
+      "tools/android-build/test_source_checkout.py"
+    ],
+    "evidence": "Observed completed exec stdout, including Ran 49 tests in 8.798s / OK and process exit 0. No separate raw log file was saved.",
+    "completedExecChunkId": "6d9ee3",
+    "savedRawLogFiles": [],
+    "testFileHashesCaptured": false
+  },
+  "versionConsistency": {
+    "passed": true,
+    "actualSourceVersion": [
+      "0.4.32-preview",
+      15
+    ],
+    "files": [
+      "tools/android-build/release-request.json",
+      "android/app/build.gradle.kts",
+      "tools/android-build/release-notes/0.4.32-preview.md"
+    ],
+    "method": "Actual source_version() and read_request() validation; equality of version and versionCode, with notes path/file validated by read_request()."
+  },
+  "generatedRuntime": {
+    "manifestPaths": [
+      "web/public/custom-map/manifest.json",
+      "android/app/src/main/assets/custom-map/manifest.json"
+    ],
+    "manifestSha256": "7d406b298be1b2afe7219c4e4310c9c2822d9ef18cb35102cb8bf1db23792fef",
+    "sourceInputsSha256": "8132930733aaadc3ccaa665b24ced16064ba23d248f187d9c19aec6722425a8d",
+    "sourceInputCount": 61,
+    "sourceInputsByteHashesVerified": true,
+    "sharedFilesIncludingManifest": 12,
+    "sharedFilesByteEqual": true,
+    "mapRenderer": "tropnik-canvas",
+    "mapRendererFilesVerified": 11,
+    "mapRendererWorkersVerified": 3,
+    "mapRendererResourceAliasesVerified": 1746,
+    "mapRendererCatalogueSourcesVerified": 621,
+    "mapRendererCatalogueOverviewVerified": true,
+    "mapRendererOfflineVectorTiles": 193,
+    "mapRendererOfflineDemTiles": 21,
+    "mapRendererCyrillicFontBundled": true,
+    "mapRendererNativeSdkRequired": false,
+    "mapRendererBridge": "exact-origin-web-message-port-v1",
+    "method": "verify_custom_map(..., actual_files=files, source_root=repo) validated generated file bytes, bound source bytes and native aliases; a separate loop compared every native custom-map file with the web copy."
+  },
+  "limitations": [
+    "This was a review of the dirty working tree at execution time; baseline commit 7d517c96 does not contain the staged 0.4.32 changes.",
+    "Per-test source file hashes and a complete tree snapshot were not captured. The generated manifest and its source-input-set digest bind only their declared inputs and outputs.",
+    "No JVM/Gradle build, R8 build, APK signature inspection, device execution or post-publication byte verification was performed in this local review.",
+    "The published website Android manifest correctly remained on 0.4.31-preview/code 14 pending new exact-artifact verification.",
+    "Previously published 0.4.31 APK hashes and certificates are not evidence for 0.4.32.",
+    "No tests were rerun while writing this checkpoint, and the repository was not modified."
+  ]
+}

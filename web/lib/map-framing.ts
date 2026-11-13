@@ -64,6 +64,7 @@ export class MapFrameRefit{
   const paint=()=>{if(revision!==this.revision)return;this.frame=undefined;if(this.active())this.options.refit();};
   this.frame=this.options.requestFrame?this.options.requestFrame(paint):requestAnimationFrame(paint);
  }
+ flush(){this.clearPending();if(this.active())this.options.refit();}
  cancel(){this.enabled=false;this.clearPending();}
  dispose(){this.disposed=true;this.cancel();}
  private clearTimer(){
@@ -74,6 +75,18 @@ export class MapFrameRefit{
   this.clearTimer();
   if(this.frame!==undefined){if(this.options.cancelFrame)this.options.cancelFrame(this.frame);else cancelAnimationFrame(this.frame);this.frame=undefined;}
  }
+}
+
+/** A zoom control takes ownership only after the selected content reaches its
+ * final drawer frame. Finish just that layout transition, then read its actual
+ * endpoint synchronously; an unrelated or already manual view is untouched. */
+export function prepareMapFrameControl(panel:Element|null,refit:MapFrameRefit){
+ if(!refit.active())return;
+ for(const animation of panel?.getAnimations()??[]){
+  const property=(animation as CSSTransition).transitionProperty;
+  if((property==='transform'||property==='height')&&(animation.pending||animation.playState==='running'))animation.finish();
+ }
+ refit.flush();
 }
 
 /** DOM input signals distinguish user navigation from programmatic camera

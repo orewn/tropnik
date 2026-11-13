@@ -11,7 +11,7 @@
 
 | Компонент | Состояние при аудите | Результат |
 |---|---|---|
-| Go toolchain | Успешный main CI использовал 1.27.3 | Активные build/CI/module требования изменены на **1.27.4**. Новый CI с этими pins ещё ожидается. |
+| Go toolchain | Исторический main `baf0b9ef` использовал 1.27.3 | Активные build/CI/module требования изменены на **1.27.4**. Точный main `7d517c96` прошёл [CI 43394040453](https://github.com/orewn/tropnik/actions/runs/43394040453) с фактической 1.27.4 в журнале. |
 | Pillow для terrain tooling | `Pillow>=11,<13` исключал исправленную версию | Требование изменено на **`Pillow==13.0.0`**. Две существующие проверки сохранённых terrain assets прошли на этой версии. |
 | PostgreSQL/PostGIS image | Recovery drill фактически использовал PostgreSQL **18.6**, PostGIS **3.7.0** | **18.7 содержит новые security fixes.** Исправленный совместимый образ и его повторный native/recovery gate на момент этого аудита ещё не подтверждены. |
 
@@ -33,6 +33,17 @@
 `.github/workflows/backend.yml` на Go **1.27.4**. Версии модулей и `go.sum`
 в этом patch не меняются. Перечисленные два advisory — проверенные примеры
 применимости, а не полный перечень исправлений данного Go release.
+
+[Exact-main receipt](backend-0.4.31-go-1.27.4.json) подтверждает source
+`7d517c96dcc8ca387ff308a238f42cbaf39fe259`, tree
+`2a89cc9413e7196fbb89303d5764adbfee75c93e`: **8** пакетов unit/race,
+`go vet`, **54** основных native-теста / **85** с подтестами, schema **8**,
+**32** таблицы, **16** guards и **11** отрицательных recovery cases PASS.
+Go **1.27.4** прочитан из фактического job log; API digest артефакта,
+upload log, скачанный ZIP и исходник восстановления сверены независимо.
+Workflow исполняет host-Go проверки, не строит production API Docker image
+и не развёртывает backend. PostgreSQL в этом новом drill остался **18.6**;
+security update базы требует отдельного доказательства.
 
 ### Объявленные модули
 
@@ -134,7 +145,7 @@ osmium/rasterio объявлений, в конечном поиске не ус
 отдельно предупреждает о платформозависимых bundled GDAL и других C-библиотеках.
 Их точный состав и уязвимости, равно как GEOS/libosmium, здесь не проверены.
 
-## PostgreSQL: успешный recovery ещё не подтверждает новый security release
+## PostgreSQL: recovery и новый security release учитываются отдельно
 
 [Main CI 43391174999](https://github.com/orewn/tropnik/actions/runs/43391174999)
 и [его receipt](backend-0.4.31-main.json) относятся к commit
@@ -144,6 +155,10 @@ osmium/rasterio объявлений, в конечном поиске не ус
 native tests (**85** с subtests, без FAIL/SKIP), schema **8**, **32** таблицы,
 **16** guards и **11** отрицательных recovery cases. Это сохранённое
 историческое доказательство; оно не переносится на новый toolchain/image.
+
+Последующий [Go 1.27.4 main receipt](backend-0.4.31-go-1.27.4.json) повторил
+этот набор на `7d517c96`, также с PostgreSQL **18.6** / PostGIS **3.7.0**
+и тем же image ID. Успешный Go patch не закрывает переход базы на 18.7.
 
 Исходный `backup-restore.json`, проверенный в `2026-11-13T08:12:45.088658+00:00`,
 имеет SHA-256 `00fb074d60aecec9d74135b4634e7b46c5611b2364d153cdc2eaefe2d54a8686`:

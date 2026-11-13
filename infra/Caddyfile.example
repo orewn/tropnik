@@ -1,7 +1,10 @@
 # Put the actual domain here after DNS is configured.
-# Set TROPA_PROXY_TOKEN in Caddy's own service environment as well as Next/Go.
+# This is the host HTTPS Caddy, outside the Compose HTTP ingress.
+# Its loopback upstreams below are ports published by the ingress sidecar.
+# Set TROPA_PROXY_TOKEN in this service environment as well as Next/Go.
 # Both incoming forwarding headers are OVERWRITTEN, not appended or trusted.
-# The actual proxy/BFF peers must also be in Go's TRUSTED_PROXY_CIDRS.
+# Go's TRUSTED_PROXY_CIDRS must include the actual ingress/Next peers on the
+# internal application network. The sidecar receives no key and preserves headers.
 your-domain.example {
     handle /api/v1/* {
         reverse_proxy 127.0.0.1:8080 {

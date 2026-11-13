@@ -19,7 +19,7 @@ import {verifyReviewedCoastalRoute} from '@/lib/reviewed-coastal-routes';
 import {mapTrailPointEntries} from '@/lib/map-trail-points';
 import {readRouteGeometry,routeGeometryPositions} from '@/lib/route-geometry';
 import {coveredRussiaBounds,inRussiaCoverage} from '@/public/maps/russia-viewport.js';
-import {MapFrameRefit,bindMapFrameRefit} from '@/lib/map-framing';
+import {MapFrameRefit,bindMapFrameRefit,prepareMapFrameControl} from '@/lib/map-framing';
 import {bindMapLabelReflow,constrainDirectionLabels,mapLabelObstacleRects} from '@/lib/map-direction-layout';
 import {MAP_CONFIG,viewportRegionId} from '@/lib/map-config';
 import {overviewContextCaption,ROUTE_PRESENTATION} from '@/lib/map-route-presentation';
@@ -67,11 +67,13 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
   useEffect(()=>{
     const element=container.current;if(!element)return;
     let alive=true,layoutFrame=0;const navigationEpoch=navigation,locationRevision=locationEpoch;
+    const panel=element.closest('.explore-layout')?.querySelector('.explore-panel')||null;
     const map=new CustomMapEngine(element,{
       camera:russiaView(element,256).camera,
       onReady:()=>{if(alive)setState(map.getState());},
       onState:value=>{if(alive)setState(value);},
       onOverlayError:message=>{if(alive)setRasterError(message);},
+      onBeforeZoom:()=>{if(frame.current)prepareMapFrameControl(panel,frame.current);},
       onGesture:()=>{manual.current=true;fullView.current=false;navigation.current++;cancelLocation();frame.current?.cancel();},
       onSettled:camera=>{
         if(!alive)return;
@@ -107,7 +109,6 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     const routeOverlay=new TrailOverlayLoader({url:trailOverlayMetadata.url,sha256:trailOverlayMetadata.sha256,load:loadPublicBytes,invalidate:invalidatePublicMapResource,
       onChange:entries=>{if(alive)map.setTrailOverlay(entries);},onError:message=>{if(alive)setOverlayError(message);}});overlay.current=routeOverlay;
     const refit=new MapFrameRefit({allowed:()=>!manual.current,refit:()=>fitCurrent.current(false)});frame.current=refit;refit.select('country');
-    const panel=element.closest('.explore-layout')?.querySelector('.explore-panel')||null;
     const refreshGeometry=()=>{
       if(!alive||layoutFrame)return;
       layoutFrame=requestAnimationFrame(()=>{

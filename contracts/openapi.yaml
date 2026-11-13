@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: TROPA API
-  version: 0.4.31
+  version: 0.4.32
   description: 'Server-authoritative guided hiking groups. Minimum four people includes the
 
     guide by default. No guide obtains verified status through self-registration.

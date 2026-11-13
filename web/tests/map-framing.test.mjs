@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {constrainFramedCamera,territoryFrameSelection,MapFrameRefit,bindMapFrameRefit} from '../lib/map-framing.ts';
+import {constrainFramedCamera,territoryFrameSelection,MapFrameRefit,bindMapFrameRefit,prepareMapFrameControl} from '../lib/map-framing.ts';
 import {RUSSIA_BOUNDS,russiaPadding,russiaCamera,constrainRussiaCamera} from '../public/maps/russia-viewport.js';
 
 const territories=JSON.parse(readFileSync(new URL('../lib/territories.generated.json',import.meta.url))).territories;
@@ -123,6 +123,25 @@ test('instant and non-CSS resizes also refit once after the settle timer and nex
  const env=refitHarness();env.refit.select('chukotka');env.refit.resized();
  env.flushTimers();assert.equal(env.count(),0);assert.equal(env.frames.size,1);
  env.flushFrames();assert.equal(env.count(),1);
+});
+
+test('manual control flushes both pending layout boundaries and only the actual drawer transitions',()=>{
+ const env=refitHarness(),finished=[];
+ const animation=(transitionProperty,playState='running',pending=false)=>({transitionProperty,playState,pending,finish(){finished.push(transitionProperty);this.playState='finished';this.pending=false;env.refit.settled();}});
+ const panel={getAnimations:()=>[animation('transform'),animation('height','idle',true),animation('opacity'),animation('color'),animation('transform','finished'),{playState:'running',finish(){assert.fail('An unrelated CSS animation must not finish');}}]};
+ env.refit.select('altai');env.refit.resized();const stale=[...env.timers.values()][0];
+ prepareMapFrameControl(panel,env.refit);
+ assert.deepEqual(finished,['transform','height']);assert.equal(env.count(),1);assert.equal(env.timers.size,0);assert.equal(env.frames.size,0);
+ env.refit.cancel();stale();env.flushTimers();env.flushFrames();assert.equal(env.count(),1);
+});
+
+test('preparing a manual, unavailable or disposed frame never measures or finishes the drawer',()=>{
+ const env=refitHarness(),panel={getAnimations(){assert.fail('An unowned frame must not inspect drawer animations');}};
+ prepareMapFrameControl(panel,env.refit);
+ env.refit.select('altai');env.setAllowed(false);prepareMapFrameControl(panel,env.refit);
+ env.setAllowed(true);env.refit.cancel();prepareMapFrameControl(panel,env.refit);
+ env.refit.select('new-region');env.refit.dispose();prepareMapFrameControl(panel,env.refit);
+ assert.equal(env.count(),0);
 });
 
 test('manual navigation cancels queued refits and stays authoritative across a style reload',()=>{

@@ -1,0 +1,262 @@
+{
+  "receiptVersion": 1,
+  "verifiedAt": "2026-11-13T09:04:17.211089+00:00",
+  "repository": "orewn/tropnik",
+  "releaseCandidate": "0.4.32",
+  "status": "local-working-tree-verification-passed",
+  "scope": "Camera handoff, anchored zoom and resize regression checks; not a release or browser CI receipt.",
+  "sourceCommit": null,
+  "sourceTree": null,
+  "sourceBinding": {
+    "kind": "working-tree file bytes",
+    "parentCommit": "7d517c96dcc8ca387ff308a238f42cbaf39fe259",
+    "parentTree": "2a89cc9413e7196fbb89303d5764adbfee75c93e",
+    "parentContainsFix": false,
+    "firstFileObservationAt": "2026-11-13T08:58:40.642306+00:00",
+    "sixFilesUnchangedThroughFinalReview": true,
+    "files": [
+      {
+        "path": "web/lib/custom-map-engine.ts",
+        "bytes": 73294,
+        "sha256": "f93de3ec53df83427358de1a35aa537bf1437a734b541223fb0b117640ed5ec5",
+        "parentSha256": "c5f240ef6bf5f45f0dc1fc2b83efa554d03fe0930e164e3791f44b4e24a0485b"
+      },
+      {
+        "path": "web/lib/map-framing.ts",
+        "bytes": 6340,
+        "sha256": "01713c0eb1ddccf8adaddd1c6ddb4876484b889965dff918e7cadaff067f517c",
+        "parentSha256": "97e5a37f7861e3e27dbe2e11e9daa3fedfb754ef4e187d4fe8fee2bf456aad47"
+      },
+      {
+        "path": "web/components/CustomAtlas.tsx",
+        "bytes": 23113,
+        "sha256": "20266c99aa3ca26c615a88a3ae7a52841a6766100ae5f620ded38199b594ad52",
+        "parentSha256": "05b231b3b3085bcf49733696be4e0f57b6212fb386e77bdd0569e77b7053e198"
+      },
+      {
+        "path": "web/tests/custom-map-engine.test.mjs",
+        "bytes": 144080,
+        "sha256": "e2b65ef2b16268845c022de00719ce9b0d96e96edf625da7472004ee21c6748a",
+        "parentSha256": "69c5e14abcbe8ae4946f497493e90f301e569ec2b10dbe035aa695e37db96862"
+      },
+      {
+        "path": "web/tests/map-framing.test.mjs",
+        "bytes": 16089,
+        "sha256": "d534661084fac427ca1b8914cda9a3b5510876aa11fbeb0f1d1b38559cdffa7d",
+        "parentSha256": "3c6d0711f9831c6f32156f3999c02aae1506b572c5cd27400ba2ef9769ab7c20"
+      },
+      {
+        "path": "web/tests/map-selection-lifecycle.test.mjs",
+        "bytes": 57669,
+        "sha256": "db446a48e9b442151a92b1d311230760ce2a4a20ee32cdd5aca830068d86c05d",
+        "parentSha256": "56d2c753196ec69386b9af20669ef632b348dff4630cadf88ad592946aa5239e"
+      }
+    ]
+  },
+  "cause": {
+    "failedPagesRun": "https://github.com/orewn/tropnik/actions/runs/43394040418",
+    "failedBuildId": "d7ccdb8d3238ff08",
+    "profile": "phone",
+    "observedFailure": "No source-line point is exposed through the actual map UI",
+    "mechanism": "Manual zoom cancelled the pending drawer refit and inherited the open-drawer camera. Whole-canvas zoom moved the selected area above the visible map.",
+    "independentNumericCheck": {
+      "node": "v24.22.1",
+      "sourceFunctionHashes": [
+        {
+          "path": "web/lib/custom-map-camera.ts",
+          "sha256": "260ccafb96cb7fcb967dfe18b627306ca3e8740fd51505459450b158e6ea32bd"
+        },
+        {
+          "path": "web/public/maps/russia-viewport.js",
+          "sha256": "56018f7d0224714235857d56d773c41f747fd87b5b9afbd69e481ab6f1771b30"
+        }
+      ],
+      "viewport": {
+        "width": 390,
+        "height": 776
+      },
+      "regionCoordinate": [
+        86.8,
+        50.5
+      ],
+      "openDrawerCameraCenter": [
+        87.37403396940255,
+        47.760138089519664
+      ],
+      "closedDrawerCameraCenter": [
+        87.37403396940255,
+        49.89632845309948
+      ],
+      "oldPointAfterTwoZooms": {
+        "x": 82.9999999999988,
+        "y": -429.2500000000008
+      },
+      "fixedPointAfterClosedDrawerAndTwoZooms": {
+        "x": 166.99999999999775,
+        "y": 341.99999999999795
+      },
+      "anchorToleranceCssPixels": 1e-07,
+      "originalRawCalculationMatched": true,
+      "scope": "Production projection functions only; no DOM, compositor or native input is simulated by this numeric check."
+    }
+  },
+  "regressionChecks": {
+    "workingDirectory": "web",
+    "originalRed": {
+      "command": "node --experimental-strip-types --test --test-name-pattern='button and keyboard zoom retain|zoom preparation completes' tests/custom-map-engine.test.mjs",
+      "exitCode": 1,
+      "tests": 2,
+      "pass": 0,
+      "fail": 2,
+      "skipped": 0,
+      "cancelled": 0,
+      "sourceState": "Unmodified HEAD7d; only two tests and the engine fixture options had been added"
+    },
+    "resizeRed": {
+      "command": "node --experimental-strip-types --test --test-name-pattern='resizing during an anchored zoom' tests/custom-map-engine.test.mjs",
+      "exitCode": 1,
+      "tests": 1,
+      "pass": 0,
+      "fail": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "sourceState": "Anchored engine and handoff implemented; before resizeCanvas stopAnimation guard"
+    },
+    "redSourceBindingLimit": "Original/intermediate source states are supported by local execution ordering, not an immutable CI checkout or a separately saved RED source digest.",
+    "focusedGreen": {
+      "command": "node --experimental-strip-types --test --test-concurrency=1 tests/custom-map-engine.test.mjs tests/map-framing.test.mjs tests/map-selection-lifecycle.test.mjs",
+      "exitCode": 0,
+      "tests": 124,
+      "pass": 124,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "fullGreen": {
+      "command": "node --experimental-strip-types --test --test-concurrency=1 tests/*.test.mjs",
+      "exitCode": 0,
+      "tests": 942,
+      "pass": 942,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc -p pages-preview/tsconfig.json --noEmit",
+      "exitCode": 0
+    },
+    "eslint": {
+      "command": "node node_modules/eslint/bin/eslint.js components/CustomAtlas.tsx lib/custom-map-engine.ts lib/map-framing.ts tests/custom-map-engine.test.mjs tests/map-framing.test.mjs tests/map-selection-lifecycle.test.mjs",
+      "exitCode": 0
+    },
+    "exitStatusEvidence": "Final full suite, TypeScript and ESLint ran sequentially under set -e and completed with exit 0; empty logs alone are not treated as success evidence.",
+    "priorFullRun": {
+      "tests": 941,
+      "pass": 940,
+      "fail": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "reason": "The overlay fixture waited one immediate turn while asynchronous hash verification was still pending. It now waits for the actual two published entries with the existing bounded settleUntil helper; assertions remain intact."
+    }
+  },
+  "independentReadOnlyReview": {
+    "confirmedNewDefects": 0,
+    "checked": [
+      "Finish only owned drawer transform/height transitions before automatic-frame flush and manual ownership",
+      "Invalidate stale settle timer/RAF callbacks",
+      "Preserve padded visible anchor through pitch, bearing, animated bursts, reversals and limits",
+      "Cancel old viewport animation on CSS-size change while retaining the displayed camera",
+      "Keep manual/disposed frame ownership and cleanup"
+    ]
+  },
+  "regeneratedRuntime": {
+    "manifestPath": "web/public/custom-map/manifest.json",
+    "manifestSha256": "7d406b298be1b2afe7219c4e4310c9c2822d9ef18cb35102cb8bf1db23792fef",
+    "sourceInputsSha256": "8132930733aaadc3ccaa665b24ced16064ba23d248f187d9c19aec6722425a8d",
+    "sourceInputCount": 61,
+    "outputFilesExcludingManifest": 11,
+    "outputFilesIncludingManifest": 12,
+    "resourceAliases": 1746,
+    "allSourceInputByteHashesVerified": true,
+    "allSharedOutputByteHashesVerified": true,
+    "webAndAndroidSharedOutputBytesEqual": true,
+    "scope": "Generated shared runtime only; service-worker shell, framework build and final APK need their own gates."
+  },
+  "browserBoundary": {
+    "browserPass": false,
+    "localChromiumAttempt": "blocked before navigation",
+    "attemptedArtifactSourceCommit": "baf0b9ef8b8132711a317e861cf1d8aed68800fb",
+    "attemptedArtifactBuildId": "fc476ec7a21065bc",
+    "reason": "Chromium process_singleton_posix socket() failed with EPERM; process exited SIGABRT.",
+    "completedProfiles": 0,
+    "gatePath": "tools/pages-preview/browser-trail-overlay.mjs",
+    "gateSha256": "f6879b3455008544162603c45ac7d92e88ba4b3340b7a17850731d2dcedda018",
+    "gateByteUnchangedFromParent": true,
+    "required": [
+      "Exact-source Pages browser and publication gate",
+      "New 0.4.32 shared-runtime Android APK and native device gates"
+    ]
+  },
+  "evidence": [
+    {
+      "file": "zoom-regression-red.log",
+      "bytes": 1802,
+      "sha256": "dd597771627ef5809434ca81406889ead60317f2de97a8622ce94ac75f5747f6"
+    },
+    {
+      "file": "zoom-resize-red.log",
+      "bytes": 1325,
+      "sha256": "f1cbd9cd4e66c6ba1d60251b45ca37e2e572e1c0de5de6995116cd75a2445c90"
+    },
+    {
+      "file": "zoom-focused-final.log",
+      "bytes": 14256,
+      "sha256": "994a25908559959877ff3790ae8ff33fbc4fc57737cf8ddc70399fce834ec883"
+    },
+    {
+      "file": "zoom-full-web-final.log",
+      "bytes": 97033,
+      "sha256": "8bd84738602875b35f22c711d1908529ac0bccb0d815246fa368b524f2d2d0da"
+    },
+    {
+      "file": "zoom-types-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "zoom-lint-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "zoom-full-web-tests.log",
+      "bytes": 97429,
+      "sha256": "2e09891731e8c75c40daa19232b1097c796192184c979d90dbe1bbf9a270af81"
+    },
+    {
+      "file": "numeric-reproduction.json",
+      "bytes": 1824,
+      "sha256": "6147f99db6c95ec7a0857f2848df0dc5162604a086e9d5970f857bbb51dc940c"
+    },
+    {
+      "file": "camera-numeric-independent.json",
+      "bytes": 1789,
+      "sha256": "7a8260da1824a196e85f4fb02fb3ba742d5930be71731cf5b777df3be182faf6"
+    },
+    {
+      "file": "repro-receipt.json",
+      "bytes": 3609,
+      "sha256": "bb0ee7c6d5ce795a623f9029e100576c478fd2dbbd98e0a06bbf230fcead4184"
+    },
+    {
+      "file": "failure/browser-trail-overlay-verification.json",
+      "bytes": 48184,
+      "sha256": "c519e9831a04e5cb24495dfc8fac05056a922631b259cc7d8ac6c07daadc95db"
+    }
+  ],
+  "limitations": [
+    "The parent commit identifies the baseline and does not contain the fix. A future commit must be matched to these file hashes.",
+    "This local result does not assert current Pages/Site publication, successful browser rendering, an APK build or a physical device result.",
+    "Existing published 0.4.31 evidence remains historical; it is not transferred to 0.4.32."
+  ]
+}

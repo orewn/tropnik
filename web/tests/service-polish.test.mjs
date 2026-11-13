@@ -54,10 +54,11 @@ test('safety drafts expose unsaved state and warn only while dirty',async()=>{
 });
 
 test('service worker update is visible and user controlled',async()=>{
-  const [client,worker,css,pkg]=await Promise.all([read('components/ServiceWorker.tsx'),read('public/sw.js'),read('app/final-polish.css'),read('package.json')]);
+  const [client,worker,css,pkg,lifecycle]=await Promise.all([read('components/ServiceWorker.tsx'),read('public/sw.js'),read('app/final-polish.css'),read('package.json'),read('lib/service-worker-registration.ts')]);
   assert.match(client,/registration\.waiting/);
   assert.match(client,/controllerchange/);
-  assert.match(client,/skip-waiting/);
+  assert.match(client,/ServiceWorkerUpdateRequest/);
+  assert.match(lifecycle,/skip-waiting/);
   assert.match(worker,/tropnik-shell-\d+\.\d+\.\d+-[a-f0-9]{16}/);
   assert.match(worker,/self\.skipWaiting/);
   assert.match(css,/\.app-update/);

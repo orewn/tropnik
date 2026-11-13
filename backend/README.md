@@ -197,7 +197,10 @@ with encrypted database backups; existing private passports cannot be decrypted
 if it is lost. Readiness remains closed without the safety key. The API binds
 `127.0.0.1:8080` unless `HTTP_ADDR` is specified. The `tropa-health` readiness
 probe reads that same address and port; wildcard binds use local loopback in
-the same address family, without HTTP proxy or redirect handling. Use the production container instructions in `../infra/README.md`
+the same address family, without HTTP proxy or redirect handling. In production
+Compose the API publishes no host port: a separate HTTP ingress exposes only
+host loopback and forwards over the internal application network. Host Caddy
+owns public HTTPS. Use the production container instructions in `../infra/README.md`
 for real users. Do not point a development process at a production database.
 
 ## Operator review, with explicit evidence
@@ -349,8 +352,10 @@ validation and matching server name are mandatory; STARTTLS cannot fall back
 to plaintext. The action URL is a fixed operator-configured HTTPS page, normally
 `https://your-domain.example/account/action`; it is never built from request
 Host headers. A deployment under a path prefix includes that prefix in this URL.
-The Docker base network has no external egress; use the explicit mail overlay in
-[`infra`](../infra/README.md) when the sender is ready.
+The Docker base API/database networks have no external egress; only the HTTP
+ingress joins the ordinary frontend bridge. Use the explicit mail overlay in
+[`infra`](../infra/README.md) to add API egress when the sender is ready. The
+database and optional Next service keep their internal networks.
 
 An entirely absent configuration disables signup and new-link requests with
 `503 registration_unavailable`, while existing accounts can log in. A partial
@@ -475,9 +480,11 @@ four slots per process. The broad non-auth write guard is still process-local;
 the existing per-user posting budgets are already persistent.
 
 To preserve distinct browser IP budgets through the BFF, configure a separate
-64-character `TROPA_PROXY_TOKEN` on Caddy, Next and Go, and explicit
-`TRUSTED_PROXY_CIDRS` on Go. Caddy overwrites both `X-Real-IP` and the proof from
-its own connection/environment. The BFF checks the proof in constant time and
+64-character `TROPA_PROXY_TOKEN` on host Caddy, Next and Go, and explicit
+`TRUSTED_PROXY_CIDRS` on Go. Host Caddy overwrites both `X-Real-IP` and the proof
+from its own connection/environment. The Compose HTTP ingress preserves them
+without receiving that key; Go sees ingress/Next peers on the internal
+`application` network. The BFF checks the proof in constant time and
 accepts only a single valid address. Go repeats the proof check **and** verifies
 the actual direct peer against its configured CIDRs. Untrusted/ambiguous headers
 fall back to the peer address; `X-Forwarded-For` is ignored. Partial trust config

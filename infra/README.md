@@ -7,13 +7,42 @@ runtime; ordinary self-hosting uses the Next application from `../web`.
 ## Host layout
 
 Use an x86-64 Linux host with Docker Compose for the supplied PostGIS image.
-The upstream `postgis/postgis:18-3.7` image documents amd64 support. An ARM host
-requires a separately verified native PostGIS build; do not silently rely on
-emulation for production. The data volume is `/var/lib/postgresql`, the
-PostgreSQL 18+ image layout.
+All three database stacks extend `compose.database.yaml`: a digest-pinned
+official PostgreSQL 18.7 base with the official PGDG PostGIS 3.7.0 packages
+rebuilt against PostgreSQL 18.7 headers. Package versions and SHA-256 hashes
+are fixed; build provenance is in [db/postgis/README.md](db/postgis/README.md).
+An ARM host requires a separately verified native build; do not silently rely
+on emulation for production. The data volume remains `/var/lib/postgresql`,
+with `PGDATA=/var/lib/postgresql/18/docker`.
 
-The database has no published port. API port 8080 binds only to host loopback.
-PostgreSQL connections use a private isolated Docker network. The explicit
+PostgreSQL 18.7's composite-type security fix requires rebuilt C extensions.
+The native and restore gates require `composite_type_mismatch=error`.
+Image construction needs network access for authenticated package downloads;
+the isolated restore database itself has no network. Compose rebuilds from
+the shared recipe, reusing Docker's build cache, and never pulls a same-named
+database image from a registry.
+
+The database, API and optional Next containers publish no host ports. A small
+HTTP `ingress` container publishes `127.0.0.1:8080` for the API and, with the web
+overlay, `127.0.0.1:3000` for Next. The existing host Caddy remains the public
+HTTPS endpoint. Docker needs a non-internal network on the container that owns
+published ports; putting that network on the ingress preserves application
+isolation:
+
+| Network | Internal | Attached services |
+| --- | --- | --- |
+| `backend` | Yes | PostgreSQL, migrations, API |
+| `application` | Yes | API, HTTP ingress, optional Next |
+| `frontend` | No | HTTP ingress only |
+| `mail-egress` | No; explicit mail overlay only | API only |
+
+The base API and database have no external egress. The ingress has fixed
+upstreams and no database-network attachment. Its official Caddy image is pinned
+by digest and runs as UID/GID 65532 with a read-only root, no capabilities and
+no-new-privileges. It neither terminates TLS nor creates certificates or proxy
+proofs. See [the ingress configuration and provenance](ingress/README.md).
+
+PostgreSQL connections use the private `backend` network. The explicit
 `TRUST_PRIVATE_DATABASE_NETWORK=true` setting applies to this topology; use
 `sslmode=verify-full` for an external database instead.
 
@@ -71,8 +100,9 @@ path prefix before `/account/action`. Set SMTP username/password together when
 the relay requires authentication. There is no plaintext transport or skipped
 certificate verification option.
 
-The base `backend` network is internal. Add the explicit mail overlay to give
-the API outbound connectivity while the database remains on the internal network:
+The base `backend` and `application` networks are internal. Add the explicit mail
+overlay to attach only the API to `mail-egress`; its existing internal attachments
+remain, and the database and Next gain no outbound network:
 
 ```bash
 docker compose -f compose.yaml -f compose.web.yaml -f compose.mail.yaml --env-file .env up --build -d
@@ -151,9 +181,12 @@ set `NEXT_PUBLIC_SITE_URL` before `pnpm run build:next`. The build defaults to
 `TROPA_PUBLIC_INDEXING=false`; enabling indexing requires the reviewed publication
 configuration and a rebuild of the relevant static metadata. Do not infer public
 launch readiness from a successful build.
-The web port binds only to loopback and the supplied Caddy example remains the
-public HTTPS ingress. Do not deploy the private-preview worker as if it were a
-standalone Node HTTP server.
+The web container joins only `application`; it cannot directly reach the database
+network and publishes no host port. The overlay adds the ingress's loopback port
+3000 and fixed `web:3000` route. The ingress waits for both upstream health checks;
+Next is healthy only when `/api/status` confirms the configured, connected API
+mode. The supplied host Caddy example remains the public HTTPS ingress. Do not
+deploy the private-preview worker as if it were a standalone Node HTTP server.
 
 The server-only environment for the Next BFF should point to the actual origin
 of the API, for example `TROPA_API_URL=http://127.0.0.1:8080` when Next and the API
@@ -197,18 +230,21 @@ actual domain must be configured before enabling public HTTPS.
 
 ### Trusted client-address forwarding
 
-The supplied forwarding path is Caddy → Next BFF → Go for website requests,
-and Caddy → Go for the native client. Caddy must be the actual HTTPS ingress and
-overwrite both `X-Real-IP` from its connection and `X-Tropa-Proxy-Token` from its
-server environment. Generate an **additional independent** 64-character hexadecimal
-value for `TROPA_PROXY_TOKEN`; install it in Caddy's service environment, the
-server-side Next process and Go. A Compose `.env` does not automatically configure
-a separately installed Caddy service.
+The container forwarding path is host Caddy → local HTTP ingress → Next BFF → Go
+for website requests, and host Caddy → local HTTP ingress → Go for the native
+client. Host Caddy owns HTTPS and overwrites both `X-Real-IP` from its connection
+and `X-Tropa-Proxy-Token` from its server environment. The intermediate HTTP
+ingress preserves these headers; it receives no proxy key and disables HTTP
+request/error logging. Generate an **additional independent** 64-character
+hexadecimal value for `TROPA_PROXY_TOKEN`; install it in host Caddy's service
+environment, the server-side Next process and Go. A Compose `.env` does not
+automatically configure a separately installed Caddy service.
 
 Set `TRUSTED_PROXY_CIDRS` to the exact direct ingress/BFF peer addresses observed
-by Go in the chosen topology. For three ordinary host processes that may be
-`127.0.0.1/32,::1/128`; a containerized Go process sees Docker peers instead.
-Inspect the actual network before choosing narrow ranges. Never allow all of
+by Go in the chosen topology. In Compose these are the HTTP ingress and Next
+peers on `application`, not the host Caddy's loopback address. For three ordinary
+host processes the range may instead be `127.0.0.1/32,::1/128`. Inspect the actual
+network before choosing narrow ranges. Never allow all of
 the Internet, publish the API/Next private ports, or copy the proof into
 `NEXT_PUBLIC_*`, browser code, access logs or an APK. Use HTTPS between hosts.
 
@@ -401,9 +437,40 @@ attached to the wrong event or UPDATE column, a missing mail outbox, a missing
 or incorrectly defined active-membership index, and an unsupported schema. Cleanup
 of temporary containers/networks and identity files is part of the gate.
 
-The Backend workflow runs this after the native store integration suite and
-uploads only `backup-restore.json`, the bounded recovery log and the existing
-native test log. No identity or encrypted fixture archive is uploaded. A gate
+The Backend workflow first qualifies the shared database image: actual
+server/client/package versions, four rebuilt library hashes, strict composite
+checks including rejected `warn`/`disabled` settings, upstream template
+initialization, and geometry/topology/raster/SFCGAL smoke cases. It then runs the
+native store suite and this recovery drill. Uploaded evidence contains the
+public image receipt/log, `backup-restore.json`, the bounded recovery log and
+the native test log. A final disposable bootstrap gate builds the actual API
+Dockerfile, verifies the four shipped binaries' Go toolchain/build metadata,
+and runs the production Compose settings with synthetic keys and passwords.
+Only API/migration image names are changed to isolate the fixture. It verifies
+migration 8, the restricted database role, and actual host → HTTP ingress → API
+readiness/liveness with the production response envelope. It checks the pinned
+ingress image ID/version, fixed HTTP routes, active loopback binding, absence of
+published API/database ports, and actual network memberships. Both running API
+and ingress processes must enforce the expected UID, read-only root, zero
+effective capabilities and no-new-privileges flag.
+
+The optional web/mail combinations are resolved with real Compose and checked
+for their network, dependency, mount and port policy. This bootstrap gate does
+**not** build/start Next or qualify the web HTTP/browser path; that runtime check
+remains separate. The local regression suite also resolves all four combinations:
+
+```bash
+python3 -m unittest discover -s infra/tests -p 'test_*.py'
+```
+
+It needs Compose, but no Docker daemon; `TROPNIK_COMPOSE=/path/to/docker-compose`
+selects a standalone Compose binary. Static checks and local Caddy parsing do
+not substitute for the actual container bootstrap receipt.
+
+The fixture containers, three networks, database volume, keys and copied
+binaries are removed before its public receipt is written. Its aggregate
+receipt/log are uploaded as well. No identity, fixture key, API binary or
+encrypted backup archive is uploaded. A gate
 run counts as evidence only for its recorded source and tool/image versions.
 It does not replace measured recovery from the selected production storage.
 
@@ -423,6 +490,7 @@ location required by the legal review. A hosting region selection alone is not
 proof of compliance. Check new route restrictions with authoritative sources
 and actual guide review; importing a map is not that review.
 
-Container tags are explicit but still mutable. Before a production release,
-resolve and record the tested image digests, SBOM and vulnerability scan results.
+The database base digest and rebuilt extension package hashes are pinned.
+Record the resulting deployment image digest, SBOM and vulnerability scan
+results for the actual host; other build/runtime tags still need that review.
 The separate website and Android artifacts do not configure any live server.

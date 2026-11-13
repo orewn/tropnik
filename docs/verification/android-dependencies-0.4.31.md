@@ -1,21 +1,26 @@
 # Android 0.4.31 — проверка зависимостей и происхождения Wrapper
 
 Дата проверки: **13 ноября 2026 года**. Это отчёт о security patch изменениях
-кандидата 0.4.31, а не подтверждение публикации APK.
+0.4.31 и последующем подтверждении их в точной Android-поставке.
 
-В рабочем дереве обновлены **Gradle 8.13 → 8.14.7** и **OkHttp 4.12.0 → 4.12.1**.
+В поставке обновлены **Gradle 8.13 → 8.14.7** и **OkHttp 4.12.0 → 4.12.1**.
 Происхождение новых файлов Wrapper подтверждено отдельным успешным CI.
-**Сборка и проверки самого приложения на итоговом commit с обеими новыми
-зависимостями ещё ожидаются.** Ранее полученные JVM, R8/APK и device результаты
-относятся к своим исходным commit и не переносятся на новый набор зависимостей.
+**Main `baf0b9ef8b8132711a317e861cf1d8aed68800fb` прошёл собственный
+[CI 43391174819](https://github.com/orewn/tropnik/actions/runs/43391174819):
+70 JVM, отдельная unsigned R8-сборка и 11 сценариев установленного API 35
+universal APK.** В build log подтверждён Gradle 8.14.7, в фактическом DEX —
+OkHttp 4.12.1 и class definition `CertificateBlocklist`.
+[Main receipt](android-0.4.31-main.json) и [public receipt](android-0.4.31-public.json)
+связывают результат с опубликованным debug-подписанным preview и анонимно
+проверенными шестью assets. Production signing и physical ARM64 не заявлены.
 
 Предвыпускной кандидат `944bfaa2ae7509f82180b606b71506f030aabc36` прошёл
 [точный CI 43388775423](https://github.com/orewn/tropnik/actions/runs/43388775423):
 70 JVM, unsigned R8 и 11 сценариев API 35. Реальный DEX универсального APK
 содержит `okhttp/4.12.1` и class definition `CertificateBlocklist`; старый
 маркер 4.12.0 отсутствует. Gradle 8.14.7 подтверждён build log.
-[Receipt](android-0.4.31-preflight.json) связывает эти результаты с точным
-деревом и APK; общий main ещё должен пройти собственные gates.
+[Исторический receipt](android-0.4.31-preflight.json) связывает эти результаты
+с деревом кандидата и не заменяет последующий main proof, приведённый выше.
 
 ## Gradle: восемь опубликованных advisories
 
@@ -128,13 +133,13 @@ release commit `f5dc9a0f3a268315f9776e07507f7f97459bb9d3`. Проверенны�
 `okhttpVersion = "4.12.1"`. Его используют `okhttp`, тестовый `mockwebserver` и
 `okhttp-tls`. Runtime и HTTPS fixtures остаются на одной patch-версии;
 перехода на OkHttp 5.x нет. Получение этих трёх артефактов и фактическое
-исполнение HTTPS тестов на новом наборе подтвердит итоговый Android CI.
+исполнение JVM/HTTPS тестов подтверждены итоговым Android main CI.
 
 ## Совместимость и оставшиеся границы проверки
 
 | Компонент | Подтверждение или ограничение |
 |---|---|
-| AGP 8.13.2, JDK 17, compile/target SDK 36 | [Официальные требования AGP](https://developer.android.com/build/releases/agp-8-13-0-release-notes) указывают минимум Gradle 8.13, JDK 17 и поддержку API до 36.1. Gradle 8.14.7 удовлетворяет этому минимуму; успешность полного приложения на точном новом наборе ещё проверяется. |
+| AGP 8.13.2, JDK 17, compile/target SDK 36 | [Официальные требования AGP](https://developer.android.com/build/releases/agp-8-13-0-release-notes) указывают минимум Gradle 8.13, JDK 17 и поддержку API до 36.1. Gradle 8.14.7 удовлетворяет этому минимуму; main `baf0b9ef` прошёл JVM/R8/device gates на этом наборе. |
 | Kotlin/KGP 2.2.21 | [Матрица JetBrains](https://kotlinlang.org/docs/gradle-configure-project.html) указывает Gradle 7.6.3–8.14 и полностью поддерживаемый AGP 7.3.1–8.11.1. Текущий AGP 8.13.2 выше этой границы. JetBrains допускает более новые версии с возможными предупреждениями и ограничениями; прежний успешный CI не расширяет официальную матрицу. |
 | Compose compiler 2.2.21 и KSP 2.2.21-2.0.4 | Compiler plugin имеет ту же версию, что Kotlin; [официальный KSP release](https://github.com/google/ksp/releases/tag/2.2.21-2.0.4) прямо указывает Kotlin 2.2.21. |
 | Room 2.8.5 | Это текущий stable из [официальных release notes](https://developer.android.com/jetpack/androidx/releases/room), выпущенный 9 сентября 2026 года. |
@@ -149,6 +154,8 @@ release/security источники по состоянию на дату отч
 Полный разрешённый транзитивный граф/SBOM не сканировался, поэтому отчёт не
 заявляет «ноль уязвимостей Android». Он не удостоверяет обновлённость системных
 Android/WebView на пользовательских устройствах, физический ARM64, production
-signing или работу live API/SMTP. Исторические receipts сохранены. Для допуска
-нового APK требуется отдельный результат CI, привязанный к итоговому commit
-с Gradle 8.14.7, OkHttp 4.12.1 и всеми текущими исходниками приложения.
+signing или работу live API/SMTP. Исторические receipts сохранены. Опубликованный
+0.4.31-preview подтверждён на source `baf0b9ef`; его сертификат отличается от
+0.4.25-preview, поэтому условия update identity не выполнены и совместимость
+обновления поверх прежней установки не заявляется. Любая последующая сборка
+требует собственного CI на её точном наборе исходников и зависимостей.

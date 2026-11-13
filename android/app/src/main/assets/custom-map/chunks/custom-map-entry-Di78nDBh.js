@@ -2977,7 +2977,7 @@ var Fn = class {
 	setCamera(e, t = !1) {
 		this.moveCamera(e, t);
 	}
-	moveCamera(e, t, n = !1) {
+	moveCamera(e, t, n) {
 		if (this.disposed) return;
 		this.pointer.cancel(), this.stopAnimation();
 		let r = z(e.center[0], e.center[1], e.zoom, {
@@ -2999,15 +2999,32 @@ var Fn = class {
 		this.zoomTarget = n ? i.zoom : null, this.setMoving(!0);
 		let l = () => {
 			if (this.disposed) return;
-			let e = Math.min(1, (performance.now() - c) / 240), t = 1 - (1 - e) ** 3;
-			this.camera = {
+			let e = Math.min(1, (performance.now() - c) / 240), t = 1 - (1 - e) ** 3, r = a.zoom + (i.zoom - a.zoom) * t;
+			if (n) {
+				let e = S(a, this.size, r, n, {
+					minZoom: this.floor.zoom,
+					maxZoom: this.options.maxZoom ?? 18
+				}), t = z(e.center[0], e.center[1], e.zoom, {
+					...this.floor,
+					center: [...this.floor.center]
+				}, this.framed ? {
+					...this.framed,
+					center: [...this.framed.center]
+				} : null);
+				this.camera = {
+					...e,
+					center: t.center,
+					zoom: t.zoom
+				};
+			} else this.camera = {
 				center: f({
 					x: o.x + (s.x - o.x) * t,
 					y: o.y + (s.y - o.y) * t
 				}),
-				zoom: a.zoom + (i.zoom - a.zoom) * t,
+				zoom: r,
 				bearingDegrees: (a.bearingDegrees ?? 0) + ((i.bearingDegrees ?? 0) - (a.bearingDegrees ?? 0)) * t
-			}, this.draw(), e < 1 ? this.animation = requestAnimationFrame(l) : (this.animation = 0, this.zoomTarget = null, this.settled());
+			};
+			this.draw(), e < 1 ? this.animation = requestAnimationFrame(l) : (this.animation = 0, this.zoomTarget = null, this.settled());
 		};
 		this.animation = requestAnimationFrame(l);
 	}
@@ -3020,12 +3037,25 @@ var Fn = class {
 		}), this.setCamera(this.framed, r);
 	}
 	zoomBy(e) {
-		if (this.disposed || !Number.isFinite(e)) return;
-		let t = (this.zoomTarget ?? this.camera.zoom) + e;
-		this.options.onGesture?.(), this.moveCamera(S(this.camera, this.size, t, void 0, {
+		if (this.disposed || !Number.isFinite(e) || (this.options.onBeforeZoom?.(), this.disposed)) return;
+		let t = (this.zoomTarget ?? this.camera.zoom) + e, n = this.padding.left ?? 0, r = this.padding.right ?? 0, i = this.padding.top ?? 0, a = this.padding.bottom ?? 0, o = [
+			n,
+			r,
+			i,
+			a
+		].every((e) => Number.isFinite(e) && e >= 0) && n + r < this.size.width && i + a < this.size.height ? {
+			x: (this.size.width + n - r) / 2,
+			y: (this.size.height + i - a) / 2
+		} : {
+			x: this.size.width / 2,
+			y: this.size.height / 2
+		};
+		this.options.onGesture?.();
+		let s = this.flatPoint(o);
+		this.moveCamera(S(this.camera, this.size, t, s, {
 			minZoom: this.floor.zoom,
 			maxZoom: this.options.maxZoom ?? 18
-		}), !0, !0);
+		}), !0, s);
 	}
 	north() {
 		this.options.onGesture?.(), this.setCamera({
@@ -3420,7 +3450,7 @@ var Fn = class {
 		if (this.disposed) return;
 		let e = Math.max(1, this.element.clientWidth), t = Math.max(1, this.element.clientHeight);
 		if (!(e === this.size.width && t === this.size.height && this.canvas.width > 1)) {
-			this.pointer.cancel(), this.size = {
+			(e !== this.size.width || t !== this.size.height) && this.stopAnimation(), this.pointer.cancel(), this.size = {
 				width: e,
 				height: t
 			}, this.pixelRatio = this.eco ? 1 : Math.min(devicePixelRatio || 1, matchMedia("(pointer:coarse)").matches ? 1.5 : 2), this.canvas.width = Math.round(e * this.pixelRatio), this.canvas.height = Math.round(t * this.pixelRatio), this.labelCanvas.width = this.canvas.width, this.labelCanvas.height = this.canvas.height;

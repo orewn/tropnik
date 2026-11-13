@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "requestId": "android-0-4-31-preview-native-trails-parity-20261113",
-  "version": "0.4.31-preview",
-  "versionCode": 14,
-  "notesFile": "tools/android-build/release-notes/0.4.31-preview.md"
+  "requestId": "android-0-4-32-preview-camera-handoff-20261113",
+  "version": "0.4.32-preview",
+  "versionCode": 15,
+  "notesFile": "tools/android-build/release-notes/0.4.32-preview.md"
 }

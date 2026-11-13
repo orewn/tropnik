@@ -13,6 +13,7 @@ import {readRouteGeometry,routeGeometryPositions} from '../lib/route-geometry.ts
 import {cameraBounds} from '../lib/custom-map-camera.ts';
 import {openingTerrainView,planTerrainNavigation} from '../lib/terrain-navigation.ts';
 import {russiaCamera,russiaPadding} from '../public/maps/russia-viewport.js';
+import {MapFrameRefit,prepareMapFrameControl} from '../lib/map-framing.ts';
 import {TrailOverlayLoader} from '../lib/map-trail-overlay.ts';
 import {buildTrailOverlay} from '../scripts/build-trail-overlay.mjs';
 import {verifyReviewedCoastalRoute} from '../lib/reviewed-coastal-routes.ts';
@@ -36,7 +37,7 @@ function componentHost(file,name,dependencies={}){
   const nodes=()=>{const out=[];const visit=node=>{if(!node||typeof node!=='object')return;if(Array.isArray(node)){node.forEach(visit);return;}out.push(node);visit(node.props?.children);};visit(tree);return out;};
   const element=()=>({dataset:{},style:{},clientWidth:800,clientHeight:600,
     getBoundingClientRect:()=>({left:0,top:0,right:800,bottom:600,width:800,height:600}),
-    closest:()=>({querySelector:()=>null,querySelectorAll:()=>[]}),querySelectorAll:()=>[],
+    closest:()=>({querySelector:()=>host.panel??null,querySelectorAll:()=>[]}),querySelectorAll:()=>[],
     querySelector:()=>host.visibleCanvas||host.canvas});
   const effect=(queue,callback,deps)=>{const index=cursor++,previous=hooks[index],changed=!previous||deps===undefined||deps.some((value,i)=>!Object.is(value,previous.deps?.[i]));
     if(changed){hooks[index]={deps,cleanup:previous?.cleanup};queue.push(()=>{hooks[index].cleanup?.();hooks[index].cleanup=callback();});}};
@@ -69,7 +70,7 @@ function componentHost(file,name,dependencies={}){
 }
 
 function atlasFixture({committedMode='detail',ready=true}={}){
-  const requests=new Map(),maps=[],notes=[],chosen=[],overlayRequests=[],invalidated=[];
+  const requests=new Map(),maps=[],notes=[],chosen=[],overlayRequests=[],invalidated=[],frameControllers=[];
   class AtlasEngine{
     constructor(_element,options){this.options=options;this.route=undefined;this.routeId=undefined;this.fits=[];this.cameras=[];this.camera=options.camera;this.visibleBounds=grid.bounds;this.active=true;this.activations=[];this.modes=[];this.pitchChanges=[];this.layers={paths:true,boundaries:true,relief:true};this.layerChanges=[];this.routeChanges=[];this.state={ready,mode:'detail',committedMode,error:ready?'':'Границы карты не загрузились.',loading:false,reliefReady:ready,imageryLoading:false};maps.push(this);queueMicrotask(()=>ready?options.onReady():options.onState(this.getState()));}
     getState(){return{...this.state};}
@@ -79,6 +80,7 @@ function atlasFixture({committedMode='detail',ready=true}={}){
     pickTrail(point,tolerance){this.lastPick={point,tolerance};return this.pickResult??this.routeId;}
     setMode(mode){this.modes.push(mode);this.state={...this.state,mode,committedMode:mode,imagerySource:mode==='satellite'?'eox-s2':undefined};this.options.onState(this.getState());}
     setLayers(value){this.layerChanges.push(value);Object.assign(this.layers,value);}
+    zoomBy(delta){this.options.onBeforeZoom?.();(this.zoomCalls??=[]).push({delta,fits:this.fits.length});this.options.onGesture?.();}
     retry(){this.retries=(this.retries||0)+1;this.state.loading=true;this.options.onState(this.getState());}
     setPosition(value){this.position=value;}
     setFloor(){}setPadding(){}setRegion(){}setActive(value){this.active=value;this.activations.push(value);}setMarkers(){}setPitch(value){this.pitchChanges.push(value);}setObstacles(){}setCamera(camera){this.camera=camera;this.cameras.push(camera);}destroy(){this.destroyed=true;}
@@ -96,7 +98,7 @@ function atlasFixture({committedMode='detail',ready=true}={}){
     '@/lib/reviewed-coastal-routes':{verifyReviewedCoastalRoute},
     '@/lib/map-trail-points':{mapTrailPointEntries:()=>[]},'@/lib/route-geometry':{readRouteGeometry,routeGeometryPositions},
     '@/public/maps/russia-viewport.js':{coveredRussiaBounds:positions=>positions.length?grid.bounds:null,inRussiaCoverage:()=>true},
-    '@/lib/map-framing':{MapFrameRefit:class{select(){}cancel(){}dispose(){}resized(){}},bindMapFrameRefit:()=>()=>{}},
+    '@/lib/map-framing':{MapFrameRefit:class extends MapFrameRefit{constructor(options){super({...options,requestFrame:callback=>host.environment.requestAnimationFrame(callback),cancelFrame:id=>host.environment.cancelAnimationFrame(id)});frameControllers.push(this);}},prepareMapFrameControl,bindMapFrameRefit:()=>()=>{}},
     '@/lib/map-direction-layout':{bindMapLabelReflow:()=>()=>{},constrainDirectionLabels(){},mapLabelObstacleRects:()=>[]},
     '@/lib/map-config':{MAP_CONFIG:{trailHitRadiusPx:12,routeMaxZoom:14,territoryMaxZoom:14},viewportRegionId:()=>region.id},
     '@/lib/map-route-presentation':{overviewContextCaption:()=>'',ROUTE_PRESENTATION:{closeZoom:12}},'@/lib/map-types':{EMPTY_MAP_TRAILS:[]},
@@ -104,8 +106,21 @@ function atlasFixture({committedMode='detail',ready=true}={}){
     '@/lib/custom-map-relief':{reliefContourIntervals},
   });
   const select=(trail,visibleTrails=[])=>host.render({region,trail,visibleTrails,onRegion(){},onTrail:value=>chosen.push(value),onMapNote:value=>notes.push(value)});
-  return{host,requests,maps,notes,chosen,select,overlayRequests,invalidated};
+  return{host,requests,maps,notes,chosen,select,overlayRequests,invalidated,frameControllers};
 }
+
+test('the real atlas controls prepare their selected frame before zoom and preserve later manual ownership',async t=>{
+ const env=atlasFixture();t.after(()=>env.host.unmount());let finishes=0;
+ const animation={transitionProperty:'transform',playState:'running',pending:false,finish(){finishes++;this.playState='finished';env.frameControllers[0].settled();}};
+ env.host.panel={getAnimations:()=>[animation]};env.select();await env.host.settle();
+ const map=env.maps[0],fits=map.fits.length;
+ env.host.click('Увеличить масштаб');
+ assert.equal(finishes,1);assert.deepEqual(map.zoomCalls,[{delta:1,fits:fits+1}]);
+ assert.equal(env.frameControllers[0].active(),false,'Only the prepared zoom now owns this selection');
+ animation.playState='running';env.host.click('Уменьшить масштаб');
+ assert.equal(finishes,1);assert.equal(map.fits.length,fits+1);assert.equal(map.zoomCalls.at(-1).delta,-1);
+ assert.equal(animation.playState,'running','Further manual controls cannot force another automatic frame');
+});
 
 test('a published list overview opens full original vertices and a stale revision cannot retain its line',async t=>{
   const env=atlasFixture();t.after(()=>env.host.unmount());
@@ -136,8 +151,9 @@ test('the same failed route retries without resetting a manually moved camera; r
 test('all filtered catalogue lines reach the engine before any individual card is selected and obey layer visibility',async t=>{
   const env=atlasFixture();t.after(()=>env.host.unmount());const a={id:'a',title:'Первый'},b={id:'b',title:'Второй'};
   env.select(undefined,[a,b]);await env.host.settle();assert.equal(env.overlayRequests.length,1);
-  env.overlayRequests[0].resolve(new TextEncoder().encode(JSON.stringify(buildTrailOverlay([overlaySource('a'),overlaySource('b')]))).buffer);await env.host.settle();
-  const map=env.maps[0];assert.deepEqual(map.overlay.map(entry=>entry.ids),[['a'],['b']]);assert.equal(map.route,undefined);
+  const map=env.maps[0];env.overlayRequests[0].resolve(new TextEncoder().encode(JSON.stringify(buildTrailOverlay([overlaySource('a'),overlaySource('b')]))).buffer);
+  await env.host.settleUntil(()=>map.overlay?.length===2);
+  assert.deepEqual(map.overlay.map(entry=>entry.ids),[['a'],['b']]);assert.equal(map.route,undefined);
   env.select(undefined,[b]);await env.host.settle();assert.deepEqual(map.overlay.map(entry=>entry.ids),[['b']]);assert.equal(env.overlayRequests.length,1);
   const layers=env.host.find(node=>node.type==='button'&&node.props['aria-expanded']!==undefined);layers.props.onClick();env.host.render();
   const paths=env.host.nodes().find(node=>node.type==='input'&&node.props.type==='checkbox');paths.props.onChange({target:{checked:false}});env.host.render();
