@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "state": "source-reviewed-awaiting-preflight",
+  "failedSourceCommit": "f0c489e956c7cbf9164a49d80521e2486b9ad18c",
+  "failedAndroidRun": 43458536492,
+  "publisherJob": 132004120524,
+  "publicationStarted": false,
+  "publicVerifier": "skipped",
+  "releaseAndTagConfirmedAbsent": true,
+  "diagnostic": {
+    "runId": 43462011812,
+    "jobId": 132011074375,
+    "status": "reproduced",
+    "archiveBytes": 150096983,
+    "archiveSHA256": "1eb7fe565310b2846f37c29b1a26f88757340d94aca19eb7e28fa7084dd91c73",
+    "regular": true,
+    "symlink": false,
+    "previousCap": 150000000,
+    "excessBytes": 96983
+  },
+  "change": {
+    "defaultCap": 150000000,
+    "sourceArchiveCap": 200000000,
+    "exactSourceNameOnly": true,
+    "fullGitArchiveCommandUnchanged": true,
+    "publishVersionFromValidatedTag": true,
+    "allThreeFingerprintPathsCovered": true,
+    "publicDownloaderUnchanged": true,
+    "apkRuntimeGeometryUnchanged": true
+  },
+  "sourceReviewedFiles": [
+    {
+      "path": "tools/android-build/preview_artifacts.py",
+      "blob": "5a690b7cf2a8774a997ba5dbe3666eda6deb591d",
+      "bytes": 16516,
+      "sha256": "5c2217b9f0db5d1de08c00b96dc61e43a99ba0d2e952d93c1e7fe76d37e0b4e3"
+    },
+    {
+      "path": "tools/android-build/release-preview.py",
+      "blob": "35ed7b431145d24a4f905b454d05db70c82305bf",
+      "bytes": 21877,
+      "sha256": "8e838f45d9253bb415391909868ba8c0e2c2f231cdebcb2e8287f95a82d2a267"
+    },
+    {
+      "path": "tools/android-build/test_release_archive_budget.py",
+      "blob": "4b82f2f46320b41cfcceff6ea4a4fac59a5eaba4",
+      "bytes": 11114,
+      "sha256": "a4c448e725e2c3e98adafcd0bb582d36fdca7bdf1d932d0b3177ceffe20b77d0"
+    }
+  ],
+  "independentReview": {
+    "production": "passed",
+    "newTests": "passed-source-review",
+    "execution": "pending",
+    "newTestsCount": 9
+  },
+  "newRequest": {
+    "schemaVersion": 1,
+    "requestId": "android-0-4-33-preview-source-archive-20261113",
+    "version": "0.4.33-preview",
+    "versionCode": 16,
+    "notesFile": "tools/android-build/release-notes/0.4.33-preview.md"
+  },
+  "requiredNext": "Run exact-candidate preflight, then promote the same commit with an expected-head lease. All original Android and Pages gates remain required."
+}

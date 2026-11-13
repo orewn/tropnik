@@ -25,6 +25,14 @@ from preview_artifacts import (ARM64, RECEIPT, REPORT_NAMES, TEST_APK, UNIVERSAL
 
 REQUEST = "tools/android-build/release-request.json"
 REPOSITORY = "orewn/tropnik"
+SOURCE_ARCHIVE_MAX_BYTES = 200_000_000
+
+
+def release_asset_fingerprint(path: Path, version: str):
+    # Only the exact archive for the verified version gets the source budget.
+    if path.name == f"tropnik-{version}-source.tar.gz":
+        return fingerprint(path, max_bytes=SOURCE_ARCHIVE_MAX_BYTES)
+    return fingerprint(path)
 
 
 def read_request(root: Path):
@@ -165,7 +173,7 @@ def prepare(root: Path, directory: Path, device_directory: Path, output: Path):
         subprocess.run(["git", "archive", "--format=tar.gz", f"--prefix=tropnik-{build['version']}/", build["sourceCommit"]],
                        cwd=root, stdout=stream, check=True)
     asset_names = [ARM64, UNIVERSAL, "android-manifest.json", "verification-reports.zip", source_name]
-    checksums = "".join(f"{fingerprint(output / name)['sha256']}  {name}\n" for name in asset_names)
+    checksums = "".join(f"{release_asset_fingerprint(output / name, build['version'])['sha256']}  {name}\n" for name in asset_names)
     (output / "checksums.sha256").write_text(checksums)
     asset_names.append("checksums.sha256")
     run_url = f"https://github.com/{REPOSITORY}/actions/runs/{build['workflowRunId']}"
@@ -185,7 +193,7 @@ def prepare(root: Path, directory: Path, device_directory: Path, output: Path):
                    "tag": "v" + build["version"], "version": build["version"],
                    "name": "Тропник " + build["version"] + " — Android и веб-конструктор",
                    "bodySha256": fingerprint(output / "release-body.md")["sha256"],
-                   "assets": [{"name": name, **fingerprint(output / name)} for name in asset_names]}
+                   "assets": [{"name": name, **release_asset_fingerprint(output / name, build["version"])} for name in asset_names]}
     (output / "release-upload.json").write_text(json.dumps(publication, ensure_ascii=False, indent=2) + "\n")
     return publication
 
@@ -235,7 +243,8 @@ def publish(output: Path, client):
             publication.get("workflowRunId") == os.environ.get("GITHUB_RUN_ID") and
             re.fullmatch(r"v\d+\.\d+\.\d+-preview", publication.get("tag", "")), "Publication provenance mismatch")
     for asset in publication["assets"]:
-        require(Path(asset["name"]).name == asset["name"] and fingerprint(output / asset["name"]) ==
+        require(Path(asset["name"]).name == asset["name"] and
+                release_asset_fingerprint(output / asset["name"], publication["tag"].removeprefix("v")) ==
                 {key: asset[key] for key in ("bytes", "sha256")}, "Prepared release asset changed")
     require(fingerprint(output / "release-body.md")["sha256"] == publication["bodySha256"], "Prepared release body changed")
     base, tag = f"/repos/{REPOSITORY}", publication["tag"]

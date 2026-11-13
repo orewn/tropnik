@@ -1,0 +1,56 @@
+{
+  "name": "Verify source archive budgets without release publication",
+  "on": {
+    "push": {
+      "branches": [
+        "verify/source-archive-budget-033-20261113"
+      ]
+    }
+  },
+  "permissions": {
+    "contents": "read"
+  },
+  "concurrency": {
+    "group": "tropnik-source-budget-033-20261113",
+    "cancel-in-progress": false
+  },
+  "jobs": {
+    "verify": {
+      "if": "github.repository == 'orewn/tropnik' && github.ref == 'refs/heads/verify/source-archive-budget-033-20261113'",
+      "runs-on": "ubuntu-24.04",
+      "timeout-minutes": 10,
+      "env": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "steps": [
+        {
+          "name": "Check out the exact candidate and its baseline",
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "with": {
+            "persist-credentials": false,
+            "fetch-depth": 2
+          }
+        },
+        {
+          "name": "Install the existing pinned Python verifier dependencies",
+          "run": "python3 -m venv \"$RUNNER_TEMP/tropnik-source-budget-python\"\n\"$RUNNER_TEMP/tropnik-source-budget-python/bin/python\" -m pip install --disable-pip-version-check -r tools/android-build/requirements.txt"
+        },
+        {
+          "name": "Require baseline failure, complete green regressions and exact source archive",
+          "run": "\"$RUNNER_TEMP/tropnik-source-budget-python/bin/python\" - <<'PY'\nimport hashlib,io,json,os,pathlib,shutil,stat,subprocess,sys,tempfile,unittest\nroot=pathlib.Path.cwd()\nsource=os.environ['GITHUB_SHA']\nbaseline_source='f0c489e956c7cbf9164a49d80521e2486b9ad18c'\nout=pathlib.Path(os.environ['RUNNER_TEMP'])/'tropnik-source-budget-proof'\nout.mkdir(exist_ok=False)\nreceipt={'schemaVersion':1,'evidence':'source-archive-budget-preflight','sourceCommit':source,'baselineSourceCommit':baseline_source,'workflowRunId':int(os.environ['GITHUB_RUN_ID']),'status':'running','newBrowserMeasurements':False,'sdkOrDeviceVerification':False}\ndef sha(data): return hashlib.sha256(data).hexdigest()\nexpected_files={\"tools/android-build/preview_artifacts.py\":{\"bytes\":16516,\"sha256\":\"5c2217b9f0db5d1de08c00b96dc61e43a99ba0d2e952d93c1e7fe76d37e0b4e3\"},\"tools/android-build/release-preview.py\":{\"bytes\":21877,\"sha256\":\"8e838f45d9253bb415391909868ba8c0e2c2f231cdebcb2e8287f95a82d2a267\"},\"tools/android-build/test_release_archive_budget.py\":{\"bytes\":11114,\"sha256\":\"a4c448e725e2c3e98adafcd0bb582d36fdca7bdf1d932d0b3177ceffe20b77d0\"}}\ntry:\n    assert os.environ['GITHUB_REPOSITORY']=='orewn/tropnik'\n    assert os.environ['GITHUB_REF']=='refs/heads/verify/source-archive-budget-033-20261113'\n    assert subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()==source\n    assert subprocess.check_output(['git','rev-parse','HEAD^'],text=True).strip()==baseline_source\n    assert subprocess.check_output(['git','status','--porcelain'],text=True).strip()==''\n    request=json.loads((root/'tools/android-build/release-request.json').read_text())\n    assert request['version']=='0.4.33-preview' and request['versionCode']==16\n    assert request['requestId']=='android-0-4-33-preview-source-archive-20261113'\n    for name,expected in expected_files.items():\n        data=(root/name).read_bytes()\n        assert len(data)==expected['bytes'] and sha(data)==expected['sha256'],name\n    receipt['reviewedFiles']=expected_files\n    runtime_bytes=(root/'web/public/custom-map/manifest.json').read_bytes()\n    assert sha(runtime_bytes)=='e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded'\n    assert runtime_bytes==(root/'android/app/src/main/assets/custom-map/manifest.json').read_bytes()\n    runtime=json.loads(runtime_bytes)\n    assert runtime['sourceInputsSha256']=='0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642'\n    assert len(runtime['sourceInputs'])==61\n    assert not set(expected_files).intersection(item['path'] for item in runtime['sourceInputs'])\n    for item in runtime['sourceInputs']:\n        data=(root/item['path']).read_bytes()\n        assert len(data)==item['sizeBytes'] and sha(data)==item['sha256'],item['path']\n    receipt['sharedRuntime']={'manifestSHA256':sha(runtime_bytes),'sourceInputsSHA256':runtime['sourceInputsSha256'],'sourceInputs':61,'allInputBytesVerified':True,'webAndroidManifestIdentical':True}\n    baseline=pathlib.Path(os.environ['RUNNER_TEMP'])/'tropnik-source-budget-baseline'\n    subprocess.run(['git','worktree','add','--detach',str(baseline),baseline_source],check=True,timeout=120)\n    try:\n        test_relative='tools/android-build/test_release_archive_budget.py'\n        (baseline/test_relative).write_bytes((root/test_relative).read_bytes())\n        environment={**os.environ,'PYTHONPATH':str(baseline/'tools/android-build'),'PYTHONDONTWRITEBYTECODE':'1'}\n        command=[sys.executable,'-m','unittest','-v','test_release_archive_budget.SourceArchivePipelineTests.test_prepare_public_rebuild_and_publish_recheck_large_source']\n        red=subprocess.run(command,cwd=baseline,env=environment,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=180)\n        (out/'baseline-red.log').write_text(red.stdout,encoding='utf-8')\n        expected_error='ValueError: Missing, linked or oversized artifact: tropnik-0.4.16-preview-source.tar.gz'\n        assert red.returncode!=0 and 'Ran 1 test' in red.stdout and 'FAILED (errors=1)' in red.stdout\n        assert expected_error in red.stdout and 'fingerprint(output / name)' in red.stdout\n        assert len(red.stdout.encode('utf-8'))<2000000\n        receipt['baselineRed']={'sourceCommit':baseline_source,'test':command[-1],'returnCode':red.returncode,'tests':1,'errors':1,'expectedError':expected_error,'expectedFailureMatched':True,'logSHA256':sha(red.stdout.encode('utf-8'))}\n        print('TROPNIK_ARCHIVE_BASELINE_RED='+json.dumps(receipt['baselineRed']))\n    finally:\n        subprocess.run(['git','worktree','remove','--force',str(baseline)],check=True,timeout=120)\n    sys.path.insert(0,str(root/'tools/android-build'))\n    names=['test_release_archive_budget','test_release_pipeline','test_public_preview']\n    loader=unittest.TestLoader()\n    counts={name:loader.loadTestsFromName(name).countTestCases() for name in names}\n    assert counts['test_release_archive_budget']==9\n    suite=loader.loadTestsFromNames(names)\n    stream=io.StringIO()\n    result=unittest.TextTestRunner(stream=stream,verbosity=2).run(suite)\n    text=stream.getvalue()\n    (out/'candidate-green.log').write_text(text,encoding='utf-8')\n    print(text)\n    receipt['candidateGreen']={'modules':names,'moduleCounts':counts,'tests':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'skipped':len(result.skipped),'unexpectedSuccesses':len(result.unexpectedSuccesses),'logSHA256':sha(text.encode('utf-8'))}\n    assert result.testsRun==sum(counts.values()) and result.wasSuccessful() and not result.skipped and not result.unexpectedSuccesses\n    import preview_artifacts as artifacts\n    import test_release_pipeline as pipeline\n    release=pipeline.release\n    name='tropnik-'+request['version']+'-source.tar.gz'\n    archive=out/name\n    argv=['git','archive','--format=tar.gz','--prefix=tropnik-'+request['version']+'/',source]\n    with archive.open('xb') as target:\n        subprocess.run(argv,cwd=root,stdout=target,check=True,timeout=180)\n    meta=archive.lstat()\n    assert stat.S_ISREG(meta.st_mode) and not archive.is_symlink()\n    assert 150000000<meta.st_size<=200000000\n    actual=release.release_asset_fingerprint(archive,request['version'])\n    assert actual['bytes']==meta.st_size\n    value=hashlib.sha256()\n    with archive.open('rb') as stream:\n        for block in iter(lambda:stream.read(1024*1024),b''): value.update(block)\n    assert actual['sha256']==value.hexdigest()\n    try:\n        artifacts.fingerprint(archive)\n    except ValueError as error:\n        default_error=str(error)\n        assert 'limit=150000000' in default_error\n    else:\n        raise AssertionError('Default APK/receipt limit was widened')\n    receipt['actualCandidateArchive']={'name':name,**actual,'argv':argv,'regular':True,'symlink':False,'sourceBudget':200000000,'sourceBudgetAccepted':True,'defaultBudget':150000000,'defaultBudgetAccepted':False,'defaultBudgetError':default_error}\n    assert subprocess.check_output(['git','status','--porcelain'],text=True).strip()==''\n    receipt['gitVersion']=subprocess.check_output(['git','--version'],text=True).strip()\n    receipt['imageOS']=os.environ.get('ImageOS')\n    receipt['imageVersion']=os.environ.get('ImageVersion')\n    receipt['status']='passed'\nexcept BaseException as error:\n    receipt['status']='failed'\n    receipt['error']=str(error)\n    raise\nfinally:\n    (out/'source-archive-budget-preflight.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\\n',encoding='utf-8')\n    print('TROPNIK_SOURCE_ARCHIVE_BUDGET_PREFLIGHT='+json.dumps(receipt,ensure_ascii=False))\nPY"
+        },
+        {
+          "name": "Preserve the preflight receipt and unit logs",
+          "if": "always()",
+          "uses": "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+          "with": {
+            "name": "tropnik-source-budget-preflight-${{ github.run_id }}",
+            "path": "${{ runner.temp }}/tropnik-source-budget-proof/source-archive-budget-preflight.json\n${{ runner.temp }}/tropnik-source-budget-proof/baseline-red.log\n${{ runner.temp }}/tropnik-source-budget-proof/candidate-green.log",
+            "if-no-files-found": "warn",
+            "retention-days": 7
+          }
+        }
+      ]
+    }
+  }
+}

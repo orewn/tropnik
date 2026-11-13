@@ -2,25 +2,30 @@
 
 ## Текущий статус
 
-Исправленный source `8020e5c3243cd99e6f727e787c3109bece3d28f7` прошёл полный
-[Pages CI 43450247714](https://github.com/orewn/tropnik/actions/runs/43450247714)
-с публичной проверкой build `39a9a382cb37a4fb`. Все 32 исходных окна плавности
-(early и full, два профиля) независимо пересчитаны из полного raw содержимого принятого Pages артефакта;
-лимиты и сценарии сохранены. Android validation того же source прошёл
-70 JVM, unsigned production R8 и все 11 сценариев точного APK на эмуляторе.
+Исправление прогрузки уже опубликовано на сайте: source `8020e5c3243cd99e6f727e787c3109bece3d28f7`,
+build `39a9a382cb37a4fb`, полный Pages run 43450247714 и независимые raw32 PASS.
+Runtime manifest `e13c534f6a2fe2b85b59e6cd830376f8e01f965d3d97bebc75e50ad0295e0ded`
+и все его 61 source inputs сохраняются.
 
-Отдельный release request запрашивает **0.4.33-preview / versionCode 16**.
-Он запускает собственные Android build/device/publish/public проверки и новый
-полный Pages run. Validation APK не используется вместо публикуемого выпуска.
-Веб-ссылка на APK остаётся 0.4.32 до получения финального universal manifest
-из нового успешного public producer job.
+Попытка Android 0.4.33 на source `f0c489e956c7cbf9164a49d80521e2486b9ad18c` прошла 70 JVM, R8 и все 11 device tests,
+но остановилась до публикации: полный source archive имеет **150 096 983 байта**,
+на 96 983 больше общего лимита 150 000 000. Отдельная read-only диагностика
+[43462011812](https://github.com/orewn/tropnik/actions/runs/43462011812) воспроизвела отказ
+на точном git archive исходного commit. Release и tag 0.4.33 ещё отсутствуют.
 
-Файловая среда стала недоступна после изолированного native proof. Поэтому
-32 raw окна получены через отдельное read-only извлечение из принятого
-Pages артефакта. SHA оригинального ZIP и трёх JSON members проверены на runner;
-полный compact payload восстановлен и проверен независимо. Локальное чтение
-всего Pages payload, новое независимое декодирование PNG этого run и проверка
-старой открытой вкладки остаются незавершёнными.
+Подготовлено отдельное ограничение 200 000 000 байт только для точного архива
+исходников проверенной версии. Лимит APK, receipts и остальных файлов остаётся
+150 000 000. Полное содержимое git archive, шесть release assets, подписи,
+публичные checksums и прежние release gates сохраняются. Проверяются все три
+места fingerprint и public recreation; девять новых regressions включают
+meaningful RED на прежнем source и GREEN текущего candidate.
+
+[Запись причины и исправления](verification/android-0.4.33-source-archive-limit.json)
+отделяет завершённый source review от ещё требуемого CI preflight. Новый
+request `android-0-4-33-preview-source-archive-20261113` сохраняет версию **0.4.33-preview / code 16**;
+его продвижение на main разрешено только после preflight того же commit.
+Затем выполняются собственные Android build/device/publish/public и полный Pages.
+Файловая среда и ручная проверка старой вкладки остаются недоступными.
 
 ## Один жест и два выбора
 

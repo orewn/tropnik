@@ -117,9 +117,12 @@ def expected_map_runtime(root: Path):
             "mapRendererBridge": manifest["bridge"]}
 
 
-def fingerprint(path: Path):
-    require(path.is_file() and not path.is_symlink() and 0 < path.stat().st_size <= 150_000_000,
-            f"Missing, linked or oversized artifact: {path.name}")
+def fingerprint(path: Path, *, max_bytes=150_000_000):
+    require(type(max_bytes) is int and max_bytes > 0, "Artifact byte limit must be a positive integer")
+    require(path.is_file() and not path.is_symlink(), f"Missing or linked artifact: {path.name}")
+    size = path.stat().st_size
+    require(0 < size <= max_bytes,
+            f"Empty or oversized artifact: {path.name} (bytes={size}, limit={max_bytes})")
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
