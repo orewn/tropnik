@@ -1,0 +1,135 @@
+name: Verify official Gradle 8.14.7 wrapper
+
+on:
+  push:
+    branches: [verify/gradle-wrapper-20261113]
+    paths: [.github/workflows/gradle-wrapper-verify.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-gradle-wrapper-20261113
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    if: github.ref == 'refs/heads/verify/gradle-wrapper-20261113'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Generate and verify the official wrapper in an empty project
+        id: wrapper
+        env:
+          GRADLE_DISTRIBUTION_URL: https://services.gradle.org/distributions/gradle-8.14.7-bin.zip
+          GRADLE_DISTRIBUTION_SHA256: 903bfc4bc7622323124054c10f509246212a1902948bdaf26c379cca8735e856
+          GRADLE_WRAPPER_JAR_SHA256: ad16bca46cb71bb5887c546860d93992aeee35c1fdaf4a242b0a612375d937e0
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          wrapper_task_dir="$(mktemp -d "$RUNNER_TEMP/gradle-wrapper-source.XXXXXX")"
+          wrapper_artifact_dir="$(mktemp -d "$RUNNER_TEMP/gradle-wrapper-artifact.XXXXXX")"
+          trap 'rm -rf -- "$wrapper_task_dir"' EXIT
+          export GRADLE_USER_HOME="$wrapper_task_dir/gradle-user-home"
+          curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+            --retry 2 --max-time 300 --output "$wrapper_task_dir/gradle.zip" "$GRADLE_DISTRIBUTION_URL"
+          printf '%s  %s\n' "$GRADLE_DISTRIBUTION_SHA256" "$wrapper_task_dir/gradle.zip" | sha256sum --check --strict
+          unzip -q "$wrapper_task_dir/gradle.zip" -d "$wrapper_task_dir/distribution"
+          mkdir "$wrapper_task_dir/project"
+          printf "rootProject.name = 'official-wrapper-verification'\n" > "$wrapper_task_dir/project/settings.gradle"
+          : > "$wrapper_task_dir/project/build.gradle"
+          "$wrapper_task_dir/distribution/gradle-8.14.7/bin/gradle" \
+            --no-daemon --console plain --project-dir "$wrapper_task_dir/project" \
+            wrapper --gradle-version 8.14.7 --distribution-type bin \
+            --gradle-distribution-sha256-sum "$GRADLE_DISTRIBUTION_SHA256" \
+            --network-timeout 10000 --validate-url
+          python3 - "$wrapper_task_dir/project" "$wrapper_artifact_dir" "$wrapper_task_dir/gradle.zip" <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import stat
+          import subprocess
+          import sys
+
+          project, output, archive = map(Path, sys.argv[1:])
+          expected = ["gradlew", "gradlew.bat", "gradle/wrapper/gradle-wrapper.jar", "gradle/wrapper/gradle-wrapper.properties"]
+          properties = {}
+          for line in (project / "gradle/wrapper/gradle-wrapper.properties").read_text().splitlines():
+              if line and not line.startswith("#"):
+                  key, value = line.split("=", 1)
+                  properties[key] = value.replace("\\:", ":")
+          assert properties["distributionUrl"] == os.environ["GRADLE_DISTRIBUTION_URL"]
+          assert properties["distributionSha256Sum"] == os.environ["GRADLE_DISTRIBUTION_SHA256"]
+          assert properties["validateDistributionUrl"] == "true"
+          assert properties["networkTimeout"] == "10000"
+          archive_bytes = archive.read_bytes()
+          assert hashlib.sha256(archive_bytes).hexdigest() == os.environ["GRADLE_DISTRIBUTION_SHA256"]
+          jar = (project / "gradle/wrapper/gradle-wrapper.jar").read_bytes()
+          assert hashlib.sha256(jar).hexdigest() == os.environ["GRADLE_WRAPPER_JAR_SHA256"]
+          files = {}
+          for relative in expected:
+              source = project / relative
+              assert source.is_file() and not source.is_symlink()
+              data = source.read_bytes()
+              mode = stat.S_IMODE(source.stat().st_mode)
+              if relative == "gradlew":
+                  assert mode & stat.S_IXUSR
+              target = output / relative
+              target.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(source, target)
+              files[relative] = {"bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(), "mode": oct(mode)}
+          java = subprocess.run(["java", "-version"], check=True, capture_output=True, text=True)
+          receipt = {
+              "gradleVersion": "8.14.7",
+              "distributionUrl": os.environ["GRADLE_DISTRIBUTION_URL"],
+              "distributionSha256": os.environ["GRADLE_DISTRIBUTION_SHA256"],
+              "distributionBytes": len(archive_bytes),
+              "wrapperJarSha256": os.environ["GRADLE_WRAPPER_JAR_SHA256"],
+              "checksumReference": "https://gradle.org/release-checksums/",
+              "generator": "official verified Gradle 8.14.7 binary distribution, wrapper task in an empty project",
+              "generationArguments": ["--no-daemon", "--console", "plain", "wrapper", "--gradle-version", "8.14.7", "--distribution-type", "bin", "--gradle-distribution-sha256-sum", os.environ["GRADLE_DISTRIBUTION_SHA256"], "--network-timeout", "10000", "--validate-url"],
+              "repositoryCheckedOut": False,
+              "existingApplicationBuildExecuted": False,
+              "javaVersion": (java.stdout + java.stderr).strip(),
+              "sourceRepository": os.environ["GITHUB_REPOSITORY"],
+              "sourceCommit": os.environ["GITHUB_SHA"],
+              "sourceRef": os.environ["GITHUB_REF"],
+              "runId": int(os.environ["GITHUB_RUN_ID"]),
+              "runAttempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+              "runUrl": os.environ["GITHUB_SERVER_URL"] + "/" + os.environ["GITHUB_REPOSITORY"] + "/actions/runs/" + os.environ["GITHUB_RUN_ID"],
+              "files": files,
+          }
+          (output / "provenance.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print(json.dumps({"gradleVersion": receipt["gradleVersion"], "wrapperJarSha256": receipt["wrapperJarSha256"], "verifiedFiles": len(files)}))
+          PY
+          printf 'artifact_dir=%s\n' "$wrapper_artifact_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Upload only generated wrapper files and provenance
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: gradle-wrapper-8.14.7-${{ github.sha }}
+          path: ${{ steps.wrapper.outputs.artifact_dir }}/
+          if-no-files-found: error
+          compression-level: 9
+          retention-days: 3
+
+      - name: Remove staged generated files
+        if: always() && steps.wrapper.outputs.artifact_dir != ''
+        env:
+          WRAPPER_ARTIFACT_DIRECTORY: ${{ steps.wrapper.outputs.artifact_dir }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$WRAPPER_ARTIFACT_DIRECTORY" in
+            "$RUNNER_TEMP"/gradle-wrapper-artifact.*) rm -rf -- "$WRAPPER_ARTIFACT_DIRECTORY" ;;
+            *) exit 1 ;;
+          esac
