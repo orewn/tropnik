@@ -68,9 +68,12 @@ def production_badging(text: str, version: str, code: int):
     require(manifest == {"applicationId": "ru.tropa.app", "versionCode": code, "version": version},
             "Production identity/version differs from the reviewed source")
     require(not re.search(r"^application-debuggable(?:\s|$)", text, re.M), "Production APK is debuggable")
-    require(re.search(r"^sdkVersion:'26'$", text, re.M) is not None
-            and re.search(r"^targetSdkVersion:'36'$", text, re.M) is not None,
-            "Production SDK levels differ from the supported policy")
+    # Current build-tools 36 emits minSdkVersion; older aapt2 used sdkVersion.
+    # Accept either spelling, with exactly one unambiguous minimum and target.
+    minimum = re.findall(r"^(?:minSdkVersion|sdkVersion):(.*)$", text, re.M)
+    target = re.findall(r"^targetSdkVersion:(.*)$", text, re.M)
+    require(minimum == ["'26'"] and target == ["'36'"],
+            f"Production SDK levels differ from the supported policy: minimum={minimum!r}, target={target!r}")
     return manifest
 
 

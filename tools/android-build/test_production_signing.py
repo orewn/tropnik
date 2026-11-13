@@ -82,11 +82,16 @@ class ProductionSigningTests(unittest.TestCase):
                 payload.verify_source_assets(archive, root)
 
     def test_production_identity_rejects_preview_debuggable_and_wrong_sdk(self):
-        valid = "package: name='ru.tropa.app' versionCode='14' versionName='0.4.31'\nsdkVersion:'26'\ntargetSdkVersion:'36'\n"
+        # SDK spelling recorded from build-tools 36 in PR 20, run 43370889007.
+        valid = "package: name='ru.tropa.app' versionCode='14' versionName='0.4.31'\nminSdkVersion:'26'\ntargetSdkVersion:'36'\n"
         self.assertEqual(MODULE.production_badging(valid, "0.4.31", 14)["applicationId"], "ru.tropa.app")
+        self.assertEqual(MODULE.production_badging(valid.replace("minSdkVersion:", "sdkVersion:"), "0.4.31", 14)["applicationId"], "ru.tropa.app")
         for invalid in (valid.replace("ru.tropa.app'", "ru.tropa.app.preview'"),
                         valid + "application-debuggable\n", valid.replace("'36'", "'35'"),
-                        valid.replace("'0.4.31'", "'0.4.31-preview'"), valid.replace("'14'", "'13'")):
+                        valid.replace("'0.4.31'", "'0.4.31-preview'"), valid.replace("'14'", "'13'"),
+                        valid.replace("'26'", "'27'"), valid.replace("minSdkVersion:'26'\n", ""),
+                        valid + "sdkVersion:'26'\n", valid + "minSdkVersion:'25'\n",
+                        valid + "targetSdkVersion:'36'\n", valid + "sdkVersion:invalid\n"):
             with self.subTest(value=invalid), self.assertRaises(ValueError):
                 MODULE.production_badging(invalid, "0.4.31", 14)
 
