@@ -1,0 +1,181 @@
+name: Isolated PostgreSQL 18.7 image probe
+
+on:
+  push:
+    branches: [verify/postgis-18.7-20261113]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isolated-postgis-image-probe
+  cancel-in-progress: false
+
+jobs:
+  measure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Measure official image digests and isolated database versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          import time
+          from datetime import datetime, timezone
+          
+          OUT = Path("verification")
+          OUT.mkdir(exist_ok=True)
+          report = {
+              "schemaVersion": 1,
+              "purpose": "Read-only measurement of official image contents; not rebuilt-extension qualification",
+              "sourceSHA": os.environ["GITHUB_SHA"],
+              "sourceRef": os.environ["GITHUB_REF"],
+              "runID": os.environ["GITHUB_RUN_ID"],
+              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "createdAt": datetime.now(timezone.utc).isoformat(),
+              "requiredPostgreSQLVersion": "18.7",
+              "requiredPostGISSeries": "3.7",
+              "postgisRebuildProvenanceVerified": False,
+              "images": [],
+              "cleanup": [],
+          }
+          
+          def command(argv, timeout=60, check=True):
+              result = subprocess.run(argv, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
+              if check and result.returncode != 0:
+                  raise RuntimeError(f"{argv[0]} {argv[1]} failed ({result.returncode}): {result.stderr[-3000:]}")
+              return result
+          
+          def save():
+              (OUT / "image-probe.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+          
+          def sql(name, query):
+              return command(["docker", "exec", name, "psql", "-XAt", "-v", "ON_ERROR_STOP=1",
+                              "-U", "tropa_probe", "-d", "probe", "-c", query]).stdout.strip()
+          
+          def inspect_image(reference, index):
+              item = {"reference": reference, "platform": "linux/amd64"}
+              report["images"].append(item)
+              save()
+              pull = command(["docker", "pull", "--platform", "linux/amd64", reference], timeout=240)
+              (OUT / f"pull-{index}.txt").write_text(pull.stdout + pull.stderr, encoding="utf-8")
+              raw = json.loads(command(["docker", "image", "inspect", reference]).stdout)[0]
+              item["imageID"] = raw["Id"]
+              item["repoDigests"] = raw.get("RepoDigests", [])
+              item["created"] = raw["Created"]
+              item["os"] = raw["Os"]
+              item["architecture"] = raw["Architecture"]
+              public_keys = {"PG_MAJOR", "PG_VERSION", "PGDATA", "POSTGIS_MAJOR", "POSTGIS_VERSION"}
+              item["versionEnvironment"] = dict(v.split("=", 1) for v in raw["Config"].get("Env", [])
+                                                if v.split("=", 1)[0] in public_keys)
+              item["provenanceLabels"] = {k: v for k, v in (raw["Config"].get("Labels") or {}).items()
+                                         if k in {"maintainer", "org.opencontainers.image.source",
+                                                  "org.opencontainers.image.version", "org.opencontainers.image.revision",
+                                                  "org.opencontainers.image.description"}}
+              manifest = command(["docker", "manifest", "inspect", "--verbose", reference], timeout=90)
+              manifest_text = manifest.stdout
+              json.loads(manifest_text)
+              (OUT / f"manifest-{index}.json").write_text(manifest_text, encoding="utf-8")
+              item["manifestEvidenceSHA256"] = hashlib.sha256(manifest_text.encode()).hexdigest()
+              name = f"tropnik-image-probe-{index}"
+              try:
+                  command(["docker", "run", "--detach", "--name", name, "--platform", "linux/amd64",
+                           "--network", "none", "--log-driver", "none",
+                           "--tmpfs", "/var/lib/postgresql:rw,size=1073741824",
+                           "--memory", "2g", "--pids-limit", "256", "--shm-size", "256m",
+                           "--security-opt", "no-new-privileges:true",
+                           "-e", "POSTGRES_USER=tropa_probe", "-e", "POSTGRES_DB=probe",
+                           "-e", "POSTGRES_HOST_AUTH_METHOD=trust", item["imageID"]], timeout=60)
+                  container = json.loads(command(["docker", "inspect", name]).stdout)[0]
+                  item["isolation"] = {
+                      "networkMode": container["HostConfig"]["NetworkMode"],
+                      "logDriver": container["HostConfig"]["LogConfig"]["Type"],
+                      "portBindings": container["HostConfig"]["PortBindings"],
+                      "binds": container["HostConfig"]["Binds"],
+                      "mounts": [{"type": m["Type"], "destination": m["Destination"]} for m in container["Mounts"]],
+                  }
+                  assert item["isolation"]["networkMode"] == "none"
+                  assert item["isolation"]["logDriver"] == "none"
+                  assert not item["isolation"]["portBindings"] and not item["isolation"]["binds"]
+                  assert all(m["type"] == "tmpfs" for m in item["isolation"]["mounts"])
+                  deadline = time.monotonic() + 90
+                  while True:
+                      ready = command(["docker", "exec", name, "pg_isready", "-h", "127.0.0.1",
+                                       "-U", "tropa_probe", "-d", "probe"], check=False)
+                      if ready.returncode == 0:
+                          break
+                      if time.monotonic() >= deadline:
+                          raise RuntimeError(f"Final TCP readiness timed out for {reference}")
+                      time.sleep(1)
+                  item["database"] = json.loads(sql(name, """
+                      SELECT json_build_object(
+                          'serverVersion', current_setting('server_version'),
+                          'serverVersionNum', current_setting('server_version_num')::integer,
+                          'dataDirectory', current_setting('data_directory'),
+                          'compositeTypeMismatch', current_setting('composite_type_mismatch', true),
+                          'extensions', (SELECT json_agg(json_build_object('name', extname, 'version', extversion)
+                                        ORDER BY extname) FROM pg_extension)
+                      )::text
+                  """))
+                  packages = command(["docker", "exec", name, "dpkg-query", "-W",
+                                      "-f=${binary:Package}\t${Version}\t${Architecture}\n"]).stdout.splitlines()
+                  item["postgresPackages"] = [line.split("\t") for line in packages
+                                              if line.startswith(("postgresql", "libpq", "postgis"))]
+                  pgconfig = command(["docker", "exec", name, "pg_config", "--version"], check=False)
+                  item["pgConfigVersion"] = pgconfig.stdout.strip() if pgconfig.returncode == 0 else None
+                  if reference.startswith("postgis/"):
+                      item["postgis"] = json.loads(sql(name, """
+                          SELECT json_build_object(
+                              'fullVersion', postgis_full_version(),
+                              'libraryVersion', postgis_lib_version(),
+                              'scriptsInstalled', postgis_scripts_installed()
+                          )::text
+                      """))
+                      build_date_available = sql(name, "SELECT to_regprocedure('postgis_lib_build_date()') IS NOT NULL") == "t"
+                      if build_date_available:
+                          item["postgis"]["libraryBuildDate"] = sql(name, "SELECT postgis_lib_build_date()")
+                      binary = command(["docker", "exec", name, "sha256sum", "/usr/lib/postgresql/18/lib/postgis-3.so"])
+                      item["postgis"]["librarySHA256"] = binary.stdout.split()[0]
+                      assert item["postgis"]["libraryVersion"].startswith("3.7.")
+                  item["targetCoreVersionSatisfied"] = item["database"]["serverVersionNum"] == 180007
+                  assert item["database"]["dataDirectory"].startswith("/var/lib/postgresql/18/")
+                  if reference.startswith("postgres:"):
+                      assert item["targetCoreVersionSatisfied"], "Official 18.7 image did not report PostgreSQL 18.7"
+              finally:
+                  removed = command(["docker", "rm", "--force", "--volumes", name], check=False)
+                  report["cleanup"].append({"container": name, "removed": removed.returncode == 0})
+                  save()
+          
+          try:
+              inspect_image("postgis/postgis:18-3.7", 0)
+              inspect_image("postgres:18.7-trixie", 1)
+              report["measurementComplete"] = True
+          finally:
+              report["finishedAt"] = datetime.now(timezone.utc).isoformat()
+              save()
+          
+          print(json.dumps({
+              "sourceSHA": report["sourceSHA"],
+              "images": [{"reference": i["reference"], "database": i.get("database"),
+                          "postgis": i.get("postgis"), "repoDigests": i.get("repoDigests"),
+                          "targetCoreVersionSatisfied": i.get("targetCoreVersionSatisfied")}
+                         for i in report["images"]],
+              "postgisRebuildProvenanceVerified": False,
+              "cleanup": report["cleanup"]
+          }, indent=2))
+          
+          PY
+      - name: Preserve public image evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropnik-postgis-18.7-probe
+          path: verification/
+          if-no-files-found: error
+          retention-days: 3
